@@ -9,9 +9,10 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //The below functions are required to use polyhedra.h. 
 //They are defined in rootSA.cpp. 
 //If you are not running Windows or aren't happy with the rootSA.cpp file,
-//just uncomment the below lines.
+//you need the below lines.
 //***************
-/*void outputText(std::string theOutput)
+#ifndef WINDOWS
+void outputText(std::string theOutput)
 {
 } 
 void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
@@ -23,7 +24,8 @@ void drawline(double X1, double Y1, double X2, double Y2,
 }
 void drawtext(double X1, double Y1, const char* text, int length, int color)
 {
-}*/
+}
+#endif
 //*******************************************
 //*******************************************
 //*******************************************

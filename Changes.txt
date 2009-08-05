@@ -1,0 +1,5 @@
+v0.0108
+
+1. Renamed class IntegersFastAccess to class Selection (was a stupid naming to begin with).
+2. Renamed partFractions::split().
+3. Wrote the general partial fraction decomposition algorithm. VERY slow implementation. Certain parts have to be rewritten.

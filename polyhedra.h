@@ -3,7 +3,7 @@
 //Vector partition function - computes an algebraic expression 
 //                            for the vector partition function
 //CopyRight (C) 2009: Todor Milev 
-//Contributors: Thomas Bliem
+//Contributors: Thomas Bliem, Todor Milev
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
 //advice and help with C++
 //
@@ -3178,6 +3178,7 @@ public:
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
 						bool RecordSplitPowerSeriesCoefficient, bool StoreToFile);
+	
 	void partFractionToPartitionFunctionStoreAnswer
 				(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient, 
 					bool StoreToFile);

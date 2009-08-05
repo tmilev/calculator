@@ -194,15 +194,15 @@ public:
 
 const char* IndicatorWindowClass::className="VectorPartitionWindowClass\0";
 IndicatorWindowClass IndicatorWindow1;
-CombinatorialChamberPointers TheBigOutput;
-FacetPointers TheBigFacetOutput;
-int NextDirectionIndex;
-int RankGlobal;
-roots InputRoots;
+extern CombinatorialChamberPointers TheBigOutput;
+extern FacetPointers TheBigFacetOutput;
+extern int NextDirectionIndex;
+extern int RankGlobal;
+extern roots InputRoots;
 const int ClickToleranceX=10;
 const int ClickToleranceY=10; 
 Polynomials<Rational> DiscreteIntegrationPolynomials;
-DrawingVariables TDV(140,400);
+extern DrawingVariables TDV;
 
 void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
 {	std::stringstream out1, out3, out4,out5;

@@ -2438,7 +2438,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>
 template <class ElementOfCommutativeRingWithIdentity>
 bool Polynomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
 {	this->DebugString.clear();
-	this->StringPrintOutAppend(this->DebugString,PolyFormatLocal); 
+//	this->StringPrintOutAppend(this->DebugString,PolyFormatLocal); 
 	return true;
 }
 
@@ -2465,7 +2465,7 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::PrintPolys(std::string &
 	for (int i=0;i<this->size;i++)
 	{	std::string tempS;
 		out << i<<". ";
-		this->TheObjects[i]->StringPrintOutAppend(tempS,PolyFormatLocal);
+//		this->TheObjects[i]->StringPrintOutAppend(tempS,PolyFormatLocal);
 		out << tempS<<"\r\n";
 	}
 	output=out.str();

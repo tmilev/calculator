@@ -158,7 +158,7 @@ int ComplexQN::NumTotalCreated=0;
 template < > int ListObjectPointers<CombinatorialChamber>::MemoryAllocationIncrement=20;
 template < > int ListObjectPointers<CombinatorialChamberCouple>::MemoryAllocationIncrement=20;
 template < > int ListObjectPointers<Facet>::MemoryAllocationIncrement=1;
-template < > int ListObjectPointers<Polynomial<CompositeComplexQN>>::MemoryAllocationIncrement=10;
+template < > int ListObjectPointers<Polynomial<CompositeComplexQN> >::MemoryAllocationIncrement=10;
 template < > int ListObjectPointers<ComplexQN>::MemoryAllocationIncrement=100000;
 template < > int ListObjectPointers<PrecomputedTaukn>::MemoryAllocationIncrement=1;
 template < > int ListObjectPointers<QuasiPolynomial>::MemoryAllocationIncrement=10;
@@ -205,7 +205,7 @@ std::fstream partFractions::ComputedContributionsList;
 
 RootToIndexTable partFraction::RootsToIndices;
 
-int ListObjectPointers<partFraction>::MemoryAllocationIncrement=100;
+template < > int ListObjectPointers<partFraction>::MemoryAllocationIncrement=100;
 ListObjectPointers<partFraction> partFraction::GlobalCollectorPartFraction;
 bool partFraction::UseGlobalCollector=true;
 bool partFractions::SplitTestMode=false;

@@ -140,7 +140,7 @@ bool PolynomialOutputFormat::UsingLatexFormat=true;
 bool PolynomialOutputFormat::CarriageReturnRegular=false;
 PolynomialOutputFormat PolyFormatNumFrac;
 IndicatorWindowVariables IndicatorWindowGlobalVariables;
-template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement; 
+template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1; 
 template < > int ListBasicObjects<ComplexQN>::ListBasicObjectsActualSizeIncrement=1; 
 template < > int ListBasicObjects<Monomial<CompositeComplexQN> >::ListBasicObjectsActualSizeIncrement=10;
 template < > int ListBasicObjects<int>::ListBasicObjectsActualSizeIncrement=1;

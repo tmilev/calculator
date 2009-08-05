@@ -3,7 +3,7 @@
 //Vector partition function - computes an algebraic expression 
 //                            for the vector partition function
 //CopyRight (C) 2009: Todor Milev 
-//Contributors: Thomas Bliem
+//Contributors: Thomas Bliem, Todor Milev
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
 //advice and help with C++
 //
@@ -48,12 +48,6 @@ extern void outputText(std::string theOutput);
 extern void FeedDataToIndicatorWindow(IndicatorWindowVariables& output); 
 extern void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
 extern void drawtext(double X1, double Y1, const char* text, int length, int color);
-extern CombinatorialChamberPointers TheBigOutput;
-extern int NextDirectionIndex;
-extern int RankGlobal;
-extern roots InputRoots;
-extern FacetPointers TheBigFacetOutput;
-extern DrawingVariables TDV;
 //taken from windows.h
 #ifndef RGB
 unsigned int RGB(int r, int g, int b)
@@ -209,6 +203,14 @@ template < > int ListObjectPointers<partFraction>::MemoryAllocationIncrement=100
 ListObjectPointers<partFraction> partFraction::GlobalCollectorPartFraction;
 bool partFraction::UseGlobalCollector=true;
 bool partFractions::SplitTestMode=false;
+
+int NextDirectionIndex;
+int RankGlobal;
+roots InputRoots;
+CombinatorialChamberPointers TheBigOutput;
+FacetPointers TheBigFacetOutput;
+DrawingVariables TDV(140,400);
+
 
 bool Stop()
 {	return true;

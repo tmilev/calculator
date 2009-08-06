@@ -12,6 +12,7 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //you need the below lines.
 //***************
 #ifndef WINDOWS
+#ifndef _WINDOWS
 void outputText(std::string theOutput)
 {
 } 
@@ -25,6 +26,7 @@ void drawline(double X1, double Y1, double X2, double Y2,
 void drawtext(double X1, double Y1, const char* text, int length, int color)
 {
 }
+#endif
 #endif
 //*******************************************
 //*******************************************

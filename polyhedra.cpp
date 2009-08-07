@@ -7686,9 +7686,9 @@ void partFractions::MakeProgressReport()
 { IndicatorWindowGlobalVariables.NumPartFractionsLoaded= this->size;
 	IndicatorWindowGlobalVariables.NumReducedPartFractions= this->IndexLowestNonReduced;
 	FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
-	while(IndicatorWindowGlobalVariables.Pause)
-	{ 
-	}
+	//while(IndicatorWindowGlobalVariables.Pause)
+	//{ 
+	//}
 }
 
 void partFractions::initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights)

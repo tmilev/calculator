@@ -17,7 +17,7 @@ void outputText(std::string theOutput)
 void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
 {
   std::cout <<"Num Reduced Fractions:"<< output.NumReducedPartFractions;
-  std::cout <<"Num Total Fractions:"<< output.NumPartFractionsLoaded;
+  std::cout <<"\tNum Total Fractions:"<< output.NumPartFractionsLoaded << "\n";
 } 
 void drawline(double X1, double Y1, double X2, double Y2, 
 								unsigned long thePenStyle, int ColorIndex)

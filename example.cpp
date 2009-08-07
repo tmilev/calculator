@@ -2,8 +2,6 @@
 
 #define dont_define_Min_and_Max_in_polyhedra_h
 #include "polyhedra.h"
-extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in 
-//polyhedra.cpp used to format the polynomial printouts.
 
 //***************
 //The below functions are required to use polyhedra.h. 

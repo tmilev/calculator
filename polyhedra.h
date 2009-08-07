@@ -100,6 +100,9 @@ class intRoots;
 class MatrixInt;
 class QuasiPolynomials;
 
+extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in 
+//polyhedra.cpp used to format the polynomial printouts.
+
 struct IndicatorWindowVariables
 { 
 public:
@@ -2082,7 +2085,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>
 	for (int i=0;i<p.size;i++)
 	{	for (int j=0;j<this->size;j++)
 		{	this->TheObjects[j].MultiplyBy(p.TheObjects[i],tempM);
-//			tempM.ComputeDebugString(PolyFormatLocal); 
+			tempM.ComputeDebugString(PolyFormatLocal); 
 //			Accum.ComputeDebugString();
 			Accum.AddMonomial(tempM);
 //			Accum.ComputeDebugString(); 
@@ -2465,7 +2468,7 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::PrintPolys(std::string &
 	for (int i=0;i<this->size;i++)
 	{	std::string tempS;
 		out << i<<". ";
-//		this->TheObjects[i]->StringPrintOutAppend(tempS,PolyFormatLocal);
+		this->TheObjects[i]->StringPrintOutAppend(tempS,PolyFormatLocal);
 		out << tempS<<"\r\n";
 	}
 	output=out.str();

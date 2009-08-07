@@ -50,15 +50,26 @@ int main(void)
 	intRoot tempWeight;
 	roots tempRoots;
 	WeylGroup tempW;
-	tempW.MakeBn(2);
+//	tempW.MakeBn(2);
+//	tempW.MakeG2();
+//	tempW.MakeBn(3);
+	tempW.MakeAn(2);
+//	tempW.MakeAn(3);
 	tempPF.ClearTheObjects();
 	tempW.ComputeRootsOfBorel(tempRoots);
 	theBorel.AssignRoots(tempRoots);
 	theVPbasis.CopyFromBase(theBorel);
 	tempPF.initFromRootSystem(theVPbasis,theVPbasis,0);
+	std::stringstream outputStream;
+	tempPF.ComputeDebugString();
+	outputStream<<tempPF.DebugString;
 	tempPF.split();
 	tempPF.ComputeDebugString();
-	//The below code uses too much memory for the time being
+	outputStream<<"\n=\n"<<tempPF.DebugString;
+	std::string LatexString;
+	LatexString=outputStream.str();
+	//you can copy the content of LatexString to a latex compiler
+	//it is supposed to display a partial fraction identity 
 	ExampleComputation ThomasExample;
 	ThomasExample.RunThomasExample();
 }

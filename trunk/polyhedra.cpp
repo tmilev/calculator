@@ -6711,19 +6711,21 @@ bool partFraction::RemoveRedundantShortRoots()
 		tempI1= partFraction::RootsToIndices.IndicesRedundantShortRoots.elements[i];
 		tempI2= partFraction::RootsToIndices.IndicesDoublesOfRedundantShortRoots[tempI1];  
 		if(tempI2!=-1)
-		{	if ( this->TheObjects[tempI1].Mult>0 && this->TheObjects[tempI2].Mult>0)
+		{	if (	this->TheObjects[tempI1].Multiplicities.TheObjects[0]>0 && 
+						this->TheObjects[tempI2].Multiplicities.TheObjects[0]>0)
 			{ static IntegerPoly tempP;
 				tempP.ClearTheObjects();
 				tempP.NumVars= root::AmbientDimension;
 				tempP.MakePolyExponentFromIntRoot(partFraction::RootsToIndices.TheObjects[tempI1]);
 				tempP.AddConstant(IOne);
 				tempP.ComputeDebugString(); 
-				for (int j=0;j<this->TheObjects[tempI1].Mult;j++)
+				for (int j=0;j<this->TheObjects[tempI1].Multiplicities.TheObjects[0];j++)
 				{ this->Coefficient.MultiplyBy(tempP);
 				}
 				this->Coefficient.ComputeDebugString(); 
-				this->TheObjects[tempI2].Mult+=this->TheObjects[tempI1].Mult;
-				this->TheObjects[tempI1].Mult=0; 
+				this->TheObjects[tempI2].Multiplicities.TheObjects[0]+=
+					this->TheObjects[tempI1].Multiplicities.TheObjects[0];
+				this->TheObjects[tempI1].Multiplicities.TheObjects[0]=0; 
 				result=true; 
 			}
 		}  
@@ -6763,8 +6765,10 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 	static MatrixRational tempMat;
 	tempRoots.size=0;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
-	{ tempRoots.AddIntRoot
-			(partFraction::RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]]);
+	{ static intRoot tempRoot; tempRoot.dimension=root::AmbientDimension;
+		tempRoot= partFraction::RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]];
+		tempRoot.MultiplyByInteger(this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
+		tempRoots.AddIntRoot(tempRoot);
 		if (tempRoots.GetLinearDependence(tempMat))
 		{	this->DecomposeFromLinRelation(tempMat,Accum);
 			return true;
@@ -6813,17 +6817,17 @@ int partFraction::ElementToString(	std::string &output, bool LatexFormat,
 }
 
 void partFraction::WriteToFile(std::fstream &output)
-{ output<<"Fraction_start\n";
+{/* output<<"Fraction_start\n";
 	for (int j=0;j<partFraction::RootsToIndices.size;j++)
 	{ output << this->TheObjects[j].Mult <<" ";
 	}
 	output<<"\nCoefficient:\n";
 	this->Coefficient.WriteToFile(output);
-	output<<"Fraction_end\n";
+	output<<"Fraction_end\n";*/
 }
 
 void partFraction::ReadFromFile(std::fstream &input)
-{ std::string tempS;
+{/* std::string tempS;
 	input >>tempS;
 	assert(tempS=="Fraction_start");
 	for (int i=0;i<partFraction::RootsToIndices.size;i++)
@@ -6832,7 +6836,7 @@ void partFraction::ReadFromFile(std::fstream &input)
 	input >>tempS;
 	this->Coefficient.ReadFromFile(input,root::AmbientDimension);	
 	input>>tempS;
-	this->ComputeIndicesNonZeroMults();
+	this->ComputeIndicesNonZeroMults();*/
 }
 
 #pragma warning(disable:4018)//grrrrr 
@@ -6969,8 +6973,8 @@ void partFraction::PrepareFraction( int indexA, int indexB,  int AminusNBindex,
 																		bool indexAisNullified, partFraction &output,
 																		IntegerPoly& AminusNbetaPoly) 
 {	output.AssignNoIndicesNonZeroMults(*this); 
-	int powerDropA = this->TheObjects[indexA].Mult;
-	int powerDropB = this->TheObjects[indexB].Mult;
+	int powerDropA = this->TheObjects[indexA].Multiplicities.TheObjects[0];
+	int powerDropB = this->TheObjects[indexB].Multiplicities.TheObjects[0];
 	if (indexAisNullified)
 	{ powerDropB=0;
 	}else
@@ -6984,70 +6988,94 @@ void partFraction::PrepareFraction( int indexA, int indexB,  int AminusNBindex,
 	output.DecreasePowerOneFrac(AminusNBindex,-powerDropA-powerDropB); 
 }
 
-bool partFraction::DecomposeFromLinRelation(MatrixRational& theLinearRelation, partFractions& Accum)
-{ int tempI= theLinearRelation.FindGCMCoefficientDenominators();
-	theLinearRelation.MultiplyByInt(tempI);
-	int indexInSelectionOfCoeffOne=-1; 
-	int firstNonZeroIndexInSelection=-1; 
-	int necessaryElongation=-1;
-	Selection ParticipatingIndices;
-	ParticipatingIndices.init(theLinearRelation.NumRows);
+int partFraction::ComputeGainingMultiplicityIndexInLinearRelation
+				(	MatrixRational& theLinearRelation)
+{ int DesireToSelectAsGainingMultiplicity=-1;
+	int result=-1;
 	for( int i=0;i<theLinearRelation.NumRows;i++)
-	{ if( theLinearRelation.elements[i][0].IsEqualTo(ROne))
-		{ indexInSelectionOfCoeffOne=ParticipatingIndices.CardinalitySelection;
-		} 
-		if( theLinearRelation.elements[i][0].IsEqualTo(RMOne))
-		{ indexInSelectionOfCoeffOne=ParticipatingIndices.CardinalitySelection;
-			theLinearRelation.MultiplyByInt(-1);
-			theLinearRelation.ComputeDebugString();
-		}
-		if(! theLinearRelation.elements[i][0].IsEqualToZero())
-		{	ParticipatingIndices.AddSelection(i);
-			if (firstNonZeroIndexInSelection==-1)
-			{ firstNonZeroIndexInSelection=ParticipatingIndices.CardinalitySelection;
-				necessaryElongation= theLinearRelation.elements[i][0].num;
+	{ if(! theLinearRelation.elements[i][0].IsEqualToZero())
+		{	int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
+			int candidateDesire=::KToTheNth(theLinearRelation.elements[i][0].num,
+						this->TheObjects[currentIndex].GetTotalMultiplicity());
+			if (candidateDesire<0)
+				candidateDesire=-candidateDesire;
+			if (result==-1 || DesireToSelectAsGainingMultiplicity<candidateDesire)
+			{	result=i;
+				DesireToSelectAsGainingMultiplicity = candidateDesire;
 			}
 		}
 	}
-	if (indexInSelectionOfCoeffOne==-1)
-	{ if (necessaryElongation<0)
-		{ necessaryElongation=-necessaryElongation;
-			theLinearRelation.MultiplyByInt(-1);			
-		}
-		int indexToBeElongated = this->IndicesNonZeroMults.TheObjects
-																[ParticipatingIndices.elements[firstNonZeroIndexInSelection]];
-		this->Elongate(	indexToBeElongated,necessaryElongation);
-		Accum.Add(*this);
-		return false;
+	return result;
+}
+
+bool partFraction::DecomposeFromLinRelation(MatrixRational& theLinearRelation, partFractions& Accum)
+{	int tempI= theLinearRelation.FindGCMCoefficientDenominators();
+	theLinearRelation.MultiplyByInt(tempI);
+	int GainingMultiplicityIndexInLinRelation=-1; 
+	int GainingMultiplicityIndex=-1; 
+	int ElongationGainingMultiplicityIndex=-1; 
+	static ListBasicObjects<int> ParticipatingIndices;
+	static ListBasicObjects<int> theElongations;
+	ParticipatingIndices.size=0;
+	theElongations.size=0;
+	GainingMultiplicityIndexInLinRelation = 
+		this->ComputeGainingMultiplicityIndexInLinearRelation(theLinearRelation);
+	ElongationGainingMultiplicityIndex= theLinearRelation
+																				.elements[GainingMultiplicityIndexInLinRelation][0].num;
+	if (ElongationGainingMultiplicityIndex<0)
+	{	ElongationGainingMultiplicityIndex=-ElongationGainingMultiplicityIndex;
 	}
-	static partFraction tempFrac;
-	static IntegerPoly tempP;
-	for(int i=0;i<ParticipatingIndices.CardinalitySelection;i++)
-	{	if (i!=indexInSelectionOfCoeffOne)
-		{ tempFrac.Assign(*this);
-			tempFrac.TheObjects[this->IndicesNonZeroMults.TheObjects[ParticipatingIndices.elements[indexInSelectionOfCoeffOne]]]
-				.Mult++;
-			tempFrac.TheObjects[this->IndicesNonZeroMults.TheObjects[ParticipatingIndices.elements[i]]].Mult--;
-			static Monomial<Integer> tempM;
-			tempM.init(root::AmbientDimension);
-			tempM.Coefficient.Assign(IOne);
-			for (int j=0;j<i;j++)
-			{	for (int k=0;k<root::AmbientDimension;k++)
-				{ tempM.degrees[k]+=(short)this->TheObjects[this->IndicesNonZeroMults.TheObjects[ParticipatingIndices.elements[j]]].Mult
-														*(short)partFraction::RootsToIndices.
-															TheObjects[this->IndicesNonZeroMults.TheObjects[ParticipatingIndices.elements[j]]].elements[k];
-				}
-			}
-			tempFrac.Coefficient.MultiplyByMonomial(tempM);
-			this->GetNElongationPoly
-				(	this->IndicesNonZeroMults.TheObjects[ParticipatingIndices.elements[i]],
-					theLinearRelation.elements[ParticipatingIndices.elements[i]][0].num,tempP);
-			tempFrac.Coefficient.MultiplyBy(tempP);
-			tempFrac.ComputeIndicesNonZeroMults();
-			Accum.Add(tempFrac);
+	else
+	{ theLinearRelation.MultiplyByInt(-1);
+	}
+	for (int i=0;i<theLinearRelation.NumRows;i++)
+	{ if (i!=GainingMultiplicityIndexInLinRelation && theLinearRelation.elements[i][0].num!=0)
+		{	ParticipatingIndices.AddObjectOnTop(this->IndicesNonZeroMults.TheObjects[i]);
+			theElongations.AddObjectOnTop(theLinearRelation.elements[i][0].num);
 		}
 	}
+	GainingMultiplicityIndex= this->IndicesNonZeroMults
+																.TheObjects[GainingMultiplicityIndexInLinRelation];
+	if (ElongationGainingMultiplicityIndex>1)
+	{	GainingMultiplicityIndex =
+			this->Elongate(GainingMultiplicityIndex,ElongationGainingMultiplicityIndex);
+	}
+//	this->ApplySzenesVergneFormula
+//		(ParticipatingIndices,theElongations,GainingMultiplicityIndex,Accum);
 	return true;
+}
+
+void partFraction::ApplySzenesVergneFormula
+			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, 
+				int GainingMultiplicityIndex,int GainingMultiplicityIndexElongation, 
+				partFractions& Accum)
+{	static partFraction tempFrac;
+	static IntegerPoly tempP;
+	for(int i=0;i<theSelectedIndices.size;i++)
+	{	tempFrac.Assign(*this);
+		tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
+			(1,GainingMultiplicityIndexElongation);
+		oneFrac& currentFrac= tempFrac.TheObjects[theSelectedIndices.TheObjects[i]];
+		int LargestElongation= currentFrac.GetLargestElongation();
+		tempFrac.TheObjects[theSelectedIndices.TheObjects[i]].AddMultiplicity
+			(-1,LargestElongation);
+		static Monomial<Integer> tempM;
+		tempM.init(root::AmbientDimension);
+		tempM.Coefficient.Assign(IOne);
+		for (int j=0;j<i;j++)
+		{	for (int k=0;k<root::AmbientDimension;k++)
+			{ tempM.degrees[k]+=(short)theElongations.TheObjects[j]*(short)LargestElongation*
+													(short)partFraction::RootsToIndices.
+														TheObjects[theSelectedIndices.TheObjects[j]].elements[k];
+			}
+		}
+		tempFrac.Coefficient.MultiplyByMonomial(tempM);
+		this->GetNElongationPoly
+				(theSelectedIndices.TheObjects[i],LargestElongation,theElongations.TheObjects[i],tempP);
+		tempFrac.Coefficient.MultiplyBy(tempP);
+		tempFrac.ComputeIndicesNonZeroMults();
+		Accum.Add(tempFrac);
+	}
 }
 
 void partFraction::decomposeAMinusNB(int indexA, int indexB, int n, 
@@ -7055,19 +7083,19 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 {	static partFraction tempFrac;
 	static IntegerPoly AminusNbetaPoly;
 	this->GetAlphaMinusNBetaPoly(indexA,indexB,n,AminusNbetaPoly);
-	int powerA= this->TheObjects[indexA].Mult;
-	int powerB= this->TheObjects[indexB].Mult; 
+	int powerA= this->TheObjects[indexA].Multiplicities.TheObjects[0];
+	int powerB= this->TheObjects[indexB].Multiplicities.TheObjects[0]; 
 	this->PrepareFraction(indexA,indexB,indexAminusNB,true,tempFrac,AminusNbetaPoly);
 //	tempFrac.ComputeDebugString(); 
 	if (partFractions::SplitTestMode)
 	{ tempFrac.Coefficient.MakeNVarConst(root::AmbientDimension,IOne);
-		tempFrac.TheObjects[indexAminusNB].Mult=1;
-		tempFrac.TheObjects[indexB].Mult=1;
-		tempFrac.TheObjects[indexA].Mult=0;
+		tempFrac.TheObjects[indexAminusNB].Multiplicities.TheObjects[0]=1;
+		tempFrac.TheObjects[indexB].Multiplicities.TheObjects[0]=1;
+		tempFrac.TheObjects[indexA].Multiplicities.TheObjects[0]=0;
 		tempFrac.ComputeIndicesNonZeroMults();
 		Accum.Add(tempFrac);
-		tempFrac.TheObjects[indexB].Mult=0;
-		tempFrac.TheObjects[indexA].Mult=1;
+		tempFrac.TheObjects[indexB].Multiplicities.TheObjects[0]=0;
+		tempFrac.TheObjects[indexA].Multiplicities.TheObjects[0]=1;
 		tempFrac.ComputeIndicesNonZeroMults();
 		Accum.Add(tempFrac);
 		return;
@@ -7079,8 +7107,8 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 		tempFrac.Coefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
-		{	tempFrac.TheObjects[indexAminusNB].Mult++;
-			tempFrac.TheObjects[indexB].Mult--; 
+		{	tempFrac.TheObjects[indexAminusNB].Multiplicities.TheObjects[0]++;
+			tempFrac.TheObjects[indexB].Multiplicities.TheObjects[0]--; 
 			tempFrac.Coefficient.MultiplyBy(AminusNbetaPoly);
 	//		tempFrac.ComputeDebugString();    
 		}
@@ -7094,8 +7122,8 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 		tempFrac.Coefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
-		{	tempFrac.TheObjects[indexAminusNB].Mult++;
-			tempFrac.TheObjects[indexA].Mult--; 
+		{	tempFrac.TheObjects[indexAminusNB].Multiplicities.TheObjects[0]++;
+			tempFrac.TheObjects[indexA].Multiplicities.TheObjects[0]--; 
 //			tempFrac.ComputeDebugString();    
 		}
 	}
@@ -7104,7 +7132,7 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 int partFraction::MultiplyByOneFrac(oneFrac& f)
 { for (int i=0;i<this->size;i++)
 	{ if (this->TheObjects[i]==f)
-		{ this->TheObjects[i].Mult+=f.Mult;
+		{ this->TheObjects[i].Multiplicities.TheObjects[0]+=f.Multiplicities.TheObjects[0];
 			return i;   
 		} 
 	}
@@ -7114,7 +7142,7 @@ int partFraction::MultiplyByOneFrac(oneFrac& f)
 }
 
 bool partFraction::DecreasePowerOneFrac(int index, int increment)
-{ this->TheObjects[index].Mult-=increment;
+{ this->TheObjects[index].Multiplicities.TheObjects[0]-=increment;
 	this->ComputeIndicesNonZeroMults();
 	return true;
 } 
@@ -7122,7 +7150,7 @@ bool partFraction::DecreasePowerOneFrac(int index, int increment)
 void partFraction::ComputeIndicesNonZeroMults() 
 { this->IndicesNonZeroMults.size=0;
 	for (int i=0;i<this->size;i++)
-	{ if(this->TheObjects[i].Mult>0)
+	{ if(this->TheObjects[i].Multiplicities.TheObjects[0]>0)
 		{ this->IndicesNonZeroMults.AddObjectOnTop(i);
 		}
 	}
@@ -7144,7 +7172,7 @@ void partFraction::GetAlphaMinusNBetaPoly(int indexA, int indexB,
 //	output.ComputeDebugString(); 
 }
 
-void partFraction::GetNElongationPoly(int index,int n, IntegerPoly& output)
+void partFraction::GetNElongationPoly(int index,int Elongation,int n, IntegerPoly& output)
 {	output.Nullify(root::AmbientDimension);  
 	Monomial<Integer> tempM;
 	tempM.init(root::AmbientDimension);
@@ -7152,7 +7180,7 @@ void partFraction::GetNElongationPoly(int index,int n, IntegerPoly& output)
 	{	tempM.Coefficient.Assign(IOne);
 		for (int i=0;i<n;i++)
 		{ for (int j=0;j<root::AmbientDimension;j++)
-			{ tempM.degrees[j]=(short)(i*partFraction::RootsToIndices.TheObjects[index].elements[j]);    
+			{ tempM.degrees[j]=(short)(Elongation*i*partFraction::RootsToIndices.TheObjects[index].elements[j]);    
 			}
 			output.AddMonomial(tempM); 
 		}
@@ -7256,7 +7284,8 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
 		static Rational tempRat,tempRat2;
 		this->MakePolynomialFromOneNormal
 			(	normals.TheObjects[i],shiftRational,
-				this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].Mult,tempP);
+				this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].Multiplicities.TheObjects[0],
+				tempP);
 		output.MultiplyBy(tempP);
 //		output.ComputeDebugString(); 	
 	}
@@ -7265,8 +7294,8 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
 	this->AlreadyAccountedForInGUIDisplay=true;
 }
 
-void partFraction::Elongate(int indexElongatedFraction, int theElongation)
-{ if (this->TheObjects[indexElongatedFraction].Mult==0) return;
+int partFraction::Elongate(int indexElongatedFraction, int theElongation)
+{ if (this->TheObjects[indexElongatedFraction].Multiplicities.TheObjects[0]==0) return indexElongatedFraction;
 	intRoot tempIntRoot;
 	tempIntRoot=partFraction::RootsToIndices.TheObjects[indexElongatedFraction];
 	tempIntRoot.MultiplyByInteger(theElongation);
@@ -7279,16 +7308,18 @@ void partFraction::Elongate(int indexElongatedFraction, int theElongation)
 	{	int oldsize=this->size;
 		this->SetSizeExpandOnTopNoObjectInit(partFraction::RootsToIndices.size);
 		for(int i= oldsize;i<this->size;i++)
-			this->TheObjects[i].Mult=0;
+			this->TheObjects[i].Multiplicities.TheObjects[0]=0;
 	}
 	assert(theElongation>0);
 	IntegerPoly tempP;
-	this->GetNElongationPoly(indexElongatedFraction,theElongation,tempP);
-	tempP.RaiseToPower(this->TheObjects[indexElongatedFraction].Mult);
-	this->TheObjects[IndexLongVector].Mult+=this->TheObjects[indexElongatedFraction].Mult;
-	this->TheObjects[indexElongatedFraction].Mult=0;
+	this->GetNElongationPoly(indexElongatedFraction,1,theElongation,tempP);
+	tempP.RaiseToPower(this->TheObjects[indexElongatedFraction].Multiplicities.TheObjects[0]);
+	this->TheObjects[IndexLongVector].Multiplicities.TheObjects[0]+=
+		this->TheObjects[indexElongatedFraction].Multiplicities.TheObjects[0];
+	this->TheObjects[indexElongatedFraction].Multiplicities.TheObjects[0]=0;
 	this->Coefficient.MultiplyBy(tempP);
 	this->ComputeIndicesNonZeroMults();
+	return IndexLongVector;
 }
 
 void partFraction::MakePolynomialFromOneNormal
@@ -7377,14 +7408,15 @@ partFraction::~partFraction()
 int partFraction::HashFunction()
 { int result=0;
 	for (int i=0;i<this->size;i++)
-		result+=SomeRandomPrimes[i]*this->TheObjects[i].Mult;
+		result+=SomeRandomPrimes[i]*this->TheObjects[i].Multiplicities.TheObjects[0];
 	return result;  
 }
 
 bool partFraction::operator==(partFraction& right)
 {	if (this->size!= right.size) return false;
 	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i].Mult!=right.TheObjects[i].Mult) return false;  
+	{ if (this->TheObjects[i].Multiplicities.TheObjects[0]!=
+				right.TheObjects[i].Multiplicities.TheObjects[0]) return false;  
 	}
 /*	for(int i=0;i<root::AmbientDimension;i++)
 	{ if (this->RootShift[i]!=right.RootShift[i])
@@ -7494,11 +7526,11 @@ void partFraction::initFromRootSystem(intRoots& theFraction, intRoots& theAlgori
 	this->SetSizeExpandOnTopNoObjectInit(partFraction::RootsToIndices.size);
 	this->init(partFraction::RootsToIndices.size);
 	for(int i=0;i<partFraction::RootsToIndices.size;i++)
-	{ this->TheObjects[i].Mult=0; 
+	{ this->TheObjects[i].Multiplicities.TheObjects[0]=0; 
 	}
 	for (int i=0;i<theFraction.size;i++)
 	{ int index = partFraction::RootsToIndices.getIndex(theFraction.TheObjects[i]);  
-		this->TheObjects[index].Mult++;
+		this->TheObjects[index].Multiplicities.TheObjects[0]++;
 	}
 	this->ComputeIndicesNonZeroMults();
 }  
@@ -7548,7 +7580,7 @@ void partFraction::ComputeDebugString()
 
 void partFraction::InsertNewRootIndex(int index)
 { this->ShiftUpExpandOnTop(index);
-	this->TheObjects[index].Mult=0; 
+	this->TheObjects[index].Multiplicities.TheObjects[0]=0; 
 }
 
 void partFractions::Add(partFraction &f)
@@ -7915,7 +7947,8 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 }
 
 void oneFrac::operator =(oneFrac& right)
-{ this->Mult= right.Mult;  
+{ this->Multiplicities.CopyFromBase(right.Multiplicities); 
+	this->Elongations.CopyFromBase(right.Elongations); 
 }
 
 /*bool oneFrac::IsHigherThan(oneFrac& f)
@@ -7935,13 +7968,62 @@ void oneFrac::operator =(oneFrac& right)
 }*/
 
 int oneFrac::HashFunction()
-{ return this->Mult;
+{ return this->Multiplicities.TheObjects[0];
 }
+
+int oneFrac::GetLargestElongation()
+{ int result=this->Elongations.TheObjects[0];
+	for (int i=1;i<this->Elongations.size;i++)
+	{ if (this->Elongations.TheObjects[i]>result)
+			result= this->Elongations.TheObjects[i];
+	}
+	return result;
+}
+
+int oneFrac::GetTotalMultiplicity()
+{ int result=0;
+	for (int i=0;i<this->Elongations.size;i++)
+	{ result+= this->Multiplicities.TheObjects[i];
+	}
+	return result;
+}
+
+
+int oneFrac::IndexLargestElongation()
+{ int result=0;
+	for (int i=1;i<this->Elongations.size;i++)
+	{ if (this->Elongations.TheObjects[i]>this->Elongations.TheObjects[result])
+			result=i;
+	}
+	return result;
+}
+void oneFrac::AddMultiplicity(int MultiplicityIncrement, int Elongation)
+{ int ElongationIndex=-1;
+	for (int i=0;i<this->Elongations.size;i++)
+	{ if (this->Elongations.TheObjects[i]==Elongation)
+		{ ElongationIndex=i;
+			break;
+		}
+	}
+	if (ElongationIndex==-1)
+	{ this->Elongations.AddObjectOnTop(Elongation);
+		this->Multiplicities.ExpandArrayOnTop(1);
+		ElongationIndex= this->Multiplicities.size-1;
+		this->Multiplicities.TheObjects[ElongationIndex]=0;
+	}
+	this->Multiplicities.TheObjects[ElongationIndex]+=MultiplicityIncrement;
+	assert(this->Multiplicities.TheObjects[ElongationIndex]>=0);
+	if (this->Multiplicities.TheObjects[ElongationIndex]==0)
+	{ this->Multiplicities.PopIndexSwapWithLast(ElongationIndex);
+		this->Elongations.PopIndexSwapWithLast(ElongationIndex);
+	}
+}
+
 
 void oneFrac::ElementToStringBasisChange( MatrixInt& VarChange, 
 															 bool UsingVarChange, std::string& output,
 															 bool LatexFormat, int index)
-{	if (this->Mult==0){output.clear(); return;}
+{	if (this->Multiplicities.TheObjects[0]==0){output.clear(); return;}
 	std::stringstream  out;
 	std::string tempS;
 	intRoot tempRoot2, tempRoot;
@@ -7973,7 +8055,7 @@ void oneFrac::ElementToStringBasisChange( MatrixInt& VarChange,
 		}
 	}
 	out <<")";
-	if (this->Mult>1) out <<"^"<<this->Mult; 
+	if (this->Multiplicities.TheObjects[0]>1) out <<"^"<<this->Multiplicities.TheObjects[0]; 
 	if (LatexFormat){ out<<"}";}
 	out<<" ";
 	output= out.str();

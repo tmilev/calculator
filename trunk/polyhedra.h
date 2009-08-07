@@ -177,6 +177,8 @@ private:
 	int IndexOfVirtualZero;
 	Object* TheActualObjects;
 	ListBasicObjects(ListBasicObjects<Object>&);
+	void ExpandArrayOnTop(int increase);
+	void ExpandArrayOnBottom(int increase);
 public:
 	static int ListBasicObjectsActualSizeIncrement;
 	Object* TheObjects;
@@ -187,8 +189,6 @@ public:
 	void AddObjectOnBottom(Object& o);
 	void AddObjectOnTop(Object& o);
 	void AddListOnTop(ListBasicObjects<Object>& theList);
-	void ExpandArrayOnTop(int increase);
-	void ExpandArrayOnBottom(int increase);
 	void PopIndexShiftUp(int index);
 	void PopIndexShiftDown(int index);
 	void PopIndexSwapWithLast(int index);
@@ -2438,7 +2438,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>
 template <class ElementOfCommutativeRingWithIdentity>
 bool Polynomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
 {	this->DebugString.clear();
-//	this->StringPrintOutAppend(this->DebugString,PolyFormatLocal); 
+	this->StringPrintOutAppend(this->DebugString,PolyFormatLocal); 
 	return true;
 }
 
@@ -3011,7 +3011,7 @@ public:
 };
 
 
-class oneFrac
+class oneFracWithMultiplicitiesAndElongations
 {
 public:
 	std::string DebugString;
@@ -3024,14 +3024,18 @@ public:
 	int GetLargestElongation();
 	int GetTotalMultiplicity();
 	void invert();
+	void init();
 	int HashFunction();
-	bool IsHigherThan(oneFrac& f);
-	void operator=(oneFrac& right);
-	bool operator==(oneFrac& right);
+	bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
+	void operator=(oneFracWithMultiplicitiesAndElongations& right);
+	bool operator==(oneFracWithMultiplicitiesAndElongations& right);
 	void ElementToString(std::string& output, int index, bool LatexFormat);
 	void ElementToStringBasisChange(MatrixInt& VarChange, 
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat, int index);
+	void OneFracToStringBasisChange(int indexElongation, MatrixInt& VarChange, 
+																	bool UsingVarChange, std::string& output,
+																	bool LatexFormat, int indexInFraction);
 };
 
 class SubsetWithMultiplicities
@@ -3151,7 +3155,7 @@ public:
 	void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials);
 };
 
-class partFraction: ListBasicObjects<oneFrac>
+class partFraction: ListBasicObjects<oneFracWithMultiplicitiesAndElongations>
 {
 private: 
 	void findPivot();
@@ -3199,14 +3203,14 @@ public:
 	bool DecomposeFromLinRelation(MatrixRational& theLinearRelation, partFractions& Accum);
 	void ApplySzenesVergneFormula			
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, 
-				int GainingMultiplicityIndex,int GainingMultiplicityIndexElongation, 
+				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, 
 				partFractions& Accum);
 	bool reduceOnceTotalOrderMethod(partFractions&Accum);
 	bool reduceOnceGeneralMethod(partFractions&Accum);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
 	int HashFunction();
-	int MultiplyByOneFrac(oneFrac& f);
+	int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
 	void init(int numRoots);
 	int Elongate(int indexElongatedFraction, int theElongation);
 	void ComputeIndicesNonZeroMults();

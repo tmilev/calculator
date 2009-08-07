@@ -3015,10 +3015,14 @@ class oneFrac
 {
 public:
 	std::string DebugString;
-	int Mult;
-	int Elongation;
+	ListBasicObjects<int> Multiplicities;
+	ListBasicObjects<int> Elongations;
 	void ComputeDebugString();
 	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
+	void AddMultiplicity(int MultiplicityIncrement, int Elongation);
+	int IndexLargestElongation();
+	int GetLargestElongation();
+	int GetTotalMultiplicity();
 	void invert();
 	int HashFunction();
 	bool IsHigherThan(oneFrac& f);
@@ -3175,6 +3179,8 @@ public:
 	static void MakePolynomialFromOneNormal
 						(	root& normal, root& shiftRational, int theMult,	PolynomialLargeRational& output);
 	void ComputeNormals(roots& output);
+	int ComputeGainingMultiplicityIndexInLinearRelation
+				(	MatrixRational& theLinearRelation);
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
 						bool RecordSplitPowerSeriesCoefficient, bool StoreToFile);
@@ -3191,6 +3197,10 @@ public:
 	void decomposeAMinusNB(int indexA, int indexB, int n, 
 												 int indexAminusNB, partFractions& Accum);
 	bool DecomposeFromLinRelation(MatrixRational& theLinearRelation, partFractions& Accum);
+	void ApplySzenesVergneFormula			
+			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, 
+				int GainingMultiplicityIndex,int GainingMultiplicityIndexElongation, 
+				partFractions& Accum);
 	bool reduceOnceTotalOrderMethod(partFractions&Accum);
 	bool reduceOnceGeneralMethod(partFractions&Accum);
 	bool AreEqual(partFraction& p);
@@ -3198,7 +3208,7 @@ public:
 	int HashFunction();
 	int MultiplyByOneFrac(oneFrac& f);
 	void init(int numRoots);
-	void Elongate(int indexElongatedFraction, int theElongation);
+	int Elongate(int indexElongatedFraction, int theElongation);
 	void ComputeIndicesNonZeroMults();
 	bool DecreasePowerOneFrac(int index, int increment);
 	void GetNumerator(PolynomialRationalCoeff& output);
@@ -3214,7 +3224,7 @@ public:
 	partFraction();
 	~partFraction();
 	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output);
-	void GetNElongationPoly(int index,int n, IntegerPoly& output);
+	void GetNElongationPoly(int index,int Elongation,int n, IntegerPoly& output);
 	bool operator==(partFraction& right);
 	void operator=(partFraction& right);
 	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);

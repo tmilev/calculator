@@ -51,9 +51,9 @@ int main(void)
 	roots tempRoots;
 	WeylGroup tempW;
 //	tempW.MakeBn(2);
-//	tempW.MakeG2();
+	tempW.MakeG2();
 //	tempW.MakeBn(3);
-	tempW.MakeAn(2);
+//	tempW.MakeAn(2);
 //	tempW.MakeAn(3);
 	tempPF.ClearTheObjects();
 	tempW.ComputeRootsOfBorel(tempRoots);
@@ -96,6 +96,7 @@ void ExampleComputation::RunThomasExample()
 	exampleRoots.TheObjects[14].initFromInt(0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0);
 	exampleRoots.TheObjects[15].initFromInt(0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0);
 	partFractions tempPF;
+	partFractions::ListBasicObjectsActualSizeIncrement=2000;
 	IntegerPoly::ListBasicObjectsActualSizeIncrement=5;
 	exampleRoots.ComputeDebugString();
 	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0);

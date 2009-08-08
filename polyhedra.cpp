@@ -6764,17 +6764,32 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 { static roots tempRoots;
 	static MatrixRational tempMat;
 	tempRoots.size=0;
+	int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 	{ static intRoot tempRoot; tempRoot.dimension=root::AmbientDimension;
-		tempRoot= partFraction::RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]];
+		int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
+		if (currentIndex== this->LastGainingMultiplicityIndex)
+		{ IndexInLinRelationOfLastGainingMultiplicityIndex=i;
+		}
+		tempRoot= partFraction::RootsToIndices.TheObjects[currentIndex];
 		tempRoot.MultiplyByInteger
-			(this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
+			(this->TheObjects[currentIndex].GetLargestElongation());
 		tempRoots.AddIntRoot(tempRoot);
-		if (tempRoots.GetLinearDependence(tempMat))
+		bool ShouldDecompose;
+		ShouldDecompose = tempRoots.GetLinearDependence(tempMat);
+		if (ShouldDecompose && this->LastGainingMultiplicityIndex!=-1)
+		{ if (IndexInLinRelationOfLastGainingMultiplicityIndex==-1)
+			{	ShouldDecompose=false;}
+			else
+			{	ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
+			}
+		}		
+		if (ShouldDecompose)
 		{	this->DecomposeFromLinRelation(tempMat,Accum);
 			return true;
 		}
 	}
+	this->LastGainingMultiplicityIndex=-1;
 	return false;
 	//tempRoots.r
 }
@@ -7039,6 +7054,7 @@ bool partFraction::DecomposeFromLinRelation(MatrixRational& theLinearRelation, p
 	}
 	GainingMultiplicityIndex= this->IndicesNonZeroMults
 																.TheObjects[GainingMultiplicityIndexInLinRelation];
+	this->LastGainingMultiplicityIndex=GainingMultiplicityIndex;
 	this->ApplySzenesVergneFormula
 		(	ParticipatingIndices,theElongations,GainingMultiplicityIndex,
 			ElongationGainingMultiplicityIndex,Accum);
@@ -7373,6 +7389,7 @@ partFraction::partFraction()
 	this->PowerSeriesCoefficientIsComputed=false;
 	this->AlreadyAccountedForInGUIDisplay=false;
 	this->FileStoragePosition=-1;
+	this->LastGainingMultiplicityIndex=-1;
 /*	if (partFraction::UseGlobalCollector)
 	{ partFraction::GlobalCollectorPartFraction.AddObject(this);
 		this->indexInGlobalCollectorPartFraction=	
@@ -7466,7 +7483,8 @@ bool partFractions::split()
 		//this->ComputeDebugString();
 		//tempF.ComputeDebugString();
 		if (! (tempF.reduceOnceGeneralMethod(*this)))
-		{ this->IndexLowestNonReduced++;
+		{ if (tempF.IndicesNonZeroMults.size==root::AmbientDimension)
+				this->IndexLowestNonReduced++;
 		}
 		else
 		{	this->PopIndexSwapWithLastHash( this->IndexLowestNonReduced);

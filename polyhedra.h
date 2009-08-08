@@ -2085,7 +2085,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>
 	for (int i=0;i<p.size;i++)
 	{	for (int j=0;j<this->size;j++)
 		{	this->TheObjects[j].MultiplyBy(p.TheObjects[i],tempM);
-			tempM.ComputeDebugString(PolyFormatLocal); 
+//			tempM.ComputeDebugString(PolyFormatLocal); 
 //			Accum.ComputeDebugString();
 			Accum.AddMonomial(tempM);
 //			Accum.ComputeDebugString(); 
@@ -2183,7 +2183,8 @@ inline int Polynomial<ElementOfCommutativeRingWithIdentity>::HasSameExponentMono
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::AddPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& p)
-{	for (int i=0;i<p.size;i++)
+{	this->SetActualSizeAtLeastExpandOnTop(p.size+this->size);
+	for (int i=0;i<p.size;i++)
 	{	this->AddMonomial(p.TheObjects[i]);   
 	}
 }
@@ -3167,6 +3168,7 @@ private:
 	bool rootIsInFractionCone(root& r);
 	friend class partFractions;
 public:
+	int LastGainingMultiplicityIndex;
 	IntegerPoly Coefficient;
 	QuasiPolynomial PowerSeriesCoefficient;
 	partFractionPolynomials SplitPowerSeriesCoefficients;

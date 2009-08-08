@@ -100,6 +100,14 @@ void ExampleComputation::RunThomasExample()
 	IntegerPoly::ListBasicObjectsActualSizeIncrement=5;
 	exampleRoots.ComputeDebugString();
 	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0);
+	std::fstream tempF;
+	tempF.open("C:/ThomasOutput.txt",std::fstream::out | std::fstream::trunc);
+	assert(tempF.is_open());
 	tempPF.split();
-	tempPF.ComputeDebugString();
+//	tempPF.ComputeDebugString();
+	tempPF.ElementToStringOutputToFile(tempF,true,false,true);
+	tempF.close();
+	#ifndef _WINDOWS
+		std::cout<<tempPF.DebugString;
+	#endif
 }

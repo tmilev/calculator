@@ -7495,7 +7495,7 @@ bool partFractions::split()
 	}
 //	this->RemoveRedundantShortRoots(); 
 	PolyFormatLocal.MakeAlphabetxi();
-	this->ComputeDebugString();
+//	this->ComputeDebugString();
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
 	return false;
@@ -7617,6 +7617,13 @@ int partFractions::ElementToString(std::string& output, bool LatexFormat,
 		(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator);
 }
 
+int partFractions::ElementToStringOutputToFile(std::fstream& output, bool LatexFormat,
+																		bool includeVPsummand, bool includeNumerator)
+{ static MatrixInt tempMat;
+	return this->ElementToStringBasisChangeOutputToFile
+		(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator);
+}
+
 int partFractions::ElementToStringBasisChange(MatrixInt& VarChange, 
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat,bool includeVPsummand, bool includeNumerator)
@@ -7658,6 +7665,43 @@ int partFractions::ElementToStringBasisChange(MatrixInt& VarChange,
 	else
 	{ out << "\\end{eqnarray*}";
 		output= out.str();
+	}
+	return TotalLines;
+} 
+
+int partFractions::ElementToStringBasisChangeOutputToFile(MatrixInt& VarChange, 
+																	bool UsingVarChange, std::fstream& output,
+																	bool LatexFormat,bool includeVPsummand, bool includeNumerator)
+{ std::string tempS;
+	int TotalLines=0;
+	PolyFormatLocal.ExtraLinesCounterLatex=0;
+	if (LatexFormat)
+	{ output << "\\begin{eqnarray*}\n";}
+	int LastCutOff=0;
+	for (int i=0;i<this->size;i++)
+	{ if (this->TheObjects[i].Coefficient.size>0 )
+		{ TotalLines+=this->TheObjects[i].ElementToStringBasisChange(VarChange, UsingVarChange,
+																									 tempS, LatexFormat,includeVPsummand,includeNumerator);  
+			if (LatexFormat)
+			{ output <<"&&"; }
+			if (tempS[0]!='-'){output<<"+";}
+			output<<tempS;
+			if (LatexFormat)
+			{ output<<"\\\\ \n";
+				TotalLines++;
+			}
+			else
+			{output <<"\n";}
+			if	( LatexFormat && 
+						(TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine 
+					)
+			{ output<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
+				LastCutOff=TotalLines;
+			}
+		} 
+	}
+	if (LatexFormat)
+	{ output << "\\end{eqnarray*}";
 	}
 	return TotalLines;
 } 

@@ -3269,6 +3269,9 @@ public:
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	int ElementToStringBasisChange(MatrixInt& VarChange, bool UsingVarChange, std::string& output,
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator);
+	int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
+	int ElementToStringBasisChangeOutputToFile(MatrixInt& VarChange, bool UsingVarChange, std::fstream& output,
+																	bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
 					(	QuasiPolynomial& output, root& r,
 						bool storeComputations, bool RecordSplitPowerSeriesCoefficient,bool StoreToFile,

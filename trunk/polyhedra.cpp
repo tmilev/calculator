@@ -6703,7 +6703,7 @@ void partFractionPolynomials::AddPolynomialLargeRational
 	}
 }
 
-bool partFraction::RemoveRedundantShortRoots()
+bool partFraction::RemoveRedundantShortRootsClassicalRootSystem()
 { bool result=false;
 	for (int i=0;i<partFraction::RootsToIndices.
 										IndicesRedundantShortRoots.CardinalitySelection;i++  )
@@ -6731,6 +6731,30 @@ bool partFraction::RemoveRedundantShortRoots()
 		}  
 	}
 	this->ComputeIndicesNonZeroMults(); 
+	return result;
+}
+
+bool partFraction::RemoveRedundantShortRoots()
+{ bool result=false;
+	for (int i=0;i<this->IndicesNonZeroMults.size;i++  )
+	{ int currentIndex=this->IndicesNonZeroMults.TheObjects[i];
+		::oneFracWithMultiplicitiesAndElongations& currentFrac =
+				 this->TheObjects[currentIndex];
+		int LCMElongations = currentFrac.GetLCMElongations();
+		for (int i=0;i<currentFrac.Elongations.size;i++)
+		{ int ElongationValue=currentFrac.Elongations.TheObjects[i];
+			if (ElongationValue!=LCMElongations)
+			{ static IntegerPoly tempP;
+				this->GetNElongationPoly(currentIndex,ElongationValue,LCMElongations,tempP);
+				tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]); 
+				this->Coefficient.MultiplyBy(tempP);
+//				this->Coefficient.ComputeDebugString(); 
+				currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i],LCMElongations);
+				currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i],ElongationValue);
+				result=true; 
+			}
+		}
+	}
 	return result;
 }
 
@@ -7493,9 +7517,10 @@ bool partFractions::split()
 //		this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
 	}
-//	this->RemoveRedundantShortRoots(); 
+//	this->RemoveRedundantShortRootsClassicalRootSystem(); 
 	PolyFormatLocal.MakeAlphabetxi();
 //	this->ComputeDebugString();
+	this->RemoveRedundantShortRoots();
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
 	return false;
@@ -7523,7 +7548,7 @@ bool partFractions::splitClassicalRootSystem()
 //		this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
 	}
-	this->RemoveRedundantShortRoots(); 
+	this->RemoveRedundantShortRootsClassicalRootSystem(); 
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
 	return this->CheckForMinimalityDecomposition();
@@ -7766,6 +7791,24 @@ void partFractions::RemoveRedundantShortRoots()
 	for (int i=0;i<this->size;i++)
 	{ tempFrac.Assign(this->TheObjects[i]);
 		if(tempFrac.RemoveRedundantShortRoots())
+		{	this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
+			this->TheObjects[i].Coefficient.ReleaseMemory();
+			this->Add(tempFrac);
+		}
+	}
+	for (int i=0;i<this->size;i++)
+	{ if (this->TheObjects[i].Coefficient.IsEqualToZero())
+		{ this->PopIndexSwapWithLastHash(i);
+			i--;
+		}
+	}
+}
+
+void partFractions::RemoveRedundantShortRootsClassicalRootSystem()
+{	partFraction tempFrac;
+	for (int i=0;i<this->size;i++)
+	{ tempFrac.Assign(this->TheObjects[i]);
+		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem())
 		{	this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
 			this->TheObjects[i].Coefficient.ReleaseMemory();
 			this->Add(tempFrac);
@@ -8036,6 +8079,14 @@ int oneFracWithMultiplicitiesAndElongations::GetLargestElongation()
 	for (int i=1;i<this->Elongations.size;i++)
 	{ if (this->Elongations.TheObjects[i]>result)
 			result= this->Elongations.TheObjects[i];
+	}
+	return result;
+}
+
+int oneFracWithMultiplicitiesAndElongations::GetLCMElongations()
+{ int result =1;
+	for (int i=1;i<this->Elongations.size;i++)
+	{ result=lcm(this->Elongations.TheObjects[i],result);
 	}
 	return result;
 }

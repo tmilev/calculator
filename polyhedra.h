@@ -3026,6 +3026,7 @@ public:
 	void AddMultiplicity(int MultiplicityIncrement, int Elongation);
 	int IndexLargestElongation();
 	int GetLargestElongation();
+	int GetLCMElongations();
 	int GetTotalMultiplicity();
 	void invert();
 	void init();
@@ -3177,6 +3178,7 @@ public:
 	int indexInGlobalCollectorPartFraction;
 	int FileStoragePosition;
 	bool PowerSeriesCoefficientIsComputed;
+	bool RemoveRedundantShortRootsClassicalRootSystem();
 	bool RemoveRedundantShortRoots();
 	bool AlreadyAccountedForInGUIDisplay;
 	static std::fstream TheBigDump;
@@ -3261,6 +3263,7 @@ public:
 	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
 	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
 	//row index is the index of the root; column(second) index is the coordinate index
+	void RemoveRedundantShortRootsClassicalRootSystem();
 	void RemoveRedundantShortRoots();
 	bool splitClassicalRootSystem();
 	bool split();

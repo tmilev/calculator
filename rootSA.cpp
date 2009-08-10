@@ -180,7 +180,7 @@ public:
 				(std::string& outputString, HWND hAssociatedEditBox);
 	IndicatorWindowClass()
 	{	this->theFont=0;this->LabelBrush1=0;this->ComputationalThread=0;oldCombo1State=1;
-		this->ComputationInitializedAndReadyToGo=5; this->usePFFile=false; this->useVPFile=false;
+		this->ComputationInitializedAndReadyToGo=1; this->usePFFile=false; this->useVPFile=false;
 		this->rootRank=3; this->TypeWeylGroup='A'; this->stringTitle="I will eat your RAM";
 		this->SlicingIndex=0; this->stringFile3="C:\\ouput.txt"; this->initDLLneeded=true;
 		this->RecalculationChambersNeeded=true; this->ComputationMustDie=false;
@@ -664,6 +664,8 @@ void IndicatorWindowClass::CreationProcedures(HWND hWnd)
 	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
 	this->stringCombo1="D4";
 	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
+	this->stringCombo1="G2";
+	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
 	SendMessage(this->hComboBox1,CB_SETCURSEL,1,0);
   //SendMessage(this->hComboBox1,,1,0);
   IndicatorWindow1.theDC=::GetDC(this->hMain);
@@ -907,7 +909,12 @@ void IndicatorWindowClass::clickCombo1()
 				this->stringEditWeights[2]="15";this->stringEditWeights[3]="16";
 				ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=3000;
 				break;
-		}
+			case 11:
+				this->TypeWeylGroup='G'; this->rootRank=2;
+				this->stringEditWeights[0]="4";this->stringEditWeights[1]="4";
+				ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=3000;
+				break;
+			}
 		this->noGraphics=true;
 		this->RecalculationChambersNeeded=true;
 		this->UpdateEditWeights();

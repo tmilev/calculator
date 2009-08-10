@@ -50,11 +50,12 @@ int main(void)
 	intRoot tempWeight;
 	roots tempRoots;
 	WeylGroup tempW;
-	tempW.MakeBn(2);
-//	tempW.MakeG2();
+//	tempW.MakeBn(2);
+	tempW.MakeG2();
 //	tempW.MakeBn(3);
 //	tempW.MakeAn(2);
 //	tempW.MakeAn(3);
+	PolyFormatLocal.MakeAlphabetxi();
 	tempPF.ClearTheObjects();
 	tempW.ComputeRootsOfBorel(tempRoots);
 	theBorel.AssignRoots(tempRoots);

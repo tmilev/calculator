@@ -3168,6 +3168,7 @@ private:
 	void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
 	bool rootIsInFractionCone(root& r);
 	friend class partFractions;
+	friend class partFractionPolynomials;
 public:
 	int LastGainingMultiplicityIndex;
 	IntegerPoly Coefficient;

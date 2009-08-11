@@ -6672,7 +6672,10 @@ void partFractionPolynomials::initLatticeIndicatorsFromPartFraction(partFraction
 	{ for(int j=0;j<root::AmbientDimension;j++)  
 		{	this->theNormals.elements[j][i].AssignInteger
 					(partFraction::RootsToIndices.TheObjects
-						[owner.IndicesNonZeroMults.TheObjects[i]].elements[j]); 
+						[owner.IndicesNonZeroMults.TheObjects[i]].elements[j]*
+						owner.TheObjects[owner.IndicesNonZeroMults.TheObjects[i]].
+							Elongations.TheObjects[0]
+						); 
 		}
 	}
 	this->theNormals.Invert();	

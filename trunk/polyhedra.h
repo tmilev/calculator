@@ -5,7 +5,8 @@
 //CopyRight (C) 2009: Todor Milev 
 //Contributors: Thomas Bliem, Todor Milev
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
-//advice and help with C++
+//advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith, 
+//Hammurabi and Duoas for the helpful comments and advice on C++!
 //
 //
 //email: t.milev@jacobs-university.de
@@ -329,9 +330,13 @@ public:
 	void NullifyAll();
 	bool Invert();
 	void MultiplyByInt(int x);
+	void MultiplyByRational(Rational& x);
 	void AssignMatrixIntWithDen(MatrixInt& theMat, int Den);
-	int FindGCMCoefficientDenominators();
-	int FindGCMCoefficientDenominatorsInRow(int index);
+	void ScaleToIntegralForMinRationalHeight();
+	int FindLCMCoefficientDenominators();
+	//int FindGCMCoefficientDenominatorsInRow(int index);
+	int FindGCDCoefficientNumerators();
+	//int FindGCMCoefficientNumeratorsInRow(int index);
 	void Free();
 	MatrixRational();
 	~MatrixRational();
@@ -882,8 +887,8 @@ template <class Object>
 int HashedListBasicObjects<Object>::ContainsObjectHash(Object &o) 
 {	int hashIndex = o.HashFunction()%this->HashSize;
 	if (hashIndex<0){hashIndex+=this->HashSize;}
-	for (int i=0;i<TheHashedArrays[hashIndex].size;i++)
-	{ int j=TheHashedArrays[hashIndex].TheObjects[i];
+	for (int i=0;i<this->TheHashedArrays[hashIndex].size;i++)
+	{ int j=this->TheHashedArrays[hashIndex].TheObjects[i];
 		if(this->TheObjects[j]==o)
 			return j; 
 	}
@@ -894,7 +899,7 @@ template <class Object>
 void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
 { int hashIndex = o.HashFunction()% this->HashSize;
 	if (hashIndex<0) {hashIndex+=this->HashSize;}
-	TheHashedArrays[hashIndex].AddObjectOnTop(this->size); 
+	this->TheHashedArrays[hashIndex].AddObjectOnTop(this->size); 
 	this->AddObjectOnTop(o);
 }
 
@@ -1530,6 +1535,7 @@ public:
 //	void MultiplyByMonomial(Monomial<ElementOfCommutativeRingWithIdentity>& m,
 //													Polynomial<ElementOfCommutativeRingWithIdentity>& output);
 //	void AddMonomial(Monomial<ElementOfCommutativeRingWithIdentity>& m);
+//	static bool AnErrorHasOccurredTimeToPanic;
 	void AddPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& p);
 	void TimesInteger(int a);
 	void AddConstant(ElementOfCommutativeRingWithIdentity& theConst);
@@ -1591,18 +1597,6 @@ class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWi
 
 };
 
-class RandomCodeIDontWantToDelete
-{
-public: 
-static void SomeRandomTests2();
-static void SomeRandomTests3();
-void SomeRandomTests4();
-static void SomeRandomTests5();
-static void SomeRandomTests6();
-void WeylChamberRandomCode();
-void KLPolysRandomCode();
-static void SomeRandomTestsIWroteMonthsAgo();
-};
 
 class PolynomialsRationalCoeff: public Polynomials<Rational>
 {
@@ -1643,10 +1637,13 @@ class IntegerPoly: public Polynomial<Integer>
 public:
 	void MakePolyExponentFromIntRoot(intRoot& r);
 	int SizeWithoutDebugString();
+	void Evaluate(root& values, LargeRational& output);
 };
 
 class PolynomialLargeRational: public Polynomial<LargeRational>
 {
+public:
+	void Evaluate(intRoot& values,LargeRational& output);
 };
 
 class PolynomialRationalCoeff: public Polynomial<Rational>
@@ -2184,8 +2181,26 @@ inline int Polynomial<ElementOfCommutativeRingWithIdentity>::HasSameExponentMono
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::AddPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& p)
 {	this->SetActualSizeAtLeastExpandOnTop(p.size+this->size);
+	/*std::string* tempS1; 
+	if (QuasiPolynomial::AnErrorHasOccurredTimeToPanic)
+	{	std::string tempS;
+		RandomCodeIDontWantToDelete::EvilList1.AddObjectOnTop(tempS);
+		tempS1=& RandomCodeIDontWantToDelete::EvilList1.TheObjects
+								[RandomCodeIDontWantToDelete::EvilList1.size-1];
+	}*/
 	for (int i=0;i<p.size;i++)
-	{	this->AddMonomial(p.TheObjects[i]);   
+	{	/*if (QuasiPolynomial::AnErrorHasOccurredTimeToPanic)
+		{	std::string tempS; 
+			LargeRational tempRat;
+			QuasiPolynomial* tempP;
+			tempP=(QuasiPolynomial*)this; 
+			tempP->Evaluate(partFraction::theVectorToBePartitioned,tempRat);
+			tempRat.ElementToString(tempS);
+		//	currentList->AddObjectOnTop(tempS);
+			tempS1->append(tempS);
+			tempS1->append("\n");
+		}*/
+		this->AddMonomial(p.TheObjects[i]);   
 	}
 }
 
@@ -2588,9 +2603,11 @@ public:
 	bool IsEqualTo(LargeRational& r);
 	bool IsEqualToZero();
 	void Simplify();
+	void Invert();
 	void MakeZero();
 	void WriteToFile (std::fstream& output);
 	void ReadFromFile(std::fstream&  input);
+	void RaiseToPower(int x);
 	static LargeRational TheRingUnit;
 	static LargeRational TheRingZero;
 	static LargeRational TheRingMUnit;
@@ -2726,6 +2743,7 @@ public:
 	bool ComputeDebugString();
 	bool IsEqualTo(QuasiNumber& q);
 	bool IsEqualToZero();
+	static bool AnErrorHasOccurredTimeToPanic;
 	void AddBasicQuasiNumber(BasicQN& q);
 	void Add(QuasiNumber &q);
 	void MultiplyByBasicQuasiNumber(BasicQN& q);
@@ -2866,6 +2884,7 @@ public:
 	static int TotalCreatedPolys;
 	int CreationNumber; //for debug purposes
 	static PrecomputedTauknPointersKillOnExit* PrecomputedTaus;
+	static bool AnErrorHasOccurredTimeToPanic;
 	void AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p);
 	void AssignPolynomialLargeRational(PolynomialLargeRational& p);
 	void MakeTauknp(int k, int n);
@@ -3030,7 +3049,9 @@ public:
 	int GetTotalMultiplicity();
 	void invert();
 	void init();
+	static root CheckSumRoot;
 	int HashFunction();
+	void ComputeOneCheckSum(LargeRational &output, intRoot& theExp);
 	bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
 	void operator=(oneFracWithMultiplicitiesAndElongations& right);
 	bool operator==(oneFracWithMultiplicitiesAndElongations& right);
@@ -3155,6 +3176,7 @@ class partFractionPolynomials: public ListBasicObjects<PolynomialLargeRational>
 public:
 	roots LatticeIndicators;
 	MatrixRational theNormals;
+	void CheckConsistency(root& RootLatticeIndicator,PolynomialLargeRational& input);
 	void initLatticeIndicatorsFromPartFraction(partFraction& owner);
 	void AddPolynomialLargeRational(root& rootLatticeIndicator,PolynomialLargeRational& input);
 	void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials);
@@ -3182,8 +3204,12 @@ public:
 	bool RemoveRedundantShortRootsClassicalRootSystem();
 	bool RemoveRedundantShortRoots();
 	bool AlreadyAccountedForInGUIDisplay;
+	static bool AnErrorHasOccurredTimeToPanic;
 	static std::fstream TheBigDump;
 	static bool UseGlobalCollector;
+	static bool MakingConsistencyCheck;
+	static LargeRational CheckSum;
+	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
 	void ComputePolyCorrespondingToOneMonomial
 			(	PolynomialLargeRational &output, int index, roots& normals, 
@@ -3209,6 +3235,7 @@ public:
 	void decomposeAMinusNB(int indexA, int indexB, int n, 
 												 int indexAminusNB, partFractions& Accum);
 	bool DecomposeFromLinRelation(MatrixRational& theLinearRelation, partFractions& Accum);
+	void ComputeOneCheckSum(LargeRational& output);
 	void ApplySzenesVergneFormula			
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, 
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, 
@@ -3257,6 +3284,8 @@ public:
 	int HighestIndex;	
 	std::string DebugString;
 	static bool SplitTestMode;
+	static bool AnErrorHasOccurredTimeToPanic;
+	static LargeRational CheckSum;
 	static std::fstream ComputedContributionsList;
 	void ComputeDebugString();
 	void ComputeDebugStringNoNumerator();
@@ -3268,6 +3297,7 @@ public:
 	void RemoveRedundantShortRoots();
 	bool splitClassicalRootSystem();
 	bool split();
+	void ComputeOneCheckSum(LargeRational& output);
 	void Add(partFraction& f);
 	void IncreaseHighestIndex(int increment);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
@@ -3592,6 +3622,24 @@ public:
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output); 
 	bool LinCombToStringDistinguishedIndex
 				(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
+};
+
+class RandomCodeIDontWantToDelete
+{
+public: 
+	static void SomeRandomTests2();
+	static void SomeRandomTests3();
+	static ListBasicObjects<std::string> EvilList1,EvilList2;
+	static bool UsingEvilList1;
+	void SomeRandomTests4();
+	static void SomeRandomTests5();
+	static void SomeRandomTests6();
+	void WeylChamberRandomCode();
+	void KLPolysRandomCode();
+	static void SomeRandomTestsIWroteMonthsAgo();
+	static std::string theFirstEvilString, theSecondEvilString;
+	QuasiPolynomial EvilPoly1, EvilPoly2;
+	void RevealTheEvilConspiracy();
 };
 
 void delIntegersFastAccess(Selection& x);

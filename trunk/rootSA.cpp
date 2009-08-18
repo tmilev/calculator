@@ -3,9 +3,10 @@
 //Vector partition function - computes an algebraic expression 
 //                            for the vector partition function
 //CopyRight (C) 2009: Todor Milev 
-//Contributors: Thomas Bliem
+//Contributors: Thomas Bliem, Todor Milev
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
-//advice and help with C++
+//advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith, 
+//Hammurabi and Duoas for the helpful comments and advice on C++!
 //
 //
 //email: t.milev@jacobs-university.de
@@ -93,6 +94,7 @@ int APIENTRY IndicatorWindow(HINSTANCE hInstance,
 extern IndicatorWindowVariables IndicatorWindowGlobalVariables;
 extern PolynomialOutputFormat PolyFormatLocal;
 extern int main(void);
+extern int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot);
 
 BOOL APIENTRY DllMain
 			(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
@@ -181,7 +183,7 @@ public:
 	IndicatorWindowClass()
 	{	this->theFont=0;this->LabelBrush1=0;this->ComputationalThread=0;oldCombo1State=1;
 		this->ComputationInitializedAndReadyToGo=1; this->usePFFile=false; this->useVPFile=false;
-		this->rootRank=3; this->TypeWeylGroup='A'; this->stringTitle="I will eat your RAM";
+		this->rootRank=3; this->TypeWeylGroup='B'; this->stringTitle="I will eat your RAM";
 		this->SlicingIndex=0; this->stringFile3="C:\\ouput.txt"; this->initDLLneeded=true;
 		this->RecalculationChambersNeeded=true; this->ComputationMustDie=false;
 		this->ComputationalThreadIsDead=false; this->noGraphics=true;
@@ -280,17 +282,60 @@ void ComputationalThread()
 			IndicatorWindow1.initDLLneeded=false;
 			IndicatorWindow1.noGraphics=true;
 			IndicatorWindow1.GetRootFromEditWeights(tempRoot);
-			tempRoot.InitFromIntegers(1,1,1,1,1);
+			partFraction::MakingConsistencyCheck=true;
+			partFraction::theVectorToBePartitioned=IndicatorWindow1.rootEvaluateWeights;
+			partFractions::AnErrorHasOccurredTimeToPanic=true;
+			//partFraction::theVectorToBePartitioned.initFromInt(5,10,12,200,200);
+			//tempRoot.InitFromIntegers(1,1,1,1,1);
 			tempPF.ComputeKostantFunctionFromWeylGroup
 				(	IndicatorWindow1.TypeWeylGroup,(unsigned char)IndicatorWindow1.rootRank,
 					IndicatorWindow1.thePoly,&tempRoot,IndicatorWindow1.usePFFile,
 					IndicatorWindow1.useVPFile);
 			PolynomialOutputFormat::LatexMaxLineLength=125;
 			tempRoot.ComputeDebugString();
+			PolyFormatLocal.MakeRegularAlphabet();
 			IndicatorWindow1.thePoly.ComputeDebugString();
 			tempPF.ComputeDebugString();
 			IndicatorWindow1.file3Output	<<"Start of LaTeX readable portion:\n"
 																		<<"Chamber Indicator: "<<tempRoot.DebugString<<"\n"
+																		<<"VP function:\n\\begin{eqnarray*}" 
+																		<<IndicatorWindow1.thePoly.DebugString
+																		<< "\\end{eqnarray*}";
+			IndicatorWindow1.file3Output<< "\nPartial Fraction Decomposition\n"<<tempPF.DebugString
+																	<< "\nEnd of LaTeX readable portion\nMore details:\n";	
+			tempPF.WriteToFile(IndicatorWindow1.file3Output);
+			IndicatorWindow1.file3Output.flush();
+			PolynomialOutputFormat::LatexMaxLineLength=27;
+			IndicatorWindow1.thePoly.ComputeDebugString();
+			IndicatorWindow1.stringTheOutput.clear();
+			IndicatorWindow1.stringTheOutput.append("\\begin{eqnarray*}\r\n");
+			IndicatorWindow1.stringTheOutput.append(IndicatorWindow1.thePoly.DebugString);
+			IndicatorWindow1.stringTheOutput.append("\\end{eqnarray*}");
+		}
+		if (IndicatorWindow1.ComputationInitializedAndReadyToGo==6)
+		{ partFractions tempPF;
+			::initDLL(2);
+			intRoots exampleRoots;
+			root indicatorRoot;
+			IndicatorWindow1.rootRank=(short)FillInRoots(exampleRoots, indicatorRoot);
+			partFractions::ListBasicObjectsActualSizeIncrement=2000;
+			IntegerPoly::ListBasicObjectsActualSizeIncrement=5;
+			exampleRoots.ComputeDebugString();
+			tempPF.initFromRootSystem(exampleRoots,exampleRoots,0);
+			tempPF.split();
+			tempPF.ComputeDebugString();
+			tempPF.partFractionsToPartitionFunctionAdaptedToRoot
+			(IndicatorWindow1.thePoly,indicatorRoot,false,false,false,false);
+			IndicatorWindow1.initDLLneeded=false;
+			IndicatorWindow1.noGraphics=true;
+			partFraction::MakingConsistencyCheck=true;
+			partFraction::theVectorToBePartitioned=IndicatorWindow1.rootEvaluateWeights;
+			PolynomialOutputFormat::LatexMaxLineLength=125;
+			PolyFormatLocal.MakeRegularAlphabet();
+			IndicatorWindow1.thePoly.ComputeDebugString();
+			tempPF.ComputeDebugString();
+			IndicatorWindow1.file3Output	<<"Start of LaTeX readable portion:\n"
+																		<<"Chamber Indicator: "<<indicatorRoot.DebugString<<"\n"
 																		<<"VP function:\n\\begin{eqnarray*}" 
 																		<<IndicatorWindow1.thePoly.DebugString
 																		<< "\\end{eqnarray*}";
@@ -597,9 +642,9 @@ void IndicatorWindowClass::CreationProcedures(HWND hWnd)
 										| CBS_DROPDOWNLIST | WS_TABSTOP | WS_VSCROLL,
 										0,0,90,80,hWnd,(HMENU)IndicatorCombo1,
 										hInst, NULL);
-	this->stringEditWeights[0]="3";
-	this->stringEditWeights[1]="4";
-	this->stringEditWeights[2]="3";
+	this->stringEditWeights[0]="5";
+	this->stringEditWeights[1]="8";
+	this->stringEditWeights[2]="9";
 	this->rootRank=3;
 	for(int i=0;i<this->numEdits;i++)
 	{ this->hEditWeightsIndicator[i]=::CreateWindow(	"EDIT","", WS_CHILD  | ES_WANTRETURN 
@@ -666,7 +711,7 @@ void IndicatorWindowClass::CreationProcedures(HWND hWnd)
 	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
 	this->stringCombo1="G2";
 	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
-	SendMessage(this->hComboBox1,CB_SETCURSEL,1,0);
+	SendMessage(this->hComboBox1,CB_SETCURSEL,5,0);
   //SendMessage(this->hComboBox1,,1,0);
   IndicatorWindow1.theDC=::GetDC(this->hMain);
   ::SetBkColor(IndicatorWindow1.theDC,RGB(192,192,192));

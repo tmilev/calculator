@@ -34,12 +34,33 @@ void drawtext(double X1, double Y1, const char* text, int length, int color)
 //*******************************************
 
 
-
 class ExampleComputation
 {	
 public: 
 	void RunThomasExample();
+	void RunSomeTests();
 };
+
+int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
+{ int Dimension=3, NumVectors=6;
+	::initDLL(Dimension);
+	ToBeSplit.SetSizeExpandOnTopNoObjectInit(NumVectors);
+	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
+	//ToBeSplit.TheObjects[1].initFromInt(2,0,0,0,0);
+	//ToBeSplit.TheObjects[2].initFromInt(3,0,0,0,0);
+	IndicatorRoot.InitFromIntegers(15,16,17,0,0);
+	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
+	//ToBeSplit.TheObjects[1].initFromInt(0,1,0,0,0);
+	//ToBeSplit.TheObjects[2].initFromInt(0,0,1,0,0);
+	ToBeSplit.TheObjects[5].initFromInt(1,1,0,0,0);
+	ToBeSplit.TheObjects[4].initFromInt(0,1,1,0,0);
+	ToBeSplit.TheObjects[3].initFromInt(1,1,1,0,0);
+	ToBeSplit.TheObjects[2].initFromInt(0,1,2,0,0);
+	ToBeSplit.TheObjects[1].initFromInt(1,1,2,0,0);
+	ToBeSplit.TheObjects[0].initFromInt(1,2,2,0,0);
+	return Dimension;
+}
+
 
 int main(void)
 { //The below lines compute a partial fraction decomposition for the 
@@ -60,6 +81,7 @@ int main(void)
 	tempW.ComputeRootsOfBorel(tempRoots);
 	theBorel.AssignRoots(tempRoots);
 	theVPbasis.CopyFromBase(theBorel);
+	theVPbasis.ComputeDebugString();
 	tempPF.initFromRootSystem(theVPbasis,theVPbasis,0);
 	std::stringstream outputStream;
 	tempPF.ComputeDebugString();
@@ -71,8 +93,14 @@ int main(void)
 	LatexString=outputStream.str();
 	//you can copy the content of LatexString to a latex compiler
 	//it is supposed to display a partial fraction identity 
+	
 	ExampleComputation ThomasExample;
-	ThomasExample.RunThomasExample();
+	ThomasExample.RunSomeTests();
+	//ThomasExample.RunThomasExample();
+}
+
+void ExampleComputation::RunSomeTests()
+{
 }
 
 void ExampleComputation::RunThomasExample()

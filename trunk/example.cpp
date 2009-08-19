@@ -66,6 +66,9 @@ int main(void)
 { //The below lines compute a partial fraction decomposition for the 
 	//generating function of the Kostant partition function for G2
 	//printout tempPF.DebugString to get the final result
+	ExampleComputation t1;
+	t1.RunSomeTests();
+		
 	partFractions tempPF;
 	intRoots theBorel,theVPbasis;
 	intRoot tempWeight;
@@ -100,7 +103,33 @@ int main(void)
 }
 
 void ExampleComputation::RunSomeTests()
-{
+{ LargeRational tempRat1, tempRat2;
+	LargeRational tempRat;
+	std::string tempS, tempS2;
+	tempRat.AssignInteger(1);
+	tempRat1.AssignInteger(2003);
+	for (int i=0;i<20;i++)
+	{ 		LargeRational tempRat2;
+		tempRat2.AssignInteger(-10-i);
+		tempRat2.Invert();
+		tempRat1.MultiplyByInt(-i-1);
+		tempRat.MultiplyBy(tempRat2);
+		tempRat.ElementToString(tempS);
+	}
+	tempRat1.ElementToString(tempS2);
+//	LargeRational::AnErrorHasOccurredTimeToPanic=true;
+	tempRat.Add(tempRat1);
+	tempRat.ElementToString(tempS);
+	tempRat.RaiseToPower(15);
+	tempRat.ElementToString(tempS);
+
+	tempRat1.AssignInteger(3);
+	tempRat2.AssignInteger(4);
+	tempRat1.RaiseToPower(21);
+	tempRat2.RaiseToPower(15);
+	tempRat1.MultiplyBy(tempRat2);
+	std::string tempS1;
+	tempRat1.ElementToString(tempS1);
 }
 
 void ExampleComputation::RunThomasExample()

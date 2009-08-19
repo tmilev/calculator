@@ -1638,6 +1638,7 @@ public:
 	void MakePolyExponentFromIntRoot(intRoot& r);
 	int SizeWithoutDebugString();
 	void Evaluate(root& values, LargeRational& output);
+	static bool AnErrorHasOccurredTimeToPanic;
 };
 
 class PolynomialLargeRational: public Polynomial<LargeRational>
@@ -2552,7 +2553,9 @@ class LargeInt:public ListBasicObjects<unsigned int>
 	void SubtractSmallerPositive(LargeInt& x);
 	void FitSize();
 	void MultiplyByShifted(unsigned int x, int shift);
-	void DivPositive(LargeInt &x, LargeInt& quotient, LargeInt& remainderOut) const; 
+	void DivPositive(LargeInt &x, LargeInt& quotientOutput, LargeInt& remainderOutput) const; 
+	void Minus_qDivisor(LargeInt& QuotientAccum,  LargeInt& q,LargeInt& divisor);
+	void Minus_qDivisor(LargeInt& QuotientAccum, unsigned int q, int shift,LargeInt& divisor);
 public:
 	short sign;
 	void MultiplyBy(LargeInt& x);
@@ -2563,6 +2566,13 @@ public:
 	bool IsEqualToZero();
 	bool IsEqualTo(LargeInt& x);
 	void Assign(const LargeInt& x);
+	void AssignShiftedUInt(unsigned int x, int shift) 
+	{ if (x==0){this->MakeZero(); return;}
+		this->SetSizeExpandOnTopNoObjectInit(shift+1);
+		for (int i=0;i<this->size;i++)
+			this->TheObjects[i]=0;
+		this->TheObjects[this->size-1]=x;
+	};
 	void AssignInt(int x);
 	void Add(LargeInt& x);
 	void AddInt(int x);
@@ -2590,6 +2600,7 @@ class LargeRational
 public:
 	LargeInt den;
 	LargeInt num;
+	static bool AnErrorHasOccurredTimeToPanic;
 	void Subtract(LargeRational& r);
 	void Add(LargeRational& r);
 	void AddRational(Rational& r);
@@ -3208,7 +3219,7 @@ public:
 	static std::fstream TheBigDump;
 	static bool UseGlobalCollector;
 	static bool MakingConsistencyCheck;
-	static LargeRational CheckSum;
+	static LargeRational CheckSum, CheckSum2;
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
 	void ComputePolyCorrespondingToOneMonomial

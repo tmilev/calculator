@@ -133,6 +133,7 @@ intRoot partFraction::theVectorToBePartitioned;
 bool partFraction::MakingConsistencyCheck=false;
 LargeRational partFractions::CheckSum;
 LargeRational partFraction::CheckSum;
+LargeRational partFraction::CheckSum2;
 int Rational::LargestRationalHeight;
 bool Rational::MinorRoutinesOnIgnoreErrors;
 
@@ -218,6 +219,7 @@ bool partFraction::AnErrorHasOccurredTimeToPanic=false;
 bool partFractions::SplitTestMode=false;
 bool partFractions::AnErrorHasOccurredTimeToPanic=false;
 bool QuasiPolynomial::AnErrorHasOccurredTimeToPanic=false;
+bool LargeRational::AnErrorHasOccurredTimeToPanic=false;
 
 int NextDirectionIndex;
 int RankGlobal;
@@ -226,6 +228,7 @@ CombinatorialChamberPointers TheBigOutput;
 FacetPointers TheBigFacetOutput;
 DrawingVariables TDV(140,400);
 bool QuasiNumber::AnErrorHasOccurredTimeToPanic=false;
+bool IntegerPoly::AnErrorHasOccurredTimeToPanic=false;
 root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
 
 bool Stop()
@@ -6299,23 +6302,47 @@ void LargeRational::AssignRational(Rational &r)
 }
 
 void LargeRational::Add(LargeRational &r) 
-{ assert(this->den.sign!=-1);
+{ static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
+	assert(this->den.sign!=-1);
 	assert(r.den.sign!=-1);
 	assert(r.den.size!=0); 
 	if (r.num.size==0) return;
 	static LargeInt tempI;
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ this->den.ElementToString(tempS1);
+		r.num.ElementToString(tempS2);	
+	}
 	this->den.MultiplyBy(r.num,tempI);
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ tempI.ElementToString(tempS3);
+		this->num.ElementToString(tempS6);
+		r.den.ElementToString(tempS7);
+	}
 	this->num.MultiplyBy(r.den);
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ this->num.ElementToString(tempS4);
+	}
 	this->num.Add(tempI);
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ this->num.ElementToString(tempS5);
+	}
 	assert(this->den.sign!=-1);
 	this->den.MultiplyBy(r.den);
 	assert(this->den.sign!=-1);
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ this->ElementToString(tempS1);
+	}	
 	this->Simplify();
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ this->ElementToString(tempS2);
+	}	
 	assert(this->den.sign!=-1);
 }
 
 void LargeRational::Simplify() 
-{ if (this->den.sign==-1)
+{ if (this->num.IsEqualToZero())
+	{ this->MakeZero(); return;}
+	if (this->den.sign==-1)
 	{ this->den.sign=1;
 		this->num.sign*=-1;
 	}
@@ -6505,8 +6532,7 @@ void LargeInt::ElementToString(std::string &output)
 
 bool LargeInt::IsEqualToZero()
 {	if (this->size==1)
-	{	if(this->TheObjects[0]==0) 
-			return true;
+	{	return this->TheObjects[0]==0; 
 	}  
 	return this->size==0; 
 } 
@@ -6568,83 +6594,107 @@ void LargeInt::Add(LargeInt &x)
 //	assert(this->CheckForConsistensy());
 }
 
+/*void LargeInt::Minus_qDivisor(LargeInt& QuotientAccum,  LargeInt& q,LargeInt& divisor)
+{ LargeInt tempI;
+	q.MultiplyBy(divisor,tempI);
+	this->SubtractSmallerPositive(tempI);
+	QuotientAccum.Add(q);
+}
+
+void LargeInt::Minus_qDivisor
+			(LargeInt& QuotientAccum, unsigned int q, int shift,LargeInt& divisor)
+{ LargeInt tempI;
+	tempI.Assign(LIOne);
+	tempI.MultiplyByShifted(q,shift);
+	QuotientAccum.Add(tempI);
+	tempI.MultiplyBy(divisor);
+	this->SubtractSmallerPositive(tempI);
+}*/
+
 #pragma warning(disable:4244)//warning 4244: data loss from conversion
-void LargeInt::DivPositive(LargeInt &x, LargeInt& quotient, LargeInt& remainderOut) const
-{	static LargeInt remainder,output;
-	assert(&quotient!=&remainderOut);
-	remainder.Assign(*this); 
-	remainder.sign/=x.size;
-	remainder.sign=1;
-	output.MakeZero(); 
-	if (this->size-x.size+1>0)
-		output.SetSizeExpandOnTopNoObjectInit(this->size-x.size+1);
-	else
-		output.SetSizeExpandOnTopNoObjectInit(1); 
-	for (int i=0;i<output.size;i++)
-	{ output.TheObjects[i]=0; 
-	}  
-	while (remainder.IsGEQByAbs(x))
-	{ unsigned int r;
-		static LargeInt tempInt;
-		if(x.size==1)
-		{ r=remainder.TheObjects[remainder.size-1]/x.TheObjects[x.size-1];
+void LargeInt::DivPositive(LargeInt &x, LargeInt& quotientOutput, LargeInt& remainderOutput) const
+{	static LargeInt remainder,quotient,divisor;
+	remainder.Assign(*this);	remainder.sign=1;
+	divisor.Assign(x);	divisor.sign=1;
+	quotient.MakeZero();
+	while (remainder.IsGEQByAbs(divisor))
+	{	unsigned int q = 
+			remainder.TheObjects[remainder.size-1]/(divisor.TheObjects[divisor.size-1]+1);
+		int shift= remainder.size-divisor.size;
+		assert(shift>=0);
+		LargeInt current, oldTotal,Total;
+		Total.Assign(divisor);
+		if (q==0 && shift>=2){q=1; shift--;}
+		if (q!=0)
+		{ current.AssignShiftedUInt(q,shift);
+			Total.MultiplyBy(current);
 		}
 		else
-		{ r=remainder.TheObjects[remainder.size-1]/(x.TheObjects[x.size-1]+1);
+		{	current.Assign(LIOne);
 		}
-		if (remainder.size==x.size && r==0)
-		{ remainder.SubtractSmallerPositive(x);
-			output.AddToIndex(0,1);  
+		oldTotal.Assign(Total);
+		for (;;)
+		{	Total.MultiplyByInt(2);
+			if (!remainder.IsGEQByAbs(Total))
+				break;
+			current.MultiplyByInt(2);
+			oldTotal.Assign(Total);
 		}
-		else
-		{	int shift;
-			if (r==0)
-			{ unsigned long long l;
-				unsigned long long tempL;
-				l = LargeInt::CarryOverBound;
-				tempL=remainder.TheObjects[remainder.size-1];
-				l= tempL*l;
-				tempL=remainder.TheObjects[remainder.size-2];
-				l=l+tempL;
-				tempL=l/(x.TheObjects[x.size-1]+1);
-				r= tempL;
-				shift= remainder.size-x.size-1;  
-			}
-			else
-			{ shift=remainder.size-x.size;  
-			}
-			tempInt.Assign(x);
-			tempInt.MultiplyByShifted(r,shift);
-			remainder.SubtractSmallerPositive(tempInt);
-			output.AddToIndex(shift,r);  
-		}
+		remainder.SubtractSmallerPositive(oldTotal);
+		quotient.Add(current);
 	}
-	output.FitSize(); 
-	remainder.sign= x.sign;
-	if (x.sign==this->sign || output.size==0)
-	{	output.sign=1;
-	}
+	quotient.sign= this->sign*x.sign;
+	if (remainder.size==0) 
+		remainder.sign=1; 
 	else
-	{ output.sign=-1;
-	}		
-	quotient.Assign(output);
-	quotient.FitSize();
-	remainderOut.Assign(remainder);
-	remainder.FitSize();
+		remainder.sign= this->sign;
+	remainderOutput.Assign(remainder);
+	quotientOutput.Assign(quotient);
 //	assert(remainderOut.CheckForConsistensy());
 }
 #pragma warning(default:4244)//warning 4244: data loss from conversion
 
 void LargeInt::gcd(LargeInt &a, LargeInt &b, LargeInt &output)
 { LargeInt p,q,r,temp;
+	static std::string tempSP, tempSQ, tempSR, tempS;
 	p.Assign(a);
 	q.Assign(b);
 	p.sign=1;
 	q.sign=1;
+	if (LargeRational::AnErrorHasOccurredTimeToPanic)
+	{ p.ElementToString(tempSP);
+		q.ElementToString(tempSQ);
+		r.ElementToString(tempSR);
+		temp.ElementToString(tempS);
+	}
 	while(!q.IsEqualToZero() )
-	{ p.DivPositive(q,temp,r);
+	{ if (LargeRational::AnErrorHasOccurredTimeToPanic)
+		{ p.ElementToString(tempSP);
+			q.ElementToString(tempSQ);
+			r.ElementToString(tempSR);
+			temp.ElementToString(tempS);
+		}
+		p.DivPositive(q,temp,r);
+		if (LargeRational::AnErrorHasOccurredTimeToPanic)
+		{ p.ElementToString(tempSP);
+			q.ElementToString(tempSQ);
+			r.ElementToString(tempSR);
+			temp.ElementToString(tempS);
+		}
 		p.Assign(q);
+		if (LargeRational::AnErrorHasOccurredTimeToPanic)
+		{ p.ElementToString(tempSP);
+			q.ElementToString(tempSQ);
+			r.ElementToString(tempSR);
+			temp.ElementToString(tempS);
+		}
 		q.Assign(r); 
+		if (LargeRational::AnErrorHasOccurredTimeToPanic)
+		{ p.ElementToString(tempSP);
+			q.ElementToString(tempSQ);
+			r.ElementToString(tempSR);
+			temp.ElementToString(tempS);
+		}
 	}  
 	output.Assign(p); 
 //	assert(output.CheckForConsistensy());
@@ -6990,6 +7040,9 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 		tempRoots.AddIntRoot(tempRoot);
 		bool ShouldDecompose;
 		ShouldDecompose = tempRoots.GetLinearDependence(tempMat);
+		if (partFraction::AnErrorHasOccurredTimeToPanic)
+		{ tempMat.ComputeDebugString();
+		}
 	//	tempMat.ComputeDebugString();
 		if (ShouldDecompose && this->LastGainingMultiplicityIndex!=-1)
 		{ if (IndexInLinRelationOfLastGainingMultiplicityIndex==-1)
@@ -6999,7 +7052,10 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 			}
 		}		
 		if (ShouldDecompose)
-		{	this->DecomposeFromLinRelation(tempMat,Accum);
+		{	if (this->AnErrorHasOccurredTimeToPanic)
+			{ this->ComputeDebugString();
+			}
+			this->DecomposeFromLinRelation(tempMat,Accum);
 			//this->ComputeDebugString();
 			return true;
 		}
@@ -7071,8 +7127,14 @@ void partFraction::ReadFromFile(std::fstream &input)
 }
 
 void partFraction::ComputeOneCheckSum(LargeRational &output)
-{ this->Coefficient.Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,output);
+{ if (this->AnErrorHasOccurredTimeToPanic)
+	{ this->Coefficient.ComputeDebugString();
+	} 
+	this->Coefficient.Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,output);
 	std::string tempS;
+	if (this->AnErrorHasOccurredTimeToPanic)
+	{ output.ElementToString(tempS);
+	}
 	//output.ElementToString(tempS);
 	LargeRational tempRat;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
@@ -7261,6 +7323,10 @@ bool partFraction::DecomposeFromLinRelation(MatrixRational& theLinearRelation, p
 	int ElongationGainingMultiplicityIndex=-1; 
 	static ListBasicObjects<int> ParticipatingIndices;
 	static ListBasicObjects<int> theElongations;
+	LargeRational oldCheckSum;
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ Accum.ComputeOneCheckSum(oldCheckSum);
+	} 
 	ParticipatingIndices.size=0;
 	theElongations.size=0;
 	//this->ComputeDebugString();
@@ -7290,9 +7356,22 @@ bool partFraction::DecomposeFromLinRelation(MatrixRational& theLinearRelation, p
 		}
 	}
 	this->LastGainingMultiplicityIndex=GainingMultiplicityIndex;
+	if (partFraction::AnErrorHasOccurredTimeToPanic)
+	{ this->ComputeDebugString();
+	}
 	this->ApplySzenesVergneFormula
 		(	ParticipatingIndices,theElongations,GainingMultiplicityIndex,
 			ElongationGainingMultiplicityIndex,Accum);
+	if (partFraction::AnErrorHasOccurredTimeToPanic)
+	{ LargeRational tempRat2, tempRat;
+		std::string tempS1,tempS2;
+		Accum.ComputeOneCheckSum(tempRat2);
+		this->ComputeOneCheckSum(tempRat);
+		tempRat.ElementToString(tempS1);
+		this->CheckSum2.ElementToString(tempS2);
+		tempRat2.Subtract(tempRat);
+		assert(oldCheckSum.IsEqualTo(tempRat2));		
+	}
 	//Accum.ComputeDebugString();
 	return true;
 }
@@ -7303,6 +7382,10 @@ void partFraction::ApplySzenesVergneFormula
 				partFractions& Accum)
 {	static partFraction tempFrac;
 	static IntegerPoly tempP;
+	if (this->AnErrorHasOccurredTimeToPanic)
+	{ this->CheckSum2.MakeZero();
+		this->ComputeOneCheckSum(this->CheckSum);
+	}
 	for(int i=0;i<theSelectedIndices.size;i++)
 	{	tempFrac.Assign(*this);
 		tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
@@ -7327,7 +7410,27 @@ void partFraction::ApplySzenesVergneFormula
 				(theSelectedIndices.TheObjects[i],LargestElongation,theElongations.TheObjects[i],tempP);
 		tempFrac.Coefficient.MultiplyBy(tempP);
 		tempFrac.ComputeIndicesNonZeroMults();
+		if (this->AnErrorHasOccurredTimeToPanic)
+		{ tempFrac.ComputeDebugString();
+			LargeRational tempRat;
+			if (i==2)
+			{ IntegerPoly::AnErrorHasOccurredTimeToPanic=true;
+			}
+			tempFrac.ComputeOneCheckSum(tempRat);
+			std::string tempS1, tempS2;
+			this->CheckSum2.ElementToString(tempS1);
+			tempRat.ElementToString(tempS2);
+			this->CheckSum2.Add(tempRat);
+			this->CheckSum2.ElementToString(tempS2);
+			Accum.ComputeDebugString();
+		}
 		Accum.Add(tempFrac);
+		if (this->AnErrorHasOccurredTimeToPanic)
+		{	Accum.ComputeDebugString();
+		}
+	}
+	if (this->AnErrorHasOccurredTimeToPanic)
+	{ assert(this->CheckSum.IsEqualTo(this->CheckSum2));
 	}
 }
 
@@ -7767,7 +7870,7 @@ bool partFractions::split()
 		tempF.Assign(this->TheObjects[this->IndexLowestNonReduced]);
 		//this->ComputeDebugString();
 		//tempF.ComputeDebugString();
-		if (this->IndexLowestNonReduced==4 && this->size==36)
+		if (this->IndexLowestNonReduced==1 && this->size==16)
 		{ partFraction::AnErrorHasOccurredTimeToPanic=true;
 		}
 		if (! (tempF.reduceOnceGeneralMethod(*this)))
@@ -7776,13 +7879,19 @@ bool partFractions::split()
 		}
 		else
 		{	this->PopIndexSwapWithLastHash( this->IndexLowestNonReduced);
+			if (partFraction::AnErrorHasOccurredTimeToPanic)
+			{ this->ComputeDebugString();
+			}
 		}
 		if (partFraction::MakingConsistencyCheck)
-		{	this->ComputeDebugString();
-			LargeRational tempRat2;
+		{	LargeRational tempRat2;
 			this->ComputeOneCheckSum(tempRat2);
-			tempRat2.ElementToString(tempS2);
-			assert(tempRat2.IsEqualTo(tempRat));
+			if (!tempRat2.IsEqualTo(tempRat))
+			{	this->ComputeDebugString();
+				tempRat2.ElementToString(tempS2);
+				tempRat.ElementToString(tempS1);
+				assert(false);
+			}
 		}
 		this->MakeProgressReport();
 	//	this->ComputeDebugString();
@@ -10757,8 +10866,11 @@ void OneVarIntPolynomials::ElementToString(std::string& output,int KLindex)
 }
 
 void IntegerPoly::Evaluate(root& values, LargeRational& output)
-{ output.MakeZero();
-	std::string tempS;
+{ std::string tempS1, tempS2;
+	output.MakeZero();
+	if(this->AnErrorHasOccurredTimeToPanic)
+	{ output.ElementToString(tempS1);
+	}
 	for (int i=0;i<this->size;i++)
 	{ LargeRational tempRat1,tempRat2;
 		tempRat1.AssignInteger(this->TheObjects[i].Coefficient.value);
@@ -10766,9 +10878,18 @@ void IntegerPoly::Evaluate(root& values, LargeRational& output)
 		{ tempRat2.AssignRational(values.coordinates[j]);
 			tempRat2.RaiseToPower(this->TheObjects[i].degrees[j]);
 			tempRat1.MultiplyBy(tempRat2);
-		}		
+		}	
+		if(this->AnErrorHasOccurredTimeToPanic)
+		{ output.ElementToString(tempS2);
+			tempRat1.ElementToString(tempS1);
+			if (i==3)
+			{ //LargeRational::AnErrorHasOccurredTimeToPanic=true;
+			}
+		}	
 		output.Add(tempRat1);
-		//output.ElementToString(tempS);
+		if(this->AnErrorHasOccurredTimeToPanic)
+		{ output.ElementToString(tempS2);
+		}
 	}
 }
 

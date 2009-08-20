@@ -33,7 +33,6 @@ void drawtext(double X1, double Y1, const char* text, int length, int color)
 //*******************************************
 //*******************************************
 
-
 class ExampleComputation
 {	
 public: 
@@ -104,17 +103,31 @@ int main(void)
 
 void ExampleComputation::RunSomeTests()
 { LargeRational tempRat1, tempRat2;
-	LargeRational tempRat;
-	std::string tempS, tempS2;
-	tempRat.AssignInteger(1);
-	tempRat1.AssignInteger(2003);
-	for (int i=0;i<20;i++)
-	{ 		LargeRational tempRat2;
-		tempRat2.AssignInteger(-10-i);
+	LargeRational tempRat ;
+	std::string tempS,tempS1, tempS2;
+	Rational fuckingBug;
+	fuckingBug.init(-3,4);
+
+	for(int x=88;x<200;x++)
+	{	tempRat.MakeZero();
+		for (int i=0;i<x;i++)
+		{	tempRat2.AssignRational(fuckingBug);
+			tempRat2.RaiseToPower(i);
+			tempRat.Add(tempRat2);
+			//tempRat.ElementToString(tempS);
+		}
+		tempRat1.AssignRational( fuckingBug);
+		tempRat1.RaiseToPower(x);
+		tempRat1.MultiplyByInt(-1);
+		tempRat1.AddRational(Rational::TheRingUnit);
+		tempRat2.AssignRational(fuckingBug);
+		tempRat2.MultiplyByRational(Rational::TheRingMUnit);
+		tempRat2.AddRational(Rational::TheRingUnit);
 		tempRat2.Invert();
-		tempRat1.MultiplyByInt(-i-1);
-		tempRat.MultiplyBy(tempRat2);
-		tempRat.ElementToString(tempS);
+		tempRat1.MultiplyBy(tempRat2);
+		tempRat1.ElementToString(tempS2);
+		tempRat.ElementToString(tempS1);
+		assert(tempRat.IsEqualTo(tempRat1));
 	}
 	tempRat1.ElementToString(tempS2);
 //	LargeRational::AnErrorHasOccurredTimeToPanic=true;
@@ -128,7 +141,6 @@ void ExampleComputation::RunSomeTests()
 	tempRat1.RaiseToPower(21);
 	tempRat2.RaiseToPower(15);
 	tempRat1.MultiplyBy(tempRat2);
-	std::string tempS1;
 	tempRat1.ElementToString(tempS1);
 }
 

@@ -105,22 +105,24 @@ void ExampleComputation::RunSomeTests()
 { LargeRational tempRat1, tempRat2;
 	LargeRational tempRat ;
 	std::string tempS,tempS1, tempS2;
-	Rational fuckingBug;
-	fuckingBug.init(-3,4);
+	Rational fBug;
+	fBug.init(-3,4);
 
-	for(int x=88;x<200;x++)
+	for(int x=87;x<200;x++)
 	{	tempRat.MakeZero();
 		for (int i=0;i<x;i++)
-		{	tempRat2.AssignRational(fuckingBug);
+		{	tempRat2.AssignRational(fBug);
 			tempRat2.RaiseToPower(i);
 			tempRat.Add(tempRat2);
 			//tempRat.ElementToString(tempS);
 		}
-		tempRat1.AssignRational( fuckingBug);
+		//LargeRational::AnErrorHasOccurredTimeToPanic=true;
+		tempRat.ElementToString(tempS2);
+		tempRat1.AssignRational( fBug);
 		tempRat1.RaiseToPower(x);
 		tempRat1.MultiplyByInt(-1);
 		tempRat1.AddRational(Rational::TheRingUnit);
-		tempRat2.AssignRational(fuckingBug);
+		tempRat2.AssignRational(fBug);
 		tempRat2.MultiplyByRational(Rational::TheRingMUnit);
 		tempRat2.AddRational(Rational::TheRingUnit);
 		tempRat2.Invert();

@@ -182,7 +182,7 @@ public:
 				(std::string& outputString, HWND hAssociatedEditBox);
 	IndicatorWindowClass()
 	{	this->theFont=0;this->LabelBrush1=0;this->ComputationalThread=0;oldCombo1State=1;
-		this->ComputationInitializedAndReadyToGo=1; this->usePFFile=false; this->useVPFile=false;
+		this->ComputationInitializedAndReadyToGo=5; this->usePFFile=false; this->useVPFile=false;
 		this->rootRank=3; this->TypeWeylGroup='B'; this->stringTitle="I will eat your RAM";
 		this->SlicingIndex=0; this->stringFile3="C:\\ouput.txt"; this->initDLLneeded=true;
 		this->RecalculationChambersNeeded=true; this->ComputationMustDie=false;
@@ -282,7 +282,7 @@ void ComputationalThread()
 			IndicatorWindow1.initDLLneeded=false;
 			IndicatorWindow1.noGraphics=true;
 			IndicatorWindow1.GetRootFromEditWeights(tempRoot);
-			partFraction::MakingConsistencyCheck=true;
+			partFraction::MakingConsistencyCheck=false;
 			partFraction::theVectorToBePartitioned=IndicatorWindow1.rootEvaluateWeights;
 			partFractions::AnErrorHasOccurredTimeToPanic=true;
 			//partFraction::theVectorToBePartitioned.initFromInt(5,10,12,200,200);
@@ -328,7 +328,7 @@ void ComputationalThread()
 			(IndicatorWindow1.thePoly,indicatorRoot,false,false,false,false);
 			IndicatorWindow1.initDLLneeded=false;
 			IndicatorWindow1.noGraphics=true;
-			partFraction::MakingConsistencyCheck=true;
+			partFraction::MakingConsistencyCheck=false;
 			partFraction::theVectorToBePartitioned=IndicatorWindow1.rootEvaluateWeights;
 			PolynomialOutputFormat::LatexMaxLineLength=125;
 			PolyFormatLocal.MakeRegularAlphabet();

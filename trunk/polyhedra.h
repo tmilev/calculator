@@ -2182,12 +2182,21 @@ inline int Polynomial<ElementOfCommutativeRingWithIdentity>::HasSameExponentMono
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::AddPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& p)
 {	this->SetActualSizeAtLeastExpandOnTop(p.size+this->size);
-	/*std::string* tempS1; 
-	if (QuasiPolynomial::AnErrorHasOccurredTimeToPanic)
+	std::string tempS1; 
+	/*if (QuasiPolynomial::AnErrorHasOccurredTimeToPanic)
 	{	std::string tempS;
 		RandomCodeIDontWantToDelete::EvilList1.AddObjectOnTop(tempS);
 		tempS1=& RandomCodeIDontWantToDelete::EvilList1.TheObjects
 								[RandomCodeIDontWantToDelete::EvilList1.size-1];
+	}*/
+/*	LargeRational tempRat,tempRat2;
+	IntegerPoly* tempP;
+	if (IntegerPoly::AnErrorHasOccurredTimeToPanic)
+	{ std::string tempS; 
+		tempP=(IntegerPoly*)this; 
+		tempP->Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,tempRat);
+		tempRat.ElementToString(tempS);
+		//	currentList->AddObjectOnTop(tempS);
 	}*/
 	for (int i=0;i<p.size;i++)
 	{	/*if (QuasiPolynomial::AnErrorHasOccurredTimeToPanic)
@@ -2203,6 +2212,14 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::AddPolynomial(Polynomial<
 		}*/
 		this->AddMonomial(p.TheObjects[i]);   
 	}
+	/*if (IntegerPoly::AnErrorHasOccurredTimeToPanic)
+	{ std::string tempS1,tempS2; 
+		tempP->Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,tempRat2);
+		tempRat.ElementToString(tempS1);
+		tempRat2.ElementToString(tempS2);
+		this->ComputeDebugString();
+		//assert(tempRat.IsEqualTo(tempRat2));
+	}*/
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -2545,17 +2562,11 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 
 class LargeInt:public ListBasicObjects<unsigned int>
 {	friend class LargeRational;
-	static const unsigned int CarryOverBound=2147483648;
-	//does not make any memory allocation!
-	void AddToIndex(int index, unsigned int x);
-	void SubtractToIndex(int index, unsigned int x);
+	static const unsigned int CarryOverBound=2147483648;//=2^31
 	void AddPositive(LargeInt& x);
 	void SubtractSmallerPositive(LargeInt& x);
 	void FitSize();
-	void MultiplyByShifted(unsigned int x, int shift);
 	void DivPositive(LargeInt &x, LargeInt& quotientOutput, LargeInt& remainderOutput) const; 
-	void Minus_qDivisor(LargeInt& QuotientAccum,  LargeInt& q,LargeInt& divisor);
-	void Minus_qDivisor(LargeInt& QuotientAccum, unsigned int q, int shift,LargeInt& divisor);
 public:
 	short sign;
 	void MultiplyBy(LargeInt& x);
@@ -2566,13 +2577,7 @@ public:
 	bool IsEqualToZero();
 	bool IsEqualTo(LargeInt& x);
 	void Assign(const LargeInt& x);
-	void AssignShiftedUInt(unsigned int x, int shift) 
-	{ if (x==0){this->MakeZero(); return;}
-		this->SetSizeExpandOnTopNoObjectInit(shift+1);
-		for (int i=0;i<this->size;i++)
-			this->TheObjects[i]=0;
-		this->TheObjects[this->size-1]=x;
-	};
+	void AssignShiftedUInt(unsigned int x, int shift);
 	void AssignInt(int x);
 	void Add(LargeInt& x);
 	void AddInt(int x);

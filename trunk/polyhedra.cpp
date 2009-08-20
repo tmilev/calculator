@@ -6359,17 +6359,33 @@ void LargeRational::Simplify()
 	this->num.DivPositive(tempI,this->num,tempI2);  
 }
 
+inline void LargeInt::AssignShiftedUInt(unsigned int x, int shift)
+{ if (x==0){this->MakeZero(); return;}
+	this->sign=1;
+	this->SetSizeExpandOnTopNoObjectInit(shift+1);
+	for (int i=0;i<this->size;i++)
+		this->TheObjects[i]=0;
+	this->TheObjects[this->size-1]=x;
+}
+	
 void LargeInt::AddPositive(LargeInt &x)
-{ int oldsize= this->size;
+{ int oldsize= this->size;	
 	this->SetSizeExpandOnTopNoObjectInit(Max(this->size,x.size)+1);
 	for (int i=oldsize;i<this->size;i++)
 	{ this->TheObjects[i]=0;
 	}
+	unsigned int CarryOver=0;
 	for(int i=0;i<x.size;i++)
-	{ this->AddToIndex(i,x.TheObjects[i]);
+	{ this->TheObjects[i]+=x.TheObjects[i]+CarryOver;
+		if (this->TheObjects[i]>=LargeInt::CarryOverBound)
+		{ this->TheObjects[i]-=LargeInt::CarryOverBound;
+			CarryOver=1;
+		}
+		else
+			CarryOver=0;
 	}
+	this->TheObjects[x.size]+=CarryOver;
 	this->FitSize();
-//	assert(this->CheckForConsistensy());
 }
 
 void LargeInt::SubtractSmallerPositive(LargeInt& x)
@@ -6391,7 +6407,7 @@ void LargeInt::SubtractSmallerPositive(LargeInt& x)
 //	assert(this->CheckForConsistensy());
 }
 
-void LargeInt::SubtractToIndex(int index, unsigned int x) 
+/*void LargeInt::SubtractToIndex(int index, unsigned int x) 
 { if (x>this->TheObjects[index])
 	{ this->TheObjects[index]+=LargeInt::CarryOverBound;
 		this->TheObjects[index]-=x;   
@@ -6401,7 +6417,7 @@ void LargeInt::SubtractToIndex(int index, unsigned int x)
 	{ this->TheObjects[index]-=x; 
 	}
 //	assert(this->CheckForConsistensy());
-}
+}*/
 
 void LargeInt::MultiplyBy(LargeInt &x, LargeInt &output)
 { output.MakeZero();
@@ -6415,9 +6431,12 @@ void LargeInt::MultiplyBy(LargeInt &x, LargeInt &output)
 			unsigned long long tempLong2= x.TheObjects[j];
 			tempLong= tempLong*tempLong2;
 			unsigned long long lowPart= tempLong%LargeInt::CarryOverBound;
-			unsigned long long highPart= tempLong/LargeInt::CarryOverBound;    
-			output.AddToIndex(i+j,(unsigned int) lowPart);
-			output.AddToIndex(i+j+1, (unsigned int) highPart);
+			unsigned long long highPart= tempLong/LargeInt::CarryOverBound;   
+			static LargeInt tempI;
+			tempI.AssignShiftedUInt((unsigned int) lowPart,i+j);
+			output.AddPositive(tempI);
+			tempI.AssignShiftedUInt((unsigned int) highPart,i+j+1);
+			output.AddPositive(tempI);
 		}
 	}
 	output.FitSize();
@@ -6436,23 +6455,11 @@ void LargeInt::FitSize()
 		{ break;
 		}
 	}
-	this->size-=sizeDecrease; 	
+	this->size-=sizeDecrease;
+	if (this->size==0) 
+		this->sign=1;
 //	assert(this->CheckForConsistensy());
 }
-
-void LargeInt::AddToIndex(int index, unsigned int x)
-{ this->TheObjects[index]+= x;
-	if (this->TheObjects[index]>=LargeInt::CarryOverBound)
-	{ this->TheObjects[index]-=LargeInt::CarryOverBound;  
-//		assert(this->TheObjects[index]<LargeInt::CarryOverBound);
-		this->AddToIndex(index+1,1);  
-	} 
-/*	assert(this->TheObjects[index]<LargeInt::CarryOverBound);
-	if(index+1<this->size)
-	{ assert(this->TheObjects[index]<LargeInt::CarryOverBound);
-	}
-//	assert(this->CheckForConsistensy());*/
-} 
 
 void LargeInt::MultiplyBy(LargeInt &x) 
 { static LargeInt tempInt;
@@ -6493,18 +6500,6 @@ void LargeInt::MultiplyByUInt(unsigned int x)
 }
 #pragma warning(default:4244)//warning 4244: data loss from conversion
 
-void LargeInt::MultiplyByShifted(unsigned int x, int shift) 
-{ this->MultiplyByInt(x);
-	if (shift==0) return;
-	this->SetSizeExpandOnTopNoObjectInit(this->size+shift);  
-	for (int i=this->size-1;i>=shift;i--)
-	{ this->TheObjects[i]=this->TheObjects[i-shift];  
-	} 
-	for (int i=0;i<shift;i++)
-	{ this->TheObjects[i]=0; 
-	}
-//	assert(this->CheckForConsistensy());
-}
 
 void LargeInt::ElementToString(std::string &output) 
 {	int base=10;
@@ -6975,13 +6970,17 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem()
 
 bool partFraction::RemoveRedundantShortRoots()
 { bool result=false;
-	this->ComputeDebugString();
+	LargeRational StartCheckSum,LocalCheckSum, LocalCheckSum2;
+	if (partFraction::MakingConsistencyCheck)
+	{	this->ComputeDebugString();
+		this->ComputeOneCheckSum(StartCheckSum);
+	}
 	for (int k=0;k<this->IndicesNonZeroMults.size;k++  )
 	{ int currentIndex=this->IndicesNonZeroMults.TheObjects[k];
 		::oneFracWithMultiplicitiesAndElongations& currentFrac =
 				 this->TheObjects[currentIndex];
 		int LCMElongations = currentFrac.GetLCMElongations();
-		std::string tempS;
+		std::string tempS, tempS1, tempS2;
 		partFraction::RootsToIndices.TheObjects[currentIndex].ElementToString(tempS);
 		while (currentFrac.Elongations.size>1)
 		{ for (int i=0;i<currentFrac.Elongations.size;i++)
@@ -7000,6 +6999,12 @@ bool partFraction::RemoveRedundantShortRoots()
 					result=true; 
 				}
 			}
+		}
+		if (partFraction::MakingConsistencyCheck)
+		{ this->ComputeOneCheckSum(LocalCheckSum2);
+			LocalCheckSum2.ElementToString(tempS1);
+			StartCheckSum.ElementToString(tempS2);
+			assert(LocalCheckSum2.IsEqualTo(StartCheckSum));
 		}
 	}
 	return result;
@@ -7862,16 +7867,17 @@ int partFractions::SizeWithoutDebugString()
 bool partFractions::split()
 { this->IndexLowestNonReduced=0; 
 	partFraction tempF;
+	//Checksum code follows:
 	LargeRational tempRat;
 	std::string tempS1, tempS2;
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,0,0);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
+	this->ComputeOneCheckSum(tempRat);
 	if (partFraction::MakingConsistencyCheck)
-	{ this->ComputeDebugString();
-		::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,0,0);
-		::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
-		::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
-		oneFracWithMultiplicitiesAndElongations::CheckSumRoot.ComputeDebugString();
-		this->ComputeOneCheckSum(tempRat);
+	{	oneFracWithMultiplicitiesAndElongations::CheckSumRoot.ComputeDebugString();
 		tempRat.ElementToString(tempS1);
+		this->ComputeDebugString();
 	}
 	while (this->IndexLowestNonReduced<this->size)
 	{ //this->ComputeDebugString();
@@ -7908,16 +7914,24 @@ bool partFractions::split()
 //	this->RemoveRedundantShortRootsClassicalRootSystem(); 
 //	PolyFormatLocal.MakeAlphabetxi();
 //	this->ComputeDebugString();
-	this->ComputeDebugString();
-	this->RemoveRedundantShortRoots();
+	LargeRational tempRat2;
+	partFraction::MakingConsistencyCheck=true;
 	if (partFraction::MakingConsistencyCheck)
 	{	this->ComputeDebugString();
-		LargeRational tempRat2;
 		this->ComputeOneCheckSum(tempRat2);
 		tempRat2.ElementToString(tempS2);
+		tempRat.ElementToString(tempS1);
 		assert(tempRat2.IsEqualTo(tempRat));
+	}	
+	this->RemoveRedundantShortRoots();
+	this->ComputeOneCheckSum(tempRat2);
+	partFraction::MakingConsistencyCheck=true;
+	if (partFraction::MakingConsistencyCheck)
+	{	this->ComputeDebugString();
+		tempRat2.ElementToString(tempS2);
+		tempRat.ElementToString(tempS1);
 	}
-	this->ComputeDebugString();
+	assert(tempRat2.IsEqualTo(tempRat));
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
 	return false;
@@ -8194,12 +8208,53 @@ void partFractions::initFromRootSystem(intRoots& theFraction, intRoots& theAlgor
 
 void partFractions::RemoveRedundantShortRoots()
 {	partFraction tempFrac;
+	LargeRational startCheckSum,tempCheckSum, tempCheckSum2,tempCheckSum3;
+	//partFraction::MakingConsistencyCheck=true;
+	if (partFraction::MakingConsistencyCheck)
+	{	this->ComputeOneCheckSum(startCheckSum);
+	}
+//	partFraction::MakingConsistencyCheck=false;
 	for (int i=0;i<this->size;i++)
-	{ tempFrac.Assign(this->TheObjects[i]);
+	{ //if (i==12)
+//			partFraction::MakingConsistencyCheck=true;
+		if (partFraction::MakingConsistencyCheck && partFractions::AnErrorHasOccurredTimeToPanic)
+		{ if (i==12)
+			{ partFraction::AnErrorHasOccurredTimeToPanic=true;
+//				this->TheObjects[i].ComputeDebugString();
+			}
+		}
+		tempFrac.Assign(this->TheObjects[i]);
 		if(tempFrac.RemoveRedundantShortRoots())
-		{	this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
+		{	if (partFraction::AnErrorHasOccurredTimeToPanic)
+			{ this->TheObjects[i].ComputeOneCheckSum(tempCheckSum);
+				tempFrac.ComputeOneCheckSum(tempCheckSum2);
+				std::string tempS1, tempS2;
+				tempCheckSum.ElementToString(tempS1);
+				tempCheckSum2.ElementToString(tempS2);
+				assert(tempCheckSum.IsEqualTo(tempCheckSum2));
+				tempFrac.ComputeDebugString();
+				this->TheObjects[i].ComputeDebugString();
+				tempCheckSum3.Assign(startCheckSum);
+				tempCheckSum3.Subtract(tempCheckSum2);
+			}
+			this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
 			this->TheObjects[i].Coefficient.ReleaseMemory();
+			if (partFraction::AnErrorHasOccurredTimeToPanic)
+			{ this->ComputeOneCheckSum(tempCheckSum);
+				std::string tempS1, tempS2;				
+				tempCheckSum.ElementToString(tempS1);
+				tempCheckSum3.ElementToString(tempS2);
+				assert(tempCheckSum3.IsEqualTo(tempCheckSum));
+				//IntegerPoly::AnErrorHasOccurredTimeToPanic=true;
+ 			}
 			this->Add(tempFrac);
+		}
+		if (partFraction::AnErrorHasOccurredTimeToPanic)
+		{	this->ComputeOneCheckSum(tempCheckSum);
+			std::string tempS1,tempS2;
+			tempCheckSum.ElementToString(tempS1);
+			startCheckSum.ElementToString(tempS2);
+			assert(startCheckSum.IsEqualTo(tempCheckSum));
 		}
 	}
 	for (int i=0;i<this->size;i++)
@@ -8207,6 +8262,10 @@ void partFractions::RemoveRedundantShortRoots()
 		{ this->PopIndexSwapWithLastHash(i);
 			i--;
 		}
+	}
+	if (partFraction::MakingConsistencyCheck)
+	{	this->ComputeOneCheckSum(tempCheckSum);
+		assert(startCheckSum.IsEqualTo(tempCheckSum));
 	}
 }
 
@@ -10891,7 +10950,7 @@ void IntegerPoly::Evaluate(root& values, LargeRational& output)
 		{ output.ElementToString(tempS2);
 			tempRat1.ElementToString(tempS1);
 			if (i==5)
-			{ LargeRational::AnErrorHasOccurredTimeToPanic=true;
+			{ //LargeRational::AnErrorHasOccurredTimeToPanic=true;
 			}
 		}	
 		output.Add(tempRat1);

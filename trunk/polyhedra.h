@@ -2562,7 +2562,8 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 
 class LargeInt:public ListBasicObjects<unsigned int>
 {	friend class LargeRational;
-	static const unsigned int CarryOverBound=2147483648;//=2^31
+//	static const unsigned int CarryOverBound=2147483648;//=2^31
+	static const unsigned int CarryOverBound=37;//=2^31
 	void AddPositive(LargeInt& x);
 	void SubtractSmallerPositive(LargeInt& x);
 	void FitSize();
@@ -2571,7 +2572,6 @@ public:
 	short sign;
 	void MultiplyBy(LargeInt& x);
 	void MultiplyBy(LargeInt& x, LargeInt& output);
-	void MultiplyByUInt(unsigned int x);
 	void MultiplyByInt(int x);
 	void ElementToString(std::string& output);
 	bool IsEqualToZero();
@@ -2581,7 +2581,7 @@ public:
 	void AssignInt(int x);
 	void Add(LargeInt& x);
 	void AddInt(int x);
-	bool IsGEQ(LargeInt& x);
+	//bool IsGEQ(LargeInt& x);
 	bool IsGEQByAbs(LargeInt& x);
 	bool CheckForConsistensy();
 	static void gcd(LargeInt&a,LargeInt&b,LargeInt& output);

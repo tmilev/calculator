@@ -6170,7 +6170,8 @@ void LargeRational::WriteToFile(std::fstream& output)
 
 void LargeRational::RaiseToPower(int x)
 { if (x==0)
-	{	this->Assign(LROne);
+	{	assert(!this->IsEqualToZero());
+		this->Assign(LROne);
 		return;
 	}
 	if (x<0)
@@ -6366,6 +6367,11 @@ inline void LargeInt::AssignShiftedUInt(unsigned int x, int shift)
 	for (int i=0;i<this->size;i++)
 		this->TheObjects[i]=0;
 	this->TheObjects[this->size-1]=x;
+	if (this->TheObjects[this->size-1]>=LargeInt::CarryOverBound)
+	{ this->TheObjects[this->size-1]-=LargeInt::CarryOverBound;
+		this->SetSizeExpandOnTopNoObjectInit(this->size+1);
+		this->TheObjects[this->size-1]=1;
+	}
 }
 	
 void LargeInt::AddPositive(LargeInt &x)
@@ -6384,7 +6390,16 @@ void LargeInt::AddPositive(LargeInt &x)
 		else
 			CarryOver=0;
 	}
-	this->TheObjects[x.size]+=CarryOver;
+	if (CarryOver!=0)
+	{	for(int i=x.size;i<this->size;i++)
+		{ this->TheObjects[i]+=1;
+			if (this->TheObjects[i]>=LargeInt::CarryOverBound)
+			{ this->TheObjects[i]-=LargeInt::CarryOverBound;
+			}
+			else
+				break;
+		}
+	}
 	this->FitSize();
 }
 
@@ -6393,7 +6408,7 @@ void LargeInt::SubtractSmallerPositive(LargeInt& x)
 	for (int i=0;i<x.size;i++)
 	{ if (this->TheObjects[i]<x.TheObjects[i]+CarryOver)
 		{ this->TheObjects[i]+=LargeInt::CarryOverBound;
-			this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);    
+			this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);  
 			CarryOver=1;
 		}
 		else
@@ -6401,9 +6416,18 @@ void LargeInt::SubtractSmallerPositive(LargeInt& x)
 			CarryOver=0;
 		}
 	} 
-	this->TheObjects[this->size-1]-=CarryOver;
+	if (CarryOver!=0)
+	{	for (int i=x.size;i<this->size;i++)
+		{	if ( this->TheObjects[i]>0)
+			{	this->TheObjects[i]--;
+				break;
+			}
+			else
+			{ this->TheObjects[i]=LargeInt::CarryOverBound-1;
+			}
+		}
+	}
 	this->FitSize();
-	assert(this->TheObjects[0]<LargeInt::CarryOverBound);
 //	assert(this->CheckForConsistensy());
 }
 
@@ -6420,11 +6444,9 @@ void LargeInt::SubtractSmallerPositive(LargeInt& x)
 }*/
 
 void LargeInt::MultiplyBy(LargeInt &x, LargeInt &output)
-{ output.MakeZero();
-	output.SetSizeExpandOnTopNoObjectInit(x.size+this->size);  
-	for (int i=0;i<output.size;i++)
-	{ output.TheObjects[i]=0; 
-	}
+{ assert(this!=&output);
+	output.MakeZero();
+	output.SetActualSizeAtLeastExpandOnTop(x.size+this->size);  
 	for (int i=0;i<this->size;i++)
 	{ for(int j=0;j<x.size;j++)
 		{ unsigned long long tempLong= this->TheObjects[i];
@@ -6439,9 +6461,8 @@ void LargeInt::MultiplyBy(LargeInt &x, LargeInt &output)
 			output.AddPositive(tempI);
 		}
 	}
-	output.FitSize();
 	output.sign= x.sign*this->sign;
-	if (output.size==0) {output.sign=1;}
+	output.FitSize();
 //	assert(this->CheckForConsistensy());
 } 
 
@@ -6470,36 +6491,10 @@ void LargeInt::MultiplyBy(LargeInt &x)
 
 void LargeInt::MultiplyByInt(int x) 
 {	if (this->size==0) return; 
-	if (x<0)
-	{	x=-x;
-		this->sign*=-1;
-	}
-	unsigned int tempI=x;
-	this->MultiplyByUInt(tempI);
+	LargeInt tempI;
+	tempI.AssignInt(x);
+	this->MultiplyBy(tempI);
 }
-
-#pragma warning(disable:4244)//warning 4244: data loss from conversion
-void LargeInt::MultiplyByUInt(unsigned int x) 
-{	unsigned int highpart=0;
-	unsigned int lowpart=0;
-	unsigned long long l;
-	if (x==0){this->MakeZero(); return;}
-	assert(x<LargeInt::CarryOverBound); 
-	for (int i=0;i<this->size;i++)
-	{	l=this->TheObjects[i];
-		l=l*x+highpart;
-		lowpart  = (l%LargeInt::CarryOverBound);
-		highpart = l/LargeInt::CarryOverBound;
-		this->TheObjects[i]=lowpart; 
-	}	
-	if (highpart!=0)
-	{ this->SetSizeExpandOnTopNoObjectInit(this->size+1);
-		this->TheObjects[this->size-1]=highpart; 
-	}
-//	assert(this->CheckForConsistensy());
-}
-#pragma warning(default:4244)//warning 4244: data loss from conversion
-
 
 void LargeInt::ElementToString(std::string &output) 
 {	int base=10;
@@ -6560,7 +6555,10 @@ bool LargeInt::CheckForConsistensy()
 }
 
 void LargeInt::AssignInt(int x)
-{ this->SetSizeExpandOnTopNoObjectInit(1);
+{ if (x==0)
+	{ this->MakeZero(); return;
+	}
+	this->SetSizeExpandOnTopNoObjectInit(1);
 	if (x<0)
 	{ this->TheObjects[0]= -x;
 		this->sign=-1; 
@@ -6636,6 +6634,7 @@ void LargeInt::DivPositive(LargeInt &x, LargeInt& quotientOutput, LargeInt& rema
 		{	current.Assign(LIOne);
 		}
 		oldTotal.Assign(Total);
+		assert(remainder.IsGEQByAbs(Total));
 		for (;;)
 		{	Total.MultiplyByInt(2);
 			if (!remainder.IsGEQByAbs(Total))
@@ -8213,42 +8212,46 @@ void partFractions::RemoveRedundantShortRoots()
 	if (partFraction::MakingConsistencyCheck)
 	{	this->ComputeOneCheckSum(startCheckSum);
 	}
+	//partFraction::AnErrorHasOccurredTimeToPanic=true;
 //	partFraction::MakingConsistencyCheck=false;
 	for (int i=0;i<this->size;i++)
 	{ //if (i==12)
 //			partFraction::MakingConsistencyCheck=true;
-		if (partFraction::MakingConsistencyCheck && partFractions::AnErrorHasOccurredTimeToPanic)
+		if (partFraction::MakingConsistencyCheck)
 		{ if (i==12)
 			{ partFraction::AnErrorHasOccurredTimeToPanic=true;
-//				this->TheObjects[i].ComputeDebugString();
+				this->TheObjects[i].ComputeDebugString();
+				this->ComputeOneCheckSum(tempCheckSum);
+				assert(tempCheckSum.IsEqualTo(startCheckSum));
 			}
 		}
 		tempFrac.Assign(this->TheObjects[i]);
 		if(tempFrac.RemoveRedundantShortRoots())
 		{	if (partFraction::AnErrorHasOccurredTimeToPanic)
-			{ this->TheObjects[i].ComputeOneCheckSum(tempCheckSum);
+			{ this->TheObjects[i].ComputeOneCheckSum(tempCheckSum3);
 				tempFrac.ComputeOneCheckSum(tempCheckSum2);
 				std::string tempS1, tempS2;
-				tempCheckSum.ElementToString(tempS1);
+				tempCheckSum3.ElementToString(tempS1);
 				tempCheckSum2.ElementToString(tempS2);
-				assert(tempCheckSum.IsEqualTo(tempCheckSum2));
+				assert(tempCheckSum3.IsEqualTo(tempCheckSum2));
 				tempFrac.ComputeDebugString();
 				this->TheObjects[i].ComputeDebugString();
-				tempCheckSum3.Assign(startCheckSum);
-				tempCheckSum3.Subtract(tempCheckSum2);
+				tempCheckSum.Subtract(tempCheckSum2);
+				tempCheckSum.Add(tempCheckSum2);
+				assert(tempCheckSum.IsEqualTo(startCheckSum));
 			}
 			this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
 			this->TheObjects[i].Coefficient.ReleaseMemory();
+			this->Add(tempFrac);
 			if (partFraction::AnErrorHasOccurredTimeToPanic)
 			{ this->ComputeOneCheckSum(tempCheckSum);
 				std::string tempS1, tempS2;				
 				tempCheckSum.ElementToString(tempS1);
-				tempCheckSum3.ElementToString(tempS2);
-				assert(tempCheckSum3.IsEqualTo(tempCheckSum));
+				startCheckSum.ElementToString(tempS2);
+				assert(startCheckSum.IsEqualTo(tempCheckSum));
 				//IntegerPoly::AnErrorHasOccurredTimeToPanic=true;
  			}
-			this->Add(tempFrac);
-		}
+ 		}
 		if (partFraction::AnErrorHasOccurredTimeToPanic)
 		{	this->ComputeOneCheckSum(tempCheckSum);
 			std::string tempS1,tempS2;

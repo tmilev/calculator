@@ -6348,6 +6348,11 @@ void LargeRational::Simplify()
 	}
 	static LargeInt tempI;
 	LargeInt::gcd(this->den, this->num,tempI);
+	if (LargeRational::AnErrorHasOccurredTimeToPanic)
+	{ std::string tempS1,tempS2,tempS3;
+		tempI.ElementToString(tempS1);
+		this->ElementToString(tempS2);
+	}
 	assert(tempI.sign!=-1);
 	static LargeInt tempI2;
 	this->den.DivPositive(tempI,this->den,tempI2);
@@ -6368,16 +6373,19 @@ void LargeInt::AddPositive(LargeInt &x)
 }
 
 void LargeInt::SubtractSmallerPositive(LargeInt& x)
-{	for (int i=0;i<x.size;i++)
-	{ if (this->TheObjects[i]<x.TheObjects[i])
+{	unsigned int CarryOver=0;
+	for (int i=0;i<x.size;i++)
+	{ if (this->TheObjects[i]<x.TheObjects[i]+CarryOver)
 		{ this->TheObjects[i]+=LargeInt::CarryOverBound;
-			this->TheObjects[i]-=x.TheObjects[i];    
-			this->TheObjects[i+1]--; 
+			this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);    
+			CarryOver=1;
 		}
 		else
-		{	this->TheObjects[i]-=x.TheObjects[i]; 
+		{	this->TheObjects[i]-=(x.TheObjects[i]+CarryOver); 
+			CarryOver=0;
 		}
 	} 
+	this->TheObjects[this->size-1]-=CarryOver;
 	this->FitSize();
 	assert(this->TheObjects[0]<LargeInt::CarryOverBound);
 //	assert(this->CheckForConsistensy());
@@ -7132,7 +7140,7 @@ void partFraction::ComputeOneCheckSum(LargeRational &output)
 	} 
 	this->Coefficient.Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,output);
 	std::string tempS;
-	if (this->AnErrorHasOccurredTimeToPanic)
+	if (this->AnErrorHasOccurredTimeToPanic && LargeRational::AnErrorHasOccurredTimeToPanic)
 	{ output.ElementToString(tempS);
 	}
 	//output.ElementToString(tempS);
@@ -7385,6 +7393,8 @@ void partFraction::ApplySzenesVergneFormula
 	if (this->AnErrorHasOccurredTimeToPanic)
 	{ this->CheckSum2.MakeZero();
 		this->ComputeOneCheckSum(this->CheckSum);
+		std::string tempS;
+		this->CheckSum.ElementToString(tempS);
 	}
 	for(int i=0;i<theSelectedIndices.size;i++)
 	{	tempFrac.Assign(*this);
@@ -7413,9 +7423,7 @@ void partFraction::ApplySzenesVergneFormula
 		if (this->AnErrorHasOccurredTimeToPanic)
 		{ tempFrac.ComputeDebugString();
 			LargeRational tempRat;
-			if (i==2)
-			{ IntegerPoly::AnErrorHasOccurredTimeToPanic=true;
-			}
+			IntegerPoly::AnErrorHasOccurredTimeToPanic=true;
 			tempFrac.ComputeOneCheckSum(tempRat);
 			std::string tempS1, tempS2;
 			this->CheckSum2.ElementToString(tempS1);
@@ -7870,7 +7878,7 @@ bool partFractions::split()
 		tempF.Assign(this->TheObjects[this->IndexLowestNonReduced]);
 		//this->ComputeDebugString();
 		//tempF.ComputeDebugString();
-		if (this->IndexLowestNonReduced==1 && this->size==16)
+		if (this->IndexLowestNonReduced==0 && this->size==-1)
 		{ partFraction::AnErrorHasOccurredTimeToPanic=true;
 		}
 		if (! (tempF.reduceOnceGeneralMethod(*this)))
@@ -10882,8 +10890,8 @@ void IntegerPoly::Evaluate(root& values, LargeRational& output)
 		if(this->AnErrorHasOccurredTimeToPanic)
 		{ output.ElementToString(tempS2);
 			tempRat1.ElementToString(tempS1);
-			if (i==3)
-			{ //LargeRational::AnErrorHasOccurredTimeToPanic=true;
+			if (i==5)
+			{ LargeRational::AnErrorHasOccurredTimeToPanic=true;
 			}
 		}	
 		output.Add(tempRat1);

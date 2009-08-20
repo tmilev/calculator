@@ -7896,7 +7896,7 @@ bool partFractions::split()
 			{ this->ComputeDebugString();
 			}
 		}
-		if (partFraction::MakingConsistencyCheck)
+/*		if (partFraction::MakingConsistencyCheck)
 		{	LargeRational tempRat2;
 			this->ComputeOneCheckSum(tempRat2);
 			if (!tempRat2.IsEqualTo(tempRat))
@@ -7905,7 +7905,7 @@ bool partFractions::split()
 				tempRat.ElementToString(tempS1);
 				assert(false);
 			}
-		}
+		}*/
 		this->MakeProgressReport();
 	//	this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
@@ -8218,12 +8218,12 @@ void partFractions::RemoveRedundantShortRoots()
 	{ //if (i==12)
 //			partFraction::MakingConsistencyCheck=true;
 		if (partFraction::MakingConsistencyCheck)
-		{ if (i==12)
+		{ /*if (i==12)
 			{ partFraction::AnErrorHasOccurredTimeToPanic=true;
 				this->TheObjects[i].ComputeDebugString();
 				this->ComputeOneCheckSum(tempCheckSum);
 				assert(tempCheckSum.IsEqualTo(startCheckSum));
-			}
+			}*/
 		}
 		tempFrac.Assign(this->TheObjects[i]);
 		if(tempFrac.RemoveRedundantShortRoots())
@@ -8237,11 +8237,16 @@ void partFractions::RemoveRedundantShortRoots()
 				tempFrac.ComputeDebugString();
 				this->TheObjects[i].ComputeDebugString();
 				tempCheckSum.Subtract(tempCheckSum2);
-				tempCheckSum.Add(tempCheckSum2);
-				assert(tempCheckSum.IsEqualTo(startCheckSum));
+//				tempCheckSum.Add(tempCheckSum2);
+		//		assert(tempCheckSum.IsEqualTo(startCheckSum));
 			}
 			this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
 			this->TheObjects[i].Coefficient.ReleaseMemory();
+			if (partFraction::AnErrorHasOccurredTimeToPanic)
+			{ this->ComputeOneCheckSum(tempCheckSum3);
+				assert(tempCheckSum3.IsEqualTo(tempCheckSum));
+				//IntegerPoly::AnErrorHasOccurredTimeToPanic=true;
+			}
 			this->Add(tempFrac);
 			if (partFraction::AnErrorHasOccurredTimeToPanic)
 			{ this->ComputeOneCheckSum(tempCheckSum);
@@ -8741,7 +8746,7 @@ bool oneFracWithMultiplicitiesAndElongations::operator ==
 	for (int i=0;i<this->Elongations.size;i++)
 	{ bool Found=false;
 		for (int j=0; j<right.Elongations.size;j++)
-		{ if (this->Elongations.TheObjects[i]==this->Elongations.TheObjects[j])
+		{ if (this->Elongations.TheObjects[i]==right.Elongations.TheObjects[j])
 			{ if(this->Multiplicities.TheObjects[i]!=right.Multiplicities.TheObjects[j])
 					return false;
 				else 

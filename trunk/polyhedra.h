@@ -2562,8 +2562,8 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 
 class LargeInt:public ListBasicObjects<unsigned int>
 {	friend class LargeRational;
-//	static const unsigned int CarryOverBound=2147483648;//=2^31
-	static const unsigned int CarryOverBound=37;//=2^31
+	static const unsigned int CarryOverBound=2147483648;//=2^31
+//	static const unsigned int CarryOverBound=37;
 	void AddPositive(LargeInt& x);
 	void SubtractSmallerPositive(LargeInt& x);
 	void FitSize();

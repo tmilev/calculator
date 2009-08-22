@@ -104,27 +104,7 @@ class QuasiPolynomials;
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in 
 //polyhedra.cpp used to format the polynomial printouts.
 
-struct IndicatorWindowVariables
-{ 
-public:
-	int NumPartFractionsLoaded;
-	int NumReducedPartFractions;
-	int NumComputedContributions;
-	int TotalNumMonomials;
-	int NumProcessedMonomials;
-	int NumProcessedFractions;
-	bool Pause;
-	std:: string StatusString;
-	IndicatorWindowVariables(){this->Nullify();}
-	void Nullify()
-	{ this->NumPartFractionsLoaded=0;
-		this->Pause=true;
-		this->NumComputedContributions=0;
-		this->TotalNumMonomials=0;
-		this->NumProcessedMonomials=0;
-		this->NumProcessedFractions=0;
-	};	
-};
+
 
 #ifndef dont_define_Min_and_Max_in_polyhedra_h
 //grrrrrrrr: names conflict
@@ -451,9 +431,11 @@ public:
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
 	void MultiplyByRational(Rational& a);
 	void ScaleForMinHeight();
+	void ScaleToIngegral();
 	int FindLCMDenominators();
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5);
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
+	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	void MultiplyByInteger(int a);
 	void MinusRoot();
 	void Subtract(root& r);
@@ -485,6 +467,7 @@ class roots : public ListBasicObjects<root>
 public:
 	std::string DebugString;
 	void AssignIntRoots(intRoots& r);
+	void AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r);
 	void AssignMatrixRows(MatrixRational& mat);
 	void ComputeDebugString();
 	int GetRankOfSpanOfElements();
@@ -493,8 +476,11 @@ public:
 	void AddRootS(roots& r);
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
+	void PerturbVectorToRegular(root&output);
 	void Average(root& output);
 	void Pop(int index);
+	bool IsRegular(root& r);
+	bool IsRegular(root& r, root& outputFailingNormal);
 	bool GetLinearDependence(MatrixRational& outputTheLinearCombination);
 	void GaussianEliminationForNormalComputation(MatrixRational& inputMatrix, 
 																							 Selection& outputNonPivotPoints);
@@ -510,7 +496,6 @@ public:
 	bool ComputeNormalFromSelectionAndExtraRoot(root& output,root& ExtraRoot, Selection& theSelection);
 	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output,root& ExtraRoot1,
 																									root& ExtraRoot2, Selection& theSelection);
-	void MakeNilradicalB3Example1();
 };
 
 class Selection
@@ -3303,6 +3288,7 @@ public:
 	static bool AnErrorHasOccurredTimeToPanic;
 	static LargeRational CheckSum;
 	static std::fstream ComputedContributionsList;
+	static bool MakingProgressReport;
 	void ComputeDebugString();
 	void ComputeDebugStringNoNumerator();
 	void ComputeDebugStringWithVPfunction();
@@ -3638,6 +3624,31 @@ public:
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output); 
 	bool LinCombToStringDistinguishedIndex
 				(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
+};
+
+struct IndicatorWindowVariables
+{ 
+public:
+	int NumPartFractionsLoaded;
+	int NumReducedPartFractions;
+	int NumComputedContributions;
+	int TotalNumMonomials;
+	int NumProcessedMonomials;
+	int NumProcessedFractions;
+	intRoot modifiedRoot;
+	bool rootIsModified;
+	bool PerturbationHasOccurred;
+	bool Pause;
+	std:: string StatusString;
+	IndicatorWindowVariables(){this->Nullify();}
+	void Nullify()
+	{ this->NumPartFractionsLoaded=0;
+		this->Pause=true;
+		this->NumComputedContributions=0;
+		this->TotalNumMonomials=0;
+		this->NumProcessedMonomials=0;
+		this->NumProcessedFractions=0;
+	};	
 };
 
 class RandomCodeIDontWantToDelete

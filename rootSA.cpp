@@ -188,6 +188,7 @@ public:
 		this->RecalculationChambersNeeded=true; this->ComputationMustDie=false;
 		this->ComputationalThreadIsDead=false; this->noGraphics=true;
 	};
+	void SetIndicator(intRoot& input);
 	~IndicatorWindowClass()
 	{ DeleteObject(this->theFont);
 		DeleteObject(this->LabelBrush1);
@@ -217,6 +218,10 @@ void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
 	IndicatorWindow1.stringMonomials= out4.str();
 	IndicatorWindow1.stringLabel9.assign(output.StatusString);
 	IndicatorWindow1.UpdateLabels5to9fromStrings();
+	if (output.rootIsModified)
+	{ output.rootIsModified=false;
+		IndicatorWindow1.SetIndicator(output.modifiedRoot);
+	}
 }
 
 void GUIthread(void* pParams)
@@ -284,7 +289,7 @@ void ComputationalThread()
 			IndicatorWindow1.GetRootFromEditWeights(tempRoot);
 			partFraction::MakingConsistencyCheck=false;
 			partFraction::theVectorToBePartitioned=IndicatorWindow1.rootEvaluateWeights;
-			partFractions::AnErrorHasOccurredTimeToPanic=true;
+			//partFractions::AnErrorHasOccurredTimeToPanic=true;
 			//partFraction::theVectorToBePartitioned.initFromInt(5,10,12,200,200);
 			//tempRoot.InitFromIntegers(1,1,1,1,1);
 			tempPF.ComputeKostantFunctionFromWeylGroup
@@ -351,6 +356,9 @@ void ComputationalThread()
 			IndicatorWindow1.stringTheOutput.append("\\end{eqnarray*}");
 		}
 		::IndicatorWindow1.stringLabel9="Output file written";
+		if (IndicatorWindowGlobalVariables.PerturbationHasOccurred)
+		{  ::IndicatorWindow1.stringLabel9.append(". Indicator perturbed to regular.");
+		}
 		IndicatorWindow1.UpdateLabels5to9fromStrings();
 		IndicatorWindow1.ComputationInitializedAndReadyToGo=0;
 		IndicatorWindow1.EnlargeWindowForGraphics();
@@ -359,6 +367,12 @@ void ComputationalThread()
 		{ tempW.MakeAn((unsigned char)IndicatorWindow1.rootRank);}
 		if (IndicatorWindow1.TypeWeylGroup=='B')
 		{ tempW.MakeBn((unsigned char)IndicatorWindow1.rootRank);}
+		if (IndicatorWindow1.TypeWeylGroup=='C')
+		{ tempW.MakeCn((unsigned char)IndicatorWindow1.rootRank);}
+		if (IndicatorWindow1.TypeWeylGroup=='D')
+		{ tempW.MakeDn((unsigned char)IndicatorWindow1.rootRank);}
+		if (IndicatorWindow1.TypeWeylGroup=='G')
+		{ tempW.MakeG2();}
 		tempW.ComputeRootsOfBorel(InputRoots);
 		InputRoots.ComputeDebugString();
 		::NextDirectionIndex=IndicatorWindow1.rootRank-1;		
@@ -393,6 +407,7 @@ bool IndicatorWindowClass::initFiles()
 	this->file3Output.open(this->stringFile3.c_str(),std::fstream::out | std::fstream::trunc);
 	return this->file3Output.is_open();
 }
+
 void IndicatorWindowClass::clickButton5EvaluateVPF()
 { root tempR;
 	this->GetRootFromEditWeights(tempR);
@@ -753,6 +768,7 @@ void IndicatorWindowClass::GetRootFromEditWeights(root& output)
 		x=std::atoi(tempS.c_str());
 		this->rootEvaluateWeights.elements[i]=x;
 	}
+	output.dimension=(unsigned char)this->rootRank;
 }
 
 void IndicatorWindowClass::EnlargeWindowForPFComputation()
@@ -890,6 +906,15 @@ void IndicatorWindowClass::RefreshRadioButtonStates()
 	{	TDV.DrawDashes=false;}
 	else
 	{ TDV.DrawDashes=true;}	
+}
+
+void IndicatorWindowClass::SetIndicator(intRoot &input)
+{ for (int i=0;i<root::AmbientDimension;i++)
+	{ std::stringstream out;
+		out<<input.elements[i];
+		this->stringEditWeights[i]=out.str();
+	}
+	this->UpdateEditWeights();
 }
 
 void IndicatorWindowClass::clickCombo1()

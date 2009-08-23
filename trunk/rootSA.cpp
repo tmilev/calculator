@@ -723,6 +723,8 @@ void IndicatorWindowClass::CreationProcedures(HWND hWnd)
 	this->stringCombo1="C4";
 	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
 	this->stringCombo1="D4";
+//	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
+//	this->stringCombo1="F4";
 	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
 	this->stringCombo1="G2";
 	SendMessage(this->hComboBox1,CB_ADDSTRING,0,(LPARAM)this->stringCombo1.c_str());
@@ -979,7 +981,13 @@ void IndicatorWindowClass::clickCombo1()
 				this->stringEditWeights[2]="15";this->stringEditWeights[3]="16";
 				ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=3000;
 				break;
-			case 11:
+/*			case 11:
+				this->TypeWeylGroup='F'; this->rootRank=4;
+				this->stringEditWeights[0]="7";this->stringEditWeights[1]="12";
+				this->stringEditWeights[2]="15";this->stringEditWeights[3]="16";
+				ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=3000;
+				break;
+	*/	case 11:
 				this->TypeWeylGroup='G'; this->rootRank=2;
 				this->stringEditWeights[0]="4";this->stringEditWeights[1]="4";
 				ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=3000;

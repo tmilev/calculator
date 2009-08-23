@@ -7957,9 +7957,21 @@ bool partFractions::ShouldIgnore()
 }
 
 void partFractions::PrepareCheckSums()
-{	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,1,1,1,1,1,1,1,1,1);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
+{//	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,1,1,1,1,1,1,1,1,1);
+//	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
+//	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[0].init(2,3);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[1].init(2,3);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[2].init(2,3);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[3].init(1,5);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[4].init(11,13);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[5].init(13,17);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[6].init(17,19);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[7].init(19,23);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[8].init(23,29);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[9].init(31,37);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[10].init(37,41);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[11].init(41,43);
 	this->ComputeOneCheckSum(this->StartCheckSum);
 }
 
@@ -8072,6 +8084,7 @@ bool partFractions::splitClassicalRootSystem()
 	}
 	//this->ComputeDebugString();
 	this->RemoveRedundantShortRootsClassicalRootSystem(); 
+//	this->ComputeDebugString();
 	this->CompareCheckSums();
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
@@ -8816,6 +8829,10 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(LargeRational& 
 		tempRat.Subtract(tempRat2);
 		tempRat.RaiseToPower(this->Multiplicities.TheObjects[i]);
 		output.MultiplyBy(tempRat);	
+	}
+	if (output.IsEqualToZero())
+	{ std::string tempS;
+		Stop();
 	}
 	output.Invert();
 	

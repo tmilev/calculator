@@ -3202,8 +3202,8 @@ public:
 	int indexInGlobalCollectorPartFraction;
 	int FileStoragePosition;
 	bool PowerSeriesCoefficientIsComputed;
-	bool RemoveRedundantShortRootsClassicalRootSystem();
-	bool RemoveRedundantShortRoots();
+	bool RemoveRedundantShortRootsClassicalRootSystem(root*Indicator);
+	bool RemoveRedundantShortRoots(root* Indicator);
 	bool AlreadyAccountedForInGUIDisplay;
 	static bool AnErrorHasOccurredTimeToPanic;
 	static std::fstream TheBigDump;
@@ -3279,11 +3279,15 @@ public:
 };
 
 class partFractions: public HashedListBasicObjects<partFraction>
-{
+{ bool ShouldIgnore();
+	void AssureIndicatorRegularity();
 public:
 	int IndexLowestNonReduced;
 	int HighestIndex;	
 	std::string DebugString;
+	bool UsingIndicatorRoot;
+	bool DiscardingFractions;
+	root IndicatorRoot;
 	static bool SplitTestMode;
 	static bool AnErrorHasOccurredTimeToPanic;
 	static LargeRational CheckSum;
@@ -3319,7 +3323,7 @@ public:
 	void ReadFromFile(std::fstream& input);
 	partFractions();
 	int SizeWithoutDebugString();
-	bool CheckForMinimalityDecomposition();
+	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r);
 	void MakeProgressReport();
 	int NumMonomialsInTheNumerators();
 	void ComputeKostantFunctionFromWeylGroup

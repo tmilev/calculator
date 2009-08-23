@@ -313,7 +313,7 @@ void ComputationalThread()
 			PolynomialOutputFormat::LatexMaxLineLength=27;
 			IndicatorWindow1.thePoly.ComputeDebugString();
 			IndicatorWindow1.stringTheOutput.clear();
-			IndicatorWindow1.stringTheOutput.append("\\begin{eqnarray*}\r\n");
+			IndicatorWindow1.stringTheOutput.append("\\begin{eqnarray*}&&\r\n");
 			IndicatorWindow1.stringTheOutput.append(IndicatorWindow1.thePoly.DebugString);
 			IndicatorWindow1.stringTheOutput.append("\\end{eqnarray*}");
 		}

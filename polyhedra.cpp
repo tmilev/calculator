@@ -7956,17 +7956,34 @@ bool partFractions::ShouldIgnore()
 	return shouldIgnore;
 }
 
+void partFractions::PrepareCheckSums()
+{	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,1,1,1,1,1,1,1,1,1);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
+	this->ComputeOneCheckSum(this->StartCheckSum);
+}
+
+void partFractions::CompareCheckSums()
+{ if (!this->DiscardingFractions)
+	{	this->ComputeOneCheckSum(this->EndCheckSum);
+	//partFraction::MakingConsistencyCheck=true;
+	/*if (partFraction::MakingConsistencyCheck)
+	{	this->ComputeDebugString();
+		tempRat2.ElementToString(tempS2);
+		tempRat.ElementToString(tempS1);
+	}*/
+		assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
+	}
+
+}
+
 bool partFractions::split()
 { this->IndexLowestNonReduced=0; 
 	partFraction tempF;
 	//Checksum code follows:
-	LargeRational tempRat;
-	std::string tempS1, tempS2;
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,1,1,1,1,1,1,1,1,1);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
-	this->ComputeDebugString();
-	this->ComputeOneCheckSum(tempRat);
+//	std::string tempS1, tempS2;
+//	this->ComputeDebugString();
+	this->PrepareCheckSums();
 	this->AssureIndicatorRegularity();
 /*	if (partFraction::MakingConsistencyCheck)
 	{	oneFracWithMultiplicitiesAndElongations::CheckSumRoot.ComputeDebugString();
@@ -8021,16 +8038,7 @@ bool partFractions::split()
 		assert(tempRat2.IsEqualTo(tempRat));
 	}	*/
 	this->RemoveRedundantShortRoots();
-	if (!this->DiscardingFractions)
-	{	this->ComputeOneCheckSum(tempRat2);
-	//partFraction::MakingConsistencyCheck=true;
-	/*if (partFraction::MakingConsistencyCheck)
-	{	this->ComputeDebugString();
-		tempRat2.ElementToString(tempS2);
-		tempRat.ElementToString(tempS1);
-	}*/
-		assert(tempRat2.IsEqualTo(tempRat));
-	}
+	this->CompareCheckSums();
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
 	return false;
@@ -8042,6 +8050,7 @@ bool partFractions::splitClassicalRootSystem()
 	{ ListBasicObjects<Monomial<Integer> >::ListBasicObjectsActualSizeIncrement=1;
 		HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=1;
 	}
+	this->PrepareCheckSums();
 	this->AssureIndicatorRegularity();
 	partFraction tempF;
 	while (this->IndexLowestNonReduced<this->size)
@@ -8063,6 +8072,7 @@ bool partFractions::splitClassicalRootSystem()
 	}
 	//this->ComputeDebugString();
 	this->RemoveRedundantShortRootsClassicalRootSystem(); 
+	this->CompareCheckSums();
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot);

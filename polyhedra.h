@@ -3288,11 +3288,15 @@ public:
 	bool UsingIndicatorRoot;
 	bool DiscardingFractions;
 	root IndicatorRoot;
+	LargeRational StartCheckSum;
+	LargeRational EndCheckSum;
 	static bool SplitTestMode;
 	static bool AnErrorHasOccurredTimeToPanic;
 	static LargeRational CheckSum;
 	static std::fstream ComputedContributionsList;
 	static bool MakingProgressReport;
+	void PrepareCheckSums();
+	void CompareCheckSums();
 	void ComputeDebugString();
 	void ComputeDebugStringNoNumerator();
 	void ComputeDebugStringWithVPfunction();

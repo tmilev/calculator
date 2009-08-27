@@ -191,7 +191,7 @@ public:
 		this->rootRank=3; this->TypeWeylGroup='B'; this->stringTitle="I will eat your RAM";
 		this->SlicingIndex=0; this->stringFile3="C:\\ouput.txt"; this->initDLLneeded=true;
 		this->RecalculationChambersNeeded=true; this->ComputationMustDie=false;
-		this->ComputationalThreadIsDead=false; this->noGraphics=true; this->RequireOutputFile=false;
+		this->ComputationalThreadIsDead=false; this->noGraphics=true; this->RequireOutputFile=true;
 		this->LabelBrush1 = CreateSolidBrush(RGB(192,192,192));
 	};
 	void SetIndicator(intRoot& input);

@@ -4,7 +4,7 @@ polyhedra.h, polyhedra.cpp: The big guns. All the algorithms are here. No extern
 
 rootSA.cpp: some WINAPI interface with a bit of graphics to give more appeal.
 
-rootSA.def: unfortunately needed to export functions from the dll. If you want to export more functions, modify rootSA.def.
+***Important note to Todor Milev: to make it work with static link you need the libcmtd.lib and the /MT option!!!***
 
 License_LGPL-3.0.txt: the license!
 

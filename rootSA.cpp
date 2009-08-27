@@ -126,6 +126,7 @@ public:
 	bool initDLLneeded;
 	bool RecalculationChambersNeeded;
 	bool noGraphics;
+	bool RequireOutputFile;
 	intRoot rootEvaluateWeights;
 	roots InputRoots;
 	HDC theDC;
@@ -190,7 +191,8 @@ public:
 		this->rootRank=3; this->TypeWeylGroup='B'; this->stringTitle="I will eat your RAM";
 		this->SlicingIndex=0; this->stringFile3="C:\\ouput.txt"; this->initDLLneeded=true;
 		this->RecalculationChambersNeeded=true; this->ComputationMustDie=false;
-		this->ComputationalThreadIsDead=false; this->noGraphics=true;
+		this->ComputationalThreadIsDead=false; this->noGraphics=true; this->RequireOutputFile=false;
+		this->LabelBrush1 = CreateSolidBrush(RGB(192,192,192));
 	};
 	void SetIndicator(intRoot& input);
 	~IndicatorWindowClass()
@@ -520,7 +522,7 @@ int APIENTRY IndicatorWindow( HINSTANCE hInstance,
   wcex.lpfnWndProc   = WndProcIndicatorWindow;
   wcex.hInstance     = hInstance;
   wcex.hCursor       = LoadCursor( NULL, IDC_ARROW );
-  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+  wcex.hbrBackground =IndicatorWindow1.LabelBrush1;
   wcex.lpszClassName = IndicatorWindowClass::className;
   RegisterClassEx(&wcex);
   hInst = hInstance; // Instanzenhandle in der globalen Variablen speichern
@@ -741,7 +743,6 @@ void IndicatorWindowClass::CreationProcedures(HWND hWnd)
   IndicatorWindow1.thePainstruct.rcPaint.bottom=800;
   IndicatorWindow1.thePainstruct.rcPaint.left=0;
   IndicatorWindow1.thePainstruct.rcPaint.right=600;
-	IndicatorWindow1.LabelBrush1 = CreateSolidBrush(RGB(192,192,192));
 	this->RefreshRadioButtonStates();
 	ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=100;
 }
@@ -819,7 +820,7 @@ void IndicatorWindowClass::UpdateEdit4output()
 void IndicatorWindowClass::clickIndicatorWindowPauseButton()
 {	::IndicatorWindowGlobalVariables.Pause=!IndicatorWindowGlobalVariables.Pause;
 	if (!this->ComputationInProgress && !IndicatorWindowGlobalVariables.Pause)
-	{ if (!this->initFiles())
+	{ if (!this->initFiles()&& this->RequireOutputFile)
 		{ std::string tempS= "Error opening file(s)!";
 			::MessageBox(this->hMain,tempS.c_str(),tempS.c_str(),MB_OK);
 			IndicatorWindowGlobalVariables.Pause=true;

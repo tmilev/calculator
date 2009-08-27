@@ -61,7 +61,7 @@ int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
 }
 
 
-int main(void)
+int AltMain(void)
 { //The below lines compute a partial fraction decomposition for the 
 	//generating function of the Kostant partition function for G2
 	//printout tempPF.DebugString to get the final result
@@ -99,6 +99,7 @@ int main(void)
 	ExampleComputation ThomasExample;
 	ThomasExample.RunSomeTests();
 	//ThomasExample.RunThomasExample();
+	return 0;
 }
 
 void ExampleComputation::RunSomeTests()

@@ -4752,11 +4752,11 @@ void QuasiPolynomial::Evaluate(intRoot& values, LargeRational& output)
 			}
 		}
 		this->TheObjects[i].Coefficient.Evaluate(values.elements,tempLRat2);
-		tempLRat2.ElementToString(tempS);
-		tempLRat.ElementToString(tempS);
+		//tempLRat2.ElementToString(tempS);
+		//tempLRat.ElementToString(tempS);
 		tempLRat.MultiplyBy(tempLRat2);
 		output.Add(tempLRat);
-		output.ElementToString(tempS);
+		//output.ElementToString(tempS);
 	}
 }
 

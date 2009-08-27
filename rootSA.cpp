@@ -93,13 +93,17 @@ int APIENTRY IndicatorWindow(HINSTANCE hInstance,
                      int       nCmdShow);
 extern IndicatorWindowVariables IndicatorWindowGlobalVariables;
 extern PolynomialOutputFormat PolyFormatLocal;
-extern int main(void);
+extern int AltMain(void);
 extern int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot);
+void RunAlgorithm1();
 
-BOOL APIENTRY DllMain
-			(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{	hInst=hModule;
-	return TRUE;
+int __stdcall WinMain(HINSTANCE hInstance,
+                     HINSTANCE hPrevInstance,
+                     LPTSTR    lpCmdLine,
+                     int       nCmdShow)
+{	hInst=hInstance;
+	::RunAlgorithm1();
+	return 0;
 }
 
 class IndicatorWindowClass
@@ -250,7 +254,7 @@ void ComputationalThread()
 			tempPFComp.Run();
 		}
 		if (IndicatorWindow1.ComputationInitializedAndReadyToGo==5)
-		{ main();
+		{ AltMain();
 		}
 		if (IndicatorWindow1.ComputationInitializedAndReadyToGo==4)
 		{ rootSubalgebra tempSA;
@@ -393,7 +397,7 @@ void ComputationalThread()
 	return;
 }
 
-__declspec(dllexport) void _stdcall RunAlgorithm1( )
+void RunAlgorithm1( )
 {	IndicatorWindow1.ComputationalThread=CreateThread
 			(0,0, (LPTHREAD_START_ROUTINE)ComputationalThread,0,0,0);
 	::SuspendThread(IndicatorWindow1.ComputationalThread);

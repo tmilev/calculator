@@ -3295,6 +3295,7 @@ public:
 	static LargeRational CheckSum;
 	static std::fstream ComputedContributionsList;
 	static bool MakingProgressReport;
+	static bool UsingCheckSum;
 	void PrepareCheckSums();
 	void CompareCheckSums();
 	void ComputeDebugString();

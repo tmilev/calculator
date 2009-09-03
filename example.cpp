@@ -41,25 +41,33 @@ public:
 };
 
 int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
-{ int Dimension=3, NumVectors=6;
+{ int Dimension=2, NumVectors=4;
 	::initDLL(Dimension);
 	ToBeSplit.SetSizeExpandOnTopNoObjectInit(NumVectors);
 	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
 	//ToBeSplit.TheObjects[1].initFromInt(2,0,0,0,0);
 	//ToBeSplit.TheObjects[2].initFromInt(3,0,0,0,0);
-	IndicatorRoot.InitFromIntegers(15,16,17,0,0);
+	IndicatorRoot.InitFromIntegers(17,86,97,0,0);
 	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
 	//ToBeSplit.TheObjects[1].initFromInt(0,1,0,0,0);
 	//ToBeSplit.TheObjects[2].initFromInt(0,0,1,0,0);
-	ToBeSplit.TheObjects[5].initFromInt(1,1,0,0,0);
-	ToBeSplit.TheObjects[4].initFromInt(0,1,1,0,0);
-	ToBeSplit.TheObjects[3].initFromInt(1,1,1,0,0);
-	ToBeSplit.TheObjects[2].initFromInt(0,1,2,0,0);
-	ToBeSplit.TheObjects[1].initFromInt(1,1,2,0,0);
-	ToBeSplit.TheObjects[0].initFromInt(1,2,2,0,0);
+	ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
+	ToBeSplit.TheObjects[1].initFromInt(0,1,0,0,0);
+	ToBeSplit.TheObjects[2].initFromInt(1,1,0,0,0);
+	ToBeSplit.TheObjects[3].initFromInt(2,1,0,0,0);
 	return Dimension;
 }
-
+void ExampleComputation::RunSomeTests()
+{ intRoots toBeSplit;
+	root indicator; 
+	::FillInRoots(toBeSplit,indicator);
+	partFractions tempPF;
+	tempPF.UsingIndicatorRoot=false;
+	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0);
+	tempPF.UsingCheckSum=false;
+	tempPF.split();
+	tempPF.ComputeDebugString();
+}
 
 int AltMain(void)
 { //The below lines compute a partial fraction decomposition for the 
@@ -102,50 +110,7 @@ int AltMain(void)
 	return 0;
 }
 
-void ExampleComputation::RunSomeTests()
-{ LargeRational tempRat1, tempRat2;
-	LargeRational tempRat ;
-	std::string tempS,tempS1, tempS2;
-	Rational fBug;
-	fBug.init(-3,4);
 
-	for(int x=87;x<200;x++)
-	{	tempRat.MakeZero();
-		for (int i=0;i<x;i++)
-		{	tempRat2.AssignRational(fBug);
-			tempRat2.RaiseToPower(i);
-			tempRat.Add(tempRat2);
-			//tempRat.ElementToString(tempS);
-		}
-		//LargeRational::AnErrorHasOccurredTimeToPanic=true;
-		tempRat.ElementToString(tempS2);
-		tempRat1.AssignRational( fBug);
-		tempRat1.RaiseToPower(x);
-		tempRat1.MultiplyByInt(-1);
-		tempRat1.AddRational(Rational::TheRingUnit);
-		tempRat2.AssignRational(fBug);
-		tempRat2.MultiplyByRational(Rational::TheRingMUnit);
-		tempRat2.AddRational(Rational::TheRingUnit);
-		tempRat2.Invert();
-		tempRat1.MultiplyBy(tempRat2);
-		tempRat1.ElementToString(tempS2);
-		tempRat.ElementToString(tempS1);
-		assert(tempRat.IsEqualTo(tempRat1));
-	}
-	tempRat1.ElementToString(tempS2);
-//	LargeRational::AnErrorHasOccurredTimeToPanic=true;
-	tempRat.Add(tempRat1);
-	tempRat.ElementToString(tempS);
-	tempRat.RaiseToPower(15);
-	tempRat.ElementToString(tempS);
-
-	tempRat1.AssignInteger(3);
-	tempRat2.AssignInteger(4);
-	tempRat1.RaiseToPower(21);
-	tempRat2.RaiseToPower(15);
-	tempRat1.MultiplyBy(tempRat2);
-	tempRat1.ElementToString(tempS1);
-}
 
 void ExampleComputation::RunThomasExample()
 { ::initDLL(12);

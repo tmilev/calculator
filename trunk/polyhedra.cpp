@@ -218,6 +218,7 @@ bool partFraction::UseGlobalCollector=true;
 bool partFraction::AnErrorHasOccurredTimeToPanic=false;
 bool partFractions::SplitTestMode=false;
 bool partFractions::AnErrorHasOccurredTimeToPanic=false;
+bool partFractions::UsingCheckSum=true;
 bool QuasiPolynomial::AnErrorHasOccurredTimeToPanic=false;
 bool LargeRational::AnErrorHasOccurredTimeToPanic=false;
 bool partFractions::MakingProgressReport=true;
@@ -7960,6 +7961,8 @@ void partFractions::PrepareCheckSums()
 {//	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,1,1,1,1,1,1,1,1,1);
 //	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
 //	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
+	if (!this->UsingCheckSum) 
+		return;
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[0].init(2,3);
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[1].init(2,3);
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.coordinates[2].init(2,3);
@@ -7976,7 +7979,9 @@ void partFractions::PrepareCheckSums()
 }
 
 void partFractions::CompareCheckSums()
-{ if (!this->DiscardingFractions)
+{	if (!this->UsingCheckSum) 
+		return;
+	if (!this->DiscardingFractions)
 	{	this->ComputeOneCheckSum(this->EndCheckSum);
 	//partFraction::MakingConsistencyCheck=true;
 	/*if (partFraction::MakingConsistencyCheck)

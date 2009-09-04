@@ -41,7 +41,7 @@ public:
 };
 
 int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
-{ int Dimension=2, NumVectors=4;
+{ int Dimension=2, NumVectors=8;
 	::initDLL(Dimension);
 	ToBeSplit.SetSizeExpandOnTopNoObjectInit(NumVectors);
 	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
@@ -55,6 +55,10 @@ int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
 	ToBeSplit.TheObjects[1].initFromInt(0,1,0,0,0);
 	ToBeSplit.TheObjects[2].initFromInt(1,1,0,0,0);
 	ToBeSplit.TheObjects[3].initFromInt(2,1,0,0,0);
+	ToBeSplit.TheObjects[4].initFromInt(1,2,0,0,0);
+	ToBeSplit.TheObjects[5].initFromInt(1,3,0,0,0);
+	ToBeSplit.TheObjects[6].initFromInt(3,1,0,0,0);
+	ToBeSplit.TheObjects[7].initFromInt(1,7,0,0,0);
 	return Dimension;
 }
 void ExampleComputation::RunSomeTests()
@@ -67,6 +71,14 @@ void ExampleComputation::RunSomeTests()
 	tempPF.UsingCheckSum=false;
 	tempPF.split();
 	tempPF.ComputeDebugString();
+	QuasiPolynomial tempQP;
+	tempPF.partFractionsToPartitionFunctionAdaptedToRoot(tempQP,indicator,false,false,false,false);
+	intRoot tempR;
+	tempR.initFromInt(0,0,0,0,0);
+	LargeRational tempRat;
+	tempQP.Evaluate(tempR,tempRat);
+	std::string tempS;
+	tempRat.ElementToString(tempS);
 }
 
 int AltMain(void)
@@ -96,6 +108,7 @@ int AltMain(void)
 	std::stringstream outputStream;
 	tempPF.ComputeDebugString();
 	outputStream<<tempPF.DebugString;
+	tempPF.UsingIndicatorRoot=false;
 	tempPF.split();
 	tempPF.ComputeDebugString();
 	outputStream<<"\n=\n"<<tempPF.DebugString;

@@ -8398,6 +8398,12 @@ void partFractions::RemoveRedundantShortRoots()
 			if (oldsize>this->size)
 			{ Stop();
 			}
+			if (this->MakingProgressReport)
+			{ std::stringstream out;
+				out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
+				IndicatorWindowGlobalVariables.StatusString=out.str();
+				::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+			}
 /*			if (partFraction::AnErrorHasOccurredTimeToPanic)
 			{ this->ComputeOneCheckSum(tempCheckSum);
 				std::string tempS1, tempS2;				

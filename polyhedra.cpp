@@ -6860,7 +6860,7 @@ void partFractionPolynomials::ComputeQuasiPolynomial
 		static QuasiPolynomial tempQP;
 		static QuasiNumber tempQN;
 		tempQP.AssignPolynomialLargeRational(this->TheObjects[i]); 
-		tempQP.ComputeDebugString();
+		//tempQP.ComputeDebugString();
 		tempQN.MakeQNFromMatrixAndColumn
 			(	this->theNormals,
 				this->LatticeIndicators.TheObjects[i]);
@@ -7023,11 +7023,11 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(root*Indicator)
 				tempP.NumVars= root::AmbientDimension;
 				tempP.MakePolyExponentFromIntRoot(partFraction::RootsToIndices.TheObjects[tempI1]);
 				tempP.AddConstant(IOne);
-				tempP.ComputeDebugString(); 
+				//tempP.ComputeDebugString(); 
 				for (int j=0;j<this->TheObjects[tempI1].Multiplicities.TheObjects[0];j++)
 				{ this->Coefficient.MultiplyBy(tempP);
 				}
-				this->Coefficient.ComputeDebugString(); 
+				//this->Coefficient.ComputeDebugString(); 
 				this->TheObjects[tempI2].AddMultiplicity(this->TheObjects[tempI1].Multiplicities.TheObjects[0],1);
 				this->TheObjects[tempI1].AddMultiplicity(-this->TheObjects[tempI1].Multiplicities.TheObjects[0],1);
 				assert(this->TheObjects[tempI1].Multiplicities.size==0); 
@@ -7064,11 +7064,11 @@ bool partFraction::RemoveRedundantShortRoots(root* Indicator)
 				{ static IntegerPoly tempP;
 					int numSummands=LCMElongations/ElongationValue; 
 					this->GetNElongationPoly(currentIndex,ElongationValue,numSummands,tempP);
-					tempP.ComputeDebugString();
+					//tempP.ComputeDebugString();
 					tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]); 
-					tempP.ComputeDebugString();
+					//tempP.ComputeDebugString();
 					this->Coefficient.MultiplyBy(tempP);
-					this->Coefficient.ComputeDebugString(); 
+					//this->Coefficient.ComputeDebugString(); 
 					currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i],LCMElongations);
 					currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i],ElongationValue);
 					result=true; 
@@ -7632,7 +7632,7 @@ void partFraction::GetNElongationPoly(int index,int Elongation,int n, IntegerPol
 			output.AddMonomial(tempM); 
 		}		
 	}
-	output.ComputeDebugString(); 
+	//output.ComputeDebugString(); 
 }
 
 void partFraction::partFractionToPartitionFunctionStoreAnswer

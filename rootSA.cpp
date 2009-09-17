@@ -43,7 +43,6 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 
-#define dont_define_Min_and_Max_in_polyhedra_h
 #include "polyhedra.h"
 #include <windows.h>
 #include <Commdlg.h>
@@ -187,7 +186,7 @@ public:
 				(std::string& outputString, HWND hAssociatedEditBox);
 	IndicatorWindowClass()
 	{	this->theFont=0;this->LabelBrush1=0;this->ComputationalThread=0;oldCombo1State=1;
-		this->ComputationInitializedAndReadyToGo=5; this->usePFFile=false; this->useVPFile=false;
+		this->ComputationInitializedAndReadyToGo=1; this->usePFFile=false; this->useVPFile=false;
 		this->rootRank=3; this->TypeWeylGroup='B'; this->stringTitle="I will eat your RAM";
 		this->SlicingIndex=0; this->stringFile3="C:\\ouput.txt"; this->initDLLneeded=true;
 		this->RecalculationChambersNeeded=true; this->ComputationMustDie=false;
@@ -767,7 +766,7 @@ void IndicatorWindowClass::GetRootFromEditWeights(root& output)
 	tempS.resize(100);
 	output.dimension=(unsigned char)this->rootRank;
 	output.MakeZero();
-	for (int i=0;i<min(this->rootRank,5);i++)
+	for (int i=0;i<Minimum(this->rootRank,5);i++)
 	{ ::GetWindowText(this->hEditWeightsIndicator[i],(LPSTR)tempS.c_str(),90);
 		int x=std::atoi(tempS.c_str());
 		output.coordinates[i].AssignInteger(x);

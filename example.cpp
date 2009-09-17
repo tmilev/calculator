@@ -1,6 +1,5 @@
 //This is a sample file using the polyhedra.h and polyhedra.cpp
 
-#define dont_define_Min_and_Max_in_polyhedra_h
 #include "polyhedra.h"
 
 //***************
@@ -41,24 +40,21 @@ public:
 };
 
 int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
-{ int Dimension=2, NumVectors=8;
+{ int Dimension=2, NumVectors=4;
 	::initDLL(Dimension);
 	ToBeSplit.SetSizeExpandOnTopNoObjectInit(NumVectors);
 	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
 	//ToBeSplit.TheObjects[1].initFromInt(2,0,0,0,0);
 	//ToBeSplit.TheObjects[2].initFromInt(3,0,0,0,0);
-	IndicatorRoot.InitFromIntegers(17,86,97,0,0);
+	IndicatorRoot.InitFromIntegers(405,603,0,0,0);
 	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
 	//ToBeSplit.TheObjects[1].initFromInt(0,1,0,0,0);
 	//ToBeSplit.TheObjects[2].initFromInt(0,0,1,0,0);
-	ToBeSplit.TheObjects[0].initFromInt(1,4,0,0,0);
-	ToBeSplit.TheObjects[7].initFromInt(1,0,0,0,0);
-	ToBeSplit.TheObjects[1].initFromInt(0,1,0,0,0);
-	ToBeSplit.TheObjects[2].initFromInt(1,1,0,0,0);
-	ToBeSplit.TheObjects[3].initFromInt(2,1,0,0,0);
-	ToBeSplit.TheObjects[4].initFromInt(1,2,0,0,0);
-	ToBeSplit.TheObjects[5].initFromInt(1,3,0,0,0);
-	ToBeSplit.TheObjects[6].initFromInt(3,1,0,0,0);
+	ToBeSplit.TheObjects[0].initFromInt(2,3,0,0,0);
+	ToBeSplit.TheObjects[1].initFromInt(4,1,0,0,0);
+	ToBeSplit.TheObjects[2].initFromInt(5,3,0,0,0);
+	ToBeSplit.TheObjects[3].initFromInt(2,5,0,0,0);
+	//ToBeSplit.TheObjects[4].initFromInt(1,3,0,0,0);
 
 	return Dimension;
 }
@@ -78,6 +74,7 @@ void ExampleComputation::RunSomeTests()
 	intRoot tempR;
 	tempR.initFromInt(0,0,0,0,0);
 	LargeRational tempRat;
+	tempQP.ComputeDebugString();
 	tempQP.Evaluate(tempR,tempRat);
 	std::string tempS;
 	tempRat.ElementToString(tempS);
@@ -88,7 +85,7 @@ int AltMain(void)
 	//generating function of the Kostant partition function for G2
 	//printout tempPF.DebugString to get the final result
 	ExampleComputation t1;
-	t1.RunSomeTests();
+	//t1.RunSomeTests();
 		
 	partFractions tempPF;
 	intRoots theBorel,theVPbasis;

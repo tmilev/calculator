@@ -1253,7 +1253,7 @@ void MatrixRational::SwitchTwoRows( int row1, int row2)
 void GaussianEliminationByRows(MatrixRational& mat, MatrixRational& output, Selection& outputNonPivotPoints)
 {	int tempI;
 	int NumFoundPivots = 0;
-	int MaxRankMat = Min(mat.NumRows, mat.NumCols);
+	int MaxRankMat = Minimum(mat.NumRows, mat.NumCols);
 	Rational tempRat;
 	outputNonPivotPoints.init(mat.NumCols);
 	for (int i=0; i<mat.NumCols; i++)
@@ -2008,8 +2008,8 @@ void Rational::Simplify()
 		num = num / temp;
 	}
 	if (!MinorRoutinesOnIgnoreErrors)
-	{	LargestRationalHeight=Max(LargestRationalHeight,abs(num));
-		LargestRationalHeight=Max(LargestRationalHeight,den);
+	{	LargestRationalHeight=Maximum(LargestRationalHeight,abs(num));
+		LargestRationalHeight=Maximum(LargestRationalHeight,den);
 	}
 }
 
@@ -5173,7 +5173,7 @@ bool CompositeComplex::SimplifyTrue()
 int CompositeComplex::FindMaxDenExp()
 { int result=0;
 	for (int i=0;i<this->size;i++)
-	{ result = Max(result,this->TheObjects[i].Exp.den);}
+	{ result = Maximum(result,this->TheObjects[i].Exp.den);}
 	return result;
 }
 
@@ -5330,7 +5330,7 @@ int CyclotomicList::EulerPhi(short n)
 { this->ComputeCyclotomic(n);
 	int result=0;
 	for(int i=0;i<this->TheObjects[n-1].size;i++)
-	{ result = Max(result,this->TheObjects[n-1].TheObjects[i].degrees[0]);  
+	{ result = Maximum(result,this->TheObjects[n-1].TheObjects[i].degrees[0]);  
 	} 
 	return result;
 }
@@ -6443,7 +6443,7 @@ inline void LargeInt::AssignShiftedUInt(unsigned int x, int shift)
 	
 void LargeInt::AddPositive(LargeInt &x)
 { int oldsize= this->size;	
-	this->SetSizeExpandOnTopNoObjectInit(Max(this->size,x.size)+1);
+	this->SetSizeExpandOnTopNoObjectInit(Maximum(this->size,x.size)+1);
 	for (int i=oldsize;i<this->size;i++)
 	{ this->TheObjects[i]=0;
 	}
@@ -9535,7 +9535,7 @@ void ElementWeylGroup::ElementToString(std::string& output)
 }
 
 int ElementWeylGroup::HashFunction() 
-{	int top = Min(this->size,::SomeRandomPrimesSize);
+{	int top = Minimum(this->size,::SomeRandomPrimesSize);
 	int result =0;
 	for (int i=0;i<top;i++)
 	{ result+=this->TheObjects[i]*::SomeRandomPrimes[i];  

@@ -106,16 +106,16 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 
 
 
-#ifndef dont_define_Min_and_Max_in_polyhedra_h
+//#ifndef dont_define_Min_and_Max_in_polyhedra_h
 //grrrrrrrr: names conflict
-int Min(int a, int b)
+inline int Minimum(int a, int b)
 {	if (a>b) {return b;} else {return a;}
 }
 
-int Max(int a, int b)
+inline int Maximum(int a, int b)
 {	if (a>b) {return a;} else {return b;}
 }
-#endif
+//#endif
 
 struct DrawingVariables
 {
@@ -402,8 +402,8 @@ inline void Matrix<Element>::Resize(short r, short c, bool PreserveValues)
 	{ newElements[i]= new int[c];
 	}
 	if (PreserveValues)
-	{ for (int j=Min(this->NumRows,r)-1;j>=0;j--)
-		{	for (int i=Min(this->NumCols,c)-1;i>=0;i--)
+	{ for (int j=Minimum(this->NumRows,r)-1;j>=0;j--)
+		{	for (int i=Minimum(this->NumCols,c)-1;i>=0;i--)
 			{ newElements[j][i]= this->elements[j][i];
 			}
 		}
@@ -1939,7 +1939,7 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>
 					::FindMaxPowerOfVariableIndex(int VariableIndex)
 { int result=0;
 	for (int i=0;i<this->size;i++)
-	{	result= Max(result,this->TheObjects[i].degrees[VariableIndex]); 
+	{	result= Maximum(result,this->TheObjects[i].degrees[VariableIndex]); 
 	}
 	return result;
 }
@@ -2322,7 +2322,7 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
 	int result=0;
 	for (int i=0;i<this->TheMonomials.size;i++)
 	{
-		result=Max(this->TheMonomials.TheObjects[i]->TotalDegree(),result);
+		result=Maximum(this->TheMonomials.TheObjects[i]->TotalDegree(),result);
 	}
 	return result;
 }

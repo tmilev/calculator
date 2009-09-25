@@ -43,6 +43,10 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 
+
+#define Ignore_rootSA_cpp
+#ifndef Ignore_rootSA_cpp
+
 #include "polyhedra.h"
 #include <windows.h>
 #include <Commdlg.h>
@@ -1094,3 +1098,6 @@ LRESULT CALLBACK WndProcIndicatorWindow(HWND hWnd, UINT message, WPARAM wParam, 
 	}
 	return 0;
 }
+
+
+#endif

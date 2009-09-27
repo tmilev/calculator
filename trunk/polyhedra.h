@@ -3468,9 +3468,11 @@ public:
 	MatrixInt KillingFormMatrix;
 	root rho;
 	hashedRoots RootSystem;
+	roots RootsOfBorel;
 	void ComputeRho();
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
+	void MakeArbitrary(char WeylGroupLetter,unsigned char n);
 	void MakeAn(unsigned char n);
 	void MakeEn(unsigned char n);
 	void MakeBn(unsigned char n);

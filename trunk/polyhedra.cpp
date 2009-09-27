@@ -9266,6 +9266,12 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 		startRoots.AddRoot(tempRoot);  
 	}
 	this->GenerateOrbit(startRoots,false,this->RootSystem); 
+	this->RootsOfBorel.size=0;
+	for (int i=0;i<this->RootSystem.size;i++)
+	{ if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
+		{ this->RootsOfBorel.AddRoot(this->RootSystem.TheObjects[i]);
+		} 
+	}
 }
 
 void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, 
@@ -9391,11 +9397,7 @@ void WeylGroup::ComputeRootsOfBorel(roots& output)
 { output.size=0;
 	this->RootSystem.ClearTheObjects();
 	this->GenerateRootSystemFromKillingFormMatrix();
-	for (int i=0;i<this->RootSystem.size;i++)
-	{ if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
-		{ output.AddRoot(this->RootSystem.TheObjects[i]);
-		} 
-	}
+	output.CopyFromBase(this->RootsOfBorel);
 }
 
 void WeylGroup::ElementToString(std::string& output)
@@ -9413,6 +9415,25 @@ void WeylGroup::ElementToString(std::string& output)
 		out << i<<". "<<tempS<<"\n";
 	}
 	output= out.str();
+}
+
+void WeylGroup::MakeArbitrary(char WeylGroupLetter,unsigned char n)
+{ switch(WeylGroupLetter)
+	{ case 'A': this->MakeAn(n);
+		break;
+		case 'B': this->MakeBn(n);
+		break;
+		case 'C': this->MakeCn(n);
+		break;
+		case 'D': this->MakeDn(n);
+		break;
+		case 'E': this->MakeEn(n);
+		break;
+		case 'F': this->MakeF4();
+		break;
+		case 'G': this->MakeG2();
+		break;		
+	}
 }
 
 void WeylGroup::MakeDn(unsigned char n)

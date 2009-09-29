@@ -3652,6 +3652,11 @@ public:
 	bool Pause;
 	std:: string StatusString;
 	IndicatorWindowVariables(){this->Nullify();}
+	std::string ProgressReportString1;
+	std::string ProgressReportString2;
+	std::string ProgressReportString3;
+	std::string ProgressReportString4;
+	void PrepareStrings();
 	void Nullify()
 	{ this->NumPartFractionsLoaded=0;
 		this->Pause=true;

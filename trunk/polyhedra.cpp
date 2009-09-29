@@ -3,31 +3,23 @@
 //Vector partition function - computes an algebraic expression 
 //                            for the vector partition function
 //CopyRight (C) 2009: Todor Milev 
-//Contributors: Thomas Bliem, Todor Milev
-//Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
-//advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith, 
-//Hammurabi and Duoas for the helpful comments and advice on C++!
-//
-//
 //email: t.milev@jacobs-university.de
-//To Thomas: add your email here if you wish it displayed
-//This is open source software (i.e. "public" software or "free" software).
-//The code is licensed under the Library General Public License version 3.0.
-//See the file License_LGPL-3.0.txt for the license information.
-//You are free to use, modify and redistribute this code and the resulting program 
-//under the terms of Library General Public License version 3.0.
+//
+//Contributors: Thomas Bliem, Todor Milev
+//
+//This is free software. You are warmly welcome to use, modify and redistribute this code 
+//and the resulting program any way you wish, as long as you provide the same rights 
+//as those given to you to any future recipients of your modifications (in case you 
+//decide you want to pass on those modifications). 
+//The code is licensed under the Library General Public License version 3.0 
+//(summarized in the preceding sentence). 
 //You should have received a copy of the GNU Library General Public License 
 //along with this program. 
 //If not, see <http://www.gnu.org/licenses/>.
-//*********************************************************************************************************
-//*********************************************************************************************************
-//The (miniature for the moment) documentation of this project is contained in 
 //
-//./tex_docs/polyhedra.tex     /    ./tex_docs/polyhedra.pdf
-//
-//For the time being, not all functions available here are described in the documentation.
-//That will hopefully be remedied in future versions of the code.
-//For a baby version of an algorithm description see partial_fraction.pdf.
+//Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
+//advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith, 
+//Hammurabi and Duoas for the helpful comments and advice on C++!
 //*********************************************************************************************************
 //*********************************************************************************************************
 //DISCLAIMER

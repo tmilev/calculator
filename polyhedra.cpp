@@ -47,6 +47,11 @@
 
 extern void outputText(std::string theOutput); 
 extern void FeedDataToIndicatorWindow(IndicatorWindowVariables& output); 
+//color styles (taken from windows.h and substituted for independence of the .h file):
+// 0 = normal line
+// 1 = dashed line
+// 2 = dotted line 
+// 5 = invisible line (no line)
 extern void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
 extern void drawtext(double X1, double Y1, const char* text, int length, int color);
 //taken from windows.h
@@ -8319,6 +8324,7 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 void partFractions::MakeProgressReport()
 { IndicatorWindowGlobalVariables.NumPartFractionsLoaded= this->size;
 	IndicatorWindowGlobalVariables.NumReducedPartFractions= this->IndexLowestNonReduced;
+	IndicatorWindowGlobalVariables.PrepareStrings();
 	FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 	//while(IndicatorWindowGlobalVariables.Pause)
 	//{ 
@@ -12115,4 +12121,16 @@ void PolynomialLargeRational::Evaluate(intRoot &values, LargeRational &output)
 		}
 		output.Add(tempLRat);
 	}
+}
+
+void IndicatorWindowVariables::PrepareStrings()
+{ std::stringstream out1,out2,out3;
+	out1<<this->NumReducedPartFractions<<" reduced fractions out of "<<this->NumPartFractionsLoaded;
+	this->ProgressReportString1= out1.str();
+	out2<< this->NumComputedContributions<<" contributions out of "
+			<< this->NumProcessedFractions <<" processed fractions";
+	this->ProgressReportString2= out2.str();
+	out3<<"Processed "<< this->NumProcessedMonomials<<" out of "<<this->TotalNumMonomials<<" monomials";
+	this->ProgressReportString3= out3.str();
+	this->ProgressReportString4.assign(this->StatusString);
 }

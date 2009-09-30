@@ -82,6 +82,7 @@ public:
 	::FXVerticalFrame* VerticalFrame1ProgressReports;
 	::FXVerticalFrame* VerticalFrame2InputData;
 	::FXListBox* ListBox1WeylGroup;
+	::FXToggleButton* ToggleButton1Custom;
 	//::FXCanvas* 
 	bool UsingCustomVectors;
 	::FXLabel* Label1ProgressReport;
@@ -90,24 +91,32 @@ public:
 	::FXLabel* Label4ProgressReport;
 	::FXLabel* Label5ProgressReport;
 	::FXLabel* Label6ProgressReport;
+	::FXSpinner* Spinner1Dimension;
+	::FXSpinner* Spinner2NumVectors;
 	WorkThreadClass WorkThread1;
-  long onRepaint(FXObject*,FXSelector sel,void*);
+  long onRepaint(FXObject* sender,FXSelector sel,void*);
 	bool AllowRepaint;
 	bool ComputationInProgress;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 	unsigned char RankEuclideanSpaceGraphics;
+	int NumVectors;
 	QuasiPolynomial theOutputPoly;
-  long onButton1MainButtonCommand(FXObject*,FXSelector sel,void*);
-  long onListBox1WeylGroupCommand(FXObject*,FXSelector sel,void*);
-  long onMouseDownOnCanvas(FXObject*,FXSelector sel,void*ptr);
+  long onButton1MainButtonCommand(FXObject* sender,FXSelector sel,void*);
+  long onToggleButton1Custom(FXObject* sender,FXSelector sel,void*);
+  long onListBox1WeylGroupCommand(FXObject* sender,FXSelector sel,void*);
+  long onMouseDownOnCanvas(FXObject* sender,FXSelector sel,void*ptr);
+  long onSpinner1and2Change(FXObject* sender,FXSelector sel,void*ptr);
+  void updateListBox1();
   void initWeylGroupInfo();
   enum
   {	ID_Button1MainButtonCommand=FXMainWindow::ID_LAST,
 		ID_Table1InputCommand,
 		ID_ListBox1WeylGroupCommand,
 		ID_Canvas1,
-		
+		ID_ToggleButton1Custom,		
+		ID_Spinner1Dimension,
+		ID_Spinner2NumVectors,
     ID_LAST
   };
   MainWindow(FXApp* a);
@@ -124,6 +133,12 @@ FXDEFMAP(MainWindow) ScribbleWindowMap[]=
 						MainWindow::onButton1MainButtonCommand),
   FXMAPFUNC(SEL_COMMAND, MainWindow::ID_ListBox1WeylGroupCommand, 
 						MainWindow::onListBox1WeylGroupCommand),
+  FXMAPFUNC(SEL_COMMAND, MainWindow::ID_ToggleButton1Custom, 
+						MainWindow::onToggleButton1Custom),
+  FXMAPFUNC(SEL_COMMAND, MainWindow::ID_Spinner1Dimension, 
+						MainWindow::onSpinner1and2Change),
+  FXMAPFUNC(SEL_COMMAND, MainWindow::ID_Spinner2NumVectors, 
+						MainWindow::onSpinner1and2Change),
   FXMAPFUNC(SEL_PAINT, MainWindow::ID_Canvas1, 
 						MainWindow::onRepaint),
 	FXMAPFUNC(SEL_LEFTBUTTONPRESS,MainWindow::ID_Canvas1, 
@@ -228,30 +243,43 @@ long MainWindow::onRepaint(FXObject*,FXSelector sel,void*)
 }
 
 MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,DECOR_ALL,0,0,800,600)
-{	this->HorizontalFrame3Background= 
-	new FXHorizontalFrame(this,LAYOUT_NORMAL,0,0);
+{	this->HorizontalFrame3Background= new FXHorizontalFrame(this,::LAYOUT_FILL,0,0);
 		this->VerticalFrame2InputData =new 
-		::FXVerticalFrame(this->HorizontalFrame3Background,LAYOUT_NORMAL,0,0);
-			this->HorizontalFrame2= new FXHorizontalFrame(this->VerticalFrame2InputData,LAYOUT_NORMAL,0,0);
-			this->HorizontalFrame1= new FXHorizontalFrame(this->HorizontalFrame2,LAYOUT_NORMAL,0,0);
-				new FXButton(	this->HorizontalFrame1,"&Go",NULL,this,MainWindow::ID_Button1MainButtonCommand,
+		::FXVerticalFrame(this->HorizontalFrame3Background,LAYOUT_NORMAL,0,0,0,0,0,0,0,0);
+//			this->HorizontalFrame2= new FXHorizontalFrame(this->VerticalFrame2InputData,LAYOUT_NORMAL,0,0);
+			this->HorizontalFrame1= new FXHorizontalFrame(this->VerticalFrame2InputData,LAYOUT_NORMAL,0,0,0,0,0,0,0,0);
+//				::FXVerticalFrame* tempVF=
+//				new ::FXVerticalFrame(this->HorizontalFrame1,0,0,0,0,0,0,0,0,0);
+			this->ToggleButton1Custom= 
+			new ::FXToggleButton(	this->HorizontalFrame1,"Use custom vectors", "Use root system",0,0,
+															this,MainWindow::ID_ToggleButton1Custom);
+			this->ListBox1WeylGroup= 
+			new FXListBox(	this->HorizontalFrame1,this,MainWindow::ID_ListBox1WeylGroupCommand,
+											LAYOUT_FIX_WIDTH,80,0,50,10);
+			new FXButton(	this->HorizontalFrame1,"&Go",NULL,this,MainWindow::ID_Button1MainButtonCommand,
 											FRAME_THICK|FRAME_RAISED|LAYOUT_FIX_WIDTH,0,0,50,10,1,1,1,1);
-				this->ListBox1WeylGroup= 
-				new FXListBox(	this->HorizontalFrame1,this,MainWindow::ID_ListBox1WeylGroupCommand,
-												LAYOUT_FIX_X|LAYOUT_FIX_WIDTH,80,0,50,10);
-				this->VerticalFrame1ProgressReports=				
-				new ::FXVerticalFrame(this->HorizontalFrame2,LAYOUT_NORMAL,0,0);
-					this->Label1ProgressReport = 
-					new ::FXLabel(this->VerticalFrame1ProgressReports,"");
-					this->Label2ProgressReport = 
-					new ::FXLabel(this->VerticalFrame1ProgressReports,"");
-					this->Label3ProgressReport = 
-					new ::FXLabel(this->VerticalFrame1ProgressReports,"");
-					this->Label4ProgressReport = 
-					new ::FXLabel(this->VerticalFrame1ProgressReports,"");
-	this->Canvas1DrawCanvas =new 
-			::FXCanvas(	this->HorizontalFrame3Background,this,MainWindow::ID_Canvas1,
-									LAYOUT_FIX_HEIGHT|::LAYOUT_FIX_WIDTH ,0,0,600,600);
+	::FXHorizontalFrame* tempHF1= 
+	new ::FXHorizontalFrame(this->VerticalFrame2InputData,::LAYOUT_FILL,0,0,0,0,0,0,0,0);
+		new ::FXLabel(tempHF1,"Dimension:");
+		this->Spinner1Dimension= 
+		new ::FXSpinner(tempHF1,2,this,MainWindow::ID_Spinner1Dimension,::LAYOUT_FIX_WIDTH,0,0,30,0);
+		new ::FXLabel(tempHF1,"Num Vectors:");
+		this->Spinner2NumVectors= 
+		new ::FXSpinner(tempHF1,3,this,MainWindow::ID_Spinner2NumVectors,::LAYOUT_FIX_WIDTH,0,0,30,0);
+			this->Table1Input= 
+			new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table1InputCommand,::LAYOUT_FILL);
+		this->VerticalFrame1ProgressReports=				
+		new ::FXVerticalFrame(this->HorizontalFrame3Background,::LAYOUT_FILL,0,0);
+			this->Label1ProgressReport = 
+			new ::FXLabel(this->VerticalFrame1ProgressReports,"");
+			this->Label2ProgressReport = 
+			new ::FXLabel(this->VerticalFrame1ProgressReports,"");
+			this->Label3ProgressReport = 
+			new ::FXLabel(this->VerticalFrame1ProgressReports,"");
+			this->Label4ProgressReport = 
+			new ::FXLabel(this->VerticalFrame1ProgressReports,"");
+			this->Canvas1DrawCanvas =
+			new ::FXCanvas(	this->VerticalFrame1ProgressReports,this,MainWindow::ID_Canvas1,::LAYOUT_FILL);
 	this->ListBox1WeylGroup->appendItem("A2");
 	this->ListBox1WeylGroup->appendItem("A3");
 	this->ListBox1WeylGroup->appendItem("A4");
@@ -264,10 +292,8 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	this->ListBox1WeylGroup->appendItem("C4");
 	this->ListBox1WeylGroup->appendItem("D4");
 	this->ListBox1WeylGroup->appendItem("G2");
-	this->ListBox1WeylGroup->appendItem("Custom");
+	//this->ListBox1WeylGroup->appendItem("Custom");
 	this->ListBox1WeylGroup->setNumVisible(5);
-	this->Table1Input= 
-	new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table1InputCommand,0,0,30,0,0);
 	//this->Table1Input->setBorderColor(FXRGB(192,192,192));
 	//this->HorizontalFrame1->setBackColor(FXRGB(192,222,22));
 	this->Table1Input->setBackColor(this->getBackColor());
@@ -285,7 +311,7 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 //  this->Table1Input->setCellColor(1,1,FXRGB(240,240,255));	
 	this->ComputationInProgress=false;
 	this->AllowRepaint=true;
-	this->Canvas1DrawCanvas->::FXCanvas::setBackColor(FXRGB(192,192,192));
+	this->Canvas1DrawCanvas->::FXCanvas::setBackColor(this->getBackColor());
 	this->ClickToleranceX=10;
 	this->ClickToleranceY=10;
 }
@@ -294,12 +320,18 @@ MainWindow::~MainWindow()
 {
 }
 
+
+
 void MainWindow::create()
 { FXMainWindow::create();
   show(PLACEMENT_SCREEN);
 }
+long MainWindow::onSpinner1and2Change(FX::FXObject *sender, FX::FXSelector sel, void *ptr)
+{ 
+	return 1;
+}
 
-long MainWindow::onButton1MainButtonCommand(FXObject*,FXSelector sel,void*)
+long MainWindow::onButton1MainButtonCommand(FXObject*sender,FXSelector sel,void*ptr)
 {	
 #ifdef WIN32
 	if (!this->ComputationInProgress)
@@ -323,7 +355,23 @@ long MainWindow::onButton1MainButtonCommand(FXObject*,FXSelector sel,void*)
 #endif
 }
 
-long MainWindow::onListBox1WeylGroupCommand(FXObject*,FXSelector sel,void*)
+long MainWindow::onToggleButton1Custom(FXObject*,FXSelector sel,void*)
+{ this->UsingCustomVectors= (bool)this->ToggleButton1Custom->getState();
+	this->updateListBox1();
+	return 1;
+}
+
+void MainWindow::updateListBox1()
+{ if (this->UsingCustomVectors)
+	{ this->ListBox1WeylGroup->disable();
+	}
+	else
+	{ this->ListBox1WeylGroup->enable();
+		this->onListBox1WeylGroupCommand(this->ToggleButton1Custom,0,0);
+	}
+}
+
+long MainWindow::onListBox1WeylGroupCommand(FXObject*sender,FXSelector sel,void*)
 {	std::string tempS;
 	unsigned char newWeylGroupIndex=0;
 	char newWeylGroupLetter=0;
@@ -341,9 +389,11 @@ long MainWindow::onListBox1WeylGroupCommand(FXObject*,FXSelector sel,void*)
 		case 9:	newWeylGroupIndex=4;  newWeylGroupLetter='C'; break;
 		case 10: newWeylGroupIndex=4; newWeylGroupLetter='D'; break;
 		case 11: newWeylGroupIndex=2; newWeylGroupLetter='G'; break;
-		case 12: this->UsingCustomVectors=true;
+	//	case 12: this->UsingCustomVectors=true;
 	}
-	if (!(newWeylGroupLetter==this->WeylGroupLetter && newWeylGroupIndex==this->WeylGroupIndex))
+	if (!(newWeylGroupLetter==this->WeylGroupLetter && newWeylGroupIndex==this->WeylGroupIndex)
+			|| this->ToggleButton1Custom==sender
+			)
 	{ this->WeylGroupLetter=newWeylGroupLetter;
 		this->WeylGroupIndex=newWeylGroupIndex;
 		this->initWeylGroupInfo();
@@ -371,6 +421,7 @@ void MainWindow::initWeylGroupInfo()
 		{ this->Table1Input->setColumnWidth(i,20);
 		}
 		this->VPVectors.CopyFromBase(tempW.RootsOfBorel);
+		this->NumVectors=this->VPVectors.size;
 	}
 }
 

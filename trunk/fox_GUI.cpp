@@ -71,9 +71,6 @@ protected:
   MainWindow(){};
 private:
 public:
-	int ClickToleranceX;
-	int ClickToleranceY; 
-	roots VPVectors;
 	::FXCanvas* Canvas1DrawCanvas;
 	::FXTable* Table1Input;
 	::FXHorizontalFrame* HorizontalFrame1;
@@ -84,7 +81,6 @@ public:
 	::FXListBox* ListBox1WeylGroup;
 	::FXToggleButton* ToggleButton1Custom;
 	//::FXCanvas* 
-	bool UsingCustomVectors;
 	::FXLabel* Label1ProgressReport;
 	::FXLabel* Label2ProgressReport;
 	::FXLabel* Label3ProgressReport;
@@ -95,12 +91,6 @@ public:
 	::FXSpinner* Spinner2NumVectors;
 	WorkThreadClass WorkThread1;
   long onRepaint(FXObject* sender,FXSelector sel,void*);
-	bool AllowRepaint;
-	bool ComputationInProgress;
-	char WeylGroupLetter;
-	unsigned char WeylGroupIndex;
-	unsigned char RankEuclideanSpaceGraphics;
-	int NumVectors;
 	QuasiPolynomial theOutputPoly;
   long onButton1MainButtonCommand(FXObject* sender,FXSelector sel,void*);
   long onToggleButton1Custom(FXObject* sender,FXSelector sel,void*);
@@ -109,6 +99,17 @@ public:
   long onSpinner1and2Change(FXObject* sender,FXSelector sel,void*ptr);
   void updateListBox1();
   void initWeylGroupInfo();
+  void ReadVPVectors();
+	bool AllowRepaint;
+	bool ComputationInProgress;
+	char WeylGroupLetter;
+	unsigned char WeylGroupIndex;
+	unsigned char RankEuclideanSpaceGraphics;
+	bool UsingCustomVectors;
+	int NumVectors;
+	int ClickToleranceX;
+	int ClickToleranceY; 
+	roots VPVectors;
   enum
   {	ID_Button1MainButtonCommand=FXMainWindow::ID_LAST,
 		ID_Table1InputCommand,
@@ -160,20 +161,25 @@ MainWindow* MainWindow1=0;
 
 
 void RunComputationalThread()
-{ partFractions tempPF;
-	MainWindow1->AllowRepaint=false;
-	tempPF.ComputeKostantFunctionFromWeylGroup
-		(MainWindow1->WeylGroupLetter,MainWindow1->WeylGroupIndex,MainWindow1->theOutputPoly,0,false,false);
+{	PolyFormatLocal.MakeRegularAlphabet();
 	PolynomialOutputFormat::LatexMaxLineLength=125;
-	PolyFormatLocal.MakeRegularAlphabet();
-	MainWindow1->theOutputPoly.ComputeDebugString();
-	tempPF.ComputeDebugString();
+	partFractions tempPF;
+	MainWindow1->AllowRepaint=false;
+	if (!MainWindow1->UsingCustomVectors)
+	{	tempPF.ComputeKostantFunctionFromWeylGroup
+			(MainWindow1->WeylGroupLetter,MainWindow1->WeylGroupIndex,MainWindow1->theOutputPoly,0,false,false);
+		MainWindow1->theOutputPoly.ComputeDebugString();
+		tempPF.ComputeDebugString();
+		::initDLL(MainWindow1->WeylGroupIndex);
+	}	else
+	{ MainWindow1->ReadVPVectors();
+		::initDLL(root::AmbientDimension);
+	}
 	::InputRoots.CopyFromBase(MainWindow1->VPVectors);
 	::NextDirectionIndex=MainWindow1->WeylGroupIndex-1;
 	MainWindow1->RankEuclideanSpaceGraphics=MainWindow1->WeylGroupIndex;
-	::initDLL(MainWindow1->WeylGroupIndex);
 	SliceTheEuclideanSpace(	::InputRoots,::NextDirectionIndex,MainWindow1->WeylGroupIndex,
-															TheBigOutput,TheBigFacetOutput);
+													TheBigOutput,TheBigFacetOutput);
 	MainWindow1->AllowRepaint=true;
 	MainWindow1->onRepaint(0,0,0);
 	MainWindow1->ComputationInProgress=false;
@@ -237,7 +243,6 @@ long MainWindow::onRepaint(FXObject*,FXSelector sel,void*)
 			tempS.clear();
 		}
 		::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,tempRoot);
-		
 	}
 	return 1;
 }
@@ -356,7 +361,8 @@ long MainWindow::onButton1MainButtonCommand(FXObject*sender,FXSelector sel,void*
 }
 
 long MainWindow::onToggleButton1Custom(FXObject*,FXSelector sel,void*)
-{ this->UsingCustomVectors= (bool)this->ToggleButton1Custom->getState();
+{ FXbool tempB= this->ToggleButton1Custom->getState();
+	this->UsingCustomVectors= (bool)tempB;
 	this->updateListBox1();
 	return 1;
 }
@@ -364,10 +370,12 @@ long MainWindow::onToggleButton1Custom(FXObject*,FXSelector sel,void*)
 void MainWindow::updateListBox1()
 { if (this->UsingCustomVectors)
 	{ this->ListBox1WeylGroup->disable();
+		this->Spinner1Dimension->setValue(this->WeylGroupIndex);
+		this->Spinner2NumVectors->setValue(this->VPVectors.size);
+		this->onListBox1WeylGroupCommand(this->ToggleButton1Custom,0,0);
 	}
 	else
 	{ this->ListBox1WeylGroup->enable();
-		this->onListBox1WeylGroupCommand(this->ToggleButton1Custom,0,0);
 	}
 }
 
@@ -375,7 +383,6 @@ long MainWindow::onListBox1WeylGroupCommand(FXObject*sender,FXSelector sel,void*
 {	std::string tempS;
 	unsigned char newWeylGroupIndex=0;
 	char newWeylGroupLetter=0;
-	this->UsingCustomVectors=false;
 	switch(this->ListBox1WeylGroup->getCurrentItem())
 	{ case 0:	newWeylGroupIndex=2;  newWeylGroupLetter='A'; break;
 		case 1:	newWeylGroupIndex=3;  newWeylGroupLetter='A'; break;
@@ -392,7 +399,6 @@ long MainWindow::onListBox1WeylGroupCommand(FXObject*sender,FXSelector sel,void*
 	//	case 12: this->UsingCustomVectors=true;
 	}
 	if (!(newWeylGroupLetter==this->WeylGroupLetter && newWeylGroupIndex==this->WeylGroupIndex)
-			|| this->ToggleButton1Custom==sender
 			)
 	{ this->WeylGroupLetter=newWeylGroupLetter;
 		this->WeylGroupIndex=newWeylGroupIndex;
@@ -438,7 +444,19 @@ void WorkThreadClass::run()
 {	::RunComputationalThread();
 }
 
-
+void MainWindow::ReadVPVectors()
+{ root::AmbientDimension= this->Spinner1Dimension->getValue();
+	MainWindow1->VPVectors.size=0;
+	for (int i=0;i<this->Spinner2NumVectors->getValue();i++)
+	{ root tempRoot;
+		for (int j=0;j<root::AmbientDimension;j++)
+		{	int tempI=::FXIntVal(this->Table1Input->getItemText(i,j));
+			tempRoot.coordinates[j].AssignInteger(tempI);
+		}
+		MainWindow1->VPVectors.AddRoot(tempRoot);
+	}
+	MainWindow1->VPVectors.ComputeDebugString();
+}
 
 
 

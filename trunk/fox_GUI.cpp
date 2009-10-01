@@ -87,16 +87,20 @@ public:
 	::FXLabel* Label4ProgressReport;
 	::FXLabel* Label5ProgressReport;
 	::FXLabel* Label6ProgressReport;
+	::FXButton* Button1MainButton;
 	::FXSpinner* Spinner1Dimension;
 	::FXSpinner* Spinner2NumVectors;
 	WorkThreadClass WorkThread1;
-  long onRepaint(FXObject* sender,FXSelector sel,void*);
+  long onRepaint(FXObject* sender,FXSelector sel,void*ptr);
 	QuasiPolynomial theOutputPoly;
-  long onButton1MainButtonCommand(FXObject* sender,FXSelector sel,void*);
-  long onToggleButton1Custom(FXObject* sender,FXSelector sel,void*);
-  long onListBox1WeylGroupCommand(FXObject* sender,FXSelector sel,void*);
+  long onButton1MainButtonCommand(FXObject* sender,FXSelector sel,void*ptr);
+  long onToggleButton1Custom(FXObject* sender,FXSelector sel,void*ptr);
+  long onListBox1WeylGroupCommand(FXObject* sender,FXSelector sel,void*ptr);
   long onMouseDownOnCanvas(FXObject* sender,FXSelector sel,void*ptr);
   long onSpinner1and2Change(FXObject* sender,FXSelector sel,void*ptr);
+  void initTableFromRowsAndColumns(int r, int c);
+  void TurnOffAllDangerousButtons();
+  void TurnOnAllDangerousButtons();
   void updateListBox1();
   void initWeylGroupInfo();
   void ReadVPVectors();
@@ -109,6 +113,8 @@ public:
 	int NumVectors;
 	int ClickToleranceX;
 	int ClickToleranceY; 
+	int maxDim;
+	int maxNumVect;
 	roots VPVectors;
   enum
   {	ID_Button1MainButtonCommand=FXMainWindow::ID_LAST,
@@ -180,6 +186,7 @@ void RunComputationalThread()
 	MainWindow1->RankEuclideanSpaceGraphics=MainWindow1->WeylGroupIndex;
 	SliceTheEuclideanSpace(	::InputRoots,::NextDirectionIndex,MainWindow1->WeylGroupIndex,
 													TheBigOutput,TheBigFacetOutput);
+	MainWindow1->TurnOnAllDangerousButtons();
 	MainWindow1->AllowRepaint=true;
 	MainWindow1->onRepaint(0,0,0);
 	MainWindow1->ComputationInProgress=false;
@@ -261,7 +268,7 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 			this->ListBox1WeylGroup= 
 			new FXListBox(	this->HorizontalFrame1,this,MainWindow::ID_ListBox1WeylGroupCommand,
 											LAYOUT_FIX_WIDTH,80,0,50,10);
-			new FXButton(	this->HorizontalFrame1,"&Go",NULL,this,MainWindow::ID_Button1MainButtonCommand,
+			this->Button1MainButton= new FXButton(	this->HorizontalFrame1,"&Go",NULL,this,MainWindow::ID_Button1MainButtonCommand,
 											FRAME_THICK|FRAME_RAISED|LAYOUT_FIX_WIDTH,0,0,50,10,1,1,1,1);
 	::FXHorizontalFrame* tempHF1= 
 	new ::FXHorizontalFrame(this->VerticalFrame2InputData,::LAYOUT_FILL,0,0,0,0,0,0,0,0);
@@ -309,11 +316,13 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	this->WeylGroupIndex=2;
 	this->RankEuclideanSpaceGraphics=2;
 	this->WeylGroupLetter='A';
-	this->initWeylGroupInfo();
+	this->updateListBox1();
 //  this->Table1Input->setCellColor(0,0,FXRGB(255,255,255));
 //  this->Table1Input->setCellColor(0,1,FXRGB(255,240,240));
 //  this->Table1Input->setCellColor(1,0,FXRGB(240,255,240));
 //  this->Table1Input->setCellColor(1,1,FXRGB(240,240,255));	
+	this->maxDim=5;
+	this->maxNumVect=15;
 	this->ComputationInProgress=false;
 	this->AllowRepaint=true;
 	this->Canvas1DrawCanvas->::FXCanvas::setBackColor(this->getBackColor());
@@ -332,25 +341,49 @@ void MainWindow::create()
   show(PLACEMENT_SCREEN);
 }
 long MainWindow::onSpinner1and2Change(FX::FXObject *sender, FX::FXSelector sel, void *ptr)
-{ 
+{ int candidateDim= this->Spinner1Dimension->getValue();
+	int candidateNumVectors= this->Spinner2NumVectors->getValue();
+	if (candidateDim!= this->WeylGroupIndex || 
+			candidateNumVectors!=this->NumVectors)
+	{ if (candidateDim<1)
+		{ candidateDim=1;
+			this->Spinner1Dimension->setValue(1);
+		}
+		if (candidateNumVectors<1)
+		{ candidateNumVectors=1;
+			this->Spinner2NumVectors->setValue(1);
+		}
+		if (candidateDim>this->maxDim)
+		{ candidateDim=this->maxDim;
+			this->Spinner1Dimension->setValue(this->maxDim);
+		}
+		if (candidateNumVectors>this->maxNumVect)
+		{ candidateNumVectors=this->maxNumVect;
+			this->Spinner2NumVectors->setValue(this->maxNumVect);
+		}	
+		this->initTableFromRowsAndColumns(candidateNumVectors,candidateDim);
+	}
 	return 1;
 }
 
 long MainWindow::onButton1MainButtonCommand(FXObject*sender,FXSelector sel,void*ptr)
-{	
+{	this->TurnOffAllDangerousButtons();
 #ifdef WIN32
 	if (!this->ComputationInProgress)
 	{ this->ComputationInProgress=true;
 		this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
+		//this->Button1MainButton->setText("Pause");
 	}
 	else
 	{ if(this->WorkThread1.isRunning)
 		{ ::SuspendThread(this->WorkThread1.ComputationalThread);
 			this->WorkThread1.isRunning=false;
+			//this->Button1MainButton->setText("Go");
 		}
 		else
 		{ ::ResumeThread(this->WorkThread1.ComputationalThread);
 			this->WorkThread1.isRunning=true;
+			//this->Button1MainButton->setText("Pause");
 		}
 	}
 	return 1;
@@ -370,16 +403,22 @@ long MainWindow::onToggleButton1Custom(FXObject*,FXSelector sel,void*)
 void MainWindow::updateListBox1()
 { if (this->UsingCustomVectors)
 	{ this->ListBox1WeylGroup->disable();
+		this->Spinner1Dimension->enable();
+		this->Spinner2NumVectors->enable();
 		this->Spinner1Dimension->setValue(this->WeylGroupIndex);
 		this->Spinner2NumVectors->setValue(this->VPVectors.size);
 		this->onListBox1WeylGroupCommand(this->ToggleButton1Custom,0,0);
 	}
 	else
-	{ this->ListBox1WeylGroup->enable();
+	{ this->Spinner1Dimension->disable();
+		this->Spinner2NumVectors->disable();
+		this->ListBox1WeylGroup->enable();
+		this->onListBox1WeylGroupCommand(0,0,0);
+		this->initWeylGroupInfo();
 	}
 }
 
-long MainWindow::onListBox1WeylGroupCommand(FXObject*sender,FXSelector sel,void*)
+long MainWindow::onListBox1WeylGroupCommand(FXObject*sender,FXSelector sel,void* ptr)
 {	std::string tempS;
 	unsigned char newWeylGroupIndex=0;
 	char newWeylGroupLetter=0;
@@ -398,8 +437,7 @@ long MainWindow::onListBox1WeylGroupCommand(FXObject*sender,FXSelector sel,void*
 		case 11: newWeylGroupIndex=2; newWeylGroupLetter='G'; break;
 	//	case 12: this->UsingCustomVectors=true;
 	}
-	if (!(newWeylGroupLetter==this->WeylGroupLetter && newWeylGroupIndex==this->WeylGroupIndex)
-			)
+	if (!(newWeylGroupLetter==this->WeylGroupLetter && newWeylGroupIndex==this->WeylGroupIndex))
 	{ this->WeylGroupLetter=newWeylGroupLetter;
 		this->WeylGroupIndex=newWeylGroupIndex;
 		this->initWeylGroupInfo();
@@ -421,13 +459,13 @@ void MainWindow::initWeylGroupInfo()
 				this->Table1Input->setItemJustify(i,j,JUSTIFY_CENTER_X);
 			}
 		}
-		this->Table1Input->setVisibleColumns(root::AmbientDimension);
-		this->Table1Input->setVisibleRows(tempW.RootsOfBorel.size);
 		for (int i=0;i<root::AmbientDimension;i++)
 		{ this->Table1Input->setColumnWidth(i,20);
 		}
 		this->VPVectors.CopyFromBase(tempW.RootsOfBorel);
 		this->NumVectors=this->VPVectors.size;
+		this->Table1Input->setVisibleColumns(root::AmbientDimension);
+		this->Table1Input->setVisibleRows(tempW.RootsOfBorel.size);
 	}
 }
 
@@ -458,10 +496,34 @@ void MainWindow::ReadVPVectors()
 	MainWindow1->VPVectors.ComputeDebugString();
 }
 
+void MainWindow::initTableFromRowsAndColumns(int r, int c)
+{	this->NumVectors=r;
+	this->WeylGroupIndex= c;	
+	this->Table1Input->setTableSize(this->NumVectors,this->WeylGroupIndex);
+	for (int j=0;j<c;j++)
+	{ this->Table1Input->setColumnWidth(j,20);
+	}
+	this->Table1Input->setVisibleColumns(min(c,10));
+	this->Table1Input->setVisibleRows(min(r,20));
+}
 
+void MainWindow::TurnOffAllDangerousButtons()
+{ this->ListBox1WeylGroup->disable();
+	this->Spinner1Dimension->disable();
+	this->Spinner2NumVectors->disable();
+	this->ToggleButton1Custom->disable();
+}
 
-
-
+void MainWindow::TurnOnAllDangerousButtons()
+{ if (this->UsingCustomVectors)
+	{ this->Spinner1Dimension->enable();
+		this->Spinner2NumVectors->enable();
+	}
+	else
+	{ this->ListBox1WeylGroup->enable();
+	}
+	this->ToggleButton1Custom->enable();
+}
 
 
 void outputText(std::string theOutput)

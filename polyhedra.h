@@ -97,6 +97,11 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
 
 
+class ParallelComputing
+{ static bool ReachSafePointASAP;
+	static bool SafePointReached;
+	static void SafePoint();
+};
 
 //#ifndef dont_define_Min_and_Max_in_polyhedra_h
 //grrrrrrrr: names conflict

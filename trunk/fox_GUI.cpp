@@ -61,6 +61,8 @@ public:
 		HANDLE ComputationalThread;
 	#endif
 	bool isRunning;
+	bool CriticalSectionWorkThreadEntered;
+	bool CriticalSectionPauseButtonEntered;
 	void run();
 };
 
@@ -328,6 +330,8 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	this->Canvas1DrawCanvas->::FXCanvas::setBackColor(this->getBackColor());
 	this->ClickToleranceX=10;
 	this->ClickToleranceY=10;
+	this->WorkThread1.CriticalSectionPauseButtonEntered=false;
+	this->WorkThread1.CriticalSectionWorkThreadEntered=false;
 }
 
 MainWindow::~MainWindow()
@@ -371,19 +375,25 @@ long MainWindow::onButton1MainButtonCommand(FXObject*sender,FXSelector sel,void*
 #ifdef WIN32
 	if (!this->ComputationInProgress)
 	{ this->ComputationInProgress=true;
+		this->Button1MainButton->setText("Pause");
 		this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
-		//this->Button1MainButton->setText("Pause");
 	}
 	else
 	{ if(this->WorkThread1.isRunning)
-		{ ::SuspendThread(this->WorkThread1.ComputationalThread);
+		{ this->WorkThread1.CriticalSectionPauseButtonEntered=true;
+			while(this->WorkThread1.CriticalSectionWorkThreadEntered)
+			{}
+			while (::SuspendThread(this->WorkThread1.ComputationalThread)==-1)
+			{}
 			this->WorkThread1.isRunning=false;
-			//this->Button1MainButton->setText("Go");
+			this->Button1MainButton->setText("Go");
+			this->WorkThread1.CriticalSectionWorkThreadEntered=false;
+			this->WorkThread1.CriticalSectionPauseButtonEntered=false;
 		}
 		else
-		{ ::ResumeThread(this->WorkThread1.ComputationalThread);
+		{	this->Button1MainButton->setText("Pause");
 			this->WorkThread1.isRunning=true;
-			//this->Button1MainButton->setText("Pause");
+			::ResumeThread(this->WorkThread1.ComputationalThread);
 		}
 	}
 	return 1;
@@ -530,10 +540,16 @@ void outputText(std::string theOutput)
 {
 } 
 void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
-{ MainWindow1->Label1ProgressReport->::FXLabel::setText(output.ProgressReportString1.c_str());
+{	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
+	if (MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered)
+	{	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
+		return;
+	}
+	MainWindow1->Label1ProgressReport->::FXLabel::setText(output.ProgressReportString1.c_str());
 	MainWindow1->Label2ProgressReport->::FXLabel::setText(output.ProgressReportString2.c_str());
 	MainWindow1->Label3ProgressReport->::FXLabel::setText(output.ProgressReportString3.c_str());
 	MainWindow1->Label4ProgressReport->::FXLabel::setText(output.ProgressReportString4.c_str());
+	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
 } 
 //color styles (taken from windows.h and substituted for independence of the .h file):
 // 0 = normal line

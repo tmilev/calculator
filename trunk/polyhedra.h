@@ -1126,15 +1126,31 @@ public:
 	void ResetCounters(int Number);
 };
 
+class hashedRoots: public HashedListBasicObjects<root>
+{
+public:
+	std::string DebugString;
+	void ComputeDebugString();
+	void ElementToString(std::string& output);
+};
+
 class Cone : public roots
 { //The roots are the normals to the walls of the cone
 public:	
 	void ComputeFromDirections(roots& directions);
 	bool IsSurelyOutsideCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
 	bool IsInCone(root& r);
-	int* ChamberTestArray;
-	Cone(){ChamberTestArray=0;};
-	~Cone(){delete [] this->ChamberTestArray;this->ChamberTestArray=0; };
+	int HashFunction();
+	ListBasicObjects<int> ChamberTestArray;
+};
+
+class simplicialCones : public HashedListBasicObjects<Cone>
+{
+public:
+	hashedRoots theFacets;
+	ListBasicObjects<ListBasicObjects<int> > ConesHavingFixedNormal; 
+	void initFromDirections(roots& directions);
+	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
 };
 
 class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
@@ -1145,6 +1161,7 @@ public:
 	static int DefragSpacing;
 	static int LastReportedMemoryUse;
 	static Cone TheGlobalConeNormals;
+	static simplicialCones startingCones;
 	static bool IsSurelyOutsideGlobalCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
 	static std::fstream TheBigDump;
 	static root PositiveLinearFunctional;
@@ -3351,14 +3368,6 @@ public:
 	int HashFunction();
 	void operator=(const ElementWeylGroup& right);
 	bool operator==(const ElementWeylGroup& right);
-};
-
-class hashedRoots: public HashedListBasicObjects<root>
-{
-public:
-	std::string DebugString;
-	void ComputeDebugString();
-	void ElementToString(std::string& output);
 };
 
 class OneVarPolynomials: public ListBasicObjects<Polynomial<LargeInt> >

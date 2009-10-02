@@ -2647,6 +2647,8 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 	LocalContainerPlusVertices.ResetCounters(LocalLinearAlgebra.size);
 	static bool hasPositive, hasNegative;
 	hasPositive=false; hasNegative=false;
+	static root PositiveChamberInternalPoint, NegativeChamberInternalPoint;
+	PositiveChamberInternalPoint.MakeZero(); NegativeChamberInternalPoint.MakeZero();
 	for (int i=0;i<NumCandidates;i++)
 	{	static root VertexCandidate; VertexCandidate.dimension=root::AmbientDimension;
 		theSelection.incrementSelectionFixedCardinality(root::AmbientDimension-1); 
@@ -2660,11 +2662,15 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 				hasNegative = (hasNegative || IsNegative);
 				for (int j=0;j<root::AmbientDimension-1;j++)
 				{	if (!IsNegative)
-					{LocalContainerPlusVertices.TheObjects[theSelection.elements[j]]
-					->AddRootNoRepetition(VertexCandidate);}
+					{	LocalContainerPlusVertices.TheObjects[theSelection.elements[j]]
+						->AddRootNoRepetition(VertexCandidate);
+						PositiveChamberInternalPoint.Add(VertexCandidate);
+					}
 					if(!IsPositive)
-					{LocalContainerMinusVertices.TheObjects[theSelection.elements[j]]
-					->AddRootNoRepetition(VertexCandidate);}
+					{	LocalContainerMinusVertices.TheObjects[theSelection.elements[j]]
+						->AddRootNoRepetition(VertexCandidate);
+						NegativeChamberInternalPoint.Add(VertexCandidate);
+					}
 				}
 			}
 		}
@@ -2677,6 +2683,10 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 		                                                         LocalLinearAlgebra.size);
 	if (!(hasPositive && hasNegative))
 	{	return false;
+	}
+	if (!CombinatorialChamberPointers::startingCones.SeparatePoints
+				( PositiveChamberInternalPoint, NegativeChamberInternalPoint,&theKillerFacet->normal))
+	{ return false;
 	}
 	NewPlusChamber= new CombinatorialChamber;
 	NewMinusChamber= new CombinatorialChamber;
@@ -3033,15 +3043,14 @@ void Cone::ComputeFromDirections(roots& directions)
 			}
 		}
 	}
-	delete [] this->ChamberTestArray;
-	this->ChamberTestArray= new int[this->size];
+	this->ChamberTestArray.SetSizeExpandOnTopNoObjectInit(this->size);
 }
 
 bool Cone::IsSurelyOutsideCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists)
 { //init first the array we will use for check
   //values in the array: -1 undertermined, 0 - outside normal, +1 inside normal
 	for (int i=0;i<this->size;i++)
-	{	this->ChamberTestArray[i]=-1; 
+	{	this->ChamberTestArray.TheObjects[i]=-1; 
 	}
 	for (int i=0;i<NumrootsLists;i++)
 	{	for (int j=0;j<TheVertices.TheObjects[i]->size;j++)
@@ -3063,11 +3072,11 @@ bool Cone::IsSurelyOutsideCone(ListObjectPointers<roots>& TheVertices, int Numro
 					}
 				} 
 				if (state!=-1)
-				{	if (this->ChamberTestArray[k]==-1)
-					{	this->ChamberTestArray[k]=state;
+				{	if (this->ChamberTestArray.TheObjects[k]==-1)
+					{	this->ChamberTestArray.TheObjects[k]=state;
 					}
 					else
-					{	if (this->ChamberTestArray[k]!=state)
+					{	if (this->ChamberTestArray.TheObjects[k]!=state)
 						{return false;}
 					}
 				}
@@ -3076,7 +3085,7 @@ bool Cone::IsSurelyOutsideCone(ListObjectPointers<roots>& TheVertices, int Numro
 		}
 	}
 	for (int i=0;i<this->size;i++)
-	{ if (this->ChamberTestArray[i]==0){return true;}
+	{ if (this->ChamberTestArray.TheObjects[i]==0){return true;}
 	}
 	return false;
 }

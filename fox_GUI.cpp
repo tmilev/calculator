@@ -327,7 +327,7 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	this->maxNumVect=15;
 	this->ComputationInProgress=false;
 	this->AllowRepaint=true;
-	this->Canvas1DrawCanvas->::FXCanvas::setBackColor(this->getBackColor());
+	//this->Canvas1DrawCanvas->::FXCanvas::setBackColor(this->getBackColor());
 	this->ClickToleranceX=10;
 	this->ClickToleranceY=10;
 	this->WorkThread1.CriticalSectionPauseButtonEntered=false;

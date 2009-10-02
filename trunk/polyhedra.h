@@ -98,9 +98,15 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 
 
 class ParallelComputing
-{ static bool ReachSafePointASAP;
+{ 
+public:
+	static bool ReachSafePointASAP;
 	static bool SafePointReached;
-	static void SafePoint();
+	inline static void SafePoint()
+	{ while(ParallelComputing::ReachSafePointASAP)
+		{ParallelComputing::SafePointReached=true;}
+		ParallelComputing::SafePointReached=false;
+	}
 };
 
 //#ifndef dont_define_Min_and_Max_in_polyhedra_h
@@ -659,7 +665,8 @@ void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From
 template <class Object>
 void ListBasicObjects<Object>::SetActualSizeAtLeastExpandOnTop(int theSize)
 {	if (!(this->ActualSize>= this->IndexOfVirtualZero+theSize))
-	{	this->ExpandArrayOnTop( this->IndexOfVirtualZero+theSize- this->ActualSize);
+	{	ParallelComputing::SafePoint();
+		this->ExpandArrayOnTop( this->IndexOfVirtualZero+theSize- this->ActualSize);
 	}
 }
 
@@ -2068,6 +2075,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>
 //			tempM.ComputeDebugString(PolyFormatLocal); 
 //			Accum.ComputeDebugString();
 			Accum.AddMonomial(tempM);
+			ParallelComputing::SafePoint();
 //			Accum.ComputeDebugString(); 
 		}
 	}
@@ -2192,6 +2200,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::AddPolynomial(Polynomial<
 			tempS1->append(tempS);
 			tempS1->append("\n");
 		}*/
+		ParallelComputing::SafePoint();
 		this->AddMonomial(p.TheObjects[i]);   
 	}
 	/*if (IntegerPoly::AnErrorHasOccurredTimeToPanic)

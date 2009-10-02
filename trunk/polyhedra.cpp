@@ -229,6 +229,8 @@ DrawingVariables TDV(140,400);
 bool QuasiNumber::AnErrorHasOccurredTimeToPanic=false;
 bool IntegerPoly::AnErrorHasOccurredTimeToPanic=false;
 root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
+bool ParallelComputing::SafePointReached=false;
+bool ParallelComputing::ReachSafePointASAP=false;
 
 bool Stop()
 {	return true;
@@ -7494,6 +7496,7 @@ void partFraction::ApplySzenesVergneFormula
 														TheObjects[theSelectedIndices.TheObjects[j]].elements[k];
 			}
 		}
+		ParallelComputing::SafePoint();
 		tempFrac.Coefficient.MultiplyByMonomial(tempM);
 		this->GetNElongationPoly
 				(theSelectedIndices.TheObjects[i],LargestElongation,theElongations.TheObjects[i],tempP);
@@ -11152,9 +11155,9 @@ void OneVarIntPolynomials::ElementToString(std::string& output,int KLindex)
 void IntegerPoly::Evaluate(root& values, LargeRational& output)
 { std::string tempS1, tempS2;
 	output.MakeZero();
-	if(this->AnErrorHasOccurredTimeToPanic)
-	{ output.ElementToString(tempS1);
-	}
+	//if(this->AnErrorHasOccurredTimeToPanic)
+	//{ output.ElementToString(tempS1);
+	//}
 	for (int i=0;i<this->size;i++)
 	{ LargeRational tempRat1,tempRat2;
 		tempRat1.AssignInteger(this->TheObjects[i].Coefficient.value);
@@ -11162,18 +11165,19 @@ void IntegerPoly::Evaluate(root& values, LargeRational& output)
 		{ tempRat2.AssignRational(values.coordinates[j]);
 			tempRat2.RaiseToPower(this->TheObjects[i].degrees[j]);
 			tempRat1.MultiplyBy(tempRat2);
+			ParallelComputing::SafePoint();
 		}	
-		if(this->AnErrorHasOccurredTimeToPanic)
-		{ output.ElementToString(tempS2);
-			tempRat1.ElementToString(tempS1);
-			if (i==5)
-			{ //LargeRational::AnErrorHasOccurredTimeToPanic=true;
-			}
-		}	
+//		if(this->AnErrorHasOccurredTimeToPanic)
+//		{ output.ElementToString(tempS2);
+//			tempRat1.ElementToString(tempS1);
+//			if (i==5)
+//			{ //LargeRational::AnErrorHasOccurredTimeToPanic=true;
+//			}
+//		}	
 		output.Add(tempRat1);
-		if(this->AnErrorHasOccurredTimeToPanic)
-		{ output.ElementToString(tempS2);
-		}
+//		if(this->AnErrorHasOccurredTimeToPanic)
+//		{ output.ElementToString(tempS2);
+//		}
 	}
 }
 
@@ -12109,6 +12113,7 @@ void PolynomialLargeRational::Evaluate(intRoot &values, LargeRational &output)
 		for (int j=0; j<this->NumVars;j++)
 		{ for (int k=0;k<this->TheObjects[i].degrees[j];k++)
 			{ tempLRat.MultiplyByInt(values.elements[j]);
+				ParallelComputing::SafePoint();
 			}
 		}
 		output.Add(tempLRat);

@@ -383,8 +383,11 @@ long MainWindow::onButton1MainButtonCommand(FXObject*sender,FXSelector sel,void*
 		{ this->WorkThread1.CriticalSectionPauseButtonEntered=true;
 			while(this->WorkThread1.CriticalSectionWorkThreadEntered)
 			{}
-			while (::SuspendThread(this->WorkThread1.ComputationalThread)==-1)
+			ParallelComputing::ReachSafePointASAP=true;
+			while(!ParallelComputing::SafePointReached)
 			{}
+			ParallelComputing::ReachSafePointASAP=false;
+			::SuspendThread(this->WorkThread1.ComputationalThread);
 			this->WorkThread1.isRunning=false;
 			this->Button1MainButton->setText("Go");
 			this->WorkThread1.CriticalSectionWorkThreadEntered=false;

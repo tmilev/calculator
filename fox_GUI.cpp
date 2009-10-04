@@ -592,7 +592,7 @@ void drawtext(double X1, double Y1, const char* text, int length, int color)
 	dc.setFont(MainWindow1->FontDefaultDrawFont);
 	dc.setForeground(color);
 	dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
-	dc.setFillStyle(FX::FXFillStyle::FILL_STIPPLED);
+	dc.setFillStyle(FILL_STIPPLED);
 	dc.drawImageText((int)X1, (int)Y1,text,length);
 }
 

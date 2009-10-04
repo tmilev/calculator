@@ -287,6 +287,8 @@ public:
 	void Subtract(Rational &r);
 	void ElementToString(std::string& output);
 	bool ElementHasPlusInFront();
+	bool IsPositive();
+	bool IsNegative();
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input);
 };
@@ -434,7 +436,10 @@ public:
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
 	void MultiplyByRational(Rational& a);
 	void ScaleForMinHeight();
-	void ScaleToIngegral();
+	void ScaleToIntegral();
+	void ScaleToIntegralMinHeight();
+	void ScaleToFirstNonZeroCoordinatePositive();
+	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 	int FindLCMDenominators();
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5);
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
@@ -1140,11 +1145,13 @@ public:
 	void ComputeFromDirections(roots& directions);
 	bool IsSurelyOutsideCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
 	bool IsInCone(root& r);
-	int HashFunction();
+	bool SeparatesPoints(root& point1, root& point2);
+//	int HashFunction();
 	ListBasicObjects<int> ChamberTestArray;
+	void operator =(Cone& right);
 };
 
-class simplicialCones : public HashedListBasicObjects<Cone>
+class simplicialCones : public ListBasicObjects<Cone>
 {
 public:
 	hashedRoots theFacets;

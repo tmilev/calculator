@@ -110,6 +110,7 @@ roots CombinatorialChamber::StartingCrossSectionNormals;
 roots CombinatorialChamber::StartingCrossSectionAffinePoints; 
 
 int CombinatorialChamber::MethodUsed;
+simplicialCones CombinatorialChamberPointers::startingCones;
 bool CombinatorialChamber::PrintWallDetails;
 bool CombinatorialChamber::DisplayingGraphics=true; 
 bool CombinatorialChamberPointers::PrintLastChamberOnly=true; 
@@ -722,9 +723,7 @@ void root::ScaleForMinHeight()
 			}
 		}
 	}
-	for (int i=0;i<this->dimension;i++)
-	{	this->coordinates[i].DivideByInteger(d);
-	}
+	this->DivByInteger(d);
 }
 
 bool root::IsEqualTo(root& right)
@@ -766,9 +765,31 @@ int root::FindLCMDenominators()
 	return result;
 }
 
-void root::ScaleToIngegral()
+void root::ScaleToIntegral()
 { int x= this->FindLCMDenominators();
 	this->MultiplyByInteger(x);
+}
+
+void root::ScaleToIntegralMinHeight()
+{ this->ScaleToIntegral();
+	this->ScaleForMinHeight();
+}
+
+void root::ScaleToFirstNonZeroCoordinatePositive()
+{ for (int i=0;i<this->dimension;i++)
+	{ if (this->coordinates[i].IsPositive())
+		{ return;
+		}
+		if (this->coordinates[i].IsNegative())
+		{ this->MultiplyByInteger(-1);
+			return;
+		}
+	}
+}
+
+void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive()
+{ this->ScaleToIntegralMinHeight();
+	this->ScaleToFirstNonZeroCoordinatePositive();
 }
 
 void root::DivByRational(Rational& a)
@@ -1644,7 +1665,7 @@ void roots::PerturbVectorToRegular(root& output)
 		output.Add(normal);
 	}
 	if (IndicatorWindowGlobalVariables.rootIsModified)
-	{ output.ScaleToIngegral();
+	{ output.ScaleToIntegral();
 		IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(output);
 		IndicatorWindowGlobalVariables.StatusString="Indicator modified to regular";
 		::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
@@ -2047,6 +2068,14 @@ inline void Rational::Assign(Rational& r)
 
 inline bool Rational::ElementHasPlusInFront()
 {	return (this->num>=0);
+}
+
+inline bool Rational::IsPositive()
+{ return (this->num>0);
+}
+
+inline bool Rational::IsNegative()
+{ return (this->num<0);
 }
 
 inline double Rational::DoubleValue()
@@ -2918,7 +2947,8 @@ void CombinatorialChamberPointers::Free()
 }
 
 void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, FacetPointers& FacetOutput)
-{	if (CombinatorialChamber::ComputingPolys)
+{	this->startingCones.initFromDirections(directions);
+	if (CombinatorialChamber::ComputingPolys)
 	{	PrecomputedQuasiPolynomialIntegrals::PreComputedBernoulli
 			->ComputeDiscreteIntegrationUpTo(15);
 	}
@@ -3030,6 +3060,7 @@ void Cone::ComputeFromDirections(roots& directions)
 			}
 			if ((hasNegative && !hasPositive))
 			{normalCandidate.MinusRoot();}
+			normalCandidate.ScaleToIntegralMinHeight();
 			if (!(hasNegative && hasPositive))
 			{	bool IsValid;
 				IsValid=true;
@@ -3094,9 +3125,20 @@ bool Cone::IsInCone(root& r)
 { for (int i=0;i<this->size;i++)
 	{	Rational tempRat;
 		root::RootScalarEuclideanRoot(r,this->TheObjects[i],tempRat);
-		if (RZero.IsGreaterThan(tempRat)){return false;}
+		if (tempRat.IsNegative()){return false;}
 	}
 	return true;
+}
+
+bool Cone::SeparatesPoints(root& point1, root& point2)
+{ bool tempB1= this->IsInCone(point1);
+	bool tempB2= this->IsInCone(point2);
+	return !(tempB1==tempB2);
+}
+
+void Cone::operator=(Cone& right)
+{ this->CopyFromBase(right);
+	this->ChamberTestArray.CopyFromBase(right.ChamberTestArray);
 }
 
 void CombinatorialChamberPointers::PrintThePolys(std::string& output)
@@ -12139,4 +12181,69 @@ void IndicatorWindowVariables::PrepareStrings()
 	out3<<"Processed "<< this->NumProcessedMonomials<<" out of "<<this->TotalNumMonomials<<" monomials";
 	this->ProgressReportString3= out3.str();
 	this->ProgressReportString4.assign(this->StatusString);
+}
+
+void simplicialCones::initFromDirections(roots &directions)
+{ Selection tempSel;
+	assert(directions.size>0);
+	tempSel.init(directions.size);
+	roots tempRoots;
+	this->size=0;
+	this->ConesHavingFixedNormal.size=0;
+	this->theFacets.ClearTheObjects();
+	int maxSize=::NChooseK(directions.size,root::AmbientDimension);
+	int maxNumFacets= 2*::NChooseK(directions.size, root::AmbientDimension-1);
+	this->SetActualSizeAtLeastExpandOnTop(maxSize);
+	for (int i=0;i<maxSize;i++)
+	{ tempSel.incrementSelectionFixedCardinality(root::AmbientDimension);
+		tempRoots.size=0;
+		for (int j=0;j<root::AmbientDimension;j++)
+		{ tempRoots.AddRoot(directions.TheObjects[tempSel.elements[j]]);
+		}		
+		if (tempRoots.GetRankOfSpanOfElements()==root::AmbientDimension)
+		{	this->SetSizeExpandOnTopNoObjectInit(this->size+1);
+			this->TheObjects[this->size-1].ComputeFromDirections(tempRoots);
+			for (int j=0;j<root::AmbientDimension;j++)
+			{	root tempRoot;
+				int tempI= this->size-1;
+				tempRoot.Assign(this->TheObjects[tempI].TheObjects[j]);
+				tempRoot.ScaleToFirstNonZeroCoordinatePositive();
+				int x=this->theFacets.ContainsObjectHash(tempRoot);
+				if (x!=-1)
+				{ this->ConesHavingFixedNormal.TheObjects[x].AddObjectOnTop(tempI);
+				}
+				else
+				{ this->theFacets.AddObjectOnTopHash(tempRoot);
+					this->ConesHavingFixedNormal.SetSizeExpandOnTopNoObjectInit
+						(this->ConesHavingFixedNormal.size+1);
+					this->ConesHavingFixedNormal.TheObjects[this->ConesHavingFixedNormal.size-1].size=0;
+					this->ConesHavingFixedNormal.TheObjects[this->ConesHavingFixedNormal.size-1]
+						.AddObjectOnBottom(tempI);
+				}
+			}
+		}
+	}
+}
+
+bool simplicialCones::SeparatePoints(root &point1, root &point2, root *PreferredNormal)
+{ if (PreferredNormal==0)
+	{ for (int i=0;this->size;i++)
+		{ if (this->TheObjects[i].SeparatesPoints(point1,point2))
+				return true;
+		}
+	}
+	else
+	{ root tempRoot;
+		tempRoot.Assign(*PreferredNormal);
+		tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+		int x= this->theFacets.ContainsObjectHash(tempRoot);
+		assert(x!=-1);
+		int theSize=this->ConesHavingFixedNormal.TheObjects[x].size;
+		for (int i=0;i<theSize;i++)
+		{ int y= this->ConesHavingFixedNormal.TheObjects[x].TheObjects[i];
+			if (this->TheObjects[y].SeparatesPoints(point1,point2))
+				return true;
+		}
+	}
+	return false;
 }

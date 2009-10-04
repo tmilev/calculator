@@ -131,6 +131,8 @@ public:
 	int Selected;
 	double centerX;
 	double centerY;
+	int textX;
+	int textY;
 	double Projections[MaxRank][2];
 	double scale;
 	int TextColor;
@@ -174,7 +176,7 @@ public:
 	void SetSizeExpandOnTopNoObjectInit(int theSize);
 	void SetActualSizeAtLeastExpandOnTop(int theSize);
 	void AddObjectOnBottom(Object& o);
-	void AddObjectOnTop(Object& o);
+	void AddObjectOnTop(const Object& o);
 	void AddListOnTop(ListBasicObjects<Object>& theList);
 	void PopIndexShiftUp(int index);
 	void PopIndexShiftDown(int index);
@@ -194,21 +196,14 @@ public:
 };
 
 template <class Object>
-class ListObjectPointers
+class ListObjectPointers: public ListBasicObjects<Object*>
 {
 public:
-	static int MemoryAllocationIncrement;
-	int ActualSize;
-	int size;
-	Object** TheObjects;
 	ListObjectPointers();
 	void KillAllElements();
 	void KillElementIndex(int i);
-	void CopyOntoObject(ListObjectPointers<Object>* FromList);
-	void AddObject(Object* o);
 	bool AddObjectNoRepetitionOfPointer(Object* o);
 	void Pop(Object*o);
-	void PopIndex(int i);
 	void init(int d);
 	int ObjectPointerToIndex(Object*o);
 	void resizeToLargerCreateNewObjects(int increase);
@@ -278,8 +273,8 @@ public:
 	void MakeZero();
 	void AssignInteger(int i);
 	void Invert();
-	void Assign(Rational& r);
-	inline void operator=(Rational& r){this->Assign(r);};
+	void Assign(const Rational& r);
+	inline void operator=(const Rational& r){this->Assign(r);};
 	void MultiplyBy(Rational& r);
 	void DivideBy(Rational& r);
 	void DivideByInteger(int x);
@@ -447,7 +442,7 @@ public:
 	void MultiplyByInteger(int a);
 	void MinusRoot();
 	void Subtract(root& r);
-	void Assign(root& right);
+	void Assign(const root& right);
 	void AssignIntRoot(intRoot& right);
 	bool IsProportianalTo(root& r);
 	bool IsPositiveOrZero();	
@@ -466,7 +461,7 @@ public:
 	static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
 	int HashFunction();
 	root(){this->dimension=root::AmbientDimension;};
-	inline void operator=(root& right){this->Assign(right);};
+	inline void operator=(const root& right){this->Assign(right);};
 	inline bool operator==(root& right){return IsEqualTo(right);};
 };
 
@@ -781,7 +776,7 @@ void ListBasicObjects<Object>::AddObjectOnBottom(Object& o)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::AddObjectOnTop(Object& o)
+void ListBasicObjects<Object>::AddObjectOnTop(const Object& o)
 {	if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
 	{
 		this->ExpandArrayOnTop(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
@@ -964,27 +959,16 @@ void ListObjectPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
 
 template<class Object>
 void ListObjectPointers<Object>::initAndCreateNewObjects(int d)
-{
-	init(d);
+{ this->SetSizeExpandOnTopNoObjectInit(d);
 	for (int i=0;i<d;i++)
-	{
-		TheObjects[i]=new Object;
+	{	TheObjects[i]=new Object;
 	}
-	this->size=d;
-	this->ActualSize=d;
 }
 
 template<class Object>
 void ListObjectPointers<Object>::KillElementIndex(int i)
 {
 	delete this->TheObjects[i];
-	this->size--;
-	this->TheObjects[i]=this->TheObjects[size]; 
-}
-
-template<class Object>
-void ListObjectPointers<Object>::PopIndex(int i)
-{
 	this->size--;
 	this->TheObjects[i]=this->TheObjects[size]; 
 }
@@ -1003,17 +987,9 @@ int ListObjectPointers<Object>::ObjectPointerToIndex(Object* o)
 template<class Object>
 void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
 {	if (increase<=0){return;}
-	size+=increase;
-	if (size>ActualSize)
-	{	ActualSize+=size-ActualSize;
-		Object** newArray = new Object*[ActualSize];
-		for (int i = 0; i< size-increase; i++)
-		{	newArray[i]=TheObjects[i];
-		}
-		delete [] TheObjects;
-		TheObjects=newArray;
-	}
-	for (int i=size-increase;i<size;i++)
+	int oldsize= this->size;
+	this->SetSizeExpandOnTopNoObjectInit(this->size+increase);
+	for (int i=oldsize;i<size;i++)
 	{	TheObjects[i]=new Object;
 	}
 }
@@ -1029,10 +1005,8 @@ void ListObjectPointers<Object>::KillAllElements()
 
 template<class Object>
 bool ListObjectPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
-{
-	if (!IsAnElementOf(o))
-	{
-		AddObject(o);
+{ if (!this->ContainsObject(o))
+	{	this->AddObjectOnTop(o);
 		return true;
 	}
 	return false;
@@ -1061,14 +1035,6 @@ void CopyOntoObject(ListObjectPointers<Object>* FromList)
 }
 
 template <class Object>
-ListObjectPointers<Object>::ListObjectPointers()
-{
-	ActualSize=0;
-	size=0;
-	TheObjects=0;
-};
-
-template <class Object>
 void ListObjectPointers<Object>::Pop(Object*o)
 {
 	for (int i =0; i<size;i++)
@@ -1080,24 +1046,6 @@ void ListObjectPointers<Object>::Pop(Object*o)
 			i--;		
 		}
 	}
-};
-
-template <class Object>
-void ListObjectPointers<Object>::AddObject(Object* o)
-{
-	size++;
-	if (size>ActualSize)
-	{
-		ActualSize+=ListObjectPointers<Object>::MemoryAllocationIncrement;
-		Object** newArray = new Object*[ActualSize];
-		for (int i = 0; i< size-1; i++)
-		{
-			newArray[i]=TheObjects[i];
-		}
-		delete [] TheObjects;
-		TheObjects=newArray;
-	}
-	TheObjects[size-1]=o;
 };
 
 template <class Object>
@@ -1156,6 +1104,9 @@ class simplicialCones : public ListBasicObjects<Cone>
 public:
 	hashedRoots theFacets;
 	ListBasicObjects<ListBasicObjects<int> > ConesHavingFixedNormal; 
+	std::string DebugString;
+	void ComputeDebugString();
+	void ElementToString(std::string& output);
 	void initFromDirections(roots& directions);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
 };
@@ -1274,22 +1225,6 @@ public:
 
 
 class FacetPointers: public ListObjectPointers<Facet>
-{
-public:
-	~FacetPointers()
-	{	
-	//	_CrtDumpMemoryLeaks();
-	};
-};
-
-class FacetPointersKillOnExit: public FacetPointers
-{
-public:
-	~FacetPointersKillOnExit(){this->KillAllElements();};
-};
-
-
-class RationalPointers: public ListObjectPointers<Rational>
 {
 public:
 };
@@ -2712,11 +2647,11 @@ public:
 	std::string DebugString;
 	BasicQN(short NumVars)
 	{	BasicQN::NumTotalCreated++; this->NumVars= NumVars; CreationNumber=NumTotalCreated;
-		BasicQN::GlobalCollectorsBasicQuasiNumbers.AddObject(this); 
+		BasicQN::GlobalCollectorsBasicQuasiNumbers.AddObjectOnTop(this); 
 	};
 	BasicQN()
 	{	BasicQN::NumTotalCreated++; CreationNumber=NumTotalCreated;
-		BasicQN::GlobalCollectorsBasicQuasiNumbers.AddObject(this); 
+		BasicQN::GlobalCollectorsBasicQuasiNumbers.AddObjectOnTop(this); 
 	};
 	void MakeQNFromMatrixAndColumn(MatrixRational& theMat, root& column);
 	LargeRational Coefficient;
@@ -2823,11 +2758,11 @@ public:
 	std::string DebugString;
 	ComplexQN(int NumVars)
 	{	ComplexQN::NumTotalCreated++; this->NumVars= NumVars;CreationNumber=NumTotalCreated;
-		ComplexQN::GlobalCollectorsComplexQNs.AddObject(this); 
+		ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this); 
 	};
 	ComplexQN()
 	{	this->NumVars=NumVars;ComplexQN::NumTotalCreated++;CreationNumber=NumTotalCreated;
-		ComplexQN::GlobalCollectorsComplexQNs.AddObject(this); 
+		ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this); 
 	};
 	CompositeComplex Coefficient;
 	Rational Exponent[MaxRank+1];

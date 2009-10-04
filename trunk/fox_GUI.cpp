@@ -92,6 +92,7 @@ public:
 	::FXButton* Button1MainButton;
 	::FXSpinner* Spinner1Dimension;
 	::FXSpinner* Spinner2NumVectors;
+	::FXFont* FontDefaultDrawFont;
 	WorkThreadClass WorkThread1;
   long onRepaint(FXObject* sender,FXSelector sel,void*ptr);
 	QuasiPolynomial theOutputPoly;
@@ -174,10 +175,10 @@ void RunComputationalThread()
 	partFractions tempPF;
 	MainWindow1->AllowRepaint=false;
 	if (!MainWindow1->UsingCustomVectors)
-	{	tempPF.ComputeKostantFunctionFromWeylGroup
+	{/*	tempPF.ComputeKostantFunctionFromWeylGroup
 			(MainWindow1->WeylGroupLetter,MainWindow1->WeylGroupIndex,MainWindow1->theOutputPoly,0,false,false);
 		MainWindow1->theOutputPoly.ComputeDebugString();
-		tempPF.ComputeDebugString();
+		tempPF.ComputeDebugString();*/
 		::initDLL(MainWindow1->WeylGroupIndex);
 	}	else
 	{ MainWindow1->ReadVPVectors();
@@ -281,7 +282,7 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 		this->Spinner2NumVectors= 
 		new ::FXSpinner(tempHF1,3,this,MainWindow::ID_Spinner2NumVectors,::LAYOUT_FIX_WIDTH,0,0,30,0);
 			this->Table1Input= 
-			new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table1InputCommand,::LAYOUT_FILL);
+			new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table1InputCommand, ::LAYOUT_FIX_WIDTH);
 		this->VerticalFrame1ProgressReports=				
 		new ::FXVerticalFrame(this->HorizontalFrame3Background,::LAYOUT_FILL,0,0);
 			this->Label1ProgressReport = 
@@ -294,6 +295,11 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 			new ::FXLabel(this->VerticalFrame1ProgressReports,"");
 			this->Canvas1DrawCanvas =
 			new ::FXCanvas(	this->VerticalFrame1ProgressReports,this,MainWindow::ID_Canvas1,::LAYOUT_FILL);
+	this->FontDefaultDrawFont=
+		new FXFont(	a,"arial",10);
+//		new FXFont(	a,"helvetica",20,FXFont::Normal,FXFont::Straight,
+//								FONTENCODING_DEFAULT,FXFont::NonExpanded,
+//								FXFont::Scalable|FXFont::Rotatable);
 	this->ListBox1WeylGroup->appendItem("A2");
 	this->ListBox1WeylGroup->appendItem("A3");
 	this->ListBox1WeylGroup->appendItem("A4");
@@ -308,6 +314,7 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	this->ListBox1WeylGroup->appendItem("G2");
 	//this->ListBox1WeylGroup->appendItem("Custom");
 	this->ListBox1WeylGroup->setNumVisible(5);
+	this->ListBox1WeylGroup->setCurrentItem(1);
 	//this->Table1Input->setBorderColor(FXRGB(192,192,192));
 	//this->HorizontalFrame1->setBackColor(FXRGB(192,222,22));
 	this->Table1Input->setBackColor(this->getBackColor());
@@ -315,7 +322,7 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	this->Table1Input->setColumnHeaderHeight(0);
 	this->Table1Input->setRowHeaderWidth(0);
 	this->UsingCustomVectors=false;
-	this->WeylGroupIndex=2;
+	this->WeylGroupIndex=3;
 	this->RankEuclideanSpaceGraphics=2;
 	this->WeylGroupLetter='A';
 	this->updateListBox1();
@@ -332,16 +339,19 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	this->ClickToleranceY=10;
 	this->WorkThread1.CriticalSectionPauseButtonEntered=false;
 	this->WorkThread1.CriticalSectionWorkThreadEntered=false;
+	TDV.centerX=150;
+	TDV.centerY=200;
 }
 
 MainWindow::~MainWindow()
-{
+{ delete this->FontDefaultDrawFont;
 }
 
 
 
 void MainWindow::create()
 { FXMainWindow::create();
+	this->FontDefaultDrawFont->create();
   show(PLACEMENT_SCREEN);
 }
 long MainWindow::onSpinner1and2Change(FX::FXObject *sender, FX::FXSelector sel, void *ptr)
@@ -472,14 +482,18 @@ void MainWindow::initWeylGroupInfo()
 				this->Table1Input->setItemJustify(i,j,JUSTIFY_CENTER_X);
 			}
 		}
+//		this->Table1Input->getColumnHeader()->setWidth(20);
+		this->Table1Input->setVisibleColumns(root::AmbientDimension);
+		this->Table1Input->setVisibleRows(tempW.RootsOfBorel.size);
+//		this->Table1Input->fitColumnsToContents(0,root::AmbientDimension);
 		for (int i=0;i<root::AmbientDimension;i++)
 		{ this->Table1Input->setColumnWidth(i,20);
 		}
+		this->Table1Input->resize(root::AmbientDimension*20+5,tempW.RootsOfBorel.size*20);
 		this->VPVectors.CopyFromBase(tempW.RootsOfBorel);
 		this->NumVectors=this->VPVectors.size;
-		this->Table1Input->setVisibleColumns(root::AmbientDimension);
-		this->Table1Input->setVisibleRows(tempW.RootsOfBorel.size);
 	}
+	//this->Table1Input->recalc();
 }
 
 int main(int argc,char *argv[])
@@ -570,11 +584,15 @@ void drawline(double X1, double Y1, double X2, double Y2,
 	}
 	dc.::FXDCWindow::setForeground(ColorIndex);
 	dc.::FXDCWindow::drawLine((int)X1, (int)Y1,(int) X2,(int) Y2);
-	int a= MainWindow1->Canvas1DrawCanvas->getHeight();
 //	dc.setForeground(FXRGB(0,0,0));
 //  dc.fillRectangle(0,0,MainWindow1->Canvas1DrawCanvas->getWidth(),MainWindow1->Canvas1DrawCanvas->getHeight());
 }
 void drawtext(double X1, double Y1, const char* text, int length, int color)
-{ 
+{	::FXDCWindow dc(MainWindow1->Canvas1DrawCanvas);
+	dc.setFont(MainWindow1->FontDefaultDrawFont);
+	dc.setForeground(color);
+	dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
+	dc.setFillStyle(FX::FXFillStyle::FILL_STIPPLED);
+	dc.drawImageText((int)X1, (int)Y1,text,length);
 }
 

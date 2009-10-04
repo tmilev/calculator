@@ -114,6 +114,7 @@ simplicialCones CombinatorialChamberPointers::startingCones;
 bool CombinatorialChamber::PrintWallDetails;
 bool CombinatorialChamber::DisplayingGraphics=true; 
 bool CombinatorialChamberPointers::PrintLastChamberOnly=true; 
+bool CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic=false;
 bool CombinatorialChamber::ComputingPolys=false; 
 Cone CombinatorialChamberPointers::TheGlobalConeNormals;
 int CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag; 
@@ -153,34 +154,25 @@ template < > int HashedListBasicObjects<Monomial<Rational> >::PreferredHashSize=
 template < > int HashedListBasicObjects<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
 int QuasiPolynomial::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
-//template < > int ListObjectPointers<CombinatorialChamber>::MemoryAllocationIncrement=20;
-//template < > int ListObjectPointers<CombinatorialChamberCouple>::MemoryAllocationIncrement=20;
-//template < > int ListObjectPointers<Facet>::MemoryAllocationIncrement=1;
-//template < > int ListObjectPointers<Polynomial<CompositeComplexQN> >::MemoryAllocationIncrement=10;
-//template < > int ListObjectPointers<ComplexQN>::MemoryAllocationIncrement=100000;
-//template < > int ListObjectPointers<PrecomputedTaukn>::MemoryAllocationIncrement=1;
-//template < > int ListObjectPointers<QuasiPolynomial>::MemoryAllocationIncrement=10;
-//template < > int ListObjectPointers<PrecomputedQuasiPolynomialIntegral>::MemoryAllocationIncrement=1;
+template < > int ListBasicObjects<Facet *>::ListBasicObjectsActualSizeIncrement=100;
+template < > int ListBasicObjects<BasicQN *>::ListBasicObjectsActualSizeIncrement=1000;
+template < > int ListBasicObjects<ComplexQN *>::ListBasicObjectsActualSizeIncrement=10000;
+template < > int ListBasicObjects<QuasiPolynomial *>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<PrecomputedTaukn *>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<BasicComplexNumber>::ListBasicObjectsActualSizeIncrement=1; 
 CyclotomicList CompositeComplex::PrecomputedCyclotomic; 
 ListObjectPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers; 
 int BasicQN::NumTotalCreated=0;
-//template < > int ListObjectPointers<Polynomial<QuasiNumber> >::MemoryAllocationIncrement=1;
 template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
-//template < > int ListObjectPointers<BasicQN>::MemoryAllocationIncrement=1;
 template < > int ListBasicObjects<Monomial<QuasiNumber> >::ListBasicObjectsActualSizeIncrement=1000;
 template < > int HashedListBasicObjects<Monomial<QuasiNumber> >::PreferredHashSize=1000;
 template < > int HashedListBasicObjects<BasicQN>::PreferredHashSize= 1;
-//template < > int ListObjectPointers<ListObjectPointersKillOnExitFakeSize
-//			<ListObjectPointersKillOnExitFakeSize<QuasiPolynomial> > >::MemoryAllocationIncrement=1;
-//template < > int ListObjectPointers<ListObjectPointersKillOnExitFakeSize<QuasiPolynomial> >::MemoryAllocationIncrement=1;
 template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int HashedListBasicObjects<partFraction>::PreferredHashSize=10000;
 template < > int ListBasicObjects<intRoot>::ListBasicObjectsActualSizeIncrement= 20;
 template < > int HashedListBasicObjects<intRoot>::PreferredHashSize = 10000;
 template < > int HashedListBasicObjects<oneFracWithMultiplicitiesAndElongations>::PreferredHashSize= 10;
 template < > int ListBasicObjects<oneFracWithMultiplicitiesAndElongations>::ListBasicObjectsActualSizeIncrement=1;
-//template < > int ListObjectPointers<Polynomial<Rational> >::MemoryAllocationIncrement=1;
 template < > int HashedListBasicObjects<ElementWeylGroup>::PreferredHashSize=10000;
 template < > int ListBasicObjects<ElementWeylGroup>::ListBasicObjectsActualSizeIncrement= 1000;
 template < > int ListBasicObjects<PolynomialsRationalCoeff>::ListBasicObjectsActualSizeIncrement=1;
@@ -306,7 +298,10 @@ void OneSlice(roots& directions, int& index, int rank,
 	else
 	{	if (index<directions.size)
 		{	if(output.NextChamberToSlice!=0)
-			{	if (output.NextChamberToSlice->SliceInDirection(directions.TheObjects[index],directions,index,output,FacetOutput))
+			{//	if (CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic)
+				//{ Stop();
+				//}
+				if (output.NextChamberToSlice->SliceInDirection(directions.TheObjects[index],directions,index,output,FacetOutput))
 				{	delete output.NextChamberToSlice; 
 				}
 			}
@@ -334,12 +329,14 @@ void OneSlice(roots& directions, int& index, int rank,
 void SliceOneDirection(roots& directions, int& index, int rank, 
 											 CombinatorialChamberPointers& output,
 											 FacetPointers& FacetOutput)
-{
-	if (index<directions.size)
-	{
-		int oldindex= index;
+{	if (index<directions.size)
+	{	int oldindex= index;
+//		int counter=0;
 		while(oldindex==index)
-		{
+		{ //counter++;
+//			if (counter==8)
+//			{CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic=true;
+//			}
 			OneSlice(directions,index,rank,output,FacetOutput);
 		}
 	}
@@ -1891,7 +1888,7 @@ void RationalToDouble(Rational& r, double& output)
 	output=x1/x2; 
 }
 
-inline bool Rational::IsEqualTo(Rational& b)
+inline bool Rational::IsEqualTo(const Rational& b)
 {	return(this->num*b.den==b.num*this->den);
 }
 
@@ -2656,6 +2653,9 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 	AnErrorHasOcurred=false;
 	MinusChamberIsPermanentZero=false;
 	LocalLinearAlgebra.size=0;
+//	if (CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic)
+//	{ this->ComputeDebugString();
+//	}
 	for (int i=0;i<this->ExternalWalls->size;i++)
 	{	static bool tempBool;
 		tempBool=LocalLinearAlgebra.AddRootNoRepetition(ExternalWalls->TheObjects[i]->normal);
@@ -2741,6 +2741,9 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 																		&PossibleBogusNeighbors,
 																		&PossibleBogusWalls);
 	}
+//	if (CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic)
+//	{ this->ComputeDebugString();
+//	}
 	for (int i=1;i<this->InternalWalls->size;i++)
 	{	Facet* tempF= this->InternalWalls->TheObjects[i];  
 		NewPlusChamber->InternalWalls->AddObjectNoRepetitionOfPointer(tempF); 
@@ -2794,6 +2797,9 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 	}
 	if (!(NewPlusChamber->ExternalWalls->size>=root::AmbientDimension)){AnErrorHasOcurred=true;}
 	if (!(NewMinusChamber->ExternalWalls->size>=root::AmbientDimension)){AnErrorHasOcurred=true;}
+//	if (CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic)
+//	{ NewPlusChamber->ComputeDebugString();
+//	}
 	assert(NewPlusChamber->ExternalWalls->size>=root::AmbientDimension);
 	assert(NewMinusChamber->ExternalWalls->size>=root::AmbientDimension);
 	if (AnErrorHasOcurred)
@@ -2928,8 +2934,7 @@ CombinatorialChamberPointers::CombinatorialChamberPointers()
 }
 
 CombinatorialChamberPointers::~CombinatorialChamberPointers()
-{
-	Free();
+{	Free();
 }
 
 void CombinatorialChamberPointers::DumpAll()
@@ -2941,8 +2946,7 @@ void CombinatorialChamberPointers::DumpAll()
 }
 
 void CombinatorialChamberPointers::Free()
-{
-	delete this->ThePolys;
+{	delete this->ThePolys;
 	this->ThePolys=0; 
 }
 
@@ -3201,8 +3205,8 @@ bool Facet::IsExternalWithRespectToDirection(root &direction, CombinatorialChamb
 
 bool Facet::IsInternalWRT(CombinatorialChamber* owner)  
 { for (int i=0;i<this->Owners.size;i++)
-	{ if (this->Owners.TheObjects[i]->MinusOwner==owner &&
-			  this->Owners.TheObjects[i]->PlusOwner ==owner)
+	{ if (this->Owners.TheObjects[i].MinusOwner==owner &&
+			  this->Owners.TheObjects[i].PlusOwner ==owner)
 		{	return true;
 		}
 	}
@@ -3221,16 +3225,12 @@ bool Facet::IsInFacetWithBoundaries(root &projection)
 }
 
 CombinatorialChamber* Facet::TheFirstOtherChamber(CombinatorialChamber *owner)
-{
-	for (int i=0;i<this->Owners.size;i++)
-	{
-		if (this->Owners.TheObjects[i]->PlusOwner==owner)
-		{
-			return this->Owners.TheObjects[i]->MinusOwner;
+{	for (int i=0;i<this->Owners.size;i++)
+	{	if (this->Owners.TheObjects[i].PlusOwner==owner)
+		{	return this->Owners.TheObjects[i].MinusOwner;
 		}
-		if (this->Owners.TheObjects[i]->MinusOwner==owner)
-		{
-			return this->Owners.TheObjects[i]->PlusOwner;
+		if (this->Owners.TheObjects[i].MinusOwner==owner)
+		{	return this->Owners.TheObjects[i].PlusOwner;
 		}
 	}
 	return 0;
@@ -3239,11 +3239,11 @@ CombinatorialChamber* Facet::TheFirstOtherChamber(CombinatorialChamber *owner)
 void Facet::GetNormal(CombinatorialChamber* owner,root& output)
 {	output.dimension=root::AmbientDimension;
 	for (int i=0;i<this->Owners.size;i++)
-	{	if (this->Owners.TheObjects[i]->PlusOwner ==owner)
+	{	if (this->Owners.TheObjects[i].PlusOwner ==owner)
 		{	output.Assign(normal);
 			return;
 		}
-		if (this->Owners.TheObjects[i]->MinusOwner ==owner)
+		if (this->Owners.TheObjects[i].MinusOwner ==owner)
 		{	output.Assign(normal);
 			output.MinusRoot(); 
 			return;
@@ -3285,8 +3285,8 @@ void Facet::ComputeDebugString(CombinatorialChamber* owner)
 	out << tempStr;
 	for (int i=0;i<this->Owners.size;i++)
 	{
-		out<<"||"<<"+c"<<this->Owners.TheObjects[i]->PlusOwner->CreationNumber 
-			 <<     " -c"<<this->Owners.TheObjects[i]->MinusOwner->CreationNumber <<" ||";
+		out<<"||"<<"+c"<<this->Owners.TheObjects[i].PlusOwner->CreationNumber 
+			 <<     " -c"<<this->Owners.TheObjects[i].MinusOwner->CreationNumber <<" ||";
 	}
 	if(CombinatorialChamber::MethodUsed==1)
 	{
@@ -3316,18 +3316,15 @@ Facet::Facet()
 }
 
 bool Facet::OneOfTheOtherChambersIsNotExplored(CombinatorialChamber* owner)
-{
-	static	CombinatorialChamber* theOtherChamber;
+{	static	CombinatorialChamber* theOtherChamber;
 	for(int i=0;i<this->Owners.size;i++)
-	{
-		theOtherChamber=0;
-		if (this->Owners.TheObjects[i]->MinusOwner==owner)
-		{theOtherChamber=this->Owners.TheObjects[i]->PlusOwner;}   
-		if (this->Owners.TheObjects[i]->PlusOwner==owner)
-		{theOtherChamber=this->Owners.TheObjects[i]->MinusOwner;}
+	{	theOtherChamber=0;
+		if (this->Owners.TheObjects[i].MinusOwner==owner)
+		{theOtherChamber=this->Owners.TheObjects[i].PlusOwner;}   
+		if (this->Owners.TheObjects[i].PlusOwner==owner)
+		{theOtherChamber=this->Owners.TheObjects[i].MinusOwner;}
 		if (theOtherChamber!=0)
-		{
-			if (!theOtherChamber->Explored)
+		{	if (!theOtherChamber->Explored)
 			{return true;}
 		}
 	}
@@ -3339,34 +3336,29 @@ void Facet::init()
 }
 
 Facet::~Facet() 
-{
-	GlobalCollectorFacets.TheObjects[CreationNumber-1]=0; 
+{	GlobalCollectorFacets.TheObjects[this->CreationNumber-1]=0; 
 }
 
 void Facet::FindAllNeighborsTo(CombinatorialChamber* TheChamber,
 					ListObjectPointers<CombinatorialChamber>& output)
-{
-	for (int i=0;i<this->Owners.size;i++)
-	{
-		if (Owners.TheObjects[i]->MinusOwner==TheChamber &&
-				Owners.TheObjects[i]->PlusOwner!=TheChamber)
-				output.AddObjectNoRepetitionOfPointer ( Owners.TheObjects[i]->PlusOwner);
-		if (Owners.TheObjects[i]->PlusOwner==TheChamber &&
-				Owners.TheObjects[i]->MinusOwner!=TheChamber)
-				output.AddObjectNoRepetitionOfPointer( Owners.TheObjects[i]->MinusOwner);
+{ for (int i=0;i<this->Owners.size;i++)
+	{ if (Owners.TheObjects[i].MinusOwner==TheChamber &&
+				Owners.TheObjects[i].PlusOwner!=TheChamber)
+				output.AddObjectNoRepetitionOfPointer ( Owners.TheObjects[i].PlusOwner);
+		if (Owners.TheObjects[i].PlusOwner==TheChamber &&
+				Owners.TheObjects[i].MinusOwner!=TheChamber)
+				output.AddObjectNoRepetitionOfPointer( Owners.TheObjects[i].MinusOwner);
 	}
 }
 
 bool Facet::FacetContainsChamberOnlyOnce(CombinatorialChamber *owner)
-{
-	bool FoundOnce= false;
+{	bool FoundOnce= false;
 	for (int i=0;i<this->Owners.size;i++)
-	{
-		if (this->Owners.TheObjects[i]->MinusOwner==owner)
+	{	if (this->Owners.TheObjects[i].MinusOwner==owner)
 		{	FoundOnce= !FoundOnce;
 			if (!FoundOnce){return false;}
 		}
-		if (this->Owners.TheObjects[i]->PlusOwner==owner)
+		if (this->Owners.TheObjects[i].PlusOwner==owner)
 		{	FoundOnce= !FoundOnce;
 			if (!FoundOnce){return false;}
 		}
@@ -3376,19 +3368,17 @@ bool Facet::FacetContainsChamberOnlyOnce(CombinatorialChamber *owner)
 
 void Facet::Free() 
 {	for (int i=0;i<this->Owners.size;i++)
-	{	if (this->Owners.TheObjects[i]->PlusOwner!=0)
-		{	this->Owners.TheObjects[i]->PlusOwner->InternalWalls->Pop(this); 
-			this->Owners.TheObjects[i]->PlusOwner->ExternalWalls->Pop(this); 
-			this->Owners.TheObjects[i]->PlusOwner=0;
+	{	if (this->Owners.TheObjects[i].PlusOwner!=0)
+		{	this->Owners.TheObjects[i].PlusOwner->InternalWalls->Pop(this); 
+			this->Owners.TheObjects[i].PlusOwner->ExternalWalls->Pop(this); 
+			this->Owners.TheObjects[i].PlusOwner=0;
 		}
-		if (this->Owners.TheObjects[i]->MinusOwner!=0)
-		{	this->Owners.TheObjects[i]->MinusOwner->InternalWalls->Pop(this); 
-			this->Owners.TheObjects[i]->MinusOwner->ExternalWalls->Pop(this); 
-			this->Owners.TheObjects[i]->MinusOwner=0;
+		if (this->Owners.TheObjects[i].MinusOwner!=0)
+		{	this->Owners.TheObjects[i].MinusOwner->InternalWalls->Pop(this); 
+			this->Owners.TheObjects[i].MinusOwner->ExternalWalls->Pop(this); 
+			this->Owners.TheObjects[i].MinusOwner=0;
 		}
 	}
-	this->Owners.KillAllElements(); 
-	this->DebugString.clear();
 }
 
 bool Facet::SplitFacetMethod2(CombinatorialChamber *BossChamber,
@@ -3401,6 +3391,9 @@ bool Facet::SplitFacetMethod2(CombinatorialChamber *BossChamber,
 {	static bool IsPositive, IsNegative;
 	IsPositive = false;	IsNegative = false;
 	static Rational tempRat;
+//	if (CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic)
+//	{ this->ComputeDebugString(BossChamber);
+//	}
 	for (int j=0;j<ThePlusVertices.size;j++)
 	{	root::RootScalarEuclideanRoot(TheKillerFacet->normal,ThePlusVertices.TheObjects[j],tempRat);
 		if (tempRat.IsGreaterThan(RZero)){IsPositive=true;}
@@ -3732,19 +3725,15 @@ Facet* Facet::RayTrace(int EdgeIndex, root& direction,roots& directions,
 
 bool Facet::IsAnOwner(CombinatorialChamber *owner, 
 											CombinatorialChamber *&TheFirstOtherOwner, bool& IsAPlusOwner)
-{
-	for (int i=0;i<this->Owners.size;i++)
-	{
-		if (this->Owners.TheObjects[i]->PlusOwner==owner)
-		{
-			IsAPlusOwner=true;
-			TheFirstOtherOwner= this->Owners.TheObjects[i]->MinusOwner;
+{	for (int i=0;i<this->Owners.size;i++)
+	{	if (this->Owners.TheObjects[i].PlusOwner==owner)
+		{	IsAPlusOwner=true;
+			TheFirstOtherOwner= this->Owners.TheObjects[i].MinusOwner;
 			return true;
 		}
-		if (this->Owners.TheObjects[i]->MinusOwner==owner)
-		{
-			IsAPlusOwner=false;
-			TheFirstOtherOwner= this->Owners.TheObjects[i]->PlusOwner;
+		if (this->Owners.TheObjects[i].MinusOwner==owner)
+		{	IsAPlusOwner=false;
+			TheFirstOtherOwner= this->Owners.TheObjects[i].PlusOwner;
 			return true;
 		}
 	}
@@ -3781,7 +3770,7 @@ void ComplexQN::MultiplyByBasicComplex(BasicComplexNumber & b)
 { 
 } 
 
-void ComplexQN::CopyFrom(ComplexQN& q)
+void ComplexQN::CopyFrom(const ComplexQN& q)
 {	this->NumVars = q.NumVars;
 	for (int i=0;i<this->NumVars;i++)
 	{	this->Exponent[i].Assign(q.Exponent[i]);
@@ -3839,7 +3828,7 @@ void ComplexQN::MultiplyByLargeRational(LargeRational& r)
 {	this->Coefficient.MultiplyByLargeRational(r);  
 } 
 
-void ComplexQN::operator =(ComplexQN& q)
+void ComplexQN::operator =(const ComplexQN& q)
 { this->CopyFrom(q); 
 	this->CheckCoefficient();
 }
@@ -4043,7 +4032,7 @@ void CompositeComplexQN::DivideByRational(Rational& r)
 	this->MultiplyByRational(tempRat); 
 }
 
-void CompositeComplexQN::Assign(CompositeComplexQN &q)
+void CompositeComplexQN::Assign(const CompositeComplexQN &q)
 {	this->size=0;
 	this->NumVariables= q.NumVariables;  
 	for (int i=0;i<q.size;i++)
@@ -4751,7 +4740,7 @@ void QuasiPolynomial::IntegrateDiscreteInDirectionFromZeroTo
 	Accum.NumVars=root::AmbientDimension; 
 	for (int i=0;i<this->size;i++)
 	{	static QuasiMonomial tempQM;
-		tempQM.CopyFrom(this->TheObjects[i]);
+		tempQM.Assign(this->TheObjects[i]);
 //		tempQM.ComputeDebugString(PolyFormatLocal); 
 		tempQM.RationalLinearSubstitution(DirectionSub,tempQP); 
 //		tempQM.ComputeDebugString(PolyFormatLocal); 
@@ -4829,7 +4818,7 @@ void QuasiPolynomial::RationalLinearSubstitution
 	Accum.NumVars= TheSub.TheQNSub.NumRows; 
 	for (int i=0;i<this->size;i++)
 	{	static QuasiMonomial tempQM;
-		tempQM.CopyFrom(this->TheObjects[i]);
+		tempQM.Assign(this->TheObjects[i]);
 		tempQM.RationalLinearSubstitution(TheSub,tempQP);
 		Accum.AddPolynomial(tempQP); 
 	}
@@ -4910,36 +4899,33 @@ void PrecomputedQuasiPolynomialIntegrals::
 
 void CombinatorialChamberCouplePointers::AddCouple(CombinatorialChamber* PlusOwner,
 																									 CombinatorialChamber* MinusOwner)
-{
-	this->resizeToLargerCreateNewObjects(1);
-	this->TheObjects[this->size-1]->MinusOwner = MinusOwner;
-	this->TheObjects[this->size-1]->PlusOwner = PlusOwner;
+{	this->SetSizeExpandOnTopNoObjectInit(this->size+1);
+	this->TheObjects[this->size-1].MinusOwner = MinusOwner;
+	this->TheObjects[this->size-1].PlusOwner = PlusOwner;
 }
 
 void CombinatorialChamberCouplePointers::Substitute
 				(Facet*owner,CombinatorialChamber *Leaves, CombinatorialChamber *Enters)
 {	for (int i=0;i<this->size;i++)
-	{	if (this->TheObjects[i]->MinusOwner==Leaves)
-		{	this->TheObjects[i]->MinusOwner=Enters;}
-		if (this->TheObjects[i]->PlusOwner==Leaves)
-		{ this->TheObjects[i]->PlusOwner=Enters;}
+	{	if (this->TheObjects[i].MinusOwner==Leaves)
+		{	this->TheObjects[i].MinusOwner=Enters;}
+		if (this->TheObjects[i].PlusOwner==Leaves)
+		{ this->TheObjects[i].PlusOwner=Enters;}
 	}
 }
 
 void CombinatorialChamberCouplePointers::RemoveCoupleBothOrders
         (CombinatorialChamber* Owner1,CombinatorialChamber* Owner2)
-{
-	bool KilledOnce=false;
+{	bool KilledOnce=false;
 	for (int i=0;i<this->size;i++)
-	{
-		if((this->TheObjects[i]->MinusOwner==Owner1 
+	{	if((this->TheObjects[i].MinusOwner==Owner1 
 			 &&
-			 this->TheObjects[i]->PlusOwner==Owner2)||
-			 (this->TheObjects[i]->MinusOwner==Owner2 
+			 this->TheObjects[i].PlusOwner==Owner2)||
+			 (this->TheObjects[i].MinusOwner==Owner2 
 			 &&
-			 this->TheObjects[i]->PlusOwner==Owner1))
-		{
-			this->KillElementIndex(i);
+			 this->TheObjects[i].PlusOwner==Owner1))
+		{	this->PopIndexSwapWithLast(i);
+			i--;
 			assert(!KilledOnce);
 			KilledOnce=true;
 		}
@@ -4947,15 +4933,13 @@ void CombinatorialChamberCouplePointers::RemoveCoupleBothOrders
 }
 
 void CombinatorialChamberCouplePointers::RemoveCouple(CombinatorialChamber *PlusOwner, CombinatorialChamber *MinusOwner) 
-{
-	bool KilledOnce=false;
+{ bool KilledOnce=false;
 	for (int i=0;i<this->size;i++)
-	{
-		if(this->TheObjects[i]->MinusOwner==MinusOwner 
+	{	if(this->TheObjects[i].MinusOwner==MinusOwner 
 			 &&
-			 this->TheObjects[i]->PlusOwner==PlusOwner)
-		{
-			this->KillElementIndex(i);
+			 this->TheObjects[i].PlusOwner==PlusOwner)
+		{	this->PopIndexSwapWithLast(i);
+			i--;
 			assert(!KilledOnce);
 			KilledOnce=true;
 		}
@@ -5038,7 +5022,7 @@ void CompositeComplexQNSub::MakeSubNVarForOtherChamber(root &direction, root &no
 	}
 }
 
-void BasicComplexNumber::Assign(BasicComplexNumber & c) 
+void BasicComplexNumber::Assign(const BasicComplexNumber & c) 
 { this->Coeff.Assign(c.Coeff);
 	this->Exp.Assign(c.Exp);   
 }
@@ -5065,11 +5049,11 @@ void BasicComplexNumber::Simplify()
 { this->Exp.AssignFracValue();  
 }
 
-bool BasicComplexNumber::operator ==(BasicComplexNumber& c)
+bool BasicComplexNumber::operator ==(const BasicComplexNumber& c)
 { return (this->Coeff.IsEqualTo(c.Coeff) && this->Exp.IsEqualTo(c.Exp));   
 }
 
-void BasicComplexNumber::operator = (BasicComplexNumber& c)
+void BasicComplexNumber::operator = (const BasicComplexNumber& c)
 { this->Assign(c); 
 }
 
@@ -5079,7 +5063,7 @@ void BasicComplexNumber::AssignRational(Rational& r)
 	this->Exp.MakeZero();   
 } 
 
-void BasicComplexNumber::AssignLargeRational(LargeRational& r)
+void BasicComplexNumber::AssignLargeRational(const LargeRational& r)
 { this->Coeff.Assign(r);
 	this->Exp.MakeZero();   
 } 
@@ -5267,7 +5251,7 @@ bool CompositeComplex::IsEqualToZero()
 { return (this->size==0);
 }
 
-void CompositeComplex::Assign(CompositeComplex& c)
+void CompositeComplex::Assign(const CompositeComplex& c)
 { this->CopyFromBase(c);
 } 
 
@@ -5320,10 +5304,10 @@ void CyclotomicList::DivOneVarByOneVarPoly(PolynomialRationalCoeff& p, Polynomia
 																					 PolynomialRationalCoeff& quotient, PolynomialRationalCoeff& remainder)
 { remainder.CopyFromPoly(p);
 	Monomial<Rational> HighestM;
-	HighestM.CopyFrom(q.TheObjects[0]);  
+	HighestM.Assign(q.TheObjects[0]);  
 	for (int i=1;i<q.size;i++)
 	{ if (HighestM.degrees[0]<q.TheObjects[i].degrees[0])
-		{	HighestM.CopyFrom(q.TheObjects[i]);} 
+		{	HighestM.Assign(q.TheObjects[i]);} 
 	}
 	int index;
 	quotient.ClearTheObjects(); 
@@ -5577,7 +5561,7 @@ int BasicQN::InvertModN( int X, int N)
 	return p;
 }
 
-inline void BasicQN::Assign(BasicQN &q)
+inline void BasicQN::Assign(const BasicQN &q)
 { this->Exp.Assign(q.Exp);
 	this->Nums.Assign(q.Nums);
 	this->NumVars= q.NumVars;
@@ -5733,7 +5717,7 @@ bool BasicQN::IsEqualToZero()
 { return this->Coefficient.IsEqualToZero();
 } 
 
-inline void BasicQN::operator =(BasicQN& q)
+inline void BasicQN::operator =(const BasicQN& q)
 { this->Assign(q); 
 }
 
@@ -5950,7 +5934,7 @@ void QuasiNumber::AssignInteger(short NumVars,int x)
 } 
 
 
-void QuasiNumber::Assign(QuasiNumber &q) 
+void QuasiNumber::Assign(const QuasiNumber &q) 
 {	if (this==&q) return;
 	this->MakeZero(q.NumVariables);
 	this->CopyFromHash(q);
@@ -6272,7 +6256,7 @@ void LargeRational::MultiplyByRational(Rational &r)
 	this->Simplify();   
 }
 
-bool LargeRational::IsEqualTo(LargeRational& r)
+bool LargeRational::IsEqualTo(const LargeRational& r)
 { static LargeRational x;
 	x.Assign(r);
 	x.Subtract(*this);
@@ -6359,7 +6343,7 @@ void LargeRational::MultiplyBy(LargeRational &r)
 	this->Simplify(); 
 } 
 
-void LargeRational::Assign(LargeRational &r) 
+void LargeRational::Assign(const LargeRational &r) 
 { this->num.Assign(r.num);
 	assert(r.den.size!=0); 
 	this->den.Assign(r.den); 
@@ -7212,7 +7196,7 @@ int partFraction::SizeWithoutDebugString()
 	return Accum; 
 }
 
-void partFraction::Assign(partFraction& p)
+void partFraction::Assign(const partFraction& p)
 { this->CopyFromBase(p);
 	this->Coefficient.CopyFromPoly(p.Coefficient);
 	this->IndicesNonZeroMults.CopyFromBase(p.IndicesNonZeroMults);
@@ -7953,7 +7937,7 @@ bool partFraction::operator==(partFraction& right)
 	return true;
 }
 
-void partFraction::operator =(partFraction &right)
+void partFraction::operator =(const partFraction &right)
 { this->Assign(right); 
 }
 
@@ -9093,7 +9077,7 @@ inline bool intRoot::IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights)
 	return (accum>0);
 } 
  
-void intRoot::operator =(intRoot &right)
+void intRoot::operator =(const intRoot &right)
 { this->dimension=right.dimension;
 	for (int i=0;i<this->dimension;i++)
 	{ this->elements[i]=right.elements[i];

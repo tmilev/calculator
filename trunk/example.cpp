@@ -84,7 +84,7 @@ int AltMain(void)
 { //The below lines compute a partial fraction decomposition for the 
 	//generating function of the Kostant partition function for G2
 	//printout tempPF.DebugString to get the final result
-	ExampleComputation t1;
+	//ExampleComputation t1;
 	//t1.RunSomeTests();
 		
 	partFractions tempPF;

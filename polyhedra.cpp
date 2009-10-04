@@ -153,34 +153,34 @@ template < > int HashedListBasicObjects<Monomial<Rational> >::PreferredHashSize=
 template < > int HashedListBasicObjects<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
 int QuasiPolynomial::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
-template < > int ListObjectPointers<CombinatorialChamber>::MemoryAllocationIncrement=20;
-template < > int ListObjectPointers<CombinatorialChamberCouple>::MemoryAllocationIncrement=20;
-template < > int ListObjectPointers<Facet>::MemoryAllocationIncrement=1;
-template < > int ListObjectPointers<Polynomial<CompositeComplexQN> >::MemoryAllocationIncrement=10;
-template < > int ListObjectPointers<ComplexQN>::MemoryAllocationIncrement=100000;
-template < > int ListObjectPointers<PrecomputedTaukn>::MemoryAllocationIncrement=1;
-template < > int ListObjectPointers<QuasiPolynomial>::MemoryAllocationIncrement=10;
-template < > int ListObjectPointers<PrecomputedQuasiPolynomialIntegral>::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<CombinatorialChamber>::MemoryAllocationIncrement=20;
+//template < > int ListObjectPointers<CombinatorialChamberCouple>::MemoryAllocationIncrement=20;
+//template < > int ListObjectPointers<Facet>::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<Polynomial<CompositeComplexQN> >::MemoryAllocationIncrement=10;
+//template < > int ListObjectPointers<ComplexQN>::MemoryAllocationIncrement=100000;
+//template < > int ListObjectPointers<PrecomputedTaukn>::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<QuasiPolynomial>::MemoryAllocationIncrement=10;
+//template < > int ListObjectPointers<PrecomputedQuasiPolynomialIntegral>::MemoryAllocationIncrement=1;
 template < > int ListBasicObjects<BasicComplexNumber>::ListBasicObjectsActualSizeIncrement=1; 
 CyclotomicList CompositeComplex::PrecomputedCyclotomic; 
 ListObjectPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers; 
 int BasicQN::NumTotalCreated=0;
-template < > int ListObjectPointers<Polynomial<QuasiNumber> >::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<Polynomial<QuasiNumber> >::MemoryAllocationIncrement=1;
 template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListObjectPointers<BasicQN>::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<BasicQN>::MemoryAllocationIncrement=1;
 template < > int ListBasicObjects<Monomial<QuasiNumber> >::ListBasicObjectsActualSizeIncrement=1000;
 template < > int HashedListBasicObjects<Monomial<QuasiNumber> >::PreferredHashSize=1000;
 template < > int HashedListBasicObjects<BasicQN>::PreferredHashSize= 1;
-template < > int ListObjectPointers<ListObjectPointersKillOnExitFakeSize
-			<ListObjectPointersKillOnExitFakeSize<QuasiPolynomial> > >::MemoryAllocationIncrement=1;
-template < > int ListObjectPointers<ListObjectPointersKillOnExitFakeSize<QuasiPolynomial> >::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<ListObjectPointersKillOnExitFakeSize
+//			<ListObjectPointersKillOnExitFakeSize<QuasiPolynomial> > >::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<ListObjectPointersKillOnExitFakeSize<QuasiPolynomial> >::MemoryAllocationIncrement=1;
 template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int HashedListBasicObjects<partFraction>::PreferredHashSize=10000;
 template < > int ListBasicObjects<intRoot>::ListBasicObjectsActualSizeIncrement= 20;
 template < > int HashedListBasicObjects<intRoot>::PreferredHashSize = 10000;
 template < > int HashedListBasicObjects<oneFracWithMultiplicitiesAndElongations>::PreferredHashSize= 10;
 template < > int ListBasicObjects<oneFracWithMultiplicitiesAndElongations>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListObjectPointers<Polynomial<Rational> >::MemoryAllocationIncrement=1;
+//template < > int ListObjectPointers<Polynomial<Rational> >::MemoryAllocationIncrement=1;
 template < > int HashedListBasicObjects<ElementWeylGroup>::PreferredHashSize=10000;
 template < > int ListBasicObjects<ElementWeylGroup>::ListBasicObjectsActualSizeIncrement= 1000;
 template < > int ListBasicObjects<PolynomialsRationalCoeff>::ListBasicObjectsActualSizeIncrement=1;
@@ -210,7 +210,7 @@ std::fstream partFractions::ComputedContributionsList;
 
 RootToIndexTable partFraction::RootsToIndices;
 
-template < > int ListObjectPointers<partFraction>::MemoryAllocationIncrement=100;
+//template < > int ListObjectPointers<partFraction>::MemoryAllocationIncrement=100;
 ListObjectPointers<partFraction> partFraction::GlobalCollectorPartFraction;
 bool partFraction::UseGlobalCollector=true;
 bool partFraction::AnErrorHasOccurredTimeToPanic=false;
@@ -279,10 +279,8 @@ void PolynomialMemoryLeakTest()
 
 void OneSlice(roots& directions, int& index, int rank, 
 							CombinatorialChamberPointers& output, FacetPointers& FacetOutput)
-{
-	if (index==rank-1)
-	{
-		output.MakeStartingChambers(directions,FacetOutput);
+{	if (index==rank-1)
+	{	output.MakeStartingChambers(directions,FacetOutput);
 		index++;
 		output.ComputeNextIndexToSlice(directions.TheObjects[index]);
 /*		SimplexMaxDimension* StartingSimplex;
@@ -306,25 +304,20 @@ void OneSlice(roots& directions, int& index, int rank,
 		output.ComputeNextIndexToSlice(directions.TheObjects[index]);*/
 	}
 	else
-	{
-		if (index<directions.size)
-		{
-			if(output.NextChamberToSlice!=0)
-			{
-				if (output.NextChamberToSlice->SliceInDirection(directions.TheObjects[index],directions,index,output,FacetOutput))
-				{
-					delete output.NextChamberToSlice; 
+	{	if (index<directions.size)
+		{	if(output.NextChamberToSlice!=0)
+			{	if (output.NextChamberToSlice->SliceInDirection(directions.TheObjects[index],directions,index,output,FacetOutput))
+				{	delete output.NextChamberToSlice; 
 				}
 			}
 			else
-			{
-				assert(output.PreferredNextChambers.size==0); 
+			{	output.PreferredNextChambers.size=0;
+//				assert(output.PreferredNextChambers.size==0); 
 				index++;
 				output.LabelAllUnexplored();
 			}
 			if (index<directions.size)
-			{
-				output.ComputeNextIndexToSlice(directions.TheObjects[index]);
+			{	output.ComputeNextIndexToSlice(directions.TheObjects[index]);
 			}
 		}
 	}
@@ -332,8 +325,7 @@ void OneSlice(roots& directions, int& index, int rank,
 	if(		CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag
 				<GlobalCollectorChambers.size-CombinatorialChamberPointers::DefragSpacing
 		)
-	{
-		CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag=
+	{	CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag=
 			GlobalCollectorChambers.size;
 		AttemptMemoryCompactification();
 	}
@@ -399,6 +391,8 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	this->DrawStyle= 0;
 	this->TextOutStyle= 0; 
 	this->Selected=-2;
+	this->textX=0;
+	this->textY=15;
 	if(cX1!=-1 && cY1!=-1)
 	{	this->centerX= (double) cX1;//(double(X2)-double(X1));
 		this->centerY= (double) cY1;
@@ -644,14 +638,13 @@ void drawOutput(DrawingVariables& TDV,
 	std::stringstream out,out1,out3;
 	out<<"#Drawn chambers: "<<NumTrueChambers;
 	tempS=out.str();
-	int textX=0, tempY=210;
-	drawtext(textX,tempY, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawtext(TDV.textX,TDV.textY, tempS.c_str(), tempS.length(),TDV.TextColor);
 	out1<<"#Zero chambers: "<< NumZeroChambers;
 	tempS=out1.str();
-	drawtext(textX,tempY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawtext(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
 	out3 <<"MaxRationalHeight:"<< Rational::LargestRationalHeight;
 	tempS=out3.str();
-	drawtext(textX,tempY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawtext(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
 }
 
 void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions)
@@ -825,7 +818,7 @@ void root::MakeZero()
 	}
 }
 
-void root::Assign(root& right)
+void root::Assign(const root& right)
 {	this->dimension=right.dimension;
 	for (int i=0;i<this->dimension;i++)
 	{ this->coordinates[i].Assign(right.coordinates[i]);
@@ -2061,7 +2054,7 @@ void Rational::MultyplyByElement(ElementOfCommutativeRingWithIdentity& e)
 }
 */
 
-inline void Rational::Assign(Rational& r)
+inline void Rational::Assign(const Rational& r)
 {	this->num= r.num;
 	this->den= r.den;
 }
@@ -2176,20 +2169,20 @@ bool CombinatorialChamber::ComputeDebugString()
 		out<< "c"<<output.TheObjects[i]->CreationNumber<<", ";  
 	}
 	PolyFormatLocal.cutOffString=false;  
-	this->ThePolynomial->ComputeDebugString();  
-	out<<"\n The Polynomial:"<< this->ThePolynomial->DebugString <<"\n\n";	
-	this->ThePolynomial->WriteComplexFormToDebugString(); 
-	out<<"\n Complex Form:"<< this->ThePolynomial->DebugString <<"\n\n";	
+	if (this->ComputingPolys)
+	{	this->ThePolynomial->ComputeDebugString();  
+		out<<"\n The Polynomial:"<< this->ThePolynomial->DebugString <<"\n\n";	
+		this->ThePolynomial->WriteComplexFormToDebugString(); 
+		out<<"\n Complex Form:"<< this->ThePolynomial->DebugString <<"\n\n";	
+	}
 	if (CombinatorialChamber::PrintWallDetails)
-	{
-		out <<"\n Wall Details:\n";
+	{	out <<"\n Wall Details:\n";
 		for (int i=0;i<this->ExternalWalls->size;i++)
 		{	this->ExternalWalls->TheObjects[i]->ComputeDebugString(this); 
 			out<<	this->ExternalWalls->TheObjects[i]->DebugString<<"\n";
 		}
 		for (int i=0;i<this->InternalWalls->size;i++)
-		{
-			this->InternalWalls->TheObjects[i]->ComputeDebugString(this);
+		{	this->InternalWalls->TheObjects[i]->ComputeDebugString(this);
 			out << this->InternalWalls->TheObjects[i]->DebugString<<"\n";
 		}
 	}
@@ -2214,7 +2207,7 @@ CombinatorialChamber::CombinatorialChamber()
 	this->InternalWalls =new FacetPointers;
 	this->Explored=false;
 	this->PermanentlyZero=false;
-	GlobalCollectorChambers.AddObject(this);
+	GlobalCollectorChambers.AddObjectOnTop(this);
 	this->CreationNumber=GlobalCollectorChambers.size;
 }
 
@@ -2525,9 +2518,15 @@ bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
 						{	Facet* theKillerFacet= tempFacet1->MakeFacetFromEdgeAndDirection
 								        (this,tempFacet2,direction,directions,CurrentIndex,FacetOutput);
 							if (theKillerFacet!=0)
-							{	this->SplitChamber(theKillerFacet,output,direction); 
-								output.KillNextChamberToSlice(); 	
-								return true;
+							{	if (this->SplitChamberMethod2(theKillerFacet,output,direction))
+								{	output.KillNextChamberToSlice();
+									return true;
+								} 	
+								else
+								{ this->Explored=true;
+									return false;
+								}
+
 							}
 						}
 					}
@@ -2555,7 +2554,7 @@ bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
 			}
 		}
 	}
-	Explored=true;
+	this->Explored=true;
 	if (output.NextChamberToSliceIndexInPreferredNextChambers!=-1)
 	{	output.PreferredNextChambers.PopIndexShiftUp(output.NextChamberToSliceIndexInPreferredNextChambers);
 		output.NextChamberToSliceIndexInPreferredNextChambers=-1;
@@ -2614,7 +2613,7 @@ void CombinatorialChamber::RemoveInternalWall(int index)
 {
 //	Facet* tempF= this->InternalWalls->TheObjects[index];
 //	tempF->Owners.RemoveCouple(this,this);
-	this->InternalWalls->PopIndex(index);  
+	this->InternalWalls->PopIndexSwapWithLast(index);  
 }
 
 bool CombinatorialChamber::TestPossibilityToSlice(root& direction) 
@@ -2713,6 +2712,7 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 	if (!(hasPositive && hasNegative))
 	{	return false;
 	}
+	//this->ComputeDebugString();
 	if (!CombinatorialChamberPointers::startingCones.SeparatePoints
 				( PositiveChamberInternalPoint, NegativeChamberInternalPoint,&theKillerFacet->normal))
 	{ return false;
@@ -2755,9 +2755,9 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 		NewMinusChamber->ThePolynomial= this->ThePolynomial;
 	}
 	theKillerFacet->Owners.AddCouple(NewPlusChamber,NewMinusChamber); 
-	NewPlusChamber->ExternalWalls->AddObject(theKillerFacet); 
+	NewPlusChamber->ExternalWalls->AddObjectOnTop(theKillerFacet); 
 	NewPlusChamber->ExternalWallsNormals.AddRoot(theKillerFacet->normal);  
-	NewMinusChamber->ExternalWalls->AddObject(theKillerFacet);
+	NewMinusChamber->ExternalWalls->AddObjectOnTop(theKillerFacet);
 	static root tempRoot; tempRoot.dimension=root::AmbientDimension;
 	tempRoot.Assign(theKillerFacet->normal);
 	tempRoot.MinusRoot(); 
@@ -2776,8 +2776,8 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 	}
 	NewPlusChamber->IndexStartingCrossSectionNormal= this->IndexStartingCrossSectionNormal;
 	NewMinusChamber->IndexStartingCrossSectionNormal= this->IndexStartingCrossSectionNormal;
-	output.AddObject(NewPlusChamber);
-	output.AddObject(NewMinusChamber);
+	output.AddObjectOnTop(NewPlusChamber);
+	output.AddObjectOnTop(NewMinusChamber);
 	if (!NewPlusChamber->PermanentlyZero )
 	{	output.PreferredNextChambers.AddObjectOnBottom (NewPlusChamber);   
 		output.NextChamberToSliceIndexInPreferredNextChambers++; 
@@ -2948,6 +2948,7 @@ void CombinatorialChamberPointers::Free()
 
 void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, FacetPointers& FacetOutput)
 {	this->startingCones.initFromDirections(directions);
+	this->startingCones.ComputeDebugString();
 	if (CombinatorialChamber::ComputingPolys)
 	{	PrecomputedQuasiPolynomialIntegrals::PreComputedBernoulli
 			->ComputeDiscreteIntegrationUpTo(15);
@@ -2976,7 +2977,7 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, Facet
 	{	int tempI= theSelection.SelectionToIndex();
 		this->TheObjects[tempI]->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(root::AmbientDimension);   
 		for (int j=0;j<root::AmbientDimension;j++)
-		{	this->TheObjects[tempI]->ExternalWalls->AddObject
+		{	this->TheObjects[tempI]->ExternalWalls->AddObjectOnTop
 				(FacetOutput.TheObjects[root::AmbientDimension-j-1]); 
 			this->TheObjects[tempI]->ExternalWallsNormals.TheObjects[j].Assign 
 				(FacetOutput.TheObjects[root::AmbientDimension-j-1]->normal);
@@ -3308,9 +3309,8 @@ void Facet::ComputeDebugString(CombinatorialChamber* owner)
 }
 
 Facet::Facet()
-{
-	this->SentencedToDeath=false; 
-	GlobalCollectorFacets.AddObject(this);
+{	this->SentencedToDeath=false; 
+	GlobalCollectorFacets.AddObjectOnTop(this);
 	CreationNumber= GlobalCollectorFacets.size;
 	init();
 }
@@ -3441,16 +3441,16 @@ bool Facet::SplitFacetMethod2(CombinatorialChamber *BossChamber,
 				this->Owners.RemoveCouple(TheOtherChamber,BossChamber); 
 			}
 			if (PossibleBogusNeighbors!=0)
-			{	PossibleBogusNeighbors->AddObject(TheOtherChamber); 
-				PossibleBogusWalls->AddObject(this);
+			{	PossibleBogusNeighbors->AddObjectOnTop(TheOtherChamber); 
+				PossibleBogusWalls->AddObjectOnTop(this);
 			}
 			if (TheOtherChamber!=0)
 			{	if (!TheOtherChamber->PermanentlyZero)
 					TheOtherChamber->AddInternalWall(TheKillerFacet,this,direction);
 			}   
 		}
-		NewPlusChamber->ExternalWalls->AddObject(this); 
-		NewMinusChamber->ExternalWalls->AddObject(this);
+		NewPlusChamber->ExternalWalls->AddObjectOnTop(this); 
+		NewMinusChamber->ExternalWalls->AddObjectOnTop(this);
 		if (IsAPlusOwner)
 		{	NewPlusChamber->ExternalWallsNormals.AddRoot(this->normal); 
 			NewMinusChamber->ExternalWallsNormals.AddRoot(this->normal); 
@@ -3694,7 +3694,7 @@ Facet* Facet::MakeFacetFromEdgeAndDirection(CombinatorialChamber* owner,
 	if (!IsAValidCandidateForNormalOfAKillerFacet(NewFacetNormal,directions,CurrentIndex)){return 0;}
 	Facet* newFacet= new Facet;
 	newFacet->normal.Assign(NewFacetNormal); 
-	FacetOutput.AddObject(newFacet);
+	FacetOutput.AddObjectOnTop(newFacet);
 	return newFacet;
 }
 
@@ -4839,7 +4839,7 @@ void QuasiPolynomial::RationalLinearSubstitution
 QuasiPolynomial::QuasiPolynomial() 
 {	QuasiPolynomial::TotalCreatedPolys++;
 	this->CreationNumber=QuasiPolynomial::TotalCreatedPolys;
-	GlobalCollectorsPolys.AddObject(this); 
+	GlobalCollectorsPolys.AddObjectOnTop(this); 
 };
 
 void QuasiPolynomial::MakeTauknp(int k, int n)
@@ -4857,7 +4857,7 @@ void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplex
 	}
 	this->ComputeTaukn(k,n,output);
 	PrecomputedTaukn* NewMember = new PrecomputedTaukn;
-	this->AddObject(NewMember);
+	this->AddObjectOnTop(NewMember);
 	NewMember->k=k;
 	NewMember->n=n;
 	NewMember->Taukn.Assign(output);  
@@ -12183,6 +12183,19 @@ void IndicatorWindowVariables::PrepareStrings()
 	this->ProgressReportString4.assign(this->StatusString);
 }
 
+void simplicialCones::ComputeDebugString()
+{ this->ElementToString(this->DebugString);
+}
+
+void simplicialCones::ElementToString(std::string& output)
+{ std::stringstream out;
+	for (int i=0; i<this->size;i++)
+	{ this->TheObjects[i].ComputeDebugString();
+		out << this->TheObjects[i].DebugString <<"\n";
+	}
+	output= out.str();
+}
+
 void simplicialCones::initFromDirections(roots &directions)
 { Selection tempSel;
 	assert(directions.size>0);
@@ -12194,6 +12207,8 @@ void simplicialCones::initFromDirections(roots &directions)
 	int maxSize=::NChooseK(directions.size,root::AmbientDimension);
 	int maxNumFacets= 2*::NChooseK(directions.size, root::AmbientDimension-1);
 	this->SetActualSizeAtLeastExpandOnTop(maxSize);
+	this->theFacets.SetActualSizeAtLeastExpandOnTop(maxNumFacets);
+	this->ConesHavingFixedNormal.SetActualSizeAtLeastExpandOnTop(maxNumFacets);
 	for (int i=0;i<maxSize;i++)
 	{ tempSel.incrementSelectionFixedCardinality(root::AmbientDimension);
 		tempRoots.size=0;

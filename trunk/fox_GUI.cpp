@@ -75,6 +75,8 @@ private:
 public:
 	::FXCanvas* Canvas1DrawCanvas;
 	::FXTable* Table1Input;
+	::FXTable* Table2Indicator;
+	::FXTable* Table3Values;
 	::FXHorizontalFrame* HorizontalFrame1;
 	::FXHorizontalFrame* HorizontalFrame2;
 	::FXHorizontalFrame* HorizontalFrame3Background;
@@ -122,6 +124,8 @@ public:
   enum
   {	ID_Button1MainButtonCommand=FXMainWindow::ID_LAST,
 		ID_Table1InputCommand,
+		ID_Table2IndicatorCommand,
+		ID_Table3ValuesCommand,
 		ID_ListBox1WeylGroupCommand,
 		ID_Canvas1,
 		ID_ToggleButton1Custom,		
@@ -190,6 +194,7 @@ void RunComputationalThread()
 	SliceTheEuclideanSpace(	::InputRoots,::NextDirectionIndex,MainWindow1->WeylGroupIndex,
 													TheBigOutput,TheBigFacetOutput);
 	MainWindow1->TurnOnAllDangerousButtons();
+	MainWindow1->Button1MainButton->setText("Go");
 	MainWindow1->AllowRepaint=true;
 	MainWindow1->onRepaint(0,0,0);
 	MainWindow1->ComputationInProgress=false;
@@ -281,8 +286,17 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 		new ::FXLabel(tempHF1,"Num Vectors:");
 		this->Spinner2NumVectors= 
 		new ::FXSpinner(tempHF1,3,this,MainWindow::ID_Spinner2NumVectors,::LAYOUT_FIX_WIDTH,0,0,30,0);
+			this->Table2Indicator= 
+			new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table2IndicatorCommand, 
+									::LAYOUT_FIX_HEIGHT|::LAYOUT_FIX_WIDTH);
+			new ::FXSeparator(this->VerticalFrame2InputData);
 			this->Table1Input= 
-			new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table1InputCommand, ::LAYOUT_FIX_WIDTH);
+			new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table1InputCommand, 
+									::LAYOUT_FIX_HEIGHT|::LAYOUT_FIX_WIDTH);
+			new ::FXSeparator(this->VerticalFrame2InputData);
+			this->Table3Values= 
+			new FXTable(this->VerticalFrame2InputData,this,MainWindow::ID_Table3ValuesCommand, 
+									::LAYOUT_FIX_HEIGHT|::LAYOUT_FIX_WIDTH);
 		this->VerticalFrame1ProgressReports=				
 		new ::FXVerticalFrame(this->HorizontalFrame3Background,::LAYOUT_FILL,0,0);
 			this->Label1ProgressReport = 
@@ -296,7 +310,7 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 			this->Canvas1DrawCanvas =
 			new ::FXCanvas(	this->VerticalFrame1ProgressReports,this,MainWindow::ID_Canvas1,::LAYOUT_FILL);
 	this->FontDefaultDrawFont=
-		new FXFont(	a,"arial",10);
+	new FXFont(	a,"arial",10);
 //		new FXFont(	a,"helvetica",20,FXFont::Normal,FXFont::Straight,
 //								FONTENCODING_DEFAULT,FXFont::NonExpanded,
 //								FXFont::Scalable|FXFont::Rotatable);
@@ -318,9 +332,15 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 	//this->Table1Input->setBorderColor(FXRGB(192,192,192));
 	//this->HorizontalFrame1->setBackColor(FXRGB(192,222,22));
 	this->Table1Input->setBackColor(this->getBackColor());
+	this->Table2Indicator->setBackColor(this->getBackColor());
+	this->Table3Values->setBackColor(this->getBackColor());
 	this->Table1Input->setBaseColor( FXRGB(192,192,192));
 	this->Table1Input->setColumnHeaderHeight(0);
 	this->Table1Input->setRowHeaderWidth(0);
+	this->Table2Indicator->setRowHeaderWidth(0);
+	this->Table2Indicator->setColumnHeaderHeight(0);
+	this->Table3Values->setRowHeaderWidth(0);
+	this->Table3Values->setColumnHeaderHeight(0);
 	this->UsingCustomVectors=false;
 	this->WeylGroupIndex=3;
 	this->RankEuclideanSpaceGraphics=2;
@@ -418,7 +438,11 @@ long MainWindow::onButton1MainButtonCommand(FXObject*sender,FXSelector sel,void*
 
 long MainWindow::onToggleButton1Custom(FXObject*,FXSelector sel,void*)
 { FXbool tempB= this->ToggleButton1Custom->getState();
-	this->UsingCustomVectors= (bool)tempB;
+	if (tempB==0)
+	{	this->UsingCustomVectors=false;
+	}else
+	{ this->UsingCustomVectors=true;
+	}
 	this->updateListBox1();
 	return 1;
 }
@@ -474,6 +498,8 @@ void MainWindow::initWeylGroupInfo()
 		tempW.MakeArbitrary(this->WeylGroupLetter,this->WeylGroupIndex);
 		tempW.ComputeRho();
 		this->Table1Input->setTableSize(tempW.RootsOfBorel.size,this->WeylGroupIndex);
+		this->Table2Indicator->setTableSize(1,this->WeylGroupIndex);
+		this->Table3Values->setTableSize(1,this->WeylGroupIndex);
 		for (int i=0;i<tempW.RootsOfBorel.size;i++)
 		{ for (int j=0;j<root::AmbientDimension;j++)
 			{ std::string tempS;
@@ -485,11 +511,24 @@ void MainWindow::initWeylGroupInfo()
 //		this->Table1Input->getColumnHeader()->setWidth(20);
 		this->Table1Input->setVisibleColumns(root::AmbientDimension);
 		this->Table1Input->setVisibleRows(tempW.RootsOfBorel.size);
+		this->Table2Indicator->setVisibleColumns(root::AmbientDimension);
+		this->Table3Values->setVisibleColumns(root::AmbientDimension);
+		this->Table2Indicator->setVisibleRows(1);
+		this->Table3Values->setVisibleRows(1);
 //		this->Table1Input->fitColumnsToContents(0,root::AmbientDimension);
+		root tempRoot; tempRoot.Assign(tempW.rho); tempRoot.MultiplyByInteger(2);
 		for (int i=0;i<root::AmbientDimension;i++)
 		{ this->Table1Input->setColumnWidth(i,20);
+			std::string tempS;
+			tempRoot.coordinates[i].ElementToString(tempS);
+			this->Table2Indicator->setItemText(0,i,tempS.c_str());
+			this->Table1Input->setItemJustify(0,i,JUSTIFY_CENTER_X);
+			this->Table2Indicator->setColumnWidth(i,20);
+			this->Table3Values->setColumnWidth(i,20);
 		}
-		this->Table1Input->resize(root::AmbientDimension*20+5,tempW.RootsOfBorel.size*20);
+		this->Table1Input->resize(root::AmbientDimension*20+5,tempW.RootsOfBorel.size*20+3);
+		this->Table2Indicator->resize(root::AmbientDimension*20+5,23);
+		this->Table3Values->resize(root::AmbientDimension*20+5,23);
 		this->VPVectors.CopyFromBase(tempW.RootsOfBorel);
 		this->NumVectors=this->VPVectors.size;
 	}

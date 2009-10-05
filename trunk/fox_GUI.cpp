@@ -104,6 +104,7 @@ public:
 	::FXSpinner* Spinner2NumVectors;
 	::FXFont* FontDefaultDrawFont;
 	::FXText* Text1OutputMain;
+	::FXTextField* Text2Value;
 	ComputationSetup theComputationSetup;
 	WorkThreadClass WorkThread1;
   long onRepaint(FXObject* sender,FXSelector sel,void*ptr);
@@ -301,12 +302,14 @@ MainWindow::MainWindow(FXApp *a):FXMainWindow(a,"I will eat your RAM",NULL,NULL,
 									::LAYOUT_FIX_HEIGHT|::LAYOUT_FIX_WIDTH);
 			new ::FXSeparator(this->VerticalFrame2InputData);
 			this->HorizontalFrame7Table3Values= 
-			new ::FXHorizontalFrame(this->VerticalFrame2InputData,0,0,0,0,0,0,0,0,0);
+			new ::FXHorizontalFrame(this->VerticalFrame2InputData,::LAYOUT_FILL_X,0,0,0,0,0,0,0,0);
 				this->Table3Values= 
 				new FXTable(this->HorizontalFrame7Table3Values,this,MainWindow::ID_Table3ValuesCommand, 
 										::LAYOUT_FIX_HEIGHT|::LAYOUT_FIX_WIDTH);
 				new ::FXButton(	this->HorizontalFrame7Table3Values,"Evaluate",
 												0,this,MainWindow::ID_Button2EvaluateCommand);
+				this->Text2Value= 
+				new ::FXTextField(this->HorizontalFrame7Table3Values,1,this,MainWindow::ID_Text1Edit, ::LAYOUT_FILL_X);
 			this->Text1OutputMain= 
 			new ::FXText(this->VerticalFrame2InputData,this,MainWindow::ID_Text1Edit,::LAYOUT_FILL);
 		this->VerticalFrame1ProgressReports=				
@@ -445,7 +448,16 @@ long MainWindow::onButton1MainButtonCommand(FXObject*sender,FXSelector sel,void*
 }
 
 long MainWindow::onButton2EvaluateCommand(FXObject*sender,FXSelector sel,void*ptr)
-{	return 1;
+{	if (this->theComputationSetup.theOutput.NumVars!=this->Table3Values->getNumColumns())
+	{ return 1;
+	}
+	intRoot tempRoot;
+	for (int i=0;i<this->theComputationSetup.theOutput.NumVars;i++)
+	{ this->theComputationSetup.ValueRoot.elements[i]= ::FXIntVal(this->Table3Values->getItemText(0,i));
+	}
+	this->theComputationSetup.EvaluatePoly();
+	this->Text2Value->setText(this->theComputationSetup.ValueString.c_str(), this->theComputationSetup.ValueString.length());
+	return 1;
 }
 
 long MainWindow::onToggleButton1Custom(FXObject*,FXSelector sel,void*)

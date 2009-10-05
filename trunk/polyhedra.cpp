@@ -506,6 +506,11 @@ void ComputationSetup::Run()
 	this->ComputationInProgress=false;
 }
 
+void ComputationSetup::EvaluatePoly()
+{ this->theOutput.Evaluate(this->ValueRoot,this->Value);
+	this->Value.ElementToString(this->ValueString);
+}
+
 void GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y)
 {	x=TDV.centerX;
 	y=TDV.centerY;

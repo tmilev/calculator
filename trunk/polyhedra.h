@@ -2191,7 +2191,10 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend
 				if (NumLines>PolyFormat.LatexMaxLineLength)
 				{ NumLines=0;
 					out <<"\\\\\n&& ";
-					if (!PolyFormat.CarriageReturnRegular){out<<"\r\n";}
+					if (!PolyFormat.CarriageReturnRegular)
+					{	out<<"\r\n";}
+					else
+					{ out <<"\n";}
 					TotalNumLines++;
 				}
 			} 
@@ -3606,6 +3609,26 @@ public:
 		this->NumProcessedMonomials=0;
 		this->NumProcessedFractions=0;
 	};	
+};
+
+struct ComputationSetup
+{
+public:
+	partFractions thePartialFraction;
+	QuasiPolynomial theOutput;
+	root IndicatorRoot;
+	roots VPVectors;
+	bool AllowRepaint;
+	bool ComputationInProgress;
+	bool UsingCustomVectors;
+	bool ComputingPartialFractions;
+	bool ComputingVectorPartitions;
+	bool ComputingChambers;
+	char WeylGroupLetter;
+	unsigned char WeylGroupIndex;
+	unsigned char RankEuclideanSpaceGraphics;
+	void Run();
+	ComputationSetup();
 };
 
 class RandomCodeIDontWantToDelete

@@ -142,7 +142,7 @@ PolynomialOutputFormat PolyFormatLocal;
 int PolynomialOutputFormat::LatexMaxLineLength=125;
 int PolynomialOutputFormat::LatexCutOffLine=15; 
 bool PolynomialOutputFormat::UsingLatexFormat=true;
-bool PolynomialOutputFormat::CarriageReturnRegular=false;
+bool PolynomialOutputFormat::CarriageReturnRegular=true;
 PolynomialOutputFormat PolyFormatNumFrac;
 IndicatorWindowVariables IndicatorWindowGlobalVariables;
 template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1; 
@@ -373,7 +373,6 @@ int NChooseK(int n, int k)
 	return result;
 }
 
-
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 { this->ColorChamberIndicator=RGB(220,220,0);
 	this->DeadChamberTextColor= RGB(200,100,100);
@@ -463,6 +462,48 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	{ this->Colors[i]=RGB(this->ColorsR[i],this->ColorsG[i],this->ColorsB[i]);
 	}
 ////////////////////
+}
+
+ComputationSetup::ComputationSetup()
+{ this->AllowRepaint=true;
+	this->UsingCustomVectors=false;
+	this->ComputingPartialFractions=true;
+	this->ComputingVectorPartitions=true;
+	this->ComputingChambers=true;
+	this->ComputationInProgress=false;
+	this->WeylGroupLetter='A';
+	this->WeylGroupIndex=3;
+	this->RankEuclideanSpaceGraphics=3;
+}
+
+void ComputationSetup::Run()
+{ PolyFormatLocal.MakeRegularAlphabet();
+	PolynomialOutputFormat::LatexMaxLineLength=125;
+	this->AllowRepaint=false;
+	::initDLL(this->WeylGroupIndex);
+	if (this->ComputingPartialFractions)
+	{	if (!this->UsingCustomVectors)
+		{	this->thePartialFraction.ComputeKostantFunctionFromWeylGroup
+				(	this->WeylGroupLetter,this->WeylGroupIndex,this->theOutput,
+					&this->IndicatorRoot,false,false);
+			this->theOutput.ComputeDebugString();
+		}
+		else
+		{ //intRoots tempRoots;
+			//tempRoots.AssignRoots(this->VPVectors);
+			//this->thePartialFraction.initFromRootSystem(this->VPVectors,this->VPVectors,0);
+			//this->thePartialFraction.split();
+		}
+	}
+	if (this->ComputingChambers)
+	{	::InputRoots.CopyFromBase(this->VPVectors);
+		::NextDirectionIndex=this->WeylGroupIndex-1;
+		this->RankEuclideanSpaceGraphics=this->WeylGroupIndex;
+		SliceTheEuclideanSpace(	::InputRoots,::NextDirectionIndex,this->WeylGroupIndex,
+													TheBigOutput,TheBigFacetOutput);
+	}
+	this->AllowRepaint=true;
+	this->ComputationInProgress=false;
 }
 
 void GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y)

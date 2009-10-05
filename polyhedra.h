@@ -3616,7 +3616,10 @@ struct ComputationSetup
 public:
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
+	LargeRational Value;
+	std::string ValueString;
 	root IndicatorRoot;
+	intRoot ValueRoot;
 	roots VPVectors;
 	bool AllowRepaint;
 	bool ComputationInProgress;
@@ -3627,6 +3630,7 @@ public:
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 	unsigned char RankEuclideanSpaceGraphics;
+	void EvaluatePoly();
 	void Run();
 	ComputationSetup();
 };

@@ -3,28 +3,29 @@
 #include "polyhedra.h"
 
 //***************
-//The below functions are required to use polyhedra.h. 
-//They are defined in rootSA.cpp. 
+//The below functions are required to use polyhedra.h.
+//They are defined in rootSA.cpp.
 //If you are not running Windows or aren't happy with the rootSA.cpp file,
 //you need the below lines.
 //***************
 #ifndef WINDOWS
 #ifndef _WINDOWS
+/*
 void outputText(std::string theOutput)
 {
-} 
+}
 void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
 {
   std::cout <<"Num Reduced Fractions:"<< output.NumReducedPartFractions;
   std::cout <<"\tNum Total Fractions:"<< output.NumPartFractionsLoaded << "\n";
-} 
-void drawline(double X1, double Y1, double X2, double Y2, 
+}
+void drawline(double X1, double Y1, double X2, double Y2,
 								unsigned long thePenStyle, int ColorIndex)
 {
 }
 void drawtext(double X1, double Y1, const char* text, int length, int color)
 {
-}
+}*/
 #endif
 #endif
 //*******************************************
@@ -33,8 +34,8 @@ void drawtext(double X1, double Y1, const char* text, int length, int color)
 //*******************************************
 
 class ExampleComputation
-{	
-public: 
+{
+public:
 	void RunThomasExample();
 	void RunSomeTests();
 };
@@ -60,7 +61,7 @@ int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
 }
 void ExampleComputation::RunSomeTests()
 { intRoots toBeSplit;
-	root indicator; 
+	root indicator;
 	::FillInRoots(toBeSplit,indicator);
 	partFractions tempPF;
 	tempPF.UsingIndicatorRoot=false;
@@ -81,12 +82,12 @@ void ExampleComputation::RunSomeTests()
 }
 
 int AltMain(void)
-{ //The below lines compute a partial fraction decomposition for the 
+{ //The below lines compute a partial fraction decomposition for the
 	//generating function of the Kostant partition function for G2
 	//printout tempPF.DebugString to get the final result
 	//ExampleComputation t1;
 	//t1.RunSomeTests();
-		
+
 	partFractions tempPF;
 	intRoots theBorel,theVPbasis;
 	intRoot tempWeight;
@@ -114,8 +115,8 @@ int AltMain(void)
 	std::string LatexString;
 	LatexString=outputStream.str();
 	//you can copy the content of LatexString to a latex compiler
-	//it is supposed to display a partial fraction identity 
-	
+	//it is supposed to display a partial fraction identity
+
 	ExampleComputation ThomasExample;
 	ThomasExample.RunSomeTests();
 	//ThomasExample.RunThomasExample();

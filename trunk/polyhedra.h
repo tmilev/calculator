@@ -46,9 +46,10 @@
 #include <iostream>
 #include <fstream>
 
-
+#ifdef WINDOWS
 #pragma warning(disable:4100)//warning C4100: non-referenced formal parameter
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
+#endif
 
 const int MaxRank=12;
 const int MaxNumberOfRoots= 100;
@@ -2502,7 +2503,7 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 
 class LargeInt:public ListBasicObjects<unsigned int>
 {	friend class LargeRational;
-	static const unsigned int CarryOverBound=2147483648;//=2^31
+	static const unsigned int CarryOverBound=37;//2147483648;//=2^31
 //	static const unsigned int CarryOverBound=37;
 	void AddPositive(LargeInt& x);
 	void SubtractSmallerPositive(LargeInt& x);

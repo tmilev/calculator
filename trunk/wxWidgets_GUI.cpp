@@ -12,10 +12,13 @@
 #include "wx/colordlg.h"
 #include "wx/fontdlg.h"
 #include "wx/numdlg.h"
+#include "wx/tglbtn.h"
 
 #include "wx/grid.h"
 #include "wx/generic/gridctrl.h"
+#include "wx/sizer.h"
 #include "polyhedra.h"
+
 
 
 class guiApp : public wxApp
@@ -42,14 +45,17 @@ class guiMainWindow : public wxFrame
   wxBoxSizer* BoxSizer2VerticalInputs;
   wxBoxSizer* BoxSizer3HorizontalInputButtons;
   wxBoxSizer* BoxSizer4VerticalToggleButton1;
+  ::wxToggleButton* ToggleButton1UsingCustom;
 public:
-  void ToggleRowLabels( wxCommandEvent& );
-  void onQuit( wxCommandEvent& );
+  void onToggleButton1UsingCustom( wxCommandEvent& ev);
+  void onQuit( wxCommandEvent& ev);
+  
   guiMainWindow();
   ~guiMainWindow();
   void OnQuit( wxCommandEvent& );
   enum
-  { ID_TOGGLEROWLABELS = 100,
+  { ID_ToggleButton1UsingCustom = 100,
+		
   };
   DECLARE_EVENT_TABLE()
 };
@@ -64,18 +70,27 @@ bool guiApp::OnInit()
 }
 
 BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
-    EVT_MENU( ID_TOGGLEROWLABELS,  guiMainWindow::ToggleRowLabels )
+	EVT_BUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
 END_EVENT_TABLE()
 
 guiMainWindow::guiMainWindow()
-        : wxFrame( (wxFrame *)NULL, wxID_ANY, _T("wxWidgets grid class demo"),
-                   wxDefaultPosition,
-                   wxDefaultSize )
-{ this->BoxSizer1HorizontalBackground = new wxBoxSizer(wxHORIZONTAL);
-   this->Table1Input = new wxGrid( this, wxID_ANY,wxPoint( 0, 0 ), wxSize( 400, 300 ) );
+        : wxFrame( (wxFrame *)NULL, wxID_ANY, _T("I will eat your RAM"),
+                   wxPoint(100,100),
+                   wxSize(600,600))
+{	this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
+	this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
+	this->BoxSizer4VerticalToggleButton1= new ::wxBoxSizer(wxVERTICAL);
+	this->ToggleButton1UsingCustom= new ::wxToggleButton(this,guiMainWindow::ID_ToggleButton1UsingCustom,"Switch to custom");
+  this->Table1Input = new wxGrid( this,::wxID_ANY);
+	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs);
+	this->BoxSizer2VerticalInputs->Add(this->BoxSizer4VerticalToggleButton1);
+	this->BoxSizer4VerticalToggleButton1->Add(this->ToggleButton1UsingCustom);
+	this->BoxSizer2VerticalInputs->Add(this->Table1Input);
+	SetSizer(this->BoxSizer1HorizontalBackground);
+	
   this->Table1Input->CreateGrid( 0, 0 );
-  this->Table1Input->AppendRows(10);
-  this->Table1Input->AppendCols(10);
+  this->Table1Input->AppendRows(5);
+  this->Table1Input->AppendCols(5);
   Centre();
 }
 
@@ -84,13 +99,8 @@ guiMainWindow::~guiMainWindow()
 {
 }
 
-void guiMainWindow::ToggleRowLabels( wxCommandEvent& WXUNUSED(ev) )
-{ if ( GetMenuBar()->IsChecked( ID_TOGGLEROWLABELS ) )
-  { this->Table1Input->SetRowLabelSize( this->Table1Input->GetDefaultRowLabelSize() );
-  }
-  else
-  { this->Table1Input->SetRowLabelSize( 0 );
-  }
+void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
+{ 
 }
 
 void guiMainWindow::OnQuit( wxCommandEvent& WXUNUSED(ev) )

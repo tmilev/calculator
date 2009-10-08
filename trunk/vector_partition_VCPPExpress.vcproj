@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="vector_partition"
 	ProjectGUID="{0912DD84-4EF4-4B4B-B998-B1A3AE20F298}"
 	TargetFrameworkVersion="0"
@@ -736,7 +736,9 @@
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\vc_mswd\grid/grid.pch"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
+				PrecompiledHeaderFile=""
 				AssemblerListingLocation=".\vc_mswd\grid/"
 				ObjectFile=".\vc_mswd\grid/"
 				ProgramDataBaseFileName="vc_mswd\grid.pdb"

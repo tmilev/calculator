@@ -49,13 +49,13 @@ class guiMainWindow : public wxFrame
 public:
   void onToggleButton1UsingCustom( wxCommandEvent& ev);
   void onQuit( wxCommandEvent& ev);
-  
+
   guiMainWindow();
   ~guiMainWindow();
   void OnQuit( wxCommandEvent& );
   enum
   { ID_ToggleButton1UsingCustom = 100,
-		
+
   };
   DECLARE_EVENT_TABLE()
 };
@@ -80,14 +80,14 @@ guiMainWindow::guiMainWindow()
 {	this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
 	this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
 	this->BoxSizer4VerticalToggleButton1= new ::wxBoxSizer(wxVERTICAL);
-	this->ToggleButton1UsingCustom= new ::wxToggleButton(this,guiMainWindow::ID_ToggleButton1UsingCustom,"Switch to custom");
+	this->ToggleButton1UsingCustom= new ::wxToggleButton(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new wxGrid( this,::wxID_ANY);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs);
 	this->BoxSizer2VerticalInputs->Add(this->BoxSizer4VerticalToggleButton1);
 	this->BoxSizer4VerticalToggleButton1->Add(this->ToggleButton1UsingCustom);
 	this->BoxSizer2VerticalInputs->Add(this->Table1Input);
 	SetSizer(this->BoxSizer1HorizontalBackground);
-	
+
   this->Table1Input->CreateGrid( 0, 0 );
   this->Table1Input->AppendRows(5);
   this->Table1Input->AppendCols(5);
@@ -100,7 +100,7 @@ guiMainWindow::~guiMainWindow()
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
-{ 
+{
 }
 
 void guiMainWindow::OnQuit( wxCommandEvent& WXUNUSED(ev) )

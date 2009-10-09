@@ -42,7 +42,7 @@ public:
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
             long style = wxWANTS_CHARS,
-            const wxString& name = wxGridNameStr );
+            const wxString& name = wxT("") );
 };
 
 class WorkThreadClass
@@ -96,7 +96,7 @@ public:
   void onListBox1Change( wxCommandEvent& ev);
   void onButton2Eval( wxCommandEvent& ev);
   void onButton1Go( wxCommandEvent& ev);
-	void onSpinner1and2(wxCommandEvent & ev);
+	void onSpinner1and2(wxSpinEvent & ev);
 	void onPaint(wxPaintEvent& ev);
 	void onMouseDownOnCanvas(wxMouseEvent& ev);
 	void ReadVPVectors();
@@ -139,8 +139,8 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_BUTTON(guiMainWindow::ID_Button1Go, guiMainWindow::onButton1Go)
 	EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
 	EVT_LEFT_UP( guiMainWindow::onMouseDownOnCanvas)
-	::EVT_TEXT(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
-	::EVT_TEXT(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
+	EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
+	EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
 	EVT_CLOSE(guiMainWindow::OnExit)
 	//EVT_PAINT(guiMainWindow::onPaint)
 
@@ -214,7 +214,7 @@ guiMainWindow::guiMainWindow()
 	this->BoxSizer8HorizontalEval =new ::wxBoxSizer(wxHORIZONTAL);
 	this->BoxSizer9HorizontalCombo1AndMainButton= new ::wxBoxSizer(wxHORIZONTAL);
 	this->ToggleButton1UsingCustom= new ::wxToggleButton(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
-  this->Table1Input = new ::wxGridExtra( this,wxID_ANY,::wxPoint(0,0),wxSize(100,300),wxEXPAND| wxALL);
+  this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
   this->Table3Values = new wxGridExtra( this,::wxID_ANY);
 	this->Label1ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
@@ -236,13 +236,13 @@ guiMainWindow::guiMainWindow()
 	this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
 	this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
 	this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
-	this->BoxSizer1HorizontalBackground->Fit(this);
+	//this->BoxSizer1HorizontalBackground->Fit(this);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,1);
-		this->BoxSizer2VerticalInputs->Add(this->BoxSizer6HorizontalInputsBlock, wxEXPAND| wxALL);
-			this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer4VerticalToggleButton1, wxEXPAND| wxALL);
+		this->BoxSizer2VerticalInputs->Add(this->BoxSizer6HorizontalInputsBlock,0, wxEXPAND| wxALL,0);
+			this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer4VerticalToggleButton1,0, wxEXPAND| wxALL,0);
 				this->BoxSizer4VerticalToggleButton1->Add(this->ToggleButton1UsingCustom,0,0,0);
 				this->BoxSizer4VerticalToggleButton1->Add(this->Spin1Dim,0,0,0);
-			this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer7VerticalListBox1, wxEXPAND| wxALL);
+			this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer7VerticalListBox1,0, wxEXPAND| wxALL,0);
         this->BoxSizer7VerticalListBox1->Add(this->BoxSizer9HorizontalCombo1AndMainButton, wxEXPAND| wxALL);
           this->BoxSizer9HorizontalCombo1AndMainButton->Add(this->ListBox1WeylGroup,0,0,0);
           this->BoxSizer9HorizontalCombo1AndMainButton->Add(this->Button1Go, 0,0,0);
@@ -250,7 +250,7 @@ guiMainWindow::guiMainWindow()
 			//this->BoxSizer7VerticalListBox1->Add(this->Spin2NumVect);
 		this->BoxSizer2VerticalInputs->Add(this->Table2Indicator,0,wxEXPAND|wxALL);
 		this->BoxSizer2VerticalInputs->Add(this->Table1Input,0,wxEXPAND|wxALL);
-		this->BoxSizer2VerticalInputs->Add(this->BoxSizer8HorizontalEval);
+		this->BoxSizer2VerticalInputs->Add(this->BoxSizer8HorizontalEval,0, wxBOTTOM);
 			this->BoxSizer8HorizontalEval->Add(this->Table3Values);
 			this->BoxSizer8HorizontalEval->Add(this->Button2Eval);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer5VerticalCanvasAndProgressReport,1,wxEXPAND|wxALL);
@@ -272,7 +272,7 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup->Append(wxT("D4"));
 	this->ListBox1WeylGroup->Append(wxT("G2"));
 	this->ListBox1WeylGroup->SetSelection(1);
-  SetSizer(this->BoxSizer1HorizontalBackground);
+  this->SetSizer(this->BoxSizer1HorizontalBackground);
  	this->maxDim=5;
 	this->maxNumVect=15;
 	this->theComputationSetup.ComputationInProgress=false;
@@ -370,7 +370,7 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 	return;
 }
 
-void guiMainWindow::onSpinner1and2(wxCommandEvent & ev)
+void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
 { int candidateDim= this->Spin1Dim->GetValue();
 	int candidateNumVectors= this->Spin2NumVect->GetValue();
 	if (candidateDim!= this->theComputationSetup.WeylGroupIndex ||
@@ -478,7 +478,7 @@ void guiMainWindow::initWeylGroupInfo()
 		this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);
 		this->NumVectors=this->theComputationSetup.VPVectors.size;
 	}
-	
+
 /*	this->Table1Input->FitInside();
 	this->Table2Indicator->FitInside();
 	this->Table3Values->FitInside();*/
@@ -532,12 +532,12 @@ void guiMainWindow::TurnOnAllDangerousButtons()
 void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 {	this->NumVectors=r;
 	this->theComputationSetup.WeylGroupIndex= c;
-	this->Table1Input->CreateGrid(this->NumVectors,this->theComputationSetup.WeylGroupIndex);
+	this->Table1Input->SetNumRowsAndCols(this->NumVectors,this->theComputationSetup.WeylGroupIndex);
 	for (int j=0;j<c;j++)
 	{ this->Table1Input->SetColumnWidth(j,20);
 	}
-//	this->Table1Input->setVisibleColumns(Minimum(c,10));
-//	this->Table1Input->setVisibleRows(Minimum(r,20));
+	this->Table1Input->Fit();
+  this->BoxSizer2VerticalInputs->Layout();
 }
 
 void guiMainWindow::TurnOffAllDangerousButtons()
@@ -547,9 +547,9 @@ void guiMainWindow::TurnOffAllDangerousButtons()
 	this->ToggleButton1UsingCustom->Disable();
 }
 
-wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id, 
-													const wxPoint &pos, 
-													const wxSize &size, 
+wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id,
+													const wxPoint &pos,
+													const wxSize &size,
 													long style, const wxString &name)
 { this->maxNumCols=5;
 	this->maxNumRows=16;

@@ -761,10 +761,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="wxmsw28d_adv.lib wxmsw28d_html.lib wxbase28d_xml.lib wxmsw28d_core.lib wxbase28d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib odbc32.lib"
-				OutputFile="vc_mswd\grid.exe"
+				OutputFile="Debug\vp_windows.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\..\..\lib\vc_lib"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="vc_mswd\grid.pdb"
 				SubSystem="2"
@@ -1584,6 +1584,14 @@
 			Name="Source Files"
 			>
 			<File
+				RelativePath=".\example.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\polyhedra.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\wxWidgets_GUI.cpp"
 				>
 				<FileConfiguration
@@ -1732,6 +1740,18 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="header files"
+			>
+			<File
+				RelativePath=".\polyhedra.h"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath=".\ReadMe.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

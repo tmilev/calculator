@@ -24,6 +24,11 @@
 #include "polyhedra.h"
 
 extern DrawingVariables TDV;
+extern int NextDirectionIndex;
+extern int RankGlobal;
+extern roots InputRoots;
+extern CombinatorialChamberPointers TheBigOutput;
+extern FacetPointers TheBigFacetOutput;
 
 class guiApp : public wxApp
 {
@@ -307,20 +312,15 @@ void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
 }
 
 void guiMainWindow::onPaint(wxPaintEvent &ev)
-{	/*if (this->theComputationSetup.AllowRepaint)
+{	if (this->theComputationSetup.AllowRepaint)
 	{	root::AmbientDimension= this->theComputationSetup.RankEuclideanSpaceGraphics;
 		root tempRoot;
 		tempRoot.MakeZero();
-		::FXDCWindow dc(this->Canvas1DrawCanvas);
-		dc.setForeground(this->Canvas1DrawCanvas->getBackColor());
-		dc.fillRectangle(0,0,this->Canvas1DrawCanvas->getWidth(),this->Canvas1DrawCanvas->getHeight());
-		if (this->ListBox1WeylGroup->getCurrentItem()==2)
-		{ std::string tempS;
-			tempS.clear();
-		}
+		::wxWindowDC dc(this->Canvas1);
+		dc.SetBackground(this->Canvas1->GetBackgroundColour());
+		dc.DrawRectangle(wxPoint(0,0),this->Canvas1->GetSize());
 		::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,tempRoot);
 	}
-	return 1;*/
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent &ev)
@@ -591,16 +591,16 @@ void outputText(std::string theOutput)
 }
 
 void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
-{/*	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
+{	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
 	if (MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered)
 	{	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
 		return;
 	}
-	MainWindow1->Label1ProgressReport->setText(output.ProgressReportString1.c_str());
-	MainWindow1->Label2ProgressReport->setText(output.ProgressReportString2.c_str());
-	MainWindow1->Label3ProgressReport->setText(output.ProgressReportString3.c_str());
-	MainWindow1->Label4ProgressReport->setText(output.ProgressReportString4.c_str());
-	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;*/
+	MainWindow1->Label1ProgressReport->SetLabel(::wxString(output.ProgressReportString1.c_str(),wxConvUTF8));
+	MainWindow1->Label2ProgressReport->SetLabel(::wxString(output.ProgressReportString2.c_str(),wxConvUTF8));
+	MainWindow1->Label3ProgressReport->SetLabel(::wxString(output.ProgressReportString3.c_str(),wxConvUTF8));
+	MainWindow1->Label4ProgressReport->SetLabel(::wxString(output.ProgressReportString4.c_str(),wxConvUTF8));
+	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
 }
 //color styles (taken from windows.h and substituted for independence of the .h file):
 // 0 = normal line

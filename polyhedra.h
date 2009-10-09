@@ -46,7 +46,7 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef WINDOWS
+#ifdef _WINDOWS
 #pragma warning(disable:4100)//warning C4100: non-referenced formal parameter
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
 #endif

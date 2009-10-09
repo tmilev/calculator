@@ -20,8 +20,8 @@
 #include "wx/spinbutt.h"
 #include "wx/menu.h"
 #include "wx/spinctrl.h"
-#include "polyhedra.h"
 #include "wx/textctrl.h"
+#include "polyhedra.h"
 
 extern DrawingVariables TDV;
 
@@ -29,6 +29,20 @@ class guiApp : public wxApp
 {
 public:
   bool OnInit();
+};
+
+class wxGridExtra : public wxGrid
+{
+public:
+	int maxNumCols;
+	int maxNumRows;
+	void SetNumRowsAndCols(int r, int c);
+	wxGridExtra( wxWindow *parent,
+            wxWindowID id,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxWANTS_CHARS,
+            const wxString& name = wxGridNameStr );
 };
 
 class WorkThreadClass
@@ -47,9 +61,9 @@ class guiMainWindow : public wxFrame
 {
 public:
   ComputationSetup theComputationSetup;
-  wxGrid *Table1Input;
-  wxGrid *Table2Indicator;
-  wxGrid *Table3Values;
+  wxGridExtra *Table1Input;
+  wxGridExtra *Table2Indicator;
+  wxGridExtra *Table3Values;
   int maxDim; int maxNumVect; int ClickToleranceX; int ClickToleranceY;	int NumVectors;
   WorkThreadClass WorkThread1;
   wxBoxSizer* BoxSizer1HorizontalBackground;
@@ -82,13 +96,13 @@ public:
   void onListBox1Change( wxCommandEvent& ev);
   void onButton2Eval( wxCommandEvent& ev);
   void onButton1Go( wxCommandEvent& ev);
-	void onSpinner1and2(wxSpinEvent& ev);
+	void onSpinner1and2(wxCommandEvent & ev);
 	void onPaint(wxPaintEvent& ev);
 	void onMouseDownOnCanvas(wxMouseEvent& ev);
 	void ReadVPVectors();
 	void TurnOnAllDangerousButtons();
 	void TurnOffAllDangerousButtons();
-	void updateListBox1();
+	void updateInputButtons();
 	void initWeylGroupInfo();
 	void initTableFromRowsAndColumns(int r, int c);
   guiMainWindow();
@@ -120,13 +134,13 @@ bool guiApp::OnInit()
 }
 
 BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
-	EVT_BUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
+	EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
 	EVT_BUTTON(guiMainWindow::ID_Buton2Eval, guiMainWindow::onButton2Eval)
 	EVT_BUTTON(guiMainWindow::ID_Button1Go, guiMainWindow::onButton1Go)
 	EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
 	EVT_LEFT_UP( guiMainWindow::onMouseDownOnCanvas)
-	//EVT_SPIN(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
-	//EVT_SPIN(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
+	::EVT_TEXT(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
+	::EVT_TEXT(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
 	EVT_CLOSE(guiMainWindow::OnExit)
 	//EVT_PAINT(guiMainWindow::onPaint)
 
@@ -139,8 +153,7 @@ void RunComputationalThread()
 	wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
 	MainWindow1->Text1Output->WriteText(tempWS);
 	MainWindow1->TurnOnAllDangerousButtons();
-	tempWS= wxT("G");
-	MainWindow1->Button1Go->SetTitle(tempWS);
+	MainWindow1->Button1Go->SetLabel(wxT("Go"));
 }
 
 void guiMainWindow::onMouseDownOnCanvas(wxMouseEvent &ev)
@@ -201,15 +214,15 @@ guiMainWindow::guiMainWindow()
 	this->BoxSizer8HorizontalEval =new ::wxBoxSizer(wxHORIZONTAL);
 	this->BoxSizer9HorizontalCombo1AndMainButton= new ::wxBoxSizer(wxHORIZONTAL);
 	this->ToggleButton1UsingCustom= new ::wxToggleButton(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
-  this->Table1Input = new ::wxGrid( this,0,0,500,500,wxEXPAND| wxALL);
-  this->Table2Indicator = new wxGrid( this,::wxID_ANY);
-  this->Table3Values = new wxGrid( this,::wxID_ANY);
+  this->Table1Input = new ::wxGridExtra( this,wxID_ANY,::wxPoint(0,0),wxSize(100,300),wxEXPAND| wxALL);
+  this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
+  this->Table3Values = new wxGridExtra( this,::wxID_ANY);
 	this->Label1ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Label2ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Label3ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Label4ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
-	this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin1Dim);
+	this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
 	//this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	//this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	this->Canvas1 = new ::wxPanel(this,0,0,0,0,::wxEXPAND|wxALL);
@@ -217,7 +230,7 @@ guiMainWindow::guiMainWindow()
   this->Table1Input->CreateGrid( 0, 0 );
   this->Table2Indicator->CreateGrid( 0, 0 );
   this->Table3Values->CreateGrid(0,0);
-	this->ListBox1WeylGroup= new ::wxComboBox(this,this->ID_ListBox1,wxT("A2"),
+	this->ListBox1WeylGroup= new ::wxComboBox(this,this->ID_ListBox1,wxT("A3"),
                                             wxPoint(0,0),wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight),0,0,wxCB_DROPDOWN);
 	this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
 	this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
@@ -250,10 +263,6 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup->Append(wxT("A3"));
   this->ListBox1WeylGroup->Append(wxT("A4"));
   this->ListBox1WeylGroup->Append(wxT("A5"));
-
-  this->ListBox1WeylGroup->Append(wxT("A3"));
-	this->ListBox1WeylGroup->Append(wxT("A4"));
-	this->ListBox1WeylGroup->Append(wxT("A5"));
 	this->ListBox1WeylGroup->Append(wxT("B2"));
   this->ListBox1WeylGroup->Append(wxT("B3"));
   this->ListBox1WeylGroup->Append(wxT("B4"));
@@ -262,8 +271,7 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup->Append(wxT("C4"));
   this->ListBox1WeylGroup->Append(wxT("D4"));
 	this->ListBox1WeylGroup->Append(wxT("G2"));
-  this->ListBox1WeylGroup->SetSelection(0,0);
-
+	this->ListBox1WeylGroup->SetSelection(1);
   SetSizer(this->BoxSizer1HorizontalBackground);
  	this->maxDim=5;
 	this->maxNumVect=15;
@@ -277,7 +285,8 @@ guiMainWindow::guiMainWindow()
 	TDV.centerX=150;
 	TDV.centerY=200;
 	this->initWeylGroupInfo();
-	this->Canvas1->Fit();
+	this->updateInputButtons();
+	this->Fit();
 	Centre();
 }
 
@@ -289,10 +298,12 @@ guiMainWindow::~guiMainWindow()
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
 { if (!this->ToggleButton1UsingCustom->GetValue())
 	{	this->theComputationSetup.UsingCustomVectors=false;
+		this->SetLabel(wxT("Switch to custom"));
 	}else
 	{ this->theComputationSetup.UsingCustomVectors=true;
+		this->SetLabel(wxT("Switch to roots"));
 	}
-	this->updateListBox1();
+	this->updateInputButtons();
 }
 
 void guiMainWindow::onPaint(wxPaintEvent &ev)
@@ -317,7 +328,7 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 #ifdef WIN32
 	if (!this->theComputationSetup.ComputationInProgress)
 	{ this->theComputationSetup.ComputationInProgress=true;
-		this->Button1MainButton->setText("Pause");
+		this->Button1Go->SetLabel(wxT("Pause"));
 		this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
 	}
 	else
@@ -331,17 +342,16 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 			ParallelComputing::ReachSafePointASAP=false;
 			::SuspendThread(this->WorkThread1.ComputationalThread);
 			this->WorkThread1.isRunning=false;
-			this->Button1MainButton->setText("Go");
+			this->Button1Go->SetLabel(wxT("Go"));
 			this->WorkThread1.CriticalSectionWorkThreadEntered=false;
 			this->WorkThread1.CriticalSectionPauseButtonEntered=false;
 		}
 		else
-		{	this->Button1MainButton->setText("Pause");
+		{	this->Button1Go->SetLabel(wxT("Go"));
 			this->WorkThread1.isRunning=true;
 			::ResumeThread(this->WorkThread1.ComputationalThread);
 		}
 	}
-	return 1;
 #else
 	this->WorkThread1.run();
 #endif
@@ -360,7 +370,7 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 	return;
 }
 
-void guiMainWindow::onSpinner1and2(wxSpinEvent& ev)
+void guiMainWindow::onSpinner1and2(wxCommandEvent & ev)
 { int candidateDim= this->Spin1Dim->GetValue();
 	int candidateNumVectors= this->Spin2NumVect->GetValue();
 	if (candidateDim!= this->theComputationSetup.WeylGroupIndex ||
@@ -385,7 +395,7 @@ void guiMainWindow::onSpinner1and2(wxSpinEvent& ev)
 	}
 }
 
-void guiMainWindow::updateListBox1()
+void guiMainWindow::updateInputButtons()
 { if (this->theComputationSetup.UsingCustomVectors)
 	{ this->ListBox1WeylGroup->Disable();
 		this->Spin1Dim->Enable();
@@ -409,7 +419,8 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 {	std::string tempS;
 	unsigned char newWeylGroupIndex=0;
 	char newWeylGroupLetter=0;
-	switch(this->ListBox1WeylGroup->GetCurrentSelection())
+	int tempI=this->ListBox1WeylGroup->GetCurrentSelection();
+	switch(tempI)
 	{ case 0:	newWeylGroupIndex=2;  newWeylGroupLetter='A'; break;
 		case 1:	newWeylGroupIndex=3;  newWeylGroupLetter='A'; break;
 		case 2:	newWeylGroupIndex=4;  newWeylGroupLetter='A'; break;
@@ -439,10 +450,10 @@ void guiMainWindow::initWeylGroupInfo()
 		tempW.MakeArbitrary(this->theComputationSetup.WeylGroupLetter,
 												this->theComputationSetup.WeylGroupIndex);
 		tempW.ComputeRho();
-		this->Table1Input->CreateGrid(tempW.RootsOfBorel.size,
+		this->Table1Input->SetNumRowsAndCols(tempW.RootsOfBorel.size,
 																		this->theComputationSetup.WeylGroupIndex);
-		this->Table2Indicator->CreateGrid(1,this->theComputationSetup.WeylGroupIndex);
-		this->Table3Values->CreateGrid(1,this->theComputationSetup.WeylGroupIndex);
+		this->Table2Indicator->SetNumRowsAndCols(1,this->theComputationSetup.WeylGroupIndex);
+		this->Table3Values->SetNumRowsAndCols(1,this->theComputationSetup.WeylGroupIndex);
 		for (int i=0;i<tempW.RootsOfBorel.size;i++)
 		{ for (int j=0;j<root::AmbientDimension;j++)
 			{ std::string tempS;
@@ -461,12 +472,22 @@ void guiMainWindow::initWeylGroupInfo()
 			this->Table2Indicator->SetColumnWidth(i,20);
 			this->Table3Values->SetColumnWidth(i,20);
 		}
-		this->Table1Input->SetSize(root::AmbientDimension*20+5,tempW.RootsOfBorel.size*20+3);
-		this->Table2Indicator->SetSize(root::AmbientDimension*20+5,23);
-		this->Table3Values->SetSize(root::AmbientDimension*20+5,23);
+		//this->Table1Input->SetSize(root::AmbientDimension*20+7,tempW.RootsOfBorel.size*20+7);
+		//this->Table2Indicator->SetSize(root::AmbientDimension*20+7,27);
+		//this->Table3Values->SetSize(root::AmbientDimension*20+7,27);
 		this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);
 		this->NumVectors=this->theComputationSetup.VPVectors.size;
 	}
+	
+/*	this->Table1Input->FitInside();
+	this->Table2Indicator->FitInside();
+	this->Table3Values->FitInside();*/
+	this->Table1Input->SetColLabelSize(0);
+	this->Table1Input->SetRowLabelSize(0);
+	this->Table2Indicator->SetColLabelSize(0);
+	this->Table2Indicator->SetRowLabelSize(0);
+	this->Table3Values->SetColLabelSize(0);
+	this->Table3Values->SetRowLabelSize(0);
 	//this->Table1Input->recalc();
 }
 
@@ -525,6 +546,39 @@ void guiMainWindow::TurnOffAllDangerousButtons()
 	this->Spin2NumVect->Disable();
 	this->ToggleButton1UsingCustom->Disable();
 }
+
+wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id, 
+													const wxPoint &pos, 
+													const wxSize &size, 
+													long style, const wxString &name)
+{ this->maxNumCols=5;
+	this->maxNumRows=16;
+	this->Create(parent,id,pos,size,style,name);
+}
+
+void wxGridExtra::SetNumRowsAndCols(int r, int c)
+{ if (r<0 || r>this->maxNumRows|| c<0 ||c>this->maxNumCols)
+		return;
+	int oldNumRows=	this->GetNumberRows();
+	int oldNumCols= this->GetNumberCols();
+	if (oldNumRows>r)
+	{ this->DeleteRows(oldNumRows-1,oldNumRows-r,true);
+		oldNumRows=r;
+	}
+	if(oldNumRows<r)
+	{ this->InsertRows(oldNumRows-1,r-oldNumRows,true);
+		oldNumRows=r;
+	}
+	if (oldNumCols>c)
+	{ this->DeleteCols(oldNumCols-1,oldNumCols-c,true);
+		oldNumCols=c;
+	}
+	if(oldNumCols<c)
+	{ this->InsertCols(oldNumCols-1,c-oldNumCols,true);
+		oldNumCols=c;
+	}
+}
+
 
 void WorkThreadClass::run()
 {	::RunComputationalThread();

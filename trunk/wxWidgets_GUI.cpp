@@ -62,6 +62,39 @@ public:
 	void run();
 };
 
+class wxComboBoxWheel : public wxComboBox
+{
+public:
+  wxComboBoxWheel( wxWindow *parent,
+                    wxWindowID id,
+                    const wxString& value= wxT(""),
+                    const wxPoint& pos = wxDefaultPosition,
+                    const wxSize& size = wxDefaultSize,
+                    const int n=0 ,const wxString choices[]=0,
+                    const long style = wxWANTS_CHARS,
+                    const wxValidator& validator=wxDefaultValidator,
+                    const wxString& name = wxT(""));
+  void OnMouseWheel(wxMouseEvent& event);
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxComboBoxWheel, wxComboBox)
+   EVT_MOUSEWHEEL(wxComboBoxWheel::OnMouseWheel)
+END_EVENT_TABLE()
+
+wxComboBoxWheel::wxComboBoxWheel( wxWindow *parent,
+                    wxWindowID id,
+                    const wxString& value,
+                    const wxPoint& pos ,
+                    const wxSize& size ,
+                    const int n ,const wxString choices[],
+                    const long style ,
+                    const wxValidator& validator,
+                    const wxString& name )
+:wxComboBox(parent,id,value,pos,size,n,choices,style,validator,name)
+{
+}
+
 class guiMainWindow : public wxFrame
 {
 public:
@@ -90,7 +123,7 @@ public:
 	::wxStaticText* Label6ProgressReport;
 	::wxStaticText* Label7Dim;
 	::wxStaticText* Label8NumVect;
-  ::wxComboBox* ListBox1WeylGroup;
+  ::wxComboBoxWheel* ListBox1WeylGroup;
   ::wxButton* Button1Go;
   ::wxButton* Button2Eval;
   ::wxSpinCtrl* Spin1Dim;
@@ -160,6 +193,17 @@ void RunComputationalThread()
 	MainWindow1->TurnOnAllDangerousButtons();
 	MainWindow1->Button1Go->SetLabel(wxT("Go"));
 }
+
+
+void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
+{  // scroll in drop down list using mouse wheel
+   int rot = event.GetWheelRotation()/event.GetWheelDelta();
+   int lines = rot*1;// event.GetLinesPerAction();
+   this->SetSelection(this->GetSelection()-lines);
+   wxCommandEvent ev;
+   MainWindow1->onListBox1Change(ev);
+}
+
 
 void guiMainWindow::onMouseDownOnCanvas(wxMouseEvent &ev)
 { int Realx=ev.GetX(); int Realy=ev.GetY();
@@ -235,14 +279,14 @@ guiMainWindow::guiMainWindow()
   this->Table1Input->CreateGrid( 0, 0 );
   this->Table2Indicator->CreateGrid( 0, 0 );
   this->Table3Values->CreateGrid(0,0);
-	this->ListBox1WeylGroup= new ::wxComboBox(this,this->ID_ListBox1,wxT("A3"),
-                                            wxPoint(0,0),wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight),0,0,wxCB_DROPDOWN);
+	this->ListBox1WeylGroup= new ::wxComboBoxWheel(this,this->ID_ListBox1,wxT("A3"),
+                                            wxPoint(0,0),wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight),0,0,wxCB_DROPDOWN  );
 	this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
 	this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
 	this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
 	this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
 	//this->BoxSizer1HorizontalBackground->Fit(this);
-	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,1);
+	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0);
 		this->BoxSizer2VerticalInputs->Add(this->BoxSizer6HorizontalInputsBlock,0, wxEXPAND| wxALL,0);
 			this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer4VerticalToggleButton1,0, wxEXPAND| wxALL,0);
 				this->BoxSizer4VerticalToggleButton1->Add(this->ToggleButton1UsingCustom,0,0,0);
@@ -255,7 +299,7 @@ guiMainWindow::guiMainWindow()
 			//this->BoxSizer7VerticalListBox1->Add(this->Spin2NumVect);
 		this->BoxSizer2VerticalInputs->Add(this->Table2Indicator,0,wxEXPAND|wxALL);
 		this->BoxSizer2VerticalInputs->Add(this->Table1Input,0,wxEXPAND|wxALL);
-		this->BoxSizer2VerticalInputs->Add(this->BoxSizer8HorizontalEval,0, wxBOTTOM);
+		this->BoxSizer2VerticalInputs->Add(this->BoxSizer8HorizontalEval);
 			this->BoxSizer8HorizontalEval->Add(this->Table3Values);
 			this->BoxSizer8HorizontalEval->Add(this->Button2Eval);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer5VerticalCanvasAndProgressReport,1,wxEXPAND|wxALL);
@@ -291,7 +335,8 @@ guiMainWindow::guiMainWindow()
 	TDV.centerY=200;
 	this->initWeylGroupInfo();
 	this->updateInputButtons();
-	this->Fit();
+	this->SetSizer(this->BoxSizer1HorizontalBackground);
+
 	Centre();
 }
 
@@ -609,15 +654,15 @@ void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
 // 5 = invisible line (no line)
 void drawline(double X1, double Y1, double X2, double Y2,
 								unsigned long thePenStyle, int ColorIndex)
-{ /*::FXDCWindow dc(MainWindow1->Canvas1DrawCanvas);
+{ wxWindowDC dc(MainWindow1->Canvas1);
 	switch (thePenStyle)
-	{ case 0: dc.::FXDCWindow::setLineStyle(::LINE_SOLID); break;
-		case 1: dc.::FXDCWindow::setLineStyle(::LINE_ONOFF_DASH); break;
-		case 2: dc.::FXDCWindow::setLineStyle(::LINE_DOUBLE_DASH); break;
+	{ case 0: dc.setLineStyle(LINE_SOLID); break;
+		case 1: dc.setLineStyle(LINE_ONOFF_DASH); break;
+		case 2: dc.setLineStyle(LINE_DOUBLE_DASH); break;
 		case 5: return;
 	}
-	dc.::FXDCWindow::setForeground(ColorIndex);
-	dc.::FXDCWindow::drawLine((int)X1, (int)Y1,(int) X2,(int) Y2);*/
+	dc.setForeground(ColorIndex);
+	dc.drawLine((int)X1, (int)Y1,(int) X2,(int) Y2);
 //	dc.setForeground(FXRGB(0,0,0));
 //  dc.fillRectangle(0,0,MainWindow1->Canvas1DrawCanvas->getWidth(),MainWindow1->Canvas1DrawCanvas->getHeight());
 }

@@ -235,7 +235,7 @@ void RunComputationalThread()
 { MainWindow1->ReadVPVectorsAndOptions();
 	MainWindow1->theComputationSetup.Run();
 	wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
-	MainWindow1->Text1Output->SetLabel(tempWS);
+	MainWindow1->Text1Output->SetValue(tempWS);
 	MainWindow1->TurnOnAllDangerousButtons();
 	MainWindow1->Button1Go->SetLabel(wxT("Go"));
 	MainWindow1->Refresh();
@@ -256,7 +256,7 @@ void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
 
 
 void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
-{ int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop(); 
+{ int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop();
 	int Realy=ev.GetY();//-this->GetRect().GetLeft();
 	if (TDV.Selected==-2)
 	{	double tempX,tempY;
@@ -342,7 +342,7 @@ guiMainWindow::guiMainWindow()
 	this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
 	this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
 	this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
-	this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,"",::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
+	this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
 	this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
 	//this->BoxSizer1HorizontalBackground->Fit(this);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
@@ -470,6 +470,7 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 		}
 	}
 #else
+  this->theComputationSetup.ComputationInProgress=true;
 	this->WorkThread1.run();
 #endif
 }
@@ -658,8 +659,8 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 		this->Table2Indicator->SetColumnWidth(j,20);
 		this->Table3Values->SetColumnWidth(j,20);
 	}
-	//this->BoxSizer2VerticalInputs->Layout();
-	//this->BoxSizer8HorizontalEval->Layout();
+	this->BoxSizer2VerticalInputs->Layout();
+	this->BoxSizer8HorizontalEval->Layout();
 	this->BoxSizer1HorizontalBackground->Layout();
 }
 
@@ -714,16 +715,15 @@ void outputText(std::string& theOutput)
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
-{	wxString tempS;
-	IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
-	tempS.assign(output.ProgressReportString1.c_str(),output.ProgressReportString1.length());
-	MainWindow1->Label1ProgressReport->SetLabel(tempS);
-	tempS.assign(output.ProgressReportString2.c_str(),output.ProgressReportString2.length());
-	MainWindow1->Label2ProgressReport->SetLabel(tempS);
-	tempS.assign(output.ProgressReportString3.c_str(),output.ProgressReportString3.length());
-	MainWindow1->Label3ProgressReport->SetLabel(tempS);
-	tempS.assign(output.ProgressReportString4.c_str(),output.ProgressReportString4.length());
-	MainWindow1->Label4ProgressReport->SetLabel(tempS);
+{	IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
+	wxString tempS1(output.ProgressReportString1.c_str(),wxConvUTF8);
+	MainWindow1->Label1ProgressReport->SetLabel(tempS1);
+	wxString tempS2(output.ProgressReportString2.c_str(),wxConvUTF8);
+	MainWindow1->Label2ProgressReport->SetLabel(tempS2);
+	wxString tempS3(output.ProgressReportString3.c_str(),wxConvUTF8);
+	MainWindow1->Label3ProgressReport->SetLabel(tempS3);
+	wxString tempS4(output.ProgressReportString4.c_str(),wxConvUTF8);
+	MainWindow1->Label4ProgressReport->SetLabel(tempS4);
 	if (output.PerturbationHasOccurred)
 	{ root tempRoot; tempRoot.AssignIntRoot(output.modifiedRoot);
 		MainWindow1->WriteIndicatorWeight(tempRoot);

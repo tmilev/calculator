@@ -2503,7 +2503,7 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 
 class LargeInt:public ListBasicObjects<unsigned int>
 {	friend class LargeRational;
-	static const unsigned int CarryOverBound=37;//2147483648;//=2^31
+	static const unsigned int CarryOverBound=2147483648;//=2^31
 //	static const unsigned int CarryOverBound=37;
 	void AddPositive(LargeInt& x);
 	void SubtractSmallerPositive(LargeInt& x);
@@ -3605,6 +3605,7 @@ public:
 	std::string ProgressReportString3;
 	std::string ProgressReportString4;
 	void PrepareStrings();
+	void Assign(IndicatorWindowVariables& right);
 	void Nullify()
 	{ this->NumPartFractionsLoaded=0;
 		this->Pause=true;
@@ -3631,6 +3632,7 @@ public:
 	bool ComputingPartialFractions;
 	bool ComputingVectorPartitions;
 	bool ComputingChambers;
+	bool MakingCheckSumPFsplit;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 	unsigned char RankEuclideanSpaceGraphics;

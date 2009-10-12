@@ -471,6 +471,7 @@ ComputationSetup::ComputationSetup()
 	this->ComputingVectorPartitions=true;
 	this->ComputingChambers=true;
 	this->ComputationInProgress=false;
+	this->MakingCheckSumPFsplit=false;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
 	this->RankEuclideanSpaceGraphics=3;
@@ -478,8 +479,10 @@ ComputationSetup::ComputationSetup()
 
 void ComputationSetup::Run()
 { PolyFormatLocal.MakeRegularAlphabet();
+::IndicatorWindowGlobalVariables.Nullify();
 	PolynomialOutputFormat::LatexMaxLineLength=125;
 	this->AllowRepaint=false;
+	partFractions::UsingCheckSum=this->MakingCheckSumPFsplit;
 	::initDLL(this->WeylGroupIndex);
 	if (this->ComputingPartialFractions)
 	{	if (!this->UsingCustomVectors)
@@ -489,10 +492,13 @@ void ComputationSetup::Run()
 			this->theOutput.ComputeDebugString();
 		}
 		else
-		{ //intRoots tempRoots;
-			//tempRoots.AssignRoots(this->VPVectors);
-			//this->thePartialFraction.initFromRootSystem(this->VPVectors,this->VPVectors,0);
-			//this->thePartialFraction.split();
+		{ intRoots tempRoots;
+			tempRoots.AssignRoots(this->VPVectors);
+			this->thePartialFraction.initFromRootSystem(tempRoots,tempRoots,0);
+			this->thePartialFraction.IndicatorRoot.Assign(this->IndicatorRoot);
+			this->thePartialFraction.split();
+			this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
+				(this->theOutput,this->thePartialFraction.IndicatorRoot,false,false,false,false);
 		}
 	}
 	if (this->ComputingChambers)
@@ -7779,7 +7785,7 @@ void partFraction::partFractionToPartitionFunctionSplit
 			std::stringstream out;
 			out <<"Current fraction: "<<i+1<<" out of "<<this->Coefficient.size
 					<<" processed";
-			::IndicatorWindowGlobalVariables.StatusString= out.str();
+			::IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
 			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
@@ -8483,7 +8489,7 @@ void partFractions::RemoveRedundantShortRoots()
 			if (this->MakingProgressReport)
 			{ std::stringstream out;
 				out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
-				IndicatorWindowGlobalVariables.StatusString=out.str();
+				IndicatorWindowGlobalVariables.ProgressReportString3=out.str();
 				::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 			}
 /*			if (partFraction::AnErrorHasOccurredTimeToPanic)
@@ -12211,6 +12217,17 @@ void IndicatorWindowVariables::PrepareStrings()
 	out3<<"Processed "<< this->NumProcessedMonomials<<" out of "<<this->TotalNumMonomials<<" monomials";
 	this->ProgressReportString3= out3.str();
 	this->ProgressReportString4.assign(this->StatusString);
+}
+
+void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
+{ this->ProgressReportString1=right.ProgressReportString1;
+	this->ProgressReportString2= right.ProgressReportString2;
+	this->ProgressReportString3= right.ProgressReportString3;
+	this->ProgressReportString4= right.ProgressReportString4;
+	this->StatusString= right.StatusString;
+	this->rootIsModified= right.rootIsModified;
+	this->PerturbationHasOccurred= right.PerturbationHasOccurred;
+	this->modifiedRoot=right.modifiedRoot;
 }
 
 void simplicialCones::ComputeDebugString()

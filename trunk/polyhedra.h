@@ -3633,6 +3633,7 @@ public:
 	bool ComputingVectorPartitions;
 	bool ComputingChambers;
 	bool MakingCheckSumPFsplit;
+	bool havingBeginEqnForLaTeXinStrings;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 	unsigned char RankEuclideanSpaceGraphics;

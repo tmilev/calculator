@@ -472,6 +472,7 @@ ComputationSetup::ComputationSetup()
 	this->ComputingChambers=true;
 	this->ComputationInProgress=false;
 	this->MakingCheckSumPFsplit=false;
+	this->havingBeginEqnForLaTeXinStrings=true;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
 	this->RankEuclideanSpaceGraphics=3;
@@ -479,8 +480,9 @@ ComputationSetup::ComputationSetup()
 
 void ComputationSetup::Run()
 { PolyFormatLocal.MakeRegularAlphabet();
-::IndicatorWindowGlobalVariables.Nullify();
-	PolynomialOutputFormat::LatexMaxLineLength=125;
+	::IndicatorWindowGlobalVariables.Nullify();
+	PolynomialOutputFormat::LatexMaxLineLength=35;
+	PolynomialOutputFormat::UsingLatexFormat=true;
 	this->AllowRepaint=false;
 	partFractions::UsingCheckSum=this->MakingCheckSumPFsplit;
 	::initDLL(this->WeylGroupIndex);
@@ -499,8 +501,15 @@ void ComputationSetup::Run()
 			this->thePartialFraction.split();
 			this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
 				(this->theOutput,this->thePartialFraction.IndicatorRoot,false,false,false,false);
+			this->theOutput.ComputeDebugString();
+		}
+		if (this->havingBeginEqnForLaTeXinStrings) 
+		{ std::stringstream out;
+			out <<"\\begin{eqnarray*}&&"<<this->theOutput.DebugString<< "\\end{eqnarray*}";
+			this->theOutput.DebugString= out.str();
 		}
 	}
+
 	if (this->ComputingChambers)
 	{	::InputRoots.CopyFromBase(this->VPVectors);
 		::NextDirectionIndex=this->WeylGroupIndex-1;

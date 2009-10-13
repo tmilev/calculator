@@ -122,10 +122,6 @@ BEGIN_EVENT_TABLE( drawCanvas, wxPanel )
 
 END_EVENT_TABLE()
 
-void drawCanvas::onSizing(wxSizeEvent& ev)
-{ this->Refresh();
-}
-
 class guiMainWindow : public wxFrame
 {
 public:
@@ -133,7 +129,8 @@ public:
   wxGridExtra *Table1Input;
   wxGridExtra *Table2Indicator;
   wxGridExtra *Table3Values;
-  int maxDim; int maxNumVect; 	int NumVectors;
+  int NumVectors;
+	wxCommandEvent wxProgressReportEvent;
   WorkThreadClass WorkThread1;
   wxBoxSizer* BoxSizer1HorizontalBackground;
   wxBoxSizer* BoxSizer2VerticalInputs;
@@ -149,6 +146,7 @@ public:
 	wxBoxSizer* BoxSizer12VerticalProgressReports;
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
+	wxFont* theFont;
 	::wxStaticText* Label1ProgressReport;
 	::wxStaticText* Label2ProgressReport;
 	::wxStaticText* Label3ProgressReport;
@@ -198,12 +196,12 @@ public:
 		ID_Spin1Dim,
 		ID_Spin2NumVect,
 		ID_Canvas1,
+		ID_ComputationUpdate,
 		ID_CheckBox1,
 		ID_Paint,
   };
-  DECLARE_EVENT_TABLE()
+	DECLARE_EVENT_TABLE()
 };
-
 
 IMPLEMENT_APP( guiApp )
 
@@ -214,7 +212,6 @@ bool guiApp::OnInit()
   return true;
 }
 
-
 BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
 	EVT_BUTTON(guiMainWindow::ID_Buton2Eval, guiMainWindow::onButton2Eval)
@@ -222,9 +219,8 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
 	EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
 	EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
-	EVT_COMMAND(guiMainWindow::ID_MainWindow, wxEVT_ProgressReport, guiMainWindow::onProgressReport)
 	EVT_SIZING(drawCanvas::onSizing)
-	//EVT_PAINT(guiMainWindow::OnPaint)
+	EVT_COMMAND  (guiMainWindow::ID_MainWindow,::wxEVT_ProgressReport,guiMainWindow::onProgressReport )
 	EVT_CLOSE(guiMainWindow::OnExit)
 	//EVT_PAINT(guiMainWindow::onPaint)
 
@@ -335,6 +331,7 @@ guiMainWindow::guiMainWindow()
   this->Table1Input->CreateGrid( 0, 0 );
   this->Table2Indicator->CreateGrid( 0, 0 );
   this->Table3Values->CreateGrid(0,0);
+	this->theFont= new ::wxFont(10,wxDEFAULT, wxNORMAL,wxNORMAL);
 	this->ListBox1WeylGroup= new ::wxComboBoxWheel(this,this->ID_ListBox1,wxT("A3"),
 																								wxPoint(0,0),::wxDefaultSize// wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight)
 																								,0,0,wxCB_DROPDOWN  );
@@ -387,10 +384,13 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup->Append(wxT("C4"));
   this->ListBox1WeylGroup->Append(wxT("D4"));
 	this->ListBox1WeylGroup->Append(wxT("G2"));
+	this->ListBox1WeylGroup->Append(wxT("E6"));
+	this->ListBox1WeylGroup->Append(wxT("E7"));
+	this->ListBox1WeylGroup->Append(wxT("E8"));
+	this->ListBox1WeylGroup->Append(wxT("F4"));
 	this->ListBox1WeylGroup->SetSelection(1);
 	this->CheckBox1ComputePFs->SetValue(false);
-	this->maxDim=5;
-	this->maxNumVect=15;
+
 	this->theComputationSetup.ComputationInProgress=false;
 	this->theComputationSetup.AllowRepaint=true;
 	//this->Canvas1DrawCanvas->::FXCanvas::setBackColor(this->getBackColor());
@@ -400,15 +400,27 @@ guiMainWindow::guiMainWindow()
 	this->WorkThread1.CriticalSectionWorkThreadEntered=false;
 	TDV.centerX=150;
 	TDV.centerY=200;
+	this->wxProgressReportEvent.SetId(this->GetId());
+	this->wxProgressReportEvent.SetEventObject(this);
+	this->wxProgressReportEvent.SetEventType(::wxEVT_ProgressReport);
 	this->initWeylGroupInfo();
 	this->updateInputButtons();
 	this->SetSizer(this->BoxSizer1HorizontalBackground);
 	Centre();
 }
-
+void drawCanvas::onSizing(wxSizeEvent& ev)
+{ this->Refresh();
+	MainWindow1->Table1Input->SetAutoLayout(true);
+	MainWindow1->BoxSizer1HorizontalBackground->Layout();
+	if (MainWindow1->Table1Input->GetNumberRows()>20)
+	{	MainWindow1->Table1Input->SetAutoLayout(false);
+		MainWindow1->Table1Input->SetSize(0,70,220,500);
+		MainWindow1->Table1Input->SetMaxSize(wxSize(220,500));
+	}
+}
 
 guiMainWindow::~guiMainWindow()
-{
+{ //this->theFont
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
@@ -464,7 +476,7 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 			this->WorkThread1.CriticalSectionPauseButtonEntered=false;
 		}
 		else
-		{	this->Button1Go->SetLabel(wxT("Go"));
+		{	this->Button1Go->SetLabel(wxT("Pause"));
 			this->WorkThread1.isRunning=true;
 			::ResumeThread(this->WorkThread1.ComputationalThread);
 		}
@@ -501,13 +513,13 @@ void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
 		{ candidateNumVectors=1;
 			this->Spin2NumVect->SetValue(1);
 		}
-		if (candidateDim>this->maxDim)
-		{ candidateDim=this->maxDim;
-			this->Spin1Dim->SetValue(this->maxDim);
+		if (candidateDim>this->Table1Input->maxNumCols)
+		{ candidateDim=this->Table1Input->maxNumCols;
+			this->Spin1Dim->SetValue(this->Table1Input->maxNumCols);
 		}
-		if (candidateNumVectors>this->maxNumVect)
-		{ candidateNumVectors=this->maxNumVect;
-			this->Spin2NumVect->SetValue(this->maxNumVect);
+		if (candidateNumVectors>this->Table1Input->maxNumRows)
+		{ candidateNumVectors=this->Table1Input->maxNumRows;
+			this->Spin2NumVect->SetValue(this->Table1Input->maxNumRows);
 		}
 		this->initTableFromRowsAndColumns(candidateNumVectors,candidateDim);
 	}
@@ -551,6 +563,10 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 		case 9:	newWeylGroupIndex=4;  newWeylGroupLetter='C'; break;
 		case 10: newWeylGroupIndex=4; newWeylGroupLetter='D'; break;
 		case 11: newWeylGroupIndex=2; newWeylGroupLetter='G'; break;
+		case 12: newWeylGroupIndex=6; newWeylGroupLetter='E'; break;
+		case 13: newWeylGroupIndex=7; newWeylGroupLetter='E'; break;
+		case 14: newWeylGroupIndex=8; newWeylGroupLetter='E'; break;
+		case 15: newWeylGroupIndex=4; newWeylGroupLetter='F'; break;
 	//	case 12: this->UsingCustomVectors=true;
 	}
 	if (!(newWeylGroupLetter==this->theComputationSetup.WeylGroupLetter &&
@@ -659,9 +675,16 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 		this->Table2Indicator->SetColumnWidth(j,20);
 		this->Table3Values->SetColumnWidth(j,20);
 	}
-	this->BoxSizer2VerticalInputs->Layout();
-	this->BoxSizer8HorizontalEval->Layout();
-	this->BoxSizer1HorizontalBackground->Layout();
+	if (this->Table1Input->GetNumberRows()>20)
+	{	this->Table1Input->SetSize(0,70,220,500);
+		this->Table1Input->SetMaxSize(wxSize(220,500));
+		this->SetAutoLayout(false);
+	}
+	else
+	{	this->BoxSizer2VerticalInputs->Layout();
+		this->BoxSizer8HorizontalEval->Layout();
+		this->BoxSizer1HorizontalBackground->Layout();
+	}
 }
 
 void guiMainWindow::TurnOffAllDangerousButtons()
@@ -675,8 +698,8 @@ wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id,
 													const wxPoint &pos,
 													const wxSize &size,
 													long style, const wxString &name)
-{ this->maxNumCols=5;
-	this->maxNumRows=16;
+{ this->maxNumCols=8;
+	this->maxNumRows=120;
 	this->Create(parent,id,pos,size,style,name);
 }
 
@@ -737,8 +760,7 @@ void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
 		return;
 	}
 	MainWindow1->progressReportVariables.Assign(output);
-	::wxCommandEvent e(::wxEVT_ProgressReport,MainWindow1->GetId());
-	MainWindow1->GetEventHandler()->ProcessEvent(e );
+	::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxProgressReportEvent);
 	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
 }
 //color styles (taken from windows.h and substituted for independence of the .h file):
@@ -763,10 +785,11 @@ void drawline(double X1, double Y1, double X2, double Y2,
 //  dc.fillRectangle(0,0,MainWindow1->Canvas1DrawCanvas->getWidth(),MainWindow1->Canvas1DrawCanvas->getHeight());
 }
 void drawtext(double X1, double Y1, const char* text, int length, int color)
-{	//::FXDCWindow dc(MainWindow1->Canvas1DrawCanvas);
-	//dc.setFont(MainWindow1->FontDefaultDrawFont);
-	//dc.setForeground(color);
+{	::wxWindowDC dc(MainWindow1->Canvas1);
+	dc.SetFont(*MainWindow1->theFont);
+	//dc.setcolo(color);
 	//dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
-	//dc.setFillStyle(FILL_STIPPLED);
-	//dc.drawImageText((int)X1, (int)Y1,text,length);
+	//dc(FILL_STIPPLED);
+	wxString wxText(text,length);
+	dc.DrawText(wxText,(int)X1, (int)Y1);
 }

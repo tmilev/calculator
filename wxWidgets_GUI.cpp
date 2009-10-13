@@ -21,6 +21,10 @@
 #include "wx/menu.h"
 #include "wx/spinctrl.h"
 #include "wx/textctrl.h"
+#ifndef WIN32
+  #include <unistd.h>
+#endif
+
 #include "polyhedra.h"
 
 extern DrawingVariables TDV;
@@ -55,6 +59,8 @@ class WorkThreadClass
 public:
 	#ifdef WIN32
 		HANDLE ComputationalThread;
+	#else
+    pthread_t ComputationalThreadLinux;
 	#endif
 	bool isRunning;
 	bool CriticalSectionWorkThreadEntered;
@@ -97,6 +103,8 @@ wxComboBoxWheel::wxComboBoxWheel( wxWindow *parent,
 
 DECLARE_EVENT_TYPE(wxEVT_ProgressReport, -1)
 DEFINE_EVENT_TYPE(wxEVT_ProgressReport)
+DECLARE_EVENT_TYPE(wxEVT_ComputationFinished, -1)
+DEFINE_EVENT_TYPE(wxEVT_ComputationFinished)
 
 class drawCanvas : public ::wxPanel
 {
@@ -131,6 +139,7 @@ public:
   wxGridExtra *Table3Values;
   int NumVectors;
 	wxCommandEvent wxProgressReportEvent;
+	wxCommandEvent wxComputationOver;
   WorkThreadClass WorkThread1;
   wxBoxSizer* BoxSizer1HorizontalBackground;
   wxBoxSizer* BoxSizer2VerticalInputs;
@@ -171,6 +180,7 @@ public:
   void onButton2Eval( wxCommandEvent& ev);
   void onButton1Go( wxCommandEvent& ev);
 	void onSpinner1and2(wxSpinEvent & ev);
+	void onComputationOver(wxCommandEvent& ev);
 	void onRePaint(wxPaintEvent& ev);
 	void onMouseDownOnCanvas(wxMouseEvent& ev);
 	void ReadVPVectorsAndOptions();
@@ -221,20 +231,21 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
 	EVT_SIZING(drawCanvas::onSizing)
 	EVT_COMMAND  (guiMainWindow::ID_MainWindow,::wxEVT_ProgressReport,guiMainWindow::onProgressReport )
+	EVT_COMMAND  (guiMainWindow::ID_MainWindow,::wxEVT_ComputationFinished,guiMainWindow::onComputationOver )
 	EVT_CLOSE(guiMainWindow::OnExit)
 	//EVT_PAINT(guiMainWindow::onPaint)
 
 END_EVENT_TABLE()
 
-
-void RunComputationalThread()
+#ifdef WIN32
+  void RunComputationalThread()
+#else
+  void* RunComputationalThread(void*ptr)
+#endif
 { MainWindow1->ReadVPVectorsAndOptions();
 	MainWindow1->theComputationSetup.Run();
-	wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
-	MainWindow1->Text1Output->SetValue(tempWS);
-	MainWindow1->TurnOnAllDangerousButtons();
-	MainWindow1->Button1Go->SetLabel(wxT("Go"));
-	MainWindow1->Refresh();
+	::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxComputationOver);
+  pthread_exit(NULL);
 }
 
 
@@ -403,9 +414,14 @@ guiMainWindow::guiMainWindow()
 	this->wxProgressReportEvent.SetId(this->GetId());
 	this->wxProgressReportEvent.SetEventObject(this);
 	this->wxProgressReportEvent.SetEventType(::wxEVT_ProgressReport);
+	this->wxComputationOver.SetId(this->GetId());
+	this->wxComputationOver.SetEventObject(this);
+	this->wxComputationOver.SetEventType(wxEVT_ComputationFinished);
 	this->initWeylGroupInfo();
 	this->updateInputButtons();
 	this->SetSizer(this->BoxSizer1HorizontalBackground);
+  pthread_mutex_init(&ParallelComputing::mutex1, NULL);
+  pthread_cond_init (&ParallelComputing::continueCondition, NULL);
 	Centre();
 }
 void drawCanvas::onSizing(wxSizeEvent& ev)
@@ -421,6 +437,8 @@ void drawCanvas::onSizing(wxSizeEvent& ev)
 
 guiMainWindow::~guiMainWindow()
 { //this->theFont
+ 	pthread_mutex_destroy(&ParallelComputing::mutex1);
+  pthread_cond_destroy(&ParallelComputing::continueCondition);
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
@@ -453,15 +471,21 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 
 void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 {	this->TurnOffAllDangerousButtons();
-#ifdef WIN32
+//#ifdef WIN32
 	if (!this->theComputationSetup.ComputationInProgress)
 	{ this->theComputationSetup.ComputationInProgress=true;
 		this->Button1Go->SetLabel(wxT("Pause"));
-		this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
+		#ifdef WIN32
+      this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
+    #else
+      //RunComputationalThread(0);
+      pthread_create(&this->WorkThread1.ComputationalThreadLinux, NULL,RunComputationalThread, 0);
+    #endif
 	}
 	else
 	{ if(this->WorkThread1.isRunning)
-		{ this->WorkThread1.CriticalSectionPauseButtonEntered=true;
+		{ //pthread_mutex_lock(&ParallelComputing::mutex1);
+      this->WorkThread1.CriticalSectionPauseButtonEntered=true;
 			//return;
 			while(this->WorkThread1.CriticalSectionWorkThreadEntered)
 			{}
@@ -469,22 +493,32 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 			while(!ParallelComputing::SafePointReached)
 			{}
 			ParallelComputing::ReachSafePointASAP=false;
-			::SuspendThread(this->WorkThread1.ComputationalThread);
+			#ifdef WIN32
+        ::SuspendThread(this->WorkThread1.ComputationalThread);
+      #endif
 			this->WorkThread1.isRunning=false;
 			this->Button1Go->SetLabel(wxT("Go"));
 			this->WorkThread1.CriticalSectionWorkThreadEntered=false;
 			this->WorkThread1.CriticalSectionPauseButtonEntered=false;
+			//pthread_mutex_unlock(&ParallelComputing::mutex1);
 		}
 		else
-		{	this->Button1Go->SetLabel(wxT("Pause"));
+		{	//pthread_mutex_lock(&ParallelComputing::mutex1);
+		  this->Button1Go->SetLabel(wxT("Pause"));
 			this->WorkThread1.isRunning=true;
-			::ResumeThread(this->WorkThread1.ComputationalThread);
+			#ifdef WIN32
+        ::ResumeThread(this->WorkThread1.ComputationalThread);
+      #else
+        pthread_cond_signal(&ParallelComputing::continueCondition);
+      #endif
+      //pthread_mutex_unlock(&ParallelComputing::mutex1);
 		}
 	}
-#else
-  this->theComputationSetup.ComputationInProgress=true;
-	this->WorkThread1.run();
-#endif
+//#else
+  //this->theComputationSetup.ComputationInProgress=true;
+
+//	this->WorkThread1.run();
+//#endif
 }
 
 void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
@@ -728,13 +762,26 @@ void wxGridExtra::SetNumRowsAndCols(int r, int c)
 
 
 void WorkThreadClass::run()
-{	::RunComputationalThread();
+{
+#ifdef WIN32
+  ::RunComputationalThread();
+#else
+  RunComputationalThread(0);
+#endif
 }
 
 
 
 void outputText(std::string& theOutput)
 {
+}
+
+void guiMainWindow::onComputationOver(wxCommandEvent& ev)
+{ wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
+	MainWindow1->Text1Output->SetValue(tempWS);
+	MainWindow1->TurnOnAllDangerousButtons();
+	MainWindow1->Button1Go->SetLabel(wxT("Go"));
+	MainWindow1->Refresh();
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
@@ -790,6 +837,6 @@ void drawtext(double X1, double Y1, const char* text, int length, int color)
 	//dc.setcolo(color);
 	//dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
 	//dc(FILL_STIPPLED);
-	wxString wxText(text,length);
-	dc.DrawText(wxText,(int)X1, (int)Y1);
+	wxString temptext(text,wxConvUTF8 ,length);
+	dc.DrawText(temptext,(int)X1, (int)Y1);
 }

@@ -245,7 +245,9 @@ END_EVENT_TABLE()
 { MainWindow1->ReadVPVectorsAndOptions();
 	MainWindow1->theComputationSetup.Run();
 	::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxComputationOver);
-  pthread_exit(NULL);
+#ifndef WIN32
+	pthread_exit(NULL);
+#endif
 }
 
 
@@ -420,8 +422,10 @@ guiMainWindow::guiMainWindow()
 	this->initWeylGroupInfo();
 	this->updateInputButtons();
 	this->SetSizer(this->BoxSizer1HorizontalBackground);
+#ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
+#endif
 	Centre();
 }
 void drawCanvas::onSizing(wxSizeEvent& ev)
@@ -437,8 +441,10 @@ void drawCanvas::onSizing(wxSizeEvent& ev)
 
 guiMainWindow::~guiMainWindow()
 { //this->theFont
+#ifndef WIN32
  	pthread_mutex_destroy(&ParallelComputing::mutex1);
   pthread_cond_destroy(&ParallelComputing::continueCondition);
+#endif
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)

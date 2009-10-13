@@ -224,8 +224,10 @@ bool IntegerPoly::AnErrorHasOccurredTimeToPanic=false;
 root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
 bool ParallelComputing::SafePointReached=false;
 bool ParallelComputing::ReachSafePointASAP=false;
+#ifndef WIN32
 pthread_mutex_t ParallelComputing::mutex1;
 pthread_cond_t ParallelComputing::continueCondition;
+#endif
 
 bool Stop()
 {	return true;

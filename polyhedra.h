@@ -45,6 +45,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <pthread.h>
+
 
 #ifdef _WINDOWS
 #pragma warning(disable:4100)//warning C4100: non-referenced formal parameter
@@ -106,9 +108,15 @@ class ParallelComputing
 public:
 	static bool ReachSafePointASAP;
 	static bool SafePointReached;
+	static pthread_mutex_t mutex1;
+  static pthread_cond_t continueCondition;
 	inline static void SafePoint()
 	{ while(ParallelComputing::ReachSafePointASAP)
-		{ParallelComputing::SafePointReached=true;}
+		{ //pthread_mutex_lock(&ParallelComputing::mutex1);
+      ParallelComputing::SafePointReached=true;
+      pthread_cond_wait(&ParallelComputing::continueCondition, &ParallelComputing::mutex1);
+      //pthread_mutex_unlock(&ParallelComputing::mutex1);
+		}
 		ParallelComputing::SafePointReached=false;
 	}
 };

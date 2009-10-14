@@ -190,7 +190,7 @@ template < > int ListBasicObjects<Monomial<LargeRational> >::ListBasicObjectsAct
 template < > int ListBasicObjects<PolynomialLargeRational>::ListBasicObjectsActualSizeIncrement=32;
 template < > int ListBasicObjects<rootWithMultiplicity>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<std::string>::ListBasicObjectsActualSizeIncrement=1;
-
+template < > int ListBasicObjects<unsigned int>::ListBasicObjectsActualSizeIncrement=1;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList2;
 bool RandomCodeIDontWantToDelete::UsingEvilList1=true;
@@ -507,7 +507,7 @@ void ComputationSetup::Run()
 				(this->theOutput,this->thePartialFraction.IndicatorRoot,false,false,false,false);
 			this->theOutput.ComputeDebugString();
 		}
-		if (this->havingBeginEqnForLaTeXinStrings) 
+		if (this->havingBeginEqnForLaTeXinStrings)
 		{ std::stringstream out;
 			out <<"\\begin{eqnarray*}&&"<<this->theOutput.DebugString<< "\\end{eqnarray*}";
 			this->theOutput.DebugString= out.str();
@@ -2533,7 +2533,7 @@ bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
 	{	this->ComputeDebugString();
 		CombinatorialChamberPointers::TheBigDump<<this->DebugString;
 	}
-	static bool tempB=false;
+//	static bool tempB=false;
 	assert(this->IsAnOwnerOfAllItsWalls());
 	this->Explored=false;
 	Facet* LastExternalWithRespectToDirection=0;
@@ -4616,7 +4616,7 @@ void QuasiMonomial::IntegrateDiscreteFromZeroTo
 		tempQN.AddBasicQuasiNumber(this->Coefficient.TheObjects[i]);
 	//	tempQN.DecreaseNumVars(1);
 		tempQP.TimesConstant(tempQN);
-		bool tempBool = ("-1/4c-1/4c^2"==tempQP.DebugString);
+//		bool tempBool = ("-1/4c-1/4c^2"==tempQP.DebugString);
 		output.AddPolynomial(tempQP);
 	}
 	static QuasiMonomial tempQM;
@@ -4711,7 +4711,7 @@ void QuasiPolynomial::IntegrateDiscreteInDirectionFromOldChamber
 	static Rational tempRat;
 	static root tempRoot; tempRoot.dimension=root::AmbientDimension;
 	static QuasiPolynomial Accum;
-	static bool tempB=false;
+//	static bool tempB=false;
 	root::RootScalarEuclideanRoot(direction,normal,tempRat);
 	tempRoot.Assign(normal);
 	tempRoot.DivByRational(tempRat);
@@ -5570,8 +5570,8 @@ void BasicQN::SetPivotRow(int index, int PivotRowIndex, int Col)
 { if (index!=PivotRowIndex)
 	{ this->SwitchTwoRows(index,PivotRowIndex,0);
 	}
-	int PivotElt = this->Exp.elements[PivotRowIndex][Col];
-	int Scale= PivotElt/(gcd(PivotElt,this->Den));
+//	int PivotElt = this->Exp.elements[PivotRowIndex][Col];
+//	int Scale= PivotElt/(gcd(PivotElt,this->Den));
 //	if (Scale!=1)
 //	{	Scale = this->InvertModN(Scale,this->Den);
 //		this->MultiplyRowBy(PivotRowIndex,Scale,0);
@@ -6110,7 +6110,7 @@ void QuasiNumber::Simplify()
 	int NumCycles = KToTheNth(theLCM,root::AmbientDimension);
 	SubsetWithMultiplicities theSubset;
 	theSubset.init(root::AmbientDimension, theLCM-1);
-	bool oneValue=true;
+//	bool oneValue=true;
 	LargeRational theValue, tempRat;
 	std::string tempS, tempS2;
 	for (int i=0;i<NumCycles;i++)
@@ -6529,15 +6529,15 @@ void LargeRational::Simplify()
 inline void LargeInt::AssignShiftedUInt(unsigned int x, int shift)
 { if (x==0){this->MakeZero(); return;}
 	this->sign=1;
-	this->SetSizeExpandOnTopNoObjectInit(shift+1);
-	for (int i=0;i<this->size;i++)
+	this->SetActualSizeAtLeastExpandOnTop(shift+1);
+  this->SetSizeExpandOnTopNoObjectInit(shift);
+	for (int i=0;i<shift;i++)
 		this->TheObjects[i]=0;
-	this->TheObjects[this->size-1]=x;
-	if (this->TheObjects[this->size-1]>=LargeInt::CarryOverBound)
-	{ this->TheObjects[this->size-1]-=LargeInt::CarryOverBound;
-		this->SetSizeExpandOnTopNoObjectInit(this->size+1);
-		this->TheObjects[this->size-1]=1;
-	}
+	while (x!=0)
+	{ unsigned int tempX= x%LargeInt::CarryOverBound;
+	  this->AddObjectOnTop(tempX);
+    x= x/LargeInt::CarryOverBound;
+  }
 }
 
 void LargeInt::AddPositive(LargeInt &x)
@@ -6777,8 +6777,9 @@ void LargeInt::Minus_qDivisor
 	tempI.MultiplyBy(divisor);
 	this->SubtractSmallerPositive(tempI);
 }*/
-
+#ifdef WIN32
 #pragma warning(disable:4244)//warning 4244: data loss from conversion
+#endif
 void LargeInt::DivPositive(LargeInt &x, LargeInt& quotientOutput, LargeInt& remainderOutput) const
 {	static LargeInt remainder,quotient,divisor;
 	remainder.Assign(*this);	remainder.sign=1;
@@ -6820,7 +6821,9 @@ void LargeInt::DivPositive(LargeInt &x, LargeInt& quotientOutput, LargeInt& rema
 	quotientOutput.Assign(quotient);
 //	assert(remainderOut.CheckForConsistensy());
 }
+#ifdef WIN32
 #pragma warning(default:4244)//warning 4244: data loss from conversion
+#endif
 
 void LargeInt::gcd(LargeInt &a, LargeInt &b, LargeInt &output)
 { LargeInt p,q,r,temp;
@@ -7334,7 +7337,9 @@ void partFraction::ComputeOneCheckSum(LargeRational &output)
 	}
 }
 
+#ifdef WIN32
 #pragma warning(disable:4018)//grrrrr
+#endif
 int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator)
@@ -7343,7 +7348,7 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 	if (this->Coefficient.size==0)
 	{output.clear(); return 0;}
 	int NumLinesUsed=0;
-	int OldCutOff=0;
+//	int OldCutOff=0;
 	if (!UsingVarChange)
 	{	if (includeNumerator)
 			NumLinesUsed+=this->Coefficient.StringPrintOutAppend (stringPoly,PolyFormatLocal);
@@ -7395,7 +7400,7 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 		//NumLinesUsed+=this->ControlLineSizeFracs(tempS);
 		output.clear();
 		output.append(stringPoly);
-		if (stringPoly.size()>PolyFormatLocal.LatexMaxLineLength)
+		if (stringPoly.size()>(unsigned) PolyFormatLocal.LatexMaxLineLength)
 		{	output.append("\\\\\n&&");
 			NumLinesUsed++;
 		}
@@ -7408,7 +7413,9 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 	}
 	return NumLinesUsed;
 }
+#ifdef WIN32
 #pragma warning(default:4018)//grrrrr
+#endif
 
 void partFraction::MultiplyMinusRootShiftBy(int *theRoot, int Multiplicity)
 { /*for (int i=0;i<root::AmbientDimension;i++)
@@ -8110,7 +8117,7 @@ bool partFractions::split()
 //	partFraction::AnErrorHasOccurredTimeToPanic=true;
 	while (this->IndexLowestNonReduced<this->size)
 	{ //this->ComputeDebugString();
-		bool ShouldIgnore=false;
+//		bool ShouldIgnore=false;
 		if (!this->ShouldIgnore())
 		{	tempF.Assign(this->TheObjects[this->IndexLowestNonReduced]);
 			//this->ComputeDebugString();
@@ -8378,14 +8385,16 @@ int partFractions::ElementToStringBasisChangeOutputToFile(MatrixInt& VarChange,
 	return TotalLines;
 }
 
+#ifdef WIN32
 #pragma warning(disable:4018)//grrrrr
+#endif
 int partFraction::ControlLineSizeFracs(std::string& output)
 { int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
 	int LastCutOffIndex=0;
 	int NumLinesAdded=0;
 	for (int i=0;i<numCutOffs;i++)
 	{ for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength;
-					j<output.size()-1;j++)
+					j< ((int) output.size())-1;j++)
 		{ if (output[j]=='\\'&&output[j+1]=='f')
 			{ output.insert(j,"\\\\\n&&");
 				NumLinesAdded++;
@@ -8403,7 +8412,7 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 	int NumLinesAdded=0;
 	for (int i=0;i<numCutOffs;i++)
 	{ for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength;
-					j<output.size()-1;j++)
+					j<(int)(output.size())-1;j++)
 		{ if ((output[j]=='+'||output[j]=='-')&&output[j-1]!='{')
 			{ output.insert(j,"\\\\\n&&");
 				NumLinesAdded++;
@@ -8414,8 +8423,9 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 	}
 	return NumLinesAdded;
 }
+#ifdef WIN32
 #pragma warning(default:4018)//grrrrr
-
+#endif
 void partFractions::MakeProgressReport()
 { IndicatorWindowGlobalVariables.NumPartFractionsLoaded= this->size;
 	IndicatorWindowGlobalVariables.NumReducedPartFractions= this->IndexLowestNonReduced;
@@ -9915,7 +9925,7 @@ void VermaModulesWithMultiplicities::initTheMults()
 void VermaModulesWithMultiplicities::Check()
 { for (int i=0;i<this->size;i++)
 	{ this->Compute(i);
-		bool found=false;
+//		bool found=false;
 		for (int j=0;j<this->size;j++)
 		{ if (this->TheMultiplicities.TheObjects[i]!=0 &&
 					this->TheMultiplicities.TheObjects[i]!=1 &&
@@ -10696,7 +10706,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	std::fstream KLDump;
 	KLDump.open("M:/math/KL.txt",std::fstream::in | std::fstream::out);
 	assert(KLDump.is_open());
-	int TopIndex= tempV.ChamberIndicatorToIndex(beta);
+  tempV.ChamberIndicatorToIndex(beta);
 	//tempV.ReadKLCoeffsFromFile(KLDump,KLcoeff);
 	tempV.ComputeKLcoefficientsFromChamberIndicator(beta,KLcoeff);
 	tempV.KLPolys.ReleaseMemory();
@@ -10772,7 +10782,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()
 
 void rootFKFTcomputation::initA2A1A1inD5()
 {	initDLL(5);
-	int j=0;
+//	int j=0;
 	intRoot tempRoot;
 	tempRoot.initFromInt(0,0,1,0,0);//eps_3-\eps_4
 	this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
@@ -10824,7 +10834,10 @@ void rootFKFTcomputation::initA2A1A1inD5()
 	this->AlgorithmBasisA2A1A1inD5.ComputeDebugString();
 }
 
-void rootFKFTcomputation::RunA2A1A1inD5beta12221(bool precomputedPartition, bool precomputedKLcoeff)
+void rootFKFTcomputation::RunA2A1A1inD5beta12221
+        (bool precomputedPartition, bool precomputedKLcoeff,
+          std::string& KLCoeffFile, std::string& PartialFractionsFile,
+          std::string& VPEntriesFile, std::string& VPIndexFile)
 {	this->initA2A1A1inD5();
 //	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	if (this->useOutputFileForFinalAnswer)
@@ -10863,7 +10876,8 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221(bool precomputedPartition, bool
 	root beta;
 	beta.InitFromIntegers(100,200,200,200,100);
 	ListBasicObjects<int> KLcoeff;
-	int TopIndex= tempV.ChamberIndicatorToIndex(beta);
+//	int TopIndex=
+  tempV.ChamberIndicatorToIndex(beta);
 	if (precomputedKLcoeff)
 	{ tempV.ReadKLCoeffsFromFile(KLDump,KLcoeff);
 	}

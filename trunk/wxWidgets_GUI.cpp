@@ -711,10 +711,15 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 	this->Table3Values->SetNumRowsAndCols(1,c);
 	this->Table1Input->SetNumRowsAndCols(this->NumVectors,this->theComputationSetup.WeylGroupIndex);
 	for (int j=0;j<c;j++)
-	{ this->Table1Input->SetColumnWidth(j,20);
-		this->Table2Indicator->SetColumnWidth(j,20);
-		this->Table3Values->SetColumnWidth(j,20);
+	{ this->Table1Input->SetColumnWidth(j,25);
+		this->Table2Indicator->SetColumnWidth(j,25);
+		this->Table3Values->SetColumnWidth(j,25);
 	}
+	this->Table2Indicator->SetRowHeight(0,25);
+	this->Table3Values->SetRowHeight(0,25);
+	for (int i=0;i<r;i++)
+	{ this->Table1Input->SetRowHeight(i,25);
+  }
 	if (this->Table1Input->GetNumberRows()>20)
 	{	this->Table1Input->SetSize(0,70,220,500);
 		this->Table1Input->SetMaxSize(wxSize(220,500));
@@ -725,6 +730,11 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 		this->BoxSizer8HorizontalEval->Layout();
 		this->BoxSizer1HorizontalBackground->Layout();
 	}
+   #ifndef WIN32
+    this->BoxSizer8HorizontalEval->Fit(this->Table3Values);
+    this->BoxSizer4VerticalToggleButton1->Fit(this->Table2Indicator);
+    this->BoxSizer2VerticalInputs->Fit(this->Table1Input);
+   #endif
 }
 
 void guiMainWindow::TurnOffAllDangerousButtons()

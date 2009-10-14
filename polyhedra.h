@@ -3482,7 +3482,9 @@ public:
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
 	void RunA2A1A1inD5();
-	void RunA2A1A1inD5beta12221(bool precomputedPartition, bool precomputedKLcoeff);
+	void RunA2A1A1inD5beta12221(bool precomputedPartition, bool precomputedKLcoeff,
+                              std::string& KLCoeffFile, std::string& PartialFractionsFile,
+                              std::string& VPEntriesFile, std::string& VPIndexFile);
 	void processA2A1A1inD5beta12221Answer(QuasiPolynomial& theAnswer);
 	//format: the polynomials must be root::AmbientDimension in count
 	//these are the coordinates in simple basis of the vector.

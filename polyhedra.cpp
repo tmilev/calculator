@@ -10834,16 +10834,20 @@ void rootFKFTcomputation::initA2A1A1inD5()
 	this->AlgorithmBasisA2A1A1inD5.ComputeDebugString();
 }
 
+rootFKFTcomputation::rootFKFTcomputation()
+{ this->OutputFile = "C:/math/output.txt";
+}
+
 void rootFKFTcomputation::RunA2A1A1inD5beta12221
         (bool precomputedPartition, bool precomputedKLcoeff,
-          std::string& KLCoeffFile, std::string& PartialFractionsFile,
-          std::string& VPEntriesFile, std::string& VPIndexFile)
+          const std::string& KLCoeffFile, const std::string& PartialFractionsFile,
+          const std::string& VPEntriesFile, const std::string& VPIndexFile)
 {	this->initA2A1A1inD5();
 //	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	if (this->useOutputFileForFinalAnswer)
 	{ RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo();
 		std::fstream tempFile;
-		tempFile.open("C:/math/output.txt",std::fstream::in );
+		tempFile.open(this->OutputFile.c_str(),std::fstream::in );
 		QuasiPolynomial tempQP;
 		tempQP.ReadFromFile(tempFile,root::AmbientDimension);
 		tempFile.close();
@@ -10852,10 +10856,10 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221
 	}
 	std::fstream KLDump;
 	std::fstream theDump;
-	KLDump.open("C:/math/KL.txt",std::fstream::in | std::fstream::out);
-	theDump.open("C:/math/VP.txt",std::fstream::in | std::fstream::out);
-	partFraction::TheBigDump.open("C:/math/pfVP.txt",std::fstream::in | std::fstream::out);
-	partFractions::ComputedContributionsList.open("C:/math/pfLocations.txt",std::fstream::in | std::fstream::out);
+	KLDump.open(KLCoeffFile.c_str(),std::fstream::in | std::fstream::out);
+	theDump.open(PartialFractionsFile.c_str(),std::fstream::in | std::fstream::out);
+	partFraction::TheBigDump.open(VPEntriesFile.c_str(),std::fstream::in | std::fstream::out);
+	partFractions::ComputedContributionsList.open(VPIndexFile.c_str(),std::fstream::in | std::fstream::out);
 	assert(partFraction::TheBigDump.is_open());
 	assert(KLDump.is_open());
 	assert(theDump.is_open());
@@ -10916,7 +10920,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221
 	this->MakeTheRootFKFTSum(beta, theVPfunction,KLcoeff,	tempQP,
 													 tempV,tempRoots);
 	std::fstream tempFile;
-	tempFile.open("C:/math/output.txt",std::fstream::out | std::fstream::trunc);
+	tempFile.open(this->OutputFile.c_str(),std::fstream::out | std::fstream::trunc);
 	tempQP.WriteToFile(tempFile);
 	tempFile.close();
 	this->processA2A1A1inD5beta12221Answer(tempQP);

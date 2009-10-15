@@ -138,6 +138,7 @@ public:
   wxGridExtra *Table2Indicator;
   wxGridExtra *Table3Values;
   int NumVectors;
+  int MaxAllowedVectors;
 	wxCommandEvent wxProgressReportEvent;
 	wxCommandEvent wxComputationOver;
   WorkThreadClass WorkThread1;
@@ -167,6 +168,7 @@ public:
   ::wxComboBoxWheel* ListBox1WeylGroup;
   ::wxButton* Button1Go;
   ::wxButton* Button2Eval;
+  ::wxButton* Button3Custom;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
 	::wxCheckBox* CheckBox1ComputePFs;
@@ -176,10 +178,11 @@ public:
 	::IndicatorWindowVariables progressReportVariables;
 	//wxEVT_ProgressReport ProgressReportEvent;
   void onToggleButton1UsingCustom( wxCommandEvent& ev);
-  void onListBox1Change( wxCommandEvent& ev);
-  void onButton2Eval( wxCommandEvent& ev);
-  void onButton1Go( wxCommandEvent& ev);
-	void onSpinner1and2(wxSpinEvent & ev);
+  void onListBox1Change(wxCommandEvent& ev);
+  void onButton2Eval(wxCommandEvent& ev);
+  void onButton1Go(wxCommandEvent& ev);
+  void onButton3Custom (wxCommandEvent& ev);
+	void onSpinner1and2 (wxSpinEvent & ev);
 	void onComputationOver(wxCommandEvent& ev);
 	void onRePaint(wxPaintEvent& ev);
 	void onMouseDownOnCanvas(wxMouseEvent& ev);
@@ -208,6 +211,7 @@ public:
 		ID_Canvas1,
 		ID_ComputationUpdate,
 		ID_CheckBox1,
+		ID_Button3Custom,
 		ID_Paint,
   };
 	DECLARE_EVENT_TABLE()
@@ -226,6 +230,7 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
 	EVT_BUTTON(guiMainWindow::ID_Buton2Eval, guiMainWindow::onButton2Eval)
 	EVT_BUTTON(guiMainWindow::ID_Button1Go, guiMainWindow::onButton1Go)
+	EVT_BUTTON(guiMainWindow::ID_Button3Custom, guiMainWindow::onButton3Custom)
 	EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
 	EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
 	EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
@@ -352,6 +357,7 @@ guiMainWindow::guiMainWindow()
 	this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
 	this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
 	this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
+	this->Button3Custom= new wxButton(this,this->ID_Button3Custom,wxT("Experiments"));
 	this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
 	this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
 	//this->BoxSizer1HorizontalBackground->Fit(this);
@@ -379,6 +385,7 @@ guiMainWindow::guiMainWindow()
 			this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer11VerticalOptions);
 				this->BoxSizer11VerticalOptions->Add(this->CheckBox1ComputePFs);
 				this->BoxSizer11VerticalOptions->Add(this->CheckBox2CheckSums);
+				this->BoxSizer11VerticalOptions->Add(this->Button3Custom);
 			this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label2ProgressReport);
@@ -422,6 +429,7 @@ guiMainWindow::guiMainWindow()
 	this->initWeylGroupInfo();
 	this->updateInputButtons();
 	this->SetSizer(this->BoxSizer1HorizontalBackground);
+	this->MaxAllowedVectors= 16;
 #ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
@@ -445,6 +453,12 @@ guiMainWindow::~guiMainWindow()
  	pthread_mutex_destroy(&ParallelComputing::mutex1);
   pthread_cond_destroy(&ParallelComputing::continueCondition);
 #endif
+}
+
+void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
+{ rootFKFTcomputation tempComp;
+  tempComp.RunA2A1A1inD5beta12221(false,false,"/home/todor/math/KLcoeff.txt","/home/todor/math/partialFractions.txt",
+                                  "/home/todor/math/VPdata.txt","/home/todor/math/VPIndex.txt");
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
@@ -730,6 +744,11 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 		this->BoxSizer8HorizontalEval->Layout();
 		this->BoxSizer1HorizontalBackground->Layout();
 	}
+	if (r>this->MaxAllowedVectors)
+	{ this->Button1Go->Disable();
+  } else
+  { this->Button1Go->Enable();
+  }
    #ifndef WIN32
     this->BoxSizer8HorizontalEval->Fit(this->Table3Values);
     this->BoxSizer4VerticalToggleButton1->Fit(this->Table2Indicator);

@@ -2516,6 +2516,8 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 
 class LargeInt:public ListBasicObjects<unsigned int>
 {	friend class LargeRational;
+  //any number smaller than 2^31 will work for a carry-over
+  //bound. Carry over bound is the "base" over which we work
 	static const unsigned int CarryOverBound=2147483648;//=2^31
 //	static const unsigned int CarryOverBound=37;
 	void AddPositive(LargeInt& x);
@@ -3478,13 +3480,14 @@ public:
 	intRoots AlgorithmBasisA2A1A1inD5;
 	intRoot weights;
 	partFractions partitionA2A1A1inD5;
+	std::string OutputFile;
 	bool useOutputFileForFinalAnswer;
+	rootFKFTcomputation();
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
-	void RunA2A1A1inD5();
-	void RunA2A1A1inD5beta12221(bool precomputedPartition, bool precomputedKLcoeff,
-                              std::string& KLCoeffFile, std::string& PartialFractionsFile,
-                              std::string& VPEntriesFile, std::string& VPIndexFile);
+  void RunA2A1A1inD5beta12221(bool precomputedPartition, bool precomputedKLcoeff,
+                              const std::string& KLCoeffFile, const std::string& PartialFractionsFile,
+                              const std::string& VPEntriesFile, const std::string& VPIndexFile);
 	void processA2A1A1inD5beta12221Answer(QuasiPolynomial& theAnswer);
 	//format: the polynomials must be root::AmbientDimension in count
 	//these are the coordinates in simple basis of the vector.

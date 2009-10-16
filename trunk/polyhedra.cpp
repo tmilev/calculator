@@ -10731,8 +10731,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	beta.Add(B3.rho);
 	roots tempRoots;
 	tempRoots.AssignIntRoots(theNilradical);
-	FKFT.MakeTheRootFKFTSum(beta, theVPfunction,KLcoeff,	tempQP,
-													 tempV,tempRoots);
+	FKFT.MakeTheRootFKFTSum();
 	tempQP.ComputeDebugString();
 }
 
@@ -10838,10 +10837,7 @@ rootFKFTcomputation::rootFKFTcomputation()
 { this->OutputFile = "C:/math/output.txt";
 }
 
-void rootFKFTcomputation::RunA2A1A1inD5beta12221
-        (bool precomputedPartition, bool precomputedKLcoeff,
-          const std::string& KLCoeffFile, const std::string& PartialFractionsFile,
-          const std::string& VPEntriesFile, const std::string& VPIndexFile)
+void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 {	this->initA2A1A1inD5();
 //	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	if (this->useOutputFileForFinalAnswer)
@@ -10855,9 +10851,26 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221
 		return;
 	}
 	std::fstream KLDump;
-	std::fstream theDump;
-	KLDump.open(KLCoeffFile.c_str(),std::fstream::in | std::fstream::out);
-	theDump.open(PartialFractionsFile.c_str(),std::fstream::in | std::fstream::out);
+	std::fstream PartialFractionsFile;
+  KLDump.open(this->KLCoeffFileString.c_str(),std::fstream::in);
+  bool KLDumpIsPresent=true;
+  if (!KLDump.is_open())
+  { KLDumpIsPresent=false;
+    KLDump.open(this->KLCoeffFileString.c_str(),std::fstream::in | std::fstream::out | std::fstream::app);
+  }
+  PartialFractionsFile.open(this->PartialFractionsFileString.c_str(),std::fstream::in);
+  bool PFfileIsPresent=true;
+  if (!PartialFractionsFile.is_open())
+  { PFfileIsPresent=false;
+    PartialFractionsFile.open(this->KLCoeffFileString.c_str(),std::fstream::in | std::fstream::out | std::fstream::app);
+  }
+  partFraction::TheBigDump.open(this->PartialFractionsFileString.c_str(),std::fstream::in | std::fstream::app);
+//  bool PFfileIsPresent=true;
+  if (!PartialFractionsFile.is_open())
+  { PFfileIsPresent=false;
+    PartialFractionsFile.open(this->KLCoeffFileString.c_str(),std::fstream::in | std::fstream::out | std::fstream::app);
+  }
+
 	partFraction::TheBigDump.open(VPEntriesFile.c_str(),std::fstream::in | std::fstream::out);
 	partFractions::ComputedContributionsList.open(VPIndexFile.c_str(),std::fstream::in | std::fstream::out);
 	assert(partFraction::TheBigDump.is_open());
@@ -10882,7 +10895,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221
 	ListBasicObjects<int> KLcoeff;
 //	int TopIndex=
   tempV.ChamberIndicatorToIndex(beta);
-	if (precomputedKLcoeff)
+	if (KLDumpIsPresent)
 	{ tempV.ReadKLCoeffsFromFile(KLDump,KLcoeff);
 	}
 	else

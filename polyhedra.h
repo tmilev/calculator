@@ -3482,12 +3482,17 @@ public:
 	partFractions partitionA2A1A1inD5;
 	std::string OutputFile;
 	bool useOutputFileForFinalAnswer;
+//	bool useOldKLData;
+	bool useOldPartialFractionDecompositionData;
+	bool useVPFstoredData;
+	std::string KLCoeffFileString;
+	std::string PartialFractionsFileString;
+	std::string VPEntriesFileString;
+	std::string VPIndexFileString;
 	rootFKFTcomputation();
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
-  void RunA2A1A1inD5beta12221(bool precomputedPartition, bool precomputedKLcoeff,
-                              const std::string& KLCoeffFile, const std::string& PartialFractionsFile,
-                              const std::string& VPEntriesFile, const std::string& VPIndexFile);
+  void RunA2A1A1inD5beta12221();
 	void processA2A1A1inD5beta12221Answer(QuasiPolynomial& theAnswer);
 	//format: the polynomials must be root::AmbientDimension in count
 	//these are the coordinates in simple basis of the vector.
@@ -3498,10 +3503,7 @@ public:
 	//of the orbit with Borel-positive weights
 	//give a Limiting cone if you want only to observe weights lying in a
 	//certain cone. Set 0 if there is no particular cone of interest.
-	void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition,
-													ListBasicObjects<int>& theKLCoeffs, QuasiPolynomial& output,
-													VermaModulesWithMultiplicities& theHighestWeights,
-													roots& theNilradical);
+	void MakeTheRootFKFTSum();
 };
 
 class LaTeXProcedures

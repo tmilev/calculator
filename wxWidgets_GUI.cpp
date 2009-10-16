@@ -127,7 +127,6 @@ public:
 BEGIN_EVENT_TABLE( drawCanvas, wxPanel )
 	EVT_PAINT(drawCanvas::OnPaint)
 	EVT_LEFT_DOWN( drawCanvas::onMouseDownOnCanvas)
-
 END_EVENT_TABLE()
 
 class guiMainWindow : public wxFrame
@@ -235,6 +234,7 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
 	EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
 	EVT_SIZING(drawCanvas::onSizing)
+	EVT_SIZE(drawCanvas::onSizing)
 	EVT_COMMAND  (guiMainWindow::ID_MainWindow,::wxEVT_ProgressReport,guiMainWindow::onProgressReport )
 	EVT_COMMAND  (guiMainWindow::ID_MainWindow,::wxEVT_ComputationFinished,guiMainWindow::onComputationOver )
 	EVT_CLOSE(guiMainWindow::OnExit)
@@ -373,8 +373,10 @@ guiMainWindow::guiMainWindow()
           this->BoxSizer9HorizontalCombo1AndMainButton->Add(this->Button1Go);
 			this->BoxSizer7VerticalListBox1->Add(this->Spin2NumVect);
 			//this->BoxSizer7VerticalListBox1->Add(this->Spin2NumVect);
+    this->BoxSizer2VerticalInputs->Add(new wxStaticText(this,wxID_ANY,wxT("Chamber indicator")));
 		this->BoxSizer2VerticalInputs->Add(this->Table2Indicator);//,0,wxEXPAND|wxALL);
 		this->BoxSizer2VerticalInputs->Add(this->Table1Input);//,0,wxEXPAND|wxALL);
+    this->BoxSizer2VerticalInputs->Add(new wxStaticText(this,wxID_ANY,wxT("Evaluation")));
 		this->BoxSizer2VerticalInputs->Add(this->BoxSizer8HorizontalEval);
 			this->BoxSizer8HorizontalEval->Add(this->Table3Values);
 			this->BoxSizer8HorizontalEval->Add(this->Button2Eval);
@@ -426,10 +428,10 @@ guiMainWindow::guiMainWindow()
 	this->wxComputationOver.SetId(this->GetId());
 	this->wxComputationOver.SetEventObject(this);
 	this->wxComputationOver.SetEventType(wxEVT_ComputationFinished);
+	this->MaxAllowedVectors= 16;
 	this->initWeylGroupInfo();
 	this->updateInputButtons();
 	this->SetSizer(this->BoxSizer1HorizontalBackground);
-	this->MaxAllowedVectors= 16;
 #ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
@@ -437,14 +439,13 @@ guiMainWindow::guiMainWindow()
 	Centre();
 }
 void drawCanvas::onSizing(wxSizeEvent& ev)
-{ this->Refresh();
-	MainWindow1->Table1Input->SetAutoLayout(true);
-	MainWindow1->BoxSizer1HorizontalBackground->Layout();
-	if (MainWindow1->Table1Input->GetNumberRows()>20)
+{ if (MainWindow1->Table1Input->GetNumberRows()>20)
 	{	MainWindow1->Table1Input->SetAutoLayout(false);
 		MainWindow1->Table1Input->SetSize(0,70,220,500);
 		MainWindow1->Table1Input->SetMaxSize(wxSize(220,500));
 	}
+  MainWindow1->Layout();
+  this->Refresh();//true,&tempRect);
 }
 
 guiMainWindow::~guiMainWindow()
@@ -457,8 +458,12 @@ guiMainWindow::~guiMainWindow()
 
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 { rootFKFTcomputation tempComp;
+#ifndef WIN32
+  tempComp.useOutputFileForFinalAnswer=false;
   tempComp.RunA2A1A1inD5beta12221(false,false,"/home/todor/math/KLcoeff.txt","/home/todor/math/partialFractions.txt",
                                   "/home/todor/math/VPdata.txt","/home/todor/math/VPIndex.txt");
+#else
+#endif
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
@@ -481,11 +486,9 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 {	::wxPaintDC  dc(this);
 	if (MainWindow1->theComputationSetup.AllowRepaint)
 	{	root::AmbientDimension= MainWindow1->theComputationSetup.RankEuclideanSpaceGraphics;
-		root tempRoot;
-		tempRoot.MakeZero();
 		dc.SetBackground(MainWindow1->GetBackgroundColour());
 		dc.DrawRectangle(wxPoint(0,0),this->GetSize());
-		::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,tempRoot);
+		::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,MainWindow1->theComputationSetup.IndicatorRoot);
 	}
 }
 
@@ -750,6 +753,7 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
   { this->Button1Go->Enable();
   }
    #ifndef WIN32
+//    this->Layout();
     this->BoxSizer8HorizontalEval->Fit(this->Table3Values);
     this->BoxSizer4VerticalToggleButton1->Fit(this->Table2Indicator);
     this->BoxSizer2VerticalInputs->Fit(this->Table1Input);

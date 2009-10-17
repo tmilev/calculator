@@ -1371,7 +1371,7 @@ public:
 
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWithIdentity> >
-{	
+{
 public:
 	void FindCoeffInFrontOfLinearTermVariableIndex(int index,
 							ElementOfCommutativeRingWithIdentity& output );
@@ -1403,12 +1403,15 @@ public:
 										short NumVarTarget);
 	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution,
 		                short NumVarTarget);
+  int TotalDegree();
 	void ComponentInFrontOfVariableToPower
 							(int VariableIndex,
 							 ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output,
 							 int UpToPower);
+  int FindMaxPowerOfVariableIndex(int VariableIndex);
 	//has to be rewritten please don't use!
 	bool IsGreaterThanZeroLexicographicOrder();
+  bool IsEqualTo(Polynomial<ElementOfCommutativeRingWithIdentity>& p);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -2228,11 +2231,9 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d)
 
 template <class ElementOfCommutativeRingWithIdentity>
 int Polynomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
-{
-	int result=0;
+{	int result=0;
 	for (int i=0;i<this->TheMonomials.size;i++)
-	{
-		result=Maximum(this->TheMonomials.TheObjects[i]->TotalDegree(),result);
+	{	result=Maximum(this->TheMonomials.TheObjects[i]->TotalDegree(),result);
 	}
 	return result;
 }

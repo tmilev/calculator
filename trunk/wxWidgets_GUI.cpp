@@ -261,7 +261,7 @@ void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
    int rot = event.GetWheelRotation()/event.GetWheelDelta();
    int lines = rot*1;// event.GetLinesPerAction();
 	 int newSelection = this->GetSelection()-lines;
-	 if (newSelection>=this->GetCount()|| newSelection<0)
+	 if (newSelection>=(unsigned)this->GetCount()|| newSelection<0)
 		 return;
    this->SetSelection(newSelection);
    wxCommandEvent ev;

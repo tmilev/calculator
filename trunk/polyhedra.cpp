@@ -10731,7 +10731,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	beta.Add(B3.rho);
 	roots tempRoots;
 	tempRoots.AssignIntRoots(theNilradical);
-	FKFT.MakeTheRootFKFTSum();
+//	FKFT.MakeTheRootFKFTSum();
 	tempQP.ComputeDebugString();
 }
 
@@ -10864,18 +10864,17 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
   { PFfileIsPresent=false;
     PartialFractionsFile.open(this->KLCoeffFileString.c_str(),std::fstream::in | std::fstream::out | std::fstream::app);
   }
-  partFraction::TheBigDump.open(this->PartialFractionsFileString.c_str(),std::fstream::in | std::fstream::app);
-//  bool PFfileIsPresent=true;
-  if (!PartialFractionsFile.is_open())
-  { PFfileIsPresent=false;
-    PartialFractionsFile.open(this->KLCoeffFileString.c_str(),std::fstream::in | std::fstream::out | std::fstream::app);
+  partFraction::TheBigDump.open(this->PartialFractionsFileString.c_str(),std::fstream::in | std::fstream::app| std::fstream::out );
+  partFractions::ComputedContributionsList.open(this->PartialFractionsFileString.c_str(),std::fstream::in| std::fstream::out );
+  bool VPIndexIsPresent=true;
+	if (!partFractions::ComputedContributionsList.is_open())
+  { VPIndexIsPresent=false;
+    partFractions::ComputedContributionsList.open
+			(this->VPIndexFileString.c_str(),std::fstream::in | std::fstream::out | std::fstream::app);
   }
-
-	partFraction::TheBigDump.open(VPEntriesFile.c_str(),std::fstream::in | std::fstream::out);
-	partFractions::ComputedContributionsList.open(VPIndexFile.c_str(),std::fstream::in | std::fstream::out);
 	assert(partFraction::TheBigDump.is_open());
 	assert(KLDump.is_open());
-	assert(theDump.is_open());
+	assert(PartialFractionsFile.is_open());
 	assert(partFractions::ComputedContributionsList.is_open());
 	ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=13000;
 	partFractions theVPfunction;
@@ -10911,16 +10910,16 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 //	tempV.ComputeDebugString();
 
 //	theVPfunction.initFromRootSystem(tempRoots1,tempRoots1,0);
-	if(! precomputedPartition)
+	if(!PFfileIsPresent )
 	{	theVPfunction.initFromRootSystem(	this->nilradicalA2A1A1inD5,
 																		this->AlgorithmBasisA2A1A1inD5, 0);
 		theVPfunction.splitClassicalRootSystem();
-		theVPfunction.WriteToFile(theDump);
+		theVPfunction.WriteToFile(PartialFractionsFile);
 	}
 	else
-	{	theVPfunction.ReadFromFile(theDump);
+	{	theVPfunction.ReadFromFile(PartialFractionsFile);
 	}
-	theDump.close();
+	PartialFractionsFile.close();
 //	theVPfunction.ComputeDebugString();
 	for (int i=0;i<theVPfunction.size;i++)
 	{ assert(theVPfunction.TheObjects[i].IndicesNonZeroMults.size==root::AmbientDimension);

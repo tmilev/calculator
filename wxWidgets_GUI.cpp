@@ -460,8 +460,11 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 { rootFKFTcomputation tempComp;
 #ifndef WIN32
   tempComp.useOutputFileForFinalAnswer=false;
-  tempComp.RunA2A1A1inD5beta12221(false,false,"/home/todor/math/KLcoeff.txt","/home/todor/math/partialFractions.txt",
-                                  "/home/todor/math/VPdata.txt","/home/todor/math/VPIndex.txt");
+  tempComp.KLCoeffFileString="/home/todor/math/KLcoeff.txt";
+  tempComp.PartialFractionsFileString="/home/todor/math/partialFractions.txt";
+  tempComp.VPEntriesFileString="/home/todor/math/VPdata.txt";
+  tempComp.VPIndexFileString="/home/todor/math/VPIndex.txt";
+  tempComp.RunA2A1A1inD5beta12221();
 #else
 #endif
 }

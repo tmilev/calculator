@@ -130,6 +130,7 @@ FacetPointers GlobalCollectorFacets;
 root ZeroRoot;
 intRoot partFraction::theVectorToBePartitioned;
 bool partFraction::MakingConsistencyCheck=false;
+bool partFraction::UncoveringBrackets=true;
 LargeRational partFractions::CheckSum;
 LargeRational partFraction::CheckSum;
 LargeRational partFraction::CheckSum2;
@@ -163,29 +164,33 @@ template < > int ListBasicObjects<BasicComplexNumber>::ListBasicObjectsActualSiz
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
 ListObjectPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
 int BasicQN::NumTotalCreated=0;
-template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<Monomial<QuasiNumber> >::ListBasicObjectsActualSizeIncrement=1000;
 template < > int HashedListBasicObjects<Monomial<QuasiNumber> >::PreferredHashSize=1000;
 template < > int HashedListBasicObjects<BasicQN>::PreferredHashSize= 1;
-template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int HashedListBasicObjects<partFraction>::PreferredHashSize=10000;
-template < > int ListBasicObjects<intRoot>::ListBasicObjectsActualSizeIncrement= 20;
 template < > int HashedListBasicObjects<intRoot>::PreferredHashSize = 10000;
 template < > int HashedListBasicObjects<oneFracWithMultiplicitiesAndElongations>::PreferredHashSize= 10;
-template < > int ListBasicObjects<oneFracWithMultiplicitiesAndElongations>::ListBasicObjectsActualSizeIncrement=1;
 template < > int HashedListBasicObjects<ElementWeylGroup>::PreferredHashSize=10000;
+template < > int HashedListBasicObjects<root>::PreferredHashSize=1000;
+template < > int HashedListBasicObjects<Monomial<LargeInt> >::PreferredHashSize=1;
+template < > int HashedListBasicObjects<Monomial<LargeRational> >::PreferredHashSize=10000;
+template < > int HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=25;
+template < > int HashedListBasicObjects<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra> >
+  ::PreferredHashSize=15;
+template < > int HashedListBasicObjects<GeneratorPFAlgebra>::PreferredHashSize = 10;
+template < > int ListBasicObjects<GeneratorPFAlgebra>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
+template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<Monomial<QuasiNumber> >::ListBasicObjectsActualSizeIncrement=1000;
+template < > int ListBasicObjects<intRoot>::ListBasicObjectsActualSizeIncrement= 20;
+template < > int ListBasicObjects<oneFracWithMultiplicitiesAndElongations>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<ElementWeylGroup>::ListBasicObjectsActualSizeIncrement= 1000;
 template < > int ListBasicObjects<PolynomialsRationalCoeff>::ListBasicObjectsActualSizeIncrement=1;
-template < > int HashedListBasicObjects<root>::PreferredHashSize=1000;
 template < > int ListBasicObjects<root>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<QuasiPolynomial>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<PolynomialRationalCoeff>::ListBasicObjectsActualSizeIncrement=1;
-template < > int HashedListBasicObjects<Monomial<LargeInt> >::PreferredHashSize=1;
 template < > int ListBasicObjects<Monomial<LargeInt> >::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<Polynomial<Rational> >::ListBasicObjectsActualSizeIncrement=1;
-template < > int HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=25;
 template < > int ListBasicObjects<Monomial<Integer> >::ListBasicObjectsActualSizeIncrement=10;
-template < > int HashedListBasicObjects<Monomial<LargeRational> >::PreferredHashSize=10000;
 template < > int ListBasicObjects<Monomial<LargeRational> >::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<PolynomialLargeRational>::ListBasicObjectsActualSizeIncrement=32;
 template < > int ListBasicObjects<rootWithMultiplicity>::ListBasicObjectsActualSizeIncrement=1;
@@ -212,6 +217,8 @@ bool partFractions::UsingCheckSum=true;
 bool QuasiPolynomial::AnErrorHasOccurredTimeToPanic=false;
 bool LargeRational::AnErrorHasOccurredTimeToPanic=false;
 bool partFractions::MakingProgressReport=true;
+HashedListBasicObjects<GeneratorPFAlgebra> GeneratorsPartialFractionAlgebra::theGenerators;
+
 
 int NextDirectionIndex;
 int RankGlobal;
@@ -231,46 +238,6 @@ pthread_cond_t ParallelComputing::continueCondition;
 
 bool Stop()
 {	return true;
-}
-
-void AttemptMemoryCompactification()
-{
-/*	HANDLE HeapHandles[CombinatorialChamberPointers::MaxNumHeaps];
-	int NumUsedHeaps= GetProcessHeaps(CombinatorialChamberPointers::MaxNumHeaps,HeapHandles);
-	if(NumUsedHeaps>CombinatorialChamberPointers::MaxNumHeaps)
-	{
-		Stop();
-	}
-	for (int i=0;i<NumUsedHeaps;i++)
-	{
-		HeapCompact(HeapHandles[i],0);
-	}
-*/
-}
-
-void PolynomialMemoryLeakTest()
-{ PolynomialRationalCoeff tempP, Accum;
-	tempP.MakeNVarDegOnePoly(5,0,ROne,ROne);
-	Accum.AddPolynomial(tempP);
-	Accum.MultiplyBy(tempP);
-	Accum.MultiplyBy(Accum);
-	tempP.MakeNVarDegOnePoly(5,1,ROne,RZero);
-	Accum.AddPolynomial(tempP);
-	Accum.MultiplyBy(tempP);
-	Accum.MultiplyBy(Accum);
-	tempP.MakeNVarDegOnePoly(5,2,ROne,RZero);
-	Accum.AddPolynomial(tempP);
-	Accum.MultiplyBy(tempP);
-	Accum.MultiplyBy(Accum);
-	tempP.MakeNVarDegOnePoly(5,3,ROne,RZero);
-	Accum.AddPolynomial(tempP);
-	Accum.MultiplyBy(tempP);
-	Accum.MultiplyBy(Accum);
-	tempP.MakeNVarDegOnePoly(5,4,ROne,RZero);
-	Accum.AddPolynomial(tempP);
-	Accum.MultiplyBy(tempP);
-	Accum.MultiplyBy(Accum);
-	Accum.ComputeDebugString();
 }
 
 void OneSlice(roots& directions, int& index, int rank,
@@ -326,7 +293,6 @@ void OneSlice(roots& directions, int& index, int rank,
 		)
 	{	CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag=
 			GlobalCollectorChambers.size;
-		AttemptMemoryCompactification();
 	}
 }
 
@@ -7570,7 +7536,8 @@ void partFraction::ApplySzenesVergneFormula
 				partFractions& Accum)
 {	static partFraction tempFrac;
 	static IntegerPoly tempP;
-	std::string tempSX;
+  static PolyPartFractionNumerator tempNum;
+	//std::string tempSX;
 /*	if (this->AnErrorHasOccurredTimeToPanic)
 	{ this->CheckSum2.MakeZero();
 		this->ComputeOneCheckSum(this->CheckSum);
@@ -7593,22 +7560,23 @@ void partFraction::ApplySzenesVergneFormula
 		currentFrac.AddMultiplicity
 			(-1,LargestElongation);
 		static Monomial<Integer> tempM;
-		tempM.init(root::AmbientDimension);
-		tempM.Coefficient.Assign(IOne);
-		for (int j=0;j<i;j++)
-		{	short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
-			for (int k=0;k<root::AmbientDimension;k++)
-			{ tempM.degrees[k]+=(short)theElongations.TheObjects[j]*tempElongation*
-													(short)partFraction::RootsToIndices.
-														TheObjects[theSelectedIndices.TheObjects[j]].elements[k];
-			}
-		}
-		ParallelComputing::SafePoint();
-		tempFrac.Coefficient.MultiplyByMonomial(tempM);
-		this->GetNElongationPoly
-				(theSelectedIndices.TheObjects[i],LargestElongation,theElongations.TheObjects[i],tempP);
-		tempFrac.Coefficient.MultiplyBy(tempP);
-		tempFrac.ComputeIndicesNonZeroMults();
+		if (this->UncoveringBrackets)
+		{ tempM.init(root::AmbientDimension);
+      tempM.Coefficient.Assign(IOne);
+      for (int j=0;j<i;j++)
+      {	short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
+        for (int k=0;k<root::AmbientDimension;k++)
+        { tempM.degrees[k]+=(short)theElongations.TheObjects[j]*tempElongation*
+                            (short)partFraction::RootsToIndices.
+                              TheObjects[theSelectedIndices.TheObjects[j]].elements[k];
+        }
+      }
+      ParallelComputing::SafePoint();
+      tempFrac.Coefficient.MultiplyByMonomial(tempM);
+      this->GetNElongationPoly
+          (theSelectedIndices.TheObjects[i],LargestElongation,theElongations.TheObjects[i],tempP);
+      tempFrac.Coefficient.MultiplyBy(tempP);
+      tempFrac.ComputeIndicesNonZeroMults();
 	/*	if (this->AnErrorHasOccurredTimeToPanic)
 		{ //tempFrac.ComputeDebugString();
 			LargeRational tempRat;
@@ -7622,14 +7590,41 @@ void partFraction::ApplySzenesVergneFormula
 			tempSX.append(tempS1);
 			tempSX.append("  + \\\\&&");
 		}*/
-		Accum.Add(tempFrac);
+      Accum.Add(tempFrac);
 		/*if (this->AnErrorHasOccurredTimeToPanic)
 		{	Accum.ComputeDebugString();
 		}*/
+		}
+		else
+		{
+    }
 	}
 	//if (this->AnErrorHasOccurredTimeToPanic)
 	//{ assert(this->CheckSum.IsEqualTo(this->CheckSum2));
 	//}
+}
+
+void partFraction::MakeMonomialFromLinCombination
+        ( ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
+          int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, int skippedIndex, int LargestElongation,
+          MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra>& output)
+{ output.Coefficient.Assign(IOne);
+  output.ClearTheObjects();
+  for (int j=0;j<skippedIndex;j++)
+  {	short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
+    for (int k=0;k<root::AmbientDimension;k++)
+    { int generatorPower= (short)theElongations.TheObjects[j]*tempElongation*
+                          (short)partFraction::RootsToIndices.
+                            TheObjects[theSelectedIndices.TheObjects[j]].elements[k];
+      output.MultiplyByGenerator(k,generatorPower);
+    }
+  }
+  ParallelComputing::SafePoint();
+  static intRoot tempRoot;
+  tempRoot=this->RootsToIndices.TheObjects[theSelectedIndices.TheObjects[skippedIndex]];
+  tempRoot.MultiplyByInteger( LargestElongation);
+  int tempInt=GeneratorsPartialFractionAlgebra::GetGeneratorIndexFromGeneratorRecord(tempRoot,theElongations.TheObjects[skippedIndex]);
+  output.MultiplyByGenerator(tempInt,1);
 }
 
 void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
@@ -7952,6 +7947,7 @@ partFraction::partFraction()
 {	this->init(partFraction::RootsToIndices.size);
 	this->PowerSeriesCoefficientIsComputed=false;
 	this->AlreadyAccountedForInGUIDisplay=false;
+	this->UncoveringBrackets=true;
 	this->FileStoragePosition=-1;
 	this->LastGainingMultiplicityIndex=-1;
 /*	if (partFraction::UseGlobalCollector)
@@ -10634,105 +10630,7 @@ void RandomCodeIDontWantToDelete::RevealTheEvilConspiracy()
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTests2()
-{	partFraction::TheBigDump.open("C:/pfVP.txt",std::fstream::in | std::fstream::trunc | std::fstream::out);
-	assert(partFraction::TheBigDump.is_open());
-	partFractions VPtemp;
-	QuasiPolynomial tempQP2;
-	partFractions::ComputedContributionsList.open
-		("C:/File_positions.txt",std::fstream::out | std::fstream::trunc| std::fstream::out);
-	VPtemp.ComputeKostantFunctionFromWeylGroup('B',3,tempQP2,0,false,false);
-	tempQP2.ComputeDebugString();
-	partFractions::ComputedContributionsList.close();
-	partFraction::TheBigDump.flush();
-	partFractions::ComputedContributionsList.open
-		("C:/File_positions.txt",std::fstream::in);
-	partFraction::TheBigDump.open("C:/pfVP.txt",std::fstream::in | std::fstream::trunc| std::fstream::out);
-	assert(partFraction::TheBigDump.is_open());
-	VPtemp.ComputeKostantFunctionFromWeylGroup('B',3,tempQP2,0,true,false);
-	tempQP2.ComputeDebugString();
-	partFraction::TheBigDump.flush();
-	partFraction::TheBigDump.close();
-	partFraction::TheBigDump.open("C:/pfVP.txt",std::fstream::in | std::fstream::out);
-	std::fstream tempFile;
-	tempFile.open("C:/outTemp.txt",std::fstream::in | std::fstream::trunc| std::fstream::out);
-	tempQP2.WriteToFile(tempFile);
-	tempQP2.ComputeDebugString();
-	tempFile.flush();
-	tempFile.close();
-	tempFile.open("C:/outTemp.txt",std::fstream::in );
-	tempQP2.ReadFromFile(tempFile,3);
-	tempQP2.ComputeDebugString();
-//	RandomCodeIDontWantToDelete::SomeRandomTests5();
-	rootFKFTcomputation FKFT;
-	root::AmbientDimension=3;
-	intRoots theBorel;
-	intRoots theNilradical;
-	theBorel.SetSizeExpandOnTopNoObjectInit(12);
-	theBorel.TheObjects[0].initFromInt(1,0,0,0,0);
-	theBorel.TheObjects[1].initFromInt(0,1,0,0,0);
-	theBorel.TheObjects[2].initFromInt(0,0,1,0,0);
-	theBorel.TheObjects[3].initFromInt(1,1,0,0,0);
-	theBorel.TheObjects[4].initFromInt(0,1,2,0,0);
-	theBorel.TheObjects[5].initFromInt(0,1,1,0,0);
-	theBorel.TheObjects[6].initFromInt(1,1,2,0,0);
-	theBorel.TheObjects[7].initFromInt(1,1,1,0,0);
-	theBorel.TheObjects[8].initFromInt(1,2,2,0,0);
-	theBorel.TheObjects[9].initFromInt(0,0,2,0,0);
-	theBorel.TheObjects[10].initFromInt(0,2,2,0,0);
-	theBorel.TheObjects[11].initFromInt(2,2,2,0,0);
-	theNilradical.CopyFromBase(theBorel);
-/*	theNilradical.SetSizeExpandOnTopNoObjectInit(8);
-	theNilradical.TheObjects[0].initFromInt(0,1,0,0,0);
-	theNilradical.TheObjects[1].initFromInt(0,0,1,0,0);
-	theNilradical.TheObjects[2].initFromInt(1,1,0,0,0);
-	theNilradical.TheObjects[3].initFromInt(0,1,2,0,0);
-	theNilradical.TheObjects[4].initFromInt(0,1,1,0,0);
-	theNilradical.TheObjects[5].initFromInt(1,1,2,0,0);
-	theNilradical.TheObjects[6].initFromInt(1,1,1,0,0);
-	theNilradical.TheObjects[7].initFromInt(1,2,2,0,0);
-*/
-
-	intRoot tempWeight;
-	tempWeight.initFromInt(100,10,1,0,0);
-	WeylGroup B3;
-	B3.MakeBn(3);
-	B3.ComputeWeylGroup();
-	B3.ComputeDebugString();
-	VermaModulesWithMultiplicities tempV;
-	tempV.initFromWeyl(&B3);
-	root beta;
-	beta.InitFromIntegers(5,8,9,0,0);
-	ListBasicObjects<int> KLcoeff;
-	std::fstream KLDump;
-	KLDump.open("M:/math/KL.txt",std::fstream::in | std::fstream::out);
-	assert(KLDump.is_open());
-  tempV.ChamberIndicatorToIndex(beta);
-	//tempV.ReadKLCoeffsFromFile(KLDump,KLcoeff);
-	tempV.ComputeKLcoefficientsFromChamberIndicator(beta,KLcoeff);
-	tempV.KLPolys.ReleaseMemory();
-	tempV.RPolys.ReleaseMemory();
-	tempV.WriteKLCoeffsToFile(KLDump,KLcoeff,tempV.ChamberIndicatorToIndex(beta));
-	KLDump.close();
-	ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=100;
-	partFractions theVPfunction;
-	std::fstream theDump;
-	theDump.open("M:/math/VP.txt",std::fstream::in | std::fstream::out);
-	assert(theDump.is_open());
-	theBorel.BubbleSort(&tempWeight);
-	theVPfunction.initFromRootSystem(	theNilradical, theBorel,0);
-	theVPfunction.splitClassicalRootSystem();
-	theVPfunction.WriteToFile(theDump);
-	//theVPfunction.ReadFromFile(theDump);
-	theDump.close();
-	theVPfunction.ComputeDebugString();
-
-	QuasiPolynomial tempQP;
-	beta.MultiplyByInteger(100);
-	beta.Add(B3.rho);
-	roots tempRoots;
-	tempRoots.AssignIntRoots(theNilradical);
-//	FKFT.MakeTheRootFKFTSum();
-	tempQP.ComputeDebugString();
+{ PolyPartFractionNumerator tempP;
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()
@@ -12351,4 +12249,22 @@ bool simplicialCones::SeparatePoints(root &point1, root &point2, root *Preferred
 		}
 	}
 	return false;
+}
+
+int GeneratorsPartialFractionAlgebra::GetGeneratorIndexFromGeneratorRecord(intRoot& exponent, int Elongation)
+{ static GeneratorPFAlgebra tempG;
+  tempG.GeneratorRoot= exponent;
+  tempG.Elongation = Elongation;
+  int x = GeneratorsPartialFractionAlgebra::theGenerators.ContainsObjectHash(tempG);
+  if (x!=-1)
+  { return x;
+  }
+  else
+  { GeneratorsPartialFractionAlgebra::theGenerators.AddObjectOnTopHash(tempG);
+    return theGenerators.size-1;
+  }
+}
+
+int GeneratorsPartialFractionAlgebra::HashFunction()
+{ return this->GeneratorIndex;
 }

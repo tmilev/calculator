@@ -260,7 +260,7 @@ void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
 {  // scroll in drop down list using mouse wheel
    int rot = event.GetWheelRotation()/event.GetWheelDelta();
    int lines = rot*1;// event.GetLinesPerAction();
-	 int newSelection = this->GetSelection()-lines;
+	 unsigned int newSelection = (unsigned)(this->GetSelection()-lines);
 	 if (newSelection>=(unsigned)this->GetCount()|| newSelection<0)
 		 return;
    this->SetSelection(newSelection);
@@ -459,6 +459,7 @@ guiMainWindow::~guiMainWindow()
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 { rootFKFTcomputation tempComp;
 #ifndef WIN32
+  RandomCodeIDontWantToDelete::SomeRandomTests2();
   tempComp.useOutputFileForFinalAnswer=false;
   tempComp.KLCoeffFileString="/home/todor/math/KLcoeff.txt";
   tempComp.PartialFractionsFileString="/home/todor/math/partialFractions.txt";

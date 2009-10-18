@@ -26,7 +26,7 @@
 //
 //THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
 //EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-//PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND,
+//PROVIDE THE PROGRAM Â“AS ISÂ” WITHOUT WARRANTY OF ANY KIND,
 //EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
 //THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 //THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
@@ -794,8 +794,7 @@ void ListBasicObjects<Object>::AddObjectOnBottom(Object& o)
 template <class Object>
 void ListBasicObjects<Object>::AddObjectOnTop(const Object& o)
 {	if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
-	{
-		this->ExpandArrayOnTop(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
+	{	this->ExpandArrayOnTop(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
 	}
 	this->TheObjects[size]=o;
 	this->size++;
@@ -1296,42 +1295,12 @@ public:
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::InitWithZero=true;
 
-//The class below is to facilitate for different realizations of monomials in the future
-//Polynomial<ElementOfCommutativeRingWithIdentity> class.
-//It should not be used outside of this file.
-//The two current uses for the TemplatePolynomial
-//would be to set TemplateMonomial to class Monomial
-//or to class ...
 
 
-//**********************************************************
-/*To use Polynomial<ElementOfCommutativeRingWithIdentity> you MUST define:
 
-void ElementOfCommutativeRingWithIdentity::Add(ElementOfCommutativeRingWithIdentity&);
-void ElementOfCommutativeRingWithIdentity::MultiplyBy(ElementOfCommutativeRingWithIdentity&);
-void ElementOfCommutativeRingWithIdentity::Assign(ElementOfCommutativeRingWithIdentity&);
-void ElementOfCommutativeRingWithIdentity::ElementToString(std::string& output);
-//the above is for printout& debug purposes:
-//how you want your element to be displayed in string format.
-ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingUnit;
-ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingMUnit;
-ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingZero;
-int HashedListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::PreferredHashSize;
-//the above is the size of the hash table your polynomial will have. The larger the hash table -
-//the more RAM consumed - the faster the computation. Set 1 if you want min RAM usage. Set 10
-//if you got no good idea of what this means.
-int ListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::ListBasicObjectsActualSizeIncrement;
-//the above is the size of the chunk of memory the polynomial class will allocate
-//whenever it needs more memory. For example, if you believe your polynomials
-//will have 1000+ monomials average, then set the above to 1000. Note: abuse of the above
-//might raise your memory usage unexpectedly high!
-*/
-//**********************************************************
-//optional functions to use some of the methods of the class:
-//void ElementOfCommutativeRingWithIdentity::DivideBy(&ElementOfCommutativeRingWithIdentity);
-//void ElementOfCommutativeRingWithIdentity::WriteToFile(std::fstream& output);
-//void ElementOfCommutativeRingWithIdentity::ReadFromFile(std::fstream& input);
-//void ElementOfCommutativeRingWithIdentity::AssignRational(Rational& r);
+//The class below could as well be called "Associative commutative algebra"
+//The ring over which the algebra is defined is called by using TemplateMonomial.Coefficient
+
 
 template <class TemplateMonomial>
 class TemplatePolynomial: public HashedListBasicObjects<TemplateMonomial>
@@ -1361,13 +1330,42 @@ public:
 	void MultiplyBy(TemplatePolynomial<TemplateMonomial>& p,
 									TemplatePolynomial<TemplateMonomial>& output);
 	void AddPolynomial(TemplatePolynomial<TemplateMonomial>& p);
-
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input, short NumV);
 	int HasSameExponentMonomial(TemplateMonomial& m);
 	void operator= (const TemplatePolynomial<TemplateMonomial>& right);
 	bool operator== (const TemplatePolynomial<TemplateMonomial>& right);
 };
+
+
+//**********************************************************
+/*To use Polynomial<ElementOfCommutativeRingWithIdentity> you MUST define:
+//Absolutely necessary:
+void ElementOfCommutativeRingWithIdentity::Add(ElementOfCommutativeRingWithIdentity&);
+void ElementOfCommutativeRingWithIdentity::MultiplyBy(ElementOfCommutativeRingWithIdentity&);
+void ElementOfCommutativeRingWithIdentity::Assign(ElementOfCommutativeRingWithIdentity&);
+void ElementOfCommutativeRingWithIdentity::ElementToString(std::string& output);
+      //the above is for printout& debug purposes:
+      //how you want your element to be displayed in string format.
+ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingUnit;
+ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingMUnit;
+ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingZero;
+int HashedListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::PreferredHashSize;
+      //the above is the size of the hash table your polynomial will have. The larger the hash table -
+      //the more RAM consumed - the faster the computation. Set 1 if you want min RAM usage. Set 10
+      //if you got no good idea of what this means.
+int ListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::ListBasicObjectsActualSizeIncrement;
+      //the above is the size of the chunk of memory the polynomial class will allocate
+      //whenever it needs more memory. For example, if you believe your polynomials
+      //will have 1000+ monomials average, then set the above to 1000. Note: abuse of the above
+      //might raise your memory usage unexpectedly high!
+//Optional (required for some moethods):
+//void ElementOfCommutativeRingWithIdentity::DivideBy(&ElementOfCommutativeRingWithIdentity);
+//void ElementOfCommutativeRingWithIdentity::WriteToFile(std::fstream& output);
+//void ElementOfCommutativeRingWithIdentity::ReadFromFile(std::fstream& input);
+//void ElementOfCommutativeRingWithIdentity::AssignRational(Rational& r);
+*/
+
 
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWithIdentity> >
@@ -1414,6 +1412,7 @@ public:
   bool IsEqualTo(Polynomial<ElementOfCommutativeRingWithIdentity>& p);
 };
 
+
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >
 {	public:
@@ -1434,6 +1433,145 @@ class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWi
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
 };
+
+class intRoot
+{
+private:
+public:
+	unsigned char dimension;
+	int elements[MaxRank];
+	void AssignRoot(root&r);
+	int HashFunction();
+	void ElementToString(std::string& output);
+	bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
+	bool IsGEQNoWeight(intRoot& r);
+	void MakeZero();
+	void MultiplyByInteger(int x)
+	{	for (int i=0;i<this->dimension;i++)
+		{ this->elements[i]*=x;
+		}
+	};
+	void initFromInt(int x1,int x2,int x3, int x4, int x5);
+	void initFromInt(	int x1,int x2,int x3, int x4, int x5, int x6,
+										int x7,int x8,int x9, int x10, int x11, int x12);
+	//remark: zero is considered to be a positive vector!
+	bool IsPositive();
+	void AddRoot(intRoot& theRoot);
+	void operator=(const intRoot& right);
+	bool operator==(intRoot& right);
+	void operator=(int* right);
+	intRoot(){this->dimension=root::AmbientDimension; for (unsigned char i=0;i<this->dimension;i++)elements[i]=0;}
+};
+
+class GeneratorPFAlgebra
+{
+private:
+  GeneratorPFAlgebra(const GeneratorPFAlgebra& right);
+public:
+  intRoot GeneratorRoot;
+  int Elongation;
+  GeneratorPFAlgebra(){};
+  void operator = (const GeneratorPFAlgebra& right)
+  { this->GeneratorRoot = right.GeneratorRoot;
+    this->Elongation = right.Elongation;
+  }
+  int HashFunction()
+  { return Elongation* GeneratorRoot.HashFunction();
+  };
+  bool operator == (GeneratorPFAlgebra& right)
+  { return (this->GeneratorRoot == right.GeneratorRoot) && (this->Elongation == right.Elongation);
+  }
+};
+
+class GeneratorsPartialFractionAlgebra
+{
+public:
+  static HashedListBasicObjects<GeneratorPFAlgebra> theGenerators;
+  static Polynomials<Integer> GeneratorValues;
+  static int GetGeneratorIndexFromGeneratorRecord(intRoot& exponent, int elongation);
+  int HashFunction();
+  void operator = (GeneratorsPartialFractionAlgebra& right);
+  bool operator == (GeneratorsPartialFractionAlgebra& right);
+  int GeneratorIndex;
+  int GeneratorPower;
+};
+
+template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
+class MonomialInCommutativeAlgebra: public HashedListBasicObjects<GeneratorsOfAlgebra>
+{
+private:
+	MonomialInCommutativeAlgebra
+    (MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,
+                                  GeneratorsOfAlgebra>&)
+  {assert(false);};
+//	int DegreesToIndexRecursive(int MaxDeg, int index);
+public:
+	ElementOfCommutativeRingWithIdentity Coefficient;
+	std::string DebugString;
+	bool ComputeDebugString(PolynomialOutputFormat &PolyFormat);
+	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
+	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
+	int HashFunction();
+	void MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m,
+									MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& output);
+	void MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
+	void MultiplyByGenerator(int GeneratorIndex, int GeneratorPower);
+	void Assign(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
+	bool IsEqualToZero();
+	bool operator==(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
+  void operator=(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
+};
+
+template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
+class PolynomialCommutativeAlgebra:
+  public TemplatePolynomial
+    <MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsPartialFractionAlgebra> >
+{
+public:
+
+};
+
+class PolyPartFractionNumerator: public PolynomialCommutativeAlgebra<Integer,GeneratorsPartialFractionAlgebra>
+{
+public:
+};
+
+template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::MultiplyBy
+  ( MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m,
+    MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& output)
+{ assert(&m!=&output);
+  if (&output!= this)
+  { output.Assign(*this);
+  }
+  output.MultiplyBy(m);
+}
+
+template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::MultiplyByGenerator
+  (int GeneratorIndex, int GeneratorPower)
+{
+}
+
+
+template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::MultiplyBy
+  ( MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m)
+{ for (int i=0;i<m.size;i++)
+  { int x = this->ContainsObjectHash(m.TheObjects[i]);
+    if (x==-1)
+    { this->AddObjectOnTopHash(m.TheObjects[x]);
+    }
+    else
+    { this->TheObjects[x].GeneratorPower+=m.TheObjects[i].GeneratorPower;
+      if (this->TheObjects[x].GeneratorPower==0)
+      { this->PopIndexSwapWithLastHash(x);
+      }
+    }
+  }
+  this->Coefficient.MultiplyBy(m.Coefficient);
+}
+
 
 
 class PolynomialsRationalCoeff: public Polynomials<Rational>
@@ -2986,34 +3124,6 @@ public:
 	void IncrementSubset();
 };
 
-class intRoot
-{
-private:
-public:
-	unsigned char dimension;
-	int elements[MaxRank];
-	void AssignRoot(root&r);
-	int HashFunction();
-	void ElementToString(std::string& output);
-	bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
-	bool IsGEQNoWeight(intRoot& r);
-	void MakeZero();
-	void MultiplyByInteger(int x)
-	{	for (int i=0;i<this->dimension;i++)
-		{ this->elements[i]*=x;
-		}
-	};
-	void initFromInt(int x1,int x2,int x3, int x4, int x5);
-	void initFromInt(	int x1,int x2,int x3, int x4, int x5, int x6,
-										int x7,int x8,int x9, int x10, int x11, int x12);
-	//remark: zero is considered to be a positive vector!
-	bool IsPositive();
-	void AddRoot(intRoot& theRoot);
-	void operator=(const intRoot& right);
-	bool operator==(intRoot& right);
-	void operator=(int* right);
-	intRoot(){this->dimension=root::AmbientDimension; for (unsigned char i=0;i<this->dimension;i++)elements[i]=0;}
-};
 
 class rootWithMultiplicity: public root
 {
@@ -3103,6 +3213,7 @@ private:
 public:
 	int LastGainingMultiplicityIndex;
 	IntegerPoly Coefficient;
+	PolyPartFractionNumerator CoefficientNonExpanded;
 	QuasiPolynomial PowerSeriesCoefficient;
 	partFractionPolynomials SplitPowerSeriesCoefficients;
 	ListBasicObjects<int> IndicesNonZeroMults;
@@ -3114,12 +3225,16 @@ public:
 	bool RemoveRedundantShortRoots(root* Indicator);
 	bool AlreadyAccountedForInGUIDisplay;
 	static bool AnErrorHasOccurredTimeToPanic;
+	static bool UncoveringBrackets;
 	static std::fstream TheBigDump;
 	static bool UseGlobalCollector;
 	static bool MakingConsistencyCheck;
 	static LargeRational CheckSum, CheckSum2;
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
+	void MakeMonomialFromLinCombination(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
+          int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, int skippedIndex, int LargestElongation,
+          MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra>& output);
 	void ComputePolyCorrespondingToOneMonomial
 			(	PolynomialLargeRational &output, int index, roots& normals,
 				partFractionPolynomials* SplitPowerSeriesCoefficient);
@@ -3131,7 +3246,6 @@ public:
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
 						bool RecordSplitPowerSeriesCoefficient, bool StoreToFile);
-
 	void partFractionToPartitionFunctionStoreAnswer
 				(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
 					bool StoreToFile);

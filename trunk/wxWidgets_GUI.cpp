@@ -410,7 +410,7 @@ guiMainWindow::guiMainWindow()
 	this->ListBox1WeylGroup->Append(wxT("E7"));
 	this->ListBox1WeylGroup->Append(wxT("E8"));
 	this->ListBox1WeylGroup->Append(wxT("F4"));
-	this->ListBox1WeylGroup->SetSelection(1);
+	this->ListBox1WeylGroup->SetSelection(0);
 	this->CheckBox1ComputePFs->SetValue(false);
 
 	this->theComputationSetup.ComputationInProgress=false;

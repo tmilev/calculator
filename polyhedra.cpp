@@ -155,12 +155,7 @@ template < > int HashedListBasicObjects<Monomial<Rational> >::PreferredHashSize=
 template < > int HashedListBasicObjects<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
 int QuasiPolynomial::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
-template < > int ListBasicObjects<Facet *>::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<BasicQN *>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<ComplexQN *>::ListBasicObjectsActualSizeIncrement=10000;
-template < > int ListBasicObjects<QuasiPolynomial *>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<PrecomputedTaukn *>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<BasicComplexNumber>::ListBasicObjectsActualSizeIncrement=1;
+
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
 ListObjectPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
 int BasicQN::NumTotalCreated=0;
@@ -177,6 +172,17 @@ template < > int HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=2
 template < > int HashedListBasicObjects<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra> >
   ::PreferredHashSize=15;
 template < > int HashedListBasicObjects<GeneratorPFAlgebra>::PreferredHashSize = 10;
+
+template < > int ListBasicObjects<Facet *>::ListBasicObjectsActualSizeIncrement=100;
+template < > int ListBasicObjects<BasicQN *>::ListBasicObjectsActualSizeIncrement=1000;
+template < > int ListBasicObjects<ComplexQN *>::ListBasicObjectsActualSizeIncrement=10000;
+template < > int ListBasicObjects<QuasiPolynomial *>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<PrecomputedTaukn *>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<BasicComplexNumber>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<MonomialInCommutativeAlgebra<Integer,GeneratorsPartialFractionAlgebra> >
+	::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<GeneratorsPartialFractionAlgebra>::ListBasicObjectsActualSizeIncrement=1;
+template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=10;
 template < > int ListBasicObjects<GeneratorPFAlgebra>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
@@ -7129,13 +7135,23 @@ bool partFraction::RemoveRedundantShortRoots(root* Indicator)
 		{ for (int i=0;i<currentFrac.Elongations.size;i++)
 			{	int ElongationValue=currentFrac.Elongations.TheObjects[i];
 				if (ElongationValue!=LCMElongations)
-				{ static IntegerPoly tempP;
-					int numSummands=LCMElongations/ElongationValue;
-					this->GetNElongationPoly(currentIndex,ElongationValue,numSummands,tempP);
-					//tempP.ComputeDebugString();
-					tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
-					//tempP.ComputeDebugString();
-					this->Coefficient.MultiplyBy(tempP);
+				{ int numSummands=LCMElongations/ElongationValue;
+					if (this->UncoveringBrackets)
+					{	static IntegerPoly tempP;
+						this->GetNElongationPoly(currentIndex,ElongationValue,numSummands,tempP);
+						//tempP.ComputeDebugString();
+						tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
+						//tempP.ComputeDebugString();
+						this->Coefficient.MultiplyBy(tempP);
+					}
+					else
+					{ static ::PolyPartFractionNumerator tempP;
+						this->GetNElongationPoly(currentIndex, ElongationValue, numSummands, tempP);
+						tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
+						this->CoefficientNonExpanded.ComputeDebugString();
+						this->CoefficientNonExpanded.MultiplyBy(tempP);
+						this->CoefficientNonExpanded.ComputeDebugString();
+					}
 					//this->Coefficient.ComputeDebugString();
 					currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i],LCMElongations);
 					currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i],ElongationValue);
@@ -7149,6 +7165,11 @@ bool partFraction::RemoveRedundantShortRoots(root* Indicator)
 			StartCheckSum.ElementToString(tempS2);
 			assert(LocalCheckSum2.IsEqualTo(StartCheckSum));
 		}*/
+	}
+	if (this->UncoveringBrackets)
+	{ this->CoefficientNonExpanded.ComputeDebugString();
+		this->CoefficientNonExpanded.ConvertToIntegerPoly(this->Coefficient);
+		this->CoefficientNonExpanded.ComputeDebugString();
 	}
 	return result;
 }
@@ -7576,7 +7597,6 @@ void partFraction::ApplySzenesVergneFormula
       this->GetNElongationPoly
           (theSelectedIndices.TheObjects[i],LargestElongation,theElongations.TheObjects[i],tempP);
       tempFrac.Coefficient.MultiplyBy(tempP);
-      tempFrac.ComputeIndicesNonZeroMults();
 	/*	if (this->AnErrorHasOccurredTimeToPanic)
 		{ //tempFrac.ComputeDebugString();
 			LargeRational tempRat;
@@ -7590,19 +7610,28 @@ void partFraction::ApplySzenesVergneFormula
 			tempSX.append(tempS1);
 			tempSX.append("  + \\\\&&");
 		}*/
-      Accum.Add(tempFrac);
 		/*if (this->AnErrorHasOccurredTimeToPanic)
 		{	Accum.ComputeDebugString();
 		}*/
 		}
 		else
-		{
-    }
+		{ ::MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra> tempM;
+			this->MakeMonomialFromLinCombination
+				(	theSelectedIndices, theElongations, GainingMultiplicityIndex, 
+					ElongationGainingMultiplicityIndex, i,LargestElongation, tempM);
+			this->CoefficientNonExpanded.ComputeDebugString();
+			tempFrac.CoefficientNonExpanded.MultiplyByMonomial(tempM);
+			this->CoefficientNonExpanded.ComputeDebugString();
+		}
+		tempFrac.ComputeIndicesNonZeroMults();
+    Accum.Add(tempFrac);
 	}
 	//if (this->AnErrorHasOccurredTimeToPanic)
 	//{ assert(this->CheckSum.IsEqualTo(this->CheckSum2));
 	//}
 }
+
+//void partFraction::GetNElongationPoly
 
 void partFraction::MakeMonomialFromLinCombination
         ( ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
@@ -7735,6 +7764,19 @@ void partFraction::GetNElongationPoly(int index,int Elongation,int n, IntegerPol
 		}
 	}
 	//output.ComputeDebugString();
+}
+
+void partFraction::GetNElongationPoly(int index,int Elongation,int n, PolyPartFractionNumerator& output)
+{	static ::MonomialInCommutativeAlgebra<Integer,::GeneratorsPartialFractionAlgebra> tempM;
+	tempM.ClearTheObjects();
+	assert (Elongation>0);
+	tempM.Coefficient.Assign(IOne);
+	::GeneratorsPartialFractionAlgebra tempG;
+	tempG.GeneratorIndex= tempG.GetGeneratorIndexFromGeneratorRecord(this->RootsToIndices.TheObjects[index],n);
+	tempG.GeneratorPower=1;
+	tempM.MultiplyByGenerator(tempG);
+	output.Nullify(root::AmbientDimension);
+	output.AddMonomial(tempM);
 }
 
 void partFraction::partFractionToPartitionFunctionStoreAnswer
@@ -7947,7 +7989,7 @@ partFraction::partFraction()
 {	this->init(partFraction::RootsToIndices.size);
 	this->PowerSeriesCoefficientIsComputed=false;
 	this->AlreadyAccountedForInGUIDisplay=false;
-	this->UncoveringBrackets=true;
+	this->UncoveringBrackets=false;
 	this->FileStoragePosition=-1;
 	this->LastGainingMultiplicityIndex=-1;
 /*	if (partFraction::UseGlobalCollector)
@@ -8211,6 +8253,11 @@ bool partFractions::CheckForMinimalityDecompositionWithRespectToRoot(root & r)
 
 void partFraction::initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights)
 {	this->Coefficient.MakeNVarConst(root::AmbientDimension,IOne);
+	if (!this->UncoveringBrackets)
+	{	this->CoefficientNonExpanded.ComputeDebugString();
+		this->CoefficientNonExpanded.MakeNVarConst(root::AmbientDimension, IOne);
+		this->CoefficientNonExpanded.ComputeDebugString();
+	}
 	partFraction::RootsToIndices.initFromRoots(theAlgorithmBasis,weights);
 	this->init(partFraction::RootsToIndices.size);
 	for(int i=0;i<partFraction::RootsToIndices.size;i++)
@@ -8281,7 +8328,14 @@ void partFractions::Add(partFraction &f)
 		tempI= this->size-1;
 	}
 	else
-	{ this->TheObjects[tempI].Coefficient.AddPolynomial(f.Coefficient);
+	{ if (partFraction::UncoveringBrackets)
+		{	this->TheObjects[tempI].Coefficient.AddPolynomial(f.Coefficient);
+		}
+		else
+		{ this->TheObjects[tempI].CoefficientNonExpanded.ComputeDebugString();
+			this->TheObjects[tempI].CoefficientNonExpanded.AddPolynomial(f.CoefficientNonExpanded);
+			this->TheObjects[tempI].CoefficientNonExpanded.ComputeDebugString();
+		}
 	}
 }
 
@@ -12255,6 +12309,7 @@ int GeneratorsPartialFractionAlgebra::GetGeneratorIndexFromGeneratorRecord(intRo
 { static GeneratorPFAlgebra tempG;
   tempG.GeneratorRoot= exponent;
   tempG.Elongation = Elongation;
+	tempG.ValueIsComputed=false;
   int x = GeneratorsPartialFractionAlgebra::theGenerators.ContainsObjectHash(tempG);
   if (x!=-1)
   { return x;
@@ -12264,7 +12319,108 @@ int GeneratorsPartialFractionAlgebra::GetGeneratorIndexFromGeneratorRecord(intRo
     return theGenerators.size-1;
   }
 }
+GeneratorPFAlgebra::GeneratorPFAlgebra()
+{this->ValueIsComputed=false; this->Value = new IntegerPoly;}
+
+GeneratorPFAlgebra::~GeneratorPFAlgebra()
+{delete this->Value; this->Value=0;}
+
+void GeneratorPFAlgebra::operator =(const GeneratorPFAlgebra &right)
+{ this->GeneratorRoot = right.GeneratorRoot;
+  this->Elongation = right.Elongation;
+	this->ValueIsComputed= right.ValueIsComputed;
+	this->Value->Assign(*right.Value);
+}
 
 int GeneratorsPartialFractionAlgebra::HashFunction()
 { return this->GeneratorIndex;
+}
+
+void GeneratorsPartialFractionAlgebra::ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat)
+{	std::string tempS;
+	::GeneratorPFAlgebra& currentGen= this->theGenerators.TheObjects[this->GeneratorIndex];
+	currentGen.ElementToString(tempS, PolyFormat);
+	if(this->GeneratorPower==1)
+	{ output.assign(tempS); 
+		return;
+	}
+	std::stringstream out;
+	out<<"("<<tempS<<")^{"<<this->GeneratorPower<<"}";
+	output=out.str();
+}
+
+bool GeneratorsPartialFractionAlgebra::operator ==(GeneratorsPartialFractionAlgebra &right)
+{ return this->GeneratorIndex== right.GeneratorIndex;
+}
+
+void GeneratorsPartialFractionAlgebra::operator =(const GeneratorsPartialFractionAlgebra &right)
+{ this->GeneratorIndex= right.GeneratorIndex;
+	this->GeneratorPower= right.GeneratorPower;
+}
+
+void ::PolyPartFractionNumerator::ConvertToIntegerPoly(IntegerPoly &output)
+{ output.Nullify(root::AmbientDimension);
+	IntegerPoly tempP;
+	for (int i=0;i<this->size;i++)
+	{ for(int j=0;j<this->TheObjects[i].size;j++)
+		{ ::GeneratorsPartialFractionAlgebra::theGenerators.TheObjects[this->TheObjects[i].TheObjects[j].GeneratorIndex]
+				.GetValue(tempP);
+		}
+	}
+}
+
+void GeneratorPFAlgebra::ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat)
+{	std::stringstream out2, out1;
+	for (int i=0;i<root::AmbientDimension;i++)
+	{	if (this->GeneratorRoot.elements[i]!=0)
+		{	if (this->GeneratorRoot.elements[i]==1)
+				out1<< PolyFormat.alphabet[i]<<"_"<<i;
+			else	
+				out1<< PolyFormat.alphabet[i]<<"_"<<i<<"^{"<<this->GeneratorRoot.elements[i]<<"}";
+		}
+	}
+	if (this->Elongation==1)
+	{ output= out1.str();
+	}
+	else
+	{	if (this->Elongation==-1)
+		{ out2<<"-"<<out1;
+			output= out2.str();
+		}
+		else
+		{ out2<<"p_"<<this->Elongation<<"("<<out1<<")";
+			output= out2.str();
+		}
+	}
+}
+
+void GeneratorPFAlgebra::GetValue(IntegerPoly &output)
+{ if (this->ValueIsComputed)
+	{ output.Assign(*this->Value);
+		return;
+	}
+	output.Nullify(root::AmbientDimension);
+	this->ValueIsComputed=true;
+	Monomial<Integer> tempM;
+	tempM.init(root::AmbientDimension);
+	if (this->Elongation<0)
+	{	tempM.Coefficient.Assign(IOne);	
+	}
+	else
+	{ tempM.Coefficient.Assign(IMOne);
+	}
+	int tempI= this->Elongation;
+	if (tempI<0) {tempI=-tempI;}
+	for (int i=0; i<tempI;i++)
+	{ for (int j=0;j<root::AmbientDimension;j++)
+		{ if ( this->Elongation<0)
+			{ tempM.degrees[j]=(short) (-this->GeneratorRoot.elements[j]*(i+1));
+			}
+			else
+			{ tempM.degrees[j]=(short) (this->GeneratorRoot.elements[j]*i);
+			}
+		}
+		output.AddMonomial(tempM);
+	}
+	this->Value->Assign(output);
 }

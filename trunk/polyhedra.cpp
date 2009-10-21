@@ -171,8 +171,8 @@ template < > int HashedListBasicObjects<Monomial<LargeRational> >::PreferredHash
 template < > int HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=25;
 template < > int HashedListBasicObjects
 		<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> >
-  ::PreferredHashSize=15;
-template < > int HashedListBasicObjects<GeneratorPFAlgebraRecord>::PreferredHashSize = 10;
+  ::PreferredHashSize=5;
+template < > int HashedListBasicObjects<GeneratorPFAlgebraRecord>::PreferredHashSize = 1000;
 template < > int ListBasicObjects<Facet *>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<BasicQN *>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<ComplexQN *>::ListBasicObjectsActualSizeIncrement=10000;
@@ -184,7 +184,7 @@ template < > int ListBasicObjects<MonomialInCommutativeAlgebra
 																		GeneratorPFAlgebraRecord> >
 	::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<GeneratorsPartialFractionAlgebra>::ListBasicObjectsActualSizeIncrement=1;
-template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=10;
+template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=4;
 template < > int ListBasicObjects<GeneratorPFAlgebraRecord>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
@@ -7602,9 +7602,9 @@ void partFraction::ApplySzenesVergneFormula
 		{ static ::MonomialInCommutativeAlgebra<Integer, 
 																						GeneratorsPartialFractionAlgebra,
 																						GeneratorPFAlgebraRecord> tempM;
-			if (this->AnErrorHasOccurredTimeToPanic)
-			{	this->ComputeDebugString();
-			}
+//			if (this->AnErrorHasOccurredTimeToPanic)
+//			{	this->ComputeDebugString();
+//			}
 			tempM.Coefficient.Assign(IOne);
 			tempM.ClearTheObjects();
 			for (int j=0;j<i;j++)
@@ -7628,14 +7628,14 @@ void partFraction::ApplySzenesVergneFormula
 					<Integer, GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord> tempM2;
 				GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation
 					(tempRoot,theElongations.TheObjects[i],tempM2);
-				tempM2.ComputeDebugString(PolyFormatLocal);
-				tempM.ComputeDebugString(PolyFormatLocal);
+				//tempM2.ComputeDebugString(PolyFormatLocal);
+				//tempM.ComputeDebugString(PolyFormatLocal);
 				tempM.MultiplyBy(tempM2);
-				tempM.ComputeDebugString(PolyFormatLocal);
+				//tempM.ComputeDebugString(PolyFormatLocal);
 			}
-			tempFrac.CoefficientNonExpanded.ComputeDebugString();
+			//tempFrac.CoefficientNonExpanded.ComputeDebugString();
 			tempFrac.CoefficientNonExpanded.MultiplyByMonomial(tempM);
-			tempFrac.CoefficientNonExpanded.ComputeDebugString();
+			//tempFrac.CoefficientNonExpanded.ComputeDebugString();
 		}
 		tempFrac.ComputeIndicesNonZeroMults();
     Accum.Add(tempFrac);
@@ -8082,7 +8082,13 @@ void partFractions::UncoverBracketsNumerators()
 { if (partFraction::UncoveringBrackets)
 		return;
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].UncoverBracketsNumerator();
+	{	if (this->MakingProgressReport)
+		{	std::stringstream out;
+			out <<"Uncovering brackets"<< i <<" out of " << this->size;
+			IndicatorWindowGlobalVariables.StatusString=out.str();
+			this->MakeProgressReport();
+		}
+		this->TheObjects[i].UncoverBracketsNumerator();
 	}
 }
 
@@ -8143,50 +8149,49 @@ bool partFractions::split()
 	//Checksum code follows:
 	std::string tempS1, tempS2;
 //	this->ComputeDebugString();
-	partFraction::UncoveringBrackets=false;
-	partFraction::MakingConsistencyCheck=true;
+//	partFraction::MakingConsistencyCheck=true;
 	this->PrepareCheckSums();
 	this->AssureIndicatorRegularity();
-	if (partFraction::MakingConsistencyCheck)
-	{	oneFracWithMultiplicitiesAndElongations::CheckSumRoot.ComputeDebugString();
-		this->CheckSum.ElementToString(tempS1);
-		this->ComputeDebugString();
-	}
+	//if (partFraction::MakingConsistencyCheck)
+	//{	oneFracWithMultiplicitiesAndElongations::CheckSumRoot.ComputeDebugString();
+	//	this->CheckSum.ElementToString(tempS1);
+	//	this->ComputeDebugString();
+	//}
 //	partFraction::AnErrorHasOccurredTimeToPanic=true;
 	while (this->IndexLowestNonReduced<this->size)
 	{ //this->ComputeDebugString();
 //		bool ShouldIgnore=false;
 		if (!this->ShouldIgnore())
 		{	tempF.Assign(this->TheObjects[this->IndexLowestNonReduced]);
-			this->ComputeDebugString();
-			tempF.ComputeDebugString();
-			if (this->IndexLowestNonReduced==5 && this->size==9)
-			{ partFraction::AnErrorHasOccurredTimeToPanic=true;
-				this->ComputeDebugString();
-			}
+//			this->ComputeDebugString();
+//			tempF.ComputeDebugString();
+//			if (this->IndexLowestNonReduced==5 && this->size==9)
+//			{ partFraction::AnErrorHasOccurredTimeToPanic=true;
+//				this->ComputeDebugString();
+//			}
 			if (! (tempF.reduceOnceGeneralMethod(*this)))
 			{ if (tempF.IndicesNonZeroMults.size<=root::AmbientDimension)
 					this->IndexLowestNonReduced++;
 			}
 			else
 			{	this->PopIndexSwapWithLastHash( this->IndexLowestNonReduced);
-				if (partFraction::AnErrorHasOccurredTimeToPanic)
-				{ this->ComputeDebugString();
-				}
+//				if (partFraction::AnErrorHasOccurredTimeToPanic)
+//				{ this->ComputeDebugString();
+//				}
 			}
-			if (partFraction::AnErrorHasOccurredTimeToPanic)
-			{	this->ComputeDebugString();
-			}
-			if (partFraction::MakingConsistencyCheck)
-			{	LargeRational tempRat2;
-				this->UncoverBracketsNumerators();
-				this->ComputeOneCheckSum(tempRat2);
-				if (!tempRat2.IsEqualTo(this->StartCheckSum))
-				{	this->ComputeDebugString();
-					tempRat2.ElementToString(tempS2);
-					assert(false);
-				}
-			}
+//			if (partFraction::AnErrorHasOccurredTimeToPanic)
+//			{	this->ComputeDebugString();
+//			}
+//			if (partFraction::MakingConsistencyCheck)
+//			{	LargeRational tempRat2;
+//				this->UncoverBracketsNumerators();
+//				this->ComputeOneCheckSum(tempRat2);
+//				if (!tempRat2.IsEqualTo(this->StartCheckSum))
+//				{	this->ComputeDebugString();
+//					tempRat2.ElementToString(tempS2);
+//					assert(false);
+//				}
+//			}
 		}
 		this->MakeProgressReport();
 	//	this->ComputeDebugString();
@@ -8203,16 +8208,10 @@ bool partFractions::split()
 		tempRat.ElementToString(tempS1);
 		assert(tempRat2.IsEqualTo(tempRat));
 	}	*/
-	this->ComputeDebugString();
-	this->UncoverBracketsNumerators();
-	this->CompareCheckSums();
 	
 	this->RemoveRedundantShortRoots();
-	this->ComputeDebugString();
+//	this->ComputeDebugString();
 	this->UncoverBracketsNumerators();
-	this->ComputeDebugString();
-	partFraction::UncoveringBrackets=true;
-	this->ComputeDebugString();
 	this->CompareCheckSums();
 	this->IndexLowestNonReduced= this->size;
 	this->MakeProgressReport();
@@ -8787,7 +8786,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 	}
 	if (WeylGroupLetter=='F')
 	{ tempW.MakeF4();
-		partFractions::ListBasicObjectsActualSizeIncrement=10000;
+		partFractions::ListBasicObjectsActualSizeIncrement=35000;
 	}
 	if (WeylGroupLetter=='A'||
 			WeylGroupLetter=='B'||
@@ -9170,8 +9169,7 @@ void intRoot::operator =(int* right)
 }
 
 bool intRoot::operator ==(intRoot &right)
-{ assert(this->dimension==right.dimension);
-	if (this->dimension!=right.dimension)
+{	if (this->dimension!=right.dimension)
 		return false;
 	for (int i=0;i<this->dimension;i++)
 	{ if (this->elements[i]!=right.elements[i]){return false;}

@@ -753,7 +753,7 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 		this->BoxSizer1HorizontalBackground->Layout();
 	}
 	if (r>this->MaxAllowedVectors)
-	{ this->Button1Go->Disable();
+	{ //this->Button1Go->Disable();
   } else
   { this->Button1Go->Enable();
   }

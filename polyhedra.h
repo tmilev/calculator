@@ -100,6 +100,10 @@ class WeylGroup;
 class intRoots;
 class MatrixInt;
 class QuasiPolynomials;
+template <class ElementOfCommutativeRingWithIdentity, 
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+class MonomialInCommutativeAlgebra;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
@@ -1464,38 +1468,53 @@ public:
 	intRoot(){this->dimension=root::AmbientDimension; for (unsigned char i=0;i<this->dimension;i++)elements[i]=0;}
 };
 
-class GeneratorPFAlgebra
+class GeneratorPFAlgebraRecord
 {
 private:
-  GeneratorPFAlgebra(const GeneratorPFAlgebra& right);
+  GeneratorPFAlgebraRecord(const GeneratorPFAlgebraRecord& right);
 public:
+	//the represented element is considered to be p_elongation(x^GeneratorRoot)
+	//where p is the numerator in the geometric series with length elongation.
+	//This is well defined only for elongation not equal to zero.
+	//For elongation=0 we define the represented element to be x^GeneratorRoot.
+	//This is a convenient programming convention for the time being, no mathematical
+	//reasons behind it.
   intRoot GeneratorRoot;
   int Elongation;
-	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
 	std::string DebugString;
 	IntegerPoly* Value;
 	bool ValueIsComputed;
-	GeneratorPFAlgebra();
-	~GeneratorPFAlgebra();
+	GeneratorPFAlgebraRecord();
+	~GeneratorPFAlgebraRecord();
+	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
 	void GetValue(IntegerPoly &output);
-  void operator = (const GeneratorPFAlgebra& right);
+  void operator = (const GeneratorPFAlgebraRecord& right);
   int HashFunction()
-  { return Elongation* GeneratorRoot.HashFunction();
+  { return this->Elongation+ this->GeneratorRoot.HashFunction();
   };
-  bool operator == (GeneratorPFAlgebra& right)
-  { return (this->GeneratorRoot == right.GeneratorRoot) && (this->Elongation == right.Elongation);
+  bool operator == (GeneratorPFAlgebraRecord& right)
+  { return (this->GeneratorRoot == right.GeneratorRoot) 
+				&& (this->Elongation == right.Elongation);
   }
 };
 
 class GeneratorsPartialFractionAlgebra
 {
 public:
-  static HashedListBasicObjects<GeneratorPFAlgebra> theGenerators;
-  static int GetGeneratorIndexFromGeneratorRecord(intRoot& exponent, int elongation);
+  static HashedListBasicObjects<GeneratorPFAlgebraRecord> theGenerators;
+  //elongation zero means we are looking for x^exponent
+  //other elongations means we are looking for p_elongation(x^exponent), where p is
+  // the numerator in the geometric series sum corresponding to elongation
+  static void GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation,
+								::MonomialInCommutativeAlgebra
+									<	Integer, 
+										::GeneratorsPartialFractionAlgebra, 
+										GeneratorPFAlgebraRecord>& output);
 	std::string DebugString;
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
   int HashFunction();
   void operator = (const GeneratorsPartialFractionAlgebra& right);
+ 	void ConvertToIntegerPoly(IntegerPoly& output);
 	//IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count
 	//this might have to be rewritten
   bool operator == (GeneratorsPartialFractionAlgebra& right);
@@ -1503,46 +1522,79 @@ public:
   int GeneratorPower;
 };
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
 class MonomialInCommutativeAlgebra: public HashedListBasicObjects<GeneratorsOfAlgebra>
 {
 private:
 	MonomialInCommutativeAlgebra
     (MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,
-                                  GeneratorsOfAlgebra>&)
+                                  GeneratorsOfAlgebra,GeneratorsOfAlgebraRecord>&)
   {assert(false);};
 //	int DegreesToIndexRecursive(int MaxDeg, int index);
 public:
 	ElementOfCommutativeRingWithIdentity Coefficient;
 	std::string DebugString;
-	bool ComputeDebugString(PolynomialOutputFormat &PolyFormat);
+	void ComputeDebugString(PolynomialOutputFormat &PolyFormat);
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
 	int HashFunction();
 	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity&coeff);
-	void MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m,
-									MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& output);
-	void MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
-	void MultiplyByGenerator(GeneratorsOfAlgebra& g);
-	void MultiplyByGenerator(int GeneratorIndex, int GeneratorPower);
-	void Assign(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
+	void MultiplyBy(MonomialInCommutativeAlgebra
+										<	ElementOfCommutativeRingWithIdentity,
+											GeneratorsOfAlgebra,
+											GeneratorsOfAlgebraRecord>& m,
+									MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity,
+																								GeneratorsOfAlgebra,
+																								GeneratorsOfAlgebraRecord>& output);
+	void MultiplyBy(MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity,
+																								GeneratorsOfAlgebra,
+																								GeneratorsOfAlgebraRecord>& m);
+	//the below functions return 1 if no reduction has occured 
+	//i.e. the generator is not in zeroth power after the multiplication
+	//If the generator is in zero-th power after the multiplication and reduction has occured,
+	//the below return 0
+	int MultiplyByGenerator(GeneratorsOfAlgebra& g);
+	int MultiplyByGenerator(GeneratorsOfAlgebraRecord& g, int Power);
+	int MultiplyByGenerator(int GeneratorIndex, int GeneratorPower);
+	void Assign(const MonomialInCommutativeAlgebra
+									<	ElementOfCommutativeRingWithIdentity,
+										GeneratorsOfAlgebra,
+										GeneratorsOfAlgebraRecord>& m);
 	bool IsEqualToZero();
 	MonomialInCommutativeAlgebra(){};
 	//IMPORTANT: the coefficients of two monomials are not compared, that is, two monomials are equal if they have the same
 	//generators at same powers
-	bool operator==(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
-  void operator=(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m);
+	bool operator==(MonomialInCommutativeAlgebra
+										<	ElementOfCommutativeRingWithIdentity,
+											GeneratorsOfAlgebra,
+											GeneratorsOfAlgebraRecord>& m);
+  void operator=(const MonomialInCommutativeAlgebra
+									<	ElementOfCommutativeRingWithIdentity,
+										GeneratorsOfAlgebra,
+										GeneratorsOfAlgebraRecord>& m);
 };
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-bool MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+bool MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>
 	::IsEqualToZero()
 { return this->Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero);
 }
 
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+void MonomialInCommutativeAlgebra		
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>
 	::StringStreamPrintOutAppend(std::stringstream& out,::PolynomialOutputFormat& PolyFormat)
 { std::stringstream out1;
 	std::string tempS;
@@ -1557,7 +1609,7 @@ void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,Generator
 	std::string tempS2;
 	this->Coefficient.ElementToString(tempS2);	
 	if (tempS=="")
-	{ out1<<tempS2;
+	{ out<<tempS2;
 	}
 	else
 	{ if (tempS2=="1")
@@ -1579,24 +1631,39 @@ void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,Generator
 }
 
 class PolyPartFractionNumerator: public TemplatePolynomial
-    <	MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra>, 
+    <	MonomialInCommutativeAlgebra<	Integer,GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>, 
 			Integer >
 {
 public:
 	void ConvertToIntegerPoly(IntegerPoly& output);
 };
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+void MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>
 				::MakeConstantMonomial(short Nvar, ElementOfCommutativeRingWithIdentity& coeff)
 { this->ClearTheObjects();
 	this->Coefficient.Assign(coeff);
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::MultiplyBy
-  ( MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m,
-    MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& output)
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+void MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>
+			::MultiplyBy
+		( MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,
+																			GeneratorsOfAlgebra, 
+																			GeneratorsOfAlgebraRecord>& m,
+			MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,
+																			GeneratorsOfAlgebra,
+																			GeneratorsOfAlgebraRecord>& output)
 { assert(&m!=&output);
   if (&output!= this)
   { output.Assign(*this);
@@ -1604,8 +1671,13 @@ void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,Generator
   output.MultiplyBy(m);
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::MultiplyByGenerator
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+int MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>::MultiplyByGenerator
   (GeneratorsOfAlgebra& g)
 {	int x = this->ContainsObjectHash(g);
   if (x==-1)
@@ -1615,22 +1687,52 @@ void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,Generator
   { this->TheObjects[x].GeneratorPower+=g.GeneratorPower;
     if (this->TheObjects[x].GeneratorPower==0)
     { this->PopIndexSwapWithLastHash(x);
+			return 0;
     }
   }
+	return 1;
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::MultiplyByGenerator
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+int MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>::MultiplyByGenerator
   (int GeneratorIndex,int GeneratorPower)
 {	static ::GeneratorsPartialFractionAlgebra tempG;
 	tempG.GeneratorIndex= GeneratorIndex;
 	tempG.GeneratorPower= GeneratorPower;
-	this->MultiplyByGenerator(tempG);
+	return this->MultiplyByGenerator(tempG);
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::
-	HashFunction()
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+int MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>::MultiplyByGenerator
+			(GeneratorsOfAlgebraRecord& g, int Power)
+{ static ::GeneratorsPartialFractionAlgebra tempG;
+	tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.ContainsObjectHash(g);
+	if (tempG.GeneratorIndex==-1)
+	{ GeneratorsOfAlgebra::theGenerators.AddObjectOnTopHash(g);
+		tempG.GeneratorIndex= GeneratorsOfAlgebra::theGenerators.size-1;
+	}
+	tempG.GeneratorPower=Power;
+	return this->MultiplyByGenerator(tempG);
+}
+
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+int MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>
+		::HashFunction()
 { int result=0;
 	for (int i=0;i<this->size;i++)
 	{ result+=this->TheObjects[i].HashFunction()*this->TheObjects[i].GeneratorPower;
@@ -1638,52 +1740,100 @@ int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,Generators
 	return result;
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+void MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>
 	::ElementToString(std::string &output, PolynomialOutputFormat &PolyFormat)
 { std::stringstream out;
 	this->StringStreamPrintOutAppend(out,PolyFormat);
 	output=out.str();
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-inline void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::Assign
-	(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& right)
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+void MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>
+	::ComputeDebugString(PolynomialOutputFormat &PolyFormat)
+{ this->ElementToString(this->DebugString,PolyFormat);
+}
+
+
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+inline void MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>::Assign
+	(const MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>& right)
 { this->CopyFromHash(right);
 	this->Coefficient.Assign(right.Coefficient);
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-inline void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::operator =
-	(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& right)
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+inline void MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>::operator =
+	(const MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>& right)
 { this->Assign(right);
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-inline bool MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::operator ==
-	(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& right)
-{ for (int i=0;i<right.size;i++)
-	{ int x= right.TheObjects[i].HashFunction();
-		x/=this->HashSize; if (x<0) {x+=this->HashSize;}
-		ListBasicObjects<int>& CurrentHashArray=  this->TheHashedArrays[x];
-		bool found=false;
-		for (int i =0; i< CurrentHashArray.size;i++)
-		{ int tempIndex= CurrentHashArray.TheObjects[i];
-			if (this->TheObjects[tempIndex].GeneratorIndex== right.TheObjects[i].GeneratorIndex
-					&& 
-					this->TheObjects[tempIndex].GeneratorPower== right.TheObjects[i].GeneratorPower)
-			{ found = true; break;
-			}
-		}
-		if (! found )
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+inline bool MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>::operator ==
+	(MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,	
+																	GeneratorsOfAlgebra,
+																	GeneratorsOfAlgebraRecord>& right)
+{ static MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord> tempM;
+	tempM.Assign(*this);
+	for (int i=0;i<right.size;i++)
+	{ static GeneratorsOfAlgebra tempG;
+		tempG= right.TheObjects[i];
+		tempG.GeneratorPower=- tempG.GeneratorPower;
+		if (tempM.MultiplyByGenerator
+					(right.TheObjects[i].GeneratorIndex, -right.TheObjects[i].GeneratorPower)==1
+				)
 			return false;
 	}
+	if (tempM.size>0)
+		return false;
 	return true;
 }
 
-template <class ElementOfCommutativeRingWithIdentity,class GeneratorsOfAlgebra>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>::MultiplyBy
-  ( MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity,GeneratorsOfAlgebra>& m)
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebraRecord>
+void MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>::MultiplyBy
+  ( MonomialInCommutativeAlgebra
+		<	ElementOfCommutativeRingWithIdentity,
+			GeneratorsOfAlgebra,
+			GeneratorsOfAlgebraRecord>& m)
 { for (int i=0;i<m.size;i++)
 	{ this->MultiplyByGenerator(m.TheObjects[i]);
   }
@@ -2203,6 +2353,7 @@ template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>::MakeNVarConst
 				(short nVar, ElementOfCommutativeRingWithIdentity& coeff)
 {	static TemplateMonomial tempM;
+	this->ClearTheObjects();
 	this->NumVars=nVar;
 	tempM.MakeConstantMonomial(nVar,coeff);
 	this->AddMonomial(tempM);
@@ -3354,9 +3505,6 @@ public:
 	static LargeRational CheckSum, CheckSum2;
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
-	void MakeMonomialFromLinCombination(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
-          int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, int skippedIndex, int LargestElongation,
-          MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra>& output);
 	void ComputePolyCorrespondingToOneMonomial
 			(	PolynomialLargeRational &output, int index, roots& normals,
 				partFractionPolynomials* SplitPowerSeriesCoefficient);
@@ -3365,6 +3513,7 @@ public:
 	void ComputeNormals(roots& output);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixRational& theLinearRelation);
+	void UncoverBracketsNumerator();
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
 						bool RecordSplitPowerSeriesCoefficient, bool StoreToFile);
@@ -3472,6 +3621,7 @@ public:
 	int ReadFromFileComputedContributions(std::fstream& input);
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input);
+	void UncoverBracketsNumerators();
 	partFractions();
 	int SizeWithoutDebugString();
 	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r);

@@ -412,6 +412,7 @@ guiMainWindow::guiMainWindow()
 	this->ListBox1WeylGroup->Append(wxT("F4"));
 	this->ListBox1WeylGroup->SetSelection(0);
 	this->CheckBox1ComputePFs->SetValue(false);
+	this->CheckBox2CheckSums->SetValue(true);
 
 	this->theComputationSetup.ComputationInProgress=false;
 	this->theComputationSetup.AllowRepaint=true;

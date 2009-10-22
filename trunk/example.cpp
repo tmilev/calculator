@@ -71,7 +71,7 @@ void ExampleComputation::RunSomeTests()
 	tempPF.split();
 	tempPF.ComputeDebugString();
 	QuasiPolynomial tempQP;
-	tempPF.partFractionsToPartitionFunctionAdaptedToRoot(tempQP,indicator,false,false,false,false);
+	tempPF.partFractionsToPartitionFunctionAdaptedToRoot(tempQP,indicator,false,false);
 	intRoot tempR;
 	tempR.initFromInt(0,0,0,0,0);
 	LargeRational tempRat;

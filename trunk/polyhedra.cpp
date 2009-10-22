@@ -478,7 +478,7 @@ void ComputationSetup::Run()
 			this->thePartialFraction.IndicatorRoot.Assign(this->IndicatorRoot);
 			this->thePartialFraction.split();
 			this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
-				(this->theOutput,this->thePartialFraction.IndicatorRoot,false,false,false,false);
+				(this->theOutput,this->thePartialFraction.IndicatorRoot,false,false);
 			this->theOutput.ComputeDebugString();
 		}
 		if (this->havingBeginEqnForLaTeXinStrings)
@@ -7101,9 +7101,12 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(root*Indicator)
 				tempP.MakePolyExponentFromIntRoot(partFraction::RootsToIndices.TheObjects[tempI1]);
 				tempP.AddConstant(IOne);
 				//tempP.ComputeDebugString();
+				static IntegerPoly ComputationalBuffer;
+				ComputationalBuffer.AssignPolynomialLight(this->Coefficient);
 				for (int j=0;j<this->TheObjects[tempI1].Multiplicities.TheObjects[0];j++)
-				{ this->Coefficient.MultiplyBy(tempP);
+				{ ComputationalBuffer.MultiplyBy(tempP);
 				}
+				this->Coefficient.AssignPolynomial(ComputationalBuffer);
 				//this->Coefficient.ComputeDebugString();
 				this->TheObjects[tempI2].AddMultiplicity(this->TheObjects[tempI1].Multiplicities.TheObjects[0],1);
 				this->TheObjects[tempI1].AddMultiplicity(-this->TheObjects[tempI1].Multiplicities.TheObjects[0],1);
@@ -7127,6 +7130,11 @@ bool partFraction::RemoveRedundantShortRoots(root* Indicator)
 	{ if (!this->rootIsInFractionCone(*Indicator))
 			return false;
 	}
+	static IntegerPoly ComputationalBufferCoefficient;
+	static ::PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
+	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+	
 	for (int k=0;k<this->IndicesNonZeroMults.size;k++  )
 	{ int currentIndex=this->IndicesNonZeroMults.TheObjects[k];
 		::oneFracWithMultiplicitiesAndElongations& currentFrac =
@@ -7145,14 +7153,14 @@ bool partFraction::RemoveRedundantShortRoots(root* Indicator)
 						//tempP.ComputeDebugString();
 						tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
 						//tempP.ComputeDebugString();
-						this->Coefficient.MultiplyBy(tempP);
+						ComputationalBufferCoefficient.MultiplyBy(tempP);
 					}
 					else
 					{ static ::PolyPartFractionNumerator tempP;
 						this->GetNElongationPoly(currentIndex, ElongationValue, numSummands, tempP);
 						tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
 //						this->CoefficientNonExpanded.ComputeDebugString();
-						this->CoefficientNonExpanded.MultiplyBy(tempP);
+						ComputationalBufferCoefficientNonExpanded.MultiplyBy(tempP);
 //						this->CoefficientNonExpanded.ComputeDebugString();
 					}
 					//this->Coefficient.ComputeDebugString();
@@ -7169,6 +7177,8 @@ bool partFraction::RemoveRedundantShortRoots(root* Indicator)
 			assert(LocalCheckSum2.IsEqualTo(StartCheckSum));
 		}*/
 	}
+	this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+	this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 	return result;
 }
 
@@ -7242,23 +7252,24 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 
 int partFraction::SizeWithoutDebugString()
 {	int Accum =0;
-	Accum+=this->Coefficient.SizeWithoutDebugString();
-	Accum+=this->ListBasicObjects<oneFracWithMultiplicitiesAndElongations>::SizeWithoutObjects();
-	Accum+=this->ActualSize*sizeof(oneFracWithMultiplicitiesAndElongations);
+	Accum+=this->Coefficient.SizeWithoutObjects();
+	Accum+=this->::ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongations>::SizeWithoutObjects();
+	Accum+=this->size*sizeof(oneFracWithMultiplicitiesAndElongations);
 	Accum+=	this->IndicesNonZeroMults.SizeWithoutObjects();
 	return Accum;
 }
 
 void partFraction::Assign(const partFraction& p)
-{ this->CopyFromBase(p);
-	this->Coefficient.CopyFromPoly(p.Coefficient);
-	this->CoefficientNonExpanded.CopyFromPoly(p.CoefficientNonExpanded);
+{ this->CopyFromLight(p);
+	this->Coefficient.AssignPolynomialLight(p.Coefficient);
+	this->CoefficientNonExpanded.AssignPolyPartFractionNumeratorLight(p.CoefficientNonExpanded);
 	this->IndicesNonZeroMults.CopyFromBase(p.IndicesNonZeroMults);
 }
 
 void partFraction::AssignNoIndicesNonZeroMults(partFraction& p)
-{ this->CopyFromBase(p);
-	this->Coefficient.CopyFromPoly(p.Coefficient);
+{ this->CopyFromLight(p);
+	this->Coefficient.AssignPolynomialLight(p.Coefficient);
+	this->CoefficientNonExpanded.AssignPolyPartFractionNumeratorLight(p.CoefficientNonExpanded);
 }
 
 /*void partFraction::swap(int indexA, int indexB)
@@ -7305,16 +7316,22 @@ void partFraction::ReadFromFile(std::fstream &input)
 void partFraction::UncoverBracketsNumerator()
 { if (this->UncoveringBrackets)
 		return;
-	this->CoefficientNonExpanded.ComputeDebugString();
-	this->CoefficientNonExpanded.ConvertToIntegerPoly(this->Coefficient);
-	this->Coefficient.ComputeDebugString();
+//	this->CoefficientNonExpanded.ComputeDebugString();
+	static ::IntegerPoly ComputationalBufferCoefficient;
+	static ::PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+	ComputationalBufferCoefficientNonExpanded.ConvertToIntegerPoly(ComputationalBufferCoefficient);
+	this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+//	this->Coefficient.ComputeDebugString();
 }
 
 void partFraction::ComputeOneCheckSum(LargeRational &output)
 { if (this->AnErrorHasOccurredTimeToPanic)
 	{ this->Coefficient.ComputeDebugString();
 	}
-	this->Coefficient.Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,output);
+	static IntegerPoly ComputationalBufferCoefficient;
+	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
+	ComputationalBufferCoefficient.Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,output);
 	std::string tempS;
 	if (this->AnErrorHasOccurredTimeToPanic && LargeRational::AnErrorHasOccurredTimeToPanic)
 	{ output.ElementToString(tempS);
@@ -7343,12 +7360,18 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 	{output.clear(); return 0;}
 	int NumLinesUsed=0;
 //	int OldCutOff=0;
+	static IntegerPoly ComputationalBufferCoefficient;
+	static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
+	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);	
 	if (!UsingVarChange)
 	{	if (includeNumerator)
 			{	if (this->UncoveringBrackets)
-				{ NumLinesUsed+=this->Coefficient.StringPrintOutAppend (stringPoly,PolyFormatLocal);}
+				{ NumLinesUsed+=ComputationalBufferCoefficient
+													.StringPrintOutAppend (stringPoly,PolyFormatLocal);}
 				else
-				{ NumLinesUsed+=this->CoefficientNonExpanded.StringPrintOutAppend (stringPoly,PolyFormatLocal);}
+				{ NumLinesUsed+=ComputationalBufferCoefficientNonExpanded
+													.StringPrintOutAppend (stringPoly,PolyFormatLocal);}
 			}
 		else
 			stringPoly="(...)";
@@ -7358,7 +7381,7 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 		static Polynomials<Rational> tempSub;
 		tempP.Nullify(VarChange.NumRows);
 		tempSub.MakeExponentSubstitution(VarChange);
-		tempP2.AssignIntegerPoly(this->Coefficient);
+		tempP2.AssignIntegerPoly(ComputationalBufferCoefficient);
 		tempP2.Substitution(tempSub,tempP,VarChange.NumRows);
 		NumLinesUsed+=tempP.StringPrintOutAppend(stringPoly, PolyFormatLocal);
 	}
@@ -7383,7 +7406,8 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 	{	std::string tempS2;
 		QuasiPolynomial tempQP;
 		tempQP.Nullify(root::AmbientDimension);
-		this->partFractionToPartitionFunctionSplit(tempQP,false,true,false);
+		this->partFractionToPartitionFunctionSplit(	tempQP,false,//true,
+																								false);
 		PolyFormatLocal.MakeAlphabetyi();
 		PolyFormatLocal.cutOffString=false;
 		tempQP.StringPrintOutAppend(tempS2, PolyFormatLocal);
@@ -7417,17 +7441,17 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 #pragma warning(default:4018)//grrrrr
 #endif
 
-void partFraction::MultiplyMinusRootShiftBy(int *theRoot, int Multiplicity)
-{ /*for (int i=0;i<root::AmbientDimension;i++)
-	{ this->RootShift[i]+=theRoot[i]*Multiplicity;
-	}*/
+/*void partFraction::MultiplyMinusRootShiftBy(int *theRoot, int Multiplicity)
+{ //for (int i=0;i<root::AmbientDimension;i++)
+	//{ this->RootShift[i]+=theRoot[i]*Multiplicity;
+	//}
 	static Monomial<Integer> tempM;
 	tempM.MakeConstantMonomial(root::AmbientDimension,IOne);
 	for (int i=0;i<root::AmbientDimension;i++)
 	{ tempM.degrees[i]=(short)(theRoot[i]*Multiplicity);
 	}
 	this->Coefficient.MultiplyByMonomial(tempM);
-}
+}*/
 
 void partFraction::intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent)
 {	for (int i=0;i<root::AmbientDimension;i++)
@@ -7461,8 +7485,10 @@ bool partFraction::rootIsInFractionCone(root&r)
 
 void partFraction::PrepareFraction( int indexA, int indexB,  int AminusNBindex,
 																		bool indexAisNullified, partFraction &output,
-																		IntegerPoly& AminusNbetaPoly)
+																		IntegerPoly& AminusNbetaPoly )
 {	output.AssignNoIndicesNonZeroMults(*this);
+	static IntegerPoly ComputationalBufferCoefficient;
+	ComputationalBufferCoefficient.AssignPolynomialLight(output.Coefficient);
 	int powerDropA = this->TheObjects[indexA].Multiplicities.TheObjects[0];
 	int powerDropB = this->TheObjects[indexB].Multiplicities.TheObjects[0];
 	if (indexAisNullified)
@@ -7471,11 +7497,12 @@ void partFraction::PrepareFraction( int indexA, int indexB,  int AminusNBindex,
 	{ powerDropA=0;
 	}
 	for (int i=0;i<powerDropB;i++)
-	{ output.Coefficient.MultiplyBy(AminusNbetaPoly);
+	{ ComputationalBufferCoefficient.MultiplyBy(AminusNbetaPoly);
 	}
 	output.DecreasePowerOneFrac(indexA,powerDropA);
 	output.DecreasePowerOneFrac(indexB,powerDropB);
 	output.DecreasePowerOneFrac(AminusNBindex,-powerDropA-powerDropB);
+	output.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 }
 
 int partFraction::ComputeGainingMultiplicityIndexInLinearRelation
@@ -7571,8 +7598,13 @@ void partFraction::ApplySzenesVergneFormula
 {	static partFraction tempFrac;
 	static IntegerPoly tempP;
   static PolyPartFractionNumerator tempNum;
+  static IntegerPoly ComputationalBufferCoefficient;
+  static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
 	for(int i=0;i<theSelectedIndices.size;i++)
 	{	tempFrac.Assign(*this);
+		ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
+		tempFrac.CoefficientNonExpanded.ComputePolyPartFractionNumerator
+			(ComputationalBufferCoefficientNonExpanded);
 		tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
 			(1,ElongationGainingMultiplicityIndex);
 		oneFracWithMultiplicitiesAndElongations& currentFrac=
@@ -7593,10 +7625,11 @@ void partFraction::ApplySzenesVergneFormula
         }
       }
       ParallelComputing::SafePoint();
-      tempFrac.Coefficient.MultiplyByMonomial(tempM);
+      ComputationalBufferCoefficient.MultiplyByMonomial(tempM);
       this->GetNElongationPoly
           (theSelectedIndices.TheObjects[i],LargestElongation,theElongations.TheObjects[i],tempP);
-      tempFrac.Coefficient.MultiplyBy(tempP);
+      ComputationalBufferCoefficient.MultiplyBy(tempP);
+      tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 		}
 		else
 		{ static ::MonomialInCommutativeAlgebra<Integer, 
@@ -7634,7 +7667,9 @@ void partFraction::ApplySzenesVergneFormula
 				//tempM.ComputeDebugString(PolyFormatLocal);
 			}
 			//tempFrac.CoefficientNonExpanded.ComputeDebugString();
-			tempFrac.CoefficientNonExpanded.MultiplyByMonomial(tempM);
+			ComputationalBufferCoefficientNonExpanded.MultiplyByMonomial(tempM);
+			tempFrac.CoefficientNonExpanded.AssignPolyPartFractionNumerator
+				(ComputationalBufferCoefficientNonExpanded);
 			//tempFrac.CoefficientNonExpanded.ComputeDebugString();
 		}
 		tempFrac.ComputeIndicesNonZeroMults();
@@ -7643,6 +7678,7 @@ void partFraction::ApplySzenesVergneFormula
 	//if (this->AnErrorHasOccurredTimeToPanic)
 	//{ assert(this->CheckSum.IsEqualTo(this->CheckSum2));
 	//}
+	this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 }
 
 //void partFraction::GetNElongationPoly
@@ -7651,13 +7687,17 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 																	   int indexAminusNB, partFractions& Accum)
 {	static partFraction tempFrac;
 	static IntegerPoly AminusNbetaPoly;
+	static IntegerPoly ComputationalBufferCoefficient;
 	this->GetAlphaMinusNBetaPoly(indexA,indexB,n,AminusNbetaPoly);
 	int powerA= this->TheObjects[indexA].Multiplicities.TheObjects[0];
 	int powerB= this->TheObjects[indexB].Multiplicities.TheObjects[0];
-	this->PrepareFraction(indexA,indexB,indexAminusNB,true,tempFrac,AminusNbetaPoly);
+	this->PrepareFraction(indexA,indexB,indexAminusNB,true,tempFrac,
+												AminusNbetaPoly);
 //	tempFrac.ComputeDebugString();
 	if (partFractions::SplitTestMode)
-	{ tempFrac.Coefficient.MakeNVarConst(root::AmbientDimension,IOne);
+	{ ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
+		ComputationalBufferCoefficient.MakeNVarConst(root::AmbientDimension,IOne);
+		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 		tempFrac.TheObjects[indexAminusNB].Multiplicities.TheObjects[0]=1;
 		tempFrac.TheObjects[indexB].Multiplicities.TheObjects[0]=1;
 		tempFrac.TheObjects[indexA].Multiplicities.TheObjects[0]=0;
@@ -7669,26 +7709,30 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 		Accum.Add(tempFrac);
 		return;
 	}
+	ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
 	for (int i=powerB;i>=1;i--)
 	{	Integer tempInt(NChooseK(powerA+powerB-i-1,powerA-1));
-		tempFrac.Coefficient.TimesConstant(tempInt);
+		ComputationalBufferCoefficient.TimesConstant(tempInt);
+		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 		Accum.Add(tempFrac);
-		tempFrac.Coefficient.DivideByConstant(tempInt);
+		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
 		{	tempFrac.TheObjects[indexAminusNB].AddMultiplicity(1,1);
 			tempFrac.TheObjects[indexB].AddMultiplicity(-1,1);
-			tempFrac.Coefficient.MultiplyBy(AminusNbetaPoly);
+			ComputationalBufferCoefficient.MultiplyBy(AminusNbetaPoly);
 	//		tempFrac.ComputeDebugString();
 		}
 	}
 	this->PrepareFraction(indexA,indexB,indexAminusNB,false,tempFrac,AminusNbetaPoly);
 //	tempFrac.ComputeDebugString();
+	ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
 	for (int i=powerA;i>=1;i--)
 	{	Integer tempInt(NChooseK(powerA+powerB-i-1,powerB-1));
-		tempFrac.Coefficient.TimesConstant(tempInt);
+		ComputationalBufferCoefficient.TimesConstant(tempInt);
+		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 		Accum.Add(tempFrac);
-		tempFrac.Coefficient.DivideByConstant(tempInt);
+		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
 		{	tempFrac.TheObjects[indexAminusNB].AddMultiplicity(1,1);;
@@ -7770,12 +7814,12 @@ void partFraction::GetNElongationPoly(int index,int Elongation,int n, PolyPartFr
 	output.AddMonomial(tempM);
 }
 
-void partFraction::partFractionToPartitionFunctionStoreAnswer
+/*void partFraction::partFractionToPartitionFunctionStoreAnswer
 				(QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient, bool StoreToFile)
-{	if (!this->PowerSeriesCoefficientIsComputed)
+{	//if (!this->PowerSeriesCoefficientIsComputed)
 	{ this->partFractionToPartitionFunctionSplit
 			(output,true,RecordSplitPowerSeriesCoefficient, StoreToFile);
-		this->PowerSeriesCoefficient.CopyFromPoly(output);
+//		this->PowerSeriesCoefficient.CopyFromPoly(output);
 		this->PowerSeriesCoefficientIsComputed=true;
 		IndicatorWindowGlobalVariables.NumComputedContributions++;
 		FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
@@ -7783,11 +7827,12 @@ void partFraction::partFractionToPartitionFunctionStoreAnswer
 	else
 	{ output.CopyFromPoly(this->PowerSeriesCoefficient);
 	}
-}
+}*/
 
 void partFraction::partFractionToPartitionFunctionSplit
 			(QuasiPolynomial& output, bool RecordNumMonomials,
-			 bool RecordSplitPowerSeriesCoefficient, bool StoreToFile)
+			 //bool RecordSplitPowerSeriesCoefficient, 
+			 bool StoreToFile)
 {	static PolynomialLargeRational shiftedPoly, tempP;
 	static roots normals;
 	static partFractionPolynomials tempSplitPowerSeriesCoefficient;
@@ -7810,10 +7855,10 @@ void partFraction::partFractionToPartitionFunctionSplit
 	if (partFraction::AnErrorHasOccurredTimeToPanic)
 	{ this->ComputeDebugString();
 	}
-	if(RecordSplitPowerSeriesCoefficient)
+	/*if(RecordSplitPowerSeriesCoefficient)
 	{ SplitPowerSeriesCoefficient= &this->SplitPowerSeriesCoefficients;
 	}
-	else
+	else*/
 	{ SplitPowerSeriesCoefficient= &tempSplitPowerSeriesCoefficient;
 	}
 	SplitPowerSeriesCoefficient->initLatticeIndicatorsFromPartFraction(*this);
@@ -7897,7 +7942,7 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
 	this->AlreadyAccountedForInGUIDisplay=true;
 }
 
-int partFraction::Elongate(int indexElongatedFraction, int theElongation)
+/*int partFraction::Elongate(int indexElongatedFraction, int theElongation)
 { if (this->TheObjects[indexElongatedFraction].Multiplicities.TheObjects[0]==0) return indexElongatedFraction;
 	intRoot tempIntRoot;
 	tempIntRoot=partFraction::RootsToIndices.TheObjects[indexElongatedFraction];
@@ -7923,7 +7968,7 @@ int partFraction::Elongate(int indexElongatedFraction, int theElongation)
 	this->Coefficient.MultiplyBy(tempP);
 	this->ComputeIndicesNonZeroMults();
 	return IndexLongVector;
-}
+}*/
 
 void partFraction::MakePolynomialFromOneNormal
 			(	root& normal, root& shiftRational, int theMult,	PolynomialLargeRational& output)
@@ -7997,10 +8042,10 @@ void partFraction::init(int numRoots)
 	//this->IndicesNonZeroMults=0;
 	this->IndicesNonZeroMults.SetActualSizeAtLeastExpandOnTop(numRoots);
 	this->IndicesNonZeroMults.size=0;
-	this->SetSizeExpandOnTopNoObjectInit(partFraction::RootsToIndices.size);
+	this->SetSizeExpandOnTopLight(partFraction::RootsToIndices.size);
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].Elongations.size=0;
-		this->TheObjects[i].Multiplicities.size=0;
+	{ this->TheObjects[i].Elongations.SetSizeExpandOnTopLight(0);
+		this->TheObjects[i].Multiplicities.SetSizeExpandOnTopLight(0);
 	}
 }
 
@@ -8264,8 +8309,13 @@ bool partFractions::CheckForMinimalityDecompositionWithRespectToRoot(root & r)
 }
 
 void partFraction::initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights)
-{	this->Coefficient.MakeNVarConst(root::AmbientDimension,IOne);
-	this->CoefficientNonExpanded.MakeNVarConst(root::AmbientDimension, IOne);
+{	static IntegerPoly ComputationalBufferCoefficient;
+	static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+	ComputationalBufferCoefficient.MakeNVarConst(root::AmbientDimension,IOne);
+	this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+	ComputationalBufferCoefficientNonExpanded.MakeNVarConst(root::AmbientDimension, IOne);
+	this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+	
 	partFraction::RootsToIndices.initFromRoots(theAlgorithmBasis,weights);
 	this->init(partFraction::RootsToIndices.size);
 	for(int i=0;i<partFraction::RootsToIndices.size;i++)
@@ -8324,10 +8374,10 @@ void partFraction::ComputeDebugString()
 		(this->DebugString, PolynomialOutputFormat::UsingLatexFormat,false,true);
 }
 
-void partFraction::InsertNewRootIndex(int index)
+/*void partFraction::InsertNewRootIndex(int index)
 { this->ShiftUpExpandOnTop(index);
 	this->TheObjects[index].Multiplicities.TheObjects[0]=0;
-}
+}*/
 
 void partFractions::Add(partFraction &f)
 { int tempI=this->ContainsObjectHash(f);
@@ -8336,8 +8386,24 @@ void partFractions::Add(partFraction &f)
 		tempI= this->size-1;
 	}
 	else
-	{ this->TheObjects[tempI].Coefficient.AddPolynomial(f.Coefficient);
-		this->TheObjects[tempI].CoefficientNonExpanded.AddPolynomial(f.CoefficientNonExpanded);
+	{ static IntegerPoly	ComputationalBufferCoefficient1,
+												ComputationalBufferCoefficient2;
+		static PolyPartFractionNumerator	ComputationalBufferCoefficientNonExpanded1,
+																			ComputationalBufferCoefficientNonExpanded2;
+		ComputationalBufferCoefficient1.AssignPolynomialLight(this->TheObjects[tempI].Coefficient);
+		ComputationalBufferCoefficient2.AssignPolynomialLight(f.Coefficient);
+		this->TheObjects[tempI].CoefficientNonExpanded.ComputePolyPartFractionNumerator
+			(ComputationalBufferCoefficientNonExpanded1);
+		f.CoefficientNonExpanded.ComputePolyPartFractionNumerator
+			(ComputationalBufferCoefficientNonExpanded2);
+		ComputationalBufferCoefficient1.AddPolynomial
+			(ComputationalBufferCoefficient2);
+		ComputationalBufferCoefficientNonExpanded1.AddPolynomial
+			(ComputationalBufferCoefficientNonExpanded2);
+		this->TheObjects[tempI].Coefficient.AssignPolynomial
+			(ComputationalBufferCoefficient1);
+		this->TheObjects[tempI].CoefficientNonExpanded.AssignPolyPartFractionNumerator
+			(ComputationalBufferCoefficientNonExpanded1);
 	}
 }
 
@@ -8524,7 +8590,6 @@ void partFractions::RemoveRedundantShortRoots()
 		if (this->UsingIndicatorRoot){tempPointerRoot=&this->IndicatorRoot;}
 		if(tempFrac.RemoveRedundantShortRoots(tempPointerRoot))
 		{	this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
-			this->TheObjects[i].Coefficient.ReleaseMemory();
 			int oldsize= this->size;
 			this->Add(tempFrac);
 			if (oldsize>this->size)
@@ -8556,7 +8621,6 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem()
 		}
 		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem(tempRoot))
 		{	this->TheObjects[i].Coefficient.Nullify(root::AmbientDimension);
-			this->TheObjects[i].Coefficient.ReleaseMemory();
 			this->Add(tempFrac);
 		}
 		if (this->MakingProgressReport)
@@ -8592,8 +8656,9 @@ bool partFractions::VerifyFileComputedContributions()
 }
 
 bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
-				(	QuasiPolynomial& output, root& r, bool storeComputations,
-					bool RecordSplitPowerSeriesCoefficient, bool StoreToFile,
+				(	QuasiPolynomial& output, root& r, //bool storeComputations,
+					//bool RecordSplitPowerSeriesCoefficient, 
+					bool StoreToFile,
 					bool UseOldData)
 {	if (!this->CheckForMinimalityDecompositionWithRespectToRoot(r)){return false;}
 	LargeRational oldCheckSum;
@@ -8613,13 +8678,13 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 	{ assert(partFraction::TheBigDump.is_open()||!StoreToFile);
 		assert(partFractions::ComputedContributionsList.is_open()||!StoreToFile);
 		if (this->TheObjects[i].rootIsInFractionCone(r))
-		{ if (storeComputations)
-			{this->TheObjects[i].partFractionToPartitionFunctionStoreAnswer
-				(tempQP,RecordSplitPowerSeriesCoefficient,StoreToFile); }
-			else
-			{ this->TheObjects[i].partFractionToPartitionFunctionSplit
-					(tempQP,true,RecordSplitPowerSeriesCoefficient,StoreToFile);
-			}
+		{ //if (storeComputations)
+			{this->TheObjects[i].partFractionToPartitionFunctionSplit
+				(tempQP,true,StoreToFile); }
+			//else
+			//{ this->TheObjects[i].partFractionToPartitionFunctionSplit
+			//		(tempQP,true,RecordSplitPowerSeriesCoefficient,StoreToFile);
+			//}
 			if (StoreToFile)
 			{ this->WriteToFileComputedContributions(partFractions::ComputedContributionsList);
 				FileSetPutPointerToEnd
@@ -8863,7 +8928,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 
 	::IndicatorWindowGlobalVariables.TotalNumMonomials= this->NumMonomialsInTheNumerators();
 	if(!this->partFractionsToPartitionFunctionAdaptedToRoot
-		(output,this->IndicatorRoot,false,false,StoreToFile,UseOldData))
+		(output,this->IndicatorRoot,StoreToFile,UseOldData))
 	{ this->ComputeDebugStringNoNumerator();
 		assert(false);
 	}
@@ -8871,8 +8936,8 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 }
 
 void oneFracWithMultiplicitiesAndElongations::operator =(oneFracWithMultiplicitiesAndElongations& right)
-{ this->Multiplicities.CopyFromBase(right.Multiplicities);
-	this->Elongations.CopyFromBase(right.Elongations);
+{ this->Multiplicities.CopyFromLight(right.Multiplicities);
+	this->Elongations.CopyFromLight(right.Elongations);
 }
 
 /*bool oneFracWithMultiplicitiesAndElongations::IsHigherThan(oneFracWithMultiplicitiesAndElongations& f)
@@ -8932,8 +8997,8 @@ int oneFracWithMultiplicitiesAndElongations::IndexLargestElongation()
 }
 
 void oneFracWithMultiplicitiesAndElongations::init()
-{ this->Elongations.size=0;
-	this->Multiplicities.size=0;
+{ this->Elongations.SetSizeExpandOnTopLight(0);
+	this->Multiplicities.SetSizeExpandOnTopLight(0);
 }
 
 void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(LargeRational& output, intRoot& theExp)
@@ -8971,16 +9036,16 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIn
 		}
 	}
 	if (ElongationIndex==-1)
-	{ this->Elongations.AddObjectOnTop(Elongation);
+	{ this->Elongations.AddObjectOnTopLight(Elongation);
 		int tempI=0;
-		this->Multiplicities.AddObjectOnTop(tempI);
+		this->Multiplicities.AddObjectOnTopLight(tempI);
 		ElongationIndex= this->Multiplicities.size-1;
 	}
 	this->Multiplicities.TheObjects[ElongationIndex]+=MultiplicityIncrement;
 	assert(this->Multiplicities.TheObjects[ElongationIndex]>=0);
 	if (this->Multiplicities.TheObjects[ElongationIndex]==0)
-	{ this->Multiplicities.PopIndexSwapWithLast(ElongationIndex);
-		this->Elongations.PopIndexSwapWithLast(ElongationIndex);
+	{ this->Multiplicities.PopIndexSwapWithLastLight(ElongationIndex);
+		this->Elongations.PopIndexSwapWithLastLight(ElongationIndex);
 	}
 }
 
@@ -10893,7 +10958,7 @@ void rootFKFTcomputation::MakeTheRootFKFTSum
 	{	if (theKLCoeffs.TheObjects[i]!=0)
 		{	tempQP1.Nullify(root::AmbientDimension);
 			theBVdecomposition.partFractionsToPartitionFunctionAdaptedToRoot
-				(tempQP1,TheChambersInTheGame.ChamberIndicators.TheObjects[i],false,false,true,true);
+				(tempQP1,TheChambersInTheGame.ChamberIndicators.TheObjects[i],true,true);
 //			tempQP1.ComputeDebugString();
 			tempQP1.TimesInteger(theKLCoeffs.TheObjects[i]);
 			Accum.AddPolynomial(tempQP1);
@@ -12422,4 +12487,32 @@ void GeneratorPFAlgebraRecord::GetValue(IntegerPoly &output)
 		output.AddMonomial(tempM);
 	}
 	this->Value->Assign(output);
+}
+
+void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumerator(PolyPartFractionNumerator &from)
+{ this->SetSizeExpandOnTopLight(from.size);
+	this->Coefficients.SetSizeExpandOnTopLight(from.size);
+	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i].CopyFromHeavy(from.TheObjects[i]);
+		this->Coefficients.TheObjects[i]=from.TheObjects[i].Coefficient.value;
+	}
+}
+
+void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFractionNumerator &output)
+{ output.Nullify(root::AmbientDimension);
+	for (int i=0;i<this->size;i++)
+	{ ::MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord>
+				tempM;
+		tempM.Coefficient.value= this->Coefficients.TheObjects[i];
+		for (int j=0;j<this->TheObjects[i].size;j++)
+		{ tempM.MultiplyByGenerator(this->TheObjects[i].TheObjects[j]);
+		}
+		output.AddMonomial(tempM);
+	}
+}
+
+void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight
+	(const PolyPartFractionNumeratorLight &right)
+{ this->CopyFromLight(right);
+	this->Coefficients.CopyFromLight(right.Coefficients);
 }

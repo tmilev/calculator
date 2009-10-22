@@ -315,7 +315,7 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 }
 
 guiMainWindow::guiMainWindow()
-				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("I will eat your RAM"),
+				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("I will eat your RAM (but not as much as in the past)"),
                    wxPoint(100,100),
                    wxSize(600,600))
 {	this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);

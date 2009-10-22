@@ -81,10 +81,14 @@ class FacetPointers;
 class CompositeComplexQN;
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial;
+template <class ElementOfCommutativeRingWithIdentity>
+class PolynomialLight;
 class Selection;
 class IntegerPoly;
 class intRoot;
 class root;
+template <class Object>
+class ListBasicObjects;
 template <class Object>
 class ListObjectPointers;
 template <class Object>
@@ -175,6 +179,106 @@ public:
 	DrawingVariables(int cx, int cy){this->initDrawingVariables(cx,cy);};
 };
 
+//The below class is to be used together with ListBasicObjects.
+//The purpose of the class is to save up RAM memory use.
+//This is the "light" version it is to be used for storage purposes only. 
+//To use it as a normal ListBasicObjects simply copy it to a buffer ListBasicObjects and there 
+//use the full functionality of ListBasicObjects.
+//Then copy the buffer ListBasicObjects back to the light version to store to RAM.
+template <class Object>
+class ListBasicObjectsLight 
+{
+private:
+	ListBasicObjectsLight(const ListBasicObjectsLight<Object>& right);
+public:
+	int size;
+	Object* TheObjects;
+	void AddObjectOnTopLight(const Object& o);
+	void CopyFromHeavy(const ListBasicObjects<Object>& from);
+	void CopyFromLight(const ListBasicObjectsLight<Object>& from);
+	void PopIndexSwapWithLastLight(int index);
+	int SizeWithoutObjects();
+	void SetSizeExpandOnTopLight(int theSize);
+	void operator = (const ListBasicObjectsLight<Object>& right);
+	void operator == (const ListBasicObjectsLight<Object>& right);
+	ListBasicObjectsLight();
+	~ListBasicObjectsLight();
+};
+
+template <class Object>
+void ListBasicObjectsLight<Object>::AddObjectOnTopLight(const Object& o)
+{ this->SetSizeExpandOnTopLight(this->size+1);
+	this->TheObjects[this->size-1]=o;
+}
+
+template <class Object>
+void ListBasicObjectsLight<Object>::PopIndexSwapWithLastLight(int index)
+{ this->TheObjects[index]=this->TheObjects[this->size-1];
+	this->SetSizeExpandOnTopLight(this->size-1);
+}
+
+template <class Object>
+inline void ListBasicObjectsLight<Object>::operator =(const ListBasicObjectsLight<Object>& right)
+{ this->CopyFromLight(right);
+}
+
+template <class Object>
+void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
+{ if (theSize== this->size) 
+		return;
+	if (theSize==0)
+	{ this->size=0;
+		delete [] this->TheObjects;
+		this->TheObjects=0;
+		return;
+	}
+	Object* newArray= new Object[theSize];
+	int CopyUpTo= this->size;
+	if (this->size>theSize)
+	{ CopyUpTo= theSize;
+	}
+	for (int i=0;i<CopyUpTo;i++)
+	{ newArray[i]=this->TheObjects[i];
+	}
+	delete [] this->TheObjects;
+	this->TheObjects=newArray;
+	this->size= theSize;
+}
+
+template <class Object>
+ListBasicObjectsLight<Object>::ListBasicObjectsLight()
+{ this->size =0;
+	this->TheObjects=0;
+}
+
+template <class Object>
+ListBasicObjectsLight<Object>::~ListBasicObjectsLight()
+{ delete [] this->TheObjects;
+	this->TheObjects=0;
+}
+
+template <class Object>
+void ListBasicObjectsLight<Object>::CopyFromHeavy(const ListBasicObjects<Object>& from)
+{ this->SetSizeExpandOnTopLight(from.size);
+	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i]= from.TheObjects[i];
+	}
+}
+
+template <class Object>
+void ListBasicObjectsLight<Object>::CopyFromLight(const ListBasicObjectsLight<Object>& from)
+{ this->SetSizeExpandOnTopLight(from.size);
+	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i]= from.TheObjects[i];
+	}
+}
+
+template <class Object>
+int ListBasicObjectsLight<Object>::SizeWithoutObjects()
+{ return sizeof(Object*)*this->size+sizeof(int);
+}
+
+
 //ListBasicObjects kills the objects it contains when it expires
 template <class Object>
 class ListBasicObjects
@@ -195,6 +299,7 @@ public:
 	Object* TheObjects;
 	int size;
 //	void AddObjectOnTop(Object o);
+	void AssignLight(const ListBasicObjectsLight<Object>& from);
 	void SetSizeExpandOnTopNoObjectInit(int theSize);
 	void SetActualSizeAtLeastExpandOnTop(int theSize);
 	void AddObjectOnBottom(Object& o);
@@ -676,6 +781,14 @@ void ListBasicObjects<Object>::ShiftUpExpandOnTop(int StartingIndex)
 }
 
 template <class Object>
+void ListBasicObjects<Object>::AssignLight(const ListBasicObjectsLight<Object>& From)
+{ this->SetSizeExpandOnTopNoObjectInit(From.size);
+	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i]= From.TheObjects[i];
+	}
+}
+
+template <class Object>
 void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From)
 { this->SetSizeExpandOnTopNoObjectInit(From.size);
 	for (int i=0;i<this->size;i++)
@@ -739,7 +852,7 @@ ListBasicObjects<Object>::ListBasicObjects()
 
 template <class Object>
 void ListBasicObjects<Object>::ReleaseMemory()
-{	delete [] TheActualObjects;
+{	delete [] this->TheActualObjects;
 	this->ActualSize=0;
 	this->IndexOfVirtualZero=0;
 	this->size=0;
@@ -760,8 +873,7 @@ void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 {	if (increase<=0) return;
 	Object* newArray = new Object[this->ActualSize+increase];
 	for (int i=0;i<this->size;i++)
-	{
-		newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
+	{	newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
 	}
 	delete [] this->TheActualObjects;
 	this->TheActualObjects= newArray;
@@ -1381,6 +1493,7 @@ class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWit
 public:
 	void FindCoeffInFrontOfLinearTermVariableIndex(int index,
 							ElementOfCommutativeRingWithIdentity& output );
+	void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
 	void MakeMonomialOneLetter(short NumVars,int LetterIndex,
 	                           short Power, ElementOfCommutativeRingWithIdentity& Coeff);
 	Polynomial(){};
@@ -1438,6 +1551,58 @@ class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWi
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
 };
+
+template <class ElementOfCommutativeRingWithIdentity>
+class PolynomialLight: public ListBasicObjectsLight<Monomial<ElementOfCommutativeRingWithIdentity> >
+{
+public:
+	short NumVars;
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(); 
+	void AssignPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& from);
+	void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
+	void Nullify(short numberVariables);
+	bool IsEqualToZero();
+};
+
+template <class ElementOfCommutativeRingWithIdentity>
+inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output)
+{ static Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
+	tempP.AssignPolynomialLight(*this);
+	tempP.ComputeDebugString();
+	output= tempP.DebugString;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
+{ this->ElementToString(this->DebugString);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::AssignPolynomial
+	(Polynomial<ElementOfCommutativeRingWithIdentity>& from)
+{ this->NumVars=from.NumVars;
+	this->CopyFromHeavy(from);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight
+	(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from)
+{ this->NumVars= from.NumVars;
+	this->CopyFromLight(from);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::Nullify(short numberVariables)
+{ this->NumVars= numberVariables;
+	this->SetSizeExpandOnTopLight(0);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+inline bool PolynomialLight<ElementOfCommutativeRingWithIdentity>::IsEqualToZero()
+{ return this->size==0;
+}
 
 class intRoot
 {
@@ -1636,6 +1801,16 @@ class PolyPartFractionNumerator: public TemplatePolynomial
 {
 public:
 	void ConvertToIntegerPoly(IntegerPoly& output);
+};
+
+class PolyPartFractionNumeratorLight: public 
+	ListBasicObjectsLight<ListBasicObjectsLight<GeneratorsPartialFractionAlgebra> > 
+{
+public:
+	ListBasicObjectsLight<int> Coefficients;
+	void AssignPolyPartFractionNumerator(PolyPartFractionNumerator& from);
+	void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output);
+	void AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight& right);
 };
 
 template <class ElementOfCommutativeRingWithIdentity,
@@ -1884,6 +2059,11 @@ public:
 	int SizeWithoutDebugString();
 	void Evaluate(root& values, LargeRational& output);
 	static bool AnErrorHasOccurredTimeToPanic;
+};
+
+class IntegerPolyLight: public PolynomialLight<Integer>
+{
+public:
 };
 
 class PolynomialLargeRational: public Polynomial<LargeRational>
@@ -2692,6 +2872,17 @@ bool Polynomial<ElementOfCommutativeRingWithIdentity>
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight
+	(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from)
+{	this->NumVars= from.NumVars;
+	this->SetActualSizeAtLeastExpandOnTop(from.size);
+	for (int i=0;i<from.size;i++)
+	{ this->AddMonomial(from.TheObjects[i]);
+	}
+}
+
+
+template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>
      ::ComponentInFrontOfVariableToPower(int VariableIndex,
 																				 ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output,
@@ -3358,8 +3549,8 @@ class oneFracWithMultiplicitiesAndElongations
 {
 public:
 	std::string DebugString;
-	ListBasicObjects<int> Multiplicities;
-	ListBasicObjects<int> Elongations;
+	ListBasicObjectsLight<int> Multiplicities;
+	ListBasicObjectsLight<int> Elongations;
 	void ComputeDebugString();
 	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
 	void AddMultiplicity(int MultiplicityIncrement, int Elongation);
@@ -3474,7 +3665,7 @@ public:
 	void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials);
 };
 
-class partFraction: ListBasicObjects<oneFracWithMultiplicitiesAndElongations>
+class partFraction: ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongations>
 {
 private:
 	void findPivot();
@@ -3484,16 +3675,18 @@ private:
 	friend class partFractions;
 	friend class partFractionPolynomials;
 public:
-	int LastGainingMultiplicityIndex;
-	IntegerPoly Coefficient;
-	PolyPartFractionNumerator CoefficientNonExpanded;
-	QuasiPolynomial PowerSeriesCoefficient;
-	partFractionPolynomials SplitPowerSeriesCoefficients;
-	ListBasicObjects<int> IndicesNonZeroMults;
 	std::string DebugString;
-	int indexInGlobalCollectorPartFraction;
+
+	int LastGainingMultiplicityIndex;
 	int FileStoragePosition;
 	bool PowerSeriesCoefficientIsComputed;
+	ListBasicObjects<int> IndicesNonZeroMults;
+	
+	IntegerPolyLight Coefficient;
+	PolyPartFractionNumeratorLight CoefficientNonExpanded;
+//	QuasiPolynomial PowerSeriesCoefficient;
+//	partFractionPolynomials SplitPowerSeriesCoefficients;
+	
 	bool RemoveRedundantShortRootsClassicalRootSystem(root*Indicator);
 	bool RemoveRedundantShortRoots(root* Indicator);
 	bool AlreadyAccountedForInGUIDisplay;
@@ -3516,15 +3709,16 @@ public:
 	void UncoverBracketsNumerator();
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
-						bool RecordSplitPowerSeriesCoefficient, bool StoreToFile);
-	void partFractionToPartitionFunctionStoreAnswer
-				(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
-					bool StoreToFile);
+						//bool RecordSplitPowerSeriesCoefficient, 
+						bool StoreToFile);
+	//void partFractionToPartitionFunctionStoreAnswer
+	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
+	//				bool StoreToFile);
 	static RootToIndexTable RootsToIndices;
 	void ComputeDebugString();
 	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
-	void InsertNewRootIndex(int index);
-	void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
+	//void InsertNewRootIndex(int index);
+	//void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
 	void MultiplyCoeffBy(Rational& r);
 	void decomposeAMinusNB(int indexA, int indexB, int n,
 												 int indexAminusNB, partFractions& Accum);
@@ -3541,14 +3735,14 @@ public:
 	int HashFunction();
 	int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
 	void init(int numRoots);
-	int Elongate(int indexElongatedFraction, int theElongation);
+	//int Elongate(int indexElongatedFraction, int theElongation);
 	void ComputeIndicesNonZeroMults();
 	bool DecreasePowerOneFrac(int index, int increment);
-	void GetNumerator(PolynomialRationalCoeff& output);
-	void SetNumerator(PolynomialRationalCoeff& input);
-	void PrepareFraction(int indexA, int indexB,  int AminusNBindex,
-											 bool indexAisNullified, partFraction &output,
-											 IntegerPoly& AminusNbetaPoly);
+	//void GetNumerator(PolynomialRationalCoeff& output);
+	//void SetNumerator(PolynomialRationalCoeff& input);
+	void PrepareFraction(	int indexA, int indexB,  int AminusNBindex,
+												bool indexAisNullified, partFraction &output,
+												IntegerPoly& AminusNbetaPoly);
 	void Assign(const partFraction&p);
 	void AssignNoIndicesNonZeroMults(partFraction&p);
 	int ControlLineSizeFracs(std::string& output);
@@ -3614,8 +3808,8 @@ public:
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
 					(	QuasiPolynomial& output, root& r,
-						bool storeComputations, bool RecordSplitPowerSeriesCoefficient,bool StoreToFile,
-						bool UseOldData);
+						//bool storeComputations, bool RecordSplitPowerSeriesCoefficient, 
+						bool StoreToFile,bool UseOldData);
 	bool VerifyFileComputedContributions();
 	void WriteToFileComputedContributions(std::fstream& output);
 	int ReadFromFileComputedContributions(std::fstream& input);

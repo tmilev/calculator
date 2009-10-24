@@ -424,9 +424,9 @@ guiMainWindow::guiMainWindow()
 	this->ListBox1WeylGroup->Append(wxT("E7"));
 	this->ListBox1WeylGroup->Append(wxT("E8"));
 	this->ListBox1WeylGroup->Append(wxT("F4"));
-	this->ListBox1WeylGroup->SetSelection(0);
+	this->ListBox1WeylGroup->SetSelection(1);
 	this->CheckBox1ComputePFs->SetValue(false);
-	this->CheckBox2CheckSums->SetValue(true);
+	this->CheckBox2CheckSums->SetValue(false);
 
 	this->theComputationSetup.ComputationInProgress=false;
 	this->theComputationSetup.AllowRepaint=true;
@@ -650,6 +650,12 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 	{ this->theComputationSetup.WeylGroupLetter=newWeylGroupLetter;
 		this->theComputationSetup.WeylGroupIndex=newWeylGroupIndex;
 		this->initWeylGroupInfo();
+	}
+	if (this->theComputationSetup.WeylGroupIndex>5)
+	{ this->Button1Go->Disable();
+	}
+	else
+	{ this->Button1Go->Enable();
 	}
 }
 

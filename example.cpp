@@ -2,32 +2,6 @@
 
 #include "polyhedra.h"
 
-//***************
-//The below functions are required to use polyhedra.h.
-//They are defined in rootSA.cpp.
-//If you are not running Windows or aren't happy with the rootSA.cpp file,
-//you need the below lines.
-//***************
-#ifndef WINDOWS
-#ifndef _WINDOWS
-/*
-void outputText(std::string theOutput)
-{
-}
-void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
-{
-  std::cout <<"Num Reduced Fractions:"<< output.NumReducedPartFractions;
-  std::cout <<"\tNum Total Fractions:"<< output.NumPartFractionsLoaded << "\n";
-}
-void drawline(double X1, double Y1, double X2, double Y2,
-								unsigned long thePenStyle, int ColorIndex)
-{
-}
-void drawtext(double X1, double Y1, const char* text, int length, int color)
-{
-}*/
-#endif
-#endif
 //*******************************************
 //*******************************************
 //*******************************************
@@ -44,18 +18,11 @@ int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
 { int Dimension=2, NumVectors=4;
 	::initDLL(Dimension);
 	ToBeSplit.SetSizeExpandOnTopNoObjectInit(NumVectors);
-	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
-	//ToBeSplit.TheObjects[1].initFromInt(2,0,0,0,0);
-	//ToBeSplit.TheObjects[2].initFromInt(3,0,0,0,0);
 	IndicatorRoot.InitFromIntegers(405,603,0,0,0);
-	//ToBeSplit.TheObjects[0].initFromInt(1,0,0,0,0);
-	//ToBeSplit.TheObjects[1].initFromInt(0,1,0,0,0);
-	//ToBeSplit.TheObjects[2].initFromInt(0,0,1,0,0);
 	ToBeSplit.TheObjects[0].initFromInt(2,3,0,0,0);
 	ToBeSplit.TheObjects[1].initFromInt(4,1,0,0,0);
 	ToBeSplit.TheObjects[2].initFromInt(5,3,0,0,0);
 	ToBeSplit.TheObjects[3].initFromInt(2,5,0,0,0);
-	//ToBeSplit.TheObjects[4].initFromInt(1,3,0,0,0);
 
 	return Dimension;
 }
@@ -81,7 +48,8 @@ void ExampleComputation::RunSomeTests()
 	tempRat.ElementToString(tempS);
 }
 
-int AltMain(void)
+#ifndef USE_GUI
+int main(void)
 { //The below lines compute a partial fraction decomposition for the
 	//generating function of the Kostant partition function for G2
 	//printout tempPF.DebugString to get the final result
@@ -93,11 +61,7 @@ int AltMain(void)
 	intRoot tempWeight;
 	roots tempRoots;
 	WeylGroup tempW;
-//	tempW.MakeBn(2);
 	tempW.MakeG2();
-//	tempW.MakeBn(3);
-//	tempW.MakeAn(2);
-//	tempW.MakeAn(3);
 	PolyFormatLocal.MakeAlphabetxi();
 	tempPF.ClearTheObjects();
 	tempW.ComputeRootsOfBorel(tempRoots);
@@ -114,15 +78,12 @@ int AltMain(void)
 	outputStream<<"\n=\n"<<tempPF.DebugString;
 	std::string LatexString;
 	LatexString=outputStream.str();
+	std::cout << LatexString;
 	//you can copy the content of LatexString to a latex compiler
 	//it is supposed to display a partial fraction identity
-
-	ExampleComputation ThomasExample;
-	ThomasExample.RunSomeTests();
-	//ThomasExample.RunThomasExample();
 	return 0;
 }
-
+#endif
 
 
 void ExampleComputation::RunThomasExample()
@@ -158,7 +119,7 @@ void ExampleComputation::RunThomasExample()
 //	tempPF.ComputeDebugString();
 	tempPF.ElementToStringOutputToFile(tempF,true,false,true);
 	tempF.close();
-	#ifndef _WINDOWS
+	#ifndef USE_GUI
 		std::cout<<tempPF.DebugString;
 	#endif
 }

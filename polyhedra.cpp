@@ -10,7 +10,7 @@
 //This is free software. You are warmly welcome to use, modify and redistribute this code
 //and the resulting program any way you wish, as long as you provide the same rights
 //as those given to you to any future recipients of your modifications (in case you
-//decide you want to pass on those modifications).
+//decide to pass on those modifications).
 //The code is licensed under the Library General Public License version 3.0
 //(summarized in the preceding sentence).
 //You should have received a copy of the GNU Library General Public License
@@ -19,14 +19,14 @@
 //
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
 //advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith,
-//Hammurabi and Duoas for the helpful comments and advice on C++!
+//Hammurabi and Duoas!
 //*********************************************************************************************************
 //*********************************************************************************************************
 //DISCLAIMER
 //
 //THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
 //EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-//PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND,
+//PROVIDE THE PROGRAM Â“AS ISÂ” WITHOUT WARRANTY OF ANY KIND,
 //EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
 //THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 //THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
@@ -35,17 +35,31 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 
+
+
 #include "polyhedra.h"
 
-extern void outputText(std::string theOutput);
-extern void FeedDataToIndicatorWindow(IndicatorWindowVariables& output);
+extern void outputText(std::string theOutput){};
+extern void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
+#ifndef USE_GUI
+{}
+#endif
+;
 //color styles (taken from windows.h and substituted for independence of the .h file):
 // 0 = normal line
 // 1 = dashed line
 // 2 = dotted line
 // 5 = invisible line (no line)
-extern void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
-extern void drawtext(double X1, double Y1, const char* text, int length, int color);
+extern void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+#ifndef USE_GUI
+{}
+#endif
+;
+extern void drawtext(double X1, double Y1, const char* text, int length, int color)
+#ifndef USE_GUI
+{}
+#endif
+;
 //taken from windows.h
 #ifndef RGB
 unsigned int RGB(int r, int g, int b)
@@ -146,20 +160,14 @@ bool PolynomialOutputFormat::UsingLatexFormat=true;
 bool PolynomialOutputFormat::CarriageReturnRegular=true;
 PolynomialOutputFormat PolyFormatNumFrac;
 IndicatorWindowVariables IndicatorWindowGlobalVariables;
-template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<ComplexQN>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<Monomial<CompositeComplexQN> >::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<int>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<Monomial<Rational> >::ListBasicObjectsActualSizeIncrement=1;
-template < > int HashedListBasicObjects<Monomial<Rational> >::PreferredHashSize=10;
-template < > int HashedListBasicObjects<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
 int QuasiPolynomial::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
 
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
 ListObjectPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
 int BasicQN::NumTotalCreated=0;
-template < > int HashedListBasicObjects<Monomial<QuasiNumber> >::PreferredHashSize=1000;
+template < > int HashedListBasicObjects<Monomial<Rational> >::PreferredHashSize=10;
+template < > int HashedListBasicObjects<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
 template < > int HashedListBasicObjects<BasicQN>::PreferredHashSize= 1;
 template < > int HashedListBasicObjects<partFraction>::PreferredHashSize=10000;
 template < > int HashedListBasicObjects<intRoot>::PreferredHashSize = 10000;
@@ -168,11 +176,19 @@ template < > int HashedListBasicObjects<ElementWeylGroup>::PreferredHashSize=100
 template < > int HashedListBasicObjects<root>::PreferredHashSize=1000;
 template < > int HashedListBasicObjects<Monomial<LargeInt> >::PreferredHashSize=1;
 template < > int HashedListBasicObjects<Monomial<LargeRational> >::PreferredHashSize=10000;
-template < > int HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=25;
+template < > int HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=100;
+template < > int HashedListBasicObjects<Monomial<QuasiNumber> >::PreferredHashSize=1000;
 template < > int HashedListBasicObjects
 		<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> >
-  ::PreferredHashSize=5;
+  ::PreferredHashSize=100;
 template < > int HashedListBasicObjects<GeneratorPFAlgebraRecord>::PreferredHashSize = 1000;
+template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=100;
+
+template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<ComplexQN>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<int>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<Monomial<Rational> >::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<Monomial<CompositeComplexQN> >::ListBasicObjectsActualSizeIncrement=10;
 template < > int ListBasicObjects<Facet *>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<BasicQN *>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<ComplexQN *>::ListBasicObjectsActualSizeIncrement=10000;
@@ -182,9 +198,8 @@ template < > int ListBasicObjects<BasicComplexNumber>::ListBasicObjectsActualSiz
 template < > int ListBasicObjects<MonomialInCommutativeAlgebra
 																	<	Integer,GeneratorsPartialFractionAlgebra,
 																		GeneratorPFAlgebraRecord> >
-	::ListBasicObjectsActualSizeIncrement=1;
+	::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<GeneratorsPartialFractionAlgebra>::ListBasicObjectsActualSizeIncrement=1;
-template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=4;
 template < > int ListBasicObjects<GeneratorPFAlgebraRecord>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
@@ -222,6 +237,8 @@ bool partFraction::AnErrorHasOccurredTimeToPanic=false;
 bool partFractions::SplitTestMode=false;
 bool partFractions::AnErrorHasOccurredTimeToPanic=false;
 bool partFractions::UsingCheckSum=true;
+int partFraction::lastApplicationOfSVformulaNumNewGenerators=0;
+int partFraction::lastApplicationOfSVformulaNumNewMonomials=0;
 bool QuasiPolynomial::AnErrorHasOccurredTimeToPanic=false;
 bool LargeRational::AnErrorHasOccurredTimeToPanic=false;
 bool partFractions::MakingProgressReport=true;
@@ -1697,7 +1714,7 @@ void roots::PerturbVectorToRegular(root& output)
 	if (IndicatorWindowGlobalVariables.rootIsModified)
 	{ output.ScaleToIntegral();
 		IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(output);
-		IndicatorWindowGlobalVariables.StatusString="Indicator modified to regular";
+		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
 		::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 	}
 }
@@ -6932,7 +6949,7 @@ void partFractionPolynomials::ComputeQuasiPolynomial
 	{	if (RecordNumMonomials)
 		{	std::stringstream out;
 			out<<i<<" out of "<<this->size<<" accounted for";
-			::IndicatorWindowGlobalVariables.StatusString= out.str();
+			::IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
 		}
 		static QuasiPolynomial tempQP;
 		static QuasiNumber tempQN;
@@ -7134,7 +7151,7 @@ bool partFraction::RemoveRedundantShortRoots(root* Indicator)
 	static ::PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
 	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
 	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
-	
+
 	for (int k=0;k<this->IndicesNonZeroMults.size;k++  )
 	{ int currentIndex=this->IndicesNonZeroMults.TheObjects[k];
 		::oneFracWithMultiplicitiesAndElongations& currentFrac =
@@ -7290,6 +7307,14 @@ int partFraction::ElementToString(	std::string &output, bool LatexFormat,
 		(tempMat,false,output,LatexFormat, includeVPsummand, includeNumerator);
 }
 
+int partFraction::GetNumMonomialsInNumerator()
+{ if (this->UncoveringBrackets)
+		return this->Coefficient.size;
+	else
+		return this->CoefficientNonExpanded.size;
+}
+
+
 void partFraction::WriteToFile(std::fstream &output)
 {/* output<<"Fraction_start\n";
 	for (int j=0;j<partFraction::RootsToIndices.size;j++)
@@ -7320,8 +7345,12 @@ void partFraction::UncoverBracketsNumerator()
 	static ::IntegerPoly ComputationalBufferCoefficient;
 	static ::PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
 	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+	//ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
 	ComputationalBufferCoefficientNonExpanded.ConvertToIntegerPoly(ComputationalBufferCoefficient);
+	//ComputationalBufferCoefficient.ComputeDebugString();
 	this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+	//ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
+	//ComputationalBufferCoefficient.ComputeDebugString();
 //	this->Coefficient.ComputeDebugString();
 }
 
@@ -7363,7 +7392,7 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 	static IntegerPoly ComputationalBufferCoefficient;
 	static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
 	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
-	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);	
+	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
 	if (!UsingVarChange)
 	{	if (includeNumerator)
 			{	if (this->UncoveringBrackets)
@@ -7600,6 +7629,8 @@ void partFraction::ApplySzenesVergneFormula
   static PolyPartFractionNumerator tempNum;
   static IntegerPoly ComputationalBufferCoefficient;
   static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+  this->lastApplicationOfSVformulaNumNewGenerators=0;
+  this->lastApplicationOfSVformulaNumNewMonomials=0;
 	for(int i=0;i<theSelectedIndices.size;i++)
 	{	tempFrac.Assign(*this);
 		ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
@@ -7632,7 +7663,7 @@ void partFraction::ApplySzenesVergneFormula
       tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 		}
 		else
-		{ static ::MonomialInCommutativeAlgebra<Integer, 
+		{ static ::MonomialInCommutativeAlgebra<Integer,
 																						GeneratorsPartialFractionAlgebra,
 																						GeneratorPFAlgebraRecord> tempM;
 //			if (this->AnErrorHasOccurredTimeToPanic)
@@ -7646,7 +7677,7 @@ void partFraction::ApplySzenesVergneFormula
 				tempRoot= partFraction::RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]];
 				tempRoot.MultiplyByInteger(theElongations.TheObjects[j]*tempElongation);
 				static ::MonomialInCommutativeAlgebra
-									<	Integer, 
+									<	Integer,
 										GeneratorsPartialFractionAlgebra,
 										GeneratorPFAlgebraRecord> tempM2;
 				GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation(tempRoot,0,tempM2);
@@ -7674,6 +7705,8 @@ void partFraction::ApplySzenesVergneFormula
 		}
 		tempFrac.ComputeIndicesNonZeroMults();
     Accum.Add(tempFrac);
+    this->lastApplicationOfSVformulaNumNewMonomials+=tempFrac.GetNumMonomialsInNumerator();
+    this->lastApplicationOfSVformulaNumNewGenerators+=tempFrac.CoefficientNonExpanded.NumGeneratorsUsed();
 	}
 	//if (this->AnErrorHasOccurredTimeToPanic)
 	//{ assert(this->CheckSum.IsEqualTo(this->CheckSum2));
@@ -7688,6 +7721,10 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 {	static partFraction tempFrac;
 	static IntegerPoly AminusNbetaPoly;
 	static IntegerPoly ComputationalBufferCoefficient;
+	if (partFractions::MakingProgressReport)
+	{	this->lastApplicationOfSVformulaNumNewGenerators=0;
+		this->lastApplicationOfSVformulaNumNewMonomials=0;
+	}
 	this->GetAlphaMinusNBetaPoly(indexA,indexB,n,AminusNbetaPoly);
 	int powerA= this->TheObjects[indexA].Multiplicities.TheObjects[0];
 	int powerB= this->TheObjects[indexB].Multiplicities.TheObjects[0];
@@ -7714,6 +7751,12 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 	{	Integer tempInt(NChooseK(powerA+powerB-i-1,powerA-1));
 		ComputationalBufferCoefficient.TimesConstant(tempInt);
 		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+		if (partFractions::MakingProgressReport)
+		{	this->lastApplicationOfSVformulaNumNewGenerators+=
+				tempFrac.CoefficientNonExpanded.NumGeneratorsUsed();
+			this->lastApplicationOfSVformulaNumNewMonomials+=
+				tempFrac.GetNumMonomialsInNumerator();
+		}
 		Accum.Add(tempFrac);
 		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
@@ -7731,6 +7774,12 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 	{	Integer tempInt(NChooseK(powerA+powerB-i-1,powerB-1));
 		ComputationalBufferCoefficient.TimesConstant(tempInt);
 		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+		if (partFractions::MakingProgressReport)
+		{	this->lastApplicationOfSVformulaNumNewGenerators+=
+				tempFrac.CoefficientNonExpanded.NumGeneratorsUsed();
+			this->lastApplicationOfSVformulaNumNewMonomials+=
+				tempFrac.GetNumMonomialsInNumerator();
+		}
 		Accum.Add(tempFrac);
 		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
@@ -7831,7 +7880,7 @@ void partFraction::GetNElongationPoly(int index,int Elongation,int n, PolyPartFr
 
 void partFraction::partFractionToPartitionFunctionSplit
 			(QuasiPolynomial& output, bool RecordNumMonomials,
-			 //bool RecordSplitPowerSeriesCoefficient, 
+			 //bool RecordSplitPowerSeriesCoefficient,
 			 bool StoreToFile)
 {	static PolynomialLargeRational shiftedPoly, tempP;
 	static roots normals;
@@ -7845,8 +7894,8 @@ void partFraction::partFractionToPartitionFunctionSplit
 		output.ReadFromFile(partFraction::TheBigDump,root::AmbientDimension);
 		if (RecordNumMonomials && ! this->AlreadyAccountedForInGUIDisplay)
 		{ this->AlreadyAccountedForInGUIDisplay=true;
-			IndicatorWindowGlobalVariables.NumProcessedMonomials+=this->Coefficient.size;
-			::IndicatorWindowGlobalVariables.StatusString.clear();
+
+			//IndicatorWindowGlobalVariables.NumProcessedMonomials+=this->Coefficient.size;
 			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 //		output.ComputeDebugString();
@@ -7874,8 +7923,7 @@ void partFraction::partFractionToPartitionFunctionSplit
 			(shiftedPoly,i,normals,SplitPowerSeriesCoefficient);
 
 		if (RecordNumMonomials)
-		{ ::IndicatorWindowGlobalVariables.NumProcessedMonomials++;
-			std::stringstream out;
+		{ std::stringstream out;
 			out <<"Current fraction: "<<i+1<<" out of "<<this->Coefficient.size
 					<<" processed";
 			::IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
@@ -8126,14 +8174,23 @@ void partFractions::AssureIndicatorRegularity()
 void partFractions::UncoverBracketsNumerators()
 { if (partFraction::UncoveringBrackets)
 		return;
+	int changeOfNumMonomials=0;
 	for (int i=0;i<this->size;i++)
 	{	if (this->MakingProgressReport)
 		{	std::stringstream out;
-			out <<"Uncovering brackets"<< i <<" out of " << this->size;
-			IndicatorWindowGlobalVariables.StatusString=out.str();
-			this->MakeProgressReport();
+			out <<"Uncovering brackets"<< i+1 <<" out of " << this->size;
+			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
+			changeOfNumMonomials-=this->TheObjects[i].Coefficient.size;
+			FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 		this->TheObjects[i].UncoverBracketsNumerator();
+		if (this->MakingProgressReport)
+		{	changeOfNumMonomials+=this->TheObjects[i].Coefficient.size;
+			std::stringstream out;
+			out <<"Number actual monomials"<< changeOfNumMonomials;
+			IndicatorWindowGlobalVariables.ProgressReportString5=out.str();
+			FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+		}
 	}
 }
 
@@ -8146,7 +8203,13 @@ bool partFractions::ShouldIgnore()
 	{ if (this->DiscardingFractions)
 		{	this->PopIndexSwapWithLastHash(this->IndexLowestNonReduced);}
 		else
-		{	this->IndexLowestNonReduced++;}
+		{	this->IndexLowestNonReduced++;
+			this->NumberIrrelevantFractions++;
+			this->NumMonomialsInNumeratorsIrrelevantFractions+=
+				this->TheObjects[this->IndexLowestNonReduced].GetNumMonomialsInNumerator();
+			this->NumGeneratorsIrrelevantFractions+=
+				this->TheObjects[this->IndexLowestNonReduced].CoefficientNonExpanded.NumGeneratorsUsed();
+		}
 	}
 	return shouldIgnore;
 }
@@ -8187,14 +8250,26 @@ void partFractions::CompareCheckSums()
 	}
 
 }
+void partFractions::SetUpIndicatorVariables()
+{ this->NumberIrrelevantFractions=0;
+	this->NumberRelevantReducedFractions=0;
+	this->NumGeneratorsInTheNumerators=0;
+	this->NumGeneratorsIrrelevantFractions=0;
+	this->NumGeneratorsRelevenatFractions=0;
+	this->NumMonomialsInNumeratorsIrrelevantFractions=0;
+	this->NumMonomialsInNumeratorsRelevantFractions=0;
+	this->NumMonomialsInTheNumerators=1;
+	::IndicatorWindowGlobalVariables.Nullify();
+}
 
 bool partFractions::split()
 { this->IndexLowestNonReduced=0;
 	partFraction tempF;
 	//Checksum code follows:
-	std::string tempS1, tempS2;
+	//std::string tempS1, tempS2;
 //	this->ComputeDebugString();
 //	partFraction::MakingConsistencyCheck=true;
+	this->SetUpIndicatorVariables();
 	this->PrepareCheckSums();
 	this->AssureIndicatorRegularity();
 	//if (partFraction::MakingConsistencyCheck)
@@ -8216,10 +8291,23 @@ bool partFractions::split()
 //			}
 			if (! (tempF.reduceOnceGeneralMethod(*this)))
 			{ if (tempF.IndicesNonZeroMults.size<=root::AmbientDimension)
-					this->IndexLowestNonReduced++;
+				{	this->IndexLowestNonReduced++;
+					if (this->MakingProgressReport)
+					{	this->NumberRelevantReducedFractions++;
+						this->NumMonomialsInNumeratorsRelevantFractions+=tempF.GetNumMonomialsInNumerator();
+						this->NumGeneratorsRelevenatFractions+=
+							tempF.CoefficientNonExpanded.NumGeneratorsUsed();
+					}
+				}
 			}
 			else
 			{	this->PopIndexSwapWithLastHash( this->IndexLowestNonReduced);
+				if (this->MakingProgressReport)
+				{	this->NumGeneratorsInTheNumerators-=tempF.CoefficientNonExpanded.NumGeneratorsUsed();
+					this->NumMonomialsInTheNumerators-=tempF.GetNumMonomialsInNumerator();
+					this->NumGeneratorsInTheNumerators+= tempF.lastApplicationOfSVformulaNumNewGenerators;
+					this->NumMonomialsInTheNumerators+= tempF.lastApplicationOfSVformulaNumNewMonomials;
+				}
 //				if (partFraction::AnErrorHasOccurredTimeToPanic)
 //				{ this->ComputeDebugString();
 //				}
@@ -8238,7 +8326,7 @@ bool partFractions::split()
 //				}
 //			}
 		}
-		this->MakeProgressReport();
+		this->MakeProgressReportSplittingMainPart();
 	//	this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
 	}
@@ -8253,18 +8341,21 @@ bool partFractions::split()
 		tempRat.ElementToString(tempS1);
 		assert(tempRat2.IsEqualTo(tempRat));
 	}	*/
-	
+	//this->ComputeDebugString();
 	this->RemoveRedundantShortRoots();
-//	this->ComputeDebugString();
+	//this->ComputeDebugString();
 	this->UncoverBracketsNumerators();
+	//partFraction::UncoveringBrackets=true;
+	//this->ComputeDebugString();
 	this->CompareCheckSums();
 	this->IndexLowestNonReduced= this->size;
-	this->MakeProgressReport();
+	this->MakeProgressReportSplittingMainPart();
 	return false;
 }
 
 bool partFractions::splitClassicalRootSystem()
 { this->IndexLowestNonReduced=0;
+	this->SetUpIndicatorVariables();
 	if (this->SplitTestMode)
 	{ ListBasicObjects<Monomial<Integer> >::ListBasicObjectsActualSizeIncrement=1;
 		HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=1;
@@ -8280,11 +8371,24 @@ bool partFractions::splitClassicalRootSystem()
 			//tempF.ComputeDebugString();
 			if (! (tempF.reduceOnceTotalOrderMethod(*this)))
 			{ this->IndexLowestNonReduced++;
+				if (this->MakingProgressReport)
+				{	this->NumberRelevantReducedFractions++;
+					this->NumMonomialsInNumeratorsRelevantFractions+=tempF.GetNumMonomialsInNumerator();
+					this->NumGeneratorsRelevenatFractions+=
+						tempF.CoefficientNonExpanded.NumGeneratorsUsed();
+				}
 			}
 			else
 			{	this->PopIndexSwapWithLastHash( this->IndexLowestNonReduced);
+				if (this->MakingProgressReport)
+				{	this->NumGeneratorsInTheNumerators-=tempF.CoefficientNonExpanded.NumGeneratorsUsed();
+					this->NumMonomialsInTheNumerators-=tempF.GetNumMonomialsInNumerator();
+					this->NumGeneratorsInTheNumerators+= tempF.lastApplicationOfSVformulaNumNewGenerators;
+					this->NumMonomialsInTheNumerators+= tempF.lastApplicationOfSVformulaNumNewMonomials;
+				}
+
 			}
-			this->MakeProgressReport();
+			this->MakeProgressReportSplittingMainPart();
 		}
 //		this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
@@ -8294,7 +8398,7 @@ bool partFractions::splitClassicalRootSystem()
 //	this->ComputeDebugString();
 	this->CompareCheckSums();
 	this->IndexLowestNonReduced= this->size;
-	this->MakeProgressReport();
+	this->MakeProgressReportSplittingMainPart();
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot);
 }
 
@@ -8315,7 +8419,7 @@ void partFraction::initFromRootSystem(intRoots& theFraction, intRoots& theAlgori
 	this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 	ComputationalBufferCoefficientNonExpanded.MakeNVarConst(root::AmbientDimension, IOne);
 	this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
-	
+
 	partFraction::RootsToIndices.initFromRoots(theAlgorithmBasis,weights);
 	this->init(partFraction::RootsToIndices.size);
 	for(int i=0;i<partFraction::RootsToIndices.size;i++)
@@ -8352,13 +8456,6 @@ void partFractions::WriteToFileComputedContributions(std::fstream& output)
 	}
 }
 
-
-int partFractions::NumMonomialsInTheNumerators()
-{ int result=0;
-	for (int i=0;i<this->size;i++)
-		result+=this->TheObjects[i].Coefficient.size;
-	return result;
-}
 
 partFractions::partFractions()
 { this->HighestIndex=-1;
@@ -8544,14 +8641,30 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 #ifdef WIN32
 #pragma warning(default:4018)//grrrrr
 #endif
-void partFractions::MakeProgressReport()
-{ IndicatorWindowGlobalVariables.NumPartFractionsLoaded= this->size;
-	IndicatorWindowGlobalVariables.NumReducedPartFractions= this->IndexLowestNonReduced;
-	IndicatorWindowGlobalVariables.PrepareStrings();
+void partFractions::MakeProgressReportSplittingMainPart()
+{ std::stringstream out1,out2,out3;
+	out1<<this->NumberRelevantReducedFractions << " relevant reduced + "
+			<< this->NumberIrrelevantFractions << " disjoint = "
+			<< this->IndexLowestNonReduced<<" out of "<<this->size
+			<<" total fractions";
+	IndicatorWindowGlobalVariables.ProgressReportString1= out1.str();
+	out2<<this->NumGeneratorsRelevenatFractions << " relevant reduced + "
+			<< this->NumGeneratorsIrrelevantFractions << " disjoint = "
+			<< this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions
+			<<" out of "<<this->NumGeneratorsInTheNumerators
+			<<" total generators in the numerators";
+	IndicatorWindowGlobalVariables.ProgressReportString2= out2.str();
+	out3<<this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
+			<< this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
+			<< this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions
+			<<" out of "<<this->NumMonomialsInTheNumerators
+			<<" total monomials in the numerators";
+	IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
 	FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
-	//while(IndicatorWindowGlobalVariables.Pause)
-	//{
-	//}
+}
+
+void partFractions::MakeProgressVPFcomputation()
+{ ::FeedDataToIndicatorWindow(::IndicatorWindowGlobalVariables);
 }
 
 void partFractions::ComputeOneCheckSum(LargeRational &output)
@@ -8561,11 +8674,10 @@ void partFractions::ComputeOneCheckSum(LargeRational &output)
 		this->TheObjects[i].ComputeOneCheckSum(tempRat);
 		output.Add(tempRat);
 		if (this->MakingProgressReport)
-		{ IndicatorWindowGlobalVariables.StatusString.clear();
-			std::stringstream out;
+		{ std::stringstream out;
 			out <<"Checksum "<<i+1<<" out of "<<this->size;
-			IndicatorWindowGlobalVariables.StatusString= out.str();
-			this->MakeProgressReport();
+			IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
+			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
 }
@@ -8626,7 +8738,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem()
 		if (this->MakingProgressReport)
 		{ std::stringstream out;
 			out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
-			IndicatorWindowGlobalVariables.StatusString=out.str();
+			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
 			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
@@ -8657,7 +8769,7 @@ bool partFractions::VerifyFileComputedContributions()
 
 bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 				(	QuasiPolynomial& output, root& r, //bool storeComputations,
-					//bool RecordSplitPowerSeriesCoefficient, 
+					//bool RecordSplitPowerSeriesCoefficient,
 					bool StoreToFile,
 					bool UseOldData)
 {	if (!this->CheckForMinimalityDecompositionWithRespectToRoot(r)){return false;}
@@ -8672,10 +8784,14 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 	}
 	IndicatorWindowGlobalVariables.rootIsModified=false;
 	IndicatorWindowGlobalVariables.PerturbationHasOccurred=false;
+	IndicatorWindowGlobalVariables.NumProcessedMonomialsCurrentFraction=0;
 	output.Nullify(root::AmbientDimension);
 	static QuasiPolynomial tempQP;
 	for (int i=0;i<this->size;i++)
-	{ assert(partFraction::TheBigDump.is_open()||!StoreToFile);
+	{ if (this->MakingProgressReport)
+		{ std::stringstream out;
+		}
+		assert(partFraction::TheBigDump.is_open()||!StoreToFile);
 		assert(partFractions::ComputedContributionsList.is_open()||!StoreToFile);
 		if (this->TheObjects[i].rootIsInFractionCone(r))
 		{ //if (storeComputations)
@@ -8735,10 +8851,8 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 				oldCheckSum.Assign(partFractions::CheckSum);
 				oldOutput.Assign(output);
 			}*/
-			::IndicatorWindowGlobalVariables.NumComputedContributions++;
 		}
-		::IndicatorWindowGlobalVariables.NumProcessedFractions=i+1;
-		this->MakeProgressReport();
+		this->MakeProgressVPFcomputation();
 	}
 /*	if (partFraction::MakingConsistencyCheck)
 	{ std::string tempS;
@@ -8815,7 +8929,7 @@ void partFractions::ReadFromFile(std::fstream& input)
 	for(int i=0;i<tempI;i++)
 	{ tempFrac.ReadFromFile(input);
 		this->Add(tempFrac);
-		this->MakeProgressReport();
+		this->MakeProgressVPFcomputation();
 	}
 }
 
@@ -8925,8 +9039,6 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 //	this->ComputeDebugString();
 	assert(this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot));
 	//return;
-
-	::IndicatorWindowGlobalVariables.TotalNumMonomials= this->NumMonomialsInTheNumerators();
 	if(!this->partFractionsToPartitionFunctionAdaptedToRoot
 		(output,this->IndicatorRoot,StoreToFile,UseOldData))
 	{ this->ComputeDebugStringNoNumerator();
@@ -10945,7 +11057,8 @@ void rootFKFTcomputation::MakeTheRootFKFTSum
 					roots& theNilradical)
 { PolynomialsRationalCoeffCollection TheChambersInTheGame;
 	PolynomialsRationalCoeff StartingRoot;
-	::IndicatorWindowGlobalVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
+	//::IndicatorWindowGlobalVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
+
 	Cone TheNilradicalCone;
 	TheNilradicalCone.ComputeFromDirections(theNilradical);
 	TheNilradicalCone.ComputeDebugString();
@@ -12218,24 +12331,12 @@ void PolynomialLargeRational::Evaluate(intRoot &values, LargeRational &output)
 	}
 }
 
-void IndicatorWindowVariables::PrepareStrings()
-{ std::stringstream out1,out2,out3;
-	out1<<this->NumReducedPartFractions<<" reduced fractions out of "<<this->NumPartFractionsLoaded;
-	this->ProgressReportString1= out1.str();
-	out2<< this->NumComputedContributions<<" contributions out of "
-			<< this->NumProcessedFractions <<" processed fractions";
-	this->ProgressReportString2= out2.str();
-	out3<<"Processed "<< this->NumProcessedMonomials<<" out of "<<this->TotalNumMonomials<<" monomials";
-	this->ProgressReportString3= out3.str();
-	this->ProgressReportString4.assign(this->StatusString);
-}
-
 void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
 { this->ProgressReportString1=right.ProgressReportString1;
 	this->ProgressReportString2= right.ProgressReportString2;
 	this->ProgressReportString3= right.ProgressReportString3;
 	this->ProgressReportString4= right.ProgressReportString4;
-	this->StatusString= right.StatusString;
+	this->ProgressReportString5= right.ProgressReportString5;
 	this->rootIsModified= right.rootIsModified;
 	this->PerturbationHasOccurred= right.PerturbationHasOccurred;
 	this->modifiedRoot=right.modifiedRoot;
@@ -12339,9 +12440,9 @@ void  GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation
 				output.MultiplyByGenerator(tempGen, tempI);
 			}
 		}
-		if (elongation==-1) 
+		if (elongation==-1)
 		{ output.Coefficient.MultiplyBy(IMOne);
-		} 
+		}
 		return;
 	}
 	if (elongation==1)
@@ -12353,7 +12454,7 @@ void  GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation
 }
 
 GeneratorPFAlgebraRecord::GeneratorPFAlgebraRecord()
-{	this->ValueIsComputed=false; 
+{	this->ValueIsComputed=false;
 	this->Value = new IntegerPoly;
 }
 
@@ -12377,7 +12478,7 @@ void GeneratorsPartialFractionAlgebra::ElementToString(std::string& output,Polyn
 	::GeneratorPFAlgebraRecord& currentGen= this->theGenerators.TheObjects[this->GeneratorIndex];
 	currentGen.ElementToString(tempS, PolyFormat);
 	if(this->GeneratorPower==1)
-	{ output.assign(tempS); 
+	{ output.assign(tempS);
 		return;
 	}
 	std::stringstream out;
@@ -12401,7 +12502,7 @@ void GeneratorsPartialFractionAlgebra::ConvertToIntegerPoly(IntegerPoly& output)
 	}
 	if (this->GeneratorPower==0)
 	{ output.MakeNVarConst(root::AmbientDimension,IOne);
-		assert(false);		
+		assert(false);
 	}
 	if (this->GeneratorPower>1)
 	{ output.RaiseToPower(this->GeneratorPower);
@@ -12442,7 +12543,7 @@ void GeneratorPFAlgebraRecord::ElementToString(std::string& output,PolynomialOut
 	{	if (this->GeneratorRoot.elements[i]!=0)
 		{	if (this->GeneratorRoot.elements[i]==1)
 				out1<< PolyFormat.alphabet[i];
-			else	
+			else
 				out1<< PolyFormat.alphabet[i]<<"^{"<<this->GeneratorRoot.elements[i]<<"}";
 		}
 	}
@@ -12464,7 +12565,7 @@ void GeneratorPFAlgebraRecord::GetValue(IntegerPoly &output)
 	static Monomial<Integer> tempM;
 	tempM.init(root::AmbientDimension);
 	if (this->Elongation>=0)
-	{	tempM.Coefficient.Assign(IOne);	
+	{	tempM.Coefficient.Assign(IOne);
 	}
 	else
 	{ tempM.Coefficient.Assign(IMOne);
@@ -12482,7 +12583,7 @@ void GeneratorPFAlgebraRecord::GetValue(IntegerPoly &output)
 			}
 			if( this->Elongation==0)
 			{ tempM.degrees[j]=(short) (this->GeneratorRoot.elements[j]);
-			}		
+			}
 		}
 		output.AddMonomial(tempM);
 	}
@@ -12500,6 +12601,7 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumerator(PolyPartFra
 
 void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFractionNumerator &output)
 { output.Nullify(root::AmbientDimension);
+	output.SetActualSizeAtLeastExpandOnTop(this->size);
 	for (int i=0;i<this->size;i++)
 	{ ::MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord>
 				tempM;
@@ -12509,6 +12611,14 @@ void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFr
 		}
 		output.AddMonomial(tempM);
 	}
+}
+
+int PolyPartFractionNumeratorLight::NumGeneratorsUsed()
+{ int result=0;
+	for (int i=0;i<this->size;i++)
+	{ result+=this->TheObjects[i].size;
+	}
+	return result;
 }
 
 void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight

@@ -732,7 +732,7 @@
 				AdditionalOptions="/EHsc "
 				Optimization="0"
 				AdditionalIncludeDirectories=".\..\..\lib\vc_lib\mswd,.\..\..\include,.,.\..\..\samples"
-				PreprocessorDefinitions="WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;NOPCH"
+				PreprocessorDefinitions="WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;_WINDOWS;USE_GUI;NOPCH"
 				MinimalRebuild="true"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"

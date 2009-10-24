@@ -1,3 +1,15 @@
+//*********************************************************************************************************
+//*********************************************************************************************************
+//file wxWidgets_GUI.cpp
+//Author: Todor Milev
+//GUI for using the Polyhedra.cpp and polyhedra.h files.
+//Uses wxWidgets. http://www.wxwidgets.org/
+//wxWidgets is an open source (completely free and modifiable) toolkit.
+//Many thanks to the wxWidgets team!
+//*********************************************************************************************************
+//*********************************************************************************************************
+
+#ifdef USE_GUI
 
 #include "wx/wxprec.h"
 
@@ -338,6 +350,7 @@ guiMainWindow::guiMainWindow()
 	this->Label2ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Label3ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Label4ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
+	this->Label5ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
 	this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
 	this->CheckBox1ComputePFs= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Chambers only"));
@@ -393,6 +406,7 @@ guiMainWindow::guiMainWindow()
 				this->BoxSizer12VerticalProgressReports->Add(this->Label2ProgressReport);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label3ProgressReport);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label4ProgressReport);
+				this->BoxSizer12VerticalProgressReports->Add(this->Label5ProgressReport);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->Canvas1,1,wxEXPAND|wxALL);
   this->ListBox1WeylGroup->Append(wxT("A2"));
   this->ListBox1WeylGroup->Append(wxT("A3"));
@@ -838,6 +852,8 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
 	MainWindow1->Label3ProgressReport->SetLabel(tempS3);
 	wxString tempS4(output.ProgressReportString4.c_str(),wxConvUTF8);
 	MainWindow1->Label4ProgressReport->SetLabel(tempS4);
+	wxString tempS5(output.ProgressReportString5.c_str(),wxConvUTF8);
+	MainWindow1->Label5ProgressReport->SetLabel(tempS5);
 	if (output.PerturbationHasOccurred)
 	{ root tempRoot; tempRoot.AssignIntRoot(output.modifiedRoot);
 		MainWindow1->WriteIndicatorWeight(tempRoot);
@@ -884,3 +900,5 @@ void drawtext(double X1, double Y1, const char* text, int length, int color)
 	wxString temptext(text,wxConvUTF8 ,length);
 	dc.DrawText(temptext,(int)X1, (int)Y1);
 }
+
+#endif

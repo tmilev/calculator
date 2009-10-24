@@ -10,7 +10,7 @@
 //This is free software. You are warmly welcome to use, modify and redistribute this code
 //and the resulting program any way you wish, as long as you provide the same rights
 //as those given to you to any future recipients of your modifications (in case you
-//decide you want to pass on those modifications).
+//decide to pass on those modifications).
 //The code is licensed under the Library General Public License version 3.0
 //(summarized in the preceding sentence).
 //You should have received a copy of the GNU Library General Public License
@@ -19,7 +19,7 @@
 //
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
 //advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith,
-//Hammurabi and Duoas for the helpful comments and advice on C++!
+//Hammurabi and Duoas!
 //*********************************************************************************************************
 //*********************************************************************************************************
 //DISCLAIMER
@@ -104,8 +104,8 @@ class WeylGroup;
 class intRoots;
 class MatrixInt;
 class QuasiPolynomials;
-template <class ElementOfCommutativeRingWithIdentity, 
-					class GeneratorsOfAlgebra, 
+template <class ElementOfCommutativeRingWithIdentity,
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 class MonomialInCommutativeAlgebra;
 
@@ -181,12 +181,12 @@ public:
 
 //The below class is to be used together with ListBasicObjects.
 //The purpose of the class is to save up RAM memory use.
-//This is the "light" version it is to be used for storage purposes only. 
-//To use it as a normal ListBasicObjects simply copy it to a buffer ListBasicObjects and there 
+//This is the "light" version it is to be used for storage purposes only.
+//To use it as a normal ListBasicObjects simply copy it to a buffer ListBasicObjects and there
 //use the full functionality of ListBasicObjects.
 //Then copy the buffer ListBasicObjects back to the light version to store to RAM.
 template <class Object>
-class ListBasicObjectsLight 
+class ListBasicObjectsLight
 {
 private:
 	ListBasicObjectsLight(const ListBasicObjectsLight<Object>& right);
@@ -224,7 +224,7 @@ inline void ListBasicObjectsLight<Object>::operator =(const ListBasicObjectsLigh
 
 template <class Object>
 void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
-{ if (theSize== this->size) 
+{ if (theSize== this->size)
 		return;
 	if (theSize==0)
 	{ this->size=0;
@@ -1473,12 +1473,12 @@ ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRi
 int HashedListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::PreferredHashSize;
       //the above is the size of the hash table your polynomial will have. The larger the hash table -
       //the more RAM consumed - the faster the computation. Set 1 if you want min RAM usage. Set 10
-      //if you got no good idea of what this means.
+      //if you got no good idea what this means.
 int ListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::ListBasicObjectsActualSizeIncrement;
       //the above is the size of the chunk of memory the polynomial class will allocate
       //whenever it needs more memory. For example, if you believe your polynomials
       //will have 1000+ monomials average, then set the above to 1000. Note: abuse of the above
-      //might raise your memory usage unexpectedly high!
+      //might raise your memory use unexpectedly high!
 //Optional (required for some moethods):
 //void ElementOfCommutativeRingWithIdentity::DivideBy(&ElementOfCommutativeRingWithIdentity);
 //void ElementOfCommutativeRingWithIdentity::WriteToFile(std::fstream& output);
@@ -1559,7 +1559,7 @@ public:
 	short NumVars;
 	std::string DebugString;
 	void ElementToString(std::string& output);
-	void ComputeDebugString(); 
+	void ComputeDebugString();
 	void AssignPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& from);
 	void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
 	void Nullify(short numberVariables);
@@ -1658,7 +1658,7 @@ public:
   { return this->Elongation+ this->GeneratorRoot.HashFunction();
   };
   bool operator == (GeneratorPFAlgebraRecord& right)
-  { return (this->GeneratorRoot == right.GeneratorRoot) 
+  { return (this->GeneratorRoot == right.GeneratorRoot)
 				&& (this->Elongation == right.Elongation);
   }
 };
@@ -1672,8 +1672,8 @@ public:
   // the numerator in the geometric series sum corresponding to elongation
   static void GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation,
 								::MonomialInCommutativeAlgebra
-									<	Integer, 
-										::GeneratorsPartialFractionAlgebra, 
+									<	Integer,
+										::GeneratorsPartialFractionAlgebra,
 										GeneratorPFAlgebraRecord>& output);
 	std::string DebugString;
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
@@ -1688,7 +1688,7 @@ public:
 };
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 class MonomialInCommutativeAlgebra: public HashedListBasicObjects<GeneratorsOfAlgebra>
 {
@@ -1716,7 +1716,7 @@ public:
 	void MultiplyBy(MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity,
 																								GeneratorsOfAlgebra,
 																								GeneratorsOfAlgebraRecord>& m);
-	//the below functions return 1 if no reduction has occured 
+	//the below functions return 1 if no reduction has occured
 	//i.e. the generator is not in zeroth power after the multiplication
 	//If the generator is in zero-th power after the multiplication and reduction has occured,
 	//the below return 0
@@ -1742,7 +1742,7 @@ public:
 };
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 bool MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1754,9 +1754,9 @@ bool MonomialInCommutativeAlgebra
 
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra		
+void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
 			GeneratorsOfAlgebra,
 			GeneratorsOfAlgebraRecord>
@@ -1772,7 +1772,7 @@ void MonomialInCommutativeAlgebra
 	}
 	tempS= out1.str();
 	std::string tempS2;
-	this->Coefficient.ElementToString(tempS2);	
+	this->Coefficient.ElementToString(tempS2);
 	if (tempS=="")
 	{ out<<tempS2;
 	}
@@ -1796,25 +1796,26 @@ void MonomialInCommutativeAlgebra
 }
 
 class PolyPartFractionNumerator: public TemplatePolynomial
-    <	MonomialInCommutativeAlgebra<	Integer,GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>, 
+    <	MonomialInCommutativeAlgebra<	Integer,GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>,
 			Integer >
 {
 public:
 	void ConvertToIntegerPoly(IntegerPoly& output);
 };
 
-class PolyPartFractionNumeratorLight: public 
-	ListBasicObjectsLight<ListBasicObjectsLight<GeneratorsPartialFractionAlgebra> > 
+class PolyPartFractionNumeratorLight: public
+	ListBasicObjectsLight<ListBasicObjectsLight<GeneratorsPartialFractionAlgebra> >
 {
 public:
 	ListBasicObjectsLight<int> Coefficients;
 	void AssignPolyPartFractionNumerator(PolyPartFractionNumerator& from);
 	void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output);
 	void AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight& right);
+	int NumGeneratorsUsed();
 };
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1826,7 +1827,7 @@ void MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1834,7 +1835,7 @@ void MonomialInCommutativeAlgebra
 			GeneratorsOfAlgebraRecord>
 			::MultiplyBy
 		( MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,
-																			GeneratorsOfAlgebra, 
+																			GeneratorsOfAlgebra,
 																			GeneratorsOfAlgebraRecord>& m,
 			MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,
 																			GeneratorsOfAlgebra,
@@ -1847,7 +1848,7 @@ void MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 int MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1869,7 +1870,7 @@ int MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 int MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1883,7 +1884,7 @@ int MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 int MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1901,7 +1902,7 @@ int MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 int MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1916,7 +1917,7 @@ int MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1929,7 +1930,7 @@ void MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1941,7 +1942,7 @@ void MonomialInCommutativeAlgebra
 
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 inline void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1956,7 +1957,7 @@ inline void MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 inline void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -1970,13 +1971,13 @@ inline void MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 inline bool MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
 			GeneratorsOfAlgebra,
 			GeneratorsOfAlgebraRecord>::operator ==
-	(MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,	
+	(MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,
 																	GeneratorsOfAlgebra,
 																	GeneratorsOfAlgebraRecord>& right)
 { static MonomialInCommutativeAlgebra
@@ -1999,7 +2000,7 @@ inline bool MonomialInCommutativeAlgebra
 }
 
 template <class ElementOfCommutativeRingWithIdentity,
-					class GeneratorsOfAlgebra, 
+					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
@@ -2009,7 +2010,8 @@ void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
 			GeneratorsOfAlgebra,
 			GeneratorsOfAlgebraRecord>& m)
-{ for (int i=0;i<m.size;i++)
+{ this->SetActualSizeAtLeastExpandOnTop(this->size+m.size);
+	for (int i=0;i<m.size;i++)
 	{ this->MultiplyByGenerator(m.TheObjects[i]);
   }
   this->Coefficient.MultiplyBy(m.Coefficient);
@@ -2874,7 +2876,7 @@ bool Polynomial<ElementOfCommutativeRingWithIdentity>
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight
 	(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from)
-{	this->NumVars= from.NumVars;
+{	this->Nullify(from.NumVars);
 	this->SetActualSizeAtLeastExpandOnTop(from.size);
 	for (int i=0;i<from.size;i++)
 	{ this->AddMonomial(from.TheObjects[i]);
@@ -3681,15 +3683,17 @@ public:
 	int FileStoragePosition;
 	bool PowerSeriesCoefficientIsComputed;
 	ListBasicObjects<int> IndicesNonZeroMults;
-	
+
 	IntegerPolyLight Coefficient;
 	PolyPartFractionNumeratorLight CoefficientNonExpanded;
 //	QuasiPolynomial PowerSeriesCoefficient;
 //	partFractionPolynomials SplitPowerSeriesCoefficients;
-	
+
 	bool RemoveRedundantShortRootsClassicalRootSystem(root*Indicator);
 	bool RemoveRedundantShortRoots(root* Indicator);
 	bool AlreadyAccountedForInGUIDisplay;
+	static int lastApplicationOfSVformulaNumNewGenerators;
+	static int lastApplicationOfSVformulaNumNewMonomials;
 	static bool AnErrorHasOccurredTimeToPanic;
 	static bool UncoveringBrackets;
 	static std::fstream TheBigDump;
@@ -3709,7 +3713,7 @@ public:
 	void UncoverBracketsNumerator();
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
-						//bool RecordSplitPowerSeriesCoefficient, 
+						//bool RecordSplitPowerSeriesCoefficient,
 						bool StoreToFile);
 	//void partFractionToPartitionFunctionStoreAnswer
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
@@ -3764,6 +3768,7 @@ public:
 																	bool LatexFormat,bool includeVPsummand,bool includeNumerator);
 	void ReadFromFile(std::fstream& input);
 	void WriteToFile(std::fstream& output);
+	int GetNumMonomialsInNumerator();
 	int SizeWithoutDebugString();
 };
 
@@ -3773,6 +3778,14 @@ class partFractions: public HashedListBasicObjects<partFraction>
 public:
 	int IndexLowestNonReduced;
 	int HighestIndex;
+	int NumberIrrelevantFractions;
+	int NumberRelevantReducedFractions;
+	int NumMonomialsInTheNumerators;
+	int NumGeneratorsInTheNumerators;
+	int NumMonomialsInNumeratorsRelevantFractions;
+	int NumGeneratorsRelevenatFractions;
+	int NumMonomialsInNumeratorsIrrelevantFractions;
+	int NumGeneratorsIrrelevantFractions;
 	std::string DebugString;
 	bool UsingIndicatorRoot;
 	bool DiscardingFractions;
@@ -3799,6 +3812,7 @@ public:
 	bool split();
 	void ComputeOneCheckSum(LargeRational& output);
 	void Add(partFraction& f);
+	void SetUpIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	int ElementToStringBasisChange(MatrixInt& VarChange, bool UsingVarChange, std::string& output,
@@ -3808,7 +3822,7 @@ public:
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
 					(	QuasiPolynomial& output, root& r,
-						//bool storeComputations, bool RecordSplitPowerSeriesCoefficient, 
+						//bool storeComputations, bool RecordSplitPowerSeriesCoefficient,
 						bool StoreToFile,bool UseOldData);
 	bool VerifyFileComputedContributions();
 	void WriteToFileComputedContributions(std::fstream& output);
@@ -3819,8 +3833,10 @@ public:
 	partFractions();
 	int SizeWithoutDebugString();
 	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r);
-	void MakeProgressReport();
-	int NumMonomialsInTheNumerators();
+	void MakeProgressReportSplittingMainPart();
+	void MakeProgressReportRemovingRedundantRoots();
+	void MakeProgressReportUncoveringBrackets();
+	void MakeProgressVPFcomputation();
 	void ComputeKostantFunctionFromWeylGroup
 				(	char WeylGroupLetter, unsigned char WeylGroupNumber,
 					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,bool StoreToFile);
@@ -4130,31 +4146,24 @@ public:
 struct IndicatorWindowVariables
 {
 public:
-	int NumPartFractionsLoaded;
-	int NumReducedPartFractions;
-	int NumComputedContributions;
-	int TotalNumMonomials;
-	int NumProcessedMonomials;
-	int NumProcessedFractions;
+	int NumProcessedMonomialsCurrentFraction;
+	int NumProcessedMonomialsTotal;
+
 	intRoot modifiedRoot;
 	bool rootIsModified;
 	bool PerturbationHasOccurred;
 	bool Pause;
-	std:: string StatusString;
 	IndicatorWindowVariables(){this->Nullify();}
 	std::string ProgressReportString1;
 	std::string ProgressReportString2;
 	std::string ProgressReportString3;
 	std::string ProgressReportString4;
-	void PrepareStrings();
+	std::string ProgressReportString5;
 	void Assign(IndicatorWindowVariables& right);
 	void Nullify()
-	{ this->NumPartFractionsLoaded=0;
-		this->Pause=true;
-		this->NumComputedContributions=0;
-		this->TotalNumMonomials=0;
-		this->NumProcessedMonomials=0;
-		this->NumProcessedFractions=0;
+	{ this->Pause=true;
+		this->NumProcessedMonomialsCurrentFraction=0;
+		this->NumProcessedMonomialsTotal=0;
 	};
 };
 

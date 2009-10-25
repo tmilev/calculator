@@ -7414,12 +7414,12 @@ int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
 	}
 	if (stringPoly=="1"){stringPoly="";}
 	if (stringPoly=="-1"){stringPoly="-";}
-	if (this->Coefficient.size>1 && this->UncoveringBrackets ||
-			this->CoefficientNonExpanded.size>1 && !this->UncoveringBrackets)
+	if ((this->Coefficient.size>1 && this->UncoveringBrackets) ||
+			(this->CoefficientNonExpanded.size>1 && !this->UncoveringBrackets))
 	{out2<<"(";}
 	out2<<stringPoly;
-	if (this->Coefficient.size>1 && this->UncoveringBrackets ||
-			this->CoefficientNonExpanded.size>1 && !this->UncoveringBrackets)
+	if ((this->Coefficient.size>1 && this->UncoveringBrackets) ||
+			(this->CoefficientNonExpanded.size>1 && !this->UncoveringBrackets))
 	{out2<<")";}
 	stringPoly= out2.str();
 //	this->intRootToString(out,this->RootShift,false);

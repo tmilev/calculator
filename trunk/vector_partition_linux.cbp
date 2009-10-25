@@ -20,6 +20,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="`wx-config --cflags`" />
+			<Add option="-DUSE_GUI" />
 		</Compiler>
 		<Linker>
 			<Add option="`wx-config --libs`" />

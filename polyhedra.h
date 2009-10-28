@@ -3815,7 +3815,7 @@ public:
 	//row index is the index of the root; column(second) index is the coordinate index
 	void RemoveRedundantShortRootsClassicalRootSystem();
 	void RemoveRedundantShortRoots();
-	bool splitClassicalRootSystem();
+	bool splitClassicalRootSystem(bool ShouldElongate);
 	bool split();
 	void ComputeOneCheckSum(LargeRational& output);
 	void AccountPartFractionInternals(int sign, int index); 

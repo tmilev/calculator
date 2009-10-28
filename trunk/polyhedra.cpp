@@ -8348,7 +8348,7 @@ bool partFractions::split()
 	return false;
 }
 
-bool partFractions::splitClassicalRootSystem()
+bool partFractions::splitClassicalRootSystem(bool ShouldElongate)
 { this->IndexLowestNonProcessed=0;
 	this->SetUpIndicatorVariables();
 	if (this->SplitTestMode)
@@ -8377,9 +8377,11 @@ bool partFractions::splitClassicalRootSystem()
 	}
 	//this->ComputeDebugString();
 	this->CompareCheckSums();
-	this->RemoveRedundantShortRootsClassicalRootSystem();
+	if (ShouldElongate)
+	{	this->RemoveRedundantShortRootsClassicalRootSystem();
 //	this->ComputeDebugString();
-	this->CompareCheckSums();
+		this->CompareCheckSums();
+	}
 	this->IndexLowestNonProcessed= this->size;
 	this->MakeProgressReportSplittingMainPart();
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot);
@@ -9021,7 +9023,8 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 	if (WeylGroupLetter=='A'||
 			WeylGroupLetter=='B'||
 			WeylGroupLetter=='C'||
-			WeylGroupLetter=='D')
+			WeylGroupLetter=='D'||
+			WeylGroupLetter=='F')
 	{	for (int i=0;i<root::AmbientDimension;i++)
 		{ tempWeight.elements[i]=KToTheNth(8,root::AmbientDimension-i-1);
 		}
@@ -9082,10 +9085,15 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 			WeylGroupLetter=='B'||
 			WeylGroupLetter=='C'||
 			WeylGroupLetter=='D')
-	{	this->splitClassicalRootSystem();
+	{	this->splitClassicalRootSystem(false);
 	}
 	else
-	{ this->split();
+	{ if (WeylGroupLetter=='F')
+		{ this->splitClassicalRootSystem(true);
+			this->split();
+		}
+		else
+			this->split();
 	}
 //	this->ComputeDebugString();
 	assert(this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot));
@@ -10773,7 +10781,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests3()
 	assert(theDump.is_open());
 	theBorel.BubbleSort(&tempWeight);
 	theVPfunction.initFromRootSystem(	theBorel, theBorel,0);
-	theVPfunction.splitClassicalRootSystem();
+	theVPfunction.splitClassicalRootSystem(true);
 	theVPfunction.WriteToFile(theDump);
 	//theVPfunction.ReadFromFile(theDump);
 	theDump.close();
@@ -11044,7 +11052,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 	if(!PFfileIsPresent )
 	{	theVPfunction.initFromRootSystem(	this->nilradicalA2A1A1inD5,
 																		this->AlgorithmBasisA2A1A1inD5, 0);
-		theVPfunction.splitClassicalRootSystem();
+		theVPfunction.splitClassicalRootSystem(true);
 		theVPfunction.WriteToFile(PartialFractionsFile);
 	}
 	else

@@ -1235,6 +1235,8 @@ public:
 	static root PositiveLinearFunctional;
 	static bool PrintLastChamberOnly;
 	static bool AnErrorHasOcurredTimeToPanic;
+	unsigned char AmbientDimension;
+	root IndicatorRoot;
 	QuasiPolynomials* ThePolys;
 	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
 	CombinatorialChamber* NextChamberToSlice;
@@ -1242,7 +1244,7 @@ public:
 	int NextChamberToSliceIndexInPreferredNextChambers;
 	int FirstNonExploredIndex;
 	void Free();
-	void MakeStartingChambers(roots& directions, FacetPointers& FacetOutput);
+	void MakeStartingChambers(roots& directions, FacetPointers& FacetOutput, root& IndicatorRoot);
 	void ComputeNextIndexToSlice(root& direction);
 	void LabelAllUnexplored();
 	void KillNextChamberToSlice();
@@ -3681,6 +3683,8 @@ public:
 	int LastGainingMultiplicityIndex;
 	int FileStoragePosition;
 	bool PowerSeriesCoefficientIsComputed;
+	bool IsIrrelevant;
+	bool RelevanceIsComputed;
 	ListBasicObjects<int> IndicesNonZeroMults;
 
 	IntegerPolyLight Coefficient;
@@ -3691,8 +3695,8 @@ public:
 	bool RemoveRedundantShortRootsClassicalRootSystem(root*Indicator);
 	bool RemoveRedundantShortRoots(root* Indicator);
 	bool AlreadyAccountedForInGUIDisplay;
-	static int lastApplicationOfSVformulaNumNewGenerators;
-	static int lastApplicationOfSVformulaNumNewMonomials;
+//	static int lastApplicationOfSVformulaNumNewGenerators;
+//	static int lastApplicationOfSVformulaNumNewMonomials;
 	static bool AnErrorHasOccurredTimeToPanic;
 	static bool UncoveringBrackets;
 	static std::fstream TheBigDump;
@@ -3718,6 +3722,7 @@ public:
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
 	//				bool StoreToFile);
 	static RootToIndexTable RootsToIndices;
+	bool IsEqualToZero();
 	void ComputeDebugString();
 	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
 	//void InsertNewRootIndex(int index);
@@ -3775,16 +3780,19 @@ class partFractions: public HashedListBasicObjects<partFraction>
 { bool ShouldIgnore();
 	void AssureIndicatorRegularity();
 public:
-	int IndexLowestNonReduced;
+	int IndexLowestNonProcessed;
 	int HighestIndex;
 	int NumberIrrelevantFractions;
 	int NumberRelevantReducedFractions;
 	int NumMonomialsInTheNumerators;
 	int NumGeneratorsInTheNumerators;
-	int NumMonomialsInNumeratorsRelevantFractions;
+	static int NumMonomialsInNumeratorsRelevantFractions;
 	int NumGeneratorsRelevenatFractions;
 	int NumMonomialsInNumeratorsIrrelevantFractions;
 	int NumGeneratorsIrrelevantFractions;
+	int NumTotalReduced;
+	int NumProcessedForVPFfractions;
+	static int NumProcessedForVPFMonomialsTotal;
 	std::string DebugString;
 	bool UsingIndicatorRoot;
 	bool DiscardingFractions;
@@ -3810,7 +3818,9 @@ public:
 	bool splitClassicalRootSystem();
 	bool split();
 	void ComputeOneCheckSum(LargeRational& output);
+	void AccountPartFractionInternals(int sign, int index); 
 	void Add(partFraction& f);
+	void PopIndexSwapWithLastHashAndAccount(int index);
 	void SetUpIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
@@ -4173,7 +4183,6 @@ public:
 	QuasiPolynomial theOutput;
 	LargeRational Value;
 	std::string ValueString;
-	root IndicatorRoot;
 	intRoot ValueRoot;
 	roots VPVectors;
 	bool AllowRepaint;
@@ -4186,7 +4195,7 @@ public:
 	bool havingBeginEqnForLaTeXinStrings;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
-	unsigned char RankEuclideanSpaceGraphics;
+//	unsigned char RankEuclideanSpaceGraphics;
 	void EvaluatePoly();
 	void Run();
 	ComputationSetup();
@@ -4234,12 +4243,12 @@ int NChooseK(int n, int k);
 int KToTheNth(int k, int n);
 void SliceTheEuclideanSpace(roots& directions,int& index, int rank,
 														CombinatorialChamberPointers& output,
-														FacetPointers& FacetOutput);
+														FacetPointers& FacetOutput, root& IndicatorRoot);
 void SliceOneDirection(roots& directions, int& index, int rank,
 											 CombinatorialChamberPointers& output,
-											 FacetPointers& FacetOutput);
+											 FacetPointers& FacetOutput, root& IndicatorRoot);
 void OneSlice(roots& directions, int& index, int rank, CombinatorialChamberPointers& output,
-							FacetPointers& FacetOutput);
+							FacetPointers& FacetOutput, root& IndicatorRoot);
 void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
 								roots& directions, int directionIndex,root& ChamberIndicator);
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);

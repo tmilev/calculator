@@ -1564,6 +1564,7 @@ public:
 	void AssignPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& from);
 	void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
 	void Nullify(short numberVariables);
+	void MakeConst(ElementOfCommutativeRingWithIdentity& theConstant, short theNumVars);
 	bool IsEqualToZero();
 };
 
@@ -1598,6 +1599,14 @@ template <class ElementOfCommutativeRingWithIdentity>
 inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::Nullify(short numberVariables)
 { this->NumVars= numberVariables;
 	this->SetSizeExpandOnTopLight(0);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::
+	MakeConst(ElementOfCommutativeRingWithIdentity& theConstant, short theNumVars)
+{ this->NumVars= theNumVars;
+	this->SetSizeExpandOnTopLight(1);
+	this->TheObjects[0].MakeConstantMonomial(theNumVars,theConstant);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -2061,7 +2070,7 @@ public:
 	IntegerPoly(){};
 	int SizeWithoutDebugString();
 	void Evaluate(root& values, LargeRational& output);
-	static bool AnErrorHasOccurredTimeToPanic;
+	static bool flagAnErrorHasOccurredTimeToPanic;
 };
 
 class IntegerPolyLight: public PolynomialLight<Integer>
@@ -2617,7 +2626,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>
 				::AddPolynomial(TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p)
 {	this->SetActualSizeAtLeastExpandOnTop(p.size+this->size);
 	//std::string tempS1;
-	/*if (QuasiPolynomial::AnErrorHasOccurredTimeToPanic)
+	/*if (QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic)
 	{	std::string tempS;
 		RandomCodeIDontWantToDelete::EvilList1.AddObjectOnTop(tempS);
 		tempS1=& RandomCodeIDontWantToDelete::EvilList1.TheObjects
@@ -2625,7 +2634,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>
 	}*/
 /*	LargeRational tempRat,tempRat2;
 	IntegerPoly* tempP;
-	if (IntegerPoly::AnErrorHasOccurredTimeToPanic)
+	if (IntegerPoly::flagAnErrorHasOccurredTimeToPanic)
 	{ std::string tempS;
 		tempP=(IntegerPoly*)this;
 		tempP->Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,tempRat);
@@ -2633,7 +2642,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>
 		//	currentList->AddObjectOnTop(tempS);
 	}*/
 	for (int i=0;i<p.size;i++)
-	{	/*if (QuasiPolynomial::AnErrorHasOccurredTimeToPanic)
+	{	/*if (QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic)
 		{	std::string tempS;
 			LargeRational tempRat;
 			QuasiPolynomial* tempP;
@@ -2647,7 +2656,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>
 		ParallelComputing::SafePoint();
 		this->AddMonomial(p.TheObjects[i]);
 	}
-	/*if (IntegerPoly::AnErrorHasOccurredTimeToPanic)
+	/*if (IntegerPoly::flagAnErrorHasOccurredTimeToPanic)
 	{ std::string tempS1,tempS2;
 		tempP->Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot,tempRat2);
 		tempRat.ElementToString(tempS1);
@@ -3103,7 +3112,7 @@ class LargeRational
 public:
 	LargeInt den;
 	LargeInt num;
-	static bool AnErrorHasOccurredTimeToPanic;
+	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(LargeRational& r);
 	void Add(LargeRational& r);
 	void AddRational(Rational& r);
@@ -3257,7 +3266,7 @@ public:
 	bool ComputeDebugString();
 	bool IsEqualTo(QuasiNumber& q);
 	bool IsEqualToZero();
-	static bool AnErrorHasOccurredTimeToPanic;
+	static bool flagAnErrorHasOccurredTimeToPanic;
 	void AddBasicQuasiNumber(BasicQN& q);
 	void Add(QuasiNumber &q);
 	void MultiplyByBasicQuasiNumber(BasicQN& q);
@@ -3398,7 +3407,7 @@ public:
 	static int TotalCreatedPolys;
 	int CreationNumber; //for debug purposes
 	static PrecomputedTauknPointersKillOnExit* PrecomputedTaus;
-	static bool AnErrorHasOccurredTimeToPanic;
+	static bool flagAnErrorHasOccurredTimeToPanic;
 	void AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p);
 	void AssignPolynomialLargeRational(PolynomialLargeRational& p);
 	void MakeTauknp(int k, int n);
@@ -3697,7 +3706,7 @@ public:
 	bool AlreadyAccountedForInGUIDisplay;
 //	static int lastApplicationOfSVformulaNumNewGenerators;
 //	static int lastApplicationOfSVformulaNumNewMonomials;
-	static bool AnErrorHasOccurredTimeToPanic;
+	static bool flagAnErrorHasOccurredTimeToPanic;
 	static bool UncoveringBrackets;
 	static std::fstream TheBigDump;
 	static bool UseGlobalCollector;
@@ -3786,6 +3795,9 @@ public:
 	int NumberRelevantReducedFractions;
 	int NumMonomialsInTheNumerators;
 	int NumGeneratorsInTheNumerators;
+	int NumRelevantNonReducedFractions;
+	//int NumRelevantMonomialsInNonReducedFractions;
+	//int NumRelevantGeneratorsInNonReducedFractions;
 	static int NumMonomialsInNumeratorsRelevantFractions;
 	int NumGeneratorsRelevenatFractions;
 	int NumMonomialsInNumeratorsIrrelevantFractions;
@@ -3793,18 +3805,18 @@ public:
 	int NumTotalReduced;
 	int NumProcessedForVPFfractions;
 	static int NumProcessedForVPFMonomialsTotal;
+	static std::fstream ComputedContributionsList;
 	std::string DebugString;
-	bool UsingIndicatorRoot;
-	bool DiscardingFractions;
 	root IndicatorRoot;
 	LargeRational StartCheckSum;
 	LargeRational EndCheckSum;
-	static bool SplitTestMode;
-	static bool AnErrorHasOccurredTimeToPanic;
 	static LargeRational CheckSum;
-	static std::fstream ComputedContributionsList;
-	static bool MakingProgressReport;
-	static bool UsingCheckSum;
+					bool flagUsingIndicatorRoot;
+					bool flagDiscardingFractions;
+	static	bool flagSplitTestModeNoNumerators;
+	static	bool flagAnErrorHasOccurredTimeToPanic;
+	static	bool flagMakingProgressReport;
+	static	bool flagUsingCheckSum;
 	void PrepareCheckSums();
 	void CompareCheckSums();
 	void ComputeDebugString();

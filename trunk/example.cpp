@@ -31,10 +31,10 @@ void ExampleComputation::RunSomeTests()
 	root indicator;
 	::FillInRoots(toBeSplit,indicator);
 	partFractions tempPF;
-	tempPF.UsingIndicatorRoot=false;
+	tempPF.flagUsingIndicatorRoot=false;
 	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0);
-	tempPF.UsingCheckSum=false;
-	tempPF.MakingProgressReport=true;
+	tempPF.flagUsingCheckSum=false;
+	tempPF.flagMakingProgressReport=true;
 	tempPF.split();
 	tempPF.ComputeDebugString();
 	QuasiPolynomial tempQP;
@@ -72,7 +72,7 @@ int main(void)
 	std::stringstream outputStream;
 	tempPF.ComputeDebugString();
 	outputStream<<tempPF.DebugString;
-	tempPF.UsingIndicatorRoot=false;
+	tempPF.flagUsingIndicatorRoot=false;
 	tempPF.split();
 	tempPF.ComputeDebugString();
 	outputStream<<"\n=\n"<<tempPF.DebugString;

@@ -765,6 +765,12 @@ void root::MultiplyByLargeInt(LargeInt& a)
 	}
 }
 
+void root::MultiplyByLargeIntUnsigned(LargeIntUnsigned& a)
+{	for (int i=0;i<this->size;i++)
+	{	this->TheObjects[i].MultiplyByLargeIntUnsigned(a);
+	}
+}
+
 void root::ScaleForMinHeight()
 {	LargeIntUnsigned d;
 	d.MakeZero();
@@ -859,6 +865,12 @@ void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive()
 void root::DivByRational(Rational& a)
 {	for (int i=0;i<this->size;i++)
 	{ this->TheObjects[i].DivideByRational(a);
+	}
+}
+
+void root::DivByLargeIntUnsigned(LargeIntUnsigned& a)
+{	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i].DivideByLargeIntegerUnsigned(a);
 	}
 }
 
@@ -1101,6 +1113,8 @@ void MatrixRational::NullifyAll()
 		for(int j=0;j<this->NumCols;j++)
 			this->elements[i][j].MakeZero();
 }
+
+
 
 void MatrixLargeRational::NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output)
 {	int RowCounter=0;
@@ -1795,7 +1809,7 @@ void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMa
 		{	inputMatrix.elements[i][j].Assign(this->TheObjects[i].TheObjects[j]);
 		}
 	}
-	MatrixLargeRational::GaussianEliminationByRowsLargeRational(inputMatrix,matOutputEmpty,outputNonPivotPoints);
+	MatrixLargeRational::GaussianEliminationByRows(inputMatrix,matOutputEmpty,outputNonPivotPoints);
 }
 
 void roots::ComputeNormal(root& output)
@@ -1849,7 +1863,7 @@ bool roots::ComputeNormalExcludingIndex(root& output, int index)
 		}
 	}
 	tempMatrix.ComputeDebugString();
-	MatrixLargeRational::GaussianEliminationByRowsLargeRational(tempMatrix,matOutputEmpty,NonPivotPoints);
+	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection!=1) return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,output);
 	return true;
@@ -1866,7 +1880,7 @@ bool roots::ComputeNormalFromSelection(root& output, Selection& theSelection)
 		{	tempMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
 		}
 	}
-	MatrixLargeRational::GaussianEliminationByRowsLargeRational(tempMatrix,matOutputEmpty,NonPivotPoints);
+	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection!=1) return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,output);
 	return true;
@@ -1885,7 +1899,7 @@ bool roots::ComputeNormalFromSelectionAndExtraRoot(root& output,root& ExtraRoot,
 		}
 		tempMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot.TheObjects[j]);
 	}
-	MatrixLargeRational::GaussianEliminationByRowsLargeRational(tempMatrix,matOutputEmpty,NonPivotPoints);
+	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection!=1) return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,output);
 	return true;
@@ -1906,7 +1920,7 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots
 		tempMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot1.TheObjects[j]);
 		tempMatrix.elements[theSelection.CardinalitySelection+1][j].Assign(ExtraRoot2.TheObjects[j]);
 	}
-	MatrixLargeRational::GaussianEliminationByRowsLargeRational(tempMatrix,matOutputEmpty,NonPivotPoints);
+	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection!=1) return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,output);
 	return true;
@@ -2073,6 +2087,11 @@ inline void Rational::MultiplyByRational(Rational &r)
 
 inline void Rational::AssignInteger(int i)
 {	this->num=i; this->den=1;
+}
+
+inline void Rational::AssignLargeRationalTruncate(LargeRational& right)
+{ this->num= right.num.GetIntValueTruncated();
+	this->den= right.den.GetUnsignedIntValueTruncated();
 }
 
 inline bool Rational::IsGreaterThanOrEqualTo(Rational& b)
@@ -2533,7 +2552,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputation
 				(ExternalWalls->TheObjects[theSelection.elements[i]]->normal.TheObjects[j]);
 		}
 	}
-	MatrixLargeRational::GaussianEliminationByRowsLargeRational(RMinus1ByR,matOutputEmpty,NonPivotPoints);
+	MatrixLargeRational::GaussianEliminationByRows(RMinus1ByR,matOutputEmpty,NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection==1)
 	{	RMinus1ByR.NonPivotPointsToRoot(NonPivotPoints,output);
 		return true;
@@ -4745,8 +4764,8 @@ void QuasiPolynomial::IntegrateDiscreteInDirectionFromOldChamber
 	root::RootScalarEuclideanRoot(direction,normal,tempRat);
 	tempRoot.Assign(normal);
 	tempRoot.DivByLargeRational(tempRat);
-	LargeInt Denominator; tempRoot.FindLCMDenominators(Denominator);
-	int Den=Denominator.GetIntValueTruncated();
+	LargeIntUnsigned Denominator; tempRoot.FindLCMDenominators(Denominator);
+	int Den=Denominator.GetUnsignedIntValueTruncated();
 	Accum.ClearTheObjects();
 	Accum.NumVars=root::AmbientDimension;
 	DirectionSub.MakeSubAddExtraVarForIntegration(direction);
@@ -6398,8 +6417,8 @@ void LargeRational::Invert()
 { assert(!this->num.IsEqualToZero());
 	LargeIntUnsigned tempI;
 	tempI.Assign(this->den);
-	this->den.Assign(this->num);
-	this->num.::LargeIntUnsigned::Assign(this->den);
+	this->den.Assign(this->num.value);
+	this->num.value.Assign(this->den);
 }
 
 void LargeRational::ReadFromFile(std::fstream& input)
@@ -6457,14 +6476,14 @@ void LargeRational::MultiplyByLargeInt(LargeInt& x)
 }
 
 void LargeRational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x)
-{ this->num.::LargeIntUnsigned::MultiplyBy(x);
+{ this->num.value.MultiplyBy(x);
 	this->Simplify();
 }
 
 void LargeRational::DivideBy(LargeRational &r)
 { this->num.sign*=r.num.sign;
-	this->num.::LargeIntUnsigned::MultiplyBy(r.den);
-	this->den.MultiplyBy(r.num);
+	this->num.value.MultiplyBy(r.den);
+	this->den.MultiplyBy(r.num.value);
 	this->Simplify();
 }
 
@@ -6529,79 +6548,83 @@ void LargeRational::AssignRational(Rational &r)
 }
 
 void LargeRational::Add(LargeRational &r)
-{ static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-	assert(!r.den.IsEqualToZero());
-	if (r.num.size==0) return;
+{ //static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
+	if (r.num.value.size==0) return;
+	if (this==&r)
+	{ this->MultiplyByInt(2); return;
+	}
 	static LargeInt tempI;
-	if(this->flagAnErrorHasOccurredTimeToPanic)
+/*	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->den.ElementToString(tempS1);
 		r.num.ElementToString(tempS2);
-	}
-	this->den.MultiplyBy(r.num,tempI);
-	if(this->flagAnErrorHasOccurredTimeToPanic)
+	}*/
+	tempI.Assign(r.num);
+	tempI.value.MultiplyBy(this->den);
+/*	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ tempI.ElementToString(tempS3);
 		this->num.ElementToString(tempS6);
 		r.den.ElementToString(tempS7);
-	}
-	this->num.::LargeIntUnsigned::MultiplyBy(r.den);
-	if(this->flagAnErrorHasOccurredTimeToPanic)
+	}*/
+	this->num.value.MultiplyBy(r.den);
+/*	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->num.ElementToString(tempS4);
-	}
+	}*/
 	this->num.Add(tempI);
-	if(this->flagAnErrorHasOccurredTimeToPanic)
+	/*if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->num.ElementToString(tempS5);
-	}
+	}*/
 	this->den.MultiplyBy(r.den);
-	if(this->flagAnErrorHasOccurredTimeToPanic)
+	/*if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->ElementToString(tempS1);
-	}
+	}*/
 	this->Simplify();
-	if(this->flagAnErrorHasOccurredTimeToPanic)
+/*	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->ElementToString(tempS2);
-	}
+	}*/
 }
 
 void LargeRational::Simplify()
 { if (this->num.IsEqualToZero())
 	{ this->MakeZero(); return;}
-	static LargeInt tempI;
-	LargeInt::gcd(this->den, this->num,tempI);
-	if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+	static LargeIntUnsigned tempI;
+	LargeIntUnsigned::gcd(this->den, this->num.value,tempI);
+	/*if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
 	{ std::string tempS1,tempS2,tempS3;
 		tempI.ElementToString(tempS1);
 		this->ElementToString(tempS2);
-	}
-	assert(tempI.sign!=-1);
-	static LargeInt tempI2;
+	}*/
+	static LargeIntUnsigned tempI2;
 	this->den.DivPositive(tempI,this->den,tempI2);
-	this->num.DivPositive(tempI,this->num,tempI2);
+	this->num.value.DivPositive(tempI,this->num.value,tempI2);
 }
 
 inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
 { if (x==0){this->MakeZero(); return;}
 	//this->sign=1;
-	this->SetActualSizeAtLeastExpandOnTop(shift+1);
-  this->SetSizeExpandOnTopNoObjectInit(shift);
+  this->SetSizeExpandOnTopLight(shift+1);
 	for (int i=0;i<shift;i++)
 		this->TheObjects[i]=0;
-	while (x!=0)
-	{ unsigned int tempX= x%LargeInt::CarryOverBound;
-	  this->AddObjectOnTop(tempX);
-    x= x/LargeInt::CarryOverBound;
+	unsigned int tempX= x%LargeIntUnsigned::CarryOverBound;
+	this->TheObjects[shift]=tempX;
+  x= x/LargeIntUnsigned::CarryOverBound;
+  while (x!=0)
+	{ tempX= x%LargeIntUnsigned::CarryOverBound;
+	  this->AddObjectOnTopLight(tempX);
+    x= x/LargeIntUnsigned::CarryOverBound;
   }
 }
 
-void LargeInt::AddPositive(LargeInt &x)
+void LargeIntUnsigned::Add(LargeIntUnsigned &x)
 { int oldsize= this->size;
-	this->SetSizeExpandOnTopNoObjectInit(Maximum(this->size,x.size)+1);
+	this->SetSizeExpandOnTopLight(Maximum(this->size,x.size)+1);
 	for (int i=oldsize;i<this->size;i++)
 	{ this->TheObjects[i]=0;
 	}
 	unsigned int CarryOver=0;
 	for(int i=0;i<x.size;i++)
 	{ this->TheObjects[i]+=x.TheObjects[i]+CarryOver;
-		if (this->TheObjects[i]>=LargeInt::CarryOverBound)
-		{ this->TheObjects[i]-=LargeInt::CarryOverBound;
+		if (this->TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
+		{ this->TheObjects[i]-=LargeIntUnsigned::CarryOverBound;
 			CarryOver=1;
 		}
 		else
@@ -6610,8 +6633,8 @@ void LargeInt::AddPositive(LargeInt &x)
 	if (CarryOver!=0)
 	{	for(int i=x.size;i<this->size;i++)
 		{ this->TheObjects[i]+=1;
-			if (this->TheObjects[i]>=LargeInt::CarryOverBound)
-			{ this->TheObjects[i]-=LargeInt::CarryOverBound;
+			if (this->TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
+			{ this->TheObjects[i]-=LargeIntUnsigned::CarryOverBound;
 			}
 			else
 				break;
@@ -6624,7 +6647,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(LargeIntUnsigned& x)
 {	unsigned int CarryOver=0;
 	for (int i=0;i<x.size;i++)
 	{ if (this->TheObjects[i]<x.TheObjects[i]+CarryOver)
-		{ this->TheObjects[i]+=LargeInt::CarryOverBound;
+		{ this->TheObjects[i]+=LargeIntUnsigned::CarryOverBound;
 			this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);
 			CarryOver=1;
 		}
@@ -6640,7 +6663,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(LargeIntUnsigned& x)
 				break;
 			}
 			else
-			{ this->TheObjects[i]=LargeInt::CarryOverBound-1;
+			{ this->TheObjects[i]=LargeIntUnsigned::CarryOverBound-1;
 			}
 		}
 	}
@@ -6663,7 +6686,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(LargeIntUnsigned& x)
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned &x, LargeIntUnsigned &output)
 { assert(this!=&output);
 	output.MakeZero();
-	output.SetActualSizeAtLeastExpandOnTop(x.size+this->size);
+	output.SetSizeExpandOnTopLight(x.size+this->size);
 	for (int i=0;i<this->size;i++)
 	{ for(int j=0;j<x.size;j++)
 		{ unsigned long long tempLong= this->TheObjects[i];
@@ -6692,7 +6715,7 @@ void LargeIntUnsigned::FitSize()
 		{ break;
 		}
 	}
-	this->SetSizeExpandOnTopNoObjectInit(newSize);
+	this->SetSizeExpandOnTopLight(newSize);
 //	assert(this->CheckForConsistensy());
 }
 
@@ -6703,27 +6726,27 @@ void LargeIntUnsigned::MultiplyByUInt(unsigned int x)
 }
 
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned &x)
-{ static LargeInt tempInt;
+{ static LargeIntUnsigned tempInt;
 	this->MultiplyBy(x,tempInt);
 	this->Assign(tempInt);
 //	assert(this->CheckForConsistensy());
 }
 
 void LargeInt::MultiplyByInt(int x)
-{	if (this->size==0) return;
+{	if (this->value.size==0) return;
 	LargeInt tempI;
 	tempI.AssignInt(x);
 	this->MultiplyBy(tempI);
 }
 
-void LargeInt::ElementToString(std::string &output)
+void LargeIntUnsigned::ElementToString(std::string &output)
 {	int base=10;
 	int tempI;
 	if (this->IsEqualToZero())
 	{ output="0";
 		return;
 	}
-	LargeInt tempInt;
+	LargeIntUnsigned tempInt;
 	tempInt.Assign(*this);
 	std::string tempS;
 	std::stringstream out;
@@ -6733,54 +6756,45 @@ void LargeInt::ElementToString(std::string &output)
 		tempInt= tempInt/base;
 	}
 	tempS= out.str();
-	int startI;
-	if (this->sign==-1)
-	{ output.resize(tempS.size()+1);
-		output[0]='-';
-		startI=1;
-	}else
-	{ output.resize(tempS.size());
-		startI=0;
-	}
 	for (unsigned int i=0; i<tempS.size();i++)
-	{ output[startI+i]=tempS[tempS.size()-1-i];
+	{ output[i]=tempS[tempS.size()-1-i];
 	}
 //	assert(this->CheckForConsistensy());
 }
 
 bool LargeInt::IsEqualTo(LargeInt& x)
-{ if (x.size!=this->size) return false;
-	if (x.sign!=this->sign) return false;
-	for (int i=0;i<this->size;i++)
-	{ if(this->TheObjects[i]!=x.TheObjects[i]) return false;
-	}
-	return true;
+{	if (x.sign!=this->sign && this->value.size!=0) return false;
+	return this->value.IsEqualTo(x.value);
 }
 
 bool LargeInt::CheckForConsistensy()
 { if (this->sign!=-1 && this->sign!=1)
 		return false;
-	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i]>=LargeInt::CarryOverBound)
+	for (int i=0;i<this->value.size;i++)
+	{ if (this->value.TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
 			return false;
 	}
 	return true;
+}
+
+void LargeInt::ElementToString(std::string& output)
+{ std::stringstream
 }
 
 void LargeInt::AssignInt(int x)
 { if (x==0)
 	{ this->MakeZero(); return;
 	}
-	this->SetSizeExpandOnTopNoObjectInit(1);
+	this->value.SetSizeExpandOnTopLight(1);
 	if (x<0)
-	{ this->TheObjects[0]= -x;
+	{ this->value.AssignShiftedUInt( (unsigned int)(-x),0);
 		this->sign=-1;
 	}
 	else
-	{ this->TheObjects[0]=x;
+	{ this->value.AssignShiftedUInt((unsigned int) x,0);
 		this->sign=1;
 	}
-	this->FitSize();
+	this->value.FitSize();
 //	assert(this->CheckForConsistensy());
 }
 
@@ -6792,17 +6806,18 @@ inline void LargeInt::AddInt(int x)
 
 void LargeInt::Add(LargeInt &x)
 { if (this->sign==x.sign)
-	{ this->AddPositive(x);
+	{ this->value.Add(x.value);
 	}
 	else
-	{ if (this->IsGEQByAbs(x))
-		{	this->SubtractSmallerPositive(x);
+	{ if (this->value.IsGEQ(x.value))
+		{	this->value.SubtractSmallerPositive(x.value);
 		}
 		else
-		{ LargeInt tempI;
-			tempI.Assign(*this);
-			this->Assign(x);
-			this->SubtractSmallerPositive(tempI);
+		{ LargeIntUnsigned tempI;
+			tempI.Assign(this->value);
+			this->value.Assign(x.value);
+			this->value.SubtractSmallerPositive(tempI);
+			this->sign= x.sign;
 		}
 	}
 //	assert(this->CheckForConsistensy());
@@ -6848,7 +6863,7 @@ void LargeIntUnsigned::DivPositive
 			Total.MultiplyBy(current);
 		}
 		else
-		{	current.Assign(LIOne);
+		{	current.AssignShiftedUInt(1,0);
 		}
 		oldTotal.Assign(Total);
 		assert(remainder.IsGEQ(Total));
@@ -6926,30 +6941,32 @@ void LargeIntUnsigned::gcd(LargeIntUnsigned &a, LargeIntUnsigned &b, LargeIntUns
 }
 
 void LargeInt::MakeZero()
-{ this->size=0;
+{ this->value.SetSizeExpandOnTopLight(0);
 	this->sign=1;
 }
 
 void LargeInt::Assign(const LargeInt &x)
 { this->sign=x.sign;
-	this->CopyFromBase(x);
+	this->value.CopyFromLight(x.value);
 //	assert(this->CheckForConsistensy());
 }
 
 LargeInt LargeInt::operator/(int x)const
 { LargeInt result;
-	LargeInt remainder;
-	LargeInt tempX;
-	tempX.AssignInt(x);
-	this->DivPositive(tempX,result,remainder);
+	LargeIntUnsigned remainder;
+	LargeIntUnsigned tempX;
+	int absX=x; signed char signX=1; if (x<0){ signX=-1; absX=-absX;}
+	tempX.AssignShiftedUInt(absX,0);
+	this->value.DivPositive(tempX,result.value,remainder);
 //	assert(result.CheckForConsistensy());
+	result.sign=this->sign* signX;
 	return result;
 }
 
 LargeInt LargeInt::operator/(LargeInt& x)const
 { LargeInt result;
 	LargeInt remainder;
-	this->DivPositive(x,result,remainder);
+	this->value.DivPositive(x.value,result.value,remainder.value);
 	result.sign= this->sign* x.sign;
 	assert(result.CheckForConsistensy());
 	return result;
@@ -6957,11 +6974,12 @@ LargeInt LargeInt::operator/(LargeInt& x)const
 
 int LargeInt::operator%(int x)
 { assert(x>0);
-	LargeInt result;
-	LargeInt remainder;
-	LargeInt tempX;
-	tempX.AssignInt(x);
-	this->DivPositive(tempX,result,remainder);
+	LargeIntUnsigned result;
+	LargeIntUnsigned remainder;
+	LargeIntUnsigned tempX;
+	if (x<0) {x=-x;}
+	tempX.AssignShiftedUInt(x,0);
+	this->value.DivPositive(tempX,result,remainder);
 	if (remainder.size ==0)
 	{return 0;
 	}else
@@ -6975,12 +6993,12 @@ LargeInt::LargeInt(const LargeInt& x)
 }
 
 void LargeIntUnsigned::MakeOne()
-{ this->SetSizeExpandOnTopNoObjectInit(1);
+{ this->SetSizeExpandOnTopLight(1);
 	this->TheObjects[0]=1;
 }
 
 void LargeIntUnsigned::MakeZero()
-{ this->SetSizeExpandOnTopNoObjectInit(0);
+{ this->SetSizeExpandOnTopLight(0);
 }
 
 bool LargeIntUnsigned::IsGEQ(LargeIntUnsigned& x)
@@ -7114,7 +7132,7 @@ void partFractionPolynomials::AddPolynomialLargeRational
 			}
 			input.Evaluate(partFraction::theVectorToBePartitioned,tempLRat);
 			tempLRat.ElementToString(tempS1);
-			assert(tempLRat.den.IsEqualTo(LIOne));
+			assert(tempLRat.den.IsEqualToOne());
 	//		tempLRat.ElementToString(tempS1);
 			partFraction::CheckSum.Add(tempLRat);
 			if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -7165,7 +7183,7 @@ void partFractionPolynomials::CheckConsistency
 	{ input.Evaluate( tempIntRoot,tempLRat);
 		std::string tempS;
 		tempLRat.ElementToString(tempS);
-		assert(tempLRat.den.IsEqualTo(LIOne));
+		assert(tempLRat.den.IsEqualToOne());
 	}
 }
 
@@ -7989,7 +8007,7 @@ void partFraction::partFractionToPartitionFunctionSplit
 	if (partFraction::MakingConsistencyCheck)
 	{ LargeRational tempLRat;
 		output.Evaluate(partFraction::theVectorToBePartitioned,tempLRat);
-		assert(tempLRat.den.IsEqualTo(LIOne));
+		assert(tempLRat.den.IsEqualToOne());
 		assert(tempLRat.IsEqualTo(partFraction::CheckSum));
 	}
 	if (StoreToFile)

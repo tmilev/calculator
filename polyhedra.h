@@ -84,6 +84,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 class PolynomialLight;
 class Selection;
 class IntegerPoly;
+class LargeRational;
 class intRoot;
 class root;
 template <class Object>
@@ -362,6 +363,7 @@ public:
 	Integer(){};
 };
 
+
 class Rational
 { bool operator==(Rational&);
 	Rational(const Rational&);
@@ -424,8 +426,8 @@ public:
 	Rational** elements;
 	std::string DebugString;
 	void ComputeDebugString();
-	void ComputeDeterminantOverwriteMatrix( Rational& output);
 	void ElementToSting(std::string& output);
+	void ComputeDeterminantOverwriteMatrix( Rational& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixRational& output);
 	void init(short r,short c);
 	void Transpose();
@@ -452,14 +454,23 @@ template <typename Element>
 class Matrix
 {
 public:
+	std::string DebugString;
+	void ComputeDebugString();
+	void ElementToSting(std::string& output);
 	short NumRows;
 	short NumCols;
 	Element** elements;
 	void Assign(const Matrix<Element>& m);
+	void SwitchTwoRows( int row1, int row2);
 	void init(short r,short c);
 	void Resize(short r, short c, bool PreserveValues);
+	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
+	void RowTimesScalar(int rowIndex, Element& scalar);
+	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
 	void Free();
 	void NullifyAll();
+	static void GaussianEliminationByRows
+	(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,Selection& outputNonPivotPoints);
 	Matrix<Element>();
 	~Matrix<Element>();
 };
@@ -468,22 +479,14 @@ class MatrixLargeRational: public Matrix<LargeRational>
 {
 public:
 	void Assign(MatrixRational& m);
-	short NumRows;
-	short NumCols;
-	std::string DebugString;
-	void ComputeDebugString();
 	void ComputeDeterminantOverwriteMatrix( Rational& output);
 	void ElementToSting(std::string& output);
 	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
-	void init(short r,short c);
 	void Transpose();
 	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
 	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Rational& scalar);
 	void RowTimesScalar(int rowIndex, Rational& scalar);
-	static void GaussianEliminationByRowsLargeRational
-		(MatrixLargeRational& theMatrix, MatrixLargeRational& otherMatrix,Selection& outputNonPivotPoints
-		);
 	void SwitchTwoRows( int row1, int row2);
 	void NullifyAll();
 	bool Invert();
@@ -496,8 +499,6 @@ public:
 	int FindGCDCoefficientNumerators();
 	//int FindGCMCoefficientNumeratorsInRow(int index);
 	void Free();
-	MatrixLargeRational();
-	~MatrixLargeRational();
 };
 
 
@@ -535,6 +536,100 @@ inline void Matrix<Element>::Free()
 }
 
 template <typename Element>
+inline void Matrix<Element>::ElementToSting(std::string& output)
+{ std::stringstream out;
+	std::string tempS;
+	for (int i=0;i<this->NumRows;i++)
+	{ for (int j=0;j<this->NumCols;j++)
+		{ this->elements[i][j].ElementToString(tempS);
+			out<< tempS<<",";
+		}
+		out <<"\n";
+	}
+	output= out.str();
+}
+
+template <typename Element>
+inline void Matrix<Element>::ComputeDebugString()
+{ this->ElementToSting(this->DebugString);
+}
+
+template <typename Element>
+inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex )
+{	for(int i = RowStartIndex;i<= RowEndIndex; i++)
+	{	if (!this->elements[i][columnIndex].IsEqualToZero())
+			return i;
+	}
+	return -1;
+};
+
+
+template <typename Element>
+inline void Matrix<Element>::AddTwoRows
+	(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar)
+{	Element tempElement;
+	for (int i = StartColIndex; i< this->NumCols; i++)
+	{	tempElement.Assign(this->elements[fromRowIndex][i]);
+		tempElement.MultiplyBy(scalar);
+		this->elements[ToRowIndex][i].Add(tempElement);
+	}
+}
+
+template <typename Element>
+inline void Matrix<Element>::SwitchTwoRows( int row1, int row2)
+{	Element tempElement;
+	for(int i = 0; i<this->NumCols; i++)
+	{	tempElement.Assign(this->elements[row1][i]);
+		this->elements[row1][i].Assign(this->elements[row2][i]);
+		this->elements[row2][i].Assign(tempElement);
+	}
+}
+
+template <typename Element>
+void Matrix<Element>::GaussianEliminationByRows
+	(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputNonPivotPoints)
+{	int tempI;
+	int NumFoundPivots = 0;
+	int MaxRankMat = Minimum(mat.NumRows, mat.NumCols);
+	Element tempElement;
+	outputNonPivotPoints.init(mat.NumCols);
+	for (int i=0; i<mat.NumCols; i++)
+	{	if (NumFoundPivots == MaxRankMat)
+		{	for (int j =i; j<mat.NumCols; j++)
+			{	AddToIntegersFastAccess(outputNonPivotPoints,j);
+			}
+			return;
+		}
+		tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
+		if (tempI!=-1)
+		{	if (tempI!=NumFoundPivots)
+			{	mat.SwitchTwoRows(NumFoundPivots, tempI);
+				output.SwitchTwoRows (NumFoundPivots, tempI);
+			}
+			tempElement.Assign(mat.elements[NumFoundPivots][i]);
+			tempElement.Invert();
+			mat.RowTimesScalar(NumFoundPivots, tempElement);
+			output.RowTimesScalar(NumFoundPivots, tempElement);
+			for (int j = 0; j<mat.NumRows; j++)
+			{	if (j!=NumFoundPivots)
+				{	if (!mat.elements[j][i].IsEqualToZero())
+					{ tempElement.Assign(mat.elements[j][i]);
+						tempElement.Minus();
+						mat.AddTwoRows (NumFoundPivots, j, i, tempElement);
+	          output.AddTwoRows (NumFoundPivots, j, 0, tempElement);
+	          //mat.ComputeDebugString();
+					}
+				}
+			}
+			NumFoundPivots++;
+		}
+		else
+		{	AddToIntegersFastAccess(outputNonPivotPoints,i);
+		}
+	}
+}
+
+template <typename Element>
 Matrix<Element>::~Matrix()
 { this->Free();
 }
@@ -559,9 +654,9 @@ inline void Matrix<Element>::Resize(short r, short c, bool PreserveValues)
 	{	Free();
 		return;
 	}
-	int** newElements= new Element*[r];
+	Element** newElements= new Element*[r];
 	for (int i=0;i<r;i++)
-	{ newElements[i]= new int[c];
+	{ newElements[i]= new Element[c];
 	}
 	if (PreserveValues)
 	{ for (int j=Minimum(this->NumRows,r)-1;j>=0;j--)
@@ -576,7 +671,7 @@ inline void Matrix<Element>::Resize(short r, short c, bool PreserveValues)
 	this->elements = newElements;
 }
 
-class LargeIntUnsigned: public ListBasicObjects<unsigned int>
+class LargeIntUnsigned: public ListBasicObjectsLight<unsigned int>
 {
 public:
   //any number smaller than 2^31 will work for a carry-over
@@ -591,14 +686,23 @@ public:
 	void MakeZero();
 	bool IsEqualToZero(){return this->size==0;};
 	bool IsEqualTo(LargeIntUnsigned& right);
+	bool IsEqualToOne();
 	bool IsGEQ(LargeIntUnsigned& x);
 	static void gcd(LargeIntUnsigned&a,LargeIntUnsigned&b,LargeIntUnsigned& output);
 	void MultiplyBy(LargeIntUnsigned& right);
 	void MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output);
 	void MultiplyByUInt(unsigned int x);
 	void AssignShiftedUInt(unsigned int x, int shift);
-	void Assign(const LargeIntUnsigned& x);
+	void Assign(const LargeIntUnsigned& x){this->CopyFromLight(x);};
 	int GetUnsignedIntValueTruncated();
+	int operator %(int x);
+	inline void operator = (const LargeIntUnsigned& x)
+	{ this->Assign(x);
+	};
+	LargeIntUnsigned operator/(int x)const;
+	LargeIntUnsigned operator/(LargeIntUnsigned& x)const;
+	LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x);};
+	LargeIntUnsigned(){};
 	//must be rewritten:
 	double GetDoubleValue();
 	void FitSize();
@@ -607,7 +711,6 @@ public:
 class LargeInt
 {	friend class LargeRational;
 
-	void AddPositive(LargeInt& x);
 public:
 	signed char sign;
 	LargeIntUnsigned value;
@@ -630,7 +733,7 @@ public:
 	bool IsGEQByAbs(LargeInt& x);
 	bool CheckForConsistensy();
 	void MakeZero();
-	void MakeOne();
+	void MakeOne(){this->value.MakeOne(); this->sign=1;};
 	void MakeMOne();
 	int GetIntValueTruncated(){return this->sign* this->value.GetUnsignedIntValueTruncated();};
 	double GetDoubleValue();
@@ -674,6 +777,8 @@ public:
 																this->Simplify();
 															};
 	void DivideByLargeInteger(LargeInt& x){this->num.sign*=x.sign; this->den.MultiplyBy(x.value); this->Simplify();};	
+	void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){	this->den.MultiplyBy(x); 
+																													this->Simplify();};	
 	void DivideByRational(Rational& r){	this->num.MultiplyByInt(r.num); 
 																			this->den.MultiplyByUInt((unsigned int) r.den); 
 																			this->Simplify();
@@ -689,10 +794,10 @@ public:
 	bool IsPositive(){return this->num.IsPositive();};
 	void Simplify();
 	void Invert();
-	void Minus();
+	void Minus(){this->num.sign*=this->num.sign;};
 	double DoubleValue();
 	void MakeZero();
-	void MakeOne();
+	void MakeOne(){this->den.MakeOne(); this->num.MakeOne(); };
 	void WriteToFile (std::fstream& output);
 	void ReadFromFile(std::fstream&  input);
 	void RaiseToPower(int x);

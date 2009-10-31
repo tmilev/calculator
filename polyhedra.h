@@ -222,7 +222,7 @@ inline void ListBasicObjectsLight<Object>::operator =(const ListBasicObjectsLigh
 }
 
 template <class Object>
-void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
+inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 { if (theSize== this->size)
 		return;
 	if (theSize==0)
@@ -384,6 +384,8 @@ public:
 	bool IsInteger();
 	void AddInteger(int x);
 	void AssignFracValue();
+	void AssignLargeRationalTruncate(LargeRational& right);
+	void AssignLargeRational(LargeRational& right){this->AssignLargeRationalTruncate(right);};
 	bool IsEqualTo(const Rational& b);
 	bool IsGreaterThan(Rational&b);
 	bool IsGreaterThanOrEqualTo(Rational&b);
@@ -424,7 +426,6 @@ public:
 	void ComputeDebugString();
 	void ComputeDeterminantOverwriteMatrix( Rational& output);
 	void ElementToSting(std::string& output);
-	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixRational& output);
 	void init(short r,short c);
 	void Transpose();
@@ -461,6 +462,42 @@ public:
 	void NullifyAll();
 	Matrix<Element>();
 	~Matrix<Element>();
+};
+
+class MatrixLargeRational: public Matrix<LargeRational>
+{
+public:
+	void Assign(MatrixRational& m);
+	short NumRows;
+	short NumCols;
+	std::string DebugString;
+	void ComputeDebugString();
+	void ComputeDeterminantOverwriteMatrix( Rational& output);
+	void ElementToSting(std::string& output);
+	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
+	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
+	void init(short r,short c);
+	void Transpose();
+	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
+	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Rational& scalar);
+	void RowTimesScalar(int rowIndex, Rational& scalar);
+	static void GaussianEliminationByRowsLargeRational
+		(MatrixLargeRational& theMatrix, MatrixLargeRational& otherMatrix,Selection& outputNonPivotPoints
+		);
+	void SwitchTwoRows( int row1, int row2);
+	void NullifyAll();
+	bool Invert();
+	void MultiplyByInt(int x);
+	void MultiplyByRational(Rational& x);
+	void AssignMatrixIntWithDen(MatrixInt& theMat, int Den);
+	void ScaleToIntegralForMinRationalHeight();
+	int FindLCMCoefficientDenominators();
+	//int FindGCMCoefficientDenominatorsInRow(int index);
+	int FindGCDCoefficientNumerators();
+	//int FindGCMCoefficientNumeratorsInRow(int index);
+	void Free();
+	MatrixLargeRational();
+	~MatrixLargeRational();
 };
 
 
@@ -539,53 +576,186 @@ inline void Matrix<Element>::Resize(short r, short c, bool PreserveValues)
 	this->elements = newElements;
 }
 
-class root
+class LargeIntUnsigned: public ListBasicObjects<unsigned int>
+{
+public:
+  //any number smaller than 2^31 will work for a carry-over
+  //bound. Carry over bound is the "base" over which we work
+//	static const unsigned int CarryOverBound=37;
+	void SubtractSmallerPositive(LargeIntUnsigned& x);
+	static const unsigned int CarryOverBound=2147483648;//=2^31
+	void ElementToString(std::string& output);
+	void DivPositive(LargeIntUnsigned &x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
+	void MakeOne();
+	void Add(LargeIntUnsigned& x);
+	void MakeZero();
+	bool IsEqualToZero(){return this->size==0;};
+	bool IsGEQ(LargeIntUnsigned& x);
+	static void gcd(LargeIntUnsigned&a,LargeIntUnsigned&b,LargeIntUnsigned& output);
+	void MultiplyBy(LargeIntUnsigned& right);
+	void MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output);
+	void MultiplyByUInt(unsigned int x);
+	void AssignShiftedUInt(unsigned int x, int shift);
+	void Assign(const LargeIntUnsigned& x);
+	int GetUnsignedIntValueTruncated();
+	//must be rewritten:
+	double GetDoubleValue();
+	void FitSize();
+};
+
+class LargeInt: public LargeIntUnsigned
+{	friend class LargeRational;
+
+	void AddPositive(LargeInt& x);
+public:
+	signed char sign;
+	void MultiplyBy(LargeInt& x){this->sign*=x.sign; this->::LargeIntUnsigned::MultiplyBy(x);};
+	void MultiplyByInt(int x);
+	void ElementToString(std::string& output);
+	bool IsPositive(){return this->size>0 && this->sign==1;};
+	bool IsNegative(){return this->size>0 && this->sign==-1;};
+	bool IsNonNegative(){return this->sign!=-1;};
+	bool IsNonPositive(){return this->sign==-1 || this->IsEqualToZero();};
+	bool IsEqualTo(LargeInt& x);
+	void Assign(const LargeInt& x);
+	void AssignInt(int x);
+	void Add(LargeInt& x);
+	void AddInt(int x);
+	//bool IsGEQ(LargeInt& x);
+	bool IsGEQByAbs(LargeInt& x);
+	bool CheckForConsistensy();
+	void MakeZero();
+	void MakeOne();
+	void MakeMOne();
+	int GetIntValueTruncated(){return this->sign* this->GetUnsignedIntValueTruncated();};
+	double GetDoubleValue();
+	int operator %(int x);
+	inline void operator = (const LargeInt& x)
+	{ this->Assign(x);
+	};
+	LargeInt operator/(int x)const;
+	LargeInt operator/(LargeInt& x)const;
+	LargeInt(const LargeInt& x);
+	LargeInt(int x){this->AssignInt(x);};
+	LargeInt(){this->sign=1;};
+	static LargeInt TheRingUnit;
+	static LargeInt TheRingZero;
+	static LargeInt TheRingMUnit;
+};
+
+class LargeRational
+{
+public:
+	LargeIntUnsigned den;
+	LargeInt num;
+	static bool flagAnErrorHasOccurredTimeToPanic;
+	void Subtract(LargeRational& r);
+	void Add(LargeRational& r);
+	void AddRational(Rational& r);
+	void AddInteger(int x);
+	void AssignFracValue();
+	void MultiplyBy(LargeRational& r);
+	void MultiplyByRational(Rational&r);
+	void MultiplyByInt(int x);
+	void MultiplyByLargeInt(LargeInt& x);
+	void Assign(const LargeRational& r);
+	void AssignRational(Rational& r);
+	void AssignInteger(int x);
+	void AssignDenominatorAndNumerator(int d, int n);
+	void DivideBy(LargeRational& r);
+	void DivideByInteger(int x)	{ if (x<0){ this->num.sign*=-1; x=-x; }
+																this->den.MultiplyByUInt((unsigned int) x);
+																this->Simplify();
+															};
+	void DivideByLargeInteger(LargeInt& x){this->num.sign*=x.sign; this->den.MultiplyBy(x); this->Simplify();};	
+	void DivideByRational(Rational& r){	this->num.MultiplyByInt(r.num); 
+																			this->den.MultiplyByUInt((unsigned int) r.den); 
+																			this->Simplify();
+																		};
+	void ElementToString(std::string& output);
+	bool IsEqualTo(const LargeRational& r);
+	void AssignLargeRational(LargeRational& r){this->Assign(r);};
+	bool IsGreaterThanOrEqualTo(LargeRational& right);
+	bool IsEqualToZero(){return this->num.IsEqualToZero();};
+	bool IsNonNegative(){return this->num.IsNonNegative();};
+	bool IsNegative(){return this->num.IsNegative();};
+	bool IsNonPositive(){return this->num.IsNonPositive();};
+	bool IsPositive(){return this->num.IsPositive();};
+	void Simplify();
+	void Invert();
+	void Minus();
+	double DoubleValue();
+	void MakeZero();
+	void MakeOne();
+	void WriteToFile (std::fstream& output);
+	void ReadFromFile(std::fstream&  input);
+	void RaiseToPower(int x);
+	static LargeRational TheRingUnit;
+	static LargeRational TheRingZero;
+	static LargeRational TheRingMUnit;
+	LargeRational(){};
+	LargeRational(int x){this->AssignInteger(x);};
+};
+
+class root :public ListBasicObjectsLight<LargeRational>
 {
 private:
 public:
 	static unsigned char AmbientDimension;
-	unsigned char dimension;
-	Rational coordinates[MaxRank];
 	std::string DebugString;
 	void ComputeDebugString();
 	void MakeZero();
 	void Add(root& r);
 	void DivByInteger(int a);
-	void DivByRational(Rational& a);
+	void DivByLargeInt(LargeInt& a);
+	void DivByRational(Rational& a);	
+	void DivByLargeRational(LargeRational& a);
 	void ElementToString(std::string& output);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
 	void MultiplyByRational(Rational& a);
+	void MultiplyByLargeRational(LargeRational& a);
 	void ScaleForMinHeight();
 	void ScaleToIntegral();
 	void ScaleToIntegralMinHeight();
 	void ScaleToFirstNonZeroCoordinatePositive();
 	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-	int FindLCMDenominators();
+	void FindLCMDenominators(LargeIntUnsigned& output);
+	int FindLCMDenominatorsTruncateToInt();
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5);
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	void MultiplyByInteger(int a);
+	void MultiplyByLargeInt(LargeInt& right);
+	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
 	void MinusRoot();
 	void Subtract(root& r);
-	void Assign(const root& right);
+	inline void Assign(const root& right)
+	{ if (this->size!=right.size)
+		{ this->SetSizeExpandOnTopLight(right.size);
+		}
+		for (int i=0;i<this->size;i++)
+		{	this->TheObjects[i].Assign(right.TheObjects[i]);
+		}
+	};
 	void AssignIntRoot(intRoot& right);
 	bool IsProportianalTo(root& r);
 	bool IsPositiveOrZero();
 	bool IsEqualToZero()
-	{	for (int i=0;i<this->dimension;i++)
-		{	if (!this->coordinates[i].IsEqualToZero())
+	{	for (int i=0;i<this->size;i++)
+		{	if (!this->TheObjects[i].IsEqualToZero())
 			return false;
 		}
 		return true;
 	};
 	bool IsGreaterThanOrEqualTo(root& r);
 	bool IsEqualTo(root& right);
-	static void RootScalarEuclideanRoot(root& r1, root& r2, Rational& output);
-	static void RootScalarRoot(root& r1, root& r2, MatrixRational& KillingForm, Rational& output);
+	static void RootScalarEuclideanRoot(root& r1, root& r2, LargeRational& output);
+	static void RootScalarEuclideanRootTruncateAnswer(root& r1, root& r2, Rational& output);
+	static void RootScalarRoot(root& r1, root& r2, MatrixRational& KillingForm, LargeRational& output);
 //	static void RootScalarRoot(root& r1, root& r2, MatrixInt& KillingForm, Rational& output);
-	static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
+	static void RootPlusRootTimesScalar(root& r1, root& r2, LargeRational& rat, root& output);
 	int HashFunction();
-	root(){this->dimension=root::AmbientDimension;};
+	root(){this->SetSizeExpandOnTopLight(root::AmbientDimension);};
 	inline void operator=(const root& right){this->Assign(right);};
 	inline bool operator==(root& right){return IsEqualTo(right);};
 };
@@ -596,7 +766,7 @@ public:
 	std::string DebugString;
 	void AssignIntRoots(intRoots& r);
 	void AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r);
-	void AssignMatrixRows(MatrixRational& mat);
+	void AssignMatrixRows(MatrixLargeRational& mat);
 	void ComputeDebugString();
 	int GetRankOfSpanOfElements();
 	void AddRoot(root& r);
@@ -610,14 +780,15 @@ public:
 	bool IsRegular(root& r);
 	bool IsRegular(root& r, root& outputFailingNormal);
 	bool GetLinearDependence(MatrixRational& outputTheLinearCombination);
-	void GaussianEliminationForNormalComputation(MatrixRational& inputMatrix,
+	void GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix,
 																							 Selection& outputNonPivotPoints);
-	void rootsToMatrix(MatrixRational& output);
+	void rootsToMatrix(MatrixLargeRational& output);
+	void rootsToMatrixRationalTruncate(MatrixRational& output);
 	void ElementToString(std::string& output);
 	void SubSelection(Selection& theSelection, roots& output);
-	void SelectionToMatrix(Selection& theSelection, MatrixRational& output);
+	void SelectionToMatrix(Selection& theSelection, MatrixLargeRational& output);
 	void SelectionToMatrixAppend
-				(Selection& theSelection, MatrixRational& output, int StartRowIndex);
+				(Selection& theSelection, MatrixLargeRational& output, int StartRowIndex);
 	void ComputeNormal(root& output);
 	bool ComputeNormalExcludingIndex(root& output, int index);
 	bool ComputeNormalFromSelection(root& output, Selection& theSelection);
@@ -2594,12 +2765,12 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeLinPolyFromRoot(root& r)
-{ this->Nullify(r.dimension);
+{ this->Nullify((short)r.size);
 	static Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-	for (int i=0;i<r.dimension;i++)
-	{ tempM.MakeNVarFirstDegree(i,r.dimension,
+	for (int i=0;i<r.size;i++)
+	{ tempM.MakeNVarFirstDegree(i,(short)r.size,
 															ElementOfCommutativeRingWithIdentity::TheRingUnit);
-		tempM.Coefficient.AssignRational(r.coordinates[i]);
+		tempM.Coefficient.AssignLargeRational(r.TheObjects[i]);
 		this->AddMonomial(tempM);
 	}
 }
@@ -3065,78 +3236,6 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 	this->TheObjects[numVars-1].CopyFromPoly(EndPoint);
 }
 
-class LargeInt:public ListBasicObjects<unsigned int>
-{	friend class LargeRational;
-  //any number smaller than 2^31 will work for a carry-over
-  //bound. Carry over bound is the "base" over which we work
-	static const unsigned int CarryOverBound=2147483648;//=2^31
-//	static const unsigned int CarryOverBound=37;
-	void AddPositive(LargeInt& x);
-	void SubtractSmallerPositive(LargeInt& x);
-	void FitSize();
-	void DivPositive(LargeInt &x, LargeInt& quotientOutput, LargeInt& remainderOutput) const;
-public:
-	short sign;
-	void MultiplyBy(LargeInt& x);
-	void MultiplyBy(LargeInt& x, LargeInt& output);
-	void MultiplyByInt(int x);
-	void ElementToString(std::string& output);
-	bool IsEqualToZero();
-	bool IsEqualTo(LargeInt& x);
-	void Assign(const LargeInt& x);
-	void AssignShiftedUInt(unsigned int x, int shift);
-	void AssignInt(int x);
-	void Add(LargeInt& x);
-	void AddInt(int x);
-	//bool IsGEQ(LargeInt& x);
-	bool IsGEQByAbs(LargeInt& x);
-	bool CheckForConsistensy();
-	static void gcd(LargeInt&a,LargeInt&b,LargeInt& output);
-	void MakeZero();
-	int operator %(int x);
-	inline void operator = (const LargeInt& x)
-	{ this->Assign(x);
-	};
-	LargeInt operator/(int x)const;
-	LargeInt operator/(LargeInt& x)const;
-	LargeInt(const LargeInt& x);
-	LargeInt(int x){this->AssignInt(x);};
-	LargeInt(){this->sign=1;};
-	static LargeInt TheRingUnit;
-	static LargeInt TheRingZero;
-	static LargeInt TheRingMUnit;
-};
-
-class LargeRational
-{
-public:
-	LargeInt den;
-	LargeInt num;
-	static bool flagAnErrorHasOccurredTimeToPanic;
-	void Subtract(LargeRational& r);
-	void Add(LargeRational& r);
-	void AddRational(Rational& r);
-	void MultiplyBy(LargeRational& r);
-	void MultiplyByRational(Rational&r);
-	void MultiplyByInt(int x);
-	void Assign(const LargeRational& r);
-	void AssignRational(Rational& r);
-	void AssignInteger(int x);
-	void ElementToString(std::string& output);
-	bool IsEqualTo(const LargeRational& r);
-	bool IsEqualToZero();
-	void Simplify();
-	void Invert();
-	void MakeZero();
-	void WriteToFile (std::fstream& output);
-	void ReadFromFile(std::fstream&  input);
-	void RaiseToPower(int x);
-	static LargeRational TheRingUnit;
-	static LargeRational TheRingZero;
-	static LargeRational TheRingMUnit;
-	LargeRational(){};
-	LargeRational(int x){this->AssignInteger(x);};
-};
 
 class BasicComplexNumber
 {
@@ -3295,6 +3394,7 @@ public:
 	int FindGCMDens();
 	void QNtoComplex(CompositeComplexQN& output);
 	void MakeQNFromMatrixAndColumn(MatrixRational& theMat, root& column);
+	void MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column);
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input);
 //	int NumNonZeroElements();
@@ -3613,13 +3713,13 @@ public:
 	{ return	this->root::operator ==(right)	&&
 						this->multiplicity== right.multiplicity;
 	};
-	bool IsGreaterThanOrEqualTo(rootWithMultiplicity& right)
-	{ for (int i=0;i<this->dimension;i++)
-		{ if (right.coordinates[i].IsGreaterThan(right.coordinates[i]))
+	/*bool IsGreaterThanOrEqualTo(rootWithMultiplicity& right)
+	{ for (int i=0;i<this->size;i++)
+		{ if (right.TheObjects[i].IsGreaterThan(right.TheObjects[i]))
 				return false;
 		}
 		return true;
-	};
+	};*/
 };
 
 
@@ -3670,7 +3770,7 @@ class partFractionPolynomials: public ListBasicObjects<PolynomialLargeRational>
 {
 public:
 	roots LatticeIndicators;
-	MatrixRational theNormals;
+	MatrixLargeRational theNormals;
 	void CheckConsistency(root& RootLatticeIndicator,PolynomialLargeRational& input);
 	void initLatticeIndicatorsFromPartFraction(partFraction& owner);
 	void AddPolynomialLargeRational(root& rootLatticeIndicator,PolynomialLargeRational& input);
@@ -3807,11 +3907,11 @@ public:
 	static int NumProcessedForVPFMonomialsTotal;
 	static std::fstream ComputedContributionsList;
 	std::string DebugString;
-	root IndicatorRoot;
+	static root IndicatorRoot;
 	LargeRational StartCheckSum;
 	LargeRational EndCheckSum;
 	static LargeRational CheckSum;
-					bool flagUsingIndicatorRoot;
+	static	bool flagUsingIndicatorRoot;
 					bool flagDiscardingFractions;
 	static	bool flagSplitTestModeNoNumerators;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
@@ -4025,7 +4125,7 @@ public:
 						(	int index, PolynomialsRationalCoeff& theRoot,
 							bool RhoAction);
 	void ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, root& output);
-	void RootScalarKillingFormMatrixRoot(root&r1, root& r2, Rational& output);
+	void RootScalarKillingFormMatrixRoot(root&r1, root& r2, LargeRational& output);
 	int length(int index);
 };
 
@@ -4046,6 +4146,7 @@ public:
 	std::string VPEntriesFileString;
 	std::string VPIndexFileString;
 	rootFKFTcomputation();
+	bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
   void RunA2A1A1inD5beta12221();
@@ -4249,7 +4350,6 @@ void initDLL(int rank);
 void exitDLL();
 void GaussianEliminationByRows(MatrixRational& mat, MatrixRational& output,Selection& outputNonPivotPoints);
 void CopyMatrix(MatrixRational& FromMat, MatrixRational& ToMat);
-void MinusRoot(root& r);
 int TwoToTheNth(int n);
 int NChooseK(int n, int k);
 int KToTheNth(int k, int n);

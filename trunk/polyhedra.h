@@ -590,6 +590,7 @@ public:
 	void Add(LargeIntUnsigned& x);
 	void MakeZero();
 	bool IsEqualToZero(){return this->size==0;};
+	bool IsEqualTo(LargeIntUnsigned& right);
 	bool IsGEQ(LargeIntUnsigned& x);
 	static void gcd(LargeIntUnsigned&a,LargeIntUnsigned&b,LargeIntUnsigned& output);
 	void MultiplyBy(LargeIntUnsigned& right);
@@ -603,20 +604,24 @@ public:
 	void FitSize();
 };
 
-class LargeInt: public LargeIntUnsigned
+class LargeInt
 {	friend class LargeRational;
 
 	void AddPositive(LargeInt& x);
 public:
 	signed char sign;
-	void MultiplyBy(LargeInt& x){this->sign*=x.sign; this->::LargeIntUnsigned::MultiplyBy(x);};
+	LargeIntUnsigned value;
+	void MultiplyBy(LargeInt& x){	this->sign*=x.sign;  
+																this->value.MultiplyBy(x.value);
+															};
 	void MultiplyByInt(int x);
 	void ElementToString(std::string& output);
-	bool IsPositive(){return this->size>0 && this->sign==1;};
-	bool IsNegative(){return this->size>0 && this->sign==-1;};
+	bool IsPositive(){return this->value.size>0 && this->sign==1;};
+	bool IsNegative(){return this->value.size>0 && this->sign==-1;};
 	bool IsNonNegative(){return this->sign!=-1;};
-	bool IsNonPositive(){return this->sign==-1 || this->IsEqualToZero();};
+	bool IsNonPositive(){return this->sign==-1 || this->value.IsEqualToZero();};
 	bool IsEqualTo(LargeInt& x);
+	bool IsEqualToZero(){ return this->value.IsEqualToZero();}
 	void Assign(const LargeInt& x);
 	void AssignInt(int x);
 	void Add(LargeInt& x);
@@ -627,7 +632,7 @@ public:
 	void MakeZero();
 	void MakeOne();
 	void MakeMOne();
-	int GetIntValueTruncated(){return this->sign* this->GetUnsignedIntValueTruncated();};
+	int GetIntValueTruncated(){return this->sign* this->value.GetUnsignedIntValueTruncated();};
 	double GetDoubleValue();
 	int operator %(int x);
 	inline void operator = (const LargeInt& x)
@@ -658,6 +663,7 @@ public:
 	void MultiplyByRational(Rational&r);
 	void MultiplyByInt(int x);
 	void MultiplyByLargeInt(LargeInt& x);
+	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& x);
 	void Assign(const LargeRational& r);
 	void AssignRational(Rational& r);
 	void AssignInteger(int x);
@@ -667,7 +673,7 @@ public:
 																this->den.MultiplyByUInt((unsigned int) x);
 																this->Simplify();
 															};
-	void DivideByLargeInteger(LargeInt& x){this->num.sign*=x.sign; this->den.MultiplyBy(x); this->Simplify();};	
+	void DivideByLargeInteger(LargeInt& x){this->num.sign*=x.sign; this->den.MultiplyBy(x.value); this->Simplify();};	
 	void DivideByRational(Rational& r){	this->num.MultiplyByInt(r.num); 
 																			this->den.MultiplyByUInt((unsigned int) r.den); 
 																			this->Simplify();
@@ -676,7 +682,7 @@ public:
 	bool IsEqualTo(const LargeRational& r);
 	void AssignLargeRational(LargeRational& r){this->Assign(r);};
 	bool IsGreaterThanOrEqualTo(LargeRational& right);
-	bool IsEqualToZero(){return this->num.IsEqualToZero();};
+	bool IsEqualToZero(){return this->num.value.IsEqualToZero();};
 	bool IsNonNegative(){return this->num.IsNonNegative();};
 	bool IsNegative(){return this->num.IsNegative();};
 	bool IsNonPositive(){return this->num.IsNonPositive();};
@@ -708,6 +714,7 @@ public:
 	void Add(root& r);
 	void DivByInteger(int a);
 	void DivByLargeInt(LargeInt& a);
+	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
 	void DivByRational(Rational& a);	
 	void DivByLargeRational(LargeRational& a);
 	void ElementToString(std::string& output);

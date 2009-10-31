@@ -766,21 +766,20 @@ void root::MultiplyByLargeInt(LargeInt& a)
 }
 
 void root::ScaleForMinHeight()
-{	LargeInt d;
+{	LargeIntUnsigned d;
 	d.MakeZero();
 	for (int i=0;i<this->size;i++)
 	{	this->MultiplyByLargeIntUnsigned(this->TheObjects[i].den);
 		if (!this->TheObjects[i].IsEqualToZero())
 		{	if (d.IsEqualToZero())
-			{ d.Assign(this->TheObjects[i].num);
-				d.sign=1;
+			{ d.Assign(this->TheObjects[i].num.value);
 			}
 			else
-			{	LargeInt::gcd(d,this->TheObjects[i].num,d);
+			{	LargeIntUnsigned::gcd(d,this->TheObjects[i].num.value,d);
 			}
 		}
 	}
-	this->DivByLargeInt(d);
+	this->DivByLargeIntUnsigned(d);
 }
 
 bool root::IsEqualTo(root& right)
@@ -830,9 +829,9 @@ int root::FindLCMDenominatorsTruncateToInt()
 }
 
 void root::ScaleToIntegral()
-{ LargeInt x;
+{ LargeIntUnsigned x;
 	this->FindLCMDenominators(x);
-	this->MultiplyByLargeInt(x);
+	this->MultiplyByLargeIntUnsigned(x);
 }
 
 void root::ScaleToIntegralMinHeight()
@@ -6458,13 +6457,13 @@ void LargeRational::MultiplyByLargeInt(LargeInt& x)
 }
 
 void LargeRational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x)
-{ this->num.MultiplyBy(x);
+{ this->num.::LargeIntUnsigned::MultiplyBy(x);
 	this->Simplify();
 }
 
 void LargeRational::DivideBy(LargeRational &r)
 { this->num.sign*=r.num.sign;
-	this->num.MultiplyBy(r.den);
+	this->num.::LargeIntUnsigned::MultiplyBy(r.den);
 	this->den.MultiplyBy(r.num);
 	this->Simplify();
 }
@@ -6510,7 +6509,7 @@ void LargeRational::Subtract(LargeRational& r)
 
 void LargeRational::MakeZero()
 { this->num.MakeZero();
-	this->den.AssignInt(1);
+	this->den.AssignShiftedUInt(1,0);
 }
 
 void LargeRational::AssignInteger(int x)
@@ -6526,14 +6525,12 @@ double LargeRational::DoubleValue()
 void LargeRational::AssignRational(Rational &r)
 {	assert(r.den>0);
 	this->num.AssignInt(r.num);
-	this->den.AssignInt(r.den);
+	this->den.AssignShiftedUInt(r.den,0);
 }
 
 void LargeRational::Add(LargeRational &r)
 { static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-	assert(this->den.sign!=-1);
-	assert(r.den.sign!=-1);
-	assert(r.den.size!=0);
+	assert(!r.den.IsEqualToZero());
 	if (r.num.size==0) return;
 	static LargeInt tempI;
 	if(this->flagAnErrorHasOccurredTimeToPanic)
@@ -6546,7 +6543,7 @@ void LargeRational::Add(LargeRational &r)
 		this->num.ElementToString(tempS6);
 		r.den.ElementToString(tempS7);
 	}
-	this->num.MultiplyBy(r.den);
+	this->num.::LargeIntUnsigned::MultiplyBy(r.den);
 	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->num.ElementToString(tempS4);
 	}
@@ -6554,9 +6551,7 @@ void LargeRational::Add(LargeRational &r)
 	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->num.ElementToString(tempS5);
 	}
-	assert(this->den.sign!=-1);
 	this->den.MultiplyBy(r.den);
-	assert(this->den.sign!=-1);
 	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->ElementToString(tempS1);
 	}
@@ -6564,16 +6559,11 @@ void LargeRational::Add(LargeRational &r)
 	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->ElementToString(tempS2);
 	}
-	assert(this->den.sign!=-1);
 }
 
 void LargeRational::Simplify()
 { if (this->num.IsEqualToZero())
 	{ this->MakeZero(); return;}
-	if (this->den.sign==-1)
-	{ this->den.sign=1;
-		this->num.sign*=-1;
-	}
 	static LargeInt tempI;
 	LargeInt::gcd(this->den, this->num,tempI);
 	if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
@@ -7046,10 +7036,10 @@ void partFractionPolynomials::ComputeQuasiPolynomial
 		{ std::string tempS;
 			LargeRational tempLR;
 			tempQP.Evaluate(partFraction::theVectorToBePartitioned,tempLR);
-			assert (tempLR.den.IsEqualTo(LIOne));
+			//assert (tempLR.den.IsEqualTo(LIOne));
 			partFractions::CheckSum.Add(tempLR);
 			//partFraction::CheckSum.Add(tempLR);
-			assert(partFractions::CheckSum.den.IsEqualTo(LIOne));
+//			assert(partFractions::CheckSum.den.IsEqualTo(LIOne));
 		}
 		output.AddPolynomial(tempQP);
 		//output.ComputeDebugString();

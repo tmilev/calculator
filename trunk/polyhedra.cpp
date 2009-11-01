@@ -6777,8 +6777,22 @@ bool LargeInt::CheckForConsistensy()
 	return true;
 }
 
+double LargeInt::GetDoubleValue()
+{ return this->GetIntValueTruncated();
+}
+
 void LargeInt::ElementToString(std::string& output)
-{ std::stringstream
+{ std::stringstream out;
+	if (this->IsEqualToZero())
+	{	output.assign("0");
+		return;
+	}
+	if (this->sign==-1)
+		out <<"-";
+	std::string tempS;
+	this->value.ElementToString(tempS);
+	out<< tempS;
+	output=out.str();
 }
 
 void LargeInt::AssignInt(int x)
@@ -6973,6 +6987,40 @@ LargeInt LargeInt::operator/(LargeInt& x)const
 }
 
 int LargeInt::operator%(int x)
+{ assert(x>0);
+	LargeIntUnsigned result;
+	LargeIntUnsigned remainder;
+	LargeIntUnsigned tempX;
+	if (x<0) {x=-x;}
+	tempX.AssignShiftedUInt(x,0);
+	this->value.DivPositive(tempX,result,remainder);
+	if (remainder.size ==0)
+	{return 0;
+	}else
+	{ return remainder.TheObjects[0];
+	}
+}
+
+LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
+{ LargeIntUnsigned result;
+	LargeIntUnsigned remainder;
+	LargeIntUnsigned tempX;
+	tempX.AssignShiftedUInt(x,0);
+	this->DivPositive(tempX,result,remainder);
+//	assert(result.CheckForConsistensy());
+	return result;
+}
+
+LargeIntUnsigned LargeIntUnsigned::operator/(LargeIntUnsigned& x)const
+{ LargeIntUnsigned result;
+	LargeIntUnsigned remainder;
+	this->DivPositive(x.value,result.value,remainder.value);
+	result.sign= this->sign* x.sign;
+	assert(result.CheckForConsistensy());
+	return result;
+}
+
+int LargeIntUnsigned::operator%(int x)
 { assert(x>0);
 	LargeIntUnsigned result;
 	LargeIntUnsigned remainder;

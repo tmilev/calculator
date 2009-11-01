@@ -454,12 +454,13 @@ template <typename Element>
 class Matrix
 {
 public:
+	Element** elements;
 	std::string DebugString;
+	static bool flagComputingDebugInfo;
 	void ComputeDebugString();
 	void ElementToSting(std::string& output);
 	short NumRows;
 	short NumCols;
-	Element** elements;
 	void Assign(const Matrix<Element>& m);
 	void SwitchTwoRows( int row1, int row2);
 	void init(short r,short c);
@@ -468,6 +469,7 @@ public:
 	void RowTimesScalar(int rowIndex, Element& scalar);
 	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
 	void Free();
+	bool Invert();
 	void NullifyAll();
 	static void GaussianEliminationByRows
 	(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,Selection& outputNonPivotPoints);
@@ -484,12 +486,7 @@ public:
 	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
 	void Transpose();
-	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
-	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Rational& scalar);
-	void RowTimesScalar(int rowIndex, Rational& scalar);
-	void SwitchTwoRows( int row1, int row2);
 	void NullifyAll();
-	bool Invert();
 	void MultiplyByInt(int x);
 	void MultiplyByRational(Rational& x);
 	void AssignMatrixIntWithDen(MatrixInt& theMat, int Den);
@@ -536,6 +533,32 @@ inline void Matrix<Element>::Free()
 }
 
 template <typename Element>
+bool Matrix<Element>::Invert()
+{ assert(this->NumCols==this->NumRows);
+	if (this->flagComputingDebugInfo)
+	{ this->ComputeDebugString();
+	}
+	static Matrix tempMatrix;
+	static Selection NonPivotPts;
+	tempMatrix.init(this->NumRows, this->NumCols);
+	tempMatrix.NullifyAll();
+	for (int i=0;i<this->NumCols;i++)
+	{ tempMatrix.elements[i][i].MakeOne();
+	}
+	this->GaussianEliminationByRows(*this,tempMatrix,NonPivotPts);
+	if(NonPivotPts.CardinalitySelection!=0)
+	{	return false;
+	}
+	else
+	{	this->Assign(tempMatrix);
+		if (this->flagComputingDebugInfo)
+		{ this->ComputeDebugString();
+		}
+		return true;
+	}
+}
+
+template <typename Element>
 inline void Matrix<Element>::ElementToSting(std::string& output)
 { std::stringstream out;
 	std::string tempS;
@@ -572,6 +595,13 @@ inline void Matrix<Element>::AddTwoRows
 	{	tempElement.Assign(this->elements[fromRowIndex][i]);
 		tempElement.MultiplyBy(scalar);
 		this->elements[ToRowIndex][i].Add(tempElement);
+	}
+}
+
+template <typename Element>
+inline void Matrix<Element>::RowTimesScalar(int rowIndex, Element& scalar)
+{	for (int i=0; i<this->NumCols; i++)
+	{ this->elements[rowIndex][i].MultiplyBy(scalar);
 	}
 }
 
@@ -672,21 +702,25 @@ inline void Matrix<Element>::Resize(short r, short c, bool PreserveValues)
 }
 
 class LargeIntUnsigned: public ListBasicObjectsLight<unsigned int>
-{
+{	void AddNoFitSize(LargeIntUnsigned& x);
 public:
   //any number smaller than 2^31 will work for a carry-over
   //bound. Carry over bound is the "base" over which we work
 //	static const unsigned int CarryOverBound=37;
 	void SubtractSmallerPositive(LargeIntUnsigned& x);
 	static const unsigned int CarryOverBound=2147483648;//=2^31
+	//the below must be less than or equal to the square root of CarryOverBound. 
+	//it is used for quick multiplication of LargeRationals.
+	static const unsigned int SquareRootOfCarryOverBound=32768;//=2^15 	
 	void ElementToString(std::string& output);
 	void DivPositive(LargeIntUnsigned &x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
 	void MakeOne();
 	void Add(LargeIntUnsigned& x);
 	void MakeZero();
-	bool IsEqualToZero(){return this->size==0;};
+	bool IsEqualToZero(){return this->size==1 && this->TheObjects[0]==0;};
 	bool IsEqualTo(LargeIntUnsigned& right);
-	bool IsEqualToOne();
+	bool IsPositive(){ return this->size>1 || this->TheObjects[0]>0;};
+	bool IsEqualToOne(){ return this->size==1 && this->TheObjects[0]==1;};
 	bool IsGEQ(LargeIntUnsigned& x);
 	static void gcd(LargeIntUnsigned&a,LargeIntUnsigned&b,LargeIntUnsigned& output);
 	void MultiplyBy(LargeIntUnsigned& right);
@@ -702,7 +736,7 @@ public:
 	LargeIntUnsigned operator/(unsigned int x)const;
 	LargeIntUnsigned operator/(LargeIntUnsigned& x)const;
 	LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x);};
-	LargeIntUnsigned(){};
+	LargeIntUnsigned(){this->SetSizeExpandOnTopLight(1); this->TheObjects[0]=0;};
 	//must be rewritten:
 	double GetDoubleValue();
 	void FitSize();
@@ -719,10 +753,10 @@ public:
 															};
 	void MultiplyByInt(int x);
 	void ElementToString(std::string& output);
-	bool IsPositive(){return this->value.size>0 && this->sign==1;};
-	bool IsNegative(){return this->value.size>0 && this->sign==-1;};
-	bool IsNonNegative(){return this->sign!=-1;};
-	bool IsNonPositive(){return this->sign==-1 || this->value.IsEqualToZero();};
+	bool IsPositive(){return this->sign==1 && (this->value.IsPositive());};
+	bool IsNegative(){return this->sign==-1&& (this->value.IsPositive());};
+	bool IsNonNegative(){return !this->IsNegative();};
+	bool IsNonPositive(){return !this->IsPositive();};
 	bool IsEqualTo(LargeInt& x);
 	bool IsEqualToZero(){ return this->value.IsEqualToZero();}
 	void Assign(const LargeInt& x);
@@ -730,7 +764,6 @@ public:
 	void Add(LargeInt& x);
 	void AddInt(int x);
 	//bool IsGEQ(LargeInt& x);
-	bool IsGEQByAbs(LargeInt& x);
 	bool CheckForConsistensy();
 	void MakeZero();
 	void MakeOne(){this->value.MakeOne(); this->sign=1;};
@@ -752,10 +785,21 @@ public:
 };
 
 class LargeRational
-{
+{	inline bool TryToAddQuickly(LargeRational& r)
+	{ if ( this->flagMinorRoutinesOnDontUseFullPrecision ||
+				(	this->num.value.size!=1 && this->den.size!=1
+					&& this->num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
+					&& this->den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
+					&& r.num.value.size!=1 && r.den.size!=1
+					&& r.num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
+					&& r.den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound	)			
+				)
+			return false;
+	};
 public:
 	LargeIntUnsigned den;
 	LargeInt num;
+	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(LargeRational& r);
 	void Add(LargeRational& r);
@@ -770,7 +814,7 @@ public:
 	void Assign(const LargeRational& r);
 	void AssignRational(Rational& r);
 	void AssignInteger(int x);
-	void AssignDenominatorAndNumerator(int d, int n);
+	void AssignNumeratorAndDenominator( int n, int d);
 	void DivideBy(LargeRational& r);
 	void DivideByInteger(int x)	{ if (x<0){ this->num.sign*=-1; x=-x; }
 																this->den.MultiplyByUInt((unsigned int) x);
@@ -779,8 +823,10 @@ public:
 	void DivideByLargeInteger(LargeInt& x){this->num.sign*=x.sign; this->den.MultiplyBy(x.value); this->Simplify();};	
 	void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){	this->den.MultiplyBy(x); 
 																													this->Simplify();};	
-	void DivideByRational(Rational& r){	this->num.MultiplyByInt(r.num); 
-																			this->den.MultiplyByUInt((unsigned int) r.den); 
+	void DivideByRational(Rational& r){	this->num.value.MultiplyByUInt((unsigned int)r.den);
+																			int absNum=r.num;
+																			if (r.num<0) {this->num.sign*=-1; absNum*=-r.num;} 
+																			this->den.MultiplyByUInt((unsigned int) absNum); 
 																			this->Simplify();
 																		};
 	void ElementToString(std::string& output);
@@ -794,7 +840,7 @@ public:
 	bool IsPositive(){return this->num.IsPositive();};
 	void Simplify();
 	void Invert();
-	void Minus(){this->num.sign*=this->num.sign;};
+	void Minus(){this->num.sign*=-1;};
 	double DoubleValue();
 	void MakeZero();
 	void MakeOne(){this->den.MakeOne(); this->num.MakeOne(); };
@@ -3422,6 +3468,7 @@ public:
 		BasicQN::GlobalCollectorsBasicQuasiNumbers.AddObjectOnTop(this);
 	};
 	void MakeQNFromMatrixAndColumn(MatrixRational& theMat, root& column);
+	void MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column);
 	LargeRational Coefficient;
 	MatrixInt Exp;
 	MatrixInt Nums;
@@ -3875,6 +3922,7 @@ public:
 	int AddRootAndSort(intRoot& theRoot);
 	int AddRootPreserveOrder(intRoot& theRoot);
 	int getIndex(intRoot& TheRoot);
+	int getIndexDoubleOfARoot(intRoot& TheRoot);
 	void ComputeTable();
 };
 
@@ -3983,6 +4031,7 @@ public:
 	void GetNElongationPoly(int index,int Elongation,int n, IntegerPoly& output);
 	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output);
 	void GetNElongationPoly(int index,int Elongation,int n, PolyPartFractionNumerator& output);
+	int GetNumProportionalVectorsClassicalRootSystems();
 	bool operator==(partFraction& right);
 	void operator=(const partFraction& right);
 	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);

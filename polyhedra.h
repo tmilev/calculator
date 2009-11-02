@@ -805,21 +805,19 @@ class LargeRational
 																unsigned int OtherNum, 
 																unsigned int OtherDen)
 	{ if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
-				(		this->num.value.size!=1 || this->den.size!=1
-					||this->num.value.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound
-					||this->den.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound 		
+				(	this->NumeratorExtended!=0
 					||OtherNum>=LargeIntUnsigned::SquareRootOfCarryOverBound
 					||OtherDen>=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
 			return false;
-		register unsigned int N= this->num.value.TheObjects[0];
-		register unsigned int D= this->den.TheObjects[0];
+		register unsigned int N= this->numShort;
+		register unsigned int D= this->denShort;
 		register unsigned int newDen= D*OtherDen;
 		N*=OtherDen;
 		D*=OtherNum;
-		if (this->num.sign!=sign)
+		if (this->theSign!=sign)
 		{ if (N<D)
 			{ N= D-N;
-				this->num.sign=sign;
+				this->theSign=sign;
 			}
 			else
 				N=N-D;
@@ -828,34 +826,69 @@ class LargeRational
 		{	N+=D;
 		}
 		register unsigned int tempGCD= Rational::gcd(N,newDen);
-		this->num.value.TheObjects[0]=(N/tempGCD);
-		this->den.TheObjects[0]= (newDen/tempGCD);
+		this->numShort=(N/tempGCD);
+		this->denShort= (newDen/tempGCD);
 		return true;
 	};
 	inline bool TryToMultiplyQuickly(	signed char sign , 
 																		unsigned int OtherNum, 
 																		unsigned int OtherDen)
 	{ if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
-				(		this->num.value.size!=1 || this->den.size!=1
-					||this->num.value.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound
-					||this->den.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound 		
+				(	this->NumeratorExtended!=0
 					||OtherNum>=LargeIntUnsigned::SquareRootOfCarryOverBound
 					||OtherDen>=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
 			return false;
-		register unsigned int tempNum = this->num.value.TheObjects[0]*OtherNum;
+		register unsigned int tempNum = this->numShort*OtherNum;
 		if (tempNum==0) 
 		{	this->MakeZero(); return true;
 		}
-		register unsigned int tempDen = this->den.TheObjects[0]*OtherDen;
-		this->num.sign*=sign;
+		register unsigned int tempDen = this->denShort*OtherDen;
+		this->theSign*=sign;
 		register unsigned int tempGCD= Rational::gcd(tempNum, tempDen);
-		this->num.value.TheObjects[0]=tempNum/tempGCD;
-		this->den.TheObjects[0]= tempDen/tempGCD;	
+		this->numShort=tempNum/tempGCD;
+		this->denShort= tempDen/tempGCD;	
 		return true;
+	};
+	bool InitExtendedFromShortIfNeeded()
+	{ if (this->NumeratorExtended!=0)
+			return false;
+		this->NumeratorExtended= new LargeIntUnsigned;
+		this->DenominatorExtended= new LargeIntUnsigned;
+		this->NumeratorExtended->SetSizeExpandOnTopLight(1);
+		this->DenominatorExtended->SetSizeExpandOnTopLight(1);
+		this->NumeratorExtended->AssignShiftedUInt(this->numShort,0);
+		this->DenominatorExtended->AssignShiftedUInt(this->denShort,0);
+		return true;
+	};
+	bool ShrinkExtendedPartIfPossible()
+	{ if (this->NumeratorExtended==0)
+			return true;
+		if (		this->NumeratorExtended->size>1 
+				||	this->DenominatorExtended->size>1
+				||	this->NumeratorExtended->TheObjects[0]>=
+							LargeIntUnsigned::SquareRootOfCarryOverBound
+				||	this->DenominatorExtended->TheObjects[0]>=
+							LargeIntUnsigned::SquareRootOfCarryOverBound)
+			return false;
+		this->FreeExtended();
+		return true;
+	};
+	inline void FreeExtended()
+	{	this->numShort= this->NumeratorExtended->TheObjects[0];
+		this->denShort= this->DenominatorExtended->TheObjects[0];
+		delete this->DenominatorExtended; this->DenominatorExtended=0;
+		delete this->NumeratorExtended; this->NumeratorExtended=0;
 	}
+	signed char theSign;
+	unsigned int numShort;
+	unsigned int denShort;
+	LargeIntUnsigned *NumeratorExtended;
+	LargeIntUnsigned *DenominatorExtended;
 public:
-	LargeIntUnsigned den;
-	LargeInt num;
+//	inline unsigned int getDenTruncated() {if (this->NumeratorExtended==0) return denShort;
+//																				};
+//	inline unsigned int getNum();
+	void GetDenExtended(LargeIntUnsigned & output);
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(LargeRational& r);
@@ -873,34 +906,55 @@ public:
 	void AssignInteger(int x);
 	void AssignNumeratorAndDenominator( int n, int d);
 	void DivideBy(LargeRational& r);
-	void DivideByInteger(int x)	{ if (x<0){ this->num.sign*=-1; x=-x; }
-																this->den.MultiplyByUInt((unsigned int) x);
+	void DivideByInteger(int x)	{ signed char tempSign=1; 
+																unsigned int tempDen;
+																if (x<0) {tempDen=(-x); tempSign=-1;} else {tempDen=x;}
+																if (this->TryToMultiplyQuickly(tempSign,1,tempDen)) 
+																	return;
+																this->InitExtendedFromShortIfNeeded();
+																this->DenominatorExtended->MultiplyByUInt(tempDen);
+																this->theSign*=tempSign;
 																this->Simplify();
 															};
-	void DivideByLargeInteger(LargeInt& x){this->num.sign*=x.sign; this->den.MultiplyBy(x.value); this->Simplify();};	
-	void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){	this->den.MultiplyBy(x); 
+	void DivideByLargeInteger(LargeInt& x){ this->InitExtendedFromShortIfNeeded();
+																					this->DenominatorExtended->MultiplyBy(x.value);
+																					this->theSign*=x.sign;
+																					this->Simplify();};	
+	void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){	this->InitExtendedFromShortIfNeeded();
+																													this->DenominatorExtended->MultiplyBy(x); 
 																													this->Simplify();};	
-	void DivideByRational(Rational& r){	this->num.value.MultiplyByUInt((unsigned int)r.den);
-																			int absNum=r.num;
-																			if (r.num<0) {this->num.sign*=-1; absNum*=-r.num;} 
-																			this->den.MultiplyByUInt((unsigned int) absNum); 
+	void DivideByRational(Rational& r){	signed char sign=1; unsigned int tempNum=r.num;
+																			if (r.num<0)
+																			{ sign=-1; tempNum = (-r.num);
+																			}
+																			unsigned int tempDen= r.den;
+																			if(this->TryToMultiplyQuickly(sign,tempDen,tempNum))
+																				return;
+																			this->theSign*=sign;
+																			this->InitExtendedFromShortIfNeeded();
+																			this->NumeratorExtended->MultiplyByUInt(tempDen);
+																			this->DenominatorExtended->MultiplyByUInt(tempNum);
 																			this->Simplify();
 																		};
 	void ElementToString(std::string& output);
 	bool IsEqualTo(const LargeRational& r);
 	void AssignLargeRational(LargeRational& r){this->Assign(r);};
 	bool IsGreaterThanOrEqualTo(LargeRational& right);
-	bool IsEqualToZero(){return this->num.value.IsEqualToZero();};
-	bool IsNonNegative(){return this->num.IsNonNegative();};
-	bool IsNegative(){return this->num.IsNegative();};
-	bool IsNonPositive(){return this->num.IsNonPositive();};
-	bool IsPositive(){return this->num.IsPositive();};
+	inline bool IsEqualToZero(){	if (this->NumeratorExtended!=0) 
+																	return this->NumeratorExtended->IsEqualToZero(); 
+																else
+																	return this->numShort==0;
+															};
+	inline bool IsNonNegative(){return this->theSign==1 || this->IsEqualToZero();};
+	bool IsNegative(){return !this->IsNonNegative();};
+	bool IsNonPositive(){return this->theSign==-1 || this->IsEqualToZero();};
+	bool IsPositive(){return !this->IsNonPositive();};
 	void Simplify();
 	void Invert();
-	void Minus(){this->num.sign*=-1;};
+	void Minus(){this->theSign*=-1;};
 	double DoubleValue();
-	void MakeZero();
-	void MakeOne(){this->den.MakeOne(); this->num.MakeOne(); };
+	void MakeZero(){this->numShort=0; this->theSign=1; this->denShort=1; this->FreeExtended(); };
+	void MakeOne(){this->numShort=1; this->theSign=1; this->denShort=1; this->FreeExtended(); };
 	void WriteToFile (std::fstream& output);
 	void ReadFromFile(std::fstream&  input);
 	void RaiseToPower(int x);

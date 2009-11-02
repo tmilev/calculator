@@ -243,6 +243,7 @@ int partFractions::NumProcessedForVPFMonomialsTotal=0;
 //int partFraction::lastApplicationOfSVformulaNumNewMonomials=0;
 bool QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic=false;
 bool LargeRational::flagAnErrorHasOccurredTimeToPanic=false;
+bool LargeRational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
 bool partFractions::flagUsingIndicatorRoot=true;
 root partFractions::IndicatorRoot;
@@ -489,7 +490,8 @@ void ComputationSetup::Run()
 	this->AllowRepaint=false;
 	partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
 	::initDLL(this->WeylGroupIndex);
-	this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
+	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	if (this->ComputingPartialFractions)
 	{	if (!this->UsingCustomVectors)
 		{	this->thePartialFraction.ComputeKostantFunctionFromWeylGroup
@@ -609,7 +611,7 @@ void drawOutput(DrawingVariables& TDV,
 								CombinatorialChamberPointers& output,
 								roots& directions, int directionIndex, root& ChamberIndicator)
 { int color=0;
-	Rational::MinorRoutinesOnIgnoreErrors=true;
+	LargeRational::flagMinorRoutinesOnDontUseFullPrecision=true;
 	int NumTrueChambers=0;
 	int NumTrueChambers2=0;
 	int NumZeroChambers=0;
@@ -692,8 +694,6 @@ void drawOutput(DrawingVariables& TDV,
 			drawtext(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
 		}
 	}
-
-	Rational::MinorRoutinesOnIgnoreErrors=false;
 	std::string tempS;
 	std::stringstream out,out1,out3;
 	out<<"#Drawn chambers: "<<NumTrueChambers;
@@ -705,6 +705,7 @@ void drawOutput(DrawingVariables& TDV,
 	out3 <<"MaxRationalHeight:"<< Rational::LargestRationalHeight;
 	tempS=out3.str();
 	drawtext(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
+	LargeRational::flagMinorRoutinesOnDontUseFullPrecision=false;
 }
 
 void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions)
@@ -1014,7 +1015,7 @@ int MatrixRational::FindLCMCoefficientDenominators()
 { int result=1;
 	for (int i=0;i<this->NumRows;i++)
 	{ for (int j=0;j<this->NumCols;j++)
-		{ result*=(this->elements[i][j].den/gcd(result,this->elements[i][j].den));
+		{ result*=(this->elements[i][j].den/Rational::gcdSigned(result,this->elements[i][j].den));
 		}
 	}
 	return result;
@@ -1025,7 +1026,7 @@ int MatrixRational::FindGCDCoefficientNumerators()
 	for (int i=0;i<this->NumRows;i++)
 	{ for (int j=0;j<this->NumCols;j++)
 		{ if (this->elements[i][j].num!=0)
-				result=gcd(result,this->elements[i][j].num);
+				result=Rational::gcdSigned(result,this->elements[i][j].num);
 		}
 	}
 	assert(result!=0);
@@ -1326,13 +1327,11 @@ void RationalDivRational(Rational& a, Rational& b, Rational& result)
 int lcm(int a, int b)
 { if (a<0){a=-a;}
 	if (b<0){b=-b;}
-	return ((a*b)/gcd(a,b));
+	return ((a*b)/Rational::gcdSigned(a,b));
 }
 
-int gcd(int a, int b)
-{	int temp;
-	if (a<0){a=-a;}
-	if (b<0){b=-b;}
+unsigned int Rational::gcd(unsigned int a, unsigned int b)
+{	unsigned int temp;
 	while(b>0)
 	{ temp= a % b;
 		a=b;
@@ -4612,7 +4611,7 @@ void PolynomialOutputFormat::MakeAlphabetyi()
 int PolynomialRationalCoeff::FindGCMCoefficientDenominators()
 {	int result=1;
 	for (int i=0;i<this->size;i++)
-	{	int tempI=gcd(result,this->TheObjects[i].Coefficient.den);
+	{	int tempI=Rational::gcdSigned(result,this->TheObjects[i].Coefficient.den);
 		result= result*this->TheObjects[i].Coefficient.den/tempI;
 	}
 	return result;
@@ -5560,7 +5559,10 @@ short BasicQN::GaussianEliminationByRows()
 short BasicQN::GaussianEliminationByRowsCol(int Col, bool MoveToRight)
 {	short Row=0;
 	while(Row<this->Exp.NumRows && Col<this->NumVars && Col>=0)
-	{	int PivotRow=-1;
+	{	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+		{ this->ComputeDebugString();
+		}
+		int PivotRow=-1;
 		for (int i=Row;i<this->Exp.NumRows;i++)
 		{	if(this->Exp.elements[i][Col]!=0)
 			{ PivotRow=i; break;}
@@ -5569,7 +5571,7 @@ short BasicQN::GaussianEliminationByRowsCol(int Col, bool MoveToRight)
 		{	this->SetPivotRow(PivotRow,Row,Col);
 			int ExploringRow= PivotRow+1;
 			while (ExploringRow<this->Exp.NumRows)
-			{	this->ComputeDebugString();
+			{	//this->ComputeDebugString();
 				int PivotElt= this->Exp.elements[Row][Col];
 				if (PivotElt<= this->Exp.elements[ExploringRow][Col])
 				{ int coeff = -(this->Exp.elements[ExploringRow][Col]/PivotElt);
@@ -5837,18 +5839,21 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
 	this->Exp.init(theMat.NumRows,root::AmbientDimension);
 	this->Nums.init(theMat.NumRows,1);
 	int tempLCM= 1;
-	theMat.ComputeDebugString();
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+	{	theMat.ComputeDebugString();
+	}
 	for (int i=0;i<theMat.NumRows;i++)
 	{	for (int j=0;j<theMat.NumCols;j++)
-		{ tempLCM= lcm(tempLCM,theMat.elements[i][j].den.TheObjects[0]);
+		{ tempLCM= lcm(tempLCM,theMat.elements[i][j].den.GetUnsignedIntValueTruncated());
 		}
 		tempLCM= lcm(tempLCM,column.TheObjects[i].den.GetUnsignedIntValueTruncated());
 	}
 	this->Den=tempLCM;
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{ for (int j=0; j<root::AmbientDimension;j++)
-		{ this->Exp.elements[i][j]=(theMat.elements[i][j].num.value.TheObjects[0]*tempLCM)/
-																theMat.elements[i][j].den.TheObjects[0];
+		{ this->Exp.elements[i][j]=(theMat.elements[i][j].num.
+																	GetIntValueTruncated()*tempLCM)/
+																theMat.elements[i][j].den.GetUnsignedIntValueTruncated();
 			this->Exp.elements[i][j]%=tempLCM;
 			if (this->Exp.elements[i][j]<0) {this->Exp.elements[i][j]+=tempLCM;}
 		}
@@ -5857,9 +5862,16 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
 		this->Nums.elements[i][0]%=tempLCM;
 		if (this->Nums.elements[i][0]<0){this->Nums.elements[i][0]+=tempLCM;}
 	}
-	//this->ComputeDebugString();
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+	{	this->ComputeDebugString();
+		if (this->DebugString=="\\tau_{6}[(3a+5b=1)(4b=2)]")
+		{ Stop();
+		}
+	}
 	this->Simplify();
-	//this->ComputeDebugString();
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+	{ this->ComputeDebugString();
+	}
 }
 
 
@@ -5912,6 +5924,9 @@ inline void BasicQN::SwitchTwoRows(int rowI1, int rowI2, int StartCol)
 
 void BasicQN::Simplify()
 {	short FirstZeroRow=this->GaussianEliminationByRows();
+	if (partFractions::flagAnErrorHasOccurredTimeToPanic)
+	{ this->ComputeDebugString();
+	}
 	if (Den==1){FirstZeroRow=0;}
 	for (int i=FirstZeroRow;i<this->Exp.NumRows;i++)
 	{ if (this->Nums.elements[i][0]!=0)
@@ -6522,7 +6537,14 @@ void LargeRational::MultiplyByInt(int x)
 }
 
 void LargeRational::MultiplyBy(LargeRational &r)
-{ this->num.MultiplyBy(r.num);
+{ if (	this->flagMinorRoutinesOnDontUseFullPrecision || 
+				(r.num.value.size==1 && r.den.size==1))
+	{ if(this->TryToMultiplyQuickly(r.num.sign, 
+																	r.num.value.TheObjects[0], 
+																	r.den.TheObjects[0]))
+			return;
+	}
+	this->num.MultiplyBy(r.num);
 	this->den.MultiplyBy(r.den);
 	this->Simplify();
 }
@@ -6541,10 +6563,11 @@ void LargeRational::DivideBy(LargeRational &r)
 { if (this==&r)
 	{ this->MakeOne(); return;
 	}
-	this->num.sign*=r.num.sign;
-	this->num.value.MultiplyBy(r.den);
-	this->den.MultiplyBy(r.num.value);
-	this->Simplify();
+	static LargeRational tempRat;
+	tempRat.num.value.Assign(r.den);
+	tempRat.num.sign= r.num.sign;
+	tempRat.den.Assign(r.num.value);
+	this->MultiplyBy(tempRat);
 }
 
 void LargeRational::Assign(const LargeRational &r)
@@ -6630,8 +6653,13 @@ void LargeRational::AssignRational(Rational &r)
 
 void LargeRational::Add(LargeRational &r)
 { //static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-	//if (this->TryToaddQuickly(r))
-	//	return;	
+	if (	this->flagMinorRoutinesOnDontUseFullPrecision || 
+				(r.num.value.size==1 && r.den.size==1))
+	{	if (this->TryToAddQuickly(r.num.sign,
+															r.num.value.TheObjects[0],
+															r.den.TheObjects[0]))
+		{	return;}	
+	}
 	if (this==&r)
 	{ this->MultiplyByInt(2); return;
 	}
@@ -7183,6 +7211,9 @@ void partFractionPolynomials::ComputeQuasiPolynomial
 		tempQN.MakeQNFromMatrixAndColumn
 			(	this->theNormals,
 				this->LatticeIndicators.TheObjects[i]);
+		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+		{ tempQN.ComputeDebugString();
+		}
 		//tempQN.ComputeDebugString();
 		tempQP.TimesConstant(tempQN);
 		//tempQP.ComputeDebugString();
@@ -7214,8 +7245,13 @@ void partFractionPolynomials::initLatticeIndicatorsFromPartFraction(partFraction
 						);
 		}
 	}
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+	{ theNormals.ComputeDebugString();
+	}
 	this->theNormals.Invert();
-	//this->theNormals.ComputeDebugString();
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+	{ theNormals.ComputeDebugString();
+	}
 	this->size=0;
 }
 
@@ -7735,6 +7771,12 @@ bool partFraction::rootIsInFractionCone(root&r)
 		return true;
 	if (this->RelevanceIsComputed)
 		return !this->IsIrrelevant;
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+	{ this->ComputeDebugString();
+		if (this->DebugString=="a^{3}b^{2} \\frac{1}{(1-a^{2}b^{3})^5} \\frac{1}{(1-ab)}")
+		{ Stop();
+		} 
+	}
 	static MatrixRational tempMat, MatOneCol;
 	static Selection NonPivotPoints;
 	Cone tempCone; roots tempRoots;
@@ -7884,6 +7926,7 @@ void partFraction::ApplySzenesVergneFormula
   //this->lastApplicationOfSVformulaNumNewMonomials=0;
 	for(int i=0;i<theSelectedIndices.size;i++)
 	{	tempFrac.Assign(*this);
+		tempFrac.RelevanceIsComputed=false;
 		ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
 		tempFrac.CoefficientNonExpanded.ComputePolyPartFractionNumerator
 			(ComputationalBufferCoefficientNonExpanded);
@@ -8510,7 +8553,6 @@ bool partFractions::split()
 	//	this->CheckSum.ElementToString(tempS1);
 	//	this->ComputeDebugString();
 	//}
-//	partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	while (this->IndexLowestNonProcessed<this->size)
 	{ //this->ComputeDebugString();
 //		bool ShouldIgnore=false;
@@ -8577,8 +8619,8 @@ bool partFractions::split()
 bool partFractions::splitClassicalRootSystem(bool ShouldElongate)
 { this->IndexLowestNonProcessed=0;
 	this->SetUpIndicatorVariables();
-	partFraction::flagAnErrorHasOccurredTimeToPanic= true;
-	partFractions::flagAnErrorHasOccurredTimeToPanic= true;
+	//partFraction::flagAnErrorHasOccurredTimeToPanic= true;
+	//partFractions::flagAnErrorHasOccurredTimeToPanic= true;
 	LargeRational::flagAnErrorHasOccurredTimeToPanic=true;
 	this->PrepareCheckSums();
 	std::string tempS;
@@ -8754,6 +8796,7 @@ void partFractions::Add(partFraction &f)
 	if (tempI==-1)
 	{ this->AddObjectOnTopHash(f);
 		tempI= this->size-1;
+		this->TheObjects[tempI].RelevanceIsComputed=false;
 		this->AccountPartFractionInternals(1,tempI);
 	}
 	else
@@ -9090,13 +9133,17 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 	IndicatorWindowGlobalVariables.NumProcessedMonomialsCurrentFraction=0;
 	output.Nullify(root::AmbientDimension);
 	///////////////////////////////////////////////
-	this->flagAnErrorHasOccurredTimeToPanic=true;
-	partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//this->flagAnErrorHasOccurredTimeToPanic=true;
+	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//this->ComputeDebugString();
 	///////////////////////////////////////////////
 	static QuasiPolynomial tempQP;
 	for (int i=0;i<this->size;i++)
 	{ assert(partFraction::TheBigDump.is_open()||!StoreToFile);
 		assert(partFractions::ComputedContributionsList.is_open()||!StoreToFile);
+		//if (this->flagAnErrorHasOccurredTimeToPanic)
+		//{ this->TheObjects[i].ComputeDebugString();
+		//}
 		if (this->TheObjects[i].rootIsInFractionCone(r))
 		{ //if (storeComputations)
 			{this->TheObjects[i].partFractionToPartitionFunctionSplit

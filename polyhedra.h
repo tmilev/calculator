@@ -253,8 +253,10 @@ ListBasicObjectsLight<Object>::ListBasicObjectsLight()
 
 template <class Object>
 ListBasicObjectsLight<Object>::~ListBasicObjectsLight()
-{ delete [] this->TheObjects;
-	this->TheObjects=0;
+{ if (this->TheObjects!=0)
+	{ delete [] this->TheObjects;
+		this->TheObjects=0;
+	}
 }
 
 template <class Object>
@@ -415,6 +417,15 @@ public:
 	bool IsNegative();
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input);
+	static unsigned int gcd(unsigned int a, unsigned int b);
+	//The below is like the above but can be called with negative 
+	//arguments:
+	static int gcdSigned(int a, int b){	if (a<0) 
+																			{a=-a;} 
+																			if (b)
+																			{b=-b;}
+																			return (int) Rational::gcd((unsigned int)a, (unsigned int)b);
+																		};
 };
 
 class MatrixRational
@@ -704,9 +715,16 @@ inline void Matrix<Element>::Resize(short r, short c, bool PreserveValues)
 class LargeIntUnsigned: public ListBasicObjectsLight<unsigned int>
 {	void AddNoFitSize(LargeIntUnsigned& x);
 public:
-  //any number smaller than 2^31 will work for a carry-over
-  //bound. Carry over bound is the "base" over which we work
-//	static const unsigned int CarryOverBound=37;
+	// Carry over bound is the "base" over which we work
+	//Requirements on the CarryOverBound:
+	//1.	CarryOverBound*2-1 must fit inside an unsigned (int)
+	//		on the system
+	//2. (CarryOverBound*2)^2-1 must fit inside (long long) 
+	//		on the system.
+	////////////////////////////////////////////////////////
+	//On a 32 bit machine any number smaller than 2^31 will work.
+	//If you got no clue what to put just leave CarryOverBound= 2^31
+	//static const unsigned int CarryOverBound=37;
 	void SubtractSmallerPositive(LargeIntUnsigned& x);
 	static const unsigned int CarryOverBound=2147483648;//=2^31
 	//the below must be less than or equal to the square root of CarryOverBound. 
@@ -736,7 +754,7 @@ public:
 	LargeIntUnsigned operator/(unsigned int x)const;
 	LargeIntUnsigned operator/(LargeIntUnsigned& x)const;
 	LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x);};
-	LargeIntUnsigned(){this->SetSizeExpandOnTopLight(1); this->TheObjects[0]=0;};
+	LargeIntUnsigned(){};//this->SetSizeExpandOnTopLight(1); this->TheObjects[0]=0;};
 	//must be rewritten:
 	double GetDoubleValue();
 	void FitSize();
@@ -785,20 +803,63 @@ public:
 };
 
 class LargeRational
-{	inline bool TryToAddQuickly(LargeRational& r)
-	{ if ( this->flagMinorRoutinesOnDontUseFullPrecision ||
-				(	this->num.value.size!=1 && this->den.size!=1
-					&& this->num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
-					&& this->den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
-					&& r.num.value.size!=1 && r.den.size!=1
-					&& r.num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
-					&& r.den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound	)			
-				)
+{	inline bool TryToAddQuickly (	signed char sign , 
+																unsigned int OtherNum, 
+																unsigned int OtherDen)
+	{ if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
+				(		this->num.value.size!=1 || this->den.size!=1
+					||this->num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
+					||this->den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound 		
+					||OtherNum<LargeIntUnsigned::SquareRootOfCarryOverBound
+					||OtherDen<LargeIntUnsigned::SquareRootOfCarryOverBound)	)
 			return false;
+		register unsigned int N= this->num.value.TheObjects[0];
+		register unsigned int D= this->den.TheObjects[0];
+		register unsigned int newDen= D*OtherDen;
+		N*=OtherDen;
+		D*=OtherNum;
+		if (this->num.sign!=sign)
+		{ if (N<D)
+			{ N= D-N;
+				this->num.sign=sign;
+			}
+			else
+				N=N-D;
+		}
+		else
+		{	N+=D;
+		}
+		register unsigned int tempGCD= Rational::gcd(N,newDen);
+		this->num.value.TheObjects[0]=(N/tempGCD);
+		this->den.TheObjects[0]= (newDen/tempGCD);
+		return true;
 	};
+	inline bool TryToMultiplyQuickly(	signed char sign , 
+																		unsigned int OtherNum, 
+																		unsigned int OtherDen)
+	{ if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
+				(		this->num.value.size!=1 || this->den.size!=1
+					||this->num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
+					||this->den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound 		
+					||OtherNum<LargeIntUnsigned::SquareRootOfCarryOverBound
+					||OtherDen<LargeIntUnsigned::SquareRootOfCarryOverBound)	)
+			return false;
+		register unsigned int tempNum = this->num.value.TheObjects[0]*OtherNum;
+		if (tempNum==0) 
+		{	this->MakeZero(); return true;
+		}
+		register unsigned int tempDen = this->den.TheObjects[0]*OtherDen;
+		this->num.sign*=sign;
+		register unsigned int tempGCD= Rational::gcd(tempNum, tempDen);
+		this->num.value.TheObjects[0]=tempNum/tempGCD;
+		this->den.TheObjects[0]= tempDen/tempGCD;	
+		return true;
+	}
 public:
-	LargeIntUnsigned den;
-	LargeInt num;
+	unsigned int numQuick;
+	unsigned int denQuick;
+	LargeIntUnsigned denExtended;
+	LargeInt numExtended;
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(LargeRational& r);
@@ -4504,7 +4565,6 @@ int RationalToInteger (Rational& r);
 bool RationalEqualsRational(Rational &a, Rational &b);
 void initIntegersFastAccessMemoryAllocation(Selection& x, int s);
 void initIntegersFastAccessNoMemoryAllocation(Selection& x);
-int gcd(int a, int b);
 int lcm(int a, int b);
 void SimplifyRational(Rational& r);
 void initDLL(int rank);

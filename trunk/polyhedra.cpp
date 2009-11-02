@@ -778,10 +778,12 @@ void root::MultiplyByLargeIntUnsigned(LargeIntUnsigned& a)
 }
 
 void root::ScaleForMinHeight()
-{	LargeIntUnsigned d;
+{	static LargeIntUnsigned d;
 	d.MakeZero();
 	for (int i=0;i<this->size;i++)
-	{	this->MultiplyByLargeIntUnsigned(this->TheObjects[i].den);
+	{	static LargeIntUnsigned tempDen;
+		this->TheObjects[i].GetDenExtended(tempDen);
+		this->MultiplyByLargeIntUnsigned(tempDen);
 		if (!this->TheObjects[i].IsEqualToZero())
 		{	if (d.IsEqualToZero())
 			{ d.Assign(this->TheObjects[i].num.value);

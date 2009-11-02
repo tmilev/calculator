@@ -253,10 +253,8 @@ ListBasicObjectsLight<Object>::ListBasicObjectsLight()
 
 template <class Object>
 ListBasicObjectsLight<Object>::~ListBasicObjectsLight()
-{ if (this->TheObjects!=0)
-	{ delete [] this->TheObjects;
-		this->TheObjects=0;
-	}
+{ delete [] this->TheObjects;
+	this->TheObjects=0;
 }
 
 template <class Object>
@@ -754,7 +752,7 @@ public:
 	LargeIntUnsigned operator/(unsigned int x)const;
 	LargeIntUnsigned operator/(LargeIntUnsigned& x)const;
 	LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x);};
-	LargeIntUnsigned(){};//this->SetSizeExpandOnTopLight(1); this->TheObjects[0]=0;};
+	LargeIntUnsigned(){this->SetSizeExpandOnTopLight(1); this->TheObjects[0]=0;};
 	//must be rewritten:
 	double GetDoubleValue();
 	void FitSize();
@@ -808,10 +806,10 @@ class LargeRational
 																unsigned int OtherDen)
 	{ if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
 				(		this->num.value.size!=1 || this->den.size!=1
-					||this->num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
-					||this->den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound 		
-					||OtherNum<LargeIntUnsigned::SquareRootOfCarryOverBound
-					||OtherDen<LargeIntUnsigned::SquareRootOfCarryOverBound)	)
+					||this->num.value.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound
+					||this->den.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound 		
+					||OtherNum>=LargeIntUnsigned::SquareRootOfCarryOverBound
+					||OtherDen>=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
 			return false;
 		register unsigned int N= this->num.value.TheObjects[0];
 		register unsigned int D= this->den.TheObjects[0];
@@ -839,10 +837,10 @@ class LargeRational
 																		unsigned int OtherDen)
 	{ if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
 				(		this->num.value.size!=1 || this->den.size!=1
-					||this->num.value.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound
-					||this->den.TheObjects[0]<LargeIntUnsigned::SquareRootOfCarryOverBound 		
-					||OtherNum<LargeIntUnsigned::SquareRootOfCarryOverBound
-					||OtherDen<LargeIntUnsigned::SquareRootOfCarryOverBound)	)
+					||this->num.value.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound
+					||this->den.TheObjects[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound 		
+					||OtherNum>=LargeIntUnsigned::SquareRootOfCarryOverBound
+					||OtherDen>=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
 			return false;
 		register unsigned int tempNum = this->num.value.TheObjects[0]*OtherNum;
 		if (tempNum==0) 
@@ -856,10 +854,8 @@ class LargeRational
 		return true;
 	}
 public:
-	unsigned int numQuick;
-	unsigned int denQuick;
-	LargeIntUnsigned denExtended;
-	LargeInt numExtended;
+	LargeIntUnsigned den;
+	LargeInt num;
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(LargeRational& r);

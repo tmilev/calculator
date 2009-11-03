@@ -779,17 +779,18 @@ void root::MultiplyByLargeIntUnsigned(LargeIntUnsigned& a)
 
 void root::ScaleForMinHeight()
 {	static LargeIntUnsigned d;
+	this->FindLCMDenominators(d);
+	this->MultiplyByLargeIntUnsigned(d);
 	d.MakeZero();
 	for (int i=0;i<this->size;i++)
-	{	static LargeIntUnsigned tempDen;
-		this->TheObjects[i].GetDenExtended(tempDen);
-		this->MultiplyByLargeIntUnsigned(tempDen);
-		if (!this->TheObjects[i].IsEqualToZero())
+	{	if (!this->TheObjects[i].IsEqualToZero())
 		{	if (d.IsEqualToZero())
-			{ d.Assign(this->TheObjects[i].num.value);
+			{ this->TheObjects[i].GetNumExtendedUnsigned(d);
 			}
 			else
-			{	LargeIntUnsigned::gcd(d,this->TheObjects[i].num.value,d);
+			{	static LargeIntUnsigned tempI;
+				this->TheObjects[i].GetNumExtendedUnsigned(tempI);
+				LargeIntUnsigned::gcd(d,tempI,d);
 			}
 		}
 	}
@@ -830,9 +831,10 @@ bool root::IsProportianalTo(root& r)
 void root::FindLCMDenominators(LargeIntUnsigned& output)
 { output.MakeOne();
 	for (int i=0;i<this->size;i++)
-	{	LargeIntUnsigned tempI,tempI2;
-		LargeIntUnsigned::gcd(output,this->TheObjects[i].den,tempI);
-		output.MultiplyBy(this->TheObjects[i].den);
+	{	static LargeIntUnsigned tempI,tempI2;
+		this->TheObjects[i].GetDenExtended(tempI2);
+		LargeIntUnsigned::gcd(output,tempI2,tempI);
+		output.MultiplyBy(tempI2);
 		output.DivPositive(tempI,output,tempI2);
 	}
 }
@@ -964,9 +966,7 @@ void root::InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7,
 int root::HashFunction()
 { int result=0;
 	for (int i=0;i<this->size;i++)
-	{ result+=	this->TheObjects[i].num.GetIntValueTruncated()
-						*	this->TheObjects[i].den.GetUnsignedIntValueTruncated()
-						*	::SomeRandomPrimes[i];
+	{ result+=	this->TheObjects[i].HashFunction()*	::SomeRandomPrimes[i];
 	}
 	return result;
 }
@@ -2099,8 +2099,8 @@ inline void Rational::AssignInteger(int i)
 }
 
 inline void Rational::AssignLargeRationalTruncate(LargeRational& right)
-{ this->num= right.num.GetIntValueTruncated();
-	this->den= right.den.GetUnsignedIntValueTruncated();
+{ this->num= right.GetNumValueTruncated();
+	this->den= right.GetDenValueTruncated();
 }
 
 inline bool Rational::IsGreaterThanOrEqualTo(Rational& b)
@@ -5816,7 +5816,7 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixRational& theMat, root& column)
 	{	for (int j=0;j<theMat.NumCols;j++)
 		{ tempLCM= lcm(tempLCM,theMat.elements[i][j].den);
 		}
-		tempLCM= lcm(tempLCM,column.TheObjects[i].den.GetUnsignedIntValueTruncated());
+		tempLCM= lcm(tempLCM,column.TheObjects[i].GetDenValueTruncated());
 	}
 	this->Den=tempLCM;
 	for (int i=0;i<this->Exp.NumRows;i++)
@@ -5825,8 +5825,8 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixRational& theMat, root& column)
 			this->Exp.elements[i][j]%=tempLCM;
 			if (this->Exp.elements[i][j]<0) {this->Exp.elements[i][j]+=tempLCM;}
 		}
-		this->Nums.elements[i][0]= (column.TheObjects[i].num.GetIntValueTruncated()*tempLCM)/
-											column.TheObjects[i].den.GetUnsignedIntValueTruncated();
+		this->Nums.elements[i][0]= (column.TheObjects[i].GetNumValueTruncated()*tempLCM)/
+											column.TheObjects[i].GetDenValueTruncated();
 		this->Nums.elements[i][0]%=tempLCM;
 		if (this->Nums.elements[i][0]<0){this->Nums.elements[i][0]+=tempLCM;}
 	}
@@ -5846,21 +5846,20 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
 	}
 	for (int i=0;i<theMat.NumRows;i++)
 	{	for (int j=0;j<theMat.NumCols;j++)
-		{ tempLCM= lcm(tempLCM,theMat.elements[i][j].den.GetUnsignedIntValueTruncated());
+		{ tempLCM= lcm(tempLCM,theMat.elements[i][j].GetDenValueTruncated());
 		}
-		tempLCM= lcm(tempLCM,column.TheObjects[i].den.GetUnsignedIntValueTruncated());
+		tempLCM= lcm(tempLCM,column.TheObjects[i].GetDenValueTruncated());
 	}
 	this->Den=tempLCM;
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{ for (int j=0; j<root::AmbientDimension;j++)
-		{ this->Exp.elements[i][j]=(theMat.elements[i][j].num.
-																	GetIntValueTruncated()*tempLCM)/
-																theMat.elements[i][j].den.GetUnsignedIntValueTruncated();
+		{ this->Exp.elements[i][j]=(theMat.elements[i][j].GetNumValueTruncated()*tempLCM)/
+																theMat.elements[i][j].GetDenValueTruncated();
 			this->Exp.elements[i][j]%=tempLCM;
 			if (this->Exp.elements[i][j]<0) {this->Exp.elements[i][j]+=tempLCM;}
 		}
-		this->Nums.elements[i][0]= (column.TheObjects[i].num.GetIntValueTruncated()*tempLCM)/
-											column.TheObjects[i].den.GetUnsignedIntValueTruncated();
+		this->Nums.elements[i][0]= (column.TheObjects[i].GetNumValueTruncated()*tempLCM)/
+											column.TheObjects[i].GetDenValueTruncated();
 		this->Nums.elements[i][0]%=tempLCM;
 		if (this->Nums.elements[i][0]<0){this->Nums.elements[i][0]+=tempLCM;}
 	}
@@ -6002,7 +6001,7 @@ void BasicQN::MakeFromNormalAndDirection(root& normal, root& direction,
 	this->NumVars= root::AmbientDimension;
 	this->Nums.elements[0][0]=theMod;
 	for (int i=0;i<root::AmbientDimension;i++)
-	{ this->Exp.elements[0][i]=tempRoot.TheObjects[i].num.GetIntValueTruncated();
+	{ this->Exp.elements[0][i]=tempRoot.TheObjects[i].GetNumValueTruncated();
 	}
 	this->Simplify();
 }
@@ -6351,7 +6350,7 @@ void QPSub::MakeLinearSubIntegrand(root &normal,
 	{	this->TheQNSub.elements[root::AmbientDimension][0]+=tempDen;
 	}
 	for (int i=0;i<this->TheQNSub.NumRows;i++)
-	{ this->TheQNSub.elements[i][0]=(normal.TheObjects[i].num.GetIntValueTruncated())%this->QNSubDen;
+	{ this->TheQNSub.elements[i][0]=(normal.TheObjects[i].GetNumValueTruncated())%this->QNSubDen;
 		if (this->TheQNSub.elements[i][0]<0){this->TheQNSub.elements[i][0]+=tempDen;}
 	}
 }
@@ -6363,7 +6362,7 @@ void QPSub::MakeSubAddExtraVarForIntegration(root &direction)
 	this->QNSubDen=1;
 	for (int i=0;i<this->TheQNSub.NumCols;i++)
 	{ this->TheQNSub.elements[i][i]=1;
-		this->TheQNSub.elements[root::AmbientDimension][i]= -direction.TheObjects[i].num.GetIntValueTruncated();
+		this->TheQNSub.elements[root::AmbientDimension][i]= -direction.TheObjects[i].GetNumValueTruncated();
 	}
 }
 
@@ -6415,13 +6414,13 @@ void QPSub::MakeSubNVarForOtherChamber(root &direction, root &normal, Rational &
 	this->QNSubDen=tempDen;
 	for (int i=0;i<root::AmbientDimension;i++)
 	{ this->TheQNSub.elements[root::AmbientDimension][i]=
-			(direction.TheObjects[i].num.GetIntValueTruncated()*Corr)%tempDen;
+			(direction.TheObjects[i].GetNumValueTruncated()*Corr)%tempDen;
 		if (this->TheQNSub.elements[root::AmbientDimension][i]<0)
 		{	this->TheQNSub.elements[root::AmbientDimension][i]+=tempDen;
 		}
 		for(int j=0;j<root::AmbientDimension;j++)
-		{ this->TheQNSub.elements[i][j]= tempRoot.TheObjects[j].num.GetIntValueTruncated()*
-																			direction.TheObjects[j].num.GetIntValueTruncated();
+		{ this->TheQNSub.elements[i][j]= tempRoot.TheObjects[j].GetNumValueTruncated()*
+																			direction.TheObjects[j].GetNumValueTruncated();
 			if (i==j)
 			{ this->TheQNSub.elements[i][j]+=1;
 			}
@@ -6445,18 +6444,37 @@ void SortedQPs::AddToEntry(int x, int y, int z, QuasiMonomial &QM)
 }
 
 void LargeRational::MultiplyByRational(Rational &r)
-{	assert(r.den>0);
-	int tempNum;
+{	unsigned int tempNum;
+	unsigned int tempDen=r.den;
+	signed char sign=1;
 	if (r.num<0)
-	{ tempNum=-r.num; this->num.sign*=-1;
+	{ tempNum=-r.num; sign*=-1;
 	}
 	else
 	{ tempNum=r.num;
-	}
-	this->num.MultiplyByInt(tempNum);
-	this->den.MultiplyByUInt((unsigned int)r.den);
+	}	
+	this->MultiplyByRational(sign,tempNum,tempDen);
+}
+
+inline void LargeRational::MultiplyByRational(signed char sign, unsigned int num, unsigned int den)
+{ if(this->TryToMultiplyQuickly(sign,den,num))
+		return;
+	this->theSign*=sign;
+	this->InitExtendedFromShortIfNeeded();
+	this->NumeratorExtended->MultiplyByUInt(num);
+	this->DenominatorExtended->MultiplyByUInt(den);
 	this->Simplify();
 }
+
+inline void LargeRational::DivideByRational(Rational &r)
+{	signed char sign=1; unsigned int tempNum=r.num;
+	if (r.num<0)
+	{ sign=-1; tempNum = (-r.num);
+	}
+	unsigned int tempDen= r.den;
+	this->MultiplyByRational(sign,tempDen,tempNum);
+};
+
 
 bool LargeRational::IsEqualTo(const LargeRational& r)
 { static LargeRational x;
@@ -6489,11 +6507,16 @@ void LargeRational::RaiseToPower(int x)
 }
 
 void LargeRational::Invert()
-{ assert(!this->num.IsEqualToZero());
-	LargeIntUnsigned tempI;
-	tempI.Assign(this->den);
-	this->den.Assign(this->num.value);
-	this->num.value.Assign(tempI);
+{ if (this->NumeratorExtended==0)
+	{ unsigned int tempI= this->denShort;
+		this->denShort= this->numShort;
+		this->numShort= tempI;
+		return;
+	}
+	LargeIntUnsigned* tempI;
+	tempI=this->DenominatorExtended;
+	this->DenominatorExtended= this->NumeratorExtended;
+	this->NumeratorExtended=tempI;
 }
 
 void LargeRational::ReadFromFile(std::fstream& input)
@@ -6504,31 +6527,33 @@ void LargeRational::ReadFromFile(std::fstream& input)
 	{ this->MakeZero();
 		return;
 	}
-	this->num.sign=1;
+	this->theSign=1;
 	if (tempS[0]=='-')
 	{ positionInTempS++;
 	}
-	this->num.MakeZero();
-	this->den.AssignShiftedUInt(1,0);
+	static LargeIntUnsigned tempNum, tempDen;
+	tempNum.MakeZero();
+	tempDen.MakeOne();
 	bool readingNumerator=true;
 	for (unsigned i=positionInTempS;i<tempS.length();i++)
 	{ char a= tempS[i];
 		if (a=='/')
 		{ readingNumerator=false;	
+			tempDen.MakeZero();
 		}else
 		{	if (readingNumerator)
-			{ this->num.MultiplyByInt(10);
-				int x=std::atoi(&a);
-				this->num.AddInt(x);
+			{ tempNum.MultiplyByUInt(10);
+				unsigned int x=std::atoi(&a);
+				tempNum.AddUInt(x);
 			} else 
-			{	this->den.MultiplyByUInt(10);
+			{	tempDen.MultiplyByUInt(10);
 				unsigned int x= std::atoi(&a);
-				this->den.AssignShiftedUInt(x,0);
+				tempDen.AddUInt(x);
 			}
 		}
 	}
 	if (tempS[0]=='-')
-	{ this->num.sign=-1;
+	{ this->theSign=-1;
 	}
 }
 
@@ -6539,50 +6564,68 @@ void LargeRational::MultiplyByInt(int x)
 }
 
 void LargeRational::MultiplyBy(LargeRational &r)
-{ if (	this->flagMinorRoutinesOnDontUseFullPrecision || 
-				(r.num.value.size==1 && r.den.size==1))
-	{ if(this->TryToMultiplyQuickly(r.num.sign, 
-																	r.num.value.TheObjects[0], 
-																	r.den.TheObjects[0]))
-			return;
+{ if (r.NumeratorExtended==0 && this->NumeratorExtended==0)
+	{ if (this->TryToMultiplyQuickly(r.theSign,r.numShort,r.denShort))
+		{	return;}
 	}
-	this->num.MultiplyBy(r.num);
-	this->den.MultiplyBy(r.den);
+	this->theSign*=r.theSign;
+	this->InitExtendedFromShortIfNeeded();
+	if (r.NumeratorExtended!=0)
+	{	this->NumeratorExtended->MultiplyBy(*r.NumeratorExtended);
+		this->DenominatorExtended->MultiplyBy(*r.DenominatorExtended);
+	}
+	else
+	{ this->NumeratorExtended->MultiplyByUInt(r.numShort);
+		this->DenominatorExtended->MultiplyByUInt(r.denShort);
+	}
 	this->Simplify();
 }
 
 void LargeRational::MultiplyByLargeInt(LargeInt& x)
-{ this->num.MultiplyBy(x);
+{ this->InitExtendedFromShortIfNeeded();
+	this->theSign*=x.sign;
+	this->NumeratorExtended->MultiplyBy(x.value);
 	this->Simplify();
 }
 
 void LargeRational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x)
-{ this->num.value.MultiplyBy(x);
+{ this->InitExtendedFromShortIfNeeded();
+	this->NumeratorExtended->MultiplyBy(x);
 	this->Simplify();
 }
 
 void LargeRational::DivideBy(LargeRational &r)
-{ if (this==&r)
+{ if (r.NumeratorExtended==0 && this->NumeratorExtended==0)
+	{ if (this->TryToMultiplyQuickly(r.theSign,r.numShort,r.denShort))
+		{	return;}
+	}
+	if (this==&r)
 	{ this->MakeOne(); return;
 	}
-	static LargeRational tempRat;
-	tempRat.num.value.Assign(r.den);
-	tempRat.num.sign= r.num.sign;
-	tempRat.den.Assign(r.num.value);
-	this->MultiplyBy(tempRat);
+	this->InitExtendedFromShortIfNeeded();
+	if (r.NumeratorExtended!=0)
+	{	this->NumeratorExtended->MultiplyBy(*r.DenominatorExtended);
+		this->DenominatorExtended->MultiplyBy(*r.NumeratorExtended);
+	}
+	else
+	{ this->NumeratorExtended->MultiplyByUInt(r.denShort);
+		this->DenominatorExtended->MultiplyByUInt(r.numShort);
+	}
+	this->Simplify();
 }
 
 void LargeRational::Assign(const LargeRational &r)
-{ this->num.Assign(r.num);
-	this->den.Assign(r.den);
-}
-
-void LargeRational::AssignNumeratorAndDenominator(int n, int d)
-{ if (d<0) 
-	{ d=-d; n=-n;}
-	this->num.AssignInt(n); 
-	this->den.AssignShiftedUInt(d,0);
-	this->Simplify();
+{ this->theSign=r.theSign;
+	this->numShort= r.numShort;
+	this->denShort= r.denShort;
+	if (r.NumeratorExtended==0)
+	{ if (this->NumeratorExtended==0) return;
+		this->FreeExtended(); 
+		return;
+	}
+	this->InitExtendedFromShortIfNeeded();
+	this->NumeratorExtended->Assign(*r.NumeratorExtended);
+	this->DenominatorExtended->Assign(*r.DenominatorExtended);
 }
 
 void LargeRational::AssignFracValue()
@@ -6629,7 +6672,7 @@ void LargeRational::AddInteger( int x)
 void LargeRational::Subtract(LargeRational& r)
 { static LargeRational temp;
 	temp.Assign(r);
-	temp.num.sign*=-1;
+	temp.theSign*=-1;
 	this->Add(temp);
 }
 
@@ -6657,7 +6700,7 @@ void LargeRational::Add(LargeRational &r)
 { //static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
 	if (	this->flagMinorRoutinesOnDontUseFullPrecision || 
 				(r.num.value.size==1 && r.den.size==1))
-	{	if (this->TryToAddQuickly(r.num.sign,
+	{	if (this->TryToAddQuickly(r.theSign,
 															r.num.value.TheObjects[0],
 															r.den.TheObjects[0]))
 		{	return;}	
@@ -9650,7 +9693,7 @@ void intRoot::ElementToString(std::string& output)
 void intRoot::AssignRoot(root& r)
 { this->dimension=(unsigned char) r.size;
 	for (int i=0;i<this->dimension;i++)
-	{ this->elements[i]= r.TheObjects[i].num.GetIntValueTruncated();
+	{ this->elements[i]= r.TheObjects[i].GetNumValueTruncated();
 	}
 }
 
@@ -11448,7 +11491,7 @@ void rootFKFTcomputation::MakeRootFKFTsub(root& direction, QPSub& theSub)
 		LargeRational tempRat;
 		tempRat.Assign(direction.TheObjects[i]);
 		tempRat.MultiplyByInt(tempLCM);
-		tempMat.elements[root::AmbientDimension][i]=tempRat.num.GetIntValueTruncated();
+		tempMat.elements[root::AmbientDimension][i]=tempRat.GetNumValueTruncated();
 		tempMat.elements[root::AmbientDimension+1][i]=0;
 	}
 	theSub.MakeSubFromMatrixIntAndDen(tempMat,tempLCM);
@@ -11870,7 +11913,7 @@ void thePFcomputation::ComputeTableAllowed()
 			root::RootScalarRoot
 				(	this->theWeylGroup.RootSystem.TheObjects[i], this->theWeylGroup.RootSystem.TheObjects[j],
 					this->theKillingForm,tempRat);
-			if (tempRat.IsPositive() || tempRat.num.GetIntValueTruncated()==-2)
+			if (tempRat.IsPositive() || tempRat.GetNumValueTruncated()==-2)
 			{ tableForbidden.TheObjects[i].AddSelection(j);
 			}
 		}
@@ -12705,8 +12748,8 @@ void rootSubalgebra::KEnumerationsToLinComb()
 			linComb.MultiplyByInteger(-x);
 			bool foundBadCombination=true;
 			for (int i=0;i<root::AmbientDimension;i++)
-			{ if (linComb.TheObjects[i].num.GetIntValueTruncated()==-1 || 
-						linComb.TheObjects[i].num.GetIntValueTruncated()== 1)
+			{ if (linComb.TheObjects[i].GetNumValueTruncated()==-1 || 
+						linComb.TheObjects[i].GetNumValueTruncated()== 1)
 				{ foundBadCombination=false;
 					break;
 				}

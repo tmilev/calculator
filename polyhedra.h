@@ -732,6 +732,7 @@ public:
 	void DivPositive(LargeIntUnsigned &x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
 	void MakeOne();
 	void Add(LargeIntUnsigned& x);
+	void AddUInt(unsigned int x){static LargeIntUnsigned tempI; tempI.AssignShiftedUInt(x,0); this->Add(tempI);};
 	void MakeZero();
 	bool IsEqualToZero(){return this->size==1 && this->TheObjects[0]==0;};
 	bool IsEqualTo(LargeIntUnsigned& right);
@@ -860,6 +861,12 @@ class LargeRational
 		this->DenominatorExtended->AssignShiftedUInt(this->denShort,0);
 		return true;
 	};
+	inline void FreeExtended()
+	{	this->numShort= this->NumeratorExtended->TheObjects[0];
+		this->denShort= this->DenominatorExtended->TheObjects[0];
+		delete this->DenominatorExtended; this->DenominatorExtended=0;
+		delete this->NumeratorExtended; this->NumeratorExtended=0;
+	}
 	bool ShrinkExtendedPartIfPossible()
 	{ if (this->NumeratorExtended==0)
 			return true;
@@ -873,22 +880,19 @@ class LargeRational
 		this->FreeExtended();
 		return true;
 	};
-	inline void FreeExtended()
-	{	this->numShort= this->NumeratorExtended->TheObjects[0];
-		this->denShort= this->DenominatorExtended->TheObjects[0];
-		delete this->DenominatorExtended; this->DenominatorExtended=0;
-		delete this->NumeratorExtended; this->NumeratorExtended=0;
-	}
+public:
 	signed char theSign;
 	unsigned int numShort;
 	unsigned int denShort;
 	LargeIntUnsigned *NumeratorExtended;
 	LargeIntUnsigned *DenominatorExtended;
-public:
 //	inline unsigned int getDenTruncated() {if (this->NumeratorExtended==0) return denShort;
 //																				};
 //	inline unsigned int getNum();
 	void GetDenExtended(LargeIntUnsigned & output);
+	void GetNumExtendedUnsigned(LargeIntUnsigned & output);
+	inline int GetNumValueTruncated(){return this->numShort* this->theSign;};
+	inline unsigned int GetDenValueTruncated(){return this->denShort;};
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(LargeRational& r);
@@ -897,14 +901,31 @@ public:
 	void AddInteger(int x);
 	void AssignFracValue();
 	void MultiplyBy(LargeRational& r);
+	int HashFunction(){return this->numShort*::SomeRandomPrimes[0]+denShort*::SomeRandomPrimes[1];}; 
 	void MultiplyByRational(Rational&r);
+	void MultiplyByRational(signed char sign, unsigned int num, unsigned int den);
 	void MultiplyByInt(int x);
 	void MultiplyByLargeInt(LargeInt& x);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& x);
 	void Assign(const LargeRational& r);
 	void AssignRational(Rational& r);
 	void AssignInteger(int x);
-	void AssignNumeratorAndDenominator( int n, int d);
+	inline void AssignNumeratorAndDenominator( int n, int d){ signed char tempSign;
+																														if (d<0) 
+																														{ d=-d; n=-n;}
+																														if (n<0)
+																														{ n=-n; tempSign=1;} 
+																														else
+																														{ this->theSign=-1;}
+																														this->AssignNumeratorAndDenominator(tempSign,n,d);
+																													};
+	inline void AssignNumeratorAndDenominator(signed char sign, unsigned int num, unsigned int den)
+	{ this->theSign=sign;
+		if (num<=LargeIntUnsigned
+		this->num.AssignInt(n); 
+		this->den.AssignShiftedUInt(d,0);
+		this->Simplify();
+	};
 	void DivideBy(LargeRational& r);
 	void DivideByInteger(int x)	{ signed char tempSign=1; 
 																unsigned int tempDen;
@@ -923,19 +944,7 @@ public:
 	void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){	this->InitExtendedFromShortIfNeeded();
 																													this->DenominatorExtended->MultiplyBy(x); 
 																													this->Simplify();};	
-	void DivideByRational(Rational& r){	signed char sign=1; unsigned int tempNum=r.num;
-																			if (r.num<0)
-																			{ sign=-1; tempNum = (-r.num);
-																			}
-																			unsigned int tempDen= r.den;
-																			if(this->TryToMultiplyQuickly(sign,tempDen,tempNum))
-																				return;
-																			this->theSign*=sign;
-																			this->InitExtendedFromShortIfNeeded();
-																			this->NumeratorExtended->MultiplyByUInt(tempDen);
-																			this->DenominatorExtended->MultiplyByUInt(tempNum);
-																			this->Simplify();
-																		};
+	void DivideByRational(Rational& r);
 	void ElementToString(std::string& output);
 	bool IsEqualTo(const LargeRational& r);
 	void AssignLargeRational(LargeRational& r){this->Assign(r);};

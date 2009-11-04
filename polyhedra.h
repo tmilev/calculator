@@ -853,7 +853,7 @@ public:
 //	inline unsigned int GetDenValueTruncated(){return this->denShort;};
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
-	void Subtract(LargeRational& r);
+	void Subtract(const LargeRational& r);
 	void Add(LargeRational& r);
 	void AddRational(LargeRational& r);
 	void AddInteger(int x);
@@ -4566,7 +4566,6 @@ bool RationalEqualsRational(LargeRational &a, LargeRational &b);
 void initIntegersFastAccessMemoryAllocation(Selection& x, int s);
 void initIntegersFastAccessNoMemoryAllocation(Selection& x);
 int lcm(int a, int b);
-void SimplifyRational(LargeRational& r);
 void initDLL(int rank);
 void exitDLL();
 void CopyMatrix(MatrixLargeRational& FromMat, MatrixLargeRational& ToMat);

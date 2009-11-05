@@ -465,6 +465,7 @@ guiMainWindow::guiMainWindow()
 	this->wxComputationOver.SetEventObject(this);
 	this->wxComputationOver.SetEventType(wxEVT_ComputationFinished);
 	this->MaxAllowedVectors= 16;
+	//WeylGroup::flagAnErrorHasOcurredTimeToPanic=true;
 	this->initWeylGroupInfo();
 	this->updateInputButtons();
 	this->SetSizer(this->BoxSizer1HorizontalBackground);

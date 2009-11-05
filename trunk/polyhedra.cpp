@@ -241,7 +241,7 @@ bool partFractions::flagMakingProgressReport=true;
 bool partFractions::flagUsingIndicatorRoot=true;
 root partFractions::IndicatorRoot;
 HashedListBasicObjects<GeneratorPFAlgebraRecord> GeneratorsPartialFractionAlgebra::theGenerators;
-
+bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 
 int NextDirectionIndex;
 int RankGlobal;
@@ -519,7 +519,8 @@ void ComputationSetup::Run()
 }
 
 void ComputationSetup::EvaluatePoly()
-{ this->theOutput.Evaluate(this->ValueRoot,this->Value);
+{ //LargeRational::flagAnErrorHasOccurredTimeToPanic=true;
+	this->theOutput.Evaluate(this->ValueRoot,this->Value);
 	this->Value.ElementToString(this->ValueString);
 }
 
@@ -612,6 +613,14 @@ void drawOutput(DrawingVariables& TDV,
 	{ if (!output.TheObjects[j]->HasZeroPoly())
 	  {NumTrueChambers++;}else{NumZeroChambers++;}
 	}
+	std::string tempS;
+	std::stringstream out,out1,out3;
+	out<<"#Drawn chambers: "<<NumTrueChambers;
+	tempS=out.str();
+	drawtext(TDV.textX,TDV.textY, tempS.c_str(), tempS.length(),TDV.TextColor);
+	out1<<"#Zero chambers: "<< NumZeroChambers;
+	tempS=out1.str();
+	drawtext(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
 	if (CombinatorialChamber::DisplayingGraphics)
 	{	for (int j=0; j<output.size;j++)
 		{	bool hasZeroPoly= output.TheObjects[j]->HasZeroPoly();
@@ -687,14 +696,6 @@ void drawOutput(DrawingVariables& TDV,
 			drawtext(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
 		}
 	}
-	std::string tempS;
-	std::stringstream out,out1,out3;
-	out<<"#Drawn chambers: "<<NumTrueChambers;
-	tempS=out.str();
-	drawtext(TDV.textX,TDV.textY, tempS.c_str(), tempS.length(),TDV.TextColor);
-	out1<<"#Zero chambers: "<< NumZeroChambers;
-	tempS=out1.str();
-	drawtext(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
 	LargeRational::flagMinorRoutinesOnDontUseFullPrecision=false;
 }
 
@@ -767,9 +768,9 @@ void root::MultiplyByLargeIntUnsigned(LargeIntUnsigned& a)
 	}
 }
 
-void root::ScaleForMinHeight()
+void root::ScaleForMinHeightHeavy()
 {	static LargeIntUnsigned d;
-	this->FindLCMDenominators(d);
+	this->FindLCMDenominatorsHeavy(d);
 	this->MultiplyByLargeIntUnsigned(d);
 	d.MakeZero();
 	for (int i=0;i<this->size;i++)
@@ -786,6 +787,26 @@ void root::ScaleForMinHeight()
 	}
 	this->DivByLargeIntUnsigned(d);
 }
+
+void root::ScaleForMinHeightLight()
+{	int d= this->FindLCMDenominatorsTruncateToInt();
+	this->MultiplyByInteger(d);
+	d=0;
+	for (int i=0;i<this->size;i++)
+	{	if (!this->TheObjects[i].IsEqualToZero())
+		{	assert(this->TheObjects[i].Extended==0);
+			if (d==0)
+				d=this->TheObjects[i].NumShort;
+			else
+			{	int tempI=this->TheObjects[i].NumShort;
+				if (tempI<0) tempI=-tempI;
+				d= LargeRational::gcd(tempI,d);
+			}
+		}
+	}
+	this->DivByInteger(d);
+}
+
 
 bool root::IsEqualTo(root& right)
 {	if (this->size!=right.size)
@@ -818,7 +839,7 @@ bool root::IsProportianalTo(root& r)
 	return tempRoot.IsEqualTo(r);
 }
 
-void root::FindLCMDenominators(LargeIntUnsigned& output)
+void root::FindLCMDenominatorsHeavy(LargeIntUnsigned& output)
 { output.MakeOne();
 	for (int i=0;i<this->size;i++)
 	{	static LargeIntUnsigned tempI,tempI2;
@@ -830,20 +851,32 @@ void root::FindLCMDenominators(LargeIntUnsigned& output)
 }
 
 int root::FindLCMDenominatorsTruncateToInt()
-{ static LargeIntUnsigned tempLargeInt;
-	this->FindLCMDenominators(tempLargeInt);
-	return tempLargeInt.GetUnsignedIntValueTruncated();
+{ int result=1;
+	for (int i=0;i<this->size;i++)
+	{	result = lcm(result,this->TheObjects[i].DenShort);
+		assert(this->TheObjects[i].Extended==0);
+	}
+	return result;
 }
 
-void root::ScaleToIntegral()
+void root::ScaleToIntegralHeavy()
 { LargeIntUnsigned x;
-	this->FindLCMDenominators(x);
+	this->FindLCMDenominatorsHeavy(x);
 	this->MultiplyByLargeIntUnsigned(x);
 }
 
-void root::ScaleToIntegralMinHeight()
-{ this->ScaleToIntegral();
-	this->ScaleForMinHeight();
+void root::ScaleToIntegralLight()
+{ this->MultiplyByInteger(this->FindLCMDenominatorsTruncateToInt());
+}
+
+void root::ScaleToIntegralMinHeightHeavy()
+{ this->ScaleToIntegralHeavy();
+	this->ScaleForMinHeightHeavy();
+}
+
+void root::ScaleToIntegralMinHeightLight()
+{ this->ScaleToIntegralLight();
+	this->ScaleForMinHeightLight();
 }
 
 void root::ScaleToFirstNonZeroCoordinatePositive()
@@ -858,10 +891,39 @@ void root::ScaleToFirstNonZeroCoordinatePositive()
 	}
 }
 
-void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive()
-{ this->ScaleToIntegralMinHeight();
+void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveHeavy()
+{ this->ScaleToIntegralMinHeightHeavy();
 	this->ScaleToFirstNonZeroCoordinatePositive();
 }
+
+void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight()
+{ this->ScaleToIntegralMinHeightLight();
+	this->ScaleToFirstNonZeroCoordinatePositive();
+}
+
+bool root::HasSmallCoordinates()
+{	for (int i=0;i<this->size;i++)
+	{ if (this->TheObjects[i].Extended!=0)
+		{ return false; 
+		}
+	}
+	return true;
+}
+
+void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive()
+{	if (this->HasSmallCoordinates())
+		this->ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight();
+	else
+		this->ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveHeavy();
+}
+
+void root::ScaleToIntegralMinHeight()
+{	if (this->HasSmallCoordinates())
+		this->ScaleToIntegralMinHeightLight();
+	else
+		this->ScaleToIntegralMinHeightHeavy();
+}
+
 
 void root::DivByLargeIntUnsigned(LargeIntUnsigned& a)
 {	for (int i=0;i<this->size;i++)
@@ -1189,8 +1251,8 @@ int lcm(int a, int b)
 	return ((a*b)/LargeRational::gcdSigned(a,b));
 }
 
-unsigned int LargeRational::gcd(unsigned int a, unsigned int b)
-{	unsigned int temp;
+int LargeRational::gcd(int a, int b)
+{	int temp;
 	while(b>0)
 	{ temp= a % b;
 		a=b;
@@ -1528,7 +1590,7 @@ void roots::PerturbVectorToRegular(root& output)
 		output.Add(normal);
 	}
 	if (IndicatorWindowGlobalVariables.rootIsModified)
-	{ output.ScaleToIntegral();
+	{ output.ScaleToIntegralMinHeight();
 		IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(output);
 		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
 		::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
@@ -4481,20 +4543,52 @@ void QuasiPolynomial::TimesInteger(int x)
 void QuasiPolynomial::Evaluate(intRoot& values, LargeRational& output)
 { output.MakeZero();
 	std::string tempS;
+	/*if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+	{	output.ElementToString(tempS);
+	}*/
 	LargeRational tempLRat, tempLRat2;
 	for (int i=0;i<this->size;i++)
 	{ tempLRat.MakeOne();
+		/*if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+		{	this->TheObjects[i].ComputeDebugString();
+		}*/
 		for (int j=0; j<this->NumVars;j++)
 		{ for (int k=0;k<this->TheObjects[i].degrees[j];k++)
-			{ tempLRat.MultiplyByInt(values.elements[j]);
+			{	/*if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+				{ if (this->TheObjects[i].DebugString=="-1/2ac^{2}")
+					{ tempLRat.ElementToString(tempS);
+					}
+				}*/
+				tempLRat.MultiplyByInt(values.elements[j]);
+			/*	if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+				{ if (this->TheObjects[i].DebugString=="-1/2ac^{2}")
+					{ tempLRat.ElementToString(tempS);
+					}
+				}*/
 			}
 		}
 		this->TheObjects[i].Coefficient.Evaluate(values.elements,tempLRat2);
-		//tempLRat2.ElementToString(tempS);
-		//tempLRat.ElementToString(tempS);
+/*		if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+		{	this->TheObjects[i].ComputeDebugString();
+			if (this->TheObjects[i].DebugString=="-1/2ac^{2}")
+			{ Stop();
+				tempLRat2.ElementToString(tempS);
+			}
+			tempLRat.ElementToString(tempS);
+		}*/
 		tempLRat.MultiplyBy(tempLRat2);
+		/*if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+		{	this->TheObjects[i].ComputeDebugString();
+			if (this->TheObjects[i].DebugString=="-1/2ac^{2}")
+			{ Stop();
+				tempLRat2.ElementToString(tempS);
+			}
+			tempLRat.ElementToString(tempS);
+		}*/
 		output.Add(tempLRat);
-		//output.ElementToString(tempS);
+		/*if (LargeRational::flagAnErrorHasOccurredTimeToPanic)
+		{	output.ElementToString(tempS);
+		}*/
 	}
 }
 
@@ -4902,7 +4996,7 @@ bool CompositeComplex::SimplifyWRT(short n)
 	CoeffFirst.MakeZero();
 	int NumFound=0;
 	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i].Exp.DenShort==(unsigned int)n)
+	{ if (this->TheObjects[i].Exp.DenShort==n)
 		{ if (!FoundFirst)
 			{ CoeffFirst.Assign(this->TheObjects[i].Coeff);
 				FoundFirst=true;
@@ -4916,7 +5010,7 @@ bool CompositeComplex::SimplifyWRT(short n)
 		return false;
 	if (!CoeffFirst.IsEqualToZero())
 	{ for (int i=0;i<this->size;i++)
-		{ if (this->TheObjects[i].Exp.DenShort==(unsigned int) n)
+		{ if (this->TheObjects[i].Exp.DenShort== n)
 			{	this->PopIndexSwapWithLast(i);
 				i--;
 			}
@@ -5087,7 +5181,7 @@ void BasicQN::MultiplyBy(BasicQN& q)
 
 void BasicQN::GetCoeffInFrontOfLast( LargeRational &output)
 {	if (this->Exp.NumRows>0)
-    output.Assign(Exp.elements[0][this->NumVars-1]);
+    output.AssignInteger(Exp.elements[0][this->NumVars-1]);
 	else
     output.MakeZero();
 }
@@ -5931,7 +6025,7 @@ void QPSub::MakeSubNVarForOtherChamber(root &direction, root &normal, LargeRatio
 	int tempDen = tempRoot.FindLCMDenominatorsTruncateToInt();
 	tempDen= lcm(tempDen,Correction.DenShort);
 	tempRoot.MultiplyByInteger(tempDen);
-	int Corr= -(Correction.NumShort*Correction.DenShort)/tempDen;
+	int Corr= -(Correction.NumShort*((signed int)Correction.DenShort))/tempDen;
 	this->TheQNSub.NullifyAll();
 	this->QNSubDen=tempDen;
 	for (int i=0;i<root::AmbientDimension;i++)
@@ -6000,10 +6094,11 @@ inline void LargeRational::RaiseToPower(int x)
 
 inline void LargeRational::Invert()
 { if (this->Extended==0)
-	{ unsigned int tempI= this->DenShort;
+	{ int tempI= this->DenShort;
+		assert(tempI>0);
 		if (this->NumShort<0)
-		{	this->DenShort=- this->NumShort;
-      this->NumShort= -tempI;
+		{	this->DenShort=-this->NumShort;
+      this->NumShort=-tempI;
 		}
 		else
 		{	this->DenShort= this->NumShort;
@@ -6072,7 +6167,7 @@ inline void LargeRational::MultiplyBy(LargeRational &r)
 	}
 	else
 	{ this->Extended->num.MultiplyByInt(r.NumShort);
-		this->Extended->den.MultiplyByUInt(r.DenShort);
+		this->Extended->den.MultiplyByUInt((unsigned int)r.DenShort);
 	}
 	this->Simplify();
 }
@@ -6085,15 +6180,15 @@ inline void LargeRational::MultiplyByLargeInt(LargeInt& x)
 
 void LargeRational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x)
 { this->InitExtendedFromShortIfNeeded();
-	this->Extended->den.MultiplyBy(x);
+	this->Extended->num.value.MultiplyBy(x);
 	this->Simplify();
 }
 
 inline void LargeRational::DivideBy(LargeRational &r)
-{ if (r.Extended==0 && this->Extended==0)
-	{ int tempNum; unsigned int tempDen;
+{ if (r.Extended==0)
+	{ int tempNum; int tempDen;
     if(r.NumShort<0)
-    { tempNum= -r.DenShort;
+    { tempNum= -(r.DenShort);
       tempDen= -r.NumShort;
     }
     else
@@ -6113,13 +6208,13 @@ inline void LargeRational::DivideBy(LargeRational &r)
 		this->Extended->num.sign*=r.Extended->num.sign;
 	}
 	else
-	{ int tempNum; unsigned int tempDen;
+	{ int tempNum; int tempDen;
     if(r.NumShort<0)
-    { tempNum= -r.DenShort;
+    { tempNum= -(r.DenShort);
       tempDen= -r.NumShort;
     }
     else
-    { tempNum=r.DenShort;
+    { tempNum= r.DenShort;
       tempDen= r.NumShort;
     }
 	  this->Extended->num.MultiplyByInt(tempNum);
@@ -6130,7 +6225,8 @@ inline void LargeRational::DivideBy(LargeRational &r)
 
 void LargeRational::GetDenExtended(LargeIntUnsigned& output)
 { if (this->Extended==0)
-  { output.AssignShiftedUInt(this->DenShort,0);
+  {	unsigned int tempI= (unsigned int) this->DenShort;
+		output.AssignShiftedUInt(tempI,0);
   }
   else
   { output.Assign(this->Extended->den);
@@ -6140,9 +6236,9 @@ void LargeRational::GetDenExtended(LargeIntUnsigned& output)
 void LargeRational::GetNumExtendedUnsigned(LargeIntUnsigned& output)
 { if (this->Extended==0)
   { if (this->NumShort<0)
-      output.AssignShiftedUInt(-this->NumShort,0);
+			output.AssignShiftedUInt((unsigned int)(-this->NumShort),0);
     else
-      output.AssignShiftedUInt(this->NumShort,0);
+      output.AssignShiftedUInt((unsigned int) this->NumShort,0);
   }
   else
   { output.Assign(this->Extended->num.value);
@@ -6181,6 +6277,8 @@ inline void LargeRational::AssignFracValue()
 	this->Extended->num.value.Assign(newNum);
 	if (this->Extended->num.IsNegative())
 		this->Extended->num.AddLargeIntUnsigned(this->Extended->den);
+	assert(this->Extended->num.IsNonNegative());
+	this->Simplify();
 }
 
 void LargeRational::AddInteger( int x)
@@ -6218,8 +6316,7 @@ double LargeRational::DoubleValue()
 
 void LargeRational::Add(LargeRational &r)
 { //static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-	if (	this->flagMinorRoutinesOnDontUseFullPrecision ||
-				(r.Extended==0))
+	if (r.Extended==0)
 	{	if (this->TryToAddQuickly(r.NumShort,
 															r.DenShort))
 		{	return;}
@@ -6230,13 +6327,13 @@ void LargeRational::Add(LargeRational &r)
 	this->InitExtendedFromShortIfNeeded();
 	static LargeRational tempRat;
 	tempRat.Assign(r);
-	r.InitExtendedFromShortIfNeeded();
+	tempRat.InitExtendedFromShortIfNeeded();
 	static LargeInt tempI;
-	tempI.Assign(r.Extended->num);
+	tempI.Assign(tempRat.Extended->num);
 	tempI.value.MultiplyBy(this->Extended->den);
-	this->Extended->num.value.MultiplyBy(r.Extended->den);
+	this->Extended->num.value.MultiplyBy(tempRat.Extended->den);
 	this->Extended->num.Add(tempI);
-	this->Extended->den.MultiplyBy(r.Extended->den);
+	this->Extended->den.MultiplyBy(tempRat.Extended->den);
 	this->Simplify();
 }
 
@@ -6253,6 +6350,8 @@ void LargeRational::Simplify()
       else
       {  tempGCD= this->gcd(-this->NumShort, this->DenShort);
       }
+      this->NumShort/=tempGCD;
+      this->DenShort/=tempGCD;
     }
     return;
   }
@@ -6598,7 +6697,7 @@ void LargeIntUnsigned::DivPositive
 #endif
 
 int LargeIntUnsigned::GetUnsignedIntValueTruncated()
-{	return this->TheObjects[0];
+{	return  (int) this->TheObjects[0];
 }
 
 bool LargeIntUnsigned::IsEqualTo(LargeIntUnsigned &right)
@@ -9475,6 +9574,10 @@ void WeylGroup::SimpleReflectionIntRoot(int index, root& theRoot,
 		tempRat.MultiplyByInt(-KillingFormMatrix.elements[index][i]*2);
 		alphaShift.Add(tempRat);
 	}
+	if (this->flagAnErrorHasOcurredTimeToPanic)
+	{ std::string tempS;
+		alphaShift.ElementToString(tempS);
+	}
 	alphaShift.DivideByInteger(this->KillingFormMatrix.elements[index][index]);
 	if (RhoAction){alphaShift.AddInteger(-1);}
 	theRoot.TheObjects[index].Add(alphaShift);
@@ -9549,7 +9652,13 @@ void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
 		{ tempEW=outputSubset.TheObjects[i];}
 		for (int j=0; j<this->KillingFormMatrix.NumRows;j++)
 		{	currentRoot=output.TheObjects[i];
+			if (this->flagAnErrorHasOcurredTimeToPanic)
+			{ currentRoot.ComputeDebugString();
+			}
 			this->SimpleReflectionIntRoot(j,currentRoot,RhoAction);
+			if (this->flagAnErrorHasOcurredTimeToPanic)
+			{ currentRoot.ComputeDebugString();
+			}
 			if (output.ContainsObjectHash(currentRoot)==-1)
 			{	output.AddObjectOnTopHash(currentRoot);
 				if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
@@ -10789,6 +10898,10 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempRat.AssignNumeratorAndDenominator(0,2);
 	tempRat.AssignFracValue();
 	tempRat.ElementToString(tempS);
+	tempRat.AssignNumeratorAndDenominator(-9,14);
+//	tempRat.RaiseToPower(100);
+	tempRat.ElementToString(tempS);
+	Stop();
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()
@@ -12364,7 +12477,7 @@ void simplicialCones::initFromDirections(roots &directions)
 			{	root tempRoot;
 				int tempI= this->size-1;
 				tempRoot.Assign(this->TheObjects[tempI].TheObjects[j]);
-				tempRoot.ScaleToFirstNonZeroCoordinatePositive();
+				tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 				int x=this->theFacets.ContainsObjectHash(tempRoot);
 				if (x!=-1)
 				{ this->ConesHavingFixedNormal.TheObjects[x].AddObjectOnTop(tempI);

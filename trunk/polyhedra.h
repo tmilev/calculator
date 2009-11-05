@@ -364,30 +364,36 @@ public:
 };
 
 template <typename Element>
-class Matrix
+class MatrixElementary
 {
 public:
+	short NumRows;
+	short NumCols;
 	Element** elements;
+	void init(short r,short c);
+	void Free();
+	void Resize(short r, short c, bool PreserveValues);
+	void Assign(const MatrixElementary<Element>& m);
+	MatrixElementary<Element>();
+	~MatrixElementary<Element>();
+};
+
+template <typename Element>
+class Matrix: public MatrixElementary<Element>
+{
+public:
 	std::string DebugString;
 	static bool flagComputingDebugInfo;
 	void ComputeDebugString();
 	void ElementToSting(std::string& output);
-	short NumRows;
-	short NumCols;
-	void Assign(const Matrix<Element>& m);
 	void SwitchTwoRows( int row1, int row2);
-	void init(short r,short c);
-	void Resize(short r, short c, bool PreserveValues);
 	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
 	void RowTimesScalar(int rowIndex, Element& scalar);
 	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
-	void Free();
 	bool Invert();
 	void NullifyAll();
 	static void GaussianEliminationByRows
 	(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,Selection& outputNonPivotPoints);
-	Matrix<Element>();
-	~Matrix<Element>();
 };
 
 class MatrixLargeRational: public Matrix<LargeRational>
@@ -436,14 +442,19 @@ public:
 };
 
 
-class MatrixInt : public Matrix<int>
+class MatrixInt : public MatrixElementary<int>
 {
 public:
+	void NullifyAll()
+	{ for (int i=0;i<this->NumRows;i++)
+			for (int j=0; j<this->NumCols;j++)
+				this->elements[i][j]=0;
+	};
 };
 
 
 template <typename Element>
-inline void Matrix<Element>::Assign(const Matrix<Element>& m)
+inline void MatrixElementary<Element>::Assign(const MatrixElementary<Element>& m)
 { if (this==&m) return;
 	this->init(m.NumRows, m.NumCols);
 	for (int i=0;i<this->NumRows;i++)
@@ -452,14 +463,14 @@ inline void Matrix<Element>::Assign(const Matrix<Element>& m)
 }
 
 template <typename Element>
-Matrix<Element>::Matrix()
+MatrixElementary<Element>::MatrixElementary()
 { this->elements=0;
 	this->NumCols=0;
 	this->NumRows=0;
 }
 
 template <typename Element>
-inline void Matrix<Element>::Free()
+inline void MatrixElementary<Element>::Free()
 { for (int i=0;i<this->NumRows;i++)
 	{	delete [] this->elements[i];
 	}
@@ -597,7 +608,7 @@ void Matrix<Element>::GaussianEliminationByRows
 }
 
 template <typename Element>
-Matrix<Element>::~Matrix()
+MatrixElementary<Element>::~MatrixElementary()
 { this->Free();
 }
 
@@ -605,16 +616,16 @@ template <typename Element>
 inline void Matrix<Element>::NullifyAll()
 { for (int i=0;i<this->NumRows;i++)
 		for (int j=0; j<this->NumCols;j++)
-			this->elements[i][j]=0;
+			this->elements[i][j].MakeZero();
 }
 
 template <typename Element>
-inline void Matrix<Element>::init(short r, short c)
+inline void MatrixElementary<Element>::init(short r, short c)
 { this->Resize(r,c,false);
 }
 
 template <typename Element>
-inline void Matrix<Element>::Resize(short r, short c, bool PreserveValues)
+inline void MatrixElementary<Element>::Resize(short r, short c, bool PreserveValues)
 { if (r==this->NumRows && c== this->NumCols)
 		return;
 	if (r<=0)
@@ -738,8 +749,9 @@ public:
 
 class LargeRational
 {	inline bool TryToAddQuickly ( int OtherNum,
-																unsigned int OtherDen)
-	{ register unsigned int OtherNumAbs, thisNumAbs;
+																int OtherDen)
+	{ register int OtherNumAbs, thisNumAbs;
+		assert(this->DenShort>0 && OtherDen>0);
 	  if (OtherNum<0)
 	  { OtherNumAbs=-OtherNum;
 	  } else
@@ -764,7 +776,7 @@ class LargeRational
       this->DenShort=1;
     }
     else
-    {	register unsigned int tempGCD;
+    {	register int tempGCD;
       if (N>0)
       { tempGCD= LargeRational::gcd(N,D);
       }
@@ -777,8 +789,9 @@ class LargeRational
 		return true;
 	};
 	inline bool TryToMultiplyQuickly(	int OtherNum,
-																		unsigned int OtherDen)
-	{ register unsigned int OtherNumAbs, thisNumAbs;
+																		int OtherDen)
+	{ register int OtherNumAbs, thisNumAbs;
+		assert(this->DenShort>0 && OtherDen>0);
 	  if (OtherNum<0)
 	  { OtherNumAbs=-OtherNum;
 	  } else
@@ -797,20 +810,20 @@ class LargeRational
 					||OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
       return false;
     register int N = this->NumShort*OtherNum;
-		register unsigned int D= this->DenShort*OtherDen;
+		register int D = this->DenShort*OtherDen;
 		if (N==0)
 		{ this->NumShort=0;
       this->DenShort=1;
     }
     else
-    { register unsigned int tempGCD;
+    { register int tempGCD;
       if (N>0)
       { tempGCD= LargeRational::gcd(N,D);
       }
       else
       { tempGCD= LargeRational::gcd(-N,D);
       }
-      this->NumShort= (N/tempGCD);
+      this->NumShort= (N/((signed int)tempGCD));
       this->DenShort= (D/tempGCD);
     }
     return true;
@@ -819,15 +832,13 @@ class LargeRational
 	{ if (this->Extended!=0)
 			return false;
 		this->Extended= new LargeRationalExtended;
-		this->Extended->den.AssignShiftedUInt(this->DenShort,0);
+		this->Extended->den.AssignShiftedUInt((unsigned int)this->DenShort,0);
 		this->Extended->num.AssignInt(this->NumShort);
 		return true;
 	};
 	inline void FreeExtended()
 	{	if (this->Extended==0)
       return;
-	  this->NumShort= this->Extended->num.GetIntValueTruncated();
-		this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
 		delete this->Extended; this->Extended=0;
 	}
 	bool ShrinkExtendedPartIfPossible()
@@ -840,17 +851,21 @@ class LargeRational
 				||	this->Extended->den.TheObjects[0]>=
 							LargeIntUnsigned::SquareRootOfCarryOverBound)
 			return false;
+		this->NumShort= this->Extended->num.GetIntValueTruncated();
+		this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
 		this->FreeExtended();
 		return true;
 	};
 public:
 	int NumShort;
-	unsigned int DenShort;
+	//the requirement that the below be unsigned cause huge problem, so I 
+	//changed it back to int. Grrrrr.
+	int DenShort;
 	LargeRationalExtended *Extended;
 	void GetDenExtended(LargeIntUnsigned & output);
 	void GetNumExtendedUnsigned(LargeIntUnsigned & output);
 //	inline int GetNumValueTruncated(){return this->NumShort;};
-//	inline unsigned int GetDenValueTruncated(){return this->denShort;};
+//	inline int GetDenValueTruncated(){return this->denShort;};
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(const LargeRational& r);
@@ -858,8 +873,9 @@ public:
 	void AddInteger(int x);
 	void AssignFracValue();
 	void MultiplyBy(LargeRational& r);
-	int HashFunction(){return this->NumShort*::SomeRandomPrimes[0]+DenShort*::SomeRandomPrimes[1];};
-	//void MultiplyByLargeRational(int num, unsigned int den);
+	int HashFunction(){return this->NumShort*::SomeRandomPrimes[0]+
+														this->DenShort*::SomeRandomPrimes[1];};
+	//void MultiplyByLargeRational(int num, int den);
 	void MultiplyByInt(int x);
 	void MultiplyByLargeInt(LargeInt& x);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& x);
@@ -874,12 +890,12 @@ public:
 																														this->Simplify();
 																													};
 	void DivideBy(LargeRational& r);
-	void DivideByInteger(int x)	{ unsigned int tempDen; int tempSign;
+	void DivideByInteger(int x)	{ int tempDen; signed char tempSign;
 																if (x<0) {tempDen=(-x); tempSign=-1;} else {tempDen=x; tempSign=1;}
 																if (this->TryToMultiplyQuickly(tempSign,tempDen))
 																	return;
 																this->InitExtendedFromShortIfNeeded();
-																this->Extended->den.MultiplyByUInt(tempDen);
+																this->Extended->den.MultiplyByUInt(((unsigned int)tempDen));
 																this->Extended->num.sign*=tempSign;
 																this->Simplify();
 															};
@@ -892,7 +908,6 @@ public:
 																													this->Simplify();};
 	void ElementToString(std::string& output);
 	bool IsEqualTo(const LargeRational& r);
-	void AssignLargeRational(LargeRational& r){this->Assign(r);};
 	bool IsGreaterThanOrEqualTo(LargeRational& right);
 	inline bool IsEqualToZero(){	if (this->Extended==0)
 																	return this->NumShort==0;
@@ -900,7 +915,7 @@ public:
 																	return this->Extended->num.IsEqualToZero();
 															};
 	inline bool IsNonNegative(){	if (this->Extended==0)
-																	return this->NumShort>0;
+																	return this->NumShort>=0;
                                 else
 																	return this->Extended->num.IsNonNegative();
 															};
@@ -935,22 +950,39 @@ public:
 	static LargeRational TheRingUnit;
 	static LargeRational TheRingZero;
 	static LargeRational TheRingMUnit;
+	//don't ever call the below manually or you can get memory leak (extended must be nullified here by
+	//default!
 	LargeRational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n,d);};
 	LargeRational(){this->Extended=0;};
-	LargeRational(int x){this->Extended=0; this->AssignInteger(x);};
+//	LargeRational(int x){this->Extended=0; this->AssignInteger(x);};
 	~LargeRational(){this->FreeExtended();};
-	static unsigned int gcd(unsigned int a, unsigned int b);
-	static unsigned int gcdSigned(int a, int b){if (a<0) {a*=-1;} if (b<0){b*=-1;} return LargeRational::gcd(a,b);};
+	//the below must be called only with positive arguments!
+	static int gcd(int a, int b);
+	static int gcdSigned(int a, int b){if (a<0) {a*=-1;} if (b<0){b*=-1;} return LargeRational::gcd(a,b);};
 	inline void operator =(const LargeRational& right){this->Assign(right);};
-	bool operator ==(const LargeRational& right){return this->IsEqualTo(right);};
+	inline bool operator ==(const LargeRational& right){return this->IsEqualTo(right);};
 };
 
 class root :public ListBasicObjectsLight<LargeRational>
 {
 private:
+	void ScaleForMinHeightHeavy();
+	void ScaleToIntegralHeavy();
+	void ScaleToIntegralMinHeightHeavy();
+	void ScaleToFirstNonZeroCoordinatePositive();
+	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveHeavy();
+	void FindLCMDenominatorsHeavy(LargeIntUnsigned& output);
+	
+	void ScaleForMinHeightLight();
+	void ScaleToIntegralLight();
+	void ScaleToIntegralMinHeightLight();
+	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight();
+	void FindLCMDenominatorsLight(LargeIntUnsigned& output);
+	bool HasSmallCoordinates();
 public:
 	static unsigned char AmbientDimension;
 	std::string DebugString;
+	void MultiplyByLargeRational(LargeRational& a);
 	void ComputeDebugString();
 	void MakeZero();
 	void Add(root& r);
@@ -960,13 +992,9 @@ public:
 	void DivByLargeRational(LargeRational& a);
 	void ElementToString(std::string& output);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
-	void MultiplyByLargeRational(LargeRational& a);
-	void ScaleForMinHeight();
-	void ScaleToIntegral();
 	void ScaleToIntegralMinHeight();
-	void ScaleToFirstNonZeroCoordinatePositive();
 	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-	void FindLCMDenominators(LargeIntUnsigned& output);
+	void FindLCMDenominators(LargeIntUnsigned& output);	
 	int FindLCMDenominatorsTruncateToInt();
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5);
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
@@ -1769,6 +1797,7 @@ public:
 	static bool InitWithZero;
 	std::string DebugString;
 	bool ComputeDebugString(PolynomialOutputFormat &PolyFormat);
+	bool ComputeDebugString();
 	ElementOfCommutativeRingWithIdentity Coefficient;
 	int HashFunction();
 //	int DegreesToIndex(int MaxDeg);
@@ -2649,6 +2678,12 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString(Polynomi
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
+bool Monomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
+{	this->ElementToString(this->DebugString,PolyFormatLocal);
+	return true;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::MultiplyBy
 			(Monomial<ElementOfCommutativeRingWithIdentity>& m,
 			 Monomial<ElementOfCommutativeRingWithIdentity>& output)
@@ -2990,7 +3025,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeLinPolyFromRoot(root&
 	for (int i=0;i<r.size;i++)
 	{ tempM.MakeNVarFirstDegree(i,(short)r.size,
 															ElementOfCommutativeRingWithIdentity::TheRingUnit);
-		tempM.Coefficient.AssignLargeRational(r.TheObjects[i]);
+		tempM.Coefficient.Assign(r.TheObjects[i]);
 		this->AddMonomial(tempM);
 	}
 }
@@ -4303,6 +4338,7 @@ public:
 	root rho;
 	hashedRoots RootSystem;
 	roots RootsOfBorel;
+	static bool flagAnErrorHasOcurredTimeToPanic;
 	void ComputeRho();
 	void ComputeDebugString();
 	void ElementToString(std::string& output);

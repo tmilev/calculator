@@ -666,7 +666,7 @@ public:
 	static const unsigned int CarryOverBound=2147483648;//=2^31
 	//the below must be less than or equal to the square root of CarryOverBound.
 	//it is used for quick multiplication of LargeRationals.
-	static const unsigned int SquareRootOfCarryOverBound=32768;//=2^15
+	static const int SquareRootOfCarryOverBound=32768;//=2^15
 	void ElementToString(std::string& output);
 	void DivPositive(LargeIntUnsigned &x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
 	void MakeOne();
@@ -847,9 +847,9 @@ class LargeRational
 		if (		this->Extended->num.value.size>1
 				||	this->Extended->den.size>1
 				||	this->Extended->num.value.TheObjects[0]>=
-							LargeIntUnsigned::SquareRootOfCarryOverBound
+						(unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound
 				||	this->Extended->den.TheObjects[0]>=
-							LargeIntUnsigned::SquareRootOfCarryOverBound)
+						(unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
 			return false;
 		this->NumShort= this->Extended->num.GetIntValueTruncated();
 		this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
@@ -858,7 +858,7 @@ class LargeRational
 	};
 public:
 	int NumShort;
-	//the requirement that the below be unsigned cause huge problem, so I 
+	//the requirement that the below be unsigned cause huge problem, so I
 	//changed it back to int. Grrrrr.
 	int DenShort;
 	LargeRationalExtended *Extended;
@@ -972,7 +972,7 @@ private:
 	void ScaleToFirstNonZeroCoordinatePositive();
 	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveHeavy();
 	void FindLCMDenominatorsHeavy(LargeIntUnsigned& output);
-	
+
 	void ScaleForMinHeightLight();
 	void ScaleToIntegralLight();
 	void ScaleToIntegralMinHeightLight();
@@ -994,7 +994,7 @@ public:
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
 	void ScaleToIntegralMinHeight();
 	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-	void FindLCMDenominators(LargeIntUnsigned& output);	
+	void FindLCMDenominators(LargeIntUnsigned& output);
 	int FindLCMDenominatorsTruncateToInt();
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5);
 	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);

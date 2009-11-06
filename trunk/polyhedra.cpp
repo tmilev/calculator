@@ -129,6 +129,7 @@ Cone CombinatorialChamberPointers::TheGlobalConeNormals;
 int CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag;
 int CombinatorialChamberPointers::LastReportedMemoryUse;
 int CombinatorialChamberPointers::DefragSpacing;
+int CombinatorialChamberPointers::flagMaxNumCharsAllowedInStringOutput=16777216;
 std::fstream CombinatorialChamberPointers::TheBigDump;
 
 ListObjectPointers<QuasiPolynomial> QuasiPolynomial::GlobalCollectorsPolys;
@@ -232,6 +233,7 @@ bool partFractions::flagAnErrorHasOccurredTimeToPanic=false;
 bool partFractions::flagUsingCheckSum=true;
 int partFractions::NumMonomialsInNumeratorsRelevantFractions=0;
 int partFractions::NumProcessedForVPFMonomialsTotal=0;
+int partFractions::flagMaxNumStringOutputLines=500;
 //int partFraction::lastApplicationOfSVformulaNumNewGenerators=0;
 //int partFraction::lastApplicationOfSVformulaNumNewMonomials=0;
 bool QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic=false;
@@ -371,11 +373,11 @@ int NChooseK(int n, int k)
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 { this->ColorChamberIndicator=RGB(220,220,0);
 	this->DeadChamberTextColor= RGB(200,100,100);
-	this->ZeroChamberTextColor= RGB(100,100,0);
+	this->ZeroChamberTextColor= RGB(220,120,120);
 	this->TextColor= RGB(0,0,0);
 	this->DrawStyleDashes= 1;
 	this->DrawStyleDashesInvisibles= 1;
-	this->DrawChamberIndices= false;
+	this->DrawChamberIndices= true;
 	this->DisplayingChamberCreationNumbers =false;
 	this->DrawDashes=true;
 	this->DrawStyleInvisibles=2;
@@ -467,8 +469,10 @@ ComputationSetup::ComputationSetup()
 	this->ComputingChambers=true;
 	this->ComputationInProgress=false;
 	this->MakingCheckSumPFsplit=false;
-	this->havingBeginEqnForLaTeXinStrings=true;
+	this->flagHavingBeginEqnForLaTeXinStrings=true;
 	this->thePartialFraction.flagUsingIndicatorRoot=true;
+	this->flagDisplayingPartialFractions=true;
+	this->flagDisplayingCombinatorialChambersTextData=false;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
 //	this->RankEuclideanSpaceGraphics=3;
@@ -501,10 +505,13 @@ void ComputationSetup::Run()
 				(this->theOutput,this->thePartialFraction.IndicatorRoot,false,false);
 			this->theOutput.ComputeDebugString();
 		}
-		if (this->havingBeginEqnForLaTeXinStrings)
+		if (this->flagHavingBeginEqnForLaTeXinStrings)
 		{ std::stringstream out;
 			out <<"\\begin{eqnarray*}&&"<<this->theOutput.DebugString<< "\\end{eqnarray*}";
 			this->theOutput.DebugString= out.str();
+		}
+//		if (this->flagDisplayingPartialFractions)
+		{ this->thePartialFraction.ComputeDebugString();
 		}
 	}
 	if (this->ComputingChambers)
@@ -512,7 +519,9 @@ void ComputationSetup::Run()
 		::InputRoots.CopyFromBase(this->VPVectors);
 		::NextDirectionIndex=root::AmbientDimension-1;
 		SliceTheEuclideanSpace(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
-													TheBigOutput,TheBigFacetOutput,this->thePartialFraction.IndicatorRoot);
+														::TheBigOutput,::TheBigFacetOutput,
+														this->thePartialFraction.IndicatorRoot);
+		::TheBigOutput.ComputeDebugString();
 	}
 	this->AllowRepaint=true;
 	this->ComputationInProgress=false;
@@ -601,13 +610,13 @@ void drawFacetVerticesMethod2(DrawingVariables& TDV,
 // 1 = dashed line
 // 2 = dotted line
 // 5 = invisible line (no line)
-void drawOutput(DrawingVariables& TDV,
+void CombinatorialChamberPointers::drawOutput(DrawingVariables& TDV,
 								CombinatorialChamberPointers& output,
 								roots& directions, int directionIndex, root& ChamberIndicator)
 { int color=0;
 	LargeRational::flagMinorRoutinesOnDontUseFullPrecision=true;
 	int NumTrueChambers=0;
-	int NumTrueChambers2=0;
+	//int NumTrueChambers2=0;
 	int NumZeroChambers=0;
 	for (int j=0; j<output.size;j++)
 	{ if (!output.TheObjects[j]->HasZeroPoly())
@@ -621,6 +630,9 @@ void drawOutput(DrawingVariables& TDV,
 	out1<<"#Zero chambers: "<< NumZeroChambers;
 	tempS=out1.str();
 	drawtext(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
+	//int NumTrueChambers=0;
+	//int NumTrueChambers2=0;
+	//int NumZeroChambers=0;
 	if (CombinatorialChamber::DisplayingGraphics)
 	{	for (int j=0; j<output.size;j++)
 		{	bool hasZeroPoly= output.TheObjects[j]->HasZeroPoly();
@@ -630,7 +642,7 @@ void drawOutput(DrawingVariables& TDV,
 			{	DrawingStyle = TDV.DrawStyle;
 				DrawingStyleDashes= TDV.DrawStyleDashes;
 				color = TDV.TextColor;
-				NumTrueChambers2++;
+				//NumTrueChambers2++;
 			}
 			else
 			{	color= TDV.ZeroChamberTextColor;
@@ -659,7 +671,7 @@ void drawOutput(DrawingVariables& TDV,
 					{	out<<output.TheObjects[j]->CreationNumber;
 					}
 					else
-					{ out<<NumTrueChambers2;
+					{ out<<output.TheObjects[j]->DisplayNumber;
 					}
 					tempS=out.str();
 					drawtext(tempX-7,tempY-7, tempS.c_str(), tempS.length(),color);
@@ -1895,27 +1907,42 @@ bool CombinatorialChamber::CheckSplittingPointCandidate(Selection &SelectionTarg
 }
 
 bool CombinatorialChamber::ComputeDebugString()
-{
-	std::stringstream out;
-	out <<"c"<<this->CreationNumber;
-	out <<"\n External Walls:\n";
+{ return this->ElementToString(this->DebugString);
+}
+
+void CombinatorialChamber::ChamberNumberToStringStream(std::stringstream& out)
+{ if (this->HasZeroPoly())
+	{ out<< "Invisible";
+	} else
+	{	out <<"c";
+	}
+	if (this->DisplayNumber!=-1)
+		out<<this->DisplayNumber;
+	else
+		out<<this->CreationNumber;
+}
+
+bool CombinatorialChamber::ElementToString(std::string& output)
+{	std::stringstream out;
+	this->ChamberNumberToStringStream(out);
+	out <<"\nExternal Walls:\n";
 	root tempNormal;
 	std::string tempS;
 	for (int i=0;i<this->ExternalWalls->size;i++)
 	{	this->ExternalWallsNormals.TheObjects[i].ElementToString(tempS);
 		out <<"f"<<i<<": "<<"n"<<this->ExternalWalls->TheObjects[i]->CreationNumber<<": "<< tempS<<"\n";
 	}
-	out <<"\n Internal Walls:\n";
+	out <<"Internal Walls:\n";
 	for (int i=0;i<this->InternalWalls->size;i++)
 	{	this->InternalWalls->TheObjects[i]->normal.ElementToString(tempS);
 		out <<"f"<<i<<": "<<"n"<<this->InternalWalls->TheObjects[i]->CreationNumber<<": "<< tempS<<"\n";
 	}
-	ListObjectPointers<CombinatorialChamber> output;
-	this->FindAllNeighbors(output);
+	ListObjectPointers<CombinatorialChamber> outputChambers;
+	this->FindAllNeighbors(outputChambers);
 	out<<"Neighbors: ";
-	for (int i=0;i<output.size;i++)
-	{
-		out<< "c"<<output.TheObjects[i]->CreationNumber<<", ";
+	for (int i=0;i<outputChambers.size;i++)
+	{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out);
+		out <<", ";
 	}
 	PolyFormatLocal.cutOffString=false;
 	if (this->ComputingPolys)
@@ -1935,16 +1962,14 @@ bool CombinatorialChamber::ComputeDebugString()
 			out << this->InternalWalls->TheObjects[i]->DebugString<<"\n";
 		}
 	}
-	out<<"\n XXX";
-	this->DebugString=out.str();
+	out<<"\n \n";
+	output=out.str();
 	return true;
 }
 
 bool CombinatorialChamber::CheckVertices()
-{
-	for (int i=0;i<this->ExternalWalls->size;i++ )
-	{
-		assert (this->ExternalWalls->TheObjects[i]->CheckVertices(this));
+{	for (int i=0;i<this->ExternalWalls->size;i++ )
+	{	assert (this->ExternalWalls->TheObjects[i]->CheckVertices(this));
 	}
 	return true;
 }
@@ -1955,6 +1980,7 @@ CombinatorialChamber::CombinatorialChamber()
 	this->ExternalWalls =new FacetPointers;
 	this->InternalWalls =new FacetPointers;
 	this->Explored=false;
+	this->DisplayNumber=-1;
 	this->PermanentlyZero=false;
 	GlobalCollectorChambers.AddObjectOnTop(this);
 	this->CreationNumber=GlobalCollectorChambers.size;
@@ -2674,6 +2700,30 @@ void CombinatorialChamberPointers::ComputeNextIndexToSlice(root &direction)
 		}
 	}
 	this->NextChamberToSlice=0;
+}
+
+void CombinatorialChamberPointers::ElementToString(std::string& output)
+{ std::stringstream out;
+	std::string tempS;
+	int NumZeroChambers=0;
+	int NumNonZeroChambers=0;
+	for (int i=0;i<this->size;i++)
+	{ if (this->TheObjects[i]->HasZeroPoly())
+		{	NumZeroChambers++;
+			this->TheObjects[i]->DisplayNumber=NumZeroChambers;
+		}
+		else
+		{	NumNonZeroChambers++;
+			this->TheObjects[i]->DisplayNumber=NumNonZeroChambers;
+		}
+	}
+	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i]->ElementToString(tempS);
+		out <<tempS <<"\n";
+		if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput)
+			break;
+	}
+	output= out.str();
 }
 
 CombinatorialChamberPointers::CombinatorialChamberPointers()
@@ -8554,6 +8604,11 @@ int partFractions::ElementToStringBasisChange(MatrixInt& VarChange,
 			{ out<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
 				LastCutOff=TotalLines;
 			}
+		}
+		if (TotalLines>this->flagMaxNumStringOutputLines)
+		{ out<< "\n Number of lines exceeded " << this->flagMaxNumStringOutputLines
+				 << "; The rest of the output was suppressed.";
+			break;
 		}
 	}
 	if (!LatexFormat)

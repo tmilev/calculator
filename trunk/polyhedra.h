@@ -4397,7 +4397,8 @@ public:
 	std::string VPEntriesFileString;
 	std::string VPIndexFileString;
 	rootFKFTcomputation();
-	bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName);
+	static bool OpenDataFileOrCreateIfNotPresent
+			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
   void RunA2A1A1inD5beta12221();

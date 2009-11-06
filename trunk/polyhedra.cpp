@@ -11022,12 +11022,12 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 	}
 	std::fstream KLDump;
 	std::fstream PartialFractionsFile;
-	bool KLDumpIsPresent =this->OpenDataFileOrCreateIfNotPresent(KLDump,this->KLCoeffFileString);
+	bool KLDumpIsPresent =this->OpenDataFileOrCreateIfNotPresent(KLDump,this->KLCoeffFileString, false);
   bool PFfileIsPresent=this->OpenDataFileOrCreateIfNotPresent
-		(PartialFractionsFile,this->PartialFractionsFileString);
+		(PartialFractionsFile,this->PartialFractionsFileString,false);
   bool VPIndexIsPresent= this->OpenDataFileOrCreateIfNotPresent
-		(partFractions::ComputedContributionsList,this->VPIndexFileString);
-	this->OpenDataFileOrCreateIfNotPresent(partFraction::TheBigDump,this->VPEntriesFileString);
+		(partFractions::ComputedContributionsList,this->VPIndexFileString,false);
+	this->OpenDataFileOrCreateIfNotPresent(partFraction::TheBigDump,this->VPEntriesFileString,true);
 	assert(partFraction::TheBigDump.is_open());
 	assert(KLDump.is_open());
 	assert(PartialFractionsFile.is_open());
@@ -11113,8 +11113,13 @@ void rootFKFTcomputation::processA2A1A1inD5beta12221Answer(QuasiPolynomial& theA
 	tempQP2.ComputeDebugString();
 }
 
-bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName)
-{ theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app);
+bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
+	(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode)
+{ if (OpenInAppendMode)
+	{	theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app);
+  } else
+  { theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
+  }
   if(theFile.is_open())
   {	theFile.seekp(0,std::ios_base::end);
 		int tempI=theFile.tellp();

@@ -1079,6 +1079,7 @@ public:
 	std::string DebugString;
 	QuasiPolynomial* ThePolynomial;
 	int CreationNumber;
+	int DisplayNumber;
 	bool Explored;
 	bool PermanentlyZero;
 	FacetPointers* ExternalWalls;
@@ -1098,6 +1099,8 @@ public:
 	bool PointLiesInMoreThanOneWall(root& point);
 	bool IsAnOwnerOfAllItsWalls();
 	bool ComputeDebugString();
+	bool ElementToString(std::string& output);
+	void ChamberNumberToStringStream(std::stringstream& out);
 	bool CheckVertices();
 	bool FacetIsInternal(Facet* f);
 	void GetNormalFromFacet(root& output, Facet* theFacet);
@@ -1643,6 +1646,7 @@ public:
 class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
 {
 public:
+	std::string DebugString;
 	static const int MaxNumHeaps=5000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
 	static int DefragSpacing;
@@ -1654,12 +1658,15 @@ public:
 	static root PositiveLinearFunctional;
 	static bool PrintLastChamberOnly;
 	static bool AnErrorHasOcurredTimeToPanic;
+	static int flagMaxNumCharsAllowedInStringOutput;
 	unsigned char AmbientDimension;
 	root IndicatorRoot;
 	QuasiPolynomials* ThePolys;
 	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
 	CombinatorialChamber* NextChamberToSlice;
 	CombinatorialChamber* LastComputedChamber;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	int NextChamberToSliceIndexInPreferredNextChambers;
 	int FirstNonExploredIndex;
 	void Free();
@@ -1671,6 +1678,8 @@ public:
 	void DumpAll();
 	void PrintThePolys(std::string& output);
 	void ComputeGlobalCone(roots& directions);
+	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
+								roots& directions, int directionIndex,root& ChamberIndicator);
 	bool TestPossibleIndexToSlice(root&direction, int index);
 	CombinatorialChamberPointers();
 	~CombinatorialChamberPointers();
@@ -4167,6 +4176,7 @@ public:
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 	static	bool flagMakingProgressReport;
 	static	bool flagUsingCheckSum;
+	static int flagMaxNumStringOutputLines;
 	void PrepareCheckSums();
 	void CompareCheckSums();
 	void ComputeDebugString();
@@ -4557,7 +4567,9 @@ public:
 	bool ComputingVectorPartitions;
 	bool ComputingChambers;
 	bool MakingCheckSumPFsplit;
-	bool havingBeginEqnForLaTeXinStrings;
+	bool flagDisplayingCombinatorialChambersTextData;
+	bool flagHavingBeginEqnForLaTeXinStrings;
+	bool flagDisplayingPartialFractions;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 //	unsigned char RankEuclideanSpaceGraphics;
@@ -4606,8 +4618,6 @@ void SliceOneDirection(roots& directions, int& index, int rank,
 											 FacetPointers& FacetOutput, root& IndicatorRoot);
 void OneSlice(roots& directions, int& index, int rank, CombinatorialChamberPointers& output,
 							FacetPointers& FacetOutput, root& IndicatorRoot);
-void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
-								roots& directions, int directionIndex,root& ChamberIndicator);
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
 

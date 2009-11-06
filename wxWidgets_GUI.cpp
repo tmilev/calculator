@@ -46,6 +46,8 @@ extern roots InputRoots;
 extern CombinatorialChamberPointers TheBigOutput;
 extern FacetPointers TheBigFacetOutput;
 
+class guiMainWindow;
+class wxDialogOutput;
 class guiApp : public wxApp
 {
 public:
@@ -166,9 +168,11 @@ public:
 	wxBoxSizer* BoxSizer10HorizontalProgressReportsAndOptions;
 	wxBoxSizer* BoxSizer11VerticalOptions;
 	wxBoxSizer* BoxSizer12VerticalProgressReports;
+	wxBoxSizer* BoxSizer13VerticalPartFracOutput;
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
-  wxDialog* Dialog1OutputPF;
+  wxTextCtrl* Text3PartialFractions;
+  wxDialogOutput* Dialog1OutputPF;
 	wxFont* theFont;
 	::wxStaticText* Label1ProgressReport;
 	::wxStaticText* Label2ProgressReport;
@@ -187,8 +191,12 @@ public:
 	::wxCheckBox* CheckBox1ComputePFs;
 	::wxCheckBox* CheckBox2CheckSums;
 	::wxCheckBox* CheckBox3ComputeChambers;
+	::wxCheckBox* CheckBox4ChamberLabels;
+	::wxCheckBox* CheckBox5InvisibleChambers;
+	::wxCheckBox* CheckBox6Dashes;
   ::drawCanvas* Canvas1;
   ::wxToggleButton* ToggleButton1UsingCustom;
+  ::wxToggleButton* ToggleButton2ViewCombinatorialChambers;
 	::IndicatorWindowVariables progressReportVariables;
 	//wxEVT_ProgressReport ProgressReportEvent;
   void onToggleButton1UsingCustom( wxCommandEvent& ev);
@@ -200,11 +208,13 @@ public:
 	void onComputationOver(wxCommandEvent& ev);
 	void onRePaint(wxPaintEvent& ev);
 	void onMouseDownOnCanvas(wxMouseEvent& ev);
+	void onCheckBoxesGraphics(wxCommandEvent& ev); 
 	void ReadVPVectorsAndOptions();
 	void WriteIndicatorWeight(root& tempRoot);
 	void onProgressReport(wxCommandEvent & ev);
 	void TurnOnAllDangerousButtons();
 	void TurnOffAllDangerousButtons();
+	void updatePartialFractionAndCombinatorialChamberTextData();
 	void updateInputButtons();
 	void initWeylGroupInfo();
 	void initTableFromVPVectors();
@@ -218,9 +228,10 @@ public:
   static const int DefaultButtonHeight=30;
   static const int DefaultButtonWidth=100;
   enum
-  { ID_MainWindow,
+  { ID_MainWindow= 1001,
 		ID_Dialog1,
-		ID_ToggleButton1UsingCustom = 100,
+		ID_ToggleButton1UsingCustom,
+		ID_ToggleButton2ViewCombinatorialChambers,
 		ID_ListBox1,
 		ID_Button1Go,
 		ID_Buton2Eval,
@@ -229,6 +240,7 @@ public:
 		ID_Canvas1,
 		ID_ComputationUpdate,
 		ID_CheckBox1,
+		ID_CheckBoxesGraphics,
 		ID_Button3Custom,
 		ID_Paint,
   };
@@ -264,7 +276,8 @@ bool guiApp::OnInit()
 }
 
 BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
-	EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
+	EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom,
+									 guiMainWindow::onToggleButton1UsingCustom)
 	EVT_BUTTON(guiMainWindow::ID_Buton2Eval, guiMainWindow::onButton2Eval)
 	EVT_BUTTON(guiMainWindow::ID_Button1Go, guiMainWindow::onButton1Go)
 	EVT_BUTTON(guiMainWindow::ID_Button3Custom, guiMainWindow::onButton3Custom)
@@ -273,12 +286,36 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
 	EVT_SIZING(drawCanvas::onSizing)
 	EVT_SIZE(drawCanvas::onSizing)
-	EVT_COMMAND  (guiMainWindow::ID_MainWindow,::wxEVT_ProgressReport,guiMainWindow::onProgressReport )
-	EVT_COMMAND  (guiMainWindow::ID_MainWindow,::wxEVT_ComputationFinished,guiMainWindow::onComputationOver )
+	EVT_CHECKBOX(guiMainWindow::ID_CheckBoxesGraphics, guiMainWindow::onCheckBoxesGraphics)
+	EVT_COMMAND (guiMainWindow::ID_MainWindow,::wxEVT_ProgressReport,guiMainWindow::onProgressReport )
+	EVT_COMMAND (guiMainWindow::ID_MainWindow,::wxEVT_ComputationFinished,guiMainWindow::onComputationOver )
 	EVT_CLOSE(guiMainWindow::OnExit)
 	//EVT_PAINT(guiMainWindow::onPaint)
 
 END_EVENT_TABLE()
+
+class wxDialogOutput : public wxDialog
+{
+public:
+	wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title,
+	              const wxPoint & pos = wxDefaultPosition,
+	              const wxSize & size = wxDefaultSize,
+	              long style = wxDEFAULT_DIALOG_STYLE );
+  void onToggleButton2ViewCombinatorialChambers( wxCommandEvent& ev);
+	DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
+EVT_TOGGLEBUTTON(	guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, 
+									wxDialogOutput::onToggleButton2ViewCombinatorialChambers)
+END_EVENT_TABLE()
+
+wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title,
+                           const wxPoint & position, const wxSize & size, long style )
+: wxDialog( parent, id, title, position, size, style)
+{
+}
+
 
 #ifdef WIN32
   void RunComputationalThread()
@@ -353,7 +390,8 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 }
 
 guiMainWindow::guiMainWindow()
-				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("I will eat your RAM (but not as much as in the past)"),
+				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow, 
+						wxT("Vector partition function v0.06 (eating RAM for breakfast)"),
                    wxPoint(100,100),
                    wxSize(800,600))
 {	this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
@@ -368,7 +406,9 @@ guiMainWindow::guiMainWindow()
 	this->BoxSizer10HorizontalProgressReportsAndOptions = new ::wxBoxSizer(wxHORIZONTAL);
 	this->BoxSizer11VerticalOptions = new ::wxBoxSizer(wxVERTICAL);
 	this->BoxSizer12VerticalProgressReports = new ::wxBoxSizer(wxVERTICAL);
-	this->ToggleButton1UsingCustom= new ::wxToggleButton(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
+	this->BoxSizer13VerticalPartFracOutput = new ::wxBoxSizer(wxVERTICAL);
+	this->ToggleButton1UsingCustom= new ::wxToggleButton
+		(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
   this->Table3Values = new wxGridExtra( this,::wxID_ANY);
@@ -381,7 +421,14 @@ guiMainWindow::guiMainWindow()
 	this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
 	this->CheckBox1ComputePFs= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Don't compute PF"));
 	this->CheckBox2CheckSums= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Checksums"));
-	this->CheckBox3ComputeChambers= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Compute chambers"));
+	this->CheckBox3ComputeChambers= new ::wxCheckBox
+		(this,this->ID_CheckBox1,wxT("Compute chambers"));
+	this->CheckBox4ChamberLabels=new ::wxCheckBox
+		(this,this->ID_CheckBoxesGraphics,wxT("Chamber labels"));
+	this->CheckBox5InvisibleChambers=new ::wxCheckBox
+		(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
+	this->CheckBox6Dashes=new ::wxCheckBox
+		(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
 	//this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	//this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
@@ -400,6 +447,15 @@ guiMainWindow::guiMainWindow()
 	this->Button3Custom= new wxButton(this,this->ID_Button3Custom,wxT("Experiments"));
 	this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
 	this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
+	this->Dialog1OutputPF= new ::wxDialogOutput(this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
+																				::wxDefaultPosition, ::wxDefaultSize,
+																				wxRESIZE_BORDER| wxCAPTION);
+	this->Text3PartialFractions= new ::wxTextCtrl
+			(	this->Dialog1OutputPF,::wxID_ANY,wxT(""),
+				::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
+	this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton
+		(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers,
+			wxT("Switch to chamber data"));
 	//this->BoxSizer1HorizontalBackground->Fit(this);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
 		this->BoxSizer2VerticalInputs->Add(this->BoxSizer6HorizontalInputsBlock,0, wxEXPAND| wxALL,0);
@@ -435,10 +491,14 @@ guiMainWindow::guiMainWindow()
 				this->BoxSizer12VerticalProgressReports->Add(this->Label3ProgressReport);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label4ProgressReport);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label5ProgressReport);
+		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox4ChamberLabels);
+		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox5InvisibleChambers);
+		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox6Dashes);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->Canvas1,1,wxEXPAND|wxALL);
-	this->Dialog1OutputPF= new ::wxDialog(this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
-																				::wxDefaultPosition, ::wxDefaultSize);
-	this->Dialog1OutputPF->Show();
+	this->BoxSizer13VerticalPartFracOutput->Add(this->ToggleButton2ViewCombinatorialChambers);
+	this->BoxSizer13VerticalPartFracOutput->Add(this->Text3PartialFractions, 1, wxEXPAND|wxALL);
+	this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
+	
 //	this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
   this->ListBox1WeylGroup->Append(wxT("A2"));
   this->ListBox1WeylGroup->Append(wxT("A3"));
@@ -460,6 +520,9 @@ guiMainWindow::guiMainWindow()
 	this->CheckBox1ComputePFs->SetValue(false);
 	this->CheckBox2CheckSums->SetValue(false);
 	this->CheckBox3ComputeChambers->SetValue(true);
+	this->CheckBox4ChamberLabels->SetValue(true);
+	this->CheckBox5InvisibleChambers->SetValue(false);
+	this->CheckBox6Dashes->SetValue(true);
 	this->theComputationSetup.ComputationInProgress=false;
 	this->theComputationSetup.AllowRepaint=true;
 	this->theComputationSetup.UsingCustomVectors=false;
@@ -504,6 +567,7 @@ guiMainWindow::guiMainWindow()
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
 #endif
 	this->ReadSettingsIfAvailable();
+	this->Dialog1OutputPF->Show();	
 	//Centre();
 }
 void drawCanvas::onSizing(wxSizeEvent& ev)
@@ -588,6 +652,21 @@ void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
 	this->updateInputButtons();
 }
 
+void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev)
+{ if (MainWindow1==0)
+		return;
+	if (!MainWindow1->ToggleButton2ViewCombinatorialChambers->GetValue())
+	{ MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
+		MainWindow1->theComputationSetup.flagDisplayingPartialFractions=true;
+		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel("Switch to chamber data");
+	} else
+	{	MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
+		MainWindow1->theComputationSetup.flagDisplayingPartialFractions=false;
+		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel("Switch to partial fractions");
+	}
+	MainWindow1->updatePartialFractionAndCombinatorialChamberTextData();
+}
+
 void guiMainWindow::onRePaint(wxPaintEvent& ev)
 {	::wxPaintDC dc;
 	this->Refresh();
@@ -599,7 +678,7 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 	{	root::AmbientDimension= TheBigOutput.AmbientDimension;
 		dc.SetBackground(MainWindow1->GetBackgroundColour());
 		dc.DrawRectangle(wxPoint(0,0),this->GetSize());
-		::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,TheBigOutput.IndicatorRoot);
+		::CombinatorialChamberPointers::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,TheBigOutput.IndicatorRoot);
 	}
 }
 
@@ -949,19 +1028,27 @@ void guiMainWindow::WriteSettingsIfAvailable()
 		this->fileSettings  <<"Main_window_top_left_corner_x " <<x
 									<<"\nMain_window_top_left_corner_y " <<y;
 		this->GetSize(& x, & y);
-		this->fileSettings  <<"\nMain_window_height " <<x
-									<<"\nMain_window_width "  <<y;		
+		this->fileSettings  <<"\nMain_window_width " <<x
+									<<"\nMain_window_height "  <<y;
+		this->Dialog1OutputPF->GetPosition(&x,&y);
+		this->fileSettings  <<"\nPartial_fraction_window_top_left_corner_x " <<x
+									<<"\nPartial_fraction_window_top_left_corner_y "  <<y;		
+		this->Dialog1OutputPF->GetSize(&x,&y);
+		this->fileSettings  <<"\nPartial_fraction_window_width " <<x
+									<<"\nPartial_fraction_window_height "  <<y;		
 		this->fileSettings.flush();
 	}
 }
 
 void guiMainWindow::ReadSettingsIfAvailable()
-{ std::stringstream out;
+{ if (::MainWindow1GlobalPath=="")
+		return;
+	std::stringstream out;
 	out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
 	std::string tempS;
 	tempS= out.str();
 	if (::rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent(this->fileSettings,tempS,false))
-	{	wxPoint tempPt; wxSize tempSize;
+	{	wxPoint tempPt, tempPt2; wxSize tempSize, tempSize2;
 		this->fileSettings.seekg(0);
 		this->fileSettings>>tempS >>tempPt.x;
 		this->fileSettings>>tempS >>tempPt.y;
@@ -969,6 +1056,12 @@ void guiMainWindow::ReadSettingsIfAvailable()
 		this->fileSettings>>tempS >> tempSize.y;
 		this->SetPosition(tempPt);
 		this->SetSize(tempSize);
+		this->fileSettings>>tempS >>tempPt2.x;
+		this->fileSettings>>tempS >>tempPt2.y;
+		this->fileSettings>>tempS >> tempSize2.x;
+		this->fileSettings>>tempS >> tempSize2.y;
+		this->Dialog1OutputPF->SetPosition(tempPt2);
+		this->Dialog1OutputPF->SetSize(tempSize2);
 	}	
 }
 
@@ -976,9 +1069,34 @@ void guiMainWindow::ArrangeWindows()
 { this->ReadSettingsIfAvailable();
 }
 
+void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
+{ {	wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
+		MainWindow1->Text1Output->SetValue(tempWS);
+	}
+	{	if (this->theComputationSetup.flagDisplayingPartialFractions)
+		{	wxString tempWS(MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(), 
+										wxConvUTF8);
+			MainWindow1->Text3PartialFractions->SetValue(tempWS);
+		} else
+		{ if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
+			{ wxString tempWS(::TheBigOutput.DebugString.c_str(), 
+										wxConvUTF8);
+				MainWindow1->Text3PartialFractions->SetValue(tempWS);
+			}
+		}
+	}
+}
+
+void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
+{ TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
+	TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
+	TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
+	this->Refresh();
+}
+
+
 void guiMainWindow::onComputationOver(wxCommandEvent& ev)
-{ wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
-	MainWindow1->Text1Output->SetValue(tempWS);
+{ this->updatePartialFractionAndCombinatorialChamberTextData();
 	MainWindow1->TurnOnAllDangerousButtons();
 	MainWindow1->Button1Go->SetLabel(wxT("Go"));
 	MainWindow1->Refresh();
@@ -1027,7 +1145,7 @@ void drawline(double X1, double Y1, double X2, double Y2,
 		case 2: tempPen.SetStyle(::wxDOT);break;
 		case 5: return;
 	}
-	tempPen.SetColour(ColorIndex);
+	tempPen.SetColour(ColorIndex); 
 	dc.SetPen(tempPen);
 	dc.DrawLine((int)X1, (int)Y1,(int) X2,(int) Y2);
 //	dc.setForeground(FXRGB(0,0,0));
@@ -1036,6 +1154,7 @@ void drawline(double X1, double Y1, double X2, double Y2,
 void drawtext(double X1, double Y1, const char* text, int length, int color)
 {	::wxWindowDC dc(MainWindow1->Canvas1);
 	dc.SetFont(*MainWindow1->theFont);
+	dc.SetTextForeground(color);
 	//dc.setcolo(color);
 	//dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
 	//dc(FILL_STIPPLED);

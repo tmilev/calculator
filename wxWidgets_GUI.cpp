@@ -33,6 +33,7 @@
 #include "wx/menu.h"
 #include "wx/spinctrl.h"
 #include "wx/textctrl.h"
+#include "wx/filename.h"
 #ifndef WIN32
   #include <unistd.h>
 #endif
@@ -208,7 +209,7 @@ public:
 	void onComputationOver(wxCommandEvent& ev);
 	void onRePaint(wxPaintEvent& ev);
 	void onMouseDownOnCanvas(wxMouseEvent& ev);
-	void onCheckBoxesGraphics(wxCommandEvent& ev); 
+	void onCheckBoxesGraphics(wxCommandEvent& ev);
 	void ReadVPVectorsAndOptions();
 	void WriteIndicatorWeight(root& tempRoot);
 	void onProgressReport(wxCommandEvent & ev);
@@ -254,7 +255,7 @@ std::string MainWindow1GlobalPath;
 
 
 bool guiApp::OnInit()
-{ 
+{
 #ifdef WIN32
 	char path[500];
 	::GetModuleFileName(NULL,path,499);
@@ -269,6 +270,17 @@ bool guiApp::OnInit()
 		}
 	}
 	::MainWindow1GlobalPath.resize(pathCutOffSize);
+#else
+  wxString path =this->argv[0];
+  if (!wxIsAbsolutePath(path))
+  { wxPathList pathlist;
+    pathlist.AddEnvList(wxT("PATH"));
+    path = pathlist.FindAbsoluteValidPath(path);
+  }
+  wxFileName filename(path);
+  filename.Normalize();
+  path = filename.GetFullPath();
+  MainWindow1GlobalPath=path.mb_str();
 #endif
 	MainWindow1 = new guiMainWindow;
   MainWindow1->Show(true);
@@ -306,7 +318,7 @@ public:
 };
 
 BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
-EVT_TOGGLEBUTTON(	guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, 
+EVT_TOGGLEBUTTON(	guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers,
 									wxDialogOutput::onToggleButton2ViewCombinatorialChambers)
 END_EVENT_TABLE()
 
@@ -390,10 +402,10 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 }
 
 guiMainWindow::guiMainWindow()
-				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow, 
+				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow,
 						wxT("Vector partition function v0.06 (eating RAM for breakfast)"),
                    wxPoint(100,100),
-                   wxSize(800,600))
+                   wxSize(800,600),wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX)
 {	this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
 	this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
 	this->BoxSizer3HorizontalInputButtons = new ::wxBoxSizer(wxHORIZONTAL);
@@ -498,7 +510,7 @@ guiMainWindow::guiMainWindow()
 	this->BoxSizer13VerticalPartFracOutput->Add(this->ToggleButton2ViewCombinatorialChambers);
 	this->BoxSizer13VerticalPartFracOutput->Add(this->Text3PartialFractions, 1, wxEXPAND|wxALL);
 	this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
-	
+
 //	this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
   this->ListBox1WeylGroup->Append(wxT("A2"));
   this->ListBox1WeylGroup->Append(wxT("A3"));
@@ -567,7 +579,7 @@ guiMainWindow::guiMainWindow()
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
 #endif
 	this->ReadSettingsIfAvailable();
-	this->Dialog1OutputPF->Show();	
+	this->Dialog1OutputPF->Show();
 	//Centre();
 }
 void drawCanvas::onSizing(wxSizeEvent& ev)
@@ -658,11 +670,11 @@ void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev
 	if (!MainWindow1->ToggleButton2ViewCombinatorialChambers->GetValue())
 	{ MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
 		MainWindow1->theComputationSetup.flagDisplayingPartialFractions=true;
-		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel("Switch to chamber data");
+		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to chamber data"));
 	} else
 	{	MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
 		MainWindow1->theComputationSetup.flagDisplayingPartialFractions=false;
-		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel("Switch to partial fractions");
+		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to partial fractions"));
 	}
 	MainWindow1->updatePartialFractionAndCombinatorialChamberTextData();
 }
@@ -1032,10 +1044,10 @@ void guiMainWindow::WriteSettingsIfAvailable()
 									<<"\nMain_window_height "  <<y;
 		this->Dialog1OutputPF->GetPosition(&x,&y);
 		this->fileSettings  <<"\nPartial_fraction_window_top_left_corner_x " <<x
-									<<"\nPartial_fraction_window_top_left_corner_y "  <<y;		
+									<<"\nPartial_fraction_window_top_left_corner_y "  <<y;
 		this->Dialog1OutputPF->GetSize(&x,&y);
 		this->fileSettings  <<"\nPartial_fraction_window_width " <<x
-									<<"\nPartial_fraction_window_height "  <<y;		
+									<<"\nPartial_fraction_window_height "  <<y;
 		this->fileSettings.flush();
 	}
 }
@@ -1062,7 +1074,7 @@ void guiMainWindow::ReadSettingsIfAvailable()
 		this->fileSettings>>tempS >> tempSize2.y;
 		this->Dialog1OutputPF->SetPosition(tempPt2);
 		this->Dialog1OutputPF->SetSize(tempSize2);
-	}	
+	}
 }
 
 void guiMainWindow::ArrangeWindows()
@@ -1074,12 +1086,12 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 		MainWindow1->Text1Output->SetValue(tempWS);
 	}
 	{	if (this->theComputationSetup.flagDisplayingPartialFractions)
-		{	wxString tempWS(MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(), 
+		{	wxString tempWS(MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(),
 										wxConvUTF8);
 			MainWindow1->Text3PartialFractions->SetValue(tempWS);
 		} else
 		{ if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
-			{ wxString tempWS(::TheBigOutput.DebugString.c_str(), 
+			{ wxString tempWS(::TheBigOutput.DebugString.c_str(),
 										wxConvUTF8);
 				MainWindow1->Text3PartialFractions->SetValue(tempWS);
 			}
@@ -1145,7 +1157,7 @@ void drawline(double X1, double Y1, double X2, double Y2,
 		case 2: tempPen.SetStyle(::wxDOT);break;
 		case 5: return;
 	}
-	tempPen.SetColour(ColorIndex); 
+	tempPen.SetColour(ColorIndex);
 	dc.SetPen(tempPen);
 	dc.DrawLine((int)X1, (int)Y1,(int) X2,(int) Y2);
 //	dc.setForeground(FXRGB(0,0,0));

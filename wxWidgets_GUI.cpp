@@ -144,6 +144,7 @@ END_EVENT_TABLE()
 class guiMainWindow : public wxFrame
 {
 public:
+	std::fstream fileSettings;
   ComputationSetup theComputationSetup;
   wxGridExtra *Table1Input;
   wxGridExtra *Table2Indicator;
@@ -167,6 +168,7 @@ public:
 	wxBoxSizer* BoxSizer12VerticalProgressReports;
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
+  wxDialog* Dialog1OutputPF;
 	wxFont* theFont;
 	::wxStaticText* Label1ProgressReport;
 	::wxStaticText* Label2ProgressReport;
@@ -207,6 +209,9 @@ public:
 	void initWeylGroupInfo();
 	void initTableFromVPVectors();
 	void initTableFromRowsAndColumns(int r, int c);
+	void ReadSettingsIfAvailable();
+	void WriteSettingsIfAvailable();
+	void ArrangeWindows();
   guiMainWindow();
   ~guiMainWindow();
   void OnExit(wxCloseEvent& event);
@@ -214,6 +219,7 @@ public:
   static const int DefaultButtonWidth=100;
   enum
   { ID_MainWindow,
+		ID_Dialog1,
 		ID_ToggleButton1UsingCustom = 100,
 		ID_ListBox1,
 		ID_Button1Go,
@@ -232,8 +238,27 @@ public:
 IMPLEMENT_APP( guiApp )
 
 guiMainWindow *MainWindow1;
+std::string MainWindow1GlobalPath;
+
+
 bool guiApp::OnInit()
-{ MainWindow1 = new guiMainWindow;
+{ 
+#ifdef WIN32
+	char path[500];
+	::GetModuleFileName(NULL,path,499);
+	std::stringstream out;
+	out<<path;
+	::MainWindow1GlobalPath= out.str();
+	int pathCutOffSize=0;
+	for (int i=MainWindow1GlobalPath.size();i>=0;i--)
+	{ if (::MainWindow1GlobalPath[i]=='\\')
+		{ pathCutOffSize=i+1;
+			break;
+		}
+	}
+	::MainWindow1GlobalPath.resize(pathCutOffSize);
+#endif
+	MainWindow1 = new guiMainWindow;
   MainWindow1->Show(true);
   return true;
 }
@@ -411,6 +436,10 @@ guiMainWindow::guiMainWindow()
 				this->BoxSizer12VerticalProgressReports->Add(this->Label4ProgressReport);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label5ProgressReport);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->Canvas1,1,wxEXPAND|wxALL);
+	this->Dialog1OutputPF= new ::wxDialog(this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
+																				::wxDefaultPosition, ::wxDefaultSize);
+	this->Dialog1OutputPF->Show();
+//	this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
   this->ListBox1WeylGroup->Append(wxT("A2"));
   this->ListBox1WeylGroup->Append(wxT("A3"));
   this->ListBox1WeylGroup->Append(wxT("A4"));
@@ -458,6 +487,7 @@ guiMainWindow::guiMainWindow()
 	this->WorkThread1.CriticalSectionWorkThreadEntered=false;
 	TDV.centerX=150;
 	TDV.centerY=200;
+	this->Button3Custom->Disable();
 	this->wxProgressReportEvent.SetId(this->GetId());
 	this->wxProgressReportEvent.SetEventObject(this);
 	this->wxProgressReportEvent.SetEventType(::wxEVT_ProgressReport);
@@ -473,10 +503,13 @@ guiMainWindow::guiMainWindow()
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
 #endif
-	Centre();
+	this->ReadSettingsIfAvailable();
+	//Centre();
 }
 void drawCanvas::onSizing(wxSizeEvent& ev)
-{ if (MainWindow1->Table1Input->GetNumberRows()>20)
+{ if (MainWindow1==0)
+		return;
+	if (MainWindow1->Table1Input->GetNumberRows()>20)
 	{	MainWindow1->Table1Input->SetAutoLayout(false);
 		MainWindow1->Table1Input->SetSize(0,70,220,500);
 		MainWindow1->Table1Input->SetMaxSize(wxSize(220,500));
@@ -487,6 +520,10 @@ void drawCanvas::onSizing(wxSizeEvent& ev)
 
 guiMainWindow::~guiMainWindow()
 { //this->theFont
+	this->WriteSettingsIfAvailable();
+	this->Canvas1->Destroy();
+	this->Dialog1OutputPF->Destroy();
+	this->fileSettings.close();
 #ifndef WIN32
  	pthread_mutex_destroy(&ParallelComputing::mutex1);
   pthread_cond_destroy(&ParallelComputing::continueCondition);
@@ -901,6 +938,42 @@ void WorkThreadClass::run()
 
 void outputText(std::string& theOutput)
 {
+}
+
+void guiMainWindow::WriteSettingsIfAvailable()
+{ if (this->fileSettings.is_open())
+	{ this->fileSettings.clear();
+		this->fileSettings.seekp(0);
+		int x,y;
+		this->GetPosition(&x,&y);
+		this->fileSettings  <<"Main_window_top_left_corner_x " <<x
+									<<"\nMain_window_top_left_corner_y " <<y;
+		this->GetSize(& x, & y);
+		this->fileSettings  <<"\nMain_window_height " <<x
+									<<"\nMain_window_width "  <<y;		
+		this->fileSettings.flush();
+	}
+}
+
+void guiMainWindow::ReadSettingsIfAvailable()
+{ std::stringstream out;
+	out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
+	std::string tempS;
+	tempS= out.str();
+	if (::rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent(this->fileSettings,tempS,false))
+	{	wxPoint tempPt; wxSize tempSize;
+		this->fileSettings.seekg(0);
+		this->fileSettings>>tempS >>tempPt.x;
+		this->fileSettings>>tempS >>tempPt.y;
+		this->fileSettings>>tempS >> tempSize.x;
+		this->fileSettings>>tempS >> tempSize.y;
+		this->SetPosition(tempPt);
+		this->SetSize(tempSize);
+	}	
+}
+
+void guiMainWindow::ArrangeWindows()
+{ this->ReadSettingsIfAvailable();
 }
 
 void guiMainWindow::onComputationOver(wxCommandEvent& ev)

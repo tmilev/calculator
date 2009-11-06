@@ -405,7 +405,9 @@ guiMainWindow::guiMainWindow()
 				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow,
 						wxT("Vector partition function v0.06 (eating RAM for breakfast)"),
                    wxPoint(100,100),
-                   wxSize(800,600),wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX)
+                   wxSize(800,600),
+                   wxRESIZE_BORDER| wxCAPTION
+                   | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
 {	this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
 	this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
 	this->BoxSizer3HorizontalInputButtons = new ::wxBoxSizer(wxHORIZONTAL);

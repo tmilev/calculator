@@ -1995,6 +1995,8 @@ public:
 	void Nullify(short numberVariables);
 	void MakeConst(ElementOfCommutativeRingWithIdentity& theConstant, short theNumVars);
 	bool IsEqualToZero();
+	void WriteToFile(std::fstream& output);
+	void ReadFromFile(std::fstream& input, int numV);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -2036,6 +2038,20 @@ inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::
 { this->NumVars= theNumVars;
 	this->SetSizeExpandOnTopLight(1);
 	this->TheObjects[0].MakeConstantMonomial(theNumVars,theConstant);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void PolynomialLight<ElementOfCommutativeRingWithIdentity>::WriteToFile(std::fstream& output)
+{ static Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
+  ComputationalBuffer.AssignPolynomialLight(*this);
+  ComputationalBuffer.WriteToFile(output);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, int numV)
+{ static Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
+  ComputationalBuffer.ReadFromFile(input, numV);
+  this->AssignPolynomial(ComputationalBuffer);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>

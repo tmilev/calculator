@@ -916,7 +916,7 @@ void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight()
 bool root::HasSmallCoordinates()
 {	for (int i=0;i<this->size;i++)
 	{ if (this->TheObjects[i].Extended!=0)
-		{ return false; 
+		{ return false;
 		}
 	}
 	return true;
@@ -7312,26 +7312,37 @@ int partFraction::GetNumMonomialsInNumerator()
 
 
 void partFraction::WriteToFile(std::fstream &output)
-{/* output<<"Fraction_start\n";
-	for (int j=0;j<partFraction::RootsToIndices.size;j++)
-	{ output << this->TheObjects[j].Mult <<" ";
+{ output<<"Fraction_start: " <<this->size<<"\n";
+	for (int j=0;j<this->size;j++)
+	{ output <<this->TheObjects[j].Multiplicities.size <<" ";
+	  for (int i=0;i<this->TheObjects[j].Multiplicities.size;i++)
+	  { output << this->TheObjects[j].Multiplicities.TheObjects[i] <<" "
+             << this->TheObjects[j].Elongations.TheObjects[i] <<" ";
+	  }
 	}
 	output<<"\nCoefficient:\n";
 	this->Coefficient.WriteToFile(output);
-	output<<"Fraction_end\n";*/
+	output<<"Fraction_end\n";
 }
 
 void partFraction::ReadFromFile(std::fstream &input)
-{/* std::string tempS;
-	input >>tempS;
-	assert(tempS=="Fraction_start");
-	for (int i=0;i<partFraction::RootsToIndices.size;i++)
-	{ input >>this->TheObjects[i].Mult;
+{ std::string tempS;
+  int tempI;
+  input>>tempS >>tempI;
+  assert(tempI==partFraction::RootsToIndices.size);
+  this->init(tempI);
+	for (int j=0;j<this->size;j++)
+	{ input >>tempI;
+    this->TheObjects[j].Multiplicities.SetSizeExpandOnTopLight(tempI);
+    this->TheObjects[j].Elongations.SetSizeExpandOnTopLight(tempI);
+	  for (int i=0;i<this->TheObjects[j].Multiplicities.size;i++)
+	  { input >> this->TheObjects[j].Multiplicities.TheObjects[i]
+             >> this->TheObjects[j].Elongations.TheObjects[i];
+	  }
 	}
 	input >>tempS;
 	this->Coefficient.ReadFromFile(input,root::AmbientDimension);
 	input>>tempS;
-	this->ComputeIndicesNonZeroMults();*/
 }
 
 void partFraction::UncoverBracketsNumerator()
@@ -8965,7 +8976,7 @@ void partFractions::ComputeDebugStringWithVPfunction()
 
 void partFractions::WriteToFile(std::fstream& output)
 { std::string tempS;
-	output<<"Dimension:\n";
+	output<<"Dimension: ";
 	output<<root::AmbientDimension<<"\n";
 	output<<"Indices_of_roots:\n";
 	for (int i=0;i<partFraction::RootsToIndices.size;i++)
@@ -11122,6 +11133,14 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 //	tempV.ComputeDebugString();
 
 //	theVPfunction.initFromRootSystem(tempRoots1,tempRoots1,0);
+  partFractions tempTest;
+  QuasiPolynomial tempQPtest;
+ // tempTest.ComputeKostantFunctionFromWeylGroup('A',3,tempQPtest,0,false,false);
+  tempTest.ReadFromFile(PartialFractionsFile);
+//  PartialFractionsFile.flush();
+ // PartialFractionsFile.close();
+ tempTest.ComputeDebugString();
+
 	if(!PFfileIsPresent )
 	{	theVPfunction.ComputeDebugString();
 		theVPfunction.IndicatorRoot.MakeZero();
@@ -11133,6 +11152,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 	else
 	{	theVPfunction.ReadFromFile(PartialFractionsFile);
 	}
+	PartialFractionsFile.flush();
 	PartialFractionsFile.close();
 //	theVPfunction.ComputeDebugString();
 	for (int i=0;i<theVPfunction.size;i++)

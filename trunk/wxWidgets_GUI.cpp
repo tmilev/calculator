@@ -255,21 +255,14 @@ std::string MainWindow1GlobalPath;
 
 
 bool guiApp::OnInit()
-{
+{ char directoryCharacter;
 #ifdef WIN32
 	char path[500];
 	::GetModuleFileName(NULL,path,499);
 	std::stringstream out;
 	out<<path;
 	::MainWindow1GlobalPath= out.str();
-	int pathCutOffSize=0;
-	for (int i=MainWindow1GlobalPath.size();i>=0;i--)
-	{ if (::MainWindow1GlobalPath[i]=='\\')
-		{ pathCutOffSize=i+1;
-			break;
-		}
-	}
-	::MainWindow1GlobalPath.resize(pathCutOffSize);
+	directoryCharacter='\\';
 #else
   wxString path =this->argv[0];
   if (!wxIsAbsolutePath(path))
@@ -281,7 +274,16 @@ bool guiApp::OnInit()
   filename.Normalize();
   path = filename.GetFullPath();
   MainWindow1GlobalPath=path.mb_str();
+  directoryCharacter='/';
 #endif
+	int pathCutOffSize=0;
+	for (int i=MainWindow1GlobalPath.size();i>=0;i--)
+	{ if (::MainWindow1GlobalPath[i]==directoryCharacter)
+		{ pathCutOffSize=i+1;
+			break;
+		}
+	}
+	::MainWindow1GlobalPath.resize(pathCutOffSize);
 	MainWindow1 = new guiMainWindow;
   MainWindow1->Show(true);
   return true;
@@ -564,7 +566,7 @@ guiMainWindow::guiMainWindow()
 	this->WorkThread1.CriticalSectionWorkThreadEntered=false;
 	TDV.centerX=150;
 	TDV.centerY=200;
-	this->Button3Custom->Disable();
+	//this->Button3Custom->Disable();
 	this->wxProgressReportEvent.SetId(this->GetId());
 	this->wxProgressReportEvent.SetEventObject(this);
 	this->wxProgressReportEvent.SetEventType(::wxEVT_ProgressReport);
@@ -638,18 +640,22 @@ void* RunrootFKFTComputationLocal(void*)
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 { rootFKFTComputationLocal.useOutputFileForFinalAnswer=false;
 	this->theComputationSetup.AllowRepaint=false;
+	std::string tempS;
+	tempS.assign(MainWindow1GlobalPath);
+	tempS.append("KLcoeff.txt");
+  rootFKFTComputationLocal.KLCoeffFileString=tempS;
+	tempS.assign(MainWindow1GlobalPath);
+	tempS.append("partialFractions.txt");
+    rootFKFTComputationLocal.PartialFractionsFileString=tempS;
+	tempS.assign(MainWindow1GlobalPath);
+	tempS.append("VPdata.txt");
+  rootFKFTComputationLocal.VPEntriesFileString=tempS;
+	tempS.assign(MainWindow1GlobalPath);
+	tempS.append("VPIndex.txt");
+  rootFKFTComputationLocal.VPIndexFileString=tempS;	
 #ifndef WIN32
-  RandomCodeIDontWantToDelete::SomeRandomTests2();
-  rootFKFTComputationLocal.KLCoeffFileString="/home/todor/math/KLcoeff.txt";
-  rootFKFTComputationLocal.PartialFractionsFileString="/home/todor/math/partialFractions.txt";
-  rootFKFTComputationLocal.VPEntriesFileString="/home/todor/math/VPdata.txt";
-  rootFKFTComputationLocal.VPIndexFileString="/home/todor/math/VPIndex.txt";
   ::RunA_voidFunctionFromFunctionAddress(&RunrootFKFTComputationLocal,&this->WorkThread1.ComputationalThreadLinux);
 #else
-  rootFKFTComputationLocal.KLCoeffFileString="C:/math/rootFKFT/cpp/KLcoeff.txt";
-  rootFKFTComputationLocal.PartialFractionsFileString="C:/math/rootFKFT/cpp/partialFractions.txt";
-  rootFKFTComputationLocal.VPEntriesFileString="C:/math/rootFKFT/cpp/VPdata.txt";
-  rootFKFTComputationLocal.VPIndexFileString="C:/math/rootFKFT/cpp/VPIndex.txt";
 	::RunA_voidFunctionFromFunctionAddress
 		(&RunrootFKFTComputationLocal,this->WorkThread1.ComputationalThread);
 #endif

@@ -1996,7 +1996,7 @@ public:
 	void MakeConst(ElementOfCommutativeRingWithIdentity& theConstant, short theNumVars);
 	bool IsEqualToZero();
 	void WriteToFile(std::fstream& output);
-	void ReadFromFile(std::fstream& input, int numV);
+	void ReadFromFile(std::fstream& input, short numV);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -2048,7 +2048,7 @@ void PolynomialLight<ElementOfCommutativeRingWithIdentity>::WriteToFile(std::fst
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, int numV)
+void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, short numV)
 { static Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
   ComputationalBuffer.ReadFromFile(input, numV);
   this->AssignPolynomial(ComputationalBuffer);
@@ -4181,6 +4181,7 @@ public:
 	int NumProcessedForVPFfractions;
 	static int NumProcessedForVPFMonomialsTotal;
 	static std::fstream ComputedContributionsList;
+	static const int MaxReadFileBufferSize= 33554432; //= 32 MB of read buffer size
 	std::string DebugString;
 	static root IndicatorRoot;
 	LargeRational StartCheckSum;
@@ -4209,7 +4210,7 @@ public:
 	void AccountPartFractionInternals(int sign, int index);
 	void Add(partFraction& f);
 	void PopIndexSwapWithLastHashAndAccount(int index);
-	void SetUpIndicatorVariables();
+	void PrepareIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	int ElementToStringBasisChange(MatrixInt& VarChange, bool UsingVarChange, std::string& output,
@@ -4227,6 +4228,7 @@ public:
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input);
 	void UncoverBracketsNumerators();
+	void ResetRelevanceIsComputed(){for (int i=0;i<this->size;i++){this->TheObjects[i].RelevanceIsComputed=false;};};
 	partFractions();
 	int SizeWithoutDebugString();
 	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r);
@@ -4550,8 +4552,7 @@ public:
 	int NumProcessedMonomialsTotal;
 
 	intRoot modifiedRoot;
-	bool rootIsModified;
-	bool PerturbationHasOccurred;
+	bool flagRootIsModified;
 	bool Pause;
 	IndicatorWindowVariables(){this->Nullify();}
 	std::string ProgressReportString1;

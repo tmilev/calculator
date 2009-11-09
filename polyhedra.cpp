@@ -129,7 +129,7 @@ Cone CombinatorialChamberPointers::TheGlobalConeNormals;
 int CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag;
 int CombinatorialChamberPointers::LastReportedMemoryUse;
 int CombinatorialChamberPointers::DefragSpacing;
-int CombinatorialChamberPointers::flagMaxNumCharsAllowedInStringOutput=16777216;
+int CombinatorialChamberPointers::flagMaxNumCharsAllowedInStringOutput=100000;//16777216;
 std::fstream CombinatorialChamberPointers::TheBigDump;
 
 ListObjectPointers<QuasiPolynomial> QuasiPolynomial::GlobalCollectorsPolys;
@@ -1596,12 +1596,11 @@ inline void roots::AddIntRoot(intRoot &r)
 void roots::PerturbVectorToRegular(root& output)
 { root normal;
 	while (!this->IsRegular(output,normal))
-	{ IndicatorWindowGlobalVariables.rootIsModified=true;
-		IndicatorWindowGlobalVariables.PerturbationHasOccurred=true;
+	{ IndicatorWindowGlobalVariables.flagRootIsModified=true;
 		normal.DivByInteger(10);
 		output.Add(normal);
 	}
-	if (IndicatorWindowGlobalVariables.rootIsModified)
+	if (IndicatorWindowGlobalVariables.flagRootIsModified)
 	{ output.ScaleToIntegralMinHeight();
 		IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(output);
 		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
@@ -7343,6 +7342,7 @@ void partFraction::ReadFromFile(std::fstream &input)
 	input >>tempS;
 	this->Coefficient.ReadFromFile(input,root::AmbientDimension);
 	input>>tempS;
+	this->ComputeIndicesNonZeroMults();
 }
 
 void partFraction::UncoverBracketsNumerator()
@@ -7896,9 +7896,8 @@ void partFraction::partFractionToPartitionFunctionSplit
 		output.ReadFromFile(partFraction::TheBigDump,root::AmbientDimension);
 		if (RecordNumMonomials && ! this->AlreadyAccountedForInGUIDisplay)
 		{ this->AlreadyAccountedForInGUIDisplay=true;
-
+			partFractions::NumProcessedForVPFMonomialsTotal+=this->Coefficient.size;
 			//IndicatorWindowGlobalVariables.NumProcessedMonomials+=this->Coefficient.size;
-			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 //		output.ComputeDebugString();
 		return;
@@ -8231,10 +8230,10 @@ void partFractions::PrepareCheckSums()
 	if (!this->flagUsingCheckSum)
 		return;
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.SetSizeExpandOnTopLight(12);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[0].AssignNumeratorAndDenominator(8,7);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[1].AssignNumeratorAndDenominator(4,5);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[2].AssignNumeratorAndDenominator(2,3);
-	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[3].AssignNumeratorAndDenominator(1,5);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[0].AssignNumeratorAndDenominator(1,2);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[1].AssignNumeratorAndDenominator(2,3);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[2].AssignNumeratorAndDenominator(3,4);
+	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[3].AssignNumeratorAndDenominator(4,5);
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[4].AssignNumeratorAndDenominator(11,13);
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[5].AssignNumeratorAndDenominator(13,17);
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[6].AssignNumeratorAndDenominator(17,19);
@@ -8261,7 +8260,7 @@ void partFractions::CompareCheckSums()
 	}
 
 }
-void partFractions::SetUpIndicatorVariables()
+void partFractions::PrepareIndicatorVariables()
 { this->NumberIrrelevantFractions=0;
 	this->NumberRelevantReducedFractions=0;
 	this->NumGeneratorsInTheNumerators=0;
@@ -8284,7 +8283,7 @@ bool partFractions::split()
 	//std::string tempS1, tempS2;
 //	this->ComputeDebugString();
 //	partFraction::MakingConsistencyCheck=true;
-	this->SetUpIndicatorVariables();
+	this->PrepareIndicatorVariables();
 	this->PrepareCheckSums();
 	this->AssureIndicatorRegularity();
 	//this->IndicatorRoot.MakeZero();
@@ -8358,7 +8357,7 @@ bool partFractions::split()
 
 bool partFractions::splitClassicalRootSystem(bool ShouldElongate)
 { this->IndexLowestNonProcessed=0;
-	this->SetUpIndicatorVariables();
+	this->PrepareIndicatorVariables();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic= true;
 	//partFractions::flagAnErrorHasOccurredTimeToPanic= true;
 	LargeRational::flagAnErrorHasOccurredTimeToPanic=true;
@@ -8395,12 +8394,12 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate)
 //		x= this->SizeWithoutDebugString();
 	}
 	//this->ComputeDebugString();
-	this->CompareCheckSums();
+//	this->CompareCheckSums();
 	if (ShouldElongate)
 	{	this->RemoveRedundantShortRootsClassicalRootSystem();
 //	this->ComputeDebugString();
-		this->CompareCheckSums();
 	}
+	this->CompareCheckSums();
 	this->IndexLowestNonProcessed= this->size;
 	this->MakeProgressReportSplittingMainPart();
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot);
@@ -8866,6 +8865,11 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 	this->NumProcessedForVPFfractions=0;
 	LargeRational oldCheckSum;
 	QuasiPolynomial oldOutput;
+	if (!this->flagUsingIndicatorRoot)
+	{ this->flagUsingIndicatorRoot=true;
+		this->AssureIndicatorRegularity();
+		this->ResetRelevanceIsComputed();
+	}
 	if (partFraction::MakingConsistencyCheck)
 	{ partFractions::CheckSum.MakeZero();
 	}
@@ -8873,8 +8877,6 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 	{ bool tempBool = this->VerifyFileComputedContributions();
 		assert(tempBool);
 	}
-	IndicatorWindowGlobalVariables.rootIsModified=false;
-	IndicatorWindowGlobalVariables.PerturbationHasOccurred=false;
 	IndicatorWindowGlobalVariables.NumProcessedMonomialsCurrentFraction=0;
 	output.Nullify(root::AmbientDimension);
 	///////////////////////////////////////////////
@@ -8995,11 +8997,24 @@ void partFractions::WriteToFile(std::fstream& output)
 
 void partFractions::ReadFromFile(std::fstream& input)
 { intRoots tempRoots;
+	this->PrepareIndicatorVariables();
+	//input.seekg(0,std::ios::end);
+	//int bufferSize= input.tellg();
+	//bufferSize = ::Minimum(bufferSize,this->MaxReadFileBufferSize)+1;
+	//char* TempBuffer= new char[bufferSize];
+	//input.rdbuf()->pubsetbuf(TempBuffer,bufferSize);
+	//input.rdbuf()->sgetn(TempBuffer, bufferSize);
+//	input.read(TempBuffer,bufferSize+1);
+//	std::filebuf* oldInputBuffer;
+//	oldInputBuffer=input.rdbuf();
+//	input.rdbuf(TempBuffer);
+  assert(input.is_open());
+	input.seekg(0);
 	std::string tempS;
-	intRoot tempRoot;
 	input>>tempS;
 	input>>root::AmbientDimension;
 	input>>tempS;
+	intRoot tempRoot;
 	for (input>>tempS; tempS!="Alphabet_used:";input>>tempS)
 	{ int tempI;
 		input>>tempI;
@@ -9027,6 +9042,9 @@ void partFractions::ReadFromFile(std::fstream& input)
 		this->Add(tempFrac);
 		this->MakeProgressVPFcomputation();
 	}
+//	input.rdbuf()->pubsetbuf(0,0);
+//	delete [] TempBuffer;
+	//input.::std::rdbuff(oldInputBuffer);
 }
 
 void partFractions::ComputeDebugStringBasisChange(MatrixInt& VarChange)
@@ -9117,11 +9135,9 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 	this->initFromRootSystem(theBorel,theVPbasis,0);
 	if (ChamberIndicator==0)
 	{ this->IndicatorRoot.Assign(tempW.rho);
-		this->flagUsingIndicatorRoot=false;
 	}
 	else
 	{ this->IndicatorRoot.Assign(*ChamberIndicator);
-		this->flagUsingIndicatorRoot=true;
 	}
 	//this->flagSplitTestModeNoNumerators=true;
 	if (WeylGroupLetter=='A'||
@@ -9228,7 +9244,8 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(LargeRational& 
 			}
 			tempRat3.Assign
 				(oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[j]);
-			tempRat3.RaiseToPower(theExp.elements[j]*this->Elongations.TheObjects[i]);
+			if (!tempRat3.IsEqualToZero())
+				tempRat3.RaiseToPower(theExp.elements[j]*this->Elongations.TheObjects[i]);
 			tempRat2.MultiplyBy(tempRat3);
 			if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 			{ tempRat2.ElementToString(tempS);
@@ -11112,7 +11129,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 	VermaModulesWithMultiplicities tempV;
 	tempV.initFromWeyl(&D5);
 	root beta;
-	beta.InitFromIntegers(100,200,200,200,100);
+	beta.InitFromIntegers(10,20,20,20,10);
 	ListBasicObjects<int> KLcoeff;
 //	int TopIndex=
   tempV.ChamberIndicatorToIndex(beta);
@@ -11133,14 +11150,16 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 //	tempV.ComputeDebugString();
 
 //	theVPfunction.initFromRootSystem(tempRoots1,tempRoots1,0);
-  partFractions tempTest;
+ /* partFractions tempTest;
   QuasiPolynomial tempQPtest;
- // tempTest.ComputeKostantFunctionFromWeylGroup('A',3,tempQPtest,0,false,false);
+  //tempTest.ComputeKostantFunctionFromWeylGroup('A',3,tempQPtest,0,false,false);
+  this->OpenDataFileOrCreateIfNotPresent(PartialFractionsFile,this->PartialFractionsFileString,false);
+	//tempTest.WriteToFile(PartialFractionsFile);
   tempTest.ReadFromFile(PartialFractionsFile);
-//  PartialFractionsFile.flush();
- // PartialFractionsFile.close();
- tempTest.ComputeDebugString();
-
+  PartialFractionsFile.flush();
+  PartialFractionsFile.close();
+  tempTest.ComputeDebugString();
+*/
 	if(!PFfileIsPresent )
 	{	theVPfunction.ComputeDebugString();
 		theVPfunction.IndicatorRoot.MakeZero();
@@ -11163,6 +11182,9 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 	beta.Add(D5.rho);
 	roots tempRoots;
 	tempRoots.AssignIntRoots(this->nilradicalA2A1A1inD5);
+	if (!VPIndexIsPresent)
+	{ theVPfunction.WriteToFileComputedContributions(theVPfunction.ComputedContributionsList);
+	}
 	this->MakeTheRootFKFTSum(beta, theVPfunction,KLcoeff,	tempQP,
 													 tempV,tempRoots);
 	std::fstream tempFile;
@@ -11196,7 +11218,8 @@ bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
   { theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
   }
   if(theFile.is_open())
-  {	theFile.seekp(0,std::ios_base::end);
+  { theFile.clear(std::ios::goodbit, false);
+  	theFile.seekp(0,std::ios_base::end);
 		int tempI=theFile.tellp();
 		if (tempI>=1)
 		{	return true;
@@ -11549,6 +11572,10 @@ void IntegerPoly::Evaluate(root& values, LargeRational& output)
 		tempRat1.AssignInteger(this->TheObjects[i].Coefficient.value);
 		for (int j=0;j<this->NumVars;j++)
 		{ tempRat2.Assign(values.TheObjects[j]);
+			if (tempRat2.IsEqualToZero())
+			{	tempRat1.MakeZero();
+				break;
+			}
 			tempRat2.RaiseToPower(this->TheObjects[i].degrees[j]);
 			tempRat1.MultiplyBy(tempRat2);
 			ParallelComputing::SafePoint();
@@ -12513,8 +12540,7 @@ void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
 	this->ProgressReportString3= right.ProgressReportString3;
 	this->ProgressReportString4= right.ProgressReportString4;
 	this->ProgressReportString5= right.ProgressReportString5;
-	this->rootIsModified= right.rootIsModified;
-	this->PerturbationHasOccurred= right.PerturbationHasOccurred;
+	this->flagRootIsModified= right.flagRootIsModified;
 	this->modifiedRoot=right.modifiedRoot;
 }
 

@@ -650,7 +650,7 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
   rootFKFTComputationLocal.KLCoeffFileString=tempS;
 	tempS.assign(MainWindow1GlobalPath);
 	tempS.append("partialFractions.txt");
-    rootFKFTComputationLocal.PartialFractionsFileString=tempS;
+  rootFKFTComputationLocal.PartialFractionsFileString=tempS;
 	tempS.assign(MainWindow1GlobalPath);
 	tempS.append("VPdata.txt");
   rootFKFTComputationLocal.VPEntriesFileString=tempS;

@@ -6137,7 +6137,11 @@ inline void LargeRational::RaiseToPower(int x)
 	LargeRational tempRat;
 	tempRat.Assign(*this);
 	for (int i=1;i<x;i++)
-	{ this->MultiplyBy(tempRat);
+	{//if (LargeRational::flagAnErrorHasOccurredTimeToPanic && i==8)
+		//{ std::string tempS;
+		//	this->ElementToString(tempS);
+		//}
+		this->MultiplyBy(tempRat);
 	}
 }
 
@@ -6425,7 +6429,7 @@ inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
 {	if (x==0)
 	{ this->MakeZero(); return;
 	}
-	this->SetSizeExpandOnTopLight(shift+1);
+	this->SetSizeExpandOnTopNoObjectInit(shift+1);
 	for (int i=0;i<shift;i++)
 		this->TheObjects[i]=0;
 	unsigned int tempX= x%LargeIntUnsigned::CarryOverBound;
@@ -6433,14 +6437,14 @@ inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
   x= x/LargeIntUnsigned::CarryOverBound;
   while (x!=0)
 	{ tempX= x%LargeIntUnsigned::CarryOverBound;
-	  this->AddObjectOnTopLight(tempX);
+	  this->AddObjectOnTop(tempX);
     x= x/LargeIntUnsigned::CarryOverBound;
   }
 }
 
 inline void LargeIntUnsigned::AddNoFitSize(LargeIntUnsigned &x)
 { int oldsize= this->size;
-	this->SetSizeExpandOnTopLight(Maximum(this->size,x.size)+1);
+	this->SetSizeExpandOnTopNoObjectInit(Maximum(this->size,x.size)+1);
 	for (int i=oldsize;i<this->size;i++)
 	{ this->TheObjects[i]=0;
 	}
@@ -6514,7 +6518,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(LargeIntUnsigned& x)
 
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned &x, LargeIntUnsigned &output)
 { assert(this!=&output);
-	output.SetSizeExpandOnTopLight(x.size+output.size);
+	output.SetSizeExpandOnTopNoObjectInit(x.size+output.size);
 	for(int i=0;i<output.size;i++)
 	{ output.TheObjects[i]=0;
 	}
@@ -6546,7 +6550,7 @@ void LargeIntUnsigned::FitSize()
 		{ break;
 		}
 	}
-	this->SetSizeExpandOnTopLight(newSize);
+	this->SetSizeExpandOnTopNoObjectInit(newSize);
 //	assert(this->CheckForConsistensy());
 }
 
@@ -6711,30 +6715,25 @@ void LargeIntUnsigned::DivPositive
 	divisor.Assign(x);
 	quotient.MakeZero();
 	while (remainder.IsGEQ(divisor))
-	{	unsigned int q =
-			remainder.TheObjects[remainder.size-1]/(divisor.TheObjects[divisor.size-1]+1);
-		int shift= remainder.size-divisor.size;
-		assert(shift>=0);
-		LargeIntUnsigned current, oldTotal,Total;
-		Total.Assign(divisor);
-		if (q==0 && shift>=2){q=1; shift--;}
-		if (q!=0)
-		{ current.AssignShiftedUInt(q,shift);
-			Total.MultiplyBy(current);
+	{	unsigned int q;
+		static LargeIntUnsigned current, Total;
+		if (	 remainder.TheObjects[remainder.size-1]> divisor.TheObjects[divisor.size-1])
+		{	q=remainder.TheObjects[remainder.size-1]/(divisor.TheObjects[divisor.size-1]+1);
+			current.AssignShiftedUInt(q,remainder.size-divisor.size);
 		}
 		else
-		{	current.AssignShiftedUInt(1,0);
+		{ if (remainder.size==divisor.size)
+			{ current.AssignShiftedUInt(1,0);
+			}
+			else
+			{	q=this->CarryOverBound/divisor.TheObjects[divisor.size-1];
+				current.AssignShiftedUInt(q, remainder.size- divisor.size-1);
+				current.MultiplyByUInt(remainder.TheObjects[remainder.size-1]);
+			}
 		}
-		oldTotal.Assign(Total);
-		assert(remainder.IsGEQ(Total));
-		for (;;)
-		{	Total.MultiplyByUInt(2);
-			if (!remainder.IsGEQ(Total))
-				break;
-			current.MultiplyByUInt(2);
-			oldTotal.Assign(Total);
-		}
-		remainder.SubtractSmallerPositive(oldTotal);
+		Total.Assign(divisor);
+		Total.MultiplyBy(current);
+		remainder.SubtractSmallerPositive(Total);
 		quotient.Add(current);
 	}
 	remainderOutput.Assign(remainder);
@@ -6813,7 +6812,7 @@ void LargeInt::MakeZero()
 
 void LargeInt::Assign(const LargeInt &x)
 { this->sign=x.sign;
-	this->value.CopyFromLight(x.value);
+	this->value.CopyFromBase(x.value);
 //	assert(this->CheckForConsistensy());
 }
 
@@ -6885,12 +6884,12 @@ LargeInt::LargeInt(const LargeInt& x)
 }
 
 void LargeIntUnsigned::MakeOne()
-{ this->SetSizeExpandOnTopLight(1);
+{ this->SetSizeExpandOnTopNoObjectInit(1);
 	this->TheObjects[0]=1;
 }
 
 void LargeIntUnsigned::MakeZero()
-{ this->SetSizeExpandOnTopLight(1);
+{ this->SetSizeExpandOnTopNoObjectInit(1);
 	this->TheObjects[0]=0;
 }
 
@@ -10982,8 +10981,26 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempRat.AssignFracValue();
 	tempRat.ElementToString(tempS);
 	tempRat.AssignNumeratorAndDenominator(-9,14);
-//	tempRat.RaiseToPower(100);
+	//LargeRational::flagAnErrorHasOccurredTimeToPanic=true;
+	tempRat.RaiseToPower(100);
 	tempRat.ElementToString(tempS);
+	tempRat.MakeOne();
+	for (int i=0;i<2000;i++)
+	{ LargeRational tempR;
+		tempR.AssignNumeratorAndDenominator(1,i+1);
+		tempRat.MultiplyBy(tempR);
+	}
+	tempRat.ElementToString(tempS);
+	LargeRational tempRat2;
+	tempRat2.MakeOne();
+	for (int i=0;i<2001;i++)
+	{ LargeRational tempR;
+		tempR.AssignNumeratorAndDenominator(1,i+1);
+		tempRat2.MultiplyBy(tempR);
+	}
+	tempRat2.ElementToString(tempS);
+	tempRat2.Subtract(tempRat);
+	tempRat2.ElementToString(tempS);	
 	Stop();
 }
 

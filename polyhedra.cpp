@@ -6555,7 +6555,7 @@ void LargeIntUnsigned::FitSize()
 }
 
 void LargeIntUnsigned::MultiplyByUInt(unsigned int x)
-{ LargeIntUnsigned tempLI;
+{ static LargeIntUnsigned tempLI;
 	tempLI.AssignShiftedUInt(x,0);
 	this->MultiplyBy(tempLI);
 }
@@ -6581,7 +6581,7 @@ void LargeIntUnsigned::ElementToString(std::string &output)
 	{ output="0";
 		return;
 	}
-	LargeIntUnsigned tempInt;
+	static LargeIntUnsigned tempInt;
 	tempInt.Assign(*this);
 	std::string tempS;
 	std::stringstream out;
@@ -6726,7 +6726,7 @@ void LargeIntUnsigned::DivPositive
 			{ current.AssignShiftedUInt(1,0);
 			}
 			else
-			{	q=this->CarryOverBound/divisor.TheObjects[divisor.size-1];
+			{	q=this->CarryOverBound/(divisor.TheObjects[divisor.size-1]+1);
 				current.AssignShiftedUInt(q, remainder.size- divisor.size-1);
 				current.MultiplyByUInt(remainder.TheObjects[remainder.size-1]);
 			}
@@ -6762,7 +6762,7 @@ double LargeIntUnsigned::GetDoubleValue()
 }
 
 void LargeIntUnsigned::gcd(LargeIntUnsigned &a, LargeIntUnsigned &b, LargeIntUnsigned &output)
-{ LargeIntUnsigned p,q,r,temp;
+{ static LargeIntUnsigned p,q,r,temp;
 	static std::string tempSP, tempSQ, tempSR, tempS;
 	p.Assign(a);
 	q.Assign(b);
@@ -6853,9 +6853,9 @@ int LargeInt::operator%(int x)
 }
 
 LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
-{ LargeIntUnsigned result;
-	LargeIntUnsigned remainder;
-	LargeIntUnsigned tempX;
+{ static LargeIntUnsigned result;
+	static LargeIntUnsigned remainder;
+	static LargeIntUnsigned tempX;
 	tempX.AssignShiftedUInt(x,0);
 	this->DivPositive(tempX,result,remainder);
 //	assert(result.CheckForConsistensy());
@@ -6863,16 +6863,16 @@ LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
 }
 
 LargeIntUnsigned LargeIntUnsigned::operator/(LargeIntUnsigned& x)const
-{ LargeIntUnsigned result;
-	LargeIntUnsigned remainder;
+{ static LargeIntUnsigned result;
+	static LargeIntUnsigned remainder;
 	this->DivPositive(x,result,remainder);
 	return result;
 }
 
 int LargeIntUnsigned::operator%(unsigned int x)
-{ LargeIntUnsigned result;
-	LargeIntUnsigned remainder;
-	LargeIntUnsigned tempX;
+{ static LargeIntUnsigned result;
+	static LargeIntUnsigned remainder;
+	static LargeIntUnsigned tempX;
 	tempX.AssignShiftedUInt(x,0);
 	this->DivPositive(tempX,result,remainder);
 	return remainder.TheObjects[0];
@@ -10982,10 +10982,10 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempRat.ElementToString(tempS);
 	tempRat.AssignNumeratorAndDenominator(-9,14);
 	//LargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	tempRat.RaiseToPower(100);
+	/*tempRat.RaiseToPower(100);
 	tempRat.ElementToString(tempS);
 	tempRat.MakeOne();
-	for (int i=0;i<2000;i++)
+	for (int i=0;i<200;i++)
 	{ LargeRational tempR;
 		tempR.AssignNumeratorAndDenominator(1,i+1);
 		tempRat.MultiplyBy(tempR);
@@ -10993,7 +10993,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempRat.ElementToString(tempS);
 	LargeRational tempRat2;
 	tempRat2.MakeOne();
-	for (int i=0;i<2001;i++)
+	for (int i=0;i<201;i++)
 	{ LargeRational tempR;
 		tempR.AssignNumeratorAndDenominator(1,i+1);
 		tempRat2.MultiplyBy(tempR);
@@ -11001,7 +11001,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempRat2.ElementToString(tempS);
 	tempRat2.Subtract(tempRat);
 	tempRat2.ElementToString(tempS);	
-	Stop();
+	Stop();*/
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()

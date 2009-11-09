@@ -649,7 +649,7 @@ inline void MatrixElementary<Element>::Resize(short r, short c, bool PreserveVal
 	this->elements = newElements;
 }
 
-class LargeIntUnsigned: public ListBasicObjectsLight<unsigned int>
+class LargeIntUnsigned: public ListBasicObjects<unsigned int>
 {	void AddNoFitSize(LargeIntUnsigned& x);
 public:
 	// Carry over bound is the "base" over which we work

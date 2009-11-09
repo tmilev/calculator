@@ -195,6 +195,7 @@ public:
 	::wxCheckBox* CheckBox4ChamberLabels;
 	::wxCheckBox* CheckBox5InvisibleChambers;
 	::wxCheckBox* CheckBox6Dashes;
+	::wxCheckBox* CheckBox7UseIndicatorForPFDecomposition;
   ::drawCanvas* Canvas1;
   ::wxToggleButton* ToggleButton1UsingCustom;
   ::wxToggleButton* ToggleButton2ViewCombinatorialChambers;
@@ -445,6 +446,8 @@ guiMainWindow::guiMainWindow()
 		(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
 	this->CheckBox6Dashes=new ::wxCheckBox
 		(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
+	this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox
+		(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition")); 
 	//this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	//this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
@@ -500,6 +503,7 @@ guiMainWindow::guiMainWindow()
 				this->BoxSizer11VerticalOptions->Add(this->CheckBox1ComputePFs);
 				this->BoxSizer11VerticalOptions->Add(this->CheckBox2CheckSums);
 				this->BoxSizer11VerticalOptions->Add(this->CheckBox3ComputeChambers);
+				this->BoxSizer11VerticalOptions->Add(this->CheckBox7UseIndicatorForPFDecomposition);
 				this->BoxSizer11VerticalOptions->Add(this->Button3Custom);
 			this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
 				this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
@@ -911,6 +915,8 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 { this->theComputationSetup.ComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
 	this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
 	this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
+	this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot= 
+			!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
 	if (this->theComputationSetup.UsingCustomVectors)
 	{	root::AmbientDimension= this->Spin1Dim->GetValue();
 		this->theComputationSetup.VPVectors.size=0;
@@ -1134,7 +1140,7 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
 	MainWindow1->Label4ProgressReport->SetLabel(tempS4);
 	wxString tempS5(output.ProgressReportString5.c_str(),wxConvUTF8);
 	MainWindow1->Label5ProgressReport->SetLabel(tempS5);
-	if (output.PerturbationHasOccurred)
+	if (output.flagRootIsModified)
 	{ root tempRoot; tempRoot.AssignIntRoot(output.modifiedRoot);
 		MainWindow1->WriteIndicatorWeight(tempRoot);
 	}

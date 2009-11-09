@@ -683,7 +683,7 @@ public:
 	void MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output);
 	void MultiplyByUInt(unsigned int x);
 	void AssignShiftedUInt(unsigned int x, int shift);
-	void Assign(const LargeIntUnsigned& x){this->CopyFromLight(x);};
+	void Assign(const LargeIntUnsigned& x){this->CopyFromBase(x);};
 	int GetUnsignedIntValueTruncated();
 	int operator %(unsigned int x);
 	inline void operator = (const LargeIntUnsigned& x)
@@ -692,7 +692,7 @@ public:
 	LargeIntUnsigned operator/(unsigned int x)const;
 	LargeIntUnsigned operator/(LargeIntUnsigned& x)const;
 	LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x);};
-	LargeIntUnsigned(){this->SetSizeExpandOnTopLight(1); this->TheObjects[0]=0;};
+	LargeIntUnsigned(){this->SetSizeExpandOnTopNoObjectInit(1); this->TheObjects[0]=0;};
 	//must be rewritten:
 	double GetDoubleValue();
 	void FitSize();

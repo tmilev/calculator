@@ -29,6 +29,7 @@
 #include "wx/grid.h"
 #include "wx/generic/gridctrl.h"
 #include "wx/sizer.h"
+#include <wx/string.h>
 #include "wx/spinbutt.h"
 #include "wx/menu.h"
 #include "wx/spinctrl.h"
@@ -170,6 +171,7 @@ public:
 	wxBoxSizer* BoxSizer11VerticalOptions;
 	wxBoxSizer* BoxSizer12VerticalProgressReports;
 	wxBoxSizer* BoxSizer13VerticalPartFracOutput;
+	wxBoxSizer* BoxSizer14HorizontalSaveButtons;
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
   wxTextCtrl* Text3PartialFractions;
@@ -183,10 +185,13 @@ public:
 	::wxStaticText* Label6ProgressReport;
 	::wxStaticText* Label7Dim;
 	::wxStaticText* Label8NumVect;
+	::wxStaticText* Label9OutputVPF;
   ::wxComboBoxWheel* ListBox1WeylGroup;
   ::wxButton* Button1Go;
   ::wxButton* Button2Eval;
   ::wxButton* Button3Custom;
+  ::wxButton* Button4SaveReadable;
+  ::wxButton* Button5SaveComputer;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
 	::wxCheckBox* CheckBox1ComputePFs;
@@ -201,6 +206,7 @@ public:
   ::wxToggleButton* ToggleButton2ViewCombinatorialChambers;
 	::IndicatorWindowVariables progressReportVariables;
 	//wxEVT_ProgressReport ProgressReportEvent;
+	void OpenFile(std::fstream& output);
   void onToggleButton1UsingCustom( wxCommandEvent& ev);
   void onListBox1Change(wxCommandEvent& ev);
   void onButton2Eval(wxCommandEvent& ev);
@@ -237,6 +243,8 @@ public:
 		ID_ListBox1,
 		ID_Button1Go,
 		ID_Buton2Eval,
+		ID_Button4SaveReadable,
+		ID_Button5SaveComputer,
 		ID_Spin1Dim,
 		ID_Spin2NumVect,
 		ID_Canvas1,
@@ -317,12 +325,16 @@ public:
 	              const wxSize & size = wxDefaultSize,
 	              long style = wxDEFAULT_DIALOG_STYLE );
   void onToggleButton2ViewCombinatorialChambers( wxCommandEvent& ev);
+ 	void onButton4SaveReadable(wxCommandEvent& ev);
+	void onButton5SaveComputer(wxCommandEvent& ev);
 	DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
 EVT_TOGGLEBUTTON(	guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers,
 									wxDialogOutput::onToggleButton2ViewCombinatorialChambers)
+EVT_BUTTON(guiMainWindow::ID_Button4SaveReadable, wxDialogOutput::onButton4SaveReadable)
+EVT_BUTTON(guiMainWindow::ID_Button5SaveComputer, wxDialogOutput::onButton5SaveComputer)
 END_EVENT_TABLE()
 
 wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title,
@@ -424,6 +436,7 @@ guiMainWindow::guiMainWindow()
 	this->BoxSizer11VerticalOptions = new ::wxBoxSizer(wxVERTICAL);
 	this->BoxSizer12VerticalProgressReports = new ::wxBoxSizer(wxVERTICAL);
 	this->BoxSizer13VerticalPartFracOutput = new ::wxBoxSizer(wxVERTICAL);
+	this->BoxSizer14HorizontalSaveButtons = new ::wxBoxSizer(wxHORIZONTAL);
 	this->ToggleButton1UsingCustom= new ::wxToggleButton
 		(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
@@ -434,6 +447,7 @@ guiMainWindow::guiMainWindow()
 	this->Label3ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Label4ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
 	this->Label5ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
+	this->Label9OutputVPF= new ::wxStaticText(this,wxID_ANY, wxT("Vector partition function LaTex format:"));
 	this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
 	this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
 	this->CheckBox1ComputePFs= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Don't compute PF"));
@@ -447,7 +461,7 @@ guiMainWindow::guiMainWindow()
 	this->CheckBox6Dashes=new ::wxCheckBox
 		(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
 	this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox
-		(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition")); 
+		(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
 	//this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	//this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
 	this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
@@ -475,6 +489,10 @@ guiMainWindow::guiMainWindow()
 	this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton
 		(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers,
 			wxT("Switch to chamber data"));
+  this->Button4SaveReadable = new ::wxButton
+    (this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
+  this->Button5SaveComputer = new ::wxButton
+    (this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
 	//this->BoxSizer1HorizontalBackground->Fit(this);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
 		this->BoxSizer2VerticalInputs->Add(this->BoxSizer6HorizontalInputsBlock,0, wxEXPAND| wxALL,0);
@@ -496,6 +514,7 @@ guiMainWindow::guiMainWindow()
 			this->BoxSizer8HorizontalEval->Add(this->Table3Values);
 			this->BoxSizer8HorizontalEval->Add(this->Button2Eval);
 			this->BoxSizer8HorizontalEval->Add(this->Text2Values,0);
+      this->BoxSizer2VerticalInputs->Add(this->Label9OutputVPF);
 			this->BoxSizer2VerticalInputs->Add(this->Text1Output,1,::wxEXPAND| ::wxALL);
 	this->BoxSizer1HorizontalBackground->Add(this->BoxSizer5VerticalCanvasAndProgressReport,1,wxEXPAND|wxALL);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->BoxSizer10HorizontalProgressReportsAndOptions);
@@ -517,6 +536,9 @@ guiMainWindow::guiMainWindow()
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->Canvas1,1,wxEXPAND|wxALL);
 	this->BoxSizer13VerticalPartFracOutput->Add(this->ToggleButton2ViewCombinatorialChambers);
 	this->BoxSizer13VerticalPartFracOutput->Add(this->Text3PartialFractions, 1, wxEXPAND|wxALL);
+	this->BoxSizer13VerticalPartFracOutput->Add(this->BoxSizer14HorizontalSaveButtons);
+    this->BoxSizer14HorizontalSaveButtons->Add(this->Button4SaveReadable);
+    this->BoxSizer14HorizontalSaveButtons->Add(this->Button5SaveComputer);
 	this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
 
 //	this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
@@ -638,6 +660,9 @@ void RunrootFKFTComputationLocal()
 void* RunrootFKFTComputationLocal(void*)
 #endif
 {	rootFKFTComputationLocal.RunA2A1A1inD5beta12221();
+#ifndef WIN32
+  return 0;
+#endif
 }
 
 
@@ -656,7 +681,7 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
   rootFKFTComputationLocal.VPEntriesFileString=tempS;
 	tempS.assign(MainWindow1GlobalPath);
 	tempS.append("VPIndex.txt");
-  rootFKFTComputationLocal.VPIndexFileString=tempS;	
+  rootFKFTComputationLocal.VPIndexFileString=tempS;
 #ifndef WIN32
   ::RunA_voidFunctionFromFunctionAddress(&RunrootFKFTComputationLocal,&this->WorkThread1.ComputationalThreadLinux);
 #else
@@ -676,6 +701,26 @@ void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
 	this->updateInputButtons();
 }
 
+void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
+{ if (MainWindow1==0)
+    return;
+  std::fstream tempFile;
+  MainWindow1->OpenFile(tempFile);
+  if (tempFile.is_open())
+  { MainWindow1->theComputationSetup.WriteToFilePFdecomposition(tempFile);
+  }
+}
+
+void wxDialogOutput::onButton5SaveComputer(wxCommandEvent &ev)
+{ if(MainWindow1==0)
+    return;
+  std::fstream tempFile;
+  MainWindow1->OpenFile(tempFile);
+  if (tempFile.is_open())
+  { MainWindow1->theComputationSetup.thePartialFraction.WriteToFile(tempFile);
+  }
+}
+
 void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev)
 { if (MainWindow1==0)
 		return;
@@ -683,10 +728,14 @@ void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev
 	{ MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
 		MainWindow1->theComputationSetup.flagDisplayingPartialFractions=true;
 		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to chamber data"));
+		MainWindow1->Button4SaveReadable->Enable();
+		MainWindow1->Button5SaveComputer->Disable();
 	} else
 	{	MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
 		MainWindow1->theComputationSetup.flagDisplayingPartialFractions=false;
 		MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to partial fractions"));
+		MainWindow1->Button4SaveReadable->Disable();
+		MainWindow1->Button5SaveComputer->Disable();
 	}
 	MainWindow1->updatePartialFractionAndCombinatorialChamberTextData();
 }
@@ -757,6 +806,20 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 
 //	this->WorkThread1.run();
 //#endif
+}
+
+void guiMainWindow::OpenFile(std::fstream& output)
+{ wxFileDialog* OpenDialog = new wxFileDialog
+    ( this, wxT("Choose a file to open"), wxEmptyString,
+      wxEmptyString,wxT("Text files (*.tex)|*.tex"),wxSAVE, wxDefaultPosition);
+    output.close();
+	if (OpenDialog->ShowModal() == wxID_OK)
+	{	wxString CurrentDocPath = OpenDialog->GetPath();
+    std::string tempS(CurrentDocPath.mb_str());
+    output.open(tempS.c_str(),std::fstream::out|std::fstream::trunc);
+    output.clear();
+	}
+	OpenDialog->Destroy();
 }
 
 void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
@@ -915,7 +978,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 { this->theComputationSetup.ComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
 	this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
 	this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
-	this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot= 
+	this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
 			!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
 	if (this->theComputationSetup.UsingCustomVectors)
 	{	root::AmbientDimension= this->Spin1Dim->GetValue();

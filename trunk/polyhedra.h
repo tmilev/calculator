@@ -4586,12 +4586,14 @@ public:
 	bool MakingCheckSumPFsplit;
 	bool flagDisplayingCombinatorialChambersTextData;
 	bool flagHavingBeginEqnForLaTeXinStrings;
+	bool flagHavingDocumentClassForLaTeX;
 	bool flagDisplayingPartialFractions;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 //	unsigned char RankEuclideanSpaceGraphics;
 	void EvaluatePoly();
 	void Run();
+	void WriteToFilePFdecomposition(std::fstream& output);
 	ComputationSetup();
 };
 

@@ -473,9 +473,19 @@ ComputationSetup::ComputationSetup()
 	this->thePartialFraction.flagUsingIndicatorRoot=true;
 	this->flagDisplayingPartialFractions=true;
 	this->flagDisplayingCombinatorialChambersTextData=false;
+	this->flagHavingDocumentClassForLaTeX=true;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
 //	this->RankEuclideanSpaceGraphics=3;
+}
+
+void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output)
+{ std::string tempS;
+  this->thePartialFraction.ElementToString(tempS,true,false,true);
+  if (this->flagHavingDocumentClassForLaTeX)
+  { output << "\\documentclass{article}\n\\begin{document}"
+        <<tempS<< "\n\\end{document}";
+  }
 }
 
 void ComputationSetup::Run()
@@ -507,7 +517,11 @@ void ComputationSetup::Run()
 		}
 		if (this->flagHavingBeginEqnForLaTeXinStrings)
 		{ std::stringstream out;
+			if (this->flagHavingDocumentClassForLaTeX)
+        out<< "\\documentclass{article}\n\\begin{document}";
 			out <<"\\begin{eqnarray*}&&"<<this->theOutput.DebugString<< "\\end{eqnarray*}";
+			if (this->flagHavingDocumentClassForLaTeX)
+        out<< "\n\\end{document}";
 			this->theOutput.DebugString= out.str();
 		}
 //		if (this->flagDisplayingPartialFractions)
@@ -11000,7 +11014,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	}
 	tempRat2.ElementToString(tempS);
 	tempRat2.Subtract(tempRat);
-	tempRat2.ElementToString(tempS);	
+	tempRat2.ElementToString(tempS);
 	Stop();*/
 }
 
@@ -11235,7 +11249,7 @@ bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
   { theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
   }
   if(theFile.is_open())
-  { theFile.clear(std::ios::goodbit, false);
+  { theFile.clear(std::ios::goodbit);// false);
   	theFile.seekp(0,std::ios_base::end);
 		int tempI=theFile.tellp();
 		if (tempI>=1)

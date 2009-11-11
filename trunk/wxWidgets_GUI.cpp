@@ -546,7 +546,8 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup->Append(wxT("A3"));
   this->ListBox1WeylGroup->Append(wxT("A4"));
   this->ListBox1WeylGroup->Append(wxT("A5"));
-	this->ListBox1WeylGroup->Append(wxT("B2"));
+  this->ListBox1WeylGroup->Append(wxT("A6"));
+  this->ListBox1WeylGroup->Append(wxT("B2"));
   this->ListBox1WeylGroup->Append(wxT("B3"));
   this->ListBox1WeylGroup->Append(wxT("B4"));
   this->ListBox1WeylGroup->Append(wxT("C2"));
@@ -892,18 +893,19 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 		case 1:	newWeylGroupIndex=3;  newWeylGroupLetter='A'; break;
 		case 2:	newWeylGroupIndex=4;  newWeylGroupLetter='A'; break;
 		case 3:	newWeylGroupIndex=5;  newWeylGroupLetter='A'; break;
-		case 4:	newWeylGroupIndex=2;  newWeylGroupLetter='B'; break;
-		case 5:	newWeylGroupIndex=3;  newWeylGroupLetter='B'; break;
-		case 6:	newWeylGroupIndex=4;  newWeylGroupLetter='B'; break;
-		case 7:	newWeylGroupIndex=2;  newWeylGroupLetter='C'; break;
-		case 8:	newWeylGroupIndex=3;  newWeylGroupLetter='C'; break;
-		case 9:	newWeylGroupIndex=4;  newWeylGroupLetter='C'; break;
-		case 10: newWeylGroupIndex=4; newWeylGroupLetter='D'; break;
-		case 11: newWeylGroupIndex=2; newWeylGroupLetter='G'; break;
-		case 12: newWeylGroupIndex=6; newWeylGroupLetter='E'; break;
-		case 13: newWeylGroupIndex=7; newWeylGroupLetter='E'; break;
-		case 14: newWeylGroupIndex=8; newWeylGroupLetter='E'; break;
-		case 15: newWeylGroupIndex=4; newWeylGroupLetter='F'; break;
+		case 4:	newWeylGroupIndex=6;  newWeylGroupLetter='A'; break;
+		case 5:	newWeylGroupIndex=2;  newWeylGroupLetter='B'; break;
+		case 6:	newWeylGroupIndex=3;  newWeylGroupLetter='B'; break;
+		case 7:	newWeylGroupIndex=4;  newWeylGroupLetter='B'; break;
+		case 8:	newWeylGroupIndex=2;  newWeylGroupLetter='C'; break;
+		case 9:	newWeylGroupIndex=3;  newWeylGroupLetter='C'; break;
+		case 10: newWeylGroupIndex=4; newWeylGroupLetter='C'; break;
+		case 11: newWeylGroupIndex=4; newWeylGroupLetter='D'; break;
+		case 12: newWeylGroupIndex=2; newWeylGroupLetter='G'; break;
+		case 13: newWeylGroupIndex=6; newWeylGroupLetter='E'; break;
+		case 14: newWeylGroupIndex=7; newWeylGroupLetter='E'; break;
+		case 15: newWeylGroupIndex=8; newWeylGroupLetter='E'; break;
+		case 16: newWeylGroupIndex=4; newWeylGroupLetter='F'; break;
 	//	case 12: this->UsingCustomVectors=true;
 	}
 	if (!(newWeylGroupLetter==this->theComputationSetup.WeylGroupLetter &&
@@ -912,7 +914,7 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 		this->theComputationSetup.WeylGroupIndex=newWeylGroupIndex;
 		this->initWeylGroupInfo();
 	}
-	if (this->theComputationSetup.WeylGroupIndex>5)
+	if (this->theComputationSetup.WeylGroupIndex>5&& newWeylGroupLetter!='A')
 	{ this->Button1Go->Disable();
 	}
 	else

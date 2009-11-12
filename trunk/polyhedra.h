@@ -108,6 +108,7 @@ template <class ElementOfCommutativeRingWithIdentity,
 					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
 class MonomialInCommutativeAlgebra;
+class affineCones;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
@@ -1629,6 +1630,35 @@ public:
 //	int HashFunction();
 	ListBasicObjects<int> ChamberTestArray;
 	void operator =(Cone& right);
+};
+
+class affineHyperplane
+{
+public:
+	root affinePoint;
+	root normal;
+	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
+	inline void operator=(const affineHyperplane& right){this->Assign(right);};
+};
+
+class affineHyperplanes: public ListBasicObjects<affineHyperplane>
+{
+public:
+};
+
+class affineCone
+{
+public:
+	affineHyperplanes theWalls;
+	void SuperimposeAffineCones(affineCones& theOtherComplex);
+	void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls);};
+	inline void operator=(const affineCone& right){this->Assign(right);}; 
+};
+
+class affineCones: public HashedListBasicObjects<affineCone>
+{
+public:
+	void SuperimposeAffineCones(affineCones& theOtherComplex);
 };
 
 class simplicialCones : public ListBasicObjects<Cone>

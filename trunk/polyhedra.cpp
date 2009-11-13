@@ -12861,5 +12861,95 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight
 }
 
 bool affineCone::SplitByHyperplane(affineHyperplane& theKillerPlane, affineCones &output)
-{  
+{ 
+	return true;
+}
+
+bool affineCone::WallIsInternalInCone(affineHyperplane &theKillerCandidate)
+{ 
+}
+
+bool 	SystemLinearInequalitiesHasSolution
+	(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint)
+{ static MatrixLargeRational tempMatA;
+	static MatrixLargeRational matX;
+	tempMatA.init(matA.NumRows, matA.NumCols+matA.NumRows);
+	matX.init(tempMatA.NumCols,1);
+	for (int j=0;j<matA.NumCols;j++)
+	{	matX.elements[j][0].MakeZero();
+		for (int i=0;i<matA.NumRows;i++)
+		{ tempMatA.elements[i][j].Assign(matA.elements[i][j]);
+		}
+	}
+	static Selection NonZeroSlackVariables;
+	static Selection BaseVariables;
+	BaseVariables.init(tempMatA.NumCols);
+	//NonZeroSlackVariables.init(matA.NumRows);
+	for (int j=0;j<matA.NumRows;j++)
+	{	if (matb.elements[j][0].IsPositive())
+			matX.elements[j+matA.NumCols][0].Assign(matb.elements[j][0]);
+		else
+			tempMatb.elements[j+matA.NumCols][0].MakeZero();
+		BaseVariables.AddSelection(j+matA.NumCols);
+		for (int i=0;i<matA.NumRows;i++)
+		{ if (i==j)
+				tempMatA.elements[i][j+matA.NumCols].MakeOne();
+			else
+				tempMatA.elements[i][j+matA.NumCols].MakeZero();
+		}		
+	}
+	static LargeRational ChangeGradient,MaxMovement, PotentialMaxMovement, PotentialChangeGradient;
+	ChangeGradient.MakeOne();	
+	int EnteringVariable=0;
+	while (EnteringVariable!=-1)
+	{ EnteringVariable=-1;
+		ChangeGradient.MakeZero();
+		for (int i=0;i<tempMatA.NumCols;i++)
+		{ if (!BaseVariables.selected[i] )
+			{ PotentialChangeGradient.MakeZero();
+				for (int j=0;j<tempMatA.NumRows;j++)
+				{	if (BaseVariables.elements[j]>=matA.NumCols)
+					{ PotentialChangeGradient.Add(tempMatA.elements[j][i]);
+						int PotentialLeavingVariable=-1;
+						if (tempMatA.elements[j][i].IsPositive())
+						{ static LargeRational tempRat;
+							tempRat.Assign(tempMatb.elements[i][0]);
+							tempRat.DivideBy(tempMatA.elements[j][i]);
+							if (PotentialLeavingVariable==-1)
+							{	PotentialMaxMovement.Assign(tempRat);
+								PotentialLeavingVariable=j;
+							}
+							else
+							{ if (PotentialMaxMovement.IsGreaterThan(tempRat))
+								{	PotentialMaxMovement.Assign(tempRat);
+									PotentialLeavingVariable=j;
+								}	
+							}
+						}
+					}
+				}
+				if (PotentialChangeGradient.IsGreaterThan(ChangeGradient))
+				{ EnteringVariable= i; 
+					LeavingVariable=PotentialLeavingVariable;
+					ChangeGradient.Assign(PotentialChange);
+					MaxMovenent.Assign(PotentialMaxMovement);
+				}
+			}
+		} 
+		if (EnteringVariable!=-1)
+		{ static LargeRational tempRat;
+			assert(!tempMatA.elements[LeavingVariable][EnteringVariable].IsEqualToZero());
+			for (int i=0;i<tempMatA.NumRows;i++)
+			{ if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariable)
+				{ tempRat.Assign(tempMatA.elements[LeavingVariable][EnteringVariable]);
+					tempRat.DivideBy(tempMatA.elements[LeavingVariable][EnteringVariable] );
+					tempRat.Minus();
+					tempMatA.AddTwoRows(LeavingVariable,i,0,tempRat);
+					tempRat.Assign(tempMatA.elements[LeavingVariable][EnteringVariable]);
+					tempRat.MultiplyBy(MaxMovement);
+					matX.elements[BaseVariables.elements[j]][0].Subtract(tempRat);
+				}
+			}
+		}
+	}
 }

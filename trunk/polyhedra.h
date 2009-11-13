@@ -1651,6 +1651,11 @@ class affineCone
 public:
 	affineHyperplanes theWalls;
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
+	bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
+	//The below function returns true if the system of homogeneous linear inequalities Ax=>b
+	//has a solution, false otherwise, where A is a matrix and x and b are column vectors.
+	bool SystemLinearInequalitiesHasSolution
+		(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
 	bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
 	void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls);};
 	inline void operator=(const affineCone& right){this->Assign(right);}; 

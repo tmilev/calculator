@@ -1651,6 +1651,7 @@ class affineCone
 public:
 	affineHyperplanes theWalls;
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
+	bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
 	void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls);};
 	inline void operator=(const affineCone& right){this->Assign(right);}; 
 };

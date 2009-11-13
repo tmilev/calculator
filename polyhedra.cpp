@@ -12859,3 +12859,7 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight
 { this->CopyFromLight(right);
 	this->Coefficients.CopyFromLight(right.Coefficients);
 }
+
+bool affineCone::SplitByHyperplane(affineHyperplane& theKillerPlane, affineCones &output)
+{  
+}

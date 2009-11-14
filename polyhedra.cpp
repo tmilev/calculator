@@ -221,6 +221,7 @@ std::string RandomCodeIDontWantToDelete::theSecondEvilString;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
+template < > std::string Matrix<LargeRational>::MatrixElementSeparator= ",";
 
 RootToIndexTable partFraction::RootsToIndices;
 
@@ -1205,19 +1206,6 @@ void MatrixLargeRational::NonPivotPointsToEigenVector(Selection& TheNonPivotPoin
 
 void MatrixLargeRational::ComputeDebugString()
 { this->ElementToSting(this->DebugString);
-}
-
-void MatrixLargeRational::ElementToSting(std::string& output)
-{ std::stringstream out;
-	std::string tempS;
-	for (int i=0;i<this->NumRows;i++)
-	{ for (int j=0;j<this->NumCols;j++)
-		{ this->elements[i][j].ElementToString(tempS);
-			out<< tempS<<",";
-		}
-		out <<"\n";
-	}
-	output= out.str();
 }
 
 void initDLL(int rank)
@@ -11016,6 +11004,19 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempRat2.Subtract(tempRat);
 	tempRat2.ElementToString(tempS);
 	Stop();*/
+	affineCone tempCone;
+	MatrixLargeRational tempA, tempb, output;
+	tempA.init(4,2);
+	tempb.init(4,1);
+	MatrixLargeRational::MatrixElementSeparator=",\t";
+	tempA.elements[0][0].AssignInteger( 0); tempA.elements[0][1].AssignInteger( 1); tempb.elements[0][0].AssignInteger(2);
+	tempA.elements[1][0].AssignInteger(-1); tempA.elements[1][1].AssignInteger(1); tempb.elements[1][0].AssignInteger(1);
+	tempA.elements[2][0].AssignInteger( 1); tempA.elements[2][1].AssignInteger( 0); tempb.elements[2][0].AssignInteger(0);
+	tempA.elements[3][0].AssignInteger(-1); tempA.elements[3][1].AssignInteger( 0); tempb.elements[3][0].AssignInteger(-2);
+	tempA.ComputeDebugString();
+	tempb.ComputeDebugString();
+	output.ComputeDebugString();
+	tempCone.SystemLinearInequalitiesHasSolution(tempA,tempb,output);
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()
@@ -12869,7 +12870,7 @@ bool affineCone::WallIsInternalInCone(affineHyperplane &theKillerCandidate)
 {  return true;
 }
 
-bool 	SystemLinearInequalitiesHasSolution
+bool affineCone::SystemLinearInequalitiesHasSolution
 	(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint)
 { static MatrixLargeRational tempMatA;
 	static MatrixLargeRational matX;
@@ -12898,6 +12899,8 @@ bool 	SystemLinearInequalitiesHasSolution
 				tempMatA.elements[i][j+matA.NumCols].MakeZero();
 		}		
 	}
+	tempMatA.ComputeDebugString(); matX.ComputeDebugString();
+	
 	static LargeRational ChangeGradient,MaxMovement, PotentialMaxMovement, PotentialChangeGradient;
 	ChangeGradient.MakeOne();	
 	int EnteringVariable=0;
@@ -12914,7 +12917,7 @@ bool 	SystemLinearInequalitiesHasSolution
 					{ PotentialChangeGradient.Add(tempMatA.elements[j][i]);
 						if (tempMatA.elements[j][i].IsPositive())
 						{ static LargeRational tempRat;
-							tempRat.Assign(matX.elements[i][0]);
+							tempRat.Assign(matX.elements[BaseVariables.elements[j]][0]);
 							tempRat.DivideBy(tempMatA.elements[j][i]);
 							if (PotentialLeavingVariableRow==-1)
 							{	PotentialMaxMovement.Assign(tempRat);

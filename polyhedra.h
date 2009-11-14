@@ -385,6 +385,7 @@ class Matrix: public MatrixElementary<Element>
 public:
 	std::string DebugString;
 	static bool flagComputingDebugInfo;
+	static std::string MatrixElementSeparator;
 	void ComputeDebugString();
 	void ElementToSting(std::string& output);
 	void SwitchTwoRows( int row1, int row2);
@@ -401,7 +402,6 @@ class MatrixLargeRational: public Matrix<LargeRational>
 {
 public:
 	void ComputeDeterminantOverwriteMatrix( LargeRational& output);
-	void ElementToSting(std::string& output);
 	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
 	void Transpose();
@@ -514,7 +514,8 @@ inline void Matrix<Element>::ElementToSting(std::string& output)
 	for (int i=0;i<this->NumRows;i++)
 	{ for (int j=0;j<this->NumCols;j++)
 		{ this->elements[i][j].ElementToString(tempS);
-			out<< tempS<<",";
+			out<< tempS;
+			out<< this->MatrixElementSeparator;
 		}
 		out <<"\n";
 	}

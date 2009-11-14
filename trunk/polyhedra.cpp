@@ -12860,13 +12860,13 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight
 	this->Coefficients.CopyFromLight(right.Coefficients);
 }
 
-bool affineCone::SplitByHyperplane(affineHyperplane& theKillerPlane, affineCones &output)
+bool affineCone::SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones &output)
 { 
 	return true;
 }
 
 bool affineCone::WallIsInternalInCone(affineHyperplane &theKillerCandidate)
-{ 
+{  return true;
 }
 
 bool 	SystemLinearInequalitiesHasSolution
@@ -12889,7 +12889,7 @@ bool 	SystemLinearInequalitiesHasSolution
 	{	if (matb.elements[j][0].IsPositive())
 			matX.elements[j+matA.NumCols][0].Assign(matb.elements[j][0]);
 		else
-			tempMatb.elements[j+matA.NumCols][0].MakeZero();
+			matX.elements[j+matA.NumCols][0].MakeZero();
 		BaseVariables.AddSelection(j+matA.NumCols);
 		for (int i=0;i<matA.NumRows;i++)
 		{ if (i==j)
@@ -12903,26 +12903,27 @@ bool 	SystemLinearInequalitiesHasSolution
 	int EnteringVariable=0;
 	while (EnteringVariable!=-1)
 	{ EnteringVariable=-1;
+		int LeavingVariableRow=-1;
 		ChangeGradient.MakeZero();
 		for (int i=0;i<tempMatA.NumCols;i++)
 		{ if (!BaseVariables.selected[i] )
 			{ PotentialChangeGradient.MakeZero();
+				int PotentialLeavingVariableRow=-1;
 				for (int j=0;j<tempMatA.NumRows;j++)
 				{	if (BaseVariables.elements[j]>=matA.NumCols)
 					{ PotentialChangeGradient.Add(tempMatA.elements[j][i]);
-						int PotentialLeavingVariable=-1;
 						if (tempMatA.elements[j][i].IsPositive())
 						{ static LargeRational tempRat;
-							tempRat.Assign(tempMatb.elements[i][0]);
+							tempRat.Assign(matX.elements[i][0]);
 							tempRat.DivideBy(tempMatA.elements[j][i]);
-							if (PotentialLeavingVariable==-1)
+							if (PotentialLeavingVariableRow==-1)
 							{	PotentialMaxMovement.Assign(tempRat);
-								PotentialLeavingVariable=j;
+								PotentialLeavingVariableRow=j;
 							}
 							else
 							{ if (PotentialMaxMovement.IsGreaterThan(tempRat))
 								{	PotentialMaxMovement.Assign(tempRat);
-									PotentialLeavingVariable=j;
+									PotentialLeavingVariableRow=j;
 								}	
 							}
 						}
@@ -12930,26 +12931,34 @@ bool 	SystemLinearInequalitiesHasSolution
 				}
 				if (PotentialChangeGradient.IsGreaterThan(ChangeGradient))
 				{ EnteringVariable= i; 
-					LeavingVariable=PotentialLeavingVariable;
-					ChangeGradient.Assign(PotentialChange);
-					MaxMovenent.Assign(PotentialMaxMovement);
+					LeavingVariableRow=PotentialLeavingVariableRow;
+					ChangeGradient.Assign(PotentialChangeGradient);
+					MaxMovement.Assign(PotentialMaxMovement);
 				}
 			}
 		} 
 		if (EnteringVariable!=-1)
 		{ static LargeRational tempRat;
-			assert(!tempMatA.elements[LeavingVariable][EnteringVariable].IsEqualToZero());
+			assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
 			for (int i=0;i<tempMatA.NumRows;i++)
-			{ if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariable)
-				{ tempRat.Assign(tempMatA.elements[LeavingVariable][EnteringVariable]);
-					tempRat.DivideBy(tempMatA.elements[LeavingVariable][EnteringVariable] );
+			{ if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariableRow)
+				{ tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
+					tempRat.DivideBy(tempMatA.elements[LeavingVariableRow][EnteringVariable] );
 					tempRat.Minus();
-					tempMatA.AddTwoRows(LeavingVariable,i,0,tempRat);
-					tempRat.Assign(tempMatA.elements[LeavingVariable][EnteringVariable]);
+					tempMatA.AddTwoRows(LeavingVariableRow,i,0,tempRat);
+					tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
 					tempRat.MultiplyBy(MaxMovement);
-					matX.elements[BaseVariables.elements[j]][0].Subtract(tempRat);
+					matX.elements[BaseVariables.elements[i]][0].Subtract(tempRat);
 				}
 			}
+			BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]]=false;
+			BaseVariables.elements[LeavingVariableRow]= EnteringVariable;
+			BaseVariables.selected[EnteringVariable]= true;
 		}
 	}
+	for(int i=0;i<BaseVariables.CardinalitySelection;i++)
+	{ if (BaseVariables.elements[i]>= matA.NumRows)
+			return false;
+	}
+	return true;
 }

@@ -306,6 +306,7 @@ public:
 	void AddObjectOnBottom(Object& o);
 	void AddObjectOnTop(const Object& o);
 	void AddListOnTop(ListBasicObjects<Object>& theList);
+	bool AddObjectOnTopNoRepetitionOfObject(const Object& o);
 	void PopIndexShiftUp(int index);
 	void PopIndexShiftDown(int index);
 	void PopIndexSwapWithLast(int index);
@@ -313,7 +314,7 @@ public:
 	void CopyFromBase (const ListBasicObjects<Object>& From);
 	void ShiftUpExpandOnTop(int StartingIndex);
 	//careful output is not bool but int!!!!
-	int ContainsObject(Object& o);
+	int ContainsObject(const Object& o);
 //	inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1;};
 	int SizeWithoutObjects();
 	void ReleaseMemory();
@@ -948,6 +949,7 @@ public:
 	void MakeOne(){this->NumShort=1;  this->DenShort=1; this->FreeExtended(); };
 	void WriteToFile (std::fstream& output);
 	void ReadFromFile(std::fstream&  input);
+	inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus();};
 	void RaiseToPower(int x);
 	static LargeRational TheRingUnit;
 	static LargeRational TheRingZero;
@@ -1025,7 +1027,7 @@ public:
 		return true;
 	};
 	bool IsGreaterThanOrEqualTo(root& r);
-	bool IsEqualTo(root& right);
+	bool IsEqualTo(const root& right);
 	static void RootScalarEuclideanRoot(root& r1, root& r2, LargeRational& output);
 	static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, LargeRational& output);
 //	static void RootScalarRoot(root& r1, root& r2, MatrixInt& KillingForm, LargeRational& output);
@@ -1033,7 +1035,7 @@ public:
 	int HashFunction();
 	root(){this->SetSizeExpandOnTopLight(root::AmbientDimension);};
 	inline void operator=(const root& right){this->Assign(right);};
-	inline bool operator==(root& right){return IsEqualTo(right);};
+	inline bool operator==(const root& right){return IsEqualTo(right);};
 };
 
 class roots : public ListBasicObjects<root>
@@ -1055,6 +1057,11 @@ public:
 	void Pop(int index);
 	bool IsRegular(root& r);
 	bool IsRegular(root& r, root& outputFailingNormal);
+	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
+		(MatrixLargeRational& outputTheLinearCombination, int theIndex);
+	void GetLinearDependenceRunTheLinearAlgebra
+		(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
+		 Selection& outputNonPivotPoints);
 	bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
 	void GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix,
 																							 Selection& outputNonPivotPoints);
@@ -1071,6 +1078,8 @@ public:
 	bool ComputeNormalFromSelectionAndExtraRoot(root& output,root& ExtraRoot, Selection& theSelection);
 	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output,root& ExtraRoot1,
 																									root& ExtraRoot2, Selection& theSelection);
+	bool operator==(const roots& right);
+	void operator = (const roots& right){this->CopyFromBase(right);};
 };
 
 
@@ -1078,8 +1087,9 @@ public:
 class CombinatorialChamber
 {
 public:
-	std::string DebugString;
-	QuasiPolynomial* ThePolynomial;
+	bool hasZeroPolynomial;
+	//std::string DebugString;
+	//QuasiPolynomial* ThePolynomial;
 	int CreationNumber;
 	int DisplayNumber;
 	bool Explored;
@@ -1155,7 +1165,7 @@ void ListBasicObjects<Object>::AddListOnTop(ListBasicObjects<Object>& theList)
 }
 
 template<class Object>
-int ListBasicObjects<Object>::ContainsObject(Object &o)
+int ListBasicObjects<Object>::ContainsObject(const Object &o)
 { for (int i=0;i<this->size;i++)
 	{ if (this->TheObjects[i]==o)
 		{ return i;
@@ -1201,6 +1211,14 @@ void ListBasicObjects<Object>::ShiftUpExpandOnTop(int StartingIndex)
 	for (int i=this->size-1;i>StartingIndex;i--)
 	{ this->TheObjects[i]= this->TheObjects[i-1];
 	}
+}
+
+template <class Object>
+bool  ListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObject(const Object& o)
+{ if (this->ContainsObject(o)!=-1)
+		return false;
+	this->AddObjectOnTop(o);
+	return true;
 }
 
 template <class Object>
@@ -1685,6 +1703,7 @@ class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamb
 public:
 	std::string DebugString;
 	static const int MaxNumHeaps=5000;
+	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
 	static int DefragSpacing;
 	static int LastReportedMemoryUse;
@@ -1751,8 +1770,8 @@ public:
 	root normal;
 	bool SentencedToDeath;
 	CombinatorialChamberCouplePointers Owners;
-	roots AllVertices;
-	roots Boundaries;
+	//roots AllVertices;
+	//roots Boundaries;
 	bool IsInternalWRT(CombinatorialChamber* owner);
 	bool IsAPlusOwner(CombinatorialChamber* owner);
 	bool IsAnOwner(CombinatorialChamber* owner,
@@ -1770,7 +1789,7 @@ public:
 																			roots & directions, int CurrentIndex,
 																			FacetPointers& FacetOutput);
 	bool CheckVertices(CombinatorialChamber* owner);
-	void ComputeDebugString(CombinatorialChamber* owner);
+	void ComputeDebugString2(CombinatorialChamber* owner);
 	bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate,
 																								roots& directions,int CurrentIndex);
 	bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
@@ -4100,7 +4119,7 @@ private:
 public:
 	std::string DebugString;
 
-	int LastGainingMultiplicityIndex;
+	int LastDistinguishedIndex;
 	int FileStoragePosition;
 	bool PowerSeriesCoefficientIsComputed;
 	bool IsIrrelevant;
@@ -4117,11 +4136,12 @@ public:
 	bool AlreadyAccountedForInGUIDisplay;
 //	static int lastApplicationOfSVformulaNumNewGenerators;
 //	static int lastApplicationOfSVformulaNumNewMonomials;
-	static bool flagAnErrorHasOccurredTimeToPanic;
-	static bool UncoveringBrackets;
-	static std::fstream TheBigDump;
-	static bool UseGlobalCollector;
-	static bool MakingConsistencyCheck;
+	static	bool flagAnErrorHasOccurredTimeToPanic;
+	static	bool flagUsingPrecomputedOrlikSolomonBases;
+	static	bool UncoveringBrackets;
+	static	std::fstream TheBigDump;
+	static	bool UseGlobalCollector;
+	static	bool MakingConsistencyCheck;
 	static LargeRational CheckSum, CheckSum2;
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
@@ -4156,7 +4176,9 @@ public:
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
 				partFractions& Accum);
+	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod(partFractions&Accum);
+//	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
 	bool reduceOnceGeneralMethod(partFractions&Accum);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
@@ -4231,6 +4253,7 @@ public:
 	static	bool flagMakingProgressReport;
 	static	bool flagUsingCheckSum;
 	static int flagMaxNumStringOutputLines;
+	static bool flagUsingOrlikSolomonBasis;
 	void PrepareCheckSums();
 	void CompareCheckSums();
 	void ComputeDebugString();
@@ -4243,6 +4266,7 @@ public:
 	void RemoveRedundantShortRoots();
 	bool splitClassicalRootSystem(bool ShouldElongate);
 	bool split();
+	void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
 	void ComputeOneCheckSum(LargeRational& output);
 	void AccountPartFractionInternals(int sign, int index);
 	void Add(partFraction& f);

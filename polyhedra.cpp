@@ -5950,7 +5950,7 @@ void QuasiNumber::Simplify()
 	}
 	if (theLCM>4) {return;}
 	int NumCycles = MathRoutines::KToTheNth(theLCM,root::AmbientDimension);
-	SelectionWithMultiplicities theSubset;
+	SelectionWithMaxMultiplicity theSubset;
 	theSubset.init(root::AmbientDimension, theLCM-1);
 //	bool oneValue=true;
 	LargeRational theValue, tempRat;
@@ -7730,6 +7730,14 @@ bool partFraction::DecomposeFromLinRelation
 	return true;
 }
 
+void partFraction::GetOneFracContributionForSzenesVergneFormula
+			(	ListBasicObjects<int>& theSelectedIndices, 
+				ListBasicObjects<int>& theElongations,
+				int theIndex, IntegerPoly& output)
+{ Monomial<Integer> tempM;
+	for ()
+}
+
 void partFraction::ApplyGeneralizedSzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, 
 				ListBasicObjects<int> &theElongations, int GainingMultiplicityIndex, 
@@ -7741,19 +7749,44 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
   static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
   //this->lastApplicationOfSVformulaNumNewGenerators=0;
   //this->lastApplicationOfSVformulaNumNewMonomials=0;
+  ::SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
+  TheBigBadIndexingSet.init(theSelectedIndices.size);
+  for (int i=0;i<theSelectedIndices.size;i++)
+  { TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]= 
+			this->TheObjects[theSelectedIndices.TheObjects[i]]
+				.GetMultiplicityLargestElongation()-1;
+  }
+  for (int i=0;i<theSelectedIndices.size;i++)
+  {	TheBigBasIndexingSet.init(theSelectedIndices.size);
+		int oldMaxMultiplicity= TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i];
+		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=0;
+		int NumSubsets=TheBigBadIndexingSet.getTotalNumSubsets();
+		for (int j=0;j<NumSubsets;j++)
+		{	tempFrac.Assign(*this);
+			tempFrac.RelevanceIsComputed=false;
+			ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
+			tempFrac.CoefficientNonExpanded.ComputePolyPartFractionNumerator
+				(ComputationalBufferCoefficientNonExpanded); 
+			for (int k=0;k<theSelectedIndices.size;k++)
+			{	oneFracWithMultiplicitiesAndElongations& currentFrac=
+				tempFrac.TheObjects[theSelectedIndices.TheObjects[k]];
+				int LargestElongation= currentFrac.GetLargestElongation();
+				int multiplicityChange= TheBigBadIndexingSet.Multiplicities.TheObjects[k];
+				currentFrac.AddMultiplicity
+					(-multiplicityChange ,LargestElongation);
+
+			}
+			tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
+				(1,ElongationGainingMultiplicityIndex);
+			
+			TheBigBadIndexingSet.IncrementSubset();	
+		}
+		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]= oldMaxMultiplicity;
+  }
+  
+  
 	for(int i=0;i<theSelectedIndices.size;i++)
-	{	tempFrac.Assign(*this);
-		tempFrac.RelevanceIsComputed=false;
-		ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
-		tempFrac.CoefficientNonExpanded.ComputePolyPartFractionNumerator
-			(ComputationalBufferCoefficientNonExpanded);
-		tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
-			(1,ElongationGainingMultiplicityIndex);
-		oneFracWithMultiplicitiesAndElongations& currentFrac=
-			tempFrac.TheObjects[theSelectedIndices.TheObjects[i]];
-		int LargestElongation= currentFrac.GetLargestElongation();
-		currentFrac.AddMultiplicity
-			(-1,LargestElongation);
+	{	//////////////////
 		static Monomial<Integer> tempM;
 		if (this->UncoveringBrackets)
 		{ tempM.init(root::AmbientDimension);
@@ -9474,8 +9507,22 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(LargeRational& 
 	}
 }
 
-void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIncrement, int Elongation)
-{ int ElongationIndex=-1;
+int oneFracWithMultiplicitiesAndElongations::GetMultiplicityLargestElongation()
+{ int result=0;
+	int LargestElongationFound=0;
+	for (int i=0;i<this->Elongations.size;i++)
+	{ if (LargestElongationFound<this->Elongations.TheObjects[i])
+		{ LargestElongationFound= this->Elongations.TheObjects[i];
+			result= this->Multiplicities.TheObjects[i];
+		}
+	}
+	return result;
+}
+
+void oneFracWithMultiplicitiesAndElongations::AddMultiplicity
+	(int MultiplicityIncrement, int Elongation)
+{ if (MultiplicityIncrement==0) return;
+	int ElongationIndex=-1;
 	for (int i=0;i<this->Elongations.size;i++)
 	{ if (this->Elongations.TheObjects[i]==Elongation)
 		{ ElongationIndex=i;
@@ -9777,17 +9824,21 @@ int RootToIndexTable::getIndexDoubleOfARoot(intRoot& TheRoot)
 	return this->getIndex(tempRoot);
 }
 
-void SelectionWithMultiplicities::init(int NumElements, int MaxMult)
-{ this->Multiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
+void ::SelectionWithMultiplicities::init(int NumElements)
+{	this->Multiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
 	for (int i=0;i<this->Multiplicities.size;i++)
 	{ this->Multiplicities.TheObjects[i]=0;
 	}
 	this->elements.SetActualSizeAtLeastExpandOnTop(NumElements);
 	this->elements.size=0;
+}
+
+void SelectionWithMaxMultiplicity::init(int NumElements, int MaxMult)
+{ this->::SelectionWithMultiplicities::init(NumElements);
 	this->MaxMultiplicity=MaxMult;
 }
 
-void SelectionWithMultiplicities::IncrementSubset()
+void SelectionWithMaxMultiplicity::IncrementSubset()
 { for (int i=this->Multiplicities.size-1;i>=0;i--)
 	{ if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
 		{ if (this->Multiplicities.TheObjects[i]==0)
@@ -9797,7 +9848,7 @@ void SelectionWithMultiplicities::IncrementSubset()
 		}
 		else
 		{ this->Multiplicities.TheObjects[i]=0;
-			this->elements.size--;
+			this->elements.PopFirstOccurenceObjectSwapWithLast(i);
 		}
 	}
 }
@@ -9810,8 +9861,32 @@ void SelectionWithMultiplicities::ComputeElements()
 	}
 }
 
-int SelectionWithMultiplicities::CardinalitySelection()
+int SelectionWithMultiplicities::CardinalitySelectionWithoutMultiplicities()
 { return this->Multiplicities.size;
+}
+
+void ::SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
+{ int result=1;
+	for (int i=0;i<this->MaxMultiplicities.size;i++)
+	{ result*=(this->MaxMultiplicities.TheObjects[i]+1);
+	}
+	assert(result>=0);
+	return result;
+}
+
+void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
+{	for (int i=this->Multiplicities.size-1;i>=0;i--)
+	{ if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicities.TheObjects[i])
+		{ if (this->Multiplicities.TheObjects[i]==0)
+			{	this->elements.AddObjectOnTop(i);}
+			this->Multiplicities.TheObjects[i]++;
+			return;
+		}
+		else
+		{ this->Multiplicities.TheObjects[i]=0;
+			this->elements.PopFirstOccurenceObjectSwapWithLast(i);
+		}
+	}
 }
 
 void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, root& output)

@@ -443,20 +443,35 @@ public:
 	~Selection();
 };
 
+
 class SelectionWithMultiplicities
 {
-private:
 public:
 	ListBasicObjects<int> elements;
 	ListBasicObjects<int> Multiplicities;
-	int MaxMultiplicity;
-	int CardinalitySelection();
+	int CardinalitySelectionWithoutMultiplicities();
+	void init(int NumElements);
 	void ComputeElements();
+};
+
+class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities
+{
+public:
+	int MaxMultiplicity;
 	void init(int NumElements, int MaxMult);
 	void IncrementSubset();
 };
 
-
+class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultiplicities
+{
+public:
+	ListBasicObjects<int> MaxMultiplicities;
+	void init(int NumElements){	this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
+															this->::SelectionWithMultiplicities::init(NumElements);
+														};
+	void IncrementSubset();
+	int getTotalNumSubsets();
+};
 
 class MatrixInt : public MatrixElementary<int>
 {
@@ -4011,6 +4026,7 @@ public:
 	void AddMultiplicity(int MultiplicityIncrement, int Elongation);
 	int IndexLargestElongation();
 	int GetLargestElongation();
+	int GetMultiplicityLargestElongation();
 	int GetLCMElongations();
 	int GetTotalMultiplicity();
 	void invert();
@@ -4151,6 +4167,10 @@ public:
 	static void MakePolynomialFromOneNormal
 						(	root& normal, root& shiftRational, int theMult,	PolynomialLargeRational& output);
 	void ComputeNormals(roots& output);
+	void GetOneFracContributionForSzenesVergneFormula
+		(	ListBasicObjects<int>& theSelectedIndices, 
+			ListBasicObjects<int>& theElongations,
+			int theIndex, IntegerPoly& output);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixLargeRational& theLinearRelation);
 	void UncoverBracketsNumerator();

@@ -540,7 +540,7 @@ guiMainWindow::guiMainWindow()
     this->BoxSizer14HorizontalSaveButtons->Add(this->Button4SaveReadable);
     this->BoxSizer14HorizontalSaveButtons->Add(this->Button5SaveComputer);
 	this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
-
+	
 //	this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
   this->ListBox1WeylGroup->Append(wxT("A2"));
   this->ListBox1WeylGroup->Append(wxT("A3"));

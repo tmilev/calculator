@@ -443,6 +443,20 @@ public:
 	~Selection();
 };
 
+class SelectionWithMultiplicities
+{
+private:
+public:
+	ListBasicObjects<int> elements;
+	ListBasicObjects<int> Multiplicities;
+	int MaxMultiplicity;
+	int CardinalitySelection();
+	void ComputeElements();
+	void init(int NumElements, int MaxMult);
+	void IncrementSubset();
+};
+
+
 
 class MatrixInt : public MatrixElementary<int>
 {
@@ -4016,20 +4030,6 @@ public:
 																	bool LatexFormat, int indexInFraction);
 };
 
-class SubsetWithMultiplicities
-{
-private:
-public:
-	ListBasicObjects<int> elements;
-	ListBasicObjects<int> Multiplicities;
-	int MaxMultiplicity;
-	int CardinalitySelection();
-	void ComputeElements();
-	void init(int NumElements, int MaxMult);
-	void IncrementSubset();
-};
-
-
 class rootWithMultiplicity: public root
 {
 public:
@@ -4173,6 +4173,10 @@ public:
 	bool DecomposeFromLinRelation(MatrixLargeRational& theLinearRelation, partFractions& Accum);
 	void ComputeOneCheckSum(LargeRational& output);
 	void ApplySzenesVergneFormula
+			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
+				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
+				partFractions& Accum);
+	void ApplyGeneralizedSzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
 				partFractions& Accum);
@@ -4676,20 +4680,16 @@ public:
 	void RevealTheEvilConspiracy();
 };
 
-void delIntegersFastAccess(Selection& x);
-void AddToIntegersFastAccess(Selection& x,int a);
-void RationalToDouble(LargeRational& r, double& output);
-int RationalToInteger (LargeRational& r);
-bool RationalEqualsRational(LargeRational &a, LargeRational &b);
-void initIntegersFastAccessMemoryAllocation(Selection& x, int s);
-void initIntegersFastAccessNoMemoryAllocation(Selection& x);
-int lcm(int a, int b);
+class MathRoutines
+{
+public:
+	static int lcm(int a, int b);
+	static int TwoToTheNth(int n);
+	static int NChooseK(int n, int k);
+	static int KToTheNth(int k, int n);
+};
 void initDLL(int rank);
 void exitDLL();
-void CopyMatrix(MatrixLargeRational& FromMat, MatrixLargeRational& ToMat);
-int TwoToTheNth(int n);
-int NChooseK(int n, int k);
-int KToTheNth(int k, int n);
 void SliceTheEuclideanSpace(roots& directions,int& index, int rank,
 														CombinatorialChamberPointers& output,
 														FacetPointers& FacetOutput, root& IndicatorRoot);

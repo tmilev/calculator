@@ -471,6 +471,8 @@ public:
 														};
 	void IncrementSubset();
 	int getTotalNumSubsets();
+	int TotalMultiplicity();
+	int MaxTotalMultiplicity();
 };
 
 class MatrixInt : public MatrixElementary<int>
@@ -4167,11 +4169,6 @@ public:
 	static void MakePolynomialFromOneNormal
 						(	root& normal, root& shiftRational, int theMult,	PolynomialLargeRational& output);
 	void ComputeNormals(roots& output);
-	void GetOneFracContributionForSzenesVergneFormula
-		(	ListBasicObjects<int>& theSelectedIndices, 
-			ListBasicObjects<int>& theElongations,
-			int theIndex, int theIndexBaseElongation, 
-			int lengthGeometricSeries, IntegerPoly& output);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixLargeRational& theLinearRelation);
 	void UncoverBracketsNumerator();
@@ -4204,6 +4201,7 @@ public:
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod(partFractions&Accum);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
+	bool reduceOnceGeneralMethodNoOSBasis(partFractions&Accum);
 	bool reduceOnceGeneralMethod(partFractions&Accum);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
@@ -4220,13 +4218,20 @@ public:
 												IntegerPoly& AminusNbetaPoly);
 	void Assign(const partFraction&p);
 	void AssignNoIndicesNonZeroMults(partFraction&p);
+	int getSmallestNonZeroIndexGreaterThanOrEqualTo(int minIndex);
 	int ControlLineSizeFracs(std::string& output);
 	int ControlLineSizeStringPolys(std::string& output);
 	//void swap(int indexA,int indexB);
 	partFraction();
 	~partFraction();
 	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output);
-	void GetNElongationPoly(int index,int baseElongation,int LengthOfGeometricSeries, IntegerPoly& output);
+	void GetNElongationPolyWithMonomialContribution 
+		(	ListBasicObjects<int>& theSelectedIndices, 
+			ListBasicObjects<int>& theElongations,
+			int theIndex, int theIndexBaseElongation, 
+			int lengthGeometricSeries, IntegerPoly& output);
+	void GetNElongationPoly(int index,int baseElongation,
+													int LengthOfGeometricSeries, IntegerPoly& output);
 	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output);
 	void GetNElongationPoly(int index,int baseElongation,int LengthOfGeometricSeries, PolyPartFractionNumerator& output);
 	int GetNumProportionalVectorsClassicalRootSystems();
@@ -4708,6 +4713,7 @@ public:
 	static int TwoToTheNth(int n);
 	static int NChooseK(int n, int k);
 	static int KToTheNth(int k, int n);
+	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
 };
 void initDLL(int rank);
 void exitDLL();

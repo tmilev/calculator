@@ -7733,9 +7733,19 @@ bool partFraction::DecomposeFromLinRelation
 void partFraction::GetOneFracContributionForSzenesVergneFormula
 			(	ListBasicObjects<int>& theSelectedIndices, 
 				ListBasicObjects<int>& theElongations,
-				int theIndex, IntegerPoly& output)
-{ Monomial<Integer> tempM;
-	for ()
+				int theIndex, int theIndexBaseElongation, int lengthGeometricSeries, IntegerPoly& output)
+{ static Monomial<Integer> tempM;
+	static IntegerPoly tempP;
+	tempM.init(root::AmbientDimension);
+	tempM.Coefficient.value=1;
+	for (int i=0;i<theIndex;i++)
+	{ int tempI= theSelectedIndices.TheObjects[i];
+		for (int j=0;j<root::AmbientDimension;j++)
+		{ tempM.degrees[j]+=(short)(theElongations.TheObjects[i] * 
+																this->RootsToIndices.TheObjects[tempI].elements[j]);
+		}
+	}
+	this->GetNElongationPoly(theIndex,theIndexBaseElongation,lengthGeometricSeries,output);
 }
 
 void partFraction::ApplyGeneralizedSzenesVergneFormula
@@ -7757,7 +7767,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 				.GetMultiplicityLargestElongation()-1;
   }
   for (int i=0;i<theSelectedIndices.size;i++)
-  {	TheBigBasIndexingSet.init(theSelectedIndices.size);
+  {	TheBigBadIndexingSet.init(theSelectedIndices.size);
 		int oldMaxMultiplicity= TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i];
 		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=0;
 		int NumSubsets=TheBigBadIndexingSet.getTotalNumSubsets();
@@ -8030,26 +8040,26 @@ void partFraction::GetAlphaMinusNBetaPoly(int indexA, int indexB,
 //	output.ComputeDebugString();
 }
 
-void partFraction::GetNElongationPoly(int index,int Elongation,int n, IntegerPoly& output)
+void partFraction::GetNElongationPoly(int index,int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output)
 {	output.Nullify(root::AmbientDimension);
 	Monomial<Integer> tempM;
 	tempM.init(root::AmbientDimension);
-	if (n>0)
+	if (LengthOfGeometricSeries>0)
 	{	tempM.Coefficient.Assign(IOne);
-		for (int i=0;i<n;i++)
+		for (int i=0;i<LengthOfGeometricSeries;i++)
 		{ for (int j=0;j<root::AmbientDimension;j++)
 			{ tempM.degrees[j]=(short)
-					(Elongation*i*partFraction::RootsToIndices.TheObjects[index].elements[j]);
+					(baseElongation*i*partFraction::RootsToIndices.TheObjects[index].elements[j]);
 			}
 			output.AddMonomial(tempM);
 		}
 	}
 	else
-	{ assert(n<0);
+	{ assert(LengthOfGeometricSeries<0);
 		tempM.Coefficient.Assign(IMOne);
-		for (int i=-1;i>=n;i--)
+		for (int i=-1;i>=LengthOfGeometricSeries;i--)
 		{ for (int j=0;j<root::AmbientDimension;j++)
-			{ tempM.degrees[j]=short(Elongation*i*partFraction::RootsToIndices.TheObjects[index].elements[j]);
+			{ tempM.degrees[j]=short(baseElongation*i*partFraction::RootsToIndices.TheObjects[index].elements[j]);
 			}
 			output.AddMonomial(tempM);
 		}
@@ -8057,15 +8067,16 @@ void partFraction::GetNElongationPoly(int index,int Elongation,int n, IntegerPol
 	//output.ComputeDebugString();
 }
 
-void partFraction::GetNElongationPoly(int index,int Elongation,int n, PolyPartFractionNumerator& output)
+void partFraction::GetNElongationPoly(int index,int baseElongation,
+																			int LengthOfGeometricSeries, PolyPartFractionNumerator& output)
 {	static ::MonomialInCommutativeAlgebra
 		<Integer,::GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord> tempM;
-	assert (n!=0);
+	assert (LengthOfGeometricSeries!=0);
 	intRoot tempRoot;
 	tempRoot= this->RootsToIndices.TheObjects[index];
-	tempRoot.MultiplyByInteger(Elongation);
+	tempRoot.MultiplyByInteger(baseElongation);
 	::GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation
-		(tempRoot,n, tempM);
+		(tempRoot,LengthOfGeometricSeries, tempM);
 	output.Nullify(root::AmbientDimension);
 	output.AddMonomial(tempM);
 }

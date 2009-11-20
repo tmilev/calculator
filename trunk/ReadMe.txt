@@ -15,11 +15,18 @@
 2.1.3 Download Visual C++ express latest version (Microsoft site) and install.
 2.1.4 Go to the wxWidgets folder->build->msw. Open file wx.dsw. 
 2.1.5 As asked by the compiler, covert files to newer format.
-2.1.6 Go through each individual project and set to Multithreaded compile Debug. To do that right click from within the Visual studio each of the individual projects, select properties->Configurations->C/C++->code generation-> Laufzeitbibliotek (Running library or something of the sort in english). There, you select option /MTd = multithreaded debug.
+2.1.6 Go through each individual project and set to Multithreaded compile Debug. 
+			To do that right click from within the Visual studio each of the individual projects, 
+			select properties->Configurations->C/C++->code generation-> Laufzeitbibliotek 
+			(Running library or something of the sort in english). 
+			There, you select option /MTd = multithreaded debug.
 2.1.7 Make sure you did this for all the projects.
-2.1.8 Build all projects (build menu)
-2.1.9 Close VS and open wxWidget folder->samples-> any sample you wish. Open and build. If it is running, you are good to go. The battle is not yet won.
-2.1.10 Set up properly all paths. This will require more detailed description. Will write it up (I am not sure how to do that properly yet).
+2.1.8 Build all projects (build menu).
+2.1.9 Close VS and open wxWidget folder->samples-> any sample you wish. 
+			Open and build. If it is running, you are good to go. The battle is not yet won.
+2.1.10	Set up properly all paths. This will require more detailed description. 
+				Will write it up (I am not sure how to do that properly yet).
 
 2.2 wxWidgets for Linux (Ubuntu).
-2.2.1 Install Code::Blocks C++ compiler. It should come with everything needed. Will write a more detailed desription in the future.
+2.2.1 Install Code::Blocks C++ compiler. It should come with everything needed. 
+			Will write a more detailed desription in the future.

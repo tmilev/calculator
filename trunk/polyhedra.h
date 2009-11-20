@@ -4170,7 +4170,8 @@ public:
 	void GetOneFracContributionForSzenesVergneFormula
 		(	ListBasicObjects<int>& theSelectedIndices, 
 			ListBasicObjects<int>& theElongations,
-			int theIndex, IntegerPoly& output);
+			int theIndex, int theIndexBaseElongation, 
+			int lengthGeometricSeries, IntegerPoly& output);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixLargeRational& theLinearRelation);
 	void UncoverBracketsNumerator();
@@ -4225,9 +4226,9 @@ public:
 	partFraction();
 	~partFraction();
 	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output);
-	void GetNElongationPoly(int index,int Elongation,int n, IntegerPoly& output);
+	void GetNElongationPoly(int index,int baseElongation,int LengthOfGeometricSeries, IntegerPoly& output);
 	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output);
-	void GetNElongationPoly(int index,int Elongation,int n, PolyPartFractionNumerator& output);
+	void GetNElongationPoly(int index,int baseElongation,int LengthOfGeometricSeries, PolyPartFractionNumerator& output);
 	int GetNumProportionalVectorsClassicalRootSystems();
 	bool operator==(partFraction& right);
 	void operator=(const partFraction& right);

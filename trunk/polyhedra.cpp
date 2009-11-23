@@ -231,6 +231,7 @@ ListObjectPointers<partFraction> partFraction::GlobalCollectorPartFraction;
 bool partFraction::UseGlobalCollector=true;
 bool partFraction::flagAnErrorHasOccurredTimeToPanic=false;
 bool partFraction::flagUsingPrecomputedOrlikSolomonBases=false;
+bool partFraction::flagUsingOrlikSolomonBases=true;
 bool partFractions::flagSplitTestModeNoNumerators=false;
 bool partFractions::flagAnErrorHasOccurredTimeToPanic=false;
 bool partFractions::flagUsingCheckSum=true;
@@ -7712,12 +7713,17 @@ int partFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(int minIndex)
 
 int partFraction::ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixLargeRational& theLinearRelation)
-{ int DesireToSelectAsGainingMultiplicity=-1;
+{	int DesireToSelectAsGainingMultiplicity=-1;
 	int result=-1;
 	for( int i=0;i<theLinearRelation.NumRows;i++)
 	{ if(! theLinearRelation.elements[i][0].IsEqualToZero())
 		{	int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
-			int candidateDesire=this->TheObjects[currentIndex].GetTotalMultiplicity();
+			int candidateDesire;
+			if (!this->flagUsingOrlikSolomonBases)
+			{	candidateDesire=this->TheObjects[currentIndex].GetTotalMultiplicity();
+			} else
+			{ candidateDesire= currentIndex;
+			}
 			if (candidateDesire<0)
 				candidateDesire=-candidateDesire;
 			if (result==-1 || DesireToSelectAsGainingMultiplicity<candidateDesire)
@@ -7789,7 +7795,7 @@ bool partFraction::DecomposeFromLinRelation
 	//}
 	//if (!this->CheckForOrlikSolomonAdmissibility(ParticipatingIndices))
 	//	return false;
-	this->ApplySzenesVergneFormula
+	this->ApplyGeneralizedSzenesVergneFormula
 		(	ParticipatingIndices,theElongations,GainingMultiplicityIndex,
 			ElongationGainingMultiplicityIndex,Accum);
 	//if (this->MakingConsistencyCheck)
@@ -7897,6 +7903,9 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
 				(	TheBigBadIndexingSet.TotalMultiplicity(),
 					ElongationGainingMultiplicityIndex);
+			if (this->flagAnErrorHasOccurredTimeToPanic)
+			{ tempFrac.ComputeDebugString();
+			}
 			Accum.Add(tempFrac);
 			TheBigBadIndexingSet.IncrementSubset();	
 		}

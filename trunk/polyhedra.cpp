@@ -7787,9 +7787,9 @@ bool partFraction::DecomposeFromLinRelation
 		}
 	}
 	this->LastDistinguishedIndex=GainingMultiplicityIndex;
-	/*if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 	{ this->ComputeDebugString();
-	}*/
+	}
 	//if (this->MakingConsistencyCheck)
 	//{ this->ComputeOneCheckSum(this->CheckSum2);
 	//}

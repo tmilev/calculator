@@ -4154,6 +4154,7 @@ public:
 	bool AlreadyAccountedForInGUIDisplay;
 //	static int lastApplicationOfSVformulaNumNewGenerators;
 //	static int lastApplicationOfSVformulaNumNewMonomials;
+	static bool flagUsingOrlikSolomonBases;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 	static	bool flagUsingPrecomputedOrlikSolomonBases;
 	static	bool UncoveringBrackets;

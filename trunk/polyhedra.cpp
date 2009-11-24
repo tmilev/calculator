@@ -7346,8 +7346,10 @@ bool partFraction::reduceOnceGeneralMethodNoOSBasis(partFractions &Accum)
 bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 { static roots tempRoots;
 	static MatrixLargeRational tempMat;
-	this->flagAnErrorHasOccurredTimeToPanic=true;
 	tempRoots.size=0;
+	if (this->flagAnErrorHasOccurredTimeToPanic)
+	{ this->ComputeDebugString();
+	}
 	this->LastDistinguishedIndex= 
 		this->getSmallestNonZeroIndexGreaterThanOrEqualTo(this->LastDistinguishedIndex);	
 	int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
@@ -7367,7 +7369,9 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 	//	{ tempMat.ComputeDebugString();
 	//	}
 	//	tempMat.ComputeDebugString();
-		if (ShouldDecompose && this->LastDistinguishedIndex!=-1)
+		if ( ShouldDecompose && 
+				 (this->LastDistinguishedIndex!=-1 ||
+					this->LastDistinguishedIndex==this->RootsToIndices.size))
 		{ if (IndexInLinRelationOfLastGainingMultiplicityIndex==-1)
 			{	ShouldDecompose=false;}
 			else
@@ -7378,18 +7382,17 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 		if (ShouldDecompose)
 		{	if (this->flagAnErrorHasOccurredTimeToPanic)
 			{ this->ComputeDebugString();
+				tempMat.ComputeDebugString();
 			}
 			this->DecomposeFromLinRelation(tempMat,Accum);
-			{ if (this->flagAnErrorHasOccurredTimeToPanic)
-				{ this->ComputeDebugString();
-					Accum.ComputeDebugString();
-				}
-				//this->ComputeDebugString();
-				return true;
-			}			
+			if (this->flagAnErrorHasOccurredTimeToPanic)
+			{ this->ComputeDebugString();
+				Accum.ComputeDebugString();
+			}
+			//this->ComputeDebugString();
+			return true;			
 		}
 	}
-	this->LastDistinguishedIndex++;
 	return false;
 	//tempRoots.r
 }
@@ -7412,6 +7415,7 @@ void partFraction::Assign(const partFraction& p)
 	this->IndicesNonZeroMults.CopyFromBase(p.IndicesNonZeroMults);
 	this->IsIrrelevant= p.IsIrrelevant;
 	this->RelevanceIsComputed= p.RelevanceIsComputed;
+	this->LastDistinguishedIndex=p.LastDistinguishedIndex;
 }
 
 void partFraction::AssignNoIndicesNonZeroMults(partFraction& p)
@@ -7790,7 +7794,9 @@ bool partFraction::DecomposeFromLinRelation
 			theElongations.AddObjectOnTop(theLinearRelation.elements[i][0].NumShort);
 		}
 	}
-	this->LastDistinguishedIndex=GainingMultiplicityIndex;
+	if (!this->flagUsingOrlikSolomonBases)
+	{	this->LastDistinguishedIndex=GainingMultiplicityIndex;
+	}
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 	{ this->ComputeDebugString();
 	}
@@ -7835,7 +7841,7 @@ void partFraction::GetNElongationPolyWithMonomialContribution
 																this->RootsToIndices.TheObjects[tempI].elements[j]);
 		}
 	}
-	this->GetNElongationPoly(theIndex,theIndexBaseElongation,lengthGeometricSeries,output);
+	this->GetNElongationPoly(theSelectedIndices.TheObjects[theIndex],theIndexBaseElongation,lengthGeometricSeries,output);
 	output.MultiplyByMonomial(tempM);
 }
 
@@ -7880,21 +7886,35 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			{	oneFracWithMultiplicitiesAndElongations& currentFrac=
 				tempFrac.TheObjects[theSelectedIndices.TheObjects[k]];
 				int LargestElongation= currentFrac.GetLargestElongation();
-				int multiplicityChange= TheBigBadIndexingSet.Multiplicities.TheObjects[k];
+				int multiplicityChange;
+				if (k!=i)
+				{ multiplicityChange= TheBigBadIndexingSet.Multiplicities.TheObjects[k];}
+				else
+				{	multiplicityChange= oldMaxMultiplicity+1;}
 				currentFrac.AddMultiplicity
 					(-multiplicityChange ,LargestElongation);
 				if (this->UncoveringBrackets)
 				{ this->GetNElongationPolyWithMonomialContribution
 						(	theSelectedIndices,theElongations,
-							theSelectedIndices.TheObjects[k], LargestElongation,
+							k, LargestElongation,
 							theElongations.TheObjects[k],tempP);
-					int tempI=TheBigBadIndexingSet.Multiplicities.TheObjects[k];
-					tempP.RaiseToPower(tempI);
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+					{ tempP.ComputeDebugString();
+					}
+					tempP.RaiseToPower(multiplicityChange);
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+					{ tempP.ComputeDebugString();
+					}
 					ComputationalBufferCoefficient.MultiplyBy(tempP);
 					static Integer tempInt; 
+					int tempI;
+					if (k==i) tempI = multiplicityChange-1; else tempI=multiplicityChange;
 					tempInt.value=MathRoutines::NChooseK(tempN,tempI);
 					ComputationalBufferCoefficient.TimesConstant(tempInt);
 					tempN-=tempI;						
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+					{ tempFrac.ComputeDebugString();
+					}
 				}else
 				{
 				}
@@ -7908,11 +7928,12 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			{ tempFrac.ComputeDebugString();
 			}
 			tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
-				(	TheBigBadIndexingSet.TotalMultiplicity(),
+				(	TheBigBadIndexingSet.TotalMultiplicity()+oldMaxMultiplicity+1,
 					ElongationGainingMultiplicityIndex);
 			if (this->flagAnErrorHasOccurredTimeToPanic)
 			{ tempFrac.ComputeDebugString();
 			}
+			tempFrac.ComputeIndicesNonZeroMults();
 			Accum.Add(tempFrac);
 			TheBigBadIndexingSet.IncrementSubset();	
 		}
@@ -8546,7 +8567,8 @@ void partFractions::PrepareIndicatorVariables()
 }
 
 bool partFractions::split()
-{ this->IndexLowestNonProcessed=0;
+{ partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	this->IndexLowestNonProcessed=0;
 	partFraction tempF;
 	//Checksum code follows:
 	//std::string tempS1, tempS2;
@@ -8565,16 +8587,22 @@ bool partFractions::split()
 	{ //this->ComputeDebugString();
 //		bool ShouldIgnore=false;
 		if (!this->ShouldIgnore())
-		{	tempF.Assign(this->TheObjects[this->IndexLowestNonProcessed]);
+		{	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+			{	this->ComputeDebugString();}
+			//tempF.Assign(this->TheObjects[this->IndexLowestNonProcessed]);
+			partFraction& tempFrac= this->TheObjects[this->IndexLowestNonProcessed];
 //			this->ComputeDebugString();
 //			tempF.ComputeDebugString();
 //			if (this->IndexLowestNonReduced==5 && this->size==9)
 //			{ partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 //				this->ComputeDebugString();
 //			}
-			if (! tempF.reduceOnceGeneralMethod(*this))
-			{ if (tempF.IndicesNonZeroMults.size<=root::AmbientDimension)
+			if (! tempFrac.reduceOnceGeneralMethod(*this))
+			{ if (tempFrac.IndicesNonZeroMults.size<=root::AmbientDimension)
 				{	this->IndexLowestNonProcessed++;
+				}
+				else
+				{ tempFrac.LastDistinguishedIndex++;
 				}
 			}
 			else
@@ -8583,9 +8611,6 @@ bool partFractions::split()
 //				{ this->ComputeDebugString();
 //				}
 			}
-//			if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-//			{	this->ComputeDebugString();
-//			}
 //			if (partFraction::MakingConsistencyCheck)
 //			{	LargeRational tempRat2;
 //				this->UncoverBracketsNumerators();
@@ -8596,6 +8621,16 @@ bool partFractions::split()
 //					assert(false);
 //				}
 //			}
+		}
+		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+		{	this->ComputeDebugString();
+			LargeRational tempRat2;
+			//this->UncoverBracketsNumerators();
+			this->ComputeOneCheckSum(tempRat2);
+			if (!tempRat2.IsEqualTo(this->StartCheckSum))
+			{	this->ComputeDebugString();
+				assert(false);
+			}		
 		}
 		this->MakeProgressReportSplittingMainPart();
 	//	this->ComputeDebugString();

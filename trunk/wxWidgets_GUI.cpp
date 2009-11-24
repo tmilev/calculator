@@ -562,7 +562,7 @@ guiMainWindow::guiMainWindow()
 	this->ListBox1WeylGroup->Append(wxT("F4"));
 	this->ListBox1WeylGroup->SetSelection(1);
 	this->CheckBox1ComputePFs->SetValue(false);
-	this->CheckBox2CheckSums->SetValue(false);
+	this->CheckBox2CheckSums->SetValue(true);
 	this->CheckBox3ComputeChambers->SetValue(true);
 	this->CheckBox4ChamberLabels->SetValue(true);
 	this->CheckBox5InvisibleChambers->SetValue(false);

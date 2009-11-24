@@ -7380,9 +7380,13 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 			{ this->ComputeDebugString();
 			}
 			this->DecomposeFromLinRelation(tempMat,Accum);
-			{ //this->ComputeDebugString();
+			{ if (this->flagAnErrorHasOccurredTimeToPanic)
+				{ this->ComputeDebugString();
+					Accum.ComputeDebugString();
+				}
+				//this->ComputeDebugString();
 				return true;
-			}
+			}			
 		}
 	}
 	this->LastDistinguishedIndex++;
@@ -7899,6 +7903,9 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			{ tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 			}else
 			{
+			}
+			if (this->flagAnErrorHasOccurredTimeToPanic)
+			{ tempFrac.ComputeDebugString();
 			}
 			tempFrac.TheObjects[GainingMultiplicityIndex].AddMultiplicity
 				(	TheBigBadIndexingSet.TotalMultiplicity(),

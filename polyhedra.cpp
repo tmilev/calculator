@@ -458,6 +458,7 @@ ComputationSetup::ComputationSetup()
 	this->flagDisplayingPartialFractions=true;
 	this->flagDisplayingCombinatorialChambersTextData=false;
 	this->flagHavingDocumentClassForLaTeX=true;
+	this->flagHavingStartingExpression=true;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
 //	this->RankEuclideanSpaceGraphics=3;
@@ -477,13 +478,14 @@ void ComputationSetup::Run()
 	::IndicatorWindowGlobalVariables.Nullify();
 	PolynomialOutputFormat::LatexMaxLineLength=95;
 	PolynomialOutputFormat::UsingLatexFormat=true;
+	std::string BeginString;
 	//this->thePartialFraction.flagSplitTestModeNoNumerators=true;
 	this->AllowRepaint=false;
 	partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
 	::initDLL(this->WeylGroupIndex);
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
-	this->VPVectors.ComputeDebugString();
+	//this->VPVectors.ComputeDebugString();
 	if (this->ComputingPartialFractions)
 	{	if (!this->UsingCustomVectors)
 		{	this->thePartialFraction.ComputeKostantFunctionFromWeylGroup
@@ -495,6 +497,9 @@ void ComputationSetup::Run()
 		{ intRoots tempRoots;
 			tempRoots.AssignRoots(this->VPVectors);
 			this->thePartialFraction.initFromRootSystem(tempRoots,tempRoots,0);
+			if (this->flagHavingStartingExpression)
+			{ this->thePartialFraction.ElementToString(	BeginString);
+			}
 			this->thePartialFraction.split();
 			this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
 				(this->theOutput,this->thePartialFraction.IndicatorRoot,false,false);
@@ -509,8 +514,14 @@ void ComputationSetup::Run()
         out<< "\n\\end{document}";
 			this->theOutput.DebugString= out.str();
 		}
-//		if (this->flagDisplayingPartialFractions)
-		{ this->thePartialFraction.ComputeDebugString();
+		if (this->flagDisplayingPartialFractions)
+		{ std::stringstream out2;
+			if (this->flagHavingStartingExpression)
+      { out2<< BeginString<<"=";
+      }
+			this->thePartialFraction.ComputeDebugString();
+			out2<<this->thePartialFraction.DebugString;
+			this->thePartialFraction.DebugString= out2.str();
 		}
 	}
 	if (this->ComputingChambers)
@@ -9274,6 +9285,11 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 void partFractions::ComputeDebugString()
 { this->ElementToString(this->DebugString,PolynomialOutputFormat::UsingLatexFormat,false,true);
 }
+
+void partFractions::ElementToString(std::string& output)
+{ this->ElementToString(output,PolynomialOutputFormat::UsingLatexFormat,false,true);
+}
+
 
 void partFractions::ComputeDebugStringNoNumerator()
 { this->ElementToString(this->DebugString,PolynomialOutputFormat::UsingLatexFormat,false,false);

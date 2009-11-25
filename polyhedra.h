@@ -447,6 +447,9 @@ public:
 class SelectionWithMultiplicities
 {
 public:
+	std::string DebugString;
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void ElementToString(std::string& output);
 	ListBasicObjects<int> elements;
 	ListBasicObjects<int> Multiplicities;
 	int CardinalitySelectionWithoutMultiplicities();
@@ -469,6 +472,7 @@ public:
 	void init(int NumElements){	this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
 															this->::SelectionWithMultiplicities::init(NumElements);
 														};
+	void clearNoMaxMultiplicitiesChange();
 	void IncrementSubset();
 	int getTotalNumSubsets();
 	int TotalMultiplicity();

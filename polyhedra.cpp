@@ -7867,7 +7867,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 		TotalMultiplicity+=tempI;
   }
   for (int i=0;i<theSelectedIndices.size;i++)
-  {	TheBigBadIndexingSet.init(theSelectedIndices.size);
+  {	TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
 		int oldMaxMultiplicity= TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i];
 		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=0;
 		int NumSubsets=TheBigBadIndexingSet.getTotalNumSubsets();
@@ -7881,7 +7881,10 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			{ tempFrac.CoefficientNonExpanded.ComputePolyPartFractionNumerator
 				(ComputationalBufferCoefficientNonExpanded); 
 			}
-			int tempN= TheBigBadIndexingSet.MaxTotalMultiplicity();
+			int tempN= TheBigBadIndexingSet.TotalMultiplicity()+oldMaxMultiplicity;
+			if (this->flagAnErrorHasOccurredTimeToPanic)
+			{ TheBigBadIndexingSet.ComputeDebugString();
+			}
 			for (int k=0;k<theSelectedIndices.size;k++)
 			{	oneFracWithMultiplicitiesAndElongations& currentFrac=
 				tempFrac.TheObjects[theSelectedIndices.TheObjects[k]];
@@ -7908,7 +7911,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 					ComputationalBufferCoefficient.MultiplyBy(tempP);
 					static Integer tempInt; 
 					int tempI;
-					if (k==i) tempI = multiplicityChange-1; else tempI=multiplicityChange;
+					if (k==i) tempI = oldMaxMultiplicity; else tempI=multiplicityChange;
 					tempInt.value=MathRoutines::NChooseK(tempN,tempI);
 					ComputationalBufferCoefficient.TimesConstant(tempInt);
 					tempN-=tempI;						
@@ -9933,6 +9936,15 @@ void ::SelectionWithMultiplicities::init(int NumElements)
 	this->elements.size=0;
 }
 
+void SelectionWithMultiplicities::ElementToString(std::string& output)
+{ std::stringstream out;
+	for (int i=0;i<this->elements.size;i++)
+	{ out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: " 
+				<<this->Multiplicities.TheObjects[this->elements.TheObjects[i]];
+	}
+	output= out.str();
+}
+
 void SelectionWithMaxMultiplicity::init(int NumElements, int MaxMult)
 { this->::SelectionWithMultiplicities::init(NumElements);
 	this->MaxMultiplicity=MaxMult;
@@ -9988,6 +10000,12 @@ int ::SelectionWithDifferentMaxMultiplicities::MaxTotalMultiplicity()
 	{ result+=this->MaxMultiplicities.TheObjects[i];
 	}
 	return result;
+}
+
+void ::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
+{ for (int i=0;i<this->Multiplicities.size;i++)
+	{ this->Multiplicities.TheObjects[i]=0;
+	}
 }
 
 void SelectionWithDifferentMaxMultiplicities::IncrementSubset()

@@ -4308,6 +4308,7 @@ public:
 	void PopIndexSwapWithLastHashAndAccount(int index);
 	void PrepareIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
+	void ElementToString(std::string& output);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	int ElementToStringBasisChange(MatrixInt& VarChange, bool UsingVarChange, std::string& output,
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator);
@@ -4680,6 +4681,7 @@ public:
 	bool ComputingVectorPartitions;
 	bool ComputingChambers;
 	bool MakingCheckSumPFsplit;
+	bool flagHavingStartingExpression;
 	bool flagDisplayingCombinatorialChambersTextData;
 	bool flagHavingBeginEqnForLaTeXinStrings;
 	bool flagHavingDocumentClassForLaTeX;

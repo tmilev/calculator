@@ -4200,9 +4200,10 @@ public:
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
 				partFractions& Accum);
 	void ApplyGeneralizedSzenesVergneFormula
-			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
-				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
-				partFractions& Accum);
+			(	ListBasicObjects<int> &theSelectedIndices, 
+				ListBasicObjects<int> &theGreatestElongations, 
+				ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, 
+				int ElongationGainingMultiplicityIndex, partFractions &Accum);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod(partFractions&Accum);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
@@ -4231,10 +4232,11 @@ public:
 	~partFraction();
 	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output);
 	void GetNElongationPolyWithMonomialContribution 
-		(	ListBasicObjects<int>& theSelectedIndices, 
-			ListBasicObjects<int>& theElongations,
-			int theIndex, int theIndexBaseElongation, 
-			int lengthGeometricSeries, IntegerPoly& output);
+			(	ListBasicObjects<int>& theSelectedIndices, 
+				ListBasicObjects<int>& theCoefficients,
+				ListBasicObjects<int>& theGreatestElongations,
+				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries, 
+				IntegerPoly& output);
 	void GetNElongationPoly(int index,int baseElongation,
 													int LengthOfGeometricSeries, IntegerPoly& output);
 	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output);

@@ -483,6 +483,7 @@ void ComputationSetup::Run()
 	this->AllowRepaint=false;
 	partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
 	::initDLL(this->WeylGroupIndex);
+	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -13324,15 +13325,17 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 	//NonZeroSlackVariables.init(matA.NumRows);
 	for (int j=0;j<matA.NumRows;j++)
 	{	matX.elements[j+matA.NumCols][0].Assign(matb.elements[j][0]);
-		if (matX.elements[j+matA.NumCols][0].IsNegative())
-		{ matX.elements[j+matA.NumCols][0].Minus();
-		}
 		BaseVariables.AddSelection(j+matA.NumCols);
 		for (int i=0;i<matA.NumRows;i++)
 		{ if (i==j)
 				tempMatA.elements[i][j+matA.NumCols].MakeOne();
 			else
 				tempMatA.elements[i][j+matA.NumCols].MakeZero();
+		}
+		if (matX.elements[j+matA.NumCols][0].IsNegative())
+		{ matX.elements[j+matA.NumCols][0].Minus();
+			tempMatA.RowTimesScalar(j,RMOne);
+			tempMatA.elements[j][j+matA.NumCols].MakeOne();
 		}
 	}
 	tempMatA.ComputeDebugString(); matX.ComputeDebugString();

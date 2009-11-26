@@ -7771,13 +7771,15 @@ bool partFraction::DecomposeFromLinRelation
 	int GainingMultiplicityIndex=-1;
 	int ElongationGainingMultiplicityIndex=-1;
 	static ListBasicObjects<int> ParticipatingIndices;
-	static ListBasicObjects<int> theElongations;
+	static ListBasicObjects<int> theGreatestElongations;
+	static ListBasicObjects<int> theCoefficients;
 	LargeRational oldCheckSum;
 /*	if(this->flagAnErrorHasOccurredTimeToPanic)
 	{ Accum.ComputeOneCheckSum(oldCheckSum);
 	} */
 	ParticipatingIndices.size=0;
-	theElongations.size=0;
+	theCoefficients.size=0;
+	theGreatestElongations.size=0;
 	//this->ComputeDebugString();
 	//Accum.ComputeDebugString();
 	
@@ -7801,8 +7803,10 @@ bool partFraction::DecomposeFromLinRelation
 	//theLinearRelation.ComputeDebugString();
 	for (int i=0;i<theLinearRelation.NumRows;i++)
 	{ if (i!=GainingMultiplicityIndexInLinRelation && theLinearRelation.elements[i][0].NumShort!=0)
-		{	ParticipatingIndices.AddObjectOnTop(this->IndicesNonZeroMults.TheObjects[i]);
-			theElongations.AddObjectOnTop(theLinearRelation.elements[i][0].NumShort);
+		{	int tempI=this->IndicesNonZeroMults.TheObjects[i];
+			ParticipatingIndices.AddObjectOnTop(tempI);
+			theGreatestElongations.AddObjectOnTop(this->TheObjects[tempI].GetLargestElongation());			
+			theCoefficients.AddObjectOnTop(theLinearRelation.elements[i][0].NumShort);
 		}
 	}
 	if (!this->flagUsingOrlikSolomonBases)
@@ -7817,7 +7821,7 @@ bool partFraction::DecomposeFromLinRelation
 	//if (!this->CheckForOrlikSolomonAdmissibility(ParticipatingIndices))
 	//	return false;
 	this->ApplyGeneralizedSzenesVergneFormula
-		(	ParticipatingIndices,theElongations,GainingMultiplicityIndex,
+		(	ParticipatingIndices,theGreatestElongations,theCoefficients,GainingMultiplicityIndex,
 			ElongationGainingMultiplicityIndex,Accum);
 	//if (this->MakingConsistencyCheck)
 	//{ assert(this->CheckSum2.IsEqualTo(this->CheckSum));
@@ -7838,8 +7842,9 @@ bool partFraction::DecomposeFromLinRelation
 
 void partFraction::GetNElongationPolyWithMonomialContribution
 			(	ListBasicObjects<int>& theSelectedIndices, 
-				ListBasicObjects<int>& theElongations,
-				int theIndex, int theIndexBaseElongation, int lengthGeometricSeries, 
+				ListBasicObjects<int>& theCoefficients,
+				ListBasicObjects<int>& theGreatestElongations,
+				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries, 
 				IntegerPoly& output)
 { static Monomial<Integer> tempM;
 	static IntegerPoly tempP;
@@ -7848,17 +7853,22 @@ void partFraction::GetNElongationPolyWithMonomialContribution
 	for (int i=0;i<theIndex;i++)
 	{ int tempI= theSelectedIndices.TheObjects[i];
 		for (int j=0;j<root::AmbientDimension;j++)
-		{ tempM.degrees[j]+=(short)(theElongations.TheObjects[i] * 
+		{ tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]* 
 																this->RootsToIndices.TheObjects[tempI].elements[j]);
 		}
 	}
-	this->GetNElongationPoly(theSelectedIndices.TheObjects[theIndex],theIndexBaseElongation,lengthGeometricSeries,output);
+	this->GetNElongationPoly
+		(	theSelectedIndices.TheObjects[theIndex],
+			theGreatestElongations.TheObjects[theIndex],
+			theCoefficients.TheObjects[theIndex],
+			output);
 	output.MultiplyByMonomial(tempM);
 }
 
 void partFraction::ApplyGeneralizedSzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, 
-				ListBasicObjects<int> &theElongations, int GainingMultiplicityIndex, 
+				ListBasicObjects<int> &theGreatestElongations, 
+				ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, 
 				int ElongationGainingMultiplicityIndex, partFractions &Accum)
 { static partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
 	static IntegerPoly tempP;
@@ -7897,21 +7907,17 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			{ TheBigBadIndexingSet.ComputeDebugString();
 			}
 			for (int k=0;k<theSelectedIndices.size;k++)
-			{	oneFracWithMultiplicitiesAndElongations& currentFrac=
-				tempFrac.TheObjects[theSelectedIndices.TheObjects[k]];
-				int LargestElongation= currentFrac.GetLargestElongation();
-				int multiplicityChange;
+			{	int multiplicityChange;
 				if (k!=i)
 				{ multiplicityChange= TheBigBadIndexingSet.Multiplicities.TheObjects[k];}
 				else
 				{	multiplicityChange= oldMaxMultiplicity+1;}
-				currentFrac.AddMultiplicity
-					(-multiplicityChange ,LargestElongation);
+				tempFrac.TheObjects[theSelectedIndices.TheObjects[k]].AddMultiplicity
+					(-multiplicityChange ,theGreatestElongations.TheObjects[k]);
 				if (this->UncoveringBrackets)
 				{ this->GetNElongationPolyWithMonomialContribution
-						(	theSelectedIndices,theElongations,
-							k, LargestElongation,
-							theElongations.TheObjects[k],tempP);
+						(	theSelectedIndices,theCoefficients,theGreatestElongations,
+							k, tempP);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 					{ tempP.ComputeDebugString();
 					}
@@ -8584,6 +8590,8 @@ bool partFractions::split()
 { partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->IndexLowestNonProcessed=0;
 	partFraction tempF;
+	std::string OldDebugString;
+	int ProblemCounter=0;
 	//Checksum code follows:
 	//std::string tempS1, tempS2;
 //	this->ComputeDebugString();
@@ -8602,7 +8610,11 @@ bool partFractions::split()
 //		bool ShouldIgnore=false;
 		if (!this->ShouldIgnore())
 		{	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-			{	this->ComputeDebugString();}
+			{	this->ElementToString(OldDebugString);
+				ProblemCounter++;
+				if (ProblemCounter==14)
+					Stop();
+			}
 			//tempF.Assign(this->TheObjects[this->IndexLowestNonProcessed]);
 			partFraction& tempFrac= this->TheObjects[this->IndexLowestNonProcessed];
 //			this->ComputeDebugString();

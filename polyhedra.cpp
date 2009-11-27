@@ -178,6 +178,7 @@ template < > int HashedListBasicObjects
   ::PreferredHashSize=100;
 template < > int HashedListBasicObjects<GeneratorPFAlgebraRecord>::PreferredHashSize = 1000;
 template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=100;
+template < > int HashedListBasicObjects<Selection>::PreferredHashSize=20;
 
 template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<ComplexQN>::ListBasicObjectsActualSizeIncrement=1;
@@ -214,6 +215,7 @@ template < > int ListBasicObjects<rootWithMultiplicity>::ListBasicObjectsActualS
 template < > int ListBasicObjects<std::string>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<unsigned int>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<roots>::ListBasicObjectsActualSizeIncrement=5;
+template < > int ListBasicObjects<Selection>::ListBasicObjectsActualSizeIncrement=5;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList2;
 bool RandomCodeIDontWantToDelete::UsingEvilList1=true;
@@ -1281,8 +1283,7 @@ int MathRoutines::KToTheNth(int k, int n)
 }
 
 int MathRoutines::BinomialCoefficientMultivariate(int N, ListBasicObjects<int> &theChoices)
-{ int counter=0;
-	int ChoiceIndex=0;
+{ int ChoiceIndex=0;
 	int denominator=1;
 	int result=0;
 	for( int i=N;i>0;i--)
@@ -1555,7 +1556,7 @@ void Selection::initNoMemoryAllocation()
 	CardinalitySelection = 0;
 }
 
-void Selection::Assign(Selection& right)
+void Selection::Assign(const Selection& right)
 { if (this==&right)
 	{ return;
 	}
@@ -1570,6 +1571,25 @@ void Selection::Assign(Selection& right)
 		this->selected[this->elements[i]]=true;
 	}
 	this->CardinalitySelection=right.CardinalitySelection;
+}
+
+int Selection::HashFunction()
+{ int tempMin=Minimum(SomeRandomPrimesSize, this->MaxSize);
+  int result=0;
+  for (int i=0;i<tempMin;i++)
+    if (this->selected[i])
+      result+=i*SomeRandomPrimes[i];
+  return result;
+}
+
+bool Selection::operator==(Selection& right)
+{ if (this->MaxSize!=right.MaxSize || this->CardinalitySelection!=right.CardinalitySelection)
+    return false;
+  for (int i=0;i<this->CardinalitySelection;i++)
+  { if (this->selected[this->elements[i]]!=right.selected[this->elements[i]])
+      return false;
+  }
+  return true;
 }
 
 void root::RootPlusRootTimesScalar(root& r1, root& r2, LargeRational& rat, root& output)
@@ -1653,8 +1673,8 @@ bool roots::GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
 
 
 void roots::GetLinearDependenceRunTheLinearAlgebra
-	(	MatrixLargeRational &outputTheLinearCombination, 
-		MatrixLargeRational &outputTheSystem, 
+	(	MatrixLargeRational &outputTheLinearCombination,
+		MatrixLargeRational &outputTheSystem,
 		Selection &outputNonPivotPoints)
 { outputTheSystem.init(root::AmbientDimension,(short)this->size);
 	static MatrixLargeRational matOutputEmpty;
@@ -2597,7 +2617,7 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 	{	//NewPlusChamber->ThePolynomial= this->ThePolynomial;
 		//NewMinusChamber->ThePolynomial= this->ThePolynomial;
 		NewPlusChamber->hasZeroPolynomial= this->hasZeroPolynomial;
-		NewMinusChamber->hasZeroPolynomial= this->hasZeroPolynomial;	
+		NewMinusChamber->hasZeroPolynomial= this->hasZeroPolynomial;
 	}
 	theKillerFacet->Owners.AddCouple(NewPlusChamber,NewMinusChamber);
 	NewPlusChamber->ExternalWalls->AddObjectOnTop(theKillerFacet);
@@ -7339,7 +7359,7 @@ bool partFraction::reduceOnceGeneralMethodNoOSBasis(partFractions &Accum)
 			{	ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
 			}
 		}
-		
+
 		if (ShouldDecompose)
 		{	if (this->flagAnErrorHasOccurredTimeToPanic)
 			{ this->ComputeDebugString();
@@ -7362,8 +7382,8 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 	if (this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->ComputeDebugString();
 	}
-	this->LastDistinguishedIndex= 
-		this->getSmallestNonZeroIndexGreaterThanOrEqualTo(this->LastDistinguishedIndex);	
+	this->LastDistinguishedIndex=
+		this->getSmallestNonZeroIndexGreaterThanOrEqualTo(this->LastDistinguishedIndex);
 	int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 	{ static intRoot tempRoot; tempRoot.dimension=root::AmbientDimension;
@@ -7381,7 +7401,7 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 	//	{ tempMat.ComputeDebugString();
 	//	}
 	//	tempMat.ComputeDebugString();
-		if ( ShouldDecompose && 
+		if ( ShouldDecompose &&
 				 (this->LastDistinguishedIndex!=-1 ||
 					this->LastDistinguishedIndex==this->RootsToIndices.size))
 		{ if (IndexInLinRelationOfLastGainingMultiplicityIndex==-1)
@@ -7390,7 +7410,7 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 			{	ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
 			}
 		}
-		
+
 		if (ShouldDecompose)
 		{	if (this->flagAnErrorHasOccurredTimeToPanic)
 			{ this->ComputeDebugString();
@@ -7402,7 +7422,7 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum)
 				Accum.ComputeDebugString();
 			}
 			//this->ComputeDebugString();
-			return true;			
+			return true;
 		}
 	}
 	return false;
@@ -7726,7 +7746,7 @@ int partFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(int minIndex)
 		if (this->TheObjects[tempI].Multiplicities.size>0)
 		{ if (tempI>=minIndex && tempI<result)
 				result=tempI;
-		} 
+		}
 	}
 	return result;
 }
@@ -7761,7 +7781,7 @@ bool partFraction::CheckForOrlikSolomonAdmissibility(ListBasicObjects<int> &theS
 	}
 	else
 	{	return true;
-	}	
+	}
 }
 
 bool partFraction::DecomposeFromLinRelation
@@ -7783,7 +7803,7 @@ bool partFraction::DecomposeFromLinRelation
 	theGreatestElongations.size=0;
 	//this->ComputeDebugString();
 	//Accum.ComputeDebugString();
-	
+
 	GainingMultiplicityIndexInLinRelation =
 		this->ComputeGainingMultiplicityIndexInLinearRelation(theLinearRelation);
 	GainingMultiplicityIndex= this->IndicesNonZeroMults
@@ -7806,7 +7826,7 @@ bool partFraction::DecomposeFromLinRelation
 	{ if (i!=GainingMultiplicityIndexInLinRelation && theLinearRelation.elements[i][0].NumShort!=0)
 		{	int tempI=this->IndicesNonZeroMults.TheObjects[i];
 			ParticipatingIndices.AddObjectOnTop(tempI);
-			theGreatestElongations.AddObjectOnTop(this->TheObjects[tempI].GetLargestElongation());			
+			theGreatestElongations.AddObjectOnTop(this->TheObjects[tempI].GetLargestElongation());
 			theCoefficients.AddObjectOnTop(theLinearRelation.elements[i][0].NumShort);
 		}
 	}
@@ -7842,10 +7862,10 @@ bool partFraction::DecomposeFromLinRelation
 }
 
 void partFraction::GetNElongationPolyWithMonomialContribution
-			(	ListBasicObjects<int>& theSelectedIndices, 
+			(	ListBasicObjects<int>& theSelectedIndices,
 				ListBasicObjects<int>& theCoefficients,
 				ListBasicObjects<int>& theGreatestElongations,
-				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries, 
+				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
 				IntegerPoly& output)
 { static Monomial<Integer> tempM;
 	static IntegerPoly tempP;
@@ -7854,7 +7874,7 @@ void partFraction::GetNElongationPolyWithMonomialContribution
 	for (int i=0;i<theIndex;i++)
 	{ int tempI= theSelectedIndices.TheObjects[i];
 		for (int j=0;j<root::AmbientDimension;j++)
-		{ tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]* 
+		{ tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]*
 																this->RootsToIndices.TheObjects[tempI].elements[j]);
 		}
 	}
@@ -7867,9 +7887,9 @@ void partFraction::GetNElongationPolyWithMonomialContribution
 }
 
 void partFraction::ApplyGeneralizedSzenesVergneFormula
-			(	ListBasicObjects<int> &theSelectedIndices, 
-				ListBasicObjects<int> &theGreatestElongations, 
-				ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, 
+			(	ListBasicObjects<int> &theSelectedIndices,
+				ListBasicObjects<int> &theGreatestElongations,
+				ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
 				int ElongationGainingMultiplicityIndex, partFractions &Accum)
 { static partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
 	static IntegerPoly tempP;
@@ -7885,7 +7905,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
   for (int i=0;i<theSelectedIndices.size;i++)
   { int tempI= this->TheObjects[theSelectedIndices.TheObjects[i]]
 				.GetMultiplicityLargestElongation()-1;
-		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=tempI;		
+		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=tempI;
 		TotalMultiplicity+=tempI;
   }
   for (int i=0;i<theSelectedIndices.size;i++)
@@ -7901,7 +7921,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			}
 			else
 			{ tempFrac.CoefficientNonExpanded.ComputePolyPartFractionNumerator
-				(ComputationalBufferCoefficientNonExpanded); 
+				(ComputationalBufferCoefficientNonExpanded);
 			}
 			int tempN= TheBigBadIndexingSet.TotalMultiplicity()+oldMaxMultiplicity;
 			if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -7927,12 +7947,12 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 					{ tempP.ComputeDebugString();
 					}
 					ComputationalBufferCoefficient.MultiplyBy(tempP);
-					static Integer tempInt; 
+					static Integer tempInt;
 					int tempI;
 					if (k==i) tempI = oldMaxMultiplicity; else tempI=multiplicityChange;
 					tempInt.value=MathRoutines::NChooseK(tempN,tempI);
 					ComputationalBufferCoefficient.TimesConstant(tempInt);
-					tempN-=tempI;						
+					tempN-=tempI;
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 					{ tempFrac.ComputeDebugString();
 					}
@@ -7956,7 +7976,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			}
 			tempFrac.ComputeIndicesNonZeroMults();
 			Accum.Add(tempFrac);
-			TheBigBadIndexingSet.IncrementSubset();	
+			TheBigBadIndexingSet.IncrementSubset();
 		}
 		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]= oldMaxMultiplicity;
   }
@@ -8657,7 +8677,7 @@ bool partFractions::split()
 			if (!tempRat2.IsEqualTo(this->StartCheckSum))
 			{	this->ComputeDebugString();
 				assert(false);
-			}		
+			}
 		}
 		this->MakeProgressReportSplittingMainPart();
 	//	this->ComputeDebugString();
@@ -9968,7 +9988,7 @@ void ::SelectionWithMultiplicities::init(int NumElements)
 void SelectionWithMultiplicities::ElementToString(std::string& output)
 { std::stringstream out;
 	for (int i=0;i<this->elements.size;i++)
-	{ out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: " 
+	{ out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: "
 				<<this->Multiplicities.TheObjects[this->elements.TheObjects[i]];
 	}
 	output= out.str();
@@ -13299,7 +13319,7 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight
 }
 
 bool affineCone::SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones &output)
-{ 
+{
 	return true;
 }
 
@@ -13325,9 +13345,12 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 		{ tempMatA.elements[i][j].Assign(matA.elements[i][j]);
 		}
 	}
+	static HashedListBasicObjects<Selection> VisitedVertices;
+	VisitedVertices.ClearTheObjects();
 	short numExtraColumns=0;
 	for (int j=0;j<matb.NumRows;j++)
-		numExtraColumns++;		
+    if (matb.elements[j][0].IsNegative())
+      numExtraColumns++;
 	static Selection NonZeroSlackVariables;
 	static Selection BaseVariables;
 	BaseVariables.init(tempMatA.NumCols+numExtraColumns);
@@ -13358,15 +13381,16 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 			matX.elements[oldNumCols][0].Minus();
 			matX.elements[j+matA.NumCols][0].MakeZero();
 			tempMatA.RowTimesScalar(j,RMOne);
-			BaseVariables.AddSelection(oldNumCols);			
+			BaseVariables.AddSelection(oldNumCols);
 		}
-	}	
+	}
 	tempMatA.ComputeDebugString(); matX.ComputeDebugString();
 	static LargeRational	PotentialChangeGradient, ChangeGradient;//Change, PotentialChange;
 	int LowestBadIndex= tempMatA.NumCols- numExtraColumns;
 	int EnteringVariable=0;
-	while (EnteringVariable!=-1)
-	{ EnteringVariable=-1; 
+	bool WeHaveNotEnteredACycle=true;
+	while (EnteringVariable!=-1 && WeHaveNotEnteredACycle)
+	{ EnteringVariable=-1;
 //		ChangeGradient.MakeZero();
 		ChangeGradient.MakeZero();
 		for (int i=0;i<tempMatA.NumCols;i++)
@@ -13389,11 +13413,11 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 //				PotentialChange.Assign(PotentialChangeGradient);
 //				PotentialChange.MultiplyBy(PotentialMaxMovement);
 				if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable)
-				{ EnteringVariable= i; 
+				{ EnteringVariable= i;
 					ChangeGradient.Assign(PotentialChangeGradient);
 				}
 			}
-		} 
+		}
 		if (EnteringVariable!=-1)
 		{	int LeavingVariableRow=-1;
 			static LargeRational	MaxMovement;
@@ -13410,12 +13434,25 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 					}
 				}
 			}
-			static LargeRational tempRat;
+			static LargeRational tempRat, tempTotalChange;
 			assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
 			tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
 			tempRat.Invert();
 			tempMatA.RowTimesScalar(LeavingVariableRow,tempRat);
-			matX.elements[EnteringVariable][0].Add(MaxMovement);
+			tempTotalChange.Assign(MaxMovement);
+			tempTotalChange.MultiplyBy(ChangeGradient);
+			if (!tempTotalChange.IsEqualToZero())
+			{	matX.elements[EnteringVariable][0].Add(MaxMovement);
+        VisitedVertices.ClearTheObjects();
+			}
+			else
+			{ int tempI= VisitedVertices.ContainsObjectHash(BaseVariables);
+        if (tempI==-1)
+        { VisitedVertices.AddObjectOnTopHash(BaseVariables);
+        }else
+        { WeHaveNotEnteredACycle=false;
+        }
+      }
 			for (int i=0;i<tempMatA.NumRows;i++)
 			{	tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
 				tempRat.MultiplyBy(MaxMovement);
@@ -13438,7 +13475,7 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 	{ if (matX.elements[i][0].IsPositive())
 			return false;
 	}
-	outputPoint.Resize(NumTrueVariables,0,false);
+	outputPoint.Resize(NumTrueVariables,1,false);
 	for (int i=0;i<NumTrueVariables;i++)
 	{ outputPoint.elements[i][0].Assign(matX.elements[i][0]);
 	}

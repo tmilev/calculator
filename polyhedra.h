@@ -369,7 +369,7 @@ template <typename Element>
 class MatrixElementaryLooseMemoryFit
 {
 public:
-	short NumRows; short ActualNumRows; 
+	short NumRows; short ActualNumRows;
 	short NumCols; short ActualNumCols;
 	Element** elements;
 	void init(short r,short c);
@@ -418,7 +418,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bo
 		for (int i=0;i<r;i++)
 		{ newElements[i]= new Element[newActualNumCols];
 		}
-	}	
+	}
 	if (PreserveValues && newElements!=0)
 	{ for (int j=::Minimum(this->NumRows,r)-1;j>=0;j--)
 		{	for (int i=::Minimum(this->NumCols,c)-1;i>=0;i--)
@@ -429,8 +429,8 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bo
 	if (newElements!=0)
 	{	this->Free();
 		this->elements = newElements;
-		this->ActualNumCols=newActualNumCols; 
-		this->ActualNumRows=newActualNumRows; 
+		this->ActualNumCols=newActualNumCols;
+		this->ActualNumRows=newActualNumRows;
 	}
 	this->NumCols=c;
 	this->NumRows=r;
@@ -521,6 +521,7 @@ public:
 	void init(int maxNumElements);
 	void ComputeIndicesFromSelection();
 	void initNoMemoryAllocation();
+	int HashFunction();
 	std::string DebugString;
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
@@ -529,9 +530,11 @@ public:
 	void ExpandMaxSize();
 	void ShrinkMaxSize();
 	void incrementSelectionFixedCardinality(int card);
-	void Assign(Selection& right);
-	inline void operator=(Selection& right){this->Assign(right);};
-	inline void operator==(const Selection& right);
+	void Assign(const Selection& right);
+	inline void operator=(const Selection& right){this->Assign(right);};
+	//warning: to call the comparison operator sucessfully, cardinalitySelection must
+	//be properly computed!
+	inline bool operator==(Selection& right);
 	Selection();
 	Selection(int m);
 	~Selection();
@@ -795,7 +798,7 @@ public:
 	//If you got no clue what to put just leave CarryOverBound= 2^31
 	//static const unsigned int CarryOverBound=37;
 	void SubtractSmallerPositive(LargeIntUnsigned& x);
-	static const unsigned int CarryOverBound=2147483648;//=2^31
+	static const unsigned int CarryOverBound=2147483648UL;//=2^31
 	//the below must be less than or equal to the square root of CarryOverBound.
 	//it is used for quick multiplication of LargeRationals.
 	static const int SquareRootOfCarryOverBound=32768;//=2^15
@@ -1807,7 +1810,7 @@ public:
 		(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
 	bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
 	void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls);};
-	inline void operator=(const affineCone& right){this->Assign(right);}; 
+	inline void operator=(const affineCone& right){this->Assign(right);};
 };
 
 class affineCones: public HashedListBasicObjects<affineCone>
@@ -4295,9 +4298,9 @@ public:
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
 				partFractions& Accum);
 	void ApplyGeneralizedSzenesVergneFormula
-			(	ListBasicObjects<int> &theSelectedIndices, 
-				ListBasicObjects<int> &theGreatestElongations, 
-				ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, 
+			(	ListBasicObjects<int> &theSelectedIndices,
+				ListBasicObjects<int> &theGreatestElongations,
+				ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
 				int ElongationGainingMultiplicityIndex, partFractions &Accum);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod(partFractions&Accum);
@@ -4326,11 +4329,11 @@ public:
 	partFraction();
 	~partFraction();
 	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output);
-	void GetNElongationPolyWithMonomialContribution 
-			(	ListBasicObjects<int>& theSelectedIndices, 
+	void GetNElongationPolyWithMonomialContribution
+			(	ListBasicObjects<int>& theSelectedIndices,
 				ListBasicObjects<int>& theCoefficients,
 				ListBasicObjects<int>& theGreatestElongations,
-				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries, 
+				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
 				IntegerPoly& output);
 	void GetNElongationPoly(int index,int baseElongation,
 													int LengthOfGeometricSeries, IntegerPoly& output);

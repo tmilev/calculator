@@ -102,7 +102,7 @@ class SubsetWithMultiplicities;
 class hashedRoots;
 class WeylGroup;
 class intRoots;
-class MatrixInt;
+class MatrixIntTightMemoryFit;
 class QuasiPolynomials;
 template <class ElementOfCommutativeRingWithIdentity,
 					class GeneratorsOfAlgebra,
@@ -366,7 +366,100 @@ public:
 };
 
 template <typename Element>
-class MatrixElementary
+class MatrixElementaryLooseMemoryFit
+{
+public:
+	short NumRows; short ActualNumRows; 
+	short NumCols; short ActualNumCols;
+	Element** elements;
+	void init(short r,short c);
+	void Free();
+	void Resize(short r, short c, bool PreserveValues);
+	void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
+	MatrixElementaryLooseMemoryFit<Element>();
+	~MatrixElementaryLooseMemoryFit<Element>();
+};
+
+template <typename Element>
+MatrixElementaryLooseMemoryFit<Element>::MatrixElementaryLooseMemoryFit()
+{ this->elements=0;
+	this->NumCols=0;
+	this->NumRows=0;
+	this->ActualNumRows=0;
+	this->ActualNumCols=0;
+}
+
+template <typename Element>
+MatrixElementaryLooseMemoryFit<Element>::~MatrixElementaryLooseMemoryFit()
+{ this->Free();
+}
+
+template <typename Element>
+inline void MatrixElementaryLooseMemoryFit<Element>::init(short r, short c)
+{ this->Resize(r,c,false);
+}
+
+template <typename Element>
+inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bool PreserveValues)
+{ if (r<0) r=0;
+	if (c<0) c=0;
+	if (r==this->NumRows && c== this->NumCols)
+		return;
+	if (r==0 || c==0)
+	{	this->NumRows=0;
+		this->NumCols=0;
+		return;
+	}
+	Element** newElements=0;
+	short newActualNumCols= (short)Maximum(this->ActualNumCols,c);
+	short newActualNumRows= (short)Maximum(this->ActualNumRows,r);
+	if (r>this->ActualNumRows || c>this->ActualNumCols)
+	{ newElements	= new Element*[newActualNumRows];
+		for (int i=0;i<r;i++)
+		{ newElements[i]= new Element[newActualNumCols];
+		}
+	}	
+	if (PreserveValues && newElements!=0)
+	{ for (int j=::Minimum(this->NumRows,r)-1;j>=0;j--)
+		{	for (int i=::Minimum(this->NumCols,c)-1;i>=0;i--)
+			{ newElements[j][i]= this->elements[j][i];
+			}
+		}
+	}
+	if (newElements!=0)
+	{	this->Free();
+		this->elements = newElements;
+		this->ActualNumCols=newActualNumCols; 
+		this->ActualNumRows=newActualNumRows; 
+	}
+	this->NumCols=c;
+	this->NumRows=r;
+}
+
+template <typename Element>
+inline void MatrixElementaryLooseMemoryFit<Element>::Assign(const MatrixElementaryLooseMemoryFit<Element>& m)
+{ if (this==&m) return;
+	this->Resize(m.NumRows, m.NumCols, false);
+	for (int i=0;i<this->NumRows;i++)
+		for (int j=0;j<this->NumCols;j++)
+			this->elements[i][j]=m.elements[i][j];
+}
+
+template <typename Element>
+inline void MatrixElementaryLooseMemoryFit<Element>::Free()
+{ for (int i=0;i<this->ActualNumRows;i++)
+	{	delete [] this->elements[i];
+	}
+	delete [] this->elements;
+	this->elements=0;
+	this->NumCols=0;
+	this->NumRows=0;
+	this->ActualNumRows=0;
+	this->ActualNumCols=0;
+}
+
+template <typename Element>
+class MatrixElementaryTightMemoryFit
 {
 public:
 	short NumRows;
@@ -375,13 +468,13 @@ public:
 	void init(short r,short c);
 	void Free();
 	void Resize(short r, short c, bool PreserveValues);
-	void Assign(const MatrixElementary<Element>& m);
-	MatrixElementary<Element>();
-	~MatrixElementary<Element>();
+	void Assign(const MatrixElementaryTightMemoryFit<Element>& m);
+	MatrixElementaryTightMemoryFit<Element>();
+	~MatrixElementaryTightMemoryFit<Element>();
 };
 
 template <typename Element>
-class Matrix: public MatrixElementary<Element>
+class Matrix: public MatrixElementaryLooseMemoryFit<Element>
 {
 public:
 	std::string DebugString;
@@ -407,7 +500,7 @@ public:
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
 	void Transpose();
 	void MultiplyByInt(int x);
-	void AssignMatrixIntWithDen(MatrixInt& theMat, int Den);
+	void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
 	void ScaleToIntegralForMinRationalHeight();
 	void ComputeDebugString();
 	void MultiplyByLargeRational(LargeRational& x);
@@ -438,6 +531,7 @@ public:
 	void incrementSelectionFixedCardinality(int card);
 	void Assign(Selection& right);
 	inline void operator=(Selection& right){this->Assign(right);};
+	inline void operator==(const Selection& right);
 	Selection();
 	Selection(int m);
 	~Selection();
@@ -479,7 +573,7 @@ public:
 	int MaxTotalMultiplicity();
 };
 
-class MatrixInt : public MatrixElementary<int>
+class MatrixIntTightMemoryFit : public ::MatrixElementaryTightMemoryFit<int>
 {
 public:
 	void NullifyAll()
@@ -491,7 +585,7 @@ public:
 
 
 template <typename Element>
-inline void MatrixElementary<Element>::Assign(const MatrixElementary<Element>& m)
+inline void MatrixElementaryTightMemoryFit<Element>::Assign(const MatrixElementaryTightMemoryFit<Element>& m)
 { if (this==&m) return;
 	this->init(m.NumRows, m.NumCols);
 	for (int i=0;i<this->NumRows;i++)
@@ -500,14 +594,14 @@ inline void MatrixElementary<Element>::Assign(const MatrixElementary<Element>& m
 }
 
 template <typename Element>
-MatrixElementary<Element>::MatrixElementary()
+MatrixElementaryTightMemoryFit<Element>::MatrixElementaryTightMemoryFit()
 { this->elements=0;
 	this->NumCols=0;
 	this->NumRows=0;
 }
 
 template <typename Element>
-inline void MatrixElementary<Element>::Free()
+inline void MatrixElementaryTightMemoryFit<Element>::Free()
 { for (int i=0;i<this->NumRows;i++)
 	{	delete [] this->elements[i];
 	}
@@ -646,7 +740,7 @@ void Matrix<Element>::GaussianEliminationByRows
 }
 
 template <typename Element>
-MatrixElementary<Element>::~MatrixElementary()
+MatrixElementaryTightMemoryFit<Element>::~MatrixElementaryTightMemoryFit()
 { this->Free();
 }
 
@@ -658,12 +752,12 @@ inline void Matrix<Element>::NullifyAll()
 }
 
 template <typename Element>
-inline void MatrixElementary<Element>::init(short r, short c)
+inline void MatrixElementaryTightMemoryFit<Element>::init(short r, short c)
 { this->Resize(r,c,false);
 }
 
 template <typename Element>
-inline void MatrixElementary<Element>::Resize(short r, short c, bool PreserveValues)
+inline void MatrixElementaryTightMemoryFit<Element>::Resize(short r, short c, bool PreserveValues)
 { if (r==this->NumRows && c== this->NumCols)
 		return;
 	if (r<=0)
@@ -980,8 +1074,9 @@ public:
                   this->Extended->num.sign*=-1;
               };
 	double DoubleValue();
-	void MakeZero(){this->NumShort=0; this->DenShort=1; this->FreeExtended(); };
-	void MakeOne(){this->NumShort=1;  this->DenShort=1; this->FreeExtended(); };
+	void MakeZero()	{this->NumShort=0;	this->DenShort=1; this->FreeExtended(); };
+	void MakeOne()	{this->NumShort=1;	this->DenShort=1; this->FreeExtended(); };
+	void MakeMOne()	{this->NumShort=-1; this->DenShort=1; this->FreeExtended(); };
 	void WriteToFile (std::fstream& output);
 	void ReadFromFile(std::fstream&  input);
 	inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus();};
@@ -1065,7 +1160,7 @@ public:
 	bool IsEqualTo(const root& right);
 	static void RootScalarEuclideanRoot(root& r1, root& r2, LargeRational& output);
 	static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, LargeRational& output);
-//	static void RootScalarRoot(root& r1, root& r2, MatrixInt& KillingForm, LargeRational& output);
+//	static void RootScalarRoot(root& r1, root& r2, MatrixIntTightMemoryFit& KillingForm, LargeRational& output);
 	static void RootPlusRootTimesScalar(root& r1, root& r2, LargeRational& rat, root& output);
 	int HashFunction();
 	root(){this->SetSizeExpandOnTopLight(root::AmbientDimension);};
@@ -1706,7 +1801,7 @@ public:
 	affineHyperplanes theWalls;
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
 	bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
-	//The below function returns true if the system of homogeneous linear inequalities Ax=>b
+	//The below function returns true if the system of homogeneous linear inequalities Ax<=b
 	//has a solution, false otherwise, where A is a matrix and x and b are column vectors.
 	bool SystemLinearInequalitiesHasSolution
 		(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
@@ -2064,7 +2159,7 @@ class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWi
 	//is defined as ElementOfCommutativeRingWithIdentity[x][y] !
 	void MakeLinearSubstitution(ElementOfCommutativeRingWithIdentity** coeffs,
 		                          short NumStartVar, short NumTargetVar);
-	void MakeExponentSubstitution(MatrixInt& theSub);
+	void MakeExponentSubstitution(MatrixIntTightMemoryFit& theSub);
 	void PrintPolys(std::string& output,ElementOfCommutativeRingWithIdentity& TheRingUnit,
 									ElementOfCommutativeRingWithIdentity& TheRingZero);
 	void MakeSubstitutionLastVariableToEndPoint(short numVars, Polynomial<ElementOfCommutativeRingWithIdentity>& EndPoint);
@@ -2579,7 +2674,7 @@ public:
 	void MakeOneParameterSubFromDirectionInts(int x1, int x2, int x3, int x4, int x5);
 	void MakeOneParameterSubFromDirectionIntsAndConstants(int x1, int x2, int x3, int x4, int x5,
 						int c1, int c2, int c3, int c4, int c5);
-	void MakeSubFromMatrixIntAndDen(MatrixInt& theMat, int Den);
+	void MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit& theMat, int Den);
 	void MakeSubFromMatrixRational(MatrixLargeRational& theMat);
 	void ComputeDiscreteIntegrationUpTo(int d);
 	void MakeLinearSubOnLastVariable(short NumVars,PolynomialRationalCoeff& LastVarSub);
@@ -3577,7 +3672,7 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeLinearSubstitution
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomials<ElementOfCommutativeRingWithIdentity>::
-			 MakeExponentSubstitution(MatrixInt& theSub)
+			 MakeExponentSubstitution(MatrixIntTightMemoryFit& theSub)
 { static Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
 	static Monomial<ElementOfCommutativeRingWithIdentity> tempM;
 	tempM.init(theSub.NumRows);
@@ -3680,8 +3775,8 @@ public:
 	};
 	void MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column);
 	LargeRational Coefficient;
-	MatrixInt Exp;
-	MatrixInt Nums;
+	MatrixIntTightMemoryFit Exp;
+	MatrixIntTightMemoryFit Nums;
 	short NumVars;
 	int Den;
 	int HashFunction();
@@ -3962,7 +4057,7 @@ public:
 class QPSub
 {
 public:
-	MatrixInt TheQNSub;
+	MatrixIntTightMemoryFit TheQNSub;
 	int QNSubDen;
 	PolynomialsRationalCoeff RationalPolyForm;
 	//PolynomialsRationalCoeff RationalPolyForm;
@@ -3977,8 +4072,8 @@ public:
 	// 2  -1
 	// 4  -2
 	// 3   1
-	void MakeSubFromMatrixInt(MatrixInt& theMat);
-	void MakeSubFromMatrixIntAndDen(MatrixInt& theMat, int Den);
+	void MakeSubFromMatrixInt(MatrixIntTightMemoryFit& theMat);
+	void MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit& theMat, int Den);
 	void MakeSubFromMatrixRational(MatrixLargeRational& theMat);
 	void MakeLinearSubIntegrand(root& normal, root&direction, LargeRational& Correction);
 	void MakeSubNVarForOtherChamber(root& direction,root& normal, LargeRational& Correction);
@@ -4028,7 +4123,7 @@ public:
 	ListBasicObjectsLight<int> Multiplicities;
 	ListBasicObjectsLight<int> Elongations;
 	void ComputeDebugString();
-	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
+	void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange);
 	void AddMultiplicity(int MultiplicityIncrement, int Elongation);
 	int IndexLargestElongation();
 	int GetLargestElongation();
@@ -4044,10 +4139,10 @@ public:
 	void operator=(oneFracWithMultiplicitiesAndElongations& right);
 	bool operator==(oneFracWithMultiplicitiesAndElongations& right);
 	void ElementToString(std::string& output, int index, bool LatexFormat);
-	void ElementToStringBasisChange(MatrixInt& VarChange,
+	void ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat, int index);
-	void OneFracToStringBasisChange(int indexElongation, MatrixInt& VarChange,
+	void OneFracToStringBasisChange(int indexElongation, MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat, int indexInFraction);
 };
@@ -4187,7 +4282,7 @@ public:
 	static RootToIndexTable RootsToIndices;
 	bool IsEqualToZero();
 	void ComputeDebugString();
-	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
+	void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange);
 	//void InsertNewRootIndex(int index);
 	//void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
 	void MultiplyCoeffBy(LargeRational& r);
@@ -4247,7 +4342,7 @@ public:
 	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
 	int ElementToString(std::string& output, bool LatexFormat,
 											bool includeVPsummand,bool includeNumerator);
-	int ElementToStringBasisChange(MatrixInt& VarChange,
+	int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat,bool includeVPsummand,bool includeNumerator);
 	void ReadFromFile(std::fstream& input);
@@ -4296,7 +4391,7 @@ public:
 	void ComputeDebugString();
 	void ComputeDebugStringNoNumerator();
 	void ComputeDebugStringWithVPfunction();
-	void ComputeDebugStringBasisChange(MatrixInt& VarChange);
+	void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange);
 	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
 	//row index is the index of the root; column(second) index is the coordinate index
 	void RemoveRedundantShortRootsClassicalRootSystem();
@@ -4312,10 +4407,10 @@ public:
 	void IncreaseHighestIndex(int increment);
 	void ElementToString(std::string& output);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
-	int ElementToStringBasisChange(MatrixInt& VarChange, bool UsingVarChange, std::string& output,
+	int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output,
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator);
-	int ElementToStringBasisChangeOutputToFile(MatrixInt& VarChange, bool UsingVarChange, std::fstream& output,
+	int ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output,
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
 					(	QuasiPolynomial& output, root& r,
@@ -4461,7 +4556,7 @@ class WeylGroup: public HashedListBasicObjects<ElementWeylGroup>
 {
 public:
 	std::string DebugString;
-	MatrixInt KillingFormMatrix;
+	MatrixIntTightMemoryFit KillingFormMatrix;
 	root rho;
 	hashedRoots RootSystem;
 	roots RootsOfBorel;

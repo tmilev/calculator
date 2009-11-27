@@ -1161,7 +1161,7 @@ void MatrixLargeRational::MultiplyByLargeRational(LargeRational& x)
 			this->elements[j][i].MultiplyBy(x);
 }
 
-void MatrixLargeRational::AssignMatrixIntWithDen(MatrixInt &theMat, int Den)
+void MatrixLargeRational::AssignMatrixIntWithDen(MatrixIntTightMemoryFit &theMat, int Den)
 { this->init(theMat.NumRows,theMat.NumCols);
 	for (int i=0;i<this->NumRows;i++)
 	{ for (int j=0;j<this->NumCols;j++)
@@ -6105,7 +6105,7 @@ void QPSub::MakeSubAddExtraVarForIntegration(root &direction)
 	}
 }
 
-void QPSub::MakeSubFromMatrixIntAndDen(MatrixInt& theMat, int Den)
+void QPSub::MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit& theMat, int Den)
 {	this->RationalPolyForm.MakeSubFromMatrixIntAndDen(theMat,Den);
 	this->QNSubDen=Den;
 	this->TheQNSub.Assign(theMat);
@@ -7449,7 +7449,7 @@ void partFraction::AssignNoIndicesNonZeroMults(partFraction& p)
 
 int partFraction::ElementToString(	std::string &output, bool LatexFormat,
 																		bool includeVPsummand, bool includeNumerator)
-{ static MatrixInt tempMat;
+{ static MatrixIntTightMemoryFit tempMat;
 	return this->ElementToStringBasisChange
 		(tempMat,false,output,LatexFormat, includeVPsummand, includeNumerator);
 }
@@ -7539,7 +7539,7 @@ void partFraction::ComputeOneCheckSum(LargeRational &output)
 #ifdef WIN32
 #pragma warning(disable:4018)//grrrrr
 #endif
-int partFraction::ElementToStringBasisChange(MatrixInt& VarChange,
+int partFraction::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat, bool includeVPsummand, bool includeNumerator)
 { std::stringstream out, out2;
@@ -8903,19 +8903,19 @@ void partFractions::Add(partFraction &f)
 
 int partFractions::ElementToString(std::string& output, bool LatexFormat,
 																		bool includeVPsummand, bool includeNumerator)
-{ static MatrixInt tempMat;
+{ static MatrixIntTightMemoryFit tempMat;
 	return this->ElementToStringBasisChange
 		(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator);
 }
 
 int partFractions::ElementToStringOutputToFile(std::fstream& output, bool LatexFormat,
 																		bool includeVPsummand, bool includeNumerator)
-{ static MatrixInt tempMat;
+{ static MatrixIntTightMemoryFit tempMat;
 	return this->ElementToStringBasisChangeOutputToFile
 		(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator);
 }
 
-int partFractions::ElementToStringBasisChange(MatrixInt& VarChange,
+int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::string& output,
 																	bool LatexFormat,bool includeVPsummand, bool includeNumerator)
 { std::stringstream out;
@@ -8965,7 +8965,7 @@ int partFractions::ElementToStringBasisChange(MatrixInt& VarChange,
 	return TotalLines;
 }
 
-int partFractions::ElementToStringBasisChangeOutputToFile(MatrixInt& VarChange,
+int partFractions::ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::fstream& output,
 																	bool LatexFormat,bool includeVPsummand, bool includeNumerator)
 { std::string tempS;
@@ -9411,7 +9411,7 @@ void partFractions::ComputeSupport( ListBasicObjects<roots>& output, std::string
 	}
 }
 
-void partFractions::ComputeDebugStringBasisChange(MatrixInt& VarChange)
+void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange)
 { this->ElementToStringBasisChange( VarChange,true,
 																		this->DebugString,
 																		PolynomialOutputFormat::UsingLatexFormat,false,true);
@@ -9676,7 +9676,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity
 }
 
 void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
-			(	int indexElongation, MatrixInt& VarChange, bool UsingVarChange, std::string& output,
+			(	int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output,
 				bool LatexFormat, int indexInFraction)
 { std::stringstream  out;
 	std::string tempS;
@@ -9717,7 +9717,7 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
 }
 
 void oneFracWithMultiplicitiesAndElongations::ElementToStringBasisChange
-			( MatrixInt& VarChange,
+			( MatrixIntTightMemoryFit& VarChange,
 				bool UsingVarChange, std::string& output,
 				bool LatexFormat, int index)
 {	if (this->Multiplicities.size==0)
@@ -10498,7 +10498,7 @@ void PolynomialsRationalCoeff::MakeOneParameterSubFromDirectionIntsAndConstants
 	this->TheObjects[4].AddConstant(rc5);
 }
 
-void PolynomialsRationalCoeff::MakeSubFromMatrixIntAndDen(MatrixInt &theMat, int Den)
+void PolynomialsRationalCoeff::MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit &theMat, int Den)
 { MatrixLargeRational tempMat;
 	tempMat.AssignMatrixIntWithDen(theMat,Den);
 	this->MakeSubFromMatrixRational(tempMat);
@@ -11446,10 +11446,10 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempA.init(4,2);
 	tempb.init(4,1);
 	MatrixLargeRational::MatrixElementSeparator=",\t";
-	tempA.elements[0][0].AssignInteger( 0); tempA.elements[0][1].AssignInteger( 1); tempb.elements[0][0].AssignInteger(2);
-	tempA.elements[1][0].AssignInteger(-1); tempA.elements[1][1].AssignInteger(1); tempb.elements[1][0].AssignInteger(1);
-	tempA.elements[2][0].AssignInteger( 1); tempA.elements[2][1].AssignInteger( 0); tempb.elements[2][0].AssignInteger(0);
-	tempA.elements[3][0].AssignInteger(-1); tempA.elements[3][1].AssignInteger( 0); tempb.elements[3][0].AssignInteger(-2);
+	tempA.elements[0][0].AssignInteger( 0); tempA.elements[0][1].AssignInteger(-1); tempb.elements[0][0].AssignInteger(-2);
+	tempA.elements[1][0].AssignInteger(1);	tempA.elements[1][1].AssignInteger(-1); tempb.elements[1][0].AssignInteger(-1);
+	tempA.elements[2][0].AssignInteger(1);	tempA.elements[2][1].AssignInteger( 0); tempb.elements[2][0].AssignInteger(2);
+	tempA.elements[3][0].AssignInteger(-1); tempA.elements[3][1].AssignInteger( 0); tempb.elements[3][0].AssignInteger(0);
 	tempA.ComputeDebugString();
 	tempb.ComputeDebugString();
 	output.ComputeDebugString();
@@ -11701,7 +11701,7 @@ bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
 }
 
 void rootFKFTcomputation::MakeRootFKFTsub(root& direction, QPSub& theSub)
-{	MatrixInt tempMat;
+{	MatrixIntTightMemoryFit tempMat;
 	tempMat.init(root::AmbientDimension+2,root::AmbientDimension);
 	tempMat.NullifyAll();
 	int tempLCM=direction.FindLCMDenominatorsTruncateToInt();
@@ -13307,11 +13307,17 @@ bool affineCone::WallIsInternalInCone(affineHyperplane &theKillerCandidate)
 {  return true;
 }
 
+//this function return true if Ax<=b has a solution
+//and records a point at outputPoint
+//else returns false
 bool affineCone::SystemLinearInequalitiesHasSolution
 	(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint)
 { static MatrixLargeRational tempMatA;
 	static MatrixLargeRational matX;
+	static short NumTrueVariables;
+	NumTrueVariables= matA.NumCols;
 	tempMatA.init(matA.NumRows, matA.NumCols+matA.NumRows);
+	assert (matA.NumRows== matb.NumRows);
 	matX.init(tempMatA.NumCols,1);
 	for (int j=0;j<matA.NumCols;j++)
 	{	matX.elements[j][0].MakeZero();
@@ -13319,53 +13325,70 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 		{ tempMatA.elements[i][j].Assign(matA.elements[i][j]);
 		}
 	}
+	short numExtraColumns=0;
+	for (int j=0;j<matb.NumRows;j++)
+		numExtraColumns++;		
 	static Selection NonZeroSlackVariables;
 	static Selection BaseVariables;
-	BaseVariables.init(tempMatA.NumCols);
+	BaseVariables.init(tempMatA.NumCols+numExtraColumns);
 	//NonZeroSlackVariables.init(matA.NumRows);
 	for (int j=0;j<matA.NumRows;j++)
 	{	matX.elements[j+matA.NumCols][0].Assign(matb.elements[j][0]);
-		BaseVariables.AddSelection(j+matA.NumCols);
 		for (int i=0;i<matA.NumRows;i++)
 		{ if (i==j)
-				tempMatA.elements[i][j+matA.NumCols].MakeOne();
+				tempMatA.elements[j][i+matA.NumCols].MakeOne();
 			else
-				tempMatA.elements[i][j+matA.NumCols].MakeZero();
-		}
-		if (matX.elements[j+matA.NumCols][0].IsNegative())
-		{ matX.elements[j+matA.NumCols][0].Minus();
-			tempMatA.RowTimesScalar(j,RMOne);
-			tempMatA.elements[j][j+matA.NumCols].MakeOne();
+				tempMatA.elements[j][i+matA.NumCols].MakeZero();
 		}
 	}
+	for (int j=0;j<matA.NumRows;j++)
+	{ if (matX.elements[j+matA.NumCols][0].IsNonNegative())
+		{	BaseVariables.AddSelection(j+matA.NumCols);
+		} else
+		{ short oldNumCols= tempMatA.NumCols;
+			tempMatA.Resize(tempMatA.NumRows, oldNumCols+1, true);
+			matX.Resize(oldNumCols+1,1,true);
+			for (int i=0;i<matA.NumRows;i++)
+			{ if (i!=j)
+					tempMatA.elements[i][oldNumCols].MakeZero();
+				else
+					tempMatA.elements[i][oldNumCols].MakeMOne();
+			}
+			matX.elements[oldNumCols][0].Assign(matX.elements[j+matA.NumCols][0]);
+			matX.elements[oldNumCols][0].Minus();
+			matX.elements[j+matA.NumCols][0].MakeZero();
+			tempMatA.RowTimesScalar(j,RMOne);
+			BaseVariables.AddSelection(oldNumCols);			
+		}
+	}	
 	tempMatA.ComputeDebugString(); matX.ComputeDebugString();
 	static LargeRational	PotentialChangeGradient, ChangeGradient;//Change, PotentialChange;
+	int LowestBadIndex= tempMatA.NumCols- numExtraColumns;
 	int EnteringVariable=0;
 	while (EnteringVariable!=-1)
-	{ EnteringVariable=-1;
+	{ EnteringVariable=-1; 
 //		ChangeGradient.MakeZero();
 		ChangeGradient.MakeZero();
 		for (int i=0;i<tempMatA.NumCols;i++)
 		{ BaseVariables.ComputeDebugString();
 			if (!BaseVariables.selected[i])
 			{ PotentialChangeGradient.MakeZero();
-				int PotentialLeavingVariableRow=-1;
+				//int PotentialLeavingVariableRow=-1;
+				bool hasAPotentialLeavingVariable=false;
 				for (int j=0;j<tempMatA.NumRows;j++)
-				{	if (BaseVariables.elements[j]>=matA.NumCols)
-					{	if (!tempMatA.elements[j][i].IsEqualToZero())
-						{ static LargeRational tempRat;
-							tempRat.Assign(tempMatA.elements[j][i]);
-							tempRat.Invert();
-							PotentialChangeGradient.Add(tempRat);
-						}
+				{	if (BaseVariables.elements[j]>=LowestBadIndex)
+					{	static LargeRational tempRat;
+						tempRat.Assign(tempMatA.elements[j][i]);
+						PotentialChangeGradient.Add(tempRat);
 					}
+					hasAPotentialLeavingVariable=hasAPotentialLeavingVariable|| tempMatA.elements[j][i].IsPositive();
 				}
-				if (i>=tempMatA.NumRows)
-				{ PotentialChangeGradient.Add(ROne);
+				if (i>=LowestBadIndex)
+				{ PotentialChangeGradient.Subtract(ROne);
 				}
 //				PotentialChange.Assign(PotentialChangeGradient);
 //				PotentialChange.MultiplyBy(PotentialMaxMovement);
-				if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient))
+				if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable)
 				{ EnteringVariable= i; 
 					ChangeGradient.Assign(PotentialChangeGradient);
 				}
@@ -13378,7 +13401,7 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 			for(int i=0; i<tempMatA.NumRows;i++)
 			{ static LargeRational tempRat;
 				tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
-				if (tempRat.IsPositive())
+				if (tempRat.IsPositive() && BaseVariables.elements[i]>=NumTrueVariables)
 				{ tempRat.Invert();
 					tempRat.MultiplyBy(matX.elements[BaseVariables.elements[i]][0]);
 					if (MaxMovement.IsGreaterThan(tempRat)|| (LeavingVariableRow==-1 ))
@@ -13411,9 +13434,13 @@ bool affineCone::SystemLinearInequalitiesHasSolution
 			BaseVariables.ComputeDebugString();
 		}
 	}
-	for(int i=0;i<BaseVariables.CardinalitySelection;i++)
-	{ if (BaseVariables.elements[i]>= matA.NumRows)
+	for(int i=LowestBadIndex;i<matX.NumRows;i++)
+	{ if (matX.elements[i][0].IsPositive())
 			return false;
+	}
+	outputPoint.Resize(NumTrueVariables,0,false);
+	for (int i=0;i<NumTrueVariables;i++)
+	{ outputPoint.elements[i][0].Assign(matX.elements[i][0]);
 	}
 	return true;
 }

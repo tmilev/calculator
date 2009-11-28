@@ -41,7 +41,7 @@ void ExampleComputation::RunSomeTests()
 	tempPF.partFractionsToPartitionFunctionAdaptedToRoot(tempQP,indicator,false,false);
 	intRoot tempR;
 	tempR.initFromInt(0,0,0,0,0);
-	LargeRational tempRat;
+	Rational tempRat;
 	tempQP.ComputeDebugString();
 	tempQP.Evaluate(tempR,tempRat);
 	std::string tempS;

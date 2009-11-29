@@ -555,13 +555,14 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup->Append(wxT("C3"));
   this->ListBox1WeylGroup->Append(wxT("C4"));
   this->ListBox1WeylGroup->Append(wxT("D4"));
+  this->ListBox1WeylGroup->Append(wxT("D5"));
 	this->ListBox1WeylGroup->Append(wxT("G2"));
 	this->ListBox1WeylGroup->Append(wxT("E6"));
 	this->ListBox1WeylGroup->Append(wxT("E7"));
 	this->ListBox1WeylGroup->Append(wxT("E8"));
 	this->ListBox1WeylGroup->Append(wxT("F4"));
-	this->ListBox1WeylGroup->SetSelection(13);
-	this->CheckBox1ComputePFs->SetValue(false);
+	this->ListBox1WeylGroup->SetSelection(1);
+	this->CheckBox1ComputePFs->SetValue(true);
 	this->CheckBox2CheckSums->SetValue(true);
 	this->CheckBox3ComputeChambers->SetValue(true);
 	this->CheckBox4ChamberLabels->SetValue(true);
@@ -898,16 +899,17 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 		case 5:	newWeylGroupIndex=2;  newWeylGroupLetter='B'; break;
 		case 6:	newWeylGroupIndex=3;  newWeylGroupLetter='B'; break;
 		case 7:	newWeylGroupIndex=4;  newWeylGroupLetter='B'; break;
-		case 8: newWeylGroupIndex=5;  newWeylGroupLetter='B'; CombinatorialChamber::DisplayingGraphics=false; break;
+		case 8: newWeylGroupIndex=5;  newWeylGroupLetter='B'; break;//CombinatorialChamber::DisplayingGraphics=false; break;
 		case 9:	newWeylGroupIndex=2;  newWeylGroupLetter='C'; break;
 		case 10:	newWeylGroupIndex=3;  newWeylGroupLetter='C'; break;
 		case 11: newWeylGroupIndex=4; newWeylGroupLetter='C'; break;
 		case 12: newWeylGroupIndex=4; newWeylGroupLetter='D'; break;
-		case 13: newWeylGroupIndex=2; newWeylGroupLetter='G'; break;
-		case 14: newWeylGroupIndex=6; newWeylGroupLetter='E'; break;
-		case 15: newWeylGroupIndex=7; newWeylGroupLetter='E'; break;
-		case 16: newWeylGroupIndex=8; newWeylGroupLetter='E'; break;
-		case 17: newWeylGroupIndex=4; newWeylGroupLetter='F'; break;
+		case 13: newWeylGroupIndex=5; newWeylGroupLetter='D'; break;
+		case 14: newWeylGroupIndex=2; newWeylGroupLetter='G'; break;
+		case 15: newWeylGroupIndex=6; newWeylGroupLetter='E'; break;
+		case 16: newWeylGroupIndex=7; newWeylGroupLetter='E'; break;
+		case 17: newWeylGroupIndex=8; newWeylGroupLetter='E'; break;
+		case 18: newWeylGroupIndex=4; newWeylGroupLetter='F'; break;
 	//	case 12: this->UsingCustomVectors=true;
 	}
 	if (!(newWeylGroupLetter==this->theComputationSetup.WeylGroupLetter &&
@@ -975,6 +977,7 @@ void guiMainWindow::initTableFromVPVectors()
 
 void guiMainWindow::OnExit(wxCloseEvent &event)
 { this->Destroy();
+	::exitDLL();
 }
 
 

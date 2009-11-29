@@ -66,6 +66,7 @@ const int SomeRandomPrimes[SomeRandomPrimesSize]=
 
 class CompositeComplexQNSub;
 class affineCone;
+class affineHyperplane;
 class QuasiNumber;
 class BasicQN;
 class CombinatorialChamber;
@@ -333,7 +334,7 @@ public:
 	void KillAllElements();
 	void KillElementIndex(int i);
 	bool AddObjectNoRepetitionOfPointer(Object* o);
-	void Pop(Object*o);
+	void PopAllOccurrencesSwapWithLast(Object*o);
 	int ObjectPointerToIndex(Object*o);
 	void resizeToLargerCreateNewObjects(int increase);
 	void IncreaseSizeWithZeroPointers(int increase);
@@ -1124,9 +1125,11 @@ public:
 	void ComputeDebugString();
 	void MakeZero();
 	void Add(root& r);
+	int getIndexFirstNonZeroCoordinate();
 	void DivByInteger(int a);
 	void DivByLargeInt(LargeInt& a);
 	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
+	void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
@@ -1238,7 +1241,10 @@ public:
 	static bool DisplayingGraphics;
 	static int MethodUsed;//1. normals vertices and boundaries
 												//2. normals only
+	static bool flagDisregardDirectionWhenPropagatingInternalWalls;
 	static bool PrintWallDetails;
+	static bool flagMakingASingleHyperplaneSlice;
+	static ListBasicObjects<CombinatorialChamber*> NonExploredChambersHavingInternalWalls;
 	bool HasZeroPoly();
 	bool PointLiesInMoreThanOneWall(root& point);
 	bool IsAnOwnerOfAllItsWalls();
@@ -1246,6 +1252,7 @@ public:
 	bool ComputeDebugString();
 	bool ElementToString(std::string& output);
 	void ChamberNumberToStringStream(std::stringstream& out);
+	bool ConsistencyCheck();
 	bool CheckVertices();
 	bool FacetIsInternal(Facet* f);
 	void GetNormalFromFacet(root& output, Facet* theFacet);
@@ -1743,13 +1750,10 @@ void CopyOntoObject(ListObjectPointers<Object>* FromList)
 }
 
 template <class Object>
-void ListObjectPointers<Object>::Pop(Object*o)
-{
-	for (int i =0; i<this->size;i++)
-	{
-		if (o==this->TheObjects[i])
-		{
-			this->TheObjects[i]=this->TheObjects[this->size-1];
+void ListObjectPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
+{	for (int i =0; i<this->size;i++)
+	{	if (o==this->TheObjects[i])
+		{	this->TheObjects[i]=this->TheObjects[this->size-1];
 			this->size--;
 			i--;
 		}
@@ -1791,6 +1795,10 @@ class affineHyperplane
 public:
 	root affinePoint;
 	root normal;
+	void InduceFromFacet(Facet& input);
+	//the below returns false if the projection is not of full dimension
+	bool ProjectFromFacet(Facet& input);
+	bool ProjectFromFacetNormal(root& input);
 	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
 	inline void operator=(const affineHyperplane& right){this->Assign(right);};
 };
@@ -1806,6 +1814,7 @@ public:
 	affineHyperplanes theWalls;
 	inline int GetDimension();
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
+	void ProjectFromCombinatorialChamber(CombinatorialChamber& input);
 	void induceFromCombinatorialChamber(CombinatorialChamber& input);
 	bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
 	//The below function returns true if the system of homogeneous linear inequalities Ax<=b
@@ -1821,6 +1830,7 @@ class affineCones: public HashedListBasicObjects<affineCone>
 {
 public:
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
+	void InduceFromCombinatorialChambers(CombinatorialChamberPointers& input);
 };
 
 class simplicialCones : public ListBasicObjects<Cone>
@@ -1851,6 +1861,7 @@ public:
 	static root PositiveLinearFunctional;
 	static bool PrintLastChamberOnly;
 	static bool AnErrorHasOcurredTimeToPanic;
+	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
 	unsigned char AmbientDimension;
 	root IndicatorRoot;
@@ -1863,8 +1874,10 @@ public:
 	int NextChamberToSliceIndexInPreferredNextChambers;
 	int FirstNonExploredIndex;
 	void Free();
+	bool ConsistencyCheck();
 	void MakeStartingChambers(roots& directions, FacetPointers& FacetOutput, root& IndicatorRoot);
 	void ComputeNextIndexToSlice(root& direction);
+	void SliceWithAWall(Facet*TheKillerFacet);
 	void LabelAllUnexplored();
 	void KillNextChamberToSlice();
 	void initThePolys();
@@ -1915,6 +1928,7 @@ public:
 		             CombinatorialChamber*&TheFirstOtherOwner, bool& IsAPlusOwner);
 	void FindAllNeighborsTo(CombinatorialChamber* TheChamber,
 					ListObjectPointers<CombinatorialChamber>& output);
+	void InduceFromAffineHyperplane(affineHyperplane& input);
 	Facet();
 	~Facet();
 	//to be used with Method 1 only:
@@ -1966,6 +1980,7 @@ public:
 class FacetPointers: public ListObjectPointers<Facet>
 {
 public:
+	void InduceFromAffineHyperplanes(affineHyperplanes& input);
 };
 
 struct PolynomialOutputFormat

@@ -1795,8 +1795,9 @@ class affineHyperplane
 public:
 	root affinePoint;
 	root normal;
-	void InduceFromFacet(Facet& input);
+	//void InduceFromFacet(Facet& input);
 	//the below returns false if the projection is not of full dimension
+	int HashFunction();
 	bool ProjectFromFacet(Facet& input);
 	bool ProjectFromFacetNormal(root& input);
 	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
@@ -1812,10 +1813,11 @@ class affineCone
 {
 public:
 	affineHyperplanes theWalls;
+	int HashFunction();
 	inline int GetDimension();
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
 	void ProjectFromCombinatorialChamber(CombinatorialChamber& input);
-	void induceFromCombinatorialChamber(CombinatorialChamber& input);
+	//void induceFromCombinatorialChamber(CombinatorialChamber& input);
 	bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
 	//The below function returns true if the system of homogeneous linear inequalities Ax<=b
 	//has a solution, false otherwise, where A is a matrix and x and b are column vectors.
@@ -1830,7 +1832,7 @@ class affineCones: public HashedListBasicObjects<affineCone>
 {
 public:
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
-	void InduceFromCombinatorialChambers(CombinatorialChamberPointers& input);
+	void ProjectFromCombinatorialChambers(CombinatorialChamberPointers& input);
 };
 
 class simplicialCones : public ListBasicObjects<Cone>
@@ -1843,52 +1845,6 @@ public:
 	void ElementToString(std::string& output);
 	void initFromDirections(roots& directions);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
-};
-
-class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
-{
-public:
-	std::string DebugString;
-	static const int MaxNumHeaps=5000;
-	static const int GraphicsMaxNumChambers = 1000;
-	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
-	static int DefragSpacing;
-	static int LastReportedMemoryUse;
-	static Cone TheGlobalConeNormals;
-	static simplicialCones startingCones;
-	static bool IsSurelyOutsideGlobalCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
-	static std::fstream TheBigDump;
-	static root PositiveLinearFunctional;
-	static bool PrintLastChamberOnly;
-	static bool AnErrorHasOcurredTimeToPanic;
-	static bool flagMakingConsistencyCheck;
-	static int flagMaxNumCharsAllowedInStringOutput;
-	unsigned char AmbientDimension;
-	root IndicatorRoot;
-	QuasiPolynomials* ThePolys;
-	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
-	CombinatorialChamber* NextChamberToSlice;
-	CombinatorialChamber* LastComputedChamber;
-	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-	int NextChamberToSliceIndexInPreferredNextChambers;
-	int FirstNonExploredIndex;
-	void Free();
-	bool ConsistencyCheck();
-	void MakeStartingChambers(roots& directions, FacetPointers& FacetOutput, root& IndicatorRoot);
-	void ComputeNextIndexToSlice(root& direction);
-	void SliceWithAWall(Facet*TheKillerFacet);
-	void LabelAllUnexplored();
-	void KillNextChamberToSlice();
-	void initThePolys();
-	void DumpAll();
-	void PrintThePolys(std::string& output);
-	void ComputeGlobalCone(roots& directions);
-	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
-								roots& directions, int directionIndex,root& ChamberIndicator);
-	bool TestPossibleIndexToSlice(root&direction, int index);
-	CombinatorialChamberPointers();
-	~CombinatorialChamberPointers();
 };
 
 class CombinatorialChamberCouple
@@ -1982,6 +1938,60 @@ class FacetPointers: public ListObjectPointers<Facet>
 public:
 	void InduceFromAffineHyperplanes(affineHyperplanes& input);
 };
+
+class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
+{
+public:
+	std::string DebugString;
+	static const int MaxNumHeaps=5000;
+	static const int GraphicsMaxNumChambers = 1000;
+	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
+	static int DefragSpacing;
+	static int LastReportedMemoryUse;
+	static Cone TheGlobalConeNormals;
+	static simplicialCones startingCones;
+	static bool IsSurelyOutsideGlobalCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
+	static std::fstream TheBigDump;
+	static root PositiveLinearFunctional;
+	static bool PrintLastChamberOnly;
+	static bool AnErrorHasOcurredTimeToPanic;
+	static bool flagMakingConsistencyCheck;
+	static int flagMaxNumCharsAllowedInStringOutput;
+	void SliceTheEuclideanSpace(roots& directions,int& index, int rank,root& IndicatorRoot);
+	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
+	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
+
+	unsigned char AmbientDimension;
+	FacetPointers theHyperplanes;
+	root IndicatorRoot;
+	QuasiPolynomials* ThePolys;
+	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
+	CombinatorialChamber* NextChamberToSlice;
+	CombinatorialChamber* LastComputedChamber;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	int NextChamberToSliceIndexInPreferredNextChambers;
+	int FirstNonExploredIndex;
+	void Free();
+	void Projectivize(CombinatorialChamberPointers& output);
+	bool ConsistencyCheck();
+	void MakeStartingChambers(roots& directions, root& IndicatorRoot);
+	void ComputeNextIndexToSlice(root& direction);
+	void SliceWithAWall(Facet*TheKillerFacet);
+	void LabelAllUnexplored();
+	void KillNextChamberToSlice();
+	void initThePolys();
+	void DumpAll();
+	void PrintThePolys(std::string& output);
+	void ComputeGlobalCone(roots& directions);
+	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
+								roots& directions, int directionIndex,root& ChamberIndicator);
+	bool TestPossibleIndexToSlice(root&direction, int index);
+	CombinatorialChamberPointers();
+	~CombinatorialChamberPointers();
+};
+
+
 
 struct PolynomialOutputFormat
 {
@@ -4843,14 +4853,6 @@ public:
 };
 void initDLL(int rank);
 void exitDLL();
-void SliceTheEuclideanSpace(roots& directions,int& index, int rank,
-														CombinatorialChamberPointers& output,
-														FacetPointers& FacetOutput, root& IndicatorRoot);
-void SliceOneDirection(roots& directions, int& index, int rank,
-											 CombinatorialChamberPointers& output,
-											 FacetPointers& FacetOutput, root& IndicatorRoot);
-void OneSlice(roots& directions, int& index, int rank, CombinatorialChamberPointers& output,
-							FacetPointers& FacetOutput, root& IndicatorRoot);
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
 

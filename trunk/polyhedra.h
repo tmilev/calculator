@@ -1289,7 +1289,8 @@ public:
 	void AddInternalWall(Facet* TheKillerFacet, Facet* TheFacetBeingKilled, root& direction);
 	void RemoveInternalWall(int index);
 	void InduceFromAffineConeAddExtraDimension(affineCone& input);
-	void InduceFromCombinatorialChamberAddExtraDimension(CombinatorialChamber& input);
+	void InduceFromCombinatorialChamberAddExtraDimension
+		(CombinatorialChamber& input,CombinatorialChamberPointers& owner);
 	void ComputeInternalPointMethod1(root& InternalPoint);
 	void ComputeInternalPointMethod2(root& InternalPoint);
 	bool TestPossibilityToSlice(root& direction);
@@ -1978,7 +1979,7 @@ public:
 	static bool IsSurelyOutsideGlobalCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
 	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
-  void ConvertToAffineAndThenProjectivize(CombinatorialChamberPointers& input);
+  void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberPointers& input);
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
@@ -4808,6 +4809,7 @@ struct ComputationSetup
 public:
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
+	CombinatorialChamberPointers theChambers;
 	Rational Value;
 	std::string ValueString;
 	intRoot ValueRoot;

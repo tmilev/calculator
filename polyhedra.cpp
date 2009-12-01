@@ -115,9 +115,6 @@ PrecomputedQuasiPolynomialIntegrals::PreComputedBernoulli;
 PolynomialsRationalCoeff PreComputedBernoulliLocal;
 PrecomputedTauknPointersKillOnExit PrecomputedTausLocal;
 
-roots CombinatorialChamber::StartingCrossSectionNormals;
-roots CombinatorialChamber::StartingCrossSectionAffinePoints;
-
 int CombinatorialChamber::MethodUsed;
 simplicialCones CombinatorialChamberPointers::startingCones;
 bool CombinatorialChamber::PrintWallDetails;
@@ -1069,6 +1066,17 @@ void root::MakeNormalInProjectivizationFromPointAndNormal(root& point, root& nor
 	for (int j=0;j<newDimension-1;j++)
 	{ this->TheObjects[j].Assign(normal.TheObjects[j]);
 	}
+}
+
+bool root::ProjectToAffineSpace(root &output)
+{ output.SetSizeExpandOnTopLight(this->size-1);
+	for (int i=0;i<this->size-1;i++)
+	{ output.TheObjects[i].Assign(this->TheObjects[i]);
+	}
+	if (this->TheObjects[this->size-1].IsEqualToZero())
+		return false;
+	output.DivByLargeRational(this->TheObjects[this->size-1]);
+	return true;
 }
 
 
@@ -2165,7 +2173,7 @@ void CombinatorialChamber::ComputeInternalPointMethod2(root &InternalPoint)
 	InternalPoint.DivByInteger(this->AllVertices.size);
 }
 
-void CombinatorialChamber::ComputeVerticesFromNormals()
+void CombinatorialChamber::ComputeVerticesFromNormals(CombinatorialChamberPointers& owner)
 {	for (int i =0;i<this->ExternalWalls->size;i++)
 	{	this->AllVertices.size=0;
 	}
@@ -2178,7 +2186,7 @@ void CombinatorialChamber::ComputeVerticesFromNormals()
 		this->LinearAlgebraForVertexComputation(theSelection,VertexCandidate);
 		if (this->PlusMinusPointIsInChamber(VertexCandidate))
 		{	for (int j=0;j<theSelection.CardinalitySelection;j++ )
-			{	this->ScaleVertexToFitCrossSection(VertexCandidate);
+			{	this->ScaleVertexToFitCrossSection(VertexCandidate,owner);
 				this->AllVertices.AddRootNoRepetition(VertexCandidate);
 			}
 		}
@@ -2196,19 +2204,20 @@ bool CombinatorialChamber::PlusMinusPointIsInChamber(root&point)
 	return false;
 }
 
-bool CombinatorialChamber::ScaleVertexToFitCrossSection(root& point)
+bool CombinatorialChamber::ScaleVertexToFitCrossSection
+	(root& point, CombinatorialChamberPointers& owner)
 {	static Rational tempRat;
 	if (this->IndexStartingCrossSectionNormal==-1)
 		return false;
 	root::RootScalarEuclideanRoot(point,
-		CombinatorialChamber::StartingCrossSectionNormals
+		owner.StartingCrossSectionNormals
 		 .TheObjects[this->IndexStartingCrossSectionNormal],tempRat);
 	if (tempRat.IsEqualToZero()){return false;}
 	point.DivByLargeRational(tempRat);
-	root::RootScalarEuclideanRoot(CombinatorialChamber::StartingCrossSectionNormals
-		.TheObjects[this->IndexStartingCrossSectionNormal],
-			CombinatorialChamber::StartingCrossSectionAffinePoints
-				.TheObjects[this->IndexStartingCrossSectionNormal],tempRat);
+	root::RootScalarEuclideanRoot(owner.StartingCrossSectionNormals
+			.TheObjects[this->IndexStartingCrossSectionNormal],
+		owner.StartingCrossSectionAffinePoints
+			.TheObjects[this->IndexStartingCrossSectionNormal],tempRat);
 	point.MultiplyByLargeRational(tempRat);
 	return true;
 }
@@ -2764,10 +2773,6 @@ bool CombinatorialChamber::SplitChamberMethod1(Facet* theKillerFacet,Combinatori
 	return true;
 }
 
-void CombinatorialChamberPointers::Projectivize(CombinatorialChamberPointers& output)
-{
-}
-
 void CombinatorialChamberPointers::SliceWithAWall(Facet* TheKillerFacet)
 { if (TheKillerFacet==0)
 		return;
@@ -2950,7 +2955,7 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 	theSelection.initNoMemoryAllocation();
 	int NumStartingChambers=MathRoutines::TwoToTheNth(root::AmbientDimension);
 	this->initAndCreateNewObjects(NumStartingChambers);
-	CombinatorialChamber::StartingCrossSectionAffinePoints.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
+	this->StartingCrossSectionAffinePoints.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
 	for(int i=0;i<NumStartingChambers;i++)
 	{	int tempI= theSelection.SelectionToIndex();
 		this->TheObjects[tempI]->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(root::AmbientDimension);
@@ -2976,7 +2981,7 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 		root tempRoot;
 		tempRoot.Assign(directions.TheObjects[0]);
 		if (!theSelection.selected[0]) {tempRoot.MinusRoot(); }
-		CombinatorialChamber::StartingCrossSectionAffinePoints.TheObjects[tempI].Assign(tempRoot);
+		this->StartingCrossSectionAffinePoints.TheObjects[tempI].Assign(tempRoot);
 		theSelection.incrementSelection();
 	}
 	for(int i=0;i<NumStartingChambers;i++)
@@ -2990,7 +2995,7 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 			this->TheObjects[i]->ExternalWallsNormals.AddRoot(tempNormal);
 			Accum.Add(tempNormal);
 		}
-		CombinatorialChamber::StartingCrossSectionNormals.AddRoot(Accum);
+		this->StartingCrossSectionNormals.AddRoot(Accum);
 //		this->TheObjects[i]->ComputeEdgesAndVerticesFromNormals(true,true);
 		assert(this->TheObjects[i]->CheckVertices());
 //		this->TheObjects[i]->ComputeDebugString();

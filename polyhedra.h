@@ -1132,6 +1132,8 @@ public:
 	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
 	inline void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
 	void MakeNormalInProjectivizationFromPointAndNormal(root& point, root& normal);
+	//the below returns false 
+	bool ProjectToAffineSpace(root& output);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
@@ -1239,8 +1241,6 @@ public:
 	root InternalPoint;
 	int IndexStartingCrossSectionNormal;
 	static bool ComputingPolys;
-	static roots StartingCrossSectionNormals;
-	static roots StartingCrossSectionAffinePoints;
 	static bool DisplayingGraphics;
 	static int MethodUsed;//1. normals vertices and boundaries
 												//2. normals only
@@ -1268,11 +1268,10 @@ public:
 	bool SplitChamberMethod2(Facet* theKillerFacet,CombinatorialChamberPointers& output,
 		                       root& direction);
 	bool IsABogusNeighbor(Facet* NeighborWall, CombinatorialChamber* Neighbor);
-	void ComputeVerticesFromNormals();//we assume that
-	//the normals of the faces have been initialized properly
+	void ComputeVerticesFromNormals(CombinatorialChamberPointers& owner);
 	bool PointIsInChamber(root&point);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
-	bool ScaleVertexToFitCrossSection(root&point);
+	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberPointers& owner);
 	bool PlusMinusPointIsInWallSelection(root &point, Selection& theSelection);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
@@ -1950,7 +1949,18 @@ public:
 class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
 {
 public:
+	int NextChamberToSliceIndexInPreferredNextChambers;
+	int FirstNonExploredIndex;
+	unsigned char AmbientDimension;
 	std::string DebugString;
+	FacetPointers theHyperplanes;
+	root IndicatorRoot;
+	QuasiPolynomials* ThePolys;
+	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
+	CombinatorialChamber* NextChamberToSlice;
+	CombinatorialChamber* LastComputedChamber;
+	roots StartingCrossSectionNormals;
+	roots StartingCrossSectionAffinePoints;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -1958,7 +1968,6 @@ public:
 	static int LastReportedMemoryUse;
 	static Cone TheGlobalConeNormals;
 	static simplicialCones startingCones;
-	static bool IsSurelyOutsideGlobalCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
 	static std::fstream TheBigDump;
 	static root PositiveLinearFunctional;
 	static bool PrintLastChamberOnly;
@@ -1966,23 +1975,14 @@ public:
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
 	void SliceTheEuclideanSpace(roots& directions,int& index, int rank,root& IndicatorRoot);
+	static bool IsSurelyOutsideGlobalCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
 	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
   void ConvertToAffineAndThenProjectivize(CombinatorialChamberPointers& input);
-	unsigned char AmbientDimension;
-	FacetPointers theHyperplanes;
-	root IndicatorRoot;
-	QuasiPolynomials* ThePolys;
-	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
-	CombinatorialChamber* NextChamberToSlice;
-	CombinatorialChamber* LastComputedChamber;
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-	int NextChamberToSliceIndexInPreferredNextChambers;
-	int FirstNonExploredIndex;
 	void Free();
-	void Projectivize(CombinatorialChamberPointers& output);
 	bool ConsistencyCheck();
 	void MakeStartingChambers(roots& directions, root& IndicatorRoot);
 	void ComputeNextIndexToSlice(root& direction);

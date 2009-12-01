@@ -514,11 +514,14 @@ void ComputationSetup::Run()
 	{	root::AmbientDimension=this->WeylGroupIndex;
 		::InputRoots.CopyFromBase(this->VPVectors);
 		::NextDirectionIndex=root::AmbientDimension-1;
-		TheBigOutput.SliceTheEuclideanSpace
+		this->theChambers.SliceTheEuclideanSpace
 													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
 														this->thePartialFraction.IndicatorRoot);
-		::TheBigOutput.ComputeDebugString();
+		this->theChambers.ComputeDebugString();
 	}
+	TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
+	TheBigOutput.ComputeDebugString();
+		
 	//std::stringstream out;
 	//ListBasicObjects<roots> tempRoots;
 	//this->thePartialFraction.ComputeSupport(tempRoots, out);
@@ -2881,14 +2884,29 @@ void CombinatorialChamberPointers::ElementToString(std::string& output)
 	output= out.str();
 }
 
-void CombinatorialChamberPointers::ConvertToAffineAndThenProjectivize(CombinatorialChamberPointers& input)
+void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberPointers& input)
 { input.LabelChamberIndicesProperly();
   this->initAndCreateNewObjects(input.size);
-  for (int i=0;i<this->size;i++)
-  { this->TheObjects[i]->InduceFromCombinatorialChamberAddExtraDimension(*input.TheObjects[i]);
+	this->StartingCrossSectionNormals.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSectionAffinePoints.size);
+	this->StartingCrossSectionAffinePoints.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSectionAffinePoints.size);
+	for (int i=0;i<input.StartingCrossSectionAffinePoints.size;i++)
+	{ this->StartingCrossSectionAffinePoints.TheObjects[i].SetSizeExpandOnTopLight(root::AmbientDimension+1);
+		this->StartingCrossSectionNormals.TheObjects[i].SetSizeExpandOnTopLight(root::AmbientDimension+1);
+		for (int j=0;j<root::AmbientDimension;j++)
+		{ this->StartingCrossSectionAffinePoints.TheObjects[i].TheObjects[j].Assign(
+				input.StartingCrossSectionAffinePoints.TheObjects[i].TheObjects[j]);
+			this->StartingCrossSectionNormals.TheObjects[i].TheObjects[j].Assign(
+				input.StartingCrossSectionNormals.TheObjects[i].TheObjects[j]);
+		}
+		this->StartingCrossSectionAffinePoints.TheObjects[i].TheObjects[root::AmbientDimension].MakeOne();
+		this->StartingCrossSectionNormals.TheObjects[i].TheObjects[root::AmbientDimension].MakeOne();
+	}	
+	for (int i=0;i<this->size;i++)
+  { this->TheObjects[i]->InduceFromCombinatorialChamberAddExtraDimension(*input.TheObjects[i],*this);
   }
 	this->LabelChamberIndicesProperly();
   this->theHyperplanes.ConvertToAffineAndProjectivize(input,*this);
+  root::AmbientDimension++;
 }
 
 void CombinatorialChamberPointers::LabelChamberIndicesProperly()
@@ -3116,13 +3134,14 @@ void CombinatorialChamber::InduceFromAffineConeAddExtraDimension(affineCone& inp
 }
 
 void CombinatorialChamber::
-	InduceFromCombinatorialChamberAddExtraDimension(CombinatorialChamber& input)
+	InduceFromCombinatorialChamberAddExtraDimension(CombinatorialChamber& input, CombinatorialChamberPointers& owner)
 { this->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(input.ExternalWallsNormals.size);
 	//the extra dimension is going to be the last dimension
 	for (int i=0;i<this->ExternalWallsNormals.size;i++)
 	{ this->ExternalWallsNormals.TheObjects[i]
 			.MakeNormalInProjectivizationFromPointAndNormal(ZeroRoot,input.ExternalWallsNormals.TheObjects[i]);
 	}
+	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
 
 

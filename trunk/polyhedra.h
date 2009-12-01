@@ -1124,12 +1124,14 @@ public:
 	void MultiplyByLargeRational(Rational& a);
 	void ComputeDebugString();
 	void MakeZero();
+	void MakeZero(int DesiredDimension);
 	void Add(root& r);
 	int getIndexFirstNonZeroCoordinate();
 	void DivByInteger(int a);
 	void DivByLargeInt(LargeInt& a);
 	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
-	void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
+	inline void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
+	void MakeNormalInProjectivizationFromPointAndNormal(root& point, root& normal);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
@@ -1227,6 +1229,7 @@ public:
 	//QuasiPolynomial* ThePolynomial;
 	int CreationNumber;
 	int DisplayNumber;
+	int IndexInOwnerComplex;
 	bool Explored;
 	bool PermanentlyZero;
 	FacetPointers* ExternalWalls;
@@ -1265,7 +1268,7 @@ public:
 	bool SplitChamberMethod2(Facet* theKillerFacet,CombinatorialChamberPointers& output,
 		                       root& direction);
 	bool IsABogusNeighbor(Facet* NeighborWall, CombinatorialChamber* Neighbor);
-	void ComputeEdgesAndVerticesFromNormals(bool ComputingVertices, bool ComputingEdges);//we assume that
+	void ComputeVerticesFromNormals();//we assume that
 	//the normals of the faces have been initialized properly
 	bool PointIsInChamber(root&point);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
@@ -1287,6 +1290,7 @@ public:
 	void AddInternalWall(Facet* TheKillerFacet, Facet* TheFacetBeingKilled, root& direction);
 	void RemoveInternalWall(int index);
 	void InduceFromAffineConeAddExtraDimension(affineCone& input);
+	void InduceFromCombinatorialChamberAddExtraDimension(CombinatorialChamber& input);
 	void ComputeInternalPointMethod1(root& InternalPoint);
 	void ComputeInternalPointMethod2(root& InternalPoint);
 	bool TestPossibilityToSlice(root& direction);
@@ -1875,6 +1879,7 @@ public:
 	int CreationNumber;
 	root normal;
 	bool SentencedToDeath;
+	int indexInOwnerFacetPointers;
 	CombinatorialChamberCouplePointers Owners;
 	//roots AllVertices;
 	//roots Boundaries;
@@ -1885,6 +1890,7 @@ public:
 	void FindAllNeighborsTo(CombinatorialChamber* TheChamber,
 					ListObjectPointers<CombinatorialChamber>& output);
 	void InduceFromAffineHyperplane(affineHyperplane& input);
+	void InduceFromFacetLowerDimension(Facet& input, CombinatorialChamberPointers& ownerComplex);
 	Facet();
 	~Facet();
 	//to be used with Method 1 only:
@@ -1936,7 +1942,9 @@ public:
 class FacetPointers: public ListObjectPointers<Facet>
 {
 public:
-	void InduceFromAffineHyperplanes(affineHyperplanes& input);
+	void ConvertToAffineAndProjectivize
+		(CombinatorialChamberPointers& input, CombinatorialChamberPointers& ownerComplex);
+	void LabelFacetIndicesProperly();
 };
 
 class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
@@ -1960,7 +1968,7 @@ public:
 	void SliceTheEuclideanSpace(roots& directions,int& index, int rank,root& IndicatorRoot);
 	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
-
+  void ConvertToAffineAndThenProjectivize(CombinatorialChamberPointers& input);
 	unsigned char AmbientDimension;
 	FacetPointers theHyperplanes;
 	root IndicatorRoot;
@@ -1968,6 +1976,7 @@ public:
 	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
 	CombinatorialChamber* NextChamberToSlice;
 	CombinatorialChamber* LastComputedChamber;
+  void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	int NextChamberToSliceIndexInPreferredNextChambers;

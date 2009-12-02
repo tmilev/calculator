@@ -1226,8 +1226,8 @@ public:
 class CombinatorialChamber
 {
 public:
+	std::string DebugString;
 	bool hasZeroPolynomial;
-	//std::string DebugString;
 	//QuasiPolynomial* ThePolynomial;
 	int CreationNumber;
 	int DisplayNumber;
@@ -1289,7 +1289,7 @@ public:
 	void AddInternalWall(Facet* TheKillerFacet, Facet* TheFacetBeingKilled, root& direction);
 	void RemoveInternalWall(int index);
 	void InduceFromAffineConeAddExtraDimension(affineCone& input);
-	void InduceFromCombinatorialChamberAddExtraDimension
+	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input,CombinatorialChamberPointers& owner);
 	void ComputeInternalPointMethod1(root& InternalPoint);
 	void ComputeInternalPointMethod2(root& InternalPoint);
@@ -1902,7 +1902,9 @@ public:
 																			roots & directions, int CurrentIndex,
 																			FacetPointers& FacetOutput);
 	bool CheckVertices(CombinatorialChamber* owner);
-	void ComputeDebugString2(CombinatorialChamber* owner);
+	void ComputeDebugString();
+	void ComputeDebugString2();
+	void ElementToString(std::string& output);
 	bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate,
 																								roots& directions,int CurrentIndex);
 	bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
@@ -1942,6 +1944,9 @@ public:
 class FacetPointers: public ListObjectPointers<Facet>
 {
 public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(DebugString);};
 	void ConvertToAffineAndProjectivize
 		(CombinatorialChamberPointers& input, CombinatorialChamberPointers& ownerComplex);
 	void LabelFacetIndicesProperly();
@@ -1980,6 +1985,7 @@ public:
 	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberPointers& input);
+  void WireChamberAdjacencyInfo(CombinatorialChamberPointers& input);
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};

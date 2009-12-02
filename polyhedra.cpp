@@ -2022,7 +2022,8 @@ bool CombinatorialChamber::CheckSplittingPointCandidate(Selection &SelectionTarg
 }
 
 bool CombinatorialChamber::ComputeDebugString()
-{ return true; //this->ElementToString(this->DebugString);
+{ this->ElementToString(this->DebugString);
+	return true; 
 }
 
 void CombinatorialChamber::ChamberNumberToStringStream(std::stringstream& out)
@@ -2884,7 +2885,22 @@ void CombinatorialChamberPointers::ElementToString(std::string& output)
 	output= out.str();
 }
 
-void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberPointers& input)
+void CombinatorialChamberPointers::WireChamberAdjacencyInfo
+	(CombinatorialChamberPointers& input)
+{ assert(this->size==input.size);
+	input.theHyperplanes.LabelFacetIndicesProperly();
+	this->theHyperplanes.LabelFacetIndicesProperly();
+	Facet* tempFacet;
+	for (int i=0;i<input.size;i++)
+	{ for (int j=0;j<input.TheObjects[i]->ExternalWalls->size;j++)
+		{	tempFacet= input.TheObjects[i]->ExternalWalls->TheObjects[j];
+			tempFacet= this->theHyperplanes.TheObjects[tempFacet->indexInOwnerFacetPointers];
+		}
+	}
+}
+
+void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize
+	(CombinatorialChamberPointers& input)
 { input.LabelChamberIndicesProperly();
   this->initAndCreateNewObjects(input.size);
 	this->StartingCrossSectionNormals.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSectionAffinePoints.size);
@@ -2902,10 +2918,15 @@ void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize(Com
 		this->StartingCrossSectionNormals.TheObjects[i].TheObjects[root::AmbientDimension].MakeOne();
 	}	
 	for (int i=0;i<this->size;i++)
-  { this->TheObjects[i]->InduceFromCombinatorialChamberAddExtraDimension(*input.TheObjects[i],*this);
+  { this->TheObjects[i]->
+			InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
+				(*input.TheObjects[i],*this);
   }
 	this->LabelChamberIndicesProperly();
   this->theHyperplanes.ConvertToAffineAndProjectivize(input,*this);
+  this->ComputeDebugString();
+  this->WireChamberAdjacencyInfo(input);
+  this->ComputeDebugString();
   root::AmbientDimension++;
 }
 
@@ -3134,13 +3155,15 @@ void CombinatorialChamber::InduceFromAffineConeAddExtraDimension(affineCone& inp
 }
 
 void CombinatorialChamber::
-	InduceFromCombinatorialChamberAddExtraDimension(CombinatorialChamber& input, CombinatorialChamberPointers& owner)
+	InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
+		(CombinatorialChamber& input, CombinatorialChamberPointers& owner)
 { this->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(input.ExternalWallsNormals.size);
 	//the extra dimension is going to be the last dimension
 	for (int i=0;i<this->ExternalWallsNormals.size;i++)
 	{ this->ExternalWallsNormals.TheObjects[i]
 			.MakeNormalInProjectivizationFromPointAndNormal(ZeroRoot,input.ExternalWallsNormals.TheObjects[i]);
 	}
+	this->ComputeDebugString();
 	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
 
@@ -3295,38 +3318,29 @@ void Facet::GetNormal(CombinatorialChamber* owner,root& output)
 	return false;
 }*/
 
-void Facet::ComputeDebugString2(CombinatorialChamber* owner)
-{
-	std::stringstream out;
+void Facet::ElementToString(std::string& output)
+{ std::stringstream out;
 	this->DebugString.clear();
 	out <<"n" <<this->CreationNumber<<": ";
 	std::string tempStr;
 	this->normal.ElementToString(tempStr);
 	out << tempStr;
 	for (int i=0;i<this->Owners.size;i++)
-	{
-		out<<"||"<<"+c"<<this->Owners.TheObjects[i].PlusOwner->CreationNumber
+	{	out<<"||"<<"+c"<<this->Owners.TheObjects[i].PlusOwner->CreationNumber
 			 <<     " -c"<<this->Owners.TheObjects[i].MinusOwner->CreationNumber <<" ||";
 	}
-/*	if(CombinatorialChamber::MethodUsed==1)
-	{
-		for (int i =0;i<this->Boundaries.size;i++)
-		{
-			out <<"b"<<i<<": ";
-			this->Boundaries.TheObjects[i].ElementToString(tempStr);
-			out<< tempStr;
-			out<<"||";
-		}
-		for (int i =0;i<this->AllVertices.size;i++)
-		{
-			out <<"v"<<i<<": ";
-			this->AllVertices.TheObjects[i].ElementToString(tempStr);
-			out<< tempStr;
-			out<<"||";
-		}
-	}*/
-	DebugString= out.str();
+	output= out.str();
 }
+
+void Facet::ComputeDebugString2()
+{	this->ElementToString(this->DebugString);
+}
+
+void Facet::ComputeDebugString()
+{ this->ElementToString(this->DebugString);
+}
+
+
 
 Facet::Facet()
 {	this->SentencedToDeath=false;
@@ -3385,6 +3399,7 @@ void Facet::InduceFromFacetLowerDimension(Facet& input, CombinatorialChamberPoin
 		tempMinus=ownerComplex.TheObjects[input.Owners.TheObjects[i].MinusOwner->IndexInOwnerComplex];
 		this->Owners.AddCouple(tempPlus,tempMinus); 
 	}
+	this->ComputeDebugString();
 }
 
 bool Facet::FacetContainsChamberOnlyOnce(CombinatorialChamber *owner)
@@ -3440,8 +3455,8 @@ bool Facet::SplitFacetMethod2(CombinatorialChamber *BossChamber,
 		if (IsPositive && IsNegative){break;}
 	}
 	if (!(IsPositive || IsNegative))
-	{	this->ComputeDebugString2(BossChamber);
-		TheKillerFacet->ComputeDebugString2(BossChamber);
+	{	this->ComputeDebugString2();
+		TheKillerFacet->ComputeDebugString2();
 		BossChamber->ComputeDebugString();
 		std::string tempS;
 		ThePlusVertices.ElementToString(tempS);
@@ -3459,8 +3474,7 @@ bool Facet::SplitFacetMethod2(CombinatorialChamber *BossChamber,
 		static bool IsAPlusOwner;
 		while(this->IsAnOwner(BossChamber,TheOtherChamber,IsAPlusOwner))
 		{	if(IsAPlusOwner)
-			{
-				this->Owners.AddCouple(NewPlusChamber,TheOtherChamber);
+			{	this->Owners.AddCouple(NewPlusChamber,TheOtherChamber);
 				this->Owners.AddCouple(NewMinusChamber,TheOtherChamber);
 				this->Owners.RemoveCouple(BossChamber,TheOtherChamber);
 			}
@@ -13677,12 +13691,24 @@ void FacetPointers::LabelFacetIndicesProperly()
 	}
 }
 
+void FacetPointers::ElementToString(std::string& output)
+{ std::stringstream out;
+	std::string tempS;
+	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i]->ElementToString(tempS);
+		out <<tempS<<"\n";
+	}
+	output= out.str();
+}
+
 void FacetPointers::ConvertToAffineAndProjectivize
 	(CombinatorialChamberPointers& input, CombinatorialChamberPointers& ownerComplex)
 { assert(this!=&input.theHyperplanes);
 	this->initAndCreateNewObjects(input.theHyperplanes.size);
-	for (int i=0;i<input.size;i++)
-	{ this->TheObjects[i]->InduceFromFacetLowerDimension(*input.theHyperplanes.TheObjects[i],input);
-			
+	input.ComputeDebugString();
+	input.theHyperplanes.ComputeDebugString();
+	for (int i=0;i<input.theHyperplanes.size;i++)
+	{ this->TheObjects[i]->InduceFromFacetLowerDimension
+			(*input.theHyperplanes.TheObjects[i],input);	
 	}
 }

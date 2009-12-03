@@ -995,7 +995,7 @@ class Rational
 	};
 public:
 	int NumShort;
-	//the requirement that the below be unsigned cause huge problem, so I
+	//the requirement that the below be unsigned caused a huge problem, so I
 	//changed it back to int. Grrrrr.
 	int DenShort;
 	LargeRationalExtended *Extended;
@@ -1227,13 +1227,13 @@ class CombinatorialChamber
 {
 public:
 	std::string DebugString;
-	bool hasZeroPolynomial;
+	bool flagHasZeroPolynomial;
+	bool flagExplored;
+	bool flagPermanentlyZero;
 	//QuasiPolynomial* ThePolynomial;
 	int CreationNumber;
 	int DisplayNumber;
 	int IndexInOwnerComplex;
-	bool Explored;
-	bool PermanentlyZero;
 	FacetPointers* ExternalWalls;
 	FacetPointers* InternalWalls;
 	roots ExternalWallsNormals;
@@ -1242,6 +1242,7 @@ public:
 	int IndexStartingCrossSectionNormal;
 	static bool ComputingPolys;
 	static bool DisplayingGraphics;
+	static bool flagIncludeVerticesInDebugString;
 	static int MethodUsed;//1. normals vertices and boundaries
 												//2. normals only
 	static bool flagDisregardDirectionWhenPropagatingInternalWalls;
@@ -1876,7 +1877,7 @@ class Facet
 {
 public:
 	std::string DebugString;
-	int CreationNumber;
+	//int CreationNumber;
 	root normal;
 	bool SentencedToDeath;
 	int indexInOwnerFacetPointers;
@@ -1961,7 +1962,7 @@ public:
 	std::string DebugString;
 	FacetPointers theHyperplanes;
 	root IndicatorRoot;
-	QuasiPolynomials* ThePolys;
+	//QuasiPolynomials* ThePolys;
 	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
 	CombinatorialChamber* NextChamberToSlice;
 	CombinatorialChamber* LastComputedChamber;
@@ -1993,6 +1994,7 @@ public:
 	bool ConsistencyCheck();
 	void MakeStartingChambers(roots& directions, root& IndicatorRoot);
 	void ComputeNextIndexToSlice(root& direction);
+	void ComputeVerticesFromNormals();
 	void SliceWithAWall(Facet*TheKillerFacet);
 	void LabelAllUnexplored();
 	void KillNextChamberToSlice();
@@ -2002,6 +2004,9 @@ public:
 	void ComputeGlobalCone(roots& directions);
 	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
 								roots& directions, int directionIndex,root& ChamberIndicator);
+	static void drawFacetVerticesMethod2(DrawingVariables& TDV,
+														  roots& r, roots& directions, int ChamberIndex,
+															Facet* TheFacet, int DrawingStyle, int DrawingStyleDashes);
 	bool TestPossibleIndexToSlice(root&direction, int index);
 	CombinatorialChamberPointers();
 	~CombinatorialChamberPointers();
@@ -2076,9 +2081,6 @@ public:
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::InitWithZero=true;
 
-
-
-
 //The class below could as well be called "Associative commutative algebra"
 //The ring over which the algebra is defined is called by using TemplateMonomial.Coefficient
 //The Template polynomial is assumed to be having coefficients in the ring given by ElementOfCommutativeRingWithIdentity
@@ -2143,7 +2145,7 @@ int ListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::ListBasicO
       //whenever it needs more memory. For example, if you believe your polynomials
       //will have 1000+ monomials average, then set the above to 1000. Note: abuse of the above
       //might raise your memory use unexpectedly high!
-//Optional (required for some moethods):
+//Optional (required for some methods):
 //void ElementOfCommutativeRingWithIdentity::DivideBy(&ElementOfCommutativeRingWithIdentity);
 //void ElementOfCommutativeRingWithIdentity::WriteToFile(std::fstream& output);
 //void ElementOfCommutativeRingWithIdentity::ReadFromFile(std::fstream& input);
@@ -2369,8 +2371,8 @@ public:
   int HashFunction();
   void operator = (const GeneratorsPartialFractionAlgebra& right);
  	void ConvertToIntegerPoly(IntegerPoly& output);
-	//IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count
-	//this might have to be rewritten
+	//IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count.
+	//This might have to be rewritten.
   bool operator == (GeneratorsPartialFractionAlgebra& right);
   int GeneratorIndex;
   int GeneratorPower;
@@ -2418,7 +2420,8 @@ public:
 										GeneratorsOfAlgebraRecord>& m);
 	bool IsEqualToZero();
 	MonomialInCommutativeAlgebra(){};
-	//IMPORTANT: the coefficients of two monomials are not compared, that is, two monomials are equal if they have the same
+	//IMPORTANT: the coefficients of two monomials are not compared, that is, 
+	//two monomials are equal if they have the same
 	//generators at same powers
 	bool operator==(MonomialInCommutativeAlgebra
 										<	ElementOfCommutativeRingWithIdentity,
@@ -4832,11 +4835,14 @@ public:
 	bool flagHavingBeginEqnForLaTeXinStrings;
 	bool flagHavingDocumentClassForLaTeX;
 	bool flagDisplayingPartialFractions;
+	bool flagComputationIsDoneStepwise;
+	bool flagComputationPartiallyDoneDontInit;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 //	unsigned char RankEuclideanSpaceGraphics;
 	void EvaluatePoly();
 	void Run();
+	void oneChamberSlice();
 	void WriteToFilePFdecomposition(std::fstream& output);
 	ComputationSetup();
 };

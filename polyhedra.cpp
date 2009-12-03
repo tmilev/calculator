@@ -220,6 +220,7 @@ template < > int ListBasicObjects<std::string>::ListBasicObjectsActualSizeIncrem
 template < > int ListBasicObjects<unsigned int>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<roots>::ListBasicObjectsActualSizeIncrement=5;
 template < > int ListBasicObjects<Selection>::ListBasicObjectsActualSizeIncrement=5;
+template < > int ListBasicObjects<class affineHyperplane>::ListBasicObjectsActualSizeIncrement=10;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList2;
 bool RandomCodeIDontWantToDelete::UsingEvilList1=true;
@@ -364,10 +365,10 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 //	Projections[2][1]=(0-50)*tempI;
 	Projections[0][0]=100;
 	Projections[0][1]=0;
-  Projections[1][0]=0;
-	Projections[1][1]=100;
-	Projections[2][0]=88;
-	Projections[2][1]=49;
+	Projections[1][0]=49;
+	Projections[1][1]=88;
+	Projections[2][0]=0;
+	Projections[2][1]=100;
 	Projections[3][0]=92;
 	Projections[3][1]=-29;
 	Projections[4][0]=88;
@@ -442,6 +443,7 @@ ComputationSetup::ComputationSetup()
 	this->flagHavingStartingExpression=true;
 	this->flagComputationIsDoneStepwise=true;
 	this->flagComputationPartiallyDoneDontInit=false;
+	this->flagSuperimposingComplexes=true;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
 //	this->RankEuclideanSpaceGraphics=3;
@@ -457,15 +459,54 @@ void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output)
 }
 
 void ComputationSetup::oneChamberSlice()
-{	this->flagComputationPartiallyDoneDontInit=true;
-	this->AllowRepaint=false;
-	::initDLL(this->WeylGroupIndex);
-	::InputRoots.CopyFromBase(this->VPVectors);
-	::NextDirectionIndex=root::AmbientDimension-1;
-	this->theChambers.OneSlice(::InputRoots,::NextDirectionIndex,root::AmbientDimension,
-														this->thePartialFraction.IndicatorRoot);
-	::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
+{	this->AllowRepaint=false;
+	if (!this->flagSuperimposingComplexes)
+	{	::initDLL(this->WeylGroupIndex);
+		::InputRoots.CopyFromBase(this->VPVectors);
+		::NextDirectionIndex=root::AmbientDimension-1;
+		this->theChambers.OneSlice(::InputRoots,::NextDirectionIndex,root::AmbientDimension,
+															this->thePartialFraction.IndicatorRoot);
+		::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
+	}
+	else
+	{	if (!this->flagComputationPartiallyDoneDontInit)
+		{ this->NumAffineHyperplanesProcessed=0;
+			::initDLL(this->WeylGroupIndex);
+			::InputRoots.CopyFromBase(this->VPVectors);
+			::NextDirectionIndex=root::AmbientDimension-1;
+			this->theChambers.SliceTheEuclideanSpace
+				(	::InputRoots,::NextDirectionIndex,
+					root::AmbientDimension,this->thePartialFraction.IndicatorRoot);	
+			WeylGroup tempWeyl;
+			tempWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
+			tempWeyl.ComputeWeylGroup();
+			this->theChambers.theWeylGroupAffineHyperplaneImages
+				.SetSizeExpandOnTopNoObjectInit(0);
+			for (int i=0;i<this->theChambers.theHyperplanes.size;i++)
+			{ affineHyperplane tempH; 
+				root tempRoot; tempRoot.MakeZero();
+				tempH.MakeFromNormalAndPoint
+					(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]->normal);
+				for (int j=1;j<tempWeyl.size;j++)
+				{ tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
+					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
+				}
+			}
+			this->theChambers.NewHyperplanesToSliceWith.size=0;
+			this->theChambers.NewHyperplanesToSliceWith.SetActualSizeAtLeastExpandOnTop
+				(this->theChambers.theWeylGroupAffineHyperplaneImages.size);
+			for (int i=0;i<this->theChambers.theWeylGroupAffineHyperplaneImages.size;i++)
+			{ root tempRoot;
+				tempRoot.MakeNormalInProjectivizationFromAffineHyperplane
+					(theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
+				this->theChambers.NewHyperplanesToSliceWith
+					.NormalizeRootAndGetFacetCreateNewIfNeeded(tempRoot);
+			}
+		}
+	}
+	this->flagComputationPartiallyDoneDontInit=true;
 	this->AllowRepaint=true;
+	
 }
 
 void ComputationSetup::Run()
@@ -2478,21 +2519,17 @@ bool CombinatorialChamber::SlashChamber(int theKillerEdgeIndex,Facet* TheFacet, 
 
 void CombinatorialChamber::FindAllNeighbors(
 	     ListObjectPointers<CombinatorialChamber>& TheNeighbors)
-{
-	for (int i=0;i<this->ExternalWalls->size;i++)
-	{
-		this->ExternalWalls->TheObjects[i]->FindAllNeighborsTo
+{	for (int i=0;i<this->ExternalWalls->size;i++)
+	{	this->ExternalWalls->TheObjects[i]->FindAllNeighborsTo
 			(this,TheNeighbors);
 	}
 }
 
 bool CombinatorialChamber::IsAnOwnerOfAllItsWalls()
-{
-	CombinatorialChamber* tempC;
+{	CombinatorialChamber* tempC;
 	bool tempB;
 	for (int i=0;i<this->ExternalWalls->size;i++)
-	{
-		if (!this->ExternalWalls->TheObjects[i]->IsAnOwner(this,tempC,tempB))
+	{	if (!this->ExternalWalls->TheObjects[i]->IsAnOwner(this,tempC,tempB))
 			return false;
 	}
 /*	for (int i=0;i<this->InternalWalls->size;i++)
@@ -3007,6 +3044,8 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 	CombinatorialChamberPointers::ComputeGlobalCone(directions);
 	Selection theSelection;
 	theSelection.init(root::AmbientDimension);
+	this->theHyperplanes.SetActualSizeAtLeastExpandOnTop
+		(MathRoutines::NChooseK(directions.size,root::AmbientDimension-1));
 	this->theHyperplanes.initAndCreateNewObjects(root::AmbientDimension);
 	for(int i=0;i<root::AmbientDimension;i++)
 	{	roots TempRoots;
@@ -3023,7 +3062,8 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 	theSelection.initNoMemoryAllocation();
 	int NumStartingChambers=MathRoutines::TwoToTheNth(root::AmbientDimension);
 	this->initAndCreateNewObjects(NumStartingChambers);
-	this->StartingCrossSectionAffinePoints.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
+	this->StartingCrossSectionAffinePoints
+		.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
 	for(int i=0;i<NumStartingChambers;i++)
 	{	int tempI= theSelection.SelectionToIndex();
 		this->TheObjects[tempI]->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(root::AmbientDimension);
@@ -3068,30 +3108,8 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 		assert(this->TheObjects[i]->CheckVertices());
 //		this->TheObjects[i]->ComputeDebugString();
 	}
-	/*if (CombinatorialChamber::ComputingPolys)
-	{	this->TheObjects[NumStartingChambers-1]->ThePolynomial
-			->MakeNVarConst(root::AmbientDimension, QNOne);
-//		this->TheObjects[NumStartingChambers-1]->ThePolynomial->ComputeDebugString();
-		for (int i=0;i<root::AmbientDimension;i++)
-		{ root tempNormal;
-			tempNormal.Assign (this->TheObjects[NumStartingChambers-1]->ExternalWalls
-														 ->TheObjects[i]->normal);
-			QPSub tempSub;
-			tempSub.MakeLinearSubIntegrand(tempNormal,directions.TheObjects[i],RZero);
-			if (tempSub.QNSubDen!=1)
-			{	QuasiPolynomial tempQP;
-				QuasiNumber tempQN;
-				tempQN.MakePureQN(1,0,ROne,1,0,1);
-				tempQN.LinearSubstitution(tempSub);
-				tempQP.MakeNVarConst(root::AmbientDimension,tempQN);
-				this->TheObjects[NumStartingChambers-1]->ThePolynomial->MultiplyBy(tempQP);
-			}
-		}
-	}
-	else*/
-	{	//this->TheObjects[NumStartingChambers-1]->ThePolynomial+=1;
-		this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomial=false;
-	}
+	this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomial=false;
+	this->theHyperplanes.ComputeHashedRootsAndScaleNormalsProperly();	
 }
 
 void Cone::ComputeFromDirections(roots& directions)
@@ -3363,6 +3381,12 @@ void Facet::ElementToString(std::string& output)
 
 void Facet::ComputeDebugString2()
 {	this->ElementToString(this->DebugString);
+}
+
+void Facet::ReverseOrientation()
+{ for (int i=0;i<this->Owners.size;i++)
+	{ this->Owners.TheObjects[i].ReverseOrientation();
+	}
 }
 
 void Facet::ComputeDebugString()
@@ -3763,16 +3787,13 @@ Facet* Facet::MakeFacetFromEdgeAndDirection(CombinatorialChamber* owner,
 	//b.ElementToString(tempS);
 	root::RootPlusRootTimesScalar(tempNormal1,tempNormal2,b,NewFacetNormal);
 	//NewFacetNormal.ComputeDebugString();
-	for (int i=0;i<FacetOutput.size;i++)
-	{	if (NewFacetNormal.IsProportianalTo( FacetOutput.TheObjects[i]->normal))
-		{	return FacetOutput.TheObjects[i];
-		}
-	}
-	if (!IsAValidCandidateForNormalOfAKillerFacet(NewFacetNormal,directions,CurrentIndex)){return 0;}
-	Facet* newFacet= new Facet;
-	newFacet->normal.Assign(NewFacetNormal);
-	FacetOutput.AddObjectOnTop(newFacet);
-	return newFacet;
+	Facet* tempFacet= FacetOutput.NormalizeRootAndGetFacetDontCreateNew(NewFacetNormal);
+	if (tempFacet!=0)
+		return tempFacet;
+	if (!this->IsAValidCandidateForNormalOfAKillerFacet
+				(NewFacetNormal,directions,CurrentIndex))
+		return 0;
+	return FacetOutput.NormalizeRootAndGetFacetCreateNewDontCheckExistence(NewFacetNormal);
 }
 
 
@@ -3844,12 +3865,10 @@ bool Facet::IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate,
 		}
 	}
 	if (WallBasis.size<root::AmbientDimension-1)
-	{return false;}
-	//WallBasis.ComputeDebugString();
-	//normalCandidate.ComputeDebugString();
+		return false;
 	int tempI=WallBasis.GetRankOfSpanOfElements();
-	if (WallBasis.GetRankOfSpanOfElements()<root::AmbientDimension-1)
-	{return false;}
+	if (tempI<root::AmbientDimension-1)
+		return false;
 	assert(tempI==root::AmbientDimension-1);
 	return true;
 }
@@ -10284,7 +10303,7 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, roo
 	}
 }
 
-void WeylGroup::SimpleReflectionIntRoot(int index, root& theRoot,
+void WeylGroup::SimpleReflectionRoot(int index, root& theRoot,
 																				bool RhoAction)
 { static Rational alphaShift, tempRat;
 	alphaShift.MakeZero();
@@ -10320,10 +10339,20 @@ void WeylGroup::SimpleReflectionRootAlg
 	if (RhoAction){theRoot.TheObjects[index].AddConstant(RMOne);}
 }
 
+void WeylGroup::ActOnAffineHyperplaneByGroupElement
+	(int index, affineHyperplane& output, bool RhoAction)
+{ for (int i=0; i<this->TheObjects[index].size;i++)
+	{	this->SimpleReflectionRoot
+			(this->TheObjects[index].TheObjects[i],output.affinePoint,RhoAction);
+		this->SimpleReflectionRoot
+			(this->TheObjects[index].TheObjects[i],output.normal,RhoAction);
+	}
+}
+
 void WeylGroup::ActOnRootByGroupElement(	int index,
 																						root &theRoot, bool RhoAction)
 { for (int i=0;i<this->TheObjects[index].size;i++)
-	{ this->SimpleReflectionIntRoot(this->TheObjects[index].TheObjects[i],theRoot,RhoAction);
+	{ this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i],theRoot,RhoAction);
 	}
 }
 
@@ -10374,7 +10403,7 @@ void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
 			if (this->flagAnErrorHasOcurredTimeToPanic)
 			{ currentRoot.ComputeDebugString();
 			}
-			this->SimpleReflectionIntRoot(j,currentRoot,RhoAction);
+			this->SimpleReflectionRoot(j,currentRoot,RhoAction);
 			if (this->flagAnErrorHasOcurredTimeToPanic)
 			{ currentRoot.ComputeDebugString();
 			}
@@ -10994,7 +11023,7 @@ void VermaModulesWithMultiplicities::GeneratePartialBruhatOrder()
 		{ root tempRoot,tempRoot2;
 			tempRoot.Assign(this->TheObjects[i]);
 			tempRoot2.Assign(this->TheObjects[i]);
-			this->TheWeylGroup->SimpleReflectionIntRoot(j,tempRoot,true);
+			this->TheWeylGroup->SimpleReflectionRoot(j,tempRoot,true);
 			int x= this->ContainsObjectHash(tempRoot);
 			this->SimpleReflectionsActionList.TheObjects[i].AddObjectOnTop(x);
 			tempRoot2.Subtract(tempRoot);
@@ -13698,6 +13727,11 @@ bool affineHyperplane::ProjectFromFacet(Facet &input)
 { return this->ProjectFromFacetNormal(input.normal);
 }
 
+void affineHyperplane::MakeFromNormalAndPoint(root& inputPoint, root& inputNormal)
+{ this->affinePoint.Assign(inputPoint);
+	this->normal.Assign(inputNormal);
+}
+
 int affineHyperplane::HashFunction()
 { //warning: if normal gets streched, the hashfunction will change!
 	return this->normal.HashFunction();
@@ -13715,6 +13749,54 @@ void affineCones::ProjectFromCombinatorialChambers(CombinatorialChamberPointers 
 void FacetPointers::LabelFacetIndicesProperly()
 { for (int i=0;i<this->size;i++)
 	{ this->TheObjects[i]->indexInOwnerFacetPointers=i;
+	}
+}
+
+Facet* FacetPointers::NormalizeRootAndGetFacetDontCreateNew(root& normal)
+{ normal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+	int tempI= this->theNormals.ContainsObjectHash(normal);
+	if(tempI==-1)
+		return 0;
+	else
+		return this->TheObjects[tempI];
+}
+
+Facet* FacetPointers::NormalizeRootAndGetFacetCreateNewDontCheckExistence(root& normal)
+{ normal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+	Facet* tempFacet= new Facet;
+	this->AddObjectOnTop(tempFacet);
+	tempFacet->normal.Assign(normal);
+	this->theNormals.AddObjectOnTopHash(normal);
+	return tempFacet;
+}
+
+void FacetPointers::ComputeHashedRootsAndScaleNormalsProperly()
+{ this->theNormals.ClearTheObjects();
+	this->theNormals.SetActualSizeAtLeastExpandOnTop(this->size);
+	for (int i=0;i<this->size;i++)
+	{ Facet* currentFacet=this->TheObjects[i];
+		currentFacet->normal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+		if (currentFacet->Owners.size>0)
+		{ bool foundPositive=false;
+			for (int j=0;j<currentFacet->Owners.TheObjects[0].PlusOwner->AllVertices.size;j++)
+			{ Rational tempRat;
+				root::RootScalarEuclideanRoot
+					(	currentFacet->normal,
+						currentFacet->Owners.TheObjects[0].PlusOwner->AllVertices.TheObjects[j],
+						tempRat);
+				if (tempRat.IsPositive())
+				{ foundPositive=true;
+					break;
+				}
+				if (tempRat.IsNegative())
+				{ break;
+				}
+			}
+			if (!foundPositive)
+			{ currentFacet->ReverseOrientation();
+			}
+		}
+		this->theNormals.AddObjectOnTop(currentFacet->normal);
 	}
 }
 

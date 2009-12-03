@@ -63,7 +63,6 @@ const int SomeRandomPrimes[SomeRandomPrimesSize]=
 																			821, 823, 827, 829, 839,
 																			853, 857, 859, 863, 877,
 																			881, 883, 887, 907, 911};
-
 class CompositeComplexQNSub;
 class affineCone;
 class affineHyperplane;
@@ -1297,6 +1296,8 @@ public:
 	bool TestPossibilityToSlice(root& direction);
 	void Free();
 	void PurgeAllSentencedFacets();
+	void Assign(const  CombinatorialChamber& right);
+	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
 	CombinatorialChamber();
 	~CombinatorialChamber();
 };
@@ -1521,6 +1522,8 @@ public:
 	void ClearTheObjects();
 	void AddObjectOnTopHash(Object& o);
 	void PopIndexSwapWithLastHash(int index);
+	//the below returns -1 if it doesn't contain the object,
+	//else returns the object's index
 	int ContainsObjectHash(Object& o);
 	void SetHashSize(int HS);
 	int SizeWithoutObjects();
@@ -1805,6 +1808,7 @@ public:
 	int HashFunction();
 	bool ProjectFromFacet(Facet& input);
 	bool ProjectFromFacetNormal(root& input);
+	void MakeFromNormalAndPoint(root& inputPoint, root&inputNormal);
 	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
 	inline void operator=(const affineHyperplane& right){this->Assign(right);};
 };
@@ -1861,6 +1865,12 @@ public:
 	{	this->MinusOwner= right.MinusOwner;
 		this->PlusOwner = right.PlusOwner;
 	};
+	void ReverseOrientation()
+	{ CombinatorialChamber* tempC;
+		tempC= this->PlusOwner;
+		this->PlusOwner= this->MinusOwner;
+		this->MinusOwner=tempC;
+	}
 };
 
 class CombinatorialChamberCouplePointers: public ListBasicObjects<CombinatorialChamberCouple>
@@ -1882,6 +1892,7 @@ public:
 	bool SentencedToDeath;
 	int indexInOwnerFacetPointers;
 	CombinatorialChamberCouplePointers Owners;
+	void ReverseOrientation();
 	//roots AllVertices;
 	//roots Boundaries;
 	bool IsInternalWRT(CombinatorialChamber* owner);
@@ -1902,6 +1913,9 @@ public:
 																			Facet* theOtherFacet, root& direction,
 																			roots & directions, int CurrentIndex,
 																			FacetPointers& FacetOutput);
+	//if no facet with teh same normal already exists
+	//the below code creates a new facet with a given normal
+	//else it returns zero.
 	bool CheckVertices(CombinatorialChamber* owner);
 	void ComputeDebugString();
 	void ComputeDebugString2();
@@ -1939,6 +1953,8 @@ public:
 																			 CombinatorialChamber* NewMinusChamber, Facet* TheKillerFacet,
 																			 CombinatorialChamber* BossChamber);
 	void ProjectOnto(root& point, root& output);
+	void Assign(const Facet& right);
+	inline void operator=(const Facet& right){this->Assign(right);};
 };
 
 
@@ -1946,6 +1962,17 @@ class FacetPointers: public ListObjectPointers<Facet>
 {
 public:
 	std::string DebugString;
+	hashedRoots theNormals;
+	Facet* NormalizeRootAndGetFacetCreateNewIfNeeded(root& normal)
+	{	Facet* tempFacet= this->NormalizeRootAndGetFacetDontCreateNew(normal);
+		if (tempFacet!=0)
+			return tempFacet;
+		else
+			return this->NormalizeRootAndGetFacetCreateNewDontCheckExistence(normal);
+	};
+	Facet* NormalizeRootAndGetFacetDontCreateNew(root& normal);
+	Facet* NormalizeRootAndGetFacetCreateNewDontCheckExistence(root& normal);
+	void ComputeHashedRootsAndScaleNormalsProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(DebugString);};
 	void ConvertToAffineAndProjectivize
@@ -1961,6 +1988,8 @@ public:
 	unsigned char AmbientDimension;
 	std::string DebugString;
 	FacetPointers theHyperplanes;
+	FacetPointers NewHyperplanesToSliceWith;
+	affineHyperplanes theWeylGroupAffineHyperplaneImages;
 	root IndicatorRoot;
 	//QuasiPolynomials* ThePolys;
 	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
@@ -4638,13 +4667,16 @@ public:
 											bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
 											WeylGroup& outputSubset);
 	void GenerateRootSystemFromKillingFormMatrix();
+	void ActOnAffineHyperplaneByGroupElement(
+		int index, affineHyperplane& output, bool RhoAction);
 	//theRoot is a list of the simple coordinates of the root
+	//theRoot serves as both input and output
 	void ActOnRootAlgByGroupElement(
 							int index, PolynomialsRationalCoeff& theRoot,
 							bool RhoAction);
 	void ActOnRootByGroupElement(int index, root& theRoot,
 																	bool RhoAction);
-	void SimpleReflectionIntRoot(int index, root& theRoot, bool RhoAction);
+	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction);
 	void SimpleReflectionRootAlg
 						(	int index, PolynomialsRationalCoeff& theRoot,
 							bool RhoAction);
@@ -4823,6 +4855,7 @@ public:
 	std::string ValueString;
 	intRoot ValueRoot;
 	roots VPVectors;
+	int NumAffineHyperplanesProcessed;
 	bool AllowRepaint;
 	bool ComputationInProgress;
 	bool UsingCustomVectors;
@@ -4837,6 +4870,7 @@ public:
 	bool flagDisplayingPartialFractions;
 	bool flagComputationIsDoneStepwise;
 	bool flagComputationPartiallyDoneDontInit;
+	bool flagSuperimposingComplexes;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 //	unsigned char RankEuclideanSpaceGraphics;

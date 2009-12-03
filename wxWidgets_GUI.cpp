@@ -172,6 +172,7 @@ public:
 	wxBoxSizer* BoxSizer12VerticalProgressReports;
 	wxBoxSizer* BoxSizer13VerticalPartFracOutput;
 	wxBoxSizer* BoxSizer14HorizontalSaveButtons;
+	wxBoxSizer* BoxSizer15HorizontalSlicingButtons;
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
   wxTextCtrl* Text3PartialFractions;
@@ -192,6 +193,9 @@ public:
   ::wxButton* Button3Custom;
   ::wxButton* Button4SaveReadable;
   ::wxButton* Button5SaveComputer;
+  ::wxButton* Button6OneSlice;
+  ::wxButton* Button7OneDirectionIncrement;
+  ::wxButton* Button8FullChopping;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
 	::wxCheckBox* CheckBox1ComputePFs;
@@ -212,6 +216,9 @@ public:
   void onButton2Eval(wxCommandEvent& ev);
   void onButton1Go(wxCommandEvent& ev);
   void onButton3Custom (wxCommandEvent& ev);
+  void onButton6OneSlice (wxCommandEvent& ev);
+  void onButton7SliceIncrement (wxCommandEvent& ev);
+	void onButton8FullChop(wxCommandEvent& ev);
 	void onSpinner1and2 (wxSpinEvent & ev);
 	void onComputationOver(wxCommandEvent& ev);
 	void onRePaint(wxPaintEvent& ev);
@@ -245,6 +252,9 @@ public:
 		ID_Buton2Eval,
 		ID_Button4SaveReadable,
 		ID_Button5SaveComputer,
+		ID_Button6OneSlice,
+		ID_Button7Increment,
+		ID_Button8FullChop,
 		ID_Spin1Dim,
 		ID_Spin2NumVect,
 		ID_Canvas1,
@@ -304,6 +314,9 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
 	EVT_BUTTON(guiMainWindow::ID_Buton2Eval, guiMainWindow::onButton2Eval)
 	EVT_BUTTON(guiMainWindow::ID_Button1Go, guiMainWindow::onButton1Go)
 	EVT_BUTTON(guiMainWindow::ID_Button3Custom, guiMainWindow::onButton3Custom)
+	EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
+	EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
+	EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
 	EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
 	EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
 	EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
@@ -437,6 +450,7 @@ guiMainWindow::guiMainWindow()
 	this->BoxSizer12VerticalProgressReports = new ::wxBoxSizer(wxVERTICAL);
 	this->BoxSizer13VerticalPartFracOutput = new ::wxBoxSizer(wxVERTICAL);
 	this->BoxSizer14HorizontalSaveButtons = new ::wxBoxSizer(wxHORIZONTAL);
+	this->BoxSizer15HorizontalSlicingButtons= new ::wxBoxSizer(wxHORIZONTAL);
 	this->ToggleButton1UsingCustom= new ::wxToggleButton
 		(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
@@ -478,6 +492,9 @@ guiMainWindow::guiMainWindow()
 	this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
 	this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
 	this->Button3Custom= new wxButton(this,this->ID_Button3Custom,wxT("Experiments"));
+	this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
+	this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
+	this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
 	this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
 	this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
 	this->Dialog1OutputPF= new ::wxDialogOutput(this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
@@ -533,6 +550,10 @@ guiMainWindow::guiMainWindow()
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox4ChamberLabels);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox5InvisibleChambers);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox6Dashes);
+		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->BoxSizer15HorizontalSlicingButtons);
+			this->BoxSizer15HorizontalSlicingButtons->Add(this->Button6OneSlice);
+			this->BoxSizer15HorizontalSlicingButtons->Add(this->Button7OneDirectionIncrement);
+			this->BoxSizer15HorizontalSlicingButtons->Add(this->Button8FullChopping);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->Canvas1,1,wxEXPAND|wxALL);
 	this->BoxSizer13VerticalPartFracOutput->Add(this->ToggleButton2ViewCombinatorialChambers);
 	this->BoxSizer13VerticalPartFracOutput->Add(this->Text3PartialFractions, 1, wxEXPAND|wxALL);
@@ -838,6 +859,19 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 	return;
 }
 
+void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
+{ this->ReadVPVectorsAndOptions();
+	this->theComputationSetup.oneChamberSlice();	
+}
+
+void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
+{
+}
+
+void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
+{
+}
+
 void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
 { int candidateDim= this->Spin1Dim->GetValue();
 	int candidateNumVectors= this->Spin2NumVect->GetValue();
@@ -982,7 +1016,9 @@ void guiMainWindow::OnExit(wxCloseEvent &event)
 
 
 void guiMainWindow::ReadVPVectorsAndOptions()
-{ this->theComputationSetup.ComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
+{ if (this->theComputationSetup.flagComputationPartiallyDoneDontInit)
+		return;
+	this->theComputationSetup.ComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
 	this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
 	this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
 	this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=

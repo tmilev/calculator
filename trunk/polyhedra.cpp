@@ -2649,12 +2649,14 @@ bool CombinatorialChamber::SplitChamberMethod2(Facet* theKillerFacet,
 			}
 		}
 	}
-	PlusChamberIsPermanentZero=
-		CombinatorialChamberPointers::IsSurelyOutsideGlobalCone( LocalContainerPlusVertices,
-																											       LocalLinearAlgebra.size);
-	MinusChamberIsPermanentZero=
-		CombinatorialChamberPointers::IsSurelyOutsideGlobalCone( LocalContainerMinusVertices,
-		                                                         LocalLinearAlgebra.size);
+	if (!this->flagMakingASingleHyperplaneSlice)
+	{	PlusChamberIsPermanentZero=
+			CombinatorialChamberPointers::IsSurelyOutsideGlobalCone( LocalContainerPlusVertices,
+																												       LocalLinearAlgebra.size);
+		MinusChamberIsPermanentZero=
+			CombinatorialChamberPointers::IsSurelyOutsideGlobalCone( LocalContainerMinusVertices,
+				                                                       LocalLinearAlgebra.size);
+	}
 	if (!(hasPositive && hasNegative))
 	{	return false;
 	}

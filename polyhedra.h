@@ -4679,7 +4679,10 @@ public:
 							bool RhoAction);
 	void ActOnRootByGroupElement(int index, root& theRoot,
 																	bool RhoAction);
+	void ActOnDualSpaceElementByGroupElement(int index, root& theDualSpaceElement,
+																	bool RhoAction);
 	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction);
+	void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
 	void SimpleReflectionRootAlg
 						(	int index, PolynomialsRationalCoeff& theRoot,
 							bool RhoAction);

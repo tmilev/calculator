@@ -486,11 +486,11 @@ void ComputationSetup::oneChamberSlice()
 			for (int i=0;i<this->theChambers.theHyperplanes.size;i++)
 			{ affineHyperplane tempH; 
 				root tempRoot; tempRoot.MakeZero();
-				tempH.MakeFromNormalAndPoint
-					(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]->normal);
-				tempH.ComputeDebugString();
 				for (int j=1;j<tempWeyl.size;j++)
-				{ tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
+				{	tempH.MakeFromNormalAndPoint
+						(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]->normal);
+					tempH.ComputeDebugString();
+					tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
 					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
 					tempH.ComputeDebugString();
 				}
@@ -10317,13 +10317,24 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, roo
 	}
 }
 
+void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
+{	static Rational coefficient, tempRat;
+	coefficient.Assign(DualSpaceElement.TheObjects[index]);
+	coefficient.DivideByInteger(this->KillingFormMatrix.elements[index][index]);
+	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
+	{ tempRat.Assign(coefficient);
+		tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[index][i]*2);
+		DualSpaceElement.TheObjects[i].Add(tempRat);
+	}
+}
+
 void WeylGroup::SimpleReflectionRoot(int index, root& theRoot,
 																				bool RhoAction)
 { static Rational alphaShift, tempRat;
 	alphaShift.MakeZero();
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
 	{ tempRat.Assign(theRoot.TheObjects[i]);
-		tempRat.MultiplyByInt(-KillingFormMatrix.elements[index][i]*2);
+		tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[index][i]*2);
 		alphaShift.Add(tempRat);
 	}
 	if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -10355,11 +10366,13 @@ void WeylGroup::SimpleReflectionRootAlg
 
 void WeylGroup::ActOnAffineHyperplaneByGroupElement
 	(int index, affineHyperplane& output, bool RhoAction)
-{ for (int i=0; i<this->TheObjects[index].size;i++)
+{ int tempI= this->TheObjects[index].size;
+	for (int i=0; i<tempI;i++)
 	{	this->SimpleReflectionRoot
 			(this->TheObjects[index].TheObjects[i],output.affinePoint,RhoAction);
-		this->SimpleReflectionRoot
-			(this->TheObjects[index].TheObjects[i],output.normal,RhoAction);
+		output.affinePoint.ComputeDebugString();
+		this->SimpleReflectionDualSpace
+			(this->TheObjects[index].TheObjects[tempI-i-1],output.normal);
 	}
 }
 

@@ -1801,8 +1801,11 @@ public:
 class affineHyperplane
 {
 public:
+	std::string DebugString;
 	root affinePoint;
 	root normal;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	//void InduceFromFacet(Facet& input);
 	//the below returns false if the projection is not of full dimension
 	int HashFunction();

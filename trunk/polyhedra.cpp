@@ -480,6 +480,7 @@ void ComputationSetup::oneChamberSlice()
 			WeylGroup tempWeyl;
 			tempWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
 			tempWeyl.ComputeWeylGroup();
+			tempWeyl.ComputeDebugString();
 			this->theChambers.theWeylGroupAffineHyperplaneImages
 				.SetSizeExpandOnTopNoObjectInit(0);
 			for (int i=0;i<this->theChambers.theHyperplanes.size;i++)
@@ -487,9 +488,11 @@ void ComputationSetup::oneChamberSlice()
 				root tempRoot; tempRoot.MakeZero();
 				tempH.MakeFromNormalAndPoint
 					(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]->normal);
+				tempH.ComputeDebugString();
 				for (int j=1;j<tempWeyl.size;j++)
 				{ tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
 					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
+					tempH.ComputeDebugString();
 				}
 			}
 			this->theChambers.NewHyperplanesToSliceWith.size=0;
@@ -499,13 +502,15 @@ void ComputationSetup::oneChamberSlice()
 			{ root tempRoot;
 				tempRoot.MakeNormalInProjectivizationFromAffineHyperplane
 					(theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
+				tempRoot.ComputeDebugString();
 				this->theChambers.NewHyperplanesToSliceWith
 					.NormalizeRootAndGetFacetCreateNewIfNeeded(tempRoot);
 			}
+			::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 		}
 		else
 		{ if (this->NumAffineHyperplanesProcessed<this->theChambers.NewHyperplanesToSliceWith.size)
-			{	this->theChambers.SliceWithAWall(this->theChambers.NewHyperplanesToSliceWith
+			{	TheBigOutput.SliceWithAWall(this->theChambers.NewHyperplanesToSliceWith
 					.TheObjects[this->NumAffineHyperplanesProcessed]);
 				this->NumAffineHyperplanesProcessed++;
 			}
@@ -13737,6 +13742,16 @@ bool affineHyperplane::ProjectFromFacet(Facet &input)
 void affineHyperplane::MakeFromNormalAndPoint(root& inputPoint, root& inputNormal)
 { this->affinePoint.Assign(inputPoint);
 	this->normal.Assign(inputNormal);
+}
+
+void affineHyperplane::ElementToString(std::string& output)
+{ std::stringstream out;
+	std::string tempS;
+	this->affinePoint.ElementToString(tempS);
+	out<< "point: " << tempS;
+	this->normal.ElementToString(tempS);
+	out<<" normal: "<< tempS;
+	output= out.str();
 }
 
 int affineHyperplane::HashFunction()

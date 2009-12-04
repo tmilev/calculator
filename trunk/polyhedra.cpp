@@ -503,6 +503,13 @@ void ComputationSetup::oneChamberSlice()
 					.NormalizeRootAndGetFacetCreateNewIfNeeded(tempRoot);
 			}
 		}
+		else
+		{ if (this->NumAffineHyperplanesProcessed<this->theChambers.NewHyperplanesToSliceWith.size)
+			{	this->theChambers.SliceWithAWall(this->theChambers.NewHyperplanesToSliceWith
+					.TheObjects[this->NumAffineHyperplanesProcessed]);
+				this->NumAffineHyperplanesProcessed++;
+			}
+		}
 	}
 	this->flagComputationPartiallyDoneDontInit=true;
 	this->AllowRepaint=true;

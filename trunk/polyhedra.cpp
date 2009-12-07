@@ -506,6 +506,8 @@ void ComputationSetup::oneChamberSlice()
 				this->theChambers.NewHyperplanesToSliceWith
 					.NormalizeRootAndGetFacetCreateNewIfNeeded(tempRoot);
 			}
+			this->theChambers.NewHyperplanesToSliceWith.theNormals.ComputeDebugString();
+			this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
 			::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 		}
 		else
@@ -13857,4 +13859,14 @@ void FacetPointers::ConvertToAffineAndProjectivize
 	{ this->TheObjects[i]->InduceFromFacetLowerDimension
 			(*input.theHyperplanes.TheObjects[i],input);	
 	}
+}
+
+void affineHyperplanes::ElementToString(std::string& output)
+{ std::stringstream out;
+	for (int i=0;i<this->size;i++)
+	{ std::string tempS;
+		this->TheObjects[i].ElementToString(tempS);
+		out<<"index: "<<i<<" "<< tempS<<"\n";
+	}
+	output= out.str();
 }

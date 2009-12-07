@@ -2983,6 +2983,10 @@ void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize
 		this->StartingCrossSectionAffinePoints.TheObjects[i].TheObjects[root::AmbientDimension].MakeOne();
 		this->StartingCrossSectionNormals.TheObjects[i].TheObjects[root::AmbientDimension].MakeOne();
 	}	
+	root extraWallNormal;
+	extraWallNormal.MakeZero(root::AmbientDimension+1);
+	extraWallNormal.TheObjects[root::AmbientDimension].MakeOne();
+	this->theHyperplanes.NormalizeRootAndGetFacetCreateNewIfNeeded(extraWallNormal);
 	for (int i=0;i<this->size;i++)
   { this->TheObjects[i]->
 			InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
@@ -2995,12 +2999,11 @@ void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize
   this->ComputeDebugString();
   root::AmbientDimension++;
   this->ComputeVerticesFromNormals();
-  root tempRoot; 
+  /*root tempRoot; 
 	tempRoot.SetSizeExpandOnTopLight(root::AmbientDimension);
 	tempRoot.TheObjects[root::AmbientDimension-1].MakeOne();
 	for (int i=0;i<this->size;i++)
-  { this->TheObjects[i]->flagHasZeroPolynomial= input.TheObjects[i]->flagHasZeroPolynomial;
-		for (int j=0;j<input.TheObjects[i]->AllVertices.size;j++)
+  { for (int j=0;j<input.TheObjects[i]->AllVertices.size;j++)
 		{ for (int k=0;k<root::AmbientDimension-1;k++)
 			{ tempRoot.TheObjects[k].Assign
 					(input.TheObjects[i]->AllVertices.TheObjects[j].TheObjects[k]);
@@ -3008,7 +3011,7 @@ void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize
 			this->TheObjects[i]->AllVertices.AddRoot(tempRoot);
 		}
   }
-  this->AmbientDimension= root::AmbientDimension;
+  this->AmbientDimension= root::AmbientDimension;*/
 	this->ComputeDebugString();
 }
 
@@ -3227,6 +3230,15 @@ void CombinatorialChamber::
 			.MakeNormalInProjectivizationFromPointAndNormal(ZeroRoot,input.ExternalWallsNormals.TheObjects[i]);
 	}
 	this->ComputeDebugString();
+	root extraWallNormal;
+	extraWallNormal.MakeZero(root::AmbientDimension+1);
+	extraWallNormal.TheObjects[root::AmbientDimension].MakeOne();
+	this->ExternalWallsNormals.AddRoot(extraWallNormal);
+	Facet* tempF= 
+		owner.theHyperplanes.NormalizeRootAndGetFacetCreateNewIfNeeded(extraWallNormal);
+	this->ExternalWalls->AddObjectOnTop(tempF);
+	tempF->Owners.AddCouple(this,0);
+	this->flagHasZeroPolynomial= input.flagHasZeroPolynomial;
 	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
 

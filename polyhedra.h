@@ -1131,7 +1131,7 @@ public:
 	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
 	inline void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
 	void MakeNormalInProjectivizationFromPointAndNormal(root& point, root& normal);
-	//the below returns false 
+	//the below returns false
 	bool ProjectToAffineSpace(root& output);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
@@ -1819,6 +1819,9 @@ public:
 class affineHyperplanes: public ListBasicObjects<affineHyperplane>
 {
 public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 };
 
 class affineCone
@@ -2452,7 +2455,7 @@ public:
 										GeneratorsOfAlgebraRecord>& m);
 	bool IsEqualToZero();
 	MonomialInCommutativeAlgebra(){};
-	//IMPORTANT: the coefficients of two monomials are not compared, that is, 
+	//IMPORTANT: the coefficients of two monomials are not compared, that is,
 	//two monomials are equal if they have the same
 	//generators at same powers
 	bool operator==(MonomialInCommutativeAlgebra
@@ -4850,6 +4853,7 @@ public:
 		this->NumProcessedMonomialsTotal=0;
 	};
 };
+
 
 struct ComputationSetup
 {

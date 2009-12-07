@@ -1245,7 +1245,7 @@ public:
 	static int MethodUsed;//1. normals vertices and boundaries
 												//2. normals only
 	static bool flagDisregardDirectionWhenPropagatingInternalWalls;
-	static bool PrintWallDetails;
+	static bool flagPrintWallDetails;
 	static bool flagMakingASingleHyperplaneSlice;
 	static ListBasicObjects<CombinatorialChamber*> NonExploredChambersHavingInternalWalls;
 	bool HasZeroPoly();
@@ -2021,6 +2021,7 @@ public:
 	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberPointers& input);
+  void MakeExtraProjectivePlane();
   void WireChamberAdjacencyInfo(CombinatorialChamberPointers& input);
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);

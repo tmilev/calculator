@@ -117,7 +117,7 @@ PrecomputedTauknPointersKillOnExit PrecomputedTausLocal;
 
 int CombinatorialChamber::MethodUsed;
 simplicialCones CombinatorialChamberPointers::startingCones;
-bool CombinatorialChamber::PrintWallDetails;
+bool CombinatorialChamber::flagPrintWallDetails=true;
 bool CombinatorialChamber::DisplayingGraphics=true;
 bool CombinatorialChamberPointers::PrintLastChamberOnly=true;
 bool CombinatorialChamberPointers::AnErrorHasOcurredTimeToPanic=false;
@@ -1325,7 +1325,6 @@ void initDLL(int rank)
 
 	ZeroRoot.MakeZero();
 
-	CombinatorialChamber::PrintWallDetails= false;
 	ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1000;
 	CombinatorialChamberPointers::DefragSpacing=500;
 	CombinatorialChamberPointers::NumTotalCreatedCombinatorialChambersAtLastDefrag=0;
@@ -2116,13 +2115,17 @@ bool CombinatorialChamber::ElementToString(std::string& output)
 	this->FindAllNeighbors(outputChambers);
 	out<<"Neighbors: ";
 	for (int i=0;i<outputChambers.size;i++)
-	{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out);
-		out <<", ";
+	{	if (outputChambers.TheObjects[i]!=0)
+		{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out);
+			out <<", ";
+		}
 	}
 	PolyFormatLocal.cutOffString=false;
 	for (int i=0;i<outputChambers.size;i++)
-	{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out);
-		out <<", ";
+	{	if (outputChambers.TheObjects[i]!=0)
+		{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out);
+			out <<", ";
+		}
 	}
 	if (this->flagIncludeVerticesInDebugString)
 	{ out << "\nVertices: ";
@@ -2131,7 +2134,7 @@ bool CombinatorialChamber::ElementToString(std::string& output)
 			out <<"("<< tempS <<"), ";
 		}
 	}
-	if (CombinatorialChamber::PrintWallDetails)
+	if (CombinatorialChamber::flagPrintWallDetails)
 	{	out <<"\n Wall Details:\n";
 		for (int i=0;i<this->ExternalWalls->size;i++)
 		{	//this->ExternalWalls->TheObjects[i]->ComputeDebugString(this);
@@ -2882,6 +2885,18 @@ void CombinatorialChamberPointers::ComputeGlobalCone(roots& directions)
 { CombinatorialChamberPointers::TheGlobalConeNormals.ComputeFromDirections(directions);
 }
 
+void CombinatorialChamberPointers::MakeExtraProjectivePlane()
+{	root extraWallNormal;
+	extraWallNormal.MakeZero(root::AmbientDimension+1);
+	extraWallNormal.TheObjects[root::AmbientDimension].MakeOne();
+	Facet* tempFacet2= this->theHyperplanes.
+	NormalizeRootAndGetFacetCreateNewIfNeeded(extraWallNormal);
+	for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i]->ExternalWalls->AddObjectOnTop(tempFacet2);
+		tempFacet2->Owners.AddCouple(this->TheObjects[i],0);
+	}
+}
+
 void CombinatorialChamberPointers::ComputeVerticesFromNormals()
 { for (int i=0;i<this->size;i++)
 		this->TheObjects[i]->ComputeVerticesFromNormals(*this);
@@ -2952,9 +2967,9 @@ void CombinatorialChamberPointers::ElementToString(std::string& output)
 void CombinatorialChamberPointers::WireChamberAdjacencyInfo
 	(CombinatorialChamberPointers& input)
 { assert(this->size==input.size);
+	Facet* tempFacet;
 	input.theHyperplanes.LabelFacetIndicesProperly();
 	this->theHyperplanes.LabelFacetIndicesProperly();
-	Facet* tempFacet;
 	for (int i=0;i<input.size;i++)
 	{ for (int j=0;j<input.TheObjects[i]->ExternalWalls->size;j++)
 		{	tempFacet= input.TheObjects[i]->ExternalWalls->TheObjects[j];
@@ -2996,6 +3011,7 @@ void CombinatorialChamberPointers::InduceFromLowerDimensionalAndProjectivize
   this->theHyperplanes.ConvertToAffineAndProjectivize(input,*this);
   this->ComputeDebugString();
   this->WireChamberAdjacencyInfo(input);
+  this->MakeExtraProjectivePlane();
   this->ComputeDebugString();
   root::AmbientDimension++;
   this->ComputeVerticesFromNormals();
@@ -3227,17 +3243,14 @@ void CombinatorialChamber::
 	//the extra dimension is going to be the last dimension
 	for (int i=0;i<this->ExternalWallsNormals.size;i++)
 	{ this->ExternalWallsNormals.TheObjects[i]
-			.MakeNormalInProjectivizationFromPointAndNormal(ZeroRoot,input.ExternalWallsNormals.TheObjects[i]);
+			.MakeNormalInProjectivizationFromPointAndNormal
+				(ZeroRoot,input.ExternalWallsNormals.TheObjects[i]);
 	}
 	this->ComputeDebugString();
 	root extraWallNormal;
 	extraWallNormal.MakeZero(root::AmbientDimension+1);
 	extraWallNormal.TheObjects[root::AmbientDimension].MakeOne();
 	this->ExternalWallsNormals.AddRoot(extraWallNormal);
-	Facet* tempF= 
-		owner.theHyperplanes.NormalizeRootAndGetFacetCreateNewIfNeeded(extraWallNormal);
-	this->ExternalWalls->AddObjectOnTop(tempF);
-	tempF->Owners.AddCouple(this,0);
 	this->flagHasZeroPolynomial= input.flagHasZeroPolynomial;
 	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
@@ -13871,6 +13884,7 @@ void FacetPointers::ConvertToAffineAndProjectivize
 	{ this->TheObjects[i]->InduceFromFacetLowerDimension
 			(*input.theHyperplanes.TheObjects[i],input);	
 	}
+//	this->ComputeHashedRootsAndScaleNormalsProperly();
 }
 
 void affineHyperplanes::ElementToString(std::string& output)

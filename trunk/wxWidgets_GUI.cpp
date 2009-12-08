@@ -46,7 +46,6 @@ extern int NextDirectionIndex;
 extern int RankGlobal;
 extern roots InputRoots;
 extern CombinatorialChamberPointers TheBigOutput;
-extern FacetPointers TheBigFacetOutput;
 
 class guiMainWindow;
 class wxDialogOutput;
@@ -862,6 +861,7 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 { this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.oneChamberSlice();	
+	this->Refresh();
 }
 
 void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)

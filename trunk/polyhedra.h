@@ -71,13 +71,11 @@ class BasicQN;
 class CombinatorialChamber;
 class PolynomialsRationalCoeff;
 class PrecomputedQuasiPolynomialIntegrals;
-class Facet;
 class hashedRoots;
 class PrecomputedTauknPointersKillOnExit;
 class QuasiPolynomial;
 class VertexSelectionPointers;
 class CombinatorialChamberPointers;
-class FacetPointers;
 class CompositeComplexQN;
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial;
@@ -1146,6 +1144,7 @@ public:
 	void MultiplyByInteger(int a);
 	void MultiplyByLargeInt(LargeInt& right);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
+	bool OurScalarProductIsPositive(root& right);
 	void MinusRoot();
 	void Subtract(root& r);
 	inline void Assign(const root& right)
@@ -1222,6 +1221,35 @@ public:
 	void operator = (const roots& right){this->CopyFromBase(right);};
 };
 
+class WallData
+{
+public: 
+	std::string DebugString;
+	root normal;
+	ListBasicObjects<CombinatorialChamber*> NeighborsAlongWall;
+	ListBasicObjects<WallData*> MirrorWall;
+	static bool flagDisplayWallDetails;
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void ElementToString(std::string& output);
+	void RemoveNeighbor(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
+	void RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer);
+	void AddNeighbor(CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
+	void operator=(const WallData& right);
+	bool IsInFacetNoBoundaries(root &point);
+	bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
+	void SubstituteNeighbor
+		(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
+	bool IsExternalWithRespectToDirection(root &direction);
+	bool SplitWall(CombinatorialChamber *BossChamber,
+												 CombinatorialChamber *NewPlusChamber,
+												 CombinatorialChamber *NewMinusChamber,
+												 roots& ThePlusVertices, roots& TheMinusVertices,
+												 root& TheKillerFacet, root& direction,
+												 CombinatorialChamberPointers* PossibleBogusNeighbors,
+												 ListBasicObjects<WallData*>* PossibleBogusWalls);
+	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
+};
+
 class CombinatorialChamber
 {
 public:
@@ -1233,9 +1261,8 @@ public:
 	int CreationNumber;
 	int DisplayNumber;
 	int IndexInOwnerComplex;
-	FacetPointers* ExternalWalls;
-	FacetPointers* InternalWalls;
-	roots ExternalWallsNormals;
+	ListBasicObjects<WallData> Externalwalls;
+	roots InternalWalls;
 	roots AllVertices;
 	root InternalPoint;
 	int IndexStartingCrossSectionNormal;
@@ -1250,29 +1277,20 @@ public:
 	static ListBasicObjects<CombinatorialChamber*> NonExploredChambersHavingInternalWalls;
 	bool HasZeroPoly();
 	bool PointLiesInMoreThanOneWall(root& point);
-	bool IsAnOwnerOfAllItsWalls();
 	//bool InduceFromAffineCone(affineCone& input);
 	bool ComputeDebugString();
 	bool ElementToString(std::string& output);
 	void ChamberNumberToStringStream(std::stringstream& out);
 	bool ConsistencyCheck();
-	bool CheckVertices();
-	bool FacetIsInternal(Facet* f);
-	void GetNormalFromFacet(root& output, Facet* theFacet);
+	//bool FacetIsInternal(Facet* f);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
-	bool SlashChamber(int theKillerEdgeIndex,Facet* TheFacet, root& direction,
-		                roots& directions, int CurrentIndex,
-										CombinatorialChamberPointers& output);
-	bool SplitChamber(Facet* theKillerFacet,CombinatorialChamberPointers& output, root& direction);
-	bool SplitChamberMethod1(Facet* theKillerFacet,CombinatorialChamberPointers& output);
-	bool SplitChamberMethod2(Facet* theKillerFacet,CombinatorialChamberPointers& output,
+	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberPointers& output,
 		                       root& direction);
-	bool IsABogusNeighbor(Facet* NeighborWall, CombinatorialChamber* Neighbor);
+	bool IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor);
 	void ComputeVerticesFromNormals(CombinatorialChamberPointers& owner);
 	bool PointIsInChamber(root&point);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
 	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberPointers& owner);
-	bool PlusMinusPointIsInWallSelection(root &point, Selection& theSelection);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	bool LinearAlgebraForVertexComputation
@@ -1280,26 +1298,29 @@ public:
 	//returns false if the vectors were linearly dependent
 	bool SliceInDirection(root& direction,roots& directions,
 										    int CurrentIndex, CombinatorialChamberPointers& output,
-												FacetPointers& FacetOutput);
-//	void SliceInDirectionOld(root& direction,CombinatorialChamberPointers& output);
+												hashedRoots& FacetOutput);
+	bool IsAValidCandidateForNormalOfAKillerFacet
+		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberPointers& owner);
 	bool HasHSignVertex(root& h,int sign);
 	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,
 																	Selection &SelectionStartSimplex,
 																	MatrixLargeRational& outputColumn);
-	void AddInternalWall(Facet* TheKillerFacet, Facet* TheFacetBeingKilled, root& direction);
-	void RemoveInternalWall(int index);
+	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction);
 	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input,CombinatorialChamberPointers& owner);
 	void ComputeInternalPointMethod1(root& InternalPoint);
 	void ComputeInternalPointMethod2(root& InternalPoint);
+	void MakeNewMutualNeighbors
+		(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
 	bool TestPossibilityToSlice(root& direction);
-	void Free();
-	void PurgeAllSentencedFacets();
+	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberPointers& owner,
+																			root& direction,
+																			roots & directions, int CurrentIndex,
+																			root& outputNormal);
 	void Assign(const  CombinatorialChamber& right);
 	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
 	CombinatorialChamber();
-	~CombinatorialChamber();
 };
 
 template <class Object>
@@ -1809,7 +1830,7 @@ public:
 	//void InduceFromFacet(Facet& input);
 	//the below returns false if the projection is not of full dimension
 	int HashFunction();
-	bool ProjectFromFacet(Facet& input);
+//	bool ProjectFromFacet(Facet& input);
 	bool ProjectFromFacetNormal(root& input);
 	void MakeFromNormalAndPoint(root& inputPoint, root&inputNormal);
 	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
@@ -1862,129 +1883,6 @@ public:
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
 };
 
-class CombinatorialChamberCouple
-{
-public:
-	CombinatorialChamber* PlusOwner;
-	CombinatorialChamber* MinusOwner;
-	void operator=(const CombinatorialChamberCouple& right)
-	{	this->MinusOwner= right.MinusOwner;
-		this->PlusOwner = right.PlusOwner;
-	};
-	void ReverseOrientation()
-	{ CombinatorialChamber* tempC;
-		tempC= this->PlusOwner;
-		this->PlusOwner= this->MinusOwner;
-		this->MinusOwner=tempC;
-	}
-};
-
-class CombinatorialChamberCouplePointers: public ListBasicObjects<CombinatorialChamberCouple>
-{
-public:
-	void AddCouple(CombinatorialChamber* PlusOwner,CombinatorialChamber* MinusOwner);
-	void RemoveCouple(CombinatorialChamber* PlusOwner,CombinatorialChamber* MinusOwner);
-	void RemoveCoupleBothOrders(CombinatorialChamber* Owner1,CombinatorialChamber* Owner2);
-	void Substitute(Facet*owner,CombinatorialChamber *Leaves,
-		              CombinatorialChamber *Enters);
-};
-
-class Facet
-{
-public:
-	std::string DebugString;
-	//int CreationNumber;
-	root normal;
-	bool SentencedToDeath;
-	int indexInOwnerFacetPointers;
-	CombinatorialChamberCouplePointers Owners;
-	void ReverseOrientation();
-	//roots AllVertices;
-	//roots Boundaries;
-	bool IsInternalWRT(CombinatorialChamber* owner);
-	bool IsAPlusOwner(CombinatorialChamber* owner);
-	bool IsAnOwner(CombinatorialChamber* owner,
-		             CombinatorialChamber*&TheFirstOtherOwner, bool& IsAPlusOwner);
-	void FindAllNeighborsTo(CombinatorialChamber* TheChamber,
-					ListObjectPointers<CombinatorialChamber>& output);
-	void InduceFromAffineHyperplane(affineHyperplane& input);
-	void InduceFromFacetLowerDimension(Facet& input, CombinatorialChamberPointers& ownerComplex);
-	Facet();
-	~Facet();
-	//to be used with Method 1 only:
-	Facet* RayTrace(int EdgeIndex, root& direction,roots& directions,
-									int CurrentIndex, CombinatorialChamber* owner);
-	//to be used with Method 2 only:
-	Facet*MakeFacetFromEdgeAndDirection(CombinatorialChamber* owner,
-																			Facet* theOtherFacet, root& direction,
-																			roots & directions, int CurrentIndex,
-																			FacetPointers& FacetOutput);
-	//if no facet with teh same normal already exists
-	//the below code creates a new facet with a given normal
-	//else it returns zero.
-	bool CheckVertices(CombinatorialChamber* owner);
-	void ComputeDebugString();
-	void ComputeDebugString2();
-	void ElementToString(std::string& output);
-	bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate,
-																								roots& directions,int CurrentIndex);
-	bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
-	void PurgeRedundantBoundaries();
-//	int OwnerToIndex(CombinatorialChamber* owner);
-//	int GetChamberSign(CombinatorialChamber* owner);
-	CombinatorialChamber* TheFirstOtherChamber(CombinatorialChamber* owner);
-	bool OneOfTheOtherChambersIsNotExplored(CombinatorialChamber* owner);
-	bool DumpSplitVerticesAndCreateNewFacets( Facet* TheKillerFacet,
-																			 CombinatorialChamber* BossChamber);
-	bool HasHPositiveVertex(root& h);
-	bool HasHNonPositiveVertex(root& h);
-	void ComputeInternalPoint(root&output);
-	void init();
-	void Free();
-	void PurgeAllEdgesAndVertices();
-	bool IsExternalWithRespectToDirection
-				(root &direction, CombinatorialChamber* owner,root& TheNormal);
-	bool IsInFacetWithBoundaries(root& projection);
-	bool IsInFacetNoBoundaries(root& point);
-	void GetNormal(CombinatorialChamber* owner, root& output);
-	bool SplitFacetMethod2(CombinatorialChamber *BossChamber,
-												 CombinatorialChamber *NewPlusChamber,
-												 CombinatorialChamber *NewMinusChamber,
-												 roots& ThePlusVertices, roots& TheMinusVertices,
-												 Facet* TheKillerFacet, root& direction,
-												 CombinatorialChamberPointers* PossibleBogusNeighbors,
-												 FacetPointers* PossibleBogusWalls);
-	bool SplitFacetFindVertices(Facet* TheKillerFacet, CombinatorialChamber* owner);
-	bool SplitVerticesAndCreateNewFacets(CombinatorialChamber* NewPlusChamber,
-																			 CombinatorialChamber* NewMinusChamber, Facet* TheKillerFacet,
-																			 CombinatorialChamber* BossChamber);
-	void ProjectOnto(root& point, root& output);
-	void Assign(const Facet& right);
-	inline void operator=(const Facet& right){this->Assign(right);};
-};
-
-
-class FacetPointers: public ListObjectPointers<Facet>
-{
-public:
-	std::string DebugString;
-	hashedRoots theNormals;
-	Facet* NormalizeRootAndGetFacetCreateNewIfNeeded(root& normal)
-	{	Facet* tempFacet= this->NormalizeRootAndGetFacetDontCreateNew(normal);
-		if (tempFacet!=0)
-			return tempFacet;
-		else
-			return this->NormalizeRootAndGetFacetCreateNewDontCheckExistence(normal);
-	};
-	Facet* NormalizeRootAndGetFacetDontCreateNew(root& normal);
-	Facet* NormalizeRootAndGetFacetCreateNewDontCheckExistence(root& normal);
-	void ComputeHashedRootsAndScaleNormalsProperly();
-	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(DebugString);};
-	void ConvertToAffineAndProjectivize
-		(CombinatorialChamberPointers& input, CombinatorialChamberPointers& ownerComplex);
-	void LabelFacetIndicesProperly();
-};
 
 class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
 {
@@ -1993,14 +1891,13 @@ public:
 	int FirstNonExploredIndex;
 	unsigned char AmbientDimension;
 	std::string DebugString;
-	FacetPointers theHyperplanes;
-	FacetPointers NewHyperplanesToSliceWith;
+	hashedRoots theHyperplanes;
+	roots NewHyperplanesToSliceWith;
 	affineHyperplanes theWeylGroupAffineHyperplaneImages;
 	root IndicatorRoot;
 	//QuasiPolynomials* ThePolys;
 	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
 	CombinatorialChamber* NextChamberToSlice;
-	CombinatorialChamber* LastComputedChamber;
 	roots StartingCrossSectionNormals;
 	roots StartingCrossSectionAffinePoints;
 	static const int MaxNumHeaps=5000;
@@ -2013,7 +1910,7 @@ public:
 	static std::fstream TheBigDump;
 	static root PositiveLinearFunctional;
 	static bool PrintLastChamberOnly;
-	static bool AnErrorHasOcurredTimeToPanic;
+	static bool flagAnErrorHasOcurredTimeToPanic;
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
 	void SliceTheEuclideanSpace(roots& directions,int& index, int rank,root& IndicatorRoot);
@@ -2031,7 +1928,7 @@ public:
 	void MakeStartingChambers(roots& directions, root& IndicatorRoot);
 	void ComputeNextIndexToSlice(root& direction);
 	void ComputeVerticesFromNormals();
-	void SliceWithAWall(Facet*TheKillerFacet);
+	void SliceWithAWall(root& TheKillerFacetNormal);
 	void LabelAllUnexplored();
 	void KillNextChamberToSlice();
 	void initThePolys();
@@ -2042,7 +1939,7 @@ public:
 								roots& directions, int directionIndex,root& ChamberIndicator);
 	static void drawFacetVerticesMethod2(DrawingVariables& TDV,
 														  roots& r, roots& directions, int ChamberIndex,
-															Facet* TheFacet, int DrawingStyle, int DrawingStyleDashes);
+															WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes);
 	bool TestPossibleIndexToSlice(root&direction, int index);
 	CombinatorialChamberPointers();
 	~CombinatorialChamberPointers();
@@ -4864,7 +4761,8 @@ public:
 	CombinatorialChamberPointers theChambers;
 	Rational Value;
 	std::string ValueString;
-	intRoot ValueRoot;
+	intRoot ValueRoot;\
+	int NextDirectionIndex;
 	roots VPVectors;
 	int NumAffineHyperplanesProcessed;
 	bool AllowRepaint;

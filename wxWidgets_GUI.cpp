@@ -586,7 +586,7 @@ guiMainWindow::guiMainWindow()
 	this->CheckBox2CheckSums->SetValue(true);
 	this->CheckBox3ComputeChambers->SetValue(true);
 	this->CheckBox4ChamberLabels->SetValue(true);
-	this->CheckBox5InvisibleChambers->SetValue(false);
+	this->CheckBox5InvisibleChambers->SetValue(true);
 	this->CheckBox6Dashes->SetValue(true);
 	this->theComputationSetup.ComputationInProgress=false;
 	this->theComputationSetup.AllowRepaint=true;
@@ -613,8 +613,7 @@ guiMainWindow::guiMainWindow()
 	this->Canvas1->ClickToleranceY=10;
 	this->WorkThread1.CriticalSectionPauseButtonEntered=false;
 	this->WorkThread1.CriticalSectionWorkThreadEntered=false;
-	TDV.centerX=150;
-	TDV.centerY=200;
+	TDV.initDrawingVariables(200,250);
 	//this->Button3Custom->Disable();
 	this->wxProgressReportEvent.SetId(this->GetId());
 	this->wxProgressReportEvent.SetEventObject(this);
@@ -1023,6 +1022,9 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 	this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
 	this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
 			!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
+	TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
+	TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
+	TDV.DrawDashes = this->CheckBox6Dashes->GetValue();	
 	if (this->theComputationSetup.UsingCustomVectors)
 	{	root::AmbientDimension= this->Spin1Dim->GetValue();
 		this->theComputationSetup.VPVectors.size=0;

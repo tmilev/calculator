@@ -316,6 +316,7 @@ public:
 	int ContainsObject(const Object& o);
 //	inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1;};
 	int SizeWithoutObjects();
+	Object& LastObject();
 	void ReleaseMemory();
 	void operator=(ListBasicObjects<Object>& right){this->CopyFromBase(right);};
 	static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
@@ -1387,6 +1388,11 @@ bool  ListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObject(const Object&
 		return false;
 	this->AddObjectOnTop(o);
 	return true;
+}
+
+template <class Object>
+Object& ListBasicObjects<Object>::LastObject()
+{ return this->TheObjects[this->size-1];
 }
 
 template <class Object>

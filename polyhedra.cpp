@@ -263,7 +263,7 @@ int RankGlobal;
 roots InputRoots;
 CombinatorialChamberPointers TheBigOutput;
 //FacetPointers TheBigFacetOutput;
-DrawingVariables TDV(140,400);
+DrawingVariables TDV(200,400);
 bool QuasiNumber::flagAnErrorHasOccurredTimeToPanic=false;
 bool IntegerPoly::flagAnErrorHasOccurredTimeToPanic=false;
 root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
@@ -350,10 +350,8 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	this->Selected=-2;
 	this->textX=0;
 	this->textY=15;
-	if(cX1!=-1 && cY1!=-1)
-	{	this->centerX= (double) cX1;//(double(X2)-double(X1));
-		this->centerY= (double) cY1;
-	}
+	this->centerX= (double) cX1;//(double(X2)-double(X1));
+	this->centerY= (double) cY1;
 	this->scale= 1.9;
 //	Projections[0][0]=(0+50)*tempI;
 //	Projections[0][1]=(0-50)*tempI;
@@ -460,14 +458,15 @@ void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output)
 void ComputationSetup::oneChamberSlice()
 {	this->AllowRepaint=false;
 	if (!this->flagSuperimposingComplexes)
-	{	::initDLL(this->WeylGroupIndex);
-		::InputRoots.CopyFromBase(this->VPVectors);
+	{	::InputRoots.CopyFromBase(this->VPVectors);
 		if (this->NextDirectionIndex==0)
-		{ this->NextDirectionIndex=root::AmbientDimension-1;
+		{ root::AmbientDimension= this->WeylGroupIndex;
+			this->theChambers.AmbientDimension= root::AmbientDimension;
+			this->NextDirectionIndex=root::AmbientDimension-1;
 		}
-		this->theChambers.OneSlice(::InputRoots,::NextDirectionIndex,root::AmbientDimension,
+		::TheBigOutput.OneSlice(::InputRoots,this->NextDirectionIndex,root::AmbientDimension,
 															this->thePartialFraction.IndicatorRoot);
-		::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
+	//	::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 	}
 	/*else
 	{	if (!this->flagComputationPartiallyDoneDontInit)
@@ -690,17 +689,28 @@ void CombinatorialChamberPointers::drawOutput(DrawingVariables& TDV,
 	//int NumTrueChambers2=0;
 	int NumZeroChambers=0;
 	for (int j=0; j<output.size;j++)
-	{ if (!output.TheObjects[j]->HasZeroPoly())
-	  {NumTrueChambers++;}else{NumZeroChambers++;}
-	}
+		if (!output.TheObjects[j]->HasZeroPoly())
+			NumTrueChambers++;
+		else
+			NumZeroChambers++;
+	if (CombinatorialChamberPointers::flagAnErrorHasOcurredTimeToPanic)
+		output.ComputeDebugString();
 	std::string tempS;
-	std::stringstream out,out1,out3;
+	std::stringstream out,out1,out3, out2;
 	out<<"#Drawn chambers: "<<NumTrueChambers;
 	tempS=out.str();
 	drawtext(TDV.textX,TDV.textY, tempS.c_str(), tempS.length(),TDV.TextColor);
 	out1<<"#Zero chambers: "<< NumZeroChambers;
 	tempS=out1.str();
 	drawtext(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
+	out2<<"#Next chamber: ";
+	if (output.NextChamberToSlice!=0)
+	{	if (output.NextChamberToSlice->flagHasZeroPolynomial)
+			out2 << "i"; else out2 <<"c";
+		out2 << output.NextChamberToSlice->DisplayNumber;
+	} 
+	tempS=out2.str();
+	drawtext(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
 	//int NumTrueChambers=0;
 	//int NumTrueChambers2=0;
 	//int NumZeroChambers=0;
@@ -731,33 +741,25 @@ void CombinatorialChamberPointers::drawOutput(DrawingVariables& TDV,
 			if (TDV.DrawChamberIndices)
 			{	if ((!hasZeroPoly)||(TDV.DrawingInvisibles))
 				{	root tempRoot;
-					if (CombinatorialChamber::MethodUsed==1)
-						output.TheObjects[j]->ComputeInternalPointMethod1(tempRoot);
-					if (CombinatorialChamber::MethodUsed==2)
-						output.TheObjects[j]->ComputeInternalPointMethod2(tempRoot);
+					output.TheObjects[j]->ComputeInternalPointMethod2(tempRoot);
 					root Proj;
 					ProjectOnToHyperPlaneGraphics(tempRoot,Proj,directions);
 					double tempX, tempY;
 					GetCoordsForDrawing(TDV,Proj,tempX,tempY);
 					std::stringstream out; std::string tempS;
 					if (TDV.DisplayingChamberCreationNumbers)
-					{	out<<output.TheObjects[j]->CreationNumber;
-					}
+						out<<output.TheObjects[j]->CreationNumber;
 					else
-					{ out<<output.TheObjects[j]->DisplayNumber;
-					}
+						out<<output.TheObjects[j]->DisplayNumber;
 					tempS=out.str();
 					drawtext(tempX-7,tempY-7, tempS.c_str(), tempS.length(),color);
 				}
 			}
-			if(CombinatorialChamber::MethodUsed==2)
-			{ for (int i =0;i< output.TheObjects[j]->Externalwalls.size;i++)
-				{	CombinatorialChamberPointers::drawFacetVerticesMethod2
-						(	TDV,output.TheObjects[j]->AllVertices,directions,j,
-							output.TheObjects[j]->Externalwalls.TheObjects[i], 
-							DrawingStyle,DrawingStyleDashes);
-		//			output.TheObjects[j]->ComputeDebugString();
-				}
+			for (int i =0;i< output.TheObjects[j]->Externalwalls.size;i++)
+			{	CombinatorialChamberPointers::drawFacetVerticesMethod2
+					(	TDV,output.TheObjects[j]->AllVertices,directions,j,
+						output.TheObjects[j]->Externalwalls.TheObjects[i], 
+						DrawingStyle,DrawingStyleDashes);
 			}
 		}
 		if (output.size>0 && ChamberIndicator.size==output.AmbientDimension)
@@ -790,10 +792,6 @@ void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions)
 		{ normal.TheObjects[i].Add(ROne);}
 		else
 		{normal.TheObjects[i].Add(RMOne);}
-	}
-	for (int i=0;i<directions.size;i++)
-	{
-//		RootPlusRoot(normal,directions.TheObjects[i],normal);
 	}
 	basepoint.MakeZero();
 	basepoint.TheObjects[0].AssignInteger(1);
@@ -1342,7 +1340,6 @@ void initDLL(int rank)
 	QuasiPolynomial::PrecomputedTaus = &PrecomputedTausLocal;
 	PrecomputedQuasiPolynomialIntegrals::PreComputedBernoulli = &PreComputedBernoulliLocal;
 	//initIntegersFastAccessMemoryAllocation(TempNonPivotPoints,rank);
-	TDV.initDrawingVariables(-1,-1);
 }
 
 void exitDLL()
@@ -2851,6 +2848,8 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 				}
 				this->TheObjects[tempI]->MakeNewMutualNeighbors
 					(	plusOwner, minusOwner,this->theHyperplanes.TheObjects[root::AmbientDimension-j-1]);
+			} else
+			{ this->TheObjects[tempI]->AllVertices.LastObject().MinusRoot();
 			}
 			if (this->flagAnErrorHasOcurredTimeToPanic)
 				this->ComputeDebugString();
@@ -2869,6 +2868,8 @@ void CombinatorialChamberPointers::MakeStartingChambers(roots& directions, root&
 		for (int j=0;j<this->TheObjects[i]->Externalwalls.size;j++)
 			Accum.Add(this->TheObjects[i]->Externalwalls.TheObjects[j].normal);
 		this->StartingCrossSectionNormals.AddRoot(Accum);
+		if (this->flagAnErrorHasOcurredTimeToPanic)
+			Accum.ComputeDebugString();
 		assert(this->TheObjects[i]->ConsistencyCheck());
 	}
 	this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomial=false;
@@ -3075,7 +3076,7 @@ void WallData::ElementToString(std::string &output)
 	if (this->flagDisplayWallDetails)
 	{ for (int i=0;i<this->NeighborsAlongWall.size;i++)
 		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
-			{ if (this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero)
+			{ if (this->NeighborsAlongWall.TheObjects[i]->HasZeroPoly())
 					out <<"Invisible";
 				else
 					out <<"c";

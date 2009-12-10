@@ -302,7 +302,7 @@ public:
 	void AssignLight(const ListBasicObjectsLight<Object>& from);
 	void SetSizeExpandOnTopNoObjectInit(int theSize);
 	void SetActualSizeAtLeastExpandOnTop(int theSize);
-	void AddObjectOnBottom(Object& o);
+	void AddObjectOnBottom(const Object& o);
 	void AddObjectOnTop(const Object& o);
 	void AddListOnTop(ListBasicObjects<Object>& theList);
 	bool AddObjectOnTopNoRepetitionOfObject(const Object& o);
@@ -316,7 +316,7 @@ public:
 	int ContainsObject(const Object& o);
 //	inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1;};
 	int SizeWithoutObjects();
-	Object& LastObject();
+	inline Object* LastObject();
 	void ReleaseMemory();
 	void operator=(ListBasicObjects<Object>& right){this->CopyFromBase(right);};
 	static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
@@ -1146,6 +1146,7 @@ public:
 	void MultiplyByLargeInt(LargeInt& right);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
 	bool OurScalarProductIsPositive(root& right);
+	bool OurScalarProductIsNegative(root& right);
 	void MinusRoot();
 	void Subtract(root& r);
 	inline void Assign(const root& right)
@@ -1232,7 +1233,7 @@ public:
 	static bool flagDisplayWallDetails;
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void ElementToString(std::string& output);
-	void RemoveNeighbor(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
+	void RemoveNeighborhoodBothSides(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
 	void RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer);
 	void AddNeighbor(CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
 	void operator=(const WallData& right);
@@ -1241,6 +1242,7 @@ public:
 	void SubstituteNeighbor
 		(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
 	bool IsExternalWithRespectToDirection(root &direction);
+	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
 	bool SplitWall(CombinatorialChamber *BossChamber,
 												 CombinatorialChamber *NewPlusChamber,
 												 CombinatorialChamber *NewMinusChamber,
@@ -1276,7 +1278,6 @@ public:
 	static bool flagPrintWallDetails;
 	static bool flagMakingASingleHyperplaneSlice;
 	static ListBasicObjects<CombinatorialChamber*> NonExploredChambersHavingInternalWalls;
-	bool HasZeroPoly();
 	bool PointLiesInMoreThanOneWall(root& point);
 	//bool InduceFromAffineCone(affineCone& input);
 	bool ComputeDebugString();
@@ -1300,6 +1301,8 @@ public:
 	bool SliceInDirection(root& direction,roots& directions,
 										    int CurrentIndex, CombinatorialChamberPointers& output,
 												hashedRoots& FacetOutput);
+	//the below function will automatically add the candidate to the 
+	//list of used hyperplanes if the candidate is an allowed one
 	bool IsAValidCandidateForNormalOfAKillerFacet
 		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberPointers& owner);
 	bool HasHSignVertex(root& h,int sign);
@@ -1391,8 +1394,8 @@ bool  ListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObject(const Object&
 }
 
 template <class Object>
-Object& ListBasicObjects<Object>::LastObject()
-{ return this->TheObjects[this->size-1];
+inline Object* ListBasicObjects<Object>::LastObject()
+{ return &this->TheObjects[this->size-1];
 }
 
 template <class Object>
@@ -1431,19 +1434,16 @@ void ListBasicObjects<Object>::PopFirstOccurenceObjectSwapWithLast(Object& o)
 
 template <class Object>
 void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
-{
-	this->SetActualSizeAtLeastExpandOnTop(theSize);
+{	this->SetActualSizeAtLeastExpandOnTop(theSize);
 	size=theSize;
 }
 
 template <class Object>
 void ListBasicObjects<Object>::PopIndexShiftUp(int index)
-{
-	if (size==0){return;}
+{	if (size==0){return;}
 	this->size--;
 	for (int i=index;i>=1;i--)
-	{
-		this->TheObjects[i]=this->TheObjects[i-1];
+	{	this->TheObjects[i]=this->TheObjects[i-1];
 	}
 	this->TheObjects++;
 	IndexOfVirtualZero++;
@@ -1511,11 +1511,9 @@ void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::AddObjectOnBottom(Object& o)
-{
-	if (this->IndexOfVirtualZero==0)
-	{
-		this->ExpandArrayOnBottom(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
+void ListBasicObjects<Object>::AddObjectOnBottom(const Object& o)
+{	if (this->IndexOfVirtualZero==0)
+	{	this->ExpandArrayOnBottom(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
 	}
 	this->IndexOfVirtualZero--;
 	this->TheObjects--;
@@ -1795,13 +1793,14 @@ void ListObjectPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
 	}
 };
 
-class rootsPointersKillOnExit: public ListObjectPointersKillOnExit<roots>
+class rootsCollection: public ListBasicObjects<roots>
 {
 public:
 	std::string DebugString;
 	void ComputeDebugString();
 	void Average(root& output, int Number);
-	void ResetCounters(int Number);
+	void ResetCounters();
+	~rootsCollection(){};
 };
 
 class hashedRoots: public HashedListBasicObjects<root>
@@ -1817,7 +1816,7 @@ class Cone : public roots
 { //The roots are the normals to the walls of the cone
 public:
 	void ComputeFromDirections(roots& directions);
-	bool IsSurelyOutsideCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
+	bool IsSurelyOutsideCone(rootsCollection& TheVertices, int NumrootsLists);
 	bool IsInCone(root& r);
 	bool SeparatesPoints(root& point1, root& point2);
 //	int HashFunction();
@@ -1893,7 +1892,6 @@ public:
 class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
 {
 public:
-	int NextChamberToSliceIndexInPreferredNextChambers;
 	int FirstNonExploredIndex;
 	unsigned char AmbientDimension;
 	std::string DebugString;
@@ -1902,8 +1900,8 @@ public:
 	affineHyperplanes theWeylGroupAffineHyperplaneImages;
 	root IndicatorRoot;
 	//QuasiPolynomials* ThePolys;
-	ListBasicObjects<CombinatorialChamber*> PreferredNextChambers;
-	CombinatorialChamber* NextChamberToSlice;
+	ListBasicObjects<int> PreferredNextChambers;
+	int indexNextChamberToSlice;
 	roots StartingCrossSectionNormals;
 	roots StartingCrossSectionAffinePoints;
 	static const int MaxNumHeaps=5000;
@@ -1920,7 +1918,7 @@ public:
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
 	void SliceTheEuclideanSpace(roots& directions,int& index, int rank,root& IndicatorRoot);
-	static bool IsSurelyOutsideGlobalCone(ListObjectPointers<roots>& TheVertices, int NumrootsLists);
+	static bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices, int NumrootsLists);
 	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberPointers& input);
@@ -1935,10 +1933,10 @@ public:
 	void ComputeNextIndexToSlice(root& direction);
 	void ComputeVerticesFromNormals();
 	void SliceWithAWall(root& TheKillerFacetNormal);
+	void AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber);
 	void LabelAllUnexplored();
-	void KillNextChamberToSlice();
-	void initThePolys();
 	void DumpAll();
+	void PurgeZeroPointers();
 	void PrintThePolys(std::string& output);
 	void ComputeGlobalCone(roots& directions);
 	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
@@ -2791,14 +2789,14 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::initNoDegreesInit(short nv)
 { if(this->NumVariables!=nv)
 	{	this->NumVariables=nv;
-		delete [] degrees;
-		degrees= new short[this->NumVariables];
+		delete [] this->degrees;
+		this->degrees= new short[this->NumVariables];
 	}
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
 Monomial<ElementOfCommutativeRingWithIdentity>::~Monomial()
-{	delete [] degrees;
+{	delete [] this->degrees;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4767,7 +4765,7 @@ public:
 	CombinatorialChamberPointers theChambers;
 	Rational Value;
 	std::string ValueString;
-	intRoot ValueRoot;\
+	intRoot ValueRoot;
 	int NextDirectionIndex;
 	roots VPVectors;
 	int NumAffineHyperplanesProcessed;
@@ -4792,6 +4790,7 @@ public:
 	void EvaluatePoly();
 	void Run();
 	void oneChamberSlice();
+	void oneIncrement();
 	void WriteToFilePFdecomposition(std::fstream& output);
 	ComputationSetup();
 };

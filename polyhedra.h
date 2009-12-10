@@ -75,7 +75,7 @@ class hashedRoots;
 class PrecomputedTauknPointersKillOnExit;
 class QuasiPolynomial;
 class VertexSelectionPointers;
-class CombinatorialChamberPointers;
+class CombinatorialChamberContainer;
 class CompositeComplexQN;
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial;
@@ -1244,12 +1244,12 @@ public:
 	bool IsExternalWithRespectToDirection(root &direction);
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
 	bool SplitWall(CombinatorialChamber *BossChamber,
-												 CombinatorialChamber *NewPlusChamber,
-												 CombinatorialChamber *NewMinusChamber,
-												 roots& ThePlusVertices, roots& TheMinusVertices,
-												 root& TheKillerFacet, root& direction,
-												 CombinatorialChamberPointers* PossibleBogusNeighbors,
-												 ListBasicObjects<WallData*>* PossibleBogusWalls);
+									CombinatorialChamber *NewPlusChamber,
+									CombinatorialChamber *NewMinusChamber,
+									roots& ThePlusVertices, roots& TheMinusVertices,
+									root& TheKillerFacet, root& direction,
+									ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors,
+									ListBasicObjects<WallData*>* PossibleBogusWalls);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 };
 
@@ -1286,25 +1286,25 @@ public:
 	bool ConsistencyCheck();
 	//bool FacetIsInternal(Facet* f);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
-	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberPointers& output,
+	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
 		                       root& direction);
 	bool IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor);
-	void ComputeVerticesFromNormals(CombinatorialChamberPointers& owner);
+	void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner);
 	bool PointIsInChamber(root&point);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
-	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberPointers& owner);
+	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberContainer& owner);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	bool LinearAlgebraForVertexComputation
 				(Selection& theSelection, root& output);
 	//returns false if the vectors were linearly dependent
 	bool SliceInDirection(root& direction,roots& directions,
-										    int CurrentIndex, CombinatorialChamberPointers& output,
+										    int CurrentIndex, CombinatorialChamberContainer& output,
 												hashedRoots& FacetOutput);
 	//the below function will automatically add the candidate to the 
 	//list of used hyperplanes if the candidate is an allowed one
 	bool IsAValidCandidateForNormalOfAKillerFacet
-		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberPointers& owner);
+		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner);
 	bool HasHSignVertex(root& h,int sign);
 	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,
 																	Selection &SelectionStartSimplex,
@@ -1312,13 +1312,13 @@ public:
 	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction);
 	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
-		(CombinatorialChamber& input,CombinatorialChamberPointers& owner);
+		(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
 	void ComputeInternalPointMethod1(root& InternalPoint);
 	void ComputeInternalPointMethod2(root& InternalPoint);
 	void MakeNewMutualNeighbors
 		(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
 	bool TestPossibilityToSlice(root& direction);
-	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberPointers& owner,
+	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner,
 																			root& direction,
 																			roots & directions, int CurrentIndex,
 																			root& outputNormal);
@@ -1873,7 +1873,7 @@ class affineCones: public HashedListBasicObjects<affineCone>
 {
 public:
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
-	void ProjectFromCombinatorialChambers(CombinatorialChamberPointers& input);
+	void ProjectFromCombinatorialChambers(CombinatorialChamberContainer& input);
 };
 
 class simplicialCones : public ListBasicObjects<Cone>
@@ -1889,7 +1889,7 @@ public:
 };
 
 
-class CombinatorialChamberPointers: public ListObjectPointers<CombinatorialChamber>
+class CombinatorialChamberContainer: public ListObjectPointers<CombinatorialChamber>
 {
 public:
 	int FirstNonExploredIndex;
@@ -1921,9 +1921,9 @@ public:
 	static bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices, int NumrootsLists);
 	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
-  void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberPointers& input);
+  void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input);
   void MakeExtraProjectivePlane();
-  void WireChamberAdjacencyInfo(CombinatorialChamberPointers& input);
+  void WireChamberAdjacencyInfo(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
@@ -1939,14 +1939,14 @@ public:
 	void PurgeZeroPointers();
 	void PrintThePolys(std::string& output);
 	void ComputeGlobalCone(roots& directions);
-	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberPointers& output,
+	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberContainer& output,
 								roots& directions, int directionIndex,root& ChamberIndicator);
 	static void drawFacetVerticesMethod2(DrawingVariables& TDV,
 														  roots& r, roots& directions, int ChamberIndex,
 															WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes);
 	bool TestPossibleIndexToSlice(root&direction, int index);
-	CombinatorialChamberPointers();
-	~CombinatorialChamberPointers();
+	CombinatorialChamberContainer();
+	~CombinatorialChamberContainer();
 };
 
 
@@ -4762,7 +4762,7 @@ struct ComputationSetup
 public:
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
-	CombinatorialChamberPointers theChambers;
+	CombinatorialChamberContainer theChambers;
 	Rational Value;
 	std::string ValueString;
 	intRoot ValueRoot;

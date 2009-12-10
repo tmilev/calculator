@@ -45,7 +45,7 @@ extern DrawingVariables TDV;
 extern int NextDirectionIndex;
 extern int RankGlobal;
 extern roots InputRoots;
-extern CombinatorialChamberPointers TheBigOutput;
+extern CombinatorialChamberContainer TheBigOutput;
 
 class guiMainWindow;
 class wxDialogOutput;
@@ -775,7 +775,7 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 	{	root::AmbientDimension= TheBigOutput.AmbientDimension;
 		dc.SetBackground(MainWindow1->GetBackgroundColour());
 		dc.DrawRectangle(wxPoint(0,0),this->GetSize());
-		::CombinatorialChamberPointers::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,TheBigOutput.IndicatorRoot);
+		::CombinatorialChamberContainer::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,TheBigOutput.IndicatorRoot);
 	}
 }
 
@@ -862,12 +862,14 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 { this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.oneChamberSlice();	
+	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();
 }
 
 void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.oneIncrement();	
+	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();
 }
 
@@ -1211,10 +1213,12 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 { {	wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
 		MainWindow1->Text1Output->SetValue(tempWS);
 	}
-	{	if (this->theComputationSetup.flagDisplayingPartialFractions)
+	{	int old= this->Text3PartialFractions->GetLastPosition();
+		if (this->theComputationSetup.flagDisplayingPartialFractions)
 		{	wxString tempWS(MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(),
 										wxConvUTF8);
 			MainWindow1->Text3PartialFractions->SetValue(tempWS);
+
 		} else
 		{ if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
 			{ wxString tempWS(::TheBigOutput.DebugString.c_str(),
@@ -1222,6 +1226,7 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 				MainWindow1->Text3PartialFractions->SetValue(tempWS);
 			}
 		}
+		this->Text3PartialFractions->ShowPosition(old);
 	}
 }
 

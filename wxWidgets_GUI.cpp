@@ -581,7 +581,7 @@ guiMainWindow::guiMainWindow()
 	this->ListBox1WeylGroup->Append(wxT("E7"));
 	this->ListBox1WeylGroup->Append(wxT("E8"));
 	this->ListBox1WeylGroup->Append(wxT("F4"));
-	this->ListBox1WeylGroup->SetSelection(0);
+	this->ListBox1WeylGroup->SetSelection(1);
 	this->CheckBox1ComputePFs->SetValue(true);
 	this->CheckBox2CheckSums->SetValue(true);
 	this->CheckBox3ComputeChambers->SetValue(true);
@@ -591,6 +591,8 @@ guiMainWindow::guiMainWindow()
 	this->theComputationSetup.ComputationInProgress=false;
 	this->theComputationSetup.AllowRepaint=true;
 	this->theComputationSetup.UsingCustomVectors=false;
+	//this->Button7OneDirectionIncrement->Disable();
+	this->Button8FullChopping->Disable();
 	//////////////////////////////////////////
 	/*this->theComputationSetup.UsingCustomVectors=true;
 	root::AmbientDimension=8;
@@ -864,7 +866,9 @@ void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 }
 
 void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
-{
+{	this->ReadVPVectorsAndOptions();
+	this->theComputationSetup.oneIncrement();	
+	this->Refresh();
 }
 
 void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)

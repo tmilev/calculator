@@ -1016,7 +1016,6 @@ void guiMainWindow::initTableFromVPVectors()
 
 void guiMainWindow::OnExit(wxCloseEvent &event)
 { this->Destroy();
-	::exitDLL();
 }
 
 

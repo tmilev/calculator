@@ -1352,10 +1352,7 @@ void MatrixLargeRational::ComputeDebugString()
 }
 
 void initDLL(int rank)
-{ TheBigOutput.PreferredNextChambers.size=0;
-	TheBigOutput.indexNextChamberToSlice=-1;
-	TheBigOutput.size=0;
-	root::AmbientDimension =(unsigned char)rank;
+{	root::AmbientDimension =(unsigned char)rank;
 	CQNOne.MakeConst(ROne,root::AmbientDimension);
 	CQNZero.MakeConst(RZero,root::AmbientDimension);
 	CQNMOne.MakeConst(RMOne,root::AmbientDimension);
@@ -1377,11 +1374,6 @@ void initDLL(int rank)
 		("C:/BigDump.txt",	std::fstream::in | std::fstream::out);
 	//NonPivotPoints.init(rank);
 	RankGlobal=rank;
-}
-
-void exitDLL()
-{	QuasiPolynomial::PrecomputedTaus=0;
-	CombinatorialChamberContainer::TheBigDump.close();
 }
 
 int MathRoutines::lcm(int a, int b)
@@ -2801,8 +2793,6 @@ void CombinatorialChamberContainer::LabelChamberIndicesProperly()
 CombinatorialChamberContainer::CombinatorialChamberContainer()
 {	this->FirstNonExploredIndex=0;
 	this->indexNextChamberToSlice=-1;
-	//this->ThePolys= 0;
-	//this->ThePolys= new QuasiPolynomials;
 }
 
 CombinatorialChamberContainer::~CombinatorialChamberContainer()
@@ -2834,6 +2824,8 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 	{	PrecomputedQuasiPolynomialIntegrals::PreComputedBernoulli
 			->ComputeDiscreteIntegrationUpTo(15);
 	}
+	this->PreferredNextChambers.ReleaseMemory();
+	this->KillAllElements();
 	CombinatorialChamber::NonExploredChambersHavingInternalWalls.size=0;
 	CombinatorialChamberContainer::ComputeGlobalCone(directions);
 	Selection theSelection;

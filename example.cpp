@@ -16,7 +16,7 @@ public:
 
 int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
 { int Dimension=2, NumVectors=4;
-	::initDLL(Dimension);
+	root::AmbientDimension= (unsigned char) Dimension;
 	ToBeSplit.SetSizeExpandOnTopNoObjectInit(NumVectors);
 	IndicatorRoot.InitFromIntegers(405,603,0,0,0);
 	ToBeSplit.TheObjects[0].initFromInt(2,3,0,0,0);
@@ -87,7 +87,7 @@ int main(void)
 
 
 void ExampleComputation::RunThomasExample()
-{ ::initDLL(12);
+{ root::AmbientDimension= 12;
 	PolyFormatLocal.MakeAlphabetxi();
 	intRoots exampleRoots;
 	exampleRoots.SetSizeExpandOnTopNoObjectInit(16);

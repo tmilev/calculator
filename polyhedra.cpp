@@ -122,7 +122,7 @@ bool CombinatorialChamber::DisplayingGraphics=true;
 bool CombinatorialChamberContainer::PrintLastChamberOnly=true;
 bool CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic=true;
 bool CombinatorialChamber::ComputingPolys=false;
-bool CombinatorialChamber::flagMakingASingleHyperplaneSlice=false;
+bool CombinatorialChamber::flagMakingASingleHyperplaneSlice=true;
 bool CombinatorialChamber::flagDisregardDirectionWhenPropagatingInternalWalls=false;
 bool CombinatorialChamber::flagIncludeVerticesInDebugString=true;
 ListBasicObjects<CombinatorialChamber*> CombinatorialChamber::NonExploredChambersHavingInternalWalls;
@@ -493,14 +493,14 @@ void ComputationSetup::oneChamberSlice()
 			this->theChambers.AmbientDimension= root::AmbientDimension;
 			this->NextDirectionIndex=root::AmbientDimension-1;
 		}
-		::TheBigOutput.OneSlice(::InputRoots,this->NextDirectionIndex,root::AmbientDimension,
+		this->theChambers.OneSlice(::InputRoots,this->NextDirectionIndex,root::AmbientDimension,
 															this->thePartialFraction.IndicatorRoot);
-	//	::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
+		::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 	}
-	/*else
+	else
 	{	if (!this->flagComputationPartiallyDoneDontInit)
 		{ this->NumAffineHyperplanesProcessed=0;
-			::initDLL(this->WeylGroupIndex);
+			root::AmbientDimension=this->WeylGroupIndex;
 			::InputRoots.CopyFromBase(this->VPVectors);
 			::NextDirectionIndex=root::AmbientDimension-1;
 			this->theChambers.SliceTheEuclideanSpace
@@ -517,7 +517,7 @@ void ComputationSetup::oneChamberSlice()
 				root tempRoot; tempRoot.MakeZero();
 				for (int j=1;j<tempWeyl.size;j++)
 				{	tempH.MakeFromNormalAndPoint
-						(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]->normal);
+						(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]);
 					tempH.ComputeDebugString();
 					tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
 					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
@@ -532,10 +532,9 @@ void ComputationSetup::oneChamberSlice()
 				tempRoot.MakeNormalInProjectivizationFromAffineHyperplane
 					(theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
 				tempRoot.ComputeDebugString();
-				this->theChambers.NewHyperplanesToSliceWith
-					.NormalizeRootAndGetFacetCreateNewIfNeeded(tempRoot);
+				tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+				this->theChambers.NewHyperplanesToSliceWith.AddRoot(tempRoot);
 			}
-			this->theChambers.NewHyperplanesToSliceWith.theNormals.ComputeDebugString();
 			this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
 			::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 		}
@@ -546,10 +545,9 @@ void ComputationSetup::oneChamberSlice()
 				this->NumAffineHyperplanesProcessed++;
 			}
 		}
-	}*/
+	}
 	this->flagComputationPartiallyDoneDontInit=true;
 	this->AllowRepaint=true;
-	
 }
 
 void ComputationSetup::Run()
@@ -561,7 +559,7 @@ void ComputationSetup::Run()
 	//this->thePartialFraction.flagSplitTestModeNoNumerators=true;
 	this->AllowRepaint=false;
 	partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
-	::initDLL(this->WeylGroupIndex);
+	root::AmbientDimension=(unsigned char)this->WeylGroupIndex;
 	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
@@ -1349,31 +1347,6 @@ void MatrixLargeRational::NonPivotPointsToEigenVector(Selection& TheNonPivotPoin
 
 void MatrixLargeRational::ComputeDebugString()
 { this->ElementToSting(this->DebugString);
-}
-
-void initDLL(int rank)
-{	root::AmbientDimension =(unsigned char)rank;
-	CQNOne.MakeConst(ROne,root::AmbientDimension);
-	CQNZero.MakeConst(RZero,root::AmbientDimension);
-	CQNMOne.MakeConst(RMOne,root::AmbientDimension);
-
-	QNZero.MakeConst( RZero,root::AmbientDimension);
-	QNOne.MakeConst ( ROne, root::AmbientDimension);
-	QNMOne.MakeConst( RMOne,root::AmbientDimension);
-
-	ZeroRoot.MakeZero();
-
-	ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1000;
-	CombinatorialChamberContainer::DefragSpacing=500;
-	CombinatorialChamberContainer::NumTotalCreatedCombinatorialChambersAtLastDefrag=0;
-	CombinatorialChamberContainer::LastReportedMemoryUse=0;
-
-	NextDirectionIndex=rank-1;
-	CombinatorialChamber::MethodUsed=2;
-	CombinatorialChamberContainer::TheBigDump.open
-		("C:/BigDump.txt",	std::fstream::in | std::fstream::out);
-	//NonPivotPoints.init(rank);
-	RankGlobal=rank;
 }
 
 int MathRoutines::lcm(int a, int b)
@@ -2791,9 +2764,19 @@ void CombinatorialChamberContainer::LabelChamberIndicesProperly()
 }
 
 CombinatorialChamberContainer::CombinatorialChamberContainer()
-{	this->FirstNonExploredIndex=0;
-	this->indexNextChamberToSlice=-1;
+{	this->init();
 }
+
+void CombinatorialChamberContainer::init()
+{ this->FirstNonExploredIndex=0;
+	this->indexNextChamberToSlice=-1;
+	this->NewHyperplanesToSliceWith.size=0;
+	this->theHyperplanes.ClearTheObjects();
+	this->PreferredNextChambers.ReleaseMemory();
+	this->startingCones.ReleaseMemory();
+	this->theWeylGroupAffineHyperplaneImages.size=0;
+}
+
 
 CombinatorialChamberContainer::~CombinatorialChamberContainer()
 {	Free();
@@ -11161,7 +11144,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()
 }
 
 void rootFKFTcomputation::initA2A1A1inD5()
-{	initDLL(5);
+{	root::AmbientDimension=5;
 //	int j=0;
 	intRoot tempRoot;
 	tempRoot.initFromInt(0,0,1,0,0);//eps_3-\eps_4
@@ -11219,7 +11202,7 @@ rootFKFTcomputation::rootFKFTcomputation()
 }
 
 void rootFKFTcomputation::RunA2A1A1inD5beta12221()
-{	::initDLL(5);
+{	root::AmbientDimension=5;
 	this->initA2A1A1inD5();
 //	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	if (this->useOutputFileForFinalAnswer)

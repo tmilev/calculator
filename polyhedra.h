@@ -1487,8 +1487,7 @@ void ListBasicObjects<Object>::ReleaseMemory()
 
 template <class Object>
 ListBasicObjects<Object>::~ListBasicObjects()
-{
-	delete [] TheActualObjects;
+{	delete [] TheActualObjects;
 	this->TheActualObjects=0;
 	this->TheObjects=0;
 }
@@ -1909,7 +1908,6 @@ public:
 	roots NewHyperplanesToSliceWith;
 	affineHyperplanes theWeylGroupAffineHyperplaneImages;
 	root IndicatorRoot;
-	//QuasiPolynomials* ThePolys;
 	ListBasicObjects<int> PreferredNextChambers;
 	int indexNextChamberToSlice;
 	roots StartingCrossSectionNormals;
@@ -4833,7 +4831,6 @@ public:
 	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
 };
 void initDLL(int rank);
-void exitDLL();
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
 

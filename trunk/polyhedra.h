@@ -1935,6 +1935,7 @@ public:
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void init();
 	void Free();
 	void MakeStartingChambers(roots& directions, root& IndicatorRoot);
 	void ComputeNextIndexToSlice(root& direction);
@@ -4830,7 +4831,6 @@ public:
 	static int KToTheNth(int k, int n);
 	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
 };
-void initDLL(int rank);
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
 

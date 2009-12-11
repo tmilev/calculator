@@ -292,10 +292,10 @@ void CombinatorialChamberContainer::OneSlice
 							(directions.TheObjects[index],directions,index,*this,this->theHyperplanes))
 				{	delete this->TheObjects[this->indexNextChamberToSlice];
 					this->TheObjects[this->indexNextChamberToSlice]=0;
-					if (this->flagAnErrorHasOcurredTimeToPanic)
-					{	this->ComputeDebugString();
-						this->ConsistencyCheck();
-					}
+					//if (this->flagAnErrorHasOcurredTimeToPanic)
+					//{	this->ComputeDebugString();
+					//	this->ConsistencyCheck();
+					//}
 				}
 			}
 			else
@@ -608,10 +608,14 @@ void ComputationSetup::Run()
 	{	root::AmbientDimension=this->WeylGroupIndex;
 		::InputRoots.CopyFromBase(this->VPVectors);
 		::NextDirectionIndex=root::AmbientDimension-1;
-		this->theChambers.SliceTheEuclideanSpace
+//		this->theChambers.SliceTheEuclideanSpace
 													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
 														this->thePartialFraction.IndicatorRoot);
-		this->theChambers.ComputeDebugString();
+//		this->theChambers.ComputeDebugString();
+		TheBigOutput.SliceTheEuclideanSpace
+													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
+														this->thePartialFraction.IndicatorRoot);
+		TheBigOutput.ComputeDebugString();
 	}
 	TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 	TheBigOutput.ComputeDebugString();
@@ -2338,8 +2342,8 @@ bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
 		return false;
 	}
 	else
-	{	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-			this->ComputeDebugString();
+	{	//if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+		//	this->ComputeDebugString();
 		for (int i=0;i<this->Externalwalls.size;i++)
 		{	if(this->Externalwalls.TheObjects[i].IsExternalWithRespectToDirection(direction))
 			{	if (this->flagHasZeroPolynomial)
@@ -2419,10 +2423,10 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,
 	AnErrorHasOcurred=false;
 	MinusChamberIsPermanentZero=false;
 	LocalLinearAlgebra.size=0;
-	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-	{	output.ComputeDebugString();
-		this->ConsistencyCheck();
-	}
+//	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+//	{	output.ComputeDebugString();
+//		this->ConsistencyCheck();
+//	}
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{	static bool tempBool;
 		tempBool=LocalLinearAlgebra.AddRootNoRepetition(Externalwalls.TheObjects[i].normal);
@@ -2480,10 +2484,10 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,
 	if (!CombinatorialChamberContainer::startingCones.SeparatePoints
 				( PositiveChamberInternalPoint, NegativeChamberInternalPoint,&theKillerPlaneNormal))
 		return false;
-	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-	{ LocalContainerPlusVertices.ComputeDebugString();
-		LocalContainerMinusVertices.ComputeDebugString();
-	}
+//	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+//	{ LocalContainerPlusVertices.ComputeDebugString();
+//		LocalContainerMinusVertices.ComputeDebugString();
+//	}
 	NewPlusChamber= new CombinatorialChamber;
 	NewMinusChamber= new CombinatorialChamber;
 	NewPlusChamber->flagPermanentlyZero= PlusChamberIsPermanentZero;
@@ -2508,8 +2512,8 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,
 	}
 	PossibleBogusNeighbors.size=0;
 	PossibleBogusWalls.size=0;
-	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-		this->ComputeDebugString();
+//	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+//		this->ComputeDebugString();
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{	Externalwalls.TheObjects[i].SplitWall(this,	NewPlusChamber,NewMinusChamber,
 																		LocalContainerPlusVertices.TheObjects[i],
@@ -2517,14 +2521,14 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,
 																		theKillerPlaneNormal,direction,
 																		PossibleBogusNeighbors,
 																		&PossibleBogusWalls);
-		if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-		{ NewPlusChamber->ComputeDebugString();
-			NewMinusChamber->ComputeDebugString();
-			this->ComputeDebugString();
-			NewPlusChamber->ConsistencyCheck();
-			NewMinusChamber->ConsistencyCheck();
-			output.ComputeDebugString();
-		}
+//		if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+//		{ NewPlusChamber->ComputeDebugString();
+//			NewMinusChamber->ComputeDebugString();
+//			this->ComputeDebugString();
+//			NewPlusChamber->ConsistencyCheck();
+//			NewMinusChamber->ConsistencyCheck();
+//			output.ComputeDebugString();
+//		}
 	}
 //	if (CombinatorialChamberContainer::AnErrorHasOcurredTimeToPanic)
 //	{ this->ComputeDebugString();
@@ -2534,15 +2538,15 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,
 		NewMinusChamber->InternalWalls.AddRootNoRepetition(this->InternalWalls.TheObjects[i]);
 	}
 	this->MakeNewMutualNeighbors(NewPlusChamber, NewMinusChamber,theKillerPlaneNormal);
-	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-	{	assert(NewPlusChamber->ConsistencyCheck());
-		assert(NewMinusChamber->ConsistencyCheck());
-	}
+	//if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+	//{	assert(NewPlusChamber->ConsistencyCheck());
+	//	assert(NewMinusChamber->ConsistencyCheck());
+	//}
 	for (int i=0;i<PossibleBogusNeighbors.size;i++)
-	{	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-		{	PossibleBogusWalls.TheObjects[i]->ComputeDebugString();
-			PossibleBogusNeighbors.TheObjects[i]->ComputeDebugString();
-		}	
+	{	//if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+		//{	PossibleBogusWalls.TheObjects[i]->ComputeDebugString();
+		//	PossibleBogusNeighbors.TheObjects[i]->ComputeDebugString();
+		//}	
 		if (NewPlusChamber->IsABogusNeighbor(*PossibleBogusWalls.TheObjects[i],
 			                                   PossibleBogusNeighbors.TheObjects[i]))
 		{	PossibleBogusWalls.TheObjects[i]->RemoveNeighborhoodBothSides
@@ -2577,11 +2581,11 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,
 //		CombinatorialChamberContainer::TheBigDump << NewPlusChamber->DebugString;
 //		CombinatorialChamberContainer::TheBigDump << NewMinusChamber->DebugString;
 	}
-	if (output.flagAnErrorHasOcurredTimeToPanic)
-	{	output.ComputeDebugString();
-		assert(NewPlusChamber->ConsistencyCheck());
-		assert(NewMinusChamber->ConsistencyCheck());
-	}
+	//if (output.flagAnErrorHasOcurredTimeToPanic)
+	//{	output.ComputeDebugString();
+		//assert(NewPlusChamber->ConsistencyCheck());
+		//assert(NewMinusChamber->ConsistencyCheck());
+	//}
 	return true;
 }
 
@@ -2604,10 +2608,10 @@ void CombinatorialChamber::MakeNewMutualNeighbors
 		(	NewMinusChamber->Externalwalls.LastObject());
 	NewMinusChamber->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop
 		(	NewPlusChamber->Externalwalls.LastObject());	
-	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-	{ NewPlusChamber->ComputeDebugString();
-		NewMinusChamber->ComputeDebugString();
-	}
+//	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+//	{ NewPlusChamber->ComputeDebugString();
+//		NewMinusChamber->ComputeDebugString();
+//	}
 }
 
 void CombinatorialChamberContainer::SliceWithAWall(root& TheKillerFacetNormal)
@@ -2661,8 +2665,8 @@ void CombinatorialChamberContainer::ComputeVerticesFromNormals()
 }
 
 void CombinatorialChamberContainer::ComputeNextIndexToSlice(root &direction)
-{	if (this->flagAnErrorHasOcurredTimeToPanic)
-		this->ComputeDebugString();
+{//	if (this->flagAnErrorHasOcurredTimeToPanic)
+//		this->ComputeDebugString();
 	while (this->PreferredNextChambers.size>0)
 	{ this->indexNextChamberToSlice=this->PreferredNextChambers.TheObjects[0];
 		this->PreferredNextChambers.PopIndexShiftUp(0);
@@ -2845,7 +2849,6 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 		directions.SubSelection(theSelection,TempRoots);
 		TempRoots.ComputeNormal(TempRoot);
 		TempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-		
 		this->theHyperplanes.AddObjectOnTopHash(TempRoot);
 	}
 	theSelection.initNoMemoryAllocation();
@@ -2875,16 +2878,16 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 			} else
 			{ this->TheObjects[tempI]->AllVertices.LastObject()->MinusRoot();
 			}
-			if (this->flagAnErrorHasOcurredTimeToPanic)
-				this->ComputeDebugString();
+//			if (this->flagAnErrorHasOcurredTimeToPanic)
+	//			this->ComputeDebugString();
 		}
 		root tempRoot;
 		tempRoot.Assign(directions.TheObjects[0]);
 		if (!theSelection.selected[0]) {tempRoot.MinusRoot(); }
 		this->StartingCrossSectionAffinePoints.TheObjects[tempI].Assign(tempRoot);
 		theSelection.incrementSelection();
-		if (this->flagAnErrorHasOcurredTimeToPanic)
-			this->ComputeDebugString();
+//		if (this->flagAnErrorHasOcurredTimeToPanic)
+//			this->ComputeDebugString();
 	}
 	for(int i=0;i<NumStartingChambers;i++)
 	{	this->TheObjects[i]->IndexStartingCrossSectionNormal=i;
@@ -2892,13 +2895,13 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 		for (int j=0;j<this->TheObjects[i]->Externalwalls.size;j++)
 			Accum.Add(this->TheObjects[i]->Externalwalls.TheObjects[j].normal);
 		this->StartingCrossSectionNormals.AddRoot(Accum);
-		if (this->flagAnErrorHasOcurredTimeToPanic)
-			Accum.ComputeDebugString();
+//		if (this->flagAnErrorHasOcurredTimeToPanic)
+//			Accum.ComputeDebugString();
 		assert(this->TheObjects[i]->ConsistencyCheck());
 	}
 	this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomial=false;
-	if (this->flagAnErrorHasOcurredTimeToPanic)
-		this->ComputeDebugString();
+//	if (this->flagAnErrorHasOcurredTimeToPanic)
+//		this->ComputeDebugString();
 }
 
 void Cone::ComputeFromDirections(roots& directions)
@@ -3102,10 +3105,10 @@ void WallData::ElementToString(std::string &output)
 }
 
 void WallData::RemoveNeighborhoodBothSides(CombinatorialChamber* owner, CombinatorialChamber *NeighborPointer)
-{ if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-	{	assert(this->ContainsNeighborAtMostOnce(NeighborPointer));
-		assert(owner->OwnsAWall(this));
-	}
+{ //if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+	//{	assert(this->ContainsNeighborAtMostOnce(NeighborPointer));
+	//	assert(owner->OwnsAWall(this));
+	//}
 	for (int i=0;i<this->NeighborsAlongWall.size;i++)
 	{ if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
 		{ this->NeighborsAlongWall.PopIndexSwapWithLast(i);
@@ -3191,7 +3194,7 @@ void WallData::operator =(const WallData& right)
 
 void WallData::SubstituteNeighbor
 	(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall)
-{	assert(this->ContainsNeighborAtMostOnce(oldNeighbor));
+{	//assert(this->ContainsNeighborAtMostOnce(oldNeighbor));
 	for (int i=0;i<this->NeighborsAlongWall.size;i++)
 	{ if (this->NeighborsAlongWall.TheObjects[i]==oldNeighbor)
 		{ this->NeighborsAlongWall.TheObjects[i]=newNeighbor;
@@ -3217,17 +3220,17 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 {	static bool IsPositive, IsNegative;
 	IsPositive = false;	IsNegative = false;
 	static Rational tempRat;
-	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-	{ this->ComputeDebugString();
-		for (int i=0;i<this->NeighborsAlongWall.size;i++)
-		{ root tempRoot;
-			tempRoot.Assign(this->normal);
-			tempRoot.MinusRoot(); 
-			tempRoot.ComputeDebugString();
-			this->MirrorWall.TheObjects[i]->normal.ComputeDebugString();
-			assert(tempRoot.IsEqualTo(this->MirrorWall.TheObjects[i]->normal));
-		}
-	}
+//	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+//	{ this->ComputeDebugString();
+//		for (int i=0;i<this->NeighborsAlongWall.size;i++)
+//		{ root tempRoot;
+//			tempRoot.Assign(this->normal);
+//			tempRoot.MinusRoot(); 
+//			tempRoot.ComputeDebugString();
+//			this->MirrorWall.TheObjects[i]->normal.ComputeDebugString();
+//			assert(tempRoot.IsEqualTo(this->MirrorWall.TheObjects[i]->normal));
+//		}
+//	}
 	for (int j=0;j<ThePlusVertices.size;j++)
 	{	root::RootScalarEuclideanRoot(TheKillerFacet,ThePlusVertices.TheObjects[j],tempRat);
 		if (tempRat.IsPositive()){IsPositive=true;}
@@ -3286,8 +3289,8 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 			PossibleBogusNeighbors.AddObjectOnTopNoRepetitionOfObject(this->NeighborsAlongWall.TheObjects[i]);
 			PossibleBogusWalls->AddObjectOnTopNoRepetitionOfObject(this->MirrorWall.TheObjects[i]);
 			assert(PossibleBogusNeighbors.size==PossibleBogusWalls->size);
-			if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-				NewMinusChamber->ComputeDebugString();
+//			if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
+//				NewMinusChamber->ComputeDebugString();
 			if (this->NeighborsAlongWall.TheObjects[i]!=0)
 			{	if (!this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero)
 				{	this->NeighborsAlongWall.TheObjects[i]->AddInternalWall

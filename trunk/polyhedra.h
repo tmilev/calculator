@@ -301,6 +301,7 @@ public:
 //	void AddObjectOnTop(Object o);
 	void AssignLight(const ListBasicObjectsLight<Object>& from);
 	void SetSizeExpandOnTopNoObjectInit(int theSize);
+	inline void AddObjectOnTopCreateNew();
 	void SetActualSizeAtLeastExpandOnTop(int theSize);
 	void AddObjectOnBottom(const Object& o);
 	void AddObjectOnTop(const Object& o);
@@ -1243,6 +1244,8 @@ public:
 		(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
 	bool IsExternalWithRespectToDirection(root &direction);
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
+	bool ContainsNeighborExactlyOnce(CombinatorialChamber *neighbor);
+	bool ContainsMirrorWallExactlyOnce(WallData* theWall);
 	bool SplitWall(CombinatorialChamber *BossChamber,
 									CombinatorialChamber *NewPlusChamber,
 									CombinatorialChamber *NewMinusChamber,
@@ -1250,6 +1253,7 @@ public:
 									root& TheKillerFacet, root& direction,
 									ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors,
 									ListBasicObjects<WallData*>* PossibleBogusWalls);
+	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 };
 
@@ -1315,6 +1319,7 @@ public:
 		(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
 	void ComputeInternalPointMethod1(root& InternalPoint);
 	void ComputeInternalPointMethod2(root& InternalPoint);
+	bool OwnsAWall(WallData* theWall);
 	void MakeNewMutualNeighbors
 		(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
 	bool TestPossibilityToSlice(root& direction);
@@ -1436,6 +1441,11 @@ template <class Object>
 void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
 {	this->SetActualSizeAtLeastExpandOnTop(theSize);
 	size=theSize;
+}
+
+template <class Object>
+inline void ListBasicObjects<Object>::AddObjectOnTopCreateNew()
+{	this->SetSizeExpandOnTopNoObjectInit(this->size+1);
 }
 
 template <class Object>
@@ -1928,7 +1938,6 @@ public:
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void Free();
-	bool ConsistencyCheck();
 	void MakeStartingChambers(roots& directions, root& IndicatorRoot);
 	void ComputeNextIndexToSlice(root& direction);
 	void ComputeVerticesFromNormals();
@@ -1936,6 +1945,7 @@ public:
 	void AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber);
 	void LabelAllUnexplored();
 	void DumpAll();
+	bool ConsistencyCheck();
 	void PurgeZeroPointers();
 	void PrintThePolys(std::string& output);
 	void ComputeGlobalCone(roots& directions);

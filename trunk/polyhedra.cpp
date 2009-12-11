@@ -125,8 +125,8 @@ bool CombinatorialChamber::ComputingPolys=false;
 bool CombinatorialChamber::flagMakingASingleHyperplaneSlice=true;
 bool CombinatorialChamber::flagDisregardDirectionWhenPropagatingInternalWalls=false;
 bool CombinatorialChamber::flagIncludeVerticesInDebugString=true;
-ListBasicObjects<CombinatorialChamber*> CombinatorialChamber::NonExploredChambersHavingInternalWalls;
-
+ListBasicObjects<CombinatorialChamber*> 
+	CombinatorialChamber::NonExploredChambersHavingInternalWalls;
 Cone CombinatorialChamberContainer::TheGlobalConeNormals;
 bool CombinatorialChamberContainer::flagMakingConsistencyCheck=true;
 int CombinatorialChamberContainer::NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -452,7 +452,7 @@ ComputationSetup::ComputationSetup()
 	this->flagHavingStartingExpression=true;
 	this->flagComputationIsDoneStepwise=true;
 	this->flagComputationPartiallyDoneDontInit=false;
-	this->flagSuperimposingComplexes=false;
+	this->flagSuperimposingComplexes=true;
 	this->NextDirectionIndex=0;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
@@ -3010,11 +3010,9 @@ void Cone::operator=(Cone& right)
 }
 
 void CombinatorialChamberContainer::LabelAllUnexplored()
-{
-	for (int i =0; i<size; i++)
+{	for (int i =0; i<size; i++)
 	{	if (!this->TheObjects[i]->flagPermanentlyZero)
-		{	this->TheObjects[i]->flagExplored =false;
-		}
+			this->TheObjects[i]->flagExplored =false;
 	}
 	FirstNonExploredIndex=0;
 }

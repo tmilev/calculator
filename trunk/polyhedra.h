@@ -101,6 +101,7 @@ class SubsetWithMultiplicities;
 class hashedRoots;
 class WeylGroup;
 class intRoots;
+class GlobalVariables;
 class MatrixIntTightMemoryFit;
 class QuasiPolynomials;
 template <class ElementOfCommutativeRingWithIdentity,
@@ -302,7 +303,7 @@ public:
 	void AssignLight(const ListBasicObjectsLight<Object>& from);
 	void SetSizeExpandOnTopNoObjectInit(int theSize);
 	inline void AddObjectOnTopCreateNew();
-	void SetActualSizeAtLeastExpandOnTop(int theSize);
+	void MakeActualSizeAtLeastExpandOnTop(int theSize);
 	void AddObjectOnBottom(const Object& o);
 	void AddObjectOnTop(const Object& o);
 	void AddListOnTop(ListBasicObjects<Object>& theList);
@@ -325,6 +326,19 @@ public:
 	~ListBasicObjects();
 };
 
+class GlobalVariables
+{
+public:
+
+void operator=(const GlobalVariables& right);
+};
+
+class GlobalVariablesContainer : ListBasicObjects<GlobalVariables>
+{
+public:
+
+};
+
 template <class Object>
 class ListObjectPointers: public ListBasicObjects<Object*>
 {
@@ -340,7 +354,6 @@ public:
 	void initAndCreateNewObjects(int d);
 	bool IsAnElementOf(Object* o);
 };
-
 
 class Integer
 {
@@ -490,7 +503,8 @@ public:
 	bool Invert();
 	void NullifyAll();
 	static void GaussianEliminationByRows
-	(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,Selection& outputNonPivotPoints);
+	(	Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,
+		Selection& outputNonPivotPoints);
 };
 
 class MatrixLargeRational: public Matrix<Rational>
@@ -1228,6 +1242,7 @@ class WallData
 {
 public: 
 	std::string DebugString;
+	int indexInOwnerChamber;
 	root normal;
 	ListBasicObjects<CombinatorialChamber*> NeighborsAlongWall;
 	ListBasicObjects<WallData*> MirrorWall;
@@ -1289,6 +1304,7 @@ public:
 	void ChamberNumberToStringStream(std::stringstream& out);
 	bool ConsistencyCheck();
 	//bool FacetIsInternal(Facet* f);
+	void LabelWallIndicesProperly();
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
 	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
 		                       root& direction);
@@ -1314,7 +1330,7 @@ public:
 																	Selection &SelectionStartSimplex,
 																	MatrixLargeRational& outputColumn);
 	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction);
-	void InduceFromAffineConeAddExtraDimension(affineCone& input);
+//	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
 	void ComputeInternalPointMethod1(root& InternalPoint);
@@ -1327,6 +1343,9 @@ public:
 																			root& direction,
 																			roots & directions, int CurrentIndex,
 																			root& outputNormal);
+	void WireChamberAndWallAdjacencyData
+		(	CombinatorialChamberContainer &owner, 
+			CombinatorialChamber* input);
 	void Assign(const  CombinatorialChamber& right);
 	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
 	CombinatorialChamber();
@@ -1420,7 +1439,7 @@ void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From
 }
 
 template <class Object>
-void ListBasicObjects<Object>::SetActualSizeAtLeastExpandOnTop(int theSize)
+void ListBasicObjects<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
 {	if (!(this->ActualSize>= this->IndexOfVirtualZero+theSize))
 	{	ParallelComputing::SafePoint();
 		this->ExpandArrayOnTop( this->IndexOfVirtualZero+theSize- this->ActualSize);
@@ -1439,7 +1458,7 @@ void ListBasicObjects<Object>::PopFirstOccurenceObjectSwapWithLast(Object& o)
 
 template <class Object>
 void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
-{	this->SetActualSizeAtLeastExpandOnTop(theSize);
+{	this->MakeActualSizeAtLeastExpandOnTop(theSize);
 	size=theSize;
 }
 
@@ -1555,6 +1574,7 @@ public:
 	void initHash();
 	void ClearTheObjects();
 	void AddObjectOnTopHash(Object& o);
+	void AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
 	void PopIndexSwapWithLastHash(int index);
 	//the below returns -1 if it doesn't contain the object,
 	//else returns the object's index
@@ -1646,6 +1666,13 @@ void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
 	if (hashIndex<0) {hashIndex+=this->HashSize;}
 	this->TheHashedArrays[hashIndex].AddObjectOnTop(this->size);
 	this->AddObjectOnTop(o);
+}
+
+template <class Object>
+void HashedListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object &o)
+{ if (this->ContainsObjectHash(o))
+		return;
+	this->AddObjectOnTopHash(o);
 }
 
 template <class Object>
@@ -1931,7 +1958,7 @@ public:
 	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input);
   void MakeExtraProjectivePlane();
-  void WireChamberAdjacencyInfo(CombinatorialChamberContainer& input);
+  void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
@@ -2648,7 +2675,7 @@ void MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
 			GeneratorsOfAlgebra,
 			GeneratorsOfAlgebraRecord>& m)
-{ this->SetActualSizeAtLeastExpandOnTop(this->size+m.size);
+{ this->MakeActualSizeAtLeastExpandOnTop(this->size+m.size);
 	for (int i=0;i<m.size;i++)
 	{ this->MultiplyByGenerator(m.TheObjects[i]);
   }
@@ -3099,7 +3126,7 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 	assert (tempS=="|/--");
 	int tempSize;
 	input>>tempSize;
-	Buffer.SetActualSizeAtLeastExpandOnTop(tempSize);
+	Buffer.MakeActualSizeAtLeastExpandOnTop(tempSize);
 	for (int i=0;i<tempSize;i++)
 	{ input >>tempS;
 		tempM.Coefficient.ReadFromFile(input);
@@ -3153,7 +3180,7 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 	}
 	static TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity> Accum;
 	static TemplateMonomial tempM;
-	Accum.SetActualSizeAtLeastExpandOnTop(this->size*p.size);
+	Accum.MakeActualSizeAtLeastExpandOnTop(this->size*p.size);
 	Accum.ClearTheObjects();
 	Accum.NumVars= p.NumVars;
 	for (int i=0;i<p.size;i++)
@@ -3258,7 +3285,7 @@ inline int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIden
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>
 				::AddPolynomial(TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p)
-{	this->SetActualSizeAtLeastExpandOnTop(p.size+this->size);
+{	this->MakeActualSizeAtLeastExpandOnTop(p.size+this->size);
 	//std::string tempS1;
 	/*if (QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic)
 	{	std::string tempS;
@@ -3521,7 +3548,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight
 	(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from)
 {	this->Nullify(from.NumVars);
-	this->SetActualSizeAtLeastExpandOnTop(from.size);
+	this->MakeActualSizeAtLeastExpandOnTop(from.size);
 	for (int i=0;i<from.size;i++)
 	{ this->AddMonomial(from.TheObjects[i]);
 	}

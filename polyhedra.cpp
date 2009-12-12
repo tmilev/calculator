@@ -140,7 +140,6 @@ ListObjectPointers<ComplexQN> ComplexQN::GlobalCollectorsComplexQNs;
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
 
-root ZeroRoot;
 intRoot partFraction::theVectorToBePartitioned;
 bool partFraction::MakingConsistencyCheck=false;
 bool partFraction::UncoveringBrackets=true;
@@ -525,7 +524,7 @@ void ComputationSetup::oneChamberSlice()
 				}
 			}
 			this->theChambers.NewHyperplanesToSliceWith.size=0;
-			this->theChambers.NewHyperplanesToSliceWith.SetActualSizeAtLeastExpandOnTop
+			this->theChambers.NewHyperplanesToSliceWith.MakeActualSizeAtLeastExpandOnTop
 				(this->theChambers.theWeylGroupAffineHyperplaneImages.size);
 			for (int i=0;i<this->theChambers.theWeylGroupAffineHyperplaneImages.size;i++)
 			{ root tempRoot;
@@ -537,6 +536,7 @@ void ComputationSetup::oneChamberSlice()
 			}
 			this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
 			::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
+			this->flagComputationPartiallyDoneDontInit=true;
 		}
 		else
 		{ if (this->NumAffineHyperplanesProcessed<this->theChambers.NewHyperplanesToSliceWith.size)
@@ -2159,6 +2159,12 @@ void CombinatorialChamber::ComputeInternalPointMethod2(root &InternalPoint)
 	InternalPoint.DivByInteger(this->AllVertices.size);
 }
 
+void CombinatorialChamber::LabelWallIndicesProperly()
+{ for (int i=0;i<this->Externalwalls.size;i++)
+	{ this->Externalwalls.TheObjects[i].indexInOwnerChamber=i;
+	}
+}
+
 void CombinatorialChamber::ComputeVerticesFromNormals(CombinatorialChamberContainer& owner)
 {	for (int i =0;i<this->Externalwalls.size;i++)
 	{	this->AllVertices.size=0;
@@ -2457,8 +2463,8 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,
 	NewMinusChamber= new CombinatorialChamber;
 	NewPlusChamber->flagPermanentlyZero= PlusChamberIsPermanentZero;
 	NewMinusChamber->flagPermanentlyZero= MinusChamberIsPermanentZero;
-	NewPlusChamber->Externalwalls.SetActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
-	NewMinusChamber->Externalwalls.SetActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
+	NewPlusChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
+	NewMinusChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
 	NewPlusChamber->flagHasZeroPolynomial= this->flagHasZeroPolynomial;
 	NewMinusChamber->flagHasZeroPolynomial= this->flagHasZeroPolynomial;
 	NewPlusChamber->IndexStartingCrossSectionNormal= this->IndexStartingCrossSectionNormal;
@@ -2697,35 +2703,23 @@ void CombinatorialChamberContainer::ElementToString(std::string& output)
 	output= out.str();
 }
 
-void CombinatorialChamberContainer::WireChamberAdjacencyInfo
+void CombinatorialChamberContainer::WireChamberAdjacencyInfoAsIn
 	(CombinatorialChamberContainer& input)
-{ /*assert(this->size==input.size);
-	Facet* tempFacet;
-	input.theHyperplanes.LabelFacetIndicesProperly();
-	this->theHyperplanes.LabelFacetIndicesProperly();
+{ assert(this->size==input.size);
+	input.LabelChamberIndicesProperly();
 	for (int i=0;i<input.size;i++)
-	{ for (int j=0;j<input.TheObjects[i]->ExternalWalls->size;j++)
-		{	tempFacet= input.TheObjects[i]->ExternalWalls->TheObjects[j];
-			tempFacet= this->theHyperplanes.TheObjects[tempFacet->indexInOwnerFacetPointers];
-			this->TheObjects[i]->ExternalWalls->AddObjectOnTop(tempFacet);
-		}
-		root tempRoot; 
-		assert(input.TheObjects[i]->ExternalWalls->size==this->TheObjects[i]->ExternalWallsNormals.size-1);
-		tempRoot.Assign(this->TheObjects[i]->
-			ExternalWallsNormals.TheObjects[input.TheObjects[i]->ExternalWalls->size]);
-		tempRoot.ComputeDebugString();
-		tempFacet= this->theHyperplanes.NormalizeRootAndGetFacetCreateNewIfNeeded(tempRoot);
-		this->TheObjects[i]->ExternalWalls->AddObjectOnTop(tempFacet);
-		tempFacet->Owners.AddCouple(this->TheObjects[i],0);
-	}*/
+	{ this->TheObjects[i]->WireChamberAndWallAdjacencyData(input, input.TheObjects[i]); 
+	}
 }
 
 void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
 	(CombinatorialChamberContainer& input)
-{ /*this->Free();
+{ this->init();
+	this->AmbientDimension=input.AmbientDimension+1;
 	input.LabelChamberIndicesProperly();
 	input.ComputeDebugString();
   this->initAndCreateNewObjects(input.size);
+  this->LabelChamberIndicesProperly();
 	this->StartingCrossSectionNormals.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSectionAffinePoints.size);
 	this->StartingCrossSectionAffinePoints.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSectionAffinePoints.size);
 	for (int i=0;i<input.StartingCrossSectionAffinePoints.size;i++)
@@ -2745,16 +2739,21 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
 			InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 				(*input.TheObjects[i],*this);
   }
+  this->theHyperplanes.ClearTheObjects();
+  this->ComputeDebugString();
+  for (int i=0;i<input.theHyperplanes.size;i++)
+  { root tempRoot, theZeroRoot; theZeroRoot.MakeZero(root::AmbientDimension);
+		tempRoot.Assign(input.theHyperplanes.TheObjects[i]);
+		tempRoot.MakeNormalInProjectivizationFromPointAndNormal(theZeroRoot,input.theHyperplanes.TheObjects[i]);
+		tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+		this->theHyperplanes.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+  }
   root::AmbientDimension++;
   this->ComputeVerticesFromNormals();
-  root::AmbientDimension--;
-	this->LabelChamberIndicesProperly();
-  this->theHyperplanes.ConvertToAffineAndProjectivize(input,*this);
   this->ComputeDebugString();
-  this->MakeExtraProjectivePlane();
-  this->WireChamberAdjacencyInfo(input);
+  this->WireChamberAdjacencyInfoAsIn(input);
   root::AmbientDimension++;
-  this->ComputeDebugString();*/
+  this->ComputeDebugString();
 }
 
 void CombinatorialChamberContainer::LabelChamberIndicesProperly()
@@ -2768,7 +2767,8 @@ CombinatorialChamberContainer::CombinatorialChamberContainer()
 }
 
 void CombinatorialChamberContainer::init()
-{ this->FirstNonExploredIndex=0;
+{ this->KillAllElements();
+	this->FirstNonExploredIndex=0;
 	this->indexNextChamberToSlice=-1;
 	this->NewHyperplanesToSliceWith.size=0;
 	this->theHyperplanes.ClearTheObjects();
@@ -2814,7 +2814,7 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 	Selection theSelection;
 	theSelection.init(root::AmbientDimension);
 	this->theHyperplanes.ClearTheObjects();
-	this->theHyperplanes.SetActualSizeAtLeastExpandOnTop
+	this->theHyperplanes.MakeActualSizeAtLeastExpandOnTop
 		(MathRoutines::NChooseK(directions.size,root::AmbientDimension-1));
 	for(int i=0;i<root::AmbientDimension;i++)
 	{	roots TempRoots;
@@ -2833,7 +2833,7 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 		.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
 	for(int i=0;i<NumStartingChambers;i++)
 	{	int tempI= theSelection.SelectionToIndex();
-		this->TheObjects[tempI]->Externalwalls.SetActualSizeAtLeastExpandOnTop(root::AmbientDimension);
+		this->TheObjects[tempI]->Externalwalls.MakeActualSizeAtLeastExpandOnTop(root::AmbientDimension);
 		for (int j=0;j<root::AmbientDimension;j++)
 		{	this->TheObjects[tempI]->AllVertices.AddRoot(directions.TheObjects[j]);
 			if (theSelection.selected[j])
@@ -2959,35 +2959,68 @@ bool Cone::IsSurelyOutsideCone(::rootsCollection& TheVertices, int NumrootsLists
 	return false;
 }
 
-void CombinatorialChamber::InduceFromAffineConeAddExtraDimension(affineCone& input)
-{ /*this->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(input.theWalls.size);
+/*void CombinatorialChamber::InduceFromAffineConeAddExtraDimension(affineCone& input)
+{ this->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(input.theWalls.size);
 	//the extra dimension is going to be the last dimension
 	for (int i=0;i<this->ExternalWallsNormals.size;i++)
 	{ this->ExternalWallsNormals.TheObjects[i].
 			MakeNormalInProjectivizationFromAffineHyperplane(input.theWalls.TheObjects[i]);
-	}*/
-}
+	}
+}*/
 
 void CombinatorialChamber::
 	InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input, CombinatorialChamberContainer& owner)
-{ /*this->ExternalWallsNormals.SetSizeExpandOnTopNoObjectInit(input.ExternalWallsNormals.size);
-	input.ExternalWallsNormals.ComputeDebugString();
+{ root ZeroRoot; ZeroRoot.MakeZero(root::AmbientDimension);
+	this->Externalwalls.SetSizeExpandOnTopNoObjectInit(input.Externalwalls.size+1);
+	input.ComputeDebugString();
 	//the extra dimension is going to be the last dimension
-	for (int i=0;i<this->ExternalWallsNormals.size;i++)
-	{ this->ExternalWallsNormals.TheObjects[i]
+	for (int i=0;i<input.Externalwalls.size;i++)
+	{ this->Externalwalls.TheObjects[i].normal
 			.MakeNormalInProjectivizationFromPointAndNormal
-				(ZeroRoot,input.ExternalWallsNormals.TheObjects[i]);
+				(ZeroRoot,input.Externalwalls.TheObjects[i].normal);
+		this->Externalwalls.TheObjects[i].NeighborsAlongWall.size=0;
+		this->Externalwalls.TheObjects[i].MirrorWall.size=0;
 	}
 	this->ComputeDebugString();
-	root extraWallNormal;
-	extraWallNormal.MakeZero(root::AmbientDimension+1);
-	extraWallNormal.TheObjects[root::AmbientDimension].MakeOne();
-	this->ExternalWallsNormals.AddRoot(extraWallNormal);
+	this->Externalwalls.LastObject()->normal.MakeZero(root::AmbientDimension+1);
+	this->Externalwalls.LastObject()->normal.TheObjects[root::AmbientDimension].MakeOne();
+	this->Externalwalls.LastObject()->MirrorWall.size=0;
+	this->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop(0);
+	this->Externalwalls.LastObject()->NeighborsAlongWall.size=0;
+	this->Externalwalls.LastObject()->NeighborsAlongWall.AddObjectOnTop(0);
 	this->flagHasZeroPolynomial= input.flagHasZeroPolynomial;
-	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;*/
+	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
 
+void CombinatorialChamber::WireChamberAndWallAdjacencyData
+	(	CombinatorialChamberContainer &owner, 
+		CombinatorialChamber *input)
+{	this->LabelWallIndicesProperly();
+	input->LabelWallIndicesProperly();
+	for (int i=0;i<input->Externalwalls.size;i++)
+	{ WallData& currentWall= this->Externalwalls.TheObjects[i];
+		WallData& originalWall= input->Externalwalls.TheObjects[i];
+		currentWall.NeighborsAlongWall.SetSizeExpandOnTopNoObjectInit
+				(originalWall.NeighborsAlongWall.size);
+		currentWall.MirrorWall.SetSizeExpandOnTopNoObjectInit
+				(originalWall.NeighborsAlongWall.size);
+		assert(originalWall.MirrorWall.size==originalWall.NeighborsAlongWall.size);
+		for (int j=0;j<currentWall.NeighborsAlongWall.size;j++)
+		{ if (originalWall.NeighborsAlongWall.TheObjects[j]==0)
+			{ currentWall.NeighborsAlongWall.TheObjects[j]=0;
+				currentWall.MirrorWall.TheObjects[j]=0;
+			}else
+			{ currentWall.NeighborsAlongWall.TheObjects[j]=
+					owner.TheObjects[originalWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex];
+				currentWall.NeighborsAlongWall.TheObjects[j]->LabelWallIndicesProperly();
+				currentWall.MirrorWall.TheObjects[j]=&
+					currentWall.NeighborsAlongWall.TheObjects[j]->Externalwalls.TheObjects
+						[originalWall.MirrorWall.TheObjects[j]->indexInOwnerChamber];
+			}
+		}
+	}
+}
 
 bool Cone::IsInCone(root& r)
 { for (int i=0;i<this->size;i++)
@@ -3808,7 +3841,7 @@ void PolynomialRationalCoeff::DivByInteger(int x)
 
 void PolynomialRationalCoeff::AssignIntegerPoly(IntegerPoly& p)
 {	this->Nullify(p.NumVars);
-	this->SetActualSizeAtLeastExpandOnTop(p.size);
+	this->MakeActualSizeAtLeastExpandOnTop(p.size);
 	static Monomial<Rational> tempM;
 	tempM.initNoDegreesInit(this->NumVars);
 	for (int i=0;i<p.size;i++)
@@ -5451,7 +5484,7 @@ void QuasiNumber::ReadFromFile(std::fstream& input)
 	input>> NeededSize >> this->NumVariables>>tempS;
 	static BasicQN tempQN;
 	this->MakeConst(RZero,this->NumVariables);
-	this->SetActualSizeAtLeastExpandOnTop(NeededSize);
+	this->MakeActualSizeAtLeastExpandOnTop(NeededSize);
 	for(int i=0;i<NeededSize;i++)
 	{ tempQN.ReadFromFile(input,this->NumVariables);
 		this->AddBasicQuasiNumber(tempQN);
@@ -8019,7 +8052,7 @@ partFraction::partFraction()
 void partFraction::init(int numRoots)
 {// delete [] this->IndicesNonZeroMults;
 	//this->IndicesNonZeroMults=0;
-	this->IndicesNonZeroMults.SetActualSizeAtLeastExpandOnTop(numRoots);
+	this->IndicesNonZeroMults.MakeActualSizeAtLeastExpandOnTop(numRoots);
 	this->IndicesNonZeroMults.size=0;
 	this->SetSizeExpandOnTopLight(partFraction::RootsToIndices.size);
 	for (int i=0;i<this->size;i++)
@@ -8989,7 +9022,7 @@ void partFractions::ReadFromFile(std::fstream& input)
 	assert(tempS=="Number_of_fractions:");
 	input >>tempI;
 	partFraction tempFrac;
-	this->SetActualSizeAtLeastExpandOnTop(tempI);
+	this->MakeActualSizeAtLeastExpandOnTop(tempI);
 	for(int i=0;i<tempI;i++)
 	{ tempFrac.ReadFromFile(input);
 		this->Add(tempFrac);
@@ -9002,7 +9035,7 @@ void partFractions::ReadFromFile(std::fstream& input)
 
 void partFractions::ComputeSupport( ListBasicObjects<roots>& output, std::stringstream& outputString)
 { output.size=0;
-	output.SetActualSizeAtLeastExpandOnTop(this->size);
+	output.MakeActualSizeAtLeastExpandOnTop(this->size);
 	for (int i=0;i<this->size;i++)
 	{ roots tempRoots;
 		tempRoots.ComputeDebugString();
@@ -9578,7 +9611,7 @@ void ::SelectionWithMultiplicities::init(int NumElements)
 	for (int i=0;i<this->Multiplicities.size;i++)
 	{ this->Multiplicities.TheObjects[i]=0;
 	}
-	this->elements.SetActualSizeAtLeastExpandOnTop(NumElements);
+	this->elements.MakeActualSizeAtLeastExpandOnTop(NumElements);
 	this->elements.size=0;
 }
 
@@ -9871,7 +9904,7 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator,
 	PolyFormatLocal.MakeAlphabetxi();
 	output.size=0;
 	output.ChamberIndicators.size=0;
-	output.SetActualSizeAtLeastExpandOnTop(OrbitGeneratingSubset.size);
+	output.MakeActualSizeAtLeastExpandOnTop(OrbitGeneratingSubset.size);
 	input.ComputeDubugString();
 	for (int i=0;i<OrbitGeneratingSubset.size;i++)
 	{	bool tempBool= TheIndicatorsOrbit.TheObjects[i].IsPositiveOrZero()||(!PositiveWeightsOnly);
@@ -10425,13 +10458,14 @@ void VermaModulesWithMultiplicities::ComputeDebugString()
 }
 
 void VermaModulesWithMultiplicities::GeneratePartialBruhatOrder()
-{ this->BruhatOrder.SetSizeExpandOnTopNoObjectInit(this->size);
+{ root ZeroRoot; ZeroRoot.MakeZero();
+	this->BruhatOrder.SetSizeExpandOnTopNoObjectInit(this->size);
 	this->InverseBruhatOrder.SetSizeExpandOnTopNoObjectInit(this->size);
 	this->SimpleReflectionsActionList.SetSizeExpandOnTopNoObjectInit(this->size);
 	this->ComputeDebugString();
 	for (int i=0;i<this->size;i++)
 	{ this->SimpleReflectionsActionList.TheObjects[i].
-			SetActualSizeAtLeastExpandOnTop(root::AmbientDimension);
+			MakeActualSizeAtLeastExpandOnTop(root::AmbientDimension);
 		for (int j=0;j<root::AmbientDimension;j++)
 		{ root tempRoot,tempRoot2;
 			tempRoot.Assign(this->TheObjects[i]);
@@ -12677,9 +12711,9 @@ void simplicialCones::initFromDirections(roots &directions)
 	this->theFacets.ClearTheObjects();
 	int maxSize=MathRoutines::NChooseK(directions.size,root::AmbientDimension);
 	int maxNumFacets= 2*MathRoutines::NChooseK(directions.size, root::AmbientDimension-1);
-	this->SetActualSizeAtLeastExpandOnTop(maxSize);
-	this->theFacets.SetActualSizeAtLeastExpandOnTop(maxNumFacets);
-	this->ConesHavingFixedNormal.SetActualSizeAtLeastExpandOnTop(maxNumFacets);
+	this->MakeActualSizeAtLeastExpandOnTop(maxSize);
+	this->theFacets.MakeActualSizeAtLeastExpandOnTop(maxNumFacets);
+	this->ConesHavingFixedNormal.MakeActualSizeAtLeastExpandOnTop(maxNumFacets);
 	for (int i=0;i<maxSize;i++)
 	{ tempSel.incrementSelectionFixedCardinality(root::AmbientDimension);
 		tempRoots.size=0;
@@ -12913,7 +12947,7 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumerator(PolyPartFra
 
 void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFractionNumerator &output)
 { output.Nullify(root::AmbientDimension);
-	output.SetActualSizeAtLeastExpandOnTop(this->size);
+	output.MakeActualSizeAtLeastExpandOnTop(this->size);
 	for (int i=0;i<this->size;i++)
 	{ ::MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord>
 				tempM;
@@ -13157,7 +13191,7 @@ int affineHyperplane::HashFunction()
 }
 
 void affineCones::ProjectFromCombinatorialChambers(CombinatorialChamberContainer &input)
-{ this->SetActualSizeAtLeastExpandOnTop(input.size);
+{ this->MakeActualSizeAtLeastExpandOnTop(input.size);
 	affineCone tempCone;
 	for(int i=0;i<input.size;i++)
 	{ tempCone.ProjectFromCombinatorialChamber(*input.TheObjects[i]);

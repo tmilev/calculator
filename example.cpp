@@ -32,14 +32,14 @@ void ExampleComputation::RunSomeTests()
 	::FillInRoots(toBeSplit,indicator);
 	partFractions tempPF;
 	tempPF.flagUsingIndicatorRoot=false;
-	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0,::StaticGlobalVariablesContainer.Default());
+	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0,&tempPF.theGlobalVariables);
 	tempPF.flagUsingCheckSum=false;
 	tempPF.flagMakingProgressReport=true;
-	tempPF.split(::StaticGlobalVariablesContainer.Default());
-	tempPF.ComputeDebugString(::StaticGlobalVariablesContainer.Default());
+	tempPF.split(&tempPF.theGlobalVariables);
+	tempPF.ComputeDebugString(&tempPF.theGlobalVariables);
 	QuasiPolynomial tempQP;
 	tempPF.partFractionsToPartitionFunctionAdaptedToRoot
-		(tempQP,indicator,false,false,StaticGlobalVariablesContainer.Default());
+		(tempQP,indicator,false,false,&tempPF.theGlobalVariables);
 	intRoot tempR;
 	tempR.initFromInt(0,0,0,0,0);
 	Rational tempRat;
@@ -112,13 +112,13 @@ void ExampleComputation::RunThomasExample()
 	partFractions::ListBasicObjectsActualSizeIncrement=2000;
 	IntegerPoly::ListBasicObjectsActualSizeIncrement=5;
 	exampleRoots.ComputeDebugString();
-	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0,::StaticGlobalVariablesContainer.Default());
+	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0,&tempPF.theGlobalVariables);
 	std::fstream tempF;
 	tempF.open("C:/ThomasOutput.txt",std::fstream::out | std::fstream::trunc);
 	assert(tempF.is_open());
-	tempPF.split(::StaticGlobalVariablesContainer.Default());
+	tempPF.split(&tempPF.theGlobalVariables);
 //	tempPF.ComputeDebugString();
-	tempPF.ElementToStringOutputToFile(tempF,true,false,true, ::StaticGlobalVariablesContainer.Default());
+	tempPF.ElementToStringOutputToFile(tempF,true,false,true, &tempPF.theGlobalVariables);
 	tempF.close();
 	#ifndef USE_GUI
 		std::cout<<tempPF.DebugString;

@@ -1240,7 +1240,7 @@ public:
 
 class WallData
 {
-public: 
+public:
 	std::string DebugString;
 	int indexInOwnerChamber;
 	root normal;
@@ -1321,7 +1321,7 @@ public:
 	bool SliceInDirection(root& direction,roots& directions,
 										    int CurrentIndex, CombinatorialChamberContainer& output,
 												hashedRoots& FacetOutput);
-	//the below function will automatically add the candidate to the 
+	//the below function will automatically add the candidate to the
 	//list of used hyperplanes if the candidate is an allowed one
 	bool IsAValidCandidateForNormalOfAKillerFacet
 		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner);
@@ -1344,7 +1344,7 @@ public:
 																			roots & directions, int CurrentIndex,
 																			root& outputNormal);
 	void WireChamberAndWallAdjacencyData
-		(	CombinatorialChamberContainer &owner, 
+		(	CombinatorialChamberContainer &owner,
 			CombinatorialChamber* input);
 	void Assign(const  CombinatorialChamber& right);
 	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
@@ -4295,7 +4295,7 @@ public:
 	void ComputeNormals(roots& output);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixLargeRational& theLinearRelation);
-	void UncoverBracketsNumerator();
+	void UncoverBracketsNumerator(GlobalVariables*  theGlobalVariables);
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
 						//bool RecordSplitPowerSeriesCoefficient,
@@ -4311,7 +4311,7 @@ public:
 	//void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
 	void MultiplyCoeffBy(Rational& r);
 	void decomposeAMinusNB(int indexA, int indexB, int n,
-												 int indexAminusNB, partFractions& Accum, 
+												 int indexAminusNB, partFractions& Accum,
 												 GlobalVariables* theGlobalVariables);
 	bool DecomposeFromLinRelation
 		(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables* theGlobalVariables);
@@ -4367,15 +4367,15 @@ public:
 	void operator=(const partFraction& right);
 	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
 	int ElementToString(std::string& output, bool LatexFormat,
-											bool includeVPsummand, bool includeNumerator, 
+											bool includeVPsummand, bool includeNumerator,
 											GlobalVariables* theGlobalVariables);
 	int ElementToStringBasisChange
 		(	MatrixIntTightMemoryFit& VarChange,
 			bool UsingVarChange, std::string& output,
-			bool LatexFormat,bool includeVPsummand,bool includeNumerator, 
+			bool LatexFormat,bool includeVPsummand,bool includeNumerator,
 			GlobalVariables* theGlobalVariables);
-	void ReadFromFile(std::fstream& input);
-	void WriteToFile(std::fstream& output);
+	void ReadFromFile(std::fstream& input, GlobalVariables*  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables*  theGlobalVariables);
 	int GetNumMonomialsInNumerator();
 	int SizeWithoutDebugString();
 };
@@ -4423,7 +4423,7 @@ public:
 	void ComputeDebugStringBasisChange
 		(MatrixIntTightMemoryFit& VarChange,GlobalVariables* theGlobalVariables);
 	void initFromRootSystem
-		(	intRoots& theFraction, intRoots& theAlgorithmBasis, 
+		(	intRoots& theFraction, intRoots& theAlgorithmBasis,
 			intRoot* weights, GlobalVariables* theGlobalVariables);
 	//row index is the index of the root; column(second) index is the coordinate index
 	void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables* theGlobalVariables);
@@ -4438,28 +4438,28 @@ public:
 	void PrepareIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
 	void ElementToString(std::string& output, GlobalVariables* theGlobalVariables);
-	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, 
+	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
 											GlobalVariables* theGlobalVariables);
 	int ElementToStringBasisChange(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output,
-																	bool LatexFormat, bool includeVPsummand, 
+																	bool LatexFormat, bool includeVPsummand,
 																	bool includeNumerator, GlobalVariables* theGlobalVariables);
-	int ElementToStringOutputToFile(std::fstream& output, 
-																	bool LatexFormat, 
+	int ElementToStringOutputToFile(std::fstream& output,
+																	bool LatexFormat,
 																	bool includeVPsummand, bool includeNumerator, GlobalVariables* theGlobalVariables);
 	int ElementToStringBasisChangeOutputToFile
 		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output,
-			bool LatexFormat, bool includeVPsummand, bool includeNumerator, 
+			bool LatexFormat, bool includeVPsummand, bool includeNumerator,
 			GlobalVariables* theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
 					(	QuasiPolynomial& output, root& r,
 						//bool storeComputations, bool RecordSplitPowerSeriesCoefficient,
-						bool StoreToFile,bool UseOldData, 
+						bool StoreToFile,bool UseOldData,
 						GlobalVariables* theGlobalVariables);
-	bool VerifyFileComputedContributions();
-	void WriteToFileComputedContributions(std::fstream& output);
-	int ReadFromFileComputedContributions(std::fstream& input);
-	void WriteToFile(std::fstream& output);
-	void ReadFromFile(std::fstream& input);
+	bool VerifyFileComputedContributions(GlobalVariables*  theGlobalVariables);
+	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables*  theGlobalVariables);
+	int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables*  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables*  theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables*  theGlobalVariables);
 	void UncoverBracketsNumerators(GlobalVariables* theGlobalVariables);
 	void ResetRelevanceIsComputed(){for (int i=0;i<this->size;i++){this->TheObjects[i].RelevanceIsComputed=false;};};
 	partFractions();
@@ -4471,7 +4471,7 @@ public:
 	void MakeProgressVPFcomputation();
 	void ComputeKostantFunctionFromWeylGroup
 				(	char WeylGroupLetter, unsigned char WeylGroupNumber,
-					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,bool StoreToFile);
+					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,bool StoreToFile, GlobalVariables*  theGlobalVariables);
 };
 
 class ElementWeylGroup: public ListBasicObjects<int>
@@ -4653,6 +4653,7 @@ public:
 	intRoots nilradicalA2A1A1inD5;
 	intRoots AlgorithmBasisA2A1A1inD5;
 	intRoot weights;
+	GlobalVariables TheGlobalVariables;
 	partFractions partitionA2A1A1inD5;
 	std::string OutputFile;
 	bool useOutputFileForFinalAnswer;
@@ -4819,6 +4820,7 @@ public:
 	intRoot ValueRoot;
 	int NextDirectionIndex;
 	roots VPVectors;
+	GlobalVariablesContainer theGlobalVariablesContainer;
 	int NumAffineHyperplanesProcessed;
 	bool AllowRepaint;
 	bool ComputationInProgress;
@@ -4875,6 +4877,6 @@ public:
 };
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
-extern GlobalVariablesContainer StaticGlobalVariablesContainer;
+//extern GlobalVariablesContainer StaticGlobalVariablesContainer;
 
 #endif

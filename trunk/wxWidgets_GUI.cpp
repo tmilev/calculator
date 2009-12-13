@@ -740,8 +740,9 @@ void wxDialogOutput::onButton5SaveComputer(wxCommandEvent &ev)
     return;
   std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
+  GlobalVariables tempGl;
   if (tempFile.is_open())
-  { MainWindow1->theComputationSetup.thePartialFraction.WriteToFile(tempFile);
+  { MainWindow1->theComputationSetup.thePartialFraction.WriteToFile(tempFile, &tempGl);
   }
 }
 

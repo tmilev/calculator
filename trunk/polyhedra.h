@@ -4841,7 +4841,6 @@ public:
 	bool flagSuperimposingComplexes;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
-//	unsigned char RankEuclideanSpaceGraphics;
 	void EvaluatePoly();
 	void Run();
 	void oneChamberSlice();

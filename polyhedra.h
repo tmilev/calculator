@@ -329,14 +329,14 @@ public:
 class GlobalVariables
 {
 public:
-
-void operator=(const GlobalVariables& right);
+	GlobalVariables();
+	void operator=(const GlobalVariables& G_V);
 };
 
-class GlobalVariablesContainer : ListBasicObjects<GlobalVariables>
+class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
 {
 public:
-	GlobalVariables* Default(){return 0;};
+	GlobalVariables* Default(){return & this->TheObjects[0];};
 };
 
 template <class Object>
@@ -1264,10 +1264,12 @@ public:
 	bool SplitWall(CombinatorialChamber *BossChamber,
 									CombinatorialChamber *NewPlusChamber,
 									CombinatorialChamber *NewMinusChamber,
+									CombinatorialChamberContainer* ownerComplex,
 									roots& ThePlusVertices, roots& TheMinusVertices,
 									root& TheKillerFacet, root& direction,
 									ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors,
-									ListBasicObjects<WallData*>* PossibleBogusWalls);
+									ListBasicObjects<WallData*>* PossibleBogusWalls, 
+									GlobalVariables* theGlobalVariables);
 	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 };
@@ -1295,8 +1297,7 @@ public:
 												//2. normals only
 	static bool flagDisregardDirectionWhenPropagatingInternalWalls;
 	static bool flagPrintWallDetails;
-	static bool flagMakingASingleHyperplaneSlice;
-	static ListBasicObjects<CombinatorialChamber*> NonExploredChambersHavingInternalWalls;
+//	static bool flagMakingASingleHyperplaneSlice;
 	bool PointLiesInMoreThanOneWall(root& point);
 	//bool InduceFromAffineCone(affineCone& input);
 	bool ComputeDebugString();
@@ -1307,20 +1308,22 @@ public:
 	void LabelWallIndicesProperly();
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
 	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
-		                       root& direction);
+		                root& direction, GlobalVariables* theGlobalVariables);
 	bool IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor);
-	void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner);
+	void ComputeVerticesFromNormals
+		(	CombinatorialChamberContainer& owner, 
+			GlobalVariables* theGlobalVariables);
 	bool PointIsInChamber(root&point);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
 	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberContainer& owner);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	bool LinearAlgebraForVertexComputation
-				(Selection& theSelection, root& output);
+				(Selection& theSelection, root& output, GlobalVariables* theGlobalVariables);
 	//returns false if the vectors were linearly dependent
 	bool SliceInDirection(root& direction,roots& directions,
 										    int CurrentIndex, CombinatorialChamberContainer& output,
-												hashedRoots& FacetOutput);
+												hashedRoots& FacetOutput, GlobalVariables* theGlobalVariables);
 	//the below function will automatically add the candidate to the
 	//list of used hyperplanes if the candidate is an allowed one
 	bool IsAValidCandidateForNormalOfAKillerFacet
@@ -1329,7 +1332,10 @@ public:
 	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,
 																	Selection &SelectionStartSimplex,
 																	MatrixLargeRational& outputColumn);
-	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction);
+	void AddInternalWall
+		(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, 
+			root &direction, CombinatorialChamberContainer* owner, 
+			GlobalVariables* theGlobalVariables);
 //	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
@@ -1939,6 +1945,7 @@ public:
 	int indexNextChamberToSlice;
 	roots StartingCrossSectionNormals;
 	roots StartingCrossSectionAffinePoints;
+	bool flagMakingASingleHyperplaneSlice;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -1952,11 +1959,18 @@ public:
 	static bool flagAnErrorHasOcurredTimeToPanic;
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
-	void SliceTheEuclideanSpace(roots& directions,int& index, int rank,root& IndicatorRoot);
+	void SliceTheEuclideanSpace
+		(	roots& directions,int& index, 
+			int rank,root& IndicatorRoot, 
+			GlobalVariables* theGlobalVariables);
 	static bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices, int NumrootsLists);
-	void SliceOneDirection(roots& directions, int& index, int rank, root& IndicatorRoot);
-	void OneSlice(roots& directions, int& index, int rank, root& IndicatorRoot);
-  void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input);
+	void SliceOneDirection
+			(	roots& directions, int& index, int rank, 
+				root& IndicatorRoot, GlobalVariables* theGlobalVariables);
+	void OneSlice(roots& directions, int& index, 
+								int rank, root& IndicatorRoot, GlobalVariables* theGlobalVariables);
+  void InduceFromLowerDimensionalAndProjectivize
+		(CombinatorialChamberContainer& input, GlobalVariables* theGlobalVariables);
   void MakeExtraProjectivePlane();
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
@@ -1964,11 +1978,13 @@ public:
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void init();
 	void Free();
-	void MakeStartingChambers(roots& directions, root& IndicatorRoot);
+	void MakeStartingChambers
+		(roots& directions, root& IndicatorRoot, GlobalVariables* theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
-	void ComputeVerticesFromNormals();
-	void SliceWithAWall(root& TheKillerFacetNormal);
-	void AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber);
+	void ComputeVerticesFromNormals(GlobalVariables* theGlobalVariables);
+	void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables);
+	void AddChamberPointerSetUpPreferredIndices
+		(CombinatorialChamber* theChamber, GlobalVariables* theGlobalVariables);
 	void LabelAllUnexplored();
 	void DumpAll();
 	bool ConsistencyCheck();
@@ -4843,8 +4859,8 @@ public:
 	unsigned char WeylGroupIndex;
 	void EvaluatePoly();
 	void Run();
-	void oneChamberSlice();
-	void oneIncrement();
+	void oneChamberSlice(GlobalVariables* theGlobalVariables);
+	void oneIncrement(GlobalVariables* theGlobalVariables);
 	void WriteToFilePFdecomposition(std::fstream& output);
 	ComputationSetup();
 };

@@ -862,14 +862,16 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 
 void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 { this->ReadVPVectorsAndOptions();
-	this->theComputationSetup.oneChamberSlice();	
+	this->theComputationSetup.oneChamberSlice
+		(this->theComputationSetup.theGlobalVariablesContainer.Default());	
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();
 }
 
 void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
-	this->theComputationSetup.oneIncrement();	
+	this->theComputationSetup.oneIncrement
+		(this->theComputationSetup.theGlobalVariablesContainer.Default());	
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();
 }

@@ -226,7 +226,7 @@ template < > int ListBasicObjects<std::string>::ListBasicObjectsActualSizeIncrem
 template < > int ListBasicObjects<unsigned int>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<roots>::ListBasicObjectsActualSizeIncrement=5;
 template < > int ListBasicObjects<Selection>::ListBasicObjectsActualSizeIncrement=5;
-template < > int ListBasicObjects<class affineHyperplane>::ListBasicObjectsActualSizeIncrement=10;
+template < > int ListBasicObjects<class affineHyperplane>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<class WallData*>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<class WallData>::ListBasicObjectsActualSizeIncrement=6;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
@@ -534,10 +534,10 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 				for (int j=1;j<tempWeyl.size;j++)
 				{	tempH.MakeFromNormalAndPoint
 						(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]);
-					tempH.ComputeDebugString();
+					//tempH.ComputeDebugString();
 					tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
 					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
-					tempH.ComputeDebugString();
+					//tempH.ComputeDebugString();
 				}
 			}
 			this->theChambers.NewHyperplanesToSliceWith.size=0;
@@ -547,7 +547,7 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 			{ root tempRoot;
 				tempRoot.MakeNormalInProjectivizationFromAffineHyperplane
 					(theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
-				tempRoot.ComputeDebugString();
+				//tempRoot.ComputeDebugString();
 				tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 				this->theChambers.NewHyperplanesToSliceWith.AddRoot(tempRoot);
 			}
@@ -2200,11 +2200,13 @@ void CombinatorialChamber::ComputeVerticesFromNormals
 	int NumCandidates = MathRoutines::NChooseK(this->Externalwalls.size, root::AmbientDimension-1);
 	for (int i=0;i<NumCandidates; i++)
 	{	theSelection.incrementSelectionFixedCardinality(root::AmbientDimension-1);
-		this->LinearAlgebraForVertexComputation(theSelection,VertexCandidate,theGlobalVariables);
-		if (this->PlusMinusPointIsInChamber(VertexCandidate))
-		{	for (int j=0;j<theSelection.CardinalitySelection;j++ )
-			{	this->ScaleVertexToFitCrossSection(VertexCandidate,owner);
-				this->AllVertices.AddRootNoRepetition(VertexCandidate);
+		if (this->LinearAlgebraForVertexComputation
+					(theSelection,VertexCandidate,theGlobalVariables))
+		{	if (this->PlusMinusPointIsInChamber(VertexCandidate))
+			{	for (int j=0;j<theSelection.CardinalitySelection;j++ )
+				{	this->ScaleVertexToFitCrossSection(VertexCandidate,owner);
+					this->AllVertices.AddRootNoRepetition(VertexCandidate);
+				}
 			}
 		}
 	}
@@ -2664,7 +2666,11 @@ void CombinatorialChamberContainer::MakeExtraProjectivePlane()
 }
 
 void CombinatorialChamberContainer::ComputeVerticesFromNormals(GlobalVariables* theGlobalVariables)
-{ for (int i=0;i<this->size;i++)
+{ if (this->flagAnErrorHasOcurredTimeToPanic)
+	{ for (int i=0;i<this->size;i++)
+			this->TheObjects[i]->ComputeDebugString();
+	}
+	for (int i=0;i<this->size;i++)
 		this->TheObjects[i]->ComputeVerticesFromNormals(*this, theGlobalVariables);
 }
 
@@ -2721,7 +2727,8 @@ void CombinatorialChamberContainer::ElementToString(std::string& output)
 		}
 	}
 	if (this->size>this->GraphicsMaxNumChambers)
-	{	out << "Number of chambers: " << this->size <<"\nDetailed chamber data too large for display";
+	{	out << "Number of chambers: " << this->size 
+				<< "\nDetailed chamber data too large for display";
 		output=out.str();
 		return;
 	}
@@ -9822,7 +9829,7 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement
 	for (int i=0; i<tempI;i++)
 	{	this->SimpleReflectionRoot
 			(this->TheObjects[index].TheObjects[i],output.affinePoint,RhoAction);
-		output.affinePoint.ComputeDebugString();
+//		output.affinePoint.ComputeDebugString();
 		this->SimpleReflectionDualSpace
 			(this->TheObjects[index].TheObjects[tempI-i-1],output.normal);
 	}

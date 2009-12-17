@@ -2250,7 +2250,8 @@ bool CombinatorialChamber::PointIsInChamber(root&point)
 	return true;
 }
 
-bool CombinatorialChamber::IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor)
+bool CombinatorialChamber::IsABogusNeighbor
+	(WallData& NeighborWall,CombinatorialChamber* Neighbor)
 {	if (NeighborWall.NeighborsAlongWall.size==1)
 		return false;
 	static roots ExternalWallsConglomerate;
@@ -2263,13 +2264,16 @@ bool CombinatorialChamber::IsABogusNeighbor(WallData& NeighborWall,Combinatorial
 	static root tempRoot; tempRoot.Assign(NeighborWall.normal); tempRoot.MinusRoot();
 	for (int i=0;i<Neighbor->Externalwalls.size;i++)
 	{	if (!(Neighbor->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot)))
-		{ExternalWallsConglomerate.AddRootNoRepetition(Neighbor->Externalwalls.TheObjects[i].normal);}
+		{ExternalWallsConglomerate.AddRootNoRepetition
+			(Neighbor->Externalwalls.TheObjects[i].normal);}
 	}
 	Selection theSelection;
 	theSelection.init(ExternalWallsConglomerate.size);
 	static int NumPossibilities;
-	NumPossibilities = MathRoutines::NChooseK(ExternalWallsConglomerate.size,root::AmbientDimension-2);
-	static root VertexCandidate; VertexCandidate.SetSizeExpandOnTopLight(root::AmbientDimension);
+	NumPossibilities = 
+		MathRoutines::NChooseK(ExternalWallsConglomerate.size,root::AmbientDimension-2);
+	static root VertexCandidate; 
+	VertexCandidate.SetSizeExpandOnTopLight(root::AmbientDimension);
 	static int OldRank;
 	OldRank= 0;
 	FoundVertices.size=0;
@@ -2744,6 +2748,7 @@ void CombinatorialChamberContainer::WireChamberAdjacencyInfoAsIn
 void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
 	(CombinatorialChamberContainer& input, GlobalVariables* theGlobalVariables)
 { this->init();
+	this->flagMakingASingleHyperplaneSlice=true;
 	this->AmbientDimension=input.AmbientDimension+1;
 	input.LabelChamberIndicesProperly();
 	input.ComputeDebugString();

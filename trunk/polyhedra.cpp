@@ -393,10 +393,10 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	Projections[3][1]=-29;
 	Projections[4][0]=88;
 	Projections[4][1]=-49;
-//	Projections[5][0]=50;
-//	Projections[5][1]=-88;
-//	Projections[6][0]=28;
-//	Projections[6][1]=-92;
+	Projections[5][0]=50;
+	Projections[5][1]=-88;
+	Projections[6][0]=28;
+	Projections[6][1]=-92;
 	for (int i =0; i<root::AmbientDimension;i++)
 	{	Projections[i][0]*=scale;
 		Projections[i][1]*=scale;
@@ -551,7 +551,7 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 				tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 				this->theChambers.NewHyperplanesToSliceWith.AddRoot(tempRoot);
 			}
-			this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
+		//	this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
 			::TheBigOutput.InduceFromLowerDimensionalAndProjectivize
 				(this->theChambers,this->theGlobalVariablesContainer.Default());
 			this->flagComputationPartiallyDoneDontInit=true;

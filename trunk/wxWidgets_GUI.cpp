@@ -430,7 +430,7 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 
 guiMainWindow::guiMainWindow()
 				: wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow,
-						wxT("Vector partition function v0.069 (eating RAM for breakfast)"),
+						wxT("Vector partition function v0.0701 (eating RAM for breakfast)"),
                    wxPoint(100,100),
                    wxSize(800,600),
                    wxRESIZE_BORDER| wxCAPTION
@@ -943,7 +943,7 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 		case 7:	newWeylGroupIndex=4;  newWeylGroupLetter='B'; break;
 		case 8: newWeylGroupIndex=5;  newWeylGroupLetter='B'; break;//CombinatorialChamber::DisplayingGraphics=false; break;
 		case 9:	newWeylGroupIndex=2;  newWeylGroupLetter='C'; break;
-		case 10:	newWeylGroupIndex=3;  newWeylGroupLetter='C'; break;
+		case 10: newWeylGroupIndex=3; newWeylGroupLetter='C'; break;
 		case 11: newWeylGroupIndex=4; newWeylGroupLetter='C'; break;
 		case 12: newWeylGroupIndex=4; newWeylGroupLetter='D'; break;
 		case 13: newWeylGroupIndex=5; newWeylGroupLetter='D'; break;

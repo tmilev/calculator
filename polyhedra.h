@@ -326,19 +326,6 @@ public:
 	~ListBasicObjects();
 };
 
-class GlobalVariables
-{
-public:
-	GlobalVariables();
-	void operator=(const GlobalVariables& G_V);
-};
-
-class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
-{
-public:
-	GlobalVariables* Default(){return & this->TheObjects[0];};
-};
-
 template <class Object>
 class ListObjectPointers: public ListBasicObjects<Object*>
 {
@@ -513,7 +500,7 @@ public:
 	void ComputeDeterminantOverwriteMatrix( Rational& output);
 	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
-	void Transpose();
+	void Transpose(GlobalVariables* theGlobalVariables);
 	void MultiplyByInt(int x);
 	void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
 	void ScaleToIntegralForMinRationalHeight();
@@ -1274,6 +1261,8 @@ public:
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 };
 
+
+
 class CombinatorialChamber
 {
 public:
@@ -1290,7 +1279,6 @@ public:
 	roots AllVertices;
 	root InternalPoint;
 	int IndexStartingCrossSectionNormal;
-	static bool ComputingPolys;
 	static bool DisplayingGraphics;
 	static bool flagIncludeVerticesInDebugString;
 	static int MethodUsed;//1. normals vertices and boundaries
@@ -1327,7 +1315,8 @@ public:
 	//the below function will automatically add the candidate to the
 	//list of used hyperplanes if the candidate is an allowed one
 	bool IsAValidCandidateForNormalOfAKillerFacet
-		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner);
+		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner,
+			GlobalVariables* theGlobalVariables);
 	bool HasHSignVertex(root& h,int sign);
 	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,
 																	Selection &SelectionStartSimplex,
@@ -1348,7 +1337,7 @@ public:
 	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner,
 																			root& direction,
 																			roots & directions, int CurrentIndex,
-																			root& outputNormal);
+																			root& outputNormal,GlobalVariables* theGlobalVariables);
 	void WireChamberAndWallAdjacencyData
 		(	CombinatorialChamberContainer &owner,
 			CombinatorialChamber* input);
@@ -1929,6 +1918,24 @@ public:
 	void initFromDirections(roots& directions);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
 };
+
+class GlobalVariables
+{
+public:
+	roots rootsWallBasis;
+	rootsCollection rootsCollectionLocalContainerPlusVertices;
+	rootsCollection rootsCollectionLocalContainerMinusVertices;
+	MatrixLargeRational matTransposeBuffer;
+	GlobalVariables();
+	void operator=(const GlobalVariables& G_V);
+};
+
+class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
+{
+public:
+	GlobalVariables* Default(){return & this->TheObjects[0];};
+};
+
 
 
 class CombinatorialChamberContainer: public ListObjectPointers<CombinatorialChamber>

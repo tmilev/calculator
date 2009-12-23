@@ -86,6 +86,7 @@ class IntegerPoly;
 class Rational;
 class intRoot;
 class root;
+class rootsCollection;
 template <class Object>
 class ListBasicObjects;
 template <class Object>
@@ -227,6 +228,9 @@ template <class Object>
 inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 { if (theSize== this->size)
 		return;
+	if (theSize<0)
+	{ theSize=-1;
+	}
 	if (theSize==0)
 	{ this->size=0;
 		delete [] this->TheObjects;
@@ -416,7 +420,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bo
 	short newActualNumRows= (short)Maximum(this->ActualNumRows,r);
 	if (r>this->ActualNumRows || c>this->ActualNumCols)
 	{ newElements	= new Element*[newActualNumRows];
-		for (int i=0;i<r;i++)
+		for (int i=0;i<newActualNumRows;i++)
 		{ newElements[i]= new Element[newActualNumCols];
 		}
 	}
@@ -1149,6 +1153,7 @@ public:
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
 	bool OurScalarProductIsPositive(root& right);
 	bool OurScalarProductIsNegative(root& right);
+	bool OurScalarProductIsZero(root& right);
 	void MinusRoot();
 	void Subtract(root& r);
 	inline void Assign(const root& right)
@@ -1245,6 +1250,7 @@ public:
 	void SubstituteNeighbor
 		(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
 	bool IsExternalWithRespectToDirection(root &direction);
+	inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point);};
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
 	bool ContainsNeighborExactlyOnce(CombinatorialChamber *neighbor);
 	bool ContainsMirrorWallExactlyOnce(WallData* theWall);
@@ -1281,9 +1287,9 @@ public:
 	int IndexStartingCrossSectionNormal;
 	static bool DisplayingGraphics;
 	static bool flagIncludeVerticesInDebugString;
+	static bool flagAnErrorHasOccurredTimeToPanic;
 	static int MethodUsed;//1. normals vertices and boundaries
 												//2. normals only
-	static bool flagDisregardDirectionWhenPropagatingInternalWalls;
 	static bool flagPrintWallDetails;
 //	static bool flagMakingASingleHyperplaneSlice;
 	bool PointLiesInMoreThanOneWall(root& point);
@@ -1312,6 +1318,9 @@ public:
 	bool SliceInDirection(root& direction,roots& directions,
 										    int CurrentIndex, CombinatorialChamberContainer& output,
 												hashedRoots& FacetOutput, GlobalVariables* theGlobalVariables);
+	void PropagateSlicingWallThroughNonExploredNeighbors
+		(	root& theKillerNormal,rootsCollection &CuttingPlaneVertices,
+			::CombinatorialChamberContainer& owner, GlobalVariables* theGlobalVariables);
 	//the below function will automatically add the candidate to the
 	//list of used hyperplanes if the candidate is an allowed one
 	bool IsAValidCandidateForNormalOfAKillerFacet
@@ -1953,6 +1962,7 @@ public:
 	roots StartingCrossSectionNormals;
 	roots StartingCrossSectionAffinePoints;
 	bool flagMakingASingleHyperplaneSlice;
+	bool flagSliceWithAWallInitDone;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -1990,6 +2000,8 @@ public:
 	void ComputeNextIndexToSlice(root& direction);
 	void ComputeVerticesFromNormals(GlobalVariables* theGlobalVariables);
 	void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables);
+	void SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables);
+	void SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables);
 	void AddChamberPointerSetUpPreferredIndices
 		(CombinatorialChamber* theChamber, GlobalVariables* theGlobalVariables);
 	void LabelAllUnexplored();

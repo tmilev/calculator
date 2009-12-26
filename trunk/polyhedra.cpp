@@ -271,7 +271,6 @@ bool WallData::flagDisplayWallDetails=true;
 int NextDirectionIndex;
 int RankGlobal;
 roots InputRoots;
-CombinatorialChamberContainer TheBigOutput;
 //FacetPointers TheBigFacetOutput;
 DrawingVariables TDV(200,400);
 bool QuasiNumber::flagAnErrorHasOccurredTimeToPanic=false;
@@ -386,10 +385,14 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 //	Projections[1][1]=(87-50)*tempI;
 //	Projections[2][0]=(100+50)*tempI;
 //	Projections[2][1]=(0-50)*tempI;
-	Projections[0][0]=100;
-	Projections[0][1]=0;
-	Projections[1][0]=49;
-	Projections[1][1]=88;
+//	Projections[0][0]=100;
+//	Projections[0][1]=0;
+//	Projections[1][0]=49;
+//	Projections[1][1]=88;
+	Projections[0][0]=200;
+	Projections[0][1]=-200;
+	Projections[1][0]=200;
+	Projections[1][1]=200;
 	Projections[2][0]=0;
 	Projections[2][1]=100;
 	Projections[3][0]=92;
@@ -494,7 +497,7 @@ void ComputationSetup::oneIncrement(GlobalVariables* theGlobalVariables)
 			this->theChambers.AmbientDimension= root::AmbientDimension;
 			this->NextDirectionIndex=root::AmbientDimension-1;
 		}
-		::TheBigOutput.SliceOneDirection(::InputRoots,this->NextDirectionIndex,root::AmbientDimension,
+		this->theChambers.SliceOneDirection(::InputRoots,this->NextDirectionIndex,root::AmbientDimension,
 															this->thePartialFraction.IndicatorRoot,theGlobalVariables);
 	}
 	this->flagComputationPartiallyDoneDontInit=true;
@@ -505,38 +508,46 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 {	this->AllowRepaint=false;
 	if (!this->flagSuperimposingComplexes)
 	{	::InputRoots.CopyFromBase(this->VPVectors);
+		CombinatorialChamberContainer tempComplex;
 		if (this->NextDirectionIndex==0)
 		{ root::AmbientDimension= this->WeylGroupIndex;
-			this->theChambers.AmbientDimension= root::AmbientDimension;
+			tempComplex.AmbientDimension= root::AmbientDimension;
 			this->NextDirectionIndex=root::AmbientDimension-1;
 		}
-		this->theChambers.OneSlice(::InputRoots,this->NextDirectionIndex,root::AmbientDimension,
+		tempComplex.OneSlice(::InputRoots,this->NextDirectionIndex,root::AmbientDimension,
 															this->thePartialFraction.IndicatorRoot,
 															this->theGlobalVariablesContainer.Default());
-		::TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers, theGlobalVariables);
+		this->theChambers.InduceFromLowerDimensionalAndProjectivize(tempComplex, theGlobalVariables);
 	}
 	else
 	{	if (!this->flagComputationPartiallyDoneDontInit)
+<<<<<<< .mine
+		{	CombinatorialChamberContainer tempComplex;
+			this->theChambers.NumAffineHyperplanesProcessed=-1;
+=======
 		{ this->NumAffineHyperplanesProcessed=-1;
+>>>>>>> .r203
 			root::AmbientDimension=this->WeylGroupIndex;
 			::InputRoots.CopyFromBase(this->VPVectors);
 			::NextDirectionIndex=root::AmbientDimension-1;
-			this->theChambers.SliceTheEuclideanSpace
+			tempComplex.SliceTheEuclideanSpace
 				(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
 					this->thePartialFraction.IndicatorRoot,
 					this->theGlobalVariablesContainer.Default());
+			this->theChambers.InduceFromLowerDimensionalAndProjectivize
+				(tempComplex,this->theGlobalVariablesContainer.Default());
 			WeylGroup tempWeyl;
 			tempWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
 			tempWeyl.ComputeWeylGroup();
 			tempWeyl.ComputeDebugString();
 			this->theChambers.theWeylGroupAffineHyperplaneImages
 				.SetSizeExpandOnTopNoObjectInit(0);
-			for (int i=0;i<this->theChambers.theHyperplanes.size;i++)
+			for (int i=0;i<tempComplex.theHyperplanes.size;i++)
 			{ affineHyperplane tempH;
 				root tempRoot; tempRoot.MakeZero();
 				for (int j=1;j<tempWeyl.size;j++)
 				{	tempH.MakeFromNormalAndPoint
-						(tempRoot,this->theChambers.theHyperplanes.TheObjects[i]);
+						(tempRoot,tempComplex.theHyperplanes.TheObjects[i]);
 					//tempH.ComputeDebugString();
 					tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
 					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
@@ -555,12 +566,39 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 				this->theChambers.NewHyperplanesToSliceWith.AddRoot(tempRoot);
 			}
 		//	this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
-			::TheBigOutput.InduceFromLowerDimensionalAndProjectivize
-				(this->theChambers,this->theGlobalVariablesContainer.Default());
 			this->flagComputationPartiallyDoneDontInit=true;
+<<<<<<< .mine
+			this->theChambers.flagSliceWithAWallInitDone=false;
+=======
 			TheBigOutput.flagSliceWithAWallInitDone=false;
+>>>>>>> .r203
 		}
 		else
+<<<<<<< .mine
+		{	if (this->theChambers.PreferredNextChambers.size==0 && 
+						this->theChambers.NumAffineHyperplanesProcessed	<
+						this->theChambers.NewHyperplanesToSliceWith.size)
+			{	this->theChambers.NumAffineHyperplanesProcessed++;}
+			if (	this->theChambers.NumAffineHyperplanesProcessed	<
+						this->theChambers.NewHyperplanesToSliceWith.size)
+			{	if (this->theChambers.NumAffineHyperplanesProcessed<13)
+				{ this->theChambers.SliceWithAWall(this->theChambers.NewHyperplanesToSliceWith
+						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
+							this->theGlobalVariablesContainer.Default());
+					this->flagComputationPartiallyDoneDontInit=true;
+					this->AllowRepaint=true;
+					return;
+				}				
+				if (this->theChambers.PreferredNextChambers.size==0)
+				{	this->theChambers.SliceWithAWallInit(this->theChambers.NewHyperplanesToSliceWith
+						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
+						this->theGlobalVariablesContainer.Default());
+				} else
+				{	this->theChambers.SliceWithAWallOneIncrement(this->theChambers.NewHyperplanesToSliceWith
+						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
+						this->theGlobalVariablesContainer.Default());
+				}
+=======
 		{	if (TheBigOutput.PreferredNextChambers.size==0)
 			{	this->NumAffineHyperplanesProcessed++;}
 			if (this->NumAffineHyperplanesProcessed<this->theChambers.NewHyperplanesToSliceWith.size)
@@ -573,6 +611,7 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 						.TheObjects[this->NumAffineHyperplanesProcessed],
 						this->theGlobalVariablesContainer.Default());
 				}
+>>>>>>> .r203
 			}
 		}
 	}
@@ -642,14 +681,14 @@ void ComputationSetup::Run()
 //													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
 //														this->thePartialFraction.IndicatorRoot);
 //		this->theChambers.ComputeDebugString();
-		TheBigOutput.SliceTheEuclideanSpace
+		this->theChambers.SliceTheEuclideanSpace
 													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
 														this->thePartialFraction.IndicatorRoot,
 														this->theGlobalVariablesContainer.Default());
-		TheBigOutput.ComputeDebugString();
+		this->theChambers.ComputeDebugString();
 	}
 	//TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
-	TheBigOutput.ComputeDebugString();
+	this->theChambers.ComputeDebugString();
 
 	//std::stringstream out;
 	//ListBasicObjects<roots> tempRoots;
@@ -781,6 +820,9 @@ void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 				out2 << "i"; else out2 <<"c";
 			out2 << output.TheObjects[output.indexNextChamberToSlice]->DisplayNumber;
 		}
+	}
+	if (output.flagMakingASingleHyperplaneSlice)
+	{ out2 << "; "<< "Plane index: " << output.NumAffineHyperplanesProcessed;
 	}
 	tempS=out2.str();
 	drawtext(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
@@ -2496,6 +2538,17 @@ bool CombinatorialChamber::SplitChamber
 				( LocalContainerMinusVertices,LocalLinearAlgebra.size);
 	}
 	if (!(hasPositive && hasNegative))
+<<<<<<< .mine
+	{	if (output.flagMakingASingleHyperplaneSlice && output.flagSliceWithAWallInitDone)
+		{ if (hasPositive)
+				this->PropagateSlicingWallThroughNonExploredNeighbors
+					(theKillerPlaneNormal,LocalContainerMinusVertices,output,theGlobalVariables);
+			else
+				this->PropagateSlicingWallThroughNonExploredNeighbors
+					(theKillerPlaneNormal,LocalContainerPlusVertices,output,theGlobalVariables);
+			this->flagExplored=true;
+		}
+=======
 	{	if (output.flagMakingASingleHyperplaneSlice)
 		{ if (hasPositive)
 				this->PropagateSlicingWallThroughNonExploredNeighbors
@@ -2505,6 +2558,7 @@ bool CombinatorialChamber::SplitChamber
 					(theKillerPlaneNormal,LocalContainerPlusVertices,output,theGlobalVariables);
 			this->flagExplored=true;
 		}
+>>>>>>> .r203
 		return false;
 	}
 	if (!output.flagMakingASingleHyperplaneSlice)
@@ -2587,29 +2641,8 @@ bool CombinatorialChamber::SplitChamber
 				(PossibleBogusNeighbors.TheObjects[i],NewMinusChamber);
 		}
 	}
-	if (output.flagMakingASingleHyperplaneSlice)
-	{ NewMinusChamber->flagExplored =true;
-		NewPlusChamber->flagExplored=true;
-	}
-	if (!(NewPlusChamber->Externalwalls.size>=root::AmbientDimension)){AnErrorHasOcurred=true;}
-	if (!(NewMinusChamber->Externalwalls.size>=root::AmbientDimension)){AnErrorHasOcurred=true;}
-//	if (CombinatorialChamberContainer::AnErrorHasOcurredTimeToPanic)
-//	{ NewPlusChamber->ComputeDebugString();
-//	}
 	assert(NewPlusChamber->Externalwalls.size>=root::AmbientDimension);
 	assert(NewMinusChamber->Externalwalls.size>=root::AmbientDimension);
-	if (AnErrorHasOcurred)
-	{	LocalContainerPlusVertices.ComputeDebugString();
-		LocalContainerMinusVertices.ComputeDebugString();
-		CombinatorialChamberContainer::TheBigDump << LocalContainerPlusVertices.DebugString<<"\n"
-																						 << LocalContainerMinusVertices.DebugString;
-		NewPlusChamber->ComputeDebugString();
-		NewMinusChamber->ComputeDebugString();
-		this->ComputeDebugString();
-//		CombinatorialChamberContainer::TheBigDump << this->DebugString;
-//		CombinatorialChamberContainer::TheBigDump << NewPlusChamber->DebugString;
-//		CombinatorialChamberContainer::TheBigDump << NewMinusChamber->DebugString;
-	}
 	//if (output.flagAnErrorHasOcurredTimeToPanic)
 	//{	output.ComputeDebugString();
 		//assert(NewPlusChamber->ConsistencyCheck());
@@ -2648,7 +2681,7 @@ void CombinatorialChamberContainer::AddChamberPointerSetUpPreferredIndices
 	(CombinatorialChamber* theChamber, GlobalVariables* theGlobalVariables)
 {	theChamber->IndexInOwnerComplex=this->size;
 	this->AddObjectOnTop(theChamber);	
-	if (!theChamber->flagPermanentlyZero && !this->flagMakingASingleHyperplaneSlice)
+	if (!theChamber->flagPermanentlyZero)
 		this->PreferredNextChambers.AddObjectOnTop(this->size-1);
 	else
 		theChamber->flagExplored=true;
@@ -2683,8 +2716,14 @@ void CombinatorialChamberContainer::SliceWithAWall
 void CombinatorialChamberContainer::SliceWithAWallInit
 	(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables)
 { this->flagMakingASingleHyperplaneSlice=true;
+<<<<<<< .mine
+	this->flagSliceWithAWallInitDone=false;
 	this->PurgeZeroPointers();
 	this->PreferredNextChambers.ReleaseMemory();
+=======
+	this->PurgeZeroPointers();
+	this->PreferredNextChambers.ReleaseMemory();
+>>>>>>> .r203
 	this->LabelAllUnexplored();
 	root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
 	TheKillerFacetNormal.ComputeDebugString();	
@@ -2915,6 +2954,7 @@ CombinatorialChamberContainer::CombinatorialChamberContainer()
 
 void CombinatorialChamberContainer::init()
 { this->KillAllElements();
+	this->ReleaseMemory();
 	this->FirstNonExploredIndex=0;
 	this->indexNextChamberToSlice=-1;
 	this->NewHyperplanesToSliceWith.size=0;
@@ -2922,6 +2962,7 @@ void CombinatorialChamberContainer::init()
 	this->PreferredNextChambers.ReleaseMemory();
 	this->startingCones.ReleaseMemory();
 	this->theWeylGroupAffineHyperplaneImages.size=0;
+	this->flagMakingASingleHyperplaneSlice=false;
 }
 
 
@@ -3447,11 +3488,19 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 		{tempC= NewMinusChamber;}
 		tempC->Externalwalls.AddObjectOnTop(*this);
 		for (int i=0;i<this->NeighborsAlongWall.size;i++)
+<<<<<<< .mine
+		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
+			{	tempC->Externalwalls.LastObject()->MirrorWall.TheObjects[i]->SubstituteNeighbor
+					(BossChamber,tempC,tempC->Externalwalls.LastObject());
+			}
+		}		
+=======
 		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
 			{	tempC->Externalwalls.LastObject()->MirrorWall.TheObjects[i]->SubstituteNeighbor
 					(BossChamber,tempC,tempC->Externalwalls.LastObject());
 			}
 		}
+>>>>>>> .r203
 		return false;
 	}
 }

@@ -45,7 +45,6 @@ extern DrawingVariables TDV;
 extern int NextDirectionIndex;
 extern int RankGlobal;
 extern roots InputRoots;
-extern CombinatorialChamberContainer TheBigOutput;
 
 class guiMainWindow;
 class wxDialogOutput;
@@ -615,7 +614,7 @@ guiMainWindow::guiMainWindow()
 	this->Canvas1->ClickToleranceY=10;
 	this->WorkThread1.CriticalSectionPauseButtonEntered=false;
 	this->WorkThread1.CriticalSectionWorkThreadEntered=false;
-	TDV.initDrawingVariables(200,250);
+	TDV.initDrawingVariables(250,250);
 	//this->Button3Custom->Disable();
 	this->wxProgressReportEvent.SetId(this->GetId());
 	this->wxProgressReportEvent.SetEventObject(this);
@@ -650,6 +649,7 @@ void drawCanvas::onSizing(wxSizeEvent& ev)
 
 guiMainWindow::~guiMainWindow()
 { //this->theFont
+	this->theComputationSetup.AllowRepaint=false;
 	this->WriteSettingsIfAvailable();
 	this->Canvas1->Destroy();
 	this->Dialog1OutputPF->Destroy();
@@ -773,10 +773,12 @@ void guiMainWindow::onRePaint(wxPaintEvent& ev)
 void drawCanvas::OnPaint(::wxPaintEvent& ev)
 {	::wxPaintDC  dc(this);
 	if (MainWindow1->theComputationSetup.AllowRepaint)
-	{	root::AmbientDimension= TheBigOutput.AmbientDimension;
+	{	root::AmbientDimension= MainWindow1->theComputationSetup.theChambers.AmbientDimension;
 		dc.SetBackground(MainWindow1->GetBackgroundColour());
 		dc.DrawRectangle(wxPoint(0,0),this->GetSize());
-		::CombinatorialChamberContainer::drawOutput(::TDV,::TheBigOutput,::InputRoots,::NextDirectionIndex,TheBigOutput.IndicatorRoot);
+		::CombinatorialChamberContainer::drawOutput
+			(	::TDV,MainWindow1->theComputationSetup.theChambers,
+				::InputRoots,::NextDirectionIndex,MainWindow1->theComputationSetup.theChambers.IndicatorRoot);
 	}
 }
 
@@ -1223,7 +1225,7 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 
 		} else
 		{ if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
-			{ wxString tempWS(::TheBigOutput.DebugString.c_str(),
+			{ wxString tempWS(this->theComputationSetup.theChambers.DebugString.c_str(),
 										wxConvUTF8);
 				MainWindow1->Text3PartialFractions->SetValue(tempWS);
 			}

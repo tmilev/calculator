@@ -1959,6 +1959,7 @@ public:
 	root IndicatorRoot;
 	ListBasicObjects<int> PreferredNextChambers;
 	int indexNextChamberToSlice;
+	int NumAffineHyperplanesProcessed;
 	roots StartingCrossSectionNormals;
 	roots StartingCrossSectionAffinePoints;
 	bool flagMakingASingleHyperplaneSlice;
@@ -4858,7 +4859,6 @@ public:
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer theGlobalVariablesContainer;
-	int NumAffineHyperplanesProcessed;
 	bool AllowRepaint;
 	bool ComputationInProgress;
 	bool UsingCustomVectors;

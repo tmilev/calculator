@@ -521,12 +521,8 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 	}
 	else
 	{	if (!this->flagComputationPartiallyDoneDontInit)
-<<<<<<< .mine
 		{	CombinatorialChamberContainer tempComplex;
 			this->theChambers.NumAffineHyperplanesProcessed=-1;
-=======
-		{ this->NumAffineHyperplanesProcessed=-1;
->>>>>>> .r203
 			root::AmbientDimension=this->WeylGroupIndex;
 			::InputRoots.CopyFromBase(this->VPVectors);
 			::NextDirectionIndex=root::AmbientDimension-1;
@@ -567,29 +563,16 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 			}
 		//	this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
 			this->flagComputationPartiallyDoneDontInit=true;
-<<<<<<< .mine
 			this->theChambers.flagSliceWithAWallInitDone=false;
-=======
-			TheBigOutput.flagSliceWithAWallInitDone=false;
->>>>>>> .r203
 		}
 		else
-<<<<<<< .mine
 		{	if (this->theChambers.PreferredNextChambers.size==0 && 
 						this->theChambers.NumAffineHyperplanesProcessed	<
 						this->theChambers.NewHyperplanesToSliceWith.size)
 			{	this->theChambers.NumAffineHyperplanesProcessed++;}
 			if (	this->theChambers.NumAffineHyperplanesProcessed	<
 						this->theChambers.NewHyperplanesToSliceWith.size)
-			{	if (this->theChambers.NumAffineHyperplanesProcessed<13)
-				{ this->theChambers.SliceWithAWall(this->theChambers.NewHyperplanesToSliceWith
-						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
-							this->theGlobalVariablesContainer.Default());
-					this->flagComputationPartiallyDoneDontInit=true;
-					this->AllowRepaint=true;
-					return;
-				}				
-				if (this->theChambers.PreferredNextChambers.size==0)
+			{	if (this->theChambers.PreferredNextChambers.size==0)
 				{	this->theChambers.SliceWithAWallInit(this->theChambers.NewHyperplanesToSliceWith
 						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
 						this->theGlobalVariablesContainer.Default());
@@ -598,20 +581,6 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
 						this->theGlobalVariablesContainer.Default());
 				}
-=======
-		{	if (TheBigOutput.PreferredNextChambers.size==0)
-			{	this->NumAffineHyperplanesProcessed++;}
-			if (this->NumAffineHyperplanesProcessed<this->theChambers.NewHyperplanesToSliceWith.size)
-			{	if (TheBigOutput.PreferredNextChambers.size==0)
-				{	TheBigOutput.SliceWithAWallInit(this->theChambers.NewHyperplanesToSliceWith
-						.TheObjects[this->NumAffineHyperplanesProcessed],
-						this->theGlobalVariablesContainer.Default());
-				} else
-				{	TheBigOutput.SliceWithAWallOneIncrement(this->theChambers.NewHyperplanesToSliceWith
-						.TheObjects[this->NumAffineHyperplanesProcessed],
-						this->theGlobalVariablesContainer.Default());
-				}
->>>>>>> .r203
 			}
 		}
 	}
@@ -2538,7 +2507,6 @@ bool CombinatorialChamber::SplitChamber
 				( LocalContainerMinusVertices,LocalLinearAlgebra.size);
 	}
 	if (!(hasPositive && hasNegative))
-<<<<<<< .mine
 	{	if (output.flagMakingASingleHyperplaneSlice && output.flagSliceWithAWallInitDone)
 		{ if (hasPositive)
 				this->PropagateSlicingWallThroughNonExploredNeighbors
@@ -2548,17 +2516,6 @@ bool CombinatorialChamber::SplitChamber
 					(theKillerPlaneNormal,LocalContainerPlusVertices,output,theGlobalVariables);
 			this->flagExplored=true;
 		}
-=======
-	{	if (output.flagMakingASingleHyperplaneSlice)
-		{ if (hasPositive)
-				this->PropagateSlicingWallThroughNonExploredNeighbors
-					(theKillerPlaneNormal,LocalContainerMinusVertices,output,theGlobalVariables);
-			else
-				this->PropagateSlicingWallThroughNonExploredNeighbors
-					(theKillerPlaneNormal,LocalContainerPlusVertices,output,theGlobalVariables);
-			this->flagExplored=true;
-		}
->>>>>>> .r203
 		return false;
 	}
 	if (!output.flagMakingASingleHyperplaneSlice)
@@ -2716,14 +2673,9 @@ void CombinatorialChamberContainer::SliceWithAWall
 void CombinatorialChamberContainer::SliceWithAWallInit
 	(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables)
 { this->flagMakingASingleHyperplaneSlice=true;
-<<<<<<< .mine
 	this->flagSliceWithAWallInitDone=false;
 	this->PurgeZeroPointers();
 	this->PreferredNextChambers.ReleaseMemory();
-=======
-	this->PurgeZeroPointers();
-	this->PreferredNextChambers.ReleaseMemory();
->>>>>>> .r203
 	this->LabelAllUnexplored();
 	root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
 	TheKillerFacetNormal.ComputeDebugString();	
@@ -3488,19 +3440,11 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 		{tempC= NewMinusChamber;}
 		tempC->Externalwalls.AddObjectOnTop(*this);
 		for (int i=0;i<this->NeighborsAlongWall.size;i++)
-<<<<<<< .mine
 		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
 			{	tempC->Externalwalls.LastObject()->MirrorWall.TheObjects[i]->SubstituteNeighbor
 					(BossChamber,tempC,tempC->Externalwalls.LastObject());
 			}
 		}		
-=======
-		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
-			{	tempC->Externalwalls.LastObject()->MirrorWall.TheObjects[i]->SubstituteNeighbor
-					(BossChamber,tempC,tempC->Externalwalls.LastObject());
-			}
-		}
->>>>>>> .r203
 		return false;
 	}
 }

@@ -86,6 +86,7 @@ class IntegerPoly;
 class Rational;
 class intRoot;
 class root;
+class roots;
 class rootsCollection;
 template <class Object>
 class ListBasicObjects;
@@ -179,6 +180,9 @@ public:
 	int ColorsB[DrawingVariables::NumColors];
 	int Colors[DrawingVariables::NumColors];
 	DrawingVariables(int cx, int cy){this->initDrawingVariables(cx,cy);};
+	static void GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y);
+	static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
+	void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor);
 };
 
 //The below class is to be used together with ListBasicObjects.
@@ -1292,7 +1296,7 @@ public:
 									roots& ThePlusVertices, roots& TheMinusVertices,
 									root& TheKillerFacet, root& direction,
 									ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors,
-									ListBasicObjects<WallData*>* PossibleBogusWalls, 
+									ListBasicObjects<WallData*>* PossibleBogusWalls,
 									GlobalVariables* theGlobalVariables);
 	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
@@ -1311,6 +1315,7 @@ public:
 	int HashFunction();
 //	bool ProjectFromFacet(Facet& input);
 	bool ProjectFromFacetNormal(root& input);
+	bool ContainsPoint(root& thePoint);
 	void MakeFromNormalAndPoint(root& inputPoint, root&inputNormal);
 	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
 	inline void operator=(const affineHyperplane& right){this->Assign(right);};
@@ -1378,8 +1383,8 @@ public:
 //	static bool flagMakingASingleHyperplaneSlice;
 	bool PointLiesInMoreThanOneWall(root& point);
 	//bool InduceFromAffineCone(affineCone& input);
-	bool ComputeDebugString();
-	bool ElementToString(std::string& output);
+	bool ComputeDebugString(CombinatorialChamberContainer* owner);
+	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner);
 	void ChamberNumberToStringStream(std::stringstream& out);
 	bool ConsistencyCheck();
 	//bool FacetIsInternal(Facet* f);
@@ -1392,7 +1397,7 @@ public:
 		                root& direction, GlobalVariables* theGlobalVariables);
 	bool IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor);
 	void ComputeVerticesFromNormals
-		(	CombinatorialChamberContainer& owner, 
+		(	CombinatorialChamberContainer& owner,
 			GlobalVariables* theGlobalVariables);
 	bool ComputeVertexFromSelection
 		(	GlobalVariables* theGlobalVariables, root& output, Selection& theSel);
@@ -1411,7 +1416,7 @@ public:
 	bool LinearAlgebraForVertexComputation
 				(Selection& theSelection, root& output, GlobalVariables* theGlobalVariables);
 	bool LinearAlgebraForVertexComputationOneAffinePlane
-				(	Selection& theSelection, root& output, 
+				(	Selection& theSelection, root& output,
 					GlobalVariables* theGlobalVariables, CombinatorialChamberContainer* owner);
 	//returns false if the vectors were linearly dependent
 	bool SliceInDirection(root& direction,roots& directions,
@@ -1426,14 +1431,12 @@ public:
 		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner,
 			GlobalVariables* theGlobalVariables);
 	bool HasHSignVertex(root& h,int sign);
-	void drawAffineVertices
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output);
 	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,
 																	Selection &SelectionStartSimplex,
 																	MatrixLargeRational& outputColumn);
 	void AddInternalWall
-		(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, 
-			root &direction, CombinatorialChamberContainer* owner, 
+		(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal,
+			root &direction, CombinatorialChamberContainer* owner,
 			GlobalVariables* theGlobalVariables);
 //	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
@@ -1448,6 +1451,8 @@ public:
 																			root& direction,
 																			roots & directions, int CurrentIndex,
 																			root& outputNormal,GlobalVariables* theGlobalVariables);
+  void drawOutputAffine
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner);
 	void WireChamberAndWallAdjacencyData
 		(	CombinatorialChamberContainer &owner,
 			CombinatorialChamber* input);
@@ -1969,8 +1974,6 @@ public:
 	GlobalVariables* Default(){return & this->TheObjects[0];};
 };
 
-
-
 class CombinatorialChamberContainer: public ListObjectPointers<CombinatorialChamber>
 {
 public:
@@ -2002,14 +2005,14 @@ public:
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
 	void SliceTheEuclideanSpace
-		(	roots& directions,int& index, 
-			int rank,root& IndicatorRoot, 
+		(	roots& directions,int& index,
+			int rank,root& IndicatorRoot,
 			GlobalVariables* theGlobalVariables);
 	static bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices, int NumrootsLists);
 	void SliceOneDirection
-			(	roots& directions, int& index, int rank, 
+			(	roots& directions, int& index, int rank,
 				root& IndicatorRoot, GlobalVariables* theGlobalVariables);
-	void OneSlice(roots& directions, int& index, 
+	void OneSlice(roots& directions, int& index,
 								int rank, root& IndicatorRoot, GlobalVariables* theGlobalVariables);
   void InduceFromLowerDimensionalAndProjectivize
 		(CombinatorialChamberContainer& input, GlobalVariables* theGlobalVariables);

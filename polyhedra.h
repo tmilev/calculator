@@ -203,6 +203,7 @@ public:
 	void SetSizeExpandOnTopLight(int theSize);
 	void operator = (const ListBasicObjectsLight<Object>& right);
 	void operator == (const ListBasicObjectsLight<Object>& right);
+	inline Object* LastObject(){return &this->TheObjects[this->size-1];};
 	ListBasicObjectsLight();
 	~ListBasicObjectsLight();
 };
@@ -345,6 +346,35 @@ public:
 	void initAndCreateNewObjects(int d);
 	bool IsAnElementOf(Object* o);
 };
+
+template <class Object>
+class HashedListBasicObjects : public ListBasicObjects<Object>
+{
+protected:
+	friend class partFractions;
+	friend class QuasiMonomial;
+	friend class CombinatorialChamber;
+	friend class QuasiPolynomial;
+	void ClearHashes();
+	ListBasicObjects<int>* TheHashedArrays;
+public:
+	static int PreferredHashSize;
+	int HashSize;
+	void initHash();
+	void ClearTheObjects();
+	void AddObjectOnTopHash(Object& o);
+	void AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
+	void PopIndexSwapWithLastHash(int index);
+	//the below returns -1 if it doesn't contain the object,
+	//else returns the object's index
+	int ContainsObjectHash(Object& o);
+	void SetHashSize(int HS);
+	int SizeWithoutObjects();
+	HashedListBasicObjects();
+	~HashedListBasicObjects();
+	void CopyFromHash(const HashedListBasicObjects<Object>& From);
+};
+
 
 class Integer
 {
@@ -1136,6 +1166,7 @@ public:
 	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
 	inline void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
 	void MakeNormalInProjectivizationFromPointAndNormal(root& point, root& normal);
+	bool MakeAffineProjectionFromNormal(affineHyperplane& output);
 	//the below returns false
 	bool ProjectToAffineSpace(root& output);
 	void DivByLargeRational(Rational& a);
@@ -1267,6 +1298,57 @@ public:
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 };
 
+class affineHyperplane
+{
+public:
+	std::string DebugString;
+	root affinePoint;
+	root normal;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	//void InduceFromFacet(Facet& input);
+	//the below returns false if the projection is not of full dimension
+	int HashFunction();
+//	bool ProjectFromFacet(Facet& input);
+	bool ProjectFromFacetNormal(root& input);
+	void MakeFromNormalAndPoint(root& inputPoint, root&inputNormal);
+	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
+	inline void operator=(const affineHyperplane& right){this->Assign(right);};
+};
+
+class affineHyperplanes: public ListBasicObjects<affineHyperplane>
+{
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+};
+
+class affineCone
+{
+public:
+	affineHyperplanes theWalls;
+	int HashFunction();
+	inline int GetDimension();
+	void SuperimposeAffineCones(affineCones& theOtherComplex);
+	void ProjectFromCombinatorialChamber(CombinatorialChamber& input);
+	//void induceFromCombinatorialChamber(CombinatorialChamber& input);
+	bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
+	//The below function returns true if the system of homogeneous linear inequalities Ax<=b
+	//has a solution, false otherwise, where A is a matrix and x and b are column vectors.
+	bool SystemLinearInequalitiesHasSolution
+		(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
+	bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
+	void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls);};
+	inline void operator=(const affineCone& right){this->Assign(right);};
+};
+
+class affineCones: public HashedListBasicObjects<affineCone>
+{
+public:
+	void SuperimposeAffineCones(affineCones& theOtherComplex);
+	void ProjectFromCombinatorialChambers(CombinatorialChamberContainer& input);
+};
 
 
 class CombinatorialChamber
@@ -1283,6 +1365,8 @@ public:
 	ListBasicObjects<WallData> Externalwalls;
 	roots InternalWalls;
 	roots AllVertices;
+	roots affineVertices;
+	affineHyperplanes affineExternalWalls;
 	root InternalPoint;
 	int IndexStartingCrossSectionNormal;
 	static bool DisplayingGraphics;
@@ -1300,6 +1384,9 @@ public:
 	bool ConsistencyCheck();
 	//bool FacetIsInternal(Facet* f);
 	void LabelWallIndicesProperly();
+	int getIndexInfiniteHyperplane(CombinatorialChamberContainer* owner);
+	int getIndexVertexIncidentWithSelection(Selection& theSel);
+	bool VertexIsIncidentWithSelection(root& VertexCandidate,Selection& theSel);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
 	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
 		                root& direction, GlobalVariables* theGlobalVariables);
@@ -1307,13 +1394,25 @@ public:
 	void ComputeVerticesFromNormals
 		(	CombinatorialChamberContainer& owner, 
 			GlobalVariables* theGlobalVariables);
+	bool ComputeVertexFromSelection
+		(	GlobalVariables* theGlobalVariables, root& output, Selection& theSel);
+	//the below function returns false if the cross-section affine walls have been modified
+	//and aborts its execution
+	bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
 	bool PointIsInChamber(root&point);
+	void findWallsIncidentWithVertexExcludeWallAtInfinity
+		(root& theVertex, Selection& output, CombinatorialChamberContainer* owner);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
 	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberContainer& owner);
+	void ComputeAffineInfinityPointApproximation
+		(Selection& selectedVertices,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	bool LinearAlgebraForVertexComputation
 				(Selection& theSelection, root& output, GlobalVariables* theGlobalVariables);
+	bool LinearAlgebraForVertexComputationOneAffinePlane
+				(	Selection& theSelection, root& output, 
+					GlobalVariables* theGlobalVariables, CombinatorialChamberContainer* owner);
 	//returns false if the vectors were linearly dependent
 	bool SliceInDirection(root& direction,roots& directions,
 										    int CurrentIndex, CombinatorialChamberContainer& output,
@@ -1327,6 +1426,8 @@ public:
 		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner,
 			GlobalVariables* theGlobalVariables);
 	bool HasHSignVertex(root& h,int sign);
+	void drawAffineVertices
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output);
 	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,
 																	Selection &SelectionStartSimplex,
 																	MatrixLargeRational& outputColumn);
@@ -1561,34 +1662,6 @@ void ListBasicObjects<Object>::AddObjectOnTop(const Object& o)
 	this->TheObjects[size]=o;
 	this->size++;
 }
-
-template <class Object>
-class HashedListBasicObjects : public ListBasicObjects<Object>
-{
-protected:
-	friend class partFractions;
-	friend class QuasiMonomial;
-	friend class CombinatorialChamber;
-	friend class QuasiPolynomial;
-	void ClearHashes();
-	ListBasicObjects<int>* TheHashedArrays;
-public:
-	static int PreferredHashSize;
-	int HashSize;
-	void initHash();
-	void ClearTheObjects();
-	void AddObjectOnTopHash(Object& o);
-	void AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
-	void PopIndexSwapWithLastHash(int index);
-	//the below returns -1 if it doesn't contain the object,
-	//else returns the object's index
-	int ContainsObjectHash(Object& o);
-	void SetHashSize(int HS);
-	int SizeWithoutObjects();
-	HashedListBasicObjects();
-	~HashedListBasicObjects();
-	void CopyFromHash(const HashedListBasicObjects<Object>& From);
-};
 
 template <class Object>
 int HashedListBasicObjects<Object>::SizeWithoutObjects()
@@ -1864,57 +1937,6 @@ public:
 	void operator =(Cone& right);
 };
 
-class affineHyperplane
-{
-public:
-	std::string DebugString;
-	root affinePoint;
-	root normal;
-	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-	//void InduceFromFacet(Facet& input);
-	//the below returns false if the projection is not of full dimension
-	int HashFunction();
-//	bool ProjectFromFacet(Facet& input);
-	bool ProjectFromFacetNormal(root& input);
-	void MakeFromNormalAndPoint(root& inputPoint, root&inputNormal);
-	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
-	inline void operator=(const affineHyperplane& right){this->Assign(right);};
-};
-
-class affineHyperplanes: public ListBasicObjects<affineHyperplane>
-{
-public:
-	std::string DebugString;
-	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-};
-
-class affineCone
-{
-public:
-	affineHyperplanes theWalls;
-	int HashFunction();
-	inline int GetDimension();
-	void SuperimposeAffineCones(affineCones& theOtherComplex);
-	void ProjectFromCombinatorialChamber(CombinatorialChamber& input);
-	//void induceFromCombinatorialChamber(CombinatorialChamber& input);
-	bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
-	//The below function returns true if the system of homogeneous linear inequalities Ax<=b
-	//has a solution, false otherwise, where A is a matrix and x and b are column vectors.
-	bool SystemLinearInequalitiesHasSolution
-		(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
-	bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
-	void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls);};
-	inline void operator=(const affineCone& right){this->Assign(right);};
-};
-
-class affineCones: public HashedListBasicObjects<affineCone>
-{
-public:
-	void SuperimposeAffineCones(affineCones& theOtherComplex);
-	void ProjectFromCombinatorialChambers(CombinatorialChamberContainer& input);
-};
 
 class simplicialCones : public ListBasicObjects<Cone>
 {
@@ -1935,6 +1957,8 @@ public:
 	rootsCollection rootsCollectionLocalContainerPlusVertices;
 	rootsCollection rootsCollectionLocalContainerMinusVertices;
 	MatrixLargeRational matTransposeBuffer;
+	MatrixLargeRational matComputationBufferLinAlgOneAffinePlane;
+	MatrixLargeRational matComputationBufferLinAlgAffinePart;
 	GlobalVariables();
 	void operator=(const GlobalVariables& G_V);
 };
@@ -1960,10 +1984,10 @@ public:
 	ListBasicObjects<int> PreferredNextChambers;
 	int indexNextChamberToSlice;
 	int NumAffineHyperplanesProcessed;
-	roots StartingCrossSectionNormals;
-	roots StartingCrossSectionAffinePoints;
+	affineHyperplanes StartingCrossSections;
 	bool flagMakingASingleHyperplaneSlice;
 	bool flagSliceWithAWallInitDone;
+	bool flagDrawingProjective;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -2009,10 +2033,18 @@ public:
 	void DumpAll();
 	bool ConsistencyCheck();
 	void PurgeZeroPointers();
+	void ProjectToDefaultAffineSpace(GlobalVariables* theGlobalVariables);
+	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables* theGlobalVariables);
 	void PrintThePolys(std::string& output);
 	void ComputeGlobalCone(roots& directions);
-	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberContainer& output,
-								roots& directions, int directionIndex,root& ChamberIndicator);
+	static void drawOutput
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
+			roots& directions, int directionIndex,root& ChamberIndicator);
+	static void drawOutputProjective
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
+			roots& directions, int directionIndex,root& ChamberIndicator);
+	static void drawOutputAffine
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output);
 	static void drawFacetVerticesMethod2(DrawingVariables& TDV,
 														  roots& r, roots& directions, int ChamberIndex,
 															WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes);

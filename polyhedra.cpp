@@ -746,12 +746,31 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 	}
 }
 
+void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
+								CombinatorialChamberContainer& output,
+								roots& directions, int directionIndex, root& ChamberIndicator)
+{ if (output.flagDrawingProjective)
+	{ CombinatorialChamberContainer::drawOutputProjective(TDV,output,directions, directionIndex,ChamberIndicator);
+	} else
+	{ CombinatorialChamberContainer::drawOutputAffine(TDV,output);
+	}
+}
+
 //color styles (taken from windows.h and substituted for independence of the .h file):
 // 0 = normal line
 // 1 = dashed line
 // 2 = dotted line
 // 5 = invisible line (no line)
-void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
+void CombinatorialChamberContainer::drawOutputAffine(DrawingVariables &TDV, CombinatorialChamberContainer &output)
+{
+}
+
+//color styles (taken from windows.h and substituted for independence of the .h file):
+// 0 = normal line
+// 1 = dashed line
+// 2 = dotted line
+// 5 = invisible line (no line)
+void CombinatorialChamberContainer::drawOutputProjective(DrawingVariables& TDV,
 								CombinatorialChamberContainer& output,
 								roots& directions, int directionIndex, root& ChamberIndicator)
 { int color=0;
@@ -1234,16 +1253,28 @@ void root::MakeNormalInProjectivizationFromPointAndNormal(root& point, root& nor
 }
 
 bool root::ProjectToAffineSpace(root &output)
-{ output.SetSizeExpandOnTopLight(this->size-1);
-	for (int i=0;i<this->size-1;i++)
-	{ output.TheObjects[i].Assign(this->TheObjects[i]);
-	}
-	if (this->TheObjects[this->size-1].IsEqualToZero())
+{	if (this->TheObjects[this->size-1].IsEqualToZero())
 		return false;
+	output.SetSizeExpandOnTopLight(this->size-1);
+	for (int i=0;i<this->size-1;i++)
+		output.TheObjects[i].Assign(this->TheObjects[i]);
 	output.DivByLargeRational(this->TheObjects[this->size-1]);
 	return true;
 }
 
+bool root::MakeAffineProjectionFromNormal(affineHyperplane& output)
+{ int tempI= this->getIndexFirstNonZeroCoordinate();
+	if (tempI==this->size-1)
+		return false;
+	output.affinePoint.MakeZero(this->size-1);
+	output.normal.SetSizeExpandOnTopLight(this->size-1);
+	output.affinePoint.TheObjects[tempI].Assign(*this->LastObject());
+	output.affinePoint.TheObjects[tempI].Minus(); 
+	output.affinePoint.TheObjects[tempI].DivideBy(this->TheObjects[tempI]);
+	for (int i=0;i<this->size-1;i++)
+		output.normal.TheObjects[i].Assign(this->TheObjects[i]);
+	return true;
+}
 
 void root::DivByInteger(int a)
 {	for (int i =0; i<this->size;i++)
@@ -2167,6 +2198,95 @@ CombinatorialChamber::CombinatorialChamber()
 	this->flagPermanentlyZero=false;
 }
 
+bool CombinatorialChamber::ProjectToDefaultAffineSpace
+	(CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables)
+{ this->affineExternalWalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size);
+	this->affineVertices.MakeActualSizeAtLeastExpandOnTop(this->AllVertices.size);
+	this->affineExternalWalls.size=0;
+	this->affineVertices.size=0;
+	for (int i=0;i<this->Externalwalls.size;i++)
+	{ affineHyperplane tempAH;
+		if (this->Externalwalls.TheObjects[i].normal.MakeAffineProjectionFromNormal(tempAH))
+		{ this->affineExternalWalls.AddObjectOnTop(tempAH);
+		}
+	}
+	Rational tempScalarProd1, tempRat;
+	root::RootScalarEuclideanRoot(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,
+																owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,
+																tempScalarProd1);
+	for (int i=0;i<this->AllVertices.size;i++)
+	{ root tempRoot;
+		if (this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
+		{ root::RootScalarEuclideanRoot
+				(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,
+					tempRoot, tempRat);
+			if (tempRat.IsEqualTo(tempScalarProd1))
+			{	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.MultiplyByInteger(2);
+				return false;
+			}
+			this->affineVertices.AddObjectOnTop(tempRoot);
+		} else
+		{ Selection tempSel;
+			this->findWallsIncidentWithVertexExcludeWallAtInfinity(this->AllVertices.TheObjects[i],tempSel, owner);
+			assert(tempSel.CardinalitySelection==owner->AmbientDimension-1);
+			this->ComputeAffineInfinityPointApproximation(tempSel,owner,theGlobalVariables);
+		}
+	}
+	return true;
+}
+
+void CombinatorialChamber::ComputeAffineInfinityPointApproximation
+	(Selection& selectedVertices,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables)
+{ for (int i=0;i<selectedVertices.CardinalitySelection;i++)
+	{ int tempIndex=selectedVertices.elements[i];
+		selectedVertices.selected[tempIndex]=false;
+		selectedVertices.ComputeIndicesFromSelection();
+		root candidateVertex;
+		this->LinearAlgebraForVertexComputationOneAffinePlane(selectedVertices,candidateVertex,theGlobalVariables,owner);
+		this->affineVertices.AddObjectOnTop(candidateVertex);
+		selectedVertices.AddSelection(tempIndex);
+	}
+}
+
+void CombinatorialChamber::findWallsIncidentWithVertexExcludeWallAtInfinity
+	(root& theVertex, Selection &output, CombinatorialChamberContainer* owner)
+{ output.init(this->Externalwalls.size);
+	root tempRoot;
+	tempRoot.MakeZero(owner->AmbientDimension); 
+	tempRoot.LastObject()->MakeOne();
+	for (int i=0;i<output.CardinalitySelection;i++)
+	{ if (	theVertex.OurScalarProductIsZero(this->Externalwalls.TheObjects[i].normal)
+				&&!this->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot))
+			output.AddSelection(i);
+	}
+}
+
+
+int CombinatorialChamber::getIndexInfiniteHyperplane(CombinatorialChamberContainer* owner)
+{ root tempRoot; tempRoot.MakeZero(owner->AmbientDimension);
+	tempRoot.LastObject()->MakeOne();
+	for(int i=0;i<this->Externalwalls.size;i++)
+		if (this->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot))
+			return i;
+	return -1;
+}
+
+int CombinatorialChamber::getIndexVertexIncidentWithSelection(Selection&theSel)
+{ for (int i=0;i<this->AllVertices.size;i++)
+	{ if (this->VertexIsIncidentWithSelection(this->AllVertices.TheObjects[i],theSel))
+			return i;
+	}
+	return -1;
+}
+
+bool CombinatorialChamber::VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel)
+{ for(int i=0; i<theSel.CardinalitySelection;i++)
+	{ if (!this->Externalwalls.TheObjects[theSel.elements[i]]
+					.normal.OurScalarProductIsZero(VertexCandidate))
+			return false;
+	}
+	return true;
+}
 
 void CombinatorialChamber::ComputeInternalPointMethod1(root &InternalPoint)
 {/*
@@ -2230,6 +2350,16 @@ void CombinatorialChamber::ComputeVerticesFromNormals
 	}
 }
 
+bool CombinatorialChamber::ComputeVertexFromSelection
+	( GlobalVariables* theGlobalVariables, root& output, Selection& theSelection)
+{ if (this->LinearAlgebraForVertexComputation
+					(theSelection,output,theGlobalVariables))
+	{ if (this->PlusMinusPointIsInChamber(output))
+			return true;
+	}
+	return false;
+}
+
 bool CombinatorialChamber::PlusMinusPointIsInChamber(root&point)
 {	if (PointIsInChamber(point))
 	{ return true;
@@ -2246,15 +2376,14 @@ bool CombinatorialChamber::ScaleVertexToFitCrossSection
 {	static Rational tempRat;
 	if (this->IndexStartingCrossSectionNormal==-1)
 		return false;
-	root::RootScalarEuclideanRoot(point,
-		owner.StartingCrossSectionNormals
-		 .TheObjects[this->IndexStartingCrossSectionNormal],tempRat);
+	root::RootScalarEuclideanRoot
+		(point,	owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,tempRat);
 	if (tempRat.IsEqualToZero()){return false;}
 	point.DivByLargeRational(tempRat);
-	root::RootScalarEuclideanRoot(owner.StartingCrossSectionNormals
-			.TheObjects[this->IndexStartingCrossSectionNormal],
-		owner.StartingCrossSectionAffinePoints
-			.TheObjects[this->IndexStartingCrossSectionNormal],tempRat);
+	root::RootScalarEuclideanRoot
+		(	owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,
+			owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,
+			tempRat);
 	point.MultiplyByLargeRational(tempRat);
 	return true;
 }
@@ -2348,6 +2477,46 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputation
 		return true;
 	}
 	return false;
+}
+
+bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane
+	(	Selection& theSelection, root& output, 
+		GlobalVariables* theGlobalVariables, CombinatorialChamberContainer* owner)
+{ assert(theSelection.CardinalitySelection==owner->AmbientDimension-2);
+	MatrixLargeRational& tempMat=theGlobalVariables->matComputationBufferLinAlgOneAffinePlane;
+	MatrixLargeRational& tempColumn=theGlobalVariables->matComputationBufferLinAlgAffinePart;
+	tempMat.init(owner->AmbientDimension, owner->AmbientDimension);
+	tempColumn.init(owner->AmbientDimension,1);
+	for (int i=0;i<theSelection.CardinalitySelection;i++)
+	{ for (int j=0;j<owner->AmbientDimension;j++)
+		{ tempMat.elements[i][j].Assign
+				(	this->Externalwalls.TheObjects[theSelection.elements[i]]
+						.normal.TheObjects[j]);
+		}
+		tempColumn.elements[i][0].MakeZero();
+	}
+	tempColumn.elements[owner->AmbientDimension-2][0].MakeOne();
+	Rational tempRat; Rational tempOne; tempOne.MakeOne();
+	root::RootScalarEuclideanRoot
+		(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,
+			owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,tempRat);
+	tempRat.Subtract(tempOne);
+	tempColumn.elements[owner->AmbientDimension-1][0].Assign(tempRat);
+	for (int i=0;i<owner->AmbientDimension-1;i++)
+	{ tempMat.elements[owner->AmbientDimension-2][i].MakeZero();
+		tempMat.elements[owner->AmbientDimension-1][i].Assign
+			(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal]
+					.normal.TheObjects[i]);
+	}
+	tempMat.elements[owner->AmbientDimension-2][owner->AmbientDimension-1].MakeOne();
+	tempMat.elements[owner->AmbientDimension-1][owner->AmbientDimension-1].MakeZero();
+	Selection tempSel;
+	Matrix<Rational>::GaussianEliminationByRows(tempMat,tempColumn, tempSel);
+	assert(tempSel.CardinalitySelection==0);
+	output.SetSizeExpandOnTopLight(owner->AmbientDimension);
+	for (int i=0;i<owner->AmbientDimension;i++)
+		output.TheObjects[i].Assign(tempColumn.elements[i][0]);
+	return true;
 }
 
 bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
@@ -2757,6 +2926,18 @@ void CombinatorialChamberContainer::ComputeVerticesFromNormals(GlobalVariables* 
 		this->TheObjects[i]->ComputeVerticesFromNormals(*this, theGlobalVariables);
 }
 
+bool CombinatorialChamberContainer::ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables* theGlobalVariables)
+{ for (int i=0;i<this->size;i++)
+		if (!this->TheObjects[i]->ProjectToDefaultAffineSpace(this,theGlobalVariables))
+			return false;
+	return true;
+}
+
+void CombinatorialChamberContainer::ProjectToDefaultAffineSpace(GlobalVariables* theGlobalVariables)
+{ while (!this->ProjectToDefaultAffineSpaceModifyCrossSections(theGlobalVariables))
+	{}
+}
+
 void CombinatorialChamberContainer::ComputeNextIndexToSlice(root &direction)
 {//	if (this->flagAnErrorHasOcurredTimeToPanic)
 //		this->ComputeDebugString();
@@ -2846,19 +3027,18 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
 	this->AmbientDimension=input.AmbientDimension+1;
 	input.ComputeDebugString();
   this->initAndCreateNewObjects(input.size);
-	this->StartingCrossSectionNormals.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSectionAffinePoints.size);
-	this->StartingCrossSectionAffinePoints.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSectionAffinePoints.size);
-	for (int i=0;i<input.StartingCrossSectionAffinePoints.size;i++)
-	{ this->StartingCrossSectionAffinePoints.TheObjects[i].SetSizeExpandOnTopLight(root::AmbientDimension+1);
-		this->StartingCrossSectionNormals.TheObjects[i].SetSizeExpandOnTopLight(root::AmbientDimension+1);
-		for (int j=0;j<root::AmbientDimension;j++)
-		{ this->StartingCrossSectionAffinePoints.TheObjects[i].TheObjects[j].Assign(
-				input.StartingCrossSectionAffinePoints.TheObjects[i].TheObjects[j]);
-			this->StartingCrossSectionNormals.TheObjects[i].TheObjects[j].Assign(
-				input.StartingCrossSectionNormals.TheObjects[i].TheObjects[j]);
+	this->StartingCrossSections.SetSizeExpandOnTopNoObjectInit(input.StartingCrossSections.size);
+	for (int i=0;i<input.StartingCrossSections.size;i++)
+	{ this->StartingCrossSections.TheObjects[i].affinePoint.SetSizeExpandOnTopLight(input.AmbientDimension+1);
+		this->StartingCrossSections.TheObjects[i].normal.SetSizeExpandOnTopLight(input.AmbientDimension+1);
+		for (int j=0;j<input.AmbientDimension;j++)
+		{ this->StartingCrossSections.TheObjects[i].affinePoint.TheObjects[j].Assign(
+				input.StartingCrossSections.TheObjects[i].affinePoint.TheObjects[j]);
+			this->StartingCrossSections.TheObjects[i].normal.TheObjects[j].Assign(
+				input.StartingCrossSections.TheObjects[i].normal.TheObjects[j]);
 		}
-		this->StartingCrossSectionAffinePoints.TheObjects[i].TheObjects[root::AmbientDimension].MakeOne();
-		this->StartingCrossSectionNormals.TheObjects[i].TheObjects[root::AmbientDimension].MakeOne();
+		this->StartingCrossSections.TheObjects[i].normal.TheObjects[input.AmbientDimension].MakeOne();
+		this->StartingCrossSections.TheObjects[i].affinePoint.TheObjects[input.AmbientDimension].MakeOne();
 	}
 	input.LabelChamberIndicesProperly();
   this->LabelChamberIndicesProperly();
@@ -2915,6 +3095,7 @@ void CombinatorialChamberContainer::init()
 	this->startingCones.ReleaseMemory();
 	this->theWeylGroupAffineHyperplaneImages.size=0;
 	this->flagMakingASingleHyperplaneSlice=false;
+	this->flagDrawingProjective=true;
 }
 
 
@@ -2966,7 +3147,7 @@ void CombinatorialChamberContainer::MakeStartingChambers
 	theSelection.initNoMemoryAllocation();
 	int NumStartingChambers=MathRoutines::TwoToTheNth(root::AmbientDimension);
 	this->initAndCreateNewObjects(NumStartingChambers);
-	this->StartingCrossSectionAffinePoints
+	this->StartingCrossSections
 		.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
 	for(int i=0;i<NumStartingChambers;i++)
 	{	int tempI= theSelection.SelectionToIndex();
@@ -2996,7 +3177,7 @@ void CombinatorialChamberContainer::MakeStartingChambers
 		root tempRoot;
 		tempRoot.Assign(directions.TheObjects[0]);
 		if (!theSelection.selected[0]) {tempRoot.MinusRoot(); }
-		this->StartingCrossSectionAffinePoints.TheObjects[tempI].Assign(tempRoot);
+		this->StartingCrossSections.TheObjects[tempI].affinePoint.Assign(tempRoot);
 		theSelection.incrementSelection();
 //		if (this->flagAnErrorHasOcurredTimeToPanic)
 //			this->ComputeDebugString();
@@ -3006,7 +3187,7 @@ void CombinatorialChamberContainer::MakeStartingChambers
 		root Accum;	Accum.MakeZero();
 		for (int j=0;j<this->TheObjects[i]->Externalwalls.size;j++)
 			Accum.Add(this->TheObjects[i]->Externalwalls.TheObjects[j].normal);
-		this->StartingCrossSectionNormals.AddRoot(Accum);
+		this->StartingCrossSections.TheObjects[i].normal.Assign(Accum);
 //		if (this->flagAnErrorHasOcurredTimeToPanic)
 //			Accum.ComputeDebugString();
 		assert(this->TheObjects[i]->ConsistencyCheck());

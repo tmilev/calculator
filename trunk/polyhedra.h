@@ -85,6 +85,7 @@ class Selection;
 class IntegerPoly;
 class Rational;
 class intRoot;
+class PolyPartFractionNumerator;
 class root;
 class roots;
 class rootsCollection;
@@ -536,7 +537,7 @@ class MatrixLargeRational: public Matrix<Rational>
 {
 public:
 	void ComputeDeterminantOverwriteMatrix( Rational& output);
-	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
+	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, int OutputDimension, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
 	void Transpose(GlobalVariables* theGlobalVariables);
 	void MultiplyByInt(int x);
@@ -1157,11 +1158,9 @@ private:
 	void FindLCMDenominatorsLight(LargeIntUnsigned& output);
 	bool HasSmallCoordinates();
 public:
-	static unsigned char AmbientDimension;
 	std::string DebugString;
 	void MultiplyByLargeRational(Rational& a);
 	void ComputeDebugString();
-	void MakeZero();
 	void MakeZero(int DesiredDimension);
 	void Add(root& r);
 	int getIndexFirstNonZeroCoordinate();
@@ -1180,9 +1179,10 @@ public:
 	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 	void FindLCMDenominators(LargeIntUnsigned& output);
 	int FindLCMDenominatorsTruncateToInt();
-	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5);
-	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
-	void InitFromIntegers(int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
+	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5);
+	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
+	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, 
+												int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	void MultiplyByInteger(int a);
 	void MultiplyByLargeInt(LargeInt& right);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
@@ -1191,6 +1191,7 @@ public:
 	bool OurScalarProductIsZero(root& right);
 	void MinusRoot();
 	void Subtract(root& r);
+	void AssignWithoutLastCoordinate(root& right);
 	inline void Assign(const root& right)
 	{ if (this->size!=right.size)
 		{ this->SetSizeExpandOnTopLight(right.size);
@@ -1216,7 +1217,7 @@ public:
 //	static void RootScalarRoot(root& r1, root& r2, MatrixIntTightMemoryFit& KillingForm, Rational& output);
 	static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
 	int HashFunction();
-	root(){this->SetSizeExpandOnTopLight(root::AmbientDimension);};
+	root(){};
 	inline void operator=(const root& right){this->Assign(right);};
 	inline bool operator==(const root& right){return IsEqualTo(right);};
 };
@@ -1235,32 +1236,34 @@ public:
 	void AddRootS(roots& r);
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
-	void PerturbVectorToRegular(root&output);
-	void Average(root& output);
+	void PerturbVectorToRegular(root&output, GlobalVariables* theGlobalVariables, int theDimension);
+	void Average(root& output, int theDimension);
 	void Pop(int index);
-	bool IsRegular(root& r);
-	bool IsRegular(root& r, root& outputFailingNormal);
+	bool IsRegular(root& r, GlobalVariables* theGlobalVariables, int theDimension);
+	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables* theGlobalVariables, int theDimension);
 	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
 		(MatrixLargeRational& outputTheLinearCombination, int theIndex);
 	void GetLinearDependenceRunTheLinearAlgebra
 		(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
 		 Selection& outputNonPivotPoints);
 	bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
-	void GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix,
-																							 Selection& outputNonPivotPoints);
+	void GaussianEliminationForNormalComputation
+		(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension);
 	void rootsToMatrix(MatrixLargeRational& output);
 	void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
 	void ElementToString(std::string& output);
 	void SubSelection(Selection& theSelection, roots& output);
-	void SelectionToMatrix(Selection& theSelection, MatrixLargeRational& output);
+	void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
 	void SelectionToMatrixAppend
-				(Selection& theSelection, MatrixLargeRational& output, int StartRowIndex);
+				(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
 	void ComputeNormal(root& output);
-	bool ComputeNormalExcludingIndex(root& output, int index);
-	bool ComputeNormalFromSelection(root& output, Selection& theSelection);
-	bool ComputeNormalFromSelectionAndExtraRoot(root& output,root& ExtraRoot, Selection& theSelection);
-	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output,root& ExtraRoot1,
-																									root& ExtraRoot2, Selection& theSelection);
+	bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables* theGlobalVariables);
+	bool ComputeNormalFromSelection
+		(root& output, Selection& theSelection, GlobalVariables* theGlobalVariables, int theDimension);
+	bool ComputeNormalFromSelectionAndExtraRoot
+		(root& output,root& ExtraRoot, Selection& theSelection, GlobalVariables* theGlobalVariables);
+	bool ComputeNormalFromSelectionAndTwoExtraRoots
+		(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables* theGlobalVariables);
 	bool operator==(const roots& right);
 	void operator = (const roots& right){this->CopyFromBase(right);};
 };
@@ -1386,7 +1389,7 @@ public:
 	bool ComputeDebugString(CombinatorialChamberContainer* owner);
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner);
 	void ChamberNumberToStringStream(std::stringstream& out);
-	bool ConsistencyCheck();
+	bool ConsistencyCheck(int theDimension);
 	//bool FacetIsInternal(Facet* f);
 	void LabelWallIndicesProperly();
 	int getIndexInfiniteHyperplane(CombinatorialChamberContainer* owner);
@@ -1395,12 +1398,14 @@ public:
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
 	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
 		                root& direction, GlobalVariables* theGlobalVariables);
-	bool IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor);
+	bool IsABogusNeighbor
+		(	WallData& NeighborWall,CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex,
+			GlobalVariables* theGlobalVariables);
 	void ComputeVerticesFromNormals
 		(	CombinatorialChamberContainer& owner,
 			GlobalVariables* theGlobalVariables);
 	bool ComputeVertexFromSelection
-		(	GlobalVariables* theGlobalVariables, root& output, Selection& theSel);
+		(	GlobalVariables* theGlobalVariables, root& output, Selection& theSel, int theDimension);
 	//the below function returns false if the cross-section affine walls have been modified
 	//and aborts its execution
 	bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
@@ -1414,7 +1419,7 @@ public:
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	bool LinearAlgebraForVertexComputation
-				(Selection& theSelection, root& output, GlobalVariables* theGlobalVariables);
+				(Selection& theSelection, root& output, GlobalVariables* theGlobalVariables, int theDimension);
 	bool LinearAlgebraForVertexComputationOneAffinePlane
 				(	Selection& theSelection, root& output,
 					GlobalVariables* theGlobalVariables, CombinatorialChamberContainer* owner);
@@ -1431,9 +1436,9 @@ public:
 		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner,
 			GlobalVariables* theGlobalVariables);
 	bool HasHSignVertex(root& h,int sign);
-	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,
-																	Selection &SelectionStartSimplex,
-																	MatrixLargeRational& outputColumn);
+	bool CheckSplittingPointCandidate
+		(	Selection &SelectionTargetSimplex,Selection &SelectionStartSimplex, 
+			MatrixLargeRational& outputColumn, int Dimension);
 	void AddInternalWall
 		(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal,
 			root &direction, CombinatorialChamberContainer* owner,
@@ -1441,8 +1446,7 @@ public:
 //	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
-	void ComputeInternalPointMethod1(root& InternalPoint);
-	void ComputeInternalPointMethod2(root& InternalPoint);
+	void ComputeInternalPointMethod2(root& InternalPoint, int theDimension);
 	bool OwnsAWall(WallData* theWall);
 	void MakeNewMutualNeighbors
 		(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
@@ -1916,7 +1920,7 @@ class rootsCollection: public ListBasicObjects<roots>
 public:
 	std::string DebugString;
 	void ComputeDebugString();
-	void Average(root& output, int Number);
+	void Average(root& output, int Number, int theDimension);
 	void ResetCounters();
 	~rootsCollection(){};
 };
@@ -1933,7 +1937,7 @@ public:
 class Cone : public roots
 { //The roots are the normals to the walls of the cone
 public:
-	void ComputeFromDirections(roots& directions);
+	void ComputeFromDirections(roots& directions, GlobalVariables* theGlobalVariables, int theDimension);
 	bool IsSurelyOutsideCone(rootsCollection& TheVertices, int NumrootsLists);
 	bool IsInCone(root& r);
 	bool SeparatesPoints(root& point1, root& point2);
@@ -1951,27 +1955,8 @@ public:
 	std::string DebugString;
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
-	void initFromDirections(roots& directions);
+	void initFromDirections(roots& directions,GlobalVariables* theGlobalVariables);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
-};
-
-class GlobalVariables
-{
-public:
-	roots rootsWallBasis;
-	rootsCollection rootsCollectionLocalContainerPlusVertices;
-	rootsCollection rootsCollectionLocalContainerMinusVertices;
-	MatrixLargeRational matTransposeBuffer;
-	MatrixLargeRational matComputationBufferLinAlgOneAffinePlane;
-	MatrixLargeRational matComputationBufferLinAlgAffinePart;
-	GlobalVariables();
-	void operator=(const GlobalVariables& G_V);
-};
-
-class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
-{
-public:
-	GlobalVariables* Default(){return & this->TheObjects[0];};
 };
 
 class CombinatorialChamberContainer: public ListObjectPointers<CombinatorialChamber>
@@ -2039,7 +2024,7 @@ public:
 	void ProjectToDefaultAffineSpace(GlobalVariables* theGlobalVariables);
 	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables* theGlobalVariables);
 	void PrintThePolys(std::string& output);
-	void ComputeGlobalCone(roots& directions);
+	void ComputeGlobalCone(roots& directions, GlobalVariables* theGlobalVariables);
 	static void drawOutput
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator);
@@ -2121,6 +2106,59 @@ public:
 	Monomial();
 	~Monomial();
 };
+
+
+class GlobalVariables
+{
+public:
+	roots rootsWallBasis;
+	roots rootsIsABogusNeighbor1;
+	roots rootsIsABogusNeighbor2;
+	roots rootsSplitChamber1;
+
+	rootsCollection rootsCollectionSplitChamber1;
+	rootsCollection rootsCollectionSplitChamber2;
+	
+	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
+	ListBasicObjects<WallData*> listWallDataPtSplitChamber;
+
+	Monomial<Rational> monMakePolyExponentFromIntRoot;
+	Monomial<Rational> monMakePolyFromDirectionAndNormal;
+
+	MatrixLargeRational matTransposeBuffer;
+	MatrixLargeRational matComputationBufferLinAlgOneAffinePlane;
+	MatrixLargeRational matComputationBufferLinAlgAffinePart;
+	MatrixLargeRational matComputeNormalFromSelection;
+	MatrixLargeRational matOutputEmpty;
+	MatrixLargeRational	matComputeNormalExcludingIndex;
+	MatrixLargeRational matLinearAlgebraForVertexComputation;
+	MatrixLargeRational	matComputeNormalFromSelectionAndExtraRoot;
+	MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
+
+	QuasiPolynomial* QPComputeQuasiPolynomial;
+	QuasiNumber* QNComputeQuasiPolynomial;
+
+	IntegerPoly* IPRemoveRedundantShortRootsClassicalRootSystem;
+	IntegerPoly* IPElementToStringBasisChange;
+
+	PolyPartFractionNumerator* PPFNElementToStringBasisChange;
+
+	Selection selComputeNormalFromSelection;
+	Selection selComputeNormalExcludingIndex;
+	Selection selWallSelection;
+	Selection selComputeNormalFromSelectionAndExtraRoot;
+	Selection selComputeNormalFromSelectionAndTwoExtraRoots;
+	GlobalVariables();
+	~GlobalVariables();
+	void operator=(const GlobalVariables& G_V);
+};
+
+class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
+{
+public:
+	GlobalVariables* Default(){return & this->TheObjects[0];};
+};
+
 
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::InitWithZero=true;
@@ -2350,22 +2388,21 @@ public:
 	void ElementToString(std::string& output);
 	bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
 	bool IsGEQNoWeight(intRoot& r);
-	void MakeZero();
+	void MakeZero(unsigned char  theDimension);
 	void MultiplyByInteger(int x)
 	{	for (int i=0;i<this->dimension;i++)
 		{ this->elements[i]*=x;
 		}
 	};
-	void initFromInt(int x1,int x2,int x3, int x4, int x5);
-	void initFromInt(	int x1,int x2,int x3, int x4, int x5, int x6,
+	void initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5);
+	void initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5, int x6,
 										int x7,int x8,int x9, int x10, int x11, int x12);
 	//remark: zero is considered to be a positive vector!
 	bool IsPositive();
 	void AddRoot(intRoot& theRoot);
 	void operator=(const intRoot& right);
 	bool operator==(intRoot& right);
-	void operator=(int* right);
-	intRoot(){this->dimension=root::AmbientDimension; for (unsigned char i=0;i<this->dimension;i++)elements[i]=0;}
+	intRoot(){};
 };
 
 class GeneratorPFAlgebraRecord
@@ -2387,7 +2424,7 @@ public:
 	GeneratorPFAlgebraRecord();
 	~GeneratorPFAlgebraRecord();
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
-	void GetValue(IntegerPoly &output);
+	void GetValue(IntegerPoly &output, int theDimension);
   void operator = (const GeneratorPFAlgebraRecord& right);
   int HashFunction()
   { return this->Elongation+ this->GeneratorRoot.HashFunction();
@@ -2411,10 +2448,11 @@ public:
 										::GeneratorsPartialFractionAlgebra,
 										GeneratorPFAlgebraRecord>& output);
 	std::string DebugString;
+	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat, int theDimension);
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
   int HashFunction();
   void operator = (const GeneratorsPartialFractionAlgebra& right);
- 	void ConvertToIntegerPoly(IntegerPoly& output);
+ 	void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
 	//IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count.
 	//This might have to be rewritten.
   bool operator == (GeneratorsPartialFractionAlgebra& right);
@@ -2536,7 +2574,7 @@ class PolyPartFractionNumerator: public TemplatePolynomial
 			Integer >
 {
 public:
-	void ConvertToIntegerPoly(IntegerPoly& output);
+	void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
 };
 
 class PolyPartFractionNumeratorLight: public
@@ -2545,7 +2583,7 @@ class PolyPartFractionNumeratorLight: public
 public:
 	ListBasicObjectsLight<int> Coefficients;
 	void AssignPolyPartFractionNumerator(PolyPartFractionNumerator& from);
-	void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output);
+	void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output, int theDimension);
 	void AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight& right);
 	int NumGeneratorsUsed();
 };
@@ -2763,8 +2801,8 @@ public:
 	void ComputeDubugString();
 	void operator=(const PolynomialsRationalCoeff& right);
 	bool operator==(const PolynomialsRationalCoeff& right);
-	void ComputeB(PolynomialRationalCoeff& output,int cutOffIndex);
-	void MakeUsualParametricRoot();
+	void ComputeB(PolynomialRationalCoeff& output,int cutOffIndex, int theDimension);
+	void MakeUsualParametricRoot(int theDimension);
 	void MakeOneParameterSubFromDirection(root& direction);
 	void MakeOneParameterSubFromDirectionInts(int x1, int x2, int x3, int x4, int x5);
 	void MakeOneParameterSubFromDirectionIntsAndConstants(int x1, int x2, int x3, int x4, int x5,
@@ -2773,7 +2811,7 @@ public:
 	void MakeSubFromMatrixRational(MatrixLargeRational& theMat);
 	void ComputeDiscreteIntegrationUpTo(int d);
 	void MakeLinearSubOnLastVariable(short NumVars,PolynomialRationalCoeff& LastVarSub);
-	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction);
+	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables* theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 	void Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget);
 };
@@ -2783,9 +2821,9 @@ class PolynomialsRationalCoeffCollection: public ListBasicObjects<PolynomialsRat
 public:
 	roots ChamberIndicators;
 	std::string DebugString;
-	void ElementToString(std::string& output);
-	void ElementToStringComputeFunctionB(std::string& output, bool computingB);
-	void ComputeDubugString();
+	void ElementToString(std::string& output, int theDimension);
+	void ElementToStringComputeFunctionB(std::string& output, bool computingB, int theDimension);
+	void ComputeDubugString(int theDimension);
 	void Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget);
 };
 
@@ -2804,27 +2842,23 @@ class IntegerPolyLight: public PolynomialLight<Integer>
 public:
 };
 
-class PolynomialLargeRational: public Polynomial<Rational>
-{
-public:
-	void Evaluate(intRoot& values,Rational& output);
-};
-
 class PolynomialRationalCoeff: public Polynomial<Rational>
 {
 public:
 	void AssignIntegerPoly(IntegerPoly& p);
-	void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction);
-	void MakePolyExponentFromIntRoot(intRoot& r);
-	void MakeLinPolyFromInt(int x1,int x2, int x3,int x4, int x5);
+	void Evaluate(intRoot& values,Rational& output);
+	void MakePolyFromDirectionAndNormal
+		(root& direction, root& normal, Rational& Correction, GlobalVariables* theGlobalVariables);
+	void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables* theGlobalVariables);
+	void MakeLinPolyFromInt(int theDimension,int x1,int x2, int x3,int x4, int x5);
 	int FindGCMCoefficientDenominators();
 	void MakeLinearPoly(short NumVars);
 	int SizeWithoutDebugString();
 	//works at the moment for linear polynomials only!!!!!!
 	void DivByInteger(int x);
 	void TimesInteger(int x);
-	void operator=(PolynomialRationalCoeff& right);
-	bool operator==(PolynomialRationalCoeff& right);
+	void operator=(const PolynomialRationalCoeff& right);
+	bool operator==(const PolynomialRationalCoeff& right);
 };
 
 class QuasiPolynomials:public Polynomials<QuasiNumber>
@@ -4063,7 +4097,6 @@ public:
 	static PrecomputedTauknPointersKillOnExit* PrecomputedTaus;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p);
-	void AssignPolynomialLargeRational(PolynomialLargeRational& p);
 	void MakeTauknp(int k, int n);
 	void MakePureQuasiPolynomial(PolynomialRationalCoeff& p, int NumVars);
 	void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output);
@@ -4094,8 +4127,8 @@ class CompositeComplexQNSub
 public:
 	MatrixLargeRational MatrixForCoeffs;
 	PolynomialsRationalCoeff RationalPolyForm;
-	void MakeLinearSubIntegrand(root& normal, root&direction, Rational& Correction);
-	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction);
+	void MakeLinearSubIntegrand(root& normal, root&direction, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 };
 
@@ -4170,8 +4203,8 @@ public:
 	void MakeSubFromMatrixInt(MatrixIntTightMemoryFit& theMat);
 	void MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit& theMat, int Den);
 	void MakeSubFromMatrixRational(MatrixLargeRational& theMat);
-	void MakeLinearSubIntegrand(root& normal, root&direction, Rational& Correction);
-	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction);
+	void MakeLinearSubIntegrand(root& normal, root&direction, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 	void MakeSubFromPolynomialsRationalCoeff(PolynomialsRationalCoeff& input);
 };
@@ -4229,17 +4262,17 @@ public:
 	void init();
 	static root CheckSumRoot;
 	int HashFunction();
-	void ComputeOneCheckSum(Rational &output, intRoot& theExp);
+	void ComputeOneCheckSum(Rational &output, intRoot& theExp, int theDimension);
 	bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
 	void operator=(oneFracWithMultiplicitiesAndElongations& right);
 	bool operator==(oneFracWithMultiplicitiesAndElongations& right);
 	void ElementToString(std::string& output, int index, bool LatexFormat);
 	void ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::string& output,
-																	bool LatexFormat, int index);
+																	bool LatexFormat, int index, int theDimension);
 	void OneFracToStringBasisChange(int indexElongation, MatrixIntTightMemoryFit& VarChange,
 																	bool UsingVarChange, std::string& output,
-																	bool LatexFormat, int indexInFraction);
+																	bool LatexFormat, int indexInFraction, int theDimension);
 };
 
 class rootWithMultiplicity: public root
@@ -4305,18 +4338,22 @@ public:
 	int AddRootPreserveOrder(intRoot& theRoot);
 	int getIndex(intRoot& TheRoot);
 	int getIndexDoubleOfARoot(intRoot& TheRoot);
-	void ComputeTable();
+	void ComputeTable(int theDimension);
 };
 
-class partFractionPolynomials: public ListBasicObjects<PolynomialLargeRational>
+class partFractionPolynomials: public ListBasicObjects<PolynomialRationalCoeff>
 {
 public:
 	roots LatticeIndicators;
 	MatrixLargeRational theNormals;
-	void CheckConsistency(root& RootLatticeIndicator,PolynomialLargeRational& input);
-	void initLatticeIndicatorsFromPartFraction(partFraction& owner, GlobalVariables* theGlobalVariables);
-	void AddPolynomialLargeRational(root& rootLatticeIndicator,PolynomialLargeRational& input);
-	void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials);
+	void CheckConsistency(root& RootLatticeIndicator,PolynomialRationalCoeff& input);
+	void initLatticeIndicatorsFromPartFraction
+		(partFraction& owner, GlobalVariables* theGlobalVariables, int theDimension);
+	void AddPolynomialLargeRational
+		(root& rootLatticeIndicator, PolynomialRationalCoeff& input);
+	void ComputeQuasiPolynomial
+		(	QuasiPolynomial& output, bool RecordNumMonomials, 
+			int theDimension, GlobalVariables* theGlobalVariables);
 };
 
 class partFraction: ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongations>
@@ -4324,7 +4361,7 @@ class partFraction: ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongation
 private:
 	void findPivot();
 	void findInitialPivot();
-	void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
+	//void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
 	bool rootIsInFractionCone(root& r, GlobalVariables* theGlobalVariables);
 	friend class partFractions;
 	friend class partFractionPolynomials;
@@ -4343,8 +4380,8 @@ public:
 //	QuasiPolynomial PowerSeriesCoefficient;
 //	partFractionPolynomials SplitPowerSeriesCoefficients;
 
-	bool RemoveRedundantShortRootsClassicalRootSystem(root* Indicator, GlobalVariables* theGlobalVariables);
-	bool RemoveRedundantShortRoots(root* Indicator, GlobalVariables* theGlobalVariables);
+	bool RemoveRedundantShortRootsClassicalRootSystem(root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+	bool RemoveRedundantShortRoots(root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
 	bool AlreadyAccountedForInGUIDisplay;
 //	static int lastApplicationOfSVformulaNumNewGenerators;
 //	static int lastApplicationOfSVformulaNumNewMonomials;
@@ -4359,18 +4396,18 @@ public:
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
 	void ComputePolyCorrespondingToOneMonomial
-			(	PolynomialLargeRational &output, int index, roots& normals,
-				partFractionPolynomials* SplitPowerSeriesCoefficient);
+			(	PolynomialRationalCoeff &output, int index, roots& normals,
+				partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
 	static void MakePolynomialFromOneNormal
-						(	root& normal, root& shiftRational, int theMult,	PolynomialLargeRational& output);
-	void ComputeNormals(roots& output);
+						(	root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
+	void ComputeNormals(roots& output, int theDimension, GlobalVariables& theGlobalVariables);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixLargeRational& theLinearRelation);
-	void UncoverBracketsNumerator(GlobalVariables*  theGlobalVariables);
+	void UncoverBracketsNumerator(GlobalVariables*  theGlobalVariables, int theDimension);
 	void partFractionToPartitionFunctionSplit
 					(	QuasiPolynomial& output, bool RecordNumMonomials,
 						//bool RecordSplitPowerSeriesCoefficient,
-						bool StoreToFile, GlobalVariables* theGlobalVariables);
+						bool StoreToFile, GlobalVariables* theGlobalVariables, int theDimension);
 	//void partFractionToPartitionFunctionStoreAnswer
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
 	//				bool StoreToFile);
@@ -4386,7 +4423,7 @@ public:
 												 GlobalVariables* theGlobalVariables);
 	bool DecomposeFromLinRelation
 		(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables* theGlobalVariables);
-	void ComputeOneCheckSum(Rational& output);
+	void ComputeOneCheckSum(Rational& output, int theDimension);
 	void ApplySzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
@@ -4422,17 +4459,19 @@ public:
 	//void swap(int indexA,int indexB);
 	partFraction();
 	~partFraction();
-	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output);
+	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
 	void GetNElongationPolyWithMonomialContribution
 			(	ListBasicObjects<int>& theSelectedIndices,
 				ListBasicObjects<int>& theCoefficients,
 				ListBasicObjects<int>& theGreatestElongations,
 				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
-				IntegerPoly& output);
+				IntegerPoly& output, int theDimension);
 	void GetNElongationPoly(int index,int baseElongation,
-													int LengthOfGeometricSeries, IntegerPoly& output);
-	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output);
-	void GetNElongationPoly(int index,int baseElongation,int LengthOfGeometricSeries, PolyPartFractionNumerator& output);
+													int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
+	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output, int theDimension);
+	void GetNElongationPoly
+		(	int index,int baseElongation,int LengthOfGeometricSeries, 
+			PolyPartFractionNumerator& output, int theDimension);
 	int GetNumProportionalVectorsClassicalRootSystems();
 	bool operator==(partFraction& right);
 	void operator=(const partFraction& right);
@@ -4445,7 +4484,7 @@ public:
 			bool UsingVarChange, std::string& output,
 			bool LatexFormat,bool includeVPsummand,bool includeNumerator,
 			GlobalVariables* theGlobalVariables);
-	void ReadFromFile(std::fstream& input, GlobalVariables*  theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables*  theGlobalVariables, int theDimension);
 	void WriteToFile(std::fstream& output, GlobalVariables*  theGlobalVariables);
 	int GetNumMonomialsInNumerator();
 	int SizeWithoutDebugString();
@@ -4453,8 +4492,9 @@ public:
 
 class partFractions: public HashedListBasicObjects<partFraction>
 { bool ShouldIgnore(GlobalVariables* theGlobalVariables);
-	void AssureIndicatorRegularity();
+	void AssureIndicatorRegularity(GlobalVariables* theGlobalVariables);
 public:
+	short AmbientDimension;
 	int IndexLowestNonProcessed;
 	int HighestIndex;
 	int NumberIrrelevantFractions;
@@ -4773,15 +4813,15 @@ public:
 	int TotalNumEnumerated;
 	ListBasicObjects<Selection> tableForbidden;
 	ListBasicObjects<Selection> theForbiddenSelections;
-	void ComputeDeterminantSelection();
+	void ComputeDeterminantSelection(int theDimension);
 	Selection theSelection;
 	roots AllRoots;
-	void EnumerateRecursively(int depth, int startingIndex);
+	void EnumerateRecursively(int depth, int startingIndex, int theDimension);
 	std::string DebugString;
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
-	void SelectionToMatrixRational(MatrixLargeRational& output);
-	void SelectionToString(std::string& output);
+	void SelectionToMatrixRational(MatrixLargeRational& output, int theDimension);
+	void SelectionToString(std::string& output, int theDimension);
 	void ComputeTableAllowed();
 //	bool CheckAvailabilityIndex(int depth, int index);
 	WeylGroup theWeylGroup;
@@ -4915,6 +4955,7 @@ public:
 	void Run();
 	void oneChamberSlice(GlobalVariables* theGlobalVariables);
 	void oneIncrement(GlobalVariables* theGlobalVariables);
+	void FullChop(GlobalVariables* theGlobalVariables);
 	void WriteToFilePFdecomposition(std::fstream& output);
 	ComputationSetup();
 };

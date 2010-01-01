@@ -591,7 +591,7 @@ guiMainWindow::guiMainWindow()
 	this->theComputationSetup.AllowRepaint=true;
 	this->theComputationSetup.UsingCustomVectors=false;
 	//this->Button7OneDirectionIncrement->Disable();
-	this->Button8FullChopping->Disable();
+	//this->Button8FullChopping->Disable();
 	//////////////////////////////////////////
 	/*this->theComputationSetup.UsingCustomVectors=true;
 	root::AmbientDimension=8;
@@ -773,8 +773,7 @@ void guiMainWindow::onRePaint(wxPaintEvent& ev)
 void drawCanvas::OnPaint(::wxPaintEvent& ev)
 {	::wxPaintDC  dc(this);
 	if (MainWindow1->theComputationSetup.AllowRepaint)
-	{	root::AmbientDimension= MainWindow1->theComputationSetup.theChambers.AmbientDimension;
-		dc.SetBackground(MainWindow1->GetBackgroundColour());
+	{	dc.SetBackground(MainWindow1->GetBackgroundColour());
 		dc.DrawRectangle(wxPoint(0,0),this->GetSize());
 		::CombinatorialChamberContainer::drawOutput
 			(	::TDV,MainWindow1->theComputationSetup.theChambers,
@@ -879,7 +878,11 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 }
 
 void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
-{
+{	this->ReadVPVectorsAndOptions();
+	this->theComputationSetup.FullChop
+		(this->theComputationSetup.theGlobalVariablesContainer.Default());	
+	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
+	this->Refresh();
 }
 
 void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
@@ -1002,20 +1005,21 @@ void guiMainWindow::initWeylGroupInfo()
 }
 
 void guiMainWindow::initTableFromVPVectors()
-{ 	this->initTableFromRowsAndColumns(this->theComputationSetup.VPVectors.size,
-																			root::AmbientDimension);
-		root tempRoot; tempRoot.MakeZero();
-		for (int i=0;i<this->theComputationSetup.VPVectors.size;i++)
-		{ for (int j=0;j<root::AmbientDimension;j++)
-			{ std::string tempS;
-				this->theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
-				this->Table1Input->SetCellValue(i,j,wxString(tempS.c_str(),wxConvUTF8));
-				this->Table1Input->SetCellAlignment(i,j,wxALIGN_CENTRE);
-			}
-			tempRoot.Add(this->theComputationSetup.VPVectors.TheObjects[i]);
+{ int theDimension=	this->theComputationSetup.WeylGroupIndex;
+	this->initTableFromRowsAndColumns
+			(this->theComputationSetup.VPVectors.size,theDimension);
+	root tempRoot; tempRoot.MakeZero(theDimension);
+	for (int i=0;i<this->theComputationSetup.VPVectors.size;i++)
+	{ for (int j=0;j<theDimension;j++)
+		{ std::string tempS;
+			this->theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
+			this->Table1Input->SetCellValue(i,j,wxString(tempS.c_str(),wxConvUTF8));
+			this->Table1Input->SetCellAlignment(i,j,wxALIGN_CENTRE);
 		}
-//		tempRoot.MultiplyByInteger(2);
-		this->WriteIndicatorWeight(tempRoot);
+		tempRoot.Add(this->theComputationSetup.VPVectors.TheObjects[i]);
+	}
+//	tempRoot.MultiplyByInteger(2);
+	this->WriteIndicatorWeight(tempRoot);
 }
 
 
@@ -1036,11 +1040,12 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 	TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
 	TDV.DrawDashes = this->CheckBox6Dashes->GetValue();	
 	if (this->theComputationSetup.UsingCustomVectors)
-	{	root::AmbientDimension= this->Spin1Dim->GetValue();
+	{	int theDimension=this->Spin1Dim->GetValue();
+		this->theComputationSetup.WeylGroupIndex= theDimension;
 		this->theComputationSetup.VPVectors.size=0;
 		for (int i=0;i<this->Spin2NumVect->GetValue();i++)
 		{ root tempRoot;
-			for (int j=0;j<root::AmbientDimension;j++)
+			for (int j=0;j<theDimension;j++)
 			{	int tempI=wxAtoi(this->Table1Input->GetCellValue(i,j));
 				tempRoot.TheObjects[j].AssignInteger(tempI);
 			}

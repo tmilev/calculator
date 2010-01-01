@@ -15,7 +15,7 @@ public:
 };
 
 int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
-{ int Dimension=2, NumVectors=4;
+{	int Dimension=2, NumVectors=4;/*
 	root::AmbientDimension= (unsigned char) Dimension;
 	ToBeSplit.SetSizeExpandOnTopNoObjectInit(NumVectors);
 	IndicatorRoot.InitFromIntegers(405,603,0,0,0);
@@ -23,7 +23,7 @@ int FillInRoots(intRoots& ToBeSplit, root& IndicatorRoot)
 	ToBeSplit.TheObjects[1].initFromInt(4,1,0,0,0);
 	ToBeSplit.TheObjects[2].initFromInt(5,3,0,0,0);
 	ToBeSplit.TheObjects[3].initFromInt(2,5,0,0,0);
-
+*/
 	return Dimension;
 }
 void ExampleComputation::RunSomeTests()
@@ -41,7 +41,7 @@ void ExampleComputation::RunSomeTests()
 	tempPF.partFractionsToPartitionFunctionAdaptedToRoot
 		(tempQP,indicator,false,false,&tempPF.theGlobalVariables);
 	intRoot tempR;
-	tempR.initFromInt(0,0,0,0,0);
+	tempR.initFromInt(5,0,0,0,0,0);
 	Rational tempRat;
 	tempQP.ComputeDebugString();
 	tempQP.Evaluate(tempR,tempRat);
@@ -88,26 +88,25 @@ int main(void)
 
 
 void ExampleComputation::RunThomasExample()
-{ root::AmbientDimension= 12;
-	PolyFormatLocal.MakeAlphabetxi();
+{ PolyFormatLocal.MakeAlphabetxi();
 	intRoots exampleRoots;
 	exampleRoots.SetSizeExpandOnTopNoObjectInit(16);
-	exampleRoots.TheObjects[0].initFromInt(0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	1	,	0);
-	exampleRoots.TheObjects[1].initFromInt(3	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,-3	,	0	,	1);
-	exampleRoots.TheObjects[2].initFromInt(-1,	2	,	0	,	0	,	0	,	0	,	0	,	1	,-1	,	2	,	1	,	0);
-	exampleRoots.TheObjects[3].initFromInt(0	,-3	,	3	,	0	,	0	,	0	,	1	,-3	,	2	,-3	,	0	,	1);
-	exampleRoots.TheObjects[4].initFromInt(0	,	0	,-2 ,	1	,	0	,	1	,-1	,	2	,-1	,	2	,	1	,	0);
-	exampleRoots.TheObjects[5].initFromInt(0	,	0	,	0	,	-3,	1	,-3	,	2	,-3	,	2	,-3	,	0	,	1);
-	exampleRoots.TheObjects[6].initFromInt(-1,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[7].initFromInt(0	,-1	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[8].initFromInt(0	,	0	,-1	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[9].initFromInt(0	,	0	,	0	,-1	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[10].initFromInt(0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[11].initFromInt(0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[12].initFromInt(0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[13].initFromInt(0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0);
-	exampleRoots.TheObjects[14].initFromInt(0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0);
-	exampleRoots.TheObjects[15].initFromInt(0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0);
+	exampleRoots.TheObjects[0].initFromInt(12, 0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	1	,	0);
+	exampleRoots.TheObjects[1].initFromInt(12, 3	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,-3	,	0	,	1);
+	exampleRoots.TheObjects[2].initFromInt(12, -1,	2	,	0	,	0	,	0	,	0	,	0	,	1	,-1	,	2	,	1	,	0);
+	exampleRoots.TheObjects[3].initFromInt(12, 0	,-3	,	3	,	0	,	0	,	0	,	1	,-3	,	2	,-3	,	0	,	1);
+	exampleRoots.TheObjects[4].initFromInt(12, 0	,	0	,-2 ,	1	,	0	,	1	,-1	,	2	,-1	,	2	,	1	,	0);
+	exampleRoots.TheObjects[5].initFromInt(12, 0	,	0	,	0	,	-3,	1	,-3	,	2	,-3	,	2	,-3	,	0	,	1);
+	exampleRoots.TheObjects[6].initFromInt(12, -1,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[7].initFromInt(12, 0	,-1	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[8].initFromInt(12, 0	,	0	,-1	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[9].initFromInt(12, 0	,	0	,	0	,-1	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[10].initFromInt(12,0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[11].initFromInt(12,0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[12].initFromInt(12,0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[13].initFromInt(12,0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0	,	0);
+	exampleRoots.TheObjects[14].initFromInt(12,0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0	,	0);
+	exampleRoots.TheObjects[15].initFromInt(12,0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	0	,	0);
 	partFractions tempPF;
 	partFractions::ListBasicObjectsActualSizeIncrement=2000;
 	IntegerPoly::ListBasicObjectsActualSizeIncrement=5;

@@ -181,9 +181,12 @@ public:
 	int ColorsB[DrawingVariables::NumColors];
 	int Colors[DrawingVariables::NumColors];
 	DrawingVariables(int cx, int cy){this->initDrawingVariables(cx,cy);};
+	int GetColorFromChamberIndex(int index);
 	static void GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y);
 	static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
+	void ApplyScale(double inputScale);
 	void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor);
+	void drawTextAtVector(root& point, std::string& inputText);
 };
 
 //The below class is to be used together with ListBasicObjects.
@@ -1418,6 +1421,7 @@ public:
 		(Selection& selectedVertices,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
+	void PurgeInternalWalls();
 	bool LinearAlgebraForVertexComputation
 				(Selection& theSelection, root& output, GlobalVariables* theGlobalVariables, int theDimension);
 	bool LinearAlgebraForVertexComputationOneAffinePlane
@@ -1447,6 +1451,7 @@ public:
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
 	void ComputeInternalPointMethod2(root& InternalPoint, int theDimension);
+	void ComputeAffineInternalPoint(root& outputPoint, int theDimension);
 	bool OwnsAWall(WallData* theWall);
 	void MakeNewMutualNeighbors
 		(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
@@ -2021,6 +2026,7 @@ public:
 	void DumpAll();
 	bool ConsistencyCheck();
 	void PurgeZeroPointers();
+	void PurgeInternalWalls();
 	void ProjectToDefaultAffineSpace(GlobalVariables* theGlobalVariables);
 	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables* theGlobalVariables);
 	void PrintThePolys(std::string& output);
@@ -2143,6 +2149,7 @@ public:
 
 	PolyPartFractionNumerator* PPFNElementToStringBasisChange;
 
+	Selection selLinearAlgebraForVertexComputation;
 	Selection selComputeNormalFromSelection;
 	Selection selComputeNormalExcludingIndex;
 	Selection selWallSelection;

@@ -374,6 +374,12 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace
 	this->ConsistencyCheck();
 }
 
+int DrawingVariables::GetColorFromChamberIndex(int index)
+{ int tempI=index%this->NumColors;
+	if (tempI<0) tempI+=this->NumColors;
+	return this->Colors[tempI];
+}
+
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 { this->ColorChamberIndicator=RGB(220,220,0);
 	this->DeadChamberTextColor= RGB(200,100,100);
@@ -392,7 +398,7 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	this->textY=15;
 	this->centerX= (double) cX1;//(double(X2)-double(X1));
 	this->centerY= (double) cY1;
-	this->scale= 1;
+	this->scale=1;
 //	Projections[0][0]=(0+50)*tempI;
 //	Projections[0][1]=(0-50)*tempI;
 //	Projections[1][0]=(50+50)*tempI;
@@ -403,24 +409,21 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 //	Projections[0][1]=0;
 //	Projections[1][0]=49;
 //	Projections[1][1]=88;
-	Projections[0][0]=200;
-	Projections[0][1]=-200;
-	Projections[1][0]=200;
-	Projections[1][1]=200;
-	Projections[2][0]=0;
-	Projections[2][1]=100;
-	Projections[3][0]=92;
-	Projections[3][1]=-29;
-	Projections[4][0]=88;
-	Projections[4][1]=-49;
-	Projections[5][0]=50;
-	Projections[5][1]=-88;
-	Projections[6][0]=28;
-	Projections[6][1]=-92;
-	for (int i =0; i<7;i++)
-	{	Projections[i][0]*=scale;
-		Projections[i][1]*=scale;
-	}
+	this->Projections[0][0]=200;
+	this->Projections[0][1]=-200;
+	this->Projections[1][0]=200;
+	this->Projections[1][1]=200;
+	this->Projections[2][0]=0;
+	this->Projections[2][1]=100;
+	this->Projections[3][0]=92;
+	this->Projections[3][1]=-29;
+	this->Projections[4][0]=88;
+	this->Projections[4][1]=-49;
+	this->Projections[5][0]=50;
+	this->Projections[5][1]=-88;
+	this->Projections[6][0]=28;
+	this->Projections[6][1]=-92;
+	this->ApplyScale(1);
 	int i=0;
 	this->ColorsR[i]=0;
 	this->ColorsG[i]=0;
@@ -465,6 +468,17 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	{ this->Colors[i]=RGB(this->ColorsR[i],this->ColorsG[i],this->ColorsB[i]);
 	}
 ////////////////////
+}
+
+void DrawingVariables::ApplyScale(double inputScale)
+{	if (inputScale==0)
+		return;
+	double ScaleChange= inputScale/this->scale;
+	this->scale= inputScale;
+	for (int i =0; i<7;i++)
+	{	this->Projections[i][0]*=ScaleChange;
+		this->Projections[i][1]*=ScaleChange;
+	}
 }
 
 ComputationSetup::ComputationSetup()
@@ -513,7 +527,7 @@ void ComputationSetup::oneIncrement(GlobalVariables* theGlobalVariables)
 
 void ComputationSetup::FullChop(GlobalVariables* theGlobalVariables)
 {	this->AllowRepaint=false;
-	for (int i=0;i<14;i++)
+	for (int i=0;i<17;i++)
 		this->oneIncrement(theGlobalVariables);
 	this->AllowRepaint=true;
 }
@@ -541,7 +555,7 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 			::InputRoots.CopyFromBase(this->VPVectors);
 			::NextDirectionIndex=this->theChambers.AmbientDimension-1;
 			tempComplex.SliceTheEuclideanSpace
-				(	::InputRoots,::NextDirectionIndex,tempComplex.AmbientDimension,
+				(	::InputRoots,::NextDirectionIndex,this->WeylGroupIndex,
 					this->thePartialFraction.IndicatorRoot,
 					this->theGlobalVariablesContainer.Default());
 			this->theChambers.InduceFromLowerDimensionalAndProjectivize
@@ -708,6 +722,11 @@ void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyl
   ::drawline(x1,y1,x2,y2,PenStyle,PenColor);
 }
 
+void DrawingVariables::drawTextAtVector(root& point, std::string& inputText)
+{ double x,y; this->GetCoordsForDrawing(*this,point,x,y);
+	::drawtext(x,y,inputText.c_str(),inputText.length(),0);
+}
+
 void drawFacetVertices(DrawingVariables& TDV,
 											 roots& r, roots& directions, int ChamberIndex)
 {	root tempRoot;
@@ -751,8 +770,7 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 			double tempX, tempY;
 			TDV.GetCoordsForDrawing(TDV,Projection1,tempX,tempY);
 			if (TDV.DrawDashes)
-			{	drawline(TDV.centerX,TDV.centerY,tempX,tempY, DrawingStyleDashes,TDV.Colors[0]);
-			}
+				drawline(TDV.centerX,TDV.centerY,tempX,tempY, DrawingStyleDashes,TDV.Colors[0]);
 			for (int j=i+1;j<r.size; j++)
 			{ if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
 				{	double tempX2;
@@ -773,11 +791,13 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 								CombinatorialChamberContainer& output,
 								roots& directions, int directionIndex, root& ChamberIndicator)
-{ if (output.flagDrawingProjective)
-	{ CombinatorialChamberContainer::drawOutputProjective(TDV,output,directions, directionIndex,ChamberIndicator);
-	} else
-	{ CombinatorialChamberContainer::drawOutputAffine(TDV,output);
-	}
+{	for(int i=0;i<output.size;i++)
+		if (output.TheObjects[i]!=0)
+			output.TheObjects[i]->DisplayNumber=i;
+	if (output.flagDrawingProjective)
+		CombinatorialChamberContainer::drawOutputProjective(TDV,output,directions, directionIndex,ChamberIndicator);
+	else
+		CombinatorialChamberContainer::drawOutputAffine(TDV,output);
 }
 
 //color styles (taken from windows.h and substituted for independence of the .h file):
@@ -787,8 +807,8 @@ void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 // 5 = invisible line (no line)
 void CombinatorialChamberContainer::drawOutputAffine(DrawingVariables &TDV, CombinatorialChamberContainer &output)
 { for(int i=0;i<output.size;i++)
-  { output.TheObjects[i]->drawOutputAffine(TDV,output);
-  }
+		if (output.TheObjects[i]!=0)
+			output.TheObjects[i]->drawOutputAffine(TDV,output);
 }
 
 //color styles (taken from windows.h and substituted for independence of the .h file):
@@ -2133,12 +2153,10 @@ void CombinatorialChamber::AddInternalWall
 	root::RootScalarEuclideanRoot(direction, TheFacetBeingKilledNormal,tempRat);
 	root tempRoot; tempRoot.Assign(TheKillerFacetNormal);
 	tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-	if ( owner->flagMakingASingleHyperplaneSlice ||tempRat.IsPositive())
-	{	this->InternalWalls.AddRootNoRepetition(tempRoot);
-		if (owner->flagMakingASingleHyperplaneSlice && !this->flagExplored )
-		{ owner->PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->IndexInOwnerComplex);
-		}
-	}
+	if ( !owner->flagMakingASingleHyperplaneSlice &&tempRat.IsPositive())
+		this->InternalWalls.AddRootNoRepetition(tempRoot);
+	if (owner->flagMakingASingleHyperplaneSlice && !this->flagExplored )
+		owner->PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->IndexInOwnerComplex);
 }
 
 bool CombinatorialChamber::CheckSplittingPointCandidate
@@ -2284,6 +2302,10 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace
 	return true;
 }
 
+void CombinatorialChamber::PurgeInternalWalls()
+{ this->InternalWalls.size=0;
+}
+
 void CombinatorialChamber::ComputeAffineInfinityPointApproximation
 	(Selection& selectedVertices,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables)
 { root candidateVertex;
@@ -2358,6 +2380,10 @@ void CombinatorialChamber::ComputeInternalPointMethod2(root &InternalPoint, int 
 	InternalPoint.DivByInteger(this->AllVertices.size);
 }
 
+void CombinatorialChamber::ComputeAffineInternalPoint(root& outputPoint, int theDimension)
+{ this->affineVertices.Average(outputPoint,theDimension);
+}
+
 void CombinatorialChamber::LabelWallIndicesProperly()
 { for (int i=0;i<this->Externalwalls.size;i++)
 	{ this->Externalwalls.TheObjects[i].indexInOwnerChamber=i;
@@ -2365,21 +2391,29 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 }
 
 void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV,CombinatorialChamberContainer& owner)
-{ for (int i=0;i<this->affineVertices.size;i++)
+{ TDV.ApplyScale(0.3);
+	for (int i=0;i<this->affineVertices.size;i++)
   { for(int j=0;j<this->affineVertices.size;j++)
     { bool AreInAWall=false;
       for (int k=0;k<this->affineExternalWalls.size;k++)
-      { if (this->Externalwalls.TheObjects[k].ContainsPoint(this->AllVertices.TheObjects[i])
+      { if (this->affineExternalWalls.TheObjects[k].ContainsPoint(this->affineVertices.TheObjects[i])
             &&
-            this->Externalwalls.TheObjects[k].ContainsPoint(this->AllVertices.TheObjects[j]))
+            this->affineExternalWalls.TheObjects[k].ContainsPoint(this->affineVertices.TheObjects[j]))
         { AreInAWall=true;
           break;
         }
       }
       if (AreInAWall)
-      { TDV.drawlineBetweenTwoVectors
-					(	this->AllVertices.TheObjects[i],
-						this->AllVertices.TheObjects[j],0,0);
+			{ int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex);
+				TDV.drawlineBetweenTwoVectors
+					(	this->affineVertices.TheObjects[i],
+						this->affineVertices.TheObjects[j],0,color);
+				root tempRoot; this->ComputeAffineInternalPoint(tempRoot,owner.AmbientDimension-1);
+				std::stringstream out;
+				out << this->DisplayNumber;
+				std::string tempS;
+				tempS=out.str();
+				TDV.drawTextAtVector(tempRoot,tempS);
       }
     }
   }
@@ -2522,7 +2556,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputation
 	MatrixLargeRational	matOutputEmpty;
 	RMinus1ByR.init((short)(theDimension-1),(short)theDimension);
 	matOutputEmpty.init(-1,-1);
-	static Selection NonPivotPoints;
+	Selection& NonPivotPoints= theGlobalVariables->selLinearAlgebraForVertexComputation;
 	for (int i =0;i<theDimension-1;i++)
 	{	for (int j=0; j<theDimension;j++)
 		{	RMinus1ByR.elements[i][j].Assign
@@ -2573,11 +2607,12 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane
 	tempColumn.ComputeDebugString();
 	Matrix<Rational>::GaussianEliminationByRows(tempMat,tempColumn, tempSel);
 	assert(tempSel.CardinalitySelection==0);
-	output.SetSizeExpandOnTopLight(owner->AmbientDimension);
+	output.SetSizeExpandOnTopLight(owner->AmbientDimension-1);
 	tempMat.ComputeDebugString();
 	tempColumn.ComputeDebugString();
-	for (int i=0;i<owner->AmbientDimension;i++)
+	for (int i=0;i<owner->AmbientDimension-1;i++)
 		output.TheObjects[i].Assign(tempColumn.elements[i][0]);
+	assert(tempColumn.elements[owner->AmbientDimension-1][0].IsEqualTo(ROne));
 	return true;
 }
 
@@ -2903,6 +2938,13 @@ void CombinatorialChamberContainer::SliceWithAWall
 	{ this->SliceWithAWallOneIncrement(TheKillerFacetNormal,theGlobalVariables);
 	}
 	this->PurgeZeroPointers();
+	this->PurgeInternalWalls();
+}
+
+void CombinatorialChamberContainer::PurgeInternalWalls()
+{ for (int i=0;i<this->size;i++)
+		if (this->TheObjects[i]!=0)
+			this->TheObjects[i]->PurgeInternalWalls();
 }
 
 void CombinatorialChamberContainer::SliceWithAWallInit
@@ -2995,8 +3037,9 @@ void CombinatorialChamberContainer::ComputeVerticesFromNormals(GlobalVariables* 
 
 bool CombinatorialChamberContainer::ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables* theGlobalVariables)
 { for (int i=0;i<this->size;i++)
-		if (!this->TheObjects[i]->ProjectToDefaultAffineSpace(this,theGlobalVariables))
-			return false;
+		if (this->TheObjects[i]!=0)
+			if (!this->TheObjects[i]->ProjectToDefaultAffineSpace(this,theGlobalVariables))
+				return false;
 	return true;
 }
 
@@ -3121,12 +3164,13 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
   this->theHyperplanes.ClearTheObjects();
   this->ComputeDebugString();
   for (int i=0;i<input.theHyperplanes.size;i++)
-	{ root tempRoot, theZeroRoot; theZeroRoot.MakeZero(this->AmbientDimension);
+	{ root tempRoot, theZeroRoot; theZeroRoot.MakeZero(this->AmbientDimension-1);
 		tempRoot.Assign(input.theHyperplanes.TheObjects[i]);
 		tempRoot.MakeNormalInProjectivizationFromPointAndNormal(theZeroRoot,input.theHyperplanes.TheObjects[i]);
 		tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 		this->theHyperplanes.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
   }
+  this->ComputeDebugString();
   this->ComputeVerticesFromNormals(theGlobalVariables);
   this->ComputeDebugString();
   this->WireChamberAdjacencyInfoAsIn(input);
@@ -3356,7 +3400,7 @@ bool Cone::IsSurelyOutsideCone(::rootsCollection& TheVertices, int NumrootsLists
 void CombinatorialChamber::
 	InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input, CombinatorialChamberContainer& owner)
-{ root ZeroRoot; ZeroRoot.MakeZero(owner.AmbientDimension);
+{ root ZeroRoot; ZeroRoot.MakeZero(owner.AmbientDimension-1);
 	this->Externalwalls.SetSizeExpandOnTopNoObjectInit(input.Externalwalls.size+1);
 	if (owner.flagAnErrorHasOcurredTimeToPanic)
 	{	input.ComputeDebugString(&owner);
@@ -3371,8 +3415,8 @@ void CombinatorialChamber::
 		this->Externalwalls.TheObjects[i].MirrorWall.size=0;
 	}
 	this->ComputeDebugString(&owner);
-	this->Externalwalls.LastObject()->normal.MakeZero(owner.AmbientDimension+1);
-	this->Externalwalls.LastObject()->normal.TheObjects[owner.AmbientDimension].MakeOne();
+	this->Externalwalls.LastObject()->normal.MakeZero(owner.AmbientDimension);
+	this->Externalwalls.LastObject()->normal.TheObjects[owner.AmbientDimension-1].MakeOne();
 	this->Externalwalls.LastObject()->MirrorWall.size=0;
 	this->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop(0);
 	this->Externalwalls.LastObject()->NeighborsAlongWall.size=0;

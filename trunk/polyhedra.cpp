@@ -152,7 +152,6 @@ bool CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic=false;
 
 bool CombinatorialChamber::flagIncludeVerticesInDebugString=true;
 bool CombinatorialChamber::flagAnErrorHasOccurredTimeToPanic=false;
-Cone CombinatorialChamberContainer::TheGlobalConeNormals;
 bool CombinatorialChamberContainer::flagMakingConsistencyCheck=true;
 int CombinatorialChamberContainer::NumTotalCreatedCombinatorialChambersAtLastDefrag;
 int CombinatorialChamberContainer::LastReportedMemoryUse;
@@ -574,7 +573,8 @@ void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
 						(tempRoot,tempComplex.theHyperplanes.TheObjects[i]);
 					//tempH.ComputeDebugString();
 					tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
-					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
+					if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
+						this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
 					//tempH.ComputeDebugString();
 				}
 			}
@@ -724,7 +724,7 @@ void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyl
 
 void DrawingVariables::drawTextAtVector(root& point, std::string& inputText)
 { double x,y; this->GetCoordsForDrawing(*this,point,x,y);
-	::drawtext(x,y,inputText.c_str(),inputText.length(),0);
+	::drawtext(x-7,y-7,inputText.c_str(),inputText.length(),0);
 }
 
 void drawFacetVertices(DrawingVariables& TDV,
@@ -855,7 +855,8 @@ void CombinatorialChamberContainer::drawOutputProjective
 		}
 	}
 	if (output.flagMakingASingleHyperplaneSlice)
-	{ out2 << "; "<< "Plane index: " << output.NumAffineHyperplanesProcessed;
+	{ out2	<< "; "<< "Plane: " << output.NumAffineHyperplanesProcessed+1 << " out of " 
+					<< output.theWeylGroupAffineHyperplaneImages.size;
 	}
 	tempS=out2.str();
 	drawtext(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
@@ -2156,7 +2157,8 @@ void CombinatorialChamber::AddInternalWall
 	if ( !owner->flagMakingASingleHyperplaneSlice &&tempRat.IsPositive())
 		this->InternalWalls.AddRootNoRepetition(tempRoot);
 	if (owner->flagMakingASingleHyperplaneSlice && !this->flagExplored )
-		owner->PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->IndexInOwnerComplex);
+		if (!owner->flagSliceWithAWallIgnorePermanentlyZero || !this->flagPermanentlyZero)
+			owner->PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->IndexInOwnerComplex);
 }
 
 bool CombinatorialChamber::CheckSplittingPointCandidate
@@ -2268,26 +2270,36 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace
 	this->affineVertices.MakeActualSizeAtLeastExpandOnTop(this->AllVertices.size);
 	this->affineExternalWalls.size=0;
 	this->affineVertices.size=0;
-	root tempCrossSectionNormal;
+	root tempCrossSectionNormal, tempAffinePoint;
 	tempCrossSectionNormal.AssignWithoutLastCoordinate
 		(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal);
+	tempAffinePoint.AssignWithoutLastCoordinate
+		(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint);
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{ affineHyperplane tempAH;
 		if (this->Externalwalls.TheObjects[i].normal.MakeAffineProjectionFromNormal(tempAH))
-		{ this->affineExternalWalls.AddObjectOnTop(tempAH);
-		}
+			this->affineExternalWalls.AddObjectOnTop(tempAH);
 	}
 	Rational tempScalarProd1, tempRat;
-	root::RootScalarEuclideanRoot(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,
-																owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,
-																tempScalarProd1);
+	root::RootScalarEuclideanRoot
+		(tempCrossSectionNormal,tempAffinePoint,tempScalarProd1);
+	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal.ComputeDebugString();
+	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.ComputeDebugString();
+	if (this->DisplayNumber==2 && !this->flagHasZeroPolynomial) 
+	{ this->ComputeDebugString(owner);
+		Stop();
+	}
+	this->ComputeDebugString(owner);
 	for (int i=0;i<this->AllVertices.size;i++)
 	{ root tempRoot;
 		if (this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
 		{ root::RootScalarEuclideanRoot
 				(	tempCrossSectionNormal,tempRoot, tempRat);
 			if (tempRat.IsEqualTo(tempScalarProd1))
-			{	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.MultiplyByInteger(2);
+			{	//for (int i=0;i<owner->StartingCrossSections.size;i++)
+				{	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.MultiplyByInteger(2);
+//					owner->StartingCrossSections.TheObjects[i].affinePoint.DivByInteger(3);
+				}
 				return false;
 			}
 			this->affineVertices.AddObjectOnTop(tempRoot);
@@ -2299,6 +2311,7 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace
 			this->ComputeAffineInfinityPointApproximation(tempSel,owner,theGlobalVariables);
 		}
 	}
+	this->ComputeDebugString(owner);
 	return true;
 }
 
@@ -2310,13 +2323,15 @@ void CombinatorialChamber::ComputeAffineInfinityPointApproximation
 	(Selection& selectedVertices,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables)
 { root candidateVertex;
 	if (selectedVertices.CardinalitySelection==owner->AmbientDimension-1)
-	{	for (int i=0;i<selectedVertices.CardinalitySelection;i++)
+	{	selectedVertices.ComputeIndicesFromSelection();
+		for (int i=0;i<selectedVertices.CardinalitySelection;i++)
 		{ int tempIndex=selectedVertices.elements[i];
 			selectedVertices.selected[tempIndex]=false;
 			selectedVertices.ComputeIndicesFromSelection();
 			this->LinearAlgebraForVertexComputationOneAffinePlane(selectedVertices,candidateVertex,theGlobalVariables,owner);
 			this->affineVertices.AddObjectOnTop(candidateVertex);
 			selectedVertices.AddSelection(tempIndex);
+			selectedVertices.ComputeIndicesFromSelection();
 		}
 	} else
 	{	this->LinearAlgebraForVertexComputationOneAffinePlane(selectedVertices,candidateVertex,theGlobalVariables,owner);
@@ -2699,7 +2714,9 @@ bool CombinatorialChamber::TestPossibilityToSlice(root& direction)
 bool CombinatorialChamber::SplitChamber
 	(	root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
 		root& direction, GlobalVariables* theGlobalVariables)
-{	//	 roots PositiveVertices, NegativeVertices;
+{	//	 roots PositiveVertices, NegativeVertices
+	if (output.flagSliceWithAWallIgnorePermanentlyZero && this->flagPermanentlyZero)
+		return false;
 	bool AnErrorHasOcurred;
 	bool PlusChamberIsPermanentZero;
 	bool MinusChamberIsPermanentZero;
@@ -2767,12 +2784,8 @@ bool CombinatorialChamber::SplitChamber
 		}
 	}
 	if (!output.flagMakingASingleHyperplaneSlice)
-	{	PlusChamberIsPermanentZero=
-			CombinatorialChamberContainer::IsSurelyOutsideGlobalCone
-				( LocalContainerPlusVertices,LocalLinearAlgebra.size);
-		MinusChamberIsPermanentZero=
-			CombinatorialChamberContainer::IsSurelyOutsideGlobalCone
-				( LocalContainerMinusVertices,LocalLinearAlgebra.size);
+	{	PlusChamberIsPermanentZero= output.IsSurelyOutsideGlobalCone( LocalContainerPlusVertices);
+		MinusChamberIsPermanentZero=output.IsSurelyOutsideGlobalCone( LocalContainerMinusVertices);
 	}
 	if (!(hasPositive && hasNegative))
 	{	if (output.flagMakingASingleHyperplaneSlice && output.flagSliceWithAWallInitDone)
@@ -3005,14 +3018,12 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement
 }
 
 bool CombinatorialChamberContainer::IsSurelyOutsideGlobalCone
-					(rootsCollection& TheVertices,int NumrootsLists)
-{ return CombinatorialChamberContainer::TheGlobalConeNormals.IsSurelyOutsideCone
-			(TheVertices,NumrootsLists);
+					(rootsCollection& TheVertices)
+{ return this->TheGlobalConeNormals.IsSurelyOutsideCone(TheVertices);
 }
 
 void CombinatorialChamberContainer::ComputeGlobalCone(roots& directions, GlobalVariables* theGlobalVariables)
-{ CombinatorialChamberContainer::TheGlobalConeNormals.ComputeFromDirections
-		(directions, theGlobalVariables,this->AmbientDimension);
+{	this->TheGlobalConeNormals.ComputeFromDirections(directions, theGlobalVariables,this->AmbientDimension);
 }
 
 void CombinatorialChamberContainer::MakeExtraProjectivePlane()
@@ -3045,7 +3056,8 @@ bool CombinatorialChamberContainer::ProjectToDefaultAffineSpaceModifyCrossSectio
 
 void CombinatorialChamberContainer::ProjectToDefaultAffineSpace(GlobalVariables* theGlobalVariables)
 { while (!this->ProjectToDefaultAffineSpaceModifyCrossSections(theGlobalVariables))
-	{}
+	{ this->ComputeDebugString();
+	}
 }
 
 void CombinatorialChamberContainer::ComputeNextIndexToSlice(root &direction)
@@ -3206,6 +3218,7 @@ void CombinatorialChamberContainer::init()
 	this->theWeylGroupAffineHyperplaneImages.size=0;
 	this->flagMakingASingleHyperplaneSlice=false;
 	this->flagDrawingProjective=true;
+	this->flagSliceWithAWallIgnorePermanentlyZero=true;
 }
 
 
@@ -3303,6 +3316,8 @@ void CombinatorialChamberContainer::MakeStartingChambers
 //		if (this->flagAnErrorHasOcurredTimeToPanic)
 //			Accum.ComputeDebugString();
 		assert(this->TheObjects[i]->ConsistencyCheck(this->AmbientDimension));
+		if (this->TheGlobalConeNormals.IsSurelyOutsideCone(this->TheObjects[i]->AllVertices))
+			this->TheObjects[i]->flagPermanentlyZero=true;
 	}
 	this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomial=false;
 //	if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -3345,47 +3360,60 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables* theGlobalVa
 	this->ChamberTestArray.SetSizeExpandOnTopNoObjectInit(this->size);
 }
 
-bool Cone::IsSurelyOutsideCone(::rootsCollection& TheVertices, int NumrootsLists)
+bool Cone::IsSurelyOutsideCone(roots& TheVertices)
+{ if (!this->FillInChamberTestArray(TheVertices,true))
+		return false;
+	return this->IsSurelyOutsideConeAccordingToChamberTestArray();
+}
+
+bool Cone::FillInChamberTestArray(roots &TheVertices, bool initChamberTestArray)
 { //init first the array we will use for check
   //values in the array: -1 undertermined, 0 - outside normal, +1 inside normal
-	for (int i=0;i<this->size;i++)
-	{	this->ChamberTestArray.TheObjects[i]=-1;
-	}
-	for (int i=0;i<NumrootsLists;i++)
-	{	for (int j=0;j<TheVertices.TheObjects[i].size;j++)
-		{	bool TestedVertexIsStrictlyInsideGlobalCone;
-			TestedVertexIsStrictlyInsideGlobalCone= true;
-			for (int k=0;k<this->size;k++)
-			{	Rational tempRat;
-				root::RootScalarEuclideanRoot(TheVertices.TheObjects[i].TheObjects[j],
-																this->TheObjects[k],tempRat);
-				int state;	state=-1;
-				if (tempRat.IsPositive())
-				{	state =1;
-				}
-				else
-				{	TestedVertexIsStrictlyInsideGlobalCone=false;
-					if (tempRat.IsNegative())
-					{	state=0;
-					}
-				}
-				if (state!=-1)
-				{	if (this->ChamberTestArray.TheObjects[k]==-1)
-					{	this->ChamberTestArray.TheObjects[k]=state;
-					}
-					else
-					{	if (this->ChamberTestArray.TheObjects[k]!=state)
-						{return false;}
-					}
-				}
+	if (initChamberTestArray)
+		for (int i=0;i<this->size;i++)
+			this->ChamberTestArray.TheObjects[i]=-1;
+	for (int j=0;j<TheVertices.size;j++)
+	{	bool TestedVertexIsStrictlyInsideGlobalCone;
+		TestedVertexIsStrictlyInsideGlobalCone= true;
+		for (int k=0;k<this->size;k++)
+		{	Rational tempRat;
+			root::RootScalarEuclideanRoot
+				(TheVertices.TheObjects[j],this->TheObjects[k],tempRat);
+			int state;	state=-1;
+			if (tempRat.IsPositive())
+				state =1;
+			else
+			{	TestedVertexIsStrictlyInsideGlobalCone=false;
+				if (tempRat.IsNegative())
+					state=0;
 			}
-			if (TestedVertexIsStrictlyInsideGlobalCone){return false;}
+			if (state!=-1)
+			{	if (this->ChamberTestArray.TheObjects[k]==-1)
+					this->ChamberTestArray.TheObjects[k]=state;
+				else
+					if (this->ChamberTestArray.TheObjects[k]!=state)
+						return false;
+			}
 		}
+		if (TestedVertexIsStrictlyInsideGlobalCone){return false;}
 	}
-	for (int i=0;i<this->size;i++)
-	{ if (this->ChamberTestArray.TheObjects[i]==0){return true;}
-	}
+	return true;
+}
+
+bool Cone::IsSurelyOutsideConeAccordingToChamberTestArray()
+{	for (int i=0;i<this->size;i++)
+		if (this->ChamberTestArray.TheObjects[i]==0){return true;}
 	return false;
+}
+
+bool Cone::IsSurelyOutsideCone(::rootsCollection& TheVertices)
+{ bool firstRun=true;
+	for (int i=0;i<TheVertices.size;i++)
+	{	if (!this->FillInChamberTestArray(TheVertices.TheObjects[i],firstRun))
+			return false;
+		firstRun=true;
+	}
+	return this->IsSurelyOutsideConeAccordingToChamberTestArray();
 }
 
 /*void CombinatorialChamber::InduceFromAffineConeAddExtraDimension(affineCone& input)
@@ -3403,8 +3431,7 @@ void CombinatorialChamber::
 { root ZeroRoot; ZeroRoot.MakeZero(owner.AmbientDimension-1);
 	this->Externalwalls.SetSizeExpandOnTopNoObjectInit(input.Externalwalls.size+1);
 	if (owner.flagAnErrorHasOcurredTimeToPanic)
-	{	input.ComputeDebugString(&owner);
-	}
+		input.ComputeDebugString(&owner);
 	assert(input.IndexInOwnerComplex==this->IndexInOwnerComplex);
 	//the extra dimension is going to be the last dimension
 	for (int i=0;i<input.Externalwalls.size;i++)
@@ -3422,6 +3449,7 @@ void CombinatorialChamber::
 	this->Externalwalls.LastObject()->NeighborsAlongWall.size=0;
 	this->Externalwalls.LastObject()->NeighborsAlongWall.AddObjectOnTop(0);
 	this->flagHasZeroPolynomial= input.flagHasZeroPolynomial;
+	this->flagPermanentlyZero= input.flagPermanentlyZero;
 	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
 
@@ -13452,6 +13480,21 @@ bool affineHyperplane::ContainsPoint(root& thePoint)
   root::RootScalarEuclideanRoot(this->normal,thePoint,tempRat1);
   root::RootScalarEuclideanRoot(this->normal,this->affinePoint,tempRat2);
   return tempRat2.IsEqualTo(tempRat1);
+}
+
+bool affineHyperplane::HasACommonPointWithPositiveTwoToTheNth_ant()
+{ Rational tempRat;
+	root::RootScalarEuclideanRoot(this->normal,this->affinePoint, tempRat);
+	if (tempRat.IsEqualToZero())
+		return true;
+	for(int i=0;i<this->normal.size;i++)
+	{ Rational& tempRat2= this->normal.TheObjects[i];
+		if (tempRat.IsNegative() && tempRat2.IsNegative())
+			return true;
+		if (tempRat.IsPositive() && tempRat2.IsPositive())
+			return true;
+	}
+	return false;
 }
 
 void affineHyperplane::MakeFromNormalAndPoint(root& inputPoint, root& inputNormal)

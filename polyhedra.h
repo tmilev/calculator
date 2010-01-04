@@ -1323,6 +1323,7 @@ public:
 	bool ProjectFromFacetNormal(root& input);
 	bool ContainsPoint(root& thePoint);
 	void MakeFromNormalAndPoint(root& inputPoint, root&inputNormal);
+	bool HasACommonPointWithPositiveTwoToTheNth_ant();
 	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
 	inline void operator=(const affineHyperplane& right){this->Assign(right);};
 };
@@ -1943,7 +1944,12 @@ class Cone : public roots
 { //The roots are the normals to the walls of the cone
 public:
 	void ComputeFromDirections(roots& directions, GlobalVariables* theGlobalVariables, int theDimension);
-	bool IsSurelyOutsideCone(rootsCollection& TheVertices, int NumrootsLists);
+	bool IsSurelyOutsideCone(rootsCollection& TheVertices);
+	// the below returns false is we have a point strictly inside the cone
+	// else it fills in the Chamber test array
+	bool FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray);
+	bool IsSurelyOutsideCone(roots& TheVertices);
+	bool IsSurelyOutsideConeAccordingToChamberTestArray();
 	bool IsInCone(root& r);
 	bool SeparatesPoints(root& point1, root& point2);
 //	int HashFunction();
@@ -1980,13 +1986,14 @@ public:
 	affineHyperplanes StartingCrossSections;
 	bool flagMakingASingleHyperplaneSlice;
 	bool flagSliceWithAWallInitDone;
+	bool flagSliceWithAWallIgnorePermanentlyZero;
 	bool flagDrawingProjective;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
 	static int DefragSpacing;
 	static int LastReportedMemoryUse;
-	static Cone TheGlobalConeNormals;
+	Cone TheGlobalConeNormals;
 	static simplicialCones startingCones;
 	static std::fstream TheBigDump;
 	static root PositiveLinearFunctional;
@@ -1998,7 +2005,7 @@ public:
 		(	roots& directions,int& index,
 			int rank,root& IndicatorRoot,
 			GlobalVariables* theGlobalVariables);
-	static bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices, int NumrootsLists);
+	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
 	void SliceOneDirection
 			(	roots& directions, int& index, int rank,
 				root& IndicatorRoot, GlobalVariables* theGlobalVariables);

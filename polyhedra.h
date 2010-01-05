@@ -573,6 +573,7 @@ public:
 	int SelectionToIndex();
 	void ExpandMaxSize();
 	void ShrinkMaxSize();
+	void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
 	void incrementSelectionFixedCardinality(int card);
 	void Assign(const Selection& right);
 	inline void operator=(const Selection& right){this->Assign(right);};
@@ -1381,6 +1382,7 @@ public:
 	affineHyperplanes affineExternalWalls;
 	root InternalPoint;
 	int IndexStartingCrossSectionNormal;
+	int NumTrueAffineVertices;
 	static bool DisplayingGraphics;
 	static bool flagIncludeVerticesInDebugString;
 	static bool flagAnErrorHasOccurredTimeToPanic;
@@ -1419,7 +1421,7 @@ public:
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
 	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberContainer& owner);
 	void ComputeAffineInfinityPointApproximation
-		(Selection& selectedVertices,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
+		(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	void PurgeInternalWalls();
@@ -2162,6 +2164,9 @@ public:
 	Selection selWallSelection;
 	Selection selComputeNormalFromSelectionAndExtraRoot;
 	Selection selComputeNormalFromSelectionAndTwoExtraRoots;
+	Selection selComputeAffineInfinityPointApproximation1; 
+	Selection selComputeAffineInfinityPointApproximation2;
+
 	GlobalVariables();
 	~GlobalVariables();
 	void operator=(const GlobalVariables& G_V);
@@ -4963,12 +4968,19 @@ public:
 	bool flagComputationIsDoneStepwise;
 	bool flagComputationPartiallyDoneDontInit;
 	bool flagSuperimposingComplexes;
+	bool flagCustomNilradicalInitted;
 	char WeylGroupLetter;
 	unsigned char WeylGroupIndex;
 	void EvaluatePoly();
 	void Run();
-	void oneChamberSlice(GlobalVariables* theGlobalVariables);
+	void oneStepGenerateCustomNilradicalSuperimposeComplex(GlobalVariables* theGlobalVariables);
+	void oneStepGenerateNilradicalSuperimposeComplex(GlobalVariables* theGlobalVariables);
+	void oneStepChamberSlice(GlobalVariables* theGlobalVariables);
 	void oneIncrement(GlobalVariables* theGlobalVariables);
+	void initSetupNilradical(GlobalVariables* theGlobalVariables);
+	void initGenerateWeylAndHyperplanesToSliceWith
+		(GlobalVariables* theGlobalVariables,CombinatorialChamberContainer& inputComplex);
+	void SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables);
 	void FullChop(GlobalVariables* theGlobalVariables);
 	void WriteToFilePFdecomposition(std::fstream& output);
 	ComputationSetup();

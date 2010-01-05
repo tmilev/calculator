@@ -480,6 +480,18 @@ void DrawingVariables::ApplyScale(double inputScale)
 	}
 }
 
+void ComputationSetup::oneStepGenerateCustomNilradicalSuperimposeComplex(GlobalVariables* theGlobalVariables)
+{ if(!this->flagCustomNilradicalInitted)
+	{ this->flagCustomNilradicalInitted=true;
+		this->SetupCustomNilradicalInVPVectors(*theGlobalVariables);
+	} else
+	this->oneStepGenerateNilradicalSuperimposeComplex(theGlobalVariables);
+}
+
+void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables)
+{ 
+}
+
 ComputationSetup::ComputationSetup()
 { this->theGlobalVariablesContainer.SetSizeExpandOnTopNoObjectInit(1);
 	this->AllowRepaint=true;
@@ -498,6 +510,7 @@ ComputationSetup::ComputationSetup()
 	this->flagComputationIsDoneStepwise=true;
 	this->flagComputationPartiallyDoneDontInit=false;
 	this->flagSuperimposingComplexes=true;
+	this->flagCustomNilradicalInitted=false;
 	this->NextDirectionIndex=0;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
@@ -517,9 +530,9 @@ void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output)
 
 void ComputationSetup::oneIncrement(GlobalVariables* theGlobalVariables)
 {	this->AllowRepaint=false;
-	for ( this->oneChamberSlice(theGlobalVariables);
+	for ( this->oneStepGenerateNilradicalSuperimposeComplex(theGlobalVariables);
         this->theChambers.PreferredNextChambers.size!=0;
-        this->oneChamberSlice(theGlobalVariables))
+        this->oneStepGenerateNilradicalSuperimposeComplex(theGlobalVariables))
 	{}
 	this->AllowRepaint=true;
 }
@@ -531,95 +544,109 @@ void ComputationSetup::FullChop(GlobalVariables* theGlobalVariables)
 	this->AllowRepaint=true;
 }
 
-void ComputationSetup::oneChamberSlice(GlobalVariables* theGlobalVariables)
+void ComputationSetup::oneStepGenerateNilradicalSuperimposeComplex(GlobalVariables* theGlobalVariables)
 {	this->AllowRepaint=false;
-	if (!this->flagSuperimposingComplexes)
-	{	::InputRoots.CopyFromBase(this->VPVectors);
-		CombinatorialChamberContainer tempComplex;
-		if (this->NextDirectionIndex==0)
-		{ tempComplex.AmbientDimension= this->WeylGroupIndex;
-			this->NextDirectionIndex=tempComplex.AmbientDimension-1;
-		}
-		tempComplex.OneSlice(::InputRoots,this->NextDirectionIndex,tempComplex.AmbientDimension,
-															this->thePartialFraction.IndicatorRoot,
-															this->theGlobalVariablesContainer.Default());
-		this->theChambers.InduceFromLowerDimensionalAndProjectivize(tempComplex, theGlobalVariables);
-	}
+	this->theChambers.flagDrawingProjective=true;
+	if (!this->flagComputationPartiallyDoneDontInit)
+		this->initSetupNilradical(theGlobalVariables);
 	else
-	{ this->theChambers.flagDrawingProjective=true;
-	  if (!this->flagComputationPartiallyDoneDontInit)
-		{	CombinatorialChamberContainer tempComplex;
-			this->theChambers.NumAffineHyperplanesProcessed=-1;
-			this->theChambers.AmbientDimension=this->WeylGroupIndex;
-			::InputRoots.CopyFromBase(this->VPVectors);
-			::NextDirectionIndex=this->theChambers.AmbientDimension-1;
-			tempComplex.SliceTheEuclideanSpace
-				(	::InputRoots,::NextDirectionIndex,this->WeylGroupIndex,
-					this->thePartialFraction.IndicatorRoot,
-					this->theGlobalVariablesContainer.Default());
-			this->theChambers.InduceFromLowerDimensionalAndProjectivize
-				(tempComplex,this->theGlobalVariablesContainer.Default());
-			WeylGroup tempWeyl;
-			tempWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
-			tempWeyl.ComputeWeylGroup();
-			tempWeyl.ComputeDebugString();
-			this->theChambers.theWeylGroupAffineHyperplaneImages
-				.SetSizeExpandOnTopNoObjectInit(0);
-			for (int i=0;i<tempComplex.theHyperplanes.size;i++)
-			{ affineHyperplane tempH;
-				root tempRoot; tempRoot.MakeZero(tempComplex.AmbientDimension);
-				for (int j=1;j<tempWeyl.size;j++)
-				{	tempH.MakeFromNormalAndPoint
-						(tempRoot,tempComplex.theHyperplanes.TheObjects[i]);
-					//tempH.ComputeDebugString();
-					tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
-					if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
-						this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
-					//tempH.ComputeDebugString();
-				}
-			}
-			this->theChambers.NewHyperplanesToSliceWith.size=0;
-			this->theChambers.NewHyperplanesToSliceWith.MakeActualSizeAtLeastExpandOnTop
-				(this->theChambers.theWeylGroupAffineHyperplaneImages.size);
-			for (int i=0;i<this->theChambers.theWeylGroupAffineHyperplaneImages.size;i++)
-			{ root tempRoot;
-				tempRoot.MakeNormalInProjectivizationFromAffineHyperplane
-					(theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
-				//tempRoot.ComputeDebugString();
-				tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-				this->theChambers.NewHyperplanesToSliceWith.AddRoot(tempRoot);
-			}
-		//	this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
-			this->flagComputationPartiallyDoneDontInit=true;
-			this->theChambers.flagSliceWithAWallInitDone=false;
-		}
-		else
-		{	if (this->theChambers.PreferredNextChambers.size==0 &&
-						this->theChambers.NumAffineHyperplanesProcessed	<
-						this->theChambers.NewHyperplanesToSliceWith.size)
-			{	this->theChambers.NumAffineHyperplanesProcessed++;}
-			if (	this->theChambers.NumAffineHyperplanesProcessed	<
-						this->theChambers.NewHyperplanesToSliceWith.size)
-			{	if (this->theChambers.PreferredNextChambers.size==0)
-				{	this->theChambers.SliceWithAWallInit(this->theChambers.NewHyperplanesToSliceWith
-						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
-						this->theGlobalVariablesContainer.Default());
-				} else
-				{	this->theChambers.SliceWithAWallOneIncrement(this->theChambers.NewHyperplanesToSliceWith
-						.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
-						this->theGlobalVariablesContainer.Default());
-				}
-			} else
-			{ this->theChambers.flagDrawingProjective=false;
-        this->theChambers.ProjectToDefaultAffineSpace(theGlobalVariables);
-        this->theChambers.ComputeDebugString();
-      }
-      this->theChambers.ComputeDebugString();
-		}
-	}
+		this->oneStepChamberSlice(theGlobalVariables);
 	this->flagComputationPartiallyDoneDontInit=true;
 	this->AllowRepaint=true;
 }
+
+void ComputationSetup::initSetupNilradical(GlobalVariables *theGlobalVariables)
+{ this->theChambers.flagDrawingProjective=true;
+	if (!this->flagComputationPartiallyDoneDontInit)
+	{	CombinatorialChamberContainer tempComplex;
+		this->theChambers.NumAffineHyperplanesProcessed=-1;
+		this->theChambers.AmbientDimension=this->WeylGroupIndex;
+		::InputRoots.CopyFromBase(this->VPVectors);
+		::NextDirectionIndex=this->theChambers.AmbientDimension-1;
+		tempComplex.SliceTheEuclideanSpace
+			(	::InputRoots,::NextDirectionIndex,this->WeylGroupIndex,
+					this->thePartialFraction.IndicatorRoot,
+						this->theGlobalVariablesContainer.Default());
+		this->initGenerateWeylAndHyperplanesToSliceWith(theGlobalVariables,tempComplex);
+	}
+	//	this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
+	this->flagComputationPartiallyDoneDontInit=true;
+	this->theChambers.flagSliceWithAWallInitDone=false;
+}
+
+void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
+	(GlobalVariables* theGlobalVariables, CombinatorialChamberContainer& inputComplex)
+{ assert(&inputComplex!=&this->theChambers);
+	this->theChambers.flagDrawingProjective=true;
+	this->AllowRepaint=false;
+	if (!this->flagComputationPartiallyDoneDontInit)
+	{	this->theChambers.InduceFromLowerDimensionalAndProjectivize
+			(inputComplex,this->theGlobalVariablesContainer.Default());
+		WeylGroup tempWeyl;
+		tempWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
+		tempWeyl.ComputeWeylGroup();
+		tempWeyl.ComputeDebugString();
+		this->theChambers.theWeylGroupAffineHyperplaneImages
+			.SetSizeExpandOnTopNoObjectInit(0);
+		for (int i=0;i<inputComplex.theHyperplanes.size;i++)
+		{ affineHyperplane tempH;
+			root tempRoot; tempRoot.MakeZero(inputComplex.AmbientDimension);
+			for (int j=1;j<tempWeyl.size;j++)
+			{	tempH.MakeFromNormalAndPoint
+					(tempRoot,inputComplex.theHyperplanes.TheObjects[i]);
+				//tempH.ComputeDebugString();
+				tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
+				if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
+					this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTop(tempH);
+				//tempH.ComputeDebugString();
+			}
+		}
+		this->theChambers.NewHyperplanesToSliceWith.size=0;
+		this->theChambers.NewHyperplanesToSliceWith.MakeActualSizeAtLeastExpandOnTop
+			(this->theChambers.theWeylGroupAffineHyperplaneImages.size);
+		for (int i=0;i<this->theChambers.theWeylGroupAffineHyperplaneImages.size;i++)
+		{ root tempRoot;
+			tempRoot.MakeNormalInProjectivizationFromAffineHyperplane
+				(theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
+			//tempRoot.ComputeDebugString();
+			tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+			this->theChambers.NewHyperplanesToSliceWith.AddRoot(tempRoot);
+		}
+	}
+	//	this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
+	this->flagComputationPartiallyDoneDontInit=true;
+	this->theChambers.flagSliceWithAWallInitDone=false;
+}
+
+void ComputationSetup::oneStepChamberSlice(GlobalVariables* theGlobalVariables)
+{	this->AllowRepaint=false;
+	this->theChambers.flagDrawingProjective=true;
+	if (this->theChambers.PreferredNextChambers.size==0 &&
+			this->theChambers.NumAffineHyperplanesProcessed	<
+			this->theChambers.NewHyperplanesToSliceWith.size)
+		this->theChambers.NumAffineHyperplanesProcessed++;
+	if (	this->theChambers.NumAffineHyperplanesProcessed	<
+				this->theChambers.NewHyperplanesToSliceWith.size)
+	{	if (this->theChambers.PreferredNextChambers.size==0)
+			this->theChambers.SliceWithAWallInit(this->theChambers.NewHyperplanesToSliceWith
+				.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],
+					this->theGlobalVariablesContainer.Default());
+		else
+			this->theChambers.SliceWithAWallOneIncrement(this->theChambers.NewHyperplanesToSliceWith
+				.TheObjects[this->theChambers.NumAffineHyperplanesProcessed],theGlobalVariables);
+	} else
+	{ this->theChambers.flagDrawingProjective=false;
+     this->theChambers.ProjectToDefaultAffineSpace(theGlobalVariables);
+     this->theChambers.ComputeDebugString();
+  }
+  this->theChambers.ComputeDebugString();
+	this->flagComputationPartiallyDoneDontInit=true;
+	this->AllowRepaint=true;
+}
+
+
+
+
 
 void ComputationSetup::Run()
 { PolyFormatLocal.MakeAlphabetxi();
@@ -1554,9 +1581,7 @@ void Selection::init(int maxNumElements)
 		MaxSize =maxNumElements;
 	}
 	for (int i=0; i<this->MaxSize;i++)
-	{ this->selected[i]=false;
-	//	this->elementsInverseSelection[i] =i;
-	}
+		this->selected[i]=false;
 	this->CardinalitySelection=0;
 }
 
@@ -1564,8 +1589,7 @@ void roots::SubSelection(Selection& theSelection, roots& output)
 { assert(&output!=this);
 	output.SetSizeExpandOnTopNoObjectInit(theSelection.CardinalitySelection);
 	for(int i=0;i<theSelection.CardinalitySelection;i++)
-	{	output.TheObjects[i].Assign(this->TheObjects[theSelection.elements[i]]);
-	}
+		output.TheObjects[i].Assign(this->TheObjects[theSelection.elements[i]]);
 }
 
 void roots::SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output)
@@ -1578,8 +1602,7 @@ void roots::SelectionToMatrixAppend
 { for(int i=0;i<theSelection.CardinalitySelection;i++)
 	{	root& tempRoot=this->TheObjects[theSelection.elements[i]];
 		for (int j=0;j<OutputDimension;j++)
-		{ output.elements[StartRowIndex+i][j].Assign(tempRoot.TheObjects[j]);
-		}
+			output.elements[StartRowIndex+i][j].Assign(tempRoot.TheObjects[j]);
 	}
 }
 
@@ -1753,10 +1776,17 @@ void Selection::ComputeIndicesFromSelection()
 
 void Selection::initNoMemoryAllocation()
 {	for (int i = 0; i<this->CardinalitySelection; i++)
-	{	this->selected[this->elements[i]]=false;
-	}
+		this->selected[this->elements[i]]=false;
 	CardinalitySelection = 0;
 }
+
+void Selection::MakeSubSelection(Selection &theSelection, Selection &theSubSelection)
+{ this->init(theSelection.MaxSize);
+	for(int i=0; i<theSubSelection.CardinalitySelection;i++)
+		this->AddSelection(theSelection.elements[theSubSelection.elements[i]]);
+}
+
+
 
 void Selection::Assign(const Selection& right)
 { if (this==&right)
@@ -2224,12 +2254,16 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 	}
 	out<<"\n";
 	if (!owner->flagDrawingProjective)
-	{ this->affineExternalWalls.ElementToString(tempS);
+	{	this->affineExternalWalls.ElementToString(tempS);
     out<<"Affine walls:\n" << tempS;
-    this->affineVertices.ElementToString(tempS);
-    out<< "Affine vertices: " << tempS;
-    out<<"\n";
-  }
+		out << "Affine vertices (true):\n";
+		for (int i=0;i<affineVertices.size;i++)
+		{	if (i==this->NumTrueAffineVertices)
+				out << "Affine vertices representing pt(s) at infty:\n";
+			this->affineVertices.TheObjects[i].ElementToString(tempS);
+			out << tempS<<"\n";
+		}
+	}
 	output=out.str();
 	return true;
 }
@@ -2262,6 +2296,7 @@ CombinatorialChamber::CombinatorialChamber()
 	this->flagExplored=false;
 	this->DisplayNumber=-1;
 	this->flagPermanentlyZero=false;
+	this->NumTrueAffineVertices=-1;
 }
 
 bool CombinatorialChamber::ProjectToDefaultAffineSpace
@@ -2290,9 +2325,9 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace
 		Stop();
 	}
 	this->ComputeDebugString(owner);
+	root tempRoot;
 	for (int i=0;i<this->AllVertices.size;i++)
-	{ root tempRoot;
-		if (this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
+	{ if (this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
 		{ root::RootScalarEuclideanRoot
 				(	tempCrossSectionNormal,tempRoot, tempRat);
 			if (tempRat.IsEqualTo(tempScalarProd1))
@@ -2303,11 +2338,14 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace
 				return false;
 			}
 			this->affineVertices.AddObjectOnTop(tempRoot);
-		} else
+		} 
+	}
+	this->NumTrueAffineVertices= this->affineVertices.size;
+	for (int i=0;i<this->AllVertices.size;i++)
+	{ if (!this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
 		{ Selection tempSel;
 			this->findWallsIncidentWithVertexExcludeWallAtInfinity(this->AllVertices.TheObjects[i],tempSel, owner);
-			assert(	tempSel.CardinalitySelection==owner->AmbientDimension-2 ||
-							tempSel.CardinalitySelection==owner->AmbientDimension-1 );
+			assert(	tempSel.CardinalitySelection>=owner->AmbientDimension-2);
 			this->ComputeAffineInfinityPointApproximation(tempSel,owner,theGlobalVariables);
 		}
 	}
@@ -2320,22 +2358,18 @@ void CombinatorialChamber::PurgeInternalWalls()
 }
 
 void CombinatorialChamber::ComputeAffineInfinityPointApproximation
-	(Selection& selectedVertices,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables)
+	(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables)
 { root candidateVertex;
-	if (selectedVertices.CardinalitySelection==owner->AmbientDimension-1)
-	{	selectedVertices.ComputeIndicesFromSelection();
-		for (int i=0;i<selectedVertices.CardinalitySelection;i++)
-		{ int tempIndex=selectedVertices.elements[i];
-			selectedVertices.selected[tempIndex]=false;
-			selectedVertices.ComputeIndicesFromSelection();
-			this->LinearAlgebraForVertexComputationOneAffinePlane(selectedVertices,candidateVertex,theGlobalVariables,owner);
+	Selection& subSelection = theGlobalVariables->selComputeAffineInfinityPointApproximation1;
+	Selection& tempSel = theGlobalVariables->selComputeAffineInfinityPointApproximation2;
+	tempSel.init(selectedExternalWalls.CardinalitySelection);
+	int tempI = MathRoutines::NChooseK(selectedExternalWalls.CardinalitySelection, owner->AmbientDimension-2);
+	for (int i=0;i<tempI;i++)
+	{ tempSel.incrementSelectionFixedCardinality(owner->AmbientDimension-2);
+		tempSel.ComputeDebugString();
+		subSelection.MakeSubSelection(selectedExternalWalls,tempSel);
+		if (this->LinearAlgebraForVertexComputationOneAffinePlane(subSelection,candidateVertex,theGlobalVariables,owner))
 			this->affineVertices.AddObjectOnTop(candidateVertex);
-			selectedVertices.AddSelection(tempIndex);
-			selectedVertices.ComputeIndicesFromSelection();
-		}
-	} else
-	{	this->LinearAlgebraForVertexComputationOneAffinePlane(selectedVertices,candidateVertex,theGlobalVariables,owner);
-		this->affineVertices.AddObjectOnTop(candidateVertex);
 	}
 }
 
@@ -2621,7 +2655,8 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane
 	tempMat.ComputeDebugString();
 	tempColumn.ComputeDebugString();
 	Matrix<Rational>::GaussianEliminationByRows(tempMat,tempColumn, tempSel);
-	assert(tempSel.CardinalitySelection==0);
+	if(tempSel.CardinalitySelection!=0)
+		return false;
 	output.SetSizeExpandOnTopLight(owner->AmbientDimension-1);
 	tempMat.ComputeDebugString();
 	tempColumn.ComputeDebugString();

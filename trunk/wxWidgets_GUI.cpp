@@ -863,7 +863,7 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 
 void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 { this->ReadVPVectorsAndOptions();
-	this->theComputationSetup.oneChamberSlice
+	this->theComputationSetup.oneStepGenerateNilradicalSuperimposeComplex
 		(this->theComputationSetup.theGlobalVariablesContainer.Default());	
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();

@@ -169,6 +169,7 @@ public:
 	int ZeroChamberTextColor;
 	int DeadChamberTextColor;
 	int ColorChamberIndicator;
+	int ColorWeylChamberWalls;
 	int TextOutStyle;
 	int TextOutStyleInvisibles;
 	int DrawStyle;
@@ -1216,7 +1217,7 @@ public:
 	};
 	bool IsGreaterThanOrEqualTo(root& r);
 	bool IsEqualTo(const root& right);
-	static void RootScalarEuclideanRoot(root& r1, root& r2, Rational& output);
+	static void RootScalarEuclideanRoot(const root& r1, const root& r2, Rational& output);
 	static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, Rational& output);
 //	static void RootScalarRoot(root& r1, root& r2, MatrixIntTightMemoryFit& KillingForm, Rational& output);
 	static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
@@ -1327,6 +1328,7 @@ public:
 	bool HasACommonPointWithPositiveTwoToTheNth_ant();
 	void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal);};
 	inline void operator=(const affineHyperplane& right){this->Assign(right);};
+	inline bool operator==(const affineHyperplane& right);
 };
 
 class affineHyperplanes: public ListBasicObjects<affineHyperplane>
@@ -1764,7 +1766,7 @@ void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
 
 template <class Object>
 void HashedListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object &o)
-{ if (this->ContainsObjectHash(o))
+{ if (this->ContainsObjectHash(o)!=-1)
 		return;
 	this->AddObjectOnTopHash(o);
 }
@@ -1980,11 +1982,14 @@ public:
 	std::string DebugString;
 	hashedRoots theHyperplanes;
 	roots NewHyperplanesToSliceWith;
+	HashedListBasicObjects<affineHyperplane> AffineWallsOfWeylChambers;
 	affineHyperplanes theWeylGroupAffineHyperplaneImages;
 	root IndicatorRoot;
 	ListBasicObjects<int> PreferredNextChambers;
 	int indexNextChamberToSlice;
 	int NumAffineHyperplanesProcessed;
+	int NumAffineHyperplanesBeforeWeylChamberWalls;
+	int NumProjectiveHyperplanesBeforeWeylChamberWalls;
 	affineHyperplanes StartingCrossSections;
 	bool flagMakingASingleHyperplaneSlice;
 	bool flagSliceWithAWallInitDone;
@@ -2003,6 +2008,9 @@ public:
 	static bool flagAnErrorHasOcurredTimeToPanic;
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
+	void ConvertHasZeroPolyToPermanentlyZero();
+	void AddWeylChamberWallsToHyperplanes
+		(GlobalVariables* theGlobalVariables, WeylGroup& theWeylGroup);
 	void SliceTheEuclideanSpace
 		(	roots& directions,int& index,
 			int rank,root& IndicatorRoot,
@@ -4969,12 +4977,14 @@ public:
 	bool flagComputationPartiallyDoneDontInit;
 	bool flagSuperimposingComplexes;
 	bool flagCustomNilradicalInitted;
+	bool flagDoCustomNilradical;
+	bool flagOneSteChamberSliceInitialized;
 	char WeylGroupLetter;
+	int NumRowsNilradical;
+	int NumColsNilradical;
 	unsigned char WeylGroupIndex;
 	void EvaluatePoly();
 	void Run();
-	void oneStepGenerateCustomNilradicalSuperimposeComplex(GlobalVariables* theGlobalVariables);
-	void oneStepGenerateNilradicalSuperimposeComplex(GlobalVariables* theGlobalVariables);
 	void oneStepChamberSlice(GlobalVariables* theGlobalVariables);
 	void oneIncrement(GlobalVariables* theGlobalVariables);
 	void initSetupNilradical(GlobalVariables* theGlobalVariables);

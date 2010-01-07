@@ -862,25 +862,37 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 }
 
 void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
-{ this->ReadVPVectorsAndOptions();
-	this->theComputationSetup.oneStepGenerateNilradicalSuperimposeComplex
-		(this->theComputationSetup.theGlobalVariablesContainer.Default());	
+{ if (!this->theComputationSetup.flagDoCustomNilradical)
+		this->ReadVPVectorsAndOptions();
+	else
+		this->theComputationSetup.SetupCustomNilradicalInVPVectors
+			(*this->theComputationSetup.theGlobalVariablesContainer.Default());
+	this->theComputationSetup.oneStepChamberSlice
+			(this->theComputationSetup.theGlobalVariablesContainer.Default());
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();
 }
 
 void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
-{	this->ReadVPVectorsAndOptions();
+{	 if (!this->theComputationSetup.flagDoCustomNilradical)
+		this->ReadVPVectorsAndOptions();
+	else
+		this->theComputationSetup.SetupCustomNilradicalInVPVectors
+			(*this->theComputationSetup.theGlobalVariablesContainer.Default());
 	this->theComputationSetup.oneIncrement
-		(this->theComputationSetup.theGlobalVariablesContainer.Default());	
+			(this->theComputationSetup.theGlobalVariablesContainer.Default());
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();
 }
 
 void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
-{	this->ReadVPVectorsAndOptions();
+{	if (!this->theComputationSetup.flagDoCustomNilradical)
+		this->ReadVPVectorsAndOptions();
+	else
+		this->theComputationSetup.SetupCustomNilradicalInVPVectors
+			(*this->theComputationSetup.theGlobalVariablesContainer.Default());
 	this->theComputationSetup.FullChop
-		(this->theComputationSetup.theGlobalVariablesContainer.Default());	
+			(this->theComputationSetup.theGlobalVariablesContainer.Default());
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
 	this->Refresh();
 }

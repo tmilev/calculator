@@ -154,6 +154,7 @@ struct DrawingVariables
 {
 public:
 	static const int NumColors=8;
+	bool flagLaTeXDraw;
 	bool DrawDashes;
 	bool DrawChamberIndices;
 	bool DrawingInvisibles;
@@ -182,12 +183,16 @@ public:
 	int ColorsB[DrawingVariables::NumColors];
 	int Colors[DrawingVariables::NumColors];
 	DrawingVariables(int cx, int cy){this->initDrawingVariables(cx,cy);};
-	int GetColorFromChamberIndex(int index);
+	int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
 	static void GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y);
 	static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
 	void ApplyScale(double inputScale);
-	void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor);
-	void drawTextAtVector(root& point, std::string& inputText);
+	void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile);
+	//if the LatexOutFile is zero then the procedure defaults to the screen
+	void drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
+	void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile);
+//	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
+	void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile);
 };
 
 //The below class is to be used together with ListBasicObjects.
@@ -326,6 +331,8 @@ public:
 	void PopIndexShiftDown(int index);
 	void PopIndexSwapWithLast(int index);
 	void PopFirstOccurenceObjectSwapWithLast(Object& o);
+	void SwapTwoIndices(int index1, int index2);
+	void ElementToStringGeneric(std::string& output);
 	void CopyFromBase (const ListBasicObjects<Object>& From);
 	void ShiftUpExpandOnTop(int StartingIndex);
 	//careful output is not bool but int!!!!
@@ -1235,7 +1242,7 @@ public:
 	void AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r);
 	void AssignMatrixRows(MatrixLargeRational& mat);
 	void ComputeDebugString();
-	int GetRankOfSpanOfElements();
+	int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables);
 	void AddRoot(root& r);
 	void AddIntRoot(intRoot& r);
 	void AddRootS(roots& r);
@@ -1251,9 +1258,12 @@ public:
 	void GetLinearDependenceRunTheLinearAlgebra
 		(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
 		 Selection& outputNonPivotPoints);
+	int GetDimensionOfElements();
 	bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
 	void GaussianEliminationForNormalComputation
 		(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension);
+	// the below function is slow
+	int ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables);
 	void rootsToMatrix(MatrixLargeRational& output);
 	void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
 	void ElementToString(std::string& output);
@@ -1396,7 +1406,7 @@ public:
 	//bool InduceFromAffineCone(affineCone& input);
 	bool ComputeDebugString(CombinatorialChamberContainer* owner);
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner);
-	void ChamberNumberToStringStream(std::stringstream& out);
+	void ChamberNumberToStringStream(std::stringstream& out, CombinatorialChamberContainer& owner);
 	bool ConsistencyCheck(int theDimension);
 	//bool FacetIsInternal(Facet* f);
 	void LabelWallIndicesProperly();
@@ -1466,7 +1476,7 @@ public:
 																			roots & directions, int CurrentIndex,
 																			root& outputNormal,GlobalVariables* theGlobalVariables);
   void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner);
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput);
 	void WireChamberAndWallAdjacencyData
 		(	CombinatorialChamberContainer &owner,
 			CombinatorialChamber* input);
@@ -1485,12 +1495,20 @@ void ListBasicObjects<Object>::AddListOnTop(ListBasicObjects<Object>& theList)
 }
 
 template<class Object>
+void ListBasicObjects<Object>::SwapTwoIndices(int index1, int index2)
+{ if (index1==index2)
+		return;
+	Object tempO;
+	tempO= this->TheObjects[index1];
+	this->TheObjects[index1]=this->TheObjects[index2];
+	this->TheObjects[index2]=tempO;
+}
+
+template<class Object>
 int ListBasicObjects<Object>::ContainsObject(const Object &o)
 { for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i]==o)
-		{ return i;
-		}
-	}
+		if (this->TheObjects[i]==o)
+			return i;
 	return -1;
 }
 
@@ -1587,6 +1605,16 @@ void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
 }
 
 template <class Object>
+inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output)
+{ std::stringstream out; std::string tempS;
+	for (int i=0;i<this->size;i++)
+	{	this->TheObjects[i].ElementToString(tempS);
+		out<< tempS<< "\n";
+	} 
+	output= out.str();
+}
+
+template <class Object>
 inline void ListBasicObjects<Object>::AddObjectOnTopCreateNew()
 {	this->SetSizeExpandOnTopNoObjectInit(this->size+1);
 }
@@ -1596,8 +1624,7 @@ void ListBasicObjects<Object>::PopIndexShiftUp(int index)
 {	if (size==0){return;}
 	this->size--;
 	for (int i=index;i>=1;i--)
-	{	this->TheObjects[i]=this->TheObjects[i-1];
-	}
+		this->TheObjects[i]=this->TheObjects[i-1];
 	this->TheObjects++;
 	IndexOfVirtualZero++;
 }
@@ -1654,8 +1681,7 @@ void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
 {	if (increase<=0) return;
 	Object* newArray = new Object[this->ActualSize+increase];
 	for (int i=0;i<this->size;i++)
-	{	newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
-	}
+		newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
@@ -1665,8 +1691,7 @@ void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
 template <class Object>
 void ListBasicObjects<Object>::AddObjectOnBottom(const Object& o)
 {	if (this->IndexOfVirtualZero==0)
-	{	this->ExpandArrayOnBottom(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
-	}
+		this->ExpandArrayOnBottom(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
 	this->IndexOfVirtualZero--;
 	this->TheObjects--;
 	this->TheObjects[0]=o;
@@ -1725,8 +1750,7 @@ void HashedListBasicObjects<Object>::ClearHashes()
 	}
 	else
 	{ for (int i=0;i<this->HashSize;i++)
-		{ this->TheHashedArrays[i].size=0;
-		}
+			this->TheHashedArrays[i].size=0;
 	}
 }
 
@@ -1824,15 +1848,13 @@ void ListObjectPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
 	if (this->ActualSize<this->size+increase)
 	{ Object** newArray= new Object*[this->size+increase];
 		for (int i=0;i<this->size;i++)
-		{ newArray[i]=this->TheObjects[i];
-		}
+			newArray[i]=this->TheObjects[i];
 		delete [] this->TheObjects;
 		this->TheObjects= newArray;
 		this->ActualSize+=increase;
 	}
 	for(int i=this->size;i<this->ActualSize;i++)
-	{ this->TheObjects[i]=0;
-	}
+		this->TheObjects[i]=0;
 	this->size+=increase;
 }
 
@@ -1841,8 +1863,7 @@ void ListObjectPointers<Object>::initAndCreateNewObjects(int d)
 { this->KillAllElements();
 	this->SetSizeExpandOnTopNoObjectInit(d);
 	for (int i=0;i<d;i++)
-	{	this->TheObjects[i]=new Object;
-	}
+		this->TheObjects[i]=new Object;
 }
 
 template<class Object>
@@ -1894,24 +1915,16 @@ bool ListObjectPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
 
 template<class Object>
 bool ListObjectPointers<Object>::IsAnElementOf(Object* o)
-{
-	for(int i=0;i<this->size;i++)
-	{
+{	for(int i=0;i<this->size;i++)
 		if (this->TheObjects[i]==o)
-		{
 			return true;
-		}
-	}
 	return false;
 }
 template<class Object>
 void CopyOntoObject(ListObjectPointers<Object>* FromList)
-{
-	init(FromList->size);
-	for(int i=0; i<FromList.size;i++)
-	{
+{	init(FromList->size);
+	for(int i=0; i<FromList->size;i++)
 		AddObject(FromList->TheObjects[i]);
-	}
 }
 
 template <class Object>
@@ -1981,11 +1994,14 @@ public:
 	unsigned char AmbientDimension;
 	std::string DebugString;
 	hashedRoots theHyperplanes;
+	Cone TheGlobalConeNormals;
+	Cone WeylChamber;
 	roots NewHyperplanesToSliceWith;
 	HashedListBasicObjects<affineHyperplane> AffineWallsOfWeylChambers;
 	affineHyperplanes theWeylGroupAffineHyperplaneImages;
 	root IndicatorRoot;
 	ListBasicObjects<int> PreferredNextChambers;
+	std::fstream FileOutput;
 	int indexNextChamberToSlice;
 	int NumAffineHyperplanesProcessed;
 	int NumAffineHyperplanesBeforeWeylChamberWalls;
@@ -1995,12 +2011,12 @@ public:
 	bool flagSliceWithAWallInitDone;
 	bool flagSliceWithAWallIgnorePermanentlyZero;
 	bool flagDrawingProjective;
+	bool flagDrawToLaTeX;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
 	static int DefragSpacing;
 	static int LastReportedMemoryUse;
-	Cone TheGlobalConeNormals;
 	static simplicialCones startingCones;
 	static std::fstream TheBigDump;
 	static root PositiveLinearFunctional;
@@ -2024,9 +2040,12 @@ public:
   void InduceFromLowerDimensionalAndProjectivize
 		(CombinatorialChamberContainer& input, GlobalVariables* theGlobalVariables);
   void MakeExtraProjectivePlane();
+	int CountNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
+	int GetNumVisibleChambersAndLabelChambersForDisplay();
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output);
+	void WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void init();
 	void Free();
@@ -2050,12 +2069,12 @@ public:
 	void ComputeGlobalCone(roots& directions, GlobalVariables* theGlobalVariables);
 	static void drawOutput
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
-			roots& directions, int directionIndex,root& ChamberIndicator);
+			roots& directions, int directionIndex,root& ChamberIndicator,std::fstream* LaTeXOutput);
 	static void drawOutputProjective
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator);
 	static void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output);
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput);
 	static void drawFacetVerticesMethod2(DrawingVariables& TDV,
 														  roots& r, roots& directions, int ChamberIndex,
 															WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes);
@@ -2157,6 +2176,7 @@ public:
 	MatrixLargeRational matLinearAlgebraForVertexComputation;
 	MatrixLargeRational	matComputeNormalFromSelectionAndExtraRoot;
 	MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
+	MatrixLargeRational matGetRankOfSpanOfElements;
 
 	QuasiPolynomial* QPComputeQuasiPolynomial;
 	QuasiNumber* QNComputeQuasiPolynomial;
@@ -2174,6 +2194,7 @@ public:
 	Selection selComputeNormalFromSelectionAndTwoExtraRoots;
 	Selection selComputeAffineInfinityPointApproximation1; 
 	Selection selComputeAffineInfinityPointApproximation2;
+	Selection selGetRankOfSpanOfElements;
 
 	GlobalVariables();
 	~GlobalVariables();
@@ -4759,24 +4780,24 @@ public:
 												bool RhoAction, bool PositiveWeightsOnly,
 												Cone* LimitingCone, bool onlyLowerWeights);
 	void GenerateOrbit(	roots& theRoots, bool RhoAction,
-											hashedRoots& output);
+											hashedRoots& output, bool UseMinusRho);
 	void GenerateOrbit(	roots& theRoots, bool RhoAction,
 											hashedRoots& output,
 											bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
-											WeylGroup& outputSubset);
+											WeylGroup& outputSubset, bool UseMinusRho);
 	void GenerateRootSystemFromKillingFormMatrix();
-	void ActOnAffineHyperplaneByGroupElement(
-		int index, affineHyperplane& output, bool RhoAction);
+	void ActOnAffineHyperplaneByGroupElement
+		(	int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
 	//theRoot is a list of the simple coordinates of the root
 	//theRoot serves as both input and output
 	void ActOnRootAlgByGroupElement(
 							int index, PolynomialsRationalCoeff& theRoot,
 							bool RhoAction);
 	void ActOnRootByGroupElement(int index, root& theRoot,
-																	bool RhoAction);
+																	bool RhoAction, bool UseMinusRho);
 	void ActOnDualSpaceElementByGroupElement(int index, root& theDualSpaceElement,
 																	bool RhoAction);
-	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction);
+	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
 	void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
 	void SimpleReflectionRootAlg
 						(	int index, PolynomialsRationalCoeff& theRoot,
@@ -4828,9 +4849,15 @@ public:
 class LaTeXProcedures
 {
 public:
-	void drawline(	double X1, double Y1, double X2, double Y2,
+	static const int ScaleFactor=40;
+	static void drawline(	double X1, double Y1, double X2, double Y2,
 									unsigned long thePenStyle, int ColorIndex, std::fstream& output);
-
+	static void drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
+	static void beginDocument(std::fstream& output);
+	static void endLatexDocument(std::fstream& output);
+	static void beginPSTricks(std::fstream& output);
+	static void endPSTricks(std::fstream& output);
+	static void GetStringFromColorIndex(int ColorIndex, std::string &output);
 };
 
 class thePFcomputation
@@ -4985,6 +5012,7 @@ public:
 	unsigned char WeylGroupIndex;
 	void EvaluatePoly();
 	void Run();
+	void WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables);
 	void oneStepChamberSlice(GlobalVariables* theGlobalVariables);
 	void oneIncrement(GlobalVariables* theGlobalVariables);
 	void initSetupNilradical(GlobalVariables* theGlobalVariables);

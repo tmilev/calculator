@@ -373,14 +373,17 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace
 	this->ConsistencyCheck();
 }
 
-int DrawingVariables::GetColorFromChamberIndex(int index)
+int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)
 { int tempI=index%this->NumColors;
 	if (tempI<0) tempI+=this->NumColors;
-	return this->Colors[tempI];
+	if (LaTexOutput==0)
+		return this->Colors[tempI];
+	return tempI;
 }
 
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
-{ this->ColorChamberIndicator=RGB(220,220,0);
+{ this->flagLaTeXDraw= false;
+	this->ColorChamberIndicator=RGB(220,220,0);
 	this->ColorWeylChamberWalls=RGB(220,220,0);
 	this->DeadChamberTextColor= RGB(200,100,100);
 	this->ZeroChamberTextColor= RGB(220,120,120);
@@ -405,14 +408,14 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 //	Projections[1][1]=(87-50)*tempI;
 //	Projections[2][0]=(100+50)*tempI;
 //	Projections[2][1]=(0-50)*tempI;
-//	Projections[0][0]=100;
-//	Projections[0][1]=0;
-//	Projections[1][0]=49;
-//	Projections[1][1]=88;
-	this->Projections[0][0]=200;
-	this->Projections[0][1]=-200;
-	this->Projections[1][0]=200;
-	this->Projections[1][1]=200;
+	Projections[0][0]=100;
+	Projections[0][1]=0;
+	Projections[1][0]=-50;
+	Projections[1][1]=86.66;
+//	this->Projections[0][0]=200;
+//	this->Projections[0][1]=-200;
+//	this->Projections[1][0]=200;
+//	this->Projections[1][1]=200;
 	this->Projections[2][0]=0;
 	this->Projections[2][1]=100;
 	this->Projections[3][0]=92;
@@ -481,6 +484,17 @@ void DrawingVariables::ApplyScale(double inputScale)
 	}
 }
 
+void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables)
+{	theFile.clear();
+	this->theChambers.flagDrawToLaTeX=true;
+	LaTeXProcedures::beginDocument(theFile);
+	if (this->thePartialFraction.size>0)
+		this->WriteToFilePFdecomposition(theFile);
+	theFile <<"\\noindent ";
+	this->theChambers.WriteToFile(TDV,this->VPVectors,theFile);
+	LaTeXProcedures::endLatexDocument(theFile);
+	this->theChambers.flagDrawToLaTeX=false;
+}
 
 void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables)
 { this->VPVectors.size=0;
@@ -590,31 +604,37 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
 			.SetSizeExpandOnTopNoObjectInit(0);
 		this->theChambers.AffineWallsOfWeylChambers.ClearTheObjects();
 		inputComplex.AddWeylChamberWallsToHyperplanes(theGlobalVariables, tempWeyl);
+		this->theChambers.WeylChamber.CopyFromBase(inputComplex.WeylChamber);
 		for (int i=0;i<inputComplex.theHyperplanes.size;i++)
 		{ affineHyperplane tempH;
 			root tempRoot; tempRoot.MakeZero(inputComplex.AmbientDimension);
 			int start = 1;
-			if (i==inputComplex.NumProjectiveHyperplanesBeforeWeylChamberWalls)
+			if (i>=inputComplex.NumProjectiveHyperplanesBeforeWeylChamberWalls)
 			{	this->theChambers.NumAffineHyperplanesBeforeWeylChamberWalls = 
 					this->theChambers.theWeylGroupAffineHyperplaneImages.size;
 				start= 0;
 			}
+			inputComplex.theHyperplanes.ComputeDebugString();
 			for (int j=start;j<tempWeyl.size;j++)
 			{	tempH.MakeFromNormalAndPoint
 					(tempRoot,inputComplex.theHyperplanes.TheObjects[i]);
-				//tempH.ComputeDebugString();
-				tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true);
+				tempH.ComputeDebugString();
+				tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true,true);
 				if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
-				{	if (this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTopNoRepetitionOfObject(tempH))
+          if (this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTopNoRepetitionOfObject(tempH))
 						if (start==0) 
 							this->theChambers.AffineWallsOfWeylChambers.AddObjectOnTopNoRepetitionOfObjectHash(tempH);
-				}
 				//tempH.ComputeDebugString();
 			}
+			std::string tempS;
+			this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
+			this->theChambers.AffineWallsOfWeylChambers.ElementToStringGeneric(tempS);
+			this->theChambers.ComputeDebugString();
 		}
 		this->theChambers.NewHyperplanesToSliceWith.size=0;
 		this->theChambers.NewHyperplanesToSliceWith.MakeActualSizeAtLeastExpandOnTop
 			(this->theChambers.theWeylGroupAffineHyperplaneImages.size);
+		this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
 		for (int i=0;i<this->theChambers.theWeylGroupAffineHyperplaneImages.size;i++)
 		{ root tempRoot;
 			tempRoot.MakeNormalInProjectivizationFromAffineHyperplane
@@ -750,16 +770,31 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r,double
 	}
 }
 
-void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor)
+void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile)
 { double x1,x2,y1,y2;
   this->GetCoordsForDrawing(*this,r1,x1,y1);
   this->GetCoordsForDrawing(*this,r2,x2,y2);
-  ::drawline(x1,y1,x2,y2,PenStyle,PenColor);
+	this->drawLine(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile);
 }
 
-void DrawingVariables::drawTextAtVector(root& point, std::string& inputText)
+void DrawingVariables::drawLine
+	(	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
+{ if (LatexOutFile==0)
+		::drawline(X1,Y1,X2,Y2,thePenStyle, ColorIndex);
+	else
+		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile); 
+}
+
+void DrawingVariables::drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile)
 { double x,y; this->GetCoordsForDrawing(*this,point,x,y);
-	::drawtext(x-7,y-7,inputText.c_str(),inputText.length(),0);
+	this->drawText(x,y,inputText,textColor,LatexOutFile);
+}
+
+void DrawingVariables::drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile)
+{ if (LatexOutFile==0)
+		::drawtext(X1-7,Y1-7,inputText.c_str(),inputText.length(),color);
+	else
+		::LaTeXProcedures::drawText(X1, Y1,inputText,color,*LatexOutFile);
 }
 
 void drawFacetVertices(DrawingVariables& TDV,
@@ -774,11 +809,9 @@ void drawFacetVertices(DrawingVariables& TDV,
 		double tempX, tempY;
 		TDV.GetCoordsForDrawing(TDV,Projection1,tempX,tempY);
 		if (TDV.DrawDashes)
-		{	drawline(TDV.centerX,TDV.centerY,tempX,tempY, 1,TDV.Colors[0]);
-		}
+			TDV.drawLine(TDV.centerX,TDV.centerY,tempX,tempY, 1,TDV.Colors[0],0);
 		for (int j=i+1;j<r.size; j++)
-		{
-			double tempX2;
+		{	double tempX2;
 			double tempY2;
 			double tempX1;
 			double tempY1;
@@ -786,7 +819,7 @@ void drawFacetVertices(DrawingVariables& TDV,
 			TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
 			TDV.GetCoordsForDrawing(TDV,Projection2,tempX2,tempY2);
 			TDV.GetCoordsForDrawing(TDV,Projection1,tempX1,tempY1);
-			drawline(tempX1,tempY1,tempX2,tempY2, 0,TDV.Colors[ChamberIndex%TDV.NumColors]);
+			TDV.drawLine(tempX1,tempY1,tempX2,tempY2, 0,TDV.Colors[ChamberIndex%TDV.NumColors],0);
 		}
 	}
 }
@@ -805,7 +838,7 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 			double tempX, tempY;
 			TDV.GetCoordsForDrawing(TDV,Projection1,tempX,tempY);
 			if (TDV.DrawDashes)
-				drawline(TDV.centerX,TDV.centerY,tempX,tempY, DrawingStyleDashes,TDV.Colors[0]);
+				TDV.drawLine(TDV.centerX,TDV.centerY,tempX,tempY, DrawingStyleDashes,TDV.Colors[0],0);
 			for (int j=i+1;j<r.size; j++)
 			{ if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
 				{	double tempX2;
@@ -816,7 +849,7 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 					TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
 					TDV.GetCoordsForDrawing(TDV,Projection2,tempX2,tempY2);
 					TDV.GetCoordsForDrawing(TDV,Projection1,tempX1,tempY1);
-					drawline(tempX1,tempY1,tempX2,tempY2, DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors]);
+					TDV.drawLine(tempX1,tempY1,tempX2,tempY2, DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors],0);
 				}
 			}
 		}
@@ -825,14 +858,19 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 
 void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 								CombinatorialChamberContainer& output,
-								roots& directions, int directionIndex, root& ChamberIndicator)
-{	for(int i=0;i<output.size;i++)
+								roots& directions, int directionIndex, root& ChamberIndicator, 
+								std::fstream* LaTeXOutput)
+{	if (LaTeXOutput!=0)
+		LaTeXProcedures::beginPSTricks(*LaTeXOutput);
+	for(int i=0;i<output.size;i++)
 		if (output.TheObjects[i]!=0)
 			output.TheObjects[i]->DisplayNumber=i;
 	if (output.flagDrawingProjective)
 		CombinatorialChamberContainer::drawOutputProjective(TDV,output,directions, directionIndex,ChamberIndicator);
 	else
-		CombinatorialChamberContainer::drawOutputAffine(TDV,output);
+		CombinatorialChamberContainer::drawOutputAffine(TDV,output, LaTeXOutput);
+	if (LaTeXOutput!=0)
+		LaTeXProcedures::endPSTricks(*LaTeXOutput);
 }
 
 //color styles (taken from windows.h and substituted for independence of the .h file):
@@ -840,10 +878,17 @@ void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 // 1 = dashed line
 // 2 = dotted line
 // 5 = invisible line (no line)
-void CombinatorialChamberContainer::drawOutputAffine(DrawingVariables &TDV, CombinatorialChamberContainer &output)
-{ for(int i=0;i<output.size;i++)
+void CombinatorialChamberContainer::drawOutputAffine
+	(DrawingVariables &TDV, CombinatorialChamberContainer &output, std::fstream* LaTeXoutput)
+{ int numNonZeroChambers=0;
+	int numZeroChambers=0;
+	if(output.AffineWallsOfWeylChambers.size>0)
+		output.CountNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
+	else
+		output.GetNumVisibleChambersAndLabelChambersForDisplay();
+	for(int i=0;i<output.size;i++)
 		if (output.TheObjects[i]!=0)
-			output.TheObjects[i]->drawOutputAffine(TDV,output);
+			output.TheObjects[i]->drawOutputAffine(TDV,output, LaTeXoutput);
 }
 
 //color styles (taken from windows.h and substituted for independence of the .h file):
@@ -953,11 +998,11 @@ void CombinatorialChamberContainer::drawOutputProjective
 			TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator,tempRootX,directions);
 			double tmpX,tmpY;
 			TDV.GetCoordsForDrawing(TDV,tempRootX,tmpX,tmpY);
-			drawline(tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator);
-			drawline(tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator);
+			TDV.drawLine(tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,0);
+			TDV.drawLine(tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,0);
 			tmpX=(tmpX-TDV.centerX)*1.5+TDV.centerX;
 			tmpY=(tmpY-TDV.centerY)*1.5+TDV.centerY;
-			drawline(TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle,TDV.ColorChamberIndicator);
+			TDV.drawLine(TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle,TDV.ColorChamberIndicator,0);
 			std::string tempS="Indicator";
 			drawtext(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
 		}
@@ -1291,8 +1336,7 @@ void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5,i
 int root::HashFunction()
 { int result=0;
 	for (int i=0;i<this->size;i++)
-	{ result+=	this->TheObjects[i].HashFunction()*	::SomeRandomPrimes[i];
-	}
+		result+=	this->TheObjects[i].HashFunction()*	::SomeRandomPrimes[i];
 	return result;
 }
 
@@ -1897,9 +1941,9 @@ void roots::PerturbVectorToRegular(root& output, GlobalVariables* theGlobalVaria
 	}
 }
 
-int roots::GetRankOfSpanOfElements()
-{ Selection NonPivotPoints;
-	MatrixLargeRational tempMatrix;
+int roots::GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)
+{ Selection& NonPivotPoints= theGlobalVariables.selGetRankOfSpanOfElements;
+	MatrixLargeRational& tempMatrix=theGlobalVariables.matGetRankOfSpanOfElements;
 	if (this->size==0)
 		return 0;
 	int theDimension= this->TheObjects[0].size;
@@ -1951,10 +1995,8 @@ void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMa
 	matOutputEmpty.init(-1,-1);
 	outputNonPivotPoints.init(theDimension);
 	for(int i=0;i<this->size;i++)
-	{	for(int j=0;j<theDimension;j++)
-		{	inputMatrix.elements[i][j].Assign(this->TheObjects[i].TheObjects[j]);
-		}
-	}
+		for(int j=0;j<theDimension;j++)
+			inputMatrix.elements[i][j].Assign(this->TheObjects[i].TheObjects[j]);
 	MatrixLargeRational::GaussianEliminationByRows(inputMatrix,matOutputEmpty,outputNonPivotPoints);
 }
 
@@ -2149,6 +2191,39 @@ bool roots::AddRootNoRepetition(root& r)
 	return false;
 }
 
+int roots::GetDimensionOfElements()
+{ if (this->size==0)
+		return -1;
+	int result= this->TheObjects[0].size;
+	for(int i=1;i<this->size;i++)
+		assert(this->TheObjects[i].size==result);
+	return result;
+}
+
+int roots::ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables)
+{	if (this->size==0)
+		return 0;
+	int theDimension= this->GetDimensionOfElements();
+	Selection NonPivotPoints;
+	MatrixLargeRational tempMatrix;
+	roots tempRoots;
+	int oldRank=0;
+	for (int i=0;i<this->size;i++)
+	{ tempRoots.AddObjectOnTop(this->TheObjects[i]);
+		int newRank= tempRoots.GetRankOfSpanOfElements(theGlobalVariables);
+		if (newRank==oldRank)
+			tempRoots.PopIndexSwapWithLast(tempRoots.size-1);
+		else
+		{	this->SwapTwoIndices(oldRank, i);
+			assert(oldRank+1==newRank);
+			oldRank=newRank;
+		}
+		if (oldRank== theDimension)
+			return theDimension;
+	}
+	return (oldRank);
+}
+
 inline bool Rational::IsEqualTo(const Rational& b)
 {	if (this->Extended==0 && b.Extended==0)
     return (this->NumShort*b.DenShort==b.NumShort*this->DenShort);
@@ -2215,7 +2290,7 @@ bool CombinatorialChamber::ComputeDebugString( CombinatorialChamberContainer* ow
 	return true;
 }
 
-void CombinatorialChamber::ChamberNumberToStringStream(std::stringstream& out)
+void CombinatorialChamber::ChamberNumberToStringStream(std::stringstream& out, CombinatorialChamberContainer& owner)
 { if (this->flagHasZeroPolynomial)
 	{ out<< "Invisible";
 	} else
@@ -2230,46 +2305,54 @@ void CombinatorialChamber::ChamberNumberToStringStream(std::stringstream& out)
 bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer* owner)
 {	std::stringstream out;
 	//assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
-	this->ChamberNumberToStringStream(out);
-	out <<"\nExternal Walls:\n";
+	std::string endOfLine;
+	if (owner->flagDrawToLaTeX)
+		endOfLine.assign("\\\\\n");
+	else
+		endOfLine.assign("\n");
+	this->ChamberNumberToStringStream(out,*owner);
+	out <<endOfLine<<"External Walls:"<<endOfLine;
 	root tempNormal;
 	std::string tempS;
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{	this->Externalwalls.TheObjects[i].ElementToString(tempS);
-		out <<"f"<<i<<": "<< tempS<<"\n";
+		out <<"f"<<i<<": "<< tempS<<endOfLine;
 	}
-	out <<"Internal Walls:\n";
+	out <<"Internal Walls:"<<endOfLine;
 	for (int i=0;i<this->InternalWalls.size;i++)
 	{	this->InternalWalls.TheObjects[i].ElementToString(tempS);
-		out <<"f"<<i<<": "<< tempS<<"\n";
+		out <<"f"<<i<<": "<< tempS<<endOfLine;
 	}
 	ListObjectPointers<CombinatorialChamber> outputChambers;
 	this->FindAllNeighbors(outputChambers);
 	out<<"Neighbors: ";
 	for (int i=0;i<outputChambers.size;i++)
 	{	if (outputChambers.TheObjects[i]!=0)
-		{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out);
+		{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out,*owner);
 			out <<", ";
 		}
 	}
 	PolyFormatLocal.cutOffString=false;
 	if (this->flagIncludeVerticesInDebugString)
-	{ out << "\nVertices: ";
+	{ out << endOfLine<<"Vertices: ";
 		for (int i=0;i<this->AllVertices.size;i++)
 		{ this->AllVertices.TheObjects[i].ElementToString(tempS);
 			out <<"("<< tempS <<"), ";
 		}
 	}
-	out<<"\n";
+	out<<endOfLine;
 	if (!owner->flagDrawingProjective)
-	{	this->affineExternalWalls.ElementToString(tempS);
-    out<<"Affine walls:\n" << tempS;
-		out << "Affine vertices (true):\n";
+	{	out<<"Affine walls: "<<endOfLine;
+		for (int i=0;i<this->affineExternalWalls.size;i++)
+		{ this->affineExternalWalls.TheObjects[i].ElementToString(tempS);
+			out << tempS <<endOfLine;
+		}
+		out << "Affine vertices (true): "<<endOfLine;
 		for (int i=0;i<affineVertices.size;i++)
 		{	if (i==this->NumTrueAffineVertices)
-				out << "Affine vertices representing pt(s) at infty:\n";
+				out << "Affine vertices representing pt(s) at infty: "<<endOfLine;
 			this->affineVertices.TheObjects[i].ElementToString(tempS);
-			out << tempS<<"\n";
+			out << tempS<<endOfLine;
 		}
 	}
 	output=out.str();
@@ -2443,7 +2526,7 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 	}
 }
 
-void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV,CombinatorialChamberContainer& owner)
+void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV,CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput)
 { TDV.ApplyScale(0.3);
 	for (int i=0;i<this->affineVertices.size;i++)
   { for(int j=0;j<this->affineVertices.size;j++)
@@ -2457,21 +2540,25 @@ void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV,CombinatorialC
         }
       }
       if (AreInAWall!=0)
-			{ int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex);
+			{ int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex,LaTeXoutput);					
 				int penStyle = TDV.DrawStyle;
 				if (this->flagHasZeroPolynomial || this->flagPermanentlyZero)
 					penStyle= TDV.DrawStyleInvisibles;
-				if (owner.AffineWallsOfWeylChambers.ContainsObjectHash(*AreInAWall))
+				if (owner.AffineWallsOfWeylChambers.ContainsObjectHash(*AreInAWall)!=-1)
 					color= TDV.ColorWeylChamberWalls;
 				TDV.drawlineBetweenTwoVectors
 					(	this->affineVertices.TheObjects[i],
-						this->affineVertices.TheObjects[j],penStyle,color);
+						this->affineVertices.TheObjects[j],penStyle,color,LaTeXoutput);
 				root tempRoot; this->ComputeAffineInternalPoint(tempRoot,owner.AmbientDimension-1);
 				std::stringstream out;
 				out << this->DisplayNumber;
 				std::string tempS;
 				tempS=out.str();
-				TDV.drawTextAtVector(tempRoot,tempS);
+				if (! this->flagHasZeroPolynomial)
+					color=TDV.TextColor;
+				else
+					color= TDV.ZeroChamberTextColor;
+				TDV.drawTextAtVector(tempRoot,tempS, color, LaTeXoutput);
       }
     }
   }
@@ -2590,7 +2677,7 @@ bool CombinatorialChamber::IsABogusNeighbor
 						if (this->flagAnErrorHasOccurredTimeToPanic)
 						{ FoundVertices.ComputeDebugString();
 						}
-						NewRank= FoundVertices.GetRankOfSpanOfElements();
+						NewRank= FoundVertices.GetRankOfSpanOfElements(*theGlobalVariables);
 						if (NewRank>OldRank)
 						{OldRank= NewRank;}
 						else
@@ -2975,12 +3062,18 @@ void CombinatorialChamberContainer::AddWeylChamberWallsToHyperplanes
 	tempMat.Invert(theGlobalVariables);
 	tempMat.ComputeDebugString();
 	this->NumProjectiveHyperplanesBeforeWeylChamberWalls=this->theHyperplanes.size;
+	roots tempRoots;
+	this->WeylChamber.ReleaseMemory();
 	for (int i=0;i<tempMat.NumCols;i++)
 	{ root tempRoot; tempRoot.SetSizeExpandOnTopLight(tempMat.NumRows);
 		for (int j=0; j<tempMat.NumRows;j++)
 			tempRoot.TheObjects[j].Assign(tempMat.elements[j][i]);
-		this->theHyperplanes.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+		tempRoots.AddRoot(tempRoot);
 	}
+	this->WeylChamber.ComputeFromDirections(tempRoots, theGlobalVariables, tempMat.NumCols);
+	this->WeylChamber.ComputeDebugString();
+	for (int i=0;i< this->WeylChamber.size;i++)
+		this->theHyperplanes.AddObjectOnTopNoRepetitionOfObjectHash(this->WeylChamber.TheObjects[i]);
 }
 
 
@@ -3162,35 +3255,48 @@ bool CombinatorialChamberContainer::ConsistencyCheck()
 	return true;
 }
 
+void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output)
+{ if (!output.is_open())
+		return;
+	this->drawOutput(TDV,*this,directions,0,this->IndicatorRoot,&output);
+	std::string tempS;
+	this->ElementToString(tempS);
+	output<< tempS;
+}
+
 void CombinatorialChamberContainer::ElementToString(std::string& output)
 { std::stringstream out;
 	std::string tempS;
-	int NumZeroChambers=0;
-	int NumNonZeroChambers=0;
-	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i]!=0)
-		{	if (this->TheObjects[i]->flagHasZeroPolynomial)
-			{	NumZeroChambers++;
-				this->TheObjects[i]->DisplayNumber=NumZeroChambers;
-			}
-			else
-			{	NumNonZeroChambers++;
-				this->TheObjects[i]->DisplayNumber=NumNonZeroChambers;
-			}
+	std::string endOfLine;
+	if (this->flagDrawToLaTeX)
+		endOfLine= "\\\\\n";
+	else
+		endOfLine= "\n";
+	if (this->AffineWallsOfWeylChambers.size>0)
+	{	int tempI=this->CountNumChambersInWeylChamberAndLabelChambers(this->WeylChamber);
+		out << "Number of chambers with internal point in Weyl chamber: " 
+				<< tempI<< endOfLine;
+		out <<"Weyl chamber walls and their images: ";
+		for (int i=0;i<this->AffineWallsOfWeylChambers.size;i++)
+		{	this->AffineWallsOfWeylChambers.TheObjects[i].ElementToString(tempS);
+			out<< tempS <<" ";
 		}
+	} else
+	{ out << "Number of visible chambers: " << this->GetNumVisibleChambersAndLabelChambersForDisplay() << endOfLine;
 	}
 	if (this->size>this->GraphicsMaxNumChambers)
-	{	out << "Number of chambers: " << this->size
-				<< "\nDetailed chamber data too large for display";
+	{	out<<"Detailed chamber data too large for display";
 		output=out.str();
 		return;
 	}
 	for (int i=0;i<this->size;i++)
 	{ if (this->TheObjects[i]!=0)
-		{	this->TheObjects[i]->ElementToString(tempS,this);
-			out <<tempS <<"\n";
-			if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput)
-				break;
+		{	if (!this->flagDrawToLaTeX || !this->TheObjects[i]->flagHasZeroPolynomial)
+			{	this->TheObjects[i]->ElementToString(tempS,this);
+				out <<tempS <<endOfLine;
+				if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput)
+					break;
+			}
 		}
 	}
 	output= out.str();
@@ -3284,6 +3390,7 @@ void CombinatorialChamberContainer::init()
 	this->startingCones.ReleaseMemory();
 	this->theWeylGroupAffineHyperplaneImages.size=0;
 	this->flagMakingASingleHyperplaneSlice=false;
+	this->flagDrawToLaTeX=false;
 	this->flagDrawingProjective=true;
 	this->flagSliceWithAWallIgnorePermanentlyZero=true;
 }
@@ -3301,6 +3408,49 @@ void CombinatorialChamberContainer::DumpAll()
 	}
 }
 
+int CombinatorialChamberContainer::GetNumVisibleChambersAndLabelChambersForDisplay()
+{ int NumZeroChambers=0;
+	int NumChambersNonZero=0;
+	for (int i=0;i<this->size;i++)
+	{	if (this->TheObjects[i]!=0)
+		{ if (this->TheObjects[i]->flagHasZeroPolynomial)
+			{ NumZeroChambers++;
+				this->TheObjects[i]->DisplayNumber=NumZeroChambers;
+			} else
+			{	NumChambersNonZero++;
+				this->TheObjects[i]->DisplayNumber=NumChambersNonZero;
+			}
+		}
+	}
+	return NumChambersNonZero;
+}
+
+int CombinatorialChamberContainer::CountNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber)
+{ int NumChambersInWeyl=0;
+	int NumZeroChambers=0;
+	int NumChambersNonZeroNotInWeyl=0;
+//	theWeylChamber.ComputeDebugString();
+	for (int i=0;i<this->size;i++)
+	{	if (this->TheObjects[i]!=0)
+		{ if (this->TheObjects[i]->flagHasZeroPolynomial)
+			{ NumZeroChambers++;
+				this->TheObjects[i]->DisplayNumber=NumZeroChambers;
+			} else
+			{	root tempRoot;
+				this->TheObjects[i]->ComputeAffineInternalPoint(tempRoot, this->AmbientDimension-1);
+				if (theWeylChamber.IsInCone(tempRoot))
+				{ NumChambersInWeyl++;
+					this->TheObjects[i]->DisplayNumber=NumChambersInWeyl;
+				} else
+				{	NumChambersNonZeroNotInWeyl++;
+					this->TheObjects[i]->DisplayNumber=NumChambersNonZeroNotInWeyl;
+				}
+			}
+		}
+	}
+	return NumChambersInWeyl;
+}
+
 void CombinatorialChamberContainer::Free()
 {	this->KillAllElements();
 }
@@ -3313,6 +3463,8 @@ void CombinatorialChamberContainer::MakeStartingChambers
 	this->AmbientDimension= (unsigned char)directions.TheObjects[0].size;
 	if (this->AmbientDimension==1)
 		return;
+	int tempI= directions.ArrangeFirstVectorsBeOfMaxPossibleRank(*theGlobalVariables);
+	assert(tempI== this->AmbientDimension);
 	this->IndicatorRoot.Assign(IndicatorRoot);
 	if (this->IndicatorRoot.size!=this->AmbientDimension)
 		this->IndicatorRoot.MakeZero(this->AmbientDimension);
@@ -3885,7 +4037,7 @@ bool CombinatorialChamber::IsAValidCandidateForNormalOfAKillerFacet
 	}
 	if (WallBasis.size<owner.AmbientDimension-1)
 		return false;
-	int tempI=WallBasis.GetRankOfSpanOfElements();
+	int tempI=WallBasis.GetRankOfSpanOfElements(*theGlobalVariables);
 	if (tempI<owner.AmbientDimension-1)
 		return false;
 	assert(tempI==owner.AmbientDimension-1);
@@ -10283,8 +10435,8 @@ void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
 	}
 }
 
-void WeylGroup::SimpleReflectionRoot(int index, root& theRoot,
-																				bool RhoAction)
+void WeylGroup::SimpleReflectionRoot
+	(int index, root& theRoot,bool RhoAction, bool UseMinusRho)
 { static Rational alphaShift, tempRat;
 	alphaShift.MakeZero();
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
@@ -10297,7 +10449,12 @@ void WeylGroup::SimpleReflectionRoot(int index, root& theRoot,
 		alphaShift.ElementToString(tempS);
 	}
 	alphaShift.DivideByInteger(this->KillingFormMatrix.elements[index][index]);
-	if (RhoAction){alphaShift.AddInteger(-1);}
+	if (RhoAction)
+	{	if(UseMinusRho)
+			alphaShift.AddInteger(1);
+		else
+			alphaShift.AddInteger(-1);
+	}
 	theRoot.TheObjects[index].Add(alphaShift);
 }
 
@@ -10320,11 +10477,11 @@ void WeylGroup::SimpleReflectionRootAlg
 }
 
 void WeylGroup::ActOnAffineHyperplaneByGroupElement
-	(int index, affineHyperplane& output, bool RhoAction)
+	(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
 { int tempI= this->TheObjects[index].size;
 	for (int i=0; i<tempI;i++)
 	{	this->SimpleReflectionRoot
-			(this->TheObjects[index].TheObjects[i],output.affinePoint,RhoAction);
+			(this->TheObjects[index].TheObjects[i],output.affinePoint,RhoAction, UseMinusRho);
 //		output.affinePoint.ComputeDebugString();
 		this->SimpleReflectionDualSpace
 			(this->TheObjects[index].TheObjects[tempI-i-1],output.normal);
@@ -10332,10 +10489,9 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement
 }
 
 void WeylGroup::ActOnRootByGroupElement(	int index,
-																						root &theRoot, bool RhoAction)
+																						root &theRoot, bool RhoAction, bool UseMinusRho)
 { for (int i=0;i<this->TheObjects[index].size;i++)
-	{ this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i],theRoot,RhoAction);
-	}
+		this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i],theRoot,RhoAction, UseMinusRho);
 }
 
 void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
@@ -10347,7 +10503,7 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 		tempRoot.TheObjects[i].AssignInteger(1);
 		startRoots.AddRoot(tempRoot);
 	}
-	this->GenerateOrbit(startRoots,false,this->RootSystem);
+	this->GenerateOrbit(startRoots,false,this->RootSystem,false);
 	this->RootsOfBorel.size=0;
 	for (int i=0;i<this->RootSystem.size;i++)
 	{ if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
@@ -10357,15 +10513,15 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 }
 
 void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction,
-															hashedRoots& output)
+															hashedRoots& output, bool UseMinusRho)
 { static WeylGroup tempW;
-	this->GenerateOrbit(theRoots,RhoAction,output,false,tempW);
+	this->GenerateOrbit(theRoots,RhoAction,output,false,tempW, UseMinusRho);
 }
 
 void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
 															 hashedRoots& output,
 															 bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
-															 WeylGroup& outputSubset)
+															 WeylGroup& outputSubset, bool UseMinusRho)
 {	for (int i=0;i<theRoots.size;i++)
 	{ output.AddObjectOnTopHash(theRoots.TheObjects[i]);
 	}
@@ -10385,7 +10541,7 @@ void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
 			if (this->flagAnErrorHasOcurredTimeToPanic)
 			{ currentRoot.ComputeDebugString();
 			}
-			this->SimpleReflectionRoot(j,currentRoot,RhoAction);
+			this->SimpleReflectionRoot(j,currentRoot,RhoAction, UseMinusRho);
 			if (this->flagAnErrorHasOcurredTimeToPanic)
 			{ currentRoot.ComputeDebugString();
 			}
@@ -10426,13 +10582,13 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator,
 	tempRoots.size=0;
 	tempRoots.AddRoot(ChamberIndicator);
 	this->GenerateOrbit(tempRoots,RhoAction,TheIndicatorsOrbit,
-											true,OrbitGeneratingSubset);
+											true,OrbitGeneratingSubset,false);
 	TheIndicatorsOrbit.ComputeDebugString();
 	roots TempTest;
 	root tempRoot;
 	for (int i=0;i<OrbitGeneratingSubset.size;i++)
 	{ tempRoot= ChamberIndicator;
-		OrbitGeneratingSubset.ActOnRootByGroupElement(i,tempRoot,RhoAction);
+		OrbitGeneratingSubset.ActOnRootByGroupElement(i,tempRoot,RhoAction,false);
 		TempTest.AddRoot(tempRoot);
 	}
 	TempTest.ComputeDebugString();
@@ -10594,7 +10750,7 @@ void WeylGroup::ComputeWeylGroup()
 	this->ClearTheObjects();
 	static hashedRoots tempRoots2;
 	tempRoots2.ClearTheObjects();
-	this->GenerateOrbit(tempRoots,false,tempRoots2,true,*this);
+	this->GenerateOrbit(tempRoots,false,tempRoots2,true,*this,false);
 }
 
 void WeylGroup::ComputeDebugString()
@@ -11004,7 +11160,7 @@ void VermaModulesWithMultiplicities::GeneratePartialBruhatOrder()
 		{ root tempRoot,tempRoot2;
 			tempRoot.Assign(this->TheObjects[i]);
 			tempRoot2.Assign(this->TheObjects[i]);
-			this->TheWeylGroup->SimpleReflectionRoot(j,tempRoot,true);
+			this->TheWeylGroup->SimpleReflectionRoot(j,tempRoot,true,false);
 			int x= this->ContainsObjectHash(tempRoot);
 			this->SimpleReflectionsActionList.TheObjects[i].AddObjectOnTop(x);
 			tempRoot2.Subtract(tempRoot);
@@ -11136,8 +11292,7 @@ void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromIndex
 	{ output.TheObjects[i]=this->KLPolys.TheObjects[ChamberIndex].TheObjects[i].
 															Substitution(1);
 		if((this->TheWeylGroup->length(i)+this->TheWeylGroup->length(ChamberIndex))%2!=0)
-		{	output.TheObjects[i]*=-1;
-		}
+			output.TheObjects[i]*=-1;
 	}
 }
 
@@ -11145,7 +11300,7 @@ void VermaModulesWithMultiplicities::initFromWeyl(WeylGroup* theWeylGroup)
 { this->TheWeylGroup= theWeylGroup;
 	roots tempRoots;
 	tempRoots.AddRoot(this->TheWeylGroup->rho);
-	this->TheWeylGroup->GenerateOrbit(tempRoots,true,*this);
+	this->TheWeylGroup->GenerateOrbit(tempRoots,true,*this,false);
 	this->initTheMults();
 }
 
@@ -12118,15 +12273,57 @@ int IntegerPoly::SizeWithoutDebugString()
 	return Accum;
 }
 
+void LaTeXProcedures::beginPSTricks(std::fstream& output)
+{ output<<"\\begin{pspicture}(8,8)";
+}
+
+void LaTeXProcedures::endPSTricks(std::fstream& output)
+{ output<<"\\end{pspicture}";
+}
+
+void LaTeXProcedures::beginDocument(std::fstream& output)
+{ output<< "\\documentclass{article}\n \\usepackage{pstricks} \\begin{document}";
+}
+
+void LaTeXProcedures::endLatexDocument(std::fstream& output)
+{ output <<"\\end{document}";
+}
+
+void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &output)
+{ switch(ColorIndex)
+	{ case 0: output.assign("black"); break;
+		case 1: output.assign("blue"); break;
+		case 2: output.assign("purple"); break;
+		case 3: output.assign("green"); break;
+		case 4: output.assign("cyan"); break;
+		case 5: output.assign("red"); break;
+		case 6: output.assign("purple"); break;
+		case 7: output.assign("cyan"); break;
+		case 56540: output.assign("yellow"); break;
+		default:
+			output.assign("black"); 
+			break;
+	}
+}
+
+void LaTeXProcedures::drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output)
+{ output.precision(4);
+	X1-=5; Y1+=5;
+	X1/=LaTeXProcedures::ScaleFactor; Y1/=LaTeXProcedures::ScaleFactor;
+	output << "\\put("<<X1<<","<<8-Y1<<"){"<<theText<<"}";
+}
+
 void LaTeXProcedures::drawline
 			(	double X1, double Y1, double X2, double Y2,
 				unsigned long thePenStyle, int ColorIndex, std::fstream& output)
 { output.precision(4);
-	X1/=50; X2/=50;
-	Y1/=50; Y2/=50;
-	output	<<"\\psline[linewidth=0.1pt]"
-					<<"("<<X1<<","<<Y1<<")"
-					<<"("<<X2<<","<<Y2<<")\n";
+	X1/=LaTeXProcedures::ScaleFactor; X2/=LaTeXProcedures::ScaleFactor;
+	Y1/=LaTeXProcedures::ScaleFactor; Y2/=LaTeXProcedures::ScaleFactor;
+	std::string tempS;
+	LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS);
+	output	<<"\\psline[linewidth=0.3pt, linecolor="<<tempS <<"]"
+					<<"("<<X1<<","<<8-Y1<<")"
+					<<"("<<X2<<","<<8-Y2<<")\n";
 }
 
 void thePFcomputation::Run()
@@ -12957,7 +13154,7 @@ void rootSubalgebra::DoKRootsEnumeration(GlobalVariables* theGlobalVariables)
 	{ this->theKEnumerations.TheObjects[i].init(this->PosRootsKConnectedComponents.TheObjects[i].size);
 		this->PosRootsKConnectedComponents.TheObjects[i].ComputeDebugString();
 		this->theKComponentRanks.TheObjects[i]=
-			this->PosRootsKConnectedComponents.TheObjects[i].GetRankOfSpanOfElements();
+			this->PosRootsKConnectedComponents.TheObjects[i].GetRankOfSpanOfElements(*theGlobalVariables);
 	}
 	this->DoKRootsEnumerationRecursively(0,theGlobalVariables);
 }
@@ -13089,7 +13286,7 @@ void simplicialCones::initFromDirections(roots &directions,GlobalVariables* theG
 		for (int j=0;j<theDimension;j++)
 		{ tempRoots.AddRoot(directions.TheObjects[tempSel.elements[j]]);
 		}
-		if (tempRoots.GetRankOfSpanOfElements()==theDimension && theDimension!=1)
+		if (tempRoots.GetRankOfSpanOfElements(*theGlobalVariables)==theDimension && theDimension!=1)
 		{	this->SetSizeExpandOnTopNoObjectInit(this->size+1);
 			this->TheObjects[this->size-1].ComputeFromDirections(tempRoots,theGlobalVariables,theDimension);
 			for (int j=0;j<theDimension;j++)

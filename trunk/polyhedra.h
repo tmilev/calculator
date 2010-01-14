@@ -186,6 +186,7 @@ public:
 	int DrawStyleDashes;
 	int DrawStyleInvisibles;
 	int DrawStyleDashesInvisibles;
+	void drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
 	void initDrawingVariables(int cX1, int cY1);
 	int ColorsR[DrawingVariables::NumColors];
 	int ColorsG[DrawingVariables::NumColors];

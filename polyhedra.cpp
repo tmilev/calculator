@@ -558,8 +558,9 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &th
 	LaTeXProcedures::beginDocument(theFile);
 	if (this->thePartialFraction.size>0)
 		this->WriteToFilePFdecomposition(theFile);
-	theFile<<"\\title{"<<this->WeylGroupIndex<< <<"}"
-	theFile <<"~\\\\~\\\\\\noindent ";
+	std::string tempS;
+	this->VPVectors.ElementToString(tempS);
+	theFile<<"\\title{"<<this->WeylGroupLetter<<(int)(this->WeylGroupIndex )<<"}" <<"\\maketitle ";
 	this->theChambers.WriteToFile(TDV,this->VPVectors,theFile);
 	LaTeXProcedures::endLatexDocument(theFile);
 }
@@ -911,6 +912,23 @@ void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyl
 	this->drawLine(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile);
 }
 
+void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile)
+{	Rational Epsilon; Epsilon.AssignNumeratorAndDenominator(-1,5);
+	for (int i=0;i<theDimension;i++)
+	{ root tempRoot; tempRoot.MakeZero(theDimension);
+		root tempRoot2; tempRoot2.MakeZero(theDimension);
+		for(int j=0;j<theDimension;j++)
+			tempRoot.TheObjects[j].Assign(Epsilon);
+		tempRoot.TheObjects[i].MakeOne();
+		tempRoot2.TheObjects[i].MakeOne();
+		std::string tempS; std::stringstream out;
+		tempRoot2.ElementToString(tempS);
+		out <<"("<<tempS<<")";
+		tempS=out.str();
+		TDV.drawTextAtVector(tempRoot,tempS, 0,LatexOutFile);
+	}
+}
+
 void DrawingVariables::drawLine
 	(	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
 { if (LatexOutFile==0)
@@ -1014,7 +1032,7 @@ void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 // 5 = invisible line (no line)
 void CombinatorialChamberContainer::drawOutputAffine
 	(DrawingVariables &TDV, CombinatorialChamberContainer &output, std::fstream* LaTeXoutput)
-{ int numNonZeroChambers=0;
+{	int numNonZeroChambers=0;
 	int numZeroChambers=0;
 	if(output.AffineWallsOfWeylChambers.size>0)
 		output.GetNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
@@ -1023,6 +1041,7 @@ void CombinatorialChamberContainer::drawOutputAffine
 	for(int i=0;i<output.size;i++)
 		if (output.TheObjects[i]!=0)
 			output.TheObjects[i]->drawOutputAffine(TDV,output, LaTeXoutput);
+	TDV.drawCoordSystem(TDV, output.AmbientDimension-1,LaTeXoutput);
 }
 
 //color styles (taken from windows.h and substituted for independence of the .h file):
@@ -2461,7 +2480,7 @@ bool CombinatorialChamber::ElementToString
 		if (!LatexFormat)
 			out <<"f"<<i<<": "<< tempS<<endOfLine;
 		else
-			out <<"~~ "<< tempS <<endOfLine;
+			out << tempS <<endOfLine;
 	}
 	if (!LatexFormat)
 	{	out <<"Internal Walls:"<<endOfLine;
@@ -2494,14 +2513,14 @@ bool CombinatorialChamber::ElementToString
 		out<<"Affine walls: "<<endOfLine;
 		for (int i=0;i<this->affineExternalWalls.size;i++)
 		{ this->affineExternalWalls.TheObjects[i].ElementToString(tempS);
-			out <<"~~ "<< tempS <<endOfLine;
+			out << tempS <<endOfLine;
 		}
 		out << "Affine vertices (true): "<<endOfLine;
 		for (int i=0;i<affineVertices.size;i++)
 		{	if (i==this->NumTrueAffineVertices)
 				out << "Affine vertices representing pt(s) at infty: "<<endOfLine;
 			this->affineVertices.TheObjects[i].ElementToString(tempS);
-			out <<"~~ "<< tempS<<endOfLine;
+			out << tempS<<endOfLine;
 		}
 	}
 	output=out.str();
@@ -3412,6 +3431,11 @@ void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& di
 		return;
 	this->drawOutput(TDV,*this,directions,0,this->IndicatorRoot,&output);
 	std::string tempS;
+	output	<< "Nilradical simple coords:\\\\\n ";
+	for (int i=0;i<directions.size;i++)
+	{ directions.TheObjects[i].ElementToString(tempS);
+		output << tempS <<"\\\\\n";
+	}
 	this->ElementToString(tempS,true);
 	output<< tempS;
 }

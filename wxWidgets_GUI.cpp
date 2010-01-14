@@ -42,9 +42,6 @@
 #include "polyhedra.h"
 
 extern DrawingVariables TDV;
-extern int NextDirectionIndex;
-extern int RankGlobal;
-extern roots InputRoots;
 
 class guiMainWindow;
 class wxDialogOutput;
@@ -602,6 +599,7 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup->Append(wxT("E7"));
   this->ListBox1WeylGroup->Append(wxT("E8"));
   this->ListBox1WeylGroup->Append(wxT("F4"));
+  this->ListBox1WeylGroup->Append(wxT("Custom nilradical in A3"));
   this->ListBox1WeylGroup->SetSelection(0);
   this->CheckBox1ComputePFs->SetValue(true);
   this->CheckBox2CheckSums->SetValue(true);
@@ -609,7 +607,7 @@ guiMainWindow::guiMainWindow()
   this->CheckBox4ChamberLabels->SetValue(true);
   this->CheckBox5InvisibleChambers->SetValue(true);
   this->CheckBox6Dashes->SetValue(true);
-  this->theComputationSetup.ComputationInProgress=false;
+  this->theComputationSetup.flagComputationInProgress=false;
   this->theComputationSetup.AllowRepaint=true;
   this->theComputationSetup.UsingCustomVectors=false;
   //this->Button7OneDirectionIncrement->Disable();
@@ -802,69 +800,65 @@ void guiMainWindow::onRePaint(wxPaintEvent& ev)
 
 void drawCanvas::OnPaint(::wxPaintEvent& ev)
 {	::wxPaintDC  dc(this);
+	if (MainWindow1==0)
+		return;
   if (MainWindow1->theComputationSetup.AllowRepaint)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
     dc.DrawRectangle(wxPoint(0,0),this->GetSize());
     ::CombinatorialChamberContainer::drawOutput
 			(	::TDV,MainWindow1->theComputationSetup.theChambers,
-        ::InputRoots,::NextDirectionIndex,MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0);
+				MainWindow1->theComputationSetup.InputRoots,
+				MainWindow1->theComputationSetup.NextDirectionIndex,
+				MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0);
   }
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent &ev)
-{
-    //::RandomCodeIDontWantToDelete::SomeRandomTests2();
-    this->TurnOffAllDangerousButtons();
+{	//::RandomCodeIDontWantToDelete::SomeRandomTests2();
+  this->TurnOffAllDangerousButtons();
 //#ifdef WIN32
-    if (!this->theComputationSetup.ComputationInProgress)
-    {
-        this->theComputationSetup.ComputationInProgress=true;
-        this->Button1Go->SetLabel(wxT("Pause"));
+	if (!this->theComputationSetup.flagComputationInProgress)
+  {	this->theComputationSetup.flagComputationInProgress=true;
+    this->Button1Go->SetLabel(wxT("Pause"));
 #ifdef WIN32
-        this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
+    this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
 #else
-        //RunComputationalThread(0);
-        pthread_create(&this->WorkThread1.ComputationalThreadLinux, NULL,RunComputationalThread, 0);
+    //RunComputationalThread(0);
+    pthread_create(&this->WorkThread1.ComputationalThreadLinux, NULL,RunComputationalThread, 0);
 #endif
-    }
-    else
-    {
-        if (this->WorkThread1.isRunning)
-        {
-            //pthread_mutex_lock(&ParallelComputing::mutex1);
-            this->WorkThread1.CriticalSectionPauseButtonEntered=true;
-            //return;
-            while (this->WorkThread1.CriticalSectionWorkThreadEntered)
-                {}
-            ParallelComputing::ReachSafePointASAP=true;
-            while (!ParallelComputing::SafePointReached)
-                {}
-            ParallelComputing::ReachSafePointASAP=false;
+  }	else
+  { if (this->WorkThread1.isRunning)
+    {	//pthread_mutex_lock(&ParallelComputing::mutex1);
+      this->WorkThread1.CriticalSectionPauseButtonEntered=true;
+      //return;
+      while (this->WorkThread1.CriticalSectionWorkThreadEntered)
+      {}
+      ParallelComputing::ReachSafePointASAP=true;
+      while (!ParallelComputing::SafePointReached)
+      {}
+      ParallelComputing::ReachSafePointASAP=false;
 #ifdef WIN32
-            ::SuspendThread(this->WorkThread1.ComputationalThread);
+      ::SuspendThread(this->WorkThread1.ComputationalThread);
 #endif
-            this->WorkThread1.isRunning=false;
-            this->Button1Go->SetLabel(wxT("Go"));
-            this->WorkThread1.CriticalSectionWorkThreadEntered=false;
-            this->WorkThread1.CriticalSectionPauseButtonEntered=false;
-            //pthread_mutex_unlock(&ParallelComputing::mutex1);
-        }
-        else
-        {
-            //pthread_mutex_lock(&ParallelComputing::mutex1);
-            this->Button1Go->SetLabel(wxT("Pause"));
-            this->WorkThread1.isRunning=true;
+      this->WorkThread1.isRunning=false;
+      this->Button1Go->SetLabel(wxT("Go"));
+      this->WorkThread1.CriticalSectionWorkThreadEntered=false;
+      this->WorkThread1.CriticalSectionPauseButtonEntered=false;
+      //pthread_mutex_unlock(&ParallelComputing::mutex1);
+    }	else
+    {	//pthread_mutex_lock(&ParallelComputing::mutex1);
+      this->Button1Go->SetLabel(wxT("Pause"));
+      this->WorkThread1.isRunning=true;
 #ifdef WIN32
-            ::ResumeThread(this->WorkThread1.ComputationalThread);
+      ::ResumeThread(this->WorkThread1.ComputationalThread);
 #else
-            pthread_cond_signal(&ParallelComputing::continueCondition);
+      pthread_cond_signal(&ParallelComputing::continueCondition);
 #endif
-            //pthread_mutex_unlock(&ParallelComputing::mutex1);
-        }
+      //pthread_mutex_unlock(&ParallelComputing::mutex1);
     }
+  }
 //#else
-    //this->theComputationSetup.ComputationInProgress=true;
-
+  //this->theComputationSetup.ComputationInProgress=true;
 //	this->WorkThread1.run();
 //#endif
 }
@@ -996,6 +990,7 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
   unsigned char newWeylGroupIndex=0;
   char newWeylGroupLetter=0;
   int tempI=this->ListBox1WeylGroup->GetCurrentSelection();
+	bool DoingCustomNilradical=false;
   switch (tempI)
   { case 0: newWeylGroupIndex=2;  newWeylGroupLetter='A'; break;
 		case 1: newWeylGroupIndex=3;  newWeylGroupLetter='A'; break;
@@ -1016,13 +1011,24 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 		case 16: newWeylGroupIndex=7; newWeylGroupLetter='E'; break;
 		case 17: newWeylGroupIndex=8; newWeylGroupLetter='E'; break;
 		case 18: newWeylGroupIndex=4; newWeylGroupLetter='F'; break;
+		case 19: newWeylGroupIndex=3; this->theComputationSetup.NumColsNilradical=2;
+						 this->theComputationSetup.NumRowsNilradical=2; newWeylGroupLetter='A'; DoingCustomNilradical= true; break;
   }
-  if (!(newWeylGroupLetter==this->theComputationSetup.WeylGroupLetter &&
-          newWeylGroupIndex==this->theComputationSetup.WeylGroupIndex))
-  { this->theComputationSetup.WeylGroupLetter=newWeylGroupLetter;
-    this->theComputationSetup.WeylGroupIndex=newWeylGroupIndex;
-    this->initWeylGroupInfo();
-  }
+	if(!DoingCustomNilradical)
+	{	if (!(newWeylGroupLetter==this->theComputationSetup.WeylGroupLetter &&
+					newWeylGroupIndex==this->theComputationSetup.WeylGroupIndex))
+		{ this->theComputationSetup.WeylGroupLetter=newWeylGroupLetter;
+			this->theComputationSetup.WeylGroupIndex=newWeylGroupIndex;
+			this->initWeylGroupInfo();
+			this->theComputationSetup.Reset();
+		}
+	} else
+	{ this->theComputationSetup.flagDoCustomNilradical=true;
+		if (newWeylGroupLetter=='A')
+			this->theComputationSetup.initSetupNilradical(this->theComputationSetup.theGlobalVariablesContainer.Default());
+		this->initTableFromVPVectors();
+		this->theComputationSetup.Reset();
+	}
   if (this->theComputationSetup.WeylGroupIndex>5&& (newWeylGroupLetter!='A' && newWeylGroupLetter!='B' ))
 		this->Button1Go->Disable();
   else
@@ -1042,28 +1048,28 @@ void guiMainWindow::WriteIndicatorWeight(root& tempRoot)
 
 
 void guiMainWindow::initWeylGroupInfo()
-{
-    if (!this->theComputationSetup.UsingCustomVectors)
-    {
-        WeylGroup tempW;
-        tempW.MakeArbitrary(this->theComputationSetup.WeylGroupLetter,
-                            this->theComputationSetup.WeylGroupIndex);
-        tempW.ComputeRho();
-        this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);
-        this->NumVectors=this->theComputationSetup.VPVectors.size;
-        if (this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot)
-        {
-            this->theComputationSetup.thePartialFraction.IndicatorRoot.Assign(tempW.rho);
-        }
-    }
-    this->initTableFromVPVectors();
-    this->Table1Input->SetColLabelSize(0);
-    this->Table1Input->SetRowLabelSize(0);
-    this->Table2Indicator->SetColLabelSize(0);
-    this->Table2Indicator->SetRowLabelSize(0);
-    this->Table3Values->SetColLabelSize(0);
-    this->Table3Values->SetRowLabelSize(0);
-    //this->Table1Input->recalc();
+{	if (!this->theComputationSetup.UsingCustomVectors)
+  {	if (!this->theComputationSetup.flagDoCustomNilradical)
+		{	WeylGroup tempW;
+			tempW.MakeArbitrary
+				(this->theComputationSetup.WeylGroupLetter,this->theComputationSetup.WeylGroupIndex);
+			tempW.ComputeRho();
+			this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);
+			this->NumVectors=this->theComputationSetup.VPVectors.size;
+			if (this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot)
+				this->theComputationSetup.thePartialFraction.IndicatorRoot.Assign(tempW.rho);
+    } else
+		{
+		}
+  }
+  this->initTableFromVPVectors();
+  this->Table1Input->SetColLabelSize(0);
+  this->Table1Input->SetRowLabelSize(0);
+  this->Table2Indicator->SetColLabelSize(0);
+  this->Table2Indicator->SetRowLabelSize(0);
+  this->Table3Values->SetColLabelSize(0);
+  this->Table3Values->SetRowLabelSize(0);
+  //this->Table1Input->recalc();
 }
 
 void guiMainWindow::initTableFromVPVectors()
@@ -1071,20 +1077,18 @@ void guiMainWindow::initTableFromVPVectors()
   this->initTableFromRowsAndColumns
 		(this->theComputationSetup.VPVectors.size,theDimension);
 	root tempRoot;
-    tempRoot.MakeZero(theDimension);
-    for (int i=0;i<this->theComputationSetup.VPVectors.size;i++)
-    {
-        for (int j=0;j<theDimension;j++)
-        {
-            std::string tempS;
-            this->theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
-            this->Table1Input->SetCellValue(i,j,wxString(tempS.c_str(),wxConvUTF8));
-            this->Table1Input->SetCellAlignment(i,j,wxALIGN_CENTRE);
-        }
-        tempRoot.Add(this->theComputationSetup.VPVectors.TheObjects[i]);
+  tempRoot.MakeZero(theDimension);
+  for (int i=0;i<this->theComputationSetup.VPVectors.size;i++)
+  {	for (int j=0;j<theDimension;j++)
+    {	std::string tempS;
+      this->theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
+      this->Table1Input->SetCellValue(i,j,wxString(tempS.c_str(),wxConvUTF8));
+      this->Table1Input->SetCellAlignment(i,j,wxALIGN_CENTRE);
     }
+    tempRoot.Add(this->theComputationSetup.VPVectors.TheObjects[i]);
+  }
 //	tempRoot.MultiplyByInteger(2);
-    this->WriteIndicatorWeight(tempRoot);
+  this->WriteIndicatorWeight(tempRoot);
 }
 
 
@@ -1095,40 +1099,35 @@ void guiMainWindow::OnExit(wxCloseEvent &event)
 
 
 void guiMainWindow::ReadVPVectorsAndOptions()
-{
-    if (this->theComputationSetup.flagComputationPartiallyDoneDontInit)
-        return;
-    this->theComputationSetup.ComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
-    this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
-    this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
-    this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
-        !this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
-    TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
-    TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
-    TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
-    if (this->theComputationSetup.UsingCustomVectors)
-    {
-        int theDimension=this->Spin1Dim->GetValue();
-        this->theComputationSetup.WeylGroupIndex= theDimension;
-        this->theComputationSetup.VPVectors.size=0;
-        for (int i=0;i<this->Spin2NumVect->GetValue();i++)
-        {
-            root tempRoot;
-            for (int j=0;j<theDimension;j++)
-            {
-                int tempI=wxAtoi(this->Table1Input->GetCellValue(i,j));
-                tempRoot.TheObjects[j].AssignInteger(tempI);
-            }
-            this->theComputationSetup.VPVectors.AddRoot(tempRoot);
-        }
-        this->theComputationSetup.VPVectors.ComputeDebugString();
+{	if (this->theComputationSetup.flagComputationPartiallyDoneDontInit)
+		return;
+	this->theComputationSetup.flagComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
+  this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
+  this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
+  this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
+    !this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
+  TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
+  TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
+  TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
+  if (this->theComputationSetup.UsingCustomVectors)
+  {	int theDimension=this->Spin1Dim->GetValue();
+    this->theComputationSetup.WeylGroupIndex= theDimension;
+    this->theComputationSetup.VPVectors.size=0;
+    for (int i=0;i<this->Spin2NumVect->GetValue();i++)
+    {	root tempRoot;
+      for (int j=0;j<theDimension;j++)
+      {	int tempI=wxAtoi(this->Table1Input->GetCellValue(i,j));
+        tempRoot.TheObjects[j].AssignInteger(tempI);
+      }
+			this->theComputationSetup.VPVectors.AddRoot(tempRoot);
     }
-    for (int j=0;j<this->theComputationSetup.WeylGroupIndex;j++)
-    {
-        int tempI=wxAtoi(this->Table2Indicator->GetCellValue(0,j));
-        this->theComputationSetup.thePartialFraction.IndicatorRoot.TheObjects[j].AssignInteger(tempI);
-    }
-    this->theComputationSetup.thePartialFraction.IndicatorRoot.size=this->theComputationSetup.WeylGroupIndex;
+    this->theComputationSetup.VPVectors.ComputeDebugString();
+  }
+  for (int j=0;j<this->theComputationSetup.WeylGroupIndex;j++)
+  {	int tempI=wxAtoi(this->Table2Indicator->GetCellValue(0,j));
+    this->theComputationSetup.thePartialFraction.IndicatorRoot.TheObjects[j].AssignInteger(tempI);
+  }
+  this->theComputationSetup.thePartialFraction.IndicatorRoot.size=this->theComputationSetup.WeylGroupIndex;
 }
 
 
@@ -1147,46 +1146,36 @@ void guiMainWindow::TurnOnAllDangerousButtons()
 }
 
 void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
-{
-    this->NumVectors=r;
-    this->theComputationSetup.WeylGroupIndex= c;
-    this->Table2Indicator->SetNumRowsAndCols(1,c);
-    this->Table3Values->SetNumRowsAndCols(1,c);
-    this->Table1Input->SetNumRowsAndCols(this->NumVectors,this->theComputationSetup.WeylGroupIndex);
-    if (r==0)
-        return;
-    for (int j=0;j<c;j++)
-    {
-        this->Table1Input->SetColumnWidth(j,25);
-        this->Table2Indicator->SetColumnWidth(j,25);
-        this->Table3Values->SetColumnWidth(j,25);
-    }
-    this->Table2Indicator->SetRowHeight(0,25);
-    this->Table3Values->SetRowHeight(0,25);
-    for (int i=0;i<r;i++)
-    {
-        this->Table1Input->SetRowHeight(i,25);
-    }
-    if (this->Table1Input->GetNumberRows()>20)
-    {
-        this->Table1Input->SetSize(0,70,220,500);
-        this->Table1Input->SetMaxSize(wxSize(220,500));
-        this->SetAutoLayout(false);
-    }
-    else
-    {
-        this->BoxSizer2VerticalInputs->Layout();
-        this->BoxSizer8HorizontalEval->Layout();
-        this->BoxSizer1HorizontalBackground->Layout();
-    }
-    if (r>this->MaxAllowedVectors)
-    {
-        //this->Button1Go->Disable();
-    }
-    else
-    {
-        this->Button1Go->Enable();
-    }
+{	this->NumVectors=r;
+  this->theComputationSetup.WeylGroupIndex= c;
+  this->Table2Indicator->SetNumRowsAndCols(1,c);
+  this->Table3Values->SetNumRowsAndCols(1,c);
+  this->Table1Input->SetNumRowsAndCols(this->NumVectors,this->theComputationSetup.WeylGroupIndex);
+  if (r==0)
+		return;
+	for (int j=0;j<c;j++)
+  {	this->Table1Input->SetColumnWidth(j,25);
+    this->Table2Indicator->SetColumnWidth(j,25);
+    this->Table3Values->SetColumnWidth(j,25);
+  }
+  this->Table2Indicator->SetRowHeight(0,25);
+  this->Table3Values->SetRowHeight(0,25);
+  for (int i=0;i<r;i++)
+  	this->Table1Input->SetRowHeight(i,25);
+  if (this->Table1Input->GetNumberRows()>20)
+  {	this->Table1Input->SetSize(0,70,220,500);
+    this->Table1Input->SetMaxSize(wxSize(220,500));
+    this->SetAutoLayout(false);
+  }	else
+	{	this->BoxSizer2VerticalInputs->Layout();
+    this->BoxSizer8HorizontalEval->Layout();
+    this->BoxSizer1HorizontalBackground->Layout();
+  }
+  if (r>this->MaxAllowedVectors)
+  {//this->Button1Go->Disable();
+  }
+  else
+  	this->Button1Go->Enable();
 #ifndef WIN32
 //    this->Layout();
     this->BoxSizer8HorizontalEval->Fit(this->Table3Values);

@@ -120,21 +120,20 @@ DEFINE_EVENT_TYPE(wxEVT_ComputationFinished)
 class drawCanvas : public ::wxPanel
 {
 public:
-    void OnPaint(wxPaintEvent& ev);
-    int ClickToleranceX;
-    int ClickToleranceY;
-    drawCanvas(wxWindow *parent,
-               wxWindowID winid = wxID_ANY,
-               const wxPoint& pos = wxDefaultPosition,
-               const wxSize& size = wxDefaultSize,
-               long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-               const wxString& name = wxPanelNameStr)
-    {
-        this->Create(parent,winid,pos,size,style,name);
-    }
-    void onMouseDownOnCanvas(wxMouseEvent &ev);
-    void onSizing(::wxSizeEvent&ev);
-    DECLARE_EVENT_TABLE()
+  void OnPaint(wxPaintEvent& ev);
+  int ClickToleranceX;
+  int ClickToleranceY;
+  drawCanvas(wxWindow *parent,
+             wxWindowID winid = wxID_ANY,
+             const wxPoint& pos = wxDefaultPosition,
+             const wxSize& size = wxDefaultSize,
+             long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+             const wxString& name = wxPanelNameStr)
+  {	this->Create(parent,winid,pos,size,style,name);
+  };
+  void onMouseDownOnCanvas(wxMouseEvent &ev);
+  void onSizing(::wxSizeEvent&ev);
+  DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE( drawCanvas, wxPanel )
@@ -170,6 +169,10 @@ public:
   wxBoxSizer* BoxSizer13VerticalPartFracOutput;
   wxBoxSizer* BoxSizer14HorizontalSaveButtons;
   wxBoxSizer* BoxSizer15HorizontalSlicingButtons;
+ // wxRadioButton* RB1OneSlice;
+ // wxRadioButton* RB2OneIncrement;
+ // wxRadioButton* RB3FullChop;
+  wxRadioBox* RBGroup1SlicingOptions;
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
   wxTextCtrl* Text3PartialFractions;
@@ -203,6 +206,7 @@ public:
   ::wxCheckBox* CheckBox5InvisibleChambers;
   ::wxCheckBox* CheckBox6Dashes;
   ::wxCheckBox* CheckBox7UseIndicatorForPFDecomposition;
+  ::wxCheckBox* CheckBox8DoTheWeylGroup;
   ::drawCanvas* Canvas1;
   ::wxToggleButton* ToggleButton1UsingCustom;
   ::wxToggleButton* ToggleButton2ViewCombinatorialChambers;
@@ -218,6 +222,7 @@ public:
   void onButton7SliceIncrement (wxCommandEvent& ev);
   void onButton8FullChop(wxCommandEvent& ev);
   void onButton9CustomNilradical(wxCommandEvent& ev);
+  void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
   void onRePaint(wxPaintEvent& ev);
@@ -230,6 +235,7 @@ public:
   void TurnOffAllDangerousButtons();
   void updatePartialFractionAndCombinatorialChamberTextData();
   void updateInputButtons();
+  void ReadRBData();
   void initWeylGroupInfo();
   void initTableFromVPVectors();
   void initTableFromRowsAndColumns(int r, int c);
@@ -255,6 +261,7 @@ public:
     ID_Button7Increment,
     ID_Button8FullChop,
 		ID_Button9CustomNilradical,
+		ID_RBGroup1SliceOptions,
     ID_Spin1Dim,
     ID_Spin2NumVect,
     ID_Canvas1,
@@ -274,42 +281,38 @@ std::string MainWindow1GlobalPath;
 
 
 bool guiApp::OnInit()
-{
-    char directoryCharacter;
+{	char directoryCharacter;
 #ifdef WIN32
-    char path[500];
-    ::GetModuleFileName(NULL,path,499);
-    std::stringstream out;
-    out<<path;
-    ::MainWindow1GlobalPath= out.str();
-    directoryCharacter='\\';
+  char path[500];
+  ::GetModuleFileName(NULL,path,499);
+  std::stringstream out;
+  out<<path;
+  ::MainWindow1GlobalPath= out.str();
+  directoryCharacter='\\';
 #else
-    wxString path =this->argv[0];
-    if (!wxIsAbsolutePath(path))
-    {
-        wxPathList pathlist;
-        pathlist.AddEnvList(wxT("PATH"));
-        path = pathlist.FindAbsoluteValidPath(path);
-    }
-    wxFileName filename(path);
-    filename.Normalize();
-    path = filename.GetFullPath();
-    MainWindow1GlobalPath=path.mb_str();
-    directoryCharacter='/';
+  wxString path =this->argv[0];
+  if (!wxIsAbsolutePath(path))
+  {	wxPathList pathlist;
+    pathlist.AddEnvList(wxT("PATH"));
+    path = pathlist.FindAbsoluteValidPath(path);
+  }
+  wxFileName filename(path);
+  filename.Normalize();
+  path = filename.GetFullPath();
+  MainWindow1GlobalPath=path.mb_str();
+  directoryCharacter='/';
 #endif
-    int pathCutOffSize=0;
-    for (int i=MainWindow1GlobalPath.size();i>=0;i--)
-    {
-        if (::MainWindow1GlobalPath[i]==directoryCharacter)
-        {
-            pathCutOffSize=i+1;
-            break;
-        }
-    }
-    ::MainWindow1GlobalPath.resize(pathCutOffSize);
-    MainWindow1 = new guiMainWindow;
-    MainWindow1->Show(true);
-    return true;
+  int pathCutOffSize=0;
+  for (int i=MainWindow1GlobalPath.size();i>=0;i--)
+  {	if (::MainWindow1GlobalPath[i]==directoryCharacter)
+    {	pathCutOffSize=i+1;
+      break;
+		}
+  }
+  ::MainWindow1GlobalPath.resize(pathCutOffSize);
+  MainWindow1 = new guiMainWindow;
+  MainWindow1->Show(true);
+  return true;
 }
 
 BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
@@ -322,6 +325,8 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
 		EVT_BUTTON(guiMainWindow::ID_Button9CustomNilradical, guiMainWindow::onButton9CustomNilradical)
+		EVT_RADIOBOX
+			(guiMainWindow::ID_RBGroup1SliceOptions,guiMainWindow::onRBGroup1SlicingOptions)
     EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
     EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
     EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
@@ -391,56 +396,45 @@ void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
 
 
 void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
-{
-    int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop();
-    int Realy=ev.GetY();//-this->GetRect().GetLeft();
-    if (TDV.Selected==-2)
-    {
-        double tempX,tempY;
-        int tempXi, tempYi;
-        int tempXi2, tempYi2;
-        for (int i=0;i<MaxRank;i++)
-        {
-            tempXi=(int)TDV.Projections[i][0];
-            tempYi=(int)TDV.Projections[i][1];
-            tempXi2=Realx-((int)TDV.centerX);
-            tempYi2=((int) TDV.centerY)-Realy;
-            if (((tempXi2-ClickToleranceX)<=tempXi) && (tempXi<=(tempXi2+ClickToleranceX)) &&
-                    ((tempYi2-ClickToleranceY)<=tempYi) && (tempYi<=(tempYi2+ClickToleranceY)))
-            {
-                TDV.Selected=i;
-                break;
-            }
-        }
-        tempX=TDV.centerX;
-        tempY=TDV.centerY;
-        tempXi=(int)tempX;
-        tempYi=(int)tempY;
-        if (((Realx-ClickToleranceX)<=tempXi) && (tempXi<=(Realx+ClickToleranceX)) &&
-                ((Realy-ClickToleranceY)<=tempYi) && (tempYi<=(Realy+ClickToleranceY)))
-        {
-            TDV.Selected=-1;
-        }
+{	int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop();
+  int Realy=ev.GetY();//-this->GetRect().GetLeft();
+  if (TDV.Selected==-2)
+  {	double tempX, tempY;
+    int tempXi, tempYi;
+    int tempXi2, tempYi2;
+    for (int i=0;i<MaxRank;i++)
+    {	tempXi=(int)TDV.Projections[i][0];
+      tempYi=(int)TDV.Projections[i][1];
+      tempXi2=Realx-((int)TDV.centerX);
+      tempYi2=((int) TDV.centerY)-Realy;
+      if (((tempXi2-ClickToleranceX)<=tempXi) && (tempXi<=(tempXi2+ClickToleranceX)) &&
+					((tempYi2-ClickToleranceY)<=tempYi) && (tempYi<=(tempYi2+ClickToleranceY)))
+			{	TDV.Selected=i;
+        break;
+      }
     }
-    else
-    {
-        if (TDV.Selected==-1)
-        {
-            TDV.centerX = (double) Realx;
-            TDV.centerY = (double) Realy;
-        }
-        else
-        {
-            double tempx, tempy;
-            tempx=Realx;
-            tempy=Realy;
-            TDV.Projections[TDV.Selected][0]=tempx-TDV.centerX;
-            TDV.Projections[TDV.Selected][1]=TDV.centerY-tempy;
-        }
-        TDV.Selected=-2;
-        //wxPaintEvent tempev;
-        this->Refresh();//tempev);
+    tempX=TDV.centerX;
+    tempY=TDV.centerY;
+    tempXi=(int)tempX;
+    tempYi=(int)tempY;
+    if (((Realx-ClickToleranceX)<=tempXi) && (tempXi<=(Realx+ClickToleranceX)) &&
+        ((Realy-ClickToleranceY)<=tempYi) && (tempYi<=(Realy+ClickToleranceY)))
+			TDV.Selected=-1;
+  }	else
+	{	if (TDV.Selected==-1)
+    {	TDV.centerX = (double) Realx;
+      TDV.centerY = (double) Realy;
+		} else
+    {	double tempx, tempy;
+      tempx=Realx;
+      tempy=Realy;
+      TDV.Projections[TDV.Selected][0]=tempx-TDV.centerX;
+      TDV.Projections[TDV.Selected][1]=TDV.centerY-tempy;
     }
+    TDV.Selected=-2;
+    //wxPaintEvent tempev;
+    this->Refresh();//tempev);
+	}
 }
 
 guiMainWindow::guiMainWindow()
@@ -480,6 +474,13 @@ guiMainWindow::guiMainWindow()
   this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
   this->CheckBox1ComputePFs= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Don't compute PF"));
   this->CheckBox2CheckSums= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Checksums"));
+  wxString tempS[3];
+  tempS[0].assign(wxT("Full chop"));
+  tempS[1].assign(wxT("One increment"));
+  tempS[2].assign(wxT("Single slice"));
+  this->RBGroup1SlicingOptions= new ::wxRadioBox
+		(	this,this->ID_RBGroup1SliceOptions,wxT("Slicing options"),
+			::wxDefaultPosition,::wxDefaultSize,3,tempS);
   this->CheckBox3ComputeChambers= new ::wxCheckBox
 		(this,this->ID_CheckBox1,wxT("Compute chambers"));
   this->CheckBox4ChamberLabels=new ::wxCheckBox
@@ -490,6 +491,8 @@ guiMainWindow::guiMainWindow()
 		(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
   this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox
 		(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
+	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox
+		(this,::wxID_ANY,wxT("Act by Weyl group"));
   //this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   //this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
@@ -501,15 +504,16 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup= new ::wxComboBoxWheel(this,this->ID_ListBox1,wxT("A3"),
           wxPoint(0,0),::wxDefaultSize// wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight)
           ,0,0,wxCB_DROPDOWN  );
+	
   this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
   this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button3Custom= new wxButton(this,this->ID_Button3Custom,wxT("Experiments"));
-  this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
-  this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
-  this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
-	this->Button9CustomNilradical= new wxButton(this,this->ID_Button9CustomNilradical,wxT("Custom nilradical"));
+  //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
+  //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
+  //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
+	//this->Button9CustomNilradical= new wxButton(this,this->ID_Button9CustomNilradical,wxT("Custom nilradical"));
   this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
   this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
   this->Dialog1OutputPF= new ::wxDialogOutput(this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
@@ -552,11 +556,11 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer1HorizontalBackground->Add(this->BoxSizer5VerticalCanvasAndProgressReport,1,wxEXPAND|wxALL);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->BoxSizer10HorizontalProgressReportsAndOptions);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer11VerticalOptions);
-  this->BoxSizer11VerticalOptions->Add(this->CheckBox1ComputePFs);
-  this->BoxSizer11VerticalOptions->Add(this->CheckBox2CheckSums);
-  this->BoxSizer11VerticalOptions->Add(this->CheckBox3ComputeChambers);
-  this->BoxSizer11VerticalOptions->Add(this->CheckBox7UseIndicatorForPFDecomposition);
-  this->BoxSizer11VerticalOptions->Add(this->Button3Custom);
+		this->BoxSizer11VerticalOptions->Add(this->CheckBox1ComputePFs);
+		this->BoxSizer11VerticalOptions->Add(this->CheckBox2CheckSums);
+		this->BoxSizer11VerticalOptions->Add(this->CheckBox3ComputeChambers);
+		this->BoxSizer11VerticalOptions->Add(this->CheckBox7UseIndicatorForPFDecomposition);
+		this->BoxSizer11VerticalOptions->Add(this->Button3Custom);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
   this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
   this->BoxSizer12VerticalProgressReports->Add(this->Label2ProgressReport);
@@ -566,11 +570,13 @@ guiMainWindow::guiMainWindow()
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox4ChamberLabels);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox5InvisibleChambers);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox6Dashes);
+		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox8DoTheWeylGroup);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->BoxSizer15HorizontalSlicingButtons);
-			this->BoxSizer15HorizontalSlicingButtons->Add(this->Button6OneSlice);
-			this->BoxSizer15HorizontalSlicingButtons->Add(this->Button7OneDirectionIncrement);
-			this->BoxSizer15HorizontalSlicingButtons->Add(this->Button8FullChopping);
-			this->BoxSizer15HorizontalSlicingButtons->Add(this->Button9CustomNilradical);
+			this->BoxSizer15HorizontalSlicingButtons->Add(this->RBGroup1SlicingOptions);
+			//this->BoxSizer15HorizontalSlicingButtons->Add(this->Button6OneSlice);
+			//this->BoxSizer15HorizontalSlicingButtons->Add(this->Button7OneDirectionIncrement);
+			//this->BoxSizer15HorizontalSlicingButtons->Add(this->Button8FullChopping);
+			//this->BoxSizer15HorizontalSlicingButtons->Add(this->Button9CustomNilradical);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->Canvas1,1,wxEXPAND|wxALL);
   this->BoxSizer13VerticalPartFracOutput->Add(this->ToggleButton2ViewCombinatorialChambers);
   this->BoxSizer13VerticalPartFracOutput->Add(this->Text3PartialFractions, 1, wxEXPAND|wxALL);
@@ -580,6 +586,8 @@ guiMainWindow::guiMainWindow()
   this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
 
 //this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
+	//this->RBGroup1SlicingOptions->set
+	
   this->ListBox1WeylGroup->Append(wxT("A2"));
   this->ListBox1WeylGroup->Append(wxT("A3"));
   this->ListBox1WeylGroup->Append(wxT("A4"));
@@ -605,8 +613,9 @@ guiMainWindow::guiMainWindow()
   this->CheckBox2CheckSums->SetValue(true);
   this->CheckBox3ComputeChambers->SetValue(true);
   this->CheckBox4ChamberLabels->SetValue(true);
-  this->CheckBox5InvisibleChambers->SetValue(true);
+  this->CheckBox5InvisibleChambers->SetValue(false);
   this->CheckBox6Dashes->SetValue(true);
+  this->CheckBox8DoTheWeylGroup->SetValue(true);
   this->theComputationSetup.flagComputationInProgress=false;
   this->theComputationSetup.AllowRepaint=true;
   this->theComputationSetup.UsingCustomVectors=false;
@@ -657,17 +666,15 @@ guiMainWindow::guiMainWindow()
 }
 
 void drawCanvas::onSizing(wxSizeEvent& ev)
-{
-    if (MainWindow1==0)
-        return;
-    if (MainWindow1->Table1Input->GetNumberRows()>20)
-    {
-        MainWindow1->Table1Input->SetAutoLayout(false);
-        MainWindow1->Table1Input->SetSize(0,70,220,500);
-        MainWindow1->Table1Input->SetMaxSize(wxSize(220,500));
-    }
-    MainWindow1->Layout();
-    this->Refresh();//true,&tempRect);
+{	if (MainWindow1==0)
+		return;
+	if (MainWindow1->Table1Input->GetNumberRows()>20)
+  {	MainWindow1->Table1Input->SetAutoLayout(false);
+    MainWindow1->Table1Input->SetSize(0,70,220,500);
+    MainWindow1->Table1Input->SetMaxSize(wxSize(220,500));
+	}
+  MainWindow1->Layout();
+  this->Refresh();//true,&tempRect);
 }
 
 guiMainWindow::~guiMainWindow()
@@ -714,43 +721,38 @@ void* RunrootFKFTComputationLocal(void*)
 
 
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
-{
-    rootFKFTComputationLocal.useOutputFileForFinalAnswer=false;
-    this->theComputationSetup.AllowRepaint=false;
-    std::string tempS;
-    tempS.assign(MainWindow1GlobalPath);
-    tempS.append("KLcoeff.txt");
-    rootFKFTComputationLocal.KLCoeffFileString=tempS;
-    tempS.assign(MainWindow1GlobalPath);
-    tempS.append("partialFractions.txt");
-    rootFKFTComputationLocal.PartialFractionsFileString=tempS;
-    tempS.assign(MainWindow1GlobalPath);
-    tempS.append("VPdata.txt");
-    rootFKFTComputationLocal.VPEntriesFileString=tempS;
-    tempS.assign(MainWindow1GlobalPath);
-    tempS.append("VPIndex.txt");
-    rootFKFTComputationLocal.VPIndexFileString=tempS;
+{	rootFKFTComputationLocal.useOutputFileForFinalAnswer=false;
+  this->theComputationSetup.AllowRepaint=false;
+  std::string tempS;
+  tempS.assign(MainWindow1GlobalPath);
+  tempS.append("KLcoeff.txt");
+  rootFKFTComputationLocal.KLCoeffFileString=tempS;
+  tempS.assign(MainWindow1GlobalPath);
+  tempS.append("partialFractions.txt");
+  rootFKFTComputationLocal.PartialFractionsFileString=tempS;
+  tempS.assign(MainWindow1GlobalPath);
+  tempS.append("VPdata.txt");
+  rootFKFTComputationLocal.VPEntriesFileString=tempS;
+  tempS.assign(MainWindow1GlobalPath);
+  tempS.append("VPIndex.txt");
+  rootFKFTComputationLocal.VPIndexFileString=tempS;
 #ifndef WIN32
-    ::RunA_voidFunctionFromFunctionAddress(&RunrootFKFTComputationLocal,&this->WorkThread1.ComputationalThreadLinux);
+  ::RunA_voidFunctionFromFunctionAddress(&RunrootFKFTComputationLocal,&this->WorkThread1.ComputationalThreadLinux);
 #else
-    ::RunA_voidFunctionFromFunctionAddress
-    (&RunrootFKFTComputationLocal,this->WorkThread1.ComputationalThread);
+  ::RunA_voidFunctionFromFunctionAddress
+		(&RunrootFKFTComputationLocal,this->WorkThread1.ComputationalThread);
 #endif
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
-{
-    if (!this->ToggleButton1UsingCustom->GetValue())
-    {
-        this->theComputationSetup.UsingCustomVectors=false;
-        this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to custom"));
-    }
-    else
-    {
-        this->theComputationSetup.UsingCustomVectors=true;
-        this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to roots"));
-    }
-    this->updateInputButtons();
+{	if (!this->ToggleButton1UsingCustom->GetValue())
+  {	this->theComputationSetup.UsingCustomVectors=false;
+    this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to custom"));
+  } else
+	{	this->theComputationSetup.UsingCustomVectors=true;
+    this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to roots"));
+  }
+  this->updateInputButtons();
 }
 
 void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
@@ -770,26 +772,22 @@ void wxDialogOutput::onButton5SaveComputer(wxCommandEvent &ev)
 }
 
 void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev)
-{
-    if (MainWindow1==0)
-        return;
-    if (!MainWindow1->ToggleButton2ViewCombinatorialChambers->GetValue())
-    {
-        MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
-        MainWindow1->theComputationSetup.flagDisplayingPartialFractions=true;
-        MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to chamber data"));
-        MainWindow1->Button4SaveReadable->Enable();
-        MainWindow1->Button5SaveComputer->Disable();
-    }
-    else
-    {
-        MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
-        MainWindow1->theComputationSetup.flagDisplayingPartialFractions=false;
-        MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to partial fractions"));
-        MainWindow1->Button4SaveReadable->Disable();
-        MainWindow1->Button5SaveComputer->Disable();
-    }
-    MainWindow1->updatePartialFractionAndCombinatorialChamberTextData();
+{	if (MainWindow1==0)
+		return;
+	if (!MainWindow1->ToggleButton2ViewCombinatorialChambers->GetValue())
+  {	MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
+    MainWindow1->theComputationSetup.flagDisplayingPartialFractions=true;
+    MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to chamber data"));
+    MainWindow1->Button4SaveReadable->Enable();
+    MainWindow1->Button5SaveComputer->Disable();
+  }	else
+	{	MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
+    MainWindow1->theComputationSetup.flagDisplayingPartialFractions=false;
+    MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to partial fractions"));
+    MainWindow1->Button4SaveReadable->Disable();
+    MainWindow1->Button5SaveComputer->Disable();
+  }
+  MainWindow1->updatePartialFractionAndCombinatorialChamberTextData();
 }
 
 void guiMainWindow::onRePaint(wxPaintEvent& ev)
@@ -1104,8 +1102,10 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 	this->theComputationSetup.flagComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
   this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
   this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
+  this->theComputationSetup.flagDoingWeylGroupAction= this->CheckBox8DoTheWeylGroup->GetValue();
   this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
     !this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
+  this->ReadRBData();
   TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
   TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
   TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
@@ -1247,54 +1247,50 @@ void outputText(std::string& theOutput)
 }
 
 void guiMainWindow::WriteSettingsIfAvailable()
-{
-    if (this->fileSettings.is_open())
-    {
-        this->fileSettings.clear();
-        this->fileSettings.seekp(0);
-        int x,y;
-        this->GetPosition(&x,&y);
-        this->fileSettings  <<"Main_window_top_left_corner_x " <<x
-        <<"\nMain_window_top_left_corner_y " <<y;
-        this->GetSize(& x, & y);
-        this->fileSettings  <<"\nMain_window_width " <<x
-        <<"\nMain_window_height "  <<y;
-        this->Dialog1OutputPF->GetPosition(&x,&y);
-        this->fileSettings  <<"\nPartial_fraction_window_top_left_corner_x " <<x
-        <<"\nPartial_fraction_window_top_left_corner_y "  <<y;
-        this->Dialog1OutputPF->GetSize(&x,&y);
-        this->fileSettings  <<"\nPartial_fraction_window_width " <<x
-        <<"\nPartial_fraction_window_height "  <<y;
-        this->fileSettings.flush();
-    }
+{	if (this->fileSettings.is_open())
+  {	this->fileSettings.clear();
+    this->fileSettings.seekp(0);
+    int x,y;
+    this->GetPosition(&x,&y);
+    this->fileSettings  <<"Main_window_top_left_corner_x " <<x
+			<<"\nMain_window_top_left_corner_y " <<y;
+    this->GetSize(& x, & y);
+    this->fileSettings  <<"\nMain_window_width " <<x
+			<<"\nMain_window_height "  <<y;
+    this->Dialog1OutputPF->GetPosition(&x,&y);
+    this->fileSettings  <<"\nPartial_fraction_window_top_left_corner_x " <<x
+			<<"\nPartial_fraction_window_top_left_corner_y "  <<y;
+    this->Dialog1OutputPF->GetSize(&x,&y);
+    this->fileSettings  <<"\nPartial_fraction_window_width " <<x
+			<<"\nPartial_fraction_window_height "  <<y <<" ";
+    this->fileSettings.flush();
+  }
 }
 
 void guiMainWindow::ReadSettingsIfAvailable()
-{
-    if (::MainWindow1GlobalPath=="")
-        return;
-    std::stringstream out;
-    out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
-    std::string tempS;
-    tempS= out.str();
-    if (::rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent(this->fileSettings,tempS,false))
-    {
-        wxPoint tempPt, tempPt2;
-        wxSize tempSize, tempSize2;
-        this->fileSettings.seekg(0);
-        this->fileSettings>>tempS >>tempPt.x;
-        this->fileSettings>>tempS >>tempPt.y;
-        this->fileSettings>>tempS >> tempSize.x;
-        this->fileSettings>>tempS >> tempSize.y;
-        this->SetPosition(tempPt);
-        this->SetSize(tempSize);
-        this->fileSettings>>tempS >>tempPt2.x;
-        this->fileSettings>>tempS >>tempPt2.y;
-        this->fileSettings>>tempS >> tempSize2.x;
-        this->fileSettings>>tempS >> tempSize2.y;
-        this->Dialog1OutputPF->SetPosition(tempPt2);
-        this->Dialog1OutputPF->SetSize(tempSize2);
-    }
+{	if (::MainWindow1GlobalPath=="")
+		return;
+  std::stringstream out;
+  out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
+  std::string tempS;
+  tempS= out.str();
+  if (::rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent(this->fileSettings,tempS,false))
+  {	wxPoint tempPt, tempPt2;
+    wxSize tempSize, tempSize2;
+    this->fileSettings.seekg(0);
+    this->fileSettings>>tempS >>tempPt.x;
+    this->fileSettings>>tempS >>tempPt.y;
+    this->fileSettings>>tempS >> tempSize.x;
+    this->fileSettings>>tempS >> tempSize.y;
+    this->SetPosition(tempPt);
+    this->SetSize(tempSize);
+    this->fileSettings>>tempS >>tempPt2.x;
+    this->fileSettings>>tempS >>tempPt2.y;
+    this->fileSettings>>tempS >> tempSize2.x;
+    this->fileSettings>>tempS >> tempSize2.y;
+    this->Dialog1OutputPF->SetPosition(tempPt2);
+    this->Dialog1OutputPF->SetSize(tempSize2);
+  }
 }
 
 void guiMainWindow::ArrangeWindows()
@@ -1336,6 +1332,20 @@ void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
     TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
     TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
     this->Refresh();
+}
+
+void guiMainWindow::ReadRBData()
+{	switch(this->RBGroup1SlicingOptions->GetSelection())
+	{ case 0: this->theComputationSetup.flagFullChop=true;					break;
+		case 1: this->theComputationSetup.flagFullChop=false; 
+						this->theComputationSetup.flagOneIncrementOnly=true;	break;
+		case 2: this->theComputationSetup.flagFullChop=false; 
+						this->theComputationSetup.flagOneIncrementOnly=false; break;
+	}
+}
+
+void guiMainWindow::onRBGroup1SlicingOptions(wxCommandEvent& ev)
+{ this->ReadRBData();
 }
 
 

@@ -332,6 +332,46 @@ void CombinatorialChamberContainer::OneSlice
 	}
 }
 
+void CombinatorialChamberContainer::SortIndicesByDisplayNumber
+	(ListBasicObjects<int>& outputSortedIndices)
+{	outputSortedIndices.MakeActualSizeAtLeastExpandOnTop(this->size);
+	for (int i=0;i<this->size;i++)
+		if (this->TheObjects[i]!=0)
+			if (!this->TheObjects[i]->flagHasZeroPolynomial)
+				outputSortedIndices.AddObjectOnTop(i);
+	this->QuickSortIndicesByDisplayNumber(outputSortedIndices,0,outputSortedIndices.size-1);
+}
+
+void CombinatorialChamberContainer::QuickSortIndicesByDisplayNumber
+	(ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex)
+{	if (TopIndex<=BottomIndex)
+		return;
+	int HighIndex=TopIndex;
+	for (int i=BottomIndex+1;i<=HighIndex;i++)
+	{ if (	this->TheObjects[outputSortedIndices.TheObjects[i]]->DisplayNumber>
+					this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber)
+		{	for (;HighIndex>i && 
+						this->TheObjects[outputSortedIndices.TheObjects[HighIndex]]->DisplayNumber>
+						this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber;
+						HighIndex--)
+			{}
+			int tempI= outputSortedIndices.TheObjects[i];
+			outputSortedIndices.TheObjects[i]= outputSortedIndices.TheObjects[HighIndex];
+			outputSortedIndices.TheObjects[HighIndex]=tempI;
+		}
+	}
+	if (this->TheObjects[outputSortedIndices.TheObjects[HighIndex]]->DisplayNumber>
+			this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber)
+		HighIndex--;
+	//swap HighIndex and Bottom Index:
+	int tempI= outputSortedIndices.TheObjects[BottomIndex];
+	outputSortedIndices.TheObjects[BottomIndex]= outputSortedIndices.TheObjects[HighIndex];
+	outputSortedIndices.TheObjects[HighIndex]=tempI;
+	HighIndex;
+	this->QuickSortIndicesByDisplayNumber(outputSortedIndices, BottomIndex,HighIndex-1);
+	this->QuickSortIndicesByDisplayNumber(outputSortedIndices, HighIndex+1,TopIndex);
+}
+
 void CombinatorialChamberContainer::PurgeZeroPointers()
 { int ActualIndex=0;
 	for (int i=0;i<this->size;i++)
@@ -470,6 +510,38 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 ////////////////////
 }
 
+void DrawingVariables::SetCoordsForA2()
+{	this->scale=1;
+	Projections[0][0]=100;
+	Projections[0][1]=0;
+	Projections[1][0]=-50;
+	Projections[1][1]=86.66;
+}
+
+void DrawingVariables::SetCoordsForB2()
+{	this->scale=1;
+	Projections[0][0]=120;
+	Projections[0][1]=0;
+	Projections[1][0]=-60;
+	Projections[1][1]=60;
+}
+
+void DrawingVariables::SetCoordsForC2()
+{	this->scale=1;
+	Projections[0][0]=100;
+	Projections[0][1]=0;
+	Projections[1][0]=-100;
+	Projections[1][1]=100;
+}
+
+void DrawingVariables::SetCoordsForG2()
+{	this->scale=1;
+	Projections[0][0]=120;
+	Projections[0][1]=0;
+	Projections[1][0]=-60;
+	Projections[1][1]=34.64;
+}
+
 void DrawingVariables::ApplyScale(double inputScale)
 {	if (inputScale==0)
 		return;
@@ -483,14 +555,12 @@ void DrawingVariables::ApplyScale(double inputScale)
 
 void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables)
 {	theFile.clear();
-	this->theChambers.flagDrawToLaTeX=true;
 	LaTeXProcedures::beginDocument(theFile);
 	if (this->thePartialFraction.size>0)
 		this->WriteToFilePFdecomposition(theFile);
-	theFile <<"~\\~\\noindent ";
+	theFile <<"~\\\\~\\\\\\noindent ";
 	this->theChambers.WriteToFile(TDV,this->VPVectors,theFile);
 	LaTeXProcedures::endLatexDocument(theFile);
-	this->theChambers.flagDrawToLaTeX=false;
 }
 
 void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables)
@@ -520,7 +590,7 @@ ComputationSetup::ComputationSetup()
 	this->flagComputationInitialized=false;
 	this->MakingCheckSumPFsplit=false;
 	this->flagOneIncrementOnly=false;
-	this->flagFullChop=false;
+	this->flagFullChop=true;
 	this->flagHavingBeginEqnForLaTeXinStrings=true;
 	this->flagSliceTheEuclideanSpaceInitialized=false;
 	this->thePartialFraction.flagUsingIndicatorRoot=true;
@@ -680,11 +750,26 @@ void ComputationSetup::oneStepChamberSlice(GlobalVariables* theGlobalVariables)
 	this->AllowRepaint=true;
 }
 
+void ComputationSetup::AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV)
+{ if (this->WeylGroupIndex!=2)
+		return;
+	if (this->WeylGroupLetter=='A')
+		TDV.SetCoordsForA2();
+	if (this->WeylGroupLetter=='B')
+		TDV.SetCoordsForB2();
+	if (this->WeylGroupLetter=='C')
+		TDV.SetCoordsForC2();
+	if (this->WeylGroupLetter=='G')
+		TDV.SetCoordsForG2();
+}
+
 void ComputationSetup::InitComputationSetup()
 { if(!this->flagComputationInitialized)
-	{ this->flagComputationInitialized=true;
+	{ this->AdjustGraphicsForTwoDimensionalLieAlgebras(TDV);
+		this->flagComputationInitialized=true;
 		this->flagComputationDone=false;
 		this->flagComputationInProgress=true;
+		this->flagComputationPartiallyDoneDontInit=false;
 		PolyFormatLocal.MakeAlphabetxi();
 		::IndicatorWindowGlobalVariables.Nullify();
 		PolynomialOutputFormat::LatexMaxLineLength=95;
@@ -748,7 +833,7 @@ void ComputationSetup::Run()
 		}
 	}
 	if (this->ComputingChambers)
-	{	if (this->flagDoingWeylGroupAction)
+	{	if (!this->flagDoingWeylGroupAction)
 		{	if (this->flagFullChop)
 			{	this->theChambers.SliceTheEuclideanSpace
 					(	this->InputRoots,this->NextDirectionIndex,this->theChambers.AmbientDimension,
@@ -931,7 +1016,7 @@ void CombinatorialChamberContainer::drawOutputAffine
 { int numNonZeroChambers=0;
 	int numZeroChambers=0;
 	if(output.AffineWallsOfWeylChambers.size>0)
-		output.CountNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
+		output.GetNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
 	else
 		output.GetNumVisibleChambersAndLabelChambersForDisplay();
 	for(int i=0;i<output.size;i++)
@@ -2350,26 +2435,39 @@ void CombinatorialChamber::ChamberNumberToStringStream(std::stringstream& out, C
 		out<<this->CreationNumber;
 }
 
-bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer* owner)
+bool CombinatorialChamber::ElementToString
+	(std::string& output, CombinatorialChamberContainer* owner)
+{ return this->ElementToString(output,owner,false);
+}
+
+bool CombinatorialChamber::ElementToString
+	(std::string& output, CombinatorialChamberContainer* owner, bool LatexFormat)
 {	std::stringstream out;
 	//assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
 	std::string endOfLine;
-	if (owner->flagDrawToLaTeX)
+	if (LatexFormat)
 		endOfLine.assign("\\\\\n");
 	else
 		endOfLine.assign("\n");
 	this->ChamberNumberToStringStream(out,*owner);
+	if (LatexFormat)
+		out <<endOfLine<< "Projective representation";
 	out <<endOfLine<<"External Walls:"<<endOfLine;
 	root tempNormal;
 	std::string tempS;
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{	this->Externalwalls.TheObjects[i].ElementToString(tempS);
-		out <<"f"<<i<<": "<< tempS<<endOfLine;
+		if (!LatexFormat)
+			out <<"f"<<i<<": "<< tempS<<endOfLine;
+		else
+			out <<"~~ "<< tempS <<endOfLine;
 	}
-	out <<"Internal Walls:"<<endOfLine;
-	for (int i=0;i<this->InternalWalls.size;i++)
-	{	this->InternalWalls.TheObjects[i].ElementToString(tempS);
-		out <<"f"<<i<<": "<< tempS<<endOfLine;
+	if (!LatexFormat)
+	{	out <<"Internal Walls:"<<endOfLine;
+		for (int i=0;i<this->InternalWalls.size;i++)
+		{	this->InternalWalls.TheObjects[i].ElementToString(tempS);
+			out <<"f"<<i<<": "<< tempS<<endOfLine;
+		}
 	}
 	ListObjectPointers<CombinatorialChamber> outputChambers;
 	this->FindAllNeighbors(outputChambers);
@@ -2390,17 +2488,19 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 	}
 	out<<endOfLine;
 	if (!owner->flagDrawingProjective)
-	{	out<<"Affine walls: "<<endOfLine;
+	{	if (LatexFormat)
+		out << "Affine data"<< endOfLine;
+		out<<"Affine walls: "<<endOfLine;
 		for (int i=0;i<this->affineExternalWalls.size;i++)
 		{ this->affineExternalWalls.TheObjects[i].ElementToString(tempS);
-			out << tempS <<endOfLine;
+			out <<"~~ "<< tempS <<endOfLine;
 		}
 		out << "Affine vertices (true): "<<endOfLine;
 		for (int i=0;i<affineVertices.size;i++)
 		{	if (i==this->NumTrueAffineVertices)
 				out << "Affine vertices representing pt(s) at infty: "<<endOfLine;
 			this->affineVertices.TheObjects[i].ElementToString(tempS);
-			out << tempS<<endOfLine;
+			out <<"~~ "<< tempS<<endOfLine;
 		}
 	}
 	output=out.str();
@@ -2574,8 +2674,11 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 	}
 }
 
-void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV,CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput)
-{ TDV.ApplyScale(0.3);
+void CombinatorialChamber::drawOutputAffine
+	(DrawingVariables& TDV,CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput)
+{ if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomial)
+		return;
+	TDV.ApplyScale(0.3);
 	for (int i=0;i<this->affineVertices.size;i++)
   { for(int j=0;j<this->affineVertices.size;j++)
     { affineHyperplane* AreInAWall=0;
@@ -3308,43 +3411,61 @@ void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& di
 		return;
 	this->drawOutput(TDV,*this,directions,0,this->IndicatorRoot,&output);
 	std::string tempS;
-	this->ElementToString(tempS);
+	this->ElementToString(tempS,true);
 	output<< tempS;
 }
 
 void CombinatorialChamberContainer::ElementToString(std::string& output)
+{ this->ElementToString(output,false);
+}
+
+void CombinatorialChamberContainer::ElementToString(std::string& output, bool LatexFormat)
 { std::stringstream out;
 	std::string tempS;
 	std::string endOfLine;
-	if (this->flagDrawToLaTeX)
+	if (LatexFormat)
 		endOfLine= "\\\\\n";
 	else
 		endOfLine= "\n";
+	if (LatexFormat)
+	{ this->PurgeZeroPointers();
+		out << "Total visible chambers: " 
+				<< this->GetNumVisibleChambersAndLabelChambersForDisplay()
+				<< endOfLine;
+	}	
 	if (this->AffineWallsOfWeylChambers.size>0)
-	{	int tempI=this->CountNumChambersInWeylChamberAndLabelChambers(this->WeylChamber);
+	{	int tempI=this->GetNumChambersInWeylChamberAndLabelChambers(this->WeylChamber);
 		out << "Number of chambers with internal point in Weyl chamber: " 
 				<< tempI<< endOfLine;
-		out <<"Weyl chamber walls and their images: ";
+		out <<"Weyl chamber walls and their images: \\\\";
 		for (int i=0;i<this->AffineWallsOfWeylChambers.size;i++)
 		{	this->AffineWallsOfWeylChambers.TheObjects[i].ElementToString(tempS);
-			out<< tempS <<" ";
+			out<< tempS <<endOfLine;
 		}
 	} else
 	{ out << "Number of visible chambers: " << this->GetNumVisibleChambersAndLabelChambersForDisplay() << endOfLine;
 	}
+	ListBasicObjects<int> sortedIndices;
+	this->SortIndicesByDisplayNumber(sortedIndices);
 	if (this->size>this->GraphicsMaxNumChambers)
 	{	out<<"Detailed chamber data too large for display";
 		output=out.str();
 		return;
 	}
-	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i]!=0)
-		{	if (!this->flagDrawToLaTeX || !this->TheObjects[i]->flagHasZeroPolynomial)
-			{	this->TheObjects[i]->ElementToString(tempS,this);
-				out <<tempS <<endOfLine;
-				if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput)
-					break;
+	if (!LatexFormat)
+	{	for (int i=0;i<this->size;i++)
+		{ if (this->TheObjects[i]!=0)
+			{	this->TheObjects[i]->ElementToString(tempS,this,LatexFormat);
+					out <<tempS <<endOfLine;
+					if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput)
+						break;
 			}
+		}
+	} else
+	{ for (int i=0;i<sortedIndices.size;i++)
+		{ this->TheObjects[sortedIndices.TheObjects[i]]->ElementToString
+				(tempS, this,LatexFormat);
+			out <<tempS <<endOfLine;
 		}
 	}
 	output= out.str();
@@ -3438,7 +3559,6 @@ void CombinatorialChamberContainer::init()
 	this->startingCones.ReleaseMemory();
 	this->theWeylGroupAffineHyperplaneImages.size=0;
 	this->flagMakingASingleHyperplaneSlice=false;
-	this->flagDrawToLaTeX=false;
 	this->flagDrawingProjective=true;
 	this->flagSliceWithAWallIgnorePermanentlyZero=true;
 }
@@ -3473,7 +3593,16 @@ int CombinatorialChamberContainer::GetNumVisibleChambersAndLabelChambersForDispl
 	return NumChambersNonZero;
 }
 
-int CombinatorialChamberContainer::CountNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber)
+int CombinatorialChamberContainer::GetNumVisibleChambersNoLabeling()
+{ int NumChambersNonZero=0;
+	for (int i=0;i<this->size;i++)
+		if (this->TheObjects[i]!=0)
+			if (!this->TheObjects[i]->flagHasZeroPolynomial)
+				NumChambersNonZero++;
+	return NumChambersNonZero;
+}
+
+int CombinatorialChamberContainer::GetNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber)
 { int NumChambersInWeyl=0;
 	int NumZeroChambers=0;
 	int NumChambersNonZeroNotInWeyl=0;
@@ -3490,8 +3619,20 @@ int CombinatorialChamberContainer::CountNumChambersInWeylChamberAndLabelChambers
 				{ NumChambersInWeyl++;
 					this->TheObjects[i]->DisplayNumber=NumChambersInWeyl;
 				} else
+					NumChambersNonZeroNotInWeyl++;
+			}
+		}
+	}
+	NumChambersNonZeroNotInWeyl=0;
+	for (int i=0;i<this->size;i++)
+	{	if (this->TheObjects[i]!=0)
+		{	if (!this->TheObjects[i]->flagHasZeroPolynomial)
+			{	root tempRoot;
+				this->TheObjects[i]->ComputeAffineInternalPoint(tempRoot, this->AmbientDimension-1);
+				if (!theWeylChamber.IsInCone(tempRoot))
 				{	NumChambersNonZeroNotInWeyl++;
-					this->TheObjects[i]->DisplayNumber=NumChambersNonZeroNotInWeyl;
+					this->TheObjects[i]->DisplayNumber=
+						NumChambersInWeyl+NumChambersNonZeroNotInWeyl;
 				}
 			}
 		}
@@ -12326,7 +12467,7 @@ void LaTeXProcedures::beginPSTricks(std::fstream& output)
 }
 
 void LaTeXProcedures::endPSTricks(std::fstream& output)
-{ output<<"\\end{pspicture}";
+{ output<<"\\end{pspicture}\\medskip \\\\ \\noindent ";
 }
 
 void LaTeXProcedures::beginDocument(std::fstream& output)
@@ -12356,16 +12497,19 @@ void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &outpu
 
 void LaTeXProcedures::drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output)
 { output.precision(4);
-	X1-=5; Y1+=5;
+	X1-=theText.length()* LaTeXProcedures::TextPrintCenteringAdjustmentX; 
+	Y1+=LaTeXProcedures::TextPrintCenteringAdjustmentY;
 	X1/=LaTeXProcedures::ScaleFactor; Y1/=LaTeXProcedures::ScaleFactor;
 	output	<< "\\put("<<X1-LaTeXProcedures::FigureCenterCoordSystemX 
-					<<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<"){"<<theText<<"}";
+					<<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<"){\\tiny{"<<theText<<"}}";
 }
 
 void LaTeXProcedures::drawline
 			(	double X1, double Y1, double X2, double Y2,
 				unsigned long thePenStyle, int ColorIndex, std::fstream& output)
-{ output.precision(4);
+{ if ((int)thePenStyle== DrawingVariables::PenStyleInvisible)
+		return;
+	output.precision(4);
 	X1/=LaTeXProcedures::ScaleFactor; X2/=LaTeXProcedures::ScaleFactor;
 	Y1/=LaTeXProcedures::ScaleFactor; Y2/=LaTeXProcedures::ScaleFactor;
 	std::string tempS;

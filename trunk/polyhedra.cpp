@@ -281,9 +281,7 @@ root partFractions::IndicatorRoot;
 HashedListBasicObjects<GeneratorPFAlgebraRecord> GeneratorsPartialFractionAlgebra::theGenerators;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 bool WallData::flagDisplayWallDetails=true;
-int NextDirectionIndex;
 int RankGlobal;
-roots InputRoots;
 //FacetPointers TheBigFacetOutput;
 DrawingVariables TDV(200,400);
 bool QuasiNumber::flagAnErrorHasOccurredTimeToPanic=false;
@@ -368,8 +366,7 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace
 	if (directions.TheObjects[0].size==1)
 		return;
 	while(index<directions.size)
-	{	SliceOneDirection(directions,index,rank,IndicatorRoot, theGlobalVariables);
-	}
+		SliceOneDirection(directions,index,rank,IndicatorRoot, theGlobalVariables);
 	this->ConsistencyCheck();
 }
 
@@ -490,7 +487,7 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &th
 	LaTeXProcedures::beginDocument(theFile);
 	if (this->thePartialFraction.size>0)
 		this->WriteToFilePFdecomposition(theFile);
-	theFile <<"\\noindent ";
+	theFile <<"~\\~\\noindent ";
 	this->theChambers.WriteToFile(TDV,this->VPVectors,theFile);
 	LaTeXProcedures::endLatexDocument(theFile);
 	this->theChambers.flagDrawToLaTeX=false;
@@ -515,12 +512,17 @@ ComputationSetup::ComputationSetup()
 { this->theGlobalVariablesContainer.SetSizeExpandOnTopNoObjectInit(1);
 	this->AllowRepaint=true;
 	this->UsingCustomVectors=false;
-	this->ComputingPartialFractions=true;
+	this->flagComputingPartialFractions=true;
 	this->ComputingVectorPartitions=true;
 	this->ComputingChambers=true;
-	this->ComputationInProgress=false;
+	this->flagComputationInProgress=false;
+	this->flagComputationDone=true;
+	this->flagComputationInitialized=false;
 	this->MakingCheckSumPFsplit=false;
+	this->flagOneIncrementOnly=false;
+	this->flagFullChop=false;
 	this->flagHavingBeginEqnForLaTeXinStrings=true;
+	this->flagSliceTheEuclideanSpaceInitialized=false;
 	this->thePartialFraction.flagUsingIndicatorRoot=true;
 	this->flagDisplayingPartialFractions=true;
 	this->flagDisplayingCombinatorialChambersTextData=false;
@@ -574,10 +576,10 @@ void ComputationSetup::initSetupNilradical(GlobalVariables *theGlobalVariables)
 	{	CombinatorialChamberContainer tempComplex;
 		this->theChambers.NumAffineHyperplanesProcessed=-1;
 		this->theChambers.AmbientDimension=this->WeylGroupIndex;
-		::InputRoots.CopyFromBase(this->VPVectors);
-		::NextDirectionIndex=this->theChambers.AmbientDimension-1;
+		this->InputRoots.CopyFromBase(this->VPVectors);
+		this->NextDirectionIndex=this->theChambers.AmbientDimension-1;
 		tempComplex.SliceTheEuclideanSpace
-			(	::InputRoots,::NextDirectionIndex,this->WeylGroupIndex,
+			(	this->InputRoots,this->NextDirectionIndex,this->WeylGroupIndex,
 					this->thePartialFraction.IndicatorRoot,
 						this->theGlobalVariablesContainer.Default());
 		this->initGenerateWeylAndHyperplanesToSliceWith(theGlobalVariables,tempComplex);
@@ -651,6 +653,7 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
 
 void ComputationSetup::oneStepChamberSlice(GlobalVariables* theGlobalVariables)
 {	this->AllowRepaint=false;
+	this->flagComputationInProgress=true;
 	this->theChambers.flagDrawingProjective=true;
 	this->initSetupNilradical(theGlobalVariables);
 	if (this->theChambers.PreferredNextChambers.size==0 &&
@@ -669,6 +672,7 @@ void ComputationSetup::oneStepChamberSlice(GlobalVariables* theGlobalVariables)
 	} else
 	{ this->theChambers.flagDrawingProjective=false;
     this->theChambers.ProjectToDefaultAffineSpace(theGlobalVariables);
+		this->flagComputationDone=true;
     this->theChambers.ComputeDebugString();
   }
  // this->theChambers.ComputeDebugString();
@@ -676,20 +680,36 @@ void ComputationSetup::oneStepChamberSlice(GlobalVariables* theGlobalVariables)
 	this->AllowRepaint=true;
 }
 
+void ComputationSetup::InitComputationSetup()
+{ if(!this->flagComputationInitialized)
+	{ this->flagComputationInitialized=true;
+		this->flagComputationDone=false;
+		this->flagComputationInProgress=true;
+		PolyFormatLocal.MakeAlphabetxi();
+		::IndicatorWindowGlobalVariables.Nullify();
+		PolynomialOutputFormat::LatexMaxLineLength=95;
+		PolynomialOutputFormat::UsingLatexFormat=true;	
+		RandomCodeIDontWantToDelete::SomeRandomTests2();
+		partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
+		this->flagDoneComputingPartialFractions=false;
+		this->theChambers.AmbientDimension=this->WeylGroupIndex;
+		this->InputRoots.CopyFromBase(this->VPVectors);
+		this->NextDirectionIndex=this->WeylGroupIndex-1;
+	//		this->theChambers.SliceTheEuclideanSpace
+	//													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
+	//														this->thePartialFraction.IndicatorRoot);
+	//		this->theChambers.ComputeDebugString();
+	}
+}
+
 void ComputationSetup::Run()
-{ PolyFormatLocal.MakeAlphabetxi();
-	::IndicatorWindowGlobalVariables.Nullify();
-	PolynomialOutputFormat::LatexMaxLineLength=95;
-	PolynomialOutputFormat::UsingLatexFormat=true;
+{ this->AllowRepaint=false;
+	this->InitComputationSetup();
 	std::string BeginString;
-	//this->thePartialFraction.flagSplitTestModeNoNumerators=true;
-	this->AllowRepaint=false;
-	partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
-	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
-	if (this->ComputingPartialFractions)
+	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
 	{	if (!this->UsingCustomVectors)
 		{	this->thePartialFraction.ComputeKostantFunctionFromWeylGroup
 				(	this->WeylGroupLetter,this->WeylGroupIndex,this->theOutput,
@@ -702,8 +722,7 @@ void ComputationSetup::Run()
 			this->thePartialFraction.initFromRootSystem
 				(tempRoots,tempRoots,0,this->theGlobalVariablesContainer.Default());
 			if (this->flagHavingStartingExpression)
-			{ this->thePartialFraction.ElementToString(BeginString, this->theGlobalVariablesContainer.Default());
-			}
+				this->thePartialFraction.ElementToString(BeginString, this->theGlobalVariablesContainer.Default());
 			this->thePartialFraction.split(this->theGlobalVariablesContainer.Default());
 			this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
 				(	this->theOutput,this->thePartialFraction.IndicatorRoot,
@@ -722,37 +741,66 @@ void ComputationSetup::Run()
 		if (this->flagDisplayingPartialFractions)
 		{ std::stringstream out2;
 			if (this->flagHavingStartingExpression)
-      { out2<< BeginString<<"=";
-      }
+				out2<< BeginString<<"=";
 			this->thePartialFraction.ComputeDebugString(this->theGlobalVariablesContainer.Default());
 			out2<<this->thePartialFraction.DebugString;
 			this->thePartialFraction.DebugString= out2.str();
 		}
 	}
 	if (this->ComputingChambers)
-	{	this->theChambers.AmbientDimension=this->WeylGroupIndex;
-		::InputRoots.CopyFromBase(this->VPVectors);
-		::NextDirectionIndex=this->WeylGroupIndex-1;
-//		this->theChambers.SliceTheEuclideanSpace
-//													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
-//														this->thePartialFraction.IndicatorRoot);
-//		this->theChambers.ComputeDebugString();
-		this->theChambers.SliceTheEuclideanSpace
-													(	::InputRoots,::NextDirectionIndex,this->theChambers.AmbientDimension,
-														this->thePartialFraction.IndicatorRoot,
-														this->theGlobalVariablesContainer.Default());
-		this->theChambers.ComputeDebugString();
+	{	if (this->flagDoingWeylGroupAction)
+		{	if (this->flagFullChop)
+			{	this->theChambers.SliceTheEuclideanSpace
+					(	this->InputRoots,this->NextDirectionIndex,this->theChambers.AmbientDimension,
+						this->thePartialFraction.IndicatorRoot, this->theGlobalVariablesContainer.Default());
+			} else
+			{ if (this->flagOneIncrementOnly)
+					this->theChambers.SliceOneDirection
+						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
+							this->thePartialFraction.IndicatorRoot, this->theGlobalVariablesContainer.Default());
+				else
+					this->theChambers.OneSlice
+						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
+							this->thePartialFraction.IndicatorRoot, this->theGlobalVariablesContainer.Default());
+			}
+			this->theChambers.ComputeDebugString();
+		} else
+		{ if (this->flagFullChop)
+				this->FullChop(this->theGlobalVariablesContainer.Default());
+			else
+			{	if (this->flagOneIncrementOnly)
+					this->oneIncrement(this->theGlobalVariablesContainer.Default());
+				else
+					this->oneStepChamberSlice(this->theGlobalVariablesContainer.Default());
+			}
+		}
 	}
 	//TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 	this->theChambers.ComputeDebugString();
-
+	this->ExitComputationSetup();
 	//std::stringstream out;
 	//ListBasicObjects<roots> tempRoots;
 	//this->thePartialFraction.ComputeSupport(tempRoots, out);
 	//std::string tempS;
 //	tempS=out.str();
 	this->AllowRepaint=true;
-	this->ComputationInProgress=false;
+	this->flagComputationInProgress=false;
+}
+
+void ComputationSetup::ExitComputationSetup()
+{ if (this->NextDirectionIndex>=this->InputRoots.size)
+	{ //Computation is done and we must reset
+		this->flagComputationDone=true;
+	//	this->flagComputationInitialized=false;
+	}
+	ParallelComputing::SafePointReached=true;
+}
+
+void ComputationSetup::Reset()
+{ if (this->flagComputationInProgress)
+		return;
+	this->flagComputationDone=false;
+	this->flagComputationInitialized=false;
 }
 
 void ComputationSetup::EvaluatePoly()
@@ -12310,7 +12358,8 @@ void LaTeXProcedures::drawText(	double X1, double Y1, std::string& theText, int 
 { output.precision(4);
 	X1-=5; Y1+=5;
 	X1/=LaTeXProcedures::ScaleFactor; Y1/=LaTeXProcedures::ScaleFactor;
-	output << "\\put("<<X1<<","<<8-Y1<<"){"<<theText<<"}";
+	output	<< "\\put("<<X1-LaTeXProcedures::FigureCenterCoordSystemX 
+					<<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<"){"<<theText<<"}";
 }
 
 void LaTeXProcedures::drawline
@@ -12322,8 +12371,8 @@ void LaTeXProcedures::drawline
 	std::string tempS;
 	LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS);
 	output	<<"\\psline[linewidth=0.3pt, linecolor="<<tempS <<"]"
-					<<"("<<X1<<","<<8-Y1<<")"
-					<<"("<<X2<<","<<8-Y2<<")\n";
+		<<"("<<X1-LaTeXProcedures::FigureCenterCoordSystemX <<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<")"
+		<<"("<<X2-LaTeXProcedures::FigureCenterCoordSystemX <<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y2<<")\n";
 }
 
 void thePFcomputation::Run()

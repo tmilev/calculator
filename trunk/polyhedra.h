@@ -4850,6 +4850,10 @@ class LaTeXProcedures
 {
 public:
 	static const int ScaleFactor=40;
+	static const int FigureSizeX= 10;//in centimeters
+	static const int FigureSizeY=10;//in centimeters
+	static const int FigureCenterCoordSystemX= 4;//in centimeters
+	static const int FigureCenterCoordSystemY=8;//in centimeters
 	static void drawline(	double X1, double Y1, double X2, double Y2,
 									unsigned long thePenStyle, int ColorIndex, std::fstream& output);
 	static void drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
@@ -4975,9 +4979,9 @@ public:
 	};
 };
 
-
 struct ComputationSetup
 {
+	roots InputRoots;
 public:
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
@@ -4989,12 +4993,19 @@ public:
 	roots VPVectors;
 	GlobalVariablesContainer theGlobalVariablesContainer;
 	bool AllowRepaint;
-	bool ComputationInProgress;
+	bool flagComputationInitialized;
+	bool flagComputationInProgress;
+	bool flagComputationDone;
+	bool flagOneStepOnly;
+	bool flagOneIncrementOnly;
+	bool flagFullChop;
 	bool UsingCustomVectors;
-	bool ComputingPartialFractions;
+	bool flagComputingPartialFractions;
+	bool flagDoneComputingPartialFractions;
 	bool ComputingVectorPartitions;
 	bool ComputingChambers;
 	bool MakingCheckSumPFsplit;
+	bool flagDoingWeylGroupAction;
 	bool flagHavingStartingExpression;
 	bool flagDisplayingCombinatorialChambersTextData;
 	bool flagHavingBeginEqnForLaTeXinStrings;
@@ -5005,6 +5016,7 @@ public:
 	bool flagSuperimposingComplexes;
 	bool flagCustomNilradicalInitted;
 	bool flagDoCustomNilradical;
+	bool flagSliceTheEuclideanSpaceInitialized;
 	bool flagOneSteChamberSliceInitialized;
 	char WeylGroupLetter;
 	int NumRowsNilradical;
@@ -5012,15 +5024,19 @@ public:
 	unsigned char WeylGroupIndex;
 	void EvaluatePoly();
 	void Run();
+	void InitComputationSetup();
+	void ExitComputationSetup();
 	void WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables);
 	void oneStepChamberSlice(GlobalVariables* theGlobalVariables);
 	void oneIncrement(GlobalVariables* theGlobalVariables);
 	void initSetupNilradical(GlobalVariables* theGlobalVariables);
+	void initSliceTheEuclideanSpace();
 	void initGenerateWeylAndHyperplanesToSliceWith
 		(GlobalVariables* theGlobalVariables,CombinatorialChamberContainer& inputComplex);
 	void SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables);
 	void FullChop(GlobalVariables* theGlobalVariables);
 	void WriteToFilePFdecomposition(std::fstream& output);
+	void Reset();
 	ComputationSetup();
 };
 

@@ -1023,7 +1023,8 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 	} else
 	{ this->theComputationSetup.flagDoCustomNilradical=true;
 		if (newWeylGroupLetter=='A')
-			this->theComputationSetup.initSetupNilradical(this->theComputationSetup.theGlobalVariablesContainer.Default());
+			this->theComputationSetup.SetupCustomNilradicalInVPVectors
+				(*this->theComputationSetup.theGlobalVariablesContainer.Default());
 		this->initTableFromVPVectors();
 		this->theComputationSetup.Reset();
 	}
@@ -1123,6 +1124,8 @@ void guiMainWindow::ReadVPVectorsAndOptions()
     }
     this->theComputationSetup.VPVectors.ComputeDebugString();
   }
+  this->theComputationSetup.thePartialFraction.IndicatorRoot.SetSizeExpandOnTopLight
+		(this->theComputationSetup.WeylGroupIndex);
   for (int j=0;j<this->theComputationSetup.WeylGroupIndex;j++)
   {	int tempI=wxAtoi(this->Table2Indicator->GetCellValue(0,j));
     this->theComputationSetup.thePartialFraction.IndicatorRoot.TheObjects[j].AssignInteger(tempI);

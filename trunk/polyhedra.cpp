@@ -558,6 +558,7 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &th
 	LaTeXProcedures::beginDocument(theFile);
 	if (this->thePartialFraction.size>0)
 		this->WriteToFilePFdecomposition(theFile);
+	theFile<<"\\title{"<<this->WeylGroupIndex<< <<"}"
 	theFile <<"~\\\\~\\\\\\noindent ";
 	this->theChambers.WriteToFile(TDV,this->VPVectors,theFile);
 	LaTeXProcedures::endLatexDocument(theFile);

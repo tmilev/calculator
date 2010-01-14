@@ -154,6 +154,15 @@ struct DrawingVariables
 {
 public:
 	static const int NumColors=8;
+	//color styles (taken from windows.h and substituted for independence of the .h file):
+	// 0 = normal line
+	// 1 = dashed line
+	// 2 = dotted line
+	// 5 = invisible line (no line)
+	static const int PenStyleInvisible= 5;
+	static const int PenStyleDashed= 1;
+	static const int PenStyleDotted= 2;
+	static const int PenStyleNormal= 0;
 	bool flagLaTeXDraw;
 	bool DrawDashes;
 	bool DrawChamberIndices;
@@ -187,6 +196,10 @@ public:
 	static void GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y);
 	static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
 	void ApplyScale(double inputScale);
+	void SetCoordsForG2();
+	void SetCoordsForB2();
+	void SetCoordsForA2();
+	void SetCoordsForC2();
 	void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile);
 	//if the LatexOutFile is zero then the procedure defaults to the screen
 	void drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
@@ -1406,6 +1419,8 @@ public:
 	//bool InduceFromAffineCone(affineCone& input);
 	bool ComputeDebugString(CombinatorialChamberContainer* owner);
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner);
+	bool ElementToString
+		(std::string& output, CombinatorialChamberContainer* owner, bool LatexFormat);
 	void ChamberNumberToStringStream(std::stringstream& out, CombinatorialChamberContainer& owner);
 	bool ConsistencyCheck(int theDimension);
 	//bool FacetIsInternal(Facet* f);
@@ -2011,7 +2026,6 @@ public:
 	bool flagSliceWithAWallInitDone;
 	bool flagSliceWithAWallIgnorePermanentlyZero;
 	bool flagDrawingProjective;
-	bool flagDrawToLaTeX;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -2025,6 +2039,9 @@ public:
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
 	void ConvertHasZeroPolyToPermanentlyZero();
+	void SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices);
+	void QuickSortIndicesByDisplayNumber
+		(ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex);
 	void AddWeylChamberWallsToHyperplanes
 		(GlobalVariables* theGlobalVariables, WeylGroup& theWeylGroup);
 	void SliceTheEuclideanSpace
@@ -2040,13 +2057,18 @@ public:
   void InduceFromLowerDimensionalAndProjectivize
 		(CombinatorialChamberContainer& input, GlobalVariables* theGlobalVariables);
   void MakeExtraProjectivePlane();
-	int CountNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
+	int GetNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
 	int GetNumVisibleChambersAndLabelChambersForDisplay();
+	int GetNumVisibleChambersNoLabeling();
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
+	void ElementToString(std::string& output, bool LatexFormat);
 	void ElementToString(std::string& output);
 	void WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void ComputeDebugString()
+		{this->ElementToString(this->DebugString);};
+	void ComputeDebugString(bool LatexFormat)
+		{this->ElementToString(this->DebugString,LatexFormat);};
 	void init();
 	void Free();
 	void MakeStartingChambers
@@ -4854,6 +4876,8 @@ public:
 	static const int FigureSizeY=10;//in centimeters
 	static const int FigureCenterCoordSystemX= 4;//in centimeters
 	static const int FigureCenterCoordSystemY=8;//in centimeters
+	static const int TextPrintCenteringAdjustmentX=3;
+	static const int TextPrintCenteringAdjustmentY=3;	
 	static void drawline(	double X1, double Y1, double X2, double Y2,
 									unsigned long thePenStyle, int ColorIndex, std::fstream& output);
 	static void drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
@@ -5022,6 +5046,7 @@ public:
 	int NumRowsNilradical;
 	int NumColsNilradical;
 	unsigned char WeylGroupIndex;
+	void AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV);
 	void EvaluatePoly();
 	void Run();
 	void InitComputationSetup();

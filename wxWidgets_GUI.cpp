@@ -469,7 +469,8 @@ guiMainWindow::guiMainWindow()
   this->Label3ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
   this->Label4ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
   this->Label5ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Label9OutputVPF= new ::wxStaticText(this,wxID_ANY, wxT("Vector partition function LaTex format:"));
+  this->Label9OutputVPF= new ::wxStaticText
+		(this,wxID_ANY, wxT("Vector partition function LaTex format:"));
   this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
   this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
   this->CheckBox1ComputePFs= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Don't compute PF"));
@@ -492,7 +493,7 @@ guiMainWindow::guiMainWindow()
   this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox
 		(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
 	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox
-		(this,::wxID_ANY,wxT("Act by Weyl group"));
+		(this,this->ID_CheckBox1,wxT("Act by Weyl group"));
   //this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   //this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
@@ -1092,18 +1093,21 @@ void guiMainWindow::initTableFromVPVectors()
 
 
 void guiMainWindow::OnExit(wxCloseEvent &event)
-{
-    this->Destroy();
+{	this->Destroy();
 }
 
 
 void guiMainWindow::ReadVPVectorsAndOptions()
-{	if (this->theComputationSetup.flagComputationPartiallyDoneDontInit)
+{	if (!this->theComputationSetup.flagComputationDone)
 		return;
 	this->theComputationSetup.flagComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
   this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
   this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
-  this->theComputationSetup.flagDoingWeylGroupAction= this->CheckBox8DoTheWeylGroup->GetValue();
+  bool tempBool = this->CheckBox8DoTheWeylGroup->GetValue();
+  if(	!(this->theComputationSetup.flagDoingWeylGroupAction== tempBool))
+	{	this->theComputationSetup.Reset();
+	}  
+  this->theComputationSetup.flagDoingWeylGroupAction= tempBool;
   this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
     !this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
   this->ReadRBData();

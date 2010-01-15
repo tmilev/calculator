@@ -5037,7 +5037,7 @@ public:
 	bool flagHavingDocumentClassForLaTeX;
 	bool flagDisplayingPartialFractions;
 	bool flagComputationIsDoneStepwise;
-	bool flagComputationPartiallyDoneDontInit;
+	//bool flagAffineComputationDone;
 	bool flagSuperimposingComplexes;
 	bool flagCustomNilradicalInitted;
 	bool flagDoCustomNilradical;
@@ -5055,8 +5055,7 @@ public:
 	void WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables);
 	void oneStepChamberSlice(GlobalVariables* theGlobalVariables);
 	void oneIncrement(GlobalVariables* theGlobalVariables);
-	void initSetupNilradical(GlobalVariables* theGlobalVariables);
-	void initSliceTheEuclideanSpace();
+	void initWeylActionSpecifics(GlobalVariables* theGlobalVariables);
 	void initGenerateWeylAndHyperplanesToSliceWith
 		(GlobalVariables* theGlobalVariables,CombinatorialChamberContainer& inputComplex);
 	void SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables);

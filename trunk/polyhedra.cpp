@@ -693,11 +693,14 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
 			{	tempH.MakeFromNormalAndPoint
 					(tempRoot,inputComplex.theHyperplanes.TheObjects[i]);
 				tempH.ComputeDebugString();
-				tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true,true);
+//				tempWeyl.ActOnAffineHyperplaneByGroupElement(j,tempH,true,true);
+				tempWeyl.ActOnRootByGroupElement(j,tempH.affinePoint,true, true);
 				if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
-          if (this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTopNoRepetitionOfObject(tempH))
+          if (this->theChambers.theWeylGroupAffineHyperplaneImages
+								.AddObjectOnTopNoRepetitionOfObject(tempH))
 						if (start==0) 
-							this->theChambers.AffineWallsOfWeylChambers.AddObjectOnTopNoRepetitionOfObjectHash(tempH);
+							this->theChambers.AffineWallsOfWeylChambers
+								.AddObjectOnTopNoRepetitionOfObjectHash(tempH);
 				//tempH.ComputeDebugString();
 			}
 			std::string tempS;

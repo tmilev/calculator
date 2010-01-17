@@ -9149,6 +9149,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 	//	this->CheckSum.ElementToString(tempS1);
 	//	this->ComputeDebugString();
 	//}
+	std::stringstream out; std::string tempS;
 	while (this->IndexLowestNonProcessed<this->size)
 	{ //this->ComputeDebugString();
 //		bool ShouldIgnore=false;
@@ -9194,6 +9195,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 		}
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 		{	this->ComputeDebugString(theGlobalVariables);
+			out <<this->DebugString<<"\\\\ = \\\\";
 			Rational tempRat2;
 			//this->UncoverBracketsNumerators();
 			this->ComputeOneCheckSum(tempRat2);
@@ -9209,6 +9211,8 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 //	this->RemoveRedundantShortRootsClassicalRootSystem();
 //	PolyFormatLocal.MakeAlphabetxi();
 //	this->ComputeDebugString();
+	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+		tempS= out.str();
 	Rational tempRat2;
 	/*if (partFraction::MakingConsistencyCheck)
 	{	this->ComputeDebugString();

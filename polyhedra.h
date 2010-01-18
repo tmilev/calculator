@@ -2148,6 +2148,9 @@ public:
 	void init(short nv);
 	void initNoDegreesInit(short nv);
 	void NullifyDegrees();
+	void DivideBy
+		(	Monomial<ElementOfCommutativeRingWithIdentity>& input, 
+			Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void GetMonomialWithCoeffOne(Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m,
 									Monomial<ElementOfCommutativeRingWithIdentity>& output);
@@ -2159,6 +2162,7 @@ public:
 	void MakeMonomialOneLetter(short NumVars,int LetterIndex,
 	                           short Power, ElementOfCommutativeRingWithIdentity& Coeff);
 	void IncreaseNumVariables(short increase);
+	bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	bool IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	bool IsEqualToZero();
 	void DecreaseNumVariables(short increment);
@@ -2328,6 +2332,10 @@ public:
 					 ElementOfCommutativeRingWithIdentity& ConstantTerm);
 	void MakeLinPolyFromRoot(root& r);
 	void TimesInteger(int a);
+	void DivideBy
+		(	Polynomial<ElementOfCommutativeRingWithIdentity>& input, 
+			Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient,
+			Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
 	void AddConstant(ElementOfCommutativeRingWithIdentity& theConst);
@@ -2339,6 +2347,7 @@ public:
 	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution,
 		                short NumVarTarget);
   int TotalDegree();
+	int GetIndexMaxMonomial();
 	void ComponentInFrontOfVariableToPower
 							(int VariableIndex,
 							 ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output,
@@ -2905,6 +2914,7 @@ public:
 	IntegerPoly(){};
 	int SizeWithoutDebugString();
 	void Evaluate(root& values, Rational& output);
+	int EvaluateAtOne();
 	static bool flagAnErrorHasOccurredTimeToPanic;
 };
 
@@ -3063,13 +3073,23 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::DegreesToIndexRecursive(int 
 } */
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ
-																							(Monomial<ElementOfCommutativeRingWithIdentity>&m)
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder
+	(Monomial<ElementOfCommutativeRingWithIdentity>&m)
 { assert(this->NumVariables == m.NumVariables);
 	for (int i=0;i<m.NumVariables;i++)
-	{ if (this->degrees[i]<m.degrees[i])
-		{ return false;
-		}
+		if (this->degrees[i]<m.degrees[i])
+			return false;
+	return true;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+bool Monomial<ElementOfCommutativeRingWithIdentity>
+	::IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity> &m)
+{ for (int i=0;i<this->NumVariables;i++)
+	{	if (this->degrees[i]>m.degrees[i])
+			return true;
+		if (this->degrees[i]<m.degrees[i])
+			return false;
 	}
 	return true;
 }
@@ -3162,9 +3182,19 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::operator =
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()
 { for (int i=0;i<this->NumVariables;i++)
-	{ if (this->degrees[i]!=0) return false;
-	}
+		if (this->degrees[i]!=0) return false;
 	return true;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy
+	(	Monomial<ElementOfCommutativeRingWithIdentity> &input, 
+		Monomial<ElementOfCommutativeRingWithIdentity> &output)
+{ output.init(this->NumVariables);
+	output.Coefficient.Assign(this->Coefficient);
+	output.Coefficient.DivideBy(input.Coefficient);
+	for (int i=0;i<this->NumVariables;i++)
+		output.degrees[i]=output.degrees[i]-input.degrees[i];
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3507,7 +3537,7 @@ template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::
                HasGEQMonomial(TemplateMonomial& m, int& WhichIndex)
 { for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i].IsGEQ(m))
+	{ if (this->TheObjects[i].IsGEQpartialOrder(m))
 		{ WhichIndex=i;
 			return true;
 		}
@@ -3575,6 +3605,49 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::TimesConstant
 	}
 	for (int i=0;i<this->size;i++)
 	{	this->TheObjects[i].Coefficient.MultiplyBy(r);
+	}
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+int Polynomial<ElementOfCommutativeRingWithIdentity>::GetIndexMaxMonomial()
+{ if (this->size==0)
+		return -1;
+	int result;
+	result = 0;
+	for (int i=1;i<this->size;i++)
+		if (this->TheObjects[i].IsGEQ(this->TheObjects[result]))
+			result=i;
+	return result;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
+	(	Polynomial<ElementOfCommutativeRingWithIdentity> &input, 
+		Polynomial<ElementOfCommutativeRingWithIdentity> &outputQuotient, 
+		Polynomial<ElementOfCommutativeRingWithIdentity> &outputRemainder)
+{ assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
+	int thisMaxMonomial=this->GetIndexMaxMonomial();
+	int inputMaxMonomial= input.GetIndexMaxMonomial();
+	outputQuotient.Nullify(this->NumVars);
+	outputRemainder.Assign(*this);
+	if (thisMaxMonomial==-1)
+		return;
+	outputRemainder.MakeActualSizeAtLeastExpandOnTop(this->size);
+	outputQuotient.MakeActualSizeAtLeastExpandOnTop(this->size);
+	Monomial<ElementOfCommutativeRingWithIdentity> tempMon;
+	tempMon.init(this->NumVars);
+	Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
+	tempP.MakeActualSizeAtLeastExpandOnTop(this->size);
+	while (this->TheObjects[thisMaxMonomial].IsGEQ(this->TheObjects[inputMaxMonomial]))
+	{ this->TheObjects[thisMaxMonomial].DivideBy(input.TheObjects[inputMaxMonomial],tempMon);
+		outputQuotient.AddMonomial(tempMon);
+		tempP.Assign(input);
+		tempP.MultiplyByMonomial(tempMon);
+		tempP.TimesConstant(ElementOfCommutativeRingWithIdentity::TheRingMUnit);
+		outputRemainder.AddPolynomial(tempP);
+		thisMaxMonomial= outputRemainder.GetIndexMaxMonomial();
+		if (thisMaxMonomial==-1)
+			break;
 	}
 }
 
@@ -4495,6 +4568,7 @@ public:
 	bool DecomposeFromLinRelation
 		(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables* theGlobalVariables);
 	void ComputeOneCheckSum(Rational& output, int theDimension);
+	void AttemptReduction(partFractions& owner);
 	void ApplySzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,

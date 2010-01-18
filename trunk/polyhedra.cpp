@@ -832,6 +832,7 @@ void ComputationSetup::Run()
 			out2<<this->thePartialFraction.DebugString;
 			this->thePartialFraction.DebugString= out2.str();
 		}
+		this->flagDoneComputingPartialFractions=true;
 	}
 	if (this->ComputingChambers)
 	{	if (!this->flagDoingWeylGroupAction)
@@ -8381,6 +8382,10 @@ bool partFraction::DecomposeFromLinRelation
 	return true;
 }
 
+void partFraction::AttemptReduction(partFractions& owner)
+{ 
+}
+
 void partFraction::GetNElongationPolyWithMonomialContribution
 			(	ListBasicObjects<int>& theSelectedIndices,
 				ListBasicObjects<int>& theCoefficients,
@@ -9135,7 +9140,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 	this->IndexLowestNonProcessed=0;
 	partFraction tempF;
 	std::string OldDebugString;
-	int ProblemCounter=0;
+	//int ProblemCounter=0;
 	//Checksum code follows:
 	//std::string tempS1, tempS2;
 //	this->ComputeDebugString();
@@ -9156,9 +9161,9 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 		if (!this->ShouldIgnore(theGlobalVariables))
 		{	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 			{	this->ElementToString(OldDebugString, theGlobalVariables);
-				ProblemCounter++;
-				if (ProblemCounter==14)
-					Stop();
+			//	ProblemCounter++;
+			//	if (ProblemCounter==14)
+			//		Stop();
 			}
 			//tempF.Assign(this->TheObjects[this->IndexLowestNonProcessed]);
 			partFraction& tempFrac= this->TheObjects[this->IndexLowestNonProcessed];
@@ -9412,7 +9417,8 @@ void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVari
 }
 
 void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
-{ int tempI=this->ContainsObjectHash(f);
+{ bool shouldAttemptReduction=false;
+	int tempI=this->ContainsObjectHash(f);
 	if (tempI==-1)
 	{ this->AddObjectOnTopHash(f);
 		tempI= this->size-1;
@@ -9435,6 +9441,8 @@ void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
 			(ComputationalBufferCoefficientNonExpanded2,this->AmbientDimension);
 		ComputationalBufferCoefficient1.AddPolynomial
 			(ComputationalBufferCoefficient2);
+		if (ComputationalBufferCoefficient1.EvaluateAtOne()==0)
+			shouldAttemptReduction=true;
 		ComputationalBufferCoefficientNonExpanded1.AddPolynomial
 			(ComputationalBufferCoefficientNonExpanded2);
 		this->TheObjects[tempI].Coefficient.AssignPolynomial
@@ -9444,11 +9452,13 @@ void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
 		this->AccountPartFractionInternals(1,tempI,theGlobalVariables);
 	}
 	if (this->flagSplitTestModeNoNumerators)
-	{ this->TheObjects[tempI].Coefficient.MakeConst(IOne,(short)this->IndicatorRoot.size);
-	}
+		this->TheObjects[tempI].Coefficient.MakeConst(IOne,(short)this->IndicatorRoot.size);
 	if ( tempI>=this->IndexLowestNonProcessed && this->TheObjects[tempI].IsEqualToZero())
 	{ this->PopIndexSwapWithLastHashAndAccount(tempI,theGlobalVariables);
-	}
+		shouldAttemptReduction=false;
+	} 
+	if (shouldAttemptReduction)
+		this->TheObjects[tempI].AttemptReduction(*this);
 }
 
 int partFractions::ElementToString(std::string& output, bool LatexFormat,
@@ -11865,6 +11875,8 @@ void RandomCodeIDontWantToDelete::SomeRandomTests2()
 	tempb.ComputeDebugString();
 	output.ComputeDebugString();
 	tempCone.SystemLinearInequalitiesHasSolution(tempA,tempb,output);
+	PolynomialRationalCoeff tempP1,tempP2,tempP3,tempP4;
+	tempP1.DivideBy(tempP2, tempP3, tempP4);
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()
@@ -12438,6 +12450,13 @@ void OneVarIntPolynomials::ElementToString(std::string& output,int KLindex)
 		}
 	}
 	output= out.str();
+}
+
+int IntegerPoly::EvaluateAtOne()
+{ int result=0;
+	for(int i=0;i<this->size;i++)
+		result+=this->TheObjects[i].Coefficient.value;
+	return result;
 }
 
 void IntegerPoly::Evaluate(root& values, Rational& output)

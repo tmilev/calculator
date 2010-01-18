@@ -8383,7 +8383,9 @@ bool partFraction::DecomposeFromLinRelation
 }
 
 void partFraction::AttemptReduction(partFractions& owner)
-{ 
+{ for (int i=0;i<this->IndicesNonZeroMults.size;i++)
+	{ 
+	}
 }
 
 void partFraction::GetNElongationPolyWithMonomialContribution
@@ -10127,6 +10129,18 @@ void oneFracWithMultiplicitiesAndElongations::operator =(oneFracWithMultipliciti
 
 int oneFracWithMultiplicitiesAndElongations::HashFunction()
 { return this->GetTotalMultiplicity();
+}
+
+int oneFracWithMultiplicitiesAndElongations::GetPolyDenominator
+	(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent)
+{ assert(index<this->Multiplicities.size);
+	Monomial<Integer> tempM;
+	output.MakeNVarConst((short)theExponent.dimension,IOne);
+	tempM.init(theExponent.dimension);
+	tempM.Coefficient.Assign(IOne);
+	for (int i=0;i<theExponent.dimension;i++)
+		tempM.degrees[i]=theExponent.elements[i]*this->Elongations.TheObjects[i];
+	output.AddMonomial(tempM);
 }
 
 int oneFracWithMultiplicitiesAndElongations::GetLargestElongation()

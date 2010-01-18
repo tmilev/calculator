@@ -4399,6 +4399,8 @@ public:
 	void AddMultiplicity(int MultiplicityIncrement, int Elongation);
 	int IndexLargestElongation();
 	int GetLargestElongation();
+	void GetPolyDenominator
+		(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent);
 	int GetMultiplicityLargestElongation();
 	int GetLCMElongations();
 	int GetTotalMultiplicity();

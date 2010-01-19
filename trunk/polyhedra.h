@@ -2314,6 +2314,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWithIdentity>, ElementOfCommutativeRingWithIdentity >
 {
 public:
+	static bool flagAnErrorHasOccuredTimeToPanic;
 	void FindCoeffInFrontOfLinearTermVariableIndex(int index,
 							ElementOfCommutativeRingWithIdentity& output );
 	void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
@@ -3638,6 +3639,10 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
 	tempMon.init(this->NumVars);
 	Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
 	tempP.MakeActualSizeAtLeastExpandOnTop(this->size);
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+	{ this->ComputeDebugString();
+		input.ComputeDebugString();
+	}
 	while (this->TheObjects[thisMaxMonomial].IsGEQ(this->TheObjects[inputMaxMonomial]))
 	{ this->TheObjects[thisMaxMonomial].DivideBy(input.TheObjects[inputMaxMonomial],tempMon);
 		outputQuotient.AddMonomial(tempMon);
@@ -3648,6 +3653,8 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
 		thisMaxMonomial= outputRemainder.GetIndexMaxMonomial();
 		if (thisMaxMonomial==-1)
 			break;
+		if (this->flagAnErrorHasOccuredTimeToPanic)
+			outputRemainder.ComputeDebugString();
 	}
 }
 
@@ -4413,12 +4420,14 @@ public:
 	void operator=(oneFracWithMultiplicitiesAndElongations& right);
 	bool operator==(oneFracWithMultiplicitiesAndElongations& right);
 	void ElementToString(std::string& output, int index, bool LatexFormat);
-	void ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange,
-																	bool UsingVarChange, std::string& output,
-																	bool LatexFormat, int index, int theDimension);
-	void OneFracToStringBasisChange(int indexElongation, MatrixIntTightMemoryFit& VarChange,
-																	bool UsingVarChange, std::string& output,
-																	bool LatexFormat, int indexInFraction, int theDimension);
+	void ElementToStringBasisChange
+		(	partFractions& owner, MatrixIntTightMemoryFit& VarChange,
+			bool UsingVarChange, std::string& output,
+			bool LatexFormat, int index, int theDimension);
+	void OneFracToStringBasisChange
+		(	partFractions& owner,int indexElongation, MatrixIntTightMemoryFit& VarChange,
+			bool UsingVarChange, std::string& output, bool LatexFormat, 
+			int indexInFraction, int theDimension);
 };
 
 class rootWithMultiplicity: public root
@@ -4494,7 +4503,7 @@ public:
 	MatrixLargeRational theNormals;
 	void CheckConsistency(root& RootLatticeIndicator,PolynomialRationalCoeff& input);
 	void initLatticeIndicatorsFromPartFraction
-		(partFraction& owner, GlobalVariables* theGlobalVariables, int theDimension);
+		(partFractions& ownerExpression,partFraction &owner,GlobalVariables* theGlobalVariables, int theDimension);
 	void AddPolynomialLargeRational
 		(root& rootLatticeIndicator, PolynomialRationalCoeff& input);
 	void ComputeQuasiPolynomial
@@ -4508,29 +4517,24 @@ private:
 	void findPivot();
 	void findInitialPivot();
 	//void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
-	bool rootIsInFractionCone(root& r, GlobalVariables* theGlobalVariables);
+	bool rootIsInFractionCone(partFractions& owner, root& r, GlobalVariables* theGlobalVariables);
 	friend class partFractions;
 	friend class partFractionPolynomials;
 public:
 	std::string DebugString;
-
 	int LastDistinguishedIndex;
 	int FileStoragePosition;
 	bool PowerSeriesCoefficientIsComputed;
 	bool IsIrrelevant;
 	bool RelevanceIsComputed;
 	ListBasicObjects<int> IndicesNonZeroMults;
-
 	IntegerPolyLight Coefficient;
 	PolyPartFractionNumeratorLight CoefficientNonExpanded;
-//	QuasiPolynomial PowerSeriesCoefficient;
-//	partFractionPolynomials SplitPowerSeriesCoefficients;
-
-	bool RemoveRedundantShortRootsClassicalRootSystem(root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
-	bool RemoveRedundantShortRoots(root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+	bool RemoveRedundantShortRootsClassicalRootSystem
+		(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+	bool RemoveRedundantShortRoots
+		(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
 	bool AlreadyAccountedForInGUIDisplay;
-//	static int lastApplicationOfSVformulaNumNewGenerators;
-//	static int lastApplicationOfSVformulaNumNewMonomials;
 	static bool flagUsingOrlikSolomonBases;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 	static	bool flagUsingPrecomputedOrlikSolomonBases;
@@ -4546,20 +4550,19 @@ public:
 				partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
 	static void MakePolynomialFromOneNormal
 						(	root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
-	void ComputeNormals(roots& output, int theDimension, GlobalVariables& theGlobalVariables);
+	void ComputeNormals(partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 				(	MatrixLargeRational& theLinearRelation);
 	void UncoverBracketsNumerator(GlobalVariables*  theGlobalVariables, int theDimension);
 	void partFractionToPartitionFunctionSplit
-					(	QuasiPolynomial& output, bool RecordNumMonomials,
+					(	partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials,
 						//bool RecordSplitPowerSeriesCoefficient,
 						bool StoreToFile, GlobalVariables* theGlobalVariables, int theDimension);
 	//void partFractionToPartitionFunctionStoreAnswer
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
 	//				bool StoreToFile);
-	static RootToIndexTable RootsToIndices;
 	bool IsEqualToZero();
-	void ComputeDebugString(GlobalVariables* theGlobalVariables);
+	void ComputeDebugString(partFractions& owner, GlobalVariables* theGlobalVariables);
 	void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange);
 	//void InsertNewRootIndex(int index);
 	//void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
@@ -4569,8 +4572,8 @@ public:
 												 GlobalVariables* theGlobalVariables);
 	bool DecomposeFromLinRelation
 		(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables* theGlobalVariables);
-	void ComputeOneCheckSum(Rational& output, int theDimension);
-	void AttemptReduction(partFractions& owner);
+	void ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension);
+	void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ApplySzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
@@ -4600,38 +4603,42 @@ public:
 												IntegerPoly& AminusNbetaPoly);
 	void Assign(const partFraction&p);
 	void AssignNoIndicesNonZeroMults(partFraction&p);
-	int getSmallestNonZeroIndexGreaterThanOrEqualTo(int minIndex);
+	int getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner,int minIndex);
 	int ControlLineSizeFracs(std::string& output);
 	int ControlLineSizeStringPolys(std::string& output);
 	//void swap(int indexA,int indexB);
 	partFraction();
 	~partFraction();
-	void GetAlphaMinusNBetaPoly(int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
+	void GetAlphaMinusNBetaPoly
+		(	partFractions& owner,int indexA, 
+			int indexB, int n, IntegerPoly& output, int theDimension);
 	void GetNElongationPolyWithMonomialContribution
-			(	ListBasicObjects<int>& theSelectedIndices,
+			(	partFractions& owner, ListBasicObjects<int>& theSelectedIndices,
 				ListBasicObjects<int>& theCoefficients,
 				ListBasicObjects<int>& theGreatestElongations,
 				int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
 				IntegerPoly& output, int theDimension);
-	void GetNElongationPoly(int index,int baseElongation,
+	void GetNElongationPoly(partFractions& owner, int index,int baseElongation,
 													int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
 	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output, int theDimension);
 	void GetNElongationPoly
-		(	int index,int baseElongation,int LengthOfGeometricSeries, 
+		(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries, 
 			PolyPartFractionNumerator& output, int theDimension);
-	int GetNumProportionalVectorsClassicalRootSystems();
+	int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
 	bool operator==(partFraction& right);
 	void operator=(const partFraction& right);
-	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
-	int ElementToString(std::string& output, bool LatexFormat,
+	void initFromRootSystem
+		(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
+	int ElementToString(partFractions& owner, std::string& output, bool LatexFormat,
 											bool includeVPsummand, bool includeNumerator,
 											GlobalVariables* theGlobalVariables);
 	int ElementToStringBasisChange
-		(	MatrixIntTightMemoryFit& VarChange,
+		(	partFractions& owner, MatrixIntTightMemoryFit& VarChange,
 			bool UsingVarChange, std::string& output,
 			bool LatexFormat,bool includeVPsummand,bool includeNumerator,
 			GlobalVariables* theGlobalVariables);
-	void ReadFromFile(std::fstream& input, GlobalVariables*  theGlobalVariables, int theDimension);
+	void ReadFromFile
+		(partFractions& owner,std::fstream &input, GlobalVariables*  theGlobalVariables, int theDimension);
 	void WriteToFile(std::fstream& output, GlobalVariables*  theGlobalVariables);
 	int GetNumMonomialsInNumerator();
 	int SizeWithoutDebugString();
@@ -4658,6 +4665,7 @@ public:
 	int NumTotalReduced;
 	int NumProcessedForVPFfractions;
 	GlobalVariables theGlobalVariables;
+	RootToIndexTable RootsToIndices;
 	static int NumProcessedForVPFMonomialsTotal;
 	static std::fstream ComputedContributionsList;
 	static const int MaxReadFileBufferSize= 33554432; //= 32 MB of read buffer size

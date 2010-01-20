@@ -391,12 +391,14 @@ public:
 	static int PreferredHashSize;
 	int HashSize;
 	void initHash();
+	inline void FitHashSize( int& i){i%=this->HashSize; if (i<0) i+=this->HashSize;};
 	void ClearTheObjects();
 	void AddObjectOnTopHash(Object& o);
 	void AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
 	void PopIndexSwapWithLastHash(int index);
 	//the below returns -1 if it doesn't contain the object,
 	//else returns the object's index
+	void SwapTwoIndicesHash(int i1, int i2);
 	int ContainsObjectHash(Object& o);
 	void SetHashSize(int HS);
 	int SizeWithoutObjects();
@@ -1721,6 +1723,21 @@ void ListBasicObjects<Object>::AddObjectOnTop(const Object& o)
 	}
 	this->TheObjects[size]=o;
 	this->size++;
+}
+
+template <class Object>
+void HashedListBasicObjects<Object>::SwapTwoIndicesHash(int i1, int i2)
+{ Object tempO;
+	int i1Hash = this->TheObjects[i1].HashFunction();
+	int i2Hash = this->TheObjects[i2].HashFunction();
+	this->FitHashSize(i1Hash); this->FitHashSize(i2Hash);
+	this->TheHashedArrays[i1Hash].PopFirstOccurenceObjectSwapWithLast(i1);
+	this->TheHashedArrays[i2Hash].PopFirstOccurenceObjectSwapWithLast(i2);
+	tempO= this->TheObjects[i1];
+	this->TheObjects[i1]=this->TheObjects[i2];
+	this->TheObjects[i2]=tempO;
+	this->TheHashedArrays[i1Hash].AddObjectOnTop(i2);
+	this->TheHashedArrays[i2Hash].AddObjectOnTop(i1);
 }
 
 template <class Object>
@@ -3195,7 +3212,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy
 	output.Coefficient.Assign(this->Coefficient);
 	output.Coefficient.DivideBy(input.Coefficient);
 	for (int i=0;i<this->NumVariables;i++)
-		output.degrees[i]=output.degrees[i]-input.degrees[i];
+		output.degrees[i]=this->degrees[i]-input.degrees[i];
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3627,13 +3644,12 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
 		Polynomial<ElementOfCommutativeRingWithIdentity> &outputQuotient, 
 		Polynomial<ElementOfCommutativeRingWithIdentity> &outputRemainder)
 { assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
-	int thisMaxMonomial=this->GetIndexMaxMonomial();
+	outputRemainder.Assign(*this);
+	int thisMaxMonomial=outputRemainder.GetIndexMaxMonomial();
 	int inputMaxMonomial= input.GetIndexMaxMonomial();
 	outputQuotient.Nullify(this->NumVars);
-	outputRemainder.Assign(*this);
 	if (thisMaxMonomial==-1)
 		return;
-	outputRemainder.MakeActualSizeAtLeastExpandOnTop(this->size);
 	outputQuotient.MakeActualSizeAtLeastExpandOnTop(this->size);
 	Monomial<ElementOfCommutativeRingWithIdentity> tempMon;
 	tempMon.init(this->NumVars);
@@ -3643,8 +3659,10 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
 	{ this->ComputeDebugString();
 		input.ComputeDebugString();
 	}
-	while (this->TheObjects[thisMaxMonomial].IsGEQ(this->TheObjects[inputMaxMonomial]))
+	while (outputRemainder.TheObjects[thisMaxMonomial].IsGEQ(this->TheObjects[inputMaxMonomial]))
 	{ this->TheObjects[thisMaxMonomial].DivideBy(input.TheObjects[inputMaxMonomial],tempMon);
+		if (this->flagAnErrorHasOccuredTimeToPanic)
+			tempMon.ComputeDebugString();
 		outputQuotient.AddMonomial(tempMon);
 		tempP.Assign(input);
 		tempP.MultiplyByMonomial(tempMon);
@@ -4701,7 +4719,7 @@ public:
 	void ComputeOneCheckSum(Rational& output);
 	void AccountPartFractionInternals(int sign, int index, GlobalVariables* theGlobalVariables);
 	void Add(partFraction& f, GlobalVariables* theGlobalVariables);
-	void PopIndexSwapWithLastHashAndAccount(int index, GlobalVariables* theGlobalVariables);
+	void PopIndexHashAndAccount(int index, GlobalVariables* theGlobalVariables);
 	void PrepareIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
 	void ElementToString(std::string& output, GlobalVariables* theGlobalVariables);

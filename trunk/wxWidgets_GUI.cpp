@@ -1036,14 +1036,12 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 }
 
 void guiMainWindow::WriteIndicatorWeight(root& tempRoot)
-{
-    for (int i=0;i<tempRoot.size;i++)
-    {
-        std::string tempS;
-        tempRoot.TheObjects[i].ElementToString(tempS);
-        this->Table2Indicator->SetCellValue(0,i,wxString(tempS.c_str(),wxConvUTF8));
-        this->Table2Indicator->SetCellAlignment(0,i,wxALIGN_CENTER);
-    }
+{	for (int i=0;i<tempRoot.size;i++)
+	{	std::string tempS;
+    tempRoot.TheObjects[i].ElementToString(tempS);
+    this->Table2Indicator->SetCellValue(0,i,wxString(tempS.c_str(),wxConvUTF8));
+    this->Table2Indicator->SetCellAlignment(0,i,wxALIGN_CENTER);
+  }
 }
 
 

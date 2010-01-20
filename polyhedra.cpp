@@ -8369,6 +8369,8 @@ bool partFraction::DecomposeFromLinRelation
 void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables)
 { bool hasImprovement=true;
 	bool improvedAtLeastOnce=false;
+	if (this->flagAnErrorHasOccurredTimeToPanic)
+		this->ComputeDebugString(owner, &theGlobalVariables);
 	partFraction tempFrac;
 	IntegerPoly numerator;
 	IntegerPoly tempP1, tempP2, tempP3;
@@ -8378,7 +8380,8 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 	{ hasImprovement=false;	
 		numerator.ComputeDebugString();
 		for (int i=0;i<tempFrac.IndicesNonZeroMults.size;i++)
-			for (int j=0;j<tempFrac.TheObjects[i].Multiplicities.size;j++)
+			for (int j=0;j<tempFrac.TheObjects[IndicesNonZeroMults.TheObjects[i]]
+												.Multiplicities.size;j++)
 			{	tempFrac.TheObjects[IndicesNonZeroMults.TheObjects[i]].GetPolyDenominator
 					(tempP1,j,owner.RootsToIndices.TheObjects[IndicesNonZeroMults.TheObjects[i]]);
 				tempP1.ComputeDebugString();
@@ -8394,8 +8397,17 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 			}		
 	}
 	if (improvedAtLeastOnce)
-	{	owner.PopIndexSwapWithLastHashAndAccount(myIndex,&theGlobalVariables);
+	{	if (this->flagAnErrorHasOccurredTimeToPanic)
+		{//	owner.CompareCheckSums();
+			owner.ComputeDebugString(&theGlobalVariables);
+		}
+		owner.PopIndexHashAndAccount(myIndex,&theGlobalVariables);
+		tempFrac.Coefficient.AssignPolynomial(numerator);
 		owner.Add(tempFrac,&theGlobalVariables);
+		if (this->flagAnErrorHasOccurredTimeToPanic)
+		{	//owner.CompareCheckSums();
+			owner.ComputeDebugString(&theGlobalVariables);
+		}
 	}
 }
 
@@ -9182,14 +9194,12 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 //			}
 			if (! tempFrac.reduceOnceGeneralMethod(*this, theGlobalVariables))
 			{ if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
-				{	this->IndexLowestNonProcessed++;
-				}
+					this->IndexLowestNonProcessed++;
 				else
-				{ tempFrac.LastDistinguishedIndex++;
-				}
+					tempFrac.LastDistinguishedIndex++;
 			}
 			else
-			{	this->PopIndexSwapWithLastHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables);
+			{	this->PopIndexHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables);
 //				if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 //				{ this->ComputeDebugString();
 //				}
@@ -9209,13 +9219,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 		{	this->ComputeDebugString(theGlobalVariables);
 			out <<this->DebugString<<"\\\\ = \\\\";
 			tempS= out.str();
-			Rational tempRat2;
-			//this->UncoverBracketsNumerators();
-			this->ComputeOneCheckSum(tempRat2);
-			if (!tempRat2.IsEqualTo(this->StartCheckSum))
-			{	this->ComputeDebugString(theGlobalVariables);
-				assert(false);
-			}
+			this->CompareCheckSums();
 		}
 		this->MakeProgressReportSplittingMainPart();
 	//	this->ComputeDebugString();
@@ -9275,8 +9279,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 				this->IndexLowestNonProcessed++;
 			}
 			else
-			{	this->PopIndexSwapWithLastHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables);
-			}
+				this->PopIndexHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables);
 			this->MakeProgressReportSplittingMainPart();
 		}
 //		this->ComputeDebugString();
@@ -9373,9 +9376,16 @@ void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables* the
 	this->TheObjects[index].Multiplicities.TheObjects[0]=0;
 }*/
 
-void partFractions::PopIndexSwapWithLastHashAndAccount(int index, GlobalVariables* theGlobalVariables)
+void partFractions::PopIndexHashAndAccount(int index, GlobalVariables* theGlobalVariables)
 { this->AccountPartFractionInternals(-1, index, theGlobalVariables);
-	this->PopIndexSwapWithLastHash(index);
+	if (index>=this->IndexLowestNonProcessed )
+		this->PopIndexSwapWithLastHash(index);
+	else
+	{	assert(this->IndexLowestNonProcessed!=0);
+		this->SwapTwoIndicesHash(index, this->IndexLowestNonProcessed-1);
+		this->PopIndexSwapWithLastHash(this->IndexLowestNonProcessed-1);
+		this->IndexLowestNonProcessed--;
+	}
 }
 
 void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVariables* theGlobalVariables)
@@ -9447,7 +9457,10 @@ void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
 		ComputationalBufferCoefficient1.AddPolynomial
 			(ComputationalBufferCoefficient2);
 		if (ComputationalBufferCoefficient1.EvaluateAtOne()==0)
+		{	if (this->flagAnErrorHasOccurredTimeToPanic)
+				ComputationalBufferCoefficient1.ComputeDebugString();
 			shouldAttemptReduction=true;
+		}
 		ComputationalBufferCoefficientNonExpanded1.AddPolynomial
 			(ComputationalBufferCoefficientNonExpanded2);
 		this->TheObjects[tempI].Coefficient.AssignPolynomial
@@ -9458,12 +9471,17 @@ void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
 	}
 	if (this->flagSplitTestModeNoNumerators)
 		this->TheObjects[tempI].Coefficient.MakeConst(IOne,(short)this->IndicatorRoot.size);
-	if ( tempI>=this->IndexLowestNonProcessed && this->TheObjects[tempI].IsEqualToZero())
-	{ this->PopIndexSwapWithLastHashAndAccount(tempI,theGlobalVariables);
+	if ( this->TheObjects[tempI].IsEqualToZero())
+	{ this->PopIndexHashAndAccount(tempI,theGlobalVariables);
 		shouldAttemptReduction=false;
 	} 
 	if (shouldAttemptReduction)
+	{	if (this->flagAnErrorHasOccurredTimeToPanic)
+			this->TheObjects[tempI].ComputeDebugString(*this,theGlobalVariables);
 		this->TheObjects[tempI].AttemptReduction(*this,tempI,*theGlobalVariables);
+		if (this->flagAnErrorHasOccurredTimeToPanic)
+			this->TheObjects[tempI].ComputeDebugString(*this,theGlobalVariables);
+	}
 }
 
 int partFractions::ElementToString(std::string& output, bool LatexFormat,
@@ -9738,7 +9756,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 	}
 	for (int i=0;i<this->size;i++)
 	{ if (this->TheObjects[i].Coefficient.IsEqualToZero())
-		{ this->PopIndexSwapWithLastHashAndAccount(i,theGlobalVariables);
+		{ this->PopIndexHashAndAccount(i,theGlobalVariables);
 			i--;
 		}
 	}

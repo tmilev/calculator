@@ -9159,7 +9159,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 	this->IndexLowestNonProcessed=0;
 	partFraction tempF;
 	std::string OldDebugString;
-	//int ProblemCounter=0;
+	int ProblemCounter=0;
 	//Checksum code follows:
 	//std::string tempS1, tempS2;
 //	this->ComputeDebugString();
@@ -9177,6 +9177,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 	while (this->IndexLowestNonProcessed<this->size)
 	{ //this->ComputeDebugString();
 //		bool ShouldIgnore=false;
+		this->IndexCurrentlyProcessed= this->IndexLowestNonProcessed;
 		if (!this->ShouldIgnore(theGlobalVariables))
 		{	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 			{	this->ElementToString(OldDebugString, theGlobalVariables);
@@ -9192,6 +9193,10 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 //			{ partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 //				this->ComputeDebugString();
 //			}
+			if (ProblemCounter==17)
+			{	this->ComputeDebugString(theGlobalVariables);
+				this->CompareCheckSums();
+			}
 			if (! tempFrac.reduceOnceGeneralMethod(*this, theGlobalVariables))
 			{ if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
 					this->IndexLowestNonProcessed++;
@@ -9199,8 +9204,9 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 					tempFrac.LastDistinguishedIndex++;
 			}
 			else
-			{	this->PopIndexHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables);
-//				if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+			{	if (ProblemCounter==17)
+					this->ComputeDebugString(theGlobalVariables);//				if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+				this->PopIndexHashAndAccount( this->IndexCurrentlyProcessed,theGlobalVariables);
 //				{ this->ComputeDebugString();
 //				}
 			}
@@ -9216,7 +9222,8 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 //			}
 		}
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-		{	this->ComputeDebugString(theGlobalVariables);
+		{	ProblemCounter++;
+			this->ComputeDebugString(theGlobalVariables);
 			out <<this->DebugString<<"\\\\ = \\\\";
 			tempS= out.str();
 			this->CompareCheckSums();
@@ -9382,6 +9389,8 @@ void partFractions::PopIndexHashAndAccount(int index, GlobalVariables* theGlobal
 		this->PopIndexSwapWithLastHash(index);
 	else
 	{	assert(this->IndexLowestNonProcessed!=0);
+		if (this->IndexLowestNonProcessed-1== this->IndexCurrentlyProcessed)
+			this->IndexCurrentlyProcessed=index; 
 		this->SwapTwoIndicesHash(index, this->IndexLowestNonProcessed-1);
 		this->PopIndexSwapWithLastHash(this->IndexLowestNonProcessed-1);
 		this->IndexLowestNonProcessed--;
@@ -9395,9 +9404,9 @@ void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVari
 		{	if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
 			{	this->NumGeneratorsRelevenatFractions+=sign*(tempFrac.CoefficientNonExpanded.NumGeneratorsUsed());
 				if (partFraction::UncoveringBrackets)
-				{	this->NumMonomialsInNumeratorsRelevantFractions+=sign*(tempFrac.Coefficient.size);}
+					this->NumMonomialsInNumeratorsRelevantFractions+=sign*(tempFrac.Coefficient.size);
 				else
-				{	this->NumMonomialsInNumeratorsRelevantFractions+=sign*tempFrac.CoefficientNonExpanded.size;}
+					this->NumMonomialsInNumeratorsRelevantFractions+=sign*tempFrac.CoefficientNonExpanded.size;
 				this->NumTotalReduced+=sign;
 				this->NumberRelevantReducedFractions+=sign;
 			}
@@ -9416,19 +9425,18 @@ void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVari
 	{	if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
 		{	this->NumGeneratorsRelevenatFractions+=sign*(tempFrac.CoefficientNonExpanded.NumGeneratorsUsed());
 			if (partFraction::UncoveringBrackets)
-			{	this->NumMonomialsInNumeratorsRelevantFractions+=sign*(tempFrac.Coefficient.size);}
+				this->NumMonomialsInNumeratorsRelevantFractions+=sign*(tempFrac.Coefficient.size);
 			else
-			{	this->NumMonomialsInNumeratorsRelevantFractions+=sign*tempFrac.CoefficientNonExpanded.size;}
+				this->NumMonomialsInNumeratorsRelevantFractions+=sign*tempFrac.CoefficientNonExpanded.size;
 			this->NumTotalReduced+=sign;
 			this->NumberRelevantReducedFractions+=sign;
 		}
 	}
 	this->NumGeneratorsInTheNumerators+=sign*tempFrac.CoefficientNonExpanded.NumGeneratorsUsed();
 	if (partFraction::UncoveringBrackets)
-	{	this->NumMonomialsInTheNumerators+=sign*tempFrac.Coefficient.size;
-	} else
-	{ this->NumMonomialsInTheNumerators+=sign*tempFrac.CoefficientNonExpanded.size;
-	}
+		this->NumMonomialsInTheNumerators+=sign*tempFrac.Coefficient.size;
+	else
+		this->NumMonomialsInTheNumerators+=sign*tempFrac.CoefficientNonExpanded.size;
 }
 
 void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
@@ -9518,7 +9526,7 @@ int partFractions::ElementToStringBasisChange
 				(	*this, VarChange, UsingVarChange,tempS, LatexFormat,
 					includeVPsummand,includeNumerator,theGlobalVariables);
 			if (LatexFormat)
-			{ out <<"&&"; }
+				out <<"&&"; 
 			if (tempS[0]!='-'){out<<"+";}
 			out<<tempS;
 			if (LatexFormat)
@@ -9542,8 +9550,7 @@ int partFractions::ElementToStringBasisChange
 	if (!LatexFormat)
 	{	output= out.str();
 		if (output.size()>0)
-		{ if (output[0]=='+')	output.erase(0,1);
-		}
+			if (output[0]=='+')	output.erase(0,1);
 	}
 	else
 	{ out << "\\end{eqnarray*}";

@@ -422,6 +422,7 @@ public:
 	inline bool operator==(Integer& y){return this->value==y.value;};
 	inline void Assign(const Integer&y){this->value=y.value;};
 	inline bool IsEqualTo(Integer&y){return this->value==y.value;};
+	inline bool IsEqualToZero(){return this->value==0;}
 	inline void DivideBy(Integer&y){this->value/=y.value;};
 	inline void WriteToFile(std::fstream& output){output<<this->value;};
 	inline void ReadFromFile(std::fstream& input){input>>this->value;};
@@ -2182,10 +2183,12 @@ public:
 	bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	bool IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	bool IsEqualToZero();
+	bool IsPositive();
 	void DecreaseNumVariables(short increment);
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
 	bool IsAConstant();
+	void InvertDegrees();
 	bool operator==(Monomial<ElementOfCommutativeRingWithIdentity>& m);
   void operator=(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   int SizeWithoutCoefficient();
@@ -2351,13 +2354,14 @@ public:
 	void MakeLinPolyFromRoot(root& r);
 	void TimesInteger(int a);
 	void DivideBy
-		(	Polynomial<ElementOfCommutativeRingWithIdentity>& input, 
+		(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, 
 			Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient,
 			Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
 	void AddConstant(ElementOfCommutativeRingWithIdentity& theConst);
 	void IncreaseNumVariables(short increase);
+	void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
 	void DecreaseNumVariables(short increment,Polynomial<ElementOfCommutativeRingWithIdentity>& output);
 	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution,
 		                Polynomial<ElementOfCommutativeRingWithIdentity>& output,
@@ -3015,8 +3019,15 @@ Monomial<ElementOfCommutativeRingWithIdentity>::Monomial()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::InvertDegrees()
+{ for (int i=0;i<this->NumVariables;i++)
+		this->degrees[i]= - this->degrees[i];
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::init(short nv)
-{	if(this->NumVariables!=nv)
+{	assert(nv>=0);
+	if(this->NumVariables!=nv)
 	{	NumVariables=nv;
 		delete [] degrees;
 		degrees= new short[NumVariables];
@@ -3103,7 +3114,8 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>
 	::IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity> &m)
-{ for (int i=0;i<this->NumVariables;i++)
+{ assert(this->NumVariables==m.NumVariables);
+	for (int i=0;i<this->NumVariables;i++)
 	{	if (this->degrees[i]>m.degrees[i])
 			return true;
 		if (this->degrees[i]<m.degrees[i])
@@ -3224,6 +3236,16 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(short 
 	this->NumVariables-=increment;
 	delete [] degrees;
 	degrees= newDegrees;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsPositive()
+{ if (this->Coefficient.IsEqualToZero())
+		return true;
+	for (int i=0;i<this->NumVariables;i++)
+		if (this->degrees[i]<0)
+			return false;
+	return true;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3639,16 +3661,39 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>::GetIndexMaxMonomial()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials
+	(Monomial<ElementOfCommutativeRingWithIdentity> &outputScale)
+{ outputScale.init(this->NumVars);
+	outputScale.Coefficient.Assign(ElementOfCommutativeRingWithIdentity::TheRingUnit);
+	for (int i=0;i<this->NumVars;i++)
+	{ outputScale.degrees[i]= 0;
+		for (int j=0;j<this->size;j++)
+			outputScale.degrees[i]= ::MathRoutines::Minimum
+				(outputScale.degrees[i], this->TheObjects[j].degrees[i]);
+	}
+	Monomial<ElementOfCommutativeRingWithIdentity> tempMon;
+	tempMon.Assign(outputScale);
+	tempMon.InvertDegrees();
+	this->MultiplyByMonomial(tempMon);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
-	(	Polynomial<ElementOfCommutativeRingWithIdentity> &input, 
+	(	Polynomial<ElementOfCommutativeRingWithIdentity> &inputDivisor, 
 		Polynomial<ElementOfCommutativeRingWithIdentity> &outputQuotient, 
 		Polynomial<ElementOfCommutativeRingWithIdentity> &outputRemainder)
 { assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
 	outputRemainder.Assign(*this);
-	int thisMaxMonomial=outputRemainder.GetIndexMaxMonomial();
-	int inputMaxMonomial= input.GetIndexMaxMonomial();
+	Monomial<ElementOfCommutativeRingWithIdentity> scaleRemainder;
+	Monomial<ElementOfCommutativeRingWithIdentity> scaleInput;
+	Polynomial<ElementOfCommutativeRingWithIdentity> tempInput;
+	tempInput.Assign(inputDivisor);
+	outputRemainder.ScaleToPositiveMonomials(scaleRemainder);
+	tempInput.ScaleToPositiveMonomials(scaleInput);
+	int remainderMaxMonomial=outputRemainder.GetIndexMaxMonomial();
+	int inputMaxMonomial= tempInput.GetIndexMaxMonomial();
 	outputQuotient.Nullify(this->NumVars);
-	if (thisMaxMonomial==-1)
+	if (remainderMaxMonomial==-1)
 		return;
 	outputQuotient.MakeActualSizeAtLeastExpandOnTop(this->size);
 	Monomial<ElementOfCommutativeRingWithIdentity> tempMon;
@@ -3657,23 +3702,32 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
 	tempP.MakeActualSizeAtLeastExpandOnTop(this->size);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 	{ this->ComputeDebugString();
-		input.ComputeDebugString();
+		tempInput.ComputeDebugString();
 	}
-	while (outputRemainder.TheObjects[thisMaxMonomial].IsGEQ(this->TheObjects[inputMaxMonomial]))
-	{ this->TheObjects[thisMaxMonomial].DivideBy(input.TheObjects[inputMaxMonomial],tempMon);
+	assert(remainderMaxMonomial<outputRemainder.size);
+	assert(inputMaxMonomial<tempInput.size);
+	while (outputRemainder.TheObjects[remainderMaxMonomial].IsGEQ(tempInput.TheObjects[inputMaxMonomial]))
+	{ assert(remainderMaxMonomial<outputRemainder.size);
+		outputRemainder.TheObjects[remainderMaxMonomial].DivideBy(tempInput.TheObjects[inputMaxMonomial],tempMon);
+		if (!tempMon.IsPositive())
+			break;
 		if (this->flagAnErrorHasOccuredTimeToPanic)
 			tempMon.ComputeDebugString();
 		outputQuotient.AddMonomial(tempMon);
-		tempP.Assign(input);
+		tempP.Assign(tempInput);
 		tempP.MultiplyByMonomial(tempMon);
 		tempP.TimesConstant(ElementOfCommutativeRingWithIdentity::TheRingMUnit);
 		outputRemainder.AddPolynomial(tempP);
-		thisMaxMonomial= outputRemainder.GetIndexMaxMonomial();
-		if (thisMaxMonomial==-1)
+		remainderMaxMonomial= outputRemainder.GetIndexMaxMonomial();
+		if (remainderMaxMonomial==-1)
 			break;
 		if (this->flagAnErrorHasOccuredTimeToPanic)
 			outputRemainder.ComputeDebugString();
 	}
+	scaleInput.InvertDegrees();
+	outputQuotient.MultiplyByMonomial(scaleInput);
+	outputQuotient.MultiplyByMonomial(scaleRemainder);
+	outputRemainder.MultiplyByMonomial(scaleRemainder);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4668,6 +4722,7 @@ class partFractions: public HashedListBasicObjects<partFraction>
 public:
 	short AmbientDimension;
 	int IndexLowestNonProcessed;
+	int IndexCurrentlyProcessed; 
 	int HighestIndex;
 	int NumberIrrelevantFractions;
 	int NumberRelevantReducedFractions;
@@ -5193,6 +5248,9 @@ public:
 	static int NChooseK(int n, int k);
 	static int KToTheNth(int k, int n);
 	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
+	inline static int Maximum(int a, int b){if (a>b) return a; else return b;}
+	inline static int Minimum(int a, int b){if (a>b) return b; else return a;}
+	inline static short Minimum(short a, short b){if (a>b) return b; else return a;}
 };
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 

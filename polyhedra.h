@@ -105,6 +105,7 @@ class hashedRoots;
 class WeylGroup;
 class intRoots;
 class GlobalVariables;
+class GlobalVariablesContainer;
 class MatrixIntTightMemoryFit;
 class QuasiPolynomials;
 template <class ElementOfCommutativeRingWithIdentity,
@@ -2195,65 +2196,6 @@ public:
 	Monomial();
 	~Monomial();
 };
-
-
-class GlobalVariables
-{
-public:
-	roots rootsWallBasis;
-	roots rootsIsABogusNeighbor1;
-	roots rootsIsABogusNeighbor2;
-	roots rootsSplitChamber1;
-
-	rootsCollection rootsCollectionSplitChamber1;
-	rootsCollection rootsCollectionSplitChamber2;
-	
-	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
-	ListBasicObjects<WallData*> listWallDataPtSplitChamber;
-
-	Monomial<Rational> monMakePolyExponentFromIntRoot;
-	Monomial<Rational> monMakePolyFromDirectionAndNormal;
-
-	MatrixLargeRational matTransposeBuffer;
-	MatrixLargeRational matComputationBufferLinAlgOneAffinePlane;
-	MatrixLargeRational matComputationBufferLinAlgAffinePart;
-	MatrixLargeRational matComputeNormalFromSelection;
-	MatrixLargeRational matOutputEmpty;
-	MatrixLargeRational	matComputeNormalExcludingIndex;
-	MatrixLargeRational matLinearAlgebraForVertexComputation;
-	MatrixLargeRational	matComputeNormalFromSelectionAndExtraRoot;
-	MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
-	MatrixLargeRational matGetRankOfSpanOfElements;
-
-	QuasiPolynomial* QPComputeQuasiPolynomial;
-	QuasiNumber* QNComputeQuasiPolynomial;
-
-	IntegerPoly* IPRemoveRedundantShortRootsClassicalRootSystem;
-	IntegerPoly* IPElementToStringBasisChange;
-
-	PolyPartFractionNumerator* PPFNElementToStringBasisChange;
-
-	Selection selLinearAlgebraForVertexComputation;
-	Selection selComputeNormalFromSelection;
-	Selection selComputeNormalExcludingIndex;
-	Selection selWallSelection;
-	Selection selComputeNormalFromSelectionAndExtraRoot;
-	Selection selComputeNormalFromSelectionAndTwoExtraRoots;
-	Selection selComputeAffineInfinityPointApproximation1; 
-	Selection selComputeAffineInfinityPointApproximation2;
-	Selection selGetRankOfSpanOfElements;
-
-	GlobalVariables();
-	~GlobalVariables();
-	void operator=(const GlobalVariables& G_V);
-};
-
-class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
-{
-public:
-	GlobalVariables* Default(){return & this->TheObjects[0];};
-};
-
 
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::InitWithZero=true;
@@ -4646,6 +4588,7 @@ public:
 		(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables* theGlobalVariables);
 	void ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension);
 	void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
+	void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ApplySzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
@@ -4737,7 +4680,7 @@ public:
 	int NumGeneratorsIrrelevantFractions;
 	int NumTotalReduced;
 	int NumProcessedForVPFfractions;
-	GlobalVariables theGlobalVariables;
+	//GlobalVariables theGlobalVariables;
 	RootToIndexTable RootsToIndices;
 	static int NumProcessedForVPFMonomialsTotal;
 	static std::fstream ComputedContributionsList;
@@ -4993,7 +4936,7 @@ public:
 	intRoots nilradicalA2A1A1inD5;
 	intRoots AlgorithmBasisA2A1A1inD5;
 	intRoot weights;
-	GlobalVariables TheGlobalVariables;
+	GlobalVariables *TheGlobalVariables;
 	partFractions partitionA2A1A1inD5;
 	std::string OutputFile;
 	bool useOutputFileForFinalAnswer;
@@ -5005,6 +4948,7 @@ public:
 	std::string VPEntriesFileString;
 	std::string VPIndexFileString;
 	rootFKFTcomputation();
+	~rootFKFTcomputation();
 	static bool OpenDataFileOrCreateIfNotPresent
 			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
@@ -5173,7 +5117,7 @@ public:
 	intRoot ValueRoot;
 	int NextDirectionIndex;
 	roots VPVectors;
-	GlobalVariablesContainer theGlobalVariablesContainer;
+	GlobalVariablesContainer *theGlobalVariablesContainer;
 	bool AllowRepaint;
 	bool flagComputationInitialized;
 	bool flagComputationInProgress;
@@ -5220,6 +5164,7 @@ public:
 	void WriteToFilePFdecomposition(std::fstream& output);
 	void Reset();
 	ComputationSetup();
+	~ComputationSetup();
 };
 
 class RandomCodeIDontWantToDelete
@@ -5252,6 +5197,64 @@ public:
 	inline static int Minimum(int a, int b){if (a>b) return b; else return a;}
 	inline static short Minimum(short a, short b){if (a>b) return b; else return a;}
 };
+
+class GlobalVariables
+{
+public:
+	roots rootsWallBasis;
+	roots rootsIsABogusNeighbor1;
+	roots rootsIsABogusNeighbor2;
+	roots rootsSplitChamber1;
+
+	rootsCollection rootsCollectionSplitChamber1;
+	rootsCollection rootsCollectionSplitChamber2;
+	
+	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
+	ListBasicObjects<WallData*> listWallDataPtSplitChamber;
+
+	Monomial<Rational> monMakePolyExponentFromIntRoot;
+	Monomial<Rational> monMakePolyFromDirectionAndNormal;
+
+	MatrixLargeRational matTransposeBuffer;
+	MatrixLargeRational matComputationBufferLinAlgOneAffinePlane;
+	MatrixLargeRational matComputationBufferLinAlgAffinePart;
+	MatrixLargeRational matComputeNormalFromSelection;
+	MatrixLargeRational matOutputEmpty;
+	MatrixLargeRational	matComputeNormalExcludingIndex;
+	MatrixLargeRational matLinearAlgebraForVertexComputation;
+	MatrixLargeRational	matComputeNormalFromSelectionAndExtraRoot;
+	MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
+	MatrixLargeRational matGetRankOfSpanOfElements;
+
+	QuasiPolynomial QPComputeQuasiPolynomial;
+	QuasiNumber QNComputeQuasiPolynomial;
+
+	IntegerPoly IPRemoveRedundantShortRootsClassicalRootSystem;
+	IntegerPoly IPElementToStringBasisChange;
+
+	PolyPartFractionNumerator PPFNElementToStringBasisChange;
+
+	Selection selLinearAlgebraForVertexComputation;
+	Selection selComputeNormalFromSelection;
+	Selection selComputeNormalExcludingIndex;
+	Selection selWallSelection;
+	Selection selComputeNormalFromSelectionAndExtraRoot;
+	Selection selComputeNormalFromSelectionAndTwoExtraRoots;
+	Selection selComputeAffineInfinityPointApproximation1; 
+	Selection selComputeAffineInfinityPointApproximation2;
+	Selection selGetRankOfSpanOfElements;
+
+	GlobalVariables();
+	~GlobalVariables();
+	void operator=(const GlobalVariables& G_V);
+};
+
+class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
+{
+public:
+	GlobalVariables* Default(){return & this->TheObjects[0];};
+};
+
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
 //extern GlobalVariablesContainer StaticGlobalVariablesContainer;

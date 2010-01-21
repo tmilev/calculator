@@ -31,15 +31,16 @@ void ExampleComputation::RunSomeTests()
 	root indicator;
 	::FillInRoots(toBeSplit,indicator);
 	partFractions tempPF;
+	GlobalVariables tempGV;
 	tempPF.flagUsingIndicatorRoot=false;
-	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0,&tempPF.theGlobalVariables);
+	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0,&tempGV);
 	tempPF.flagUsingCheckSum=false;
 	tempPF.flagMakingProgressReport=true;
-	tempPF.split(&tempPF.theGlobalVariables);
-	tempPF.ComputeDebugString(&tempPF.theGlobalVariables);
+	tempPF.split(&tempGV);
+	tempPF.ComputeDebugString(&tempGV);
 	QuasiPolynomial tempQP;
 	tempPF.partFractionsToPartitionFunctionAdaptedToRoot
-		(tempQP,indicator,false,false,&tempPF.theGlobalVariables);
+		(tempQP,indicator,false,false,&tempGV);
 	intRoot tempR;
 	tempR.initFromInt(5,0,0,0,0,0);
 	Rational tempRat;
@@ -90,6 +91,7 @@ int main(void)
 void ExampleComputation::RunThomasExample()
 { PolyFormatLocal.MakeAlphabetxi();
 	intRoots exampleRoots;
+	GlobalVariables tempGV;
 	exampleRoots.SetSizeExpandOnTopNoObjectInit(16);
 	exampleRoots.TheObjects[0].initFromInt(12, 0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,	1	,	0);
 	exampleRoots.TheObjects[1].initFromInt(12, 3	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,	1	,-3	,	0	,	1);
@@ -111,13 +113,13 @@ void ExampleComputation::RunThomasExample()
 	partFractions::ListBasicObjectsActualSizeIncrement=2000;
 	IntegerPoly::ListBasicObjectsActualSizeIncrement=5;
 	exampleRoots.ComputeDebugString();
-	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0,&tempPF.theGlobalVariables);
+	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0,&tempGV);
 	std::fstream tempF;
 	tempF.open("C:/ThomasOutput.txt",std::fstream::out | std::fstream::trunc);
 	assert(tempF.is_open());
-	tempPF.split(&tempPF.theGlobalVariables);
+	tempPF.split(&tempGV);
 //	tempPF.ComputeDebugString();
-	tempPF.ElementToStringOutputToFile(tempF,true,false,true, &tempPF.theGlobalVariables);
+	tempPF.ElementToStringOutputToFile(tempF,true,false,true, &tempGV);
 	tempF.close();
 	#ifndef USE_GUI
 		std::cout<<tempPF.DebugString;

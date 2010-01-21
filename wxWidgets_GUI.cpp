@@ -763,7 +763,7 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
 	{	MainWindow1->theComputationSetup.WriteReportToFile
-		(::TDV,tempFile,*MainWindow1->theComputationSetup.theGlobalVariablesContainer.Default());
+		(::TDV,tempFile,*MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
 	}
 	tempFile.close();
 }
@@ -898,7 +898,7 @@ void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.oneStepChamberSlice
-    (this->theComputationSetup.theGlobalVariablesContainer.Default());
+    (this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
@@ -907,7 +907,7 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.oneIncrement
-		(this->theComputationSetup.theGlobalVariablesContainer.Default());
+		(this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
@@ -916,7 +916,7 @@ void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.FullChop
-    (this->theComputationSetup.theGlobalVariablesContainer.Default());
+    (this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
@@ -924,9 +924,9 @@ void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
 void guiMainWindow::onButton9CustomNilradical(wxCommandEvent& ev)
 {	this->theComputationSetup.flagDoCustomNilradical=true;
 	this->theComputationSetup.SetupCustomNilradicalInVPVectors
-			(*this->theComputationSetup.theGlobalVariablesContainer.Default());
+			(*this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->theComputationSetup.FullChop
-    (this->theComputationSetup.theGlobalVariablesContainer.Default());
+    (this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();	
 }
@@ -1025,7 +1025,7 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 	{ this->theComputationSetup.flagDoCustomNilradical=true;
 		if (newWeylGroupLetter=='A')
 			this->theComputationSetup.SetupCustomNilradicalInVPVectors
-				(*this->theComputationSetup.theGlobalVariablesContainer.Default());
+				(*this->theComputationSetup.theGlobalVariablesContainer->Default());
 		this->initTableFromVPVectors();
 		this->theComputationSetup.Reset();
 	}

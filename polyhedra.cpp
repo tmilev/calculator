@@ -9435,8 +9435,14 @@ void partFraction::ReduceMonomialByMonomial
 	(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables)
 {	partFraction& tempFrac= theGlobalVariables.fracReduceMonomialByMonomial;
 	tempFrac.Assign(*this);
+	MatrixLargeRational& tempMat= theGlobalVariables.matReduceMonomialByMonomial;
+	tempMat.init(owner.AmbientDimension,(short) this->IndicesNonZeroMults.size);
+	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
+		for (int j=0;j<owner.AmbientDimension;j++)
+			tempMat.elements[j][i].AssignInteger(owner.RootsToIndices
+				.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]);
 	for (int i=0;i<this->Coefficient.size;i++)
-	{ this->
+	{ //		this->
 	} 
 }
 

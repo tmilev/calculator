@@ -555,6 +555,9 @@ public:
 	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
 	void RowTimesScalar(int rowIndex, Element& scalar);
 	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
+	//returns true if successful, false otherwise
+//	bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
+//		(Matrix<Element>& inputColumn,Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
 	bool Invert(GlobalVariables* theGlobalVariables);
 	void NullifyAll();
 	static void GaussianEliminationByRows
@@ -780,8 +783,7 @@ void Matrix<Element>::GaussianEliminationByRows
 	for (int i=0; i<mat.NumCols; i++)
 	{	if (NumFoundPivots == MaxRankMat)
 		{	for (int j =i; j<mat.NumCols; j++)
-			{	outputNonPivotPoints.AddSelection(j);
-			}
+				outputNonPivotPoints.AddSelection(j);
 			return;
 		}
 		tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
@@ -808,8 +810,7 @@ void Matrix<Element>::GaussianEliminationByRows
 			NumFoundPivots++;
 		}
 		else
-		{ outputNonPivotPoints.AddSelection(i);
-		}
+			outputNonPivotPoints.AddSelection(i);
 	}
 }
 
@@ -2170,6 +2171,7 @@ public:
 	void DivideBy
 		(	Monomial<ElementOfCommutativeRingWithIdentity>& input, 
 			Monomial<ElementOfCommutativeRingWithIdentity>& output);
+	void MonomialExponentToRoot(root& output);
 	void GetMonomialWithCoeffOne(Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m,
 									Monomial<ElementOfCommutativeRingWithIdentity>& output);
@@ -3156,6 +3158,13 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()
 { for (int i=0;i<this->NumVariables;i++)
 		if (this->degrees[i]!=0) return false;
 	return true;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(root& output)
+{ output.SetSizeExpandOnTopLight(this->NumVariables);
+	for (int i=0;i<this->NumVariables;i++)
+		output.TheObjects[i].AssignInteger(this->degrees[i]);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -5225,6 +5234,7 @@ public:
 	MatrixLargeRational	matComputeNormalFromSelectionAndExtraRoot;
 	MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
 	MatrixLargeRational matGetRankOfSpanOfElements;
+	MatrixLargeRational matReduceMonomialByMonomial;
 
 	partFraction fracReduceMonomialByMonomial;
 	QuasiPolynomial QPComputeQuasiPolynomial;

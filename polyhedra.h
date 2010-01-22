@@ -445,6 +445,7 @@ public:
 	void Free();
 	void Resize(short r, short c, bool PreserveValues);
 	void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
+	void MakeIdMatrix(short theDimension);
 	MatrixElementaryLooseMemoryFit<Element>();
 	~MatrixElementaryLooseMemoryFit<Element>();
 };
@@ -469,6 +470,17 @@ inline void MatrixElementaryLooseMemoryFit<Element>::init(short r, short c)
 }
 
 template <typename Element>
+void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(short theDimension)
+{ this->init(theDimension, theDimension);
+	for (int i=0;i<theDimension;i++)
+		for (int j=0;j<theDimension;j++)
+			if (j!=i)
+				this->elements[i][j].Assign(Element::TheRingZero);
+			else
+				this->elements[i][j].Assign(Element::TheRingUnit);
+}
+
+template <typename Element>
 inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bool PreserveValues)
 { if (r<0) r=0;
 	if (c<0) c=0;
@@ -485,16 +497,12 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bo
 	if (r>this->ActualNumRows || c>this->ActualNumCols)
 	{ newElements	= new Element*[newActualNumRows];
 		for (int i=0;i<newActualNumRows;i++)
-		{ newElements[i]= new Element[newActualNumCols];
-		}
+			newElements[i]= new Element[newActualNumCols];
 	}
 	if (PreserveValues && newElements!=0)
-	{ for (int j=::Minimum(this->NumRows,r)-1;j>=0;j--)
-		{	for (int i=::Minimum(this->NumCols,c)-1;i>=0;i--)
-			{ newElements[j][i]= this->elements[j][i];
-			}
-		}
-	}
+		for (int j=::Minimum(this->NumRows,r)-1;j>=0;j--)
+			for (int i=::Minimum(this->NumCols,c)-1;i>=0;i--)
+				newElements[j][i]= this->elements[j][i];
 	if (newElements!=0)
 	{	this->Free();
 		this->elements = newElements;
@@ -555,14 +563,23 @@ public:
 	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
 	void RowTimesScalar(int rowIndex, Element& scalar);
 	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
+	void MultiplyOnTheLeft(Matrix<Element>& input,Matrix<Element>& output);
+	void MultiplyOnTheLeft(Matrix<Element>& input);
 	//returns true if successful, false otherwise
 //	bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //		(Matrix<Element>& inputColumn,Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
 	bool Invert(GlobalVariables* theGlobalVariables);
 	void NullifyAll();
+	void RowEchelonFormToLinearSystemSolution
+		( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, 
+			Matrix<Element>& outputSolution);
+	inline static void GaussianEliminationByRows
+		(	Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,
+			Selection& outputNonPivotPoints)
+				{Matrix<Element>::GaussianEliminationByRows(theMatrix,otherMatrix,outputNonPivotPoints,true);};
 	static void GaussianEliminationByRows
-	(	Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,
-		Selection& outputNonPivotPoints);
+		(	Matrix<Element>& mat, Matrix<Element>& output,
+			Selection& outputSelection, bool returnNonPivotPoints);
 };
 
 class MatrixLargeRational: public Matrix<Rational>
@@ -680,8 +697,7 @@ MatrixElementaryTightMemoryFit<Element>::MatrixElementaryTightMemoryFit()
 template <typename Element>
 inline void MatrixElementaryTightMemoryFit<Element>::Free()
 { for (int i=0;i<this->NumRows;i++)
-	{	delete [] this->elements[i];
-	}
+		delete [] this->elements[i];
 	delete [] this->elements;
 	this->elements=0;
 	this->NumRows=0;
@@ -692,26 +708,47 @@ template <typename Element>
 bool Matrix<Element>::Invert(GlobalVariables* theGlobalVariables)
 { assert(this->NumCols==this->NumRows);
 	if (this->flagComputingDebugInfo)
-	{ this->ComputeDebugString();
-	}
+		this->ComputeDebugString();
 	static Matrix tempMatrix;
 	static Selection NonPivotPts;
 	tempMatrix.init(this->NumRows, this->NumCols);
 	tempMatrix.NullifyAll();
 	for (int i=0;i<this->NumCols;i++)
-	{ tempMatrix.elements[i][i].MakeOne();
-	}
+		tempMatrix.elements[i][i].MakeOne();
 	this->GaussianEliminationByRows(*this,tempMatrix,NonPivotPts);
 	if(NonPivotPts.CardinalitySelection!=0)
-	{	return false;
-	}
+		return false;
 	else
 	{	this->Assign(tempMatrix);
 		if (this->flagComputingDebugInfo)
-		{ this->ComputeDebugString();
-		}
+			this->ComputeDebugString();
 		return true;
 	}
+}
+
+template <typename Element>
+void Matrix<Element>::MultiplyOnTheLeft(Matrix<Element>& input)
+{ Matrix<Element> tempMat;
+	this->MultiplyOnTheLeft(input,tempMat);
+	this->Assign(tempMat);
+}
+
+template <typename Element>
+void Matrix<Element>::MultiplyOnTheLeft
+	(Matrix<Element>& input, Matrix<Element>& output)
+{ assert(&output!=this && &output!=&input);
+	assert(this->NumRows==input.NumCols);
+	Element tempEl;
+	output.init(input.NumRows, this->NumCols);
+	for (int i=0; i< input.NumRows;i++)
+		for( int j=0;j< this->NumCols;j++)
+		{ output.elements[i][j].Assign(Element::TheRingZero);
+			for (int k=0;k<this->NumRows;k++)
+			{ tempEl.Assign(input.elements[i][k]);
+				tempEl.MultiplyBy(this->elements[k][j]);
+				output.elements[i][j].Add(tempEl);
+			}
+		}
 }
 
 template <typename Element>
@@ -758,8 +795,7 @@ inline void Matrix<Element>::AddTwoRows
 template <typename Element>
 inline void Matrix<Element>::RowTimesScalar(int rowIndex, Element& scalar)
 {	for (int i=0; i<this->NumCols; i++)
-	{ this->elements[rowIndex][i].MultiplyBy(scalar);
-	}
+		this->elements[rowIndex][i].MultiplyBy(scalar);
 }
 
 template <typename Element>
@@ -773,17 +809,35 @@ inline void Matrix<Element>::SwitchTwoRows( int row1, int row2)
 }
 
 template <typename Element>
+void Matrix<Element>::RowEchelonFormToLinearSystemSolution
+	( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, 
+			Matrix<Element>& outputSolution)
+{ assert(	inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1
+					&& inputRightHandSide.NumRows==this->NumRows);
+	outputSolution.init(this->NumCols,1);
+	int NumPivots=0;
+	for (int i=0;i<this->NumCols;i++)
+		if (inputPivotPoints.selected[i])
+		{	outputSolution.elements[i][0].Assign(inputRightHandSide.elements[NumPivots][0]);
+			NumPivots++;
+		}
+		else
+			outputSolution.elements[i][0].MakeZero();
+}
+
+template <typename Element>
 void Matrix<Element>::GaussianEliminationByRows
-	(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputNonPivotPoints)
+	(	Matrix<Element>& mat, Matrix<Element>& output,
+		Selection& outputSelection, bool returnNonPivotPoints)
 {	int tempI;
 	int NumFoundPivots = 0;
 	int MaxRankMat = Minimum(mat.NumRows, mat.NumCols);
 	Element tempElement;
-	outputNonPivotPoints.init(mat.NumCols);
+	outputSelection.init(mat.NumCols);
 	for (int i=0; i<mat.NumCols; i++)
 	{	if (NumFoundPivots == MaxRankMat)
 		{	for (int j =i; j<mat.NumCols; j++)
-				outputNonPivotPoints.AddSelection(j);
+				outputSelection.AddSelection(j);
 			return;
 		}
 		tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
@@ -808,9 +862,12 @@ void Matrix<Element>::GaussianEliminationByRows
 				}
 			}
 			NumFoundPivots++;
+			if (!returnNonPivotPoints)
+				outputSelection.AddSelection(i);
 		}
 		else
-			outputNonPivotPoints.AddSelection(i);
+			if (returnNonPivotPoints)
+				outputSelection.AddSelection(i);
 	}
 }
 
@@ -2172,6 +2229,7 @@ public:
 		(	Monomial<ElementOfCommutativeRingWithIdentity>& input, 
 			Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void MonomialExponentToRoot(root& output);
+	void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
 	void GetMonomialWithCoeffOne(Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m,
 									Monomial<ElementOfCommutativeRingWithIdentity>& output);
@@ -3158,6 +3216,14 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()
 { for (int i=0;i<this->NumVariables;i++)
 		if (this->degrees[i]!=0) return false;
 	return true;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::
+	MonomialExponentToColumnMatrix(MatrixLargeRational& output)
+{ output.init(this->NumVariables,1);
+	for (int i=0;i<this->NumVariables;i++)
+		output.elements[i][0].AssignInteger(this->degrees[i]);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4725,7 +4791,7 @@ public:
 	void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
 	void ComputeOneCheckSum(Rational& output);
 	void AccountPartFractionInternals(int sign, int index, GlobalVariables* theGlobalVariables);
-	void Add(partFraction& f, GlobalVariables* theGlobalVariables);
+	void Add(partFraction& f, GlobalVariables& theGlobalVariables);
 	void PopIndexHashAndAccount(int index, GlobalVariables* theGlobalVariables);
 	void PrepareIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
@@ -5229,22 +5295,28 @@ public:
 	MatrixLargeRational matComputationBufferLinAlgAffinePart;
 	MatrixLargeRational matComputeNormalFromSelection;
 	MatrixLargeRational matOutputEmpty;
+	MatrixLargeRational matIdMatrix;
 	MatrixLargeRational	matComputeNormalExcludingIndex;
 	MatrixLargeRational matLinearAlgebraForVertexComputation;
 	MatrixLargeRational	matComputeNormalFromSelectionAndExtraRoot;
 	MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
 	MatrixLargeRational matGetRankOfSpanOfElements;
 	MatrixLargeRational matReduceMonomialByMonomial;
-
+	MatrixLargeRational matReduceMonomialByMonomial2;
+	MatrixLargeRational matOneColumn;
+	
 	partFraction fracReduceMonomialByMonomial;
 	QuasiPolynomial QPComputeQuasiPolynomial;
 	QuasiNumber QNComputeQuasiPolynomial;
 
 	IntegerPoly IPRemoveRedundantShortRootsClassicalRootSystem;
 	IntegerPoly IPElementToStringBasisChange;
-	
+	IntegerPoly IPComputationalBufferAddPartFraction1;
+	IntegerPoly IPComputationalBufferAddPartFraction2;
 
 	PolyPartFractionNumerator PPFNElementToStringBasisChange;
+	PolyPartFractionNumerator PPFNAddPartFraction1;
+	PolyPartFractionNumerator PPFNAddPartFraction2;
 
 	Selection selLinearAlgebraForVertexComputation;
 	Selection selComputeNormalFromSelection;
@@ -5255,6 +5327,7 @@ public:
 	Selection selComputeAffineInfinityPointApproximation1; 
 	Selection selComputeAffineInfinityPointApproximation2;
 	Selection selGetRankOfSpanOfElements;
+	Selection selReduceMonomialByMonomial;
 
 	GlobalVariables();
 	~GlobalVariables();

@@ -8395,7 +8395,7 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 		}
 		owner.PopIndexHashAndAccount(myIndex,&theGlobalVariables);
 		tempFrac.Coefficient.AssignPolynomial(numerator);
-		owner.Add(tempFrac,&theGlobalVariables);
+		owner.Add(tempFrac,theGlobalVariables);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 		{	//owner.CompareCheckSums();
 			owner.ComputeDebugString(&theGlobalVariables);
@@ -8511,7 +8511,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			if (this->flagAnErrorHasOccurredTimeToPanic)
 				tempFrac.ComputeDebugString(Accum,theGlobalVariables);
 			tempFrac.ComputeIndicesNonZeroMults();
-			Accum.Add(tempFrac,theGlobalVariables);
+			Accum.Add(tempFrac,*theGlobalVariables);
 			TheBigBadIndexingSet.IncrementSubset();
 		}
 		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]= oldMaxMultiplicity;
@@ -8604,7 +8604,7 @@ void partFraction::ApplySzenesVergneFormula
 			//tempFrac.CoefficientNonExpanded.ComputeDebugString();
 		}
 		tempFrac.ComputeIndicesNonZeroMults();
-    Accum.Add(tempFrac,theGlobalVariables);
+    Accum.Add(tempFrac,*theGlobalVariables);
 //    this->lastApplicationOfSVformulaNumNewMonomials+=tempFrac.GetNumMonomialsInNumerator();
 //    this->lastApplicationOfSVformulaNumNewGenerators+=tempFrac.CoefficientNonExpanded.NumGeneratorsUsed();
 	}
@@ -8632,7 +8632,7 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 	{	Integer tempInt(MathRoutines::NChooseK(powerA+powerB-i-1,powerA-1));
 		ComputationalBufferCoefficient.TimesConstant(tempInt);
 		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-		Accum.Add(tempFrac,theGlobalVariables);
+		Accum.Add(tempFrac,*theGlobalVariables);
 		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
@@ -8649,7 +8649,7 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 	{	Integer tempInt(MathRoutines::NChooseK(powerA+powerB-i-1,powerB-1));
 		ComputationalBufferCoefficient.TimesConstant(tempInt);
 		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-		Accum.Add(tempFrac,theGlobalVariables);
+		Accum.Add(tempFrac,*theGlobalVariables);
 		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
@@ -9436,32 +9436,45 @@ void partFraction::ReduceMonomialByMonomial
 {	partFraction& tempFrac= theGlobalVariables.fracReduceMonomialByMonomial;
 	tempFrac.Assign(*this);
 	MatrixLargeRational& tempMat= theGlobalVariables.matReduceMonomialByMonomial;
+	MatrixLargeRational& startAsIdMat = theGlobalVariables.matIdMatrix;
+	MatrixLargeRational& matColumn = theGlobalVariables.matOneColumn;
+	MatrixLargeRational& matLinComb = theGlobalVariables.matReduceMonomialByMonomial2;
+	Selection& tempSel= theGlobalVariables.selReduceMonomialByMonomial;
 	tempMat.init(owner.AmbientDimension,(short) this->IndicesNonZeroMults.size);
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 		for (int j=0;j<owner.AmbientDimension;j++)
 			tempMat.elements[j][i].AssignInteger(owner.RootsToIndices
 				.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]);
+	startAsIdMat.MakeIdMatrix(owner.AmbientDimension);
+	MatrixLargeRational::GaussianEliminationByRows(tempMat,startAsIdMat,tempSel);
 	for (int i=0;i<this->Coefficient.size;i++)
-	{ //		this->
+	{ this->Coefficient.TheObjects[i].MonomialExponentToColumnMatrix(matColumn);
+		matColumn.MultiplyOnTheLeft(startAsIdMat);
+		startAsIdMat.RowEchelonFormToLinearSystemSolution
+			(tempSel,matColumn,matLinComb);
 	} 
 }
 
-void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
+void partFractions::Add(partFraction &f, GlobalVariables& theGlobalVariables)
 { bool shouldAttemptReduction=false;
 	int tempI=this->ContainsObjectHash(f);
 	if (tempI==-1)
 	{ this->AddObjectOnTopHash(f);
 		tempI= this->size-1;
 		this->TheObjects[tempI].RelevanceIsComputed=false;
-		this->AccountPartFractionInternals(1,tempI,theGlobalVariables);
+		this->AccountPartFractionInternals(1,tempI,&theGlobalVariables);
 	}
 	else
-	{ static IntegerPoly	ComputationalBufferCoefficient1,
-												ComputationalBufferCoefficient2;
-		static PolyPartFractionNumerator	ComputationalBufferCoefficientNonExpanded1,
-																			ComputationalBufferCoefficientNonExpanded2;
+	{ IntegerPoly& ComputationalBufferCoefficient1 = 
+			theGlobalVariables.IPComputationalBufferAddPartFraction1;
+		IntegerPoly& ComputationalBufferCoefficient2 = 
+			theGlobalVariables.IPComputationalBufferAddPartFraction2;
+		PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded1
+			=theGlobalVariables.PPFNAddPartFraction1;
+		PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded2
+			=theGlobalVariables.PPFNAddPartFraction2;
 		//Accounting
-		this->AccountPartFractionInternals(-1,tempI,theGlobalVariables);
+		this->AccountPartFractionInternals(-1,tempI,&theGlobalVariables);
 		//end of accounting
 		ComputationalBufferCoefficient1.AssignPolynomialLight(this->TheObjects[tempI].Coefficient);
 		ComputationalBufferCoefficient2.AssignPolynomialLight(f.Coefficient);
@@ -9482,20 +9495,20 @@ void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)
 			(ComputationalBufferCoefficient1);
 		this->TheObjects[tempI].CoefficientNonExpanded.AssignPolyPartFractionNumerator
 			(ComputationalBufferCoefficientNonExpanded1);
-		this->AccountPartFractionInternals(1,tempI,theGlobalVariables);
+		this->AccountPartFractionInternals(1,tempI,&theGlobalVariables);
 	}
 	if (this->flagSplitTestModeNoNumerators)
 		this->TheObjects[tempI].Coefficient.MakeConst(IOne,(short)this->IndicatorRoot.size);
 	if ( this->TheObjects[tempI].IsEqualToZero())
-	{ this->PopIndexHashAndAccount(tempI,theGlobalVariables);
+	{ this->PopIndexHashAndAccount(tempI,&theGlobalVariables);
 		shouldAttemptReduction=false;
 	} 
 	if (shouldAttemptReduction)
 	{	if (this->flagAnErrorHasOccurredTimeToPanic)
-			this->TheObjects[tempI].ComputeDebugString(*this,theGlobalVariables);
-		this->TheObjects[tempI].AttemptReduction(*this,tempI,*theGlobalVariables);
+			this->TheObjects[tempI].ComputeDebugString(*this,&theGlobalVariables);
+		this->TheObjects[tempI].AttemptReduction(*this,tempI,theGlobalVariables);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
-			this->TheObjects[tempI].ComputeDebugString(*this,theGlobalVariables);
+			this->TheObjects[tempI].ComputeDebugString(*this,&theGlobalVariables);
 	}
 }
 
@@ -9712,7 +9725,7 @@ void partFractions::initFromRootSystem
 	this->RootsToIndices.ClearTheObjects();
 	partFraction f;
 	f.initFromRootSystem(*this,theFraction,theAlgorithmBasis, weights);
-	this->Add(f,theGlobalVariables);
+	this->Add(f,*theGlobalVariables);
 }
 
 void partFractions::RemoveRedundantShortRoots(GlobalVariables* theGlobalVariables)
@@ -9730,7 +9743,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables* theGlobalVariable
 			this->TheObjects[i].CoefficientNonExpanded.SetSizeExpandOnTopLight(0);
 			this->TheObjects[i].Coefficient.Nullify(this->AmbientDimension);
 			int oldsize= this->size;
-			this->Add(tempFrac,theGlobalVariables);
+			this->Add(tempFrac,*theGlobalVariables);
 			assert(oldsize<=this->size);
 			if (this->flagMakingProgressReport)
 			{ std::stringstream out;
@@ -9759,7 +9772,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem
 			(*this,tempRoot,*theGlobalVariables,this->AmbientDimension))
 		{	this->TheObjects[i].Coefficient.Nullify(this->AmbientDimension);
-			this->Add(tempFrac,theGlobalVariables);
+			this->Add(tempFrac,*theGlobalVariables);
 		}
 		if (this->flagMakingProgressReport)
 		{ std::stringstream out;
@@ -9978,7 +9991,7 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables*  theGloba
 	this->MakeActualSizeAtLeastExpandOnTop(tempI);
 	for(int i=0;i<tempI;i++)
 	{ tempFrac.ReadFromFile(*this,input, theGlobalVariables,this->AmbientDimension);
-		this->Add(tempFrac, theGlobalVariables);
+		this->Add(tempFrac, *theGlobalVariables);
 		this->MakeProgressVPFcomputation();
 	}
 //	input.rdbuf()->pubsetbuf(0,0);

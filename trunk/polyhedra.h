@@ -5226,11 +5226,13 @@ public:
 	MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
 	MatrixLargeRational matGetRankOfSpanOfElements;
 
+	partFraction fracReduceMonomialByMonomial;
 	QuasiPolynomial QPComputeQuasiPolynomial;
 	QuasiNumber QNComputeQuasiPolynomial;
 
 	IntegerPoly IPRemoveRedundantShortRootsClassicalRootSystem;
 	IntegerPoly IPElementToStringBasisChange;
+	
 
 	PolyPartFractionNumerator PPFNElementToStringBasisChange;
 

@@ -7898,10 +7898,9 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum, GlobalVariables
 				 (this->LastDistinguishedIndex!=-1 ||
 					this->LastDistinguishedIndex==Accum.RootsToIndices.size))
 		{ if (IndexInLinRelationOfLastGainingMultiplicityIndex==-1)
-			{	ShouldDecompose=false;}
+				ShouldDecompose=false;
 			else
-			{	ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
-			}
+				ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
 		}
 
 		if (ShouldDecompose)
@@ -8077,11 +8076,11 @@ int partFraction::ElementToStringBasisChange
 	if (!UsingVarChange)
 	{	if (includeNumerator)
 			{	if (this->UncoveringBrackets)
-				{ NumLinesUsed+=ComputationalBufferCoefficient
-													.StringPrintOutAppend (stringPoly,PolyFormatLocal);}
+					NumLinesUsed+=ComputationalBufferCoefficient
+						.StringPrintOutAppend (stringPoly,PolyFormatLocal);
 				else
-				{ NumLinesUsed+=ComputationalBufferCoefficientNonExpanded
-													.StringPrintOutAppend (stringPoly,PolyFormatLocal);}
+					NumLinesUsed+=ComputationalBufferCoefficientNonExpanded
+						.StringPrintOutAppend (stringPoly,PolyFormatLocal);
 			}
 		else
 			stringPoly="(...)";
@@ -9434,7 +9433,11 @@ void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVari
 
 void partFraction::ReduceMonomialByMonomial
 	(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables)
-{ 
+{	partFraction& tempFrac= theGlobalVariables.fracReduceMonomialByMonomial;
+	tempFrac.Assign(*this);
+	for (int i=0;i<this->Coefficient.size;i++)
+	{ this->
+	} 
 }
 
 void partFractions::Add(partFraction &f, GlobalVariables* theGlobalVariables)

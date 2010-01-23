@@ -105,6 +105,7 @@ class hashedRoots;
 class WeylGroup;
 class intRoots;
 class GlobalVariables;
+class MathRoutines;
 class GlobalVariablesContainer;
 class MatrixIntTightMemoryFit;
 class QuasiPolynomials;
@@ -572,7 +573,7 @@ public:
 	void NullifyAll();
 	//returns true if the system has a solution, false otherwise
 	bool RowEchelonFormToLinearSystemSolution
-		( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, 
+		( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide,
 			Matrix<Element>& outputSolution);
 	inline static void GaussianEliminationByRows
 		(	Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix,
@@ -811,7 +812,7 @@ inline void Matrix<Element>::SwitchTwoRows( int row1, int row2)
 
 template <typename Element>
 bool Matrix<Element>::RowEchelonFormToLinearSystemSolution
-	( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, 
+	( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide,
 			Matrix<Element>& outputSolution)
 { assert(	inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1
 					&& inputRightHandSide.NumRows==this->NumRows);
@@ -1211,6 +1212,7 @@ public:
                   this->Extended->num.sign*=-1;
               };
 	double DoubleValue();
+	int floor(){ if (NumShort<0) return (this->NumShort/ this->DenShort)-1;else return this->NumShort/this->DenShort;};
 	void MakeZero()	{this->NumShort=0;	this->DenShort=1; this->FreeExtended(); };
 	void MakeOne()	{this->NumShort=1;	this->DenShort=1; this->FreeExtended(); };
 	void MakeMOne()	{this->NumShort=-1; this->DenShort=1; this->FreeExtended(); };
@@ -1274,7 +1276,7 @@ public:
 	int FindLCMDenominatorsTruncateToInt();
 	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5);
 	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
-	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, 
+	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4,
 												int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	void MultiplyByInteger(int a);
 	void MultiplyByLargeInt(LargeInt& right);
@@ -1539,7 +1541,7 @@ public:
 			GlobalVariables* theGlobalVariables);
 	bool HasHSignVertex(root& h,int sign);
 	bool CheckSplittingPointCandidate
-		(	Selection &SelectionTargetSimplex,Selection &SelectionStartSimplex, 
+		(	Selection &SelectionTargetSimplex,Selection &SelectionStartSimplex,
 			MatrixLargeRational& outputColumn, int Dimension);
 	void AddInternalWall
 		(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal,
@@ -1693,7 +1695,7 @@ inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output
 	for (int i=0;i<this->size;i++)
 	{	this->TheObjects[i].ElementToString(tempS);
 		out<< tempS<< "\n";
-	} 
+	}
 	output= out.str();
 }
 
@@ -2054,6 +2056,19 @@ public:
 	void ElementToString(std::string& output);
 };
 
+class MathRoutines
+{
+public:
+	static int lcm(int a, int b);
+	static int TwoToTheNth(int n);
+	static int NChooseK(int n, int k);
+	static int KToTheNth(int k, int n);
+	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
+	inline static int Maximum(int a, int b){if (a>b) return a; else return b;}
+	inline static int Minimum(int a, int b){if (a>b) return b; else return a;}
+	inline static short Minimum(short a, short b){if (a>b) return b; else return a;}
+};
+
 //class pertains to the Q^+span of a set of roots.
 class Cone : public roots
 { //The roots are the normals to the walls of the cone
@@ -2231,7 +2246,7 @@ public:
 	void initNoDegreesInit(short nv);
 	void NullifyDegrees();
 	void DivideBy
-		(	Monomial<ElementOfCommutativeRingWithIdentity>& input, 
+		(	Monomial<ElementOfCommutativeRingWithIdentity>& input,
 			Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void MonomialExponentToRoot(root& output);
 	void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
@@ -2361,7 +2376,7 @@ public:
 	void MakeLinPolyFromRoot(root& r);
 	void TimesInteger(int a);
 	void DivideBy
-		(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, 
+		(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor,
 			Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient,
 			Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
@@ -3240,7 +3255,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(root
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy
-	(	Monomial<ElementOfCommutativeRingWithIdentity> &input, 
+	(	Monomial<ElementOfCommutativeRingWithIdentity> &input,
 		Monomial<ElementOfCommutativeRingWithIdentity> &output)
 { output.init(this->NumVariables);
 	output.Coefficient.Assign(this->Coefficient);
@@ -3701,8 +3716,8 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy
-	(	Polynomial<ElementOfCommutativeRingWithIdentity> &inputDivisor, 
-		Polynomial<ElementOfCommutativeRingWithIdentity> &outputQuotient, 
+	(	Polynomial<ElementOfCommutativeRingWithIdentity> &inputDivisor,
+		Polynomial<ElementOfCommutativeRingWithIdentity> &outputQuotient,
 		Polynomial<ElementOfCommutativeRingWithIdentity> &outputRemainder)
 { assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
 	outputRemainder.Assign(*this);
@@ -4520,7 +4535,7 @@ public:
 			bool LatexFormat, int index, int theDimension);
 	void OneFracToStringBasisChange
 		(	partFractions& owner,int indexElongation, MatrixIntTightMemoryFit& VarChange,
-			bool UsingVarChange, std::string& output, bool LatexFormat, 
+			bool UsingVarChange, std::string& output, bool LatexFormat,
 			int indexInFraction, int theDimension);
 };
 
@@ -4601,7 +4616,7 @@ public:
 	void AddPolynomialLargeRational
 		(root& rootLatticeIndicator, PolynomialRationalCoeff& input);
 	void ComputeQuasiPolynomial
-		(	QuasiPolynomial& output, bool RecordNumMonomials, 
+		(	QuasiPolynomial& output, bool RecordNumMonomials,
 			int theDimension, GlobalVariables* theGlobalVariables);
 };
 
@@ -4706,7 +4721,7 @@ public:
 	partFraction();
 	~partFraction();
 	void GetAlphaMinusNBetaPoly
-		(	partFractions& owner,int indexA, 
+		(	partFractions& owner,int indexA,
 			int indexB, int n, IntegerPoly& output, int theDimension);
 	void GetNElongationPolyWithMonomialContribution
 			(	partFractions& owner, ListBasicObjects<int>& theSelectedIndices,
@@ -4718,7 +4733,7 @@ public:
 													int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
 	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output, int theDimension);
 	void GetNElongationPoly
-		(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries, 
+		(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries,
 			PolyPartFractionNumerator& output, int theDimension);
 	int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
 	bool operator==(partFraction& right);
@@ -4746,7 +4761,7 @@ class partFractions: public HashedListBasicObjects<partFraction>
 public:
 	short AmbientDimension;
 	int IndexLowestNonProcessed;
-	int IndexCurrentlyProcessed; 
+	int IndexCurrentlyProcessed;
 	int HighestIndex;
 	int NumberIrrelevantFractions;
 	int NumberRelevantReducedFractions;
@@ -4809,7 +4824,7 @@ public:
 																	bool LatexFormat, bool includeVPsummand,
 																	bool includeNumerator, GlobalVariables* theGlobalVariables);
 	int ElementToStringOutputToFile
-		(	std::fstream& output, bool LatexFormat, bool includeVPsummand, 
+		(	std::fstream& output, bool LatexFormat, bool includeVPsummand,
 			bool includeNumerator, GlobalVariables* theGlobalVariables);
 	int ElementToStringBasisChangeOutputToFile
 		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output,
@@ -5062,7 +5077,7 @@ public:
 	static const int FigureCenterCoordSystemX= 4;//in centimeters
 	static const int FigureCenterCoordSystemY=8;//in centimeters
 	static const int TextPrintCenteringAdjustmentX=3;
-	static const int TextPrintCenteringAdjustmentY=3;	
+	static const int TextPrintCenteringAdjustmentY=3;
 	static void drawline(	double X1, double Y1, double X2, double Y2,
 									unsigned long thePenStyle, int ColorIndex, std::fstream& output);
 	static void drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
@@ -5268,19 +5283,6 @@ public:
 	void RevealTheEvilConspiracy();
 };
 
-class MathRoutines
-{
-public:
-	static int lcm(int a, int b);
-	static int TwoToTheNth(int n);
-	static int NChooseK(int n, int k);
-	static int KToTheNth(int k, int n);
-	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
-	inline static int Maximum(int a, int b){if (a>b) return a; else return b;}
-	inline static int Minimum(int a, int b){if (a>b) return b; else return a;}
-	inline static short Minimum(short a, short b){if (a>b) return b; else return a;}
-};
-
 class GlobalVariables
 {
 public:
@@ -5291,7 +5293,7 @@ public:
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
-	
+
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
 	ListBasicObjects<WallData*> listWallDataPtSplitChamber;
 
@@ -5312,7 +5314,7 @@ public:
 	MatrixLargeRational matReduceMonomialByMonomial;
 	MatrixLargeRational matReduceMonomialByMonomial2;
 	MatrixLargeRational matOneColumn;
-	
+
 	partFraction fracReduceMonomialByMonomial;
 	QuasiPolynomial QPComputeQuasiPolynomial;
 	QuasiNumber QNComputeQuasiPolynomial;
@@ -5332,7 +5334,7 @@ public:
 	Selection selWallSelection;
 	Selection selComputeNormalFromSelectionAndExtraRoot;
 	Selection selComputeNormalFromSelectionAndTwoExtraRoots;
-	Selection selComputeAffineInfinityPointApproximation1; 
+	Selection selComputeAffineInfinityPointApproximation1;
 	Selection selComputeAffineInfinityPointApproximation2;
 	Selection selGetRankOfSpanOfElements;
 	Selection selReduceMonomialByMonomial;

@@ -67,11 +67,11 @@ unsigned int RGB(int r, int g, int b)
 //end of windows.h portion
 
 GlobalVariables::GlobalVariables()
-{ 
+{
 }
 
 GlobalVariables::~GlobalVariables()
-{ 
+{
 }
 
 
@@ -336,7 +336,7 @@ void CombinatorialChamberContainer::QuickSortIndicesByDisplayNumber
 	for (int i=BottomIndex+1;i<=HighIndex;i++)
 	{ if (	this->TheObjects[outputSortedIndices.TheObjects[i]]->DisplayNumber>
 					this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber)
-		{	for (;HighIndex>i && 
+		{	for (;HighIndex>i &&
 						this->TheObjects[outputSortedIndices.TheObjects[HighIndex]]->DisplayNumber>
 						this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber;
 						HighIndex--)
@@ -353,7 +353,6 @@ void CombinatorialChamberContainer::QuickSortIndicesByDisplayNumber
 	int tempI= outputSortedIndices.TheObjects[BottomIndex];
 	outputSortedIndices.TheObjects[BottomIndex]= outputSortedIndices.TheObjects[HighIndex];
 	outputSortedIndices.TheObjects[HighIndex]=tempI;
-	HighIndex;
 	this->QuickSortIndicesByDisplayNumber(outputSortedIndices, BottomIndex,HighIndex-1);
 	this->QuickSortIndicesByDisplayNumber(outputSortedIndices, HighIndex+1,TopIndex);
 }
@@ -672,7 +671,7 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
 		root tempRoot; tempRoot.MakeZero(inputComplex.AmbientDimension);
 		int start = 1;
 		if (i>=inputComplex.NumProjectiveHyperplanesBeforeWeylChamberWalls)
-		{	this->theChambers.NumAffineHyperplanesBeforeWeylChamberWalls = 
+		{	this->theChambers.NumAffineHyperplanesBeforeWeylChamberWalls =
 				this->theChambers.theWeylGroupAffineHyperplaneImages.size;
 			start= 0;
 		}
@@ -686,7 +685,7 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
 			if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
         if (this->theChambers.theWeylGroupAffineHyperplaneImages
 							.AddObjectOnTopNoRepetitionOfObject(tempH))
-					if (start==0) 
+					if (start==0)
 						this->theChambers.AffineWallsOfWeylChambers
 							.AddObjectOnTopNoRepetitionOfObjectHash(tempH);
 			//tempH.ComputeDebugString();
@@ -769,7 +768,7 @@ void ComputationSetup::InitComputationSetup()
 		PolyFormatLocal.MakeAlphabetxi();
 		::IndicatorWindowGlobalVariables.Nullify();
 		PolynomialOutputFormat::LatexMaxLineLength=95;
-		PolynomialOutputFormat::UsingLatexFormat=true;	
+		PolynomialOutputFormat::UsingLatexFormat=true;
 		RandomCodeIDontWantToDelete::SomeRandomTests2();
 		partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
 		this->flagDoneComputingPartialFractions=false;
@@ -867,13 +866,13 @@ void ComputationSetup::Run()
 }
 
 void ComputationSetup::ExitComputationSetup()
-{ if (!this->flagDoingWeylGroupAction) 
+{ if (!this->flagDoingWeylGroupAction)
 	{	if(this->NextDirectionIndex>=this->InputRoots.size)
 		{ //Computation is done and we must reset
 			this->flagComputationDone=true;
 		//	this->flagComputationInitialized=false;
 		}
-	} 
+	}
 	ParallelComputing::SafePointReached=true;
 }
 
@@ -927,7 +926,7 @@ void DrawingVariables::drawLine
 { if (LatexOutFile==0)
 		::drawline(X1,Y1,X2,Y2,thePenStyle, ColorIndex);
 	else
-		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile); 
+		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile);
 }
 
 void DrawingVariables::drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile)
@@ -1003,7 +1002,7 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 
 void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 								CombinatorialChamberContainer& output,
-								roots& directions, int directionIndex, root& ChamberIndicator, 
+								roots& directions, int directionIndex, root& ChamberIndicator,
 								std::fstream* LaTeXOutput)
 {	if (LaTeXOutput!=0)
 		LaTeXProcedures::beginPSTricks(*LaTeXOutput);
@@ -1025,9 +1024,7 @@ void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 // 5 = invisible line (no line)
 void CombinatorialChamberContainer::drawOutputAffine
 	(DrawingVariables &TDV, CombinatorialChamberContainer &output, std::fstream* LaTeXoutput)
-{	int numNonZeroChambers=0;
-	int numZeroChambers=0;
-	if(output.AffineWallsOfWeylChambers.size>0)
+{ if(output.AffineWallsOfWeylChambers.size>0)
 		output.GetNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
 	else
 		output.GetNumVisibleChambersAndLabelChambersForDisplay();
@@ -1081,7 +1078,7 @@ void CombinatorialChamberContainer::drawOutputProjective
 		}
 	}
 	if (output.flagMakingASingleHyperplaneSlice)
-	{ out2	<< "; "<< "Plane: " << output.NumAffineHyperplanesProcessed+1 << " out of " 
+	{ out2	<< "; "<< "Plane: " << output.NumAffineHyperplanesProcessed+1 << " out of "
 					<< output.theWeylGroupAffineHyperplaneImages.size;
 	}
 	tempS=out2.str();
@@ -2211,7 +2208,7 @@ bool roots::ComputeNormalFromSelection
 	(root& output, Selection& theSelection, GlobalVariables* theGlobalVariables, int theDimension)
 {	MatrixLargeRational& tempMatrix= theGlobalVariables->matComputeNormalFromSelection;
 	MatrixLargeRational& matOutputEmpty=theGlobalVariables->matOutputEmpty;
-	Selection& NonPivotPoints=theGlobalVariables->selComputeNormalFromSelection;	
+	Selection& NonPivotPoints=theGlobalVariables->selComputeNormalFromSelection;
 	matOutputEmpty.init(-1,-1);
 	output.SetSizeExpandOnTopLight(theDimension);
 	tempMatrix.init((short)theSelection.CardinalitySelection,(short)theDimension);
@@ -2586,7 +2583,7 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace
 				return false;
 			}
 			this->affineVertices.AddObjectOnTop(tempRoot);
-		} 
+		}
 	}
 	this->NumTrueAffineVertices= this->affineVertices.size;
 	for (int i=0;i<this->AllVertices.size;i++)
@@ -2704,7 +2701,7 @@ void CombinatorialChamber::drawOutputAffine
         }
       }
       if (AreInAWall!=0)
-			{ int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex,LaTeXoutput);					
+			{ int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex,LaTeXoutput);
 				int penStyle = TDV.DrawStyle;
 				if (this->flagHasZeroPolynomial || this->flagPermanentlyZero)
 					penStyle= TDV.DrawStyleInvisibles;
@@ -3049,7 +3046,7 @@ bool CombinatorialChamber::SplitChamber
 	bool hasPositive, hasNegative;
 	hasPositive=false; hasNegative=false;
 	root PositiveChamberInternalPoint, NegativeChamberInternalPoint;
-	PositiveChamberInternalPoint.MakeZero(output.AmbientDimension); 
+	PositiveChamberInternalPoint.MakeZero(output.AmbientDimension);
 	NegativeChamberInternalPoint.MakeZero(output.AmbientDimension);
 	for (int i=0;i<NumCandidates;i++)
 	{	root VertexCandidate; VertexCandidate.SetSizeExpandOnTopLight(output.AmbientDimension);
@@ -3447,13 +3444,13 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool La
 		endOfLine= "\n";
 	if (LatexFormat)
 	{ this->PurgeZeroPointers();
-		out << "Total visible chambers: " 
+		out << "Total visible chambers: "
 				<< this->GetNumVisibleChambersAndLabelChambersForDisplay()
 				<< endOfLine;
-	}	
+	}
 	if (this->AffineWallsOfWeylChambers.size>0)
 	{	int tempI=this->GetNumChambersInWeylChamberAndLabelChambers(this->WeylChamber);
-		out << "Number of chambers with internal point in Weyl chamber: " 
+		out << "Number of chambers with internal point in Weyl chamber: "
 				<< tempI<< endOfLine;
 		out <<"Weyl chamber walls and their images: \\\\";
 		for (int i=0;i<this->AffineWallsOfWeylChambers.size;i++)
@@ -8068,7 +8065,7 @@ int partFraction::ElementToStringBasisChange
 //	int OldCutOff=0;
 	int theDimension= owner.RootsToIndices.TheObjects[0].dimension;
 	IntegerPoly& ComputationalBufferCoefficient=theGlobalVariables->IPElementToStringBasisChange;
-	PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded= 
+	PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded=
 		theGlobalVariables->PPFNElementToStringBasisChange;
 	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
 	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator
@@ -8369,7 +8366,7 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 	numerator.AssignPolynomialLight(this->Coefficient);
 	tempFrac.Assign(*this);
 	while (hasImprovement)
-	{ hasImprovement=false;	
+	{ hasImprovement=false;
 		numerator.ComputeDebugString();
 		for (int i=0;i<tempFrac.IndicesNonZeroMults.size;i++)
 			for (int j=0;j<tempFrac.TheObjects[IndicesNonZeroMults.TheObjects[i]]
@@ -8386,7 +8383,7 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 					hasImprovement=true;
 					improvedAtLeastOnce=true;
 				}
-			}		
+			}
 	}
 	if (improvedAtLeastOnce)
 	{	if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -8691,7 +8688,7 @@ void partFraction::GetAlphaMinusNBetaPoly
 }
 
 void partFraction::GetNElongationPoly
-			(	partFractions& owner,int index,int baseElongation, 
+			(	partFractions& owner,int index,int baseElongation,
 				int LengthOfGeometricSeries, IntegerPoly& output,int theDimension)
 {	output.Nullify((short)theDimension);
 	Monomial<Integer> tempM;
@@ -8720,7 +8717,7 @@ void partFraction::GetNElongationPoly
 }
 
 void partFraction::GetNElongationPoly
-	(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries, 
+	(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries,
 		PolyPartFractionNumerator& output, int theDimension)
 {	::MonomialInCommutativeAlgebra
 		<Integer,::GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord> tempM;
@@ -9382,7 +9379,7 @@ void partFractions::PopIndexHashAndAccount(int index, GlobalVariables* theGlobal
 	else
 	{	assert(this->IndexLowestNonProcessed!=0);
 		if (this->IndexLowestNonProcessed-1== this->IndexCurrentlyProcessed)
-			this->IndexCurrentlyProcessed=index; 
+			this->IndexCurrentlyProcessed=index;
 		this->SwapTwoIndicesHash(index, this->IndexLowestNonProcessed-1);
 		this->PopIndexSwapWithLastHash(this->IndexLowestNonProcessed-1);
 		this->IndexLowestNonProcessed--;
@@ -9447,17 +9444,28 @@ void partFraction::ReduceEachMonomialOnce
 				.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]);
 	startAsIdMat.MakeIdMatrix(owner.AmbientDimension);
 	MatrixLargeRational::GaussianEliminationByRows(tempMat,startAsIdMat,tempSel);
+	SelectionWithDifferentMaxMultiplicities thePowers;
+	ListBasicObjects<bool> theSigns; theSigns.SetSizeExpandOnTopNoObjectInit(owner->AmbientDimension);
+	thePowers.init(owner->AmbientDimension);
 	for (int i=0;i<this->Coefficient.size;i++)
 	{ this->Coefficient.TheObjects[i].MonomialExponentToColumnMatrix(matColumn);
 		matColumn.MultiplyOnTheLeft(startAsIdMat);
 		if (	startAsIdMat.RowEchelonFormToLinearSystemSolution
 						(tempSel,matColumn,matLinComb))
-		{ //for (int i=0;i<matLinComb.NumRows;i++)
-				//if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
-					//RMOne.IsGreaterThanOrEqualTo(matLinComb.elements[i][0]) )
-						
+		{ for (int i=0;i<matLinComb.NumRows;i++)
+				if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
+            matLinComb.elements[i][0].IsNegative() )
+        { int tempI=matLinComb.elements[i][0].floor();
+          if (tempI<0)
+          { tempI=-tempI; theSigns.TheObjects[i]=false;
+          } else
+            theSigns.TheObjects[i]=true;
+          thePowers.MaxMultiplicities.TheObjects[i]=tempI;
+        }
 		}
-	} 
+		MathRoutines::BinomialCoefficientMultivariate(thePowers.MaxTotalMultiplicity(),thePowers.Multiplicities);
+		thePowers
+	}
 }
 
 void partFractions::AddAndReduce(partFraction &f, GlobalVariables& theGlobalVariables)
@@ -9474,9 +9482,9 @@ void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGloba
 		this->AccountPartFractionInternals(1,tempI,&theGlobalVariables);
 	}
 	else
-	{ IntegerPoly& ComputationalBufferCoefficient1 = 
+	{ IntegerPoly& ComputationalBufferCoefficient1 =
 			theGlobalVariables.IPComputationalBufferAddPartFraction1;
-		IntegerPoly& ComputationalBufferCoefficient2 = 
+		IntegerPoly& ComputationalBufferCoefficient2 =
 			theGlobalVariables.IPComputationalBufferAddPartFraction2;
 		PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded1
 			=theGlobalVariables.PPFNAddPartFraction1;
@@ -9511,7 +9519,7 @@ void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGloba
 	if ( this->TheObjects[tempI].IsEqualToZero())
 	{ this->PopIndexHashAndAccount(tempI,&theGlobalVariables);
 		shouldAttemptReduction=false;
-	} 
+	}
 	if (shouldAttemptReduction)
 	{	if (this->flagAnErrorHasOccurredTimeToPanic)
 			this->TheObjects[tempI].ComputeDebugString(*this,&theGlobalVariables);
@@ -9555,7 +9563,7 @@ int partFractions::ElementToStringBasisChange
 				(	*this, VarChange, UsingVarChange,tempS, LatexFormat,
 					includeVPsummand,includeNumerator,theGlobalVariables);
 			if (LatexFormat)
-				out <<"&&"; 
+				out <<"&&";
 			if (tempS[0]!='-'){out<<"+";}
 			out<<tempS;
 			if (LatexFormat)
@@ -9589,8 +9597,8 @@ int partFractions::ElementToStringBasisChange
 }
 
 int partFractions::ElementToStringBasisChangeOutputToFile
-	(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, 
-		std::fstream& output, bool LatexFormat,bool includeVPsummand, 
+	(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange,
+		std::fstream& output, bool LatexFormat,bool includeVPsummand,
 		bool includeNumerator,GlobalVariables* theGlobalVariables)
 { std::string tempS;
 	int TotalLines=0;
@@ -10312,7 +10320,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity
 }
 
 void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
-	(	partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, 
+	(	partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange,
 		std::string& output, bool LatexFormat, int indexInFraction, int theDimension)
 { std::stringstream  out;
 	std::string tempS;
@@ -11827,7 +11835,7 @@ void RandomCodeIDontWantToDelete::SomeRandomTests6()
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTests5()
-{ 
+{
 }
 
 void RandomCodeIDontWantToDelete::SomeRandomTests4()
@@ -12606,17 +12614,17 @@ void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &outpu
 		case 7: output.assign("cyan"); break;
 		case 56540: output.assign("yellow"); break;
 		default:
-			output.assign("black"); 
+			output.assign("black");
 			break;
 	}
 }
 
 void LaTeXProcedures::drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output)
 { output.precision(4);
-	X1-=theText.length()* LaTeXProcedures::TextPrintCenteringAdjustmentX; 
+	X1-=theText.length()* LaTeXProcedures::TextPrintCenteringAdjustmentX;
 	Y1+=LaTeXProcedures::TextPrintCenteringAdjustmentY;
 	X1/=LaTeXProcedures::ScaleFactor; Y1/=LaTeXProcedures::ScaleFactor;
-	output	<< "\\put("<<X1-LaTeXProcedures::FigureCenterCoordSystemX 
+	output	<< "\\put("<<X1-LaTeXProcedures::FigureCenterCoordSystemX
 					<<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<"){\\tiny{"<<theText<<"}}";
 }
 
@@ -14042,7 +14050,7 @@ inline bool affineHyperplane::operator ==(const affineHyperplane& right)
 	Rational tempRat1, tempRat2;
 	root::RootScalarEuclideanRoot(tempRoot1, this->affinePoint, tempRat1);
 	root::RootScalarEuclideanRoot(tempRoot1, right.affinePoint, tempRat2);
-	return tempRat1.IsEqualTo(tempRat2);	
+	return tempRat1.IsEqualTo(tempRat2);
 }
 
 

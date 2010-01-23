@@ -8395,7 +8395,7 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 		}
 		owner.PopIndexHashAndAccount(myIndex,&theGlobalVariables);
 		tempFrac.Coefficient.AssignPolynomial(numerator);
-		owner.Add(tempFrac,theGlobalVariables);
+		owner.AddAndReduce(tempFrac,theGlobalVariables);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 		{	//owner.CompareCheckSums();
 			owner.ComputeDebugString(&theGlobalVariables);
@@ -8511,7 +8511,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 			if (this->flagAnErrorHasOccurredTimeToPanic)
 				tempFrac.ComputeDebugString(Accum,theGlobalVariables);
 			tempFrac.ComputeIndicesNonZeroMults();
-			Accum.Add(tempFrac,*theGlobalVariables);
+			Accum.AddAndReduce(tempFrac,*theGlobalVariables);
 			TheBigBadIndexingSet.IncrementSubset();
 		}
 		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]= oldMaxMultiplicity;
@@ -8604,7 +8604,7 @@ void partFraction::ApplySzenesVergneFormula
 			//tempFrac.CoefficientNonExpanded.ComputeDebugString();
 		}
 		tempFrac.ComputeIndicesNonZeroMults();
-    Accum.Add(tempFrac,*theGlobalVariables);
+    Accum.AddAndReduce(tempFrac,*theGlobalVariables);
 //    this->lastApplicationOfSVformulaNumNewMonomials+=tempFrac.GetNumMonomialsInNumerator();
 //    this->lastApplicationOfSVformulaNumNewGenerators+=tempFrac.CoefficientNonExpanded.NumGeneratorsUsed();
 	}
@@ -8632,7 +8632,7 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 	{	Integer tempInt(MathRoutines::NChooseK(powerA+powerB-i-1,powerA-1));
 		ComputationalBufferCoefficient.TimesConstant(tempInt);
 		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-		Accum.Add(tempFrac,*theGlobalVariables);
+		Accum.AddAlreadyReduced(tempFrac,*theGlobalVariables);
 		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
@@ -8649,7 +8649,7 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,
 	{	Integer tempInt(MathRoutines::NChooseK(powerA+powerB-i-1,powerB-1));
 		ComputationalBufferCoefficient.TimesConstant(tempInt);
 		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-		Accum.Add(tempFrac,*theGlobalVariables);
+		Accum.AddAlreadyReduced(tempFrac,*theGlobalVariables);
 		ComputationalBufferCoefficient.DivideByConstant(tempInt);
 //		Accum.ComputeDebugString();
 		if (i>1)
@@ -9431,7 +9431,7 @@ void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVari
 		this->NumMonomialsInTheNumerators+=sign*tempFrac.CoefficientNonExpanded.size;
 }
 
-void partFraction::ReduceMonomialByMonomial
+void partFraction::ReduceEachMonomialOnce
 	(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables)
 {	partFraction& tempFrac= theGlobalVariables.fracReduceMonomialByMonomial;
 	tempFrac.Assign(*this);
@@ -9450,12 +9450,21 @@ void partFraction::ReduceMonomialByMonomial
 	for (int i=0;i<this->Coefficient.size;i++)
 	{ this->Coefficient.TheObjects[i].MonomialExponentToColumnMatrix(matColumn);
 		matColumn.MultiplyOnTheLeft(startAsIdMat);
-		startAsIdMat.RowEchelonFormToLinearSystemSolution
-			(tempSel,matColumn,matLinComb);
+		if (	startAsIdMat.RowEchelonFormToLinearSystemSolution
+						(tempSel,matColumn,matLinComb))
+		{ //for (int i=0;i<matLinComb.NumRows;i++)
+				//if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
+					//RMOne.IsGreaterThanOrEqualTo(matLinComb.elements[i][0]) )
+						
+		}
 	} 
 }
 
-void partFractions::Add(partFraction &f, GlobalVariables& theGlobalVariables)
+void partFractions::AddAndReduce(partFraction &f, GlobalVariables& theGlobalVariables)
+{
+}
+
+void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGlobalVariables)
 { bool shouldAttemptReduction=false;
 	int tempI=this->ContainsObjectHash(f);
 	if (tempI==-1)
@@ -9725,7 +9734,7 @@ void partFractions::initFromRootSystem
 	this->RootsToIndices.ClearTheObjects();
 	partFraction f;
 	f.initFromRootSystem(*this,theFraction,theAlgorithmBasis, weights);
-	this->Add(f,*theGlobalVariables);
+	this->AddAlreadyReduced(f,*theGlobalVariables);
 }
 
 void partFractions::RemoveRedundantShortRoots(GlobalVariables* theGlobalVariables)
@@ -9743,7 +9752,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables* theGlobalVariable
 			this->TheObjects[i].CoefficientNonExpanded.SetSizeExpandOnTopLight(0);
 			this->TheObjects[i].Coefficient.Nullify(this->AmbientDimension);
 			int oldsize= this->size;
-			this->Add(tempFrac,*theGlobalVariables);
+			this->AddAlreadyReduced(tempFrac,*theGlobalVariables);
 			assert(oldsize<=this->size);
 			if (this->flagMakingProgressReport)
 			{ std::stringstream out;
@@ -9772,7 +9781,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem
 			(*this,tempRoot,*theGlobalVariables,this->AmbientDimension))
 		{	this->TheObjects[i].Coefficient.Nullify(this->AmbientDimension);
-			this->Add(tempFrac,*theGlobalVariables);
+			this->AddAlreadyReduced(tempFrac,*theGlobalVariables);
 		}
 		if (this->flagMakingProgressReport)
 		{ std::stringstream out;
@@ -9991,7 +10000,7 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables*  theGloba
 	this->MakeActualSizeAtLeastExpandOnTop(tempI);
 	for(int i=0;i<tempI;i++)
 	{ tempFrac.ReadFromFile(*this,input, theGlobalVariables,this->AmbientDimension);
-		this->Add(tempFrac, *theGlobalVariables);
+		this->AddAlreadyReduced(tempFrac, *theGlobalVariables);
 		this->MakeProgressVPFcomputation();
 	}
 //	input.rdbuf()->pubsetbuf(0,0);

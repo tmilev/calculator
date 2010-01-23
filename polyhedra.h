@@ -570,7 +570,8 @@ public:
 //		(Matrix<Element>& inputColumn,Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
 	bool Invert(GlobalVariables* theGlobalVariables);
 	void NullifyAll();
-	void RowEchelonFormToLinearSystemSolution
+	//returns true if the system has a solution, false otherwise
+	bool RowEchelonFormToLinearSystemSolution
 		( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, 
 			Matrix<Element>& outputSolution);
 	inline static void GaussianEliminationByRows
@@ -809,7 +810,7 @@ inline void Matrix<Element>::SwitchTwoRows( int row1, int row2)
 }
 
 template <typename Element>
-void Matrix<Element>::RowEchelonFormToLinearSystemSolution
+bool Matrix<Element>::RowEchelonFormToLinearSystemSolution
 	( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, 
 			Matrix<Element>& outputSolution)
 { assert(	inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1
@@ -823,6 +824,10 @@ void Matrix<Element>::RowEchelonFormToLinearSystemSolution
 		}
 		else
 			outputSolution.elements[i][0].MakeZero();
+	for (int i=NumPivots;i<this->NumRows;i++)
+		if (!inputRightHandSide.elements[i][0].IsEqualToZero())
+			return false;
+	return true;
 }
 
 template <typename Element>
@@ -4664,6 +4669,7 @@ public:
 	void ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension);
 	void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
+	void ReduceEachMonomialOnce(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ApplySzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
@@ -4791,7 +4797,8 @@ public:
 	void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
 	void ComputeOneCheckSum(Rational& output);
 	void AccountPartFractionInternals(int sign, int index, GlobalVariables* theGlobalVariables);
-	void Add(partFraction& f, GlobalVariables& theGlobalVariables);
+	void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables);
+	void AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables);
 	void PopIndexHashAndAccount(int index, GlobalVariables* theGlobalVariables);
 	void PrepareIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
@@ -4801,18 +4808,18 @@ public:
 	int ElementToStringBasisChange(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output,
 																	bool LatexFormat, bool includeVPsummand,
 																	bool includeNumerator, GlobalVariables* theGlobalVariables);
-	int ElementToStringOutputToFile(std::fstream& output,
-																	bool LatexFormat,
-																	bool includeVPsummand, bool includeNumerator, GlobalVariables* theGlobalVariables);
+	int ElementToStringOutputToFile
+		(	std::fstream& output, bool LatexFormat, bool includeVPsummand, 
+			bool includeNumerator, GlobalVariables* theGlobalVariables);
 	int ElementToStringBasisChangeOutputToFile
 		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output,
 			bool LatexFormat, bool includeVPsummand, bool includeNumerator,
 			GlobalVariables* theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
-					(	QuasiPolynomial& output, root& r,
-						//bool storeComputations, bool RecordSplitPowerSeriesCoefficient,
-						bool StoreToFile,bool UseOldData,
-						GlobalVariables* theGlobalVariables);
+		(	QuasiPolynomial& output, root& r,
+			//bool storeComputations, bool RecordSplitPowerSeriesCoefficient,
+			bool StoreToFile,bool UseOldData,
+			GlobalVariables* theGlobalVariables);
 	bool VerifyFileComputedContributions(GlobalVariables*  theGlobalVariables);
 	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables*  theGlobalVariables);
 	int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables*  theGlobalVariables);
@@ -4829,7 +4836,8 @@ public:
 	void MakeProgressVPFcomputation();
 	void ComputeKostantFunctionFromWeylGroup
 				(	char WeylGroupLetter, unsigned char WeylGroupNumber,
-					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,bool StoreToFile, GlobalVariables*  theGlobalVariables);
+					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,
+					bool StoreToFile, GlobalVariables*  theGlobalVariables);
 };
 
 class ElementWeylGroup: public ListBasicObjects<int>

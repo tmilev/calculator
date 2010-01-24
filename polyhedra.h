@@ -2249,6 +2249,8 @@ public:
 		(	Monomial<ElementOfCommutativeRingWithIdentity>& input,
 			Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void MonomialExponentToRoot(root& output);
+	void MonomialExponentToRoot(intRoot& output);
+	void MakeFromRoot(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
 	void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
 	void GetMonomialWithCoeffOne(Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m,
@@ -3239,6 +3241,15 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot
+	(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input)
+{ this->init(input.dimension);
+	this->Coefficient.Assign(coeff);
+	for (int i=0;i<this->NumVariables;i++)
+		this->degrees[i]=(short) input.elements[i];
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::
 	MonomialExponentToColumnMatrix(MatrixLargeRational& output)
 { output.init(this->NumVariables,1);
@@ -3252,6 +3263,14 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(root
 	for (int i=0;i<this->NumVariables;i++)
 		output.TheObjects[i].AssignInteger(this->degrees[i]);
 }
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(intRoot& output)
+{ output.dimension=(unsigned char)this->NumVariables;
+	for (int i=0;i<this->NumVariables;i++)
+		output.elements[i]=this->degrees[i];
+}
+
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy
@@ -4684,7 +4703,6 @@ public:
 	void ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension);
 	void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
-	void ReduceEachMonomialOnce(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ApplySzenesVergneFormula
 			(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 				int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
@@ -4713,6 +4731,7 @@ public:
 												bool indexAisNullified, partFraction &output,
 												IntegerPoly& AminusNbetaPoly);
 	void Assign(const partFraction&p);
+	void AssignDenominatorOnly(const partFraction& p);
 	void AssignNoIndicesNonZeroMults(partFraction&p);
 	int getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner,int minIndex);
 	int ControlLineSizeFracs(std::string& output);

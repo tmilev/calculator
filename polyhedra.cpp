@@ -7929,6 +7929,10 @@ int partFraction::SizeWithoutDebugString()
 	return Accum;
 }
 
+void partFraction::AssignDenominatorOnly(const partFraction& p)
+{ this->CopyFromLight(p);
+}
+
 void partFraction::Assign(const partFraction& p)
 { this->CopyFromLight(p);
 	this->Coefficient.AssignPolynomialLight(p.Coefficient);
@@ -9428,10 +9432,10 @@ void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVari
 		this->NumMonomialsInTheNumerators+=sign*tempFrac.CoefficientNonExpanded.size;
 }
 
-void partFraction::ReduceEachMonomialOnce
+void partFraction::ReduceMonomialByMonomial
 	(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables)
 {	partFraction& tempFrac= theGlobalVariables.fracReduceMonomialByMonomial;
-	tempFrac.Assign(*this);
+	//tempFrac.Assign(*this);
 	MatrixLargeRational& tempMat= theGlobalVariables.matReduceMonomialByMonomial;
 	MatrixLargeRational& startAsIdMat = theGlobalVariables.matIdMatrix;
 	MatrixLargeRational& matColumn = theGlobalVariables.matOneColumn;
@@ -9441,35 +9445,76 @@ void partFraction::ReduceEachMonomialOnce
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 		for (int j=0;j<owner.AmbientDimension;j++)
 			tempMat.elements[j][i].AssignInteger(owner.RootsToIndices
-				.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]);
+				.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]*
+					this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
 	startAsIdMat.MakeIdMatrix(owner.AmbientDimension);
 	MatrixLargeRational::GaussianEliminationByRows(tempMat,startAsIdMat,tempSel);
 	SelectionWithDifferentMaxMultiplicities thePowers;
-	ListBasicObjects<bool> theSigns; theSigns.SetSizeExpandOnTopNoObjectInit(owner->AmbientDimension);
-	thePowers.init(owner->AmbientDimension);
-	for (int i=0;i<this->Coefficient.size;i++)
-	{ this->Coefficient.TheObjects[i].MonomialExponentToColumnMatrix(matColumn);
+	ListBasicObjects<bool> theSigns; theSigns.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
+	thePowers.init(owner.AmbientDimension);
+	for (int k=0;k<this->Coefficient.size;k++)
+	{ this->Coefficient.TheObjects[k].MonomialExponentToColumnMatrix(matColumn);
 		matColumn.MultiplyOnTheLeft(startAsIdMat);
 		if (	startAsIdMat.RowEchelonFormToLinearSystemSolution
 						(tempSel,matColumn,matLinComb))
 		{ for (int i=0;i<matLinComb.NumRows;i++)
-				if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
+			{	if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
             matLinComb.elements[i][0].IsNegative() )
         { int tempI=matLinComb.elements[i][0].floor();
           if (tempI<0)
-          { tempI=-tempI; theSigns.TheObjects[i]=false;
-          } else
+          { tempI=-tempI; theSigns.TheObjects[i]=false;} 
+          else
             theSigns.TheObjects[i]=true;
           thePowers.MaxMultiplicities.TheObjects[i]=tempI;
-        }
+        } 
+        else
+					thePowers.MaxMultiplicities.TheObjects[i]=0;
+				thePowers.MaxMultiplicities.TheObjects[i]= 
+					MathRoutines::Minimum
+						(	thePowers.MaxMultiplicities.TheObjects[i],
+							this->TheObjects[i].GetMultiplicityLargestElongation());
+			}
+			int numSummands=MathRoutines::BinomialCoefficientMultivariate
+				(thePowers.MaxTotalMultiplicity(),thePowers.Multiplicities);
+			for (int l=0;l<numSummands;l++)
+			{ intRoot monomialRoot;
+				this->Coefficient.TheObjects[k].MonomialExponentToRoot(monomialRoot);
+				Monomial<Integer> tempMon;
+				tempMon.Assign(this->Coefficient.TheObjects[k]);
+				tempFrac.CopyFromLight(*this);
+				for (int j=0;j<thePowers.elements.size;j++)
+				{ int sign=1;
+					int currentIndex = thePowers.elements.TheObjects[j];
+					if (!theSigns.TheObjects[currentIndex])
+						sign=-1;
+					int currentElongation=tempFrac.TheObjects[currentIndex].GetLargestElongation();
+					int MultChange= -thePowers.Multiplicities.TheObjects[ currentIndex];
+					int MaxMultchange=-thePowers.MaxMultiplicities.TheObjects[ currentIndex];
+					int coeffChange=MathRoutines::NChooseK(MaxMultchange,MultChange);
+					if (sign==-1 && MultChange%2!=0)
+						coeffChange*=-1;
+					intRoot tempRoot;
+					tempRoot= owner.RootsToIndices.TheObjects[currentIndex];
+					tempRoot.MultiplyByInteger(MaxMultchange*currentElongation*sign);
+					tempFrac.TheObjects[currentIndex].AddMultiplicity(MultChange,currentElongation);
+					monomialRoot.AddRoot(tempRoot);
+					tempMon.Coefficient.value*=coeffChange;
+				}
+				tempMon.MakeFromRoot(tempMon.Coefficient,monomialRoot);
+				tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
+				tempFrac.Coefficient.TheObjects[0]=tempMon;
+				tempFrac.ReduceMonomialByMonomial(owner,-1,theGlobalVariables);
+				thePowers.IncrementSubset();
+			}
 		}
-		MathRoutines::BinomialCoefficientMultivariate(thePowers.MaxTotalMultiplicity(),thePowers.Multiplicities);
-		thePowers
+		else
+		{ owner.AddAlreadyReduced(*this,theGlobalVariables);
+		}
 	}
 }
 
 void partFractions::AddAndReduce(partFraction &f, GlobalVariables& theGlobalVariables)
-{
+{ f.ReduceMonomialByMonomial(*this,-1,theGlobalVariables);
 }
 
 void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGlobalVariables)

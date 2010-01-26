@@ -842,8 +842,9 @@ void Matrix<Element>::GaussianEliminationByRows
 	outputSelection.init(mat.NumCols);
 	for (int i=0; i<mat.NumCols; i++)
 	{	if (NumFoundPivots == MaxRankMat)
-		{	for (int j =i; j<mat.NumCols; j++)
-				outputSelection.AddSelection(j);
+		{	if (returnNonPivotPoints)
+				for (int j =i; j<mat.NumCols; j++)
+					outputSelection.AddSelection(j);
 			return;
 		}
 		tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
@@ -1786,8 +1787,7 @@ void ListBasicObjects<Object>::AddObjectOnBottom(const Object& o)
 template <class Object>
 void ListBasicObjects<Object>::AddObjectOnTop(const Object& o)
 {	if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
-	{	this->ExpandArrayOnTop(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
-	}
+		this->ExpandArrayOnTop(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
 	this->TheObjects[size]=o;
 	this->size++;
 }
@@ -1814,8 +1814,7 @@ int HashedListBasicObjects<Object>::SizeWithoutObjects()
 	Accum+=sizeof(this->TheHashedArrays)*this->HashSize;
 	Accum+=sizeof(this->HashSize);
 	for (int i=0;i<this->HashSize;i++)
-	{ Accum+=this->TheHashedArrays[i].SizeWithoutObjects();
-	}
+		Accum+=this->TheHashedArrays[i].SizeWithoutObjects();
 	return Accum;
 }
 
@@ -1827,31 +1826,26 @@ void HashedListBasicObjects<Object>::CopyFromHash (const HashedListBasicObjects<
 	this->SetHashSize(From.HashSize);
   this->CopyFromBase(From);
   if (this->size<this->HashSize)
-  {	for (int i=0;i<this->size;i++)
+  	for (int i=0;i<this->size;i++)
 		{	int hashIndex= this->TheObjects[i].HashFunction()% this->HashSize;
 			if (hashIndex<0){hashIndex+=this->HashSize;}
 			this->TheHashedArrays[hashIndex].CopyFromBase(From.TheHashedArrays[hashIndex]);
 		}
-	}
 	else
-	{ for (int i=0;i<this->HashSize;i++)
-		{ this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
-		}
-	}
+		for (int i=0;i<this->HashSize;i++)
+			this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
 }
 template <class Object>
 void HashedListBasicObjects<Object>::ClearHashes()
 { if (this->size<this->HashSize)
-	{	for (int i=0;i<this->size;i++)
+		for (int i=0;i<this->size;i++)
 		{ int hashIndex=this->TheObjects[i].HashFunction()%this->HashSize;
 			if (hashIndex<0){hashIndex+=this->HashSize;}
 			this->TheHashedArrays[hashIndex].size=0;
 		}
-	}
 	else
-	{ for (int i=0;i<this->HashSize;i++)
+		for (int i=0;i<this->HashSize;i++)
 			this->TheHashedArrays[i].size=0;
-	}
 }
 
 template <class Object>
@@ -1864,8 +1858,7 @@ template <class Object>
 void HashedListBasicObjects<Object>::initHash()
 { this->size=0;
 	for (int i=0;i<this->HashSize;i++)
-	{ this->TheHashedArrays[i].size=0;
-	}
+		this->TheHashedArrays[i].size=0;
 }
 
 template <class Object>

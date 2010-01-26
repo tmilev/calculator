@@ -9447,15 +9447,27 @@ void partFraction::ReduceMonomialByMonomial
 			tempMat.elements[j][i].AssignInteger(owner.RootsToIndices
 				.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]*
 					this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
+	if (this->flagAnErrorHasOccurredTimeToPanic)
+	{	this->ComputeDebugString(owner,&theGlobalVariables);
+		tempMat.ComputeDebugString();
+	}
 	startAsIdMat.MakeIdMatrix(owner.AmbientDimension);
-	MatrixLargeRational::GaussianEliminationByRows(tempMat,startAsIdMat,tempSel);
+	MatrixLargeRational::GaussianEliminationByRows(tempMat,startAsIdMat,tempSel,false);
+	if (this->flagAnErrorHasOccurredTimeToPanic)
+	{ startAsIdMat.ComputeDebugString();
+		tempMat.ComputeDebugString();
+	}
 	SelectionWithDifferentMaxMultiplicities thePowers;
 	ListBasicObjects<bool> theSigns; theSigns.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
 	thePowers.init(owner.AmbientDimension);
 	for (int k=0;k<this->Coefficient.size;k++)
 	{ this->Coefficient.TheObjects[k].MonomialExponentToColumnMatrix(matColumn);
+		if (this->flagAnErrorHasOccurredTimeToPanic)
+			matColumn.ComputeDebugString();
 		matColumn.MultiplyOnTheLeft(startAsIdMat);
-		if (	startAsIdMat.RowEchelonFormToLinearSystemSolution
+		if (this->flagAnErrorHasOccurredTimeToPanic)
+			matColumn.ComputeDebugString();
+		if (	tempMat.RowEchelonFormToLinearSystemSolution
 						(tempSel,matColumn,matLinComb))
 		{ for (int i=0;i<matLinComb.NumRows;i++)
 			{	if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||

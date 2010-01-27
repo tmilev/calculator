@@ -1217,7 +1217,13 @@ public:
                   this->Extended->num.sign*=-1;
               };
 	double DoubleValue();
-	int floor(){ if (NumShort<0) return (this->NumShort/ this->DenShort)-1;else return this->NumShort/this->DenShort;};
+	int floor(){	if (NumShort<0)
+									if (DenShort!=1) 
+										return (this->NumShort/ this->DenShort)-1;
+									else
+										return this->NumShort/ this->DenShort;
+								else				
+									return this->NumShort/this->DenShort;};
 	void MakeZero()	{this->NumShort=0;	this->DenShort=1; this->FreeExtended(); };
 	void MakeOne()	{this->NumShort=1;	this->DenShort=1; this->FreeExtended(); };
 	void MakeMOne()	{this->NumShort=-1; this->DenShort=1; this->FreeExtended(); };
@@ -4695,7 +4701,9 @@ public:
 												 GlobalVariables* theGlobalVariables);
 	bool DecomposeFromLinRelation
 		(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables* theGlobalVariables);
-	void ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension);
+	void ComputeOneCheckSum
+		(	partFractions& owner,Rational &output, int theDimension, 
+			GlobalVariables& theGlobalVariables);
 	void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
 	void ApplySzenesVergneFormula
@@ -4808,8 +4816,8 @@ public:
 	static	bool flagUsingCheckSum;
 	static int flagMaxNumStringOutputLines;
 	static bool flagUsingOrlikSolomonBasis;
-	void PrepareCheckSums();
-	void CompareCheckSums();
+	void PrepareCheckSums(GlobalVariables& theGlobalVariables);
+	void CompareCheckSums(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables* theGlobalVariables);
 	void ComputeDebugStringNoNumerator(GlobalVariables* theGlobalVariables);
 	void ComputeDebugStringWithVPfunction(GlobalVariables* theGlobalVariables);
@@ -4824,7 +4832,7 @@ public:
 	bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables* theGlobalVariables);
 	bool split(GlobalVariables* theGlobalVariables);
 	void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
-	void ComputeOneCheckSum(Rational& output);
+	void ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables);
 	void AccountPartFractionInternals(int sign, int index, GlobalVariables* theGlobalVariables);
 	void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables);
 	void AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables);

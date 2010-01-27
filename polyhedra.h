@@ -667,6 +667,10 @@ public:
 	int getTotalNumSubsets();
 	int TotalMultiplicity();
 	int MaxTotalMultiplicity();
+//	SelectionWithDifferentMaxMultiplicities(){};
+//	~SelectionWithDifferentMaxMultiplicities()
+//	{ std::string tempS;
+//	};
 };
 
 class MatrixIntTightMemoryFit : public ::MatrixElementaryTightMemoryFit<int>
@@ -1576,8 +1580,7 @@ void ListBasicObjects<Object>::AddListOnTop(ListBasicObjects<Object>& theList)
 { int oldsize= this->size;
 	this->SetSizeExpandOnTopNoObjectInit(this->size+theList.size);
 	for (int i=oldsize;i<this->size;i++)
-	{ this->TheObjects[i]= theList.TheObjects[i];
-	}
+		this->TheObjects[i]= theList.TheObjects[i];
 }
 
 template<class Object>
@@ -1633,8 +1636,7 @@ template <class Object>
 void ListBasicObjects<Object>::ShiftUpExpandOnTop(int StartingIndex)
 { this->SetSizeExpandOnTopNoObjectInit(this->size+1);
 	for (int i=this->size-1;i>StartingIndex;i--)
-	{ this->TheObjects[i]= this->TheObjects[i-1];
-	}
+		this->TheObjects[i]= this->TheObjects[i-1];
 }
 
 template <class Object>
@@ -1654,16 +1656,14 @@ template <class Object>
 void ListBasicObjects<Object>::AssignLight(const ListBasicObjectsLight<Object>& From)
 { this->SetSizeExpandOnTopNoObjectInit(From.size);
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i]= From.TheObjects[i];
-	}
+		this->TheObjects[i]= From.TheObjects[i];
 }
 
 template <class Object>
 void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From)
 { this->SetSizeExpandOnTopNoObjectInit(From.size);
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i]= From.TheObjects[i];
-	}
+		this->TheObjects[i]= From.TheObjects[i];
 }
 
 template <class Object>
@@ -1707,7 +1707,8 @@ inline void ListBasicObjects<Object>::AddObjectOnTopCreateNew()
 
 template <class Object>
 void ListBasicObjects<Object>::PopIndexShiftUp(int index)
-{	if (size==0){return;}
+{	if (size==0)
+		return;
 	this->size--;
 	for (int i=index;i>=1;i--)
 		this->TheObjects[i]=this->TheObjects[i-1];
@@ -1717,7 +1718,8 @@ void ListBasicObjects<Object>::PopIndexShiftUp(int index)
 
 template <class Object>
 void ListBasicObjects<Object>::PopIndexSwapWithLast(int index)
-{	if (this->size==0){return;}
+{	if (this->size==0)
+		return;
 	this->size--;
 	this->TheObjects[index]=this->TheObjects[this->size];
 }
@@ -1753,8 +1755,7 @@ void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 {	if (increase<=0) return;
 	Object* newArray = new Object[this->ActualSize+increase];
 	for (int i=0;i<this->size;i++)
-	{	newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
-	}
+		newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
@@ -1764,7 +1765,8 @@ void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 
 template <class Object>
 void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
-{	if (increase<=0) return;
+{	if (increase<=0) 
+		return;
 	Object* newArray = new Object[this->ActualSize+increase];
 	for (int i=0;i<this->size;i++)
 		newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];

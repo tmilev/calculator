@@ -7931,6 +7931,8 @@ int partFraction::SizeWithoutDebugString()
 
 void partFraction::AssignDenominatorOnly(const partFraction& p)
 { this->CopyFromLight(p);
+	this->Coefficient.NumVars=p.Coefficient.NumVars;
+	this->ComputeIndicesNonZeroMults();
 }
 
 void partFraction::Assign(const partFraction& p)
@@ -8030,9 +8032,12 @@ void partFraction::UncoverBracketsNumerator(GlobalVariables*  theGlobalVariables
 //	this->Coefficient.ComputeDebugString();
 }
 
-void partFraction::ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension)
+void partFraction::ComputeOneCheckSum
+	(	partFractions& owner,Rational &output, int theDimension, 
+		GlobalVariables& theGlobalVariables)
 { if (this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->Coefficient.ComputeDebugString();
+		this->ComputeDebugString(owner,&theGlobalVariables);
 	}
 	static IntegerPoly ComputationalBufferCoefficient;
 	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
@@ -9094,7 +9099,7 @@ bool partFractions::ShouldIgnore(GlobalVariables* theGlobalVariables)
 	return shouldIgnore;
 }
 
-void partFractions::PrepareCheckSums()
+void partFractions::PrepareCheckSums(GlobalVariables& theGlobalVariables)
 {//	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.InitFromIntegers(1,1,1,1,1,1,1,1,1,1,1,1);
 //	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.DivByInteger(4);
 //	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
@@ -9113,20 +9118,25 @@ void partFractions::PrepareCheckSums()
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[9].AssignNumeratorAndDenominator(31,37);
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[10].AssignNumeratorAndDenominator(37,41);
 	::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[11].AssignNumeratorAndDenominator(41,43);
-	this->ComputeOneCheckSum(this->StartCheckSum);
+	this->ComputeOneCheckSum(this->StartCheckSum,theGlobalVariables);
 }
 
-void partFractions::CompareCheckSums()
+void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 {	if (!this->flagUsingCheckSum)
 		return;
 	if (!this->flagDiscardingFractions)
-	{	this->ComputeOneCheckSum(this->EndCheckSum);
+	{	this->ComputeOneCheckSum(this->EndCheckSum,theGlobalVariables);
 	//partFraction::MakingConsistencyCheck=true;
 	/*if (partFraction::MakingConsistencyCheck)
 	{	this->ComputeDebugString();
 		tempRat2.ElementToString(tempS2);
 		tempRat.ElementToString(tempS1);
 	}*/
+		if (this->flagAnErrorHasOccurredTimeToPanic)
+		{ std::string tempS1, tempS2;
+			this->StartCheckSum.ElementToString(tempS1);
+			this->EndCheckSum.ElementToString(tempS2);
+		}
 		assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
 	}
 
@@ -9149,6 +9159,7 @@ void partFractions::PrepareIndicatorVariables()
 
 bool partFractions::split(GlobalVariables* theGlobalVariables)
 { partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	this->flagAnErrorHasOccurredTimeToPanic=true;
 	this->IndexLowestNonProcessed=0;
 	partFraction tempF;
 	std::string OldDebugString;
@@ -9158,7 +9169,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 //	this->ComputeDebugString();
 //	partFraction::MakingConsistencyCheck=true;
 	this->PrepareIndicatorVariables();
-	this->PrepareCheckSums();
+	this->PrepareCheckSums(*theGlobalVariables);
 	this->AssureIndicatorRegularity(theGlobalVariables);
 	//this->IndicatorRoot.MakeZero();
 	//if (partFraction::MakingConsistencyCheck)
@@ -9188,7 +9199,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 //			}
 			if (ProblemCounter==17)
 			{	this->ComputeDebugString(theGlobalVariables);
-				this->CompareCheckSums();
+				this->CompareCheckSums(*theGlobalVariables);
 			}
 			if (! tempFrac.reduceOnceGeneralMethod(*this, theGlobalVariables))
 			{ if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
@@ -9219,7 +9230,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 			this->ComputeDebugString(theGlobalVariables);
 			out <<this->DebugString<<"\\\\ = \\\\";
 			tempS= out.str();
-			this->CompareCheckSums();
+			this->CompareCheckSums(*theGlobalVariables);
 		}
 		this->MakeProgressReportSplittingMainPart();
 	//	this->ComputeDebugString();
@@ -9242,7 +9253,7 @@ bool partFractions::split(GlobalVariables* theGlobalVariables)
 	this->UncoverBracketsNumerators(theGlobalVariables);
 	//partFraction::UncoveringBrackets=true;
 	//this->ComputeDebugString();
-	this->CompareCheckSums();
+	this->CompareCheckSums(*theGlobalVariables);
 	this->IndexLowestNonProcessed= this->size;
 	this->MakeProgressReportSplittingMainPart();
 	return false;
@@ -9254,7 +9265,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 	//partFraction::flagAnErrorHasOccurredTimeToPanic= true;
 	//partFractions::flagAnErrorHasOccurredTimeToPanic= true;
 	Rational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->PrepareCheckSums();
+	this->PrepareCheckSums(*theGlobalVariables);
 	std::string tempS;
 	this->CheckSum.ElementToString(tempS);
 	// if IndicatorRoot is zero then the caller has forgotten
@@ -9291,7 +9302,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 	{	this->RemoveRedundantShortRootsClassicalRootSystem(theGlobalVariables);
 //	this->ComputeDebugString();
 	}
-	this->CompareCheckSums();
+	this->CompareCheckSums(*theGlobalVariables);
 	this->IndexLowestNonProcessed= this->size;
 	this->MakeProgressReportSplittingMainPart();
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot, theGlobalVariables);
@@ -9458,8 +9469,9 @@ void partFraction::ReduceMonomialByMonomial
 		tempMat.ComputeDebugString();
 	}
 	SelectionWithDifferentMaxMultiplicities thePowers;
-	ListBasicObjects<bool> theSigns; theSigns.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
-	thePowers.init(owner.RootsToIndices.size);
+	ListBasicObjects<bool> theSigns; 
+	theSigns.SetSizeExpandOnTopNoObjectInit(this->IndicesNonZeroMults.size);
+	thePowers.init(this->IndicesNonZeroMults.size);
 	for (int k=0;k<this->Coefficient.size;k++)
 	{ this->Coefficient.TheObjects[k].MonomialExponentToColumnMatrix(matColumn);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -9467,7 +9479,7 @@ void partFraction::ReduceMonomialByMonomial
 		matColumn.MultiplyOnTheLeft(startAsIdMat);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 			matColumn.ComputeDebugString();
-		tempFrac.CopyFromLight(*this);
+		tempFrac.AssignDenominatorOnly(*this);
 		tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
 		tempFrac.Coefficient.TheObjects[0].Assign(this->Coefficient.TheObjects[k]);
 		if (	tempMat.RowEchelonFormToLinearSystemSolution
@@ -9489,12 +9501,12 @@ void partFraction::ReduceMonomialByMonomial
 				thePowers.MaxMultiplicities.TheObjects[i]= 
 					MathRoutines::Minimum
 						(	thePowers.MaxMultiplicities.TheObjects[i],
-							this->TheObjects[i].GetMultiplicityLargestElongation());
+							this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
+								.GetMultiplicityLargestElongation());
 			}
 			thePowers.ComputeElements();
-			int numSummands=MathRoutines::BinomialCoefficientMultivariate
-				(thePowers.MaxTotalMultiplicity(),thePowers.Multiplicities);
-			if (numSummands==0)
+			int numSummands=thePowers.getTotalNumSubsets();
+			if (numSummands==1)
 				owner.AddAlreadyReduced(tempFrac,theGlobalVariables);
 			else
 			{	for (int l=0;l<numSummands;l++)
@@ -9502,29 +9514,35 @@ void partFraction::ReduceMonomialByMonomial
 					this->Coefficient.TheObjects[k].MonomialExponentToRoot(monomialRoot);
 					Monomial<Integer> tempMon;
 					tempMon.Assign(this->Coefficient.TheObjects[k]);
-					for (int j=0;j<thePowers.elements.size;j++)
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+						tempMon.ComputeDebugString();
+					for (int j=0;j<thePowers.Multiplicities.size;j++)
 					{ int sign=1;
-						int currentIndex = thePowers.elements.TheObjects[j];
-						if (!theSigns.TheObjects[currentIndex])
+						int currentIndexInFraction = 
+							this->IndicesNonZeroMults.TheObjects[j];
+						if (!theSigns.TheObjects[j])
 							sign=-1;
-						int currentElongation=tempFrac.TheObjects[currentIndex].GetLargestElongation();
-						int MultChange= -thePowers.Multiplicities.TheObjects[ currentIndex];
-						int MaxMultchange=-thePowers.MaxMultiplicities.TheObjects[ currentIndex];
+						int currentElongation=tempFrac.TheObjects[currentIndexInFraction].GetLargestElongation();
+						int MultChange= -thePowers.Multiplicities.TheObjects[ j];
+						int MaxMultchange=-thePowers.MaxMultiplicities.TheObjects[ j];
 						int coeffChange=MathRoutines::NChooseK(MaxMultchange,MultChange);
 						if (sign==-1 && MultChange%2!=0)
 							coeffChange*=-1;
 						intRoot tempRoot;
-						tempRoot= owner.RootsToIndices.TheObjects[currentIndex];
+						tempRoot= owner.RootsToIndices.TheObjects[currentIndexInFraction];
 						tempRoot.MultiplyByInteger(MaxMultchange*currentElongation*sign);
-						tempFrac.TheObjects[currentIndex].AddMultiplicity(MultChange,currentElongation);
+						tempFrac.TheObjects[currentIndexInFraction].AddMultiplicity
+							(MultChange,currentElongation);
 						monomialRoot.AddRoot(tempRoot);
 						tempMon.Coefficient.value*=coeffChange;
 					}
+					tempFrac.AssignDenominatorOnly(*this);					
 					tempMon.MakeFromRoot(tempMon.Coefficient,monomialRoot);
 					tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
 					tempFrac.Coefficient.TheObjects[0]=tempMon;
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+						tempFrac.ComputeDebugString(owner,&theGlobalVariables);
 					tempFrac.ReduceMonomialByMonomial(owner,-1,theGlobalVariables);
-					tempFrac.CopyFromLight(*this);					
 					thePowers.IncrementSubset();
 				}
 			}
@@ -9782,11 +9800,13 @@ void partFractions::MakeProgressVPFcomputation()
 	::FeedDataToIndicatorWindow(::IndicatorWindowGlobalVariables);
 }
 
-void partFractions::ComputeOneCheckSum(Rational &output)
+void partFractions::ComputeOneCheckSum
+	(Rational &output,GlobalVariables& theGlobalVariables)
 { output.MakeZero();
 	for(int i=0;i<this->size;i++)
 	{ Rational tempRat;
-		this->TheObjects[i].ComputeOneCheckSum(*this,tempRat, this->AmbientDimension);
+		this->TheObjects[i].ComputeOneCheckSum
+			(*this,tempRat, this->AmbientDimension,theGlobalVariables);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 		{ std::string tempS;
 			tempRat.ElementToString(tempS);
@@ -9815,8 +9835,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables* theGlobalVariable
 {	partFraction tempFrac;
 	Rational startCheckSum,tempCheckSum, tempCheckSum2,tempCheckSum3;
 	if (partFraction::MakingConsistencyCheck)
-	{	this->ComputeOneCheckSum(startCheckSum);
-	}
+		this->ComputeOneCheckSum(startCheckSum,*theGlobalVariables);
 	for (int i=0;i<this->size;i++)
 	{ tempFrac.Assign(this->TheObjects[i]);
 		root* tempPointerRoot=0;

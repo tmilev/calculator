@@ -9459,7 +9459,7 @@ void partFraction::ReduceMonomialByMonomial
 	}
 	SelectionWithDifferentMaxMultiplicities thePowers;
 	ListBasicObjects<bool> theSigns; theSigns.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
-	thePowers.init(owner.AmbientDimension);
+	thePowers.init(owner.RootsToIndices.size);
 	for (int k=0;k<this->Coefficient.size;k++)
 	{ this->Coefficient.TheObjects[k].MonomialExponentToColumnMatrix(matColumn);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -9467,9 +9467,14 @@ void partFraction::ReduceMonomialByMonomial
 		matColumn.MultiplyOnTheLeft(startAsIdMat);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 			matColumn.ComputeDebugString();
+		tempFrac.CopyFromLight(*this);
+		tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
+		tempFrac.Coefficient.TheObjects[0].Assign(this->Coefficient.TheObjects[k]);
 		if (	tempMat.RowEchelonFormToLinearSystemSolution
 						(tempSel,matColumn,matLinComb))
-		{ for (int i=0;i<matLinComb.NumRows;i++)
+		{ if (this->flagAnErrorHasOccurredTimeToPanic)
+				matLinComb.ComputeDebugString();
+			for (int i=0;i<matLinComb.NumRows;i++)
 			{	if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
             matLinComb.elements[i][0].IsNegative() )
         { int tempI=matLinComb.elements[i][0].floor();
@@ -9486,42 +9491,46 @@ void partFraction::ReduceMonomialByMonomial
 						(	thePowers.MaxMultiplicities.TheObjects[i],
 							this->TheObjects[i].GetMultiplicityLargestElongation());
 			}
+			thePowers.ComputeElements();
 			int numSummands=MathRoutines::BinomialCoefficientMultivariate
 				(thePowers.MaxTotalMultiplicity(),thePowers.Multiplicities);
-			for (int l=0;l<numSummands;l++)
-			{ intRoot monomialRoot;
-				this->Coefficient.TheObjects[k].MonomialExponentToRoot(monomialRoot);
-				Monomial<Integer> tempMon;
-				tempMon.Assign(this->Coefficient.TheObjects[k]);
-				tempFrac.CopyFromLight(*this);
-				for (int j=0;j<thePowers.elements.size;j++)
-				{ int sign=1;
-					int currentIndex = thePowers.elements.TheObjects[j];
-					if (!theSigns.TheObjects[currentIndex])
-						sign=-1;
-					int currentElongation=tempFrac.TheObjects[currentIndex].GetLargestElongation();
-					int MultChange= -thePowers.Multiplicities.TheObjects[ currentIndex];
-					int MaxMultchange=-thePowers.MaxMultiplicities.TheObjects[ currentIndex];
-					int coeffChange=MathRoutines::NChooseK(MaxMultchange,MultChange);
-					if (sign==-1 && MultChange%2!=0)
-						coeffChange*=-1;
-					intRoot tempRoot;
-					tempRoot= owner.RootsToIndices.TheObjects[currentIndex];
-					tempRoot.MultiplyByInteger(MaxMultchange*currentElongation*sign);
-					tempFrac.TheObjects[currentIndex].AddMultiplicity(MultChange,currentElongation);
-					monomialRoot.AddRoot(tempRoot);
-					tempMon.Coefficient.value*=coeffChange;
+			if (numSummands==0)
+				owner.AddAlreadyReduced(tempFrac,theGlobalVariables);
+			else
+			{	for (int l=0;l<numSummands;l++)
+				{ intRoot monomialRoot;
+					this->Coefficient.TheObjects[k].MonomialExponentToRoot(monomialRoot);
+					Monomial<Integer> tempMon;
+					tempMon.Assign(this->Coefficient.TheObjects[k]);
+					for (int j=0;j<thePowers.elements.size;j++)
+					{ int sign=1;
+						int currentIndex = thePowers.elements.TheObjects[j];
+						if (!theSigns.TheObjects[currentIndex])
+							sign=-1;
+						int currentElongation=tempFrac.TheObjects[currentIndex].GetLargestElongation();
+						int MultChange= -thePowers.Multiplicities.TheObjects[ currentIndex];
+						int MaxMultchange=-thePowers.MaxMultiplicities.TheObjects[ currentIndex];
+						int coeffChange=MathRoutines::NChooseK(MaxMultchange,MultChange);
+						if (sign==-1 && MultChange%2!=0)
+							coeffChange*=-1;
+						intRoot tempRoot;
+						tempRoot= owner.RootsToIndices.TheObjects[currentIndex];
+						tempRoot.MultiplyByInteger(MaxMultchange*currentElongation*sign);
+						tempFrac.TheObjects[currentIndex].AddMultiplicity(MultChange,currentElongation);
+						monomialRoot.AddRoot(tempRoot);
+						tempMon.Coefficient.value*=coeffChange;
+					}
+					tempMon.MakeFromRoot(tempMon.Coefficient,monomialRoot);
+					tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
+					tempFrac.Coefficient.TheObjects[0]=tempMon;
+					tempFrac.ReduceMonomialByMonomial(owner,-1,theGlobalVariables);
+					tempFrac.CopyFromLight(*this);					
+					thePowers.IncrementSubset();
 				}
-				tempMon.MakeFromRoot(tempMon.Coefficient,monomialRoot);
-				tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
-				tempFrac.Coefficient.TheObjects[0]=tempMon;
-				tempFrac.ReduceMonomialByMonomial(owner,-1,theGlobalVariables);
-				thePowers.IncrementSubset();
 			}
 		}
 		else
-		{ owner.AddAlreadyReduced(*this,theGlobalVariables);
-		}
+			owner.AddAlreadyReduced(tempFrac,theGlobalVariables);
 	}
 }
 
@@ -10656,8 +10665,7 @@ int RootToIndexTable::getIndexDoubleOfARoot(intRoot& TheRoot)
 void ::SelectionWithMultiplicities::init(int NumElements)
 {	this->Multiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
 	for (int i=0;i<this->Multiplicities.size;i++)
-	{ this->Multiplicities.TheObjects[i]=0;
-	}
+		this->Multiplicities.TheObjects[i]=0;
 	this->elements.MakeActualSizeAtLeastExpandOnTop(NumElements);
 	this->elements.size=0;
 }
@@ -10694,9 +10702,8 @@ void SelectionWithMaxMultiplicity::IncrementSubset()
 void SelectionWithMultiplicities::ComputeElements()
 { this->elements.size=0;
 	for (int i=0;i<this->Multiplicities.size;i++)
-	{ if (this->Multiplicities.TheObjects[i]>0)
+		if (this->Multiplicities.TheObjects[i]>0)
 			this->elements.AddObjectOnTop(i);
-	}
 }
 
 int SelectionWithMultiplicities::CardinalitySelectionWithoutMultiplicities()
@@ -10706,8 +10713,7 @@ int SelectionWithMultiplicities::CardinalitySelectionWithoutMultiplicities()
 int ::SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
 { int result=1;
 	for (int i=0;i<this->MaxMultiplicities.size;i++)
-	{ result*=(this->MaxMultiplicities.TheObjects[i]+1);
-	}
+		result*=(this->MaxMultiplicities.TheObjects[i]+1);
 	assert(result>=0);
 	return result;
 }
@@ -10715,30 +10721,27 @@ int ::SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
 int ::SelectionWithDifferentMaxMultiplicities::TotalMultiplicity()
 { int result=0;
 	for (int i=0;i<this->Multiplicities.size;i++)
-	{ result+=this->Multiplicities.TheObjects[i];
-	}
+		result+=this->Multiplicities.TheObjects[i];
 	return result;
 }
 
 int ::SelectionWithDifferentMaxMultiplicities::MaxTotalMultiplicity()
 { int result=0;
 	for (int i=0;i<this->Multiplicities.size;i++)
-	{ result+=this->MaxMultiplicities.TheObjects[i];
-	}
+		result+=this->MaxMultiplicities.TheObjects[i];
 	return result;
 }
 
 void ::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
 { for (int i=0;i<this->Multiplicities.size;i++)
-	{ this->Multiplicities.TheObjects[i]=0;
-	}
+		this->Multiplicities.TheObjects[i]=0;
 }
 
 void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
 {	for (int i=this->Multiplicities.size-1;i>=0;i--)
 	{ if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicities.TheObjects[i])
 		{ if (this->Multiplicities.TheObjects[i]==0)
-			{	this->elements.AddObjectOnTop(i);}
+				this->elements.AddObjectOnTop(i);
 			this->Multiplicities.TheObjects[i]++;
 			return;
 		}
@@ -10756,8 +10759,7 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, roo
 	Rational lengthA;
 	lengthA.MakeZero();
 	if (RhoAction)
-	{ beta.Add(this->rho);
-	}
+		beta.Add(this->rho);
 	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
 	{ for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
 		{ tempRat.Assign(beta.TheObjects[j]);

@@ -9445,7 +9445,7 @@ void partFractions::AccountPartFractionInternals(int sign, int index, GlobalVari
 
 void partFraction::ReduceMonomialByMonomial
 	(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables)
-{	partFraction& tempFrac= theGlobalVariables.fracReduceMonomialByMonomial;
+{	partFraction tempFrac;
 	//tempFrac.Assign(*this);
 	MatrixLargeRational& tempMat= theGlobalVariables.matReduceMonomialByMonomial;
 	MatrixLargeRational& startAsIdMat = theGlobalVariables.matIdMatrix;
@@ -9520,12 +9520,12 @@ void partFraction::ReduceMonomialByMonomial
 					{ int sign=1;
 						int currentIndexInFraction = 
 							this->IndicesNonZeroMults.TheObjects[j];
-						if (!theSigns.TheObjects[j])
+						if (theSigns.TheObjects[j])
 							sign=-1;
 						int currentElongation=tempFrac.TheObjects[currentIndexInFraction].GetLargestElongation();
 						int MultChange= -thePowers.Multiplicities.TheObjects[ j];
 						int MaxMultchange=-thePowers.MaxMultiplicities.TheObjects[ j];
-						int coeffChange=MathRoutines::NChooseK(MaxMultchange,MultChange);
+						int coeffChange=MathRoutines::NChooseK(-MaxMultchange,-MultChange);
 						if (sign==-1 && MultChange%2!=0)
 							coeffChange*=-1;
 						intRoot tempRoot;

@@ -1735,25 +1735,6 @@ int MathRoutines::BinomialCoefficientMultivariate(int N, ListBasicObjects<int> &
 	return result;
 }
 
-int MathRoutines::NChooseK(int n, int k)
-{	int result=1;
-	for (int i =0; i<k;i++)
-	{	result*=(n-i);
-		result/=(i+1);
-	}
-	return result;
-}
-
-int Rational::gcd(int a, int b)
-{	int temp;
-	while(b>0)
-	{ temp= a % b;
-		a=b;
-		b=temp;
-	}
-  return a;
-}
-
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output)
 {	Rational t;
 	Rational tempRat;
@@ -9452,6 +9433,7 @@ void partFraction::ReduceMonomialByMonomial
 	MatrixLargeRational& matColumn = theGlobalVariables.matOneColumn;
 	MatrixLargeRational& matLinComb = theGlobalVariables.matReduceMonomialByMonomial2;
 	Selection& tempSel= theGlobalVariables.selReduceMonomialByMonomial;
+	Monomial<Integer> tempMon; intRoot tempRoot;
 	tempMat.init(owner.AmbientDimension,(short) this->IndicesNonZeroMults.size);
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 		for (int j=0;j<owner.AmbientDimension;j++)
@@ -9469,8 +9451,8 @@ void partFraction::ReduceMonomialByMonomial
 		tempMat.ComputeDebugString();
 	}
 	SelectionWithDifferentMaxMultiplicities thePowers;
-	ListBasicObjects<bool> theSigns; 
-	theSigns.SetSizeExpandOnTopNoObjectInit(this->IndicesNonZeroMults.size);
+	ListBasicObjects<int> thePowersSigned; 
+	thePowersSigned.SetSizeExpandOnTopNoObjectInit(this->IndicesNonZeroMults.size);
 	thePowers.init(this->IndicesNonZeroMults.size);
 	for (int k=0;k<this->Coefficient.size;k++)
 	{ this->Coefficient.TheObjects[k].MonomialExponentToColumnMatrix(matColumn);
@@ -9484,25 +9466,39 @@ void partFraction::ReduceMonomialByMonomial
 		tempFrac.Coefficient.TheObjects[0].Assign(this->Coefficient.TheObjects[k]);
 		if (	tempMat.RowEchelonFormToLinearSystemSolution
 						(tempSel,matColumn,matLinComb))
-		{ if (this->flagAnErrorHasOccurredTimeToPanic)
+		{ tempMon.Assign(this->Coefficient.TheObjects[k]);
+			if (this->flagAnErrorHasOccurredTimeToPanic)
 				matLinComb.ComputeDebugString();
 			for (int i=0;i<matLinComb.NumRows;i++)
-			{	if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
-            matLinComb.elements[i][0].IsNegative() )
+			{	thePowers.MaxMultiplicities.TheObjects[i]=0;
+				if (	matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
+							matLinComb.elements[i][0].IsNegative() )
         { int tempI=matLinComb.elements[i][0].floor();
           if (tempI<0)
-          { tempI=-tempI; theSigns.TheObjects[i]=false;} 
-          else
-            theSigns.TheObjects[i]=true;
-          thePowers.MaxMultiplicities.TheObjects[i]=tempI;
-        } 
-        else
-					thePowers.MaxMultiplicities.TheObjects[i]=0;
-				thePowers.MaxMultiplicities.TheObjects[i]= 
-					MathRoutines::Minimum
-						(	thePowers.MaxMultiplicities.TheObjects[i],
+					{	thePowers.MaxMultiplicities.TheObjects[i]=
 							this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
-								.GetMultiplicityLargestElongation());
+									.GetMultiplicityLargestElongation();
+	          thePowersSigned.TheObjects[i]=tempI;
+					}
+					else
+					{	thePowers.MaxMultiplicities.TheObjects[i]=MathRoutines::Minimum
+							(	tempI,this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
+									.GetMultiplicityLargestElongation());
+						thePowersSigned.TheObjects[i]=thePowers.MaxMultiplicities.TheObjects[i];
+					}
+					tempRoot=owner.RootsToIndices.TheObjects
+						[this->IndicesNonZeroMults.TheObjects[i]];
+					tempRoot.MultiplyByInteger
+						(	thePowersSigned.TheObjects[i]*
+							this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
+								.GetLargestElongation());
+					tempMon.DivideByExponentOnly(tempRoot);
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+						tempMon.ComputeDebugString();
+        } else
+        {	thePowers.Multiplicities.TheObjects[i]=0;
+					thePowersSigned.TheObjects[i]=0;
+        }
 			}
 			thePowers.ComputeElements();
 			int numSummands=thePowers.getTotalNumSubsets();
@@ -9510,36 +9506,9 @@ void partFraction::ReduceMonomialByMonomial
 				owner.AddAlreadyReduced(tempFrac,theGlobalVariables);
 			else
 			{	for (int l=0;l<numSummands;l++)
-				{ intRoot monomialRoot;
-					this->Coefficient.TheObjects[k].MonomialExponentToRoot(monomialRoot);
-					Monomial<Integer> tempMon;
-					tempMon.Assign(this->Coefficient.TheObjects[k]);
-					if (this->flagAnErrorHasOccurredTimeToPanic)
-						tempMon.ComputeDebugString();
-					for (int j=0;j<thePowers.Multiplicities.size;j++)
-					{ int sign=1;
-						int currentIndexInFraction = 
-							this->IndicesNonZeroMults.TheObjects[j];
-						if (theSigns.TheObjects[j])
-							sign=-1;
-						int currentElongation=tempFrac.TheObjects[currentIndexInFraction].GetLargestElongation();
-						int MultChange= -thePowers.Multiplicities.TheObjects[ j];
-						int MaxMultchange=-thePowers.MaxMultiplicities.TheObjects[ j];
-						int coeffChange=MathRoutines::NChooseK(-MaxMultchange,-MultChange);
-						if (sign==-1 && MultChange%2!=0)
-							coeffChange*=-1;
-						intRoot tempRoot;
-						tempRoot= owner.RootsToIndices.TheObjects[currentIndexInFraction];
-						tempRoot.MultiplyByInteger(MaxMultchange*currentElongation*sign);
-						tempFrac.TheObjects[currentIndexInFraction].AddMultiplicity
-							(MultChange,currentElongation);
-						monomialRoot.AddRoot(tempRoot);
-						tempMon.Coefficient.value*=coeffChange;
-					}
-					tempFrac.AssignDenominatorOnly(*this);					
-					tempMon.MakeFromRoot(tempMon.Coefficient,monomialRoot);
-					tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
-					tempFrac.Coefficient.TheObjects[0]=tempMon;
+				{	tempFrac.AssignDenominatorOnly(*this);
+					tempFrac.ReduceMonomialByMonomialModifyOneMonomial
+						(owner, theGlobalVariables,thePowers,thePowersSigned,tempMon);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 						tempFrac.ComputeDebugString(owner,&theGlobalVariables);
 					tempFrac.ReduceMonomialByMonomial(owner,-1,theGlobalVariables);
@@ -9550,6 +9519,80 @@ void partFraction::ReduceMonomialByMonomial
 		else
 			owner.AddAlreadyReduced(tempFrac,theGlobalVariables);
 	}
+}
+
+void partFraction::ReduceMonomialByMonomialModifyOneMonomial
+	(	partFractions &Accum, GlobalVariables &theGlobalVariables, 
+		SelectionWithDifferentMaxMultiplicities &thePowers, 
+		ListBasicObjects<int> &thePowersSigned, Monomial<Integer> &input)
+{	IntegerPoly& theNumerator= 
+		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial1;
+	IntegerPoly& tempP=
+		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial2;
+	theNumerator.Nullify(Accum.AmbientDimension);
+	theNumerator.AddMonomial(input);
+	assert(thePowersSigned.size== thePowers.Multiplicities.size);
+	if (this->flagAnErrorHasOccurredTimeToPanic)
+		theNumerator.ComputeDebugString();
+	for (int j=0;j<thePowers.Multiplicities.size;j++)
+	{ int currentIndexInFraction = this->IndicesNonZeroMults.TheObjects[j];
+		int currentElongation=
+			this->TheObjects[currentIndexInFraction].GetLargestElongation();
+		int MultChange= thePowers.Multiplicities.TheObjects[j];
+		int MaxMultchange=
+			this->TheObjects[currentIndexInFraction].GetMultiplicityLargestElongation();
+		intRoot tempRoot;
+		tempRoot= Accum.RootsToIndices.TheObjects[currentIndexInFraction];
+		tempRoot.MultiplyByInteger(currentElongation);
+		this->GetPolyReduceMonomialByMonomial
+			(	Accum, theGlobalVariables,tempRoot,thePowersSigned.TheObjects[j],MultChange,
+				MaxMultchange,tempP);
+		if (this->flagAnErrorHasOccurredTimeToPanic)
+			tempP.ComputeDebugString();
+		theNumerator.MultiplyBy(tempP);
+		if (this->flagAnErrorHasOccurredTimeToPanic)
+			theNumerator.ComputeDebugString();
+		this->TheObjects[currentIndexInFraction].AddMultiplicity
+			(-MultChange,currentElongation);
+	}
+	this->Coefficient.AssignPolynomial(theNumerator);
+	this->ReduceMonomialByMonomial(Accum,-1,theGlobalVariables);
+}
+
+void partFraction::GetPolyReduceMonomialByMonomial
+	(	partFractions& owner, GlobalVariables& theGlobalVariables,
+		intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, 
+		int startDenominatorPower,IntegerPoly& output)
+{ if (StartMonomialPower==0)
+	{	output.MakeNVarConst(owner.AmbientDimension,IOne);
+		return;
+	}
+	Monomial<Integer> tempMon;	tempMon.init(owner.AmbientDimension);	
+	output.Nullify(owner.AmbientDimension);
+	if (StartMonomialPower>0)
+	{	tempMon.Coefficient.value= MathRoutines::NChooseK
+			(StartMonomialPower,DenPowerReduction);
+		if ((DenPowerReduction)%2!=0)
+			tempMon.Coefficient.value*=-1;
+		output.AddMonomial(tempMon);
+	}
+	if (StartMonomialPower<0 )
+	{ if (DenPowerReduction!=startDenominatorPower)
+		{	tempMon.Coefficient.value= MathRoutines::NChooseK
+				(StartMonomialPower-1+DenPowerReduction,DenPowerReduction); 
+			output.AddMonomial(tempMon);
+		} else
+		{ intRoot tempRoot; 
+			for (int i=0;i<StartMonomialPower-1;i++)
+			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(-startDenominatorPower+i);
+				tempMon.MakeFromRoot(IOne,tempRoot);
+				tempMon.Coefficient.value= MathRoutines::NChooseK
+					(startDenominatorPower-1+i,i);
+				output.AddMonomial(tempMon);
+			}
+		}
+	}
+	output.ComputeDebugString();
 }
 
 void partFractions::AddAndReduce(partFraction &f, GlobalVariables& theGlobalVariables)

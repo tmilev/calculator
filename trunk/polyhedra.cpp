@@ -9507,6 +9507,8 @@ void partFraction::ReduceMonomialByMonomial
 			else
 			{	for (int l=0;l<numSummands;l++)
 				{	tempFrac.AssignDenominatorOnly(*this);
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+						thePowers.ComputeDebugString();				
 					tempFrac.ReduceMonomialByMonomialModifyOneMonomial
 						(owner, theGlobalVariables,thePowers,thePowersSigned,tempMon);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -9556,7 +9558,9 @@ void partFraction::ReduceMonomialByMonomialModifyOneMonomial
 			(-MultChange,currentElongation);
 	}
 	this->Coefficient.AssignPolynomial(theNumerator);
-	this->ReduceMonomialByMonomial(Accum,-1,theGlobalVariables);
+	this->ComputeIndicesNonZeroMults();
+	if (this->flagAnErrorHasOccurredTimeToPanic)
+		this->ComputeDebugString(Accum, &theGlobalVariables);
 }
 
 void partFraction::GetPolyReduceMonomialByMonomial
@@ -9579,11 +9583,11 @@ void partFraction::GetPolyReduceMonomialByMonomial
 	if (StartMonomialPower<0 )
 	{ if (DenPowerReduction!=startDenominatorPower)
 		{	tempMon.Coefficient.value= MathRoutines::NChooseK
-				(StartMonomialPower-1+DenPowerReduction,DenPowerReduction); 
+				(-StartMonomialPower-1+DenPowerReduction,DenPowerReduction); 
 			output.AddMonomial(tempMon);
 		} else
 		{ intRoot tempRoot; 
-			for (int i=0;i<StartMonomialPower-1;i++)
+			for (int i=0;i<-StartMonomialPower;i++)
 			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(-startDenominatorPower+i);
 				tempMon.MakeFromRoot(IOne,tempRoot);
 				tempMon.Coefficient.value= MathRoutines::NChooseK

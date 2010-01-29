@@ -898,7 +898,7 @@ void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.oneStepChamberSlice
-    (this->theComputationSetup.theGlobalVariablesContainer->Default());
+    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
@@ -907,7 +907,7 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.oneIncrement
-		(this->theComputationSetup.theGlobalVariablesContainer->Default());
+		(*this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
@@ -916,7 +916,7 @@ void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.FullChop
-    (this->theComputationSetup.theGlobalVariablesContainer->Default());
+    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
@@ -926,7 +926,7 @@ void guiMainWindow::onButton9CustomNilradical(wxCommandEvent& ev)
 	this->theComputationSetup.SetupCustomNilradicalInVPVectors
 			(*this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->theComputationSetup.FullChop
-    (this->theComputationSetup.theGlobalVariablesContainer->Default());
+    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();	
 }

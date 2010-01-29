@@ -569,7 +569,7 @@ public:
 	//returns true if successful, false otherwise
 //	bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //		(Matrix<Element>& inputColumn,Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
-	bool Invert(GlobalVariables* theGlobalVariables);
+	bool Invert(GlobalVariables& theGlobalVariables);
 	void NullifyAll();
 	//returns true if the system has a solution, false otherwise
 	bool RowEchelonFormToLinearSystemSolution
@@ -590,7 +590,7 @@ public:
 	void ComputeDeterminantOverwriteMatrix( Rational& output);
 	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, int OutputDimension, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
-	void Transpose(GlobalVariables* theGlobalVariables);
+	void Transpose(GlobalVariables& theGlobalVariables);
 	void MultiplyByInt(int x);
 	void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
 	void ScaleToIntegralForMinRationalHeight();
@@ -711,7 +711,7 @@ inline void MatrixElementaryTightMemoryFit<Element>::Free()
 }
 
 template <typename Element>
-bool Matrix<Element>::Invert(GlobalVariables* theGlobalVariables)
+bool Matrix<Element>::Invert(GlobalVariables& theGlobalVariables)
 { assert(this->NumCols==this->NumRows);
 	if (this->flagComputingDebugInfo)
 		this->ComputeDebugString();
@@ -1345,11 +1345,11 @@ public:
 	void AddRootS(roots& r);
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
-	void PerturbVectorToRegular(root&output, GlobalVariables* theGlobalVariables, int theDimension);
+	void PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
 	void Average(root& output, int theDimension);
 	void Pop(int index);
-	bool IsRegular(root& r, GlobalVariables* theGlobalVariables, int theDimension);
-	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables* theGlobalVariables, int theDimension);
+	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
+	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
 	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
 		(MatrixLargeRational& outputTheLinearCombination, int theIndex);
 	void GetLinearDependenceRunTheLinearAlgebra
@@ -1369,13 +1369,13 @@ public:
 	void SelectionToMatrixAppend
 				(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
 	void ComputeNormal(root& output);
-	bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables* theGlobalVariables);
+	bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables& theGlobalVariables);
 	bool ComputeNormalFromSelection
-		(root& output, Selection& theSelection, GlobalVariables* theGlobalVariables, int theDimension);
+		(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension);
 	bool ComputeNormalFromSelectionAndExtraRoot
-		(root& output,root& ExtraRoot, Selection& theSelection, GlobalVariables* theGlobalVariables);
+		(root& output,root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
 	bool ComputeNormalFromSelectionAndTwoExtraRoots
-		(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables* theGlobalVariables);
+		(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
 	bool operator==(const roots& right);
 	void operator = (const roots& right){this->CopyFromBase(right);};
 };
@@ -1412,7 +1412,7 @@ public:
 									root& TheKillerFacet, root& direction,
 									ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors,
 									ListBasicObjects<WallData*>* PossibleBogusWalls,
-									GlobalVariables* theGlobalVariables);
+									GlobalVariables& theGlobalVariables);
 	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 };
@@ -1514,45 +1514,45 @@ public:
 	bool VertexIsIncidentWithSelection(root& VertexCandidate,Selection& theSel);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
 	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
-		                root& direction, GlobalVariables* theGlobalVariables);
+		                root& direction, GlobalVariables& theGlobalVariables);
 	bool IsABogusNeighbor
 		(	WallData& NeighborWall,CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	void ComputeVerticesFromNormals
 		(	CombinatorialChamberContainer& owner,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	bool ComputeVertexFromSelection
-		(	GlobalVariables* theGlobalVariables, root& output, Selection& theSel, int theDimension);
+		(	GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
 	//the below function returns false if the cross-section affine walls have been modified
 	//and aborts its execution
-	bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
+	bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
 	bool PointIsInChamber(root&point);
 	void findWallsIncidentWithVertexExcludeWallAtInfinity
 		(root& theVertex, Selection& output, CombinatorialChamberContainer* owner);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
 	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberContainer& owner);
 	void ComputeAffineInfinityPointApproximation
-		(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables* theGlobalVariables);
+		(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	void PurgeInternalWalls();
 	bool LinearAlgebraForVertexComputation
-				(Selection& theSelection, root& output, GlobalVariables* theGlobalVariables, int theDimension);
+				(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension);
 	bool LinearAlgebraForVertexComputationOneAffinePlane
 				(	Selection& theSelection, root& output,
-					GlobalVariables* theGlobalVariables, CombinatorialChamberContainer* owner);
+					GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner);
 	//returns false if the vectors were linearly dependent
 	bool SliceInDirection(root& direction,roots& directions,
 										    int CurrentIndex, CombinatorialChamberContainer& output,
-												hashedRoots& FacetOutput, GlobalVariables* theGlobalVariables);
+												hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables);
 	void PropagateSlicingWallThroughNonExploredNeighbors
 		(	root& theKillerNormal,rootsCollection &CuttingPlaneVertices,
-			::CombinatorialChamberContainer& owner, GlobalVariables* theGlobalVariables);
+			::CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	//the below function will automatically add the candidate to the
 	//list of used hyperplanes if the candidate is an allowed one
 	bool IsAValidCandidateForNormalOfAKillerFacet
 		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	bool HasHSignVertex(root& h,int sign);
 	bool CheckSplittingPointCandidate
 		(	Selection &SelectionTargetSimplex,Selection &SelectionStartSimplex,
@@ -1560,7 +1560,7 @@ public:
 	void AddInternalWall
 		(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal,
 			root &direction, CombinatorialChamberContainer* owner,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 //	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
 		(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
@@ -1573,7 +1573,7 @@ public:
 	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner,
 																			root& direction,
 																			roots & directions, int CurrentIndex,
-																			root& outputNormal,GlobalVariables* theGlobalVariables);
+																			root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput);
 	void WireChamberAndWallAdjacencyData
@@ -2083,7 +2083,7 @@ public:
 class Cone : public roots
 { //The roots are the normals to the walls of the cone
 public:
-	void ComputeFromDirections(roots& directions, GlobalVariables* theGlobalVariables, int theDimension);
+	void ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsSurelyOutsideCone(rootsCollection& TheVertices);
 	// the below returns false is we have a point strictly inside the cone
 	// else it fills in the Chamber test array
@@ -2106,7 +2106,7 @@ public:
 	std::string DebugString;
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
-	void initFromDirections(roots& directions,GlobalVariables* theGlobalVariables);
+	void initFromDirections(roots& directions,GlobalVariables& theGlobalVariables);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
 };
 
@@ -2151,19 +2151,19 @@ public:
 	void QuickSortIndicesByDisplayNumber
 		(ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex);
 	void AddWeylChamberWallsToHyperplanes
-		(GlobalVariables* theGlobalVariables, WeylGroup& theWeylGroup);
+		(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
 	void SliceTheEuclideanSpace
 		(	roots& directions,int& index,
 			int rank,root& IndicatorRoot,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
 	void SliceOneDirection
 			(	roots& directions, int& index, int rank,
-				root& IndicatorRoot, GlobalVariables* theGlobalVariables);
+				root& IndicatorRoot, GlobalVariables& theGlobalVariables);
 	void OneSlice(roots& directions, int& index,
-								int rank, root& IndicatorRoot, GlobalVariables* theGlobalVariables);
+								int rank, root& IndicatorRoot, GlobalVariables& theGlobalVariables);
   void InduceFromLowerDimensionalAndProjectivize
-		(CombinatorialChamberContainer& input, GlobalVariables* theGlobalVariables);
+		(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
   void MakeExtraProjectivePlane();
 	int GetNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
 	int GetNumVisibleChambersAndLabelChambersForDisplay();
@@ -2180,23 +2180,23 @@ public:
 	void init();
 	void Free();
 	void MakeStartingChambers
-		(roots& directions, root& IndicatorRoot, GlobalVariables* theGlobalVariables);
+		(roots& directions, root& IndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
-	void ComputeVerticesFromNormals(GlobalVariables* theGlobalVariables);
-	void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables);
-	void SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables);
-	void SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables* theGlobalVariables);
+	void ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables);
+	void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
+	void SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
+	void SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
 	void AddChamberPointerSetUpPreferredIndices
-		(CombinatorialChamber* theChamber, GlobalVariables* theGlobalVariables);
+		(CombinatorialChamber* theChamber, GlobalVariables& theGlobalVariables);
 	void LabelAllUnexplored();
 	void DumpAll();
 	bool ConsistencyCheck();
 	void PurgeZeroPointers();
 	void PurgeInternalWalls();
-	void ProjectToDefaultAffineSpace(GlobalVariables* theGlobalVariables);
-	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables* theGlobalVariables);
+	void ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables);
+	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables& theGlobalVariables);
 	void PrintThePolys(std::string& output);
-	void ComputeGlobalCone(roots& directions, GlobalVariables* theGlobalVariables);
+	void ComputeGlobalCone(roots& directions, GlobalVariables& theGlobalVariables);
 	static void drawOutput
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator,std::fstream* LaTeXOutput);
@@ -2948,7 +2948,7 @@ public:
 	void MakeSubFromMatrixRational(MatrixLargeRational& theMat);
 	void ComputeDiscreteIntegrationUpTo(int d);
 	void MakeLinearSubOnLastVariable(short NumVars,PolynomialRationalCoeff& LastVarSub);
-	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables* theGlobalVariables);
+	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 	void Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget);
 };
@@ -2986,8 +2986,8 @@ public:
 	void AssignIntegerPoly(IntegerPoly& p);
 	void Evaluate(intRoot& values,Rational& output);
 	void MakePolyFromDirectionAndNormal
-		(root& direction, root& normal, Rational& Correction, GlobalVariables* theGlobalVariables);
-	void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables* theGlobalVariables);
+		(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables);
 	void MakeLinPolyFromInt(int theDimension,int x1,int x2, int x3,int x4, int x5);
 	int FindGCMCoefficientDenominators();
 	void MakeLinearPoly(short NumVars);
@@ -4650,12 +4650,12 @@ public:
 	void CheckConsistency(root& RootLatticeIndicator,PolynomialRationalCoeff& input);
 	void initLatticeIndicatorsFromPartFraction
 		(	partFractions& ownerExpression,partFraction &owner,
-			GlobalVariables* theGlobalVariables, int theDimension);
+			GlobalVariables& theGlobalVariables, int theDimension);
 	void AddPolynomialLargeRational
 		(	root& rootLatticeIndicator, PolynomialRationalCoeff& input);
 	void ComputeQuasiPolynomial
 		(	QuasiPolynomial& output, bool RecordNumMonomials,
-			int theDimension, GlobalVariables* theGlobalVariables);
+			int theDimension, GlobalVariables& theGlobalVariables);
 };
 
 class partFraction: ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongations>
@@ -4665,7 +4665,7 @@ private:
 	void findInitialPivot();
 	//void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
 	bool rootIsInFractionCone
-		(partFractions& owner, root& r, GlobalVariables* theGlobalVariables);
+		(partFractions& owner, root& r, GlobalVariables& theGlobalVariables);
 	friend class partFractions;
 	friend class partFractionPolynomials;
 public:
@@ -4705,26 +4705,26 @@ public:
 			GlobalVariables& theGlobalVariables);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 		(	MatrixLargeRational& theLinearRelation);
-	void UncoverBracketsNumerator(GlobalVariables*  theGlobalVariables, int theDimension);
+	void UncoverBracketsNumerator(GlobalVariables&  theGlobalVariables, int theDimension);
 	void partFractionToPartitionFunctionSplit
 		(	partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials,
 			//bool RecordSplitPowerSeriesCoefficient,
-			bool StoreToFile, GlobalVariables* theGlobalVariables, int theDimension);
+			bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
 	//void partFractionToPartitionFunctionStoreAnswer
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
 	//				bool StoreToFile);
 	bool IsEqualToZero();
-	void ComputeDebugString(partFractions& owner, GlobalVariables* theGlobalVariables);
+	void ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange);
 	//void InsertNewRootIndex(int index);
 	//void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
 	void MultiplyCoeffBy(Rational& r);
 	void decomposeAMinusNB
 		(	int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	bool DecomposeFromLinRelation
 		(	MatrixLargeRational& theLinearRelation, partFractions& Accum, 
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	void ComputeOneCheckSum
 		(	partFractions& owner,Rational &output, int theDimension, 
 			GlobalVariables& theGlobalVariables);
@@ -4735,21 +4735,21 @@ public:
 	void ApplySzenesVergneFormula
 		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 			int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
-			partFractions& Accum, GlobalVariables* theGlobalVariables);
+			partFractions& Accum, GlobalVariables& theGlobalVariables);
 	void ApplyGeneralizedSzenesVergneFormula
 		(	ListBasicObjects<int> &theSelectedIndices,
 			ListBasicObjects<int> &theGreatestElongations,
 			ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
 			int ElongationGainingMultiplicityIndex, partFractions &Accum, 
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod
-		(partFractions&Accum, GlobalVariables* theGlobalVariables);
+		(partFractions&Accum, GlobalVariables& theGlobalVariables);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
 	bool reduceOnceGeneralMethodNoOSBasis
-		(partFractions& Accum, GlobalVariables* theGlobalVariables);
+		(partFractions& Accum, GlobalVariables& theGlobalVariables);
 	bool reduceOnceGeneralMethod
-		(partFractions& Accum, GlobalVariables* theGlobalVariables);
+		(partFractions& Accum, GlobalVariables& theGlobalVariables);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
 	int HashFunction();
@@ -4807,23 +4807,23 @@ public:
 	int ElementToString
 		(	partFractions& owner, std::string& output, bool LatexFormat,
 			bool includeVPsummand, bool includeNumerator,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	int ElementToStringBasisChange
 		(	partFractions& owner, MatrixIntTightMemoryFit& VarChange,
 			bool UsingVarChange, std::string& output,
 			bool LatexFormat,bool includeVPsummand,bool includeNumerator,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	void ReadFromFile
-		(	partFractions& owner,std::fstream &input, GlobalVariables*  theGlobalVariables, 
+		(	partFractions& owner,std::fstream &input, GlobalVariables&  theGlobalVariables, 
 			int theDimension);
-	void WriteToFile(std::fstream& output, GlobalVariables*  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	int GetNumMonomialsInNumerator();
 	int SizeWithoutDebugString();
 };
 
 class partFractions: public HashedListBasicObjects<partFraction>
-{ bool ShouldIgnore(GlobalVariables* theGlobalVariables);
-	void AssureIndicatorRegularity(GlobalVariables* theGlobalVariables);
+{ bool ShouldIgnore(GlobalVariables& theGlobalVariables);
+	void AssureIndicatorRegularity(GlobalVariables& theGlobalVariables);
 public:
 	short AmbientDimension;
 	int IndexLowestNonProcessed;
@@ -4842,6 +4842,7 @@ public:
 	int NumGeneratorsIrrelevantFractions;
 	int NumTotalReduced;
 	int NumProcessedForVPFfractions;
+	int NumRunsReduceMonomialByMonomial;
 	//GlobalVariables theGlobalVariables;
 	RootToIndexTable RootsToIndices;
 	static int NumProcessedForVPFMonomialsTotal;
@@ -4862,55 +4863,55 @@ public:
 	static bool flagUsingOrlikSolomonBasis;
 	void PrepareCheckSums(GlobalVariables& theGlobalVariables);
 	void CompareCheckSums(GlobalVariables& theGlobalVariables);
-	void ComputeDebugString(GlobalVariables* theGlobalVariables);
-	void ComputeDebugStringNoNumerator(GlobalVariables* theGlobalVariables);
-	void ComputeDebugStringWithVPfunction(GlobalVariables* theGlobalVariables);
+	void ComputeDebugString(GlobalVariables& theGlobalVariables);
+	void ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables);
+	void ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringBasisChange
-		(MatrixIntTightMemoryFit& VarChange,GlobalVariables* theGlobalVariables);
+		(MatrixIntTightMemoryFit& VarChange,GlobalVariables& theGlobalVariables);
 	void initFromRootSystem
 		(	intRoots& theFraction, intRoots& theAlgorithmBasis,
-			intRoot* weights, GlobalVariables* theGlobalVariables);
+			intRoot* weights, GlobalVariables& theGlobalVariables);
 	//row index is the index of the root; column(second) index is the coordinate index
-	void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables* theGlobalVariables);
-	void RemoveRedundantShortRoots(GlobalVariables* theGlobalVariables);
-	bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables* theGlobalVariables);
-	bool split(GlobalVariables* theGlobalVariables);
+	void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables);
+	void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables);
+	bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables);
+	bool split(GlobalVariables& theGlobalVariables);
 	void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
 	void ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables);
-	void AccountPartFractionInternals(int sign, int index, GlobalVariables* theGlobalVariables);
+	void AccountPartFractionInternals(int sign, int index, GlobalVariables& theGlobalVariables);
 	void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables);
 	void AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables);
-	void PopIndexHashAndAccount(int index, GlobalVariables* theGlobalVariables);
+	void PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables);
 	void PrepareIndicatorVariables();
 	void IncreaseHighestIndex(int increment);
-	void ElementToString(std::string& output, GlobalVariables* theGlobalVariables);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
-											GlobalVariables* theGlobalVariables);
+											GlobalVariables& theGlobalVariables);
 	int ElementToStringBasisChange(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output,
 																	bool LatexFormat, bool includeVPsummand,
-																	bool includeNumerator, GlobalVariables* theGlobalVariables);
+																	bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringOutputToFile
 		(	std::fstream& output, bool LatexFormat, bool includeVPsummand,
-			bool includeNumerator, GlobalVariables* theGlobalVariables);
+			bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringBasisChangeOutputToFile
 		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output,
 			bool LatexFormat, bool includeVPsummand, bool includeNumerator,
-			GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
 		(	QuasiPolynomial& output, root& r,
 			//bool storeComputations, bool RecordSplitPowerSeriesCoefficient,
 			bool StoreToFile,bool UseOldData,
-			GlobalVariables* theGlobalVariables);
-	bool VerifyFileComputedContributions(GlobalVariables*  theGlobalVariables);
-	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables*  theGlobalVariables);
-	int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables*  theGlobalVariables);
-	void WriteToFile(std::fstream& output, GlobalVariables*  theGlobalVariables);
-	void ReadFromFile(std::fstream& input, GlobalVariables*  theGlobalVariables);
-	void UncoverBracketsNumerators(GlobalVariables* theGlobalVariables);
+			GlobalVariables& theGlobalVariables);
+	bool VerifyFileComputedContributions(GlobalVariables&  theGlobalVariables);
+	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
+	int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
+	void UncoverBracketsNumerators(GlobalVariables& theGlobalVariables);
 	void ResetRelevanceIsComputed(){for (int i=0;i<this->size;i++){this->TheObjects[i].RelevanceIsComputed=false;};};
 	partFractions();
 	int SizeWithoutDebugString();
-	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r, GlobalVariables* theGlobalVariables);
+	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r, GlobalVariables& theGlobalVariables);
 	void MakeProgressReportSplittingMainPart();
 	void MakeProgressReportRemovingRedundantRoots();
 	void MakeProgressReportUncoveringBrackets();
@@ -4918,7 +4919,7 @@ public:
 	void ComputeKostantFunctionFromWeylGroup
 				(	char WeylGroupLetter, unsigned char WeylGroupNumber,
 					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,
-					bool StoreToFile, GlobalVariables*  theGlobalVariables);
+					bool StoreToFile, GlobalVariables&  theGlobalVariables);
 };
 
 class ElementWeylGroup: public ListBasicObjects<int>
@@ -5100,7 +5101,7 @@ public:
 	intRoots nilradicalA2A1A1inD5;
 	intRoots AlgorithmBasisA2A1A1inD5;
 	intRoot weights;
-	GlobalVariables *TheGlobalVariables;
+	GlobalVariables* TheGlobalVariables;
 	partFractions partitionA2A1A1inD5;
 	std::string OutputFile;
 	bool useOutputFileForFinalAnswer;
@@ -5128,10 +5129,11 @@ public:
 	//of the orbit with Borel-positive weights
 	//give a Limiting cone if you want only to observe weights lying in a
 	//certain cone. Set 0 if there is no particular cone of interest.
-	void MakeTheRootFKFTSum				(	root& ChamberIndicator, partFractions& theBVdecomposition,
-					ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
-					VermaModulesWithMultiplicities& theHighestWeights,
-					roots& theNilradical);
+	void MakeTheRootFKFTSum				
+		(	root& ChamberIndicator, partFractions& theBVdecomposition,
+			ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
+			VermaModulesWithMultiplicities& theHighestWeights,
+			roots& theNilradical);
 };
 
 class LaTeXProcedures
@@ -5196,9 +5198,9 @@ public:
 	ListBasicObjects<Selection> theKEnumerations;
 	ListBasicObjects<int> theKComponentRanks;
 	std::string DebugString;
-	void KEnumerationsToLinComb(GlobalVariables* theGlobalVariables);
-	void DoKRootsEnumeration(GlobalVariables* theGlobalVariables);
-	void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables* theGlobalVariables);
+	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
+	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
+	void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
 	void initFromAmbientWeyl();
@@ -5209,38 +5211,38 @@ public:
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
 	void ComputeExtremeWeightInTheSameKMod(root& input, root& outputW, bool lookingForHighest);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
-	void RunE6_3A2(GlobalVariables* theGlobalVariables);
-	void RunE7_D6plusA1(GlobalVariables* theGlobalVariables);
-	void RunE7_A2plusA5(GlobalVariables* theGlobalVariables);
-	void RunE7_2A3plusA1(GlobalVariables* theGlobalVariables);
-	void RunE7_D4plus3A1(GlobalVariables* theGlobalVariables);
-	void RunE7_A7(GlobalVariables* theGlobalVariables);
-	void RunE7_7A1(GlobalVariables* theGlobalVariables);
-	void RunE8_A8(GlobalVariables* theGlobalVariables);
-	void RunE8_D8(GlobalVariables* theGlobalVariables);
-	void RunE8_A1_A7(GlobalVariables* theGlobalVariables);
-	void RunE8_A5_A1_A2(GlobalVariables* theGlobalVariables);
-	void RunE8_2A4(GlobalVariables* theGlobalVariables);
-	void RunE8_4A2(GlobalVariables* theGlobalVariables);
-	void RunE8_A2_E6(GlobalVariables* theGlobalVariables);
-	void RunE8_A1_E7(GlobalVariables* theGlobalVariables);
-	void RunE8_D6_2A1(GlobalVariables* theGlobalVariables);
-	void RunE8_D5_A3(GlobalVariables* theGlobalVariables);
-	void RunE8_2D4(GlobalVariables* theGlobalVariables);
-	void RunE8_D4_4A1(GlobalVariables* theGlobalVariables);
-	void RunE8_2A3_2A1(GlobalVariables* theGlobalVariables);
-	void RunE8_8A1(GlobalVariables* theGlobalVariables);
-	void RunF4_B4(GlobalVariables* theGlobalVariables);
-	void RunF4_A3_A1(GlobalVariables* theGlobalVariables);
-	void RunF4_A2_A2(GlobalVariables* theGlobalVariables);
-	void RunF4_C3_A1(GlobalVariables* theGlobalVariables);
-	void RunF4_D4(GlobalVariables* theGlobalVariables);
-	void RunF4_B2_2A1(GlobalVariables* theGlobalVariables);
-	void RunF4_4A1(GlobalVariables* theGlobalVariables);
+	void RunE6_3A2(GlobalVariables& theGlobalVariables);
+	void RunE7_D6plusA1(GlobalVariables& theGlobalVariables);
+	void RunE7_A2plusA5(GlobalVariables& theGlobalVariables);
+	void RunE7_2A3plusA1(GlobalVariables& theGlobalVariables);
+	void RunE7_D4plus3A1(GlobalVariables& theGlobalVariables);
+	void RunE7_A7(GlobalVariables& theGlobalVariables);
+	void RunE7_7A1(GlobalVariables& theGlobalVariables);
+	void RunE8_A8(GlobalVariables& theGlobalVariables);
+	void RunE8_D8(GlobalVariables& theGlobalVariables);
+	void RunE8_A1_A7(GlobalVariables& theGlobalVariables);
+	void RunE8_A5_A1_A2(GlobalVariables& theGlobalVariables);
+	void RunE8_2A4(GlobalVariables& theGlobalVariables);
+	void RunE8_4A2(GlobalVariables& theGlobalVariables);
+	void RunE8_A2_E6(GlobalVariables& theGlobalVariables);
+	void RunE8_A1_E7(GlobalVariables& theGlobalVariables);
+	void RunE8_D6_2A1(GlobalVariables& theGlobalVariables);
+	void RunE8_D5_A3(GlobalVariables& theGlobalVariables);
+	void RunE8_2D4(GlobalVariables& theGlobalVariables);
+	void RunE8_D4_4A1(GlobalVariables& theGlobalVariables);
+	void RunE8_2A3_2A1(GlobalVariables& theGlobalVariables);
+	void RunE8_8A1(GlobalVariables& theGlobalVariables);
+	void RunF4_B4(GlobalVariables& theGlobalVariables);
+	void RunF4_A3_A1(GlobalVariables& theGlobalVariables);
+	void RunF4_A2_A2(GlobalVariables& theGlobalVariables);
+	void RunF4_C3_A1(GlobalVariables& theGlobalVariables);
+	void RunF4_D4(GlobalVariables& theGlobalVariables);
+	void RunF4_B2_2A1(GlobalVariables& theGlobalVariables);
+	void RunF4_4A1(GlobalVariables& theGlobalVariables);
 	void GetLinearCombinationFromMaxRankRootsAndExtraRoot
-		(bool DoEnumeration, GlobalVariables* theGlobalVariables);
+		(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
-	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables* theGlobalVariables);
+	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
 	bool LinCombToStringDistinguishedIndex
 				(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
@@ -5318,13 +5320,13 @@ public:
 	void InitComputationSetup();
 	void ExitComputationSetup();
 	void WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables);
-	void oneStepChamberSlice(GlobalVariables* theGlobalVariables);
-	void oneIncrement(GlobalVariables* theGlobalVariables);
-	void initWeylActionSpecifics(GlobalVariables* theGlobalVariables);
+	void oneStepChamberSlice(GlobalVariables& theGlobalVariables);
+	void oneIncrement(GlobalVariables& theGlobalVariables);
+	void initWeylActionSpecifics(GlobalVariables& theGlobalVariables);
 	void initGenerateWeylAndHyperplanesToSliceWith
-		(GlobalVariables* theGlobalVariables,CombinatorialChamberContainer& inputComplex);
+		(GlobalVariables& theGlobalVariables,CombinatorialChamberContainer& inputComplex);
 	void SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables);
-	void FullChop(GlobalVariables* theGlobalVariables);
+	void FullChop(GlobalVariables& theGlobalVariables);
 	void WriteToFilePFdecomposition(std::fstream& output);
 	void Reset();
 	ComputationSetup();

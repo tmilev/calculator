@@ -33,14 +33,14 @@ void ExampleComputation::RunSomeTests()
 	partFractions tempPF;
 	GlobalVariables tempGV;
 	tempPF.flagUsingIndicatorRoot=false;
-	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0,&tempGV);
+	tempPF.initFromRootSystem(toBeSplit,toBeSplit,0,tempGV);
 	tempPF.flagUsingCheckSum=false;
 	tempPF.flagMakingProgressReport=true;
-	tempPF.split(&tempGV);
-	tempPF.ComputeDebugString(&tempGV);
+	tempPF.split(tempGV);
+	tempPF.ComputeDebugString(tempGV);
 	QuasiPolynomial tempQP;
 	tempPF.partFractionsToPartitionFunctionAdaptedToRoot
-		(tempQP,indicator,false,false,&tempGV);
+		(tempQP,indicator,false,false,tempGV);
 	intRoot tempR;
 	tempR.initFromInt(5,0,0,0,0,0);
 	Rational tempRat;
@@ -113,13 +113,13 @@ void ExampleComputation::RunThomasExample()
 	partFractions::ListBasicObjectsActualSizeIncrement=2000;
 	IntegerPoly::ListBasicObjectsActualSizeIncrement=5;
 	exampleRoots.ComputeDebugString();
-	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0,&tempGV);
+	tempPF.initFromRootSystem(exampleRoots,exampleRoots,0,tempGV);
 	std::fstream tempF;
 	tempF.open("C:/ThomasOutput.txt",std::fstream::out | std::fstream::trunc);
 	assert(tempF.is_open());
-	tempPF.split(&tempGV);
+	tempPF.split(tempGV);
 //	tempPF.ComputeDebugString();
-	tempPF.ElementToStringOutputToFile(tempF,true,false,true, &tempGV);
+	tempPF.ElementToStringOutputToFile(tempF,true,false,true, tempGV);
 	tempF.close();
 	#ifndef USE_GUI
 		std::cout<<tempPF.DebugString;

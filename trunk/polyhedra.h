@@ -2071,6 +2071,7 @@ public:
 																				result/=(i+1); }
 																			return result; };
 	static int KToTheNth(int k, int n);
+	inline static int parity(int n){if (n%2==0) return 1; else return -1;};
 	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
 	inline static int Maximum(int a, int b){	if (a>b) return a; 
 																						else return b;};
@@ -4849,7 +4850,7 @@ public:
 	static std::fstream ComputedContributionsList;
 	static const int MaxReadFileBufferSize= 33554432; //= 32 MB of read buffer size
 	std::string DebugString;
-	static root IndicatorRoot;
+	root IndicatorRoot;
 	Rational StartCheckSum;
 	Rational EndCheckSum;
 	static Rational CheckSum;
@@ -4883,6 +4884,7 @@ public:
 	void AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables);
 	void PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables);
 	void PrepareIndicatorVariables();
+	void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
 	void IncreaseHighestIndex(int increment);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
 	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,

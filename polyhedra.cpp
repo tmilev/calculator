@@ -263,7 +263,6 @@ bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
 bool partFractions::flagUsingIndicatorRoot=true;
 bool partFractions::flagUsingOrlikSolomonBasis=false;
-root partFractions::IndicatorRoot;
 HashedListBasicObjects<GeneratorPFAlgebraRecord> GeneratorsPartialFractionAlgebra::theGenerators;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 bool WallData::flagDisplayWallDetails=true;
@@ -8180,7 +8179,7 @@ int partFraction::ElementToStringBasisChange
 
 bool partFraction::rootIsInFractionCone(partFractions& owner, root&r, GlobalVariables& theGlobalVariables)
 { //assert(this->IndicesNonZeroMults.size==root::AmbientDimension);
-	if (!partFractions::flagUsingIndicatorRoot|| partFractions::IndicatorRoot.IsEqualToZero())
+	if (!partFractions::flagUsingIndicatorRoot|| owner.IndicatorRoot.IsEqualToZero())
 		return true;
 	if (this->RelevanceIsComputed)
 		return !this->IsIrrelevant;
@@ -9135,6 +9134,15 @@ void partFractions::PrepareCheckSums(GlobalVariables& theGlobalVariables)
 	this->ComputeOneCheckSum(this->StartCheckSum,theGlobalVariables);
 }
 
+void partFractions::initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables)
+{ this->RootsToIndices.CopyFromHash(input.RootsToIndices);
+	this->IndicatorRoot.Assign(input.IndicatorRoot);
+	this->IndexLowestNonProcessed=0;
+	this->IndexCurrentlyProcessed=0;
+	this->SetSizeExpandOnTopNoObjectInit(0);
+	this->AmbientDimension= input.AmbientDimension;
+}
+
 void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 {	if (!this->flagUsingCheckSum)
 		return;
@@ -9524,7 +9532,7 @@ void partFraction::ReduceMonomialByMonomial
           if (tempI<0)
 						thePowers.MaxMultiplicities.TheObjects[i]=
 							this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
-									.GetMultiplicityLargestElongation();
+								.GetMultiplicityLargestElongation();
 					else
 						thePowers.MaxMultiplicities.TheObjects[i]=MathRoutines::Minimum
 							(	tempI,this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
@@ -9548,8 +9556,19 @@ void partFraction::ReduceMonomialByMonomial
 			if (numSummands==1)
 				owner.AddAlreadyReduced(tempFrac,theGlobalVariables);
 			else
-			{	for (int l=0;l<numSummands;l++)
-				{	tempFrac.AssignDenominatorOnly(*this);
+			{	partFractions tempFracs;
+				Rational tempDiff;
+				if (this->flagAnErrorHasOccurredTimeToPanic)
+				{	tempFracs.initFromOtherPartFractions(owner, theGlobalVariables);
+					tempFrac.AssignDenominatorOnly(*this);
+					tempFrac.Coefficient.Nullify(owner.AmbientDimension);
+					tempFrac.Coefficient.AddObjectOnTopLight(this->Coefficient.TheObjects[k]);
+					tempFrac.ComputeOneCheckSum(owner,tempDiff,owner.AmbientDimension,theGlobalVariables);
+				}
+				for (int l=0;l<numSummands;l++)
+				{	if (ProblemCounter==8 )
+						Stop();
+					tempFrac.AssignDenominatorOnly(*this);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 						thePowers.ComputeDebugString();				
 					tempFrac.ReduceMonomialByMonomialModifyOneMonomial
@@ -9557,7 +9576,15 @@ void partFraction::ReduceMonomialByMonomial
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 						tempFrac.ComputeDebugString(owner,theGlobalVariables);
 					tempFrac.ReduceMonomialByMonomial(owner,-1,theGlobalVariables);
+					if (this->flagAnErrorHasOccurredTimeToPanic)
+						tempFrac.ReduceMonomialByMonomial(tempFracs,-1,theGlobalVariables);
 					thePowers.IncrementSubset();
+				}
+				if (this->flagAnErrorHasOccurredTimeToPanic)
+				{ Rational tempFracsCheckSum;
+					tempFracs.ComputeOneCheckSum(tempFracsCheckSum,theGlobalVariables);
+					tempFracs.ComputeDebugString(theGlobalVariables);
+					assert(tempFracsCheckSum.IsEqualTo(tempDiff));
 				}
 			}
 		}
@@ -9623,11 +9650,22 @@ void partFraction::GetPolyReduceMonomialByMonomial
 	Monomial<Integer> tempMon;	tempMon.init(owner.AmbientDimension);	
 	output.Nullify(owner.AmbientDimension);
 	if (StartMonomialPower>0)
-	{	tempMon.Coefficient.value= MathRoutines::NChooseK
-			(StartMonomialPower,DenPowerReduction);
-		if ((DenPowerReduction)%2!=0)
-			tempMon.Coefficient.value*=-1;
-		output.AddMonomial(tempMon);
+	{	if (DenPowerReduction!=startDenominatorPower)	
+		{	tempMon.Coefficient.value= MathRoutines::NChooseK
+				(StartMonomialPower,DenPowerReduction);
+			tempMon.Coefficient.value*=MathRoutines::parity(DenPowerReduction);
+			output.AddMonomial(tempMon);
+		} else
+		{	intRoot tempRoot; 
+			assert(StartMonomialPower>=startDenominatorPower);
+			for (int k=0;k<=StartMonomialPower-startDenominatorPower;k++)
+			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(k);
+				tempMon.MakeFromRoot(IOne,tempRoot);
+				tempMon.Coefficient.value= MathRoutines::parity(startDenominatorPower)* 
+					MathRoutines::NChooseK(StartMonomialPower-1-k,startDenominatorPower-1);
+				output.AddMonomial(tempMon);
+			}
+		}
 	}
 	if (StartMonomialPower<0 )
 	{ if (DenPowerReduction!=startDenominatorPower)
@@ -9636,11 +9674,11 @@ void partFraction::GetPolyReduceMonomialByMonomial
 			output.AddMonomial(tempMon);
 		} else
 		{ intRoot tempRoot; 
-			for (int i=0;i<-StartMonomialPower;i++)
-			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(-startDenominatorPower+i);
+			for (int k=1;k<=-StartMonomialPower;k++)
+			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(-k);
 				tempMon.MakeFromRoot(IOne,tempRoot);
 				tempMon.Coefficient.value= MathRoutines::NChooseK
-					(startDenominatorPower-1+i,i);
+					(startDenominatorPower-StartMonomialPower-1-k,startDenominatorPower-1);
 				output.AddMonomial(tempMon);
 			}
 		}

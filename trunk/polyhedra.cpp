@@ -1635,7 +1635,7 @@ void MatrixLargeRational::Transpose(GlobalVariables& theGlobalVariables)
 	for (int i=0;i<this->NumRows;i++)
 	{	for (int j=0;j<this->NumCols;j++)
 			tempMat.elements[j][i].Assign(this->elements[i][j]);
-		
+
 	}
 	this->Assign(tempMat);
 }
@@ -2144,7 +2144,7 @@ bool roots::IsRegular(root &r, GlobalVariables& theGlobalVariables, int theDimen
 }
 
 bool roots::IsRegular
-	(	root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, 
+	(	root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables,
 		int theDimension)
 { Selection& WallSelection=theGlobalVariables.selWallSelection;
 	WallSelection.init(this->size);
@@ -2237,7 +2237,7 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots
 {	MatrixLargeRational& tempMatrix=
 		theGlobalVariables.matComputeNormalFromSelectionAndTwoExtraRoots;
 	MatrixLargeRational matOutputEmpty;
-	Selection& NonPivotPoints= 
+	Selection& NonPivotPoints=
 		theGlobalVariables.selComputeNormalFromSelectionAndTwoExtraRoots;
 	if (this->size==0) return false; int theDimension= this->TheObjects[0].size;
 	output.SetSizeExpandOnTopLight(theDimension);
@@ -2707,7 +2707,8 @@ void CombinatorialChamber::drawOutputAffine
 					color=TDV.TextColor;
 				else
 					color= TDV.ZeroChamberTextColor;
-				TDV.drawTextAtVector(tempRoot,tempS, color, LaTeXoutput);
+        if(TDV.DrawChamberIndices)
+          TDV.drawTextAtVector(tempRoot,tempS, color, LaTeXoutput);
       }
     }
   }
@@ -2845,7 +2846,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputation
 			(Selection& theSelection,  root& output, GlobalVariables& theGlobalVariables, int theDimension)
 { output.SetSizeExpandOnTopLight(theDimension);
 	assert(theDimension -1== theSelection.CardinalitySelection);
-	MatrixLargeRational& RMinus1ByR= 
+	MatrixLargeRational& RMinus1ByR=
 		theGlobalVariables.matLinearAlgebraForVertexComputation;
 	MatrixLargeRational	matOutputEmpty;
 	RMinus1ByR.init((short)(theDimension-1),(short)theDimension);
@@ -3004,9 +3005,9 @@ bool CombinatorialChamber::SplitChamber
 	rootsCollection& LocalContainerPlusVertices=theGlobalVariables.rootsCollectionSplitChamber1;
 	rootsCollection& LocalContainerMinusVertices=theGlobalVariables.rootsCollectionSplitChamber2;
 	roots& LocalLinearAlgebra= theGlobalVariables.rootsSplitChamber1;
-	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors= 
+	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors=
 		theGlobalVariables.listCombinatorialChamberPtSplitChamber;
-	ListBasicObjects<WallData*>& PossibleBogusWalls= 
+	ListBasicObjects<WallData*>& PossibleBogusWalls=
 		theGlobalVariables.listWallDataPtSplitChamber;
 	CombinatorialChamber* NewPlusChamber;
 	CombinatorialChamber* NewMinusChamber;
@@ -8025,7 +8026,7 @@ void partFraction::UncoverBracketsNumerator(GlobalVariables&  theGlobalVariables
 }
 
 void partFraction::ComputeOneCheckSum
-	(	partFractions& owner,Rational &output, int theDimension, 
+	(	partFractions& owner,Rational &output, int theDimension,
 		GlobalVariables& theGlobalVariables)
 { if (this->flagAnErrorHasOccurredTimeToPanic)
 	{ this->Coefficient.ComputeDebugString();
@@ -9505,7 +9506,7 @@ void partFraction::ReduceMonomialByMonomial
 		tempMat.ComputeDebugString();
 	}
 	SelectionWithDifferentMaxMultiplicities thePowers;
-	ListBasicObjects<int> thePowersSigned; 
+	ListBasicObjects<int> thePowersSigned;
 	thePowersSigned.SetSizeExpandOnTopNoObjectInit(this->IndicesNonZeroMults.size);
 	thePowers.init(this->IndicesNonZeroMults.size);
 	for (int k=0;k<this->Coefficient.size;k++)
@@ -9570,7 +9571,7 @@ void partFraction::ReduceMonomialByMonomial
 						Stop();
 					tempFrac.AssignDenominatorOnly(*this);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
-						thePowers.ComputeDebugString();				
+						thePowers.ComputeDebugString();
 					tempFrac.ReduceMonomialByMonomialModifyOneMonomial
 						(owner, theGlobalVariables,thePowers,thePowersSigned,tempMon);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -9600,10 +9601,10 @@ void partFraction::ReduceMonomialByMonomial
 }
 
 void partFraction::ReduceMonomialByMonomialModifyOneMonomial
-	(	partFractions &Accum, GlobalVariables &theGlobalVariables, 
-		SelectionWithDifferentMaxMultiplicities &thePowers, 
+	(	partFractions &Accum, GlobalVariables &theGlobalVariables,
+		SelectionWithDifferentMaxMultiplicities &thePowers,
 		ListBasicObjects<int> &thePowersSigned, Monomial<Integer> &input)
-{	IntegerPoly& theNumerator= 
+{	IntegerPoly& theNumerator=
 		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial1;
 	IntegerPoly& tempP=
 		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial2;
@@ -9641,27 +9642,27 @@ void partFraction::ReduceMonomialByMonomialModifyOneMonomial
 
 void partFraction::GetPolyReduceMonomialByMonomial
 	(	partFractions& owner, GlobalVariables& theGlobalVariables,
-		intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, 
+		intRoot& theExponent, int StartMonomialPower, int DenPowerReduction,
 		int startDenominatorPower,IntegerPoly& output)
 { if (StartMonomialPower==0)
 	{	output.MakeNVarConst(owner.AmbientDimension,IOne);
 		return;
 	}
-	Monomial<Integer> tempMon;	tempMon.init(owner.AmbientDimension);	
+	Monomial<Integer> tempMon;	tempMon.init(owner.AmbientDimension);
 	output.Nullify(owner.AmbientDimension);
 	if (StartMonomialPower>0)
-	{	if (DenPowerReduction!=startDenominatorPower)	
+	{	if (DenPowerReduction!=startDenominatorPower)
 		{	tempMon.Coefficient.value= MathRoutines::NChooseK
 				(StartMonomialPower,DenPowerReduction);
 			tempMon.Coefficient.value*=MathRoutines::parity(DenPowerReduction);
 			output.AddMonomial(tempMon);
 		} else
-		{	intRoot tempRoot; 
+		{	intRoot tempRoot;
 			assert(StartMonomialPower>=startDenominatorPower);
 			for (int k=0;k<=StartMonomialPower-startDenominatorPower;k++)
 			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(k);
 				tempMon.MakeFromRoot(IOne,tempRoot);
-				tempMon.Coefficient.value= MathRoutines::parity(startDenominatorPower)* 
+				tempMon.Coefficient.value= MathRoutines::parity(startDenominatorPower)*
 					MathRoutines::NChooseK(StartMonomialPower-1-k,startDenominatorPower-1);
 				output.AddMonomial(tempMon);
 			}
@@ -9670,10 +9671,10 @@ void partFraction::GetPolyReduceMonomialByMonomial
 	if (StartMonomialPower<0 )
 	{ if (DenPowerReduction!=startDenominatorPower)
 		{	tempMon.Coefficient.value= MathRoutines::NChooseK
-				(-StartMonomialPower-1+DenPowerReduction,DenPowerReduction); 
+				(-StartMonomialPower-1+DenPowerReduction,DenPowerReduction);
 			output.AddMonomial(tempMon);
 		} else
-		{ intRoot tempRoot; 
+		{ intRoot tempRoot;
 			for (int k=1;k<=-StartMonomialPower;k++)
 			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(-k);
 				tempMon.MakeFromRoot(IOne,tempRoot);
@@ -12444,7 +12445,7 @@ void rootFKFTcomputation::MakeTheRootFKFTSum
 	{	if (theKLCoeffs.TheObjects[i]!=0)
 		{	tempQP1.Nullify(5);
 			theBVdecomposition.partFractionsToPartitionFunctionAdaptedToRoot
-				(tempQP1,TheChambersInTheGame.ChamberIndicators.TheObjects[i],true,true, 
+				(tempQP1,TheChambersInTheGame.ChamberIndicators.TheObjects[i],true,true,
 					*this->TheGlobalVariables);
 //			tempQP1.ComputeDebugString();
 			tempQP1.TimesInteger(theKLCoeffs.TheObjects[i]);
@@ -13817,7 +13818,7 @@ void simplicialCones::initFromDirections(roots &directions,GlobalVariables& theG
 		for (int j=0;j<theDimension;j++)
 		{ tempRoots.AddRoot(directions.TheObjects[tempSel.elements[j]]);
 		}
-		if (		tempRoots.GetRankOfSpanOfElements(theGlobalVariables)==theDimension 
+		if (		tempRoots.GetRankOfSpanOfElements(theGlobalVariables)==theDimension
 				&&	theDimension!=1)
 		{	this->SetSizeExpandOnTopNoObjectInit(this->size+1);
 			this->TheObjects[this->size-1].ComputeFromDirections(tempRoots,theGlobalVariables,theDimension);

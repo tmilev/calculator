@@ -1,29 +1,62 @@
 <HTML>
-<HEAD><TITLE>VP Test CGIcc form</TITLE></HEAD>
-<BODY bgcolor="#cccccc" text="#000000">
-<H2>VP Test CGIcc form</H2>
-<P>
-sudo /etc/init.d/apache2 restart
-
-to restart 
-<FORM method="POST" action="./bin/Debug/vector_partition_linux_cgi.cgi">
-Value 1 :
-<input type="text" name="value1">
-<P>
-Value 2 :
-<select name="value2">
-   <option value="option1">Option 1
-   <option value="option2">Option 2
-   <option value="option3">Option 3
-</select>
-<P>
-Value 3 :
-<input type="radio" name="value3" value="button1" checked="checked">Button1
-<input type="radio" name="value3" value="button2">Button2
-
-<input type="hidden" name="value4" value="data4">
-<P>
-<input type="submit" value="Submit">
-</FORM>
+<HEAD><TITLE>Vector partition</TITLE>
+</HEAD>
+<META http-equiv="Content-Script-Type" content="text/javascript">
+<BODY>
+<FORM method="POST" name="formMain" action="./bin/Debug/vector_partition_linux_cgi.cgi">
+Dimension: <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
+Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="submit" name="buttonGo" value="Go">
+</FORM>	
+<script type="text/javascript">
+	var oldDimension=-1;
+	var oldNumVectors=-1;
+	var NumElements=0;
+	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
+	{ dim = Number(inputDim);
+		num = Number(inputNum);
+//		alert("dim: "+dim+" num: "+num);
+		if (dim<1 || dim>3 || num>8 || num<1)
+		{	return;
+		}
+		if ((oldDimension!=dim) || (oldNumVectors!=num))
+		{	oldDimension=dim;
+			oldNumVectors=num;
+			document.formMain.textDim.value=dim;
+			document.formMain.textNumVectors.value=num;
+			totalCoords=dim*num+num+1;
+			if (NumElements!=totalCoords)
+			{	firstChildinLine=document.formMain.firstChild;
+				firstChildinLine=firstChildinLine.nextSibling;				
+				firstChildinLine=firstChildinLine.nextSibling;				
+				firstChildinLine=firstChildinLine.nextSibling;				
+				firstChildinLine=firstChildinLine.nextSibling;	
+	//			alert("Num elements to be killed:"+ NumElements);			
+				for(i=0;i<NumElements;i++)
+				{ nextchild=firstChildinLine.nextSibling;
+					//alert(firstChildinLine.value);
+					document.formMain.removeChild(firstChildinLine);
+					firstChildinLine=nextchild;
+				}
+				NumElements=totalCoords;
+				mytext=document.createElement("br");					
+				document.formMain.insertBefore(mytext,formMain.buttonGo);				
+				for (i=0;i<num;i++)
+				{ for (j=0;j<dim;j++)
+					{	mytext=document.createElement("input");					
+						mytext.type="text";
+						mytext.name= "textCoord"+i;
+						mytext.value=mytext.name;
+						mytext.size=1;
+						document.formMain.insertBefore(mytext,formMain.buttonGo);				
+					}
+					mytext=document.createElement("br");					
+					document.formMain.insertBefore(mytext,formMain.buttonGo);				
+				}
+				NumElements=totalCoords;
+			}			
+		}
+	}
+	generatePageFromDimAndNum(3,6,5);
+</script>
 </BODY>
 </HTML>

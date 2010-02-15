@@ -36,10 +36,9 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 			totalCoords=dim*num+num+1;
 			if (NumElements!=totalCoords)
 			{	firstChildinLine=document.formMain.firstChild;
-				firstChildinLine=firstChildinLine.nextSibling;				
-				firstChildinLine=firstChildinLine.nextSibling;				
-				firstChildinLine=firstChildinLine.nextSibling;				
-				firstChildinLine=firstChildinLine.nextSibling;	
+				for (i=0;i<4;i++)				
+				{	firstChildinLine=firstChildinLine.nextSibling;			
+				}
 	//			alert("Num elements to be killed:"+ NumElements);			
 				for(i=0;i<NumElements;i++)
 				{ nextchild=firstChildinLine.nextSibling;
@@ -55,7 +54,7 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 					{	mytext=document.createElement("input");					
 						mytext.type="text";
 						mytext.name= "textCoord"+i;
-						mytext.value=mytext.name;
+						mytext.value=rootsArray[i][j];
 						mytext.size=1;
 						document.formMain.insertBefore(mytext,formMain.buttonGo);				
 					}
@@ -66,7 +65,5 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 			}			
 		}
 	}
-	generatePageFromDimAndNum(3,6,5);
 </script>
-</BODY>
-</HTML>
+

@@ -27,7 +27,7 @@ int main(int argc, char **argv)
   getPath(argv[0],tempS);
   std::stringstream out;
   out<<tempS;
-  out<<"../../vector_partition.html";
+  out<<"../vector_partition.html";
   tempS=out.str();
   std::fstream fileHeaderHtml;
   rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);
@@ -37,7 +37,20 @@ int main(int argc, char **argv)
     std::cout.write(buffer, fileHeaderHtml.gcount());
 
   }
-//  std::cout << tempS;
-  //fileHeaderHtml
+  WeylGroup tempWeyl;
+  tempWeyl.MakeArbitrary('A',3);
+  tempWeyl.ComputeRho();
+  std::cout<<"<script>\n";
+  std::cout<< "\tvar rootsArray= new Array(" <<tempWeyl.RootsOfBorel.size << ");";
+  for (int i=0;i<tempWeyl.RootsOfBorel.size;i++)
+  { std::cout<< "\n\trootsArray["<<i<<"]= new Array(3);\n";
+    for (int j=0;j<3;j++)
+    { tempWeyl.RootsOfBorel.TheObjects[i].TheObjects[j].ElementToString(tempS);
+      std::cout<< "\trootsArray["<<i<< "]["<<j <<"]="<<tempS<<";";
+    }
+  }
+  std::cout<<"\ngeneratePageFromDimAndNum(3,6,5);\n</script>\n";
+  std::cout<<"</BODY>\n</HTML>";
+
   return 0;   // To avoid Apache errors.
 }

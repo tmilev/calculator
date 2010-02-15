@@ -12386,6 +12386,21 @@ void rootFKFTcomputation::processA2A1A1inD5beta12221Answer(QuasiPolynomial& theA
 	tempQP2.ComputeDebugString();
 }
 
+bool rootFKFTcomputation::OpenDataFile
+	(std::fstream& theFile, std::string& theFileName)
+{ theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
+  if(theFile.is_open())
+  { theFile.clear(std::ios::goodbit);// false);
+  	theFile.seekp(0,std::ios_base::end);
+  	theFile.seekg(0);
+		int tempI=theFile.tellp();
+		if (tempI>=1)
+		{	return true;
+		}
+  }
+	return false;
+}
+
 bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
 	(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode)
 { if (OpenInAppendMode)

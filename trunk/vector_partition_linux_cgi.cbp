@@ -26,6 +26,8 @@
 			<Add library="/usr/lib/libcgicc.so.5" />
 			<Add library="/usr/lib/libcgicc.so.5.0.2" />
 		</Linker>
+		<Unit filename="polyhedra.cpp" />
+		<Unit filename="polyhedra.h" />
 		<Unit filename="vp_cgi_interface.cpp" />
 		<Extensions>
 			<code_completion />

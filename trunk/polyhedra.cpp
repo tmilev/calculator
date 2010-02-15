@@ -782,6 +782,8 @@ void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
+	rootSubalgebra theRootSA;
+	
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -13123,8 +13125,7 @@ void rootSubalgebra::ElementToString(std::string &output)
 	out<<this->LowestWeightsGmodK.DebugString;
 	output=out.str();
 }
-
-void rootSubalgebra::RunE6_3A2(GlobalVariables& theGlobalVariables)
+void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
 { this->AmbientWeyl.MakeEn(6);
 	this->genK.SetSizeExpandOnTopNoObjectInit(6);
 	this->genK.TheObjects[0].InitFromIntegers(6, 0,0,0,0,0,1,0,0);
@@ -13135,6 +13136,10 @@ void rootSubalgebra::RunE6_3A2(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[5].InitFromIntegers(6, 0,1,0,1,0,0,0,0);
 	this->ComputeAll();
 	this->ComputeDebugString();
+}
+
+void rootSubalgebra::RunE6_3A2(GlobalVariables& theGlobalVariables)
+{ this->SetupE6_3A2(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 

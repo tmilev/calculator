@@ -5184,6 +5184,14 @@ public:
 	void Run();
 };
 
+class multTableKmods : public ListBasicObjects<ListBasicObjects <ListBasicObjects<int> > >
+{
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+};
+
 class rootSubalgebra
 {
 public:
@@ -5209,11 +5217,18 @@ public:
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
 	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
+	void GeneratePossibleNilradicalsRecursive
+		(	GlobalVariables& theGlobalVariables,int startIndex, Selection& selKmods,
+			ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & multTable, 
+			ListBasicObjects<int>& oppositeKmods);
 	void ElementToString(std::string& output);
 	void GenerateKmodMultTable
 		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output, 
+			ListBasicObjects<int>& oppositeKmods,
 			GlobalVariables& theGlobalVariables);
-	void KmodTimesKmod(int index1, int index2, ListBasicObjects<int> & output);
+	void KmodTimesKmod
+		(	int index1, int index2,ListBasicObjects<int>& oppositeKmods, 
+			ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();

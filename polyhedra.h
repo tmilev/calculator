@@ -5202,18 +5202,26 @@ public:
 	ListBasicObjects<Selection> theKEnumerations;
 	ListBasicObjects<int> theKComponentRanks;
 	std::string DebugString;
+	bool IsARoot(root& input);
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
-	void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
+	void DoKRootsEnumerationRecursively
+		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
+	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	void ElementToString(std::string& output);
+	void GenerateKmodMultTable
+		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output, 
+			GlobalVariables& theGlobalVariables);
+	void KmodTimesKmod(int index1, int index2, ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
 	void TransformToSimpleBasisGenerators(roots& theGens);
 	void ComputeKModules();
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
-	void ComputeExtremeWeightInTheSameKMod(root& input, root& outputW, bool lookingForHighest);
+	void ComputeExtremeWeightInTheSameKMod
+		(root& input, root& outputW, bool lookingForHighest);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
 	void RunE6_3A2(GlobalVariables& theGlobalVariables);
@@ -5247,7 +5255,8 @@ public:
 	void GetLinearCombinationFromMaxRankRootsAndExtraRoot
 		(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
-	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
+	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2
+		(GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
 	bool LinCombToStringDistinguishedIndex
 				(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
@@ -5334,6 +5343,7 @@ public:
 	void FullChop(GlobalVariables& theGlobalVariables);
 	void WriteToFilePFdecomposition(std::fstream& output);
 	void Reset();
+	void DoTheRootSAComputation();
 	ComputationSetup();
 	~ComputationSetup();
 };

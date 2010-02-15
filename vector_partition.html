@@ -1,16 +1,26 @@
 <HTML>
 <HEAD><TITLE>Vector partition</TITLE>
+<script type="text/javascript" src="./../../wz_jsgraphics.js"></script>
 </HEAD>
 <META http-equiv="Content-Script-Type" content="text/javascript">
 <BODY>
-<FORM method="POST" name="formMain" action="./bin/Debug/vector_partition_linux_cgi.cgi">
+<FORM method="POST" name="formMain" action="./../../bin/Debug/vector_partition_linux_cgi.cgi">
 Dimension: <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
 Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="submit" name="buttonGo" value="Go">
 </FORM>	
+<input type="button" name="buttonTest" value="Draw" onclick="drawTest();" >
+
+<div id="canvasMain" style="position:relative;height:250px;width:100%;"></div>
 <script type="text/javascript">
 	var oldDimension=-1;
 	var oldNumVectors=-1;
 	var NumElements=0;
+	var jsMain= new jsGraphics("canvasMain");
+	function drawTest()
+	{ alert("");
+		jsMain.drawLine(10,10,150,150);
+		//jsMain.paint();
+	}		
 	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
 	{ dim = Number(inputDim);
 		num = Number(inputNum);

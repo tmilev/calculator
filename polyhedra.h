@@ -1218,11 +1218,11 @@ public:
               };
 	double DoubleValue();
 	int floor(){	if (NumShort<0)
-									if (DenShort!=1) 
+									if (DenShort!=1)
 										return (this->NumShort/ this->DenShort)-1;
 									else
 										return this->NumShort/ this->DenShort;
-								else				
+								else
 									return this->NumShort/this->DenShort;};
 	void MakeZero()	{this->NumShort=0;	this->DenShort=1; this->FreeExtended(); };
 	void MakeOne()	{this->NumShort=1;	this->DenShort=1; this->FreeExtended(); };
@@ -1774,7 +1774,7 @@ void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 
 template <class Object>
 void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
-{	if (increase<=0) 
+{	if (increase<=0)
 		return;
 	Object* newArray = new Object[this->ActualSize+increase];
 	for (int i=0;i<this->size;i++)
@@ -2073,9 +2073,9 @@ public:
 	static int KToTheNth(int k, int n);
 	inline static int parity(int n){if (n%2==0) return 1; else return -1;};
 	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
-	inline static int Maximum(int a, int b){	if (a>b) return a; 
+	inline static int Maximum(int a, int b){	if (a>b) return a;
 																						else return b;};
-	inline static int Minimum(int a, int b){	if (a>b) return b; 
+	inline static int Minimum(int a, int b){	if (a>b) return b;
 																						else return a;};
 	inline static short Minimum(short a, short b){if (a>b) return b; else return a;};
 };
@@ -4680,10 +4680,10 @@ public:
 	IntegerPolyLight Coefficient;
 	PolyPartFractionNumeratorLight CoefficientNonExpanded;
 	bool RemoveRedundantShortRootsClassicalRootSystem
-		(	partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, 
+		(	partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables,
 			int theDimension);
 	bool RemoveRedundantShortRoots
-		(	partFractions& owner, root* Indicator, 
+		(	partFractions& owner, root* Indicator,
 			GlobalVariables& theGlobalVariables, int theDimension);
 	bool AlreadyAccountedForInGUIDisplay;
 	static bool flagUsingOrlikSolomonBases;
@@ -4702,7 +4702,7 @@ public:
 	static void MakePolynomialFromOneNormal
 		(	root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
 	void ComputeNormals
-		(	partFractions& owner, roots& output, int theDimension, 
+		(	partFractions& owner, roots& output, int theDimension,
 			GlobalVariables& theGlobalVariables);
 	int ComputeGainingMultiplicityIndexInLinearRelation
 		(	MatrixLargeRational& theLinearRelation);
@@ -4724,10 +4724,10 @@ public:
 		(	int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum,
 			GlobalVariables& theGlobalVariables);
 	bool DecomposeFromLinRelation
-		(	MatrixLargeRational& theLinearRelation, partFractions& Accum, 
+		(	MatrixLargeRational& theLinearRelation, partFractions& Accum,
 			GlobalVariables& theGlobalVariables);
 	void ComputeOneCheckSum
-		(	partFractions& owner,Rational &output, int theDimension, 
+		(	partFractions& owner,Rational &output, int theDimension,
 			GlobalVariables& theGlobalVariables);
 	void AttemptReduction
 		(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
@@ -4741,7 +4741,7 @@ public:
 		(	ListBasicObjects<int> &theSelectedIndices,
 			ListBasicObjects<int> &theGreatestElongations,
 			ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
-			int ElongationGainingMultiplicityIndex, partFractions &Accum, 
+			int ElongationGainingMultiplicityIndex, partFractions &Accum,
 			GlobalVariables& theGlobalVariables);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod
@@ -4776,11 +4776,11 @@ public:
 	~partFraction();
 	void GetPolyReduceMonomialByMonomial
 		(	partFractions& owner, GlobalVariables& theGlobalVariables,
-			intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, 
+			intRoot& theExponent, int StartMonomialPower, int DenPowerReduction,
 			int startDenominatorPower,IntegerPoly& output);
 	void ReduceMonomialByMonomialModifyOneMonomial
 		(	partFractions& Accum,GlobalVariables& theGlobalVariables,
-			SelectionWithDifferentMaxMultiplicities& thePowers, 
+			SelectionWithDifferentMaxMultiplicities& thePowers,
 			ListBasicObjects<int>&thePowersSigned, Monomial<Integer>& input);
 	void GetAlphaMinusNBetaPoly
 		(	partFractions& owner,int indexA,
@@ -4803,7 +4803,7 @@ public:
 	bool operator==(partFraction& right);
 	void operator=(const partFraction& right);
 	void initFromRootSystem
-		(	partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, 
+		(	partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis,
 			intRoot* weights);
 	int ElementToString
 		(	partFractions& owner, std::string& output, bool LatexFormat,
@@ -4815,7 +4815,7 @@ public:
 			bool LatexFormat,bool includeVPsummand,bool includeNumerator,
 			GlobalVariables& theGlobalVariables);
 	void ReadFromFile
-		(	partFractions& owner,std::fstream &input, GlobalVariables&  theGlobalVariables, 
+		(	partFractions& owner,std::fstream &input, GlobalVariables&  theGlobalVariables,
 			int theDimension);
 	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	int GetNumMonomialsInNumerator();
@@ -5116,6 +5116,8 @@ public:
 	std::string VPIndexFileString;
 	rootFKFTcomputation();
 	~rootFKFTcomputation();
+	static bool OpenDataFile
+			(std::fstream& theFileOutput, std::string& theFileName);
 	static bool OpenDataFileOrCreateIfNotPresent
 			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
@@ -5131,7 +5133,7 @@ public:
 	//of the orbit with Borel-positive weights
 	//give a Limiting cone if you want only to observe weights lying in a
 	//certain cone. Set 0 if there is no particular cone of interest.
-	void MakeTheRootFKFTSum				
+	void MakeTheRootFKFTSum
 		(	root& ChamberIndicator, partFractions& theBVdecomposition,
 			ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
 			VermaModulesWithMultiplicities& theHighestWeights,

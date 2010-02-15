@@ -778,12 +778,17 @@ void ComputationSetup::InitComputationSetup()
 	}
 }
 
+void ComputationSetup::DoTheRootSAComputation()
+{	rootSubalgebra theRootSA;
+	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
+	Stop();
+}
+
 void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
-	rootSubalgebra theRootSA;
-	
+	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -1262,9 +1267,8 @@ bool root::IsEqualTo(const root& right)
 {	if (this->size!=right.size)
 		return false;
 	for (int i=0;i<this->size;i++)
-	{ if (!this->TheObjects[i].IsEqualTo(right.TheObjects[i]))
+		if (!this->TheObjects[i].IsEqualTo(right.TheObjects[i]))
 			return false;
-	}
 	return true;
 }
 
@@ -12987,8 +12991,8 @@ void rootSubalgebra::ComputeAll()
 { this->initFromAmbientWeyl();
 	this->SimpleBasisK.CopyFromBase(this->genK);
 	this->TransformToSimpleBasisGenerators(this->SimpleBasisK);
-	this->ComputeDebugString();
 	this->ComputeKModules();
+	this->ComputeDebugString();
 }
 
 void rootSubalgebra::initFromAmbientWeyl()
@@ -13060,6 +13064,45 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(root& input, root& outputL
 { this->ComputeExtremeWeightInTheSameKMod(input,outputLW,false);
 }
 
+void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables)
+{ ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > multTable;
+	
+}
+
+void rootSubalgebra::GenerateKmodMultTable
+	(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > >& output,
+		GlobalVariables& theGlobalVariables) 
+{ output.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+	for (int i=0;i<this->kModules.size;i++)
+	{ output.TheObjects[i].SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+		for (int j=i;j<this->kModules.size;j++)
+		{ this->KmodTimesKmod(i,j,output.TheObjects[i].TheObjects[j]);
+		}
+	}
+}
+
+bool rootSubalgebra::IsARoot(root& input)
+{ if (input.size!=this->AmbientWeyl.KillingFormMatrix.NumRows)
+		return false;
+	return !(this->AmbientWeyl.RootSystem.ContainsObjectHash(input)==-1);
+}
+
+void rootSubalgebra::KmodTimesKmod
+	(int index1, int index2, ListBasicObjects<int>& output)
+{ root tempRoot;
+	for (int i=0;i<this->kModules.TheObjects[index1].size;i++)
+		for (int j=0;j<this->kModules.TheObjects[index2].size;j++)
+		{ tempRoot.Assign(this->kModules.TheObjects[index1].TheObjects[i]);
+			tempRoot.Add(this->kModules.TheObjects[index2].TheObjects[j]);
+			if (this->IsARoot(tempRoot))
+				for (int k=0;k<this->kModules.size;k++)
+					if (this->kModules.TheObjects[k].ContainsObject(tempRoot)
+					{	output.AddObjectOnTopNoRepetitionOfObject(k);
+						break;
+					}
+		}
+}
+
 void rootSubalgebra::ComputeKModules()
 {	this->HighestRootsK.size =0;
 	this->ComputeDebugString();
@@ -13104,8 +13147,7 @@ void rootSubalgebra::ComputeRootsOfK()
 		if (tempHW.IsEqualToZero() || tempLW.IsEqualToZero())
 		{ this->AllRootsK.AddRoot(this->AllRoots.TheObjects[i]);
 			if (this->AllRoots.TheObjects[i].IsPositiveOrZero())
-			{ this->PositiveRootsK.AddRoot(this->AllRoots.TheObjects[i]);
-			}
+				this->PositiveRootsK.AddRoot(this->AllRoots.TheObjects[i]);
 		}
 	}
 }

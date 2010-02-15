@@ -5215,6 +5215,7 @@ public:
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
 	void ComputeExtremeWeightInTheSameKMod(root& input, root& outputW, bool lookingForHighest);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
+	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
 	void RunE6_3A2(GlobalVariables& theGlobalVariables);
 	void RunE7_D6plusA1(GlobalVariables& theGlobalVariables);
 	void RunE7_A2plusA5(GlobalVariables& theGlobalVariables);

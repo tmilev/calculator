@@ -1973,14 +1973,11 @@ void Selection::MakeSubSelection(Selection &theSelection, Selection &theSubSelec
 
 void Selection::Assign(const Selection& right)
 { if (this==&right)
-	{ return;
-	}
+		return;
 	if (this->MaxSize!=right.MaxSize)
-	{	this->init(right.MaxSize);
-	}
+		this->init(right.MaxSize);
 	else
-	{ this->initNoMemoryAllocation();
-	}
+		this->initNoMemoryAllocation();
 	for (int i=0; i<right.CardinalitySelection;i++)
 	{ this->elements[i]=right.elements[i];
 		this->selected[this->elements[i]]=true;
@@ -13065,19 +13062,33 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(root& input, root& outputL
 }
 
 void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables)
-{ ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > multTable;
-	
+{ multTableKmods multTable;
+	ListBasicObjects<int> oppositeKmods;
+	this->GenerateKmodMultTable(multTable,oppositeKmods,theGlobalVariables);
+	std::string tempS;
+	multTable.ComputeDebugString();
+		
+}
+
+void rootSubalgebra::GeneratePossibleNilradicalsRecursive
+	(	GlobalVariables &theGlobalVariables,int startIndex, Selection &selKmods, 
+		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable, 
+		ListBasicObjects<int> &oppositeKmods)
+{ for (int i=startIndex; i<this->kModules.size;i++)
+	{ 
+	}
 }
 
 void rootSubalgebra::GenerateKmodMultTable
 	(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > >& output,
+		ListBasicObjects<int>& oppositeKmods,
 		GlobalVariables& theGlobalVariables) 
 { output.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+	oppositeKmods.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	for (int i=0;i<this->kModules.size;i++)
 	{ output.TheObjects[i].SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 		for (int j=i;j<this->kModules.size;j++)
-		{ this->KmodTimesKmod(i,j,output.TheObjects[i].TheObjects[j]);
-		}
+			this->KmodTimesKmod(i,j,oppositeKmods,output.TheObjects[i].TheObjects[j]);
 	}
 }
 
@@ -13088,18 +13099,26 @@ bool rootSubalgebra::IsARoot(root& input)
 }
 
 void rootSubalgebra::KmodTimesKmod
-	(int index1, int index2, ListBasicObjects<int>& output)
+	(int index1, int index2,ListBasicObjects<int>& oppositeKmods,
+	 ListBasicObjects<int>& output)
 { root tempRoot;
+	output.size=0;
 	for (int i=0;i<this->kModules.TheObjects[index1].size;i++)
 		for (int j=0;j<this->kModules.TheObjects[index2].size;j++)
 		{ tempRoot.Assign(this->kModules.TheObjects[index1].TheObjects[i]);
 			tempRoot.Add(this->kModules.TheObjects[index2].TheObjects[j]);
-			if (this->IsARoot(tempRoot))
-				for (int k=0;k<this->kModules.size;k++)
-					if (this->kModules.TheObjects[k].ContainsObject(tempRoot)
-					{	output.AddObjectOnTopNoRepetitionOfObject(k);
-						break;
-					}
+			if (tempRoot.IsEqualToZero())
+			{ oppositeKmods.TheObjects[index1]=index2;
+				oppositeKmods.TheObjects[index2]=index1;
+				return;
+			}
+			else
+				if (this->IsARoot(tempRoot))
+					for (int k=0;k<this->kModules.size;k++)
+						if (this->kModules.TheObjects[k].ContainsObject(tempRoot))
+						{	output.AddObjectOnTopNoRepetitionOfObject(k);
+							break;
+						}
 		}
 }
 
@@ -14428,4 +14447,17 @@ void affineHyperplanes::ElementToString(std::string& output)
 	output= out.str();
 }
 
+
+void multTableKmods::ElementToString(std::string& output)
+{ std::stringstream out;
+	for (int i=0; i<this->size;i++)
+	{ for (int j=0;j<this->TheObjects[i].size;j++)
+		{	for (int k=0;k<this->TheObjects[i].TheObjects[j].size;k++)
+				out << this->TheObjects[i].TheObjects[j].TheObjects[k] << ", ";
+			out << "\t";
+		}		
+		out<< "\n";
+	}
+	output=out.str();
+}
 

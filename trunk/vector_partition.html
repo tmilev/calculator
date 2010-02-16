@@ -4,9 +4,10 @@
 </HEAD>
 <META http-equiv="Content-Script-Type" content="text/javascript">
 <BODY>
-<FORM method="POST" name="formMain" action="./../../bin/Debug/vector_partition_linux_cgi.cgi">
+<FORM method="POST" name="formMain" action="./../Debug/vector_partition_linux_cgi.cgi">
 Dimension: <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
 Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="submit" name="buttonGo" value="Go">
+<input type="hidden" name="hidden1">
 </FORM>	
 <input type="button" name="buttonTest" value="Draw" onclick="drawTest();" >
 

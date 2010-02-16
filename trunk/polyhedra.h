@@ -5346,6 +5346,11 @@ public:
 	void AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV);
 	void EvaluatePoly();
 	void Run();
+	int getNextEqualityIndex(std::string& input, int index);
+	bool IsAnInteger(char a);
+	int GetDigitFromChar(char a);
+	int readNextIntData(std::string&input, int index, int& endIndex);
+	void ReadDataFromCGIinput(std::string& input);
 	void InitComputationSetup();
 	void ExitComputationSetup();
 	void WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables);

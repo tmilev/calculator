@@ -18,8 +18,11 @@ void getPath(char* path, std::string& output)
   }
 }
 
+
+
 int main(int argc, char **argv)
-{ std::cout << "Content-Type: text/html\n\n";
+{ ComputationSetup theComputationSetup;
+	std::cout << "Content-Type: text/html\n\n";
   //std::cout <<  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
    //         << std::endl;
   //std::cout << "<html lang=\"en\" dir=\"LTR\">"<< std::endl;
@@ -35,7 +38,6 @@ int main(int argc, char **argv)
   while (!fileHeaderHtml.eof())
   { fileHeaderHtml.read(buffer,1024);
     std::cout.write(buffer, fileHeaderHtml.gcount());
-
   }
   WeylGroup tempWeyl;
   tempWeyl.MakeArbitrary('A',3);
@@ -50,7 +52,12 @@ int main(int argc, char **argv)
     }
   }
   std::cout<<"\ngeneratePageFromDimAndNum(3,6,5);\n</script>\n";
+  std::cin >> tempS;
+  std::cout<< tempS;
+  theComputationSetup.ReadDataFromCGIinput(tempS);
   std::cout<<"</BODY>\n</HTML>";
 
   return 0;   // To avoid Apache errors.
 }
+
+

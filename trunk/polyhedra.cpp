@@ -564,10 +564,70 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
 	this->VPVectors.ComputeDebugString();
 }
 
+int ComputationSetup::getNextEqualityIndex(std::string& input, int index)
+{	if(index==-1)
+		return -1;
+	for (int i=index;i<(signed)input.length();i++)
+		if (input[i]=='=')
+			return i+1;
+	return -1;
+}
+
+bool ComputationSetup::IsAnInteger(char a)
+{ if (a=='0')	return true;
+	if (a=='1')	return true;
+	if (a=='2')	return true;
+	if (a=='3')	return true;
+	if (a=='4')	return true;
+	if (a=='5')	return true;
+	if (a=='6')	return true;
+	if (a=='7')	return true;
+	if (a=='8')	return true;
+	if (a=='9')	return true;
+	return false;
+}
+
+int ComputationSetup::GetDigitFromChar(char a)
+{ if (a=='0') return 0;
+	if (a=='1') return 1;
+	if (a=='2') return 2;
+	if (a=='3') return 3;
+	if (a=='4') return 4;
+	if (a=='5') return 5;
+	if (a=='6') return 6;
+	if (a=='7') return 7;
+	if (a=='8') return 8;
+	if (a=='9') return 9;
+	return -1;
+}
+
+int ComputationSetup::readNextIntData(std::string& input, int index, int& endIndex)
+{ if (index==-1)
+		return -1;
+	int result=0;
+	int i;
+	for (i=index;this->IsAnInteger(input[i]) && i-index<10;i++)
+	{ result*=10;
+		result+=this->GetDigitFromChar(input[i]);
+	}
+	endIndex=i;
+	return result;
+}
+
+void ComputationSetup::ReadDataFromCGIinput(std::string& input)
+{	if (input.length()<2)
+		return;
+	int index=0;
+	index=this->getNextEqualityIndex(input, index);
+	this->theChambers.AmbientDimension= this->readNextIntData(input,index,index);
+	std::cout<<"\n"<< ((int)this->theChambers.AmbientDimension);
+}
+
 ComputationSetup::ComputationSetup()
 {	this->AllowRepaint=true;
 	this->UsingCustomVectors=false;
-	this->flagComputingPartialFractions=true;
+//	this->flagComputingPartialFractions=true;
+	this->flagComputingPartialFractions=false;
 	this->ComputingVectorPartitions=true;
 	this->ComputingChambers=true;
 	this->flagComputationInProgress=false;
@@ -14449,7 +14509,7 @@ void affineHyperplanes::ElementToString(std::string& output)
 
 
 void multTableKmods::ElementToString(std::string& output)
-{ std::stringstream out;
+{	std::stringstream out;
 	for (int i=0; i<this->size;i++)
 	{ for (int j=0;j<this->TheObjects[i].size;j++)
 		{	for (int k=0;k<this->TheObjects[i].TheObjects[j].size;k++)

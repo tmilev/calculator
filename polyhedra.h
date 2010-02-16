@@ -352,7 +352,8 @@ public:
 	void CopyFromBase (const ListBasicObjects<Object>& From);
 	void ShiftUpExpandOnTop(int StartingIndex);
 	//careful output is not bool but int!!!!
-	int ContainsObject(const Object& o);
+	int IndexOfObject(const Object& o);
+	bool ContainsObject(const Object& o){return this->IndexOfObject(o)!=-1;};
 //	inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1;};
 	int SizeWithoutObjects();
 	inline Object* LastObject();
@@ -1603,7 +1604,7 @@ void ListBasicObjects<Object>::SwapTwoIndices(int index1, int index2)
 }
 
 template<class Object>
-int ListBasicObjects<Object>::ContainsObject(const Object &o)
+int ListBasicObjects<Object>::IndexOfObject(const Object &o)
 { for (int i=0;i<this->size;i++)
 		if (this->TheObjects[i]==o)
 			return i;
@@ -1650,7 +1651,7 @@ void ListBasicObjects<Object>::ShiftUpExpandOnTop(int StartingIndex)
 
 template <class Object>
 bool  ListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObject(const Object& o)
-{ if (this->ContainsObject(o)!=-1)
+{ if (this->IndexOfObject(o)!=-1)
 		return false;
 	this->AddObjectOnTop(o);
 	return true;
@@ -5202,6 +5203,7 @@ public:
 	roots SimpleBasisK;
 	roots PositiveRootsK;
 	roots AllRootsK;
+	Selection theNilradicalKmods;
 	roots LowestWeightsGmodK;
 	roots HighestRootsK;
 	roots TestedRootsAlpha;
@@ -5216,11 +5218,19 @@ public:
 	void DoKRootsEnumerationRecursively
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
+	bool IndexIsCompatibleWithPrevious
+		(	int startIndex, int RecursionDepth,
+			ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable, 
+			ListBasicObjects<Selection>& impliedSelections,
+			ListBasicObjects<int> &oppositeKmods);
 	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	void GeneratePossibleNilradicalsRecursive
-		(	GlobalVariables& theGlobalVariables,int startIndex, Selection& selKmods,
+		(	GlobalVariables& theGlobalVariables,int startIndex, int RecursionDepth, 
 			ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & multTable, 
+			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int>& oppositeKmods);
+	void PossibleNilradicalComputation
+		(GlobalVariables& theGlobalVariables,Selection& selKmods);
 	void ElementToString(std::string& output);
 	void GenerateKmodMultTable
 		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output, 

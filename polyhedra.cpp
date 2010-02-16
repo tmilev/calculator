@@ -619,7 +619,8 @@ void ComputationSetup::ReadDataFromCGIinput(std::string& input)
 		return;
 	int index=0;
 	index=this->getNextEqualityIndex(input, index);
-	this->theChambers.AmbientDimension= this->readNextIntData(input,index,index);
+	this->theChambers.AmbientDimension= 
+		(unsigned char)this->readNextIntData(input,index,index);
 	std::cout<<"\n"<< ((int)this->theChambers.AmbientDimension);
 }
 
@@ -841,6 +842,7 @@ void ComputationSetup::InitComputationSetup()
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
 	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
 	Stop();
 }
 
@@ -2377,7 +2379,7 @@ void roots::AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r)
 }
 
 bool roots::AddRootNoRepetition(root& r)
-{	if (this->ContainsObject(r)==-1)
+{	if (this->IndexOfObject(r)==-1)
 	{	this->AddObjectOnTop(r);
 		return true;
 	}
@@ -7687,7 +7689,7 @@ void partFractionPolynomials::AddPolynomialLargeRational
 	{ rootLatticeIndicator.ComputeDebugString();
 	}
 
-	int x= this->LatticeIndicators.ContainsObject(tempRoot);
+	int x= this->LatticeIndicators.IndexOfObject(tempRoot);
 	if (x==-1)
 	{ this->LatticeIndicators.AddRoot(tempRoot);
 		this->AddObjectOnTop(input);
@@ -13066,15 +13068,13 @@ void rootSubalgebra::initFromAmbientWeyl()
 
 void rootSubalgebra::TransformToSimpleBasisGenerators(roots& theGens)
 { for (int i=0;i>theGens.size;i++)
-	{ if (!theGens.TheObjects[i].IsPositiveOrZero())
-		{ theGens.TheObjects[i].MinusRoot();
-		}
-	}
+		if (!theGens.TheObjects[i].IsPositiveOrZero())
+			theGens.TheObjects[i].MinusRoot();
 	bool reductionOccured=true;
 	while (reductionOccured)
 	{ reductionOccured= false;
 		for (int i=0;i<theGens.size;i++)
-		{ for (int j=i+1; j<theGens.size;j++)
+			for (int j=i+1; j<theGens.size;j++)
 			{ root tempRoot;
 				tempRoot.Assign(theGens.TheObjects[i]);
 				tempRoot.Subtract(theGens.TheObjects[j]);
@@ -13082,13 +13082,12 @@ void rootSubalgebra::TransformToSimpleBasisGenerators(roots& theGens)
 				{	theGens.PopIndexSwapWithLast(j);
 					reductionOccured=true;
 				}
-				if (this->AllRoots.ContainsObject(tempRoot)!=-1)
+				if (this->AllRoots.IndexOfObject(tempRoot)!=-1)
 				{ if (!tempRoot.IsPositiveOrZero()){tempRoot.MinusRoot();}
 					theGens.TheObjects[j].Assign(tempRoot);
 					reductionOccured=true;
 				}
 			}
-		}
 	}
 }
 
@@ -13101,10 +13100,10 @@ void rootSubalgebra::ComputeExtremeWeightInTheSameKMod
 		{	root tempRoot;
 			tempRoot.Assign(outputW);
 			if (lookingForHighest)
-			{ tempRoot.Add(this->SimpleBasisK.TheObjects[i]);}
+				tempRoot.Add(this->SimpleBasisK.TheObjects[i]);
 			else
 			{ tempRoot.Subtract(this->SimpleBasisK.TheObjects[i]);}
-			if (this->AllRoots.ContainsObject(tempRoot)!=-1)
+			if (this->AllRoots.IndexOfObject(tempRoot)!=-1)
 			{ outputW.Assign(tempRoot);
 				FoundHigher=true;
 			}
@@ -13127,16 +13126,68 @@ void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVaria
 	this->GenerateKmodMultTable(multTable,oppositeKmods,theGlobalVariables);
 	std::string tempS;
 	multTable.ComputeDebugString();
-		
+	ListBasicObjects<Selection> impliedSelections;
+	impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+	impliedSelections.TheObjects[0].init(this->kModules.size);
+	this->GeneratePossibleNilradicalsRecursive
+		(theGlobalVariables,0,0,multTable,impliedSelections,oppositeKmods);
 }
 
 void rootSubalgebra::GeneratePossibleNilradicalsRecursive
-	(	GlobalVariables &theGlobalVariables,int startIndex, Selection &selKmods, 
+	(	GlobalVariables &theGlobalVariables,int startIndex, int RecursionDepth, 
 		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable, 
+		ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods)
-{ for (int i=startIndex; i<this->kModules.size;i++)
-	{ 
+{ for (int i=startIndex;i<this->kModules.size;i++)
+	{ if (this->IndexIsCompatibleWithPrevious
+					(	i,RecursionDepth,multTable,
+						impliedSelections,oppositeKmods))
+			this->GeneratePossibleNilradicalsRecursive
+				(	theGlobalVariables,i+1,RecursionDepth+1,multTable,
+					impliedSelections,oppositeKmods);
+		if ( impliedSelections.TheObjects[RecursionDepth]
+						.selected[i])
+			return;		
 	}
+	this->PossibleNilradicalComputation
+		(theGlobalVariables,impliedSelections.TheObjects[RecursionDepth]);
+}
+
+bool rootSubalgebra::IndexIsCompatibleWithPrevious
+	(	int startIndex,int RecursionDepth,
+		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable, 
+		ListBasicObjects<Selection>& impliedSelections,
+		ListBasicObjects<int> &oppositeKmods)
+{ if (impliedSelections.TheObjects[RecursionDepth]
+				.selected[oppositeKmods.TheObjects[startIndex]])
+		return false;
+	Selection& tempSel=impliedSelections.TheObjects[RecursionDepth];
+	for (int i=0; i<tempSel.CardinalitySelection;i++ )
+	{ ListBasicObjects<int>& tempList=
+			multTable.TheObjects[startIndex].TheObjects[tempSel.elements[i]];
+		for (int j=0;j<tempList.size;j++)
+			if (tempList.TheObjects[j]<startIndex)
+				if (!tempSel.selected[tempList.TheObjects[j]])
+					return false;
+	}
+	Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
+	targetSel.Assign(tempSel);
+	targetSel.AddSelection(startIndex);
+	for (int i=0; i<tempSel.CardinalitySelection;i++ )
+	{ ListBasicObjects<int>& tempList=
+			multTable.TheObjects[startIndex].TheObjects[tempSel.elements[i]];
+		for (int j=0;j<tempList.size;j++)
+			if (tempList.TheObjects[j]>startIndex)
+				targetSel.AddSelection(tempList.TheObjects[j]);
+	}
+	return true;
+}
+
+void rootSubalgebra::PossibleNilradicalComputation
+	(GlobalVariables& theGlobalVariables, Selection& selKmods)
+{ this->theNilradicalKmods.Assign(selKmods);
+	this->ComputeDebugString();
+	Stop();
 }
 
 void rootSubalgebra::GenerateKmodMultTable
@@ -13147,7 +13198,7 @@ void rootSubalgebra::GenerateKmodMultTable
 	oppositeKmods.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	for (int i=0;i<this->kModules.size;i++)
 	{ output.TheObjects[i].SetSizeExpandOnTopNoObjectInit(this->kModules.size);
-		for (int j=i;j<this->kModules.size;j++)
+		for (int j=0;j<this->kModules.size;j++)
 			this->KmodTimesKmod(i,j,oppositeKmods,output.TheObjects[i].TheObjects[j]);
 	}
 }
@@ -13167,15 +13218,15 @@ void rootSubalgebra::KmodTimesKmod
 		for (int j=0;j<this->kModules.TheObjects[index2].size;j++)
 		{ tempRoot.Assign(this->kModules.TheObjects[index1].TheObjects[i]);
 			tempRoot.Add(this->kModules.TheObjects[index2].TheObjects[j]);
+			tempRoot.ComputeDebugString();
 			if (tempRoot.IsEqualToZero())
 			{ oppositeKmods.TheObjects[index1]=index2;
 				oppositeKmods.TheObjects[index2]=index1;
-				return;
 			}
 			else
 				if (this->IsARoot(tempRoot))
 					for (int k=0;k<this->kModules.size;k++)
-						if (this->kModules.TheObjects[k].ContainsObject(tempRoot))
+						if (this->kModules.TheObjects[k].IndexOfObject(tempRoot)!=-1)
 						{	output.AddObjectOnTopNoRepetitionOfObject(k);
 							break;
 						}
@@ -13187,10 +13238,10 @@ void rootSubalgebra::ComputeKModules()
 	this->ComputeDebugString();
 	this->ComputeRootsOfK();
 	for (int i=0;i<this->AllRoots.size;i++)
-	{ if (this->AllRootsK.ContainsObject(this->AllRoots.TheObjects[i])==-1)
+	{ if (this->AllRootsK.IndexOfObject(this->AllRoots.TheObjects[i])==-1)
 		{	root tempLW;
 			this->ComputeLowestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempLW);
-			int x=this->LowestWeightsGmodK.ContainsObject(tempLW);
+			int x=this->LowestWeightsGmodK.IndexOfObject(tempLW);
 			if (x==-1)
 			{ this->LowestWeightsGmodK.AddRoot(tempLW);
 				x=this->LowestWeightsGmodK.size -1;
@@ -13202,7 +13253,7 @@ void rootSubalgebra::ComputeKModules()
 		{	if (this->AllRoots.TheObjects[i].IsPositiveOrZero())
 			{	root tempHW;
 				this->ComputeHighestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempHW);
-				int x=this->HighestRootsK.ContainsObject(tempHW);
+				int x=this->HighestRootsK.IndexOfObject(tempHW);
 				if (x==-1)
 				{ this->HighestRootsK.AddRoot(tempHW);
 					x=this->HighestRootsK.size -1;
@@ -13241,9 +13292,18 @@ void rootSubalgebra::ElementToString(std::string &output)
 	out<<"\nRank k: " <<this->SimpleBasisK.size <<"\nSimple Basis:";
 	this->SimpleBasisK.ComputeDebugString();
 	out <<this->SimpleBasisK.DebugString;
-	out << "Num g mod k modules: "<<this->LowestWeightsGmodK.size << "\nLowest weights: ";
-	this->LowestWeightsGmodK.ComputeDebugString();
-	out<<this->LowestWeightsGmodK.DebugString;
+	out << "Num g mod k modules: "<<this->LowestWeightsGmodK.size;
+	for (int i=0;i<this->kModules.size;i++)
+	{ this->LowestWeightsGmodK.TheObjects[i].ComputeDebugString();
+		out << "\nModule "<<i+1<<": lowest weight: "
+				<< this->LowestWeightsGmodK.TheObjects[i].DebugString
+				<< "\n"<<this->kModules.TheObjects[i].size<< " roots:\n";
+		for (int j=0;j<this->kModules.TheObjects[i].size;j++)
+		{ this->kModules.TheObjects[i].TheObjects[j].ComputeDebugString();
+			out	<<this->kModules.TheObjects[i].TheObjects[j].DebugString
+					<<"\n";
+		}
+	}
 	output=out.str();
 }
 void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
@@ -13675,7 +13735,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot
 	int counter=0;
 	for(int i=0;i<this->AllRoots.size;i++)
 	{ root linComb;
-		if (this->AllRootsK.ContainsObject(this->AllRoots.TheObjects[i])==-1)
+		if (this->AllRootsK.IndexOfObject(this->AllRoots.TheObjects[i])==-1)
 		{ for (int j=0;j<theDimension;j++)
 			{	linComb.TheObjects[j].MakeZero();
 				for(int k=0;k<theDimension;k++)
@@ -13691,7 +13751,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot
 			if (this->LinCombToString(this->AllRoots.TheObjects[i], x,linComb,tempS))
 			{ out<<tempS<<"\n";
 				counter++;
-				if (this->LowestWeightsGmodK.ContainsObject(this->AllRoots.TheObjects[i]) !=-1)
+				if (this->LowestWeightsGmodK.IndexOfObject(this->AllRoots.TheObjects[i]) !=-1)
 				{ out2<< tempS<<"\n";
 				}
 			}
@@ -13729,7 +13789,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
 			tempMat.Invert(theGlobalVariables);
 			for(int i=0;i<this->AllRoots.size;i++)
 			{ root linComb;
-				if (this->AllRootsK.ContainsObject(this->AllRoots.TheObjects[i])==-1)
+				if (this->AllRootsK.IndexOfObject(this->AllRoots.TheObjects[i])==-1)
 				{ for (int j=0;j<theDimension;j++)
 					{	linComb.TheObjects[j].MakeZero();
 						for(int k=0;k<theDimension;k++)
@@ -14510,13 +14570,16 @@ void affineHyperplanes::ElementToString(std::string& output)
 
 void multTableKmods::ElementToString(std::string& output)
 {	std::stringstream out;
+	out <<"\t";
 	for (int i=0; i<this->size;i++)
-	{ for (int j=0;j<this->TheObjects[i].size;j++)
+		out << i<<"\t";
+	for (int i=0; i<this->size;i++)
+	{ out <<"\n"<<i<<"\t";
+		for (int j=0;j<this->TheObjects[i].size;j++)
 		{	for (int k=0;k<this->TheObjects[i].TheObjects[j].size;k++)
 				out << this->TheObjects[i].TheObjects[j].TheObjects[k] << ", ";
 			out << "\t";
 		}		
-		out<< "\n";
 	}
 	output=out.str();
 }

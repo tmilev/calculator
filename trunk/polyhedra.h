@@ -597,6 +597,12 @@ public:
 	void ScaleToIntegralForMinRationalHeight();
 	void ComputeDebugString();
 	void MultiplyByLargeRational(Rational& x);
+	static bool SystemLinearInequalitiesHasSolution
+		(	MatrixLargeRational& matA, MatrixLargeRational& matb, 
+			MatrixLargeRational& outputPoint);
+	static bool SystemLinearEqualitiesHasNonNegativeSolution
+		(	MatrixLargeRational& matA, MatrixLargeRational& matb, 
+			MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
 	int FindLCMCoefficientDenominatorsTruncated();
 	int FindGCDCoefficientNumeratorsTruncated();
 };
@@ -1459,8 +1465,8 @@ public:
 	bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
 	//The below function returns true if the system of homogeneous linear inequalities Ax<=b
 	//has a solution, false otherwise, where A is a matrix and x and b are column vectors.
-	bool SystemLinearInequalitiesHasSolution
-		(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
+//	bool SystemLinearInequalitiesHasSolution
+//		(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
 	bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
 	void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls);};
 	inline void operator=(const affineCone& right){this->Assign(right);};
@@ -5212,6 +5218,7 @@ public:
 	ListBasicObjects<Selection> theKEnumerations;
 	ListBasicObjects<int> theKComponentRanks;
 	std::string DebugString;
+	int NumRootsInNilradical();
 	bool IsARoot(root& input);
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
@@ -5229,6 +5236,7 @@ public:
 			ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & multTable, 
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int>& oppositeKmods);
+	bool ConeConditionHolds(GlobalVariables& theGlobalVariables);
 	void PossibleNilradicalComputation
 		(GlobalVariables& theGlobalVariables,Selection& selKmods);
 	void ElementToString(std::string& output);
@@ -5427,7 +5435,10 @@ public:
 	MatrixLargeRational matReduceMonomialByMonomial;
 	MatrixLargeRational matReduceMonomialByMonomial2;
 	MatrixLargeRational matOneColumn;
-
+	MatrixLargeRational matConeCondition1;
+	MatrixLargeRational matConeCondition2;	
+	MatrixLargeRational matConeCondition3;	
+	
 	partFraction fracReduceMonomialByMonomial;
 	QuasiPolynomial QPComputeQuasiPolynomial;
 	QuasiNumber QNComputeQuasiPolynomial;

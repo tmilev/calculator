@@ -5398,6 +5398,7 @@ struct CGIspecificRoutines
 public:
 	static void ReadDataFromCGIinput(std::string& input, ComputationSetup& output);
 	static void CivilizedStringTranslation(std::string& input);
+	static void MakeReportFromComputationSetup(ComputationSetup& input, std::string& output);
 };
 
 class RandomCodeIDontWantToDelete

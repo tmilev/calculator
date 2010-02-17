@@ -4708,11 +4708,12 @@ void PolynomialRationalCoeff::operator=(const PolynomialRationalCoeff& right)
 { this->CopyFromPoly(right);
 }
 
-void PolynomialRationalCoeff::MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables)
+void PolynomialRationalCoeff::MakePolyExponentFromIntRoot
+	(intRoot& r, GlobalVariables& theGlobalVariables)
 {	this->ClearTheObjects();
-	this->NumVars=r.dimension;
+	this->NumVars=(short)r.dimension;
 	Monomial<Rational>& tempM=theGlobalVariables.monMakePolyExponentFromIntRoot;
-	tempM.init(r.dimension);
+	tempM.init((short)r.dimension);
 	tempM.Coefficient.Assign(ROne);
 	for (int i=0;i<r.dimension;i++)
 		tempM.degrees[i]=(short) r.elements[i];
@@ -5011,7 +5012,7 @@ void PolynomialRationalCoeff::IntegrateDiscreteFromZeroTo
 void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output)
 {	if (this->Coefficient.IsEqualToZero())
 	{	output.ClearTheObjects();
-		output.NumVars= TheSub.TheQNSub.NumRows;
+		output.NumVars= (short)TheSub.TheQNSub.NumRows;
 		return;
 	}
 	static PolynomialRationalCoeff tempP;
@@ -5021,8 +5022,8 @@ void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& o
 	for (int i=0;i<this->NumVariables;i++)
 	{ tempM.degrees[i]= this->degrees[i];
 	}
-	tempM.Substitution(TheSub.RationalPolyForm,tempP,TheSub.TheQNSub.NumRows-1);
-	static QuasiNumber tempQ(TheSub.TheQNSub.NumRows);
+	tempM.Substitution(TheSub.RationalPolyForm,tempP,(short)(TheSub.TheQNSub.NumRows-1));
+	static QuasiNumber tempQ((short)TheSub.TheQNSub.NumRows);
 	tempQ.Assign(this->Coefficient);
 	tempQ.LinearSubstitution(TheSub);
 	output.AssignPolynomialRationalCoeff(tempP);
@@ -5343,7 +5344,7 @@ void QuasiPolynomial::RationalLinearSubstitution
 {	static QuasiPolynomial tempQP;
 	static QuasiPolynomial Accum;
 	Accum.ClearTheObjects();
-	Accum.NumVars= TheSub.TheQNSub.NumRows;
+	Accum.NumVars= (short)TheSub.TheQNSub.NumRows;
 	for (int i=0;i<this->size;i++)
 	{	static QuasiMonomial tempQM;
 		tempQM.Assign(this->TheObjects[i]);
@@ -6240,7 +6241,7 @@ void BasicQN::Simplify()
 void BasicQN::LinearSubstitution(QPSub& theSub)
 {	assert(this->NumVars== theSub.TheQNSub.NumCols);
 	static BasicQN tempOutput;
-	short LastRowIndex=theSub.TheQNSub.NumRows-1;
+	int LastRowIndex=theSub.TheQNSub.NumRows-1;
 	tempOutput.Exp.init(this->Exp.NumRows,LastRowIndex);
 	tempOutput.Nums.init(LastRowIndex,1);
 	this->ScaleBy(theSub.QNSubDen);
@@ -6262,7 +6263,7 @@ void BasicQN::LinearSubstitution(QPSub& theSub)
 	}
 	this->Exp.Assign(tempOutput.Exp);
 	this->Nums.Assign(tempOutput.Nums);
-	this->NumVars=theSub.TheQNSub.NumRows-1;
+	this->NumVars=(short)theSub.TheQNSub.NumRows-1;
 	this->ComputeDebugString();
 	this->Simplify();
 }
@@ -6493,7 +6494,7 @@ bool QuasiNumber::IsEqualToZero()
 void QuasiNumber::LinearSubstitution(QPSub& TheSub)
 {	static QuasiNumber Accum;
 	static BasicQN tempQ;
-	Accum.MakeZero(TheSub.TheQNSub.NumRows-1);
+	Accum.MakeZero((short)(TheSub.TheQNSub.NumRows-1));
 	for(int i=0;i<this->size;i++)
 	{	tempQ.Assign(this->TheObjects[i]);
 		tempQ.LinearSubstitution(TheSub);
@@ -8128,10 +8129,10 @@ int partFraction::ElementToStringBasisChange
 	else
 	{ static PolynomialRationalCoeff tempP,tempP2;
 		static Polynomials<Rational> tempSub;
-		tempP.Nullify(VarChange.NumRows);
+		tempP.Nullify((short)VarChange.NumRows);
 		tempSub.MakeExponentSubstitution(VarChange);
 		tempP2.AssignIntegerPoly(ComputationalBufferCoefficient);
-		tempP2.Substitution(tempSub,tempP,VarChange.NumRows);
+		tempP2.Substitution(tempSub,tempP,(short)VarChange.NumRows);
 		NumLinesUsed+=tempP.StringPrintOutAppend(stringPoly, PolyFormatLocal);
 	}
 	if (stringPoly=="1"){stringPoly="";}
@@ -10317,7 +10318,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 	roots tempRoots;
 	WeylGroup tempW;
 	this->ClearTheObjects();
-	this->AmbientDimension= WeylGroupNumber;
+	this->AmbientDimension=(short) WeylGroupNumber;
 	if (WeylGroupLetter=='A')
 	{ tempW.MakeAn(WeylGroupNumber);
 	}
@@ -10452,7 +10453,7 @@ void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator
 { assert(MultiplicityIndex<this->Multiplicities.size);
 	Monomial<Integer> tempM;
 	output.MakeNVarConst((short)theExponent.dimension,IOne);
-	tempM.init(theExponent.dimension);
+	tempM.init((short)theExponent.dimension);
 	tempM.Coefficient.Assign(IMOne);
 	for (int i=0;i<theExponent.dimension;i++)
 		tempM.degrees[i]=(short)(theExponent.elements[i]*this->Elongations.TheObjects[MultiplicityIndex]);
@@ -11018,9 +11019,9 @@ void WeylGroup::SimpleReflectionRootAlg
 						bool RhoAction)
 {	int lengthA=this->KillingFormMatrix.elements[index][index];
 	static PolynomialRationalCoeff AscalarB, tempP;
-	AscalarB.Nullify(this->KillingFormMatrix.NumRows);
+	AscalarB.Nullify((short)this->KillingFormMatrix.NumRows);
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
-	{ tempP.Nullify(this->KillingFormMatrix.NumRows);
+	{ tempP.Nullify((short)this->KillingFormMatrix.NumRows);
 		tempP.CopyFromPoly(theRoot.TheObjects[i]);
 		tempP.TimesInteger(KillingFormMatrix.elements[index][i]);
 		AscalarB.AddPolynomial(tempP);
@@ -11425,9 +11426,9 @@ void PolynomialsRationalCoeff::MakeSubFromMatrixRational(MatrixLargeRational &th
 { this->SetSizeExpandOnTopNoObjectInit(theMat.NumCols);
 	for (int i=0;i<this->size;i++)
 	{ static Monomial<Rational> tempM;
-		this->TheObjects[i].Nullify(theMat.NumRows-1);
+		this->TheObjects[i].Nullify((short)theMat.NumRows-1);
 		for (int j=0;j<theMat.NumRows-1;j++)
-		{	tempM.init(theMat.NumRows-1);
+		{	tempM.init((short)theMat.NumRows-1);
 			tempM.degrees[j]=1;
 			tempM.Coefficient.Assign(theMat.elements[j][i]);
 			this->TheObjects[i].AddMonomial(tempM);
@@ -12835,13 +12836,12 @@ void IntegerPoly::Evaluate(root& values, Rational& output)
 
 void IntegerPoly::MakePolyExponentFromIntRoot(intRoot&r)
 {	this->ClearTheObjects();
-	this->NumVars=r.dimension;
+	this->NumVars=(short)r.dimension;
 	static Monomial<Integer> tempM;
-	tempM.init(r.dimension);
+	tempM.init((short)r.dimension);
 	tempM.Coefficient.Assign(IOne);
 	for (int i=0;i<r.dimension;i++)
-	{ tempM.degrees[i]=(short) r.elements[i];
-	}
+		tempM.degrees[i]=(short) r.elements[i];
 	this->AddMonomial(tempM);
 }
 
@@ -13101,6 +13101,8 @@ void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVaria
 	this->GenerateKmodMultTable(multTable,oppositeKmods,theGlobalVariables);
 	std::string tempS;
 	multTable.ComputeDebugString();
+	this->NumNilradicalsAllowed=0;
+	this->NumConeConditionFailures=0;
 	ListBasicObjects<Selection> impliedSelections;
 	impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	impliedSelections.TheObjects[0].init(this->kModules.size);
@@ -13160,9 +13162,11 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 
 void rootSubalgebra::PossibleNilradicalComputation
 	(GlobalVariables& theGlobalVariables, Selection& selKmods)
-{ this->theNilradicalKmods.Assign(selKmods);
+{ this->NumNilradicalsAllowed++;
+	this->theNilradicalKmods.Assign(selKmods);
 	this->ComputeDebugString();
-	this->ConeConditionHolds(theGlobalVariables);
+	if(!this->ConeConditionHolds(theGlobalVariables))
+		this->NumConeConditionFailures++;
 	Stop();
 }
 
@@ -13252,12 +13256,14 @@ int rootSubalgebra::NumRootsInNilradical()
 
 bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
-	//MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
-	//MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
+	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
+	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	int numNilradRoots=this->NumRootsInNilradical();
 	int numCols=numNilradRoots+this->kModules.size-this->theNilradicalKmods.CardinalitySelection;
 	matA.init((short)theDimension+1, (short)numCols);
+	matb.init((short)theDimension+1,1);
+	matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
 	int counter=0;
 	for (int i=0;i<this->theNilradicalKmods.CardinalitySelection;i++)
 	{	roots& tempKmod= this->kModules.TheObjects[this->theNilradicalKmods.elements[i]];
@@ -13276,7 +13282,8 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 			counter++;
 		}
 	}
-	return false;
+	return MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
+		(matA,matb,matX,theGlobalVariables);
 }
 
 void rootSubalgebra::ComputeRootsOfK()
@@ -14312,104 +14319,101 @@ inline int affineCone::HashFunction()
 	return result;
 }
 
+void MatrixLargeRational::ComputePotentialChangeGradient
+	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables,
+		int ColumnIndex, Rational &outputChangeGradient, bool &hasAPotentialLeavingVariable)
+{ hasAPotentialLeavingVariable = false;
+	outputChangeGradient.MakeZero();
+	for (int j=0;j<matA.NumRows;j++)
+	{	if (BaseVariables.elements[j]>=NumTrueVariables)
+			outputChangeGradient.Add(matA.elements[j][ColumnIndex]);
+		hasAPotentialLeavingVariable = 
+			hasAPotentialLeavingVariable || 
+				matA.elements[j][ColumnIndex].IsPositive();
+	}
+	if (ColumnIndex>=NumTrueVariables)
+		outputChangeGradient.Subtract(ROne);		
+}
+
+void MatrixLargeRational::GetMaxMovementAndLeavingVariableRow
+	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, 
+		int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX,
+		Selection& BaseVariables)
+{	LeavingVariableRow=-1;
+	maxMovement.MakeZero();
+	for(int i=0; i<tempMatA.NumRows;i++)
+	{ Rational tempRat;
+		tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+		if (tempRat.IsPositive() && BaseVariables.elements[i]>=NumTrueVariables)
+		{ tempRat.Invert();
+			tempRat.MultiplyBy(matX.elements[BaseVariables.elements[i]][0]);
+			if (maxMovement.IsGreaterThan(tempRat)|| (LeavingVariableRow==-1 ))
+			{ maxMovement.Assign(tempRat);
+				LeavingVariableRow=i;
+			}
+		}
+	}
+}
+
 //this function return true if Ax=b>=0 has a solution with x>=0
 //and records a solution x at outputPoint
 //else returns false,
 //where b is a given nonnegative column vector, A is an n by m matrix
 //and x is a column vector with m entries
 bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
-	(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint,
+	(	MatrixLargeRational& matA, MatrixLargeRational& matb, 
+		MatrixLargeRational& outputPoint,
 		GlobalVariables& theGlobalVariables)
-{	/*MatrixLargeRational tempMatA;
-	MatrixLargeRational matX;
-	NumTrueVariables;
-	short numExtraColumns=0;
-	Rational GlobalGoal;
-	GlobalGoal.MakeZero();
+{	MatrixLargeRational& tempMatA=theGlobalVariables.matSimplexAlgorithm1;
+	MatrixLargeRational& matX=theGlobalVariables.matSimplexAlgorithm2;
+	Selection& NonZeroSlackVariables = theGlobalVariables.selSimplexAlg1;
+	Selection& BaseVariables = theGlobalVariables.selSimplexAlg2;
+	Rational GlobalGoal;	GlobalGoal.MakeZero();
 	assert (matA.NumRows== matb.NumRows);
 	for (int j=0;j<matb.NumRows;j++)
     assert(!matb.elements[j][0].IsNegative());  
-	NumTrueVariables= matA.NumCols;
-	tempMatA.init(matA.NumRows, NumTrueVariables*2+matA.NumRows+numExtraColumns);
+	int NumTrueVariables=matA.NumCols;
+	tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
 	matX.init(tempMatA.NumCols,1);
-	static HashedListBasicObjects<Selection> VisitedVertices;
+	HashedListBasicObjects<Selection>& VisitedVertices=
+		theGlobalVariables.hashedSelSimplexAlg;
 	VisitedVertices.ClearTheObjects();
-	static Selection NonZeroSlackVariables;
-	static Selection BaseVariables;
 	BaseVariables.init(tempMatA.NumCols);
-	tempMatA.NullifyAll();
-	matX.NullifyAll();
+	tempMatA.NullifyAll();	matX.NullifyAll();
 	for (int j=0;j<matA.NumCols;j++)
-	{	for (int i=0;i<matA.NumRows;i++)
-		{	tempMatA.elements[i][j].Assign(matA.elements[i][j]);
-			tempMatA.elements[i][j+NumTrueVariables].Assign(matA.elements[i][j]);
-			tempMatA.elements[i][j+NumTrueVariables].Minus();
-		}
-	}
-	int LowestBadIndex= tempMatA.NumCols- numExtraColumns;
-	short tempCounter=0;
+		for (int i=0;i<matA.NumRows;i++)
+			tempMatA.elements[i][j].Assign(matA.elements[i][j]);
 	for (int j=0;j<matA.NumRows;j++)
-	{ tempMatA.elements[j][j+NumTrueVariables*2].MakeOne();
-		if (matb.elements[j][0].IsNonNegative())
-		{	matX.elements[j+NumTrueVariables*2][0].Assign(matb.elements[j][0]);
-			BaseVariables.AddSelection(j+NumTrueVariables*2);
-		}
-		else
-		{	int tempI=NumTrueVariables*2+matA.NumRows+tempCounter;
-			matX.elements[tempI][0].Assign(matb.elements[j][0]);
-			matX.elements[tempI][0].Minus();
-			GlobalGoal.Add(matX.elements[tempI][0]);
-			tempMatA.elements[j][tempI].Assign(RMOne);
-			tempMatA.RowTimesScalar(j,RMOne);
-			BaseVariables.AddSelection(tempI);
-			tempCounter++;
-		}
+	{ tempMatA.elements[j][j+NumTrueVariables].MakeOne();
+		matX.elements[j+NumTrueVariables][0].Assign(matb.elements[j][0]);
+		BaseVariables.AddSelection(j+NumTrueVariables);
 	}
 	tempMatA.ComputeDebugString(); matX.ComputeDebugString();
-	static Rational	PotentialChangeGradient, ChangeGradient;//Change, PotentialChange;
+	Rational	PotentialChangeGradient, ChangeGradient;//Change, PotentialChange;
 	int EnteringVariable=0;
 	bool WeHaveNotEnteredACycle=true;
 	while (EnteringVariable!=-1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
-	{ EnteringVariable=-1;
-		ChangeGradient.MakeZero();
+	{ EnteringVariable=-1; ChangeGradient.MakeZero();
 		for (int i=0;i<tempMatA.NumCols;i++)
 		{ BaseVariables.ComputeDebugString();
 			if (!BaseVariables.selected[i])
-			{ PotentialChangeGradient.MakeZero();
-				bool hasAPotentialLeavingVariable=false;
-				for (int j=0;j<tempMatA.NumRows;j++)
-				{	if (BaseVariables.elements[j]>=LowestBadIndex)
-					{	static Rational tempRat;
-						tempRat.Assign(tempMatA.elements[j][i]);
-						PotentialChangeGradient.Add(tempRat);
-					}
-					hasAPotentialLeavingVariable=hasAPotentialLeavingVariable|| tempMatA.elements[j][i].IsPositive();
-				}
-				if (i>=LowestBadIndex)
-					PotentialChangeGradient.Subtract(ROne);
-				if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable)
+			{ Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
+				MatrixLargeRational::ComputePotentialChangeGradient
+					(	tempMatA,BaseVariables,NumTrueVariables,i,
+						PotentialChangeGradient,hasAPotentialLeavingVariable);
+				if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && 
+						hasAPotentialLeavingVariable)
 				{ EnteringVariable= i;
 					ChangeGradient.Assign(PotentialChangeGradient);
 				}
 			}
 		}
 		if (EnteringVariable!=-1)
-		{	int LeavingVariableRow=-1;
-			static Rational	MaxMovement;
-			MaxMovement.MakeZero();
-			for(int i=0; i<tempMatA.NumRows;i++)
-			{ static Rational tempRat;
-				tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
-				if (tempRat.IsPositive() && BaseVariables.elements[i]>=NumTrueVariables)
-				{ tempRat.Invert();
-					tempRat.MultiplyBy(matX.elements[BaseVariables.elements[i]][0]);
-					if (MaxMovement.IsGreaterThan(tempRat)|| (LeavingVariableRow==-1 ))
-					{ MaxMovement.Assign(tempRat);
-						LeavingVariableRow=i;
-					}
-				}
-			}
-			static Rational tempRat, tempTotalChange;
+		{	int LeavingVariableRow;	Rational MaxMovement;
+			MatrixLargeRational::GetMaxMovementAndLeavingVariableRow
+				(	MaxMovement,LeavingVariableRow,EnteringVariable, NumTrueVariables,
+					tempMatA, matX, BaseVariables);
+			Rational tempRat, tempTotalChange;
 			assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
 			tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
 			tempRat.Invert();
@@ -14446,15 +14450,14 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 			BaseVariables.ComputeDebugString();
 		}
 	}
-	for(int i=LowestBadIndex;i<matX.NumRows;i++)
-	{ if (matX.elements[i][0].IsPositive())
+	for(int i=NumTrueVariables;i<matX.NumRows;i++)
+		if (matX.elements[i][0].IsPositive())
 			return false;
-	}
 	outputPoint.Resize(NumTrueVariables,1,false);
 	for (int i=0;i<NumTrueVariables;i++)
 	{	outputPoint.elements[i][0].Assign(matX.elements[i][0]);
 		outputPoint.elements[i][0].Subtract(matX.elements[i+NumTrueVariables][0]);
-	}*/
+	}
 	return true;
 }
 
@@ -14463,7 +14466,7 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 //else returns false
 bool MatrixLargeRational::SystemLinearInequalitiesHasSolution
 	(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint)
-{ static MatrixLargeRational tempMatA;
+{/* static MatrixLargeRational tempMatA;
 	static MatrixLargeRational matX;
 	static short NumTrueVariables;
 	short numExtraColumns=0;
@@ -14598,7 +14601,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution
 	for (int i=0;i<NumTrueVariables;i++)
 	{	outputPoint.elements[i][0].Assign(matX.elements[i][0]);
 		outputPoint.elements[i][0].Subtract(matX.elements[i+NumTrueVariables][0]);
-	}
+	}*/
 	return true;
 }
 

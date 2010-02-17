@@ -440,14 +440,14 @@ template <typename Element>
 class MatrixElementaryLooseMemoryFit
 {
 public:
-	short NumRows; short ActualNumRows;
-	short NumCols; short ActualNumCols;
+	int NumRows; int ActualNumRows;
+	int NumCols; int ActualNumCols;
 	Element** elements;
-	void init(short r,short c);
+	void init(int r,int c);
 	void Free();
-	void Resize(short r, short c, bool PreserveValues);
+	void Resize(int r, int c, bool PreserveValues);
 	void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
-	void MakeIdMatrix(short theDimension);
+	void MakeIdMatrix(int theDimension);
 	MatrixElementaryLooseMemoryFit<Element>();
 	~MatrixElementaryLooseMemoryFit<Element>();
 };
@@ -467,12 +467,12 @@ MatrixElementaryLooseMemoryFit<Element>::~MatrixElementaryLooseMemoryFit()
 }
 
 template <typename Element>
-inline void MatrixElementaryLooseMemoryFit<Element>::init(short r, short c)
+inline void MatrixElementaryLooseMemoryFit<Element>::init(int r, int c)
 { this->Resize(r,c,false);
 }
 
 template <typename Element>
-void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(short theDimension)
+void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
 { this->init(theDimension, theDimension);
 	for (int i=0;i<theDimension;i++)
 		for (int j=0;j<theDimension;j++)
@@ -483,7 +483,8 @@ void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(short theDimension)
 }
 
 template <typename Element>
-inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bool PreserveValues)
+inline void MatrixElementaryLooseMemoryFit<Element>::Resize
+	(int r, int c, bool PreserveValues)
 { if (r<0) r=0;
 	if (c<0) c=0;
 	if (r==this->NumRows && c== this->NumCols)
@@ -494,8 +495,8 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(short r, short c, bo
 		return;
 	}
 	Element** newElements=0;
-	short newActualNumCols= (short)Maximum(this->ActualNumCols,c);
-	short newActualNumRows= (short)Maximum(this->ActualNumRows,r);
+	int newActualNumCols= MathRoutines::Maximum(this->ActualNumCols,c);
+	int newActualNumRows= MathRoutines::Maximum(this->ActualNumRows,r);
 	if (r>this->ActualNumRows || c>this->ActualNumCols)
 	{ newElements	= new Element*[newActualNumRows];
 		for (int i=0;i<newActualNumRows;i++)
@@ -527,8 +528,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Assign(const MatrixElementa
 template <typename Element>
 inline void MatrixElementaryLooseMemoryFit<Element>::Free()
 { for (int i=0;i<this->ActualNumRows;i++)
-	{	delete [] this->elements[i];
-	}
+		delete [] this->elements[i];
 	delete [] this->elements;
 	this->elements=0;
 	this->NumCols=0;
@@ -541,12 +541,12 @@ template <typename Element>
 class MatrixElementaryTightMemoryFit
 {
 public:
-	short NumRows;
-	short NumCols;
+	int NumRows;
+	int NumCols;
 	Element** elements;
-	void init(short r,short c);
+	void init(int r,int c);
 	void Free();
-	void Resize(short r, short c, bool PreserveValues);
+	void Resize(int r, int c, bool PreserveValues);
 	void Assign(const MatrixElementaryTightMemoryFit<Element>& m);
 	MatrixElementaryTightMemoryFit<Element>();
 	~MatrixElementaryTightMemoryFit<Element>();
@@ -603,6 +603,14 @@ public:
 	static bool SystemLinearEqualitiesHasNonNegativeSolution
 		(	MatrixLargeRational& matA, MatrixLargeRational& matb, 
 			MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
+	static void ComputePotentialChangeGradient
+	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables,
+		int ColumnIndex, Rational &outputChangeGradient, 
+		bool &hasAPotentialLeavingVariable);
+	static void GetMaxMovementAndLeavingVariableRow
+	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, 
+		int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX,
+		Selection& BaseVariables);
 	int FindLCMCoefficientDenominatorsTruncated();
 	int FindGCDCoefficientNumeratorsTruncated();
 };
@@ -902,12 +910,13 @@ inline void Matrix<Element>::NullifyAll()
 }
 
 template <typename Element>
-inline void MatrixElementaryTightMemoryFit<Element>::init(short r, short c)
+inline void MatrixElementaryTightMemoryFit<Element>::init(int r, int c)
 { this->Resize(r,c,false);
 }
 
 template <typename Element>
-inline void MatrixElementaryTightMemoryFit<Element>::Resize(short r, short c, bool PreserveValues)
+inline void MatrixElementaryTightMemoryFit<Element>::Resize
+	(int r, int c, bool PreserveValues)
 { if (r==this->NumRows && c== this->NumCols)
 		return;
 	if (r<=0)
@@ -3260,7 +3269,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot
 	(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input)
-{ this->init(input.dimension);
+{ this->init((short)input.dimension);
 	this->Coefficient.Assign(coeff);
 	for (int i=0;i<this->NumVariables;i++)
 		this->degrees[i]=(short) input.elements[i];
@@ -4107,15 +4116,14 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::
 			 MakeExponentSubstitution(MatrixIntTightMemoryFit& theSub)
 { static Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
 	static Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-	tempM.init(theSub.NumRows);
+	tempM.init((short)theSub.NumRows);
 	tempM.Coefficient.Assign(ElementOfCommutativeRingWithIdentity::TheRingUnit);
 	this->size=0;
 	this->SetSizeExpandOnTopNoObjectInit(theSub.NumCols);
 	for (int i=0;i<theSub.NumCols;i++)
 	{	for (int j=0;j<theSub.NumRows;j++)
-		{ tempM.degrees[j]=(short) theSub.elements[j][i];
-		}
-		tempP.Nullify(theSub.NumRows);
+			tempM.degrees[j]=(short) theSub.elements[j][i];
+		tempP.Nullify((short)theSub.NumRows);
 		tempP.AddMonomial(tempM);
 //		tempP->ComputeDebugString();
 		this->TheObjects[i].CopyFromPoly(tempP);
@@ -5200,6 +5208,8 @@ public:
 class rootSubalgebra
 {
 public:
+	int NumNilradicalsAllowed;
+	int NumConeConditionFailures;
 	roots AllRoots;
 	roots AllPositiveRoots;
 	WeylGroup AmbientWeyl;
@@ -5442,6 +5452,9 @@ public:
 	MatrixLargeRational matConeCondition1;
 	MatrixLargeRational matConeCondition2;	
 	MatrixLargeRational matConeCondition3;	
+	MatrixLargeRational matSimplexAlgorithm1;	
+	MatrixLargeRational matSimplexAlgorithm2;	
+	MatrixLargeRational matSimplexAlgorithm3;	
 	
 	partFraction fracReduceMonomialByMonomial;
 	QuasiPolynomial QPComputeQuasiPolynomial;
@@ -5468,6 +5481,10 @@ public:
 	Selection selComputeAffineInfinityPointApproximation2;
 	Selection selGetRankOfSpanOfElements;
 	Selection selReduceMonomialByMonomial;
+	Selection selSimplexAlg1;
+	Selection selSimplexAlg2;
+
+	HashedListBasicObjects<Selection> hashedSelSimplexAlg;
 
 	GlobalVariables();
 	~GlobalVariables();

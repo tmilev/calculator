@@ -566,7 +566,7 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
 
 void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input, std::string& output)
 { std::stringstream out;
-
+	input.theChambers.drawOutput(TDV, input.theChambers, input.VPVectors, -1,input.theChambers.IndicatorRoot,&out,drawline);
 	output=out.str();
 }
 
@@ -1084,7 +1084,7 @@ void CombinatorialChamberContainer::drawOutputAffine
 void CombinatorialChamberContainer::drawOutputProjective
 	(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 		roots& directions, int directionIndex, root& ChamberIndicator,
-		drawLineFunction theDrawFunction)
+		drawLineFunction theDrawFunction, std::stringstream* LatexOutput)
 { int color=0;
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
 	int NumTrueChambers=0;

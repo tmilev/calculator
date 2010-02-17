@@ -2229,7 +2229,7 @@ public:
 	static void drawOutputProjective
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator,
-			drawLineFunction theDrawFunction);
+			drawLineFunction theDrawFunction,std::stringstream* LatexOutput);
 	static void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, 
 			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);

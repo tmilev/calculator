@@ -950,11 +950,14 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r,double
 	}
 }
 
-void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile)
+void DrawingVariables::drawlineBetweenTwoVectors
+	(	root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile,
+		drawLineFunction theDrawFunction)
 { double x1,x2,y1,y2;
   this->GetCoordsForDrawing(*this,r1,x1,y1);
   this->GetCoordsForDrawing(*this,r2,x2,y2);
-	this->drawLine(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile);
+	this->drawLine
+		(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile, theDrawFunction);
 }
 
 void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile)
@@ -975,9 +978,11 @@ void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, 
 }
 
 void DrawingVariables::drawLine
-	(	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
+	(	double X1, double Y1, double X2, double Y2, 
+		unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile,
+		drawLineFunction theDrawFunction)
 { if (LatexOutFile==0)
-		::drawline(X1,Y1,X2,Y2,thePenStyle, ColorIndex);
+		(*theDrawFunction)(X1,Y1,X2,Y2,thePenStyle, ColorIndex);
 	else
 		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile);
 }
@@ -994,36 +999,10 @@ void DrawingVariables::drawText(double X1, double Y1, std::string& inputText, in
 		::LaTeXProcedures::drawText(X1, Y1,inputText,color,*LatexOutFile);
 }
 
-void drawFacetVertices(DrawingVariables& TDV,
-											 roots& r, roots& directions, int ChamberIndex)
-{	root tempRoot;
-	root Projection1;
-	root tempRoot2;
-	root Projection2;
-	for (int i = 0; i<r.size; i++)
-	{ tempRoot.Assign(r.TheObjects[i]);
-		//ProjectOnToHyperPlaneGraphics(tempRoot, Projection1,directions);
-		double tempX, tempY;
-		TDV.GetCoordsForDrawing(TDV,Projection1,tempX,tempY);
-		if (TDV.DrawDashes)
-			TDV.drawLine(TDV.centerX,TDV.centerY,tempX,tempY, 1,TDV.Colors[0],0);
-		for (int j=i+1;j<r.size; j++)
-		{	double tempX2;
-			double tempY2;
-			double tempX1;
-			double tempY1;
-			tempRoot2.Assign(r.TheObjects[j]);
-			TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
-			TDV.GetCoordsForDrawing(TDV,Projection2,tempX2,tempY2);
-			TDV.GetCoordsForDrawing(TDV,Projection1,tempX1,tempY1);
-			TDV.drawLine(tempX1,tempY1,tempX2,tempY2, 0,TDV.Colors[ChamberIndex%TDV.NumColors],0);
-		}
-	}
-}
-
-void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& TDV,
-														  roots& r, roots& directions, int ChamberIndex,
-															WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes)
+void CombinatorialChamberContainer::drawFacetVerticesMethod2
+	(	DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex,
+		WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes,
+		drawLineFunction theDrawFunction)
 {	root tempRoot;
 	root Projection1;
 	root tempRoot2;
@@ -1035,7 +1014,9 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 			double tempX, tempY;
 			TDV.GetCoordsForDrawing(TDV,Projection1,tempX,tempY);
 			if (TDV.DrawDashes)
-				TDV.drawLine(TDV.centerX,TDV.centerY,tempX,tempY, DrawingStyleDashes,TDV.Colors[0],0);
+				TDV.drawLine
+					(	TDV.centerX,TDV.centerY,tempX,tempY, DrawingStyleDashes,
+						TDV.Colors[0],0,theDrawFunction);
 			for (int j=i+1;j<r.size; j++)
 			{ if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
 				{	double tempX2;
@@ -1046,7 +1027,10 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 					TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
 					TDV.GetCoordsForDrawing(TDV,Projection2,tempX2,tempY2);
 					TDV.GetCoordsForDrawing(TDV,Projection1,tempX1,tempY1);
-					TDV.drawLine(tempX1,tempY1,tempX2,tempY2, DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors],0);
+					TDV.drawLine
+						(	tempX1,tempY1,tempX2,tempY2, 
+							DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors],0,
+							theDrawFunction);
 				}
 			}
 		}
@@ -1056,16 +1040,19 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
 void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 								CombinatorialChamberContainer& output,
 								roots& directions, int directionIndex, root& ChamberIndicator,
-								std::fstream* LaTeXOutput)
+								std::fstream* LaTeXOutput,drawLineFunction theDrawFunction)
 {	if (LaTeXOutput!=0)
 		LaTeXProcedures::beginPSTricks(*LaTeXOutput);
 	for(int i=0;i<output.size;i++)
 		if (output.TheObjects[i]!=0)
 			output.TheObjects[i]->DisplayNumber=i;
 	if (output.flagDrawingProjective)
-		CombinatorialChamberContainer::drawOutputProjective(TDV,output,directions, directionIndex,ChamberIndicator);
+		CombinatorialChamberContainer::drawOutputProjective
+			(	TDV,output,directions, directionIndex,ChamberIndicator,
+				theDrawFunction);
 	else
-		CombinatorialChamberContainer::drawOutputAffine(TDV,output, LaTeXOutput);
+		CombinatorialChamberContainer::drawOutputAffine
+			(TDV,output, LaTeXOutput,theDrawFunction);
 	if (LaTeXOutput!=0)
 		LaTeXProcedures::endPSTricks(*LaTeXOutput);
 }
@@ -1076,14 +1063,16 @@ void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
 // 2 = dotted line
 // 5 = invisible line (no line)
 void CombinatorialChamberContainer::drawOutputAffine
-	(DrawingVariables &TDV, CombinatorialChamberContainer &output, std::fstream* LaTeXoutput)
+	(	DrawingVariables &TDV, CombinatorialChamberContainer &output, 
+		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction)
 { if(output.AffineWallsOfWeylChambers.size>0)
 		output.GetNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
 	else
 		output.GetNumVisibleChambersAndLabelChambersForDisplay();
 	for(int i=0;i<output.size;i++)
 		if (output.TheObjects[i]!=0)
-			output.TheObjects[i]->drawOutputAffine(TDV,output, LaTeXoutput);
+			output.TheObjects[i]->drawOutputAffine
+				(TDV,output, LaTeXoutput, theDrawFunction);
 	TDV.drawCoordSystem(TDV, output.AmbientDimension-1,LaTeXoutput);
 }
 
@@ -1094,7 +1083,8 @@ void CombinatorialChamberContainer::drawOutputAffine
 // 5 = invisible line (no line)
 void CombinatorialChamberContainer::drawOutputProjective
 	(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
-		roots& directions, int directionIndex, root& ChamberIndicator)
+		roots& directions, int directionIndex, root& ChamberIndicator,
+		drawLineFunction theDrawFunction)
 { int color=0;
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
 	int NumTrueChambers=0;
@@ -1185,7 +1175,7 @@ void CombinatorialChamberContainer::drawOutputProjective
 				{	CombinatorialChamberContainer::drawFacetVerticesMethod2
 						(	TDV,output.TheObjects[j]->AllVertices,directions,j,
 							output.TheObjects[j]->Externalwalls.TheObjects[i],
-							DrawingStyle,DrawingStyleDashes);
+							DrawingStyle,DrawingStyleDashes,theDrawFunction);
 				}
 			}
 		}
@@ -1194,11 +1184,17 @@ void CombinatorialChamberContainer::drawOutputProjective
 			TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator,tempRootX,directions);
 			double tmpX,tmpY;
 			TDV.GetCoordsForDrawing(TDV,tempRootX,tmpX,tmpY);
-			TDV.drawLine(tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,0);
-			TDV.drawLine(tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,0);
+			TDV.drawLine
+				(	tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,0,
+					theDrawFunction);
+			TDV.drawLine
+				(	tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,0,
+					theDrawFunction);
 			tmpX=(tmpX-TDV.centerX)*1.5+TDV.centerX;
 			tmpY=(tmpY-TDV.centerY)*1.5+TDV.centerY;
-			TDV.drawLine(TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle,TDV.ColorChamberIndicator,0);
+			TDV.drawLine
+				(	TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle,
+					TDV.ColorChamberIndicator,0,theDrawFunction);
 			std::string tempS="Indicator";
 			drawtext(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
 		}
@@ -2720,7 +2716,8 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 }
 
 void CombinatorialChamber::drawOutputAffine
-	(DrawingVariables& TDV,CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput)
+	(	DrawingVariables& TDV,CombinatorialChamberContainer& owner, 
+		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction)
 { if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomial)
 		return;
 	TDV.ApplyScale(0.3);
@@ -2744,7 +2741,8 @@ void CombinatorialChamber::drawOutputAffine
 					color= TDV.ColorWeylChamberWalls;
 				TDV.drawlineBetweenTwoVectors
 					(	this->affineVertices.TheObjects[i],
-						this->affineVertices.TheObjects[j],penStyle,color,LaTeXoutput);
+						this->affineVertices.TheObjects[j],penStyle,color,LaTeXoutput,
+						theDrawFunction);
 				root tempRoot; this->ComputeAffineInternalPoint(tempRoot,owner.AmbientDimension-1);
 				std::stringstream out;
 				out << this->DisplayNumber;
@@ -3458,7 +3456,8 @@ bool CombinatorialChamberContainer::ConsistencyCheck()
 void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output)
 { if (!output.is_open())
 		return;
-	this->drawOutput(TDV,*this,directions,0,this->IndicatorRoot,&output);
+	this->drawOutput
+		(TDV,*this,directions,0,this->IndicatorRoot,&output,&drawline);
 	std::string tempS;
 	output	<< "Nilradical simple coords:\\\\\n ";
 	for (int i=0;i<directions.size;i++)
@@ -10652,14 +10651,13 @@ bool oneFracWithMultiplicitiesAndElongations::operator ==
 	for (int i=0;i<this->Elongations.size;i++)
 	{ bool Found=false;
 		for (int j=0; j<right.Elongations.size;j++)
-		{ if (this->Elongations.TheObjects[i]==right.Elongations.TheObjects[j])
+			if (this->Elongations.TheObjects[i]==right.Elongations.TheObjects[j])
 			{ if(this->Multiplicities.TheObjects[i]!=right.Multiplicities.TheObjects[j])
 					return false;
 				else
 				{ Found=true; break;
 				}
 			}
-		}
 		if (!Found)
 			return false;
 	}
@@ -10669,20 +10667,18 @@ bool oneFracWithMultiplicitiesAndElongations::operator ==
 void intRoot::MakeZero(int theDimension)
 { this->dimension=theDimension;
 	for (int i=0;i<this->dimension;i++)
-	{ this->elements[i]=0;
-	}
+		this->elements[i]=0;
 }
 
 void intRoot::AddRoot(intRoot& theRoot)
 { for (int i=0;i<this->dimension;i++)
-	{this->elements[i]+=theRoot.elements[i];}
+		this->elements[i]+=theRoot.elements[i];
 }
 
 int intRoot::HashFunction()
 {	int result=0;
 	for (int i=0;i<this->dimension;i++)
-	{ result+=::SomeRandomPrimes[i]*this->elements[i];
-	}
+		result+=::SomeRandomPrimes[i]*this->elements[i];
 	return result;
 }
 
@@ -10701,15 +10697,13 @@ void intRoot::ElementToString(std::string& output)
 void intRoot::AssignRoot(root& r)
 { this->dimension= r.size;
 	for (int i=0;i<this->dimension;i++)
-	{ this->elements[i]= r.TheObjects[i].NumShort;
-	}
+		this->elements[i]= r.TheObjects[i].NumShort;
 }
 
 bool intRoot::IsPositive()
 { for (int i=0;i<this->dimension;i++)
-	{ if (this->elements[i]<0)
+		if (this->elements[i]<0)
 			return false;
-	}
 	return true;
 }
 
@@ -10742,9 +10736,8 @@ void intRoot::initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5
 inline bool intRoot::IsGEQNoWeight(intRoot& r)
 { assert(this->dimension==r.dimension);
 	for (int i=0;i<this->dimension;i++)
-	{ if (r.elements[i]>this->elements[i])
+		if (r.elements[i]>this->elements[i])
 			return false;
-	}
 	return true;
 }
 
@@ -10752,24 +10745,22 @@ inline bool intRoot::IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights)
 {	assert(this->dimension == r.dimension);
 	int accum=0;
 	for (int i=0;i<this->dimension;i++)
-	{ accum+=(this->elements[i]-r.elements[i])*theWeights.elements[i];
-	}
+		accum+=(this->elements[i]-r.elements[i])*theWeights.elements[i];
 	return (accum>0);
 }
 
 void intRoot::operator =(const intRoot &right)
 { this->dimension=right.dimension;
 	for (int i=0;i<this->dimension;i++)
-	{ this->elements[i]=right.elements[i];
-	}
+		this->elements[i]=right.elements[i];
 }
 
 bool intRoot::operator ==(intRoot &right)
 {	if (this->dimension!=right.dimension)
 		return false;
 	for (int i=0;i<this->dimension;i++)
-	{ if (this->elements[i]!=right.elements[i]){return false;}
-	}
+		if (this->elements[i]!=right.elements[i])
+			return false;
 	return true;
 }
 
@@ -10789,10 +10780,9 @@ void RootToIndexTable::initFromRoots(intRoots& theAlgorithmBasis, intRoot* theWe
 	{ int x= this->ContainsObjectHash(theAlgorithmBasis.TheObjects[i]);
 		if (x==-1)
 		{	if (theWeights!=0)
-			{ this->AddRootAndSort(theAlgorithmBasis.TheObjects[i]);
-			}else
-			{ this->AddRootPreserveOrder(theAlgorithmBasis.TheObjects[i]);
-			}
+				this->AddRootAndSort(theAlgorithmBasis.TheObjects[i]);
+			else
+				this->AddRootPreserveOrder(theAlgorithmBasis.TheObjects[i]);
 		}
 	}
 	this->NumNonRedundantShortRoots= this->size;
@@ -10817,8 +10807,7 @@ void RootToIndexTable::ComputeTable(int theDimension)
 		tempR3.MultiplyByInteger(2);
 		this->IndicesDoublesOfRedundantShortRoots[i] = this->getIndex(tempR3);
 		if (IndicesDoublesOfRedundantShortRoots[i]!=-1)
-		{ this->IndicesRedundantShortRoots.AddSelection(i);
-		}
+			this->IndicesRedundantShortRoots.AddSelection(i);
 	}
 }
 
@@ -10832,15 +10821,13 @@ int RootToIndexTable::AddRootAndSort(intRoot& theRoot)
 	tempList.CopyFromBase(*this);
 	int index=0;
 	for (index=0;index<tempList.size;index++)
-	{ if (theRoot.IsHigherThanWRTWeight(tempList.TheObjects[index],this->weights))
+		if (theRoot.IsHigherThanWRTWeight(tempList.TheObjects[index],this->weights))
 			break;
-	}
 	tempList.ShiftUpExpandOnTop(index);
 	tempList.TheObjects[index]= theRoot;
 	this->ClearTheObjects();
 	for (int i=0;i<tempList.size;i++)
-	{ this->AddObjectOnTopHash(tempList.TheObjects[i]);
-	}
+		this->AddObjectOnTopHash(tempList.TheObjects[i]);
 	return index;
 }
 
@@ -10875,9 +10862,8 @@ void ::SelectionWithMultiplicities::init(int NumElements)
 void SelectionWithMultiplicities::ElementToString(std::string& output)
 { std::stringstream out;
 	for (int i=0;i<this->elements.size;i++)
-	{ out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: "
+		out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: "
 				<<this->Multiplicities.TheObjects[this->elements.TheObjects[i]];
-	}
 	output= out.str();
 }
 
@@ -10890,7 +10876,7 @@ void SelectionWithMaxMultiplicity::IncrementSubset()
 { for (int i=this->Multiplicities.size-1;i>=0;i--)
 	{ if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
 		{ if (this->Multiplicities.TheObjects[i]==0)
-			{	this->elements.AddObjectOnTop(i);}
+				this->elements.AddObjectOnTop(i);
 			this->Multiplicities.TheObjects[i]++;
 			return;
 		}
@@ -10963,7 +10949,7 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, roo
 	if (RhoAction)
 		beta.Add(this->rho);
 	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
-	{ for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
+		for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
 		{ tempRat.Assign(beta.TheObjects[j]);
 			tempRat.MultiplyBy(alpha.TheObjects[i]);
 			tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[i][j]*2);
@@ -10973,7 +10959,6 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, roo
 			tempRat.MultiplyByInt(this->KillingFormMatrix.elements[i][j]);
 			lengthA.Add(tempRat);
 		}
-	}
 	alphaShift.DivideBy(lengthA);
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
 	{ tempRat.Assign(alphaShift);
@@ -13289,6 +13274,9 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 			counter++;
 		}
 	}
+	matA.ComputeDebugString();
+	matb.ComputeDebugString();
+	matX.ComputeDebugString();
 	return MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 		(matA,matb,matX,theGlobalVariables);
 }

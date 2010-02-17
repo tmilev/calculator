@@ -152,6 +152,10 @@ inline int Maximum(int a, int b)
 }
 //#endif
 
+typedef void (*drawLineFunction)
+	(	double X1, double Y1, double X2, double Y2, 
+		unsigned long thePenStyle, int ColorIndex);
+
 struct DrawingVariables
 {
 public:
@@ -205,8 +209,13 @@ public:
 	void SetCoordsForC2();
 	void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile);
 	//if the LatexOutFile is zero then the procedure defaults to the screen
-	void drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
-	void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile);
+	void drawLine
+		(	double X1, double Y1, double X2, double Y2, 
+			unsigned long thePenStyle, int ColorIndex, 
+			std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
+	void drawlineBetweenTwoVectors
+		(	root& r1, root& r2, int PenStyle, int PenColor, 
+			std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 //	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
 	void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile);
 };
@@ -1589,7 +1598,8 @@ public:
 																			roots & directions, int CurrentIndex,
 																			root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput);
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner, 
+			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);
 	void WireChamberAndWallAdjacencyData
 		(	CombinatorialChamberContainer &owner,
 			CombinatorialChamber* input);
@@ -2214,15 +2224,19 @@ public:
 	void ComputeGlobalCone(roots& directions, GlobalVariables& theGlobalVariables);
 	static void drawOutput
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
-			roots& directions, int directionIndex,root& ChamberIndicator,std::fstream* LaTeXOutput);
+			roots& directions, int directionIndex,root& ChamberIndicator,
+			std::fstream* LaTeXOutput,drawLineFunction theDrawFunction);
 	static void drawOutputProjective
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
-			roots& directions, int directionIndex,root& ChamberIndicator);
+			roots& directions, int directionIndex,root& ChamberIndicator,
+			drawLineFunction theDrawFunction);
 	static void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput);
-	static void drawFacetVerticesMethod2(DrawingVariables& TDV,
-														  roots& r, roots& directions, int ChamberIndex,
-															WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes);
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, 
+			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);
+	static void drawFacetVerticesMethod2
+		(	DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex,
+			WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes,
+			drawLineFunction theDrawFunction);
 	bool TestPossibleIndexToSlice(root&direction, int index);
 	CombinatorialChamberContainer();
 	~CombinatorialChamberContainer();

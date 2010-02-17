@@ -277,6 +277,37 @@ public:
 IMPLEMENT_APP( guiApp )
 
 guiMainWindow *MainWindow1;
+//color styles (taken from windows.h and substituted for independence of the .h file):
+// 0 = normal line
+// 1 = dashed line
+// 2 = dotted line
+// 5 = invisible line (no line)
+void drawline(double X1, double Y1, double X2, double Y2,
+              unsigned long thePenStyle, int ColorIndex)
+{	::wxWindowDC dc(MainWindow1->Canvas1); wxPen tempPen;
+  switch (thePenStyle)
+  {	case 0: tempPen.SetStyle(::wxSOLID); break;
+		case 1:	tempPen.SetStyle(::wxSHORT_DASH); break;
+		case 2:	tempPen.SetStyle(::wxDOT); break;
+		case 5: return;
+  }
+  tempPen.SetColour(ColorIndex); dc.SetPen(tempPen);
+  dc.DrawLine((int)X1, (int)Y1,(int) X2,(int) Y2);
+//	dc.setForeground(FXRGB(0,0,0));
+//  dc.fillRectangle(0,0,MainWindow1->Canvas1DrawCanvas->getWidth(),MainWindow1->Canvas1DrawCanvas->getHeight());
+}
+
+void drawtext(double X1, double Y1, const char* text, int length, int color)
+{	::wxWindowDC dc(MainWindow1->Canvas1);
+  dc.SetFont(*MainWindow1->theFont);
+  dc.SetTextForeground(color);
+  //dc.setcolo(color);
+  //dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
+  //dc(FILL_STIPPLED);
+  wxString temptext(text,wxConvUTF8 ,length);
+  dc.DrawText(temptext,(int)X1, (int)Y1);
+}
+
 std::string MainWindow1GlobalPath;
 
 
@@ -808,7 +839,8 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 			(	::TDV,MainWindow1->theComputationSetup.theChambers,
 				MainWindow1->theComputationSetup.InputRoots,
 				MainWindow1->theComputationSetup.NextDirectionIndex,
-				MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0);
+				MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0,
+				&drawline);
   }
 }
 
@@ -1395,47 +1427,7 @@ void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
     ::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxProgressReportEvent);
     MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
 }
-//color styles (taken from windows.h and substituted for independence of the .h file):
-// 0 = normal line
-// 1 = dashed line
-// 2 = dotted line
-// 5 = invisible line (no line)
-void drawline(double X1, double Y1, double X2, double Y2,
-              unsigned long thePenStyle, int ColorIndex)
-{
-    ::wxWindowDC dc(MainWindow1->Canvas1);
-    wxPen tempPen;
-    switch (thePenStyle)
-    {
-    case 0:
-        tempPen.SetStyle(::wxSOLID);
-        break;
-    case 1:
-        tempPen.SetStyle(::wxSHORT_DASH);
-        break;
-    case 2:
-        tempPen.SetStyle(::wxDOT);
-        break;
-    case 5:
-        return;
-    }
-    tempPen.SetColour(ColorIndex);
-    dc.SetPen(tempPen);
-    dc.DrawLine((int)X1, (int)Y1,(int) X2,(int) Y2);
-//	dc.setForeground(FXRGB(0,0,0));
-//  dc.fillRectangle(0,0,MainWindow1->Canvas1DrawCanvas->getWidth(),MainWindow1->Canvas1DrawCanvas->getHeight());
-}
-void drawtext(double X1, double Y1, const char* text, int length, int color)
-{
-    ::wxWindowDC dc(MainWindow1->Canvas1);
-    dc.SetFont(*MainWindow1->theFont);
-    dc.SetTextForeground(color);
-    //dc.setcolo(color);
-    //dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
-    //dc(FILL_STIPPLED);
-    wxString temptext(text,wxConvUTF8 ,length);
-    dc.DrawText(temptext,(int)X1, (int)Y1);
-}
+
 
 #endif
 

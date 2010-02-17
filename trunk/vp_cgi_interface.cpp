@@ -54,6 +54,7 @@ int main(int argc, char **argv)
   std::cout<<"\ngeneratePageFromDimAndNum(3,6,5);\n</script>\n";
   std::cin >> tempS;
   ::CGIspecificRoutines::ReadDataFromCGIinput(tempS, theComputationSetup);
+  theComputationSetup.Run();
   std::cout<<"</BODY>\n</HTML>";
 
   return 0;   // To avoid Apache errors.

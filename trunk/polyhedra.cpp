@@ -564,6 +564,12 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
 	this->VPVectors.ComputeDebugString();
 }
 
+void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input, std::string& output)
+{ std::stringstream out;
+
+	output=out.str();
+}
+
 void CGIspecificRoutines::CivilizedStringTranslation(std::string& input)
 {	for (int i=0;i<(signed)input.length();i++)
 	{	if (input[i]=='&')
@@ -594,6 +600,7 @@ void CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 		}
 	}
 	output.VPVectors.ComputeDebugString();
+	output.flagComputingPartialFractions=false;
 	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[2].DebugString;

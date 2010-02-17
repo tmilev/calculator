@@ -1310,11 +1310,9 @@ public:
 	void AssignWithoutLastCoordinate(root& right);
 	inline void Assign(const root& right)
 	{ if (this->size!=right.size)
-		{ this->SetSizeExpandOnTopLight(right.size);
-		}
+			this->SetSizeExpandOnTopLight(right.size);
 		for (int i=0;i<this->size;i++)
-		{	this->TheObjects[i].Assign(right.TheObjects[i]);
-		}
+			this->TheObjects[i].Assign(right.TheObjects[i]);
 	};
 	void AssignIntRoot(intRoot& right);
 	bool IsProportianalTo(root& r);
@@ -2122,7 +2120,7 @@ class CombinatorialChamberContainer: public ListObjectPointers<CombinatorialCham
 {
 public:
 	int FirstNonExploredIndex;
-	unsigned char AmbientDimension;
+	int AmbientDimension;
 	std::string DebugString;
 	hashedRoots theHyperplanes;
 	Cone TheGlobalConeNormals;
@@ -2526,14 +2524,14 @@ class intRoot
 {
 private:
 public:
-	unsigned char dimension;
+	int dimension;
 	int elements[MaxRank];
 	void AssignRoot(root&r);
 	int HashFunction();
 	void ElementToString(std::string& output);
 	bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
 	bool IsGEQNoWeight(intRoot& r);
-	void MakeZero(unsigned char  theDimension);
+	void MakeZero(int  theDimension);
 	void MultiplyByInteger(int x)
 	{	for (int i=0;i<this->dimension;i++)
 		{ this->elements[i]*=x;
@@ -3285,7 +3283,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(root
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(intRoot& output)
-{ output.dimension=(unsigned char)this->NumVariables;
+{ output.dimension=this->NumVariables;
 	for (int i=0;i<this->NumVariables;i++)
 		output.elements[i]=this->degrees[i];
 }
@@ -4926,7 +4924,7 @@ public:
 	void MakeProgressReportUncoveringBrackets();
 	void MakeProgressVPFcomputation();
 	void ComputeKostantFunctionFromWeylGroup
-				(	char WeylGroupLetter, unsigned char WeylGroupNumber,
+				(	char WeylGroupLetter, int WeylGroupNumber,
 					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,
 					bool StoreToFile, GlobalVariables&  theGlobalVariables);
 };
@@ -5060,12 +5058,12 @@ public:
 	void ComputeRho();
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
-	void MakeArbitrary(char WeylGroupLetter,unsigned char n);
-	void MakeAn(unsigned char n);
-	void MakeEn(unsigned char n);
-	void MakeBn(unsigned char n);
-	void MakeCn(unsigned char n);
-	void MakeDn(unsigned char n);
+	void MakeArbitrary(char WeylGroupLetter,int n);
+	void MakeAn(int n);
+	void MakeEn(int n);
+	void MakeBn(int n);
+	void MakeCn(int n);
+	void MakeDn(int n);
 	void MakeF4();
 	void MakeG2();
 	void ComputeWeylGroup();
@@ -5360,7 +5358,7 @@ public:
 	char WeylGroupLetter;
 	int NumRowsNilradical;
 	int NumColsNilradical;
-	unsigned char WeylGroupIndex;
+	int WeylGroupIndex;
 	void AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV);
 	void EvaluatePoly();
 	void Run();
@@ -5368,7 +5366,6 @@ public:
 	bool IsAnInteger(char a);
 	int GetDigitFromChar(char a);
 	int readNextIntData(std::string&input, int index, int& endIndex);
-	void ReadDataFromCGIinput(std::string& input);
 	void InitComputationSetup();
 	void ExitComputationSetup();
 	void WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables);
@@ -5384,6 +5381,13 @@ public:
 	void DoTheRootSAComputation();
 	ComputationSetup();
 	~ComputationSetup();
+};
+
+struct CGIspecificRoutines
+{
+public:
+	static void ReadDataFromCGIinput(std::string& input, ComputationSetup& output);
+	static void CivilizedStringTranslation(std::string& input);
 };
 
 class RandomCodeIDontWantToDelete

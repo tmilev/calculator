@@ -551,7 +551,7 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &th
 
 void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables)
 { this->VPVectors.size=0;
-	this->WeylGroupIndex=(unsigned char) (this->NumColsNilradical+this->NumRowsNilradical-1);
+	this->WeylGroupIndex= (this->NumColsNilradical+this->NumRowsNilradical-1);
 	this->WeylGroupLetter='A';
 	for (int i=0;i<this->NumRowsNilradical;i++)
 	{ for(int j=0;j<this->NumColsNilradical;j++)
@@ -564,64 +564,40 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
 	this->VPVectors.ComputeDebugString();
 }
 
-int ComputationSetup::getNextEqualityIndex(std::string& input, int index)
-{	if(index==-1)
-		return -1;
-	for (int i=index;i<(signed)input.length();i++)
+void CGIspecificRoutines::CivilizedStringTranslation(std::string& input)
+{	for (int i=0;i<(signed)input.length();i++)
+	{	if (input[i]=='&')
+			input[i]=' ';
 		if (input[i]=='=')
-			return i+1;
-	return -1;
-}
-
-bool ComputationSetup::IsAnInteger(char a)
-{ if (a=='0')	return true;
-	if (a=='1')	return true;
-	if (a=='2')	return true;
-	if (a=='3')	return true;
-	if (a=='4')	return true;
-	if (a=='5')	return true;
-	if (a=='6')	return true;
-	if (a=='7')	return true;
-	if (a=='8')	return true;
-	if (a=='9')	return true;
-	return false;
-}
-
-int ComputationSetup::GetDigitFromChar(char a)
-{ if (a=='0') return 0;
-	if (a=='1') return 1;
-	if (a=='2') return 2;
-	if (a=='3') return 3;
-	if (a=='4') return 4;
-	if (a=='5') return 5;
-	if (a=='6') return 6;
-	if (a=='7') return 7;
-	if (a=='8') return 8;
-	if (a=='9') return 9;
-	return -1;
-}
-
-int ComputationSetup::readNextIntData(std::string& input, int index, int& endIndex)
-{ if (index==-1)
-		return -1;
-	int result=0;
-	int i;
-	for (i=index;this->IsAnInteger(input[i]) && i-index<10;i++)
-	{ result*=10;
-		result+=this->GetDigitFromChar(input[i]);
+		{	input.insert(i+1," ");
+			input.insert(i," ");
+			i+=2;
+		}
 	}
-	endIndex=i;
-	return result;
 }
 
-void ComputationSetup::ReadDataFromCGIinput(std::string& input)
+void CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSetup& output)
 {	if (input.length()<2)
 		return;
-	int index=0;
-	index=this->getNextEqualityIndex(input, index);
-	this->theChambers.AmbientDimension= 
-		(unsigned char)this->readNextIntData(input,index,index);
-	std::cout<<"\n"<< ((int)this->theChambers.AmbientDimension);
+	CGIspecificRoutines::CivilizedStringTranslation(input);
+	std::stringstream tempStream;
+	tempStream << input;
+	std::string tempS; int tempI;	tempStream.seekg(0);
+	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
+	tempStream >> tempS>>tempS>> tempI;
+	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
+	for (int i=0;i<output.VPVectors.size;i++)
+	{ output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.theChambers.AmbientDimension);
+		for(int j=0;j<(signed int)output.theChambers.AmbientDimension;j++)
+		{ tempStream>> tempS>>tempS>>tempI;
+			output.VPVectors.TheObjects[i].TheObjects[j].AssignInteger(tempI);
+		}
+	}
+	output.VPVectors.ComputeDebugString();
+	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
+//	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
+//	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[2].DebugString;
+//	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[3].DebugString;
 }
 
 ComputationSetup::ComputationSetup()
@@ -1258,8 +1234,7 @@ void root::ElementToString(std::string& output)
 		this->TheObjects[i].ElementToString(tempStr);
 		output.append(tempStr);
 		if (i!=this->size-1)
-		{	output.append(",");
-		}
+			output.append(",");
 	}
 }
 
@@ -3725,7 +3700,7 @@ void CombinatorialChamberContainer::MakeStartingChambers
 {	this->flagMakingASingleHyperplaneSlice=false;
 	if (directions.size==0)
 		return;
-	this->AmbientDimension= (unsigned char)directions.TheObjects[0].size;
+	this->AmbientDimension= directions.TheObjects[0].size;
 	if (this->AmbientDimension==1)
 		return;
 	int tempI= directions.ArrangeFirstVectorsBeOfMaxPossibleRank(theGlobalVariables);
@@ -7891,7 +7866,7 @@ bool partFraction::reduceOnceGeneralMethodNoOSBasis
 	tempRoots.size=0;
 	int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
-	{ intRoot tempRoot; tempRoot.dimension=(unsigned char) Accum.AmbientDimension;
+	{ intRoot tempRoot; tempRoot.dimension= Accum.AmbientDimension;
 		int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
 		if (currentIndex== this->LastDistinguishedIndex)
 		{ IndexInLinRelationOfLastGainingMultiplicityIndex=i;
@@ -7935,7 +7910,7 @@ bool partFraction::reduceOnceGeneralMethod(partFractions &Accum, GlobalVariables
 		this->getSmallestNonZeroIndexGreaterThanOrEqualTo(Accum,this->LastDistinguishedIndex);
 	int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
-	{ intRoot tempRoot; tempRoot.dimension=(unsigned char) Accum.AmbientDimension;
+	{ intRoot tempRoot; tempRoot.dimension= Accum.AmbientDimension;
 		int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
 		if (currentIndex== this->LastDistinguishedIndex)
 			IndexInLinRelationOfLastGainingMultiplicityIndex=i;
@@ -10334,7 +10309,7 @@ void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarCh
 }
 
 void partFractions::ComputeKostantFunctionFromWeylGroup
-				(	char WeylGroupLetter, unsigned char WeylGroupNumber,
+				(	char WeylGroupLetter, int WeylGroupNumber,
 					QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData,
 					bool StoreToFile, GlobalVariables&  theGlobalVariables)
 {	intRoots theBorel,theVPbasis;
@@ -10395,7 +10370,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 	}
 	if (WeylGroupLetter=='D')
 	{	intRoot tempRoot;
-		tempRoot.MakeZero((unsigned char)this->AmbientDimension);
+		tempRoot.MakeZero(this->AmbientDimension);
 		tempRoot.elements[this->AmbientDimension-1]=1;
 		tempRoot.elements[this->AmbientDimension-2]=-1;
 		theVPbasis.AddObjectOnTop(tempRoot);
@@ -10683,7 +10658,7 @@ bool oneFracWithMultiplicitiesAndElongations::operator ==
 	return true;
 }
 
-void intRoot::MakeZero(unsigned char theDimension)
+void intRoot::MakeZero(int theDimension)
 { this->dimension=theDimension;
 	for (int i=0;i<this->dimension;i++)
 	{ this->elements[i]=0;
@@ -10716,7 +10691,7 @@ void intRoot::ElementToString(std::string& output)
 }
 
 void intRoot::AssignRoot(root& r)
-{ this->dimension=(unsigned char) r.size;
+{ this->dimension= r.size;
 	for (int i=0;i<this->dimension;i++)
 	{ this->elements[i]= r.TheObjects[i].NumShort;
 	}
@@ -10731,7 +10706,7 @@ bool intRoot::IsPositive()
 }
 
 void intRoot::initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5)
-{ this->dimension= (unsigned char)theDimension;
+{ this->dimension= theDimension;
 	this->elements[0]=x1;
 	this->elements[1]=x2;
 	this->elements[2]=x3;
@@ -10741,7 +10716,7 @@ void intRoot::initFromInt(int theDimension, int x1, int x2, int x3, int x4, int 
 
 void intRoot::initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5, int x6,
 														int x7,int x8,int x9, int x10, int x11, int x12)
-{ this->dimension=(unsigned char)theDimension;
+{ this->dimension=theDimension;
 	this->elements[0]=x1;
 	this->elements[1]=x2;
 	this->elements[2]=x3;
@@ -11241,7 +11216,7 @@ void WeylGroup::ElementToString(std::string& output)
 	output= out.str();
 }
 
-void WeylGroup::MakeArbitrary(char WeylGroupLetter,unsigned char n)
+void WeylGroup::MakeArbitrary(char WeylGroupLetter,int n)
 { switch(WeylGroupLetter)
 	{ case 'A': this->MakeAn(n);
 		break;
@@ -11260,7 +11235,7 @@ void WeylGroup::MakeArbitrary(char WeylGroupLetter,unsigned char n)
 	}
 }
 
-void WeylGroup::MakeDn(unsigned char n)
+void WeylGroup::MakeDn(int n)
 { this->MakeAn(n);
 	this->KillingFormMatrix.elements[n-1][n-2]=0;
 	this->KillingFormMatrix.elements[n-2][n-1]=0;
@@ -11268,7 +11243,7 @@ void WeylGroup::MakeDn(unsigned char n)
 	this->KillingFormMatrix.elements[n-1][n-3]=-1;
 }
 
-void WeylGroup::MakeAn(unsigned char n)
+void WeylGroup::MakeAn(int n)
 {	this->rho.SetSizeExpandOnTopLight(n);
 	this->KillingFormMatrix.init(n,n);
 	this->KillingFormMatrix.NullifyAll();
@@ -11280,7 +11255,7 @@ void WeylGroup::MakeAn(unsigned char n)
 	this->KillingFormMatrix.elements[n-1][n-1]=2;
 }
 
-void WeylGroup::MakeEn(unsigned char n)
+void WeylGroup::MakeEn(int n)
 {	this->MakeAn(n);
 	this->KillingFormMatrix.elements[0][1]=0;
 	this->KillingFormMatrix.elements[1][0]=0;
@@ -11310,12 +11285,12 @@ void WeylGroup::MakeG2()
 	this->KillingFormMatrix.elements[0][1]=-3;
 }
 
-void WeylGroup::MakeBn(unsigned char n)
+void WeylGroup::MakeBn(int n)
 { this->MakeAn(n);
 	this->KillingFormMatrix.elements[n-1][n-1]=1;
 }
 
-void WeylGroup::MakeCn(unsigned char n)
+void WeylGroup::MakeCn(int n)
 { this->MakeAn(n);
 	this->KillingFormMatrix.elements[n-1][n-1]=4;
 	this->KillingFormMatrix.elements[n-2][n-1]=-2;
@@ -13277,8 +13252,8 @@ int rootSubalgebra::NumRootsInNilradical()
 
 bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
-	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
-	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
+	//MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
+	//MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	int numNilradRoots=this->NumRootsInNilradical();
 	int numCols=numNilradRoots+this->kModules.size-this->theNilradicalKmods.CardinalitySelection;
@@ -14117,7 +14092,7 @@ void  GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation
 	{ for (int i=0;i<theDimension;i++)
 		{ if (exponent.elements[i]!=0)
 			{ GeneratorPFAlgebraRecord tempGen;
-				tempGen.GeneratorRoot.MakeZero((unsigned char)theDimension); tempGen.GeneratorRoot.elements[i]=1;
+				tempGen.GeneratorRoot.MakeZero(theDimension); tempGen.GeneratorRoot.elements[i]=1;
 				tempGen.Elongation=0;
 				int tempI= exponent.elements[i];
 				if (elongation==-1) tempI=-tempI;

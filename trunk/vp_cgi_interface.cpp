@@ -30,13 +30,13 @@ int main(int argc, char **argv)
   getPath(argv[0],tempS);
   std::stringstream out;
   out<<tempS;
-  out<<"../vector_partition.bmp";
+ // out<<"../vector_partition.bmp";
   tempS=out.str();
-  std::fstream tempf;
-  ::CGIspecificRoutines::MakeABitmap(tempS,tempf);
-//  out<<"../vector_partition.html";
+//  std::fstream tempf;
+ // ::CGIspecificRoutines::MakeABitmap(tempS,tempf);
+  out<<"../vector_partition.html";
 
-  /*tempS=out.str();
+  tempS=out.str();
   std::fstream fileHeaderHtml;
   rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);
   char buffer[1024];
@@ -56,15 +56,14 @@ int main(int argc, char **argv)
       std::cout<< "\trootsArray["<<i<< "]["<<j <<"]="<<tempS<<";";
     }
   }
+	std::cout<<"\n\tgeneratePageFromDimAndNum(3,6,5);\n</script>\n";
   std::cin >> tempS;
-  //if(
-  ::CGIspecificRoutines::ReadDataFromCGIinput(tempS, theComputationSetup);//)
+	//std::cout<< tempS;
+  if(::CGIspecificRoutines::ReadDataFromCGIinput(tempS, theComputationSetup))
   {	theComputationSetup.Run();
 		::CGIspecificRoutines::MakeReportFromComputationSetup(theComputationSetup);
   }
-	std::cout<<"\n\tgeneratePageFromDimAndNum(3,6,5);\n</script>\n";
 	std::cout<<"</BODY>\n</HTML>";
-*/
   return 0;   // To avoid Apache errors.
 }
 

@@ -2,34 +2,6 @@
 <HEAD><TITLE>Vector partition</TITLE>
 </HEAD>
 <BODY>
-<div id="showMe" style="padding: 10px;">click here to see how it works</div>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.3/dojo/dojo.xd.js" djConfig = "parseOnLoad: true">
-</script>
-    <script>
-        dojo.addOnLoad(function() {
-            dojo.query("#showMe").onclick(function(e) {
-                var node = e.target;
-
-                var a = dojo.anim(node, {
-                    backgroundColor: "#363636",
-                    color: "#f7f7f7"
-                },
-                1000);
-
-                dojo.connect(a, "onEnd", function() {
-                    dojo.anim(node, {
-                        color: "#363636"
-                    },
-                    null, null, function() {
-                        node.innerHTML = "wow, that was easy!";
-                        dojo.anim(node, {
-                            color: "white"
-                        });
-                    });
-                });
-            });
-        });
-    </script>        </div>
 
 <FORM method="POST" name="formMain" action="./../Debug/vector_partition_linux_cgi.cgi">
 Dimension: <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
@@ -37,8 +9,7 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 <input type="hidden" name="hidden1">
 </FORM>	
 <input type="button" name="buttonTest" value="Draw" onclick="drawTest();" >
-
-<div id="canvasMain" style="position:relative;height:250px;width:100%;"></div>
+<div style="width:400;height:400;border:solid 1px" id="canvasMain"></div>
 <script type="text/javascript">
 	var oldDimension=-1;
 	var oldNumVectors=-1;
@@ -121,5 +92,5 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 		jsMain.paint();
 	}	
 </script>
-</BODY>
-</HTML>
+<script type="text/javascript" src="../dojo.xd.js" djConfig = "parseOnLoad: true">
+</script>

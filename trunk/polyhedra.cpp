@@ -404,6 +404,7 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
 
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 { this->flagLaTeXDraw= false;
+	this->flag2DprojectionDraw=true;
 	this->ColorChamberIndicator=RGB(220,220,0);
 	this->ColorWeylChamberWalls=RGB(220,220,0);
 	this->DeadChamberTextColor= RGB(200,100,100);
@@ -564,10 +565,119 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
 	this->VPVectors.ComputeDebugString();
 }
 
-void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input, std::string& output)
-{ std::stringstream out;
-	input.theChambers.drawOutput(TDV, input.theChambers, input.VPVectors, -1,input.theChambers.IndicatorRoot,&out,drawline);
-	output=out.str();
+::std::stringstream  CGIspecificRoutines::outputStream;
+int CGIspecificRoutines::numLines;
+int CGIspecificRoutines::shiftX=0;
+int CGIspecificRoutines::shiftY=-200;
+int CGIspecificRoutines::scale=100;
+
+void CGIspecificRoutines::drawlineInOutputStream
+	(	double X1, double Y1, double X2, double Y2,
+		unsigned long thePenStyle, int ColorIndex)
+{ ::CGIspecificRoutines::outputStream << ((int)X1)+ CGIspecificRoutines::shiftX << " "
+																			<< ((int)Y1)+ CGIspecificRoutines::shiftY<< " "
+																			<< ((int)X2)+ CGIspecificRoutines::shiftX << " "
+																			<< ((int)Y2)+ CGIspecificRoutines::shiftY << "\n";
+	CGIspecificRoutines::numLines++;
+}
+
+void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots
+	(	root& r1, root& r2,	unsigned long thePenStyle, int ColorIndex)
+{ std::string tempS1;
+	for (int i=0;i<r1.size;i++)
+		CGIspecificRoutines::outputStream <<(int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " ";
+	CGIspecificRoutines::outputStream<<"\t";
+	for (int i=0;i<r2.size;i++)
+		CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
+	CGIspecificRoutines::numLines++;
+}
+
+void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input)
+{ CGIspecificRoutines::numLines=0;
+	TDV.flag2DprojectionDraw=false;
+	input.theChambers.drawOutput
+		(	TDV, input.theChambers, input.VPVectors, -1,
+			input.theChambers.IndicatorRoot,0,&CGIspecificRoutines::drawlineInOutputStream);
+	std::string tempS;
+	CGIspecificRoutines::outputStream.seekg(0);
+	//if (CGIspecificRoutines::numLines!=0)
+	//	CGIspecificRoutines::numLines= 1;
+	std::cout <<"\n\tvar numDrawLines="<<CGIspecificRoutines::numLines<<";\n";
+	std::cout<<"\tvar l1= new Array(" <<CGIspecificRoutines::numLines<< ");\n";
+	std::cout<<"\tvar l2= new Array(" <<CGIspecificRoutines::numLines<< ");";
+	for (int i=0;i<CGIspecificRoutines::numLines;i++)
+	{ std::cout	<< "\n\tl1["<<i<<"]= new Array("<< input.theChambers.AmbientDimension<<");\t\n\t"
+							<<     "l2["<<i<<"]= new Array("<< input.theChambers.AmbientDimension<<");\n";
+		for (int j=0;j<input.theChambers.AmbientDimension;j++)
+		{ CGIspecificRoutines::outputStream >> tempS;
+			std::cout<< "\tl1["<<i<<"]["<<j<<"]="<< tempS<<";";
+		}
+		for (int j=0;j<input.theChambers.AmbientDimension;j++)
+		{ CGIspecificRoutines::outputStream >> tempS;
+			std::cout<< "\tl2["<<i<<"]["<<j<<"]="<< tempS<<";";
+		}
+
+	}
+}
+struct bmpfile_magic {
+  unsigned char magic[2];
+};
+
+struct bmpfile_header {
+	unsigned int filesz;
+	unsigned short creator1;
+	unsigned short creator2;
+	unsigned int bmp_offset;
+};
+
+struct bmp_dib_v3_header_t
+{ unsigned int header_sz;
+	unsigned int width;
+	unsigned int height;
+	unsigned short nplanes;
+	unsigned short bitspp;
+	unsigned int compress_type;
+	unsigned int bmp_bytesz;
+	unsigned int hres;
+	unsigned int vres;
+	unsigned int ncolors;
+	unsigned int nimpcolors;
+};
+
+
+void CGIspecificRoutines::MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader)
+{	outputFileOpenWithPreparedHeader.open(fileName.c_str(),std::fstream::trunc|std::fstream::out| std::fstream::binary);
+	outputFileOpenWithPreparedHeader.clear(std::ios::goodbit);// false);
+	::bmpfile_magic h1;
+	::bmpfile_header h2;
+	::bmp_dib_v3_header_t h3;
+	int size=10000;
+	h1.magic[0]='B'; h1.magic[1]='M';
+	h2.bmp_offset=14;
+	h2.creator1=0;
+	h2.creator2=0;
+	h2.filesz=size*3+54;
+	h3.width=100;
+	h3.height=100;
+	h3.header_sz=40;
+	h3.nplanes=1;
+	h3.bitspp=24;
+	h3.bmp_bytesz=size*3;
+	h3.compress_type=0;
+	h3.hres=2835;
+	h3.vres=2835;
+	h3.nimpcolors=0;
+	h3.ncolors=0;
+	outputFileOpenWithPreparedHeader.write((char*)(&h1),2);
+	outputFileOpenWithPreparedHeader.write((char*)(&h2),12);
+	outputFileOpenWithPreparedHeader.write((char*)(&h3),40);
+	for (int i=0;i<size;i++)
+	{	char tempUI=100;
+		outputFileOpenWithPreparedHeader.write(&tempUI,1);
+		outputFileOpenWithPreparedHeader.write(&tempUI,1);
+		outputFileOpenWithPreparedHeader.write(&tempUI,1);
+	}
+	outputFileOpenWithPreparedHeader.close();
 }
 
 void CGIspecificRoutines::CivilizedStringTranslation(std::string& input)
@@ -582,9 +692,9 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input)
 	}
 }
 
-void CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSetup& output)
+bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSetup& output)
 {	if (input.length()<2)
-		return;
+		return false;
 	CGIspecificRoutines::CivilizedStringTranslation(input);
 	std::stringstream tempStream;
 	tempStream << input;
@@ -601,10 +711,11 @@ void CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 	}
 	output.VPVectors.ComputeDebugString();
 	output.flagComputingPartialFractions=false;
-	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
+//	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[2].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[3].DebugString;
+	return true;
 }
 
 ComputationSetup::ComputationSetup()
@@ -833,7 +944,7 @@ void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
-	this->DoTheRootSAComputation();
+//	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -953,11 +1064,16 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r,double
 void DrawingVariables::drawlineBetweenTwoVectors
 	(	root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile,
 		drawLineFunction theDrawFunction)
-{ double x1,x2,y1,y2;
-  this->GetCoordsForDrawing(*this,r1,x1,y1);
-  this->GetCoordsForDrawing(*this,r2,x2,y2);
-	this->drawLine
-		(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile, theDrawFunction);
+{ if (this->flag2DprojectionDraw)
+	{	double x1,x2,y1,y2;
+		this->GetCoordsForDrawing(*this,r1,x1,y1);
+		this->GetCoordsForDrawing(*this,r2,x2,y2);
+		this->drawLine
+			(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile, theDrawFunction);
+	}
+	else
+	{ ::CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots(r1,r2,PenStyle,PenColor);
+	}
 }
 
 void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile)
@@ -1006,30 +1122,21 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2
 {	root tempRoot;
 	root Projection1;
 	root tempRoot2;
+	root zeroRoot; zeroRoot.MakeZero(r.TheObjects[0].size);
 	root Projection2;
 	for (int i = 0; i<r.size; i++)
 	{	if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[i]))
 		{	tempRoot.Assign(r.TheObjects[i]);
 			TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Projection1,directions);
-			double tempX, tempY;
-			TDV.GetCoordsForDrawing(TDV,Projection1,tempX,tempY);
 			if (TDV.DrawDashes)
-				TDV.drawLine
-					(	TDV.centerX,TDV.centerY,tempX,tempY, DrawingStyleDashes,
-						TDV.Colors[0],0,theDrawFunction);
+				TDV.drawlineBetweenTwoVectors
+					(zeroRoot,Projection1, DrawingStyleDashes,TDV.Colors[0],0,theDrawFunction);
 			for (int j=i+1;j<r.size; j++)
 			{ if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
-				{	double tempX2;
-					double tempY2;
-					double tempX1;
-					double tempY1;
-					tempRoot2.Assign(r.TheObjects[j]);
+				{	tempRoot2.Assign(r.TheObjects[j]);
 					TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
-					TDV.GetCoordsForDrawing(TDV,Projection2,tempX2,tempY2);
-					TDV.GetCoordsForDrawing(TDV,Projection1,tempX1,tempY1);
-					TDV.drawLine
-						(	tempX1,tempY1,tempX2,tempY2, 
-							DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors],0,
+					TDV.drawlineBetweenTwoVectors
+						(	Projection1, Projection2,	DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors],0,
 							theDrawFunction);
 				}
 			}
@@ -1037,10 +1144,10 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2
 	}
 }
 
-void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV,
-								CombinatorialChamberContainer& output,
-								roots& directions, int directionIndex, root& ChamberIndicator,
-								std::fstream* LaTeXOutput,drawLineFunction theDrawFunction)
+void CombinatorialChamberContainer::drawOutput
+	(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
+		roots& directions, int directionIndex, root& ChamberIndicator,
+		std::fstream* LaTeXOutput,drawLineFunction theDrawFunction)
 {	if (LaTeXOutput!=0)
 		LaTeXProcedures::beginPSTricks(*LaTeXOutput);
 	for(int i=0;i<output.size;i++)
@@ -1084,7 +1191,7 @@ void CombinatorialChamberContainer::drawOutputAffine
 void CombinatorialChamberContainer::drawOutputProjective
 	(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 		roots& directions, int directionIndex, root& ChamberIndicator,
-		drawLineFunction theDrawFunction, std::stringstream* LatexOutput)
+		drawLineFunction theDrawFunction)
 { int color=0;
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
 	int NumTrueChambers=0;
@@ -1160,15 +1267,13 @@ void CombinatorialChamberContainer::drawOutputProjective
 						output.TheObjects[j]->ComputeInternalPointMethod2(tempRoot,output.AmbientDimension);
 						root Proj;
 						TDV.ProjectOnToHyperPlaneGraphics(tempRoot,Proj,directions);
-						double tempX, tempY;
-						TDV.GetCoordsForDrawing(TDV,Proj,tempX,tempY);
 						std::stringstream out; std::string tempS;
 						if (TDV.DisplayingChamberCreationNumbers)
 							out<<output.TheObjects[j]->CreationNumber;
 						else
 							out<<output.TheObjects[j]->DisplayNumber;
 						tempS=out.str();
-						drawtext(tempX-7,tempY-7, tempS.c_str(), tempS.length(),color);
+						TDV.drawTextAtVector(Proj,tempS,color,0);
 					}
 				}
 				for (int i =0;i< output.TheObjects[j]->Externalwalls.size;i++)
@@ -12316,12 +12421,12 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 	}
 	std::fstream KLDump;
 	std::fstream PartialFractionsFile;
-	bool KLDumpIsPresent =this->OpenDataFileOrCreateIfNotPresent(KLDump,this->KLCoeffFileString, false);
+	bool KLDumpIsPresent =this->OpenDataFileOrCreateIfNotPresent(KLDump,this->KLCoeffFileString, false,false);
   bool PFfileIsPresent=this->OpenDataFileOrCreateIfNotPresent
-		(PartialFractionsFile,this->PartialFractionsFileString,false);
+		(PartialFractionsFile,this->PartialFractionsFileString,false,false);
   bool VPIndexIsPresent= this->OpenDataFileOrCreateIfNotPresent
-		(partFractions::ComputedContributionsList,this->VPIndexFileString,false);
-	this->OpenDataFileOrCreateIfNotPresent(partFraction::TheBigDump,this->VPEntriesFileString,true);
+		(partFractions::ComputedContributionsList,this->VPIndexFileString,false,false);
+	this->OpenDataFileOrCreateIfNotPresent(partFraction::TheBigDump,this->VPEntriesFileString,true,false);
 	assert(partFraction::TheBigDump.is_open());
 	assert(KLDump.is_open());
 	assert(PartialFractionsFile.is_open());
@@ -12435,11 +12540,17 @@ bool rootFKFTcomputation::OpenDataFile
 }
 
 bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
-	(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode)
+	(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary)
 { if (OpenInAppendMode)
-	{	theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app);
+	{	if (openAsBinary)
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
+		else
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app);
   } else
-  { theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
+  { if (openAsBinary)
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::binary);
+		else
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
   }
   if(theFile.is_open())
   { theFile.clear(std::ios::goodbit);// false);
@@ -14361,7 +14472,6 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 		GlobalVariables& theGlobalVariables)
 {	MatrixLargeRational& tempMatA=theGlobalVariables.matSimplexAlgorithm1;
 	MatrixLargeRational& matX=theGlobalVariables.matSimplexAlgorithm2;
-	Selection& NonZeroSlackVariables = theGlobalVariables.selSimplexAlg1;
 	Selection& BaseVariables = theGlobalVariables.selSimplexAlg2;
 	Rational GlobalGoal;	GlobalGoal.MakeZero();
 	assert (matA.NumRows== matb.NumRows);

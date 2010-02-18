@@ -16,12 +16,7 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 	var oldDimension=-1;
 	var oldNumVectors=-1;
 	var NumElements=0;
-	var jsMain= new jsGraphics("canvasMain");
-	function drawTest()
-	{ alert("");
-		jsMain.drawLine(10,10,150,150);
-		//jsMain.paint();
-	}		
+	var jsMain= new jsGraphics("canvasMain");	
 	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
 	{ dim = Number(inputDim);
 		num = Number(inputNum);
@@ -67,4 +62,35 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 		}
 	}
 </script>
-
+<script type="text/javascript">
+	var Basis= new Array(5);
+	var Xshift=150;
+	var Yshift=150; 
+	for (i=0;i<5;i++)
+	{ Basis[i]= new Array(2);
+	}  
+	Basis[0][0]=1; Basis[0][1]=0;
+	Basis[1][0]=0;   Basis[1][1]=1;
+	Basis[2][0]=0.45; Basis[2][1]=0.8;
+	Basis[3][0]=-0.45; Basis[3][1]=-0.8;
+	Basis[4][0]=0.80; Basis[4][1]=-0.45;
+	function getCoord(thePoint,Coord)
+	{	result=Number(0);
+		for (counterI=0;counterI<oldDimension;counterI++)
+		{	result= result+ thePoint[counterI]*Basis[counterI][Coord];
+		}
+		result=Math.floor(result);
+		return result;
+	}	
+	function drawTest()
+	{	for (CounterK=0;CounterK<numDrawLines;CounterK++)
+		{	var x1=getCoord(l1[CounterK],0)+Xshift;	
+			var y1=getCoord(l1[CounterK],1)+Yshift; 
+			var x2=getCoord(l2[CounterK],0)+Xshift; 
+			var y2=getCoord(l2[CounterK],1)+Yshift;
+			//alert(" "+x1+" "+y1+" "+x2+" "+y2+" ");			
+			jsMain.drawLine(x1,y1,x2,y2);
+		}
+		jsMain.paint();
+	}	
+</script>

@@ -170,6 +170,7 @@ public:
 	static const int PenStyleDotted= 2;
 	static const int PenStyleNormal= 0;
 	bool flagLaTeXDraw;
+	bool flag2DprojectionDraw;
 	bool DrawDashes;
 	bool DrawChamberIndices;
 	bool DrawingInvisibles;
@@ -218,6 +219,26 @@ public:
 			std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 //	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
 	void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile);
+};
+
+class MathRoutines
+{
+public:
+	static int lcm(int a, int b);
+	static int TwoToTheNth(int n);
+	static int NChooseK(int n, int k){	int result=1;
+																			for (int i =0; i<k;i++){
+																				result*=(n-i);
+																				result/=(i+1); }
+																			return result; };
+	static int KToTheNth(int k, int n);
+	inline static int parity(int n){if (n%2==0) return 1; else return -1;};
+	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
+	inline static int Maximum(int a, int b){	if (a>b) return a;
+																						else return b;};
+	inline static int Minimum(int a, int b){	if (a>b) return b;
+																						else return a;};
+	inline static short Minimum(short a, short b){if (a>b) return b; else return a;};
 };
 
 //The below class is to be used together with ListBasicObjects.
@@ -2084,25 +2105,6 @@ public:
 	void ElementToString(std::string& output);
 };
 
-class MathRoutines
-{
-public:
-	static int lcm(int a, int b);
-	static int TwoToTheNth(int n);
-	static int NChooseK(int n, int k){	int result=1;
-																			for (int i =0; i<k;i++){
-																				result*=(n-i);
-																				result/=(i+1); }
-																			return result; };
-	static int KToTheNth(int k, int n);
-	inline static int parity(int n){if (n%2==0) return 1; else return -1;};
-	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
-	inline static int Maximum(int a, int b){	if (a>b) return a;
-																						else return b;};
-	inline static int Minimum(int a, int b){	if (a>b) return b;
-																						else return a;};
-	inline static short Minimum(short a, short b){if (a>b) return b; else return a;};
-};
 
 //class pertains to the Q^+span of a set of roots.
 class Cone : public roots
@@ -2229,7 +2231,7 @@ public:
 	static void drawOutputProjective
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator,
-			drawLineFunction theDrawFunction,std::stringstream* LatexOutput);
+			drawLineFunction theDrawFunction);
 	static void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, 
 			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);
@@ -5146,7 +5148,7 @@ public:
 	static bool OpenDataFile
 			(std::fstream& theFileOutput, std::string& theFileName);
 	static bool OpenDataFileOrCreateIfNotPresent
-			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode);
+			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
   void RunA2A1A1inD5beta12221();
@@ -5410,9 +5412,20 @@ public:
 struct CGIspecificRoutines
 {
 public:
-	static void ReadDataFromCGIinput(std::string& input, ComputationSetup& output);
+	static std::stringstream outputStream;
+	static int numLines;
+	static int shiftX;
+	static int shiftY;
+	static int scale;
+	static bool ReadDataFromCGIinput(std::string& input, ComputationSetup& output);
 	static void CivilizedStringTranslation(std::string& input);
-	static void MakeReportFromComputationSetup(ComputationSetup& input, std::string& output);
+	static void MakeReportFromComputationSetup(ComputationSetup& input);
+	static void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader);//format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
+	static void drawlineInOutputStreamBetweenTwoRoots
+		(	root& r1, root& r2,	unsigned long thePenStyle, int ColorIndex);
+	static void drawlineInOutputStream
+		(	double X1, double Y1, double X2, double Y2,
+			unsigned long thePenStyle, int ColorIndex);
 };
 
 class RandomCodeIDontWantToDelete

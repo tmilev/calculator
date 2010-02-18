@@ -934,6 +934,9 @@ void ComputationSetup::InitComputationSetup()
 
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
+	theRootSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
+	Stop();
 	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
 	Stop();
@@ -943,7 +946,7 @@ void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
-//	this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -13321,11 +13324,13 @@ void rootSubalgebra::ComputeKModules()
 	this->ComputeRootsOfK();
 	for (int i=0;i<this->AllRoots.size;i++)
 	{ if (this->AllRootsK.IndexOfObject(this->AllRoots.TheObjects[i])==-1)
-		{	root tempLW;
+		{	root tempLW, tempHW;
 			this->ComputeLowestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempLW);
+			this->ComputeHighestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempHW);
 			int x=this->LowestWeightsGmodK.IndexOfObject(tempLW);
 			if (x==-1)
 			{ this->LowestWeightsGmodK.AddRoot(tempLW);
+				this->HighestWeightsGmodK.AddRoot(tempHW);
 				x=this->LowestWeightsGmodK.size -1;
 				this->kModules.SetSizeExpandOnTopNoObjectInit(this->LowestWeightsGmodK.size);
 			}
@@ -13379,8 +13384,12 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	for (int i=0;i<this->kModules.size;i++)
 	{ if (!this->theNilradicalKmods.selected[i])
 		{ for (int k=0;k<theDimension;k++)
-				matA.elements[k][counter].Assign(this->HighestRootsK.TheObjects[i].TheObjects[k]);
-			matA.elements[theDimension][counter].MakeOne();
+			{	matA.elements[k][counter].Assign
+					(this->HighestWeightsGmodK.TheObjects[i].TheObjects[k]);
+				matA.elements[k][counter].Minus();
+			}
+			this->HighestWeightsGmodK.TheObjects[i].ComputeDebugString();
+			matA.elements[theDimension][counter].MakeZero();
 			counter++;
 		}
 	}
@@ -13430,6 +13439,19 @@ void rootSubalgebra::ElementToString(std::string &output)
 	}
 	output=out.str();
 }
+
+void rootSubalgebra::SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(5);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
 void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
 { this->AmbientWeyl.MakeEn(6);
 	this->genK.SetSizeExpandOnTopNoObjectInit(6);
@@ -14449,7 +14471,7 @@ void MatrixLargeRational::GetMaxMovementAndLeavingVariableRow
 	for(int i=0; i<tempMatA.NumRows;i++)
 	{ Rational tempRat;
 		tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
-		if (tempRat.IsPositive() && BaseVariables.elements[i]>=NumTrueVariables)
+		if (tempRat.IsPositive())
 		{ tempRat.Invert();
 			tempRat.MultiplyBy(matX.elements[BaseVariables.elements[i]][0]);
 			if (maxMovement.IsGreaterThan(tempRat)|| (LeavingVariableRow==-1 ))
@@ -14472,10 +14494,12 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 {	MatrixLargeRational& tempMatA=theGlobalVariables.matSimplexAlgorithm1;
 	MatrixLargeRational& matX=theGlobalVariables.matSimplexAlgorithm2;
 	Selection& BaseVariables = theGlobalVariables.selSimplexAlg2;
-	Rational GlobalGoal;	GlobalGoal.MakeZero();
+	Rational GlobalGoal; GlobalGoal.MakeZero();
 	assert (matA.NumRows== matb.NumRows);
 	for (int j=0;j<matb.NumRows;j++)
-    assert(!matb.elements[j][0].IsNegative());  
+  { GlobalGoal.Add(matb.elements[j][0]);
+		assert(!matb.elements[j][0].IsNegative());  
+	}
 	int NumTrueVariables=matA.NumCols;
 	tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
 	matX.init(tempMatA.NumCols,1);
@@ -14497,10 +14521,10 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 	int EnteringVariable=0;
 	bool WeHaveNotEnteredACycle=true;
 	while (EnteringVariable!=-1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
-	{ EnteringVariable=-1; ChangeGradient.MakeZero();
+	{	tempMatA.ComputeDebugString(); matX.ComputeDebugString();
+		EnteringVariable=-1; ChangeGradient.MakeZero();
 		for (int i=0;i<tempMatA.NumCols;i++)
-		{ BaseVariables.ComputeDebugString();
-			if (!BaseVariables.selected[i])
+		{ if (!BaseVariables.selected[i])
 			{ Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
 				MatrixLargeRational::ComputePotentialChangeGradient
 					(	tempMatA,BaseVariables,NumTrueVariables,i,
@@ -14521,7 +14545,13 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 			assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
 			tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
 			tempRat.Invert();
+      if (BaseVariables.elements[LeavingVariableRow]==34)
+				tempMatA.ComputeDebugString();
+			for (int i=0;i<tempMatA.NumRows;i++)
+				assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(ROne));
 			tempMatA.RowTimesScalar(LeavingVariableRow,tempRat);
+      if (BaseVariables.elements[LeavingVariableRow]==34)
+				tempMatA.ComputeDebugString();
 			tempTotalChange.Assign(MaxMovement);
 			tempTotalChange.MultiplyBy(ChangeGradient);
 			matX.elements[EnteringVariable][0].Add(MaxMovement);
@@ -14530,38 +14560,65 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 				GlobalGoal.Subtract(tempTotalChange);
 			}
 			else
-			{ int tempI= VisitedVertices.ContainsObjectHash(BaseVariables);
+			{ BaseVariables.ComputeDebugString();
+				int tempI= VisitedVertices.ContainsObjectHash(BaseVariables);
         if (tempI==-1)
 					VisitedVertices.AddObjectOnTopHash(BaseVariables);
         else
 					WeHaveNotEnteredACycle=false;
       }
+      if (BaseVariables.elements[LeavingVariableRow]==34)
+				tempMatA.ComputeDebugString();
 			for (int i=0;i<tempMatA.NumRows;i++)
-			{	tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
-				tempRat.MultiplyBy(MaxMovement);
-				matX.elements[BaseVariables.elements[i]][0].Subtract(tempRat);
-				if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariableRow)
-				{ tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+			{	if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariableRow)
+				{	tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+					tempRat.MultiplyBy(MaxMovement);
+					matX.elements[BaseVariables.elements[i]][0].Subtract(tempRat);
+					tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
 					tempRat.Minus();
 					tempMatA.AddTwoRows(LeavingVariableRow,i,0,tempRat);
 				}
+				else
+					matX.elements[BaseVariables.elements[i]][0].MakeZero();
 				tempMatA.ComputeDebugString();
 				matX.ComputeDebugString();
 			}
+			assert
+				(	matX.elements[BaseVariables.elements[LeavingVariableRow]][0]
+						.IsEqualToZero());
 			BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]]=false;
 			BaseVariables.elements[LeavingVariableRow]= EnteringVariable;
 			BaseVariables.selected[EnteringVariable]= true;
 			BaseVariables.ComputeDebugString();
+			for (int i=0;i<tempMatA.NumRows;i++)
+				assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(ROne));
 		}
 	}
-	for(int i=NumTrueVariables;i<matX.NumRows;i++)
-		if (matX.elements[i][0].IsPositive())
-			return false;
-	outputPoint.Resize(NumTrueVariables,1,false);
-	for (int i=0;i<NumTrueVariables;i++)
-	{	outputPoint.elements[i][0].Assign(matX.elements[i][0]);
-		outputPoint.elements[i][0].Subtract(matX.elements[i+NumTrueVariables][0]);
+	std::string tempS;
+	std::stringstream out;
+	for (int i=0;i<BaseVariables.CardinalitySelection;i++)
+	{ int tempI=BaseVariables.elements[i];
+		matX.elements[tempI][0].ElementToString(tempS);
+		out << tempS <<"(";
+		for (int j=0;j<matA.NumRows;j++)
+		{ matA.elements[j][tempI].ElementToString(tempS);
+			out << tempS;
+			if (j!=matA.NumRows-1)
+				out <<",";
+		}
+		out <<")"; 
+		if (i!=BaseVariables.CardinalitySelection-1)
+			out <<"+";
 	}
+	tempS=out.str();
+	for(int i=NumTrueVariables;i<matX.NumRows;i++)
+	{	if (matX.elements[i][0].IsPositive())
+			return false;
+	}
+	outputPoint.Resize(NumTrueVariables,1,false);
+
+	for (int i=0;i<NumTrueVariables;i++)
+		outputPoint.elements[i][0].Assign(matX.elements[i][0]);
 	return true;
 }
 

@@ -1311,7 +1311,8 @@ void guiMainWindow::ReadSettingsIfAvailable()
   out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
   std::string tempS;
   tempS= out.str();
-  if (::rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent(this->fileSettings,tempS,false))
+  if (rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
+				(this->fileSettings,tempS,false,false))
   {	wxPoint tempPt, tempPt2;
     wxSize tempSize, tempSize2;
     this->fileSettings.seekg(0);

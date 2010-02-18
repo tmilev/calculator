@@ -5235,6 +5235,7 @@ public:
 	roots AllRootsK;
 	Selection theNilradicalKmods;
 	roots LowestWeightsGmodK;
+	roots HighestWeightsGmodK;
 	roots HighestRootsK;
 	roots TestedRootsAlpha;
 	ListBasicObjects<roots> kModules;
@@ -5281,7 +5282,11 @@ public:
 		(root& input, root& outputW, bool lookingForHighest);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
+	void SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables);
+	
 	void RunE6_3A2(GlobalVariables& theGlobalVariables);
+	
+	
 	void RunE7_D6plusA1(GlobalVariables& theGlobalVariables);
 	void RunE7_A2plusA5(GlobalVariables& theGlobalVariables);
 	void RunE7_2A3plusA1(GlobalVariables& theGlobalVariables);

@@ -600,24 +600,23 @@ void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input
 			input.theChambers.IndicatorRoot,0,&CGIspecificRoutines::drawlineInOutputStream);
 	std::string tempS;
 	CGIspecificRoutines::outputStream.seekg(0);
-	//if (CGIspecificRoutines::numLines!=0)
-	//	CGIspecificRoutines::numLines= 1;
-	std::cout <<"\n\tvar numDrawLines="<<CGIspecificRoutines::numLines<<";\n";
-	std::cout<<"\tvar l1= new Array(" <<CGIspecificRoutines::numLines<< ");\n";
-	std::cout<<"\tvar l2= new Array(" <<CGIspecificRoutines::numLines<< ");";
+	std::cout <<"\n<script>	\n\tdojo.require(\"dojox.gfx\");";
+	std::cout <<"\n\tdojo.addOnLoad(function()";
+	std::cout <<"\n\t\t{\tvar node = dojo.byId(\"canvasMain\");";
+	std::cout <<"\n\t\t\tvar surface = dojox.gfx.createSurface(node, 400, 400);";
 	for (int i=0;i<CGIspecificRoutines::numLines;i++)
-	{ std::cout	<< "\n\tl1["<<i<<"]= new Array("<< input.theChambers.AmbientDimension<<");\t\n\t"
-							<<     "l2["<<i<<"]= new Array("<< input.theChambers.AmbientDimension<<");\n";
-		for (int j=0;j<input.theChambers.AmbientDimension;j++)
-		{ CGIspecificRoutines::outputStream >> tempS;
-			std::cout<< "\tl1["<<i<<"]["<<j<<"]="<< tempS<<";";
-		}
-		for (int j=0;j<input.theChambers.AmbientDimension;j++)
-		{ CGIspecificRoutines::outputStream >> tempS;
-			std::cout<< "\tl2["<<i<<"]["<<j<<"]="<< tempS<<";";
-		}
-
+	{	std::cout <<"\n\t\t\tsurface.createLine({";
+		CGIspecificRoutines::outputStream>>tempS;
+		std::cout << " x1 : "	<< tempS;
+		CGIspecificRoutines::outputStream>>tempS;
+		std::cout << ",y1 : " << tempS;
+		CGIspecificRoutines::outputStream>>tempS;
+		std::cout << ",x2 : " << tempS;
+				CGIspecificRoutines::outputStream>>tempS;
+		std::cout << ",y2 : " << tempS;
+		std::cout <<"}).setStroke(\"black\");";
 	}
+	std::cout <<"\n\t\t}\n\t);\n</script>";
 }
 struct bmpfile_magic {
   unsigned char magic[2];

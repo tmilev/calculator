@@ -67,30 +67,37 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 	for (i=0;i<5;i++)
 	{ Basis[i]= new Array(2);
 	}  
-	Basis[0][0]=1; Basis[0][1]=0;
-	Basis[1][0]=0;   Basis[1][1]=1;
-	Basis[2][0]=0.45; Basis[2][1]=0.8;
-	Basis[3][0]=-0.45; Basis[3][1]=-0.8;
-	Basis[4][0]=0.80; Basis[4][1]=-0.45;
-	function getCoord(thePoint,Coord)
-	{	result=Number(0);
-		for (counterI=0;counterI<oldDimension;counterI++)
-		{	result= result+ thePoint[counterI]*Basis[counterI][Coord];
-		}
-		result=Math.floor(result);
-		return result;
-	}	
-	function drawTest()
-	{	for (CounterK=0;CounterK<numDrawLines;CounterK++)
-		{	var x1=getCoord(l1[CounterK],0)+Xshift;	
-			var y1=getCoord(l1[CounterK],1)+Yshift; 
-			var x2=getCoord(l2[CounterK],0)+Xshift; 
-			var y2=getCoord(l2[CounterK],1)+Yshift;
-			//alert(" "+x1+" "+y1+" "+x2+" "+y2+" ");			
-			jsMain.drawLine(x1,y1,x2,y2);
-		}
-		jsMain.paint();
-	}	
+	Basis[0][0]=0.85; Basis[0][1]=0.4;
+	Basis[1][0]=0;   Basis[1][1]=-1;
+	Basis[2][0]=0.75; Basis[2][1]=-0.9;
+	Basis[3][0]=-0.45; Basis[3][1]=0.8;
+	Basis[4][0]=0.80; Basis[4][1]=0.45;
 </script>
 <script type="text/javascript" src="../dojo.xd.js" djConfig = "parseOnLoad: true">
 </script>
+<script>	
+	dojo.require("dojox.gfx");
+	dojo.addOnLoad
+	(	function()
+		{	var node = dojo.byId(canvasMain);
+			var surface = dojox.gfx.createSurface(node, 400, 400);
+			function getCoord(thePoint,Coord)
+			{	result=Number(0);
+				for (counterI=0;counterI<oldDimension;counterI++)
+				{	result= result+ thePoint[counterI]*Basis[counterI][Coord];
+				}
+				result=Math.floor(result);
+				return result;
+			}	
+			for (CounterK=0;CounterK<numDrawLines;CounterK++)
+			{	var xCoord1=getCoord(l1[CounterK],0)+Xshift;	
+				var yCoord1=getCoord(l1[CounterK],1)+Yshift; 
+				var xCoord2=getCoord(l2[CounterK],0)+Xshift; 
+				var yCoord2=getCoord(l2[CounterK],1)+Yshift;
+				surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(myColors[CounterK]);
+			}
+		}
+	);		
+</script>
+
+

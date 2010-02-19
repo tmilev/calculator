@@ -9,6 +9,8 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 <input type="submit" name="buttonGo" value="Go">
 </FORM>	
 <div style="width:400;height:400;border:solid 1px" id="canvasMain" onmouseup="clickCanvasMain(event.clientX, event.clientY);"></div>
+<script type="text/javascript" src="../dojo.xd.js" djConfig = "parseOnLoad: true">
+</script>
 
 <script type="text/javascript">
 	var oldDimension=-1;
@@ -16,20 +18,24 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 	var NumElements=0;
 	var node;
 	var surface;				
+	var Basis= new Array(5);
+	var Xshift=150;
+	var Yshift=250; 
 	function clickCanvasMain(cx,cy)
-	{	var divPosX=0;
-		var divPosY=0;
-		var thePointer= canvasMain;
+	{	divPosX=0;
+		divPosY=0;
+		thePointer= canvasMain;
 		while(thePointer)
 		{ divPosX += thePointer.offsetLeft;
     	divPosY += thePointer.offsetTop;
     	thePointer = thePointer.offsetParent;
 		}
-		var posy=cy-divPosY;
-		Basis[0][0]=0; Basis[0][1]=0.8;
+		posy=cy-divPosY-document.body.offsetTop;
+		posx=cx-divPosX-document.body.offsetLeft;		
 		surface.clear();
+		alert("click");
+		alert("posx: "+posx+"posy"+posy);
 		drawOnCanvasMain();
-		alert(posy);
 	}
 	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
 	{ dim = Number(inputDim);
@@ -75,11 +81,6 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 			}			
 		}
 	}
-</script>
-<script type="text/javascript">
-	var Basis= new Array(5);
-	var Xshift=150;
-	var Yshift=250; 
 	for (i=0;i<5;i++)
 	{ Basis[i]= new Array(2);
 	}  
@@ -88,10 +89,6 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 	Basis[2][0]=1.5; Basis[2][1]=-1.8;
 	Basis[3][0]=-0.9; Basis[3][1]=1.6;
 	Basis[4][0]=1.6; Basis[4][1]=0.9;
-</script>
-<script type="text/javascript" src="../dojo.xd.js" djConfig = "parseOnLoad: true">
-</script>
-<script>	
 	function getCoord(thePoint,Coord)
 	{	result=Number(0);
 		for (counterI=0;counterI<oldDimension;counterI++)
@@ -101,18 +98,22 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 		return result;
 	}	
 	function drawOnCanvasMain()
-	{	node = dojo.byId(canvasMain);
-		surface = dojox.gfx.createSurface(node, 400, 400);
+	{	alert("paint");
 		for (CounterK=0;CounterK<numDrawLines;CounterK++)
 		{	xCoord1=getCoord(l1[CounterK],0)+Xshift;	
 			yCoord1=getCoord(l1[CounterK],1)+Yshift; 
 			xCoord2=getCoord(l2[CounterK],0)+Xshift; 
 			yCoord2=getCoord(l2[CounterK],1)+Yshift;
 			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(myColors[CounterK]);
-		}
+		}		
 	}	
+	function drawOnCanvasMainPlusInit()
+	{	node = dojo.byId(canvasMain);
+		surface = dojox.gfx.createSurface(node, 400, 400);
+		drawOnCanvasMain();
+	}
 	dojo.require("dojox.gfx");
-	dojo.addOnLoad(drawOnCanvasMain);		
+	dojo.addOnLoad(drawOnCanvasMainPlusInit);		
 </script>
 
 

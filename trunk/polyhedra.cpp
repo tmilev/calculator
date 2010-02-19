@@ -582,14 +582,14 @@ void CGIspecificRoutines::drawlineInOutputStream
 }
 
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots
-	(	root& r1, root& r2,	unsigned long thePenStyle, int ColorIndex)
-{ std::string tempS1;
-	for (int i=0;i<r1.size;i++)
-		CGIspecificRoutines::outputStream <<(int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " ";
-	CGIspecificRoutines::outputStream<<"\t";
-	for (int i=0;i<r2.size;i++)
-		CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
-	CGIspecificRoutines::numLines++;
+	(	root& r1, root& r2,	unsigned long thePenStyle, int r, int g, int b)
+{ if (thePenStyle!=5)
+	{	for (int i=0;i<r1.size;i++)
+		CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " "
+																			<< (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
+		CGIspecificRoutines::outputStream <<"["<<r<<","<<g<<","<<b<<"] ";
+		CGIspecificRoutines::numLines++;
+	}
 }
 
 void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input)
@@ -600,7 +600,27 @@ void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input
 			input.theChambers.IndicatorRoot,0,&CGIspecificRoutines::drawlineInOutputStream);
 	std::string tempS;
 	CGIspecificRoutines::outputStream.seekg(0);
-	std::cout <<"\n<script>	\n\tdojo.require(\"dojox.gfx\");";
+	std::cout << "\n<script>";
+	std::cout	<< "\n\tvar numDrawLines=" << CGIspecificRoutines::numLines<<";";
+	std::cout	<< "\n\tvar l1= new Array("<< CGIspecificRoutines::numLines <<");"
+						<< "  \tvar l2= new Array("<< CGIspecificRoutines::numLines <<");"
+						<< "  \tvar myColors= new Array("<< CGIspecificRoutines::numLines <<");";
+	int theDimension=input.theChambers.AmbientDimension;
+	for (int i=0;i<CGIspecificRoutines::numLines;i++)
+	{	std::cout	<< "\n\tl1["<< i <<"]= new Array(" << theDimension << ");"
+							<< "\tl2["  << i <<"]= new Array(" << theDimension << ");"
+							<< "\tmyColors["  << i <<"]= new Array(" << 3 << ");\n";
+		for (int j=0;j< theDimension;j++)
+		{ CGIspecificRoutines::outputStream>> tempS;
+			std::cout << "\tl1[" <<i<< "][" << j<<"]=" <<tempS <<";";
+			CGIspecificRoutines::outputStream>> tempS;
+			std::cout << "\tl2[" <<i<< "][" << j<<"]=" <<tempS <<";";
+		}
+		CGIspecificRoutines::outputStream>> tempS;
+		std::cout << "\tmyColors[" <<i<< "]=" <<tempS <<";";
+	}
+	std::cout <<"</script>";
+/*	std::cout <<"\n<script>	\n\tdojo.require(\"dojox.gfx\");";
 	std::cout <<"\n\tdojo.addOnLoad(function()";
 	std::cout <<"\n\t\t{\tvar node = dojo.byId(\"canvasMain\");";
 	std::cout <<"\n\t\t\tvar surface = dojox.gfx.createSurface(node, 400, 400);";
@@ -616,7 +636,7 @@ void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input
 		std::cout << ",y2 : " << tempS;
 		std::cout <<"}).setStroke(\"black\");";
 	}
-	std::cout <<"\n\t\t}\n\t);\n</script>";
+	std::cout <<"\n\t\t}\n\t);\n</script>";*/
 }
 struct bmpfile_magic {
   unsigned char magic[2];
@@ -946,7 +966,7 @@ void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
-	this->DoTheRootSAComputation();
+//	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -1074,7 +1094,11 @@ void DrawingVariables::drawlineBetweenTwoVectors
 			(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile, theDrawFunction);
 	}
 	else
-	{ ::CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots(r1,r2,PenStyle,PenColor);
+	{ int r,g,b;
+		r=PenColor/65536;
+		g=(PenColor/256)%256;
+		b=PenColor%256;
+		::CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots(r1,r2,PenStyle,r,g,b);
 	}
 }
 
@@ -1096,7 +1120,7 @@ void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, 
 }
 
 void DrawingVariables::drawLine
-	(	double X1, double Y1, double X2, double Y2, 
+	(	double X1, double Y1, double X2, double Y2,
 		unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile,
 		drawLineFunction theDrawFunction)
 { if (LatexOutFile==0)
@@ -1172,7 +1196,7 @@ void CombinatorialChamberContainer::drawOutput
 // 2 = dotted line
 // 5 = invisible line (no line)
 void CombinatorialChamberContainer::drawOutputAffine
-	(	DrawingVariables &TDV, CombinatorialChamberContainer &output, 
+	(	DrawingVariables &TDV, CombinatorialChamberContainer &output,
 		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction)
 { if(output.AffineWallsOfWeylChambers.size>0)
 		output.GetNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
@@ -2823,7 +2847,7 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 }
 
 void CombinatorialChamber::drawOutputAffine
-	(	DrawingVariables& TDV,CombinatorialChamberContainer& owner, 
+	(	DrawingVariables& TDV,CombinatorialChamberContainer& owner,
 		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction)
 { if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomial)
 		return;
@@ -3246,6 +3270,7 @@ bool CombinatorialChamber::SplitChamber
 //	}
 	NewPlusChamber= new CombinatorialChamber;
 	NewMinusChamber= new CombinatorialChamber;
+
 	NewPlusChamber->flagPermanentlyZero= PlusChamberIsPermanentZero;
 	NewMinusChamber->flagPermanentlyZero= MinusChamberIsPermanentZero;
 	NewPlusChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
@@ -13216,8 +13241,8 @@ void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVaria
 }
 
 void rootSubalgebra::GeneratePossibleNilradicalsRecursive
-	(	GlobalVariables &theGlobalVariables,int startIndex, int RecursionDepth, 
-		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable, 
+	(	GlobalVariables &theGlobalVariables,int startIndex, int RecursionDepth,
+		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable,
 		ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods)
 { for (int i=startIndex;i<this->kModules.size;i++)
@@ -13229,7 +13254,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 					impliedSelections,oppositeKmods);
 		if ( impliedSelections.TheObjects[RecursionDepth]
 						.selected[i])
-			return;		
+			return;
 	}
 	this->PossibleNilradicalComputation
 		(theGlobalVariables,impliedSelections.TheObjects[RecursionDepth]);
@@ -13237,7 +13262,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 
 bool rootSubalgebra::IndexIsCompatibleWithPrevious
 	(	int startIndex,int RecursionDepth,
-		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable, 
+		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable,
 		ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods)
 { if (impliedSelections.TheObjects[RecursionDepth]
@@ -13278,7 +13303,7 @@ void rootSubalgebra::PossibleNilradicalComputation
 void rootSubalgebra::GenerateKmodMultTable
 	(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > >& output,
 		ListBasicObjects<int>& oppositeKmods,
-		GlobalVariables& theGlobalVariables) 
+		GlobalVariables& theGlobalVariables)
 { output.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	oppositeKmods.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	for (int i=0;i<this->kModules.size;i++)

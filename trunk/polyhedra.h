@@ -53,6 +53,12 @@
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
 #endif
 
+//#ifndef CGIversionLimitRAMuse
+//#define CGIversionLimitRAMuse
+//	static const int cgiLimitRAMuseNumPointersInListBasicObjects=100000;
+//	static int GlobalPointerCounter=0;
+//#endif
+
 const int MaxRank=12;
 const int MaxNumberOfRoots= 100;
 const int SomeRandomPrimesSize= 25;
@@ -290,23 +296,33 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 { if (theSize== this->size)
 		return;
 	if (theSize<0)
-	{ theSize=-1;
-	}
+		theSize=-1;
 	if (theSize==0)
-	{ this->size=0;
+	{
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter-=this->size;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
+		this->size=0;
 		delete [] this->TheObjects;
 		this->TheObjects=0;
 		return;
 	}
 	Object* newArray= new Object[theSize];
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter+=theSize;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	int CopyUpTo= this->size;
 	if (this->size>theSize)
-	{ CopyUpTo= theSize;
-	}
+		CopyUpTo= theSize;
 	for (int i=0;i<CopyUpTo;i++)
-	{ newArray[i]=this->TheObjects[i];
-	}
+		newArray[i]=this->TheObjects[i];
 	delete [] this->TheObjects;
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter-=this->size;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->TheObjects=newArray;
 	this->size= theSize;
 }
@@ -320,6 +336,10 @@ ListBasicObjectsLight<Object>::ListBasicObjectsLight()
 template <class Object>
 ListBasicObjectsLight<Object>::~ListBasicObjectsLight()
 { delete [] this->TheObjects;
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter-=this->size;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->TheObjects=0;
 }
 
@@ -1790,6 +1810,10 @@ ListBasicObjects<Object>::ListBasicObjects()
 template <class Object>
 void ListBasicObjects<Object>::ReleaseMemory()
 {	delete [] this->TheActualObjects;
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter-=this->ActualSize;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->ActualSize=0;
 	this->IndexOfVirtualZero=0;
 	this->size=0;
@@ -1799,7 +1823,12 @@ void ListBasicObjects<Object>::ReleaseMemory()
 
 template <class Object>
 ListBasicObjects<Object>::~ListBasicObjects()
-{	delete [] TheActualObjects;
+{	delete [] this->TheActualObjects;
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter-=this->ActualSize;
+	this->ActualSize=0;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->TheActualObjects=0;
 	this->TheObjects=0;
 }
@@ -1808,9 +1837,17 @@ template <class Object>
 void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 {	if (increase<=0) return;
 	Object* newArray = new Object[this->ActualSize+increase];
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter+=this->ActualSize+increase;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	for (int i=0;i<this->size;i++)
 		newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter-=this->ActualSize;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
 	this->IndexOfVirtualZero+=increase;
@@ -1822,9 +1859,17 @@ void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
 {	if (increase<=0)
 		return;
 	Object* newArray = new Object[this->ActualSize+increase];
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter+=this->ActualSize+increase;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	for (int i=0;i<this->size;i++)
 		newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
+#ifdef CGIversionLimitRAMuse
+	::GlobalPointerCounter-=this->ActualSize;
+	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
 	this->TheObjects = this->TheActualObjects+this->IndexOfVirtualZero;
@@ -5427,7 +5472,7 @@ public:
 	static void MakeReportFromComputationSetup(ComputationSetup& input);
 	static void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader);//format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
 	static void drawlineInOutputStreamBetweenTwoRoots
-		(	root& r1, root& r2,	unsigned long thePenStyle, int ColorIndex);
+		(	root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
 	static void drawlineInOutputStream
 		(	double X1, double Y1, double X2, double Y2,
 			unsigned long thePenStyle, int ColorIndex);

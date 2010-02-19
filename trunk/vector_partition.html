@@ -5,21 +5,32 @@
 
 <FORM method="POST" name="formMain" action="./../Debug/vector_partition_linux_cgi.cgi">
 Dimension: <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
-Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="submit" name="buttonGo" value="Go">
-<input type="hidden" name="hidden1">
+Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);">
+<input type="submit" name="buttonGo" value="Go">
 </FORM>	
-<input type="button" name="buttonTest" value="Draw" onclick="drawTest();" >
-<div style="width:400;height:400;border:solid 1px" id="canvasMain"></div>
+<div style="width:400;height:400;border:solid 1px" id="canvasMain" onmouseup="clickCanvasMain(event.clientX, event.clientY);"></div>
+
 <script type="text/javascript">
 	var oldDimension=-1;
 	var oldNumVectors=-1;
 	var NumElements=0;
-	var jsMain= new jsGraphics("canvasMain");	
+	function clickCanvasMain(cx,cy) {
+		var divPosX=0;
+		var divPosY=0;
+		var thePointer= canvasMain;
+		while(thePointer)
+		{ divPosX += thePointer.offsetLeft;
+    	divPosY += thePointer.offsetTop;
+    	thePointer = thePointer.offsetParent;
+		}
+		var posy=cy-divPosY;
+		alert(posy);
+	}
 	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
 	{ dim = Number(inputDim);
 		num = Number(inputNum);
-//		alert("dim: "+dim+" num: "+num);
-		if (dim<1 || dim>3 || num>8 || num<1)
+//		alert("dim: "+dim+" num: "+num);s
+		if (dim<1 || dim>3 || num>9 || num<1)
 		{	return;
 		}
 		if ((oldDimension!=dim) || (oldNumVectors!=num))
@@ -63,15 +74,15 @@ Num Vectors: <input type="text" size="1" name="textNumVectors"><input type="subm
 <script type="text/javascript">
 	var Basis= new Array(5);
 	var Xshift=150;
-	var Yshift=150; 
+	var Yshift=250; 
 	for (i=0;i<5;i++)
 	{ Basis[i]= new Array(2);
 	}  
-	Basis[0][0]=0.85; Basis[0][1]=0.4;
-	Basis[1][0]=0;   Basis[1][1]=-1;
-	Basis[2][0]=0.75; Basis[2][1]=-0.9;
-	Basis[3][0]=-0.45; Basis[3][1]=0.8;
-	Basis[4][0]=0.80; Basis[4][1]=0.45;
+	Basis[0][0]=1.7; Basis[0][1]=0.8;
+	Basis[1][0]=0;   Basis[1][1]=-2;
+	Basis[2][0]=1.5; Basis[2][1]=-1.8;
+	Basis[3][0]=-0.9; Basis[3][1]=1.6;
+	Basis[4][0]=1.6; Basis[4][1]=0.9;
 </script>
 <script type="text/javascript" src="../dojo.xd.js" djConfig = "parseOnLoad: true">
 </script>

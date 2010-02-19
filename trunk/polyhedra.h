@@ -53,11 +53,9 @@
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
 #endif
 
-//#ifndef CGIversionLimitRAMuse
-//#define CGIversionLimitRAMuse
-//	static const int cgiLimitRAMuseNumPointersInListBasicObjects=100000;
-//	static int GlobalPointerCounter=0;
-//#endif
+#ifdef CGIversionLimitRAMuse
+static const int cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
+#endif
 
 const int MaxRank=12;
 const int MaxNumberOfRoots= 100;
@@ -130,6 +128,7 @@ class ParallelComputing
 public:
 	static bool ReachSafePointASAP;
 	static bool SafePointReached;
+	static int GlobalPointerCounter;
 #ifndef WIN32
 	static pthread_mutex_t mutex1;
   static pthread_cond_t continueCondition;
@@ -159,7 +158,7 @@ inline int Maximum(int a, int b)
 //#endif
 
 typedef void (*drawLineFunction)
-	(	double X1, double Y1, double X2, double Y2, 
+	(	double X1, double Y1, double X2, double Y2,
 		unsigned long thePenStyle, int ColorIndex);
 
 struct DrawingVariables
@@ -217,11 +216,11 @@ public:
 	void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile);
 	//if the LatexOutFile is zero then the procedure defaults to the screen
 	void drawLine
-		(	double X1, double Y1, double X2, double Y2, 
-			unsigned long thePenStyle, int ColorIndex, 
+		(	double X1, double Y1, double X2, double Y2,
+			unsigned long thePenStyle, int ColorIndex,
 			std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 	void drawlineBetweenTwoVectors
-		(	root& r1, root& r2, int PenStyle, int PenColor, 
+		(	root& r1, root& r2, int PenStyle, int PenColor,
 			std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 //	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
 	void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile);
@@ -300,8 +299,8 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 	if (theSize==0)
 	{
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter-=this->size;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	ParallelComputing::GlobalPointerCounter-=this->size;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 		this->size=0;
 		delete [] this->TheObjects;
@@ -310,8 +309,8 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 	}
 	Object* newArray= new Object[theSize];
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter+=theSize;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter+=theSize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	int CopyUpTo= this->size;
 	if (this->size>theSize)
@@ -320,8 +319,8 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 		newArray[i]=this->TheObjects[i];
 	delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter-=this->size;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter-=this->size;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	this->TheObjects=newArray;
 	this->size= theSize;
@@ -337,8 +336,8 @@ template <class Object>
 ListBasicObjectsLight<Object>::~ListBasicObjectsLight()
 { delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter-=this->size;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter-=this->size;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	this->TheObjects=0;
 }
@@ -549,8 +548,17 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize
 	int newActualNumRows= MathRoutines::Maximum(this->ActualNumRows,r);
 	if (r>this->ActualNumRows || c>this->ActualNumCols)
 	{ newElements	= new Element*[newActualNumRows];
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=newActualNumRows;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 		for (int i=0;i<newActualNumRows;i++)
-			newElements[i]= new Element[newActualNumCols];
+		{	newElements[i]= new Element[newActualNumCols];
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=newActualNumCols;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
+		}
 	}
 	if (PreserveValues && newElements!=0)
 		for (int j=::Minimum(this->NumRows,r)-1;j>=0;j--)
@@ -580,6 +588,10 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Free()
 { for (int i=0;i<this->ActualNumRows;i++)
 		delete [] this->elements[i];
 	delete [] this->elements;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols+this->ActualNumRows;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->elements=0;
 	this->NumCols=0;
 	this->NumRows=0;
@@ -648,17 +660,17 @@ public:
 	void ComputeDebugString();
 	void MultiplyByLargeRational(Rational& x);
 	static bool SystemLinearInequalitiesHasSolution
-		(	MatrixLargeRational& matA, MatrixLargeRational& matb, 
+		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
 			MatrixLargeRational& outputPoint);
 	static bool SystemLinearEqualitiesHasNonNegativeSolution
-		(	MatrixLargeRational& matA, MatrixLargeRational& matb, 
+		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
 			MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
 	static void ComputePotentialChangeGradient
 	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables,
-		int ColumnIndex, Rational &outputChangeGradient, 
+		int ColumnIndex, Rational &outputChangeGradient,
 		bool &hasAPotentialLeavingVariable);
 	static void GetMaxMovementAndLeavingVariableRow
-	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, 
+	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable,
 		int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX,
 		Selection& BaseVariables);
 	int FindLCMCoefficientDenominatorsTruncated();
@@ -770,6 +782,10 @@ inline void MatrixElementaryTightMemoryFit<Element>::Free()
 { for (int i=0;i<this->NumRows;i++)
 		delete [] this->elements[i];
 	delete [] this->elements;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter-=this->NumRows*this->NumCols+this->NumRows;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->elements=0;
 	this->NumRows=0;
 	this->NumCols=0;
@@ -974,8 +990,16 @@ inline void MatrixElementaryTightMemoryFit<Element>::Resize
 		return;
 	}
 	Element** newElements= new Element*[r];
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=r;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	for (int i=0;i<r;i++)
 	{ newElements[i]= new Element[c];
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=c;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	}
 	if (PreserveValues)
 	{ for (int j=Minimum(this->NumRows,r)-1;j>=0;j--)
@@ -1173,6 +1197,10 @@ class Rational
 	{ if (this->Extended!=0)
 			return false;
 		this->Extended= new LargeRationalExtended;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter++;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 		this->Extended->den.AssignShiftedUInt((unsigned int)this->DenShort,0);
 		this->Extended->num.AssignInt(this->NumShort);
 		return true;
@@ -1181,6 +1209,10 @@ class Rational
 	{	if (this->Extended==0)
       return;
 		delete this->Extended; this->Extended=0;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter++;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	}
 	bool ShrinkExtendedPartIfPossible()
 	{ if (this->Extended==0)
@@ -1639,7 +1671,7 @@ public:
 																			roots & directions, int CurrentIndex,
 																			root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner, 
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner,
 			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);
 	void WireChamberAndWallAdjacencyData
 		(	CombinatorialChamberContainer &owner,
@@ -1811,8 +1843,8 @@ template <class Object>
 void ListBasicObjects<Object>::ReleaseMemory()
 {	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter-=this->ActualSize;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter-=this->ActualSize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	this->ActualSize=0;
 	this->IndexOfVirtualZero=0;
@@ -1825,9 +1857,9 @@ template <class Object>
 ListBasicObjects<Object>::~ListBasicObjects()
 {	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter-=this->ActualSize;
+ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 	this->ActualSize=0;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	this->TheActualObjects=0;
 	this->TheObjects=0;
@@ -1838,15 +1870,15 @@ void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 {	if (increase<=0) return;
 	Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter+=this->ActualSize+increase;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	for (int i=0;i<this->size;i++)
 		newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter-=this->ActualSize;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter-=this->ActualSize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
@@ -1860,15 +1892,15 @@ void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
 		return;
 	Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter+=this->ActualSize+increase;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	for (int i=0;i<this->size;i++)
 		newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
-	::GlobalPointerCounter-=this->ActualSize;
-	if (::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+ParallelComputing::GlobalPointerCounter-=this->ActualSize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
@@ -2009,6 +2041,10 @@ template <class Object>
 void HashedListBasicObjects<Object>::SetHashSize(int HS)
 { if (HS!=this->HashSize)
 	{	delete [] this->TheHashedArrays;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 		this->TheHashedArrays= new  ListBasicObjects<int>[HS];
 		this->HashSize=HS;
 		this->size=0;
@@ -2026,6 +2062,11 @@ HashedListBasicObjects<Object>::HashedListBasicObjects()
 template <class Object>
 HashedListBasicObjects<Object>::~HashedListBasicObjects()
 {	delete [] this->TheHashedArrays;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter-=this->HashSize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
+	this->HashSize=0;
 	this->TheHashedArrays=0;
 }
 
@@ -2041,6 +2082,10 @@ void ListObjectPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
 { if (increase<=0){return;}
 	if (this->ActualSize<this->size+increase)
 	{ Object** newArray= new Object*[this->size+increase];
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=increase;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 		for (int i=0;i<this->size;i++)
 			newArray[i]=this->TheObjects[i];
 		delete [] this->TheObjects;
@@ -2058,12 +2103,19 @@ void ListObjectPointers<Object>::initAndCreateNewObjects(int d)
 	this->SetSizeExpandOnTopNoObjectInit(d);
 	for (int i=0;i<d;i++)
 		this->TheObjects[i]=new Object;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=d;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 template<class Object>
 void ListObjectPointers<Object>::KillElementIndex(int i)
-{
-	delete this->TheObjects[i];
+{	delete this->TheObjects[i];
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter--;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->size--;
 	this->TheObjects[i]=this->TheObjects[this->size];
 }
@@ -2085,14 +2137,21 @@ void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
 	int oldsize= this->size;
 	this->SetSizeExpandOnTopNoObjectInit(this->size+increase);
 	for (int i=oldsize;i<this->size;i++)
-	{	this->TheObjects[i]=new Object;
-	}
+		this->TheObjects[i]=new Object;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 template<class Object>
 void ListObjectPointers<Object>::KillAllElements()
 {	for (int i =0;i<this->size;i++)
 	{	delete this->TheObjects[i];
+#ifdef CGIversionLimitRAMuse
+	if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 		this->TheObjects[i]=0;
 	}
 	this->size=0;
@@ -2278,7 +2337,7 @@ public:
 			roots& directions, int directionIndex,root& ChamberIndicator,
 			drawLineFunction theDrawFunction);
 	static void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, 
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);
 	static void drawFacetVerticesMethod2
 		(	DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex,
@@ -3138,6 +3197,10 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::InvertDegrees()
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::init(short nv)
 {	assert(nv>=0);
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	if(this->NumVariables!=nv)
 	{	NumVariables=nv;
 		delete [] degrees;
@@ -3149,7 +3212,12 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::init(short nv)
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::initNoDegreesInit(short nv)
-{ if(this->NumVariables!=nv)
+{
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
+	if(this->NumVariables!=nv)
 	{	this->NumVariables=nv;
 		delete [] this->degrees;
 		this->degrees= new short[this->NumVariables];
@@ -3159,6 +3227,10 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::initNoDegreesInit(short nv)
 template <class ElementOfCommutativeRingWithIdentity>
 Monomial<ElementOfCommutativeRingWithIdentity>::~Monomial()
 {	delete [] this->degrees;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter-=this->NumVariables;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3280,13 +3352,16 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::HasSameExponent(Monomial& m
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(short increase)
-{	short* newDegrees= new short[NumVariables+increase];
+{
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter+=increase;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
+	short* newDegrees= new short[NumVariables+increase];
 	for(int i=0;i<this->NumVariables;i++)
-	{	newDegrees[i]=degrees[i];
-	}
+		newDegrees[i]=degrees[i];
 	for(int i=NumVariables;i<this->NumVariables+increase;i++)
-	{	newDegrees[i]=0;
-	}
+		newDegrees[i]=0;
 	this->NumVariables+=increase;
 	delete [] degrees;
 	degrees= newDegrees;
@@ -3379,7 +3454,12 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(short increment)
-{	short* newDegrees= new short[NumVariables-increment];
+{
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter-=increment;
+	if(ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
+	short* newDegrees= new short[NumVariables-increment];
 	for(int i=0;i<this->NumVariables-increment;i++)
 	{	newDegrees[i]=degrees[i];
 	}
@@ -5297,13 +5377,13 @@ public:
 	void ComputeDebugString();
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,
-			ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable, 
+			ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int> &oppositeKmods);
 	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	void GeneratePossibleNilradicalsRecursive
-		(	GlobalVariables& theGlobalVariables,int startIndex, int RecursionDepth, 
-			ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & multTable, 
+		(	GlobalVariables& theGlobalVariables,int startIndex, int RecursionDepth,
+			ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & multTable,
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int>& oppositeKmods);
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables);
@@ -5311,11 +5391,11 @@ public:
 		(GlobalVariables& theGlobalVariables,Selection& selKmods);
 	void ElementToString(std::string& output);
 	void GenerateKmodMultTable
-		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output, 
+		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,
 			ListBasicObjects<int>& oppositeKmods,
 			GlobalVariables& theGlobalVariables);
 	void KmodTimesKmod
-		(	int index1, int index2,ListBasicObjects<int>& oppositeKmods, 
+		(	int index1, int index2,ListBasicObjects<int>& oppositeKmods,
 			ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
 	void ComputeAll();
@@ -5328,10 +5408,10 @@ public:
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
 	void SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables);
-	
+
 	void RunE6_3A2(GlobalVariables& theGlobalVariables);
-	
-	
+
+
 	void RunE7_D6plusA1(GlobalVariables& theGlobalVariables);
 	void RunE7_A2plusA5(GlobalVariables& theGlobalVariables);
 	void RunE7_2A3plusA1(GlobalVariables& theGlobalVariables);
@@ -5528,12 +5608,12 @@ public:
 	MatrixLargeRational matReduceMonomialByMonomial2;
 	MatrixLargeRational matOneColumn;
 	MatrixLargeRational matConeCondition1;
-	MatrixLargeRational matConeCondition2;	
-	MatrixLargeRational matConeCondition3;	
-	MatrixLargeRational matSimplexAlgorithm1;	
-	MatrixLargeRational matSimplexAlgorithm2;	
-	MatrixLargeRational matSimplexAlgorithm3;	
-	
+	MatrixLargeRational matConeCondition2;
+	MatrixLargeRational matConeCondition3;
+	MatrixLargeRational matSimplexAlgorithm1;
+	MatrixLargeRational matSimplexAlgorithm2;
+	MatrixLargeRational matSimplexAlgorithm3;
+
 	partFraction fracReduceMonomialByMonomial;
 	QuasiPolynomial QPComputeQuasiPolynomial;
 	QuasiNumber QNComputeQuasiPolynomial;

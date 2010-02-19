@@ -536,7 +536,7 @@ guiMainWindow::guiMainWindow()
   this->ListBox1WeylGroup= new ::wxComboBoxWheel(this,this->ID_ListBox1,wxT("A3"),
           wxPoint(0,0),::wxDefaultSize// wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight)
           ,0,0,wxCB_DROPDOWN  );
-	
+
   this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
@@ -619,7 +619,7 @@ guiMainWindow::guiMainWindow()
 
 //this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
 	//this->RBGroup1SlicingOptions->set
-	
+
   this->ListBox1WeylGroup->Append(wxT("A2"));
   this->ListBox1WeylGroup->Append(wxT("A3"));
   this->ListBox1WeylGroup->Append(wxT("A4"));
@@ -800,7 +800,7 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
 }
 
 void wxDialogOutput::onButton5SaveComputer(wxCommandEvent &ev)
-{	
+{
 }
 
 void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev)
@@ -960,7 +960,7 @@ void guiMainWindow::onButton9CustomNilradical(wxCommandEvent& ev)
 	this->theComputationSetup.FullChop
     (*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
-  this->Refresh();	
+  this->Refresh();
 }
 
 void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
@@ -1136,7 +1136,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   bool tempBool = this->CheckBox8DoTheWeylGroup->GetValue();
   if(	!(this->theComputationSetup.flagDoingWeylGroupAction== tempBool))
 	{	this->theComputationSetup.Reset();
-	}  
+	}
   this->theComputationSetup.flagDoingWeylGroupAction= tempBool;
   this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
     !this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
@@ -1375,9 +1375,9 @@ void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
 void guiMainWindow::ReadRBData()
 {	switch(this->RBGroup1SlicingOptions->GetSelection())
 	{ case 0: this->theComputationSetup.flagFullChop=true;					break;
-		case 1: this->theComputationSetup.flagFullChop=false; 
+		case 1: this->theComputationSetup.flagFullChop=false;
 						this->theComputationSetup.flagOneIncrementOnly=true;	break;
-		case 2: this->theComputationSetup.flagFullChop=false; 
+		case 2: this->theComputationSetup.flagFullChop=false;
 						this->theComputationSetup.flagOneIncrementOnly=false; break;
 	}
 }

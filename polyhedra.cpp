@@ -82,6 +82,7 @@ void GlobalVariables::operator =(const GlobalVariables &G_V)
 	this->matTransposeBuffer.Assign(G_V.matTransposeBuffer);
 }
 
+int ParallelComputing::GlobalPointerCounter=0;
 Integer Integer::TheRingUnit  (1) ;
 Integer Integer::TheRingMUnit (-1);
 Integer Integer::TheRingZero  (0) ;
@@ -298,6 +299,10 @@ void CombinatorialChamberContainer::OneSlice
 							(	directions.TheObjects[index],directions,index,*this,
 								this->theHyperplanes, theGlobalVariables))
 				{	delete this->TheObjects[this->indexNextChamberToSlice];
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter--;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 					this->TheObjects[this->indexNextChamberToSlice]=0;
 					//if (this->flagAnErrorHasOcurredTimeToPanic)
 					//{	this->ComputeDebugString();
@@ -714,6 +719,12 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input)
 bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSetup& output)
 {	if (input.length()<2)
 		return false;
+	std::string tempS3;
+	tempS3=input;
+	tempS3.resize(7);
+	if (tempS3!="textDim")
+		return false;
+//	std::cout<<input;
 	CGIspecificRoutines::CivilizedStringTranslation(input);
 	std::stringstream tempStream;
 	tempStream << input;
@@ -769,12 +780,20 @@ ComputationSetup::ComputationSetup()
 	this->NumRowsNilradical=2;
 	this->NumColsNilradical=2;
 	this->theGlobalVariablesContainer= new GlobalVariablesContainer;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter++;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->theGlobalVariablesContainer->SetSizeExpandOnTopNoObjectInit(1);
 //	this->RankEuclideanSpaceGraphics=3;
 }
 
 ComputationSetup::~ComputationSetup()
-{delete this->theGlobalVariablesContainer;
+{	delete this->theGlobalVariablesContainer;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter--;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 
@@ -1931,7 +1950,10 @@ void Selection::init(int maxNumElements)
 		//delete [] elementsInverseSelection;
 		this->selected = new bool[maxNumElements];
 		this->elements = new int[maxNumElements];
-	//	this->elementsInverseSelection= new int[maxNumElements];
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter+=(maxNumElements-this->MaxSize)*2;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 		MaxSize =maxNumElements;
 	}
 	for (int i=0; i<this->MaxSize;i++)
@@ -2022,7 +2044,12 @@ void Selection::RemoveLastSelection()
 Selection::~Selection()
 {	delete [] this->selected;
 	delete [] this->elements;
-//	delete [] elementsInverseSelection;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter-=this->MaxSize;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
+	//	delete [] elementsInverseSelection;
+	this->MaxSize=0;
 	this->selected=0;
 	this->elements=0;
 }
@@ -3270,7 +3297,10 @@ bool CombinatorialChamber::SplitChamber
 //	}
 	NewPlusChamber= new CombinatorialChamber;
 	NewMinusChamber= new CombinatorialChamber;
-
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter+=2;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	NewPlusChamber->flagPermanentlyZero= PlusChamberIsPermanentZero;
 	NewMinusChamber->flagPermanentlyZero= MinusChamberIsPermanentZero;
 	NewPlusChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
@@ -3466,6 +3496,10 @@ void CombinatorialChamberContainer::SliceWithAWallInit
 		if (this->TheObjects[i]!=0)
 		{	if (this->TheObjects[i]->SplitChamber(TheKillerFacetNormal,*this,tempRoot,theGlobalVariables))
 			{	delete this->TheObjects[i];
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter--;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 				this->TheObjects[i]=0;
 				break;
 			}
@@ -3491,6 +3525,10 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement
 			{	if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->
 							SplitChamber(TheKillerFacetNormal,*this,tempRoot,theGlobalVariables))
 				{ delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter--;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 					this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
 				}
 			}
@@ -5513,6 +5551,10 @@ void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplex
 	}
 	this->ComputeTaukn(k,n,output);
 	PrecomputedTaukn* NewMember = new PrecomputedTaukn;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter++;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 	this->AddObjectOnTop(NewMember);
 	NewMember->k=k;
 	NewMember->n=n;
@@ -9157,9 +9199,7 @@ partFraction::partFraction()
 }
 
 void partFraction::init(int numRoots)
-{// delete [] this->IndicesNonZeroMults;
-	//this->IndicesNonZeroMults=0;
-	this->IndicesNonZeroMults.MakeActualSizeAtLeastExpandOnTop(numRoots);
+{	this->IndicesNonZeroMults.MakeActualSizeAtLeastExpandOnTop(numRoots);
 	this->IndicesNonZeroMults.size=0;
 	this->SetSizeExpandOnTopLight(numRoots);
 	for (int i=0;i<this->size;i++)
@@ -10410,9 +10450,6 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables&  theGloba
 		this->AddAlreadyReduced(tempFrac, theGlobalVariables);
 		this->MakeProgressVPFcomputation();
 	}
-//	input.rdbuf()->pubsetbuf(0,0);
-//	delete [] TempBuffer;
-	//input.::std::rdbuff(oldInputBuffer);
 }
 
 void partFractions::ComputeSupport( ListBasicObjects<roots>& output, std::stringstream& outputString)
@@ -12427,10 +12464,18 @@ void rootFKFTcomputation::initA2A1A1inD5()
 rootFKFTcomputation::rootFKFTcomputation()
 { this->OutputFile = "C:/math/output.txt";
 	this->TheGlobalVariables= new GlobalVariables;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter++;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 rootFKFTcomputation::~rootFKFTcomputation()
 { delete this->TheGlobalVariables;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter--;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 void rootFKFTcomputation::RunA2A1A1inD5beta12221()
@@ -14274,10 +14319,18 @@ void  GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation
 GeneratorPFAlgebraRecord::GeneratorPFAlgebraRecord()
 {	this->ValueIsComputed=false;
 	this->Value = new IntegerPoly;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter++;
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 GeneratorPFAlgebraRecord::~GeneratorPFAlgebraRecord()
 {	delete this->Value; this->Value=0;
+#ifdef CGIversionLimitRAMuse
+	ParallelComputing::GlobalPointerCounter--;
+	if(ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+#endif
 }
 
 void GeneratorPFAlgebraRecord::operator =(const GeneratorPFAlgebraRecord &right)

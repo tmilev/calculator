@@ -14,38 +14,54 @@ void getPath(char* path, std::string& output)
     length++;
   output= path;
   for (int i=length-1;i>=0;i--)
-  { if (path[i]=='/')
+  { 
+#ifdef WIN32  
+		if (path[i]=='\\' )
     { output.resize(i+1);
       return;
     }
+#elif
+		if (path[i]=='/')
+    { output.resize(i+1);
+      return;
+    }
+#endif
   }
 }
 
 
 
 int main(int argc, char **argv)
-{ ComputationSetup theComputationSetup;
+{ std::string inputString;
+	std::cin >> inputString;
+	ComputationSetup theComputationSetup;
 	std::cout << "Content-Type: text/html\n\n";
   //std::cout <<  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
 	//					<< std::endl;
   //std::cout << "<html lang=\"en\" dir=\"LTR\">"<< std::endl;
-  std::string tempS2, tempS1;
-  getPath(argv[0],tempS1);
+  std::string tempS;
+  getPath(argv[0],tempS);
   std::stringstream out;
-  out<<tempS1;
+  out<<tempS;
+#ifdef WIN32
+	tempS="C:\\todor\\math\\rootFKFT\\cpp\\vector_partition.html";
+#elif
   out<<"../vector_partition.html";
-
   tempS1=out.str();
+#endif
+	std::cout<<tempS<<inputString;
   std::fstream fileHeaderHtml;
-  rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS1);
+  std::cout<<"before the vicious cycle";
+  rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);
   char buffer[1024];
   while (!fileHeaderHtml.eof())
   { fileHeaderHtml.read(buffer,1024);
     std::cout.write(buffer, fileHeaderHtml.gcount());
+    std::cout<<"inside the vicious cycle";
   }
-  std::cin >> tempS1;
-  if(::CGIspecificRoutines::ReadDataFromCGIinput(tempS1, theComputationSetup))
-  {	theComputationSetup.Run();
+  if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
+  {	std::cout<<"before computation setup";
+		theComputationSetup.Run();
 		::CGIspecificRoutines::MakeReportFromComputationSetup(theComputationSetup);
   }
   else
@@ -62,8 +78,8 @@ int main(int argc, char **argv)
   { std::cout	<< "\n\trootsArray["<<i<<"]= new Array("
 							<< theComputationSetup.theChambers.AmbientDimension<<");\n";
     for (int j=0;j<theComputationSetup.theChambers.AmbientDimension;j++)
-    { theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS2);
-      std::cout<< "\trootsArray["<<i<< "]["<<j <<"]="<<tempS2<<";";
+    { theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
+      std::cout<< "\trootsArray["<<i<< "]["<<j <<"]="<<tempS<<";";
     }
   }
 	std::cout	<<"\n\tgeneratePageFromDimAndNum("

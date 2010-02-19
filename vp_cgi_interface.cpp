@@ -20,7 +20,7 @@ void getPath(char* path, std::string& output)
     { output.resize(i+1);
       return;
     }
-#elif
+#else
 		if (path[i]=='/')
     { output.resize(i+1);
       return;
@@ -45,22 +45,23 @@ int main(int argc, char **argv)
   out<<tempS;
 #ifdef WIN32
 	tempS="C:\\todor\\math\\rootFKFT\\cpp\\vector_partition.html";
-#elif
+#else
   out<<"../vector_partition.html";
-  tempS1=out.str();
+  tempS=out.str();
 #endif
-	std::cout<<tempS<<inputString;
+	//std::cout<<tempS<<inputString;
   std::fstream fileHeaderHtml;
-  std::cout<<"before the vicious cycle";
+  //std::cout<<"before the vicious cycle";
   rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);
   char buffer[1024];
   while (!fileHeaderHtml.eof())
   { fileHeaderHtml.read(buffer,1024);
     std::cout.write(buffer, fileHeaderHtml.gcount());
-    std::cout<<"inside the vicious cycle";
+    //std::cout<<"inside the vicious cycle";
   }
   if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
-  {	std::cout<<"before computation setup";
+  {	//std::cout<<"before computation setup";
+  //	theComputationSetup.flagComputingPartialFractions=false;
 		theComputationSetup.Run();
 		::CGIspecificRoutines::MakeReportFromComputationSetup(theComputationSetup);
   }

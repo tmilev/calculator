@@ -3,7 +3,7 @@
 </HEAD>
 <BODY>
 
-<FORM method="POST" name="formMain" action="/cgi-bin/vector_partition_linux_cgi.cgi">
+<FORM method="POST" name="formMain" action="../Debug/vector_partition_linux_cgi.cgi">
 Dimension: <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
 Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);">
 <input type="submit" name="buttonGo" value="Go">
@@ -14,8 +14,10 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 	var oldDimension=-1;
 	var oldNumVectors=-1;
 	var NumElements=0;
-	function clickCanvasMain(cx,cy) {
-		var divPosX=0;
+	var node;
+	var surface;				
+	function clickCanvasMain(cx,cy)
+	{	var divPosX=0;
 		var divPosY=0;
 		var thePointer= canvasMain;
 		while(thePointer)
@@ -24,6 +26,9 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
     	thePointer = thePointer.offsetParent;
 		}
 		var posy=cy-divPosY;
+		Basis[0][0]=0; Basis[0][1]=0.8;
+		surface.clear();
+		drawOnCanvasMain();
 		alert(posy);
 	}
 	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
@@ -87,28 +92,27 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 <script type="text/javascript" src="../dojo.xd.js" djConfig = "parseOnLoad: true">
 </script>
 <script>	
-	dojo.require("dojox.gfx");
-	dojo.addOnLoad
-	(	function()
-		{	var node = dojo.byId(canvasMain);
-			var surface = dojox.gfx.createSurface(node, 400, 400);
-			function getCoord(thePoint,Coord)
-			{	result=Number(0);
-				for (counterI=0;counterI<oldDimension;counterI++)
-				{	result= result+ thePoint[counterI]*Basis[counterI][Coord];
-				}
-				result=Math.floor(result);
-				return result;
-			}	
-			for (CounterK=0;CounterK<numDrawLines;CounterK++)
-			{	var xCoord1=getCoord(l1[CounterK],0)+Xshift;	
-				var yCoord1=getCoord(l1[CounterK],1)+Yshift; 
-				var xCoord2=getCoord(l2[CounterK],0)+Xshift; 
-				var yCoord2=getCoord(l2[CounterK],1)+Yshift;
-				surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(myColors[CounterK]);
-			}
+	function getCoord(thePoint,Coord)
+	{	result=Number(0);
+		for (counterI=0;counterI<oldDimension;counterI++)
+		{	result= result+ thePoint[counterI]*Basis[counterI][Coord];
 		}
-	);		
+		result=Math.floor(result);
+		return result;
+	}	
+	function drawOnCanvasMain()
+	{	node = dojo.byId(canvasMain);
+		surface = dojox.gfx.createSurface(node, 400, 400);
+		for (CounterK=0;CounterK<numDrawLines;CounterK++)
+		{	xCoord1=getCoord(l1[CounterK],0)+Xshift;	
+			yCoord1=getCoord(l1[CounterK],1)+Yshift; 
+			xCoord2=getCoord(l2[CounterK],0)+Xshift; 
+			yCoord2=getCoord(l2[CounterK],1)+Yshift;
+			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(myColors[CounterK]);
+		}
+	}	
+	dojo.require("dojox.gfx");
+	dojo.addOnLoad(drawOnCanvasMain);		
 </script>
 
 

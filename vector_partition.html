@@ -131,12 +131,19 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 	}	
 	function drawOnCanvasMain()
 	{//	alert("paint");
-		for (CounterK=0;CounterK<numDrawLines;CounterK++)
+		for (CounterK=0;CounterK<numdaLines;CounterK++)
+		{	xCoord1=getCoord(da1[CounterK],0)+Xshift;	
+			yCoord1=getCoord(da1[CounterK],1)+Yshift; 
+			xCoord2=getCoord(da2[CounterK],0)+Xshift; 
+			yCoord2=getCoord(da2[CounterK],1)+Yshift;
+			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(clrda[CounterK]);
+		}		
+		for (CounterK=0;CounterK<numlLines;CounterK++)
 		{	xCoord1=getCoord(l1[CounterK],0)+Xshift;	
 			yCoord1=getCoord(l1[CounterK],1)+Yshift; 
 			xCoord2=getCoord(l2[CounterK],0)+Xshift; 
 			yCoord2=getCoord(l2[CounterK],1)+Yshift;
-			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(myColors[CounterK]);
+			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(clrl[CounterK]);
 		}		
 	}	
 	function drawOnCanvasMainPlusInit()

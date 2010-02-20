@@ -5545,9 +5545,16 @@ struct CGIspecificRoutines
 public:
 	static std::stringstream outputStream;
 	static int numLines;
+	static int numRegularLines;
+	static int numDashedLines;
+	static int numDottedLines;
 	static int shiftX;
 	static int shiftY;
 	static int scale;
+	static void outputLineJavaScriptSpecific
+		(	const std::string& lineTypeName, int theDimension, std::string& stringColor,
+			int& lineCounter );
+	static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
 	static bool ReadDataFromCGIinput(std::string& input, ComputationSetup& output);
 	static void CivilizedStringTranslation(std::string& input);
 	static void MakeReportFromComputationSetup(ComputationSetup& input);

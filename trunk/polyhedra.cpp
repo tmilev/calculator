@@ -574,6 +574,9 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
 ::std::stringstream  CGIspecificRoutines::outputStream;
 int CGIspecificRoutines::numLines;
 int CGIspecificRoutines::shiftX=0;
+int CGIspecificRoutines::numDashedLines=0;
+int CGIspecificRoutines::numRegularLines=0;
+int CGIspecificRoutines::numDottedLines=0;
 int CGIspecificRoutines::shiftY=-200;
 int CGIspecificRoutines::scale=100;
 
@@ -590,61 +593,75 @@ void CGIspecificRoutines::drawlineInOutputStream
 
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots
 	(	root& r1, root& r2,	unsigned long thePenStyle, int r, int g, int b)
-{ if (thePenStyle!=5)
-	{	for (int i=0;i<r1.size;i++)
+{	if (thePenStyle!=5)
+	{	CGIspecificRoutines::outputStream << thePenStyle<<" ["<<r<<","<<g<<","<<b<<"] ";
+		for (int i=0;i<r1.size;i++)
 			CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " "
 																				<< (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
-		CGIspecificRoutines::outputStream <<"["<<r<<","<<g<<","<<b<<"] ";
 		CGIspecificRoutines::numLines++;
+		switch(thePenStyle)
+		{ case 0: CGIspecificRoutines::numRegularLines++; break;
+			case 1: CGIspecificRoutines::numDashedLines++; break;
+			case 2: CGIspecificRoutines::numDottedLines++; break;
+		}
 	}
+}
+
+void CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
+{	std::cout	<< "\n\tvar num"<< lineTypeName <<"Lines=" 					<< numberLines <<";";
+	std::cout	<< "\n\tvar "		<< lineTypeName <<"1= new Array("		<< numberLines <<");"
+						<< "  \tvar "		<< lineTypeName <<"2= new Array("		<< numberLines <<");"
+						<< "  \tvar clr"	<< lineTypeName <<"= new Array("	<< numberLines <<");";
+}
+void CGIspecificRoutines::outputLineJavaScriptSpecific
+	(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter )
+{	std::string tempS;
+	std::cout	<< "\n\t"		<< lineTypeName <<"1["	<< lineCounter <<"]= new Array(" << theDimension << ");"
+							<< "\t"		<< lineTypeName <<"2["	<< lineCounter <<"]= new Array(" << theDimension << ");"
+							<< "\tclr"<< lineTypeName <<"["  	<< lineCounter <<"]= new Array(" << 3 << ");\n";
+	for (int j=0;j< theDimension;j++)
+	{ CGIspecificRoutines::outputStream>> tempS;
+		std::cout << "\t"<< lineTypeName <<"1[" <<lineCounter<< "][" << j<<"]=" <<tempS <<";";
+		CGIspecificRoutines::outputStream>> tempS;
+		std::cout << "\t"<< lineTypeName <<"2[" <<lineCounter<< "][" << j<<"]=" <<tempS <<";";
+	}
+	std::cout << "\tclr"<< lineTypeName <<"[" <<lineCounter<< "]=" <<stringColor <<";";
+	lineCounter++;
 }
 
 void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input)
 { CGIspecificRoutines::numLines=0;
+	CGIspecificRoutines::numRegularLines=0;
+	CGIspecificRoutines::numDottedLines=0;
 	TDV.flag2DprojectionDraw=false;
 	input.theChambers.drawOutput
 		(	TDV, input.theChambers, input.VPVectors, -1,
 			input.theChambers.IndicatorRoot,0,&CGIspecificRoutines::drawlineInOutputStream);
 	std::string tempS;
+	std::string stringColor;
 	CGIspecificRoutines::outputStream.seekg(0);
 	std::cout << "\n<script>";
 	std::cout	<< "\n\tvar numDrawLines=" << CGIspecificRoutines::numLines<<";";
-	std::cout	<< "\n\tvar l1= new Array("<< CGIspecificRoutines::numLines <<");"
-						<< "  \tvar l2= new Array("<< CGIspecificRoutines::numLines <<");"
-						<< "  \tvar myColors= new Array("<< CGIspecificRoutines::numLines <<");";
+	CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("l", CGIspecificRoutines::numRegularLines);
+	CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("da",CGIspecificRoutines::numDashedLines);
+	CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("do",CGIspecificRoutines::numDottedLines);
 	int theDimension=input.theChambers.AmbientDimension;
+	int numLlines=0;	int numDalines=0;	int numDolines=0;
 	for (int i=0;i<CGIspecificRoutines::numLines;i++)
-	{	std::cout	<< "\n\tl1["<< i <<"]= new Array(" << theDimension << ");"
-							<< "\tl2["  << i <<"]= new Array(" << theDimension << ");"
-							<< "\tmyColors["  << i <<"]= new Array(" << 3 << ");\n";
-		for (int j=0;j< theDimension;j++)
-		{ CGIspecificRoutines::outputStream>> tempS;
-			std::cout << "\tl1[" <<i<< "][" << j<<"]=" <<tempS <<";";
-			CGIspecificRoutines::outputStream>> tempS;
-			std::cout << "\tl2[" <<i<< "][" << j<<"]=" <<tempS <<";";
-		}
-		CGIspecificRoutines::outputStream>> tempS;
-		std::cout << "\tmyColors[" <<i<< "]=" <<tempS <<";";
+	{	CGIspecificRoutines::outputStream>> tempS>> stringColor;
+		if (tempS=="0")
+			CGIspecificRoutines::outputLineJavaScriptSpecific
+				("l",theDimension,stringColor, numLlines);
+		if (tempS=="1")
+			CGIspecificRoutines::outputLineJavaScriptSpecific
+				("da",theDimension,stringColor, numDalines);
+		if (tempS=="2")
+			CGIspecificRoutines::outputLineJavaScriptSpecific
+				("do",theDimension,stringColor, numDolines);
 	}
 	std::cout <<"</script>";
-/*	std::cout <<"\n<script>	\n\tdojo.require(\"dojox.gfx\");";
-	std::cout <<"\n\tdojo.addOnLoad(function()";
-	std::cout <<"\n\t\t{\tvar node = dojo.byId(\"canvasMain\");";
-	std::cout <<"\n\t\t\tvar surface = dojox.gfx.createSurface(node, 400, 400);";
-	for (int i=0;i<CGIspecificRoutines::numLines;i++)
-	{	std::cout <<"\n\t\t\tsurface.createLine({";
-		CGIspecificRoutines::outputStream>>tempS;
-		std::cout << " x1 : "	<< tempS;
-		CGIspecificRoutines::outputStream>>tempS;
-		std::cout << ",y1 : " << tempS;
-		CGIspecificRoutines::outputStream>>tempS;
-		std::cout << ",x2 : " << tempS;
-				CGIspecificRoutines::outputStream>>tempS;
-		std::cout << ",y2 : " << tempS;
-		std::cout <<"}).setStroke(\"black\");";
-	}
-	std::cout <<"\n\t\t}\n\t);\n</script>";*/
 }
+
 struct bmpfile_magic {
   unsigned char magic[2];
 };

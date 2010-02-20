@@ -39,10 +39,13 @@
 
 void outputTextDummy(std::string theOutput)
 {}
+
 void FeedDataToIndicatorWindowDummy(IndicatorWindowVariables& output)
 {}
+
 void drawlineDummy(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 {}
+
 extern void drawtextDummy(double X1, double Y1, const char* text, int length, int color)
 {}
 //taken from windows.h
@@ -1149,7 +1152,7 @@ void DrawingVariables::drawLine
 }
 
 void DrawingVariables::drawTextAtVector
-	(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, 
+	(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile,
 		drawTextFunction drawTextIn)
 { double x,y; this->GetCoordsForDrawing(*this,point,x,y);
 	this->drawText(x,y,inputText,textColor,LatexOutFile,drawTextIn);
@@ -2271,7 +2274,7 @@ void roots::PerturbVectorToRegular
 	{ output.ScaleToIntegralMinHeight();
 		IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(output);
 		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
-		if (reportFunction!=0) 
+		if (reportFunction!=0)
 			reportFunction(IndicatorWindowGlobalVariables);
 	}
 }

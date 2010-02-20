@@ -174,6 +174,7 @@ public:
 	static const int PenStyleDashed= 1;
 	static const int PenStyleDotted= 2;
 	static const int PenStyleNormal= 0;
+	int ColorDashes;
 	bool flagLaTeXDraw;
 	bool flag2DprojectionDraw;
 	bool DrawDashes;

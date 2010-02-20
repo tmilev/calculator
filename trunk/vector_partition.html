@@ -17,10 +17,21 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 	var oldNumVectors=-1;
 	var NumElements=0;
 	var node;
-	var surface;				
-	var Basis= new Array(5);
+	var surface;		
+	var MaxNumCoords=5;		
+	var Basis= new Array(MaxNumCoords);
 	var Xshift=150;
 	var Yshift=250; 
+	var selectedBasisIndex=-1;//-2 = center of coord system is selected
+	var GraphicsUnit=100;
+	var clickTolerance=0.1;
+	function ptsWithinClickTolerance(x1,y1,x2,y2)
+	{	if (x1-x2>clickTolerance || x2-x1>clickTolerance ||
+				y1-y2>clickTolerance || y2-y1>clickTolerance )
+		{ return false;
+		}
+		return true;
+	}
 	function clickCanvasMain(cx,cy)
 	{	divPosX=0;
 		divPosY=0;
@@ -30,12 +41,33 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
     	divPosY += thePointer.offsetTop;
     	thePointer = thePointer.offsetParent;
 		}
-		posy=cy-divPosY-document.body.offsetTop;
-		posx=cx-divPosX-document.body.offsetLeft;		
-		surface.clear();
-		alert("click");
-		alert("posx: "+posx+"posy"+posy);
-		drawOnCanvasMain();
+//		alert(cy-divPosY+document.body.scrollTop);
+		posx=(cx-divPosX+document.body.scrollLeft-Xshift)/GraphicsUnit;		
+		posy=(cy-divPosY+document.body.scrollTop-Yshift)/GraphicsUnit;
+		if (!(selectedBasisIndex==-1))
+		{	if (selectedBasisIndex==-2)
+			{	Xshift=(cx-divPosX+document.body.scrollLeft);
+				Yshift=(cy-divPosY+document.body.scrollTop);
+			}
+			else
+			{	Basis[selectedBasisIndex][0]=posx;
+				Basis[selectedBasisIndex][1]=posy;		
+			}
+			surface.clear();
+			selectedBasisIndex=-1;
+			drawOnCanvasMain();
+			//nothing after this procedure gets executed (dunno why, wtf)
+		} else
+		{ if (ptsWithinClickTolerance(posx,posy,0,0))
+			{ selectedBasisIndex=-2;
+			}
+			for (i=0;i<MaxNumCoords;i++)
+			{ if  (ptsWithinClickTolerance(posx,posy,Basis[i][0],Basis[i][1]))
+				{ selectedBasisIndex=i;
+				}
+			}
+			//alert("selected index"+selectedBasisIndex);
+		}
 	}
 	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
 	{ dim = Number(inputDim);
@@ -98,7 +130,7 @@ Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generate
 		return result;
 	}	
 	function drawOnCanvasMain()
-	{	alert("paint");
+	{//	alert("paint");
 		for (CounterK=0;CounterK<numDrawLines;CounterK++)
 		{	xCoord1=getCoord(l1[CounterK],0)+Xshift;	
 			yCoord1=getCoord(l1[CounterK],1)+Yshift; 

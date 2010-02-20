@@ -409,6 +409,7 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
 
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 { this->flagLaTeXDraw= false;
+	this->ColorDashes=RGB(200,200,200);
 	this->flag2DprojectionDraw=true;
 	this->ColorChamberIndicator=RGB(220,220,0);
 	this->ColorWeylChamberWalls=RGB(220,220,0);
@@ -579,19 +580,20 @@ int CGIspecificRoutines::scale=100;
 void CGIspecificRoutines::drawlineInOutputStream
 	(	double X1, double Y1, double X2, double Y2,
 		unsigned long thePenStyle, int ColorIndex)
-{ ::CGIspecificRoutines::outputStream << ((int)X1)+ CGIspecificRoutines::shiftX << " "
+{ /*::CGIspecificRoutines::outputStream << ((int)X1)+ CGIspecificRoutines::shiftX << " "
 																			<< ((int)Y1)+ CGIspecificRoutines::shiftY<< " "
 																			<< ((int)X2)+ CGIspecificRoutines::shiftX << " "
 																			<< ((int)Y2)+ CGIspecificRoutines::shiftY << "\n";
-	CGIspecificRoutines::numLines++;
+	CGIspecificRoutines::outputStream <<"["<< 0<<","<<0<<","<<0<<"] ";
+	CGIspecificRoutines::numLines++;*/
 }
 
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots
 	(	root& r1, root& r2,	unsigned long thePenStyle, int r, int g, int b)
 { if (thePenStyle!=5)
 	{	for (int i=0;i<r1.size;i++)
-		CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " "
-																			<< (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
+			CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " "
+																				<< (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
 		CGIspecificRoutines::outputStream <<"["<<r<<","<<g<<","<<b<<"] ";
 		CGIspecificRoutines::numLines++;
 	}
@@ -1175,7 +1177,7 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2
 			TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Projection1,directions);
 			if (TDV.DrawDashes)
 				TDV.drawlineBetweenTwoVectors
-					(zeroRoot,Projection1, DrawingStyleDashes,TDV.Colors[0],0,theDrawFunction);
+					(zeroRoot,Projection1, DrawingStyleDashes,TDV.ColorDashes,0,theDrawFunction);
 			for (int j=i+1;j<r.size; j++)
 			{ if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
 				{	tempRoot2.Assign(r.TheObjects[j]);
@@ -1329,7 +1331,8 @@ void CombinatorialChamberContainer::drawOutputProjective
 				}
 			}
 		}
-		if (output.size>0 && ChamberIndicator.size==output.AmbientDimension)
+		if (output.size>0 && ChamberIndicator.size==output.AmbientDimension &&
+				TDV.flag2DprojectionDraw)
 		{	root tempRootX;
 			TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator,tempRootX,directions);
 			double tmpX,tmpY;

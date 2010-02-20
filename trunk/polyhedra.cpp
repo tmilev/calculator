@@ -37,27 +37,14 @@
 
 #include "polyhedra.h"
 
-extern void outputText(std::string theOutput){};
-extern void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
-#ifndef USE_GUI
+void outputTextDummy(std::string theOutput)
 {}
-#endif
-;
-//color styles (taken from windows.h and substituted for independence of the .h file):
-// 0 = normal line
-// 1 = dashed line
-// 2 = dotted line
-// 5 = invisible line (no line)
-extern void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
-#ifndef USE_GUI
+void FeedDataToIndicatorWindowDummy(IndicatorWindowVariables& output)
 {}
-#endif
-;
-extern void drawtext(double X1, double Y1, const char* text, int length, int color)
-#ifndef USE_GUI
+void drawlineDummy(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 {}
-#endif
-;
+extern void drawtextDummy(double X1, double Y1, const char* text, int length, int color)
+{}
 //taken from windows.h
 #ifndef RGB
 unsigned int RGB(int r, int g, int b)
@@ -1172,11 +1159,13 @@ void DrawingVariables::drawTextAtVector(root& point, std::string& inputText, int
 	this->drawText(x,y,inputText,textColor,LatexOutFile);
 }
 
-void DrawingVariables::drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile)
-{ if (LatexOutFile==0)
-		::drawtext(X1-7,Y1-7,inputText.c_str(),inputText.length(),color);
-	else
-		::LaTeXProcedures::drawText(X1, Y1,inputText,color,*LatexOutFile);
+void DrawingVariables::drawText
+	(	double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile,
+		drawTextFunciton drawTextIn)
+{	if (LatexOutFile==0)
+		drawTextIn(X1-7,Y1-7,inputText.c_str(),inputText.length(),color);
+  else
+    ::LaTeXProcedures::drawText(X1, Y1,inputText,color,*LatexOutFile);
 }
 
 void CombinatorialChamberContainer::drawFacetVerticesMethod2
@@ -2272,7 +2261,9 @@ inline void roots::AddIntRoot(intRoot &r)
 	this->TheObjects[this->size-1].AssignIntRoot(r);
 }
 
-void roots::PerturbVectorToRegular(root& output, GlobalVariables& theGlobalVariables, int theDimension)
+void roots::PerturbVectorToRegular
+	(	root& output, GlobalVariables& theGlobalVariables, int theDimension,
+			FeedDataToIndicatorWindow reportFunction)
 { root normal;
 	while (!this->IsRegular(output,normal, theGlobalVariables,theDimension))
 	{ IndicatorWindowGlobalVariables.flagRootIsModified=true;
@@ -2283,7 +2274,7 @@ void roots::PerturbVectorToRegular(root& output, GlobalVariables& theGlobalVaria
 	{ output.ScaleToIntegralMinHeight();
 		IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(output);
 		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
-		::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+		reportFunction(IndicatorWindowGlobalVariables);
 	}
 }
 
@@ -13469,7 +13460,7 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 				matA.elements[k][counter].Assign(tempKmod.TheObjects[j].TheObjects[k]);
 			matA.elements[theDimension][counter].MakeOne();
 			counter++;
-		}	
+		}
 	}
 	for (int i=0;i<this->kModules.size;i++)
 	{ if (!this->theNilradicalKmods.selected[i])
@@ -14552,16 +14543,16 @@ void MatrixLargeRational::ComputePotentialChangeGradient
 	for (int j=0;j<matA.NumRows;j++)
 	{	if (BaseVariables.elements[j]>=NumTrueVariables)
 			outputChangeGradient.Add(matA.elements[j][ColumnIndex]);
-		hasAPotentialLeavingVariable = 
-			hasAPotentialLeavingVariable || 
+		hasAPotentialLeavingVariable =
+			hasAPotentialLeavingVariable ||
 				matA.elements[j][ColumnIndex].IsPositive();
 	}
 	if (ColumnIndex>=NumTrueVariables)
-		outputChangeGradient.Subtract(ROne);		
+		outputChangeGradient.Subtract(ROne);
 }
 
 void MatrixLargeRational::GetMaxMovementAndLeavingVariableRow
-	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, 
+	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable,
 		int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX,
 		Selection& BaseVariables)
 {	LeavingVariableRow=-1;
@@ -14586,7 +14577,7 @@ void MatrixLargeRational::GetMaxMovementAndLeavingVariableRow
 //where b is a given nonnegative column vector, A is an n by m matrix
 //and x is a column vector with m entries
 bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
-	(	MatrixLargeRational& matA, MatrixLargeRational& matb, 
+	(	MatrixLargeRational& matA, MatrixLargeRational& matb,
 		MatrixLargeRational& outputPoint,
 		GlobalVariables& theGlobalVariables)
 {	MatrixLargeRational& tempMatA=theGlobalVariables.matSimplexAlgorithm1;
@@ -14596,7 +14587,7 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 	assert (matA.NumRows== matb.NumRows);
 	for (int j=0;j<matb.NumRows;j++)
   { GlobalGoal.Add(matb.elements[j][0]);
-		assert(!matb.elements[j][0].IsNegative());  
+		assert(!matb.elements[j][0].IsNegative());
 	}
 	int NumTrueVariables=matA.NumCols;
 	tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
@@ -14627,7 +14618,7 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 				MatrixLargeRational::ComputePotentialChangeGradient
 					(	tempMatA,BaseVariables,NumTrueVariables,i,
 						PotentialChangeGradient,hasAPotentialLeavingVariable);
-				if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && 
+				if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) &&
 						hasAPotentialLeavingVariable)
 				{ EnteringVariable= i;
 					ChangeGradient.Assign(PotentialChangeGradient);
@@ -14704,7 +14695,7 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 			if (j!=matA.NumRows-1)
 				out <<",";
 		}
-		out <<")"; 
+		out <<")";
 		if (i!=BaseVariables.CardinalitySelection-1)
 			out <<"+";
 	}
@@ -14999,7 +14990,7 @@ void multTableKmods::ElementToString(std::string& output)
 		{	for (int k=0;k<this->TheObjects[i].TheObjects[j].size;k++)
 				out << this->TheObjects[i].TheObjects[j].TheObjects[k] << ", ";
 			out << "\t";
-		}		
+		}
 	}
 	output=out.str();
 }

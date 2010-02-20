@@ -62,11 +62,11 @@ const int MaxNumberOfRoots= 100;
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
 const int SomeRandomPrimes[SomeRandomPrimesSize]=
-																		{ 743, 751, 757, 761, 769,
-																			773, 787, 797, 809, 811,
-																			821, 823, 827, 829, 839,
-																			853, 857, 859, 863, 877,
-																			881, 883, 887, 907, 911};
+  { 743, 751, 757, 761, 769,
+		773, 787, 797, 809, 811,
+		821, 823, 827, 829, 839,
+		853, 857, 859, 863, 877,
+		881, 883, 887, 907, 911};
 class CompositeComplexQNSub;
 class affineCone;
 class affineHyperplane;
@@ -160,6 +160,10 @@ inline int Maximum(int a, int b)
 typedef void (*drawLineFunction)
 	(	double X1, double Y1, double X2, double Y2,
 		unsigned long thePenStyle, int ColorIndex);
+typedef void (*drawTextFunction)
+	(	double X1, double Y1, char* theText, int length, int ColorIndex);
+typedef void (*FeedDataToIndicatorWindow)
+	(	IndicatorWindowVariables& input);
 
 struct DrawingVariables
 {
@@ -214,7 +218,10 @@ public:
 	void SetCoordsForB2();
 	void SetCoordsForA2();
 	void SetCoordsForC2();
-	void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile);
+	void drawText
+		(	double X1, double Y1, std::string& inputText,
+			int color, std::fstream* LatexOutFile,
+			drawTextFunciton drawTextIn);
 	//if the LatexOutFile is zero then the procedure defaults to the screen
 	void drawLine
 		(	double X1, double Y1, double X2, double Y2,
@@ -5654,6 +5661,8 @@ public:
 
 	GlobalVariables();
 	~GlobalVariables();
+	static void FeedDataToIndicatorWindowDefault
+		(IndicatorWindowVariables& input)
 	void operator=(const GlobalVariables& G_V);
 };
 

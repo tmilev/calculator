@@ -162,7 +162,7 @@ typedef void (*drawLineFunction)
 	(	double X1, double Y1, double X2, double Y2,
 		unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawTextFunction)
-	(	double X1, double Y1, char* theText, int length, int ColorIndex);
+	(	double X1, double Y1, const char* theText, int length, int ColorIndex);
 typedef void (*FeedDataToIndicatorWindow)
 	(	IndicatorWindowVariables& input);
 
@@ -204,7 +204,9 @@ public:
 	int DrawStyleDashes;
 	int DrawStyleInvisibles;
 	int DrawStyleDashesInvisibles;
-	void drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
+	void drawCoordSystem
+		(	DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile,
+			drawTextFunction drawTextIn);
 	void initDrawingVariables(int cX1, int cY1);
 	int ColorsR[DrawingVariables::NumColors];
 	int ColorsG[DrawingVariables::NumColors];
@@ -232,7 +234,9 @@ public:
 		(	root& r1, root& r2, int PenStyle, int PenColor,
 			std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 //	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
-	void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile);
+	void drawTextAtVector	
+		(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, 
+			drawTextFunction drawTextIn);
 };
 
 class MathRoutines
@@ -1450,7 +1454,9 @@ public:
 	void AddRootS(roots& r);
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
-	void PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
+	void PerturbVectorToRegular
+		(	root&output, GlobalVariables& theGlobalVariables, 
+			int theDimension,FeedDataToIndicatorWindow reportFunction);
 	void Average(root& output, int theDimension);
 	void Pop(int index);
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
@@ -1681,7 +1687,8 @@ public:
 																			root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner,
-			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);
+			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, 
+			drawTextFunction drawTextIn);
 	void WireChamberAndWallAdjacencyData
 		(	CombinatorialChamberContainer &owner,
 			CombinatorialChamber* input);
@@ -2340,14 +2347,16 @@ public:
 	static void drawOutput
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator,
-			std::fstream* LaTeXOutput,drawLineFunction theDrawFunction);
+			std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, 
+			drawTextFunction drawTextIn);
 	static void drawOutputProjective
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator,
-			drawLineFunction theDrawFunction);
+			drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
-			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction);
+			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction,
+			drawTextFunction drawTextIn);
 	static void drawFacetVerticesMethod2
 		(	DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex,
 			WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes,
@@ -4872,7 +4881,6 @@ public:
 	void UncoverBracketsNumerator(GlobalVariables&  theGlobalVariables, int theDimension);
 	void partFractionToPartitionFunctionSplit
 		(	partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials,
-			//bool RecordSplitPowerSeriesCoefficient,
 			bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
 	//void partFractionToPartitionFunctionStoreAnswer
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
@@ -5077,10 +5085,10 @@ public:
 	partFractions();
 	int SizeWithoutDebugString();
 	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r, GlobalVariables& theGlobalVariables);
-	void MakeProgressReportSplittingMainPart();
-	void MakeProgressReportRemovingRedundantRoots();
-	void MakeProgressReportUncoveringBrackets();
-	void MakeProgressVPFcomputation();
+	void MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindow reportFunction);
+	void MakeProgressReportRemovingRedundantRoots(FeedDataToIndicatorWindow reportFunction);
+	void MakeProgressReportUncoveringBrackets(FeedDataToIndicatorWindow reportFunction);
+	void MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction);
 	void ComputeKostantFunctionFromWeylGroup
 				(	char WeylGroupLetter, int WeylGroupNumber,
 					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,
@@ -5569,9 +5577,6 @@ public:
 	static void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader);//format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
 	static void drawlineInOutputStreamBetweenTwoRoots
 		(	root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
-	static void drawlineInOutputStream
-		(	double X1, double Y1, double X2, double Y2,
-			unsigned long thePenStyle, int ColorIndex);
 };
 
 class RandomCodeIDontWantToDelete
@@ -5662,8 +5667,7 @@ public:
 
 	GlobalVariables();
 	~GlobalVariables();
-	static void FeedDataToIndicatorWindowDefault
-		(IndicatorWindowVariables& input)
+	static FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
 	void operator=(const GlobalVariables& G_V);
 };
 

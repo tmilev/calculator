@@ -468,6 +468,8 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 	}
 }
 
+void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output);
+
 guiMainWindow::guiMainWindow()
         : wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow,
                    wxT("Vector partition function v0.0701 (eating RAM for breakfast)"),
@@ -688,6 +690,8 @@ guiMainWindow::guiMainWindow()
   this->initWeylGroupInfo();
   this->updateInputButtons();
   this->SetSizer(this->BoxSizer1HorizontalBackground);
+  this->theComputationSetup.theGlobalVariablesContainer->Default()
+			->FeedDataToIndicatorWindowDefault=&FeedDataToIndicatorWindowWX;
 #ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
@@ -840,7 +844,7 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 				MainWindow1->theComputationSetup.InputRoots,
 				MainWindow1->theComputationSetup.NextDirectionIndex,
 				MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0,
-				&drawline);
+				&drawline, &drawtext);
   }
 }
 
@@ -1416,17 +1420,15 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
     }
 }
 
-void FeedDataToIndicatorWindow(IndicatorWindowVariables& output)
-{
-    MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
-    if (MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered)
-    {
-        MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
-        return;
-    }
-    MainWindow1->progressReportVariables.Assign(output);
-    ::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxProgressReportEvent);
-    MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
+void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
+{	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
+  if (MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered)
+  {	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
+    return;
+  }
+  MainWindow1->progressReportVariables.Assign(output);
+  ::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxProgressReportEvent);
+  MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
 }
 
 

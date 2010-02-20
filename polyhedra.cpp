@@ -262,6 +262,8 @@ bool IntegerPoly::flagAnErrorHasOccurredTimeToPanic=false;
 root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
 bool ParallelComputing::SafePointReached=false;
 bool ParallelComputing::ReachSafePointASAP=false;
+FeedDataToIndicatorWindow GlobalVariables::FeedDataToIndicatorWindowDefault=0;
+
 #ifndef WIN32
 pthread_mutex_t ParallelComputing::mutex1;
 pthread_cond_t ParallelComputing::continueCondition;
@@ -567,17 +569,6 @@ int CGIspecificRoutines::numDottedLines=0;
 int CGIspecificRoutines::shiftY=-200;
 int CGIspecificRoutines::scale=100;
 
-void CGIspecificRoutines::drawlineInOutputStream
-	(	double X1, double Y1, double X2, double Y2,
-		unsigned long thePenStyle, int ColorIndex)
-{ /*::CGIspecificRoutines::outputStream << ((int)X1)+ CGIspecificRoutines::shiftX << " "
-																			<< ((int)Y1)+ CGIspecificRoutines::shiftY<< " "
-																			<< ((int)X2)+ CGIspecificRoutines::shiftX << " "
-																			<< ((int)Y2)+ CGIspecificRoutines::shiftY << "\n";
-	CGIspecificRoutines::outputStream <<"["<< 0<<","<<0<<","<<0<<"] ";
-	CGIspecificRoutines::numLines++;*/
-}
-
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots
 	(	root& r1, root& r2,	unsigned long thePenStyle, int r, int g, int b)
 {	if (thePenStyle!=5)
@@ -623,7 +614,8 @@ void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input
 	TDV.flag2DprojectionDraw=false;
 	input.theChambers.drawOutput
 		(	TDV, input.theChambers, input.VPVectors, -1,
-			input.theChambers.IndicatorRoot,0,&CGIspecificRoutines::drawlineInOutputStream);
+			input.theChambers.IndicatorRoot,0,&::drawlineDummy,
+			&::drawtextDummy);
 	std::string tempS;
 	std::string stringColor;
 	CGIspecificRoutines::outputStream.seekg(0);
@@ -1127,7 +1119,9 @@ void DrawingVariables::drawlineBetweenTwoVectors
 	}
 }
 
-void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile)
+void DrawingVariables::drawCoordSystem
+	(	DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile,
+		drawTextFunction drawTextIn)
 {	Rational Epsilon; Epsilon.AssignNumeratorAndDenominator(-1,5);
 	for (int i=0;i<theDimension;i++)
 	{ root tempRoot; tempRoot.MakeZero(theDimension);
@@ -1140,7 +1134,7 @@ void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, 
 		tempRoot2.ElementToString(tempS);
 		out <<"("<<tempS<<")";
 		tempS=out.str();
-		TDV.drawTextAtVector(tempRoot,tempS, 0,LatexOutFile);
+		TDV.drawTextAtVector(tempRoot,tempS, 0,LatexOutFile, drawTextIn);
 	}
 }
 
@@ -1154,14 +1148,16 @@ void DrawingVariables::drawLine
 		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile);
 }
 
-void DrawingVariables::drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile)
+void DrawingVariables::drawTextAtVector
+	(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, 
+		drawTextFunction drawTextIn)
 { double x,y; this->GetCoordsForDrawing(*this,point,x,y);
-	this->drawText(x,y,inputText,textColor,LatexOutFile);
+	this->drawText(x,y,inputText,textColor,LatexOutFile,drawTextIn);
 }
 
 void DrawingVariables::drawText
 	(	double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile,
-		drawTextFunciton drawTextIn)
+		drawTextFunction drawTextIn)
 {	if (LatexOutFile==0)
 		drawTextIn(X1-7,Y1-7,inputText.c_str(),inputText.length(),color);
   else
@@ -1200,7 +1196,7 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2
 void CombinatorialChamberContainer::drawOutput
 	(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 		roots& directions, int directionIndex, root& ChamberIndicator,
-		std::fstream* LaTeXOutput,drawLineFunction theDrawFunction)
+		std::fstream* LaTeXOutput,drawLineFunction theDrawFunction, drawTextFunction drawTextIn)
 {	if (LaTeXOutput!=0)
 		LaTeXProcedures::beginPSTricks(*LaTeXOutput);
 	for(int i=0;i<output.size;i++)
@@ -1209,10 +1205,10 @@ void CombinatorialChamberContainer::drawOutput
 	if (output.flagDrawingProjective)
 		CombinatorialChamberContainer::drawOutputProjective
 			(	TDV,output,directions, directionIndex,ChamberIndicator,
-				theDrawFunction);
+				theDrawFunction,drawTextIn);
 	else
 		CombinatorialChamberContainer::drawOutputAffine
-			(TDV,output, LaTeXOutput,theDrawFunction);
+			(TDV,output, LaTeXOutput,theDrawFunction,drawTextIn);
 	if (LaTeXOutput!=0)
 		LaTeXProcedures::endPSTricks(*LaTeXOutput);
 }
@@ -1224,7 +1220,8 @@ void CombinatorialChamberContainer::drawOutput
 // 5 = invisible line (no line)
 void CombinatorialChamberContainer::drawOutputAffine
 	(	DrawingVariables &TDV, CombinatorialChamberContainer &output,
-		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction)
+		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction,
+		drawTextFunction drawTextIn)
 { if(output.AffineWallsOfWeylChambers.size>0)
 		output.GetNumChambersInWeylChamberAndLabelChambers(output.WeylChamber);
 	else
@@ -1232,8 +1229,8 @@ void CombinatorialChamberContainer::drawOutputAffine
 	for(int i=0;i<output.size;i++)
 		if (output.TheObjects[i]!=0)
 			output.TheObjects[i]->drawOutputAffine
-				(TDV,output, LaTeXoutput, theDrawFunction);
-	TDV.drawCoordSystem(TDV, output.AmbientDimension-1,LaTeXoutput);
+				(TDV,output, LaTeXoutput, theDrawFunction,drawTextIn);
+	TDV.drawCoordSystem(TDV, output.AmbientDimension-1,LaTeXoutput,drawTextIn);
 }
 
 //color styles (taken from windows.h and substituted for independence of the .h file):
@@ -1244,7 +1241,7 @@ void CombinatorialChamberContainer::drawOutputAffine
 void CombinatorialChamberContainer::drawOutputProjective
 	(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 		roots& directions, int directionIndex, root& ChamberIndicator,
-		drawLineFunction theDrawFunction)
+		drawLineFunction theDrawFunction,drawTextFunction drawTextIn)
 { int color=0;
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
 	int NumTrueChambers=0;
@@ -1268,10 +1265,10 @@ void CombinatorialChamberContainer::drawOutputProjective
 	std::stringstream out,out1,out3, out2;
 	out<<"#Drawn chambers: "<<NumTrueChambers;
 	tempS=out.str();
-	drawtext(TDV.textX,TDV.textY, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawTextIn(TDV.textX,TDV.textY, tempS.c_str(), tempS.length(),TDV.TextColor);
 	out1<<"#Zero chambers: "<< NumZeroChambers;
 	tempS=out1.str();
-	drawtext(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawTextIn(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
 	out2<<"#Next chamber: ";
 	if (output.indexNextChamberToSlice!=-1)
 	{	if (output.TheObjects[output.indexNextChamberToSlice]!=0)
@@ -1285,7 +1282,7 @@ void CombinatorialChamberContainer::drawOutputProjective
 					<< output.theWeylGroupAffineHyperplaneImages.size;
 	}
 	tempS=out2.str();
-	drawtext(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawTextIn(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
 	//int NumTrueChambers=0;
 	//int NumTrueChambers2=0;
 	//int NumZeroChambers=0;
@@ -1326,7 +1323,7 @@ void CombinatorialChamberContainer::drawOutputProjective
 						else
 							out<<output.TheObjects[j]->DisplayNumber;
 						tempS=out.str();
-						TDV.drawTextAtVector(Proj,tempS,color,0);
+						TDV.drawTextAtVector(Proj,tempS,color,0,drawTextIn);
 					}
 				}
 				for (int i =0;i< output.TheObjects[j]->Externalwalls.size;i++)
@@ -1355,7 +1352,7 @@ void CombinatorialChamberContainer::drawOutputProjective
 				(	TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle,
 					TDV.ColorChamberIndicator,0,theDrawFunction);
 			std::string tempS="Indicator";
-			drawtext(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
+			drawTextIn(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
 		}
 	}
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
@@ -2263,7 +2260,7 @@ inline void roots::AddIntRoot(intRoot &r)
 
 void roots::PerturbVectorToRegular
 	(	root& output, GlobalVariables& theGlobalVariables, int theDimension,
-			FeedDataToIndicatorWindow reportFunction)
+		FeedDataToIndicatorWindow reportFunction)
 { root normal;
 	while (!this->IsRegular(output,normal, theGlobalVariables,theDimension))
 	{ IndicatorWindowGlobalVariables.flagRootIsModified=true;
@@ -2274,7 +2271,8 @@ void roots::PerturbVectorToRegular
 	{ output.ScaleToIntegralMinHeight();
 		IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(output);
 		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
-		reportFunction(IndicatorWindowGlobalVariables);
+		if (reportFunction!=0) 
+			reportFunction(IndicatorWindowGlobalVariables);
 	}
 }
 
@@ -2886,7 +2884,7 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 
 void CombinatorialChamber::drawOutputAffine
 	(	DrawingVariables& TDV,CombinatorialChamberContainer& owner,
-		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction)
+		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction,drawTextFunction drawTextIn)
 { if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomial)
 		return;
 	TDV.ApplyScale(0.3);
@@ -2922,7 +2920,7 @@ void CombinatorialChamber::drawOutputAffine
 				else
 					color= TDV.ZeroChamberTextColor;
         if(TDV.DrawChamberIndices)
-          TDV.drawTextAtVector(tempRoot,tempS, color, LaTeXoutput);
+          TDV.drawTextAtVector(tempRoot,tempS, color, LaTeXoutput, drawTextIn);
       }
     }
   }
@@ -3638,7 +3636,7 @@ void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& di
 { if (!output.is_open())
 		return;
 	this->drawOutput
-		(TDV,*this,directions,0,this->IndicatorRoot,&output,&drawline);
+		(TDV,*this,directions,0,this->IndicatorRoot,&output,&drawlineDummy, &drawtextDummy);
 	std::string tempS;
 	output	<< "Nilradical simple coords:\\\\\n ";
 	for (int i=0;i<directions.size;i++)
@@ -9052,7 +9050,8 @@ void partFraction::partFractionToPartitionFunctionSplit
 						<<partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
 			::IndicatorWindowGlobalVariables.ProgressReportString4= out4.str();
 			::IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 		}
 	}
 	SplitPowerSeriesCoefficient->ComputeQuasiPolynomial(output, RecordNumMonomials,theDimension,theGlobalVariables);
@@ -9298,7 +9297,9 @@ void partFractions::AssureIndicatorRegularity(GlobalVariables& theGlobalVariable
 {	if (this->flagUsingIndicatorRoot)
 	{	roots tempRoots;
 		tempRoots.AssignHashedIntRoots(this->RootsToIndices);
-		tempRoots.PerturbVectorToRegular(this->IndicatorRoot, theGlobalVariables,this->IndicatorRoot.size);
+		tempRoots.PerturbVectorToRegular
+			(	this->IndicatorRoot, theGlobalVariables,this->IndicatorRoot.size,
+				theGlobalVariables.FeedDataToIndicatorWindowDefault);
 	}
 }
 
@@ -9312,7 +9313,8 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 			out <<"Uncovering brackets"<< i+1 <<" out of " << this->size;
 			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
 			changeOfNumMonomials-=this->TheObjects[i].Coefficient.size;
-			FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 		}
 		this->AccountPartFractionInternals(-1, i,theGlobalVariables);
 		this->TheObjects[i].UncoverBracketsNumerator(theGlobalVariables, this->AmbientDimension);
@@ -9322,7 +9324,8 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 			std::stringstream out;
 			out <<"Number actual monomials"<< changeOfNumMonomials;
 			IndicatorWindowGlobalVariables.ProgressReportString5=out.str();
-			FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 		}
 	}
 }
@@ -9486,7 +9489,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 			tempS= out.str();
 			this->CompareCheckSums(theGlobalVariables);
 		}
-		this->MakeProgressReportSplittingMainPart();
+		this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
 	//	this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
 	}
@@ -9509,7 +9512,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 	//this->ComputeDebugString();
 	this->CompareCheckSums(theGlobalVariables);
 	this->IndexLowestNonProcessed= this->size;
-	this->MakeProgressReportSplittingMainPart();
+	this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
 	return false;
 }
 
@@ -9545,7 +9548,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 			}
 			else
 				this->PopIndexHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables);
-			this->MakeProgressReportSplittingMainPart();
+			this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
 		}
 //		this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
@@ -9558,7 +9561,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 	}
 	this->CompareCheckSums(theGlobalVariables);
 	this->IndexLowestNonProcessed= this->size;
-	this->MakeProgressReportSplittingMainPart();
+	this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(this->IndicatorRoot, theGlobalVariables);
 }
 
@@ -10125,7 +10128,7 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 #ifdef WIN32
 #pragma warning(default:4018)//grrrrr
 #endif
-void partFractions::MakeProgressReportSplittingMainPart()
+void partFractions::MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindow reportFunction)
 { std::stringstream out1,out2,out3;
 	out1<< this->NumberRelevantReducedFractions << " relevant reduced + "
 			<< this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
@@ -10150,10 +10153,11 @@ void partFractions::MakeProgressReportSplittingMainPart()
 	} else
 	{ IndicatorWindowGlobalVariables.ProgressReportString3.clear();
 	}
-	FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+	if (reportFunction!=0)
+		reportFunction(IndicatorWindowGlobalVariables);
 }
 
-void partFractions::MakeProgressVPFcomputation()
+void partFractions::MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction)
 { this->NumProcessedForVPFfractions++;
 	std::stringstream out2, out3;
 	out2	<< "Processed " << this->NumProcessedForVPFfractions<<" out of " <<this->NumberRelevantReducedFractions
@@ -10162,7 +10166,8 @@ void partFractions::MakeProgressVPFcomputation()
 //				<< " relevant fractions";
 	::IndicatorWindowGlobalVariables.ProgressReportString2= out2.str();
 	//::IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-	::FeedDataToIndicatorWindow(::IndicatorWindowGlobalVariables);
+	if (reportFunction!=0)
+		reportFunction(::IndicatorWindowGlobalVariables);
 }
 
 void partFractions::ComputeOneCheckSum
@@ -10181,7 +10186,8 @@ void partFractions::ComputeOneCheckSum
 		{ std::stringstream out;
 			out <<"Checksum "<<i+1<<" out of "<<this->size;
 			IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
-			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 		}
 	}
 }
@@ -10216,7 +10222,8 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
 			{ std::stringstream out;
 				out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
 				IndicatorWindowGlobalVariables.ProgressReportString3=out.str();
-				::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+				if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+					theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 			}
  		}
 	}
@@ -10228,7 +10235,8 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
 	}
 }
 
-void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables)
+void partFractions::RemoveRedundantShortRootsClassicalRootSystem
+	(GlobalVariables& theGlobalVariables)
 {	partFraction tempFrac;
 	for (int i=0;i<this->size;i++)
 	{ tempFrac.Assign(this->TheObjects[i]);
@@ -10245,7 +10253,8 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 		{ std::stringstream out;
 			out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
 			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
-			::FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
+			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 		}
 	}
 	for (int i=0;i<this->size;i++)
@@ -10360,7 +10369,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 				oldCheckSum.Assign(partFractions::CheckSum);
 				oldOutput.Assign(output);
 			}*/
-			this->MakeProgressVPFcomputation();
+			this->MakeProgressVPFcomputation(theGlobalVariables.FeedDataToIndicatorWindowDefault);
 		}
 	}
 /*	if (partFraction::MakingConsistencyCheck)
@@ -10459,7 +10468,7 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables&  theGloba
 	for(int i=0;i<tempI;i++)
 	{ tempFrac.ReadFromFile(*this,input, theGlobalVariables,this->AmbientDimension);
 		this->AddAlreadyReduced(tempFrac, theGlobalVariables);
-		this->MakeProgressVPFcomputation();
+		this->MakeProgressVPFcomputation(theGlobalVariables.FeedDataToIndicatorWindowDefault);
 	}
 }
 

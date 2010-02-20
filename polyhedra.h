@@ -118,6 +118,7 @@ template <class ElementOfCommutativeRingWithIdentity,
 					class GeneratorsOfAlgebraRecord>
 class MonomialInCommutativeAlgebra;
 class affineCones;
+struct IndicatorWindowVariables;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
@@ -221,7 +222,7 @@ public:
 	void drawText
 		(	double X1, double Y1, std::string& inputText,
 			int color, std::fstream* LatexOutFile,
-			drawTextFunciton drawTextIn);
+			drawTextFunction drawTextIn);
 	//if the LatexOutFile is zero then the procedure defaults to the screen
 	void drawLine
 		(	double X1, double Y1, double X2, double Y2,

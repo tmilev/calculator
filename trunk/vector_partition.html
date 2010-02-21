@@ -4,8 +4,8 @@
 <BODY>
 
 <FORM method="POST" name="formMain" action="../Debug/vector_partition_linux_cgi.cgi">
-Dimension: <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
-Num Vectors: <input type="text" size="1" name="textNumVectors" onkeyup="generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);">
+Dimension(<=3): <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
+Num Vectors(<=9): <input type="text" size="1" name="textNumVectors" onkeyup="generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);">
 <input type="submit" name="buttonGo" value="Go">
 </FORM>	
 <div style="width:400;height:400;border:solid 1px" id="canvasMain" onmouseup="clickCanvasMain(event.clientX, event.clientY);"></div>

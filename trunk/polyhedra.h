@@ -234,8 +234,8 @@ public:
 		(	root& r1, root& r2, int PenStyle, int PenColor,
 			std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 //	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
-	void drawTextAtVector	
-		(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, 
+	void drawTextAtVector
+		(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile,
 			drawTextFunction drawTextIn);
 };
 
@@ -1455,7 +1455,7 @@ public:
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
 	void PerturbVectorToRegular
-		(	root&output, GlobalVariables& theGlobalVariables, 
+		(	root&output, GlobalVariables& theGlobalVariables,
 			int theDimension,FeedDataToIndicatorWindow reportFunction);
 	void Average(root& output, int theDimension);
 	void Pop(int index);
@@ -1687,7 +1687,7 @@ public:
 																			root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner,
-			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, 
+			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction,
 			drawTextFunction drawTextIn);
 	void WireChamberAndWallAdjacencyData
 		(	CombinatorialChamberContainer &owner,
@@ -2347,7 +2347,7 @@ public:
 	static void drawOutput
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 			roots& directions, int directionIndex,root& ChamberIndicator,
-			std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, 
+			std::fstream* LaTeXOutput, drawLineFunction theDrawFunction,
 			drawTextFunction drawTextIn);
 	static void drawOutputProjective
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
@@ -5027,6 +5027,7 @@ public:
 	static Rational CheckSum;
 	static	bool flagUsingIndicatorRoot;
 					bool flagDiscardingFractions;
+  bool flagUseOSBasis;
 	static	bool flagSplitTestModeNoNumerators;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 	static	bool flagMakingProgressReport;

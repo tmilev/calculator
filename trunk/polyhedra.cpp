@@ -8080,7 +8080,6 @@ bool partFraction::reduceOnceGeneralMethodNoOSBasis
 			else
 				ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
 		}
-
 		if (ShouldDecompose)
 		{	if (this->flagAnErrorHasOccurredTimeToPanic)
 				this->ComputeDebugString(Accum,theGlobalVariables);
@@ -9468,8 +9467,8 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 					tempFrac.LastDistinguishedIndex++;
 			}
 			else
-			{	if (ProblemCounter==17)
-					this->ComputeDebugString(theGlobalVariables);//				if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+			{//	if (ProblemCounter==17)
+				//	this->ComputeDebugString(theGlobalVariables);//				if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 				this->PopIndexHashAndAccount( this->IndexCurrentlyProcessed,theGlobalVariables);
 //				{ this->ComputeDebugString();
 //				}

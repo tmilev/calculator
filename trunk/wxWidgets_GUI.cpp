@@ -648,6 +648,7 @@ guiMainWindow::guiMainWindow()
   this->CheckBox3ComputeChambers->SetValue(true);
   this->CheckBox4ChamberLabels->SetValue(true);
   this->CheckBox5InvisibleChambers->SetValue(false);
+  this->CheckBox7UseIndicatorForPFDecomposition->SetValue(true);
   this->CheckBox6Dashes->SetValue(true);
   this->CheckBox8DoTheWeylGroup->SetValue(false);
   this->theComputationSetup.flagComputationInProgress=false;
@@ -1153,7 +1154,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
     this->theComputationSetup.WeylGroupIndex= theDimension;
     this->theComputationSetup.VPVectors.size=0;
     for (int i=0;i<this->Spin2NumVect->GetValue();i++)
-    {	root tempRoot;
+    {	root tempRoot; tempRoot.SetSizeExpandOnTopLight(theDimension);
       for (int j=0;j<theDimension;j++)
       {	int tempI=wxAtoi(this->Table1Input->GetCellValue(i,j));
         tempRoot.TheObjects[j].AssignInteger(tempI);

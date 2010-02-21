@@ -253,7 +253,6 @@ bool Rational::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
 bool partFractions::flagUsingIndicatorRoot=true;
-bool partFractions::flagUsingOrlikSolomonBasis=false;
 HashedListBasicObjects<GeneratorPFAlgebraRecord> GeneratorsPartialFractionAlgebra::theGenerators;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 bool WallData::flagDisplayWallDetails=true;
@@ -986,6 +985,9 @@ void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
+//	this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
+//	partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 //	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
@@ -1006,6 +1008,7 @@ void ComputationSetup::Run()
 			if (this->flagHavingStartingExpression)
 				this->thePartialFraction.ElementToString(BeginString, *this->theGlobalVariablesContainer->Default());
 			this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
+			
 			this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
 				(	this->theOutput,this->thePartialFraction.IndicatorRoot,
 					false,false,*this->theGlobalVariablesContainer->Default());
@@ -8790,7 +8793,7 @@ void partFraction::ApplySzenesVergneFormula
 			(-1,LargestElongation);
 		static Monomial<Integer> tempM;
 		if (this->UncoveringBrackets)
-		{ tempM.init(Accum.AmbientDimension);
+		{ tempM.init((short)Accum.AmbientDimension);
       tempM.Coefficient.Assign(IOne);
       for (int j=0;j<i;j++)
       {	short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
@@ -9417,8 +9420,8 @@ void partFractions::PrepareIndicatorVariables()
 }
 
 bool partFractions::split(GlobalVariables& theGlobalVariables)
-{ partFraction::flagAnErrorHasOccurredTimeToPanic=true;
-	this->flagAnErrorHasOccurredTimeToPanic=true;
+{ //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//this->flagAnErrorHasOccurredTimeToPanic=true;
 	this->IndexLowestNonProcessed=0;
 	partFraction tempF;
 	std::string OldDebugString;
@@ -9456,11 +9459,12 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 //			{ partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 //				this->ComputeDebugString();
 //			}
-			if (ProblemCounter==17)
-			{	this->ComputeDebugString(theGlobalVariables);
-				this->CompareCheckSums(theGlobalVariables);
-			}
-			if (! tempFrac.reduceOnceGeneralMethod(*this, theGlobalVariables))
+			bool tempBool;
+			if (this->flagUsingOrlikSolomonBasis)
+				tempBool=tempFrac.reduceOnceGeneralMethod(*this, theGlobalVariables);
+			else
+				tempBool = tempFrac.reduceOnceGeneralMethodNoOSBasis(*this,theGlobalVariables);
+			if (! tempBool)
 			{ if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
 					this->IndexLowestNonProcessed++;
 				else
@@ -9498,6 +9502,11 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 //	this->RemoveRedundantShortRootsClassicalRootSystem();
 //	PolyFormatLocal.MakeAlphabetxi();
 //	this->ComputeDebugString();
+	this->flagAnErrorHasOccurredTimeToPanic=true;
+	if (this->flagAnErrorHasOccurredTimeToPanic)
+	{	this->ComputeDebugString(theGlobalVariables);
+		this->CompareCheckSums(theGlobalVariables);
+	}
 	Rational tempRat2;
 	/*if (partFraction::MakingConsistencyCheck)
 	{	this->ComputeDebugString();
@@ -9633,6 +9642,7 @@ partFractions::partFractions()
 	this->flagUsingIndicatorRoot=true;
 	this->flagDiscardingFractions=false;
 	this->flagUsingCheckSum=false;
+	this->flagUsingOrlikSolomonBasis=true;
 	this->IndicatorRoot.MakeZero(0);
 }
 
@@ -9797,7 +9807,7 @@ void partFraction::ReduceMonomialByMonomial
 				if (this->flagAnErrorHasOccurredTimeToPanic)
 				{	tempFracs.initFromOtherPartFractions(owner, theGlobalVariables);
 					tempFrac.AssignDenominatorOnly(*this);
-					tempFrac.Coefficient.Nullify(owner.AmbientDimension);
+					tempFrac.Coefficient.Nullify((short)owner.AmbientDimension);
 					tempFrac.Coefficient.AddObjectOnTopLight(this->Coefficient.TheObjects[k]);
 					tempFrac.ComputeOneCheckSum(owner,tempDiff,owner.AmbientDimension,theGlobalVariables);
 				}
@@ -9843,7 +9853,7 @@ void partFraction::ReduceMonomialByMonomialModifyOneMonomial
 		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial1;
 	IntegerPoly& tempP=
 		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial2;
-	theNumerator.Nullify(Accum.AmbientDimension);
+	theNumerator.Nullify((short)Accum.AmbientDimension);
 	theNumerator.AddMonomial(input);
 	assert(thePowersSigned.size== thePowers.Multiplicities.size);
 	if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -9880,11 +9890,11 @@ void partFraction::GetPolyReduceMonomialByMonomial
 		intRoot& theExponent, int StartMonomialPower, int DenPowerReduction,
 		int startDenominatorPower,IntegerPoly& output)
 { if (StartMonomialPower==0)
-	{	output.MakeNVarConst(owner.AmbientDimension,IOne);
+	{	output.MakeNVarConst((short)owner.AmbientDimension,IOne);
 		return;
 	}
-	Monomial<Integer> tempMon;	tempMon.init(owner.AmbientDimension);
-	output.Nullify(owner.AmbientDimension);
+	Monomial<Integer> tempMon;	tempMon.init((short)owner.AmbientDimension);
+	output.Nullify((short)owner.AmbientDimension);
 	if (StartMonomialPower>0)
 	{	if (DenPowerReduction!=startDenominatorPower)
 		{	tempMon.Coefficient.value= MathRoutines::NChooseK
@@ -9923,7 +9933,10 @@ void partFraction::GetPolyReduceMonomialByMonomial
 }
 
 void partFractions::AddAndReduce(partFraction &f, GlobalVariables& theGlobalVariables)
-{ f.ReduceMonomialByMonomial(*this,-1,theGlobalVariables);
+{	if (this->flagUsingOrlikSolomonBasis)
+		f.ReduceMonomialByMonomial(*this,-1,theGlobalVariables);
+	else
+		this->AddAlreadyReduced(f,theGlobalVariables);
 }
 
 void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGlobalVariables)
@@ -9974,7 +9987,7 @@ void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGloba
 	{ this->PopIndexHashAndAccount(tempI,theGlobalVariables);
 		shouldAttemptReduction=false;
 	}
-	if (shouldAttemptReduction)
+	if (shouldAttemptReduction&& this->flagUsingOrlikSolomonBasis)
 	{	if (this->flagAnErrorHasOccurredTimeToPanic)
 			this->TheObjects[tempI].ComputeDebugString(*this,theGlobalVariables);
 		this->TheObjects[tempI].AttemptReduction(*this,tempI,theGlobalVariables);
@@ -10200,6 +10213,7 @@ void partFractions::initFromRootSystem
 { this->ClearTheObjects();
 	this->RootsToIndices.ClearTheObjects();
 	partFraction f;
+	this->AmbientDimension= theFraction.TheObjects[0].dimension;
 	f.initFromRootSystem(*this,theFraction,theAlgorithmBasis, weights);
 	this->AddAlreadyReduced(f,theGlobalVariables);
 }
@@ -10216,7 +10230,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
 		if(tempFrac.RemoveRedundantShortRoots(*this,tempPointerRoot,theGlobalVariables,this->AmbientDimension))
 		{	this->AccountPartFractionInternals(-1,i,theGlobalVariables);
 			this->TheObjects[i].CoefficientNonExpanded.SetSizeExpandOnTopLight(0);
-			this->TheObjects[i].Coefficient.Nullify(this->AmbientDimension);
+			this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
 			int oldsize= this->size;
 			this->AddAlreadyReduced(tempFrac,theGlobalVariables);
 			assert(oldsize<=this->size);
@@ -10248,7 +10262,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem
 		}
 		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem
 			(*this,tempRoot,theGlobalVariables,this->AmbientDimension))
-		{	this->TheObjects[i].Coefficient.Nullify(this->AmbientDimension);
+		{	this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
 			this->AddAlreadyReduced(tempFrac,theGlobalVariables);
 		}
 		if (this->flagMakingProgressReport)
@@ -10305,7 +10319,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 		assert(tempBool);
 	}
 	IndicatorWindowGlobalVariables.NumProcessedMonomialsCurrentFraction=0;
-	output.Nullify(this->AmbientDimension);
+	output.Nullify((short)this->AmbientDimension);
 	///////////////////////////////////////////////
 	//this->flagAnErrorHasOccurredTimeToPanic=true;
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
@@ -10982,6 +10996,8 @@ void RootToIndexTable::initFromRoots(intRoots& theAlgorithmBasis, intRoot* theWe
 
 void RootToIndexTable::ComputeTable(int theDimension)
 { intRoot tempR, tempR2, tempR3;
+	tempR.dimension=theDimension; tempR2.dimension= theDimension;
+	tempR3.dimension= theDimension;
 	this->IndicesRedundantShortRoots.init(this->size);
 	for (int i=0;i<this->size;i++)
 	{ for (int j=0;j<this->size;j++)

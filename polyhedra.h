@@ -4997,7 +4997,7 @@ class partFractions: public HashedListBasicObjects<partFraction>
 { bool ShouldIgnore(GlobalVariables& theGlobalVariables);
 	void AssureIndicatorRegularity(GlobalVariables& theGlobalVariables);
 public:
-	short AmbientDimension;
+	int AmbientDimension;
 	int IndexLowestNonProcessed;
 	int IndexCurrentlyProcessed;
 	int HighestIndex;
@@ -5027,13 +5027,12 @@ public:
 	static Rational CheckSum;
 	static	bool flagUsingIndicatorRoot;
 					bool flagDiscardingFractions;
-  bool flagUseOSBasis;
 	static	bool flagSplitTestModeNoNumerators;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 	static	bool flagMakingProgressReport;
 	static	bool flagUsingCheckSum;
 	static int flagMaxNumStringOutputLines;
-	static bool flagUsingOrlikSolomonBasis;
+	bool flagUsingOrlikSolomonBasis;
 	void PrepareCheckSums(GlobalVariables& theGlobalVariables);
 	void CompareCheckSums(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);

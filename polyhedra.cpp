@@ -265,6 +265,7 @@ root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
 bool ParallelComputing::SafePointReached=false;
 bool ParallelComputing::ReachSafePointASAP=false;
 FeedDataToIndicatorWindow GlobalVariables::FeedDataToIndicatorWindowDefault=0;
+bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
 
 #ifndef WIN32
 pthread_mutex_t ParallelComputing::mutex1;
@@ -739,6 +740,8 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 	tempStream << input;
 	std::string tempS; int tempI;	tempStream.seekg(0);
 	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
+	if (output.theChambers.AmbientDimension>20)
+		return false;
 	tempStream >> tempS>>tempS>> tempI;
 	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
 	for (int i=0;i<output.VPVectors.size;i++)
@@ -1001,7 +1004,8 @@ void ComputationSetup::Run()
 //	this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
 //	partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
-//	this->DoTheRootSAComputation();
+	MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
+	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -9256,11 +9260,9 @@ partFraction::~partFraction()
 
 bool partFraction::IsEqualToZero()
 { if (this->UncoveringBrackets)
-	{ return this->Coefficient.IsEqualToZero();
-	}
+		return this->Coefficient.IsEqualToZero();
 	else
-	{ return this->CoefficientNonExpanded.size==0;
-	}
+		return this->CoefficientNonExpanded.size==0;
 }
 
 int partFraction::HashFunction()
@@ -9309,8 +9311,7 @@ int partFractions::SizeWithoutDebugString()
 { int Accum=0;
 	Accum+=	this->HashedListBasicObjects<partFraction>::SizeWithoutObjects();
 	for (int i=0;i<this->ActualSize;i++)
-	{ Accum+=this->TheActualObjects[i].SizeWithoutDebugString();
-	}
+		Accum+=this->TheActualObjects[i].SizeWithoutDebugString();
 	Accum+=	sizeof(this->HighestIndex)+
 					sizeof(this->IndexLowestNonProcessed);
 	return Accum;
@@ -9356,15 +9357,13 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 bool partFractions::ShouldIgnore(GlobalVariables& theGlobalVariables)
 { bool shouldIgnore=false;
 	if (this->flagUsingIndicatorRoot)
-	{	shouldIgnore=!this->TheObjects[this->IndexLowestNonProcessed].rootIsInFractionCone
+		shouldIgnore=!this->TheObjects[this->IndexLowestNonProcessed].rootIsInFractionCone
 			(*this,this->IndicatorRoot,theGlobalVariables);
-	}
 	if (shouldIgnore)
 	{ if (this->flagDiscardingFractions)
-		{	this->PopIndexSwapWithLastHash(this->IndexLowestNonProcessed);}
+			this->PopIndexSwapWithLastHash(this->IndexLowestNonProcessed);
 		else
-		{	this->IndexLowestNonProcessed++;
-		}
+			this->IndexLowestNonProcessed++;
 	}
 	return shouldIgnore;
 }
@@ -9557,8 +9556,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 	// if IndicatorRoot is zero then the caller has forgotten
 	// to set the flagUsingIndicatorRoot to false
 	if ( this->flagUsingIndicatorRoot&& !this->IndicatorRoot.IsEqualToZero())
-	{ this->AssureIndicatorRegularity(theGlobalVariables);
-	}
+		this->AssureIndicatorRegularity(theGlobalVariables);
 	partFraction tempF;
 	while (this->IndexLowestNonProcessed<this->size)
 	{ //this->ComputeDebugString();
@@ -9637,8 +9635,7 @@ int partFractions::ReadFromFileComputedContributions(std::fstream& input, Global
 	{ int x;
 		input>>x>>this->TheObjects[i].FileStoragePosition;
 		if (this->TheObjects[i].FileStoragePosition>lastNonZero)
-		{ lastNonZero=this->TheObjects[i].FileStoragePosition;
-		}
+			lastNonZero=this->TheObjects[i].FileStoragePosition;
 		assert(x==i);
 	}
 	return lastNonZero;
@@ -9648,8 +9645,7 @@ void partFractions::WriteToFileComputedContributions(std::fstream& output, Globa
 { output.seekp(0);
 	output<< "Partial_fraction_index/file_storage_position\n";
 	for (int i=0;i<this->size;i++)
-	{ output<< i<<" "<<this->TheObjects[i].FileStoragePosition<<"\n";
-	}
+		output<< i<<" "<<this->TheObjects[i].FileStoragePosition<<"\n";
 }
 
 
@@ -13522,8 +13518,9 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	matA.ComputeDebugString();
 	matb.ComputeDebugString();
 	matX.ComputeDebugString();
-	return MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
-		(matA,matb,matX,theGlobalVariables);
+	return MatrixLargeRational
+		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+			(matA,matb,matX,theGlobalVariables);
 }
 
 void rootSubalgebra::ComputeRootsOfK()
@@ -14616,15 +14613,16 @@ void MatrixLargeRational::GetMaxMovementAndLeavingVariableRow
 	}
 }
 
+bool MatrixLargeRational
+	::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+	(	MatrixLargeRational& matA, MatrixLargeRational& matb,
+		MatrixLargeRational& outputPoint,
+		GlobalVariables& theGlobalVariables)
 //this function return true if Ax=b>=0 has a solution with x>=0
 //and records a solution x at outputPoint
 //else returns false,
 //where b is a given nonnegative column vector, A is an n by m matrix
 //and x is a column vector with m entries
-bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
-	(	MatrixLargeRational& matA, MatrixLargeRational& matb,
-		MatrixLargeRational& outputPoint,
-		GlobalVariables& theGlobalVariables)
 {	MatrixLargeRational& tempMatA=theGlobalVariables.matSimplexAlgorithm1;
 	MatrixLargeRational& matX=theGlobalVariables.matSimplexAlgorithm2;
 	Selection& BaseVariables = theGlobalVariables.selSimplexAlg2;
@@ -14634,6 +14632,8 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
   { GlobalGoal.Add(matb.elements[j][0]);
 		assert(!matb.elements[j][0].IsNegative());
 	}
+	if (GlobalGoal.IsEqualToZero())
+		return false;
 	int NumTrueVariables=matA.NumCols;
 	tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
 	matX.init(tempMatA.NumCols,1);
@@ -14734,12 +14734,15 @@ bool MatrixLargeRational::SystemLinearEqualitiesHasNonNegativeSolution
 	{ int tempI=BaseVariables.elements[i];
 		matX.elements[tempI][0].ElementToString(tempS);
 		out << tempS <<"(";
-		for (int j=0;j<matA.NumRows;j++)
-		{ matA.elements[j][tempI].ElementToString(tempS);
-			out << tempS;
-			if (j!=matA.NumRows-1)
-				out <<",";
-		}
+		if (tempI<matA.NumCols)
+		{	for (int j=0;j<matA.NumRows;j++)
+			{ matA.elements[j][tempI].ElementToString(tempS);
+				out << tempS;
+				if (j!=matA.NumRows-1)
+					out <<",";
+			}
+		} else
+			out<<"dummy column " << i <<" ";
 		out <<")";
 		if (i!=BaseVariables.CardinalitySelection-1)
 			out <<"+";

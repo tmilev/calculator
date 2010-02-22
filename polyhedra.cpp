@@ -641,6 +641,15 @@ void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input
 				("do",theDimension,stringColor, numDolines);
 	}
 	std::cout <<"</script>";
+#ifdef CGIversionLimitRAMuse
+	std::cout <<"Total number of pointers allocated: "<< ::ParallelComputing::GlobalPointerCounter <<"<br>\n";
+#endif
+	std::cout << "Number of partial fractions: " << input.thePartialFraction.size <<"<br>\n";
+	std::cout << "Number of monomials in the numerators: "<<input.thePartialFraction.NumMonomialsInTheNumerators
+						<<"<br>\n";
+	std::cout << "<textarea name=\"vp_output\" cols=\"120\" rows=\"150\">"
+						<< input.thePartialFraction.DebugString
+						<< "</textarea>";
 }
 
 struct bmpfile_magic {
@@ -740,7 +749,11 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 		}
 	}
 	output.VPVectors.ComputeDebugString();
-	output.flagComputingPartialFractions=false;
+	output.flagComputingPartialFractions=true;
+	output.thePartialFraction.flagUsingOrlikSolomonBasis=false;
+	output.flagComputingVectorPartitions=false;
+	output.flagUsingCustomVectors=true;
+	output.thePartialFraction.flagMaxNumStringOutputLines=200000;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[2].DebugString;
@@ -750,10 +763,10 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 
 ComputationSetup::ComputationSetup()
 {	this->AllowRepaint=true;
-	this->UsingCustomVectors=false;
+	this->flagUsingCustomVectors=false;
 //	this->flagComputingPartialFractions=true;
 	this->flagComputingPartialFractions=false;
-	this->ComputingVectorPartitions=true;
+	this->flagComputingVectorPartitions=true;
 	this->ComputingChambers=true;
 	this->flagComputationInProgress=false;
 	this->flagComputationDone=true;
@@ -993,7 +1006,7 @@ void ComputationSetup::Run()
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
-	{	if (!this->UsingCustomVectors)
+	{	if (!this->flagUsingCustomVectors)
 		{	this->thePartialFraction.ComputeKostantFunctionFromWeylGroup
 				(	this->WeylGroupLetter,this->WeylGroupIndex,this->theOutput,
 					&this->thePartialFraction.IndicatorRoot,false,false,
@@ -1008,11 +1021,12 @@ void ComputationSetup::Run()
 			if (this->flagHavingStartingExpression)
 				this->thePartialFraction.ElementToString(BeginString, *this->theGlobalVariablesContainer->Default());
 			this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
-			
-			this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
-				(	this->theOutput,this->thePartialFraction.IndicatorRoot,
-					false,false,*this->theGlobalVariablesContainer->Default());
-			this->theOutput.ComputeDebugString();
+			if (this->flagComputingVectorPartitions)
+			{	this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
+					(	this->theOutput,this->thePartialFraction.IndicatorRoot,
+						false,false,*this->theGlobalVariablesContainer->Default());
+				this->theOutput.ComputeDebugString();
+			}
 		}
 		if (this->flagHavingBeginEqnForLaTeXinStrings)
 		{ std::stringstream out;
@@ -1025,11 +1039,15 @@ void ComputationSetup::Run()
 		}
 		if (this->flagDisplayingPartialFractions)
 		{ std::stringstream out2;
+			if (this->flagHavingBeginEqnForLaTeXinStrings)
+				out2<<"\\documentclass{article}\n\\begin{document}";
 			if (this->flagHavingStartingExpression)
 				out2<< BeginString<<"=";
 			this->thePartialFraction.ComputeDebugString
 				(*this->theGlobalVariablesContainer->Default());
 			out2<<this->thePartialFraction.DebugString;
+			if (this->flagHavingBeginEqnForLaTeXinStrings)
+	       out2<< "\n\\end{document}";
 			this->thePartialFraction.DebugString= out2.str();
 		}
 		this->flagDoneComputingPartialFractions=true;
@@ -9502,7 +9520,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 //	this->RemoveRedundantShortRootsClassicalRootSystem();
 //	PolyFormatLocal.MakeAlphabetxi();
 //	this->ComputeDebugString();
-	this->flagAnErrorHasOccurredTimeToPanic=true;
+	//this->flagAnErrorHasOccurredTimeToPanic=true;
 	if (this->flagAnErrorHasOccurredTimeToPanic)
 	{	this->ComputeDebugString(theGlobalVariables);
 		this->CompareCheckSums(theGlobalVariables);

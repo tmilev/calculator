@@ -54,7 +54,7 @@
 #endif
 
 #ifdef CGIversionLimitRAMuse
-static const int cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
+static const int cgiLimitRAMuseNumPointersInListBasicObjects=9000000;
 #endif
 
 const int MaxRank=12;
@@ -5509,10 +5509,10 @@ public:
 	bool flagOneStepOnly;
 	bool flagOneIncrementOnly;
 	bool flagFullChop;
-	bool UsingCustomVectors;
+	bool flagUsingCustomVectors;
 	bool flagComputingPartialFractions;
 	bool flagDoneComputingPartialFractions;
-	bool ComputingVectorPartitions;
+	bool flagComputingVectorPartitions;
 	bool ComputingChambers;
 	bool MakingCheckSumPFsplit;
 	bool flagDoingWeylGroupAction;

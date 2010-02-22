@@ -653,7 +653,7 @@ guiMainWindow::guiMainWindow()
   this->CheckBox8DoTheWeylGroup->SetValue(false);
   this->theComputationSetup.flagComputationInProgress=false;
   this->theComputationSetup.AllowRepaint=true;
-  this->theComputationSetup.UsingCustomVectors=false;
+  this->theComputationSetup.flagUsingCustomVectors=false;
   //this->Button7OneDirectionIncrement->Disable();
   //this->Button8FullChopping->Disable();
   //////////////////////////////////////////
@@ -783,10 +783,10 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
 {	if (!this->ToggleButton1UsingCustom->GetValue())
-  {	this->theComputationSetup.UsingCustomVectors=false;
+  {	this->theComputationSetup.flagUsingCustomVectors=false;
     this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to custom"));
   } else
-	{	this->theComputationSetup.UsingCustomVectors=true;
+	{	this->theComputationSetup.flagUsingCustomVectors=true;
     this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to roots"));
   }
   this->updateInputButtons();
@@ -1000,7 +1000,7 @@ void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
 }
 
 void guiMainWindow::updateInputButtons()
-{	if (this->theComputationSetup.UsingCustomVectors)
+{	if (this->theComputationSetup.flagUsingCustomVectors)
   {	this->ListBox1WeylGroup->Disable();
     this->Spin1Dim->Enable();
     this->Spin2NumVect->Enable();
@@ -1020,7 +1020,7 @@ void guiMainWindow::updateInputButtons()
 }
 
 void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
-{	if (this->theComputationSetup.UsingCustomVectors)
+{	if (this->theComputationSetup.flagUsingCustomVectors)
 		return;
   std::string tempS;
   unsigned char newWeylGroupIndex=0;
@@ -1083,7 +1083,7 @@ void guiMainWindow::WriteIndicatorWeight(root& tempRoot)
 
 
 void guiMainWindow::initWeylGroupInfo()
-{	if (!this->theComputationSetup.UsingCustomVectors)
+{	if (!this->theComputationSetup.flagUsingCustomVectors)
   {	if (!this->theComputationSetup.flagDoCustomNilradical)
 		{	WeylGroup tempW;
 			tempW.MakeArbitrary
@@ -1149,7 +1149,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
   TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
   TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
-  if (this->theComputationSetup.UsingCustomVectors)
+  if (this->theComputationSetup.flagUsingCustomVectors)
   {	int theDimension=this->Spin1Dim->GetValue();
     this->theComputationSetup.WeylGroupIndex= theDimension;
     this->theComputationSetup.VPVectors.size=0;
@@ -1174,17 +1174,14 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 
 
 void guiMainWindow::TurnOnAllDangerousButtons()
-{
-    if (this->theComputationSetup.UsingCustomVectors)
-    {
-        this->Spin1Dim->Enable();
-        this->Spin2NumVect->Enable();
-    }
-    else
-    {
-        this->ListBox1WeylGroup->Enable();
-    }
-    this->ToggleButton1UsingCustom->Enable();
+{	if (this->theComputationSetup.flagUsingCustomVectors)
+  {	this->Spin1Dim->Enable();
+    this->Spin2NumVect->Enable();
+  }
+  else
+  {	this->ListBox1WeylGroup->Enable();
+  }
+  this->ToggleButton1UsingCustom->Enable();
 }
 
 void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
@@ -1294,17 +1291,17 @@ void guiMainWindow::WriteSettingsIfAvailable()
     this->fileSettings.seekp(0);
     int x,y;
     this->GetPosition(&x,&y);
-    this->fileSettings  <<"Main_window_top_left_corner_x " <<x
-			<<"\nMain_window_top_left_corner_y " <<y;
+    this->fileSettings  <<"  Main_window_top_left_corner_x " <<x
+			<<"  \nMain_window_top_left_corner_y " <<y;
     this->GetSize(& x, & y);
-    this->fileSettings  <<"\nMain_window_width " <<x
-			<<"\nMain_window_height "  <<y;
+    this->fileSettings  <<"  \nMain_window_width " <<x
+			<<"  \nMain_window_height "  <<y;
     this->Dialog1OutputPF->GetPosition(&x,&y);
-    this->fileSettings  <<"\nPartial_fraction_window_top_left_corner_x " <<x
-			<<"\nPartial_fraction_window_top_left_corner_y "  <<y;
+    this->fileSettings  <<"  \nPartial_fraction_window_top_left_corner_x " <<x
+			<<"  \nPartial_fraction_window_top_left_corner_y "  <<y;
     this->Dialog1OutputPF->GetSize(&x,&y);
-    this->fileSettings  <<"\nPartial_fraction_window_width " <<x
-			<<"\nPartial_fraction_window_height "  <<y <<" ";
+    this->fileSettings  <<"  \nPartial_fraction_window_width " <<x
+			<<"  \nPartial_fraction_window_height "  <<y <<"  ";
     this->fileSettings.flush();
   }
 }

@@ -663,6 +663,7 @@ public:
 class MatrixLargeRational: public Matrix<Rational>
 {
 public:
+	static bool flagAnErrorHasOccurredTimeToPanic;
 	void ComputeDeterminantOverwriteMatrix( Rational& output);
 	void NonPivotPointsToRoot(Selection& TheNonPivotPoints, int OutputDimension, root& output);
 	void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output);
@@ -675,7 +676,7 @@ public:
 	static bool SystemLinearInequalitiesHasSolution
 		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
 			MatrixLargeRational& outputPoint);
-	static bool SystemLinearEqualitiesHasNonNegativeSolution
+	static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
 			MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
 	static void ComputePotentialChangeGradient

@@ -712,7 +712,7 @@ public:
 //	int* elementsInverseSelection;
 	bool* selected;
 	int CardinalitySelection;
-	void AddSelection(int index);
+	void AddSelectionAppendNewIndex(int index);
 	void RemoveLastSelection();
 	void init(int maxNumElements);
 	void ComputeIndicesFromSelection();
@@ -956,7 +956,7 @@ void Matrix<Element>::GaussianEliminationByRows
 	{	if (NumFoundPivots == MaxRankMat)
 		{	if (returnNonPivotPoints)
 				for (int j =i; j<mat.NumCols; j++)
-					outputSelection.AddSelection(j);
+					outputSelection.AddSelectionAppendNewIndex(j);
 			return;
 		}
 		tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
@@ -982,11 +982,11 @@ void Matrix<Element>::GaussianEliminationByRows
 			}
 			NumFoundPivots++;
 			if (!returnNonPivotPoints)
-				outputSelection.AddSelection(i);
+				outputSelection.AddSelectionAppendNewIndex(i);
 		}
 		else
 			if (returnNonPivotPoints)
-				outputSelection.AddSelection(i);
+				outputSelection.AddSelectionAppendNewIndex(i);
 	}
 }
 
@@ -5401,6 +5401,7 @@ public:
 	roots HighestWeightsGmodK;
 	roots HighestRootsK;
 	roots TestedRootsAlpha;
+	bool flagAnErrorHasOccuredTimeToPanic;
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
 	ListBasicObjects<Selection> theKEnumerations;

@@ -989,10 +989,10 @@ void ComputationSetup::InitComputationSetup()
 
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
-	theRootSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
 	Stop();
-	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
+	theRootSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
 	Stop();
 }
@@ -1001,8 +1001,8 @@ void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
-//	this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
-//	partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
+	partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
 	this->DoTheRootSAComputation();
@@ -2044,7 +2044,7 @@ void roots::rootsToMatrix(MatrixLargeRational& output)
 }
 
 
-void Selection::AddSelection(int index)
+void Selection::AddSelectionAppendNewIndex(int index)
 {	if (!(index>=this->MaxSize))
 	{	if (!this->selected[index])
 		{	this->selected[index]=true;
@@ -2198,7 +2198,7 @@ void Selection::initNoMemoryAllocation()
 void Selection::MakeSubSelection(Selection &theSelection, Selection &theSubSelection)
 { this->init(theSelection.MaxSize);
 	for(int i=0; i<theSubSelection.CardinalitySelection;i++)
-		this->AddSelection(theSelection.elements[theSubSelection.elements[i]]);
+		this->AddSelectionAppendNewIndex(theSelection.elements[theSubSelection.elements[i]]);
 }
 
 
@@ -2853,7 +2853,7 @@ void CombinatorialChamber::findWallsIncidentWithVertexExcludeWallAtInfinity
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{ if (	theVertex.OurScalarProductIsZero(this->Externalwalls.TheObjects[i].normal)
 				&&!this->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot))
-			output.AddSelection(i);
+			output.AddSelectionAppendNewIndex(i);
 	}
 }
 
@@ -11021,7 +11021,7 @@ void RootToIndexTable::ComputeTable(int theDimension)
 		tempR3.MultiplyByInteger(2);
 		this->IndicesDoublesOfRedundantShortRoots[i] = this->getIndex(tempR3);
 		if (IndicesDoublesOfRedundantShortRoots[i]!=-1)
-			this->IndicesRedundantShortRoots.AddSelection(i);
+			this->IndicesRedundantShortRoots.AddSelectionAppendNewIndex(i);
 	}
 }
 
@@ -13173,7 +13173,7 @@ void thePFcomputation::ComputeTableAllowed()
 				(	this->theWeylGroup.RootSystem.TheObjects[i], this->theWeylGroup.RootSystem.TheObjects[j],
 					this->theKillingForm,tempRat);
 			if (tempRat.IsPositive() || tempRat.NumShort==-2)
-			{ tableForbidden.TheObjects[i].AddSelection(j);
+			{ tableForbidden.TheObjects[i].AddSelectionAppendNewIndex(j);
 			}
 		}
 		this->theForbiddenSelections.TheObjects[i].init
@@ -13193,7 +13193,7 @@ void thePFcomputation::EnumerateRecursively(int depth, int startingIndex, int th
 	}
 	for (int i=startingIndex;i<this->theWeylGroup.RootSystem.size;i++)
 	{ if (!this->theForbiddenSelections.TheObjects[depth].selected[i])
-		{ this->theSelection.AddSelection(i);
+		{ this->theSelection.AddSelectionAppendNewIndex(i);
 	//		this->theSelection.ComputeDebugString();
 			if (depth+1!=theDimension)
 			{ this->ComputeNewRestrictionsFromOld(depth+1,i);
@@ -13208,7 +13208,7 @@ void thePFcomputation::ComputeNewRestrictionsFromOld(int depth, int newIndex)
 { this->theForbiddenSelections.TheObjects[depth].Assign(this->theForbiddenSelections.TheObjects[depth-1]);
 //	this->theForbiddenSelections.TheObjects[depth].ComputeDebugString();
 	for(int i=0;i<this->tableForbidden.TheObjects[newIndex].CardinalitySelection;i++)
-	{	this->theForbiddenSelections.TheObjects[depth].AddSelection
+	{	this->theForbiddenSelections.TheObjects[depth].AddSelectionAppendNewIndex
 			(this->tableForbidden.TheObjects[newIndex].elements[i]);
 	}
 }
@@ -13246,6 +13246,7 @@ void rootSubalgebra::ComputeAll()
 	this->SimpleBasisK.CopyFromBase(this->genK);
 	this->TransformToSimpleBasisGenerators(this->SimpleBasisK);
 	this->ComputeKModules();
+	this->theNilradicalKmods.init(this->kModules.size);
 	this->ComputeDebugString();
 }
 
@@ -13337,8 +13338,9 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 		ListBasicObjects<int> &oppositeKmods)
 { int RecursionDepth=0;
 	std::string tempSsel, tempSopposite;
+	ListBasicObjects<Selection> tempSels;
 	multTable.ComputeDebugString();
-	std::stringstream out; out <<"\n";
+	std::stringstream out; out <<"\n\t";
 	for (int i=0;i<oppositeKmods.size;i++)
 		out <<i <<" / " << oppositeKmods.TheObjects[i]<< "\t";
 	tempSopposite=out.str();
@@ -13347,8 +13349,9 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 	counters.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	counters.TheObjects[0]=0;
 	while (RecursionDepth>-1)
-	{	for (;counters.TheObjects[RecursionDepth]<this->kModules.size;counters.TheObjects[RecursionDepth]++)
-		{	if (! impliedSelections.TheObjects[RecursionDepth].selected[counters.TheObjects[RecursionDepth]])
+	{	while(counters.TheObjects[RecursionDepth]<this->kModules.size)
+		{	if (! impliedSelections.TheObjects[RecursionDepth]
+							.selected[counters.TheObjects[RecursionDepth]])
 			{	if ( this->IndexIsCompatibleWithPrevious
 							(	counters.TheObjects[RecursionDepth],RecursionDepth,multTable,
 								impliedSelections,oppositeKmods))
@@ -13357,11 +13360,19 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 				} 
 			}	
 			impliedSelections.ElementToStringGeneric(tempSsel,RecursionDepth+1);
+			impliedSelections.TheObjects[RecursionDepth].ComputeDebugString();
+			counters.TheObjects[RecursionDepth]++;
 		}
 		this->PossibleNilradicalComputation
 			(theGlobalVariables,impliedSelections.TheObjects[RecursionDepth]);
+		if (this->flagAnErrorHasOccuredTimeToPanic)
+			tempSels.AddObjectOnTop(impliedSelections.TheObjects[RecursionDepth]);
 		RecursionDepth--;
+		if (RecursionDepth>-1)
+			counters.TheObjects[RecursionDepth]++;
 	}
+	tempSels.ElementToStringGeneric(tempSsel);
+	
 }
 
 bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven
@@ -13377,28 +13388,23 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 	(	int startIndex,int RecursionDepth,	multTableKmods & multTable,
 		ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods)
-{ if (impliedSelections.TheObjects[RecursionDepth]
-				.selected[oppositeKmods.TheObjects[startIndex]])
-		return false;
-	Selection& tempSel=impliedSelections.TheObjects[RecursionDepth];
-	if (!this->ListHasNonSelectedIndexLowerThanGiven
-				(	startIndex,multTable.TheObjects[startIndex]
-						.TheObjects[startIndex],tempSel))
-		return false;
-	for (int i=0; i<tempSel.CardinalitySelection;i++ )
-		if(!this->ListHasNonSelectedIndexLowerThanGiven
-				(	startIndex,multTable.TheObjects[startIndex]
-						.TheObjects[tempSel.elements[i]],tempSel))
-			return false;
-	Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
-	targetSel.Assign(tempSel);
-	targetSel.AddSelection(startIndex);
-	for (int i=0; i<tempSel.CardinalitySelection;i++ )
-	{ ListBasicObjects<int>& tempList=
-			multTable.TheObjects[startIndex].TheObjects[tempSel.elements[i]];
-		for (int j=0;j<tempList.size;j++)
-			if (tempList.TheObjects[j]>startIndex)
-				targetSel.AddSelection(tempList.TheObjects[j]);
+{ Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
+	targetSel.Assign(impliedSelections.TheObjects[RecursionDepth]);
+	targetSel.AddSelectionAppendNewIndex(startIndex);
+	for (int k=targetSel.CardinalitySelection-1;k<targetSel.CardinalitySelection;k++)
+	{	int tempI=targetSel.elements[k];
+		for (int i=0; i<targetSel.CardinalitySelection;i++ )
+		{	if (targetSel.selected[oppositeKmods.TheObjects[targetSel.elements[i]]])
+				return false;
+			ListBasicObjects<int>& tempList=
+				multTable.TheObjects[tempI].TheObjects[targetSel.elements[i]];
+			for (int j=0;j<tempList.size;j++)
+			{	if (tempList.TheObjects[j]<startIndex)
+					return false;
+				else
+					targetSel.AddSelectionAppendNewIndex(tempList.TheObjects[j]);
+			}
+		}
 	}
 	return true;
 }
@@ -13458,6 +13464,9 @@ void rootSubalgebra::KmodTimesKmod
 
 void rootSubalgebra::ComputeKModules()
 {	this->HighestRootsK.size =0;
+	this->LowestWeightsGmodK.size=0;
+	this->HighestWeightsGmodK.size=0;
+	this->kModules.size=0;
 	this->ComputeDebugString();
 	this->ComputeRootsOfK();
 	for (int i=0;i<this->AllRoots.size;i++)
@@ -13471,6 +13480,7 @@ void rootSubalgebra::ComputeKModules()
 				this->HighestWeightsGmodK.AddRoot(tempHW);
 				x=this->LowestWeightsGmodK.size -1;
 				this->kModules.SetSizeExpandOnTopNoObjectInit(this->LowestWeightsGmodK.size);
+				this->kModules.TheObjects[x].size=0;
 			}
 			this->kModules.TheObjects[x].AddRoot(this->AllRoots.TheObjects[i]);
 		}
@@ -13535,7 +13545,7 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	matb.ComputeDebugString();
 	matX.ComputeDebugString();
 	this->theNilradicalKmods.ComputeDebugString();
-	return MatrixLargeRational
+	return !MatrixLargeRational
 		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 			(matA,matb,matX,theGlobalVariables);
 }
@@ -14668,7 +14678,7 @@ bool MatrixLargeRational
 	for (int j=0;j<matA.NumRows;j++)
 	{ tempMatA.elements[j][j+NumTrueVariables].MakeOne();
 		matX.elements[j+NumTrueVariables][0].Assign(matb.elements[j][0]);
-		BaseVariables.AddSelection(j+NumTrueVariables);
+		BaseVariables.AddSelectionAppendNewIndex(j+NumTrueVariables);
 	}
 	if (::MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic)
 	{	tempDebugMat.Assign(tempMatA);
@@ -14835,7 +14845,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution
 	{ tempMatA.elements[j][j+NumTrueVariables*2].MakeOne();
 		if (matb.elements[j][0].IsNonNegative())
 		{	matX.elements[j+NumTrueVariables*2][0].Assign(matb.elements[j][0]);
-			BaseVariables.AddSelection(j+NumTrueVariables*2);
+			BaseVariables.AddSelectionAppendNewIndex(j+NumTrueVariables*2);
 		}
 		else
 		{	int tempI=NumTrueVariables*2+matA.NumRows+tempCounter;
@@ -14844,7 +14854,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution
 			GlobalGoal.Add(matX.elements[tempI][0]);
 			tempMatA.elements[j][tempI].Assign(RMOne);
 			tempMatA.RowTimesScalar(j,RMOne);
-			BaseVariables.AddSelection(tempI);
+			BaseVariables.AddSelectionAppendNewIndex(tempI);
 			tempCounter++;
 		}
 	}

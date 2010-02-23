@@ -744,6 +744,7 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 		return false;
 	tempStream >> tempS>>tempS>> tempI;
 	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
+	std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
 	for (int i=0;i<output.VPVectors.size;i++)
 	{ output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.theChambers.AmbientDimension);
 		for(int j=0;j<(signed int)output.theChambers.AmbientDimension;j++)
@@ -1001,11 +1002,11 @@ void ComputationSetup::Run()
 { this->AllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
-	this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
-	partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
+	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
-	MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
+	//this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -12650,8 +12651,7 @@ bool rootFKFTcomputation::OpenDataFile
   	theFile.seekg(0);
 		int tempI=theFile.tellp();
 		if (tempI>=1)
-		{	return true;
-		}
+			return true;
   }
 	return false;
 }

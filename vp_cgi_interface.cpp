@@ -41,10 +41,11 @@ int main(int argc, char **argv)
   //std::cout << "<html lang=\"en\" dir=\"LTR\">"<< std::endl;
   std::string tempS;
   getPath(argv[0],tempS);
+  //std::cout<<tempS;
   std::stringstream out;
   out<<tempS;
 #ifdef WIN32
-	tempS="C:\\todor\\math\\rootFKFT\\cpp\\vector_partition.html";
+	tempS="C:\\math\\rootFKFT\\cpp\\trunk\\vector_partition.html";
 #else
   out<<"../vector_partition.html";
   tempS=out.str();
@@ -53,16 +54,31 @@ int main(int argc, char **argv)
   std::fstream fileHeaderHtml;
   //std::cout<<"before the vicious cycle";
   rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);
+  //if (fileHeaderHtml.is_open())
+	//	std::cout<<"header opened succesfully";
+		
   char buffer[1024];
-  while (!fileHeaderHtml.eof())
+  int tempI=0;
+  fileHeaderHtml.setstate(std::ios_base::goodbit);
+  fileHeaderHtml.seekp(0,std::ios_base::end);
+  int tempSize=fileHeaderHtml.tellp();
+  std::cout<<tempSize << inputString;
+  fileHeaderHtml.seekg(0);
+  std::stringstream MicrosoftSucks;
+  for (int i=0; i<(tempSize/1024)+1;i++)
   { fileHeaderHtml.read(buffer,1024);
-    std::cout.write(buffer, fileHeaderHtml.gcount());
-    //std::cout<<"inside the vicious cycle";
+		MicrosoftSucks.write(buffer, fileHeaderHtml.gcount());
   }
+  fileHeaderHtml.close();
+  tempS=MicrosoftSucks.str();
+  //std::cout <<"header read successfully!";
+	std::cout<< tempS;
   if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
   {	//std::cout<<"before computation setup";
   //	theComputationSetup.flagComputingPartialFractions=false;
+		std::cout <<"before Run!";
 		theComputationSetup.Run();
+		std::cout <<"Run ok!";
 		::CGIspecificRoutines::MakeReportFromComputationSetup(theComputationSetup);
   }
   else

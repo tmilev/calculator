@@ -8470,13 +8470,11 @@ void partFraction::PrepareFraction( int indexA, int indexB,  int AminusNBindex,
 	int powerDropA = this->TheObjects[indexA].Multiplicities.TheObjects[0];
 	int powerDropB = this->TheObjects[indexB].Multiplicities.TheObjects[0];
 	if (indexAisNullified)
-	{ powerDropB=0;
-	}else
-	{ powerDropA=0;
-	}
+		powerDropB=0;
+	else
+		powerDropA=0;
 	for (int i=0;i<powerDropB;i++)
-	{ ComputationalBufferCoefficient.MultiplyBy(AminusNbetaPoly);
-	}
+		ComputationalBufferCoefficient.MultiplyBy(AminusNbetaPoly);
 	output.DecreasePowerOneFrac(indexA,powerDropA);
 	output.DecreasePowerOneFrac(indexB,powerDropB);
 	output.DecreasePowerOneFrac(AminusNBindex,-powerDropA-powerDropB);
@@ -8516,10 +8514,9 @@ int partFraction::ComputeGainingMultiplicityIndexInLinearRelation
 		{	int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
 			int candidateDesire;
 			if (!this->flagUsingOrlikSolomonBases)
-			{	candidateDesire=this->TheObjects[currentIndex].GetTotalMultiplicity();
-			} else
-			{ candidateDesire= currentIndex;
-			}
+				candidateDesire=this->TheObjects[currentIndex].GetTotalMultiplicity();
+			else
+				candidateDesire= currentIndex;
 			if (candidateDesire<0)
 				candidateDesire=-candidateDesire;
 			if (result==-1 || DesireToSelectAsGainingMultiplicity<candidateDesire)
@@ -8533,11 +8530,9 @@ int partFraction::ComputeGainingMultiplicityIndexInLinearRelation
 
 bool partFraction::CheckForOrlikSolomonAdmissibility(ListBasicObjects<int> &theSelectedIndices)
 { if (!this->flagUsingPrecomputedOrlikSolomonBases)
-	{ return true;
-	}
+		return true;
 	else
-	{	return true;
-	}
+		return true;
 }
 
 bool partFraction::DecomposeFromLinRelation
@@ -8572,11 +8567,9 @@ bool partFraction::DecomposeFromLinRelation
 	ElongationGainingMultiplicityIndex= theLinearRelation
 																				.elements[GainingMultiplicityIndexInLinRelation][0].NumShort;
 	if (ElongationGainingMultiplicityIndex<0)
-	{	ElongationGainingMultiplicityIndex=-ElongationGainingMultiplicityIndex;
-	}
+		ElongationGainingMultiplicityIndex=-ElongationGainingMultiplicityIndex;
 	else
-	{ theLinearRelation.MultiplyByInt(-1);
-	}
+		theLinearRelation.MultiplyByInt(-1);
 	//theLinearRelation.ComputeDebugString();
 	for (int i=0;i<theLinearRelation.NumRows;i++)
 	{ if (i!=GainingMultiplicityIndexInLinRelation && theLinearRelation.elements[i][0].NumShort!=0)
@@ -13334,46 +13327,69 @@ void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVaria
 	impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	impliedSelections.TheObjects[0].init(this->kModules.size);
 	this->GeneratePossibleNilradicalsRecursive
-		(theGlobalVariables,0,0,multTable,impliedSelections,oppositeKmods);
+		(theGlobalVariables,multTable,impliedSelections,oppositeKmods);
 }
 
 void rootSubalgebra::GeneratePossibleNilradicalsRecursive
-	(	GlobalVariables &theGlobalVariables,int startIndex, int RecursionDepth,
-		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable,
+	(	GlobalVariables &theGlobalVariables, 
+		multTableKmods &multTable,
 		ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods)
-{ for (int i=startIndex;i<this->kModules.size;i++)
-	{ if (this->IndexIsCompatibleWithPrevious
-					(	i,RecursionDepth,multTable,
-						impliedSelections,oppositeKmods))
-			this->GeneratePossibleNilradicalsRecursive
-				(	theGlobalVariables,i+1,RecursionDepth+1,multTable,
-					impliedSelections,oppositeKmods);
-		if ( impliedSelections.TheObjects[RecursionDepth]
-						.selected[i])
-			return;
+{ int RecursionDepth=0;
+	std::string tempSsel, tempSopposite;
+	multTable.ComputeDebugString();
+	std::stringstream out; out <<"\n";
+	for (int i=0;i<oppositeKmods.size;i++)
+		out <<i <<" / " << oppositeKmods.TheObjects[i]<< "\t";
+	tempSopposite=out.str();
+	multTable.DebugString.append(tempSopposite);
+	ListBasicObjects<int> counters;
+	counters.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+	counters.TheObjects[0]=0;
+	while (RecursionDepth>-1)
+	{	for (;counters.TheObjects[RecursionDepth]<this->kModules.size;counters.TheObjects[RecursionDepth]++)
+		{	if (! impliedSelections.TheObjects[RecursionDepth].selected[counters.TheObjects[RecursionDepth]])
+			{	if ( this->IndexIsCompatibleWithPrevious
+							(	counters.TheObjects[RecursionDepth],RecursionDepth,multTable,
+								impliedSelections,oppositeKmods))
+				{	RecursionDepth++;
+					counters.TheObjects[RecursionDepth]=counters.TheObjects[RecursionDepth-1];
+				} 
+			}	
+			impliedSelections.ElementToStringGeneric(tempSsel,RecursionDepth+1);
+		}
+		this->PossibleNilradicalComputation
+			(theGlobalVariables,impliedSelections.TheObjects[RecursionDepth]);
+		RecursionDepth--;
 	}
-	this->PossibleNilradicalComputation
-		(theGlobalVariables,impliedSelections.TheObjects[RecursionDepth]);
+}
+
+bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven
+	(int index, ListBasicObjects<int>& tempList, Selection& tempSel)
+{	for (int j=0;j<tempList.size;j++)
+		if (tempList.TheObjects[j]<index)
+			if (!tempSel.selected[tempList.TheObjects[j]])
+				return false;
+	return true;
 }
 
 bool rootSubalgebra::IndexIsCompatibleWithPrevious
-	(	int startIndex,int RecursionDepth,
-		ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable,
+	(	int startIndex,int RecursionDepth,	multTableKmods & multTable,
 		ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods)
 { if (impliedSelections.TheObjects[RecursionDepth]
 				.selected[oppositeKmods.TheObjects[startIndex]])
 		return false;
 	Selection& tempSel=impliedSelections.TheObjects[RecursionDepth];
+	if (!this->ListHasNonSelectedIndexLowerThanGiven
+				(	startIndex,multTable.TheObjects[startIndex]
+						.TheObjects[startIndex],tempSel))
+		return false;
 	for (int i=0; i<tempSel.CardinalitySelection;i++ )
-	{ ListBasicObjects<int>& tempList=
-			multTable.TheObjects[startIndex].TheObjects[tempSel.elements[i]];
-		for (int j=0;j<tempList.size;j++)
-			if (tempList.TheObjects[j]<startIndex)
-				if (!tempSel.selected[tempList.TheObjects[j]])
-					return false;
-	}
+		if(!this->ListHasNonSelectedIndexLowerThanGiven
+				(	startIndex,multTable.TheObjects[startIndex]
+						.TheObjects[tempSel.elements[i]],tempSel))
+			return false;
 	Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
 	targetSel.Assign(tempSel);
 	targetSel.AddSelection(startIndex);
@@ -13518,6 +13534,7 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	matA.ComputeDebugString();
 	matb.ComputeDebugString();
 	matX.ComputeDebugString();
+	this->theNilradicalKmods.ComputeDebugString();
 	return MatrixLargeRational
 		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 			(matA,matb,matX,theGlobalVariables);
@@ -14625,6 +14642,8 @@ bool MatrixLargeRational
 //and x is a column vector with m entries
 {	MatrixLargeRational& tempMatA=theGlobalVariables.matSimplexAlgorithm1;
 	MatrixLargeRational& matX=theGlobalVariables.matSimplexAlgorithm2;
+	MatrixLargeRational& tempDebugMat=theGlobalVariables.matSimplexAlgorithm3;
+	//MatrixLargeRational& tempMatb=theGlobalVariables.matSimplexAlgorithm3;
 	Selection& BaseVariables = theGlobalVariables.selSimplexAlg2;
 	Rational GlobalGoal; GlobalGoal.MakeZero();
 	assert (matA.NumRows== matb.NumRows);
@@ -14635,6 +14654,7 @@ bool MatrixLargeRational
 	if (GlobalGoal.IsEqualToZero())
 		return false;
 	int NumTrueVariables=matA.NumCols;
+	//tempMatb.Assign(matb);
 	tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
 	matX.init(tempMatA.NumCols,1);
 	HashedListBasicObjects<Selection>& VisitedVertices=
@@ -14650,12 +14670,20 @@ bool MatrixLargeRational
 		matX.elements[j+NumTrueVariables][0].Assign(matb.elements[j][0]);
 		BaseVariables.AddSelection(j+NumTrueVariables);
 	}
-	tempMatA.ComputeDebugString(); matX.ComputeDebugString();
+	if (::MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic)
+	{	tempDebugMat.Assign(tempMatA);
+		tempMatA.ComputeDebugString(); matX.ComputeDebugString();
+	}
 	Rational	PotentialChangeGradient, ChangeGradient;//Change, PotentialChange;
 	int EnteringVariable=0;
 	bool WeHaveNotEnteredACycle=true;
+	int ProblemCounter=0;
 	while (EnteringVariable!=-1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
-	{	tempMatA.ComputeDebugString(); matX.ComputeDebugString();
+	{	ProblemCounter++;
+		if (ProblemCounter==8)
+		{ BaseVariables.ComputeDebugString();
+		}
+		tempMatA.ComputeDebugString(); matX.ComputeDebugString();
 		EnteringVariable=-1; ChangeGradient.MakeZero();
 		for (int i=0;i<tempMatA.NumCols;i++)
 		{ if (!BaseVariables.selected[i])
@@ -14712,7 +14740,7 @@ bool MatrixLargeRational
 					tempRat.Minus();
 					tempMatA.AddTwoRows(LeavingVariableRow,i,0,tempRat);
 				}
-				else
+				if (i==LeavingVariableRow)
 					matX.elements[BaseVariables.elements[i]][0].MakeZero();
 				tempMatA.ComputeDebugString();
 				matX.ComputeDebugString();
@@ -14725,7 +14753,17 @@ bool MatrixLargeRational
 			BaseVariables.selected[EnteringVariable]= true;
 			BaseVariables.ComputeDebugString();
 			for (int i=0;i<tempMatA.NumRows;i++)
-				assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(ROne));
+			{	assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(ROne));
+			}
+		}
+		if (::MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic)
+		{ MatrixLargeRational tempMat;
+			tempMat.Assign(matX);
+			tempMat.ComputeDebugString();
+			tempDebugMat.ComputeDebugString();
+			tempMat.MultiplyOnTheLeft(tempDebugMat);
+			tempMat.ComputeDebugString();
+			assert(tempMat.IsEqualTo(matb));
 		}
 	}
 	std::string tempS;
@@ -15043,3 +15081,6 @@ void multTableKmods::ElementToString(std::string& output)
 	output=out.str();
 }
 
+/*void SelectionList::ElementToString(std::string &output)
+{ for ()
+}*/

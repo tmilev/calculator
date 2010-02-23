@@ -411,6 +411,7 @@ public:
 	void PopFirstOccurenceObjectSwapWithLast(Object& o);
 	void SwapTwoIndices(int index1, int index2);
 	void ElementToStringGeneric(std::string& output);
+	void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
 	void CopyFromBase (const ListBasicObjects<Object>& From);
 	void ShiftUpExpandOnTop(int StartingIndex);
 	//careful output is not bool but int!!!!
@@ -507,6 +508,7 @@ public:
 	Element** elements;
 	void init(int r,int c);
 	void Free();
+	bool IsEqualTo(MatrixElementaryLooseMemoryFit<Element>& right);
 	void Resize(int r, int c, bool PreserveValues);
 	void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
 	void MakeIdMatrix(int theDimension);
@@ -531,6 +533,17 @@ MatrixElementaryLooseMemoryFit<Element>::~MatrixElementaryLooseMemoryFit()
 template <typename Element>
 inline void MatrixElementaryLooseMemoryFit<Element>::init(int r, int c)
 { this->Resize(r,c,false);
+}
+
+template <typename Element>
+bool MatrixElementaryLooseMemoryFit<Element>::IsEqualTo(MatrixElementaryLooseMemoryFit<Element> &right)
+{ if (this->NumCols!=right.NumCols || this->NumRows!=right.NumRows)
+		return false;
+	for (int i=0;i<this->NumRows;i++)
+		for (int j=0; j<this->NumCols;j++)
+			if(!(this->elements[i][j]==right.elements[i][j]))
+				return false;
+	return true;
 }
 
 template <typename Element>
@@ -1815,8 +1828,15 @@ void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
 
 template <class Object>
 inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output)
+{ this->ElementToStringGeneric(output,this->size);
+}
+
+template <class Object>
+inline void ListBasicObjects<Object>::ElementToStringGeneric
+	(std::string& output, int NumElementsToPrint)
 { std::stringstream out; std::string tempS;
-	for (int i=0;i<this->size;i++)
+	int Upper= ::MathRoutines::Minimum(NumElementsToPrint,this->size);
+	for (int i=0;i<Upper;i++)
 	{	this->TheObjects[i].ElementToString(tempS);
 		out<< tempS<< "\n";
 	}
@@ -5394,15 +5414,15 @@ public:
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
 	bool IndexIsCompatibleWithPrevious
-		(	int startIndex, int RecursionDepth,
-			ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > &multTable,
+		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int> &oppositeKmods);
 	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
+	bool ListHasNonSelectedIndexLowerThanGiven
+		(int index,ListBasicObjects<int>& tempList, Selection& tempSel);
 	void GeneratePossibleNilradicalsRecursive
-		(	GlobalVariables& theGlobalVariables,int startIndex, int RecursionDepth,
-			ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & multTable,
-			ListBasicObjects<Selection>& impliedSelections,
+		(	GlobalVariables& theGlobalVariables, 
+			multTableKmods & multTable,	ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int>& oppositeKmods);
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables);
 	void PossibleNilradicalComputation
@@ -5556,6 +5576,14 @@ public:
 	ComputationSetup();
 	~ComputationSetup();
 };
+
+/*class SelectionList: public ListBasicObjects<Selection>
+{
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(DebugString);};
+};*/
 
 struct CGIspecificRoutines
 {

@@ -991,12 +991,14 @@ void ComputationSetup::InitComputationSetup()
 
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
+	theRootSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
+	theRootSA.SetupE6_A5(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
 	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
-	Stop();
 	theRootSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GeneratePossibleNilradicals(*this->theGlobalVariablesContainer->Default());
-	Stop();
 }
 
 void ComputationSetup::Run()
@@ -1006,8 +1008,8 @@ void ComputationSetup::Run()
 	//this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
-	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	//this->DoTheRootSAComputation();
+	MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
+	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -13235,11 +13237,9 @@ void thePFcomputation::SelectionToString(std::string &output, int theDimension)
 void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational &output, int theDimension)
 {	output.init((short)theDimension,(short)theDimension);
 	for (int i=0;i<theDimension;i++)
-	{ for (int j=0;j<theDimension;j++)
-		{ output.elements[i][j].Assign
+		for (int j=0;j<theDimension;j++)
+			output.elements[i][j].Assign
 				(this->theWeylGroup.RootSystem.TheObjects[this->theSelection.elements[i]].TheObjects[j]);
-		}
-	}
 }
 
 void rootSubalgebra::ComputeAll()
@@ -13603,6 +13603,29 @@ void rootSubalgebra::SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables)
 	this->ComputeDebugString();
 }
 
+void rootSubalgebra::SetupE6_A5(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(5);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_A4(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(4);
+//	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
 void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
 { this->AmbientWeyl.MakeEn(6);
 	this->genK.SetSizeExpandOnTopNoObjectInit(6);

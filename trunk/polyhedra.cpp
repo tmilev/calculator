@@ -13247,7 +13247,7 @@ void rootSubalgebra::ComputeAll()
 	this->SimpleBasisK.CopyFromBase(this->genK);
 	this->TransformToSimpleBasisGenerators(this->SimpleBasisK);
 	this->ComputeKModules();
-	this->theNilradicalKmods.init(this->kModules.size);
+	this->NilradicalKmods.init(this->kModules.size);
 	this->ComputeDebugString();
 }
 
@@ -13413,7 +13413,7 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 void rootSubalgebra::PossibleNilradicalComputation
 	(GlobalVariables& theGlobalVariables, Selection& selKmods)
 { this->NumNilradicalsAllowed++;
-	this->theNilradicalKmods.Assign(selKmods);
+	this->NilradicalKmods.Assign(selKmods);
 	this->ComputeDebugString();
 	if(!this->ConeConditionHolds(theGlobalVariables))
 		this->NumConeConditionFailures++;
@@ -13505,8 +13505,8 @@ void rootSubalgebra::ComputeKModules()
 
 int rootSubalgebra::NumRootsInNilradical()
 { int result=0;
-	for (int i=0;i<this->theNilradicalKmods.CardinalitySelection;i++)
-		result+=this->kModules.TheObjects[this->theNilradicalKmods.elements[i]].size;
+	for (int i=0;i<this->NilradicalKmods.CardinalitySelection;i++)
+		result+=this->kModules.TheObjects[this->NilradicalKmods.elements[i]].size;
 	return result;
 }
 
@@ -13516,13 +13516,13 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	int numNilradRoots=this->NumRootsInNilradical();
-	int numCols=numNilradRoots+this->kModules.size-this->theNilradicalKmods.CardinalitySelection;
+	int numCols=numNilradRoots+this->kModules.size-this->NilradicalKmods.CardinalitySelection;
 	matA.init((short)theDimension+1, (short)numCols);
 	matb.init((short)theDimension+1,1);
 	matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
 	int counter=0;
-	for (int i=0;i<this->theNilradicalKmods.CardinalitySelection;i++)
-	{	roots& tempKmod= this->kModules.TheObjects[this->theNilradicalKmods.elements[i]];
+	for (int i=0;i<this->NilradicalKmods.CardinalitySelection;i++)
+	{	roots& tempKmod= this->kModules.TheObjects[this->NilradicalKmods.elements[i]];
 		for (int j=0;j<tempKmod.size;j++)
 		{	for (int k=0;k<theDimension;k++)
 				matA.elements[k][counter].Assign(tempKmod.TheObjects[j].TheObjects[k]);
@@ -13531,7 +13531,7 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 		}
 	}
 	for (int i=0;i<this->kModules.size;i++)
-	{ if (!this->theNilradicalKmods.selected[i])
+	{ if (!this->NilradicalKmods.selected[i])
 		{ for (int k=0;k<theDimension;k++)
 			{	matA.elements[k][counter].Assign
 					(this->HighestWeightsGmodK.TheObjects[i].TheObjects[k]);
@@ -13545,7 +13545,7 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	matA.ComputeDebugString();
 	matb.ComputeDebugString();
 	matX.ComputeDebugString();
-	this->theNilradicalKmods.ComputeDebugString();
+	this->NilradicalKmods.ComputeDebugString();
 	return !MatrixLargeRational
 		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 			(matA,matb,matX,theGlobalVariables);

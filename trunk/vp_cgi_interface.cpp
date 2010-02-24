@@ -58,27 +58,26 @@ int main(int argc, char **argv)
 	//	std::cout<<"header opened succesfully";
 		
   char buffer[1024];
-  int tempI=0;
-  fileHeaderHtml.setstate(std::ios_base::goodbit);
-  fileHeaderHtml.seekp(0,std::ios_base::end);
-  int tempSize=fileHeaderHtml.tellp();
-  std::cout<<tempSize << inputString;
-  fileHeaderHtml.seekg(0);
-  std::stringstream MicrosoftSucks;
-  for (int i=0; i<(tempSize/1024)+1;i++)
+  //int tempI=0;
+  //fileHeaderHtml.setstate(std::ios_base::goodbit);
+  //fileHeaderHtml.seekp(0,std::ios_base::end);
+  //int tempSize=fileHeaderHtml.tellp();
+  //std::cout<<tempSize << inputString;
+  //fileHeaderHtml.seekg(0);
+  //std::stringstream MicrosoftSucks;
+  while (!fileHeaderHtml.eof())
   { fileHeaderHtml.read(buffer,1024);
-		MicrosoftSucks.write(buffer, fileHeaderHtml.gcount());
+		std::cout.write(buffer, fileHeaderHtml.gcount());
   }
   fileHeaderHtml.close();
-  tempS=MicrosoftSucks.str();
   //std::cout <<"header read successfully!";
-	std::cout<< tempS;
+  //std::cout<<inputString;
   if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
   {	//std::cout<<"before computation setup";
   //	theComputationSetup.flagComputingPartialFractions=false;
-		std::cout <<"before Run!";
+	//	std::cout <<"before Run!";
 		theComputationSetup.Run();
-		std::cout <<"Run ok!";
+		//std::cout <<"Run ok!";
 		::CGIspecificRoutines::MakeReportFromComputationSetup(theComputationSetup);
   }
   else

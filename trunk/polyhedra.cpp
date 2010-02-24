@@ -734,8 +734,8 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 	tempS3.resize(7);
 	if (tempS3!="textDim")
 		return false;
-//	std::cout<<input;
 	CGIspecificRoutines::CivilizedStringTranslation(input);
+	//std::cout<<input;
 	std::stringstream tempStream;
 	tempStream << input;
 	std::string tempS; int tempI;	tempStream.seekg(0);
@@ -744,7 +744,7 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 		return false;
 	tempStream >> tempS>>tempS>> tempI;
 	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
-	std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
+	//std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
 	for (int i=0;i<output.VPVectors.size;i++)
 	{ output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.theChambers.AmbientDimension);
 		for(int j=0;j<(signed int)output.theChambers.AmbientDimension;j++)
@@ -752,7 +752,8 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 			output.VPVectors.TheObjects[i].TheObjects[j].AssignInteger(tempI);
 		}
 	}
-	output.VPVectors.ComputeDebugString();
+	//output.VPVectors.ComputeDebugString();
+	//std::cout<<output.VPVectors.size<<output.theChambers.AmbientDimension<< output.VPVectors.DebugString;
 	output.flagComputingPartialFractions=true;
 	output.thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	output.flagComputingVectorPartitions=false;

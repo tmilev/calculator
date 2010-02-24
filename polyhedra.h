@@ -4031,14 +4031,12 @@ template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddMonomial(TemplateMonomial& m)
 {	int j= this->ContainsObjectHash(m);
 	if (j==-1)
-	{	if (!m.IsEqualToZero())
+		if (!m.IsEqualToZero())
 			this->AddObjectOnTopHash(m);
-	}
 	else
 	{	this->TheObjects[j].Coefficient.Add(m.Coefficient);
 		if (this->TheObjects[j].IsEqualToZero())
-		{ this->PopIndexSwapWithLastHash(j);
-		}
+			this->PopIndexSwapWithLastHash(j);
 	}
 }
 
@@ -4080,8 +4078,7 @@ void TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>::
 	static TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity> Accum;
 	Accum.CopyFromPoly(*this);
 	for (int i=0;i<d-1;i++)
-	{	Accum.MultiplyBy(*this);
-	}
+		Accum.MultiplyBy(*this);
 	output.CopyFromPoly(Accum);
 }
 
@@ -4094,8 +4091,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 int Polynomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
 {	int result=0;
 	for (int i=0;i<this->TheMonomials.size;i++)
-	{	result=Maximum(this->TheMonomials.TheObjects[i]->TotalDegree(),result);
-	}
+		result=Maximum(this->TheMonomials.TheObjects[i]->TotalDegree(),result);
 	return result;
 }
 
@@ -5402,6 +5398,8 @@ public:
 	roots HighestWeightsGmodK;
 	roots HighestRootsK;
 	roots TestedRootsAlpha;
+	roots CentralizerRoots;
+	roots SimpleBasisCentralizerRoots;
 	bool flagAnErrorHasOccuredTimeToPanic;
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
@@ -5410,8 +5408,12 @@ public:
 	std::string DebugString;
 	int NumRootsInNilradical();
 	bool IsARoot(root& input);
+	bool IsARootOrZero(root& input);
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
+	void ComputeCentralizerFromKModulesAndSortKModules();
+	void GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumerationRecursively
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
@@ -5419,12 +5421,13 @@ public:
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int> &oppositeKmods);
-	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
+//	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	bool ListHasNonSelectedIndexLowerThanGiven
 		(int index,ListBasicObjects<int>& tempList, Selection& tempSel);
 	void GeneratePossibleNilradicalsRecursive
 		(	GlobalVariables& theGlobalVariables, 
-			multTableKmods & multTable,	ListBasicObjects<Selection>& impliedSelections,
+			multTableKmods & multTable,	int StartIndex,
+			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int>& oppositeKmods);
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables);
 	void PossibleNilradicalComputation

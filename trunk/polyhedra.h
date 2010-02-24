@@ -5396,7 +5396,8 @@ public:
 	roots SimpleBasisK;
 	roots PositiveRootsK;
 	roots AllRootsK;
-	Selection theNilradicalKmods;
+	Selection NilradicalKmods;
+	Selection CentralizerKmods;
 	roots LowestWeightsGmodK;
 	roots HighestWeightsGmodK;
 	roots HighestRootsK;
@@ -5447,9 +5448,11 @@ public:
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
 	void SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables);
+	void SetupE6_A5(GlobalVariables& theGlobalVariables);
+	void SetupE6_A4(GlobalVariables& theGlobalVariables);
+
 
 	void RunE6_3A2(GlobalVariables& theGlobalVariables);
-
 
 	void RunE7_D6plusA1(GlobalVariables& theGlobalVariables);
 	void RunE7_A2plusA5(GlobalVariables& theGlobalVariables);

@@ -13392,7 +13392,8 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 		ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods)
 { Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
-	targetSel.Assign(impliedSelections.TheObjects[RecursionDepth]);
+	Selection& originalSel=impliedSelections.TheObjects[RecursionDepth];
+	targetSel.Assign(originalSel);
 	targetSel.AddSelectionAppendNewIndex(startIndex);
 	for (int k=targetSel.CardinalitySelection-1;k<targetSel.CardinalitySelection;k++)
 	{	int tempI=targetSel.elements[k];
@@ -13402,7 +13403,7 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 			ListBasicObjects<int>& tempList=
 				multTable.TheObjects[tempI].TheObjects[targetSel.elements[i]];
 			for (int j=0;j<tempList.size;j++)
-			{	if (tempList.TheObjects[j]<startIndex)
+			{	if (tempList.TheObjects[j]<startIndex && !originalSel.selected[tempList.TheObjects[j]])
 					return false;
 				else
 					targetSel.AddSelectionAppendNewIndex(tempList.TheObjects[j]);

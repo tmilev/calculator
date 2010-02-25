@@ -4003,8 +4003,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideByConstant
                  (ElementOfCommutativeRingWithIdentity& r)
 {	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].Coefficient.DivideBy(r);
-	}
+		this->TheObjects[i].Coefficient.DivideBy(r);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4031,8 +4030,9 @@ template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddMonomial(TemplateMonomial& m)
 {	int j= this->ContainsObjectHash(m);
 	if (j==-1)
-		if (!m.IsEqualToZero())
+	{	if (!m.IsEqualToZero())
 			this->AddObjectOnTopHash(m);
+	}
 	else
 	{	this->TheObjects[j].Coefficient.Add(m.Coefficient);
 		if (this->TheObjects[j].IsEqualToZero())
@@ -4875,9 +4875,8 @@ public:
 		(	partFractions& owner, root* Indicator,
 			GlobalVariables& theGlobalVariables, int theDimension);
 	bool AlreadyAccountedForInGUIDisplay;
-	static bool flagUsingOrlikSolomonBases;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
-	static	bool flagUsingPrecomputedOrlikSolomonBases;
+//	static	bool flagUsingPrecomputedOrlikSolomonBases;
 	static	bool UncoveringBrackets;
 	static	std::fstream TheBigDump;
 	static	bool UseGlobalCollector;
@@ -4894,7 +4893,7 @@ public:
 		(	partFractions& owner, roots& output, int theDimension,
 			GlobalVariables& theGlobalVariables);
 	int ComputeGainingMultiplicityIndexInLinearRelation
-		(	MatrixLargeRational& theLinearRelation);
+		(	partFractions& owner,	MatrixLargeRational& theLinearRelation);
 	void UncoverBracketsNumerator(GlobalVariables&  theGlobalVariables, int theDimension);
 	void partFractionToPartitionFunctionSplit
 		(	partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials,
@@ -5406,6 +5405,7 @@ public:
 	ListBasicObjects<Selection> theKEnumerations;
 	ListBasicObjects<int> theKComponentRanks;
 	std::string DebugString;
+	rootSubalgebra();
 	int NumRootsInNilradical();
 	bool IsARoot(root& input);
 	bool IsARootOrZero(root& input);
@@ -5452,8 +5452,18 @@ public:
 	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
 	void SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables);
 	void SetupE6_A5(GlobalVariables& theGlobalVariables);
-	void SetupE6_A4(GlobalVariables& theGlobalVariables);
+	void SetupE6_A4plusA1(GlobalVariables& theGlobalVariables);
+	void SetupE6_D5(GlobalVariables& theGlobalVariables);
+	void SetupE6_A3plus2A1(GlobalVariables& theGlobalVariables);
 
+	void SetupE6_A4(GlobalVariables& theGlobalVariables);
+	void SetupE6_A3plusA1(GlobalVariables& theGlobalVariables);
+	void SetupE6_2A2(GlobalVariables& theGlobalVariables);
+	void SetupE6_A2plus2A1(GlobalVariables& theGlobalVariables);
+	void SetupE6_4A1(GlobalVariables& theGlobalVariables);
+	void SetupE6_D4(GlobalVariables& theGlobalVariables);
+
+	void SetupE6_A3(GlobalVariables& theGlobalVariables);
 
 	void RunE6_3A2(GlobalVariables& theGlobalVariables);
 

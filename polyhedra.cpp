@@ -238,8 +238,6 @@ template < > std::string Matrix<Rational>::MatrixElementSeparator= ",";
 ListObjectPointers<partFraction> partFraction::GlobalCollectorPartFraction;
 bool partFraction::UseGlobalCollector=true;
 bool partFraction::flagAnErrorHasOccurredTimeToPanic=false;
-bool partFraction::flagUsingPrecomputedOrlikSolomonBases=false;
-bool partFraction::flagUsingOrlikSolomonBases=true;
 bool partFractions::flagSplitTestModeNoNumerators=false;
 bool partFractions::flagAnErrorHasOccurredTimeToPanic=false;
 bool partFractions::flagUsingCheckSum=true;
@@ -991,16 +989,56 @@ void ComputationSetup::InitComputationSetup()
 
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
-	theRootSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.SetupE6_A5(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
+
 	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
+
 	theRootSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_A5(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_A4plusA1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_D5(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_2A2(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_A2plus2A1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_4A1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_D4(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+
+	theRootSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 }
@@ -1012,8 +1050,8 @@ void ComputationSetup::Run()
 	//this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
-	MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
+	//this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -8485,14 +8523,14 @@ int partFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& own
 }
 
 int partFraction::ComputeGainingMultiplicityIndexInLinearRelation
-				(	MatrixLargeRational& theLinearRelation)
+				(partFractions& owner,	MatrixLargeRational& theLinearRelation)
 {	int DesireToSelectAsGainingMultiplicity=-1;
 	int result=-1;
 	for( int i=0;i<theLinearRelation.NumRows;i++)
 	{ if(! theLinearRelation.elements[i][0].IsEqualToZero())
 		{	int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
 			int candidateDesire;
-			if (!this->flagUsingOrlikSolomonBases)
+			if (!owner.flagUsingOrlikSolomonBasis)
 				candidateDesire=this->TheObjects[currentIndex].GetTotalMultiplicity();
 			else
 				candidateDesire= currentIndex;
@@ -8507,15 +8545,18 @@ int partFraction::ComputeGainingMultiplicityIndexInLinearRelation
 	return result;
 }
 
-bool partFraction::CheckForOrlikSolomonAdmissibility(ListBasicObjects<int> &theSelectedIndices)
-{ if (!this->flagUsingPrecomputedOrlikSolomonBases)
+bool partFraction::CheckForOrlikSolomonAdmissibility
+	(ListBasicObjects<int> &theSelectedIndices)
+{ return true;
+	/*if (!this->flagUsingPrecomputedOrlikSolomonBases)
 		return true;
 	else
-		return true;
+		return true;*/
 }
 
 bool partFraction::DecomposeFromLinRelation
-	(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables& theGlobalVariables)
+	(	MatrixLargeRational& theLinearRelation, partFractions& Accum, 
+		GlobalVariables& theGlobalVariables)
 {//	theLinearRelation.ComputeDebugString();
 	//theLinearRelation.ComputeDebugString();
 	int GainingMultiplicityIndexInLinRelation=-1;
@@ -8525,17 +8566,12 @@ bool partFraction::DecomposeFromLinRelation
 	static ListBasicObjects<int> theGreatestElongations;
 	static ListBasicObjects<int> theCoefficients;
 	Rational oldCheckSum;
-/*	if(this->flagAnErrorHasOccurredTimeToPanic)
-	{ Accum.ComputeOneCheckSum(oldCheckSum);
-	} */
 	ParticipatingIndices.size=0;
 	theCoefficients.size=0;
 	theGreatestElongations.size=0;
-	//this->ComputeDebugString();
-	//Accum.ComputeDebugString();
-
 	GainingMultiplicityIndexInLinRelation =
-		this->ComputeGainingMultiplicityIndexInLinearRelation(theLinearRelation);
+		this->ComputeGainingMultiplicityIndexInLinearRelation
+			(Accum,theLinearRelation);
 	GainingMultiplicityIndex= this->IndicesNonZeroMults
 																.TheObjects[GainingMultiplicityIndexInLinRelation];
 	int tempI=this->TheObjects[GainingMultiplicityIndex].GetLargestElongation();
@@ -8543,8 +8579,8 @@ bool partFraction::DecomposeFromLinRelation
 	//theLinearRelation.ComputeDebugString();
 	theLinearRelation.ScaleToIntegralForMinRationalHeight();
 	//theLinearRelation.ComputeDebugString();
-	ElongationGainingMultiplicityIndex= theLinearRelation
-																				.elements[GainingMultiplicityIndexInLinRelation][0].NumShort;
+	ElongationGainingMultiplicityIndex = 
+		theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].NumShort;
 	if (ElongationGainingMultiplicityIndex<0)
 		ElongationGainingMultiplicityIndex=-ElongationGainingMultiplicityIndex;
 	else
@@ -8558,7 +8594,7 @@ bool partFraction::DecomposeFromLinRelation
 			theCoefficients.AddObjectOnTop(theLinearRelation.elements[i][0].NumShort);
 		}
 	}
-	if (!this->flagUsingOrlikSolomonBases)
+	if (!Accum.flagUsingOrlikSolomonBasis)
 		this->LastDistinguishedIndex=GainingMultiplicityIndex;
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 		this->ComputeDebugString(Accum,theGlobalVariables);
@@ -9160,6 +9196,8 @@ void partFraction::MakePolynomialFromOneNormal
 		Rational tempRat3;
 		tempRat3.AssignNumeratorAndDenominator(1,j+1);
 		tempP.TimesConstant(tempRat3);
+		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+		{ tempP.ComputeDebugString(); }		
 		tempP.AddConstant(tempRat2);
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 		{ tempP.ComputeDebugString(); }
@@ -9456,8 +9494,6 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 			if (! tempBool)
 			{ if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
 					this->IndexLowestNonProcessed++;
-				else
-					tempFrac.LastDistinguishedIndex++;
 			}
 			else
 			{//	if (ProblemCounter==17)
@@ -13304,7 +13340,8 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 {  multTableKmods multTable;
 	ListBasicObjects<int> oppositeKmods;
 	this->GenerateKmodMultTable(multTable,oppositeKmods,theGlobalVariables);
-	multTable.ComputeDebugString();
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+		multTable.ComputeDebugString();
 	this->NumNilradicalsAllowed=0;
 	this->NumConeConditionFailures=0;
 	ListBasicObjects<Selection> impliedSelections;
@@ -13312,12 +13349,17 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	Selection tempSel;
 	tempSel.init(this->SimpleBasisCentralizerRoots.size);
 	int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
-	this->ComputeDebugString();
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+		this->ComputeDebugString();
 	for (int i=0;i<numCycles;i++)
 	{	impliedSelections.TheObjects[0].init(this->kModules.size);
 		for (int j=0;j<this->CentralizerRoots.size;j++)
 			for (int k=0;k<tempSel.CardinalitySelection;k++)
-			{ root tempRoot; tempRoot.Assign(this->CentralizerRoots.TheObjects[j]);
+			{ root tempRoot; 
+				if (!this->CentralizerRoots.TheObjects[j].IsPositiveOrZero())
+					break;
+				else
+					tempRoot.Assign(this->CentralizerRoots.TheObjects[j]);
 				tempRoot.Subtract
 					(	this->SimpleBasisCentralizerRoots.TheObjects
 							[tempSel.elements[k]]);
@@ -13326,7 +13368,9 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 					break;
 				}	
 			}
-		impliedSelections.TheObjects[0].ComputeDebugString();
+		if (this->flagAnErrorHasOccuredTimeToPanic)
+			tempSel.ComputeDebugString();
+		//impliedSelections.TheObjects[0].ComputeDebugString();
 		this->GeneratePossibleNilradicalsRecursive
 			(	theGlobalVariables, multTable,this->CentralizerRoots.size,
 				impliedSelections, oppositeKmods);
@@ -13342,12 +13386,14 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 { int RecursionDepth=0;
 	std::string tempSsel, tempSopposite;
 	ListBasicObjects<Selection> tempSels;
-	multTable.ComputeDebugString();
-	std::stringstream out; out <<"\n\t";
-	for (int i=0;i<oppositeKmods.size;i++)
-		out <<i <<" / " << oppositeKmods.TheObjects[i]<< "\t";
-	tempSopposite=out.str();
-	multTable.DebugString.append(tempSopposite);
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+	{	multTable.ComputeDebugString();
+		std::stringstream out; out <<"\n\t";
+		for (int i=0;i<oppositeKmods.size;i++)
+			out <<i <<" / " << oppositeKmods.TheObjects[i]<< "\t";
+		tempSopposite=out.str();
+		multTable.DebugString.append(tempSopposite);
+	}
 	ListBasicObjects<int> counters;
 	counters.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	counters.TheObjects[0]=StartIndex;
@@ -13362,8 +13408,10 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 					counters.TheObjects[RecursionDepth]=counters.TheObjects[RecursionDepth-1];
 				} 
 			}	
-			impliedSelections.ElementToStringGeneric(tempSsel,RecursionDepth+1);
-			impliedSelections.TheObjects[RecursionDepth].ComputeDebugString();
+			if (this->flagAnErrorHasOccuredTimeToPanic)
+			{	impliedSelections.ElementToStringGeneric(tempSsel,RecursionDepth+1);
+				impliedSelections.TheObjects[RecursionDepth].ComputeDebugString();
+			}
 			counters.TheObjects[RecursionDepth]++;
 		}
 		this->PossibleNilradicalComputation
@@ -13374,8 +13422,6 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 		if (RecursionDepth>-1)
 			counters.TheObjects[RecursionDepth]++;
 	}
-	tempSels.ElementToStringGeneric(tempSsel);
-	
 }
 
 bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven
@@ -13523,7 +13569,8 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	int numNilradRoots=this->NumRootsInNilradical();
-	int numCols=numNilradRoots+this->kModules.size-this->NilradicalKmods.CardinalitySelection;
+	int numCols=
+		numNilradRoots+this->kModules.size- this->NilradicalKmods.CardinalitySelection;
 	matA.init((short)theDimension+1, (short)numCols);
 	matb.init((short)theDimension+1,1);
 	matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
@@ -13544,14 +13591,14 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 					(this->HighestWeightsGmodK.TheObjects[i].TheObjects[k]);
 				matA.elements[k][counter].Minus();
 			}
-			this->HighestWeightsGmodK.TheObjects[i].ComputeDebugString();
+			//this->HighestWeightsGmodK.TheObjects[i].ComputeDebugString();
 			matA.elements[theDimension][counter].MakeZero();
 			counter++;
 		}
 	}
-	matA.ComputeDebugString();
-	matb.ComputeDebugString();
-	matX.ComputeDebugString();
+	//matA.ComputeDebugString();
+	//matb.ComputeDebugString();
+	//matX.ComputeDebugString();
 	this->NilradicalKmods.ComputeDebugString();
 	return !MatrixLargeRational
 		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
@@ -13602,6 +13649,19 @@ void rootSubalgebra::ElementToString(std::string &output)
 	output=out.str();
 }
 
+void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(6);
+	this->genK.TheObjects[0].InitFromIntegers(6, 0,0,0,0,0,1,0,0);
+	this->genK.TheObjects[1].InitFromIntegers(6, 1,1,1,1,1,0,0,0);
+	this->genK.TheObjects[2].InitFromIntegers(6, 1,0,1,1,0,0,0,0);
+	this->genK.TheObjects[3].InitFromIntegers(6, 0,1,1,2,2,1,0,0);
+	this->genK.TheObjects[4].InitFromIntegers(6, 0,0,1,0,0,0,0,0);
+	this->genK.TheObjects[5].InitFromIntegers(6, 0,1,0,1,0,0,0,0);
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
 void rootSubalgebra::SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables)
 { this->AmbientWeyl.MakeEn(6);
 	this->genK.SetSizeExpandOnTopNoObjectInit(5);
@@ -13626,10 +13686,45 @@ void rootSubalgebra::SetupE6_A5(GlobalVariables& theGlobalVariables)
 	this->ComputeDebugString();
 }
 
+void rootSubalgebra::SetupE6_A4plusA1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(5);
+	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->genK.TheObjects[4].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_D5(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(5);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_A3plus2A1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(5);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
 void rootSubalgebra::SetupE6_A4(GlobalVariables& theGlobalVariables)
 { this->AmbientWeyl.MakeEn(6);
 	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-//	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
@@ -13637,18 +13732,72 @@ void rootSubalgebra::SetupE6_A4(GlobalVariables& theGlobalVariables)
 	this->ComputeAll();
 	this->ComputeDebugString();
 }
-void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
+
+void rootSubalgebra::SetupE6_A3plusA1(GlobalVariables& theGlobalVariables)
 { this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(6);
-	this->genK.TheObjects[0].InitFromIntegers(6, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(6, 1,1,1,1,1,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(6, 1,0,1,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(6, 0,1,1,2,2,1,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(6, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(6, 0,1,0,1,0,0,0,0);
+	this->genK.SetSizeExpandOnTopNoObjectInit(4);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
 	this->ComputeDebugString();
 }
+
+void rootSubalgebra::SetupE6_2A2(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(4);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_A2plus2A1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(4);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_4A1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(4);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_D4(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(4);
+	this->genK.TheObjects[0].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_A3(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(3);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+/////////////////////////////////////////////////////
 
 void rootSubalgebra::RunE6_3A2(GlobalVariables& theGlobalVariables)
 { this->SetupE6_3A2(theGlobalVariables);
@@ -14722,13 +14871,13 @@ bool MatrixLargeRational
 	Rational	PotentialChangeGradient, ChangeGradient;//Change, PotentialChange;
 	int EnteringVariable=0;
 	bool WeHaveNotEnteredACycle=true;
-	int ProblemCounter=0;
+//	int ProblemCounter=0;
 	while (EnteringVariable!=-1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
-	{	ProblemCounter++;
-		if (ProblemCounter==8)
-		{ BaseVariables.ComputeDebugString();
-		}
-		tempMatA.ComputeDebugString(); matX.ComputeDebugString();
+	{//	ProblemCounter++;
+	//	if (ProblemCounter==8)
+		//{ BaseVariables.ComputeDebugString();
+		//}
+		//tempMatA.ComputeDebugString(); matX.ComputeDebugString();
 		EnteringVariable=-1; ChangeGradient.MakeZero();
 		for (int i=0;i<tempMatA.NumCols;i++)
 		{ if (!BaseVariables.selected[i])
@@ -14752,13 +14901,13 @@ bool MatrixLargeRational
 			assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
 			tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
 			tempRat.Invert();
-      if (BaseVariables.elements[LeavingVariableRow]==34)
-				tempMatA.ComputeDebugString();
+  //    if (BaseVariables.elements[LeavingVariableRow]==34)
+	//			tempMatA.ComputeDebugString();
 			for (int i=0;i<tempMatA.NumRows;i++)
 				assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(ROne));
 			tempMatA.RowTimesScalar(LeavingVariableRow,tempRat);
-      if (BaseVariables.elements[LeavingVariableRow]==34)
-				tempMatA.ComputeDebugString();
+      //if (BaseVariables.elements[LeavingVariableRow]==34)
+			//	tempMatA.ComputeDebugString();
 			tempTotalChange.Assign(MaxMovement);
 			tempTotalChange.MultiplyBy(ChangeGradient);
 			matX.elements[EnteringVariable][0].Add(MaxMovement);
@@ -14767,15 +14916,15 @@ bool MatrixLargeRational
 				GlobalGoal.Subtract(tempTotalChange);
 			}
 			else
-			{ BaseVariables.ComputeDebugString();
+			{ //BaseVariables.ComputeDebugString();
 				int tempI= VisitedVertices.ContainsObjectHash(BaseVariables);
         if (tempI==-1)
 					VisitedVertices.AddObjectOnTopHash(BaseVariables);
         else
 					WeHaveNotEnteredACycle=false;
       }
-      if (BaseVariables.elements[LeavingVariableRow]==34)
-				tempMatA.ComputeDebugString();
+      //if (BaseVariables.elements[LeavingVariableRow]==34)
+			//	tempMatA.ComputeDebugString();
 			for (int i=0;i<tempMatA.NumRows;i++)
 			{	if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariableRow)
 				{	tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
@@ -14787,8 +14936,8 @@ bool MatrixLargeRational
 				}
 				if (i==LeavingVariableRow)
 					matX.elements[BaseVariables.elements[i]][0].MakeZero();
-				tempMatA.ComputeDebugString();
-				matX.ComputeDebugString();
+				//tempMatA.ComputeDebugString();
+				//matX.ComputeDebugString();
 			}
 			assert
 				(	matX.elements[BaseVariables.elements[LeavingVariableRow]][0]
@@ -14796,47 +14945,44 @@ bool MatrixLargeRational
 			BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]]=false;
 			BaseVariables.elements[LeavingVariableRow]= EnteringVariable;
 			BaseVariables.selected[EnteringVariable]= true;
-			BaseVariables.ComputeDebugString();
+			//BaseVariables.ComputeDebugString();
 			for (int i=0;i<tempMatA.NumRows;i++)
-			{	assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(ROne));
-			}
+				assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(ROne));
 		}
-		if (::MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic)
-		{ MatrixLargeRational tempMat;
-			tempMat.Assign(matX);
-			tempMat.ComputeDebugString();
-			tempDebugMat.ComputeDebugString();
-			tempMat.MultiplyOnTheLeft(tempDebugMat);
-			tempMat.ComputeDebugString();
-			assert(tempMat.IsEqualTo(matb));
-		}
+//		if (::MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic)
+//		{ MatrixLargeRational tempMat;
+//			tempMat.Assign(matX);
+//			tempMat.ComputeDebugString();
+//			tempDebugMat.ComputeDebugString();
+//			tempMat.MultiplyOnTheLeft(tempDebugMat);
+//			tempMat.ComputeDebugString();
+//			assert(tempMat.IsEqualTo(matb));
+//		}
 	}
-	std::string tempS;
-	std::stringstream out;
-	for (int i=0;i<BaseVariables.CardinalitySelection;i++)
-	{ int tempI=BaseVariables.elements[i];
-		matX.elements[tempI][0].ElementToString(tempS);
-		out << tempS <<"(";
-		if (tempI<matA.NumCols)
-		{	for (int j=0;j<matA.NumRows;j++)
-			{ matA.elements[j][tempI].ElementToString(tempS);
-				out << tempS;
-				if (j!=matA.NumRows-1)
-					out <<",";
-			}
-		} else
-			out<<"dummy column " << i <<" ";
-		out <<")";
-		if (i!=BaseVariables.CardinalitySelection-1)
-			out <<"+";
-	}
-	tempS=out.str();
+//	std::string tempS;
+//	std::stringstream out;
+//	for (int i=0;i<BaseVariables.CardinalitySelection;i++)
+//	{ int tempI=BaseVariables.elements[i];
+//		matX.elements[tempI][0].ElementToString(tempS);
+//		out << tempS <<"(";
+//		if (tempI<matA.NumCols)
+//		{	for (int j=0;j<matA.NumRows;j++)
+//			{ matA.elements[j][tempI].ElementToString(tempS);
+//				out << tempS;
+//				if (j!=matA.NumRows-1)
+//					out <<",";
+//			}
+//		} else
+//			out<<"dummy column " << i <<" ";
+//		out <<")";
+//		if (i!=BaseVariables.CardinalitySelection-1)
+//			out <<"+";
+//	}
+//	tempS=out.str();
 	for(int i=NumTrueVariables;i<matX.NumRows;i++)
-	{	if (matX.elements[i][0].IsPositive())
+		if (matX.elements[i][0].IsPositive())
 			return false;
-	}
 	outputPoint.Resize(NumTrueVariables,1,false);
-
 	for (int i=0;i<NumTrueVariables;i++)
 		outputPoint.elements[i][0].Assign(matX.elements[i][0]);
 	return true;
@@ -15124,6 +15270,10 @@ void multTableKmods::ElementToString(std::string& output)
 		}
 	}
 	output=out.str();
+}
+
+rootSubalgebra::rootSubalgebra()
+{ this->flagAnErrorHasOccuredTimeToPanic=false;
 }
 
 /*void SelectionList::ElementToString(std::string &output)

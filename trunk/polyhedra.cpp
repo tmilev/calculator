@@ -8707,7 +8707,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
   static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
   //this->lastApplicationOfSVformulaNumNewGenerators=0;
   //this->lastApplicationOfSVformulaNumNewMonomials=0;
-   Rational StartCheckSum, theDiff;
+  Rational StartCheckSum, theDiff;
   if (this->flagAnErrorHasOccurredTimeToPanic)
 	{ Accum.ComputeOneCheckSum(StartCheckSum,theGlobalVariables);
 		this->ComputeOneCheckSum(Accum,theDiff,Accum.AmbientDimension,theGlobalVariables);
@@ -9449,6 +9449,7 @@ void partFractions::PrepareIndicatorVariables()
 bool partFractions::split(GlobalVariables& theGlobalVariables)
 { //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->flagAnErrorHasOccurredTimeToPanic=true;
+	partFraction& tempFrac= theGlobalVariables.fracSplit1;
 	this->IndexLowestNonProcessed=0;
 	partFraction tempF;
 	std::string OldDebugString;
@@ -9479,7 +9480,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 			//		Stop();
 			}
 			//tempF.Assign(this->TheObjects[this->IndexLowestNonProcessed]);
-			partFraction& tempFrac= this->TheObjects[this->IndexLowestNonProcessed];
+				tempFrac.Assign(this->TheObjects[this->IndexLowestNonProcessed]);
 //			this->ComputeDebugString();
 //			tempF.ComputeDebugString();
 //			if (this->IndexLowestNonReduced==5 && this->size==9)
@@ -9494,6 +9495,9 @@ bool partFractions::split(GlobalVariables& theGlobalVariables)
 			if (! tempBool)
 			{ if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
 					this->IndexLowestNonProcessed++;
+				else
+					this->TheObjects[this->IndexLowestNonProcessed].LastDistinguishedIndex=
+						tempFrac.LastDistinguishedIndex;
 			}
 			else
 			{//	if (ProblemCounter==17)

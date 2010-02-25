@@ -359,16 +359,14 @@ template <class Object>
 void ListBasicObjectsLight<Object>::CopyFromHeavy(const ListBasicObjects<Object>& from)
 { this->SetSizeExpandOnTopLight(from.size);
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i]= from.TheObjects[i];
-	}
+		this->TheObjects[i]= from.TheObjects[i];
 }
 
 template <class Object>
 void ListBasicObjectsLight<Object>::CopyFromLight(const ListBasicObjectsLight<Object>& from)
 { this->SetSizeExpandOnTopLight(from.size);
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i]= from.TheObjects[i];
-	}
+		this->TheObjects[i]= from.TheObjects[i];
 }
 
 template <class Object>
@@ -1343,10 +1341,11 @@ public:
               };
 	double DoubleValue();
 	int floor(){	if (NumShort<0)
-									if (DenShort!=1)
+								{	if (DenShort!=1)
 										return (this->NumShort/ this->DenShort)-1;
 									else
 										return this->NumShort/ this->DenShort;
+								}
 								else
 									return this->NumShort/this->DenShort;};
 	void MakeZero()	{this->NumShort=0;	this->DenShort=1; this->FreeExtended(); };
@@ -5682,6 +5681,7 @@ public:
 	MatrixLargeRational matSimplexAlgorithm3;
 
 	partFraction fracReduceMonomialByMonomial;
+	partFraction fracSplit1;
 	QuasiPolynomial QPComputeQuasiPolynomial;
 	QuasiNumber QNComputeQuasiPolynomial;
 

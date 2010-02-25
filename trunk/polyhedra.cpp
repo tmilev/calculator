@@ -1051,7 +1051,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	//this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -1548,14 +1548,12 @@ bool root::IsProportianalTo(root& r)
 	//r.ComputeDebugString();
 	int IndexFirstNonZero=-1;
 	for(int i=0;i<this->size;i++)
-	{	if (!this->TheObjects[i].IsEqualToZero())
+		if (!this->TheObjects[i].IsEqualToZero())
 		{	IndexFirstNonZero=i;
 			break;
 		}
-	}
 	if (IndexFirstNonZero==-1)
-	{	return false;
-	}
+		return false;
 	root tempRoot;
 	tempRoot.Assign(*this);
 	tempRoot.DivByLargeRational(this->TheObjects[IndexFirstNonZero]);
@@ -1627,10 +1625,8 @@ void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight()
 
 bool root::HasSmallCoordinates()
 {	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i].Extended!=0)
-		{ return false;
-		}
-	}
+		if (this->TheObjects[i].Extended!=0)
+			return false;
 	return true;
 }
 
@@ -1651,21 +1647,18 @@ void root::ScaleToIntegralMinHeight()
 
 void root::DivByLargeIntUnsigned(LargeIntUnsigned& a)
 {	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].DivideByLargeIntegerUnsigned(a);
-	}
+		this->TheObjects[i].DivideByLargeIntegerUnsigned(a);
 }
 
 void root::MultiplyByLargeRational(Rational& a)
 {	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].MultiplyBy(a);
-	}
+		this->TheObjects[i].MultiplyBy(a);
 }
 
 void root::Add(root&r)
 {	assert(r.size==this->size);
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].Add(r.TheObjects[i]);
-	}
+		this->TheObjects[i].Add(r.TheObjects[i]);
 }
 
 bool root::OurScalarProductIsPositive(root& right)
@@ -1689,22 +1682,19 @@ bool root::OurScalarProductIsZero(root& right)
 void root::Subtract(root&r)
 { assert(r.size==this->size);
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].Subtract(r.TheObjects[i]);
-	}
+		this->TheObjects[i].Subtract(r.TheObjects[i]);
 }
 
 void root::MakeZero(int DesiredDimension)
 {	this->SetSizeExpandOnTopLight(DesiredDimension);
 	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].MakeZero();
-	}
+		this->TheObjects[i].MakeZero();
 }
 
 void root::AssignIntRoot(intRoot& r)
 {	this->SetSizeExpandOnTopLight(r.dimension);
 	for (int i=0;i<r.dimension;i++)
-	{ this->TheObjects[i].AssignInteger(r.elements[i]);
-	}
+		this->TheObjects[i].AssignInteger(r.elements[i]);
 }
 
 void root::AssignWithoutLastCoordinate(root& right)
@@ -1762,9 +1752,8 @@ int root::HashFunction()
 
 inline bool root::IsPositiveOrZero()
 { for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i].IsNegative())
+		if (this->TheObjects[i].IsNegative())
 			return false;
-	}
 	return true;
 }
 
@@ -1791,8 +1780,7 @@ void root::MakeNormalInProjectivizationFromPointAndNormal(root& point, root& nor
 			(	normal,point,this->TheObjects[newDimension-1]);
 	this->TheObjects[newDimension-1].Minus();
 	for (int j=0;j<newDimension-1;j++)
-	{ this->TheObjects[j].Assign(normal.TheObjects[j]);
-	}
+		this->TheObjects[j].Assign(normal.TheObjects[j]);
 }
 
 bool root::ProjectToAffineSpace(root &output)
@@ -1821,28 +1809,56 @@ bool root::MakeAffineProjectionFromNormal(affineHyperplane& output)
 
 void root::DivByInteger(int a)
 {	for (int i =0; i<this->size;i++)
-	{ this->TheObjects[i].DivideByInteger(a);
-	}
+		this->TheObjects[i].DivideByInteger(a);
 }
 
 int root::getIndexFirstNonZeroCoordinate()
 {	for (int i =0; i<this->size;i++)
-	{ if (!this->TheObjects[i].IsEqualToZero())
+		if (!this->TheObjects[i].IsEqualToZero())
 			return i;
-	}
 	return -1;
 }
 
 void root::DivByLargeInt(LargeInt& a)
 {	for (int i =0; i<this->size;i++)
-	{ this->TheObjects[i].DivideByLargeInteger(a);
-	}
+		this->TheObjects[i].DivideByLargeInteger(a);
 }
 
 void root::DivByLargeRational(Rational&a)
 {	for (int i =0; i<this->size;i++)
-	{ this->TheObjects[i].DivideBy(a);
-	}
+		this->TheObjects[i].DivideBy(a);
+}
+
+bool root::HasStronglyPerpendicularDecompositionWRT
+	(	roots& theSet, WeylGroup& theWeylGroup)
+{ if (theSet.size==0)
+		return false;
+	roots theNewSet;
+	theNewSet.MakeActualSizeAtLeastExpandOnTop(theSet.size);
+	root tempRoot;
+	int indexFirstNonZeroRoot=0;
+	Rational tempRat;
+	while (indexFirstNonZeroRoot<theSet.size)
+	{	root& currentRoot = theSet.TheObjects[indexFirstNonZeroRoot];
+		for (int i=indexFirstNonZeroRoot;i<theSet.size;i++)
+		{ theWeylGroup.RootScalarKillingFormMatrixRoot
+				(currentRoot,theSet.TheObjects[i],tempRat);
+			if (tempRat.IsEqualToZero())
+				theNewSet.AddRoot(theSet.TheObjects[i]);
+		}
+		tempRoot.Assign(currentRoot); 
+		tempRoot.MinusRoot();
+		theWeylGroup.RootScalarKillingFormMatrixRoot
+			(*this,currentRoot,tempRat);
+		tempRoot.MultiplyByLargeRational(tempRat);
+		theWeylGroup.RootScalarKillingFormMatrixRoot
+			(currentRoot,currentRoot,tempRat);
+		tempRoot.DivByLargeRational(tempRat);
+		tempRoot.Add(*this);
+		if (tempRoot.HasStronglyPerpendicularDecompositionWRT(theNewSet,theWeylGroup))
+			return true;
+	}	
+	return false;
 }
 
 int MatrixLargeRational::FindLCMCoefficientDenominatorsTruncated()

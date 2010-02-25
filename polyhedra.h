@@ -1405,6 +1405,8 @@ public:
 	bool MakeAffineProjectionFromNormal(affineHyperplane& output);
 	//the below returns false
 	bool ProjectToAffineSpace(root& output);
+	bool HasStronglyPerpendicularDecompositionWRT
+		(	roots& theSet, WeylGroup& theWeylGroup);	
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
@@ -5652,6 +5654,7 @@ public:
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
+	rootsCollection rootsStronglyPerpendicular;
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
 	ListBasicObjects<WallData*> listWallDataPtSplitChamber;
@@ -5708,6 +5711,8 @@ public:
 	Selection selReduceMonomialByMonomial;
 	Selection selSimplexAlg1;
 	Selection selSimplexAlg2;
+	
+	
 
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;
 

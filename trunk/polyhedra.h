@@ -681,7 +681,7 @@ public:
 	void Transpose(GlobalVariables& theGlobalVariables);
 	void MultiplyByInt(int x);
 	void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
-	void ScaleToIntegralForMinRationalHeight();
+	void ScaleToIntegralForMinRationalHeightNoSignChange();
 	void ComputeDebugString();
 	void MultiplyByLargeRational(Rational& x);
 	static bool SystemLinearInequalitiesHasSolution
@@ -698,8 +698,8 @@ public:
 	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable,
 		int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX,
 		Selection& BaseVariables);
-	int FindLCMCoefficientDenominatorsTruncated();
-	int FindGCDCoefficientNumeratorsTruncated();
+	int FindPositiveLCMCoefficientDenominatorsTruncated();
+	int FindPositiveGCDCoefficientNumeratorsTruncated();
 };
 
 class Selection
@@ -4771,21 +4771,18 @@ class rootWithMultiplicity: public root
 {
 public:
 	int multiplicity;
-	void operator=(rootWithMultiplicity& right)
+	void operator=(const rootWithMultiplicity& right)
 	{	this->multiplicity= right.multiplicity;
 		this->root::operator= (right);
 	};
-	bool operator==(rootWithMultiplicity& right)
+	bool operator==(const rootWithMultiplicity& right)
 	{ return	this->root::operator ==(right)	&&
 						this->multiplicity== right.multiplicity;
 	};
-	/*bool IsGreaterThanOrEqualTo(rootWithMultiplicity& right)
-	{ for (int i=0;i<this->size;i++)
-		{ if (right.TheObjects[i].IsGreaterThan(right.TheObjects[i]))
-				return false;
-		}
-		return true;
-	};*/
+	void GetSum(root& output)
+	{ output.Assign(*this);
+		output.MultiplyByInteger(this->multiplicity);
+	};
 };
 
 
@@ -4802,6 +4799,14 @@ public:
 					this->TheObjects[j]=tempRoot;
 				}
 			}
+		}
+	};
+	void GetSum(root& output, int theDimension)
+	{ output.MakeZero(theDimension);
+		root tempRoot;
+		for(int i=0;i<this->size;i++)
+		{	this->TheObjects[i].GetSum(tempRoot);
+			output.Add(tempRoot);
 		}
 	};
 };
@@ -5385,6 +5390,7 @@ class rootSubalgebra
 public:
 	int NumNilradicalsAllowed;
 	int NumConeConditionFailures;
+	int NumRelationsWithStronglyPerpendicularDecomposition;
 	roots AllRoots;
 	roots AllPositiveRoots;
 	WeylGroup AmbientWeyl;
@@ -5407,6 +5413,8 @@ public:
 	ListBasicObjects<int> theKComponentRanks;
 	std::string DebugString;
 	rootSubalgebra();
+	void MakeGeneratingSingularVectors
+		(rootsWithMultiplicity &theRelation, roots& nilradicalRoots); 
 	int NumRootsInNilradical();
 	bool IsARoot(root& input);
 	bool IsARootOrZero(root& input);
@@ -5651,6 +5659,7 @@ public:
 	roots rootsIsABogusNeighbor1;
 	roots rootsIsABogusNeighbor2;
 	roots rootsSplitChamber1;
+	roots rootsNilradicalRoots;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;

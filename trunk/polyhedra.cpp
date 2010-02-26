@@ -990,7 +990,7 @@ void ComputationSetup::InitComputationSetup()
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
 
-	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
+/*	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 
@@ -1013,7 +1013,8 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-
+*/
+	theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
 	theRootSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
@@ -1831,37 +1832,43 @@ void root::DivByLargeRational(Rational&a)
 
 bool root::HasStronglyPerpendicularDecompositionWRT
 	(	roots& theSet, WeylGroup& theWeylGroup)
-{ if (theSet.size==0)
+{ if (this->IsEqualToZero())
+		return true;
+	if (theSet.size==0)
 		return false;
+//	this->ComputeDebugString();
+//	theSet.ComputeDebugString();
 	roots theNewSet;
 	theNewSet.MakeActualSizeAtLeastExpandOnTop(theSet.size);
 	root tempRoot;
-	int indexFirstNonZeroRoot=0;
-	Rational tempRat;
-	while (indexFirstNonZeroRoot<theSet.size)
+	Rational tempRat, tempRat2;
+	for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
 	{	root& currentRoot = theSet.TheObjects[indexFirstNonZeroRoot];
-		for (int i=indexFirstNonZeroRoot;i<theSet.size;i++)
-		{ theWeylGroup.RootScalarKillingFormMatrixRoot
-				(currentRoot,theSet.TheObjects[i],tempRat);
-			if (tempRat.IsEqualToZero())
-				theNewSet.AddRoot(theSet.TheObjects[i]);
-		}
-		tempRoot.Assign(currentRoot); 
-		tempRoot.MinusRoot();
 		theWeylGroup.RootScalarKillingFormMatrixRoot
 			(*this,currentRoot,tempRat);
-		tempRoot.MultiplyByLargeRational(tempRat);
-		theWeylGroup.RootScalarKillingFormMatrixRoot
-			(currentRoot,currentRoot,tempRat);
-		tempRoot.DivByLargeRational(tempRat);
-		tempRoot.Add(*this);
-		if (tempRoot.HasStronglyPerpendicularDecompositionWRT(theNewSet,theWeylGroup))
-			return true;
+		if (tempRat.IsPositive())
+		{	theNewSet.size=0;
+			for (int i=indexFirstNonZeroRoot;i<theSet.size;i++)
+			{ theWeylGroup.RootScalarKillingFormMatrixRoot
+					(currentRoot,theSet.TheObjects[i],tempRat2);
+				if (tempRat2.IsEqualToZero())
+					theNewSet.AddRoot(theSet.TheObjects[i]);
+			}
+			tempRoot.Assign(currentRoot); 
+			tempRoot.MinusRoot();
+			tempRoot.MultiplyByLargeRational(tempRat);
+			theWeylGroup.RootScalarKillingFormMatrixRoot
+				(currentRoot,currentRoot,tempRat);
+			tempRoot.DivByLargeRational(tempRat);
+			tempRoot.Add(*this);
+			if (tempRoot.HasStronglyPerpendicularDecompositionWRT(theNewSet,theWeylGroup))
+				return true;
+		}
 	}	
 	return false;
 }
 
-int MatrixLargeRational::FindLCMCoefficientDenominatorsTruncated()
+int MatrixLargeRational::FindPositiveLCMCoefficientDenominatorsTruncated()
 { int result=1;
 	for (int i=0;i<this->NumRows;i++)
 		for (int j=0;j<this->NumCols;j++)
@@ -1869,21 +1876,23 @@ int MatrixLargeRational::FindLCMCoefficientDenominatorsTruncated()
 	return result;
 }
 
-int MatrixLargeRational::FindGCDCoefficientNumeratorsTruncated()
+int MatrixLargeRational::FindPositiveGCDCoefficientNumeratorsTruncated()
 { int result=1;
 	for (int i=0;i<this->NumRows;i++)
 		for (int j=0;j<this->NumCols;j++)
 			if (this->elements[i][j].NumShort!=0)
 				result=Rational::gcdSigned(result,this->elements[i][j].NumShort);
 	assert(result!=0);
+	if (result<0) 
+		result=-result;
 	return result;
 }
 
-void MatrixLargeRational::ScaleToIntegralForMinRationalHeight()
+void MatrixLargeRational::ScaleToIntegralForMinRationalHeightNoSignChange()
 { Rational tempRat;
 	tempRat.AssignNumeratorAndDenominator
-		(	this->FindLCMCoefficientDenominatorsTruncated(),
-      this->FindGCDCoefficientNumeratorsTruncated());
+		(	this->FindPositiveLCMCoefficientDenominatorsTruncated(),
+      this->FindPositiveGCDCoefficientNumeratorsTruncated());
 	this->MultiplyByLargeRational(tempRat);
 }
 
@@ -8593,7 +8602,7 @@ bool partFraction::DecomposeFromLinRelation
 	int tempI=this->TheObjects[GainingMultiplicityIndex].GetLargestElongation();
 	theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].MultiplyByInt(tempI);
 	//theLinearRelation.ComputeDebugString();
-	theLinearRelation.ScaleToIntegralForMinRationalHeight();
+	theLinearRelation.ScaleToIntegralForMinRationalHeightNoSignChange();
 	//theLinearRelation.ComputeDebugString();
 	ElongationGainingMultiplicityIndex = 
 		theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].NumShort;
@@ -13336,7 +13345,7 @@ void rootSubalgebra::ComputeExtremeWeightInTheSameKMod
 			if (lookingForHighest)
 				tempRoot.Add(this->SimpleBasisK.TheObjects[i]);
 			else
-			{ tempRoot.Subtract(this->SimpleBasisK.TheObjects[i]);}
+				tempRoot.Subtract(this->SimpleBasisK.TheObjects[i]);
 			if (this->AllRoots.IndexOfObject(tempRoot)!=-1)
 			{ outputW.Assign(tempRoot);
 				FoundHigher=true;
@@ -13364,6 +13373,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 		multTable.ComputeDebugString();
 	this->NumNilradicalsAllowed=0;
 	this->NumConeConditionFailures=0;
+	this->NumRelationsWithStronglyPerpendicularDecomposition=0;
 	ListBasicObjects<Selection> impliedSelections;
 	impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	Selection tempSel;
@@ -13587,12 +13597,14 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
+	roots& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	int numNilradRoots=this->NumRootsInNilradical();
-	int numCols=
-		numNilradRoots+this->kModules.size- this->NilradicalKmods.CardinalitySelection;
+	int numCols= numNilradRoots+this->kModules.size- 
+		this->NilradicalKmods.CardinalitySelection;
 	matA.init((short)theDimension+1, (short)numCols);
 	matb.init((short)theDimension+1,1);
+	NilradicalRoots.size=0;
 	matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
 	int counter=0;
 	for (int i=0;i<this->NilradicalKmods.CardinalitySelection;i++)
@@ -13600,6 +13612,7 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 		for (int j=0;j<tempKmod.size;j++)
 		{	for (int k=0;k<theDimension;k++)
 				matA.elements[k][counter].Assign(tempKmod.TheObjects[j].TheObjects[k]);
+			NilradicalRoots.AddRoot(tempKmod.TheObjects[j]);
 			matA.elements[theDimension][counter].MakeOne();
 			counter++;
 		}
@@ -13619,10 +13632,41 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	//matA.ComputeDebugString();
 	//matb.ComputeDebugString();
 	//matX.ComputeDebugString();
-	this->NilradicalKmods.ComputeDebugString();
-	return !MatrixLargeRational
-		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-			(matA,matb,matX,theGlobalVariables);
+	if (	MatrixLargeRational
+					::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+						(matA,matb,matX,theGlobalVariables))
+	{	if (this->flagAnErrorHasOccuredTimeToPanic)
+		{	this->NilradicalKmods.ComputeDebugString();
+			NilradicalRoots.ComputeDebugString();
+			matX.ComputeDebugString();
+		}
+		root tempRoot; tempRoot.MakeZero(theDimension);
+		rootsWithMultiplicity Alphas; rootWithMultiplicity tempMRoot;
+		matX.ScaleToIntegralForMinRationalHeightNoSignChange();
+		for (int i=numNilradRoots;i<matA.NumCols;i++)
+		{ if (!matX.elements[i][0].IsEqualToZero())
+			{	for (int j=0;j<theDimension;j++)
+					tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
+				assert(matX.elements[i][0].DenShort==1);
+				tempMRoot.::root::Assign(tempRoot); tempMRoot.multiplicity=matX.elements[i][0].NumShort;
+				Alphas.AddObjectOnTop(tempMRoot);
+			}
+		}
+		this->MakeGeneratingSingularVectors(Alphas,NilradicalRoots);
+		root AccumRoot;
+		Alphas.GetSum(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
+		if (this->flagAnErrorHasOccuredTimeToPanic)
+		{	std::string tempS;
+			Alphas.ElementToStringGeneric(tempS);
+			AccumRoot.ComputeDebugString();
+		}		
+		if (	AccumRoot.HasStronglyPerpendicularDecompositionWRT
+						(NilradicalRoots,this->AmbientWeyl))
+			this->NumRelationsWithStronglyPerpendicularDecomposition++;
+		return false;
+	}
+	else
+		return true;
 }
 
 void rootSubalgebra::ComputeRootsOfK()
@@ -13653,7 +13697,6 @@ void rootSubalgebra::ElementToString(std::string &output)
 	out<<"\nRank C(k): " <<this->SimpleBasisCentralizerRoots.size <<"\nSimple Basis centralizer: ";
 	this->SimpleBasisCentralizerRoots.ComputeDebugString();
 	out <<this->SimpleBasisCentralizerRoots.DebugString;
-
 	out << "Num g mod k modules: "<<this->LowestWeightsGmodK.size;
 	for (int i=0;i<this->kModules.size;i++)
 	{ this->LowestWeightsGmodK.TheObjects[i].ComputeDebugString();
@@ -13667,6 +13710,33 @@ void rootSubalgebra::ElementToString(std::string &output)
 		}
 	}
 	output=out.str();
+}
+
+void rootSubalgebra::MakeGeneratingSingularVectors
+	(rootsWithMultiplicity &theRelation, roots& nilradicalRoots)
+{ bool isMaximal=false;
+	root beta,tempRoot;
+	while (!isMaximal)
+	{ isMaximal=true;
+		for (int i=0;i<theRelation.size;i++)
+		{ for (int j=0;j<nilradicalRoots.size;j++)
+			{ tempRoot.Assign(theRelation.TheObjects[i]);
+				tempRoot.Add(nilradicalRoots.TheObjects[j]);
+				if (this->IsARoot(tempRoot)&& ! nilradicalRoots.ContainsObject(tempRoot))
+				{ this->ComputeHighestWeightInTheSameKMod(tempRoot,tempRoot);
+					theRelation.TheObjects[i].::root::Assign(tempRoot);
+					isMaximal=false;
+					break;
+				}
+				if (tempRoot.IsEqualToZero())
+				{	theRelation.PopIndexSwapWithLast(i);
+					i--;
+					isMaximal=false;
+					break;
+				}
+			}
+		}
+	}
 }
 
 void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)

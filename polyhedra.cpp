@@ -221,9 +221,13 @@ template < > int ListBasicObjects<std::string>::ListBasicObjectsActualSizeIncrem
 template < > int ListBasicObjects<unsigned int>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<roots>::ListBasicObjectsActualSizeIncrement=5;
 template < > int ListBasicObjects<Selection>::ListBasicObjectsActualSizeIncrement=5;
-template < > int ListBasicObjects<class affineHyperplane>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<class WallData*>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<class WallData>::ListBasicObjectsActualSizeIncrement=6;
+template < > int ListBasicObjects<affineHyperplane>::ListBasicObjectsActualSizeIncrement=1000;
+template < > int ListBasicObjects<WallData*>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<WallData>::ListBasicObjectsActualSizeIncrement=6;
+template < > int ListBasicObjects<rootsWithMultiplicity>::ListBasicObjectsActualSizeIncrement=10;
+template < > int ListBasicObjects<Rational>::ListBasicObjectsActualSizeIncrement=10;
+template < > int ListBasicObjects<coneRelation>::ListBasicObjectsActualSizeIncrement=10;
+
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList2;
 bool RandomCodeIDontWantToDelete::UsingEvilList1=true;
@@ -1013,35 +1017,42 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-*/
-	theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
+
+		theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
 	theRootSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-
+*/
 	theRootSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
+	std::string tempS;
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
 
 	theRootSA.SetupE6_2A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
 
 	theRootSA.SetupE6_A2plus2A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
 
 	theRootSA.SetupE6_4A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
 
 	theRootSA.SetupE6_D4(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
 
 	theRootSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
 }
 
 void ComputationSetup::Run()
@@ -1831,11 +1842,16 @@ void root::DivByLargeRational(Rational&a)
 }
 
 bool root::HasStronglyPerpendicularDecompositionWRT
-	(	roots& theSet, WeylGroup& theWeylGroup)
+	(	roots& theSet, WeylGroup& theWeylGroup, roots& output, 
+		ListBasicObjects<Rational>& outputCoeffs)
 { if (this->IsEqualToZero())
 		return true;
 	if (theSet.size==0)
 		return false;
+	if (output.size==0)
+	{	output.MakeActualSizeAtLeastExpandOnTop(theSet.size);
+		outputCoeffs.MakeActualSizeAtLeastExpandOnTop(theSet.size);
+	}
 //	this->ComputeDebugString();
 //	theSet.ComputeDebugString();
 	roots theNewSet;
@@ -1857,12 +1873,18 @@ bool root::HasStronglyPerpendicularDecompositionWRT
 			tempRoot.Assign(currentRoot); 
 			tempRoot.MinusRoot();
 			tempRoot.MultiplyByLargeRational(tempRat);
+			outputCoeffs.AddObjectOnTop(tempRat);
 			theWeylGroup.RootScalarKillingFormMatrixRoot
 				(currentRoot,currentRoot,tempRat);
 			tempRoot.DivByLargeRational(tempRat);
 			tempRoot.Add(*this);
-			if (tempRoot.HasStronglyPerpendicularDecompositionWRT(theNewSet,theWeylGroup))
+			outputCoeffs.LastObject()->DivideBy(tempRat);
+			output.AddRoot(currentRoot);
+			if (	tempRoot.HasStronglyPerpendicularDecompositionWRT
+							(theNewSet,theWeylGroup,output,outputCoeffs))
 				return true;
+			output.size--;
+			outputCoeffs.size--;
 		}
 	}	
 	return false;
@@ -13641,28 +13663,40 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 			matX.ComputeDebugString();
 		}
 		root tempRoot; tempRoot.MakeZero(theDimension);
-		rootsWithMultiplicity Alphas; rootWithMultiplicity tempMRoot;
+		coneRelation theRel; 
 		matX.ScaleToIntegralForMinRationalHeightNoSignChange();
-		for (int i=numNilradRoots;i<matA.NumCols;i++)
-		{ if (!matX.elements[i][0].IsEqualToZero())
+		for (int i=0;i<matA.NumCols;i++)
+			if (!matX.elements[i][0].IsEqualToZero())
 			{	for (int j=0;j<theDimension;j++)
 					tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
 				assert(matX.elements[i][0].DenShort==1);
-				tempMRoot.::root::Assign(tempRoot); tempMRoot.multiplicity=matX.elements[i][0].NumShort;
-				Alphas.AddObjectOnTop(tempMRoot);
+				if (i<numNilradRoots)
+				{ theRel.Betas.AddObjectOnTop(tempRoot);
+					theRel.BetaCoeffs.AddObjectOnTop(matX.elements[i][0]);
+				} else
+				{	tempRoot.MinusRoot();
+					theRel.Alphas.AddObjectOnTop(tempRoot);
+					theRel.AlphaCoeffs.AddObjectOnTop(matX.elements[i][0]);
+				}
 			}
-		}
-		this->MakeGeneratingSingularVectors(Alphas,NilradicalRoots);
+		theRel.ComputeDebugString();
+		this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
+		theRel.ComputeDebugString();
 		root AccumRoot;
-		Alphas.GetSum(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
+		theRel.GetSumAlphas(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
 		if (this->flagAnErrorHasOccuredTimeToPanic)
 		{	std::string tempS;
-			Alphas.ElementToStringGeneric(tempS);
+			theRel.ComputeDebugString();
 			AccumRoot.ComputeDebugString();
 		}		
+		coneRelation tempRel; 
+		tempRel=theRel;
+		tempRel.BetaCoeffs.size=0; tempRel.Betas.size=0;
 		if (	AccumRoot.HasStronglyPerpendicularDecompositionWRT
-						(NilradicalRoots,this->AmbientWeyl))
+						(NilradicalRoots,this->AmbientWeyl,tempRel.Betas, tempRel.BetaCoeffs))
 			this->NumRelationsWithStronglyPerpendicularDecomposition++;
+		else
+			this->theRelations.AddObjectOnTop(theRel);
 		return false;
 	}
 	else
@@ -13713,23 +13747,42 @@ void rootSubalgebra::ElementToString(std::string &output)
 }
 
 void rootSubalgebra::MakeGeneratingSingularVectors
-	(rootsWithMultiplicity &theRelation, roots& nilradicalRoots)
+	( coneRelation &theRelation, roots& nilradicalRoots)
 { bool isMaximal=false;
 	root beta,tempRoot;
+	theRelation.ComputeDebugString();
 	while (!isMaximal)
 	{ isMaximal=true;
-		for (int i=0;i<theRelation.size;i++)
+		for (int i=0;i<theRelation.AlphaCoeffs.size;i++)
 		{ for (int j=0;j<nilradicalRoots.size;j++)
-			{ tempRoot.Assign(theRelation.TheObjects[i]);
+			{ tempRoot.Assign(theRelation.Alphas.TheObjects[i]);
+				theRelation.Alphas.TheObjects[i].ComputeDebugString();
+				nilradicalRoots.TheObjects[j].ComputeDebugString();
 				tempRoot.Add(nilradicalRoots.TheObjects[j]);
-				if (this->IsARoot(tempRoot)&& ! nilradicalRoots.ContainsObject(tempRoot))
+				tempRoot.ComputeDebugString();
+				theRelation.ComputeDebugString();
+				if (	(this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
+						&&(!nilradicalRoots.ContainsObject(tempRoot)))
 				{ this->ComputeHighestWeightInTheSameKMod(tempRoot,tempRoot);
-					theRelation.TheObjects[i].::root::Assign(tempRoot);
+					tempRoot.ComputeDebugString();
+					tempRoot.Subtract(theRelation.Alphas.TheObjects[i]);
+					tempRoot.ComputeDebugString();
+					theRelation.Alphas.TheObjects[i].Add(tempRoot);
+					int tempI=theRelation.Betas.IndexOfObject(tempRoot);
+					if (tempI==-1)
+					{ theRelation.Betas.AddObjectOnTop(tempRoot);
+						theRelation.BetaCoeffs.AddObjectOnTop
+							(theRelation.AlphaCoeffs.TheObjects[i]);
+					}
+					else
+						theRelation.BetaCoeffs.TheObjects[tempI].Add
+							(theRelation.AlphaCoeffs.TheObjects[i]);					
 					isMaximal=false;
 					break;
 				}
-				if (tempRoot.IsEqualToZero())
-				{	theRelation.PopIndexSwapWithLast(i);
+				if (theRelation.Alphas.TheObjects[i].IsEqualToZero())
+				{	theRelation.Alphas.PopIndexSwapWithLast(i);
+					theRelation.AlphaCoeffs.PopIndexSwapWithLast(i);
 					i--;
 					isMaximal=false;
 					break;
@@ -15369,3 +15422,76 @@ rootSubalgebra::rootSubalgebra()
 /*void SelectionList::ElementToString(std::string &output)
 { for ()
 }*/
+void rootsWithMultiplicitiesContainer::ElementToString(std::string &output)
+{ std::stringstream out;
+	std::string tempS;
+	out << "Num Elements: "<< this->size<<"    \n";
+	for (int i=0; i<this->size;i++)
+	{ this->TheObjects[i].ElementToString(tempS);
+		out<< tempS<<"\n";
+	}
+	output=out.str();
+}
+
+void rootWithMultiplicity::ElementToString(std::string& output)
+{ std::stringstream out;
+	std::string tempS;
+	out<< this->multiplicity <<" (";
+	this->::root::ElementToString(tempS);
+	out << tempS<<")";
+	output=out.str();
+}
+
+void rootsWithMultiplicity::ElementToString(std::string &output)
+{ std::string tempS;
+	std::stringstream out;
+	for (int i=0;i<this->size;i++)
+	{	this->TheObjects[i].ElementToString(tempS);
+		out <<tempS;
+		if (i!=this->size-1)
+			out <<" + ";
+	}
+	output=out.str();
+}
+
+void coneRelation::ElementToString(std::string &output)
+{ std::string tempS;
+	std::stringstream out;
+	assert(this->AlphaCoeffs.size==this->Alphas.size);
+	assert(this->BetaCoeffs.size==this->Betas.size);
+	for (int i=0;i<this->Alphas.size;i++)
+	{	this->AlphaCoeffs.TheObjects[i].ElementToString(tempS);
+		if (tempS=="1")	tempS="";
+		if (tempS=="-1") tempS="-";
+		assert(!(tempS=="0"));
+		out<< tempS;
+		this->Alphas.TheObjects[i].ElementToString(tempS);
+		out <<"("<<tempS<<")";
+		if (i!=this->Alphas.size-1)
+			out <<" + ";
+	}
+	out << "=";
+	for (int i=0;i<this->Betas.size;i++)
+	{	this->BetaCoeffs.TheObjects[i].ElementToString(tempS);
+		if (tempS=="1")	tempS="";
+		if (tempS=="-1") tempS="-";
+		assert(!(tempS=="0"));
+		out<< tempS;
+		this->Betas.TheObjects[i].ElementToString(tempS);
+		out <<"("<<tempS<<")";
+		if (i!=this->Betas.size-1)
+			out <<" + ";
+	}
+	output=out.str();
+}
+
+void coneRelation::GetSumAlphas(root &output, int theDimension)
+{ assert(this->AlphaCoeffs.size==this->Alphas.size);
+	output.MakeZero(theDimension);
+	root tempRoot; 
+	for(int i=0;i<this->Alphas.size;i++)
+	{ tempRoot.Assign(this->Alphas.TheObjects[i]);
+		tempRoot.MultiplyByLargeRational(this->AlphaCoeffs.TheObjects[i]);
+		output.Add(tempRoot);
+	}
+}

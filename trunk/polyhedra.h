@@ -419,7 +419,7 @@ public:
 	int SizeWithoutObjects();
 	inline Object* LastObject();
 	void ReleaseMemory();
-	void operator=(ListBasicObjects<Object>& right){this->CopyFromBase(right);};
+	void operator=(const ListBasicObjects<Object>& right){this->CopyFromBase(right);};
 	static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
 	ListBasicObjects();
 	~ListBasicObjects();
@@ -1406,7 +1406,8 @@ public:
 	//the below returns false
 	bool ProjectToAffineSpace(root& output);
 	bool HasStronglyPerpendicularDecompositionWRT
-		(	roots& theSet, WeylGroup& theWeylGroup);	
+	(	roots& theSet, WeylGroup& theWeylGroup, roots& output, 
+		ListBasicObjects<Rational>& outputCoeffs);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
@@ -1415,9 +1416,12 @@ public:
 	void FindLCMDenominators(LargeIntUnsigned& output);
 	int FindLCMDenominatorsTruncateToInt();
 	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5);
-	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8);
-	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4,
-												int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
+	void InitFromIntegers
+		(	int Dimension, int x1, int x2, int x3,
+			int x4, int x5,int x6, int x7, int x8);
+	void InitFromIntegers
+		(	int Dimension, int x1, int x2, int x3, int x4,
+			int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	void MultiplyByInteger(int a);
 	void MultiplyByLargeInt(LargeInt& right);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
@@ -4771,6 +4775,9 @@ class rootWithMultiplicity: public root
 {
 public:
 	int multiplicity;
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};	
 	void operator=(const rootWithMultiplicity& right)
 	{	this->multiplicity= right.multiplicity;
 		this->root::operator= (right);
@@ -4785,10 +4792,12 @@ public:
 	};
 };
 
-
 class rootsWithMultiplicity: public ListBasicObjects<rootWithMultiplicity>
 {
 public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};	
 	void BubbleSort()
 	{ for (int i=0;this->size;i++)
 		{ for (int j=i+1;j<this->size;j++)
@@ -4809,6 +4818,14 @@ public:
 			output.Add(tempRoot);
 		}
 	};
+};
+
+class rootsWithMultiplicitiesContainer: public ListBasicObjects<rootsWithMultiplicity>
+{ 
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 };
 
 class intRoots: public ListBasicObjects<intRoot>
@@ -5385,12 +5402,32 @@ public:
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 };
 
+class coneRelation
+{ 
+public:
+	roots Alphas;
+	roots Betas;
+	ListBasicObjects<Rational> AlphaCoeffs;
+	ListBasicObjects<Rational> BetaCoeffs;
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void GetSumAlphas(root& output, int theDimension);
+	void operator=(const coneRelation& right)
+	{ this->Alphas.CopyFromBase(right.Alphas);
+		this->Betas.CopyFromBase(right.Betas);
+		this->AlphaCoeffs.CopyFromBase(right.AlphaCoeffs);
+		this->BetaCoeffs.CopyFromBase(right.BetaCoeffs);
+	};
+};
+
 class rootSubalgebra
 {
 public:
 	int NumNilradicalsAllowed;
 	int NumConeConditionFailures;
 	int NumRelationsWithStronglyPerpendicularDecomposition;
+	ListBasicObjects<coneRelation> theRelations;
 	roots AllRoots;
 	roots AllPositiveRoots;
 	WeylGroup AmbientWeyl;
@@ -5414,7 +5451,7 @@ public:
 	std::string DebugString;
 	rootSubalgebra();
 	void MakeGeneratingSingularVectors
-		(rootsWithMultiplicity &theRelation, roots& nilradicalRoots); 
+		(coneRelation &theRelation, roots& nilradicalRoots); 
 	int NumRootsInNilradical();
 	bool IsARoot(root& input);
 	bool IsARootOrZero(root& input);

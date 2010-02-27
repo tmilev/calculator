@@ -5450,9 +5450,14 @@ public:
 	ListBasicObjects<int> theKComponentRanks;
 	std::string DebugString;
 	rootSubalgebra();
+	void ExtractRelations
+		(	MatrixLargeRational& matA,MatrixLargeRational& matX, 
+			roots& NilradicalRoots);
 	void MakeGeneratingSingularVectors
-		(coneRelation &theRelation, roots& nilradicalRoots); 
+		(coneRelation &theRelation, roots& nilradicalRoots);
+	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
+	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
 	bool IsARoot(root& input);
 	bool IsARootOrZero(root& input);
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
@@ -5510,6 +5515,13 @@ public:
 	void SetupE6_D4(GlobalVariables& theGlobalVariables);
 
 	void SetupE6_A3(GlobalVariables& theGlobalVariables);
+	void SetupE6_A2plusA1(GlobalVariables& theGlobalVariables);
+	void SetupE6_3A1(GlobalVariables& theGlobalVariables);
+
+	void SetupE6_A2(GlobalVariables& theGlobalVariables);
+	void SetupE6_2A1(GlobalVariables& theGlobalVariables);
+	void SetupE6_A1(GlobalVariables& theGlobalVariables);
+
 
 	void RunE6_3A2(GlobalVariables& theGlobalVariables);
 

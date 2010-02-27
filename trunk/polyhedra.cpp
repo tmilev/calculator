@@ -993,7 +993,7 @@ void ComputationSetup::InitComputationSetup()
 
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
-
+	std::string tempS;
 /*	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
@@ -1022,11 +1022,11 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-*/
+
 	theRootSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	std::string tempS;
+
 	theRootSA.theRelations.ElementToStringGeneric(tempS);
 
 	theRootSA.SetupE6_2A2(*this->theGlobalVariablesContainer->Default());
@@ -1048,8 +1048,33 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theRelations.ElementToStringGeneric(tempS);
-
+*/
 	theRootSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
+	
+	theRootSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
+	
+	theRootSA.SetupE6_3A1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
+	
+	theRootSA.SetupE6_A2(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
+	
+	theRootSA.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
+	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
+	theRootSA.theRelations.ElementToStringGeneric(tempS);
+	
+	theRootSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theRelations.ElementToStringGeneric(tempS);
@@ -13620,8 +13645,8 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
 	roots& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots;
-	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	int numNilradRoots=this->NumRootsInNilradical();
+	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	int numCols= numNilradRoots+this->kModules.size- 
 		this->NilradicalKmods.CardinalitySelection;
 	matA.init((short)theDimension+1, (short)numCols);
@@ -13657,50 +13682,148 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	if (	MatrixLargeRational
 					::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 						(matA,matb,matX,theGlobalVariables))
-	{	if (this->flagAnErrorHasOccuredTimeToPanic)
-		{	this->NilradicalKmods.ComputeDebugString();
-			NilradicalRoots.ComputeDebugString();
-			matX.ComputeDebugString();
-		}
-		root tempRoot; tempRoot.MakeZero(theDimension);
-		coneRelation theRel; 
-		matX.ScaleToIntegralForMinRationalHeightNoSignChange();
-		for (int i=0;i<matA.NumCols;i++)
-			if (!matX.elements[i][0].IsEqualToZero())
-			{	for (int j=0;j<theDimension;j++)
-					tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
-				assert(matX.elements[i][0].DenShort==1);
-				if (i<numNilradRoots)
-				{ theRel.Betas.AddObjectOnTop(tempRoot);
-					theRel.BetaCoeffs.AddObjectOnTop(matX.elements[i][0]);
-				} else
-				{	tempRoot.MinusRoot();
-					theRel.Alphas.AddObjectOnTop(tempRoot);
-					theRel.AlphaCoeffs.AddObjectOnTop(matX.elements[i][0]);
-				}
-			}
-		theRel.ComputeDebugString();
-		this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
-		theRel.ComputeDebugString();
-		root AccumRoot;
-		theRel.GetSumAlphas(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
-		if (this->flagAnErrorHasOccuredTimeToPanic)
-		{	std::string tempS;
-			theRel.ComputeDebugString();
-			AccumRoot.ComputeDebugString();
-		}		
-		coneRelation tempRel; 
-		tempRel=theRel;
-		tempRel.BetaCoeffs.size=0; tempRel.Betas.size=0;
-		if (	AccumRoot.HasStronglyPerpendicularDecompositionWRT
-						(NilradicalRoots,this->AmbientWeyl,tempRel.Betas, tempRel.BetaCoeffs))
-			this->NumRelationsWithStronglyPerpendicularDecomposition++;
-		else
-			this->theRelations.AddObjectOnTop(theRel);
+	{	this->ExtractRelations(matA, matX,NilradicalRoots);
 		return false;
 	}
 	else
 		return true;
+}
+
+bool rootSubalgebra::CheckForSmallRelations
+	(coneRelation& theRel, roots& nilradicalRoots)
+{ //return false;
+	root tempRoot;
+	coneRelation tempRel;
+	for (int i=0;i<this->kModules.size;i++)
+		for (int j=i+1;j<this->kModules.size;j++)
+		{ tempRoot.Assign(this->HighestWeightsGmodK.TheObjects[i]);
+			tempRoot.Add(this->HighestWeightsGmodK.TheObjects[j]);
+			if (!tempRoot.IsEqualToZero()) 
+			{ tempRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(0);
+				tempRel.Betas.SetSizeExpandOnTopNoObjectInit(0);
+				if (tempRoot.HasStronglyPerpendicularDecompositionWRT
+							(nilradicalRoots,this->AmbientWeyl,tempRel.Betas, tempRel.BetaCoeffs))
+				{	theRel=tempRel;
+					theRel.ComputeDebugString();
+					return true;
+				}
+			}
+		}
+	return false;
+} 
+
+void rootSubalgebra::ExtractRelations
+	(MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots)
+{	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+	{	this->NilradicalKmods.ComputeDebugString();
+		NilradicalRoots.ComputeDebugString();
+		matX.ComputeDebugString();
+	}
+	root tempRoot; tempRoot.MakeZero(theDimension);
+	coneRelation theRel; 
+	if (this->CheckForSmallRelations(theRel,NilradicalRoots))
+	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
+		return;
+	}	
+	matX.ScaleToIntegralForMinRationalHeightNoSignChange();
+	for (int i=0;i<matA.NumCols;i++)
+		if (!matX.elements[i][0].IsEqualToZero())
+		{	for (int j=0;j<theDimension;j++)
+				tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
+			assert(matX.elements[i][0].DenShort==1);
+			if (i<NilradicalRoots.size)
+			{ theRel.Betas.AddObjectOnTop(tempRoot);
+				theRel.BetaCoeffs.AddObjectOnTop(matX.elements[i][0]);
+			} else
+			{	tempRoot.MinusRoot();
+				theRel.Alphas.AddObjectOnTop(tempRoot);
+				theRel.AlphaCoeffs.AddObjectOnTop(matX.elements[i][0]);
+			}
+		}
+	theRel.ComputeDebugString();
+	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
+	theRel.ComputeDebugString();
+	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
+	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
+	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
+	
+	theRel.ComputeDebugString();
+	root AccumRoot;
+	theRel.GetSumAlphas(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+	{	std::string tempS;
+		theRel.ComputeDebugString();
+		AccumRoot.ComputeDebugString();
+	}		
+	coneRelation tempRel; 
+	tempRel=theRel;
+	tempRel.BetaCoeffs.size=0; tempRel.Betas.size=0;
+	if (	AccumRoot.HasStronglyPerpendicularDecompositionWRT
+					(NilradicalRoots,this->AmbientWeyl,tempRel.Betas, tempRel.BetaCoeffs))
+		this->NumRelationsWithStronglyPerpendicularDecomposition++;
+	else
+	{ theRel.ComputeDebugString();
+		//this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
+		this->theRelations.AddObjectOnTop(theRel);
+	}
+}
+
+void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots)
+{ root alpha1, alpha2,beta1, tempRoot;
+	bool madeChange=true;
+	while(madeChange)
+	{	madeChange=false;
+		for (int i=0;i<theRel.Alphas.size;i++)
+			for(int j=i+1;j<theRel.Alphas.size;j++)
+			{ theRel.ComputeDebugString();
+				beta1.Assign(theRel.Alphas.TheObjects[i]);
+				beta1.Add(theRel.Alphas.TheObjects[j]);
+				if (this->IsARootOrZero(beta1))
+				{	this->ComputeHighestWeightInTheSameKMod(beta1,tempRoot);
+					assert(tempRoot.IsEqualTo(tempRoot));
+					if (NilradicalRoots.ContainsObject(beta1))
+					{ alpha1.Assign(theRel.Alphas.TheObjects[i]);
+						alpha2.Assign(theRel.Alphas.TheObjects[j]);
+						theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
+						theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
+						theRel.Alphas.TheObjects[0].Assign(alpha1);
+						theRel.Alphas.TheObjects[1].Assign(alpha2);
+						theRel.AlphaCoeffs.TheObjects[0].Assign(ROne);
+						theRel.AlphaCoeffs.TheObjects[1].Assign(ROne);
+						theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
+						theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
+						theRel.BetaCoeffs.TheObjects[0].Assign(ROne);
+						theRel.Betas.TheObjects[0].Assign(beta1);
+						madeChange=false;
+						break;
+					}
+					else
+					{ int changedIndex=i, otherIndex=j;
+						Rational alpha1coeff, alpha2coeff;
+						if (alpha1coeff.IsGreaterThanOrEqualTo
+									(alpha2coeff))
+						{ changedIndex=j; 
+							otherIndex=i;
+						}
+						alpha1coeff.Assign(theRel.AlphaCoeffs.TheObjects[changedIndex]);
+						alpha2coeff.Assign(theRel.AlphaCoeffs.TheObjects[otherIndex]);
+						alpha2.Assign(theRel.Alphas.TheObjects[otherIndex]);
+						alpha2coeff.Subtract(alpha1coeff);
+						madeChange=true;
+						theRel.Alphas.TheObjects[changedIndex].Assign(beta1);
+						theRel.AlphaCoeffs.TheObjects[changedIndex].Assign(alpha1coeff);
+						if (alpha2coeff.IsEqualToZero())
+						{	theRel.Alphas.PopIndexSwapWithLast(otherIndex);
+							theRel.AlphaCoeffs.PopIndexSwapWithLast(otherIndex);
+						} else
+						{ theRel.Alphas.TheObjects[otherIndex].Assign(alpha2);
+							theRel.AlphaCoeffs.TheObjects[otherIndex].Assign(alpha2coeff);
+						}
+					}
+				}
+			}
+	}
 }
 
 void rootSubalgebra::ComputeRootsOfK()
@@ -13940,6 +14063,53 @@ void rootSubalgebra::SetupE6_A3(GlobalVariables& theGlobalVariables)
 	this->ComputeAll();
 	this->ComputeDebugString();
 }
+
+void rootSubalgebra::SetupE6_A2plusA1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(3);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_3A1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(3);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_A2(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(2);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_2A1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(2);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
+void rootSubalgebra::SetupE6_A1(GlobalVariables& theGlobalVariables)
+{ this->AmbientWeyl.MakeEn(6);
+	this->genK.SetSizeExpandOnTopNoObjectInit(1);
+	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->ComputeAll();
+	this->ComputeDebugString();
+}
+
 /////////////////////////////////////////////////////
 
 void rootSubalgebra::RunE6_3A2(GlobalVariables& theGlobalVariables)

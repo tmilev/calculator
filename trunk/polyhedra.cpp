@@ -994,7 +994,9 @@ void ComputationSetup::InitComputationSetup()
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA;
 	std::string tempS;
-/*	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
+	
+	theRootSA.NumRelationsgreaterLengthThan2=0;
+	theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 
@@ -1048,7 +1050,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theRelations.ElementToStringGeneric(tempS);
-*/
+
 	theRootSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
@@ -1088,7 +1090,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+//	this->DoTheRootSAComputation();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -13726,6 +13728,7 @@ void rootSubalgebra::ExtractRelations
 	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
 		return;
 	}	
+	this->NumRelationsgreaterLengthThan2++;
 	matX.ScaleToIntegralForMinRationalHeightNoSignChange();
 	for (int i=0;i<matA.NumCols;i++)
 		if (!matX.elements[i][0].IsEqualToZero())

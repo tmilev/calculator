@@ -5427,6 +5427,7 @@ public:
 	int NumNilradicalsAllowed;
 	int NumConeConditionFailures;
 	int NumRelationsWithStronglyPerpendicularDecomposition;
+	int NumRelationsgreaterLengthThan2;
 	ListBasicObjects<coneRelation> theRelations;
 	roots AllRoots;
 	roots AllPositiveRoots;

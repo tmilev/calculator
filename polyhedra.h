@@ -1478,6 +1478,7 @@ public:
 			int theDimension,FeedDataToIndicatorWindow reportFunction);
 	void Average(root& output, int theDimension);
 	void Pop(int index);
+	bool ContainsARootConnectedTo(root& input, WeylGroup& theWeyl);
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
 	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
@@ -1719,9 +1720,10 @@ public:
 template <class Object>
 void ListBasicObjects<Object>::AddListOnTop(ListBasicObjects<Object>& theList)
 { int oldsize= this->size;
-	this->SetSizeExpandOnTopNoObjectInit(this->size+theList.size);
-	for (int i=oldsize;i<this->size;i++)
-		this->TheObjects[i]= theList.TheObjects[i];
+	int otherSize=theList.size;
+	this->SetSizeExpandOnTopNoObjectInit(oldsize+otherSize);
+	for (int i=0;i<otherSize;i++)
+		this->TheObjects[i+oldsize]= theList.TheObjects[i];
 }
 
 template<class Object>
@@ -5421,6 +5423,24 @@ public:
 	};
 };
 
+class DynkinDiagramRootSubalgebra
+{
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	rootsCollection SimpleBasesConnectedComponents;
+	ListBasicObjects<std::string> DynkinTypeStrings;
+	ListBasicObjects<int> indicesThreeNodes;
+	void Sort();
+	void ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl);
+	void ComputeDynkinStrings(WeylGroup& theWeyl);
+	void ComputeDynkinString(int indexComponent, WeylGroup& theWeyl);
+	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
+	void operator=(const DynkinDiagramRootSubalgebra& right);
+	bool operator==(const DynkinDiagramRootSubalgebra& right);
+};
+
 class rootSubalgebra
 {
 public:
@@ -5428,6 +5448,7 @@ public:
 	int NumConeConditionFailures;
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
+	DynkinDiagramRootSubalgebra theDynkinDiagram;
 	ListBasicObjects<coneRelation> theRelations;
 	roots AllRoots;
 	roots AllPositiveRoots;
@@ -5469,6 +5490,8 @@ public:
 	void DoKRootsEnumerationRecursively
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
+	void ComputeDebugString(bool makeALaTeXReport) 
+		{this->ElementToString(this->DebugString,makeALaTeXReport);};
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
@@ -5484,7 +5507,8 @@ public:
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables);
 	void PossibleNilradicalComputation
 		(GlobalVariables& theGlobalVariables,Selection& selKmods);
-	void ElementToString(std::string& output);
+	void ElementToString(std::string& output){this->ElementToString(output,false);};
+	void ElementToString(std::string& output, bool makeALaTeXReport);	
 	void GenerateKmodMultTable
 		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,
 			ListBasicObjects<int>& oppositeKmods,

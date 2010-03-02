@@ -5449,6 +5449,7 @@ public:
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
+	ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
 	ListBasicObjects<coneRelation> theRelations;
 	roots AllRoots;
 	roots AllPositiveRoots;

@@ -227,6 +227,8 @@ template < > int ListBasicObjects<WallData>::ListBasicObjectsActualSizeIncrement
 template < > int ListBasicObjects<rootsWithMultiplicity>::ListBasicObjectsActualSizeIncrement=10;
 template < > int ListBasicObjects<Rational>::ListBasicObjectsActualSizeIncrement=10;
 template < > int ListBasicObjects<coneRelation>::ListBasicObjectsActualSizeIncrement=10;
+template < > int ListBasicObjects<DynkinDiagramRootSubalgebra>::ListBasicObjectsActualSizeIncrement=100;
+
 
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList2;
@@ -996,7 +998,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	std::string tempS;
 	
 	theRootSA.NumRelationsgreaterLengthThan2=0;
-	//theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
+	theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
 	
 	/*theRootSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theDynkinDiagram.ComputeDiagramType
@@ -1021,7 +1023,7 @@ void ComputationSetup::DoTheRootSAComputation()
 		(theRootSA.SimpleBasisK,theRootSA.AmbientWeyl);
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-*/
+
 	theRootSA.SetupE6_D5(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theDynkinDiagram.ComputeDiagramType
 		(theRootSA.SimpleBasisK,theRootSA.AmbientWeyl);
@@ -1076,13 +1078,14 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theRelations.ElementToStringGeneric(tempS);
-
+*/
 	theRootSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theDynkinDiagram.ComputeDiagramType
 		(theRootSA.SimpleBasisK,theRootSA.AmbientWeyl);
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theRelations.ElementToStringGeneric(tempS);
+	theRootSA.relationsDiagrams.ElementToStringGeneric(tempS);
 	
 	theRootSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theDynkinDiagram.ComputeDiagramType
@@ -13411,20 +13414,28 @@ void rootSubalgebra::TransformToSimpleBasisGenerators(roots& theGens)
 		if (!theGens.TheObjects[i].IsPositiveOrZero())
 			theGens.TheObjects[i].MinusRoot();
 	bool reductionOccured=true;
+	root tempRoot;
 	while (reductionOccured)
 	{ reductionOccured= false;
 		for (int i=0;i<theGens.size;i++)
 			for (int j=i+1; j<theGens.size;j++)
-			{ root tempRoot;
+			{ if (this->flagAnErrorHasOccuredTimeToPanic)
+					theGens.ComputeDebugString();
 				tempRoot.Assign(theGens.TheObjects[i]);
 				tempRoot.Subtract(theGens.TheObjects[j]);
+				if (this->flagAnErrorHasOccuredTimeToPanic)
+					tempRoot.ComputeDebugString();
 				if (tempRoot.IsEqualToZero())
 				{	theGens.PopIndexSwapWithLast(j);
 					reductionOccured=true;
 				}
 				if (this->AllRoots.IndexOfObject(tempRoot)!=-1)
-				{ if (!tempRoot.IsPositiveOrZero()){tempRoot.MinusRoot();}
-					theGens.TheObjects[j].Assign(tempRoot);
+				{ if (!tempRoot.IsPositiveOrZero())
+					{	tempRoot.MinusRoot();
+						theGens.TheObjects[j].Assign(tempRoot);
+					}
+					else
+						theGens.TheObjects[i].Assign(tempRoot);
 					reductionOccured=true;
 				}
 			}
@@ -13743,17 +13754,21 @@ bool rootSubalgebra::CheckForSmallRelations
 	(coneRelation& theRel, roots& nilradicalRoots)
 { //return false;
 	root tempRoot;
-	coneRelation tempRel;
 	for (int i=0;i<this->kModules.size;i++)
 		for (int j=i+1;j<this->kModules.size;j++)
 		{ tempRoot.Assign(this->HighestWeightsGmodK.TheObjects[i]);
 			tempRoot.Add(this->HighestWeightsGmodK.TheObjects[j]);
 			if (!tempRoot.IsEqualToZero()) 
-			{ tempRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(0);
-				tempRel.Betas.SetSizeExpandOnTopNoObjectInit(0);
+			{ theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(0);
+				theRel.Betas.SetSizeExpandOnTopNoObjectInit(0);
 				if (tempRoot.HasStronglyPerpendicularDecompositionWRT
-							(nilradicalRoots,this->AmbientWeyl,tempRel.Betas, tempRel.BetaCoeffs))
-				{	theRel=tempRel;
+							(nilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs))
+				{	theRel.Alphas.size=0;
+					theRel.AlphaCoeffs.size=0;
+					theRel.Alphas.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
+					theRel.Alphas.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[j]);
+					theRel.AlphaCoeffs.AddObjectOnTop(ROne);
+					theRel.AlphaCoeffs.AddObjectOnTop(ROne);
 					theRel.ComputeDebugString();
 					return true;
 				}
@@ -13772,31 +13787,29 @@ void rootSubalgebra::ExtractRelations
 	}
 	root tempRoot; tempRoot.MakeZero(theDimension);
 	coneRelation theRel; 
-	if (this->CheckForSmallRelations(theRel,NilradicalRoots))
-	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
-		return;
-	}	
-	this->NumRelationsgreaterLengthThan2++;
-	matX.ScaleToIntegralForMinRationalHeightNoSignChange();
-	for (int i=0;i<matA.NumCols;i++)
-		if (!matX.elements[i][0].IsEqualToZero())
-		{	for (int j=0;j<theDimension;j++)
-				tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
-			assert(matX.elements[i][0].DenShort==1);
-			if (i<NilradicalRoots.size)
-			{ theRel.Betas.AddObjectOnTop(tempRoot);
-				theRel.BetaCoeffs.AddObjectOnTop(matX.elements[i][0]);
-			} else
-			{	tempRoot.MinusRoot();
-				theRel.Alphas.AddObjectOnTop(tempRoot);
-				theRel.AlphaCoeffs.AddObjectOnTop(matX.elements[i][0]);
+	if (!this->CheckForSmallRelations(theRel,NilradicalRoots))
+	{	this->NumRelationsgreaterLengthThan2++;
+		matX.ScaleToIntegralForMinRationalHeightNoSignChange();
+		for (int i=0;i<matA.NumCols;i++)
+			if (!matX.elements[i][0].IsEqualToZero())
+			{	for (int j=0;j<theDimension;j++)
+					tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
+				assert(matX.elements[i][0].DenShort==1);
+				if (i<NilradicalRoots.size)
+				{ theRel.Betas.AddObjectOnTop(tempRoot);
+					theRel.BetaCoeffs.AddObjectOnTop(matX.elements[i][0]);
+				} else
+				{	tempRoot.MinusRoot();
+					theRel.Alphas.AddObjectOnTop(tempRoot);
+					theRel.AlphaCoeffs.AddObjectOnTop(matX.elements[i][0]);
+				}
 			}
-		}
+	}
+//	theRel.ComputeDebugString();
+//	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
 	theRel.ComputeDebugString();
-	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
-	theRel.ComputeDebugString();
-	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
-	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
+//	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
+//	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
 	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
 	
 	theRel.ComputeDebugString();
@@ -13807,12 +13820,18 @@ void rootSubalgebra::ExtractRelations
 		theRel.ComputeDebugString();
 		AccumRoot.ComputeDebugString();
 	}		
-	coneRelation tempRel; 
-	tempRel=theRel;
-	tempRel.BetaCoeffs.size=0; tempRel.Betas.size=0;
+	theRel.BetaCoeffs.size=0; theRel.Betas.size=0;
 	if (	AccumRoot.HasStronglyPerpendicularDecompositionWRT
-					(NilradicalRoots,this->AmbientWeyl,tempRel.Betas, tempRel.BetaCoeffs))
-		this->NumRelationsWithStronglyPerpendicularDecomposition++;
+					(NilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs))
+	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
+		roots tempRoots;
+		tempRoots.CopyFromBase(theRel.Alphas);
+		tempRoots.AddListOnTop(theRel.Betas);
+		this->TransformToSimpleBasisGenerators(tempRoots);
+		DynkinDiagramRootSubalgebra tempD;
+		tempD.ComputeDiagramType(tempRoots, this->AmbientWeyl);
+		this->relationsDiagrams.AddObjectOnTop(tempD);
+	}
 	else
 	{ theRel.ComputeDebugString();
 		//this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
@@ -14101,7 +14120,7 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 	this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
 }
 
-bool ::DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra&right) 
+bool ::DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& right) 
 { if (right.SimpleBasesConnectedComponents.size!=
 			this->SimpleBasesConnectedComponents.size)
 		return false;
@@ -14115,6 +14134,13 @@ bool ::DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra
 			return false;
 	}
 	return true;
+}
+
+void DynkinDiagramRootSubalgebra::operator =(const DynkinDiagramRootSubalgebra& right)
+{ this->DebugString.assign(right.DebugString);
+	this->DynkinTypeStrings.CopyFromBase(right.DynkinTypeStrings);
+	this->indicesThreeNodes.CopyFromBase(right.indicesThreeNodes);
+	this->SimpleBasesConnectedComponents.CopyFromBase(right.SimpleBasesConnectedComponents);
 }
 
 int ::DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes

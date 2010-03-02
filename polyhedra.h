@@ -88,6 +88,7 @@ class PolynomialLight;
 class Selection;
 class IntegerPoly;
 class Rational;
+class rootSubalgebra;
 class intRoot;
 class PolyPartFractionNumerator;
 class root;
@@ -5404,25 +5405,6 @@ public:
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 };
 
-class coneRelation
-{ 
-public:
-	roots Alphas;
-	roots Betas;
-	ListBasicObjects<Rational> AlphaCoeffs;
-	ListBasicObjects<Rational> BetaCoeffs;
-	std::string DebugString;
-	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-	void GetSumAlphas(root& output, int theDimension);
-	void operator=(const coneRelation& right)
-	{ this->Alphas.CopyFromBase(right.Alphas);
-		this->Betas.CopyFromBase(right.Betas);
-		this->AlphaCoeffs.CopyFromBase(right.AlphaCoeffs);
-		this->BetaCoeffs.CopyFromBase(right.BetaCoeffs);
-	};
-};
-
 class DynkinDiagramRootSubalgebra
 {
 public:
@@ -5441,6 +5423,44 @@ public:
 	bool operator==(const DynkinDiagramRootSubalgebra& right);
 };
 
+class coneRelation
+{ 
+public:
+	roots Alphas;
+	roots Betas;
+	DynkinDiagramRootSubalgebra theDiagram;
+	ListBasicObjects<Rational> AlphaCoeffs;
+	ListBasicObjects<Rational> BetaCoeffs;
+	ListBasicObjects<ListBasicObjects<int> > AlphaKComponents;
+	ListBasicObjects<ListBasicObjects<int> > BetaKComponents;
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	bool leftSortedBiggerThanOrEqualToRight
+		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
+	void ComputeKComponents
+		(	roots& input, ListBasicObjects<ListBasicObjects<int> >& output,
+			rootSubalgebra& owner);
+	void GetSumAlphas(root& output, int theDimension);
+	void SortRelation(rootSubalgebra& owner);
+	void operator=(const coneRelation& right)
+	{ this->Alphas.CopyFromBase(right.Alphas);
+		this->Betas.CopyFromBase(right.Betas);
+		this->AlphaCoeffs.CopyFromBase(right.AlphaCoeffs);
+		this->BetaCoeffs.CopyFromBase(right.BetaCoeffs);
+		this->theDiagram=right.theDiagram;
+	};
+};
+
+class coneRelations: public ListBasicObjects<coneRelation>
+{
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output){this->ElementToStringGeneric(output);};
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void AddRelationNoRepetition(coneRelation& input);
+};
+
 class rootSubalgebra
 {
 public:
@@ -5450,7 +5470,8 @@ public:
 	int NumRelationsgreaterLengthThan2;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
 	ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
-	ListBasicObjects<coneRelation> theRelations;
+	coneRelations theBadRelations;
+	coneRelations theGoodRelations;
 	roots AllRoots;
 	roots AllPositiveRoots;
 	WeylGroup AmbientWeyl;
@@ -5585,7 +5606,8 @@ public:
 		(GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
 	bool LinCombToStringDistinguishedIndex
-				(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
+		(	int distinguished,root& alphaRoot, int coeff, root &linComb, 
+			std::string &output);
 };
 
 struct IndicatorWindowVariables

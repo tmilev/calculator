@@ -5414,6 +5414,9 @@ public:
 	rootsCollection SimpleBasesConnectedComponents;
 	ListBasicObjects<std::string> DynkinTypeStrings;
 	ListBasicObjects<int> indicesThreeNodes;
+	ListBasicObjects<ListBasicObjects< int > > sameTypeComponents;
+	ListBasicObjects<int> indexUniComponent;
+	ListBasicObjects<int> indexInUniComponent;
 	void Sort();
 	void ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl);
 	void ComputeDynkinStrings(WeylGroup& theWeyl);
@@ -5433,14 +5436,16 @@ public:
 	ListBasicObjects<Rational> BetaCoeffs;
 	ListBasicObjects<ListBasicObjects<int> > AlphaKComponents;
 	ListBasicObjects<ListBasicObjects<int> > BetaKComponents;
+	bool isIsomorphicTo(coneRelation& right,rootSubalgebra& owner);
 	std::string DebugString;
-	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void ElementToString(std::string& output, rootSubalgebra& owner);
+	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner);};
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
 	void ComputeKComponents
 		(	roots& input, ListBasicObjects<ListBasicObjects<int> >& output,
 			rootSubalgebra& owner);
+	void stringByConnectedComponents(roots& input, std::string& output, rootSubalgebra& owner);
 	void GetSumAlphas(root& output, int theDimension);
 	void SortRelation(rootSubalgebra& owner);
 	void operator=(const coneRelation& right)
@@ -5456,9 +5461,17 @@ class coneRelations: public ListBasicObjects<coneRelation>
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output){this->ElementToStringGeneric(output);};
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-	void AddRelationNoRepetition(coneRelation& input);
+	void ElementToString(std::string& output, rootSubalgebra& owner)
+	{ std::stringstream out;
+		std::string tempS;
+		for(int i=0;i<this->size;i++)
+		{	this->TheObjects[i].ElementToString(tempS,owner);
+			out << tempS<<"\n";
+		}
+		output=out.str();
+	};
+	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner);};
+	void AddRelationNoRepetition(coneRelation& input, rootSubalgebra& owner);
 };
 
 class rootSubalgebra
@@ -5469,6 +5482,8 @@ public:
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
+	ListBasicObjects< ListBasicObjects<int> > coneRelationsBuffer;
+	ListBasicObjects< int> coneRelationsNumSameTypeComponentsTaken;
 	ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;

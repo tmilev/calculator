@@ -1088,26 +1088,26 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.SetupE6_3A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 	
 	theRootSA.SetupE6_A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 	
 	theRootSA.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 	
 	theRootSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 }
 
 void ComputationSetup::Run()
@@ -13759,7 +13759,7 @@ bool rootSubalgebra::CheckForSmallRelations
 							theRel.Alphas.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[j]);
 							theRel.AlphaCoeffs.AddObjectOnTop(ROne);
 							theRel.AlphaCoeffs.AddObjectOnTop(ROne);
-							theRel.ComputeDebugString();
+							theRel.ComputeDebugString(*this);
 							return true;
 						}
 					}
@@ -13798,17 +13798,17 @@ void rootSubalgebra::ExtractRelations
 	}
 //	theRel.ComputeDebugString();
 //	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
-	theRel.ComputeDebugString();
+	theRel.ComputeDebugString(*this);
 //	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
 //	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
 	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
 	
-	theRel.ComputeDebugString();
+	theRel.ComputeDebugString(*this);
 	root AccumRoot;
 	theRel.GetSumAlphas(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 	{	std::string tempS;
-		theRel.ComputeDebugString();
+		theRel.ComputeDebugString(*this);
 		AccumRoot.ComputeDebugString();
 	}		
 	theRel.BetaCoeffs.size=0; theRel.Betas.size=0;
@@ -13817,7 +13817,7 @@ void rootSubalgebra::ExtractRelations
 	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
 		roots tempRoots;
 		if (this->flagAnErrorHasOccuredTimeToPanic)
-			theRel.ComputeDebugString();
+			theRel.ComputeDebugString(*this);
 		tempRoots.CopyFromBase(theRel.Alphas);
 		tempRoots.AddListOnTop(theRel.Betas);
 		if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -13829,10 +13829,10 @@ void rootSubalgebra::ExtractRelations
 		if (theRel.theDiagram.DynkinTypeStrings.TheObjects[0]=="A1")
 			Stop();
 		theRel.SortRelation(*this);
-		this->theGoodRelations.AddRelationNoRepetition(theRel);
+		this->theGoodRelations.AddRelationNoRepetition(theRel,*this);
 	}
 	else
-	{ theRel.ComputeDebugString();
+	{ theRel.ComputeDebugString(*this);
 		//this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
 		this->theBadRelations.AddObjectOnTop(theRel);
 	}
@@ -13845,7 +13845,7 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& Ni
 	{	madeChange=false;
 		for (int i=0;i<theRel.Alphas.size;i++)
 			for(int j=i+1;j<theRel.Alphas.size;j++)
-			{ theRel.ComputeDebugString();
+			{ theRel.ComputeDebugString(*this);
 				beta1.Assign(theRel.Alphas.TheObjects[i]);
 				beta1.Add(theRel.Alphas.TheObjects[j]);
 				if (this->IsARootOrZero(beta1))
@@ -13942,7 +13942,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors
 	( coneRelation &theRelation, roots& nilradicalRoots)
 { bool isMaximal=false;
 	root beta,tempRoot;
-	theRelation.ComputeDebugString();
+	theRelation.ComputeDebugString(*this);
 	while (!isMaximal)
 	{ isMaximal=true;
 		for (int i=0;i<theRelation.AlphaCoeffs.size;i++)
@@ -13952,7 +13952,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors
 				nilradicalRoots.TheObjects[j].ComputeDebugString();
 				tempRoot.Add(nilradicalRoots.TheObjects[j]);
 				tempRoot.ComputeDebugString();
-				theRelation.ComputeDebugString();
+				theRelation.ComputeDebugString(*this);
 				if (	(this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
 						&&(!nilradicalRoots.ContainsObject(tempRoot)))
 				{ this->ComputeHighestWeightInTheSameKMod(tempRoot,tempRoot);
@@ -14002,6 +14002,21 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 				this->SimpleBasesConnectedComponents.SwapTwoIndices(i,j);
 			}
 		}					
+	}
+	this->sameTypeComponents.size=0;
+	this->indexInUniComponent.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
+	this->indexUniComponent.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
+	this->sameTypeComponents.MakeActualSizeAtLeastExpandOnTop(this->SimpleBasesConnectedComponents.size);
+	std::string LastString="";
+	for (int i=0; i<this->SimpleBasesConnectedComponents.size;i++)
+	{ if (!(this->DynkinTypeStrings.TheObjects[i]==LastString))
+		{	this->sameTypeComponents.SetSizeExpandOnTopNoObjectInit(this->sameTypeComponents.size+1);
+			this->sameTypeComponents.LastObject()->size=0;
+			LastString=this->DynkinTypeStrings.TheObjects[i];
+		}
+		this->sameTypeComponents.LastObject()->AddObjectOnTop(i);
+		this->indexUniComponent.TheObjects[i]=this->sameTypeComponents.size-1;
+		this->indexInUniComponent.TheObjects[i]=this->sameTypeComponents.LastObject()->size-1;
 	}
 }
 
@@ -15881,7 +15896,7 @@ void rootsWithMultiplicity::ElementToString(std::string &output)
 	output=out.str();
 }
 
-void coneRelation::ElementToString(std::string &output)
+void coneRelation::ElementToString(std::string &output, rootSubalgebra& owner)
 { std::string tempS;
 	std::stringstream out;
 	assert(this->AlphaCoeffs.size==this->Alphas.size);
@@ -15909,10 +15924,56 @@ void coneRelation::ElementToString(std::string &output)
 		if (i!=this->Betas.size-1)
 			out <<" + ";
 	}
+	owner.coneRelationsBuffer.SetSizeExpandOnTopNoObjectInit
+		(owner.theDynkinDiagram.sameTypeComponents.size);
+	owner.coneRelationsNumSameTypeComponentsTaken.SetSizeExpandOnTopNoObjectInit
+		(owner.theDynkinDiagram.sameTypeComponents.size);	
+	for (int i=0;i<owner.theDynkinDiagram.sameTypeComponents.size;i++)
+	{ owner.coneRelationsNumSameTypeComponentsTaken.TheObjects[i]=-1;
+		owner.coneRelationsBuffer.TheObjects[i].SetSizeExpandOnTopNoObjectInit
+			(owner.theDynkinDiagram.sameTypeComponents.TheObjects[i].size);
+		for (int j=0; j<owner.coneRelationsBuffer.TheObjects[i].size;j++)
+			owner.coneRelationsBuffer.TheObjects[i].TheObjects[j]=-1;
+	}
+	out<<"\n";
+	this->stringByConnectedComponents(this->Alphas,tempS,owner);
+	out <<tempS;
+	this->stringByConnectedComponents(this->Betas,tempS,owner);
+	out << tempS;
 	this->theDiagram.ElementToString(tempS);
 	out <<"\n"<<tempS;
 	output=out.str();
 }
+
+void coneRelation::stringByConnectedComponents(roots& input, std::string& output, rootSubalgebra& owner)
+{	std::stringstream out;
+	for (int i=0;i<input.size;i++)
+	{ bool foundAnotherComponent=false;
+		for (int j=0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size;j++)
+			if (owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j]
+						.ContainsARootConnectedTo(input.TheObjects[i],owner.AmbientWeyl))
+			{	if (foundAnotherComponent)
+					out<<"+";
+				foundAnotherComponent=true;
+				out << owner.theDynkinDiagram.DynkinTypeStrings.TheObjects[j];
+				int& index = 
+					owner.coneRelationsBuffer.TheObjects
+						[owner.theDynkinDiagram.indexUniComponent.TheObjects[j]].TheObjects
+							[owner.theDynkinDiagram.indexInUniComponent.TheObjects[j]];
+				int& numPrimes=owner.coneRelationsNumSameTypeComponentsTaken.TheObjects
+					[owner.theDynkinDiagram.indexUniComponent.TheObjects[j]]; 
+				if (index==-1)
+				{ index=numPrimes;
+					numPrimes++;
+				}	
+				for (int k=0;k<numPrimes;k++)
+					out<<"'";				
+			}
+		out <<"\t";
+	}	
+	output=out.str();
+}
+
 
 void coneRelation::GetSumAlphas(root &output, int theDimension)
 { assert(this->AlphaCoeffs.size==this->Alphas.size);
@@ -15974,9 +16035,15 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight
 	return true;
 }
 
-void coneRelations::AddRelationNoRepetition(coneRelation& input)
+bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebra& owner)
+{ this->ComputeDebugString(owner);
+	right.ComputeDebugString(owner);
+	return this->DebugString==right.DebugString;
+}
+
+void coneRelations::AddRelationNoRepetition(coneRelation& input,rootSubalgebra& owner)
 { for (int i=0;i<this->size;i++)
-		if(	this->TheObjects[i].theDiagram==input.theDiagram)
+		if(	this->TheObjects[i].isIsomorphicTo(input,owner))
 			return;
 	this->AddObjectOnTop(input);
 }

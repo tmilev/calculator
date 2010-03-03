@@ -5438,7 +5438,9 @@ public:
 	ListBasicObjects<ListBasicObjects<int> > BetaKComponents;
 	bool isIsomorphicTo(coneRelation& right,rootSubalgebra& owner);
 	std::string DebugString;
+	std::string stringConnectedComponents;
 	void ElementToString(std::string& output, rootSubalgebra& owner);
+	void ComputeStringConnectedComponents(rootSubalgebra& owner, std::string& output);
 	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner);};
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);

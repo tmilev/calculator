@@ -1032,58 +1032,58 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
 	theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
 	theRootSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
 
 	theRootSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
 	theRootSA.SetupE6_2A2(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
 	theRootSA.SetupE6_A2plus2A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
 	theRootSA.SetupE6_4A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
 	theRootSA.SetupE6_D4(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
 	theRootSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 	
 	theRootSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString();
-	theRootSA.theGoodRelations.ComputeDebugString();
+	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
+	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 	*/
 	theRootSA.SetupE6_3A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
@@ -15924,7 +15924,18 @@ void coneRelation::ElementToString(std::string &output, rootSubalgebra& owner)
 		if (i!=this->Betas.size-1)
 			out <<" + ";
 	}
-	owner.coneRelationsBuffer.SetSizeExpandOnTopNoObjectInit
+	this->ComputeStringConnectedComponents(owner,this->stringConnectedComponents);
+	out <<this->stringConnectedComponents<<"\n";
+	this->theDiagram.ElementToString(tempS);
+	out <<"\n"<<tempS;
+	output=out.str();
+}
+
+void coneRelation::ComputeStringConnectedComponents
+	(rootSubalgebra& owner, std::string& output)
+{ std::string tempS;
+	std::stringstream out;
+		owner.coneRelationsBuffer.SetSizeExpandOnTopNoObjectInit
 		(owner.theDynkinDiagram.sameTypeComponents.size);
 	owner.coneRelationsNumSameTypeComponentsTaken.SetSizeExpandOnTopNoObjectInit
 		(owner.theDynkinDiagram.sameTypeComponents.size);	
@@ -15935,13 +15946,10 @@ void coneRelation::ElementToString(std::string &output, rootSubalgebra& owner)
 		for (int j=0; j<owner.coneRelationsBuffer.TheObjects[i].size;j++)
 			owner.coneRelationsBuffer.TheObjects[i].TheObjects[j]=-1;
 	}
-	out<<"\n";
 	this->stringByConnectedComponents(this->Alphas,tempS,owner);
 	out <<tempS;
 	this->stringByConnectedComponents(this->Betas,tempS,owner);
 	out << tempS;
-	this->theDiagram.ElementToString(tempS);
-	out <<"\n"<<tempS;
 	output=out.str();
 }
 
@@ -15963,13 +15971,13 @@ void coneRelation::stringByConnectedComponents(roots& input, std::string& output
 				int& numPrimes=owner.coneRelationsNumSameTypeComponentsTaken.TheObjects
 					[owner.theDynkinDiagram.indexUniComponent.TheObjects[j]]; 
 				if (index==-1)
-				{ index=numPrimes;
-					numPrimes++;
+				{	numPrimes++;
+					index=numPrimes;
 				}	
 				for (int k=0;k<numPrimes;k++)
 					out<<"'";				
 			}
-		out <<"\t";
+		out <<",\t";
 	}	
 	output=out.str();
 }
@@ -16038,7 +16046,7 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight
 bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebra& owner)
 { this->ComputeDebugString(owner);
 	right.ComputeDebugString(owner);
-	return this->DebugString==right.DebugString;
+	return this->stringConnectedComponents==right.stringConnectedComponents;
 }
 
 void coneRelations::AddRelationNoRepetition(coneRelation& input,rootSubalgebra& owner)

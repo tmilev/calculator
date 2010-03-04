@@ -13482,7 +13482,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	(GlobalVariables& theGlobalVariables)
 {	this->GenerateKmodMultTable(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
-		this->theMultTable.ComputeDebugString();
+		this->theMultTable.ComputeDebugString(*this);
 	this->NumNilradicalsAllowed=0;
 	this->NumConeConditionFailures=0;
 	this->NumRelationsWithStronglyPerpendicularDecomposition=0;
@@ -13529,7 +13529,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 	std::string tempSsel, tempSopposite;
 	ListBasicObjects<Selection> tempSels;
 	if (this->flagAnErrorHasOccuredTimeToPanic)
-	{	multTable.ComputeDebugString();
+	{	multTable.ComputeDebugString(*this);
 		std::stringstream out; out <<"\n\t";
 		for (int i=0;i<oppositeKmods.size;i++)
 			out <<i <<" / " << oppositeKmods.TheObjects[i]<< "\t";
@@ -13953,7 +13953,7 @@ void rootSubalgebra::ElementToString(std::string &output, bool makeALaTeXReport)
 			out	<<tempS	<<"\n";
 		}
 	}
-	this->theMultTable.ElementToString(tempS,makeALaTeXReport);
+	this->theMultTable.ElementToString(tempS,makeALaTeXReport,*this);
 	out << tempS <<"\n";
   for (int i=0;i<this->theOppositeKmods.size;i++)
     out << this->theOppositeKmods.TheObjects[i]<<"\t";
@@ -15863,27 +15863,27 @@ void affineHyperplanes::ElementToString(std::string& output)
 	output= out.str();
 }
 
-void multTableKmods::ElementToString(std::string& output)
-{ this->ElementToString(output,false);
+void multTableKmods::ElementToString(std::string& output, rootSubalgebra& owner)
+{ this->ElementToString(output,false,owner);
 }
 
-void multTableKmods::ElementToString(std::string& output, bool useLaTeX)
+void multTableKmods::ElementToString(std::string& output, bool useLaTeX, rootSubalgebra& owner)
 {	std::stringstream out;
 	out <<"\t";
 	if (!useLaTeX)
     for (int i=0; i<this->size;i++)
       out << i<<"\t";
   else
-  { out <<"\\begin{tabular}{";
-    for (int i=0; i<this->size+1;i++)
+  { out <<"\\begin{tabular}{c|";
+    for (int i=0; i<this->size;i++)
       out << "c";
-    out << "}";
+    out << "} & ";
     for (int i=0; i<this->size;i++)
     { out << i;
       if (i!=this->size-1)
         out <<"&";
     }
-    out<<"\\\\";
+    out<<"\\\\\\hline";
   }
 	for (int i=0; i<this->size;i++)
 	{ out <<"\n"<<i;
@@ -15892,9 +15892,13 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX)
     else
       out <<"\t";
 		for (int j=0;j<this->TheObjects[i].size;j++)
-		{	for (int k=0;k<this->TheObjects[i].TheObjects[j].size;k++)
+		{	if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
+        out<<"\\multicolumn{1}{c|}{";
+      for (int k=0;k<this->TheObjects[i].TheObjects[j].size;k++)
 				out << this->TheObjects[i].TheObjects[j].TheObjects[k] << ", ";
-			if (useLaTeX )
+			if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
+        out<<"}";
+      if (useLaTeX )
       { if (j!=this->TheObjects[i].size-1)
           out <<" & ";
       }
@@ -15902,7 +15906,10 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX)
         out << "\t";
 		}
 		if (useLaTeX)
-      out <<"\\\\";
+    { out <<"\\\\";
+      if (i==owner.CentralizerRoots.size-1)
+        out<<"\\cline{2-" << owner.CentralizerRoots.size+1<<"}";
+    }
 	}
 	if (useLaTeX)
     out <<"\n\\end{tabular}";

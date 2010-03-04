@@ -255,6 +255,13 @@ public:
 	static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
 	inline static int Maximum(int a, int b){	if (a>b) return a;
 																						else return b;};
+	template <typename T>
+	inline static void swap(T& a, T& b)
+	{ T temp;
+    temp=a;
+    a=b;
+    b=temp;
+  };
 	inline static int Minimum(int a, int b){	if (a>b) return b;
 																						else return a;};
 	inline static short Minimum(short a, short b){if (a>b) return b; else return a;};
@@ -746,7 +753,7 @@ public:
 	ListBasicObjects<int> elements;
 	ListBasicObjects<int> Multiplicities;
 	int CardinalitySelectionWithoutMultiplicities();
-	void init(int NumElements);
+	void initMe(int NumElements);
 	void ComputeElements();
 };
 
@@ -754,7 +761,7 @@ class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities
 {
 public:
 	int MaxMultiplicity;
-	void init(int NumElements, int MaxMult);
+	void initMe2(int NumElements, int MaxMult);
 	void IncrementSubset();
 };
 
@@ -762,9 +769,8 @@ class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultipliciti
 {
 public:
 	ListBasicObjects<int> MaxMultiplicities;
-	void init(int NumElements){	this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
-															this->::SelectionWithMultiplicities::init(NumElements);
-														};
+	void initIncomplete(int NumElements){	this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
+                                        this->initMe(NumElements);};
 	void clearNoMaxMultiplicitiesChange();
 	void IncrementSubset();
 	int getTotalNumSubsets();
@@ -5481,6 +5487,22 @@ public:
 	void AddRelationNoRepetition(coneRelation& input, rootSubalgebra& owner);
 };
 
+class permutation: public SelectionWithDifferentMaxMultiplicities
+{
+public:
+  void initPermutation(int n);
+  void initPermutation(ListBasicObjects<int>& disjointSubsets, int TotalNumElements);
+  void incrementAndGetPermutation(ListBasicObjects<int>& output);
+  void GetPermutation(ListBasicObjects<int>& output);
+};
+
+class rootsmap
+{
+public:
+  roots domain;
+  roots image;
+};
+
 class rootSubalgebra
 {
 public:
@@ -5488,9 +5510,11 @@ public:
 	int NumConeConditionFailures;
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
+	int NumGmodKtableRowsAllowedLatex;
 	::multTableKmods theMultTable;
 	ListBasicObjects<int> theOppositeKmods;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
+	DynkinDiagramRootSubalgebra theCentralizerDiagram;
 	ListBasicObjects< ListBasicObjects<int> > coneRelationsBuffer;
 	ListBasicObjects< int> coneRelationsNumSameTypeComponentsTaken;
 	ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
@@ -5512,6 +5536,7 @@ public:
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
 	bool flagAnErrorHasOccuredTimeToPanic;
+	void ElementToStringLaTeXHeaderModTable(std::string& outputHeader,std::string&  outputFooter);
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
 	ListBasicObjects<Selection> theKEnumerations;
@@ -5521,6 +5546,7 @@ public:
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots);
+  bool IsIsomorphicTo(rootSubalgebra& right);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);

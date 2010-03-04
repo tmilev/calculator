@@ -1034,15 +1034,16 @@ void ComputationSetup::DoTheRootSAComputation()
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
 	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-*/
+*//*
 	this->theRootSubalgebra.flagAnErrorHasOccuredTimeToPanic=true;
 	this->theRootSubalgebra.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
 	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
+*//*
 
-/*
+
 	theRootSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
@@ -1073,11 +1074,11 @@ void ComputationSetup::DoTheRootSAComputation()
 	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
 	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
 
-	theRootSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
+	this->theRootSubalgebra.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
+	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
+	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
 
 	theRootSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
@@ -1096,14 +1097,14 @@ void ComputationSetup::DoTheRootSAComputation()
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
 	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
+*/
+	this->theRootSubalgebra.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
+//	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
+//		(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
+	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
 
-	theRootSA.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-
-	theRootSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
+	/*theRootSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
@@ -1120,7 +1121,9 @@ void ComputationSetup::Run()
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
 	this->DoTheRootSAComputation();
     this->theRootSubalgebra.ComputeDebugString(true);
-		this->theOutput.DebugString=this->theRootSubalgebra.DebugString;
+    this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
+		this->theOutput.DebugString.append(this->theRootSubalgebra.DebugString);
+    this->theOutput.DebugString.append("\\end{document}");
     this->ExitComputationSetup();
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
@@ -2182,8 +2185,14 @@ void roots::ElementToString(std::string& output, bool useLaTeX)
 	if (! useLaTeX)
     out<<"Num roots: "<<this->size<<"\n";
 	for (int i=0; i<this->size;i++)
-	{	this->TheObjects[i].ElementToString(tempS);
-		out<<tempS<<"\n";
+	{	this->TheObjects[i].ElementToString(tempS,useLaTeX);
+		out<<tempS;
+		if (i!=this->size-1)
+		{ if (useLaTeX)
+        out<<", ";
+      else
+        out<<"\n";
+		}
 	}
 	output = out.str();
 }
@@ -6895,7 +6904,7 @@ void QuasiNumber::Simplify()
 	if (theLCM>4) {return;}
 	int NumCycles = MathRoutines::KToTheNth(theLCM,this->NumVariables);
 	SelectionWithMaxMultiplicity theSubset;
-	theSubset.init(this->NumVariables, theLCM-1);
+	theSubset.initMe2(this->NumVariables, theLCM-1);
 //	bool oneValue=true;
 	Rational theValue, tempRat;
 	std::string tempS, tempS2;
@@ -8842,8 +8851,8 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula
 	{ Accum.ComputeOneCheckSum(StartCheckSum,theGlobalVariables);
 		this->ComputeOneCheckSum(Accum,theDiff,Accum.AmbientDimension,theGlobalVariables);
 	}
-  ::SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
-  TheBigBadIndexingSet.init(theSelectedIndices.size);
+  SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
+  TheBigBadIndexingSet.initIncomplete(theSelectedIndices.size);
   static int TotalMultiplicity;
   TotalMultiplicity=0;
   for (int i=0;i<theSelectedIndices.size;i++)
@@ -9909,7 +9918,7 @@ void partFraction::ReduceMonomialByMonomial
 	SelectionWithDifferentMaxMultiplicities thePowers;
 	ListBasicObjects<int> thePowersSigned;
 	thePowersSigned.SetSizeExpandOnTopNoObjectInit(this->IndicesNonZeroMults.size);
-	thePowers.init(this->IndicesNonZeroMults.size);
+	thePowers.initIncomplete(this->IndicesNonZeroMults.size);
 	for (int k=0;k<this->Coefficient.size;k++)
 	{ this->Coefficient.TheObjects[k].MonomialExponentToColumnMatrix(matColumn);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -11214,7 +11223,7 @@ int RootToIndexTable::getIndexDoubleOfARoot(intRoot& TheRoot)
 	return this->getIndex(tempRoot);
 }
 
-void ::SelectionWithMultiplicities::init(int NumElements)
+void ::SelectionWithMultiplicities::initMe(int NumElements)
 {	this->Multiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
 	for (int i=0;i<this->Multiplicities.size;i++)
 		this->Multiplicities.TheObjects[i]=0;
@@ -11230,8 +11239,8 @@ void SelectionWithMultiplicities::ElementToString(std::string& output)
 	output= out.str();
 }
 
-void SelectionWithMaxMultiplicity::init(int NumElements, int MaxMult)
-{ this->::SelectionWithMultiplicities::init(NumElements);
+void SelectionWithMaxMultiplicity::initMe2(int NumElements, int MaxMult)
+{ this->initMe(NumElements);
 	this->MaxMultiplicity=MaxMult;
 }
 
@@ -13380,6 +13389,7 @@ void rootSubalgebra::ComputeAll()
 	this->ComputeCentralizerFromKModulesAndSortKModules();
 	this->NilradicalKmods.init(this->kModules.size);
 	this->theDynkinDiagram.ComputeDiagramType(this->SimpleBasisK,this->AmbientWeyl);
+	this->theCentralizerDiagram.ComputeDiagramType(this->SimpleBasisCentralizerRoots,this->AmbientWeyl);
 	this->ComputeDebugString();
 }
 
@@ -13930,33 +13940,99 @@ void rootSubalgebra::ComputeDebugString()
 { this->ElementToString(this->DebugString);
 }
 
+void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeader,std::string&  outputFooter)
+{ outputHeader.clear();
+  outputHeader.append
+    ("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
+  outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
+  outputHeader.append ("id & size & highest weight& lowest weight& elements\\\\");
+  outputFooter.clear();
+  outputFooter.append("\\hline \\end{tabular}");
+}
+
+bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right)
+{ if (this->theDynkinDiagram.DebugString!= right.theDynkinDiagram.DebugString)
+    return false;
+
+}
+
+
+
 void rootSubalgebra::ElementToString(std::string &output, bool makeALaTeXReport)
 { std::stringstream out;
 	std::string tempS;
+	std::string latexFooter, latexHeader;
+	int LatexLineCounter=0;
+	this->ElementToStringLaTeXHeaderModTable(latexHeader, latexFooter);
 	this->theDynkinDiagram.ElementToString(tempS);
-  out <<"Semisimple type of $\\mathfrak{k}:$ "
+  out <<"\\noindent Semisimple type of $\\mathfrak{k}:$ "
       << tempS;
   if (!makeALaTeXReport)
     out<<"\nRank k: " <<this->SimpleBasisK.size;
 	this->SimpleBasisK.ElementToString(tempS,makeALaTeXReport);
-	out <<"\nSimple Basis:"<<tempS;
-	out<<"\nRank $C(\\mathfrak{k})$: " <<this->SimpleBasisCentralizerRoots.size <<"\nSimple Basis centralizer: ";
+	out <<"\n\\noindent Simple basis: "<<tempS;
+	this->theCentralizerDiagram.ElementToString(tempS);
+	out<<"\n\n\\noindent  Type of centralizer of $\\mathfrak{k}$: " <<tempS<<"; simple basis centralizer: ";
 	this->SimpleBasisCentralizerRoots.ElementToString(tempS,makeALaTeXReport);
 	out <<tempS;
-	out << "Num g mod k modules: "<<this->LowestWeightsGmodK.size;
+	out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: "<<this->LowestWeightsGmodK.size;
+	if (makeALaTeXReport)
+    out << latexHeader;
 	for (int i=0;i<this->kModules.size;i++)
 	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,makeALaTeXReport);
-		out << "\nModule "<<i<<": lowest weight: "
-				<< tempS	<< "\n"<<this->kModules.TheObjects[i].size<< " roots:\n";
+    if (!makeALaTeXReport)
+      out << "\n\n Module ";
+    else
+      out <<"\\hline";
+    out<<i;
+    if (!makeALaTeXReport)
+      out << ": size: ";
+    else
+      out <<" & ";
+    out << this->kModules.TheObjects[i].size;
+    if (!makeALaTeXReport)
+      out << "; lowest weight: ";
+    else
+      out <<" & ";
+		out << tempS;
+		this->HighestWeightsGmodK.TheObjects[i].ElementToString(tempS,makeALaTeXReport);
+    if (!makeALaTeXReport)
+      out << "; highest weight: ";
+    else
+      out <<" & ";
+		out	<< tempS;
+		if (!makeALaTeXReport)
+      out	<< "; elements: ";
+    else
+      out <<" & \n\\begin{tabular}{c}\n";
 		for (int j=0;j<this->kModules.TheObjects[i].size;j++)
 		{ this->kModules.TheObjects[i].TheObjects[j].ElementToString(tempS,makeALaTeXReport);
-			out	<<tempS	<<"\n";
-		}
+			out	<<tempS;
+			if (j!=this->kModules.TheObjects[i].size)
+        out<<", ";
+      if (makeALaTeXReport)
+        out<<"\\\\";
+    }
+    if (makeALaTeXReport)
+      out <<"\\end{tabular}\\\\\n";
+    if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
+    { LatexLineCounter=0;
+      out <<latexFooter<<latexHeader;
+    }
+    if (i!=this->kModules.size-1)
+    { LatexLineCounter+=this->kModules.TheObjects[i].size;
+      if (  (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) &&
+            (LatexLineCounter!=this->kModules.TheObjects[i].size))
+      { out <<latexFooter<<latexHeader;
+        LatexLineCounter=this->kModules.TheObjects[i].size;
+      }
+    }
 	}
+	if (makeALaTeXReport)
+    out<<latexFooter;
+	out <<"\n\n\\noindent Pairing table:\n\n\\noindent";
 	this->theMultTable.ElementToString(tempS,makeALaTeXReport,*this);
 	out << tempS <<"\n";
-  for (int i=0;i<this->theOppositeKmods.size;i++)
-    out << this->theOppositeKmods.TheObjects[i]<<"\t";
 	output=out.str();
 }
 
@@ -14391,7 +14467,7 @@ void rootSubalgebra::SetupE6_A2(GlobalVariables& theGlobalVariables)
 void rootSubalgebra::SetupE6_2A1(GlobalVariables& theGlobalVariables)
 { this->AmbientWeyl.MakeEn(6);
 	this->genK.SetSizeExpandOnTopNoObjectInit(2);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
+	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
 	this->ComputeAll();
 	this->ComputeDebugString();
@@ -15877,7 +15953,7 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, rootSub
   { out <<"\\begin{tabular}{c|";
     for (int i=0; i<this->size;i++)
       out << "c";
-    out << "} & ";
+    out << "|} & ";
     for (int i=0; i<this->size;i++)
     { out << i;
       if (i!=this->size-1)
@@ -15911,6 +15987,19 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, rootSub
         out<<"\\cline{2-" << owner.CentralizerRoots.size+1<<"}";
     }
 	}
+  if (useLaTeX)
+    out << "\n\\hline opposite & ";
+  else
+    out << "\t";
+  for (int i=0;i<owner.theOppositeKmods.size;i++)
+  { out << i<<"/"<< owner.theOppositeKmods.TheObjects[i];
+    if (i!=owner.theOppositeKmods.size-1)
+    { if (useLaTeX)
+        out<<" & ";
+      else
+        out <<"\t";
+    }
+  }
 	if (useLaTeX)
     out <<"\n\\end{tabular}";
 	output=out.str();
@@ -15918,6 +16007,7 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, rootSub
 
 rootSubalgebra::rootSubalgebra()
 { this->flagAnErrorHasOccuredTimeToPanic=false;
+  this->NumGmodKtableRowsAllowedLatex=35;
 }
 
 /*void SelectionList::ElementToString(std::string &output)
@@ -16115,3 +16205,35 @@ void coneRelations::AddRelationNoRepetition(coneRelation& input,rootSubalgebra& 
 	this->AddObjectOnTop(input);
 }
 
+void permutation::initPermutation(int n)
+{ this->initIncomplete(n);
+  for(int i=0;i<n;i++)
+  { this->MaxMultiplicities.TheObjects[i]=n-i-1;
+    this->Multiplicities.TheObjects[i]=0;
+  }
+}
+
+void permutation::initPermutation(ListBasicObjects<int>& disjointSubsets, int TotalNumElements)
+{ this->initIncomplete(TotalNumElements);
+  for(int i=0;i<disjointSubsets.size;i++)
+  { for (int j=0;j<disjointSubsets.TheObjects[i];j++)
+    { this->MaxMultiplicities.TheObjects[i]=disjointSubsets.TheObjects[i]-j-1;
+      this->Multiplicities.TheObjects[i]=0;
+    }
+    TotalNumElements-=disjointSubsets.TheObjects[i];
+  }
+  assert(TotalNumElements==0);
+}
+
+void permutation::incrementAndGetPermutation(ListBasicObjects<int>& output)
+{ this->IncrementSubset();
+  this->GetPermutation(output);
+}
+void permutation::GetPermutation(ListBasicObjects<int>& output)
+{ int numElements=this->Multiplicities.size;
+  output.SetSizeExpandOnTopNoObjectInit(numElements);
+  for (int i=0; i<numElements;i++)
+    output.TheObjects[i]=i;
+  for (int i=0;i<numElements;i++)
+    MathRoutines::swap(output.TheObjects[i],output.TheObjects[i+this->Multiplicities.TheObjects[i]]);
+}

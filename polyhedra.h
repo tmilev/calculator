@@ -5403,9 +5403,11 @@ class multTableKmods : public ListBasicObjects<ListBasicObjects <ListBasicObject
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output);
-	void ElementToString(std::string& output, bool useLaTeX);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void ElementToString(std::string& output, rootSubalgebra& owner);
+	void ElementToString(std::string& output, bool useLaTeX, rootSubalgebra& owner);
+	void ComputeDebugString(rootSubalgebra& owner)
+	{	this->ElementToString(this->DebugString,owner);
+	};
 };
 
 class DynkinDiagramRootSubalgebra

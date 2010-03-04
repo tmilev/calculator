@@ -1407,10 +1407,11 @@ public:
 	//the below returns false
 	bool ProjectToAffineSpace(root& output);
 	bool HasStronglyPerpendicularDecompositionWRT
-	(	roots& theSet, WeylGroup& theWeylGroup, roots& output, 
+	(	roots& theSet, WeylGroup& theWeylGroup, roots& output,
 		ListBasicObjects<Rational>& outputCoeffs);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
+	void ElementToString(std::string& output, bool useLaTeX);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
 	void ScaleToIntegralMinHeight();
 	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
@@ -1496,6 +1497,7 @@ public:
 	void rootsToMatrix(MatrixLargeRational& output);
 	void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
 	void ElementToString(std::string& output);
+	void ElementToString(std::string& output, bool useLaTeX);
 	void SubSelection(Selection& theSelection, roots& output);
 	void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
 	void SelectionToMatrixAppend
@@ -4780,7 +4782,7 @@ public:
 	int multiplicity;
 	std::string DebugString;
 	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};	
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void operator=(const rootWithMultiplicity& right)
 	{	this->multiplicity= right.multiplicity;
 		this->root::operator= (right);
@@ -4800,7 +4802,7 @@ class rootsWithMultiplicity: public ListBasicObjects<rootWithMultiplicity>
 public:
 	std::string DebugString;
 	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};	
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void BubbleSort()
 	{ for (int i=0;this->size;i++)
 		{ for (int j=i+1;j<this->size;j++)
@@ -4824,7 +4826,7 @@ public:
 };
 
 class rootsWithMultiplicitiesContainer: public ListBasicObjects<rootsWithMultiplicity>
-{ 
+{
 public:
 	std::string DebugString;
 	void ElementToString(std::string& output);
@@ -5402,6 +5404,7 @@ class multTableKmods : public ListBasicObjects<ListBasicObjects <ListBasicObject
 public:
 	std::string DebugString;
 	void ElementToString(std::string& output);
+	void ElementToString(std::string& output, bool useLaTeX);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 };
 
@@ -5427,7 +5430,7 @@ public:
 };
 
 class coneRelation
-{ 
+{
 public:
 	roots Alphas;
 	roots Betas;
@@ -5483,6 +5486,8 @@ public:
 	int NumConeConditionFailures;
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
+	::multTableKmods theMultTable;
+	ListBasicObjects<int> theOppositeKmods;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
 	ListBasicObjects< ListBasicObjects<int> > coneRelationsBuffer;
 	ListBasicObjects< int> coneRelationsNumSameTypeComponentsTaken;
@@ -5512,7 +5517,7 @@ public:
 	std::string DebugString;
 	rootSubalgebra();
 	void ExtractRelations
-		(	MatrixLargeRational& matA,MatrixLargeRational& matX, 
+		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
@@ -5529,7 +5534,7 @@ public:
 	void DoKRootsEnumerationRecursively
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
-	void ComputeDebugString(bool makeALaTeXReport) 
+	void ComputeDebugString(bool makeALaTeXReport)
 		{this->ElementToString(this->DebugString,makeALaTeXReport);};
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
@@ -5539,7 +5544,7 @@ public:
 	bool ListHasNonSelectedIndexLowerThanGiven
 		(int index,ListBasicObjects<int>& tempList, Selection& tempSel);
 	void GeneratePossibleNilradicalsRecursive
-		(	GlobalVariables& theGlobalVariables, 
+		(	GlobalVariables& theGlobalVariables,
 			multTableKmods & multTable,	int StartIndex,
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int>& oppositeKmods);
@@ -5547,7 +5552,7 @@ public:
 	void PossibleNilradicalComputation
 		(GlobalVariables& theGlobalVariables,Selection& selKmods);
 	void ElementToString(std::string& output){this->ElementToString(output,false);};
-	void ElementToString(std::string& output, bool makeALaTeXReport);	
+	void ElementToString(std::string& output, bool makeALaTeXReport);
 	void GenerateKmodMultTable
 		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,
 			ListBasicObjects<int>& oppositeKmods,
@@ -5623,7 +5628,7 @@ public:
 		(GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
 	bool LinCombToStringDistinguishedIndex
-		(	int distinguished,root& alphaRoot, int coeff, root &linComb, 
+		(	int distinguished,root& alphaRoot, int coeff, root &linComb,
 			std::string &output);
 };
 
@@ -5656,6 +5661,7 @@ struct ComputationSetup
 public:
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
+	rootSubalgebra theRootSubalgebra;
 	CombinatorialChamberContainer theChambers;
 	Rational Value;
 	std::string ValueString;
@@ -5834,8 +5840,8 @@ public:
 	Selection selReduceMonomialByMonomial;
 	Selection selSimplexAlg1;
 	Selection selSimplexAlg2;
-	
-	
+
+
 
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;
 

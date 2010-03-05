@@ -13983,15 +13983,29 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right)
     { isoDomain.size=0; isoRange.size=0;
       this->theDynkinDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation1);
       this->theCentralizerDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation2);
-      this->attemptExtensionToIsomorphism(isoDomain,isoRange);
+      if (this->attemptExtensionToIsomorphism(isoDomain,isoRange))
+				return true;
       permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
     }
     permComponents.incrementAndGetPermutation(tempPermutation1);
   }
+  return false;
 }
 
-bool rootSubalgebra::attemptExtensionToIsomorphism(roots& domain, roots& range)
-{
+bool rootSubalgebra::attemptExtensionToIsomorphism
+	(roots& domain, roots& range, GlobalVariables& theGlobalVariables)
+{	int CurrentRank=domain.GetRankOfSpanOfElements(theGlobalVariables);
+	assert(CurrentRank==range.GetRankOfSpanOfElements(theGlobalVariables));
+	rootSubalgebra leftSA, rightSA;
+	leftSA.genK.size=0; rightSA.genK.size=0;
+	leftSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
+	rightSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
+	leftSA.genK.AddRootS(domain); rightSA.genK.AddRootS(range);
+	leftSA.ComputeAll(); rightSA.ComputeAll();
+	for (int i=CurrentRank;i<this->AmbientWeyl.KillingFormMatrix.NumRows;i++)
+	{	
+	}
+	return false;
 }
 
 

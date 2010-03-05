@@ -2267,6 +2267,10 @@ class hashedRoots: public HashedListBasicObjects<root>
 {
 public:
 	std::string DebugString;
+	void AddRootsOnTopHash(roots& input)
+	{ for (int i=0;i<input.size;i++)
+			this->AddObjectOnTopHash(input.TheObjects[i]);
+	};
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
 };
@@ -5554,7 +5558,8 @@ public:
   bool IsIsomorphicTo(rootSubalgebra& right);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
-  bool attemptExtensionToIsomorphism( roots& domain, roots& range);
+  bool attemptExtensionToIsomorphism
+		( roots& domain, roots& range, GlobalVariables& theGlobalVariables);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);

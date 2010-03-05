@@ -1034,14 +1034,14 @@ void ComputationSetup::DoTheRootSAComputation()
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
 	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-*//*
+*/
 	this->theRootSubalgebra.flagAnErrorHasOccuredTimeToPanic=true;
 	this->theRootSubalgebra.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
 	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-*//*
+/*
 
 
 	theRootSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
@@ -1097,14 +1097,14 @@ void ComputationSetup::DoTheRootSAComputation()
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
 	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-*/
+*//*
 	this->theRootSubalgebra.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
-//	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-//		(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
+		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
 	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
 
-	/*theRootSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
+	*//*theRootSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(*this->theGlobalVariablesContainer->Default());
 	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
@@ -13953,7 +13953,45 @@ void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeade
 bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right)
 { if (this->theDynkinDiagram.DebugString!= right.theDynkinDiagram.DebugString)
     return false;
+  if (this->theCentralizerDiagram.DebugString!= right.theCentralizerDiagram.DebugString)
+    return false;
+  roots isoDomain, isoRange;
+  permutation permComponents, permComponentsCentralizer;
+  ListBasicObjects<int> UniTypicComponents, tempPermutation1, tempPermutation2;
+  UniTypicComponents.SetSizeExpandOnTopNoObjectInit
+    (this->theDynkinDiagram.sameTypeComponents.size);
+  int tempSize=0;
+  for (int i=0;i<this->theDynkinDiagram.sameTypeComponents.size;i++)
+  { UniTypicComponents.TheObjects[i]= this->theDynkinDiagram.sameTypeComponents.TheObjects[i].size;
+    tempSize+=UniTypicComponents.TheObjects[i];
+  }
+  permComponents.initPermutation(UniTypicComponents,tempSize);
+  UniTypicComponents.SetSizeExpandOnTopNoObjectInit
+    (this->theCentralizerDiagram.sameTypeComponents.size);
+  tempSize=0;
+  for (int i=0;i<this->theCentralizerDiagram.sameTypeComponents.size;i++)
+  { UniTypicComponents.TheObjects[i]= this->theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
+    tempSize+=UniTypicComponents.TheObjects[i];
+  }
+  permComponentsCentralizer.initPermutation(UniTypicComponents,tempSize);
+  int tempI1= permComponents.getTotalNumSubsets();
+  int tempI2= permComponentsCentralizer.getTotalNumSubsets();
+  permComponents.GetPermutation(tempPermutation1);
+  permComponentsCentralizer.GetPermutation(tempPermutation2);
+  for (int i=0;i<tempI1;i++)
+  { for(int j=0;j<tempI2;j++)
+    { isoDomain.size=0; isoRange.size=0;
+      this->theDynkinDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation1);
+      this->theCentralizerDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation2);
+      this->attemptExtensionToIsomorphism(isoDomain,isoRange);
+      permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
+    }
+    permComponents.incrementAndGetPermutation(tempPermutation1);
+  }
+}
 
+bool rootSubalgebra::attemptExtensionToIsomorphism(roots& domain, roots& range)
+{
 }
 
 
@@ -14151,9 +14189,21 @@ void ::DynkinDiagramRootSubalgebra::ComputeDiagramType
 		(this->SimpleBasesConnectedComponents.size);
 	this->DynkinTypeStrings.SetSizeExpandOnTopNoObjectInit
 		(this->SimpleBasesConnectedComponents.size);
+  this->indicesEnds.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
 	this->ComputeDynkinStrings(theWeyl);
 	this->Sort();
 	this->ComputeDebugString();
+}
+
+void DynkinDiagramRootSubalgebra::GetMapFromPermutation
+  (roots& domain, roots& range, ListBasicObjects< int >& thePerm)
+{ for(int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
+    for (int j=0;j<this->SimpleBasesConnectedComponents.TheObjects[i].size;j++)
+    { domain.AddObjectOnTop( this->SimpleBasesConnectedComponents.TheObjects[i].TheObjects[j]);
+      range.AddObjectOnTop
+        ( this->SimpleBasesConnectedComponents.TheObjects
+            [thePerm.TheObjects[i]].TheObjects[j]);
+    }
 }
 
 void ::DynkinDiagramRootSubalgebra::ComputeDynkinStrings(WeylGroup& theWeyl)
@@ -14174,19 +14224,45 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 	std::stringstream out;
 	roots& currentComponent=
 		this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
+  ListBasicObjects<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
 	if (this->numberOfThreeValencyNodes(indexComponent,theWeyl)==1)
 	{//type D or E
+	  root tripleNode;
+	  int tripleNodeindex=this->indicesThreeNodes.TheObjects[indexComponent];
+	  tripleNode.Assign( currentComponent.TheObjects[tripleNodeindex]);
 		roots tempRoots;
 		tempRoots.CopyFromBase(currentComponent);
-		tempRoots.PopIndexSwapWithLast(this->indicesThreeNodes.TheObjects[indexComponent]);
+		tempRoots.PopIndexSwapWithLast(tripleNodeindex);
 		DynkinDiagramRootSubalgebra	tempDiagram;
 		tempDiagram.ComputeDiagramType(tempRoots,theWeyl);
 		assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
 		ListBasicObjects<int> indicesLongComponents;
 		indicesLongComponents.size=0;
+		Rational tempRat;
 		for (int i=0;i<3;i++)
-			if(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size>1)
+		{	if(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size>1)
 				indicesLongComponents.AddObjectOnTop(i);
+      theWeyl.RootScalarKillingFormMatrixRoot
+        ( tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].TheObjects[0],
+          currentComponent.TheObjects[tripleNodeindex],
+          tempRat);
+      if (tempRat.IsEqualToZero())
+        tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].ReverseOrderElements();
+		}
+    for(int i=0;i<3;i++)
+      for(int j=0;j<3;j++)
+      { if (tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size<
+            tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].size)
+        { tempRoots.CopyFromBase(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
+          tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].CopyFromBase
+            (tempDiagram.SimpleBasesConnectedComponents.TheObjects[j]);
+          tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].CopyFromBase(tempRoots);
+        }
+      }
+    currentComponent.size=0;
+    currentComponent.AddObjectOnTop(tripleNode);
+    for (int i=0;i<3;i++)
+      currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
 		if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
 			out<<"D" <<currentComponent.size;
 		else
@@ -14214,7 +14290,17 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 			out<< "A"<<numLength1;
 		}
 		else
-		{ if (numLength1==numLength2)
+		{ Rational greaterlength, tempRat;
+		  greaterlength.Assign(length2);
+		  if (length1.IsGreaterThan(length2))
+        greaterlength.Assign(length1);
+      theWeyl.RootScalarKillingFormMatrixRoot
+        ( currentComponent.TheObjects[currentEnds.TheObjects[0]],
+          currentComponent.TheObjects[currentEnds.TheObjects[0]],
+          tempRat);
+      if (greaterlength.IsGreaterThan(tempRat))
+        currentEnds.SwapTwoIndices(0,1);
+		  if (numLength1==numLength2)
 			{//B2, C2, F4 or G2
 				if (numLength1!=1)
 				{	out <<"F4";
@@ -14228,6 +14314,15 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 				}
 			}
 		}
+		currentComponent.SwapTwoIndices(0,currentEnds.TheObjects[0]);
+		for (int i=0;i<currentComponent.size;i++)
+      for (int j=i+1;j<currentComponent.size;j++)
+      { theWeyl.RootScalarKillingFormMatrixRoot
+          (currentComponent.TheObjects[i],currentComponent.TheObjects[j],tempRat);
+        if (!tempRat.IsEqualToZero())
+          currentComponent.SwapTwoIndices(i+1,j);
+        break;
+      }
 	}
 	this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
 }
@@ -14261,6 +14356,7 @@ int ::DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes
 		this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
 	int numEnds=0; int result=0;
 	this->indicesThreeNodes.TheObjects[indexComponent] =-1;
+	this->indicesEnds.TheObjects[indexComponent].size=0;
 	for (int i=0;i<currentComponent.size;i++)
 	{ int counter=0;
 		for (int j=0; j<currentComponent.size;j++)
@@ -14276,7 +14372,9 @@ int ::DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes
 			this->indicesThreeNodes.TheObjects[indexComponent]=i;
 		}
 		if (counter<=1)
-			numEnds++;
+		{	numEnds++;
+      this->indicesEnds.TheObjects[indexComponent].AddObjectOnTop(i);
+		}
 	}
 	assert(result<=1);
 	if (result==1)
@@ -16229,6 +16327,7 @@ void permutation::incrementAndGetPermutation(ListBasicObjects<int>& output)
 { this->IncrementSubset();
   this->GetPermutation(output);
 }
+
 void permutation::GetPermutation(ListBasicObjects<int>& output)
 { int numElements=this->Multiplicities.size;
   output.SetSizeExpandOnTopNoObjectInit(numElements);

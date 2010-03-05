@@ -114,6 +114,7 @@ class MathRoutines;
 class GlobalVariablesContainer;
 class MatrixIntTightMemoryFit;
 class QuasiPolynomials;
+class permutation;
 template <class ElementOfCommutativeRingWithIdentity,
 					class GeneratorsOfAlgebra,
 					class GeneratorsOfAlgebraRecord>
@@ -429,6 +430,7 @@ public:
 	void ReleaseMemory();
 	void operator=(const ListBasicObjects<Object>& right){this->CopyFromBase(right);};
 	static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
+	void ReverseOrderElements();
 	ListBasicObjects();
 	~ListBasicObjects();
 };
@@ -1958,6 +1960,13 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
 	this->TheObjects = this->TheActualObjects+this->IndexOfVirtualZero;
+}
+
+template <class Object>
+void ListBasicObjects<Object>::ReverseOrderElements()
+{ int tempI= this->size/2;
+  for (int i=0;i<tempI;i++)
+    this->SwapTwoIndices(i,this->size-i);
 }
 
 template <class Object>
@@ -5425,6 +5434,8 @@ public:
 	rootsCollection SimpleBasesConnectedComponents;
 	ListBasicObjects<std::string> DynkinTypeStrings;
 	ListBasicObjects<int> indicesThreeNodes;
+	ListBasicObjects<ListBasicObjects< int > > indicesEnds;
+
 	ListBasicObjects<ListBasicObjects< int > > sameTypeComponents;
 	ListBasicObjects<int> indexUniComponent;
 	ListBasicObjects<int> indexInUniComponent;
@@ -5435,6 +5446,7 @@ public:
 	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
 	void operator=(const DynkinDiagramRootSubalgebra& right);
 	bool operator==(const DynkinDiagramRootSubalgebra& right);
+	void GetMapFromPermutation(roots& domain, roots& range, ListBasicObjects< int >& thePerm);
 };
 
 class coneRelation
@@ -5496,13 +5508,6 @@ public:
   void GetPermutation(ListBasicObjects<int>& output);
 };
 
-class rootsmap
-{
-public:
-  roots domain;
-  roots image;
-};
-
 class rootSubalgebra
 {
 public:
@@ -5549,6 +5554,7 @@ public:
   bool IsIsomorphicTo(rootSubalgebra& right);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
+  bool attemptExtensionToIsomorphism( roots& domain, roots& range);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);

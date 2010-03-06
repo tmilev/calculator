@@ -47,9 +47,10 @@ int main(int argc, char **argv)
 #ifdef WIN32
 	tempS="C:\\math\\rootFKFT\\cpp\\trunk\\vector_partition.html";
 #else
-  out<<"../vector_partition.html";
+  out<<"./vector_partition.html";
   tempS=out.str();
 #endif
+
 	//std::cout<<tempS<<inputString;
   std::fstream fileHeaderHtml;
   //std::cout<<"before the vicious cycle";
@@ -65,14 +66,17 @@ int main(int argc, char **argv)
   //std::cout<<tempSize << inputString;
   //fileHeaderHtml.seekg(0);
   //std::stringstream MicrosoftSucks;
-  while (!fileHeaderHtml.eof())
+  int counter=0;
+  while (!fileHeaderHtml.eof() && counter<100)
   { fileHeaderHtml.read(buffer,1024);
 		std::cout.write(buffer, fileHeaderHtml.gcount());
+		counter++;
   }
   fileHeaderHtml.close();
   //std::cout <<"header read successfully!";
   //std::cout<<inputString;
-  if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
+ // if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
+  if (false)
   {	//std::cout<<"before computation setup";
   //	theComputationSetup.flagComputingPartialFractions=false;
 	//	std::cout <<"before Run!";

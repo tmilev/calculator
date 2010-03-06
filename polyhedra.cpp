@@ -1119,7 +1119,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+/*	this->DoTheRootSAComputation();
     this->theRootSubalgebra.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theOutput.DebugString.append(this->theRootSubalgebra.DebugString);
@@ -1128,7 +1128,7 @@ void ComputationSetup::Run()
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
 		return;
-	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	*///partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
@@ -13983,8 +13983,8 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right)
     { isoDomain.size=0; isoRange.size=0;
       this->theDynkinDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation1);
       this->theCentralizerDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation2);
-      if (this->attemptExtensionToIsomorphism(isoDomain,isoRange))
-				return true;
+     // if (this->attemptExtensionToIsomorphism(isoDomain,isoRange))
+		//		return true;
       permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
     }
     permComponents.incrementAndGetPermutation(tempPermutation1);
@@ -14000,7 +14000,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 	leftSA.genK.size=0; rightSA.genK.size=0;
 	leftSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
 	rightSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
-	leftSA.genK.AddRootS(domain); rightSA.genK.AddRootS(range);
+	leftSA.genK.AddListOnTop(domain); rightSA.genK.AddListOnTop(range);
 	leftSA.ComputeAll(); rightSA.ComputeAll();
 	for (int i=CurrentRank;i<this->AmbientWeyl.KillingFormMatrix.NumRows;i++)
 	{	

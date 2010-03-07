@@ -48,8 +48,11 @@
 #include <pthread.h>
 #endif
 
-#ifdef _WINDOWS
+#ifdef WIN32
+//have to disable C4100 in VS because it warns me on passing non-used parameters to my functions. 
+//Those of course are passed to facilitate future extensions of functionality.
 #pragma warning(disable:4100)//warning C4100: non-referenced formal parameter
+//The below causes problems in VS with my debugging code (which I comment/uncomment often).
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
 #endif
 
@@ -121,6 +124,7 @@ template <class ElementOfCommutativeRingWithIdentity,
 class MonomialInCommutativeAlgebra;
 class affineCones;
 struct IndicatorWindowVariables;
+class rootSubalgebras;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
@@ -1966,7 +1970,7 @@ template <class Object>
 void ListBasicObjects<Object>::ReverseOrderElements()
 { int tempI= this->size/2;
   for (int i=0;i<tempI;i++)
-    this->SwapTwoIndices(i,this->size-i);
+    this->SwapTwoIndices(i,this->size-i-1);
 }
 
 template <class Object>
@@ -5450,7 +5454,9 @@ public:
 	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
 	void operator=(const DynkinDiagramRootSubalgebra& right);
 	bool operator==(const DynkinDiagramRootSubalgebra& right);
-	void GetMapFromPermutation(roots& domain, roots& range, ListBasicObjects< int >& thePerm);
+	void GetMapFromPermutation
+		(	roots& domain, roots& range, ListBasicObjects< int >& thePerm,
+			DynkinDiagramRootSubalgebra& right);
 };
 
 class coneRelation
@@ -5555,11 +5561,15 @@ public:
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots);
-  bool IsIsomorphicTo(rootSubalgebra& right);
+  bool IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theGlobalVariables);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphism
 		( roots& domain, roots& range, GlobalVariables& theGlobalVariables);
+	void GenerateAllRootSubalgebrasUpToIsomorphism
+		(rootSubalgebras& output, GlobalVariables& theGlobalVariables);
+	void GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
+		(rootSubalgebras& output, GlobalVariables& theGlobalVariables);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
@@ -5579,6 +5589,7 @@ public:
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int> &oppositeKmods);
+	bool IsAnIsomorphism (roots& domain, roots& range, GlobalVariables& theGlobalVariables);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	bool ListHasNonSelectedIndexLowerThanGiven
 		(int index,ListBasicObjects<int>& tempList, Selection& tempSel);
@@ -5607,6 +5618,7 @@ public:
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
 	void ComputeExtremeWeightInTheSameKMod
 		(root& input, root& outputW, bool lookingForHighest);
+	void operator=(const rootSubalgebra& right);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
 	void SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables);
@@ -5669,6 +5681,21 @@ public:
 	bool LinCombToStringDistinguishedIndex
 		(	int distinguished,root& alphaRoot, int coeff, root &linComb,
 			std::string &output);
+};
+
+class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
+{
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output)
+	{ std::stringstream out; std::string tempS;
+		for (int i=0;i<this->size; i++)
+		{	this->TheObjects[i].ElementToString(tempS,false);
+			out << tempS;
+		}
+		output= out.str();
+	};
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 };
 
 struct IndicatorWindowVariables
@@ -5819,6 +5846,7 @@ public:
 	roots rootsIsABogusNeighbor2;
 	roots rootsSplitChamber1;
 	roots rootsNilradicalRoots;
+	roots rootsRootSAIso;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -5850,6 +5878,7 @@ public:
 	MatrixLargeRational matSimplexAlgorithm1;
 	MatrixLargeRational matSimplexAlgorithm2;
 	MatrixLargeRational matSimplexAlgorithm3;
+	MatrixLargeRational matRootSAIso;
 
 	partFraction fracReduceMonomialByMonomial;
 	partFraction fracSplit1;

@@ -228,7 +228,7 @@ template < > int ListBasicObjects<rootsWithMultiplicity>::ListBasicObjectsActual
 template < > int ListBasicObjects<Rational>::ListBasicObjectsActualSizeIncrement=10;
 template < > int ListBasicObjects<coneRelation>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<DynkinDiagramRootSubalgebra>::ListBasicObjectsActualSizeIncrement=100;
-
+template < > int ListBasicObjects<rootSubalgebra>::ListBasicObjectsActualSizeIncrement=10;
 
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList2;
@@ -994,8 +994,14 @@ void ComputationSetup::InitComputationSetup()
 }
 
 void ComputationSetup::DoTheRootSAComputation()
-{	//rootSubalgebra theRootSA;
-
+{	rootSubalgebra theRootSA;
+	rootSubalgebras tempSAs;
+	theRootSA.AmbientWeyl.MakeEn(6);
+	theRootSA.ComputeAll();
+	theRootSA.GenerateAllRootSubalgebrasUpToIsomorphism
+		(tempSAs,	*this->theGlobalVariablesContainer->Default());
+	tempSAs.ComputeDebugString();
+	
 	this->theRootSubalgebra.NumRelationsgreaterLengthThan2=0;
 	//theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
 
@@ -1119,7 +1125,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-/*	this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
     this->theRootSubalgebra.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theOutput.DebugString.append(this->theRootSubalgebra.DebugString);
@@ -1127,8 +1133,8 @@ void ComputationSetup::Run()
     this->ExitComputationSetup();
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
-		return;
-	*///partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//	return;
+	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
@@ -13921,6 +13927,44 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& Ni
 	}
 }
 
+void rootSubalgebra::operator =(const rootSubalgebra& right)
+{ this->AmbientWeyl.KillingFormMatrix.Assign(right.AmbientWeyl.KillingFormMatrix);
+	this->genK.CopyFromBase(right.genK);
+	this->flagAnErrorHasOccuredTimeToPanic=right.flagAnErrorHasOccuredTimeToPanic;
+	this->ComputeAll();
+}
+
+void rootSubalgebra::GenerateAllRootSubalgebrasUpToIsomorphism
+	(rootSubalgebras& output, GlobalVariables& theGlobalVariables)
+{	output.SetSizeExpandOnTopNoObjectInit(0);	
+	this->genK.size=0;
+	this->ComputeAll();
+	this->GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
+		(output,theGlobalVariables);
+}
+
+void rootSubalgebra::GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
+	(rootSubalgebras& output, GlobalVariables &theGlobalVariables)
+{	output.AddObjectOnTop(*this);
+	rootSubalgebra tempSA;
+	tempSA=*this;
+	for (int i=0;i<this->kModules.size;i++)
+		if (this->HighestWeightsGmodK.TheObjects[i].IsPositiveOrZero())
+		{	tempSA.genK.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
+			tempSA.ComputeAll();
+			bool foundNew=true;
+			for (int i=0;i<output.size;i++)
+				if (tempSA.IsIsomorphicTo(output.TheObjects[i],theGlobalVariables))
+				{	foundNew=false;
+					break;
+				}
+			if (foundNew)
+				tempSA.GenerateAllRootSubalgebrasContainingThisUpToIsomorphism(output,theGlobalVariables);
+			tempSA.genK.PopIndexSwapWithLast(tempSA.genK.size-1);
+		}
+}
+
+
 void rootSubalgebra::ComputeRootsOfK()
 { this->AllRootsK.size=0;
 	this->PositiveRootsK.size=0;
@@ -13950,7 +13994,7 @@ void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeade
   outputFooter.append("\\hline \\end{tabular}");
 }
 
-bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right)
+bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theGlobalVariables)
 { if (this->theDynkinDiagram.DebugString!= right.theDynkinDiagram.DebugString)
     return false;
   if (this->theCentralizerDiagram.DebugString!= right.theCentralizerDiagram.DebugString)
@@ -13981,10 +14025,12 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right)
   for (int i=0;i<tempI1;i++)
   { for(int j=0;j<tempI2;j++)
     { isoDomain.size=0; isoRange.size=0;
-      this->theDynkinDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation1);
-      this->theCentralizerDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation2);
-     // if (this->attemptExtensionToIsomorphism(isoDomain,isoRange))
-		//		return true;
+      this->theDynkinDiagram.GetMapFromPermutation
+				(isoDomain,isoRange,tempPermutation1,right.theDynkinDiagram);
+      this->theCentralizerDiagram.GetMapFromPermutation
+				(isoDomain,isoRange,tempPermutation2, right.theCentralizerDiagram);
+      if (this->attemptExtensionToIsomorphism(isoDomain,isoRange,theGlobalVariables))
+				return true;
       permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
     }
     permComponents.incrementAndGetPermutation(tempPermutation1);
@@ -13995,20 +14041,79 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right)
 bool rootSubalgebra::attemptExtensionToIsomorphism
 	(roots& domain, roots& range, GlobalVariables& theGlobalVariables)
 {	int CurrentRank=domain.GetRankOfSpanOfElements(theGlobalVariables);
-	assert(CurrentRank==range.GetRankOfSpanOfElements(theGlobalVariables));
+	assert(CurrentRank==range.GetRankOfSpanOfElements(theGlobalVariables));	
+	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
+		return this->IsAnIsomorphism(domain, range, theGlobalVariables);
 	rootSubalgebra leftSA, rightSA;
 	leftSA.genK.size=0; rightSA.genK.size=0;
 	leftSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
 	rightSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
 	leftSA.genK.AddListOnTop(domain); rightSA.genK.AddListOnTop(range);
 	leftSA.ComputeAll(); rightSA.ComputeAll();
-	for (int i=CurrentRank;i<this->AmbientWeyl.KillingFormMatrix.NumRows;i++)
-	{	
+	if (rightSA.kModules.size!=leftSA.kModules.size)
+		return false;
+	int counter =0;
+	domain.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
+	while(domain.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank)
+	{	counter++;
+		domain.PopIndexSwapWithLast(domain.size-1);
+		domain.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
 	}
+	roots& firstKmodLeft= leftSA.kModules.TheObjects[counter];  
+	for (int i=0;rightSA.kModules.size;i++)
+		if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
+		{	range.AddObjectOnTop(rightSA.HighestWeightsGmodK.TheObjects[i]);
+			if (range.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
+				if (this->attemptExtensionToIsomorphism(domain, range, theGlobalVariables))
+					return true;
+			range.PopIndexSwapWithLast(range.size-1);
+		}
 	return false;
 }
 
-
+bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational& matB= theGlobalVariables.matRootSAIso;
+	roots& tempRoots= theGlobalVariables.rootsRootSAIso;
+	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+	tempRoots.SetSizeExpandOnTopNoObjectInit(theDimension);
+	matB.init(theDimension, theDimension);
+	this->flagAnErrorHasOccuredTimeToPanic=true;
+	for (int i=0;i<theDimension;i++)
+	{	for (int j=0;j<theDimension;j++)
+			matB.elements[i][j].Assign(domain.TheObjects[i].TheObjects[j]);
+		tempRoots.TheObjects[i].MakeZero(theDimension);
+	}
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+	{	domain.ComputeDebugString();
+		range.ComputeDebugString();
+		matB.ComputeDebugString();
+	}
+	matB.Invert(theGlobalVariables);
+	Rational tempRat2;
+	for (int k=0;k<theDimension;k++)
+		for (int i=0;i<theDimension;i++)
+			for (int j=0;j<theDimension;j++)
+			{	tempRat2.Assign(range.TheObjects[j].TheObjects[k]);
+				tempRat2.MultiplyBy(matB.elements[i][j]);
+				tempRoots.TheObjects[i].TheObjects[k].Add(tempRat2);
+			}
+	if (this->flagAnErrorHasOccuredTimeToPanic)
+		tempRoots.ComputeDebugString();
+	root tempRoot, tempRoot2;
+	for (int i=0;i<this->AmbientWeyl.RootsOfBorel.size;i++)
+	{	tempRoot.MakeZero(theDimension);
+		for (int j=0; j<theDimension;j++)
+		{ tempRoot2.Assign(tempRoots.TheObjects[j]);
+			tempRoot2.MultiplyByLargeRational(this->AmbientWeyl.RootsOfBorel.TheObjects[i].TheObjects[j]);
+			tempRoot.Add(tempRoot2);
+		}
+		if (this->flagAnErrorHasOccuredTimeToPanic)
+			tempRoot.ComputeDebugString();
+		if (!this->IsARoot(tempRoot))
+			return false;
+	}	
+	return true;
+}
 
 void rootSubalgebra::ElementToString(std::string &output, bool makeALaTeXReport)
 { std::stringstream out;
@@ -14210,14 +14315,18 @@ void ::DynkinDiagramRootSubalgebra::ComputeDiagramType
 }
 
 void DynkinDiagramRootSubalgebra::GetMapFromPermutation
-  (roots& domain, roots& range, ListBasicObjects< int >& thePerm)
+  (roots& domain, roots& range, ListBasicObjects< int >& thePerm, DynkinDiagramRootSubalgebra& right)
 { for(int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
     for (int j=0;j<this->SimpleBasesConnectedComponents.TheObjects[i].size;j++)
-    { domain.AddObjectOnTop( this->SimpleBasesConnectedComponents.TheObjects[i].TheObjects[j]);
+    { assert
+				(	this->SimpleBasesConnectedComponents.TheObjects[i].size==
+					right.SimpleBasesConnectedComponents.TheObjects[thePerm.TheObjects[i]].size);
+			domain.AddObjectOnTop( this->SimpleBasesConnectedComponents.TheObjects[i].TheObjects[j]);
       range.AddObjectOnTop
-        ( this->SimpleBasesConnectedComponents.TheObjects
+        ( right.SimpleBasesConnectedComponents.TheObjects
             [thePerm.TheObjects[i]].TheObjects[j]);
     }
+  
 }
 
 void ::DynkinDiagramRootSubalgebra::ComputeDynkinStrings(WeylGroup& theWeyl)
@@ -14264,7 +14373,7 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
         tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].ReverseOrderElements();
 		}
     for(int i=0;i<3;i++)
-      for(int j=0;j<3;j++)
+      for(int j=i+1;j<3;j++)
       { if (tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size<
             tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].size)
         { tempRoots.CopyFromBase(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
@@ -14327,15 +14436,16 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 						out<<"B2=C2";
 				}
 			}
-		}
+		} 
 		currentComponent.SwapTwoIndices(0,currentEnds.TheObjects[0]);
 		for (int i=0;i<currentComponent.size;i++)
-      for (int j=i+1;j<currentComponent.size;j++)
+			for (int j=i+1;j<currentComponent.size;j++)
       { theWeyl.RootScalarKillingFormMatrixRoot
           (currentComponent.TheObjects[i],currentComponent.TheObjects[j],tempRat);
         if (!tempRat.IsEqualToZero())
-          currentComponent.SwapTwoIndices(i+1,j);
-        break;
+        {	currentComponent.SwapTwoIndices(i+1,j);
+					break;
+				}
       }
 	}
 	this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
@@ -14347,9 +14457,8 @@ bool ::DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra
 		return false;
 	for (int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
 	{ bool tempBool=
-			(	(	this->SimpleBasesConnectedComponents.TheObjects[i].size==
-					right.SimpleBasesConnectedComponents.TheObjects[i].size)
-				&&
+			(	(	this->SimpleBasesConnectedComponents.TheObjects[i].size ==
+					right.SimpleBasesConnectedComponents.TheObjects[i].size) &&
 				(this->DynkinTypeStrings.TheObjects[i]==right.DynkinTypeStrings.TheObjects[i]));
 		if (!tempBool)
 			return false;
@@ -16327,10 +16436,12 @@ void permutation::initPermutation(int n)
 
 void permutation::initPermutation(ListBasicObjects<int>& disjointSubsets, int TotalNumElements)
 { this->initIncomplete(TotalNumElements);
+	int counter=0;
   for(int i=0;i<disjointSubsets.size;i++)
   { for (int j=0;j<disjointSubsets.TheObjects[i];j++)
-    { this->MaxMultiplicities.TheObjects[i]=disjointSubsets.TheObjects[i]-j-1;
-      this->Multiplicities.TheObjects[i]=0;
+    { this->MaxMultiplicities.TheObjects[counter]=disjointSubsets.TheObjects[i]-j-1;
+      this->Multiplicities.TheObjects[counter]=0;
+      counter++;
     }
     TotalNumElements-=disjointSubsets.TheObjects[i];
   }

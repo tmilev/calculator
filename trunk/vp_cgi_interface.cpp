@@ -29,7 +29,7 @@ void getPath(char* path, std::string& output)
   }
 }
 
-
+extern void static_html_header_dump( std::stringstream& output);
 
 int main(int argc, char **argv)
 { std::string inputString;
@@ -55,8 +55,7 @@ int main(int argc, char **argv)
   tempS=out.str();
 #endif
 
-	//std::cout<<tempS<<inputString;
-  std::fstream fileHeaderHtml;
+
   //std::cout<<"before the vicious cycle";
   std::cout<< tempS;
   rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);

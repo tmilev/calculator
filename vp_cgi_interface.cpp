@@ -14,8 +14,8 @@ void getPath(char* path, std::string& output)
     length++;
   output= path;
   for (int i=length-1;i>=0;i--)
-  { 
-#ifdef WIN32  
+  {
+#ifdef WIN32
 		if (path[i]=='\\' )
     { output.resize(i+1);
       return;
@@ -34,30 +34,35 @@ void getPath(char* path, std::string& output)
 int main(int argc, char **argv)
 { std::string inputString;
 	std::cin >> inputString;
-	ComputationSetup theComputationSetup;
 	std::cout << "Content-Type: text/html\n\n";
+
+  std::cout << "<HTML><BODY>Hello World "<< inputString;
   //std::cout <<  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
 	//					<< std::endl;
   //std::cout << "<html lang=\"en\" dir=\"LTR\">"<< std::endl;
-  std::string tempS;
+
+  ComputationSetup theComputationSetup;
+	std::string tempS;
   getPath(argv[0],tempS);
   //std::cout<<tempS;
   std::stringstream out;
-  out<<tempS;
+  //out<<tempS;
+  out << tempS;
 #ifdef WIN32
 	tempS="C:\\math\\rootFKFT\\cpp\\trunk\\vector_partition.html";
 #else
-  out<<"./vector_partition.html";
+  out<<"vector_partition.html";
   tempS=out.str();
 #endif
 
 	//std::cout<<tempS<<inputString;
   std::fstream fileHeaderHtml;
   //std::cout<<"before the vicious cycle";
+  std::cout<< tempS;
   rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);
   //if (fileHeaderHtml.is_open())
 	//	std::cout<<"header opened succesfully";
-		
+
   char buffer[1024];
   //int tempI=0;
   //fileHeaderHtml.setstate(std::ios_base::goodbit);
@@ -69,8 +74,11 @@ int main(int argc, char **argv)
   int counter=0;
   while (!fileHeaderHtml.eof() && counter<100)
   { fileHeaderHtml.read(buffer,1024);
-		std::cout.write(buffer, fileHeaderHtml.gcount());
+    tempS= buffer;
+    tempS.resize(fileHeaderHtml.gcount());
+		std::cout<< tempS;
 		counter++;
+		std::cout << counter;
   }
   fileHeaderHtml.close();
   //std::cout <<"header read successfully!";

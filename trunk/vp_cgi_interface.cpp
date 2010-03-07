@@ -29,58 +29,23 @@ void getPath(char* path, std::string& output)
   }
 }
 
-extern void static_html_header_dump( std::stringstream& output);
+extern void static_html1( std::ostream& output);
 
 int main(int argc, char **argv)
 { std::string inputString;
 	std::cin >> inputString;
 	std::cout << "Content-Type: text/html\n\n";
-
-  std::cout << "<HTML><BODY>Hello World "<< inputString;
+ // std::cout
   //std::cout <<  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
 	//					<< std::endl;
   //std::cout << "<html lang=\"en\" dir=\"LTR\">"<< std::endl;
+  //std::stringstream out;
+  static_html1(std::cout);
+  std::string tempS;
+  //tempS= out.str();
+  //std::cout<< tempS;
 
   ComputationSetup theComputationSetup;
-	std::string tempS;
-  getPath(argv[0],tempS);
-  //std::cout<<tempS;
-  std::stringstream out;
-  //out<<tempS;
-  out << tempS;
-#ifdef WIN32
-	tempS="C:\\math\\rootFKFT\\cpp\\trunk\\vector_partition.html";
-#else
-  out<<"vector_partition.html";
-  tempS=out.str();
-#endif
-
-
-  //std::cout<<"before the vicious cycle";
-  std::cout<< tempS;
-  rootFKFTcomputation::OpenDataFile(fileHeaderHtml,tempS);
-  //if (fileHeaderHtml.is_open())
-	//	std::cout<<"header opened succesfully";
-
-  char buffer[1024];
-  //int tempI=0;
-  //fileHeaderHtml.setstate(std::ios_base::goodbit);
-  //fileHeaderHtml.seekp(0,std::ios_base::end);
-  //int tempSize=fileHeaderHtml.tellp();
-  //std::cout<<tempSize << inputString;
-  //fileHeaderHtml.seekg(0);
-  //std::stringstream MicrosoftSucks;
-  int counter=0;
-  while (!fileHeaderHtml.eof() && counter<100)
-  { fileHeaderHtml.read(buffer,1024);
-    tempS= buffer;
-    tempS.resize(fileHeaderHtml.gcount());
-		std::cout<< tempS;
-		counter++;
-		std::cout << counter;
-  }
-  fileHeaderHtml.close();
-  //std::cout <<"header read successfully!";
   //std::cout<<inputString;
  // if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
   if (false)

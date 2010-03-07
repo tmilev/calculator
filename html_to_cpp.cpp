@@ -39,7 +39,7 @@ int main(int argc, char **argv)
   getPathTemp(argv[0],tempS);
   tempS2=tempS;
   tempS.append("../vector_partition.html");
-  tempS2.append("../vector_partition.html");
+  tempS2.append("../vector_partition.html.cpp");
   std::stringstream BufferIO;
   std::fstream fileHeaderHtml;
   std::fstream fileout;

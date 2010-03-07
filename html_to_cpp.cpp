@@ -31,7 +31,21 @@ void getPathTemp(char* path, std::string& output)
 }
 
 void htmlTocpp(std::string& input, std::string& output)
-{ output=input;
+{ std::stringstream out;
+  out<< "output <<\" ";
+  for (unsigned int i=0; i<input.length();i++)
+  { if (input[i]=='\"')
+      out <<"\\\"";
+    else
+    { if (input[i]=='\\')
+        out <<"\\\\";
+      else
+      { out <<input[i];
+      }
+    }
+  }
+  out <<"\\n\";";
+  output = out.str();
 }
 
 int main(int argc, char **argv)
@@ -48,20 +62,25 @@ int main(int argc, char **argv)
   fileHeaderHtml.clear(std::ios::goodbit);
   fileHeaderHtml.seekp(0,std::ios_base::end);
   fileHeaderHtml.seekg(0);
-  char buffer[2000];
+  char buffer[10000];
   while (!fileHeaderHtml.eof())
-  { fileHeaderHtml.read(buffer,1024);
+  { fileHeaderHtml.read(buffer,5000);
 		BufferIO.write(buffer,fileHeaderHtml.gcount());
   }
   fileHeaderHtml.close();
-  int bufferSize=BufferIO.tellp();
-  BufferIO.seekg(0);;
-
-  while (BufferIO.tellg()<bufferSize)
-  { BufferIO >> tempS;
+  BufferIO <<"\n<EndOfFile>";
+  BufferIO.seekg(0);
+  fileout <<"#include<iostream>\n";
+  fileout <<"void static_html1(std::ostream& output){\n";
+  for (;;)
+  { BufferIO.getline(buffer,5000);
+    tempS=buffer;
+    if (tempS=="<EndOfFile>")
+      break;
     htmlTocpp(tempS, tempS2);
-    fileout << tempS2;
+    fileout << tempS2 <<"\n";
   }
+  fileout <<"}";
   fileout.flush();
   fileout.close();
   return 0;

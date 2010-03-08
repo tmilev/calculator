@@ -5433,6 +5433,10 @@ public:
 	};
 };
 
+class DynkinConnectedDiagramIso
+{
+};
+
 class DynkinDiagramRootSubalgebra
 {
 public:
@@ -5526,6 +5530,7 @@ public:
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
 	int NumGmodKtableRowsAllowedLatex;
+	static int ProblemCounter;
 	::multTableKmods theMultTable;
 	ListBasicObjects<int> theOppositeKmods;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
@@ -5551,7 +5556,8 @@ public:
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
 	bool flagAnErrorHasOccuredTimeToPanic;
-	void ElementToStringLaTeXHeaderModTable(std::string& outputHeader,std::string&  outputFooter);
+	void ElementToStringLaTeXHeaderModTable
+		(std::string& outputHeader,std::string&  outputFooter);
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
 	ListBasicObjects<Selection> theKEnumerations;
@@ -5565,7 +5571,7 @@ public:
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphism
-		( roots& domain, roots& range, GlobalVariables& theGlobalVariables);
+		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
 		(rootSubalgebras& output, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingThisUpToIsomorphism

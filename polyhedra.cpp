@@ -994,9 +994,28 @@ void ComputationSetup::InitComputationSetup()
 }
 
 void ComputationSetup::DoTheRootSAComputation()
-{	rootSubalgebra theRootSA;
+{	rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebras tempSAs;
 	theRootSA.AmbientWeyl.MakeEn(6);
+	theRootSA2.AmbientWeyl.MakeEn(6);
+	theRootSA.genK.SetSizeExpandOnTopNoObjectInit(4);
+	theRootSA2.genK.SetSizeExpandOnTopNoObjectInit(4);
+	int i;
+	roots& tempRoots= theRootSA.genK; i=0;
+	tempRoots.TheObjects[i].InitFromIntegers(6, 1, 0, 0, 0, 0, 0, 0, 0); i++;
+	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 1, 0, 0, 0, 0, 0, 0); i++;
+	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 1, 0, 0, 0); i++;
+	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 0, 1, 0, 0); i++;
+	roots& tempRoots2= theRootSA2.genK; i=0;
+	tempRoots2.TheObjects[i].InitFromIntegers(6, 1, 0, 0, 0, 0, 0, 0, 0); i++;
+	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 1, 0, 0, 0, 0, 0, 0); i++;
+	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 1, 0, 0, 0); i++;
+	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 1, 1, 2, 1, 0, 0, 0); i++;
+	theRootSA.ComputeAll();
+	theRootSA2.ComputeAll();
+	assert(theRootSA2.IsIsomorphicTo
+		(theRootSA, *this->theGlobalVariablesContainer->Default()));
+	
 	theRootSA.ComputeAll();
 	theRootSA.GenerateAllRootSubalgebrasUpToIsomorphism
 		(tempSAs,	*this->theGlobalVariablesContainer->Default());
@@ -13423,9 +13442,9 @@ void rootSubalgebra::initFromAmbientWeyl()
 { MatrixLargeRational tempMat;
 	tempMat.AssignMatrixIntWithDen(this->AmbientWeyl.KillingFormMatrix,1);
 	tempMat.ComputeDebugString();
-	this->PosRootsKConnectedComponents.ReleaseMemory();
-	this->theKComponentRanks.ReleaseMemory();
-	this->theKEnumerations.ReleaseMemory();
+	this->PosRootsKConnectedComponents.size=0;
+	this->theKComponentRanks.size=0;
+	this->theKEnumerations.size=0;
 	this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
 	this->AllRoots.CopyFromBase(this->AmbientWeyl.RootSystem);
 	this->AmbientWeyl.ComputeRootsOfBorel(this->AllPositiveRoots);
@@ -13994,11 +14013,15 @@ void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeade
   outputFooter.append("\\hline \\end{tabular}");
 }
 
+int rootSubalgebra::ProblemCounter=0;
 bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theGlobalVariables)
 { if (this->theDynkinDiagram.DebugString!= right.theDynkinDiagram.DebugString)
     return false;
   if (this->theCentralizerDiagram.DebugString!= right.theCentralizerDiagram.DebugString)
     return false;
+  rootSubalgebra::ProblemCounter++;
+  if (rootSubalgebra::ProblemCounter==35)
+		Stop();
   roots isoDomain, isoRange;
   permutation permComponents, permComponentsCentralizer;
   ListBasicObjects<int> UniTypicComponents, tempPermutation1, tempPermutation2;
@@ -14029,44 +14052,52 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
 				(isoDomain,isoRange,tempPermutation1,right.theDynkinDiagram);
       this->theCentralizerDiagram.GetMapFromPermutation
 				(isoDomain,isoRange,tempPermutation2, right.theCentralizerDiagram);
+			isoDomain.ComputeDebugString();
+			isoRange.ComputeDebugString();
       if (this->attemptExtensionToIsomorphism(isoDomain,isoRange,theGlobalVariables))
 				return true;
       permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
     }
     permComponents.incrementAndGetPermutation(tempPermutation1);
   }
+  assert(!(	this->AmbientWeyl.KillingFormMatrix.NumRows==6 && 
+						this->AmbientWeyl.RootsOfBorel.size==36));
   return false;
 }
 
 bool rootSubalgebra::attemptExtensionToIsomorphism
-	(roots& domain, roots& range, GlobalVariables& theGlobalVariables)
-{	int CurrentRank=domain.GetRankOfSpanOfElements(theGlobalVariables);
-	assert(CurrentRank==range.GetRankOfSpanOfElements(theGlobalVariables));	
+	(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables)
+{	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
+	assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));	
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
-		return this->IsAnIsomorphism(domain, range, theGlobalVariables);
+		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables);
+	roots domainRec, rangeRec;
+	domainRec.CopyFromBase(Domain); rangeRec.CopyFromBase(Range);
 	rootSubalgebra leftSA, rightSA;
 	leftSA.genK.size=0; rightSA.genK.size=0;
 	leftSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
 	rightSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
-	leftSA.genK.AddListOnTop(domain); rightSA.genK.AddListOnTop(range);
+	leftSA.genK.AddListOnTop(domainRec); rightSA.genK.AddListOnTop(rangeRec);
 	leftSA.ComputeAll(); rightSA.ComputeAll();
 	if (rightSA.kModules.size!=leftSA.kModules.size)
 		return false;
 	int counter =0;
-	domain.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
-	while(domain.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank)
+	domainRec.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
+	while(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank)
 	{	counter++;
-		domain.PopIndexSwapWithLast(domain.size-1);
-		domain.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
+		assert(leftSA.kModules.size>counter);
+		domainRec.PopIndexSwapWithLast(domainRec.size-1);
+		domainRec.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
 	}
+	assert(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank+1);
 	roots& firstKmodLeft= leftSA.kModules.TheObjects[counter];  
-	for (int i=0;rightSA.kModules.size;i++)
+	for (int i=0;i<rightSA.kModules.size;i++)
 		if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
-		{	range.AddObjectOnTop(rightSA.HighestWeightsGmodK.TheObjects[i]);
-			if (range.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
-				if (this->attemptExtensionToIsomorphism(domain, range, theGlobalVariables))
+		{	rangeRec.AddObjectOnTop(rightSA.HighestWeightsGmodK.TheObjects[i]);
+			if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
+				if (this->attemptExtensionToIsomorphism(domainRec, rangeRec, theGlobalVariables))
 					return true;
-			range.PopIndexSwapWithLast(range.size-1);
+			rangeRec.PopIndexSwapWithLast(rangeRec.size-1);
 		}
 	return false;
 }

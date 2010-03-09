@@ -782,10 +782,11 @@ public:
 	int getTotalNumSubsets();
 	int TotalMultiplicity();
 	int MaxTotalMultiplicity();
-//	SelectionWithDifferentMaxMultiplicities(){};
-//	~SelectionWithDifferentMaxMultiplicities()
-//	{ std::string tempS;
-//	};
+	void operator=(const SelectionWithDifferentMaxMultiplicities& right)
+	{ this->Multiplicities.CopyFromBase(right.Multiplicities);
+		this->MaxMultiplicities.CopyFromBase(right.MaxMultiplicities);
+		this->elements.CopyFromBase(right.elements);
+	};
 };
 
 class MatrixIntTightMemoryFit : public ::MatrixElementaryTightMemoryFit<int>
@@ -5433,10 +5434,6 @@ public:
 	};
 };
 
-class DynkinConnectedDiagramIso
-{
-};
-
 class DynkinDiagramRootSubalgebra
 {
 public:
@@ -5458,8 +5455,13 @@ public:
 	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
 	void operator=(const DynkinDiagramRootSubalgebra& right);
 	bool operator==(const DynkinDiagramRootSubalgebra& right);
+	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output,int index);
+	void GetAutomorphisms
+		(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output);
 	void GetMapFromPermutation
-		(	roots& domain, roots& range, ListBasicObjects< int >& thePerm,
+		(	roots& domain, roots& range, ListBasicObjects< int >& thePerm, 
+			ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos, 
+			ListBasicObjects<int>& theAutosPerm,
 			DynkinDiagramRootSubalgebra& right);
 };
 
@@ -5530,6 +5532,7 @@ public:
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
 	int NumGmodKtableRowsAllowedLatex;
+	static bool flagUseDynkinClassificationForIsomorphismComputation;
 	static int ProblemCounter;
 	::multTableKmods theMultTable;
 	ListBasicObjects<int> theOppositeKmods;

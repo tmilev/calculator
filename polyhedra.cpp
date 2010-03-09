@@ -14029,29 +14029,23 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
   if (rootSubalgebra::ProblemCounter==35)
 		Stop();
   roots isoDomain, isoRange;
-  permutation permComponents, permComponentsCentralizer, permAutos, permAutosCentralizer;
-  ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2, 
-		tempPermAutos, tempPermAutosCentralizer;
+  permutation permComponents, permComponentsCentralizer;
+  ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
+	SelectionWithDifferentMaxMultiplicities tempAutos, tempAutosCentralizer;
   ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms; 
-  int tempSize=0;
   this->theDynkinDiagram.GetAutomorphisms(DiagramAutomorphisms);
   this->theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
-  tempList.SetSizeExpandOnTopNoObjectInit(DiagramAutomorphisms.size);
+  tempAutos.initIncomplete(DiagramAutomorphisms.size);
+  tempAutosCentralizer.initIncomplete(DiagramAutomorphisms.size);
   for (int i=0;i<DiagramAutomorphisms.size;i++)
-	{	tempList.TheObjects[i]=DiagramAutomorphisms.TheObjects[i].size;
-		tempSize+=DiagramAutomorphisms.TheObjects[i].size;
-	}
-	permAutos.initPermutation(tempList,tempSize);
-	tempSize=0;
-  tempList.SetSizeExpandOnTopNoObjectInit(CentralizerDiagramAutomorphisms.size);
+		tempAutos.MaxMultiplicities.TheObjects[i]=
+			DiagramAutomorphisms.TheObjects[i].size;
 	for (int i=0;i<CentralizerDiagramAutomorphisms.size;i++)
-	{	tempList.TheObjects[i]=CentralizerDiagramAutomorphisms.TheObjects[i].size;
-		tempSize+=CentralizerDiagramAutomorphisms.TheObjects[i].size;
-	}
-	permAutosCentralizer.initPermutation(tempList,tempSize);
+		tempAutosCentralizer.MaxMultiplicities.TheObjects[i]=
+			CentralizerDiagramAutomorphisms.TheObjects[i].size;
   tempList.SetSizeExpandOnTopNoObjectInit
     (this->theDynkinDiagram.sameTypeComponents.size);
-  tempSize=0;
+  int tempSize=0;
   for (int i=0;i<this->theDynkinDiagram.sameTypeComponents.size;i++)
   { tempList.TheObjects[i]= this->theDynkinDiagram.sameTypeComponents.TheObjects[i].size;
     tempSize+=tempList.TheObjects[i];
@@ -14067,12 +14061,10 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
   permComponentsCentralizer.initPermutation(tempList,tempSize);
   int tempI1= permComponents.getTotalNumSubsets();
   int tempI2= permComponentsCentralizer.getTotalNumSubsets();
-	int NumAutos=permAutos.getTotalNumSubsets();
-	int NumAutosCentralizer= permAutosCentralizer.getTotalNumSubsets();
+	int NumAutos=tempAutos.getTotalNumSubsets();
+	int NumAutosCentralizer= tempAutosCentralizer.getTotalNumSubsets();
   permComponents.GetPermutation(tempPermutation1);
   permComponentsCentralizer.GetPermutation(tempPermutation2);
-  permAutos.GetPermutation(tempPermAutos);
-  permAutosCentralizer.GetPermutation(tempPermAutosCentralizer);
   for (int i=0;i<tempI1;i++)
   { for(int j=0;j<tempI2;j++)
     { for (int k=0;k<NumAutos;k++)
@@ -14080,17 +14072,17 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
 				{	isoDomain.size=0; isoRange.size=0;
 					this->theDynkinDiagram.GetMapFromPermutation
 						(	isoDomain,isoRange,tempPermutation1,DiagramAutomorphisms,
-							tempPermAutos, right.theDynkinDiagram);
+							tempAutos, right.theDynkinDiagram);
 					this->theCentralizerDiagram.GetMapFromPermutation
 						(	isoDomain,isoRange,tempPermutation2,CentralizerDiagramAutomorphisms,
-							tempPermAutosCentralizer, right.theCentralizerDiagram);
+							tempAutosCentralizer, right.theCentralizerDiagram);
 					isoDomain.ComputeDebugString();
 					isoRange.ComputeDebugString();
 					if (this->attemptExtensionToIsomorphism(isoDomain,isoRange,theGlobalVariables))
 						return true;
-					permAutosCentralizer.incrementAndGetPermutation(tempPermAutosCentralizer);
+					tempAutosCentralizer.IncrementSubset();
 				}
-				permAutos.incrementAndGetPermutation(tempPermAutos);
+				tempAutos.IncrementSubset();
 			}
 			permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
     }
@@ -14384,7 +14376,7 @@ void ::DynkinDiagramRootSubalgebra::ComputeDiagramType
 void DynkinDiagramRootSubalgebra::GetMapFromPermutation
   (	roots& domain, roots& range, ListBasicObjects< int >& thePerm, 
 		ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos, 
-		ListBasicObjects<int>& theAutosPerm,
+		SelectionWithDifferentMaxMultiplicities& theAutosPerm,
 		DynkinDiagramRootSubalgebra& right)
 { for(int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
     for (int j=0;j<this->SimpleBasesConnectedComponents.TheObjects[i].size;j++)
@@ -14392,10 +14384,11 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation
 				(	this->SimpleBasesConnectedComponents.TheObjects[i].size==
 					right.SimpleBasesConnectedComponents.TheObjects[thePerm.TheObjects[i]].size);
 			domain.AddObjectOnTop( this->SimpleBasesConnectedComponents.TheObjects[i].TheObjects[j]);
+      int indexTargetComponent=thePerm.TheObjects[i];
+      int indexAutomorphismInComponent=theAutosPerm.Multiplicities.TheObjects[i];
+      int indexRoot= theAutos.TheObjects[i].TheObjects[indexAutomorphismInComponent].TheObjects[j];
       range.AddObjectOnTop
-        ( right.SimpleBasesConnectedComponents.TheObjects
-            [ thePerm.TheObjects[i]].TheObjects[theAutos.TheObjects[i]
-								.TheObjects[theAutosPerm.TheObjects[i]].TheObjects[j]]);
+        ( right.SimpleBasesConnectedComponents.TheObjects[indexTargetComponent].TheObjects[indexRoot]);
     }
   
 }

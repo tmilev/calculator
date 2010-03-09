@@ -998,27 +998,38 @@ void ComputationSetup::InitComputationSetup()
 void ComputationSetup::DoTheRootSAComputation()
 {	rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebras tempSAs;
-	theRootSA.AmbientWeyl.MakeEn(6);
-	theRootSA2.AmbientWeyl.MakeEn(6);
-	theRootSA.genK.SetSizeExpandOnTopNoObjectInit(4);
-	theRootSA2.genK.SetSizeExpandOnTopNoObjectInit(4);
+	theRootSA.AmbientWeyl.MakeEn(7);
+	theRootSA2.AmbientWeyl.MakeEn(7);
+/*	theRootSA.genK.SetSizeExpandOnTopNoObjectInit(10);
+	theRootSA2.genK.SetSizeExpandOnTopNoObjectInit(10);
 	int i;
 	roots& tempRoots= theRootSA.genK; i=0;
 	tempRoots.TheObjects[i].InitFromIntegers(6, 1, 0, 0, 0, 0, 0, 0, 0); i++;
 	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 1, 0, 0, 0, 0, 0, 0); i++;
 	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 1, 0, 0, 0); i++;
 	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 0, 1, 0, 0); i++;
+//	tempRoots.TheObjects[i].InitFromIntegers(6, 1, 1, 2, 2, 1, 0, 0, 0); i++;
+	tempRoots.SetSizeExpandOnTopNoObjectInit(i);
 	roots& tempRoots2= theRootSA2.genK; i=0;
 	tempRoots2.TheObjects[i].InitFromIntegers(6, 1, 0, 0, 0, 0, 0, 0, 0); i++;
+	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 1, 1, 1, 0, 0); i++;
+	tempRoots2.TheObjects[i].InitFromIntegers(6, 1, 1, 2, 2, 1, 1, 0, 0); i++;
 	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 1, 0, 0, 0, 0, 0, 0); i++;
-	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 1, 0, 0, 0); i++;
-	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 1, 1, 2, 1, 0, 0, 0); i++;
+//	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, -1, -1, 0, 0); i++;
+	tempRoots2.SetSizeExpandOnTopNoObjectInit(i);
 	theRootSA.ComputeAll();
 	theRootSA2.ComputeAll();
+	theRootSA.GenerateKmodMultTable
+		(	theRootSA.theMultTable, theRootSA.theOppositeKmods,
+			*this->theGlobalVariablesContainer->Default());
+	theRootSA2.GenerateKmodMultTable
+		(	theRootSA2.theMultTable, theRootSA2.theOppositeKmods,
+			*this->theGlobalVariablesContainer->Default());	
+	theRootSA.ComputeDebugString(true);
+	theRootSA2.ComputeDebugString(true);			
 	assert(theRootSA2.IsIsomorphicTo
 		(theRootSA, *this->theGlobalVariablesContainer->Default()));
-	
-	theRootSA.ComputeAll();
+	theRootSA.ComputeAll();*/
 	theRootSA.GenerateAllRootSubalgebrasUpToIsomorphism
 		(tempSAs,	*this->theGlobalVariablesContainer->Default());
 	tempSAs.ComputeDebugString();
@@ -9571,7 +9582,7 @@ void partFractions::initFromOtherPartFractions(partFractions& input, GlobalVaria
 	this->IndicatorRoot.Assign(input.IndicatorRoot);
 	this->IndexLowestNonProcessed=0;
 	this->IndexCurrentlyProcessed=0;
-	this->SetSizeExpandOnTopNoObjectInit(0);
+	this->ClearHashes();
 	this->AmbientDimension= input.AmbientDimension;
 }
 
@@ -11435,6 +11446,13 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement
 	}
 }
 
+void WeylGroup::Assign(const WeylGroup& right)
+{ this->KillingFormMatrix.Assign(right.KillingFormMatrix);
+	this->CopyFromHash(right);
+	this->RootSystem.CopyFromHash(right.RootSystem);
+	this->RootsOfBorel.CopyFromBase(right.RootsOfBorel);
+}
+
 void WeylGroup::ActOnRootByGroupElement(	int index,
 																						root &theRoot, bool RhoAction, bool UseMinusRho)
 { for (int i=0;i<this->TheObjects[index].size;i++)
@@ -11453,10 +11471,8 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 	this->GenerateOrbit(startRoots,false,this->RootSystem,false);
 	this->RootsOfBorel.size=0;
 	for (int i=0;i<this->RootSystem.size;i++)
-	{ if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
-		{ this->RootsOfBorel.AddRoot(this->RootSystem.TheObjects[i]);
-		}
-	}
+		if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
+			this->RootsOfBorel.AddRoot(this->RootSystem.TheObjects[i]);
 }
 
 void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction,
@@ -11496,7 +11512,7 @@ void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
 			{	output.AddObjectOnTopHash(currentRoot);
 				if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
 				{ tempEW.AddObjectOnTop(j);
-					outputSubset.AddObjectOnTop(tempEW);
+					outputSubset.AddObjectOnTopHash(tempEW);
 					tempEW.PopIndexSwapWithLast(tempEW.size-1);
 				}
 			}
@@ -13408,22 +13424,32 @@ void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational &output, in
 				(this->theWeylGroup.RootSystem.TheObjects[this->theSelection.elements[i]].TheObjects[j]);
 }
 
-void rootSubalgebra::ComputeAll()
-{ this->initFromAmbientWeyl();
+void rootSubalgebra::ComputeAllButAmbientWeyl()
+{	this->PosRootsKConnectedComponents.size=0;
+	this->theKComponentRanks.size=0;
+	this->theKEnumerations.size=0;
 	this->SimpleBasisK.CopyFromBase(this->genK);
 	this->TransformToSimpleBasisGenerators(this->SimpleBasisK);
 	this->ComputeKModules();
 	this->ComputeCentralizerFromKModulesAndSortKModules();
 	this->NilradicalKmods.init(this->kModules.size);
 	this->theDynkinDiagram.ComputeDiagramType(this->SimpleBasisK,this->AmbientWeyl);
-	this->theCentralizerDiagram.ComputeDiagramType(this->SimpleBasisCentralizerRoots,this->AmbientWeyl);
-	this->ComputeDebugString();
+	this->theCentralizerDiagram.ComputeDiagramType
+		(this->SimpleBasisCentralizerRoots,this->AmbientWeyl);
+}
+
+void rootSubalgebra::ComputeAll()
+{ this->initFromAmbientWeyl();
+	this->ComputeAllButAmbientWeyl();
+	//this->ComputeDebugString();
 }
 
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
 { this->CentralizerKmods.init(this->kModules.size);
 	this->CentralizerRoots.size=0;
+	this->CentralizerRoots.MakeActualSizeAtLeastExpandOnTop(this->kModules.size);
 	this->SimpleBasisCentralizerRoots.size=0;
+	this->SimpleBasisCentralizerRoots.MakeActualSizeAtLeastExpandOnTop(this->kModules.size);
 	int counter=0;
 	for (int i=0;i<this->kModules.size;i++)
 		if (this->kModules.TheObjects[i].size==1)
@@ -13441,15 +13467,7 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
 }
 
 void rootSubalgebra::initFromAmbientWeyl()
-{ MatrixLargeRational tempMat;
-	tempMat.AssignMatrixIntWithDen(this->AmbientWeyl.KillingFormMatrix,1);
-	tempMat.ComputeDebugString();
-	this->PosRootsKConnectedComponents.size=0;
-	this->theKComponentRanks.size=0;
-	this->theKEnumerations.size=0;
-	this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
-	this->AllRoots.CopyFromBase(this->AmbientWeyl.RootSystem);
-	this->AmbientWeyl.ComputeRootsOfBorel(this->AllPositiveRoots);
+{ this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
 }
 
 void rootSubalgebra::TransformToSimpleBasisGenerators(roots& theGens)
@@ -13462,17 +13480,17 @@ void rootSubalgebra::TransformToSimpleBasisGenerators(roots& theGens)
 	{ reductionOccured= false;
 		for (int i=0;i<theGens.size;i++)
 			for (int j=i+1; j<theGens.size;j++)
-			{ if (this->flagAnErrorHasOccuredTimeToPanic)
-					theGens.ComputeDebugString();
+			{// if (this->flagAnErrorHasOccuredTimeToPanic)
+				//	theGens.ComputeDebugString();
 				tempRoot.Assign(theGens.TheObjects[i]);
 				tempRoot.Subtract(theGens.TheObjects[j]);
-				if (this->flagAnErrorHasOccuredTimeToPanic)
-					tempRoot.ComputeDebugString();
+				//if (this->flagAnErrorHasOccuredTimeToPanic)
+					//tempRoot.ComputeDebugString();
 				if (tempRoot.IsEqualToZero())
 				{	theGens.PopIndexSwapWithLast(j);
 					reductionOccured=true;
 				}
-				if (this->AllRoots.IndexOfObject(tempRoot)!=-1)
+				if (this->AmbientWeyl.RootSystem.ContainsObjectHash(tempRoot)!=-1)
 				{ if (!tempRoot.IsPositiveOrZero())
 					{	tempRoot.MinusRoot();
 						theGens.TheObjects[j].Assign(tempRoot);
@@ -13497,11 +13515,14 @@ void rootSubalgebra::ComputeExtremeWeightInTheSameKMod
 				tempRoot.Add(this->SimpleBasisK.TheObjects[i]);
 			else
 				tempRoot.Subtract(this->SimpleBasisK.TheObjects[i]);
-			if (this->AllRoots.IndexOfObject(tempRoot)!=-1)
+			if (this->AmbientWeyl.RootSystem.ContainsObjectHash(tempRoot)!=-1)
 			{ outputW.Assign(tempRoot);
 				FoundHigher=true;
 			}
-			if (tempRoot.IsEqualToZero()) {outputW.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows); return;}
+			if (tempRoot.IsEqualToZero()) 
+			{	outputW.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows); 
+				return;
+			}
 		}
 	}
 }
@@ -13700,13 +13721,19 @@ void rootSubalgebra::ComputeKModules()
 	this->LowestWeightsGmodK.size=0;
 	this->HighestWeightsGmodK.size=0;
 	this->kModules.size=0;
-	this->ComputeDebugString();
+	//this->ComputeDebugString();
 	this->ComputeRootsOfK();
-	for (int i=0;i<this->AllRoots.size;i++)
-	{ if (this->AllRootsK.IndexOfObject(this->AllRoots.TheObjects[i])==-1)
-		{	root tempLW, tempHW;
-			this->ComputeLowestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempLW);
-			this->ComputeHighestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempHW);
+	root tempLW, tempHW;
+	hashedRoots& AllRoots= this->AmbientWeyl.RootSystem;
+	this->kModules.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
+	this->HighestRootsK.MakeActualSizeAtLeastExpandOnTop
+		(this->AmbientWeyl.KillingFormMatrix.NumRows);
+	this->LowestWeightsGmodK.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
+	this->HighestWeightsGmodK.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
+	for (int i=0;i<AllRoots.size;i++)
+	{ if (this->AllRootsK.IndexOfObject(AllRoots.TheObjects[i])==-1)
+		{	this->ComputeLowestWeightInTheSameKMod(AllRoots.TheObjects[i],tempLW);
+			this->ComputeHighestWeightInTheSameKMod(AllRoots.TheObjects[i],tempHW);
 			int x=this->LowestWeightsGmodK.IndexOfObject(tempLW);
 			if (x==-1)
 			{ this->LowestWeightsGmodK.AddRoot(tempLW);
@@ -13715,12 +13742,15 @@ void rootSubalgebra::ComputeKModules()
 				this->kModules.SetSizeExpandOnTopNoObjectInit(this->LowestWeightsGmodK.size);
 				this->kModules.TheObjects[x].size=0;
 			}
-			this->kModules.TheObjects[x].AddRoot(this->AllRoots.TheObjects[i]);
+			this->kModules.TheObjects[x].AddRoot(AllRoots.TheObjects[i]);
+			if (AllRoots.TheObjects[i].IsEqualTo(tempHW))
+				this->kModules.TheObjects[x].SwapTwoIndices
+					(0, this->kModules.TheObjects[x].size-1);
 		}
 		else
-		{	if (this->AllRoots.TheObjects[i].IsPositiveOrZero())
+		{	if (AllRoots.TheObjects[i].IsPositiveOrZero())
 			{	root tempHW;
-				this->ComputeHighestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempHW);
+				this->ComputeHighestWeightInTheSameKMod(AllRoots.TheObjects[i],tempHW);
 				int x=this->HighestRootsK.IndexOfObject(tempHW);
 				if (x==-1)
 				{ this->HighestRootsK.AddRoot(tempHW);
@@ -13729,7 +13759,7 @@ void rootSubalgebra::ComputeKModules()
 						(this->HighestRootsK.size);
 				}
 				this->PosRootsKConnectedComponents.TheObjects[x].AddRoot
-					(this->AllRoots.TheObjects[i]);
+					(AllRoots.TheObjects[i]);
 			}
 		}
 	}
@@ -13948,11 +13978,23 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& Ni
 	}
 }
 
-void rootSubalgebra::operator =(const rootSubalgebra& right)
-{ this->AmbientWeyl.KillingFormMatrix.Assign(right.AmbientWeyl.KillingFormMatrix);
+void rootSubalgebra::Assign(const rootSubalgebra& right)
+{	this->AmbientWeyl.Assign(right.AmbientWeyl);
 	this->genK.CopyFromBase(right.genK);
+	this->AllRootsK.CopyFromBase(right.AllRootsK);
+	this->CentralizerKmods.Assign(right.CentralizerKmods);	
+	this->CentralizerRoots.CopyFromBase(right.CentralizerRoots);
+	this->HighestRootsK.CopyFromBase(right.HighestRootsK);
+	this->HighestWeightsGmodK.CopyFromBase(right.HighestWeightsGmodK);
+	this->kModules.CopyFromBase(right.kModules);
+	this->LowestWeightsGmodK.CopyFromBase(right.LowestWeightsGmodK);
 	this->flagAnErrorHasOccuredTimeToPanic=right.flagAnErrorHasOccuredTimeToPanic;
-	this->ComputeAll();
+	this->theDynkinDiagram.Assign(right.theDynkinDiagram);
+	this->theCentralizerDiagram.Assign(right.theCentralizerDiagram);
+}
+
+inline void rootSubalgebra::operator =(const rootSubalgebra& right)
+{ this->Assign(right);
 }
 
 void rootSubalgebra::GenerateAllRootSubalgebrasUpToIsomorphism
@@ -13967,20 +14009,25 @@ void rootSubalgebra::GenerateAllRootSubalgebrasUpToIsomorphism
 void rootSubalgebra::GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
 	(rootSubalgebras& output, GlobalVariables &theGlobalVariables)
 {	output.AddObjectOnTop(*this);
+	this->ProblemCounter++;
 	rootSubalgebra tempSA;
 	tempSA=*this;
-	for (int i=0;i<this->kModules.size;i++)
-		if (this->HighestWeightsGmodK.TheObjects[i].IsPositiveOrZero())
-		{	tempSA.genK.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-			tempSA.ComputeAll();
+	for (int k=0;k<this->kModules.size;k++)
+		if (this->HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
+		{	tempSA.genK.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[k]);
+			tempSA.ComputeAllButAmbientWeyl();
+			//tempSA.ComputeAll();
 			bool foundNew=true;
-			for (int i=0;i<output.size;i++)
-				if (tempSA.IsIsomorphicTo(output.TheObjects[i],theGlobalVariables))
+			for (int j=0;j<output.size;j++)
+				if (tempSA.IsIsomorphicTo(output.TheObjects[j],theGlobalVariables))
 				{	foundNew=false;
 					break;
 				}
 			if (foundNew)
-				tempSA.GenerateAllRootSubalgebrasContainingThisUpToIsomorphism(output,theGlobalVariables);
+			{	tempSA.GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
+					(output,theGlobalVariables);
+				output.DynkinTableToString(output.DebugString);
+			}
 			tempSA.genK.PopIndexSwapWithLast(tempSA.genK.size-1);
 		}
 }
@@ -13989,14 +14036,17 @@ void rootSubalgebra::GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
 void rootSubalgebra::ComputeRootsOfK()
 { this->AllRootsK.size=0;
 	this->PositiveRootsK.size=0;
-	for (int i=0;i<this->AllRoots.size;i++)
+	hashedRoots& AllRoots=this->AmbientWeyl.RootSystem;
+	this->AllRootsK.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
+	this->PositiveRootsK.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
+	for (int i=0;i<AllRoots.size;i++)
 	{ root tempHW, tempLW;
-		this->ComputeHighestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempHW);
-		this->ComputeLowestWeightInTheSameKMod(this->AllRoots.TheObjects[i],tempLW);
+		this->ComputeHighestWeightInTheSameKMod(AllRoots.TheObjects[i],tempHW);
+		this->ComputeLowestWeightInTheSameKMod(AllRoots.TheObjects[i],tempLW);
 		if (tempHW.IsEqualToZero() || tempLW.IsEqualToZero())
-		{ this->AllRootsK.AddRoot(this->AllRoots.TheObjects[i]);
-			if (this->AllRoots.TheObjects[i].IsPositiveOrZero())
-				this->PositiveRootsK.AddRoot(this->AllRoots.TheObjects[i]);
+		{ this->AllRootsK.AddRoot(AllRoots.TheObjects[i]);
+			if (AllRoots.TheObjects[i].IsPositiveOrZero())
+				this->PositiveRootsK.AddRoot(AllRoots.TheObjects[i]);
 		}
 	}
 }
@@ -14010,7 +14060,8 @@ void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeade
   outputHeader.append
     ("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
   outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
-  outputHeader.append ("id & size & highest weight& lowest weight& elements\\\\");
+  outputHeader.append ("id & size & $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-lowest weight&");
+  outputHeader.append(" $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-highest weight& elements\\\\");
   outputFooter.clear();
   outputFooter.append("\\hline \\end{tabular}");
 }
@@ -14025,9 +14076,9 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
 		if (!((	this->AmbientWeyl.KillingFormMatrix.NumRows==7 && this->AmbientWeyl.RootsOfBorel.size==63)||
 					( this->AmbientWeyl.KillingFormMatrix.NumRows==8 && this->AmbientWeyl.RootsOfBorel.size==120)))
 			return true;
+	//if (this->theDynkinDiagram.DebugString=="D6\nA1\n")
+	//	Stop();
   rootSubalgebra::ProblemCounter++;
-  if (rootSubalgebra::ProblemCounter==35)
-		Stop();
   roots isoDomain, isoRange;
   permutation permComponents, permComponentsCentralizer;
   ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
@@ -14036,13 +14087,13 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
   this->theDynkinDiagram.GetAutomorphisms(DiagramAutomorphisms);
   this->theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
   tempAutos.initIncomplete(DiagramAutomorphisms.size);
-  tempAutosCentralizer.initIncomplete(DiagramAutomorphisms.size);
+  tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
   for (int i=0;i<DiagramAutomorphisms.size;i++)
 		tempAutos.MaxMultiplicities.TheObjects[i]=
-			DiagramAutomorphisms.TheObjects[i].size;
+			DiagramAutomorphisms.TheObjects[i].size-1;
 	for (int i=0;i<CentralizerDiagramAutomorphisms.size;i++)
 		tempAutosCentralizer.MaxMultiplicities.TheObjects[i]=
-			CentralizerDiagramAutomorphisms.TheObjects[i].size;
+			CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
   tempList.SetSizeExpandOnTopNoObjectInit
     (this->theDynkinDiagram.sameTypeComponents.size);
   int tempSize=0;
@@ -14078,7 +14129,7 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
 							tempAutosCentralizer, right.theCentralizerDiagram);
 					isoDomain.ComputeDebugString();
 					isoRange.ComputeDebugString();
-					if (this->attemptExtensionToIsomorphism(isoDomain,isoRange,theGlobalVariables))
+					if (this->attemptExtensionToIsomorphism(isoDomain,isoRange,theGlobalVariables,0))
 						return true;
 					tempAutosCentralizer.IncrementSubset();
 				}
@@ -14093,20 +14144,43 @@ bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theG
   return false;
 }
 
+int rootSubalgebra::ProblemCounter2=0;
+
 bool rootSubalgebra::attemptExtensionToIsomorphism
-	(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables)
-{	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
+	(	roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, 
+		int RecursionDepth)
+{	this->ProblemCounter2++;
+	if (this->ProblemCounter2==8)
+		Stop();
+	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
 	assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));	
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
 		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables);
-	roots domainRec, rangeRec;
+	if (RecursionDepth>=theGlobalVariables.rootsAttemptExtensionIso1.size)
+	{	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+		theGlobalVariables.rootsAttemptExtensionIso1.SetSizeExpandOnTopNoObjectInit
+			(	theGlobalVariables.rootsAttemptExtensionIso1.size+theDimension);
+		theGlobalVariables.rootsAttemptExtensionIso2.SetSizeExpandOnTopNoObjectInit
+			(	theGlobalVariables.rootsAttemptExtensionIso2.size+theDimension);
+		theGlobalVariables.rootSAAttemptExtensionIso1.SetSizeExpandOnTopNoObjectInit
+			(theGlobalVariables.rootSAAttemptExtensionIso1.size+theDimension);
+		theGlobalVariables.rootSAAttemptExtensionIso2.SetSizeExpandOnTopNoObjectInit
+			(theGlobalVariables.rootSAAttemptExtensionIso2.size+theDimension);
+	}
+	roots& domainRec =
+		theGlobalVariables.rootsAttemptExtensionIso1.TheObjects[RecursionDepth];
+	roots& rangeRec = 
+		theGlobalVariables.rootsAttemptExtensionIso2.TheObjects[RecursionDepth];
 	domainRec.CopyFromBase(Domain); rangeRec.CopyFromBase(Range);
-	rootSubalgebra leftSA, rightSA;
+	rootSubalgebra& leftSA=
+		theGlobalVariables.rootSAAttemptExtensionIso1.TheObjects[RecursionDepth];
+	rootSubalgebra& rightSA=
+		theGlobalVariables.rootSAAttemptExtensionIso2.TheObjects[RecursionDepth];
 	leftSA.genK.size=0; rightSA.genK.size=0;
-	leftSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
-	rightSA.AmbientWeyl.KillingFormMatrix.Assign(this->AmbientWeyl.KillingFormMatrix);
+	leftSA.AmbientWeyl.Assign(this->AmbientWeyl);
+	rightSA.AmbientWeyl.Assign(this->AmbientWeyl);
 	leftSA.genK.AddListOnTop(domainRec); rightSA.genK.AddListOnTop(rangeRec);
-	leftSA.ComputeAll(); rightSA.ComputeAll();
+	leftSA.ComputeAllButAmbientWeyl(); rightSA.ComputeAllButAmbientWeyl();
 	if (rightSA.kModules.size!=leftSA.kModules.size)
 		return false;
 	int counter =0;
@@ -14117,16 +14191,28 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 		domainRec.PopIndexSwapWithLast(domainRec.size-1);
 		domainRec.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
 	}
+	//find a minimal possible new kmodule to throw in
+	for (int i=0;i<leftSA.kModules.size;i++)
+	{ if (leftSA.kModules.TheObjects[i].size> leftSA.kModules.TheObjects[counter].size)
+		{ domainRec.LastObject()->Assign(leftSA.HighestWeightsGmodK.TheObjects[i]);
+			if (domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank)
+				domainRec.LastObject()->Assign(leftSA.HighestWeightsGmodK.TheObjects[counter]);
+			else
+				counter=i;
+		}
+	}
 	assert(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank+1);
 	roots& firstKmodLeft= leftSA.kModules.TheObjects[counter];  
-	for (int i=0;i<rightSA.kModules.size;i++)
-		if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
-		{	rangeRec.AddObjectOnTop(rightSA.HighestWeightsGmodK.TheObjects[i]);
-			if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
-				if (this->attemptExtensionToIsomorphism(domainRec, rangeRec, theGlobalVariables))
-					return true;
-			rangeRec.PopIndexSwapWithLast(rangeRec.size-1);
-		}
+	for (int j=0;j<firstKmodLeft.size;j++)
+		for (int i=0;i<rightSA.kModules.size;i++)
+			if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
+			{	rangeRec.AddObjectOnTop(rightSA.kModules.TheObjects[i].TheObjects[j]);
+				if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
+					if (this->attemptExtensionToIsomorphism
+								(domainRec, rangeRec, theGlobalVariables,RecursionDepth+1))
+						return true;
+				rangeRec.PopIndexSwapWithLast(rangeRec.size-1);	
+			}
 	return false;
 }
 
@@ -14142,11 +14228,11 @@ bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariable
 			matB.elements[i][j].Assign(domain.TheObjects[i].TheObjects[j]);
 		tempRoots.TheObjects[i].MakeZero(theDimension);
 	}
-	if (this->flagAnErrorHasOccuredTimeToPanic)
-	{	domain.ComputeDebugString();
-		range.ComputeDebugString();
-		matB.ComputeDebugString();
-	}
+	//if (this->flagAnErrorHasOccuredTimeToPanic)
+	//{	domain.ComputeDebugString();
+	//	range.ComputeDebugString();
+	//	matB.ComputeDebugString();
+	//}
 	matB.Invert(theGlobalVariables);
 	Rational tempRat2;
 	for (int k=0;k<theDimension;k++)
@@ -14156,18 +14242,20 @@ bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariable
 				tempRat2.MultiplyBy(matB.elements[i][j]);
 				tempRoots.TheObjects[i].TheObjects[k].Add(tempRat2);
 			}
-	if (this->flagAnErrorHasOccuredTimeToPanic)
-		tempRoots.ComputeDebugString();
+	//if (this->flagAnErrorHasOccuredTimeToPanic)
+		//tempRoots.ComputeDebugString();
 	root tempRoot, tempRoot2;
 	for (int i=0;i<this->AmbientWeyl.RootsOfBorel.size;i++)
 	{	tempRoot.MakeZero(theDimension);
 		for (int j=0; j<theDimension;j++)
 		{ tempRoot2.Assign(tempRoots.TheObjects[j]);
-			tempRoot2.MultiplyByLargeRational(this->AmbientWeyl.RootsOfBorel.TheObjects[i].TheObjects[j]);
+			tempRoot2.MultiplyByLargeRational
+				(this->AmbientWeyl.RootsOfBorel.TheObjects[i].TheObjects[j]);
 			tempRoot.Add(tempRoot2);
 		}
-		if (this->flagAnErrorHasOccuredTimeToPanic)
-			tempRoot.ComputeDebugString();
+//		if (this->flagAnErrorHasOccuredTimeToPanic)
+//			tempRoot.ComputeDebugString();
+//		this->AmbientWeyl.ComputeDebugString();
 		if (!this->IsARoot(tempRoot))
 			return false;
 	}	
@@ -14337,6 +14425,8 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 void ::DynkinDiagramRootSubalgebra::ComputeDiagramType
 	(roots& simpleBasisInput, WeylGroup& theWeyl)
 { this->SimpleBasesConnectedComponents.size=0;
+	this->SimpleBasesConnectedComponents
+		.MakeActualSizeAtLeastExpandOnTop(simpleBasisInput.size);
 	for (int i=0;i<simpleBasisInput.size;i++)
 	{	int indexFirstComponentConnectedToRoot=-1;
 		for (int j=0;j<this->SimpleBasesConnectedComponents.size;j++)
@@ -14530,11 +14620,23 @@ bool ::DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra
 	return true;
 }
 
-void DynkinDiagramRootSubalgebra::operator =(const DynkinDiagramRootSubalgebra& right)
+void DynkinDiagramRootSubalgebra::Assign
+	(const DynkinDiagramRootSubalgebra& right)
 { this->DebugString.assign(right.DebugString);
 	this->DynkinTypeStrings.CopyFromBase(right.DynkinTypeStrings);
 	this->indicesThreeNodes.CopyFromBase(right.indicesThreeNodes);
-	this->SimpleBasesConnectedComponents.CopyFromBase(right.SimpleBasesConnectedComponents);
+	this->SimpleBasesConnectedComponents.CopyFromBase
+		(right.SimpleBasesConnectedComponents);
+	this->indexInUniComponent.CopyFromBase(right.indexInUniComponent);
+	this->indexUniComponent.CopyFromBase(right.indexUniComponent);
+	this->indicesEnds.CopyFromBase(right.indicesEnds);
+	this->indicesThreeNodes.CopyFromBase(right.indicesThreeNodes);
+	this->sameTypeComponents.CopyFromBase(right.sameTypeComponents);
+}
+
+inline void DynkinDiagramRootSubalgebra::operator =
+	(const DynkinDiagramRootSubalgebra& right)
+{	this->Assign(right);
 }
 
 void ::DynkinDiagramRootSubalgebra::GetAutomorphism
@@ -14562,7 +14664,7 @@ void ::DynkinDiagramRootSubalgebra::GetAutomorphism
 			output.AddObjectOnTop(thePermutation);
 			thePermutation.TheObjects[1]=3; thePermutation.TheObjects[2]=1; thePermutation.TheObjects[3]=2;
 			output.AddObjectOnTop(thePermutation);
-			thePermutation.TheObjects[1]=3; thePermutation.TheObjects[2]=1; thePermutation.TheObjects[3]=1;
+			thePermutation.TheObjects[1]=3; thePermutation.TheObjects[2]=2; thePermutation.TheObjects[3]=1;
 			output.AddObjectOnTop(thePermutation);
 		} else
 		{ thePermutation.TheObjects[currentComponent.size-2]=currentComponent.size-1;
@@ -15230,25 +15332,26 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot
 	this->SimpleBasisK.rootsToMatrix(tempMat);
 	tempMat.Invert(theGlobalVariables);
 	int counter=0;
-	for(int i=0;i<this->AllRoots.size;i++)
+	hashedRoots& AllRoots= this->AmbientWeyl.RootSystem;
+	for(int i=0;i<AllRoots.size;i++)
 	{ root linComb;
-		if (this->AllRootsK.IndexOfObject(this->AllRoots.TheObjects[i])==-1)
+		if (this->AllRootsK.IndexOfObject(AllRoots.TheObjects[i])==-1)
 		{ for (int j=0;j<theDimension;j++)
 			{	linComb.TheObjects[j].MakeZero();
 				for(int k=0;k<theDimension;k++)
 				{ Rational tempRat;
 					tempRat.Assign(tempMat.elements[k][j]);
-					tempRat.MultiplyBy(this->AllRoots.TheObjects[i].TheObjects[k]);
+					tempRat.MultiplyBy(AllRoots.TheObjects[i].TheObjects[k]);
 					linComb.TheObjects[j].Add(tempRat);
 				}
 			}
 			int x= linComb.FindLCMDenominatorsTruncateToInt();
 			linComb.MultiplyByInteger(-x);
 			std::string tempS;
-			if (this->LinCombToString(this->AllRoots.TheObjects[i], x,linComb,tempS))
+			if (this->LinCombToString(AllRoots.TheObjects[i], x,linComb,tempS))
 			{ out<<tempS<<"\n";
 				counter++;
-				if (this->LowestWeightsGmodK.IndexOfObject(this->AllRoots.TheObjects[i]) !=-1)
+				if (this->LowestWeightsGmodK.IndexOfObject(AllRoots.TheObjects[i]) !=-1)
 				{ out2<< tempS<<"\n";
 				}
 			}
@@ -15272,6 +15375,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
 	root tempRoot;
 	tempRoot.Assign(this->SimpleBasisK.TheObjects[0]);
 	this->ComputeHighestWeightInTheSameKMod(tempRoot,tempRoot);
+	hashedRoots& AllRoots= this->AmbientWeyl.RootSystem;
 	for (int l=0;l<this->SimpleBasisK.size;l++)
 	{ Rational tempRat;
 		this->AmbientWeyl.RootScalarKillingFormMatrixRoot
@@ -15284,15 +15388,15 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
 			MatrixLargeRational tempMat;
 			tempRoots.rootsToMatrix(tempMat);
 			tempMat.Invert(theGlobalVariables);
-			for(int i=0;i<this->AllRoots.size;i++)
+			for(int i=0;i<AllRoots.size;i++)
 			{ root linComb;
-				if (this->AllRootsK.IndexOfObject(this->AllRoots.TheObjects[i])==-1)
+				if (this->AllRootsK.IndexOfObject(AllRoots.TheObjects[i])==-1)
 				{ for (int j=0;j<theDimension;j++)
 					{	linComb.TheObjects[j].MakeZero();
 						for(int k=0;k<theDimension;k++)
 						{ Rational tempRat;
 							tempRat.Assign(tempMat.elements[k][j]);
-							tempRat.MultiplyBy(this->AllRoots.TheObjects[i].TheObjects[k]);
+							tempRat.MultiplyBy(AllRoots.TheObjects[i].TheObjects[k]);
 							linComb.TheObjects[j].Add(tempRat);
 						}
 					}
@@ -15300,7 +15404,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
 					linComb.MultiplyByInteger(-x);
 					std::string tempS;
 					if (this->LinCombToStringDistinguishedIndex
-						(l,this->AllRoots.TheObjects[i], x,linComb,tempS))
+								(l,AllRoots.TheObjects[i], x,linComb,tempS))
 					{ out<<tempS<<"\n";
 						counter++;
 					}
@@ -16572,4 +16676,13 @@ void permutation::GetPermutation(ListBasicObjects<int>& output)
     output.TheObjects[i]=i;
   for (int i=0;i<numElements;i++)
     MathRoutines::swap(output.TheObjects[i],output.TheObjects[i+this->Multiplicities.TheObjects[i]]);
+}
+
+void rootSubalgebras::DynkinTableToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+	for (int i=0;i<this->size;i++)
+	{	this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
+		out <<i<<":\n" << tempS<<"\n";
+	}	
+	output=out.str();
 }

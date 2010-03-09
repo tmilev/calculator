@@ -423,8 +423,6 @@ public:
 	void SwapTwoIndices(int index1, int index2);
 	void ElementToStringGeneric(std::string& output);
 	void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
-	void CopyFromBase (const ListBasicObjects<Object>& From);
-	void ShiftUpExpandOnTop(int StartingIndex);
 	//careful output is not bool but int!!!!
 	int IndexOfObject(const Object& o);
 	bool ContainsObject(const Object& o){return this->IndexOfObject(o)!=-1;};
@@ -435,6 +433,8 @@ public:
 	void operator=(const ListBasicObjects<Object>& right){this->CopyFromBase(right);};
 	static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
 	void ReverseOrderElements();
+	void CopyFromBase (const ListBasicObjects<Object>& From);
+	void ShiftUpExpandOnTop(int StartingIndex);
 	ListBasicObjects();
 	~ListBasicObjects();
 };
@@ -458,6 +458,24 @@ public:
 template <class Object>
 class HashedListBasicObjects : public ListBasicObjects<Object>
 {
+private:
+	void AddObjectOnBottom(const Object& o);
+	void AddObjectOnTop(const Object& o);
+	void AddListOnTop(ListBasicObjects<Object>& theList);
+	bool AddObjectOnTopNoRepetitionOfObject(const Object& o);
+	void PopIndexShiftUp(int index);
+	void PopIndexShiftDown(int index);
+	void PopIndexSwapWithLast(int index);
+	void PopFirstOccurenceObjectSwapWithLast(Object& o);
+	void CopyFromBase (const ListBasicObjects<Object>& From);
+	void SwapTwoIndices(int index1, int index2);
+	void operator=(const ListBasicObjects<Object>& right){this->CopyFromBase(right);};
+	void AssignLight(const ListBasicObjectsLight<Object>& from);
+	void SetSizeExpandOnTopNoObjectInit(int theSize);
+	int IndexOfObject(const Object& o);
+	bool ContainsObject(const Object& o);
+	void ReverseOrderElements();
+	void ShiftUpExpandOnTop(int StartingIndex);
 protected:
 	friend class partFractions;
 	friend class QuasiMonomial;
@@ -2024,12 +2042,13 @@ void HashedListBasicObjects<Object>::CopyFromHash (const HashedListBasicObjects<
 { if (&From==this){return;}
 	this->ClearHashes();
 	this->SetHashSize(From.HashSize);
-  this->CopyFromBase(From);
+  this->::ListBasicObjects<Object>::CopyFromBase(From);
   if (this->size<this->HashSize)
   	for (int i=0;i<this->size;i++)
 		{	int hashIndex= this->TheObjects[i].HashFunction()% this->HashSize;
 			if (hashIndex<0){hashIndex+=this->HashSize;}
-			this->TheHashedArrays[hashIndex].CopyFromBase(From.TheHashedArrays[hashIndex]);
+			this->TheHashedArrays[hashIndex].
+				CopyFromBase(From.TheHashedArrays[hashIndex]);
 		}
 	else
 		for (int i=0;i<this->HashSize;i++)
@@ -2078,7 +2097,7 @@ void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
 { int hashIndex = o.HashFunction()% this->HashSize;
 	if (hashIndex<0) {hashIndex+=this->HashSize;}
 	this->TheHashedArrays[hashIndex].AddObjectOnTop(this->size);
-	this->AddObjectOnTop(o);
+	this->::ListBasicObjects<Object>::AddObjectOnTop(o);
 }
 
 template <class Object>
@@ -2093,15 +2112,15 @@ void HashedListBasicObjects<Object>::PopIndexSwapWithLastHash(int index)
 {	Object* oPop= &this->TheObjects[index];
 	int hashIndexPop = oPop->HashFunction()% this->HashSize;
 	if (hashIndexPop<0) {hashIndexPop+=this->HashSize;}
-	TheHashedArrays[hashIndexPop].PopFirstOccurenceObjectSwapWithLast(index);
+	this->TheHashedArrays[hashIndexPop].PopFirstOccurenceObjectSwapWithLast(index);
 	if (index==this->size-1){this->size--; return;}
 	int tempI=this->size-1;
 	Object* oTop= &this->TheObjects[tempI];
 	int hashIndexTop= oTop->HashFunction()% this->HashSize;
 	if (hashIndexTop<0){hashIndexTop+=this->HashSize;}
-	TheHashedArrays[hashIndexTop].PopFirstOccurenceObjectSwapWithLast(tempI);
-	TheHashedArrays[hashIndexTop].AddObjectOnTop(index);
-	this->PopIndexSwapWithLast(index);
+	this->TheHashedArrays[hashIndexTop].PopFirstOccurenceObjectSwapWithLast(tempI);
+	this->TheHashedArrays[hashIndexTop].AddObjectOnTop(index);
+	this->::ListBasicObjects<Object>::PopIndexSwapWithLast(index);
 }
 
 template <class Object>
@@ -5289,6 +5308,7 @@ public:
 	hashedRoots RootSystem;
 	roots RootsOfBorel;
 	static bool flagAnErrorHasOcurredTimeToPanic;
+	void Assign(const WeylGroup &right);
 	void ComputeRho();
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
@@ -5453,7 +5473,8 @@ public:
 	void ComputeDynkinStrings(WeylGroup& theWeyl);
 	void ComputeDynkinString(int indexComponent, WeylGroup& theWeyl);
 	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
-	void operator=(const DynkinDiagramRootSubalgebra& right);
+	void Assign(const DynkinDiagramRootSubalgebra& right);
+	inline void operator=(const DynkinDiagramRootSubalgebra& right);
 	bool operator==(const DynkinDiagramRootSubalgebra& right);
 	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output,int index);
 	void GetAutomorphisms
@@ -5534,6 +5555,7 @@ public:
 	int NumGmodKtableRowsAllowedLatex;
 	static bool flagUseDynkinClassificationForIsomorphismComputation;
 	static int ProblemCounter;
+	static int ProblemCounter2;
 	::multTableKmods theMultTable;
 	ListBasicObjects<int> theOppositeKmods;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
@@ -5543,8 +5565,6 @@ public:
 	ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
-	roots AllRoots;
-	roots AllPositiveRoots;
 	WeylGroup AmbientWeyl;
 	roots genK;
 	roots SimpleBasisK;
@@ -5570,11 +5590,13 @@ public:
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots);
-  bool IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theGlobalVariables);
+  bool IsIsomorphicTo
+		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphism
-		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables);
+		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, 
+			int RecursionDepth);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
 		(rootSubalgebras& output, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
@@ -5620,6 +5642,7 @@ public:
 		(	int index1, int index2,ListBasicObjects<int>& oppositeKmods,
 			ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
+	void ComputeAllButAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
 	void TransformToSimpleBasisGenerators(roots& theGens);
@@ -5627,7 +5650,8 @@ public:
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
 	void ComputeExtremeWeightInTheSameKMod
 		(root& input, root& outputW, bool lookingForHighest);
-	void operator=(const rootSubalgebra& right);
+	inline void operator=(const rootSubalgebra& right);
+	void Assign(const rootSubalgebra& right);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
 	void SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables);
@@ -5696,8 +5720,11 @@ class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
 {
 public:
 	std::string DebugString;
+	void DynkinTableToString(std::string& output);
 	void ElementToString(std::string& output)
 	{ std::stringstream out; std::string tempS;
+		this->DynkinTableToString(tempS);
+		out <<tempS<<"\n";
 		for (int i=0;i<this->size; i++)
 		{	this->TheObjects[i].ElementToString(tempS,false);
 			out << tempS;
@@ -5860,6 +5887,11 @@ public:
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
 	rootsCollection rootsStronglyPerpendicular;
+	rootsCollection rootsAttemptExtensionIso1;
+	rootsCollection rootsAttemptExtensionIso2;
+	
+	rootSubalgebras rootSAAttemptExtensionIso1;
+	rootSubalgebras rootSAAttemptExtensionIso2;
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
 	ListBasicObjects<WallData*> listWallDataPtSplitChamber;

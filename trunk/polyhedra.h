@@ -5461,7 +5461,7 @@ public:
 	void GetMapFromPermutation
 		(	roots& domain, roots& range, ListBasicObjects< int >& thePerm, 
 			ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos, 
-			ListBasicObjects<int>& theAutosPerm,
+			SelectionWithDifferentMaxMultiplicities& theAutosPerm,
 			DynkinDiagramRootSubalgebra& right);
 };
 

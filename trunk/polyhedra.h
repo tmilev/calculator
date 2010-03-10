@@ -49,7 +49,7 @@
 #endif
 
 #ifdef WIN32
-//have to disable C4100 in VS because it warns me on passing non-used parameters to my functions. 
+//have to disable C4100 in VS because it warns me on passing non-used parameters to my functions.
 //Those of course are passed to facilitate future extensions of functionality.
 #pragma warning(disable:4100)//warning C4100: non-referenced formal parameter
 //The below causes problems in VS with my debugging code (which I comment/uncomment often).
@@ -5480,8 +5480,8 @@ public:
 	void GetAutomorphisms
 		(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output);
 	void GetMapFromPermutation
-		(	roots& domain, roots& range, ListBasicObjects< int >& thePerm, 
-			ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos, 
+		(	roots& domain, roots& range, ListBasicObjects< int >& thePerm,
+			ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos,
 			SelectionWithDifferentMaxMultiplicities& theAutosPerm,
 			DynkinDiagramRootSubalgebra& right);
 };
@@ -5499,9 +5499,13 @@ public:
 	bool isIsomorphicTo(coneRelation& right,rootSubalgebra& owner);
 	std::string DebugString;
 	std::string stringConnectedComponents;
-	void ElementToString(std::string& output, rootSubalgebra& owner);
+	void RelationOneSideToString
+    ( std::string& output, std::string& letterType, ListBasicObjects<Rational>& coeffs,
+      ListBasicObjects<ListBasicObjects<int> > kComponents, roots& theRoots,bool useLatex,
+      rootSubalgebra& owner);
+	void ElementToString(std::string& output, rootSubalgebra& owner,bool useLatex);
 	void ComputeStringConnectedComponents(rootSubalgebra& owner, std::string& output);
-	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner);};
+	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner,true);};
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
 	void ComputeKComponents
@@ -5523,16 +5527,8 @@ class coneRelations: public ListBasicObjects<coneRelation>
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output, rootSubalgebra& owner)
-	{ std::stringstream out;
-		std::string tempS;
-		for(int i=0;i<this->size;i++)
-		{	this->TheObjects[i].ElementToString(tempS,owner);
-			out << tempS<<"\n";
-		}
-		output=out.str();
-	};
-	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner);};
+	void ElementToString(std::string& output, rootSubalgebra& owner, bool useLatex);
+	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner,true);};
 	void AddRelationNoRepetition(coneRelation& input, rootSubalgebra& owner);
 };
 
@@ -5595,7 +5591,7 @@ public:
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphism
-		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, 
+		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 			int RecursionDepth);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
 		(rootSubalgebras& output, GlobalVariables& theGlobalVariables);
@@ -5889,7 +5885,7 @@ public:
 	rootsCollection rootsStronglyPerpendicular;
 	rootsCollection rootsAttemptExtensionIso1;
 	rootsCollection rootsAttemptExtensionIso2;
-	
+
 	rootSubalgebras rootSAAttemptExtensionIso1;
 	rootSubalgebras rootSAAttemptExtensionIso2;
 

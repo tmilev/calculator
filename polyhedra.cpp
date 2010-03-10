@@ -16488,10 +16488,10 @@ void rootsWithMultiplicity::ElementToString(std::string &output)
 }
 
 void coneRelation::RelationOneSideToString
-  ( std::string& output, std::string& letterType, ListBasicObjects<Rational>& coeffs,
-    ListBasicObjects<ListBasicObjects<int> > kComponents, roots& theRoots,bool useLatex,
+  ( std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs,
+    ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,bool useLatex,
     rootSubalgebra& owner)
-{ assert(theRoots.size=coeffs.size);
+{ assert(theRoots.size==coeffs.size);
   std::stringstream out;
   std::string tempS;
   for (int i=0;i<theRoots.size;i++)
@@ -16511,6 +16511,22 @@ void coneRelation::RelationOneSideToString
         out <<"+";
     }
 	}
+	ListBasicObjects<int> TakenIndices;
+	ListBasicObjects<int> NumPrimesUniTypicComponent;
+	TakenIndices.initFillInObject(owner.theDynkinDiagram.SimpleBasesConnectedComponents.size,-1);
+	NumPrimesUniTypicComponent.initFillInObject(owner.theDynkinDiagram.sameTypeComponents.size,-1);
+	for (int i=0;i<kComponents.size;i++)
+		for (int j=0;j<kComponents.TheObjects[i].size;j++)
+		{ int index= kComponents.TheObjects[i].TheObjects[j];
+			int indexUniComponent=owner.theDynkinDiagram.indexUniComponent.TheObjects[index];
+			out <<"\t"<<owner.theDynkinDiagram.DynkinTypeStrings.TheObjects[index];
+			if (TakenIndices.TheObjects[index]==-1)
+			{ NumPrimesUniTypicComponent.TheObjects[indexUniComponent]++;
+				TakenIndices.TheObjects[index]=NumPrimesUniTypicComponent.TheObjects[indexUniComponent];
+			}
+			for (int k=0;k<TakenIndices.TheObjects[index];k++)
+				out <<"'";
+		}
 	output=out.str();
 }
 
@@ -16519,91 +16535,27 @@ void coneRelation::ElementToString(std::string &output, rootSubalgebra& owner, b
 	std::stringstream out;
 	assert(this->AlphaCoeffs.size==this->Alphas.size);
 	assert(this->BetaCoeffs.size==this->Betas.size);
-	for (int i=0;i<this->Alphas.size;i++)
-	{	this->AlphaCoeffs.TheObjects[i].ElementToString(tempS);
-		if (tempS=="1")	tempS="";
-		if (tempS=="-1") tempS="-";
-		assert(!(tempS=="0"));
-		out<< tempS;
-		if (!useLatex)
-    { this->Alphas.TheObjects[i].ElementToString(tempS);
-      out <<"("<<tempS<<")";
-      if (i!=this->Alphas.size-1)
-        out <<" + ";
-    } else
-    { out <<"\\alpha_"<< i+1;
-      if (i!=this->Alphas.size-1)
-        out <<"+";
-    }
-	}
+	this->ComputeConnectedComponents(this->Alphas,owner, this->AlphaKComponents);
+	this->ComputeConnectedComponents(this->Betas,owner, this->BetaKComponents);
+	this->RelationOneSideToString
+		(tempS,"\\alpha",this->AlphaCoeffs,this->AlphaKComponents,this->Alphas,useLatex,owner);
 	out << "=";
-	for (int i=0;i<this->Betas.size;i++)
-	{	this->BetaCoeffs.TheObjects[i].ElementToString(tempS);
-		if (tempS=="1")	tempS="";
-		if (tempS=="-1") tempS="-";
-		assert(!(tempS=="0"));
-		out<< tempS;
-		this->Betas.TheObjects[i].ElementToString(tempS);
-		out <<"("<<tempS<<")";
-		if (i!=this->Betas.size-1)
-			out <<" + ";
-	}
-	this->ComputeStringConnectedComponents(owner,this->stringConnectedComponents);
-	out <<this->stringConnectedComponents<<"\n";
+	this->RelationOneSideToString
+		(tempS,"\\beta",this->BetaCoeffs,this->BetaKComponents,this->Betas,useLatex,owner);
 	this->theDiagram.ElementToString(tempS);
 	out <<"\n"<<tempS;
 	output=out.str();
 }
 
-void coneRelation::ComputeStringConnectedComponents
-	(rootSubalgebra& owner, std::string& output)
-{ std::string tempS;
-	std::stringstream out;
-		owner.coneRelationsBuffer.SetSizeExpandOnTopNoObjectInit
-		(owner.theDynkinDiagram.sameTypeComponents.size);
-	owner.coneRelationsNumSameTypeComponentsTaken.SetSizeExpandOnTopNoObjectInit
-		(owner.theDynkinDiagram.sameTypeComponents.size);
-	for (int i=0;i<owner.theDynkinDiagram.sameTypeComponents.size;i++)
-	{ owner.coneRelationsNumSameTypeComponentsTaken.TheObjects[i]=-1;
-		owner.coneRelationsBuffer.TheObjects[i].SetSizeExpandOnTopNoObjectInit
-			(owner.theDynkinDiagram.sameTypeComponents.TheObjects[i].size);
-		for (int j=0; j<owner.coneRelationsBuffer.TheObjects[i].size;j++)
-			owner.coneRelationsBuffer.TheObjects[i].TheObjects[j]=-1;
-	}
-	this->stringByConnectedComponents(this->Alphas,tempS,owner);
-	out <<tempS;
-	this->stringByConnectedComponents(this->Betas,tempS,owner);
-	out << tempS;
-	output=out.str();
-}
-
-void coneRelation::stringByConnectedComponents(roots& input, std::string& output, rootSubalgebra& owner)
-{	std::stringstream out;
-	for (int i=0;i<input.size;i++)
-	{ bool foundAnotherComponent=false;
+void coneRelation::ComputeConnectedComponents
+	(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output)
+{	for (int i=0;i<input.size;i++)
+	{	output.TheObjects[i].size=0;
 		for (int j=0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size;j++)
 			if (owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j]
 						.ContainsARootConnectedTo(input.TheObjects[i],owner.AmbientWeyl))
-			{	if (foundAnotherComponent)
-					out<<"+";
-				foundAnotherComponent=true;
-				out << owner.theDynkinDiagram.DynkinTypeStrings.TheObjects[j];
-				int& index =
-					owner.coneRelationsBuffer.TheObjects
-						[owner.theDynkinDiagram.indexUniComponent.TheObjects[j]].TheObjects
-							[owner.theDynkinDiagram.indexInUniComponent.TheObjects[j]];
-				int& numPrimes=owner.coneRelationsNumSameTypeComponentsTaken.TheObjects
-					[owner.theDynkinDiagram.indexUniComponent.TheObjects[j]];
-				if (index==-1)
-				{	numPrimes++;
-					index=numPrimes;
-				}
-				for (int k=0;k<numPrimes;k++)
-					out<<"'";
-			}
-		out <<",\t";
+				output.TheObjects[i].AddObjectOnTop(j);
 	}
-	output=out.str();
 }
 
 

@@ -57,7 +57,7 @@ unsigned int RGB(int r, int g, int b)
 //end of windows.h portion
 
 GlobalVariables::GlobalVariables()
-{
+{ this->FeedDataToIndicatorWindowDefault=0;
 }
 
 GlobalVariables::~GlobalVariables()
@@ -186,6 +186,7 @@ template < > int HashedListBasicObjects<GeneratorPFAlgebraRecord>::PreferredHash
 template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=100;
 template < > int HashedListBasicObjects<Selection>::PreferredHashSize=20;
 template < > int HashedListBasicObjects<affineHyperplane>::PreferredHashSize=100;
+template < > int HashedListBasicObjects<coneRelation>::PreferredHashSize=1000;
 
 template < > int ListBasicObjects<affineCone>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1;
@@ -1036,12 +1037,9 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);
-	for (int i=14;i<15 //this->theRootSubalgebras.size
-					;i++)
-	{ this->theRootSubalgebras.TheObjects[i]
-			.GenerateParabolicsInCentralizerAndPossibleNilradicals
-				(*this->theGlobalVariablesContainer->Default(),this->theRootSubalgebras,i);	
-	}
+	this->theRootSubalgebras.ComputeLProhibitingRelations
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size);
+	
 }
 
 void ComputationSetup::Run()
@@ -13442,14 +13440,11 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(root& input, root& outputL
 
 void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
-{	this->ComputeAll();
+{	//this->ComputeAll();
 	this->GenerateKmodMultTable
 		(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 		this->theMultTable.ComputeDebugString(*this);
-	this->NumNilradicalsAllowed=0;
-	this->NumConeConditionFailures=0;
-	this->NumRelationsWithStronglyPerpendicularDecomposition=0;
 	ListBasicObjects<Selection> impliedSelections;
 	impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
 	Selection tempSel;
@@ -13457,30 +13452,38 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 		this->ComputeDebugString();
-	for (int i=0;i<numCycles;i++)
-	{	impliedSelections.TheObjects[0].init(this->kModules.size);
-		for (int j=0;j<this->CentralizerRoots.size;j++)
-			for (int k=0;k<tempSel.CardinalitySelection;k++)
-			{ root tempRoot;
-				if (!this->CentralizerRoots.TheObjects[j].IsPositiveOrZero())
-					break;
-				else
-					tempRoot.Assign(this->CentralizerRoots.TheObjects[j]);
-				tempRoot.Subtract
-					(	this->SimpleBasisCentralizerRoots.TheObjects
-							[tempSel.elements[k]]);
-				if (this->IsARootOrZero(tempRoot))
-				{ impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
-					break;
+	this->flagCountingSubalgebrasOnly=true;
+	this->NumTotalSubalgebras=0;
+	for (int l=0;l<2;l++)
+	{	this->NumNilradicalsAllowed=0;
+		this->NumConeConditionFailures=0;
+		this->NumRelationsWithStronglyPerpendicularDecomposition=0;
+		for (int i=0;i<numCycles;i++)
+		{	impliedSelections.TheObjects[0].init(this->kModules.size);
+			for (int j=0;j<this->CentralizerRoots.size;j++)
+				for (int k=0;k<tempSel.CardinalitySelection;k++)
+				{ root tempRoot;
+					if (!this->CentralizerRoots.TheObjects[j].IsPositiveOrZero())
+						break;
+					else
+						tempRoot.Assign(this->CentralizerRoots.TheObjects[j]);
+					tempRoot.Subtract
+						(	this->SimpleBasisCentralizerRoots.TheObjects
+								[tempSel.elements[k]]);
+					if (this->IsARootOrZero(tempRoot))
+					{ impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
+						break;
+					}
 				}
-			}
-		if (this->flagAnErrorHasOccuredTimeToPanic)
-			tempSel.ComputeDebugString();
-		//impliedSelections.TheObjects[0].ComputeDebugString();
-		this->GeneratePossibleNilradicalsRecursive
-			(	theGlobalVariables, this->theMultTable,this->CentralizerRoots.size,
-				impliedSelections, this->theOppositeKmods, owner, indexInOwner);
-		tempSel.incrementSelection();
+			if (this->flagAnErrorHasOccuredTimeToPanic)
+				tempSel.ComputeDebugString();
+			//impliedSelections.TheObjects[0].ComputeDebugString();
+			this->GeneratePossibleNilradicalsRecursive
+				(	theGlobalVariables, this->theMultTable,this->CentralizerRoots.size,
+					impliedSelections, this->theOppositeKmods, owner, indexInOwner);
+			tempSel.incrementSelection();
+		}
+		this->flagCountingSubalgebrasOnly=false;
 	}
 }
 
@@ -13571,10 +13574,42 @@ void rootSubalgebra::PossibleNilradicalComputation
 		rootSubalgebras& owner, int indexInOwner)
 { this->NumNilradicalsAllowed++;
 	this->NilradicalKmods.Assign(selKmods);
-	this->ComputeDebugString();
-	if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner))
-		this->NumConeConditionFailures++;
-	Stop();
+	//this->ComputeDebugString();
+	if (this->flagCountingSubalgebrasOnly)
+		this->NumTotalSubalgebras=this->NumNilradicalsAllowed;
+	if (!this->flagCountingSubalgebrasOnly)
+	{	if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner))
+		{	this->NumConeConditionFailures++;
+			owner.NumConeConditionFailures++;
+		}
+	}
+	this->MakeProgressReportPossibleNilradicalComputation(theGlobalVariables,owner,indexInOwner);
+}
+
+void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
+	(GlobalVariables& theGlobalVariables,rootSubalgebras& owner, int indexInOwner)
+{ if (this->flagMakingProgressReport)
+	{ std::stringstream out1, out2,out3,out4, out5;
+		if (this->flagCountingSubalgebrasOnly)
+		{	out1<<"Counting ss part "<< this->theDynkinDiagram.DebugString;
+			out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
+		}
+		else
+		{ out1<<"Computing ss part "<< this->theDynkinDiagram.DebugString;
+			out2 << this->NumNilradicalsAllowed<<" Nilradicals processed out of "<< this->NumTotalSubalgebras;
+			owner.NumSubalgebrasProcessed++;
+			out3<<  "Total # subalgebras processed: "<< owner.NumSubalgebrasProcessed;
+			out4<< "Num cone condition failures: " << owner.NumConeConditionFailures;
+			out5<<"Num failures to find l-prohibiting relations: " <<owner.theBadRelations.size;
+			::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+			::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+			::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
+		}
+		::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
+		::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+			theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	}
 }
 
 void rootSubalgebra::GenerateKmodMultTable
@@ -13828,7 +13863,7 @@ void rootSubalgebra::ExtractRelations
 	else
 	{ //theRel.ComputeDebugString(*this,true);
 		//this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
-		owner.theBadRelations.AddObjectOnTop(theRel);
+		owner.theBadRelations.AddObjectOnTopHash(theRel);
 	}
 }
 
@@ -13902,6 +13937,11 @@ void rootSubalgebra::Assign(const rootSubalgebra& right)
 	this->flagAnErrorHasOccuredTimeToPanic=right.flagAnErrorHasOccuredTimeToPanic;
 	this->theDynkinDiagram.Assign(right.theDynkinDiagram);
 	this->theCentralizerDiagram.Assign(right.theCentralizerDiagram);
+	this->PositiveRootsK.CopyFromBase(right.PositiveRootsK);
+	this->PosRootsKConnectedComponents.CopyFromBase(right.PosRootsKConnectedComponents);
+	this->NilradicalKmods.Assign(right.NilradicalKmods);
+	this->SimpleBasisCentralizerRoots.CopyFromBase(right.SimpleBasisCentralizerRoots);
+	this->SimpleBasisK.CopyFromBase(right.SimpleBasisK);
 }
 
 inline void rootSubalgebra::operator =(const rootSubalgebra& right)
@@ -16371,6 +16411,7 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, rootSub
 rootSubalgebra::rootSubalgebra()
 { this->flagAnErrorHasOccuredTimeToPanic=false;
   this->NumGmodKtableRowsAllowedLatex=35;
+  this->flagMakingProgressReport=true;
 }
 
 /*void SelectionList::ElementToString(std::string &output)
@@ -16610,9 +16651,7 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight
 }
 
 bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebras& owners)
-{ this->ComputeDebugString(owners,true);
-	right.ComputeDebugString(owners,true);
-	/*if (this->DebugString.length()!=right.DebugString.length())
+{ /*if (this->DebugString.length()!=right.DebugString.length())
 		return false;
 	for (unsigned int i=0;i<this->DebugString.length();i++)
 	{	if (this->DebugString[i]!=right.DebugString[i])
@@ -16625,11 +16664,14 @@ bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebras& owners)
 
 void coneRelations::AddRelationNoRepetition
 	(coneRelation& input,rootSubalgebras& owners, int indexInRootSubalgebras)
-{ for (int i=0;i<this->size;i++)
-	{	if(	this->TheObjects[i].isIsomorphicTo(input,owners))
+{ input.ComputeDebugString(owners,true);
+	int i=this->FitHashSize(input.HashFunction());
+	ListBasicObjects<int>& theIndices= this->TheHashedArrays[i];
+	for (int j=0;j<theIndices.size;j++)
+	{	if(	this->TheObjects[theIndices.TheObjects[j]].isIsomorphicTo(input,owners))
 			return;
 	}
-	this->AddObjectOnTop(input);
+	this->AddObjectOnTopHash(input);
 }
 
 void permutation::initPermutation(int n)
@@ -16666,6 +16708,17 @@ void permutation::GetPermutation(ListBasicObjects<int>& output)
     output.TheObjects[i]=i;
   for (int i=0;i<numElements;i++)
     MathRoutines::swap(output.TheObjects[i],output.TheObjects[i+this->Multiplicities.TheObjects[i]]);
+}
+
+void rootSubalgebras::ComputeLProhibitingRelations
+	(GlobalVariables &theGlobalVariables,int StartingIndex, int NumToBeProcessed)
+{ this->NumSubalgebrasProcessed=0;
+	this->NumConeConditionFailures=0;
+	for (int i=StartingIndex;i<NumToBeProcessed+StartingIndex;i++)
+	{ this->TheObjects[i]
+			.GenerateParabolicsInCentralizerAndPossibleNilradicals
+				(theGlobalVariables,*this,i);	
+	}
 }
 
 void rootSubalgebras::DynkinTableToString(std::string& output)

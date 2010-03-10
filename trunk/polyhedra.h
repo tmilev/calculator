@@ -488,7 +488,7 @@ public:
 	static int PreferredHashSize;
 	int HashSize;
 	void initHash();
-	inline void FitHashSize( int& i){i%=this->HashSize; if (i<0) i+=this->HashSize;};
+	inline int FitHashSize( int i){i%=this->HashSize; if (i<0) i+=this->HashSize; return i;};
 	void ClearTheObjects();
 	void AddObjectOnTopHash(Object& o);
 	void AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
@@ -5539,11 +5539,22 @@ public:
 		this->BetaKComponents.CopyFromBase(right.BetaKComponents);
 		this->theDiagram=right.theDiagram;
 		this->IndexOwnerRootSubalgebra=right.IndexOwnerRootSubalgebra;
+		this->DebugString= right.DebugString;
+	};
+	bool operator==(const coneRelation& right)
+	{ return this->DebugString==right.DebugString;
+	};	
+	int HashFunction()
+	{ int tempI= ::MathRoutines::Minimum(this->DebugString.length(),::SomeRandomPrimesSize);
+		int result=0;
+		for (int i=0;i<tempI;i++)
+			result+= this->DebugString[i]*::SomeRandomPrimes[i];
+		return result;
 	};
 	coneRelation(){this->IndexOwnerRootSubalgebra=-1;};
 };
 
-class coneRelations: public ListBasicObjects<coneRelation>
+class coneRelations: public HashedListBasicObjects<coneRelation>
 {
 public:
 	int NumAllowedLatexLines;
@@ -5574,6 +5585,9 @@ public:
 	int NumRelationsWithStronglyPerpendicularDecomposition;
 	int NumRelationsgreaterLengthThan2;
 	int NumGmodKtableRowsAllowedLatex;
+	int NumTotalSubalgebras;
+	bool flagCountingSubalgebrasOnly;
+	bool flagMakingProgressReport;
 	static bool flagUseDynkinClassificationForIsomorphismComputation;
 	static int ProblemCounter;
 	static int ProblemCounter2;
@@ -5597,6 +5611,8 @@ public:
 	roots TestedRootsAlpha;
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
+	void MakeProgressReportPossibleNilradicalComputation
+		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	bool flagAnErrorHasOccuredTimeToPanic;
 	void ElementToStringLaTeXHeaderModTable
 		(std::string& outputHeader,std::string&  outputFooter);
@@ -5743,6 +5759,8 @@ public:
 	std::string DebugString;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
+	int NumSubalgebrasProcessed;
+	int NumConeConditionFailures;
 	void DynkinTableToString(std::string& output);
 	void ElementToString(std::string& output)
 	{ std::stringstream out; std::string tempS;
@@ -5754,6 +5772,7 @@ public:
 		}
 		output= out.str();
 	};
+	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 };
 

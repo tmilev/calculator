@@ -997,156 +997,51 @@ void ComputationSetup::InitComputationSetup()
 
 void ComputationSetup::DoTheRootSAComputation()
 {	//rootSubalgebra theRootSA, theRootSA2;
-	rootSubalgebras tempSAs;
-	//theRootSA.AmbientWeyl.MakeEn(7);
-	//theRootSA2.AmbientWeyl.MakeEn(7);
-/*	theRootSA.genK.SetSizeExpandOnTopNoObjectInit(10);
-	theRootSA2.genK.SetSizeExpandOnTopNoObjectInit(10);
-	int i;
-	roots& tempRoots= theRootSA.genK; i=0;
-	tempRoots.TheObjects[i].InitFromIntegers(6, 1, 0, 0, 0, 0, 0, 0, 0); i++;
-	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 1, 0, 0, 0, 0, 0, 0); i++;
-	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 1, 0, 0, 0); i++;
-	tempRoots.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, 0, 1, 0, 0); i++;
-//	tempRoots.TheObjects[i].InitFromIntegers(6, 1, 1, 2, 2, 1, 0, 0, 0); i++;
-	tempRoots.SetSizeExpandOnTopNoObjectInit(i);
-	roots& tempRoots2= theRootSA2.genK; i=0;
-	tempRoots2.TheObjects[i].InitFromIntegers(6, 1, 0, 0, 0, 0, 0, 0, 0); i++;
-	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 1, 1, 1, 0, 0); i++;
-	tempRoots2.TheObjects[i].InitFromIntegers(6, 1, 1, 2, 2, 1, 1, 0, 0); i++;
-	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 1, 0, 0, 0, 0, 0, 0); i++;
-//	tempRoots2.TheObjects[i].InitFromIntegers(6, 0, 0, 0, 0, -1, -1, 0, 0); i++;
-	tempRoots2.SetSizeExpandOnTopNoObjectInit(i);
-	theRootSA.ComputeAll();
-	theRootSA2.ComputeAll();
-	theRootSA.GenerateKmodMultTable
-		(	theRootSA.theMultTable, theRootSA.theOppositeKmods,
-			*this->theGlobalVariablesContainer->Default());
-	theRootSA2.GenerateKmodMultTable
-		(	theRootSA2.theMultTable, theRootSA2.theOppositeKmods,
-			*this->theGlobalVariablesContainer->Default());
-	theRootSA.ComputeDebugString(true);
-	theRootSA2.ComputeDebugString(true);
-	assert(theRootSA2.IsIsomorphicTo
-		(theRootSA, *this->theGlobalVariablesContainer->Default()));
-	theRootSA.ComputeAll();*/
-	//theRootSA.GenerateAllRootSubalgebrasUpToIsomorphism
-	//	(tempSAs,	*this->theGlobalVariablesContainer->Default());
-	//tempSAs.ComputeDebugString();
-
-	this->theRootSubalgebra.NumRelationsgreaterLengthThan2=0;
-	//theRootSA.flagAnErrorHasOccuredTimeToPanic=true;
-
-	this->theRootSubalgebra.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	this->theRootSubalgebra.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	this->theRootSubalgebra.SetupE6_A5(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	this->theRootSubalgebra.SetupE6_A4plusA1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	this->theRootSubalgebra.SetupE6_D5(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	this->theRootSubalgebra.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	this->theRootSubalgebra.flagAnErrorHasOccuredTimeToPanic=true;
-	this->theRootSubalgebra.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-/*
-
-
-	theRootSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-
-	theRootSA.SetupE6_2A2(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-
-	theRootSA.SetupE6_A2plus2A1(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-
-	theRootSA.SetupE6_4A1(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-
-	theRootSA.SetupE6_D4(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-
-	this->theRootSubalgebra.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	theRootSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-
-	this->theRootSubalgebra.SetupE6_3A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	theRootSA.SetupE6_A2(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);
-*//*
-	this->theRootSubalgebra.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-	this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-
-	*//*theRootSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
-	theRootSA.GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(*this->theGlobalVariablesContainer->Default());
-	theRootSA.theBadRelations.ComputeDebugString(theRootSA);
-	theRootSA.theGoodRelations.ComputeDebugString(theRootSA);*/
+	rootSubalgebra tempSA;
+	tempSA.NumRelationsgreaterLengthThan2=0;
+	tempSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A5(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A4plusA1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_D5(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_2A2(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A2plus2A1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_4A1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_D4(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_3A1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A2(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);
+	for (int i=14;i<15 //this->theRootSubalgebras.size
+					;i++)
+	{ this->theRootSubalgebras.TheObjects[i]
+			.GenerateParabolicsInCentralizerAndPossibleNilradicals
+				(*this->theGlobalVariablesContainer->Default(),this->theRootSubalgebras,i);	
+	}
 }
 
 void ComputationSetup::Run()
@@ -1158,13 +1053,17 @@ void ComputationSetup::Run()
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
 	this->DoTheRootSAComputation();
-    this->theRootSubalgebra.ComputeDebugString(true);
+//    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
-		this->theOutput.DebugString.append(this->theRootSubalgebra.DebugString);
-		this->theRootSubalgebra.theBadRelations.ComputeDebugString(this->theRootSubalgebra);
-		this->theRootSubalgebra.theGoodRelations.ComputeDebugString(this->theRootSubalgebra);
-		this->theOutput.DebugString.append(this->theRootSubalgebra.theGoodRelations.DebugString);
-		this->theOutput.DebugString.append(this->theRootSubalgebra.theBadRelations.DebugString);
+		this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
+		this->theRootSubalgebras.theBadRelations.ComputeDebugString(this->theRootSubalgebras);
+		this->theRootSubalgebras.theGoodRelations.ComputeDebugString(this->theRootSubalgebras);
+		this->theOutput.DebugString.append("\n\n\n");
+		this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
+		this->theOutput.DebugString.append("\n\n\n");
+		if (this->theRootSubalgebras.theBadRelations.size>0)
+			this->theOutput.DebugString.append
+				(this->theRootSubalgebras.theBadRelations.DebugString);
     this->theOutput.DebugString.append("\\end{document}");
     this->ExitComputationSetup();
     this->AllowRepaint=true;
@@ -13542,8 +13441,10 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(root& input, root& outputL
 
 
 void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
-	(GlobalVariables& theGlobalVariables)
-{	this->GenerateKmodMultTable(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
+	(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
+{	this->ComputeAll();
+	this->GenerateKmodMultTable
+		(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 		this->theMultTable.ComputeDebugString(*this);
 	this->NumNilradicalsAllowed=0;
@@ -13578,7 +13479,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 		//impliedSelections.TheObjects[0].ComputeDebugString();
 		this->GeneratePossibleNilradicalsRecursive
 			(	theGlobalVariables, this->theMultTable,this->CentralizerRoots.size,
-				impliedSelections, this->theOppositeKmods);
+				impliedSelections, this->theOppositeKmods, owner, indexInOwner);
 		tempSel.incrementSelection();
 	}
 }
@@ -13587,7 +13488,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 	(	GlobalVariables &theGlobalVariables,
 		multTableKmods &multTable, int StartIndex,
 		ListBasicObjects<Selection>& impliedSelections,
-		ListBasicObjects<int> &oppositeKmods)
+		ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
 { int RecursionDepth=0;
 	std::string tempSsel, tempSopposite;
 	ListBasicObjects<Selection> tempSels;
@@ -13620,7 +13521,8 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 			counters.TheObjects[RecursionDepth]++;
 		}
 		this->PossibleNilradicalComputation
-			(theGlobalVariables,impliedSelections.TheObjects[RecursionDepth]);
+			(	theGlobalVariables,impliedSelections.TheObjects[RecursionDepth],
+				owner, indexInOwner);
 		if (this->flagAnErrorHasOccuredTimeToPanic)
 			tempSels.AddObjectOnTop(impliedSelections.TheObjects[RecursionDepth]);
 		RecursionDepth--;
@@ -13665,11 +13567,12 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 }
 
 void rootSubalgebra::PossibleNilradicalComputation
-	(GlobalVariables& theGlobalVariables, Selection& selKmods)
+	(	GlobalVariables& theGlobalVariables, Selection& selKmods, 
+		rootSubalgebras& owner, int indexInOwner)
 { this->NumNilradicalsAllowed++;
 	this->NilradicalKmods.Assign(selKmods);
 	this->ComputeDebugString();
-	if(!this->ConeConditionHolds(theGlobalVariables))
+	if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner))
 		this->NumConeConditionFailures++;
 	Stop();
 }
@@ -13777,7 +13680,8 @@ int rootSubalgebra::NumRootsInNilradical()
 	return result;
 }
 
-bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
+bool rootSubalgebra::ConeConditionHolds
+	(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
 { MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
@@ -13819,7 +13723,8 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables)
 	if (	MatrixLargeRational
 					::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 						(matA,matb,matX,theGlobalVariables))
-	{	this->ExtractRelations(matA, matX,NilradicalRoots);
+	{	this->ExtractRelations
+			(matA, matX,NilradicalRoots, owner, indexInOwner);
 		return false;
 	}
 	else
@@ -13847,7 +13752,7 @@ bool rootSubalgebra::CheckForSmallRelations
 							theRel.Alphas.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[j]);
 							theRel.AlphaCoeffs.AddObjectOnTop(ROne);
 							theRel.AlphaCoeffs.AddObjectOnTop(ROne);
-							theRel.ComputeDebugString(*this);
+//							theRel.ComputeDebugString(*this,true);
 							return true;
 						}
 					}
@@ -13857,7 +13762,8 @@ bool rootSubalgebra::CheckForSmallRelations
 }
 
 void rootSubalgebra::ExtractRelations
-	(MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots)
+	(	MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots,
+		rootSubalgebras& owner, int indexInOwner)
 {	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 	{	this->NilradicalKmods.ComputeDebugString();
@@ -13865,7 +13771,7 @@ void rootSubalgebra::ExtractRelations
 		matX.ComputeDebugString();
 	}
 	root tempRoot; tempRoot.MakeZero(theDimension);
-	coneRelation theRel;
+	coneRelation theRel; theRel.IndexOwnerRootSubalgebra=indexInOwner;
 	if (!this->CheckForSmallRelations(theRel,NilradicalRoots))
 	{	this->NumRelationsgreaterLengthThan2++;
 		matX.ScaleToIntegralForMinRationalHeightNoSignChange();
@@ -13886,26 +13792,26 @@ void rootSubalgebra::ExtractRelations
 	}
 //	theRel.ComputeDebugString();
 //	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
-	theRel.ComputeDebugString(*this);
+//	theRel.ComputeDebugString(*this);
 //	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
 //	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
 	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
 
-	theRel.ComputeDebugString(*this);
+//	theRel.ComputeDebugString(*this);
 	root AccumRoot;
 	theRel.GetSumAlphas(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
-	if (this->flagAnErrorHasOccuredTimeToPanic)
-	{	std::string tempS;
-		theRel.ComputeDebugString(*this);
-		AccumRoot.ComputeDebugString();
-	}
+//	if (this->flagAnErrorHasOccuredTimeToPanic)
+//	{	std::string tempS;
+//		theRel.ComputeDebugString(*this,true);
+//		AccumRoot.ComputeDebugString();
+//	}
 	theRel.BetaCoeffs.size=0; theRel.Betas.size=0;
 	if (	AccumRoot.HasStronglyPerpendicularDecompositionWRT
 					(NilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs))
 	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
 		roots tempRoots;
-		if (this->flagAnErrorHasOccuredTimeToPanic)
-			theRel.ComputeDebugString(*this);
+//		if (this->flagAnErrorHasOccuredTimeToPanic)
+//			theRel.ComputeDebugString(*this,true);
 		tempRoots.CopyFromBase(theRel.Alphas);
 		tempRoots.AddListOnTop(theRel.Betas);
 		if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -13914,15 +13820,15 @@ void rootSubalgebra::ExtractRelations
 		if (this->flagAnErrorHasOccuredTimeToPanic)
 			tempRoots.ComputeDebugString();
 		theRel.theDiagram.ComputeDiagramType(tempRoots, this->AmbientWeyl);
-		if (theRel.theDiagram.DynkinTypeStrings.TheObjects[0]=="A1")
+		if (theRel.theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
 			Stop();
 		theRel.SortRelation(*this);
-		this->theGoodRelations.AddRelationNoRepetition(theRel,*this);
+		owner.theGoodRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
 	else
-	{ theRel.ComputeDebugString(*this);
+	{ //theRel.ComputeDebugString(*this,true);
 		//this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
-		this->theBadRelations.AddObjectOnTop(theRel);
+		owner.theBadRelations.AddObjectOnTop(theRel);
 	}
 }
 
@@ -13933,7 +13839,7 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& Ni
 	{	madeChange=false;
 		for (int i=0;i<theRel.Alphas.size;i++)
 			for(int j=i+1;j<theRel.Alphas.size;j++)
-			{ theRel.ComputeDebugString(*this);
+			{ //theRel.ComputeDebugString(*this);
 				beta1.Assign(theRel.Alphas.TheObjects[i]);
 				beta1.Add(theRel.Alphas.TheObjects[j]);
 				if (this->IsARootOrZero(beta1))
@@ -14349,7 +14255,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors
 	( coneRelation &theRelation, roots& nilradicalRoots)
 { bool isMaximal=false;
 	root beta,tempRoot;
-	theRelation.ComputeDebugString(*this);
+	//theRelation.ComputeDebugString(*this);
 	while (!isMaximal)
 	{ isMaximal=true;
 		for (int i=0;i<theRelation.AlphaCoeffs.size;i++)
@@ -14359,13 +14265,13 @@ void rootSubalgebra::MakeGeneratingSingularVectors
 				nilradicalRoots.TheObjects[j].ComputeDebugString();
 				tempRoot.Add(nilradicalRoots.TheObjects[j]);
 				tempRoot.ComputeDebugString();
-				theRelation.ComputeDebugString(*this);
+				//theRelation.ComputeDebugString(*this);
 				if (	(this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
 						&&(!nilradicalRoots.ContainsObject(tempRoot)))
 				{ this->ComputeHighestWeightInTheSameKMod(tempRoot,tempRoot);
-					tempRoot.ComputeDebugString();
+					//tempRoot.ComputeDebugString();
 					tempRoot.Subtract(theRelation.Alphas.TheObjects[i]);
-					tempRoot.ComputeDebugString();
+					//tempRoot.ComputeDebugString();
 					theRelation.Alphas.TheObjects[i].Add(tempRoot);
 					int tempI=theRelation.Betas.IndexOfObject(tempRoot);
 					if (tempI==-1)
@@ -14496,7 +14402,10 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinStrings(WeylGroup& theWeyl)
 void ::DynkinDiagramRootSubalgebra::ElementToString(std::string& output)
 { std::stringstream out;
 	for (int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
-		out <<this->DynkinTypeStrings.TheObjects[i]<<"\n";
+	{	out <<this->DynkinTypeStrings.TheObjects[i];
+		if (i!=this->SimpleBasesConnectedComponents.size-1)
+			out <<"+";
+	}
 	output=out.str();
 }
 
@@ -14504,6 +14413,7 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 	(int indexComponent, WeylGroup& theWeyl)
 { assert(indexComponent<this->SimpleBasesConnectedComponents.size);
 	std::stringstream out;
+	out <<"$";
 	roots& currentComponent=
 		this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
   ListBasicObjects<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
@@ -14546,11 +14456,11 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
     for (int i=0;i<3;i++)
       currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
 		if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
-			out<<"D" <<currentComponent.size;
+			out<<"D_" <<currentComponent.size;
 		else
 		{//type E
 			assert(indicesLongComponents.size==2);
-			out <<"E" <<currentComponent.size;
+			out <<"E_" <<currentComponent.size;
 		}
 	}else
 	{ Rational length1, length2, tempRat;
@@ -14569,13 +14479,18 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 		}
 		if (numLength2==0 )
 		{//type A
-			out<< "A"<<numLength1;
+			out<< "A_"<<numLength1;
 		}
 		else
 		{ Rational greaterlength, tempRat;
+			int numGreaterLength=numLength2;
+			int numSmallerLength=numLength1;
 		  greaterlength.Assign(length2);
 		  if (length1.IsGreaterThan(length2))
-        greaterlength.Assign(length1);
+      {	greaterlength.Assign(length1);
+				numGreaterLength=numLength1;
+				numSmallerLength=numLength2;
+      }
       theWeyl.RootScalarKillingFormMatrixRoot
         ( currentComponent.TheObjects[currentEnds.TheObjects[0]],
           currentComponent.TheObjects[currentEnds.TheObjects[0]],
@@ -14585,15 +14500,20 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 		  if (numLength1==numLength2)
 			{//B2, C2, F4 or G2
 				if (numLength1!=1)
-				{	out <<"F4";
+				{	out <<"F_4";
 					assert(numLength1==2);
 				}
 				else
 				{ if (length1.NumShort==6 || length2.NumShort==6)
-						out<<"G2";
+						out<<"G_2";
 					else
-						out<<"B2=C2";
+						out<<"B_2=C2";
 				}
+			} else
+			{ if (numGreaterLength>numSmallerLength)
+					out <<"B_"<< currentComponent.size;
+				else
+					out <<"C_"<< currentComponent.size;
 			}
 		}
 		currentComponent.SwapTwoIndices(0,currentEnds.TheObjects[0]);
@@ -14607,6 +14527,7 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 				}
       }
 	}
+	out <<"$";
 	this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
 }
 
@@ -14654,11 +14575,11 @@ void ::DynkinDiagramRootSubalgebra::GetAutomorphism
 	for (int i=0;i<currentComponent.size;i++)
 		thePermutation.TheObjects[i]=i;
 	output.AddObjectOnTop(thePermutation);
-	if (currentString[0]=='A' && currentComponent.size!=1)
+	if (currentString[1]=='A' && currentComponent.size!=1)
 	{	thePermutation.ReverseOrderElements();
 		output.AddObjectOnTop(thePermutation);
 	}
-	if (currentString[0]=='D')
+	if (currentString[1]=='D')
 	{ if (currentComponent.size==4)
 		{//the automorphism group of the Dynkin Diagram is S3
 			thePermutation.TheObjects[1]=1; thePermutation.TheObjects[2]=3; thePermutation.TheObjects[3]=2;
@@ -14677,7 +14598,7 @@ void ::DynkinDiagramRootSubalgebra::GetAutomorphism
 			output.AddObjectOnTop(thePermutation);
 		}
 	}
-	if (currentString=="E6")
+	if (currentString=="$E_6$")
 	{ thePermutation.TheObjects[1]=3; thePermutation.TheObjects[2]=4;
 		thePermutation.TheObjects[3]=1; thePermutation.TheObjects[4]=2;
 		output.AddObjectOnTop(thePermutation);
@@ -16488,12 +16409,19 @@ void rootsWithMultiplicity::ElementToString(std::string &output)
 }
 
 void coneRelation::RelationOneSideToString
-  ( std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs,
-    ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,bool useLatex,
-    rootSubalgebra& owner)
+  ( std::string& output, const std::string& letterType, 
+		ListBasicObjects<Rational>& coeffs, 
+		ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, 
+		bool useLatex, rootSubalgebra& owner)
 { assert(theRoots.size==coeffs.size);
   std::stringstream out;
   std::string tempS;
+  if (useLatex)
+	{	out <<"\\begin{tabular}{"; 
+		for (int i=0;i< theRoots.size;i++)
+			out <<"c";
+		out <<"}";
+	}
   for (int i=0;i<theRoots.size;i++)
 	{	coeffs.TheObjects[i].ElementToString(tempS);
 		if (tempS=="1")	tempS="";
@@ -16506,50 +16434,112 @@ void coneRelation::RelationOneSideToString
       if (i!=theRoots.size-1)
         out <<" + ";
     } else
-    { out <<"\\alpha_"<< i+1;
+    { out <<"$"<< letterType<<"_"<< i+1<<"$";
       if (i!=theRoots.size-1)
-        out <<"+";
+				out <<"+ & ";
     }
 	}
+	if (useLatex)
+		out <<"\\\\";
 	ListBasicObjects<int> TakenIndices;
 	ListBasicObjects<int> NumPrimesUniTypicComponent;
 	TakenIndices.initFillInObject(owner.theDynkinDiagram.SimpleBasesConnectedComponents.size,-1);
 	NumPrimesUniTypicComponent.initFillInObject(owner.theDynkinDiagram.sameTypeComponents.size,-1);
 	for (int i=0;i<kComponents.size;i++)
+	{	if (useLatex)
+				out <<"\\tiny{ ";
 		for (int j=0;j<kComponents.TheObjects[i].size;j++)
 		{ int index= kComponents.TheObjects[i].TheObjects[j];
 			int indexUniComponent=owner.theDynkinDiagram.indexUniComponent.TheObjects[index];
-			out <<"\t"<<owner.theDynkinDiagram.DynkinTypeStrings.TheObjects[index];
+			out <<owner.theDynkinDiagram.DynkinTypeStrings.TheObjects[index];
 			if (TakenIndices.TheObjects[index]==-1)
 			{ NumPrimesUniTypicComponent.TheObjects[indexUniComponent]++;
 				TakenIndices.TheObjects[index]=NumPrimesUniTypicComponent.TheObjects[indexUniComponent];
 			}
 			for (int k=0;k<TakenIndices.TheObjects[index];k++)
 				out <<"'";
+			if (j!=kComponents.TheObjects[i].size-1)
+				out<<"+";
 		}
+		if (useLatex)
+		{	out <<" }"; 
+			if(i!=kComponents.size-1)
+				out <<" & ";
+		}
+	}
+	if (useLatex)
+		out <<"\\end{tabular}";
 	output=out.str();
 }
 
-void coneRelation::ElementToString(std::string &output, rootSubalgebra& owner, bool useLatex)
+void coneRelation::ElementToString
+	(	std::string &output, rootSubalgebras& owners, bool useLatex, 
+		bool includeScalarsProducts)
 { std::string tempS;
 	std::stringstream out;
 	assert(this->AlphaCoeffs.size==this->Alphas.size);
 	assert(this->BetaCoeffs.size==this->Betas.size);
-	this->ComputeConnectedComponents(this->Alphas,owner, this->AlphaKComponents);
-	this->ComputeConnectedComponents(this->Betas,owner, this->BetaKComponents);
+	this->ComputeConnectedComponents
+		(	this->Alphas,owners.TheObjects[this->IndexOwnerRootSubalgebra], 
+			this->AlphaKComponents);
+	this->ComputeConnectedComponents
+		(	this->Betas,owners.TheObjects[this->IndexOwnerRootSubalgebra], 
+			this->BetaKComponents);
 	this->RelationOneSideToString
-		(tempS,"\\alpha",this->AlphaCoeffs,this->AlphaKComponents,this->Alphas,useLatex,owner);
-	out << "=";
+		(	tempS,"\\alpha",this->AlphaCoeffs,this->AlphaKComponents,this->Alphas,useLatex,
+			owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+	out <<tempS;
+	if (useLatex)
+		out <<" &\\begin{tabular}{c} ";
+	out<< "=";
+	if (useLatex)
+		out <<" \\\\~ \\end{tabular} & ";
 	this->RelationOneSideToString
-		(tempS,"\\beta",this->BetaCoeffs,this->BetaKComponents,this->Betas,useLatex,owner);
+		(	tempS,"\\beta",this->BetaCoeffs,this->BetaKComponents,this->Betas,useLatex,
+			owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+	out <<tempS;
+	if (useLatex)
+		out <<" & ";
 	this->theDiagram.ElementToString(tempS);
-	out <<"\n"<<tempS;
+	out << tempS;
+	if (includeScalarsProducts)
+	{ out <<" & ";
+		this->RootsToScalarProductString
+			(	this->Alphas,"\\alpha",tempS,useLatex,
+				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+		out << tempS;
+		this->RootsToScalarProductString
+			(	this->Betas,"\\beta",tempS,useLatex,
+				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+		out <<" "<< tempS;
+	}
+	out <<tempS<<"\n";
 	output=out.str();
+}
+
+void coneRelation::RootsToScalarProductString
+	(	roots& input,const std::string& letterType, std::string& output, bool useLatex,
+		rootSubalgebra& owner)
+{ std::string tempS; std::stringstream out;
+	Rational tempRat;
+	for (int i=0;i<input.size;i++)
+		for(int j=i+1;j<input.size;j++)
+		{ owner.AmbientWeyl.RootScalarKillingFormMatrixRoot
+				(input.TheObjects[i],input.TheObjects[j],tempRat);
+			if (!tempRat.IsEqualToZero())
+			{	tempRat.ElementToString(tempS);
+				out <<"$\\langle"<<letterType<<"_"<< i+1<<","
+						<<letterType<<"_"<<j+1<<"\\rangle="
+						<<tempS<< "$, ";
+			}
+		}
+	output= out.str();
 }
 
 void coneRelation::ComputeConnectedComponents
 	(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output)
-{	for (int i=0;i<input.size;i++)
+{	output.SetSizeExpandOnTopNoObjectInit(input.size);
+	for (int i=0;i<input.size;i++)
 	{	output.TheObjects[i].size=0;
 		for (int j=0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size;j++)
 			if (owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j]
@@ -16619,16 +16609,26 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight
 	return true;
 }
 
-bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebra& owner)
-{ this->ComputeDebugString(owner);
-	right.ComputeDebugString(owner);
-	return this->stringConnectedComponents==right.stringConnectedComponents;
+bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebras& owners)
+{ this->ComputeDebugString(owners,true);
+	right.ComputeDebugString(owners,true);
+	/*if (this->DebugString.length()!=right.DebugString.length())
+		return false;
+	for (unsigned int i=0;i<this->DebugString.length();i++)
+	{	if (this->DebugString[i]!=right.DebugString[i])
+			return false;
+	}*/
+	if (this->DebugString!=right.DebugString)
+		return false;
+	return true;
 }
 
-void coneRelations::AddRelationNoRepetition(coneRelation& input,rootSubalgebra& owner)
+void coneRelations::AddRelationNoRepetition
+	(coneRelation& input,rootSubalgebras& owners, int indexInRootSubalgebras)
 { for (int i=0;i<this->size;i++)
-		if(	this->TheObjects[i].isIsomorphicTo(input,owner))
+	{	if(	this->TheObjects[i].isIsomorphicTo(input,owners))
 			return;
+	}
 	this->AddObjectOnTop(input);
 }
 
@@ -16677,16 +16677,49 @@ void rootSubalgebras::DynkinTableToString(std::string& output)
 	output=out.str();
 }
 
-void coneRelations::ElementToString(std::string& output, rootSubalgebra& owner, bool useLatex)
+void coneRelations::GetLatexHeaderAndFooter
+	(std::string& outputHeader, std::string& outputFooter)
+{ outputHeader.clear();
+	outputFooter.clear();
+	outputHeader.append("\\begin{tabular}{rcl p{1cm}p{3cm} } \\multicolumn{3}{c}");
+	outputHeader.append("{ Relation / linked $\\mathfrak{k}$-components}");
+	outputHeader.append(" & relation lives in & non-zero $\\langle,\\rangle$ ");
+	outputHeader.append("products (LHS/RHS only)\\\\");
+	outputFooter.append("\\end{tabular}");
+}
+
+void coneRelations::ElementToString
+	(std::string& output, rootSubalgebras& owners, bool useLatex)
 { std::stringstream out;
-	std::string tempS;
-	//if (useLatex)
-  //{ out <<"\\begin{tabular}{";
-  //}
+	std::string tempS, header, footer;
+	this->GetLatexHeaderAndFooter(header, footer);
+	if (useLatex)
+		out <<header;
+	int oldIndex=-1;
+	int lineCounter=0;
 	for(int i=0;i<this->size;i++)
-	{	this->TheObjects[i].ElementToString(tempS,owner,useLatex);
-		out << tempS<<"\n";
+	{	lineCounter+=2;
+		if (oldIndex!=this->TheObjects[i].IndexOwnerRootSubalgebra)
+		{	oldIndex=this->TheObjects[i].IndexOwnerRootSubalgebra;
+			if (useLatex)
+			{ out	<<"\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "
+						<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString
+						<<"}\\\\\n";
+			}
+		}
+		this->TheObjects[i].ElementToString
+			(	tempS,owners,	useLatex,true);
+		out << tempS;
+		if (useLatex)
+			out <<"\\\\";
+		out<<"\n";
+		if (lineCounter>this->NumAllowedLatexLines)
+		{ out <<footer<< "\n\n\n"<<header;
+			lineCounter=0;
+		}
 	}
+	if (useLatex)
+		out <<footer;
 	output=out.str();
 };
 

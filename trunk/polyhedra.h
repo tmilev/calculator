@@ -410,6 +410,7 @@ public:
 //	void AddObjectOnTop(Object o);
 	void AssignLight(const ListBasicObjectsLight<Object>& from);
 	void SetSizeExpandOnTopNoObjectInit(int theSize);
+	void initFillInObject(int theSize, const Object& o);
 	inline void AddObjectOnTopCreateNew();
 	void MakeActualSizeAtLeastExpandOnTop(int theSize);
 	void AddObjectOnBottom(const Object& o);
@@ -1814,6 +1815,13 @@ void ListBasicObjects<Object>::ShiftUpExpandOnTop(int StartingIndex)
 { this->SetSizeExpandOnTopNoObjectInit(this->size+1);
 	for (int i=this->size-1;i>StartingIndex;i--)
 		this->TheObjects[i]= this->TheObjects[i-1];
+}
+
+template <class Object>
+void ListBasicObjects<Object>::initFillInObject(int theSize, const Object& o)
+{ this->SetSizeExpandOnTopNoObjectInit(theSize);
+	for (int i=0; i<this->size;i++)
+		this->TheObjects[i]=o;
 }
 
 template <class Object>
@@ -5491,27 +5499,27 @@ class coneRelation
 public:
 	roots Alphas;
 	roots Betas;
-	DynkinDiagramRootSubalgebra theDiagram;
 	ListBasicObjects<Rational> AlphaCoeffs;
 	ListBasicObjects<Rational> BetaCoeffs;
 	ListBasicObjects<ListBasicObjects<int> > AlphaKComponents;
 	ListBasicObjects<ListBasicObjects<int> > BetaKComponents;
 	bool isIsomorphicTo(coneRelation& right,rootSubalgebra& owner);
+	::DynkinDiagramRootSubalgebra theDiagram;
 	std::string DebugString;
 	std::string stringConnectedComponents;
 	void RelationOneSideToString
-    ( std::string& output, std::string& letterType, ListBasicObjects<Rational>& coeffs,
-      ListBasicObjects<ListBasicObjects<int> > kComponents, roots& theRoots,bool useLatex,
+    ( std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs,
+      ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,bool useLatex,
       rootSubalgebra& owner);
 	void ElementToString(std::string& output, rootSubalgebra& owner,bool useLatex);
-	void ComputeStringConnectedComponents(rootSubalgebra& owner, std::string& output);
+	void ComputeConnectedComponents
+		(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
 	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner,true);};
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
 	void ComputeKComponents
 		(	roots& input, ListBasicObjects<ListBasicObjects<int> >& output,
 			rootSubalgebra& owner);
-	void stringByConnectedComponents(roots& input, std::string& output, rootSubalgebra& owner);
 	void GetSumAlphas(root& output, int theDimension);
 	void SortRelation(rootSubalgebra& owner);
 	void operator=(const coneRelation& right)

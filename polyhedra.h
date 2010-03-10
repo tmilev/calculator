@@ -5503,18 +5503,26 @@ public:
 	ListBasicObjects<Rational> BetaCoeffs;
 	ListBasicObjects<ListBasicObjects<int> > AlphaKComponents;
 	ListBasicObjects<ListBasicObjects<int> > BetaKComponents;
-	bool isIsomorphicTo(coneRelation& right,rootSubalgebra& owner);
+	int IndexOwnerRootSubalgebra;
+	bool isIsomorphicTo(coneRelation& right,rootSubalgebras& owners);
 	::DynkinDiagramRootSubalgebra theDiagram;
 	std::string DebugString;
 	std::string stringConnectedComponents;
 	void RelationOneSideToString
-    ( std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs,
-      ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,bool useLatex,
-      rootSubalgebra& owner);
-	void ElementToString(std::string& output, rootSubalgebra& owner,bool useLatex);
+    ( std::string& output, const std::string& letterType, 
+			ListBasicObjects<Rational>& coeffs,
+      ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,
+			bool useLatex, rootSubalgebra& owner);
+	void ElementToString
+		(	std::string& output, rootSubalgebras& owners, bool useLatex, 
+			bool includeScalarsProducts);
+	void RootsToScalarProductString
+		(	roots& input,const std::string& letterType, std::string& output, bool useLatex,
+			rootSubalgebra& owner);
 	void ComputeConnectedComponents
 		(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
-	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner,true);};
+	void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts)
+	{	this->ElementToString(this->DebugString,owner,true,includeScalarsProducts);};
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
 	void ComputeKComponents
@@ -5527,17 +5535,26 @@ public:
 		this->Betas.CopyFromBase(right.Betas);
 		this->AlphaCoeffs.CopyFromBase(right.AlphaCoeffs);
 		this->BetaCoeffs.CopyFromBase(right.BetaCoeffs);
+		this->AlphaKComponents.CopyFromBase(right.AlphaKComponents);
+		this->BetaKComponents.CopyFromBase(right.BetaKComponents);
 		this->theDiagram=right.theDiagram;
+		this->IndexOwnerRootSubalgebra=right.IndexOwnerRootSubalgebra;
 	};
+	coneRelation(){this->IndexOwnerRootSubalgebra=-1;};
 };
 
 class coneRelations: public ListBasicObjects<coneRelation>
 {
 public:
+	int NumAllowedLatexLines;
 	std::string DebugString;
-	void ElementToString(std::string& output, rootSubalgebra& owner, bool useLatex);
-	void ComputeDebugString(rootSubalgebra& owner){this->ElementToString(this->DebugString,owner,true);};
-	void AddRelationNoRepetition(coneRelation& input, rootSubalgebra& owner);
+	void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
+	void ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex);
+	void ComputeDebugString(rootSubalgebras& owners)
+	{this->ElementToString(this->DebugString,owners,true);};
+	void AddRelationNoRepetition
+		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
+	coneRelations(){this->NumAllowedLatexLines=30;};
 };
 
 class permutation: public SelectionWithDifferentMaxMultiplicities
@@ -5567,8 +5584,6 @@ public:
 	ListBasicObjects< ListBasicObjects<int> > coneRelationsBuffer;
 	ListBasicObjects< int> coneRelationsNumSameTypeComponentsTaken;
 	ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
-	coneRelations theBadRelations;
-	coneRelations theGoodRelations;
 	WeylGroup AmbientWeyl;
 	roots genK;
 	roots SimpleBasisK;
@@ -5593,7 +5608,7 @@ public:
 	rootSubalgebra();
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
-			roots& NilradicalRoots);
+			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner);
   bool IsIsomorphicTo
 		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables);
 	void MakeGeneratingSingularVectors
@@ -5614,7 +5629,7 @@ public:
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
 	void ComputeCentralizerFromKModulesAndSortKModules();
 	void GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(GlobalVariables& theGlobalVariables);
+		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void DoKRootsEnumerationRecursively
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString();
@@ -5632,10 +5647,12 @@ public:
 		(	GlobalVariables& theGlobalVariables,
 			multTableKmods & multTable,	int StartIndex,
 			ListBasicObjects<Selection>& impliedSelections,
-			ListBasicObjects<int>& oppositeKmods);
-	bool ConeConditionHolds(GlobalVariables& theGlobalVariables);
+			ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+	bool ConeConditionHolds
+		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void PossibleNilradicalComputation
-		(GlobalVariables& theGlobalVariables,Selection& selKmods);
+		(	GlobalVariables& theGlobalVariables,Selection& selKmods, 
+			rootSubalgebras& owner, int indexInOwner);
 	void ElementToString(std::string& output){this->ElementToString(output,false);};
 	void ElementToString(std::string& output, bool makeALaTeXReport);
 	void GenerateKmodMultTable
@@ -5724,6 +5741,8 @@ class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
 {
 public:
 	std::string DebugString;
+	coneRelations theBadRelations;
+	coneRelations theGoodRelations;
 	void DynkinTableToString(std::string& output);
 	void ElementToString(std::string& output)
 	{ std::stringstream out; std::string tempS;
@@ -5767,7 +5786,7 @@ struct ComputationSetup
 public:
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
-	rootSubalgebra theRootSubalgebra;
+	rootSubalgebras theRootSubalgebras;
 	CombinatorialChamberContainer theChambers;
 	Rational Value;
 	std::string ValueString;

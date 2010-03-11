@@ -5476,6 +5476,7 @@ public:
 	ListBasicObjects<ListBasicObjects< int > > sameTypeComponents;
 	ListBasicObjects<int> indexUniComponent;
 	ListBasicObjects<int> indexInUniComponent;
+	int RankTotal();
 	void Sort();
 	void ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl);
 	void ComputeDynkinStrings(WeylGroup& theWeyl);
@@ -5484,6 +5485,7 @@ public:
 	void Assign(const DynkinDiagramRootSubalgebra& right);
 	inline void operator=(const DynkinDiagramRootSubalgebra& right);
 	bool operator==(const DynkinDiagramRootSubalgebra& right);
+	bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
 	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output,int index);
 	void GetAutomorphisms
 		(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output);
@@ -5506,8 +5508,11 @@ public:
 	int IndexOwnerRootSubalgebra;
 	bool isIsomorphicTo(coneRelation& right,rootSubalgebras& owners);
 	::DynkinDiagramRootSubalgebra theDiagram;
+	::DynkinDiagramRootSubalgebra theDiagramRelAndK;
 	std::string DebugString;
 	std::string stringConnectedComponents;
+	void ComputeDiagramRelAndK(rootSubalgebra& owner);
+	void FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational>& coeffs);
 	void RelationOneSideToString
     ( std::string& output, const std::string& letterType, 
 			ListBasicObjects<Rational>& coeffs,
@@ -5538,6 +5543,7 @@ public:
 		this->AlphaKComponents.CopyFromBase(right.AlphaKComponents);
 		this->BetaKComponents.CopyFromBase(right.BetaKComponents);
 		this->theDiagram=right.theDiagram;
+		this->theDiagramRelAndK=right.theDiagramRelAndK;
 		this->IndexOwnerRootSubalgebra=right.IndexOwnerRootSubalgebra;
 		this->DebugString= right.DebugString;
 	};
@@ -5558,6 +5564,7 @@ class coneRelations: public HashedListBasicObjects<coneRelation>
 {
 public:
 	int NumAllowedLatexLines;
+	bool flagIncludeSmallerRelations;
 	std::string DebugString;
 	void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
 	void ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex);
@@ -5565,7 +5572,10 @@ public:
 	{this->ElementToString(this->DebugString,owners,true);};
 	void AddRelationNoRepetition
 		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
-	coneRelations(){this->NumAllowedLatexLines=30;};
+	coneRelations()
+	{	this->NumAllowedLatexLines=30;
+		this->flagIncludeSmallerRelations=false;
+	};
 };
 
 class permutation: public SelectionWithDifferentMaxMultiplicities
@@ -5762,6 +5772,7 @@ public:
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	void DynkinTableToString(std::string& output);
+	void SortDescendingOrderBySSRank();
 	void ElementToString(std::string& output)
 	{ std::stringstream out; std::string tempS;
 		this->DynkinTableToString(tempS);

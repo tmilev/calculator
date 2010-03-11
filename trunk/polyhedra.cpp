@@ -1000,7 +1000,7 @@ void ComputationSetup::DoTheRootSAComputation()
 {	//rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebra tempSA;
 	tempSA.NumRelationsgreaterLengthThan2=0;
-	tempSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
+	/*tempSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	tempSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
@@ -1036,9 +1036,14 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);
+	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
+	tempSA.AmbientWeyl.MakeEn(6);
+	tempSA.GenerateAllRootSubalgebrasUpToIsomorphism
+		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.SortDescendingOrderBySSRank();
+	this->theRootSubalgebras.ComputeDebugString();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size);
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 	
 }
 
@@ -13723,6 +13728,8 @@ bool rootSubalgebra::ConeConditionHolds
 	roots& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots;
 	int numNilradRoots=this->NumRootsInNilradical();
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+	if (this->kModules.size==0)
+		return true;
 	int numCols= numNilradRoots+this->kModules.size-
 		this->NilradicalKmods.CardinalitySelection;
 	matA.init((short)theDimension+1, (short)numCols);
@@ -13858,6 +13865,8 @@ void rootSubalgebra::ExtractRelations
 		if (theRel.theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
 			Stop();
 		theRel.SortRelation(*this);
+		theRel.FixRepeatingRoots(theRel.Alphas,theRel.AlphaCoeffs);
+		theRel.ComputeDiagramRelAndK(*this);
 		owner.theGoodRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
 	else
@@ -14414,6 +14423,15 @@ void ::DynkinDiagramRootSubalgebra::ComputeDiagramType
 	this->ComputeDebugString();
 }
 
+bool DynkinDiagramRootSubalgebra::IsGreaterThan
+	(DynkinDiagramRootSubalgebra& right)
+{	if (this->RankTotal()>right.RankTotal())
+		return true;
+	if (this->SimpleBasesConnectedComponents.size<right.SimpleBasesConnectedComponents.size)
+		return false;	
+	return this->DebugString>right.DebugString;
+}
+
 void DynkinDiagramRootSubalgebra::GetMapFromPermutation
   (	roots& domain, roots& range, ListBasicObjects< int >& thePerm,
 		ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos,
@@ -14652,6 +14670,12 @@ void ::DynkinDiagramRootSubalgebra::GetAutomorphisms
 		this->GetAutomorphism( output.TheObjects[i],i);
 }
 
+int DynkinDiagramRootSubalgebra::RankTotal()
+{ int result=0;
+	for (int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
+		result+=this->SimpleBasesConnectedComponents.TheObjects[i].size;
+	return result;
+}
 
 int ::DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes
 	(int indexComponent, WeylGroup& theWeyl)
@@ -16543,6 +16567,10 @@ void coneRelation::ElementToString
 		out <<" & ";
 	this->theDiagram.ElementToString(tempS);
 	out << tempS;
+	this->theDiagramRelAndK.ElementToString(tempS);
+	if (useLatex)
+		out <<" & ";
+	out << tempS;
 	if (includeScalarsProducts)
 	{ out <<" & ";
 		this->RootsToScalarProductString
@@ -16635,6 +16663,28 @@ void coneRelation::ComputeKComponents
 	}
 }
 
+void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
+{ roots tempRoots;
+	tempRoots.size=0;
+	tempRoots.MakeActualSizeAtLeastExpandOnTop(owner.AmbientWeyl.KillingFormMatrix.NumRows*2);
+	tempRoots.AddListOnTop(owner.SimpleBasisK);
+	for (int i=0;i<this->theDiagram.SimpleBasesConnectedComponents.size;i++)
+		tempRoots.AddListOnTop(this->theDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
+	owner.TransformToSimpleBasisGenerators(tempRoots);
+	this->theDiagramRelAndK.ComputeDiagramType(tempRoots,owner.AmbientWeyl);
+}
+
+void coneRelation::FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational>& coeffs)
+{ for (int i=0;i<theRoots.size;i++)
+		for (int j=i+1;j<theRoots.size;j++)
+			if (theRoots.TheObjects[i].IsEqualTo(theRoots.TheObjects[j]))
+			{ coeffs.TheObjects[i].Add(coeffs.TheObjects[j]);
+				theRoots.PopIndexSwapWithLast(j);
+				coeffs.PopIndexSwapWithLast(j);				
+				j--;
+			}	
+}
+
 bool coneRelation::leftSortedBiggerThanOrEqualToRight
 	(ListBasicObjects<int>& left,ListBasicObjects<int>& right)
 { if (left.size>right.size)
@@ -16671,6 +16721,9 @@ void coneRelations::AddRelationNoRepetition
 	{	if(	this->TheObjects[theIndices.TheObjects[j]].isIsomorphicTo(input,owners))
 			return;
 	}
+	if (!this->flagIncludeSmallerRelations)
+		if (input.theDiagramRelAndK.DebugString!="$E_6$")
+			return;
 	this->AddObjectOnTopHash(input);
 }
 
@@ -16721,6 +16774,25 @@ void rootSubalgebras::ComputeLProhibitingRelations
 	}
 }
 
+void rootSubalgebras::SortDescendingOrderBySSRank()
+{//Bubble sort
+	rootSubalgebras output;
+	ListBasicObjects<int> SortingArray; 
+	SortingArray.SetSizeExpandOnTopNoObjectInit(this->size);
+	for (int i=0;i<this->size;i++)
+		SortingArray.TheObjects[i]=i;
+	for (int i=0;i<this->size;i++)
+		for (int j=i+1;j<this->size;j++)
+		{	if(this->TheObjects[SortingArray.TheObjects[j]].theDynkinDiagram
+					.IsGreaterThan(this->TheObjects[SortingArray.TheObjects[i]].theDynkinDiagram))
+				SortingArray.SwapTwoIndices(i,j);
+		}
+	output.MakeActualSizeAtLeastExpandOnTop(this->size);
+	for (int i=0;i<this->size;i++)
+		output.AddObjectOnTop(this->TheObjects[SortingArray.TheObjects[i]]);
+	this->CopyFromBase(output);
+}
+
 void rootSubalgebras::DynkinTableToString(std::string& output)
 { std::stringstream out; std::string tempS;
 	for (int i=0;i<this->size;i++)
@@ -16734,9 +16806,9 @@ void coneRelations::GetLatexHeaderAndFooter
 	(std::string& outputHeader, std::string& outputFooter)
 { outputHeader.clear();
 	outputFooter.clear();
-	outputHeader.append("\\begin{tabular}{rcl p{1cm}p{3cm} } \\multicolumn{3}{c}");
+	outputHeader.append("\\begin{tabular}{rcl p{1cm}p{1cm}p{3cm} } \\multicolumn{3}{c}");
 	outputHeader.append("{ Relation / linked $\\mathfrak{k}$-components}");
-	outputHeader.append(" & relation lives in & non-zero $\\langle,\\rangle$ ");
+	outputHeader.append(" & relation lives in & rel and $\\mathfrak{k}$ live in& non-zero $\\langle,\\rangle$ ");
 	outputHeader.append("products (LHS/RHS only)\\\\");
 	outputFooter.append("\\end{tabular}");
 }

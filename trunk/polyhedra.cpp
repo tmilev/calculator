@@ -229,7 +229,7 @@ template < > int ListBasicObjects<rootsWithMultiplicity>::ListBasicObjectsActual
 template < > int ListBasicObjects<Rational>::ListBasicObjectsActualSizeIncrement=10;
 template < > int ListBasicObjects<coneRelation>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<DynkinDiagramRootSubalgebra>::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<rootSubalgebra>::ListBasicObjectsActualSizeIncrement=10;
+template < > int ListBasicObjects<rootSubalgebra>::ListBasicObjectsActualSizeIncrement=77;
 template < > int ListBasicObjects<ListBasicObjects<int> >::ListBasicObjectsActualSizeIncrement=10;
 
 ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
@@ -1039,8 +1039,8 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
-	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(8);
+	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
@@ -13961,8 +13961,10 @@ inline void rootSubalgebra::operator =(const rootSubalgebra& right)
 
 void rootSubalgebras::GenerateAllRootSubalgebrasUpToIsomorphism
 	(GlobalVariables& theGlobalVariables)
-{	rootSubalgebra tempSA;
-	this->size=0;
+{	this->size=0;
+	this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
+	this->initDynkinDiagramsNonDecided(this->AmbientWeyl);
+	rootSubalgebra tempSA;
 	tempSA.genK.size=0;
 	tempSA.AmbientWeyl.Assign(this->AmbientWeyl);
 	tempSA.ComputeAll();
@@ -14000,9 +14002,9 @@ bool rootSubalgebras::IsANewSubalgebra
 			{	result=false;
 				int tempI= this->theBadDiagrams.IndexOfObject(input.theDynkinDiagram.DebugString);
 				if (tempI!=-1)
-					if (this->numFoundBadDiagrams.TheObjects[tempI]<2)
-					{	result=input.IsIsomorphicTo(right,theGlobalVariables);
-						if (!result)
+					if (this->numFoundBadDiagrams.TheObjects[tempI]==0)
+					{	result=!input.IsIsomorphicTo(right,theGlobalVariables);
+						if (result)
 							this->numFoundBadDiagrams.TheObjects[tempI]++;
 					}
 			} else
@@ -14446,7 +14448,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan
 	(DynkinDiagramRootSubalgebra& right)
 {	if (this->RankTotal()>right.RankTotal())
 		return true;
-	if (this->SimpleBasesConnectedComponents.size<right.SimpleBasesConnectedComponents.size)
+	if (this->RankTotal()<right.RankTotal())
 		return false;
 	return this->DebugString>right.DebugString;
 }
@@ -16807,7 +16809,7 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 	this->CopyFromBase(output);
 }
 
-void rootSubalgebras::ComputeDynkinDiagramsNonDecided
+void rootSubalgebras::initDynkinDiagramsNonDecided
 	(WeylGroup& theWeylGroup)
 { //Dynkin: Semisimple subalgebras of simple Lie algebras, Table 11.
 	this->theBadDiagrams.size=0;

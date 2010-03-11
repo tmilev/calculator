@@ -5777,7 +5777,7 @@ public:
 	int NumConeConditionFailures;
 	void DynkinTableToString(std::string& output);
 	void SortDescendingOrderBySSRank();
-	void ComputeDynkinDiagramsNonDecided
+	void initDynkinDiagramsNonDecided
 		(WeylGroup& theWeylGroup);
 	void ElementToString(std::string& output)
 	{ std::stringstream out; std::string tempS;

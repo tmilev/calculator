@@ -1039,14 +1039,14 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(8);
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
+	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	this->theRootSubalgebras.ComputeDebugString();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
 		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
-
 }
 
 void ComputationSetup::Run()
@@ -1057,7 +1057,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-/*	this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
@@ -1075,7 +1075,7 @@ void ComputationSetup::Run()
     this->flagComputationInProgress=false;
 	if (true)
 		return;
-*/	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
@@ -13976,10 +13976,11 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 	rootSubalgebra::ProblemCounter++;
 	rootSubalgebra tempSA;
 	tempSA=input;
-	for (int k=0;k<tempSA.kModules.size;k++)
+	for (int k=0;k<input.kModules.size;k++)
 		if (input.HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
 		{	tempSA.genK.AddObjectOnTop(input.HighestWeightsGmodK.TheObjects[k]);
 			tempSA.ComputeAllButAmbientWeyl();
+			//tempSA.ComputeDebugString();
 			if (this->IsANewSubalgebra(tempSA,theGlobalVariables))
 				this->GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 					(tempSA,theGlobalVariables);
@@ -14005,7 +14006,7 @@ bool rootSubalgebras::IsANewSubalgebra
 							this->numFoundBadDiagrams.TheObjects[tempI]++;
 					}
 			} else
-				result = input.IsIsomorphicTo(right,theGlobalVariables);
+				result = !input.IsIsomorphicTo(right,theGlobalVariables);
 			if (!result)
 				return result;
 		}

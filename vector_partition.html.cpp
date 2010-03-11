@@ -10,7 +10,7 @@ output <<" ***NOT FUNCTIONAL***\n";
 output <<" \n";
 output <<" Testing the infrastructure atm :)\n";
 output <<" \n";
-output <<" <img src=\"../jacobs_logo.png\" alt=\"Jacobs University\">\n";
+output <<" <img src=\"http://vector-partition.jacobs-university.de/jacobs_logo.png\" alt=\"Jacobs University\">\n";
 output <<" <FORM method=\"POST\" name=\"formMain\" action=\"./vector_partition_linux_cgi\">\n";
 output <<" Dimension(<=3): <input type=\"text\" size =\"1\" name=\"textDim\" onkeyup=\"generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);\">\n";
 output <<" Num Vectors(<=9): <input type=\"text\" size=\"1\" name=\"textNumVectors\" onkeyup=\"generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);\">\n";

@@ -740,6 +740,9 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 	tempS3.resize(7);
 	if (tempS3!="textDim")
 		return false;
+//	std::cout<< input<<"\n";
+	output.flagDoingWeylGroupAction=false;
+
 	CGIspecificRoutines::CivilizedStringTranslation(input);
 	//std::cout<<input;
 	std::stringstream tempStream;
@@ -750,7 +753,7 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 		return false;
 	tempStream >> tempS>>tempS>> tempI;
 	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
-	//std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
+	std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
 	for (int i=0;i<output.VPVectors.size;i++)
 	{ output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.theChambers.AmbientDimension);
 		for(int j=0;j<(signed int)output.theChambers.AmbientDimension;j++)
@@ -1043,7 +1046,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.ComputeDebugString();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
 		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
-	
+
 }
 
 void ComputationSetup::Run()
@@ -1054,7 +1057,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+/*	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
@@ -1072,7 +1075,7 @@ void ComputationSetup::Run()
     this->flagComputationInProgress=false;
 	if (true)
 		return;
-	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+*/	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
@@ -13574,7 +13577,7 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 }
 
 void rootSubalgebra::PossibleNilradicalComputation
-	(	GlobalVariables& theGlobalVariables, Selection& selKmods, 
+	(	GlobalVariables& theGlobalVariables, Selection& selKmods,
 		rootSubalgebras& owner, int indexInOwner)
 { this->NumNilradicalsAllowed++;
 	this->NilradicalKmods.Assign(selKmods);
@@ -14443,7 +14446,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan
 {	if (this->RankTotal()>right.RankTotal())
 		return true;
 	if (this->SimpleBasesConnectedComponents.size<right.SimpleBasesConnectedComponents.size)
-		return false;	
+		return false;
 	return this->DebugString>right.DebugString;
 }
 
@@ -14631,11 +14634,6 @@ void DynkinDiagramRootSubalgebra::Assign
 	this->indicesEnds.CopyFromBase(right.indicesEnds);
 	this->indicesThreeNodes.CopyFromBase(right.indicesThreeNodes);
 	this->sameTypeComponents.CopyFromBase(right.sameTypeComponents);
-}
-
-inline void DynkinDiagramRootSubalgebra::operator =
-	(const DynkinDiagramRootSubalgebra& right)
-{	this->Assign(right);
 }
 
 void ::DynkinDiagramRootSubalgebra::GetAutomorphism
@@ -16489,15 +16487,15 @@ void rootsWithMultiplicity::ElementToString(std::string &output)
 }
 
 void coneRelation::RelationOneSideToString
-  ( std::string& output, const std::string& letterType, 
-		ListBasicObjects<Rational>& coeffs, 
-		ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, 
+  ( std::string& output, const std::string& letterType,
+		ListBasicObjects<Rational>& coeffs,
+		ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,
 		bool useLatex, rootSubalgebra& owner)
 { assert(theRoots.size==coeffs.size);
   std::stringstream out;
   std::string tempS;
   if (useLatex)
-	{	out <<"\\begin{tabular}{"; 
+	{	out <<"\\begin{tabular}{";
 		for (int i=0;i< theRoots.size;i++)
 			out <<"c";
 		out <<"}";
@@ -16542,7 +16540,7 @@ void coneRelation::RelationOneSideToString
 				out<<"+";
 		}
 		if (useLatex)
-		{	out <<" }"; 
+		{	out <<" }";
 			if(i!=kComponents.size-1)
 				out <<" & ";
 		}
@@ -16553,17 +16551,17 @@ void coneRelation::RelationOneSideToString
 }
 
 void coneRelation::ElementToString
-	(	std::string &output, rootSubalgebras& owners, bool useLatex, 
+	(	std::string &output, rootSubalgebras& owners, bool useLatex,
 		bool includeScalarsProducts)
 { std::string tempS;
 	std::stringstream out;
 	assert(this->AlphaCoeffs.size==this->Alphas.size);
 	assert(this->BetaCoeffs.size==this->Betas.size);
 	this->ComputeConnectedComponents
-		(	this->Alphas,owners.TheObjects[this->IndexOwnerRootSubalgebra], 
+		(	this->Alphas,owners.TheObjects[this->IndexOwnerRootSubalgebra],
 			this->AlphaKComponents);
 	this->ComputeConnectedComponents
-		(	this->Betas,owners.TheObjects[this->IndexOwnerRootSubalgebra], 
+		(	this->Betas,owners.TheObjects[this->IndexOwnerRootSubalgebra],
 			this->BetaKComponents);
 	this->RelationOneSideToString
 		(	tempS,"\\alpha",this->AlphaCoeffs,this->AlphaKComponents,this->Alphas,useLatex,
@@ -16695,9 +16693,9 @@ void coneRelation::FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational
 			if (theRoots.TheObjects[i].IsEqualTo(theRoots.TheObjects[j]))
 			{ coeffs.TheObjects[i].Add(coeffs.TheObjects[j]);
 				theRoots.PopIndexSwapWithLast(j);
-				coeffs.PopIndexSwapWithLast(j);				
+				coeffs.PopIndexSwapWithLast(j);
 				j--;
-			}	
+			}
 }
 
 bool coneRelation::leftSortedBiggerThanOrEqualToRight
@@ -16785,14 +16783,14 @@ void rootSubalgebras::ComputeLProhibitingRelations
 	for (int i=StartingIndex;i<NumToBeProcessed+StartingIndex;i++)
 	{ this->TheObjects[i]
 			.GenerateParabolicsInCentralizerAndPossibleNilradicals
-				(theGlobalVariables,*this,i);	
+				(theGlobalVariables,*this,i);
 	}
 }
 
 void rootSubalgebras::SortDescendingOrderBySSRank()
 {//Bubble sort
 	rootSubalgebras output;
-	ListBasicObjects<int> SortingArray; 
+	ListBasicObjects<int> SortingArray;
 	SortingArray.SetSizeExpandOnTopNoObjectInit(this->size);
 	for (int i=0;i<this->size;i++)
 		SortingArray.TheObjects[i]=i;
@@ -16827,21 +16825,21 @@ void rootSubalgebras::ComputeDynkinDiagramsNonDecided
 		tempS="$A_1$+$A_1$+$A_1$+$A_1$";
 		this->theBadDiagrams.AddObjectOnTop(tempS);
 	}
-	if (theWeylGroup.RootSystem.size=126 && theWeylGroup.KillingFormMatrix.NumRows==7)
+	if (theWeylGroup.RootSystem.size==126 && theWeylGroup.KillingFormMatrix.NumRows==7)
 	{//it's E7 folks!
 		this->theBadDiagrams.MakeActualSizeAtLeastExpandOnTop(6);
 		tempS="$A_5$+$A_1$";
-		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		this->theBadDiagrams.AddObjectOnTop(tempS);
 		tempS="$A_5$";
-		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		this->theBadDiagrams.AddObjectOnTop(tempS);
 		tempS="$A_3$+$A_1$+$A_1$";
-		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		this->theBadDiagrams.AddObjectOnTop(tempS);
 		tempS="$A_3$+$A_1$";
-		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		this->theBadDiagrams.AddObjectOnTop(tempS);
 		tempS="$A_1$+$A_1$+$A_1$+$A_1$";
-		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		this->theBadDiagrams.AddObjectOnTop(tempS);
 		tempS="$A_1$+$A_1$+$A_1$";
-		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		this->theBadDiagrams.AddObjectOnTop(tempS);
 	}
 	this->numFoundBadDiagrams.initFillInObject(this->theBadDiagrams.size,0);
 }

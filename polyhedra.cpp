@@ -159,7 +159,6 @@ PolynomialOutputFormat PolyFormatNumFrac;
 IndicatorWindowVariables IndicatorWindowGlobalVariables;
 int QuasiPolynomial::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
-bool ::rootSubalgebra::flagUseDynkinClassificationForIsomorphismComputation=false;
 
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
 ListObjectPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
@@ -1037,9 +1036,9 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	tempSA.AmbientWeyl.MakeEn(6);
-	tempSA.GenerateAllRootSubalgebrasUpToIsomorphism
-		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(8);
+	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
+		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	this->theRootSubalgebras.ComputeDebugString();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
@@ -13957,41 +13956,59 @@ inline void rootSubalgebra::operator =(const rootSubalgebra& right)
 { this->Assign(right);
 }
 
-void rootSubalgebra::GenerateAllRootSubalgebrasUpToIsomorphism
-	(rootSubalgebras& output, GlobalVariables& theGlobalVariables)
-{	output.SetSizeExpandOnTopNoObjectInit(0);
-	this->genK.size=0;
-	this->ComputeAll();
-	this->GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
-		(output,theGlobalVariables);
+void rootSubalgebras::GenerateAllRootSubalgebrasUpToIsomorphism
+	(GlobalVariables& theGlobalVariables)
+{	rootSubalgebra tempSA;
+	this->size=0;
+	tempSA.genK.size=0;
+	tempSA.AmbientWeyl.Assign(this->AmbientWeyl);
+	tempSA.ComputeAll();
+	this->GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
+		(tempSA,theGlobalVariables);
 }
 
-void rootSubalgebra::GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
-	(rootSubalgebras& output, GlobalVariables &theGlobalVariables)
-{	output.AddObjectOnTop(*this);
-	this->ProblemCounter++;
+void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
+	(rootSubalgebra& input, GlobalVariables &theGlobalVariables)
+{	this->AddObjectOnTop(input);
+	rootSubalgebra::ProblemCounter++;
 	rootSubalgebra tempSA;
-	tempSA=*this;
-	for (int k=0;k<this->kModules.size;k++)
-		if (this->HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
-		{	tempSA.genK.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[k]);
+	tempSA=input;
+	for (int k=0;k<tempSA.kModules.size;k++)
+		if (input.HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
+		{	tempSA.genK.AddObjectOnTop(input.HighestWeightsGmodK.TheObjects[k]);
 			tempSA.ComputeAllButAmbientWeyl();
-			//tempSA.ComputeAll();
-			bool foundNew=true;
-			for (int j=0;j<output.size;j++)
-				if (tempSA.IsIsomorphicTo(output.TheObjects[j],theGlobalVariables))
-				{	foundNew=false;
-					break;
-				}
-			if (foundNew)
-			{	tempSA.GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
-					(output,theGlobalVariables);
-				output.DynkinTableToString(output.DebugString);
-			}
+			if (this->IsANewSubalgebra(tempSA,theGlobalVariables))
+				this->GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
+					(tempSA,theGlobalVariables);
 			tempSA.genK.PopIndexSwapWithLast(tempSA.genK.size-1);
 		}
 }
 
+bool rootSubalgebras::IsANewSubalgebra
+	(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
+{	bool result=true;
+	for (int j=0;j<this->size;j++)
+	{	rootSubalgebra& right=this->TheObjects[j];
+		if (input.theDynkinDiagram.DebugString==right.theDynkinDiagram.DebugString &&
+				input.theCentralizerDiagram.DebugString==
+					right.theCentralizerDiagram.DebugString)
+		{	if (this->flagUseDynkinClassificationForIsomorphismComputation)
+			{	result=false;
+				int tempI= this->theBadDiagrams.IndexOfObject(input.theDynkinDiagram.DebugString);
+				if (tempI!=-1)
+					if (this->numFoundBadDiagrams.TheObjects[tempI]<2)
+					{	result=input.IsIsomorphicTo(right,theGlobalVariables);
+						if (!result)
+							this->numFoundBadDiagrams.TheObjects[tempI]++;
+					}
+			} else
+				result = input.IsIsomorphicTo(right,theGlobalVariables);
+			if (!result)
+				return result;
+		}
+	}
+	return result;
+}
 
 void rootSubalgebra::ComputeRootsOfK()
 { this->AllRootsK.size=0;
@@ -14027,15 +14044,12 @@ void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeade
 }
 
 int rootSubalgebra::ProblemCounter=0;
-bool rootSubalgebra::IsIsomorphicTo(rootSubalgebra& right, GlobalVariables& theGlobalVariables)
+bool rootSubalgebra::IsIsomorphicTo
+	(	rootSubalgebra& right, GlobalVariables& theGlobalVariables)
 { if (this->theDynkinDiagram.DebugString!= right.theDynkinDiagram.DebugString)
     return false;
   if (this->theCentralizerDiagram.DebugString!= right.theCentralizerDiagram.DebugString)
     return false;
-  if (this->flagUseDynkinClassificationForIsomorphismComputation)
-		if (!((	this->AmbientWeyl.KillingFormMatrix.NumRows==7 && this->AmbientWeyl.RootsOfBorel.size==63)||
-					( this->AmbientWeyl.KillingFormMatrix.NumRows==8 && this->AmbientWeyl.RootsOfBorel.size==120)))
-			return true;
 	//if (this->theDynkinDiagram.DebugString=="D6\nA1\n")
 	//	Stop();
   rootSubalgebra::ProblemCounter++;
@@ -14176,7 +14190,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 	return false;
 }
 
-bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariables& theGlobalVariables)
+bool rootSubalgebra::IsAnIsomorphism
+	(roots &domain, roots &range, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& matB= theGlobalVariables.matRootSAIso;
 	roots& tempRoots= theGlobalVariables.rootsRootSAIso;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
@@ -16791,6 +16806,44 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 	for (int i=0;i<this->size;i++)
 		output.AddObjectOnTop(this->TheObjects[SortingArray.TheObjects[i]]);
 	this->CopyFromBase(output);
+}
+
+void rootSubalgebras::ComputeDynkinDiagramsNonDecided
+	(WeylGroup& theWeylGroup)
+{ //Dynkin: Semisimple subalgebras of simple Lie algebras, Table 11.
+	this->theBadDiagrams.size=0;
+	std::string tempS;
+	if (theWeylGroup.RootSystem.size==240 && theWeylGroup.KillingFormMatrix.NumRows==8)
+	{//it's E8 folks!
+		this->theBadDiagrams.MakeActualSizeAtLeastExpandOnTop(5);
+		tempS="$A_7$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);
+		tempS="$A_3$+$A_3$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);
+		tempS="$A_5$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);
+		tempS="$A_3$+$A_1$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);
+		tempS="$A_1$+$A_1$+$A_1$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);
+	}
+	if (theWeylGroup.RootSystem.size=126 && theWeylGroup.KillingFormMatrix.NumRows==7)
+	{//it's E7 folks!
+		this->theBadDiagrams.MakeActualSizeAtLeastExpandOnTop(6);
+		tempS="$A_5$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		tempS="$A_5$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		tempS="$A_3$+$A_1$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		tempS="$A_3$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		tempS="$A_1$+$A_1$+$A_1$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);	
+		tempS="$A_1$+$A_1$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);	
+	}
+	this->numFoundBadDiagrams.initFillInObject(this->theBadDiagrams.size,0);
 }
 
 void rootSubalgebras::DynkinTableToString(std::string& output)

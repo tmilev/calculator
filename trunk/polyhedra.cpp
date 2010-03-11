@@ -741,7 +741,6 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 	if (tempS3!="textDim")
 		return false;
 //	std::cout<< input<<"\n";
-	output.flagDoingWeylGroupAction=false;
 
 	CGIspecificRoutines::CivilizedStringTranslation(input);
 	//std::cout<<input;
@@ -767,6 +766,8 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
 	output.thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	output.flagComputingVectorPartitions=false;
 	output.flagUsingCustomVectors=true;
+	output.flagDoingWeylGroupAction=false;
+	output.thePartialFraction.flagUsingCheckSum=true;
 	output.thePartialFraction.flagMaxNumStringOutputLines=200000;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
@@ -9512,9 +9513,17 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 			this->EndCheckSum.ElementToString(tempS2);
 		}
 		assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
+#ifdef cgiLimitRAMuseNumPointersInListBasicObjects
+		if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum))
+		{ std::cout<< "Checksum partial fractions failed </BODY></HTML>";
+			std::exit(0);
+		}
+		else
+			std::cout<< "Checksum successful";
+#endif
 	}
-
 }
+
 void partFractions::PrepareIndicatorVariables()
 { this->NumberIrrelevantFractions=0;
 	this->NumberRelevantReducedFractions=0;
@@ -13964,29 +13973,37 @@ void rootSubalgebras::GenerateAllRootSubalgebrasUpToIsomorphism
 {	this->size=0;
 	this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
 	this->initDynkinDiagramsNonDecided(this->AmbientWeyl);
-	rootSubalgebra tempSA;
-	tempSA.genK.size=0;
-	tempSA.AmbientWeyl.Assign(this->AmbientWeyl);
-	tempSA.ComputeAll();
+	theGlobalVariables.rootSAsGenerateAll.SetSizeExpandOnTopNoObjectInit
+		(this->AmbientWeyl.KillingFormMatrix.NumRows*2+1);
+	theGlobalVariables.rootSAsGenerateAll.TheObjects[0].genK.size=0;
+	theGlobalVariables.rootSAsGenerateAll.TheObjects[0].AmbientWeyl.Assign(this->AmbientWeyl);
+	theGlobalVariables.rootSAsGenerateAll.TheObjects[0].ComputeAll();
 	this->GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
-		(tempSA,theGlobalVariables);
+		(theGlobalVariables.rootSAsGenerateAll,1,theGlobalVariables);
 }
 
 void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
-	(rootSubalgebra& input, GlobalVariables &theGlobalVariables)
-{	this->AddObjectOnTop(input);
+	(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables)
+{	this->AddObjectOnTop(bufferSAs.TheObjects[RecursionDepth-1]);
 	rootSubalgebra::ProblemCounter++;
-	rootSubalgebra tempSA;
-	tempSA=input;
-	for (int k=0;k<input.kModules.size;k++)
-		if (input.HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
-		{	tempSA.genK.AddObjectOnTop(input.HighestWeightsGmodK.TheObjects[k]);
-			tempSA.ComputeAllButAmbientWeyl();
-			//tempSA.ComputeDebugString();
-			if (this->IsANewSubalgebra(tempSA,theGlobalVariables))
+	if (RecursionDepth>=bufferSAs.size)
+		bufferSAs.SetSizeExpandOnTopNoObjectInit
+			(bufferSAs.size+this->AmbientWeyl.KillingFormMatrix.NumRows);
+	bufferSAs.TheObjects[RecursionDepth]=bufferSAs.TheObjects[RecursionDepth-1];
+	for (int k=0;k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size;k++)
+		if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
+		{	bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop
+				(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
+			bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
+			if (this->IsANewSubalgebra
+						(	theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth],
+							theGlobalVariables))
 				this->GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
-					(tempSA,theGlobalVariables);
-			tempSA.genK.PopIndexSwapWithLast(tempSA.genK.size-1);
+					(	bufferSAs,
+						RecursionDepth+1,theGlobalVariables);
+			bufferSAs.TheObjects[RecursionDepth]
+				.genK.PopIndexSwapWithLast
+					(bufferSAs.TheObjects[RecursionDepth].genK.size-1);
 		}
 }
 

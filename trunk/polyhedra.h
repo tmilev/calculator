@@ -5772,7 +5772,7 @@ public:
 		(GlobalVariables& theGlobalVariables);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
-		(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
+		(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	void DynkinTableToString(std::string& output);
@@ -5952,6 +5952,7 @@ public:
 
 	rootSubalgebras rootSAAttemptExtensionIso1;
 	rootSubalgebras rootSAAttemptExtensionIso2;
+	rootSubalgebras rootSAsGenerateAll;
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
 	ListBasicObjects<WallData*> listWallDataPtSplitChamber;

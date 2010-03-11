@@ -5598,7 +5598,6 @@ public:
 	int NumTotalSubalgebras;
 	bool flagCountingSubalgebrasOnly;
 	bool flagMakingProgressReport;
-	static bool flagUseDynkinClassificationForIsomorphismComputation;
 	static int ProblemCounter;
 	static int ProblemCounter2;
 	::multTableKmods theMultTable;
@@ -5642,10 +5641,6 @@ public:
   bool attemptExtensionToIsomorphism
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 			int RecursionDepth);
-	void GenerateAllRootSubalgebrasUpToIsomorphism
-		(rootSubalgebras& output, GlobalVariables& theGlobalVariables);
-	void GenerateAllRootSubalgebrasContainingThisUpToIsomorphism
-		(rootSubalgebras& output, GlobalVariables& theGlobalVariables);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
@@ -5769,10 +5764,21 @@ public:
 	std::string DebugString;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
+	ListBasicObjects<std::string> theBadDiagrams;
+	ListBasicObjects<int> numFoundBadDiagrams;
+	WeylGroup AmbientWeyl;
+	bool flagUseDynkinClassificationForIsomorphismComputation;
+	void GenerateAllRootSubalgebrasUpToIsomorphism
+		(GlobalVariables& theGlobalVariables);
+	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
+	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
+		(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	void DynkinTableToString(std::string& output);
 	void SortDescendingOrderBySSRank();
+	void ComputeDynkinDiagramsNonDecided
+		(WeylGroup& theWeylGroup);
 	void ElementToString(std::string& output)
 	{ std::stringstream out; std::string tempS;
 		this->DynkinTableToString(tempS);
@@ -5785,6 +5791,7 @@ public:
 	};
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	rootSubalgebras(){this->flagUseDynkinClassificationForIsomorphismComputation=true;};
 };
 
 struct IndicatorWindowVariables

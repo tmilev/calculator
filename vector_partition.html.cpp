@@ -1,5 +1,5 @@
-#include<iostream>
-void static_html1(std::ostream& output){
+#include<sstream>
+void static_html1(std::stringstream& output){
 output <<" <HTML>\n";
 output <<" <HEAD><TITLE>Vector partition</TITLE>\n";
 output <<" </HEAD>\n";
@@ -11,7 +11,7 @@ output <<" \n";
 output <<" Testing the infrastructure atm :)\n";
 output <<" \n";
 output <<" <img src=\"../jacobs_logo.png\" alt=\"Jacobs University\">\n";
-output <<" <FORM method=\"POST\" name=\"formMain\" action=\"../cgi-bin/vector_partition_linux_cgi.cgi\">\n";
+output <<" <FORM method=\"POST\" name=\"formMain\" action=\"./vector_partition_linux_cgi\">\n";
 output <<" Dimension(<=3): <input type=\"text\" size =\"1\" name=\"textDim\" onkeyup=\"generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);\">\n";
 output <<" Num Vectors(<=9): <input type=\"text\" size=\"1\" name=\"textNumVectors\" onkeyup=\"generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);\">\n";
 output <<" <input type=\"submit\" name=\"buttonGo\" value=\"Go\">\n";

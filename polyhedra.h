@@ -57,7 +57,7 @@
 #endif
 
 #ifdef CGIversionLimitRAMuse
-static const int cgiLimitRAMuseNumPointersInListBasicObjects=9000000;
+static const int cgiLimitRAMuseNumPointersInListBasicObjects=900000;
 #endif
 
 const int MaxRank=12;
@@ -5483,7 +5483,7 @@ public:
 	void ComputeDynkinString(int indexComponent, WeylGroup& theWeyl);
 	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
 	void Assign(const DynkinDiagramRootSubalgebra& right);
-	inline void operator=(const DynkinDiagramRootSubalgebra& right);
+	inline void operator=(const DynkinDiagramRootSubalgebra& right){this->Assign(right);};
 	bool operator==(const DynkinDiagramRootSubalgebra& right);
 	bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
 	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output,int index);
@@ -5514,12 +5514,12 @@ public:
 	void ComputeDiagramRelAndK(rootSubalgebra& owner);
 	void FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational>& coeffs);
 	void RelationOneSideToString
-    ( std::string& output, const std::string& letterType, 
+    ( std::string& output, const std::string& letterType,
 			ListBasicObjects<Rational>& coeffs,
       ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,
 			bool useLatex, rootSubalgebra& owner);
 	void ElementToString
-		(	std::string& output, rootSubalgebras& owners, bool useLatex, 
+		(	std::string& output, rootSubalgebras& owners, bool useLatex,
 			bool includeScalarsProducts);
 	void RootsToScalarProductString
 		(	roots& input,const std::string& letterType, std::string& output, bool useLatex,
@@ -5549,7 +5549,7 @@ public:
 	};
 	bool operator==(const coneRelation& right)
 	{ return this->DebugString==right.DebugString;
-	};	
+	};
 	int HashFunction()
 	{ int tempI= ::MathRoutines::Minimum(this->DebugString.length(),::SomeRandomPrimesSize);
 		int result=0;
@@ -5672,7 +5672,7 @@ public:
 	bool ConeConditionHolds
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void PossibleNilradicalComputation
-		(	GlobalVariables& theGlobalVariables,Selection& selKmods, 
+		(	GlobalVariables& theGlobalVariables,Selection& selKmods,
 			rootSubalgebras& owner, int indexInOwner);
 	void ElementToString(std::string& output){this->ElementToString(output,false);};
 	void ElementToString(std::string& output, bool makeALaTeXReport);

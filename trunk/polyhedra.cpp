@@ -1040,12 +1040,13 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(8);
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(7);
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	this->theRootSubalgebras.ComputeDebugString();
+	this->theRootSubalgebras.flagComputeConeCondition=false;
 	this->theRootSubalgebras.ComputeLProhibitingRelations
 		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
@@ -13468,10 +13469,12 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 		this->ComputeDebugString();
-	this->flagCountingSubalgebrasOnly=true;
+	this->flagFirstRoundCounting=true;
 	this->NumTotalSubalgebras=0;
 	for (int l=0;l<2;l++)
-	{	this->NumNilradicalsAllowed=0;
+	{	if (l==1 && !this->flagComputeConeCondition)
+			break;
+		this->NumNilradicalsAllowed=0;
 		this->NumConeConditionFailures=0;
 		this->NumRelationsWithStronglyPerpendicularDecomposition=0;
 		for (int i=0;i<numCycles;i++)
@@ -13499,7 +13502,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 					impliedSelections, this->theOppositeKmods, owner, indexInOwner);
 			tempSel.incrementSelection();
 		}
-		this->flagCountingSubalgebrasOnly=false;
+		this->flagFirstRoundCounting=false;
 	}
 }
 
@@ -13591,9 +13594,9 @@ void rootSubalgebra::PossibleNilradicalComputation
 { this->NumNilradicalsAllowed++;
 	this->NilradicalKmods.Assign(selKmods);
 	//this->ComputeDebugString();
-	if (this->flagCountingSubalgebrasOnly)
+	if (this->flagFirstRoundCounting)
 		this->NumTotalSubalgebras=this->NumNilradicalsAllowed;
-	if (!this->flagCountingSubalgebrasOnly)
+	if (!this->flagFirstRoundCounting)
 	{	if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner))
 		{	this->NumConeConditionFailures++;
 			owner.NumConeConditionFailures++;
@@ -13606,9 +13609,11 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
 	(GlobalVariables& theGlobalVariables,rootSubalgebras& owner, int indexInOwner)
 { if (this->flagMakingProgressReport)
 	{ std::stringstream out1, out2,out3,out4, out5;
-		if (this->flagCountingSubalgebrasOnly)
-		{	out1<<"Counting ss part "<< this->theDynkinDiagram.DebugString;
-			out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
+		if (this->flagFirstRoundCounting)
+		{	out1 <<"Counting ss part "<< this->theDynkinDiagram.DebugString;
+			out2 <<"# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
+			owner.NumSubalgebrasCounted++;
+			out3 <<owner.NumSubalgebrasCounted <<" total subalgebras counted";
 		}
 		else
 		{ out1<<"Computing ss part "<< this->theDynkinDiagram.DebugString;
@@ -13617,12 +13622,12 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
 			out3<<  "Total # subalgebras processed: "<< owner.NumSubalgebrasProcessed;
 			out4<< "Num cone condition failures: " << owner.NumConeConditionFailures;
 			out5<<"Num failures to find l-prohibiting relations: " <<owner.theBadRelations.size;
-			::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 			::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 			::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
 		}
 		::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
 		::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 			theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 	}
@@ -16469,6 +16474,7 @@ rootSubalgebra::rootSubalgebra()
 { this->flagAnErrorHasOccuredTimeToPanic=false;
   this->NumGmodKtableRowsAllowedLatex=35;
   this->flagMakingProgressReport=true;
+  this->flagComputeConeCondition=true;
 }
 
 /*void SelectionList::ElementToString(std::string &output)
@@ -16800,8 +16806,10 @@ void rootSubalgebras::ComputeLProhibitingRelations
 	(GlobalVariables &theGlobalVariables,int StartingIndex, int NumToBeProcessed)
 { this->NumSubalgebrasProcessed=0;
 	this->NumConeConditionFailures=0;
+	this->NumSubalgebrasCounted=0;
 	for (int i=StartingIndex;i<NumToBeProcessed+StartingIndex;i++)
-	{ this->TheObjects[i]
+	{ this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
+		this->TheObjects[i]
 			.GenerateParabolicsInCentralizerAndPossibleNilradicals
 				(theGlobalVariables,*this,i);
 	}

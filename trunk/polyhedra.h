@@ -5596,7 +5596,8 @@ public:
 	int NumRelationsgreaterLengthThan2;
 	int NumGmodKtableRowsAllowedLatex;
 	int NumTotalSubalgebras;
-	bool flagCountingSubalgebrasOnly;
+	bool flagFirstRoundCounting;
+	bool flagComputeConeCondition;
 	bool flagMakingProgressReport;
 	static int ProblemCounter;
 	static int ProblemCounter2;
@@ -5764,17 +5765,19 @@ public:
 	std::string DebugString;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
+	int NumSubalgebrasProcessed;
+	int NumConeConditionFailures;
+	int NumSubalgebrasCounted;
 	ListBasicObjects<std::string> theBadDiagrams;
 	ListBasicObjects<int> numFoundBadDiagrams;
 	WeylGroup AmbientWeyl;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
+	bool flagComputeConeCondition;
 	void GenerateAllRootSubalgebrasUpToIsomorphism
 		(GlobalVariables& theGlobalVariables);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
-	int NumSubalgebrasProcessed;
-	int NumConeConditionFailures;
 	void DynkinTableToString(std::string& output);
 	void SortDescendingOrderBySSRank();
 	void initDynkinDiagramsNonDecided
@@ -5791,7 +5794,10 @@ public:
 	};
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-	rootSubalgebras(){this->flagUseDynkinClassificationForIsomorphismComputation=true;};
+	rootSubalgebras()
+	{	this->flagUseDynkinClassificationForIsomorphismComputation=true;
+		this->flagComputeConeCondition=true;
+	};
 };
 
 struct IndicatorWindowVariables

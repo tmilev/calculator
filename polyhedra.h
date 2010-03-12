@@ -5632,6 +5632,8 @@ public:
 	ListBasicObjects<int> theKComponentRanks;
 	std::string DebugString;
 	rootSubalgebra();
+	//returns -1 if the weight/root is not in g/k
+	int GetIndexKmoduleContainingRoot(root& input);
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner);
@@ -5765,6 +5767,7 @@ public:
 	std::string DebugString;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
+	ListBasicObjects< ListBasicObjects <int> > ActionsGeneratorsWeyl;
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	int NumSubalgebrasCounted;
@@ -5773,6 +5776,8 @@ public:
 	WeylGroup AmbientWeyl;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
 	bool flagComputeConeCondition;
+	void ComputeActionsGeneratorsWeyl
+		(rootSubalgebra& input, ListBasicObjects<Selection>& SelectionsToBePermuted);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
 		(GlobalVariables& theGlobalVariables);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);

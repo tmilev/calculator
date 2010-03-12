@@ -1040,7 +1040,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(7);
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
@@ -13736,6 +13736,13 @@ int rootSubalgebra::NumRootsInNilradical()
 	return result;
 }
 
+int rootSubalgebra::GetIndexKmoduleContainingRoot(root& input)
+{ for (int i=0;i<this->kModules.size;i++)
+		if (this->kModules.TheObjects[i].ContainsObject(input))
+			return i;
+	return -1;
+}
+
 bool rootSubalgebra::ConeConditionHolds
 	(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
 { MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
@@ -16800,6 +16807,24 @@ void permutation::GetPermutation(ListBasicObjects<int>& output)
     output.TheObjects[i]=i;
   for (int i=0;i<numElements;i++)
     MathRoutines::swap(output.TheObjects[i],output.TheObjects[i+this->Multiplicities.TheObjects[i]]);
+}
+
+void rootSubalgebras::ComputeActionsGeneratorsWeyl
+	(rootSubalgebra& input, ListBasicObjects<Selection>& SelectionsToBePermuted)
+{//we assume input has all had its kModules computed properly
+	this->ActionsGeneratorsWeyl.SetSizeExpandOnTopNoObjectInit
+		(this->AmbientWeyl.KillingFormMatrix.NumRows);
+	root tempRoot;
+	for (int i=0;i<this->ActionsGeneratorsWeyl.size;i++)
+	{ this->ActionsGeneratorsWeyl.TheObjects[i]
+			.SetSizeExpandOnTopNoObjectInit(input.kModules.size);
+		assert(input.kModules.size==input.HighestWeightsGmodK.size);
+		for (int j=0;j<input.kModules.size;j++)
+		{	tempRoot.Assign(input.HighestWeightsGmodK.TheObjects[j]);
+			this->AmbientWeyl.SimpleReflectionRoot(i,tempRoot,false,false);
+			int tempI=input.GetIndexKmoduleContainingRoot(tempRoot);
+		}
+	}
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations

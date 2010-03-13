@@ -13800,6 +13800,7 @@ bool rootSubalgebra::CheckForSmallRelations
 	(coneRelation& theRel, roots& nilradicalRoots)
 { //return false;
 	root tempRoot;
+	bool tempBool; int tempI;
 	for (int i=0;i<this->kModules.size;i++)
 		if (!this->NilradicalKmods.selected[i])
 			for (int j=i+1;j<this->kModules.size;j++)
@@ -13809,8 +13810,17 @@ bool rootSubalgebra::CheckForSmallRelations
 					if (!tempRoot.IsEqualToZero())
 					{ theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(0);
 						theRel.Betas.SetSizeExpandOnTopNoObjectInit(0);
-						if (tempRoot.HasStronglyPerpendicularDecompositionWRT
-									(nilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs))
+						tempI= nilradicalRoots.IndexOfObject(tempRoot);
+						if (tempI!=-1)
+						{ tempBool=true;
+							theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
+							theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
+							theRel.BetaCoeffs.TheObjects[0].MakeOne();
+							theRel.Betas.TheObjects[0].Assign(nilradicalRoots.TheObjects[tempI]);
+						} else
+							tempBool=	tempRoot.HasStronglyPerpendicularDecompositionWRT
+								(nilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs);
+						if (tempBool)
 						{	theRel.Alphas.size=0;
 							theRel.AlphaCoeffs.size=0;
 							theRel.Alphas.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);

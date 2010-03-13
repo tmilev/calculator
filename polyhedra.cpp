@@ -1790,6 +1790,13 @@ inline bool root::IsPositiveOrZero()
 	return true;
 }
 
+inline bool root::IsNegativeZero()
+{ for (int i=0;i<this->size;i++)
+		if (this->TheObjects[i].IsPositive())
+			return false;
+	return true;
+}
+
 inline bool root::IsGreaterThanOrEqualTo(root& r)
 { root tempRoot;
 	tempRoot.Assign(*this);
@@ -11269,17 +11276,15 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
 	}
 }
 
-void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, root& output)
-{ static Rational alphaShift, tempRat;
-	output.SetSizeExpandOnTopLight(this->KillingFormMatrix.NumCols);
-	alphaShift.MakeZero();
-	Rational lengthA;
-	lengthA.MakeZero();
+void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output)
+{ Rational alphaShift, tempRat,lengthA;
+	root result; result.Assign(Beta);
+	alphaShift.MakeZero(); lengthA.MakeZero();
 	if (RhoAction)
-		beta.Add(this->rho);
+		result.Add(this->rho);
 	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
 		for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
-		{ tempRat.Assign(beta.TheObjects[j]);
+		{ tempRat.Assign(result.TheObjects[j]);
 			tempRat.MultiplyBy(alpha.TheObjects[i]);
 			tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[i][j]*2);
 			alphaShift.Add(tempRat);
@@ -11292,13 +11297,11 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, roo
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
 	{ tempRat.Assign(alphaShift);
 		tempRat.MultiplyBy(alpha.TheObjects[i]);
-		tempRat.Add(beta.TheObjects[i]);
-		output.TheObjects[i].Assign(tempRat);
+		tempRat.Add(result.TheObjects[i]);
+		Output.TheObjects[i].Assign(tempRat);
 	}
 	if (RhoAction)
-	{ beta.Subtract(this->rho);
-		output.Subtract(this->rho);
-	}
+		Output.Subtract(this->rho);
 }
 
 void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
@@ -13363,6 +13366,7 @@ void rootSubalgebra::ComputeAll()
 	//this->ComputeDebugString();
 }
 
+
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
 { this->CentralizerKmods.init(this->kModules.size);
 	this->CentralizerRoots.size=0;
@@ -13478,25 +13482,27 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 		this->NumConeConditionFailures=0;
 		this->NumRelationsWithStronglyPerpendicularDecomposition=0;
 		for (int i=0;i<numCycles;i++)
-		{	impliedSelections.TheObjects[0].init(this->kModules.size);
+		{	roots tempRootsTest; tempRootsTest.size=0;
+			impliedSelections.TheObjects[0].init(this->kModules.size);
 			for (int j=0;j<this->CentralizerRoots.size;j++)
-				for (int k=0;k<tempSel.CardinalitySelection;k++)
-				{ root tempRoot;
-					if (!this->CentralizerRoots.TheObjects[j].IsPositiveOrZero())
-						break;
-					else
-						tempRoot.Assign(this->CentralizerRoots.TheObjects[j]);
-					tempRoot.Subtract
-						(	this->SimpleBasisCentralizerRoots.TheObjects
-								[tempSel.elements[k]]);
-					if (this->IsARootOrZero(tempRoot))
-					{ impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
-						break;
-					}
+				if (this->rootIsInNilradicalParabolicCentralizer
+							(tempSel,this->CentralizerRoots.TheObjects[j]))
+				{	impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
+					tempRootsTest.AddObjectOnTop(this->CentralizerRoots.TheObjects[j]);
 				}
+			assert(this->RootsDefineASubalgebra(tempRootsTest));
 			if (this->flagAnErrorHasOccuredTimeToPanic)
 				tempSel.ComputeDebugString();
 			//impliedSelections.TheObjects[0].ComputeDebugString();
+			owner.ComputeActionNormalizerOfCentralizerIntersectNilradical
+				(tempSel,*this);
+			std::string tempS; std::stringstream out;
+			for (int s=0;s<owner.ActionsNormalizerCentralizerNilradical.size;s++)
+			{	for (int t=0;t<owner.ActionsNormalizerCentralizerNilradical.size;t++)
+					out << owner.ActionsNormalizerCentralizerNilradical.TheObjects[s].TheObjects[t]<<", ";
+				out<<"\n";
+			}
+			tempS=out.str();
 			this->GeneratePossibleNilradicalsRecursive
 				(	theGlobalVariables, this->theMultTable,this->CentralizerRoots.size,
 					impliedSelections, this->theOppositeKmods, owner, indexInOwner);
@@ -13506,6 +13512,42 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	}
 }
 
+bool rootSubalgebra::RootsDefineASubalgebra(roots& theRoots)
+{ root tempRoot;
+	for (int i=0;i<theRoots.size;i++)
+	{ if (!this->IsARoot(theRoots.TheObjects[i]))
+			return false;
+		for (int j=i+1;j<theRoots.size;j++)
+		{ tempRoot.Assign(theRoots.TheObjects[i]);
+			tempRoot.Add(theRoots.TheObjects[j]);
+			if (this->IsARoot(tempRoot))
+				if (!theRoots.ContainsObject(tempRoot))
+					return false;
+		}
+	}
+	return true;
+}
+
+bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer
+	(Selection& positiveSimpleRootsSel, root& input)
+{	if (input.IsNegativeZero())
+		return false;
+	root tempRoot;
+	for (int k=0;k<this->SimpleBasisCentralizerRoots.size;k++)
+	{	tempRoot.Assign(input);
+		tempRoot.Subtract
+			(	this->SimpleBasisCentralizerRoots.TheObjects[k]);
+		if (this->IsARootOrZero(tempRoot))
+		{ if (positiveSimpleRootsSel.selected[k])
+				return true;
+			else
+				return this->rootIsInNilradicalParabolicCentralizer
+					(positiveSimpleRootsSel,tempRoot);
+		}
+	}
+	assert(false);
+	return false;
+}
 void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 	(	GlobalVariables &theGlobalVariables,
 		multTableKmods &multTable, int StartIndex,
@@ -14026,6 +14068,31 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 			bufferSAs.TheObjects[RecursionDepth]
 				.genK.PopIndexSwapWithLast
 					(bufferSAs.TheObjects[RecursionDepth].genK.size-1);
+		}
+}
+
+void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
+	(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA)
+{ this->ActionsNormalizerCentralizerNilradical.MakeActualSizeAtLeastExpandOnTop
+		(SelectedBasisRoots.MaxSize-SelectedBasisRoots.CardinalitySelection+1);
+	root currentRoot,tempRoot;
+	for (int i=0;i<SelectedBasisRoots.MaxSize;i++)
+		if (!SelectedBasisRoots.selected[i])
+		{	currentRoot.Assign(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
+			this->ActionsNormalizerCentralizerNilradical.TheObjects[i]
+				.SetSizeExpandOnTopNoObjectInit(theRootSA.kModules.size);
+			for (int j=0;j<theRootSA.kModules.size;j++)
+			{	tempRoot.Assign(theRootSA.HighestWeightsGmodK.TheObjects[j]);
+				this->AmbientWeyl.ReflectBetaWRTAlpha(currentRoot,tempRoot,false,tempRoot);
+				int tempI=theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
+				this->ActionsNormalizerCentralizerNilradical.TheObjects[i]
+					.TheObjects[j]= tempI;
+				for (int k=0;k<theRootSA.kModules.TheObjects[j].size;k++)
+				{ tempRoot.Assign(theRootSA.kModules.TheObjects[j].TheObjects[k]);
+					this->AmbientWeyl.ReflectBetaWRTAlpha(currentRoot,tempRoot,false,tempRoot);
+					assert(tempI==theRootSA.GetIndexKmoduleContainingRoot(tempRoot));
+				}
+			}
 		}
 }
 
@@ -16817,24 +16884,6 @@ void permutation::GetPermutation(ListBasicObjects<int>& output)
     output.TheObjects[i]=i;
   for (int i=0;i<numElements;i++)
     MathRoutines::swap(output.TheObjects[i],output.TheObjects[i+this->Multiplicities.TheObjects[i]]);
-}
-
-void rootSubalgebras::ComputeActionsGeneratorsWeyl
-	(rootSubalgebra& input, ListBasicObjects<Selection>& SelectionsToBePermuted)
-{//we assume input has all had its kModules computed properly
-	this->ActionsGeneratorsWeyl.SetSizeExpandOnTopNoObjectInit
-		(this->AmbientWeyl.KillingFormMatrix.NumRows);
-	root tempRoot;
-	for (int i=0;i<this->ActionsGeneratorsWeyl.size;i++)
-	{ this->ActionsGeneratorsWeyl.TheObjects[i]
-			.SetSizeExpandOnTopNoObjectInit(input.kModules.size);
-		assert(input.kModules.size==input.HighestWeightsGmodK.size);
-		for (int j=0;j<input.kModules.size;j++)
-		{	tempRoot.Assign(input.HighestWeightsGmodK.TheObjects[j]);
-			this->AmbientWeyl.SimpleReflectionRoot(i,tempRoot,false,false);
-			int tempI=input.GetIndexKmoduleContainingRoot(tempRoot);
-		}
-	}
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations

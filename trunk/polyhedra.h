@@ -1474,6 +1474,7 @@ public:
 	void AssignIntRoot(intRoot& right);
 	bool IsProportianalTo(root& r);
 	bool IsPositiveOrZero();
+	bool IsNegativeZero();
 	bool IsEqualToZero()
 	{	for (int i=0;i<this->size;i++)
 		{	if (!this->TheObjects[i].IsEqualToZero())
@@ -5359,7 +5360,7 @@ public:
 	void SimpleReflectionRootAlg
 						(	int index, PolynomialsRationalCoeff& theRoot,
 							bool RhoAction);
-	void ReflectBetaWRTAlpha(root& alpha, root &beta, bool RhoAction, root& output);
+	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
 	void RootScalarKillingFormMatrixRoot(root&r1, root& r2, Rational& output);
 	int length(int index);
 };
@@ -5634,6 +5635,7 @@ public:
 	rootSubalgebra();
 	//returns -1 if the weight/root is not in g/k
 	int GetIndexKmoduleContainingRoot(root& input);
+	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner);
@@ -5679,6 +5681,7 @@ public:
 			rootSubalgebras& owner, int indexInOwner);
 	void ElementToString(std::string& output){this->ElementToString(output,false);};
 	void ElementToString(std::string& output, bool makeALaTeXReport);
+	bool RootsDefineASubalgebra(roots& theRoots);
 	void GenerateKmodMultTable
 		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,
 			ListBasicObjects<int>& oppositeKmods,
@@ -5767,7 +5770,7 @@ public:
 	std::string DebugString;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
-	ListBasicObjects< ListBasicObjects <int> > ActionsGeneratorsWeyl;
+	ListBasicObjects< ListBasicObjects <int> > ActionsNormalizerCentralizerNilradical;
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	int NumSubalgebrasCounted;
@@ -5776,8 +5779,8 @@ public:
 	WeylGroup AmbientWeyl;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
 	bool flagComputeConeCondition;
-	void ComputeActionsGeneratorsWeyl
-		(rootSubalgebra& input, ListBasicObjects<Selection>& SelectionsToBePermuted);
+	void ComputeActionNormalizerOfCentralizerIntersectNilradical
+		(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
 		(GlobalVariables& theGlobalVariables);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);

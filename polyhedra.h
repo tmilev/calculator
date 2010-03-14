@@ -5664,7 +5664,7 @@ public:
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
-			ListBasicObjects<int> &oppositeKmods);
+			ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism (roots& domain, roots& range, GlobalVariables& theGlobalVariables);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	bool ListHasNonSelectedIndexLowerThanGiven
@@ -5771,6 +5771,7 @@ public:
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
 	ListBasicObjects< ListBasicObjects <int> > ActionsNormalizerCentralizerNilradical;
+	//ListBasicObjects< ListBasicObjects <int> > OrbitsUnderNormalizerCentralizerNilradical;
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	int NumSubalgebrasCounted;
@@ -5779,6 +5780,12 @@ public:
 	WeylGroup AmbientWeyl;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
 	bool flagComputeConeCondition;
+	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
+		(	Selection& startSel, Selection& targetSel, 
+			GlobalVariables& theGlobalVariables);
+	bool ApproveSelAgainstOneGenerator
+		(	ListBasicObjects<int>& generator, Selection& startSel, 
+			Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical
 		(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
@@ -6024,7 +6031,7 @@ public:
 	Selection selReduceMonomialByMonomial;
 	Selection selSimplexAlg1;
 	Selection selSimplexAlg2;
-
+	Selection selApproveSelAgainstOneGenerator;
 
 
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;

@@ -13475,6 +13475,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 		this->ComputeDebugString();
 	this->flagFirstRoundCounting=true;
 	this->NumTotalSubalgebras=0;
+	theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
 	for (int l=0;l<2;l++)
 	{	if (l==1 && !this->flagComputeConeCondition)
 			break;
@@ -13573,7 +13574,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 							.selected[counters.TheObjects[RecursionDepth]])
 			{	if ( this->IndexIsCompatibleWithPrevious
 							(	counters.TheObjects[RecursionDepth],RecursionDepth,multTable,
-								impliedSelections,oppositeKmods))
+								impliedSelections,oppositeKmods,owner,theGlobalVariables))
 				{	RecursionDepth++;
 					counters.TheObjects[RecursionDepth]=counters.TheObjects[RecursionDepth-1];
 				}
@@ -13607,7 +13608,7 @@ bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven
 bool rootSubalgebra::IndexIsCompatibleWithPrevious
 	(	int startIndex,int RecursionDepth,	multTableKmods & multTable,
 		ListBasicObjects<Selection>& impliedSelections,
-		ListBasicObjects<int> &oppositeKmods)
+		ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables)
 { Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
 	Selection& originalSel=impliedSelections.TheObjects[RecursionDepth];
 	targetSel.Assign(originalSel);
@@ -13627,6 +13628,9 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 			}
 		}
 	}
+	if (!owner.ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
+				(originalSel,targetSel,theGlobalVariables))
+		return false;
 	return true;
 }
 
@@ -14094,6 +14098,34 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 				}
 			}
 		}
+}
+
+bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
+	(	Selection& startSel, Selection& targetSel, 
+		GlobalVariables& theGlobalVariables)
+{	for (int i=0;i<this->ActionsNormalizerCentralizerNilradical.size;i++)
+	{	if (!this->ApproveSelAgainstOneGenerator
+					(	this->ActionsNormalizerCentralizerNilradical.TheObjects[i],
+						startSel,targetSel,theGlobalVariables))
+			return false;
+	}
+	return true;
+}
+
+bool rootSubalgebras::ApproveSelAgainstOneGenerator
+	(	ListBasicObjects<int>& generator, Selection& startSel, 
+		Selection& targetSel, GlobalVariables& theGlobalVariables)
+{	Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator;
+	tempSel.initNoMemoryAllocation();
+	for (int i=0;i<targetSel.CardinalitySelection;i++)
+		tempSel.AddSelectionAppendNewIndex(generator.TheObjects[targetSel.elements[i]]);
+	for (int i=0;i<tempSel.MaxSize;i++)
+	{ if (targetSel.selected[i]&& !tempSel.selected[i])
+			return true;
+		if (!targetSel.selected[i] && tempSel.selected[i])
+			return false;
+	}
+	return true;
 }
 
 bool rootSubalgebras::IsANewSubalgebra

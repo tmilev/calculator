@@ -299,7 +299,7 @@ void CombinatorialChamberContainer::OneSlice
 				{	delete this->TheObjects[this->indexNextChamberToSlice];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 					this->TheObjects[this->indexNextChamberToSlice]=0;
 					//if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -810,7 +810,7 @@ ComputationSetup::ComputationSetup()
 	this->theGlobalVariablesContainer= new GlobalVariablesContainer;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->theGlobalVariablesContainer->SetSizeExpandOnTopNoObjectInit(1);
 //	this->RankEuclideanSpaceGraphics=3;
@@ -820,7 +820,7 @@ ComputationSetup::~ComputationSetup()
 {	delete this->theGlobalVariablesContainer;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -1042,12 +1042,13 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
 	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
+	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
+	this->theRootSubalgebras.flagComputeConeCondition=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeDebugString();
-	this->theRootSubalgebras.flagComputeConeCondition=false;
 	this->theRootSubalgebras.ComputeLProhibitingRelations
+//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -1062,9 +1063,10 @@ void ComputationSetup::Run()
 	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
-		this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
-		this->theRootSubalgebras.theBadRelations.ComputeDebugString(this->theRootSubalgebras);
-		this->theRootSubalgebras.theGoodRelations.ComputeDebugString(this->theRootSubalgebras);
+		this->theRootSubalgebras.theBadRelations.ComputeDebugString
+			(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+		this->theRootSubalgebras.theGoodRelations.ComputeDebugString
+			(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
 		this->theOutput.DebugString.append("\n\n\n");
 		this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
 		this->theOutput.DebugString.append("\n\n\n");
@@ -2096,7 +2098,7 @@ void Selection::init(int maxNumElements)
 		this->elements = new int[maxNumElements];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter+=(maxNumElements-this->MaxSize)*2;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		MaxSize =maxNumElements;
 	}
@@ -2200,7 +2202,7 @@ Selection::~Selection()
 	delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter-=this->MaxSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	//	delete [] elementsInverseSelection;
 	this->MaxSize=0;
@@ -3453,7 +3455,7 @@ bool CombinatorialChamber::SplitChamber
 	NewMinusChamber= new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter+=2;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	NewPlusChamber->flagPermanentlyZero= PlusChamberIsPermanentZero;
 	NewMinusChamber->flagPermanentlyZero= MinusChamberIsPermanentZero;
@@ -3652,7 +3654,7 @@ void CombinatorialChamberContainer::SliceWithAWallInit
 			{	delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 				this->TheObjects[i]=0;
 				break;
@@ -3681,7 +3683,7 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement
 				{ delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 					this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
 				}
@@ -5707,7 +5709,7 @@ void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplex
 	PrecomputedTaukn* NewMember = new PrecomputedTaukn;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->AddObjectOnTop(NewMember);
 	NewMember->k=k;
@@ -12634,7 +12636,7 @@ rootFKFTcomputation::rootFKFTcomputation()
 	this->TheGlobalVariables= new GlobalVariables;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -12642,7 +12644,7 @@ rootFKFTcomputation::~rootFKFTcomputation()
 { delete this->TheGlobalVariables;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -13472,7 +13474,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	tempSel.init(this->SimpleBasisCentralizerRoots.size);
 	int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
-		this->ComputeDebugString();
+		this->ComputeDebugString(theGlobalVariables);
 	this->flagFirstRoundCounting=true;
 	this->NumTotalSubalgebras=0;
 	theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
@@ -13955,7 +13957,8 @@ void rootSubalgebra::ExtractRelations
 	}
 }
 
-void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots)
+void rootSubalgebra::MakeSureAlphasDontSumToRoot
+	(coneRelation& theRel, roots& NilradicalRoots)
 { root alpha1, alpha2,beta1, tempRoot;
 	bool madeChange=true;
 	while(madeChange)
@@ -14077,8 +14080,8 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 
 void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 	(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA)
-{ this->ActionsNormalizerCentralizerNilradical.MakeActualSizeAtLeastExpandOnTop
-		(SelectedBasisRoots.MaxSize-SelectedBasisRoots.CardinalitySelection+1);
+{ this->ActionsNormalizerCentralizerNilradical.SetSizeExpandOnTopNoObjectInit
+		(SelectedBasisRoots.MaxSize-SelectedBasisRoots.CardinalitySelection);
 	root currentRoot,tempRoot;
 	for (int i=0;i<SelectedBasisRoots.MaxSize;i++)
 		if (!SelectedBasisRoots.selected[i])
@@ -14103,7 +14106,9 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
 	(	Selection& startSel, Selection& targetSel, 
 		GlobalVariables& theGlobalVariables)
-{	for (int i=0;i<this->ActionsNormalizerCentralizerNilradical.size;i++)
+{	if (!this->flagUsingActionsNormalizerCentralizerNilradical)
+		return true;
+	for (int i=0;i<this->ActionsNormalizerCentralizerNilradical.size;i++)
 	{	if (!this->ApproveSelAgainstOneGenerator
 					(	this->ActionsNormalizerCentralizerNilradical.TheObjects[i],
 						startSel,targetSel,theGlobalVariables))
@@ -14172,8 +14177,8 @@ void rootSubalgebra::ComputeRootsOfK()
 	}
 }
 
-void rootSubalgebra::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
+void rootSubalgebra::ComputeDebugString(GlobalVariables& theGlobalVariables)
+{ this->ElementToString(this->DebugString,theGlobalVariables);
 }
 
 void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeader,std::string&  outputFooter)
@@ -14381,7 +14386,8 @@ bool rootSubalgebra::IsAnIsomorphism
 	return true;
 }
 
-void rootSubalgebra::ElementToString(std::string &output, bool makeALaTeXReport)
+void rootSubalgebra::ElementToString
+	(std::string &output, bool makeALaTeXReport,GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
@@ -14406,7 +14412,7 @@ void rootSubalgebra::ElementToString(std::string &output, bool makeALaTeXReport)
     if (!makeALaTeXReport)
       out << "\n\n Module ";
     else
-      out <<"\\hline";
+      out <<"\\hline ";
     out<<i;
     if (!makeALaTeXReport)
       out << ": size: ";
@@ -14452,10 +14458,15 @@ void rootSubalgebra::ElementToString(std::string &output, bool makeALaTeXReport)
     }
 	}
 	if (makeALaTeXReport)
-    out<<latexFooter;
-	out <<"\n\n\\noindent Pairing table:\n\n\\noindent";
-	this->theMultTable.ElementToString(tempS,makeALaTeXReport,*this);
-	out << tempS <<"\n";
+		out<<latexFooter;
+	if (makeALaTeXReport && this->theMultTable.size==0 && this->kModules.size!=0)
+		this->GenerateKmodMultTable
+			(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
+	if (this->theMultTable.size!=0)
+	{	out <<"\n\n\\noindent Pairing table:\n\n\\noindent";
+		this->theMultTable.ElementToString(tempS,makeALaTeXReport,*this);
+		out << tempS <<"\n";
+	}
 	output=out.str();
 }
 
@@ -14875,7 +14886,7 @@ void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[4].InitFromIntegers(6, 0,0,1,0,0,0,0,0);
 	this->genK.TheObjects[5].InitFromIntegers(6, 0,1,0,1,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables)
@@ -14887,7 +14898,7 @@ void rootSubalgebra::SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A5(GlobalVariables& theGlobalVariables)
@@ -14899,7 +14910,7 @@ void rootSubalgebra::SetupE6_A5(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A4plusA1(GlobalVariables& theGlobalVariables)
@@ -14911,7 +14922,7 @@ void rootSubalgebra::SetupE6_A4plusA1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->genK.TheObjects[4].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_D5(GlobalVariables& theGlobalVariables)
@@ -14923,7 +14934,7 @@ void rootSubalgebra::SetupE6_D5(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A3plus2A1(GlobalVariables& theGlobalVariables)
@@ -14935,7 +14946,7 @@ void rootSubalgebra::SetupE6_A3plus2A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
 	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A4(GlobalVariables& theGlobalVariables)
@@ -14946,7 +14957,7 @@ void rootSubalgebra::SetupE6_A4(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A3plusA1(GlobalVariables& theGlobalVariables)
@@ -14957,7 +14968,7 @@ void rootSubalgebra::SetupE6_A3plusA1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_2A2(GlobalVariables& theGlobalVariables)
@@ -14968,7 +14979,7 @@ void rootSubalgebra::SetupE6_2A2(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A2plus2A1(GlobalVariables& theGlobalVariables)
@@ -14979,7 +14990,7 @@ void rootSubalgebra::SetupE6_A2plus2A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_4A1(GlobalVariables& theGlobalVariables)
@@ -14990,7 +15001,7 @@ void rootSubalgebra::SetupE6_4A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->genK.TheObjects[3].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_D4(GlobalVariables& theGlobalVariables)
@@ -15001,7 +15012,7 @@ void rootSubalgebra::SetupE6_D4(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
 	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A3(GlobalVariables& theGlobalVariables)
@@ -15011,7 +15022,7 @@ void rootSubalgebra::SetupE6_A3(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A2plusA1(GlobalVariables& theGlobalVariables)
@@ -15021,7 +15032,7 @@ void rootSubalgebra::SetupE6_A2plusA1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_3A1(GlobalVariables& theGlobalVariables)
@@ -15031,7 +15042,7 @@ void rootSubalgebra::SetupE6_3A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A2(GlobalVariables& theGlobalVariables)
@@ -15040,7 +15051,7 @@ void rootSubalgebra::SetupE6_A2(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_2A1(GlobalVariables& theGlobalVariables)
@@ -15049,7 +15060,7 @@ void rootSubalgebra::SetupE6_2A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
 	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 void rootSubalgebra::SetupE6_A1(GlobalVariables& theGlobalVariables)
@@ -15057,7 +15068,7 @@ void rootSubalgebra::SetupE6_A1(GlobalVariables& theGlobalVariables)
 	this->genK.SetSizeExpandOnTopNoObjectInit(1);
 	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 }
 
 /////////////////////////////////////////////////////
@@ -15078,7 +15089,7 @@ void rootSubalgebra::RunE7_D6plusA1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
 	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15093,7 +15104,7 @@ void rootSubalgebra::RunE7_A2plusA5(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[5].InitFromIntegers(7, 1,1,2,3,2,1,0,0);
 	this->genK.TheObjects[6].InitFromIntegers(7, 0,1,0,0,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15108,7 +15119,7 @@ void rootSubalgebra::RunE7_2A3plusA1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,0,1,0);
 	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15123,7 +15134,7 @@ void rootSubalgebra::RunE7_A7(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,0,1,0);
 	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15138,7 +15149,7 @@ void rootSubalgebra::RunE7_D4plus3A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
 	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15153,7 +15164,7 @@ void rootSubalgebra::RunE7_7A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[5].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
 	this->genK.TheObjects[6].InitFromIntegers(7, 1,1,2,2,1,1,1,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15169,7 +15180,7 @@ void rootSubalgebra::RunE8_A8(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(true,theGlobalVariables);
 }
 
@@ -15185,7 +15196,7 @@ void rootSubalgebra::RunE8_D8(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15201,7 +15212,7 @@ void rootSubalgebra::RunE8_A1_A7(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15217,7 +15228,7 @@ void rootSubalgebra::RunE8_A5_A1_A2(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 2,3,4,6,5,4,3,1);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15233,7 +15244,7 @@ void rootSubalgebra::RunE8_2A4(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(true,theGlobalVariables);
 }
 
@@ -15249,7 +15260,7 @@ void rootSubalgebra::RunE8_4A2(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 2,3,4,6,5,4,3,1);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15265,7 +15276,7 @@ void rootSubalgebra::RunE8_A2_E6(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15281,7 +15292,7 @@ void rootSubalgebra::RunE8_A1_E7(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,1,1);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15297,7 +15308,7 @@ void rootSubalgebra::RunE8_D6_2A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 2,3,4,6,5,4,3,2);
 	this->genK.TheObjects[7].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15313,7 +15324,7 @@ void rootSubalgebra::RunE8_D5_A3(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,1,1);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15329,7 +15340,7 @@ void rootSubalgebra::RunE8_2D4(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,0,1,1);
 	this->genK.TheObjects[7].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15345,7 +15356,7 @@ void rootSubalgebra::RunE8_D4_4A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15361,7 +15372,7 @@ void rootSubalgebra::RunE8_2A3_2A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15377,7 +15388,7 @@ void rootSubalgebra::RunE8_8A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
 	this->genK.TheObjects[7].InitFromIntegers(8, 2,3,4,6,5,4,3,2);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15389,7 +15400,7 @@ void rootSubalgebra::RunF4_B4(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,0,1,0,0,0,0);
 	this->genK.TheObjects[3].InitFromIntegers(4, 2,2,1,0,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15401,7 +15412,7 @@ void rootSubalgebra::RunF4_A3_A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,0,1,0,0,0,0);
 	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,2,1,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15413,7 +15424,7 @@ void rootSubalgebra::RunF4_A2_A2(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,0,1,0,0,0,0);
 	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,1,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15425,7 +15436,7 @@ void rootSubalgebra::RunF4_C3_A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
 	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,2,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15437,7 +15448,7 @@ void rootSubalgebra::RunF4_D4(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(4, 0,2,1,0,0,0,0,0);
 	this->genK.TheObjects[3].InitFromIntegers(4, 2,2,1,0,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15449,7 +15460,7 @@ void rootSubalgebra::RunF4_B2_2A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
 	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,2,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15461,7 +15472,7 @@ void rootSubalgebra::RunF4_4A1(GlobalVariables& theGlobalVariables)
 	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
 	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,2,0,0,0,0);
 	this->ComputeAll();
-	this->ComputeDebugString();
+	this->ComputeDebugString(theGlobalVariables);
 	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
@@ -15470,7 +15481,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot
 { int theDimension = this->AmbientWeyl.KillingFormMatrix.NumRows;
 	std::stringstream out2;
 	std::stringstream out;
-	this->ComputeDebugString();
+	//this->ComputeDebugString(theGlobalVariables);
 	out2<<this->DebugString<<"\n";
 	MatrixLargeRational tempMat;
 	this->SimpleBasisK.rootsToMatrix(tempMat);
@@ -15850,7 +15861,7 @@ GeneratorPFAlgebraRecord::GeneratorPFAlgebraRecord()
 	this->Value = new IntegerPoly;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -16628,6 +16639,25 @@ void rootsWithMultiplicity::ElementToString(std::string &output)
 	output=out.str();
 }
 
+void coneRelation::RelationOneSideToStringCoordForm
+	(std::string& output,	ListBasicObjects<Rational>& coeffs,	roots& theRoots)
+{ std::stringstream out;
+  std::string tempS;
+  for (int i=0;i<theRoots.size;i++)
+	{	coeffs.TheObjects[i].ElementToString(tempS);
+		if (tempS=="1")	tempS="";
+		if (tempS=="-1") tempS="-";
+		assert(!(tempS=="0"));
+		out<< tempS;
+		theRoots.TheObjects[i].ElementToString(tempS);
+    out <<"("<<tempS<<")";
+    if (i!=theRoots.size-1)
+      out <<" + ";
+	}
+ 	output=out.str();
+}
+
+
 void coneRelation::RelationOneSideToString
   ( std::string& output, const std::string& letterType,
 		ListBasicObjects<Rational>& coeffs,
@@ -16880,6 +16910,9 @@ void coneRelations::AddRelationNoRepetition
 		if (input.theDiagramRelAndK.DebugString!="$E_6$")
 			return;
 	this->AddObjectOnTopHash(input);
+	if (this->flagIncludeCoordinateRepresentation)
+	{ 
+	}
 }
 
 void permutation::initPermutation(int n)
@@ -16916,6 +16949,15 @@ void permutation::GetPermutation(ListBasicObjects<int>& output)
     output.TheObjects[i]=i;
   for (int i=0;i<numElements;i++)
     MathRoutines::swap(output.TheObjects[i],output.TheObjects[i+this->Multiplicities.TheObjects[i]]);
+}
+
+void rootSubalgebras::ComputeKmodMultTables
+	(GlobalVariables& theGlobalVariables)
+{ for (int i=0;i<this->size;i++)
+	{ this->TheObjects[i].GenerateKmodMultTable
+			(	this->TheObjects[i].theMultTable,
+				this->TheObjects[i].theOppositeKmods,theGlobalVariables);
+	}
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations
@@ -17009,7 +17051,8 @@ void coneRelations::GetLatexHeaderAndFooter
 }
 
 void coneRelations::ElementToString
-	(std::string& output, rootSubalgebras& owners, bool useLatex)
+	(	std::string& output, rootSubalgebras& owners, bool useLatex, 
+		GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS, header, footer;
 	this->GetLatexHeaderAndFooter(header, footer);
@@ -17033,6 +17076,14 @@ void coneRelations::ElementToString
 		if (useLatex)
 			out <<"\\\\";
 		out<<"\n";
+		if (this->flagIncludeCoordinateRepresentation)
+		{ this->TheObjects[i].RelationOneSideToStringCoordForm
+				(tempS, this->TheObjects[i].AlphaCoeffs,this->TheObjects[i].Alphas);
+			out <<"\\multicolumn{3}{c}{"<<tempS;
+			this->TheObjects[i].RelationOneSideToStringCoordForm
+				(tempS, this->TheObjects[i].BetaCoeffs,this->TheObjects[i].Betas);
+			out <<"="<<tempS<<"}\\\\\n";
+		}
 		if (lineCounter>this->NumAllowedLatexLines)
 		{ out <<footer<< "\n\n\n"<<header;
 			lineCounter=0;
@@ -17040,6 +17091,10 @@ void coneRelations::ElementToString
 	}
 	if (useLatex)
 		out <<footer;
+	if (this->flagIncludeSubalgebraDataInDebugString)
+	{ owners.ElementToString(tempS,useLatex,theGlobalVariables);
+		out <<"\n\n\\newpage"<<tempS;
+	}
 	output=out.str();
 };
 

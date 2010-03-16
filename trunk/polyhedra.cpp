@@ -1060,10 +1060,14 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(7);
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=false;
+	this->theRootSubalgebras.flagComputeConeCondition=true;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=false;
+	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=false;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
+	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
@@ -11419,19 +11423,18 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 			this->RootsOfBorel.AddRoot(this->RootSystem.TheObjects[i]);
 }
 
-void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction,
-															hashedRoots& output, bool UseMinusRho)
+void WeylGroup::GenerateOrbit
+  (roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho)
 { static WeylGroup tempW;
-	this->GenerateOrbit(theRoots,RhoAction,output,false,tempW, UseMinusRho);
+	this->GenerateOrbit(theRoots,RhoAction,output,false,tempW, UseMinusRho,0);
 }
 
-void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
-															 hashedRoots& output,
-															 bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
-															 WeylGroup& outputSubset, bool UseMinusRho)
+void WeylGroup::GenerateOrbit
+  ( roots& theRoots, bool RhoAction,
+		hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
+		WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
 {	for (int i=0;i<theRoots.size;i++)
-	{ output.AddObjectOnTopHash(theRoots.TheObjects[i]);
-	}
+    output.AddObjectOnTopHash(theRoots.TheObjects[i]);
 	root currentRoot;
 	ElementWeylGroup tempEW;
 	if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
@@ -11445,13 +11448,13 @@ void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
 		{ tempEW=outputSubset.TheObjects[i];}
 		for (int j=0; j<this->KillingFormMatrix.NumRows;j++)
 		{	currentRoot=output.TheObjects[i];
-			if (this->flagAnErrorHasOcurredTimeToPanic)
-			{ currentRoot.ComputeDebugString();
-			}
+			//if (this->flagAnErrorHasOcurredTimeToPanic)
+			//{ currentRoot.ComputeDebugString();
+			//}
 			this->SimpleReflectionRoot(j,currentRoot,RhoAction, UseMinusRho);
-			if (this->flagAnErrorHasOcurredTimeToPanic)
-			{ currentRoot.ComputeDebugString();
-			}
+			//if (this->flagAnErrorHasOcurredTimeToPanic)
+			//{ currentRoot.ComputeDebugString();
+			//}
 			if (output.ContainsObjectHash(currentRoot)==-1)
 			{	output.AddObjectOnTopHash(currentRoot);
 				if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
@@ -11460,6 +11463,9 @@ void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction,
 					tempEW.PopIndexSwapWithLast(tempEW.size-1);
 				}
 			}
+			if (UpperLimitNumElements>0)
+        if (outputSubset.size>=UpperLimitNumElements)
+          return;
 		}
 	}
 }
@@ -11489,7 +11495,7 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator,
 	tempRoots.size=0;
 	tempRoots.AddRoot(ChamberIndicator);
 	this->GenerateOrbit(tempRoots,RhoAction,TheIndicatorsOrbit,
-											true,OrbitGeneratingSubset,false);
+											true,OrbitGeneratingSubset,false,0);
 	TheIndicatorsOrbit.ComputeDebugString();
 	roots TempTest;
 	root tempRoot;
@@ -11650,6 +11656,10 @@ void WeylGroup::MakeCn(int n)
 }
 
 void WeylGroup::ComputeWeylGroup()
+{ this->ComputeWeylGroup(0);
+}
+
+void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
 { this->ComputeRho();
 	this->ComputeDebugString();
 	roots tempRoots;
@@ -11657,7 +11667,7 @@ void WeylGroup::ComputeWeylGroup()
 	this->ClearTheObjects();
 	static hashedRoots tempRoots2;
 	tempRoots2.ClearTheObjects();
-	this->GenerateOrbit(tempRoots,false,tempRoots2,true,*this,false);
+	this->GenerateOrbit(tempRoots,false,tempRoots2,true,*this,false,UpperLimitNumElements);
 }
 
 void WeylGroup::ComputeDebugString()
@@ -14129,7 +14139,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 }
 
 bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-	(	Selection& targetSel, 
+	(	Selection& targetSel,
 		GlobalVariables& theGlobalVariables)
 {	if (!this->flagUsingActionsNormalizerCentralizerNilradical)
 		return true;
@@ -14160,7 +14170,7 @@ void rootSubalgebras::RaiseSelectionUntilApproval
 }
 
 void rootSubalgebras::ApplyOneGenerator
-	(	ListBasicObjects<int>& generator, Selection& targetSel, 
+	(	ListBasicObjects<int>& generator, Selection& targetSel,
 		GlobalVariables& theGlobalVariables)
 {	Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator;
 	tempSel.initNoMemoryAllocation();
@@ -14170,7 +14180,7 @@ void rootSubalgebras::ApplyOneGenerator
 }
 
 bool rootSubalgebras::ApproveSelAgainstOneGenerator
-	(	ListBasicObjects<int>& generator, 
+	(	ListBasicObjects<int>& generator,
 		Selection& targetSel, GlobalVariables& theGlobalVariables)
 {	Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator;
 	tempSel.initNoMemoryAllocation();
@@ -16963,7 +16973,7 @@ void coneRelations::AddRelationNoRepetition
 			return;
 	this->AddObjectOnTopHash(input);
 	if (this->flagIncludeCoordinateRepresentation)
-	{ 
+	{
 	}
 }
 
@@ -17103,7 +17113,7 @@ void coneRelations::GetLatexHeaderAndFooter
 }
 
 void coneRelations::ElementToString
-	(	std::string& output, rootSubalgebras& owners, bool useLatex, 
+	(	std::string& output, rootSubalgebras& owners, bool useLatex,
 		GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS, header, footer;

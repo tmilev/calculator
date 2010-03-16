@@ -5330,6 +5330,7 @@ public:
 	void MakeF4();
 	void MakeG2();
 	void ComputeWeylGroup();
+	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
 	void ComputeRootsOfBorel(roots& output);
 	void GenerateOrbitAlg(root& ChamberIndicator,
@@ -5339,10 +5340,10 @@ public:
 												Cone* LimitingCone, bool onlyLowerWeights);
 	void GenerateOrbit(	roots& theRoots, bool RhoAction,
 											hashedRoots& output, bool UseMinusRho);
-	void GenerateOrbit(	roots& theRoots, bool RhoAction,
-											hashedRoots& output,
-											bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
-											WeylGroup& outputSubset, bool UseMinusRho);
+	void GenerateOrbit
+    (	roots& theRoots, bool RhoAction, hashedRoots& output,
+      bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
+			WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
 	void GenerateRootSystemFromKillingFormMatrix();
 	void ActOnAffineHyperplaneByGroupElement
 		(	int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
@@ -5794,15 +5795,15 @@ public:
 	bool flagComputeConeCondition;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
 	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-		(	Selection& targetSel, 
+		(	Selection& targetSel,
 			GlobalVariables& theGlobalVariables);
 	bool ApproveSelAgainstOneGenerator
-		(	ListBasicObjects<int>& generator, 
+		(	ListBasicObjects<int>& generator,
 			Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void RaiseSelectionUntilApproval
-		(	Selection& targetSel, GlobalVariables& theGlobalVariables);		
+		(	Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void ApplyOneGenerator
-		(	ListBasicObjects<int>& generator, Selection& targetSel, 
+		(	ListBasicObjects<int>& generator, Selection& targetSel,
 			GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical
 		(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA);

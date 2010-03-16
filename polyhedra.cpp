@@ -1014,8 +1014,8 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_D5(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	tempSA.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);*/
+/*	tempSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	tempSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
@@ -1026,9 +1026,29 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_4A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	tempSA.SetupE6_D4(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.AddObjectOnTop(tempSA);*/
+	/*tempSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
+		Selection tempSel;
+	ListBasicObjects<Selection> tempSels;
+	tempSel.init(tempSA.kModules.size);
+	tempSels.AddObjectOnTop(tempSel);
+	tempSels.SetSizeExpandOnTopNoObjectInit(tempSA.kModules.size+1);
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
+		this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
+	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=false;
+	this->theRootSubalgebras.flagComputeConeCondition=false;
+	this->theRootSubalgebras.TheObjects[0].GenerateKmodMultTable
+		(	this->theRootSubalgebras.TheObjects[0].theMultTable,
+			this->theRootSubalgebras.TheObjects[0].theOppositeKmods,
+			*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.TheObjects[0].NumNilradicalsAllowed=0;
+	this->theRootSubalgebras.TheObjects[0].GeneratePossibleNilradicalsRecursive
+		(	*this->theGlobalVariablesContainer->Default(),
+			this->theRootSubalgebras.TheObjects[0].theMultTable,0,
+			tempSels,this->theRootSubalgebras.TheObjects[0].theOppositeKmods,
+			this->theRootSubalgebras,0);*/
+	/*
 	tempSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	tempSA.SetupE6_3A1(*this->theGlobalVariablesContainer->Default());
@@ -1040,7 +1060,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
+	this->theRootSubalgebras.AmbientWeyl.MakeEn(7);
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	this->theRootSubalgebras.flagComputeConeCondition=false;
@@ -13470,14 +13490,14 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 		this->theMultTable.ComputeDebugString(*this);
 	ListBasicObjects<Selection> impliedSelections;
 	impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
-	Selection tempSel;
+	Selection tempSel, emptySel;
 	tempSel.init(this->SimpleBasisCentralizerRoots.size);
+	emptySel.init(this->SimpleBasisCentralizerRoots.size);
 	int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 		this->ComputeDebugString(theGlobalVariables);
 	this->flagFirstRoundCounting=true;
 	this->NumTotalSubalgebras=0;
-	theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
 	for (int l=0;l<2;l++)
 	{	if (l==1 && !this->flagComputeConeCondition)
 			break;
@@ -13490,22 +13510,27 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 			for (int j=0;j<this->CentralizerRoots.size;j++)
 				if (this->rootIsInNilradicalParabolicCentralizer
 							(tempSel,this->CentralizerRoots.TheObjects[j]))
-				{	impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
-					tempRootsTest.AddObjectOnTop(this->CentralizerRoots.TheObjects[j]);
-				}
+					impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
+//			owner.ComputeActionNormalizerOfCentralizerIntersectNilradical
+//				(tempSel,*this);
+			owner.ComputeActionNormalizerOfCentralizerIntersectNilradical
+				(emptySel,*this);
+			theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
+			if (owner.flagUsingActionsNormalizerCentralizerNilradical)
+				owner.RaiseSelectionUntilApproval
+					(impliedSelections.TheObjects[0],theGlobalVariables);
+			std::string tempS; std::stringstream out;
+			for (int s=0;s<impliedSelections.TheObjects[0].CardinalitySelection;s++)
+			{	tempRootsTest.AddObjectOnTop
+					( this->kModules
+							.TheObjects[impliedSelections.TheObjects[0].elements[s]]
+								.TheObjects[0]);
+			}
+			tempS=out.str();
 			assert(this->RootsDefineASubalgebra(tempRootsTest));
 			if (this->flagAnErrorHasOccuredTimeToPanic)
 				tempSel.ComputeDebugString();
 			//impliedSelections.TheObjects[0].ComputeDebugString();
-			owner.ComputeActionNormalizerOfCentralizerIntersectNilradical
-				(tempSel,*this);
-			std::string tempS; std::stringstream out;
-			for (int s=0;s<owner.ActionsNormalizerCentralizerNilradical.size;s++)
-			{	for (int t=0;t<owner.ActionsNormalizerCentralizerNilradical.size;t++)
-					out << owner.ActionsNormalizerCentralizerNilradical.TheObjects[s].TheObjects[t]<<", ";
-				out<<"\n";
-			}
-			tempS=out.str();
 			this->GeneratePossibleNilradicalsRecursive
 				(	theGlobalVariables, this->theMultTable,this->CentralizerRoots.size,
 					impliedSelections, this->theOppositeKmods, owner, indexInOwner);
@@ -13631,7 +13656,7 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 		}
 	}
 	if (!owner.ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-				(originalSel,targetSel,theGlobalVariables))
+				(targetSel,theGlobalVariables))
 		return false;
 	return true;
 }
@@ -14104,21 +14129,48 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 }
 
 bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-	(	Selection& startSel, Selection& targetSel, 
+	(	Selection& targetSel, 
 		GlobalVariables& theGlobalVariables)
 {	if (!this->flagUsingActionsNormalizerCentralizerNilradical)
 		return true;
 	for (int i=0;i<this->ActionsNormalizerCentralizerNilradical.size;i++)
 	{	if (!this->ApproveSelAgainstOneGenerator
 					(	this->ActionsNormalizerCentralizerNilradical.TheObjects[i],
-						startSel,targetSel,theGlobalVariables))
+						targetSel,theGlobalVariables))
 			return false;
 	}
 	return true;
 }
 
+void rootSubalgebras::RaiseSelectionUntilApproval
+	(	Selection& targetSel, GlobalVariables& theGlobalVariables)
+{ bool raised=true;
+	while (raised)
+	{	raised=false;
+		for (int i=0;i<this->ActionsNormalizerCentralizerNilradical.size;i++)
+			if(!this->ApproveSelAgainstOneGenerator(
+					this->ActionsNormalizerCentralizerNilradical.TheObjects[i],targetSel,
+					theGlobalVariables))
+			{	this->ApplyOneGenerator
+					(	this->ActionsNormalizerCentralizerNilradical.TheObjects[i],
+						targetSel,theGlobalVariables);
+				raised=true;
+			}
+	}
+}
+
+void rootSubalgebras::ApplyOneGenerator
+	(	ListBasicObjects<int>& generator, Selection& targetSel, 
+		GlobalVariables& theGlobalVariables)
+{	Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator;
+	tempSel.initNoMemoryAllocation();
+	for (int i=0;i<targetSel.CardinalitySelection;i++)
+		tempSel.AddSelectionAppendNewIndex(generator.TheObjects[targetSel.elements[i]]);
+	targetSel.Assign(tempSel);
+}
+
 bool rootSubalgebras::ApproveSelAgainstOneGenerator
-	(	ListBasicObjects<int>& generator, Selection& startSel, 
+	(	ListBasicObjects<int>& generator, 
 		Selection& targetSel, GlobalVariables& theGlobalVariables)
 {	Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator;
 	tempSel.initNoMemoryAllocation();

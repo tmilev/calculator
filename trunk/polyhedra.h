@@ -5794,11 +5794,16 @@ public:
 	bool flagComputeConeCondition;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
 	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-		(	Selection& startSel, Selection& targetSel, 
+		(	Selection& targetSel, 
 			GlobalVariables& theGlobalVariables);
 	bool ApproveSelAgainstOneGenerator
-		(	ListBasicObjects<int>& generator, Selection& startSel, 
+		(	ListBasicObjects<int>& generator, 
 			Selection& targetSel, GlobalVariables& theGlobalVariables);
+	void RaiseSelectionUntilApproval
+		(	Selection& targetSel, GlobalVariables& theGlobalVariables);		
+	void ApplyOneGenerator
+		(	ListBasicObjects<int>& generator, Selection& targetSel, 
+			GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical
 		(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA);
 	void GenerateAllRootSubalgebrasUpToIsomorphism

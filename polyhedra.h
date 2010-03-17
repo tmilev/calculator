@@ -5888,7 +5888,6 @@ public:
 	bool flagDoneComputingPartialFractions;
 	bool flagComputingVectorPartitions;
 	bool ComputingChambers;
-	bool MakingCheckSumPFsplit;
 	bool flagDoingWeylGroupAction;
 	bool flagHavingStartingExpression;
 	bool flagDisplayingCombinatorialChambersTextData;
@@ -5959,6 +5958,8 @@ public:
 	static void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader);//format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
 	static void drawlineInOutputStreamBetweenTwoRoots
 		(	root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
+  static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
+  static void WeylGroupToHtml(WeylGroup&input);
 };
 
 class RandomCodeIDontWantToDelete

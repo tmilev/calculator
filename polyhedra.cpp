@@ -37,6 +37,13 @@
 
 #include "polyhedra.h"
 
+class htmlRoutines
+{
+public:
+  static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
+  static void WeylGroupToHtml(WeylGroup&input, std::fstream& output);
+};
+
 void outputTextDummy(std::string theOutput)
 {}
 
@@ -732,14 +739,50 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input)
 	}
 }
 
+void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input)
+{ std::fstream output;
+  std::string tempS;
+  tempS="/tmp/WeylGroup.html";
+  rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
+    (output, tempS, false,false);
+  output<< "<HTML><BODY>aaaaaaaaaaaaaaaaaaaaaa</BODY></HTML>";
+  output.close();
+}
+
+
 bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSetup& output)
 {	if (input.length()<2)
 		return false;
 	std::string tempS3;
 	tempS3=input;
 	tempS3.resize(7);
-	if (tempS3!="textDim")
-		return false;
+	bool InputDataOK=false;
+	if (tempS3=="textDim")
+    InputDataOK=true;
+  else
+    std::cout<< input;
+  if (tempS3=="textTyp")
+  {	CGIspecificRoutines::CivilizedStringTranslation(input);
+    std::cout<<input;
+    std::stringstream tempStream1;
+    tempStream1 << input;
+    std::string tempS; tempStream1.seekg(0);
+    char theType; int theDim;
+    tempStream1 >> tempS>>tempS>> theType;
+    tempStream1 >> tempS>> tempS>> theDim;
+    if (theType=='A'|| theType=='B' ||
+        theType=='C'|| theType=='D' ||
+        theType=='E'|| theType=='F' || theType=='G')
+      InputDataOK=true;
+    if (!InputDataOK)
+      return false;
+    output.theRootSubalgebras.AmbientWeyl.MakeArbitrary(theType,theDim);
+    CGIspecificRoutines::WeylGroupToHtml(output.theRootSubalgebras.AmbientWeyl);
+    return false;
+  }
+
+  if (!InputDataOK==true)
+    return false;
 //	std::cout<< input<<"\n";
 
 	CGIspecificRoutines::CivilizedStringTranslation(input);
@@ -786,7 +829,6 @@ ComputationSetup::ComputationSetup()
 	this->flagComputationInProgress=false;
 	this->flagComputationDone=true;
 	this->flagComputationInitialized=false;
-	this->MakingCheckSumPFsplit=false;
 	this->flagOneIncrementOnly=false;
 	this->flagFullChop=true;
 	this->flagHavingBeginEqnForLaTeXinStrings=true;
@@ -990,7 +1032,6 @@ void ComputationSetup::InitComputationSetup()
 		PolynomialOutputFormat::LatexMaxLineLength=95;
 		PolynomialOutputFormat::UsingLatexFormat=true;
 		RandomCodeIDontWantToDelete::SomeRandomTests2();
-		partFractions::flagUsingCheckSum=this->MakingCheckSumPFsplit;
 		this->flagDoneComputingPartialFractions=false;
 	//		this->theChambers.SliceTheEuclideanSpace
 	//													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
@@ -1084,7 +1125,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+/*	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theRootSubalgebras.theBadRelations.ComputeDebugString
@@ -1102,7 +1143,7 @@ void ComputationSetup::Run()
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
 	if (true)
-		return;
+		return;*/
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -9533,7 +9574,7 @@ void partFractions::initFromOtherPartFractions(partFractions& input, GlobalVaria
 void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 {	if (!this->flagUsingCheckSum)
 		return;
-	if (!this->flagDiscardingFractions)
+  if (!this->flagDiscardingFractions)
 	{	this->ComputeOneCheckSum(this->EndCheckSum,theGlobalVariables);
 	//partFraction::MakingConsistencyCheck=true;
 	/*if (partFraction::MakingConsistencyCheck)
@@ -9547,7 +9588,7 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 			this->EndCheckSum.ElementToString(tempS2);
 		}
 		assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
-#ifdef cgiLimitRAMuseNumPointersInListBasicObjects
+#ifdef CGIversionLimitRAMuse
 		if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum))
 		{ std::cout<< "Checksum partial fractions failed </BODY></HTML>";
 			std::exit(0);

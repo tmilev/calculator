@@ -70,7 +70,7 @@ int main(int argc, char **argv)
   fileHeaderHtml.close();
   BufferIO <<"\n<EndOfFile>";
   BufferIO.seekg(0);
-  fileout <<"#include<iostream>\n";
+  fileout <<"#include<sstream>\n";
   fileout <<"void static_html1(std::stringstream& output){\n";
   for (;;)
   { BufferIO.getline(buffer,5000);

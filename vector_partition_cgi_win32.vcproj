@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="vector_partition_cgi_win32.cgi"
-	ProjectGUID="{04A1EE40-C91C-4B98-8209-7BCD3017054A}"
-	RootNamespace="vector_partition_cgi_win32cgi"
+	Name="vector_partition_cgi_win32"
+	ProjectGUID="{0869D5CC-82DE-4304-9B14-DCF87BC2A488}"
+	RootNamespace="vector_partition_cgi_win32"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -60,7 +60,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\vector_partition_linux_cgi"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"

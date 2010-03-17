@@ -5524,14 +5524,14 @@ public:
 		(	std::string &output, rootSubalgebras& owners, bool useLatex,
 			bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
 	void RootsToScalarProductString
-		(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft, 
-			const std::string& letterTypeRight, 
+		(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft,
+			const std::string& letterTypeRight,
 			std::string& output, bool useLatex,
 			rootSubalgebra& owner);
 	void ComputeConnectedComponents
 		(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
 	void ComputeDebugString
-		(	rootSubalgebras& owner, bool includeScalarsProducts, 
+		(	rootSubalgebras& owner, bool includeScalarsProducts,
 			bool includeMixedScalarProducts)
 	{	this->ElementToString
 			(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
@@ -5830,10 +5830,10 @@ public:
 			GlobalVariables& theGlobalVariables)
 	{ std::stringstream out; std::string tempS;
 		this->DynkinTableToString(tempS);
-		out <<tempS<<"\n\n";
+		out <<tempS;
 		for (int i=0;i<this->size; i++)
 		{	this->TheObjects[i].ElementToString(tempS,useLatex,theGlobalVariables);
-			out << tempS;
+			out << tempS <<"\n\n";
 		}
 		output= out.str();
 	};
@@ -5963,14 +5963,14 @@ public:
 		(	const std::string& lineTypeName, int theDimension, std::string& stringColor,
 			int& lineCounter );
 	static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-	static bool ReadDataFromCGIinput(std::string& input, ComputationSetup& output);
-	static void CivilizedStringTranslation(std::string& input);
+	static bool ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
+	static void CivilizedStringTranslation(std::string& input, std::string& output);
 	static void MakeReportFromComputationSetup(ComputationSetup& input);
 	static void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader);//format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
 	static void drawlineInOutputStreamBetweenTwoRoots
 		(	root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
-  static void WeylGroupToHtml(WeylGroup&input);
+  static void WeylGroupToHtml(WeylGroup&input, std::string& path);
 };
 
 class RandomCodeIDontWantToDelete

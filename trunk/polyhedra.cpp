@@ -37,13 +37,6 @@
 
 #include "polyhedra.h"
 
-class htmlRoutines
-{
-public:
-  static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
-  static void WeylGroupToHtml(WeylGroup&input, std::fstream& output);
-};
-
 void outputTextDummy(std::string theOutput)
 {}
 
@@ -727,45 +720,57 @@ void CGIspecificRoutines::MakeABitmap(std::string& fileName, std::fstream& outpu
 	outputFileOpenWithPreparedHeader.close();
 }
 
-void CGIspecificRoutines::CivilizedStringTranslation(std::string& input)
-{	for (int i=0;i<(signed)input.length();i++)
-	{	if (input[i]=='&')
-			input[i]=' ';
-		if (input[i]=='=')
-		{	input.insert(i+1," ");
-			input.insert(i," ");
-			i+=2;
+void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::string& output)
+{ output.clear();
+  int oldindex=0;
+  int tempSize=(signed) input.size();
+  //std::cout << "   "<<tempSize <<" asdfdafadsfadsf";
+  //  return;
+  if (tempSize>1000)
+    return;
+  for (int i=0;i<tempSize;i++)
+	{	if (input[i]=='=')
+		{	for (int j=oldindex;j<i;j++)
+      {  if (input[j]=='&')
+          output.append(" ");
+        else
+          output.push_back(input.at(j));
+      }
+      oldindex=i+1;
+      output.append(" = ");
 		}
 	}
+	for (int j=oldindex;j<tempSize-1;j++)
+    output.push_back(input.at(j));
 }
 
-void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input)
+void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input, std::string& path)
 { std::fstream output;
   std::string tempS;
-  tempS="/tmp/WeylGroup.html";
   rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
-    (output, tempS, false,false);
+    (output, path, false,false);
   output<< "<HTML><BODY>aaaaaaaaaaaaaaaaaaaaaa</BODY></HTML>";
   output.close();
 }
 
 
-bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSetup& output)
-{	if (input.length()<2)
+bool CGIspecificRoutines::ReadDataFromCGIinput
+  (std::string& inputBad, ComputationSetup& output, std::string& thePath)
+{	if (inputBad.length()<2)
 		return false;
-	std::string tempS3;
-	tempS3=input;
+	std::string inputGood;
+  std::string tempS3;
+	tempS3=inputBad;
 	tempS3.resize(7);
 	bool InputDataOK=false;
 	if (tempS3=="textDim")
     InputDataOK=true;
-  else
-    std::cout<< input;
+  std::cout.flush();
   if (tempS3=="textTyp")
-  {	CGIspecificRoutines::CivilizedStringTranslation(input);
-    std::cout<<input;
+  { CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
+    std::cout<<inputGood;
     std::stringstream tempStream1;
-    tempStream1 << input;
+    tempStream1 << inputGood;
     std::string tempS; tempStream1.seekg(0);
     char theType; int theDim;
     tempStream1 >> tempS>>tempS>> theType;
@@ -777,7 +782,8 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
     if (!InputDataOK)
       return false;
     output.theRootSubalgebras.AmbientWeyl.MakeArbitrary(theType,theDim);
-    CGIspecificRoutines::WeylGroupToHtml(output.theRootSubalgebras.AmbientWeyl);
+    thePath.append("../htdocs/tmp/WeylHtml.html");
+    CGIspecificRoutines::WeylGroupToHtml(output.theRootSubalgebras.AmbientWeyl,thePath);
     return false;
   }
 
@@ -785,10 +791,9 @@ bool CGIspecificRoutines::ReadDataFromCGIinput(std::string& input, ComputationSe
     return false;
 //	std::cout<< input<<"\n";
 
-	CGIspecificRoutines::CivilizedStringTranslation(input);
-	//std::cout<<input;
+	CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
 	std::stringstream tempStream;
-	tempStream << input;
+	tempStream << inputGood;
 	std::string tempS; int tempI;	tempStream.seekg(0);
 	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
 	if (output.theChambers.AmbientDimension>20)
@@ -16882,14 +16887,14 @@ void coneRelation::ElementToString
 			(	this->Alphas,this->Betas,"\\alpha","\\beta",tempS,useLatex,
 				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
 		out << tempS;
-	}	
+	}
 	out <<"\n";
 	output=out.str();
 }
 
 void coneRelation::RootsToScalarProductString
-	(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft, 
-		const std::string& letterTypeRight, 
+	(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft,
+		const std::string& letterTypeRight,
 		std::string& output, bool useLatex,
 		rootSubalgebra& owner)
 { std::string tempS; std::stringstream out;

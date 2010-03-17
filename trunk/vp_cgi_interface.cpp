@@ -7,20 +7,20 @@ extern int GlobalPointerCounter;
 
 
 void getPath(char* path, std::string& output)
-{ int length=0;
-  if (path==0) return;
-  while (path[length]!=0)
-    length++;
+{ if (path==0) return;
+  int length=0;
   output= path;
+  while (output[length]!=0 && length<150)
+    length++;
   for (int i=length-1;i>=0;i--)
   {
 #ifdef WIN32
-		if (path[i]=='\\' )
+		if (output[i]=='\\' )
     { output.resize(i+1);
       return;
     }
 #else
-		if (path[i]=='/')
+		if (output[i]=='/')
     { output.resize(i+1);
       return;
     }
@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 	std::cin >> inputString;
 	//the below comment is for debug purposes when testing offline please dont delete it!
 	//inputString="textDim=3&textNumVectors=9&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=1&textCoord3=1&textCoord3=0&textCoord4=0&textCoord4=1&textCoord4=2&textCoord5=0&textCoord5=1&textCoord5=1&textCoord6=1&textCoord6=1&textCoord6=2&textCoord7=1&textCoord7=1&textCoord7=1&textCoord8=1&textCoord8=2&textCoord8=2&buttonGo=Go";
+	inputString="textType=E ";
 	std::cout << "Content-Type: text/html\n\n";
  // std::cout
   //std::cout <<  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
@@ -50,10 +51,11 @@ int main(int argc, char **argv)
   //return 0;
   //tempS= out.str();
   //std::cout<< tempS;
+  getPath(argv[0],tempS);
 
   ComputationSetup theComputationSetup;
   //std::cout<<inputString;
-  if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup))
+  if(::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup,tempS))
   //if (false)
   {	//std::cout<<"before computation setup";
   //	theComputationSetup.flagComputingPartialFractions=false;

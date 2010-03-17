@@ -4,6 +4,8 @@
 
 extern int GlobalPointerCounter;
 
+
+
 void getPath(char* path, std::string& output)
 { int length=0;
   if (path==0) return;
@@ -57,7 +59,6 @@ int main(int argc, char **argv)
   //	theComputationSetup.flagComputingPartialFractions=false;
 	//	std::cout <<"before Run!";
     theComputationSetup.Run();
-	  std::cout << "Computation Successfully completed";
 		//std::cout <<"Run ok!";
 		::CGIspecificRoutines::MakeReportFromComputationSetup(theComputationSetup);
   }

@@ -1125,7 +1125,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-/*	this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theRootSubalgebras.theBadRelations.ComputeDebugString
@@ -1143,7 +1143,7 @@ void ComputationSetup::Run()
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
 	if (true)
-		return;*/
+		return;
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -1944,7 +1944,14 @@ bool root::HasStronglyPerpendicularDecompositionWRT
 	if (theSet.size==0)
 		return false;
 	if (output.size==0)
-	{	output.MakeActualSizeAtLeastExpandOnTop(theSet.size);
+	{	if (theSet.ContainsObject(*this))
+		{ output.SetSizeExpandOnTopNoObjectInit(1);
+			output.LastObject()->Assign(*this);
+			outputCoeffs.SetSizeExpandOnTopNoObjectInit(1);
+			outputCoeffs.LastObject()->MakeOne();
+			return true;
+		}
+		output.MakeActualSizeAtLeastExpandOnTop(theSet.size);
 		outputCoeffs.MakeActualSizeAtLeastExpandOnTop(theSet.size);
 	}
 //	this->ComputeDebugString();
@@ -16827,7 +16834,7 @@ void coneRelation::RelationOneSideToString
 
 void coneRelation::ElementToString
 	(	std::string &output, rootSubalgebras& owners, bool useLatex,
-		bool includeScalarsProducts)
+		bool includeScalarsProductsEachSide, bool includeMixedScalarProducts )
 { std::string tempS;
 	std::stringstream out;
 	assert(this->AlphaCoeffs.size==this->Alphas.size);
@@ -16859,34 +16866,42 @@ void coneRelation::ElementToString
 	if (useLatex)
 		out <<" & ";
 	out << tempS;
-	if (includeScalarsProducts)
+	if (includeScalarsProductsEachSide)
 	{ out <<" & ";
 		this->RootsToScalarProductString
-			(	this->Alphas,"\\alpha",tempS,useLatex,
+			(	this->Alphas,this->Alphas,"\\alpha","\\alpha",tempS,useLatex,
 				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
 		out << tempS;
 		this->RootsToScalarProductString
-			(	this->Betas,"\\beta",tempS,useLatex,
+			(	this->Betas,this->Betas,"\\beta","\\beta",tempS,useLatex,
 				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
 		out <<" "<< tempS;
 	}
+	if (includeMixedScalarProducts)
+	{ this->RootsToScalarProductString
+			(	this->Alphas,this->Betas,"\\alpha","\\beta",tempS,useLatex,
+				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+		out << tempS;
+	}	
 	out <<tempS<<"\n";
 	output=out.str();
 }
 
 void coneRelation::RootsToScalarProductString
-	(	roots& input,const std::string& letterType, std::string& output, bool useLatex,
+	(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft, 
+		const std::string& letterTypeRight, 
+		std::string& output, bool useLatex,
 		rootSubalgebra& owner)
 { std::string tempS; std::stringstream out;
 	Rational tempRat;
-	for (int i=0;i<input.size;i++)
-		for(int j=i+1;j<input.size;j++)
+	for (int i=0;i<inputLeft.size;i++)
+		for(int j=i+1;j<inputRight.size;j++)
 		{ owner.AmbientWeyl.RootScalarKillingFormMatrixRoot
-				(input.TheObjects[i],input.TheObjects[j],tempRat);
+				(inputLeft.TheObjects[i],inputRight.TheObjects[j],tempRat);
 			if (!tempRat.IsEqualToZero())
 			{	tempRat.ElementToString(tempS);
-				out <<"$\\langle"<<letterType<<"_"<< i+1<<","
-						<<letterType<<"_"<<j+1<<"\\rangle="
+				out <<"$\\langle"<<letterTypeLeft<<"_"<< i+1<<","
+						<<letterTypeRight<<"_"<<j+1<<"\\rangle="
 						<<tempS<< "$, ";
 			}
 		}
@@ -17002,7 +17017,7 @@ bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebras& owners)
 
 void coneRelations::AddRelationNoRepetition
 	(coneRelation& input,rootSubalgebras& owners, int indexInRootSubalgebras)
-{ input.ComputeDebugString(owners,true);
+{ input.ComputeDebugString(owners,true,true);
 	int i=this->FitHashSize(input.HashFunction());
 	ListBasicObjects<int>& theIndices= this->TheHashedArrays[i];
 	for (int j=0;j<theIndices.size;j++)
@@ -17133,12 +17148,44 @@ void rootSubalgebras::initDynkinDiagramsNonDecided
 	this->numFoundBadDiagrams.initFillInObject(this->theBadDiagrams.size,0);
 }
 
+void rootSubalgebras::GetTableHeaderAndFooter
+	(std::string& outputHeader,std::string& outputFooter)
+{ std::stringstream out1,out2; std::string tempS;
+	out1 << "\n\n \\begin{tabular}{";
+	for (int i=0;i<this->NumColsPerTableLatex;i++)
+		out1 <<"c";
+	out1 <<"}\n";
+	out2 << "\\end{tabular}";
+	outputHeader=out1.str();
+	outputFooter=out2.str();
+}
+
 void rootSubalgebras::DynkinTableToString(std::string& output)
-{ std::stringstream out; std::string tempS;
-	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
-		out <<i<<":\n" << tempS<<"\n";
+{ std::stringstream out; std::string header, footer, tempS, tempS2;
+	this->GetTableHeaderAndFooter(header, footer);
+	int col=0; int row=0;
+	this->TheObjects[0].theDynkinDiagram.ElementToString(tempS);
+	out << "$\\mathfrak{g}$: "<< tempS <<"\n\n";
+	for (int i=1;i<this->size;i++)
+	{	if (col==0 && row==0)
+			out << header;
+		this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
+		this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
+		out << "$\\mathfrak{k}$: "<<tempS <<" $C(\\mathfrak{k})$: " << tempS2;
+		row=(i)/this->NumColsPerTableLatex;
+		col=(i)% this->NumColsPerTableLatex;
+		if (row==this->NumLinesPerTableLatex)
+			row=0;
+		if (col==0 && row!=0)
+			out <<"\\\\\n\\hline";
+		if (col!=0)
+			out <<" & ";
+		if (row==0 && col==0)
+			out <<footer;
 	}
+	if (!(col==0 && row==0))
+		out <<footer;
+	out <<"\n\n";
 	output=out.str();
 }
 
@@ -17174,7 +17221,7 @@ void coneRelations::ElementToString
 			}
 		}
 		this->TheObjects[i].ElementToString
-			(	tempS,owners,	useLatex,true);
+			(	tempS,owners,	useLatex,true,true);
 		out << tempS;
 		if (useLatex)
 			out <<"\\\\";

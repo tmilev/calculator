@@ -16883,7 +16883,7 @@ void coneRelation::ElementToString
 				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
 		out << tempS;
 	}	
-	out <<tempS<<"\n";
+	out <<"\n";
 	output=out.str();
 }
 

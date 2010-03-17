@@ -1136,7 +1136,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 {	if (!this->theComputationSetup.flagComputationDone)
 		return;
 	this->theComputationSetup.flagComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
-  this->theComputationSetup.MakingCheckSumPFsplit=this->CheckBox2CheckSums->GetValue();
+  this->theComputationSetup.thePartialFraction.flagUsingCheckSum=this->CheckBox2CheckSums->GetValue();
   this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
   bool tempBool = this->CheckBox8DoTheWeylGroup->GetValue();
   if(	!(this->theComputationSetup.flagDoingWeylGroupAction== tempBool))

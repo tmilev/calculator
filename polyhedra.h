@@ -5521,15 +5521,21 @@ public:
       ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,
 			bool useLatex, rootSubalgebra& owner);
 	void ElementToString
-		(	std::string& output, rootSubalgebras& owners, bool useLatex,
-			bool includeScalarsProducts);
+		(	std::string &output, rootSubalgebras& owners, bool useLatex,
+			bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
 	void RootsToScalarProductString
-		(	roots& input,const std::string& letterType, std::string& output, bool useLatex,
+		(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft, 
+			const std::string& letterTypeRight, 
+			std::string& output, bool useLatex,
 			rootSubalgebra& owner);
 	void ComputeConnectedComponents
 		(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
-	void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts)
-	{	this->ElementToString(this->DebugString,owner,true,includeScalarsProducts);};
+	void ComputeDebugString
+		(	rootSubalgebras& owner, bool includeScalarsProducts, 
+			bool includeMixedScalarProducts)
+	{	this->ElementToString
+			(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
+	};
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
 	void ComputeKComponents
@@ -5787,6 +5793,8 @@ public:
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	int NumSubalgebrasCounted;
+	int NumLinesPerTableLatex;
+	int NumColsPerTableLatex;
 	ListBasicObjects<std::string> theBadDiagrams;
 	ListBasicObjects<int> numFoundBadDiagrams;
 	WeylGroup AmbientWeyl;
@@ -5794,6 +5802,7 @@ public:
 	bool flagUsingActionsNormalizerCentralizerNilradical;
 	bool flagComputeConeCondition;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
+	void GetTableHeaderAndFooter(std::string& outputHeader,std::string& outputFooter);
 	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
 		(	Selection& targetSel,
 			GlobalVariables& theGlobalVariables);
@@ -5821,7 +5830,7 @@ public:
 			GlobalVariables& theGlobalVariables)
 	{ std::stringstream out; std::string tempS;
 		this->DynkinTableToString(tempS);
-		out <<tempS<<"\n";
+		out <<tempS<<"\n\n";
 		for (int i=0;i<this->size; i++)
 		{	this->TheObjects[i].ElementToString(tempS,useLatex,theGlobalVariables);
 			out << tempS;
@@ -5836,6 +5845,8 @@ public:
 	{	this->flagUseDynkinClassificationForIsomorphismComputation=false;
 		this->flagComputeConeCondition=true;
 		this->flagUsingActionsNormalizerCentralizerNilradical=true;
+		this->NumLinesPerTableLatex=20;
+		this->NumColsPerTableLatex=4;
 	};
 };
 

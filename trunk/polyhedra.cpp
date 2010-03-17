@@ -740,7 +740,7 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::st
       output.append(" = ");
 		}
 	}
-	for (int j=oldindex;j<tempSize-1;j++)
+	for (int j=oldindex;j<tempSize;j++)
     output.push_back(input.at(j));
 }
 
@@ -781,7 +781,7 @@ bool CGIspecificRoutines::ReadDataFromCGIinput
       InputDataOK=true;
     if (!InputDataOK)
       return false;
-    output.theRootSubalgebras.AmbientWeyl.MakeArbitrary(theType,theDim);
+//    output.theRootSubalgebras.AmbientWeyl.MakeArbitrary(theType,theDim);
     thePath.append("../htdocs/tmp/WeylHtml.html");
     CGIspecificRoutines::WeylGroupToHtml(output.theRootSubalgebras.AmbientWeyl,thePath);
     return false;

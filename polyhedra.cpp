@@ -780,16 +780,10 @@ void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input, std::string& path)
   output.close();
 }
 
-void CGIspecificRoutines::rootSubalgebrasToHtml
-  (GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path)
-{ std::fstream output;
-  std::string tempS;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
-    (output, path, false,false);
-  input.ComputeDebugString(false,true,theGlobalVariables);
-  output<< input.DebugString;
-  output.close();
-}
+//void CGIspecificRoutines::rootSubalgebrasToHtml
+ // (GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path)
+//{ input.ElementToHtml(path,theGlobalVariables);
+//}
 
 //outputs:
 //0 = default choice, computation needed
@@ -1169,7 +1163,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+/*	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theRootSubalgebras.theBadRelations.ComputeDebugString
@@ -1187,7 +1181,7 @@ void ComputationSetup::Run()
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
 	if (true)
-		return;
+		return;*/
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -14540,6 +14534,23 @@ bool rootSubalgebra::IsAnIsomorphism
 	return true;
 }
 
+void rootSubalgebra::ElementToHtml
+	(int index, std::string &path, GlobalVariables &theGlobalVariables)
+{	std::fstream output; std::string tempS;
+  std::string MyPath, childrenPath;
+  MyPath=path; childrenPath=path;
+  std::stringstream out;
+  out <<path <<"rootSA" <<index;
+  childrenPath=out.str();
+  out << ".html";
+  MyPath=out.str();
+	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
+    (output, MyPath, false,false);
+  this->ComputeDebugString(false,true,theGlobalVariables);
+  output<< this->DebugString;
+  output.close();
+}
+
 void rootSubalgebra::ElementToString
 	( std::string &output, bool makeALaTeXReport, bool useHtml,
     GlobalVariables& theGlobalVariables)
@@ -17215,37 +17226,138 @@ void rootSubalgebras::initDynkinDiagramsNonDecided
 }
 
 void rootSubalgebras::GetTableHeaderAndFooter
-	(std::string& outputHeader,std::string& outputFooter)
+	(	std::string& outputHeader,std::string& outputFooter, bool useLatex, 
+		bool useHtml)
 { std::stringstream out1,out2; std::string tempS;
-	out1 << "\n\n \\begin{tabular}{";
-	for (int i=0;i<this->NumColsPerTableLatex;i++)
-		out1 <<"c";
-	out1 <<"}\n";
-	out2 << "\\end{tabular}";
-	outputHeader=out1.str();
+	if (useHtml)
+	{ out1 <<"<table border=\"1\">\n <colgroup>";
+		for (int i=0;i<this->NumColsPerTableLatex;i++)
+		{ out1<<"<col width=\"80\">";
+		}  
+		out1<<"</colgroup><tr><td>";
+		out2 <<"</table>";
+	}
+	if (useLatex)
+	{	out1 << "\n\n \\begin{tabular}{";
+		for (int i=0;i<this->NumColsPerTableLatex;i++)
+			out1 <<"c";
+		out1 <<"}\n";
+		out2 << "\\end{tabular}";
+	}
 	outputFooter=out2.str();
+	outputHeader=out1.str();
 }
 
-void rootSubalgebras::DynkinTableToString(std::string& output)
-{ std::stringstream out; std::string header, footer, tempS, tempS2;
-	this->GetTableHeaderAndFooter(header, footer);
+void rootSubalgebras::ElementToHtml
+	(std::string& pathServer, std::string& pathPhysical, GlobalVariables& theGlobalVariables)
+{	std::fstream output; std::string tempS;
+  std::string MyPathPhysical, childrenPathPhysical;
+  std::string MyPathServer, childrenPathServer;
+  MyPathPhysical=pathPhysical; childrenPathPhysical=pathPhysical;
+  MyPathPhysical.append("rootHtml.html");
+  childrenPathPhysical.append("rootHtml_");
+	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
+    (output, MyPathPhysical, false,false);
+  this->ComputeDebugString(false,true,&childrenPathPhysical,theGlobalVariables);
+  output<< this->DebugString;
+  output.close();
+  for (int i=0;i<this->size;i++)
+  {	this->TheObjects[i].ElementToHtml(i,childrenPathPhysical,theGlobalVariables);
+  }
+}
+
+void rootSubalgebras::ElementToString
+	(	std::string& output, bool useLatex, bool useHtml,std::string* htmlPath,
+		GlobalVariables& theGlobalVariables)
+{ std::stringstream out; std::string tempS;
+	this->DynkinTableToString(useLatex, useHtml,htmlPath,tempS);
+	out <<tempS;
+	for (int i=0;i<this->size; i++)
+	{	this->TheObjects[i].ElementToString(tempS,useLatex,useHtml,theGlobalVariables);
+		out << tempS <<"\n\n";
+	}
+	output= out.str();
+};
+	
+void rootSubalgebras::pathToHtmlFileNameElements
+	(	int index, std::string* htmlPathServer, 
+		std::string& output, bool includeDotHtml)
+{	if (htmlPathServer==0)
+	{	output.clear();
+		return;
+	}
+	std::stringstream out;
+	out<< *htmlPathServer<< "rootSA"<<index;
+	if (includeDotHtml)
+		out <<".html";
+	output=out.str();
+}	
+
+void rootSubalgebras::pathToHtmlReference
+	(	int index,std::string& DisplayString, std::string* htmlPathServer,
+		std::string& output)
+{ if(htmlPathServer==0)
+	{ output.clear(); 
+		return;
+	}
+	std::stringstream out; std::string tempS;
+	this->pathToHtmlFileNameElements(index,htmlPathServer,tempS,true);
+	out << "<a href=\""<<tempS <<"\">"<<DisplayString<<"</a>";
+	output=out.str();
+}
+
+void rootSubalgebras::DynkinTableToString
+	(	bool useLatex, bool useHtml,std::string* htmlPath,
+		std::string& output)
+{ std::stringstream out; std::string header, footer, tempS, tempS2,tempS3;
+	this->GetTableHeaderAndFooter(header, footer,useLatex,useHtml);
 	int col=0; int row=0;
 	this->TheObjects[0].theDynkinDiagram.ElementToString(tempS);
-	out << "$\\mathfrak{g}$: "<< tempS <<"\n\n";
+	if (useLatex)
+		out << "$\\mathfrak{g}$: ";
+	else
+		out <<"g: ";
+	out << tempS <<"\n\n";
 	for (int i=1;i<this->size;i++)
 	{	if (col==0 && row==0)
 			out << header;
 		this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
 		this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
-		out << "$\\mathfrak{k}$: "<<tempS <<" $C(\\mathfrak{k})$: " << tempS2;
+		if (useLatex)
+			out << "$\\mathfrak{k}$: "<<tempS;
+		else 
+		{	out <<" k: ";
+			if (!useHtml)
+			{	out	<<tempS;
+			} else
+			{	this->pathToHtmlReference(i,tempS,htmlPath, tempS3);
+				out	<< tempS3;
+			}
+		}
+		if (useLatex)
+			out <<" $C(\\mathfrak{k})_{ss}$: ";
+		else
+			out <<" C(k)_{ss}: ";
+		out << tempS2;
 		row=(i)/this->NumColsPerTableLatex;
 		col=(i)% this->NumColsPerTableLatex;
 		if (row==this->NumLinesPerTableLatex)
 			row=0;
 		if (col==0 && row!=0)
-			out <<"\\\\\n\\hline";
+		{	if (useLatex)
+				out <<"\\\\\n\\hline";
+			if (useHtml)
+			{	out <<"</td></tr>";
+				if(i!=this->size-1)
+					out<< "<tr><td>";
+			}
+		}
 		if (col!=0)
-			out <<" & ";
+		{	if (useLatex)
+				out <<" & ";
+			if(useHtml)
+				out <<"</td><td>";
+		}
 		if (row==0 && col==0)
 			out <<footer;
 	}
@@ -17268,7 +17380,7 @@ void coneRelations::GetLatexHeaderAndFooter
 
 void coneRelations::ElementToString
 	(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml,
-		GlobalVariables& theGlobalVariables)
+		std::string* htmlPath, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS, header, footer;
 	this->GetLatexHeaderAndFooter(header, footer);
@@ -17312,7 +17424,7 @@ void coneRelations::ElementToString
 	if (useLatex)
 		out <<footer;
 	if (this->flagIncludeSubalgebraDataInDebugString)
-	{ owners.ElementToString(tempS,useLatex, useHtml,theGlobalVariables);
+	{ owners.ElementToString(tempS,useLatex, useHtml,htmlPath,theGlobalVariables);
 		out <<"\n\n\\newpage"<<tempS;
 	}
 	output=out.str();

@@ -5581,10 +5581,12 @@ public:
 	ListBasicObjects<std::string> CoordinateReps;
 	void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
 	void ElementToString
-		(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml,
-			GlobalVariables& theGlobalVariables);
-	void ComputeDebugString(rootSubalgebras& owners,GlobalVariables& theGlobalVariables)
-	{this->ElementToString(this->DebugString,owners,true,false,theGlobalVariables);};
+		(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, 
+			std::string* htmlPath, GlobalVariables& theGlobalVariables);
+	void ComputeDebugString(rootSubalgebras& owners,std::string* htmlPath,GlobalVariables& theGlobalVariables)
+	{	this->ElementToString
+			(this->DebugString,owners,true,false, htmlPath,theGlobalVariables);
+	};
 	void AddRelationNoRepetition
 		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
 	coneRelations()
@@ -5696,6 +5698,7 @@ public:
 			rootSubalgebras& owner, int indexInOwner);
 	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)
 		{this->ElementToString(output,false,false,theGlobalVariables);};
+	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
 	void ElementToString
 		(	std::string& output, bool makeALaTeXReport, bool useHtml,
 			GlobalVariables& theGlobalVariables);
@@ -5802,7 +5805,6 @@ public:
 	bool flagUsingActionsNormalizerCentralizerNilradical;
 	bool flagComputeConeCondition;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
-	void GetTableHeaderAndFooter(std::string& outputHeader,std::string& outputFooter);
 	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
 		(	Selection& targetSel,
 			GlobalVariables& theGlobalVariables);
@@ -5821,26 +5823,31 @@ public:
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
-	void DynkinTableToString(std::string& output);
+	void DynkinTableToString
+		(	bool useLatex, bool useHtml,std::string* htmlPathPhysical, 
+			std::string* htmlPathServer,std::string& output);
+	void GetTableHeaderAndFooter
+		(	std::string& outputHeader,std::string& outputFooter, bool useLatex, 
+			bool useHtml);
 	void SortDescendingOrderBySSRank();
 	void initDynkinDiagramsNonDecided
 		(WeylGroup& theWeylGroup);
+	void pathToHtmlFileNameElements
+		(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
+	void pathToHtmlReference
+		(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
+	void ElementToHtml
+		(	std::string& pathServer, std::string& pathPhysical,
+			GlobalVariables& theGlobalVariables);
 	void ElementToString
-		(	std::string& output, bool useLatex, bool useHtml,
-			GlobalVariables& theGlobalVariables)
-	{ std::stringstream out; std::string tempS;
-		this->DynkinTableToString(tempS);
-		out <<tempS;
-		for (int i=0;i<this->size; i++)
-		{	this->TheObjects[i].ElementToString(tempS,useLatex,useHtml,theGlobalVariables);
-			out << tempS <<"\n\n";
-		}
-		output= out.str();
-	};
-	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
+		(	std::string& output, bool useLatex, bool useHtml, std::string* htmlPath,
+			GlobalVariables& theGlobalVariables);
+	void ComputeLProhibitingRelations
+		(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString
-		(bool useLatex, bool useHtml,GlobalVariables& theGlobalVariables)
-	{	this->ElementToString(this->DebugString,useLatex, useHtml,theGlobalVariables);};
+		(	bool useLatex, bool useHtml, std::string* htmlPath,
+			GlobalVariables& theGlobalVariables)
+	{	this->ElementToString(this->DebugString,useLatex, useHtml,htmlPath,theGlobalVariables);};
 	rootSubalgebras()
 	{	this->flagUseDynkinClassificationForIsomorphismComputation=false;
 		this->flagComputeConeCondition=true;

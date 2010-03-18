@@ -744,20 +744,61 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::st
     output.push_back(input.at(j));
 }
 
+bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
+  (std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary)
+{ if (OpenInAppendMode)
+	{	if (openAsBinary)
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
+		else
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app);
+  } else
+  { if (openAsBinary)
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::binary);
+		else
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::trunc);
+  }
+  if(theFile.is_open())
+  { theFile.clear(std::ios::goodbit);// false);
+  	theFile.seekp(0,std::ios_base::end);
+		int tempI=theFile.tellp();
+		if (tempI>=1)
+		{	return true;
+		}
+  }
+	theFile.close();
+	theFile.open(theFileName.c_str(),std::fstream::out |std::fstream::in| std::fstream::trunc);
+	theFile.clear();
+	return false;
+}
+
 void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input, std::string& path)
 { std::fstream output;
   std::string tempS;
   rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
     (output, path, false,false);
-  output<< "<HTML><BODY>aaaaaaaaaaaaaaaaaaaaaa</BODY></HTML>";
+  output<< "<HTML><BODY>In preparation</BODY></HTML>";
   output.close();
 }
 
+void CGIspecificRoutines::rootSubalgebrasToHtml
+  (GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path)
+{ std::fstream output;
+  std::string tempS;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
+    (output, path, false,false);
+  input.ComputeDebugString(false,true,theGlobalVariables);
+  output<< input.DebugString;
+  output.close();
+}
 
-bool CGIspecificRoutines::ReadDataFromCGIinput
+//outputs:
+//0 = default choice, computation needed
+//1 = page not initialized fill in initial data
+//2 = Generate Dynkin tables
+int CGIspecificRoutines::ReadDataFromCGIinput
   (std::string& inputBad, ComputationSetup& output, std::string& thePath)
 {	if (inputBad.length()<2)
-		return false;
+		return 1;
 	std::string inputGood;
   std::string tempS3;
 	tempS3=inputBad;
@@ -766,29 +807,27 @@ bool CGIspecificRoutines::ReadDataFromCGIinput
 	if (tempS3=="textDim")
     InputDataOK=true;
   std::cout.flush();
+  std::cout <<"  tempS3: "<< tempS3<<"   ";
   if (tempS3=="textTyp")
   { CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
     std::cout<<inputGood;
     std::stringstream tempStream1;
     tempStream1 << inputGood;
     std::string tempS; tempStream1.seekg(0);
-    char theType; int theDim;
-    tempStream1 >> tempS>>tempS>> theType;
-    tempStream1 >> tempS>> tempS>> theDim;
-    if (theType=='A'|| theType=='B' ||
-        theType=='C'|| theType=='D' ||
-        theType=='E'|| theType=='F' || theType=='G')
+    tempStream1 >> tempS>>tempS>> output.WeylGroupLetter;
+    tempStream1 >> tempS>> tempS>> output.WeylGroupIndex;
+    if (output.WeylGroupLetter=='A'|| output.WeylGroupLetter=='B' ||
+        output.WeylGroupLetter=='C'|| output.WeylGroupLetter=='D' ||
+        output.WeylGroupLetter=='E'|| output.WeylGroupLetter=='F' ||
+        output.WeylGroupLetter=='G')
       InputDataOK=true;
     if (!InputDataOK)
-      return false;
-//    output.theRootSubalgebras.AmbientWeyl.MakeArbitrary(theType,theDim);
-    thePath.append("../htdocs/tmp/WeylHtml.html");
-    CGIspecificRoutines::WeylGroupToHtml(output.theRootSubalgebras.AmbientWeyl,thePath);
-    return false;
+      return 1;
+    return 2;
   }
 
   if (!InputDataOK==true)
-    return false;
+    return 1;
 //	std::cout<< input<<"\n";
 
 	CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
@@ -797,7 +836,7 @@ bool CGIspecificRoutines::ReadDataFromCGIinput
 	std::string tempS; int tempI;	tempStream.seekg(0);
 	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
 	if (output.theChambers.AmbientDimension>20)
-		return false;
+		return 1;
 	tempStream >> tempS>>tempS>> tempI;
 	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
 	std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
@@ -821,7 +860,7 @@ bool CGIspecificRoutines::ReadDataFromCGIinput
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[2].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[3].DebugString;
-	return true;
+	return 0;
 }
 
 ComputationSetup::ComputationSetup()
@@ -1106,10 +1145,10 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
+	this->theRootSubalgebras.AmbientWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=true;
+	this->theRootSubalgebras.flagComputeConeCondition=false;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=false;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
@@ -1117,9 +1156,9 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeLProhibitingRelations
+//	this->theRootSubalgebras.ComputeLProhibitingRelations
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
 void ComputationSetup::Run()
@@ -12874,7 +12913,7 @@ bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
   { if (openAsBinary)
 			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::binary);
 		else
-			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::trunc);
   }
   if(theFile.is_open())
   { theFile.clear(std::ios::goodbit);// false);
@@ -14502,61 +14541,76 @@ bool rootSubalgebra::IsAnIsomorphism
 }
 
 void rootSubalgebra::ElementToString
-	(std::string &output, bool makeALaTeXReport,GlobalVariables& theGlobalVariables)
+	( std::string &output, bool makeALaTeXReport, bool useHtml,
+    GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
 	int LatexLineCounter=0;
 	this->ElementToStringLaTeXHeaderModTable(latexHeader, latexFooter);
 	this->theDynkinDiagram.ElementToString(tempS);
-  out <<"\\noindent Semisimple type of $\\mathfrak{k}:$ "
+  if (makeALaTeXReport)
+    out <<"\\noindent";
+  out << " Semisimple type of $\\mathfrak{k}:$ "
       << tempS;
-  if (!makeALaTeXReport)
-    out<<"\nRank k: " <<this->SimpleBasisK.size;
-	this->SimpleBasisK.ElementToString(tempS,makeALaTeXReport);
-	out <<"\n\\noindent Simple basis: "<<tempS;
+  this->SimpleBasisK.ElementToString(tempS,makeALaTeXReport);
+  if (makeALaTeXReport)
+    out <<"\n\\noindent";
+	out <<" Simple basis: "<<tempS;
 	this->theCentralizerDiagram.ElementToString(tempS);
-	out<<"\n\n\\noindent  Type of centralizer of $\\mathfrak{k}$: " <<tempS<<"; simple basis centralizer: ";
+  if (makeALaTeXReport)
+    out <<"\n\n\\noindent ";
+	out<<"Type of centralizer of $\\mathfrak{k}$: " <<tempS<<"; simple basis centralizer: ";
 	this->SimpleBasisCentralizerRoots.ElementToString(tempS,makeALaTeXReport);
 	out <<tempS;
-	out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: "<<this->LowestWeightsGmodK.size;
+	if (makeALaTeXReport)
+    out <<"\n\n\\noindent ";
+	out << " Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: "<<this->LowestWeightsGmodK.size;
 	if (makeALaTeXReport)
     out << latexHeader;
+  if (useHtml)
+    out <<"<table>";
 	for (int i=0;i<this->kModules.size;i++)
 	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,makeALaTeXReport);
-    if (!makeALaTeXReport)
-      out << "\n\n Module ";
-    else
+    if (useHtml)
+      out <<"<tr><td>";
+    if (makeALaTeXReport)
       out <<"\\hline ";
     out<<i;
-    if (!makeALaTeXReport)
-      out << ": size: ";
-    else
+    if (useHtml)
+      out <<"</td><td>";
+    if (makeALaTeXReport)
       out <<" & ";
     out << this->kModules.TheObjects[i].size;
-    if (!makeALaTeXReport)
-      out << "; lowest weight: ";
-    else
+    if (useHtml)
+      out <<"</td><td>";
+    if (makeALaTeXReport)
       out <<" & ";
 		out << tempS;
 		this->HighestWeightsGmodK.TheObjects[i].ElementToString(tempS,makeALaTeXReport);
-    if (!makeALaTeXReport)
-      out << "; highest weight: ";
-    else
+    if (useHtml)
+      out <<"</td><td>";
+    if (makeALaTeXReport)
       out <<" & ";
 		out	<< tempS;
-		if (!makeALaTeXReport)
-      out	<< "; elements: ";
-    else
+    if (useHtml)
+      out <<"<table>";
+		if (makeALaTeXReport)
       out <<" & \n\\begin{tabular}{c}\n";
 		for (int j=0;j<this->kModules.TheObjects[i].size;j++)
 		{ this->kModules.TheObjects[i].TheObjects[j].ElementToString(tempS,makeALaTeXReport);
+      if (useHtml)
+        out <<"<tr>";
 			out	<<tempS;
 			if (j!=this->kModules.TheObjects[i].size)
         out<<", ";
+      if (useHtml)
+        out <<"</tr>";
       if (makeALaTeXReport)
         out<<"\\\\";
     }
+     if (useHtml)
+        out <<"</table>";
     if (makeALaTeXReport)
       out <<"\\end{tabular}\\\\\n";
     if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
@@ -14565,20 +14619,27 @@ void rootSubalgebra::ElementToString
     }
     if (i!=this->kModules.size-1)
     { LatexLineCounter+=this->kModules.TheObjects[i].size;
-      if (  (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) &&
-            (LatexLineCounter!=this->kModules.TheObjects[i].size))
-      { out <<latexFooter<<latexHeader;
-        LatexLineCounter=this->kModules.TheObjects[i].size;
+      if (makeALaTeXReport)
+      { if (  (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) &&
+              (LatexLineCounter!=this->kModules.TheObjects[i].size))
+        { out <<latexFooter<<latexHeader;
+          LatexLineCounter=this->kModules.TheObjects[i].size;
+        }
       }
     }
 	}
+	if (useHtml)
+    out <<"</table>";
 	if (makeALaTeXReport)
 		out<<latexFooter;
-	if (makeALaTeXReport && this->theMultTable.size==0 && this->kModules.size!=0)
+	if ((makeALaTeXReport|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
 		this->GenerateKmodMultTable
 			(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
 	if (this->theMultTable.size!=0)
-	{	out <<"\n\n\\noindent Pairing table:\n\n\\noindent";
+	{	if (useHtml)
+      out<< "\n\n\\noindent Pairing table:\n\n";
+	  if (makeALaTeXReport)
+      out <<"\n\n\\noindent Pairing table:\n\n\\noindent";
 		this->theMultTable.ElementToString(tempS,makeALaTeXReport,*this);
 		out << tempS <<"\n";
 	}
@@ -17206,7 +17267,7 @@ void coneRelations::GetLatexHeaderAndFooter
 }
 
 void coneRelations::ElementToString
-	(	std::string& output, rootSubalgebras& owners, bool useLatex,
+	(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml,
 		GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS, header, footer;
@@ -17224,6 +17285,10 @@ void coneRelations::ElementToString
 						<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString
 						<<"}\\\\\n";
 			}
+			//if (useHtml)
+			//{ out << "<table>" << "<tr>"<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString
+       //     <<"</tr>";
+      //}
 		}
 		this->TheObjects[i].ElementToString
 			(	tempS,owners,	useLatex,true,true);
@@ -17247,7 +17312,7 @@ void coneRelations::ElementToString
 	if (useLatex)
 		out <<footer;
 	if (this->flagIncludeSubalgebraDataInDebugString)
-	{ owners.ElementToString(tempS,useLatex,theGlobalVariables);
+	{ owners.ElementToString(tempS,useLatex, useHtml,theGlobalVariables);
 		out <<"\n\n\\newpage"<<tempS;
 	}
 	output=out.str();

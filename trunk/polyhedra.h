@@ -57,7 +57,7 @@
 #endif
 
 #ifdef CGIversionLimitRAMuse
-static const int cgiLimitRAMuseNumPointersInListBasicObjects=900000;
+static const int cgiLimitRAMuseNumPointersInListBasicObjects=9000000;
 #endif
 
 const int MaxRank=12;
@@ -5581,10 +5581,10 @@ public:
 	ListBasicObjects<std::string> CoordinateReps;
 	void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
 	void ElementToString
-		(	std::string& output, rootSubalgebras& owners, bool useLatex,
+		(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml,
 			GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(rootSubalgebras& owners,GlobalVariables& theGlobalVariables)
-	{this->ElementToString(this->DebugString,owners,true,theGlobalVariables);};
+	{this->ElementToString(this->DebugString,owners,true,false,theGlobalVariables);};
 	void AddRelationNoRepetition
 		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
 	coneRelations()
@@ -5674,8 +5674,8 @@ public:
 	void DoKRootsEnumerationRecursively
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
-	void ComputeDebugString(bool makeALaTeXReport,GlobalVariables& theGlobalVariables)
-		{this->ElementToString(this->DebugString,makeALaTeXReport,theGlobalVariables);};
+	void ComputeDebugString(bool makeALaTeXReport, bool useHtml,GlobalVariables& theGlobalVariables)
+		{this->ElementToString(this->DebugString,makeALaTeXReport,useHtml,theGlobalVariables);};
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
@@ -5695,9 +5695,9 @@ public:
 		(	GlobalVariables& theGlobalVariables,Selection& selKmods,
 			rootSubalgebras& owner, int indexInOwner);
 	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)
-		{this->ElementToString(output,false,theGlobalVariables);};
+		{this->ElementToString(output,false,false,theGlobalVariables);};
 	void ElementToString
-		(	std::string& output, bool makeALaTeXReport,
+		(	std::string& output, bool makeALaTeXReport, bool useHtml,
 			GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
 	void GenerateKmodMultTable
@@ -5826,21 +5826,21 @@ public:
 	void initDynkinDiagramsNonDecided
 		(WeylGroup& theWeylGroup);
 	void ElementToString
-		(	std::string& output, bool useLatex,
+		(	std::string& output, bool useLatex, bool useHtml,
 			GlobalVariables& theGlobalVariables)
 	{ std::stringstream out; std::string tempS;
 		this->DynkinTableToString(tempS);
 		out <<tempS;
 		for (int i=0;i<this->size; i++)
-		{	this->TheObjects[i].ElementToString(tempS,useLatex,theGlobalVariables);
+		{	this->TheObjects[i].ElementToString(tempS,useLatex,useHtml,theGlobalVariables);
 			out << tempS <<"\n\n";
 		}
 		output= out.str();
 	};
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString
-		(bool useLatex,GlobalVariables& theGlobalVariables)
-	{	this->ElementToString(this->DebugString,useLatex,theGlobalVariables);};
+		(bool useLatex, bool useHtml,GlobalVariables& theGlobalVariables)
+	{	this->ElementToString(this->DebugString,useLatex, useHtml,theGlobalVariables);};
 	rootSubalgebras()
 	{	this->flagUseDynkinClassificationForIsomorphismComputation=false;
 		this->flagComputeConeCondition=true;
@@ -5963,7 +5963,7 @@ public:
 		(	const std::string& lineTypeName, int theDimension, std::string& stringColor,
 			int& lineCounter );
 	static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-	static bool ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
+	static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
 	static void CivilizedStringTranslation(std::string& input, std::string& output);
 	static void MakeReportFromComputationSetup(ComputationSetup& input);
 	static void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader);//format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
@@ -5971,6 +5971,11 @@ public:
 		(	root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
+  static void rootSubalgebrasToHtml
+    (GlobalVariables& theGlobalVariables,rootSubalgebras& input, std::string& path);
+ 	static bool OpenDataFileOrCreateIfNotPresent
+		(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
+
 };
 
 class RandomCodeIDontWantToDelete

@@ -17,9 +17,9 @@ output <<" Num Vectors(<=9): <input type=\"text\" size=\"1\" name=\"textNumVecto
 output <<" <input type=\"submit\" name=\"buttonGo\" value=\"Go\">\n";
 output <<" </FORM>	\n";
 output <<" <FORM method=\"POST\" name=\"formRootSAs\" action=\"../cgi-bin/vector_partition_linux_cgi.cgi\">\n";
-output <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\">\n";
-output <<" Dimension: <input type=\"text\" size=\"1\" name=\"textRank\">\n";
-output <<" <input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\">\n";
+output <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n";
+output <<" Dimension: <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n";
+output <<" <input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n";
 output <<" </FORM>	\n";
 output <<" \n";
 output <<" <div style=\"width:400;height:400;border:solid 1px\" id=\"canvasMain\" onmouseup=\"clickCanvasMain(event.clientX, event.clientY);\"></div>\n";

@@ -774,7 +774,7 @@ bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
 void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input, std::string& path)
 { std::fstream output;
   std::string tempS;
-  rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
     (output, path, false,false);
   output<< "<HTML><BODY>In preparation</BODY></HTML>";
   output.close();
@@ -1139,19 +1139,20 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	this->theRootSubalgebras.AmbientWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
+	//this->theRootSubalgebras.AmbientWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
+	this->theRootSubalgebras.AmbientWeyl.MakeArbitrary('E',6);
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=false;
+	this->theRootSubalgebras.flagComputeConeCondition=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=false;
-	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-//	this->theRootSubalgebras.ComputeLProhibitingRelations
-//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	this->theRootSubalgebras.ComputeLProhibitingRelations
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -1163,7 +1164,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-/*	this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theRootSubalgebras.theBadRelations.ComputeDebugString
@@ -1181,7 +1182,7 @@ void ComputationSetup::Run()
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
 	if (true)
-		return;*/
+		return;
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -12779,12 +12780,14 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 	}
 	std::fstream KLDump;
 	std::fstream PartialFractionsFile;
-	bool KLDumpIsPresent =this->OpenDataFileOrCreateIfNotPresent(KLDump,this->KLCoeffFileString, false,false);
-  bool PFfileIsPresent=this->OpenDataFileOrCreateIfNotPresent
+	bool KLDumpIsPresent =this->OpenDataFileOrCreateIfNotPresent2
+    (KLDump,this->KLCoeffFileString, false,false);
+  bool PFfileIsPresent=this->OpenDataFileOrCreateIfNotPresent2
 		(PartialFractionsFile,this->PartialFractionsFileString,false,false);
-  bool VPIndexIsPresent= this->OpenDataFileOrCreateIfNotPresent
+  bool VPIndexIsPresent= this->OpenDataFileOrCreateIfNotPresent2
 		(partFractions::ComputedContributionsList,this->VPIndexFileString,false,false);
-	this->OpenDataFileOrCreateIfNotPresent(partFraction::TheBigDump,this->VPEntriesFileString,true,false);
+	this->OpenDataFileOrCreateIfNotPresent2
+    (partFraction::TheBigDump,this->VPEntriesFileString,true,false);
 	assert(partFraction::TheBigDump.is_open());
 	assert(KLDump.is_open());
 	assert(PartialFractionsFile.is_open());
@@ -12896,7 +12899,7 @@ bool rootFKFTcomputation::OpenDataFile
 	return false;
 }
 
-bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
+bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent2
 	(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary)
 { if (OpenInAppendMode)
 	{	if (openAsBinary)
@@ -12907,7 +12910,7 @@ bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent
   { if (openAsBinary)
 			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::binary);
 		else
-			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::trunc);
+			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
   }
   if(theFile.is_open())
   { theFile.clear(std::ios::goodbit);// false);
@@ -14549,7 +14552,7 @@ void rootSubalgebra::ElementToStringHeaderFooter
 		outputHeader.append("<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>roots</th></tr>");
 		outputFooter.append("</td></tr></table>");
 	}
-  if(useLatex) 
+  if(useLatex)
   {	outputHeader.append
 			("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
 		outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
@@ -14587,7 +14590,7 @@ void rootSubalgebra::ElementToString
 	if (makeALaTeXReport)
 		out<<"$C(\\mathfrak{k})_{ss}$: ";
 	if (useHtml)
-		out <<"C(k)_{ss}";	
+		out <<"C(k)_{ss}";
 	out	 <<tempS;
 	if (useHtml)
 		out <<"<br>\n simple basis centralizer: ";
@@ -14598,7 +14601,7 @@ void rootSubalgebra::ElementToString
 	if (useHtml)
 		out << "<br>\n Number g/k k-submodules: ";
 	if (makeALaTeXReport)
-    out <<"\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";    
+    out <<"\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
   out<<this->LowestWeightsGmodK.size ;
   if (useHtml)
 		out << "<br>\n";
@@ -16769,8 +16772,8 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool us
 				out <<"</th>";
       else
       {	if (i!=this->size-1)
-					out <<"&";    
-			}  
+					out <<"&";
+			}
     }
     if (useHtml)
 			out <<"</tr>";
@@ -16802,7 +16805,7 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool us
 					out<<"}";
 				if (j!=this->TheObjects[i].size-1)
           out <<" & ";
-      }			
+      }
       if (useHtml)
 				out <<"</td>";
 		}
@@ -17026,15 +17029,17 @@ void coneRelation::RootsToScalarProductString
 { std::string tempS; std::stringstream out;
 	Rational tempRat;
 	for (int i=0;i<inputLeft.size;i++)
-		for(int j=i+1;j<inputRight.size;j++)
-		{ owner.AmbientWeyl.RootScalarKillingFormMatrixRoot
-				(inputLeft.TheObjects[i],inputRight.TheObjects[j],tempRat);
-			if (!tempRat.IsEqualToZero())
-			{	tempRat.ElementToString(tempS);
-				out <<"$\\langle"<<letterTypeLeft<<"_"<< i+1<<","
-						<<letterTypeRight<<"_"<<j+1<<"\\rangle="
-						<<tempS<< "$, ";
-			}
+		for(int j=0;j<inputRight.size;j++)
+		{ if (!(letterTypeLeft==letterTypeRight && i==j))
+		  { owner.AmbientWeyl.RootScalarKillingFormMatrixRoot
+          (inputLeft.TheObjects[i],inputRight.TheObjects[j],tempRat);
+        if (!tempRat.IsEqualToZero())
+        {	tempRat.ElementToString(tempS);
+          out <<"$\\langle"<<letterTypeLeft<<"_"<< i+1<<","
+              <<letterTypeRight<<"_"<<j+1<<"\\rangle="
+              <<tempS<< "$, ";
+        }
+		  }
 		}
 	output= out.str();
 }
@@ -17280,14 +17285,14 @@ void rootSubalgebras::initDynkinDiagramsNonDecided
 }
 
 void rootSubalgebras::GetTableHeaderAndFooter
-	(	std::string& outputHeader,std::string& outputFooter, bool useLatex, 
+	(	std::string& outputHeader,std::string& outputFooter, bool useLatex,
 		bool useHtml)
 { std::stringstream out1,out2; std::string tempS;
 	if (useHtml)
 	{ out1 <<"<table border=\"1\">\n <colgroup>";
 		for (int i=0;i<this->NumColsPerTableLatex;i++)
 		{ out1<<"<col width=\"80\">";
-		}  
+		}
 		out1<<"</colgroup><tr><td>";
 		out2 <<"</table>";
 	}
@@ -17303,7 +17308,7 @@ void rootSubalgebras::GetTableHeaderAndFooter
 }
 
 void rootSubalgebras::ElementToHtml
-	(	std::string& pathPhysical,std::string& htmlPathServer, 
+	(	std::string& pathPhysical,std::string& htmlPathServer,
 		GlobalVariables& theGlobalVariables)
 {	std::fstream output; std::string tempS;
   std::string MyPathPhysical, childrenPathPhysical;
@@ -17334,9 +17339,9 @@ void rootSubalgebras::ElementToString
 	}
 	output= out.str();
 };
-	
+
 void rootSubalgebras::pathToHtmlFileNameElements
-	(	int index, std::string* htmlPathServer, 
+	(	int index, std::string* htmlPathServer,
 		std::string& output, bool includeDotHtml)
 {	if (htmlPathServer==0)
 	{	output.clear();
@@ -17347,13 +17352,13 @@ void rootSubalgebras::pathToHtmlFileNameElements
 	if (includeDotHtml)
 		out <<".html";
 	output=out.str();
-}	
+}
 
 void rootSubalgebras::pathToHtmlReference
 	(	int index,std::string& DisplayString, std::string* htmlPathServer,
 		std::string& output)
 { if(htmlPathServer==0)
-	{ output.clear(); 
+	{ output.clear();
 		return;
 	}
 	std::stringstream out; std::string tempS;
@@ -17363,7 +17368,7 @@ void rootSubalgebras::pathToHtmlReference
 }
 
 void rootSubalgebras::DynkinTableToString
-	(	bool useLatex, bool useHtml,std::string* htmlPathPhysical, 
+	(	bool useLatex, bool useHtml,std::string* htmlPathPhysical,
 		std::string* htmlPathServer,std::string& output)
 { std::stringstream out; std::string header, footer, tempS, tempS2,tempS3;
 	this->GetTableHeaderAndFooter(header, footer,useLatex,useHtml);
@@ -17381,7 +17386,7 @@ void rootSubalgebras::DynkinTableToString
 		this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
 		if (useLatex)
 			out << "$\\mathfrak{k}$: "<<tempS;
-		else 
+		else
 		{	out <<" k: ";
 			if (!useHtml)
 			{	out	<<tempS;
@@ -17435,7 +17440,7 @@ void coneRelations::GetLatexHeaderAndFooter
 }
 
 void coneRelations::ElementToString
-	(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, 
+	(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml,
 		std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS, header, footer;

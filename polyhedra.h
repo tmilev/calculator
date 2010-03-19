@@ -5387,7 +5387,7 @@ public:
 	~rootFKFTcomputation();
 	static bool OpenDataFile
 			(std::fstream& theFileOutput, std::string& theFileName);
-	static bool OpenDataFileOrCreateIfNotPresent
+	static bool OpenDataFileOrCreateIfNotPresent2
 			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
@@ -5581,7 +5581,7 @@ public:
 	ListBasicObjects<std::string> CoordinateReps;
 	void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
 	void ElementToString
-		(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, 
+		(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml,
 			std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString
 		(	rootSubalgebras& owners,std::string* htmlPathPhysical,
@@ -5589,6 +5589,10 @@ public:
 	{	this->ElementToString
 			(this->DebugString,owners,true,false, htmlPathPhysical,htmlPathServer,theGlobalVariables);
 	};
+	void ComputeDebugString
+    (	rootSubalgebras& owners,GlobalVariables& theGlobalVariables)
+  { this->ComputeDebugString(owners,0,0,theGlobalVariables);
+  };
 	void AddRelationNoRepetition
 		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
 	coneRelations()
@@ -5826,10 +5830,10 @@ public:
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
 	void DynkinTableToString
-		(	bool useLatex, bool useHtml,std::string* htmlPathPhysical, 
+		(	bool useLatex, bool useHtml,std::string* htmlPathPhysical,
 			std::string* htmlPathServer,std::string& output);
 	void GetTableHeaderAndFooter
-		(	std::string& outputHeader,std::string& outputFooter, bool useLatex, 
+		(	std::string& outputHeader,std::string& outputFooter, bool useLatex,
 			bool useHtml);
 	void SortDescendingOrderBySSRank();
 	void initDynkinDiagramsNonDecided

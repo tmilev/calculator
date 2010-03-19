@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	//					<< std::endl;
   //std::cout << "<html lang=\"en\" dir=\"LTR\">"<< std::endl;
   //std::stringstream out;
-  inputString="textType=A&textRank=4";
+  //inputString="textType=A&textRank=4";
   getPath(argv[0],inputPath);
   ComputationSetup theComputationSetup;
   int choice =::CGIspecificRoutines::ReadDataFromCGIinput
@@ -95,8 +95,7 @@ int main(int argc, char **argv)
       inputPath.append("../htdocs/tmp/");
       std::string serverPath="/tmp/";
       theComputationSetup.theRootSubalgebras.ElementToHtml
-        ( *theComputationSetup.theGlobalVariablesContainer->Default(),
-          theComputationSetup.theRootSubalgebras, inputPath);
+        ( inputPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
       std::cout <<"<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; "
                 <<"url=../tmp/rootHtml.html\"> <BODY>"<< inputPath;
     }

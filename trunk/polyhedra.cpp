@@ -14329,17 +14329,6 @@ void rootSubalgebra::ComputeDebugString(GlobalVariables& theGlobalVariables)
 { this->ElementToString(this->DebugString,theGlobalVariables);
 }
 
-void rootSubalgebra::ElementToStringLaTeXHeaderModTable(std::string& outputHeader,std::string&  outputFooter)
-{ outputHeader.clear();
-  outputHeader.append
-    ("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
-  outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
-  outputHeader.append ("id & size & $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-lowest weight&");
-  outputHeader.append(" $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-highest weight& elements\\\\");
-  outputFooter.clear();
-  outputFooter.append("\\hline \\end{tabular}");
-}
-
 int rootSubalgebra::ProblemCounter=0;
 bool rootSubalgebra::IsIsomorphicTo
 	(	rootSubalgebra& right, GlobalVariables& theGlobalVariables)
@@ -14551,6 +14540,25 @@ void rootSubalgebra::ElementToHtml
   output.close();
 }
 
+void rootSubalgebra::ElementToStringHeaderFooter
+	(std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml)
+{ outputHeader.clear();
+  outputFooter.clear();
+	if (useHtml)
+	{ outputHeader.append("g/k k-submodules<table border=\"1\">\n<tr><th>id</th><th>size</th>");
+		outputHeader.append("<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>roots</th></tr>");
+		outputFooter.append("</td></tr></table>");
+	}
+  if(useLatex) 
+  {	outputHeader.append
+			("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
+		outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
+		outputHeader.append ("id & size & $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-lowest weight&");
+		outputHeader.append(" $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-highest weight& elements\\\\");
+		outputFooter.append("\\hline \\end{tabular}");
+	}
+}
+
 void rootSubalgebra::ElementToString
 	( std::string &output, bool makeALaTeXReport, bool useHtml,
     GlobalVariables& theGlobalVariables)
@@ -14558,33 +14566,49 @@ void rootSubalgebra::ElementToString
 	std::string tempS;
 	std::string latexFooter, latexHeader;
 	int LatexLineCounter=0;
-	this->ElementToStringLaTeXHeaderModTable(latexHeader, latexFooter);
+	this->ElementToStringHeaderFooter(latexHeader, latexFooter, makeALaTeXReport, useHtml);
 	this->theDynkinDiagram.ElementToString(tempS);
   if (makeALaTeXReport)
-    out <<"\\noindent";
-  out << " Semisimple type of $\\mathfrak{k}:$ "
-      << tempS;
-  this->SimpleBasisK.ElementToString(tempS,makeALaTeXReport);
+    out <<"\\noindent Semisimple type of $\\mathfrak{k}:$ ";
+  else
+		out << "k: ";
+  out << tempS;
+  this->SimpleBasisK.ElementToString(tempS,true);
+  if (useHtml)
+		out <<"\n<br>\n";
   if (makeALaTeXReport)
     out <<"\n\\noindent";
 	out <<" Simple basis: "<<tempS;
 	this->theCentralizerDiagram.ElementToString(tempS);
   if (makeALaTeXReport)
     out <<"\n\n\\noindent ";
-	out<<"Type of centralizer of $\\mathfrak{k}$: " <<tempS<<"; simple basis centralizer: ";
-	this->SimpleBasisCentralizerRoots.ElementToString(tempS,makeALaTeXReport);
-	out <<tempS;
-	if (makeALaTeXReport)
-    out <<"\n\n\\noindent ";
-	out << " Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: "<<this->LowestWeightsGmodK.size;
-	if (makeALaTeXReport)
-    out << latexHeader;
   if (useHtml)
-    out <<"<table>";
+		out << "<br>\n";
+	if (makeALaTeXReport)
+		out<<"$C(\\mathfrak{k})_{ss}$: ";
+	if (useHtml)
+		out <<"C(k)_{ss}";	
+	out	 <<tempS;
+	if (useHtml)
+		out <<"<br>\n simple basis centralizer: ";
+	if (makeALaTeXReport)
+		out<<"; simple basis centralizer: ";
+	this->SimpleBasisCentralizerRoots.ElementToString(tempS,true);
+	out <<tempS;
+	if (useHtml)
+		out << "<br>\n Number g/k k-submodules: ";
+	if (makeALaTeXReport)
+    out <<"\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";    
+  out<<this->LowestWeightsGmodK.size ;
+  if (useHtml)
+		out << "<br>\n";
+  if (makeALaTeXReport)
+		out <<"\n\n";
+	out << latexHeader;
 	for (int i=0;i<this->kModules.size;i++)
 	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,makeALaTeXReport);
     if (useHtml)
-      out <<"<tr><td>";
+      out <<"\n<tr><td>";
     if (makeALaTeXReport)
       out <<"\\hline ";
     out<<i;
@@ -14605,23 +14629,23 @@ void rootSubalgebra::ElementToString
       out <<" & ";
 		out	<< tempS;
     if (useHtml)
-      out <<"<table>";
+      out <<"</td><td><table>";
 		if (makeALaTeXReport)
       out <<" & \n\\begin{tabular}{c}\n";
 		for (int j=0;j<this->kModules.TheObjects[i].size;j++)
-		{ this->kModules.TheObjects[i].TheObjects[j].ElementToString(tempS,makeALaTeXReport);
+		{ this->kModules.TheObjects[i].TheObjects[j].ElementToString(tempS,true);
       if (useHtml)
-        out <<"<tr>";
+        out <<"<tr><td>";
 			out	<<tempS;
 			if (j!=this->kModules.TheObjects[i].size)
         out<<", ";
       if (useHtml)
-        out <<"</tr>";
+        out <<"</td></tr>";
       if (makeALaTeXReport)
         out<<"\\\\";
     }
-     if (useHtml)
-        out <<"</table>";
+    if (useHtml)
+        out <<"</table></tr>";
     if (makeALaTeXReport)
       out <<"\\end{tabular}\\\\\n";
     if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
@@ -14648,10 +14672,10 @@ void rootSubalgebra::ElementToString
 			(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
 	if (this->theMultTable.size!=0)
 	{	if (useHtml)
-      out<< "\n\n\\noindent Pairing table:\n\n";
+      out<< "\n\n Pairing table:\n\n";
 	  if (makeALaTeXReport)
       out <<"\n\n\\noindent Pairing table:\n\n\\noindent";
-		this->theMultTable.ElementToString(tempS,makeALaTeXReport,*this);
+		this->theMultTable.ElementToString(tempS,makeALaTeXReport,useHtml,*this);
 		out << tempS <<"\n";
 	}
 	output=out.str();
@@ -16719,47 +16743,71 @@ void affineHyperplanes::ElementToString(std::string& output)
 }
 
 void multTableKmods::ElementToString(std::string& output, rootSubalgebra& owner)
-{ this->ElementToString(output,false,owner);
+{ this->ElementToString(output,false,false,owner);
 }
 
-void multTableKmods::ElementToString(std::string& output, bool useLaTeX, rootSubalgebra& owner)
+void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool useHtml, rootSubalgebra& owner)
 {	std::stringstream out;
 	out <<"\t";
-	if (!useLaTeX)
+	if (!(useLaTeX||useHtml))
     for (int i=0; i<this->size;i++)
       out << i<<"\t";
   else
-  { out <<"\\begin{tabular}{c|";
-    for (int i=0; i<this->size;i++)
-      out << "c";
-    out << "|} & ";
-    for (int i=0; i<this->size;i++)
-    { out << i;
-      if (i!=this->size-1)
-        out <<"&";
+  { if (useHtml)
+			out<<"<table><tr><th></th>";
+		if (useLaTeX)
+		{	out <<"\\begin{tabular}{c|";
+			for (int i=0; i<this->size;i++)
+				out << "c";
+			out << "|} & ";
     }
-    out<<"\\\\\\hline";
+    for (int i=0; i<this->size;i++)
+    { if (useHtml)
+				out <<"<th>";
+			out << i;
+      if (useHtml)
+				out <<"</th>";
+      else
+      {	if (i!=this->size-1)
+					out <<"&";    
+			}  
+    }
+    if (useHtml)
+			out <<"</tr>";
+    if (useLaTeX)
+			out<<"\\\\\\hline";
   }
 	for (int i=0; i<this->size;i++)
-	{ out <<"\n"<<i;
+	{ if (useHtml)
+			out <<"\n<tr><td>";
+		out <<"\n"<<i;
     if (useLaTeX)
       out<<" & ";
-    else
-      out <<"\t";
+		if (useHtml)
+			out <<"</td>";
 		for (int j=0;j<this->TheObjects[i].size;j++)
 		{	if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
-        out<<"\\multicolumn{1}{c|}{";
+			{	if(useLaTeX)
+					out<<"\\multicolumn{1}{c|}{";
+				if(useHtml)
+					out <<"<td rhs=\"1\">";
+      } else
+      {	if (useHtml)
+					out <<"<td>";
+      }
       for (int k=0;k<this->TheObjects[i].TheObjects[j].size;k++)
 				out << this->TheObjects[i].TheObjects[j].TheObjects[k] << ", ";
-			if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
-        out<<"}";
       if (useLaTeX )
-      { if (j!=this->TheObjects[i].size-1)
+      {	if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
+					out<<"}";
+				if (j!=this->TheObjects[i].size-1)
           out <<" & ";
-      }
-			else
-        out << "\t";
+      }			
+      if (useHtml)
+				out <<"</td>";
 		}
+		if (useHtml)
+			out <<"</tr>";
 		if (useLaTeX)
     { out <<"\\\\";
       if (i==owner.CentralizerRoots.size-1)
@@ -16768,16 +16816,22 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, rootSub
 	}
   if (useLaTeX)
     out << "\n\\hline opposite & ";
-  else
-    out << "\t";
+  if(useHtml)
+    out << "<tr><td>opposite</td>";
   for (int i=0;i<owner.theOppositeKmods.size;i++)
-  { out << i<<"/"<< owner.theOppositeKmods.TheObjects[i];
-    if (i!=owner.theOppositeKmods.size-1)
-    { if (useLaTeX)
-        out<<" & ";
-      else
-        out <<"\t";
-    }
+  { if (useHtml)
+			out <<"<td>";
+		out << i<<"/"<< owner.theOppositeKmods.TheObjects[i];
+    if (useHtml)
+			out <<"</td>";
+    if (useLaTeX)
+		{	if (i!=owner.theOppositeKmods.size-1)
+			{ if (useLaTeX)
+					out<<" & ";
+				else
+					out <<"\t";
+			}
+		}
   }
 	if (useLaTeX)
     out <<"\n\\end{tabular}";
@@ -17249,16 +17303,18 @@ void rootSubalgebras::GetTableHeaderAndFooter
 }
 
 void rootSubalgebras::ElementToHtml
-	(std::string& pathServer, std::string& pathPhysical, GlobalVariables& theGlobalVariables)
+	(	std::string& pathPhysical,std::string& htmlPathServer, 
+		GlobalVariables& theGlobalVariables)
 {	std::fstream output; std::string tempS;
   std::string MyPathPhysical, childrenPathPhysical;
   std::string MyPathServer, childrenPathServer;
   MyPathPhysical=pathPhysical; childrenPathPhysical=pathPhysical;
-  MyPathPhysical.append("rootHtml.html");
-  childrenPathPhysical.append("rootHtml_");
+  MyPathServer=htmlPathServer; childrenPathServer= htmlPathServer;
+  MyPathPhysical.append("rootHtml.html"); MyPathServer.append("rootHtml.html");
+  childrenPathPhysical.append("rootHtml_");childrenPathServer.append("rootHtml_");
 	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
     (output, MyPathPhysical, false,false);
-  this->ComputeDebugString(false,true,&childrenPathPhysical,theGlobalVariables);
+  this->ComputeDebugString(false,true,&childrenPathPhysical,&childrenPathServer,theGlobalVariables);
   output<< this->DebugString;
   output.close();
   for (int i=0;i<this->size;i++)
@@ -17267,10 +17323,10 @@ void rootSubalgebras::ElementToHtml
 }
 
 void rootSubalgebras::ElementToString
-	(	std::string& output, bool useLatex, bool useHtml,std::string* htmlPath,
-		GlobalVariables& theGlobalVariables)
+	(	std::string& output, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
+		std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
-	this->DynkinTableToString(useLatex, useHtml,htmlPath,tempS);
+	this->DynkinTableToString(useLatex, useHtml,htmlPathPhysical,htmlPathServer,tempS);
 	out <<tempS;
 	for (int i=0;i<this->size; i++)
 	{	this->TheObjects[i].ElementToString(tempS,useLatex,useHtml,theGlobalVariables);
@@ -17307,8 +17363,8 @@ void rootSubalgebras::pathToHtmlReference
 }
 
 void rootSubalgebras::DynkinTableToString
-	(	bool useLatex, bool useHtml,std::string* htmlPath,
-		std::string& output)
+	(	bool useLatex, bool useHtml,std::string* htmlPathPhysical, 
+		std::string* htmlPathServer,std::string& output)
 { std::stringstream out; std::string header, footer, tempS, tempS2,tempS3;
 	this->GetTableHeaderAndFooter(header, footer,useLatex,useHtml);
 	int col=0; int row=0;
@@ -17330,7 +17386,7 @@ void rootSubalgebras::DynkinTableToString
 			if (!useHtml)
 			{	out	<<tempS;
 			} else
-			{	this->pathToHtmlReference(i,tempS,htmlPath, tempS3);
+			{	this->pathToHtmlReference(i,tempS,htmlPathServer, tempS3);
 				out	<< tempS3;
 			}
 		}
@@ -17379,8 +17435,8 @@ void coneRelations::GetLatexHeaderAndFooter
 }
 
 void coneRelations::ElementToString
-	(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml,
-		std::string* htmlPath, GlobalVariables& theGlobalVariables)
+	(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, 
+		std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS, header, footer;
 	this->GetLatexHeaderAndFooter(header, footer);
@@ -17424,7 +17480,8 @@ void coneRelations::ElementToString
 	if (useLatex)
 		out <<footer;
 	if (this->flagIncludeSubalgebraDataInDebugString)
-	{ owners.ElementToString(tempS,useLatex, useHtml,htmlPath,theGlobalVariables);
+	{ owners.ElementToString
+			(tempS,useLatex, useHtml,htmlPathPhysical, htmlPathServer,theGlobalVariables);
 		out <<"\n\n\\newpage"<<tempS;
 	}
 	output=out.str();

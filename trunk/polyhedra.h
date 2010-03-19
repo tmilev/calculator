@@ -5458,7 +5458,7 @@ class multTableKmods : public ListBasicObjects<ListBasicObjects <ListBasicObject
 public:
 	std::string DebugString;
 	void ElementToString(std::string& output, rootSubalgebra& owner);
-	void ElementToString(std::string& output, bool useLaTeX, rootSubalgebra& owner);
+	void ElementToString(std::string& output, bool useLaTeX, bool useHtml, rootSubalgebra& owner);
 	void ComputeDebugString(rootSubalgebra& owner)
 	{	this->ElementToString(this->DebugString,owner);
 	};
@@ -5582,10 +5582,12 @@ public:
 	void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
 	void ElementToString
 		(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, 
-			std::string* htmlPath, GlobalVariables& theGlobalVariables);
-	void ComputeDebugString(rootSubalgebras& owners,std::string* htmlPath,GlobalVariables& theGlobalVariables)
+			std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
+	void ComputeDebugString
+		(	rootSubalgebras& owners,std::string* htmlPathPhysical,
+			std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 	{	this->ElementToString
-			(this->DebugString,owners,true,false, htmlPath,theGlobalVariables);
+			(this->DebugString,owners,true,false, htmlPathPhysical,htmlPathServer,theGlobalVariables);
 	};
 	void AddRelationNoRepetition
 		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
@@ -5617,6 +5619,7 @@ public:
 	bool flagFirstRoundCounting;
 	bool flagComputeConeCondition;
 	bool flagMakingProgressReport;
+	bool flagAnErrorHasOccuredTimeToPanic;
 	static int ProblemCounter;
 	static int ProblemCounter2;
 	::multTableKmods theMultTable;
@@ -5639,11 +5642,6 @@ public:
 	roots TestedRootsAlpha;
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
-	void MakeProgressReportPossibleNilradicalComputation
-		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
-	bool flagAnErrorHasOccuredTimeToPanic;
-	void ElementToStringLaTeXHeaderModTable
-		(std::string& outputHeader,std::string&  outputFooter);
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
 	ListBasicObjects<Selection> theKEnumerations;
@@ -5675,6 +5673,8 @@ public:
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void DoKRootsEnumerationRecursively
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
+	void MakeProgressReportPossibleNilradicalComputation
+		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(bool makeALaTeXReport, bool useHtml,GlobalVariables& theGlobalVariables)
 		{this->ElementToString(this->DebugString,makeALaTeXReport,useHtml,theGlobalVariables);};
@@ -5696,8 +5696,10 @@ public:
 	void PossibleNilradicalComputation
 		(	GlobalVariables& theGlobalVariables,Selection& selKmods,
 			rootSubalgebras& owner, int indexInOwner);
+	void ElementToStringHeaderFooter
+		(std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)
-		{this->ElementToString(output,false,false,theGlobalVariables);};
+	{this->ElementToString(output,false,false,theGlobalVariables);};
 	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
 	void ElementToString
 		(	std::string& output, bool makeALaTeXReport, bool useHtml,
@@ -5837,17 +5839,19 @@ public:
 	void pathToHtmlReference
 		(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
 	void ElementToHtml
-		(	std::string& pathServer, std::string& pathPhysical,
+		(	std::string& pathPhysical,std::string& htmlPathServer,
 			GlobalVariables& theGlobalVariables);
 	void ElementToString
-		(	std::string& output, bool useLatex, bool useHtml, std::string* htmlPath,
-			GlobalVariables& theGlobalVariables);
+		(	std::string& output, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
+			std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations
 		(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString
-		(	bool useLatex, bool useHtml, std::string* htmlPath,
-			GlobalVariables& theGlobalVariables)
-	{	this->ElementToString(this->DebugString,useLatex, useHtml,htmlPath,theGlobalVariables);};
+		(	bool useLatex, bool useHtml, std::string* htmlPathPhysical,
+			std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+	{	this->ElementToString
+			(this->DebugString,useLatex, useHtml,htmlPathPhysical,htmlPathServer,theGlobalVariables);
+	};
 	rootSubalgebras()
 	{	this->flagUseDynkinClassificationForIsomorphismComputation=false;
 		this->flagComputeConeCondition=true;

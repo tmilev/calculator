@@ -40,7 +40,6 @@
 #include <assert.h>
 #include <sstream>
 //#include <cstring>
-
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -420,6 +419,7 @@ public:
 	void PopIndexShiftUp(int index);
 	void PopIndexShiftDown(int index);
 	void PopIndexSwapWithLast(int index);
+	void PopLastObject();
 	void PopFirstOccurenceObjectSwapWithLast(Object& o);
 	void SwapTwoIndices(int index1, int index2);
 	void ElementToStringGeneric(std::string& output);
@@ -477,6 +477,7 @@ private:
 	bool ContainsObject(const Object& o);
 	void ReverseOrderElements();
 	void ShiftUpExpandOnTop(int StartingIndex);
+	void PopLastObject();
 protected:
 	friend class partFractions;
 	friend class QuasiMonomial;
@@ -496,7 +497,8 @@ public:
 	//the below returns -1 if it doesn't contain the object,
 	//else returns the object's index
 	void SwapTwoIndicesHash(int i1, int i2);
-	int ContainsObjectHash(Object& o);
+	inline bool ContainsObjectHash(Object& o) {return this->IndexOfObjectHash(o)!=-1;};
+	int IndexOfObjectHash(Object& o);
 	void SetHashSize(int HS);
 	int SizeWithoutObjects();
 	HashedListBasicObjects();
@@ -717,6 +719,7 @@ public:
 	void ScaleToIntegralForMinRationalHeightNoSignChange();
 	void ComputeDebugString();
 	void MultiplyByLargeRational(Rational& x);
+	void DivideByRational(Rational& x);
 	static bool SystemLinearInequalitiesHasSolution
 		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
 			MatrixLargeRational& outputPoint);
@@ -1405,6 +1408,7 @@ public:
 	static int gcdSigned(int a, int b){if (a<0) {a*=-1;} if (b<0){b*=-1;} return Rational::gcd(a,b);};
 	inline void operator =(const Rational& right){this->Assign(right);};
 	inline bool operator ==(const Rational& right){return this->IsEqualTo(right);};
+	inline void operator = (int right){this->AssignInteger(right);};
 };
 
 class root :public ListBasicObjectsLight<Rational>
@@ -1433,6 +1437,7 @@ public:
 	void DivByInteger(int a);
 	void DivByLargeInt(LargeInt& a);
 	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
+	void GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariables& theGlobalVariables);
 	inline void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
 	void MakeNormalInProjectivizationFromPointAndNormal(root& point, root& normal);
 	bool MakeAffineProjectionFromNormal(affineHyperplane& output);
@@ -1443,6 +1448,7 @@ public:
 		ListBasicObjects<Rational>& outputCoeffs);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
+	void ElementToStringEpsilonForm(std::string& output);
 	void ElementToString(std::string& output, bool useLaTeX);
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
 	void ScaleToIntegralMinHeight();
@@ -1484,6 +1490,7 @@ public:
 	};
 	bool IsGreaterThanOrEqualTo(root& r);
 	bool IsEqualTo(const root& right);
+	bool IsStronglyPerpendicularTo(root& right, WeylGroup& theWeyl);
 	static void RootScalarEuclideanRoot(const root& r1, const root& r2, Rational& output);
 	static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, Rational& output);
 //	static void RootScalarRoot(root& r1, root& r2, MatrixIntTightMemoryFit& KillingForm, Rational& output);
@@ -1918,6 +1925,15 @@ void ListBasicObjects<Object>::PopIndexSwapWithLast(int index)
 }
 
 template <class Object>
+void ListBasicObjects<Object>::PopLastObject()
+{	if (this->size==0)
+		return;
+	this->size--;
+}
+
+
+
+template <class Object>
 ListBasicObjects<Object>::ListBasicObjects()
 {	this->ActualSize=0;
 	this->IndexOfVirtualZero=0;
@@ -2090,7 +2106,7 @@ void HashedListBasicObjects<Object>::initHash()
 }
 
 template <class Object>
-int HashedListBasicObjects<Object>::ContainsObjectHash(Object &o)
+int HashedListBasicObjects<Object>::IndexOfObjectHash(Object &o)
 {	int hashIndex = o.HashFunction()%this->HashSize;
 	if (hashIndex<0){hashIndex+=this->HashSize;}
 	for (int i=0;i<this->TheHashedArrays[hashIndex].size;i++)
@@ -2111,7 +2127,7 @@ void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
 
 template <class Object>
 void HashedListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object &o)
-{ if (this->ContainsObjectHash(o)!=-1)
+{ if (this->IndexOfObjectHash(o)!=-1)
 		return;
 	this->AddObjectOnTopHash(o);
 }
@@ -2293,6 +2309,7 @@ public:
 	void ComputeDebugString();
 	void Average(root& output, int Number, int theDimension);
 	void ResetCounters();
+	void CollectionToRoots(roots& output);
 	~rootsCollection(){};
 };
 
@@ -3002,7 +3019,7 @@ int MonomialInCommutativeAlgebra
 			GeneratorsOfAlgebra,
 			GeneratorsOfAlgebraRecord>::MultiplyByGenerator
   (GeneratorsOfAlgebra& g)
-{	int x = this->ContainsObjectHash(g);
+{	int x = this->IndexOfObjectHash(g);
   if (x==-1)
   { this->AddObjectOnTopHash(g);
   }
@@ -3039,7 +3056,7 @@ int MonomialInCommutativeAlgebra
 			GeneratorsOfAlgebraRecord>::MultiplyByGenerator
 			(GeneratorsOfAlgebraRecord& g, int Power)
 { static ::GeneratorsPartialFractionAlgebra tempG;
-	tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.ContainsObjectHash(g);
+	tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.IndexOfObjectHash(g);
 	if (tempG.GeneratorIndex==-1)
 	{ GeneratorsOfAlgebra::theGenerators.AddObjectOnTopHash(g);
 		tempG.GeneratorIndex= GeneratorsOfAlgebra::theGenerators.size-1;
@@ -3856,7 +3873,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 inline int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::HasSameExponentMonomial(TemplateMonomial& m)
-{ return this->ContainsObjectHash(m);
+{ return this->IndexOfObjectHash(m);
 }
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
@@ -4090,7 +4107,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddMonomial(TemplateMonomial& m)
-{	int j= this->ContainsObjectHash(m);
+{	int j= this->IndexOfObjectHash(m);
 	if (j==-1)
 	{	if (!m.IsEqualToZero())
 			this->AddObjectOnTopHash(m);
@@ -5329,6 +5346,12 @@ public:
 	void MakeDn(int n);
 	void MakeF4();
 	void MakeG2();
+	void GetEpsilonCoords
+		(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input, 
+			root& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonMatrix
+		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
+			MatrixLargeRational& output);
 	void ComputeWeylGroup();
 	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
@@ -5363,7 +5386,23 @@ public:
 							bool RhoAction);
 	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
 	void RootScalarKillingFormMatrixRoot(root&r1, root& r2, Rational& output);
+	void TransformToSimpleBasisGenerators(roots& theGens);
 	int length(int index);
+};
+
+class ReflectionSubgroupWeylGroup: public HashedListBasicObjects<ElementWeylGroup>
+{
+public:
+	WeylGroup AmbientWeyl;
+	WeylGroup Elements;
+	roots simpleGenerators;
+	std::string DebugString;
+	void ComputeDebugString(){this->ElementToString(DebugString);};
+	void ElementToString(std::string& output);
+	void ComputeSubGroupFromGeneratingReflections
+		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, 
+			bool recomputeAmbientRho);
+	void ActByElement(int index, root& theRoot);	
 };
 
 class rootFKFTcomputation
@@ -5520,6 +5559,9 @@ public:
 			ListBasicObjects<Rational>& coeffs,
       ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,
 			bool useLatex, rootSubalgebra& owner);
+	void GetEpsilonCoords
+		(	roots& input, roots& output, WeylGroup& theWeyl, 
+			GlobalVariables& theGlobalVariables);
 	void ElementToString
 		(	std::string &output, rootSubalgebras& owners, bool useLatex,
 			bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
@@ -5536,13 +5578,15 @@ public:
 	{	this->ElementToString
 			(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
 	};
+	void MakeLookCivilized(rootSubalgebra& owner);
+	void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
 	void ComputeKComponents
 		(	roots& input, ListBasicObjects<ListBasicObjects<int> >& output,
 			rootSubalgebra& owner);
 	void RelationOneSideToStringCoordForm
-		(std::string& output,	ListBasicObjects<Rational>& coeffs,	roots& theRoots);
+		(std::string& output,	ListBasicObjects<Rational>& coeffs,	roots& theRoots, bool EpsilonForm);
 	void GetSumAlphas(root& output, int theDimension);
 	void SortRelation(rootSubalgebra& owner);
 	void operator=(const coneRelation& right)
@@ -5596,9 +5640,10 @@ public:
 	void AddRelationNoRepetition
 		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
 	coneRelations()
-	{	this->NumAllowedLatexLines=30;
+	{	this->NumAllowedLatexLines=20;
 		this->flagIncludeSmallerRelations=false;
-		this->flagIncludeCoordinateRepresentation=true;
+		this->flagIncludeCoordinateRepresentation=false;
+		this->flagIncludeSubalgebraDataInDebugString=false;
 	};
 };
 
@@ -5617,7 +5662,7 @@ public:
 	int NumNilradicalsAllowed;
 	int NumConeConditionFailures;
 	int NumRelationsWithStronglyPerpendicularDecomposition;
-	int NumRelationsgreaterLengthThan2;
+	//int NumRelationsgreaterLengthThan2;
 	int NumGmodKtableRowsAllowedLatex;
 	int NumTotalSubalgebras;
 	bool flagFirstRoundCounting;
@@ -5657,7 +5702,8 @@ public:
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
-			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner);
+			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, 
+			GlobalVariables& theGlobalVariables);
   bool IsIsomorphicTo
 		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables);
 	void MakeGeneratingSingularVectors
@@ -5673,6 +5719,9 @@ public:
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
 	void ComputeCentralizerFromKModulesAndSortKModules();
+	void MatrixToRelation
+		(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, 
+			int theDimension, roots& NilradicalRoots);
 	void GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void DoKRootsEnumerationRecursively
@@ -5720,7 +5769,6 @@ public:
 	void ComputeAllButAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
-	void TransformToSimpleBasisGenerators(roots& theGens);
 	void ComputeKModules();
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
 	void ComputeExtremeWeightInTheSameKMod
@@ -5797,6 +5845,7 @@ public:
 	std::string DebugString;
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
+	coneRelations theMinRels;
 	ListBasicObjects< ListBasicObjects <int> > ActionsNormalizerCentralizerNilradical;
 	//ListBasicObjects< ListBasicObjects <int> > OrbitsUnderNormalizerCentralizerNilradical;
 	int NumSubalgebrasProcessed;
@@ -5810,6 +5859,7 @@ public:
 	bool flagUseDynkinClassificationForIsomorphismComputation;
 	bool flagUsingActionsNormalizerCentralizerNilradical;
 	bool flagComputeConeCondition;
+	bool flagLookingForMinimalRels;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
 	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
 		(	Selection& targetSel,
@@ -5823,9 +5873,9 @@ public:
 		(	ListBasicObjects<int>& generator, Selection& targetSel,
 			GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical
-		(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA);
+		(	Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
-		(GlobalVariables& theGlobalVariables);
+			(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
@@ -5837,7 +5887,7 @@ public:
 			bool useHtml);
 	void SortDescendingOrderBySSRank();
 	void initDynkinDiagramsNonDecided
-		(WeylGroup& theWeylGroup);
+		(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
 	void pathToHtmlFileNameElements
 		(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
 	void pathToHtmlReference
@@ -5860,6 +5910,7 @@ public:
 	{	this->flagUseDynkinClassificationForIsomorphismComputation=false;
 		this->flagComputeConeCondition=true;
 		this->flagUsingActionsNormalizerCentralizerNilradical=true;
+		this->flagLookingForMinimalRels=false;
 		this->NumLinesPerTableLatex=20;
 		this->NumColsPerTableLatex=4;
 	};
@@ -6020,7 +6071,9 @@ public:
 	roots rootsSplitChamber1;
 	roots rootsNilradicalRoots;
 	roots rootsRootSAIso;
-
+	roots rootsGetCoordsInBasis;
+	roots rootsGetEpsilonCoords;
+	
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
 	rootsCollection rootsStronglyPerpendicular;
@@ -6030,6 +6083,8 @@ public:
 	rootSubalgebras rootSAAttemptExtensionIso1;
 	rootSubalgebras rootSAAttemptExtensionIso2;
 	rootSubalgebras rootSAsGenerateAll;
+		
+	hashedRoots hashedRootsComputeSubGroupFromGeneratingReflections;
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
 	ListBasicObjects<WallData*> listWallDataPtSplitChamber;
@@ -6058,7 +6113,9 @@ public:
 	MatrixLargeRational matSimplexAlgorithm2;
 	MatrixLargeRational matSimplexAlgorithm3;
 	MatrixLargeRational matRootSAIso;
-
+	MatrixLargeRational matGetCoordsInBasis;
+	MatrixLargeRational matGetEpsilonCoords;
+	
 	partFraction fracReduceMonomialByMonomial;
 	partFraction fracSplit1;
 	QuasiPolynomial QPComputeQuasiPolynomial;

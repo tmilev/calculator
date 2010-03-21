@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include "polyhedra.h"
 
 extern int GlobalPointerCounter;

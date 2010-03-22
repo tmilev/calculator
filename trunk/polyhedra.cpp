@@ -1139,7 +1139,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.AddObjectOnTop(tempSA);
 	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-	
+
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	this->theRootSubalgebras.flagComputeConeCondition=true;
@@ -1621,7 +1621,7 @@ void root::ElementToString(std::string& output, bool useLaTeX)
 }
 
 void root::ElementToStringEpsilonForm(std::string& output)
-{	std::stringstream out;	
+{	std::stringstream out;
 	std::string tempS;
   for(int i=0;i<this->size;i++)
 	{	if (!this->TheObjects[i].IsEqualToZero())
@@ -1631,7 +1631,7 @@ void root::ElementToStringEpsilonForm(std::string& output)
 			if (i!=0)
 			{	if (tempS.size()>0)
 				{	if (tempS[0]!='-')
-						out<<"+";	
+						out<<"+";
 				} else
 					out<<"+";
 			}
@@ -11806,14 +11806,14 @@ void WeylGroup::MakeG2()
 }
 
 void WeylGroup::GetEpsilonCoords
-	(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input, 
+	(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input,
 		root& output, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& tempMat=theGlobalVariables.matGetEpsilonCoords;
 	this->GetEpsilonMatrix(WeylLetter,WeylRank,theGlobalVariables, tempMat);
 //	tempMat.ComputeDebugString();
 	root result; result.MakeZero(tempMat.NumRows);
 	Rational tempRat;
-	for (int i=0;i<tempMat.NumRows;i++)	
+	for (int i=0;i<tempMat.NumRows;i++)
 		for (int j=0;j<input.size;j++)
 		{ tempRat.Assign(tempMat.elements[i][j]);
 			tempRat.MultiplyBy(input.TheObjects[j]);
@@ -11826,7 +11826,7 @@ void WeylGroup::GetEpsilonCoords
 void WeylGroup::GetEpsilonMatrix
 	(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
 		MatrixLargeRational& output)
-{	//longer root has always smaller index	 
+{	//longer root has always smaller index
 	if (WeylLetter=='A')
 	{ output.init(WeylRank+1,WeylRank);
 		output.NullifyAll();
@@ -11857,7 +11857,7 @@ void WeylGroup::GetEpsilonMatrix
 	}
 	if (WeylLetter=='D')
 	{	//the triple node comes first, then the long string, then the two short strings.
-		// the long string is oriented with the end that is connected to the triple node having 
+		// the long string is oriented with the end that is connected to the triple node having
 		//smaller index
 		output.init(WeylRank,WeylRank);
 		output.NullifyAll();
@@ -11915,7 +11915,7 @@ void WeylGroup::ComputeRho()
 	this->rho.MakeZero(this->KillingFormMatrix.NumRows);
 	for (int i=0;i<this->RootSystem.size;i++)
 		if (RootSystem.TheObjects[i].IsPositiveOrZero() )
-			this->rho.Add(RootSystem.TheObjects[i]);	
+			this->rho.Add(RootSystem.TheObjects[i]);
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
 		this->rho.TheObjects[i].DivideByInteger(2);
 }
@@ -11938,7 +11938,7 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, root& theRoot)
 }
 
 void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
-		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, 
+		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
 			bool recomputeAmbientRho)
 {	hashedRoots& orbitRho=theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
 	this->ClearTheObjects();
@@ -14201,7 +14201,7 @@ bool rootSubalgebra::CheckForSmallRelations
 }
 
 void rootSubalgebra::MatrixToRelation
-	(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, 
+	(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX,
 		int theDimension, roots& NilradicalRoots)
 {	output.AlphaCoeffs.size=0;	output.Alphas.size=0;
 	output.BetaCoeffs.size=0;	output.Betas.size=0;
@@ -14267,6 +14267,27 @@ void rootSubalgebra::ExtractRelations
 	else
 	{ //if(!this->CheckForSmallRelations(theRel,NilradicalRoots))
 		this->MatrixToRelation(theRel, matA,matX,theDimension,NilradicalRoots);
+    roots tempRoots; tempRoots.size=0;
+    for (int i=0;i<this->kModules.size;i++)
+      if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
+        tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
+    root tempRoot; coneRelation tempRel;
+    for (int i=0;i<tempRoots.size;i++)
+      for (int j=i;j<tempRoots.size;j++)
+      { tempRoot.Assign(tempRoots.TheObjects[i]);
+        tempRoot.Add(tempRoots.TheObjects[j]);
+        if (tempRoot.HasStronglyPerpendicularDecompositionWRT
+              (NilradicalRoots,this->AmbientWeyl,tempRel.Betas,tempRel.BetaCoeffs))
+          return;
+        for (int k=j;k<tempRoots.size;k++)
+        { tempRoot.Assign(tempRoots.TheObjects[i]);
+          tempRoot.Add(tempRoots.TheObjects[j]);
+          tempRoot.Add(tempRoots.TheObjects[k]);
+          if (tempRoot.HasStronglyPerpendicularDecompositionWRT
+              (NilradicalRoots,this->AmbientWeyl,tempRel.Betas,tempRel.BetaCoeffs))
+            return;
+        }
+      }
 	//	matA.ComputeDebugString();
 	//	matX.ComputeDebugString();
 	//	theRel.Alphas.ComputeDebugString();
@@ -14308,10 +14329,29 @@ void rootSubalgebra::ExtractRelations
 //		theRel.ComputeDebugString(owner,true,true);
 //		theRel.Alphas.ComputeDebugString();
 //		theRel.Betas.ComputeDebugString();
-		theRel.MakeLookCivilized(*this);		
+		theRel.MakeLookCivilized(*this);
 //		theRel.ComputeDebugString(owner,true,true);
 //		theRel.Alphas.ComputeDebugString();
 //		theRel.Betas.ComputeDebugString();
+    theRel.ComputeDebugString(owner,true,true);
+    if (theRel.theDiagram.DebugString=="$B_3$")
+    { tempRoot.Assign(theRel.Betas.TheObjects[0]);
+      tempRoot.Subtract(theRel.Alphas.TheObjects[0]);
+      int tempI=this->HighestWeightsGmodK.IndexOfObject(tempRoot);
+      if (tempI!=-1)
+      { if (!this->NilradicalKmods.selected[tempI])
+        { theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
+          theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
+          theRel.Alphas.TheObjects[1].Assign(tempRoot);
+          theRel.AlphaCoeffs.TheObjects[0].MakeOne();
+          theRel.AlphaCoeffs.TheObjects[1].MakeOne();
+          theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
+          theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
+          theRel.BetaCoeffs.TheObjects[0].MakeOne();
+          theRel.ComputeDebugString(owner,true,true);
+        }
+      }
+    }
 		owner.theBadRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
 }
@@ -14453,7 +14493,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 	theSubgroup.ComputeSubGroupFromGeneratingReflections
 		(selectedRootsBasisCentralizer,theGlobalVariables,0,false);
 	//theSubgroup.ComputeDebugString();
-	this->ActionsNormalizerCentralizerNilradical.SetSizeExpandOnTopNoObjectInit(theSubgroup.size-1);		
+	this->ActionsNormalizerCentralizerNilradical.SetSizeExpandOnTopNoObjectInit(theSubgroup.size-1);
 	for(int i=0;i<theSubgroup.size-1;i++)
 	{	this->ActionsNormalizerCentralizerNilradical.TheObjects[i]
 			.SetSizeExpandOnTopNoObjectInit(theRootSA.kModules.size);
@@ -14929,6 +14969,19 @@ void rootSubalgebra::ElementToString
 	output=out.str();
 }
 
+bool rootSubalgebra::IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots)
+{ root& currentRoot=this->HighestWeightsGmodK.TheObjects[indexKmod];
+  root tempRoot;
+  for (int i=0;i<NilradicalRoots.size;i++)
+  { tempRoot.Assign(currentRoot);
+    tempRoot.Add(NilradicalRoots.TheObjects[i]);
+    if (this->IsARootOrZero(tempRoot))
+      if (!NilradicalRoots.ContainsObject(tempRoot))
+        return false;
+  }
+  return true;
+}
+
 void rootSubalgebra::MakeGeneratingSingularVectors
 	( coneRelation &theRelation, roots& nilradicalRoots)
 { bool isMaximal=false;
@@ -15107,7 +15160,7 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 	if (this->numberOfThreeValencyNodes(indexComponent,theWeyl)==1)
 	{//type D or E
 		//in type D first comes the triple node, then the long string, then the one-root long short strings
-		// the long string is oriented with the end that is connected to the triple node having 
+		// the long string is oriented with the end that is connected to the triple node having
 		//smaller index
 	  root tripleNode;
 	  int tripleNodeindex=this->indicesThreeNodes.TheObjects[indexComponent];
@@ -17350,7 +17403,7 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoot
 				{ int leavingIndex=j; int remainingIndex=i;
 					if (this->BetaCoeffs.TheObjects[j].IsGreaterThan(this->BetaCoeffs.TheObjects[i]))
 					{ leavingIndex=i; remainingIndex=j;
-					} 
+					}
 					this->Betas.TheObjects[leavingIndex].Assign(tempRoot);
 					this->BetaCoeffs.TheObjects[remainingIndex].Subtract
 						(this->BetaCoeffs.TheObjects[leavingIndex]);
@@ -17603,7 +17656,7 @@ void rootSubalgebras::initDynkinDiagramsNonDecided
 	{	tempS="$A_2$+$A_1$";
 		this->theBadDiagrams.AddObjectOnTop(tempS);
 	}
-	
+
 	this->numFoundBadDiagrams.initFillInObject(this->theBadDiagrams.size,0);
 }
 

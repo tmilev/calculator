@@ -5347,7 +5347,7 @@ public:
 	void MakeF4();
 	void MakeG2();
 	void GetEpsilonCoords
-		(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input, 
+		(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input,
 			root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonMatrix
 		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
@@ -5400,9 +5400,9 @@ public:
 	void ComputeDebugString(){this->ElementToString(DebugString);};
 	void ElementToString(std::string& output);
 	void ComputeSubGroupFromGeneratingReflections
-		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, 
+		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
 			bool recomputeAmbientRho);
-	void ActByElement(int index, root& theRoot);	
+	void ActByElement(int index, root& theRoot);
 };
 
 class rootFKFTcomputation
@@ -5560,7 +5560,7 @@ public:
       ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,
 			bool useLatex, rootSubalgebra& owner);
 	void GetEpsilonCoords
-		(	roots& input, roots& output, WeylGroup& theWeyl, 
+		(	roots& input, roots& output, WeylGroup& theWeyl,
 			GlobalVariables& theGlobalVariables);
 	void ElementToString
 		(	std::string &output, rootSubalgebras& owners, bool useLatex,
@@ -5699,10 +5699,11 @@ public:
 	rootSubalgebra();
 	//returns -1 if the weight/root is not in g/k
 	int GetIndexKmoduleContainingRoot(root& input);
+	bool IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots);
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
-			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, 
+			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner,
 			GlobalVariables& theGlobalVariables);
   bool IsIsomorphicTo
 		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables);
@@ -5720,7 +5721,7 @@ public:
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
 	void ComputeCentralizerFromKModulesAndSortKModules();
 	void MatrixToRelation
-		(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, 
+		(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX,
 			int theDimension, roots& NilradicalRoots);
 	void GenerateParabolicsInCentralizerAndPossibleNilradicals
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
@@ -6073,7 +6074,7 @@ public:
 	roots rootsRootSAIso;
 	roots rootsGetCoordsInBasis;
 	roots rootsGetEpsilonCoords;
-	
+
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
 	rootsCollection rootsStronglyPerpendicular;
@@ -6083,7 +6084,7 @@ public:
 	rootSubalgebras rootSAAttemptExtensionIso1;
 	rootSubalgebras rootSAAttemptExtensionIso2;
 	rootSubalgebras rootSAsGenerateAll;
-		
+
 	hashedRoots hashedRootsComputeSubGroupFromGeneratingReflections;
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
@@ -6115,7 +6116,7 @@ public:
 	MatrixLargeRational matRootSAIso;
 	MatrixLargeRational matGetCoordsInBasis;
 	MatrixLargeRational matGetEpsilonCoords;
-	
+
 	partFraction fracReduceMonomialByMonomial;
 	partFraction fracSplit1;
 	QuasiPolynomial QPComputeQuasiPolynomial;

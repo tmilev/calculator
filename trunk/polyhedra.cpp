@@ -1158,8 +1158,8 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'F',4);
-	//	(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
+		//(*this->theGlobalVariablesContainer->Default(),'F',4);
+		(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	//this->theRootSubalgebras.ComputeLProhibitingRelations
 	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
@@ -1174,7 +1174,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
+	/*this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theRootSubalgebras.theBadRelations.ComputeDebugString
@@ -1201,7 +1201,7 @@ void ComputationSetup::Run()
     this->flagComputationInProgress=false;
 	if (true)
 		return;
-	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	*///partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
@@ -14260,7 +14260,7 @@ void rootSubalgebra::ExtractRelations
 			(NilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs);
 	if (!tempBool)
 	{ tempBool=this->AttemptTheTripleTrick(theRel,NilradicalRoots,theGlobalVariables);
-	}	
+	}
 	if (tempBool)
 	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
 		theRel.MakeLookCivilized(*this);
@@ -14279,12 +14279,12 @@ void rootSubalgebra::ExtractRelations
 
 bool rootSubalgebra::AttemptTheTripleTrick
 	(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables)
-{	roots& tempRoots= theGlobalVariables.rootsAttemptTheTripleTrick; 
+{	roots& tempRoots= theGlobalVariables.rootsAttemptTheTripleTrick;
 	tempRoots.size=0;
   for (int i=0;i<this->kModules.size;i++)
 		if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
 			tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-  root tempRoot; 
+  root tempRoot;
   for (int i=0;i<tempRoots.size;i++)
 		for (int j=i;j<tempRoots.size;j++)
     { tempRoot.Assign(tempRoots.TheObjects[i]);
@@ -14841,9 +14841,9 @@ void rootSubalgebra::ElementToString
 	if (useHtml)
 		out <<"C(k)_{ss}";
 	out	 <<tempS;
-	int CartanPieceSize=
-		this->AmbientWeyl.KillingFormMatrix.NumRows- this->SimpleBasisCentralizerRoots.size-
-			this->SimpleBasisK.size;
+	//int CartanPieceSize=
+		//this->AmbientWeyl.KillingFormMatrix.NumRows- this->SimpleBasisCentralizerRoots.size-
+		//	this->SimpleBasisK.size;
 	//if (CartanPieceSize!=0)
 	//{	if (makeALaTeXReport)
 	//		out << "$\\oplus\\mathfrak{h}_" << CartanPieceSize<<"$";
@@ -17644,7 +17644,10 @@ void rootSubalgebras::initDynkinDiagramsNonDecided
 	{	tempS="$A_2$+$A_1$";
 		this->theBadDiagrams.AddObjectOnTop(tempS);
 	}
-
+	if (WeylLetter=='F')
+	{	tempS="$A_1$+$A_1$";
+		this->theBadDiagrams.AddObjectOnTop(tempS);
+	}
 	this->numFoundBadDiagrams.initFillInObject(this->theBadDiagrams.size,0);
 }
 
@@ -17672,7 +17675,7 @@ void rootSubalgebras::GetTableHeaderAndFooter
 }
 
 void rootSubalgebras::ElementToHtml
-	(	std::string& pathPhysical,std::string& htmlPathServer,
+	(	std::string& header,	std::string& pathPhysical,std::string& htmlPathServer,
 		GlobalVariables& theGlobalVariables)
 {	std::fstream output; std::string tempS;
   std::string MyPathPhysical, childrenPathPhysical;
@@ -17684,7 +17687,7 @@ void rootSubalgebras::ElementToHtml
 	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
     (output, MyPathPhysical, false,false);
   this->ComputeDebugString(false,true,&childrenPathPhysical,&childrenPathServer,theGlobalVariables);
-  output<< this->DebugString;
+  output<< "<HTML><BODY>"<<header<<this->DebugString<<"</BODY></HTML>";
   output.close();
   for (int i=0;i<this->size;i++)
   {	this->TheObjects[i].ElementToHtml(i,childrenPathPhysical,theGlobalVariables);
@@ -17781,7 +17784,7 @@ void rootSubalgebras::DynkinTableToString
 				out << tempS3<<" , ";
 			}
 		}
-		
+
 		row=(i)/this->NumColsPerTableLatex;
 		col=(i)% this->NumColsPerTableLatex;
 		if (row==this->NumLinesPerTableLatex)

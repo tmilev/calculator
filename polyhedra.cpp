@@ -578,6 +578,14 @@ int CGIspecificRoutines::numDottedLines=0;
 int CGIspecificRoutines::shiftY=-200;
 int CGIspecificRoutines::scale=100;
 
+void CGIspecificRoutines::clearDollarSigns(std::string& theString, std::string& output)
+{ std::stringstream out;
+	for(unsigned int i=0;i<theString.size();i++)
+		if(theString[i]!='$')
+			out<<theString[i];
+	output=out.str();
+}
+
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots
 	(	root& r1, root& r2,	unsigned long thePenStyle, int r, int g, int b)
 {	if (thePenStyle!=5)
@@ -1150,11 +1158,11 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-	//	(*this->theGlobalVariablesContainer->Default(),'F',4);
-		(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
+		(*this->theGlobalVariablesContainer->Default(),'F',4);
+	//	(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-//	this->theRootSubalgebras.ComputeLProhibitingRelations
-//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	this->theRootSubalgebras.ComputeLProhibitingRelations
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -1166,7 +1174,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-/*	this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 		this->theRootSubalgebras.theBadRelations.ComputeDebugString
@@ -1192,7 +1200,7 @@ void ComputationSetup::Run()
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
 	if (true)
-		return;*/
+		return;
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -14242,24 +14250,18 @@ void rootSubalgebra::ExtractRelations
 		theRel.MakeLookCivilized(*this);
 		owner.theMinRels.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
-//	theRel.ComputeDebugString();
-//	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
-//	theRel.ComputeDebugString(*this);
-//	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
 //	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
 	this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
-
-//	theRel.ComputeDebugString(*this);
 	root AccumRoot;
 	theRel.GetSumAlphas(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
-//	if (this->flagAnErrorHasOccuredTimeToPanic)
-//	{	std::string tempS;
-//		theRel.ComputeDebugString(*this,true);
-//		AccumRoot.ComputeDebugString();
-//	}
 	theRel.BetaCoeffs.size=0; theRel.Betas.size=0;
-	if (	AccumRoot.HasStronglyPerpendicularDecompositionWRT
-					(NilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs))
+	bool tempBool=
+		AccumRoot.HasStronglyPerpendicularDecompositionWRT
+			(NilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs);
+	if (!tempBool)
+	{ tempBool=this->AttemptTheTripleTrick(theRel,NilradicalRoots,theGlobalVariables);
+	}	
+	if (tempBool)
 	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
 		theRel.MakeLookCivilized(*this);
 		owner.theGoodRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
@@ -14267,95 +14269,40 @@ void rootSubalgebra::ExtractRelations
 	else
 	{ //if(!this->CheckForSmallRelations(theRel,NilradicalRoots))
 		this->MatrixToRelation(theRel, matA,matX,theDimension,NilradicalRoots);
-    roots tempRoots; tempRoots.size=0;
-    for (int i=0;i<this->kModules.size;i++)
-      if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
-        tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-    root tempRoot; coneRelation tempRel;
-    for (int i=0;i<tempRoots.size;i++)
-      for (int j=i;j<tempRoots.size;j++)
-      { tempRoot.Assign(tempRoots.TheObjects[i]);
-        tempRoot.Add(tempRoots.TheObjects[j]);
-        if (tempRoot.HasStronglyPerpendicularDecompositionWRT
-              (NilradicalRoots,this->AmbientWeyl,tempRel.Betas,tempRel.BetaCoeffs))
-          return;
-        for (int k=j;k<tempRoots.size;k++)
-        { tempRoot.Assign(tempRoots.TheObjects[i]);
-          tempRoot.Add(tempRoots.TheObjects[j]);
-          tempRoot.Add(tempRoots.TheObjects[k]);
-          if (tempRoot.HasStronglyPerpendicularDecompositionWRT
-              (NilradicalRoots,this->AmbientWeyl,tempRel.Betas,tempRel.BetaCoeffs))
-            return;
-        }
-      }
-	//	matA.ComputeDebugString();
-	//	matX.ComputeDebugString();
-	//	theRel.Alphas.ComputeDebugString();
-	//	theRel.Betas.ComputeDebugString();
-	//	theRel.ComputeDebugString(owner,true,true);
 		this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
-		/*root tempRoot;
-		theRel.GetSumAlphas(tempRoot,theDimension);
-		roots tempRoots;
-		bool found=false;
-		for (int i=0;i<NilradicalRoots.size;i++)
-		{	for (int j=i+1;j<NilradicalRoots.size;j++)
-			{ tempRoots.size=0;
-				tempRoots.AddObjectOnTop(tempRoot);
-				tempRoots.AddObjectOnTop(NilradicalRoots.TheObjects[i]);
-				tempRoots.AddObjectOnTop(NilradicalRoots.TheObjects[j]);
-				if (tempRoots.GetRankOfSpanOfElements(theGlobalVariables)<3)
-				{	found=true; break;
-				}
-			}
-			if (found) break;
-		}
-		if (found)
-		{ MatrixLargeRational tempMat;
-			tempRoots.GetLinearDependence(tempMat);
-			tempMat.DivideByRational(tempMat.elements[0][0]);
-			theRel.Betas.SetSizeExpandOnTopNoObjectInit(2);
-			theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
-			theRel.Betas.TheObjects[0].Assign(tempRoots.TheObjects[1]);
-			theRel.Betas.TheObjects[1].Assign(tempRoots.TheObjects[2]);
-			theRel.BetaCoeffs.TheObjects[0].Assign(tempMat.elements[1][0]);
-			theRel.BetaCoeffs.TheObjects[1].Assign(tempMat.elements[2][0]);
-			theRel.FixRepeatingRoots(theRel.Betas,theRel.BetaCoeffs);
-		}*/
-//		theRel.ComputeDebugString(owner,true,true);
-//		theRel.Alphas.ComputeDebugString();
-//		theRel.Betas.ComputeDebugString();
 		theRel.FixRightHandSide(*this,NilradicalRoots);
-//		theRel.ComputeDebugString(owner,true,true);
-//		theRel.Alphas.ComputeDebugString();
-//		theRel.Betas.ComputeDebugString();
 		theRel.MakeLookCivilized(*this);
-//		theRel.ComputeDebugString(owner,true,true);
-//		theRel.Alphas.ComputeDebugString();
-//		theRel.Betas.ComputeDebugString();
     theRel.ComputeDebugString(owner,true,true);
-    if (theRel.theDiagram.DebugString=="$B_3$")
-    { tempRoot.Assign(theRel.Betas.TheObjects[0]);
-      tempRoot.Subtract(theRel.Alphas.TheObjects[0]);
-      int tempI=this->HighestWeightsGmodK.IndexOfObject(tempRoot);
-      if (tempI!=-1)
-      { if (!this->NilradicalKmods.selected[tempI])
-        { theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
-          theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
-          theRel.Alphas.TheObjects[1].Assign(tempRoot);
-          theRel.AlphaCoeffs.TheObjects[0].MakeOne();
-          theRel.AlphaCoeffs.TheObjects[1].MakeOne();
-          theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
-          theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
-          theRel.BetaCoeffs.TheObjects[0].MakeOne();
-          theRel.ComputeDebugString(owner,true,true);
-        }
-      }
-    }
 		owner.theBadRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
 }
 
+bool rootSubalgebra::AttemptTheTripleTrick
+	(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables)
+{	roots& tempRoots= theGlobalVariables.rootsAttemptTheTripleTrick; 
+	tempRoots.size=0;
+  for (int i=0;i<this->kModules.size;i++)
+		if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
+			tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
+  root tempRoot; 
+  for (int i=0;i<tempRoots.size;i++)
+		for (int j=i;j<tempRoots.size;j++)
+    { tempRoot.Assign(tempRoots.TheObjects[i]);
+      tempRoot.Add(tempRoots.TheObjects[j]);
+      if (tempRoot.HasStronglyPerpendicularDecompositionWRT
+            (NilradicalRoots,this->AmbientWeyl,theRel.Betas,theRel.BetaCoeffs))
+        return true;
+      for (int k=j;k<tempRoots.size;k++)
+      { tempRoot.Assign(tempRoots.TheObjects[i]);
+        tempRoot.Add(tempRoots.TheObjects[j]);
+        tempRoot.Add(tempRoots.TheObjects[k]);
+        if (tempRoot.HasStronglyPerpendicularDecompositionWRT
+							(NilradicalRoots,this->AmbientWeyl,theRel.Betas,theRel.BetaCoeffs))
+          return true;
+      }
+    }
+  return false;
+}
 void rootSubalgebra::MakeSureAlphasDontSumToRoot
 	(coneRelation& theRel, roots& NilradicalRoots)
 { root alpha1, alpha2,beta1, tempRoot;
@@ -14857,9 +14804,11 @@ void rootSubalgebra::ElementToString
 	this->ElementToStringHeaderFooter(latexHeader, latexFooter, makeALaTeXReport, useHtml);
 	this->theDynkinDiagram.ElementToString(tempS);
   if (makeALaTeXReport)
-    out <<"\\noindent Semisimple type of $\\mathfrak{k}:$ ";
+    out <<"\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
-		out << "k: ";
+	{	out << "k_{ss}: ";
+		::CGIspecificRoutines::clearDollarSigns(tempS,tempS);
+  }
   out << tempS;
   this->SimpleBasisK.ElementToString(tempS,true);
   if (useHtml)
@@ -14877,6 +14826,15 @@ void rootSubalgebra::ElementToString
 	if (useHtml)
 		out <<"C(k)_{ss}";
 	out	 <<tempS;
+	int CartanPieceSize=
+		this->AmbientWeyl.KillingFormMatrix.NumRows- this->SimpleBasisCentralizerRoots.size-
+			this->SimpleBasisK.size;
+	//if (CartanPieceSize!=0)
+	//{	if (makeALaTeXReport)
+	//		out << "$\\oplus\\mathfrak{h}_" << CartanPieceSize<<"$";
+	//	if (useHtml)
+	//		out <<"+h_"<<CartanPieceSize;
+	//}
 	if (useHtml)
 		out <<"<br>\n simple basis centralizer: ";
 	if (makeALaTeXReport)
@@ -17753,7 +17711,9 @@ void rootSubalgebras::DynkinTableToString
 	if (useLatex)
 		out << "$\\mathfrak{g}$: ";
 	else
-		out <<"g: ";
+	{	out <<"g: ";
+		::CGIspecificRoutines::clearDollarSigns(tempS,tempS);
+	}
 	out << tempS <<"\n\n";
 	for (int i=1;i<this->size;i++)
 	{	if (col==0 && row==0)
@@ -17761,9 +17721,11 @@ void rootSubalgebras::DynkinTableToString
 		this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
 		this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
 		if (useLatex)
-			out << "$\\mathfrak{k}$: "<<tempS;
+			out << "$\\mathfrak{k}_{ss}$: "<<tempS;
 		else
-		{	out <<" k: ";
+		{	::CGIspecificRoutines::clearDollarSigns(tempS,tempS);
+			::CGIspecificRoutines::clearDollarSigns(tempS2,tempS2);
+			out <<" k_{ss}: ";
 			if (!useHtml)
 			{	out	<<tempS;
 			} else

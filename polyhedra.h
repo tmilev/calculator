@@ -5701,6 +5701,8 @@ public:
 	int GetIndexKmoduleContainingRoot(root& input);
 	bool IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots);
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
+	bool AttemptTheTripleTrick
+		(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner,
@@ -6042,7 +6044,7 @@ public:
     (GlobalVariables& theGlobalVariables,rootSubalgebras& input, std::string& path);
  	static bool OpenDataFileOrCreateIfNotPresent
 		(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
-
+	static void clearDollarSigns(std::string& theString, std::string& output);
 };
 
 class RandomCodeIDontWantToDelete
@@ -6074,6 +6076,7 @@ public:
 	roots rootsRootSAIso;
 	roots rootsGetCoordsInBasis;
 	roots rootsGetEpsilonCoords;
+	roots rootsAttemptTheTripleTrick;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;

@@ -1161,8 +1161,8 @@ void ComputationSetup::DoTheRootSAComputation()
 		(*this->theGlobalVariablesContainer->Default(),'F',4);
 	//	(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	//this->theRootSubalgebras.ComputeLProhibitingRelations
+	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -14379,6 +14379,7 @@ void rootSubalgebra::Assign(const rootSubalgebra& right)
 	this->NilradicalKmods.Assign(right.NilradicalKmods);
 	this->SimpleBasisCentralizerRoots.CopyFromBase(right.SimpleBasisCentralizerRoots);
 	this->SimpleBasisK.CopyFromBase(right.SimpleBasisK);
+	this->indicesSubalgebrasContainingK.CopyFromBase(right.indicesSubalgebrasContainingK);
 }
 
 inline void rootSubalgebra::operator =(const rootSubalgebra& right)
@@ -14403,6 +14404,7 @@ void rootSubalgebras::GenerateAllRootSubalgebrasUpToIsomorphism
 void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 	(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables)
 {	this->AddObjectOnTop(bufferSAs.TheObjects[RecursionDepth-1]);
+	int currentAlgebraIndex=this->size-1;
 	rootSubalgebra::ProblemCounter++;
 	if (RecursionDepth>=bufferSAs.size)
 		bufferSAs.SetSizeExpandOnTopNoObjectInit
@@ -14413,12 +14415,18 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		{	bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop
 				(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
 			bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
-			if (this->IsANewSubalgebra
-						(	theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth],
-							theGlobalVariables))
+			int indexSA=
+				this->IndexSubalgebra
+					(	theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth],
+						theGlobalVariables);
+			if (indexSA==-1)
+			{	this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK
+					.AddObjectOnTopNoRepetitionOfObject(this->size);
 				this->GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
-					(	bufferSAs,
-						RecursionDepth+1,theGlobalVariables);
+					(	bufferSAs,RecursionDepth+1,theGlobalVariables);
+			} else
+				this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK
+					.AddObjectOnTopNoRepetitionOfObject(indexSA);
 			bufferSAs.TheObjects[RecursionDepth]
 				.genK.PopIndexSwapWithLast
 					(bufferSAs.TheObjects[RecursionDepth].genK.size-1);
@@ -14516,30 +14524,37 @@ bool rootSubalgebras::ApproveSelAgainstOneGenerator
 	return true;
 }
 
-bool rootSubalgebras::IsANewSubalgebra
+int rootSubalgebras::IndexSubalgebra
 	(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
-{	bool result=true;
+{	int result=-1;
 	for (int j=0;j<this->size;j++)
 	{	rootSubalgebra& right=this->TheObjects[j];
 		if (input.theDynkinDiagram.DebugString==right.theDynkinDiagram.DebugString &&
 				input.theCentralizerDiagram.DebugString==
 					right.theCentralizerDiagram.DebugString)
 		{	if (this->flagUseDynkinClassificationForIsomorphismComputation)
-			{	result=false;
+			{	result=j;
 				int tempI= this->theBadDiagrams.IndexOfObject(input.theDynkinDiagram.DebugString);
 				if (tempI!=-1)
 					if (this->numFoundBadDiagrams.TheObjects[tempI]==0)
-					{	result=!input.IsIsomorphicTo(right,theGlobalVariables);
-						if (result)
+					{	if(!input.IsIsomorphicTo(right,theGlobalVariables))
+							result=-1;
+						if (result==-1)
 							this->numFoundBadDiagrams.TheObjects[tempI]++;
 					}
 			} else
-				result = !input.IsIsomorphicTo(right,theGlobalVariables);
-			if (!result)
+			if(!input.IsIsomorphicTo(right,theGlobalVariables))
+				result=-1;
+			if (result!=-1)
 				return result;
 		}
 	}
 	return result;
+}
+
+bool rootSubalgebras::IsANewSubalgebra
+	(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
+{	return this->IndexSubalgebra(input,theGlobalVariables)==-1;
 }
 
 void rootSubalgebra::ComputeRootsOfK()
@@ -17556,6 +17571,7 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 {//Bubble sort
 	rootSubalgebras output;
 	ListBasicObjects<int> SortingArray;
+	ListBasicObjects<int> inverseOfSortingArray;
 	SortingArray.SetSizeExpandOnTopNoObjectInit(this->size);
 	for (int i=0;i<this->size;i++)
 		SortingArray.TheObjects[i]=i;
@@ -17565,10 +17581,24 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 					.IsGreaterThan(this->TheObjects[SortingArray.TheObjects[i]].theDynkinDiagram))
 				SortingArray.SwapTwoIndices(i,j);
 		}
+	inverseOfSortingArray.SetSizeExpandOnTopNoObjectInit(SortingArray.size);
+	for(int i=0;i<SortingArray.size;i++)
+		inverseOfSortingArray.TheObjects[SortingArray.TheObjects[i]]=i;
 	output.MakeActualSizeAtLeastExpandOnTop(this->size);
 	for (int i=0;i<this->size;i++)
-		output.AddObjectOnTop(this->TheObjects[SortingArray.TheObjects[i]]);
-	this->CopyFromBase(output);
+	{	output.AddObjectOnTop(this->TheObjects[SortingArray.TheObjects[i]]);
+		ListBasicObjects<int>& otherArray=
+			this->TheObjects[SortingArray.TheObjects[i]].indicesSubalgebrasContainingK;
+		ListBasicObjects<int>& currentArray=
+			output.LastObject()->indicesSubalgebrasContainingK;
+		currentArray.MakeActualSizeAtLeastExpandOnTop(otherArray.size);
+		currentArray.size=0;
+		for(int j=0;j<otherArray.size;j++)
+			currentArray.AddObjectOnTop
+				(inverseOfSortingArray.TheObjects[otherArray.TheObjects[j]]);
+	}
+	for(int i=0;i<this->size;i++)
+		this->TheObjects[i].Assign(output.TheObjects[i]);
 }
 
 void rootSubalgebras::initDynkinDiagramsNonDecided
@@ -17738,6 +17768,20 @@ void rootSubalgebras::DynkinTableToString
 		else
 			out <<" C(k)_{ss}: ";
 		out << tempS2;
+		out<<"\n\n Contained in: ";
+		for(int j=0;j<this->TheObjects[i].indicesSubalgebrasContainingK.size;j++)
+		{ int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
+			this->TheObjects[tempI].theDynkinDiagram.ElementToString(tempS);
+			if (!useHtml)
+				out<<tempS<<", ";
+			else
+			{ if (!useLatex)
+					::CGIspecificRoutines::clearDollarSigns(tempS,tempS);
+				this->pathToHtmlReference(tempI,tempS,htmlPathServer,tempS3);
+				out << tempS3<<" , ";
+			}
+		}
+		
 		row=(i)/this->NumColsPerTableLatex;
 		col=(i)% this->NumColsPerTableLatex;
 		if (row==this->NumLinesPerTableLatex)

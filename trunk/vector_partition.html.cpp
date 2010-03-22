@@ -16,7 +16,7 @@ output <<" Dimension(<=3): <input type=\"text\" size =\"1\" name=\"textDim\" onk
 output <<" Num Vectors(<=9): <input type=\"text\" size=\"1\" name=\"textNumVectors\" onkeyup=\"generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);\">\n";
 output <<" <input type=\"submit\" name=\"buttonGo\" value=\"Go\">\n";
 output <<" </FORM>	\n";
-output <<" <FORM method=\"POST\" name=\"formRootSAs\" action=\"../cgi-bin/vector_partition_cgi_win32.exe\">\n";
+output <<" <FORM method=\"GET\" name=\"formRootSAs\" action=\"../cgi-bin/vector_partition_cgi_win32.exe\">\n";
 output <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n";
 output <<" Dimension: <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n";
 output <<" <input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n";

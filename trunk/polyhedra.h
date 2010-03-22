@@ -5671,6 +5671,7 @@ public:
 	bool flagAnErrorHasOccuredTimeToPanic;
 	static int ProblemCounter;
 	static int ProblemCounter2;
+	ListBasicObjects<int> indicesSubalgebrasContainingK;
 	::multTableKmods theMultTable;
 	ListBasicObjects<int> theOppositeKmods;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
@@ -5880,6 +5881,7 @@ public:
 	void GenerateAllRootSubalgebrasUpToIsomorphism
 			(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
+	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
 	void DynkinTableToString

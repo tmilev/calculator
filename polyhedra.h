@@ -5898,7 +5898,7 @@ public:
 	void pathToHtmlReference
 		(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
 	void ElementToHtml
-		(	std::string& pathPhysical,std::string& htmlPathServer,
+		( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer,
 			GlobalVariables& theGlobalVariables);
 	void ElementToString
 		(	std::string& output, bool useLatex, bool useHtml, std::string* htmlPathPhysical,

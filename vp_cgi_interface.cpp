@@ -33,14 +33,14 @@ int main(int argc, char **argv)
 { std::string inputString, inputPath, tempS;
 	std::cin >> inputString;
 	if (inputString=="")
-	{ char buffer[2000];
+	{
+#ifdef WIN32
+    char buffer[2000];
 		size_t tempI=1500;
-#ifdef WIN32	
 		::getenv_s(&tempI, buffer,1500,"QUERY_STRING");
 		inputString=buffer;
 #else
-		::getenv_s(&tempI, buffer,1500,"QUERY_STRING");
-		inputString=buffer;
+		inputString=::getenv("QUERY_STRING");
 //		inputString=::getenv("QUERY_STRING");
 #endif
 	}
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 	std::cout.flush();
 //	for (int i=0;i<argc;i++)
 //	{ std::cout<< " argument "<<i<<": "<< argv[i];
-//	}	
+//	}
  // std::cout
   //std::cout <<  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
 	//					<< std::endl;
@@ -110,9 +110,21 @@ int main(int argc, char **argv)
       //inputPath.append("../tmp/WeylHtml.html");
       inputPath.append("../htdocs/tmp/");
       std::string serverPath="/tmp/";
+      std::string header;
+      std::stringstream tempOut;
+      header="http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi?";
+      header.append(inputString);
+      tempOut <<"Permanent link to this page: <br>\n"<<"<a href=\""
+              <<  header<<"\">"<<header<<"</a>\n<br>\n"
+              <<"Main page: <br>\n"
+              <<"<a href=\"http://vector-partition.jacobs-university.de"
+              <<"/cgi-bin/vector_partition_linux_cgi\">"
+              <<"http://vector-partition.jacobs-university.de"
+              <<"/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
+      header=tempOut.str();
       theComputationSetup.theRootSubalgebras.ElementToHtml
-        ( inputPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
-      std::cout <<"<HTML>"<<"<META http-equiv=\"refresh\" content=\"20; "
+        ( header,inputPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
+      std::cout <<"<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; "
                 <<"url=../tmp/rootHtml.html\"> <BODY>"<< inputPath;
     }
   }

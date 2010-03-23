@@ -1158,11 +1158,11 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		//(*this->theGlobalVariablesContainer->Default(),'F',4);
-		(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
+		(*this->theGlobalVariablesContainer->Default(),'F',4);
+		//(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	//this->theRootSubalgebras.ComputeLProhibitingRelations
-	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	this->theRootSubalgebras.ComputeLProhibitingRelations
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -1174,9 +1174,11 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	/*this->DoTheRootSAComputation();
+	this->DoTheRootSAComputation();
 //    this->theRootSubalgebras.ComputeDebugString(true);
     this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
+		this->theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
+		this->theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
 		this->theRootSubalgebras.theBadRelations.ComputeDebugString
 			(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
 		this->theRootSubalgebras.theGoodRelations.ComputeDebugString
@@ -1201,7 +1203,7 @@ void ComputationSetup::Run()
     this->flagComputationInProgress=false;
 	if (true)
 		return;
-	*///partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
@@ -14247,7 +14249,7 @@ void rootSubalgebra::ExtractRelations
 		this->MatrixToRelation(theRel, matA,matX,theDimension,NilradicalRoots);
 	if (owner.flagLookingForMinimalRels)
 	{	theRel.FixRightHandSide(*this,NilradicalRoots);
-		theRel.MakeLookCivilized(*this);
+		theRel.MakeLookCivilized(*this,NilradicalRoots);
 		owner.theMinRels.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
 //	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
@@ -14259,11 +14261,10 @@ void rootSubalgebra::ExtractRelations
 		AccumRoot.HasStronglyPerpendicularDecompositionWRT
 			(NilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs);
 	if (!tempBool)
-	{ tempBool=this->AttemptTheTripleTrick(theRel,NilradicalRoots,theGlobalVariables);
-	}
+    tempBool=this->AttemptTheTripleTrick(theRel,NilradicalRoots,theGlobalVariables);
 	if (tempBool)
 	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
-		theRel.MakeLookCivilized(*this);
+		theRel.MakeLookCivilized(*this,NilradicalRoots);
 		owner.theGoodRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
 	else
@@ -14271,7 +14272,7 @@ void rootSubalgebra::ExtractRelations
 		this->MatrixToRelation(theRel, matA,matX,theDimension,NilradicalRoots);
 		this->MakeGeneratingSingularVectors(theRel,NilradicalRoots);
 		theRel.FixRightHandSide(*this,NilradicalRoots);
-		theRel.MakeLookCivilized(*this);
+		theRel.MakeLookCivilized(*this,NilradicalRoots);
     theRel.ComputeDebugString(owner,true,true);
 		owner.theBadRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
@@ -17244,13 +17245,14 @@ void coneRelation::RelationOneSideToString
 	output=out.str();
 }
 
-void coneRelation::ElementToString
+int coneRelation::ElementToString
 	(	std::string &output, rootSubalgebras& owners, bool useLatex,
 		bool includeScalarsProductsEachSide, bool includeMixedScalarProducts )
 { std::string tempS;
 	std::stringstream out;
 	assert(this->AlphaCoeffs.size==this->Alphas.size);
 	assert(this->BetaCoeffs.size==this->Betas.size);
+	int LatexLineCounter=0;
 	this->ComputeConnectedComponents
 		(	this->Alphas,owners.TheObjects[this->IndexOwnerRootSubalgebra],
 			this->AlphaKComponents);
@@ -17280,31 +17282,36 @@ void coneRelation::ElementToString
 	out << tempS;
 	if (includeScalarsProductsEachSide)
 	{ out <<" & ";
-		this->RootsToScalarProductString
-			(	this->Alphas,this->Alphas,"\\alpha","\\alpha",tempS,useLatex,
-				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+		LatexLineCounter+=
+      this->RootsToScalarProductString
+        (	this->Alphas,this->Alphas,"\\alpha","\\alpha",tempS,useLatex,
+          owners.TheObjects[this->IndexOwnerRootSubalgebra]);
 		out << tempS;
-		this->RootsToScalarProductString
-			(	this->Betas,this->Betas,"\\beta","\\beta",tempS,useLatex,
-				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+		LatexLineCounter+=
+      this->RootsToScalarProductString
+        (	this->Betas,this->Betas,"\\beta","\\beta",tempS,useLatex,
+          owners.TheObjects[this->IndexOwnerRootSubalgebra]);
 		out <<" "<< tempS;
 	}
 	if (includeMixedScalarProducts)
-	{ this->RootsToScalarProductString
-			(	this->Alphas,this->Betas,"\\alpha","\\beta",tempS,useLatex,
-				owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+	{ LatexLineCounter+=
+      this->RootsToScalarProductString
+        (	this->Alphas,this->Betas,"\\alpha","\\beta",tempS,useLatex,
+          owners.TheObjects[this->IndexOwnerRootSubalgebra]);
 		out << tempS;
 	}
 	out <<"\n";
 	output=out.str();
+	return MathRoutines::Maximum(2,LatexLineCounter);
 }
 
-void coneRelation::RootsToScalarProductString
+int coneRelation::RootsToScalarProductString
 	(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft,
 		const std::string& letterTypeRight,
 		std::string& output, bool useLatex,
 		rootSubalgebra& owner)
 { std::string tempS; std::stringstream out;
+  int numLinesLatex=0;
 	Rational tempRat;
 	for (int i=0;i<inputLeft.size;i++)
 		for(int j=0;j<inputRight.size;j++)
@@ -17316,10 +17323,12 @@ void coneRelation::RootsToScalarProductString
           out <<"$\\langle"<<letterTypeLeft<<"_"<< i+1<<","
               <<letterTypeRight<<"_"<<j+1<<"\\rangle="
               <<tempS<< "$, ";
+          numLinesLatex++;
         }
 		  }
 		}
 	output= out.str();
+	return numLinesLatex;
 }
 
 void coneRelation::ComputeConnectedComponents
@@ -17334,16 +17343,19 @@ void coneRelation::ComputeConnectedComponents
 	}
 }
 
-void coneRelation::MakeLookCivilized(rootSubalgebra& owner)
+void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots)
 {	roots tempRoots;
 	tempRoots.CopyFromBase(this->Alphas);
 	tempRoots.AddListOnTop(this->Betas);
 	owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
 	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
 	if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
-		Stop();
+	{//	assert(false);
+    Stop();
+	}
 	this->SortRelation(owner);
 	this->FixRepeatingRoots(this->Alphas,this->AlphaCoeffs);
+	//this->FixRightHandSide(owner,NilradicalRoots);
 	this->ComputeDiagramRelAndK(owner);
 }
 
@@ -17836,8 +17848,7 @@ void coneRelations::ElementToString
 	int oldIndex=-1;
 	int lineCounter=0;
 	for(int i=0;i<this->size;i++)
-	{	lineCounter+=2;
-		if (oldIndex!=this->TheObjects[i].IndexOwnerRootSubalgebra)
+	{	if (oldIndex!=this->TheObjects[i].IndexOwnerRootSubalgebra)
 		{	oldIndex=this->TheObjects[i].IndexOwnerRootSubalgebra;
 			if (useLatex)
 			{ out	<<"\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "
@@ -17849,14 +17860,16 @@ void coneRelations::ElementToString
        //     <<"</tr>";
       //}
 		}
-		this->TheObjects[i].ElementToString
-			(	tempS,owners,	useLatex,true,true);
+		lineCounter+=
+      this->TheObjects[i].ElementToString
+        (	tempS,owners,	useLatex,true,true);
 		out << tempS;
 		if (useLatex)
 			out <<"\\\\";
 		out<<"\n";
 		if (this->flagIncludeCoordinateRepresentation)
-		{ this->TheObjects[i].GetEpsilonCoords
+		{ lineCounter++;
+      this->TheObjects[i].GetEpsilonCoords
 				(this->TheObjects[i].Alphas,tempAlphas,owners.AmbientWeyl,theGlobalVariables);
 		 this->TheObjects[i].GetEpsilonCoords
 				(this->TheObjects[i].Betas,tempBetas,owners.AmbientWeyl,theGlobalVariables);
@@ -17865,13 +17878,14 @@ void coneRelations::ElementToString
 			out <<"\\multicolumn{5}{c}{"<<tempS;
 			this->TheObjects[i].RelationOneSideToStringCoordForm
 				(tempS, this->TheObjects[i].BetaCoeffs,tempBetas,true);
-			out <<"="<<tempS<<"~~~~";
-			this->TheObjects[i].RelationOneSideToStringCoordForm
-				(tempS,this->TheObjects[i].AlphaCoeffs,this->TheObjects[i].Alphas,false);
-			out <<tempS;
-			this->TheObjects[i].RelationOneSideToStringCoordForm
-				(tempS,this->TheObjects[i].BetaCoeffs,this->TheObjects[i].Betas,false);
-			out <<"="<<tempS<<"}\\\\\n";
+			out <<"="<<tempS;//<<"~~~~";
+		//	this->TheObjects[i].RelationOneSideToStringCoordForm
+		//		(tempS,this->TheObjects[i].AlphaCoeffs,this->TheObjects[i].Alphas,false);
+		//	out <<tempS;
+		//	this->TheObjects[i].RelationOneSideToStringCoordForm
+		//		(tempS,this->TheObjects[i].BetaCoeffs,this->TheObjects[i].Betas,false);
+		//	out <<"="<<tempS<<"}\\\\\n";
+      out<<"}\\\\\n";
 		}
 		if (lineCounter>this->NumAllowedLatexLines)
 		{ out <<footer<< "\n\n\n"<<header;

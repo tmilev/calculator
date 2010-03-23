@@ -5562,10 +5562,10 @@ public:
 	void GetEpsilonCoords
 		(	roots& input, roots& output, WeylGroup& theWeyl,
 			GlobalVariables& theGlobalVariables);
-	void ElementToString
+	int ElementToString
 		(	std::string &output, rootSubalgebras& owners, bool useLatex,
 			bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
-	void RootsToScalarProductString
+	int RootsToScalarProductString
 		(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft,
 			const std::string& letterTypeRight,
 			std::string& output, bool useLatex,
@@ -5578,7 +5578,7 @@ public:
 	{	this->ElementToString
 			(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
 	};
-	void MakeLookCivilized(rootSubalgebra& owner);
+	void MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots);
 	void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
@@ -5640,8 +5640,8 @@ public:
 	void AddRelationNoRepetition
 		(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
 	coneRelations()
-	{	this->NumAllowedLatexLines=20;
-		this->flagIncludeSmallerRelations=false;
+	{	this->NumAllowedLatexLines=44;
+		this->flagIncludeSmallerRelations=true;
 		this->flagIncludeCoordinateRepresentation=false;
 		this->flagIncludeSubalgebraDataInDebugString=false;
 	};

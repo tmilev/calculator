@@ -11404,6 +11404,64 @@ void SelectionWithMaxMultiplicity::initMe2(int NumElements, int MaxMult)
 	this->MaxMultiplicity=MaxMult;
 }
 
+int ::SelectionWithMaxMultiplicity::CardinalitySelectionWithMultiplicities()
+{ int result=0;
+	for (int i=0;i<this->Multiplicities.size;i++)
+		result+=this->Multiplicities.TheObjects[i];
+	return result;
+}
+
+void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality
+	(int Cardinality)
+{ if (Cardinality<1 || Cardinality>this->MaxMultiplicity*this->Multiplicities.size)
+		return;
+	if (this->CardinalitySelectionWithMultiplicities()!=Cardinality)
+		this->Multiplicities.initFillInObject(this->Multiplicities.size,0);
+	if (this->CardinalitySelectionWithMultiplicities()==0)
+	{ for (int i=this->Multiplicities.size-1;Cardinality>0;i--)
+		{ if (Cardinality>=this->MaxMultiplicity)
+				this->Multiplicities.TheObjects[i]=this->MaxMultiplicity;
+			else
+				this->Multiplicities.TheObjects[i]=Cardinality;
+			Cardinality-=this->Multiplicities.TheObjects[i];
+		}
+		this->ComputeElements();
+		return;
+	}
+	int firstNonZeroMult;
+	int currentCardinality=Cardinality;
+	for(firstNonZeroMult=this->Multiplicities.size-1;firstNonZeroMult>=0;firstNonZeroMult--)
+		if (this->Multiplicities.TheObjects[firstNonZeroMult]>0)
+			break;
+	if (firstNonZeroMult==0)
+		return;
+	currentCardinality-=this->Multiplicities.TheObjects[firstNonZeroMult];
+	this->Multiplicities.TheObjects[firstNonZeroMult]=0;
+	for(int i=firstNonZeroMult-1;i>=0;i--)
+	{	if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
+		{	this->Multiplicities.TheObjects[i]++;
+			currentCardinality++;
+			break;
+		} else
+		{ this->Multiplicities.TheObjects[i]=0;
+			currentCardinality-=this->MaxMultiplicity;
+		}
+	}
+	for (int i=this->Multiplicities.size-1;currentCardinality<Cardinality;i--)
+	{ assert(this->Multiplicities.TheObjects[i]==0);
+		if (Cardinality-currentCardinality>=this->MaxMultiplicity)
+				this->Multiplicities.TheObjects[i]=this->MaxMultiplicity;
+			else
+				this->Multiplicities.TheObjects[i]=Cardinality-currentCardinality;
+			currentCardinality+=this->Multiplicities.TheObjects[i];
+	}	
+	this->ComputeElements();	
+}
+
+int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality)
+{ return ::MathRoutines::NChooseK(this->Multiplicities.size+cardinality-1,cardinality);
+}
+
 void SelectionWithMaxMultiplicity::IncrementSubset()
 { for (int i=this->Multiplicities.size-1;i>=0;i--)
 	{ if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
@@ -11427,7 +11485,7 @@ void SelectionWithMultiplicities::ComputeElements()
 }
 
 int SelectionWithMultiplicities::CardinalitySelectionWithoutMultiplicities()
-{ return this->Multiplicities.size;
+{ return this->elements.size;
 }
 
 int ::SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
@@ -14283,25 +14341,36 @@ bool rootSubalgebra::AttemptTheTripleTrick
 {	roots& tempRoots= theGlobalVariables.rootsAttemptTheTripleTrick;
 	tempRoots.size=0;
   for (int i=0;i<this->kModules.size;i++)
-		if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
-			tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-  root tempRoot;
-  for (int i=0;i<tempRoots.size;i++)
-		for (int j=i;j<tempRoots.size;j++)
-    { tempRoot.Assign(tempRoots.TheObjects[i]);
-      tempRoot.Add(tempRoots.TheObjects[j]);
-      if (tempRoot.HasStronglyPerpendicularDecompositionWRT
+		if (!this->NilradicalKmods.selected[i])
+			if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
+				tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
+  root tempRoot,Accum;
+  ::SelectionWithMaxMultiplicity tempSel;
+  for (int i=2;i<6;i++)
+  {	tempSel.initMe2(tempRoots.size,i);
+		int NumElts=tempSel.NumCombinationsOfCardinality(i);
+		for (int j=0;j<NumElts;j++)
+		{ tempSel.IncrementSubsetFixedCardinality(i);
+			Accum.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
+			for (int k=0;k<tempSel.elements.size;k++)
+			{ tempRoot.Assign(tempRoots.TheObjects[tempSel.elements.TheObjects[k]]);
+				tempRoot.MultiplyByInteger(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
+				Accum.Add(tempRoot);
+			}
+			theRel.Betas.size=0; theRel.BetaCoeffs.size=0;
+			if (Accum.HasStronglyPerpendicularDecompositionWRT
             (NilradicalRoots,this->AmbientWeyl,theRel.Betas,theRel.BetaCoeffs))
-        return true;
-      for (int k=j;k<tempRoots.size;k++)
-      { tempRoot.Assign(tempRoots.TheObjects[i]);
-        tempRoot.Add(tempRoots.TheObjects[j]);
-        tempRoot.Add(tempRoots.TheObjects[k]);
-        if (tempRoot.HasStronglyPerpendicularDecompositionWRT
-							(NilradicalRoots,this->AmbientWeyl,theRel.Betas,theRel.BetaCoeffs))
-          return true;
-      }
-    }
+      {	theRel.Alphas.SetSizeExpandOnTopNoObjectInit(tempSel.CardinalitySelectionWithoutMultiplicities());
+				theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(theRel.Alphas.size);
+				for (int k=0;k<tempSel.elements.size;k++)
+				{ theRel.Alphas.TheObjects[k].Assign(tempRoots.TheObjects[tempSel.elements.TheObjects[k]]);
+					theRel.AlphaCoeffs.TheObjects[k].AssignInteger
+						(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
+				}
+				return true;
+			}
+		}
+	}
   return false;
 }
 void rootSubalgebra::MakeSureAlphasDontSumToRoot
@@ -17350,7 +17419,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoo
 	owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
 	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
 	if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
-	{//	assert(false);
+	{	assert(false);
     Stop();
 	}
 	this->SortRelation(owner);

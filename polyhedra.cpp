@@ -14332,7 +14332,34 @@ void rootSubalgebra::ExtractRelations
 		theRel.FixRightHandSide(*this,NilradicalRoots);
 		theRel.MakeLookCivilized(*this,NilradicalRoots);
     theRel.ComputeDebugString(owner,true,true);
-		owner.theBadRelations.AddRelationNoRepetition(theRel,owner,indexInOwner);
+		if (theRel.theDiagram.DebugString=="$C_3$")
+		{ root theLongAlpha; root theShortAlpha;
+		  Rational tempRat;
+      for (int i=0;i<2;i++)
+      { this->AmbientWeyl.RootScalarKillingFormMatrixRoot
+          (theRel.Alphas.TheObjects[i],theRel.Alphas.TheObjects[i], tempRat);
+        if (tempRat==2)
+          theShortAlpha.Assign(theRel.Alphas.TheObjects[i]);
+        else
+          theLongAlpha.Assign(theRel.Alphas.TheObjects[i]);
+      }
+      root firstBeta; firstBeta.Assign(theRel.Betas.TheObjects[0]);
+      root tempRoot; tempRoot.Assign(firstBeta);
+      tempRoot.MultiplyByInteger(2);
+      tempRoot.Subtract(theLongAlpha);
+      theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
+      theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
+      theRel.Alphas.TheObjects[0].Assign(theLongAlpha);
+      theRel.Alphas.TheObjects[1].Assign(tempRoot);
+      theRel.AlphaCoeffs.TheObjects[0].MakeOne();
+      theRel.AlphaCoeffs.TheObjects[1].MakeOne();
+      theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
+      theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
+      theRel.BetaCoeffs.TheObjects[0]=2;
+      theRel.Betas.TheObjects[0].Assign(firstBeta);
+      theRel.MakeLookCivilized(*this,NilradicalRoots);
+		}
+		owner.theBadRelations.AddObjectOnTopHash(theRel);
 	}
 }
 

@@ -2861,6 +2861,15 @@ int roots::GetDimensionOfElements()
 	return result;
 }
 
+void roots::intersectWith(roots& right,roots& output)
+{//this is slow please use the hashed version when speed is needed!
+	output.MakeActualSizeAtLeastExpandOnTop(this->size);
+	output.size=0;
+	for (int i=0;i<this->size;i++)
+		if (right.ContainsObject(this->TheObjects[i]))
+			output.AddRoot(this->TheObjects[i]);
+}
+
 bool roots::ContainsARootConnectedTo(root& input, WeylGroup& theWeyl)
 { Rational tempRat;
 	for (int i=0;i<this->size;i++)
@@ -12005,6 +12014,19 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, root& theRoot)
 			(this->simpleGenerators.TheObjects[tempEW.TheObjects[i]],theRoot,false,theRoot);
 }
 
+void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
+{ this->RootSubsystem.ClearTheObjects();
+	this->RootSubsystem.AddRootsOnTopHash(this->simpleGenerators);
+	root currentRoot;
+	for (int i=0;i<this->RootSubsystem.size;i++)
+		for (int j=0; j<this->simpleGenerators.size;j++)
+		{	currentRoot.Assign(this->RootSubsystem.TheObjects[i]);
+			this->AmbientWeyl.ReflectBetaWRTAlpha
+				(this->simpleGenerators.TheObjects[j],currentRoot,false,currentRoot);
+			this->RootSubsystem.AddObjectOnTopNoRepetitionOfObjectHash(currentRoot);
+		}
+}
+
 void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
 			bool recomputeAmbientRho)
@@ -12013,12 +12035,13 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 	orbitRho.ClearTheObjects();
 	if (recomputeAmbientRho)
 		this->AmbientWeyl.ComputeRho();
+	this->simpleGenerators.CopyFromBase(generators);
+	this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators);
+	this->ComputeRootSubsystem();
 	ElementWeylGroup tempEW;
 	tempEW.size=0;
 	orbitRho.AddObjectOnTopHash(this->AmbientWeyl.rho);
 	this->AddObjectOnTopHash(tempEW);
-	this->simpleGenerators.CopyFromBase(generators);
-	this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators);
 	root currentRoot;
 	for (int i=0;i<this->size;i++)
 	{	tempEW=this->TheObjects[i];
@@ -14176,43 +14199,31 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(root& input)
 }
 
 bool rootSubalgebra::ConeConditionHolds
-	(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
-{ MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
+	(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
+		roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations)
+{	MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
-	roots& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots;
-	int numNilradRoots=this->NumRootsInNilradical();
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
-	if (this->kModules.size==0)
+	if (Ksingular.size==0)
 		return true;
-	int numCols= numNilradRoots+this->kModules.size-
-		this->NilradicalKmods.CardinalitySelection;
+	int numCols= NilradicalRoots.size + Ksingular.size;
 	matA.init((short)theDimension+1, (short)numCols);
 	matb.init((short)theDimension+1,1);
-	NilradicalRoots.size=0;
 	matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
-	int counter=0;
-	for (int i=0;i<this->NilradicalKmods.CardinalitySelection;i++)
-	{	roots& tempKmod= this->kModules.TheObjects[this->NilradicalKmods.elements[i]];
-		for (int j=0;j<tempKmod.size;j++)
-		{	for (int k=0;k<theDimension;k++)
-				matA.elements[k][counter].Assign(tempKmod.TheObjects[j].TheObjects[k]);
-			NilradicalRoots.AddRoot(tempKmod.TheObjects[j]);
-			matA.elements[theDimension][counter].MakeOne();
-			counter++;
-		}
+	for (int i=0;i<NilradicalRoots.size;i++)
+	{	for (int k=0;k<theDimension;k++)
+			matA.elements[k][i].Assign(NilradicalRoots.TheObjects[i].TheObjects[k]);
+		matA.elements[theDimension][i].MakeOne();
 	}
-	for (int i=0;i<this->kModules.size;i++)
-	{ if (!this->NilradicalKmods.selected[i])
-		{ for (int k=0;k<theDimension;k++)
-			{	matA.elements[k][counter].Assign
-					(this->HighestWeightsGmodK.TheObjects[i].TheObjects[k]);
-				matA.elements[k][counter].Minus();
-			}
-			//this->HighestWeightsGmodK.TheObjects[i].ComputeDebugString();
-			matA.elements[theDimension][counter].MakeZero();
-			counter++;
+	for (int i=0;i<Ksingular.size;i++)
+	{ int currentCol=i+NilradicalRoots.size;
+		for (int k=0;k<theDimension;k++)
+		{	matA.elements[k][currentCol].Assign
+				(Ksingular.TheObjects[i].TheObjects[k]);
+			matA.elements[k][currentCol].Minus();
 		}
+		matA.elements[theDimension][currentCol].MakeZero();
 	}
 	//matA.ComputeDebugString();
 	//matb.ComputeDebugString();
@@ -14220,10 +14231,38 @@ bool rootSubalgebra::ConeConditionHolds
 	if (	MatrixLargeRational
 					::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 						(matA,matb,matX,theGlobalVariables))
-	{	this->ExtractRelations
-			(matA, matX,NilradicalRoots, owner, indexInOwner,theGlobalVariables);
+	{	if (doExtractRelations)
+			this->ExtractRelations
+				(	matA, matX,NilradicalRoots, owner, indexInOwner,theGlobalVariables,
+					Ksingular);
 		return false;
+	}	else
+		return true;
+}
+
+bool rootSubalgebra::ConeConditionHolds
+	(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
+{ roots& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots;
+	roots& Ksingular=theGlobalVariables.rootsConeConditionHolds2;
+	if (this->kModules.size==0)
+		return true;
+	NilradicalRoots.size=0;
+	int counter=0;
+	for (int i=0;i<this->NilradicalKmods.CardinalitySelection;i++)
+	{	roots& tempKmod= this->kModules.TheObjects[this->NilradicalKmods.elements[i]];
+		for (int j=0;j<tempKmod.size;j++)
+		{	NilradicalRoots.AddRoot(tempKmod.TheObjects[j]);
+			counter++;
+		}
 	}
+	Ksingular.size=0;
+	for (int i=0;i<this->kModules.size;i++)
+		if (!this->NilradicalKmods.selected[i])
+			Ksingular.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
+	if ( !this->ConeConditionHolds
+					(	theGlobalVariables,owner,indexInOwner,NilradicalRoots,
+						Ksingular,true ))
+		return false;
 	else
 		return true;
 }
@@ -14294,7 +14333,8 @@ void rootSubalgebra::MatrixToRelation
 
 void rootSubalgebra::ExtractRelations
 	(	MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots,
-		rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables)
+		rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables,
+		roots& Ksingular)
 {	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 	{	this->NilradicalKmods.ComputeDebugString();
@@ -14333,7 +14373,24 @@ void rootSubalgebra::ExtractRelations
 		theRel.MakeLookCivilized(*this,NilradicalRoots);
     theRel.ComputeDebugString(owner,true,true);
 		if (theRel.theDiagram.DebugString=="$C_3$")
-		{ root theLongAlpha; root theShortAlpha;
+		{ Selection tempSel;
+			tempSel.init(Ksingular.size);
+			int tempNum=::MathRoutines::NChooseK(Ksingular.size,2);
+			for (int i=0;i<tempNum;i++)
+			{ tempSel.incrementSelectionFixedCardinality(2);
+				theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
+				theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
+				theRel.Betas.size=0;
+				theRel.BetaCoeffs.size=0;
+				for (int j=0;j<tempSel.CardinalitySelection;j++)
+					theRel.Alphas.TheObjects[j].Assign
+						(Ksingular.TheObjects[tempSel.elements[j]]);
+				if (theRel.IsStrictlyWeaklyProhibiting
+							(*this,NilradicalRoots,theGlobalVariables,owner,indexInOwner))
+				{ Stop();
+				}		
+			}
+			/*root theLongAlpha; root theShortAlpha;
 		  Rational tempRat;
       for (int i=0;i<2;i++)
       { this->AmbientWeyl.RootScalarKillingFormMatrixRoot
@@ -14343,21 +14400,29 @@ void rootSubalgebra::ExtractRelations
         else
           theLongAlpha.Assign(theRel.Alphas.TheObjects[i]);
       }
-      root firstBeta; firstBeta.Assign(theRel.Betas.TheObjects[0]);
-      root tempRoot; tempRoot.Assign(firstBeta);
-      tempRoot.MultiplyByInteger(2);
-      tempRoot.Subtract(theLongAlpha);
-      theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
-      theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
-      theRel.Alphas.TheObjects[0].Assign(theLongAlpha);
-      theRel.Alphas.TheObjects[1].Assign(tempRoot);
-      theRel.AlphaCoeffs.TheObjects[0].MakeOne();
-      theRel.AlphaCoeffs.TheObjects[1].MakeOne();
-      theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
-      theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
-      theRel.BetaCoeffs.TheObjects[0]=2;
-      theRel.Betas.TheObjects[0].Assign(firstBeta);
-      theRel.MakeLookCivilized(*this,NilradicalRoots);
+			root firstBeta; root tempRoot; 
+      for (int i=0;i<2;i++)
+      {	firstBeta.Assign(theRel.Betas.TheObjects[i]);
+				tempRoot.Assign(firstBeta);
+				tempRoot.MultiplyByInteger(2);
+				tempRoot.Subtract(theLongAlpha);
+				assert(!NilradicalRoots.ContainsObject(tempRoot));
+				//}
+				theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
+				theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
+				theRel.Alphas.TheObjects[0].Assign(theLongAlpha);
+				theRel.Alphas.TheObjects[1].Assign(tempRoot);
+				theRel.AlphaCoeffs.TheObjects[0].MakeOne();
+				theRel.AlphaCoeffs.TheObjects[1].MakeOne();
+				theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
+				theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
+				theRel.BetaCoeffs.TheObjects[0]=2;
+				theRel.Betas.TheObjects[0].Assign(firstBeta);
+				bool tempBool=theRel.IsStrictlyWeaklyProhibiting(*this,NilradicalRoots,theGlobalVariables);
+				if (tempBool)
+					break;
+			}*/
+			assert(theRel.CheckForBugs(*this,NilradicalRoots));	
 		}
 		owner.theBadRelations.AddObjectOnTopHash(theRel);
 	}
@@ -14371,31 +14436,44 @@ bool rootSubalgebra::AttemptTheTripleTrick
 		if (!this->NilradicalKmods.selected[i])
 			if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
 				tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-  root tempRoot,Accum;
+	return this->AttemptTheTripleTrickWRTSubalgebra
+		(theRel,tempRoots,NilradicalRoots,theGlobalVariables);
+}				
+
+bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra
+	(	coneRelation& theRel, roots& highestWeightsAllowed, 
+		roots& NilradicalRoots, GlobalVariables& theGlobalVariables)	
+{ root tempRoot,Accum;
   ::SelectionWithMaxMultiplicity tempSel;
   for (int i=2;i<6;i++)
-  {	tempSel.initMe2(tempRoots.size,i);
+  {	tempSel.initMe2(highestWeightsAllowed.size,i);
 		int NumElts=tempSel.NumCombinationsOfCardinality(i);
 		for (int j=0;j<NumElts;j++)
 		{ tempSel.IncrementSubsetFixedCardinality(i);
 			Accum.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
 			for (int k=0;k<tempSel.elements.size;k++)
-			{ tempRoot.Assign(tempRoots.TheObjects[tempSel.elements.TheObjects[k]]);
-				tempRoot.MultiplyByInteger(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
+			{ tempRoot.Assign
+					(highestWeightsAllowed.TheObjects[tempSel.elements.TheObjects[k]]);
+				tempRoot.MultiplyByInteger
+					(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
 				Accum.Add(tempRoot);
 			}
 			theRel.Betas.size=0; theRel.BetaCoeffs.size=0;
-			if (Accum.HasStronglyPerpendicularDecompositionWRT
-            (NilradicalRoots,this->AmbientWeyl,theRel.Betas,theRel.BetaCoeffs))
-      {	theRel.Alphas.SetSizeExpandOnTopNoObjectInit(tempSel.CardinalitySelectionWithoutMultiplicities());
-				theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(theRel.Alphas.size);
-				for (int k=0;k<tempSel.elements.size;k++)
-				{ theRel.Alphas.TheObjects[k].Assign(tempRoots.TheObjects[tempSel.elements.TheObjects[k]]);
-					theRel.AlphaCoeffs.TheObjects[k].AssignInteger
-						(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
+			if (!Accum.IsEqualToZero())
+				if (Accum.HasStronglyPerpendicularDecompositionWRT
+							(NilradicalRoots,this->AmbientWeyl,theRel.Betas,theRel.BetaCoeffs))
+				{	Accum.ComputeDebugString();
+					theRel.Alphas.SetSizeExpandOnTopNoObjectInit
+						(tempSel.CardinalitySelectionWithoutMultiplicities());
+					theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(theRel.Alphas.size);
+					for (int k=0;k<tempSel.elements.size;k++)
+					{ theRel.Alphas.TheObjects[k].Assign
+							(highestWeightsAllowed.TheObjects[tempSel.elements.TheObjects[k]]);
+						theRel.AlphaCoeffs.TheObjects[k].AssignInteger
+							(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
+					}
+					return true;
 				}
-				return true;
-			}
 		}
 	}
   return false;
@@ -17439,6 +17517,52 @@ void coneRelation::ComputeConnectedComponents
 	}
 }
 
+bool coneRelation::IsStrictlyWeaklyProhibiting
+	(	rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables,
+		rootSubalgebras& owners, int indexInOwner)
+{	roots tempRoots;
+	tempRoots.CopyFromBase(this->Alphas);
+	tempRoots.AddListOnTop(this->Betas);
+	tempRoots.AddListOnTop(owner.genK);
+	owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
+	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
+	if (this->theDiagram.DebugString=="$F_4$")
+		return false;
+	if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
+	{//	assert(false);
+    Stop();
+	}
+	::ReflectionSubgroupWeylGroup tempSubgroup;
+	tempSubgroup.AmbientWeyl.Assign(owner.AmbientWeyl);
+	tempSubgroup.ComputeSubGroupFromGeneratingReflections
+		(tempRoots,theGlobalVariables,0,true);
+	roots NilradicalIntersection, genSingHW;
+	tempRoots.CopyFromBase(tempSubgroup.RootSubsystem);
+	tempRoots.ComputeDebugString();
+	NilradicalRoots.ComputeDebugString();
+	NilradicalRoots.intersectWith(tempRoots,NilradicalIntersection);
+	NilradicalIntersection.ComputeDebugString();
+	for (int i=0;i<owner.HighestWeightsGmodK.size;i++)
+		if (	 !owner.NilradicalKmods.selected[i] 
+				&& tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i]) )
+//				&& owner.IsGeneratingSingularVectors(i,NilradicalIntersection))
+			genSingHW.AddObjectOnTop(owner.HighestWeightsGmodK.TheObjects[i]);
+	genSingHW.ComputeDebugString();
+	if (owner.ConeConditionHolds
+				(	theGlobalVariables,owners,indexInOwner,NilradicalIntersection,
+					genSingHW,false))
+		return false;
+	if (!owner.AttemptTheTripleTrickWRTSubalgebra
+				(*this,genSingHW,NilradicalIntersection,theGlobalVariables))
+		return false;
+	this->SortRelation(owner);
+	this->FixRepeatingRoots(this->Alphas,this->AlphaCoeffs);
+	//this->FixRightHandSide(owner,NilradicalRoots);
+	this->ComputeDiagramRelAndK(owner);
+	return true;
+}
+
+
 void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots)
 {	roots tempRoots;
 	tempRoots.CopyFromBase(this->Alphas);
@@ -17497,6 +17621,20 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoot
 				}
 			}
 	}
+}
+
+bool coneRelation::CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots)
+{ for (int i=0;i<this->Alphas.size;i++)
+	{ int tempI= owner.HighestWeightsGmodK.IndexOfObject(this->Alphas.TheObjects[i]);
+		if (tempI==-1)
+			return false;
+		if (NilradicalRoots.ContainsObject(this->Alphas.TheObjects[i]))
+			return false;
+	}
+	for (int i=0;i<this->Betas.size;i++)
+		if (!NilradicalRoots.ContainsObject(this->Betas.TheObjects[i]))
+			return false;
+	return true;
 }
 
 void coneRelation::GetSumAlphas(root &output, int theDimension)

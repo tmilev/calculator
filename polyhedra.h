@@ -1524,6 +1524,7 @@ public:
 			int theDimension,FeedDataToIndicatorWindow reportFunction);
 	void Average(root& output, int theDimension);
 	void Pop(int index);
+	void intersectWith(roots& right, roots& output);
 	bool ContainsARootConnectedTo(root& input, WeylGroup& theWeyl);
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
@@ -5400,12 +5401,14 @@ public:
 	WeylGroup AmbientWeyl;
 	WeylGroup Elements;
 	roots simpleGenerators;
+	hashedRoots RootSubsystem;
 	std::string DebugString;
 	void ComputeDebugString(){this->ElementToString(DebugString);};
 	void ElementToString(std::string& output);
 	void ComputeSubGroupFromGeneratingReflections
 		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
 			bool recomputeAmbientRho);
+	void ComputeRootSubsystem();
 	void ActByElement(int index, root& theRoot);
 };
 
@@ -5583,6 +5586,9 @@ public:
 			(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
 	};
 	void MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots);
+	bool IsStrictlyWeaklyProhibiting
+		(	rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables,
+			rootSubalgebras& owners, int indexInOwner);
 	void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
 	bool leftSortedBiggerThanOrEqualToRight
 		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
@@ -5592,6 +5598,7 @@ public:
 	void RelationOneSideToStringCoordForm
 		(std::string& output,	ListBasicObjects<Rational>& coeffs,	roots& theRoots, bool EpsilonForm);
 	void GetSumAlphas(root& output, int theDimension);
+	bool CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots);
 	void SortRelation(rootSubalgebra& owner);
 	void operator=(const coneRelation& right)
 	{ this->Alphas.CopyFromBase(right.Alphas);
@@ -5708,10 +5715,13 @@ public:
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
 	bool AttemptTheTripleTrick
 		(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
+	bool AttemptTheTripleTrickWRTSubalgebra
+		(	coneRelation& theRel, roots& highestWeightsAllowed, 
+			roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	void ExtractRelations
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner,
-			GlobalVariables& theGlobalVariables);
+			GlobalVariables& theGlobalVariables,roots& Ksingular);
   bool IsIsomorphicTo
 		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables);
 	void MakeGeneratingSingularVectors
@@ -5738,7 +5748,7 @@ public:
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(bool makeALaTeXReport, bool useHtml,GlobalVariables& theGlobalVariables)
-		{this->ElementToString(this->DebugString,makeALaTeXReport,useHtml,theGlobalVariables);};
+	{this->ElementToString(this->DebugString,makeALaTeXReport,useHtml,theGlobalVariables);};
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
@@ -5754,6 +5764,9 @@ public:
 			ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
 	bool ConeConditionHolds
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+	bool ConeConditionHolds
+		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
+			roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
 	void PossibleNilradicalComputation
 		(	GlobalVariables& theGlobalVariables,Selection& selKmods,
 			rootSubalgebras& owner, int indexInOwner);
@@ -6079,6 +6092,7 @@ public:
 	roots rootsIsABogusNeighbor2;
 	roots rootsSplitChamber1;
 	roots rootsNilradicalRoots;
+	roots rootsConeConditionHolds2;
 	roots rootsRootSAIso;
 	roots rootsGetCoordsInBasis;
 	roots rootsGetEpsilonCoords;

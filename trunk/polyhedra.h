@@ -791,7 +791,7 @@ public:
 	int MaxMultiplicity;
 	void initMe2(int NumElements, int MaxMult);
 	int NumCombinationsOfCardinality(int cardinality);
-	void IncrementSubset();	
+	void IncrementSubset();
 	void IncrementSubsetFixedCardinality(int Cardinality);
 	int CardinalitySelectionWithMultiplicities();
 };
@@ -1411,6 +1411,7 @@ public:
 	static int gcdSigned(int a, int b){if (a<0) {a*=-1;} if (b<0){b*=-1;} return Rational::gcd(a,b);};
 	inline void operator =(const Rational& right){this->Assign(right);};
 	inline bool operator ==(const Rational& right){return this->IsEqualTo(right);};
+	inline bool operator ==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
 	inline void operator = (int right){this->AssignInteger(right);};
 };
 

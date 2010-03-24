@@ -790,7 +790,10 @@ class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities
 public:
 	int MaxMultiplicity;
 	void initMe2(int NumElements, int MaxMult);
-	void IncrementSubset();
+	int NumCombinationsOfCardinality(int cardinality);
+	void IncrementSubset();	
+	void IncrementSubsetFixedCardinality(int Cardinality);
+	int CardinalitySelectionWithMultiplicities();
 };
 
 class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultiplicities

@@ -1155,7 +1155,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
-	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default(),'F',4);
@@ -11454,8 +11454,8 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality
 			else
 				this->Multiplicities.TheObjects[i]=Cardinality-currentCardinality;
 			currentCardinality+=this->Multiplicities.TheObjects[i];
-	}	
-	this->ComputeElements();	
+	}
+	this->ComputeElements();
 }
 
 int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality)

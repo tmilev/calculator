@@ -6064,6 +6064,8 @@ public:
  	static bool OpenDataFileOrCreateIfNotPresent
 		(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
 	static void clearDollarSigns(std::string& theString, std::string& output);
+	static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
+	
 };
 
 class RandomCodeIDontWantToDelete

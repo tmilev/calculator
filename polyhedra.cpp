@@ -585,7 +585,15 @@ void CGIspecificRoutines::clearDollarSigns(std::string& theString, std::string& 
 			out<<theString[i];
 	output=out.str();
 }
-
+void CGIspecificRoutines::subEqualitiesWithSimeq(std::string& theString, std::string& output)
+{ std::stringstream out;
+	for(unsigned int i=0;i<theString.size();i++)
+		if(theString[i]!='=')
+			out<<theString[i];
+		else
+			out <<"\\simeq ";
+	output=out.str();
+}
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots
 	(	root& r1, root& r2,	unsigned long thePenStyle, int r, int g, int b)
 {	if (thePenStyle!=5)
@@ -1155,14 +1163,14 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
-	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 		(*this->theGlobalVariablesContainer->Default(),'F',4);
 		//(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	//this->theRootSubalgebras.ComputeLProhibitingRelations
+	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -14422,6 +14430,9 @@ void rootSubalgebra::ExtractRelations
 					break;
 			}*/
 			assert(theRel.CheckForBugs(*this,NilradicalRoots));
+			NilradicalRoots.ComputeDebugString();
+			this->NilradicalKmods.ComputeDebugString();
+			this->ComputeDebugString(true,false,theGlobalVariables);
 		}
 		owner.theBadRelations.AddObjectOnTopHash(theRel);
 	}
@@ -17999,12 +18010,17 @@ void rootSubalgebras::DynkinTableToString
 			out << header;
 		this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
 		this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
+		if (tempS=="") tempS="-";
 		if (useLatex)
-			out << "$\\mathfrak{k}_{ss}$: "<<tempS;
+		{	::CGIspecificRoutines::subEqualitiesWithSimeq(tempS,tempS);
+			::CGIspecificRoutines::subEqualitiesWithSimeq(tempS2,tempS2);
+			out << "\\begin{tabular}{p{2cm}}\n $\\mathfrak{k}_{ss}$: "<<tempS;
+			out <<"\\\\\n";
+		}
 		else
 		{	::CGIspecificRoutines::clearDollarSigns(tempS,tempS);
 			::CGIspecificRoutines::clearDollarSigns(tempS2,tempS2);
-			out <<" k_{ss}: ";
+			out <<"k_{ss}: ";
 			if (!useHtml)
 			{	out	<<tempS;
 			} else
@@ -18013,14 +18029,21 @@ void rootSubalgebras::DynkinTableToString
 			}
 		}
 		if (useLatex)
-			out <<" $C(\\mathfrak{k})_{ss}$: ";
+			out <<"$C(\\mathfrak{k})_{ss}$: ";
 		else
-			out <<" C(k)_{ss}: ";
+			out <<"C(k)_{ss}: ";
+		if (tempS2=="") tempS2="-";
 		out << tempS2;
-		out<<"\n\n Contained in: ";
+		if (useLatex)
+			out<<"\\\\\n";
+		out<<"\nLies in: \\\\\n";
+		int counter=0;
 		for(int j=0;j<this->TheObjects[i].indicesSubalgebrasContainingK.size;j++)
 		{ int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
 			this->TheObjects[tempI].theDynkinDiagram.ElementToString(tempS);
+			if (useLatex)
+				::CGIspecificRoutines::subEqualitiesWithSimeq(tempS,tempS);
+			counter+=(signed)tempS.length();
 			if (!useHtml)
 				out<<tempS<<", ";
 			else
@@ -18029,8 +18052,13 @@ void rootSubalgebras::DynkinTableToString
 				this->pathToHtmlReference(tempI,tempS,htmlPathServer,tempS3);
 				out << tempS3<<" , ";
 			}
+			if (useLatex&& counter>20)
+			{ counter=0;
+				out<<"\\\\\n";
+			}
 		}
-
+		if (useLatex)
+			out<<"\\end{tabular}";
 		row=(i)/this->NumColsPerTableLatex;
 		col=(i)% this->NumColsPerTableLatex;
 		if (row==this->NumLinesPerTableLatex)

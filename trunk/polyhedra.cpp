@@ -14387,8 +14387,7 @@ void rootSubalgebra::ExtractRelations
 						(Ksingular.TheObjects[tempSel.elements[j]]);
 				if (theRel.IsStrictlyWeaklyProhibiting
 							(*this,NilradicalRoots,theGlobalVariables,owner,indexInOwner))
-				{ Stop();
-				}
+          break;
 			}
 			/*root theLongAlpha; root theShortAlpha;
 		  Rational tempRat;

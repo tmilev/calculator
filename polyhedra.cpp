@@ -14388,7 +14388,7 @@ void rootSubalgebra::ExtractRelations
 				if (theRel.IsStrictlyWeaklyProhibiting
 							(*this,NilradicalRoots,theGlobalVariables,owner,indexInOwner))
 				{ Stop();
-				}		
+				}
 			}
 			/*root theLongAlpha; root theShortAlpha;
 		  Rational tempRat;
@@ -14400,7 +14400,7 @@ void rootSubalgebra::ExtractRelations
         else
           theLongAlpha.Assign(theRel.Alphas.TheObjects[i]);
       }
-			root firstBeta; root tempRoot; 
+			root firstBeta; root tempRoot;
       for (int i=0;i<2;i++)
       {	firstBeta.Assign(theRel.Betas.TheObjects[i]);
 				tempRoot.Assign(firstBeta);
@@ -14422,7 +14422,7 @@ void rootSubalgebra::ExtractRelations
 				if (tempBool)
 					break;
 			}*/
-			assert(theRel.CheckForBugs(*this,NilradicalRoots));	
+			assert(theRel.CheckForBugs(*this,NilradicalRoots));
 		}
 		owner.theBadRelations.AddObjectOnTopHash(theRel);
 	}
@@ -14438,11 +14438,11 @@ bool rootSubalgebra::AttemptTheTripleTrick
 				tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
 	return this->AttemptTheTripleTrickWRTSubalgebra
 		(theRel,tempRoots,NilradicalRoots,theGlobalVariables);
-}				
+}
 
 bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra
-	(	coneRelation& theRel, roots& highestWeightsAllowed, 
-		roots& NilradicalRoots, GlobalVariables& theGlobalVariables)	
+	(	coneRelation& theRel, roots& highestWeightsAllowed,
+		roots& NilradicalRoots, GlobalVariables& theGlobalVariables)
 { root tempRoot,Accum;
   ::SelectionWithMaxMultiplicity tempSel;
   for (int i=2;i<6;i++)
@@ -17543,9 +17543,10 @@ bool coneRelation::IsStrictlyWeaklyProhibiting
 	NilradicalRoots.intersectWith(tempRoots,NilradicalIntersection);
 	NilradicalIntersection.ComputeDebugString();
 	for (int i=0;i<owner.HighestWeightsGmodK.size;i++)
-		if (	 !owner.NilradicalKmods.selected[i] 
-				&& tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i]) )
-//				&& owner.IsGeneratingSingularVectors(i,NilradicalIntersection))
+		if (	 !owner.NilradicalKmods.selected[i]
+				&& tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i])
+				&& owner.IsGeneratingSingularVectors(i,NilradicalIntersection)
+				)
 			genSingHW.AddObjectOnTop(owner.HighestWeightsGmodK.TheObjects[i]);
 	genSingHW.ComputeDebugString();
 	if (owner.ConeConditionHolds

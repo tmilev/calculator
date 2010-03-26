@@ -1166,11 +1166,11 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'E',6);
+		(*this->theGlobalVariablesContainer->Default(),'E',8);
 		//(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-7);
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 

@@ -1158,19 +1158,19 @@ void ComputationSetup::DoTheRootSAComputation()
 
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=true;
+	this->theRootSubalgebras.flagComputeConeCondition=false;
 	this->theRootSubalgebras.flagLookingForMinimalRels=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
-	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=true;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'F',4);
+		(*this->theGlobalVariablesContainer->Default(),'E',6);
 		//(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	//this->theRootSubalgebras.ComputeLProhibitingRelations
-	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	this->theRootSubalgebras.ComputeLProhibitingRelations
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-7);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -11950,12 +11950,15 @@ void WeylGroup::GetEpsilonMatrix
 		{	output.elements[i][WeylRank-3-i]=1;
 			if (i!=0)
 				output.elements[i][WeylRank-2-i]=-1;
+		//	output.ComputeDebugString();
 		}
+		output.elements[WeylRank-2][0]=-1;
 		output.elements[WeylRank-2][WeylRank-2]=1;
 		output.elements[WeylRank-2][WeylRank-1]=1;
 		output.elements[WeylRank-1][WeylRank-2]=1;
 		output.elements[WeylRank-1][WeylRank-1]=-1;
 	}
+	//output.ComputeDebugString();
 }
 
 void WeylGroup::MakeBn(int n)
@@ -14631,7 +14634,8 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 		Stop();
 	theSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
 	theSubgroup.ComputeSubGroupFromGeneratingReflections
-		(selectedRootsBasisCentralizer,theGlobalVariables,0,false);
+		(	selectedRootsBasisCentralizer,theGlobalVariables,
+			this->UpperLimitNumElementsWeyl,false);
 	//theSubgroup.ComputeDebugString();
 	this->ActionsNormalizerCentralizerNilradical.SetSizeExpandOnTopNoObjectInit(theSubgroup.size-1);
 	for(int i=0;i<theSubgroup.size-1;i++)

@@ -5874,6 +5874,7 @@ public:
 	int NumSubalgebrasCounted;
 	int NumLinesPerTableLatex;
 	int NumColsPerTableLatex;
+	int UpperLimitNumElementsWeyl;
 	ListBasicObjects<std::string> theBadDiagrams;
 	ListBasicObjects<int> numFoundBadDiagrams;
 	WeylGroup AmbientWeyl;
@@ -5935,12 +5936,14 @@ public:
 		this->flagLookingForMinimalRels=false;
 		this->NumLinesPerTableLatex=20;
 		this->NumColsPerTableLatex=4;
+		this->UpperLimitNumElementsWeyl=10000;
 	};
 };
 
 struct IndicatorWindowVariables
 {
 public:
+	bool Busy;
 	int NumProcessedMonomialsCurrentFraction;
 	int NumProcessedMonomialsTotal;
 
@@ -5955,7 +5958,8 @@ public:
 	std::string ProgressReportString5;
 	void Assign(IndicatorWindowVariables& right);
 	void Nullify()
-	{ this->Pause=true;
+	{ this->Busy=false;
+		this->Pause=true;
 		this->NumProcessedMonomialsCurrentFraction=0;
 		this->NumProcessedMonomialsTotal=0;
 	};

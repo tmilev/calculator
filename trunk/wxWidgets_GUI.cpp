@@ -1398,24 +1398,27 @@ void guiMainWindow::onComputationOver(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
-{
-    IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
-    wxString tempS1(output.ProgressReportString1.c_str(),wxConvUTF8);
-    MainWindow1->Label1ProgressReport->SetLabel(tempS1);
-    wxString tempS2(output.ProgressReportString2.c_str(),wxConvUTF8);
-    MainWindow1->Label2ProgressReport->SetLabel(tempS2);
-    wxString tempS3(output.ProgressReportString3.c_str(),wxConvUTF8);
-    MainWindow1->Label3ProgressReport->SetLabel(tempS3);
-    wxString tempS4(output.ProgressReportString4.c_str(),wxConvUTF8);
-    MainWindow1->Label4ProgressReport->SetLabel(tempS4);
-    wxString tempS5(output.ProgressReportString5.c_str(),wxConvUTF8);
-    MainWindow1->Label5ProgressReport->SetLabel(tempS5);
-    if (output.flagRootIsModified)
-    {
-        root tempRoot;
-        tempRoot.AssignIntRoot(output.modifiedRoot);
-        MainWindow1->WriteIndicatorWeight(tempRoot);
-    }
+{	IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
+  //if (output.Busy)
+	//	return;
+	output.Busy=true;
+  wxString tempS1(output.ProgressReportString1.c_str(),wxConvUTF8);
+  MainWindow1->Label1ProgressReport->SetLabel(tempS1);
+  wxString tempS2(output.ProgressReportString2.c_str(),wxConvUTF8);
+  MainWindow1->Label2ProgressReport->SetLabel(tempS2);
+  wxString tempS3(output.ProgressReportString3.c_str(),wxConvUTF8);
+  MainWindow1->Label3ProgressReport->SetLabel(tempS3);
+  wxString tempS4(output.ProgressReportString4.c_str(),wxConvUTF8);
+  MainWindow1->Label4ProgressReport->SetLabel(tempS4);
+  wxString tempS5(output.ProgressReportString5.c_str(),wxConvUTF8);
+  MainWindow1->Label5ProgressReport->SetLabel(tempS5);
+  if (output.flagRootIsModified)
+  {
+      root tempRoot;
+      tempRoot.AssignIntRoot(output.modifiedRoot);
+      MainWindow1->WriteIndicatorWeight(tempRoot);
+  }
+  output.Busy=false;
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
@@ -1424,9 +1427,13 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
   {	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
     return;
   }
+  if (MainWindow1->progressReportVariables.Busy)
+		return;
+  MainWindow1->progressReportVariables.Busy=true;
   MainWindow1->progressReportVariables.Assign(output);
   ::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxProgressReportEvent);
   MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
+  MainWindow1->progressReportVariables.Busy=false;
 }
 
 

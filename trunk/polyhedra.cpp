@@ -1166,7 +1166,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'E',8);
+		(*this->theGlobalVariablesContainer->Default(),'E',7);
 		//(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
@@ -2886,6 +2886,19 @@ bool roots::ContainsARootConnectedTo(root& input, WeylGroup& theWeyl)
 			return true;
 	}
 	return false;
+}
+
+void roots::MakeBasisChange(root& input, root& output)
+{	int theDimension=input.size;
+	assert(theDimension==this->size);
+	assert(&input!=&output);
+	root tempRoot2;
+	output.MakeZero(theDimension);
+	for (int j=0; j<theDimension;j++)
+	{ tempRoot2.Assign(this->TheObjects[j]);
+		tempRoot2.MultiplyByLargeRational(input.TheObjects[j]);
+		output.Add(tempRoot2);
+	}
 }
 
 int roots::ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables)
@@ -12014,15 +12027,26 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
 	{ this->TheObjects[i].ElementToString(tempS);
 		out << tempS<<"\n";
 	}
+	this->ExternalAutomorphisms.ElementToStringGeneric(tempS);
+	out << tempS;
 	output=out.str();
 }
 
 void ReflectionSubgroupWeylGroup::ActByElement(int index, root& theRoot)
 { ElementWeylGroup& tempEW= this->TheObjects[index];
 	int NumElts=tempEW.size;
+	root tempRoot; tempRoot.Assign(theRoot);
 	for (int i=0;i<NumElts;i++)
-		this->AmbientWeyl.ReflectBetaWRTAlpha
-			(this->simpleGenerators.TheObjects[tempEW.TheObjects[i]],theRoot,false,theRoot);
+	{ int tempI=tempEW.TheObjects[i];
+		if(tempI<this->simpleGenerators.size)
+			this->AmbientWeyl.ReflectBetaWRTAlpha
+				(this->simpleGenerators.TheObjects[tempI],theRoot,false,theRoot);
+		else
+		{ tempI-=this->simpleGenerators.size;
+			this->ExternalAutomorphisms.TheObjects[tempI].MakeBasisChange(tempRoot,theRoot);
+			tempRoot.Assign(theRoot);
+		}
+	}
 }
 
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
@@ -12039,9 +12063,12 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 }
 
 void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
-		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
-			bool recomputeAmbientRho)
+	(	roots& generators,rootsCollection& ExternalAutos, 
+		GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
+		bool recomputeAmbientRho)
 {	hashedRoots& orbitRho=theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
+	this->truncated=false;
+	ExternalAutos.ComputeDebugString();
 	this->ClearTheObjects();
 	orbitRho.ClearTheObjects();
 	if (recomputeAmbientRho)
@@ -12051,7 +12078,12 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 	this->ComputeRootSubsystem();
 	ElementWeylGroup tempEW;
 	tempEW.size=0;
-	orbitRho.AddObjectOnTopHash(this->AmbientWeyl.rho);
+	root tempRoot;
+	tempRoot.Assign(this->AmbientWeyl.rho);
+	tempRoot.MultiplyByInteger(3);
+	tempRoot.TheObjects[0].Add(ROne);
+	//orbitRho.AddObjectOnTopHash(this->AmbientWeyl.rho);
+	orbitRho.AddObjectOnTopHash(tempRoot);
 	this->AddObjectOnTopHash(tempEW);
 	root currentRoot;
 	for (int i=0;i<this->size;i++)
@@ -12059,16 +12091,27 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 		for (int j=0; j<this->simpleGenerators.size;j++)
 		{	this->AmbientWeyl.ReflectBetaWRTAlpha
 				(this->simpleGenerators.TheObjects[j],orbitRho.TheObjects[i],false,currentRoot);
-			if (orbitRho.IndexOfObjectHash(currentRoot)==-1)
+			if (!orbitRho.ContainsObjectHash(currentRoot))
 			{	orbitRho.AddObjectOnTopHash(currentRoot);
 				tempEW.AddObjectOnTop(j);
 				this->AddObjectOnTopHash(tempEW);
 				tempEW.PopLastObject();
 			}
-			if (UpperLimitNumElements>0)
-        if (this->size>=UpperLimitNumElements)
-          return;
 		}
+		for (int j=1;j<ExternalAutos.size;j++)
+		{	ExternalAutos.TheObjects[j].MakeBasisChange(orbitRho.TheObjects[i],currentRoot);
+			if (!orbitRho.ContainsObjectHash(currentRoot))
+			{ orbitRho.AddObjectOnTopHash(currentRoot);
+				tempEW.AddObjectOnTop(j+this->simpleGenerators.size);
+				this->AddObjectOnTopHash(tempEW);
+				tempEW.PopLastObject();
+			}
+		}
+		if (UpperLimitNumElements>0)
+			if (this->size>=UpperLimitNumElements)
+			{	this->truncated=true;
+				return;
+			}
 	}
 }
 
@@ -14071,9 +14114,23 @@ void rootSubalgebra::PossibleNilradicalComputation
 	this->MakeProgressReportPossibleNilradicalComputation(theGlobalVariables,owner,indexInOwner);
 }
 
+void rootSubalgebra::MakeProgressReportGenAutos
+	(int progress,int outOf,int found, GlobalVariables& theGlobalVariables)
+{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out4, out5;
+	out4<< progress+1 << " out of "<< outOf <<" possibilities checked";
+	out5<< found << " found possible generators";
+	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
+	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);	
+}
+
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
 	(GlobalVariables& theGlobalVariables,rootSubalgebras& owner, int indexInOwner)
-{ if (this->flagMakingProgressReport)
+{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	if (this->flagMakingProgressReport)
 	{ std::stringstream out1, out2,out3,out4, out5;
 		if (this->flagFirstRoundCounting)
 		{	out1 <<"Counting ss part "<< this->theDynkinDiagram.DebugString;
@@ -14094,8 +14151,7 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
 		::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
 		::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
 		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-			theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 	}
 }
 
@@ -14603,6 +14659,9 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		{	bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop
 				(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
 			bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
+			this->MakeProgressReportGenerationSubalgebras
+				(	bufferSAs,RecursionDepth,theGlobalVariables,k,	
+					bufferSAs.TheObjects[RecursionDepth-1].kModules.size);	
 			int indexSA=
 				this->IndexSubalgebra
 					(	theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth],
@@ -14621,6 +14680,50 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		}
 }
 
+void rootSubalgebras::MakeProgressReportGenerationSubalgebras
+	(	rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables,
+		int currentIndex, int TotalIndex)
+{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out1, out2, out3,out4,out5;
+	std::stringstream* tempOut;
+	tempOut=&out1;
+	for (int i=0;i<=RecursionDepth;i++)
+	{ (*tempOut)<<bufferSAs.TheObjects[i].theDynkinDiagram.DebugString;
+		if (i!=RecursionDepth)
+			(*tempOut)<< ": ";
+		if (i==4)
+			tempOut=&out2;
+		if (i==6)
+			tempOut=&out3;
+		if (i==8)
+			tempOut=&out4;
+	}
+	out5<< "Included root " << currentIndex<< " out of "<< TotalIndex;
+	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();	
+	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();	
+	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();	
+	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();	
+	theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+}
+
+void rootSubalgebras::MakeProgressReportAutomorphisms
+	(	ReflectionSubgroupWeylGroup &theSubgroup, rootSubalgebra &theRootSA, 
+		GlobalVariables &theGlobalVariables)
+{	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out4, out1;
+	out1<<"k_ss: "<<theRootSA.theDynkinDiagram.DebugString <<" C(k_ss): "<<theRootSA.theCentralizerDiagram.DebugString;
+	out4<< "Num elements ";
+	if (theSubgroup.truncated)
+		out4<<"truncated ";
+	out4<<"group preserving k: "<< theSubgroup.size;
+	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();	
+	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();	
+	theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+}
+
 void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 	(	Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { roots selectedRootsBasisCentralizer;
@@ -14629,14 +14732,16 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 	for (int i=0;i<SelectedBasisRoots.MaxSize;i++)
 		if (!SelectedBasisRoots.selected[i])
 			selectedRootsBasisCentralizer.AddObjectOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
-	ReflectionSubgroupWeylGroup theSubgroup;
-	if (selectedRootsBasisCentralizer.size!=0)
-		Stop();
+	ReflectionSubgroupWeylGroup& theSubgroup=theGlobalVariables.subGroupActionNormalizerCentralizer;
 	theSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
+	this->MakeProgressReportAutomorphisms(theSubgroup,theRootSA,theGlobalVariables);
+	theRootSA.GenerateAutomorphisms
+		(theRootSA,theGlobalVariables,&theSubgroup,true);
 	theSubgroup.ComputeSubGroupFromGeneratingReflections
-		(	selectedRootsBasisCentralizer,theGlobalVariables,
+		(	selectedRootsBasisCentralizer,theSubgroup.ExternalAutomorphisms,theGlobalVariables,
 			this->UpperLimitNumElementsWeyl,false);
-	//theSubgroup.ComputeDebugString();
+	this->MakeProgressReportAutomorphisms(theSubgroup,theRootSA,theGlobalVariables);
+	theSubgroup.ComputeDebugString();
 	this->ActionsNormalizerCentralizerNilradical.SetSizeExpandOnTopNoObjectInit(theSubgroup.size-1);
 	for(int i=0;i<theSubgroup.size-1;i++)
 	{	this->ActionsNormalizerCentralizerNilradical.TheObjects[i]
@@ -14657,16 +14762,14 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical
 }
 
 bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-	(	Selection& targetSel,
-		GlobalVariables& theGlobalVariables)
+	(	Selection& targetSel,	GlobalVariables& theGlobalVariables)
 {	if (!this->flagUsingActionsNormalizerCentralizerNilradical)
 		return true;
 	for (int i=0;i<this->ActionsNormalizerCentralizerNilradical.size;i++)
-	{	if (!this->ApproveSelAgainstOneGenerator
+		if (!this->ApproveSelAgainstOneGenerator
 					(	this->ActionsNormalizerCentralizerNilradical.TheObjects[i],
 						targetSel,theGlobalVariables))
 			return false;
-	}
 	return true;
 }
 
@@ -14726,13 +14829,13 @@ int rootSubalgebras::IndexSubalgebra
 				int tempI= this->theBadDiagrams.IndexOfObject(input.theDynkinDiagram.DebugString);
 				if (tempI!=-1)
 					if (this->numFoundBadDiagrams.TheObjects[tempI]==0)
-					{	if(!input.IsIsomorphicTo(right,theGlobalVariables))
+					{	if(!input.GenerateAutomorphisms(right,theGlobalVariables,0,false))
 							result=-1;
 						if (result==-1)
 							this->numFoundBadDiagrams.TheObjects[tempI]++;
 					}
 			} else
-			if(!input.IsIsomorphicTo(right,theGlobalVariables))
+			if(!input.GenerateAutomorphisms(right,theGlobalVariables,0,false))
 				result=-1;
 			if (result!=-1)
 				return result;
@@ -14769,15 +14872,18 @@ void rootSubalgebra::ComputeDebugString(GlobalVariables& theGlobalVariables)
 }
 
 int rootSubalgebra::ProblemCounter=0;
-bool rootSubalgebra::IsIsomorphicTo
-	(	rootSubalgebra& right, GlobalVariables& theGlobalVariables)
+bool rootSubalgebra::GenerateAutomorphisms
+	(	rootSubalgebra& right, GlobalVariables& theGlobalVariables,
+		ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly)
 { if (this->theDynkinDiagram.DebugString!= right.theDynkinDiagram.DebugString)
     return false;
   if (this->theCentralizerDiagram.DebugString!= right.theCentralizerDiagram.DebugString)
     return false;
 	//if (this->theDynkinDiagram.DebugString=="D6\nA1\n")
 	//	Stop();
-  rootSubalgebra::ProblemCounter++;
+	if (outputAutomorphisms!=0)
+		outputAutomorphisms->ExternalAutomorphisms.size=0;
+  //rootSubalgebra::ProblemCounter++;
   roots isoDomain, isoRange;
   permutation permComponents, permComponentsCentralizer;
   ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
@@ -14809,12 +14915,21 @@ bool rootSubalgebra::IsIsomorphicTo
     tempSize+=tempList.TheObjects[i];
   }
   permComponentsCentralizer.initPermutation(tempList,tempSize);
-  int tempI1= permComponents.getTotalNumSubsets();
-  int tempI2= permComponentsCentralizer.getTotalNumSubsets();
-	int NumAutos=tempAutos.getTotalNumSubsets();
+	int tempI1;
+	int NumAutos;
+  //if (!actOnCentralizerOnly)
+  { tempI1= permComponents.getTotalNumSubsets();
+		NumAutos=tempAutos.getTotalNumSubsets();
+	} //else
+	//{ tempI1=1;
+	//	NumAutos=1;
+	//}
+	int tempI2= permComponentsCentralizer.getTotalNumSubsets();
 	int NumAutosCentralizer= tempAutosCentralizer.getTotalNumSubsets();
   permComponents.GetPermutation(tempPermutation1);
   permComponentsCentralizer.GetPermutation(tempPermutation2);
+  if (NumAutos*NumAutosCentralizer>1)
+		Stop();
   for (int i=0;i<tempI1;i++)
   { for(int j=0;j<tempI2;j++)
     { for (int k=0;k<NumAutos;k++)
@@ -14826,10 +14941,21 @@ bool rootSubalgebra::IsIsomorphicTo
 					this->theCentralizerDiagram.GetMapFromPermutation
 						(	isoDomain,isoRange,tempPermutation2,CentralizerDiagramAutomorphisms,
 							tempAutosCentralizer, right.theCentralizerDiagram);
-					isoDomain.ComputeDebugString();
-					isoRange.ComputeDebugString();
-					if (this->attemptExtensionToIsomorphism(isoDomain,isoRange,theGlobalVariables,0))
-						return true;
+//					isoDomain.ComputeDebugString();
+//					isoRange.ComputeDebugString();
+					//bool GenerateAllAutos=false;
+					//if (outputAutomorphisms!=0 && k==0 && l==0)
+					//	GenerateAllAutos=true;
+					if (this->attemptExtensionToIsomorphism
+								(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false))//GenerateAllAutos))
+					{	if (outputAutomorphisms==0)
+							return true;
+					}
+					if (outputAutomorphisms!=0)
+						this->MakeProgressReportGenAutos
+							( l+NumAutosCentralizer*(l+NumAutos*(j+i*tempI2)),
+								tempI1*tempI2*NumAutos*NumAutosCentralizer,outputAutomorphisms->ExternalAutomorphisms.size,
+								theGlobalVariables);
 					tempAutosCentralizer.IncrementSubset();
 				}
 				tempAutos.IncrementSubset();
@@ -14838,8 +14964,6 @@ bool rootSubalgebra::IsIsomorphicTo
     }
     permComponents.incrementAndGetPermutation(tempPermutation1);
   }
-  assert(!(	this->AmbientWeyl.KillingFormMatrix.NumRows==6 &&
-						this->AmbientWeyl.RootsOfBorel.size==36));
   return false;
 }
 
@@ -14847,14 +14971,12 @@ int rootSubalgebra::ProblemCounter2=0;
 
 bool rootSubalgebra::attemptExtensionToIsomorphism
 	(	roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
-		int RecursionDepth)
-{	this->ProblemCounter2++;
-	if (this->ProblemCounter2==8)
-		Stop();
-	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
+		int RecursionDepth,ReflectionSubgroupWeylGroup* outputAutomorphisms,
+		bool GenerateAllpossibleExtensions)
+{	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
 	assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
-		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables);
+		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables,outputAutomorphisms);
 	if (RecursionDepth>=theGlobalVariables.rootsAttemptExtensionIso1.size)
 	{	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 		theGlobalVariables.rootsAttemptExtensionIso1.SetSizeExpandOnTopNoObjectInit
@@ -14902,21 +15024,27 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 	}
 	assert(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank+1);
 	roots& firstKmodLeft= leftSA.kModules.TheObjects[counter];
+	bool result=false;
 	for (int j=0;j<firstKmodLeft.size;j++)
 		for (int i=0;i<rightSA.kModules.size;i++)
 			if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
 			{	rangeRec.AddObjectOnTop(rightSA.kModules.TheObjects[i].TheObjects[j]);
 				if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
 					if (this->attemptExtensionToIsomorphism
-								(domainRec, rangeRec, theGlobalVariables,RecursionDepth+1))
-						return true;
+								(	domainRec, rangeRec, theGlobalVariables,RecursionDepth+1,outputAutomorphisms,
+									GenerateAllpossibleExtensions))
+					{	if (!GenerateAllpossibleExtensions)
+							return true;
+						else
+							result=true;
+					}		
 				rangeRec.PopIndexSwapWithLast(rangeRec.size-1);
 			}
-	return false;
+	return result;
 }
 
 bool rootSubalgebra::IsAnIsomorphism
-	(roots &domain, roots &range, GlobalVariables& theGlobalVariables)
+	(roots &domain, roots &range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms)
 { MatrixLargeRational& matB= theGlobalVariables.matRootSAIso;
 	roots& tempRoots= theGlobalVariables.rootsRootSAIso;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
@@ -14944,20 +15072,14 @@ bool rootSubalgebra::IsAnIsomorphism
 			}
 	//if (this->flagAnErrorHasOccuredTimeToPanic)
 		//tempRoots.ComputeDebugString();
-	root tempRoot, tempRoot2;
+	root tempRoot;
 	for (int i=0;i<this->AmbientWeyl.RootsOfBorel.size;i++)
-	{	tempRoot.MakeZero(theDimension);
-		for (int j=0; j<theDimension;j++)
-		{ tempRoot2.Assign(tempRoots.TheObjects[j]);
-			tempRoot2.MultiplyByLargeRational
-				(this->AmbientWeyl.RootsOfBorel.TheObjects[i].TheObjects[j]);
-			tempRoot.Add(tempRoot2);
-		}
-//		if (this->flagAnErrorHasOccuredTimeToPanic)
-//			tempRoot.ComputeDebugString();
-//		this->AmbientWeyl.ComputeDebugString();
+	{	tempRoots.MakeBasisChange(this->AmbientWeyl.RootsOfBorel.TheObjects[i],tempRoot);
 		if (!this->IsARoot(tempRoot))
 			return false;
+	}
+	if (outputAutomorphisms!=0)
+	{ outputAutomorphisms->ExternalAutomorphisms.AddObjectOnTop(tempRoots);
 	}
 	return true;
 }
@@ -15552,606 +15674,6 @@ int ::DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes
 	else
 		assert(numEnds<=2);
 	return result;
-}
-
-void rootSubalgebra::SetupE6_3A2(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(6);
-	this->genK.TheObjects[0].InitFromIntegers(6, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(6, 1,1,1,1,1,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(6, 1,0,1,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(6, 0,1,1,2,2,1,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(6, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(6, 0,1,0,1,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(5);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A5(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(5);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A4plusA1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(5);
-	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->genK.TheObjects[4].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_D5(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(5);
-	this->genK.TheObjects[0].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A3plus2A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(5);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[4].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A4(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A3plusA1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_2A2(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A2plus2A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_4A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6, -1, -2, -2, -3, -2, -1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_D4(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->genK.TheObjects[3].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A3(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(3);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	1,	0,	0, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A2plusA1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(3);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	1,	0, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_3A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(3);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[2].InitFromIntegers(6,	0,	0,	0,	0,	0,	1, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A2(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(2);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_2A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(2);
-	this->genK.TheObjects[0].InitFromIntegers(6,	0,	0,	1,	0,	0,	0, 0, 0 );
-	this->genK.TheObjects[1].InitFromIntegers(6,	0,	1,	0,	0,	0,	0, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-void rootSubalgebra::SetupE6_A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(6);
-	this->genK.SetSizeExpandOnTopNoObjectInit(1);
-	this->genK.TheObjects[0].InitFromIntegers(6,	1,	0,	0,	0,	0,	0, 0, 0 );
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-}
-
-/////////////////////////////////////////////////////
-
-void rootSubalgebra::RunE6_3A2(GlobalVariables& theGlobalVariables)
-{ this->SetupE6_3A2(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE7_D6plusA1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(7);
-	this->genK.SetSizeExpandOnTopNoObjectInit(7);
-	this->genK.TheObjects[0].InitFromIntegers(7, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(7, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[2].InitFromIntegers(7, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(7, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(7, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE7_A2plusA5(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(7);
-	this->genK.SetSizeExpandOnTopNoObjectInit(7);
-	this->genK.TheObjects[0].InitFromIntegers(7, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(7, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(7, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(7, 0,0,0,0,0,0,1,0);
-	this->genK.TheObjects[5].InitFromIntegers(7, 1,1,2,3,2,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(7, 0,1,0,0,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE7_2A3plusA1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(7);
-	this->genK.SetSizeExpandOnTopNoObjectInit(7);
-	this->genK.TheObjects[0].InitFromIntegers(7, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(7, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(7, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(7, 1,1,2,3,3,2,1,0);
-	this->genK.TheObjects[4].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,0,1,0);
-	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE7_A7(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(7);
-	this->genK.SetSizeExpandOnTopNoObjectInit(7);
-	this->genK.TheObjects[0].InitFromIntegers(7, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(7, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(7, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(7, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,0,1,0);
-	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE7_D4plus3A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(7);
-	this->genK.SetSizeExpandOnTopNoObjectInit(7);
-	this->genK.TheObjects[0].InitFromIntegers(7, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(7, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(7, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(7, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[4].InitFromIntegers(7, 1,1,2,3,3,2,1,0);
-	this->genK.TheObjects[5].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE7_7A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(7);
-	this->genK.SetSizeExpandOnTopNoObjectInit(7);
-	this->genK.TheObjects[0].InitFromIntegers(7, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(7, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(7, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[3].InitFromIntegers(7, 1,1,2,3,3,2,1,0);
-	this->genK.TheObjects[4].InitFromIntegers(7, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(7, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(7, 1,1,2,2,1,1,1,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_A8(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 1,3,3,5,4,3,2,1);
-	this->genK.TheObjects[1].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(true,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_D8(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_A1_A7(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 2,3,4,6,5,4,3,2);
-	this->genK.TheObjects[1].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_A5_A1_A2(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 2,3,4,6,5,4,3,1);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_2A4(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 1,1,2,3,3,3,2,1);
-	this->genK.TheObjects[5].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(true,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_4A2(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 1,1,2,3,2,1,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,1,0,0,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 2,3,4,6,5,4,3,1);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_A2_E6(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 2,3,4,6,5,4,3,1);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->genK.TheObjects[2].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,1,0,0,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_A1_E7(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 2,3,4,6,5,4,3,1);
-	this->genK.TheObjects[1].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,1,0,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,1,1);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_D6_2A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 2,3,4,6,5,4,3,2);
-	this->genK.TheObjects[7].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_D5_A3(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 1,1,2,3,3,3,2,1);
-	this->genK.TheObjects[6].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,0,1,1);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_2D4(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 1,1,2,3,3,2,1,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,0,1,1);
-	this->genK.TheObjects[7].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_D4_4A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 1,1,2,3,3,2,1,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->genK.TheObjects[3].InitFromIntegers(8, 1,1,2,2,1,1,1,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_2A3_2A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 1,2,2,3,2,2,2,1);
-	this->genK.TheObjects[1].InitFromIntegers(8, 1,1,2,3,3,2,1,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,0,0,0,1);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunE8_8A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeEn(8);
-	this->genK.SetSizeExpandOnTopNoObjectInit(8);
-	this->genK.TheObjects[0].InitFromIntegers(8, 0,1,0,1,1,1,1,0);
-	this->genK.TheObjects[1].InitFromIntegers(8, 1,1,2,3,3,2,1,0);
-	this->genK.TheObjects[2].InitFromIntegers(8, 1,1,2,2,1,1,1,0);
-	this->genK.TheObjects[3].InitFromIntegers(8, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[4].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[5].InitFromIntegers(8, 1,2,2,3,2,1,0,0);
-	this->genK.TheObjects[6].InitFromIntegers(8, 0,0,0,0,0,1,0,0);
-	this->genK.TheObjects[7].InitFromIntegers(8, 2,3,4,6,5,4,3,2);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunF4_B4(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeF4();
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(4, 0,1,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(4, 2,2,1,0,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunF4_A3_A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeF4();
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(4, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,2,1,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunF4_A2_A2(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeF4();
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(4, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(4, 0,1,0,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,1,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunF4_C3_A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeF4();
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(4, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(4, 0,1,0,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,2,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunF4_D4(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeF4();
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(4, 0,0,0,1,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(4, 0,2,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(4, 2,2,1,0,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunF4_B2_2A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeF4();
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(4, 1,0,0,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(4, 0,2,1,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,2,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
-}
-
-void rootSubalgebra::RunF4_4A1(GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.MakeF4();
-	this->genK.SetSizeExpandOnTopNoObjectInit(4);
-	this->genK.TheObjects[0].InitFromIntegers(4, 2,2,1,0,0,0,0,0);
-	this->genK.TheObjects[1].InitFromIntegers(4, 0,2,1,0,0,0,0,0);
-	this->genK.TheObjects[2].InitFromIntegers(4, 0,0,1,0,0,0,0,0);
-	this->genK.TheObjects[3].InitFromIntegers(4, 2,4,3,2,0,0,0,0);
-	this->ComputeAll();
-	this->ComputeDebugString(theGlobalVariables);
-	this->GetLinearCombinationFromMaxRankRootsAndExtraRoot(false,theGlobalVariables);
 }
 
 void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot
@@ -17549,7 +17071,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting
 	::ReflectionSubgroupWeylGroup tempSubgroup;
 	tempSubgroup.AmbientWeyl.Assign(owner.AmbientWeyl);
 	tempSubgroup.ComputeSubGroupFromGeneratingReflections
-		(tempRoots,theGlobalVariables,0,true);
+		(tempRoots,tempSubgroup.ExternalAutomorphisms,theGlobalVariables,0,true);
 	roots NilradicalIntersection, genSingHW;
 	tempRoots.CopyFromBase(tempSubgroup.RootSubsystem);
 	tempRoots.ComputeDebugString();
@@ -17740,7 +17262,7 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight
 	return true;
 }
 
-bool coneRelation::isIsomorphicTo(coneRelation& right, rootSubalgebras& owners)
+bool coneRelation::GenerateAutomorphisms(coneRelation& right, rootSubalgebras& owners)
 { /*if (this->DebugString.length()!=right.DebugString.length())
 		return false;
 	for (unsigned int i=0;i<this->DebugString.length();i++)
@@ -17758,7 +17280,7 @@ void coneRelations::AddRelationNoRepetition
 	int i=this->FitHashSize(input.HashFunction());
 	ListBasicObjects<int>& theIndices= this->TheHashedArrays[i];
 	for (int j=0;j<theIndices.size;j++)
-	{	if(	this->TheObjects[theIndices.TheObjects[j]].isIsomorphicTo(input,owners))
+	{	if(	this->TheObjects[theIndices.TheObjects[j]].GenerateAutomorphisms(input,owners))
 			return;
 	}
 	if (!this->flagIncludeSmallerRelations)

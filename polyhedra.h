@@ -545,6 +545,7 @@ public:
 	void Resize(int r, int c, bool PreserveValues);
 	void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
 	void MakeIdMatrix(int theDimension);
+	inline void operator=(const MatrixElementaryLooseMemoryFit<Element>& right){this->Assign(right);};
 	MatrixElementaryLooseMemoryFit<Element>();
 	~MatrixElementaryLooseMemoryFit<Element>();
 };
@@ -1534,6 +1535,9 @@ public:
 		(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
 		 Selection& outputNonPivotPoints);
 	int GetDimensionOfElements();
+	//the following function assumes the first dimension vectors are the images of the 
+	// vectors (1,0,...,0),..., (0,...,0,1)
+	void MakeBasisChange(root& input, root& output);
 	bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
 	void GaussianEliminationForNormalComputation
 		(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension);
@@ -5398,15 +5402,18 @@ public:
 class ReflectionSubgroupWeylGroup: public HashedListBasicObjects<ElementWeylGroup>
 {
 public:
+	bool truncated;
 	WeylGroup AmbientWeyl;
 	WeylGroup Elements;
 	roots simpleGenerators;
+	rootsCollection ExternalAutomorphisms;
 	hashedRoots RootSubsystem;
 	std::string DebugString;
 	void ComputeDebugString(){this->ElementToString(DebugString);};
 	void ElementToString(std::string& output);
 	void ComputeSubGroupFromGeneratingReflections
-		(	roots& generators, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
+		(	roots& generators,rootsCollection& ExternalAutos, 
+			GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
 			bool recomputeAmbientRho);
 	void ComputeRootSubsystem();
 	void ActByElement(int index, root& theRoot);
@@ -5554,7 +5561,7 @@ public:
 	ListBasicObjects<ListBasicObjects<int> > AlphaKComponents;
 	ListBasicObjects<ListBasicObjects<int> > BetaKComponents;
 	int IndexOwnerRootSubalgebra;
-	bool isIsomorphicTo(coneRelation& right,rootSubalgebras& owners);
+	bool GenerateAutomorphisms(coneRelation& right,rootSubalgebras& owners);
 	::DynkinDiagramRootSubalgebra theDiagram;
 	::DynkinDiagramRootSubalgebra theDiagramRelAndK;
 	std::string DebugString;
@@ -5722,13 +5729,15 @@ public:
 		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
 			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner,
 			GlobalVariables& theGlobalVariables,roots& Ksingular);
-  bool IsIsomorphicTo
-		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables);
+  bool GenerateAutomorphisms
+		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables, 
+			ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphism
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
-			int RecursionDepth);
+			int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
+			bool GenerateAllpossibleExtensions);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
@@ -5746,6 +5755,8 @@ public:
 		(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void MakeProgressReportPossibleNilradicalComputation
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+	void MakeProgressReportGenAutos
+		(int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(bool makeALaTeXReport, bool useHtml,GlobalVariables& theGlobalVariables)
 	{this->ElementToString(this->DebugString,makeALaTeXReport,useHtml,theGlobalVariables);};
@@ -5753,7 +5764,9 @@ public:
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
-	bool IsAnIsomorphism (roots& domain, roots& range, GlobalVariables& theGlobalVariables);
+	bool IsAnIsomorphism 
+		(	roots& domain, roots& range, GlobalVariables& theGlobalVariables,
+			ReflectionSubgroupWeylGroup* outputAutomorphisms);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	bool ListHasNonSelectedIndexLowerThanGiven
 		(int index,ListBasicObjects<int>& tempList, Selection& tempSel);
@@ -5797,58 +5810,6 @@ public:
 	inline void operator=(const rootSubalgebra& right);
 	void Assign(const rootSubalgebra& right);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
-	void SetupE6_3A2(GlobalVariables& theGlobalVariables);
-	void SetupE6_2A2plusA1(GlobalVariables& theGlobalVariables);
-	void SetupE6_A5(GlobalVariables& theGlobalVariables);
-	void SetupE6_A4plusA1(GlobalVariables& theGlobalVariables);
-	void SetupE6_D5(GlobalVariables& theGlobalVariables);
-	void SetupE6_A3plus2A1(GlobalVariables& theGlobalVariables);
-
-	void SetupE6_A4(GlobalVariables& theGlobalVariables);
-	void SetupE6_A3plusA1(GlobalVariables& theGlobalVariables);
-	void SetupE6_2A2(GlobalVariables& theGlobalVariables);
-	void SetupE6_A2plus2A1(GlobalVariables& theGlobalVariables);
-	void SetupE6_4A1(GlobalVariables& theGlobalVariables);
-	void SetupE6_D4(GlobalVariables& theGlobalVariables);
-
-	void SetupE6_A3(GlobalVariables& theGlobalVariables);
-	void SetupE6_A2plusA1(GlobalVariables& theGlobalVariables);
-	void SetupE6_3A1(GlobalVariables& theGlobalVariables);
-
-	void SetupE6_A2(GlobalVariables& theGlobalVariables);
-	void SetupE6_2A1(GlobalVariables& theGlobalVariables);
-	void SetupE6_A1(GlobalVariables& theGlobalVariables);
-
-
-	void RunE6_3A2(GlobalVariables& theGlobalVariables);
-
-	void RunE7_D6plusA1(GlobalVariables& theGlobalVariables);
-	void RunE7_A2plusA5(GlobalVariables& theGlobalVariables);
-	void RunE7_2A3plusA1(GlobalVariables& theGlobalVariables);
-	void RunE7_D4plus3A1(GlobalVariables& theGlobalVariables);
-	void RunE7_A7(GlobalVariables& theGlobalVariables);
-	void RunE7_7A1(GlobalVariables& theGlobalVariables);
-	void RunE8_A8(GlobalVariables& theGlobalVariables);
-	void RunE8_D8(GlobalVariables& theGlobalVariables);
-	void RunE8_A1_A7(GlobalVariables& theGlobalVariables);
-	void RunE8_A5_A1_A2(GlobalVariables& theGlobalVariables);
-	void RunE8_2A4(GlobalVariables& theGlobalVariables);
-	void RunE8_4A2(GlobalVariables& theGlobalVariables);
-	void RunE8_A2_E6(GlobalVariables& theGlobalVariables);
-	void RunE8_A1_E7(GlobalVariables& theGlobalVariables);
-	void RunE8_D6_2A1(GlobalVariables& theGlobalVariables);
-	void RunE8_D5_A3(GlobalVariables& theGlobalVariables);
-	void RunE8_2D4(GlobalVariables& theGlobalVariables);
-	void RunE8_D4_4A1(GlobalVariables& theGlobalVariables);
-	void RunE8_2A3_2A1(GlobalVariables& theGlobalVariables);
-	void RunE8_8A1(GlobalVariables& theGlobalVariables);
-	void RunF4_B4(GlobalVariables& theGlobalVariables);
-	void RunF4_A3_A1(GlobalVariables& theGlobalVariables);
-	void RunF4_A2_A2(GlobalVariables& theGlobalVariables);
-	void RunF4_C3_A1(GlobalVariables& theGlobalVariables);
-	void RunF4_D4(GlobalVariables& theGlobalVariables);
-	void RunF4_B2_2A1(GlobalVariables& theGlobalVariables);
-	void RunF4_4A1(GlobalVariables& theGlobalVariables);
 	void GetLinearCombinationFromMaxRankRootsAndExtraRoot
 		(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
@@ -5929,6 +5890,12 @@ public:
 	{	this->ElementToString
 			(this->DebugString,useLatex, useHtml,htmlPathPhysical,htmlPathServer,theGlobalVariables);
 	};
+	void MakeProgressReportGenerationSubalgebras
+		(	rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables,
+			int currentIndex, int TotalIndex);
+	void MakeProgressReportAutomorphisms
+		(	ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, 
+			GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
 	{	this->flagUseDynkinClassificationForIsomorphismComputation=false;
 		this->flagComputeConeCondition=true;
@@ -6175,7 +6142,7 @@ public:
 	Selection selSimplexAlg1;
 	Selection selSimplexAlg2;
 	Selection selApproveSelAgainstOneGenerator;
-
+	ReflectionSubgroupWeylGroup subGroupActionNormalizerCentralizer;
 
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;
 

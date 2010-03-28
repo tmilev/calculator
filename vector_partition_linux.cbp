@@ -20,10 +20,12 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-pg" />
 			<Add option="`wx-config --cflags`" />
 			<Add option="-DUSE_GUI" />
 		</Compiler>
 		<Linker>
+			<Add option="-pg" />
 			<Add option="`wx-config --libs`" />
 		</Linker>
 		<Unit filename="polyhedra.cpp" />
@@ -32,6 +34,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

@@ -477,7 +477,8 @@ guiMainWindow::guiMainWindow()
                    wxSize(800,600),
                    wxRESIZE_BORDER| wxCAPTION
                    | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
-{	this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
+{	this->theComputationSetup.flagDoCustomComputation=true;
+  this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
   this->BoxSizer3HorizontalInputButtons = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer4VerticalToggleButton1 = new ::wxBoxSizer(wxVERTICAL);

@@ -1141,7 +1141,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	rootSubalgebra tempSA;
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=false;
+	this->theRootSubalgebras.flagComputeConeCondition=true;
 	this->theRootSubalgebras.flagLookingForMinimalRels=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
@@ -1149,7 +1149,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'E',6);
+		(*this->theGlobalVariablesContainer->Default(),'D',7);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
 		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
@@ -2261,7 +2261,9 @@ void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection,
 }
 
 void Selection::init(int maxNumElements)
-{	if (maxNumElements>0 && maxNumElements!=this->MaxSize)
+{	if (maxNumElements==0)
+		this->MaxSize=0;
+	if (maxNumElements>0 && maxNumElements!=this->MaxSize)
 	{	delete [] selected;
 		delete [] elements;
 		//delete [] elementsInverseSelection;
@@ -13946,6 +13948,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 	this->AmbientWeyl.ComputeRho();
 	owner.ComputeActionNormalizerOfCentralizerIntersectNilradical
 		(emptySel,*this,theGlobalVariables);
+	theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
 	for (int l=0;l<2;l++)
 	{	if (l==1 && !this->flagComputeConeCondition)
 			break;
@@ -13961,7 +13964,6 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 					impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
 //			owner.ComputeActionNormalizerOfCentralizerIntersectNilradical
 //				(tempSel,*this);
-			theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
 			if (owner.flagUsingActionsNormalizerCentralizerNilradical)
 				owner.RaiseSelectionUntilApproval
 					(impliedSelections.TheObjects[0],theGlobalVariables);
@@ -14129,9 +14131,9 @@ void rootSubalgebra::MakeProgressReportGenAutos
 { if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
 		return;
 	std::stringstream out4, out5;
-	out4<< progress+1 << " out of "<< outOf <<" possibilities checked";
-	out5<< found << " found possible generators";
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	out5<< progress+1 << " out of "<< outOf <<" checked; ";
+	out5<< found << " found pos. generators";
+	//::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
 	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }

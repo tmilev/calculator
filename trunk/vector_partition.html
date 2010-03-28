@@ -2,26 +2,28 @@
 <HEAD><TITLE>Vector partition</TITLE>
 </HEAD>
 <BODY>
-**********************************
-
-***NOT FUNCTIONAL***
-
-Testing the infrastructure atm :)
-
-<img src="../jacobs_logo.png" alt="Jacobs University">
-<FORM method="POST" name="formMain" action="../cgi-bin/vector_partition_linux_cgi">
+<table>
+<tr valign="top">
+<td>
+<FORM method="POST" name="formMain" action="../cgi-bin/vector_partition_linux_cgi.cgi">
 Dimension(<=3): <input type="text" size ="1" name="textDim" onkeyup="generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);">
 Num Vectors(<=9): <input type="text" size="1" name="textNumVectors" onkeyup="generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);">
 <input type="submit" name="buttonGo" value="Go">
 </FORM>	
-<FORM method="POST" name="formRootSAs" action="../cgi-bin/vector_partition_linux_cgi">
+<FORM method="POST" name="formRootSAs" action="../cgi-bin/vector_partition_linux_cgi.cgi">
 Type(A,B,C,D,E,F,G): <input type="text" size ="1" name="textType" value="E">
 Dimension: <input type="text" size="1" name="textRank" value="6">
 <input type="submit" name="buttonGoRootSA" value="rootSA diagrams"	>
 </FORM>	
-
+</td>
+<td>
+<a href="http://math.jacobs-university.de/"><img src="../jacobs_logo.png" alt="Jacobs University"></a>
+</td>
+</tr>
+</table>
 <div style="width:400;height:400;border:solid 1px" id="canvasMain" onmouseup="clickCanvasMain(event.clientX, event.clientY);"></div>
 <SCRIPT TYPE="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" djConfig = "parseOnLoad: true"></SCRIPT>
+
 
 <script type="text/javascript">
 //<SCRIPT TYPE="text/javascript" src="../dojo.xd.js" djConfig = "parseOnLoad: true">

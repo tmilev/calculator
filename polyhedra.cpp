@@ -826,7 +826,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput
     InputDataOK=true;
   std::cout.flush();
 //  std::cout <<"  tempS3: "<< tempS3<<"   ";
+#ifdef CGIversionLimitRAMuse
   cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
+#endif
   if (tempS3=="textTyp")
   { CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
     std::stringstream tempStream1;
@@ -846,7 +848,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput
       return 1;
     }
     std::cout<<inputGood;
+#ifdef CGIversionLimitRAMuse
     cgiLimitRAMuseNumPointersInListBasicObjects=12000000;
+#endif
     return 2;
   }
   if (!InputDataOK==true)
@@ -1145,10 +1149,10 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'B',8);
+		(*this->theGlobalVariablesContainer->Default(),'E',6);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	//this->theRootSubalgebras.ComputeLProhibitingRelations
-	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	this->theRootSubalgebras.ComputeLProhibitingRelations
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -14107,12 +14111,12 @@ void rootSubalgebra::PossibleNilradicalComputation
 	(	GlobalVariables& theGlobalVariables, Selection& selKmods,
 		rootSubalgebras& owner, int indexInOwner)
 { this->NumNilradicalsAllowed++;
-	this->NilradicalKmods.Assign(selKmods);
 	//this->ComputeDebugString();
 	if (this->flagFirstRoundCounting)
 		this->NumTotalSubalgebras=this->NumNilradicalsAllowed;
 	if (!this->flagFirstRoundCounting)
-	{	if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner))
+	{	this->NilradicalKmods.Assign(selKmods);
+    if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner))
 		{	this->NumConeConditionFailures++;
 			owner.NumConeConditionFailures++;
 		}

@@ -901,35 +901,30 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 }
 
 void guiMainWindow::OpenFile(std::fstream& output)
-{
-    wxFileDialog* OpenDialog = new wxFileDialog
+{ wxFileDialog* OpenDialog = new wxFileDialog
     ( this, wxT("Choose a file to open"), wxEmptyString,
       wxEmptyString,wxT("Text files (*.tex)|*.tex"),wxSAVE, wxDefaultPosition);
-    output.close();
-    if (OpenDialog->ShowModal() == wxID_OK)
-    {
-        wxString CurrentDocPath = OpenDialog->GetPath();
-        std::string tempS(CurrentDocPath.mb_str());
-        output.open(tempS.c_str(),std::fstream::out|std::fstream::trunc);
-        output.clear();
-    }
-    OpenDialog->Destroy();
+  output.close();
+  if (OpenDialog->ShowModal() == wxID_OK)
+  { wxString CurrentDocPath = OpenDialog->GetPath();
+    std::string tempS(CurrentDocPath.mb_str());
+    output.open(tempS.c_str(),std::fstream::out|std::fstream::trunc);
+    output.clear();
+  }
+  OpenDialog->Destroy();
 }
 
 void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
-{
-    if (this->theComputationSetup.theOutput.NumVars!=this->Table3Values->GetNumberCols())
-    {
-        return;
-    }
-    intRoot tempRoot;
-    for (int i=0;i<this->theComputationSetup.theOutput.NumVars;i++)
-    {
-        this->theComputationSetup.ValueRoot.elements[i]= wxAtoi(this->Table3Values->GetCellValue(0,i));
-    }
-    this->theComputationSetup.EvaluatePoly();
-    this->Text2Values->SetValue(wxString(this->theComputationSetup.ValueString.c_str(),wxConvUTF8));
-    return;
+{ if (this->theComputationSetup.theOutput.NumVars!=this->Table3Values->GetNumberCols())
+  { return;
+  }
+  intRoot tempRoot;
+  for (int i=0;i<this->theComputationSetup.theOutput.NumVars;i++)
+  { this->theComputationSetup.ValueRoot.elements[i]= wxAtoi(this->Table3Values->GetCellValue(0,i));
+  }
+  this->theComputationSetup.EvaluatePoly();
+  this->Text2Values->SetValue(wxString(this->theComputationSetup.ValueString.c_str(),wxConvUTF8));
+  return;
 }
 
 void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)

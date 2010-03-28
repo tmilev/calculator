@@ -299,7 +299,7 @@ void CombinatorialChamberContainer::OneSlice
 				{	delete this->TheObjects[this->indexNextChamberToSlice];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 					this->TheObjects[this->indexNextChamberToSlice]=0;
 					//if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -665,7 +665,7 @@ void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input
 	}
 	std::cout <<"</script>";
 #ifdef CGIversionLimitRAMuse
-	std::cout <<"Total number of pointers allocated: "<< ::ParallelComputing::GlobalPointerCounter <<"<br>\n";
+	std::cout <<"<br>Total number of pointers allocated: "<< ::ParallelComputing::GlobalPointerCounter <<"<br>\n";
 #endif
 	std::cout << "Number of partial fractions: " << input.thePartialFraction.size <<"<br>\n";
 	std::cout << "Number of monomials in the numerators: "<<input.thePartialFraction.NumMonomialsInTheNumerators
@@ -796,10 +796,18 @@ void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input, std::string& path)
   output.close();
 }
 
-//void CGIspecificRoutines::rootSubalgebrasToHtml
- // (GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path)
-//{ input.ElementToHtml(path,theGlobalVariables);
-//}
+bool CGIspecificRoutines::CheckForInputSanity(ComputationSetup& input)
+{ if (input.VPVectors.size>15 || input.VPVectors.size<1)
+    return false;
+  if (input.theChambers.AmbientDimension>10 || input.theChambers.AmbientDimension<1)
+    return false;
+  if (!input.VPVectors.CheckForElementSanity())
+    return false;
+  for (int i=0;i<input.VPVectors.size;i++)
+    if (input.VPVectors.TheObjects[i].IsEqualToZero())
+      return false;
+  return true;
+}
 
 //outputs:
 //0 = default choice, computation needed
@@ -817,10 +825,10 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 	if (tempS3=="textDim")
     InputDataOK=true;
   std::cout.flush();
-  std::cout <<"  tempS3: "<< tempS3<<"   ";
+//  std::cout <<"  tempS3: "<< tempS3<<"   ";
+  cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
   if (tempS3=="textTyp")
   { CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
-    std::cout<<inputGood;
     std::stringstream tempStream1;
     tempStream1 << inputGood;
     std::string tempS; tempStream1.seekg(0);
@@ -831,13 +839,20 @@ int CGIspecificRoutines::ReadDataFromCGIinput
         output.WeylGroupLetter=='E'|| output.WeylGroupLetter=='F' ||
         output.WeylGroupLetter=='G')
       InputDataOK=true;
+    if (output.WeylGroupIndex<1 || output.WeylGroupIndex>8)
+      InputDataOK=false;
     if (!InputDataOK)
+    { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
       return 1;
+    }
+    std::cout<<inputGood;
+    cgiLimitRAMuseNumPointersInListBasicObjects=12000000;
     return 2;
   }
-
   if (!InputDataOK==true)
+  { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
     return 1;
+  }
 //	std::cout<< input<<"\n";
 
 	CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
@@ -845,11 +860,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 	tempStream << inputGood;
 	std::string tempS; int tempI;	tempStream.seekg(0);
 	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
-	if (output.theChambers.AmbientDimension>20)
-		return 1;
 	tempStream >> tempS>>tempS>> tempI;
 	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
-	std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
+	//std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
 	for (int i=0;i<output.VPVectors.size;i++)
 	{ output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.theChambers.AmbientDimension);
 		for(int j=0;j<(signed int)output.theChambers.AmbientDimension;j++)
@@ -857,6 +870,10 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 			output.VPVectors.TheObjects[i].TheObjects[j].AssignInteger(tempI);
 		}
 	}
+  if (!CGIspecificRoutines::CheckForInputSanity(output))
+  { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
+    return 1;
+  }
 	//output.VPVectors.ComputeDebugString();
 	//std::cout<<output.VPVectors.size<<output.theChambers.AmbientDimension<< output.VPVectors.DebugString;
 	output.flagComputingPartialFractions=true;
@@ -898,6 +915,7 @@ ComputationSetup::ComputationSetup()
 	this->flagCustomNilradicalInitted=false;
 	this->flagDoCustomNilradical=false;
 	this->flagOneSteChamberSliceInitialized=false;
+	this->flagDoCustomComputation=true;
 	this->NextDirectionIndex=0;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
@@ -906,7 +924,7 @@ ComputationSetup::ComputationSetup()
 	this->theGlobalVariablesContainer= new GlobalVariablesContainer;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->theGlobalVariablesContainer->SetSizeExpandOnTopNoObjectInit(1);
 //	this->RankEuclideanSpaceGraphics=3;
@@ -916,7 +934,7 @@ ComputationSetup::~ComputationSetup()
 {	delete this->theGlobalVariablesContainer;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -1097,65 +1115,6 @@ void ComputationSetup::InitComputationSetup()
 void ComputationSetup::DoTheRootSAComputation()
 {	//rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebra tempSA;
-//	tempSA.NumRelationsgreaterLengthThan2=0;
-	/*tempSA.SetupE6_3A2(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_2A2plusA1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A5(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A4plusA1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_D5(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A3plus2A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);*/
-/*	tempSA.SetupE6_A4(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A3plusA1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_2A2(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A2plus2A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_4A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_D4(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);*/
-	/*tempSA.SetupE6_A3(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-		Selection tempSel;
-	ListBasicObjects<Selection> tempSels;
-	tempSel.init(tempSA.kModules.size);
-	tempSels.AddObjectOnTop(tempSel);
-	tempSels.SetSizeExpandOnTopNoObjectInit(tempSA.kModules.size+1);
-	this->theRootSubalgebras.AmbientWeyl.MakeEn(6);
-		this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
-	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=false;
-	this->theRootSubalgebras.flagComputeConeCondition=false;
-	this->theRootSubalgebras.TheObjects[0].GenerateKmodMultTable
-		(	this->theRootSubalgebras.TheObjects[0].theMultTable,
-			this->theRootSubalgebras.TheObjects[0].theOppositeKmods,
-			*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.TheObjects[0].NumNilradicalsAllowed=0;
-	this->theRootSubalgebras.TheObjects[0].GeneratePossibleNilradicalsRecursive
-		(	*this->theGlobalVariablesContainer->Default(),
-			this->theRootSubalgebras.TheObjects[0].theMultTable,0,
-			tempSels,this->theRootSubalgebras.TheObjects[0].theOppositeKmods,
-			this->theRootSubalgebras,0);*/
-	/*
-	tempSA.SetupE6_A2plusA1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_3A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A2(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_2A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	tempSA.SetupE6_A1(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.AddObjectOnTop(tempSA);
-	this->theRootSubalgebras.TheObjects[14].ComputeDebugString(true);*/
-
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	this->theRootSubalgebras.flagComputeConeCondition=false;
@@ -1166,12 +1125,58 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'E',7);
-		//(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
+		(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	//this->theRootSubalgebras.ComputeLProhibitingRelations
+	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+}
+
+void ComputationSetup::DoTheRootSAComputationCustom()
+{	//rootSubalgebra theRootSA, theRootSA2;
+	rootSubalgebra tempSA;
+	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
+	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
+	this->theRootSubalgebras.flagComputeConeCondition=false;
+	this->theRootSubalgebras.flagLookingForMinimalRels=true;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
+	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
+	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
+	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
+	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
+	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
+		(*this->theGlobalVariablesContainer->Default(),'B',8);
+	this->theRootSubalgebras.SortDescendingOrderBySSRank();
+	//this->theRootSubalgebras.ComputeLProhibitingRelations
+	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+}
+
+void ComputationSetup::RunCustom()
+{	this->DoTheRootSAComputationCustom();
+//    this->theRootSubalgebras.ComputeDebugString(true);
+  this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
+	this->theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
+	this->theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
+	this->theRootSubalgebras.theBadRelations.ComputeDebugString
+		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.theGoodRelations.ComputeDebugString
+		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.theMinRels.ComputeDebugString
+		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theOutput.DebugString.append("\n\n\n");
+	this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
+	this->theOutput.DebugString.append("\n\n\n");
+	if (this->theRootSubalgebras.theBadRelations.size>0)
+	{	this->theOutput.DebugString.append("The bad relations: \n\n");
+		this->theOutput.DebugString.append
+			(this->theRootSubalgebras.theBadRelations.DebugString);
+	}
+	if (this->theRootSubalgebras.flagLookingForMinimalRels)
+	{ this->theOutput.DebugString.append("\n\nMinimal relations: \n\n");
+		this->theOutput.DebugString.append(this->theRootSubalgebras.theMinRels.DebugString);
+	}
+  this->theOutput.DebugString.append("\\end{document}");
 }
 
 void ComputationSetup::Run()
@@ -1181,36 +1186,13 @@ void ComputationSetup::Run()
 	//this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
-	//MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=true;
-	this->DoTheRootSAComputation();
-//    this->theRootSubalgebras.ComputeDebugString(true);
-    this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
-		this->theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
-		this->theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
-		this->theRootSubalgebras.theBadRelations.ComputeDebugString
-			(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-		this->theRootSubalgebras.theGoodRelations.ComputeDebugString
-			(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-		this->theRootSubalgebras.theMinRels.ComputeDebugString
-			(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-		this->theOutput.DebugString.append("\n\n\n");
-		this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
-		this->theOutput.DebugString.append("\n\n\n");
-		if (this->theRootSubalgebras.theBadRelations.size>0)
-		{	this->theOutput.DebugString.append("The bad relations: \n\n");
-			this->theOutput.DebugString.append
-				(this->theRootSubalgebras.theBadRelations.DebugString);
-		}
-		if (this->theRootSubalgebras.flagLookingForMinimalRels)
-		{ this->theOutput.DebugString.append("\n\nMinimal relations: \n\n");
-			this->theOutput.DebugString.append(this->theRootSubalgebras.theMinRels.DebugString);
-		}
-    this->theOutput.DebugString.append("\\end{document}");
+  if (this->flagDoCustomComputation)
+  { this->RunCustom();
     this->ExitComputationSetup();
     this->AllowRepaint=true;
     this->flagComputationInProgress=false;
-	if (true)
-		return;
+    return;
+  }
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
@@ -1897,6 +1879,13 @@ void root::AssignIntRoot(intRoot& r)
 		this->TheObjects[i].AssignInteger(r.elements[i]);
 }
 
+bool root::CheckForElementSanity()
+{ for (int i=0;i<this->size;i++)
+    if (!this->TheObjects[i].CheckForElementSanity())
+      return false;
+  return true;
+}
+
 void root::AssignWithoutLastCoordinate(root& right)
 {	this->SetSizeExpandOnTopLight(right.size-1);
 	for (int i=0;i<this->size;i++)
@@ -2276,7 +2265,7 @@ void Selection::init(int maxNumElements)
 		this->elements = new int[maxNumElements];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter+=(maxNumElements-this->MaxSize)*2;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		MaxSize =maxNumElements;
 	}
@@ -2380,7 +2369,7 @@ Selection::~Selection()
 	delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter-=this->MaxSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	//	delete [] elementsInverseSelection;
 	this->MaxSize=0;
@@ -2850,6 +2839,13 @@ void roots::AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r)
 	{ tempRoot.AssignIntRoot(r.TheObjects[i]);
 		this->AddRoot(tempRoot);
 	}
+}
+
+bool roots::CheckForElementSanity()
+{ for(int i=0;i<this->size;i++)
+    if (!this->TheObjects[i].CheckForElementSanity())
+      return false;
+  return true;
 }
 
 bool roots::AddRootNoRepetition(root& r)
@@ -3669,7 +3665,7 @@ bool CombinatorialChamber::SplitChamber
 	NewMinusChamber= new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter+=2;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	NewPlusChamber->flagPermanentlyZero= PlusChamberIsPermanentZero;
 	NewMinusChamber->flagPermanentlyZero= MinusChamberIsPermanentZero;
@@ -3868,7 +3864,7 @@ void CombinatorialChamberContainer::SliceWithAWallInit
 			{	delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 				this->TheObjects[i]=0;
 				break;
@@ -3897,7 +3893,7 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement
 				{ delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 					this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
 				}
@@ -5923,7 +5919,7 @@ void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplex
 	PrecomputedTaukn* NewMember = new PrecomputedTaukn;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->AddObjectOnTop(NewMember);
 	NewMember->k=k;
@@ -11855,6 +11851,8 @@ void WeylGroup::MakeArbitrary(char WeylGroupLetter,int n)
 
 void WeylGroup::MakeDn(int n)
 { this->MakeAn(n);
+  if (n<3)
+    return;
 	this->KillingFormMatrix.elements[n-1][n-2]=0;
 	this->KillingFormMatrix.elements[n-2][n-1]=0;
 	this->KillingFormMatrix.elements[n-3][n-1]=-1;
@@ -11862,7 +11860,9 @@ void WeylGroup::MakeDn(int n)
 }
 
 void WeylGroup::MakeAn(int n)
-{	this->rho.SetSizeExpandOnTopLight(n);
+{	if (n<0)
+    return;
+  this->rho.SetSizeExpandOnTopLight(n);
 	this->KillingFormMatrix.init(n,n);
 	this->KillingFormMatrix.NullifyAll();
 	for (int i=0;i<n-1;i++)
@@ -11875,6 +11875,8 @@ void WeylGroup::MakeAn(int n)
 
 void WeylGroup::MakeEn(int n)
 {	this->MakeAn(n);
+  if (n<4)
+    return;
 	this->KillingFormMatrix.elements[0][1]=0;
 	this->KillingFormMatrix.elements[1][0]=0;
 	this->KillingFormMatrix.elements[1][2]=0;
@@ -11976,11 +11978,15 @@ void WeylGroup::GetEpsilonMatrix
 
 void WeylGroup::MakeBn(int n)
 { this->MakeAn(n);
+  if (n<1)
+    return;
 	this->KillingFormMatrix.elements[n-1][n-1]=1;
 }
 
 void WeylGroup::MakeCn(int n)
 { this->MakeAn(n);
+  if(n<2)
+    return;
 	this->KillingFormMatrix.elements[n-1][n-1]=4;
 	this->KillingFormMatrix.elements[n-2][n-1]=-2;
 	this->KillingFormMatrix.elements[n-1][n-2]=-2;
@@ -12063,7 +12069,7 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 }
 
 void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
-	(	roots& generators,rootsCollection& ExternalAutos, 
+	(	roots& generators,rootsCollection& ExternalAutos,
 		GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
 		bool recomputeAmbientRho)
 {	hashedRoots& orbitRho=theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
@@ -13089,7 +13095,7 @@ rootFKFTcomputation::rootFKFTcomputation()
 	this->TheGlobalVariables= new GlobalVariables;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -13097,7 +13103,7 @@ rootFKFTcomputation::~rootFKFTcomputation()
 { delete this->TheGlobalVariables;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -14123,7 +14129,7 @@ void rootSubalgebra::MakeProgressReportGenAutos
 	out5<< found << " found possible generators";
 	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);	
+	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
@@ -14660,8 +14666,8 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 				(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
 			bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
 			this->MakeProgressReportGenerationSubalgebras
-				(	bufferSAs,RecursionDepth,theGlobalVariables,k,	
-					bufferSAs.TheObjects[RecursionDepth-1].kModules.size);	
+				(	bufferSAs,RecursionDepth,theGlobalVariables,k,
+					bufferSAs.TheObjects[RecursionDepth-1].kModules.size);
 			int indexSA=
 				this->IndexSubalgebra
 					(	theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth],
@@ -14701,15 +14707,15 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras
 	}
 	out5<< "Included root " << currentIndex<< " out of "<< TotalIndex;
 	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();	
-	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();	
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();	
-	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();	
+	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
 	theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
 void rootSubalgebras::MakeProgressReportAutomorphisms
-	(	ReflectionSubgroupWeylGroup &theSubgroup, rootSubalgebra &theRootSA, 
+	(	ReflectionSubgroupWeylGroup &theSubgroup, rootSubalgebra &theRootSA,
 		GlobalVariables &theGlobalVariables)
 {	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
 		return;
@@ -14719,8 +14725,8 @@ void rootSubalgebras::MakeProgressReportAutomorphisms
 	if (theSubgroup.truncated)
 		out4<<"truncated ";
 	out4<<"group preserving k: "<< theSubgroup.size;
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();	
-	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();	
+	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
 	theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
@@ -15037,7 +15043,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 							return true;
 						else
 							result=true;
-					}		
+					}
 				rangeRec.PopIndexSwapWithLast(rangeRec.size-1);
 			}
 	return result;
@@ -16061,7 +16067,7 @@ GeneratorPFAlgebraRecord::GeneratorPFAlgebraRecord()
 	this->Value = new IntegerPoly;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -17557,12 +17563,21 @@ void rootSubalgebras::DynkinTableToString
 		if (useLatex)
 			out <<"$C(\\mathfrak{k})_{ss}$: ";
 		else
-			out <<"C(k)_{ss}: ";
+		{	if (useHtml)
+        out <<"\n<br>\n";
+		  out <<"C(k)_{ss}: ";
+		}
 		if (tempS2=="") tempS2="-";
 		out << tempS2;
 		if (useLatex)
 			out<<"\\\\\n";
-		out<<"\nLies in: \\\\\n";
+    if (useHtml)
+      out <<"\n<br>\n";
+		out<<"\nLies in: ";
+		if (useLatex)
+			out<<	"\\\\\n";
+    if (useHtml)
+      out<<"\n<br>\n";
 		int counter=0;
 		for(int j=0;j<this->TheObjects[i].indicesSubalgebrasContainingK.size;j++)
 		{ int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];

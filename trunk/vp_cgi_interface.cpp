@@ -60,6 +60,7 @@ int main(int argc, char **argv)
   //inputString="textType=A&textRank=4";
   getPath(argv[0],inputPath);
   ComputationSetup theComputationSetup;
+  theComputationSetup.flagDoCustomComputation=false;
   int choice =::CGIspecificRoutines::ReadDataFromCGIinput
     (inputString, theComputationSetup,inputPath);
   //std::cout<< "choice " <<choice <<"       ";
@@ -80,13 +81,15 @@ int main(int argc, char **argv)
     }
     else
     {	WeylGroup tempWeyl;
-      tempWeyl.MakeArbitrary('B',3);
+      theComputationSetup.theChambers.AmbientDimension=3;
+      tempWeyl.MakeArbitrary('B',theComputationSetup.theChambers.AmbientDimension);
       tempWeyl.ComputeRho();
       theComputationSetup.VPVectors.CopyFromBase(tempWeyl.RootsOfBorel);
-      theComputationSetup.theChambers.AmbientDimension=3;
     }
     //std::cout.flush();
     std::cout<<"<script type=\"text/javascript\">\n";
+    std::cout<<"\tvar rootsArraySize=" <<theComputationSetup.VPVectors.size<<";\n";
+    std::cout<<"\tvar rootsArrayDim=" <<theComputationSetup.theChambers.AmbientDimension<<";\n";
     std::cout<< "\tvar rootsArray= new Array(" <<theComputationSetup.VPVectors.size << ");";
     for (int i=0;i<theComputationSetup.VPVectors.size;i++)
     { std::cout	<< "\n\trootsArray["<<i<<"]= new Array("

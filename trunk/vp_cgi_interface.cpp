@@ -105,18 +105,10 @@ int main(int argc, char **argv)
 #endif
 	}
 	//the below comment is for debug purposes when testing offline please dont delete it!
-	//inputString="textDim=3&textNumVectors=9&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=1&textCoord3=1&textCoord3=0&textCoord4=0&textCoord4=1&textCoord4=2&textCoord5=0&textCoord5=1&textCoord5=1&textCoord6=1&textCoord6=1&textCoord6=2&textCoord7=1&textCoord7=1&textCoord7=1&textCoord8=1&textCoord8=2&textCoord8=2&buttonGo=Go";
+	inputString="textDim=3&textNumVectors=9&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=1&textCoord3=1&textCoord3=0&textCoord4=0&textCoord4=1&textCoord4=2&textCoord5=0&textCoord5=1&textCoord5=1&textCoord6=1&textCoord6=1&textCoord6=2&textCoord7=1&textCoord7=1&textCoord7=1&textCoord8=1&textCoord8=2&textCoord8=2&buttonGo=Go";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
-//	for (int i=0;i<argc;i++)
-//	{ std::cout<< " argument "<<i<<": "<< argv[i];
-//	}
- // std::cout
-  //std::cout <<  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
-	//					<< std::endl;
-  //std::cout << "<html lang=\"en\" dir=\"LTR\">"<< std::endl;
-  //std::stringstream out;
   //inputString="textType=A&textRank=4";
   getPath(argv[0],inputPath);
   ComputationSetup theComputationSetup;
@@ -139,8 +131,7 @@ int main(int argc, char **argv)
       theComputationSetup.flagPartialFractionSplitPrecomputed=false;
       theComputationSetup.Run();
       ::CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
-      if (theComputationSetup.flagComputingVectorPartitions)
-        CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
+      CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
       std::string chamberFileName;
       std::fstream chamberFile;
       chamberFileName=inputPath;
@@ -148,6 +139,17 @@ int main(int argc, char **argv)
       CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(chamberFile,chamberFileName,false,false);
       chamberFile<<"<HTML><BODY>"<< theComputationSetup.theChambers.DebugString<<"</BODY></HTML>";
       chamberFile.close();
+      if (  theComputationSetup.DisplayNumberChamberOfInterest==-1 &&
+            theComputationSetup.flagComputingVectorPartitions)
+      { theComputationSetup.DisplayNumberChamberOfInterest=
+          theComputationSetup.theChambers.TheObjects
+            [theComputationSetup.theChambers.RootBelongsToChamberIndex
+               (theComputationSetup.thePartialFraction.IndicatorRoot,0)]
+                 ->DisplayNumber;
+        theComputationSetup.DisplayNumberChamberOfInterest=
+          theComputationSetup.theChambers
+            .TheObjects[theComputationSetup.DisplayNumberChamberOfInterest]->DisplayNumber;
+      }
       //std::cout <<"Run ok!";
     }
     else
@@ -174,9 +176,10 @@ int main(int argc, char **argv)
       }
   //    std::cout.flush();
     }
-    std::cout	<<"\n\tgeneratePageFromDimAndNum("
-              <<theComputationSetup.theChambers.AmbientDimension<<","
-              <<theComputationSetup.VPVectors.size <<","<<-1<<");\n</script>\n";
+    std::cout	<< "\n\tgeneratePageFromDimAndNum("
+              << theComputationSetup.theChambers.AmbientDimension<<","
+              << theComputationSetup.VPVectors.size <<","<<-1<<","
+              << theComputationSetup.DisplayNumberChamberOfInterest<<");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
   } else if (choice==2)
   { if (theComputationSetup.WeylGroupIndex<9)

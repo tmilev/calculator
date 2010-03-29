@@ -100,13 +100,14 @@ Requires <a href="http://httpd.apache.org/">Apache server</a> installed:
 			//alert("selected index"+selectedBasisIndex);
 		}
 	}
-	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim)
+	function generatePageFromDimAndNum(inputDim,inputNum,posIntextDim, ChamberDisplayIndex)
 	{ dim = Number(inputDim);
 		num = Number(inputNum);
 //		alert("dim: "+dim+" num: "+num);s
 		if (dim<1 || dim>4 || num>15 || num<1)
 		{	return;
 		}
+		document.formMain.chamberNumber.value=ChamberDisplayIndex;
 		if ((oldDimension!=dim) || (oldNumVectors!=num))
 		{	oldDimension=dim;
 			oldNumVectors=num;
@@ -186,6 +187,7 @@ Requires <a href="http://httpd.apache.org/">Apache server</a> installed:
 	}
 	dojo.require("dojox.gfx");
 	dojo.addOnLoad(drawOnCanvasMainPlusInit);		
+//generatePageFromDimAndNum(3,9,-1,-1);
 </script>
 
 

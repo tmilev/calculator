@@ -832,18 +832,21 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   }
   tempStream>> tempS;
  	output.flagComputingVectorPartitions=true;
+  output.DisplayNumberChamberOfInterest=-1;
   if (tempS=="buttonGo" || tempS=="buttonSplitChambers")
   { output.thePartialFraction.flagUsingIndicatorRoot=false;
-    if (tempS=="buttonGo")
-    { output.VPVectors.Average(output.thePartialFraction.IndicatorRoot, output.theChambers.AmbientDimension);
-      output.thePartialFraction.IndicatorRoot.MultiplyByInteger(output.VPVectors.size);
-    }
     if (tempS=="buttonSplitChambers")
     { output.flagComputingVectorPartitions=false;
     }
   }
   if (tempS=="buttonOneChamber")
   { output.thePartialFraction.flagUsingIndicatorRoot=true;
+    tempStream>> tempS>>tempS>>output.DisplayNumberChamberOfInterest;
+    std::cout<< "Chamber of interest: "<< output.DisplayNumberChamberOfInterest;
+  }
+  if (output.flagComputingVectorPartitions && output.DisplayNumberChamberOfInterest==-1)
+  { output.VPVectors.Average(output.thePartialFraction.IndicatorRoot, output.theChambers.AmbientDimension);
+    output.thePartialFraction.IndicatorRoot.MultiplyByInteger(output.VPVectors.size);
   }
 	//output.VPVectors.ComputeDebugString();
 	//std::cout<<output.VPVectors.size<<output.theChambers.AmbientDimension<< output.VPVectors.DebugString;
@@ -869,6 +872,7 @@ ComputationSetup::ComputationSetup()
 {	this->flagAllowRepaint=true;
   this->flagUseHtml=false;
 	this->flagUsingCustomVectors=false;
+	this->DisplayNumberChamberOfInterest=-1;
 //	this->flagComputingPartialFractions=true;
 	this->flagComputingPartialFractions=false;
 	this->flagComputingVectorPartitions=true;
@@ -1172,6 +1176,34 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
+  if (this->flagComputingChambers)
+	{	if (!this->flagDoingWeylGroupAction)
+		{	if (this->flagFullChop)
+			{	this->theChambers.SliceTheEuclideanSpace
+					(	this->InputRoots,this->NextDirectionIndex,this->theChambers.AmbientDimension,
+						this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
+			} else
+			{ if (this->flagOneIncrementOnly)
+					this->theChambers.SliceOneDirection
+						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
+							this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
+				else
+					this->theChambers.OneSlice
+						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
+							this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
+			}
+			this->theChambers.ComputeDebugString(false,this->flagUseHtml);
+		} else
+		{ if (this->flagFullChop)
+				this->FullChop(*this->theGlobalVariablesContainer->Default());
+			else
+			{	if (this->flagOneIncrementOnly)
+					this->oneIncrement(*this->theGlobalVariablesContainer->Default());
+				else
+					this->oneStepChamberSlice(*this->theGlobalVariablesContainer->Default());
+			}
+		}
+	}
 	if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
 	{	if (!this->flagUsingCustomVectors)
 		{	this->thePartialFraction.ComputeKostantFunctionFromWeylGroup
@@ -1191,7 +1223,16 @@ void ComputationSetup::Run()
         this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
       }
 			if (this->flagComputingVectorPartitions)
-			{	this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
+			{	if (!this->thePartialFraction.flagUsingIndicatorRoot && this->DisplayNumberChamberOfInterest!=-1
+            && this->flagComputingChambers)
+        { int tempI=this->theChambers.FindVisibleChamberWithDisplayNumber(this->DisplayNumberChamberOfInterest);
+          if (tempI!=-1)
+            this->theChambers.TheObjects[tempI]->ComputeInternalPointMethod2
+              (this->thePartialFraction.IndicatorRoot, this->theChambers.AmbientDimension);
+          else
+            this->thePartialFraction.IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
+        }
+			  this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
 					(	this->theOutput,this->thePartialFraction.IndicatorRoot,
 						false,false,*this->theGlobalVariablesContainer->Default());
 				this->theOutput.ComputeDebugString();
@@ -1220,34 +1261,6 @@ void ComputationSetup::Run()
 			this->thePartialFraction.DebugString= out2.str();
 		}
 		this->flagDoneComputingPartialFractions=true;
-	}
-	if (this->flagComputingChambers)
-	{	if (!this->flagDoingWeylGroupAction)
-		{	if (this->flagFullChop)
-			{	this->theChambers.SliceTheEuclideanSpace
-					(	this->InputRoots,this->NextDirectionIndex,this->theChambers.AmbientDimension,
-						this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
-			} else
-			{ if (this->flagOneIncrementOnly)
-					this->theChambers.SliceOneDirection
-						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
-							this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
-				else
-					this->theChambers.OneSlice
-						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
-							this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
-			}
-			this->theChambers.ComputeDebugString(false,this->flagUseHtml);
-		} else
-		{ if (this->flagFullChop)
-				this->FullChop(*this->theGlobalVariablesContainer->Default());
-			else
-			{	if (this->flagOneIncrementOnly)
-					this->oneIncrement(*this->theGlobalVariablesContainer->Default());
-				else
-					this->oneStepChamberSlice(*this->theGlobalVariablesContainer->Default());
-			}
-		}
 	}
 	//TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
 	this->ExitComputationSetup();
@@ -4185,6 +4198,13 @@ int CombinatorialChamberContainer::GetNumVisibleChambersAndLabelChambersForDispl
 		}
 	}
 	return NumChambersNonZero;
+}
+
+int CombinatorialChamberContainer::FindVisibleChamberWithDisplayNumber(int inputDisplayNumber)
+{ for (int i=inputDisplayNumber-1;i<this->size;i++)
+    if (this->TheObjects[i]->DisplayNumber==inputDisplayNumber)
+      return i;
+  return -1;
 }
 
 int CombinatorialChamberContainer::GetNumVisibleChambersNoLabeling()

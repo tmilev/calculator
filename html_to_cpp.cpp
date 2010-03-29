@@ -24,10 +24,17 @@ void getPathTemp(char* path, std::string& output)
     length++;
   output= path;
   for (int i=length-1;i>=0;i--)
+#ifndef WIN32
     if (path[i]=='/')
     { output.resize(i+1);
       return;
     }
+#else
+    if (path[i]=='\\')
+    { output.resize(i+1);
+      return;
+    }
+#endif
 }
 
 void htmlTocpp(std::string& input, std::string& output)

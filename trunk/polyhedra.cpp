@@ -258,7 +258,6 @@ bool QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
-bool partFractions::flagUsingIndicatorRoot=true;
 HashedListBasicObjects<GeneratorPFAlgebraRecord> GeneratorsPartialFractionAlgebra::theGenerators;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 bool WallData::flagDisplayWallDetails=true;
@@ -762,6 +761,7 @@ bool CGIspecificRoutines::CheckForInputSanity(ComputationSetup& input)
 //0 = default choice, computation needed
 //1 = page not initialized fill in initial data
 //2 = Generate Dynkin tables
+//3 = Go to root subalgebras page
 int CGIspecificRoutines::ReadDataFromCGIinput
   (std::string& inputBad, ComputationSetup& output, std::string& thePath)
 {	if (inputBad.length()<2)
@@ -780,6 +780,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 #endif
   CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
   //std::cout<<inputGood;
+  if (tempS3=="rootSAs")
+  { return 3;
+  }
   if (tempS3=="textTyp")
   { std::stringstream tempStream1;
     tempStream1 << inputGood;
@@ -809,6 +812,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   }
 //	std::cout<< input<<"\n";
 	std::stringstream tempStream;
+	std::cout<<inputGood;
 	tempStream << inputGood;
 	std::string tempS; int tempI;	tempStream.seekg(0);
 	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
@@ -826,21 +830,34 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
     return 1;
   }
+  tempStream>> tempS;
+ 	output.flagComputingVectorPartitions=true;
+  if (tempS=="buttonGo" || tempS=="buttonSplitChambers")
+  { output.thePartialFraction.flagUsingIndicatorRoot=false;
+    if (tempS=="buttonGo")
+    { output.VPVectors.Average(output.thePartialFraction.IndicatorRoot, output.theChambers.AmbientDimension);
+      output.thePartialFraction.IndicatorRoot.MultiplyByInteger(output.VPVectors.size);
+    }
+    if (tempS=="buttonSplitChambers")
+    { output.flagComputingVectorPartitions=false;
+    }
+  }
+  if (tempS=="buttonOneChamber")
+  { output.thePartialFraction.flagUsingIndicatorRoot=true;
+  }
 	//output.VPVectors.ComputeDebugString();
 	//std::cout<<output.VPVectors.size<<output.theChambers.AmbientDimension<< output.VPVectors.DebugString;
+	output.flagComputationInitialized=false;
 	output.WeylGroupIndex=output.theChambers.AmbientDimension;
 	output.flagComputingPartialFractions=true;
 	output.thePartialFraction.flagUsingOrlikSolomonBasis=false;
-	output.flagComputingVectorPartitions=false;
 	output.flagUsingCustomVectors=true;
 	output.flagDoingWeylGroupAction=false;
 	output.thePartialFraction.flagUsingCheckSum=true;
 	output.thePartialFraction.flagMaxNumStringOutputLines=200000;
-	output.thePartialFraction.flagUsingIndicatorRoot=true;
+  output.flagPartialFractionSplitPrecomputed=false;
 	output.flagComputationInitialized=false;
 	output.flagUseHtml=true;
-	output.VPVectors.Average(output.thePartialFraction.IndicatorRoot, output.theChambers.AmbientDimension);
-	output.thePartialFraction.IndicatorRoot.MultiplyByInteger(output.VPVectors.size);
 //	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[2].DebugString;
@@ -8759,15 +8776,15 @@ int partFraction::ElementToStringBasisChange
 
 bool partFraction::rootIsInFractionCone(partFractions& owner, root&r, GlobalVariables& theGlobalVariables)
 { //assert(this->IndicesNonZeroMults.size==root::AmbientDimension);
-	if (!partFractions::flagUsingIndicatorRoot|| owner.IndicatorRoot.IsEqualToZero())
+	if (!owner.flagUsingIndicatorRoot|| owner.IndicatorRoot.IsEqualToZero())
 		return true;
 	if (this->RelevanceIsComputed)
 		return !this->IsIrrelevant;
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 	{ this->ComputeDebugString(owner,theGlobalVariables);
-		if (this->DebugString=="a^{3}b^{2} \\frac{1}{(1-a^{2}b^{3})^5} \\frac{1}{(1-ab)}")
-		{ Stop();
-		}
+		//if (this->DebugString=="a^{3}b^{2} \\frac{1}{(1-a^{2}b^{3})^5} \\frac{1}{(1-ab)}")
+		//{ Stop();
+		//}
 	}
 	static MatrixLargeRational tempMat, MatOneCol;
 	static Selection NonPivotPoints;

@@ -1702,8 +1702,9 @@ public:
 	int getIndexVertexIncidentWithSelection(Selection& theSel);
 	bool VertexIsIncidentWithSelection(root& VertexCandidate,Selection& theSel);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
-	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
-		                root& direction, GlobalVariables& theGlobalVariables);
+	bool SplitChamber
+    ( root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
+      root& direction, GlobalVariables& theGlobalVariables);
 	bool IsABogusNeighbor
 		(	WallData& NeighborWall,CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex,
 			GlobalVariables& theGlobalVariables);
@@ -1726,14 +1727,14 @@ public:
 	bool PlusMinusPointIsInChamber(root&point);
 	void PurgeInternalWalls();
 	bool LinearAlgebraForVertexComputation
-				(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension);
+    (Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension);
 	bool LinearAlgebraForVertexComputationOneAffinePlane
-				(	Selection& theSelection, root& output,
-					GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner);
+		(	Selection& theSelection, root& output,
+			GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner);
 	//returns false if the vectors were linearly dependent
-	bool SliceInDirection(root& direction,roots& directions,
-										    int CurrentIndex, CombinatorialChamberContainer& output,
-												hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables);
+	bool SliceInDirection
+    ( root& direction,roots& directions, int CurrentIndex, CombinatorialChamberContainer& output,
+      hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables);
 	void PropagateSlicingWallThroughNonExploredNeighbors
 		(	root& theKillerNormal,rootsCollection &CuttingPlaneVertices,
 			::CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
@@ -1759,10 +1760,10 @@ public:
 	void MakeNewMutualNeighbors
 		(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
 	bool TestPossibilityToSlice(root& direction);
-	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner,
-																			root& direction,
-																			roots & directions, int CurrentIndex,
-																			root& outputNormal,GlobalVariables& theGlobalVariables);
+	bool MakeFacetFromEdgeAndDirection
+    (	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner,
+			root& direction, roots & directions, int CurrentIndex,
+			root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner,
 			std::fstream* LaTeXoutput, drawLineFunction theDrawFunction,
@@ -2419,6 +2420,7 @@ public:
 			int rank,root& IndicatorRoot,
 			GlobalVariables& theGlobalVariables);
 	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
+	int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
 	void SliceOneDirection
 			(	roots& directions, int& index, int rank,
 				root& IndicatorRoot, GlobalVariables& theGlobalVariables);
@@ -5987,6 +5989,7 @@ public:
 	int NumRowsNilradical;
 	int NumColsNilradical;
 	int WeylGroupIndex;
+	int DisplayNumberChamberOfInterest;
 	void AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV);
 	void EvaluatePoly();
 	void Run();

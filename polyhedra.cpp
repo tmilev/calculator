@@ -632,7 +632,17 @@ void CGIspecificRoutines::outputLineJavaScriptSpecific
 	lineCounter++;
 }
 
-void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input)
+void CGIspecificRoutines::MakeVPReportFromComputationSetup(ComputationSetup& input)
+{	std::string tempS;
+  input.theChambers.RootBelongsToChamberIndex(input.thePartialFraction.IndicatorRoot,&tempS);
+  std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n"
+            << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>\n<br>\n"
+            <<"<textarea name=\"vp_output\" cols=\"50\" rows=\"30\">"
+						<< input.theOutput.DebugString
+						<< "</textarea>";
+}
+
+void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(ComputationSetup& input)
 { CGIspecificRoutines::numLines=0;
 	CGIspecificRoutines::numRegularLines=0;
 	CGIspecificRoutines::numDottedLines=0;
@@ -670,70 +680,9 @@ void CGIspecificRoutines::MakeReportFromComputationSetup(ComputationSetup& input
 	std::cout << "Number of partial fractions: " << input.thePartialFraction.size <<"<br>\n";
 	std::cout << "Number of monomials in the numerators: "<<input.thePartialFraction.NumMonomialsInTheNumerators
 						<<"<br>\n";
-	std::cout << "<textarea name=\"vp_output\" cols=\"120\" rows=\"150\">"
+	std::cout << "<textarea name=\"pf_output\" cols=\"50\" rows=\"30\">"
 						<< input.thePartialFraction.DebugString
 						<< "</textarea>";
-}
-
-struct bmpfile_magic {
-  unsigned char magic[2];
-};
-
-struct bmpfile_header {
-	unsigned int filesz;
-	unsigned short creator1;
-	unsigned short creator2;
-	unsigned int bmp_offset;
-};
-
-struct bmp_dib_v3_header_t
-{ unsigned int header_sz;
-	unsigned int width;
-	unsigned int height;
-	unsigned short nplanes;
-	unsigned short bitspp;
-	unsigned int compress_type;
-	unsigned int bmp_bytesz;
-	unsigned int hres;
-	unsigned int vres;
-	unsigned int ncolors;
-	unsigned int nimpcolors;
-};
-
-
-void CGIspecificRoutines::MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader)
-{	outputFileOpenWithPreparedHeader.open(fileName.c_str(),std::fstream::trunc|std::fstream::out| std::fstream::binary);
-	outputFileOpenWithPreparedHeader.clear(std::ios::goodbit);// false);
-	::bmpfile_magic h1;
-	::bmpfile_header h2;
-	::bmp_dib_v3_header_t h3;
-	int size=10000;
-	h1.magic[0]='B'; h1.magic[1]='M';
-	h2.bmp_offset=14;
-	h2.creator1=0;
-	h2.creator2=0;
-	h2.filesz=size*3+54;
-	h3.width=100;
-	h3.height=100;
-	h3.header_sz=40;
-	h3.nplanes=1;
-	h3.bitspp=24;
-	h3.bmp_bytesz=size*3;
-	h3.compress_type=0;
-	h3.hres=2835;
-	h3.vres=2835;
-	h3.nimpcolors=0;
-	h3.ncolors=0;
-	outputFileOpenWithPreparedHeader.write((char*)(&h1),2);
-	outputFileOpenWithPreparedHeader.write((char*)(&h2),12);
-	outputFileOpenWithPreparedHeader.write((char*)(&h3),40);
-	for (int i=0;i<size;i++)
-	{	char tempUI=100;
-		outputFileOpenWithPreparedHeader.write(&tempUI,1);
-		outputFileOpenWithPreparedHeader.write(&tempUI,1);
-		outputFileOpenWithPreparedHeader.write(&tempUI,1);
-	}
-	outputFileOpenWithPreparedHeader.close();
 }
 
 void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::string& output)
@@ -829,9 +778,10 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 #ifdef CGIversionLimitRAMuse
   cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
 #endif
+  CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
+  //std::cout<<inputGood;
   if (tempS3=="textTyp")
-  { CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
-    std::stringstream tempStream1;
+  { std::stringstream tempStream1;
     tempStream1 << inputGood;
     std::string tempS; tempStream1.seekg(0);
     tempStream1 >> tempS>>tempS>> output.WeylGroupLetter;
@@ -858,8 +808,6 @@ int CGIspecificRoutines::ReadDataFromCGIinput
     return 1;
   }
 //	std::cout<< input<<"\n";
-
-	CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
 	std::stringstream tempStream;
 	tempStream << inputGood;
 	std::string tempS; int tempI;	tempStream.seekg(0);
@@ -880,6 +828,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   }
 	//output.VPVectors.ComputeDebugString();
 	//std::cout<<output.VPVectors.size<<output.theChambers.AmbientDimension<< output.VPVectors.DebugString;
+	output.WeylGroupIndex=output.theChambers.AmbientDimension;
 	output.flagComputingPartialFractions=true;
 	output.thePartialFraction.flagUsingOrlikSolomonBasis=false;
 	output.flagComputingVectorPartitions=false;
@@ -887,6 +836,11 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 	output.flagDoingWeylGroupAction=false;
 	output.thePartialFraction.flagUsingCheckSum=true;
 	output.thePartialFraction.flagMaxNumStringOutputLines=200000;
+	output.thePartialFraction.flagUsingIndicatorRoot=true;
+	output.flagComputationInitialized=false;
+	output.flagUseHtml=true;
+	output.VPVectors.Average(output.thePartialFraction.IndicatorRoot, output.theChambers.AmbientDimension);
+	output.thePartialFraction.IndicatorRoot.MultiplyByInteger(output.VPVectors.size);
 //	std::cout<<"\n<br><br>"<<output.VPVectors.DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[1].DebugString;
 //	std::cout<<"\n<br><br>"<<output.VPVectors.TheObjects[2].DebugString;
@@ -895,12 +849,14 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 }
 
 ComputationSetup::ComputationSetup()
-{	this->AllowRepaint=true;
+{	this->flagAllowRepaint=true;
+  this->flagUseHtml=false;
 	this->flagUsingCustomVectors=false;
 //	this->flagComputingPartialFractions=true;
 	this->flagComputingPartialFractions=false;
 	this->flagComputingVectorPartitions=true;
-	this->ComputingChambers=true;
+	this->flagComputingChambers=true;
+	this->flagPartialFractionSplitPrecomputed=false;
 	this->flagComputationInProgress=false;
 	this->flagComputationDone=true;
 	this->flagComputationInitialized=false;
@@ -955,20 +911,20 @@ void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output)
 }
 
 void ComputationSetup::oneIncrement(GlobalVariables& theGlobalVariables)
-{	this->AllowRepaint=false;
+{	this->flagAllowRepaint=false;
 	for ( this->oneStepChamberSlice(theGlobalVariables);
         this->theChambers.PreferredNextChambers.size!=0;
         this->oneStepChamberSlice(theGlobalVariables))
 	{}
-	this->AllowRepaint=true;
+	this->flagAllowRepaint=true;
 }
 
 void ComputationSetup::FullChop(GlobalVariables& theGlobalVariables)
-{	this->AllowRepaint=false;
+{	this->flagAllowRepaint=false;
 	this->theChambers.flagDrawingProjective=true;
 	while (this->theChambers.flagDrawingProjective)
 		this->oneIncrement(theGlobalVariables);
-	this->AllowRepaint=true;
+	this->flagAllowRepaint=true;
 }
 
 void ComputationSetup::initWeylActionSpecifics(GlobalVariables& theGlobalVariables)
@@ -991,7 +947,7 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
 	(GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& inputComplex)
 { assert(&inputComplex!=&this->theChambers);
 	this->theChambers.flagDrawingProjective=true;
-	this->AllowRepaint=false;
+	this->flagAllowRepaint=false;
 	this->theChambers.InduceFromLowerDimensionalAndProjectivize
 		(inputComplex,*this->theGlobalVariablesContainer->Default());
 	this->theChambers.ConvertHasZeroPolyToPermanentlyZero();
@@ -1049,7 +1005,7 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith
 }
 
 void ComputationSetup::oneStepChamberSlice(GlobalVariables& theGlobalVariables)
-{	this->AllowRepaint=false;
+{	this->flagAllowRepaint=false;
 	this->flagComputationInProgress=true;
 	this->theChambers.flagDrawingProjective=true;
 	if (this->theChambers.PreferredNextChambers.size==0 &&
@@ -1072,7 +1028,7 @@ void ComputationSetup::oneStepChamberSlice(GlobalVariables& theGlobalVariables)
     this->theChambers.ComputeDebugString();
   }
  // this->theChambers.ComputeDebugString();
-	this->AllowRepaint=true;
+	this->flagAllowRepaint=true;
 }
 
 void ComputationSetup::AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV)
@@ -1107,7 +1063,6 @@ void ComputationSetup::InitComputationSetup()
 		::IndicatorWindowGlobalVariables.Nullify();
 		PolynomialOutputFormat::LatexMaxLineLength=95;
 		PolynomialOutputFormat::UsingLatexFormat=true;
-		RandomCodeIDontWantToDelete::SomeRandomTests2();
 		this->flagDoneComputingPartialFractions=false;
 	//		this->theChambers.SliceTheEuclideanSpace
 	//													(	::InputRoots,::NextDirectionIndex,root::AmbientDimension,
@@ -1184,7 +1139,7 @@ void ComputationSetup::RunCustom()
 }
 
 void ComputationSetup::Run()
-{ this->AllowRepaint=false;
+{ this->flagAllowRepaint=false;
 	this->InitComputationSetup();
 	std::string BeginString;
 	//this->thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
@@ -1193,7 +1148,7 @@ void ComputationSetup::Run()
   if (this->flagDoCustomComputation)
   { this->RunCustom();
     this->ExitComputationSetup();
-    this->AllowRepaint=true;
+    this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;
     return;
   }
@@ -1211,11 +1166,13 @@ void ComputationSetup::Run()
 		else
 		{ intRoots tempRoots;
 			tempRoots.AssignRoots(this->VPVectors);
-			this->thePartialFraction.initFromRootSystem
-				(tempRoots,tempRoots,0,*this->theGlobalVariablesContainer->Default());
-			if (this->flagHavingStartingExpression)
-				this->thePartialFraction.ElementToString(BeginString, *this->theGlobalVariablesContainer->Default());
-			this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
+			if (!this->flagPartialFractionSplitPrecomputed)
+      {  this->thePartialFraction.initFromRootSystem
+          (tempRoots,tempRoots,0,*this->theGlobalVariablesContainer->Default());
+        if (this->flagHavingStartingExpression)
+          this->thePartialFraction.ElementToString(BeginString, *this->theGlobalVariablesContainer->Default());
+        this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
+      }
 			if (this->flagComputingVectorPartitions)
 			{	this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
 					(	this->theOutput,this->thePartialFraction.IndicatorRoot,
@@ -1247,7 +1204,7 @@ void ComputationSetup::Run()
 		}
 		this->flagDoneComputingPartialFractions=true;
 	}
-	if (this->ComputingChambers)
+	if (this->flagComputingChambers)
 	{	if (!this->flagDoingWeylGroupAction)
 		{	if (this->flagFullChop)
 			{	this->theChambers.SliceTheEuclideanSpace
@@ -1263,7 +1220,7 @@ void ComputationSetup::Run()
 						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
 							this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
 			}
-			this->theChambers.ComputeDebugString();
+			this->theChambers.ComputeDebugString(false,this->flagUseHtml);
 		} else
 		{ if (this->flagFullChop)
 				this->FullChop(*this->theGlobalVariablesContainer->Default());
@@ -1276,14 +1233,13 @@ void ComputationSetup::Run()
 		}
 	}
 	//TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
-	this->theChambers.ComputeDebugString();
 	this->ExitComputationSetup();
 	//std::stringstream out;
 	//ListBasicObjects<roots> tempRoots;
 	//this->thePartialFraction.ComputeSupport(tempRoots, out);
 	//std::string tempS;
 //	tempS=out.str();
-	this->AllowRepaint=true;
+	this->flagAllowRepaint=true;
 	this->flagComputationInProgress=false;
 }
 
@@ -2993,46 +2949,52 @@ bool CombinatorialChamber::ComputeDebugString( CombinatorialChamberContainer* ow
 	return true;
 }
 
-void CombinatorialChamber::ChamberNumberToStringStream(std::stringstream& out, CombinatorialChamberContainer& owner)
-{ if (this->flagHasZeroPolynomial)
-	{ out<< "Invisible";
-	} else
-	{	out <<"c";
-	}
+void CombinatorialChamber::ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner)
+{ std::stringstream out;
+  if (this->flagHasZeroPolynomial)
+    out<< "Invisible";
+	else
+    out <<"c";
 	if (this->DisplayNumber!=-1)
 		out<<this->DisplayNumber;
 	else
 		out<<this->CreationNumber;
+  output=out.str();
 }
 
 bool CombinatorialChamber::ElementToString
 	(std::string& output, CombinatorialChamberContainer* owner)
-{ return this->ElementToString(output,owner,false);
+{ return this->ElementToString(output,owner,false,false);
 }
 
 bool CombinatorialChamber::ElementToString
-	(std::string& output, CombinatorialChamberContainer* owner, bool LatexFormat)
+	(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml)
 {	std::stringstream out;
+  std::string tempS;
 	//assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
 	std::string endOfLine;
-	if (LatexFormat)
+	endOfLine="\n";
+	if (useLatex)
 		endOfLine.assign("\\\\\n");
+	if(useHtml)
+		endOfLine.assign("\n<br>\n");
+	this->ChamberNumberToString(tempS,*owner);
+	if(!useHtml)
+    out<<tempS;
 	else
-		endOfLine.assign("\n");
-	this->ChamberNumberToStringStream(out,*owner);
-	if (LatexFormat)
+    out << "<a name=\""<<tempS<<"\">"<<tempS<<"</a>";
+	if (useLatex)
 		out <<endOfLine<< "Projective representation";
 	out <<endOfLine<<"External Walls:"<<endOfLine;
 	root tempNormal;
-	std::string tempS;
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{	this->Externalwalls.TheObjects[i].ElementToString(tempS);
-		if (!LatexFormat)
+		if (!useLatex)
 			out <<"f"<<i<<": "<< tempS<<endOfLine;
 		else
 			out << tempS <<endOfLine;
 	}
-	if (!LatexFormat)
+	if (!useLatex && !useHtml)
 	{	out <<"Internal Walls:"<<endOfLine;
 		for (int i=0;i<this->InternalWalls.size;i++)
 		{	this->InternalWalls.TheObjects[i].ElementToString(tempS);
@@ -3044,8 +3006,8 @@ bool CombinatorialChamber::ElementToString
 	out<<"Neighbors: ";
 	for (int i=0;i<outputChambers.size;i++)
 	{	if (outputChambers.TheObjects[i]!=0)
-		{	outputChambers.TheObjects[i]->ChamberNumberToStringStream(out,*owner);
-			out <<", ";
+		{	outputChambers.TheObjects[i]->ChamberNumberToString(tempS,*owner);
+			out <<tempS<<", ";
 		}
 	}
 	PolyFormatLocal.cutOffString=false;
@@ -3058,7 +3020,7 @@ bool CombinatorialChamber::ElementToString
 	}
 	out<<endOfLine;
 	if (!owner->flagDrawingProjective)
-	{	if (LatexFormat)
+	{	if (useLatex)
 		out << "Affine data"<< endOfLine;
 		out<<"Affine walls: "<<endOfLine;
 		for (int i=0;i<this->affineExternalWalls.size;i++)
@@ -3954,6 +3916,20 @@ bool CombinatorialChamberContainer::ProjectToDefaultAffineSpaceModifyCrossSectio
 	return true;
 }
 
+int CombinatorialChamberContainer::RootBelongsToChamberIndex(root& input, std::string* outputString)
+{ std::stringstream out;
+  for (int i=0;i<this->size;i++)
+  { if (this->TheObjects[i]!=0)
+      if (this->TheObjects[i]->PointIsInChamber(input))
+      { if (outputString!=0)
+        { this->TheObjects[i]->ChamberNumberToString(*outputString,*this);
+          return i;
+        }
+      }
+  }
+  return -1;
+}
+
 void CombinatorialChamberContainer::ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables)
 { while (!this->ProjectToDefaultAffineSpaceModifyCrossSections(theGlobalVariables))
 	{ //this->ComputeDebugString();
@@ -4006,39 +3982,37 @@ void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& di
 	{ directions.TheObjects[i].ElementToString(tempS);
 		output << tempS <<"\\\\\n";
 	}
-	this->ElementToString(tempS,true);
+	this->ElementToString(tempS,true,false);
 	output<< tempS;
 }
 
 void CombinatorialChamberContainer::ElementToString(std::string& output)
-{ this->ElementToString(output,false);
+{ this->ElementToString(output,false,false);
 }
 
-void CombinatorialChamberContainer::ElementToString(std::string& output, bool LatexFormat)
+void CombinatorialChamberContainer::ElementToString(std::string& output, bool useLatex, bool useHtml)
 { std::stringstream out;
 	std::string tempS;
 	std::string endOfLine;
-	if (LatexFormat)
-		endOfLine= "\\\\\n";
-	else
-		endOfLine= "\n";
-	if (LatexFormat)
-	{ this->PurgeZeroPointers();
-		out << "Total visible chambers: "
-				<< this->GetNumVisibleChambersAndLabelChambersForDisplay()
-				<< endOfLine;
-	}
+	root tempRoot;
+	endOfLine="\n";
+	if (useLatex)
+    endOfLine="\\\\\n";
+  if (useHtml)
+    endOfLine="\n<br>\n";
+  this->PurgeZeroPointers();
+	out << "Number of visible chambers: "
+			<< this->GetNumVisibleChambersAndLabelChambersForDisplay()
+			<< endOfLine;
 	if (this->AffineWallsOfWeylChambers.size>0)
 	{	int tempI=this->GetNumChambersInWeylChamberAndLabelChambers(this->WeylChamber);
 		out << "Number of chambers with internal point in Weyl chamber: "
 				<< tempI<< endOfLine;
-		out <<"Weyl chamber walls and their images: \\\\";
+		out <<"Weyl chamber walls and their images: "<< endOfLine;
 		for (int i=0;i<this->AffineWallsOfWeylChambers.size;i++)
 		{	this->AffineWallsOfWeylChambers.TheObjects[i].ElementToString(tempS);
 			out<< tempS <<endOfLine;
 		}
-	} else
-	{ out << "Number of visible chambers: " << this->GetNumVisibleChambersAndLabelChambersForDisplay() << endOfLine;
 	}
 	ListBasicObjects<int> sortedIndices;
 	this->SortIndicesByDisplayNumber(sortedIndices);
@@ -4047,19 +4021,27 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool La
 		output=out.str();
 		return;
 	}
-	if (!LatexFormat)
+	if (!useLatex)
 	{	for (int i=0;i<this->size;i++)
 		{ if (this->TheObjects[i]!=0)
-			{	this->TheObjects[i]->ElementToString(tempS,this,LatexFormat);
-					out <<tempS <<endOfLine;
-					if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput)
+			{	if (!this->TheObjects[i]->flagHasZeroPolynomial || !useHtml)
+			  { this->TheObjects[i]->ElementToString(tempS,this,useLatex,useHtml);
+          out <<tempS;
+          if (useHtml)
+          { this->TheObjects[i]->ComputeInternalPointMethod2(tempRoot, this->AmbientDimension);
+            tempRoot.ElementToString(tempS,true);
+            out << "Internal point: "<<tempS;
+          }
+          out <<endOfLine<<endOfLine;
+					if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput && !useHtml)
 						break;
+			  }
 			}
 		}
 	} else
 	{ for (int i=0;i<sortedIndices.size;i++)
 		{ this->TheObjects[sortedIndices.TheObjects[i]]->ElementToString
-				(tempS, this,LatexFormat);
+				(tempS, this,useLatex,useHtml);
 			out <<tempS <<endOfLine;
 		}
 	}

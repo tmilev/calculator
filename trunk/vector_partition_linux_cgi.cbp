@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="Debug/vector_partition_linux_cgi" prefix_auto="1" extension_auto="0" />
+				<Option output="Debug/vector_partition_linux_cgi.cgi" prefix_auto="1" extension_auto="0" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />

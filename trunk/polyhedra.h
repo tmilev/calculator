@@ -1693,8 +1693,8 @@ public:
 	bool ComputeDebugString(CombinatorialChamberContainer* owner);
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner);
 	bool ElementToString
-		(std::string& output, CombinatorialChamberContainer* owner, bool LatexFormat);
-	void ChamberNumberToStringStream(std::stringstream& out, CombinatorialChamberContainer& owner);
+		(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml);
+	void ChamberNumberToString(std::string& out, CombinatorialChamberContainer& owner);
 	bool ConsistencyCheck(int theDimension);
 	//bool FacetIsInternal(Facet* f);
 	void LabelWallIndicesProperly();
@@ -2432,15 +2432,18 @@ public:
 	int GetNumVisibleChambersNoLabeling();
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
-	void ElementToString(std::string& output, bool LatexFormat);
+	void ElementToString(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output);
 	void WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
 	void ComputeDebugString()
 		{this->ElementToString(this->DebugString);};
 	void ComputeDebugString(bool LatexFormat)
-		{this->ElementToString(this->DebugString,LatexFormat);};
+		{this->ElementToString(this->DebugString,LatexFormat,false);};
+	void ComputeDebugString(bool useLatex, bool useHtml)
+		{this->ElementToString(this->DebugString,useLatex,useHtml);};
 	void init();
 	void Free();
+	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers
 		(roots& directions, root& IndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
@@ -5952,19 +5955,20 @@ public:
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
-	bool AllowRepaint;
+	bool flagAllowRepaint;
 	bool flagDoCustomComputation;
 	bool flagComputationInitialized;
 	bool flagComputationInProgress;
 	bool flagComputationDone;
 	bool flagOneStepOnly;
+	bool flagUseHtml;
 	bool flagOneIncrementOnly;
 	bool flagFullChop;
 	bool flagUsingCustomVectors;
 	bool flagComputingPartialFractions;
 	bool flagDoneComputingPartialFractions;
 	bool flagComputingVectorPartitions;
-	bool ComputingChambers;
+	bool flagComputingChambers;
 	bool flagDoingWeylGroupAction;
 	bool flagHavingStartingExpression;
 	bool flagDisplayingCombinatorialChambersTextData;
@@ -5978,6 +5982,7 @@ public:
 	bool flagDoCustomNilradical;
 	bool flagSliceTheEuclideanSpaceInitialized;
 	bool flagOneSteChamberSliceInitialized;
+	bool flagPartialFractionSplitPrecomputed;
 	char WeylGroupLetter;
 	int NumRowsNilradical;
 	int NumColsNilradical;
@@ -6030,11 +6035,11 @@ public:
 	static void outputLineJavaScriptSpecific
 		(	const std::string& lineTypeName, int theDimension, std::string& stringColor,
 			int& lineCounter );
+  static void MakeVPReportFromComputationSetup(ComputationSetup& input);
 	static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
 	static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
 	static void CivilizedStringTranslation(std::string& input, std::string& output);
-	static void MakeReportFromComputationSetup(ComputationSetup& input);
-	static void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader);//format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
+	static void MakePFAndChamberReportFromComputationSetup(ComputationSetup& input);
 	static void drawlineInOutputStreamBetweenTwoRoots
 		(	root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);

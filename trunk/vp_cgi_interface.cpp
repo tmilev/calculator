@@ -3,6 +3,66 @@
 
 extern int GlobalPointerCounter;
 
+struct bmpfile_magic {
+  unsigned char magic[2];
+};
+
+struct bmpfile_header {
+	unsigned int filesz;
+	unsigned short creator1;
+	unsigned short creator2;
+	unsigned int bmp_offset;
+};
+
+struct bmp_dib_v3_header_t
+{ unsigned int header_sz;
+	unsigned int width;
+	unsigned int height;
+	unsigned short nplanes;
+	unsigned short bitspp;
+	unsigned int compress_type;
+	unsigned int bmp_bytesz;
+	unsigned int hres;
+	unsigned int vres;
+	unsigned int ncolors;
+	unsigned int nimpcolors;
+};
+
+void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader)
+{	//	format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
+  outputFileOpenWithPreparedHeader.open(fileName.c_str(),std::fstream::trunc|std::fstream::out| std::fstream::binary);
+	outputFileOpenWithPreparedHeader.clear(std::ios::goodbit);// false);
+	::bmpfile_magic h1;
+	::bmpfile_header h2;
+	::bmp_dib_v3_header_t h3;
+	int size=10000;
+	h1.magic[0]='B'; h1.magic[1]='M';
+	h2.bmp_offset=14;
+	h2.creator1=0;
+	h2.creator2=0;
+	h2.filesz=size*3+54;
+	h3.width=100;
+	h3.height=100;
+	h3.header_sz=40;
+	h3.nplanes=1;
+	h3.bitspp=24;
+	h3.bmp_bytesz=size*3;
+	h3.compress_type=0;
+	h3.hres=2835;
+	h3.vres=2835;
+	h3.nimpcolors=0;
+	h3.ncolors=0;
+	outputFileOpenWithPreparedHeader.write((char*)(&h1),2);
+	outputFileOpenWithPreparedHeader.write((char*)(&h2),12);
+	outputFileOpenWithPreparedHeader.write((char*)(&h3),40);
+	for (int i=0;i<size;i++)
+	{	char tempUI=100;
+		outputFileOpenWithPreparedHeader.write(&tempUI,1);
+		outputFileOpenWithPreparedHeader.write(&tempUI,1);
+		outputFileOpenWithPreparedHeader.write(&tempUI,1);
+	}
+	outputFileOpenWithPreparedHeader.close();
+}
 
 
 void getPath(char* path, std::string& output)
@@ -64,6 +124,7 @@ int main(int argc, char **argv)
   int choice =::CGIspecificRoutines::ReadDataFromCGIinput
     (inputString, theComputationSetup,inputPath);
   //std::cout<< "choice " <<choice <<"       ";
+  inputPath.append("../htdocs/tmp/");
   if (choice ==0 || choice==1)
   { std::stringstream tempSS;
     static_html1(tempSS);
@@ -75,14 +136,29 @@ int main(int argc, char **argv)
     {	//std::cout<<"before computation setup";
     //	theComputationSetup.flagComputingPartialFractions=false;
     //	std::cout <<"before Run!";
+      theComputationSetup.flagPartialFractionSplitPrecomputed=false;
       theComputationSetup.Run();
+      ::CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
+      theComputationSetup.flagPartialFractionSplitPrecomputed=true;
+      theComputationSetup.flagComputingVectorPartitions=true;
+      theComputationSetup.flagComputingChambers=false;
+      theComputationSetup.flagComputationInitialized=false;
+      theComputationSetup.Run();
+      CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
+      std::string chamberFileName;
+      std::fstream chamberFile;
+      chamberFileName=inputPath;
+      chamberFileName.append("chambers.html");
+      CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(chamberFile,chamberFileName,false,false);
+      chamberFile<<"<HTML><BODY>"<< theComputationSetup.theChambers.DebugString<<"</BODY></HTML>";
+      chamberFile.close();
       //std::cout <<"Run ok!";
-      ::CGIspecificRoutines::MakeReportFromComputationSetup(theComputationSetup);
     }
     else
     {	WeylGroup tempWeyl;
-      theComputationSetup.theChambers.AmbientDimension=3;
-      tempWeyl.MakeArbitrary('B',theComputationSetup.theChambers.AmbientDimension);
+      theComputationSetup.WeylGroupIndex=4;
+      theComputationSetup.theChambers.AmbientDimension=4;
+      tempWeyl.MakeArbitrary('A',theComputationSetup.theChambers.AmbientDimension);
       tempWeyl.ComputeRho();
       theComputationSetup.VPVectors.CopyFromBase(tempWeyl.RootsOfBorel);
     }
@@ -111,7 +187,6 @@ int main(int argc, char **argv)
     { theComputationSetup.DoTheRootSAComputation();
 //      theComputationSetup.theRootSubalgebras.ComputeDebugString();
       //inputPath.append("../tmp/WeylHtml.html");
-      inputPath.append("../htdocs/tmp/");
       std::string serverPath="/tmp/";
       std::string header;
       std::stringstream tempOut;

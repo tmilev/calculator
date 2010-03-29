@@ -165,6 +165,14 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="html"
+			>
+			<File
+				RelativePath=".\vector_partition.html"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\polyhedra.cpp"
 			>

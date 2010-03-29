@@ -139,12 +139,8 @@ int main(int argc, char **argv)
       theComputationSetup.flagPartialFractionSplitPrecomputed=false;
       theComputationSetup.Run();
       ::CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
-      theComputationSetup.flagPartialFractionSplitPrecomputed=true;
-      theComputationSetup.flagComputingVectorPartitions=true;
-      theComputationSetup.flagComputingChambers=false;
-      theComputationSetup.flagComputationInitialized=false;
-      theComputationSetup.Run();
-      CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
+      if (theComputationSetup.flagComputingVectorPartitions)
+        CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
       std::string chamberFileName;
       std::fstream chamberFile;
       chamberFileName=inputPath;
@@ -193,7 +189,7 @@ int main(int argc, char **argv)
       header="http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi?";
       header.append(inputString);
       tempOut <<"Permanent link to this page: <br>\n"<<"<a href=\""
-              <<  header<<"\">"<<header<<"</a>\n<br>\n"
+              << header<<"\">"<<header<<"</a>\n<br>\n"
               <<"Main page: <br>\n"
               <<"<a href=\"http://vector-partition.jacobs-university.de"
               <<"/cgi-bin/vector_partition_linux_cgi\">"
@@ -205,6 +201,12 @@ int main(int argc, char **argv)
       std::cout <<"<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; "
                 <<"url=../tmp/rootHtml.html\"> <BODY>"<< inputPath;
     }
+  } else if (choice==3)
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi.cgi\">\n"
+              <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n"
+              << "Dimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n"
+              << "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n"
+              << "</FORM>\n";
   }
   std::cout<<"</BODY>\n</HTML>";
 	std::cout.flush();

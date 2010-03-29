@@ -5156,8 +5156,8 @@ public:
 	Rational StartCheckSum;
 	Rational EndCheckSum;
 	static Rational CheckSum;
-	static	bool flagUsingIndicatorRoot;
-					bool flagDiscardingFractions;
+	bool flagUsingIndicatorRoot;
+	bool flagDiscardingFractions;
 	static	bool flagSplitTestModeNoNumerators;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 	static	bool flagMakingProgressReport;

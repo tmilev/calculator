@@ -151,7 +151,7 @@ Rational partFraction::CheckSum2;
 PolynomialsRationalCoeff PrecomputedPolys;
 PrecomputedQuasiPolynomialIntegrals PrecomputedQuasiPolys;
 PolynomialOutputFormat PolyFormatLocal;
-int PolynomialOutputFormat::LatexMaxLineLength=125;
+int PolynomialOutputFormat::LatexMaxLineLength=100;
 int PolynomialOutputFormat::LatexCutOffLine=15;
 bool PolynomialOutputFormat::UsingLatexFormat=true;
 bool PolynomialOutputFormat::CarriageReturnRegular=true;
@@ -633,6 +633,7 @@ void CGIspecificRoutines::outputLineJavaScriptSpecific
 
 void CGIspecificRoutines::MakeVPReportFromComputationSetup(ComputationSetup& input)
 {	std::string tempS;
+	//input.thePartialFraction.IndicatorRoot.ComputeDebugString();
   input.theChambers.RootBelongsToChamberIndex(input.thePartialFraction.IndicatorRoot,&tempS);
   std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n"
             << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>\n<br>\n"
@@ -678,7 +679,7 @@ void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(Computation
 #endif
 	std::cout << "Number of partial fractions: " << input.thePartialFraction.size <<"<br>\n";
 	std::cout << "Number of monomials in the numerators: "<<input.thePartialFraction.NumMonomialsInTheNumerators
-						<<"<br>\n";
+						<<"<br>\n" <<"Partial fraction decomposition:\n<br>\n";
 	std::cout << "<textarea name=\"pf_output\" cols=\"50\" rows=\"30\">"
 						<< input.thePartialFraction.DebugString
 						<< "</textarea>";
@@ -774,6 +775,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 	if (tempS3=="textDim")
     InputDataOK=true;
   std::cout.flush();
+//  std::cout<< inputBad<<"\n<br>\n";
 //  std::cout <<"  tempS3: "<< tempS3<<"   ";
 #ifdef CGIversionLimitRAMuse
   cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
@@ -812,7 +814,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   }
 //	std::cout<< input<<"\n";
 	std::stringstream tempStream;
-	std::cout<<inputGood;
+	//std::cout<<"\n<br>\n input good: <br>\n"<<inputGood<<"\n<br>\n";
 	tempStream << inputGood;
 	std::string tempS; int tempI;	tempStream.seekg(0);
 	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
@@ -841,7 +843,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   }
   if (tempS=="buttonOneChamber")
   { output.thePartialFraction.flagUsingIndicatorRoot=true;
-    tempStream>> tempS>>tempS>>output.DisplayNumberChamberOfInterest;
+    tempStream>> tempS>>tempS>>tempS>>tempS>>output.DisplayNumberChamberOfInterest;
     std::cout<< "Chamber of interest: "<< output.DisplayNumberChamberOfInterest;
   }
   if (output.flagComputingVectorPartitions && output.DisplayNumberChamberOfInterest==-1)
@@ -903,6 +905,26 @@ ComputationSetup::ComputationSetup()
 	this->NumRowsNilradical=2;
 	this->NumColsNilradical=2;
 	this->theGlobalVariablesContainer= new GlobalVariablesContainer;
+	std::stringstream out1,out2,out3,out4;
+	out1	<<"Denote by $P_I(x_1,\\dots,x_n)$ the number of ways to split the vector with coordinates $(x_1,\\dots,x_n)$"
+				<<" into non-negative integral sum of the integral vectors $I$, where $I$ is the set given by "
+				<<" the following list.\n\n";
+	out2	<< "\n\n For given integers $N$, $m$ and integral matrices"
+				<<"$A:=\\left(\\begin{array}{ccc}a_{11}&\\dots&a_{1n}\\\\ &\\dots& \\\\ a_{m1}&\\dots& a_{mn}\\end{array}\\right)$,"
+				<<" $B:=\\left( \\begin{array}{c} b_1\\\\\\vdots\\\\b_m\\end{array}\\right)$,"
+				<<" and let \n\\[{\\tau_{N}}_{[(a_{11}x_1+\\dots a_{1n}x_n=b_1),\\dots, (a_{m1}x_1+\\dots a_{mn}x_n=b_m) ]} "
+				<<"(x_1,\\dots,x_n)\\]\n"
+				<<" denote the function that takes value 1 if "
+				<<"$A\\left( \\begin{array}{c} x_1\\\\\\vdots\\\\x_n\\end{array}\\right)\\equiv B"
+				<<" (\\textrm{mod}~ N\\mathbb{Z}^n)$"
+				<<" and zero otherwise (where $N\\mathbb{Z}^n$ stands for an integral stretch of the starting integral lattice). "
+				<<"The arguments of the $\\tau$ function will be suppressed in the output. Let $n= ";
+	out3<<"$. Let in addition $x_1,\\dots x_n$ satisfty the following inequalities. "; 
+	out4<<"\n\n Then $P_I(x_1,\\dots,x_n)$ equals:"; 
+	this->NotationExplanationLatex1=out1.str();
+	this->NotationExplanationLatex2=out2.str();
+	this->NotationExplanationLatex3=out3.str();
+	this->NotationExplanationLatex4=out4.str();
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
@@ -1082,7 +1104,7 @@ void ComputationSetup::InitComputationSetup()
 		this->theChambers.NumAffineHyperplanesProcessed=0;
 		PolyFormatLocal.MakeAlphabetxi();
 		::IndicatorWindowGlobalVariables.Nullify();
-		PolynomialOutputFormat::LatexMaxLineLength=95;
+		PolynomialOutputFormat::LatexMaxLineLength=100;
 		PolynomialOutputFormat::UsingLatexFormat=true;
 		this->flagDoneComputingPartialFractions=false;
 	//		this->theChambers.SliceTheEuclideanSpace
@@ -1125,7 +1147,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'D',7);
+		(*this->theGlobalVariablesContainer->Default(),'E',7);
 	this->theRootSubalgebras.SortDescendingOrderBySSRank();
 	this->theRootSubalgebras.ComputeLProhibitingRelations
 		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
@@ -1176,6 +1198,7 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	//this->thePartialFraction.IndicatorRoot.InitFromIntegers(6,10,0,0,0);
 	//this->VPVectors.ComputeDebugString();
+	int indexChamberOfInterest=-1;
   if (this->flagComputingChambers)
 	{	if (!this->flagDoingWeylGroupAction)
 		{	if (this->flagFullChop)
@@ -1193,6 +1216,17 @@ void ComputationSetup::Run()
 							this->thePartialFraction.IndicatorRoot, *this->theGlobalVariablesContainer->Default());
 			}
 			this->theChambers.ComputeDebugString(false,this->flagUseHtml);
+			if (this->DisplayNumberChamberOfInterest!=-1)
+      { indexChamberOfInterest=this->theChambers.FindVisibleChamberWithDisplayNumber(this->DisplayNumberChamberOfInterest);
+        if (indexChamberOfInterest!=-1)
+          this->theChambers.TheObjects[indexChamberOfInterest]->ComputeInternalPointMethod2
+            (this->thePartialFraction.IndicatorRoot, this->theChambers.AmbientDimension);
+        else
+        { this->thePartialFraction.IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
+					this->DisplayNumberChamberOfInterest=-1;
+        }
+        //this->thePartialFraction.IndicatorRoot.ComputeDebugString();
+      }
 		} else
 		{ if (this->flagFullChop)
 				this->FullChop(*this->theGlobalVariablesContainer->Default());
@@ -1220,19 +1254,27 @@ void ComputationSetup::Run()
           (tempRoots,tempRoots,0,*this->theGlobalVariablesContainer->Default());
         if (this->flagHavingStartingExpression)
           this->thePartialFraction.ElementToString(BeginString, *this->theGlobalVariablesContainer->Default());
+        if (indexChamberOfInterest!=-1)
+        { roots tempRoots;
+					tempRoots.AssignHashedIntRoots(this->thePartialFraction.RootsToIndices);
+					root oldIndicator; oldIndicator.Assign(this->thePartialFraction.IndicatorRoot);
+					tempRoots.PerturbVectorToRegular
+						(	this->thePartialFraction.IndicatorRoot,*this->theGlobalVariablesContainer->Default(),
+							this->theChambers.AmbientDimension,0);
+					while (!this->theChambers.TheObjects[indexChamberOfInterest]
+										->PointIsInChamber(this->thePartialFraction.IndicatorRoot))
+						this->thePartialFraction.IndicatorRoot.Add(oldIndicator);
+					while (!tempRoots.IsRegular
+										(	this->thePartialFraction.IndicatorRoot,
+											*this->theGlobalVariablesContainer->Default(),
+											this->theChambers.AmbientDimension))
+						this->thePartialFraction.IndicatorRoot.Add(oldIndicator);											
+					//this->thePartialFraction.IndicatorRoot.ComputeDebugString();
+        }
         this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
       }
 			if (this->flagComputingVectorPartitions)
-			{	if (!this->thePartialFraction.flagUsingIndicatorRoot && this->DisplayNumberChamberOfInterest!=-1
-            && this->flagComputingChambers)
-        { int tempI=this->theChambers.FindVisibleChamberWithDisplayNumber(this->DisplayNumberChamberOfInterest);
-          if (tempI!=-1)
-            this->theChambers.TheObjects[tempI]->ComputeInternalPointMethod2
-              (this->thePartialFraction.IndicatorRoot, this->theChambers.AmbientDimension);
-          else
-            this->thePartialFraction.IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
-        }
-			  this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
+			{	this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
 					(	this->theOutput,this->thePartialFraction.IndicatorRoot,
 						false,false,*this->theGlobalVariablesContainer->Default());
 				this->theOutput.ComputeDebugString();
@@ -1240,8 +1282,24 @@ void ComputationSetup::Run()
 		}
 		if (this->flagHavingBeginEqnForLaTeXinStrings)
 		{ std::stringstream out;
+			std::string tempS;
 			if (this->flagHavingDocumentClassForLaTeX)
-        out<< "\\documentclass{article}\n\\begin{document}";
+      {	out	<<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\n "
+						<<"\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}\\addtolength{\\voffset}{-3.5cm}"
+						<<"\\addtolength{\\textheight}{7cm} \\begin{document}";
+				this->VPVectors.ElementToString(tempS,true);
+				out	<< this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2
+						<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;				
+				if (this->flagComputingChambers )
+				{ int tempI =this->theChambers.RootBelongsToChamberIndex(this->thePartialFraction.IndicatorRoot,0);
+					this->theChambers.TheObjects[tempI]->ElementToInequalitiesString
+						(tempS,this->theChambers,true,false);
+					out<< tempS;				
+				} else
+				{ out <<"\n\n(Inequalities missing)\n\n";
+				}
+				out << this->NotationExplanationLatex4;
+			}
 			out <<"\\begin{eqnarray*}&&"<<this->theOutput.DebugString<< "\\end{eqnarray*}";
 			if (this->flagHavingDocumentClassForLaTeX)
         out<< "\n\\end{document}";
@@ -2997,6 +3055,33 @@ bool CombinatorialChamber::ElementToString
 { return this->ElementToString(output,owner,false,false);
 }
 
+void CombinatorialChamber::ElementToInequalitiesString
+	(std::string& output,CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
+{ int theDimension=owner.AmbientDimension;
+	std::string tempS; std::stringstream out;
+	out << "\\begin{eqnarray*}";
+	for (int i=0;i<this->Externalwalls.size;i++)
+	{	for (int j=0;j<theDimension;j++)
+		{ this->Externalwalls.TheObjects[i].normal.TheObjects[j].ElementToString(tempS);
+			if (tempS!="0")
+			{ if (tempS=="1")
+				{	tempS=""; out <<'+';
+				}
+				if (tempS=="-1")
+					tempS="-";
+				if (j!=0)
+					if (tempS.size()!=0)
+						if (tempS[0]!='-')
+							out <<'+';
+				out << tempS<<PolyFormatLocal.alphabet[j];
+			}
+		}
+		out <<"& \\geq & 0\\\\";
+	}
+	out << "\\end{eqnarray*}";
+	output=out.str();
+}
+
 bool CombinatorialChamber::ElementToString
 	(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml)
 {	std::stringstream out;
@@ -3949,14 +4034,12 @@ bool CombinatorialChamberContainer::ProjectToDefaultAffineSpaceModifyCrossSectio
 int CombinatorialChamberContainer::RootBelongsToChamberIndex(root& input, std::string* outputString)
 { std::stringstream out;
   for (int i=0;i<this->size;i++)
-  { if (this->TheObjects[i]!=0)
+		if (this->TheObjects[i]!=0)
       if (this->TheObjects[i]->PointIsInChamber(input))
       { if (outputString!=0)
-        { this->TheObjects[i]->ChamberNumberToString(*outputString,*this);
-          return i;
-        }
+					this->TheObjects[i]->ChamberNumberToString(*outputString,*this);
+        return i;
       }
-  }
   return -1;
 }
 
@@ -3994,10 +4077,9 @@ void CombinatorialChamberContainer::ComputeNextIndexToSlice(root &direction)
 
 bool CombinatorialChamberContainer::ConsistencyCheck()
 {	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i]!=0)
+		if (this->TheObjects[i]!=0)
 			if (!this->TheObjects[i]->ConsistencyCheck(this->AmbientDimension))
 				return false;
-	}
 	return true;
 }
 
@@ -4201,8 +4283,10 @@ int CombinatorialChamberContainer::GetNumVisibleChambersAndLabelChambersForDispl
 }
 
 int CombinatorialChamberContainer::FindVisibleChamberWithDisplayNumber(int inputDisplayNumber)
-{ for (int i=inputDisplayNumber-1;i<this->size;i++)
-    if (this->TheObjects[i]->DisplayNumber==inputDisplayNumber)
+{ for (int i=0;i<this->size;i++)
+		if (this->TheObjects[i]!=0)
+			if (!this->TheObjects[i]->flagHasZeroPolynomial)
+				if (this->TheObjects[i]->DisplayNumber==inputDisplayNumber)
       return i;
   return -1;
 }
@@ -6614,7 +6698,7 @@ void BasicQN::ElementToString(std::string &output,PolynomialOutputFormat& PolyFo
 	if (!PolyFormat.UsingLatexFormat )
 	{ out<<tempS<<"t_"<<this->Den<< "["; }
 	else
-	{ out <<tempS<<"\\tau_{"<<this->Den<<"}[";
+	{ out <<tempS<<"{\\tau_{"<<this->Den<<"}}_{[";
 	}
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{	std::stringstream out2;
@@ -6642,7 +6726,7 @@ void BasicQN::ElementToString(std::string &output,PolynomialOutputFormat& PolyFo
 		}
 		out<<tempS;
 	}
-	out<<"]";
+	out<<"]}";
 	output=out.str();
 }
 
@@ -6917,28 +7001,32 @@ void QuasiNumber::ElementToString(std::string &output, PolynomialOutputFormat& P
 { std::stringstream out;
 	std::string tempS;
 	if (this->size>1)
-	{ out<<"(";}
+		out<<"(";
+	int LineLengthCounter=0;
 	for (int i=0;i<this->size;i++)
 	{	this->TheObjects[i].ElementToString(tempS, PolyFormat);
 		if (!(tempS[0]=='0'))
 		{ if(!(tempS[0]=='-'))
-			{ out <<"+";
+			{	out <<"+";
+				LineLengthCounter++;
 			}
 			out<<tempS;
+			LineLengthCounter+=(signed)tempS.length();
+			if(LineLengthCounter>PolyFormat.LatexMaxLineLength && i!=this->size-1)
+			{	LineLengthCounter=0;
+				out <<"\\\\&&\n";
+			}
 		}
 	}
 	if (this->size>1)
-	{ out<<")";
-	}
+		out<<")";
 	output= out.str();
 	if (output.size()>1)
-	{ if (output[1]=='+')
-	  { output.erase(1,1); }
-	}
+		if (output[1]=='+')
+			output.erase(1,1); 
 	if (output.size()>0)
-	{ if (output[0]=='+')
-	  { output.erase(0,1); }
-	}
+		if (output[0]=='+')
+			output.erase(0,1); 
 }
 
 void QuasiNumber::Add(QuasiNumber &q)
@@ -9770,11 +9858,13 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 		assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
 #ifdef CGIversionLimitRAMuse
 		if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum))
-		{ std::cout<< "Checksum partial fractions failed </BODY></HTML>";
+		{ std::cout<< "<b>Checksum partial fractions failed!!! </b> </BODY></HTML>";
 			std::exit(0);
 		}
 		else
-			std::cout<< "Checksum successful";
+		{	std::cout<< "Checksum successful";
+			std::cout.flush();
+		}	
 #endif
 	}
 }

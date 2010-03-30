@@ -477,7 +477,7 @@ guiMainWindow::guiMainWindow()
                    wxSize(800,600),
                    wxRESIZE_BORDER| wxCAPTION
                    | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
-{	this->theComputationSetup.flagDoCustomComputation=true;
+{	//this->theComputationSetup.flagDoCustomComputation=true;
   this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
   this->BoxSizer3HorizontalInputButtons = new ::wxBoxSizer(wxHORIZONTAL);
@@ -653,7 +653,7 @@ guiMainWindow::guiMainWindow()
   this->CheckBox6Dashes->SetValue(true);
   this->CheckBox8DoTheWeylGroup->SetValue(false);
   this->theComputationSetup.flagComputationInProgress=false;
-  this->theComputationSetup.AllowRepaint=true;
+  this->theComputationSetup.flagAllowRepaint=true;
   this->theComputationSetup.flagUsingCustomVectors=false;
   //this->Button7OneDirectionIncrement->Disable();
   //this->Button8FullChopping->Disable();
@@ -717,7 +717,7 @@ void drawCanvas::onSizing(wxSizeEvent& ev)
 
 guiMainWindow::~guiMainWindow()
 {	//this->theFont
-  this->theComputationSetup.AllowRepaint=false;
+  this->theComputationSetup.flagAllowRepaint=false;
   this->WriteSettingsIfAvailable();
   this->Canvas1->Destroy();
   this->Dialog1OutputPF->Destroy();
@@ -760,7 +760,7 @@ void* RunrootFKFTComputationLocal(void*)
 
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 {	rootFKFTComputationLocal.useOutputFileForFinalAnswer=false;
-  this->theComputationSetup.AllowRepaint=false;
+  this->theComputationSetup.flagAllowRepaint=false;
   std::string tempS;
   tempS.assign(MainWindow1GlobalPath);
   tempS.append("KLcoeff.txt");
@@ -838,7 +838,7 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 {	::wxPaintDC  dc(this);
 	if (MainWindow1==0)
 		return;
-  if (MainWindow1->theComputationSetup.AllowRepaint)
+  if (MainWindow1->theComputationSetup.flagAllowRepaint)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
     dc.DrawRectangle(wxPoint(0,0),this->GetSize());
     ::CombinatorialChamberContainer::drawOutput
@@ -1133,7 +1133,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 		return;
 	this->theComputationSetup.flagComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
   this->theComputationSetup.thePartialFraction.flagUsingCheckSum=this->CheckBox2CheckSums->GetValue();
-  this->theComputationSetup.ComputingChambers= this->CheckBox3ComputeChambers->GetValue();
+  this->theComputationSetup.flagComputingChambers= this->CheckBox3ComputeChambers->GetValue();
   bool tempBool = this->CheckBox8DoTheWeylGroup->GetValue();
   if(	!(this->theComputationSetup.flagDoingWeylGroupAction== tempBool))
 	{	this->theComputationSetup.Reset();

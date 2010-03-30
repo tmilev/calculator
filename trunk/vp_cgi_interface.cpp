@@ -135,7 +135,21 @@ int main(int argc, char **argv)
       theComputationSetup.Run();
       ::CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
 			if (theComputationSetup.flagComputingVectorPartitions)
-				CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
+			{	CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
+        std::string vpFileName;
+        std::fstream vpFile;
+        vpFileName=inputPath;
+        vpFileName.append("vector_partition.tex");
+        CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(vpFile,vpFileName,false,false);
+        vpFile<< theComputationSetup.theOutput.DebugString;
+        vpFile.close();
+        std::string latexCommand;
+        latexCommand.append("pdflatex -output-directory=");
+        latexCommand.append(inputPath);
+        latexCommand.append(" ");
+        latexCommand.append(vpFileName);
+        ::system(latexCommand.c_str());
+			}
       std::string chamberFileName;
       std::fstream chamberFile;
       chamberFileName=inputPath;
@@ -154,9 +168,9 @@ int main(int argc, char **argv)
     }
     else
     {	WeylGroup tempWeyl;
-      theComputationSetup.WeylGroupIndex=3;
-      theComputationSetup.theChambers.AmbientDimension=3;
-      tempWeyl.MakeArbitrary('B',theComputationSetup.theChambers.AmbientDimension);
+      theComputationSetup.WeylGroupIndex=4;
+      theComputationSetup.theChambers.AmbientDimension=4;
+      tempWeyl.MakeArbitrary('A',theComputationSetup.theChambers.AmbientDimension);
       tempWeyl.ComputeRho();
       theComputationSetup.VPVectors.CopyFromBase(tempWeyl.RootsOfBorel);
     }

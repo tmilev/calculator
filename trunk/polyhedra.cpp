@@ -636,7 +636,8 @@ void CGIspecificRoutines::MakeVPReportFromComputationSetup(ComputationSetup& inp
 	//input.thePartialFraction.IndicatorRoot.ComputeDebugString();
   input.theChambers.RootBelongsToChamberIndex(input.thePartialFraction.IndicatorRoot,&tempS);
   std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n"
-            << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>\n<br>\n"
+            << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>; "
+            <<"&nbsp;&nbsp;&nbsp;<a href=\"/tmp/vector_partition.pdf\">pdf</a>\n<br>\n"
             <<"<textarea name=\"vp_output\" cols=\"50\" rows=\"30\">"
 						<< input.theOutput.DebugString
 						<< "</textarea>";
@@ -898,7 +899,7 @@ ComputationSetup::ComputationSetup()
 	this->flagCustomNilradicalInitted=false;
 	this->flagDoCustomNilradical=false;
 	this->flagOneSteChamberSliceInitialized=false;
-	this->flagDoCustomComputation=true;
+	this->flagDoCustomComputation=false;
 	this->NextDirectionIndex=0;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
@@ -919,8 +920,8 @@ ComputationSetup::ComputationSetup()
 				<<" (\\textrm{mod}~ N\\mathbb{Z}^n)$"
 				<<" and zero otherwise (where $N\\mathbb{Z}^n$ stands for an integral stretch of the starting integral lattice). "
 				<<"The arguments of the $\\tau$ function will be suppressed in the output. Let $n= ";
-	out3<<"$. Let in addition $x_1,\\dots x_n$ satisfty the following inequalities. "; 
-	out4<<"\n\n Then $P_I(x_1,\\dots,x_n)$ equals:"; 
+	out3<<"$. Let in addition $x_1,\\dots x_n$ satisfty the following inequalities. ";
+	out4<<"\n\n Then $P_I(x_1,\\dots,x_n)$ equals:";
 	this->NotationExplanationLatex1=out1.str();
 	this->NotationExplanationLatex2=out2.str();
 	this->NotationExplanationLatex3=out3.str();
@@ -1268,7 +1269,7 @@ void ComputationSetup::Run()
 										(	this->thePartialFraction.IndicatorRoot,
 											*this->theGlobalVariablesContainer->Default(),
 											this->theChambers.AmbientDimension))
-						this->thePartialFraction.IndicatorRoot.Add(oldIndicator);											
+						this->thePartialFraction.IndicatorRoot.Add(oldIndicator);
 					//this->thePartialFraction.IndicatorRoot.ComputeDebugString();
         }
         this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
@@ -1289,12 +1290,12 @@ void ComputationSetup::Run()
 						<<"\\addtolength{\\textheight}{7cm} \\begin{document}";
 				this->VPVectors.ElementToString(tempS,true);
 				out	<< this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2
-						<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;				
+						<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
 				if (this->flagComputingChambers )
 				{ int tempI =this->theChambers.RootBelongsToChamberIndex(this->thePartialFraction.IndicatorRoot,0);
 					this->theChambers.TheObjects[tempI]->ElementToInequalitiesString
 						(tempS,this->theChambers,true,false);
-					out<< tempS;				
+					out<< tempS;
 				} else
 				{ out <<"\n\n(Inequalities missing)\n\n";
 				}
@@ -7023,10 +7024,10 @@ void QuasiNumber::ElementToString(std::string &output, PolynomialOutputFormat& P
 	output= out.str();
 	if (output.size()>1)
 		if (output[1]=='+')
-			output.erase(1,1); 
+			output.erase(1,1);
 	if (output.size()>0)
 		if (output[0]=='+')
-			output.erase(0,1); 
+			output.erase(0,1);
 }
 
 void QuasiNumber::Add(QuasiNumber &q)
@@ -9864,7 +9865,7 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 		else
 		{	std::cout<< "Checksum successful";
 			std::cout.flush();
-		}	
+		}
 #endif
 	}
 }

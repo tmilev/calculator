@@ -1694,6 +1694,8 @@ public:
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner);
 	bool ElementToString
 		(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml);
+	void ElementToInequalitiesString
+		(std::string& output,CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
 	void ChamberNumberToString(std::string& out, CombinatorialChamberContainer& owner);
 	bool ConsistencyCheck(int theDimension);
 	//bool FacetIsInternal(Facet* f);
@@ -3372,8 +3374,8 @@ ParallelComputing::GlobalPointerCounter-=this->NumVariables;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(std::stringstream& out,
-																					PolynomialOutputFormat& PolyFormat)
+void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend
+	(std::stringstream& out,PolynomialOutputFormat& PolyFormat)
 {	if (this->Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
 	{ out<< "0";
 		return;
@@ -3385,27 +3387,22 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(
 		return;
 	}
 	if (tempS=="-1")
-	{ tempS="-";
-	}
+		tempS="-";
 	if (tempS=="1")
-	{ tempS.clear();
-	}
+		tempS.clear();
 	out <<tempS;
 	for (int i=0;i<this->NumVariables;i++)
-	{	if (this->degrees[i]!=0)
+		if (this->degrees[i]!=0)
 		{	out<<	PolyFormat.alphabet[i];
 			if (!PolynomialOutputFormat::UsingLatexFormat)
 			{	if (this->degrees[i]!=1)
-				{	out << "^"<<this->degrees[i];
-				}
+					out << "^"<<this->degrees[i];
 			}
 			else
 			{	if (this->degrees[i]!=1)
-				{	out << "^{"<<this->degrees[i]<<"}";
-				}
+					out << "^{"<<this->degrees[i]<<"}";
 			}
 		}
-	}
 }
 
 /*template <class ElementOfCommutativeRingWithIdentity>
@@ -3958,28 +3955,34 @@ template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend
 															(std::string& output, PolynomialOutputFormat& PolyFormat)
 {	std::stringstream out;
-	int NumLines=0;
+	int NumChars=0;
 	int TotalNumLines=0;
+	std::string tempS;
 	const std::string LatexBeginString="";// "\\begin{eqnarray*}\n&&";
 //	if (PolyFormat.UsingLatexFormat)
 //	{ out <<LatexBeginString;
 //	}
 	for (int i=0;i<this->size;i++)
-	{ std::string tempS;
-		this->TheObjects[i].ElementToString(tempS,PolyFormat);
+	{ this->TheObjects[i].ElementToString(tempS,PolyFormat);
 		if (tempS[0]=='0'){tempS.erase(0,1);}
 		if (tempS.size()!=0)
 		{ if (tempS[0]!='-'){out <<"+";}
 			out <<tempS;
 			if (PolyFormat.UsingLatexFormat)
-			{ NumLines+=tempS.size();
-				if (NumLines>PolyFormat.LatexMaxLineLength)
-				{ NumLines=0;
-					out <<"\\\\\n&& ";
-					if (!PolyFormat.CarriageReturnRegular)
-					{	out<<"\r\n";}
-					else
-					{ out <<"\n";}
+			{ if (((signed)tempS.size())> PolyFormat.LatexMaxLineLength)
+				{ bool found=false; int extraChars=0;
+					for (int j=(signed)tempS.size();j>=1;j--)
+						if (tempS[j]=='\\' && tempS[j-1]=='\\')
+						{ found=true;	break;}
+						else
+							extraChars++;
+					if (found)	NumChars=extraChars;	else	NumChars+=extraChars;
+				}
+				else
+					NumChars+= tempS.size();
+				if (NumChars>PolyFormat.LatexMaxLineLength)
+				{ NumChars=0;
+					out <<"\\\\&&\n ";
 					TotalNumLines++;
 				}
 			}
@@ -3989,7 +3992,7 @@ int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::
 			}
 		}
 	}
-	std::string tempS;
+//	std::string tempS;
 	tempS= out.str();
 	if (tempS.size()!=0)
 		if (tempS[0]=='+'){tempS.erase(0,1); }
@@ -5953,6 +5956,10 @@ public:
 	CombinatorialChamberContainer theChambers;
 	Rational Value;
 	std::string ValueString;
+	std::string NotationExplanationLatex1;
+	std::string NotationExplanationLatex2;
+	std::string NotationExplanationLatex3;
+	std::string NotationExplanationLatex4;
 	intRoot ValueRoot;
 	int NextDirectionIndex;
 	roots VPVectors;

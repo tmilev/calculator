@@ -105,7 +105,10 @@ int main(int argc, char **argv)
 #endif
 	}
 	//the below comment is for debug purposes when testing offline please dont delete it!
-	inputString="textDim=3&textNumVectors=9&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=1&textCoord3=1&textCoord3=0&textCoord4=0&textCoord4=1&textCoord4=2&textCoord5=0&textCoord5=1&textCoord5=1&textCoord6=1&textCoord6=1&textCoord6=2&textCoord7=1&textCoord7=1&textCoord7=1&textCoord8=1&textCoord8=2&textCoord8=2&buttonGo=Go";
+	//inputString="textDim=3&textNumVectors=9&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=1&textCoord3=1&textCoord3=0&textCoord4=0&textCoord4=1&textCoord4=2&textCoord5=0&textCoord5=1&textCoord5=1&textCoord6=1&textCoord6=1&textCoord6=2&textCoord7=1&textCoord7=1&textCoord7=1&textCoord8=1&textCoord8=2&textCoord8=2&buttonGo=Go";
+	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonGo=Default_computation&chamberNumber=-1";
+	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonSplitChambers=Chambers%2Bpartial_fractions&chamberNumber=-1";
+	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=12";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -131,7 +134,8 @@ int main(int argc, char **argv)
       theComputationSetup.flagPartialFractionSplitPrecomputed=false;
       theComputationSetup.Run();
       ::CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
-      CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
+			if (theComputationSetup.flagComputingVectorPartitions)
+				CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
       std::string chamberFileName;
       std::fstream chamberFile;
       chamberFileName=inputPath;
@@ -141,22 +145,18 @@ int main(int argc, char **argv)
       chamberFile.close();
       if (  theComputationSetup.DisplayNumberChamberOfInterest==-1 &&
             theComputationSetup.flagComputingVectorPartitions)
-      { theComputationSetup.DisplayNumberChamberOfInterest=
+				theComputationSetup.DisplayNumberChamberOfInterest=
           theComputationSetup.theChambers.TheObjects
             [theComputationSetup.theChambers.RootBelongsToChamberIndex
                (theComputationSetup.thePartialFraction.IndicatorRoot,0)]
                  ->DisplayNumber;
-        theComputationSetup.DisplayNumberChamberOfInterest=
-          theComputationSetup.theChambers
-            .TheObjects[theComputationSetup.DisplayNumberChamberOfInterest]->DisplayNumber;
-      }
       //std::cout <<"Run ok!";
     }
     else
     {	WeylGroup tempWeyl;
-      theComputationSetup.WeylGroupIndex=4;
-      theComputationSetup.theChambers.AmbientDimension=4;
-      tempWeyl.MakeArbitrary('A',theComputationSetup.theChambers.AmbientDimension);
+      theComputationSetup.WeylGroupIndex=3;
+      theComputationSetup.theChambers.AmbientDimension=3;
+      tempWeyl.MakeArbitrary('B',theComputationSetup.theChambers.AmbientDimension);
       tempWeyl.ComputeRho();
       theComputationSetup.VPVectors.CopyFromBase(tempWeyl.RootsOfBorel);
     }

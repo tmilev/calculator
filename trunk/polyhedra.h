@@ -720,6 +720,8 @@ public:
 	void ScaleToIntegralForMinRationalHeightNoSignChange();
 	void ComputeDebugString();
 	void MultiplyByLargeRational(Rational& x);
+	void ActOnAroot(root& input, root& output);
+	void ActOnRoots(roots& input, roots& output);
 	void DivideByRational(Rational& x);
 	static bool SystemLinearInequalitiesHasSolution
 		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
@@ -1294,6 +1296,8 @@ ParallelComputing::GlobalPointerCounter++;
 		this->FreeExtended();
 		return true;
 	};
+	Rational(const Rational& right);
+	Rational(Rational& right);
 public:
 	int NumShort;
 	//the requirement that the below be unsigned caused a huge problem, so I
@@ -1307,10 +1311,10 @@ public:
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void Subtract(const Rational& r);
-	void Add(Rational& r);
+	void Add(const Rational& r);
 	void AddInteger(int x);
 	void AssignFracValue();
-	void MultiplyBy(Rational& r);
+	void MultiplyBy(const Rational& r);
 	int HashFunction(){return this->NumShort*::SomeRandomPrimes[0]+
 														this->DenShort*::SomeRandomPrimes[1];};
 	//void MultiplyByLargeRational(int num, int den);
@@ -1418,6 +1422,8 @@ public:
 	inline bool operator ==(const Rational& right){return this->IsEqualTo(right);};
 	inline bool operator ==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
 	inline void operator = (int right){this->AssignInteger(right);};
+	const Rational operator*(const Rational& right);
+	const Rational operator+(const Rational& right);
 };
 
 class root :public ListBasicObjectsLight<Rational>
@@ -1529,6 +1535,7 @@ public:
 	void PerturbVectorToRegular
 		(	root&output, GlobalVariables& theGlobalVariables,
 			int theDimension,FeedDataToIndicatorWindow reportFunction);
+	void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
 	void Average(root& output, int theDimension);
 	void Pop(int index);
 	void intersectWith(roots& right, roots& output);
@@ -1541,9 +1548,10 @@ public:
 		(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
 		 Selection& outputNonPivotPoints);
 	int GetDimensionOfElements();
-	//the following function assumes the first dimension vectors are the images of the
+	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)
 	void MakeBasisChange(root& input, root& output);
+	void MakeBasisChange(roots& input, roots& output);
 	bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
 	void GaussianEliminationForNormalComputation
 		(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension);
@@ -1551,7 +1559,9 @@ public:
 	int ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables);
 	void rootsToMatrix(MatrixLargeRational& output);
 	void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
+	void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString);};
 	void ElementToString(std::string& output);
+	void ElementToStringEpsilonForm(std::string& output);
 	void ElementToString(std::string& output, bool useLaTeX);
 	void SubSelection(Selection& theSelection, roots& output);
 	void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
@@ -5724,6 +5734,8 @@ public:
 	roots TestedRootsAlpha;
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
+	roots EpsilonCoordsWRTk;
+	rootsCollection kModulesEpsCoords;
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
 	ListBasicObjects<Selection> theKEnumerations;

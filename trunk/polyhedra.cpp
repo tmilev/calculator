@@ -1147,11 +1147,29 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
-	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),'E',7);
-	this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	WeylGroup Eeight;
+	Eeight.MakeEn(8);
+	Eeight.GenerateRootSystemFromKillingFormMatrix();
+	MatrixLargeRational tempMat;
+	roots tempRoots, epsilons,tempRoots2;
+  tempRoots.CopyFromBase(Eeight.RootSystem);
+  DynkinDiagramRootSubalgebra tempD;
+  tempD.ComputeDiagramType(tempRoots,Eeight);
+  tempD.SimpleBasesConnectedComponents.CollectionToRoots(tempRoots);
+  epsilons.CopyFromBase(Eeight.RootSystem);
+  epsilons.GetCoordsInBasis(tempRoots, tempRoots2,*this->theGlobalVariablesContainer->Default());
+  for (int i=0;i<Eeight.RootSystem.size;i++)
+  { Eeight.GetEpsilonCoords
+      ( 'E',8,tempRoots,tempRoots2.TheObjects[i],epsilons.TheObjects[i],
+        *this->theGlobalVariablesContainer->Default());
+  }
+  epsilons.ComputeDebugStringEpsilonForm();
+  this->theRootSubalgebras.DebugString.append(epsilons.DebugString);
+	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
+	//	(*this->theGlobalVariablesContainer->Default(),'E',7);
+	//this->theRootSubalgebras.SortDescendingOrderBySSRank();
+	//this->theRootSubalgebras.ComputeLProhibitingRelations
+		//(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -1161,12 +1179,13 @@ void ComputationSetup::RunCustom()
   this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
 	this->theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
 	this->theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
-	this->theRootSubalgebras.theBadRelations.ComputeDebugString
-		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.theGoodRelations.ComputeDebugString
-		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.theMinRels.ComputeDebugString
-		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	//this->theRootSubalgebras.theBadRelations.ComputeDebugString
+	//	(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	//this->theRootSubalgebras.theGoodRelations.ComputeDebugString
+	//	(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	//this->theRootSubalgebras.theMinRels.ComputeDebugString
+	//	(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
 	this->theOutput.DebugString.append("\n\n\n");
 	this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
 	this->theOutput.DebugString.append("\n\n\n");
@@ -2216,6 +2235,22 @@ void MatrixLargeRational::DivideByRational(Rational& x)
 			this->elements[j][i].DivideBy(tempRat);
 }
 
+void MatrixLargeRational::ActOnAroot(root& input, root& output)
+{ assert(&input!=&output);
+  assert(this->NumCols==input.size);
+  output.MakeZero(this->NumRows);
+  for (int i=0;i<this->NumRows;i++)
+    for(int j=0;j<this->NumCols;j++)
+      output.TheObjects[i]=output.TheObjects[i]+ this->elements[i][j]*input.TheObjects[j];
+
+}
+
+void MatrixLargeRational::ActOnRoots(roots& input, roots&output)
+{ output.SetSizeExpandOnTopNoObjectInit(input.size);
+  for (int i=0;i<input.size;i++)
+    this->ActOnAroot(input.TheObjects[i],output.TheObjects[i]);
+}
+
 void MatrixLargeRational::AssignMatrixIntWithDen(MatrixIntTightMemoryFit &theMat, int Den)
 { this->init(theMat.NumRows,theMat.NumCols);
 	for (int i=0;i<this->NumRows;i++)
@@ -2353,6 +2388,15 @@ void roots::ComputeDebugString()
 
 void roots::ElementToString(std::string& output)
 { this->ElementToString(output,false);
+}
+
+void roots::ElementToStringEpsilonForm(std::string& output)
+{ std::string tempS; std::stringstream out;
+  for (int i=0;i<this->size;i++)
+  { this->TheObjects[i].ElementToStringEpsilonForm(tempS);
+    out <<"("<<tempS<<")"<<"\\\\\n";
+  }
+  output=out.str();
 }
 
 void roots::ElementToString(std::string& output, bool useLaTeX)
@@ -2946,6 +2990,20 @@ void roots::MakeBasisChange(root& input, root& output)
 		tempRoot2.MultiplyByLargeRational(input.TheObjects[j]);
 		output.Add(tempRoot2);
 	}
+}
+
+void roots::MakeBasisChange(roots& input, roots& output)
+{ assert(&input!=&output);
+  output.SetSizeExpandOnTopNoObjectInit(input.size);
+ 	for (int i=0;i<input.size;i++)
+    this->MakeBasisChange(input.TheObjects[i],output.TheObjects[i]);
+}
+
+void roots::GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables)
+{ assert(this!=&outputCoords);
+  outputCoords.SetSizeExpandOnTopNoObjectInit(this->size);
+  for(int i=0;i<this->size;i++)
+    this->TheObjects[i].GetCoordsInBasis(inputBasis,outputCoords.TheObjects[i],theGlobalVariables);
 }
 
 int roots::ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables)
@@ -7499,7 +7557,7 @@ inline void Rational::MultiplyByInt(int x)
 	this->MultiplyBy(tempRat);
 }
 
-inline void Rational::MultiplyBy(Rational &r)
+inline void Rational::MultiplyBy(const Rational &r)
 { if (r.Extended==0)
 	{ if (this->TryToMultiplyQuickly(r.NumShort,r.DenShort))
 		{	return;}
@@ -7589,6 +7647,24 @@ void Rational::GetNumExtendedUnsigned(LargeIntUnsigned& output)
   }
 }
 
+//Rational::Rational(const Rational& right)
+//{ this->Assign(right);
+//}
+
+const Rational Rational::operator*(const Rational& right)
+{ Rational tempRat;
+  tempRat.Assign(*this);
+  tempRat.MultiplyBy(right);
+  return tempRat;
+}
+
+const Rational Rational::operator+(const Rational& right)
+{ Rational tempRat;
+  tempRat.Assign(*this);
+  tempRat.Add(right);
+  return tempRat;
+}
+
 void Rational::Assign(const Rational &r)
 { this->NumShort= r.NumShort;
 	this->DenShort= r.DenShort;
@@ -7658,7 +7734,7 @@ double Rational::DoubleValue()
     return this->Extended->num.GetDoubleValue()/this->Extended->den.GetDoubleValue();
 }
 
-void Rational::Add(Rational &r)
+void Rational::Add(const Rational &r)
 { //static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
 	if (r.Extended==0)
 	{	if (this->TryToAddQuickly(r.NumShort,
@@ -12089,6 +12165,43 @@ void WeylGroup::GetEpsilonMatrix
 		output.elements[WeylRank-1][WeylRank-2]=1;
 		output.elements[WeylRank-1][WeylRank-1]=-1;
 	}
+	if (WeylLetter=='E' && WeylRank==8)
+	{ //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
+    //first comes the triple node, then the strip of length 4, then the strip of length 2 and finally the strip of lenght 1
+    //as in D, all strips are oriented with the node linked to the triple node first
+	  output.init(WeylRank,WeylRank);
+    output.NullifyAll();
+    //\eps_1 coefficient:
+    output.elements[0][5]=-1;
+    output.elements[0][6]=RHalf;
+    output.elements[0][7]=1;
+    //\eps_2 coefficient:
+    output.elements[1][0]=-1;
+    output.elements[1][5]=1;
+    output.elements[1][6]=RMHalf;
+    output.elements[1][7]=1;
+    //\eps_3 coefficient:
+    output.elements[2][0]=1;
+    output.elements[2][1]=-1;
+    output.elements[2][6]=RMHalf;
+    //\eps_4 coefficient:
+    output.elements[3][1]=1;
+    output.elements[3][2]=-1;
+    output.elements[3][6]=RMHalf;
+    //\eps_5 coefficient:
+    output.elements[4][2]=1;
+    output.elements[4][3]=-1;
+    output.elements[4][6]=RMHalf;
+    //\eps_6 coefficient:
+    output.elements[5][3]=1;
+    output.elements[5][4]=-1;
+    output.elements[5][6]=RMHalf;
+    //\eps_7 coefficient:
+    output.elements[6][4]=1;
+    output.elements[6][6]=RMHalf;
+    //\eps_8 coefficient:
+    output.elements[7][6]=RHalf;
+  }
 	//output.ComputeDebugString();
 }
 
@@ -15472,7 +15585,8 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 
 void ::DynkinDiagramRootSubalgebra::ComputeDiagramType
 	(roots& simpleBasisInput, WeylGroup& theWeyl)
-{ this->SimpleBasesConnectedComponents.size=0;
+{ theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
+  this->SimpleBasesConnectedComponents.size=0;
 	this->SimpleBasesConnectedComponents
 		.MakeActualSizeAtLeastExpandOnTop(simpleBasisInput.size);
 	for (int i=0;i<simpleBasisInput.size;i++)
@@ -17182,7 +17296,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting
 	tempRoots.CopyFromBase(this->Alphas);
 	tempRoots.AddListOnTop(this->Betas);
 	tempRoots.AddListOnTop(owner.genK);
-	owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
+	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
 	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
 	if (this->theDiagram.DebugString=="$F_4$")
 		return false;
@@ -17226,7 +17340,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoo
 {	roots tempRoots;
 	tempRoots.CopyFromBase(this->Alphas);
 	tempRoots.AddListOnTop(this->Betas);
-	owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
+	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
 	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
 	if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
 	{	assert(false);
@@ -17348,7 +17462,7 @@ void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
 	tempRoots.AddListOnTop(owner.SimpleBasisK);
 	for (int i=0;i<this->theDiagram.SimpleBasesConnectedComponents.size;i++)
 		tempRoots.AddListOnTop(this->theDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
-	owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
+	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
 	this->theDiagramRelAndK.ComputeDiagramType(tempRoots,owner.AmbientWeyl);
 }
 

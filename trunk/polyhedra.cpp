@@ -680,7 +680,8 @@ void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(Computation
 #endif
 	std::cout << "Number of partial fractions: " << input.thePartialFraction.size <<"<br>\n";
 	std::cout << "Number of monomials in the numerators: "<<input.thePartialFraction.NumMonomialsInTheNumerators
-						<<"<br>\n" <<"Partial fraction decomposition:\n<br>\n";
+						<<"<br>\n" <<"Partial fraction decomposition &nbsp;&nbsp;&nbsp;"
+						<<"<a href=\"/tmp/partial_fraction.pdf\">pdf</a>\n<br>\n";
 	std::cout << "<textarea name=\"pf_output\" cols=\"50\" rows=\"30\">"
 						<< input.thePartialFraction.DebugString
 						<< "</textarea>";
@@ -845,7 +846,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   if (tempS=="buttonOneChamber")
   { output.thePartialFraction.flagUsingIndicatorRoot=true;
     tempStream>> tempS>>tempS>>tempS>>tempS>>output.DisplayNumberChamberOfInterest;
-    std::cout<< "Chamber of interest: "<< output.DisplayNumberChamberOfInterest;
+   // std::cout<< "Chamber of interest: "<< output.DisplayNumberChamberOfInterest;
   }
   if (output.flagComputingVectorPartitions && output.DisplayNumberChamberOfInterest==-1)
   { output.VPVectors.Average(output.thePartialFraction.IndicatorRoot, output.theChambers.AmbientDimension);
@@ -911,9 +912,9 @@ ComputationSetup::ComputationSetup()
 				<<" into non-negative integral sum of the integral vectors $I$, where $I$ is the set given by "
 				<<" the following list.\n\n";
 	out2	<< "\n\n For given integers $N$, $m$ and integral matrices"
-				<<"$A:=\\left(\\begin{array}{ccc}a_{11}&\\dots&a_{1n}\\\\ &\\dots& \\\\ a_{m1}&\\dots& a_{mn}\\end{array}\\right)$,"
+				<<" $A:=\\left(\\begin{array}{ccc}a_{11}&\\dots&a_{1n}\\\\ &\\dots& \\\\ a_{m1}&\\dots& a_{mn}\\end{array}\\right)$,"
 				<<" $B:=\\left( \\begin{array}{c} b_1\\\\\\vdots\\\\b_m\\end{array}\\right)$,"
-				<<" and let \n\\[{\\tau_{N}}_{[(a_{11}x_1+\\dots a_{1n}x_n=b_1),\\dots, (a_{m1}x_1+\\dots a_{mn}x_n=b_m) ]} "
+				<<" let \n\\[{\\tau_{N}}_{[(a_{11}x_1+\\dots a_{1n}x_n=b_1),\\dots, (a_{m1}x_1+\\dots a_{mn}x_n=b_m) ]} "
 				<<"(x_1,\\dots,x_n)\\]\n"
 				<<" denote the function that takes value 1 if "
 				<<"$A\\left( \\begin{array}{c} x_1\\\\\\vdots\\\\x_n\\end{array}\\right)\\equiv B"
@@ -1128,8 +1129,8 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		(*this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex);
-	this->theRootSubalgebras.SortDescendingOrderBySSRank();
+		( *this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex,
+      true, true);
 	//this->theRootSubalgebras.ComputeLProhibitingRelations
 	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
@@ -1147,24 +1148,10 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
-	WeylGroup Eeight;
-	Eeight.MakeEn(8);
-	Eeight.GenerateRootSystemFromKillingFormMatrix();
-	MatrixLargeRational tempMat;
-	roots tempRoots, epsilons,tempRoots2;
-  tempRoots.CopyFromBase(Eeight.RootSystem);
-  DynkinDiagramRootSubalgebra tempD;
-  tempD.ComputeDiagramType(tempRoots,Eeight);
-  tempD.SimpleBasesConnectedComponents.CollectionToRoots(tempRoots);
-  epsilons.CopyFromBase(Eeight.RootSystem);
-  epsilons.GetCoordsInBasis(tempRoots, tempRoots2,*this->theGlobalVariablesContainer->Default());
-  for (int i=0;i<Eeight.RootSystem.size;i++)
-  { Eeight.GetEpsilonCoords
-      ( 'E',8,tempRoots,tempRoots2.TheObjects[i],epsilons.TheObjects[i],
-        *this->theGlobalVariablesContainer->Default());
-  }
-  epsilons.ComputeDebugStringEpsilonForm();
-  this->theRootSubalgebras.DebugString.append(epsilons.DebugString);
+	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
+		( *this->theGlobalVariablesContainer->Default(),'E',6,true, true);
+  this->theRootSubalgebras.ComputeDebugString
+    (true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
 	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 	//	(*this->theGlobalVariablesContainer->Default(),'E',7);
 	//this->theRootSubalgebras.SortDescendingOrderBySSRank();
@@ -1246,7 +1233,8 @@ void ComputationSetup::Run()
 					this->DisplayNumberChamberOfInterest=-1;
         }
         //this->thePartialFraction.IndicatorRoot.ComputeDebugString();
-      }
+      } else
+        this->thePartialFraction.IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
 		} else
 		{ if (this->flagFullChop)
 				this->FullChop(*this->theGlobalVariablesContainer->Default());
@@ -1328,7 +1316,10 @@ void ComputationSetup::Run()
 		if (this->flagDisplayingPartialFractions)
 		{ std::stringstream out2;
 			if (this->flagHavingBeginEqnForLaTeXinStrings)
-				out2<<"\\documentclass{article}\n\\begin{document}";
+				out2<<"\\documentclass{article}\n "
+						<<"\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}"
+						<<"\\addtolength{\\voffset}{-3.5cm}"
+						<<"\\addtolength{\\textheight}{7cm} \\begin{document}";
 			if (this->flagHavingStartingExpression)
 				out2<< BeginString<<"=";
 			this->thePartialFraction.ComputeDebugString
@@ -3460,12 +3451,10 @@ bool CombinatorialChamber::ComputeVertexFromSelection
 
 bool CombinatorialChamber::PlusMinusPointIsInChamber(root&point)
 {	if (PointIsInChamber(point))
-	{ return true;
-	}
+    return true;
 	point.MinusRoot();
 	if (PointIsInChamber(point))
-	{	return true;
-	}
+    return true;
 	return false;
 }
 
@@ -4075,9 +4064,8 @@ void CombinatorialChamberContainer::MakeExtraProjectivePlane()
 
 void CombinatorialChamberContainer::ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables)
 { if (this->flagAnErrorHasOcurredTimeToPanic)
-	{ for (int i=0;i<this->size;i++)
+    for (int i=0;i<this->size;i++)
 			this->TheObjects[i]->ComputeDebugString(this);
-	}
 	for (int i=0;i<this->size;i++)
 		this->TheObjects[i]->ComputeVerticesFromNormals(*this, theGlobalVariables);
 }
@@ -12097,6 +12085,40 @@ void WeylGroup::MakeG2()
 	this->KillingFormMatrix.elements[0][1]=-3;
 }
 
+void WeylGroup::GetEpsilonCoordsWRTsubalgebra
+  (	roots& generators, roots& input, roots& output, GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational& basisChange=theGlobalVariables.matGetEpsilonCoords2;
+  MatrixLargeRational& tempMat= theGlobalVariables.matGetEpsilonCoords3;
+  DynkinDiagramRootSubalgebra& tempDyn= theGlobalVariables.dynGetEpsCoords;
+  roots& simpleBasis=theGlobalVariables.rootsGetEpsCoords2;
+  roots& coordsInNewBasis=theGlobalVariables.rootsGetEpsCoords3;
+  simpleBasis.CopyFromBase(generators);
+  tempDyn.ComputeDiagramType(simpleBasis,*this);
+  bool tempBool=true;
+  if (generators.size==0)
+    tempBool=false;
+  else
+    if(tempDyn.DebugString.at(1)=='E')
+      tempBool=false;
+  if (!tempBool)
+  { output.SetSizeExpandOnTopNoObjectInit(input.size);
+    for(int i=0;i<input.size;i++)
+      output.TheObjects[i].MakeZero(0);
+    return;
+  }
+  for (int i=0;i<tempDyn.SimpleBasesConnectedComponents.size;i++)
+  { this->GetEpsilonMatrix
+      ( tempDyn.DynkinTypeStrings.TheObjects[i].at(1),
+        tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size,
+        theGlobalVariables,tempMat);
+    basisChange.DirectSumWith(tempMat);
+    basisChange.ComputeDebugString();
+  }
+  tempDyn.SimpleBasesConnectedComponents.CollectionToRoots(simpleBasis);
+  input.GetCoordsInBasis(simpleBasis,coordsInNewBasis,theGlobalVariables);
+  basisChange.ActOnRoots(coordsInNewBasis,output);
+}
+
 void WeylGroup::GetEpsilonCoords
 	(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input,
 		root& output, GlobalVariables& theGlobalVariables)
@@ -14726,7 +14748,7 @@ void rootSubalgebra::ExtractRelations
 			assert(theRel.CheckForBugs(*this,NilradicalRoots));
 			NilradicalRoots.ComputeDebugString();
 			this->NilradicalKmods.ComputeDebugString();
-			this->ComputeDebugString(true,false,theGlobalVariables);
+			this->ComputeDebugString(true,false,false,theGlobalVariables);
 		}
 		owner.theBadRelations.AddObjectOnTopHash(theRel);
 	}
@@ -14840,6 +14862,16 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot
 	}
 }
 
+void rootSubalgebra::computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
+{ this->kModulesEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+  for(int i=0;i<this->kModules.size;i++)
+    this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
+      ( this->SimpleBasisK, this->kModules.TheObjects[i], this->kModulesEpsCoords.TheObjects[i],
+        theGlobalVariables);
+  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
+    (this->SimpleBasisK,this->SimpleBasisK,this->SimpleBasisKEpsCoords,theGlobalVariables);
+}
+
 void rootSubalgebra::Assign(const rootSubalgebra& right)
 {	this->AmbientWeyl.Assign(right.AmbientWeyl);
 	this->genK.CopyFromBase(right.genK);
@@ -14866,7 +14898,8 @@ inline void rootSubalgebra::operator =(const rootSubalgebra& right)
 }
 
 void rootSubalgebras::GenerateAllRootSubalgebrasUpToIsomorphism
-	(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank)
+	( GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank,
+    bool sort, bool computeEpsCoords)
 {	this->size=0;
 	this->AmbientWeyl.MakeArbitrary(WeylLetter,WeylRank);
 	this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
@@ -14878,6 +14911,11 @@ void rootSubalgebras::GenerateAllRootSubalgebrasUpToIsomorphism
 	theGlobalVariables.rootSAsGenerateAll.TheObjects[0].ComputeAll();
 	this->GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		(theGlobalVariables.rootSAsGenerateAll,1,theGlobalVariables);
+  if (sort)
+    this->SortDescendingOrderBySSRank();
+  if(computeEpsCoords)
+    for(int i=0;i<this->size;i++)
+      this->TheObjects[i].computeEpsCoordsWRTk(theGlobalVariables);
 }
 
 void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
@@ -15331,38 +15369,49 @@ void rootSubalgebra::ElementToHtml
   MyPath=out.str();
 	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
     (output, MyPath, false,false);
-  this->ComputeDebugString(false,true,theGlobalVariables);
+  this->ComputeDebugString(false,true,true,theGlobalVariables);
   output<< this->DebugString;
   output.close();
 }
 
 void rootSubalgebra::ElementToStringHeaderFooter
-	(std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml)
+	( std::string& outputHeader,std::string&  outputFooter, bool useLatex,
+    bool useHtml, bool includeKEpsCoords)
 { outputHeader.clear();
   outputFooter.clear();
 	if (useHtml)
 	{ outputHeader.append("g/k k-submodules<table border=\"1\">\n<tr><th>id</th><th>size</th>");
-		outputHeader.append("<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>roots</th></tr>");
+		outputHeader.append("<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>roots</th>");
+		if (includeKEpsCoords)
+      outputHeader.append("<th>epsilon coords wrt k</th>");
+		outputHeader.append("</tr>");
 		outputFooter.append("</td></tr></table>");
 	}
   if(useLatex)
-  {	outputHeader.append
-			("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
+  {	if (!includeKEpsCoords)
+      outputHeader.append
+        ("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
+		else
+      outputHeader.append("\n\n\\noindent\\begin{tabular}{|cccccc|} \n \\multicolumn{6}{c}{");
 		outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
 		outputHeader.append ("id & size & $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-lowest weight&");
-		outputHeader.append(" $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-highest weight& elements\\\\");
+		outputHeader.append(" $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-highest weight& elements");
+		if (includeKEpsCoords)
+      outputHeader.append(" & $\\varepsilon$-coordinates wrt $\\mathfrak{k}$");
+    outputHeader.append("\\\\");
 		outputFooter.append("\\hline \\end{tabular}");
 	}
 }
 
 void rootSubalgebra::ElementToString
 	( std::string &output, bool makeALaTeXReport, bool useHtml,
-    GlobalVariables& theGlobalVariables)
+    bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
 	int LatexLineCounter=0;
-	this->ElementToStringHeaderFooter(latexHeader, latexFooter, makeALaTeXReport, useHtml);
+	this->ElementToStringHeaderFooter
+    (latexHeader, latexFooter, makeALaTeXReport, useHtml,includeKEpsCoords);
 	this->theDynkinDiagram.ElementToString(tempS);
   if (makeALaTeXReport)
     out <<"\\noindent$\\mathfrak{k}_{ss}:$ ";
@@ -15455,6 +15504,28 @@ void rootSubalgebra::ElementToString
         out <<"</table></tr>";
     if (makeALaTeXReport)
       out <<"\\end{tabular}\\\\\n";
+    if (includeKEpsCoords)
+    { if (useHtml)
+        out <<"</td><td><table>";
+      if (makeALaTeXReport)
+        out <<" & \n\\begin{tabular}{c}\n";
+      for (int j=0;j<this->kModules.TheObjects[i].size;j++)
+      { this->kModulesEpsCoords.TheObjects[i].TheObjects[j].ElementToStringEpsilonForm(tempS);
+        if (useHtml)
+          out <<"<tr><td>";
+        out	<<tempS;
+        if (j!=this->kModules.TheObjects[i].size)
+          out<<", ";
+        if (useHtml)
+          out <<"</td></tr>";
+        if (makeALaTeXReport)
+          out<<"\\\\";
+      }
+      if (useHtml)
+        out <<"</table></tr>";
+      if (makeALaTeXReport)
+        out <<"\\end{tabular}\\\\\n";
+    }
     if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
     { LatexLineCounter=0;
       out <<latexFooter<<latexHeader;
@@ -17705,7 +17776,8 @@ void rootSubalgebras::ElementToHtml
   childrenPathPhysical.append("rootHtml_");childrenPathServer.append("rootHtml_");
 	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
     (output, MyPathPhysical, false,false);
-  this->ComputeDebugString(false,true,&childrenPathPhysical,&childrenPathServer,theGlobalVariables);
+  this->ComputeDebugString
+    (false,true,true,&childrenPathPhysical,&childrenPathServer,theGlobalVariables);
   output<< "<HTML><BODY>"<<header<<this->DebugString<<"</BODY></HTML>";
   output.close();
   for (int i=0;i<this->size;i++)
@@ -17714,13 +17786,15 @@ void rootSubalgebras::ElementToHtml
 }
 
 void rootSubalgebras::ElementToString
-	(	std::string& output, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
-		std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+	(	std::string& output, bool useLatex, bool useHtml,bool includeKEpsCoords,
+    std::string* htmlPathPhysical, std::string* htmlPathServer,
+    GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
 	this->DynkinTableToString(useLatex, useHtml,htmlPathPhysical,htmlPathServer,tempS);
 	out <<tempS;
 	for (int i=0;i<this->size; i++)
-	{	this->TheObjects[i].ElementToString(tempS,useLatex,useHtml,theGlobalVariables);
+	{	this->TheObjects[i].ElementToString
+      (tempS,useLatex,useHtml,includeKEpsCoords,theGlobalVariables);
 		out << tempS <<"\n\n";
 	}
 	output= out.str();
@@ -17929,7 +18003,7 @@ void coneRelations::ElementToString
 		out <<footer;
 	if (this->flagIncludeSubalgebraDataInDebugString)
 	{ owners.ElementToString
-			(tempS,useLatex, useHtml,htmlPathPhysical, htmlPathServer,theGlobalVariables);
+			(tempS,useLatex, useHtml, false, htmlPathPhysical, htmlPathServer,theGlobalVariables);
 		out <<"\n\n\\newpage"<<tempS;
 	}
 	output=out.str();

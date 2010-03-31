@@ -2,7 +2,7 @@
 #include "polyhedra.h"
 
 extern int GlobalPointerCounter;
-
+/*
 struct bmpfile_magic {
   unsigned char magic[2];
 };
@@ -63,7 +63,7 @@ void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPrepared
 	}
 	outputFileOpenWithPreparedHeader.close();
 }
-
+*/
 
 void getPath(char* path, std::string& output)
 { if (path==0) return;
@@ -119,6 +119,8 @@ int main(int argc, char **argv)
   int choice =::CGIspecificRoutines::ReadDataFromCGIinput
     (inputString, theComputationSetup,inputPath);
   //std::cout<< "choice " <<choice <<"       ";
+  std::string latexCommand1;
+  std::string latexCommand2;    //std::cout<<inputString;
   inputPath.append("../htdocs/tmp/");
   if (choice ==0 || choice==1)
   { std::stringstream tempSS;
@@ -126,7 +128,6 @@ int main(int argc, char **argv)
     std::string tempS;
     tempS=tempSS.str();
     std::cout<<tempS;
-    //std::cout<<inputString;
     if (choice==0)//default choice
     {	//std::cout<<"before computation setup";
     //	theComputationSetup.flagComputingPartialFractions=false;
@@ -134,7 +135,21 @@ int main(int argc, char **argv)
       theComputationSetup.flagPartialFractionSplitPrecomputed=false;
       theComputationSetup.Run();
       ::CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
-			if (theComputationSetup.flagComputingVectorPartitions)
+      std::string pfFileName;
+      std::fstream pfFile;
+      pfFileName=inputPath;
+      pfFileName.append("partial_fraction.tex");
+      CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(pfFile,pfFileName,false,false);
+      pfFile<< theComputationSetup.thePartialFraction.DebugString;
+      pfFile.close();
+      latexCommand1.append("pdflatex -output-directory=");
+      latexCommand1.append(inputPath);
+      latexCommand1.append(" ");
+      latexCommand1.append(pfFileName);
+      //std::cout<<"latex command:";
+      //std::cout.flush();
+      //std::cout<<"time for second report";
+      if (theComputationSetup.flagComputingVectorPartitions)
 			{	CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
         std::string vpFileName;
         std::fstream vpFile;
@@ -143,13 +158,12 @@ int main(int argc, char **argv)
         CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(vpFile,vpFileName,false,false);
         vpFile<< theComputationSetup.theOutput.DebugString;
         vpFile.close();
-        std::string latexCommand;
-        latexCommand.append("pdflatex -output-directory=");
-        latexCommand.append(inputPath);
-        latexCommand.append(" ");
-        latexCommand.append(vpFileName);
-        ::system(latexCommand.c_str());
-			}
+        latexCommand2.clear();
+        latexCommand2.append("pdflatex -output-directory=");
+        latexCommand2.append(inputPath);
+        latexCommand2.append(" ");
+        latexCommand2.append(vpFileName);
+ 		}
       std::string chamberFileName;
       std::fstream chamberFile;
       chamberFileName=inputPath;
@@ -219,13 +233,18 @@ int main(int argc, char **argv)
                 <<"url=../tmp/rootHtml.html\"> <BODY>"<< inputPath;
     }
   } else if (choice==3)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi.cgi\">\n"
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n"
               <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n"
               << "Dimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n"
               << "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n"
               << "</FORM>\n";
   }
   std::cout<<"</BODY>\n</HTML>";
+	std::cout<<"<!--";
 	std::cout.flush();
-  return 0;   // To avoid Apache errors.
+  ::system(latexCommand1.c_str());
+  ::system(latexCommand2.c_str());
+	std::cout<<"-->";
+	std::cout.flush();
+	return 0;   // To avoid Apache errors.
 }

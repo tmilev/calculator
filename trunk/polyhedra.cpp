@@ -1295,7 +1295,7 @@ void ComputationSetup::Run()
       {	out	<<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\n "
 						<<"\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}\\addtolength{\\voffset}{-3.5cm}"
 						<<"\\addtolength{\\textheight}{7cm} \\begin{document}";
-				this->VPVectors.ElementToString(tempS,true);
+				this->VPVectors.ElementToString(tempS,true,false,false);
 				out	<< this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2
 						<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
 				if (this->flagComputingChambers )
@@ -1667,19 +1667,17 @@ void root::ElementToString(std::string& output)
 void root::ElementToString(std::string& output, bool useLaTeX)
 {	output.clear();
 	std::string tempStr;
-	if (useLaTeX)
-    output.append("(");
+  output.append("(");
   for(int i=0;i<this->size;i++)
 	{	this->TheObjects[i].ElementToString(tempStr);
 		output.append(tempStr);
 		if (i!=this->size-1)
 			output.append(",");
 	}
-	if (useLaTeX)
-    output.append(")");
+  output.append(")");
 }
 
-void root::ElementToStringEpsilonForm(std::string& output)
+void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)
 {	std::stringstream out;
 	std::string tempS;
   for(int i=0;i<this->size;i++)
@@ -1694,7 +1692,14 @@ void root::ElementToStringEpsilonForm(std::string& output)
 				} else
 					out<<"+";
 			}
-			out <<tempS<<"$\\varepsilon_" <<i+1<<"$";
+			out <<tempS;
+			if (useLatex)
+        out <<"$\\varepsilon_";
+      else
+        out <<"e_";
+      out <<i+1;
+			if (useLatex)
+        out<<"$";
 		}
 	}
 	output=out.str();
@@ -2385,33 +2390,61 @@ void roots::ComputeDebugString()
 }
 
 void roots::ElementToString(std::string& output)
-{ this->ElementToString(output,false);
+{ this->ElementToString(output,false,false,false);
 }
 
-void roots::ElementToStringEpsilonForm(std::string& output)
+void roots::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable)
 { std::string tempS; std::stringstream out;
+  if (useHtml && makeTable)
+    out <<"<table>";
+  if (useLatex && makeTable)
+    out <<"\\begin{tabular}{c}";
   for (int i=0;i<this->size;i++)
-  { this->TheObjects[i].ElementToStringEpsilonForm(tempS);
-    out <<"("<<tempS<<")"<<"\\\\\n";
+  { this->TheObjects[i].ElementToStringEpsilonForm(tempS, useLatex, useHtml);
+    if (useHtml && makeTable)
+      out<<"<tr><td>";
+    out <<"("<<tempS<<")";
+    if (useLatex && makeTable)
+      out<<"\\\\";
+    if (useHtml && makeTable)
+      out <<"</td></tr>";
+    if (!makeTable)
+    { if (i!=this->size-1)
+        out <<", ";
+    }
+    else
+      out <<"\n";
   }
+  if (useHtml && makeTable)
+    out <<"</table>";
   output=out.str();
 }
 
-void roots::ElementToString(std::string& output, bool useLaTeX)
+void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable)
 {	std::stringstream out;
 	std::string tempS;
-	if (! useLaTeX)
+	if (! useLaTeX && ! useHtml)
     out<<"Num roots: "<<this->size<<"\n";
+	if (useLaTeX && makeTable)
+    out <<"\\begin{tabular}{c}";
+  if (useHtml && makeTable)
+    out <<"<table>";
 	for (int i=0; i<this->size;i++)
 	{	this->TheObjects[i].ElementToString(tempS,useLaTeX);
+		if (useHtml&& makeTable)
+      out <<"<tr><td>";
 		out<<tempS;
-		if (i!=this->size-1)
-		{ if (useLaTeX)
-        out<<", ";
-      else
-        out<<"\n";
-		}
+		if (!makeTable && i!=this->size-1)
+      out<<", ";
+    if (useLaTeX && makeTable)
+      out <<"\\\\\n";
+    if (useHtml && makeTable)
+      out <<"</td></tr>";
 	}
+	if (useHtml&& makeTable)
+    out << "</table>";
+  if (useLaTeX && makeTable)
+    out <<"\\end{tabular}";
 	output = out.str();
 }
 
@@ -15451,135 +15484,119 @@ void rootSubalgebra::ElementToStringHeaderFooter
 }
 
 void rootSubalgebra::ElementToString
-	( std::string &output, bool makeALaTeXReport, bool useHtml,
+	( std::string &output, bool useLatex, bool useHtml,
     bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
 	int LatexLineCounter=0;
 	this->ElementToStringHeaderFooter
-    (latexHeader, latexFooter, makeALaTeXReport, useHtml,includeKEpsCoords);
+    (latexHeader, latexFooter, useLatex, useHtml,includeKEpsCoords);
 	this->theDynkinDiagram.ElementToString(tempS);
-  if (makeALaTeXReport)
+  if (useLatex)
     out <<"\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
 	{	out << "k_{ss}: ";
 		::CGIspecificRoutines::clearDollarSigns(tempS,tempS);
   }
   out << tempS;
-  this->SimpleBasisK.ElementToString(tempS,true);
+  this->SimpleBasisK.ElementToString(tempS,useLatex,useHtml,false);
   if (useHtml)
 		out <<"\n<br>\n";
-  if (makeALaTeXReport)
+  if (useLatex)
     out <<"\n\\noindent";
 	out <<" Simple basis: "<<tempS;
+	this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS,useLatex,useHtml,false);
+	if (useHtml)
+    out <<"\n<br>\nSimple basis epsilon form: "<< tempS;
 	this->theCentralizerDiagram.ElementToString(tempS);
-  if (makeALaTeXReport)
+  if(!useLatex)
+    CGIspecificRoutines::clearDollarSigns(tempS,tempS);
+  if (useLatex)
     out <<"\n\n\\noindent ";
   if (useHtml)
 		out << "<br>\n";
-	if (makeALaTeXReport)
+	if (useLatex)
 		out<<"$C(\\mathfrak{k})_{ss}$: ";
 	if (useHtml)
-		out <<"C(k)_{ss}";
+    out <<"C(k)_{ss}: ";
 	out	 <<tempS;
 	//int CartanPieceSize=
 		//this->AmbientWeyl.KillingFormMatrix.NumRows- this->SimpleBasisCentralizerRoots.size-
 		//	this->SimpleBasisK.size;
 	//if (CartanPieceSize!=0)
-	//{	if (makeALaTeXReport)
+	//{	if (useLatex)
 	//		out << "$\\oplus\\mathfrak{h}_" << CartanPieceSize<<"$";
 	//	if (useHtml)
 	//		out <<"+h_"<<CartanPieceSize;
 	//}
 	if (useHtml)
 		out <<"<br>\n simple basis centralizer: ";
-	if (makeALaTeXReport)
+	if (useLatex)
 		out<<"; simple basis centralizer: ";
-	this->SimpleBasisCentralizerRoots.ElementToString(tempS,true);
+	this->SimpleBasisCentralizerRoots.ElementToString(tempS,true,true,false);
 	out <<tempS;
 	if (useHtml)
 		out << "<br>\n Number g/k k-submodules: ";
-	if (makeALaTeXReport)
+	if (useLatex)
     out <<"\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
   out<<this->LowestWeightsGmodK.size ;
   if (useHtml)
 		out << "<br>\n";
-  if (makeALaTeXReport)
+  if (useLatex)
 		out <<"\n\n";
 	out << latexHeader;
 	for (int i=0;i<this->kModules.size;i++)
-	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,makeALaTeXReport);
+	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,useLatex);
     if (useHtml)
       out <<"\n<tr><td>";
-    if (makeALaTeXReport)
+    if (useLatex)
       out <<"\\hline ";
     out<<i;
     if (useHtml)
       out <<"</td><td>";
-    if (makeALaTeXReport)
+    if (useLatex)
       out <<" & ";
     out << this->kModules.TheObjects[i].size;
     if (useHtml)
       out <<"</td><td>";
-    if (makeALaTeXReport)
+    if (useLatex)
       out <<" & ";
 		out << tempS;
-		this->HighestWeightsGmodK.TheObjects[i].ElementToString(tempS,makeALaTeXReport);
+		this->HighestWeightsGmodK.TheObjects[i].ElementToString(tempS,useLatex);
     if (useHtml)
       out <<"</td><td>";
-    if (makeALaTeXReport)
+    if (useLatex)
       out <<" & ";
 		out	<< tempS;
     if (useHtml)
-      out <<"</td><td><table>";
-		if (makeALaTeXReport)
-      out <<" & \n\\begin{tabular}{c}\n";
-		for (int j=0;j<this->kModules.TheObjects[i].size;j++)
-		{ this->kModules.TheObjects[i].TheObjects[j].ElementToString(tempS,true);
-      if (useHtml)
-        out <<"<tr><td>";
-			out	<<tempS;
-			if (j!=this->kModules.TheObjects[i].size)
-        out<<", ";
-      if (useHtml)
-        out <<"</td></tr>";
-      if (makeALaTeXReport)
-        out<<"\\\\";
-    }
+      out <<"</td><td>";
+		if (useLatex)
+      out <<" & \n";
+    this->kModules.TheObjects[i].ElementToString(tempS, useLatex,useHtml,true);
+    out << tempS;
     if (useHtml)
-        out <<"</table></tr>";
-    if (makeALaTeXReport)
-      out <<"\\end{tabular}\\\\\n";
+      out <<"</td>";
     if (includeKEpsCoords)
     { if (useHtml)
-        out <<"</td><td><table>";
-      if (makeALaTeXReport)
-        out <<" & \n\\begin{tabular}{c}\n";
-      for (int j=0;j<this->kModules.TheObjects[i].size;j++)
-      { this->kModulesEpsCoords.TheObjects[i].TheObjects[j].ElementToStringEpsilonForm(tempS);
-        if (useHtml)
-          out <<"<tr><td>";
-        out	<<tempS;
-        if (j!=this->kModules.TheObjects[i].size)
-          out<<", ";
-        if (useHtml)
-          out <<"</td></tr>";
-        if (makeALaTeXReport)
-          out<<"\\\\";
-      }
+        out << "<td>";
+      if (useLatex)
+        out <<" & ";
+      this->kModulesEpsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS,useLatex,useHtml,true);
       if (useHtml)
-        out <<"</table></tr>";
-      if (makeALaTeXReport)
-        out <<"\\end{tabular}\\\\\n";
+        out <<"</td>";
+      if (useLatex)
+        out <<"\\\\\n";
     }
+    if (useHtml)
+      out <<"</tr>";
     if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
     { LatexLineCounter=0;
       out <<latexFooter<<latexHeader;
     }
     if (i!=this->kModules.size-1)
     { LatexLineCounter+=this->kModules.TheObjects[i].size;
-      if (makeALaTeXReport)
+      if (useLatex)
       { if (  (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) &&
               (LatexLineCounter!=this->kModules.TheObjects[i].size))
         { out <<latexFooter<<latexHeader;
@@ -15590,17 +15607,17 @@ void rootSubalgebra::ElementToString
 	}
 	if (useHtml)
     out <<"</table>";
-	if (makeALaTeXReport)
+	if (useLatex)
 		out<<latexFooter;
-	if ((makeALaTeXReport|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
+	if ((useLatex|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
 		this->GenerateKmodMultTable
 			(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
 	if (this->theMultTable.size!=0)
 	{	if (useHtml)
       out<< "\n\n Pairing table:\n\n";
-	  if (makeALaTeXReport)
+	  if (useLatex)
       out <<"\n\n\\noindent Pairing table:\n\n\\noindent";
-		this->theMultTable.ElementToString(tempS,makeALaTeXReport,useHtml,*this);
+		this->theMultTable.ElementToString(tempS,useLatex,useHtml,*this);
 		out << tempS <<"\n";
 	}
 	output=out.str();
@@ -17236,7 +17253,7 @@ void coneRelation::RelationOneSideToStringCoordForm
 		if (!EpsilonForm)
 			theRoots.TheObjects[i].ElementToString(tempS);
     else
-			theRoots.TheObjects[i].ElementToStringEpsilonForm(tempS);
+			theRoots.TheObjects[i].ElementToStringEpsilonForm(tempS,true,false);
 		out <<"("<<tempS<<")";
     if (i!=theRoots.size-1)
       out <<" + ";

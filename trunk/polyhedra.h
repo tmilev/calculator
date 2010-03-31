@@ -1503,7 +1503,7 @@ public:
 		ListBasicObjects<Rational>& outputCoeffs);
 	void DivByLargeRational(Rational& a);
 	void ElementToString(std::string& output);
-	void ElementToStringEpsilonForm(std::string& output);
+	void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output, bool useLaTeX);
 	bool CheckForElementSanity();
 	//void RootToLinPolyToString(std::string& output,PolynomialOutputFormat& PolyOutput);
@@ -1601,10 +1601,10 @@ public:
 	int ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables);
 	void rootsToMatrix(MatrixLargeRational& output);
 	void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
-	void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString);};
+	void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString,false,false,false);};
 	void ElementToString(std::string& output);
-	void ElementToStringEpsilonForm(std::string& output);
-	void ElementToString(std::string& output, bool useLaTeX);
+	void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable);
+	void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable);
 	void SubSelection(Selection& theSelection, roots& output);
 	void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
 	void SelectionToMatrixAppend
@@ -5832,10 +5832,10 @@ public:
 		(int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString
-    ( bool makeALaTeXReport, bool useHtml, bool includeKEpsCoords,
+    ( bool useLatex, bool useHtml, bool includeKEpsCoords,
       GlobalVariables& theGlobalVariables)
 	{ this->ElementToString
-      ( this->DebugString,makeALaTeXReport,useHtml,
+      ( this->DebugString,useLatex,useHtml,
         includeKEpsCoords,theGlobalVariables);
   };
 	bool IndexIsCompatibleWithPrevious
@@ -5869,7 +5869,7 @@ public:
 	};
 	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
 	void ElementToString
-		(	std::string& output, bool makeALaTeXReport, bool useHtml, bool includeKEpsCoords,
+		(	std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords,
 			GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
 	void GenerateKmodMultTable

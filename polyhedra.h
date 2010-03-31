@@ -687,13 +687,20 @@ public:
 	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
 	void RowTimesScalar(int rowIndex, Element& scalar);
 	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
-	void MultiplyOnTheLeft(Matrix<Element>& input,Matrix<Element>& output);
+	void MultiplyOnTheLeft(Matrix<Element>& input, Matrix<Element>& output);
 	void MultiplyOnTheLeft(Matrix<Element>& input);
 	//returns true if successful, false otherwise
 //	bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //		(Matrix<Element>& inputColumn,Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
 	bool Invert(GlobalVariables& theGlobalVariables);
 	void NullifyAll();
+	//if m1 corresponds to a linear operator from V1 to V2 and
+	// m2 to a linear operator from W1 to W2, then the result of the below function
+	//corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
+	//this means you write the matrix m1 in the upper left corner m2 in the lower right
+	// and everything else you fill with zeros
+	void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>&m2);
+	void DirectSumWith( Matrix<Element>&m2);
 	//returns true if the system has a solution, false otherwise
 	bool RowEchelonFormToLinearSystemSolution
 		( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide,
@@ -918,6 +925,34 @@ inline void Matrix<Element>::ElementToSting(std::string& output)
 		out <<"\n";
 	}
 	output= out.str();
+}
+
+template<typename Element>
+void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
+{ assert(this!=&m1 && this!=&m2);
+  this->Resize(m1.NumRows+m2.NumRows,m1.NumCols+m2.NumCols,false);
+  this->NullifyAll();
+  for(int i=0;i<m1.NumRows;i++)
+    for(int j=0;j<m1.NumCols;j++)
+      this->elements[i][j]=m1.elements[i][j];
+  for(int i=0;i<m2.NumRows;i++)
+    for(int j=0;j<m2.NumCols;j++)
+      this->elements[i+m1.NumRows][j+m1.NumCols]=m2.elements[i][j];
+}
+
+template<typename Element>
+void Matrix<Element>::DirectSumWith(Matrix<Element>& m2)
+{ int oldNumRows=this->NumRows; int oldNumCols=this->NumCols;
+  this->Resize(this->NumRows+m2.NumRows,this->NumCols+m2.NumCols,true);
+  for(int i=0;i<m2.NumRows;i++)
+  { for(int j=0;j<m2.NumCols;j++)
+      this->elements[i+oldNumRows][j+oldNumCols]=m2.elements[i][j];
+    for(int j=0;j<oldNumCols;j++)
+      this->elements[i+oldNumRows][j]=0;
+  }
+  for (int i=oldNumCols;i<this->NumCols;i++)
+    for(int j=0;j<oldNumRows;j++)
+      this->elements[i][j]=0;
 }
 
 template <typename Element>
@@ -5382,6 +5417,8 @@ public:
 	void GetEpsilonCoords
 		(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input,
 			root& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonCoordsWRTsubalgebra
+    (	roots& generators, roots& input, roots& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonMatrix
 		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
 			MatrixLargeRational& output);
@@ -5548,6 +5585,8 @@ public:
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	rootsCollection SimpleBasesConnectedComponents;
+	//to each connected component of the simple bases corresponds
+	//its dynkin string with the same index
 	ListBasicObjects<std::string> DynkinTypeStrings;
 	ListBasicObjects<int> indicesThreeNodes;
 	ListBasicObjects<ListBasicObjects< int > > indicesEnds;
@@ -5734,7 +5773,7 @@ public:
 	roots TestedRootsAlpha;
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
-	roots EpsilonCoordsWRTk;
+	roots SimpleBasisKEpsCoords;
 	rootsCollection kModulesEpsCoords;
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
@@ -5746,6 +5785,7 @@ public:
 	int GetIndexKmoduleContainingRoot(root& input);
 	bool IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots);
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
+	void computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrick
 		(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrickWRTSubalgebra
@@ -5784,8 +5824,13 @@ public:
 	void MakeProgressReportGenAutos
 		(int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
-	void ComputeDebugString(bool makeALaTeXReport, bool useHtml,GlobalVariables& theGlobalVariables)
-	{this->ElementToString(this->DebugString,makeALaTeXReport,useHtml,theGlobalVariables);};
+	void ComputeDebugString
+    ( bool makeALaTeXReport, bool useHtml, bool includeKEpsCoords,
+      GlobalVariables& theGlobalVariables)
+	{ this->ElementToString
+      ( this->DebugString,makeALaTeXReport,useHtml,
+        includeKEpsCoords,theGlobalVariables);
+  };
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
@@ -5810,12 +5855,14 @@ public:
 		(	GlobalVariables& theGlobalVariables,Selection& selKmods,
 			rootSubalgebras& owner, int indexInOwner);
 	void ElementToStringHeaderFooter
-		(std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml);
+		( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml,
+      bool includeKEpsCoords);
 	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)
-	{this->ElementToString(output,false,false,theGlobalVariables);};
+	{ this->ElementToString(output,false,false,false,theGlobalVariables);
+	};
 	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
 	void ElementToString
-		(	std::string& output, bool makeALaTeXReport, bool useHtml,
+		(	std::string& output, bool makeALaTeXReport, bool useHtml, bool includeKEpsCoords,
 			GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
 	void GenerateKmodMultTable
@@ -5884,7 +5931,8 @@ public:
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical
 		(	Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
-			(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank);
+		( GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank,
+      bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
@@ -5906,15 +5954,17 @@ public:
 		( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer,
 			GlobalVariables& theGlobalVariables);
 	void ElementToString
-		(	std::string& output, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
-			std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
+		(	std::string& output, bool useLatex, bool useHtml,bool includeKEpsCoords,
+      std::string* htmlPathPhysical,std::string* htmlPathServer,
+      GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations
 		(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString
-		(	bool useLatex, bool useHtml, std::string* htmlPathPhysical,
+		(	bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,
 			std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 	{	this->ElementToString
-			(this->DebugString,useLatex, useHtml,htmlPathPhysical,htmlPathServer,theGlobalVariables);
+			( this->DebugString,useLatex, useHtml,includeKEpsCoords,
+        htmlPathPhysical, htmlPathServer,theGlobalVariables);
 	};
 	void MakeProgressReportGenerationSubalgebras
 		(	rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables,
@@ -6107,6 +6157,8 @@ public:
 	roots rootsGetCoordsInBasis;
 	roots rootsGetEpsilonCoords;
 	roots rootsAttemptTheTripleTrick;
+  roots rootsGetEpsCoords2;
+  roots rootsGetEpsCoords3;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -6149,6 +6201,9 @@ public:
 	MatrixLargeRational matRootSAIso;
 	MatrixLargeRational matGetCoordsInBasis;
 	MatrixLargeRational matGetEpsilonCoords;
+	MatrixLargeRational matGetEpsilonCoords2;
+	MatrixLargeRational matGetEpsilonCoords3;
+
 
 	partFraction fracReduceMonomialByMonomial;
 	partFraction fracSplit1;
@@ -6182,6 +6237,8 @@ public:
 	ReflectionSubgroupWeylGroup subGroupActionNormalizerCentralizer;
 
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;
+
+  DynkinDiagramRootSubalgebra dynGetEpsCoords;
 
 	GlobalVariables();
 	~GlobalVariables();

@@ -1896,7 +1896,7 @@ void root::MultiplyByLargeRational(Rational& a)
 		this->TheObjects[i].MultiplyBy(a);
 }
 
-void root::Add(root&r)
+void root::Add(const root&r)
 {	assert(r.size==this->size);
 	for (int i=0;i<this->size;i++)
 		this->TheObjects[i].Add(r.TheObjects[i]);
@@ -1918,6 +1918,13 @@ bool root::OurScalarProductIsZero(root& right)
 { Rational tempRat;
 	root::RootScalarEuclideanRoot(*this,right,tempRat);
 	return tempRat.IsEqualToZero();
+}
+
+const root root::operator +(const root& right)
+{ root result;
+	result.Assign(*this);
+	result.Add(right);
+	return result;
 }
 
 void root::Subtract(root&r)
@@ -2873,6 +2880,16 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots
 	if (NonPivotPoints.CardinalitySelection!=1) return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 	return true;
+}
+
+void roots::GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl)
+{	output.Resize(this->size,this->size,false);
+	for (int i=0;i<this->size;i++)
+		for(int j=i;j<this->size;j++)
+		{	theWeyl.RootScalarKillingFormMatrixRoot(this->TheObjects[i],this->TheObjects[j],output.elements[i][j]);
+			if (i!=j)
+				output.elements[j][i].Assign(output.elements[i][j]);
+		}
 }
 
 void roots::AssignMatrixRows(MatrixLargeRational& mat)
@@ -7539,6 +7556,13 @@ void Rational::ReadFromFile(std::fstream& input)
 	}
 }
 
+const root Rational::operator *(const root& right)
+{ root result;
+	result.Assign(right);
+	result.MultiplyByLargeRational(*this);
+	return result;
+}
+
 inline void Rational::MultiplyByInt(int x)
 { static Rational tempRat;
 	tempRat.AssignInteger(x);
@@ -12106,16 +12130,19 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
       output.TheObjects[i].MakeZero(0);
     return;
   }
+  basisChange.Resize(0,0,true);
   for (int i=0;i<tempDyn.SimpleBasesConnectedComponents.size;i++)
   { this->GetEpsilonMatrix
       ( tempDyn.DynkinTypeStrings.TheObjects[i].at(1),
         tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size,
         theGlobalVariables,tempMat);
     basisChange.DirectSumWith(tempMat);
-    basisChange.ComputeDebugString();
+    //basisChange.ComputeDebugString();
   }
   tempDyn.SimpleBasesConnectedComponents.CollectionToRoots(simpleBasis);
   input.GetCoordsInBasis(simpleBasis,coordsInNewBasis,theGlobalVariables);
+  //basisChange.ComputeDebugString();
+  //coordsInNewBasis.ComputeDebugString();
   basisChange.ActOnRoots(coordsInNewBasis,output);
 }
 
@@ -14864,10 +14891,30 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot
 
 void rootSubalgebra::computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 { this->kModulesEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+  MatrixLargeRational& InvertedGramMatrix=theGlobalVariables.matcomputeEpsCoordsWRTk;
+  this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix,this->AmbientWeyl);
+  InvertedGramMatrix.Invert(theGlobalVariables);
+  roots& tempRoots=theGlobalVariables.rootscomputeEpsCoordsWRTk;
+  root tempRoot, tempRoot2,tempRoot3;
   for(int i=0;i<this->kModules.size;i++)
-    this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
-      ( this->SimpleBasisK, this->kModules.TheObjects[i], this->kModulesEpsCoords.TheObjects[i],
+  {	tempRoots.size=0;
+		for (int j=0;j<this->kModules.TheObjects[i].size;j++)
+		{ tempRoot.SetSizeExpandOnTopLight(this->SimpleBasisK.size);
+			for (int k=0;k<this->SimpleBasisK.size;k++)
+				this->AmbientWeyl.RootScalarKillingFormMatrixRoot
+					(	this->kModules.TheObjects[i].TheObjects[j],this->SimpleBasisK.TheObjects[k],
+						tempRoot.TheObjects[k]);
+			InvertedGramMatrix.ActOnAroot(tempRoot,tempRoot3);
+			tempRoot2.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
+			for (int j=0;j<this->SimpleBasisK.size;j++)
+				tempRoot2= tempRoot2+tempRoot3.TheObjects[j]*this->SimpleBasisK.TheObjects[j];
+			tempRoots.AddObjectOnTop(tempRoot2);
+		}
+		tempRoots.ComputeDebugString();
+		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
+      ( this->SimpleBasisK, tempRoots, this->kModulesEpsCoords.TheObjects[i],
         theGlobalVariables);
+  }
   this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
     (this->SimpleBasisK,this->SimpleBasisK,this->SimpleBasisKEpsCoords,theGlobalVariables);
 }

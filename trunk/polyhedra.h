@@ -950,9 +950,9 @@ void Matrix<Element>::DirectSumWith(Matrix<Element>& m2)
     for(int j=0;j<oldNumCols;j++)
       this->elements[i+oldNumRows][j]=0;
   }
-  for (int i=oldNumCols;i<this->NumCols;i++)
-    for(int j=0;j<oldNumRows;j++)
-      this->elements[i][j]=0;
+  for(int j=0;j<oldNumRows;j++)
+		for (int i=oldNumCols;i<this->NumCols;i++)
+      this->elements[j][i]=0;
 }
 
 template <typename Element>
@@ -1331,8 +1331,10 @@ ParallelComputing::GlobalPointerCounter++;
 		this->FreeExtended();
 		return true;
 	};
-	Rational(const Rational& right);
-	Rational(Rational& right);
+	//Rational(const Rational& right);
+	//grrr the below function is not needed for the gcc but needed for the MS compiler
+	//that is bull(on MS's part), one shouldn't need to call an extra copy constructor.
+	Rational(Rational& right){this->Extended=0; this->Assign(right);};
 public:
 	int NumShort;
 	//the requirement that the below be unsigned caused a huge problem, so I
@@ -1458,6 +1460,7 @@ public:
 	inline bool operator ==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
 	inline void operator = (int right){this->AssignInteger(right);};
 	const Rational operator*(const Rational& right);
+	const root operator*(const root& right);
 	const Rational operator+(const Rational& right);
 };
 
@@ -1478,11 +1481,13 @@ private:
 	void FindLCMDenominatorsLight(LargeIntUnsigned& output);
 	bool HasSmallCoordinates();
 public:
+//the below is to facilitate operator overloading
+	root(const root& right){this->Assign(right);};
 	std::string DebugString;
 	void MultiplyByLargeRational(Rational& a);
 	void ComputeDebugString();
 	void MakeZero(int DesiredDimension);
-	void Add(root& r);
+	void Add(const root& r);
 	int getIndexFirstNonZeroCoordinate();
 	void DivByInteger(int a);
 	void DivByLargeInt(LargeInt& a);
@@ -1550,6 +1555,7 @@ public:
 	root(){};
 	inline void operator=(const root& right){this->Assign(right);};
 	inline bool operator==(const root& right){return IsEqualTo(right);};
+	inline const root operator+(const root& right);
 };
 
 class roots : public ListBasicObjects<root>
@@ -1583,6 +1589,7 @@ public:
 		(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
 		 Selection& outputNonPivotPoints);
 	int GetDimensionOfElements();
+	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)
 	void MakeBasisChange(root& input, root& output);
@@ -6159,6 +6166,7 @@ public:
 	roots rootsAttemptTheTripleTrick;
   roots rootsGetEpsCoords2;
   roots rootsGetEpsCoords3;
+  roots rootscomputeEpsCoordsWRTk;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -6203,6 +6211,7 @@ public:
 	MatrixLargeRational matGetEpsilonCoords;
 	MatrixLargeRational matGetEpsilonCoords2;
 	MatrixLargeRational matGetEpsilonCoords3;
+	MatrixLargeRational matcomputeEpsCoordsWRTk;
 
 
 	partFraction fracReduceMonomialByMonomial;

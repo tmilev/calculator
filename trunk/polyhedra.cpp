@@ -793,6 +793,13 @@ int CGIspecificRoutines::ReadDataFromCGIinput
     std::string tempS; tempStream1.seekg(0);
     tempStream1 >> tempS>>tempS>> output.WeylGroupLetter;
     tempStream1 >> tempS>> tempS>> output.WeylGroupIndex;
+    if (output.WeylGroupLetter=='a') output.WeylGroupLetter='A';
+    if (output.WeylGroupLetter=='b') output.WeylGroupLetter='B';
+    if (output.WeylGroupLetter=='c') output.WeylGroupLetter='C';
+    if (output.WeylGroupLetter=='d') output.WeylGroupLetter='D';
+    if (output.WeylGroupLetter=='e') output.WeylGroupLetter='E';
+    if (output.WeylGroupLetter=='f') output.WeylGroupLetter='F';
+    if (output.WeylGroupLetter=='g') output.WeylGroupLetter='G';
     if (output.WeylGroupLetter=='A'|| output.WeylGroupLetter=='B' ||
         output.WeylGroupLetter=='C'|| output.WeylGroupLetter=='D' ||
         output.WeylGroupLetter=='E'|| output.WeylGroupLetter=='F' ||
@@ -12346,7 +12353,25 @@ void WeylGroup::GetEpsilonMatrix
     //\eps_8 coefficient:
     output.elements[7][4]=RHalf;
   }
-	//output.ComputeDebugString();
+  if (WeylLetter=='F')
+	{ //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
+    // longer roots have smaller indices
+	  output.init(4,4);
+    output.NullifyAll();
+    //eps_1:
+    output.elements[0][3]=RHalf;
+    //eps_2:
+    output.elements[1][0]=1;
+    output.elements[1][3]=RMHalf;
+    //eps_3:
+    output.elements[2][0]=-1;
+    output.elements[2][1]=1;
+    output.elements[2][3]=RMHalf;
+    //eps_4:
+    output.elements[3][1]=-1;
+    output.elements[3][2]=1;
+    output.elements[3][3]=RMHalf;
+	}
 }
 
 void WeylGroup::MakeBn(int n)

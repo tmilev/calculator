@@ -5810,7 +5810,7 @@ public:
   bool attemptExtensionToIsomorphism
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 			int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
-			bool GenerateAllpossibleExtensions);
+			bool GenerateAllpossibleExtensions, bool* abortKmodule);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
@@ -6173,6 +6173,8 @@ public:
 	rootsCollection rootsStronglyPerpendicular;
 	rootsCollection rootsAttemptExtensionIso1;
 	rootsCollection rootsAttemptExtensionIso2;
+  rootsCollection rootsAttemptExtensionIso3;
+  rootsCollection rootsAttemptExtensionIso4;
 
 	rootSubalgebras rootSAAttemptExtensionIso1;
 	rootSubalgebras rootSAAttemptExtensionIso2;

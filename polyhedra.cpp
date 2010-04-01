@@ -1146,7 +1146,7 @@ void ComputationSetup::DoTheRootSAComputation()
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebra tempSA;
-	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
+//	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	this->theRootSubalgebras.flagComputeConeCondition=true;
 	this->theRootSubalgebras.flagLookingForMinimalRels=true;
@@ -1156,7 +1156,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(),'E',7,true, true);
+		( *this->theGlobalVariablesContainer->Default(),'E',6,true, true);
   this->theRootSubalgebras.ComputeDebugString
     (true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
 	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
@@ -15099,6 +15099,8 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		bufferSAs.SetSizeExpandOnTopNoObjectInit
 			(bufferSAs.size+this->AmbientWeyl.KillingFormMatrix.NumRows);
 	bufferSAs.TheObjects[RecursionDepth]=bufferSAs.TheObjects[RecursionDepth-1];
+	if (RecursionDepth>4)
+    return;
 	for (int k=0;k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size;k++)
 		if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
 		{	bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop
@@ -15392,7 +15394,7 @@ bool rootSubalgebra::GenerateAutomorphisms
 					//if (outputAutomorphisms!=0 && k==0 && l==0)
 					//	GenerateAllAutos=true;
 					if (this->attemptExtensionToIsomorphism
-								(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false))//GenerateAllAutos))
+								(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false,0))//GenerateAllAutos))
 					{	if (outputAutomorphisms==0)
 							return true;
 					}
@@ -15417,7 +15419,7 @@ int rootSubalgebra::ProblemCounter2=0;
 bool rootSubalgebra::attemptExtensionToIsomorphism
 	(	roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 		int RecursionDepth,ReflectionSubgroupWeylGroup* outputAutomorphisms,
-		bool GenerateAllpossibleExtensions)
+		bool GenerateAllpossibleExtensions, bool* abortKmodule)
 {	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
 	assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
@@ -15432,7 +15434,13 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 			(theGlobalVariables.rootSAAttemptExtensionIso1.size+theDimension);
 		theGlobalVariables.rootSAAttemptExtensionIso2.SetSizeExpandOnTopNoObjectInit
 			(theGlobalVariables.rootSAAttemptExtensionIso2.size+theDimension);
+    theGlobalVariables.rootsAttemptExtensionIso3.SetSizeExpandOnTopNoObjectInit
+      (theGlobalVariables.rootsAttemptExtensionIso3.size+theDimension);
+    theGlobalVariables.rootsAttemptExtensionIso4.SetSizeExpandOnTopNoObjectInit
+      (theGlobalVariables.rootsAttemptExtensionIso4.size+theDimension);
 	}
+	if (abortKmodule!=0)
+    *abortKmodule=false;
 	roots& domainRec =
 		theGlobalVariables.rootsAttemptExtensionIso1.TheObjects[RecursionDepth];
 	roots& rangeRec =
@@ -15442,13 +15450,29 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 		theGlobalVariables.rootSAAttemptExtensionIso1.TheObjects[RecursionDepth];
 	rootSubalgebra& rightSA=
 		theGlobalVariables.rootSAAttemptExtensionIso2.TheObjects[RecursionDepth];
+  Rational tempRatD, tempRatR;
+  for (int i=0;i<domainRec.size;i++)
+  { root& LastRootD=*domainRec.LastObject();
+    root& LastRootR=*rangeRec.LastObject();
+    this->AmbientWeyl.RootScalarKillingFormMatrixRoot
+      (domainRec.TheObjects[i],LastRootD,tempRatD);
+    this->AmbientWeyl.RootScalarKillingFormMatrixRoot
+      (rangeRec.TheObjects[i],LastRootR,tempRatR);
+    if (!tempRatR.IsEqualTo(tempRatD))
+      return false;
+  }
 	leftSA.genK.size=0; rightSA.genK.size=0;
 	leftSA.AmbientWeyl.Assign(this->AmbientWeyl);
 	rightSA.AmbientWeyl.Assign(this->AmbientWeyl);
 	leftSA.genK.AddListOnTop(domainRec); rightSA.genK.AddListOnTop(rangeRec);
 	leftSA.ComputeAllButAmbientWeyl(); rightSA.ComputeAllButAmbientWeyl();
-	if (rightSA.kModules.size!=leftSA.kModules.size)
-		return false;
+	if (leftSA.theDynkinDiagram.DebugString!=rightSA.theDynkinDiagram.DebugString ||
+      leftSA.theCentralizerDiagram.DebugString!=rightSA.theCentralizerDiagram.DebugString ||
+      rightSA.kModules.size!=leftSA.kModules.size)
+	{	if (abortKmodule!=0)
+      *abortKmodule=true;
+	  return false;
+	}
 	int counter =0;
 	domainRec.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
 	while(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank)
@@ -15470,21 +15494,26 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 	assert(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank+1);
 	roots& firstKmodLeft= leftSA.kModules.TheObjects[counter];
 	bool result=false;
-	for (int j=0;j<firstKmodLeft.size;j++)
-		for (int i=0;i<rightSA.kModules.size;i++)
-			if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
-			{	rangeRec.AddObjectOnTop(rightSA.kModules.TheObjects[i].TheObjects[j]);
-				if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
-					if (this->attemptExtensionToIsomorphism
-								(	domainRec, rangeRec, theGlobalVariables,RecursionDepth+1,outputAutomorphisms,
-									GenerateAllpossibleExtensions))
-					{	if (!GenerateAllpossibleExtensions)
-							return true;
-						else
-							result=true;
-					}
-				rangeRec.PopIndexSwapWithLast(rangeRec.size-1);
-			}
+	bool tempBool;
+	for (int i=0;i<rightSA.kModules.size;i++)
+		if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
+      for (int j=0;j<firstKmodLeft.size;j++)
+      { rangeRec.AddObjectOnTop(rightSA.kModules.TheObjects[i].TheObjects[j]);
+        if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
+        {  if (this->attemptExtensionToIsomorphism
+                (	domainRec, rangeRec, theGlobalVariables,RecursionDepth+1,outputAutomorphisms,
+                  GenerateAllpossibleExtensions,&tempBool))
+          {	if (!GenerateAllpossibleExtensions)
+              return true;
+            else
+              result=true;
+          }
+          else
+            if (tempBool)
+              break;
+        }
+        rangeRec.PopIndexSwapWithLast(rangeRec.size-1);
+      }
 	return result;
 }
 

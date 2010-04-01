@@ -1149,7 +1149,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(),'E',6,true, true);
+		( *this->theGlobalVariablesContainer->Default(),'E',7,true, true);
   this->theRootSubalgebras.ComputeDebugString
     (true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
 	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
@@ -1694,12 +1694,12 @@ void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool u
 			}
 			out <<tempS;
 			if (useLatex)
-        out <<"$\\varepsilon_";
+        out <<"$\\varepsilon_{";
       else
         out <<"e_";
       out <<i+1;
 			if (useLatex)
-        out<<"$";
+        out<<"}$";
 		}
 	}
 	output=out.str();
@@ -12156,9 +12156,6 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
   bool tempBool=true;
   if (generators.size==0)
     tempBool=false;
-  else
-    if(tempDyn.DebugString.at(1)=='E')
-      tempBool=false;
   if (!tempBool)
   { output.SetSizeExpandOnTopNoObjectInit(input.size);
     for(int i=0;i<input.size;i++)
@@ -12286,6 +12283,68 @@ void WeylGroup::GetEpsilonMatrix
     output.elements[6][6]=RMHalf;
     //\eps_8 coefficient:
     output.elements[7][6]=RHalf;
+  }
+	if (WeylLetter=='E' && WeylRank==7)
+  { output.init(8,7);
+    output.NullifyAll();
+    //\eps_1 coefficient:
+    output.elements[0][4]=-1;
+    output.elements[0][5]=RHalf;
+    output.elements[0][6]=1;
+    //\eps_2 coefficient:
+    output.elements[1][0]=-1;
+    output.elements[1][4]=1;
+    output.elements[1][5]=RMHalf;
+    output.elements[1][6]=1;
+    //\eps_3 coefficient:
+    output.elements[2][0]=1;
+    output.elements[2][1]=-1;
+    output.elements[2][5]=RMHalf;
+    //\eps_4 coefficient:
+    output.elements[3][1]=1;
+    output.elements[3][2]=-1;
+    output.elements[3][5]=RMHalf;
+    //\eps_5 coefficient:
+    output.elements[4][2]=1;
+    output.elements[4][3]=-1;
+    output.elements[4][5]=RMHalf;
+    //\eps_6 coefficient:
+    output.elements[5][3]=1;
+    output.elements[5][5]=RMHalf;
+    //\eps_7 coefficient:
+    output.elements[6][5]=RMHalf;
+    //\eps_8 coefficient:
+    output.elements[7][5]=RHalf;
+  }
+	if (WeylLetter=='E' && WeylRank==6)
+  { output.init(8,6);
+    output.NullifyAll();
+    //\eps_1 coefficient:
+    output.elements[0][3]=-1;
+    output.elements[0][4]=RHalf;
+    output.elements[0][5]=1;
+    //\eps_2 coefficient:
+    output.elements[1][0]=-1;
+    output.elements[1][3]=1;
+    output.elements[1][4]=RMHalf;
+    output.elements[1][5]=1;
+    //\eps_3 coefficient:
+    output.elements[2][0]=1;
+    output.elements[2][1]=-1;
+    output.elements[2][4]=RMHalf;
+    //\eps_4 coefficient:
+    output.elements[3][1]=1;
+    output.elements[3][2]=-1;
+    output.elements[3][4]=RMHalf;
+    //\eps_5 coefficient:
+    output.elements[4][2]=1;
+    output.elements[4][4]=RMHalf;
+    //\eps_6 coefficient:
+    output.elements[5][4]=RMHalf;
+    //\eps_7 coefficient:
+    output.elements[6][4]=RMHalf;
+    //\eps_8 coefficient:
+    output.elements[7][4]=RHalf;
   }
 	//output.ComputeDebugString();
 }
@@ -14950,6 +15009,10 @@ void rootSubalgebra::computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
       ( this->SimpleBasisK, tempRoots, this->kModulesEpsCoords.TheObjects[i],
         theGlobalVariables);
+    root tempRoot;
+    this->kModulesEpsCoords.TheObjects[i].Average
+      (tempRoot, this->kModulesEpsCoords.TheObjects[i].TheObjects[0].size);
+    assert(tempRoot.IsEqualToZero());
 	//	this->kModulesEpsCoords.TheObjects[i].ComputeDebugString();
   }
   this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra

@@ -2417,6 +2417,8 @@ void roots::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool 
   }
   if (useHtml && makeTable)
     out <<"</table>";
+	if (useLatex && makeTable)
+		out <<"\\end{tabular}";
   output=out.str();
 }
 
@@ -12177,6 +12179,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
   //basisChange.ComputeDebugString();
   //coordsInNewBasis.ComputeDebugString();
   basisChange.ActOnRoots(coordsInNewBasis,output);
+//	output.ComputeDebugString();
 }
 
 void WeylGroup::GetEpsilonCoords
@@ -14943,10 +14946,11 @@ void rootSubalgebra::computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 				tempRoot2= tempRoot2+tempRoot3.TheObjects[j]*this->SimpleBasisK.TheObjects[j];
 			tempRoots.AddObjectOnTop(tempRoot2);
 		}
-		tempRoots.ComputeDebugString();
+//		tempRoots.ComputeDebugString();
 		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
       ( this->SimpleBasisK, tempRoots, this->kModulesEpsCoords.TheObjects[i],
         theGlobalVariables);
+	//	this->kModulesEpsCoords.TheObjects[i].ComputeDebugString();
   }
   this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
     (this->SimpleBasisK,this->SimpleBasisK,this->SimpleBasisKEpsCoords,theGlobalVariables);
@@ -15583,7 +15587,8 @@ void rootSubalgebra::ElementToString
       if (useLatex)
         out <<" & ";
       this->kModulesEpsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS,useLatex,useHtml,true);
-      if (useHtml)
+      out<<tempS;
+			if (useHtml)
         out <<"</td>";
       if (useLatex)
         out <<"\\\\\n";

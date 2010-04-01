@@ -1126,7 +1126,7 @@ void ComputationSetup::InitComputationSetup()
 void ComputationSetup::DoTheRootSAComputation()
 {	//rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebra tempSA;
-	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
+	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	this->theRootSubalgebras.flagComputeConeCondition=false;
 	this->theRootSubalgebras.flagLookingForMinimalRels=true;
@@ -15099,8 +15099,8 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		bufferSAs.SetSizeExpandOnTopNoObjectInit
 			(bufferSAs.size+this->AmbientWeyl.KillingFormMatrix.NumRows);
 	bufferSAs.TheObjects[RecursionDepth]=bufferSAs.TheObjects[RecursionDepth-1];
-	if (RecursionDepth>4)
-    return;
+//	if (RecursionDepth>4)
+ //   return;
 	for (int k=0;k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size;k++)
 		if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
 		{	bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop
@@ -15146,7 +15146,7 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras
 		if (i==8)
 			tempOut=&out4;
 	}
-	out5<< "Included root " << currentIndex<< " out of "<< TotalIndex;
+	out5<< "Included root " << currentIndex<< " out of "<< TotalIndex <<" Total found SAs: "<<this->size;
 	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
@@ -15271,9 +15271,9 @@ int rootSubalgebras::IndexSubalgebra
 		if (input.theDynkinDiagram.DebugString==right.theDynkinDiagram.DebugString &&
 				input.theCentralizerDiagram.DebugString==
 					right.theCentralizerDiagram.DebugString)
-		{	if (this->flagUseDynkinClassificationForIsomorphismComputation)
-			{	result=j;
-				int tempI= this->theBadDiagrams.IndexOfObject(input.theDynkinDiagram.DebugString);
+		{	result=j;
+			if (this->flagUseDynkinClassificationForIsomorphismComputation)
+			{	int tempI= this->theBadDiagrams.IndexOfObject(input.theDynkinDiagram.DebugString);
 				if (tempI!=-1)
 					if (this->numFoundBadDiagrams.TheObjects[tempI]==0)
 					{	if(!input.GenerateAutomorphisms(right,theGlobalVariables,0,false))

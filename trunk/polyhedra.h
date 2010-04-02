@@ -5781,7 +5781,8 @@ public:
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
 	roots SimpleBasisKEpsCoords;
-	rootsCollection kModulesEpsCoords;
+	rootsCollection kModulesKepsCoords;
+	rootsCollection kModulesgEpsCoords;
 	ListBasicObjects<roots> kModules;
 	ListBasicObjects<roots> PosRootsKConnectedComponents;
 	ListBasicObjects<Selection> theKEnumerations;
@@ -5792,7 +5793,7 @@ public:
 	int GetIndexKmoduleContainingRoot(root& input);
 	bool IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots);
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
-	void computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
+	void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrick
 		(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrickWRTSubalgebra
@@ -6166,7 +6167,8 @@ public:
 	roots rootsAttemptTheTripleTrick;
   roots rootsGetEpsCoords2;
   roots rootsGetEpsCoords3;
-  roots rootscomputeEpsCoordsWRTk;
+  roots rootsComputeEpsCoordsWRTk;
+  roots rootsComputeEpsCoordsWRTk2;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -6213,7 +6215,7 @@ public:
 	MatrixLargeRational matGetEpsilonCoords;
 	MatrixLargeRational matGetEpsilonCoords2;
 	MatrixLargeRational matGetEpsilonCoords3;
-	MatrixLargeRational matcomputeEpsCoordsWRTk;
+	MatrixLargeRational matComputeEpsCoordsWRTk;
 
 
 	partFraction fracReduceMonomialByMonomial;

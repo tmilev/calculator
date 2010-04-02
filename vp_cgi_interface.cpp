@@ -109,6 +109,7 @@ int main(int argc, char **argv)
 	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonGo=Default_computation&chamberNumber=-1";
 	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonSplitChambers=Chambers%2Bpartial_fractions&chamberNumber=-1";
 	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=12";
+	//inputString ="textType=E&textRank=6&buttonGoRootSA=rootSA+diagrams";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -230,10 +231,11 @@ int main(int argc, char **argv)
       theComputationSetup.theRootSubalgebras.ElementToHtml
         ( header,inputPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
       std::cout <<"<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; "
-                <<"url=../tmp/rootHtml.html\"> <BODY>"<< inputPath;
+                <<"url=../tmp/rootHtml.html\"> <BODY>"<< inputPath <<"<br> input string: <br>\n"
+                <<inputString;
     }
   } else if (choice==3)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi.cgi\">\n"
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_cgi_win32.exe\">\n"
               <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n"
               << "Dimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n"
               << "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n"
@@ -242,8 +244,10 @@ int main(int argc, char **argv)
   std::cout<<"</BODY>\n</HTML>";
 	std::cout<<"<!--";
 	std::cout.flush();
+#ifndef WIN32	
   ::system(latexCommand1.c_str());
   ::system(latexCommand2.c_str());
+#endif
 	std::cout<<"-->";
 	std::cout.flush();
 	return 0;   // To avoid Apache errors.

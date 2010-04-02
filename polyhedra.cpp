@@ -271,6 +271,8 @@ bool ParallelComputing::SafePointReached=false;
 bool ParallelComputing::ReachSafePointASAP=false;
 FeedDataToIndicatorWindow GlobalVariables::FeedDataToIndicatorWindowDefault=0;
 bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
+int rootSubalgebras::ProblemCounter=0;
+
 
 #ifndef WIN32
 pthread_mutex_t ParallelComputing::mutex1;
@@ -1126,7 +1128,10 @@ void ComputationSetup::InitComputationSetup()
 void ComputationSetup::DoTheRootSAComputation()
 {	//rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebra tempSA;
-	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
+	if (this->WeylGroupLetter=='F')
+		this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
+	else
+		this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	this->theRootSubalgebras.flagComputeConeCondition=false;
 	this->theRootSubalgebras.flagLookingForMinimalRels=true;
@@ -1146,7 +1151,7 @@ void ComputationSetup::DoTheRootSAComputation()
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
 	rootSubalgebra tempSA;
-//	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
+	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	this->theRootSubalgebras.flagComputeConeCondition=true;
 	this->theRootSubalgebras.flagLookingForMinimalRels=true;
@@ -15276,15 +15281,16 @@ bool rootSubalgebras::ApproveSelAgainstOneGenerator
 	}
 	return true;
 }
-
 int rootSubalgebras::IndexSubalgebra
 	(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
-{	int result=-1;
+{	this->ProblemCounter++;
+	//if (this->ProblemCounter==49)
+		//Stop();
+	int result=-1;
 	for (int j=0;j<this->size;j++)
 	{	rootSubalgebra& right=this->TheObjects[j];
-		if (input.theDynkinDiagram.DebugString==right.theDynkinDiagram.DebugString &&
-				input.theCentralizerDiagram.DebugString==
-					right.theCentralizerDiagram.DebugString)
+		if (input.theDynkinDiagram.DebugString      == right.theDynkinDiagram.DebugString &&
+				input.theCentralizerDiagram.DebugString == right.theCentralizerDiagram.DebugString)
 		{	result=j;
 			if (this->flagUseDynkinClassificationForIsomorphismComputation)
 			{	int tempI= this->theBadDiagrams.IndexOfObject(input.theDynkinDiagram.DebugString);
@@ -15296,8 +15302,14 @@ int rootSubalgebras::IndexSubalgebra
 							this->numFoundBadDiagrams.TheObjects[tempI]++;
 					}
 			} else
-			if(!input.GenerateAutomorphisms(right,theGlobalVariables,0,false))
-				result=-1;
+			{	//if (this->ProblemCounter==49)
+				//	input.ProblemCounter=49;
+				if(!input.GenerateAutomorphisms(right,theGlobalVariables,0,false))
+				{	//if (input.theDynkinDiagram.DebugString=="$A_2$+$A_1$+$A_1$")
+						//input.ProblemCounter=this->ProblemCounter;
+					result=-1;
+				}
+			}
 			if (result!=-1)
 				return result;
 		}
@@ -15436,6 +15448,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 		bool GenerateAllpossibleExtensions, bool* abortKmodule)
 {	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
 	assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));
+	if (abortKmodule!=0)
+    *abortKmodule=false;
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
 		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables,outputAutomorphisms);
 	if (RecursionDepth>=theGlobalVariables.rootsAttemptExtensionIso1.size)
@@ -15453,8 +15467,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
     theGlobalVariables.rootsAttemptExtensionIso4.SetSizeExpandOnTopNoObjectInit
       (theGlobalVariables.rootsAttemptExtensionIso4.size+theDimension);
 	}
-	if (abortKmodule!=0)
-    *abortKmodule=false;
+//	if (ProblemCounter==49)
+//		Stop();
 	roots& domainRec =
 		theGlobalVariables.rootsAttemptExtensionIso1.TheObjects[RecursionDepth];
 	roots& rangeRec =
@@ -15465,28 +15479,30 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 	rootSubalgebra& rightSA=
 		theGlobalVariables.rootSAAttemptExtensionIso2.TheObjects[RecursionDepth];
   Rational tempRatD, tempRatR;
-  for (int i=0;i<domainRec.size;i++)
-  { root& LastRootD=*domainRec.LastObject();
-    root& LastRootR=*rangeRec.LastObject();
-    this->AmbientWeyl.RootScalarKillingFormMatrixRoot
-      (domainRec.TheObjects[i],LastRootD,tempRatD);
-    this->AmbientWeyl.RootScalarKillingFormMatrixRoot
-      (rangeRec.TheObjects[i],LastRootR,tempRatR);
-    if (!tempRatR.IsEqualTo(tempRatD))
-      return false;
-  }
+  root& LastRootD=*domainRec.LastObject();
+	root& LastRootR=*rangeRec.LastObject();
+	if (RecursionDepth!=0)
+		for (int i=0;i<domainRec.size;i++)
+		{ this->AmbientWeyl.RootScalarKillingFormMatrixRoot
+				(domainRec.TheObjects[i],LastRootD,tempRatD);
+			this->AmbientWeyl.RootScalarKillingFormMatrixRoot
+				(rangeRec.TheObjects[i],LastRootR,tempRatR);
+			if (!tempRatR.IsEqualTo(tempRatD))
+				return false;
+		}
 	leftSA.genK.size=0; rightSA.genK.size=0;
 	leftSA.AmbientWeyl.Assign(this->AmbientWeyl);
 	rightSA.AmbientWeyl.Assign(this->AmbientWeyl);
 	leftSA.genK.AddListOnTop(domainRec); rightSA.genK.AddListOnTop(rangeRec);
 	leftSA.ComputeAllButAmbientWeyl(); rightSA.ComputeAllButAmbientWeyl();
-	if (leftSA.theDynkinDiagram.DebugString!=rightSA.theDynkinDiagram.DebugString ||
-      leftSA.theCentralizerDiagram.DebugString!=rightSA.theCentralizerDiagram.DebugString ||
-      rightSA.kModules.size!=leftSA.kModules.size)
-	{	if (abortKmodule!=0)
-      *abortKmodule=true;
-	  return false;
-	}
+	if (RecursionDepth!=0)
+		if (leftSA.theDynkinDiagram.DebugString!=rightSA.theDynkinDiagram.DebugString ||
+				leftSA.theCentralizerDiagram.DebugString!=rightSA.theCentralizerDiagram.DebugString ||
+				rightSA.kModules.size!=leftSA.kModules.size)
+		{	if (abortKmodule!=0)
+				*abortKmodule=true;
+			return false;
+		}
 	int counter =0;
 	domainRec.AddObjectOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
 	while(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank)
@@ -15539,6 +15555,8 @@ bool rootSubalgebra::IsAnIsomorphism
 	tempRoots.SetSizeExpandOnTopNoObjectInit(theDimension);
 	matB.init(theDimension, theDimension);
 	this->flagAnErrorHasOccuredTimeToPanic=true;
+//	if (this->ProblemCounter==49)
+	//	Stop();
 	for (int i=0;i<theDimension;i++)
 	{	for (int j=0;j<theDimension;j++)
 			matB.elements[i][j].Assign(domain.TheObjects[i].TheObjects[j]);
@@ -15714,7 +15732,7 @@ void rootSubalgebra::ElementToString
     out << tempS;
     if (useHtml)
       out <<"</td><td>";
-    this->kModulesgEpsCoords.TheObjects[i].ElementToString(tempS,useLatex,useHtml,true);
+    this->kModulesgEpsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS,useLatex,useHtml,true);
     out << tempS;
 		if (useLatex)
       out <<" & \n";

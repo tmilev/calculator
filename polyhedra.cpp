@@ -15009,12 +15009,20 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot
 	}
 }
 
-void rootSubalgebra::computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
-{ this->kModulesEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
-  MatrixLargeRational& InvertedGramMatrix=theGlobalVariables.matcomputeEpsCoordsWRTk;
+void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
+{ this->kModulesKepsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+  this->kModulesgEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+  roots& simpleBasisG=theGlobalVariables.rootsComputeEpsCoordsWRTk2;
+  int theDimension=this->AmbientWeyl.KillingFormMatrix.NumRows;
+  simpleBasisG.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0;i<theDimension;i++)
+  { simpleBasisG.TheObjects[i].MakeZero(theDimension);
+    simpleBasisG.TheObjects[i].TheObjects[i]=1;
+  }
+  MatrixLargeRational& InvertedGramMatrix=theGlobalVariables.matComputeEpsCoordsWRTk;
   this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix,this->AmbientWeyl);
   InvertedGramMatrix.Invert(theGlobalVariables);
-  roots& tempRoots=theGlobalVariables.rootscomputeEpsCoordsWRTk;
+  roots& tempRoots=theGlobalVariables.rootsComputeEpsCoordsWRTk;
   root tempRoot, tempRoot2,tempRoot3;
   for(int i=0;i<this->kModules.size;i++)
   {	tempRoots.size=0;
@@ -15032,12 +15040,18 @@ void rootSubalgebra::computeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 		}
 //		tempRoots.ComputeDebugString();
 		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
-      ( this->SimpleBasisK, tempRoots, this->kModulesEpsCoords.TheObjects[i],
+      ( this->SimpleBasisK, tempRoots, this->kModulesKepsCoords.TheObjects[i],
+        theGlobalVariables);
+		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
+      ( simpleBasisG,this->kModules.TheObjects[i],this->kModulesgEpsCoords.TheObjects[i],
         theGlobalVariables);
     root tempRoot;
-    this->kModulesEpsCoords.TheObjects[i].Average
-      (tempRoot, this->kModulesEpsCoords.TheObjects[i].TheObjects[0].size);
+    this->kModulesKepsCoords.TheObjects[i].Average
+      (tempRoot, this->kModulesKepsCoords.TheObjects[i].TheObjects[0].size);
     assert(tempRoot.IsEqualToZero());
+   // this->kModulesgEpsCoords.TheObjects[i].Average
+     // (tempRoot, this->kModulesgEpsCoords.TheObjects[i].TheObjects[0].size);
+    //assert(tempRoot.IsEqualToZero());
 	//	this->kModulesEpsCoords.TheObjects[i].ComputeDebugString();
   }
   this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
@@ -15087,7 +15101,7 @@ void rootSubalgebras::GenerateAllRootSubalgebrasUpToIsomorphism
     this->SortDescendingOrderBySSRank();
   if(computeEpsCoords)
     for(int i=0;i<this->size;i++)
-      this->TheObjects[i].computeEpsCoordsWRTk(theGlobalVariables);
+      this->TheObjects[i].ComputeEpsCoordsWRTk(theGlobalVariables);
 }
 
 void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
@@ -15583,6 +15597,7 @@ void rootSubalgebra::ElementToStringHeaderFooter
 	if (useHtml)
 	{ outputHeader.append("g/k k-submodules<table border=\"1\">\n<tr><th>id</th><th>size</th>");
 		outputHeader.append("<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>roots</th>");
+		outputHeader.append("<th>epsilon coordinates</th>");
 		if (includeKEpsCoords)
       outputHeader.append("<th>epsilon coords wrt k</th>");
 		outputHeader.append("</tr>");
@@ -15591,12 +15606,13 @@ void rootSubalgebra::ElementToStringHeaderFooter
   if(useLatex)
   {	if (!includeKEpsCoords)
       outputHeader.append
-        ("\n\n\\noindent\\begin{tabular}{|ccccc|} \n \\multicolumn{5}{c}{");
+        ("\n\n\\noindent\\begin{tabular}{|cccccc|} \n \\multicolumn{5}{c}{");
 		else
-      outputHeader.append("\n\n\\noindent\\begin{tabular}{|cccccc|} \n \\multicolumn{6}{c}{");
+      outputHeader.append("\n\n\\noindent\\begin{tabular}{|ccccccc|} \n \\multicolumn{6}{c}{");
 		outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
 		outputHeader.append ("id & size & $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-lowest weight&");
 		outputHeader.append(" $\\mathfrak{\\mathfrak{b}\\cap\\mathfrak{k}}$-highest weight& elements");
+		outputHeader.append(" & $\\varepsilon$-coordinates ");
 		if (includeKEpsCoords)
       outputHeader.append(" & $\\varepsilon$-coordinates wrt $\\mathfrak{k}$");
     outputHeader.append("\\\\");
@@ -15697,13 +15713,19 @@ void rootSubalgebra::ElementToString
     this->kModules.TheObjects[i].ElementToString(tempS, useLatex,useHtml,true);
     out << tempS;
     if (useHtml)
+      out <<"</td><td>";
+    this->kModulesgEpsCoords.TheObjects[i].ElementToString(tempS,useLatex,useHtml,true);
+    out << tempS;
+		if (useLatex)
+      out <<" & \n";
+    if (useHtml)
       out <<"</td>";
     if (includeKEpsCoords)
     { if (useHtml)
         out << "<td>";
       if (useLatex)
         out <<" & ";
-      this->kModulesEpsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS,useLatex,useHtml,true);
+      this->kModulesKepsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS,useLatex,useHtml,true);
       out<<tempS;
 			if (useHtml)
         out <<"</td>";

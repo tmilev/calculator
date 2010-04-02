@@ -5406,6 +5406,8 @@ public:
 	std::string DebugString;
 	MatrixIntTightMemoryFit KillingFormMatrix;
 	root rho;
+	char WeylLetter;
+	Rational LongRootLength;
 	hashedRoots RootSystem;
 	roots RootsOfBorel;
 	static bool flagAnErrorHasOcurredTimeToPanic;
@@ -5421,6 +5423,7 @@ public:
 	void MakeDn(int n);
 	void MakeF4();
 	void MakeG2();
+	//void GetLongRootLength(Rational& output);
 	void GetEpsilonCoords
 		(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input,
 			root& output, GlobalVariables& theGlobalVariables);
@@ -5781,6 +5784,7 @@ public:
 	roots CentralizerRoots;
 	roots SimpleBasisCentralizerRoots;
 	roots SimpleBasisKEpsCoords;
+	roots SimpleBasisgEpsCoords;
 	rootsCollection kModulesKepsCoords;
 	rootsCollection kModulesgEpsCoords;
 	ListBasicObjects<roots> kModules;

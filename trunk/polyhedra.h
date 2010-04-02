@@ -5917,6 +5917,7 @@ public:
 	int NumLinesPerTableLatex;
 	int NumColsPerTableLatex;
 	int UpperLimitNumElementsWeyl;
+	static int ProblemCounter;
 	ListBasicObjects<std::string> theBadDiagrams;
 	ListBasicObjects<int> numFoundBadDiagrams;
 	WeylGroup AmbientWeyl;

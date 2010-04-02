@@ -235,7 +235,7 @@ int main(int argc, char **argv)
                 <<inputString;
     }
   } else if (choice==3)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_cgi_win32.exe\">\n"
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n"
               <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n"
               << "Dimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n"
               << "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n"
@@ -244,7 +244,7 @@ int main(int argc, char **argv)
   std::cout<<"</BODY>\n</HTML>";
 	std::cout<<"<!--";
 	std::cout.flush();
-#ifndef WIN32	
+#ifndef WIN32
   ::system(latexCommand1.c_str());
   ::system(latexCommand2.c_str());
 #endif

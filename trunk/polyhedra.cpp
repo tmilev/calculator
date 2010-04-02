@@ -18104,9 +18104,9 @@ void rootSubalgebras::DynkinTableToString
     if (useHtml)
       out <<"\n<br>\n";
     if (useLatex)
-      out<<"\n\\mathfrak{k} lies in: ";
+      out<<"\n$\\mathfrak{k}$ lies in: ";
 		else
-      out <<"\n k lies in: "
+      out <<"\n k lies in: ";
 		if (useLatex)
 			out<<	"\\\\\n";
     if (useHtml)

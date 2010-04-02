@@ -11901,7 +11901,9 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement
 }
 
 void WeylGroup::Assign(const WeylGroup& right)
-{ this->KillingFormMatrix.Assign(right.KillingFormMatrix);
+{ this->WeylLetter=right.WeylLetter;
+  this->LongRootLength.Assign(right.LongRootLength);
+  this->KillingFormMatrix.Assign(right.KillingFormMatrix);
 	this->CopyFromHash(right);
 	this->RootSystem.CopyFromHash(right.RootSystem);
 	this->RootsOfBorel.CopyFromBase(right.RootsOfBorel);
@@ -12104,6 +12106,7 @@ void WeylGroup::MakeDn(int n)
 { this->MakeAn(n);
   if (n<3)
     return;
+  this->WeylLetter='D';
 	this->KillingFormMatrix.elements[n-1][n-2]=0;
 	this->KillingFormMatrix.elements[n-2][n-1]=0;
 	this->KillingFormMatrix.elements[n-3][n-1]=-1;
@@ -12113,6 +12116,8 @@ void WeylGroup::MakeDn(int n)
 void WeylGroup::MakeAn(int n)
 {	if (n<0)
     return;
+  this->WeylLetter='A';
+  this->LongRootLength=2;
   this->rho.SetSizeExpandOnTopLight(n);
 	this->KillingFormMatrix.init(n,n);
 	this->KillingFormMatrix.NullifyAll();
@@ -12128,6 +12133,7 @@ void WeylGroup::MakeEn(int n)
 {	this->MakeAn(n);
   if (n<4)
     return;
+  this->WeylLetter='E';
 	this->KillingFormMatrix.elements[0][1]=0;
 	this->KillingFormMatrix.elements[1][0]=0;
 	this->KillingFormMatrix.elements[1][2]=0;
@@ -12139,7 +12145,9 @@ void WeylGroup::MakeEn(int n)
 }
 
 void WeylGroup::MakeF4()
-{	this->rho.SetSizeExpandOnTopLight(4);
+{	this->WeylLetter='F';
+  this->LongRootLength=4;
+  this->rho.SetSizeExpandOnTopLight(4);
 	this->KillingFormMatrix.init(4,4);
 	this->KillingFormMatrix.elements[0][0]=2 ;this->KillingFormMatrix.elements[0][1]=-1;this->KillingFormMatrix.elements[0][2]=0 ;this->KillingFormMatrix.elements[0][3]=0 ;
 	this->KillingFormMatrix.elements[1][0]=-1;this->KillingFormMatrix.elements[1][1]=2 ;this->KillingFormMatrix.elements[1][2]=-2;this->KillingFormMatrix.elements[1][3]=0 ;
@@ -12148,7 +12156,9 @@ void WeylGroup::MakeF4()
 }
 
 void WeylGroup::MakeG2()
-{	this->rho.SetSizeExpandOnTopLight(2);
+{	this->WeylLetter='G';
+  this->LongRootLength=6;
+  this->rho.SetSizeExpandOnTopLight(2);
 	this->KillingFormMatrix.init(2,2);
 	this->KillingFormMatrix.elements[0][0]=6;
 	this->KillingFormMatrix.elements[1][1]=2;
@@ -12383,6 +12393,7 @@ void WeylGroup::MakeBn(int n)
 { this->MakeAn(n);
   if (n<1)
     return;
+  this->WeylLetter='B';
 	this->KillingFormMatrix.elements[n-1][n-1]=1;
 }
 
@@ -12390,6 +12401,8 @@ void WeylGroup::MakeCn(int n)
 { this->MakeAn(n);
   if(n<2)
     return;
+  this->LongRootLength=4;
+  this->WeylLetter='C';
 	this->KillingFormMatrix.elements[n-1][n-1]=4;
 	this->KillingFormMatrix.elements[n-2][n-1]=-2;
 	this->KillingFormMatrix.elements[n-1][n-2]=-2;
@@ -15061,6 +15074,8 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
   }
   this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
     (this->SimpleBasisK,this->SimpleBasisK,this->SimpleBasisKEpsCoords,theGlobalVariables);
+  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra
+    (simpleBasisG,this->SimpleBasisK,this->SimpleBasisgEpsCoords,theGlobalVariables);
 }
 
 void rootSubalgebra::Assign(const rootSubalgebra& right)
@@ -15661,9 +15676,12 @@ void rootSubalgebra::ElementToString
   if (useLatex)
     out <<"\n\\noindent";
 	out <<" Simple basis: "<<tempS;
-	this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS,useLatex,useHtml,false);
+	this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(tempS,useLatex,useHtml,false);
 	if (useHtml)
     out <<"\n<br>\nSimple basis epsilon form: "<< tempS;
+	this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS,useLatex,useHtml,false);
+	if (useHtml)
+    out <<"\n<br>\nSimple basis epsilon form with respect to k: "<< tempS;
 	this->theCentralizerDiagram.ElementToString(tempS);
   if(!useLatex)
     CGIspecificRoutines::clearDollarSigns(tempS,tempS);
@@ -15855,8 +15873,8 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 			if 	(	this->SimpleBasesConnectedComponents.TheObjects[i].size==
 						this->SimpleBasesConnectedComponents.TheObjects[j].size)
 				tempBool=
-					(	(this->DynkinTypeStrings.TheObjects[i])[0]<
-						(this->DynkinTypeStrings.TheObjects[j])[0]);
+					(	(this->DynkinTypeStrings.TheObjects[i])<
+						(this->DynkinTypeStrings.TheObjects[j]));
 			if (tempBool)
 			{	this->DynkinTypeStrings.SwapTwoIndices(i,j);
 				this->SimpleBasesConnectedComponents.SwapTwoIndices(i,j);
@@ -16038,8 +16056,10 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString
 			}
 		}
 		if (numLength2==0 )
-		{//type A
+		{ //type A
 			out<< "A_"<<numLength1;
+      if (!length1.IsEqualTo(theWeyl.LongRootLength))
+        out <<"'";
 		}
 		else
 		{//the longer root should have smaller index

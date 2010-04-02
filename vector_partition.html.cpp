@@ -42,7 +42,7 @@ output <<" <br>\n";
 output <<" <br> \n";
 output <<" Additional functionality of the program:\n";
 output <<" <br>\n";
-output <<" <a href=\"/cgi-bin/vector_partition_cgi_win32.exe?rootSAs\">Root subalgebra tables</a>\n";
+output <<" <a href=\"/cgi-bin/vector_partition_linux_cgi?rootSAs\">Root subalgebra tables</a>\n";
 output <<" </td>\n";
 output <<" </tr>\n";
 output <<" </table>\n";

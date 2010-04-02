@@ -1161,7 +1161,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(),'E',6,true, true);
+		( *this->theGlobalVariablesContainer->Default(),'F',4,true, true);
   this->theRootSubalgebras.ComputeDebugString
     (true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
 	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
@@ -18103,7 +18103,10 @@ void rootSubalgebras::DynkinTableToString
 			out<<"\\\\\n";
     if (useHtml)
       out <<"\n<br>\n";
-		out<<"\nLies in: ";
+    if (useLatex)
+      out<<"\n\\mathfrak{k} lies in: ";
+		else
+      out <<"\n k lies in: "
 		if (useLatex)
 			out<<	"\\\\\n";
     if (useHtml)

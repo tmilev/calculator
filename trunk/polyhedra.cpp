@@ -495,8 +495,7 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	this->ColorsB[i]=200;
 	i++;
 	for (int i=0;i<DrawingVariables::NumColors;i++)
-	{ this->Colors[i]=RGB(this->ColorsR[i],this->ColorsG[i],this->ColorsB[i]);
-	}
+    this->Colors[i]=RGB(this->ColorsR[i],this->ColorsG[i],this->ColorsB[i]);
 ////////////////////
 }
 
@@ -547,11 +546,17 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &th
 {	theFile.clear();
 	LaTeXProcedures::beginDocument(theFile);
 	if (this->thePartialFraction.size>0)
-		this->WriteToFilePFdecomposition(theFile);
+		this->WriteToFilePFdecomposition(theFile,false);
 	std::string tempS;
 	this->VPVectors.ElementToString(tempS);
 	theFile<<"\\title{"<<this->WeylGroupLetter<<(int)(this->WeylGroupIndex )<<"}" <<"\\maketitle ";
 	this->theChambers.WriteToFile(TDV,this->VPVectors,theFile);
+	this->thePartialFraction.ElementToString(tempS,theGlobalVariables);
+	theFile<<"\n\n";
+	theFile<< tempS;
+	theFile<<"\n\n";
+	this->theOutput.ElementToStringGeneric(tempS);
+	theFile<< tempS;
 	LaTeXProcedures::endLatexDocument(theFile);
 }
 
@@ -953,12 +958,13 @@ ComputationSetup::~ComputationSetup()
 }
 
 
-void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output)
+void ComputationSetup::WriteToFilePFdecomposition
+  (std::fstream& output, bool includeLatexHeaderAndFooter)
 { std::string tempS;
   this->thePartialFraction.ElementToString
 		(	tempS,true,false,true,
 			*this->theGlobalVariablesContainer->Default());
-  if (this->flagHavingDocumentClassForLaTeX)
+  if (includeLatexHeaderAndFooter)
   { output << "\\documentclass{article}\n\\begin{document}"
         <<tempS<< "\n\\end{document}";
   }
@@ -1150,6 +1156,12 @@ void ComputationSetup::DoTheRootSAComputation()
 
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
+  rootFKFTcomputation tempFKFT;
+  std::string tempS;
+  tempFKFT.SearchForMinimalRelations(tempS);
+  this->theRootSubalgebras.DebugString=tempS;
+  if(true)
+    return;
 	rootSubalgebra tempSA;
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
@@ -1161,32 +1173,34 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(),'F',4,true, true);
+		( *this->theGlobalVariablesContainer->Default(),'E',6,true, true);
   this->theRootSubalgebras.ComputeDebugString
     (true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
 	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
 	//	(*this->theGlobalVariablesContainer->Default(),'E',7);
 	//this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	//this->theRootSubalgebras.ComputeLProhibitingRelations
-		//(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+	this->theRootSubalgebras.ComputeLProhibitingRelations
+		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
 void ComputationSetup::RunCustom()
 {	this->DoTheRootSAComputationCustom();
 //    this->theRootSubalgebras.ComputeDebugString(true);
-  this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}");
+  this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n");
 	this->theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
 	this->theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
-	//this->theRootSubalgebras.theBadRelations.ComputeDebugString
-	//	(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-	//this->theRootSubalgebras.theGoodRelations.ComputeDebugString
-	//	(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theOutput.DebugString.append("\\begin{document}~");
+	this->theRootSubalgebras.theBadRelations.ComputeDebugString
+		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.theGoodRelations.ComputeDebugString
+		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
 	//this->theRootSubalgebras.theMinRels.ComputeDebugString
 	//	(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-	this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
-	this->theOutput.DebugString.append("\n\n\n");
-	this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
+	//this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
+	//this->theOutput.DebugString.append("\n\n\n");
+	if (this->theRootSubalgebras.theGoodRelations.size!=0)
+    this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
 	this->theOutput.DebugString.append("\n\n\n");
 	if (this->theRootSubalgebras.theBadRelations.size>0)
 	{	this->theOutput.DebugString.append("The bad relations: \n\n");
@@ -1293,14 +1307,14 @@ void ComputationSetup::Run()
         }
         this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default());
       }
-			if (this->flagComputingVectorPartitions)
-			{	this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
-					(	this->theOutput,this->thePartialFraction.IndicatorRoot,
-						false,false,*this->theGlobalVariablesContainer->Default());
-				this->theOutput.ComputeDebugString();
-			}
 		}
-		if (this->flagHavingBeginEqnForLaTeXinStrings)
+		if (this->flagComputingVectorPartitions)
+    {	this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot
+				(	this->theOutput,this->thePartialFraction.IndicatorRoot,
+					false,false,*this->theGlobalVariablesContainer->Default());
+			this->theOutput.ComputeDebugString();
+		}
+    if (this->flagHavingBeginEqnForLaTeXinStrings)
 		{ std::stringstream out;
 			std::string tempS;
 			if (this->flagHavingDocumentClassForLaTeX)
@@ -1428,10 +1442,10 @@ void DrawingVariables::drawLine
 	(	double X1, double Y1, double X2, double Y2,
 		unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile,
 		drawLineFunction theDrawFunction)
-{ if (LatexOutFile==0)
+{ if (theDrawFunction!=0)
 		(*theDrawFunction)(X1,Y1,X2,Y2,thePenStyle, ColorIndex);
-	else
-		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile);
+	if (LatexOutFile!=0)
+		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile,*this);
 }
 
 void DrawingVariables::drawTextAtVector
@@ -1444,39 +1458,37 @@ void DrawingVariables::drawTextAtVector
 void DrawingVariables::drawText
 	(	double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile,
 		drawTextFunction drawTextIn)
-{	if (LatexOutFile==0)
-		drawTextIn(X1-7,Y1-7,inputText.c_str(),inputText.length(),color);
-  else
+{	if (drawTextIn!=0)
+  	drawTextIn(X1-7,Y1-7,inputText.c_str(),inputText.length(),color);
+  if (LatexOutFile!=0)
     ::LaTeXProcedures::drawText(X1, Y1,inputText,color,*LatexOutFile);
 }
 
 void CombinatorialChamberContainer::drawFacetVerticesMethod2
 	(	DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex,
 		WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes,
-		drawLineFunction theDrawFunction)
+		drawLineFunction theDrawFunction, std::fstream* outputLatex)
 {	root tempRoot;
 	root Projection1;
 	root tempRoot2;
 	root zeroRoot; zeroRoot.MakeZero(r.TheObjects[0].size);
 	root Projection2;
 	for (int i = 0; i<r.size; i++)
-	{	if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[i]))
+    if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[i]))
 		{	tempRoot.Assign(r.TheObjects[i]);
 			TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Projection1,directions);
 			if (TDV.DrawDashes)
 				TDV.drawlineBetweenTwoVectors
-					(zeroRoot,Projection1, DrawingStyleDashes,TDV.ColorDashes,0,theDrawFunction);
+					(zeroRoot,Projection1, DrawingStyleDashes,TDV.ColorDashes,outputLatex,theDrawFunction);
 			for (int j=i+1;j<r.size; j++)
-			{ if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
+        if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
 				{	tempRoot2.Assign(r.TheObjects[j]);
 					TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
 					TDV.drawlineBetweenTwoVectors
-						(	Projection1, Projection2,	DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors],0,
-							theDrawFunction);
+						(	Projection1, Projection2,	DrawingStyle,TDV.Colors[ChamberIndex%TDV.NumColors],
+              outputLatex, theDrawFunction);
 				}
-			}
 		}
-	}
 }
 
 void CombinatorialChamberContainer::drawOutput
@@ -1489,8 +1501,8 @@ void CombinatorialChamberContainer::drawOutput
 		if (output.TheObjects[i]!=0)
 			output.TheObjects[i]->DisplayNumber=i;
 	if (output.flagDrawingProjective)
-		CombinatorialChamberContainer::drawOutputProjective
-			(	TDV,output,directions, directionIndex,ChamberIndicator,
+		CombinatorialChamberContainer::DrawOutputProjective
+			(	TDV,output,directions, directionIndex,ChamberIndicator,LaTeXOutput,
 				theDrawFunction,drawTextIn);
 	else
 		CombinatorialChamberContainer::drawOutputAffine
@@ -1524,17 +1536,18 @@ void CombinatorialChamberContainer::drawOutputAffine
 // 1 = dashed line
 // 2 = dotted line
 // 5 = invisible line (no line)
-void CombinatorialChamberContainer::drawOutputProjective
+void CombinatorialChamberContainer::DrawOutputProjective
 	(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
 		roots& directions, int directionIndex, root& ChamberIndicator,
-		drawLineFunction theDrawFunction,drawTextFunction drawTextIn)
+		std::fstream* outputLatex, drawLineFunction theDrawFunction,
+		drawTextFunction drawTextIn)
 { int color=0;
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
 	int NumTrueChambers=0;
 	//int NumTrueChambers2=0;
 	int NumZeroChambers=0;
 	for (int j=0; j<output.size;j++)
-	{	if (output.TheObjects[j]!=0)
+		if (output.TheObjects[j]!=0)
 		{	if (!output.TheObjects[j]->flagHasZeroPolynomial)
 			{	NumTrueChambers++;
 				output.TheObjects[j]->DisplayNumber=NumTrueChambers;
@@ -1544,7 +1557,6 @@ void CombinatorialChamberContainer::drawOutputProjective
 				output.TheObjects[j]->DisplayNumber=NumZeroChambers;
 			}
 		}
-	}
 	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
 		output.ComputeDebugString();
 	std::string tempS;
@@ -1557,18 +1569,19 @@ void CombinatorialChamberContainer::drawOutputProjective
 	drawTextIn(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
 	out2<<"#Next chamber: ";
 	if (output.indexNextChamberToSlice!=-1)
-	{	if (output.TheObjects[output.indexNextChamberToSlice]!=0)
+		if (output.TheObjects[output.indexNextChamberToSlice]!=0)
 		{	if (output.TheObjects[output.indexNextChamberToSlice]->flagHasZeroPolynomial)
 				out2 << "i"; else out2 <<"c";
 			out2 << output.TheObjects[output.indexNextChamberToSlice]->DisplayNumber;
 		}
-	}
 	if (output.flagMakingASingleHyperplaneSlice)
-	{ out2	<< "; "<< "Plane: " << output.NumAffineHyperplanesProcessed+1 << " out of "
-					<< output.theWeylGroupAffineHyperplaneImages.size;
-	}
+	 out2	<< "; "<< "Plane: " << output.NumAffineHyperplanesProcessed+1 << " out of "
+				<< output.theWeylGroupAffineHyperplaneImages.size;
 	tempS=out2.str();
-	drawTextIn(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
+	if(drawTextIn!=0)
+    drawTextIn(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
+  //if (outputLatex!=0)
+  //  LaTeXProcedures::drawText(TDV.textX,TDV.textY+15,tempS,0,outputLatex);
 	//int NumTrueChambers=0;
 	//int NumTrueChambers2=0;
 	//int NumZeroChambers=0;
@@ -1609,15 +1622,14 @@ void CombinatorialChamberContainer::drawOutputProjective
 						else
 							out<<output.TheObjects[j]->DisplayNumber;
 						tempS=out.str();
-						TDV.drawTextAtVector(Proj,tempS,color,0,drawTextIn);
+						TDV.drawTextAtVector(Proj,tempS,color,outputLatex,drawTextIn);
 					}
 				}
 				for (int i =0;i< output.TheObjects[j]->Externalwalls.size;i++)
-				{	CombinatorialChamberContainer::drawFacetVerticesMethod2
+          CombinatorialChamberContainer::drawFacetVerticesMethod2
 						(	TDV,output.TheObjects[j]->AllVertices,directions,j,
 							output.TheObjects[j]->Externalwalls.TheObjects[i],
-							DrawingStyle,DrawingStyleDashes,theDrawFunction);
-				}
+							DrawingStyle,DrawingStyleDashes,theDrawFunction,outputLatex);
 			}
 		}
 		if (output.size>0 && ChamberIndicator.size==output.AmbientDimension &&
@@ -1627,18 +1639,19 @@ void CombinatorialChamberContainer::drawOutputProjective
 			double tmpX,tmpY;
 			TDV.GetCoordsForDrawing(TDV,tempRootX,tmpX,tmpY);
 			TDV.drawLine
-				(	tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,0,
+				(	tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex,
 					theDrawFunction);
 			TDV.drawLine
-				(	tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,0,
+				(	tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex,
 					theDrawFunction);
 			tmpX=(tmpX-TDV.centerX)*1.5+TDV.centerX;
 			tmpY=(tmpY-TDV.centerY)*1.5+TDV.centerY;
 			TDV.drawLine
 				(	TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle,
-					TDV.ColorChamberIndicator,0,theDrawFunction);
+					TDV.ColorChamberIndicator,outputLatex,theDrawFunction);
 			std::string tempS="Indicator";
-			drawTextIn(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
+			if (drawTextIn!=0)
+        drawTextIn(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
 		}
 	}
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
@@ -1937,14 +1950,7 @@ bool root::OurScalarProductIsZero(root& right)
 	return tempRat.IsEqualToZero();
 }
 
-const root root::operator +(const root& right)
-{ root result;
-	result.Assign(*this);
-	result.Add(right);
-	return result;
-}
-
-void root::Subtract(root&r)
+void root::Subtract(const root&r)
 { assert(r.size==this->size);
 	for (int i=0;i<this->size;i++)
 		this->TheObjects[i].Subtract(r.TheObjects[i]);
@@ -2015,7 +2021,7 @@ void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5,i
 	this->SetSizeExpandOnTopLight(Dimension);
 }
 
-int root::HashFunction()
+int root::HashFunction() const
 { int result=0;
 	for (int i=0;i<this->size;i++)
 		result+=	this->TheObjects[i].HashFunction()*	::SomeRandomPrimes[i];
@@ -2638,7 +2644,7 @@ void Selection::Assign(const Selection& right)
 	this->CardinalitySelection=right.CardinalitySelection;
 }
 
-int Selection::HashFunction()
+int Selection::HashFunction() const
 { int tempMin=Minimum(SomeRandomPrimesSize, this->MaxSize);
   int result=0;
   for (int i=0;i<tempMin;i++)
@@ -2647,7 +2653,7 @@ int Selection::HashFunction()
   return result;
 }
 
-bool Selection::operator==(Selection& right)
+bool Selection::operator==(const Selection& right)
 { if (this->MaxSize!=right.MaxSize || this->CardinalitySelection!=right.CardinalitySelection)
     return false;
   for (int i=0;i<this->CardinalitySelection;i++)
@@ -4194,7 +4200,8 @@ bool CombinatorialChamberContainer::ConsistencyCheck()
 	return true;
 }
 
-void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output)
+void CombinatorialChamberContainer::WriteToFile
+  (DrawingVariables& TDV, roots& directions, std::fstream& output)
 { if (!output.is_open())
 		return;
 	this->drawOutput
@@ -4508,15 +4515,17 @@ void CombinatorialChamberContainer::MakeStartingChambers
 				CombinatorialChamber* plusOwner;CombinatorialChamber* minusOwner;
 				if(this->theHyperplanes.TheObjects[this->AmbientDimension-j-1]
 						.OurScalarProductIsPositive(directions.TheObjects[j]))
-				{ plusOwner= this->TheObjects[tempI]; minusOwner= this->TheObjects[tempI2];
+				{ plusOwner= this->TheObjects[tempI];
+          minusOwner= this->TheObjects[tempI2];
 				} else
-				{ minusOwner= this->TheObjects[tempI]; plusOwner= this->TheObjects[tempI2];
+				{ minusOwner= this->TheObjects[tempI];
+          plusOwner= this->TheObjects[tempI2];
 				}
 				this->TheObjects[tempI]->MakeNewMutualNeighbors
 					(	plusOwner, minusOwner,this->theHyperplanes.TheObjects[this->AmbientDimension-j-1]);
 			} else
-			{ this->TheObjects[tempI]->AllVertices.LastObject()->MinusRoot();
-			}
+        this->TheObjects[tempI]->AllVertices.LastObject()->MinusRoot();
+
 //			if (this->flagAnErrorHasOcurredTimeToPanic)
 	//			this->ComputeDebugString();
 		}
@@ -4563,7 +4572,7 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVa
 				if (tempRat.IsPositive()){hasPositive=true;}
 			}
 			if ((hasNegative && !hasPositive))
-			{normalCandidate.MinusRoot();}
+        normalCandidate.MinusRoot();
 			normalCandidate.ScaleToIntegralMinHeight();
 			if (!(hasNegative && hasPositive))
 			{	bool IsValid;
@@ -4573,8 +4582,7 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVa
 						IsValid=false;
 				}
 				if (IsValid)
-				{	this->AddRootNoRepetition(normalCandidate);
-				}
+          this->AddRootNoRepetition(normalCandidate);
 			}
 		}
 	}
@@ -4616,14 +4624,16 @@ bool Cone::FillInChamberTestArray(roots &TheVertices, bool initChamberTestArray)
 						return false;
 			}
 		}
-		if (TestedVertexIsStrictlyInsideGlobalCone){return false;}
+		if (TestedVertexIsStrictlyInsideGlobalCone)
+      return false;
 	}
 	return true;
 }
 
 bool Cone::IsSurelyOutsideConeAccordingToChamberTestArray()
 {	for (int i=0;i<this->size;i++)
-		if (this->ChamberTestArray.TheObjects[i]==0){return true;}
+		if (this->ChamberTestArray.TheObjects[i]==0)
+      return true;
 	return false;
 }
 
@@ -4689,7 +4699,7 @@ void CombinatorialChamber::WireChamberAndWallAdjacencyData
 				(originalWall.NeighborsAlongWall.size);
 		assert(originalWall.MirrorWall.size==originalWall.NeighborsAlongWall.size);
 		for (int j=0;j<currentWall.NeighborsAlongWall.size;j++)
-		{ if (originalWall.NeighborsAlongWall.TheObjects[j]==0)
+      if (originalWall.NeighborsAlongWall.TheObjects[j]==0)
 			{ currentWall.NeighborsAlongWall.TheObjects[j]=0;
 				currentWall.MirrorWall.TheObjects[j]=0;
 			}else
@@ -4703,7 +4713,6 @@ void CombinatorialChamber::WireChamberAndWallAdjacencyData
 					currentWall.NeighborsAlongWall.TheObjects[j]->Externalwalls.TheObjects
 						[originalWall.MirrorWall.TheObjects[j]->indexInOwnerChamber];
 			}
-		}
 	}
 }
 
@@ -4729,9 +4738,8 @@ void Cone::operator=(Cone& right)
 
 void CombinatorialChamberContainer::LabelAllUnexplored()
 {	for (int i =0; i<size; i++)
-	{	if (!this->TheObjects[i]->flagPermanentlyZero || this->flagMakingASingleHyperplaneSlice)
+    if (!this->TheObjects[i]->flagPermanentlyZero || this->flagMakingASingleHyperplaneSlice)
 			this->TheObjects[i]->flagExplored =false;
-	}
 	FirstNonExploredIndex=0;
 }
 
@@ -4742,7 +4750,7 @@ bool WallData::IsExternalWithRespectToDirection(root &direction)
 bool WallData::EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly)
 { aNeighborHasNonZeroPoly=false;
 	for (int i=0;i<this->NeighborsAlongWall.size;i++)
-	{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
+    if (this->NeighborsAlongWall.TheObjects[i]!=0)
 		{	if ((!this->NeighborsAlongWall.TheObjects[i]->flagExplored)&&
 					(!this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero))
 				return false;
@@ -4751,7 +4759,6 @@ bool WallData::EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly)
 					aNeighborHasNonZeroPoly	||
 					this->NeighborsAlongWall.TheObjects[i]->flagHasZeroPolynomial;
 		}
-	}
 	return true;
 }
 
@@ -4783,7 +4790,7 @@ void WallData::ElementToString(std::string &output)
 	std::string tempS; this->normal.ElementToString(tempS);
 	out<< "normal: "<< tempS << " Neighbors: ";
 	if (this->flagDisplayWallDetails)
-	{ for (int i=0;i<this->NeighborsAlongWall.size;i++)
+    for (int i=0;i<this->NeighborsAlongWall.size;i++)
 		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
 			{ if (this->NeighborsAlongWall.TheObjects[i]->flagHasZeroPolynomial)
 					out <<"Invisible";
@@ -4792,7 +4799,6 @@ void WallData::ElementToString(std::string &output)
 				out << this->NeighborsAlongWall.TheObjects[i]->DisplayNumber <<", ";
 			}
 		}
-	}
 	output= out.str();
 }
 
@@ -4815,18 +4821,17 @@ void WallData::RemoveNeighborhoodBothSides(CombinatorialChamber* owner, Combinat
 void WallData::RemoveNeighborOneSide(CombinatorialChamber *NeighborPointer)
 { assert(this->ContainsNeighborAtMostOnce(NeighborPointer));
 	for (int i=0;i<this->NeighborsAlongWall.size;i++)
-	{ if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
+    if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
 		{ this->NeighborsAlongWall.PopIndexSwapWithLast(i);
 			this->MirrorWall.PopIndexSwapWithLast(i);
 			return;
 		}
-	}
 	assert(false);
 }
 
 bool WallData::ConsistencyCheck(CombinatorialChamber* owner)
 { for (int i=0;i<this->NeighborsAlongWall.size;i++)
-	{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
+    if (this->NeighborsAlongWall.TheObjects[i]!=0)
 		{	if (!(	this->MirrorWall.TheObjects[i]->ContainsNeighborExactlyOnce(owner)
 						||this->MirrorWall.TheObjects[i]->ContainsMirrorWallExactlyOnce(this)))
 				return false;
@@ -4836,7 +4841,6 @@ bool WallData::ConsistencyCheck(CombinatorialChamber* owner)
 				return false;
 			}
 		}
-	}
 	return true;
 }
 
@@ -4923,7 +4927,7 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 	}
 	for (int j=0;j<TheMinusVertices.size;j++)
 	{	if(TheKillerFacet.OurScalarProductIsNegative(TheMinusVertices.TheObjects[j]))
-		{	IsNegative=true; break;
+		{	IsNegative=true;
 			break;
 		}
 	}
@@ -4977,16 +4981,14 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 		CombinatorialChamber* tempC;
 		root FacetInternalPoint; FacetInternalPoint.SetSizeExpandOnTopLight(ownerComplex->AmbientDimension);
 		if (IsPositive)
-		{tempC= NewPlusChamber;}
+      tempC= NewPlusChamber;
 		else
-		{tempC= NewMinusChamber;}
+      tempC= NewMinusChamber;
 		tempC->Externalwalls.AddObjectOnTop(*this);
 		for (int i=0;i<this->NeighborsAlongWall.size;i++)
-		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
-			{	tempC->Externalwalls.LastObject()->MirrorWall.TheObjects[i]->SubstituteNeighbor
+      if (this->NeighborsAlongWall.TheObjects[i]!=0)
+				tempC->Externalwalls.LastObject()->MirrorWall.TheObjects[i]->SubstituteNeighbor
 					(BossChamber,tempC,tempC->Externalwalls.LastObject());
-			}
-		}
 		return false;
 	}
 }
@@ -5034,8 +5036,7 @@ bool CombinatorialChamber::IsAValidCandidateForNormalOfAKillerFacet
 	{	static Rational tempRat;
 		root::RootScalarEuclideanRoot(directions.TheObjects[i],normalCandidate,tempRat);
 		if (tempRat.IsEqualToZero())
-		{	WallBasis.AddRoot(directions.TheObjects[i]);
-		}
+			WallBasis.AddRoot(directions.TheObjects[i]);
 	}
 	if (WallBasis.size<owner.AmbientDimension-1)
 		return false;
@@ -5054,8 +5055,7 @@ void ComplexQN::MultiplyByBasicComplex(BasicComplexNumber & b)
 void ComplexQN::CopyFrom(const ComplexQN& q)
 {	this->NumVars = q.NumVars;
 	for (int i=0;i<this->NumVars;i++)
-	{	this->Exponent[i].Assign(q.Exponent[i]);
-	}
+    this->Exponent[i].Assign(q.Exponent[i]);
 	this->Coefficient.Assign(q.Coefficient);
 }
 
@@ -5063,8 +5063,7 @@ void ComplexQN::MakePureQN(Rational* expArg, int NumVars)
 {	this->NumVars=NumVars;
 	this->MakeConst(ROne,NumVars);
 	for(int i=0;i<this->NumVars;i++)
-	{	this->Exponent[i].Assign(expArg[i]);
-	}
+    this->Exponent[i].Assign(expArg[i]);
 	this->Simplify();
 	this->CheckCoefficient();
 }
@@ -5072,8 +5071,7 @@ void ComplexQN::MakePureQN(Rational* expArg, int NumVars)
 void ComplexQN::MakePureQN(int NumVars,int NonZeroIndex, Rational&coeff, Rational&ConstExp, Rational& Exp)
 { this->NumVars =NumVars;
 	for(int i=0;i<this->NumVars;i++)
-	{ this->Exponent[i].MakeZero();
-	}
+    this->Exponent[i].MakeZero();
 	this->Coefficient.MakeBasicComplex(coeff,ConstExp) ;
 	this->Exponent[NonZeroIndex].Assign(Exp);
 	this->Simplify();
@@ -5082,9 +5080,8 @@ void ComplexQN::MakePureQN(int NumVars,int NonZeroIndex, Rational&coeff, Rationa
 bool ComplexQN::ExponentIsEqualToZero()
 {	this->CheckCoefficient();
 	for (int i=0;i<this->NumVars;i++)
-	{ if (!this->Exponent[i].IsEqualTo(RZero))
+    if (!this->Exponent[i].IsEqualTo(RZero))
 			return false;
-	}
 	return true;
 }
 
@@ -5094,10 +5091,8 @@ void ComplexQN::ComputeDebugString()
 
 bool ComplexQN::HasSameExponent(ComplexQN& q)
 {	for (int i=0;i<this->NumVars;i++)
-	{ if (!this->Exponent[i].IsEqualTo(q.Exponent[i]))
-		{ return false;
-		}
-	}
+    if (!this->Exponent[i].IsEqualTo(q.Exponent[i]))
+      return false;
 	return true;
 }
 
@@ -5113,25 +5108,23 @@ void ComplexQN::operator =(const ComplexQN& q)
 bool ComplexQN::operator ==(ComplexQN& q)
 { this->CheckCoefficient();
 	for (int i=0;i<this->NumVars+1;i++)
-	{ if (!(this->Exponent[i].IsEqualTo(q.Exponent[i]))){return false;}
-	}
+    if (!(this->Exponent[i].IsEqualTo(q.Exponent[i])))
+      return false;
 	return true;
 }
 
 void ComplexQN::MultiplyBy(ComplexQN &q)
 {	for (int i=0;i<this->NumVars;i++)
-	{	this->Exponent[i].Add(q.Exponent[i]);
-	}
+    this->Exponent[i].Add(q.Exponent[i]);
 	this->Coefficient.MultiplyBy(q.Coefficient);
 	this->Simplify();
 }
 
 void ComplexQN::MakeConst(Rational& Coeff, int NumVars)
-{this->Coefficient.AssignRational(Coeff);
+{ this->Coefficient.AssignRational(Coeff);
 	this->NumVars =NumVars;
 	for (int i=0;i<this->NumVars;i++)
-	{	this->Exponent[i].MakeZero();
-	}
+    this->Exponent[i].MakeZero();
 }
 
 void CompositeComplexQN::MakeConst(Rational& Coeff, int numVars)
@@ -5163,15 +5156,13 @@ void CompositeComplexQN::ElementToString(std::string& output)
 	{ this->TheObjects[i].ElementToString(tempS);
 		if (tempS[0]!='0')
 		{ if (tempS[0]!='-')
-			{ out<<"+";
-			}
+        out<<"+";
 			out<<tempS;
 		}
 	}
 	output=out.str();
 	if (output[0]=='+')
-	{ output.erase(0,1);
-	}
+    output.erase(0,1);
 	if (NumNonZero >1)
 	{ output.append(")");
 		output.insert(0,"(");
@@ -5180,34 +5171,29 @@ void CompositeComplexQN::ElementToString(std::string& output)
 
 void CompositeComplexQN::AddComplexQN(ComplexQN& q)
 {	for (int i=0;i<this->size;i++)
-	{	if (this->TheObjects[i].HasSameExponent(q))
+    if (this->TheObjects[i].HasSameExponent(q))
 		{	this->TheObjects[i].Coefficient.Add(q.Coefficient);
 			if (this->TheObjects[i].Coefficient.IsEqualToZero())
-			{	this->PopIndexSwapWithLast(i);
-			}
+				this->PopIndexSwapWithLast(i);
 			return;
 		}
-	}
 	this->AddObjectOnTop(q);
 }
 
 void CompositeComplexQN::Add(CompositeComplexQN &q)
 { for (int i=0;i<q.size;i++)
-	{	this->AddComplexQN(q.TheObjects[i]);
-	}
+		this->AddComplexQN(q.TheObjects[i]);
 }
 
 bool CompositeComplexQN::ComputeDebugString()
-{
-	this->DebugString.clear();
+{	this->DebugString.clear();
 	this->ElementToString(this->DebugString);
 	return true;
 }
 
 void CompositeComplexQN::MultiplyByComplexQN(ComplexQN &q)
 {	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].MultiplyBy(q);
-	}
+    this->TheObjects[i].MultiplyBy(q);
 }
 
 void CompositeComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
@@ -5257,32 +5243,26 @@ void CompositeComplexQN::MakePureQN(Rational& constExp,int numVars, Rational&coe
 
 void CompositeComplexQN::MultiplyByLargeRational(Rational &r)
 {	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].MultiplyByLargeRational(r);
-	}
+    this->TheObjects[i].MultiplyByLargeRational(r);
 }
 
 bool CompositeComplexQN::IsEqualToZero()
 { for (int i=0;i<this->size;i++)
-	{	if (!this->TheObjects[i].IsEqualToZero())
-		{	return false;
-		}
-	}
+    if (!this->TheObjects[i].IsEqualToZero())
+      return false;
 	return true;
 }
 
 void CompositeComplexQN::Simplify()
 { for( int i=0;i<this->size;i++)
-	{ this->TheObjects[i].Simplify();
-	}
+    this->TheObjects[i].Simplify();
 }
 
 int CompositeComplexQN::NumNonZeroElements()
 {	int result=0;
 	for (int i=0;i<this->size;i++)
-	{	if (!this->TheObjects[i].IsEqualToZero())
-		{	result++;
-		}
-	}
+		if (!this->TheObjects[i].IsEqualToZero())
+      result++;
 	return result;
 }
 
@@ -5295,8 +5275,7 @@ bool CompositeComplexQN::IsEqualTo(CompositeComplexQN&q)
 }
 
 void CompositeComplexQN::DivideByRational(Rational& r)
-{
-	Rational tempRat;
+{	Rational tempRat;
 	tempRat.Assign(r);
 	tempRat.Invert();
 	this->MultiplyByLargeRational(tempRat);
@@ -5306,8 +5285,7 @@ void CompositeComplexQN::Assign(const CompositeComplexQN &q)
 {	this->size=0;
 	this->NumVariables= q.NumVariables;
 	for (int i=0;i<q.size;i++)
-	{	this->AddObjectOnTop(q.TheObjects[i]);
-	}
+		this->AddObjectOnTop(q.TheObjects[i]);
 }
 
 void CompositeComplexQN::MultiplyBy(CompositeComplexQN& q)
@@ -5357,19 +5335,16 @@ void ComplexQN::ElementToString(std::string& output)
 	this->Coefficient.ElementToString(tempS);
 	if (!this->ExponentIsEqualToZero())
 	{	if (tempS=="1")
-		{ tempS.clear();
-		}
+      tempS.clear();
 		if (tempS=="-1")
-		{ tempS="-";
-		}
+      tempS="-";
 		out<< tempS<<"e^{2i \\pi(";
 		tempS.clear();
 		this->LinPartToString(tempS);
 		out<< tempS<<")}";
 	}
 	else
-	{ out<<tempS;
-	}
+    out<<tempS;
 	output= out.str();
 }
 
@@ -5378,31 +5353,25 @@ void ComplexQN::LinPartToString(std::string& output)
 	std::stringstream out;
 	std::string tempS;
 	for (int i=0;i<this->NumVars;i++)
-	{	if (!this->Exponent[i].IsEqualTo(RZero))
+    if (!this->Exponent[i].IsEqualTo(RZero))
 		{	if (!this->Exponent[i].IsEqualTo(ROne))
 			{ tempS.clear();
 				if (!this->Exponent[i].IsEqualTo(RMOne))
-				{	this->Exponent[i].ElementToString(tempS);
-				}
+					this->Exponent[i].ElementToString(tempS);
 				else
-				{ tempS.assign("-");
-				}
+          tempS.assign("-");
 				if (tempS[0]!='-')
-				{out<<"+";}
+          out<<"+";
 				out<<tempS;
 			}
 			else
-			{	out<<"+";
-			}
+				out<<"+";
 			out<<PolyFormatLocal.alphabet[i];
 		}
-	}
 	output= out.str();
 	if (output.size()!=0)
-	{ if( output[0]=='+')
-		{ output.erase(0,1);
-		}
-	}
+    if( output[0]=='+')
+      output.erase(0,1);
 }
 
 void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
@@ -5413,8 +5382,7 @@ void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
 	tempBC.Exp.Assign(RZero);
 	assert(TheSub.NumCols==this->NumVars);
 	for (int i=0;i<TheSub.NumRows-1;i++)
-	{ tempExponent[i].MakeZero();
-	}
+    tempExponent[i].MakeZero();
 	for (int i=0; i<this->NumVars;i++)
 	{ tempRat.Assign(TheSub.elements[0][i]);
     tempRat.MultiplyBy(this->Exponent[i]);
@@ -5427,8 +5395,7 @@ void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
 	}
 	this->NumVars= TheSub.NumRows-1;
 	for (int i=0;i<this->NumVars;i++)
-	{	this->Exponent[i].Assign(tempExponent[i]);
-	}
+    this->Exponent[i].Assign(tempExponent[i]);
 	this->Coefficient.MultiplyByBasicComplex(tempBC);
 	this->Simplify();
 }
@@ -5436,8 +5403,7 @@ void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
 void ComplexQN::Simplify()
 {	this->Coefficient.Simplify();
 	for (int i=0;i<this->NumVars;i++)
-	{ this->Exponent[i].AssignFracValue();
-	}
+    this->Exponent[i].AssignFracValue();
 }
 
 bool ComplexQN::IsBasicComplex()
@@ -5487,8 +5453,7 @@ int PolynomialRationalCoeff::SizeWithoutDebugString()
 	Accum+=this->HashedListBasicObjects<Monomial<Rational> >::SizeWithoutObjects();
 	Accum+=	sizeof(this->NumVars);
 	for (int i=0;i<this->ActualSize;i++)
-	{ Accum+=this->TheActualObjects[i].SizeWithoutCoefficient()+sizeof(Rational);
-	}
+    Accum+=this->TheActualObjects[i].SizeWithoutCoefficient()+sizeof(Rational);
 	return Accum;
 }
 
@@ -5498,14 +5463,12 @@ void PolynomialRationalCoeff::TimesInteger(int x)
 		return;
 	}
 	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].Coefficient.MultiplyByInt(x);
-	}
+    this->TheObjects[i].Coefficient.MultiplyByInt(x);
 }
 
 void PolynomialRationalCoeff::DivByInteger(int x)
 {	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].Coefficient.DivideByInteger(x);
-	}
+    this->TheObjects[i].Coefficient.DivideByInteger(x);
 }
 
 void PolynomialRationalCoeff::AssignIntegerPoly(IntegerPoly& p)
@@ -5515,8 +5478,7 @@ void PolynomialRationalCoeff::AssignIntegerPoly(IntegerPoly& p)
 	tempM.initNoDegreesInit(this->NumVars);
 	for (int i=0;i<p.size;i++)
 	{	for (int j=0;j<this->NumVars;j++)
-		{ tempM.degrees[j]=p.TheObjects[i].degrees[j];
-		}
+      tempM.degrees[j]=p.TheObjects[i].degrees[j];
 		tempM.Coefficient.AssignInteger(p.TheObjects[i].Coefficient.value);
 		this->AddObjectOnTopHash(tempM);
 	}
@@ -5645,8 +5607,7 @@ void PolynomialsRationalCoeff::MakeLinearSubOnLastVariable
             (short NumVars,PolynomialRationalCoeff& LastVarSub)
 { this->SetSizeExpandOnTopNoObjectInit(NumVars);
 	for (int i=0;i<NumVars-1;i++)
-	{ this->TheObjects[i].MakeNVarDegOnePoly(NumVars,i,ROne);
-	}
+    this->TheObjects[i].MakeNVarDegOnePoly(NumVars,i,ROne);
 	this->TheObjects[NumVars-1].CopyFromPoly(LastVarSub);
 }
 
@@ -5888,8 +5849,7 @@ void QuasiPolynomial::AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p)
 	tempM.initNoDegreesInit(this->NumVars);
 	for (int i=0;i<p.size;i++)
 	{	for (int j=0;j<this->NumVars;j++)
-		{ tempM.degrees[j]=p.TheObjects[i].degrees[j];
-		}
+      tempM.degrees[j]=p.TheObjects[i].degrees[j];
 		tempM.Coefficient.MakeConst(p.TheObjects[i].Coefficient, this->NumVars);
 		this->AddObjectOnTopHash(tempM);
 	}
@@ -7073,7 +7033,7 @@ void BasicQN::MakeFromNormalAndDirection(root& normal, root& direction,
 	this->Simplify();
 }
 
-int BasicQN::HashFunction()
+int BasicQN::HashFunction() const
 { int result=0;
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{ result+=SomeRandomPrimes[i]*this->Exp.elements[i][this->NumVars-i-1];
@@ -9841,14 +9801,14 @@ bool partFraction::IsEqualToZero()
 		return this->CoefficientNonExpanded.size==0;
 }
 
-int partFraction::HashFunction()
+int partFraction::HashFunction() const
 { int result=0;
 	for (int i=0;i<this->size;i++)
 		result+=SomeRandomPrimes[i]*this->TheObjects[i].HashFunction();
 	return result;
 }
 
-bool partFraction::operator==(partFraction& right)
+bool partFraction::operator==(const partFraction& right)
 {	if (this->size!= right.size) return false;
 	for (int i=0;i<this->size;i++)
 	{ if (! (this->TheObjects[i]==right.TheObjects[i]))
@@ -9897,6 +9857,10 @@ void partFractions::AssureIndicatorRegularity(GlobalVariables& theGlobalVariable
 {	if (this->flagUsingIndicatorRoot)
 	{	roots tempRoots;
 		tempRoots.AssignHashedIntRoots(this->RootsToIndices);
+		if (this->IndicatorRoot.IsEqualToZero())
+    { tempRoots.Average(this->IndicatorRoot, this->AmbientDimension);
+      this->IndicatorRoot.MultiplyByInteger(tempRoots.size);
+    }
 		tempRoots.PerturbVectorToRegular
 			(	this->IndicatorRoot, theGlobalVariables,this->IndicatorRoot.size,
 				theGlobalVariables.FeedDataToIndicatorWindowDefault);
@@ -10901,19 +10865,19 @@ bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalV
 }
 
 bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
-				(	QuasiPolynomial& output, root& r, //bool storeComputations,
+				(	QuasiPolynomial& output, root& newIndicator, //bool storeComputations,
 					//bool RecordSplitPowerSeriesCoefficient,
 					bool StoreToFile,
 					bool UseOldData, GlobalVariables& theGlobalVariables)
-{	if (!this->CheckForMinimalityDecompositionWithRespectToRoot(r,theGlobalVariables)){return false;}
+{	if (!this->CheckForMinimalityDecompositionWithRespectToRoot(newIndicator,theGlobalVariables)){return false;}
 	this->NumProcessedForVPFfractions=0;
 	Rational oldCheckSum;
 	QuasiPolynomial oldOutput;
-	if (!this->flagUsingIndicatorRoot)
-	{ this->flagUsingIndicatorRoot=true;
-		this->AssureIndicatorRegularity(theGlobalVariables);
-		this->ResetRelevanceIsComputed();
-	}
+	this->IndicatorRoot.Assign(newIndicator);
+  this->flagUsingIndicatorRoot=true;
+	this->AssureIndicatorRegularity(theGlobalVariables);
+	this->IndicatorRoot.ComputeDebugString();
+	this->ResetRelevanceIsComputed();
 	if (partFraction::MakingConsistencyCheck)
 		partFractions::CheckSum.MakeZero();
 	if (StoreToFile&& UseOldData)
@@ -10934,7 +10898,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 		//if (this->flagAnErrorHasOccurredTimeToPanic)
 		//{ this->TheObjects[i].ComputeDebugString();
 		//}
-		if (this->TheObjects[i].rootIsInFractionCone(*this,r,theGlobalVariables))
+		if (this->TheObjects[i].rootIsInFractionCone(*this,this->IndicatorRoot,theGlobalVariables))
 		{ this->TheObjects[i].partFractionToPartitionFunctionSplit
 				(*this,tempQP,true,StoreToFile,theGlobalVariables,this->AmbientDimension);
 			if (StoreToFile)
@@ -11257,7 +11221,7 @@ void oneFracWithMultiplicitiesAndElongations::operator =(oneFracWithMultipliciti
 	return result;
 }*/
 
-int oneFracWithMultiplicitiesAndElongations::HashFunction()
+int oneFracWithMultiplicitiesAndElongations::HashFunction() const
 { return this->GetTotalMultiplicity();
 }
 
@@ -11292,11 +11256,10 @@ int oneFracWithMultiplicitiesAndElongations::GetLCMElongations()
 	return result;
 }
 
-int oneFracWithMultiplicitiesAndElongations::GetTotalMultiplicity()
+int oneFracWithMultiplicitiesAndElongations::GetTotalMultiplicity() const
 { int result=0;
 	for (int i=0;i<this->Elongations.size;i++)
-	{ result+= this->Multiplicities.TheObjects[i];
-	}
+    result+= this->Multiplicities.TheObjects[i];
 	return result;
 }
 
@@ -11482,7 +11445,7 @@ void intRoot::AddRoot(intRoot& theRoot)
 		this->elements[i]+=theRoot.elements[i];
 }
 
-int intRoot::HashFunction()
+int intRoot::HashFunction() const
 {	int result=0;
 	for (int i=0;i<this->dimension;i++)
 		result+=::SomeRandomPrimes[i]*this->elements[i];
@@ -11562,7 +11525,7 @@ void intRoot::operator =(const intRoot &right)
 		this->elements[i]=right.elements[i];
 }
 
-bool intRoot::operator ==(intRoot &right)
+bool intRoot::operator ==(const intRoot &right)
 {	if (this->dimension!=right.dimension)
 		return false;
 	for (int i=0;i<this->dimension;i++)
@@ -11898,6 +11861,18 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement
 		this->SimpleReflectionDualSpace
 			(this->TheObjects[index].TheObjects[tempI-i-1],output.normal);
 	}
+}
+
+void WeylGroup::GenerateAdditivelyClosedSubset
+  (roots& input, roots& output)
+{ output.CopyFromBase(input);
+  root tempRoot;
+  for (int i=0;i<output.size;i++)
+    for (int j=i+1; j<output.size;j++)
+    { tempRoot=output.TheObjects[i]+output.TheObjects[j];
+      if (this->IsARoot(tempRoot))
+        output.AddObjectOnTop(tempRoot);
+    }
 }
 
 void WeylGroup::Assign(const WeylGroup& right)
@@ -12558,7 +12533,7 @@ void ElementWeylGroup::ElementToString(std::string& output)
 	output= out.str();
 }
 
-int ElementWeylGroup::HashFunction()
+int ElementWeylGroup::HashFunction() const
 {	int top = Minimum(this->size,::SomeRandomPrimesSize);
 	int result =0;
 	for (int i=0;i<top;i++)
@@ -13700,7 +13675,6 @@ void rootFKFTcomputation::MakeRootFKFTsub(root& direction, QPSub& theSub)
 	theSub.MakeSubFromMatrixIntAndDen(tempMat,tempLCM);
 }
 
-
 void rootFKFTcomputation::MakeTheRootFKFTSum
 				(	root& ChamberIndicator, partFractions& theBVdecomposition,
 					ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
@@ -14081,7 +14055,8 @@ void LaTeXProcedures::endLatexDocument(std::fstream& output)
 { output <<"\\end{document}";
 }
 
-void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &output)
+void LaTeXProcedures::GetStringFromColorIndex
+  (int ColorIndex, std::string &output, DrawingVariables& drawInput)
 { switch(ColorIndex)
 	{ case 0: output.assign("black"); break;
 		case 1: output.assign("blue"); break;
@@ -14096,6 +14071,20 @@ void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &outpu
 			output.assign("black");
 			break;
 	}
+  if(ColorIndex==TDV.Colors[1])
+    output.assign("blue");
+  if(ColorIndex==TDV.Colors[2])
+    output.assign("purple");
+  if(ColorIndex==TDV.Colors[3])
+    output.assign("green");
+  if(ColorIndex==TDV.Colors[4])
+    output.assign("cyan");
+  if(ColorIndex==TDV.Colors[5])
+    output.assign("red");
+  if(ColorIndex==TDV.Colors[6])
+    output.assign("purple");
+  if(ColorIndex==TDV.Colors[7])
+    output.assign("cyan");
 }
 
 void LaTeXProcedures::drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output)
@@ -14108,15 +14097,18 @@ void LaTeXProcedures::drawText(	double X1, double Y1, std::string& theText, int 
 }
 
 void LaTeXProcedures::drawline
-			(	double X1, double Y1, double X2, double Y2,
-				unsigned long thePenStyle, int ColorIndex, std::fstream& output)
+  (	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle,
+		int ColorIndex, std::fstream& output,	DrawingVariables& drawInput)
 { if ((int)thePenStyle== DrawingVariables::PenStyleInvisible)
 		return;
 	output.precision(4);
 	X1/=LaTeXProcedures::ScaleFactor; X2/=LaTeXProcedures::ScaleFactor;
 	Y1/=LaTeXProcedures::ScaleFactor; Y2/=LaTeXProcedures::ScaleFactor;
 	std::string tempS;
-	LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS);
+	if (thePenStyle==(unsigned)DrawingVariables::PenStyleDashed)
+    tempS="lightgray";
+  else
+    LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS,drawInput);
 	output	<<"\\psline[linewidth=0.3pt, linecolor="<<tempS <<"]"
 		<<"("<<X1-LaTeXProcedures::FigureCenterCoordSystemX <<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<")"
 		<<"("<<X2-LaTeXProcedures::FigureCenterCoordSystemX <<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y2<<")\n";
@@ -15133,8 +15125,8 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		bufferSAs.SetSizeExpandOnTopNoObjectInit
 			(bufferSAs.size+this->AmbientWeyl.KillingFormMatrix.NumRows);
 	bufferSAs.TheObjects[RecursionDepth]=bufferSAs.TheObjects[RecursionDepth-1];
-//	if (RecursionDepth>4)
- //   return;
+	//if (RecursionDepth>4)
+   // return;
 	for (int k=0;k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size;k++)
 		if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
 		{	bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop
@@ -16633,7 +16625,7 @@ void GeneratorPFAlgebraRecord::operator =(const GeneratorPFAlgebraRecord &right)
 	this->Value->Assign(*right.Value);
 }
 
-int GeneratorsPartialFractionAlgebra::HashFunction()
+int GeneratorsPartialFractionAlgebra::HashFunction() const
 { return this->GeneratorIndex;
 }
 
@@ -16678,7 +16670,7 @@ void GeneratorsPartialFractionAlgebra::ConvertToIntegerPoly(IntegerPoly& output,
 }
 
 
-bool GeneratorsPartialFractionAlgebra::operator ==(GeneratorsPartialFractionAlgebra &right)
+bool GeneratorsPartialFractionAlgebra::operator ==(const GeneratorsPartialFractionAlgebra &right)
 { return this->GeneratorIndex== right.GeneratorIndex;
 }
 
@@ -16808,7 +16800,7 @@ inline int affineCone::GetDimension()
 	return this->theWalls.TheObjects[0].affinePoint.size;
 }
 
-inline int affineCone::HashFunction()
+inline int affineCone::HashFunction() const
 { int tempMin = ::Minimum(this->theWalls.size, ::SomeRandomPrimesSize);
 	int result=0;
 	for (int i=0;i<tempMin;i++)
@@ -17241,9 +17233,11 @@ void affineHyperplane::ElementToString(std::string& output)
 	output= out.str();
 }
 
-int affineHyperplane::HashFunction()
+int affineHyperplane::HashFunction() const
 { //warning: if normal gets streched, the hashfunction will change!
-	this->normal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+	root tempNormal;
+	tempNormal.Assign(this->normal);
+	tempNormal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 	Rational tempRat;
 	root::RootScalarEuclideanRoot(this->normal, this->affinePoint, tempRat);
 	return this->normal.HashFunction()+ tempRat.HashFunction();

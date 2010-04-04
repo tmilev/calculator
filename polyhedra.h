@@ -96,6 +96,7 @@ class PolyPartFractionNumerator;
 class root;
 class roots;
 class rootsCollection;
+class coneRelation;
 template <class Object>
 class ListBasicObjects;
 template <class Object>
@@ -127,6 +128,7 @@ class rootSubalgebras;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
+
 
 
 class ParallelComputing
@@ -497,8 +499,8 @@ public:
 	//the below returns -1 if it doesn't contain the object,
 	//else returns the object's index
 	void SwapTwoIndicesHash(int i1, int i2);
-	inline bool ContainsObjectHash(Object& o) {return this->IndexOfObjectHash(o)!=-1;};
-	int IndexOfObjectHash(Object& o);
+	inline bool ContainsObjectHash(const Object& o) {return this->IndexOfObjectHash(o)!=-1;};
+	int IndexOfObjectHash(const Object& o);
 	void SetHashSize(int HS);
 	int SizeWithoutObjects();
 	HashedListBasicObjects();
@@ -761,7 +763,7 @@ public:
 	void init(int maxNumElements);
 	void ComputeIndicesFromSelection();
 	void initNoMemoryAllocation();
-	int HashFunction();
+	int HashFunction() const;
 	std::string DebugString;
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
@@ -775,7 +777,7 @@ public:
 	inline void operator=(const Selection& right){this->Assign(right);};
 	//warning: to call the comparison operator sucessfully, cardinalitySelection must
 	//be properly computed!
-	inline bool operator==(Selection& right);
+	inline bool operator==(const Selection& right);
 	Selection();
 	Selection(int m);
 	~Selection();
@@ -1352,7 +1354,7 @@ public:
 	void AddInteger(int x);
 	void AssignFracValue();
 	void MultiplyBy(const Rational& r);
-	int HashFunction(){return this->NumShort*::SomeRandomPrimes[0]+
+	int HashFunction() const{return this->NumShort*::SomeRandomPrimes[0]+
 														this->DenShort*::SomeRandomPrimes[1];};
 	//void MultiplyByLargeRational(int num, int den);
 	void MultiplyByInt(int x);
@@ -1525,7 +1527,7 @@ public:
 	bool OurScalarProductIsNegative(root& right);
 	bool OurScalarProductIsZero(root& right);
 	void MinusRoot();
-	void Subtract(root& r);
+	void Subtract(const root& r);
 	void AssignWithoutLastCoordinate(root& right);
 	inline void Assign(const root& right)
 	{ if (this->size!=right.size)
@@ -1539,9 +1541,8 @@ public:
 	bool IsNegativeZero();
 	bool IsEqualToZero()
 	{	for (int i=0;i<this->size;i++)
-		{	if (!this->TheObjects[i].IsEqualToZero())
-			return false;
-		}
+      if (!this->TheObjects[i].IsEqualToZero())
+        return false;
 		return true;
 	};
 	bool IsGreaterThanOrEqualTo(root& r);
@@ -1551,11 +1552,28 @@ public:
 	static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, Rational& output);
 //	static void RootScalarRoot(root& r1, root& r2, MatrixIntTightMemoryFit& KillingForm, Rational& output);
 	static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
-	int HashFunction();
+	int HashFunction() const;
 	root(){};
 	inline void operator=(const root& right){this->Assign(right);};
 	inline bool operator==(const root& right){return IsEqualTo(right);};
-	inline const root operator+(const root& right);
+	inline const root operator+(const root& right)
+	{ root result;
+    result.Assign(*this);
+    result.Add(right);
+    return result;
+  };
+  inline const root operator-(const root& right)
+  { root result;
+    result.Assign(*this);
+    result.Subtract(right);
+    return result;
+  };
+  inline void operator+=(const root& right)
+  { this->Add(right);
+  };
+  inline void operator-=(const root& right)
+  { this->Subtract(right);
+  }
 };
 
 class roots : public ListBasicObjects<root>
@@ -1668,7 +1686,7 @@ public:
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	//void InduceFromFacet(Facet& input);
 	//the below returns false if the projection is not of full dimension
-	int HashFunction();
+  int HashFunction() const;
 //	bool ProjectFromFacet(Facet& input);
 	bool ProjectFromFacetNormal(root& input);
 	bool ContainsPoint(root& thePoint);
@@ -1691,7 +1709,7 @@ class affineCone
 {
 public:
 	affineHyperplanes theWalls;
-	int HashFunction();
+	int HashFunction() const;
 	inline int GetDimension();
 	void SuperimposeAffineCones(affineCones& theOtherComplex);
 	void ProjectFromCombinatorialChamber(CombinatorialChamber& input);
@@ -2176,7 +2194,7 @@ void HashedListBasicObjects<Object>::initHash()
 }
 
 template <class Object>
-int HashedListBasicObjects<Object>::IndexOfObjectHash(Object &o)
+int HashedListBasicObjects<Object>::IndexOfObjectHash(const Object &o)
 {	int hashIndex = o.HashFunction()%this->HashSize;
 	if (hashIndex<0){hashIndex+=this->HashSize;}
 	for (int i=0;i<this->TheHashedArrays[hashIndex].size;i++)
@@ -2409,7 +2427,7 @@ public:
 	bool IsSurelyOutsideConeAccordingToChamberTestArray();
 	bool IsInCone(root& r);
 	bool SeparatesPoints(root& point1, root& point2);
-//	int HashFunction();
+//	int HashFunction() const;
 	ListBasicObjects<int> ChamberTestArray;
 	void operator =(Cone& right);
 };
@@ -2470,18 +2488,18 @@ public:
 	void AddWeylChamberWallsToHyperplanes
 		(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
 	void SliceTheEuclideanSpace
-		(	roots& directions,int& index,
-			int rank,root& IndicatorRoot,
+		(	roots& directions, int& index, int rank,root& IndicatorRoot,
 			GlobalVariables& theGlobalVariables);
 	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
 	int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
 	void SliceOneDirection
-			(	roots& directions, int& index, int rank,
-				root& IndicatorRoot, GlobalVariables& theGlobalVariables);
-	void OneSlice(roots& directions, int& index,
-								int rank, root& IndicatorRoot, GlobalVariables& theGlobalVariables);
+    (	roots& directions, int& index, int rank, root& IndicatorRoot,
+      GlobalVariables& theGlobalVariables);
+	void OneSlice
+    ( roots& directions, int& index,int rank, root& IndicatorRoot,
+      GlobalVariables& theGlobalVariables);
   void InduceFromLowerDimensionalAndProjectivize
-		(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
+		( CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
   void MakeExtraProjectivePlane();
 	int GetNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
 	int GetNumVisibleChambersAndLabelChambersForDisplay();
@@ -2492,16 +2510,16 @@ public:
 	void ElementToString(std::string& output);
 	void WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
 	void ComputeDebugString()
-		{this->ElementToString(this->DebugString);};
+	{this->ElementToString(this->DebugString);};
 	void ComputeDebugString(bool LatexFormat)
-		{this->ElementToString(this->DebugString,LatexFormat,false);};
+  {this->ElementToString(this->DebugString,LatexFormat,false);};
 	void ComputeDebugString(bool useLatex, bool useHtml)
-		{this->ElementToString(this->DebugString,useLatex,useHtml);};
+	{this->ElementToString(this->DebugString,useLatex,useHtml);};
 	void init();
 	void Free();
 	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers
-		(roots& directions, root& IndicatorRoot, GlobalVariables& theGlobalVariables);
+    (roots& directions, root& IndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
 	void ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables);
 	void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
@@ -2523,9 +2541,9 @@ public:
 			roots& directions, int directionIndex,root& ChamberIndicator,
 			std::fstream* LaTeXOutput, drawLineFunction theDrawFunction,
 			drawTextFunction drawTextIn);
-	static void drawOutputProjective
+	static void DrawOutputProjective
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
-			roots& directions, int directionIndex,root& ChamberIndicator,
+			roots& directions, int directionIndex,root& ChamberIndicator, std::fstream* outputLatex,
 			drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output,
@@ -2534,7 +2552,7 @@ public:
 	static void drawFacetVerticesMethod2
 		(	DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex,
 			WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes,
-			drawLineFunction theDrawFunction);
+			drawLineFunction theDrawFunction, std::fstream* outputLatex);
 	bool TestPossibleIndexToSlice(root&direction, int index);
 	CombinatorialChamberContainer();
 	~CombinatorialChamberContainer();
@@ -2575,7 +2593,7 @@ public:
 	bool ComputeDebugString(PolynomialOutputFormat &PolyFormat);
 	bool ComputeDebugString();
 	ElementOfCommutativeRingWithIdentity Coefficient;
-	int HashFunction();
+	int HashFunction() const;
 //	int DegreesToIndex(int MaxDeg);
 	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity&coeff);
 	void MakeNVarFirstDegree(int LetterIndex,short NumVars,ElementOfCommutativeRingWithIdentity& coeff);
@@ -2608,9 +2626,10 @@ public:
 	void DecreaseNumVariables(short increment);
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
+	void ElementToString(std::string& output);
 	bool IsAConstant();
 	void InvertDegrees();
-	bool operator==(Monomial<ElementOfCommutativeRingWithIdentity>& m);
+	bool operator==(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   void operator=(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   int SizeWithoutCoefficient();
 	Monomial();
@@ -2848,15 +2867,14 @@ public:
 	int dimension;
 	int elements[MaxRank];
 	void AssignRoot(root&r);
-	int HashFunction();
+	int HashFunction() const;
 	void ElementToString(std::string& output);
 	bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
 	bool IsGEQNoWeight(intRoot& r);
 	void MakeZero(int  theDimension);
 	void MultiplyByInteger(int x)
 	{	for (int i=0;i<this->dimension;i++)
-		{ this->elements[i]*=x;
-		}
+      this->elements[i]*=x;
 	};
 	void initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5);
 	void initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5, int x6,
@@ -2865,7 +2883,7 @@ public:
 	bool IsPositive();
 	void AddRoot(intRoot& theRoot);
 	void operator=(const intRoot& right);
-	bool operator==(intRoot& right);
+	bool operator==(const intRoot& right);
 	intRoot(){};
 };
 
@@ -2890,10 +2908,10 @@ public:
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
 	void GetValue(IntegerPoly &output, int theDimension);
   void operator = (const GeneratorPFAlgebraRecord& right);
-  int HashFunction()
+  int HashFunction() const
   { return this->Elongation+ this->GeneratorRoot.HashFunction();
   };
-  bool operator == (GeneratorPFAlgebraRecord& right)
+  bool operator == (const GeneratorPFAlgebraRecord& right)
   { return (this->GeneratorRoot == right.GeneratorRoot)
 				&& (this->Elongation == right.Elongation);
   }
@@ -2914,12 +2932,12 @@ public:
 	std::string DebugString;
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat, int theDimension);
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
-  int HashFunction();
+  int HashFunction() const;
   void operator = (const GeneratorsPartialFractionAlgebra& right);
  	void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
 	//IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count.
 	//This might have to be rewritten.
-  bool operator == (GeneratorsPartialFractionAlgebra& right);
+  bool operator == (const GeneratorsPartialFractionAlgebra& right);
   int GeneratorIndex;
   int GeneratorPower;
 };
@@ -2941,7 +2959,7 @@ public:
 	void ComputeDebugString(PolynomialOutputFormat &PolyFormat);
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
-	int HashFunction();
+	int HashFunction() const;
 	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity&coeff);
 	void MultiplyBy(MonomialInCommutativeAlgebra
 										<	ElementOfCommutativeRingWithIdentity,
@@ -2969,7 +2987,7 @@ public:
 	//IMPORTANT: the coefficients of two monomials are not compared, that is,
 	//two monomials are equal if they have the same
 	//generators at same powers
-	bool operator==(MonomialInCommutativeAlgebra
+	bool operator==(const MonomialInCommutativeAlgebra
 										<	ElementOfCommutativeRingWithIdentity,
 											GeneratorsOfAlgebra,
 											GeneratorsOfAlgebraRecord>& m);
@@ -3146,7 +3164,7 @@ int MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
 			GeneratorsOfAlgebra,
 			GeneratorsOfAlgebraRecord>
-		::HashFunction()
+		::HashFunction() const
 { int result=0;
 	for (int i=0;i<this->size;i++)
 	{ result+=this->TheObjects[i].HashFunction()*this->TheObjects[i].GeneratorPower;
@@ -3215,7 +3233,7 @@ inline bool MonomialInCommutativeAlgebra
 		<	ElementOfCommutativeRingWithIdentity,
 			GeneratorsOfAlgebra,
 			GeneratorsOfAlgebraRecord>::operator ==
-	(MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,
+	(const MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity,
 																	GeneratorsOfAlgebra,
 																	GeneratorsOfAlgebraRecord>& right)
 { static MonomialInCommutativeAlgebra
@@ -3496,9 +3514,17 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString
-           (std::string &output, PolynomialOutputFormat &PolyFormat)
+  (std::string &output, PolynomialOutputFormat &PolyFormat)
 { std::stringstream out;
 	this->StringStreamPrintOutAppend(out,PolyFormat);
+	output=out.str();
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString
+  (std::string &output)
+{ std::stringstream out;
+	this->StringStreamPrintOutAppend(out,PolyFormatLocal);
 	output=out.str();
 }
 
@@ -3565,10 +3591,9 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::GetMonomialWithCoeffOne(
 }
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::operator ==
-																(Monomial<ElementOfCommutativeRingWithIdentity>&  m)
+																(const Monomial<ElementOfCommutativeRingWithIdentity>&  m)
 { for(int i=0;i<this->NumVariables;i++)
-	{ if (this->degrees[i]!=m.degrees[i]) return false;
-	}
+    if (this->degrees[i]!=m.degrees[i]) return false;
 	return true;
 }
 
@@ -3671,7 +3696,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsEqualToZero()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-int Monomial<ElementOfCommutativeRingWithIdentity>::HashFunction()
+int Monomial<ElementOfCommutativeRingWithIdentity>::HashFunction() const
 {int result=0;
 	for (int i=0;i<this->NumVariables;i++)
 	{ result+=this->degrees[i]*SomeRandomPrimes[i];}
@@ -4549,7 +4574,7 @@ public:
 	MatrixIntTightMemoryFit Nums;
 	short NumVars;
 	int Den;
-	int HashFunction();
+	int HashFunction() const;
 	void ScaleBy(int DenIncrease);
 //	Selection PivotPoints;
 	void ExpToDebugString();
@@ -4900,11 +4925,11 @@ public:
 		(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent);
 	int GetMultiplicityLargestElongation();
 	int GetLCMElongations();
-	int GetTotalMultiplicity();
+	int GetTotalMultiplicity() const;
 	void invert();
 	void init();
 	static root CheckSumRoot;
-	int HashFunction();
+	int HashFunction() const;
 	void ComputeOneCheckSum(Rational &output, intRoot& theExp, int theDimension);
 	bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
 	void operator=(oneFracWithMultiplicitiesAndElongations& right);
@@ -5112,7 +5137,7 @@ public:
 		(partFractions& Accum, GlobalVariables& theGlobalVariables);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
-	int HashFunction();
+	int HashFunction() const;
 	int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
 	void init(int numRoots);
 	//int Elongate(int indexElongatedFraction, int theElongation);
@@ -5159,7 +5184,7 @@ public:
 		(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries,
 			PolyPartFractionNumerator& output, int theDimension);
 	int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
-	bool operator==(partFraction& right);
+	bool operator==(const partFraction& right);
 	void operator=(const partFraction& right);
 	void initFromRootSystem
 		(	partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis,
@@ -5259,7 +5284,7 @@ public:
 			bool LatexFormat, bool includeVPsummand, bool includeNumerator,
 			GlobalVariables& theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
-		(	QuasiPolynomial& output, root& r,
+		(	QuasiPolynomial& output, root& newIndicator,
 			//bool storeComputations, bool RecordSplitPowerSeriesCoefficient,
 			bool StoreToFile,bool UseOldData,
 			GlobalVariables& theGlobalVariables);
@@ -5289,7 +5314,7 @@ public:
 	std::string DebugString;
 	void ElementToString(std::string& output);
 	void ComputeDebugString();
-	int HashFunction();
+	int HashFunction() const;
 	void operator=(const ElementWeylGroup& right);
 	bool operator==(const ElementWeylGroup& right);
 };
@@ -5416,6 +5441,7 @@ public:
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
 	void MakeArbitrary(char WeylGroupLetter,int n);
+	void GenerateAdditivelyClosedSubset(roots& input, roots& output);
 	void MakeAn(int n);
 	void MakeEn(int n);
 	void MakeBn(int n);
@@ -5436,6 +5462,7 @@ public:
 	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
 	void ComputeRootsOfBorel(roots& output);
+  bool IsARoot(root& input){return this->RootSystem.ContainsObjectHash(input);};
 	void GenerateOrbitAlg(root& ChamberIndicator,
 												PolynomialsRationalCoeff& input,
 												PolynomialsRationalCoeffCollection& output,
@@ -5490,49 +5517,6 @@ public:
 	void ActByElement(int index, root& theRoot);
 };
 
-class rootFKFTcomputation
-{
-public:
-	intRoots nilradicalA2A1A1inD5;
-	intRoots AlgorithmBasisA2A1A1inD5;
-	intRoot weights;
-	GlobalVariables* TheGlobalVariables;
-	partFractions partitionA2A1A1inD5;
-	std::string OutputFile;
-	bool useOutputFileForFinalAnswer;
-//	bool useOldKLData;
-	bool useOldPartialFractionDecompositionData;
-	bool useVPFstoredData;
-	std::string KLCoeffFileString;
-	std::string PartialFractionsFileString;
-	std::string VPEntriesFileString;
-	std::string VPIndexFileString;
-	rootFKFTcomputation();
-	~rootFKFTcomputation();
-	static bool OpenDataFile
-			(std::fstream& theFileOutput, std::string& theFileName);
-	static bool OpenDataFileOrCreateIfNotPresent2
-			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
-	void MakeRootFKFTsub(root& direction, QPSub& theSub);
-	void initA2A1A1inD5();
-  void RunA2A1A1inD5beta12221();
-	void processA2A1A1inD5beta12221Answer(QuasiPolynomial& theAnswer);
-	//format: the polynomials must be root::AmbientDimension in count
-	//these are the coordinates in simple basis of the vector.
-	//They are allowed to be arbitrary
-	//polynomials. The chamberIndicator indicates which chamber
-	//(in the partition function sense) is the input vector located.
-	//setting PositiveWeightsOnly makes the program generate only elements
-	//of the orbit with Borel-positive weights
-	//give a Limiting cone if you want only to observe weights lying in a
-	//certain cone. Set 0 if there is no particular cone of interest.
-	void MakeTheRootFKFTSum
-		(	root& ChamberIndicator, partFractions& theBVdecomposition,
-			ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
-			VermaModulesWithMultiplicities& theHighestWeights,
-			roots& theNilradical);
-};
-
 class LaTeXProcedures
 {
 public:
@@ -5543,14 +5527,18 @@ public:
 	static const int FigureCenterCoordSystemY=8;//in centimeters
 	static const int TextPrintCenteringAdjustmentX=3;
 	static const int TextPrintCenteringAdjustmentY=3;
-	static void drawline(	double X1, double Y1, double X2, double Y2,
-									unsigned long thePenStyle, int ColorIndex, std::fstream& output);
-	static void drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
+	static void drawline
+    (	double X1, double Y1, double X2, double Y2,
+			unsigned long thePenStyle, int ColorIndex, std::fstream& output,
+			DrawingVariables& drawInput);
+	static void drawText
+    (	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
 	static void beginDocument(std::fstream& output);
 	static void endLatexDocument(std::fstream& output);
 	static void beginPSTricks(std::fstream& output);
 	static void endPSTricks(std::fstream& output);
-	static void GetStringFromColorIndex(int ColorIndex, std::string &output);
+	static void GetStringFromColorIndex
+    (int ColorIndex, std::string &output,DrawingVariables& drawInput);
 };
 
 class thePFcomputation
@@ -5695,7 +5683,7 @@ public:
 	bool operator==(const coneRelation& right)
 	{ return this->DebugString==right.DebugString;
 	};
-	int HashFunction()
+	int HashFunction() const
 	{ int tempI= ::MathRoutines::Minimum(this->DebugString.length(),::SomeRandomPrimesSize);
 		int result=0;
 		for (int i=0;i<tempI;i++)
@@ -5996,6 +5984,55 @@ public:
 	};
 };
 
+class rootFKFTcomputation
+{
+public:
+	intRoots nilradicalA2A1A1inD5;
+	intRoots AlgorithmBasisA2A1A1inD5;
+	intRoot weights;
+	GlobalVariables* TheGlobalVariables;
+	partFractions partitionA2A1A1inD5;
+	std::string OutputFile;
+	bool useOutputFileForFinalAnswer;
+//	bool useOldKLData;
+	bool useOldPartialFractionDecompositionData;
+	bool useVPFstoredData;
+	std::string KLCoeffFileString;
+	std::string PartialFractionsFileString;
+	std::string VPEntriesFileString;
+	std::string VPIndexFileString;
+	rootFKFTcomputation();
+	~rootFKFTcomputation();
+	void SearchForMinimalRelations(std::string& output);
+	bool PartialRelationCouldBeMinimal
+    (coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables);
+  void GetImpliedMembers
+    ( coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables,
+      roots& impliedNilradical, roots& impliedK, roots& impliedGmodL, roots impliedBKSingular);
+	static bool OpenDataFile
+			(std::fstream& theFileOutput, std::string& theFileName);
+	static bool OpenDataFileOrCreateIfNotPresent2
+			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
+	void MakeRootFKFTsub(root& direction, QPSub& theSub);
+	void initA2A1A1inD5();
+  void RunA2A1A1inD5beta12221();
+	void processA2A1A1inD5beta12221Answer(QuasiPolynomial& theAnswer);
+	//format: the polynomials must be root::AmbientDimension in count
+	//these are the coordinates in simple basis of the vector.
+	//They are allowed to be arbitrary
+	//polynomials. The chamberIndicator indicates which chamber
+	//(in the partition function sense) is the input vector located.
+	//setting PositiveWeightsOnly makes the program generate only elements
+	//of the orbit with Borel-positive weights
+	//give a Limiting cone if you want only to observe weights lying in a
+	//certain cone. Set 0 if there is no particular cone of interest.
+	void MakeTheRootFKFTSum
+		(	root& ChamberIndicator, partFractions& theBVdecomposition,
+			ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
+			VermaModulesWithMultiplicities& theHighestWeights,
+			roots& theNilradical);
+};
+
 struct IndicatorWindowVariables
 {
 public:
@@ -6090,7 +6127,8 @@ public:
 		(GlobalVariables& theGlobalVariables,CombinatorialChamberContainer& inputComplex);
 	void SetupCustomNilradicalInVPVectors(GlobalVariables& theGlobalVariables);
 	void FullChop(GlobalVariables& theGlobalVariables);
-	void WriteToFilePFdecomposition(std::fstream& output);
+	void WriteToFilePFdecomposition
+    (std::fstream& output, bool includeLatexHeaderAndFooter);
 	void Reset();
 	void DoTheRootSAComputation();
 	void DoTheRootSAComputationCustom();
@@ -6274,4 +6312,7 @@ void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection,
 
 //extern GlobalVariablesContainer StaticGlobalVariablesContainer;
 
+//to be merged in later.
+// done in separate file to speed up compilation/autocomplete during development
+#include "rootFKFT.h"
 #endif

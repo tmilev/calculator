@@ -30,6 +30,8 @@
 		</Linker>
 		<Unit filename="polyhedra.cpp" />
 		<Unit filename="polyhedra.h" />
+		<Unit filename="rootFKFT.cpp" />
+		<Unit filename="rootFKFT.h" />
 		<Unit filename="wxWidgets_GUI.cpp" />
 		<Extensions>
 			<code_completion />

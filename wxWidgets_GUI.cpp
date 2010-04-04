@@ -472,12 +472,14 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output);
 
 guiMainWindow::guiMainWindow()
         : wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow,
-                   wxT("Vector partition function v0.0701 (eating RAM for breakfast)"),
+                   wxT("Vector partition function v0.101 (eating RAM for breakfast)"),
                    wxPoint(100,100),
                    wxSize(800,600),
                    wxRESIZE_BORDER| wxCAPTION
                    | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
-{	this->theComputationSetup.flagDoCustomComputation=true;
+{	//this->theComputationSetup.flagDoCustomComputation=true;
+  this->theComputationSetup.flagComputingVectorPartitions=true;
+  this->theComputationSetup.flagHavingStartingExpression=true;
   this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
   this->BoxSizer3HorizontalInputButtons = new ::wxBoxSizer(wxHORIZONTAL);

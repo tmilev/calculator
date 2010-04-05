@@ -164,7 +164,7 @@ int main(int argc, char **argv)
         latexCommand2.append(inputPath);
         latexCommand2.append(" ");
         latexCommand2.append(vpFileName);
- 		}
+      }
       std::string chamberFileName;
       std::fstream chamberFile;
       chamberFileName=inputPath;
@@ -174,12 +174,12 @@ int main(int argc, char **argv)
       chamberFile.close();
       if (  theComputationSetup.DisplayNumberChamberOfInterest==-1 &&
             theComputationSetup.flagComputingVectorPartitions)
-				theComputationSetup.DisplayNumberChamberOfInterest=
+        theComputationSetup.DisplayNumberChamberOfInterest=
           theComputationSetup.theChambers.TheObjects
             [theComputationSetup.theChambers.RootBelongsToChamberIndex
-               (theComputationSetup.thePartialFraction.IndicatorRoot,0)]
+               (theComputationSetup.IndicatorRoot,0)]
                  ->DisplayNumber;
-      //std::cout <<"Run ok!";
+        //std::cout <<"Run ok!";
     }
     else
     {	WeylGroup tempWeyl;

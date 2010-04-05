@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="vector_partition_linux_cgi" />
+		<Option title="vector_partition_linux_cgi.cgi" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -24,6 +24,8 @@
 		</Compiler>
 		<Unit filename="polyhedra.cpp" />
 		<Unit filename="polyhedra.h" />
+		<Unit filename="rootFKFT.cpp" />
+		<Unit filename="rootFKFT.h" />
 		<Unit filename="vector_partition.html.cpp" />
 		<Unit filename="vp_cgi_interface.cpp" />
 		<Extensions>

@@ -145,6 +145,7 @@ class guiMainWindow : public wxFrame
 {
 public:
   std::fstream fileSettings;
+  std::string bufferString1;
   ComputationSetup theComputationSetup;
   wxGridExtra *Table1Input;
   wxGridExtra *Table2Indicator;
@@ -481,7 +482,7 @@ guiMainWindow::guiMainWindow()
   this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
   this->theComputationSetup.flagHavingStartingExpression=true;
-  this->theComputationSetup.flagHavingDocumentClassForLaTeX=false;
+  this->theComputationSetup.flagHavingDocumentClassForLaTeX=true;
   this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
   this->BoxSizer3HorizontalInputButtons = new ::wxBoxSizer(wxHORIZONTAL);
@@ -1091,8 +1092,8 @@ void guiMainWindow::initWeylGroupInfo()
 			tempW.ComputeRho();
 			this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);
 			this->NumVectors=this->theComputationSetup.VPVectors.size;
-			if (this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot)
-				this->theComputationSetup.thePartialFraction.IndicatorRoot.Assign(tempW.rho);
+			if (this->theComputationSetup.flagUsingIndicatorRoot)
+				this->theComputationSetup.IndicatorRoot.Assign(tempW.rho);
     } else
 		{
 		}
@@ -1143,7 +1144,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 	{	this->theComputationSetup.Reset();
 	}
   this->theComputationSetup.flagDoingWeylGroupAction= tempBool;
-  this->theComputationSetup.thePartialFraction.flagUsingIndicatorRoot=
+  this->theComputationSetup.flagUsingIndicatorRoot=
     !this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
   this->ReadRBData();
   TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
@@ -1163,13 +1164,13 @@ void guiMainWindow::ReadVPVectorsAndOptions()
     }
     this->theComputationSetup.VPVectors.ComputeDebugString();
   }
-  this->theComputationSetup.thePartialFraction.IndicatorRoot.SetSizeExpandOnTopLight
+  this->theComputationSetup.IndicatorRoot.SetSizeExpandOnTopLight
 		(this->theComputationSetup.WeylGroupIndex);
   for (int j=0;j<this->theComputationSetup.WeylGroupIndex;j++)
   {	int tempI=wxAtoi(this->Table2Indicator->GetCellValue(0,j));
-    this->theComputationSetup.thePartialFraction.IndicatorRoot.TheObjects[j].AssignInteger(tempI);
+    this->theComputationSetup.IndicatorRoot.TheObjects[j].AssignInteger(tempI);
   }
-  this->theComputationSetup.thePartialFraction.IndicatorRoot.size=this->theComputationSetup.WeylGroupIndex;
+  this->theComputationSetup.IndicatorRoot.size=this->theComputationSetup.WeylGroupIndex;
 }
 
 
@@ -1339,31 +1340,23 @@ void guiMainWindow::ArrangeWindows()
 }
 
 void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
-{
-    {
-        wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
-        MainWindow1->Text1Output->SetValue(tempWS);
+{ std::stringstream out;
+  wxString tempWS(MainWindow1->theComputationSetup.theOutput.DebugString.c_str(), wxConvUTF8);
+  MainWindow1->Text1Output->SetValue(tempWS);
+  int old= this->Text3PartialFractions->GetLastPosition();
+  if (this->theComputationSetup.flagDisplayingPartialFractions)
+  { wxString tempWS
+      (MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(),wxConvUTF8);
+    MainWindow1->Text3PartialFractions->SetValue(tempWS);
+  } else
+    if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
+    { out <<"\\documentclass{article}\\begin{document}"
+          <<this->theComputationSetup.theChambers.DebugString<<"\\end{document}";
+      MainWindow1->bufferString1=out.str();
+      wxString tempWS(MainWindow1->bufferString1.c_str(),wxConvUTF8);
+      MainWindow1->Text3PartialFractions->SetValue(tempWS);
     }
-    {
-        int old= this->Text3PartialFractions->GetLastPosition();
-        if (this->theComputationSetup.flagDisplayingPartialFractions)
-        {
-            wxString tempWS(MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(),
-                            wxConvUTF8);
-            MainWindow1->Text3PartialFractions->SetValue(tempWS);
-
-        }
-        else
-        {
-            if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
-            {
-                wxString tempWS(this->theComputationSetup.theChambers.DebugString.c_str(),
-                                wxConvUTF8);
-                MainWindow1->Text3PartialFractions->SetValue(tempWS);
-            }
-        }
-        this->Text3PartialFractions->ShowPosition(old);
-    }
+  this->Text3PartialFractions->ShowPosition(old);
 }
 
 void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
@@ -1390,11 +1383,10 @@ void guiMainWindow::onRBGroup1SlicingOptions(wxCommandEvent& ev)
 
 
 void guiMainWindow::onComputationOver(wxCommandEvent& ev)
-{
-    this->updatePartialFractionAndCombinatorialChamberTextData();
-    MainWindow1->TurnOnAllDangerousButtons();
-    MainWindow1->Button1Go->SetLabel(wxT("Go"));
-    MainWindow1->Refresh();
+{ this->updatePartialFractionAndCombinatorialChamberTextData();
+  MainWindow1->TurnOnAllDangerousButtons();
+  MainWindow1->Button1Go->SetLabel(wxT("Go"));
+  MainWindow1->Refresh();
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)

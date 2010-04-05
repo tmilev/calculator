@@ -1591,9 +1591,8 @@ public:
 	void AddRootS(roots& r);
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
-	void PerturbVectorToRegular
-		(	root&output, GlobalVariables& theGlobalVariables,
-			int theDimension,FeedDataToIndicatorWindow reportFunction);
+	bool PerturbVectorToRegular
+		(	root&output, GlobalVariables& theGlobalVariables, int theDimension);
 	void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
 	void Average(root& output, int theDimension);
 	void Pop(int index);
@@ -1942,7 +1941,9 @@ void ListBasicObjects<Object>::AssignLight(const ListBasicObjectsLight<Object>& 
 
 template <class Object>
 void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From)
-{ this->SetSizeExpandOnTopNoObjectInit(From.size);
+{ if (this==&From)
+    return;
+  this->SetSizeExpandOnTopNoObjectInit(From.size);
 	for (int i=0;i<this->size;i++)
 		this->TheObjects[i]= From.TheObjects[i];
 }
@@ -2469,6 +2470,7 @@ public:
 	bool flagSliceWithAWallInitDone;
 	bool flagSliceWithAWallIgnorePermanentlyZero;
 	bool flagDrawingProjective;
+	bool flagMakingReports;
 	static const int MaxNumHeaps=5000;
 	static const int GraphicsMaxNumChambers = 1000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -2488,15 +2490,15 @@ public:
 	void AddWeylChamberWallsToHyperplanes
 		(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
 	void SliceTheEuclideanSpace
-		(	roots& directions, int& index, int rank,root& IndicatorRoot,
+		(	roots& directions, int& index, int rank,root* theIndicatorRoot,
 			GlobalVariables& theGlobalVariables);
 	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
 	int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
 	void SliceOneDirection
-    (	roots& directions, int& index, int rank, root& IndicatorRoot,
+    (	roots& directions, int& index, int rank, root* theIndicatorRoot,
       GlobalVariables& theGlobalVariables);
 	void OneSlice
-    ( roots& directions, int& index,int rank, root& IndicatorRoot,
+    ( roots& directions, int& index,int rank, root* theIndicatorRoot,
       GlobalVariables& theGlobalVariables);
   void InduceFromLowerDimensionalAndProjectivize
 		( CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
@@ -2519,7 +2521,7 @@ public:
 	void Free();
 	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers
-    (roots& directions, root& IndicatorRoot, GlobalVariables& theGlobalVariables);
+    (roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
 	void ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables);
 	void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
@@ -2532,6 +2534,7 @@ public:
 	bool ConsistencyCheck();
 	void PurgeZeroPointers();
 	void PurgeInternalWalls();
+	void MakeReportOneSlice(GlobalVariables& theGlobalVariables);
 	void ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables);
 	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables& theGlobalVariables);
 	void PrintThePolys(std::string& output);
@@ -5052,7 +5055,7 @@ private:
 	void findInitialPivot();
 	//void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
 	bool rootIsInFractionCone
-		(partFractions& owner, root& r, GlobalVariables& theGlobalVariables);
+		(partFractions& owner,  root*theRoot, GlobalVariables& theGlobalVariables);
 	friend class partFractions;
 	friend class partFractionPolynomials;
 public:
@@ -5106,35 +5109,37 @@ public:
 	void MultiplyCoeffBy(Rational& r);
 	void decomposeAMinusNB
 		(	int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum,
-			GlobalVariables& theGlobalVariables);
+			GlobalVariables& theGlobalVariables, root* Indicator);
 	bool DecomposeFromLinRelation
 		(	MatrixLargeRational& theLinearRelation, partFractions& Accum,
-			GlobalVariables& theGlobalVariables);
+			GlobalVariables& theGlobalVariables, root* Indicator);
 	void ComputeOneCheckSum
 		(	partFractions& owner,Rational &output, int theDimension,
 			GlobalVariables& theGlobalVariables);
 	void AttemptReduction
-		(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
+		( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables,
+      root* Indicator);
 	void ReduceMonomialByMonomial
-		(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables);
+		( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables,
+      root* Indicator);
 	void ApplySzenesVergneFormula
 		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
 			int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
-			partFractions& Accum, GlobalVariables& theGlobalVariables);
+			partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ApplyGeneralizedSzenesVergneFormula
 		(	ListBasicObjects<int> &theSelectedIndices,
 			ListBasicObjects<int> &theGreatestElongations,
 			ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
 			int ElongationGainingMultiplicityIndex, partFractions &Accum,
-			GlobalVariables& theGlobalVariables);
+			GlobalVariables& theGlobalVariables, root* Indicator);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod
-		(partFractions&Accum, GlobalVariables& theGlobalVariables);
+		(partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
 	bool reduceOnceGeneralMethodNoOSBasis
-		(partFractions& Accum, GlobalVariables& theGlobalVariables);
+		(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool reduceOnceGeneralMethod
-		(partFractions& Accum, GlobalVariables& theGlobalVariables);
+		(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
 	int HashFunction() const;
@@ -5207,9 +5212,7 @@ public:
 };
 
 class partFractions: public HashedListBasicObjects<partFraction>
-{ bool ShouldIgnore(GlobalVariables& theGlobalVariables);
-	void AssureIndicatorRegularity(GlobalVariables& theGlobalVariables);
-	void AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
+{ bool ShouldIgnore(GlobalVariables& theGlobalVariables, root*Indicator);
 public:
 	int AmbientDimension;
 	int IndexLowestNonProcessed;
@@ -5235,11 +5238,9 @@ public:
 	static std::fstream ComputedContributionsList;
 	static const int MaxReadFileBufferSize= 33554432; //= 32 MB of read buffer size
 	std::string DebugString;
-	root IndicatorRoot;
 	Rational StartCheckSum;
 	Rational EndCheckSum;
 	static Rational CheckSum;
-	bool flagUsingIndicatorRoot;
 	bool flagDiscardingFractions;
 	static	bool flagSplitTestModeNoNumerators;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
@@ -5248,6 +5249,7 @@ public:
 	static int flagMaxNumStringOutputLines;
 	bool flagUsingOrlikSolomonBasis;
 	void PrepareCheckSums(GlobalVariables& theGlobalVariables);
+	bool AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
 	void CompareCheckSums(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables);
@@ -5258,25 +5260,31 @@ public:
 		(	intRoots& theFraction, intRoots& theAlgorithmBasis,
 			intRoot* weights, GlobalVariables& theGlobalVariables);
 	//row index is the index of the root; column(second) index is the coordinate index
-	void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables);
-	void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables);
-	bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables);
-	bool split(GlobalVariables& theGlobalVariables);
+	void RemoveRedundantShortRootsClassicalRootSystem
+    (GlobalVariables& theGlobalVariables, root* Indicator);
+	void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, root* Indicator);
+	bool splitClassicalRootSystem
+    (bool ShouldElongate, GlobalVariables& theGlobalVariables, root*Indicator);
+	bool split(GlobalVariables& theGlobalVariables, root* Indicator);
 	void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
 	void ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables);
-	void AccountPartFractionInternals(int sign, int index, GlobalVariables& theGlobalVariables);
-	void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables);
-	void AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables);
-	void PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables);
+	void AccountPartFractionInternals
+    (int sign, int index,root* Indicator, GlobalVariables& theGlobalVariables);
+	void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
+	void AddAlreadyReduced
+    (partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
+	void PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator);
 	void PrepareIndicatorVariables();
 	void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
 	void IncreaseHighestIndex(int increment);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
-	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
-											GlobalVariables& theGlobalVariables);
-	int ElementToStringBasisChange(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output,
-																	bool LatexFormat, bool includeVPsummand,
-																	bool includeNumerator, GlobalVariables& theGlobalVariables);
+	int ElementToString
+    ( std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
+			GlobalVariables& theGlobalVariables);
+	int ElementToStringBasisChange
+    (	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output,
+			bool LatexFormat, bool includeVPsummand,
+			bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringOutputToFile
 		(	std::fstream& output, bool LatexFormat, bool includeVPsummand,
 			bool includeNumerator, GlobalVariables& theGlobalVariables);
@@ -5285,28 +5293,27 @@ public:
 			bool LatexFormat, bool includeVPsummand, bool includeNumerator,
 			GlobalVariables& theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
-		(	QuasiPolynomial& output, root& newIndicator,
-			//bool storeComputations, bool RecordSplitPowerSeriesCoefficient,
-			bool StoreToFile,bool UseOldData,
-			GlobalVariables& theGlobalVariables);
+		(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData,
+			GlobalVariables& theGlobalVariables, bool ResetRelevance );
 	bool VerifyFileComputedContributions(GlobalVariables&  theGlobalVariables);
 	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
 	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
-	void UncoverBracketsNumerators(GlobalVariables& theGlobalVariables);
+	void UncoverBracketsNumerators(GlobalVariables& theGlobalVariables, root* Indicator);
 	void ResetRelevanceIsComputed(){for (int i=0;i<this->size;i++){this->TheObjects[i].RelevanceIsComputed=false;};};
 	partFractions();
 	int SizeWithoutDebugString();
-	bool CheckForMinimalityDecompositionWithRespectToRoot(root& r, GlobalVariables& theGlobalVariables);
+	bool CheckForMinimalityDecompositionWithRespectToRoot
+    (root *theRoot, GlobalVariables& theGlobalVariables);
 	void MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindow reportFunction);
 	void MakeProgressReportRemovingRedundantRoots(FeedDataToIndicatorWindow reportFunction);
 	void MakeProgressReportUncoveringBrackets(FeedDataToIndicatorWindow reportFunction);
 	void MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction);
 	void ComputeKostantFunctionFromWeylGroup
-				(	char WeylGroupLetter, int WeylGroupNumber,
-					QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,
-					bool StoreToFile, GlobalVariables&  theGlobalVariables);
+		(	char WeylGroupLetter, int WeylGroupNumber,
+			QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData,
+			bool StoreToFile, GlobalVariables&  theGlobalVariables);
 };
 
 class ElementWeylGroup: public ListBasicObjects<int>
@@ -6060,8 +6067,7 @@ public:
 };
 
 struct ComputationSetup
-{
-	roots InputRoots;
+{	roots InputRoots;
 public:
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
@@ -6106,10 +6112,13 @@ public:
 	bool flagSliceTheEuclideanSpaceInitialized;
 	bool flagOneSteChamberSliceInitialized;
 	bool flagPartialFractionSplitPrecomputed;
+	bool flagUsingIndicatorRoot;
+	root IndicatorRoot;
 	char WeylGroupLetter;
 	int NumRowsNilradical;
 	int NumColsNilradical;
 	int WeylGroupIndex;
+	int IndexChamberOfInterest;
 	int DisplayNumberChamberOfInterest;
 	void AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV);
 	void EvaluatePoly();
@@ -6292,6 +6301,7 @@ public:
 	Selection selSimplexAlg1;
 	Selection selSimplexAlg2;
 	Selection selApproveSelAgainstOneGenerator;
+	Selection selIsBogusNeighbor;
 	ReflectionSubgroupWeylGroup subGroupActionNormalizerCentralizer;
 
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;

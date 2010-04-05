@@ -888,6 +888,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 
 ComputationSetup::ComputationSetup()
 {	this->flagAllowRepaint=true;
+  this->flagHavingNotationExplanation=true;
   this->flagUseHtml=false;
 	this->flagUsingCustomVectors=false;
 	this->DisplayNumberChamberOfInterest=-1;
@@ -1321,18 +1322,20 @@ void ComputationSetup::Run()
       {	out	<<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\n "
 						<<"\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}\\addtolength{\\voffset}{-3.5cm}"
 						<<"\\addtolength{\\textheight}{7cm} \\begin{document}";
-				this->VPVectors.ElementToString(tempS,true,false,false);
-				out	<< this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2
-						<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
-				if (this->flagComputingChambers )
-				{ int tempI =this->theChambers.RootBelongsToChamberIndex(this->thePartialFraction.IndicatorRoot,0);
-					this->theChambers.TheObjects[tempI]->ElementToInequalitiesString
-						(tempS,this->theChambers,true,false);
-					out<< tempS;
-				} else
-				{ out <<"\n\n(Inequalities missing)\n\n";
-				}
-				out << this->NotationExplanationLatex4;
+				if (this->flagHavingNotationExplanation)
+        {	this->VPVectors.ElementToString(tempS,true,false,false);
+          out	<< this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2
+              << this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
+          if (this->flagComputingChambers )
+          { int tempI =this->theChambers.RootBelongsToChamberIndex(this->thePartialFraction.IndicatorRoot,0);
+            this->theChambers.TheObjects[tempI]->ElementToInequalitiesString
+              (tempS,this->theChambers,true,false);
+            out<< tempS;
+          } else
+          { out <<"\n\n(Inequalities missing)\n\n";
+          }
+          out << this->NotationExplanationLatex4;
+        }
 			}
 			out <<"\\begin{eqnarray*}&&"<<this->theOutput.DebugString<< "\\end{eqnarray*}";
 			if (this->flagHavingDocumentClassForLaTeX)
@@ -9855,16 +9858,20 @@ int partFractions::SizeWithoutDebugString()
 
 void partFractions::AssureIndicatorRegularity(GlobalVariables& theGlobalVariables)
 {	if (this->flagUsingIndicatorRoot)
-	{	roots tempRoots;
-		tempRoots.AssignHashedIntRoots(this->RootsToIndices);
-		if (this->IndicatorRoot.IsEqualToZero())
-    { tempRoots.Average(this->IndicatorRoot, this->AmbientDimension);
-      this->IndicatorRoot.MultiplyByInteger(tempRoots.size);
-    }
-		tempRoots.PerturbVectorToRegular
-			(	this->IndicatorRoot, theGlobalVariables,this->IndicatorRoot.size,
-				theGlobalVariables.FeedDataToIndicatorWindowDefault);
-	}
+    this->AssureIndicatorRegularity(theGlobalVariables,this->IndicatorRoot);
+}
+
+void partFractions::AssureIndicatorRegularity
+  (GlobalVariables& theGlobalVariables, root& theIndicator)
+{	roots tempRoots;
+	tempRoots.AssignHashedIntRoots(this->RootsToIndices);
+	if (theIndicator.IsEqualToZero())
+  { tempRoots.Average(theIndicator, this->AmbientDimension);
+    theIndicator.MultiplyByInteger(tempRoots.size);
+  }
+	tempRoots.PerturbVectorToRegular
+		(	theIndicator, theGlobalVariables,theIndicator.size,
+			theGlobalVariables.FeedDataToIndicatorWindowDefault);
 }
 
 void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariables)
@@ -10869,15 +10876,19 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 					//bool RecordSplitPowerSeriesCoefficient,
 					bool StoreToFile,
 					bool UseOldData, GlobalVariables& theGlobalVariables)
-{	if (!this->CheckForMinimalityDecompositionWithRespectToRoot(newIndicator,theGlobalVariables)){return false;}
+{	this->AssureIndicatorRegularity(theGlobalVariables, newIndicator);
+  newIndicator.ComputeDebugString();
+  if (!this->CheckForMinimalityDecompositionWithRespectToRoot(newIndicator,theGlobalVariables))
+    return false;
 	this->NumProcessedForVPFfractions=0;
 	Rational oldCheckSum;
 	QuasiPolynomial oldOutput;
-	this->IndicatorRoot.Assign(newIndicator);
-  this->flagUsingIndicatorRoot=true;
-	this->AssureIndicatorRegularity(theGlobalVariables);
-	this->IndicatorRoot.ComputeDebugString();
-	this->ResetRelevanceIsComputed();
+	if (this->flagUsingIndicatorRoot)
+	{ this->IndicatorRoot.Assign(newIndicator);
+    this->AssureIndicatorRegularity(theGlobalVariables);
+    this->ResetRelevanceIsComputed();
+    //this->IndicatorRoot.ComputeDebugString();
+	}
 	if (partFraction::MakingConsistencyCheck)
 		partFractions::CheckSum.MakeZero();
 	if (StoreToFile&& UseOldData)
@@ -10898,11 +10909,12 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
 		//if (this->flagAnErrorHasOccurredTimeToPanic)
 		//{ this->TheObjects[i].ComputeDebugString();
 		//}
-		if (this->TheObjects[i].rootIsInFractionCone(*this,this->IndicatorRoot,theGlobalVariables))
+		if (this->TheObjects[i].rootIsInFractionCone(*this,newIndicator,theGlobalVariables))
 		{ this->TheObjects[i].partFractionToPartitionFunctionSplit
 				(*this,tempQP,true,StoreToFile,theGlobalVariables,this->AmbientDimension);
 			if (StoreToFile)
-			{ this->WriteToFileComputedContributions(partFractions::ComputedContributionsList,theGlobalVariables);
+			{ this->WriteToFileComputedContributions
+          (partFractions::ComputedContributionsList,theGlobalVariables);
 				FileSetPutPointerToEnd
 					(partFractions::ComputedContributionsList, StoreToFile);
 				FileSetPutPointerToEnd

@@ -478,8 +478,10 @@ guiMainWindow::guiMainWindow()
                    wxRESIZE_BORDER| wxCAPTION
                    | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
 {	//this->theComputationSetup.flagDoCustomComputation=true;
+  this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
   this->theComputationSetup.flagHavingStartingExpression=true;
+  this->theComputationSetup.flagHavingDocumentClassForLaTeX=false;
   this->BoxSizer1HorizontalBackground = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer2VerticalInputs = new ::wxBoxSizer(::wxVERTICAL);
   this->BoxSizer3HorizontalInputButtons = new ::wxBoxSizer(wxHORIZONTAL);

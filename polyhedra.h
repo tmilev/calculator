@@ -5209,6 +5209,7 @@ public:
 class partFractions: public HashedListBasicObjects<partFraction>
 { bool ShouldIgnore(GlobalVariables& theGlobalVariables);
 	void AssureIndicatorRegularity(GlobalVariables& theGlobalVariables);
+	void AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
 public:
 	int AmbientDimension;
 	int IndexLowestNonProcessed;
@@ -6097,6 +6098,7 @@ public:
 	bool flagHavingDocumentClassForLaTeX;
 	bool flagDisplayingPartialFractions;
 	bool flagComputationIsDoneStepwise;
+	bool flagHavingNotationExplanation;
 	//bool flagAffineComputationDone;
 	bool flagSuperimposingComplexes;
 	bool flagCustomNilradicalInitted;

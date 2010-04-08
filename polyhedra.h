@@ -423,10 +423,10 @@ public:
 	void PopIndexSwapWithLast(int index);
 	void PopLastObject();
 	void PopFirstOccurenceObjectSwapWithLast(Object& o);
+	bool HasACommonElementWith(ListBasicObjects<Object>& right);
 	void SwapTwoIndices(int index1, int index2);
 	void ElementToStringGeneric(std::string& output);
 	void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
-	//careful output is not bool but int!!!!
 	int IndexOfObject(const Object& o);
 	bool ContainsObject(const Object& o){return this->IndexOfObject(o)!=-1;};
 //	inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1;};
@@ -1336,7 +1336,6 @@ ParallelComputing::GlobalPointerCounter++;
 	//Rational(const Rational& right);
 	//grrr the below function is not needed for the gcc but needed for the MS compiler
 	//that is bull(on MS's part), one shouldn't need to call an extra copy constructor.
-	Rational(Rational& right){this->Extended=0; this->Assign(right);};
 public:
 	int NumShort;
 	//the requirement that the below be unsigned caused a huge problem, so I
@@ -1362,7 +1361,7 @@ public:
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& x);
 	void Assign(const Rational& r);
 	void AssignInteger(int x);
-	bool IsGreaterThan(Rational& r);
+	bool IsGreaterThan(const Rational& r) const;
 	inline void AssignNumeratorAndDenominator( int n, int d){ if (d<0)
 																														{ d=-d; n=-n;}
 																														this->NumShort=n;
@@ -1445,6 +1444,7 @@ public:
 	//default!
 	Rational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n,d);};
 	Rational(){this->Extended=0;};
+	Rational(Rational& right){this->Extended=0; this->Assign(right);};
 //	Rational(int x){this->Extended=0; this->AssignInteger(x);};
 	~Rational(){this->FreeExtended();};
 	//the below must be called only with positive arguments!
@@ -1464,6 +1464,9 @@ public:
 	const Rational operator*(const Rational& right);
 	const root operator*(const root& right);
 	const Rational operator+(const Rational& right);
+	bool operator>(const Rational& right) const{return this->IsGreaterThan(right);};
+	bool operator>(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat);};
+	bool operator<(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this);};
 };
 
 class root :public ListBasicObjectsLight<Rational>
@@ -1573,8 +1576,16 @@ public:
   };
   inline void operator-=(const root& right)
   { this->Subtract(right);
-  }
+  };
 };
+
+inline root operator-(const root& right)
+{ root tempRoot;
+  tempRoot.Assign(right);
+  tempRoot.MinusRoot();
+  return tempRoot;
+};
+
 
 class roots : public ListBasicObjects<root>
 {
@@ -1591,6 +1602,7 @@ public:
 	void AddRootS(roots& r);
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
+	bool ContainsOppositeRoots();
 	bool PerturbVectorToRegular
 		(	root&output, GlobalVariables& theGlobalVariables, int theDimension);
 	void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
@@ -1598,6 +1610,7 @@ public:
 	void Pop(int index);
 	void intersectWith(roots& right, roots& output);
 	bool ContainsARootConnectedTo(root& input, WeylGroup& theWeyl);
+	int NumRootsConnectedTo(root& input, WeylGroup& theWeyl);
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
 	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
@@ -1619,6 +1632,7 @@ public:
 	void rootsToMatrix(MatrixLargeRational& output);
 	void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
 	void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString,false,false,false);};
+	void ElementToLinearCombinationString(std::string& output);
 	void ElementToString(std::string& output);
 	void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable);
 	void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable);
@@ -1930,6 +1944,15 @@ bool  ListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObject(const Object&
 template <class Object>
 inline Object* ListBasicObjects<Object>::LastObject()
 { return &this->TheObjects[this->size-1];
+}
+
+template <class Object>
+bool ListBasicObjects<Object>::HasACommonElementWith(ListBasicObjects<Object>& right)
+{ for(int i=0;i<this->size;i++)
+    for (int j=0;j<right.size;j++)
+      if (this->TheObjects[i]==right.TheObjects[j])
+        return true;
+  return false;
 }
 
 template <class Object>
@@ -5470,14 +5493,17 @@ public:
 	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
 	void ComputeRootsOfBorel(roots& output);
-  bool IsARoot(root& input){return this->RootSystem.ContainsObjectHash(input);};
-	void GenerateOrbitAlg(root& ChamberIndicator,
-												PolynomialsRationalCoeff& input,
-												PolynomialsRationalCoeffCollection& output,
-												bool RhoAction, bool PositiveWeightsOnly,
-												Cone* LimitingCone, bool onlyLowerWeights);
-	void GenerateOrbit(	roots& theRoots, bool RhoAction,
-											hashedRoots& output, bool UseMinusRho);
+  bool IsARoot(const root& input)
+  { return this->RootSystem.ContainsObjectHash(input);
+  };
+  void GenerateRootSubsystem(roots& theRoots);
+	void GenerateOrbitAlg
+    ( root& ChamberIndicator, PolynomialsRationalCoeff& input,
+      PolynomialsRationalCoeffCollection& output,
+      bool RhoAction, bool PositiveWeightsOnly,
+      Cone* LimitingCone, bool onlyLowerWeights);
+	void GenerateOrbit
+    (	roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho);
 	void GenerateOrbit
     (	roots& theRoots, bool RhoAction, hashedRoots& output,
       bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
@@ -5501,6 +5527,11 @@ public:
 							bool RhoAction);
 	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
 	void RootScalarKillingFormMatrixRoot(root&r1, root& r2, Rational& output);
+	Rational RootScalarKillingFormMatrixRoot(root& r1, root& r2)
+	{ Rational tempRat;
+    this->RootScalarKillingFormMatrixRoot(r1, r2, tempRat);
+    return tempRat;
+  };
 	void TransformToSimpleBasisGenerators(roots& theGens);
 	int length(int index);
 };
@@ -6223,6 +6254,8 @@ public:
   roots rootsGetEpsCoords3;
   roots rootsComputeEpsCoordsWRTk;
   roots rootsComputeEpsCoordsWRTk2;
+  roots rootsProverStateComputation1;
+  roots rootsProverStateComputation2;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -6270,7 +6303,6 @@ public:
 	MatrixLargeRational matGetEpsilonCoords2;
 	MatrixLargeRational matGetEpsilonCoords3;
 	MatrixLargeRational matComputeEpsCoordsWRTk;
-
 
 	partFraction fracReduceMonomialByMonomial;
 	partFraction fracSplit1;
@@ -6326,5 +6358,5 @@ void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection,
 
 //to be merged in later.
 // done in separate file to speed up compilation/autocomplete during development
-#include "rootFKFT.h"
+//#include "rootFKFT.h"
 #endif

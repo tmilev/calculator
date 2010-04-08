@@ -1155,35 +1155,6 @@ void ComputationSetup::DoTheRootSAComputation()
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
-void ComputationSetup::DoTheRootSAComputationCustom()
-{	//rootSubalgebra theRootSA, theRootSA2;
-  rootFKFTcomputation tempFKFT;
-  std::string tempS;
-  tempFKFT.SearchForMinimalRelations(tempS);
-  this->theRootSubalgebras.DebugString=tempS;
-  if(true)
-    return;
-	rootSubalgebra tempSA;
-	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
-	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=true;
-	this->theRootSubalgebras.flagLookingForMinimalRels=true;
-	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
-	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
-	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
-	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
-	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
-	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(),'E',6,true, true);
-  this->theRootSubalgebras.ComputeDebugString
-    (true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
-	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-	//	(*this->theGlobalVariablesContainer->Default(),'E',7);
-	//this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
-//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
-}
 
 void ComputationSetup::RunCustom()
 {	this->DoTheRootSAComputationCustom();
@@ -2432,6 +2403,18 @@ void roots::ElementToString(std::string& output)
 { this->ElementToString(output,false,false,false);
 }
 
+void roots::ElementToLinearCombinationString(std::string& output)
+{ std::stringstream out;
+  std::string tempS;
+  for (int i=0;i<this->size;i++)
+	{	this->TheObjects[i].ElementToString(tempS);
+    out <<"("<<tempS<<")";
+     if (i!=this->size-1)
+      out <<" + ";
+	}
+	output=out.str();
+}
+
 void roots::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable)
 { std::string tempS; std::stringstream out;
   if (useHtml && makeTable)
@@ -2982,6 +2965,18 @@ void roots::Average(root& output, int theDimension)
 	output.DivByInteger(this->size);
 }
 
+bool roots::ContainsOppositeRoots()
+{ root tempRoot;
+  for(int i=0;i<this->size;i++)
+  { tempRoot.Assign(this->TheObjects[i]);
+    tempRoot.MinusRoot();
+    for (int j=i+1;j<this->size;j++)
+      if (this->TheObjects[j].IsEqualTo(tempRoot))
+        return true;
+  }
+  return false;
+}
+
 void roots::AddRootSnoRepetition(roots &r)
 {	for (int i=0;i<r.size;i++)
 		this->AddRootNoRepetition(r.TheObjects[i]);
@@ -3056,6 +3051,17 @@ bool roots::ContainsARootConnectedTo(root& input, WeylGroup& theWeyl)
 			return true;
 	}
 	return false;
+}
+
+int roots::NumRootsConnectedTo(root& input, WeylGroup& theWeyl)
+{ Rational tempRat;
+	int result=0;
+	for (int i=0;i<this->size;i++)
+	{	theWeyl.RootScalarKillingFormMatrixRoot(this->TheObjects[i],input,tempRat);
+		if(!tempRat.IsEqualToZero())
+			result++;
+	}
+	return result;
 }
 
 void roots::MakeBasisChange(root& input, root& output)
@@ -3278,7 +3284,7 @@ bool CombinatorialChamber::ElementToString
 	{ out << endOfLine<<"Vertices: ";
 		for (int i=0;i<this->AllVertices.size;i++)
 		{ this->AllVertices.TheObjects[i].ElementToString(tempS);
-			out <<"("<< tempS <<"), ";
+			out << tempS <<", ";
 		}
 	}
 	out<<endOfLine;
@@ -7761,8 +7767,8 @@ void Rational::AddInteger( int x)
 	this->Add(tempRat);
 }
 
-bool Rational::IsGreaterThan(Rational& r)
-{ static Rational tempRat;
+bool Rational::IsGreaterThan(const Rational& r) const
+{ Rational tempRat;
   tempRat.Assign(*this);
   tempRat.Subtract(r);
   return tempRat.IsPositive();

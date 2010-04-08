@@ -478,7 +478,7 @@ guiMainWindow::guiMainWindow()
                    wxSize(800,600),
                    wxRESIZE_BORDER| wxCAPTION
                    | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
-{	//this->theComputationSetup.flagDoCustomComputation=true;
+{	this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
   this->theComputationSetup.flagHavingStartingExpression=true;

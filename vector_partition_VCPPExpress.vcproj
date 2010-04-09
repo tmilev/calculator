@@ -1580,11 +1580,11 @@
 			Name="Source Files"
 			>
 			<File
-				RelativePath=".\example.cpp"
+				RelativePath=".\polyhedra.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\polyhedra.cpp"
+				RelativePath=".\rootFKFT.cpp"
 				>
 			</File>
 			<File
@@ -1741,6 +1741,10 @@
 			>
 			<File
 				RelativePath=".\polyhedra.h"
+				>
+			</File>
+			<File
+				RelativePath=".\rootFKFT.h"
 				>
 			</File>
 		</Filter>

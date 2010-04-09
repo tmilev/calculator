@@ -45,6 +45,8 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
   Selection selBetas; Selection selAlphas;
   int NumAlphas=MathRoutines::TwoToTheNth(this->PartialRelation.Alphas.size);
   int NumBetas=MathRoutines::TwoToTheNth(this->PartialRelation.Betas.size);
+  selBetas.init(this->PartialRelation.Betas.size);
+  selAlphas.init(this->PartialRelation.Alphas.size);
   for (int i=0;i<NumAlphas;i++)  {
     for (int j=0;j<NumBetas;j++) {
       if (this->CanBeShortened(this->PartialRelation,selAlphas,selBetas,theWeyl)){

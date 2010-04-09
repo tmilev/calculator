@@ -2408,7 +2408,7 @@ void roots::ElementToLinearCombinationString(std::string& output)
   std::string tempS;
   for (int i=0;i<this->size;i++)
 	{	this->TheObjects[i].ElementToString(tempS);
-    out <<"("<<tempS<<")";
+    out <<tempS;
      if (i!=this->size-1)
       out <<" + ";
 	}

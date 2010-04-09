@@ -32,13 +32,6 @@ public:
       WeylGroup& theWeyl);
   bool IsBKSingular(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
-  void ExtensionStep
-    ( minimalRelationsProverStates& owner, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
-      minimalRelationsProverState& newState);
-  void RemoveDoubt
-    (minimalRelationsProverStates& owner, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void Extend
-    (minimalRelationsProverStates& owner, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   bool FindBetaWithoutTwoAlphas
     (root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool IsEqualTo
@@ -60,6 +53,13 @@ public:
     ( minimalRelationsProverState& theState, WeylGroup& theWeyl,
       GlobalVariables& TheGlobalVariables);
   void GenerateStates(GlobalVariables& TheGlobalVariables,WeylGroup& theWeyl);
+  void Extend
+    (	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ExtensionStep
+		( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+			minimalRelationsProverState& newState);
+  void RemoveDoubt
+		(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 };
 template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjectsActualSizeIncrement=10;
 #endif

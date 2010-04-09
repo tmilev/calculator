@@ -25,12 +25,17 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
       return false; }
   roots& tempRoots=TheGlobalVariables.rootsProverStateComputation2;
   tempRoots.CopyFromBase(this->PositiveKroots);
+  tempRoots.ComputeDebugString();
   theWeyl.GenerateRootSubsystem(tempRoots);
+  tempRoots.ComputeDebugString();
   tempRoots.AddListOnTop(this->NilradicalRoots);
+  tempRoots.ComputeDebugString();
   int oldsize= tempRoots.size;
   theWeyl.GenerateAdditivelyClosedSubset(tempRoots, tempRoots);
+  tempRoots.ComputeDebugString();
   for(int i=oldsize;i<tempRoots.size;i++)
     this->NilradicalRoots.AddObjectOnTop(tempRoots.TheObjects[i]);
+  this->NilradicalRoots.ComputeDebugString();
   if (this->NilradicalRoots.ContainsOppositeRoots())
   { this->StateIsPossible=false;
     return false;
@@ -104,58 +109,70 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
   this->UndecidedRoots.CopyFromBase(right.UndecidedRoots);
 }
 
-void minimalRelationsProverState::ExtensionStep
-  ( minimalRelationsProverStates& owner, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+void minimalRelationsProverStates::ExtensionStep
+  ( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
     minimalRelationsProverState& newState)
-{ if (owner.AddObjectOnTopNoRepetitionOfObject(newState, theWeyl,TheGlobalVariables))
-  { owner.LastObject()->ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl);
-    if (owner.LastObject()->StateIsPossible)
-    { if (owner.LastObject()->StateIsDubious)
-        owner.LastObject()->RemoveDoubt(owner,theWeyl,TheGlobalVariables);
+{ int currentNewIndex=this->size;
+	if (this->AddObjectOnTopNoRepetitionOfObject(newState, theWeyl,TheGlobalVariables))
+  { this->TheObjects[currentNewIndex].ComputeStateReturnFalseIfDubious
+			(TheGlobalVariables, theWeyl);
+    if (this->TheObjects[currentNewIndex].StateIsPossible)
+    { if (this->TheObjects[currentNewIndex].StateIsDubious)
+        this->RemoveDoubt(currentNewIndex,theWeyl,TheGlobalVariables);
       else
-        owner.LastObject()->Extend(owner,theWeyl,TheGlobalVariables);
+        this->Extend(currentNewIndex,theWeyl,TheGlobalVariables);
     }
   }
 }
 
-void minimalRelationsProverState::Extend
-  (minimalRelationsProverStates& owner, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::Extend
+  (int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { root theBeta, theAlpha;
-  owner.ComputeDebugString();
-  if (this->FindBetaWithoutTwoAlphas
-        (theBeta, this->PartialRelation.Betas, this->PartialRelation.Alphas, theWeyl))
-  { owner.MakeActualSizeAtLeastExpandOnTop(owner.size+this->UndecidedRoots.size);
+  this->ComputeDebugString();
+  if (this->TheObjects[index].FindBetaWithoutTwoAlphas
+        (	theBeta, this->TheObjects[index].PartialRelation.Betas, 
+					this->TheObjects[index].PartialRelation.Alphas, theWeyl))
+  { this->MakeActualSizeAtLeastExpandOnTop
+			(this->size+this->TheObjects[index].UndecidedRoots.size);
     minimalRelationsProverState newState;
-    for (int i=0;i<this->UndecidedRoots.size;i++)
-      if (theWeyl.RootScalarKillingFormMatrixRoot(theBeta, this->UndecidedRoots.TheObjects[i])>0)
-      { newState.Assign(*this);
-        newState.PartialRelation.Alphas.AddObjectOnTop(this->UndecidedRoots.TheObjects[i]);
-        this->ExtensionStep(owner, theWeyl, TheGlobalVariables, newState);
-      }
-    for (int i=0;i<this->BKnonSingularRoots.size;i++)
+    for (int i=0;i<this->TheObjects[index].UndecidedRoots.size;i++)
       if (theWeyl.RootScalarKillingFormMatrixRoot
-            (theBeta, this->nonNilradicalRoots.TheObjects[i])>0)
-        if (!this->BKnonSingularRoots.ContainsObject(this->nonNilradicalRoots.TheObjects[i]))
-        { newState.Assign(*this);
-          newState.PartialRelation.Alphas.AddObjectOnTop(this->nonNilradicalRoots.TheObjects[i]);
-          this->ExtensionStep(owner, theWeyl, TheGlobalVariables, newState);
+						(theBeta, this->TheObjects[index].UndecidedRoots.TheObjects[i])>0)
+      { newState.Assign(this->TheObjects[index]);
+        newState.PartialRelation.Alphas.AddObjectOnTop
+					(this->TheObjects[index].UndecidedRoots.TheObjects[i]);
+        this->ExtensionStep(this->size-1, theWeyl, TheGlobalVariables, newState);
+      }
+    for (int i=0;i<this->TheObjects[index].BKnonSingularRoots.size;i++)
+      if (theWeyl.RootScalarKillingFormMatrixRoot
+            (theBeta, this->TheObjects[index].nonNilradicalRoots.TheObjects[i])>0)
+        if (!this->TheObjects[index].BKnonSingularRoots.ContainsObject
+							(this->TheObjects[index].nonNilradicalRoots.TheObjects[i]))
+        { newState.Assign(this->TheObjects[index]);
+          newState.PartialRelation.Alphas.AddObjectOnTop
+						(this->TheObjects[index].nonNilradicalRoots.TheObjects[i]);
+          this->ExtensionStep(index, theWeyl, TheGlobalVariables, newState);
         }
-  } else if (this->FindBetaWithoutTwoAlphas
-              ( theAlpha,this->PartialRelation.Alphas, this->PartialRelation.Betas,theWeyl))
-  { owner.MakeActualSizeAtLeastExpandOnTop(owner.size+this->UndecidedRoots.size);
+  } else if (this->TheObjects[index].FindBetaWithoutTwoAlphas
+              ( theAlpha,this->TheObjects[index].PartialRelation.Alphas, 
+								this->TheObjects[index].PartialRelation.Betas,theWeyl))
+  { this->MakeActualSizeAtLeastExpandOnTop(this->size+this->TheObjects[index].UndecidedRoots.size);
     minimalRelationsProverState newState;
-    for (int i=0;i<this->UndecidedRoots.size;i++)
-      if (theWeyl.RootScalarKillingFormMatrixRoot(theAlpha, this->UndecidedRoots.TheObjects[i])>0)
-      { newState.Assign(*this);
-        newState.PartialRelation.Betas.AddObjectOnTop(this->UndecidedRoots.TheObjects[i]);
-        this->ExtensionStep(owner, theWeyl, TheGlobalVariables, newState);
-      }
-    for (int i=0;i<this->BKnonSingularRoots.size;i++)
+    for (int i=0;i<this->TheObjects[index].UndecidedRoots.size;i++)
       if (theWeyl.RootScalarKillingFormMatrixRoot
-            (theAlpha, this->BKnonSingularRoots.TheObjects[i])>0)
-      { newState.Assign(*this);
-        newState.PartialRelation.Betas.AddObjectOnTop(this->BKnonSingularRoots.TheObjects[i]);
-        this->ExtensionStep(owner, theWeyl, TheGlobalVariables, newState);
+						(theAlpha, this->TheObjects[index].UndecidedRoots.TheObjects[i])>0)
+      { newState.Assign(this->TheObjects[index]);
+        newState.PartialRelation.Betas.AddObjectOnTop
+					(this->TheObjects[index].UndecidedRoots.TheObjects[i]);
+        this->ExtensionStep(index, theWeyl, TheGlobalVariables, newState);
+      }
+    for (int i=0;i<this->TheObjects[index].BKnonSingularRoots.size;i++)
+      if (theWeyl.RootScalarKillingFormMatrixRoot
+            (theAlpha, this->TheObjects[index].BKnonSingularRoots.TheObjects[i])>0)
+      { newState.Assign(this->TheObjects[index]);
+        newState.PartialRelation.Betas.AddObjectOnTop
+					(this->TheObjects[index].BKnonSingularRoots.TheObjects[i]);
+        this->ExtensionStep(index, theWeyl, TheGlobalVariables, newState);
       }
    }
 }
@@ -170,19 +187,21 @@ bool minimalRelationsProverState::IsAGoodPosRootsKChoice
 }
 
 
-void minimalRelationsProverState::RemoveDoubt
-  (minimalRelationsProverStates& owner, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::RemoveDoubt
+  (int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { //roots& tempPosRootsK=TheGlobalVariables.rootsRemoveDoubt;
   //tempPosRootsK.size=0;
   //tempPosRootsK.AddListOnTop(this->PositiveKroots);
-  for (int i=0;i<this->BKnonSingularRoots.size;i++)
-    if (this->IsBKSingular(this->BKnonSingularRoots.TheObjects[i], theWeyl))
-      for (int j=0;j<this->UndecidedRoots.size;j++)
-      { int oldsize=this->PositiveKroots.size;
-        this->PositiveKroots.AddObjectOnTop(this->UndecidedRoots.TheObjects[i]);
-        if (this->IsAGoodPosRootsKChoice(theWeyl, TheGlobalVariables))
-          this->ExtensionStep(owner, theWeyl,TheGlobalVariables,*this);
-        this->PositiveKroots.size=oldsize;
+  for (int i=0;i<this->TheObjects[index].BKnonSingularRoots.size;i++)
+    if (this->TheObjects[index].IsBKSingular
+					(this->TheObjects[index].BKnonSingularRoots.TheObjects[i], theWeyl))
+      for (int j=0;j<this->TheObjects[index].UndecidedRoots.size;j++)
+      { int oldsize=this->TheObjects[index].PositiveKroots.size;
+        this->TheObjects[index].PositiveKroots.AddObjectOnTop
+					(this->TheObjects[index].UndecidedRoots.TheObjects[i]);
+        if (this->TheObjects[index].IsAGoodPosRootsKChoice(theWeyl, TheGlobalVariables))
+          this->ExtensionStep(index, theWeyl,TheGlobalVariables,this->TheObjects[index]);
+        this->TheObjects[index].PositiveKroots.size=oldsize;
       }
 }
 
@@ -245,9 +264,17 @@ void minimalRelationsProverStates::GenerateStates
   (GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 { minimalRelationsProverState tempState;
   theWeyl.ComputeRho();
-  tempState.PartialRelation.Alphas.AddObjectOnTop(theWeyl.RootSystem.TheObjects[0]);
-  tempState.ComputeStateReturnFalseIfDubious(TheGlobalVariables,theWeyl);
-  tempState.Extend(*this,theWeyl, TheGlobalVariables);
+  root tempRoot;
+  tempRoot.Assign(theWeyl.RootSystem.TheObjects[0]);
+  tempState.PartialRelation.Alphas.AddObjectOnTop(tempRoot);
+  this->size=0;
+  this->AddObjectOnTop(tempState);
+	this->LastObject()->ComputeStateReturnFalseIfDubious(TheGlobalVariables,theWeyl);
+	this->LastObject()->UndecidedRoots.CopyFromBase(theWeyl.RootSystem);
+	this->LastObject()->UndecidedRoots.PopFirstOccurenceObjectSwapWithLast(tempRoot);
+	tempRoot.MinusRoot();
+	this->LastObject()->UndecidedRoots.PopFirstOccurenceObjectSwapWithLast(tempRoot);
+  this->Extend(0,theWeyl, TheGlobalVariables);
 }
 
 void ComputationSetup::DoTheRootSAComputationCustom()
@@ -257,12 +284,6 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   tempWeyl.MakeDn(5);
   tempProver.GenerateStates(*this->theGlobalVariablesContainer->Default(),tempWeyl);
   return;
-  rootFKFTcomputation tempFKFT;
-  std::string tempS;
-  tempFKFT.SearchForMinimalRelations(tempS);
-  this->theRootSubalgebras.DebugString=tempS;
-  if(true)
-    return;
 	rootSubalgebra tempSA;
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;

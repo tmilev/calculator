@@ -798,13 +798,14 @@ public:
 };
 
 class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities
-{
+{	void init(int NumElements);
 public:
 	int MaxMultiplicity;
 	void initMe2(int NumElements, int MaxMult);
 	int NumCombinationsOfCardinality(int cardinality);
 	void IncrementSubset();
 	void IncrementSubsetFixedCardinality(int Cardinality);
+	int MaxCardinalityWithMultiplicities(){return this->MaxMultiplicity*this->Multiplicities.size;};
 	int CardinalitySelectionWithMultiplicities();
 };
 
@@ -1444,7 +1445,7 @@ public:
 	//default!
 	Rational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n,d);};
 	Rational(){this->Extended=0;};
-	Rational(Rational& right){this->Extended=0; this->Assign(right);};
+	Rational(const Rational& right){this->Extended=0; this->Assign(right);};
 //	Rational(int x){this->Extended=0; this->AssignInteger(x);};
 	~Rational(){this->FreeExtended();};
 	//the below must be called only with positive arguments!
@@ -1464,6 +1465,7 @@ public:
 	const Rational operator*(const Rational& right);
 	const root operator*(const root& right);
 	const Rational operator+(const Rational& right);
+	const Rational operator-(const Rational& right);
 	bool operator>(const Rational& right) const{return this->IsGreaterThan(right);};
 	bool operator>(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat);};
 	bool operator<(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this);};
@@ -1607,6 +1609,8 @@ public:
 		(	root&output, GlobalVariables& theGlobalVariables, int theDimension);
 	void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
 	void Average(root& output, int theDimension);
+	void Sum(root& output, int theDimension);
+	void Sum(root& output);
 	void Pop(int index);
 	void intersectWith(roots& right, roots& output);
 	bool ContainsARootConnectedTo(root& input, WeylGroup& theWeyl);
@@ -1614,11 +1618,13 @@ public:
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
 	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
-		(MatrixLargeRational& outputTheLinearCombination, int theIndex);
+		(	MatrixLargeRational& outputTheLinearCombination, int theIndex);
 	void GetLinearDependenceRunTheLinearAlgebra
-		(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
-		 Selection& outputNonPivotPoints);
+		(	MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
+			Selection& outputNonPivotPoints);
 	int GetDimensionOfElements();
+	static bool ConesIntersect
+		(	GlobalVariables& theGlobalVariables, roots& NilradicalRoots, roots& Ksingular, int theDimension);
 	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)
@@ -5484,6 +5490,8 @@ public:
 	void GetEpsilonCoords
 		(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input,
 			root& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonCoords
+		(	root& input, root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonCoordsWRTsubalgebra
     (	roots& generators, roots& input, roots& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonMatrix
@@ -6083,6 +6091,11 @@ public:
 	bool flagRootIsModified;
 	bool Pause;
 	IndicatorWindowVariables(){this->Nullify();}
+	bool String1NeedsRefresh;
+	bool String2NeedsRefresh;
+	bool String3NeedsRefresh;
+	bool String4NeedsRefresh;
+	bool String5NeedsRefresh;
 	std::string ProgressReportString1;
 	std::string ProgressReportString2;
 	std::string ProgressReportString3;
@@ -6092,6 +6105,11 @@ public:
 	void Nullify()
 	{ this->Busy=false;
 		this->Pause=true;
+		this->String1NeedsRefresh=true;
+		this->String2NeedsRefresh=true;
+		this->String3NeedsRefresh=true;
+		this->String4NeedsRefresh=true;
+		this->String5NeedsRefresh=true;
 		this->NumProcessedMonomialsCurrentFraction=0;
 		this->NumProcessedMonomialsTotal=0;
 	};

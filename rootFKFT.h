@@ -20,7 +20,7 @@ public:
   roots nonPositiveKRoots;
   roots BKSingularGmodLRoots;
   roots nonBKSingularGmodLRoots;
-  //roots nonAlphas;
+  roots nonAlphas;
   roots nonBetas;
 //  roots nonBKsingularRoots;
 	//roots UndecidedRoots;

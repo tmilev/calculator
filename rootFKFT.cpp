@@ -140,7 +140,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 		{	tempRoot.Assign( this->PartialRelation.Alphas.TheObjects[i]);
 			tempRoot.Add(theWeyl.RootSystem.TheObjects[j]);
 			if (theWeyl.IsARoot(tempRoot))
-				this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
+				this->nonAlphas.AddObjectOnTopNoRepetitionOfObject
           (theWeyl.RootSystem.TheObjects[j]);
 		}
 		for (int i=0; i<this->PartialRelation.Betas.size;i++)
@@ -198,7 +198,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 		this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
       (-this->PositiveKroots.TheObjects[i]);
 	}
-//	this->nonAlphas.AddRootSnoRepetition(this->nonBKSingularGmodLRoots);
+	this->nonAlphas.AddRootSnoRepetition(this->nonBKSingularGmodLRoots);
 	this->nonBetas.AddRootSnoRepetition(this->nonNilradicalRoots);
 //	this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	if (this->nonNilradicalRoots.HasACommonElementWith(this->NilradicalRoots))
@@ -207,7 +207,9 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 		return false;
 	if (this->BKSingularGmodLRoots.HasACommonElementWith(this->nonBKSingularGmodLRoots))
 		return false;
-	return true;
+	//if (this->BKSingularGmodLRoots.HasACommonElementWith(this->nonBKSingularGmodLRoots))
+	//	return false;
+  return true;
 }
 
 bool minimalRelationsProverState::SatisfyNonBKSingularRoots
@@ -381,7 +383,7 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
 	this->nonPositiveKRoots.CopyFromBase(right.nonPositiveKRoots);
 	this->NilradicalRoots.CopyFromBase(right.NilradicalRoots);
 	this->nonNilradicalRoots.CopyFromBase(right.nonNilradicalRoots);
-//  this->nonAlphas.CopyFromBase(right.nonAlphas);
+  this->nonAlphas.CopyFromBase(right.nonAlphas);
   this->nonBetas.CopyFromBase(right.nonBetas);
   this->childStates.CopyFromBase(right.childStates);
   this->owner=right.owner;
@@ -588,7 +590,7 @@ void minimalRelationsProverStates::TestAddingExtraRoot
   if (AddAlpha)
   { tempBool =
 			(!this->TheObjects[Index].PartialRelation.Alphas.ContainsObject(theRoot))&&
-			(!this->TheObjects[Index].nonBKSingularGmodLRoots.ContainsObject(theRoot));
+			(!this->TheObjects[Index].nonAlphas.ContainsObject(theRoot));
   } else
   { tempBool =
  			(!this->TheObjects[Index].PartialRelation.Betas.ContainsObject(theRoot))&&
@@ -637,7 +639,7 @@ bool minimalRelationsProverState::RootIsGoodForProblematicIndex
 	(	root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution,
 		roots& theDualBasis, WeylGroup& theWeyl)
 {	if (AddingAlphas)
-	{	if (this->nonBKSingularGmodLRoots.ContainsObject(input))
+	{	if (this->nonAlphas.ContainsObject(input))
 			return false;
 	}else
 	{ if (this->nonBetas.ContainsObject(input))
@@ -773,8 +775,8 @@ void minimalRelationsProverState::ElementToString
 	out <<"...";
   this->BKSingularGmodLRoots.ElementToString(tempS);
   out <<"\nBK singular g mod l roots: "<< tempS;
-//  this->nonAlphas.ElementToString(tempS);
- // out <<"\nNon-alphas: "<< tempS;
+  this->nonAlphas.ElementToString(tempS);
+  out <<"\nNon-alphas: "<< tempS;
   this->nonBetas.ElementToString(tempS);
   out <<"\nNon-betas: "<< tempS;
   this->nonBKSingularGmodLRoots.ElementToString(tempS);

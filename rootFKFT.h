@@ -31,6 +31,14 @@ public:
   //bool StateIsDubious;
   ListBasicObjects<int> childStates;
   minimalRelationsProverStates* owner;
+  void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void GetNumberScalarProductsData
+		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue, 
+			int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue, 
+			int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	bool Root1IsGreaterThanRoot2
+		(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet, 
+			GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
   void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   bool ComputeStateReturnFalseIfDubious
     ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);

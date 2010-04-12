@@ -11911,7 +11911,14 @@ void WeylGroup::GenerateAdditivelyClosedSubset
 
 void WeylGroup::Assign(const WeylGroup& right)
 { this->WeylLetter=right.WeylLetter;
+  
   this->LongRootLength.Assign(right.LongRootLength);
+//  this->ShortRootLength.Assign(right.ShortRootLength);
+
+//  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
+//  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
+//  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
+    
   this->KillingFormMatrix.Assign(right.KillingFormMatrix);
 	this->CopyFromHash(right);
 	this->RootSystem.CopyFromHash(right.RootSystem);
@@ -12120,6 +12127,11 @@ void WeylGroup::MakeAn(int n)
     return;
   this->WeylLetter='A';
   this->LongRootLength=2;
+//  this->ShortRootLength=0;
+//  this->ShortLongScalarProdPositive=0;
+//  this->ShortShortScalarProdPositive=0;
+//  this->LongLongScalarProdPositive=1;
+  
   this->rho.SetSizeExpandOnTopLight(n);
 	this->KillingFormMatrix.init(n,n);
 	this->KillingFormMatrix.NullifyAll();
@@ -12149,6 +12161,11 @@ void WeylGroup::MakeEn(int n)
 void WeylGroup::MakeF4()
 {	this->WeylLetter='F';
   this->LongRootLength=4;
+//  this->ShortRootLength=2;
+//  this->LongLongScalarProdPositive=2;
+//  this->ShortLongScalarProdPositive=2;
+//  this->ShortShortScalarProdPositive=1;
+  
   this->rho.SetSizeExpandOnTopLight(4);
 	this->KillingFormMatrix.init(4,4);
 	this->KillingFormMatrix.elements[0][0]=2 ;this->KillingFormMatrix.elements[0][1]=-1;this->KillingFormMatrix.elements[0][2]=0 ;this->KillingFormMatrix.elements[0][3]=0 ;
@@ -12160,6 +12177,10 @@ void WeylGroup::MakeF4()
 void WeylGroup::MakeG2()
 {	this->WeylLetter='G';
   this->LongRootLength=6;
+//  this->ShortRootLength=2;
+//  this->LongLongScalarProdPositive=3;
+//  this->ShortLongScalarProdPositive=3;
+//  this->ShortShortScalarProdPositive=1;
   this->rho.SetSizeExpandOnTopLight(2);
 	this->KillingFormMatrix.init(2,2);
 	this->KillingFormMatrix.elements[0][0]=6;
@@ -12395,6 +12416,10 @@ void WeylGroup::MakeBn(int n)
 { this->MakeAn(n);
   if (n<1)
     return;
+//  this->ShortRootLength=1;
+//  this->LongLongScalarProdPositive=1;
+//  this->ShortLongScalarProdPositive=1;
+//  this->ShortShortScalarProdPositive=0;  
   this->WeylLetter='B';
 	this->KillingFormMatrix.elements[n-1][n-1]=1;
 }
@@ -12404,6 +12429,10 @@ void WeylGroup::MakeCn(int n)
   if(n<2)
     return;
   this->LongRootLength=4;
+//  this->ShortRootLength=2;
+//  this->LongLongScalarProdPositive=2;
+//  this->ShortLongScalarProdPositive=2;
+//  this->ShortShortScalarProdPositive=1;
   this->WeylLetter='C';
 	this->KillingFormMatrix.elements[n-1][n-1]=4;
 	this->KillingFormMatrix.elements[n-2][n-1]=-2;

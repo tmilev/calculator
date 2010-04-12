@@ -15,6 +15,101 @@ bool minimalRelationsProverState::IsBKSingular(root& input, WeylGroup& theWeyl)
   return true;
 }
 
+void minimalRelationsProverState::SortAlphasAndBetas
+	(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{	roots& theAlphas = this->PartialRelation.Alphas;
+	roots& theBetas  = this->PartialRelation.Betas;
+	for(int i=0;i<theAlphas.size;i++)
+		for (int j=i+1;j<theAlphas.size;j++)
+			if (this->Root1IsGreaterThanRoot2(j,i,theAlphas,theBetas,TheGlobalVariables,theWeyl))
+				theAlphas.SwapTwoIndices(i,j);
+	for(int i=0;i<theBetas.size;i++)
+		for (int j=i+1;j<theBetas.size;j++)
+			if (this->Root1IsGreaterThanRoot2(j,i,theBetas,theAlphas,TheGlobalVariables,theWeyl))
+				theBetas.SwapTwoIndices(i,j);
+}
+
+bool minimalRelationsProverState::Root1IsGreaterThanRoot2
+	(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet, 
+		GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl)
+{	root& root1=setWeBelongTo.TheObjects[index1];
+	root& root2=setWeBelongTo.TheObjects[index2];
+	bool IsLong1, IsLong2;
+	int NumLongValue1, NumMixedValue1, NumShortValue1, 
+			NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1,
+			NumLongValue2, NumMixedValue2, NumShortValue2, 
+			NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2;
+	this->GetNumberScalarProductsData
+		(	root1,setWeBelongTo, IsLong1, 
+			NumLongValue1, NumMixedValue1, NumShortValue1,
+			NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1,
+			TheGlobalVariables, theWeyl);
+	this->GetNumberScalarProductsData
+		(	root2,setWeBelongTo, IsLong2, 
+			NumLongValue2, NumMixedValue2, NumShortValue2,
+			NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2,
+			TheGlobalVariables, theWeyl);
+	if (IsLong1> IsLong2) return true;
+	if (IsLong1< IsLong2) return false;
+	if (NumLongValue1>NumLongValue2) return true;
+	if (NumLongValue1<NumLongValue2) return false;	
+	if (NumMixedValue1>NumMixedValue2) return true;	
+	if (NumMixedValue1<NumMixedValue2) return false;	
+	if (NumShortValue1>NumShortValue2) return true;	
+	if (NumShortValue1<NumShortValue2) return false;	
+	if (NumMinusLongValue1>NumMinusLongValue2) return true;	
+	if (NumMinusLongValue1<NumMinusLongValue2) return false;	
+	if (NumMinusMixedValue1>NumMinusMixedValue2) return true;	
+	if (NumMinusMixedValue1<NumMinusMixedValue2) return false;	
+	if (NumMinusShortValue1>NumMinusShortValue2) return true;	
+	if (NumMinusShortValue1<NumMinusShortValue2) return false;	
+	return false;
+}
+
+void minimalRelationsProverState::GetNumberScalarProductsData
+	(	root& input, roots& theRoots, bool& isLong, 
+		int& NumLongValue, int& NumMixedValue, int& NumShortValue, 
+		int& NumMinusLongValue, int& NumMinusMixedValue, int& NumMinusShortValue, 
+		GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{	Rational tempRat = theWeyl.RootScalarKillingFormMatrixRoot(input,input);
+	isLong=false; NumMinusShortValue=0;
+	NumLongValue=0; NumMixedValue=0; NumShortValue=0; NumMinusLongValue=0;
+	NumMinusMixedValue=0; 
+	if (tempRat.IsEqualTo(theWeyl.LongRootLength))
+		isLong=true;	
+	Rational tempRat2;
+	for (int i=0;i<theRoots.size;i++)
+		if (!input.IsEqualTo(theRoots.TheObjects[i]))
+		{ theWeyl.RootScalarKillingFormMatrixRoot(input,theRoots.TheObjects[i],tempRat);
+			if (!tempRat.IsEqualToZero())
+			{	theWeyl.RootScalarKillingFormMatrixRoot
+					(theRoots.TheObjects[i],theRoots.TheObjects[i],tempRat2);
+				bool otherIsLong=false;
+				bool ScalarProdIsPositive=tempRat.IsPositive();
+				if (theWeyl.LongRootLength.IsEqualTo(tempRat2))
+					otherIsLong=true;
+				if (!(otherIsLong==isLong))
+				{ if (ScalarProdIsPositive)
+						NumMixedValue++;
+					else
+						NumMinusMixedValue++;
+				} else
+				{ if (isLong)
+					{	if (ScalarProdIsPositive)
+							NumLongValue++;
+						else
+							NumMinusLongValue++;
+					}	else
+					{	if (ScalarProdIsPositive)
+							NumShortValue++;
+						else
+							NumMinusShortValue++;
+					}
+				}
+			}
+		}
+}
+
 bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction
 	(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables)
 {	root tempRoot;
@@ -186,9 +281,6 @@ bool minimalRelationsProverState::CanBeShortened
 	if (selBetas.CardinalitySelectionWithMultiplicities()==0 && 
 			selAlphas.CardinalitySelectionWithMultiplicities()==0)
     return false;
-  if (selBetas.CardinalitySelectionWithMultiplicities() == selBetas.MaxCardinalityWithMultiplicities() && 
-			selAlphas.CardinalitySelectionWithMultiplicities()== selAlphas.MaxCardinalityWithMultiplicities())
-    return false;
   root Candidate; Candidate.MakeZero(theWeyl.KillingFormMatrix.NumRows);
   root tempRoot;
   for(int i=0;i<selBetas.elements.size;i++)
@@ -202,7 +294,11 @@ bool minimalRelationsProverState::CanBeShortened
 		Candidate.Subtract(tempRoot);
   }  
   if (Candidate.IsEqualToZero())
+  {	if (	selBetas.CardinalitySelectionWithMultiplicities() == selBetas.MaxCardinalityWithMultiplicities() && 
+					selAlphas.CardinalitySelectionWithMultiplicities()== selAlphas.MaxCardinalityWithMultiplicities())
+			return false;
     return true; 
+  }
   root MinusCandidate;
   MinusCandidate.Assign(Candidate); MinusCandidate.MinusRoot();
   Candidate.ComputeDebugString(); MinusCandidate.ComputeDebugString();
@@ -582,7 +678,8 @@ bool minimalRelationsProverState::IsEqualTo
 bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject
   ( minimalRelationsProverState& theState, WeylGroup& theWeyl,
     GlobalVariables& TheGlobalVariables)
-{ theState.ComputeScalarProductsMatrix(TheGlobalVariables,theWeyl);
+{ theState.SortAlphasAndBetas(TheGlobalVariables, theWeyl);
+	theState.ComputeScalarProductsMatrix(TheGlobalVariables,theWeyl);
 	theState.theScalarProducts.ComputeDebugString();
   for (int i=0;i<this->size;i++)
     if (this->TheObjects[i].IsEqualTo(theState,theWeyl,TheGlobalVariables))
@@ -695,8 +792,9 @@ void minimalRelationsProverStates::GenerateStates
 //	tempRoot.MinusRoot();
 //	this->LastObject()->UndecidedRoots.PopFirstOccurenceObjectSwapWithLast(tempRoot);
 	this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, theWeyl);
-	this->LastObject()->theScalarProducts.ComputeDebugString();
+//	this->LastObject()->theScalarProducts.ComputeDebugString();
   this->Extend(0,0,theWeyl, TheGlobalVariables);
+  this->ComputeDebugString(theWeyl,TheGlobalVariables);
 }
 
 void ComputationSetup::DoTheRootSAComputationCustom()

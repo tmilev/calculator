@@ -5470,6 +5470,10 @@ public:
 	root rho;
 	char WeylLetter;
 	Rational LongRootLength;
+	//Rational LongLongScalarProdPositive;
+	//Rational ShortShortScalarProdPositive;
+	//Rational ShortLongScalarProdPositive;
+	//Rational ShortRootLength;
 	hashedRoots RootSystem;
 	roots RootsOfBorel;
 	static bool flagAnErrorHasOcurredTimeToPanic;

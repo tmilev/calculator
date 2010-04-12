@@ -6278,6 +6278,7 @@ public:
   roots rootsComputeEpsCoordsWRTk2;
   roots rootsProverStateComputation1;
   roots rootsProverStateComputation2;
+  roots rootsProverStateComputation3;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;

@@ -20,7 +20,7 @@ public:
   roots nonPositiveKRoots;
   roots BKSingularGmodLRoots;
   roots nonBKSingularGmodLRoots;
-  roots nonAlphas;
+  //roots nonAlphas;
   roots nonBetas;
 //  roots nonBKsingularRoots;
 	//roots UndecidedRoots;
@@ -33,26 +33,27 @@ public:
   minimalRelationsProverStates* owner;
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void GetNumberScalarProductsData
-		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue, 
-			int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue, 
+		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,
+			int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue,
 			int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	bool Root1IsGreaterThanRoot2
-		(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet, 
+		(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet,
 			GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
   void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   bool ComputeStateReturnFalseIfDubious
     ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   bool CanBeShortened
-    ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, 
+    ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas,
 			SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl);
-  bool IsBKSingular(root& input, WeylGroup& theWeyl);
+  bool IsBKSingularNonImplied(root& input, WeylGroup& theWeyl);
+  bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
 	bool RootIsGoodForPreferredSimpleRoot
-		(	root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, 
+		(	root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl,
 			GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
 	bool RootIsGoodForProblematicIndex
-		(	root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, 
+		(	root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution,
 			roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas
     (root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
@@ -86,14 +87,15 @@ public:
   bool AddObjectOnTopNoRepetitionOfObject
     ( minimalRelationsProverState& theState, WeylGroup& theWeyl,
       GlobalVariables& TheGlobalVariables);
-  void GenerateStates(GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
+  void GenerateStates
+    (ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void Extend
     (	int index, int preferredSimpleRoot, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep
 		( int index, int preferredSimpleRootIndex, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
 			minimalRelationsProverState& newState);
-	void TestAddingExtraRoot 
-		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, 
+	void TestAddingExtraRoot
+		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
 			bool AddAlpha, int indexAddedRoot);
   void RemoveDoubt
 		(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);

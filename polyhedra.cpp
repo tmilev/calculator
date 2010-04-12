@@ -1155,37 +1155,6 @@ void ComputationSetup::DoTheRootSAComputation()
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
-
-void ComputationSetup::RunCustom()
-{	this->DoTheRootSAComputationCustom();
-//    this->theRootSubalgebras.ComputeDebugString(true);
-  this->theOutput.DebugString.append(	"\\documentclass{article}\n\\usepackage{amssymb}\n");
-	this->theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
-	this->theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
-	this->theOutput.DebugString.append("\\begin{document}~");
-	this->theRootSubalgebras.theBadRelations.ComputeDebugString
-		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.theGoodRelations.ComputeDebugString
-		(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-	//this->theRootSubalgebras.theMinRels.ComputeDebugString
-	//	(this->theRootSubalgebras,*this->theGlobalVariablesContainer->Default());
-	//this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
-	//this->theOutput.DebugString.append("\n\n\n");
-	if (this->theRootSubalgebras.theGoodRelations.size!=0)
-    this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
-	this->theOutput.DebugString.append("\n\n\n");
-	if (this->theRootSubalgebras.theBadRelations.size>0)
-	{	this->theOutput.DebugString.append("The bad relations: \n\n");
-		this->theOutput.DebugString.append
-			(this->theRootSubalgebras.theBadRelations.DebugString);
-	}
-	if (this->theRootSubalgebras.flagLookingForMinimalRels)
-	{ this->theOutput.DebugString.append("\n\nMinimal relations: \n\n");
-		this->theOutput.DebugString.append(this->theRootSubalgebras.theMinRels.DebugString);
-	}
-  this->theOutput.DebugString.append("\\end{document}");
-}
-
 void ComputationSetup::Run()
 { this->flagAllowRepaint=false;
 	this->InitComputationSetup();
@@ -3994,7 +3963,7 @@ void CombinatorialChamber::PropagateSlicingWallThroughNonExploredNeighbors
 						this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]
 							->AddInternalWall(theKillerNormal,this->Externalwalls.TheObjects[i]
 								.MirrorWall.TheObjects[j]->normal,tempRoot,&owner,theGlobalVariables);
-					}			
+					}
 	}
 }
 
@@ -11911,14 +11880,14 @@ void WeylGroup::GenerateAdditivelyClosedSubset
 
 void WeylGroup::Assign(const WeylGroup& right)
 { this->WeylLetter=right.WeylLetter;
-  
+
   this->LongRootLength.Assign(right.LongRootLength);
 //  this->ShortRootLength.Assign(right.ShortRootLength);
 
 //  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
 //  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
 //  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
-    
+
   this->KillingFormMatrix.Assign(right.KillingFormMatrix);
 	this->CopyFromHash(right);
 	this->RootSystem.CopyFromHash(right.RootSystem);
@@ -12131,7 +12100,7 @@ void WeylGroup::MakeAn(int n)
 //  this->ShortLongScalarProdPositive=0;
 //  this->ShortShortScalarProdPositive=0;
 //  this->LongLongScalarProdPositive=1;
-  
+
   this->rho.SetSizeExpandOnTopLight(n);
 	this->KillingFormMatrix.init(n,n);
 	this->KillingFormMatrix.NullifyAll();
@@ -12165,7 +12134,7 @@ void WeylGroup::MakeF4()
 //  this->LongLongScalarProdPositive=2;
 //  this->ShortLongScalarProdPositive=2;
 //  this->ShortShortScalarProdPositive=1;
-  
+
   this->rho.SetSizeExpandOnTopLight(4);
 	this->KillingFormMatrix.init(4,4);
 	this->KillingFormMatrix.elements[0][0]=2 ;this->KillingFormMatrix.elements[0][1]=-1;this->KillingFormMatrix.elements[0][2]=0 ;this->KillingFormMatrix.elements[0][3]=0 ;
@@ -12419,7 +12388,7 @@ void WeylGroup::MakeBn(int n)
 //  this->ShortRootLength=1;
 //  this->LongLongScalarProdPositive=1;
 //  this->ShortLongScalarProdPositive=1;
-//  this->ShortShortScalarProdPositive=0;  
+//  this->ShortShortScalarProdPositive=0;
   this->WeylLetter='B';
 	this->KillingFormMatrix.elements[n-1][n-1]=1;
 }
@@ -12573,7 +12542,7 @@ void ElementWeylGroup::operator =(const ElementWeylGroup &right)
 }
 
 bool ElementWeylGroup::operator ==(const ElementWeylGroup &right)
-{ if (this->size!=right.size) 
+{ if (this->size!=right.size)
 		return false;
 	for (int i=0;i<this->size;i++)
 		if (this->TheObjects[i]!=right.TheObjects[i])
@@ -14759,7 +14728,7 @@ bool rootSubalgebra::ConeConditionHolds
 	(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
 		roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations)
 {	if (roots::ConesIntersect
-				(	theGlobalVariables, NilradicalRoots, Ksingular,	
+				(	theGlobalVariables, NilradicalRoots, Ksingular,
 					this->AmbientWeyl.KillingFormMatrix.NumRows))
 	{	if (doExtractRelations)
 			this->ExtractRelations

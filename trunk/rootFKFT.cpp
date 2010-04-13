@@ -451,7 +451,7 @@ void minimalRelationsProverStates::Extend
   bool AddAlphas=false;
   bool PositiveContribution=false;
 	Rational tempRat;
-  for (int i=0;i<theDimension;i++)
+  for (int i=0;i<this->PreferredDualBasis.size;i++)
 	{	bool foundPlusAlpha=false;
 		bool foundMinusAlpha=false;
 		for (int j=0;j<theAlphas.size;j++)
@@ -606,7 +606,7 @@ void minimalRelationsProverStates::TestAddingExtraRoot
   } else
   { if (tempRat.IsNonNegative())
 			return;
-  }  
+  }
   if (AddAlpha)
   { tempBool =
 			(!this->TheObjects[Index].PartialRelation.Alphas.ContainsObject(theRoot))&&
@@ -833,7 +833,8 @@ void minimalRelationsProverStates::GenerateStates
 	WeylGroup theWeyl;
 	theWeyl.MakeArbitrary(WeylLetter, theDimension);
   theWeyl.ComputeRho();
-  this->PreferredDualBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
+  this->PreferredDualBasis.size=0;
+  /*this->PreferredDualBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
   for (int i=0;i<theDimension;i++)
 		this->PreferredDualBasis.TheObjects[i].MakeZero(theDimension);
 	if (WeylLetter=='D')
@@ -845,7 +846,7 @@ void minimalRelationsProverStates::GenerateStates
 			if (i==theDimension-1)
 				this->PreferredDualBasis.TheObjects[i].TheObjects[theDimension-2]=-1;
 		}
-	this->PreferredDualBasis.ComputeDebugString();
+	this->PreferredDualBasis.ComputeDebugString();*/
 
   root tempRoot;
   tempRoot.Assign(theWeyl.RootSystem.TheObjects[0]);
@@ -906,7 +907,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   minimalRelationsProverStates tempProver;
   WeylGroup tempWeyl;
   tempWeyl.MakeDn(5);
-  tempProver.GenerateStates(*this,*this->theGlobalVariablesContainer->Default(),'D',5);
+  tempProver.GenerateStates(*this,*this->theGlobalVariablesContainer->Default(),'E',8);
   return;
 	rootSubalgebra tempSA;
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;

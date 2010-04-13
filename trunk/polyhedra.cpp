@@ -240,7 +240,7 @@ std::string RandomCodeIDontWantToDelete::theSecondEvilString;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
-template < > std::string Matrix<Rational>::MatrixElementSeparator= ",";
+template < > std::string Matrix<Rational>::MatrixElementSeparator= ",\t";
 
 //template < > int ListObjectPointers<partFraction>::MemoryAllocationIncrement=100;
 ListObjectPointers<partFraction> partFraction::GlobalCollectorPartFraction;
@@ -14691,6 +14691,65 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(root& input)
 	return -1;
 }
 
+bool roots::GetNormalSeparatingCones
+	(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, 
+		roots& coneNonNegativeCoeffs, root& outputNormal)
+{	MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
+	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
+	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
+	if (coneStrictlyPositiveCoeffs.size==0)
+		return true;
+	int numRows= coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
+	matA.init((short)numRows, (short)theDimension*2+numRows);
+	matA.NullifyAll();
+	matb.init((short)numRows,1);
+	matb.NullifyAll(); 
+	for (int i=0;i<coneStrictlyPositiveCoeffs.size;i++)
+	{	for (int k=0;k<theDimension;k++)
+		{	matA.elements[i][k].Assign(coneStrictlyPositiveCoeffs.TheObjects[i].TheObjects[k]);
+			matA.elements[i][k+theDimension].Assign(matA.elements[i][k]);
+			matA.elements[i][k+theDimension].Minus();
+		}
+		matb.elements[i][0].MakeOne();
+		matA.elements[i][theDimension*2+i].MakeMOne();
+	}
+	for (int i=0;i<coneNonNegativeCoeffs.size;i++)
+	{ int currentRow=i+coneStrictlyPositiveCoeffs.size;
+		for (int k=0;k<theDimension;k++)
+		{	matA.elements[currentRow][k].Assign(coneNonNegativeCoeffs.TheObjects[i].TheObjects[k]);
+			matA.elements[currentRow][k+theDimension].Assign(matA.elements[currentRow][k]);
+			matA.elements[currentRow][k+theDimension].Minus();
+		}
+		matA.elements[currentRow][2*theDimension+currentRow].MakeOne();
+	}
+	//matA.ComputeDebugString();
+	//matb.ComputeDebugString();
+	//matX.ComputeDebugString();
+	bool result= 
+		MatrixLargeRational
+			::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+				(matA,matb,matX,theGlobalVariables);
+	//matA.ComputeDebugString();
+	//matb.ComputeDebugString();
+	//matX.ComputeDebugString();
+	outputNormal.MakeZero(theDimension);
+	for (int i=0;i<theDimension;i++)
+		outputNormal.TheObjects[i]=matX.elements[i][0]-matX.elements[i+theDimension][0];
+	if (result)
+	{	Rational tempRat;
+		for(int i=0;i<coneStrictlyPositiveCoeffs.size;i++)
+		{	root::RootScalarEuclideanRoot(coneStrictlyPositiveCoeffs.TheObjects[i],outputNormal,tempRat);
+			assert(tempRat.IsPositive());
+		}	
+		for(int i=0;i<coneNonNegativeCoeffs.size;i++)
+		{	root::RootScalarEuclideanRoot(coneNonNegativeCoeffs.TheObjects[i],outputNormal,tempRat);
+			assert(tempRat.IsNonPositive());
+		}			
+	}
+//	outputNormal.ComputeDebugString();
+	return result;
+}
+
 bool roots::ConesIntersect
 	(	GlobalVariables& theGlobalVariables, roots& NilradicalRoots, roots& Ksingular, int theDimension)
 {	MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
@@ -14720,8 +14779,8 @@ bool roots::ConesIntersect
 	//matb.ComputeDebugString();
 	//matX.ComputeDebugString();
 	return MatrixLargeRational
-					::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-						(matA,matb,matX,theGlobalVariables);
+		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+			(matA,matb,matX,theGlobalVariables);
 }
 
 bool rootSubalgebra::ConeConditionHolds

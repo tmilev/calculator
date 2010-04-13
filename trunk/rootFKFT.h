@@ -18,6 +18,7 @@ public:
   roots nonNilradicalRoots;
   roots PositiveKroots;
   roots nonPositiveKRoots;
+  roots nonKRoots;
   roots BKSingularGmodLRoots;
   roots nonBKSingularGmodLRoots;
   roots nonAlphas;
@@ -60,14 +61,12 @@ public:
   bool ComputeCommonSenseImplicationsReturnFalseIfContradiction
 		(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
 	bool SatisfyNonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
-  bool IsEqualTo
-    ( minimalRelationsProverState& right, WeylGroup& theWeyl,
-      GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverState& right){this->Assign(right);};
   minimalRelationsProverState();
-  void MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables);
+  void MakeProgressReportCanBeShortened
+		(int checked, int outOf, GlobalVariables& theGlobalVariables);
 };
 
 class minimalRelationsProverStates: public ListBasicObjects<minimalRelationsProverState>
@@ -79,6 +78,10 @@ public:
   ListBasicObjects<int> theIndexStack;
   ListBasicObjects<int> theCounter1Stack;
   ListBasicObjects<int> theCounter2Stack;
+  rootSubalgebra isomorphismComputer;
+ 	bool ExtendToIsomorphismRootSystem
+		(	minimalRelationsProverState& theState, int indexOther, 
+			GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
@@ -96,10 +99,18 @@ public:
 			minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
-			bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones);
+			bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool usingWeyl);
+	bool GetSeparatingRootIfExists
+		(	roots& ConeStrictlyPositive,roots& ConeNonNegative, root& output, WeylGroup& theWeyl, 
+			GlobalVariables& TheGlobalVariables);
   void RemoveDoubt
 		(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	bool StateIsEqualTo
+    ( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl,
+      GlobalVariables& TheGlobalVariables);
+	void MakeProgressReportIsos
+		(int numSearched, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 };
 template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjectsActualSizeIncrement=800;
 

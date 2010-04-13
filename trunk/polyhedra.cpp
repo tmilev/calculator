@@ -15506,9 +15506,8 @@ bool rootSubalgebra::GenerateAutomorphisms
 					//	GenerateAllAutos=true;
 					if (this->attemptExtensionToIsomorphism
 								(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false,0))//GenerateAllAutos))
-					{	if (outputAutomorphisms==0)
+						if (outputAutomorphisms==0)
 							return true;
-					}
 					if (outputAutomorphisms!=0)
 						this->MakeProgressReportGenAutos
 							( l+NumAutosCentralizer*(l+NumAutos*(j+i*tempI2)),

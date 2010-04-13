@@ -96,7 +96,7 @@ public:
 			minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
-			bool AddAlpha, int indexAddedRoot);
+			bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones);
   void RemoveDoubt
 		(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);

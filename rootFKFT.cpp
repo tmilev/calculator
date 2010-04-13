@@ -17,8 +17,8 @@ bool minimalRelationsProverState::IsBKSingularNonImplied(root& input, WeylGroup&
 }
 
 bool minimalRelationsProverState::IsBKSingularImplied(root& input, WeylGroup& theWeyl)
-{ if (this->IsBKSingularNonImplied(input, theWeyl))
-    return true;
+{ if (!this->IsBKSingularNonImplied(input, theWeyl))
+    return false;
   root tempRoot;
   for (int j=0;j<theWeyl.RootSystem.size;j++)
   { tempRoot=input+theWeyl.RootSystem.TheObjects[j];
@@ -135,6 +135,7 @@ void minimalRelationsProverState::GetNumberScalarProductsData
 bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction
 	(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables)
 {	root tempRoot;
+	this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	for (int j=0;j<theWeyl.RootSystem.size;j++)
 	{	for (int i=0;i<this->PartialRelation.Alphas.size;i++)
 		{	tempRoot.Assign( this->PartialRelation.Alphas.TheObjects[i]);
@@ -148,6 +149,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
             (this->PartialRelation.Betas.TheObjects[i]+theWeyl.RootSystem.TheObjects[j]))
 				this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theWeyl.RootSystem.TheObjects[j]);
 	}
+	this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots,this->PositiveKroots);
   roots& tempRoots=TheGlobalVariables.rootsProverStateComputation2;
   tempRoots.CopyFromBase(this->PositiveKroots);
@@ -556,37 +558,55 @@ void minimalRelationsProverStates::Extend
 					this->ExtensionStep(index, theWeyl, TheGlobalVariables, newState);
 				}
   }*/
-
-  if (!roots::ConesIntersect
-				(	TheGlobalVariables,this->TheObjects[index].PartialRelation.Alphas,
-					this->TheObjects[index].NilradicalRoots,theDimension))
-  { bool addFirstAlpha=false;
-		if (this->TheObjects[index].FindBetaWithoutTwoAlphas
-					(	theBeta, this->TheObjects[index].PartialRelation.Betas,
-						this->TheObjects[index].PartialRelation.Alphas, theWeyl))
-			addFirstAlpha=true;
-		if (this->TheObjects[index].FindBetaWithoutTwoAlphas
-					( theAlpha,this->TheObjects[index].PartialRelation.Alphas,
-						this->TheObjects[index].PartialRelation.Betas,theWeyl))
-			addFirstAlpha=false;
-		for (int i=0;i<theWeyl.RootSystem.size;i++)
-			this->TestAddingExtraRoot
-				(	index,theWeyl,TheGlobalVariables,theWeyl.RootSystem.TheObjects[i], addFirstAlpha,i);
-		for (int i=0;i<theWeyl.RootSystem.size;i++)
-			this->TestAddingExtraRoot
-				(	index,theWeyl,TheGlobalVariables,theWeyl.RootSystem.TheObjects[i], !addFirstAlpha,i);
-	}
-	else
-	{ this->TheObjects[index].StateIsComplete=true;
+	if (firstProblematicIndex==-1)
+	{	if (!roots::ConesIntersect
+					(	TheGlobalVariables,this->TheObjects[index].PartialRelation.Alphas,
+						this->TheObjects[index].NilradicalRoots,theDimension))
+		{ root NormalSeparatingCones;
+			bool tempBool=
+				roots::GetNormalSeparatingCones
+					( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots,
+						this->TheObjects[index].PartialRelation.Alphas, NormalSeparatingCones);
+			assert(tempBool);
+			bool addFirstAlpha=false;
+			if (this->TheObjects[index].FindBetaWithoutTwoAlphas
+						(	theBeta, this->TheObjects[index].PartialRelation.Betas,
+							this->TheObjects[index].PartialRelation.Alphas, theWeyl))
+				addFirstAlpha=true;
+			if (this->TheObjects[index].FindBetaWithoutTwoAlphas
+						( theAlpha,this->TheObjects[index].PartialRelation.Alphas,
+							this->TheObjects[index].PartialRelation.Betas,theWeyl))
+				addFirstAlpha=false;
+			for (int i=0;i<theWeyl.RootSystem.size;i++)
+				this->TestAddingExtraRoot
+					(	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha,
+						i, NormalSeparatingCones);
+			for (int i=0;i<theWeyl.RootSystem.size;i++)
+				this->TestAddingExtraRoot
+					(	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha,
+						i, NormalSeparatingCones);
+		}
+		else
+		{ this->TheObjects[index].StateIsComplete=true;
+		}
 	}
 }
 
 void minimalRelationsProverStates::TestAddingExtraRoot
 	(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
-		bool AddAlpha, int indexAddedRoot)
+		bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones)
 { minimalRelationsProverState newState;
   int theDimension=theWeyl.KillingFormMatrix.NumRows;
   bool tempBool;
+  Rational tempRat;
+  root::RootScalarEuclideanRoot(theRoot,normalSeparatingCones,tempRat);
+	if (AddAlpha)
+	{	if (tempRat.IsNonPositive())
+			return;
+  } else
+  { if (tempRat.IsNonNegative())
+			return;
+  }  
   if (AddAlpha)
   { tempBool =
 			(!this->TheObjects[Index].PartialRelation.Alphas.ContainsObject(theRoot))&&

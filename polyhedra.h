@@ -1417,11 +1417,13 @@ public:
                    };
 	void Simplify();
 	void Invert();
-	void Minus(){ if (this->Extended==0)
-                  this->NumShort*=-1;
-                else
-                  this->Extended->num.sign*=-1;
-              };
+	Rational& Minus()
+	{ if (this->Extended==0)
+			this->NumShort*=-1;
+    else
+			this->Extended->num.sign*=-1;
+		return *this;
+  };
 	double DoubleValue();
 	int floor(){	if (NumShort<0)
 								{	if (DenShort!=1)
@@ -1625,6 +1627,9 @@ public:
 	int GetDimensionOfElements();
 	static bool ConesIntersect
 		(	GlobalVariables& theGlobalVariables, roots& NilradicalRoots, roots& Ksingular, int theDimension);
+	static bool GetNormalSeparatingCones
+		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, 
+			roots& coneNonNegativeCoeffs, root& outputNormal);
 	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)

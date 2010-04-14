@@ -42,7 +42,11 @@ public:
 	bool Root1IsGreaterThanRoot2
 		(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet,
 			GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
-  void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void ComputeScalarProductsMatrix
+		(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void ComputeScalarProductsMatrix
+		(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, 
+			roots& theBetas, MatrixLargeRational& output);
   bool ComputeStateReturnFalseIfDubious
     ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   bool CanBeShortened
@@ -104,13 +108,16 @@ public:
 		(	roots& ConeStrictlyPositive,roots& ConeNonNegative, root& output, WeylGroup& theWeyl,
 			GlobalVariables& TheGlobalVariables);
   void RemoveDoubt
-		(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+		(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	bool StateIsEqualTo
     ( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl,
       GlobalVariables& TheGlobalVariables);
+	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportIsos
-		(int numSearched, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+		(	int numSearched, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportChildStates
+		(	int numSearched, int outOf, int NewFound, 
+			GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 };
 
 #endif

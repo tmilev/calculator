@@ -303,7 +303,7 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
 void minimalRelationsProverState::MakeProgressReportCanBeShortened
 	(int checked, int outOf, GlobalVariables &theGlobalVariables)
 { std::stringstream out5;
-	out5<<checked << " checked out of " << outOf;
+	out5<<checked+1 << " checked out of " << outOf;
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
 	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
@@ -404,15 +404,32 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
 void minimalRelationsProverStates::MakeProgressReportIsos
 	(int numSearched, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out3;
-	out3 <<"Searching for automorphisms: "<< numSearched<<" out of "<< outOf;
+	out3 <<"Searching for automorphisms: "<< numSearched+1<<" out of "<< outOf;
 	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
+
+void minimalRelationsProverStates::MakeProgressReportChildStates
+	(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{	std::stringstream out4;
+	out4	<<"Computing children states: "<< numSearched+1<<" out of "<< outOf << "; "
+				<<NewFound<<" new states found";
+	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
+	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+}
+
 void minimalRelationsProverStates::MakeProgressReportStack
 	( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out1, out2, out3, out4;
@@ -532,13 +549,7 @@ bool minimalRelationsProverState::FindBetaWithoutTwoAlphas
 bool minimalRelationsProverStates::StateIsEqualTo
   ( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl,
     GlobalVariables& TheGlobalVariables)
-{ minimalRelationsProverState& right=this->TheObjects[IndexOther];
-	if (	theState.PartialRelation.Alphas.size!=right.PartialRelation.Alphas.size ||
-				theState.PartialRelation.Betas.size!=right.PartialRelation.Betas.size)
-    return false;
-  if (!theState.theScalarProducts.IsEqualTo(right.theScalarProducts))
-		return false;
-	return this->ExtendToIsomorphismRootSystem
+{	return this->ExtendToIsomorphismRootSystem
 		(theState,IndexOther,TheGlobalVariables,theWeyl);
 }
 
@@ -557,17 +568,25 @@ bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject
 
 void minimalRelationsProverState::ComputeScalarProductsMatrix
   (GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{ return this->ComputeScalarProductsMatrix
+		(	TheGlobalVariables, theWeyl, this->PartialRelation.Alphas, 
+			this->PartialRelation.Betas, this->theScalarProducts);
+}
+
+void minimalRelationsProverState::ComputeScalarProductsMatrix
+	(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, 
+		roots& theBetas, MatrixLargeRational& output)
 { roots& tempRoots=TheGlobalVariables.rootsProverStateComputation1;
   tempRoots.size=0;
-  tempRoots.AddListOnTop(this->PartialRelation.Alphas);
-  tempRoots.AddListOnTop(this->PartialRelation.Betas);
-  this->theScalarProducts.init(tempRoots.size, tempRoots.size);
+  tempRoots.AddListOnTop(theAlphas);
+  tempRoots.AddListOnTop(theBetas);
+  output.init(tempRoots.size, tempRoots.size);
   for (int i=0;i<tempRoots.size;i++)
     for (int j=0;j<tempRoots.size;j++)
-      this->theScalarProducts.elements[i][j].Assign
-        (theWeyl.RootScalarKillingFormMatrixRoot
-          (tempRoots.TheObjects[i], tempRoots.TheObjects[j]));
+      theWeyl.RootScalarKillingFormMatrixRoot
+				(tempRoots.TheObjects[i], tempRoots.TheObjects[j],output.elements[i][j]);
 }
+
 
 void minimalRelationsProverState::ElementToString
 	( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
@@ -758,7 +777,7 @@ void WeylGroup::GetEpsilonCoords(root &input, root &output, GlobalVariables &the
 bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 	(	minimalRelationsProverState& theState, int indexOther,
 		GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
-{	return true;
+{	//return true;
   theState.SortAlphasAndBetas(theGlobalVariables, theWeyl);
 	minimalRelationsProverState& theOtherState=this->TheObjects[indexOther];
 	//rootSubalgebra& theRootSA=theGlobalVariables.rootSAProverIsos;
@@ -766,54 +785,92 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 	roots& theBetas  = theState.PartialRelation.Betas;
 	roots& theOtherAlphas = theOtherState.PartialRelation.Alphas;
 	roots& theOtherBetas  = theOtherState.PartialRelation.Betas;
-	rootsCollection& isotypicPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem;
-	isotypicPieces.MakeActualSizeAtLeastExpandOnTop(theBetas.size+theAlphas.size);
-	isotypicPieces.SetSizeExpandOnTopNoObjectInit(1);
-	isotypicPieces.TheObjects[0].size=0;
-	isotypicPieces.TheObjects[0].AddObjectOnTop(theAlphas.TheObjects[0]);
+	if (theAlphas.size!=theOtherAlphas.size)
+		return false;
+	if (theBetas.size!=theOtherBetas.size)
+		return false;	
+	rootsCollection& isotypicAlphaPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem1;
+	rootsCollection& isotypicBetaPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem2;
+	isotypicAlphaPieces.MakeActualSizeAtLeastExpandOnTop(theAlphas.size);
+	isotypicBetaPieces.MakeActualSizeAtLeastExpandOnTop(theBetas.size);
+	isotypicAlphaPieces.SetSizeExpandOnTopNoObjectInit(1);
+	isotypicAlphaPieces.TheObjects[0].size=0;
+	isotypicAlphaPieces.TheObjects[0].AddObjectOnTop(theAlphas.TheObjects[0]);
+	ListBasicObjects<int> tempList;
+	tempList.size=0;
+	permutation thePermAlphas, thePermBetas;
 	for (int i=1;i<theAlphas.size;i++)
 	{ if (theState.Root1IsGreaterThanRoot2
 					(i-1,i,theAlphas,theBetas,theGlobalVariables,theWeyl))
-		{	isotypicPieces.SetSizeExpandOnTopNoObjectInit(isotypicPieces.size+1);
-			isotypicPieces.LastObject()->size=0;
+		{	tempList.AddObjectOnTop(isotypicAlphaPieces.LastObject()->size);
+			isotypicAlphaPieces.SetSizeExpandOnTopNoObjectInit(isotypicAlphaPieces.size+1);
+			isotypicAlphaPieces.LastObject()->size=0;
 		}
-		isotypicPieces.LastObject()->AddObjectOnTop(theAlphas.TheObjects[i]);
+		isotypicAlphaPieces.LastObject()->AddObjectOnTop(theAlphas.TheObjects[i]);
 	}
-	ListBasicObjects<int> tempList;
+	tempList.AddObjectOnTop(isotypicAlphaPieces.LastObject()->size);
+	thePermAlphas.initPermutation(tempList,theAlphas.size);
+	isotypicBetaPieces.SetSizeExpandOnTopNoObjectInit(1);
+	isotypicBetaPieces.TheObjects[0].size=0;
+	isotypicBetaPieces.TheObjects[0].AddObjectOnTop(theBetas.TheObjects[0]);
 	tempList.size=0;
 	for (int i=1;i<theBetas.size;i++)
 	{ if (theState.Root1IsGreaterThanRoot2
 					(i-1,i,theBetas,theAlphas,theGlobalVariables,theWeyl))
-		{	tempList.AddObjectOnTop(isotypicPieces.LastObject()->size);
-			isotypicPieces.SetSizeExpandOnTopNoObjectInit(isotypicPieces.size+1);
-			isotypicPieces.LastObject()->size=0;
+		{	tempList.AddObjectOnTop(isotypicBetaPieces.LastObject()->size);
+			isotypicBetaPieces.SetSizeExpandOnTopNoObjectInit(isotypicBetaPieces.size+1);
+			isotypicBetaPieces.LastObject()->size=0;
 		}
-		isotypicPieces.LastObject()->AddObjectOnTop(theBetas.TheObjects[i]);
+		isotypicBetaPieces.LastObject()->AddObjectOnTop(theBetas.TheObjects[i]);
 	}
-	tempList.AddObjectOnTop(isotypicPieces.LastObject()->size);
-	permutation thePerm;
-	thePerm.initPermutation(tempList,theAlphas.size+theBetas.size);
-	int NumCycles=thePerm.getTotalNumSubsets();
-	roots nonPermutedDomain, theRange, theDomain;
-	nonPermutedDomain.size=0; theRange.size=0;
-	nonPermutedDomain.AddListOnTop(theAlphas); nonPermutedDomain.AddListOnTop(theBetas);
+	tempList.AddObjectOnTop(isotypicBetaPieces.LastObject()->size);
+	thePermBetas.initPermutation(tempList,theBetas.size);
+	int NumCyclesAlphas = thePermAlphas.getTotalNumSubsets();
+	int NumCyclesBetas  = thePermBetas.getTotalNumSubsets();
+	roots theDomain, thePermutedAlphas, thePermutedBetas, theRange;
+	theRange.size=0;
 	theRange.AddListOnTop(theOtherAlphas); theRange.AddListOnTop(theOtherBetas);
-	theDomain.MakeActualSizeAtLeastExpandOnTop(theAlphas.size+theBetas.size);
-	thePerm.GetPermutation(tempList);
-	for(int i=0;i<NumCycles;i++)
+	MatrixLargeRational theOtherMatrix, thisMatrix;
+	this->TheObjects[indexOther].ComputeScalarProductsMatrix
+		(theGlobalVariables, theWeyl, theOtherAlphas, theOtherBetas, theOtherMatrix);		
+	this->TheObjects[indexOther].theScalarProducts.ComputeDebugString(); 
+	for(int i=0;i<NumCyclesAlphas;i++)
 	{	theDomain.size=0;
-		this->MakeProgressReportIsos(i,NumCycles,theGlobalVariables,theWeyl);
-		for (int j=0;j<tempList.size;j++)
-			theDomain.AddObjectOnTop(nonPermutedDomain.TheObjects[tempList.TheObjects[j]]);
-		if (this->isomorphismComputer.attemptExtensionToIsomorphism
-					(theDomain, theRange,theGlobalVariables,0,0,false,0))
-		{ theDomain.ComputeDebugString();
-			theRange.ComputeDebugString();
-			return true;
+		thePermutedAlphas.size=0;
+		thePermAlphas.GetPermutation(tempList);
+		for (int k=0;k<tempList.size;k++)
+		{	root& tempRoot=theAlphas.TheObjects[tempList.TheObjects[k]];
+			thePermutedAlphas.AddObjectOnTop(tempRoot);
+			theDomain.AddObjectOnTop(tempRoot);
 		}
-		thePerm.incrementAndGetPermutation(tempList);
-	}
-	//theSA.attemptExtensionToIsomorphism
+		theDomain.ComputeDebugString();
+		for (int j=0;j<NumCyclesBetas;j++)
+		{	theDomain.size=theAlphas.size;
+			thePermutedBetas.size=0;
+			thePermBetas.GetPermutation(tempList);
+			for (int k=0;k<tempList.size;k++)
+			{	root& tempRoot=theBetas.TheObjects[tempList.TheObjects[k]];
+				thePermutedBetas.AddObjectOnTop(tempRoot);
+				theDomain.AddObjectOnTop(tempRoot);
+			}		
+			theDomain.ComputeDebugString();
+			this->MakeProgressReportIsos
+				(i*NumCyclesBetas+j,NumCyclesBetas*NumCyclesAlphas,theGlobalVariables,theWeyl);
+			theState.ComputeScalarProductsMatrix
+				(theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
+			thisMatrix.ComputeDebugString();
+			if (thisMatrix.IsEqualTo(theOtherMatrix))
+				if (this->isomorphismComputer.attemptExtensionToIsomorphismNoCentralizer
+							(theDomain, theRange,theGlobalVariables,0,0,false,0))
+				{ theDomain.ComputeDebugString();
+					theRange.ComputeDebugString();
+					return true;
+				}
+			thePermBetas.IncrementSubset();
+		}
+		thePermAlphas.IncrementSubset();
+	}	
+	//theSA.attemptExtensionToIsomorphismNoCentralizer
 	return false;
 }
 

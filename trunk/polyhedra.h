@@ -1628,7 +1628,7 @@ public:
 	static bool ConesIntersect
 		(	GlobalVariables& theGlobalVariables, roots& NilradicalRoots, roots& Ksingular, int theDimension);
 	static bool GetNormalSeparatingCones
-		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, 
+		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs,
 			roots& coneNonNegativeCoeffs, root& outputNormal);
 	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
@@ -3020,7 +3020,7 @@ public:
 	int MultiplyByGenerator(GeneratorsOfAlgebraRecord& g, int Power);
 	int MultiplyByGenerator(int GeneratorIndex, int GeneratorPower);
 	void Assign
-		(	const MonomialInCommutativeAlgebra 
+		(	const MonomialInCommutativeAlgebra
 				<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra,
 					GeneratorsOfAlgebraRecord>& m);
 	bool IsEqualToZero();
@@ -3075,7 +3075,7 @@ void MonomialInCommutativeAlgebra
 	}
 	else
 	{ if (tempS2=="1")
-		{ out<< tempS; 
+		{ out<< tempS;
 			return;
 		}
 		if (tempS2=="-1")
@@ -3094,7 +3094,7 @@ void MonomialInCommutativeAlgebra
 }
 
 class PolyPartFractionNumerator: public TemplatePolynomial
-  <	MonomialInCommutativeAlgebra<	Integer,GeneratorsPartialFractionAlgebra, 
+  <	MonomialInCommutativeAlgebra<	Integer,GeneratorsPartialFractionAlgebra,
 		GeneratorPFAlgebraRecord>, Integer >
 {
 public:
@@ -3112,7 +3112,7 @@ public:
 	int NumGeneratorsUsed();
 };
 
-template 
+template
 	<	class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra,
 		class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra
@@ -3371,7 +3371,7 @@ public:
 	void AssignIntegerPoly(IntegerPoly& p);
 	void Evaluate(intRoot& values,Rational& output);
 	void MakePolyFromDirectionAndNormal
-		(	root& direction, root& normal, Rational& Correction, 
+		(	root& direction, root& normal, Rational& Correction,
 			GlobalVariables& theGlobalVariables);
 	void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables);
 	void MakeLinPolyFromInt(int theDimension,int x1,int x2, int x3,int x4, int x5);
@@ -4346,7 +4346,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>
 	::ComponentInFrontOfVariableToPower
-		(	int VariableIndex, 
+		(	int VariableIndex,
 			ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output,
 			int UpToPower)
 {	static Monomial<ElementOfCommutativeRingWithIdentity> tempM;
@@ -4653,7 +4653,7 @@ public:
 //	void DecreaseNumVars(int decrease);
 	void MultiplyByLargeRational(Rational& r);
 	void MakePureQN
-		(	short NumVar,int NonZeroIndex, Rational&coeff, int theExp, int Num, 
+		(	short NumVar,int NonZeroIndex, Rational&coeff, int theExp, int Num,
 			int theDen);
 	void MakeFromNormalAndDirection
 		(root& normal, root& direction, int theMod, Rational& coeff);
@@ -4812,10 +4812,10 @@ public:
 	MatrixLargeRational MatrixForCoeffs;
 	PolynomialsRationalCoeff RationalPolyForm;
 	void MakeLinearSubIntegrand
-		(	root& normal, root&direction, Rational& Correction, 
+		(	root& normal, root&direction, Rational& Correction,
 			GlobalVariables& theGlobalVariables);
 	void MakeSubNVarForOtherChamber
-		(	root& direction,root& normal, Rational& Correction, 
+		(	root& direction,root& normal, Rational& Correction,
 			GlobalVariables& theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 };
@@ -4824,7 +4824,7 @@ class QuasiMonomial: public Monomial<QuasiNumber>
 {
 public:
 	void IntegrateDiscreteInDirectionFromZeroTo
-		(	QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output, 
+		(	QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output,
 			PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals) ;
 	void IntegrateDiscreteFromZeroTo
 		(	QPSub& EndPointSub, QuasiPolynomial &output,
@@ -5868,7 +5868,7 @@ public:
 	bool IndexIsCompatibleWithPrevious
 		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
 			ListBasicObjects<Selection>& impliedSelections,
-			ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, 
+			ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner,
 			GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism
 		(	roots& domain, roots& range, GlobalVariables& theGlobalVariables,
@@ -6263,6 +6263,8 @@ public:
   roots rootsProverStateComputation1;
   roots rootsProverStateComputation2;
   roots rootsProverStateComputation3;
+  roots rootsProverStateComputation4;
+  roots rootsProverStateComputation5;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -6272,7 +6274,7 @@ public:
   rootsCollection rootsAttemptExtensionIso3;
   rootsCollection rootsAttemptExtensionIso4;
   rootsCollection rootsExtendToIsomorphismRootSystem;
-	
+
 	rootSubalgebra rootSAProverIsos;
 
 	rootSubalgebras rootSAAttemptExtensionIso1;

@@ -36,6 +36,7 @@
 		<Unit filename="polyhedra.h" />
 		<Unit filename="rootFKFT.cpp" />
 		<Unit filename="rootFKFT.h" />
+		<Unit filename="rootFKFT2.cpp" />
 		<Unit filename="wxWidgets_GUI.cpp" />
 		<Extensions>
 			<code_completion />

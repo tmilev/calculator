@@ -1,6 +1,7 @@
 #ifdef polyhedra_h_already_included
 //to be merged in polyhedra.h
-
+#ifndef rootFKFT_already_included
+#define rootFKFT_already_included
 class minimalRelationsProverStates;
 
 
@@ -31,6 +32,7 @@ public:
   bool StateIsComplete;
   //bool StateIsDubious;
   ListBasicObjects<int> childStates;
+  int activeChild;
   minimalRelationsProverStates* owner;
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void GetNumberScalarProductsData
@@ -76,11 +78,9 @@ public:
   static int ProblemCounter;
   roots PreferredDualBasis;
   ListBasicObjects<int> theIndexStack;
-  ListBasicObjects<int> theCounter1Stack;
-  ListBasicObjects<int> theCounter2Stack;
   rootSubalgebra isomorphismComputer;
  	bool ExtendToIsomorphismRootSystem
-		(	minimalRelationsProverState& theState, int indexOther, 
+		(	minimalRelationsProverState& theState, int indexOther,
 			GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -101,7 +101,7 @@ public:
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
 			bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool usingWeyl);
 	bool GetSeparatingRootIfExists
-		(	roots& ConeStrictlyPositive,roots& ConeNonNegative, root& output, WeylGroup& theWeyl, 
+		(	roots& ConeStrictlyPositive,roots& ConeNonNegative, root& output, WeylGroup& theWeyl,
 			GlobalVariables& TheGlobalVariables);
   void RemoveDoubt
 		(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -112,7 +112,6 @@ public:
 	void MakeProgressReportIsos
 		(int numSearched, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 };
-template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjectsActualSizeIncrement=800;
 
-
+#endif
 #endif

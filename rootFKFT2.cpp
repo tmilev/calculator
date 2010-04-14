@@ -157,18 +157,28 @@ void minimalRelationsProverStates::Extend
             this->TheObjects[index].PartialRelation.Alphas.size)
         addFirstAlpha=true;
       *///end of experimental lines
+      int oldSize=this->size;
       for (int i=0;i<theWeyl.RootSystem.size;i++)
-        this->TestAddingExtraRoot
+      { this->TestAddingExtraRoot
           (	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i],
             addFirstAlpha, i, NormalSeparatingCones, usingWeyl);
+				this->MakeProgressReportChildStates
+					(	i, theWeyl.RootSystem.size*2, this->size-oldSize,
+						TheGlobalVariables, theWeyl);
+      }
       for (int i=0;i<theWeyl.RootSystem.size;i++)
-        this->TestAddingExtraRoot
+      {	this->TestAddingExtraRoot
           (	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i],
             !addFirstAlpha, i, NormalSeparatingCones, usingWeyl);
+				this->MakeProgressReportChildStates
+					(	i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, 
+						this->size-oldSize, TheGlobalVariables, theWeyl);
+      }
       for (int i=0;i<this->TheObjects[index].childStates.size;i++)
       { int newIndex= this->TheObjects[index].childStates.TheObjects[i];
         this->theIndexStack.AddObjectOnTop(newIndex);
         this->TheObjects[index].activeChild=i;
+				this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
 				this->Extend(newIndex,0,theWeyl,TheGlobalVariables);
         this->theIndexStack.PopLastObject();
     	}
@@ -246,8 +256,7 @@ void minimalRelationsProverStates::TestAddingExtraRoot
 void minimalRelationsProverStates::ExtensionStep
   ( int index, int preferredSimpleRootIndex, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
     minimalRelationsProverState& newState)
-{ this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
-	int currentNewIndex=this->size;
+{ int currentNewIndex=this->size;
 	if (this->AddObjectOnTopNoRepetitionOfObject(newState, theWeyl,TheGlobalVariables))
   { this->TheObjects[currentNewIndex].ComputeStateReturnFalseIfDubious
 			(TheGlobalVariables, theWeyl);

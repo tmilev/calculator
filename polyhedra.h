@@ -5834,10 +5834,14 @@ public:
 			ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
 	void MakeGeneratingSingularVectors
 		(coneRelation &theRelation, roots& nilradicalRoots);
-  bool attemptExtensionToIsomorphism
+  bool attemptExtensionToIsomorphismNoCentralizer
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 			int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
 			bool GenerateAllpossibleExtensions, bool* abortKmodule);
+  static bool attemptExtensionToIsomorphism
+		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
+			ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly,
+			WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
@@ -6273,9 +6277,12 @@ public:
 	rootsCollection rootsAttemptExtensionIso2;
   rootsCollection rootsAttemptExtensionIso3;
   rootsCollection rootsAttemptExtensionIso4;
-  rootsCollection rootsExtendToIsomorphismRootSystem;
+  rootsCollection rootsExtendToIsomorphismRootSystem1;
+  rootsCollection rootsExtendToIsomorphismRootSystem2;
 
 	rootSubalgebra rootSAProverIsos;
+	rootSubalgebra rootSAAttemptExtensionToIso1;
+	rootSubalgebra rootSAAttemptExtensionToIso2;
 
 	rootSubalgebras rootSAAttemptExtensionIso1;
 	rootSubalgebras rootSAAttemptExtensionIso2;

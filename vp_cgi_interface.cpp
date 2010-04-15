@@ -215,7 +215,20 @@ int main(int argc, char **argv)
     { theComputationSetup.DoTheRootSAComputation();
 //      theComputationSetup.theRootSubalgebras.ComputeDebugString();
       //inputPath.append("../tmp/WeylHtml.html");
-      std::string serverPath="/tmp/";
+      std::stringstream outServerPath;
+      outServerPath<<"/tmp/"<< theComputationSetup.WeylGroupLetter
+                  <<theComputationSetup.WeylGroupIndex <<"/";
+      std::string serverPath=outServerPath.str();
+      std::stringstream outPhysicalPath;
+      std::string PhysicalPath;
+      outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter
+                      << theComputationSetup.WeylGroupIndex <<"/";
+      PhysicalPath=outPhysicalPath.str();
+      std::string MkDirCommand;
+      std::stringstream outMkDirCommand;
+      outMkDirCommand<< "mkdir " <<PhysicalPath;
+      MkDirCommand=outMkDirCommand.str();
+      ::system(MkDirCommand.c_str());
       std::string header;
       std::stringstream tempOut;
       header="http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi?";
@@ -229,10 +242,11 @@ int main(int argc, char **argv)
               <<"/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
       header=tempOut.str();
       theComputationSetup.theRootSubalgebras.ElementToHtml
-        ( header,inputPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
-      std::cout <<"<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; "
-                <<"url=../tmp/rootHtml.html\"> <BODY>"<< inputPath <<"<br> input string: <br>\n"
-                <<inputString;
+        ( header,PhysicalPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
+      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; "
+                << "url="<<serverPath<< "rootHtml.html\"> <BODY>"
+                << serverPath <<"<br> input string: <br>\n"
+                << inputString << "<br>"<<PhysicalPath;
     }
   } else if (choice==3)
   { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n"

@@ -115,6 +115,8 @@ public:
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportIsos
 		(	int numSearched, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportCurrentState
+		(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportChildStates
 		(	int numSearched, int outOf, int NewFound, 
 			GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);

@@ -15505,7 +15505,7 @@ bool rootSubalgebra::GenerateAutomorphisms
 					//if (outputAutomorphisms!=0 && k==0 && l==0)
 					//	GenerateAllAutos=true;
 					if (this->attemptExtensionToIsomorphismNoCentralizer
-								(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false,0))//GenerateAllAutos))
+								(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false,0,0,0))//GenerateAllAutos))
 						if (outputAutomorphisms==0)
 							return true;
 					if (outputAutomorphisms!=0)
@@ -15524,87 +15524,21 @@ bool rootSubalgebra::GenerateAutomorphisms
   return false;
 }
 
-bool rootSubalgebra::attemptExtensionToIsomorphism
-	( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
-		ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly,
-		WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs)
-{ if (outputAutomorphisms!=0)
-		outputAutomorphisms->ExternalAutomorphisms.size=0;
-	if (DomainAndRangeGenerateNonIsoSAs!=0)
-		*DomainAndRangeGenerateNonIsoSAs=false; 
-  //rootSubalgebra::ProblemCounter++;
-  rootSubalgebra& theDomainRootSA = theGlobalVariables.rootSAAttemptExtensionToIso1;
-  rootSubalgebra& theRangeRootSA  = theGlobalVariables.rootSAAttemptExtensionToIso2;
-  theDomainRootSA.AmbientWeyl.Assign(theWeyl);
-  theRangeRootSA.AmbientWeyl.Assign(theWeyl);
-  theDomainRootSA.genK.CopyFromBase(Domain);
-  theRangeRootSA.genK.CopyFromBase(Range);
-	theDomainRootSA.ComputeAllButAmbientWeyl();
-	theRangeRootSA.ComputeAllButAmbientWeyl();
-	if (theDomainRootSA.theDynkinDiagram.DebugString!= 
-				theRangeRootSA.theDynkinDiagram.DebugString ||
-			theDomainRootSA.theCentralizerDiagram.DebugString!= 
-				theRangeRootSA.theCentralizerDiagram.DebugString)
-  {	if (DomainAndRangeGenerateNonIsoSAs!=0)
-			*DomainAndRangeGenerateNonIsoSAs=true;
-		return false;
-  } 
-  roots isoDomain, isoRange;
-  permutation permComponentsCentralizer;
-  ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
-	SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
-  ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > CentralizerDiagramAutomorphisms;
-  theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
-  tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
-	for (int i=0;i<CentralizerDiagramAutomorphisms.size;i++)
-		tempAutosCentralizer.MaxMultiplicities.TheObjects[i]=
-			CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
-  tempList.SetSizeExpandOnTopNoObjectInit
-    (theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size);
-  int tempSize=0;
-  for (int i=0;i<theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size;i++)
-  { tempList.TheObjects[i]= 
-			theDomainRootSA.theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
-    tempSize+=tempList.TheObjects[i];
-  }
-  permComponentsCentralizer.initPermutation(tempList,tempSize);
-	int tempI2= permComponentsCentralizer.getTotalNumSubsets();
-	int NumAutosCentralizer= tempAutosCentralizer.getTotalNumSubsets();
-  permComponentsCentralizer.GetPermutation(tempPermutation2);
-	for(int j=0;j<tempI2;j++)
-  {	for(int l=0;l<NumAutosCentralizer;l++)
-		{	isoDomain.size=0; isoRange.size=0;
-			theDomainRootSA.theCentralizerDiagram.GetMapFromPermutation
-				(	isoDomain,isoRange,tempPermutation2,CentralizerDiagramAutomorphisms,
-					tempAutosCentralizer, theRangeRootSA.theCentralizerDiagram);
-			if (theDomainRootSA.attemptExtensionToIsomorphismNoCentralizer
-						(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false,0))//GenerateAllAutos))
-				if (outputAutomorphisms==0)
-					return true;
-			if (outputAutomorphisms!=0)
-				theDomainRootSA.MakeProgressReportGenAutos
-					( l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer,
-						outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
-			tempAutosCentralizer.IncrementSubset();
-		}
-		permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
-  }
-  return false;
-}
-
 
 int rootSubalgebra::ProblemCounter2=0;
 
 bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
 	(	roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 		int RecursionDepth,ReflectionSubgroupWeylGroup* outputAutomorphisms,
-		bool GenerateAllpossibleExtensions, bool* abortKmodule)
+		bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange)
 {	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
 	assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));
 	if (abortKmodule!=0)
     *abortKmodule=false;
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
-		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables,outputAutomorphisms);
+		return 
+			this->IsAnIsomorphism
+				(Domain, Range, theGlobalVariables, outputAutomorphisms,additionalDomain, additionalRange);
 	if (RecursionDepth>=theGlobalVariables.rootsAttemptExtensionIso1.size)
 	{	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 		theGlobalVariables.rootsAttemptExtensionIso1.SetSizeExpandOnTopNoObjectInit
@@ -15684,8 +15618,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
       { rangeRec.AddObjectOnTop(rightSA.kModules.TheObjects[i].TheObjects[j]);
         if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
         {  if (this->attemptExtensionToIsomorphismNoCentralizer
-                (	domainRec, rangeRec, theGlobalVariables,RecursionDepth+1,outputAutomorphisms,
-                  GenerateAllpossibleExtensions,&tempBool))
+                (	domainRec, rangeRec, theGlobalVariables, RecursionDepth+1, outputAutomorphisms,
+                  GenerateAllpossibleExtensions, &tempBool, additionalDomain, additionalRange))
           {	if (!GenerateAllpossibleExtensions)
               return true;
             else
@@ -15701,7 +15635,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
 }
 
 bool rootSubalgebra::IsAnIsomorphism
-	(roots &domain, roots &range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms)
+	(	roots &domain, roots &range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms,
+		roots* additionalDomain, roots* additionalRange)
 { MatrixLargeRational& matB= theGlobalVariables.matRootSAIso;
 	roots& tempRoots= theGlobalVariables.rootsRootSAIso;
 	int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
@@ -15732,6 +15667,12 @@ bool rootSubalgebra::IsAnIsomorphism
 	//if (this->flagAnErrorHasOccuredTimeToPanic)
 		//tempRoots.ComputeDebugString();
 	root tempRoot;
+	if (additionalDomain!=0)
+		for (int i=0;i<additionalDomain->size;i++)
+		{	tempRoots.MakeBasisChange(additionalDomain->TheObjects[i],tempRoot);
+			if (!tempRoot.IsEqualTo(additionalRange->TheObjects[i]))
+				return false;
+		}	
 	for (int i=0;i<this->AmbientWeyl.RootsOfBorel.size;i++)
 	{	tempRoots.MakeBasisChange(this->AmbientWeyl.RootsOfBorel.TheObjects[i],tempRoot);
 		if (!this->IsARoot(tempRoot))
@@ -16631,7 +16572,10 @@ void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
 	this->String3NeedsRefresh=right.String3NeedsRefresh;
 	this->String4NeedsRefresh=right.String4NeedsRefresh;
 	this->String5NeedsRefresh=right.String5NeedsRefresh;
+	this->StatusString1=right.StatusString1;
+	this->StatusString1NeedsRefresh=right.StatusString1NeedsRefresh;
 	this->flagRootIsModified= right.flagRootIsModified;
+	
 	this->modifiedRoot=right.modifiedRoot;
 }
 

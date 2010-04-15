@@ -2,10 +2,11 @@
 #include "rootFKFT.h"
 
 void minimalRelationsProverStates::Extend
-  (	int index, int preferredSimpleRoot, WeylGroup& theWeyl,
-		GlobalVariables& TheGlobalVariables)
+  (	int index, int preferredSimpleRoot, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+	this->MakeProgressReportCurrentState(index,TheGlobalVariables,theWeyl);
+  this->TheObjects[index].childStates.size=0;
   minimalRelationsProverState newState;
   int theDimension=theWeyl.KillingFormMatrix.NumRows;
   //roots& theAlphas = this->TheObjects[index].PartialRelation.Alphas;

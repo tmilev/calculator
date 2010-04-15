@@ -1218,56 +1218,49 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
   	this->Button1Go->Enable();
 #ifndef WIN32
 //    this->Layout();
-    this->BoxSizer8HorizontalEval->Fit(this->Table3Values);
-    this->BoxSizer4VerticalToggleButton1->Fit(this->Table2Indicator);
-    this->BoxSizer2VerticalInputs->Fit(this->Table1Input);
+  this->BoxSizer8HorizontalEval->Fit(this->Table3Values);
+  this->BoxSizer4VerticalToggleButton1->Fit(this->Table2Indicator);
+  this->BoxSizer2VerticalInputs->Fit(this->Table1Input);
 #endif
 }
 
 void guiMainWindow::TurnOffAllDangerousButtons()
-{
-    this->ListBox1WeylGroup->Disable();
-    this->Spin1Dim->Disable();
-    this->Spin2NumVect->Disable();
-    this->ToggleButton1UsingCustom->Disable();
+{	this->ListBox1WeylGroup->Disable();
+  this->Spin1Dim->Disable();
+  this->Spin2NumVect->Disable();
+  this->ToggleButton1UsingCustom->Disable();
 }
 
 wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id,
                           const wxPoint &pos,
                           const wxSize &size,
                           long style, const wxString &name)
-{
-    this->maxNumCols=8;
-    this->maxNumRows=120;
-    this->Create(parent,id,pos,size,style,name);
+{	this->maxNumCols=8;
+  this->maxNumRows=120;
+  this->Create(parent,id,pos,size,style,name);
 }
 
 void wxGridExtra::SetNumRowsAndCols(int r, int c)
-{
-    if (r<0 || r>this->maxNumRows|| c<0 ||c>this->maxNumCols)
-        return;
-    int oldNumRows=	this->GetNumberRows();
-    int oldNumCols= this->GetNumberCols();
-    if (oldNumRows>r)
-    {
-        this->DeleteRows(r,oldNumRows-r,true);
-        oldNumRows=r;
-    }
-    if (oldNumRows<r)
-    {
-        this->InsertRows(oldNumRows-1,r-oldNumRows,true);
-        oldNumRows=r;
-    }
-    if (oldNumCols>c)
-    {
-        this->DeleteCols(c,oldNumCols-c,true);
-        oldNumCols=c;
-    }
-    if (oldNumCols<c)
-    {
-        this->InsertCols(oldNumCols-1,c-oldNumCols,true);
-        oldNumCols=c;
-    }
+{	if (r<0 || r>this->maxNumRows|| c<0 ||c>this->maxNumCols)
+		return;
+  int oldNumRows=	this->GetNumberRows();
+  int oldNumCols= this->GetNumberCols();
+  if (oldNumRows>r)
+  {	this->DeleteRows(r,oldNumRows-r,true);
+    oldNumRows=r;
+  }
+  if (oldNumRows<r)
+  {	this->InsertRows(oldNumRows-1,r-oldNumRows,true);
+    oldNumRows=r;
+  }
+  if (oldNumCols>c)
+  {	this->DeleteCols(c,oldNumCols-c,true);
+    oldNumCols=c;
+  }
+  if (oldNumCols<c)
+  {	this->InsertCols(oldNumCols-1,c-oldNumCols,true);
+    oldNumCols=c;
+  }
 }
 
 
@@ -1413,6 +1406,10 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
   if (output.String5NeedsRefresh)
   {	wxString tempS5(output.ProgressReportString5.c_str(),wxConvUTF8);
 		MainWindow1->Label5ProgressReport->SetLabel(tempS5);
+  }
+  if (output.StatusString1NeedsRefresh)
+  {	wxString tempS5(output.StatusString1.c_str(),wxConvUTF8);
+		MainWindow1->Text3PartialFractions->SetLabel(tempS5);
   }
   if (output.flagRootIsModified)
   {	root tempRoot;

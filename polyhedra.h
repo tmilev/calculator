@@ -437,6 +437,14 @@ public:
 	static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
 	void ReverseOrderElements();
 	void CopyFromBase (const ListBasicObjects<Object>& From);
+	bool IsEqualTo(const ListBasicObjects<Object>& Other)
+	{ if (this->size!=Other.size) 
+			return false;
+		for (int i=0;i<Other.size;i++)
+			if (!(this->TheObjects[i]==Other.TheObjects[i]))
+				return false;
+		return true;
+	};
 	void ShiftUpExpandOnTop(int StartingIndex);
 	ListBasicObjects();
 	~ListBasicObjects();
@@ -494,7 +502,7 @@ public:
 	inline int FitHashSize( int i){i%=this->HashSize; if (i<0) i+=this->HashSize; return i;};
 	void ClearTheObjects();
 	void AddObjectOnTopHash(Object& o);
-	void AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
+	bool AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
 	void PopIndexSwapWithLastHash(int index);
 	//the below returns -1 if it doesn't contain the object,
 	//else returns the object's index
@@ -2249,10 +2257,11 @@ void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object &o)
+bool HashedListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object &o)
 { if (this->IndexOfObjectHash(o)!=-1)
-		return;
+		return false;
 	this->AddObjectOnTopHash(o);
+	return true;
 }
 
 template <class Object>
@@ -6112,6 +6121,55 @@ public:
 	};
 };
 
+class SltwoDecomposition
+{	
+public:
+	ListBasicObjects<int> theModulesHighestWeights;
+	ListBasicObjects<int> theModulesMultiplicities;
+	void operator=(const SltwoDecomposition& right)
+	{	this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
+		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
+	};
+	bool  operator==(const SltwoDecomposition& right)
+	{ return 
+			this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) &&
+			this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
+	};	
+	int HashFunction() const
+	{ int tempI=::MathRoutines::Minimum
+			(::SomeRandomPrimesSize,this->theModulesHighestWeights.size);
+		int result=0;
+		for (int i=0; i<tempI;i++)
+		{	result+=
+				this->theModulesHighestWeights.TheObjects[i]*
+				this->theModulesMultiplicities.TheObjects[i]*
+				::SomeRandomPrimes[i];	
+		}
+		return result;
+	};
+};
+
+class SltwoSubalgebras : public HashedListBasicObjects<SltwoDecomposition>
+{
+public:
+	std::string DebugString;
+	WeylGroup theWeylGroup;
+	roots theHelements;
+//	ListBasicObjects< int > hSingularWeights;
+	ListBasicObjects<int> MultiplicitiesFixedHweight;
+	int IndexZeroWeight;
+	void ComputeDebugString
+		(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
+	{ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml);
+	};
+	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
+	void ComputeDebugStringCurrent();
+	void ElementToString
+		(	std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, 
+			bool useLatex, bool UseHtml);
+	void Compute(GlobalVariables& theGlobalVariables);
+};
+
 struct ComputationSetup
 {	roots InputRoots;
 public:
@@ -6120,6 +6178,7 @@ public:
 	rootSubalgebras theRootSubalgebras;
 	CombinatorialChamberContainer theChambers;
 	Rational Value;
+	::SltwoSubalgebras theSltwoSubalgebras;
 	std::string ValueString;
 	std::string NotationExplanationLatex1;
 	std::string NotationExplanationLatex2;
@@ -6377,6 +6436,8 @@ public:
 };
 
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
+
+
 
 //extern GlobalVariablesContainer StaticGlobalVariablesContainer;
 

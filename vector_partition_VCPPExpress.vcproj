@@ -1592,6 +1592,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SLtwoSubalgebras.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\wxWidgets_GUI.cpp"
 				>
 				<FileConfiguration

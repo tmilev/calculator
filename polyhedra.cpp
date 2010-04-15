@@ -777,6 +777,7 @@ bool CGIspecificRoutines::CheckForInputSanity(ComputationSetup& input)
 //1 = page not initialized fill in initial data
 //2 = Generate Dynkin tables
 //3 = Go to root subalgebras page
+//4 = Generate SL two subalgebras
 int CGIspecificRoutines::ReadDataFromCGIinput
   (std::string& inputBad, ComputationSetup& output, std::string& thePath)
 {	if (inputBad.length()<2)
@@ -784,7 +785,8 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 	std::string inputGood;
   std::string tempS3;
 	tempS3=inputBad;
-	tempS3.resize(7);
+	if (tempS3.size()>7)
+		tempS3.resize(7);
 	bool InputDataOK=false;
 	if (tempS3=="textDim")
     InputDataOK=true;
@@ -797,7 +799,10 @@ int CGIspecificRoutines::ReadDataFromCGIinput
   CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
   //std::cout<<inputGood;
   if (tempS3=="rootSAs")
-  { return 3;
+		return 3;
+	if (tempS3=="SLtwos")
+	{	InputDataOK=true;
+		return 4;
   }
   if (tempS3=="textTyp")
   { std::stringstream tempStream1;

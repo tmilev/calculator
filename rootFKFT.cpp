@@ -733,6 +733,9 @@ void ComputationSetup::RunCustom()
 
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
+	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
+	return;
   minimalRelationsProverStates tempProver;
   WeylGroup tempWeyl;
   tempWeyl.MakeDn(5);

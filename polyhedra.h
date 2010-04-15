@@ -5837,7 +5837,8 @@ public:
   bool attemptExtensionToIsomorphismNoCentralizer
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 			int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
-			bool GenerateAllpossibleExtensions, bool* abortKmodule);
+			bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, 
+			roots* additionalRange);
   static bool attemptExtensionToIsomorphism
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 			ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly,
@@ -5854,13 +5855,13 @@ public:
 		(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX,
 			int theDimension, roots& NilradicalRoots);
 	void GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void DoKRootsEnumerationRecursively
-		(int indexEnumeration, GlobalVariables& theGlobalVariables);
+		(	int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void MakeProgressReportPossibleNilradicalComputation
-		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void MakeProgressReportGenAutos
-		(int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
+		(	int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString
     ( bool useLatex, bool useHtml, bool includeKEpsCoords,
@@ -5876,10 +5877,10 @@ public:
 			GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism
 		(	roots& domain, roots& range, GlobalVariables& theGlobalVariables,
-			ReflectionSubgroupWeylGroup* outputAutomorphisms);
+			ReflectionSubgroupWeylGroup* outputAutomorphisms,	roots* additionalDomain, roots* additionalRange);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	bool ListHasNonSelectedIndexLowerThanGiven
-		(int index,ListBasicObjects<int>& tempList, Selection& tempSel);
+		(	int index,ListBasicObjects<int>& tempList, Selection& tempSel);
 	void GeneratePossibleNilradicalsRecursive
 		(	GlobalVariables& theGlobalVariables,
 			multTableKmods & multTable,	int StartIndex,
@@ -5926,7 +5927,7 @@ public:
 		(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
 	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2
-		(GlobalVariables& theGlobalVariables);
+		(	GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
 	bool LinCombToStringDistinguishedIndex
 		(	int distinguished,root& alphaRoot, int coeff, root &linComb,
@@ -6093,6 +6094,9 @@ public:
 	std::string ProgressReportString3;
 	std::string ProgressReportString4;
 	std::string ProgressReportString5;
+	std::string StatusString1;
+	
+	bool StatusString1NeedsRefresh;
 	void Assign(IndicatorWindowVariables& right);
 	void Nullify()
 	{ this->Busy=false;
@@ -6102,6 +6106,7 @@ public:
 		this->String3NeedsRefresh=true;
 		this->String4NeedsRefresh=true;
 		this->String5NeedsRefresh=true;
+		this->StatusString1NeedsRefresh=false;
 		this->NumProcessedMonomialsCurrentFraction=0;
 		this->NumProcessedMonomialsTotal=0;
 	};

@@ -1,13 +1,13 @@
 #include<sstream>
 void static_html1(std::stringstream& output){
 output <<" <HTML>\n";
-output <<" <HEAD><TITLE>Vector partition rev406, 06.04.2010</TITLE>\n";
+output <<" <HEAD><TITLE>Vector partition</TITLE>\n";
 output <<" </HEAD>\n";
 output <<" <BODY>\n";
 output <<" <table>\n";
 output <<" <tr valign=\"top\">\n";
 output <<" <td width=\"400\">\n";
-output <<" <FORM method=\"GET\" name=\"formMain\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n";
+output <<" <FORM method=\"GET\" name=\"formMain\" action=\"/cgi-bin/vector_partition_linux_cgi.cgi\">\n";
 output <<" Dimension(<=3): <input type=\"text\" size =\"1\" name=\"textDim\" onkeyup=\"generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);\">\n";
 output <<" Num Vectors(<=10): <input type=\"text\" size=\"1\" name=\"textNumVectors\" onkeyup=\"generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);\">\n";
 output <<" <input type=\"submit\" name=\"buttonGo\" value=\"Default_computation\">\n";
@@ -42,7 +42,9 @@ output <<" <br>\n";
 output <<" <br> \n";
 output <<" Additional functionality of the program:\n";
 output <<" <br>\n";
-output <<" <a href=\"/cgi-bin/vector_partition_linux_cgi?rootSAs\">Root subalgebra tables</a>\n";
+output <<" <a href=\"/cgi-bin/vector_partition_linux_cgi.cgi?rootSAs\">Root subalgebra tables</a>\n";
+output <<" <br>\n";
+output <<" <a href=\"/cgi-bin/vector_partition_cgi_win32.exe?SLtwos\">sl(2) subalgebras of E8</a>\n";
 output <<" </td>\n";
 output <<" </tr>\n";
 output <<" </table>\n";

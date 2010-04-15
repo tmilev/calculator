@@ -169,6 +169,10 @@
 			Name="html"
 			>
 			<File
+				RelativePath=".\SLtwoSubalgebras.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\vector_partition.html"
 				>
 			</File>
@@ -179,6 +183,18 @@
 		</File>
 		<File
 			RelativePath=".\polyhedra.h"
+			>
+		</File>
+		<File
+			RelativePath=".\rootFKFT.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\rootFKFT.h"
+			>
+		</File>
+		<File
+			RelativePath=".\rootFKFT2.cpp"
 			>
 		</File>
 		<File

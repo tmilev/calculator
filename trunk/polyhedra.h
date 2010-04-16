@@ -6132,9 +6132,14 @@ class SltwoDecomposition
 public:
 	ListBasicObjects<int> theModulesHighestWeights;
 	ListBasicObjects<int> theModulesMultiplicities;
+	root hCharacteristic;
 	roots hCommutingRootSpaces;
+	roots RootsHavingScalarProduct2WithH;
 	DynkinDiagramRootSubalgebra DiagramM;
 	DynkinDiagramRootSubalgebra CentralizerDiagram;
+  bool DifferenceTwoHsimpleRootsIsARoot;
+  int DynkinsEpsilon;
+  void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
 	void operator=(const SltwoDecomposition& right)
 	{	this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
 		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
@@ -6142,6 +6147,10 @@ public:
 		this->CentralizerDiagram.Assign(right.CentralizerDiagram);
 		this->DiagramM.Assign(right.DiagramM);
 		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
+		this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
+		this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
+		this->DynkinsEpsilon=right.DynkinsEpsilon;
+		this->hCharacteristic.Assign(right.hCharacteristic);
 	};
 	bool  operator==(const SltwoDecomposition& right)
 	{ return
@@ -6167,7 +6176,6 @@ class SltwoSubalgebras : public HashedListBasicObjects<SltwoDecomposition>
 public:
 	std::string DebugString;
 	WeylGroup theWeylGroup;
-	roots theHelements;
 //	ListBasicObjects< int > hSingularWeights;
 	ListBasicObjects<int> MultiplicitiesFixedHweight;
 	int IndexZeroWeight;

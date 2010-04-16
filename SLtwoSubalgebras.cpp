@@ -16,6 +16,7 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables)
 	root hCandidate;
 	roots rootsHavingScalarProd2WithH;
 	roots CommutingRootSpaces;
+	roots hCommutingRoots;
 	Rational tempRat;
 	this->theHelements.MakeActualSizeAtLeastExpandOnTop(1000);
 	this->IndexZeroWeight=this->theWeylGroup.RootsOfBorel.size;
@@ -25,6 +26,7 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables)
 	{ this->MakeProgressReport(i,NumCycles,theGlobalVariables);
 		theHselection.IncrementSubset();
 		CommutingRootSpaces.size=0;
+		hCommutingRoots.size=0;
 		rootsHavingScalarProd2WithH.size=0;
 		//theHselection.ComputeDebugString();
 		hCandidate.MakeZero(theDimension);
@@ -48,6 +50,8 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables)
 			this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight+tempRat.NumShort]++;
 			if (tempRat.NumShort==2)
         rootsHavingScalarProd2WithH.AddObjectOnTop(theWeylGroup.RootSystem.TheObjects[k]);
+      if (tempRat.IsEqualToZero())
+        hCommutingRoots.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[k]);
 		}
 		//this->ComputeDebugStringCurrent();
 		for (int j=this->MultiplicitiesFixedHweight.size-1; j>=this->IndexZeroWeight;j--)
@@ -92,14 +96,17 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables)
 				{ BufferDecomposition.theModulesHighestWeights.AddObjectOnTop(j-this->IndexZeroWeight);
 					BufferDecomposition.theModulesMultiplicities.AddObjectOnTop
 						(this->MultiplicitiesFixedHweight.TheObjects[j]);
+          BufferDecomposition.hCommutingRootSpaces.CopyFromBase(CommutingRootSpaces);
+          BufferDecomposition.DiagramM.ComputeDiagramType(hCommutingRoots,this->theWeylGroup);
           BufferDecomposition.CentralizerDiagram.ComputeDiagramType
             (CommutingRootSpaces,this->theWeylGroup);
           BufferDecomposition.hCommutingRootSpaces.CopyFromBase(CommutingRootSpaces);
 				}
-			//if (this->AddObjectOnTopNoRepetitionOfObjectHash(BufferDecomposition))
-			//	this->theHelements.AddObjectOnTop(hCandidate);
-			this->AddObjectOnTopHash(BufferDecomposition);
-			this->theHelements.AddObjectOnTop(hCandidate);
+			if (this->AddObjectOnTopNoRepetitionOfObjectHash(BufferDecomposition))
+			{	this->theHelements.AddObjectOnTop(hCandidate);
+			}
+			//this->AddObjectOnTopHash(BufferDecomposition);
+			//this->theHelements.AddObjectOnTop(hCandidate);
 		}
 	}
 	this->ComputeDebugString(theGlobalVariables,this->theWeylGroup,false,false);
@@ -109,10 +116,24 @@ void SltwoSubalgebras::ElementToString
 	(	std::string &output, GlobalVariables &theGlobalVariables, WeylGroup &theWeyl,
 		bool useLatex, bool UseHtml)
 {	std::string tempS; std::stringstream out;
+  int Zcounter=0;
+
 	out <<"Number sl(2)s: "<< this->theHelements.size<<"\n\n";
 	for (int i=0;i<this->size;i++)
 	{ this->theHelements.TheObjects[i].ElementToString(tempS);
 		out << "h: " << tempS;
+		root& r=this->theHelements.TheObjects[i];
+		out <<"$\\begin{array}{ccccccc}"
+        << r.TheObjects[7].ElementToString() <<" & "
+        << r.TheObjects[6].ElementToString() <<" & "
+        << r.TheObjects[5].ElementToString() <<" & "
+        << r.TheObjects[4].ElementToString() <<" & "
+        << r.TheObjects[3].ElementToString() <<" & "
+        << r.TheObjects[2].ElementToString() <<" & "
+        << r.TheObjects[0].ElementToString()
+        <<"\\\\&&&&"
+        << r.TheObjects[1].ElementToString()
+        <<"\\end{array}$\n\n";
 		out << "\n sl(2) - module decomposition: ";
 		int DimensionCentralizer;
 		for (int j=0;j<this->TheObjects[i].theModulesHighestWeights.size;j++)
@@ -125,7 +146,17 @@ void SltwoSubalgebras::ElementToString
           this->TheObjects[i].theModulesMultiplicities.TheObjects[j];
 		}
 		int easyCentralizerDim=this->TheObjects[i].CentralizerDiagram.NumRootsGeneratedByDiagram()+
-          this->TheObjects[i].CentralizerDiagram.RankTotal();
+      this->TheObjects[i].CentralizerDiagram.RankTotal();
+    int dimM=this->TheObjects[i].DiagramM.NumRootsGeneratedByDiagram()+
+      this->TheObjects[i].DiagramM.RankTotal();
+    out <<"\n\nm is of type: " << this->TheObjects[i].DiagramM.DebugString<<" Dimension of m: "<< dimM<< "\n\n";
+    if (dimM<=DimensionCentralizer+3)
+    { out <<"\n\n~ \Large{This subalgebra satisfies your inequality}\\\\~\\\\~\\\\~ ";
+      Zcounter++;
+    }
+    else
+      out <<"\n\nDimension of m is smaller than the total dim of  $V_0$";
+
 		if (  DimensionCentralizer==easyCentralizerDim  )
       out <<"\n\n\n   Dynkin Diagram centralizer: "
           << this->TheObjects[i].CentralizerDiagram.DebugString;
@@ -134,8 +165,9 @@ void SltwoSubalgebras::ElementToString
           << this->TheObjects[i].CentralizerDiagram.DebugString;
     if (DimensionCentralizer<easyCentralizerDim)
       out <<"aaaaaaaarrrrrrrrrrrrrggggggggggggggggghhhhhhhhh";
-		out <<"\n\n";
+		out <<"\n\n\\rule{\\textwidth}{0.4pt}";
 	}
+	out << "\n\n Num subalgebras satisfying your inequality= "<< Zcounter;
 	output=out.str();
 }
 

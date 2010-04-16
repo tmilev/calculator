@@ -5636,6 +5636,7 @@ public:
 	ListBasicObjects<int> indexUniComponent;
 	ListBasicObjects<int> indexInUniComponent;
 	int RankTotal();
+	int NumRootsGeneratedByDiagram();
 	void Sort();
 	void ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl);
 	void ComputeDynkinStrings(WeylGroup& theWeyl);

@@ -1408,8 +1408,9 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
 		MainWindow1->Label5ProgressReport->SetLabel(tempS5);
   }
   if (output.StatusString1NeedsRefresh)
-  {	wxString tempS5(output.StatusString1.c_str(),wxConvUTF8);
-		MainWindow1->Text3PartialFractions->SetLabel(tempS5);
+  {	wxString tempS6(output.StatusString1.c_str(),wxConvUTF8);
+		MainWindow1->Text3PartialFractions->SetValue(tempS6);
+		MainWindow1->Text3PartialFractions->Refresh();
   }
   if (output.flagRootIsModified)
   {	root tempRoot;

@@ -151,7 +151,7 @@ public:
       //pthread_mutex_unlock(&ParallelComputing::mutex1);
 		}
 		ParallelComputing::SafePointReached=false;
-	}
+	};
 };
 
 //#ifndef dont_define_Min_and_Max_in_polyhedra_h
@@ -438,7 +438,7 @@ public:
 	void ReverseOrderElements();
 	void CopyFromBase (const ListBasicObjects<Object>& From);
 	bool IsEqualTo(const ListBasicObjects<Object>& Other)
-	{ if (this->size!=Other.size) 
+	{ if (this->size!=Other.size)
 			return false;
 		for (int i=0;i<Other.size;i++)
 			if (!(this->TheObjects[i]==Other.TheObjects[i]))
@@ -5846,7 +5846,7 @@ public:
   bool attemptExtensionToIsomorphismNoCentralizer
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
 			int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
-			bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, 
+			bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain,
 			roots* additionalRange);
   static bool attemptExtensionToIsomorphism
 		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
@@ -6104,7 +6104,7 @@ public:
 	std::string ProgressReportString4;
 	std::string ProgressReportString5;
 	std::string StatusString1;
-	
+
 	bool StatusString1NeedsRefresh;
 	void Assign(IndicatorWindowVariables& right);
 	void Nullify()
@@ -6122,19 +6122,23 @@ public:
 };
 
 class SltwoDecomposition
-{	
+{
 public:
 	ListBasicObjects<int> theModulesHighestWeights;
 	ListBasicObjects<int> theModulesMultiplicities;
+	roots hCommutingRootSpaces;
+	DynkinDiagramRootSubalgebra CentralizerDiagram;
 	void operator=(const SltwoDecomposition& right)
 	{	this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
 		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
+		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
+		CentralizerDiagram.Assign(right.CentralizerDiagram);
 	};
 	bool  operator==(const SltwoDecomposition& right)
-	{ return 
+	{ return
 			this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) &&
 			this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
-	};	
+	};
 	int HashFunction() const
 	{ int tempI=::MathRoutines::Minimum
 			(::SomeRandomPrimesSize,this->theModulesHighestWeights.size);
@@ -6143,7 +6147,7 @@ public:
 		{	result+=
 				this->theModulesHighestWeights.TheObjects[i]*
 				this->theModulesMultiplicities.TheObjects[i]*
-				::SomeRandomPrimes[i];	
+				::SomeRandomPrimes[i];
 		}
 		return result;
 	};
@@ -6165,7 +6169,7 @@ public:
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringCurrent();
 	void ElementToString
-		(	std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, 
+		(	std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl,
 			bool useLatex, bool UseHtml);
 	void Compute(GlobalVariables& theGlobalVariables);
 };

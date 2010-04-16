@@ -5,6 +5,7 @@ void minimalRelationsProverStates::Extend
   (	int index, int preferredSimpleRoot, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+  this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
 	this->MakeProgressReportCurrentState(index,TheGlobalVariables,theWeyl);
   this->TheObjects[index].childStates.size=0;
   minimalRelationsProverState newState;
@@ -172,7 +173,7 @@ void minimalRelationsProverStates::Extend
           (	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i],
             !addFirstAlpha, i, NormalSeparatingCones, usingWeyl);
 				this->MakeProgressReportChildStates
-					(	i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, 
+					(	i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2,
 						this->size-oldSize, TheGlobalVariables, theWeyl);
       }
       for (int i=0;i<this->TheObjects[index].childStates.size;i++)

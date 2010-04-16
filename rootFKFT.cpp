@@ -470,10 +470,6 @@ void minimalRelationsProverStates::MakeProgressReportStack
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
 
-
-
-
-
 bool minimalRelationsProverState::RootIsGoodForProblematicIndex
 	(	root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution,
 		roots& theDualBasis, WeylGroup& theWeyl)
@@ -580,12 +576,12 @@ bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject
 void minimalRelationsProverState::ComputeScalarProductsMatrix
   (GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 { return this->ComputeScalarProductsMatrix
-		(	TheGlobalVariables, theWeyl, this->PartialRelation.Alphas, 
+		(	TheGlobalVariables, theWeyl, this->PartialRelation.Alphas,
 			this->PartialRelation.Betas, this->theScalarProducts);
 }
 
 void minimalRelationsProverState::ComputeScalarProductsMatrix
-	(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, 
+	(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas,
 		roots& theBetas, MatrixLargeRational& output)
 { roots& tempRoots=TheGlobalVariables.rootsProverStateComputation1;
   tempRoots.size=0;
@@ -733,9 +729,9 @@ void ComputationSetup::RunCustom()
 
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
-	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
-	return;
+	//this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
+	//this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
+	//return;
   minimalRelationsProverStates tempProver;
   WeylGroup tempWeyl;
   tempWeyl.MakeDn(5);
@@ -803,7 +799,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 	if (theAlphas.size!=theOtherAlphas.size)
 		return false;
 	if (theBetas.size!=theOtherBetas.size)
-		return false;	
+		return false;
 	rootsCollection& isotypicAlphaPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem1;
 	rootsCollection& isotypicBetaPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem2;
 	isotypicAlphaPieces.MakeActualSizeAtLeastExpandOnTop(theAlphas.size);
@@ -847,8 +843,8 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 	theRange.AddListOnTop(theOtherAlphas); theRange.AddListOnTop(theOtherBetas);
 	MatrixLargeRational theOtherMatrix, thisMatrix;
 	this->TheObjects[indexOther].ComputeScalarProductsMatrix
-		(theGlobalVariables, theWeyl, theOtherAlphas, theOtherBetas, theOtherMatrix);		
-	this->TheObjects[indexOther].theScalarProducts.ComputeDebugString(); 
+		(theGlobalVariables, theWeyl, theOtherAlphas, theOtherBetas, theOtherMatrix);
+	this->TheObjects[indexOther].theScalarProducts.ComputeDebugString();
 	bool DomainAndRangeGenerateNonIsoSAs;
 	for(int i=0;i<NumCyclesAlphas;i++)
 	{	theDomain.size=0;
@@ -868,14 +864,14 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 			{	root& tempRoot=theBetas.TheObjects[tempList.TheObjects[k]];
 				thePermutedBetas.AddObjectOnTop(tempRoot);
 				theDomain.AddObjectOnTop(tempRoot);
-			}		
+			}
 			theDomain.ComputeDebugString();
 			this->MakeProgressReportIsos
 				(i*NumCyclesBetas+j,NumCyclesBetas*NumCyclesAlphas,theGlobalVariables,theWeyl);
 			theState.ComputeScalarProductsMatrix
 				(theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
 			thisMatrix.ComputeDebugString();
-			
+
 			if (thisMatrix.IsEqualTo(theOtherMatrix))
 			{	if (this->isomorphismComputer.attemptExtensionToIsomorphism
 							(theDomain, theRange,	theGlobalVariables, 0, false, theWeyl, &DomainAndRangeGenerateNonIsoSAs))
@@ -890,7 +886,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 			thePermBetas.IncrementSubset();
 		}
 		thePermAlphas.IncrementSubset();
-	}	
+	}
 	//theSA.attemptExtensionToIsomorphismNoCentralizer
 	return false;
 }
@@ -931,7 +927,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 { if (outputAutomorphisms!=0)
 		outputAutomorphisms->ExternalAutomorphisms.size=0;
 	if (DomainAndRangeGenerateNonIsoSAs!=0)
-		*DomainAndRangeGenerateNonIsoSAs=false; 
+		*DomainAndRangeGenerateNonIsoSAs=false;
   //rootSubalgebra::ProblemCounter++;
   rootSubalgebra& theDomainRootSA = theGlobalVariables.rootSAAttemptExtensionToIso1;
   rootSubalgebra& theRangeRootSA  = theGlobalVariables.rootSAAttemptExtensionToIso2;
@@ -941,14 +937,14 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   theRangeRootSA.genK.CopyFromBase(Range);
 	theDomainRootSA.ComputeAllButAmbientWeyl();
 	theRangeRootSA.ComputeAllButAmbientWeyl();
-	if (theDomainRootSA.theDynkinDiagram.DebugString!= 
+	if (theDomainRootSA.theDynkinDiagram.DebugString!=
 				theRangeRootSA.theDynkinDiagram.DebugString ||
-			theDomainRootSA.theCentralizerDiagram.DebugString!= 
+			theDomainRootSA.theCentralizerDiagram.DebugString!=
 				theRangeRootSA.theCentralizerDiagram.DebugString)
   {	if (DomainAndRangeGenerateNonIsoSAs!=0)
 			*DomainAndRangeGenerateNonIsoSAs=true;
 		return false;
-  } 
+  }
   roots isoDomain, isoRange;
   permutation permComponentsCentralizer;
   ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
@@ -964,7 +960,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
     (theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size);
   int tempSize=0;
   for (int i=0;i<theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size;i++)
-  { tempList.TheObjects[i]= 
+  { tempList.TheObjects[i]=
 			theDomainRootSA.theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
     tempSize+=tempList.TheObjects[i];
   }
@@ -989,7 +985,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 				(	isoDomain,isoRange,tempPermutation2,CentralizerDiagramAutomorphisms,
 					tempAutosCentralizer, theRangeRootSA.theCentralizerDiagram);
 			if (theDomainRootSA.attemptExtensionToIsomorphismNoCentralizer
-						(	isoDomain, isoRange, theGlobalVariables, 0, outputAutomorphisms, 
+						(	isoDomain, isoRange, theGlobalVariables, 0, outputAutomorphisms,
 							false, 0, &Domain, &Range))//GenerateAllAutos))
 				if (outputAutomorphisms==0)
 					return true;

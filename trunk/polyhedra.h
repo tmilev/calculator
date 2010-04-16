@@ -1396,6 +1396,11 @@ public:
 																													this->Extended->den.MultiplyBy(x);
 																													this->Simplify();};
 	void ElementToString(std::string& output);
+	std::string ElementToString()
+	{ std::string tempS;
+    this->ElementToString(tempS);
+    return tempS;
+  };
 	bool IsEqualTo(const Rational& r);
 	bool IsGreaterThanOrEqualTo(Rational& right);
 	inline bool IsEqualToZero(){	if (this->Extended==0)
@@ -6128,12 +6133,15 @@ public:
 	ListBasicObjects<int> theModulesHighestWeights;
 	ListBasicObjects<int> theModulesMultiplicities;
 	roots hCommutingRootSpaces;
+	DynkinDiagramRootSubalgebra DiagramM;
 	DynkinDiagramRootSubalgebra CentralizerDiagram;
 	void operator=(const SltwoDecomposition& right)
 	{	this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
 		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
 		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
-		CentralizerDiagram.Assign(right.CentralizerDiagram);
+		this->CentralizerDiagram.Assign(right.CentralizerDiagram);
+		this->DiagramM.Assign(right.DiagramM);
+		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
 	};
 	bool  operator==(const SltwoDecomposition& right)
 	{ return

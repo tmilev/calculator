@@ -650,7 +650,8 @@ void minimalRelationsProverStates::ElementToString
 }
 
 void minimalRelationsProverStates::GenerateStates
-  (ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
+  ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter,
+    int theDimension)
 { minimalRelationsProverState tempState;
 	WeylGroup theWeyl;
 	theWeyl.MakeArbitrary(WeylLetter, theDimension);
@@ -690,6 +691,7 @@ void minimalRelationsProverStates::GenerateStates
 //	this->LastObject()->UndecidedRoots.PopFirstOccurenceObjectSwapWithLast(tempRoot);
 	this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, theWeyl);
 	this->theIndexStack.AddObjectOnTop(0);
+	this->LastObject()->ComputeDebugString(theWeyl,TheGlobalVariables);
 //	this->LastObject()->theScalarProducts.ComputeDebugString();
   this->Extend(0,0,theWeyl, TheGlobalVariables);
   this->ComputeDebugString(theWeyl,TheGlobalVariables);
@@ -729,9 +731,9 @@ void ComputationSetup::RunCustom()
 
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
-	//this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
-	//this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
-	//return;
+	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
+	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
+	return;
   minimalRelationsProverStates tempProver;
   WeylGroup tempWeyl;
   tempWeyl.MakeDn(5);

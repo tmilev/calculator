@@ -14697,7 +14697,7 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(root& input)
 }
 
 bool roots::GetNormalSeparatingCones
-	(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, 
+	(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs,
 		roots& coneNonNegativeCoeffs, root& outputNormal)
 {	MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
@@ -14708,7 +14708,7 @@ bool roots::GetNormalSeparatingCones
 	matA.init((short)numRows, (short)theDimension*2+numRows);
 	matA.NullifyAll();
 	matb.init((short)numRows,1);
-	matb.NullifyAll(); 
+	matb.NullifyAll();
 	for (int i=0;i<coneStrictlyPositiveCoeffs.size;i++)
 	{	for (int k=0;k<theDimension;k++)
 		{	matA.elements[i][k].Assign(coneStrictlyPositiveCoeffs.TheObjects[i].TheObjects[k]);
@@ -14730,7 +14730,7 @@ bool roots::GetNormalSeparatingCones
 	//matA.ComputeDebugString();
 	//matb.ComputeDebugString();
 	//matX.ComputeDebugString();
-	bool result= 
+	bool result=
 		MatrixLargeRational
 			::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 				(matA,matb,matX,theGlobalVariables);
@@ -14745,11 +14745,11 @@ bool roots::GetNormalSeparatingCones
 		for(int i=0;i<coneStrictlyPositiveCoeffs.size;i++)
 		{	root::RootScalarEuclideanRoot(coneStrictlyPositiveCoeffs.TheObjects[i],outputNormal,tempRat);
 			assert(tempRat.IsPositive());
-		}	
+		}
 		for(int i=0;i<coneNonNegativeCoeffs.size;i++)
 		{	root::RootScalarEuclideanRoot(coneNonNegativeCoeffs.TheObjects[i],outputNormal,tempRat);
 			assert(tempRat.IsNonPositive());
-		}			
+		}
 	}
 //	outputNormal.ComputeDebugString();
 	return result;
@@ -15541,7 +15541,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
 	if (abortKmodule!=0)
     *abortKmodule=false;
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
-		return 
+		return
 			this->IsAnIsomorphism
 				(Domain, Range, theGlobalVariables, outputAutomorphisms,additionalDomain, additionalRange);
 	if (RecursionDepth>=theGlobalVariables.rootsAttemptExtensionIso1.size)
@@ -15677,7 +15677,7 @@ bool rootSubalgebra::IsAnIsomorphism
 		{	tempRoots.MakeBasisChange(additionalDomain->TheObjects[i],tempRoot);
 			if (!tempRoot.IsEqualTo(additionalRange->TheObjects[i]))
 				return false;
-		}	
+		}
 	for (int i=0;i<this->AmbientWeyl.RootsOfBorel.size;i++)
 	{	tempRoots.MakeBasisChange(this->AmbientWeyl.RootsOfBorel.TheObjects[i],tempRoot);
 		if (!this->IsARoot(tempRoot))
@@ -16046,7 +16046,7 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation
 			domain.AddObjectOnTop( this->SimpleBasesConnectedComponents.TheObjects[i].TheObjects[j]);
       int indexTargetComponent=thePerm.TheObjects[i];
       int indexAutomorphismInComponent=theAutosPerm.Multiplicities.TheObjects[i];
-      int indexRoot= 
+      int indexRoot=
 				theAutos.TheObjects[i].TheObjects[indexAutomorphismInComponent].TheObjects[j];
       range.AddObjectOnTop
         ( right.SimpleBasesConnectedComponents.TheObjects[indexTargetComponent]
@@ -16278,6 +16278,34 @@ int DynkinDiagramRootSubalgebra::RankTotal()
 	for (int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
 		result+=this->SimpleBasesConnectedComponents.TheObjects[i].size;
 	return result;
+}
+
+int DynkinDiagramRootSubalgebra::NumRootsGeneratedByDiagram()
+{ int result=0;
+  assert(this->SimpleBasesConnectedComponents.size==this->DynkinTypeStrings.size);
+  for (int i=0;i<this->DynkinTypeStrings.size;i++)
+  { int Rank=this->SimpleBasesConnectedComponents.TheObjects[i].size;
+    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='A')
+      result+=Rank*(Rank+1);
+    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='B'||
+        this->DynkinTypeStrings.TheObjects[i].at(1)=='C')
+      result+=Rank*Rank*2;
+    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='D')
+      result+=Rank*(Rank-1)*2;
+    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='E')
+    { if (Rank==6)
+        result+=72;
+      if (Rank==7)
+        result+=126;
+      if (Rank==8)
+        result+=240;
+    }
+    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='F')
+      result+=48;
+    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='G')
+      result+=12;
+  }
+  return result;
 }
 
 int ::DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes
@@ -16580,7 +16608,7 @@ void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
 	this->StatusString1=right.StatusString1;
 	this->StatusString1NeedsRefresh=right.StatusString1NeedsRefresh;
 	this->flagRootIsModified= right.flagRootIsModified;
-	
+
 	this->modifiedRoot=right.modifiedRoot;
 }
 

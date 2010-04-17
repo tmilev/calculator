@@ -1580,6 +1580,10 @@
 			Name="Source Files"
 			>
 			<File
+				RelativePath=".\ChevalleyConstants.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\polyhedra.cpp"
 				>
 			</File>

@@ -6219,6 +6219,10 @@ public:
 class SimpleLieAlgebra
 {
 public:
+	std::string DebugString;
+	void ElementToString(std::string& output);
+	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //format:
   //the Chevalley constants are listed in the same order as the root system of the Weyl group

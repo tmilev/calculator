@@ -1697,25 +1697,23 @@ void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool u
 }
 
 void root::MinusRoot()
-{	MultiplyByInteger(-1);
+{	for (int i=0;i<this->size;i++)
+		this->TheObjects[i].Minus();
 }
 
 void root::MultiplyByInteger(int a)
 {	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].MultiplyByInt(a);
-	}
+		this->TheObjects[i].MultiplyByInt(a);
 }
 
 void root::MultiplyByLargeInt(LargeInt& a)
 {	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].MultiplyByLargeInt(a);
-	}
+		this->TheObjects[i].MultiplyByLargeInt(a);
 }
 
 void root::MultiplyByLargeIntUnsigned(LargeIntUnsigned& a)
 {	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].MultiplyByLargeIntUnsigned(a);
-	}
+		this->TheObjects[i].MultiplyByLargeIntUnsigned(a);
 }
 
 void root::ScaleForMinHeightHeavy()
@@ -1724,17 +1722,16 @@ void root::ScaleForMinHeightHeavy()
 	this->MultiplyByLargeIntUnsigned(d);
 	d.MakeZero();
 	for (int i=0;i<this->size;i++)
-	{	if (!this->TheObjects[i].IsEqualToZero())
+		if (!this->TheObjects[i].IsEqualToZero())
 		{	if (d.IsEqualToZero())
-			{ this->TheObjects[i].GetNumExtendedUnsigned(d);
-			}
+        this->TheObjects[i].GetNumExtendedUnsigned(d);
 			else
 			{	LargeIntUnsigned tempI;
 				this->TheObjects[i].GetNumExtendedUnsigned(tempI);
 				LargeIntUnsigned::gcd(d,tempI,d);
 			}
 		}
-	}
+
 	this->DivByLargeIntUnsigned(d);
 }
 
@@ -1887,7 +1884,7 @@ void root::DivByLargeIntUnsigned(LargeIntUnsigned& a)
 		this->TheObjects[i].DivideByLargeIntegerUnsigned(a);
 }
 
-void root::MultiplyByLargeRational(Rational& a)
+void root::MultiplyByLargeRational(const Rational& a)
 {	for (int i=0;i<this->size;i++)
 		this->TheObjects[i].MultiplyBy(a);
 }
@@ -1985,6 +1982,18 @@ void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5,i
 	this->TheObjects[10].AssignInteger(x11);
 	this->TheObjects[11].AssignInteger(x12);
 	this->SetSizeExpandOnTopLight(Dimension);
+}
+
+void root::GetHeight(Rational& output)
+{ output.MakeZero();
+  for(int i=0;i<this->size;i++)
+    output.Add(this->TheObjects[i]);
+}
+
+Rational root::GetHeight()
+{ Rational tempRat;
+  this->GetHeight(tempRat);
+  return tempRat;
 }
 
 int root::HashFunction() const
@@ -7571,7 +7580,7 @@ void Rational::ReadFromFile(std::fstream& input)
 	}
 }
 
-const root Rational::operator *(const root& right)
+root Rational::operator *(const root& right)const
 { root result;
 	result.Assign(right);
 	result.MultiplyByLargeRational(*this);
@@ -7613,9 +7622,10 @@ void Rational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x)
 	this->Simplify();
 }
 
-inline void Rational::DivideBy(Rational &r)
+inline void Rational::DivideBy(const Rational &r)
 { if (r.Extended==0)
-	{ int tempNum; int tempDen;
+	{ int tempNum;
+    int tempDen;
     if(r.NumShort<0)
     { tempNum= -(r.DenShort);
       tempDen= -r.NumShort;
@@ -7625,10 +7635,11 @@ inline void Rational::DivideBy(Rational &r)
       tempDen= r.NumShort;
     }
 	  if (this->TryToMultiplyQuickly(tempNum, tempDen))
-		{	return;}
+			return;
 	}
 	if (this==&r)
-	{ this->MakeOne(); return;
+	{ this->MakeOne();
+    return;
 	}
 	this->InitExtendedFromShortIfNeeded();
 	if (r.Extended!=0)
@@ -7678,21 +7689,28 @@ void Rational::GetNumExtendedUnsigned(LargeIntUnsigned& output)
 //{ this->Assign(right);
 //}
 
-const Rational Rational::operator*(const Rational& right)
+Rational Rational::operator/(const Rational& right) const
+{ Rational tempRat;
+  tempRat.Assign(*this);
+  tempRat.DivideBy(right);
+  return tempRat;
+}
+
+Rational Rational::operator*(const Rational& right) const
 { Rational tempRat;
   tempRat.Assign(*this);
   tempRat.MultiplyBy(right);
   return tempRat;
 }
 
-const Rational Rational::operator+(const Rational& right)
+Rational Rational::operator+(const Rational& right) const
 { Rational tempRat;
   tempRat.Assign(*this);
   tempRat.Add(right);
   return tempRat;
 }
 
-const Rational Rational::operator-(const Rational& right)
+Rational Rational::operator-(const Rational& right) const
 { Rational tempRat;
   tempRat.Assign(*this);
   tempRat.Subtract(right);

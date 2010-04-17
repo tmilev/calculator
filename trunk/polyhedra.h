@@ -704,6 +704,7 @@ public:
 //		(Matrix<Element>& inputColumn,Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
 	bool Invert(GlobalVariables& theGlobalVariables);
 	void NullifyAll();
+	void NullifyAll(const Element& theRingZero);
 	//if m1 corresponds to a linear operator from V1 to V2 and
 	// m2 to a linear operator from W1 to W2, then the result of the below function
 	//corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
@@ -1089,6 +1090,13 @@ inline void Matrix<Element>::NullifyAll()
 }
 
 template <typename Element>
+inline void Matrix<Element>::NullifyAll(const Element& theRingZero)
+{ for (int i=0;i<this->NumRows;i++)
+		for (int j=0; j<this->NumCols;j++)
+			this->elements[i][j]=theRingZero;
+}
+
+template <typename Element>
 inline void MatrixElementaryTightMemoryFit<Element>::init(int r, int c)
 { this->Resize(r,c,false);
 }
@@ -1378,7 +1386,7 @@ public:
 																														this->FreeExtended();
 																														this->Simplify();
 																													};
-	void DivideBy(Rational& r);
+	void DivideBy(const Rational& r);
 	void DivideByInteger(int x)	{ int tempDen; signed char tempSign;
 																if (x<0) {tempDen=(-x); tempSign=-1;} else {tempDen=x; tempSign=1;}
 																if (this->TryToMultiplyQuickly(tempSign,tempDen))
@@ -1477,14 +1485,29 @@ public:
 	inline bool operator ==(const Rational& right){return this->IsEqualTo(right);};
 	inline bool operator ==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
 	inline void operator = (int right){this->AssignInteger(right);};
-	const Rational operator*(const Rational& right);
-	const root operator*(const root& right);
-	const Rational operator+(const Rational& right);
-	const Rational operator-(const Rational& right);
+	Rational operator*(const Rational& right)const;
+	root operator*(const root& right) const;
+	Rational operator+(const Rational& right) const;
+	Rational operator-(const Rational& right) const;
+	Rational operator/(const Rational& right) const;
 	bool operator>(const Rational& right) const{return this->IsGreaterThan(right);};
 	bool operator>(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat);};
 	bool operator<(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this);};
 };
+
+/*WFT The below doesn't link
+GGGGGGGGGGGGRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrrr
+RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
+RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
+RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
+RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
+RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
+Rational operator-(const Rational& argument)
+{ Rational tempRat;
+  tempRat.Assign(argument);
+  tempRat.Minus();
+  return tempRat;
+}*/
 
 class root :public ListBasicObjectsLight<Rational>
 {
@@ -1506,7 +1529,7 @@ public:
 //the below is to facilitate operator overloading
 	root(const root& right){this->Assign(right);};
 	std::string DebugString;
-	void MultiplyByLargeRational(Rational& a);
+	void MultiplyByLargeRational(const Rational& a);
 	void ComputeDebugString();
 	void MakeZero(int DesiredDimension);
 	void Add(const root& r);
@@ -1524,6 +1547,8 @@ public:
 	(	roots& theSet, WeylGroup& theWeylGroup, roots& output,
 		ListBasicObjects<Rational>& outputCoeffs);
 	void DivByLargeRational(Rational& a);
+	void GetHeight(Rational& output);
+	Rational GetHeight();
 	void ElementToString(std::string& output);
 	void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output, bool useLaTeX);
@@ -6191,6 +6216,26 @@ public:
 	void Compute(GlobalVariables& theGlobalVariables);
 };
 
+class SimpleLieAlgebra
+{
+public:
+  WeylGroup theWeyl;
+  //format:
+  //the Chevalley constants are listed in the same order as the root system of the Weyl group
+  // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
+  //the root at the j^th position, then
+  //the chevalley constant N_{\alpha\beta} given by [g^\alpha,g^\beta]=N_{\alpha\beta}g^{\alpha+\beta}
+  //will be located at the ij^{th} entry in the below matrix.
+  MatrixLargeRational ChevalleyConstants;
+  Matrix<bool> Computed;
+  void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
+  //Setup: \gamma+\delta-\epsilon is a root. \gamma+\delta=\eta is a root too.
+  //then the below function computes n_{-\epsilon, \eta}
+  void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexEpsilon, int indexEta);
+  void ExploitSymmetryChevalleyConstants
+    (int indexEpsilon, int indexEta);
+};
+
 struct ComputationSetup
 {	roots InputRoots;
 public:
@@ -6198,6 +6243,7 @@ public:
 	QuasiPolynomial theOutput;
 	rootSubalgebras theRootSubalgebras;
 	CombinatorialChamberContainer theChambers;
+	SimpleLieAlgebra theChevalleyConstantComputer;
 	Rational Value;
 	::SltwoSubalgebras theSltwoSubalgebras;
 	std::string ValueString;

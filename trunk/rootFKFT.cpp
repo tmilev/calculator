@@ -731,6 +731,9 @@ void ComputationSetup::RunCustom()
 
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
+  this->theChevalleyConstantComputer.ComputeChevalleyConstants
+    ('E', 8, *this->theGlobalVariablesContainer->Default());
+  return;
 	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
 	return;

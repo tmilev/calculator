@@ -1767,7 +1767,7 @@ bool root::IsStronglyPerpendicularTo(root &right, WeylGroup& theWeyl)
 	return true;
 }
 
-bool root::IsEqualTo(const root& right)
+bool root::IsEqualTo(const root& right) const
 {	if (this->size!=right.size)
 		return false;
 	for (int i=0;i<this->size;i++)
@@ -2003,7 +2003,7 @@ int root::HashFunction() const
 	return result;
 }
 
-inline bool root::IsPositiveOrZero()
+inline bool root::IsPositiveOrZero() const
 { for (int i=0;i<this->size;i++)
 		if (this->TheObjects[i].IsNegative())
 			return false;
@@ -2084,7 +2084,7 @@ void root::DivByLargeInt(LargeInt& a)
 		this->TheObjects[i].DivideByLargeInteger(a);
 }
 
-void root::DivByLargeRational(Rational&a)
+void root::DivByLargeRational(const Rational& a)
 {	for (int i =0; i<this->size;i++)
 		this->TheObjects[i].DivideBy(a);
 }
@@ -3110,7 +3110,7 @@ int roots::ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVari
 	return (oldRank);
 }
 
-inline bool Rational::IsEqualTo(const Rational& b)
+inline bool Rational::IsEqualTo(const Rational& b) const
 {	if (this->Extended==0 && b.Extended==0)
     return (this->NumShort*b.DenShort==b.NumShort*this->DenShort);
   static Rational tempRat;
@@ -11987,7 +11987,7 @@ void WeylGroup::GenerateOrbit
 	}
 }
 
-void WeylGroup::RootScalarKillingFormMatrixRoot(root& r1, root& r2, Rational& output)
+void WeylGroup::RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output)
 { output.MakeZero();
 	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
 	{	for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
@@ -18412,14 +18412,18 @@ void SimpleLieAlgebra::ComputeChevalleyConstants
   nonExploredRoots.init(posRoots.size);
   for (int i=0;i<posRoots.size;i++)
     nonExploredRoots.AddSelectionAppendNewIndex(i);
+  root tempRoot;
   for (int i=0;i<this->theWeyl.RootSystem.size;i++)
 		for(int j=i;j<this->theWeyl.RootSystem.size;j++)
-			if(!this->theWeyl.IsARoot(this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j]))
-			{ this->Computed.elements[i][j]=true;
-				this->ChevalleyConstants.elements[i][j].MakeZero();
-				this->Computed.elements[j][i]=true;
-				this->ChevalleyConstants.elements[j][i].MakeZero();
-			}
+		{	tempRoot=this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
+			if(!tempRoot.IsEqualToZero())
+				if( !this->theWeyl.IsARoot(tempRoot))
+				{ this->Computed.elements[i][j]=true;
+					this->ChevalleyConstants.elements[i][j].MakeZero();
+					this->Computed.elements[j][i]=true;
+					this->ChevalleyConstants.elements[j][i].MakeZero();
+				}
+		}
   Rational tempRat;
   while (nonExploredRoots.CardinalitySelection>0)
   { //this->ComputeDebugString();
@@ -18476,12 +18480,14 @@ void SimpleLieAlgebra::ComputeChevalleyConstants
     nonExploredRoots.ComputeIndicesFromSelection();
   }
 	this->ComputeDebugString();
+  this->TestForConsistency();
 }
 
 void SimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants
 	(int indexI, int indexJ)
 {	root& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
 	root& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
+	assert(!(rootI+rootJ).IsEqualToZero());
 	int indexMinusRootI= this->theWeyl.RootSystem.IndexOfObjectHash(-rootI);
 	int indexMinusRootJ= this->theWeyl.RootSystem.IndexOfObjectHash(-rootJ);
   //this->ComputeDebugString();
@@ -18506,6 +18512,7 @@ void SimpleLieAlgebra::ExploitSymmetryChevalleyConstants
     (this->ChevalleyConstants.elements[indexI][indexJ]*(-1));
   //this->ComputeDebugString();
   this->Computed.elements[indexJ][indexI]=true;
+  assert(!(rootI+rootJ).IsEqualToZero());
 	int i=
 		1+this->GetMaxQForWhichBetaMinusQAlphaIsARoot
 			( this->theWeyl.RootSystem.TheObjects[indexMinusRootI],
@@ -18526,6 +18533,9 @@ void SimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 	root& rootK= this->theWeyl.RootSystem.TheObjects[k];
 	root& rootJ= this->theWeyl.RootSystem.TheObjects[j];
 	assert((rootI+rootK+rootJ).IsEqualToZero());
+	assert(	!(rootI+rootJ).IsEqualToZero() && 
+					!(rootK+rootK).IsEqualToZero() &&
+					!(rootJ+rootI).IsEqualToZero());
 	assert(this->Computed.elements[i][j]);
 	Rational& tempRat= this->ChevalleyConstants.elements[i][j];
 	Rational tempRat2= this->theWeyl.RootScalarKillingFormMatrixRoot(rootK,rootK);
@@ -18613,3 +18623,77 @@ void ::SimpleLieAlgebra::ElementToString(std::string &output)
 	//out <<"\n"<< tempS<<"\n";
 	output=out.str();
 }
+
+bool SimpleLieAlgebra::TestForConsistency()
+{	::hashedRoots& theRoots=this->theWeyl.RootSystem;
+	for (int i=0;i<theRoots.size;i++)
+		for (int j=0;j<theRoots.size;j++)
+			for (int k=0;k<theRoots.size;k++)
+			{ root& rootI= this->theWeyl.RootSystem.TheObjects[i];
+				root& rootJ= this->theWeyl.RootSystem.TheObjects[j];
+				root& rootK= this->theWeyl.RootSystem.TheObjects[k];
+				if ((rootI+rootJ)!=-rootK)
+				{	Rational RatIJK, RatJKI, RatKIJ;
+					if (!(rootJ+rootK).IsEqualToZero())
+						RatIJK=this->GetConstant(rootI, rootJ+rootK)*this->GetConstant(rootJ, rootK);
+					else
+						RatIJK= this->theWeyl.RootScalarKillingFormMatrixRoot(rootK, rootI)*2/
+										this->theWeyl.RootScalarKillingFormMatrixRoot(rootK, rootK);	
+					if (!(rootK+rootI).IsEqualToZero())
+						RatJKI=this->GetConstant(rootJ, rootK+rootI)*this->GetConstant(rootK, rootI);
+					else
+						RatJKI= this->theWeyl.RootScalarKillingFormMatrixRoot(rootI, rootJ)*2/
+										this->theWeyl.RootScalarKillingFormMatrixRoot(rootI, rootI);	
+					if (!(rootI+rootJ).IsEqualToZero())
+						RatKIJ=this->GetConstant(rootK, rootI+rootJ)*this->GetConstant(rootI, rootJ);
+					else
+						RatKIJ= this->theWeyl.RootScalarKillingFormMatrixRoot(rootJ, rootK)*2/
+										this->theWeyl.RootScalarKillingFormMatrixRoot(rootJ, rootJ);	
+									
+					Rational tempRat=RatIJK+RatJKI+RatKIJ; 
+					assert(tempRat.IsEqualToZero());
+					if (!tempRat.IsEqualToZero())
+						return false;
+				} else
+				{	root rootIJK, rootJKI, rootKIJ, tempRoot;
+					Rational tempRat1;
+					this->GetConstantOrHElement(rootI, rootJ+rootK,tempRat1, rootIJK);
+					this->GetConstantOrHElement(rootJ, rootK+rootI,tempRat1, rootJKI);
+					this->GetConstantOrHElement(rootK, rootI+rootJ,tempRat1, rootKIJ);
+					tempRoot= 
+						this->GetConstant(rootJ, rootK)*rootIJK+
+						this->GetConstant(rootK, rootI)*rootJKI+
+						this->GetConstant(rootI, rootJ)*rootKIJ;
+					assert(tempRoot.IsEqualToZero());
+				}
+			}
+	return true;
+}
+
+Rational SimpleLieAlgebra::GetConstant(const root &root1, const  root &root2)
+{	int index1=this->theWeyl.RootSystem.IndexOfObjectHash(root1);
+	int index2= this->theWeyl.RootSystem.IndexOfObjectHash(root2);
+	Rational tempRat;
+	if (index1==-1 || index2==-1)
+	{ tempRat.MakeZero();
+		return tempRat;
+	}	
+	tempRat.Assign(this->ChevalleyConstants.elements[index1][index2]);
+	return tempRat;
+}
+
+bool SimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& root2, Rational& outputRat, root& outputH)
+{ if (!(root1+root2).IsEqualToZero())
+	{	outputRat=this->GetConstant(root1, root2);
+		return true;
+	}
+	if (this->theWeyl.RootSystem.IndexOfObjectHash(root1)==-1 ||
+			this->theWeyl.RootSystem.IndexOfObjectHash(root2)==-1)
+	{	outputRat.MakeZero();
+		return true;
+	} 
+	outputH=(root1*2)/this->theWeyl.RootScalarKillingFormMatrixRoot(root1,root1);
+	return false;
+}
+
+

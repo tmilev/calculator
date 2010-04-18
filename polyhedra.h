@@ -1486,6 +1486,12 @@ public:
 	inline bool operator ==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
 	inline void operator = (int right){this->AssignInteger(right);};
 	Rational operator*(const Rational& right)const;
+	Rational operator*(int right)const
+	{	Rational tempRat; 
+		tempRat.Assign(*this);
+		tempRat.MultiplyByInt(right);
+		return tempRat;
+	};
 	root operator*(const root& right) const;
 	Rational operator+(const Rational& right) const;
 	Rational operator-(const Rational& right) const;
@@ -1601,13 +1607,13 @@ public:
 	root(){};
 	inline void operator=(const root& right){this->Assign(right);};
 	inline bool operator==(const root& right){return IsEqualTo(right);};
-	inline const root operator+(const root& right)
+	inline root operator+(const root& right) const
 	{ root result;
     result.Assign(*this);
     result.Add(right);
     return result;
   };
-  inline const root operator-(const root& right)
+  inline root operator-(const root& right) const
   { root result;
     result.Assign(*this);
     result.Subtract(right);
@@ -6233,11 +6239,15 @@ public:
   MatrixLargeRational ChevalleyConstants;
   Matrix<bool> Computed;
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
-  //Setup: \gamma+\delta-\epsilon is a root. \gamma+\delta=\eta is a root too.
-  //then the below function computes n_{-\epsilon, \eta}
-  void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexEpsilon, int indexEta);
+  //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root. 
+  //then the below function computes n_{-\epsilon, -\zeta}
+  void ComputeOneChevalleyConstant
+		(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta );
+	void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants
-    (int indexEpsilon, int indexEta);
+      (int indexI, int indexJ);
+  void ExploitTheCyclicTrick(int i, int j, int k);
+  int GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta);
 };
 
 struct ComputationSetup

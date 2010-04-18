@@ -18399,3 +18399,217 @@ void coneRelations::ElementToString
 	output=out.str();
 };
 
+void SimpleLieAlgebra::ComputeChevalleyConstants
+  (char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
+{ this->theWeyl.MakeArbitrary(WeylLetter, WeylIndex);
+  this->theWeyl.ComputeRho();
+  this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
+  this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
+  this->Computed.NullifyAll(false);
+  Selection nonExploredRoots;
+  this->flagAnErrorHasOccurredTimeToPanic=false;
+  roots& posRoots=this->theWeyl.RootsOfBorel;
+  nonExploredRoots.init(posRoots.size);
+  for (int i=0;i<posRoots.size;i++)
+    nonExploredRoots.AddSelectionAppendNewIndex(i);
+  for (int i=0;i<this->theWeyl.RootSystem.size;i++)
+		for(int j=i;j<this->theWeyl.RootSystem.size;j++)
+			if(!this->theWeyl.IsARoot(this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j]))
+			{ this->Computed.elements[i][j]=true;
+				this->ChevalleyConstants.elements[i][j].MakeZero();
+				this->Computed.elements[j][i]=true;
+				this->ChevalleyConstants.elements[j][i].MakeZero();
+			}
+  Rational tempRat;
+  while (nonExploredRoots.CardinalitySelection>0)
+  { //this->ComputeDebugString();
+		//nonExploredRoots.ComputeDebugString();
+		int theBorelIndex=nonExploredRoots.elements[0];
+    Rational theHeight= posRoots.TheObjects[theBorelIndex].GetHeight();
+    for (int i=1;i<nonExploredRoots.CardinalitySelection;i++)
+    { posRoots.TheObjects[nonExploredRoots.elements[i]].GetHeight(tempRat);
+      if (theHeight.IsGreaterThan(tempRat))
+      { theHeight.Assign(tempRat);
+        theBorelIndex=nonExploredRoots.elements[i];
+      }
+    }
+    root& theRoot= posRoots.TheObjects[theBorelIndex];
+    int theIndex=this->theWeyl.RootSystem.IndexOfObjectHash(theRoot);
+    root smallRoot2;
+    int FirstIndexFirstPosChoice=-1;
+    int FirstIndexFirstNegChoice=-1;
+    int SecondIndexFirstPosChoice=-1;
+    int SecondIndexFirstNegChoice=-1;
+    Rational CurrentHeight;
+    for (int i=0;i<this->theWeyl.RootsOfBorel.size;i++)
+    { root& smallRoot1=this->theWeyl.RootsOfBorel.TheObjects[i];
+      smallRoot1.GetHeight(CurrentHeight);
+      int FirstPosIndex= this->theWeyl.RootSystem.IndexOfObjectHash(smallRoot1);
+      int FirstNegIndex= this->theWeyl.RootSystem.IndexOfObjectHash(-smallRoot1);
+      if (theHeight.IsGreaterThan(CurrentHeight))
+      { smallRoot2=theRoot-smallRoot1;
+        int SecondPosIndex=this->theWeyl.RootSystem.IndexOfObjectHash(smallRoot2);
+        if (FirstPosIndex<SecondPosIndex)
+					if (SecondPosIndex!=-1)
+					{ int SecondNegIndex=this->theWeyl.RootSystem.IndexOfObjectHash(-smallRoot2);
+						if (FirstIndexFirstPosChoice==-1)
+						{ FirstIndexFirstPosChoice=FirstPosIndex;
+							SecondIndexFirstPosChoice=SecondPosIndex;
+							FirstIndexFirstNegChoice=FirstNegIndex;
+							SecondIndexFirstNegChoice= SecondNegIndex;							
+							this->ChevalleyConstants.elements[FirstNegIndex][SecondNegIndex]=
+								-(1+this->GetMaxQForWhichBetaMinusQAlphaIsARoot(smallRoot1, smallRoot2));
+							this->Computed.elements[FirstNegIndex][SecondNegIndex]=true;
+						}
+						else
+          		this->ComputeOneChevalleyConstant
+								(FirstIndexFirstPosChoice, SecondIndexFirstPosChoice, FirstNegIndex, SecondNegIndex, theIndex);
+						//this->ComputeDebugString();
+						this->ExploitSymmetryAndCyclicityChevalleyConstants(FirstNegIndex, SecondNegIndex);
+						//this->ComputeDebugString();
+					}
+      }
+      if (this->flagAnErrorHasOccurredTimeToPanic)
+				this->ComputeDebugString();
+    }
+    nonExploredRoots.selected[theBorelIndex]=false;
+    nonExploredRoots.ComputeIndicesFromSelection();
+  }
+	this->ComputeDebugString();
+}
+
+void SimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants
+	(int indexI, int indexJ)
+{	root& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
+	root& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
+	int indexMinusRootI= this->theWeyl.RootSystem.IndexOfObjectHash(-rootI);
+	int indexMinusRootJ= this->theWeyl.RootSystem.IndexOfObjectHash(-rootJ);
+  //this->ComputeDebugString();
+	this->ExploitSymmetryChevalleyConstants(indexI, indexJ);
+  //this->ComputeDebugString();
+  int indexRootIPlusRootJ=this->theWeyl.RootSystem.IndexOfObjectHash(rootI+rootJ);
+  int indexMinusRootIMinusRootJ=this->theWeyl.RootSystem.IndexOfObjectHash(-rootI-rootJ);
+  this->ExploitTheCyclicTrick(indexI, indexJ, indexMinusRootIMinusRootJ);
+  //this->ComputeDebugString();
+  //this->ExploitTheCyclicTrick(indexMinusRootI, indexMinusRootJ, indexRootIPlusRootJ);
+  //this->ComputeDebugString();
+}
+
+void SimpleLieAlgebra::ExploitSymmetryChevalleyConstants
+  (int indexI, int indexJ)
+{ root& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
+	root& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
+	assert(this->Computed.elements[indexI][indexJ]);
+	int indexMinusRootI = this->theWeyl.RootSystem.IndexOfObjectHash(-rootI);
+	int indexMinusRootJ = this->theWeyl.RootSystem.IndexOfObjectHash(-rootJ);	
+	this->ChevalleyConstants.elements[indexJ][indexI].Assign
+    (this->ChevalleyConstants.elements[indexI][indexJ]*(-1));
+  //this->ComputeDebugString();
+  this->Computed.elements[indexJ][indexI]=true;
+	int i=
+		1+this->GetMaxQForWhichBetaMinusQAlphaIsARoot
+			( this->theWeyl.RootSystem.TheObjects[indexMinusRootI],
+				this->theWeyl.RootSystem.TheObjects[indexMinusRootJ]);
+  this->ChevalleyConstants.elements[indexMinusRootI][indexMinusRootJ].AssignInteger(-i*i);
+  this->ChevalleyConstants.elements[indexMinusRootI][indexMinusRootJ].DivideBy
+    (this->ChevalleyConstants.elements[indexI][indexJ]);
+  this->Computed.elements[indexMinusRootI][indexMinusRootJ]=true;
+  //this->ComputeDebugString();
+  this->ChevalleyConstants.elements[indexMinusRootJ][indexMinusRootI].Assign
+    (this->ChevalleyConstants.elements[indexMinusRootI][indexMinusRootJ]*(-1));
+  this->Computed.elements[indexMinusRootJ][indexMinusRootI]=true;
+  //this->ComputeDebugString();
+}
+
+void SimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
+{ root& rootI= this->theWeyl.RootSystem.TheObjects[i];
+	root& rootK= this->theWeyl.RootSystem.TheObjects[k];
+	root& rootJ= this->theWeyl.RootSystem.TheObjects[j];
+	assert((rootI+rootK+rootJ).IsEqualToZero());
+	assert(this->Computed.elements[i][j]);
+	Rational& tempRat= this->ChevalleyConstants.elements[i][j];
+	Rational tempRat2= this->theWeyl.RootScalarKillingFormMatrixRoot(rootK,rootK);
+	this->ChevalleyConstants.elements[j][k]= 
+		(tempRat*this->theWeyl.RootScalarKillingFormMatrixRoot(rootI, rootI))/tempRat2;
+	this->Computed.elements[j][k]=true;
+	this->ChevalleyConstants.elements[k][i]= 
+		(tempRat*this->theWeyl.RootScalarKillingFormMatrixRoot(rootJ, rootJ))/tempRat2;
+	this->Computed.elements[k][i]=true;
+	this->ExploitSymmetryChevalleyConstants(j,k);
+	this->ExploitSymmetryChevalleyConstants(k,i);
+}
+
+int SimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(root &alpha, root &beta)
+{ int result=-1;
+  root tempRoot;
+  tempRoot.Assign(beta);
+  while (this->theWeyl.IsARoot(tempRoot))
+  { result++;
+    tempRoot.Subtract(alpha);
+  }
+  return result;
+}
+
+void SimpleLieAlgebra::ComputeOneChevalleyConstant
+  (int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta )
+{//using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
+	root& gamma= this->theWeyl.RootSystem.TheObjects[indexGamma];
+  root& delta= this->theWeyl.RootSystem.TheObjects[indexDelta];
+  root& minusEpsilon= this->theWeyl.RootSystem.TheObjects[indexMinusEpsilon];
+  root& eta= this->theWeyl.RootSystem.TheObjects[indexEta];
+  root& minusZeta=this->theWeyl.RootSystem.TheObjects[indexMinusZeta];
+  assert(eta==gamma+delta);
+  assert(this->theWeyl.IsARoot(eta+minusEpsilon));
+  assert
+    ( this->Computed.elements[indexDelta][indexMinusEpsilon] &&
+      this->Computed.elements[indexMinusEpsilon][indexGamma] &&
+      this->Computed.elements[indexGamma][indexDelta] );
+  assert(!this->ChevalleyConstants.elements[indexGamma][indexDelta].IsEqualToZero());
+  int indexDeltaMinusEpsilon= this->theWeyl.RootSystem.IndexOfObjectHash(delta+minusEpsilon);
+  int indexGammaMinusEpsilon= this->theWeyl.RootSystem.IndexOfObjectHash(gamma+minusEpsilon);
+  Rational FirstSummand, SecondSummand;
+  if (indexDeltaMinusEpsilon!=-1)
+  {	assert
+			(	this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] &&
+				this->Computed.elements[indexDelta][indexMinusEpsilon]);
+		FirstSummand=
+			this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon]*
+			this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
+  } else
+		FirstSummand.MakeZero();
+  if (indexGammaMinusEpsilon!=-1)
+  {	assert
+			(	this->Computed.elements[indexDelta][indexGammaMinusEpsilon] &&
+				this->Computed.elements[indexMinusEpsilon][indexGamma]);
+		SecondSummand =
+			this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*
+			this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
+  } else
+		SecondSummand.MakeZero();		
+  this->ChevalleyConstants.elements[indexMinusEpsilon][indexMinusZeta]=
+    (	this->theWeyl.RootScalarKillingFormMatrixRoot(eta,eta)/
+			this->theWeyl.RootScalarKillingFormMatrixRoot(minusZeta,minusZeta))*
+    ( FirstSummand+SecondSummand)/ this->ChevalleyConstants.elements[indexGamma][indexDelta];
+  this->Computed.elements[indexMinusEpsilon][indexMinusZeta]=true;
+}
+
+void ::SimpleLieAlgebra::ElementToString(std::string &output)
+{ std::stringstream out;
+	std::string tempS;
+	for (int i=0; i<this->theWeyl.RootSystem.size; i++)
+	{	this->theWeyl.RootSystem.TheObjects[i].ElementToString(tempS);
+		out << tempS<<"\t";
+	}
+	out <<"\n\n";
+	for (int i=0;i<this->ChevalleyConstants.NumRows;i++)
+	{	for (int j=0; j<this->ChevalleyConstants.NumCols;j++)
+			if (this->Computed.elements[i][j])
+				out << this->ChevalleyConstants.elements[i][j].ElementToString()<<",\t";
+			else
+				out << "n/a,\t";
+		out <<"\n";
+	}
+	//this->ChevalleyConstants.ElementToSting(tempS);
+	//out <<"\n"<< tempS<<"\n";
+	output=out.str();
+}

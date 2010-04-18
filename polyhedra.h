@@ -1409,7 +1409,7 @@ public:
     this->ElementToString(tempS);
     return tempS;
   };
-	bool IsEqualTo(const Rational& r);
+	bool IsEqualTo(const Rational& r) const;
 	bool IsGreaterThanOrEqualTo(Rational& right);
 	inline bool IsEqualToZero(){	if (this->Extended==0)
 																	return this->NumShort==0;
@@ -1492,6 +1492,12 @@ public:
 		tempRat.MultiplyByInt(right);
 		return tempRat;
 	};
+	Rational operator/(int right)const
+	{	Rational tempRat; 
+		tempRat.Assign(*this);
+		tempRat.DivideByInteger(right);
+		return tempRat;
+	};
 	root operator*(const root& right) const;
 	Rational operator+(const Rational& right) const;
 	Rational operator-(const Rational& right) const;
@@ -1552,7 +1558,7 @@ public:
 	bool HasStronglyPerpendicularDecompositionWRT
 	(	roots& theSet, WeylGroup& theWeylGroup, roots& output,
 		ListBasicObjects<Rational>& outputCoeffs);
-	void DivByLargeRational(Rational& a);
+	void DivByLargeRational(const Rational& a);
 	void GetHeight(Rational& output);
 	Rational GetHeight();
 	void ElementToString(std::string& output);
@@ -1588,7 +1594,7 @@ public:
 	};
 	void AssignIntRoot(intRoot& right);
 	bool IsProportianalTo(root& r);
-	bool IsPositiveOrZero();
+	bool IsPositiveOrZero() const;
 	bool IsNegativeZero();
 	bool IsEqualToZero()
 	{	for (int i=0;i<this->size;i++)
@@ -1597,7 +1603,7 @@ public:
 		return true;
 	};
 	bool IsGreaterThanOrEqualTo(root& r);
-	bool IsEqualTo(const root& right);
+	bool IsEqualTo(const root& right) const;
 	bool IsStronglyPerpendicularTo(root& right, WeylGroup& theWeyl);
 	static void RootScalarEuclideanRoot(const root& r1, const root& r2, Rational& output);
 	static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, Rational& output);
@@ -1625,6 +1631,21 @@ public:
   inline void operator-=(const root& right)
   { this->Subtract(right);
   };
+	inline bool operator!=(const root& right) const
+	{ return !this->IsEqualTo(right);
+	};
+	root operator*(int right)const
+	{	root tempRoot; 
+		tempRoot.Assign(*this);
+		tempRoot.MultiplyByInteger(right);
+		return tempRoot;
+	};
+	root operator/(const Rational& right)const
+	{	root tempRoot; 
+		tempRoot.Assign(*this);
+		tempRoot.DivByLargeRational(right);
+		return tempRoot;
+	};
 };
 
 inline root operator-(const root& right)
@@ -5566,8 +5587,8 @@ public:
 	void SimpleReflectionRootAlg
 		(	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
 	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
-	void RootScalarKillingFormMatrixRoot(root&r1, root& r2, Rational& output);
-	Rational RootScalarKillingFormMatrixRoot(root& r1, root& r2)
+	void RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output);
+	Rational RootScalarKillingFormMatrixRoot(const root& r1, const root& r2)
 	{ Rational tempRat;
     this->RootScalarKillingFormMatrixRoot(r1, r2, tempRat);
     return tempRat;
@@ -6248,6 +6269,10 @@ public:
       (int indexI, int indexJ);
   void ExploitTheCyclicTrick(int i, int j, int k);
   int GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta);
+  Rational GetConstant(const root& root1, const root& root2);
+  //returns true if returning constant, false if returning element of h
+  bool GetConstantOrHElement(const root& root1, const root& root2, Rational& outputRat, root& outputH);
+  bool TestForConsistency();
 };
 
 struct ComputationSetup

@@ -724,6 +724,8 @@ public:
 	static void GaussianEliminationByRows
 		(	Matrix<Element>& mat, Matrix<Element>& output,
 			Selection& outputSelection, bool returnNonPivotPoints);
+  static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
+    (Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
 };
 
 class MatrixLargeRational: public Matrix<Rational>
@@ -1011,9 +1013,19 @@ inline void Matrix<Element>::SwitchTwoRows( int row1, int row2)
 }
 
 template <typename Element>
+bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
+  ( Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output)
+{ assert(A.NumRows== b.NumRows);
+  Selection thePivotPoints;
+  Matrix<Element>::GaussianEliminationByRows(A, b, thePivotPoints, false);
+  return A.RowEchelonFormToLinearSystemSolution( thePivotPoints,b,output);
+}
+
+
+template <typename Element>
 bool Matrix<Element>::RowEchelonFormToLinearSystemSolution
 	( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide,
-			Matrix<Element>& outputSolution)
+		Matrix<Element>& outputSolution)
 { assert(	inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1
 					&& inputRightHandSide.NumRows==this->NumRows);
 	outputSolution.init(this->NumCols,1);

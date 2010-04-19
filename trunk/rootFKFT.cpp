@@ -731,9 +731,26 @@ void ComputationSetup::RunCustom()
 
 void ComputationSetup::DoTheRootSAComputationCustom()
 {	//rootSubalgebra theRootSA, theRootSA2;
-  //this->theChevalleyConstantComputer.ComputeChevalleyConstants
-   // ('E',8 , *this->theGlobalVariablesContainer->Default());
+  //MatrixLargeRational tempMat,tempB, tempX;
+  //tempMat.init(3,4); tempB.init(3,1);
+  //tempMat.elements[0][0]=0;tempMat.elements[0][1]=80;tempMat.elements[0][2]=1;tempMat.elements[0][3]=0;
+  //tempMat.elements[1][0]=1;tempMat.elements[1][1]=96;tempMat.elements[1][2]=0;tempMat.elements[1][3]=0;
+  //tempMat.elements[2][0]=0;tempMat.elements[2][1]=95;tempMat.elements[2][2]=1;tempMat.elements[2][3]=0;
+  //tempB.elements[0][0]=5;
+  //tempB.elements[1][0]=6;
+  //tempB.elements[2][0]=6;
+  //std::stringstream out;
+  //if (MatrixLargeRational::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat,tempB,tempX))
+   // out <<"has solution\n\n";
+  //else
+   // out<<"no solution\n\n";
+  //tempX.ComputeDebugString();
+  //out<<tempX.DebugString;
+  //this->theRootSubalgebras.DebugString=out.str();
   //return;
+  this->theChevalleyConstantComputer.ComputeChevalleyConstants
+    ('E',8 , *this->theGlobalVariablesContainer->Default());
+  return;
 	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
 	return;

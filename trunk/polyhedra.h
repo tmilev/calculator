@@ -112,6 +112,7 @@ class SubsetWithMultiplicities;
 class hashedRoots;
 class WeylGroup;
 class intRoots;
+class SimpleLieAlgebra;
 class GlobalVariables;
 class MathRoutines;
 class GlobalVariablesContainer;
@@ -437,7 +438,7 @@ public:
 	static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
 	void ReverseOrderElements();
 	void CopyFromBase (const ListBasicObjects<Object>& From);
-	bool IsEqualTo(const ListBasicObjects<Object>& Other)
+	bool IsEqualTo(const ListBasicObjects<Object>& Other) const
 	{ if (this->size!=Other.size)
 			return false;
 		for (int i=0;i<Other.size;i++)
@@ -1487,13 +1488,13 @@ public:
 	inline void operator = (int right){this->AssignInteger(right);};
 	Rational operator*(const Rational& right)const;
 	Rational operator*(int right)const
-	{	Rational tempRat; 
+	{	Rational tempRat;
 		tempRat.Assign(*this);
 		tempRat.MultiplyByInt(right);
 		return tempRat;
 	};
 	Rational operator/(int right)const
-	{	Rational tempRat; 
+	{	Rational tempRat;
 		tempRat.Assign(*this);
 		tempRat.DivideByInteger(right);
 		return tempRat;
@@ -1635,13 +1636,13 @@ public:
 	{ return !this->IsEqualTo(right);
 	};
 	root operator*(int right)const
-	{	root tempRoot; 
+	{	root tempRoot;
 		tempRoot.Assign(*this);
 		tempRoot.MultiplyByInteger(right);
 		return tempRoot;
 	};
 	root operator/(const Rational& right)const
-	{	root tempRoot; 
+	{	root tempRoot;
 		tempRoot.Assign(*this);
 		tempRoot.DivByLargeRational(right);
 		return tempRoot;
@@ -6243,7 +6244,25 @@ public:
 	void Compute(GlobalVariables& theGlobalVariables);
 };
 
-class SimpleLieAlgebra
+class ElementSimpleLieAlgebra
+{
+public:
+  ListBasicObjects<Rational> coeffsRootSpaces;
+  root Hcomponent;
+  void operator=(const ElementSimpleLieAlgebra& other)
+  { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
+    this->Hcomponent.Assign(other.Hcomponent);
+  };
+  void init(SimpleLieAlgebra& owner);
+  void Nullify(SimpleLieAlgebra& owner);
+  bool operator==(const ElementSimpleLieAlgebra& other) const
+  { return
+      this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) &&
+      this->Hcomponent.IsEqualTo(other.Hcomponent);
+  };
+};
+
+class SimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
 {
 public:
 	std::string DebugString;
@@ -6260,8 +6279,11 @@ public:
   MatrixLargeRational ChevalleyConstants;
   Matrix<bool> Computed;
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
-  //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root. 
+  //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
   //then the below function computes n_{-\epsilon, -\zeta}
+  void LieBracket
+    ( const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2,
+      ElementSimpleLieAlgebra& output);
   void ComputeOneChevalleyConstant
 		(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta );
 	void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);

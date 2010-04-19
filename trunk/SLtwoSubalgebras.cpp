@@ -3,6 +3,9 @@
 
 template < > int HashedListBasicObjects<SltwoDecomposition>::PreferredHashSize=1000;
 template < > int ListBasicObjects<SltwoDecomposition>::ListBasicObjectsActualSizeIncrement=1000;
+template < > int HashedListBasicObjects<ElementSimpleLieAlgebra>::PreferredHashSize=100;
+template < > int ListBasicObjects<ElementSimpleLieAlgebra>::ListBasicObjectsActualSizeIncrement=100;
+
 extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
 void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables)
 {	this->theWeylGroup.MakeEn(8);
@@ -125,14 +128,14 @@ void SltwoSubalgebras::ElementToString
 		bool useLatex, bool UseHtml)
 {	std::string tempS; std::stringstream out;
   int Zcounter=0;
-  int NumDynkinEps0=0;
+  int numGood=0;
 	out <<"Number sl(2)s: "<< this->size<<"\n\n";
 	//for (int k=0;k<2;k++)
 	//{	//bool tempBool=(k==0);
 	for (int i=0;i<this->size;i++)
-    if ((this->TheObjects[i].DynkinsEpsilon==0))//)==tempBool)
-    { if(this->TheObjects[i].DynkinsEpsilon==0)
-        NumDynkinEps0++;
+    if (!this->TheObjects[i].DifferenceTwoHsimpleRootsIsARoot)//)==tempBool)
+    { //if(this->TheObjects[i].DynkinsEpsilon==0)
+      numGood++;
       this->TheObjects[i].hCharacteristic.ElementToString(tempS);
       out << "h: " << tempS;
       root& r=this->TheObjects[i].hCharacteristic;
@@ -181,8 +184,7 @@ void SltwoSubalgebras::ElementToString
       out <<"\n\n\\rule{\\textwidth}{0.4pt}";
     }
 	out <<  "\n\n Num subalgebras satisfying your inequality= "<< Zcounter;
-	//out <<  "\n\nNum Subalgebras with Dynkin's epsilon equal to zero:"
-  //    << NumDynkinEps0;
+	out <<  "\n\nNum good subalgebras: "<< numGood;
 	output=out.str();
 }
 
@@ -229,3 +231,51 @@ void SltwoDecomposition::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
   this->DynkinsEpsilon=0;
 
 }
+
+void ElementSimpleLieAlgebra::init (SimpleLieAlgebra& owner)
+{ this->Hcomponent.SetSizeExpandOnTopLight(owner.theWeyl.KillingFormMatrix.NumRows);
+  this->coeffsRootSpaces.SetSizeExpandOnTopNoObjectInit(owner.theWeyl.RootSystem.size);
+}
+
+void ElementSimpleLieAlgebra::Nullify(SimpleLieAlgebra& owner)
+{ this->init(owner);
+  this->Hcomponent.MakeZero(owner.theWeyl.KillingFormMatrix.NumRows);
+  for(int j=0; j<this->coeffsRootSpaces.size;j++)
+    this->coeffsRootSpaces.TheObjects[j].MakeZero();
+}
+
+void SimpleLieAlgebra::LieBracket
+  ( const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2,
+    ElementSimpleLieAlgebra& output)
+{ assert(&output!=&g1 && &output!=&g2);
+  output.Nullify(*this);
+  root tempRoot, rootIplusRootJ;
+  Rational tempRat;
+  for (int i=0;i<g1.coeffsRootSpaces.size;i++)
+    for (int j=0; j<g2.coeffsRootSpaces.size;j++)
+      if (!g1.coeffsRootSpaces.TheObjects[i].IsEqualToZero() &&
+          !g2.coeffsRootSpaces.TheObjects[j].IsEqualToZero())
+      { root& rootI= this->theWeyl.RootSystem.TheObjects[i];
+        root& rootJ= this->theWeyl.RootSystem.TheObjects[j];
+        rootIplusRootJ=rootI+rootJ;
+        if (rootIplusRootJ.IsEqualToZero())
+        { tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i]);
+          tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[j]);
+          tempRoot.Assign(rootI);
+          tempRoot.DivByLargeRational
+            ((this->theWeyl.RootScalarKillingFormMatrixRoot(rootI, rootI)/tempRat)/2);
+          output.Hcomponent.Add(tempRoot);
+        }
+        else
+        { if (!this->ChevalleyConstants.elements[i][j].IsEqualToZero())
+          { int theIndex=this->theWeyl.RootSystem.IndexOfObjectHash(rootIplusRootJ);
+            tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i]);
+            tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[j]);
+            output.coeffsRootSpaces.TheObjects[theIndex].Add
+              (tempRat*this->ChevalleyConstants.elements[i][j]);
+          }
+        }
+      }
+}
+
+

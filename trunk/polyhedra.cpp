@@ -2010,7 +2010,7 @@ inline bool root::IsPositiveOrZero() const
 	return true;
 }
 
-inline bool root::IsNegativeZero()
+inline bool root::IsNegativeOrZero()
 { for (int i=0;i<this->size;i++)
 		if (this->TheObjects[i].IsPositive())
 			return false;
@@ -14444,7 +14444,7 @@ bool rootSubalgebra::RootsDefineASubalgebra(roots& theRoots)
 
 bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer
 	(Selection& positiveSimpleRootsSel, root& input)
-{	if (input.IsNegativeZero())
+{	if (input.IsNegativeOrZero())
 		return false;
 	root tempRoot;
 	for (int k=0;k<this->SimpleBasisCentralizerRoots.size;k++)

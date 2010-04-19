@@ -278,4 +278,46 @@ void SimpleLieAlgebra::LieBracket
       }
 }
 
+void ElementSimpleLieAlgebra::ComputeNonZeroElements()
+{ this->NonZeroElements.init(this->coeffsRootSpaces.size);
+  for (int i=0;i<this->coeffsRootSpaces.size;i++)
+    if (!this->coeffsRootSpaces.TheObjects[i].IsEqualToZero())
+      this->NonZeroElements.AddSelectionAppendNewIndex(i);
+}
 
+bool SimpleLieAlgebra::FindComplementaryNilpotent
+  (root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+{ assert(e.Hcomponent.IsEqualToZero());
+  e.ComputeNonZeroElements();
+  root Difference;
+  //format of the system
+  //Let the negative roots of the Weyl be r_1, ..., r_k where k=this->theWeyl.RootsOfBorel.size
+  //Let the coefficient in front of r_i in f be x_i, let x be the column vector of the x_i's.
+  //Let b be the column vector parametrizing [e,f] (<- Lie bracket). We write b as a column vector
+  //in the following format: first come the coefficients in front of p_i, where p_i is the i^th
+  //vector of this->theWeyl.RootSystem, and then comes the element of the Cartan.
+  //Note that the column vector b is ordered differently from the column vector x!!!
+  //Then define theSystem to be the matrix A such that  A x=b.
+  MatrixLargeRational theSystem;
+  theSystem.init
+    ( this->theWeyl.RootsOfBorel.size*2+this->theWeyl.KillingFormMatrix.NumRows,
+      this->theWeyl.RootsOfBorel.size);
+  theSystem.NullifyAll();
+  for (int i=0;i<this->theWeyl.RootsOfBorel.size;i++)
+    for (int j=0;j<e.NonZeroElements.CardinalitySelection;j++)
+    { int indexE= e.NonZeroElements.elements[j];
+      root& rootE=this->theWeyl.RootSystem.TheObjects[indexE];
+      root PotentialF= -this->theWeyl.RootsOfBorel.TheObjects[i];
+      int indexF=this->theWeyl.RootSystem.IndexOfObjectHash(PotentialF);
+      root relation= rootE-PotentialF;
+      if (relation.IsEqualToZero())
+      { for (int k=0;k<this->theWeyl.KillingFormMatrix.NumRows;k++)
+          theSystem.elements[][k]
+      } else
+      { int indexRel= this->theWeyl.RootSystem.IndexOfObjectHash(relation);
+        if (indexRel!=-1)
+        {
+        }
+      }
+    }
+}

@@ -1596,7 +1596,7 @@ public:
 	void AssignIntRoot(intRoot& right);
 	bool IsProportianalTo(root& r);
 	bool IsPositiveOrZero() const;
-	bool IsNegativeZero();
+	bool IsNegativeOrZero();
 	bool IsEqualToZero()
 	{	for (int i=0;i<this->size;i++)
       if (!this->TheObjects[i].IsEqualToZero())
@@ -6247,11 +6247,14 @@ public:
 class ElementSimpleLieAlgebra
 {
 public:
+  Selection NonZeroElements;
   ListBasicObjects<Rational> coeffsRootSpaces;
   root Hcomponent;
+  void ComputeNonZeroElements();
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);
+    this->NonZeroElements.Assign(other.NonZeroElements);
   };
   void init(SimpleLieAlgebra& owner);
   void Nullify(SimpleLieAlgebra& owner);
@@ -6293,8 +6296,12 @@ public:
   int GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta);
   Rational GetConstant(const root& root1, const root& root2);
   //returns true if returning constant, false if returning element of h
-  bool GetConstantOrHElement(const root& root1, const root& root2, Rational& outputRat, root& outputH);
+  bool GetConstantOrHElement
+    (const root& root1, const root& root2, Rational& outputRat, root& outputH);
   bool TestForConsistency();
+  bool FindComplementaryNilpotent
+    ( root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
+      GlobalVariables& theGlobalVariables);
 };
 
 struct ComputationSetup

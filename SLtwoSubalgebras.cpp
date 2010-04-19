@@ -286,38 +286,46 @@ void ElementSimpleLieAlgebra::ComputeNonZeroElements()
 }
 
 bool SimpleLieAlgebra::FindComplementaryNilpotent
-  (root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+  ( root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
+    GlobalVariables& theGlobalVariables)
 { assert(e.Hcomponent.IsEqualToZero());
   e.ComputeNonZeroElements();
   root Difference;
   //format of the system
-  //Let the negative roots of the Weyl be r_1, ..., r_k where k=this->theWeyl.RootsOfBorel.size
+  //Let the roots of the Weyl be r_1, ..., r_k where k=this->theWeyl.RootSystem.size
   //Let the coefficient in front of r_i in f be x_i, let x be the column vector of the x_i's.
   //Let b be the column vector parametrizing [e,f] (<- Lie bracket). We write b as a column vector
   //in the following format: first come the coefficients in front of p_i, where p_i is the i^th
   //vector of this->theWeyl.RootSystem, and then comes the element of the Cartan.
   //Note that the column vector b is ordered differently from the column vector x!!!
   //Then define theSystem to be the matrix A such that  A x=b.
-  MatrixLargeRational theSystem;
+  MatrixLargeRational theSystem, targetH;
   theSystem.init
-    ( this->theWeyl.RootsOfBorel.size*2+this->theWeyl.KillingFormMatrix.NumRows,
-      this->theWeyl.RootsOfBorel.size);
+    ( this->theWeyl.RootSystem.size+this->theWeyl.KillingFormMatrix.NumRows,
+      this->theWeyl.RootSystem.size);
+  targetH.init(this->theWeyl.RootSystem.size+this->theWeyl.KillingFormMatrix.NumRows,1);
+  targetH.NullifyAll();
   theSystem.NullifyAll();
-  for (int i=0;i<this->theWeyl.RootsOfBorel.size;i++)
-    for (int j=0;j<e.NonZeroElements.CardinalitySelection;j++)
-    { int indexE= e.NonZeroElements.elements[j];
-      root& rootE=this->theWeyl.RootSystem.TheObjects[indexE];
-      root PotentialF= -this->theWeyl.RootsOfBorel.TheObjects[i];
-      int indexF=this->theWeyl.RootSystem.IndexOfObjectHash(PotentialF);
-      root relation= rootE-PotentialF;
+  for (int indexF=0; indexF<this->theWeyl.RootSystem.size; indexF++)
+    for (int j=0; j<e.NonZeroElements.CardinalitySelection; j++)
+    { int indexE = e.NonZeroElements.elements[j];
+      root& rootE = this->theWeyl.RootSystem.TheObjects[indexE];
+      root PotentialF = -this->theWeyl.RootSystem.TheObjects[indexF];
+      root relation = rootE-PotentialF;
       if (relation.IsEqualToZero())
-      { for (int k=0;k<this->theWeyl.KillingFormMatrix.NumRows;k++)
-          theSystem.elements[][k]
+      { for (int k=0; k<this->theWeyl.KillingFormMatrix.NumRows; k++)
+          theSystem.elements[this->theWeyl.RootSystem.size+k][indexE].Assign
+            (rootE.TheObjects[k]*2/this->theWeyl.RootScalarKillingFormMatrixRoot(rootE,rootE));
       } else
-      { int indexRel= this->theWeyl.RootSystem.IndexOfObjectHash(relation);
+      { int indexRel = this->theWeyl.RootSystem.IndexOfObjectHash(relation);
         if (indexRel!=-1)
-        {
-        }
+          theSystem.elements[indexRel][indexE].Assign
+            (e.coeffsRootSpaces.TheObjects[indexE]*this->ChevalleyConstants.elements[indexE][indexF]);
       }
+      theSystem.ComputeDebugString();
     }
+  for (int i=0;i<this->theWeyl.KillingFormMatrix.NumRows;i++)
+    targetH.elements[i+this->theWeyl.RootSystem.size][0].Assign(h.TheObjects[i]);
+  MatrixLargeRational result;
+  return theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem,targetH,result);
 }

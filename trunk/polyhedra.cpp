@@ -2694,11 +2694,15 @@ void root::GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariabl
 	tempRoots.AddListOnTop(inputBasis);
 	tempRoots.AddObjectOnTop(*this);
 	bool tempBool=tempRoots.GetLinearDependence(tempMat);
+	//tempRoots.ComputeDebugString();
+	//tempMat.ComputeDebugString();
 	assert(tempBool);
 	tempMat.DivideByRational(tempMat.elements[tempMat.NumRows-1][0]);
 	outputCoords.SetSizeExpandOnTopLight(tempMat.NumRows-1);
 	for (int i=0;i<tempMat.NumRows-1;i++)
+	{	tempMat.elements[i][0].Minus();
 		outputCoords.TheObjects[i].Assign(tempMat.elements[i][0]);
+	}
 }
 
 inline void roots::Pop(int index)
@@ -12436,7 +12440,7 @@ void WeylGroup::ComputeWeylGroup()
 }
 
 void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
-{ this->ComputeRho();
+{ this->ComputeRho(true);
 	this->ComputeDebugString();
 	roots tempRoots;
 	tempRoots.AddRoot(this->rho);
@@ -12454,8 +12458,8 @@ int WeylGroup::length(int index)
 { return this->TheObjects[this->size-1].size-this->TheObjects[index].size;
 }
 
-void WeylGroup::ComputeRho()
-{ if (this->RootSystem.size==0)
+void WeylGroup::ComputeRho(bool Recompute)
+{ if (this->RootSystem.size==0 || Recompute)
 		this->GenerateRootSystemFromKillingFormMatrix();
 	//this->ComputeDebugString();
 	this->rho.MakeZero(this->KillingFormMatrix.NumRows);
@@ -12517,7 +12521,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 	this->ClearTheObjects();
 	orbitRho.ClearTheObjects();
 	if (recomputeAmbientRho)
-		this->AmbientWeyl.ComputeRho();
+		this->AmbientWeyl.ComputeRho(false);
 	this->simpleGenerators.CopyFromBase(generators);
 	this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators);
 	this->ComputeRootSubsystem();
@@ -14383,7 +14387,7 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals
 		this->ComputeDebugString(theGlobalVariables);
 	this->flagFirstRoundCounting=true;
 	this->NumTotalSubalgebras=0;
-	this->AmbientWeyl.ComputeRho();
+	this->AmbientWeyl.ComputeRho(false);
 	owner.ComputeActionNormalizerOfCentralizerIntersectNilradical
 		(emptySel,*this,theGlobalVariables);
 	theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
@@ -18402,7 +18406,7 @@ void coneRelations::ElementToString
 void SimpleLieAlgebra::ComputeChevalleyConstants
   (char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
 { this->theWeyl.MakeArbitrary(WeylLetter, WeylIndex);
-  this->theWeyl.ComputeRho();
+  this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.NullifyAll(false);
@@ -18474,7 +18478,7 @@ void SimpleLieAlgebra::ComputeChevalleyConstants
 					}
       }
       if (this->flagAnErrorHasOccurredTimeToPanic)
-				this->ComputeDebugString();
+				this->ComputeDebugString(false,false,theGlobalVariables);
     }
     nonExploredRoots.selected[theBorelIndex]=false;
     nonExploredRoots.ComputeIndicesFromSelection();
@@ -18601,27 +18605,6 @@ void SimpleLieAlgebra::ComputeOneChevalleyConstant
 			this->theWeyl.RootScalarKillingFormMatrixRoot(minusZeta,minusZeta))*
     ( FirstSummand+SecondSummand)/ this->ChevalleyConstants.elements[indexGamma][indexDelta];
   this->Computed.elements[indexMinusEpsilon][indexMinusZeta]=true;
-}
-
-void ::SimpleLieAlgebra::ElementToString(std::string &output)
-{ std::stringstream out;
-	std::string tempS;
-	for (int i=0; i<this->theWeyl.RootSystem.size; i++)
-	{	this->theWeyl.RootSystem.TheObjects[i].ElementToString(tempS);
-		out << tempS<<"\t";
-	}
-	out <<"\n\n";
-	for (int i=0;i<this->ChevalleyConstants.NumRows;i++)
-	{	for (int j=0; j<this->ChevalleyConstants.NumCols;j++)
-			if (this->Computed.elements[i][j])
-				out << this->ChevalleyConstants.elements[i][j].ElementToString()<<",\t";
-			else
-				out << "n/a,\t";
-		out <<"\n";
-	}
-	//this->ChevalleyConstants.ElementToSting(tempS);
-	//out <<"\n"<< tempS<<"\n";
-	output=out.str();
 }
 
 bool SimpleLieAlgebra::TestForConsistency()

@@ -655,7 +655,7 @@ void minimalRelationsProverStates::GenerateStates
 { minimalRelationsProverState tempState;
 	WeylGroup theWeyl;
 	theWeyl.MakeArbitrary(WeylLetter, theDimension);
-  theWeyl.ComputeRho();
+  theWeyl.ComputeRho(false);
   this->isomorphismComputer.AmbientWeyl.Assign(theWeyl);
   this->isomorphismComputer.ComputeAll();
   this->PreferredDualBasis.size=0;
@@ -748,35 +748,77 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   //out<<tempX.DebugString;
   //this->theRootSubalgebras.DebugString=out.str();
   //return;
-  this->theChevalleyConstantComputer.ComputeChevalleyConstants
+ /* this->theChevalleyConstantComputer.ComputeChevalleyConstants
     ('A',2 , *this->theGlobalVariablesContainer->Default());
-  this->theChevalleyConstantComputer.ComputeDebugString();
-  out <<"\n\n"<< this->theChevalleyConstantComputer.DebugString<<"\n\n";
+  this->theChevalleyConstantComputer.ComputeDebugString
+		(false,true,*this->theGlobalVariablesContainer->Default());*/
+  /*out <<"\n\n"<< this->theChevalleyConstantComputer.DebugString<<"\n\n";
 
   ElementSimpleLieAlgebra e,f;
   e.Nullify(this->theChevalleyConstantComputer);
-  e.ComputeDebugString(this->theChevalleyConstantComputer);
+  e.ComputeDebugString(this->theChevalleyConstantComputer,false, true);
   root root1;
   root1.SetSizeExpandOnTopLight
     (this->theChevalleyConstantComputer.theWeyl.KillingFormMatrix.NumRows);
   root1.TheObjects[0]=1;root1.TheObjects[1]=0;
   e.SetCoefficient(root1,1,this->theChevalleyConstantComputer);
   root1.TheObjects[0]=0;root1.TheObjects[1]=1;
-  e.SetCoefficient(root1,1,this->theChevalleyConstantComputer);
-  root1.TheObjects[0]=2; root1.TheObjects[1]=2;
-  e.ComputeDebugString(this->theChevalleyConstantComputer);
-  out <<"e= " << e.DebugString <<"\n\n";
-  if ( this->theChevalleyConstantComputer.FindComplementaryNilpotent
-    (root1, e, f, *this->theGlobalVariablesContainer->Default()))
-    out << "\n\nhas solution\n\n";
-  else
-    out <<"\n\nno solution\n\n";
-  f.ComputeDebugString(this->theChevalleyConstantComputer);
-  out << "\nf="<<f.DebugString<<"\n\n";
+
+  return;*/
+  Rational tempRat;
+  this->theChevalleyConstantComputer.ComputeChevalleyConstants
+    ('E', 8 , *this->theGlobalVariablesContainer->Default());
+  this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
+	ElementSimpleLieAlgebra e,f,h;
+	for (int i=1;i<2;i++)
+	{	SltwoDecomposition& theSl2= this->theSltwoSubalgebras.TheObjects[i];
+		e.Nullify(this->theChevalleyConstantComputer);
+		theSl2.RootsHavingScalarProduct2WithH.ComputeDebugString();
+		for (int j=0;j<theSl2.RootsHavingScalarProduct2WithH.size;j++)
+		{	int x=1;//=1;
+			if (j==0)
+				x=2;
+			e.SetCoefficient
+				(	theSl2.RootsHavingScalarProduct2WithH.TheObjects[j],x,
+					this->theChevalleyConstantComputer);
+		}
+		e.ComputeDebugString(this->theChevalleyConstantComputer,false,true);
+		if (!this->theChevalleyConstantComputer.FindComplementaryNilpotent
+					(0, e, f, *this->theGlobalVariablesContainer->Default()))
+			out <<"\n\nno solution\n\n";
+		else
+		{	out << "\n\nhas solution\n\n";
+			this->theChevalleyConstantComputer.LieBracket(e,f,h);
+			this->theChevalleyConstantComputer.theWeyl.RootScalarKillingFormMatrixRoot
+				(	this->theChevalleyConstantComputer.theWeyl.RootSystem.TheObjects
+						[e.NonZeroElements.elements[0]],
+					h.Hcomponent, tempRat);
+			tempRat.Invert();
+			tempRat.MultiplyByInt(2);
+			h.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
+			f.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);		
+			ElementSimpleLieAlgebra Eprime, Fprime, Hprime;
+			this->theChevalleyConstantComputer.LieBracket(h,e,Eprime);
+			this->theChevalleyConstantComputer.LieBracket(h,f,Fprime);
+			this->theChevalleyConstantComputer.LieBracket(e,f,Hprime);
+			h.ComputeDebugString(this->theChevalleyConstantComputer,false,true);
+			e.ComputeDebugString(this->theChevalleyConstantComputer,false, true);
+			f.ComputeDebugString(this->theChevalleyConstantComputer,false, true);
+			Hprime.ComputeDebugString(this->theChevalleyConstantComputer,false,true);
+			Eprime.ComputeDebugString(this->theChevalleyConstantComputer,false,true);
+			Fprime.ComputeDebugString(this->theChevalleyConstantComputer,false,true);
+			out <<"\n\nh:=[e,f]="<<h.DebugString<<"\n\n";
+			out <<"e= " << e.DebugString <<"\n\n";
+			out << "f= "<<f.DebugString<<"\n\n";
+			out<<"[h,f]= "<<Fprime.DebugString<<"\n\n";
+			out<<"[h,e]= "<<Eprime.DebugString<<"\n\n";
+		}
+	}	
+	/*this->theChevalleyConstantComputer.ComputeDebugString
+		(false,true,*this->theGlobalVariablesContainer->Default());
+  out <<this->theChevalleyConstantComputer.DebugString;
+  */
   this->theRootSubalgebras.DebugString=out.str();
-  return;
-	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
-	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
 	return;
   minimalRelationsProverStates tempProver;
   WeylGroup tempWeyl;

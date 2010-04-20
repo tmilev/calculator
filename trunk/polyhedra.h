@@ -1028,6 +1028,9 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution
 		Matrix<Element>& outputSolution)
 { assert(	inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1
 					&& inputRightHandSide.NumRows==this->NumRows);
+	this->ComputeDebugString();
+	inputRightHandSide.ComputeDebugString();
+	inputPivotPoints.ComputeDebugString();
 	outputSolution.init(this->NumCols,1);
 	int NumPivots=0;
 	for (int i=0;i<this->NumCols;i++)
@@ -1424,11 +1427,12 @@ public:
   };
 	bool IsEqualTo(const Rational& r) const;
 	bool IsGreaterThanOrEqualTo(Rational& right);
-	inline bool IsEqualToZero(){	if (this->Extended==0)
-																	return this->NumShort==0;
-                                else
-																	return this->Extended->num.IsEqualToZero();
-															};
+	inline bool IsEqualToZero()const
+	{	if (this->Extended==0)
+			return this->NumShort==0;
+    else
+			return this->Extended->num.IsEqualToZero();
+	};
 	inline bool IsNonNegative(){	if (this->Extended==0)
 																	return this->NumShort>=0;
                                 else
@@ -5547,7 +5551,7 @@ public:
 	roots RootsOfBorel;
 	static bool flagAnErrorHasOcurredTimeToPanic;
 	void Assign(const WeylGroup &right);
-	void ComputeRho();
+	void ComputeRho(bool Recompute);
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
 	void MakeArbitrary(char WeylGroupLetter,int n);
@@ -6265,13 +6269,14 @@ class ElementSimpleLieAlgebra
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output, SimpleLieAlgebra& owner);
-	void ComputeDebugString(SimpleLieAlgebra& owner)
-	{ this->ElementToString(this->DebugString,owner);
+	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex);
+	void ComputeDebugString(SimpleLieAlgebra& owner, bool useHtml, bool useLatex)
+	{ this->ElementToString(this->DebugString,owner, useHtml, useLatex);
 	};
   Selection NonZeroElements;
   ListBasicObjects<Rational> coeffsRootSpaces;
   root Hcomponent;
+  void MultiplyByRational(SimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
   void SetCoefficient( root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
   void SetCoefficient( root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
@@ -6293,8 +6298,12 @@ class SimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output);
-	void ComputeDebugString(){this->ElementToString(this->DebugString);};
+	void ElementToString
+		(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables);
+	void ComputeDebugString
+		( bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
+	{	this->ElementToString(this->DebugString,useHtml, useLatex, theGlobalVariables);
+	};
 	bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //format:
@@ -6324,7 +6333,7 @@ public:
     (const root& root1, const root& root2, Rational& outputRat, root& outputH);
   bool TestForConsistency();
   bool FindComplementaryNilpotent
-    ( root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
+    ( root* h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
       GlobalVariables& theGlobalVariables);
 };
 

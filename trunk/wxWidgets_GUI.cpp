@@ -1089,7 +1089,7 @@ void guiMainWindow::initWeylGroupInfo()
 		{	WeylGroup tempW;
 			tempW.MakeArbitrary
 				(this->theComputationSetup.WeylGroupLetter,this->theComputationSetup.WeylGroupIndex);
-			tempW.ComputeRho();
+			tempW.ComputeRho(true);
 			this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);
 			this->NumVectors=this->theComputationSetup.VPVectors.size;
 			if (this->theComputationSetup.flagUsingIndicatorRoot)

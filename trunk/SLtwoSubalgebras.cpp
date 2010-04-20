@@ -299,6 +299,7 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent
   //vector of this->theWeyl.RootSystem, and then comes the element of the Cartan.
   //Note that the column vector b is ordered differently from the column vector x!!!
   //Then define theSystem to be the matrix A such that  A x=b.
+  int theDimension = this->theWeyl.KillingFormMatrix.NumRows;
   MatrixLargeRational theSystem, targetH;
   theSystem.init
     ( this->theWeyl.RootSystem.size+this->theWeyl.KillingFormMatrix.NumRows,
@@ -327,5 +328,12 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent
   for (int i=0;i<this->theWeyl.KillingFormMatrix.NumRows;i++)
     targetH.elements[i+this->theWeyl.RootSystem.size][0].Assign(h.TheObjects[i]);
   MatrixLargeRational result;
-  return theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem,targetH,result);
+  bool hasSolution=
+    theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem,targetH,result);
+  if (hasSolution)
+  { output.Hcomponent.MakeZero(theDimension);
+    for (int i=0;i<theSystem.NumRows;i++)
+      output.coeffsRootSpaces.TheObjects[i].Assign(result.elements[i][0]);
+  }
+  return hasSolution;
 }

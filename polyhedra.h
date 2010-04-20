@@ -1451,12 +1451,11 @@ public:
                    };
 	void Simplify();
 	void Invert();
-	Rational& Minus()
+	void Minus()
 	{ if (this->Extended==0)
 			this->NumShort*=-1;
     else
 			this->Extended->num.sign*=-1;
-		return *this;
   };
 	double DoubleValue();
 	int floor(){	if (NumShort<0)
@@ -1481,6 +1480,7 @@ public:
 	//default!
 	Rational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n,d);};
 	Rational(){this->Extended=0;};
+	Rational(int n){this->Extended=0; this->AssignNumeratorAndDenominator(n,1);};
 	Rational(const Rational& right){this->Extended=0; this->Assign(right);};
 //	Rational(int x){this->Extended=0; this->AssignInteger(x);};
 	~Rational(){this->FreeExtended();};
@@ -1575,6 +1575,11 @@ public:
 	void GetHeight(Rational& output);
 	Rational GetHeight();
 	void ElementToString(std::string& output);
+	std::string ElementToString()
+	{ std::string tempS;
+    this->ElementToString(tempS);
+    return tempS;
+  };
 	void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output, bool useLaTeX);
 	bool CheckForElementSanity();
@@ -6259,10 +6264,17 @@ public:
 class ElementSimpleLieAlgebra
 {
 public:
+	std::string DebugString;
+	void ElementToString(std::string& output, SimpleLieAlgebra& owner);
+	void ComputeDebugString(SimpleLieAlgebra& owner)
+	{ this->ElementToString(this->DebugString,owner);
+	};
   Selection NonZeroElements;
   ListBasicObjects<Rational> coeffsRootSpaces;
   root Hcomponent;
   void ComputeNonZeroElements();
+  void SetCoefficient( root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
+  void SetCoefficient( root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);

@@ -334,6 +334,30 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent
   { output.Hcomponent.MakeZero(theDimension);
     for (int i=0;i<theSystem.NumRows;i++)
       output.coeffsRootSpaces.TheObjects[i].Assign(result.elements[i][0]);
+    output.ComputeNonZeroElements();
   }
   return hasSolution;
+}
+
+void ElementSimpleLieAlgebra::ElementToString(std::string& output, SimpleLieAlgebra& owner)
+{ std::stringstream out; std::string tempS;
+  for (int i=0;i<this->NonZeroElements.CardinalitySelection;i++)
+  { out << this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]]
+              .ElementToString()
+        << owner.theWeyl.RootSystem.TheObjects[i].ElementToString()
+        <<"\n\n";
+  }
+  out <<"Cartan piece: " << this->Hcomponent.ElementToString();
+  output= out.str();
+}
+
+void ElementSimpleLieAlgebra::SetCoefficient
+  ( root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner )
+{ int index= owner.theWeyl.RootSystem.IndexOfObjectHash(indexingRoot);
+  if (index!=-1)
+    this->coeffsRootSpaces.TheObjects[index].Assign(theCoeff);
+}
+void ElementSimpleLieAlgebra::SetCoefficient
+  ( root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner )
+{ Rational tempRat=theCoeff; this->SetCoefficient(indexingRoot,tempRat, owner);
 }

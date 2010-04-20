@@ -739,7 +739,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   //tempB.elements[0][0]=5;
   //tempB.elements[1][0]=6;
   //tempB.elements[2][0]=6;
-  //std::stringstream out;
+  std::stringstream out;
   //if (MatrixLargeRational::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat,tempB,tempX))
    // out <<"has solution\n\n";
   //else
@@ -749,7 +749,31 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   //this->theRootSubalgebras.DebugString=out.str();
   //return;
   this->theChevalleyConstantComputer.ComputeChevalleyConstants
-    ('E',8 , *this->theGlobalVariablesContainer->Default());
+    ('A',2 , *this->theGlobalVariablesContainer->Default());
+  this->theChevalleyConstantComputer.ComputeDebugString();
+  out <<"\n\n"<< this->theChevalleyConstantComputer.DebugString<<"\n\n";
+
+  ElementSimpleLieAlgebra e,f;
+  e.Nullify(this->theChevalleyConstantComputer);
+  e.ComputeDebugString(this->theChevalleyConstantComputer);
+  root root1;
+  root1.SetSizeExpandOnTopLight
+    (this->theChevalleyConstantComputer.theWeyl.KillingFormMatrix.NumRows);
+  root1.TheObjects[0]=1;root1.TheObjects[1]=0;
+  e.SetCoefficient(root1,1,this->theChevalleyConstantComputer);
+  root1.TheObjects[0]=0;root1.TheObjects[1]=1;
+  e.SetCoefficient(root1,1,this->theChevalleyConstantComputer);
+  root1.TheObjects[0]=2; root1.TheObjects[1]=2;
+  e.ComputeDebugString(this->theChevalleyConstantComputer);
+  out <<"e= " << e.DebugString <<"\n\n";
+  if ( this->theChevalleyConstantComputer.FindComplementaryNilpotent
+    (root1, e, f, *this->theGlobalVariablesContainer->Default()))
+    out << "\n\nhas solution\n\n";
+  else
+    out <<"\n\nno solution\n\n";
+  f.ComputeDebugString(this->theChevalleyConstantComputer);
+  out << "\nf="<<f.DebugString<<"\n\n";
+  this->theRootSubalgebras.DebugString=out.str();
   return;
 	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default());
 	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;

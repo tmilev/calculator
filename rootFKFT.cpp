@@ -768,11 +768,11 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   return;*/
   Rational tempRat;
   this->theChevalleyConstantComputer.ComputeChevalleyConstants
-    ('E', 8 , *this->theGlobalVariablesContainer->Default());
+    ('C', 3 , *this->theGlobalVariablesContainer->Default());
   this->theChevalleyConstantComputer.TestForConsistency
     ( *this->theGlobalVariablesContainer->Default());
-  this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
-  this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
+ // this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
+//  this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
   return;
 	ElementSimpleLieAlgebra e,f,h;
 	roots thefoundHs;

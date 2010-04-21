@@ -1760,6 +1760,10 @@
 			RelativePath=".\ReadMe.txt"
 			>
 		</File>
+		<File
+			RelativePath=".\Zuckermans_problem.cpp"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

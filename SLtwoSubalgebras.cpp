@@ -261,6 +261,7 @@ bool ElementSimpleLieAlgebra::IsEqualToZero()const
 void ElementSimpleLieAlgebra::init (SimpleLieAlgebra& owner)
 { this->Hcomponent.SetSizeExpandOnTopLight(owner.theWeyl.KillingFormMatrix.NumRows);
   this->coeffsRootSpaces.SetSizeExpandOnTopNoObjectInit(owner.theWeyl.RootSystem.size);
+  this->NonZeroElements.init(owner.theWeyl.RootSystem.size);
 }
 
 void ElementSimpleLieAlgebra::Nullify(SimpleLieAlgebra& owner)
@@ -268,6 +269,7 @@ void ElementSimpleLieAlgebra::Nullify(SimpleLieAlgebra& owner)
   this->Hcomponent.MakeZero(owner.theWeyl.KillingFormMatrix.NumRows);
   for(int j=0; j<this->coeffsRootSpaces.size;j++)
     this->coeffsRootSpaces.TheObjects[j].MakeZero();
+  this->NonZeroElements.init(this->coeffsRootSpaces.size);
 }
 
 void SimpleLieAlgebra::LieBracket
@@ -275,33 +277,39 @@ void SimpleLieAlgebra::LieBracket
     ElementSimpleLieAlgebra& output)
 { assert(&output!=&g1 && &output!=&g2);
   output.Nullify(*this);
-  root tempRoot, rootIplusRootJ;
+  root tempRoot, root1plusRoot2;
   Rational tempRat;
-  for (int i=0;i<g1.coeffsRootSpaces.size;i++)
-    for (int j=0; j<g2.coeffsRootSpaces.size;j++)
-      if (!g1.coeffsRootSpaces.TheObjects[i].IsEqualToZero() &&
-          !g2.coeffsRootSpaces.TheObjects[j].IsEqualToZero())
-      { root& rootI= this->theWeyl.RootSystem.TheObjects[i];
-        root& rootJ= this->theWeyl.RootSystem.TheObjects[j];
-        rootIplusRootJ=rootI+rootJ;
-        if (rootIplusRootJ.IsEqualToZero())
-        { tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i]);
-          tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[j]);
-          tempRoot.Assign(rootI);
-          tempRoot.DivByLargeRational
-            ((this->theWeyl.RootScalarKillingFormMatrixRoot(rootI, rootI)/tempRat)/2);
-          output.Hcomponent.Add(tempRoot);
-        }
-        else
-        { if (!this->ChevalleyConstants.elements[i][j].IsEqualToZero())
-          { int theIndex=this->theWeyl.RootSystem.IndexOfObjectHash(rootIplusRootJ);
-            tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i]);
-            tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[j]);
-            output.coeffsRootSpaces.TheObjects[theIndex].Add
-              (tempRat*this->ChevalleyConstants.elements[i][j]);
-          }
+  int i1, i2;
+  int g1NumZero=g1.NonZeroElements.CardinalitySelection;
+  int g2NumZero=g2.NonZeroElements.CardinalitySelection;
+  for (int counter1=0; counter1<g1NumZero; counter1++)
+    for (int counter2=0; counter2<g2NumZero; counter2++)
+    {	i1=g1.NonZeroElements.elements[counter1];
+			i2=g2.NonZeroElements.elements[counter2];
+			assert
+				(	!g1.coeffsRootSpaces.TheObjects[i1].IsEqualToZero() &&
+          !g2.coeffsRootSpaces.TheObjects[i2].IsEqualToZero());
+			root& root1= this->theWeyl.RootSystem.TheObjects[i1];
+      root& root2= this->theWeyl.RootSystem.TheObjects[i2];
+      root1plusRoot2=root1+root2;
+      if (root1plusRoot2.IsEqualToZero())
+      { tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i1]);
+        tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[i2]);
+        tempRoot.Assign(root1);
+        tempRoot.DivByLargeRational
+          ((this->theWeyl.RootScalarKillingFormMatrixRoot(root1, root1)/tempRat)/2);
+        output.Hcomponent.Add(tempRoot);
+      }
+      else
+      { if (!this->ChevalleyConstants.elements[i1][i2].IsEqualToZero())
+        { int theIndex=this->theWeyl.RootSystem.IndexOfObjectHash(root1plusRoot2);
+          tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i1]);
+          tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[i2]);
+          output.coeffsRootSpaces.TheObjects[theIndex].Add
+            (tempRat*this->ChevalleyConstants.elements[i1][i2]);
         }
       }
+    }
   ElementSimpleLieAlgebra const* element1;
   ElementSimpleLieAlgebra const* element2;
   Rational order; order.MakeOne();
@@ -603,13 +611,13 @@ void SimpleLieAlgebra::MakeChevalleyTestReport
   out3<< "Total progress: " << x<<" out of "<< (Total*Total*Total);
   IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
   IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-  if (x%100==0)
+  //if (x%100==0)
   { IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
     IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-  } else
-  { IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-    IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
-  }
+  } //else
+  //{ IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+   // IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
+  //}
   if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
     theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }

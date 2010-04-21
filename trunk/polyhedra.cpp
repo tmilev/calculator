@@ -18618,7 +18618,7 @@ bool SimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
   g1.Nullify(*this);
   g2.Nullify(*this);
   g3.Nullify(*this);
-
+	//this->ComputeDebugString(false, false, theGlobalVariables);
 	for (int i=0;i<TotalDim;i++)
 	{ g1.Nullify(*this);
     if (i<theRoots.size)
@@ -18627,19 +18627,25 @@ bool SimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
     }
     else
       g1.Hcomponent.TheObjects[i-theRoots.size]=1;
-	  for (int j=0;j<TotalDim;j++)
-		{ g2.NonZeroElements.RemoveLastSelection();
+   // g1.ComputeDebugString(*this,false,true);
+    for (int j=0;j<TotalDim;j++)
+		{ if(g2.NonZeroElements.CardinalitySelection>0)
+				g2.coeffsRootSpaces.TheObjects[g2.NonZeroElements.elements[0]]=0;
+			g2.NonZeroElements.RemoveLastSelection();
       if (j>numRoots|| j==0)
         g2.Hcomponent.MakeZero(theDimension);
       if (j<theRoots.size)
       { g2.coeffsRootSpaces.TheObjects[j]=1;
-        g3.NonZeroElements.AddSelectionAppendNewIndex(j);
+        g2.NonZeroElements.AddSelectionAppendNewIndex(j);
       }
       else
         g2.Hcomponent.TheObjects[j-theRoots.size]=1;
+     // g2.ComputeDebugString(*this,false,true);
       for (int k=0;k<TotalDim;k++)
-			{ g3.NonZeroElements.RemoveLastSelection();
-        if (k>numRoots|| k==0)
+			{ if(g3.NonZeroElements.CardinalitySelection>0)
+					g3.coeffsRootSpaces.TheObjects[g3.NonZeroElements.elements[0]]=0;
+				g3.NonZeroElements.RemoveLastSelection();
+				if (k>numRoots|| k==0)
           g3.Hcomponent.MakeZero(theDimension);
         if (k<theRoots.size)
         { g3.coeffsRootSpaces.TheObjects[k]=1;
@@ -18647,13 +18653,20 @@ bool SimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
         }
         else
           g3.Hcomponent.TheObjects[k-theRoots.size]=1;
+			//	g3.ComputeDebugString(*this,false,true);
         this->LieBracket(g2,g3,temp); this->LieBracket(g1,temp,g123);
         this->LieBracket(g3,g1,temp); this->LieBracket(g2,temp,g231);
         this->LieBracket(g1,g2,temp); this->LieBracket(g3,temp,g312);
-        g123+=g231;
-        g123+=g312;
-        if (!g123.IsEqualToZero())
-        { assert(false);
+        temp=g123;
+        temp+=g231;
+        temp+=g312;
+        //g2.ComputeDebugString(*this,false,true);
+        //g3.ComputeDebugString(*this,false,true);
+        //g123.ComputeDebugString(*this,false,true);
+        //g231.ComputeDebugString(*this,false,true);
+        //g312.ComputeDebugString(*this,false,true);
+        if (!temp.IsEqualToZero())
+        {	assert(false);
           return false;
         }
         this->MakeChevalleyTestReport(i,j,k,TotalDim,theGlobalVariables);

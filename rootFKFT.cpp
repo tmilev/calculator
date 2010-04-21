@@ -768,143 +768,20 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   return;*/
   Rational tempRat;
   this->theChevalleyConstantComputer.ComputeChevalleyConstants
-    ('C', 3 , *this->theGlobalVariablesContainer->Default());
-  this->theChevalleyConstantComputer.TestForConsistency
-    ( *this->theGlobalVariablesContainer->Default());
+    ('E', 8 , *this->theGlobalVariablesContainer->Default());
+//  this->theChevalleyConstantComputer.TestForConsistency
+//    ( *this->theGlobalVariablesContainer->Default());
  // this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
-//  this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
-  return;
-	ElementSimpleLieAlgebra e,f,h;
-	roots thefoundHs;
-	ListBasicObjects< ElementSimpleLieAlgebra> goodHs, goodEs, goodFs;
-	ListBasicObjects< ElementSimpleLieAlgebra> goodHPrimes, goodEPrimes, goodFPrimes;
-	ListBasicObjects< ElementSimpleLieAlgebra> badHs, badEs, badFs;
-	ListBasicObjects< ElementSimpleLieAlgebra> badHPrimes, badEPrimes, badFPrimes;
-	ListBasicObjects<int> goodSLtwos, badSltwos;
-	int NumCandidates=this->theSltwoSubalgebras.size;
-	//NumCandidates=5;
-	goodHs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodEs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodFs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badHs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badEs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badFs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	//goodHPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodEPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodFPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	//badHPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badEPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badFPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	int NumFound=0;
-	for (int i=0;i<NumCandidates;i++)
-	{	SltwoDecomposition& theSl2= this->theSltwoSubalgebras.TheObjects[i];
-		e.Nullify(this->theChevalleyConstantComputer);
-		theSl2.RootsHavingScalarProduct2WithH.ComputeDebugString();
-		for (int j=0;j<theSl2.RootsHavingScalarProduct2WithH.size;j++)
-		{	int x=1;//=1;
-		//	if (j==0 && theSl2.RootsHavingScalarProduct2WithH.size!=1)
-		//		x=2;
-			e.SetCoefficient
-				(	theSl2.RootsHavingScalarProduct2WithH.TheObjects[j],x,
-					this->theChevalleyConstantComputer);
-		}
-		e.ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-		if (this->theChevalleyConstantComputer.FindComplementaryNilpotent
-					(0, e, f, *this->theGlobalVariablesContainer->Default()))
-		{ NumFound++;
-		  this->theChevalleyConstantComputer.LieBracket(e,f,h);
-			this->theChevalleyConstantComputer.theWeyl.RootScalarKillingFormMatrixRoot
-				(	this->theChevalleyConstantComputer.theWeyl.RootSystem.TheObjects
-						[e.NonZeroElements.elements[0]],
-					h.Hcomponent, tempRat);
-      if (!tempRat.IsEqualToZero())
-      { assert(!tempRat.IsEqualToZero());
-        tempRat.Invert();
-        tempRat.MultiplyByInt(2);
-        h.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
-        f.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
-        ElementSimpleLieAlgebra Eprime, Fprime, Eprime2, Fprime2;
-        this->theChevalleyConstantComputer.LieBracket(h,e,Eprime);
-        this->theChevalleyConstantComputer.LieBracket(h,f,Fprime);
-        Eprime2=Eprime; Fprime2=Fprime;
-        tempRat.AssignNumeratorAndDenominator(-1,2);
-        Eprime2.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
-        tempRat.AssignNumeratorAndDenominator(1,2);
-        Fprime2.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
-        Eprime2+=e;
-        Fprime2+=f;
-        if (Eprime2.IsEqualToZero()&& Fprime2.IsEqualToZero())
-        { goodHs.AddObjectOnTop(h);
-          goodEs.AddObjectOnTop(e);
-          goodFs.AddObjectOnTop(f);
-          goodEPrimes.AddObjectOnTop(Eprime);
-          goodFPrimes.AddObjectOnTop(Fprime);
-          thefoundHs.AddObjectOnTopNoRepetitionOfObject(h.Hcomponent);
-          goodSLtwos.AddObjectOnTop(i);
-        }
-        else
-        { badHs.AddObjectOnTop(h);
-          badEs.AddObjectOnTop(e);
-          badFs.AddObjectOnTop(f);
-          badEPrimes.AddObjectOnTop(Eprime);
-          badFPrimes.AddObjectOnTop(Fprime);
-          badSltwos.AddObjectOnTop(i);
-        }
-      }
-		}
-    this->theChevalleyConstantComputer.MakeSl2ProgressReport
-      ( i, NumFound, goodHs.size,thefoundHs.size, this->theSltwoSubalgebras.size,
-        *this->theGlobalVariablesContainer->Default());
-	}
-	out <<"Good cases found: "<<goodHs.size << " bad cases: "<< badHs.size<< "; total: "
-      << badHs.size+goodHs.size;
-	out <<"\\section{Good cases}";
-	for(int i=0;i<goodHs.size;i++)
-	{ out <<"\n\n\\textbf{Good case " <<i+1<<"}";
-	  goodHs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    goodEs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    goodFs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    goodEPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    goodFPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    out <<"\n\nh:=[e,f]="<<goodHs.TheObjects[i].DebugString<<"\n\n";
-    out <<"e= " << goodEs.TheObjects[i].DebugString <<"\n\n";
-    out << "f= "<<goodFs.TheObjects[i].DebugString<<"\n\n";
-    out<<"[h,f]= "<<goodFPrimes.TheObjects[i].DebugString<<"\n\n";
-    out<<"[h,e]= "<<goodEPrimes.TheObjects[i].DebugString<<"\n\n";
-    int theDimension= this->theChevalleyConstantComputer.theWeyl.KillingFormMatrix.NumRows;
-    root tempRoot;
-    out <<"Characteristic: (";
-    for (int j=0;j<theDimension;j++)
-    { tempRoot.MakeZero(theDimension);
-      tempRoot.TheObjects[j]=1;
-      this->theChevalleyConstantComputer.theWeyl.RootScalarKillingFormMatrixRoot
-        (tempRoot, goodHs.TheObjects[i].Hcomponent,tempRat);
-      out << tempRat.ElementToString();
-      if (j!=theDimension-1)
-        out<<",";
-    }
-    out <<")\n\n\\rule{\\textwidth}{0.4pt}\n\n";
-	}
-	out <<"\\section{Bad cases}";
-	for(int i=0;i<badHs.size;i++)
-	{ out <<"\n\n\\textbf{Bad case" <<i+1<<"}";
-	  badHs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    badEs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    badFs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    badEPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    badFPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    out <<"\n\nh:=[e,f]="<<badHs.TheObjects[i].DebugString<<"\n\n";
-    out <<"e= " << badEs.TheObjects[i].DebugString <<"\n\n";
-    out << "f= "<<badFs.TheObjects[i].DebugString<<"\n\n";
-    out<<"[h,f]= "<<badFPrimes.TheObjects[i].DebugString<<"\n\n";
-    out<<"[h,e]= "<<badEPrimes.TheObjects[i].DebugString<<"\n\n";
-    out <<"\n\n\\rule{\\textwidth}{0.4pt}\n\n";
-	}
+	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),false);
+	this-
+	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
+	return;
+
 	/*this->theChevalleyConstantComputer.ComputeDebugString
 		(false,true,*this->theGlobalVariablesContainer->Default());
   out <<this->theChevalleyConstantComputer.DebugString;
   */
-  this->theRootSubalgebras.DebugString=out.str();
+  this->theRootSubalgebras.DebugString=this->theChevalleyConstantComputer.DebugString;
 	return;
   minimalRelationsProverStates tempProver;
   WeylGroup tempWeyl;

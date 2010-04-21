@@ -6207,6 +6207,7 @@ public:
 	ListBasicObjects<int> theModulesHighestWeights;
 	ListBasicObjects<int> theModulesMultiplicities;
 	root hCharacteristic;
+	root hElementCorrespondingToCharacteristic;
 	roots hCommutingRootSpaces;
 	roots RootsHavingScalarProduct2WithH;
 	DynkinDiagramRootSubalgebra DiagramM;
@@ -6225,6 +6226,8 @@ public:
 		this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
 		this->DynkinsEpsilon=right.DynkinsEpsilon;
 		this->hCharacteristic.Assign(right.hCharacteristic);
+		this->hElementCorrespondingToCharacteristic.Assign
+			(right.hElementCorrespondingToCharacteristic);
 	};
 	bool  operator==(const SltwoDecomposition& right)
 	{ return
@@ -6316,7 +6319,8 @@ public:
   //will be located at the ij^{th} entry in the below matrix.
   MatrixLargeRational ChevalleyConstants;
   Matrix<bool> Computed;
-  void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
+  void ComputeChevalleyConstants
+		(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
   //then the below function computes n_{-\epsilon, -\zeta}
   void LieBracket
@@ -6337,8 +6341,12 @@ public:
   bool FindComplementaryNilpotent
     ( root* h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
       GlobalVariables& theGlobalVariables);
+  void FindSl2Subalgebras
+		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, 
+			SltwoSubalgebras& inputCandidates);
   void MakeSl2ProgressReport
-    (int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
+    (	int progress, int found, int foundGood, int DifferentHs, int outOf, 
+			GlobalVariables& theGlobalVariables);
   void MakeChevalleyTestReport
     (int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
 };

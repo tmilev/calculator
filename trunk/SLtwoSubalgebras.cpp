@@ -594,3 +594,22 @@ void SimpleLieAlgebra::MakeSl2ProgressReport
   if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
     theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
+
+void SimpleLieAlgebra::MakeChevalleyTestReport
+  (int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
+{ std::stringstream out2,out3;
+  int x=(i*Total*Total+j*Total+k+1);
+  out2<< "i: "<<i+1<<" of "<< Total << " j: "<<j+1<<" of "<< Total << " k: "<<k+1<<" of "<< Total;
+  out3<< "Total progress: " << x<<" out of "<< (Total*Total*Total);
+  IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+  IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+  if (x%100==0)
+  { IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
+    IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+  } else
+  { IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+    IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
+  }
+  if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+}

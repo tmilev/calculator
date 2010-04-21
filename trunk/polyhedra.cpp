@@ -2493,7 +2493,9 @@ Selection::Selection(int m)
 }
 
 void Selection::RemoveLastSelection()
-{ this->selected[this->elements[this->CardinalitySelection-1]]=false;
+{ if (this->CardinalitySelection==0)
+    return;
+  this->selected[this->elements[this->CardinalitySelection-1]]=false;
 	this->CardinalitySelection--;
 }
 
@@ -18607,49 +18609,57 @@ void SimpleLieAlgebra::ComputeOneChevalleyConstant
   this->Computed.elements[indexMinusEpsilon][indexMinusZeta]=true;
 }
 
-bool SimpleLieAlgebra::TestForConsistency()
+bool SimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 {	::hashedRoots& theRoots=this->theWeyl.RootSystem;
-	for (int i=0;i<theRoots.size;i++)
-		for (int j=0;j<theRoots.size;j++)
-			for (int k=0;k<theRoots.size;k++)
-			{ root& rootI= this->theWeyl.RootSystem.TheObjects[i];
-				root& rootJ= this->theWeyl.RootSystem.TheObjects[j];
-				root& rootK= this->theWeyl.RootSystem.TheObjects[k];
-				if ((rootI+rootJ)!=-rootK)
-				{	Rational RatIJK, RatJKI, RatKIJ;
-					if (!(rootJ+rootK).IsEqualToZero())
-						RatIJK=this->GetConstant(rootI, rootJ+rootK)*this->GetConstant(rootJ, rootK);
-					else
-						RatIJK= this->theWeyl.RootScalarKillingFormMatrixRoot(rootK, rootI)*2/
-										this->theWeyl.RootScalarKillingFormMatrixRoot(rootK, rootK);
-					if (!(rootK+rootI).IsEqualToZero())
-						RatJKI=this->GetConstant(rootJ, rootK+rootI)*this->GetConstant(rootK, rootI);
-					else
-						RatJKI= this->theWeyl.RootScalarKillingFormMatrixRoot(rootI, rootJ)*2/
-										this->theWeyl.RootScalarKillingFormMatrixRoot(rootI, rootI);
-					if (!(rootI+rootJ).IsEqualToZero())
-						RatKIJ=this->GetConstant(rootK, rootI+rootJ)*this->GetConstant(rootI, rootJ);
-					else
-						RatKIJ= this->theWeyl.RootScalarKillingFormMatrixRoot(rootJ, rootK)*2/
-										this->theWeyl.RootScalarKillingFormMatrixRoot(rootJ, rootJ);
+  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+  int TotalDim=theRoots.size+theDimension;
+  int numRoots=theRoots.size;
+  ElementSimpleLieAlgebra g1, g2, g3, g123, g231, g312, temp;
+  g1.Nullify(*this);
+  g2.Nullify(*this);
+  g3.Nullify(*this);
 
-					Rational tempRat=RatIJK+RatJKI+RatKIJ;
-					assert(tempRat.IsEqualToZero());
-					if (!tempRat.IsEqualToZero())
-						return false;
-				} else
-				{	root rootIJK, rootJKI, rootKIJ, tempRoot;
-					Rational tempRat1;
-					this->GetConstantOrHElement(rootI, rootJ+rootK,tempRat1, rootIJK);
-					this->GetConstantOrHElement(rootJ, rootK+rootI,tempRat1, rootJKI);
-					this->GetConstantOrHElement(rootK, rootI+rootJ,tempRat1, rootKIJ);
-					tempRoot=
-						this->GetConstant(rootJ, rootK)*rootIJK+
-						this->GetConstant(rootK, rootI)*rootJKI+
-						this->GetConstant(rootI, rootJ)*rootKIJ;
-					assert(tempRoot.IsEqualToZero());
-				}
+	for (int i=0;i<TotalDim;i++)
+	{ g1.Nullify(*this);
+    if (i<theRoots.size)
+    { g1.coeffsRootSpaces.TheObjects[i]=1;
+      g1.NonZeroElements.AddSelectionAppendNewIndex(i);
+    }
+    else
+      g1.Hcomponent.TheObjects[i-theRoots.size]=1;
+	  for (int j=0;j<TotalDim;j++)
+		{ g2.NonZeroElements.RemoveLastSelection();
+      if (j>numRoots|| j==0)
+        g2.Hcomponent.MakeZero(theDimension);
+      if (j<theRoots.size)
+      { g2.coeffsRootSpaces.TheObjects[j]=1;
+        g3.NonZeroElements.AddSelectionAppendNewIndex(j);
+      }
+      else
+        g2.Hcomponent.TheObjects[j-theRoots.size]=1;
+      for (int k=0;k<TotalDim;k++)
+			{ g3.NonZeroElements.RemoveLastSelection();
+        if (k>numRoots|| k==0)
+          g3.Hcomponent.MakeZero(theDimension);
+        if (k<theRoots.size)
+        { g3.coeffsRootSpaces.TheObjects[k]=1;
+          g3.NonZeroElements.AddSelectionAppendNewIndex(k);
+        }
+        else
+          g3.Hcomponent.TheObjects[k-theRoots.size]=1;
+        this->LieBracket(g2,g3,temp); this->LieBracket(g1,temp,g123);
+        this->LieBracket(g3,g1,temp); this->LieBracket(g2,temp,g231);
+        this->LieBracket(g1,g2,temp); this->LieBracket(g3,temp,g312);
+        g123+=g231;
+        g123+=g312;
+        if (!g123.IsEqualToZero())
+        { assert(false);
+          return false;
+        }
+        this->MakeChevalleyTestReport(i,j,k,TotalDim,theGlobalVariables);
 			}
+		}
+	}
 	return true;
 }
 

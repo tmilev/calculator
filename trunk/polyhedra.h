@@ -1028,9 +1028,9 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution
 		Matrix<Element>& outputSolution)
 { assert(	inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1
 					&& inputRightHandSide.NumRows==this->NumRows);
-	this->ComputeDebugString();
-	inputRightHandSide.ComputeDebugString();
-	inputPivotPoints.ComputeDebugString();
+	//this->ComputeDebugString();
+	//inputRightHandSide.ComputeDebugString();
+	//inputPivotPoints.ComputeDebugString();
 	outputSolution.init(this->NumCols,1);
 	int NumPivots=0;
 	for (int i=0;i<this->NumCols;i++)
@@ -1618,7 +1618,7 @@ public:
 	bool IsProportianalTo(root& r);
 	bool IsPositiveOrZero() const;
 	bool IsNegativeOrZero();
-	bool IsEqualToZero()
+	bool IsEqualToZero() const
 	{	for (int i=0;i<this->size;i++)
       if (!this->TheObjects[i].IsEqualToZero())
         return false;
@@ -6262,7 +6262,7 @@ public:
 	void ElementToString
 		(	std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl,
 			bool useLatex, bool UseHtml);
-	void Compute(GlobalVariables& theGlobalVariables);
+	void Compute(GlobalVariables& theGlobalVariables, bool flagUsingDynkinHardCodedTables);
 };
 
 class ElementSimpleLieAlgebra
@@ -6280,6 +6280,7 @@ public:
   void ComputeNonZeroElements();
   void SetCoefficient( root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
   void SetCoefficient( root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
+  bool IsEqualToZero()const;
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);
@@ -6292,6 +6293,7 @@ public:
       this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) &&
       this->Hcomponent.IsEqualTo(other.Hcomponent);
   };
+  void operator+=(const ElementSimpleLieAlgebra& other);
 };
 
 class SimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
@@ -6335,6 +6337,8 @@ public:
   bool FindComplementaryNilpotent
     ( root* h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
       GlobalVariables& theGlobalVariables);
+  void MakeSl2ProgressReport
+    (int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
 };
 
 struct ComputationSetup

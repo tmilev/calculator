@@ -33,6 +33,7 @@
 			<Add option="`wx-config --libs`" />
 		</Linker>
 		<Unit filename="SLtwoSubalgebras.cpp" />
+		<Unit filename="Zuckermans_problem.cpp" />
 		<Unit filename="polyhedra.cpp" />
 		<Unit filename="polyhedra.h" />
 		<Unit filename="rootFKFT.cpp" />

@@ -7592,7 +7592,7 @@ root Rational::operator *(const root& right)const
 }
 
 inline void Rational::MultiplyByInt(int x)
-{ static Rational tempRat;
+{ Rational tempRat;
 	tempRat.AssignInteger(x);
 	this->MultiplyBy(tempRat);
 }

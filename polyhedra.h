@@ -6333,12 +6333,14 @@ public:
   //returns true if returning constant, false if returning element of h
   bool GetConstantOrHElement
     (const root& root1, const root& root2, Rational& outputRat, root& outputH);
-  bool TestForConsistency();
+  bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent
     ( root* h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
       GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReport
     (int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
+  void MakeChevalleyTestReport
+    (int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
 };
 
 struct ComputationSetup

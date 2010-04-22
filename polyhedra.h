@@ -6339,16 +6339,22 @@ public:
     (const root& root1, const root& root2, Rational& outputRat, root& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent
-    ( root* h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
+    ( ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
+      GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingHEtoHEF
+    ( root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
       GlobalVariables& theGlobalVariables);
   void FindSl2Subalgebras
-		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, 
+		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
 			SltwoSubalgebras& inputCandidates);
-  void MakeSl2ProgressReport
-    (	int progress, int found, int foundGood, int DifferentHs, int outOf, 
-			GlobalVariables& theGlobalVariables);
+  void GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e);
   void MakeChevalleyTestReport
     (int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
+  void MakeSl2ProgressReport
+    (	int progress, int found, int foundGood, int DifferentHs, int outOf,
+			GlobalVariables& theGlobalVariables);
+  void MakeSl2ProgressReportNumCycles
+    (	int progress, int outOf,	GlobalVariables& theGlobalVariables);
 };
 
 struct ComputationSetup

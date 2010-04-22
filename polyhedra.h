@@ -5569,7 +5569,9 @@ public:
 			root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonCoords
 		(	root& input, root& output, GlobalVariables& theGlobalVariables);
-	void GetEpsilonCoordsWRTsubalgebra
+	void GetEpsilonCoords
+		(	roots& input, roots& output, GlobalVariables& theGlobalVariables);
+  void GetEpsilonCoordsWRTsubalgebra
     (	roots& generators, roots& input, roots& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonMatrix
 		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,

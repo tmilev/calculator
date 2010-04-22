@@ -131,19 +131,26 @@ void minimalRelationsProverStates::Extend
 					(	TheGlobalVariables,this->TheObjects[index].PartialRelation.Alphas,
 						this->TheObjects[index].NilradicalRoots,theDimension))
 		{ root NormalSeparatingCones;
-      bool tempBool=
-        roots::GetNormalSeparatingCones
-          ( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots,
-            this->TheObjects[index].PartialRelation.Alphas, NormalSeparatingCones);
-      assert(tempBool);
-      root tempRoot;
-      bool usingWeyl=
-        this->GetSeparatingRootIfExists
-          (	this->TheObjects[index].NilradicalRoots,
-            this->TheObjects[index].PartialRelation.Alphas,
-            tempRoot,theWeyl,TheGlobalVariables);
-      if (usingWeyl)
-        NormalSeparatingCones.Assign(tempRoot);
+      bool foundNormal=
+        this->getNormalSeparatingConesFromPreferredBasis
+          (index,NormalSeparatingCones, theWeyl, TheGlobalVariables);
+      bool usingWeyl=!foundNormal;
+      if (!foundNormal)
+      { bool tempBool=
+          roots::GetNormalSeparatingCones
+            ( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots,
+              this->TheObjects[index].PartialRelation.Alphas, NormalSeparatingCones);
+        assert(tempBool);
+        root tempRoot;
+        usingWeyl=
+          this->GetSeparatingRootIfExists
+            (	this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas,
+              tempRoot,theWeyl,TheGlobalVariables);
+        if (usingWeyl)
+          NormalSeparatingCones.Assign(tempRoot);
+      }
+      theWeyl.GetEpsilonCoords
+        (NormalSeparatingCones,this->currentSeparatingNormalEpsilonForm,TheGlobalVariables);
       bool addFirstAlpha=false;
       if (this->TheObjects[index].FindBetaWithoutTwoAlphas
             (	theBeta, this->TheObjects[index].PartialRelation.Betas,
@@ -261,7 +268,7 @@ void minimalRelationsProverStates::ExtensionStep
 { int currentNewIndex=this->size;
 	if (this->AddObjectOnTopNoRepetitionOfObject(newState, theWeyl,TheGlobalVariables))
   { this->TheObjects[currentNewIndex].ComputeStateReturnFalseIfDubious
-			(TheGlobalVariables, theWeyl);
+			(TheGlobalVariables, theWeyl,  this->flagAssumeGlobalMinimalityRHS);
 //		this->ComputeDebugString(theWeyl, TheGlobalVariables);
     if (this->TheObjects[currentNewIndex].StateIsPossible &&
 				!this->TheObjects[currentNewIndex].StateIsComplete)
@@ -271,4 +278,48 @@ void minimalRelationsProverStates::ExtensionStep
       this->TheObjects[index].childStates.AddObjectOnTop(currentNewIndex);
     }
   }
+}
+
+bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet
+  (	roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl,
+		GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates)
+{ Rational tempRat;
+  for (int i=0;i<theNormalCandidates.size;i++)
+	{ bool isGood=true;
+    bool oneFound=false;
+		root& Candidate=theNormalCandidates.TheObjects[i];
+		for (int j=0; j<ConeOneStrictlyPositive.size;j++)
+		{ tempRat=TheWeyl.RootScalarKillingFormMatrixRoot
+				(ConeOneStrictlyPositive.TheObjects[j],Candidate);
+		  if ( tempRat.IsNegative())
+			{ isGood=false;
+				break;
+			} else
+        if (tempRat.IsPositive())
+          oneFound=true;
+		}
+		if (!oneFound)
+      isGood=false;
+		if (isGood)
+			for (int j=0; j<ConeNonNegative.size;j++)
+				if ( TheWeyl.RootScalarKillingFormMatrixRoot
+							(ConeNonNegative.TheObjects[j],Candidate).IsPositive())
+				{ isGood=false;
+					break;
+				}
+		if (isGood)
+		{	output.Assign(Candidate);
+			output.ComputeDebugString();
+			return true;
+		}
+	}
+	return false;
+}
+
+bool minimalRelationsProverStates::getNormalSeparatingConesFromPreferredBasis
+  ( int theIndex, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables )
+{ minimalRelationsProverState& theRel=this->TheObjects[theIndex];
+  roots& theAlphas=theRel.PartialRelation.Alphas;
+  return this->GetSeparatingRootIfExistsFromSet
+    ( theRel.NilradicalRoots,theAlphas,output, theWeyl,TheGlobalVariables,this->PreferredDualBasis);
 }

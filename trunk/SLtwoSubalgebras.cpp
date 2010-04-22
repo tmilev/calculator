@@ -93,6 +93,9 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
 			}
 		}
 		//this->ComputeDebugStringCurrent();
+		if (this->MultiplicitiesFixedHweight.TheObjects[2+this->IndexZeroWeight]<=
+        this->MultiplicitiesFixedHweight.TheObjects[4+this->IndexZeroWeight])
+      possible=false;
 		if (possible)
 		{ for (int k=0;k<this->theWeylGroup.RootSystem.size;k++)
       { root::RootScalarEuclideanRoot
@@ -117,7 +120,7 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
 				{ BufferDecomposition.theModulesHighestWeights.AddObjectOnTop(j-this->IndexZeroWeight);
 					BufferDecomposition.theModulesMultiplicities.AddObjectOnTop
 						(this->MultiplicitiesFixedHweight.TheObjects[j]);
-				}		
+				}
       BufferDecomposition.hCharacteristic.Assign(hCandidate);
 			invertedCartan.ActOnAroot
 				(hCandidate,BufferDecomposition.hElementCorrespondingToCharacteristic);
@@ -346,7 +349,7 @@ void ElementSimpleLieAlgebra::ComputeNonZeroElements()
 }
 
 bool SimpleLieAlgebra::FindComplementaryNilpotent
-  ( root* h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
+  ( ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
     GlobalVariables& theGlobalVariables)
 { assert(e.Hcomponent.IsEqualToZero());
   e.ComputeNonZeroElements();
@@ -357,13 +360,7 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent
   // and the last rank(g) coordinates correspond to the elements of the cartan.
   //then ad(e) is a linear operator which has theWeyl.RootSystem.size+theDimension rows and columns.
   //Then ad(e)ad(e)(f)=-2e, so this gives us a linear system for f.
-  roots theBasis;
   int theDimension = this->theWeyl.KillingFormMatrix.NumRows;
-  theBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
-  for(int i=0;i<theDimension;i++)
-  { theBasis.TheObjects[i].MakeZero(theDimension);
-    theBasis.TheObjects[i].TheObjects[i].MakeOne();
-  }
   MatrixLargeRational theSystem, adESquaredadE, targetElt;
   int NumRoots=this->theWeyl.RootSystem.size;
   int NumRows=NumRoots+theDimension;
@@ -372,31 +369,7 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent
   targetElt.NullifyAll();
   theSystem.NullifyAll();
   assert(e.Hcomponent.IsEqualToZero());
-  for (int i=0; i<this->theWeyl.RootSystem.size; i++)
-    for (int j=0; j<e.NonZeroElements.CardinalitySelection; j++)
-    { int indexE = e.NonZeroElements.elements[j];
-      root& rootE = this->theWeyl.RootSystem.TheObjects[indexE];
-      root& rootF= this->theWeyl.RootSystem.TheObjects[i];
-      root relation = rootE+rootF;
-      if (!relation.IsEqualToZero())
-      { int indexRel = this->theWeyl.RootSystem.IndexOfObjectHash(relation);
-        if (indexRel!=-1)
-          theSystem.elements[indexRel][i].Assign
-            (	e.coeffsRootSpaces.TheObjects[indexE]*
-							this->ChevalleyConstants.elements[indexE][i]);
-      }else
-      {	//if (h!=0)
-				for (int k=0; k<theDimension; k++)
-					theSystem.elements[NumRoots+k][i].Assign
-						(	e.coeffsRootSpaces.TheObjects[indexE]*rootE.TheObjects[k]*2/
-							this->theWeyl.RootScalarKillingFormMatrixRoot(rootE,rootE));
-      }
-      for(int j=0;j<theDimension;j++)
-      { theSystem.elements[indexE][j+NumRoots].Assign
-          ( this->theWeyl.RootScalarKillingFormMatrixRoot(theBasis.TheObjects[j],rootE)*
-            e.coeffsRootSpaces.TheObjects[indexE]*(-1));
-      }
-    }
+  this->GetAdNilpotentElement(theSystem,e);
   theSystem.MultiplyOnTheLeft(theSystem,adESquaredadE);
   for (int i=0;i<e.NonZeroElements.CardinalitySelection;i++)
     targetElt.elements[e.NonZeroElements.elements[i]][0].Assign
@@ -419,6 +392,82 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent
     output.ComputeNonZeroElements();
   }
   return hasSolution;
+}
+
+bool SimpleLieAlgebra::AttemptExtendingHEtoHEF
+  ( root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output,
+    GlobalVariables& theGlobalVariables)
+{ assert(e.Hcomponent.IsEqualToZero());
+  e.ComputeNonZeroElements();
+  root Difference;
+  //format of the system
+  //let an element of the simple lie algebra be written so that the first theWeyl.RootSystem.size
+  // coordinates correspond to the root spaces g^\alpha,
+  // and the last rank(g) coordinates correspond to the elements of the cartan.
+  //then ad(e) is a linear operator which has theWeyl.RootSystem.size+theDimension rows and columns.
+  //Then ad(e)ad(e)(f)=-2e, so this gives us a linear system for f.
+  int theDimension = this->theWeyl.KillingFormMatrix.NumRows;
+  MatrixLargeRational theSystem, targetElt;
+  int NumRoots=this->theWeyl.RootSystem.size;
+  int NumRows=NumRoots+theDimension;
+  theSystem.init( NumRows,NumRows);
+  targetElt.init(NumRows,1);
+  targetElt.NullifyAll();
+  theSystem.NullifyAll();
+  assert(e.Hcomponent.IsEqualToZero());
+  this->GetAdNilpotentElement(theSystem,e);
+  for (int i=0;i<h.size;i++)
+    targetElt.elements[i+NumRoots][0].Assign(h.TheObjects[i]);
+  //targetH.ComputeDebugString();
+	//theSystem.ComputeDebugString();
+  MatrixLargeRational result;
+  bool hasSolution =
+    theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem,targetElt,result);
+	//result.ComputeDebugString();
+  if (hasSolution)
+  { output.Nullify(*this);
+		output.Hcomponent.MakeZero(theDimension);
+    for (int i=0;i<this->theWeyl.RootSystem.size;i++)
+      output.coeffsRootSpaces.TheObjects[i].Assign(result.elements[i][0]);
+    output.ComputeNonZeroElements();
+  }
+  return hasSolution;
+}
+
+void SimpleLieAlgebra::GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e)
+{ roots theBasis;
+  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+  theBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for(int i=0;i<theDimension;i++)
+  { theBasis.TheObjects[i].MakeZero(theDimension);
+    theBasis.TheObjects[i].TheObjects[i].MakeOne();
+  }
+  int NumRoots= this->theWeyl.RootSystem.size;
+  for (int i=0; i<NumRoots; i++)
+   for (int j=0; j<e.NonZeroElements.CardinalitySelection; j++)
+   { int indexE = e.NonZeroElements.elements[j];
+     root& rootE = this->theWeyl.RootSystem.TheObjects[indexE];
+     root& rootF= this->theWeyl.RootSystem.TheObjects[i];
+     root relation = rootE+rootF;
+     if (!relation.IsEqualToZero())
+     { int indexRel = this->theWeyl.RootSystem.IndexOfObjectHash(relation);
+       if (indexRel!=-1)
+         output.elements[indexRel][i].Assign
+           (	e.coeffsRootSpaces.TheObjects[indexE]*
+						this->ChevalleyConstants.elements[indexE][i]);
+     }else
+     {	//if (h!=0)
+			for (int k=0; k<theDimension; k++)
+				output.elements[NumRoots+k][i].Assign
+					(	e.coeffsRootSpaces.TheObjects[indexE]*rootE.TheObjects[k]*2/
+						this->theWeyl.RootScalarKillingFormMatrixRoot(rootE,rootE));
+     }
+     for(int j=0;j<theDimension;j++)
+     { output.elements[indexE][j+NumRoots].Assign
+         ( this->theWeyl.RootScalarKillingFormMatrixRoot(theBasis.TheObjects[j],rootE)*
+           e.coeffsRootSpaces.TheObjects[indexE]*(-1));
+     }
+   }
 }
 
 void ElementSimpleLieAlgebra::MultiplyByRational
@@ -610,6 +659,16 @@ void SimpleLieAlgebra::MakeSl2ProgressReport
     theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
+void SimpleLieAlgebra::MakeSl2ProgressReportNumCycles
+  (	int progress, int outOf,	GlobalVariables& theGlobalVariables)
+{ std::stringstream out4;
+  out4<< "Searching fixed characteristic: " << progress<<" out of "<< outOf;
+  IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+  IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
+  if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+}
+
 void SimpleLieAlgebra::MakeChevalleyTestReport
   (int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
 { std::stringstream out2,out3;
@@ -631,17 +690,23 @@ void SimpleLieAlgebra::MakeChevalleyTestReport
 
 
 void SimpleLieAlgebra::FindSl2Subalgebras
-	(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, 
-		theSltwoSubalgebras& inputCandidates)
-{	std::stringstream pit;
+	(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
+		SltwoSubalgebras& inputCandidates)
+{ this->ComputeChevalleyConstants(WeylLetter, WeylRank ,theGlobalVariables );
+//  this->theChevalleyConstantComputer.TestForConsistency
+//    ( *this->theGlobalVariablesContainer->Default());
+ // this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
+	inputCandidates.Compute(theGlobalVariables,true);
+  std::stringstream out;
 	ElementSimpleLieAlgebra e,f,h;
 	roots thefoundHs;
+	Rational tempRat;
 	ListBasicObjects< ElementSimpleLieAlgebra> goodHs, goodEs, goodFs;
 	ListBasicObjects< ElementSimpleLieAlgebra> goodHPrimes, goodEPrimes, goodFPrimes;
 	ListBasicObjects< ElementSimpleLieAlgebra> badHs, badEs, badFs;
 	ListBasicObjects< ElementSimpleLieAlgebra> badHPrimes, badEPrimes, badFPrimes;
 	ListBasicObjects<int> goodSLtwos, badSltwos;
-	int NumCandidates=this->theSltwoSubalgebras.size;
+	int NumCandidates=inputCandidates.size;
 	//NumCandidates=5;
 	goodHs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
 	goodEs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
@@ -656,41 +721,52 @@ void SimpleLieAlgebra::FindSl2Subalgebras
 	badEPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
 	badFPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
 	int NumFound=0;
+	roots tempRoots;
+	Selection selRoots;
 	for (int i=0;i<NumCandidates;i++)
-	{	SltwoDecomposition& theSl2= this->theSltwoSubalgebras.TheObjects[i];
-		e.Nullify(this->theChevalleyConstantComputer);
+	{	SltwoDecomposition& theSl2= inputCandidates.TheObjects[i];
+		e.Nullify(*this);
 		theSl2.RootsHavingScalarProduct2WithH.ComputeDebugString();
-		for (int j=0;j<theSl2.RootsHavingScalarProduct2WithH.size;j++)
-		{	int x=1;//=1;
-		//	if (j==0 && theSl2.RootsHavingScalarProduct2WithH.size!=1)
-		//		x=2;
-			e.SetCoefficient
-				(	theSl2.RootsHavingScalarProduct2WithH.TheObjects[j],x,
-					this->theChevalleyConstantComputer);
-		}
-		e.ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-		if (this->theChevalleyConstantComputer.FindComplementaryNilpotent
-					(0, e, f, *this->theGlobalVariablesContainer->Default()))
+		//int tempRank=theSl2.RootsHavingScalarProduct2WithH.GetRankOfSpanOfElements(theGlobalVariables);
+    tempRoots.size=0;
+    selRoots.init(theSl2.RootsHavingScalarProduct2WithH.size);
+    int NumCycles= MathRoutines::TwoToTheNth(theSl2.RootsHavingScalarProduct2WithH.size);
+    bool found=false;
+    for (int j=0;j<NumCycles;j++)
+    { e.Nullify(*this);
+      this->MakeSl2ProgressReportNumCycles(j, NumCycles,theGlobalVariables);
+      for (int k=0;k<theSl2.RootsHavingScalarProduct2WithH.size;k++)
+        if(!selRoots.selected[k])
+          e.SetCoefficient( theSl2.RootsHavingScalarProduct2WithH.TheObjects[k],1,*this);
+   		if (this->AttemptExtendingHEtoHEF
+            (theSl2.hElementCorrespondingToCharacteristic, e, f, theGlobalVariables))
+      { found=true;
+        break;
+      }
+      selRoots.incrementSelection();
+    }
+    this->MakeSl2ProgressReportNumCycles(NumCycles, NumCycles,theGlobalVariables);
+//		if (this->AttemptExtendingHEtoHEF
+  //        (theSl2.hElementCorrespondingToCharacteristic, e, f, theGlobalVariables))
+    if (found)
 		{ NumFound++;
-		  this->theChevalleyConstantComputer.LieBracket(e,f,h);
-			this->theChevalleyConstantComputer.theWeyl.RootScalarKillingFormMatrixRoot
-				(	this->theChevalleyConstantComputer.theWeyl.RootSystem.TheObjects
-						[e.NonZeroElements.elements[0]],
-					h.Hcomponent, tempRat);
+		  this->LieBracket(e,f,h);
+			this->theWeyl.RootScalarKillingFormMatrixRoot
+				(	this->theWeyl.RootSystem.TheObjects[e.NonZeroElements.elements[0]],h.Hcomponent, tempRat);
       if (!tempRat.IsEqualToZero())
       { assert(!tempRat.IsEqualToZero());
         tempRat.Invert();
         tempRat.MultiplyByInt(2);
-        h.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
-        f.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
+        h.MultiplyByRational(*this,tempRat);
+        f.MultiplyByRational(*this,tempRat);
         ElementSimpleLieAlgebra Eprime, Fprime, Eprime2, Fprime2;
-        this->theChevalleyConstantComputer.LieBracket(h,e,Eprime);
-        this->theChevalleyConstantComputer.LieBracket(h,f,Fprime);
+        this->LieBracket(h,e,Eprime);
+        this->LieBracket(h,f,Fprime);
         Eprime2=Eprime; Fprime2=Fprime;
         tempRat.AssignNumeratorAndDenominator(-1,2);
-        Eprime2.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
+        Eprime2.MultiplyByRational(*this,tempRat);
         tempRat.AssignNumeratorAndDenominator(1,2);
-        Fprime2.MultiplyByRational(this->theChevalleyConstantComputer,tempRat);
+        Fprime2.MultiplyByRational(*this,tempRat);
         Eprime2+=e;
         Fprime2+=f;
         if (Eprime2.IsEqualToZero()&& Fprime2.IsEqualToZero())
@@ -712,33 +788,31 @@ void SimpleLieAlgebra::FindSl2Subalgebras
         }
       }
 		}
-    this->theChevalleyConstantComputer.MakeSl2ProgressReport
-      ( i, NumFound, goodHs.size,thefoundHs.size, this->theSltwoSubalgebras.size,
-        *this->theGlobalVariablesContainer->Default());
+    this->MakeSl2ProgressReport
+      ( i, NumFound, goodHs.size,thefoundHs.size, inputCandidates.size, theGlobalVariables);
 	}
 	out <<"Good cases found: "<<goodHs.size << " bad cases: "<< badHs.size<< "; total: "
       << badHs.size+goodHs.size;
 	out <<"\\section{Good cases}";
 	for(int i=0;i<goodHs.size;i++)
 	{ out <<"\n\n\\textbf{Good case " <<i+1<<"}";
-	  goodHs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    goodEs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    goodFs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    goodEPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    goodFPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
+	  goodHs.TheObjects[i].ComputeDebugString(*this,false,true);
+    goodEs.TheObjects[i].ComputeDebugString(*this,false, true);
+    goodFs.TheObjects[i].ComputeDebugString(*this,false, true);
+    goodEPrimes.TheObjects[i].ComputeDebugString(*this,false,true);
+    goodFPrimes.TheObjects[i].ComputeDebugString(*this,false,true);
     out <<"\n\nh:=[e,f]="<<goodHs.TheObjects[i].DebugString<<"\n\n";
     out <<"e= " << goodEs.TheObjects[i].DebugString <<"\n\n";
     out << "f= "<<goodFs.TheObjects[i].DebugString<<"\n\n";
     out<<"[h,f]= "<<goodFPrimes.TheObjects[i].DebugString<<"\n\n";
     out<<"[h,e]= "<<goodEPrimes.TheObjects[i].DebugString<<"\n\n";
-    int theDimension= this->theChevalleyConstantComputer.theWeyl.KillingFormMatrix.NumRows;
+    int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
     root tempRoot;
     out <<"Characteristic: (";
     for (int j=0;j<theDimension;j++)
     { tempRoot.MakeZero(theDimension);
       tempRoot.TheObjects[j]=1;
-      this->theChevalleyConstantComputer.theWeyl.RootScalarKillingFormMatrixRoot
-        (tempRoot, goodHs.TheObjects[i].Hcomponent,tempRat);
+      this->theWeyl.RootScalarKillingFormMatrixRoot(tempRoot, goodHs.TheObjects[i].Hcomponent,tempRat);
       out << tempRat.ElementToString();
       if (j!=theDimension-1)
         out<<",";
@@ -748,11 +822,11 @@ void SimpleLieAlgebra::FindSl2Subalgebras
 	out <<"\\section{Bad cases}";
 	for(int i=0;i<badHs.size;i++)
 	{ out <<"\n\n\\textbf{Bad case" <<i+1<<"}";
-	  badHs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    badEs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    badFs.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-    badEPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
-    badFPrimes.TheObjects[i].ComputeDebugString(this->theChevalleyConstantComputer,false,true);
+	  badHs.TheObjects[i].ComputeDebugString(*this,false,true);
+    badEs.TheObjects[i].ComputeDebugString(*this,false, true);
+    badFs.TheObjects[i].ComputeDebugString(*this,false, true);
+    badEPrimes.TheObjects[i].ComputeDebugString(*this,false,true);
+    badFPrimes.TheObjects[i].ComputeDebugString(*this,false,true);
     out <<"\n\nh:=[e,f]="<<badHs.TheObjects[i].DebugString<<"\n\n";
     out <<"e= " << badEs.TheObjects[i].DebugString <<"\n\n";
     out << "f= "<<badFs.TheObjects[i].DebugString<<"\n\n";

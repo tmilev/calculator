@@ -766,16 +766,12 @@ void ComputationSetup::DoTheRootSAComputationCustom()
   root1.TheObjects[0]=0;root1.TheObjects[1]=1;
 
   return;*/
-  Rational tempRat;
-  this->theChevalleyConstantComputer.ComputeChevalleyConstants
-    ('E', 8 , *this->theGlobalVariablesContainer->Default());
-//  this->theChevalleyConstantComputer.TestForConsistency
-//    ( *this->theGlobalVariablesContainer->Default());
- // this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
-	this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),false);
-	this-
-	this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
-	return;
+  //this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),false);
+	//this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
+	this->theChevalleyConstantComputer.FindSl2Subalgebras
+    ('E',8,*this->theGlobalVariablesContainer->Default(),this->theSltwoSubalgebras);
+//	this->theRootSubalgebras.DebugString=this->theChevalleyConstantComputer.DebugString;
+	//return;
 
 	/*this->theChevalleyConstantComputer.ComputeDebugString
 		(false,true,*this->theGlobalVariablesContainer->Default());

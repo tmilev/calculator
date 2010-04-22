@@ -170,6 +170,7 @@ public:
   wxBoxSizer* BoxSizer13VerticalPartFracOutput;
   wxBoxSizer* BoxSizer14HorizontalSaveButtons;
   wxBoxSizer* BoxSizer15HorizontalSlicingButtons;
+  wxBoxSizer* BoxSizer16VerticalStatusString;
  // wxRadioButton* RB1OneSlice;
  // wxRadioButton* RB2OneIncrement;
  // wxRadioButton* RB3FullChop;
@@ -177,7 +178,9 @@ public:
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
   wxTextCtrl* Text3PartialFractions;
+  wxTextCtrl* Text4StatusString1;
   wxDialogOutput* Dialog1OutputPF;
+  wxDialogOutput* Dialog2StatusString1;
   wxFont* theFont;
   ::wxStaticText* Label1ProgressReport;
   ::wxStaticText* Label2ProgressReport;
@@ -251,6 +254,7 @@ public:
   enum
   { ID_MainWindow= 1001,
     ID_Dialog1,
+    ID_Dialog2,
     ID_ToggleButton1UsingCustom,
     ID_ToggleButton2ViewCombinatorialChambers,
     ID_ListBox1,
@@ -498,6 +502,7 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer13VerticalPartFracOutput = new ::wxBoxSizer(wxVERTICAL);
   this->BoxSizer14HorizontalSaveButtons = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer15HorizontalSlicingButtons= new ::wxBoxSizer(wxHORIZONTAL);
+  this->BoxSizer16VerticalStatusString= new wxBoxSizer(wxVERTICAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton
 		(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
@@ -556,12 +561,18 @@ guiMainWindow::guiMainWindow()
 	//this->Button9CustomNilradical= new wxButton(this,this->ID_Button9CustomNilradical,wxT("Custom nilradical"));
   this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
   this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
-  this->Dialog1OutputPF= new ::wxDialogOutput(this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
-          ::wxDefaultPosition, ::wxDefaultSize,
-          wxRESIZE_BORDER| wxCAPTION);
+  this->Dialog1OutputPF= new ::wxDialogOutput
+    ( this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
+      ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
+  this->Dialog2StatusString1=  new ::wxDialogOutput
+    ( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition,
+      wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
   this->Text3PartialFractions= new ::wxTextCtrl
-		(	this->Dialog1OutputPF,::wxID_ANY,wxT(""),
-			::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
+		(	this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition,
+      ::wxDefaultSize,wxTE_MULTILINE);
+  this->Text4StatusString1 = new wxTextCtrl
+    ( this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition,
+      ::wxDefaultSize, wxTE_MULTILINE);
   this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton
 		(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers,
 			wxT("Switch to chamber data"));
@@ -621,9 +632,11 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer13VerticalPartFracOutput->Add(this->ToggleButton2ViewCombinatorialChambers);
   this->BoxSizer13VerticalPartFracOutput->Add(this->Text3PartialFractions, 1, wxEXPAND|wxALL);
   this->BoxSizer13VerticalPartFracOutput->Add(this->BoxSizer14HorizontalSaveButtons);
-  this->BoxSizer14HorizontalSaveButtons->Add(this->Button4SaveReadable);
-  this->BoxSizer14HorizontalSaveButtons->Add(this->Button5SaveComputer);
+    this->BoxSizer14HorizontalSaveButtons->Add(this->Button4SaveReadable);
+    this->BoxSizer14HorizontalSaveButtons->Add(this->Button5SaveComputer);
+  this->BoxSizer16VerticalStatusString->Add(this->Text4StatusString1,1,wxEXPAND| wxALL);
   this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
+  this->Dialog2StatusString1->SetSizer(this->BoxSizer16VerticalStatusString);
 
 //this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
 	//this->RBGroup1SlicingOptions->set
@@ -705,6 +718,7 @@ guiMainWindow::guiMainWindow()
 #endif
   this->ReadSettingsIfAvailable();
   this->Dialog1OutputPF->Show();
+  this->Dialog2StatusString1->Show();
   //Centre();
 }
 
@@ -726,6 +740,7 @@ guiMainWindow::~guiMainWindow()
   this->WriteSettingsIfAvailable();
   this->Canvas1->Destroy();
   this->Dialog1OutputPF->Destroy();
+  this->Dialog2StatusString1->Destroy();
   this->fileSettings.close();
 #ifndef WIN32
   pthread_mutex_destroy(&ParallelComputing::mutex1);
@@ -1286,16 +1301,22 @@ void guiMainWindow::WriteSettingsIfAvailable()
     int x,y;
     this->GetPosition(&x,&y);
     this->fileSettings  <<"  Main_window_top_left_corner_x " <<x
-			<<"  \nMain_window_top_left_corner_y " <<y;
+			<<"   \nMain_window_top_left_corner_y " <<y<<"    ";
     this->GetSize(& x, & y);
     this->fileSettings  <<"  \nMain_window_width " <<x
-			<<"  \nMain_window_height "  <<y;
+			<<"   \nMain_window_height "  <<y<<"    ";
     this->Dialog1OutputPF->GetPosition(&x,&y);
     this->fileSettings  <<"  \nPartial_fraction_window_top_left_corner_x " <<x
-			<<"  \nPartial_fraction_window_top_left_corner_y "  <<y;
+			<<"   \nPartial_fraction_window_top_left_corner_y "  <<y<<"    ";
     this->Dialog1OutputPF->GetSize(&x,&y);
     this->fileSettings  <<"  \nPartial_fraction_window_width " <<x
-			<<"  \nPartial_fraction_window_height "  <<y <<"  ";
+			<<"   \nPartial_fraction_window_height "  <<y <<"    ";
+    this->Dialog2StatusString1->GetPosition(&x,&y);
+    this->fileSettings  <<"  \nStatus_string1_window_top_left_corner_x " <<x
+			<<"   \nStatus_string1_top_left_corner_y "  <<y<<"    ";
+    this->Dialog2StatusString1->GetSize(&x,&y);
+    this->fileSettings <<"\nStatus_string1_window_width " <<x
+      <<"   \nStatus_string1_window_height "  <<y <<"    ";
     this->fileSettings.flush();
   }
 }
@@ -1309,21 +1330,27 @@ void guiMainWindow::ReadSettingsIfAvailable()
   tempS= out.str();
   if (rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent2
 				(this->fileSettings,tempS,false,false))
-  {	wxPoint tempPt, tempPt2;
-    wxSize tempSize, tempSize2;
+  {	wxPoint tempPt, tempPt2, tempPt3;
+    wxSize tempSize, tempSize2, tempSize3;
     this->fileSettings.seekg(0);
     this->fileSettings>>tempS >>tempPt.x;
     this->fileSettings>>tempS >>tempPt.y;
     this->fileSettings>>tempS >> tempSize.x;
     this->fileSettings>>tempS >> tempSize.y;
-    this->SetPosition(tempPt);
-    this->SetSize(tempSize);
     this->fileSettings>>tempS >>tempPt2.x;
     this->fileSettings>>tempS >>tempPt2.y;
     this->fileSettings>>tempS >> tempSize2.x;
     this->fileSettings>>tempS >> tempSize2.y;
+    this->fileSettings>>tempS >>tempPt3.x;
+    this->fileSettings>>tempS >>tempPt3.y;
+    this->fileSettings>>tempS >> tempSize3.x;
+    this->fileSettings>>tempS >> tempSize3.y;
+    this->SetPosition(tempPt);
+    this->SetSize(tempSize);
     this->Dialog1OutputPF->SetPosition(tempPt2);
     this->Dialog1OutputPF->SetSize(tempSize2);
+    this->Dialog2StatusString1->SetPosition(tempPt3);
+    this->Dialog2StatusString1->SetSize(tempSize3);
   }
 }
 
@@ -1409,8 +1436,8 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
   }
   if (output.StatusString1NeedsRefresh)
   {	wxString tempS6(output.StatusString1.c_str(),wxConvUTF8);
-		MainWindow1->Text3PartialFractions->SetValue(tempS6);
-		MainWindow1->Text3PartialFractions->Refresh();
+		MainWindow1->Text4StatusString1->SetValue(tempS6);
+		MainWindow1->Text4StatusString1->Refresh();
   }
   if (output.flagRootIsModified)
   {	root tempRoot;

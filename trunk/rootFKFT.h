@@ -11,9 +11,11 @@ public:
   std::string DebugString;
   static int ProblemCounter;
   bool flagAnErrorHasOccurredTimeToPanic;
-  void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ElementToString
+    ( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+      bool displayEpsilons);
   void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-  {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);
+  {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);
   };
   roots NilradicalRoots;
   roots nonNilradicalRoots;
@@ -24,6 +26,8 @@ public:
   roots nonBKSingularGmodLRoots;
   roots nonAlphas;
   roots nonBetas;
+  roots nonLRoots;
+  roots nonLNonSingularRoots;
 //  roots nonBKsingularRoots;
 	//roots UndecidedRoots;
   coneRelation PartialRelation;
@@ -45,13 +49,14 @@ public:
   void ComputeScalarProductsMatrix
 		(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix
-		(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, 
+		(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas,
 			roots& theBetas, MatrixLargeRational& output);
   bool ComputeStateReturnFalseIfDubious
-    ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+    ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool CanBeShortened
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas,
-			SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl);
+			SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
+			bool AssumeGlobalMinimalityRHS);
   bool IsBKSingularNonImplied(root& input, WeylGroup& theWeyl);
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
@@ -81,8 +86,11 @@ public:
   std::string DebugString;
   static int ProblemCounter;
   roots PreferredDualBasis;
+  roots PreferredDualBasisEpsilonCoords;
   ListBasicObjects<int> theIndexStack;
   rootSubalgebra isomorphismComputer;
+  root currentSeparatingNormalEpsilonForm;
+  bool flagAssumeGlobalMinimalityRHS;
  	bool ExtendToIsomorphismRootSystem
 		(	minimalRelationsProverState& theState, int indexOther,
 			GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
@@ -104,9 +112,14 @@ public:
 	void TestAddingExtraRoot
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
 			bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool usingWeyl);
+  bool getNormalSeparatingConesFromPreferredBasis
+    ( int theIndex, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables );
 	bool GetSeparatingRootIfExists
-		(	roots& ConeStrictlyPositive,roots& ConeNonNegative, root& output, WeylGroup& theWeyl,
+		(	roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& theWeyl,
 			GlobalVariables& TheGlobalVariables);
+	bool GetSeparatingRootIfExistsFromSet
+		(	roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl,
+			GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
   void RemoveDoubt
 		(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	bool StateIsEqualTo
@@ -118,7 +131,7 @@ public:
 	void MakeProgressReportCurrentState
 		(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportChildStates
-		(	int numSearched, int outOf, int NewFound, 
+		(	int numSearched, int outOf, int NewFound,
 			GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 };
 

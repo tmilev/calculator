@@ -832,6 +832,9 @@ public:
 	int getTotalNumSubsets();
 	int TotalMultiplicity();
 	int MaxTotalMultiplicity();
+	bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other)
+	{ return this->MaxMultiplicities.IsEqualTo(other.MaxMultiplicities);
+  };
 	void operator=(const SelectionWithDifferentMaxMultiplicities& right)
 	{ this->Multiplicities.CopyFromBase(right.Multiplicities);
 		this->MaxMultiplicities.CopyFromBase(right.MaxMultiplicities);
@@ -5858,6 +5861,7 @@ public:
   void initPermutation(ListBasicObjects<int>& disjointSubsets, int TotalNumElements);
   void incrementAndGetPermutation(ListBasicObjects<int>& output);
   void GetPermutation(ListBasicObjects<int>& output);
+
 };
 
 class rootSubalgebra

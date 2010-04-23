@@ -17,6 +17,7 @@ public:
   void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
   {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);
   };
+  bool flagNeedsAdditionOfPositiveKroots;
   root currentSeparatingNormalEpsilonForm;
   roots NilradicalRoots;
   roots nonNilradicalRoots;
@@ -29,6 +30,8 @@ public:
   roots nonBetas;
   roots nonLRoots;
   roots nonLNonSingularRoots;
+  roots nonLNonSingularRootsInNeedOfPosKroots;
+  roots chosenKroots;
 //  roots nonBKsingularRoots;
 	//roots UndecidedRoots;
   coneRelation PartialRelation;
@@ -48,7 +51,7 @@ public:
 		(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet,
 			GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
   void ComputeScalarProductsMatrix
-		(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+		( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix
 		(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas,
 			roots& theBetas, MatrixLargeRational& output);
@@ -72,7 +75,7 @@ public:
     ( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool ComputeCommonSenseImplicationsReturnFalseIfContradiction
 		( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
-	bool SatisfyNonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
+	bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverState& right){this->Assign(right);};
@@ -109,9 +112,11 @@ public:
   void GenerateStates
     ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void Extend
-    (	int index, int preferredSimpleRoot, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+    (	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ExploreAllChildrenIndex
+    ( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep
-		( int index, int preferredSimpleRootIndex, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+		( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
 			minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,

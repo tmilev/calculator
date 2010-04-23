@@ -126,39 +126,40 @@ void minimalRelationsProverState::GetNumberScalarProductsData
 		}
 }
 
-bool minimalRelationsProverState::SatisfyNonBKSingularRoots
+bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 	(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{	root theRoot,tempRoot;
-	this->nonBKSingularGmodLRoots.ComputeDebugString();
-//	this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	for (int i=0;i<this->nonBKSingularGmodLRoots.size;i++)
-	{ theRoot.Assign(this->nonBKSingularGmodLRoots.TheObjects[i]);
-		if (	this->nonNilradicalRoots.ContainsObject(theRoot) &&
-					this->nonKRoots.ContainsObject(theRoot))
-		{	int LastFoundIndex=-1;
-			int NumFoundIndices=0;
-			for(int j=0;j<theWeyl.RootSystem.size;j++)
-			{	tempRoot=theRoot+theWeyl.RootSystem.TheObjects[j];
-				if (theWeyl.IsARoot(tempRoot))
-				{	if (this->PositiveKroots.ContainsObject(theWeyl.RootSystem.TheObjects[j]))
-					{	NumFoundIndices++;
-						LastFoundIndex=j;
-						break;
-					}
-					if (!this->nonPositiveKRoots.ContainsObject(theWeyl.RootSystem.TheObjects[j]))
-					{	NumFoundIndices++;
-						LastFoundIndex=j;
-					}
+{	root tempRoot;
+	//this->nonBKSingularGmodLRoots.ComputeDebugString();
+	this->ComputeDebugString(theWeyl, TheGlobalVariables);
+	for (int i=0;i<this->nonLNonSingularRoots.size;i++)
+	{ root& theRoot= this->nonLNonSingularRoots.TheObjects[i];
+    int LastFoundIndex=-1;
+		int NumFoundIndices=0;
+		for(int j=0;j<theWeyl.RootSystem.size;j++)
+		{	tempRoot=theRoot+theWeyl.RootSystem.TheObjects[j];
+			if (theWeyl.IsARoot(tempRoot))
+			{	if (this->PositiveKroots.ContainsObject(theWeyl.RootSystem.TheObjects[j]))
+				{	NumFoundIndices++;
+					LastFoundIndex=j;
+					break;
+				}
+				if (!this->nonPositiveKRoots.ContainsObject(theWeyl.RootSystem.TheObjects[j]))
+				{	NumFoundIndices++;
+					LastFoundIndex=j;
 				}
 			}
-			if (NumFoundIndices==0)
-			{	this->StateIsPossible=false;
-				return false;
-			}
-			if (NumFoundIndices==1)
-				this->PositiveKroots.AddObjectOnTopNoRepetitionOfObject
-					(theWeyl.RootSystem.TheObjects[LastFoundIndex]);
 		}
+		if (NumFoundIndices==0)
+		{	this->StateIsPossible=false;
+			return false;
+		}
+		if (NumFoundIndices==1)
+			this->PositiveKroots.AddObjectOnTopNoRepetitionOfObject
+        (theWeyl.RootSystem.TheObjects[LastFoundIndex]);
+    if (NumFoundIndices>1)
+    { this->flagNeedsAdditionOfPositiveKroots=true;
+      this->nonLNonSingularRootsInNeedOfPosKroots.AddObjectOnTopNoRepetitionOfObject(theRoot);
+    }
 	}
 	return true;
 }
@@ -231,8 +232,6 @@ void minimalRelationsProverState::GetPossibleAlphasAndBetas
 	}
 }
 
-
-
 void minimalRelationsProverState::Assign(const minimalRelationsProverState& right)
 { this->BKSingularGmodLRoots.CopyFromBase(right.BKSingularGmodLRoots);
   this->nonBKSingularGmodLRoots.CopyFromBase(right.nonBKSingularGmodLRoots);
@@ -248,6 +247,7 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
   this->StateIsPossible=right.StateIsPossible;
   this->theScalarProducts.Assign(right.theScalarProducts);
   this->StateIsComplete=right.StateIsComplete;
+  //this->chosenKroots=right.chosenKroots;
 }
 
 void minimalRelationsProverStates::MakeProgressReportCurrentState
@@ -367,6 +367,7 @@ bool minimalRelationsProverState::RootIsGoodForPreferredSimpleRoot
 
 minimalRelationsProverState::minimalRelationsProverState()
 { this->StateIsComplete=false;
+  this->flagNeedsAdditionOfPositiveKroots=false;
 	this->activeChild=-1;
 }
 
@@ -603,7 +604,8 @@ void minimalRelationsProverStates::GenerateStates
 	this->theIndexStack.AddObjectOnTop(0);
 	this->LastObject()->ComputeDebugString(theWeyl,TheGlobalVariables);
 //	this->LastObject()->theScalarProducts.ComputeDebugString();
-  this->Extend(0,0,theWeyl, TheGlobalVariables);
+  this->MakeProgressReportCurrentState(0,TheGlobalVariables,theWeyl);
+  this->Extend(0,theWeyl, TheGlobalVariables);
   this->ComputeDebugString(theWeyl,TheGlobalVariables);
   theSetup.theRootSubalgebras.DebugString=this->DebugString;
 }
@@ -776,9 +778,18 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
   if (!(diagram1==diagram2))
     return false;
 	ListBasicObjects<int> tempList;
-	permutation thePermAlphas, thePermBetas;
+	permutation thePermAlphas, thePermBetas, tempPermAlphas, tempPermBetas;
   this->GetIsoTypicComponents(theAlphas, theBetas, thePermAlphas, theState, theWeyl,  theGlobalVariables);
   this->GetIsoTypicComponents(theBetas, theAlphas, thePermBetas, theState, theWeyl, theGlobalVariables);
+  this->GetIsoTypicComponents
+    (theAlphas, theBetas, tempPermAlphas, this->TheObjects[indexOther], theWeyl,  theGlobalVariables);
+  this->GetIsoTypicComponents
+    (theBetas, theAlphas, tempPermBetas, this->TheObjects[indexOther], theWeyl, theGlobalVariables);
+  if (!thePermAlphas.HasSameMaxMultiplicities(tempPermAlphas) ||
+      !thePermBetas.HasSameMaxMultiplicities(tempPermBetas))
+    return false;
+  if(theState.PositiveKroots.IsEqualTo( this->TheObjects[indexOther].PositiveKroots))
+    return false;
 	int NumCyclesAlphas = thePermAlphas.getTotalNumSubsets();
 	int NumCyclesBetas  = thePermBetas.getTotalNumSubsets();
 	roots theDomain, thePermutedAlphas, thePermutedBetas, theRange;
@@ -894,6 +905,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   roots isoDomain, isoRange;
   permutation permComponentsCentralizer;
   ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
+
 	SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > CentralizerDiagramAutomorphisms;
   theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);

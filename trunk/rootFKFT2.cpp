@@ -2,8 +2,9 @@
 #include "rootFKFT.h"
 
 bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction
-	(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables)
+	(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 {	root tempRoot;
+	this->flagNeedsAdditionOfPositiveKroots=false;
 	this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	for (int j=0;j<theWeyl.RootSystem.size;j++)
 	{	root& tested=theWeyl.RootSystem.TheObjects[j];
@@ -64,7 +65,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject
       (-this->BKSingularGmodLRoots.TheObjects[i]);
 	}
-  if (!this->SatisfyNonBKSingularRoots(theWeyl, TheGlobalVariables))
+  if (!this->SatisfyNonLnonBKSingularRoots(theWeyl, TheGlobalVariables))
 		return false;
   for (int i=0;i<this->PositiveKroots.size;i++)
 	{	this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject
@@ -157,9 +158,33 @@ bool minimalRelationsProverState::CanBeShortened
   return false;
 }
 
+void minimalRelationsProverStates::ExploreAllChildrenIndex
+  (	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{ for (int i=0;i<this->TheObjects[index].childStates.size;i++)
+  { int newIndex= this->TheObjects[index].childStates.TheObjects[i];
+    this->theIndexStack.AddObjectOnTop(newIndex);
+    this->TheObjects[index].activeChild=i;
+		this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
+		this->Extend(newIndex,theWeyl,TheGlobalVariables);
+    this->theIndexStack.PopLastObject();
+  }
+}
+
 void minimalRelationsProverStates::Extend
-  (	int index, int preferredSimpleRoot, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{ root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
+  (	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{ if (this->TheObjects[index].flagNeedsAdditionOfPositiveKroots)
+  { minimalRelationsProverState& theState=this->TheObjects[index];
+    minimalRelationsProverState newState;
+    for (int j=0; j<theWeyl.RootSystem.size;j++)
+      if (!theState.nonKRoots.ContainsObject(theWeyl.RootSystem.TheObjects[j]))
+      { newState.Assign(theState);
+        newState.PositiveKroots.AddObjectOnTop(theWeyl.RootSystem.TheObjects[j]);
+        this->ExtensionStep(index, theWeyl,TheGlobalVariables,newState);
+      }
+    this->ExploreAllChildrenIndex(index,theWeyl,TheGlobalVariables);
+    return;
+  }
+  root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
   this->TheObjects[index].childStates.size=0;
   minimalRelationsProverState newState;
@@ -212,14 +237,7 @@ void minimalRelationsProverStates::Extend
 					(	i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2,
 						this->size-oldSize, TheGlobalVariables, theWeyl);
       }
-      for (int i=0;i<this->TheObjects[index].childStates.size;i++)
-      { int newIndex= this->TheObjects[index].childStates.TheObjects[i];
-        this->theIndexStack.AddObjectOnTop(newIndex);
-        this->TheObjects[index].activeChild=i;
-				this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
-				this->Extend(newIndex,0,theWeyl,TheGlobalVariables);
-        this->theIndexStack.PopLastObject();
-    	}
+      this->ExploreAllChildrenIndex(index,theWeyl,TheGlobalVariables);
 		}
 		else
 		{ this->MakeProgressReportCurrentState(index,TheGlobalVariables,theWeyl);
@@ -227,6 +245,7 @@ void minimalRelationsProverStates::Extend
 		}
 	}
 }
+
 
 
 void minimalRelationsProverStates::TestAddingExtraRoot
@@ -258,13 +277,13 @@ void minimalRelationsProverStates::TestAddingExtraRoot
 			newState.PartialRelation.Alphas.AddObjectOnTop(theRoot);
 		else
 			newState.PartialRelation.Betas.AddObjectOnTop(theRoot);
-		this->ExtensionStep(Index,0, theWeyl, TheGlobalVariables, newState);
+		this->ExtensionStep(Index, theWeyl, TheGlobalVariables, newState);
   }
 }
 
 
 void minimalRelationsProverStates::ExtensionStep
-  ( int index, int preferredSimpleRootIndex, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+  ( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
     minimalRelationsProverState& newState)
 { int currentNewIndex=this->size;
 	if (this->AddObjectOnTopNoRepetitionOfObject(newState, theWeyl,TheGlobalVariables))

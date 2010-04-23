@@ -17,6 +17,7 @@ public:
   void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
   {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);
   };
+  root currentSeparatingNormalEpsilonForm;
   roots NilradicalRoots;
   roots nonNilradicalRoots;
   roots PositiveKroots;
@@ -68,16 +69,16 @@ public:
 		(	root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution,
 			roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas
-    (root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
+    ( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool ComputeCommonSenseImplicationsReturnFalseIfContradiction
-		(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
+		( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
 	bool SatisfyNonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverState& right){this->Assign(right);};
   minimalRelationsProverState();
   void MakeProgressReportCanBeShortened
-		(int checked, int outOf, GlobalVariables& theGlobalVariables);
+		( int checked, int outOf, GlobalVariables& theGlobalVariables);
 };
 
 class minimalRelationsProverStates: public ListBasicObjects<minimalRelationsProverState>
@@ -89,13 +90,16 @@ public:
   roots PreferredDualBasisEpsilonCoords;
   ListBasicObjects<int> theIndexStack;
   rootSubalgebra isomorphismComputer;
-  root currentSeparatingNormalEpsilonForm;
+  MatrixLargeRational invertedCartan;
   bool flagAssumeGlobalMinimalityRHS;
  	bool ExtendToIsomorphismRootSystem
 		(	minimalRelationsProverState& theState, int indexOther,
 			GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void GetIsoTypicComponents
+    ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState,
+      WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
   {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);
   };
@@ -103,7 +107,7 @@ public:
     ( minimalRelationsProverState& theState, WeylGroup& theWeyl,
       GlobalVariables& TheGlobalVariables);
   void GenerateStates
-    (ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
+    ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void Extend
     (	int index, int preferredSimpleRoot, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep
@@ -111,11 +115,12 @@ public:
 			minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
-			bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool usingWeyl);
+			bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
   bool getNormalSeparatingConesFromPreferredBasis
-    ( int theIndex, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables );
+    ( int theIndex, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+      bool& oneBetaIsPositive );
 	bool GetSeparatingRootIfExists
-		(	roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& theWeyl,
+		(	roots& ConeOneStrictlyPositive, roots& ConeNonPositive, root& output, WeylGroup& theWeyl,
 			GlobalVariables& TheGlobalVariables);
 	bool GetSeparatingRootIfExistsFromSet
 		(	roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl,

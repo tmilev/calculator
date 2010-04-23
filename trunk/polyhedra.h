@@ -5725,7 +5725,7 @@ public:
 	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
 	void Assign(const DynkinDiagramRootSubalgebra& right);
 	inline void operator=(const DynkinDiagramRootSubalgebra& right){this->Assign(right);};
-	bool operator==(const DynkinDiagramRootSubalgebra& right);
+	bool operator==(const DynkinDiagramRootSubalgebra& right) const;
 	bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
 	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output,int index);
 	void GetAutomorphisms

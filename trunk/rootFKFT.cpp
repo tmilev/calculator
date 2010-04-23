@@ -126,95 +126,6 @@ void minimalRelationsProverState::GetNumberScalarProductsData
 		}
 }
 
-bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction
-	(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables)
-{	root tempRoot;
-	this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	for (int j=0;j<theWeyl.RootSystem.size;j++)
-	{	root& tested=theWeyl.RootSystem.TheObjects[j];
-	  for (int i=0;i<this->PartialRelation.Alphas.size;i++)
-		{	tempRoot= this->PartialRelation.Alphas.TheObjects[i]+tested;
-			if (theWeyl.IsARoot(tempRoot))
-			{	this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(tested);
-        this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(tested);
-			}
-		}
-		for (int i=0; i<this->PartialRelation.Betas.size;i++)
-			if (theWeyl.IsARoot(this->PartialRelation.Betas.TheObjects[i]+tested))
-				this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theWeyl.RootSystem.TheObjects[j]);
-	}
-	this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots,this->PositiveKroots);
-  roots& tempRoots=TheGlobalVariables.rootsProverStateComputation2;
-  tempRoots.CopyFromBase(this->PositiveKroots);
-  //tempRoots.ComputeDebugString();
-  theWeyl.GenerateRootSubsystem(tempRoots);
-  //tempRoots.ComputeDebugString();
-  tempRoots.AddListOnTop(this->NilradicalRoots);
-  //tempRoots.ComputeDebugString();
-  int oldsize= tempRoots.size;
-  theWeyl.GenerateAdditivelyClosedSubset(tempRoots, tempRoots);
-  //tempRoots.ComputeDebugString();
-  //roots& tempRoots2           = TheGlobalVariables.rootsProverStateComputation3;
-  for (int i=0;i<this->nonPositiveKRoots.size;i++)
-  {	this->nonKRoots.AddObjectOnTopNoRepetitionOfObject
-			(this->nonPositiveKRoots.TheObjects[i]);
-		this->nonKRoots.AddObjectOnTopNoRepetitionOfObject
-			(-this->nonPositiveKRoots.TheObjects[i]);
-  }
-  this->nonKRoots.intersectWith(this->nonNilradicalRoots,this->nonLRoots);
-  for (int i=0;i<this->nonLRoots.size;i++)
-  { if (this->IsBKSingularImplied(this->nonLRoots.TheObjects[i], theWeyl))
-      this->BKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
-        (this->nonLRoots.TheObjects[i]);
-  }
-  this->nonLRoots.intersectWith(this->nonBKSingularGmodLRoots, this->nonLNonSingularRoots);
-  for(int i=oldsize;i<tempRoots.size;i++)
-		this->NilradicalRoots.AddObjectOnTop(tempRoots.TheObjects[i]);
-	for (int i=0;i<this->NilradicalRoots.size;i++)
-	{	this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject
-      (-this->NilradicalRoots.TheObjects[i]);
-		this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
-      (this->NilradicalRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject
-      (-this->NilradicalRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject
-      (this->NilradicalRoots.TheObjects[i]);
-  }
-  for (int i=0;i<this->BKSingularGmodLRoots.size;i++)
-	{	this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject
-      (this->BKSingularGmodLRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject
-      (this->BKSingularGmodLRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject
-      (-this->BKSingularGmodLRoots.TheObjects[i]);
-	}
-  if (!this->SatisfyNonBKSingularRoots(theWeyl, TheGlobalVariables))
-		return false;
-  for (int i=0;i<this->PositiveKroots.size;i++)
-	{	this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject
-      ( this->PositiveKroots.TheObjects[i]);
-		this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject
-      (-this->PositiveKroots.TheObjects[i]);
-		this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
-      ( this->PositiveKroots.TheObjects[i]);
-		this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
-      (-this->PositiveKroots.TheObjects[i]);
-	}
-	this->nonAlphas.AddRootSnoRepetition(this->nonBKSingularGmodLRoots);
-	this->nonBetas.AddRootSnoRepetition(this->nonNilradicalRoots);
-//	this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	if (this->nonNilradicalRoots.HasACommonElementWith(this->NilradicalRoots))
-		return false;
-	if (this->PositiveKroots.HasACommonElementWith(this->nonPositiveKRoots))
-		return false;
-	if (this->BKSingularGmodLRoots.HasACommonElementWith(this->nonBKSingularGmodLRoots))
-		return false;
-	//if (this->BKSingularGmodLRoots.HasACommonElementWith(this->nonBKSingularGmodLRoots))
-	//	return false;
-  return true;
-}
-
 bool minimalRelationsProverState::SatisfyNonBKSingularRoots
 	(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 {	root theRoot,tempRoot;
@@ -320,67 +231,7 @@ void minimalRelationsProverState::GetPossibleAlphasAndBetas
 	}
 }
 
-bool minimalRelationsProverState::CanBeShortened
-  (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas,
-		SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
-		bool AssumeGlobalMinimalityRHS)
-{	selAlphas.ComputeDebugString();
-	selBetas.ComputeDebugString();
-	if (selBetas.CardinalitySelectionWithMultiplicities()==0 &&
-			selAlphas.CardinalitySelectionWithMultiplicities()==0)
-    return false;
-  root Candidate; Candidate.MakeZero(theWeyl.KillingFormMatrix.NumRows);
-  root tempRoot;
-  for(int i=0;i<selBetas.elements.size;i++)
-	{	tempRoot.Assign(theRelation.Betas.TheObjects[selBetas.elements.TheObjects[i]]);
-		tempRoot.MultiplyByInteger(selBetas.Multiplicities.TheObjects[selBetas.elements.TheObjects[i]]);
-		Candidate.Add(tempRoot);
-  }
-  for(int i=0;i<selAlphas.elements.size;i++)
-	{	tempRoot.Assign(theRelation.Alphas.TheObjects[selAlphas.elements.TheObjects[i]]);
-		tempRoot.MultiplyByInteger(selAlphas.Multiplicities.TheObjects[selAlphas.elements.TheObjects[i]]);
-		Candidate.Subtract(tempRoot);
-  }
-  if (Candidate.IsEqualToZero())
-  {	if (	selBetas.CardinalitySelectionWithMultiplicities() == selBetas.MaxCardinalityWithMultiplicities() &&
-					selAlphas.CardinalitySelectionWithMultiplicities()== selAlphas.MaxCardinalityWithMultiplicities())
-			return false;
-    return true;
-  }
-  root MinusCandidate;
-  MinusCandidate.Assign(Candidate); MinusCandidate.MinusRoot();
-  Candidate.ComputeDebugString(); MinusCandidate.ComputeDebugString();
-  if (theWeyl.IsARoot(Candidate))
-  { if( selAlphas.CardinalitySelectionWithMultiplicities()>0 ||
-        selBetas.CardinalitySelectionWithMultiplicities()>1)
-    { if (this->NilradicalRoots.ContainsObject(Candidate))
-				return true;
-			else
-				this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
-    }
-    if ( this->PositiveKroots.ContainsObject(Candidate) ||
-         this->PositiveKroots.ContainsObject(MinusCandidate))
-    { for (int i=0;i<this->NilradicalRoots.size;i++)
-        if (theWeyl.IsARoot(this->NilradicalRoots.TheObjects[i]-Candidate))
-          return true;
-      this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
-    }
-//    if (selAlphas.CardinalitySelectionWithMultiplicities()>1)
-    if (selAlphas.elements.size>1 ||
-          ( AssumeGlobalMinimalityRHS && selBetas.elements.size!=0 &&
-            selAlphas.elements.size==1 ))
-    { this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
-//      this->StateIsDubious=true;
-      if (this->PartialRelation.Alphas.ContainsObject(MinusCandidate))
-        return true;
-    }
-    if (selAlphas.elements.size==1)
-    { this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
-			this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
-    }
-  }
-  return false;
-}
+
 
 void minimalRelationsProverState::Assign(const minimalRelationsProverState& right)
 { this->BKSingularGmodLRoots.CopyFromBase(right.BKSingularGmodLRoots);
@@ -402,8 +253,6 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
 void minimalRelationsProverStates::MakeProgressReportCurrentState
 	(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out; std::string tempS;
-  this->currentSeparatingNormalEpsilonForm.ElementToStringEpsilonForm(tempS,false,false);
-  out <<"Current separating normal: " << tempS<<"\r\n";
   out << this->TheObjects[index].DebugString;
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
   IndicatorWindowGlobalVariables.StatusString1=out.str();
@@ -530,25 +379,6 @@ bool minimalRelationsProverState::IsAGoodPosRootsKChoice
   return true;
 }
 
-
-/*void minimalRelationsProverStates::RemoveDoubt
-  (int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{ //roots& tempPosRootsK=TheGlobalVariables.rootsRemoveDoubt;
-  //tempPosRootsK.size=0;
-  //tempPosRootsK.AddListOnTop(this->PositiveKroots);
-  for (int i=0;i<this->TheObjects[index].nonBKSingularRoots.size;i++)
-    if (this->TheObjects[index].IsBKSingularNonImplied
-					(this->TheObjects[index].nonBKSingularRoots.TheObjects[i], theWeyl))
-      for (int j=0;j<this->TheObjects[index].UndecidedRoots.size;j++)
-      { int oldsize=this->TheObjects[index].PositiveKroots.size;
-        this->TheObjects[index].PositiveKroots.AddObjectOnTop
-					(this->TheObjects[index].UndecidedRoots.TheObjects[i]);
-        if (this->TheObjects[index].IsAGoodPosRootsKChoice(theWeyl, TheGlobalVariables))
-          this->ExtensionStep(index, theWeyl,TheGlobalVariables,this->TheObjects[index]);
-        this->TheObjects[index].PositiveKroots.size=oldsize;
-      }
-}*/
-
 bool minimalRelationsProverState::FindBetaWithoutTwoAlphas
   (root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl)
 { for (int i=0;i<inputBetas.size;i++)
@@ -623,6 +453,8 @@ void minimalRelationsProverState::ElementToString
 		out << tempS <<" + ";
 	}
 	out <<"...";
+  this->currentSeparatingNormalEpsilonForm.ElementToStringEpsilonForm(tempS,false,false);
+  out <<"\n\nCurrent separating normal: " << tempS<<"\r\n";
 	if (!displayEpsilons)
     this->BKSingularGmodLRoots.ElementToString(tempS);
   else
@@ -729,6 +561,8 @@ void minimalRelationsProverStates::GenerateStates
   this->isomorphismComputer.ComputeAll();
   this->PreferredDualBasis.size=0;
   this->flagAssumeGlobalMinimalityRHS=false;
+  this->invertedCartan.AssignMatrixIntWithDen(theWeyl.KillingFormMatrix,1);
+  this->invertedCartan.Invert(TheGlobalVariables);
   this->PreferredDualBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
   for (int i=0;i<theDimension;i++)
 		this->PreferredDualBasis.TheObjects[i].MakeZero(theDimension);
@@ -934,42 +768,17 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 		return false;
 	if (theBetas.size!=theOtherBetas.size)
 		return false;
-	rootsCollection& isotypicAlphaPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem1;
-	rootsCollection& isotypicBetaPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem2;
-	isotypicAlphaPieces.MakeActualSizeAtLeastExpandOnTop(theAlphas.size);
-	isotypicBetaPieces.MakeActualSizeAtLeastExpandOnTop(theBetas.size);
-	isotypicAlphaPieces.SetSizeExpandOnTopNoObjectInit(1);
-	isotypicAlphaPieces.TheObjects[0].size=0;
-	isotypicAlphaPieces.TheObjects[0].AddObjectOnTop(theAlphas.TheObjects[0]);
+  DynkinDiagramRootSubalgebra diagram1, diagram2;
+  roots tempRoots; tempRoots.CopyFromBase(theState.PositiveKroots);
+  diagram1.ComputeDiagramType(tempRoots, theWeyl);
+  tempRoots.CopyFromBase(theState.PositiveKroots);
+  diagram2.ComputeDiagramType(tempRoots, theWeyl);
+  if (!(diagram1==diagram2))
+    return false;
 	ListBasicObjects<int> tempList;
-	tempList.size=0;
 	permutation thePermAlphas, thePermBetas;
-	for (int i=1;i<theAlphas.size;i++)
-	{ if (theState.Root1IsGreaterThanRoot2
-					(i-1,i,theAlphas,theBetas,theGlobalVariables,theWeyl))
-		{	tempList.AddObjectOnTop(isotypicAlphaPieces.LastObject()->size);
-			isotypicAlphaPieces.SetSizeExpandOnTopNoObjectInit(isotypicAlphaPieces.size+1);
-			isotypicAlphaPieces.LastObject()->size=0;
-		}
-		isotypicAlphaPieces.LastObject()->AddObjectOnTop(theAlphas.TheObjects[i]);
-	}
-	tempList.AddObjectOnTop(isotypicAlphaPieces.LastObject()->size);
-	thePermAlphas.initPermutation(tempList,theAlphas.size);
-	isotypicBetaPieces.SetSizeExpandOnTopNoObjectInit(1);
-	isotypicBetaPieces.TheObjects[0].size=0;
-	isotypicBetaPieces.TheObjects[0].AddObjectOnTop(theBetas.TheObjects[0]);
-	tempList.size=0;
-	for (int i=1;i<theBetas.size;i++)
-	{ if (theState.Root1IsGreaterThanRoot2
-					(i-1,i,theBetas,theAlphas,theGlobalVariables,theWeyl))
-		{	tempList.AddObjectOnTop(isotypicBetaPieces.LastObject()->size);
-			isotypicBetaPieces.SetSizeExpandOnTopNoObjectInit(isotypicBetaPieces.size+1);
-			isotypicBetaPieces.LastObject()->size=0;
-		}
-		isotypicBetaPieces.LastObject()->AddObjectOnTop(theBetas.TheObjects[i]);
-	}
-	tempList.AddObjectOnTop(isotypicBetaPieces.LastObject()->size);
-	thePermBetas.initPermutation(tempList,theBetas.size);
+  this->GetIsoTypicComponents(theAlphas, theBetas, thePermAlphas, theState, theWeyl,  theGlobalVariables);
+  this->GetIsoTypicComponents(theBetas, theAlphas, thePermBetas, theState, theWeyl, theGlobalVariables);
 	int NumCyclesAlphas = thePermAlphas.getTotalNumSubsets();
 	int NumCyclesBetas  = thePermBetas.getTotalNumSubsets();
 	roots theDomain, thePermutedAlphas, thePermutedBetas, theRange;
@@ -1023,6 +832,30 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 	}
 	//theSA.attemptExtensionToIsomorphismNoCentralizer
 	return false;
+}
+
+void minimalRelationsProverStates::GetIsoTypicComponents
+  ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState,
+    WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{	ListBasicObjects<int> tempList;
+  tempList.MakeActualSizeAtLeastExpandOnTop(theRoots.size);
+	rootsCollection& isotypicPieces=TheGlobalVariables.rootsExtendToIsomorphismRootSystem1;
+	isotypicPieces.MakeActualSizeAtLeastExpandOnTop(theRoots.size);
+	isotypicPieces.SetSizeExpandOnTopNoObjectInit(1);
+	isotypicPieces.TheObjects[0].size=0;
+	isotypicPieces.TheObjects[0].AddObjectOnTop(theRoots.TheObjects[0]);
+	tempList.size=0;
+	for (int i=1;i<theRoots.size;i++)
+	{ if (theState.Root1IsGreaterThanRoot2
+					(i-1,i,theRoots,theOtherTypeRoots,TheGlobalVariables,theWeyl))
+		{	tempList.AddObjectOnTop(isotypicPieces.LastObject()->size);
+			isotypicPieces.SetSizeExpandOnTopNoObjectInit(isotypicPieces.size+1);
+			isotypicPieces.LastObject()->size=0;
+		}
+		isotypicPieces.LastObject()->AddObjectOnTop(theRoots.TheObjects[i]);
+	}
+	tempList.AddObjectOnTop(isotypicPieces.LastObject()->size);
+	outputComponents.initPermutation(tempList,theRoots.size);
 }
 
 bool 	minimalRelationsProverStates::GetSeparatingRootIfExists

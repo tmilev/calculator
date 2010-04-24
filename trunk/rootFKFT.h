@@ -21,6 +21,7 @@ public:
   root currentSeparatingNormalEpsilonForm;
   roots NilradicalRoots;
   roots nonNilradicalRoots;
+  roots ChosenPositiveKroots;
   roots PositiveKroots;
   roots nonPositiveKRoots;
   roots nonKRoots;
@@ -31,7 +32,6 @@ public:
   roots nonLRoots;
   roots nonLNonSingularRoots;
   roots nonLNonSingularRootsInNeedOfPosKroots;
-  roots chosenKroots;
 //  roots nonBKsingularRoots;
 	//roots UndecidedRoots;
   coneRelation PartialRelation;
@@ -61,7 +61,7 @@ public:
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas,
 			SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
 			bool AssumeGlobalMinimalityRHS);
-  bool IsBKSingularNonImplied(root& input, WeylGroup& theWeyl);
+  bool SumWithPosRootIsARoot(root& input, WeylGroup& theWeyl);
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
 	bool RootIsGoodForPreferredSimpleRoot
@@ -91,13 +91,13 @@ public:
   static int ProblemCounter;
   roots PreferredDualBasis;
   roots PreferredDualBasisEpsilonCoords;
+  //int RecursionDepth;
   ListBasicObjects<int> theIndexStack;
   rootSubalgebra isomorphismComputer;
   MatrixLargeRational invertedCartan;
   bool flagAssumeGlobalMinimalityRHS;
  	bool ExtendToIsomorphismRootSystem
-		(	minimalRelationsProverState& theState, int indexOther,
-			GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
+		(	minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GetIsoTypicComponents
@@ -107,17 +107,16 @@ public:
   {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);
   };
   bool AddObjectOnTopNoRepetitionOfObject
-    ( minimalRelationsProverState& theState, WeylGroup& theWeyl,
-      GlobalVariables& TheGlobalVariables);
+    ( minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStates
     ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
-  void Extend
-    (	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void ExploreAllChildrenIndex
-    ( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void RecursionStep
+    (	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void TheFullRecursion
+    (	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep
-		( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
-			minimalRelationsProverState& newState);
+		( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
 			bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);

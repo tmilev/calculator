@@ -6,6 +6,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 {	root tempRoot;
 	this->flagNeedsAdditionOfPositiveKroots=false;
 	this->ComputeDebugString(theWeyl, TheGlobalVariables);
+  this->nonBKSingularGmodLRoots.ComputeDebugString();
 	for (int j=0;j<theWeyl.RootSystem.size;j++)
 	{	root& tested=theWeyl.RootSystem.TheObjects[j];
 	  for (int i=0;i<this->PartialRelation.Alphas.size;i++)
@@ -44,6 +45,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
       this->BKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
         (this->nonLRoots.TheObjects[i]);
   }
+  this->nonBKSingularGmodLRoots.ComputeDebugString();
   this->nonLRoots.intersectWith(this->nonBKSingularGmodLRoots, this->nonLNonSingularRoots);
   for(int i=oldsize;i<tempRoots.size;i++)
 		this->NilradicalRoots.AddObjectOnTop(tempRoots.TheObjects[i]);
@@ -151,98 +153,121 @@ bool minimalRelationsProverState::CanBeShortened
         this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
       }
       if (!(selBetas.CardinalitySelectionWithMultiplicities() == selBetas.MaxCardinalityWithMultiplicities() &&
-            selAlphas.CardinalitySelectionWithMultiplicities()== selAlphas.MaxCardinalityWithMultiplicities()))
+            selAlphas.CardinalitySelectionWithMultiplicities()== selAlphas.MaxCardinalityWithMultiplicities()) &&
+            selBetas.CardinalitySelectionWithMultiplicities()>0 )
         this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
     }
   }
   return false;
 }
 
-void minimalRelationsProverStates::ExploreAllChildrenIndex
-  (	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{ for (int i=0;i<this->TheObjects[index].childStates.size;i++)
-  { int newIndex= this->TheObjects[index].childStates.TheObjects[i];
-    this->theIndexStack.AddObjectOnTop(newIndex);
-    this->TheObjects[index].activeChild=i;
-		this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
-		this->Extend(newIndex,theWeyl,TheGlobalVariables);
-    this->theIndexStack.PopLastObject();
-  }
-}
-
-void minimalRelationsProverStates::Extend
-  (	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{ if (this->TheObjects[index].flagNeedsAdditionOfPositiveKroots)
-  { minimalRelationsProverState& theState=this->TheObjects[index];
-    minimalRelationsProverState newState;
-    for (int j=0; j<theWeyl.RootSystem.size;j++)
-      if (!theState.nonKRoots.ContainsObject(theWeyl.RootSystem.TheObjects[j]))
-      { newState.Assign(theState);
-        newState.PositiveKroots.AddObjectOnTop(theWeyl.RootSystem.TheObjects[j]);
-        this->ExtensionStep(index, theWeyl,TheGlobalVariables,newState);
-      }
-    this->ExploreAllChildrenIndex(index,theWeyl,TheGlobalVariables);
-    return;
-  }
-  root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
-//  this->ComputeDebugString(theWeyl, TheGlobalVariables);
-  this->TheObjects[index].childStates.size=0;
-  minimalRelationsProverState newState;
-  int theDimension=theWeyl.KillingFormMatrix.NumRows;
-  //roots& theAlphas = this->TheObjects[index].PartialRelation.Alphas;
-  //roots& theBetas  = this->TheObjects[index].PartialRelation.Betas;
-  int firstProblematicIndex=-1;
+void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{	int index= *this->theIndexStack.LastObject();
+	this->MakeProgressReportCurrentState(index,TheGlobalVariables, theWeyl);
+	if (this->TheObjects[index].flagNeedsAdditionOfPositiveKroots)
+	{ minimalRelationsProverState& theState=this->TheObjects[index];
+		minimalRelationsProverState newState;
+		assert(theState.nonLNonSingularRootsInNeedOfPosKroots.size>0);
+		root& firstRoot=theState.nonLNonSingularRootsInNeedOfPosKroots.TheObjects[0];
+		firstRoot.ComputeDebugString();
+		theState.nonKRoots.ComputeDebugString();
+		theState.ComputeDebugString(theWeyl, TheGlobalVariables);
+		int TotalCounter=0; int Counter2=0;
+		for (int j=0; j<theWeyl.RootSystem.size;j++)
+			if (!theState.nonPositiveKRoots.ContainsObject(theWeyl.RootSystem.TheObjects[j])&&
+					!theState.PositiveKroots.ContainsObject(theWeyl.RootSystem.TheObjects[j]) &&
+					theWeyl.IsARoot(firstRoot+theWeyl.RootSystem.TheObjects[j]))
+				TotalCounter++;
+		for (int j=0; j<theWeyl.RootSystem.size;j++)
+			if (!theState.nonPositiveKRoots.ContainsObject(theWeyl.RootSystem.TheObjects[j])&&
+					!theState.PositiveKroots.ContainsObject(theWeyl.RootSystem.TheObjects[j]) &&
+					theWeyl.IsARoot(firstRoot+theWeyl.RootSystem.TheObjects[j]))
+			{ this->MakeProgressReportChildStates
+					(Counter2,TotalCounter,this->TheObjects[index].childStates.size, TheGlobalVariables, theWeyl);
+				Counter2++;
+				newState.Assign(theState);
+				newState.ChosenPositiveKroots.AddObjectOnTop(theWeyl.RootSystem.TheObjects[j]);
+				this->ExtensionStep(index, theWeyl,TheGlobalVariables,newState);
+			}
+		return;
+	} 
+	root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
+	//this->ComputeDebugString(theWeyl, TheGlobalVariables);
+	this->TheObjects[index].childStates.size=0;
+	minimalRelationsProverState newState;
+	int theDimension=theWeyl.KillingFormMatrix.NumRows;
+	//roots& theAlphas = this->TheObjects[index].PartialRelation.Alphas;
+	//roots& theBetas  = this->TheObjects[index].PartialRelation.Betas;
+	int firstProblematicIndex=-1;
 	Rational tempRat;
  	if (firstProblematicIndex==-1)
 	{	if (!roots::ConesIntersect
 					(	TheGlobalVariables,this->TheObjects[index].PartialRelation.Alphas,
 						this->TheObjects[index].NilradicalRoots,theDimension))
 		{ root NormalSeparatingCones;
-      bool oneBetaIsPositive;
-      bool foundNormal=
-        this->getNormalSeparatingConesFromPreferredBasis
-          (index, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive);
-      if (!foundNormal)
-      { bool tempBool=
-          roots::GetNormalSeparatingCones
-            ( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots,
-              this->TheObjects[index].PartialRelation.Alphas, NormalSeparatingCones);
-        assert(tempBool);
-        root tempRoot;
-        if(!this->GetSeparatingRootIfExists
-              (	this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas,
-                tempRoot, theWeyl, TheGlobalVariables))
-          this->invertedCartan.ActOnAroot(NormalSeparatingCones, tempRoot);
-        NormalSeparatingCones.Assign(tempRoot);
-      }
-      theWeyl.GetEpsilonCoords
-        (NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
-      this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
-      this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
-      int oldSize=this->size;
-      bool addFirstAlpha=true;
-      for (int i=0;i<theWeyl.RootSystem.size;i++)
-      { this->TestAddingExtraRoot
-          (	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i],
-            addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+			bool oneBetaIsPositive;
+			bool foundNormal=
+				this->getNormalSeparatingConesFromPreferredBasis
+					(index, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive);
+			if (!foundNormal)
+			{ bool tempBool=
+					roots::GetNormalSeparatingCones
+						( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots,
+							this->TheObjects[index].PartialRelation.Alphas, NormalSeparatingCones);
+				assert(tempBool);
+				root tempRoot;
+				if(!this->GetSeparatingRootIfExists
+							(	this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas,
+								tempRoot, theWeyl, TheGlobalVariables))
+					this->invertedCartan.ActOnAroot(NormalSeparatingCones, tempRoot);
+				NormalSeparatingCones.Assign(tempRoot);
+			}
+			theWeyl.GetEpsilonCoords
+				(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
+			this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
+			this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+			bool addFirstAlpha=true;
+			for (int i=0;i<theWeyl.RootSystem.size;i++)
+			{ this->TestAddingExtraRoot
+					(	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i],
+						addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
 				this->MakeProgressReportChildStates
-					(	i, theWeyl.RootSystem.size*2, this->size-oldSize,
+					(	i, theWeyl.RootSystem.size*2, this->TheObjects[index].childStates.size, TheGlobalVariables, theWeyl);
+			}
+			for (int i=0;i<theWeyl.RootSystem.size;i++)
+			{	this->TestAddingExtraRoot
+					(	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i],
+						!addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+				this->MakeProgressReportChildStates
+					(	i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].childStates.size, 
 						TheGlobalVariables, theWeyl);
-      }
-      for (int i=0;i<theWeyl.RootSystem.size;i++)
-      {	this->TestAddingExtraRoot
-          (	index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i],
-            !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-				this->MakeProgressReportChildStates
-					(	i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2,
-						this->size-oldSize, TheGlobalVariables, theWeyl);
-      }
-      this->ExploreAllChildrenIndex(index,theWeyl,TheGlobalVariables);
+			}
 		}
 		else
 		{ this->MakeProgressReportCurrentState(index,TheGlobalVariables,theWeyl);
-		  this->TheObjects[index].StateIsComplete=true;
+			this->TheObjects[index].StateIsComplete=true;
 		}
+	}
+}
+
+void minimalRelationsProverStates::TheFullRecursion(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{	while (this->theIndexStack.size>0)
+	{	this->RecursionStep(theWeyl, TheGlobalVariables);
+	}
+}
+
+void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{ if (this->theIndexStack.size<1)
+		return;
+	int currentIndex= *this->theIndexStack.LastObject();
+	if(this->TheObjects[currentIndex].activeChild>=this->TheObjects[currentIndex].childStates.size-1)
+		this->theIndexStack.PopLastObject();
+	else
+	{	this->TheObjects[currentIndex].activeChild++;
+		this->theIndexStack.AddObjectOnTop
+			(this->TheObjects[currentIndex].childStates.TheObjects[this->TheObjects[currentIndex].activeChild]);
+		this->ComputeLastStackIndex(theWeyl, TheGlobalVariables);
+		this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
 	}
 }
 
@@ -296,6 +321,7 @@ void minimalRelationsProverStates::ExtensionStep
       //  this->RemoveDoubt(currentNewIndex,theWeyl,TheGlobalVariables);
       //else
       this->TheObjects[index].childStates.AddObjectOnTop(currentNewIndex);
+      this->TheObjects[index].activeChild=-1;
     }
   }
 }

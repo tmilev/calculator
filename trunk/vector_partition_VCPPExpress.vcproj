@@ -1592,10 +1592,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SLtwoSubalgebras.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\wxWidgets_GUI.cpp"
 				>
 				<FileConfiguration
@@ -1758,10 +1754,6 @@
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"
-			>
-		</File>
-		<File
-			RelativePath=".\Zuckermans_problem.cpp"
 			>
 		</File>
 	</Files>

@@ -8,7 +8,7 @@ template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjects
 extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
 
 
-bool minimalRelationsProverState::IsBKSingularNonImplied(root& input, WeylGroup& theWeyl)
+bool minimalRelationsProverState::SumWithPosRootIsARoot(root& input, WeylGroup& theWeyl)
 { root tempRoot;
   for (int j=0;j<this->PositiveKroots.size;j++)
   { tempRoot=input+this->PositiveKroots.TheObjects[j];
@@ -19,7 +19,7 @@ bool minimalRelationsProverState::IsBKSingularNonImplied(root& input, WeylGroup&
 }
 
 bool minimalRelationsProverState::IsBKSingularImplied(root& input, WeylGroup& theWeyl)
-{ if (!this->IsBKSingularNonImplied(input, theWeyl))
+{ if (!this->SumWithPosRootIsARoot(input, theWeyl))
     return false;
   root tempRoot;
   for (int j=0;j<theWeyl.RootSystem.size;j++)
@@ -130,7 +130,7 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 	(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 {	root tempRoot;
 	//this->nonBKSingularGmodLRoots.ComputeDebugString();
-	this->ComputeDebugString(theWeyl, TheGlobalVariables);
+	//this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	for (int i=0;i<this->nonLNonSingularRoots.size;i++)
 	{ root& theRoot= this->nonLNonSingularRoots.TheObjects[i];
     int LastFoundIndex=-1;
@@ -156,11 +156,13 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 		if (NumFoundIndices==1)
 			this->PositiveKroots.AddObjectOnTopNoRepetitionOfObject
         (theWeyl.RootSystem.TheObjects[LastFoundIndex]);
-    if (NumFoundIndices>1)
-    { this->flagNeedsAdditionOfPositiveKroots=true;
-      this->nonLNonSingularRootsInNeedOfPosKroots.AddObjectOnTopNoRepetitionOfObject(theRoot);
-    }
 	}
+	for (int i=0;i<this->nonLNonSingularRoots.size;i++)
+		if (!this->SumWithPosRootIsARoot(this->nonLNonSingularRoots.TheObjects[i],theWeyl))
+		{	this->flagNeedsAdditionOfPositiveKroots=true;
+      this->nonLNonSingularRootsInNeedOfPosKroots.AddObjectOnTopNoRepetitionOfObject
+				(this->nonLNonSingularRoots.TheObjects[i]);
+		}
 	return true;
 }
 
@@ -170,6 +172,7 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
 //  this->StateIsDubious=false;
   this->NilradicalRoots.AddRootSnoRepetition(this->PartialRelation.Betas);
   this->BKSingularGmodLRoots.AddRootSnoRepetition(this->PartialRelation.Alphas);
+  this->PositiveKroots.AddRootSnoRepetition(this->ChosenPositiveKroots);
   SelectionWithMaxMultiplicity selBetas, selAlphas;
   selBetas.initMe2(this->PartialRelation.Betas.size,1);
   selAlphas.initMe2(this->PartialRelation.Alphas.size,1);
@@ -217,6 +220,7 @@ void minimalRelationsProverState::MakeProgressReportCanBeShortened
 	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
+	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
@@ -247,7 +251,7 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
   this->StateIsPossible=right.StateIsPossible;
   this->theScalarProducts.Assign(right.theScalarProducts);
   this->StateIsComplete=right.StateIsComplete;
-  //this->chosenKroots=right.chosenKroots;
+  this->ChosenPositiveKroots=right.ChosenPositiveKroots;
 }
 
 void minimalRelationsProverStates::MakeProgressReportCurrentState
@@ -282,7 +286,7 @@ void minimalRelationsProverStates::MakeProgressReportChildStates
 	std::stringstream out4;
 	out4	<<"Computing children states: "<< numSearched+1<<" out of "<< outOf << "; "
 				<< this->TheObjects[*this->theIndexStack.LastObject()].childStates.size
-				<<" possible out of " <<NewFound<<" new states";
+				<<" possible ";
 	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
@@ -320,6 +324,7 @@ void minimalRelationsProverStates::MakeProgressReportStack
 	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
@@ -375,7 +380,7 @@ bool minimalRelationsProverState::IsAGoodPosRootsKChoice
   (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots,this->PositiveKroots);
   for (int i=0;i<this->BKSingularGmodLRoots.size;i++)
-    if (!this->IsBKSingularNonImplied(this->BKSingularGmodLRoots.TheObjects[i],theWeyl))
+    if (!this->SumWithPosRootIsARoot(this->BKSingularGmodLRoots.TheObjects[i],theWeyl))
       return false;
   return true;
 }
@@ -433,8 +438,7 @@ void minimalRelationsProverState::ComputeScalarProductsMatrix
 
 
 void minimalRelationsProverState::ElementToString
-	( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
-    bool displayEpsilons)
+	( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons)
 { std::string tempS; std::stringstream out;
   this->PartialRelation.Alphas.ElementToLinearCombinationString(tempS);
   out << tempS <<"+ ... = ";
@@ -601,11 +605,12 @@ void minimalRelationsProverStates::GenerateStates
 //	tempRoot.MinusRoot();
 //	this->LastObject()->UndecidedRoots.PopFirstOccurenceObjectSwapWithLast(tempRoot);
 	this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, theWeyl);
-	this->theIndexStack.AddObjectOnTop(0);
 	this->LastObject()->ComputeDebugString(theWeyl,TheGlobalVariables);
 //	this->LastObject()->theScalarProducts.ComputeDebugString();
+	this->theIndexStack.AddObjectOnTop(0);
   this->MakeProgressReportCurrentState(0,TheGlobalVariables,theWeyl);
-  this->Extend(0,theWeyl, TheGlobalVariables);
+  this->ComputeLastStackIndex(theWeyl, TheGlobalVariables);
+  this->TheFullRecursion(theWeyl, TheGlobalVariables);
   this->ComputeDebugString(theWeyl,TheGlobalVariables);
   theSetup.theRootSubalgebras.DebugString=this->DebugString;
 }
@@ -788,20 +793,23 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
   if (!thePermAlphas.HasSameMaxMultiplicities(tempPermAlphas) ||
       !thePermBetas.HasSameMaxMultiplicities(tempPermBetas))
     return false;
-  if(theState.PositiveKroots.IsEqualTo( this->TheObjects[indexOther].PositiveKroots))
+  if(theState.ChosenPositiveKroots.size!= this->TheObjects[indexOther].ChosenPositiveKroots.size)
     return false;
 	int NumCyclesAlphas = thePermAlphas.getTotalNumSubsets();
 	int NumCyclesBetas  = thePermBetas.getTotalNumSubsets();
 	roots theDomain, thePermutedAlphas, thePermutedBetas, theRange;
 	theRange.size=0;
+	theRange.AddListOnTop(this->TheObjects[indexOther].ChosenPositiveKroots);
 	theRange.AddListOnTop(theOtherAlphas); theRange.AddListOnTop(theOtherBetas);
 	MatrixLargeRational theOtherMatrix, thisMatrix;
 	this->TheObjects[indexOther].ComputeScalarProductsMatrix
 		(theGlobalVariables, theWeyl, theOtherAlphas, theOtherBetas, theOtherMatrix);
 	this->TheObjects[indexOther].theScalarProducts.ComputeDebugString();
 	bool DomainAndRangeGenerateNonIsoSAs;
+	int ChosenKrootsSize=theState.ChosenPositiveKroots.size;
+	theDomain.AddListOnTop(theState.ChosenPositiveKroots);
 	for(int i=0;i<NumCyclesAlphas;i++)
-	{	theDomain.size=0;
+	{	theDomain.size=ChosenKrootsSize;
 		thePermutedAlphas.size=0;
 		thePermAlphas.GetPermutation(tempList);
 		for (int k=0;k<tempList.size;k++)
@@ -811,7 +819,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 		}
 		theDomain.ComputeDebugString();
 		for (int j=0;j<NumCyclesBetas;j++)
-		{	theDomain.size=theAlphas.size;
+		{	theDomain.size=theAlphas.size+ChosenKrootsSize;
 			thePermutedBetas.size=0;
 			thePermBetas.GetPermutation(tempList);
 			for (int k=0;k<tempList.size;k++)
@@ -819,12 +827,12 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 				thePermutedBetas.AddObjectOnTop(tempRoot);
 				theDomain.AddObjectOnTop(tempRoot);
 			}
-			theDomain.ComputeDebugString();
+//			theDomain.ComputeDebugString();
 			this->MakeProgressReportIsos
 				(i*NumCyclesBetas+j,NumCyclesBetas*NumCyclesAlphas,theGlobalVariables,theWeyl);
 			theState.ComputeScalarProductsMatrix
 				(theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
-			thisMatrix.ComputeDebugString();
+//			thisMatrix.ComputeDebugString();
 
 			if (thisMatrix.IsEqualTo(theOtherMatrix))
 			{	if (this->isomorphismComputer.attemptExtensionToIsomorphism

@@ -11907,7 +11907,7 @@ void WeylGroup::GenerateAdditivelyClosedSubset
     for (int j=i+1; j<output.size;j++)
     { tempRoot=output.TheObjects[i]+output.TheObjects[j];
       if (this->IsARoot(tempRoot))
-        output.AddObjectOnTop(tempRoot);
+        output.AddObjectOnTopNoRepetitionOfObject(tempRoot);
     }
 }
 

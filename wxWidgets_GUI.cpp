@@ -171,6 +171,7 @@ public:
   wxBoxSizer* BoxSizer14HorizontalSaveButtons;
   wxBoxSizer* BoxSizer15HorizontalSlicingButtons;
   wxBoxSizer* BoxSizer16VerticalStatusString;
+  wxBoxSizer* BoxSizer17HorizontalProverButtons;
  // wxRadioButton* RB1OneSlice;
  // wxRadioButton* RB2OneIncrement;
  // wxRadioButton* RB3FullChop;
@@ -201,6 +202,8 @@ public:
   ::wxButton* Button7OneDirectionIncrement;
   ::wxButton* Button8FullChopping;
 	::wxButton* Button9CustomNilradical;
+	::wxButton* Button10ProverOneStep;
+	::wxButton* Button11ProverFullComputation;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -226,6 +229,8 @@ public:
   void onButton7SliceIncrement (wxCommandEvent& ev);
   void onButton8FullChop(wxCommandEvent& ev);
   void onButton9CustomNilradical(wxCommandEvent& ev);
+  void onButton10ProverOneStep(wxCommandEvent& ev);
+  void onButton11ProverFullComputation(wxCommandEvent& ev);
   void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
@@ -266,6 +271,8 @@ public:
     ID_Button7Increment,
     ID_Button8FullChop,
 		ID_Button9CustomNilradical,
+		ID_Button10ProverOneStep,
+		ID_Button11ProverFullComputation,		
 		ID_RBGroup1SliceOptions,
     ID_Spin1Dim,
     ID_Spin2NumVect,
@@ -360,9 +367,8 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
-		EVT_BUTTON(guiMainWindow::ID_Button9CustomNilradical, guiMainWindow::onButton9CustomNilradical)
-		EVT_RADIOBOX
-			(guiMainWindow::ID_RBGroup1SliceOptions,guiMainWindow::onRBGroup1SlicingOptions)
+    EVT_BUTTON(guiMainWindow::ID_Button9CustomNilradical, guiMainWindow::onButton9CustomNilradical)
+		EVT_RADIOBOX(guiMainWindow::ID_RBGroup1SliceOptions,guiMainWindow::onRBGroup1SlicingOptions)
     EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
     EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner1and2)
     EVT_SPINCTRL(guiMainWindow::ID_Spin2NumVect, guiMainWindow::onSpinner1and2)
@@ -373,7 +379,6 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_COMMAND (guiMainWindow::ID_MainWindow,::wxEVT_ComputationFinished,guiMainWindow::onComputationOver )
     EVT_CLOSE(guiMainWindow::OnExit)
     //EVT_PAINT(guiMainWindow::onPaint)
-
 END_EVENT_TABLE()
 
 class wxDialogOutput : public wxDialog
@@ -394,6 +399,8 @@ BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
                       wxDialogOutput::onToggleButton2ViewCombinatorialChambers)
     EVT_BUTTON(guiMainWindow::ID_Button4SaveReadable, wxDialogOutput::onButton4SaveReadable)
     EVT_BUTTON(guiMainWindow::ID_Button5SaveComputer, wxDialogOutput::onButton5SaveComputer)
+    EVT_BUTTON(guiMainWindow::ID_Button10ProverOneStep, guiMainWindow::onButton10ProverOneStep)
+    EVT_BUTTON(guiMainWindow::ID_Button11ProverFullComputation, guiMainWindow::onButton11ProverFullComputation)
 END_EVENT_TABLE()
 
 wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title,
@@ -503,6 +510,7 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer14HorizontalSaveButtons = new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer15HorizontalSlicingButtons= new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer16VerticalStatusString= new wxBoxSizer(wxVERTICAL);
+  this->BoxSizer17HorizontalProverButtons=  new ::wxBoxSizer(wxHORIZONTAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton
 		(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
@@ -580,6 +588,10 @@ guiMainWindow::guiMainWindow()
 		(this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
   this->Button5SaveComputer = new ::wxButton
 		(this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
+	this->Button10ProverOneStep = new ::wxButton
+		(this->Dialog2StatusString1,this->ID_Button10ProverOneStep,wxT("Prover one step "));
+	this->Button11ProverFullComputation = new ::wxButton
+		(this->Dialog2StatusString1,this->ID_Button11ProverFullComputation,wxT("Prover full go"));
 	this->Button5SaveComputer->Disable();
   //this->BoxSizer1HorizontalBackground->Fit(this);
   this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
@@ -634,7 +646,10 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer13VerticalPartFracOutput->Add(this->BoxSizer14HorizontalSaveButtons);
     this->BoxSizer14HorizontalSaveButtons->Add(this->Button4SaveReadable);
     this->BoxSizer14HorizontalSaveButtons->Add(this->Button5SaveComputer);
+  this->BoxSizer16VerticalStatusString->Add(this->BoxSizer17HorizontalProverButtons);
   this->BoxSizer16VerticalStatusString->Add(this->Text4StatusString1,1,wxEXPAND| wxALL);
+		this->BoxSizer17HorizontalProverButtons->Add(this->Button10ProverOneStep);
+		this->BoxSizer17HorizontalProverButtons->Add(this->Button11ProverFullComputation);
   this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
   this->Dialog2StatusString1->SetSizer(this->BoxSizer16VerticalStatusString);
 
@@ -963,6 +978,14 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 		(*this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
+}
+
+void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
+{// std::stringstream out;
+}
+
+void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
+{	 //std::stringstream out;
 }
 
 void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)

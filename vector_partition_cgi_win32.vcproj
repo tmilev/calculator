@@ -169,10 +169,6 @@
 			Name="html"
 			>
 			<File
-				RelativePath=".\SLtwoSubalgebras.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\vector_partition.html"
 				>
 			</File>

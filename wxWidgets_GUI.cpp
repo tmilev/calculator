@@ -272,7 +272,7 @@ public:
     ID_Button8FullChop,
 		ID_Button9CustomNilradical,
 		ID_Button10ProverOneStep,
-		ID_Button11ProverFullComputation,		
+		ID_Button11ProverFullComputation,
 		ID_RBGroup1SliceOptions,
     ID_Spin1Dim,
     ID_Spin2NumVect,
@@ -974,14 +974,21 @@ void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
-	this->theComputationSetup.oneIncrement
-		(*this->theComputationSetup.theGlobalVariablesContainer->Default());
+	this->theComputationSetup.oneIncrement(*this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
 
 void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
-{// std::stringstream out;
+{ minimalRelationsProverStates& theProver= MainWindow1->theComputationSetup.theProver;
+  GlobalVariables* tgv= MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default();
+  if (!theProver.flagComputationIsInitialized)
+    theProver.GenerateStartingState (MainWindow1->theComputationSetup, *tgv, 'E',8);
+  else
+    theProver.RecursionStep(theProver.theWeylGroup,*tgv);
+  if (*theProver.theIndexStack.LastObject()>=0)
+    theProver.TheObjects[*theProver.theIndexStack.LastObject()].ComputeDebugString(theProver.theWeylGroup, *tgv);
+  theProver.MakeProgressReportCurrentState(*theProver.theIndexStack.LastObject(), *tgv, theProver.theWeylGroup);
 }
 
 void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
@@ -991,8 +998,7 @@ void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
 void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
 {	this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
-	this->theComputationSetup.FullChop
-    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
+	this->theComputationSetup.FullChop(*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }

@@ -901,18 +901,9 @@ void minimalRelationsProverStates::GetIsoTypicComponents
 	outputComponents.initPermutation(tempList,theRoots.size);
 }
 
-bool 	minimalRelationsProverStates::GetSeparatingRootIfExists
-	(	roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& theWeyl,
-		GlobalVariables& TheGlobalVariables)
-{	return this->GetSeparatingRootIfExistsFromSet
-    (choicePreferrence, choiceIndex, ConeOneStrictlyPositive, ConeNonNegative, output,theWeyl, TheGlobalVariables,theWeyl.RootSystem);
-}
-
-
 bool rootSubalgebra::attemptExtensionToIsomorphism
-	( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
-		ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly,
-		WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs)
+	( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,	ReflectionSubgroupWeylGroup* outputAutomorphisms,
+    bool actOnCentralizerOnly, WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs)
 { if (outputAutomorphisms!=0)
 		outputAutomorphisms->ExternalAutomorphisms.size=0;
 	if (DomainAndRangeGenerateNonIsoSAs!=0)

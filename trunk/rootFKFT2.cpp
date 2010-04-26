@@ -94,8 +94,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 }
 
 bool minimalRelationsProverState::CanBeShortened
-  (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas,
-		SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
+  (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
 		bool AssumeGlobalMinimalityRHS)
 {	selAlphas.ComputeDebugString();
 	selBetas.ComputeDebugString();
@@ -203,20 +202,21 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 	Rational tempRat;
  	if (firstProblematicIndex==-1)
 	{	if (!roots::ConesIntersect
-					(	TheGlobalVariables,this->TheObjects[index].PartialRelation.Alphas,
-						this->TheObjects[index].NilradicalRoots,theDimension))
+					(	TheGlobalVariables, this->TheObjects[index].PartialRelation.Alphas,
+						this->TheObjects[index].NilradicalRoots, theDimension))
 		{ root NormalSeparatingCones;
 			bool oneBetaIsPositive;
 			bool foundNormal=
-				this->GetNormalSeparatingConesFromPreferredBasis(index, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive);
+				this->GetNormalSeparatingConesFromPreferredBasis
+          (index, this->PreferredDualBasis, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive);
 			if (!foundNormal)
 			{ bool tempBool= roots::GetNormalSeparatingCones
 						( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas,
               NormalSeparatingCones);
 				assert(tempBool);
 				root tempRoot;
-				if(!this->GetSeparatingRootIfExists
-							(	0, 0, this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, tempRoot, theWeyl, TheGlobalVariables))
+				if(!this->GetNormalSeparatingConesFromPreferredBasis
+							 (index, this->theWeylGroup.RootSystem, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive))
 					this->invertedCartan.ActOnAroot(NormalSeparatingCones, tempRoot);
 				NormalSeparatingCones.Assign(tempRoot);
 			}
@@ -381,7 +381,8 @@ bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet
 }
 
 bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis
-  ( int theIndex, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
+  ( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+    bool& oneBetaIsPositive )
 { minimalRelationsProverState& theRel=this->TheObjects[theIndex];
   roots& theAlphas=theRel.PartialRelation.Alphas;
   int firstChoiceSeparated1, firstChoiceSeparated2;
@@ -389,14 +390,14 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis
   bool result=false;
   if( this->GetSeparatingRootIfExistsFromSet
       ( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theRel.NilradicalRoots, rootCandidate, theWeyl, TheGlobalVariables,
-        this->PreferredDualBasis))
+        inputPreferredBasis))
   { oneBetaIsPositive=false;
     output.Assign(rootCandidate);
     result=true;
   }
   if( this->GetSeparatingRootIfExistsFromSet
       ( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theRel.NilradicalRoots,theAlphas, rootCandidate, theWeyl, TheGlobalVariables,
-        this->PreferredDualBasis))
+        inputPreferredBasis))
   { if (!(result && firstChoiceSeparated1<firstChoiceSeparated2))
     { result=true;
       oneBetaIsPositive=true;

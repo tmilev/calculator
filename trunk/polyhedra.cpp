@@ -897,7 +897,8 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 }
 
 ComputationSetup::ComputationSetup()
-{	this->flagUsingProverDoNotCallOthers=false;
+{ this->flagProverDoingFullRecursion=false;
+  this->flagUsingProverDoNotCallOthers=false;
   this->flagAllowRepaint=true;
   this->flagHavingNotationExplanation=true;
   this->flagUseHtml=false;
@@ -1181,10 +1182,15 @@ void ComputationSetup::Run()
   }
   if (this->flagUsingProverDoNotCallOthers)
   { GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
-    if (!this->theProver.flagComputationIsInitialized)
-      this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
-    else
-      this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
+    if (!this->flagProverDoingFullRecursion)
+    {  if (!this->theProver.flagComputationIsInitialized)
+        this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
+      else
+        this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
+    } else
+    { this->theProver.GenerateStartingState(*this,*tgv, 'E',8);
+      this->theProver.TheFullRecursion(this->theProver.theWeylGroup, *tgv);
+    }
     if (*this->theProver.theIndexStack.LastObject()>=0)
       this->theProver.TheObjects[*theProver.theIndexStack.LastObject()].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
     this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);

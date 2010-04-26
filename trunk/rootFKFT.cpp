@@ -576,15 +576,26 @@ void minimalRelationsProverStates::ComputePreferredDualBasis
 				this->PreferredDualBasis.TheObjects[i].TheObjects[theDimension-2]=-1;
 		}
 	if (WeylLetter=='E' && theDimension==8)
-    for (int i=0; i<theDimension; i++)
+  { for (int i=0; i<theDimension; i++)
       this->PreferredDualBasis.TheObjects[i].TheObjects[i].MakeOne();
+    /*  for (int i=0; i<7; i++)
+      { this->PreferredDualBasis.TheObjects[i].TheObjects[1]=1;
+        this->PreferredDualBasis.TheObjects[i].TheObjects[2]=-1;
+        for (int j=0; j<i; j++)
+          this->PreferredDualBasis.TheObjects[i].TheObjects[j+2]+=2;
+      }
+      this->PreferredDualBasis.TheObjects[7].TheObjects[0]=4;
+      this->PreferredDualBasis.TheObjects[7]-=this->PreferredDualBasis.TheObjects[0];
+      for (int i=1; i< 7;i++)
+        this->PreferredDualBasis.TheObjects[7]+=this->PreferredDualBasis.TheObjects[i];*/
+  }
   int oldsize=PreferredDualBasis.size;
   for (int i=0;i<oldsize;i++)
     PreferredDualBasis.AddObjectOnTop(-PreferredDualBasis.TheObjects[i]);
   this->theWeylGroup.GetEpsilonCoords
-    (this->PreferredDualBasis,this->PreferredDualBasisEpsilonCoords,TheGlobalVariables);
+    ( this->PreferredDualBasis, this->PreferredDualBasisEpsilonCoords, TheGlobalVariables);
 	this->PreferredDualBasisEpsilonCoords.ElementToStringEpsilonForm
-    (this->PreferredDualBasisEpsilonCoords.DebugString, false, false, false);
+    ( this->PreferredDualBasisEpsilonCoords.DebugString, false, false, false);
 }
 
 

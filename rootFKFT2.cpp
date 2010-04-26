@@ -250,7 +250,8 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 
 void minimalRelationsProverStates::TheFullRecursion(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 {	while (this->theIndexStack.size>0)
-	{	this->RecursionStep(theWeyl, TheGlobalVariables);
+	{ this->RecursionStep(theWeyl, TheGlobalVariables);
+    this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(),TheGlobalVariables,theWeyl);
 	}
 }
 

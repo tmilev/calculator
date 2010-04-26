@@ -6428,7 +6428,7 @@ public:
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas,
 			SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
 			bool AssumeGlobalMinimalityRHS);
-  bool SumWithPosRootIsARoot(root& input, WeylGroup& theWeyl);
+  bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
 	bool RootIsGoodForPreferredSimpleRoot
@@ -6502,7 +6502,7 @@ public:
       GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportIsos
-		(	int numSearched, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+		( int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportCurrentState
 		(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportChildStates
@@ -6533,6 +6533,7 @@ public:
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
 	bool flagUsingProverDoNotCallOthers;
+	bool flagProverDoingFullRecursion;
 	bool flagAllowRepaint;
 	bool flagDoCustomComputation;
 	bool flagComputationInitialized;

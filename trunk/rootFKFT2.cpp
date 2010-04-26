@@ -82,6 +82,8 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 	this->nonAlphas.AddRootSnoRepetition(this->nonBKSingularGmodLRoots);
 	this->nonBetas.AddRootSnoRepetition(this->nonNilradicalRoots);
 //	this->ComputeDebugString(theWeyl, TheGlobalVariables);
+  if (this->nonLRoots.HasACommonElementWith(this->NilradicalRoots) || this->nonLRoots.HasACommonElementWith(this->PositiveKroots))
+    return false;
 	if (this->nonNilradicalRoots.HasACommonElementWith(this->NilradicalRoots))
 		return false;
 	if (this->PositiveKroots.HasACommonElementWith(this->nonPositiveKRoots))

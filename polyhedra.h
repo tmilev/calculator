@@ -6447,8 +6447,7 @@ public:
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverState& right){this->Assign(right);};
   minimalRelationsProverState();
-  void MakeProgressReportCanBeShortened
-		( int checked, int outOf, GlobalVariables& theGlobalVariables);
+  void MakeProgressReportCanBeShortened( int checked, int outOf, GlobalVariables& theGlobalVariables);
 };
 
 class minimalRelationsProverStates: public ListBasicObjects<minimalRelationsProverState>
@@ -6491,11 +6490,8 @@ public:
 		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
 			bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
   bool GetNormalSeparatingConesFromPreferredBasis
-    ( int theIndex, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+    ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
       bool& oneBetaIsPositive );
-	bool GetSeparatingRootIfExists
-		(	roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonPositive, root& output, WeylGroup& theWeyl,
-			GlobalVariables& TheGlobalVariables);
 	bool GetSeparatingRootIfExistsFromSet
 		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl,
 			GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);

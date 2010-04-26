@@ -1504,6 +1504,8 @@ public:
                                        return true; };
 	inline void operator =(const Rational& right){this->Assign(right);};
 	inline bool operator ==(const Rational& right){return this->IsEqualTo(right);};
+	inline void operator+=(const Rational& right){this->Add(right);};
+	inline void operator+=(int right){this->AddInteger(right);};
 	inline bool operator ==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
 	inline void operator = (int right){this->AssignInteger(right);};
 	Rational operator*(const Rational& right)const;
@@ -6534,6 +6536,7 @@ public:
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
+	bool flagUsingProverDoNotCallOthers;
 	bool flagAllowRepaint;
 	bool flagDoCustomComputation;
 	bool flagComputationInitialized;

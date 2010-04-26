@@ -246,6 +246,7 @@ public:
   void updateInputButtons();
   void ReadRBData();
   void initWeylGroupInfo();
+  static void RunTheComputation();
   void initTableFromVPVectors();
   void initTableFromRowsAndColumns(int r, int c);
   void ReadSettingsIfAvailable();
@@ -489,7 +490,7 @@ guiMainWindow::guiMainWindow()
                    wxSize(800,600),
                    wxRESIZE_BORDER| wxCAPTION
                    | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
-{	this->theComputationSetup.flagDoCustomComputation=true;
+{	//this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
   this->theComputationSetup.flagHavingStartingExpression=true;
@@ -864,9 +865,8 @@ void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev
 }
 
 void guiMainWindow::onRePaint(wxPaintEvent& ev)
-{
-    ::wxPaintDC dc;
-    this->Refresh();
+{ ::wxPaintDC dc;
+  this->Refresh();
 }
 
 void drawCanvas::OnPaint(::wxPaintEvent& ev)
@@ -885,44 +885,44 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
   }
 }
 
-void guiMainWindow::onButton1Go(wxCommandEvent &ev)
-{	//::RandomCodeIDontWantToDelete::SomeRandomTests2();
-  this->TurnOffAllDangerousButtons();
+void guiMainWindow::RunTheComputation()
+{//::RandomCodeIDontWantToDelete::SomeRandomTests2();
+  MainWindow1->TurnOffAllDangerousButtons();
 //#ifdef WIN32
-	if (!this->theComputationSetup.flagComputationInProgress)
-  {	this->theComputationSetup.flagComputationInProgress=true;
-    this->Button1Go->SetLabel(wxT("Pause"));
+	if (!MainWindow1->theComputationSetup.flagComputationInProgress)
+  {	MainWindow1->theComputationSetup.flagComputationInProgress=true;
+    MainWindow1->Button1Go->SetLabel(wxT("Pause"));
 #ifdef WIN32
-    this->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
+    MainWindow1->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
 #else
     //RunComputationalThread(0);
-    pthread_create(&this->WorkThread1.ComputationalThreadLinux, NULL,RunComputationalThread, 0);
+    pthread_create(&MainWindow1->WorkThread1.ComputationalThreadLinux, NULL,RunComputationalThread, 0);
 #endif
   }	else
-  { if (this->WorkThread1.isRunning)
+  { if (MainWindow1->WorkThread1.isRunning)
     {	//pthread_mutex_lock(&ParallelComputing::mutex1);
-      this->WorkThread1.CriticalSectionPauseButtonEntered=true;
+      MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered=true;
       //return;
-      while (this->WorkThread1.CriticalSectionWorkThreadEntered)
+      while (MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered)
       {}
       ParallelComputing::ReachSafePointASAP=true;
       while (!ParallelComputing::SafePointReached)
       {}
       ParallelComputing::ReachSafePointASAP=false;
 #ifdef WIN32
-      ::SuspendThread(this->WorkThread1.ComputationalThread);
+      ::SuspendThread(MainWindow1->WorkThread1.ComputationalThread);
 #endif
-      this->WorkThread1.isRunning=false;
-      this->Button1Go->SetLabel(wxT("Go"));
-      this->WorkThread1.CriticalSectionWorkThreadEntered=false;
-      this->WorkThread1.CriticalSectionPauseButtonEntered=false;
+      MainWindow1->WorkThread1.isRunning=false;
+      MainWindow1->Button1Go->SetLabel(wxT("Go"));
+      MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
+      MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered=false;
       //pthread_mutex_unlock(&ParallelComputing::mutex1);
     }	else
     {	//pthread_mutex_lock(&ParallelComputing::mutex1);
-      this->Button1Go->SetLabel(wxT("Pause"));
-      this->WorkThread1.isRunning=true;
+      MainWindow1->Button1Go->SetLabel(wxT("Pause"));
+      MainWindow1->WorkThread1.isRunning=true;
 #ifdef WIN32
-      ::ResumeThread(this->WorkThread1.ComputationalThread);
+      ::ResumeThread(MainWindow1->WorkThread1.ComputationalThread);
 #else
       pthread_cond_signal(&ParallelComputing::continueCondition);
 #endif
@@ -933,6 +933,11 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
   //this->theComputationSetup.ComputationInProgress=true;
 //	this->WorkThread1.run();
 //#endif
+}
+
+void guiMainWindow::onButton1Go(wxCommandEvent &ev)
+{ this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
+  this->RunTheComputation();
 }
 
 void guiMainWindow::OpenFile(std::fstream& output)
@@ -980,15 +985,8 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 }
 
 void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
-{ minimalRelationsProverStates& theProver= MainWindow1->theComputationSetup.theProver;
-  GlobalVariables* tgv= MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default();
-  if (!theProver.flagComputationIsInitialized)
-    theProver.GenerateStartingState (MainWindow1->theComputationSetup, *tgv, 'E',8);
-  else
-    theProver.RecursionStep(theProver.theWeylGroup,*tgv);
-  if (*theProver.theIndexStack.LastObject()>=0)
-    theProver.TheObjects[*theProver.theIndexStack.LastObject()].ComputeDebugString(theProver.theWeylGroup, *tgv);
-  theProver.MakeProgressReportCurrentState(*theProver.theIndexStack.LastObject(), *tgv, theProver.theWeylGroup);
+{ MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+  MainWindow1->RunTheComputation();
 }
 
 void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
@@ -1269,16 +1267,14 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 }
 
 void guiMainWindow::TurnOffAllDangerousButtons()
-{	this->ListBox1WeylGroup->Disable();
-  this->Spin1Dim->Disable();
-  this->Spin2NumVect->Disable();
-  this->ToggleButton1UsingCustom->Disable();
+{	MainWindow1->ListBox1WeylGroup->Disable();
+  MainWindow1->Spin1Dim->Disable();
+  MainWindow1->Spin2NumVect->Disable();
+  MainWindow1->ToggleButton1UsingCustom->Disable();
 }
 
-wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id,
-                          const wxPoint &pos,
-                          const wxSize &size,
-                          long style, const wxString &name)
+wxGridExtra::wxGridExtra
+  (	wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style, const wxString &name)
 {	this->maxNumCols=8;
   this->maxNumRows=120;
   this->Create(parent,id,pos,size,style,name);

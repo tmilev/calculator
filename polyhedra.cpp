@@ -897,7 +897,8 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 }
 
 ComputationSetup::ComputationSetup()
-{	this->flagAllowRepaint=true;
+{	this->flagUsingProverDoNotCallOthers=false;
+  this->flagAllowRepaint=true;
   this->flagHavingNotationExplanation=true;
   this->flagUseHtml=false;
 	this->flagUsingCustomVectors=false;
@@ -1173,6 +1174,20 @@ void ComputationSetup::Run()
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
   if (this->flagDoCustomComputation)
   { this->RunCustom();
+    this->ExitComputationSetup();
+    this->flagAllowRepaint=true;
+    this->flagComputationInProgress=false;
+    return;
+  }
+  if (this->flagUsingProverDoNotCallOthers)
+  { GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
+    if (!this->theProver.flagComputationIsInitialized)
+      this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
+    else
+      this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
+    if (*this->theProver.theIndexStack.LastObject()>=0)
+      this->theProver.TheObjects[*theProver.theIndexStack.LastObject()].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
+    this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;

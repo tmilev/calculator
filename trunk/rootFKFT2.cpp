@@ -153,9 +153,9 @@ bool minimalRelationsProverState::CanBeShortened
       { this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
         this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
       }
-      if (!(selBetas.CardinalitySelectionWithMultiplicities() == selBetas.MaxCardinalityWithMultiplicities() &&
+      if ((!((selBetas.CardinalitySelectionWithMultiplicities() == selBetas.MaxCardinalityWithMultiplicities()) &&
             selAlphas.CardinalitySelectionWithMultiplicities()== selAlphas.MaxCardinalityWithMultiplicities()) &&
-            selBetas.CardinalitySelectionWithMultiplicities()>0 )
+            selBetas.CardinalitySelectionWithMultiplicities()>0 )|| selBetas.CardinalitySelectionWithMultiplicities()==1)
         this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
     }
   }
@@ -213,14 +213,15 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
           (index, this->PreferredDualBasis, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive);
 			if (!foundNormal)
 			{ bool tempBool= roots::GetNormalSeparatingCones
-						( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas,
-              NormalSeparatingCones);
+					( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas,
+						NormalSeparatingCones);
 				assert(tempBool);
 				root tempRoot;
-				if(!this->GetNormalSeparatingConesFromPreferredBasis
-							 (index, this->theWeylGroup.RootSystem, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive))
-					this->invertedCartan.ActOnAroot(NormalSeparatingCones, tempRoot);
+				this->invertedCartan.ActOnAroot(NormalSeparatingCones, tempRoot);
 				NormalSeparatingCones.Assign(tempRoot);
+				if(!this->GetNormalSeparatingConesFromPreferredBasis
+							(index, this->theWeylGroup.RootSystem, NormalSeparatingCones, theWeyl, TheGlobalVariables, oneBetaIsPositive))
+					NormalSeparatingCones.Assign(tempRoot);
 			}
 			theWeyl.GetEpsilonCoords
 				(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);

@@ -586,16 +586,16 @@ void minimalRelationsProverStates::ComputePreferredDualBasis
 	if (WeylLetter=='E' && theDimension==8)
   { //for (int i=0; i<theDimension; i++)
      // this->PreferredDualBasis.TheObjects[i].TheObjects[i].MakeOne();
-      for (int i=0; i<7; i++)
-      { this->PreferredDualBasis.TheObjects[i].TheObjects[1]=1;
-        this->PreferredDualBasis.TheObjects[i].TheObjects[2]=-1;
-        for (int j=0; j<i; j++)
-          this->PreferredDualBasis.TheObjects[i].TheObjects[j+2]+=2;
-      }
-      this->PreferredDualBasis.TheObjects[7].TheObjects[0]=4;
-      this->PreferredDualBasis.TheObjects[7]-=this->PreferredDualBasis.TheObjects[0];
-      for (int i=1; i< 7;i++)
-        this->PreferredDualBasis.TheObjects[7]+=this->PreferredDualBasis.TheObjects[i];
+    /*for (int i=0; i<7; i++)
+    { this->PreferredDualBasis.TheObjects[i].TheObjects[1]=1;
+			this->PreferredDualBasis.TheObjects[i].TheObjects[2]=-1;
+      for (int j=0; j<i; j++)
+        this->PreferredDualBasis.TheObjects[i].TheObjects[j+2]+=2;
+    }
+    this->PreferredDualBasis.TheObjects[7].TheObjects[0]=4;
+    this->PreferredDualBasis.TheObjects[7]-=this->PreferredDualBasis.TheObjects[0];
+    for (int i=1; i< 7;i++)
+      this->PreferredDualBasis.TheObjects[7]+=this->PreferredDualBasis.TheObjects[i];*/
   }
   int oldsize=PreferredDualBasis.size;
   for (int i=0;i<oldsize;i++)

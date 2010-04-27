@@ -126,7 +126,7 @@ class MonomialInCommutativeAlgebra;
 class affineCones;
 struct IndicatorWindowVariables;
 class rootSubalgebras;
-class ComputationSetup;
+struct ComputationSetup;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.

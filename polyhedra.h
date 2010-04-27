@@ -6426,8 +6426,7 @@ public:
     ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool CanBeShortened
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas,
-			SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
-			bool AssumeGlobalMinimalityRHS);
+			SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,	bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
@@ -6436,7 +6435,7 @@ public:
 			GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
 	bool RootIsGoodForProblematicIndex
-		(	root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution,
+		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution,
 			roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas
     ( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
@@ -6455,6 +6454,7 @@ class minimalRelationsProverStates: public ListBasicObjects<minimalRelationsProv
 public:
   std::string DebugString;
   static int ProblemCounter;
+  int MinNumDifferentBetas;
   roots PreferredDualBasis;
   roots PreferredDualBasisEpsilonCoords;
   //int RecursionDepth;
@@ -6474,16 +6474,16 @@ public:
   void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
   {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);
   };
+  bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive
+    (int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
   bool AddObjectOnTopNoRepetitionOfObject
     ( minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingState
     ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
-  void RecursionStep
-    (	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void TheFullRecursion
-    (	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void RecursionStep(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void TheFullRecursion(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep
 		( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
@@ -6509,6 +6509,7 @@ public:
 		(	int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   minimalRelationsProverStates()
   { this->flagComputationIsInitialized=false;
+    MinNumDifferentBetas=-1;
   };
 };
 

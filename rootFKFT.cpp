@@ -822,12 +822,16 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 	//rootSubalgebra& theRootSA=theGlobalVariables.rootSAProverIsos;
 	roots& theAlphas = theState.PartialRelation.Alphas;
 	roots& theBetas  = theState.PartialRelation.Betas;
+	roots& theKroots = theState.ChosenPositiveKroots;
 	roots& theOtherAlphas = theOtherState.PartialRelation.Alphas;
 	roots& theOtherBetas  = theOtherState.PartialRelation.Betas;
+  roots& theOtherKroots = theOtherState.ChosenPositiveKroots;
 	if (theAlphas.size!=theOtherAlphas.size)
 		return false;
 	if (theBetas.size!=theOtherBetas.size)
 		return false;
+  if(theKroots.size!= theOtherKroots.size)
+    return false;
   DynkinDiagramRootSubalgebra diagram1, diagram2;
   roots tempRoots; tempRoots.CopyFromBase(theState.PositiveKroots);
   diagram1.ComputeDiagramType(tempRoots, theWeyl);
@@ -836,71 +840,82 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
   if (!(diagram1==diagram2))
     return false;
 	ListBasicObjects<int> tempList;
-	permutation thePermAlphas, thePermBetas, tempPermAlphas, tempPermBetas;
+	permutation thePermAlphas, thePermBetas, thePermK, tempPermAlphas, tempPermBetas, tempPermK;
   this->GetIsoTypicComponents(theAlphas, theBetas, thePermAlphas, theState, theWeyl,  theGlobalVariables);
   this->GetIsoTypicComponents(theBetas, theAlphas, thePermBetas, theState, theWeyl, theGlobalVariables);
-  this->GetIsoTypicComponents
-    (theAlphas, theBetas, tempPermAlphas, this->TheObjects[indexOther], theWeyl,  theGlobalVariables);
-  this->GetIsoTypicComponents
-    (theBetas, theAlphas, tempPermBetas, this->TheObjects[indexOther], theWeyl, theGlobalVariables);
+  this->GetIsoTypicComponents(theKroots, theAlphas, thePermK, theState, theWeyl, theGlobalVariables);
+  this->GetIsoTypicComponents(theOtherAlphas, theOtherBetas, tempPermAlphas, theOtherState, theWeyl,  theGlobalVariables);
+  this->GetIsoTypicComponents(theOtherBetas, theOtherAlphas, tempPermBetas, theOtherState, theWeyl, theGlobalVariables);
+  this->GetIsoTypicComponents(theOtherKroots, theOtherAlphas, tempPermK, theOtherState, theWeyl, theGlobalVariables);
   if (!thePermAlphas.HasSameMaxMultiplicities(tempPermAlphas) ||
-      !thePermBetas.HasSameMaxMultiplicities(tempPermBetas))
-    return false;
-  if(theState.ChosenPositiveKroots.size!= this->TheObjects[indexOther].ChosenPositiveKroots.size)
+      !thePermBetas.HasSameMaxMultiplicities(tempPermBetas) ||
+      !thePermK.HasSameMaxMultiplicities(tempPermK))
     return false;
 	int NumCyclesAlphas = thePermAlphas.getTotalNumSubsets();
 	int NumCyclesBetas  = thePermBetas.getTotalNumSubsets();
-	roots theDomain, thePermutedAlphas, thePermutedBetas, theRange;
+	int NumCyclesK= thePermK.getTotalNumSubsets();
+	roots theDomain, thePermutedAlphas, thePermutedBetas, thePermutedKs, theRange;
 	theRange.size=0;
-	theRange.AddListOnTop(this->TheObjects[indexOther].ChosenPositiveKroots);
-	theRange.AddListOnTop(theOtherAlphas); theRange.AddListOnTop(theOtherBetas);
+	theRange.AddListOnTop(theOtherKroots);
+	theRange.AddListOnTop(theOtherAlphas);
+	theRange.AddListOnTop(theOtherBetas);
 	MatrixLargeRational theOtherMatrix, thisMatrix;
 	this->TheObjects[indexOther].ComputeScalarProductsMatrix
 		(theGlobalVariables, theWeyl, theOtherAlphas, theOtherBetas, theOtherMatrix);
 	this->TheObjects[indexOther].theScalarProducts.ComputeDebugString();
 	bool DomainAndRangeGenerateNonIsoSAs;
-	int ChosenKrootsSize=theState.ChosenPositiveKroots.size;
-	theDomain.AddListOnTop(theState.ChosenPositiveKroots);
-	for(int i=0;i<NumCyclesAlphas;i++)
-	{ theDomain.size=ChosenKrootsSize;
-		thePermutedAlphas.size=0;
-		thePermAlphas.GetPermutation(tempList);
-		for (int k=0;k<tempList.size;k++)
-		{	root& tempRoot=theAlphas.TheObjects[tempList.TheObjects[k]];
-			thePermutedAlphas.AddObjectOnTop(tempRoot);
-			theDomain.AddObjectOnTop(tempRoot);
-		}
-		//theDomain.ComputeDebugString();
-		for (int j=0;j<NumCyclesBetas;j++)
-		{	theDomain.size=theAlphas.size+ChosenKrootsSize;
-			thePermutedBetas.size=0;
-			thePermBetas.GetPermutation(tempList);
-			for (int k=0;k<tempList.size;k++)
-			{	root& tempRoot=theBetas.TheObjects[tempList.TheObjects[k]];
-				thePermutedBetas.AddObjectOnTop(tempRoot);
-				theDomain.AddObjectOnTop(tempRoot);
-			}
-//			theDomain.ComputeDebugString();
-			this->MakeProgressReportIsos
-				(indexOther, i*NumCyclesBetas+j, NumCyclesBetas*NumCyclesAlphas, theGlobalVariables,theWeyl);
-			theState.ComputeScalarProductsMatrix
-				(theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
-//			thisMatrix.ComputeDebugString();
+	//theDomain.AddListOnTop(theState.ChosenPositiveKroots);
+	for (int l=0;l<NumCyclesK;l++)
+	{ thePermutedKs.size=0;
+    thePermK.GetPermutation(tempList);
+    for (int k=0;k<tempList.size;k++)
+    { root& tempRoot=theKroots.TheObjects[tempList.TheObjects[k]];
+      thePermutedKs.AddObjectOnTop(tempRoot);
+      theDomain.AddObjectOnTop(tempRoot);
+    }
+	  for(int i=0;i<NumCyclesAlphas;i++)
+    { theDomain.size=theKroots.size;
+      thePermutedAlphas.size=0;
+      thePermAlphas.GetPermutation(tempList);
+      for (int k=0;k<tempList.size;k++)
+      {	root& tempRoot=theAlphas.TheObjects[tempList.TheObjects[k]];
+        thePermutedAlphas.AddObjectOnTop(tempRoot);
+        theDomain.AddObjectOnTop(tempRoot);
+      }
+      //theDomain.ComputeDebugString();
+      for (int j=0;j<NumCyclesBetas;j++)
+      { theDomain.size=theAlphas.size+theKroots.size;
+        thePermutedBetas.size=0;
+        thePermBetas.GetPermutation(tempList);
+        for (int k=0;k<tempList.size;k++)
+        {	root& tempRoot=theBetas.TheObjects[tempList.TheObjects[k]];
+          thePermutedBetas.AddObjectOnTop(tempRoot);
+          theDomain.AddObjectOnTop(tempRoot);
+        }
+  //			theDomain.ComputeDebugString();
+        this->MakeProgressReportIsos
+          ( indexOther, (l*NumCyclesAlphas+ i)*NumCyclesBetas+j, NumCyclesK*NumCyclesBetas*NumCyclesAlphas,
+            theGlobalVariables,theWeyl);
+        theState.ComputeScalarProductsMatrix
+          (theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
+  //			thisMatrix.ComputeDebugString();
 
-			if (thisMatrix.IsEqualTo(theOtherMatrix))
-			{	if (this->isomorphismComputer.attemptExtensionToIsomorphism
-							(theDomain, theRange,	theGlobalVariables, 0, false, theWeyl, &DomainAndRangeGenerateNonIsoSAs))
-				{ //theDomain.ComputeDebugString();
-					//theRange.ComputeDebugString();
-					return true;
-				} else
-				{ if (DomainAndRangeGenerateNonIsoSAs)
-						return false;
-				}
-			}
-			thePermBetas.IncrementSubset();
-		}
-		thePermAlphas.IncrementSubset();
+        if (thisMatrix.IsEqualTo(theOtherMatrix))
+        {	if (this->isomorphismComputer.attemptExtensionToIsomorphism
+                (theDomain, theRange,	theGlobalVariables, 0, false, theWeyl, &DomainAndRangeGenerateNonIsoSAs))
+          { //theDomain.ComputeDebugString();
+            //theRange.ComputeDebugString();
+            return true;
+          } else
+          { if (DomainAndRangeGenerateNonIsoSAs)
+              return false;
+          }
+        }
+        thePermBetas.IncrementSubset();
+      }
+      thePermAlphas.IncrementSubset();
+    }
+    thePermK.IncrementSubset();
 	}
 	//theSA.attemptExtensionToIsomorphismNoCentralizer
 	return false;

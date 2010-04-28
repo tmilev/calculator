@@ -5976,8 +5976,8 @@ public:
 	bool ListHasNonSelectedIndexLowerThanGiven
 		(	int index,ListBasicObjects<int>& tempList, Selection& tempSel);
 	void GeneratePossibleNilradicalsRecursive
-		(	GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex, 
-			ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, 
+		(	GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex,
+			ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner,
 			int indexInOwner);
 	bool ConeConditionHolds
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
@@ -6380,6 +6380,7 @@ public:
   roots NilradicalRoots;
   roots nonNilradicalRoots;
   roots ChosenPositiveKroots;
+  roots nonLNonSingularsAleviatedByChosenPosKRoots;
   roots PositiveKroots;
   roots nonPositiveKRoots;
   roots nonKRoots;
@@ -6402,6 +6403,8 @@ public:
   ListBasicObjects<int> CompleteChildStates;
   int activeChild;
   minimalRelationsProverStates* owner;
+  bool StateAllowsPositiveKChoice
+    (root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void GetNumberScalarProductsData
 		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,
@@ -6471,7 +6474,7 @@ public:
     (int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
   bool AddObjectOnTopNoRepetitionOfObject
-    ( minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+    ( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingState
     ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
@@ -6488,8 +6491,7 @@ public:
 	bool GetSeparatingRootIfExistsFromSet
 		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl,
 			GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
-  void RemoveDoubt
-		(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void RemoveDoubt(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	bool StateIsEqualTo
     ( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl,
       GlobalVariables& TheGlobalVariables);

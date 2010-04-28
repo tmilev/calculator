@@ -175,8 +175,8 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
   this->BKSingularGmodLRoots.AddRootSnoRepetition(this->PartialRelation.Alphas);
   this->PositiveKroots.AddRootSnoRepetition(this->ChosenPositiveKroots);
   SelectionWithMaxMultiplicity selBetas, selAlphas;
-  selBetas.initMe2(this->PartialRelation.Betas.size,1);
-  selAlphas.initMe2(this->PartialRelation.Alphas.size,1);
+  selBetas.initMe2(this->PartialRelation.Betas.size,2);
+  selAlphas.initMe2(this->PartialRelation.Alphas.size,2);
   int NumAlphas= MathRoutines::KToTheNth
 		(selAlphas.MaxMultiplicity+1,this->PartialRelation.Alphas.size);
   int NumBetas=MathRoutines::KToTheNth
@@ -263,6 +263,7 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
   this->PossibleChildStates= right.PossibleChildStates;
   this->CompleteChildStates= right.CompleteChildStates;
   this->activeChild=right.activeChild;
+  this->nonLNonSingularsAleviatedByChosenPosKRoots=right.nonLNonSingularsAleviatedByChosenPosKRoots;
 }
 
 void minimalRelationsProverStates::MakeProgressReportCurrentState
@@ -413,13 +414,14 @@ bool minimalRelationsProverStates::StateIsEqualTo
 }
 
 bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject
-  ( minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+  ( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { theState.SortAlphasAndBetas(TheGlobalVariables, theWeyl);
 	theState.ComputeScalarProductsMatrix(TheGlobalVariables,theWeyl);
 	//theState.theScalarProducts.ComputeDebugString();
-  for (int i=0;i<this->size;i++)
-    if (this->StateIsEqualTo(theState,i,theWeyl,TheGlobalVariables))
-      return false;
+ // if (!this->TheObjects[ParentIndex].flagNeedsAdditionOfPositiveKroots || ParentIndex==0)
+    for (int i=0;i<this->size;i++)
+      if (this->StateIsEqualTo(theState,i,theWeyl,TheGlobalVariables))
+        return false;
   this->AddObjectOnTop(theState);
   return true;
 }
@@ -973,9 +975,8 @@ void minimalRelationsProverStates::GetIsoTypicComponents
 	isotypicPieces.TheObjects[0].size=0;
 	isotypicPieces.TheObjects[0].AddObjectOnTop(theRoots.TheObjects[0]);
 	tempList.size=0;
-	for (int i=1;i<theRoots.size;i++)
-	{ if (theState.Root1IsGreaterThanRoot2
-					(i-1,i,theRoots,theOtherTypeRoots,TheGlobalVariables,theWeyl))
+	for (int i=1; i<theRoots.size; i++)
+	{ if (theState.Root1IsGreaterThanRoot2	(i-1,i,theRoots,theOtherTypeRoots,TheGlobalVariables,theWeyl))
 		{	tempList.AddObjectOnTop(isotypicPieces.LastObject()->size);
 			isotypicPieces.SetSizeExpandOnTopNoObjectInit(isotypicPieces.size+1);
 			isotypicPieces.LastObject()->size=0;
@@ -1019,9 +1020,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
   theDomainRootSA.theCentralizerDiagram.ComputeDebugString();
   tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
-	for (int i=0;i<CentralizerDiagramAutomorphisms.size;i++)
-		tempAutosCentralizer.MaxMultiplicities.TheObjects[i]=
-			CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
+	for (int i=0; i<CentralizerDiagramAutomorphisms.size; i++)
+		tempAutosCentralizer.MaxMultiplicities.TheObjects[i] = CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
   tempList.SetSizeExpandOnTopNoObjectInit
     (theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size);
   int tempSize=0;

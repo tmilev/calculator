@@ -5962,17 +5962,13 @@ public:
 		(	int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString
-    ( bool useLatex, bool useHtml, bool includeKEpsCoords,
-      GlobalVariables& theGlobalVariables)
+    ( bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 	{ this->ElementToString
-      ( this->DebugString,useLatex,useHtml,
-        includeKEpsCoords,theGlobalVariables);
+      ( this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
   };
 	bool IndexIsCompatibleWithPrevious
-		(	int startIndex, int RecursionDepth,	multTableKmods &multTable,
-			ListBasicObjects<Selection>& impliedSelections,
-			ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner,
-			GlobalVariables& theGlobalVariables);
+		(	int startIndex, int RecursionDepth,	multTableKmods &multTable, ListBasicObjects<Selection>& impliedSelections,
+			ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism
 		(	roots& domain, roots& range, GlobalVariables& theGlobalVariables,
 			ReflectionSubgroupWeylGroup* outputAutomorphisms,	roots* additionalDomain, roots* additionalRange);
@@ -5980,18 +5976,16 @@ public:
 	bool ListHasNonSelectedIndexLowerThanGiven
 		(	int index,ListBasicObjects<int>& tempList, Selection& tempSel);
 	void GeneratePossibleNilradicalsRecursive
-		(	GlobalVariables& theGlobalVariables,
-			multTableKmods & multTable,	int StartIndex,
-			ListBasicObjects<Selection>& impliedSelections,
-			ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+		(	GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex, 
+			ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, 
+			int indexInOwner);
 	bool ConeConditionHolds
 		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	bool ConeConditionHolds
 		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
 			roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
 	void PossibleNilradicalComputation
-		(	GlobalVariables& theGlobalVariables,Selection& selKmods,
-			rootSubalgebras& owner, int indexInOwner);
+		(	GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
 	void ElementToStringHeaderFooter
 		( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml,
       bool includeKEpsCoords);
@@ -6376,8 +6370,7 @@ public:
   static int ProblemCounter;
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString
-    ( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
-      bool displayEpsilons);
+    ( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons);
   void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
   {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);
   };

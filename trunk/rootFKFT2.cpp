@@ -11,8 +11,8 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
  // this->nonBKSingularGmodLRoots.ComputeDebugString();
 	for (int j=0;j<theWeyl.RootSystem.size;j++)
 	{	root& tested=theWeyl.RootSystem.TheObjects[j];
-	  for (int i=0;i<this->PartialRelation.Alphas.size;i++)
-		{	tempRoot= this->PartialRelation.Alphas.TheObjects[i]+tested;
+	  for (int i=0;i<this->BKSingularGmodLRoots.size;i++)
+		{	tempRoot= this->BKSingularGmodLRoots.TheObjects[i]+tested;
 			if (theWeyl.IsARoot(tempRoot))
 			{	this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(tested);
         this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(tested);
@@ -37,12 +37,14 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 		this->NilradicalRoots.AddObjectOnTop(tempRoots.TheObjects[i]);
 	//tempRoots.ComputeDebugString();
   //roots& tempRoots2           = TheGlobalVariables.rootsProverStateComputation3;
-  for (int i=0;i<this->nonPositiveKRoots.size;i++)
-  {	this->nonKRoots.AddObjectOnTopNoRepetitionOfObject
-			(this->nonPositiveKRoots.TheObjects[i]);
-		this->nonKRoots.AddObjectOnTopNoRepetitionOfObject
-			(-this->nonPositiveKRoots.TheObjects[i]);
-  }
+	for (int i=0;i<theWeyl.RootSystem.size;i++)
+	{	root& theRoot=theWeyl.RootSystem.TheObjects[i];
+		if (this->nonPositiveKRoots.ContainsObject(theRoot) &&
+				this->nonPositiveKRoots.ContainsObject(-theRoot))
+		{	this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
+			this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
+		}
+  } 
   this->nonKRoots.intersectWith(this->nonNilradicalRoots,this->nonLRoots);
   for (int i=0;i<this->nonLRoots.size;i++)
 		if (this->IsBKSingularImplied(this->nonLRoots.TheObjects[i], theWeyl))
@@ -81,6 +83,9 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 //	this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	if(this->nonLNonSingularRoots.HasACommonElementWith(this->BKSingularGmodLRoots))
 		return false;
+	this->nonLRoots.ComputeDebugString();
+	this->NilradicalRoots.ComputeDebugString();
+	this->PositiveKroots.ComputeDebugString();
   if (this->nonLRoots.HasACommonElementWith(this->NilradicalRoots) || this->nonLRoots.HasACommonElementWith(this->PositiveKroots))
     return false;
 	if (this->nonNilradicalRoots.HasACommonElementWith(this->NilradicalRoots))

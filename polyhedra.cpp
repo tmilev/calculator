@@ -1193,7 +1193,8 @@ void ComputationSetup::Run()
     }
     if (*this->theProver.theIndexStack.LastObject()>=0)
       this->theProver.TheObjects[*theProver.theIndexStack.LastObject()].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
-    this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
+    if (this->theProver.theIndexStack.size>0)
+			this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;

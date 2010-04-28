@@ -157,6 +157,7 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 			this->PositiveKroots.AddObjectOnTopNoRepetitionOfObject
         (theWeyl.RootSystem.TheObjects[LastFoundIndex]);
 	}
+	this->nonLNonSingularRootsInNeedOfPosKroots.size=0;
 	for (int i=0;i<this->nonLNonSingularRoots.size;i++)
 		if (this->SumWithNoPosRootIsARoot(this->nonLNonSingularRoots.TheObjects[i],theWeyl))
 		{ this->flagNeedsAdditionOfPositiveKroots=true;
@@ -447,28 +448,63 @@ void minimalRelationsProverState::ComputeScalarProductsMatrix
 void minimalRelationsProverState::ElementToString
 	( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons)
 { std::string tempS; std::stringstream out;
-  this->PartialRelation.Alphas.ElementToLinearCombinationString(tempS);
-  out << tempS <<"+ ... = ";
-  this->PartialRelation.Betas.ElementToLinearCombinationString(tempS);
-  out << tempS <<" + ...\r\n";
+	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
+	{	this->PartialRelation.Alphas.TheObjects[i].ElementToString(tempS);
+		out << "a_"<<i+1<<"("<<tempS <<") + ";
+	}  
+	out <<"... = ";
+	for(int i=0;i<this->PartialRelation.Betas.size;i++)
+	{	this->PartialRelation.Betas.TheObjects[i].ElementToString(tempS);
+		out << "b_"<<i+1<<"("<<tempS <<") + ";
+	} 
+	out <<"...     (a_i,b_i>0)\r\n";
 	root tempRoot; roots tempRoots;
 	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
 	{	theWeyl.GetEpsilonCoords
       (this->PartialRelation.Alphas.TheObjects[i],tempRoot,TheGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS,false,false);
-		out << tempS <<" + ";
+		out << "a_"<<i+1<<"("<<tempS <<") + ";
 	}
 	out <<"... = ";
 	for(int i=0;i<this->PartialRelation.Betas.size;i++)
 	{	theWeyl.GetEpsilonCoords(this->PartialRelation.Betas.TheObjects[i],tempRoot,TheGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS,false,false);
-		out << tempS <<" + ";
+		out << "b_"<<i+1<<"("<<tempS <<") + ";
 	}
 	out <<"...";
   this->currentSeparatingNormalEpsilonForm.ElementToStringEpsilonForm(tempS,false,false);
   out <<"\nCurrent separating normal: " << tempS;
   out<<"\r\nChildren states: "<<  this->PossibleChildStates.size <<" possible, "<< this->ImpossibleChildStates.size
       <<" impossible, " << this->CompleteChildStates.size<<" complete. Index next possible child to explore: " << this->activeChild+2;
+  roots AlphaChildren, BetaChildren, Kchildren;
+  for (int i=0;i<this->PossibleChildStates.size;i++)
+  {	::minimalRelationsProverState& child = owner->TheObjects[this->PossibleChildStates.TheObjects[i]];
+		if (this->PartialRelation.Alphas.size<child.PartialRelation.Alphas.size)
+		{	theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
+			AlphaChildren.AddObjectOnTop(tempRoot);
+		}
+		if (this->PartialRelation.Betas.size<child.PartialRelation.Betas.size)
+		{	theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
+			BetaChildren.AddObjectOnTop(tempRoot);
+		}
+		if (this->ChosenPositiveKroots.size<child.ChosenPositiveKroots.size)
+		{	theWeyl.GetEpsilonCoords(*child.ChosenPositiveKroots.LastObject(),tempRoot,TheGlobalVariables);
+			Kchildren.AddObjectOnTop(tempRoot);
+		}		
+  }
+  //assert(!(AlphaChildren.size+BetaChildren.size+Kchildren.size==0));
+	if (AlphaChildren.size>0)
+	{	AlphaChildren.ElementToStringEpsilonForm(tempS,false,false,false);
+		out <<"\r\nNew alphas added next: " <<tempS;
+  }
+	if (BetaChildren.size>0)
+	{	BetaChildren.ElementToStringEpsilonForm(tempS,false,false,false);
+		out <<"\r\nNew betas added next: " <<tempS;
+  }
+	if (Kchildren.size>0)
+	{	Kchildren.ElementToStringEpsilonForm(tempS,false,false,false);
+		out <<"\r\nNew k-roots added next: " <<tempS;
+  }
   if(!displayEpsilons)
     this->ChosenPositiveKroots.ElementToString(tempS);
   else
@@ -648,7 +684,7 @@ void minimalRelationsProverStates::GenerateStartingState
 		}
   tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Betas.TheObjects[0]);
   tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Alphas.TheObjects[0]);
-
+	tempState.owner=this;
 /*  tempState.PartialRelation.Betas.AddObjectOnTop(tempRoot);
   tempRoot.Assign(this->theWeylGroup.RootSystem.TheObjects[5]);
   tempState.theChoicesWeMake.AddObjectOnTop(tempRoot);

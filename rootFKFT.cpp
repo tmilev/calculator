@@ -216,10 +216,10 @@ void minimalRelationsProverState::MakeProgressReportCanBeShortened
 { std::stringstream out5;
 	out5<<checked+1 << " checked out of " << outOf;
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
@@ -283,11 +283,11 @@ void minimalRelationsProverStates::MakeProgressReportIsos
 	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "
           << numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
 	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
@@ -300,10 +300,10 @@ void minimalRelationsProverStates::MakeProgressReportChildStates
         << this->TheObjects[*this->theIndexStack.LastObject()].PossibleChildStates.size<<" possible, "
 				<< this->TheObjects[*this->theIndexStack.LastObject()].ImpossibleChildStates.size<<" impossible ";
 	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
+//	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
+//	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+//	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
+//	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
@@ -335,7 +335,7 @@ void minimalRelationsProverStates::MakeProgressReportStack
 	::IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
+//	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
@@ -450,13 +450,13 @@ void minimalRelationsProverState::ElementToString
 { std::string tempS; std::stringstream out;
 	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
 	{	this->PartialRelation.Alphas.TheObjects[i].ElementToString(tempS);
-		out << "a_"<<i+1<<"("<<tempS <<") + ";
-	}  
+		out << "a_"<<i+1<<tempS <<" + ";
+	}
 	out <<"... = ";
 	for(int i=0;i<this->PartialRelation.Betas.size;i++)
 	{	this->PartialRelation.Betas.TheObjects[i].ElementToString(tempS);
-		out << "b_"<<i+1<<"("<<tempS <<") + ";
-	} 
+		out << "b_"<<i+1<<tempS <<" + ";
+	}
 	out <<"...     (a_i,b_i>0)\r\n";
 	root tempRoot; roots tempRoots;
 	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
@@ -490,7 +490,7 @@ void minimalRelationsProverState::ElementToString
 		if (this->ChosenPositiveKroots.size<child.ChosenPositiveKroots.size)
 		{	theWeyl.GetEpsilonCoords(*child.ChosenPositiveKroots.LastObject(),tempRoot,TheGlobalVariables);
 			Kchildren.AddObjectOnTop(tempRoot);
-		}		
+		}
   }
   //assert(!(AlphaChildren.size+BetaChildren.size+Kchildren.size==0));
 	if (AlphaChildren.size>0)

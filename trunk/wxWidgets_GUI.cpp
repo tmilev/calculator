@@ -82,15 +82,10 @@ public:
 class wxComboBoxWheel : public wxComboBox
 {
 public:
-    wxComboBoxWheel( wxWindow *parent,
-                     wxWindowID id,
-                     const wxString& value= wxT(""),
-                     const wxPoint& pos = wxDefaultPosition,
-                     const wxSize& size = wxDefaultSize,
-                     const int n=0 ,const wxString choices[]=0,
-                     const long style = wxWANTS_CHARS,
-                     const wxValidator& validator=wxDefaultValidator,
-                     const wxString& name = wxT(""));
+  wxComboBoxWheel
+    ( wxWindow *parent, wxWindowID id, const wxString& value= wxT(""), const wxPoint& pos = wxDefaultPosition,
+      const wxSize& size = wxDefaultSize, const int n=0, const wxString choices[]=0, const long style = wxWANTS_CHARS,
+      const wxValidator& validator=wxDefaultValidator, const wxString& name = wxT(""));
     void OnMouseWheel(wxMouseEvent& event);
     DECLARE_EVENT_TABLE()
 };
@@ -99,16 +94,10 @@ BEGIN_EVENT_TABLE(wxComboBoxWheel, wxComboBox)
     EVT_MOUSEWHEEL(wxComboBoxWheel::OnMouseWheel)
 END_EVENT_TABLE()
 
-wxComboBoxWheel::wxComboBoxWheel( wxWindow *parent,
-                                  wxWindowID id,
-                                  const wxString& value,
-                                  const wxPoint& pos ,
-                                  const wxSize& size ,
-                                  const int n ,const wxString choices[],
-                                  const long style ,
-                                  const wxValidator& validator,
-                                  const wxString& name )
-        :wxComboBox(parent,id,value,pos,size,n,choices,style,validator,name)
+wxComboBoxWheel::wxComboBoxWheel
+  ( wxWindow *parent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size,
+    const int n ,const wxString choices[], const long style, const wxValidator& validator, const wxString& name )
+      :wxComboBox(parent,id,value,pos,size,n,choices,style,validator,name)
 {
 }
 
@@ -123,12 +112,9 @@ public:
   void OnPaint(wxPaintEvent& ev);
   int ClickToleranceX;
   int ClickToleranceY;
-  drawCanvas(wxWindow *parent,
-             wxWindowID winid = wxID_ANY,
-             const wxPoint& pos = wxDefaultPosition,
-             const wxSize& size = wxDefaultSize,
-             long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-             const wxString& name = wxPanelNameStr)
+  drawCanvas
+    ( wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+      long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr)
   {	this->Create(parent,winid,pos,size,style,name);
   };
   void onMouseDownOnCanvas(wxMouseEvent &ev);
@@ -424,18 +410,16 @@ void* RunComputationalThread(void*ptr)
 #endif
 }
 
-
 void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
-{
-    // scroll in drop down list using mouse wheel
-    int rot = event.GetWheelRotation()/event.GetWheelDelta();
-    int lines = rot*1;// event.GetLinesPerAction();
-    unsigned int newSelection = (unsigned)(this->GetSelection()-lines);
-    if (newSelection>=(unsigned)this->GetCount()|| newSelection<0)
-        return;
-    this->SetSelection(newSelection);
-    wxCommandEvent ev;
-    MainWindow1->onListBox1Change(ev);
+{ // scroll in drop down list using mouse wheel
+  int rot = event.GetWheelRotation()/event.GetWheelDelta();
+  int lines = rot*1;// event.GetLinesPerAction();
+  unsigned int newSelection = (unsigned)(this->GetSelection()-lines);
+  if (newSelection>=(unsigned)this->GetCount()|| newSelection<0)
+    return;
+  this->SetSelection(newSelection);
+  wxCommandEvent ev;
+  MainWindow1->onListBox1Change(ev);
 }
 
 
@@ -513,7 +497,7 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer16VerticalStatusString= new wxBoxSizer(wxVERTICAL);
   this->BoxSizer17HorizontalProverButtons=  new ::wxBoxSizer(wxHORIZONTAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton
-		(this,guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
+		(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
   this->Table3Values = new wxGridExtra( this,::wxID_ANY);
@@ -533,20 +517,14 @@ guiMainWindow::guiMainWindow()
   tempS[1].assign(wxT("One increment"));
   tempS[2].assign(wxT("Single slice"));
   this->RBGroup1SlicingOptions= new ::wxRadioBox
-		(	this,this->ID_RBGroup1SliceOptions,wxT("Slicing options"),
-			::wxDefaultPosition,::wxDefaultSize,3,tempS);
-  this->CheckBox3ComputeChambers= new ::wxCheckBox
-		(this,this->ID_CheckBox1,wxT("Compute chambers"));
-  this->CheckBox4ChamberLabels=new ::wxCheckBox
-		(this,this->ID_CheckBoxesGraphics,wxT("Chamber labels"));
-  this->CheckBox5InvisibleChambers=new ::wxCheckBox
-		(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
-  this->CheckBox6Dashes=new ::wxCheckBox
-		(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
+		(	this,this->ID_RBGroup1SliceOptions,wxT("Slicing options"), ::wxDefaultPosition,::wxDefaultSize,3,tempS);
+  this->CheckBox3ComputeChambers= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Compute chambers"));
+  this->CheckBox4ChamberLabels=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Chamber labels"));
+  this->CheckBox5InvisibleChambers=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
+  this->CheckBox6Dashes=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
   this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox
 		(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
-	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox
-		(this,this->ID_CheckBox1,wxT("Act by Weyl group"));
+	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Act by Weyl group"));
   //this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   //this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
@@ -555,10 +533,9 @@ guiMainWindow::guiMainWindow()
   this->Table2Indicator->CreateGrid( 0, 0 );
   this->Table3Values->CreateGrid(0,0);
   this->theFont= new ::wxFont(10,wxDEFAULT, wxNORMAL,wxNORMAL);
-  this->ListBox1WeylGroup= new ::wxComboBoxWheel(this,this->ID_ListBox1,wxT("A3"),
-          wxPoint(0,0),::wxDefaultSize// wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight)
-          ,0,0,wxCB_DROPDOWN  );
-
+  this->ListBox1WeylGroup= new ::wxComboBoxWheel
+    ( this,this->ID_ListBox1,wxT("A3"), wxPoint(0,0),::wxDefaultSize// wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight)
+       ,0,0,wxCB_DROPDOWN  );
   this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
@@ -574,14 +551,11 @@ guiMainWindow::guiMainWindow()
     ( this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
       ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
   this->Dialog2StatusString1=  new ::wxDialogOutput
-    ( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition,
-      wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
+    ( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
   this->Text3PartialFractions= new ::wxTextCtrl
-		(	this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition,
-      ::wxDefaultSize,wxTE_MULTILINE);
+		(	this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
   this->Text4StatusString1 = new wxTextCtrl
-    ( this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition,
-      ::wxDefaultSize, wxTE_MULTILINE);
+    ( this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize, wxTE_MULTILINE);
   this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton
 		(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers,
 			wxT("Switch to chamber data"));
@@ -793,31 +767,6 @@ void* RunrootFKFTComputationLocal(void*)
 #endif
 }
 
-
-void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
-{	rootFKFTComputationLocal.useOutputFileForFinalAnswer=false;
-  this->theComputationSetup.flagAllowRepaint=false;
-  std::string tempS;
-  tempS.assign(MainWindow1GlobalPath);
-  tempS.append("KLcoeff.txt");
-  rootFKFTComputationLocal.KLCoeffFileString=tempS;
-  tempS.assign(MainWindow1GlobalPath);
-  tempS.append("partialFractions.txt");
-  rootFKFTComputationLocal.PartialFractionsFileString=tempS;
-  tempS.assign(MainWindow1GlobalPath);
-  tempS.append("VPdata.txt");
-  rootFKFTComputationLocal.VPEntriesFileString=tempS;
-  tempS.assign(MainWindow1GlobalPath);
-  tempS.append("VPIndex.txt");
-  rootFKFTComputationLocal.VPIndexFileString=tempS;
-#ifndef WIN32
-  ::RunA_voidFunctionFromFunctionAddress(&RunrootFKFTComputationLocal,&this->WorkThread1.ComputationalThreadLinux);
-#else
-  ::RunA_voidFunctionFromFunctionAddress
-		(&RunrootFKFTComputationLocal,this->WorkThread1.ComputationalThread);
-#endif
-}
-
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
 {	if (!this->ToggleButton1UsingCustom->GetValue())
   {	this->theComputationSetup.flagUsingCustomVectors=false;
@@ -935,8 +884,17 @@ void guiMainWindow::RunTheComputation()
 //#endif
 }
 
+void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
+{ this->theComputationSetup.flagDoCustomComputation=true;
+  this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
+  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=false;
+  this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
+  this->RunTheComputation();
+}
+
 void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 { this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
+  this->theComputationSetup.flagDoCustomComputation=false;
   this->RunTheComputation();
 }
 
@@ -994,7 +952,7 @@ void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
 }
 
 void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
-{	this->ReadVPVectorsAndOptions();
+{ this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.FullChop(*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);

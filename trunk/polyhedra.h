@@ -5639,9 +5639,9 @@ public:
 	std::string DebugString;
 	void ComputeDebugString(){this->ElementToString(DebugString);};
 	void ElementToString(std::string& output);
+	bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
 	void ComputeSubGroupFromGeneratingReflections
-		(	roots& generators,rootsCollection& ExternalAutos,
-			GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
+		( roots& generators, rootsCollection& ExternalAutos,	GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
 			bool recomputeAmbientRho);
 	void ComputeRootSubsystem();
 	void ActByElement(int index, root& theRoot);
@@ -5980,7 +5980,7 @@ public:
 			ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner,
 			int indexInOwner);
 	bool ConeConditionHolds
-		(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+		  ( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
 	bool ConeConditionHolds
 		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
 			roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
@@ -6045,6 +6045,7 @@ public:
 	ListBasicObjects<std::string> theBadDiagrams;
 	ListBasicObjects<int> numFoundBadDiagrams;
 	WeylGroup AmbientWeyl;
+	bool flagComputingLprohibitingWeights;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
 	bool flagUsingActionsNormalizerCentralizerNilradical;
 	bool flagComputeConeCondition;
@@ -6106,8 +6107,9 @@ public:
 		(	ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA,
 			GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
-	{	this->flagUseDynkinClassificationForIsomorphismComputation=false;
-		this->flagComputeConeCondition=true;
+	{ this->flagUseDynkinClassificationForIsomorphismComputation=false;
+    this->flagComputingLprohibitingWeights=false;
+		this->flagComputeConeCondition=false;
 		this->flagUsingActionsNormalizerCentralizerNilradical=true;
 		this->flagLookingForMinimalRels=false;
 		this->NumLinesPerTableLatex=20;
@@ -6458,51 +6460,56 @@ public:
   rootSubalgebra isomorphismComputer;
   MatrixLargeRational invertedCartan;
   WeylGroup theWeylGroup;
+  rootSubalgebra theK;
+  ReflectionSubgroupWeylGroup theIsos;
   bool flagAssumeGlobalMinimalityRHS;
   bool flagComputationIsInitialized;
  	bool ExtendToIsomorphismRootSystem
-		(	minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
+		( minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GetIsoTypicComponents
     ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState,
       WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-  {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);
+  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);
   };
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive
-    (int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+    ( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
   bool AddObjectOnTopNoRepetitionOfObject
     ( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingState
     ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
+  void GenerateStartingStatesFixedK
+    ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStep(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void TheFullRecursion(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep
 		( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
+  void ExtensionStepFixedK
+		( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
-		(	int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
+		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
 			bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
   bool GetNormalSeparatingConesFromPreferredBasis
     ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
       bool& oneBetaIsPositive );
 	bool GetSeparatingRootIfExistsFromSet
-		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl,
-			GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
+		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output,
+      WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
   void RemoveDoubt(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	bool StateIsEqualTo
-    ( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl,
-      GlobalVariables& TheGlobalVariables);
+    ( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportIsos
 		( int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportCurrentState
-		(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+		( int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportChildStates
-		(	int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-  minimalRelationsProverStates()
+		( int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+       minimalRelationsProverStates()
   { this->flagComputationIsInitialized=false;
     MinNumDifferentBetas=-1;
   };

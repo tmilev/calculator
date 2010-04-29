@@ -105,18 +105,17 @@ bool minimalRelationsProverState::CanBeShortened
 		bool AssumeGlobalMinimalityRHS)
 {	selAlphas.ComputeDebugString();
 	selBetas.ComputeDebugString();
-	if (selBetas.CardinalitySelectionWithMultiplicities()==0 &&
-			selAlphas.CardinalitySelectionWithMultiplicities()==0)
+	if (selBetas.CardinalitySelectionWithMultiplicities()==0 && selAlphas.CardinalitySelectionWithMultiplicities()==0)
     return false;
   root Candidate; Candidate.MakeZero(theWeyl.KillingFormMatrix.NumRows);
   root tempRoot;
   for(int i=0;i<selBetas.elements.size;i++)
-	{	tempRoot.Assign(theRelation.Betas.TheObjects[selBetas.elements.TheObjects[i]]);
+	{ tempRoot.Assign(theRelation.Betas.TheObjects[selBetas.elements.TheObjects[i]]);
 		tempRoot.MultiplyByInteger(selBetas.Multiplicities.TheObjects[selBetas.elements.TheObjects[i]]);
 		Candidate.Add(tempRoot);
   }
   for(int i=0;i<selAlphas.elements.size;i++)
-	{	tempRoot.Assign(theRelation.Alphas.TheObjects[selAlphas.elements.TheObjects[i]]);
+	{ tempRoot.Assign(theRelation.Alphas.TheObjects[selAlphas.elements.TheObjects[i]]);
 		tempRoot.MultiplyByInteger(selAlphas.Multiplicities.TheObjects[selAlphas.elements.TheObjects[i]]);
 		Candidate.Subtract(tempRoot);
   }
@@ -130,8 +129,7 @@ bool minimalRelationsProverState::CanBeShortened
   MinusCandidate.Assign(Candidate); MinusCandidate.MinusRoot();
   Candidate.ComputeDebugString(); MinusCandidate.ComputeDebugString();
   if (theWeyl.IsARoot(Candidate))
-  { if( selAlphas.CardinalitySelectionWithMultiplicities()>0 ||
-        selBetas.CardinalitySelectionWithMultiplicities()>1)
+  { if( selAlphas.CardinalitySelectionWithMultiplicities()>0 || selBetas.CardinalitySelectionWithMultiplicities()>1)
     { if (this->NilradicalRoots.ContainsObject(Candidate))
 				return true;
 			else
@@ -147,8 +145,7 @@ bool minimalRelationsProverState::CanBeShortened
 //    if (selAlphas.CardinalitySelectionWithMultiplicities()>1)
     if (selAlphas.elements.size!=0)
     { if (selAlphas.elements.size>1 ||
-            ( AssumeGlobalMinimalityRHS && selBetas.elements.size!=0 &&
-              selAlphas.elements.size==1 ))
+            ( AssumeGlobalMinimalityRHS && selBetas.elements.size!=0 && selAlphas.elements.size==1 ))
       { this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
   //      this->StateIsDubious=true;
         if (this->PartialRelation.Alphas.ContainsObject(MinusCandidate))

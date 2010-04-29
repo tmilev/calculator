@@ -681,7 +681,7 @@ void minimalRelationsProverStates::GenerateStartingState
   for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
 		if (this->theWeylGroup.RootSystem.TheObjects[i]!=tempRoot && this->theWeylGroup.RootScalarKillingFormMatrixRoot
           (tempRoot, this->theWeylGroup.RootSystem.TheObjects[i]).IsPositive() )
-		{	tempState.PartialRelation.Betas.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[i]);
+		{ tempState.PartialRelation.Betas.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[i]);
 			break;
 		}
   tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Betas.TheObjects[0]);
@@ -738,66 +738,9 @@ void ComputationSetup::RunCustom()
 
 
 void ComputationSetup::DoTheRootSAComputationCustom()
-{	//rootSubalgebra theRootSA, theRootSA2;
-  //MatrixLargeRational tempMat,tempB, tempX;
-  //tempMat.init(3,4); tempB.init(3,1);
-  //tempMat.elements[0][0]=0;tempMat.elements[0][1]=80;tempMat.elements[0][2]=1;tempMat.elements[0][3]=0;
-  //tempMat.elements[1][0]=1;tempMat.elements[1][1]=96;tempMat.elements[1][2]=0;tempMat.elements[1][3]=0;
-  //tempMat.elements[2][0]=0;tempMat.elements[2][1]=95;tempMat.elements[2][2]=1;tempMat.elements[2][3]=0;
-  //tempB.elements[0][0]=5;
-  //tempB.elements[1][0]=6;
-  //tempB.elements[2][0]=6;
-  //std::stringstream out;
-  //if (MatrixLargeRational::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat,tempB,tempX))
-   // out <<"has solution\n\n";
-  //else
-   // out<<"no solution\n\n";
-  //tempX.ComputeDebugString();
-  //out<<tempX.DebugString;
-  //this->theRootSubalgebras.DebugString=out.str();
-  //return;
- /* this->theChevalleyConstantComputer.ComputeChevalleyConstants
-    ('A',2 , *this->theGlobalVariablesContainer->Default());
-  this->theChevalleyConstantComputer.ComputeDebugString
-		(false,true,*this->theGlobalVariablesContainer->Default());*/
-  /*out <<"\n\n"<< this->theChevalleyConstantComputer.DebugString<<"\n\n";
-
-  ElementSimpleLieAlgebra e,f;
-  e.Nullify(this->theChevalleyConstantComputer);
-  e.ComputeDebugString(this->theChevalleyConstantComputer,false, true);
-  root root1;
-  root1.SetSizeExpandOnTopLight
-    (this->theChevalleyConstantComputer.theWeyl.KillingFormMatrix.NumRows);
-  root1.TheObjects[0]=1;root1.TheObjects[1]=0;
-  e.SetCoefficient(root1,1,this->theChevalleyConstantComputer);
-  root1.TheObjects[0]=0;root1.TheObjects[1]=1;
-
-  return;*/
-  //this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),false);
- // this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
-	//this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
-	//this->theChevalleyConstantComputer.FindSl2Subalgebras
-   // ('E',8,*this->theGlobalVariablesContainer->Default(),this->theSltwoSubalgebras);
-//	this->theRootSubalgebras.DebugString=this->theChevalleyConstantComputer.DebugString;
-	//return;
-
-	/*this->theChevalleyConstantComputer.ComputeDebugString
-		(false,true,*this->theGlobalVariablesContainer->Default());
-  out <<this->theChevalleyConstantComputer.DebugString;
-  */
-//  this->theRootSubalgebras.DebugString=this->theChevalleyConstantComputer.DebugString;
-  /*this->theRootSubalgebras.DebugString=this->theSltwoSubalgebras.DebugString;
-	return;*/
-  minimalRelationsProverStates tempProver;
-  WeylGroup tempWeyl;
-  tempWeyl.MakeDn(5);
-  tempProver.GenerateStartingState(*this,*this->theGlobalVariablesContainer->Default(),'D',8);
-  tempProver.TheFullRecursion(tempProver.theWeylGroup,*this->theGlobalVariablesContainer->Default());
-  return;
-	rootSubalgebra tempSA;
+{ rootSubalgebra tempSA;
 	this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=true;
 	this->theRootSubalgebras.flagLookingForMinimalRels=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
@@ -805,14 +748,11 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(),'E',6,true, true);
-  this->theRootSubalgebras.ComputeDebugString
-    (true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
-	//this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-	//	(*this->theGlobalVariablesContainer->Default(),'E',7);
-	//this->theRootSubalgebras.SortDescendingOrderBySSRank();
-	this->theRootSubalgebras.ComputeLProhibitingRelations
-		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+    ( *this->theGlobalVariablesContainer->Default(), 'E', 6, true, true);
+  this->theRootSubalgebras.ComputeDebugString(true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
+  if (this->theRootSubalgebras.flagComputeConeCondition)
+    this->theRootSubalgebras.ComputeLProhibitingRelations
+      (*this->theGlobalVariablesContainer->Default(), 0, this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -1065,3 +1005,4 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   }
   return false;
 }
+

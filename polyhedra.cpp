@@ -15566,13 +15566,12 @@ bool rootSubalgebra::IsAnIsomorphism
 				return false;
 		}
 	for (int i=0;i<this->AmbientWeyl.RootsOfBorel.size;i++)
-	{	tempRoots.MakeBasisChange(this->AmbientWeyl.RootsOfBorel.TheObjects[i],tempRoot);
+	{ tempRoots.MakeBasisChange(this->AmbientWeyl.RootsOfBorel.TheObjects[i],tempRoot);
 		if (!this->IsARoot(tempRoot))
 			return false;
 	}
 	if (outputAutomorphisms!=0)
-	{ outputAutomorphisms->ExternalAutomorphisms.AddObjectOnTop(tempRoots);
-	}
+    outputAutomorphisms->ExternalAutomorphisms.AddObjectOnTop(tempRoots);
 	return true;
 }
 
@@ -15586,8 +15585,7 @@ void rootSubalgebra::ElementToHtml
   childrenPath=out.str();
   out << ".html";
   MyPath=out.str();
-	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
-    (output, MyPath, false,false);
+	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPath, false,false);
   this->ComputeDebugString(false,true,true,theGlobalVariables);
   output<< this->DebugString;
   output.close();
@@ -15812,12 +15810,10 @@ void rootSubalgebra::MakeGeneratingSingularVectors
 					int tempI=theRelation.Betas.IndexOfObject(tempRoot);
 					if (tempI==-1)
 					{ theRelation.Betas.AddObjectOnTop(tempRoot);
-						theRelation.BetaCoeffs.AddObjectOnTop
-							(theRelation.AlphaCoeffs.TheObjects[i]);
+						theRelation.BetaCoeffs.AddObjectOnTop(theRelation.AlphaCoeffs.TheObjects[i]);
 					}
 					else
-						theRelation.BetaCoeffs.TheObjects[tempI].Add
-							(theRelation.AlphaCoeffs.TheObjects[i]);
+						theRelation.BetaCoeffs.TheObjects[tempI].Add(theRelation.AlphaCoeffs.TheObjects[i]);
 					isMaximal=false;
 					break;
 				}
@@ -15847,7 +15843,7 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 					(	(this->DynkinTypeStrings.TheObjects[i])<
 						(this->DynkinTypeStrings.TheObjects[j]));
 			if (tempBool)
-			{	this->DynkinTypeStrings.SwapTwoIndices(i,j);
+			{ this->DynkinTypeStrings.SwapTwoIndices(i,j);
 				this->SimpleBasesConnectedComponents.SwapTwoIndices(i,j);
 			}
 		}
@@ -15859,7 +15855,7 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 	std::string LastString="";
 	for (int i=0; i<this->SimpleBasesConnectedComponents.size;i++)
 	{ if (!(this->DynkinTypeStrings.TheObjects[i]==LastString))
-		{	this->sameTypeComponents.SetSizeExpandOnTopNoObjectInit(this->sameTypeComponents.size+1);
+		{ this->sameTypeComponents.SetSizeExpandOnTopNoObjectInit(this->sameTypeComponents.size+1);
 			this->sameTypeComponents.LastObject()->size=0;
 			LastString=this->DynkinTypeStrings.TheObjects[i];
 		}
@@ -15911,12 +15907,34 @@ void ::DynkinDiagramRootSubalgebra::ComputeDiagramType
 	this->ComputeDebugString();
 }
 
-bool DynkinDiagramRootSubalgebra::IsGreaterThan
-	(DynkinDiagramRootSubalgebra& right)
+bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, char letter2)
+{ if( (letter1=='B' || letter1=='D') && (letter2=='B' || letter2=='D') )
+  { if (letter1==letter2)
+      return false;
+    if (letter1=='B')
+      return true;
+  }
+  return letter1>letter2;
+}
+
+bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& right)
 {	if (this->RankTotal()>right.RankTotal())
 		return true;
 	if (this->RankTotal()<right.RankTotal())
 		return false;
+  assert(this->DynkinTypeStrings.size==this->SimpleBasesConnectedComponents.size);
+  for (int i=0;i<this->DynkinTypeStrings.size;i++)
+  { if (this->SimpleBasesConnectedComponents.TheObjects[i].size>right.SimpleBasesConnectedComponents.TheObjects[i].size)
+      return true;
+     if (right.SimpleBasesConnectedComponents.TheObjects[i].size>this->SimpleBasesConnectedComponents.TheObjects[i].size)
+      return false;
+    if (this->LetterIsDynkinGreaterThanLetter
+          ( this->DynkinTypeStrings.TheObjects[i].at(1), right.DynkinTypeStrings.TheObjects[i].at(1)))
+      return true;
+     if (this->LetterIsDynkinGreaterThanLetter
+          ( right.DynkinTypeStrings.TheObjects[i].at(1),this->DynkinTypeStrings.TheObjects[i].at(1)))
+      return false;
+  }
 	return this->DebugString>right.DebugString;
 }
 

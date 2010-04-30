@@ -13,7 +13,7 @@ Num Vectors(<=10): <input type="text" size="1" name="textNumVectors" onkeyup="ge
 <br>
 <input type="submit" name="buttonOneChamber" value="Vector_partition_function_chamber_#">
 <input type="text" size="1" name="chamberNumber" >
-</FORM>	
+</FORM>
 </td>
 <td>
 <a href="http://math.jacobs-university.de/"><img src="/jacobs_logo.png" alt="Jacobs University"></a>
@@ -37,12 +37,12 @@ Requires <a href="http://httpd.apache.org/">Apache server</a> installed:
 <a href="http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vector_partition.html.cpp?view=markup"> Server c++ source(2 out of 2 files)</a>
 <br> <a href="http://vectorpartition.sourceforge.net/">Sourceforge project page</a>
 <br>
-<br> 
+<br>
 Additional functionality of the program:
 <br>
-<a href="/cgi-bin/vector_partition_linux_cgi.cgi?rootSAs">Root subalgebra tables</a>
+<a href="/cgi-bin/vector_partition_linux_cgi?rootSAs">Root subalgebra tables</a>
 <br>
-<a href="/cgi-bin/vector_partition_cgi_win32.exe?SLtwos">sl(2) subalgebras of E8</a>
+<a href="cgi-bin/vector_partition_linux_cgi?SLtwos">sl(2) subalgebras of E8</a>
 </td>
 </tr>
 </table>
@@ -57,11 +57,11 @@ Additional functionality of the program:
 	var oldNumVectors=-1;
 	var NumElements=0;
 	var node;
-	var surface;		
-	var MaxNumCoords=5;		
+	var surface;
+	var MaxNumCoords=5;
 	var Basis= new Array(MaxNumCoords);
 	var Xshift=150;
-	var Yshift=250; 
+	var Yshift=250;
 	var selectedBasisIndex=-1;//-2 = center of coord system is selected
 	var GraphicsUnit=100;
 	var clickTolerance=0.1;
@@ -82,7 +82,7 @@ Additional functionality of the program:
     	thePointer = thePointer.offsetParent;
 		}
 //		alert(cy-divPosY+document.body.scrollTop);
-		posx=(cx-divPosX+document.body.scrollLeft-Xshift)/GraphicsUnit;		
+		posx=(cx-divPosX+document.body.scrollLeft-Xshift)/GraphicsUnit;
 		posy=(cy-divPosY+document.body.scrollTop-Yshift)/GraphicsUnit;
 		if (!(selectedBasisIndex==-1))
 		{	if (selectedBasisIndex==-2)
@@ -91,7 +91,7 @@ Additional functionality of the program:
 			}
 			else
 			{	Basis[selectedBasisIndex][0]=posx;
-				Basis[selectedBasisIndex][1]=posy;		
+				Basis[selectedBasisIndex][1]=posy;
 			}
 			surface.clear();
 			selectedBasisIndex=-1;
@@ -125,10 +125,10 @@ Additional functionality of the program:
 			totalCoords=dim*num+num+1;
 			if (NumElements!=totalCoords)
 			{	firstChildinLine=document.formMain.firstChild;
-				for (i=0;i<4;i++)				
-				{	firstChildinLine=firstChildinLine.nextSibling;			
+				for (i=0;i<4;i++)
+				{	firstChildinLine=firstChildinLine.nextSibling;
 				}
-	//			alert("Num elements to be killed:"+ NumElements);			
+	//			alert("Num elements to be killed:"+ NumElements);
 				for(i=0;i<NumElements;i++)
 				{ nextchild=firstChildinLine.nextSibling;
 					//alert(firstChildinLine.value);
@@ -136,29 +136,29 @@ Additional functionality of the program:
 					firstChildinLine=nextchild;
 				}
 				NumElements=totalCoords;
-				mytext=document.createElement("br");					
-				document.formMain.insertBefore(mytext,formMain.buttonGo);				
+				mytext=document.createElement("br");
+				document.formMain.insertBefore(mytext,formMain.buttonGo);
 				for (i=0;i<num;i++)
 				{ for (j=0;j<dim;j++)
-					{	mytext=document.createElement("input");					
+					{	mytext=document.createElement("input");
 						mytext.type="text";
 						mytext.name= "textCoord"+i;
 						if (rootsArraySize>i && rootsArrayDim>j)
 						{	mytext.value=rootsArray[i][j];
 						}
 						mytext.size=1;
-						document.formMain.insertBefore(mytext,formMain.buttonGo);				
+						document.formMain.insertBefore(mytext,formMain.buttonGo);
 					}
-					mytext=document.createElement("br");					
-					document.formMain.insertBefore(mytext,formMain.buttonGo);				
+					mytext=document.createElement("br");
+					document.formMain.insertBefore(mytext,formMain.buttonGo);
 				}
 				NumElements=totalCoords;
-			}			
+			}
 		}
 	}
 	for (i=0;i<5;i++)
 	{ Basis[i]= new Array(2);
-	}  
+	}
 	Basis[0][0]=1.7; Basis[0][1]=0.8;
 	Basis[1][0]=0;   Basis[1][1]=-2;
 	Basis[2][0]=1.5; Basis[2][1]=-1.8;
@@ -171,31 +171,31 @@ Additional functionality of the program:
 		}
 		result=Math.floor(result);
 		return result;
-	}	
+	}
 	function drawOnCanvasMain()
 	{//	alert("paint");
 		for (CounterK=0;CounterK<numdaLines;CounterK++)
-		{	xCoord1=getCoord(da1[CounterK],0)+Xshift;	
-			yCoord1=getCoord(da1[CounterK],1)+Yshift; 
-			xCoord2=getCoord(da2[CounterK],0)+Xshift; 
+		{	xCoord1=getCoord(da1[CounterK],0)+Xshift;
+			yCoord1=getCoord(da1[CounterK],1)+Yshift;
+			xCoord2=getCoord(da2[CounterK],0)+Xshift;
 			yCoord2=getCoord(da2[CounterK],1)+Yshift;
 			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(clrda[CounterK]);
-		}		
+		}
 		for (CounterK=0;CounterK<numlLines;CounterK++)
-		{	xCoord1=getCoord(l1[CounterK],0)+Xshift;	
-			yCoord1=getCoord(l1[CounterK],1)+Yshift; 
-			xCoord2=getCoord(l2[CounterK],0)+Xshift; 
+		{	xCoord1=getCoord(l1[CounterK],0)+Xshift;
+			yCoord1=getCoord(l1[CounterK],1)+Yshift;
+			xCoord2=getCoord(l2[CounterK],0)+Xshift;
 			yCoord2=getCoord(l2[CounterK],1)+Yshift;
 			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(clrl[CounterK]);
-		}		
-	}	
+		}
+	}
 	function drawOnCanvasMainPlusInit()
 	{	node = dojo.byId(canvasMain);
 		surface = dojox.gfx.createSurface(node, 400, 400);
 		drawOnCanvasMain();
 	}
 	dojo.require("dojox.gfx");
-	dojo.addOnLoad(drawOnCanvasMainPlusInit);		
+	dojo.addOnLoad(drawOnCanvasMainPlusInit);
 //generatePageFromDimAndNum(3,9,-1,-1);
 </script>
 

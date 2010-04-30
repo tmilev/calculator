@@ -962,7 +962,7 @@ void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
 void guiMainWindow::onButton9CustomNilradical(wxCommandEvent& ev)
 {	this->theComputationSetup.flagDoCustomNilradical=true;
 	this->theComputationSetup.SetupCustomNilradicalInVPVectors
-			(*this->theComputationSetup.theGlobalVariablesContainer->Default());
+    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->theComputationSetup.FullChop
     (*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);

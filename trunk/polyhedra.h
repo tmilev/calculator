@@ -5725,6 +5725,7 @@ public:
 	int RankTotal();
 	int NumRootsGeneratedByDiagram();
 	void Sort();
+	bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
 	void ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl);
 	void ComputeDynkinStrings(WeylGroup& theWeyl);
 	void ComputeDynkinString(int indexComponent, WeylGroup& theWeyl);
@@ -6052,60 +6053,51 @@ public:
 	bool flagLookingForMinimalRels;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
 	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-		(	Selection& targetSel,
-			GlobalVariables& theGlobalVariables);
+		( Selection& targetSel,	GlobalVariables& theGlobalVariables);
 	bool ApproveSelAgainstOneGenerator
-		(	ListBasicObjects<int>& generator,
-			Selection& targetSel, GlobalVariables& theGlobalVariables);
+		( ListBasicObjects<int>& generator,	Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void RaiseSelectionUntilApproval
-		(	Selection& targetSel, GlobalVariables& theGlobalVariables);
+		( Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void ApplyOneGenerator
-		(	ListBasicObjects<int>& generator, Selection& targetSel,
-			GlobalVariables& theGlobalVariables);
+		( ListBasicObjects<int>& generator, Selection& targetSel,	GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical
-		(	Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+		( Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
-		( GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank,
-      bool sort, bool computeEpsCoords);
+		( GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank,  bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
-		(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
+		( rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
 	void DynkinTableToString
-		(	bool useLatex, bool useHtml,std::string* htmlPathPhysical,
-			std::string* htmlPathServer,std::string& output);
+		( bool useLatex, bool useHtml,std::string* htmlPathPhysical, std::string* htmlPathServer,std::string& output);
 	void GetTableHeaderAndFooter
-		(	std::string& outputHeader,std::string& outputFooter, bool useLatex,
-			bool useHtml);
+		( std::string& outputHeader,std::string& outputFooter, bool useLatex,	bool useHtml);
 	void SortDescendingOrderBySSRank();
 	void initDynkinDiagramsNonDecided
-		(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
+		( WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
 	void pathToHtmlFileNameElements
-		(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
+		( int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
 	void pathToHtmlReference
-		(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
+		( int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
 	void ElementToHtml
-		( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer,
-			GlobalVariables& theGlobalVariables);
+		( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ElementToString
-		(	std::string& output, bool useLatex, bool useHtml,bool includeKEpsCoords,
-      std::string* htmlPathPhysical,std::string* htmlPathServer,
+		( std::string& output, bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,std::string* htmlPathServer,
       GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations
 		(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString
-		(	bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,
+		( bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,
 			std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 	{	this->ElementToString
 			( this->DebugString,useLatex, useHtml,includeKEpsCoords,
         htmlPathPhysical, htmlPathServer,theGlobalVariables);
 	};
 	void MakeProgressReportGenerationSubalgebras
-		(	rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables,
+		( rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables,
 			int currentIndex, int TotalIndex);
 	void MakeProgressReportAutomorphisms
-		(	ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA,
-			GlobalVariables& theGlobalVariables);
+		( ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
 	{ this->flagUseDynkinClassificationForIsomorphismComputation=false;
     this->flagComputingLprohibitingWeights=false;
@@ -6139,14 +6131,14 @@ public:
 	~rootFKFTcomputation();
 	void SearchForMinimalRelations(std::string& output);
 	bool PartialRelationCouldBeMinimal
-    (coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables);
+    ( coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables);
   void GetImpliedMembers
     ( coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables,
       roots& impliedNilradical, roots& impliedK, roots& impliedGmodL, roots impliedBKSingular);
 	static bool OpenDataFile
-			(std::fstream& theFileOutput, std::string& theFileName);
+    ( std::fstream& theFileOutput, std::string& theFileName);
 	static bool OpenDataFileOrCreateIfNotPresent2
-			(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
+		( std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
   void RunA2A1A1inD5beta12221();
@@ -6161,10 +6153,8 @@ public:
 	//give a Limiting cone if you want only to observe weights lying in a
 	//certain cone. Set 0 if there is no particular cone of interest.
 	void MakeTheRootFKFTSum
-		(	root& ChamberIndicator, partFractions& theBVdecomposition,
-			ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
-			VermaModulesWithMultiplicities& theHighestWeights,
-			roots& theNilradical);
+		( root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output,
+			VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
 };
 
 struct IndicatorWindowVariables
@@ -6189,7 +6179,6 @@ public:
 	std::string ProgressReportString4;
 	std::string ProgressReportString5;
 	std::string StatusString1;
-
 	bool StatusString1NeedsRefresh;
 	void Assign(IndicatorWindowVariables& right);
 	void Nullify()
@@ -6221,7 +6210,7 @@ public:
   int DynkinsEpsilon;
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
 	void operator=(const SltwoDecomposition& right)
-	{	this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
+	{ this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
 		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
 		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
 		this->CentralizerDiagram.Assign(right.CentralizerDiagram);
@@ -6244,10 +6233,10 @@ public:
 			(::SomeRandomPrimesSize,this->theModulesHighestWeights.size);
 		int result=0;
 		for (int i=0; i<tempI;i++)
-		{	result+=
-				this->theModulesHighestWeights.TheObjects[i]*
-				this->theModulesMultiplicities.TheObjects[i]*
-				::SomeRandomPrimes[i];
+		{ result+=
+			this->theModulesHighestWeights.TheObjects[i]*
+			this->theModulesMultiplicities.TheObjects[i]*
+			::SomeRandomPrimes[i];
 		}
 		return result;
 	};

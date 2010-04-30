@@ -25,8 +25,9 @@
 		<Unit filename="polyhedra.cpp" />
 		<Unit filename="polyhedra.h" />
 		<Unit filename="rootFKFT.cpp" />
-		<Unit filename="rootFKFT.h" />
 		<Unit filename="rootFKFT2.cpp" />
+		<Unit filename="rootFKFT3.cpp" />
+		<Unit filename="vector_partition.html" />
 		<Unit filename="vector_partition.html.cpp" />
 		<Unit filename="vp_cgi_interface.cpp" />
 		<Extensions>

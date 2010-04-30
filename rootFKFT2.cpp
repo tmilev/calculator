@@ -83,11 +83,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 //	this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	if(this->nonLNonSingularRoots.HasACommonElementWith(this->BKSingularGmodLRoots))
 		return false;
-/*	this->nonLRoots.ComputeDebugString();
-	this->NilradicalRoots.ComputeDebugString();
-	this->PositiveKroots.ComputeDebugString();*/
-  if ( this->nonLRoots.HasACommonElementWith(this->NilradicalRoots) ||
-        this->nonLRoots.HasACommonElementWith(this->PositiveKroots))
+  if ( this->nonLRoots.HasACommonElementWith(this->NilradicalRoots) || this->nonLRoots.HasACommonElementWith(this->PositiveKroots))
     return false;
 	if (this->nonNilradicalRoots.HasACommonElementWith(this->NilradicalRoots))
 		return false;
@@ -256,8 +252,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 
 	Rational tempRat;
  	if (!roots::ConesIntersect
-				( TheGlobalVariables, this->TheObjects[index].PartialRelation.Alphas,
-					this->TheObjects[index].NilradicalRoots, theDimension))
+				( TheGlobalVariables, this->TheObjects[index].PartialRelation.Alphas, this->TheObjects[index].NilradicalRoots, theDimension))
 	{ root NormalSeparatingCones;
     bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive
       (index, NormalSeparatingCones, theWeyl, TheGlobalVariables);

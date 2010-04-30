@@ -825,8 +825,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
   this->GetIsoTypicComponents(theOtherAlphas, theOtherBetas, tempPermAlphas, theOtherState, theWeyl,  theGlobalVariables);
   this->GetIsoTypicComponents(theOtherBetas, theOtherAlphas, tempPermBetas, theOtherState, theWeyl, theGlobalVariables);
   this->GetIsoTypicComponents(theOtherKroots, theOtherAlphas, tempPermK, theOtherState, theWeyl, theGlobalVariables);
-  if (!thePermAlphas.HasSameMaxMultiplicities(tempPermAlphas) ||
-      !thePermBetas.HasSameMaxMultiplicities(tempPermBetas) ||
+  if (!thePermAlphas.HasSameMaxMultiplicities(tempPermAlphas) || !thePermBetas.HasSameMaxMultiplicities(tempPermBetas) ||
       !thePermK.HasSameMaxMultiplicities(tempPermK))
     return false;
 	int NumCyclesAlphas = thePermAlphas.getTotalNumSubsets();
@@ -838,8 +837,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
 	theRange.AddListOnTop(theOtherAlphas);
 	theRange.AddListOnTop(theOtherBetas);
 	MatrixLargeRational theOtherMatrix, thisMatrix;
-	this->TheObjects[indexOther].ComputeScalarProductsMatrix
-		(theGlobalVariables, theWeyl, theOtherAlphas, theOtherBetas, theOtherMatrix);
+	this->TheObjects[indexOther].ComputeScalarProductsMatrix(theGlobalVariables, theWeyl, theOtherAlphas, theOtherBetas, theOtherMatrix);
 	this->TheObjects[indexOther].theScalarProducts.ComputeDebugString();
 	bool DomainAndRangeGenerateNonIsoSAs;
 	//theDomain.AddListOnTop(theState.ChosenPositiveKroots);
@@ -874,20 +872,14 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
         this->MakeProgressReportIsos
           ( indexOther, (l*NumCyclesAlphas+ i)*NumCyclesBetas+j, NumCyclesK*NumCyclesBetas*NumCyclesAlphas,
             theGlobalVariables,theWeyl);
-        theState.ComputeScalarProductsMatrix
-          (theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
-  //			thisMatrix.ComputeDebugString();
-
+        theState.ComputeScalarProductsMatrix(theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
         if (thisMatrix.IsEqualTo(theOtherMatrix))
         {	if (this->isomorphismComputer.attemptExtensionToIsomorphism
                 (theDomain, theRange,	theGlobalVariables, 0, false, theWeyl, &DomainAndRangeGenerateNonIsoSAs))
-          { //theDomain.ComputeDebugString();
-            //theRange.ComputeDebugString();
             return true;
-          } else
-          { if (DomainAndRangeGenerateNonIsoSAs)
+          else
+            if (DomainAndRangeGenerateNonIsoSAs)
               return false;
-          }
         }
         thePermBetas.IncrementSubset();
       }
@@ -943,10 +935,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   theRangeRootSA.genK.CopyFromBase(Range);
 	theDomainRootSA.ComputeAllButAmbientWeyl();
 	theRangeRootSA.ComputeAllButAmbientWeyl();
-	if (theDomainRootSA.theDynkinDiagram.DebugString!=
-				theRangeRootSA.theDynkinDiagram.DebugString ||
-			theDomainRootSA.theCentralizerDiagram.DebugString!=
-				theRangeRootSA.theCentralizerDiagram.DebugString)
+	if (theDomainRootSA.theDynkinDiagram.DebugString!= theRangeRootSA.theDynkinDiagram.DebugString ||
+			theDomainRootSA.theCentralizerDiagram.DebugString!=theRangeRootSA.theCentralizerDiagram.DebugString)
   {	if (DomainAndRangeGenerateNonIsoSAs!=0)
 			*DomainAndRangeGenerateNonIsoSAs=true;
 		return false;
@@ -997,8 +987,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 					return true;
 			if (outputAutomorphisms!=0)
 				theDomainRootSA.MakeProgressReportGenAutos
-					( l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer,
-						outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
+					( l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
 			tempAutosCentralizer.IncrementSubset();
 		}
 		permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);

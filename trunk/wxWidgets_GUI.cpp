@@ -190,6 +190,8 @@ public:
 	::wxButton* Button9CustomNilradical;
 	::wxButton* Button10ProverOneStep;
 	::wxButton* Button11ProverFullComputation;
+	::wxButton* Button12ProverOneStepFixedK;
+	::wxButton* Button13ProverFullComputationFixedK;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -217,6 +219,8 @@ public:
   void onButton9CustomNilradical(wxCommandEvent& ev);
   void onButton10ProverOneStep(wxCommandEvent& ev);
   void onButton11ProverFullComputation(wxCommandEvent& ev);
+  void onButton12ProverOneStepFixedK(wxCommandEvent& ev);
+  void onButton13ProverFullComputationFixedK(wxCommandEvent& ev);
   void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
@@ -260,6 +264,8 @@ public:
 		ID_Button9CustomNilradical,
 		ID_Button10ProverOneStep,
 		ID_Button11ProverFullComputation,
+		ID_Button12ProverOneStepFixedK,
+		ID_Button13ProverFullComputationFixedK,
 		ID_RBGroup1SliceOptions,
     ID_Spin1Dim,
     ID_Spin2NumVect,
@@ -388,6 +394,8 @@ BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
     EVT_BUTTON(guiMainWindow::ID_Button5SaveComputer, wxDialogOutput::onButton5SaveComputer)
     EVT_BUTTON(guiMainWindow::ID_Button10ProverOneStep, guiMainWindow::onButton10ProverOneStep)
     EVT_BUTTON(guiMainWindow::ID_Button11ProverFullComputation, guiMainWindow::onButton11ProverFullComputation)
+    EVT_BUTTON(guiMainWindow::ID_Button12ProverOneStepFixedK, guiMainWindow::onButton12ProverOneStepFixedK)
+    EVT_BUTTON(guiMainWindow::ID_Button13ProverFullComputationFixedK, guiMainWindow::onButton13ProverFullComputationFixedK)
 END_EVENT_TABLE()
 
 wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title,
@@ -563,10 +571,10 @@ guiMainWindow::guiMainWindow()
 		(this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
   this->Button5SaveComputer = new ::wxButton
 		(this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
-	this->Button10ProverOneStep = new ::wxButton
-		(this->Dialog2StatusString1,this->ID_Button10ProverOneStep,wxT("Prover one step "));
-	this->Button11ProverFullComputation = new ::wxButton
-		(this->Dialog2StatusString1,this->ID_Button11ProverFullComputation,wxT("Prover full go"));
+	this->Button10ProverOneStep = new ::wxButton(this->Dialog2StatusString1,this->ID_Button10ProverOneStep,wxT("Prover one step "));
+	this->Button11ProverFullComputation = new ::wxButton(this->Dialog2StatusString1,this->ID_Button11ProverFullComputation,wxT("Prover full go"));
+	this->Button12ProverOneStepFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button12ProverOneStepFixedK,wxT("Prover one step fixed K"));
+	this->Button13ProverFullComputationFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button13ProverFullComputationFixedK,wxT("Prover full go Fixed K"));
 	this->Button5SaveComputer->Disable();
   //this->BoxSizer1HorizontalBackground->Fit(this);
   this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
@@ -625,6 +633,8 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer16VerticalStatusString->Add(this->Text4StatusString1,1,wxEXPAND| wxALL);
 		this->BoxSizer17HorizontalProverButtons->Add(this->Button10ProverOneStep);
 		this->BoxSizer17HorizontalProverButtons->Add(this->Button11ProverFullComputation);
+		this->BoxSizer17HorizontalProverButtons->Add(this->Button12ProverOneStepFixedK);
+		this->BoxSizer17HorizontalProverButtons->Add(this->Button13ProverFullComputationFixedK);
   this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
   this->Dialog2StatusString1->SetSizer(this->BoxSizer16VerticalStatusString);
 
@@ -942,12 +952,27 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 
 void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+  MainWindow1->theComputationSetup.flagProverUseFixedK=false;
   MainWindow1->RunTheComputation();
 }
 
 void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+  MainWindow1->theComputationSetup.flagProverUseFixedK=false;
+  MainWindow1->RunTheComputation();
+}
+
+void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent &ev)
+{ MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+  MainWindow1->theComputationSetup.flagProverUseFixedK=true;
+  MainWindow1->RunTheComputation();
+}
+
+void guiMainWindow::onButton13ProverFullComputationFixedK(wxCommandEvent &ev)
+{ MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
+  MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+  MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->RunTheComputation();
 }
 

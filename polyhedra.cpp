@@ -897,7 +897,8 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 }
 
 ComputationSetup::ComputationSetup()
-{ this->flagProverDoingFullRecursion=false;
+{ this->flagProverUseFixedK=false;
+  this->flagProverDoingFullRecursion=false;
   this->flagUsingProverDoNotCallOthers=false;
   this->flagAllowRepaint=true;
   this->flagHavingNotationExplanation=true;
@@ -1176,13 +1177,25 @@ void ComputationSetup::Run()
   if (this->flagUsingProverDoNotCallOthers)
   { GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
     if (!this->flagProverDoingFullRecursion)
-    {  if (!this->theProver.flagComputationIsInitialized)
-        this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
-      else
-        this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
+    { if (!this->theProver.flagComputationIsInitialized)
+      { if(!this->flagProverUseFixedK)
+          this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
+        else
+          this->theProver.GenerateStartingStatesFixedK(*this, *tgv, 'E',8);
+      } else
+      { if(!this->flagProverUseFixedK)
+          this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
+        else
+          this->theProver.RecursionStepFixedK(this->theProver.theWeylGroup, *tgv);
+      }
     } else
-    { this->theProver.GenerateStartingState(*this,*tgv, 'E',8);
-      this->theProver.TheFullRecursion(this->theProver.theWeylGroup, *tgv);
+    { if(!this->flagProverDoingFullRecursion)
+      { this->theProver.GenerateStartingState(*this,*tgv, 'E',8);
+        this->theProver.TheFullRecursion(this->theProver.theWeylGroup, *tgv);
+      } else
+      { this->theProver.GenerateStartingStatesFixedK(*this,*tgv, 'E', 8);
+        this->theProver.TheFullRecursionFixedK(this->theProver.theWeylGroup, *tgv);
+      }
     }
     if (*this->theProver.theIndexStack.LastObject()>=0)
       this->theProver.TheObjects[*theProver.theIndexStack.LastObject()].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
@@ -12510,23 +12523,6 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
 	output=out.str();
 }
 
-void ReflectionSubgroupWeylGroup::ActByElement(int index, root& theRoot)
-{ ElementWeylGroup& tempEW= this->TheObjects[index];
-	int NumElts=tempEW.size;
-	root tempRoot; tempRoot.Assign(theRoot);
-	for (int i=0;i<NumElts;i++)
-	{ int tempI=tempEW.TheObjects[i];
-		if(tempI<this->simpleGenerators.size)
-			this->AmbientWeyl.ReflectBetaWRTAlpha
-				(this->simpleGenerators.TheObjects[tempI],theRoot,false,theRoot);
-		else
-		{ tempI-=this->simpleGenerators.size;
-			this->ExternalAutomorphisms.TheObjects[tempI].MakeBasisChange(tempRoot,theRoot);
-			tempRoot.Assign(theRoot);
-		}
-	}
-}
-
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 { this->RootSubsystem.ClearTheObjects();
 	this->RootSubsystem.AddRootsOnTopHash(this->simpleGenerators);
@@ -19587,3 +19583,5 @@ void SimpleLieAlgebra::FindSl2Subalgebras
 	}
 	this->DebugString=out.str();
 }
+
+

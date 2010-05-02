@@ -426,11 +426,8 @@ bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject
   return true;
 }
 
-void minimalRelationsProverState::ComputeScalarProductsMatrix
-  (GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
-{ return this->ComputeScalarProductsMatrix
-		(	TheGlobalVariables, theWeyl, this->PartialRelation.Alphas,
-			this->PartialRelation.Betas, this->theScalarProducts);
+void minimalRelationsProverState::ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{ return this->ComputeScalarProductsMatrix(	TheGlobalVariables, theWeyl, this->PartialRelation.Alphas, this->PartialRelation.Betas, this->theScalarProducts);
 }
 
 void minimalRelationsProverState::ComputeScalarProductsMatrix
@@ -447,8 +444,7 @@ void minimalRelationsProverState::ComputeScalarProductsMatrix
 }
 
 
-void minimalRelationsProverState::ElementToString
-	( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons)
+void minimalRelationsProverState::ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons)
 { std::string tempS; std::stringstream out;
 	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
 	{	this->PartialRelation.Alphas.TheObjects[i].ElementToString(tempS);
@@ -623,8 +619,7 @@ void minimalRelationsProverStates::ElementToString
 	output=out.str();
 }
 
-void minimalRelationsProverStates::ComputePreferredDualBasis
-  (char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables)
 { this->PreferredDualBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
   for (int i=0;i<theDimension;i++)
 		this->PreferredDualBasis.TheObjects[i].MakeZero(theDimension);
@@ -662,8 +657,7 @@ void minimalRelationsProverStates::ComputePreferredDualBasis
 }
 
 
-void minimalRelationsProverStates::GenerateStartingState
-  ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
+void minimalRelationsProverStates::GenerateStartingState( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
 {  minimalRelationsProverState tempState;
     this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
     this->theWeylGroup.ComputeRho(false);

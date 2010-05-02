@@ -1197,8 +1197,9 @@ void ComputationSetup::Run()
         this->theProver.TheFullRecursionFixedK(this->theProver.theWeylGroup, *tgv);
       }
     }
-    if (*this->theProver.theIndexStack.LastObject()>=0)
-      this->theProver.TheObjects[*theProver.theIndexStack.LastObject()].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
+    int currentIndex=*this->theProver.theIndexStack.LastObject();
+    if (currentIndex>=0)
+      this->theProver.TheObjects[currentIndex].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
     if (this->theProver.theIndexStack.size>0)
 			this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
     this->ExitComputationSetup();
@@ -11844,31 +11845,31 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
 
 void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output)
 { Rational alphaShift, tempRat,lengthA;
-		root result; result.Assign(Beta);
-		alphaShift.MakeZero(); lengthA.MakeZero();
-		if (RhoAction)
-			result.Add(this->rho);
-		for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
-			for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
-			{ tempRat.Assign(result.TheObjects[j]);
-					tempRat.MultiplyBy(alpha.TheObjects[i]);
-					tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[i][j]*2);
-					alphaShift.Add(tempRat);
-					tempRat.Assign(alpha.TheObjects[i]);
-					tempRat.MultiplyBy(alpha.TheObjects[j]);
-					tempRat.MultiplyByInt(this->KillingFormMatrix.elements[i][j]);
-					lengthA.Add(tempRat);
-			}
-		alphaShift.DivideBy(lengthA);
-		Output.SetSizeExpandOnTopLight(this->KillingFormMatrix.NumRows);
-		for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
-		{ tempRat.Assign(alphaShift);
-				tempRat.MultiplyBy(alpha.TheObjects[i]);
-				tempRat.Add(result.TheObjects[i]);
-				Output.TheObjects[i].Assign(tempRat);
+	root result; result.Assign(Beta);
+	alphaShift.MakeZero(); lengthA.MakeZero();
+	if (RhoAction)
+		result.Add(this->rho);
+	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
+		for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
+		{ tempRat.Assign(result.TheObjects[j]);
+			tempRat.MultiplyBy(alpha.TheObjects[i]);
+			tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[i][j]*2);
+			alphaShift.Add(tempRat);
+			tempRat.Assign(alpha.TheObjects[i]);
+			tempRat.MultiplyBy(alpha.TheObjects[j]);
+			tempRat.MultiplyByInt(this->KillingFormMatrix.elements[i][j]);
+			lengthA.Add(tempRat);
 		}
-		if (RhoAction)
-			Output.Subtract(this->rho);
+	alphaShift.DivideBy(lengthA);
+	Output.SetSizeExpandOnTopLight(this->KillingFormMatrix.NumRows);
+	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
+	{ tempRat.Assign(alphaShift);
+		tempRat.MultiplyBy(alpha.TheObjects[i]);
+		tempRat.Add(result.TheObjects[i]);
+		Output.TheObjects[i].Assign(tempRat);
+	}
+	if (RhoAction)
+		Output.Subtract(this->rho);
 }
 
 void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
@@ -12524,15 +12525,15 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
 }
 
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
-{ this->RootSubsystem.ClearTheObjects();
-		this->RootSubsystem.AddRootsOnTopHash(this->simpleGenerators);
-		root currentRoot;
-		for (int i=0;i<this->RootSubsystem.size;i++)
-			for (int j=0; j<this->simpleGenerators.size;j++)
-			{	currentRoot.Assign(this->RootSubsystem.TheObjects[i]);
-					this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j],currentRoot,false,currentRoot);
-					this->RootSubsystem.AddObjectOnTopNoRepetitionOfObjectHash(currentRoot);
-			}
+{	this->RootSubsystem.ClearTheObjects();
+	this->RootSubsystem.AddRootsOnTopHash(this->simpleGenerators);
+	root currentRoot;
+	for (int i=0;i<this->RootSubsystem.size;i++)
+		for (int j=0; j<this->simpleGenerators.size;j++)
+		{	currentRoot.Assign(this->RootSubsystem.TheObjects[i]);
+			this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j],currentRoot,false,currentRoot);
+			this->RootSubsystem.AddObjectOnTopNoRepetitionOfObjectHash(currentRoot);
+		}
 }
 
 void ElementWeylGroup::operator =(const ElementWeylGroup &right)

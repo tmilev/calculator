@@ -664,46 +664,44 @@ void minimalRelationsProverStates::ComputePreferredDualBasis
 
 void minimalRelationsProverStates::GenerateStartingState
   ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
-{ minimalRelationsProverState tempState;
-	this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
-  this->theWeylGroup.ComputeRho(false);
-  this->isomorphismComputer.AmbientWeyl.Assign(this->theWeylGroup);
-  this->isomorphismComputer.ComputeAll();
-  this->PreferredDualBasis.size=0;
-  this->flagAssumeGlobalMinimalityRHS=false;
-  this->invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
-  this->invertedCartan.Invert(TheGlobalVariables);
-  this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
-  this->size=0;
-  root tempRoot;
-  tempRoot.Assign(this->theWeylGroup.RootSystem.TheObjects[7]);
-  tempState.PartialRelation.Alphas.AddObjectOnTop(tempRoot);
-  for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
-		if (this->theWeylGroup.RootSystem.TheObjects[i]!=tempRoot && this->theWeylGroup.RootScalarKillingFormMatrixRoot
-          (tempRoot, this->theWeylGroup.RootSystem.TheObjects[i]).IsPositive() )
-		{ tempState.PartialRelation.Betas.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[i]);
-			break;
-		}
-  tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Betas.TheObjects[0]);
-  tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Alphas.TheObjects[0]);
-	tempState.owner=this;
-/*  tempState.PartialRelation.Betas.AddObjectOnTop(tempRoot);
-  tempRoot.Assign(this->theWeylGroup.RootSystem.TheObjects[5]);
-  tempState.theChoicesWeMake.AddObjectOnTop(tempRoot);
-  tempState.PartialRelation.Betas.AddObjectOnTop(tempRoot);
-  tempState.theChoicesWeMake.AddObjectOnTop(tempRoot);
-  this->MinNumDifferentBetas=2;
-  */
-
-  this->AddObjectOnTop(tempState);
-	this->LastObject()->ComputeStateReturnFalseIfDubious
-    (TheGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS);
-	this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, this->theWeylGroup);
-	this->LastObject()->ComputeDebugString(this->theWeylGroup,TheGlobalVariables);
-	this->theIndexStack.AddObjectOnTop(0);
-  this->MakeProgressReportCurrentState(0,TheGlobalVariables,this->theWeylGroup);
-  this->ComputeLastStackIndex(this->theWeylGroup, TheGlobalVariables);
-  this->flagComputationIsInitialized=true;
+{  minimalRelationsProverState tempState;
+    this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
+    this->theWeylGroup.ComputeRho(false);
+    this->isomorphismComputer.AmbientWeyl.Assign(this->theWeylGroup);
+    this->isomorphismComputer.ComputeAll();
+    this->PreferredDualBasis.size=0;
+    this->flagAssumeGlobalMinimalityRHS=false;
+    this->invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
+    this->invertedCartan.Invert(TheGlobalVariables);
+    this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
+    this->size=0;
+    root tempRoot;
+    tempRoot.Assign(this->theWeylGroup.RootSystem.TheObjects[7]);
+    tempState.PartialRelation.Alphas.AddObjectOnTop(tempRoot);
+    for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
+      if (this->theWeylGroup.RootSystem.TheObjects[i]!=tempRoot && this->theWeylGroup.RootScalarKillingFormMatrixRoot
+              (tempRoot, this->theWeylGroup.RootSystem.TheObjects[i]).IsPositive() )
+      { tempState.PartialRelation.Betas.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[i]);
+          break;
+      }
+    tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Betas.TheObjects[0]);
+    tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Alphas.TheObjects[0]);
+    tempState.owner=this;
+  /*  tempState.PartialRelation.Betas.AddObjectOnTop(tempRoot);
+    tempRoot.Assign(this->theWeylGroup.RootSystem.TheObjects[5]);
+    tempState.theChoicesWeMake.AddObjectOnTop(tempRoot);
+    tempState.PartialRelation.Betas.AddObjectOnTop(tempRoot);
+    tempState.theChoicesWeMake.AddObjectOnTop(tempRoot);
+    this->MinNumDifferentBetas=2;
+    */
+    this->AddObjectOnTop(tempState);
+    this->LastObject()->ComputeStateReturnFalseIfDubious(TheGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS);
+    this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, this->theWeylGroup);
+    this->LastObject()->ComputeDebugString(this->theWeylGroup,TheGlobalVariables);
+    this->theIndexStack.AddObjectOnTop(0);
+    this->MakeProgressReportCurrentState(0,TheGlobalVariables,this->theWeylGroup);
+    this->ComputeLastStackIndex(this->theWeylGroup, TheGlobalVariables);
+    this->flagComputationIsInitialized=true;
 }
 
 void ComputationSetup::RunCustom()

@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
+					<Add option="-Wall" />
 					<Add option="-pg" />
 					<Add option="-g" />
 					<Add option="-DUSE_GUI" />
@@ -25,6 +26,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-pg" />
+			<Add option="-g" />
 			<Add option="`wx-config --cflags`" />
 			<Add option="-DUSE_GUI" />
 		</Compiler>

@@ -76,75 +76,75 @@ bool rootSubalgebra::GenerateAutomorphisms ( rootSubalgebra& right, GlobalVariab
 
 void minimalRelationsProverStates::GenerateStartingStatesFixedK( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
 { minimalRelationsProverState tempState;
-	this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
-  this->theWeylGroup.ComputeRho(false);
-  this->isomorphismComputer.AmbientWeyl.Assign(this->theWeylGroup);
-  this->isomorphismComputer.ComputeAll();
-  this->PreferredDualBasis.size=0;
-  this->flagAssumeGlobalMinimalityRHS=false;
-  this->invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
-  this->invertedCartan.Invert(TheGlobalVariables);
-  this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
-  this->size=0;
-  this->theK.AmbientWeyl.Assign(this->theWeylGroup);
-  this->theK.genK.SetSizeExpandOnTopNoObjectInit(4);
-  this->theK.genK.TheObjects[0].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
-  this->theK.genK.TheObjects[1].InitFromIntegers(8, 0,1,0,0,0,0,0,0);
-  this->theK.genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
-  this->theK.genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
-  this->theK.ComputeAll();
-  this->theK.GenerateAutomorphisms(this->theK, TheGlobalVariables, &this->theIsos, true);
-  this->theIsos.simpleGenerators.size=0;
-  this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, TheGlobalVariables, 20000, true);
-  ListBasicObjects<int> kModOrbitInfo;
-  ListBasicObjects<int> kModOrbitRepresentatives;
-  kModOrbitInfo.initFillInObject(this->theK.kModules.size,-1);
-  kModOrbitRepresentatives.size=0;
-  rootsCollection IsoOrbits;
-  roots tempRoots;
-  for (int i=0;i<this->theK.kModules.size;i++)
-    if (kModOrbitInfo.TheObjects[i]==-1)
-    { this->theIsos.GenerateOrbitReturnFalseIfTruncated(this->theK.kModules.TheObjects[i].TheObjects[0], tempRoots,0);
-      kModOrbitInfo.TheObjects[i]=i;
-      kModOrbitRepresentatives.AddObjectOnTop(i);
-      for (int j=1; j<tempRoots.size;j++)
-        kModOrbitInfo.TheObjects[this->theK.GetIndexKmoduleContainingRoot(tempRoots.TheObjects[j])]=i;
-    }
-  for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
-  { root& theRoot= this->theWeylGroup.RootSystem.TheObjects[i];
-    if (this->theK.AllRootsK.ContainsObject(theRoot))
-    { tempState.nonNilradicalRoots.AddObjectOnTop(theRoot);
-      if (theRoot.IsPositiveOrZero())
-        tempState.PositiveKroots.AddObjectOnTop(theRoot);
-      else
-        tempState.nonPositiveKRoots.AddObjectOnTop(theRoot);
-      tempState.nonAlphas.AddObjectOnTop(theRoot);
-      tempState.nonBetas.AddObjectOnTop(theRoot);
-      tempState.nonBKSingularGmodLRoots.AddObjectOnTop(theRoot);
-    } else
-      if (!this->theK.HighestWeightsGmodK.ContainsObject(theRoot))
-      { tempState.nonBKSingularGmodLRoots.AddObjectOnTop(theRoot);
-        tempState.nonKRoots.AddObjectOnTop(theRoot);
-        tempState.nonPositiveKRoots.AddObjectOnTop(theRoot);
-        tempState.nonAlphas.AddObjectOnTop(theRoot);
+		this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
+    this->theWeylGroup.ComputeRho(false);
+    this->isomorphismComputer.AmbientWeyl.Assign(this->theWeylGroup);
+    this->isomorphismComputer.ComputeAll();
+    this->PreferredDualBasis.size=0;
+    this->flagAssumeGlobalMinimalityRHS=false;
+    this->invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
+    this->invertedCartan.Invert(TheGlobalVariables);
+    this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
+    this->size=0;
+    this->theK.AmbientWeyl.Assign(this->theWeylGroup);
+    this->theK.genK.SetSizeExpandOnTopNoObjectInit(4);
+    this->theK.genK.TheObjects[0].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
+    this->theK.genK.TheObjects[1].InitFromIntegers(8, 0,1,0,0,0,0,0,0);
+    this->theK.genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
+    this->theK.genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
+    this->theK.ComputeAll();
+    this->theK.GenerateAutomorphisms(this->theK, TheGlobalVariables, &this->theIsos, true);
+    this->theIsos.simpleGenerators.size=0;
+    this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, TheGlobalVariables, 20000, true);
+    ListBasicObjects<int> kModOrbitInfo;
+    ListBasicObjects<int> kModOrbitRepresentatives;
+    kModOrbitInfo.initFillInObject(this->theK.kModules.size,-1);
+    kModOrbitRepresentatives.size=0;
+    rootsCollection IsoOrbits;
+    roots tempRoots;
+    for (int i=0;i<this->theK.kModules.size;i++)
+			if (kModOrbitInfo.TheObjects[i]==-1)
+			{	this->theIsos.GenerateOrbitReturnFalseIfTruncated(this->theK.kModules.TheObjects[i].TheObjects[0], tempRoots,0);
+					kModOrbitInfo.TheObjects[i]=i;
+					kModOrbitRepresentatives.AddObjectOnTop(i);
+					for (int j=1; j<tempRoots.size;j++)
+						kModOrbitInfo.TheObjects[this->theK.GetIndexKmoduleContainingRoot(tempRoots.TheObjects[j])]=i;
       }
-  }
-  this->AddObjectOnTop(tempState);
-  for(int i=0;i<kModOrbitRepresentatives.size;i++)
-  { root& theHW= this->theK.HighestWeightsGmodK.TheObjects[kModOrbitRepresentatives.TheObjects[i]];
-    tempState.theChoicesWeMake.AddObjectOnTop(theHW);
-    tempState.PartialRelation.Alphas.AddObjectOnTop(theHW);
-    this->ExtensionStepFixedK(0,this->theWeylGroup,TheGlobalVariables,tempState);
-    tempState.theChoicesWeMake.size=0;
-    tempState.PartialRelation.Alphas.size=0;
-  }
-	this->theIndexStack.AddObjectOnTop(0);
-  if (this->TheObjects[0].PossibleChildStates.size>0)
-  { this->TheObjects[0].activeChild=-1;
+    for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
+    { root& theRoot= this->theWeylGroup.RootSystem.TheObjects[i];
+				if (this->theK.AllRootsK.ContainsObject(theRoot))
+				{	tempState.nonNilradicalRoots.AddObjectOnTop(theRoot);
+						if (theRoot.IsPositiveOrZero())
+							tempState.PositiveKroots.AddObjectOnTop(theRoot);
+						else
+							tempState.nonPositiveKRoots.AddObjectOnTop(theRoot);
+						tempState.nonAlphas.AddObjectOnTop(theRoot);
+						tempState.nonBetas.AddObjectOnTop(theRoot);
+						tempState.nonBKSingularGmodLRoots.AddObjectOnTop(theRoot);
+				} else
+						if (!this->theK.HighestWeightsGmodK.ContainsObject(theRoot))
+						{ tempState.nonBKSingularGmodLRoots.AddObjectOnTop(theRoot);
+								tempState.nonKRoots.AddObjectOnTop(theRoot);
+								tempState.nonPositiveKRoots.AddObjectOnTop(theRoot);
+								tempState.nonAlphas.AddObjectOnTop(theRoot);
+						}
+    }
+    this->AddObjectOnTop(tempState);
+    for(int i=0;i<kModOrbitRepresentatives.size;i++)
+    {	root& theHW= this->theK.HighestWeightsGmodK.TheObjects[kModOrbitRepresentatives.TheObjects[i]];
+				tempState.theChoicesWeMake.AddObjectOnTop(theHW);
+				tempState.PartialRelation.Alphas.AddObjectOnTop(theHW);
+				this->ExtensionStepFixedK(0,this->theWeylGroup,TheGlobalVariables,tempState);
+				tempState.theChoicesWeMake.size=0;
+				tempState.PartialRelation.Alphas.size=0;
+    }
     this->theIndexStack.AddObjectOnTop(0);
-  }
-  this->MakeProgressReportCurrentState(0,TheGlobalVariables, this->theWeylGroup);
-  this->flagComputationIsInitialized=true;
+    if (this->TheObjects[0].PossibleChildStates.size>0)
+    {	this->TheObjects[0].activeChild=-1;
+				this->theIndexStack.AddObjectOnTop(0);
+    }
+    this->MakeProgressReportCurrentState(0,TheGlobalVariables, this->theWeylGroup);
+    this->flagComputationIsInitialized=true;
 }
 
 void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
@@ -308,35 +308,35 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, root& theRoot)
 }
 
 void ReflectionSubgroupWeylGroup::ActByElement(int index, root& input, root& output)
-{ assert(&input!=&output);
-  ElementWeylGroup& tempEW= this->TheObjects[index];
-	int NumElts=tempEW.size;
-	root tempRoot;
-	output.Assign(input);
-	for (int i=0;i<NumElts;i++)
-	{ int tempI=tempEW.TheObjects[i];
-		if(tempI<this->simpleGenerators.size)
-			this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[tempI], output, false, output);
-		else
-		{ tempI-=this->simpleGenerators.size;
-			this->ExternalAutomorphisms.TheObjects[tempI].MakeBasisChange(output,tempRoot);
-			output.Assign(tempRoot);
+{	assert(&input!=&output);
+		ElementWeylGroup& tempEW= this->TheObjects[index];
+		int NumElts=tempEW.size;
+		root tempRoot;
+		output.Assign(input);
+		for (int i=0;i<NumElts;i++)
+		{	int tempI=tempEW.TheObjects[i];
+				if(tempI<this->simpleGenerators.size)
+					this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[tempI], output, false, output);
+				else
+				{	tempI-=this->simpleGenerators.size;
+						this->ExternalAutomorphisms.TheObjects[tempI].MakeBasisChange(output,tempRoot);
+						output.Assign(tempRoot);
+				}
 		}
-	}
 }
 
 void ReflectionSubgroupWeylGroup::ActByElement(int index, roots& input, roots& output)
 { assert(&input!=&output);
-  output.SetSizeExpandOnTopNoObjectInit(input.size);
-  for (int i=0; i<input.size; i++)
-    this->ActByElement(index, input.TheObjects[i], output.TheObjects[i]);
+    output.SetSizeExpandOnTopNoObjectInit(input.size);
+    for (int i=0; i<input.size; i++)
+      this->ActByElement(index, input.TheObjects[i], output.TheObjects[i]);
 }
 
 void minimalRelationsProverStates::ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { int index= *this->theIndexStack.LastObject();
-  this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
-	if (!this->TheObjects[index].StateIsPossible || this->TheObjects[index].StateIsComplete)
-    return;
+    this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+    if (!this->TheObjects[index].StateIsPossible || this->TheObjects[index].StateIsComplete)
+      return;
   /*if (this->TheObjects[index].theChoicesWeMake.size>=8)
     if (this->TheObjects[index].flagNeedsAdditionOfPositiveKroots)
     { minimalRelationsProverState& theState=this->TheObjects[index];
@@ -362,30 +362,30 @@ void minimalRelationsProverStates::ComputeLastStackIndexFixedK(WeylGroup& theWey
         }
       return;
     }*/
-	root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
-	this->TheObjects[index].PossibleChildStates.size=0;
-	minimalRelationsProverState newState;
-	int theDimension=theWeyl.KillingFormMatrix.NumRows;
-	Rational tempRat;
- 	if (!roots::ConesIntersect( TheGlobalVariables, this->TheObjects[index].PartialRelation.Alphas, this->TheObjects[index].NilradicalRoots, theDimension))
-	{ root NormalSeparatingCones;
-    bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
-    this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
-    this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
-		bool addFirstAlpha=true;
-    for (int i=0; i<theWeyl.RootSystem.size; i++)
-    { this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-      this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+    root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
+    this->TheObjects[index].PossibleChildStates.size=0;
+    minimalRelationsProverState newState;
+    int theDimension=theWeyl.KillingFormMatrix.NumRows;
+    Rational tempRat;
+    if (!roots::ConesIntersect( TheGlobalVariables, this->TheObjects[index].PartialRelation.Alphas, this->TheObjects[index].NilradicalRoots, theDimension))
+    {	root NormalSeparatingCones;
+        bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
+        this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
+        this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+        bool addFirstAlpha=true;
+        for (int i=0; i<theWeyl.RootSystem.size; i++)
+        {	this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+            this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+        }
+        for (int i=0;i<theWeyl.RootSystem.size;i++)
+        {	this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+            this->MakeProgressReportChildStates
+              ( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+        }
     }
-    for (int i=0;i<theWeyl.RootSystem.size;i++)
-    {	this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-      this->MakeProgressReportChildStates
-        ( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+    else
+    {	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+        this->TheObjects[index].StateIsComplete=true;
     }
-	}
-	else
-	{ this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
-		this->TheObjects[index].StateIsComplete=true;
-	}
 //	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);*/
 }

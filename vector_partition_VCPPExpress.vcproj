@@ -1592,6 +1592,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\rootFKFT3.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\wxWidgets_GUI.cpp"
 				>
 				<FileConfiguration
@@ -1745,10 +1749,6 @@
 			>
 			<File
 				RelativePath=".\polyhedra.h"
-				>
-			</File>
-			<File
-				RelativePath=".\rootFKFT.h"
 				>
 			</File>
 		</Filter>

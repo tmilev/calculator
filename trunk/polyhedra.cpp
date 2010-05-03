@@ -1201,7 +1201,13 @@ void ComputationSetup::Run()
     if (currentIndex>=0)
       this->theProver.TheObjects[currentIndex].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
     if (this->theProver.theIndexStack.size>0)
-			this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
+		{//	this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
+      this->theProver.theK.ComputeDebugString(*tgv);
+      IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
+      IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+      if (tgv->FeedDataToIndicatorWindowDefault!=0)
+        tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+		}
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;
@@ -1223,25 +1229,20 @@ void ComputationSetup::Run()
 	{	if (!this->flagDoingWeylGroupAction)
 		{	if (this->flagFullChop)
 			{	this->theChambers.SliceTheEuclideanSpace
-					(	this->InputRoots,this->NextDirectionIndex,this->theChambers.AmbientDimension,
-						0, *this->theGlobalVariablesContainer->Default());
+					(	this->InputRoots,this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
 			} else
 			{ if (this->flagOneIncrementOnly)
 					this->theChambers.SliceOneDirection
-						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
-							0, *this->theGlobalVariablesContainer->Default());
+						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
 				else
 					this->theChambers.OneSlice
-						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension,
-							0, *this->theGlobalVariablesContainer->Default());
+						(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
 			}
 			this->theChambers.ComputeDebugString(false,this->flagUseHtml);
 			if (this->DisplayNumberChamberOfInterest!=-1)
-      { this->IndexChamberOfInterest=this->theChambers.FindVisibleChamberWithDisplayNumber
-          (this->DisplayNumberChamberOfInterest);
+      { this->IndexChamberOfInterest=this->theChambers.FindVisibleChamberWithDisplayNumber(this->DisplayNumberChamberOfInterest);
         if (this->IndexChamberOfInterest!=-1)
-          this->theChambers.TheObjects[this->IndexChamberOfInterest]
-            ->ComputeInternalPointMethod2
+          this->theChambers.TheObjects[this->IndexChamberOfInterest]->ComputeInternalPointMethod2
               (this->IndicatorRoot, this->theChambers.AmbientDimension);
         else
         { this->IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
@@ -15618,15 +15619,12 @@ void rootSubalgebra::ElementToStringHeaderFooter
 	}
 }
 
-void rootSubalgebra::ElementToString
-	( std::string &output, bool useLatex, bool useHtml,
-    bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::ElementToString ( std::string &output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
 	int LatexLineCounter=0;
-	this->ElementToStringHeaderFooter
-    (latexHeader, latexFooter, useLatex, useHtml,includeKEpsCoords);
+	this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml,includeKEpsCoords);
 	this->theDynkinDiagram.ElementToString(tempS);
   if (useLatex)
     out <<"\\noindent$\\mathfrak{k}_{ss}:$ ";
@@ -15684,6 +15682,7 @@ void rootSubalgebra::ElementToString
   if (useLatex)
 		out <<"\n\n";
 	out << latexHeader;
+	this->kModulesgEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	for (int i=0;i<this->kModules.size;i++)
 	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,useLatex);
     if (useHtml)
@@ -15715,6 +15714,8 @@ void rootSubalgebra::ElementToString
     out << tempS;
     if (useHtml)
       out <<"</td><td>";
+    if (i>=this->kModulesgEpsCoords.size)
+      this->AmbientWeyl.GetEpsilonCoords(this->kModules.TheObjects[i], this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
     this->kModulesgEpsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS,useLatex,useHtml,true);
     out << tempS;
 		if (useLatex)
@@ -15742,8 +15743,7 @@ void rootSubalgebra::ElementToString
     if (i!=this->kModules.size-1)
     { LatexLineCounter+=this->kModules.TheObjects[i].size;
       if (useLatex)
-      { if (  (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) &&
-              (LatexLineCounter!=this->kModules.TheObjects[i].size))
+      { if (  (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules.TheObjects[i].size))
         { out <<latexFooter<<latexHeader;
           LatexLineCounter=this->kModules.TheObjects[i].size;
         }
@@ -15755,8 +15755,7 @@ void rootSubalgebra::ElementToString
 	if (useLatex)
 		out<<latexFooter;
 	if ((useLatex|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
-		this->GenerateKmodMultTable
-			(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
+		this->GenerateKmodMultTable(this->theMultTable,this->theOppositeKmods,theGlobalVariables);
 	if (this->theMultTable.size!=0)
 	{	if (useHtml)
       out<< "\n\n Pairing table:\n\n";

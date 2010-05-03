@@ -1,6 +1,6 @@
 #include "polyhedra.h"
 #include "rootFKFT.h"
-
+extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
 bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction
 	(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { root tempRoot;
@@ -299,6 +299,7 @@ void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVari
 		this->ComputeLastStackIndex(theWeyl, TheGlobalVariables);
 		this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
 	}
+
 }
 
 void minimalRelationsProverStates::RecursionStepFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
@@ -435,15 +436,13 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis
   root rootCandidate;
   bool result=false;
   if( this->GetSeparatingRootIfExistsFromSet
-      ( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theBetas, rootCandidate, theWeyl, TheGlobalVariables,
-        inputPreferredBasis))
+      ( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theBetas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
   { oneBetaIsPositive=false;
     output.Assign(rootCandidate);
     result=true;
   }
   if( this->GetSeparatingRootIfExistsFromSet
-      ( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, TheGlobalVariables,
-        inputPreferredBasis))
+      ( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
   { if (!(result && firstChoiceSeparated1<firstChoiceSeparated2))
     { result=true;
       oneBetaIsPositive=true;

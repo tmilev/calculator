@@ -1,4 +1,5 @@
 #include "polyhedra.h"
+extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
 
 int rootSubalgebra::ProblemCounter=0;
 bool rootSubalgebra::GenerateAutomorphisms ( rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly)

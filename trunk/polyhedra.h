@@ -742,19 +742,15 @@ public:
 	void ActOnRoots(roots& input, roots& output);
 	void DivideByRational(Rational& x);
 	static bool SystemLinearInequalitiesHasSolution
-		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
-			MatrixLargeRational& outputPoint);
+		(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
 	static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-		(	MatrixLargeRational& matA, MatrixLargeRational& matb,
-			MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
+		(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
 	static void ComputePotentialChangeGradient
-	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables,
-		int ColumnIndex, Rational &outputChangeGradient,
+	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient, 
 		bool &hasAPotentialLeavingVariable);
 	static void GetMaxMovementAndLeavingVariableRow
-	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable,
-		int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX,
-		Selection& BaseVariables);
+	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, 
+		MatrixLargeRational& matX, Selection& BaseVariables);
 	int FindPositiveLCMCoefficientDenominatorsTruncated();
 	int FindPositiveGCDCoefficientNumeratorsTruncated();
 };
@@ -814,6 +810,7 @@ public:
 	int NumCombinationsOfCardinality(int cardinality);
 	void IncrementSubset();
 	void IncrementSubsetFixedCardinality(int Cardinality);
+	bool HasMultiplicitiesZeroAndOneOnly();
 	int MaxCardinalityWithMultiplicities(){return this->MaxMultiplicity*this->Multiplicities.size;};
 	int CardinalitySelectionWithMultiplicities();
 };
@@ -1696,8 +1693,7 @@ public:
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
 	bool ContainsOppositeRoots();
-	bool PerturbVectorToRegular
-		(	root&output, GlobalVariables& theGlobalVariables, int theDimension);
+	bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
 	void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
 	void Average(root& output, int theDimension);
 	void Sum(root& output, int theDimension);
@@ -1708,25 +1704,28 @@ public:
 	int NumRootsConnectedTo(root& input, WeylGroup& theWeyl);
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
-	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
-		(	MatrixLargeRational& outputTheLinearCombination, int theIndex);
+	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(	MatrixLargeRational& outputTheLinearCombination, int theIndex);
 	void GetLinearDependenceRunTheLinearAlgebra
-		(	MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem,
-			Selection& outputNonPivotPoints);
+		(	MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints);
 	int GetDimensionOfElements();
-	static bool ConesIntersect
-		(	GlobalVariables& theGlobalVariables, roots& NilradicalRoots, roots& Ksingular, int theDimension);
+	//Strict cone: The zero linear combination is not allowed.
+	//Non-Strict cone: the zero linear combination is allowed.
+	//the below function returns true if there exists positive numbers a_i b_j and vectors v_i in the nonstrict cone and
+	//w_j in the strict cone such that a_1 v_1 +... +a_k v_k= b_1 w_1+...+b_lw_l
+	// The left hand side is allowed to have zero number of summands (hence "non-strict" cone - contains 0)
+	//The right hand side is NOT allowed to have zero number of summands.
+	//If the strict cone has zero elements, the function returns false.
+	static bool ConesIntersect(	GlobalVariables& theGlobalVariables,  roots& StrictCone, roots& NonStrictCone, int theDimension);
 	static bool GetNormalSeparatingCones
-		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs,
-			roots& coneNonNegativeCoeffs, root& outputNormal);
+		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, roots& coneNonNegativeCoeffs, 
+			root& outputNormal);
 	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)
 	void MakeBasisChange(root& input, root& output);
 	void MakeBasisChange(roots& input, roots& output);
 	bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
-	void GaussianEliminationForNormalComputation
-		(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension);
+	void GaussianEliminationForNormalComputation (MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension);
 	// the below function is slow
 	int ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables);
 	void rootsToMatrix(MatrixLargeRational& output);
@@ -1738,8 +1737,7 @@ public:
 	void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable);
 	void SubSelection(Selection& theSelection, roots& output);
 	void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
-	void SelectionToMatrixAppend
-				(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
+	void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
 	void ComputeNormal(root& output);
 	bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables& theGlobalVariables);
 	bool ComputeNormalFromSelection
@@ -6052,12 +6050,9 @@ public:
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
 	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
 		( Selection& targetSel,	GlobalVariables& theGlobalVariables);
-	bool ApproveSelAgainstOneGenerator
-		( ListBasicObjects<int>& generator,	Selection& targetSel, GlobalVariables& theGlobalVariables);
-	void RaiseSelectionUntilApproval
-		( Selection& targetSel, GlobalVariables& theGlobalVariables);
-	void ApplyOneGenerator
-		( ListBasicObjects<int>& generator, Selection& targetSel,	GlobalVariables& theGlobalVariables);
+	bool ApproveSelAgainstOneGenerator( ListBasicObjects<int>& generator,	Selection& targetSel, GlobalVariables& theGlobalVariables);
+	void RaiseSelectionUntilApproval( Selection& targetSel, GlobalVariables& theGlobalVariables);
+	void ApplyOneGenerator( ListBasicObjects<int>& generator, Selection& targetSel,	GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical
 		( Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasUpToIsomorphism
@@ -6066,34 +6061,24 @@ public:
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
 		( rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
-	void DynkinTableToString
-		( bool useLatex, bool useHtml,std::string* htmlPathPhysical, std::string* htmlPathServer,std::string& output);
-	void GetTableHeaderAndFooter
-		( std::string& outputHeader,std::string& outputFooter, bool useLatex,	bool useHtml);
+	void DynkinTableToString( bool useLatex, bool useHtml,std::string* htmlPathPhysical, std::string* htmlPathServer,std::string& output);
+	void GetTableHeaderAndFooter( std::string& outputHeader,std::string& outputFooter, bool useLatex,	bool useHtml);
 	void SortDescendingOrderBySSRank();
-	void initDynkinDiagramsNonDecided
-		( WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
-	void pathToHtmlFileNameElements
-		( int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
-	void pathToHtmlReference
-		( int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
-	void ElementToHtml
-		( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables);
+	void initDynkinDiagramsNonDecided( WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
+	void pathToHtmlFileNameElements( int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
+	void pathToHtmlReference( int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
+	void ElementToHtml( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ElementToString
 		( std::string& output, bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,std::string* htmlPathServer,
       GlobalVariables& theGlobalVariables);
-	void ComputeLProhibitingRelations
-		(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
+	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString
 		( bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,
 			std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
-	{	this->ElementToString
-			( this->DebugString,useLatex, useHtml,includeKEpsCoords,
-        htmlPathPhysical, htmlPathServer,theGlobalVariables);
+	{	this->ElementToString( this->DebugString,useLatex, useHtml,includeKEpsCoords, htmlPathPhysical, htmlPathServer,theGlobalVariables);
 	};
 	void MakeProgressReportGenerationSubalgebras
-		( rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables,
-			int currentIndex, int TotalIndex);
+		( rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables, int currentIndex, int TotalIndex);
 	void MakeProgressReportAutomorphisms
 		( ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
@@ -6378,12 +6363,11 @@ public:
   void GetNumberScalarProductsData
 		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	bool Root1IsGreaterThanRoot2
-		(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
+	bool Root1IsGreaterThanRoot2	(	int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
   void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix
     (	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
-  bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS, bool usingFixedK);
   bool CanBeShortened
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
       bool AssumeGlobalMinimalityRHS);
@@ -6396,7 +6380,7 @@ public:
 	bool RootIsGoodForProblematicIndex
 		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
-  bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
+  bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables, bool usingFixedK);
 	bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
@@ -6450,8 +6434,8 @@ public:
   void ExtensionStep(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
   void ExtensionStepFixedK (int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
-		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
-			bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
+		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, 
+			root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive, bool HavingFixedK);
   bool GetNormalSeparatingConesFromPreferredBasis
     ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
       bool& oneBetaIsPositive );

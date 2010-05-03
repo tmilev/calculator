@@ -1,8 +1,7 @@
 #include "polyhedra.h"
 #include "rootFKFT.h"
 extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
-bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction
-	(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool usingFixedK)
 { root tempRoot;
 	this->flagNeedsAdditionOfPositiveKroots=false;
 	for (int i=0;i<this->PositiveKroots.size;i++)
@@ -21,6 +20,15 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 		for (int i=0; i<this->PartialRelation.Betas.size;i++)
 			if (theWeyl.IsARoot(this->PartialRelation.Betas.TheObjects[i]+tested))
 				this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theWeyl.RootSystem.TheObjects[j]);
+	}
+	if (usingFixedK)
+	{	for (int i=0;i<this->owner->theK.HighestWeightsGmodK.size;i++)
+		{	root& theRoot= this->owner->theK.HighestWeightsGmodK.TheObjects[i];
+			if(this->nonBKSingularGmodLRoots.ContainsObject(theRoot))
+				this->NilradicalRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
+			if(this->nonNilradicalRoots.ContainsObject(theRoot))
+				this->BKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
+		}
 	}
 	//this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots,this->PositiveKroots);
@@ -47,8 +55,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
   this->nonKRoots.intersectWith(this->nonNilradicalRoots,this->nonLRoots);
   for (int i=0;i<this->nonLRoots.size;i++)
 		if (this->IsBKSingularImplied(this->nonLRoots.TheObjects[i], theWeyl))
-      this->BKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject
-        (this->nonLRoots.TheObjects[i]);
+      this->BKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(this->nonLRoots.TheObjects[i]);
 //  this->nonBKSingularGmodLRoots.ComputeDebugString();
   this->nonLRoots.intersectWith(this->nonBKSingularGmodLRoots, this->nonLNonSingularRoots);
 	for (int i=0;i<this->NilradicalRoots.size;i++)
@@ -91,8 +98,8 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 bool minimalRelationsProverState::CanBeShortened
   (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
 		bool AssumeGlobalMinimalityRHS)
-{	selAlphas.ComputeDebugString();
-	selBetas.ComputeDebugString();
+{	//selAlphas.ComputeDebugString();
+	//selBetas.ComputeDebugString();
 	if (selBetas.CardinalitySelectionWithMultiplicities()==0 && selAlphas.CardinalitySelectionWithMultiplicities()==0)
     return false;
   root Candidate; Candidate.MakeZero(theWeyl.KillingFormMatrix.NumRows);
@@ -108,10 +115,10 @@ bool minimalRelationsProverState::CanBeShortened
 		Candidate.Add(tempRoot);
   }
   bool bothSelsAreMaximal =
-    ( selBetas.CardinalitySelectionWithMultiplicities() == selBetas.MaxCardinalityWithMultiplicities()) &&
-    ( selAlphas.CardinalitySelectionWithMultiplicities()== selAlphas.MaxCardinalityWithMultiplicities()) ;
+    ( selBetas.CardinalitySelectionWithoutMultiplicities() == theRelation.Betas.size ) && ( selAlphas.CardinalitySelectionWithoutMultiplicities()== theRelation.Alphas.size) ;
+  bool bothSelsHaveZeroesAndOnes= selBetas.HasMultiplicitiesZeroAndOneOnly() && selAlphas.HasMultiplicitiesZeroAndOneOnly();
   if (Candidate.IsEqualToZero())
-  { if (	bothSelsAreMaximal)
+  { if (	bothSelsAreMaximal && selBetas.CardinalitySelectionWithMultiplicities()!=0)
 			return false;
     return true;
   }
@@ -122,12 +129,12 @@ bool minimalRelationsProverState::CanBeShortened
       if (this->NilradicalRoots.ContainsObject(Candidate))
 				return true;
     }
-    if( selAlphas.CardinalitySelectionWithMultiplicities()>0 || selBetas.CardinalitySelectionWithMultiplicities()>1)
+    if(bothSelsHaveZeroesAndOnes && ( selAlphas.CardinalitySelectionWithMultiplicities()>0 || selBetas.CardinalitySelectionWithMultiplicities()>1))
     { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
       if (this->NilradicalRoots.ContainsObject(MinusCandidate))
 				return true;
     }
-    if (selAlphas.elements.size>1 || ( AssumeGlobalMinimalityRHS && selBetas.elements.size>0 && selAlphas.elements.size==1 ))
+    if(bothSelsHaveZeroesAndOnes && (selAlphas.elements.size>1 || ( AssumeGlobalMinimalityRHS && selBetas.elements.size>0 && selAlphas.elements.size==1 )))
     { this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
       if (this->BKSingularGmodLRoots.ContainsObject(Candidate))
         return true;
@@ -241,11 +248,13 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 		bool addFirstAlpha=true;
 		if (this->MinNumDifferentBetas==-1 || this->MinNumDifferentBetas<=this->TheObjects[index].PartialRelation.Betas.size)
     { for (int i=0;i<theWeyl.RootSystem.size;i++)
-      { this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+      { this->TestAddingExtraRoot
+					( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive,false);
         this->MakeProgressReportChildStates ( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
       }
       for (int i=0; i<theWeyl.RootSystem.size; i++)
-      {	this->TestAddingExtraRoot ( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+      {	this->TestAddingExtraRoot
+					( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive,false);
         this->MakeProgressReportChildStates
           ( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
       }
@@ -319,7 +328,7 @@ void minimalRelationsProverStates::RecursionStepFixedK (WeylGroup& theWeyl, Glob
 
 void minimalRelationsProverStates::TestAddingExtraRoot
 	( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot,
-    bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
+    bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive, bool HavingFixedK)
 { minimalRelationsProverState newState;
   bool tempBool;
   Rational tempRat=theWeyl.RootScalarKillingFormMatrixRoot(theRoot, normalSeparatingCones);
@@ -345,13 +354,16 @@ void minimalRelationsProverStates::TestAddingExtraRoot
 		else
 			newState.PartialRelation.Betas.AddObjectOnTop(theRoot);
     newState.theChoicesWeMake.AddObjectOnTop(theRoot);
-		this->ExtensionStep(Index, theWeyl, TheGlobalVariables, newState);
+    if (HavingFixedK)
+			this->ExtensionStepFixedK(Index, theWeyl, TheGlobalVariables, newState);
+		else
+			this->ExtensionStep(Index, theWeyl, TheGlobalVariables, newState);
   }
 }
 
 
 void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverState& newState)
-{ newState.ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl,this->flagAssumeGlobalMinimalityRHS);
+{ newState.ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS, false);
   if (newState.StateIsPossible)
   { int currentNewIndex=this->size;
     if (this->AddObjectOnTopNoRepetitionOfObject(index, newState, theWeyl, TheGlobalVariables))

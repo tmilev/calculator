@@ -1201,12 +1201,12 @@ void ComputationSetup::Run()
     if (currentIndex>=0)
       this->theProver.TheObjects[currentIndex].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
     if (this->theProver.theIndexStack.size>0)
-		{//	this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
-      this->theProver.theK.ComputeDebugString(*tgv);
-      IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
-      IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-      if (tgv->FeedDataToIndicatorWindowDefault!=0)
-        tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+		{	this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
+      //this->theProver.theK.ComputeDebugString(*tgv);
+      //IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
+      //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+      //if (tgv->FeedDataToIndicatorWindowDefault!=0)
+       // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 		}
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
@@ -11725,8 +11725,14 @@ int ::SelectionWithMaxMultiplicity::CardinalitySelectionWithMultiplicities()
 	return result;
 }
 
-void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality
-	(int Cardinality)
+bool SelectionWithMaxMultiplicity::HasMultiplicitiesZeroAndOneOnly()
+{	for(int i=0;i<this->elements.size;i++)
+		if (this->Multiplicities.TheObjects[elements.TheObjects[i]]>1)
+			return false;
+	return true;
+}
+
+void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinality)
 { if (Cardinality<1 || Cardinality>this->MaxMultiplicity*this->Multiplicities.size)
 		return;
 	if (this->CardinalitySelectionWithMultiplicities()!=Cardinality)
@@ -14747,27 +14753,25 @@ bool roots::GetNormalSeparatingCones
 	return result;
 }
 
-bool roots::ConesIntersect
-	(	GlobalVariables& theGlobalVariables, roots& NilradicalRoots, roots& Ksingular, int theDimension)
+bool roots::ConesIntersect(	GlobalVariables& theGlobalVariables, roots& StrictCone, roots& NonStrictCone, int theDimension)
 {	MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
-	if (Ksingular.size==0)
-		return true;
-	int numCols= NilradicalRoots.size + Ksingular.size;
+	if (StrictCone.size==0)
+		return false;
+	int numCols= StrictCone.size + NonStrictCone.size;
 	matA.init((short)theDimension+1, (short)numCols);
 	matb.init((short)theDimension+1,1);
 	matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
-	for (int i=0;i<NilradicalRoots.size;i++)
+	for (int i=0;i<StrictCone.size;i++)
 	{	for (int k=0;k<theDimension;k++)
-			matA.elements[k][i].Assign(NilradicalRoots.TheObjects[i].TheObjects[k]);
+			matA.elements[k][i].Assign(StrictCone.TheObjects[i].TheObjects[k]);
 		matA.elements[theDimension][i].MakeOne();
 	}
-	for (int i=0;i<Ksingular.size;i++)
-	{ int currentCol=i+NilradicalRoots.size;
+	for (int i=0;i<NonStrictCone.size;i++)
+	{ int currentCol=i+StrictCone.size;
 		for (int k=0;k<theDimension;k++)
-		{	matA.elements[k][currentCol].Assign
-				(Ksingular.TheObjects[i].TheObjects[k]);
+		{	matA.elements[k][currentCol].Assign(NonStrictCone.TheObjects[i].TheObjects[k]);
 			matA.elements[k][currentCol].Minus();
 		}
 		matA.elements[theDimension][currentCol].MakeZero();
@@ -14776,15 +14780,12 @@ bool roots::ConesIntersect
 	//matb.ComputeDebugString();
 	//matX.ComputeDebugString();
 	return MatrixLargeRational
-		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-			(matA,matb,matX,theGlobalVariables);
+		::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA,matb,matX,theGlobalVariables);
 }
 
 bool rootSubalgebra::ConeConditionHolds
-	( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
-		roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations)
-{	if (roots::ConesIntersect
-				(	theGlobalVariables, NilradicalRoots, Ksingular, this->AmbientWeyl.KillingFormMatrix.NumRows))
+	( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations)
+{	if (roots::ConesIntersect(	theGlobalVariables, NilradicalRoots, Ksingular, this->AmbientWeyl.KillingFormMatrix.NumRows))
 	{	if (doExtractRelations)
         this->ExtractRelations
           ( theGlobalVariables.matConeCondition1, theGlobalVariables.matConeCondition3,NilradicalRoots, owner,
@@ -14795,7 +14796,7 @@ bool rootSubalgebra::ConeConditionHolds
 }
 
 bool rootSubalgebra::ConeConditionHolds
-  ( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations)
+	( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations)
 { roots& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots;
 	roots& Ksingular=theGlobalVariables.rootsConeConditionHolds2;
 	if (this->kModules.size==0)
@@ -15654,7 +15655,7 @@ void rootSubalgebra::ElementToString ( std::string &output, bool useLatex, bool 
 		out << "<br>\n";
 	if (useLatex)
 		out<<"$C(\\mathfrak{k})_{ss}$: ";
-	if (useHtml)
+	else
     out <<"C(k)_{ss}: ";
 	out	 <<tempS;
 	//int CartanPieceSize=

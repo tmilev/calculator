@@ -161,14 +161,13 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 	for (int i=0;i<this->nonLNonSingularRoots.size;i++)
 		if (this->SumWithNoPosRootIsARoot(this->nonLNonSingularRoots.TheObjects[i],theWeyl))
 		{ this->flagNeedsAdditionOfPositiveKroots=true;
-      this->nonLNonSingularRootsInNeedOfPosKroots.AddObjectOnTopNoRepetitionOfObject
-				(this->nonLNonSingularRoots.TheObjects[i]);
+      this->nonLNonSingularRootsInNeedOfPosKroots.AddObjectOnTopNoRepetitionOfObject(this->nonLNonSingularRoots.TheObjects[i]);
 		}
 	return true;
 }
 
 bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
-  ( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
+	( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS, bool usingFixedK)
 { this->StateIsPossible=true;
 //  this->StateIsDubious=false;
   this->NilradicalRoots.AddRootSnoRepetition(this->PartialRelation.Betas);
@@ -177,15 +176,12 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
   SelectionWithMaxMultiplicity selBetas, selAlphas;
   selBetas.initMe2(this->PartialRelation.Betas.size,2);
   selAlphas.initMe2(this->PartialRelation.Alphas.size,2);
-  int NumAlphas= MathRoutines::KToTheNth
-		(selAlphas.MaxMultiplicity+1,this->PartialRelation.Alphas.size);
-  int NumBetas=MathRoutines::KToTheNth
-		(selBetas.MaxMultiplicity+1,this->PartialRelation.Betas.size);
+  int NumAlphas= MathRoutines::KToTheNth(selAlphas.MaxMultiplicity+1,this->PartialRelation.Alphas.size);
+  int NumBetas=MathRoutines::KToTheNth(selBetas.MaxMultiplicity+1,this->PartialRelation.Betas.size);
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
   for (int i=0;i<NumAlphas;i++)
   {	for (int j=0;j<NumBetas;j++)
-		{ if (this->CanBeShortened
-            (this->PartialRelation, selAlphas,selBetas,theWeyl,AssumeGlobalMinimalityRHS))
+		{ if (this->CanBeShortened(this->PartialRelation, selAlphas,selBetas,theWeyl,AssumeGlobalMinimalityRHS))
       {	this->StateIsPossible=false;
         return false;
       }
@@ -195,15 +191,14 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
     selAlphas.IncrementSubset();
   }
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
-  if (!this->ComputeCommonSenseImplicationsReturnFalseIfContradiction(theWeyl, TheGlobalVariables))
+	if (!this->ComputeCommonSenseImplicationsReturnFalseIfContradiction(theWeyl, TheGlobalVariables,usingFixedK))
 	{	this->StateIsPossible=false;
-		return false;
-  }
+			return false;
+	}
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
  	roots possibleAlphas, possibleBetas;
 	this->GetPossibleAlphasAndBetas(possibleAlphas, possibleBetas, theWeyl);
-	if (!roots::ConesIntersect
-				(	TheGlobalVariables,possibleAlphas,possibleBetas,theWeyl.KillingFormMatrix.NumRows))
+	if (!roots::ConesIntersect(TheGlobalVariables, possibleBetas, possibleAlphas, theWeyl.KillingFormMatrix.NumRows))
 	{	this->StateIsPossible=false;
 		return false;
 	}
@@ -689,7 +684,7 @@ void minimalRelationsProverStates::GenerateStartingState( ComputationSetup& theS
     this->MinNumDifferentBetas=2;
     */
     this->AddObjectOnTop(tempState);
-    this->LastObject()->ComputeStateReturnFalseIfDubious(TheGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS);
+    this->LastObject()->ComputeStateReturnFalseIfDubious(TheGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS,false);
     this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, this->theWeylGroup);
     this->LastObject()->ComputeDebugString(this->theWeylGroup,TheGlobalVariables);
     this->theIndexStack.AddObjectOnTop(0);

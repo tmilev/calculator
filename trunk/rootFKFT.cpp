@@ -167,7 +167,7 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 }
 
 bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
-	( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS, bool usingFixedK)
+	( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsPossible=true;
 //  this->StateIsDubious=false;
   this->NilradicalRoots.AddRootSnoRepetition(this->PartialRelation.Betas);
@@ -191,9 +191,9 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
     selAlphas.IncrementSubset();
   }
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	if (!this->ComputeCommonSenseImplicationsReturnFalseIfContradiction(theWeyl, TheGlobalVariables,usingFixedK))
+	if (! this->ComputeCommonSenseImplicationsReturnFalseIfContradiction(theWeyl, TheGlobalVariables))
 	{	this->StateIsPossible=false;
-			return false;
+		return false;
 	}
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
  	roots possibleAlphas, possibleBetas;
@@ -206,8 +206,21 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious
   return true;
 }
 
-void minimalRelationsProverState::MakeProgressReportCanBeShortened
-	(int checked, int outOf, GlobalVariables &theGlobalVariables)
+void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables &theGlobalVariables)
+{ std::stringstream out5;
+	out5<<checked+1 << " checked out of " << outOf;
+	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
+	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
+	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+}
+
+void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables &theGlobalVariables)
 { std::stringstream out5;
 	out5<<checked+1 << " checked out of " << outOf;
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
@@ -261,8 +274,7 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
   this->nonLNonSingularsAleviatedByChosenPosKRoots=right.nonLNonSingularsAleviatedByChosenPosKRoots;
 }
 
-void minimalRelationsProverStates::MakeProgressReportCurrentState
-	(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStates::MakeProgressReportCurrentState(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out; std::string tempS;
   out << this->TheObjects[index].DebugString;
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
@@ -273,8 +285,32 @@ void minimalRelationsProverStates::MakeProgressReportCurrentState
 	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 }
 
-void minimalRelationsProverStates::MakeProgressReportIsos
-	(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStatesFixedK::MakeProgressReportCurrentState(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{	std::stringstream out; std::string tempS;
+  out << this->TheObjects[index].DebugString;
+  out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
+  IndicatorWindowGlobalVariables.StatusString1=out.str();
+	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+}
+
+void minimalRelationsProverStates::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{	std::stringstream out3;
+	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "
+          << numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
+	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
+	//::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+}
+
+void minimalRelationsProverStatesFixedK::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out3;
 	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "
           << numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
@@ -305,8 +341,38 @@ void minimalRelationsProverStates::MakeProgressReportChildStates
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
 
-void minimalRelationsProverStates::MakeProgressReportStack
-	( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStates::MakeProgressReportStack( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+{	std::stringstream out1, out2, out3, out4;
+	std::stringstream* tempOut1=&out1;
+	for (int i=0;i<this->theIndexStack.size;i++)
+	{ int currentIndex=this->theIndexStack.TheObjects[i];
+	  (*tempOut1)	<< currentIndex << ": " << this->TheObjects[currentIndex].activeChild+1
+                << " of "<< this->TheObjects[currentIndex].PossibleChildStates.size	<<"; ";
+		if (i==4)	tempOut1=&out2;
+		if (i==8)	tempOut1=&out3;
+	//	if (i==12)	tempOut1=&out4;
+	}
+	if (theIndexStack.size!=0)
+    (*tempOut1)
+				<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size
+        <<" alphas + ... = "
+        <<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size
+        <<" betas + ...";
+	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
+	::IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
+	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
+//	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
+	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+}
+
+void minimalRelationsProverStatesFixedK::MakeProgressReportStack	( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out1, out2, out3, out4;
 	std::stringstream* tempOut1=&out1;
 	for (int i=0;i<this->theIndexStack.size;i++)
@@ -684,7 +750,7 @@ void minimalRelationsProverStates::GenerateStartingState( ComputationSetup& theS
     this->MinNumDifferentBetas=2;
     */
     this->AddObjectOnTop(tempState);
-    this->LastObject()->ComputeStateReturnFalseIfDubious(TheGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS,false);
+    this->LastObject()->ComputeStateReturnFalseIfDubious(TheGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS);
     this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, this->theWeylGroup);
     this->LastObject()->ComputeDebugString(this->theWeylGroup,TheGlobalVariables);
     this->theIndexStack.AddObjectOnTop(0);

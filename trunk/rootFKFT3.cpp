@@ -103,8 +103,10 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, TheGlobalVariables, 20000, true);
   this->AddObjectOnTop(tempState);
   int numParabolics=MathRoutines::TwoToTheNth(this->theK.SimpleBasisCentralizerRoots.size);
+  //this->theIsos.simpleGenerators.ComputeDebugString();
+  //this->theK.SimpleBasisCentralizerRoots.ComputeDebugString();
   Selection selCentralizerNilradical;
-  selCentralizerNilradical.init(numParabolics);
+  selCentralizerNilradical.init(this->theK.SimpleBasisCentralizerRoots.size);
   roots InitialCentralizerNilradicalChoicePositiveSimpleRoots, tempRoots, tempRoots2;
   for (int i=0; i<numParabolics; i++)
   { tempState.Assign(this->TheObjects[0]);
@@ -132,6 +134,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
     selCentralizerNilradical.incrementSelection();
   }
 	this->theIndexStack.AddObjectOnTop(0);
+	this->TheObjects[0].activeChild=-1;
   this->MakeProgressReportCurrentState(0,TheGlobalVariables, this->theWeylGroup);
   this->flagComputationIsInitialized=true;
 }
@@ -326,6 +329,17 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, roots& input, roots& o
 void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { int index= *this->theIndexStack.LastObject();
 	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+	if (this->TheObjects[index].PartialRelation.Alphas.size==0 && this->TheObjects[index].PartialRelation.Betas.size==0)
+	{	::minimalRelationsProverStateFixedK theNewState;
+		for (int i=0;i<theWeyl.RootSystem.size;i++)
+		{ theNewState.Assign(this->TheObjects[index]);
+			theNewState.PartialRelation.Alphas.AddObjectOnTop(theWeyl.RootSystem.TheObjects[i]);
+			theNewState.theChoicesWeMake.AddObjectOnTop(theWeyl.RootSystem.TheObjects[i]);
+			this->ExtensionStepFixedK(index, theWeyl, TheGlobalVariables, theNewState);
+			this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		}
+		return;
+	}
 	if (!this->TheObjects[index].StateIsPossible || this->TheObjects[index].StateIsComplete)
 		return;
 	root theBeta, theAlpha, theMinusAlpha, theMinusBeta;

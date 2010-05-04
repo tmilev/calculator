@@ -1176,24 +1176,21 @@ void ComputationSetup::Run()
   if (this->flagUsingProverDoNotCallOthers)
   { GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
     if (!this->flagProverDoingFullRecursion)
-    { if (!this->theProver.flagComputationIsInitialized)
-      { if(!this->flagProverUseFixedK)
-          this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
-        else
-          this->theProverFixedK.GenerateStartingStatesFixedK(*this, *tgv, 'E',8);
-      } else
-      { if(!this->flagProverUseFixedK)
+    { if (!this->flagProverUseFixedK && !this->theProver.flagComputationIsInitialized)
+				this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
+			if(!this->flagProverUseFixedK && this->theProver.flagComputationIsInitialized )
           this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
-        else
-          this->theProverFixedK.RecursionStepFixedK(this->theProver.theWeylGroup, *tgv);
-      }
+      if (!this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
+				this->theProverFixedK.GenerateStartingStatesFixedK(*this, *tgv, 'E',8);
+      if (this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
+				this->theProverFixedK.RecursionStepFixedK(this->theProverFixedK.theWeylGroup, *tgv);
     } else
     { if(!this->flagProverUseFixedK)
       { this->theProver.GenerateStartingState(*this,*tgv, 'E',8);
         this->theProver.TheFullRecursion(this->theProver.theWeylGroup, *tgv);
       } else
       { this->theProverFixedK.GenerateStartingStatesFixedK(*this,*tgv, 'E', 8);
-        this->theProverFixedK.TheFullRecursionFixedK(this->theProver.theWeylGroup, *tgv);
+        this->theProverFixedK.TheFullRecursionFixedK(this->theProverFixedK.theWeylGroup, *tgv);
       }
     }
     if(!this->flagProverUseFixedK)

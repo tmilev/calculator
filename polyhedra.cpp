@@ -1181,20 +1181,20 @@ void ComputationSetup::Run()
       { if(!this->flagProverUseFixedK)
           this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
         else
-          this->theProver.GenerateStartingStatesFixedK(*this, *tgv, 'E',8);
+          this->theProverFixedK.GenerateStartingStatesFixedK(*this, *tgv, 'E',8);
       } else
       { if(!this->flagProverUseFixedK)
           this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
         else
-          this->theProver.RecursionStepFixedK(this->theProver.theWeylGroup, *tgv);
+          this->theProverFixedK.RecursionStepFixedK(this->theProver.theWeylGroup, *tgv);
       }
     } else
-    { if(!this->flagProverDoingFullRecursion)
+    { if(!this->flagProverUseFixedK)
       { this->theProver.GenerateStartingState(*this,*tgv, 'E',8);
         this->theProver.TheFullRecursion(this->theProver.theWeylGroup, *tgv);
       } else
-      { this->theProver.GenerateStartingStatesFixedK(*this,*tgv, 'E', 8);
-        this->theProver.TheFullRecursionFixedK(this->theProver.theWeylGroup, *tgv);
+      { this->theProverFixedK.GenerateStartingStatesFixedK(*this,*tgv, 'E', 8);
+        this->theProverFixedK.TheFullRecursionFixedK(this->theProver.theWeylGroup, *tgv);
       }
     }
     int currentIndex=*this->theProver.theIndexStack.LastObject();

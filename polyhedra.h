@@ -746,10 +746,10 @@ public:
 	static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 		(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
 	static void ComputePotentialChangeGradient
-	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient, 
+	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient,
 		bool &hasAPotentialLeavingVariable);
 	static void GetMaxMovementAndLeavingVariableRow
-	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, 
+	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA,
 		MatrixLargeRational& matX, Selection& BaseVariables);
 	int FindPositiveLCMCoefficientDenominatorsTruncated();
 	int FindPositiveGCDCoefficientNumeratorsTruncated();
@@ -1717,7 +1717,7 @@ public:
 	//If the strict cone has zero elements, the function returns false.
 	static bool ConesIntersect(	GlobalVariables& theGlobalVariables,  roots& StrictCone, roots& NonStrictCone, int theDimension);
 	static bool GetNormalSeparatingCones
-		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, roots& coneNonNegativeCoeffs, 
+		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, roots& coneNonNegativeCoeffs,
 			root& outputNormal);
 	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
@@ -2471,8 +2471,8 @@ void ListObjectPointers<Object>::KillAllElements()
 {	for (int i =0;i<this->size;i++)
 	{	delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
-	if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+    if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
+    if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		this->TheObjects[i]=0;
 	}
@@ -2504,13 +2504,13 @@ void CopyOntoObject(ListObjectPointers<Object>* FromList)
 
 template <class Object>
 void ListObjectPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
-{	for (int i =0; i<this->size;i++)
-	{	if (o==this->TheObjects[i])
-		{	this->TheObjects[i]=this->TheObjects[this->size-1];
-			this->size--;
-			i--;
-		}
-	}
+{ for (int i =0; i<this->size;i++)
+  { if (o==this->TheObjects[i])
+    { this->TheObjects[i]=this->TheObjects[this->size-1];
+      this->size--;
+      i--;
+    }
+  }
 };
 
 class rootsCollection: public ListBasicObjects<roots>
@@ -2530,7 +2530,7 @@ public:
 	std::string DebugString;
 	void AddRootsOnTopHash(roots& input)
 	{ for (int i=0;i<input.size;i++)
-			this->AddObjectOnTopHash(input.TheObjects[i]);
+		this->AddObjectOnTopHash(input.TheObjects[i]);
 	};
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
@@ -6316,9 +6316,137 @@ public:
   void MakeSl2ProgressReportNumCycles(	int progress, int outOf,	GlobalVariables& theGlobalVariables);
 };
 
+class minimalRelationsProverStatesFixedK;
+
+
+class minimalRelationsProverStateFixedK
+{
+public:
+  std::string DebugString;
+  static int ProblemCounter;
+  bool flagAnErrorHasOccurredTimeToPanic;
+  void ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons);
+  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+  {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);
+  };
+  bool flagNeedsAdditionOfPositiveKroots;
+  root currentSeparatingNormalEpsilonForm;
+  roots theChoicesWeMake;
+  roots NilradicalRoots;
+  roots nonNilradicalRoots;
+  roots ChosenPositiveKroots;
+  roots nonLNonSingularsAleviatedByChosenPosKRoots;
+  roots PositiveKroots;
+  roots nonPositiveKRoots;
+  roots nonKRoots;
+  roots BKSingularGmodLRoots;
+  roots nonBKSingularGmodLRoots;
+  roots nonAlphas;
+  roots nonBetas;
+  roots nonLRoots;
+  roots nonLNonSingularRoots;
+  roots nonLNonSingularRootsInNeedOfPosKroots;
+//  roots nonBKsingularRoots;
+	//roots UndecidedRoots;
+  coneRelation PartialRelation;
+  MatrixLargeRational theScalarProducts;
+  bool StateIsPossible;
+  bool StateIsComplete;
+  //bool StateIsDubious;
+  ListBasicObjects<int> PossibleChildStates;
+  ListBasicObjects<int> ImpossibleChildStates;
+  ListBasicObjects<int> CompleteChildStates;
+  int activeChild;
+  minimalRelationsProverStatesFixedK* owner;
+  bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void GetNumberScalarProductsData
+		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
+      int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	bool Root1IsGreaterThanRoot2	(	int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
+  void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void ComputeScalarProductsMatrix
+    (	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
+  bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS, bool usingFixedK);
+  bool CanBeShortened
+    ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
+  bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
+  void Assign(const minimalRelationsProverStateFixedK& right);
+	bool RootIsGoodForPreferredSimpleRoot
+		(	root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
+	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
+	bool RootIsGoodForProblematicIndex
+		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
+	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
+  bool ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
+	bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
+  bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void MakeAlphaBetaMatrix(MatrixLargeRational& output);
+  void operator=(const minimalRelationsProverStateFixedK& right){this->Assign(right);};
+  minimalRelationsProverStateFixedK();
+  void MakeProgressReportCanBeShortened( int checked, int outOf, GlobalVariables& theGlobalVariables);
+};
+
+class minimalRelationsProverStatesFixedK: public ListBasicObjects<minimalRelationsProverStateFixedK>
+{
+public:
+  std::string DebugString;
+  static int ProblemCounter;
+  int MinNumDifferentBetas;
+  roots PreferredDualBasis;
+  roots PreferredDualBasisEpsilonCoords;
+  //int RecursionDepth;
+  ListBasicObjects<int> theIndexStack;
+  rootSubalgebra isomorphismComputer;
+  MatrixLargeRational invertedCartan;
+  WeylGroup theWeylGroup;
+  rootSubalgebra theK;
+  ReflectionSubgroupWeylGroup theIsos;
+  rootsCollection PrecomputedIsoDomains;
+  rootsCollection PrecomputedIsoRanges;
+  bool flagAssumeGlobalMinimalityRHS;
+  bool flagComputationIsInitialized;
+ 	bool ExtendToIsomorphismRootSystemFixedK( minimalRelationsProverStateFixedK& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
+  bool flagAnErrorHasOccurredTimeToPanic;
+  void PrepareKIsos();
+  void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void GetIsoTypicComponents
+    ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl,
+      GlobalVariables& TheGlobalVariables);
+  void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);
+  };
+  bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
+  bool AddObjectOnTopNoRepetitionOfObjectFixedK( int ParentIndex, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void GenerateStartingStatesFixedK ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
+  void RecursionStepFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ExtensionStepFixedK (int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState);
+	void TestAddingExtraRootFixedK
+		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot,
+			root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
+  bool GetNormalSeparatingConesFromPreferredBasis
+    ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
+      bool& oneBetaIsPositive );
+	bool GetSeparatingRootIfExistsFromSet
+		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output,
+      WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
+  void RemoveDoubt(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+	bool StateIsEqualTo( minimalRelationsProverStateFixedK& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportIsos( int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportCurrentState( int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportChildStates( int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  minimalRelationsProverStatesFixedK()
+  { this->flagComputationIsInitialized=false;
+    MinNumDifferentBetas=-1;
+  };
+};
+
 class minimalRelationsProverStates;
-
-
 class minimalRelationsProverState
 {
 public:
@@ -6367,10 +6495,9 @@ public:
   void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix
     (	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
-  bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS, bool usingFixedK);
+  bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool CanBeShortened
-    ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
-      bool AssumeGlobalMinimalityRHS);
+    ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
@@ -6380,7 +6507,8 @@ public:
 	bool RootIsGoodForProblematicIndex
 		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
-  bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables, bool usingFixedK);
+  bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
+  bool ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
 	bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
@@ -6409,7 +6537,6 @@ public:
   bool flagAssumeGlobalMinimalityRHS;
   bool flagComputationIsInitialized;
  	bool ExtendToIsomorphismRootSystem( minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
- 	bool ExtendToIsomorphismRootSystemFixedK( minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void PrepareKIsos();
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -6422,23 +6549,16 @@ public:
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
   bool AddObjectOnTopNoRepetitionOfObject( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  bool AddObjectOnTopNoRepetitionOfObjectFixedK( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingState( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
-  void GenerateStartingStatesFixedK ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStep(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void RecursionStepFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void TheFullRecursion (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
-  void ExtensionStepFixedK (int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
 	void TestAddingExtraRoot
-		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, 
-			root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive, bool HavingFixedK);
+		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot,
+			root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
   bool GetNormalSeparatingConesFromPreferredBasis
-    ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,
-      bool& oneBetaIsPositive );
+    ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
 	bool GetSeparatingRootIfExistsFromSet
 		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output,
       WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
@@ -6463,6 +6583,7 @@ public:
 	CombinatorialChamberContainer theChambers;
 	SimpleLieAlgebra theChevalleyConstantComputer;
 	minimalRelationsProverStates theProver;
+	minimalRelationsProverStatesFixedK theProverFixedK;
 	Rational Value;
 	::SltwoSubalgebras theSltwoSubalgebras;
 	std::string ValueString;

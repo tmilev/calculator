@@ -96,6 +96,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   this->theK.genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
   this->theK.ComputeAll();
   this->theK.GenerateAutomorphisms(this->theK, TheGlobalVariables, &this->theIsos, true);
+  this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods,TheGlobalVariables);
   this->theK.ComputeDebugString(TheGlobalVariables);
   this->theIsos.AmbientWeyl.Assign(this->theWeylGroup);
   this->theIsos.simpleGenerators.size=0;
@@ -369,10 +370,16 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 
 bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { root tempRoot;
-	theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots,this->PositiveKroots);
+	rootSubalgebra& kAlg= this->owner->theK;
+	for (int i=0; i<this->theNilradicalModules.CardinalitySelection; i++)
+	{	for(int j=0; j<this->theNilradicalModules.CardinalitySelection; j++)
+		{	int i1= this->theNilradicalModules.elements[i];
+			int i2= this->theNilradicalModules.elements[j];
+			for (int k=0; kAlg.theMultTable.TheObjects[i].TheObjects[j].size;k++)
+				this->theNilradicalModules.AddSelectionAppendNewIndex(kAlg.theMultTable.TheObjects[i].TheObjects[j].TheObjects[k]);
+		}
+	}
   roots& tempRoots=TheGlobalVariables.rootsProverStateComputation2;
-  tempRoots.CopyFromBase(this->PositiveKroots);
-  theWeyl.GenerateRootSubsystem(tempRoots);
   tempRoots.AddListOnTop(this->NilradicalRoots);
   int oldsize= tempRoots.size;
   theWeyl.GenerateAdditivelyClosedSubset(tempRoots, tempRoots);

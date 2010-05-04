@@ -87,8 +87,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 }
 
 bool minimalRelationsProverState::CanBeShortened
-  (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl,
-		bool AssumeGlobalMinimalityRHS)
+  (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 {	//selAlphas.ComputeDebugString();
 	//selBetas.ComputeDebugString();
 	if (selBetas.CardinalitySelectionWithMultiplicities()==0 && selAlphas.CardinalitySelectionWithMultiplicities()==0)
@@ -145,8 +144,102 @@ bool minimalRelationsProverState::CanBeShortened
   return false;
 }
 
-bool minimalRelationsProverStates::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive
-  (int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverStateFixedK::CanBeShortened
+  (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
+{	//selAlphas.ComputeDebugString();
+	//selBetas.ComputeDebugString();
+	if (selBetas.CardinalitySelectionWithMultiplicities()==0 && selAlphas.CardinalitySelectionWithMultiplicities()==0)
+    return false;
+  root Candidate; Candidate.MakeZero(theWeyl.KillingFormMatrix.NumRows);
+  root tempRoot;
+  for(int i=0;i<selBetas.elements.size;i++)
+	{ tempRoot.Assign(theRelation.Betas.TheObjects[selBetas.elements.TheObjects[i]]);
+		tempRoot.MultiplyByInteger(selBetas.Multiplicities.TheObjects[selBetas.elements.TheObjects[i]]);
+		Candidate.Subtract(tempRoot);
+  }
+  for(int i=0;i<selAlphas.elements.size;i++)
+	{ tempRoot.Assign(theRelation.Alphas.TheObjects[selAlphas.elements.TheObjects[i]]);
+		tempRoot.MultiplyByInteger(selAlphas.Multiplicities.TheObjects[selAlphas.elements.TheObjects[i]]);
+		Candidate.Add(tempRoot);
+  }
+  bool bothSelsAreMaximal =
+    ( selBetas.CardinalitySelectionWithoutMultiplicities() == theRelation.Betas.size ) && ( selAlphas.CardinalitySelectionWithoutMultiplicities()== theRelation.Alphas.size) ;
+  bool bothSelsHaveZeroesAndOnes= selBetas.HasMultiplicitiesZeroAndOneOnly() && selAlphas.HasMultiplicitiesZeroAndOneOnly();
+  if (Candidate.IsEqualToZero())
+  { if (	bothSelsAreMaximal && selBetas.CardinalitySelectionWithMultiplicities()!=0)
+			return false;
+    return true;
+  }
+  root MinusCandidate = -Candidate;
+  if (theWeyl.IsARoot(Candidate))
+  { if( !bothSelsAreMaximal)
+    { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+      if (this->NilradicalRoots.ContainsObject(Candidate))
+				return true;
+    }
+    if(bothSelsHaveZeroesAndOnes && ( selAlphas.CardinalitySelectionWithMultiplicities()>0 || selBetas.CardinalitySelectionWithMultiplicities()>1))
+    { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
+      if (this->NilradicalRoots.ContainsObject(MinusCandidate))
+				return true;
+    }
+    if(bothSelsHaveZeroesAndOnes && (selAlphas.elements.size>1 || ( AssumeGlobalMinimalityRHS && selBetas.elements.size>0 && selAlphas.elements.size==1 )))
+    { this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+      if (this->BKSingularGmodLRoots.ContainsObject(Candidate))
+        return true;
+    }
+    if (!bothSelsAreMaximal && selBetas.CardinalitySelectionWithMultiplicities()>0)
+    { this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
+      if (this->BKSingularGmodLRoots.ContainsObject(MinusCandidate))
+        return true;
+    }
+    if (selAlphas.elements.size==1)
+    { this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+      this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
+      this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+      this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
+    }
+  }
+  return false;
+}
+
+bool minimalRelationsProverStates::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{ bool result;
+  int theDimension= theWeyl.KillingFormMatrix.NumRows;
+  if (!this->GetNormalSeparatingConesFromPreferredBasis
+          (index, this->PreferredDualBasis, outputNormal, theWeyl, TheGlobalVariables, result))
+    if(!this->GetNormalSeparatingConesFromPreferredBasis
+          (index, this->TheObjects[index].theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
+      if(!this->GetNormalSeparatingConesFromPreferredBasis
+            (index, this->TheObjects[index].BKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+        if(!this->GetNormalSeparatingConesFromPreferredBasis
+              (index, this->TheObjects[index].NilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+          if(!this->GetNormalSeparatingConesFromPreferredBasis
+               (index, this->TheObjects[index].nonLNonSingularRootsInNeedOfPosKroots, outputNormal, theWeyl, TheGlobalVariables, result))
+            if(!this->GetNormalSeparatingConesFromPreferredBasis
+                 (index, this->TheObjects[index].nonLNonSingularRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+              if (!this->GetNormalSeparatingConesFromPreferredBasis
+                  (index, this->TheObjects[index].nonBKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+                if (!this->GetNormalSeparatingConesFromPreferredBasis
+                    (index, this->TheObjects[index].nonNilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+                  if(!this->GetNormalSeparatingConesFromPreferredBasis
+                        (index, this->TheObjects[index].ChosenPositiveKroots, outputNormal, theWeyl, TheGlobalVariables, result))
+                    if(!this->GetNormalSeparatingConesFromPreferredBasis
+                          (index, this->theWeylGroup.RootSystem, outputNormal, theWeyl, TheGlobalVariables, result))
+                    { root tempRoot;
+                      bool tempBool= roots::GetNormalSeparatingCones
+                        ( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots,
+                          this->TheObjects[index].PartialRelation.Alphas, tempRoot);
+                      assert(tempBool);
+                      this->invertedCartan.ActOnAroot(tempRoot, outputNormal);
+                    }
+	theWeyl.GetEpsilonCoords
+		(outputNormal, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
+	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
+	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+	return result;
+}
+
+bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { bool result;
   int theDimension= theWeyl.KillingFormMatrix.NumRows;
   if (!this->GetNormalSeparatingConesFromPreferredBasis
@@ -481,4 +574,28 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis
   return result;
 }
 
+bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBasis
+  ( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
+{ minimalRelationsProverStateFixedK& theRel=this->TheObjects[theIndex];
+  roots& theAlphas = theRel.PartialRelation.Alphas;
+  roots& theBetas = theRel.PartialRelation.Betas;
+  int firstChoiceSeparated1, firstChoiceSeparated2;
+  root rootCandidate;
+  bool result=false;
+  if(  minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet
+      ( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theBetas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
+  { oneBetaIsPositive=false;
+    output.Assign(rootCandidate);
+    result=true;
+  }
+  if(  minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet
+      ( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
+  { if (!(result && firstChoiceSeparated1<firstChoiceSeparated2))
+    { result=true;
+      oneBetaIsPositive=true;
+      output.Assign(rootCandidate);
+    }
+  }
+  return result;
+}
 

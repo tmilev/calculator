@@ -1,5 +1,6 @@
 #include "polyhedra.h"
 extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
+template < > int ListBasicObjects< minimalRelationsProverStateFixedK>::ListBasicObjectsActualSizeIncrement=10;
 
 int rootSubalgebra::ProblemCounter=0;
 bool rootSubalgebra::GenerateAutomorphisms ( rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly)
@@ -85,7 +86,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   this->flagAssumeGlobalMinimalityRHS=false;
   this->invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
   this->invertedCartan.Invert(TheGlobalVariables);
-  this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
+  //this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
   this->size=0;
   this->theK.AmbientWeyl.Assign(this->theWeylGroup);
   this->theK.genK.SetSizeExpandOnTopNoObjectInit(4);
@@ -226,7 +227,7 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(root& inpu
 }
 
 void minimalRelationsProverStatesFixedK::ExtensionStepFixedK( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState)
-{ newState.ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS, true);
+{ newState.ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
   if (newState.StateIsPossible)
   { int currentNewIndex=this->size;
     if (this->AddObjectOnTopNoRepetitionOfObjectFixedK(index, newState, theWeyl, TheGlobalVariables))
@@ -373,13 +374,10 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
   tempRoots.CopyFromBase(this->PositiveKroots);
   theWeyl.GenerateRootSubsystem(tempRoots);
   tempRoots.AddListOnTop(this->NilradicalRoots);
-  //tempRoots.ComputeDebugString();
   int oldsize= tempRoots.size;
   theWeyl.GenerateAdditivelyClosedSubset(tempRoots, tempRoots);
   for(int i=oldsize;i<tempRoots.size;i++)
 		this->NilradicalRoots.AddObjectOnTop(tempRoots.TheObjects[i]);
-	//tempRoots.ComputeDebugString();
-  //roots& tempRoots2           = TheGlobalVariables.rootsProverStateComputation3;
 	for (int i=0;i<theWeyl.RootSystem.size;i++)
 	{ root& theRoot=theWeyl.RootSystem.TheObjects[i];
 		if (this->nonPositiveKRoots.ContainsObject(theRoot) && this->nonPositiveKRoots.ContainsObject(-theRoot))
@@ -388,10 +386,6 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
 		}
   }
   this->nonKRoots.intersectWith(this->nonNilradicalRoots,this->nonLRoots);
-  for (int i=0;i<this->nonLRoots.size;i++)
-		if (this->IsBKSingularImplied(this->nonLRoots.TheObjects[i], theWeyl))
-      this->BKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(this->nonLRoots.TheObjects[i]);
-//  this->nonBKSingularGmodLRoots.ComputeDebugString();
   this->nonLRoots.intersectWith(this->nonBKSingularGmodLRoots, this->nonLNonSingularRoots);
 	for (int i=0;i<this->NilradicalRoots.size;i++)
 	{ this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(-this->NilradicalRoots.TheObjects[i]);
@@ -404,8 +398,6 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
 		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(this->BKSingularGmodLRoots.TheObjects[i]);
 		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(-this->BKSingularGmodLRoots.TheObjects[i]);
 	}
-  if (!this->SatisfyNonLnonBKSingularRoots(theWeyl, TheGlobalVariables))
-		return false;
   for (int i=0;i<this->PositiveKroots.size;i++)
 	{ this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject( this->PositiveKroots.TheObjects[i]);
 		this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(-this->PositiveKroots.TheObjects[i]);

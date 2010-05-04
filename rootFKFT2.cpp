@@ -242,24 +242,25 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesReturnTrueIfOneBetaIs
 bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { bool result;
   int theDimension= theWeyl.KillingFormMatrix.NumRows;
+  ::minimalRelationsProverStateFixedK& theState= this->TheObjects[index];
   if (!this->GetNormalSeparatingConesFromPreferredBasis
           (index, this->PreferredDualBasis, outputNormal, theWeyl, TheGlobalVariables, result))
     if(!this->GetNormalSeparatingConesFromPreferredBasis
-          (index, this->TheObjects[index].theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
+          (index, theState.theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
       if(!this->GetNormalSeparatingConesFromPreferredBasis
-            (index, this->TheObjects[index].BKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+            (index, theState.BKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
         if(!this->GetNormalSeparatingConesFromPreferredBasis
-              (index, this->TheObjects[index].NilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+              (index, theState.NilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
           if(!this->GetNormalSeparatingConesFromPreferredBasis
-               (index, this->TheObjects[index].nonLNonSingularRootsInNeedOfPosKroots, outputNormal, theWeyl, TheGlobalVariables, result))
+               (index, theState.nonLNonSingularRootsInNeedOfPosKroots, outputNormal, theWeyl, TheGlobalVariables, result))
             if(!this->GetNormalSeparatingConesFromPreferredBasis
-                 (index, this->TheObjects[index].nonLNonSingularRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+                 (index, theState.nonLNonSingularRoots, outputNormal, theWeyl, TheGlobalVariables, result))
               if (!this->GetNormalSeparatingConesFromPreferredBasis
-                  (index, this->TheObjects[index].nonBKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+                  (index, theState.nonBKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
                 if (!this->GetNormalSeparatingConesFromPreferredBasis
-                    (index, this->TheObjects[index].nonNilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+                    (index, theState.nonNilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
                   if(!this->GetNormalSeparatingConesFromPreferredBasis
-                        (index, this->TheObjects[index].ChosenPositiveKroots, outputNormal, theWeyl, TheGlobalVariables, result))
+                        (index, theState.ChosenPositiveKroots, outputNormal, theWeyl, TheGlobalVariables, result))
                     if(!this->GetNormalSeparatingConesFromPreferredBasis
                           (index, this->theWeylGroup.RootSystem, outputNormal, theWeyl, TheGlobalVariables, result))
                     { root tempRoot;

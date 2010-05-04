@@ -443,6 +443,9 @@ public:
 				return false;
 		return true;
 	};
+	bool operator!=(const ListBasicObjects<Object>& other) const
+	{ return !this->IsEqualTo(other);
+  };
 	void ShiftUpExpandOnTop(int StartingIndex);
 	ListBasicObjects();
 	~ListBasicObjects();
@@ -5913,30 +5916,23 @@ public:
 	//returns -1 if the weight/root is not in g/k
 	int GetIndexKmoduleContainingRoot(root& input);
 	bool IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots);
+	bool rootIsInCentralizer(root& input);
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
 	void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
-	bool AttemptTheTripleTrick
-		(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
+	bool AttemptTheTripleTrick(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrickWRTSubalgebra
-		(	coneRelation& theRel, roots& highestWeightsAllowed,
-			roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
+		( coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	void ExtractRelations
-		(	MatrixLargeRational& matA,MatrixLargeRational& matX,
-			roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner,
+		( MatrixLargeRational& matA,MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner,
 			GlobalVariables& theGlobalVariables,roots& Ksingular);
   bool GenerateAutomorphisms
-		(	rootSubalgebra& right, GlobalVariables& theGlobalVariables,
-			ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
-	void MakeGeneratingSingularVectors
-		(coneRelation &theRelation, roots& nilradicalRoots);
+		( rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
+	void MakeGeneratingSingularVectors(coneRelation &theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphismNoCentralizer
-		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
-			int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
-			bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain,
-			roots* additionalRange);
+		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
+			bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange);
   static bool attemptExtensionToIsomorphism
-		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,
-			ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly,
+		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly,
 			WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
@@ -5946,81 +5942,57 @@ public:
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
 	void ComputeCentralizerFromKModulesAndSortKModules();
-	void MatrixToRelation
-		(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX,
-			int theDimension, roots& NilradicalRoots);
-	void GenerateParabolicsInCentralizerAndPossibleNilradicals
-		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
-	void DoKRootsEnumerationRecursively
-		(	int indexEnumeration, GlobalVariables& theGlobalVariables);
-	void MakeProgressReportPossibleNilradicalComputation
-		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
-	void MakeProgressReportGenAutos
-		(	int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
+	void MatrixToRelation(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, int theDimension, roots& NilradicalRoots);
+	void GenerateParabolicsInCentralizerAndPossibleNilradicals (	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+	void DoKRootsEnumerationRecursively(	int indexEnumeration, GlobalVariables& theGlobalVariables);
+	void MakeProgressReportPossibleNilradicalComputation(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+	void MakeProgressReportGenAutos(	int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
-	void ComputeDebugString
-    ( bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
+	void ComputeDebugString( bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 	{ this->ElementToString
       ( this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
   };
 	bool IndexIsCompatibleWithPrevious
-		(	int startIndex, int RecursionDepth,	multTableKmods &multTable, ListBasicObjects<Selection>& impliedSelections,
+		( int startIndex, int RecursionDepth,	multTableKmods &multTable, ListBasicObjects<Selection>& impliedSelections,
 			ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism
-		(	roots& domain, roots& range, GlobalVariables& theGlobalVariables,
-			ReflectionSubgroupWeylGroup* outputAutomorphisms,	roots* additionalDomain, roots* additionalRange);
+		( roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms,
+      roots* additionalDomain, roots* additionalRange);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
-	bool ListHasNonSelectedIndexLowerThanGiven
-		(	int index,ListBasicObjects<int>& tempList, Selection& tempSel);
+	bool ListHasNonSelectedIndexLowerThanGiven(	int index,ListBasicObjects<int>& tempList, Selection& tempSel);
 	void GeneratePossibleNilradicalsRecursive
-		(	GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex,
-			ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner,
-			int indexInOwner);
+    ( GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex, ListBasicObjects<Selection>& impliedSelections,
+      ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+	bool ConeConditionHolds( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
 	bool ConeConditionHolds
-		  ( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
-	bool ConeConditionHolds
-		(	GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
-			roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
-	void PossibleNilradicalComputation
-		(	GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
+		( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
+	void PossibleNilradicalComputation( GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
 	void ElementToStringHeaderFooter
-		( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml,
-      bool includeKEpsCoords);
+		( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
 	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)
 	{ this->ElementToString(output,false,false,false,theGlobalVariables);
 	};
 	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
-	void ElementToString
-		(	std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords,
-			GlobalVariables& theGlobalVariables);
+	void ElementToString( std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
 	void GenerateKmodMultTable
-		(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,
-			ListBasicObjects<int>& oppositeKmods,
-			GlobalVariables& theGlobalVariables);
-	void KmodTimesKmod
-		(	int index1, int index2,ListBasicObjects<int>& oppositeKmods,
-			ListBasicObjects<int> & output);
+    ( ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,	ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
+	void KmodTimesKmod(	int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
 	void ComputeAllButAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
 	void ComputeKModules();
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
-	void ComputeExtremeWeightInTheSameKMod
-		(root& input, root& outputW, bool lookingForHighest);
+	void ComputeExtremeWeightInTheSameKMod(root& input, root& outputW, bool lookingForHighest);
 	inline void operator=(const rootSubalgebra& right);
 	void Assign(const rootSubalgebra& right);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
-	void GetLinearCombinationFromMaxRankRootsAndExtraRoot
-		(bool DoEnumeration, GlobalVariables& theGlobalVariables);
+	void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
-	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2
-		(	GlobalVariables& theGlobalVariables);
+	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2 (	GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
-	bool LinCombToStringDistinguishedIndex
-		(	int distinguished,root& alphaRoot, int coeff, root &linComb,
-			std::string &output);
+	bool LinCombToStringDistinguishedIndex(	int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
 };
 
 class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
@@ -6332,6 +6304,7 @@ public:
   bool flagNeedsAdditionOfPositiveKroots;
   Selection theGmodLmodules;
   Selection theNilradicalModules;
+  ListBasicObjects<int > indicesIsosRespectingInitialNilradicalChoice;
   root currentSeparatingNormalEpsilonForm;
   roots theChoicesWeMake;
   roots NilradicalRoots;
@@ -6363,18 +6336,18 @@ public:
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void GetNumberScalarProductsData
-		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
+		( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix
-    (	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
+    ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
   bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool CanBeShortened
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverStateFixedK& right);
 	bool RootIsGoodForPreferredSimpleRoot
-		(	root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
+		( root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
 	bool RootIsGoodForProblematicIndex
 		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);

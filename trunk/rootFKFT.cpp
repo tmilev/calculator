@@ -354,6 +354,9 @@ void minimalRelationsProverStateFixedK::Assign(const minimalRelationsProverState
   this->CompleteChildStates= right.CompleteChildStates;
   this->activeChild=right.activeChild;
   this->nonLNonSingularsAleviatedByChosenPosKRoots=right.nonLNonSingularsAleviatedByChosenPosKRoots;
+  this->theGmodLmodules.Assign(right.theGmodLmodules);
+  this->theNilradicalModules.Assign(right.theNilradicalModules);
+  this->indicesIsosRespectingInitialNilradicalChoice.CopyFromBase(right.indicesIsosRespectingInitialNilradicalChoice);
 }
 
 void minimalRelationsProverStates::MakeProgressReportCurrentState(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)

@@ -1160,8 +1160,7 @@ void ComputationSetup::DoTheRootSAComputation()
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(),this->WeylGroupLetter, this->WeylGroupIndex,
-      true, true);
+		( *this->theGlobalVariablesContainer->Default(), this->WeylGroupLetter, this->WeylGroupIndex, true, true);
 	//this->theRootSubalgebras.ComputeLProhibitingRelations
 	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
@@ -1197,17 +1196,31 @@ void ComputationSetup::Run()
         this->theProverFixedK.TheFullRecursionFixedK(this->theProver.theWeylGroup, *tgv);
       }
     }
-    int currentIndex=*this->theProver.theIndexStack.LastObject();
-    if (currentIndex>=0)
-      this->theProver.TheObjects[currentIndex].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
-    if (this->theProver.theIndexStack.size>0)
-		{	this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
-      //this->theProver.theK.ComputeDebugString(*tgv);
-      //IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
-      //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-      //if (tgv->FeedDataToIndicatorWindowDefault!=0)
-       // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-		}
+    if(!this->flagProverUseFixedK)
+    { int currentIndex=*this->theProver.theIndexStack.LastObject();
+      if (currentIndex>=0)
+        this->theProver.TheObjects[currentIndex].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
+      if (this->theProver.theIndexStack.size>0)
+      {	this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
+        //this->theProver.theK.ComputeDebugString(*tgv);
+        //IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
+        //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+        //if (tgv->FeedDataToIndicatorWindowDefault!=0)
+         // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+      }
+    } else
+    { int currentIndex=*this->theProverFixedK.theIndexStack.LastObject();
+      if (currentIndex>=0)
+        this->theProverFixedK.TheObjects[currentIndex].ComputeDebugString(this->theProverFixedK.theWeylGroup, *tgv);
+      if (this->theProverFixedK.theIndexStack.size>0)
+      {	this->theProverFixedK.MakeProgressReportCurrentState(*this->theProverFixedK.theIndexStack.LastObject(), *tgv, this->theProverFixedK.theWeylGroup);
+        //this->theProver.theK.ComputeDebugString(*tgv);
+        //IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
+        //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+        //if (tgv->FeedDataToIndicatorWindowDefault!=0)
+         // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+      }
+    }
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;
@@ -14414,7 +14427,7 @@ bool rootSubalgebra::RootsDefineASubalgebra(roots& theRoots)
 	for (int i=0;i<theRoots.size;i++)
 	{ if (!this->IsARoot(theRoots.TheObjects[i]))
 			return false;
-		for (int j=i+1;j<theRoots.size;j++)
+		for (int j=i+1; j<theRoots.size; j++)
 		{ tempRoot.Assign(theRoots.TheObjects[i]);
 			tempRoot.Add(theRoots.TheObjects[j]);
 			if (this->IsARoot(tempRoot))
@@ -14425,30 +14438,42 @@ bool rootSubalgebra::RootsDefineASubalgebra(roots& theRoots)
 	return true;
 }
 
-bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer
-	(Selection& positiveSimpleRootsSel, root& input)
-{	if (input.IsNegativeOrZero())
-		return false;
-	root tempRoot;
-	for (int k=0;k<this->SimpleBasisCentralizerRoots.size;k++)
-	{	tempRoot.Assign(input);
-		tempRoot.Subtract
-			(	this->SimpleBasisCentralizerRoots.TheObjects[k]);
-		if (this->IsARootOrZero(tempRoot))
-		{ if (positiveSimpleRootsSel.selected[k])
-				return true;
-			else
-				return this->rootIsInNilradicalParabolicCentralizer
-					(positiveSimpleRootsSel,tempRoot);
-		}
+bool rootSubalgebra::rootIsInCentralizer(root& input)
+{ root tempRoot;
+  for(int i=0; i<this->SimpleBasisK.size; i++)
+  { tempRoot=input+this->SimpleBasisK.TheObjects[i];
+    if (this->IsARoot(tempRoot))
+      return false;
+    tempRoot=input-this->SimpleBasisK.TheObjects[i];
+    if (this->IsARoot(tempRoot))
+      return false;
+  }
+  return true;
+}
+
+bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input)
+{ root tempRoot;
+	bool found =true;
+	root currentRoot=input;
+	bool foundPositive=false;
+	while(found)
+	{ found=false;
+    for (int k=0; k<this->SimpleBasisCentralizerRoots.size; k++)
+    { tempRoot=currentRoot - this->SimpleBasisCentralizerRoots.TheObjects[k];
+      if (this->IsARoot(tempRoot))
+      { currentRoot.Assign(tempRoot);
+        found=true;
+        if(positiveSimpleRootsSel.selected[k])
+          foundPositive=true;
+      }
+      if (currentRoot.IsEqualToZero())
+        return foundPositive;
+    }
 	}
-	assert(false);
 	return false;
 }
 void rootSubalgebra::GeneratePossibleNilradicalsRecursive
-	(	GlobalVariables &theGlobalVariables,
-		multTableKmods &multTable, int StartIndex,
-		ListBasicObjects<Selection>& impliedSelections,
+	( GlobalVariables &theGlobalVariables, multTableKmods &multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections,
 		ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
 { int RecursionDepth=0;
 	std::string tempSsel, tempSopposite;

@@ -6330,6 +6330,8 @@ public:
   {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);
   };
   bool flagNeedsAdditionOfPositiveKroots;
+  Selection theGmodLmodules;
+  Selection theNilradicalModules;
   root currentSeparatingNormalEpsilonForm;
   roots theChoicesWeMake;
   roots NilradicalRoots;

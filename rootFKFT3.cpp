@@ -107,7 +107,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   kModOrbitRepresentatives.size=0;
   rootsCollection IsoOrbits;
   roots tempRoots;
-  for (int i=0;i<this->theK.kModules.size;i++)
+  /*for (int i=0; i<this->theK.kModules.size; i++)
 		if (kModOrbitInfo.TheObjects[i]==-1)
 		{	this->theIsos.GenerateOrbitReturnFalseIfTruncated(this->theK.kModules.TheObjects[i].TheObjects[0], tempRoots,0);
 			kModOrbitInfo.TheObjects[i]=i;
@@ -115,7 +115,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
 			for (int j=1; j<tempRoots.size;j++)
 				kModOrbitInfo.TheObjects[this->theK.GetIndexKmoduleContainingRoot(tempRoots.TheObjects[j])]=i;
     }
-  for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
+  for (int i=0; i<this->theWeylGroup.RootSystem.size; i++)
   { root& theRoot= this->theWeylGroup.RootSystem.TheObjects[i];
 		if (this->theK.AllRootsK.ContainsObject(theRoot))
 		{	tempState.nonNilradicalRoots.AddObjectOnTop(theRoot);
@@ -133,9 +133,16 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
 				tempState.nonPositiveKRoots.AddObjectOnTop(theRoot);
 				tempState.nonAlphas.AddObjectOnTop(theRoot);
 			}
-  }
+  }*/
   this->AddObjectOnTop(tempState);
-  for(int i=0;i<kModOrbitRepresentatives.size;i++)
+  int numParabolics=MathRoutines::TwoToTheNth(this->theK.SimpleBasisCentralizerRoots.size);
+  Selection selCentralizerNilradical;
+  selCentralizerNilradical.init(numParabolics);
+  for (int i=0; i<numParabolics; i++)
+  {
+    selCentralizerNilradical.incrementSelection();
+  }
+  for(int i=0; i<kModOrbitRepresentatives.size; i++)
   {	root& theHW= this->theK.HighestWeightsGmodK.TheObjects[kModOrbitRepresentatives.TheObjects[i]];
 		tempState.theChoicesWeMake.AddObjectOnTop(theHW);
 		tempState.PartialRelation.Alphas.AddObjectOnTop(theHW);
@@ -372,19 +379,12 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
 { root tempRoot;
 	rootSubalgebra& kAlg= this->owner->theK;
 	for (int i=0; i<this->theNilradicalModules.CardinalitySelection; i++)
-	{	for(int j=0; j<this->theNilradicalModules.CardinalitySelection; j++)
+    for(int j=0; j<this->theNilradicalModules.CardinalitySelection; j++)
 		{	int i1= this->theNilradicalModules.elements[i];
 			int i2= this->theNilradicalModules.elements[j];
-			for (int k=0; kAlg.theMultTable.TheObjects[i].TheObjects[j].size;k++)
-				this->theNilradicalModules.AddSelectionAppendNewIndex(kAlg.theMultTable.TheObjects[i].TheObjects[j].TheObjects[k]);
+			for (int k=0; kAlg.theMultTable.TheObjects[i1].TheObjects[i2].size;k++)
+				this->theNilradicalModules.AddSelectionAppendNewIndex(kAlg.theMultTable.TheObjects[i1].TheObjects[i2].TheObjects[k]);
 		}
-	}
-  roots& tempRoots=TheGlobalVariables.rootsProverStateComputation2;
-  tempRoots.AddListOnTop(this->NilradicalRoots);
-  int oldsize= tempRoots.size;
-  theWeyl.GenerateAdditivelyClosedSubset(tempRoots, tempRoots);
-  for(int i=oldsize;i<tempRoots.size;i++)
-		this->NilradicalRoots.AddObjectOnTop(tempRoots.TheObjects[i]);
 	for (int i=0;i<theWeyl.RootSystem.size;i++)
 	{ root& theRoot=theWeyl.RootSystem.TheObjects[i];
 		if (this->nonPositiveKRoots.ContainsObject(theRoot) && this->nonPositiveKRoots.ContainsObject(-theRoot))

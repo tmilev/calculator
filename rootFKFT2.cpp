@@ -173,7 +173,7 @@ bool minimalRelationsProverStateFixedK::CanBeShortened
   root MinusCandidate = -Candidate;
   if (theWeyl.IsARoot(Candidate))
   { int indexModuleCandidate= this->owner->GetModuleIndex(Candidate);
-		int indexModuleMinusCandidate=this->owner->GetModuleIndex(MinusCandidate); 
+		int indexModuleMinusCandidate=this->owner->GetModuleIndex(MinusCandidate);
 		if (indexModuleCandidate==-1)
 		{ assert(indexModuleMinusCandidate==-1);
 			if (selAlphas.CardinalitySelectionWithMultiplicities()==0&& selBetas.CardinalitySelectionWithMultiplicities()!=0)
@@ -201,7 +201,7 @@ bool minimalRelationsProverStateFixedK::CanBeShortened
 			if (!bothSelsAreMaximal && selBetas.CardinalitySelectionWithMultiplicities()>0)
 				if (this->owner->theK.IsBKhighest(MinusCandidate))
 				{ this->theNilradicalModules.AddSelectionAppendNewIndex(indexModuleMinusCandidate);
-					this->theGmodLmodules.AddSelectionAppendNewIndex(indexModuleCandidate);					
+					this->theGmodLmodules.AddSelectionAppendNewIndex(indexModuleCandidate);
 					if (this->theNilradicalModules.selected[indexModuleCandidate]|| this->theGmodLmodules.selected[indexModuleMinusCandidate])
 						return true;
 				}
@@ -459,9 +459,11 @@ void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK
     if (oneBetaIsPositive==tempRat.IsPositive())
       return;
   if (AddAlpha)
-		tempBool =	this->theK.HighestWeightsGmodK.ContainsObject(theRoot) && !this->TheObjects[Index].theNilradicalModules.selected[indexModule];
+		tempBool =
+      this->theK.HighestWeightsGmodK.ContainsObject(theRoot) && !this->TheObjects[Index].theNilradicalModules.selected[indexModule] &&
+      !this->TheObjects[Index].nonAlphas.ContainsObject(theRoot);
   else
-		tempBool = !this->TheObjects[Index].theGmodLmodules.selected[indexModule];
+		tempBool = !this->TheObjects[Index].theGmodLmodules.selected[indexModule]&& !this->TheObjects[Index].nonAlphas.ContainsObject(theRoot);
 	if (tempBool)
   { newState.Assign(this->TheObjects[Index]);
 		if (AddAlpha)

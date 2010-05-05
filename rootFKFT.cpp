@@ -237,7 +237,7 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( Global
   }
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
 	if (! this->ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(theWeyl, TheGlobalVariables))
-	{	this->StateIsPossible=false;
+	{ this->StateIsPossible=false;
 		return false;
 	}
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
@@ -339,9 +339,11 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
 }
 
 void minimalRelationsProverStateFixedK::Assign(const minimalRelationsProverStateFixedK& right)
-{	this->theNilradicalModules.Assign(right.theNilradicalModules);
+{ this->theNilradicalModules.Assign(right.theNilradicalModules);
   this->theGmodLmodules.Assign(right.theGmodLmodules);
   this->owner=right.owner;
+  this->nonAlphas.CopyFromBase(right.nonAlphas);
+  this->nonBetas.CopyFromBase(right.nonBetas);
   this->PartialRelation=right.PartialRelation;
   this->StateIsPossible=right.StateIsPossible;
   this->StateIsComplete=right.StateIsComplete;
@@ -834,6 +836,20 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out <<"\r\nThe choices we make: "<< tempS;
+  if (!displayEpsilons)
+    this->nonAlphas.ElementToString(tempS);
+  else
+  { theWeyl.GetEpsilonCoords(this->nonAlphas,tempRoots,TheGlobalVariables);
+    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
+  }
+  out <<"\r\nNon alphas: "<< tempS;
+  if (!displayEpsilons)
+    this->nonBetas.ElementToString(tempS);
+  else
+  { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,TheGlobalVariables);
+    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
+  }
+  out <<"\r\nNon betas: "<< tempS;
   if (!this->StateIsPossible)
 		out << "\r\n I am Impossible!";
   if (this->StateIsComplete)

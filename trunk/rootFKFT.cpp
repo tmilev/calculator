@@ -214,9 +214,10 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious( GlobalVariab
 bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsPossible=true;
 //  this->StateIsDubious=false;
-  this->NilradicalRoots.AddRootSnoRepetition(this->PartialRelation.Betas);
-  this->BKSingularGmodLRoots.AddRootSnoRepetition(this->PartialRelation.Alphas);
-  this->PositiveKroots.AddRootSnoRepetition(this->ChosenPositiveKroots);
+  for (int i=0;i<this->PartialRelation.Betas.size;i++)
+		this->theNilradicalModules.AddSelectionAppendNewIndex(this->owner->GetModuleIndex(this->PartialRelation.Betas.TheObjects[i]));
+  for (int i=0;i<this->PartialRelation.Alphas.size;i++)
+		this->theGmodLmodules.AddSelectionAppendNewIndex(this->owner->GetModuleIndex(this->PartialRelation.Alphas.TheObjects[i]));
   SelectionWithMaxMultiplicity selBetas, selAlphas;
   selBetas.initMe2(this->PartialRelation.Betas.size,2);
   selAlphas.initMe2(this->PartialRelation.Alphas.size,2);
@@ -290,11 +291,21 @@ void minimalRelationsProverState::GetPossibleAlphasAndBetas(roots& outputAlphas,
 
 void minimalRelationsProverStateFixedK::GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl)
 {	outputBetas.size=0; outputAlphas.size=0;
-	for (int i=0;i<theWeyl.RootSystem.size;i++)
-	{ if (!this->nonBKSingularGmodLRoots.ContainsObject(theWeyl.RootSystem.TheObjects[i]))
-			outputAlphas.AddObjectOnTop(theWeyl.RootSystem.TheObjects[i]);
-		if (!this->nonBetas.ContainsObject(theWeyl.RootSystem.TheObjects[i]))
-			outputBetas.AddObjectOnTop(theWeyl.RootSystem.TheObjects[i]);
+	for (int i=0; i<this->owner->theK.kModules.size; i++)
+	{	if (!this->theNilradicalModules.selected[i])
+			outputAlphas.AddObjectOnTop(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
+		if (!this->theGmodLmodules.selected[i])
+			outputBetas.AddListOnTop(this->owner->theK.kModules.TheObjects[i]);
+	}
+}
+
+void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl)
+{	outputAGmodLhighest.size=0; outputNilradicalRoots.size=0;
+	for (int i=0; i<this->owner->theK.kModules.size; i++)
+	{	if (this->theNilradicalModules.selected[i])
+			outputNilradicalRoots.AddListOnTop(this->owner->theK.kModules.TheObjects[i]);
+		if (this->theGmodLmodules.selected[i])
+			outputAGmodLhighest.AddObjectOnTop(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
 	}
 }
 
@@ -328,34 +339,20 @@ void minimalRelationsProverState::Assign(const minimalRelationsProverState& righ
 }
 
 void minimalRelationsProverStateFixedK::Assign(const minimalRelationsProverStateFixedK& right)
-{ this->BKSingularGmodLRoots.CopyFromBase(right.BKSingularGmodLRoots);
-  this->nonBKSingularGmodLRoots.CopyFromBase(right.nonBKSingularGmodLRoots);
-  this->PositiveKroots.CopyFromBase(right.PositiveKroots);
-	this->nonPositiveKRoots.CopyFromBase(right.nonPositiveKRoots);
-	this->NilradicalRoots.CopyFromBase(right.NilradicalRoots);
-	this->nonNilradicalRoots.CopyFromBase(right.nonNilradicalRoots);
-	this->nonKRoots.CopyFromBase(right.nonKRoots);
-  this->nonAlphas.CopyFromBase(right.nonAlphas);
-  this->nonBetas.CopyFromBase(right.nonBetas);
+{	this->theNilradicalModules.Assign(right.theNilradicalModules);
+  this->theGmodLmodules.Assign(right.theGmodLmodules);
   this->owner=right.owner;
   this->PartialRelation=right.PartialRelation;
   this->StateIsPossible=right.StateIsPossible;
   this->StateIsComplete=right.StateIsComplete;
   this->theScalarProducts.Assign(right.theScalarProducts);
-  this->ChosenPositiveKroots=right.ChosenPositiveKroots;
   this->theChoicesWeMake.CopyFromBase(right.theChoicesWeMake);
   this->currentSeparatingNormalEpsilonForm.Assign(right.currentSeparatingNormalEpsilonForm);
-  this->nonLRoots.CopyFromBase(right.nonLRoots);
   this->flagNeedsAdditionOfPositiveKroots=right.flagNeedsAdditionOfPositiveKroots;
-  this->nonLNonSingularRoots=right.nonLNonSingularRoots;
-  this->nonLNonSingularRootsInNeedOfPosKroots=right.nonLNonSingularRootsInNeedOfPosKroots;
   this->ImpossibleChildStates= right.ImpossibleChildStates;
   this->PossibleChildStates= right.PossibleChildStates;
   this->CompleteChildStates= right.CompleteChildStates;
   this->activeChild=right.activeChild;
-  this->nonLNonSingularsAleviatedByChosenPosKRoots=right.nonLNonSingularsAleviatedByChosenPosKRoots;
-  this->theGmodLmodules.Assign(right.theGmodLmodules);
-  this->theNilradicalModules.Assign(right.theNilradicalModules);
   this->indicesIsosRespectingInitialNilradicalChoice.CopyFromBase(right.indicesIsosRespectingInitialNilradicalChoice);
 }
 
@@ -816,10 +813,6 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
 		{	theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
 			BetaChildren.AddObjectOnTop(tempRoot);
 		}
-		if (this->ChosenPositiveKroots.size<child.ChosenPositiveKroots.size)
-		{	theWeyl.GetEpsilonCoords(*child.ChosenPositiveKroots.LastObject(),tempRoot,TheGlobalVariables);
-			Kchildren.AddObjectOnTop(tempRoot);
-		}
   }
   //assert(!(AlphaChildren.size+BetaChildren.size+Kchildren.size==0));
 	if (AlphaChildren.size>0)
@@ -834,20 +827,6 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
 	{	Kchildren.ElementToStringEpsilonForm(tempS,false,false,false);
 		out <<"\r\nNew k-roots added next: " <<tempS;
   }
-  if(!displayEpsilons)
-    this->ChosenPositiveKroots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->ChosenPositiveKroots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nPositive choices for K-roots made:" << tempS;
-  if(!displayEpsilons)
-    this->nonLNonSingularRootsInNeedOfPosKroots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonLNonSingularRootsInNeedOfPosKroots, tempRoots, TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nNon-L non-singular roots in need of a K- positive root: " << tempS;
   if (!displayEpsilons)
     this->theChoicesWeMake.ElementToString(tempS);
   else
@@ -855,83 +834,6 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out <<"\r\nThe choices we make: "<< tempS;
-	if (!displayEpsilons)
-    this->BKSingularGmodLRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->BKSingularGmodLRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nBK singular g mod l roots: "<< tempS;
-	if (!displayEpsilons)
-    this->nonAlphas.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonAlphas,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nNon-alphas: "<< tempS;
-  if (!displayEpsilons)
-    this->nonBetas.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nNon-betas: "<< tempS;
-  if (!displayEpsilons)
-    this->nonBKSingularGmodLRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonBKSingularGmodLRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nnon BK-singular g mod l roots: "<< tempS;
-  if (!displayEpsilons)
-    this->NilradicalRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->NilradicalRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out << "\r\nNilradical roots: "<< tempS;
-  if (!displayEpsilons)
-    this->nonNilradicalRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonNilradicalRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out << "\r\nnon-nilradical roots: "<< tempS;
-  if (!displayEpsilons)
-    this->PositiveKroots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->PositiveKroots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out << "\r\nPositive roots of K: "<< tempS;
-  if (!displayEpsilons)
-    this->nonKRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonKRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nNon-roots of K: "<< tempS;
-  if (!displayEpsilons)
-    this->nonPositiveKRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonPositiveKRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nNon-positive roots of K: "<< tempS;
-  if (!displayEpsilons)
-    this->nonLRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonLRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nNon-L roots: "<< tempS;
-  if (!displayEpsilons)
-    this->nonLNonSingularRoots.ElementToString(tempS);
-  else
-  { theWeyl.GetEpsilonCoords(this->nonLNonSingularRoots,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
-  }
-  out <<"\r\nNon-L non-singular roots: "<< tempS;
   if (!this->StateIsPossible)
 		out << "\r\n I am Impossible!";
   if (this->StateIsComplete)
@@ -1091,14 +993,14 @@ void WeylGroup::GenerateRootSubsystem(roots& theRoots)
     }
 }
 
-void WeylGroup::GetEpsilonCoords(roots &input, roots &output, GlobalVariables &theGlobalVariables)
+void WeylGroup::GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
 	tempRoots.SetSizeExpandOnTopNoObjectInit(this->KillingFormMatrix.NumRows);
 	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
 	{ tempRoots.TheObjects[i].MakeZero(this->KillingFormMatrix.NumRows);
 		tempRoots.TheObjects[i].TheObjects[i].MakeOne();
 	}
-	this->GetEpsilonCoordsWRTsubalgebra(tempRoots,input,output,theGlobalVariables);
+	this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output, theGlobalVariables);
 }
 
 void WeylGroup::GetEpsilonCoords(root &input, root &output, GlobalVariables &theGlobalVariables)

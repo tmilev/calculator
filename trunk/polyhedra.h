@@ -504,6 +504,7 @@ public:
 	void ClearTheObjects();
 	void AddObjectOnTopHash(Object& o);
 	bool AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
+	void AddListOnTopNoRepetitionOfObjectHash(const ListBasicObjects<Object>& theList);
 	void PopIndexSwapWithLastHash(int index);
 	//the below returns -1 if it doesn't contain the object,
 	//else returns the object's index
@@ -1679,7 +1680,6 @@ inline root operator-(const root& right)
   return tempRoot;
 };
 
-
 class roots : public ListBasicObjects<root>
 {
 public:
@@ -1692,7 +1692,6 @@ public:
 	int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables);
 	void AddRoot(root& r);
 	void AddIntRoot(intRoot& r);
-	void AddRootS(roots& r);
 	void AddRootSnoRepetition(roots& r);
 	bool AddRootNoRepetition(root& r);
 	bool ContainsOppositeRoots();
@@ -1718,10 +1717,9 @@ public:
 	// The left hand side is allowed to have zero number of summands (hence "non-strict" cone - contains 0)
 	//The right hand side is NOT allowed to have zero number of summands.
 	//If the strict cone has zero elements, the function returns false.
-	static bool ConesIntersect(	GlobalVariables& theGlobalVariables,  roots& StrictCone, roots& NonStrictCone, int theDimension);
+	static bool ConesIntersect(	GlobalVariables& theGlobalVariables,  ListBasicObjects<root>& StrictCone, ListBasicObjects<root>& NonStrictCone, int theDimension);
 	static bool GetNormalSeparatingCones
-		(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs, roots& coneNonNegativeCoeffs,
-			root& outputNormal);
+		(	GlobalVariables& theGlobalVariables, int theDimension, ListBasicObjects<root>& coneStrictlyPositiveCoeffs, ListBasicObjects<root>& coneNonNegativeCoeffs, root& outputNormal);
 	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)
@@ -1743,12 +1741,9 @@ public:
 	void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
 	void ComputeNormal(root& output);
 	bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables& theGlobalVariables);
-	bool ComputeNormalFromSelection
-		(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension);
-	bool ComputeNormalFromSelectionAndExtraRoot
-		(root& output,root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
-	bool ComputeNormalFromSelectionAndTwoExtraRoots
-		(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
+	bool ComputeNormalFromSelection(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension);
+	bool ComputeNormalFromSelectionAndExtraRoot(root& output,root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
+	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
 	bool operator==(const roots& right);
 	void operator = (const roots& right){this->CopyFromBase(right);};
 };
@@ -2336,6 +2331,13 @@ void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
 	if (hashIndex<0) {hashIndex+=this->HashSize;}
 	this->TheHashedArrays[hashIndex].AddObjectOnTop(this->size);
 	this->::ListBasicObjects<Object>::AddObjectOnTop(o);
+}
+
+template <class Object>
+void HashedListBasicObjects<Object>::AddListOnTopNoRepetitionOfObjectHash(const ListBasicObjects<Object>& theList)
+{ this->MakeActualSizeAtLeastExpandOnTop(this->size+theList.size);
+	for (int i=0; i<theList.size; i++)
+		this->AddObjectOnTopNoRepetitionOfObjectHash(theList.TheObjects[i]);	
 }
 
 template <class Object>
@@ -5567,18 +5569,11 @@ public:
 	void MakeF4();
 	void MakeG2();
 	//void GetLongRootLength(Rational& output);
-	void GetEpsilonCoords
-		(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input,
-			root& output, GlobalVariables& theGlobalVariables);
-	void GetEpsilonCoords
-		(	root& input, root& output, GlobalVariables& theGlobalVariables);
-	void GetEpsilonCoords
-		(	roots& input, roots& output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonCoordsWRTsubalgebra
-    (	roots& generators, roots& input, roots& output, GlobalVariables& theGlobalVariables);
-	void GetEpsilonMatrix
-		(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
-			MatrixLargeRational& output);
+	void GetEpsilonCoords(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonCoords(	root& input, root& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonCoords(	ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
+  void GetEpsilonCoordsWRTsubalgebra(	roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonMatrix(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,MatrixLargeRational& output);
 	void ComputeWeylGroup();
 	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
@@ -5917,6 +5912,7 @@ public:
 	int GetIndexKmoduleContainingRoot(root& input);
 	bool IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots);
 	bool rootIsInCentralizer(root& input);
+	bool IsBKhighest(root& input);
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
 	void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrick(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
@@ -5937,7 +5933,7 @@ public:
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
-	bool IsARoot(root& input);
+	bool IsARoot(const root& input);
 	bool IsARootOrZero(root& input);
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
@@ -5949,8 +5945,7 @@ public:
 	void MakeProgressReportGenAutos(	int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString( bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
-	{ this->ElementToString
-      ( this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
+	{ this->ElementToString( this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
   };
 	bool IndexIsCompatibleWithPrevious
 		( int startIndex, int RecursionDepth,	multTableKmods &multTable, ListBasicObjects<Selection>& impliedSelections,
@@ -5967,8 +5962,7 @@ public:
 	bool ConeConditionHolds
 		( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
 	void PossibleNilradicalComputation( GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-	void ElementToStringHeaderFooter
-		( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
+	void ElementToStringHeaderFooter( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
 	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)
 	{ this->ElementToString(output,false,false,false,theGlobalVariables);
 	};
@@ -5977,6 +5971,7 @@ public:
 	bool RootsDefineASubalgebra(roots& theRoots);
 	void GenerateKmodMultTable
     ( ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,	ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
+  void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void KmodTimesKmod(	int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
 	void ComputeAllButAmbientWeyl();
@@ -6307,22 +6302,6 @@ public:
   ListBasicObjects<int > indicesIsosRespectingInitialNilradicalChoice;
   root currentSeparatingNormalEpsilonForm;
   roots theChoicesWeMake;
-  roots NilradicalRoots;
-  roots nonNilradicalRoots;
-  roots ChosenPositiveKroots;
-  roots nonLNonSingularsAleviatedByChosenPosKRoots;
-  roots PositiveKroots;
-  roots nonPositiveKRoots;
-  roots nonKRoots;
-  roots BKSingularGmodLRoots;
-  roots nonBKSingularGmodLRoots;
-  roots nonAlphas;
-  roots nonBetas;
-  roots nonLRoots;
-  roots nonLNonSingularRoots;
-  roots nonLNonSingularRootsInNeedOfPosKroots;
-//  roots nonBKsingularRoots;
-	//roots UndecidedRoots;
   coneRelation PartialRelation;
   MatrixLargeRational theScalarProducts;
   bool StateIsPossible;
@@ -6349,6 +6328,7 @@ public:
 	bool RootIsGoodForPreferredSimpleRoot
 		( root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
+	void GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl);
 	bool RootIsGoodForProblematicIndex
 		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
@@ -6370,6 +6350,7 @@ public:
   roots PreferredDualBasisEpsilonCoords;
   //int RecursionDepth;
   ListBasicObjects<int> theIndexStack;
+  ListBasicObjects<int> IndexKmoduleByRoots;
   rootSubalgebra isomorphismComputer;
   MatrixLargeRational invertedCartan;
   WeylGroup theWeylGroup;
@@ -6382,6 +6363,7 @@ public:
  	bool ExtendToIsomorphismRootSystemFixedK( minimalRelationsProverStateFixedK& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void PrepareKIsos();
+  int GetModuleIndex(root& input);
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GetIsoTypicComponents
     ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl,

@@ -6316,6 +6316,7 @@ public:
   minimalRelationsProverStatesFixedK* owner;
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
   void GetNumberScalarProductsData
 		( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
@@ -6362,6 +6363,7 @@ public:
   rootsCollection PrecomputedIsoRanges;
   bool flagAssumeGlobalMinimalityRHS;
   bool flagComputationIsInitialized;
+  bool flagSearchForOptimalSeparatingRoot;
  	bool ExtendToIsomorphismRootSystemFixedK( minimalRelationsProverStateFixedK& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void PrepareKIsos();
@@ -6376,6 +6378,7 @@ public:
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   bool AddObjectOnTopNoRepetitionOfObjectFixedK( int ParentIndex, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void InvokeExtensionOfState	(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingStatesFixedK ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStepFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -6395,6 +6398,7 @@ public:
   minimalRelationsProverStatesFixedK()
   { this->flagComputationIsInitialized=false;
     MinNumDifferentBetas=-1;
+    this->flagSearchForOptimalSeparatingRoot=true;
   };
 };
 

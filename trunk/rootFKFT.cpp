@@ -214,7 +214,7 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious( GlobalVariab
 bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsPossible=true;
 //  this->StateIsDubious=false;
-  for (int i=0;i<this->PartialRelation.Betas.size;i++)
+	for (int i=0;i<this->PartialRelation.Betas.size;i++)
 		this->theNilradicalModules.AddSelectionAppendNewIndex(this->owner->GetModuleIndex(this->PartialRelation.Betas.TheObjects[i]));
   for (int i=0;i<this->PartialRelation.Alphas.size;i++)
 		this->theGmodLmodules.AddSelectionAppendNewIndex(this->owner->GetModuleIndex(this->PartialRelation.Alphas.TheObjects[i]));
@@ -241,6 +241,19 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( Global
 		return false;
 	}
 //  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+	//A relation consists always of minimally linearly dependent vectors, hence the below check.
+	roots tempRoots;
+	tempRoots.AddListOnTop(this->PartialRelation.Alphas);
+	tempRoots.AddListOnTop(this->PartialRelation.Betas);
+	if (tempRoots.GetRankOfSpanOfElements(TheGlobalVariables)< this->PartialRelation.Betas.size+this->PartialRelation.Alphas.size)
+	{	if (!roots::ConesIntersect(TheGlobalVariables, this->PartialRelation.Betas, this->PartialRelation.Alphas, theWeyl.KillingFormMatrix.NumRows))
+		{	this->StateIsPossible=false;
+			return false;
+		} 
+		this->StateIsComplete=true;
+		return true;
+	}
+
  	roots possibleAlphas, possibleBetas;
 	this->GetPossibleAlphasAndBetas(possibleAlphas, possibleBetas, theWeyl);
 	if (!roots::ConesIntersect(TheGlobalVariables, possibleBetas, possibleAlphas, theWeyl.KillingFormMatrix.NumRows))
@@ -297,6 +310,44 @@ void minimalRelationsProverStateFixedK::GetPossibleAlphasAndBetas(roots& outputA
 		if (!this->theGmodLmodules.selected[i])
 			outputBetas.AddListOnTop(this->owner->theK.kModules.TheObjects[i]);
 	}
+}
+
+bool ::minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl)
+{	bool foundPosBeta=false;
+	bool foundNegBeta=false;
+	bool foundPosAlpha=false;
+	bool foundNegAlpha=false;
+	Rational tempRat;
+	for (int i=0;i<this->PartialRelation.Betas.size;i++)
+	{	tempRat=theWeyl.RootScalarKillingFormMatrixRoot(this->PartialRelation.Betas.TheObjects[i],input);
+		if (tempRat.IsPositive())
+		{	if (foundNegBeta)
+				return false;
+			foundPosBeta=true;
+		}
+		if (tempRat.IsNegative())
+		{	if (foundPosBeta)
+				return false;
+			foundNegBeta=true;
+		}
+	}
+	for (int i=0;i<this->PartialRelation.Alphas.size;i++)
+	{	tempRat=theWeyl.RootScalarKillingFormMatrixRoot(this->PartialRelation.Alphas.TheObjects[i],input);
+		if (tempRat.IsPositive())
+		{	if (foundNegAlpha || foundPosBeta)
+				return false;
+			foundPosAlpha=true;
+		}
+		if (tempRat.IsNegative())
+		{	if (foundPosAlpha || foundNegBeta)
+				return false;
+			foundNegAlpha=true;
+		}
+	}
+	if (!(foundPosBeta|| foundNegBeta || foundPosAlpha || foundNegAlpha))
+		return false;
+	oneBetaIsPositive=foundPosBeta;
+	return true;		
 }
 
 void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl)
@@ -458,7 +509,8 @@ void minimalRelationsProverStates::MakeProgressReportStack( GlobalVariables& The
         <<" betas + ...";
 	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	if (this->theIndexStack.size>8)
+		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
@@ -489,7 +541,8 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportStack	( GlobalVariabl
         <<" betas + ...";
 	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	if (this->theIndexStack.size>8)
+		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.String2NeedsRefresh=true;

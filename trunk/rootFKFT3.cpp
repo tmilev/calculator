@@ -359,30 +359,64 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
   int theDimension=theWeyl.KillingFormMatrix.NumRows;
   Rational tempRat;
   roots theNilradicalRoots, tempRoots;
-  this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl);
+  this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl);  
   if (!roots::ConesIntersect( TheGlobalVariables, theNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, theDimension))
   { root NormalSeparatingCones;
     bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
     this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
     this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
     bool addFirstAlpha=true;
-    for (int i=0; i<theWeyl.RootSystem.size; i++)
-    { this->TestAddingExtraRootFixedK
-				( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-			this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
-    }
-    for (int i=0;i<theWeyl.RootSystem.size;i++)
-    { this->TestAddingExtraRootFixedK
-				( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-      this->MakeProgressReportChildStates
-				( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
-    }
+    if (this->flagSearchForOptimalSeparatingRoot)
+		{	int minNumChildren=theWeyl.RootSystem.size;
+			int oldSize=this->size;
+			for (int i=0;	i<theWeyl.RootsOfBorel.size; i++)
+			{ root& tempNormal= theWeyl.RootsOfBorel.TheObjects[i];
+				if (this->TheObjects[index].IsSeparatingCones(tempNormal, oneBetaIsPositive, theWeyl))
+				{	this->InvokeExtensionOfState(index, minNumChildren, oneBetaIsPositive, tempNormal, true, theWeyl, TheGlobalVariables);
+					if (this->size-oldSize<minNumChildren)
+					{	NormalSeparatingCones.Assign(tempNormal);
+						minNumChildren=this->size-oldSize;
+					}
+					this->size=oldSize;
+					this->TheObjects[index].PossibleChildStates.size=0;
+					if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+					{	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+						std::stringstream out3;
+						out3<< i+1 <<" out of  "<< theWeyl.RootsOfBorel.size<<" normals tested, best hit "<<minNumChildren<<" children";
+						::IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
+						TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+					}
+				}
+			}
+		}
+		this->InvokeExtensionOfState(index,-1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, TheGlobalVariables);
   }
   else
   { this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
     this->TheObjects[index].StateIsComplete=true;
   }
 //	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);*/
+}
+
+void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState
+	(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{	for (int i=0; i<theWeyl.RootSystem.size; i++)
+	{ this->TestAddingExtraRootFixedK
+			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		if (UpperLimitChildren>0)
+			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
+				return;
+	}
+	for (int i=0; i<theWeyl.RootSystem.size; i++)
+	{ this->TestAddingExtraRootFixedK
+			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates
+			( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		if (UpperLimitChildren>0)
+			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
+				return;
+	}
 }
 
 bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)

@@ -256,6 +256,10 @@ bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOne
   theState.GetCertainGmodLhighestAndNilradicalRoots(theCertainGmodLhighestRoots, theCertainNilradicalRoots, theWeyl);
   if(!this->GetNormalSeparatingConesFromPreferredBasis
         (index, theState.theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
+	//	if(!this->GetNormalSeparatingConesFromPreferredBasis
+	//			(index, this->theK.SimpleBasisCentralizerRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+//		if(!this->GetNormalSeparatingConesFromPreferredBasis
+//				(index, this->theK.SimpleBasisK, outputNormal, theWeyl, TheGlobalVariables, result))
 		if(!this->GetNormalSeparatingConesFromPreferredBasis
 				(index, theCertainGmodLhighestRoots, outputNormal, theWeyl, TheGlobalVariables, result))
 			if(!this->GetNormalSeparatingConesFromPreferredBasis

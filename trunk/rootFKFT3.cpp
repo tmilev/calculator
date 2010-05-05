@@ -414,13 +414,15 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
         { this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
           break;
         }
-      for (int j=0;j<this->owner->theK.kModules.size;j++)
+      for (int j=0;j<this->owner->theK.kModules.TheObjects[i].size;j++)
       { root& theRoot= this->owner->theK.kModules.TheObjects[i].TheObjects[j];
         for (int k=0; k<this->PartialRelation.Betas.size; k++)
-          if (theWeyl.IsARoot(this->PartialRelation.Betas.TheObjects[k]+theRoot))
+        {	theRoot.ComputeDebugString();  this->PartialRelation.Betas.TheObjects[k].ComputeDebugString();
+					if (theWeyl.IsARoot(this->PartialRelation.Betas.TheObjects[k]+theRoot))
           { this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theRoot);
             break;
           }
+         }
       }
     }
   return true;

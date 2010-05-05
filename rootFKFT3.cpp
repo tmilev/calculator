@@ -75,6 +75,12 @@ bool rootSubalgebra::GenerateAutomorphisms ( rootSubalgebra& right, GlobalVariab
   return false;
 }
 
+int minimalRelationsProverStatesFixedK::GetModuleIndex(root& input)
+{	int tempI= this->theWeylGroup.RootSystem.IndexOfObjectHash(input);
+	if (tempI==-1)
+		return -1;
+	return this->IndexKmoduleByRoots.TheObjects[tempI];
+}
 
 void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
 { minimalRelationsProverStateFixedK tempState; tempState.owner=this;
@@ -95,12 +101,17 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   this->theK.genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
   this->theK.genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
   this->theK.ComputeAll();
+  this->IndexKmoduleByRoots.SetSizeExpandOnTopNoObjectInit(this->theWeylGroup.RootSystem.size);
+  for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
+		this->IndexKmoduleByRoots.TheObjects[i]=this->theK.GetIndexKmoduleContainingRoot(this->theWeylGroup.RootSystem.TheObjects[i]);
   this->theK.GenerateAutomorphisms(this->theK, TheGlobalVariables, &this->theIsos, true);
   this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods,TheGlobalVariables);
   this->theK.ComputeDebugString(TheGlobalVariables);
   this->theIsos.AmbientWeyl.Assign(this->theWeylGroup);
   this->theIsos.simpleGenerators.size=0;
   this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, TheGlobalVariables, 20000, true);
+  tempState.theNilradicalModules.init(this->theK.kModules.size);
+  tempState.theGmodLmodules.init(this->theK.kModules.size); 
   this->AddObjectOnTop(tempState);
   int numParabolics=MathRoutines::TwoToTheNth(this->theK.SimpleBasisCentralizerRoots.size);
   //this->theIsos.simpleGenerators.ComputeDebugString();
@@ -114,9 +125,9 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
     { root& tempRoot=this->theWeylGroup.RootSystem.TheObjects[j];
       if (this->theK.rootIsInCentralizer(tempRoot))
       { if (this->theK.rootIsInNilradicalParabolicCentralizer(selCentralizerNilradical, tempRoot))
-          tempState.NilradicalRoots.AddObjectOnTop(tempRoot);
+          tempState.theNilradicalModules.AddSelectionAppendNewIndex(this->theK.GetIndexKmoduleContainingRoot(tempRoot));
         else
-          tempState.BKSingularGmodLRoots.AddObjectOnTop(tempRoot);
+          tempState.theGmodLmodules.AddSelectionAppendNewIndex(this->theK.GetIndexKmoduleContainingRoot(tempRoot));
       }
     }
     InitialCentralizerNilradicalChoicePositiveSimpleRoots.size=0;
@@ -331,12 +342,12 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
 	if (this->TheObjects[index].PartialRelation.Alphas.size==0 && this->TheObjects[index].PartialRelation.Betas.size==0)
 	{	::minimalRelationsProverStateFixedK theNewState;
-		for (int i=0;i<theWeyl.RootSystem.size;i++)
+		for (int i=0;i<this->theK.HighestWeightsGmodK.size;i++)
 		{ theNewState.Assign(this->TheObjects[index]);
-			theNewState.PartialRelation.Alphas.AddObjectOnTop(theWeyl.RootSystem.TheObjects[i]);
-			theNewState.theChoicesWeMake.AddObjectOnTop(theWeyl.RootSystem.TheObjects[i]);
+			theNewState.PartialRelation.Alphas.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
+			theNewState.theChoicesWeMake.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
 			this->ExtensionStepFixedK(index, theWeyl, TheGlobalVariables, theNewState);
-			this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+			this->MakeProgressReportChildStates( i, this->theK.HighestWeightsGmodK.size, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
 		}
 		return;
 	}
@@ -347,7 +358,9 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
   minimalRelationsProverState newState;
   int theDimension=theWeyl.KillingFormMatrix.NumRows;
   Rational tempRat;
-  if (!roots::ConesIntersect( TheGlobalVariables, this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, theDimension))
+  roots theNilradicalRoots, tempRoots;
+  this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl); 
+  if (!roots::ConesIntersect( TheGlobalVariables, theNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, theDimension))
   { root NormalSeparatingCones;
     bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
     this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
@@ -379,49 +392,20 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
     for(int j=0; j<this->theNilradicalModules.CardinalitySelection; j++)
 		{ int i1= this->theNilradicalModules.elements[i];
 			int i2= this->theNilradicalModules.elements[j];
-			for (int k=0; kAlg.theMultTable.TheObjects[i1].TheObjects[i2].size;k++)
+			for (int k=0; k<kAlg.theMultTable.TheObjects[i1].TheObjects[i2].size;k++)
 				this->theNilradicalModules.AddSelectionAppendNewIndex(kAlg.theMultTable.TheObjects[i1].TheObjects[i2].TheObjects[k]);
 		}
-	for (int i=0;i<theWeyl.RootSystem.size;i++)
-	{ root& theRoot=theWeyl.RootSystem.TheObjects[i];
-		if (this->nonPositiveKRoots.ContainsObject(theRoot) && this->nonPositiveKRoots.ContainsObject(-theRoot))
-		{ this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
-			this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
-		}
+	for (int i=0; i<this->theNilradicalModules.CardinalitySelection; i++)
+	{ int theIndex = this->theNilradicalModules.elements[i];
+		if (this->theGmodLmodules.selected[theIndex])
+			return false;
+		if (this->theNilradicalModules.selected[this->owner->theK.theOppositeKmods.TheObjects[theIndex]])
+			return false;
   }
-  this->nonKRoots.intersectWith(this->nonNilradicalRoots,this->nonLRoots);
-  this->nonLRoots.intersectWith(this->nonBKSingularGmodLRoots, this->nonLNonSingularRoots);
-	for (int i=0;i<this->NilradicalRoots.size;i++)
-	{ this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(-this->NilradicalRoots.TheObjects[i]);
-		this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(this->NilradicalRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(-this->NilradicalRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(this->NilradicalRoots.TheObjects[i]);
-  }
-  for (int i=0; i<this->BKSingularGmodLRoots.size; i++)
-	{ this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(this->BKSingularGmodLRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(this->BKSingularGmodLRoots.TheObjects[i]);
-		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(-this->BKSingularGmodLRoots.TheObjects[i]);
+  for (int i=0; i<this->theGmodLmodules.CardinalitySelection; i++)
+	{ int theIndex = this->theGmodLmodules.elements[i];
+		if (this->theNilradicalModules.selected[theIndex])
+			return false;
 	}
-  for (int i=0;i<this->PositiveKroots.size;i++)
-	{ this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject( this->PositiveKroots.TheObjects[i]);
-		this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(-this->PositiveKroots.TheObjects[i]);
-		this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject( this->PositiveKroots.TheObjects[i]);
-		this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(-this->PositiveKroots.TheObjects[i]);
-	}
-	this->nonAlphas.AddRootSnoRepetition(this->nonBKSingularGmodLRoots);
-	this->nonBetas.AddRootSnoRepetition(this->nonNilradicalRoots);
-//	this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	if(this->nonLNonSingularRoots.HasACommonElementWith(this->BKSingularGmodLRoots))
-		return false;
-  if ( this->nonLRoots.HasACommonElementWith(this->NilradicalRoots) || this->nonLRoots.HasACommonElementWith(this->PositiveKroots))
-    return false;
-	if (this->nonNilradicalRoots.HasACommonElementWith(this->NilradicalRoots))
-		return false;
-	if (this->PositiveKroots.HasACommonElementWith(this->nonPositiveKRoots))
-		return false;
-	if (this->BKSingularGmodLRoots.HasACommonElementWith(this->nonBKSingularGmodLRoots))
-		return false;
-	//if (this->BKSingularGmodLRoots.HasACommonElementWith(this->nonBKSingularGmodLRoots))
-	//	return false;
   return true;
 }

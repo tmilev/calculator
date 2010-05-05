@@ -64,7 +64,6 @@ GlobalVariables::~GlobalVariables()
 {
 }
 
-
 void GlobalVariables::operator =(const GlobalVariables &G_V)
 { if(this==&G_V)
 		return;
@@ -2519,13 +2518,13 @@ void roots::rootsToMatrix(MatrixLargeRational& output)
 
 
 void Selection::AddSelectionAppendNewIndex(int index)
-{	if (!(index>=this->MaxSize))
-	{	if (!this->selected[index])
-		{	this->selected[index]=true;
-			this->elements[this->CardinalitySelection]=index;
-			this->CardinalitySelection++;
-		}
-	}
+{	if (index>=this->MaxSize || index<0)
+		return;	
+	if (this->selected[index])
+		return;
+	this->selected[index]=true;
+	this->elements[this->CardinalitySelection]=index;
+	this->CardinalitySelection++;
 }
 
 Selection::Selection()
@@ -4198,12 +4197,13 @@ void CombinatorialChamberContainer::MakeExtraProjectivePlane()
 
 void CombinatorialChamberContainer::MakeReportOneSlice
   (GlobalVariables& theGlobalVariables)
-{ std::stringstream out5;
+{	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out5;
   out5<< "Slicing index: " << this->indexNextChamberToSlice
-      <<" Total #: "<< this->size;
+				<<" Total #: "<< this->size;
   IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-  if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
 void CombinatorialChamberContainer::ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables)
@@ -9656,9 +9656,7 @@ void partFraction::GetNElongationPoly
 }*/
 
 void partFraction::partFractionToPartitionFunctionSplit
-			(partFractions& owner,QuasiPolynomial& output, bool RecordNumMonomials,
-			 //bool RecordSplitPowerSeriesCoefficient,
-			 bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension)
+	( partFractions& owner,QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension)
 {	static PolynomialRationalCoeff shiftedPoly, tempP;
 	static roots normals;
 	static partFractionPolynomials tempSplitPowerSeriesCoefficient;
@@ -9694,9 +9692,7 @@ void partFraction::partFractionToPartitionFunctionSplit
 		Stop();
 	}
 	for (int i=0;i<this->Coefficient.size;i++)
-	{	this->ComputePolyCorrespondingToOneMonomial
-			(shiftedPoly,i,normals,SplitPowerSeriesCoefficient,theDimension);
-
+	{	this->ComputePolyCorrespondingToOneMonomial(shiftedPoly,i,normals,SplitPowerSeriesCoefficient,theDimension);
 		if (RecordNumMonomials)
 		{ std::stringstream out4,out3;
 			out4 <<"Current fraction: "<<i+1<<" out of "<<this->Coefficient.size
@@ -10218,8 +10214,7 @@ bool partFractions::splitClassicalRootSystem
 				this->IndexLowestNonProcessed++;
 			}
 			else
-				this->PopIndexHashAndAccount
-          ( this->IndexLowestNonProcessed,theGlobalVariables, Indicator);
+				this->PopIndexHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables, Indicator);
 			this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
 		}
 //		this->ComputeDebugString();
@@ -10234,9 +10229,7 @@ bool partFractions::splitClassicalRootSystem
 	this->CompareCheckSums(theGlobalVariables);
 	this->IndexLowestNonProcessed= this->size;
 	this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
-	return
-    this->CheckForMinimalityDecompositionWithRespectToRoot
-      (Indicator, theGlobalVariables);
+	return this->CheckForMinimalityDecompositionWithRespectToRoot(Indicator, theGlobalVariables);
 }
 
 bool partFractions::CheckForMinimalityDecompositionWithRespectToRoot
@@ -10835,13 +10828,11 @@ void partFractions::MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportF
 		reportFunction(::IndicatorWindowGlobalVariables);
 }
 
-void partFractions::ComputeOneCheckSum
-	(Rational &output,GlobalVariables& theGlobalVariables)
+void partFractions::ComputeOneCheckSum(Rational &output,GlobalVariables& theGlobalVariables)
 { output.MakeZero();
 	for(int i=0;i<this->size;i++)
 	{ Rational tempRat;
-		this->TheObjects[i].ComputeOneCheckSum
-			(*this,tempRat, this->AmbientDimension,theGlobalVariables);
+		this->TheObjects[i].ComputeOneCheckSum(*this,tempRat, this->AmbientDimension,theGlobalVariables);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 		{ std::string tempS;
 			tempRat.ElementToString(tempS);
@@ -10857,9 +10848,7 @@ void partFractions::ComputeOneCheckSum
 	}
 }
 
-void partFractions::initFromRootSystem
-	(	intRoots& theFraction, intRoots& theAlgorithmBasis,
-		intRoot* weights, GlobalVariables& theGlobalVariables)
+void partFractions::initFromRootSystem	(	intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables)
 { this->ClearTheObjects();
 	this->RootsToIndices.ClearTheObjects();
 	partFraction f;
@@ -10868,8 +10857,7 @@ void partFractions::initFromRootSystem
 	this->AddAlreadyReduced(f,theGlobalVariables, 0);
 }
 
-void partFractions::RemoveRedundantShortRoots
-  (GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, root* Indicator)
 {	partFraction tempFrac;
 	Rational startCheckSum,tempCheckSum, tempCheckSum2,tempCheckSum3;
 	if (partFraction::MakingConsistencyCheck)
@@ -10900,8 +10888,7 @@ void partFractions::RemoveRedundantShortRoots
 	}
 }
 
-void partFractions::RemoveRedundantShortRootsClassicalRootSystem
-	(GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, root* Indicator)
 {	partFraction tempFrac;
 	for (int i=0;i<this->size;i++)
 	{ tempFrac.Assign(this->TheObjects[i]);
@@ -10919,11 +10906,10 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem
 		}
 	}
 	for (int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i].Coefficient.IsEqualToZero())
+		if (this->TheObjects[i].Coefficient.IsEqualToZero())
 		{ this->PopIndexHashAndAccount(i,theGlobalVariables, Indicator);
 			i--;
 		}
-	}
 }
 
 void FileSetPutPointerToEnd(std::fstream& theFile, bool StoreToFile)
@@ -10943,8 +10929,7 @@ bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalV
 	return(tempSize>=tempI);
 }
 
-bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot
-	(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile,
+bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile,
 		bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance)
 {	if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
 	{ IndicatorWindowGlobalVariables.flagRootIsModified=true;
@@ -12245,8 +12230,7 @@ void WeylGroup::MakeG2()
 	this->KillingFormMatrix.elements[0][1]=-3;
 }
 
-void WeylGroup::GetEpsilonCoordsWRTsubalgebra
-  (	roots& generators, roots& input, roots& output, GlobalVariables& theGlobalVariables)
+void WeylGroup::GetEpsilonCoordsWRTsubalgebra(	roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& basisChange=theGlobalVariables.matGetEpsilonCoords2;
   MatrixLargeRational& tempMat= theGlobalVariables.matGetEpsilonCoords3;
   DynkinDiagramRootSubalgebra& tempDyn= theGlobalVariables.dynGetEpsCoords;
@@ -12273,7 +12257,9 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
     //basisChange.ComputeDebugString();
   }
   tempDyn.SimpleBasesConnectedComponents.CollectionToRoots(simpleBasis);
-  input.GetCoordsInBasis(simpleBasis,coordsInNewBasis,theGlobalVariables);
+  coordsInNewBasis.SetSizeExpandOnTopNoObjectInit(input.size);
+  for (int i=0;i<input.size;i++)
+		input.TheObjects[i].GetCoordsInBasis(simpleBasis, coordsInNewBasis.TheObjects[i], theGlobalVariables);
   //basisChange.ComputeDebugString();
   //coordsInNewBasis.ComputeDebugString();
   basisChange.ActOnRoots(coordsInNewBasis,output);
@@ -14435,6 +14421,13 @@ bool rootSubalgebra::RootsDefineASubalgebra(roots& theRoots)
 	return true;
 }
 
+bool rootSubalgebra::IsBKhighest(root& input)
+{	for (int i=0;i<this->SimpleBasisK.size;i++)
+		if (this->IsARoot(input+this->SimpleBasisK.TheObjects[i]))
+			return false;
+	return true;
+}
+
 bool rootSubalgebra::rootIsInCentralizer(root& input)
 { root tempRoot;
   for(int i=0; i<this->SimpleBasisK.size; i++)
@@ -14566,20 +14559,28 @@ void rootSubalgebra::PossibleNilradicalComputation
 	this->MakeProgressReportPossibleNilradicalComputation(theGlobalVariables,owner,indexInOwner);
 }
 
-void rootSubalgebra::MakeProgressReportGenAutos
-	(int progress,int outOf,int found, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::MakeProgressReportGenAutos(int progress,int outOf,int found, GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
 		return;
 	std::stringstream out4, out5;
 	out5<< progress+1 << " out of "<< outOf <<" checked; ";
 	out5<< found << " found pos. generators";
 	//::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
+	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+}
+
+void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables)
+{	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out5;
+	out5<<"Computing pairing table: "<< index+1 << " out of "<< outOf; 
+	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
 	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
 
-void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
-	(GlobalVariables& theGlobalVariables,rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables,rootSubalgebras& owner, int indexInOwner)
 { if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
 		return;
 	if (this->flagMakingProgressReport)
@@ -14607,19 +14608,20 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
 	}
 }
 
-void rootSubalgebra::GenerateKmodMultTable
-	(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > >& output,
-		ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::GenerateKmodMultTable(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > >& output, ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables)
 { output.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	oppositeKmods.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
+	int numTotal= this->kModules.size* this->kModules.size;
 	for (int i=0;i<this->kModules.size;i++)
 	{ output.TheObjects[i].SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 		for (int j=0;j<this->kModules.size;j++)
-			this->KmodTimesKmod(i,j,oppositeKmods,output.TheObjects[i].TheObjects[j]);
+		{	this->KmodTimesKmod(i, j, oppositeKmods, output.TheObjects[i].TheObjects[j]);
+			this->MakeProgressReportMultTable(i*this->kModules.size+j, numTotal, theGlobalVariables);
+		}
 	}
 }
 
-bool rootSubalgebra::IsARoot(root& input)
+bool rootSubalgebra::IsARoot(const root& input)
 { if (input.size!=this->AmbientWeyl.KillingFormMatrix.NumRows)
 		return false;
 	return !(this->AmbientWeyl.RootSystem.IndexOfObjectHash(input)==-1);
@@ -14717,8 +14719,8 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(root& input)
 }
 
 bool roots::GetNormalSeparatingCones
-	(	GlobalVariables& theGlobalVariables, int theDimension, roots& coneStrictlyPositiveCoeffs,
-		roots& coneNonNegativeCoeffs, root& outputNormal)
+	(	GlobalVariables& theGlobalVariables, int theDimension, ListBasicObjects<root>& coneStrictlyPositiveCoeffs,
+		ListBasicObjects<root>& coneNonNegativeCoeffs, root& outputNormal)
 {	MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
@@ -14775,7 +14777,7 @@ bool roots::GetNormalSeparatingCones
 	return result;
 }
 
-bool roots::ConesIntersect(	GlobalVariables& theGlobalVariables, roots& StrictCone, roots& NonStrictCone, int theDimension)
+bool roots::ConesIntersect(	GlobalVariables& theGlobalVariables, ListBasicObjects<root>& StrictCone, ListBasicObjects<root>& NonStrictCone, int theDimension)
 {	MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
 	MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
 	MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
@@ -18984,14 +18986,14 @@ void SltwoSubalgebras::ComputeDebugStringCurrent()
 	this->DebugString=out.str();
 }
 
-void SltwoSubalgebras::MakeProgressReport
-	(int index, int outOf, GlobalVariables &theGlobalVariables)
-{ std::stringstream out;
+void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables &theGlobalVariables)
+{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out;
 	out <<index <<" out of "<< outOf <<" =3^8-1 computed";
 	::IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
 	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
 
 void SltwoDecomposition::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
@@ -19417,30 +19419,33 @@ void ::SimpleLieAlgebra::ElementToString
 
 void SimpleLieAlgebra::MakeSl2ProgressReport
   (int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables)
-{ std::stringstream out2,out3;
+{	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out2,out3;
   out2<< "found "<<found<< " out of "<<progress+1<<" processed out of total " << outOf<<" candidates";
   out3<< foundGood<<" good subalgebras realizing " <<DifferentHs <<" different h's";
   IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
   IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
   IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
   IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-  if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
 void SimpleLieAlgebra::MakeSl2ProgressReportNumCycles
   (	int progress, int outOf,	GlobalVariables& theGlobalVariables)
-{ std::stringstream out4;
+{	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out4;
   out4<< "Searching fixed characteristic: " << progress<<" out of "<< outOf;
   IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
   IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-  if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
-void SimpleLieAlgebra::MakeChevalleyTestReport
-  (int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
-{ std::stringstream out2,out3;
+void SimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
+{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+		return;
+	std::stringstream out2,out3;
   int x=(i*Total*Total+j*Total+k+1);
   out2<< "i: "<<i+1<<" of "<< Total << " j: "<<j+1<<" of "<< Total << " k: "<<k+1<<" of "<< Total;
   out3<< "Total progress: " << x<<" out of "<< (Total*Total*Total);
@@ -19453,8 +19458,7 @@ void SimpleLieAlgebra::MakeChevalleyTestReport
   //{ IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
    // IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
   //}
-  if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
 

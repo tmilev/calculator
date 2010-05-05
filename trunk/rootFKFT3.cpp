@@ -111,7 +111,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   this->theIsos.simpleGenerators.size=0;
   this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, TheGlobalVariables, 20000, true);
   tempState.theNilradicalModules.init(this->theK.kModules.size);
-  tempState.theGmodLmodules.init(this->theK.kModules.size); 
+  tempState.theGmodLmodules.init(this->theK.kModules.size);
   this->AddObjectOnTop(tempState);
   int numParabolics=MathRoutines::TwoToTheNth(this->theK.SimpleBasisCentralizerRoots.size);
   //this->theIsos.simpleGenerators.ComputeDebugString();
@@ -359,7 +359,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
   int theDimension=theWeyl.KillingFormMatrix.NumRows;
   Rational tempRat;
   roots theNilradicalRoots, tempRoots;
-  this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl); 
+  this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl);
   if (!roots::ConesIntersect( TheGlobalVariables, theNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, theDimension))
   { root NormalSeparatingCones;
     bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
@@ -372,14 +372,14 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 			this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
     }
     for (int i=0;i<theWeyl.RootSystem.size;i++)
-    {	this->TestAddingExtraRootFixedK
+    { this->TestAddingExtraRootFixedK
 				( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
       this->MakeProgressReportChildStates
 				( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
     }
   }
   else
-  {	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+  { this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
     this->TheObjects[index].StateIsComplete=true;
   }
 //	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);*/
@@ -407,5 +407,21 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
 		if (this->theNilradicalModules.selected[theIndex])
 			return false;
 	}
+	for(int i=0;i<this->owner->theK.kModules.size;i++)
+    if (!this->theNilradicalModules.selected[i]&& !this->theGmodLmodules.selected[i])
+    { for (int k=0; k<this->PartialRelation.Alphas.size; k++)
+        if (theWeyl.IsARoot(this->PartialRelation.Alphas.TheObjects[k]+this->owner->theK.HighestWeightsGmodK.TheObjects[i]))
+        { this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
+          break;
+        }
+      for (int j=0;j<this->owner->theK.kModules.size;j++)
+      { root& theRoot= this->owner->theK.kModules.TheObjects[i].TheObjects[j];
+        for (int k=0; k<this->PartialRelation.Betas.size; k++)
+          if (theWeyl.IsARoot(this->PartialRelation.Betas.TheObjects[k]+theRoot))
+          { this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theRoot);
+            break;
+          }
+      }
+    }
   return true;
 }

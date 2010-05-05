@@ -2337,7 +2337,7 @@ template <class Object>
 void HashedListBasicObjects<Object>::AddListOnTopNoRepetitionOfObjectHash(const ListBasicObjects<Object>& theList)
 { this->MakeActualSizeAtLeastExpandOnTop(this->size+theList.size);
 	for (int i=0; i<theList.size; i++)
-		this->AddObjectOnTopNoRepetitionOfObjectHash(theList.TheObjects[i]);	
+		this->AddObjectOnTopNoRepetitionOfObjectHash(theList.TheObjects[i]);
 }
 
 template <class Object>
@@ -6299,6 +6299,8 @@ public:
   bool flagNeedsAdditionOfPositiveKroots;
   Selection theGmodLmodules;
   Selection theNilradicalModules;
+  roots nonAlphas;
+  roots nonBetas;
   ListBasicObjects<int > indicesIsosRespectingInitialNilradicalChoice;
   root currentSeparatingNormalEpsilonForm;
   roots theChoicesWeMake;

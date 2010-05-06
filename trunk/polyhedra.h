@@ -1746,6 +1746,8 @@ public:
 	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
 	bool operator==(const roots& right);
 	void operator = (const roots& right){this->CopyFromBase(right);};
+	void ReadFromFile (std::fstream &input, GlobalVariables&  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 };
 
 class WallData
@@ -2527,6 +2529,8 @@ public:
 	void ResetCounters();
 	void CollectionToRoots(roots& output);
 	~rootsCollection(){};
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
 
 class hashedRoots: public HashedListBasicObjects<root>
@@ -5175,12 +5179,8 @@ public:
 	ListBasicObjects<int> IndicesNonZeroMults;
 	IntegerPolyLight Coefficient;
 	PolyPartFractionNumeratorLight CoefficientNonExpanded;
-	bool RemoveRedundantShortRootsClassicalRootSystem
-		(	partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables,
-			int theDimension);
-	bool RemoveRedundantShortRoots
-		(	partFractions& owner, root* Indicator,
-			GlobalVariables& theGlobalVariables, int theDimension);
+	bool RemoveRedundantShortRootsClassicalRootSystem(	partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+	bool RemoveRedundantShortRoots(	partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
 	bool AlreadyAccountedForInGUIDisplay;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 //	static	bool flagUsingPrecomputedOrlikSolomonBases;
@@ -5191,20 +5191,12 @@ public:
 	static Rational CheckSum, CheckSum2;
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
-	void ComputePolyCorrespondingToOneMonomial
-		(	PolynomialRationalCoeff &output, int index, roots& normals,
-			partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
-	static void MakePolynomialFromOneNormal
-		(	root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
-	void ComputeNormals
-		(	partFractions& owner, roots& output, int theDimension,
-			GlobalVariables& theGlobalVariables);
-	int ComputeGainingMultiplicityIndexInLinearRelation
-		(	partFractions& owner,	MatrixLargeRational& theLinearRelation);
+	void ComputePolyCorrespondingToOneMonomial(	PolynomialRationalCoeff &output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
+	static void MakePolynomialFromOneNormal(	root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
+	void ComputeNormals(	partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
+	int ComputeGainingMultiplicityIndexInLinearRelation(	partFractions& owner,	MatrixLargeRational& theLinearRelation);
 	void UncoverBracketsNumerator(GlobalVariables&  theGlobalVariables, int theDimension);
-	void partFractionToPartitionFunctionSplit
-		(	partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials,
-			bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
+	void partFractionToPartitionFunctionSplit(	partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
 	//void partFractionToPartitionFunctionStoreAnswer
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
 	//				bool StoreToFile);
@@ -5214,39 +5206,22 @@ public:
 	//void InsertNewRootIndex(int index);
 	//void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
 	void MultiplyCoeffBy(Rational& r);
-	void decomposeAMinusNB
-		(	int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum,
-			GlobalVariables& theGlobalVariables, root* Indicator);
-	bool DecomposeFromLinRelation
-		(	MatrixLargeRational& theLinearRelation, partFractions& Accum,
-			GlobalVariables& theGlobalVariables, root* Indicator);
-	void ComputeOneCheckSum
-		(	partFractions& owner,Rational &output, int theDimension,
-			GlobalVariables& theGlobalVariables);
-	void AttemptReduction
-		( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables,
-      root* Indicator);
-	void ReduceMonomialByMonomial
-		( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables,
-      root* Indicator);
+	void decomposeAMinusNB(	int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool DecomposeFromLinRelation( MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	void ComputeOneCheckSum(	partFractions& owner,Rational &output, int theDimension, GlobalVariables& theGlobalVariables);
+	void AttemptReduction( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
+	void ReduceMonomialByMonomial( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ApplySzenesVergneFormula
-		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations,
-			int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
+		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
 			partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ApplyGeneralizedSzenesVergneFormula
-		(	ListBasicObjects<int> &theSelectedIndices,
-			ListBasicObjects<int> &theGreatestElongations,
-			ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
-			int ElongationGainingMultiplicityIndex, partFractions &Accum,
-			GlobalVariables& theGlobalVariables, root* Indicator);
+		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int> &theGreatestElongations, ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
+			int ElongationGainingMultiplicityIndex, partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
-	bool reduceOnceTotalOrderMethod
-		(	partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool reduceOnceTotalOrderMethod(	partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
-	bool reduceOnceGeneralMethodNoOSBasis
-		(	partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-	bool reduceOnceGeneralMethod
-		(	partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool reduceOnceGeneralMethodNoOSBasis(	partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool reduceOnceGeneralMethod(	partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
 	int HashFunction() const;
@@ -5257,10 +5232,7 @@ public:
 	bool DecreasePowerOneFrac(int index, int increment);
 	//void GetNumerator(PolynomialRationalCoeff& output);
 	//void SetNumerator(PolynomialRationalCoeff& input);
-	void PrepareFraction
-		(	int indexA, int indexB,  int AminusNBindex,
-			bool indexAisNullified, partFraction &output,
-			IntegerPoly& AminusNbetaPoly);
+	void PrepareFraction(	int indexA, int indexB,  int AminusNBindex, bool indexAisNullified, partFraction &output, IntegerPoly& AminusNbetaPoly);
 	void Assign(const partFraction&p);
 	void AssignDenominatorOnly(const partFraction& p);
 	void AssignNoIndicesNonZeroMults(partFraction&p);
@@ -5271,48 +5243,27 @@ public:
 	partFraction();
 	~partFraction();
 	void GetPolyReduceMonomialByMonomial
-		(	partFractions& owner, GlobalVariables& theGlobalVariables,
-			intRoot& theExponent, int StartMonomialPower, int DenPowerReduction,
+		(	partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction,
 			int startDenominatorPower,IntegerPoly& output);
 	void ReduceMonomialByMonomialModifyOneMonomial
-		(	partFractions& Accum,GlobalVariables& theGlobalVariables,
-			SelectionWithDifferentMaxMultiplicities& thePowers,
+		(	partFractions& Accum,GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers,
 			ListBasicObjects<int>&thePowersSigned, Monomial<Integer>& input);
-	void GetAlphaMinusNBetaPoly
-		(	partFractions& owner,int indexA,
-			int indexB, int n, IntegerPoly& output, int theDimension);
+	void GetAlphaMinusNBetaPoly(	partFractions& owner, int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
 	void GetNElongationPolyWithMonomialContribution
-		(	partFractions& owner, ListBasicObjects<int>& theSelectedIndices,
-			ListBasicObjects<int>& theCoefficients,
-			ListBasicObjects<int>& theGreatestElongations,
-			int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
+		(	partFractions& owner, ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theCoefficients, ListBasicObjects<int>& theGreatestElongations, int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
 			IntegerPoly& output, int theDimension);
-	void GetNElongationPoly
-		(	partFractions& owner, int index,int baseElongation,
-			int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
-	static void GetNElongationPoly
-		(intRoot& exponent, int n, IntegerPoly& output, int theDimension);
-	void GetNElongationPoly
-		(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries,
-			PolyPartFractionNumerator& output, int theDimension);
+	void GetNElongationPoly (	partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
+	static void GetNElongationPoly (intRoot& exponent, int n, IntegerPoly& output, int theDimension);
+	void GetNElongationPoly(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries, PolyPartFractionNumerator& output, int theDimension);
 	int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
 	bool operator==(const partFraction& right);
 	void operator=(const partFraction& right);
-	void initFromRootSystem
-		(	partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis,
-			intRoot* weights);
-	int ElementToString
-		(	partFractions& owner, std::string& output, bool LatexFormat,
-			bool includeVPsummand, bool includeNumerator,
-			GlobalVariables& theGlobalVariables);
-	int ElementToStringBasisChange
-		(	partFractions& owner, MatrixIntTightMemoryFit& VarChange,
-			bool UsingVarChange, std::string& output,
-			bool LatexFormat,bool includeVPsummand,bool includeNumerator,
-			GlobalVariables& theGlobalVariables);
-	void ReadFromFile
-		(	partFractions& owner,std::fstream &input, GlobalVariables&  theGlobalVariables,
-			int theDimension);
+	void initFromRootSystem(	partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
+	int ElementToString (	partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+	int ElementToStringBasisChange 
+		( partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand,
+			bool includeNumerator, GlobalVariables& theGlobalVariables);
+	void ReadFromFile (	partFractions& owner, std::fstream &input, GlobalVariables&  theGlobalVariables, int theDimension);
 	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	int GetNumMonomialsInNumerator();
 	int SizeWithoutDebugString();
@@ -5638,7 +5589,8 @@ public:
 	void ActByElement(int index, root& theRoot);
 	void ActByElement(int index, root& input, root& output);
 	void ActByElement(int index, roots& input, roots& output);
-
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
 
 class LaTeXProcedures
@@ -5661,8 +5613,7 @@ public:
 	static void endLatexDocument(std::fstream& output);
 	static void beginPSTricks(std::fstream& output);
 	static void endPSTricks(std::fstream& output);
-	static void GetStringFromColorIndex
-    (int ColorIndex, std::string &output,DrawingVariables& drawInput);
+	static void GetStringFromColorIndex(int ColorIndex, std::string &output,DrawingVariables& drawInput);
 };
 
 class thePFcomputation
@@ -6341,6 +6292,8 @@ public:
   void operator=(const minimalRelationsProverStateFixedK& right){this->Assign(right);};
   minimalRelationsProverStateFixedK();
   void MakeProgressReportCanBeShortened( int checked, int outOf, GlobalVariables& theGlobalVariables);
+	void ReadFromFile (	std::fstream &input, GlobalVariables&  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 };
 
 class minimalRelationsProverStatesFixedK: public ListBasicObjects<minimalRelationsProverStateFixedK>
@@ -6361,6 +6314,7 @@ public:
   ReflectionSubgroupWeylGroup theIsos;
   rootsCollection PrecomputedIsoDomains;
   rootsCollection PrecomputedIsoRanges;
+  std::fstream theFile;
   bool flagAssumeGlobalMinimalityRHS;
   bool flagComputationIsInitialized;
   bool flagSearchForOptimalSeparatingRoot;
@@ -6400,6 +6354,10 @@ public:
     MinNumDifferentBetas=-1;
     this->flagSearchForOptimalSeparatingRoot=true;
   };
+	void ReadFromFile (	std::fstream &input, GlobalVariables&  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
+	void WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables);
+	void ReadFromFile (std::string& fileName, GlobalVariables&  theGlobalVariables);
 };
 
 class minimalRelationsProverStates;
@@ -6547,10 +6505,13 @@ public:
 	std::string NotationExplanationLatex2;
 	std::string NotationExplanationLatex3;
 	std::string NotationExplanationLatex4;
+	std::string ProverFileName;
 	intRoot ValueRoot;
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
+	bool flagSavingFixedK;
+	bool flagOpenFixedK;
 	bool flagProverUseFixedK;
 	bool flagUsingProverDoNotCallOthers;
 	bool flagProverDoingFullRecursion;

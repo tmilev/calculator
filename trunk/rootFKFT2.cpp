@@ -240,8 +240,7 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesReturnTrueIfOneBetaIs
                       assert(tempBool);
                       this->invertedCartan.ActOnAroot(tempRoot, outputNormal);
                     }
-	theWeyl.GetEpsilonCoords
-		(outputNormal, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
+	theWeyl.GetEpsilonCoords(outputNormal, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
 	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
 	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
 	return result;
@@ -275,7 +274,6 @@ bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOne
               assert(tempBool);
               this->invertedCartan.ActOnAroot(tempRoot, outputNormal);
             }
-	theWeyl.GetEpsilonCoords(outputNormal, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
 	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
 	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
 	return result;

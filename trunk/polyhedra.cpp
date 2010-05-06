@@ -563,8 +563,9 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &th
 	theFile<<"\n\n";
 	theFile<< tempS;
 	theFile<<"\n\n";
-	this->theOutput.ElementToStringGeneric(tempS);
-	theFile<< tempS;
+	tempS.clear();
+	this->theOutput.StringPrintOutAppend(tempS, PolyFormatLocal);
+	theFile<< "\\begin{eqnarray*}&&"<< tempS<< "\\end{eqnarray*}";
 	LaTeXProcedures::endLatexDocument(theFile);
 }
 
@@ -726,8 +727,7 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::st
     output.push_back(input.at(j));
 }
 
-bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
-  (std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary)
+bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary)
 { if (OpenInAppendMode)
 	{	if (openAsBinary)
 			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
@@ -896,7 +896,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput
 }
 
 ComputationSetup::ComputationSetup()
-{ this->flagProverUseFixedK=false;
+{ this->flagOpenFixedK=false;
+	this->flagSavingFixedK=false;
+	this->flagProverUseFixedK=false;
   this->flagProverDoingFullRecursion=false;
   this->flagUsingProverDoNotCallOthers=false;
   this->flagAllowRepaint=true;
@@ -1173,7 +1175,17 @@ void ComputationSetup::Run()
 	//partFraction::flagAnErrorHasOccurredTimeToPanic=true;
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
   if (this->flagUsingProverDoNotCallOthers)
-  { GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
+  { if (this->flagSavingFixedK)
+		{ this->theProverFixedK.WriteToFile(this->ProverFileName, *this->theGlobalVariablesContainer->Default());
+			this->flagSavingFixedK=false;
+			return;
+		} 
+		if (this->flagOpenFixedK)
+		{	this->theProverFixedK.ReadFromFile(this->ProverFileName, *this->theGlobalVariablesContainer->Default());
+			this->flagOpenFixedK=false;
+			return;
+		}
+		GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
     if (!this->flagProverDoingFullRecursion)
     { if (!this->flagProverUseFixedK && !this->theProver.flagComputationIsInitialized)
 				this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
@@ -2764,6 +2776,37 @@ inline void roots::Pop(int index)
 
 inline void roots::AddRoot(root &r)
 {	this->AddObjectOnTop(r);
+}
+
+void roots::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariables)
+{	int theDimension=0;
+	if (this->size>0)
+		theDimension= this->TheObjects[0].size;
+	output<< "Num_roots|Dim: "<< this->size<<" "<< theDimension<<" ";
+	if (this->size<1)
+		return;
+	for ( int i=0;i<this->size;i++)
+		for (int j=0;j<theDimension;j++)
+		{	this->TheObjects[i].TheObjects[j].WriteToFile(output);
+			output<<" ";
+		}
+	output<<"\n";
+}
+
+void roots::ReadFromFile (std::fstream &input, GlobalVariables&  theGlobalVariables)
+{	std::string tempS;
+	input >> tempS;
+	assert (tempS=="Num_roots|Dim:");
+	int theDim, theSize;
+	input>> theSize>>theDim;
+	if (theSize<0)
+		theSize=0;
+	this->SetSizeExpandOnTopNoObjectInit(theSize);
+	for (int i=0; i<this->size; i++)
+	{	this->TheObjects[i].SetSizeExpandOnTopLight(theDim);
+		for (int j=0; j<theDim; j++)
+			this->TheObjects[i].TheObjects[j].ReadFromFile(input);
+	}
 }
 
 inline void roots::AddIntRoot(intRoot &r)
@@ -6231,6 +6274,21 @@ void rootsCollection::ComputeDebugString()
 		this->DebugString.append(tempS);
 		this->DebugString.append("\n");
 	}
+}
+
+void rootsCollection::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{	output <<"Num_collections: " <<this->size<<"\n";
+	for (int i=0;i<this->size;i++)
+		this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+}
+
+void rootsCollection::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{	std::string tempS;
+	int tempI;
+	input>> tempS>> tempI;
+	this->SetSizeExpandOnTopNoObjectInit(tempI);
+	for (int i=0; i<this->size;i++)
+		this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
 }
 
 void rootsCollection::Average(root& output, int Number, int theDimension)
@@ -13633,16 +13691,16 @@ void rootFKFTcomputation::processA2A1A1inD5beta12221Answer(QuasiPolynomial& theA
 	tempQP2.ComputeDebugString();
 }
 
-bool rootFKFTcomputation::OpenDataFile
-	(std::fstream& theFile, std::string& theFileName)
+bool rootFKFTcomputation::OpenDataFile(std::fstream& theFile, std::string& theFileName)
 { theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
   if(theFile.is_open())
-  { theFile.clear(std::ios::goodbit);// false);
-  	theFile.seekp(0,std::ios_base::end);
-  	theFile.seekg(0);
-		int tempI=theFile.tellp();
+  { theFile.clear();
+		theFile.seekp(0,std::ios_base::end);
+  	int tempI=theFile.tellp();
 		if (tempI>=1)
+		{	theFile.seekg(0);			
 			return true;
+		}
   }
 	return false;
 }

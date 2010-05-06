@@ -351,18 +351,30 @@ bool ::minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, bool& o
 }
 
 void minimalRelationsProverStateFixedK::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariables)
-{ output <<"Num_isos: " << this->indicesIsosRespectingInitialNilradicalChoice.size<<"\n";
+{ output <<"\n\n\n\nNum_isos: " << this->indicesIsosRespectingInitialNilradicalChoice.size<<"\n";
 	for (int i=0;i<this->indicesIsosRespectingInitialNilradicalChoice.size;i++)
 		output <<this->indicesIsosRespectingInitialNilradicalChoice.TheObjects[i]<<" ";
 	output << "\nAlphas: ";
 	this->PartialRelation.Alphas.WriteToFile(output, theGlobalVariables);
 	output << "Betas: ";
 	this->PartialRelation.Betas.WriteToFile(output, theGlobalVariables);
+	output<<"\nSeparating_normal: ";
+	this->SeparatingNormalUsed.WriteToFile(output);
 	output <<"Num_possible_children: " << this->PossibleChildStates.size<<"\n";
 	output <<"Active_child: " << this->activeChild<<"\n";
 	output <<"Children: ";
 	for (int i=0;i<this->PossibleChildStates.size;i++)
 		output <<this->PossibleChildStates.TheObjects[i]<<" ";
+	output<<"\nthe_choices_we_make: ";
+	this->theChoicesWeMake.WriteToFile(output, theGlobalVariables);
+	output<<"\nNon_L_modules: "; 
+	this->theGmodLmodules.WriteToFile(output);
+	output<<"\nN_modules: "; 
+	this->theNilradicalModules.WriteToFile(output);
+	output<<"\nNon-alphas: ";
+	this->nonAlphas.WriteToFile(output, theGlobalVariables);
+	output<<"\nNon-betas: ";
+	this->nonBetas.WriteToFile(output, theGlobalVariables);
 }
 
 void ::minimalRelationsProverStateFixedK::ReadFromFile(	std::fstream &input, GlobalVariables&  theGlobalVariables)
@@ -376,12 +388,25 @@ void ::minimalRelationsProverStateFixedK::ReadFromFile(	std::fstream &input, Glo
 	this->PartialRelation.Alphas.ReadFromFile(input, theGlobalVariables);
 	input >> tempS;
 	this->PartialRelation.Betas.ReadFromFile(input, theGlobalVariables);
+	input>>tempS;
+	this->SeparatingNormalUsed.ReadFromFile(input);
 	input >>tempS >> tempI;
 	this->PossibleChildStates.SetSizeExpandOnTopNoObjectInit(tempI);
 	input >>tempS >> this->activeChild;
 	input >>tempS;
 	for (int i=0;i<this->PossibleChildStates.size;i++)
 		input >>this->PossibleChildStates.TheObjects[i];
+	input>>tempS; 
+	this->theChoicesWeMake.ReadFromFile(input, theGlobalVariables);
+	input>>tempS; 
+	this->theGmodLmodules.ReadFromFile(input);
+	input>>tempS; 
+	this->theNilradicalModules.ReadFromFile(input);
+	input>>tempS; 
+	this->nonAlphas.ReadFromFile(input, theGlobalVariables);
+	input>>tempS; 
+	this->nonBetas.ReadFromFile(input, theGlobalVariables);
+	assert(tempS=="Non-betas:");
 }
 
 void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl)
@@ -397,11 +422,16 @@ void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots
 void ::minimalRelationsProverStatesFixedK::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output <<"Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.KillingFormMatrix.NumRows<<"\n";
 	output<<"Simple_basis_K: ";
+	//this->theK.SimpleBasisK.ComputeDebugString();
 	this->theK.SimpleBasisK.WriteToFile(output, theGlobalVariables);
 	this->theIsos.WriteToFile(output, theGlobalVariables);
+	output<<"\nState_stack_size: "<< this->theIndexStack.size<<" ";
+	for (int i=0;i<this->theIndexStack.size;i++)
+		output << this->theIndexStack.TheObjects[i]<<" ";
 	output<<"\nNum_states: "<< this->size<<"\n";
 	for (int i=0;i<this->size;i++)	
 		this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+	this->theK.WriteMultTableAndOppositeKmodsToFile(output, this->theK.theMultTable, this->theK.theOppositeKmods);
 }
 
 void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
@@ -411,24 +441,46 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 	this->theWeylGroup.MakeArbitrary(this->theWeylGroup.WeylLetter, tempI);
 	input>> tempS;
 	this->theK.genK.ReadFromFile(input, theGlobalVariables);
+	this->theK.genK.ComputeDebugString();
 	this->theIsos.ReadFromFile(input, theGlobalVariables);
+	input>>tempS>>tempI;
+	this->theIndexStack.SetSizeExpandOnTopNoObjectInit(tempI);
+	for (int i=0;i<this->theIndexStack.size;i++)
+		input>>this->theIndexStack.TheObjects[i];
 	input>> tempS>> tempI;
 	this->SetSizeExpandOnTopNoObjectInit(tempI);
 	for(int i=0; i<this->size; i++)
 	{	this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
 		this->TheObjects[i].owner=this;
 	}
+	this->theK.ReadMultTableAndOppositeKmodsToFile(input, this->theK.theMultTable, this->theK.theOppositeKmods);
+	this->theWeylGroup.ComputeRho(true);
+	this->initShared(this->theWeylGroup, theGlobalVariables);
+	this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theIsos.simpleGenerators,this->theIsos.ExternalAutomorphisms	,theGlobalVariables, -1, false);
+	this->theK.ComputeAll();
+	this->flagComputationIsInitialized=true;
+	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		if (this->theIndexStack.size>0)
+		{ int tempI= *this->theIndexStack.LastObject(); 
+			this->TheObjects[tempI].ComputeDebugString(this->theWeylGroup, theGlobalVariables);
+			::IndicatorWindowGlobalVariables.StatusString1=this->TheObjects[tempI].DebugString;
+			::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+			theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		}
+	//this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods, theGlobalVariables);
 }
 
 void minimalRelationsProverStatesFixedK::WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
 {	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false);
 	this->WriteToFile(this->theFile,theGlobalVariables);
+	this->theFile.close();
 }
 
 void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
 {	if(!rootFKFTcomputation::OpenDataFile(this->theFile, fileName))
 		return;
 	this->ReadFromFile(this->theFile, theGlobalVariables);
+	this->theFile.close();
 }
 
 void minimalRelationsProverState::Assign(const minimalRelationsProverState& right)
@@ -466,7 +518,8 @@ void minimalRelationsProverStateFixedK::Assign(const minimalRelationsProverState
   this->owner=right.owner;
   this->nonAlphas.CopyFromBase(right.nonAlphas);
   this->nonBetas.CopyFromBase(right.nonBetas);
-  this->PartialRelation=right.PartialRelation;
+  this->PartialRelation.Alphas.CopyFromBase(right.PartialRelation.Alphas);
+  this->PartialRelation.Betas.CopyFromBase(right.PartialRelation.Betas);
   this->StateIsPossible=right.StateIsPossible;
   this->StateIsComplete=right.StateIsComplete;
   this->theScalarProducts.Assign(right.theScalarProducts);
@@ -474,10 +527,32 @@ void minimalRelationsProverStateFixedK::Assign(const minimalRelationsProverState
   this->currentSeparatingNormalEpsilonForm.Assign(right.currentSeparatingNormalEpsilonForm);
   this->flagNeedsAdditionOfPositiveKroots=right.flagNeedsAdditionOfPositiveKroots;
   this->ImpossibleChildStates= right.ImpossibleChildStates;
-  this->PossibleChildStates= right.PossibleChildStates;
+  this->PossibleChildStates.CopyFromBase( right.PossibleChildStates);
   this->CompleteChildStates= right.CompleteChildStates;
   this->activeChild=right.activeChild;
   this->indicesIsosRespectingInitialNilradicalChoice.CopyFromBase(right.indicesIsosRespectingInitialNilradicalChoice);
+  this->SeparatingNormalUsed.Assign(right.SeparatingNormalUsed);
+}
+
+void minimalRelationsProverStateFixedK::initFromParentState(minimalRelationsProverStateFixedK& parent)
+{this->theNilradicalModules.Assign(parent.theNilradicalModules);
+  this->theGmodLmodules.Assign(parent.theGmodLmodules);
+  this->owner=parent.owner;
+  this->nonAlphas.CopyFromBase(parent.nonAlphas);
+  this->nonBetas.CopyFromBase(parent.nonBetas);
+  this->PartialRelation=parent.PartialRelation;
+  this->StateIsPossible=parent.StateIsPossible;
+  this->StateIsComplete=parent.StateIsComplete;
+  this->theScalarProducts.Assign(parent.theScalarProducts);
+  this->theChoicesWeMake.CopyFromBase(parent.theChoicesWeMake);
+  this->currentSeparatingNormalEpsilonForm.MakeZero(0);
+  this->flagNeedsAdditionOfPositiveKroots=false;
+  this->ImpossibleChildStates.size=0;
+  this->PossibleChildStates.size=0;
+  this->CompleteChildStates.size=0;
+  this->activeChild=-1;
+  this->indicesIsosRespectingInitialNilradicalChoice.CopyFromBase(parent.indicesIsosRespectingInitialNilradicalChoice);
+  this->SeparatingNormalUsed.MakeZero(0);
 }
 
 void minimalRelationsProverStates::MakeProgressReportCurrentState(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
@@ -926,10 +1001,11 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
 	out <<"...";
   this->currentSeparatingNormalEpsilonForm.ElementToStringEpsilonForm(tempS,false,false);
   out <<"\nCurrent separating normal: " << tempS;
+  out <<"\nInternal separating normal: " << this->SeparatingNormalUsed.ElementToString();
   out<<"\r\nChildren states: "<<  this->PossibleChildStates.size <<" possible, "<< this->ImpossibleChildStates.size
-      <<" impossible, " << this->CompleteChildStates.size<<" complete. Index next possible child to explore: " << this->activeChild+2;
+				<<" impossible, " << this->CompleteChildStates.size<<" complete. Index next possible child to explore: " << this->activeChild+2;
   roots AlphaChildren, BetaChildren, Kchildren;
-  for (int i=0;i<this->PossibleChildStates.size;i++)
+  for (int i=0; i<this->PossibleChildStates.size; i++)
   {	::minimalRelationsProverStateFixedK& child = owner->TheObjects[this->PossibleChildStates.TheObjects[i]];
 		if (this->PartialRelation.Alphas.size<child.PartialRelation.Alphas.size)
 		{	theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
@@ -964,21 +1040,33 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
     this->nonAlphas.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonAlphas,tempRoots,TheGlobalVariables);
-    tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
+    tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
-  out <<"\r\nNon alphas: "<< tempS;
+  out <<"\r\nNon alphas("<< this->nonAlphas.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonBetas.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon betas: "<< tempS;
+  out <<"\r\nNon betas("<<this->nonBetas.size<<"): "<< tempS;
+  out<<"\r\nG mod L modules(" <<this->theGmodLmodules.CardinalitySelection<<"): ";
+  for (int i=0;i<this->theGmodLmodules.CardinalitySelection;i++)
+  	out<< this->theGmodLmodules.elements[i]<<" ";
+  out<<"\r\nNilradical modules(" <<this->theNilradicalModules.CardinalitySelection<<"): ";
+  for (int i=0;i<this->theNilradicalModules.CardinalitySelection;i++)
+  	out<< this->theNilradicalModules.elements[i]<<" "; 
   if (!this->StateIsPossible)
 		out << "\r\n I am Impossible!";
   if (this->StateIsComplete)
 		out <<"\r\nI am complete!";
   out<<"\r\n\n";
+  out <<"Call stack: ";
+  for (int i=0; i<this->owner->theIndexStack.size; i++)
+  { out << "state "<<this->owner->theIndexStack.TheObjects[i];
+		if (i!=this->owner->theIndexStack.size-1)
+			out<<"-> ";
+  }
   output=out.str();
 }
 

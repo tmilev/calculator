@@ -1178,57 +1178,55 @@ void ComputationSetup::Run()
   { if (this->flagSavingFixedK)
 		{ this->theProverFixedK.WriteToFile(this->ProverFileName, *this->theGlobalVariablesContainer->Default());
 			this->flagSavingFixedK=false;
-			return;
-		} 
-		if (this->flagOpenFixedK)
+		}	else if (this->flagOpenFixedK)
 		{	this->theProverFixedK.ReadFromFile(this->ProverFileName, *this->theGlobalVariablesContainer->Default());
 			this->flagOpenFixedK=false;
-			return;
+		} else
+		{	GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
+			if (!this->flagProverDoingFullRecursion)
+			{ if (!this->flagProverUseFixedK && !this->theProver.flagComputationIsInitialized)
+					this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
+				if(!this->flagProverUseFixedK && this->theProver.flagComputationIsInitialized )
+						this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
+				if (!this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
+					this->theProverFixedK.GenerateStartingStatesFixedK(*this, *tgv, 'E',8);
+				if (this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
+					this->theProverFixedK.RecursionStepFixedK(this->theProverFixedK.theWeylGroup, *tgv);
+			} else
+			{ if(!this->flagProverUseFixedK)
+				{ this->theProver.GenerateStartingState(*this,*tgv, 'E',8);
+					this->theProver.TheFullRecursion(this->theProver.theWeylGroup, *tgv);
+				} else
+				{ this->theProverFixedK.GenerateStartingStatesFixedK(*this,*tgv, 'E', 8);
+					this->theProverFixedK.TheFullRecursionFixedK(this->theProverFixedK.theWeylGroup, *tgv);
+				}
+			}
+			if(!this->flagProverUseFixedK)
+			{ int currentIndex=*this->theProver.theIndexStack.LastObject();
+				if (currentIndex>=0)
+					this->theProver.TheObjects[currentIndex].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
+				if (this->theProver.theIndexStack.size>0)
+				{	this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
+					//this->theProver.theK.ComputeDebugString(*tgv);
+					//IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
+					//IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+					//if (tgv->FeedDataToIndicatorWindowDefault!=0)
+					 // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+				}
+			} else
+			{ int currentIndex=*this->theProverFixedK.theIndexStack.LastObject();
+				if (currentIndex>=0)
+					this->theProverFixedK.TheObjects[currentIndex].ComputeDebugString(this->theProverFixedK.theWeylGroup, *tgv);
+				if (this->theProverFixedK.theIndexStack.size>0)
+				{	this->theProverFixedK.MakeProgressReportCurrentState(*this->theProverFixedK.theIndexStack.LastObject(), *tgv, this->theProverFixedK.theWeylGroup);
+					//this->theProver.theK.ComputeDebugString(*tgv);
+					//IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
+					//IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+					//if (tgv->FeedDataToIndicatorWindowDefault!=0)
+					 // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+				}
+			}
 		}
-		GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
-    if (!this->flagProverDoingFullRecursion)
-    { if (!this->flagProverUseFixedK && !this->theProver.flagComputationIsInitialized)
-				this->theProver.GenerateStartingState (*this, *tgv, 'E',8);
-			if(!this->flagProverUseFixedK && this->theProver.flagComputationIsInitialized )
-          this->theProver.RecursionStep(this->theProver.theWeylGroup,*tgv);
-      if (!this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
-				this->theProverFixedK.GenerateStartingStatesFixedK(*this, *tgv, 'E',8);
-      if (this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
-				this->theProverFixedK.RecursionStepFixedK(this->theProverFixedK.theWeylGroup, *tgv);
-    } else
-    { if(!this->flagProverUseFixedK)
-      { this->theProver.GenerateStartingState(*this,*tgv, 'E',8);
-        this->theProver.TheFullRecursion(this->theProver.theWeylGroup, *tgv);
-      } else
-      { this->theProverFixedK.GenerateStartingStatesFixedK(*this,*tgv, 'E', 8);
-        this->theProverFixedK.TheFullRecursionFixedK(this->theProverFixedK.theWeylGroup, *tgv);
-      }
-    }
-    if(!this->flagProverUseFixedK)
-    { int currentIndex=*this->theProver.theIndexStack.LastObject();
-      if (currentIndex>=0)
-        this->theProver.TheObjects[currentIndex].ComputeDebugString(this->theProver.theWeylGroup, *tgv);
-      if (this->theProver.theIndexStack.size>0)
-      {	this->theProver.MakeProgressReportCurrentState(*this->theProver.theIndexStack.LastObject(), *tgv, this->theProver.theWeylGroup);
-        //this->theProver.theK.ComputeDebugString(*tgv);
-        //IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
-        //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-        //if (tgv->FeedDataToIndicatorWindowDefault!=0)
-         // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-      }
-    } else
-    { int currentIndex=*this->theProverFixedK.theIndexStack.LastObject();
-      if (currentIndex>=0)
-        this->theProverFixedK.TheObjects[currentIndex].ComputeDebugString(this->theProverFixedK.theWeylGroup, *tgv);
-      if (this->theProverFixedK.theIndexStack.size>0)
-      {	this->theProverFixedK.MakeProgressReportCurrentState(*this->theProverFixedK.theIndexStack.LastObject(), *tgv, this->theProverFixedK.theWeylGroup);
-        //this->theProver.theK.ComputeDebugString(*tgv);
-        //IndicatorWindowGlobalVariables.StatusString1=this->theProver.theK.DebugString;
-        //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-        //if (tgv->FeedDataToIndicatorWindowDefault!=0)
-         // tgv->FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-      }
-    }
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;
@@ -1941,6 +1939,23 @@ void root::ScaleToIntegralMinHeight()
 		this->ScaleToIntegralMinHeightHeavy();
 }
 
+void root::ReadFromFile(std::fstream& input)
+{	std::string tempS;
+	input>>tempS; assert(tempS=="root_dim:");
+	int tempI;
+	input>>tempI;
+	this->SetSizeExpandOnTopLight(tempI);
+	for (int i=0;i<this->size;i++)
+		this->TheObjects[i].ReadFromFile(input);
+}
+
+void root::WriteToFile(std::fstream &output)
+{	output<<"root_dim: " << this->size<<" ";
+	for (int i=0;i<this->size;i++)
+	{	this->TheObjects[i].WriteToFile(output);
+		output<<" ";
+	}
+}
 
 void root::DivByLargeIntUnsigned(LargeIntUnsigned& a)
 {	for (int i=0;i<this->size;i++)
@@ -2599,6 +2614,24 @@ void Selection::ExpandMaxSize()
 
 void Selection::ComputeDebugString()
 { this->ElementToString(this->DebugString);
+}
+
+void Selection::WriteToFile(std::fstream& output)
+{	output<<"Sel_max_size: " << this->MaxSize<<" cardinality: "<< this->CardinalitySelection<<" ";
+	for (int i=0;i<this->CardinalitySelection;i++)
+		output<<this->elements[i]<<" ";	
+}
+
+void Selection::ReadFromFile(std::fstream& input)
+{	std::string tempS; int tempI, card;
+	input>>tempS >>tempI;
+	this->init(tempI);
+	assert(tempI==72);
+	input>>tempS >>card;
+	for (int i=0;i<card;i++)
+	{	input>>tempI;	
+		this->AddSelectionAppendNewIndex(tempI);
+	}
 }
 
 void Selection::ElementToString(std::string& output)
@@ -7670,7 +7703,7 @@ void Rational::ReadFromFile(std::fstream& input)
 	if (tempS[0]=='-')
 	{ positionInTempS++;
 	}
-	static LargeIntUnsigned tempNum, tempDen;
+	LargeIntUnsigned tempNum, tempDen;
 	tempNum.MakeZero();
 	tempDen.MakeOne();
 	bool readingNumerator=true;
@@ -7691,6 +7724,9 @@ void Rational::ReadFromFile(std::fstream& input)
 			}
 		}
 	}
+	this->MakeOne();
+	this->DivideByLargeIntegerUnsigned(tempDen);
+	this->MultiplyByLargeIntUnsigned(tempNum);
 	if (tempS[0]=='-')
 	{ this->Minus();
 	}
@@ -14286,8 +14322,7 @@ void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational &output, in
 {	output.init((short)theDimension,(short)theDimension);
 	for (int i=0;i<theDimension;i++)
 		for (int j=0;j<theDimension;j++)
-			output.elements[i][j].Assign
-				(this->theWeylGroup.RootSystem.TheObjects[this->theSelection.elements[i]].TheObjects[j]);
+			output.elements[i][j].Assign(this->theWeylGroup.RootSystem.TheObjects[this->theSelection.elements[i]].TheObjects[j]);
 }
 
 void rootSubalgebra::ComputeAllButAmbientWeyl()
@@ -14300,8 +14335,7 @@ void rootSubalgebra::ComputeAllButAmbientWeyl()
 	this->ComputeCentralizerFromKModulesAndSortKModules();
 	this->NilradicalKmods.init(this->kModules.size);
 	this->theDynkinDiagram.ComputeDiagramType(this->SimpleBasisK,this->AmbientWeyl);
-	this->theCentralizerDiagram.ComputeDiagramType
-		(this->SimpleBasisCentralizerRoots,this->AmbientWeyl);
+	this->theCentralizerDiagram.ComputeDiagramType(this->SimpleBasisCentralizerRoots,this->AmbientWeyl);
 }
 
 void rootSubalgebra::ComputeAll()
@@ -14370,8 +14404,7 @@ void WeylGroup::TransformToSimpleBasisGenerators(roots& theGens)
 	}
 }
 
-void rootSubalgebra::ComputeExtremeWeightInTheSameKMod
-			(root& input, root& outputW, bool lookingForHighest)
+void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(root& input, root& outputW, bool lookingForHighest)
 { outputW.Assign(input);
 	for(bool FoundHigher=true;FoundHigher;)
 	{ FoundHigher=false;
@@ -14498,6 +14531,41 @@ bool rootSubalgebra::rootIsInCentralizer(root& input)
   }
   return true;
 }
+
+void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile (std::fstream &output, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites )
+{	output<< "pairing_table_size: "<< inMultTable.size<<"\n";
+	for (int i=0;i<inMultTable.size;i++)
+		for (int j=0;j<inMultTable.size;j++)
+		{	output << inMultTable.TheObjects[i].TheObjects[j].size<<" ";
+			for(int k=0;k<inMultTable.TheObjects[i].TheObjects[j].size;k++)
+				output<< inMultTable.TheObjects[i].TheObjects[j].TheObjects[k]<<" ";			
+		}
+	output<<"\nopposites: ";
+	for (int i=0;i<inMultTable.size;i++)
+		output<< inOpposites.TheObjects[i]<<" ";
+}
+
+void rootSubalgebra::ReadMultTableAndOppositeKmodsToFile(std::fstream& input, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites )
+{	std::string tempS; 
+	int tempI, theSize;
+	input>> tempS>> theSize;
+	outMultTable.SetSizeExpandOnTopNoObjectInit(theSize);
+	outOpposites.SetSizeExpandOnTopNoObjectInit(theSize);
+	for (int i=0;i<theSize;i++)
+	{	outMultTable.TheObjects[i].SetSizeExpandOnTopNoObjectInit(theSize);
+		for (int j=0;j<theSize;j++)
+		{	input>> tempI;
+			outMultTable.TheObjects[i].TheObjects[j].SetSizeExpandOnTopNoObjectInit(tempI);
+			for(int k=0;k<outMultTable.TheObjects[i].TheObjects[j].size;k++)
+				input>> outMultTable.TheObjects[i].TheObjects[j].TheObjects[k];			
+		}
+	}
+	input>> tempS;
+	for (int i=0;i<outMultTable.size;i++)
+		input>> outOpposites.TheObjects[i];
+	assert(tempS=="opposites:");
+}
+
 
 bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input)
 { root tempRoot;

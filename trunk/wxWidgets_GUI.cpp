@@ -951,6 +951,7 @@ void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
 
 void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+	MainWindow1->theComputationSetup.flagProverDoingFullRecursion=false;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->theComputationSetup.flagOpenFixedK=false;
   MainWindow1->theComputationSetup.flagSavingFixedK=false;  
@@ -971,7 +972,8 @@ void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->theComputationSetup.flagOpenFixedK=false;
   MainWindow1->theComputationSetup.flagSavingFixedK=true;  
-  MainWindow1->theComputationSetup.ProverFileName= "C:/math/rootFKFT/cpp/trunk/Debug/theProver.txt";
+  MainWindow1->theComputationSetup.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.ProverFileName.append( "theProver.txt");
   MainWindow1->RunTheComputation();
 }
 
@@ -981,7 +983,8 @@ void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent &ev)
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->theComputationSetup.flagOpenFixedK=true;
   MainWindow1->theComputationSetup.flagSavingFixedK=false;  
-  MainWindow1->theComputationSetup.ProverFileName= "C:/math/rootFKFT/cpp/trunk/Debug/theProver.txt";
+  MainWindow1->theComputationSetup.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.ProverFileName.append( "theProver.txt");
   MainWindow1->RunTheComputation();
 }
 
@@ -995,37 +998,34 @@ void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
 
 void guiMainWindow::onButton9CustomNilradical(wxCommandEvent& ev)
 {	this->theComputationSetup.flagDoCustomNilradical=true;
-	this->theComputationSetup.SetupCustomNilradicalInVPVectors
-    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
-	this->theComputationSetup.FullChop
-    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
+	this->theComputationSetup.SetupCustomNilradicalInVPVectors(*this->theComputationSetup.theGlobalVariablesContainer->Default());
+	this->theComputationSetup.FullChop(*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
 
 void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
-{
-    int candidateDim= this->Spin1Dim->GetValue();
-    int candidateNumVectors= this->Spin2NumVect->GetValue();
-    if (candidateDim!= this->theComputationSetup.WeylGroupIndex || candidateNumVectors!=this->NumVectors)
-    { if (candidateDim<1)
-      { candidateDim=1;
-         this->Spin1Dim->SetValue(1);
-      }
-      if (candidateNumVectors<1)
-      { candidateNumVectors=1;
-         this->Spin2NumVect->SetValue(1);
-      }
-      if (candidateDim>this->Table1Input->maxNumCols)
-      { candidateDim=this->Table1Input->maxNumCols;
-         this->Spin1Dim->SetValue(this->Table1Input->maxNumCols);
-      }
-      if (candidateNumVectors>this->Table1Input->maxNumRows)
-      { candidateNumVectors=this->Table1Input->maxNumRows;
-         this->Spin2NumVect->SetValue(this->Table1Input->maxNumRows);
-      }
-      this->initTableFromRowsAndColumns(candidateNumVectors,candidateDim);
+{	int candidateDim= this->Spin1Dim->GetValue();
+  int candidateNumVectors= this->Spin2NumVect->GetValue();
+  if (candidateDim!= this->theComputationSetup.WeylGroupIndex || candidateNumVectors!=this->NumVectors)
+  { if (candidateDim<1)
+    { candidateDim=1;
+       this->Spin1Dim->SetValue(1);
     }
+    if (candidateNumVectors<1)
+    { candidateNumVectors=1;
+       this->Spin2NumVect->SetValue(1);
+    }
+    if (candidateDim>this->Table1Input->maxNumCols)
+    { candidateDim=this->Table1Input->maxNumCols;
+       this->Spin1Dim->SetValue(this->Table1Input->maxNumCols);
+    }
+    if (candidateNumVectors>this->Table1Input->maxNumRows)
+    { candidateNumVectors=this->Table1Input->maxNumRows;
+       this->Spin2NumVect->SetValue(this->Table1Input->maxNumRows);
+    }
+    this->initTableFromRowsAndColumns(candidateNumVectors,candidateDim);
+  }
 }
 
 void guiMainWindow::updateInputButtons()

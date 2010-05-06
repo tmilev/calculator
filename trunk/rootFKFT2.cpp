@@ -467,7 +467,7 @@ void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK
   else
 		tempBool = !this->TheObjects[Index].theGmodLmodules.selected[indexModule]&& !this->TheObjects[Index].nonAlphas.ContainsObject(theRoot);
 	if (tempBool)
-  { newState.Assign(this->TheObjects[Index]);
+  { newState.initFromParentState(this->TheObjects[Index]);
 		if (AddAlpha)
 			newState.PartialRelation.Alphas.AddObjectOnTop(theRoot);
 		else

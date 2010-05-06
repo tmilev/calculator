@@ -350,6 +350,40 @@ bool ::minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, bool& o
 	return true;		
 }
 
+void minimalRelationsProverStateFixedK::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariables)
+{ output <<"Num_isos: " << this->indicesIsosRespectingInitialNilradicalChoice.size<<"\n";
+	for (int i=0;i<this->indicesIsosRespectingInitialNilradicalChoice.size;i++)
+		output <<this->indicesIsosRespectingInitialNilradicalChoice.TheObjects[i]<<" ";
+	output << "\nAlphas: ";
+	this->PartialRelation.Alphas.WriteToFile(output, theGlobalVariables);
+	output << "Betas: ";
+	this->PartialRelation.Betas.WriteToFile(output, theGlobalVariables);
+	output <<"Num_possible_children: " << this->PossibleChildStates.size<<"\n";
+	output <<"Active_child: " << this->activeChild<<"\n";
+	output <<"Children: ";
+	for (int i=0;i<this->PossibleChildStates.size;i++)
+		output <<this->PossibleChildStates.TheObjects[i]<<" ";
+}
+
+void ::minimalRelationsProverStateFixedK::ReadFromFile(	std::fstream &input, GlobalVariables&  theGlobalVariables)
+{	std::string tempS;
+	int tempI;
+	input>>tempS >> tempI;	assert(tempS=="Num_isos:");
+	this->indicesIsosRespectingInitialNilradicalChoice.SetSizeExpandOnTopNoObjectInit(tempI);
+	for (int i=0;i<this->indicesIsosRespectingInitialNilradicalChoice.size;i++)
+		input>>this->indicesIsosRespectingInitialNilradicalChoice.TheObjects[i];
+	input >>tempS;
+	this->PartialRelation.Alphas.ReadFromFile(input, theGlobalVariables);
+	input >> tempS;
+	this->PartialRelation.Betas.ReadFromFile(input, theGlobalVariables);
+	input >>tempS >> tempI;
+	this->PossibleChildStates.SetSizeExpandOnTopNoObjectInit(tempI);
+	input >>tempS >> this->activeChild;
+	input >>tempS;
+	for (int i=0;i<this->PossibleChildStates.size;i++)
+		input >>this->PossibleChildStates.TheObjects[i];
+}
+
 void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl)
 {	outputAGmodLhighest.size=0; outputNilradicalRoots.size=0;
 	for (int i=0; i<this->owner->theK.kModules.size; i++)
@@ -358,6 +392,43 @@ void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots
 		if (this->theGmodLmodules.selected[i])
 			outputAGmodLhighest.AddObjectOnTop(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
 	}
+}
+
+void ::minimalRelationsProverStatesFixedK::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output <<"Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.KillingFormMatrix.NumRows<<"\n";
+	output<<"Simple_basis_K: ";
+	this->theK.SimpleBasisK.WriteToFile(output, theGlobalVariables);
+	this->theIsos.WriteToFile(output, theGlobalVariables);
+	output<<"\nNum_states: "<< this->size<<"\n";
+	for (int i=0;i<this->size;i++)	
+		this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+}
+
+void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{	std::string tempS;
+	int tempI;
+	input >> tempS>> this->theWeylGroup.WeylLetter >> tempS>> tempI;
+	this->theWeylGroup.MakeArbitrary(this->theWeylGroup.WeylLetter, tempI);
+	input>> tempS;
+	this->theK.genK.ReadFromFile(input, theGlobalVariables);
+	this->theIsos.ReadFromFile(input, theGlobalVariables);
+	input>> tempS>> tempI;
+	this->SetSizeExpandOnTopNoObjectInit(tempI);
+	for(int i=0; i<this->size; i++)
+	{	this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+		this->TheObjects[i].owner=this;
+	}
+}
+
+void minimalRelationsProverStatesFixedK::WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
+{	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false);
+	this->WriteToFile(this->theFile,theGlobalVariables);
+}
+
+void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
+{	if(!rootFKFTcomputation::OpenDataFile(this->theFile, fileName))
+		return;
+	this->ReadFromFile(this->theFile, theGlobalVariables);
 }
 
 void minimalRelationsProverState::Assign(const minimalRelationsProverState& right)

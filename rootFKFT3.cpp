@@ -147,7 +147,24 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
 	this->theIndexStack.AddObjectOnTop(0);
 	this->TheObjects[0].activeChild=-1;
   this->MakeProgressReportCurrentState(0,TheGlobalVariables, this->theWeylGroup);
+  //this->WriteToFile(TheGlobalVariables);
+  this->theFile.flush();
   this->flagComputationIsInitialized=true;
+}
+
+void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{	output << "generator_reflections: ";
+	this->simpleGenerators.WriteToFile(output, theGlobalVariables);
+	output <<"\nouter_generators: ";
+	this->ExternalAutomorphisms.WriteToFile(output, theGlobalVariables);
+}
+
+void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{	std::string tempS;
+	input>> tempS;
+	this->simpleGenerators.ReadFromFile(input, theGlobalVariables);
+	input>> tempS;
+	this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
 }
 
 void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
@@ -375,6 +392,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 				{	this->InvokeExtensionOfState(index, minNumChildren, oneBetaIsPositive, tempNormal, true, theWeyl, TheGlobalVariables);
 					if (this->size-oldSize<minNumChildren)
 					{	NormalSeparatingCones.Assign(tempNormal);
+						theWeyl.GetEpsilonCoords(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
 						minNumChildren=this->size-oldSize;
 					}
 					this->size=oldSize;
@@ -404,7 +422,7 @@ void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState
 	{ this->TestAddingExtraRootFixedK
 			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
 		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
-		if (UpperLimitChildren>0)
+		if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
 	}
@@ -413,7 +431,7 @@ void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState
 			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
 		this->MakeProgressReportChildStates
 			( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
-		if (UpperLimitChildren>0)
+		if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
 	}

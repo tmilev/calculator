@@ -54,29 +54,25 @@ public:
 class wxGridExtra : public wxGrid
 {
 public:
-    int maxNumCols;
-    int maxNumRows;
-    void SetNumRowsAndCols(int r, int c);
-    wxGridExtra( wxWindow *parent,
-                 wxWindowID id,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
-                 long style = wxWANTS_CHARS,
-                 const wxString& name = wxT("") );
+	int maxNumCols;
+	int maxNumRows;
+	void SetNumRowsAndCols(int r, int c);
+	wxGridExtra
+		( wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxWANTS_CHARS, const wxString& name = wxT("") );
 };
 
 class WorkThreadClass
 {
 public:
 #ifdef WIN32
-    HANDLE ComputationalThread;
+	HANDLE ComputationalThread;
 #else
-    pthread_t ComputationalThreadLinux;
+	pthread_t ComputationalThreadLinux;
 #endif
-    bool isRunning;
-    bool CriticalSectionWorkThreadEntered;
-    bool CriticalSectionPauseButtonEntered;
-    void run();
+  bool isRunning;
+  bool CriticalSectionWorkThreadEntered;
+  bool CriticalSectionPauseButtonEntered;
+  void run();
 };
 
 class wxComboBoxWheel : public wxComboBox
@@ -192,6 +188,8 @@ public:
 	::wxButton* Button11ProverFullComputation;
 	::wxButton* Button12ProverOneStepFixedK;
 	::wxButton* Button13ProverFullComputationFixedK;
+	::wxButton* Button14ProverFixedKSave;
+	::wxButton* Button15ProverFixedKOpen;	
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -221,6 +219,8 @@ public:
   void onButton11ProverFullComputation(wxCommandEvent& ev);
   void onButton12ProverOneStepFixedK(wxCommandEvent& ev);
   void onButton13ProverFullComputationFixedK(wxCommandEvent& ev);
+  void onButton14ProverProverFixedKSave(wxCommandEvent& ev);
+  void onButton15ProverFixedKOpen(wxCommandEvent& ev);
   void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
@@ -266,6 +266,8 @@ public:
 		ID_Button11ProverFullComputation,
 		ID_Button12ProverOneStepFixedK,
 		ID_Button13ProverFullComputationFixedK,
+		ID_Button14ProverFixedKSave,
+		ID_Button15ProverFixedKOpen,
 		ID_RBGroup1SliceOptions,
     ID_Spin1Dim,
     ID_Spin2NumVect,
@@ -396,6 +398,8 @@ BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
     EVT_BUTTON(guiMainWindow::ID_Button11ProverFullComputation, guiMainWindow::onButton11ProverFullComputation)
     EVT_BUTTON(guiMainWindow::ID_Button12ProverOneStepFixedK, guiMainWindow::onButton12ProverOneStepFixedK)
     EVT_BUTTON(guiMainWindow::ID_Button13ProverFullComputationFixedK, guiMainWindow::onButton13ProverFullComputationFixedK)
+    EVT_BUTTON(guiMainWindow::ID_Button14ProverFixedKSave, guiMainWindow::onButton14ProverProverFixedKSave)
+    EVT_BUTTON(guiMainWindow::ID_Button15ProverFixedKOpen, guiMainWindow::onButton15ProverFixedKOpen)
 END_EVENT_TABLE()
 
 wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title,
@@ -476,12 +480,9 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output);
 
 guiMainWindow::guiMainWindow()
-        : wxFrame( (wxFrame *)NULL, guiMainWindow::ID_MainWindow,
-                   wxT("Vector partition function v0.101 (eating RAM for breakfast)"),
-                   wxPoint(100,100),
-                   wxSize(800,600),
-                   wxRESIZE_BORDER| wxCAPTION
-                   | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
+        : wxFrame
+						(	(wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("Vector partition function v0.101 (eating RAM for breakfast)"),
+							wxPoint(100,100), wxSize(800,600), wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
 {	//this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
@@ -504,8 +505,7 @@ guiMainWindow::guiMainWindow()
   this->BoxSizer15HorizontalSlicingButtons= new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer16VerticalStatusString= new wxBoxSizer(wxVERTICAL);
   this->BoxSizer17HorizontalProverButtons=  new ::wxBoxSizer(wxHORIZONTAL);
-  this->ToggleButton1UsingCustom= new ::wxToggleButton
-		(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
+  this->ToggleButton1UsingCustom= new ::wxToggleButton(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
   this->Table3Values = new wxGridExtra( this,::wxID_ANY);
@@ -514,8 +514,7 @@ guiMainWindow::guiMainWindow()
   this->Label3ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
   this->Label4ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
   this->Label5ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Label9OutputVPF= new ::wxStaticText
-		(this,wxID_ANY, wxT("Vector partition function LaTex format:"));
+  this->Label9OutputVPF= new ::wxStaticText(this,wxID_ANY, wxT("Vector partition function LaTex format:"));
   this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
   this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
   this->CheckBox1ComputePFs= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Don't compute PF"));
@@ -524,14 +523,12 @@ guiMainWindow::guiMainWindow()
   tempS[0].assign(wxT("Full chop"));
   tempS[1].assign(wxT("One increment"));
   tempS[2].assign(wxT("Single slice"));
-  this->RBGroup1SlicingOptions= new ::wxRadioBox
-		(	this,this->ID_RBGroup1SliceOptions,wxT("Slicing options"), ::wxDefaultPosition,::wxDefaultSize,3,tempS);
+  this->RBGroup1SlicingOptions= new wxRadioBox(this, this->ID_RBGroup1SliceOptions, wxT("Slicing options"), wxDefaultPosition, wxDefaultSize, 3, tempS);
   this->CheckBox3ComputeChambers= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Compute chambers"));
   this->CheckBox4ChamberLabels=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Chamber labels"));
   this->CheckBox5InvisibleChambers=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
   this->CheckBox6Dashes=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
-  this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox
-		(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
+  this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
 	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Act by Weyl group"));
   //this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   //this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
@@ -543,7 +540,7 @@ guiMainWindow::guiMainWindow()
   this->theFont= new ::wxFont(10,wxDEFAULT, wxNORMAL,wxNORMAL);
   this->ListBox1WeylGroup= new ::wxComboBoxWheel
     ( this,this->ID_ListBox1,wxT("A3"), wxPoint(0,0),::wxDefaultSize// wxSize(this->DefaultButtonWidth, this->DefaultButtonHeight)
-       ,0,0,wxCB_DROPDOWN  );
+      ,0,0,wxCB_DROPDOWN  );
   this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
@@ -555,26 +552,21 @@ guiMainWindow::guiMainWindow()
 	//this->Button9CustomNilradical= new wxButton(this,this->ID_Button9CustomNilradical,wxT("Custom nilradical"));
   this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
   this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
-  this->Dialog1OutputPF= new ::wxDialogOutput
-    ( this,guiMainWindow::ID_Dialog1,wxT("Partial fractions"),
-      ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
+  this->Dialog1OutputPF= new ::wxDialogOutput ( this,guiMainWindow::ID_Dialog1, wxT("Partial fractions"), ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
   this->Dialog2StatusString1=  new ::wxDialogOutput
     ( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
-  this->Text3PartialFractions= new ::wxTextCtrl
-		(	this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
-  this->Text4StatusString1 = new wxTextCtrl
-    ( this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize, wxTE_MULTILINE);
+  this->Text3PartialFractions= new ::wxTextCtrl (	this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
+  this->Text4StatusString1 = new wxTextCtrl ( this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize, wxTE_MULTILINE);
   this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton
-		(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers,
-			wxT("Switch to chamber data"));
-  this->Button4SaveReadable = new ::wxButton
-		(this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
-  this->Button5SaveComputer = new ::wxButton
-		(this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
+		(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, wxT("Switch to chamber data"));
+  this->Button4SaveReadable = new ::wxButton (this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
+  this->Button5SaveComputer = new ::wxButton (this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
 	this->Button10ProverOneStep = new ::wxButton(this->Dialog2StatusString1,this->ID_Button10ProverOneStep,wxT("Prover one step "));
 	this->Button11ProverFullComputation = new ::wxButton(this->Dialog2StatusString1,this->ID_Button11ProverFullComputation,wxT("Prover full go"));
 	this->Button12ProverOneStepFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button12ProverOneStepFixedK,wxT("Prover one step fixed K"));
 	this->Button13ProverFullComputationFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button13ProverFullComputationFixedK,wxT("Prover full go Fixed K"));
+	this->Button14ProverFixedKSave= new ::wxButton(this->Dialog2StatusString1,this->ID_Button14ProverFixedKSave,wxT("Save fixed K"));
+	this->Button15ProverFixedKOpen= new ::wxButton(this->Dialog2StatusString1,this->ID_Button15ProverFixedKOpen,wxT("Open fixed K"));
 	this->Button5SaveComputer->Disable();
   //this->BoxSizer1HorizontalBackground->Fit(this);
   this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
@@ -635,7 +627,9 @@ guiMainWindow::guiMainWindow()
 		this->BoxSizer17HorizontalProverButtons->Add(this->Button11ProverFullComputation);
 		this->BoxSizer17HorizontalProverButtons->Add(this->Button12ProverOneStepFixedK);
 		this->BoxSizer17HorizontalProverButtons->Add(this->Button13ProverFullComputationFixedK);
-  this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
+		this->BoxSizer17HorizontalProverButtons->Add(this->Button14ProverFixedKSave);
+		this->BoxSizer17HorizontalProverButtons->Add(this->Button15ProverFixedKOpen);
+	this->Dialog1OutputPF->SetSizer(this->BoxSizer13VerticalPartFracOutput);
   this->Dialog2StatusString1->SetSizer(this->BoxSizer16VerticalStatusString);
 
 //this->Panel1OutputPF->Create(this,::wxID_ANY, ::wxDefaultPosition, ::wxDefaultSize);
@@ -710,8 +704,7 @@ guiMainWindow::guiMainWindow()
   this->initWeylGroupInfo();
   this->updateInputButtons();
   this->SetSizer(this->BoxSizer1HorizontalBackground);
-  this->theComputationSetup.theGlobalVariablesContainer->Default()
-			->FeedDataToIndicatorWindowDefault=&FeedDataToIndicatorWindowWX;
+  this->theComputationSetup.theGlobalVariablesContainer->Default()->FeedDataToIndicatorWindowDefault=&FeedDataToIndicatorWindowWX;
 #ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
@@ -794,8 +787,7 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
-	{	MainWindow1->theComputationSetup.WriteReportToFile
-		(::TDV,tempFile,*MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
+	{	MainWindow1->theComputationSetup.WriteReportToFile(::TDV,tempFile,*MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
 	}
 	tempFile.close();
 }
@@ -836,11 +828,8 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
     dc.DrawRectangle(wxPoint(0,0),this->GetSize());
     ::CombinatorialChamberContainer::drawOutput
-			(	::TDV,MainWindow1->theComputationSetup.theChambers,
-				MainWindow1->theComputationSetup.InputRoots,
-				MainWindow1->theComputationSetup.NextDirectionIndex,
-				MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0,
-				&drawline, &drawtext);
+			(	::TDV,MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.InputRoots, MainWindow1->theComputationSetup.NextDirectionIndex,
+				MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
   }
 }
 
@@ -909,9 +898,7 @@ void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 }
 
 void guiMainWindow::OpenFile(std::fstream& output)
-{ wxFileDialog* OpenDialog = new wxFileDialog
-    ( this, wxT("Choose a file to open"), wxEmptyString,
-      wxEmptyString,wxT("Text files (*.tex)|*.tex"),wxSAVE, wxDefaultPosition);
+{ wxFileDialog* OpenDialog = new wxFileDialog ( this, wxT("Choose a file to open"), wxEmptyString, wxEmptyString,wxT("Text files (*.tex)|*.tex"),wxSAVE, wxDefaultPosition);
   output.close();
   if (OpenDialog->ShowModal() == wxID_OK)
   { wxString CurrentDocPath = OpenDialog->GetPath();
@@ -936,8 +923,7 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
 void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
 { this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
-	this->theComputationSetup.oneStepChamberSlice
-    (*this->theComputationSetup.theGlobalVariablesContainer->Default());
+	this->theComputationSetup.oneStepChamberSlice(*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
   this->Refresh();
 }
@@ -966,6 +952,8 @@ void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
 void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
+  MainWindow1->theComputationSetup.flagOpenFixedK=false;
+  MainWindow1->theComputationSetup.flagSavingFixedK=false;  
   MainWindow1->RunTheComputation();
 }
 
@@ -973,6 +961,27 @@ void guiMainWindow::onButton13ProverFullComputationFixedK(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
+  MainWindow1->theComputationSetup.flagOpenFixedK=false;
+  MainWindow1->theComputationSetup.flagSavingFixedK=false;  
+  MainWindow1->RunTheComputation();
+}
+
+void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
+{ MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+  MainWindow1->theComputationSetup.flagProverUseFixedK=true;
+  MainWindow1->theComputationSetup.flagOpenFixedK=false;
+  MainWindow1->theComputationSetup.flagSavingFixedK=true;  
+  MainWindow1->theComputationSetup.ProverFileName= "C:/math/rootFKFT/cpp/trunk/Debug/theProver.txt";
+  MainWindow1->RunTheComputation();
+}
+
+void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent &ev)
+{ MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
+  MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+  MainWindow1->theComputationSetup.flagProverUseFixedK=true;
+  MainWindow1->theComputationSetup.flagOpenFixedK=true;
+  MainWindow1->theComputationSetup.flagSavingFixedK=false;  
+  MainWindow1->theComputationSetup.ProverFileName= "C:/math/rootFKFT/cpp/trunk/Debug/theProver.txt";
   MainWindow1->RunTheComputation();
 }
 
@@ -998,8 +1007,7 @@ void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
 {
     int candidateDim= this->Spin1Dim->GetValue();
     int candidateNumVectors= this->Spin2NumVect->GetValue();
-    if (candidateDim!= this->theComputationSetup.WeylGroupIndex ||
-            candidateNumVectors!=this->NumVectors)
+    if (candidateDim!= this->theComputationSetup.WeylGroupIndex || candidateNumVectors!=this->NumVectors)
     { if (candidateDim<1)
       { candidateDim=1;
          this->Spin1Dim->SetValue(1);
@@ -1072,8 +1080,7 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 						 this->theComputationSetup.NumRowsNilradical=2; newWeylGroupLetter='A'; DoingCustomNilradical= true; break;
   }
 	if(!DoingCustomNilradical)
-	{	if (!(newWeylGroupLetter==this->theComputationSetup.WeylGroupLetter &&
-					newWeylGroupIndex==this->theComputationSetup.WeylGroupIndex))
+	{	if (!(newWeylGroupLetter==this->theComputationSetup.WeylGroupLetter && newWeylGroupIndex==this->theComputationSetup.WeylGroupIndex))
 		{ this->theComputationSetup.WeylGroupLetter=newWeylGroupLetter;
 			this->theComputationSetup.WeylGroupIndex=newWeylGroupIndex;
 			this->initWeylGroupInfo();
@@ -1107,8 +1114,7 @@ void guiMainWindow::initWeylGroupInfo()
 {	if (!this->theComputationSetup.flagUsingCustomVectors)
   {	if (!this->theComputationSetup.flagDoCustomNilradical)
 		{	WeylGroup tempW;
-			tempW.MakeArbitrary
-				(this->theComputationSetup.WeylGroupLetter,this->theComputationSetup.WeylGroupIndex);
+			tempW.MakeArbitrary(this->theComputationSetup.WeylGroupLetter,this->theComputationSetup.WeylGroupIndex);
 			tempW.ComputeRho(true);
 			this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);
 			this->NumVectors=this->theComputationSetup.VPVectors.size;
@@ -1130,8 +1136,7 @@ void guiMainWindow::initWeylGroupInfo()
 
 void guiMainWindow::initTableFromVPVectors()
 {	int theDimension=	this->theComputationSetup.WeylGroupIndex;
-  this->initTableFromRowsAndColumns
-		(this->theComputationSetup.VPVectors.size,theDimension);
+  this->initTableFromRowsAndColumns(this->theComputationSetup.VPVectors.size,theDimension);
 	root tempRoot;
   tempRoot.MakeZero(theDimension);
   for (int i=0;i<this->theComputationSetup.VPVectors.size;i++)
@@ -1164,8 +1169,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 	{ this->theComputationSetup.Reset();
 	}
   this->theComputationSetup.flagDoingWeylGroupAction= tempBool;
-  this->theComputationSetup.flagUsingIndicatorRoot=
-    !this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
+  this->theComputationSetup.flagUsingIndicatorRoot=!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
   this->ReadRBData();
   TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
   TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
@@ -1251,8 +1255,7 @@ void guiMainWindow::TurnOffAllDangerousButtons()
   MainWindow1->ToggleButton1UsingCustom->Disable();
 }
 
-wxGridExtra::wxGridExtra
-  (	wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style, const wxString &name)
+wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style, const wxString &name)
 {	this->maxNumCols=8;
   this->maxNumRows=120;
   this->Create(parent,id,pos,size,style,name);
@@ -1331,8 +1334,7 @@ void guiMainWindow::ReadSettingsIfAvailable()
   out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
   std::string tempS;
   tempS= out.str();
-  if (rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent2
-				(this->fileSettings,tempS,false,false))
+  if (rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent2(this->fileSettings,tempS,false,false))
   {	wxPoint tempPt, tempPt2, tempPt3;
     wxSize tempSize, tempSize2, tempSize3;
     this->fileSettings.seekg(0);
@@ -1383,20 +1385,17 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 }
 
 void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
-{
-    TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
-    TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
-    TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
-    this->Refresh();
+{	TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
+  TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
+  TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
+  this->Refresh();
 }
 
 void guiMainWindow::ReadRBData()
 {	switch(this->RBGroup1SlicingOptions->GetSelection())
-	{ case 0: this->theComputationSetup.flagFullChop=true;					break;
-		case 1: this->theComputationSetup.flagFullChop=false;
-						this->theComputationSetup.flagOneIncrementOnly=true;	break;
-		case 2: this->theComputationSetup.flagFullChop=false;
-						this->theComputationSetup.flagOneIncrementOnly=false; break;
+	{ case 0: this->theComputationSetup.flagFullChop=true; break;
+		case 1: this->theComputationSetup.flagFullChop=false; this->theComputationSetup.flagOneIncrementOnly=true;	break;
+		case 2: this->theComputationSetup.flagFullChop=false; this->theComputationSetup.flagOneIncrementOnly=false; break;
 	}
 }
 

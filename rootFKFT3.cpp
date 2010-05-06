@@ -82,6 +82,16 @@ int minimalRelationsProverStatesFixedK::GetModuleIndex(root& input)
 	return this->IndexKmoduleByRoots.TheObjects[tempI];
 }
 
+void minimalRelationsProverStatesFixedK::initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{ this->theK.AmbientWeyl.Assign(this->theWeylGroup);
+	this->theK.ComputeAll();
+  this->IndexKmoduleByRoots.SetSizeExpandOnTopNoObjectInit(this->theWeylGroup.RootSystem.size);
+  for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
+		this->IndexKmoduleByRoots.TheObjects[i]=this->theK.GetIndexKmoduleContainingRoot(this->theWeylGroup.RootSystem.TheObjects[i]);
+  this->theIsos.AmbientWeyl.Assign(this->theWeylGroup);
+
+}
+
 void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
 { minimalRelationsProverStateFixedK tempState; tempState.owner=this;
 	this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
@@ -94,20 +104,14 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   this->invertedCartan.Invert(TheGlobalVariables);
   //this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
   this->size=0;
-  this->theK.AmbientWeyl.Assign(this->theWeylGroup);
   this->theK.genK.SetSizeExpandOnTopNoObjectInit(4);
   this->theK.genK.TheObjects[0].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
   this->theK.genK.TheObjects[1].InitFromIntegers(8, 0,1,0,0,0,0,0,0);
   this->theK.genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
   this->theK.genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
-  this->theK.ComputeAll();
-  this->IndexKmoduleByRoots.SetSizeExpandOnTopNoObjectInit(this->theWeylGroup.RootSystem.size);
-  for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
-		this->IndexKmoduleByRoots.TheObjects[i]=this->theK.GetIndexKmoduleContainingRoot(this->theWeylGroup.RootSystem.TheObjects[i]);
-  this->theK.GenerateAutomorphisms(this->theK, TheGlobalVariables, &this->theIsos, true);
+	this->initShared(this->theWeylGroup,TheGlobalVariables);
+	this->theK.GenerateAutomorphisms(this->theK, TheGlobalVariables, &this->theIsos, true);
   this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods,TheGlobalVariables);
-  this->theK.ComputeDebugString(TheGlobalVariables);
-  this->theIsos.AmbientWeyl.Assign(this->theWeylGroup);
   this->theIsos.simpleGenerators.size=0;
   this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, TheGlobalVariables, 20000, true);
   tempState.theNilradicalModules.init(this->theK.kModules.size);
@@ -120,7 +124,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( Computati
   selCentralizerNilradical.init(this->theK.SimpleBasisCentralizerRoots.size);
   roots InitialCentralizerNilradicalChoicePositiveSimpleRoots, tempRoots, tempRoots2;
   for (int i=0; i<numParabolics; i++)
-  { tempState.Assign(this->TheObjects[0]);
+  { tempState.initFromParentState(this->TheObjects[0]);
     for (int j=0; j<this->theWeylGroup.RootSystem.size; j++)
     { root& tempRoot=this->theWeylGroup.RootSystem.TheObjects[j];
       if (this->theK.rootIsInCentralizer(tempRoot))
@@ -360,7 +364,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 	if (this->TheObjects[index].PartialRelation.Alphas.size==0 && this->TheObjects[index].PartialRelation.Betas.size==0)
 	{	::minimalRelationsProverStateFixedK theNewState;
 		for (int i=0;i<this->theK.HighestWeightsGmodK.size;i++)
-		{ theNewState.Assign(this->TheObjects[index]);
+		{ theNewState.initFromParentState(this->TheObjects[index]);
 			theNewState.PartialRelation.Alphas.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
 			theNewState.theChoicesWeMake.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
 			this->ExtensionStepFixedK(index, theWeyl, TheGlobalVariables, theNewState);
@@ -386,8 +390,12 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
     if (this->flagSearchForOptimalSeparatingRoot)
 		{	int minNumChildren=theWeyl.RootSystem.size;
 			int oldSize=this->size;
-			for (int i=0;	i<theWeyl.RootsOfBorel.size; i++)
-			{ root& tempNormal= theWeyl.RootsOfBorel.TheObjects[i];
+			root tempNormal;
+			for (int i=-1;	i<theWeyl.RootsOfBorel.size; i++)
+			{ if (i!=-1) 
+					tempNormal= theWeyl.RootsOfBorel.TheObjects[i];
+				else
+					tempNormal= NormalSeparatingCones;
 				if (this->TheObjects[index].IsSeparatingCones(tempNormal, oneBetaIsPositive, theWeyl))
 				{	this->InvokeExtensionOfState(index, minNumChildren, oneBetaIsPositive, tempNormal, true, theWeyl, TheGlobalVariables);
 					if (this->size-oldSize<minNumChildren)
@@ -407,6 +415,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 				}
 			}
 		}
+		this->TheObjects[index].SeparatingNormalUsed.Assign(NormalSeparatingCones);
 		this->InvokeExtensionOfState(index,-1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, TheGlobalVariables);
   }
   else
@@ -462,10 +471,11 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
 	for(int i=0;i<this->owner->theK.kModules.size;i++)
     if (!this->theNilradicalModules.selected[i]&& !this->theGmodLmodules.selected[i])
     { for (int k=0; k<this->PartialRelation.Alphas.size; k++)
-        if (theWeyl.IsARoot(this->PartialRelation.Alphas.TheObjects[k]+this->owner->theK.HighestWeightsGmodK.TheObjects[i]))
+      { if (theWeyl.IsARoot(this->PartialRelation.Alphas.TheObjects[k]+this->owner->theK.HighestWeightsGmodK.TheObjects[i]))
         { this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
           break;
         }
+       }
       for (int j=0;j<this->owner->theK.kModules.TheObjects[i].size;j++)
       { root& theRoot= this->owner->theK.kModules.TheObjects[i].TheObjects[j];
         for (int k=0; k<this->PartialRelation.Betas.size; k++)

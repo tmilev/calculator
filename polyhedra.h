@@ -783,6 +783,8 @@ public:
 	void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
 	void incrementSelectionFixedCardinality(int card);
 	void Assign(const Selection& right);
+	void WriteToFile(std::fstream& output);
+	void ReadFromFile(std::fstream& input);
 	inline void operator=(const Selection& right){this->Assign(right);};
 	//warning: to call the comparison operator sucessfully, cardinalitySelection must
 	//be properly computed!
@@ -1611,6 +1613,8 @@ public:
 	void MinusRoot();
 	void Subtract(const root& r);
 	void AssignWithoutLastCoordinate(root& right);
+	void ReadFromFile(std::fstream& input);
+	void WriteToFile(std::fstream& output);
 	inline void Assign(const root& right)
 	{ if (this->size!=right.size)
 			this->SetSizeExpandOnTopLight(right.size);
@@ -5706,42 +5710,23 @@ public:
 	std::string stringConnectedComponents;
 	void ComputeDiagramRelAndK(rootSubalgebra& owner);
 	void FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational>& coeffs);
-	void RelationOneSideToString
-    ( std::string& output, const std::string& letterType,
-			ListBasicObjects<Rational>& coeffs,
-      ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots,
-			bool useLatex, rootSubalgebra& owner);
-	void GetEpsilonCoords
-		(	roots& input, roots& output, WeylGroup& theWeyl,
-			GlobalVariables& theGlobalVariables);
-	int ElementToString
-		(	std::string &output, rootSubalgebras& owners, bool useLatex,
-			bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
+	void RelationOneSideToString 
+		(	std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
+	void GetEpsilonCoords(	roots& input, roots& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
+	int ElementToString(	std::string &output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
 	int RootsToScalarProductString
-		(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft,
-			const std::string& letterTypeRight,
-			std::string& output, bool useLatex,
+		(	roots& inputLeft, roots& inputRight,const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex,
 			rootSubalgebra& owner);
-	void ComputeConnectedComponents
-		(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
-	void ComputeDebugString
-		(	rootSubalgebras& owner, bool includeScalarsProducts,
-			bool includeMixedScalarProducts)
-	{	this->ElementToString
-			(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
+	void ComputeConnectedComponents(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
+	void ComputeDebugString(	rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts)
+	{	this->ElementToString(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
 	};
 	void MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots);
-	bool IsStrictlyWeaklyProhibiting
-		(	rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables,
-			rootSubalgebras& owners, int indexInOwner);
+	bool IsStrictlyWeaklyProhibiting(	rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner);
 	void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
-	bool leftSortedBiggerThanOrEqualToRight
-		(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
-	void ComputeKComponents
-		(	roots& input, ListBasicObjects<ListBasicObjects<int> >& output,
-			rootSubalgebra& owner);
-	void RelationOneSideToStringCoordForm
-		(std::string& output,	ListBasicObjects<Rational>& coeffs,	roots& theRoots, bool EpsilonForm);
+	bool leftSortedBiggerThanOrEqualToRight(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
+	void ComputeKComponents(	roots& input, ListBasicObjects<ListBasicObjects<int> >& output, rootSubalgebra& owner);
+	void RelationOneSideToStringCoordForm(std::string& output,	ListBasicObjects<Rational>& coeffs,	roots& theRoots, bool EpsilonForm);
 	void GetSumAlphas(root& output, int theDimension);
 	bool CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots);
 	void SortRelation(rootSubalgebra& owner);
@@ -5939,6 +5924,8 @@ public:
 	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2 (	GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
 	bool LinCombToStringDistinguishedIndex(	int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
+	void WriteMultTableAndOppositeKmodsToFile	(std::fstream& output, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& inMultTable,ListBasicObjects<int>& inOpposites );
+	void ReadMultTableAndOppositeKmodsToFile	(std::fstream& input, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& outMultTable,ListBasicObjects<int>& outOpposites );
 };
 
 class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
@@ -5966,15 +5953,12 @@ public:
 	bool flagComputeConeCondition;
 	bool flagLookingForMinimalRels;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
-	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-		( Selection& targetSel,	GlobalVariables& theGlobalVariables);
+	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical( Selection& targetSel,	GlobalVariables& theGlobalVariables);
 	bool ApproveSelAgainstOneGenerator( ListBasicObjects<int>& generator,	Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void RaiseSelectionUntilApproval( Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void ApplyOneGenerator( ListBasicObjects<int>& generator, Selection& targetSel,	GlobalVariables& theGlobalVariables);
-	void ComputeActionNormalizerOfCentralizerIntersectNilradical
-		( Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-	void GenerateAllRootSubalgebrasUpToIsomorphism
-		( GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank,  bool sort, bool computeEpsCoords);
+	void ComputeActionNormalizerOfCentralizerIntersectNilradical( Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+	void GenerateAllRootSubalgebrasUpToIsomorphism( GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank,  bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism
@@ -5995,10 +5979,8 @@ public:
 			std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 	{	this->ElementToString( this->DebugString,useLatex, useHtml,includeKEpsCoords, htmlPathPhysical, htmlPathServer,theGlobalVariables);
 	};
-	void MakeProgressReportGenerationSubalgebras
-		( rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables, int currentIndex, int TotalIndex);
-	void MakeProgressReportAutomorphisms
-		( ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+	void MakeProgressReportGenerationSubalgebras( rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables, int currentIndex, int TotalIndex);
+	void MakeProgressReportAutomorphisms( ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
 	{ this->flagUseDynkinClassificationForIsomorphismComputation=false;
     this->flagComputingLprohibitingWeights=false;
@@ -6250,6 +6232,7 @@ public:
   bool flagNeedsAdditionOfPositiveKroots;
   Selection theGmodLmodules;
   Selection theNilradicalModules;
+  root SeparatingNormalUsed;
   roots nonAlphas;
   roots nonBetas;
   ListBasicObjects<int > indicesIsosRespectingInitialNilradicalChoice;
@@ -6265,6 +6248,7 @@ public:
   ListBasicObjects<int> CompleteChildStates;
   int activeChild;
   minimalRelationsProverStatesFixedK* owner;
+  void initFromParentState(minimalRelationsProverStateFixedK& parent);
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
@@ -6323,6 +6307,7 @@ public:
   void PrepareKIsos();
   int GetModuleIndex(root& input);
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GetIsoTypicComponents
     ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl,
       GlobalVariables& TheGlobalVariables);

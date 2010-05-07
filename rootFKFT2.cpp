@@ -10,8 +10,8 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
  // this->nonBKSingularGmodLRoots.ComputeDebugString();
 	for (int j=0;j<theWeyl.RootSystem.size;j++)
 	{ root& tested=theWeyl.RootSystem.TheObjects[j];
-	  for (int i=0;i<this->BKSingularGmodLRoots.size;i++)
-		{ tempRoot= this->BKSingularGmodLRoots.TheObjects[i]+tested;
+	  for (int i=0; i<this->BKSingularGmodLRoots.size;i++)
+		{ tempRoot = this->BKSingularGmodLRoots.TheObjects[i]+tested;
 			if (theWeyl.IsARoot(tempRoot))
 			{ this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(tested);
         this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(tested);
@@ -114,7 +114,8 @@ bool minimalRelationsProverState::CanBeShortened
   }
   root MinusCandidate = -Candidate;
   if (theWeyl.IsARoot(Candidate))
-  { if( !bothSelsAreMaximal)
+  {	this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+		if( !bothSelsAreMaximal)
     { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
       if (this->NilradicalRoots.ContainsObject(Candidate))
 				return true;
@@ -176,6 +177,8 @@ bool minimalRelationsProverStateFixedK::CanBeShortened
 		int indexModuleMinusCandidate=this->owner->GetModuleIndex(MinusCandidate);
 		if (indexModuleCandidate==-1)
 		{ assert(indexModuleMinusCandidate==-1);
+			if (Candidate.IsNegativeOrZero())
+				return false;
 			if (selAlphas.CardinalitySelectionWithMultiplicities()==0&& selBetas.CardinalitySelectionWithMultiplicities()!=0)
 				return false;
 		}
@@ -298,7 +301,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
   this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
 	if (!this->TheObjects[index].StateIsPossible || this->TheObjects[index].StateIsComplete)
     return;
-  if (this->TheObjects[index].theChoicesWeMake.size>=8)
+/*  if (this->TheObjects[index].theChoicesWeMake.size>=8)
     if (this->TheObjects[index].flagNeedsAdditionOfPositiveKroots)
     { minimalRelationsProverState& theState=this->TheObjects[index];
       minimalRelationsProverState newState;
@@ -315,13 +318,13 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
         if (theState.StateAllowsPositiveKChoice(theWeyl.RootSystem.TheObjects[j] ,firstRoot, TheGlobalVariables, theWeyl))
         { this->MakeProgressReportChildStates(Counter2,TotalCounter,this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
           Counter2++;
-          newState.Assign(theState);
+          newState.initFromParent(theState);
           newState.ChosenPositiveKroots.AddObjectOnTop(theWeyl.RootSystem.TheObjects[j]);
           newState.nonLNonSingularsAleviatedByChosenPosKRoots.AddObjectOnTop(theWeyl.RootSystem.TheObjects[j]);
           this->ExtensionStep(index, theWeyl,TheGlobalVariables,newState);
         }
       return;
-    }
+    }*/
 	root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
 	this->TheObjects[index].PossibleChildStates.size=0;
 	minimalRelationsProverState newState;
@@ -351,7 +354,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
       for(int i=0;i<theWeyl.RootSystem.size;i++)
       { root& newRoot= theWeyl.RootSystem.TheObjects[i];
         if(!this->TheObjects[index].nonNilradicalRoots.ContainsObject(newRoot) && !this->TheObjects[index].PartialRelation.Betas.ContainsObject(newRoot))
-        { newState.Assign(this->TheObjects[index]);
+        { newState.initFromParent(this->TheObjects[index]);
           newState.PartialRelation.Betas.AddObjectOnTop(newRoot);
           newState.theChoicesWeMake.AddObjectOnTop(newRoot);
           this->ExtensionStep(index, theWeyl,TheGlobalVariables,newState);
@@ -435,7 +438,7 @@ void minimalRelationsProverStates::TestAddingExtraRoot
   { tempBool = !this->TheObjects[Index].PartialRelation.Betas.ContainsObject(theRoot) && !this->TheObjects[Index].nonBetas.ContainsObject(theRoot);
   }
 	if (tempBool)
-  { newState.Assign(this->TheObjects[Index]);
+  { newState.initFromParent(this->TheObjects[Index]);
 		if (AddAlpha)
 			newState.PartialRelation.Alphas.AddObjectOnTop(theRoot);
 		else

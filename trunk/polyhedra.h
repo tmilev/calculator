@@ -6299,6 +6299,7 @@ public:
   rootsCollection PrecomputedIsoDomains;
   rootsCollection PrecomputedIsoRanges;
   std::fstream theFile;
+  std::string ProverFileName;
   bool flagAssumeGlobalMinimalityRHS;
   bool flagComputationIsInitialized;
   bool flagSearchForOptimalSeparatingRoot;
@@ -6490,7 +6491,6 @@ public:
 	std::string NotationExplanationLatex2;
 	std::string NotationExplanationLatex3;
 	std::string NotationExplanationLatex4;
-	std::string ProverFileName;
 	intRoot ValueRoot;
 	int NextDirectionIndex;
 	roots VPVectors;

@@ -380,6 +380,7 @@ void minimalRelationsProverStatesFixedK::TheFullRecursionFixedK (WeylGroup& theW
 	{ this->RecursionStepFixedK(theWeyl, TheGlobalVariables);
 		if (this->theIndexStack.size>0)
 			this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), TheGlobalVariables, theWeyl);
+		this->WriteToFile(this->ProverFileName,TheGlobalVariables);
 	}
 }
 

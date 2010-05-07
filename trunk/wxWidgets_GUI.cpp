@@ -972,8 +972,8 @@ void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->theComputationSetup.flagOpenFixedK=false;
   MainWindow1->theComputationSetup.flagSavingFixedK=true;  
-  MainWindow1->theComputationSetup.ProverFileName=MainWindow1GlobalPath;
-  MainWindow1->theComputationSetup.ProverFileName.append( "theProver.txt");
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProver.txt");
   MainWindow1->RunTheComputation();
 }
 
@@ -983,8 +983,8 @@ void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent &ev)
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->theComputationSetup.flagOpenFixedK=true;
   MainWindow1->theComputationSetup.flagSavingFixedK=false;  
-  MainWindow1->theComputationSetup.ProverFileName=MainWindow1GlobalPath;
-  MainWindow1->theComputationSetup.ProverFileName.append( "theProver.txt");
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProver.txt");
   MainWindow1->RunTheComputation();
 }
 

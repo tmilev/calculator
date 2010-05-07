@@ -93,7 +93,9 @@ void minimalRelationsProverStatesFixedK::initShared(WeylGroup& theWeyl, GlobalVa
 }
 
 void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
-{ minimalRelationsProverStateFixedK tempState; tempState.owner=this;
+{ if (this->flagComputationIsInitialized)
+		return;
+	minimalRelationsProverStateFixedK tempState; tempState.owner=this;
 	this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
   this->theWeylGroup.ComputeRho(false);
   this->isomorphismComputer.AmbientWeyl.Assign(this->theWeylGroup);
@@ -391,16 +393,19 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 		{	int minNumChildren=theWeyl.RootSystem.size;
 			int oldSize=this->size;
 			root tempNormal;
+			bool tempBetaPos;
 			for (int i=-1;	i<theWeyl.RootsOfBorel.size; i++)
 			{ if (i!=-1) 
 					tempNormal= theWeyl.RootsOfBorel.TheObjects[i];
 				else
 					tempNormal= NormalSeparatingCones;
-				if (this->TheObjects[index].IsSeparatingCones(tempNormal, oneBetaIsPositive, theWeyl))
-				{	this->InvokeExtensionOfState(index, minNumChildren, oneBetaIsPositive, tempNormal, true, theWeyl, TheGlobalVariables);
+				if (this->TheObjects[index].IsSeparatingCones(tempNormal, tempBetaPos, theWeyl))
+				{	this->InvokeExtensionOfState(index, minNumChildren, tempBetaPos, tempNormal, true, theWeyl, TheGlobalVariables);
 					if (this->size-oldSize<minNumChildren)
 					{	NormalSeparatingCones.Assign(tempNormal);
+						NormalSeparatingCones.ComputeDebugString();
 						theWeyl.GetEpsilonCoords(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
+						oneBetaIsPositive=tempBetaPos;
 						minNumChildren=this->size-oldSize;
 					}
 					this->size=oldSize;
@@ -415,6 +420,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 				}
 			}
 		}
+		NormalSeparatingCones.ComputeDebugString();
 		this->TheObjects[index].SeparatingNormalUsed.Assign(NormalSeparatingCones);
 		this->InvokeExtensionOfState(index,-1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, TheGlobalVariables);
   }
@@ -428,21 +434,21 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState
 	(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 {	for (int i=0; i<theWeyl.RootSystem.size; i++)
-	{ this->TestAddingExtraRootFixedK
-			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
-		if (UpperLimitChildren>=0)
+	{	if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
+		this->TestAddingExtraRootFixedK
+			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
 	}
 	for (int i=0; i<theWeyl.RootSystem.size; i++)
-	{ this->TestAddingExtraRootFixedK
+	{ if (UpperLimitChildren>=0)
+			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
+				return;
+		this->TestAddingExtraRootFixedK
 			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
 		this->MakeProgressReportChildStates
 			( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
-		if (UpperLimitChildren>=0)
-			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
-				return;
 	}
 }
 

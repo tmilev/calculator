@@ -1176,10 +1176,10 @@ void ComputationSetup::Run()
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
   if (this->flagUsingProverDoNotCallOthers)
   { if (this->flagSavingFixedK)
-		{ this->theProverFixedK.WriteToFile(this->ProverFileName, *this->theGlobalVariablesContainer->Default());
+		{ this->theProverFixedK.WriteToFile(this->theProverFixedK.ProverFileName, *this->theGlobalVariablesContainer->Default());
 			this->flagSavingFixedK=false;
 		}	else if (this->flagOpenFixedK)
-		{	this->theProverFixedK.ReadFromFile(this->ProverFileName, *this->theGlobalVariablesContainer->Default());
+		{	this->theProverFixedK.ReadFromFile(this->theProverFixedK.ProverFileName, *this->theGlobalVariablesContainer->Default());
 			this->flagOpenFixedK=false;
 		} else
 		{	GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();

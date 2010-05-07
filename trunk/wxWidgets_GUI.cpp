@@ -57,8 +57,7 @@ public:
 	int maxNumCols;
 	int maxNumRows;
 	void SetNumRowsAndCols(int r, int c);
-	wxGridExtra
-		( wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxWANTS_CHARS, const wxString& name = wxT("") );
+	wxGridExtra( wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxWANTS_CHARS, const wxString& name = wxT("") );
 };
 
 class WorkThreadClass
@@ -91,8 +90,7 @@ BEGIN_EVENT_TABLE(wxComboBoxWheel, wxComboBox)
 END_EVENT_TABLE()
 
 wxComboBoxWheel::wxComboBoxWheel
-  ( wxWindow *parent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size,
-    const int n ,const wxString choices[], const long style, const wxValidator& validator, const wxString& name )
+  ( wxWindow *parent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size, const int n ,const wxString choices[], const long style, const wxValidator& validator, const wxString& name )
       :wxComboBox(parent,id,value,pos,size,n,choices,style,validator,name)
 {
 }
@@ -565,8 +563,8 @@ guiMainWindow::guiMainWindow()
 	this->Button11ProverFullComputation = new ::wxButton(this->Dialog2StatusString1,this->ID_Button11ProverFullComputation,wxT("Prover full go"));
 	this->Button12ProverOneStepFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button12ProverOneStepFixedK,wxT("Prover one step fixed K"));
 	this->Button13ProverFullComputationFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button13ProverFullComputationFixedK,wxT("Prover full go Fixed K"));
-	this->Button14ProverFixedKSave= new ::wxButton(this->Dialog2StatusString1,this->ID_Button14ProverFixedKSave,wxT("Save fixed K"));
-	this->Button15ProverFixedKOpen= new ::wxButton(this->Dialog2StatusString1,this->ID_Button15ProverFixedKOpen,wxT("Open fixed K"));
+	this->Button14ProverFixedKSave= new ::wxButton(this->Dialog2StatusString1,this->ID_Button14ProverFixedKSave,wxT("Save provers"));
+	this->Button15ProverFixedKOpen= new ::wxButton(this->Dialog2StatusString1,this->ID_Button15ProverFixedKOpen,wxT("Open provers"));
 	this->Button5SaveComputer->Disable();
   //this->BoxSizer1HorizontalBackground->Fit(this);
   this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
@@ -953,8 +951,8 @@ void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
 	MainWindow1->theComputationSetup.flagProverDoingFullRecursion=false;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
-  MainWindow1->theComputationSetup.flagOpenFixedK=false;
-  MainWindow1->theComputationSetup.flagSavingFixedK=false;  
+  MainWindow1->theComputationSetup.flagOpenProverData=false;
+  MainWindow1->theComputationSetup.flagSavingProverData=false;  
   MainWindow1->RunTheComputation();
 }
 
@@ -962,29 +960,31 @@ void guiMainWindow::onButton13ProverFullComputationFixedK(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
-  MainWindow1->theComputationSetup.flagOpenFixedK=false;
-  MainWindow1->theComputationSetup.flagSavingFixedK=false;  
+  MainWindow1->theComputationSetup.flagOpenProverData=false;
+  MainWindow1->theComputationSetup.flagSavingProverData=false;  
   MainWindow1->RunTheComputation();
 }
 
 void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
-  MainWindow1->theComputationSetup.flagProverUseFixedK=true;
-  MainWindow1->theComputationSetup.flagOpenFixedK=false;
-  MainWindow1->theComputationSetup.flagSavingFixedK=true;  
+  MainWindow1->theComputationSetup.flagSavingProverData=true;
+  MainWindow1->theComputationSetup.flagOpenProverData=false;  
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
-  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProver.txt");
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
+  MainWindow1->theComputationSetup.theProver.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.ProverFileName.append( "theProver.txt");
   MainWindow1->RunTheComputation();
 }
 
 void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
-  MainWindow1->theComputationSetup.flagProverUseFixedK=true;
-  MainWindow1->theComputationSetup.flagOpenFixedK=true;
-  MainWindow1->theComputationSetup.flagSavingFixedK=false;  
+  MainWindow1->theComputationSetup.flagOpenProverData=true;
+  MainWindow1->theComputationSetup.flagSavingProverData=false;  
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
-  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProver.txt");
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
+  MainWindow1->theComputationSetup.theProver.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.ProverFileName.append( "theProver.txt");
   MainWindow1->RunTheComputation();
 }
 

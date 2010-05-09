@@ -1,4 +1,6 @@
 #include "polyhedra.h"
+//to be merged in main file polyhedra.cpp later
+
 extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
 template < > int ListBasicObjects< minimalRelationsProverStateFixedK>::ListBasicObjectsActualSizeIncrement=10;
 
@@ -364,7 +366,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 { int index= *this->theIndexStack.LastObject();
 	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
 	if (this->TheObjects[index].PartialRelation.Alphas.size==0 && this->TheObjects[index].PartialRelation.Betas.size==0)
-	{	::minimalRelationsProverStateFixedK theNewState;
+	{	minimalRelationsProverStateFixedK theNewState;
 		for (int i=0;i<this->theK.HighestWeightsGmodK.size;i++)
 		{ theNewState.initFromParentState(this->TheObjects[index]);
 			theNewState.PartialRelation.Alphas.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
@@ -420,7 +422,6 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 				}
 			}
 		}
-		NormalSeparatingCones.ComputeDebugString();
 		this->TheObjects[index].SeparatingNormalUsed.Assign(NormalSeparatingCones);
 		this->InvokeExtensionOfState(index,-1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, TheGlobalVariables);
   }
@@ -437,18 +438,33 @@ void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState
 	{	if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
-		this->TestAddingExtraRootFixedK
-			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->TestAddingExtraRootFixedK( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
 		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
 	}
 	for (int i=0; i<theWeyl.RootSystem.size; i++)
 	{ if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
-		this->TestAddingExtraRootFixedK
-			( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-		this->MakeProgressReportChildStates
-			( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		this->TestAddingExtraRootFixedK( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+	}
+}
+
+void ::minimalRelationsProverStates::InvokeExtensionOfState
+	(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{	for (int i=0; i<theWeyl.RootSystem.size; i++)
+	{	if (UpperLimitChildren>=0)
+			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
+				return;
+		this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+	}
+	for (int i=0; i<theWeyl.RootSystem.size; i++)
+	{ if (UpperLimitChildren>=0)
+			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
+				return;
+		this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
 	}
 }
 
@@ -477,11 +493,10 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
 	for(int i=0;i<this->owner->theK.kModules.size;i++)
     if (!this->theNilradicalModules.selected[i]&& !this->theGmodLmodules.selected[i])
     { for (int k=0; k<this->PartialRelation.Alphas.size; k++)
-      { if (theWeyl.IsARoot(this->PartialRelation.Alphas.TheObjects[k]+this->owner->theK.HighestWeightsGmodK.TheObjects[i]))
+				if (theWeyl.IsARoot(this->PartialRelation.Alphas.TheObjects[k]+this->owner->theK.HighestWeightsGmodK.TheObjects[i]))
         { this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
           break;
         }
-       }
       for (int j=0;j<this->owner->theK.kModules.TheObjects[i].size;j++)
       { root& theRoot= this->owner->theK.kModules.TheObjects[i].TheObjects[j];
         for (int k=0; k<this->PartialRelation.Betas.size; k++)

@@ -5798,6 +5798,7 @@ public:
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
+  static bool IsSeparatingCones( root& input, roots& theAlphas, roots& theBetas, bool& oneBetaIsPositive, WeylGroup& theWeyl);
   void GetNumberScalarProductsData
 		( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
@@ -5809,12 +5810,10 @@ public:
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverStateFixedK& right);
-	bool RootIsGoodForPreferredSimpleRoot
-		( root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
+	bool RootIsGoodForPreferredSimpleRoot	( root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
 	void GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl);
-	bool RootIsGoodForProblematicIndex
-		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
+	bool RootIsGoodForProblematicIndex	( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -5928,6 +5927,7 @@ public:
   ListBasicObjects<int> CompleteChildStates;
   int activeChild;
   minimalRelationsProverStates* owner;
+  bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   static void GetNumberScalarProductsData
@@ -5935,8 +5935,7 @@ public:
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	static bool Root1IsGreaterThanRoot2	(	int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
   void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-  void ComputeScalarProductsMatrix
-    (	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
+  void ComputeScalarProductsMatrix(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
   bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool CanBeShortened
     ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
@@ -5944,11 +5943,9 @@ public:
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
   void initFromParent(const minimalRelationsProverState& right);
-	bool RootIsGoodForPreferredSimpleRoot
-		(	root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
+	bool RootIsGoodForPreferredSimpleRoot(	root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
-	bool RootIsGoodForProblematicIndex
-		( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
+	bool RootIsGoodForProblematicIndex	( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
 	bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
@@ -5978,10 +5975,14 @@ public:
   ReflectionSubgroupWeylGroup theIsos;
   rootsCollection PrecomputedIsoDomains;
   rootsCollection PrecomputedIsoRanges;
-  std::fstream theFile;
-  std::string ProverFileName;
+  int sizeByLastSave;
+  std::fstream theFileHeader;
+  std::fstream theFileBody;
+  std::string FileHeaderString;
+  std::string FileBodyString;
   bool flagAssumeGlobalMinimalityRHS;
   bool flagComputationIsInitialized;
+  bool flagSearchForOptimalSeparatingRoot;
  	bool ExtendToIsomorphismRootSystem( minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl);
   bool flagAnErrorHasOccurredTimeToPanic;
   void PrepareKIsos();
@@ -5999,6 +6000,8 @@ public:
   void RecursionStep(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void TheFullRecursion (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
+  void BranchByAddingKRoots(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  static int CountNumSeparatingNormals(roots& theAlphas, roots& theBetas, WeylGroup& theWeyl);
 	void TestAddingExtraRoot
 		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot,
 			root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
@@ -6007,6 +6010,7 @@ public:
 	static bool GetSeparatingRootIfExistsFromSet
 		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output,
       WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
+  void InvokeExtensionOfState	(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void RemoveDoubt(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	bool StateIsEqualTo( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
@@ -6015,12 +6019,14 @@ public:
 	void MakeProgressReportChildStates( int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   minimalRelationsProverStates()
   { this->flagComputationIsInitialized=false;
-    MinNumDifferentBetas=-1;
+    this->MinNumDifferentBetas=-1;
+    this->flagSearchForOptimalSeparatingRoot=true;
+    this->sizeByLastSave=0;
   };
- 	void ReadFromFile(std::fstream &input, GlobalVariables&  theGlobalVariables);
-	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
-	void WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables);
-	void ReadFromFile (std::string& fileName, GlobalVariables&  theGlobalVariables);
+ 	void ReadFromFile(std::fstream &inputHeader, std::fstream &inputBody, GlobalVariables &theGlobalVariables);
+	void WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables &theGlobalVariables);
+	void WriteToFileAppend(GlobalVariables&  theGlobalVariables);
+	void ReadFromFile (GlobalVariables&  theGlobalVariables);
 };
 
 struct ComputationSetup
@@ -6140,7 +6146,7 @@ public:
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables,rootSubalgebras& input, std::string& path);
- 	static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
+ 	static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
 	static void clearDollarSigns(std::string& theString, std::string& output);
 	static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
 	static bool CheckForInputSanity(ComputationSetup& input);

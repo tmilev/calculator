@@ -727,7 +727,7 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::st
     output.push_back(input.at(j));
 }
 
-bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary)
+bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
 	{	if (openAsBinary)
 			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
@@ -737,15 +737,18 @@ bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile
   { if (openAsBinary)
 			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::binary);
 		else
-			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::trunc);
+		{	if (truncate)
+				theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::trunc);
+			else
+				theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
+		}
   }
   if(theFile.is_open())
   { theFile.clear(std::ios::goodbit);// false);
   	theFile.seekp(0,std::ios_base::end);
 		int tempI=theFile.tellp();
 		if (tempI>=1)
-		{	return true;
-		}
+			return true;
   }
 	theFile.close();
 	theFile.open(theFileName.c_str(),std::fstream::out |std::fstream::in| std::fstream::trunc);
@@ -756,8 +759,7 @@ bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile
 void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input, std::string& path)
 { std::fstream output;
   std::string tempS;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
-    (output, path, false,false);
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, path, false, true, false);
   output<< "<HTML><BODY>In preparation</BODY></HTML>";
   output.close();
 }
@@ -1177,11 +1179,11 @@ void ComputationSetup::Run()
   if (this->flagUsingProverDoNotCallOthers)
   { if (this->flagSavingProverData)
 		{ this->theProverFixedK.WriteToFile(this->theProverFixedK.ProverFileName, *this->theGlobalVariablesContainer->Default());
-			this->theProver.WriteToFile(this->theProver.ProverFileName, *this->theGlobalVariablesContainer->Default()); 
+			this->theProver.WriteToFileAppend(*this->theGlobalVariablesContainer->Default()); 
 			this->flagSavingProverData=false;
 		}	else if (this->flagOpenProverData)
 		{	this->theProverFixedK.ReadFromFile(this->theProverFixedK.ProverFileName, *this->theGlobalVariablesContainer->Default());
-			this->theProver.ReadFromFile(this->theProver.ProverFileName, *this->theGlobalVariablesContainer->Default());
+			this->theProver.ReadFromFile(*this->theGlobalVariablesContainer->Default());
 			this->flagOpenProverData=false;
 		} else
 		{	GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
@@ -15712,8 +15714,7 @@ bool rootSubalgebra::IsAnIsomorphism
 	return true;
 }
 
-void rootSubalgebra::ElementToHtml
-	(int index, std::string &path, GlobalVariables &theGlobalVariables)
+void rootSubalgebra::ElementToHtml(int index, std::string &path, GlobalVariables &theGlobalVariables)
 {	std::fstream output; std::string tempS;
   std::string MyPath, childrenPath;
   MyPath=path; childrenPath=path;
@@ -15722,8 +15723,8 @@ void rootSubalgebra::ElementToHtml
   childrenPath=out.str();
   out << ".html";
   MyPath=out.str();
-	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPath, false,false);
-  this->ComputeDebugString(false,true,true,theGlobalVariables);
+	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPath, false, true, false);
+  this->ComputeDebugString(false, true, true, theGlobalVariables);
   output<< this->DebugString;
   output.close();
 }
@@ -18112,7 +18113,7 @@ void rootSubalgebras::ElementToHtml(	std::string& header,	std::string& pathPhysi
   MyPathServer=htmlPathServer; childrenPathServer= htmlPathServer;
   MyPathPhysical.append("rootHtml.html"); MyPathServer.append("rootHtml.html");
   childrenPathPhysical.append("rootHtml_");childrenPathServer.append("rootHtml_");
-	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false,false);
+	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   this->ComputeDebugString(false,true,true,&childrenPathPhysical,&childrenPathServer,theGlobalVariables);
   output<< "<HTML><BODY>"<<header<<this->DebugString<<"</BODY></HTML>";
   output.close();

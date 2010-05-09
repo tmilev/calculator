@@ -160,8 +160,7 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 			return false;
 		}
 		if (NumFoundIndices==1)
-			this->PositiveKroots.AddObjectOnTopNoRepetitionOfObject
-        (theWeyl.RootSystem.TheObjects[LastFoundIndex]);
+			this->PositiveKroots.AddObjectOnTopNoRepetitionOfObject(theWeyl.RootSystem.TheObjects[LastFoundIndex]);
 	}
 	this->nonLNonSingularRootsInNeedOfPosKroots.size=0;
 	for (int i=0;i<this->nonLNonSingularRoots.size;i++)
@@ -278,13 +277,13 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( Global
 void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables &theGlobalVariables)
 { std::stringstream out5;
 	out5<<checked+1 << " checked out of " << outOf;
-	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
+	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
 	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+	IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
@@ -292,13 +291,13 @@ void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, 
 void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables &theGlobalVariables)
 { std::stringstream out5;
 	out5<<checked+1 << " checked out of " << outOf;
-	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
+	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
 	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+	IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
@@ -323,14 +322,22 @@ void minimalRelationsProverStateFixedK::GetPossibleAlphasAndBetas(roots& outputA
 	}
 }
 
-bool ::minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl)
+bool minimalRelationsProverState::IsSeparatingCones(root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl)
+{	return minimalRelationsProverStateFixedK::IsSeparatingCones(input, this->PartialRelation.Alphas, this->PartialRelation.Betas, oneBetaIsPositive, theWeyl);
+}
+
+bool minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl)
+{	return this->IsSeparatingCones(input, this->PartialRelation.Alphas, this->PartialRelation.Betas, oneBetaIsPositive, theWeyl);
+}
+
+bool minimalRelationsProverStateFixedK::IsSeparatingCones( root& input, roots& theAlphas, roots& theBetas, bool& oneBetaIsPositive, WeylGroup& theWeyl)
 {	bool foundPosBeta=false;
 	bool foundNegBeta=false;
 	bool foundPosAlpha=false;
 	bool foundNegAlpha=false;
 	Rational tempRat;
-	for (int i=0;i<this->PartialRelation.Betas.size;i++)
-	{	tempRat=theWeyl.RootScalarKillingFormMatrixRoot(this->PartialRelation.Betas.TheObjects[i],input);
+	for (int i=0;i<theBetas.size;i++)
+	{	tempRat=theWeyl.RootScalarKillingFormMatrixRoot(theBetas.TheObjects[i],input);
 		if (tempRat.IsPositive())
 		{	if (foundNegBeta)
 				return false;
@@ -342,8 +349,8 @@ bool ::minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, bool& o
 			foundNegBeta=true;
 		}
 	}
-	for (int i=0;i<this->PartialRelation.Alphas.size;i++)
-	{	tempRat=theWeyl.RootScalarKillingFormMatrixRoot(this->PartialRelation.Alphas.TheObjects[i],input);
+	for (int i=0;i<theAlphas.size;i++)
+	{	tempRat=theWeyl.RootScalarKillingFormMatrixRoot(theAlphas.TheObjects[i],input);
 		if (tempRat.IsPositive())
 		{	if (foundNegAlpha || foundPosBeta)
 				return false;
@@ -425,7 +432,7 @@ void minimalRelationsProverState::WriteToFile(std::fstream& output, GlobalVariab
 	this->PartialRelation.Alphas.WriteToFile(output, theGlobalVariables);
 	output<<"\nBetas: ";
 	this->PartialRelation.Betas.WriteToFile(output, theGlobalVariables);
-	output<<"\nActive_child: " << this->activeChild <<" "<< this->PossibleChildStates.size<<" ";
+	output<<"\nActive_child(non-updated_see_header_for_true_data): " << this->activeChild <<" "<< this->PossibleChildStates.size<<" ";
 	for (int i=0; i<this->PossibleChildStates.size; i++)
 		output<< this->PossibleChildStates.TheObjects[i]<<" ";
 	output<<"\nBk_singular: ";
@@ -567,15 +574,15 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 		if (this->theIndexStack.size>0)
 		{ int tempI= *this->theIndexStack.LastObject(); 
 			this->TheObjects[tempI].ComputeDebugString(this->theWeylGroup, theGlobalVariables);
-			::IndicatorWindowGlobalVariables.StatusString1=this->TheObjects[tempI].DebugString;
-			::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+			IndicatorWindowGlobalVariables.StatusString1=this->TheObjects[tempI].DebugString;
+			IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
 			theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 		}
 	//this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods, theGlobalVariables);
 }
 
 void minimalRelationsProverStatesFixedK::WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
-{	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false);
+{	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, true, false);
 	this->WriteToFile(this->theFile,theGlobalVariables);
 	this->theFile.close();
 }
@@ -587,43 +594,107 @@ void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, Glo
 	this->theFile.close();
 }
 
-void minimalRelationsProverStates::WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
-{	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false);
-	this->WriteToFile(this->theFile,theGlobalVariables);
-	this->theFile.close();
+void minimalRelationsProverStates::WriteToFileAppend( GlobalVariables&  theGlobalVariables)
+{	if (this->sizeByLastSave!=0)
+		CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, true, false, false);
+	else
+		CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, true, false);	
+	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, true, false);
+	this->WriteToFileAppend(this->theFileHeader, this->theFileBody, theGlobalVariables);
+	this->theFileHeader.close();
+	this->theFileBody.close();
 }
 
-void minimalRelationsProverStates::ReadFromFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
-{	if(!rootFKFTcomputation::OpenDataFile(this->theFile, fileName))
+void minimalRelationsProverStates::ReadFromFile(GlobalVariables&  theGlobalVariables)
+{	if(!rootFKFTcomputation::OpenDataFile(this->theFileBody, this->FileBodyString))
 		return;
-	this->ReadFromFile(this->theFile, theGlobalVariables);
-	this->theFile.close();
+	if(!rootFKFTcomputation::OpenDataFile(this->theFileHeader, this->FileHeaderString))
+		return;
+	this->ReadFromFile(this->theFileHeader, this->theFileBody, theGlobalVariables);
+	this->theFileHeader.close();
+	this->theFileBody.close();
 }
 
-void minimalRelationsProverStates::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariables)
-{	output <<"Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.KillingFormMatrix.NumRows<<"\n";
-	output<<"\nState_stack_size: "<< this->theIndexStack.size<<" ";
+void minimalRelationsProverStates::WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables &theGlobalVariables)
+{	outputHeader <<"Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.KillingFormMatrix.NumRows<<"\n" <<"\nNum_states: "<<this->size;
+	outputHeader<<"\nState_stack_size: "<< this->theIndexStack.size<<" ";
 	for (int i=0; i<this->theIndexStack.size; i++)
-		output << this->theIndexStack.TheObjects[i]<<" ";
-	output<<"\nNum_states: "<< this->size<<"\n";
-	for (int i=0; i<this->size; i++)	
-		this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+		outputHeader << this->theIndexStack.TheObjects[i]<<" ";
+	outputHeader<<"\nActive_child_list: ";
+	for (int i=0;i<this->size; i++)
+		outputHeader<<this->TheObjects[i].activeChild<<" ";
+	outputHeader<< "\nTree_structure: ";
+	for(int i=0; i<this->size; i++)
+	{	outputHeader<<"\nChild_index "<<i<<" size: "<< this->TheObjects[i].PossibleChildStates.size<<" ";
+		for (int j=0; j<this->TheObjects[i].PossibleChildStates.size; j++)
+			outputHeader<< this->TheObjects[i].PossibleChildStates.TheObjects[j]<<" ";
+	}
+	for (int i=this->sizeByLastSave; i<this->size; i++)	
+	{	outputBody<<"\n\n\nState_index: "<< i<<" \n";
+		this->TheObjects[i].WriteToFile(outputBody, theGlobalVariables);
+		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		{ std::stringstream out3;
+			out3<< i+1<<" out of "<< this->size<< " states stored to disk";
+			IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
+			IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+			theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+		}
+	}
+	this->sizeByLastSave=this->size;
 }
 
-void minimalRelationsProverStates::ReadFromFile(std::fstream &input, GlobalVariables &theGlobalVariables)
+void minimalRelationsProverStates::ReadFromFile(std::fstream &inputHeader, std::fstream &inputBody, GlobalVariables &theGlobalVariables)
 {	std::string tempS; int tempI;
-	input >>tempS >> this->theWeylGroup.WeylLetter >>tempS>> tempI;
+	inputHeader >>tempS >> this->theWeylGroup.WeylLetter >>tempS>> tempI;
 	this->theWeylGroup.MakeArbitrary(this->theWeylGroup.WeylLetter, tempI);
-	input >>tempS>> tempI;
+	inputHeader>>tempS>>tempI;
+	this->SetSizeExpandOnTopNoObjectInit(tempI);
+	inputHeader >>tempS>> tempI;
 	this->theIndexStack.SetSizeExpandOnTopNoObjectInit(tempI);
 	for (int i=0; i<this->theIndexStack.size; i++)
-		input>>this->theIndexStack.TheObjects[i];
-	input>>tempS>>tempI;
-	this->SetSizeExpandOnTopNoObjectInit(tempI);
+		inputHeader>>this->theIndexStack.TheObjects[i];
+	ListBasicObjects<int> theActiveChildren;
+	ListBasicObjects< ListBasicObjects<int> > thePossibleChildStates;
+	theActiveChildren.SetSizeExpandOnTopNoObjectInit(this->size);
+	thePossibleChildStates.SetSizeExpandOnTopNoObjectInit(this->size);
+	inputHeader>>tempS;
+	assert(tempS=="Active_child_list:");
+	for (int i=0;i<this->size;i++)
+		inputHeader>>theActiveChildren.TheObjects[i];
+	inputHeader>> tempS;
+	assert(tempS=="Tree_structure:");
+	for(int i=0; i<this->size; i++)
+	{	inputHeader>>tempS>>tempI>> tempS>>tempI;
+		assert(tempS=="size:");
+		thePossibleChildStates.TheObjects[i].SetSizeExpandOnTopNoObjectInit(tempI);
+		for (int j=0; j<tempI; j++)
+			inputHeader>> thePossibleChildStates.TheObjects[i].TheObjects[j];
+	}
 	for (int i=0; i<this->size; i++)	
-		this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+	{	inputBody>> tempS>>tempI;
+		assert(tempI==i);
+		this->TheObjects[i].ReadFromFile(inputBody, theGlobalVariables);
+		this->TheObjects[i].owner=this;
+		this->TheObjects[i].activeChild=theActiveChildren.TheObjects[i];
+		this->TheObjects[i].PossibleChildStates.CopyFromBase(thePossibleChildStates.TheObjects[i]);
+		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		{ std::stringstream out3;
+			out3<< i+1<<" out of "<< this->size<< " states read from disk";
+			IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
+			IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+			IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+			theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+		}
+	}
+	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
 	this->initShared(this->theWeylGroup, theGlobalVariables);
-	this->MakeProgressReportCurrentState(0,theGlobalVariables, this->theWeylGroup);
+	if (this->theIndexStack.size>0)
+	{	int currentI=*this->theIndexStack.LastObject();
+		this->TheObjects[currentI].ComputeDebugString(this->theWeylGroup, theGlobalVariables);
+		this->MakeProgressReportCurrentState(currentI, theGlobalVariables, this->theWeylGroup);
+		this->MakeProgressReportStack(theGlobalVariables, this->theWeylGroup);
+	}
+	this->sizeByLastSave=this->size;
 }
 
 
@@ -708,9 +779,9 @@ void minimalRelationsProverStates::MakeProgressReportCurrentState(	int index, Gl
   out << this->TheObjects[index].DebugString;
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
   IndicatorWindowGlobalVariables.StatusString1=out.str();
-	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 }
 
@@ -719,38 +790,36 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportCurrentState(	int ind
   out << this->TheObjects[index].DebugString;
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
   IndicatorWindowGlobalVariables.StatusString1=out.str();
-	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 }
 
 void minimalRelationsProverStates::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out3;
-	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "
-          << numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
-	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "<< numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
+	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStatesFixedK::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out3;
-	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "
-          << numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
-	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "<< numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
+	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStates::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
@@ -764,9 +833,9 @@ void minimalRelationsProverStates::MakeProgressReportChildStates(int numSearched
 //	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
 //	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStatesFixedK::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
@@ -775,43 +844,38 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportChildStates(int numSe
 	out4<<"Computing children states: "<< numSearched+1<<" out of "<< outOf << "; "
         << this->TheObjects[*this->theIndexStack.LastObject()].PossibleChildStates.size<<" possible, "
 				<< this->TheObjects[*this->theIndexStack.LastObject()].ImpossibleChildStates.size<<" impossible ";
-	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
 //	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
 //	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
 //	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 void minimalRelationsProverStates::MakeProgressReportStack( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 {	std::stringstream out1, out2, out3, out4;
 	std::stringstream* tempOut1=&out1;
 	for (int i=0;i<this->theIndexStack.size;i++)
 	{ int currentIndex=this->theIndexStack.TheObjects[i];
-	  (*tempOut1)	<< currentIndex << ": " << this->TheObjects[currentIndex].activeChild+1
-                << " of "<< this->TheObjects[currentIndex].PossibleChildStates.size	<<"; ";
+	  (*tempOut1)	<< currentIndex << ": " << this->TheObjects[currentIndex].activeChild+1<< " of "<< this->TheObjects[currentIndex].PossibleChildStates.size	<<"; ";
 		if (i==4)	tempOut1=&out2;
 		if (i==8)	tempOut1=&out3;
 	//	if (i==12)	tempOut1=&out4;
 	}
 	if (theIndexStack.size!=0)
-    (*tempOut1)
-				<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size
-        <<" alphas + ... = "
-        <<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size
-        <<" betas + ...";
-	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+    (*tempOut1)<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size<<" alphas + ... = "<<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size<<" betas + ...";
+	IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
+	IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
 	if (this->theIndexStack.size>8)
-		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
+		IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
@@ -821,29 +885,24 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportStack	( GlobalVariabl
 	std::stringstream* tempOut1=&out1;
 	for (int i=0;i<this->theIndexStack.size;i++)
 	{ int currentIndex=this->theIndexStack.TheObjects[i];
-	  (*tempOut1)	<< currentIndex << ": " << this->TheObjects[currentIndex].activeChild+1
-                << " of "<< this->TheObjects[currentIndex].PossibleChildStates.size	<<"; ";
+	  (*tempOut1)	<< currentIndex << ": " << this->TheObjects[currentIndex].activeChild+1<< " of "<< this->TheObjects[currentIndex].PossibleChildStates.size	<<"; ";
 		if (i==4)	tempOut1=&out2;
 		if (i==8)	tempOut1=&out3;
 	//	if (i==12)	tempOut1=&out4;
 	}
 	if (theIndexStack.size!=0)
-    (*tempOut1)
-				<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size
-        <<" alphas + ... = "
-        <<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size
-        <<" betas + ...";
-	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+    (*tempOut1)<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size <<" alphas + ... = " <<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size <<" betas + ...";
+	IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
+	IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
 	if (this->theIndexStack.size>8)
 		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
+	IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
@@ -925,15 +984,11 @@ bool minimalRelationsProverStates::StateIsEqualTo
 {	return this->ExtendToIsomorphismRootSystem(theState,IndexOther,TheGlobalVariables,theWeyl);
 }
 
-bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject
-  ( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{ theState.SortAlphasAndBetas(TheGlobalVariables, theWeyl);
-	theState.ComputeScalarProductsMatrix(TheGlobalVariables,theWeyl);
-	//theState.theScalarProducts.ComputeDebugString();
- // if (!this->TheObjects[ParentIndex].flagNeedsAdditionOfPositiveKroots || ParentIndex==0)
-    for (int i=0;i<this->size;i++)
-      if (this->StateIsEqualTo(theState,i,theWeyl,TheGlobalVariables))
-        return false;
+bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{ if (theState.PartialRelation.Alphas.size+theState.PartialRelation.Betas.size<7)
+		for (int i=0;i<this->size;i++)
+			if (this->StateIsEqualTo(theState,i,theWeyl,TheGlobalVariables))
+				return false;
   this->AddObjectOnTop(theState);
   return true;
 }
@@ -951,8 +1006,7 @@ void minimalRelationsProverState::ComputeScalarProductsMatrix
   output.init(tempRoots.size, tempRoots.size);
   for (int i=0;i<tempRoots.size;i++)
     for (int j=0;j<tempRoots.size;j++)
-      theWeyl.RootScalarKillingFormMatrixRoot
-				(tempRoots.TheObjects[i], tempRoots.TheObjects[j],output.elements[i][j]);
+      theWeyl.RootScalarKillingFormMatrixRoot(tempRoots.TheObjects[i], tempRoots.TheObjects[j],output.elements[i][j]);
 }
 
 
@@ -970,8 +1024,7 @@ void minimalRelationsProverState::ElementToString( std::string& output, WeylGrou
 	out <<"...     (a_i,b_i>0)\r\n";
 	root tempRoot; roots tempRoots;
 	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
-	{	theWeyl.GetEpsilonCoords
-      (this->PartialRelation.Alphas.TheObjects[i],tempRoot,TheGlobalVariables);
+	{	theWeyl.GetEpsilonCoords(this->PartialRelation.Alphas.TheObjects[i],tempRoot,TheGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS,false,false);
 		out << "a_"<<i+1<<"("<<tempS <<") + ";
 	}
@@ -1021,98 +1074,98 @@ void minimalRelationsProverState::ElementToString( std::string& output, WeylGrou
   { theWeyl.GetEpsilonCoords(this->ChosenPositiveKroots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nPositive choices for K-roots made:" << tempS;
+  out <<"\r\nPositive choices for K-roots made("<<this->ChosenPositiveKroots.size<<"): " << tempS;
   if(!displayEpsilons)
     this->nonLNonSingularRootsInNeedOfPosKroots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonLNonSingularRootsInNeedOfPosKroots, tempRoots, TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon-L non-singular roots in need of a K- positive root: " << tempS;
+  out <<"\r\nNon-L non-singular roots in need of a K- positive root("<<this->nonLNonSingularRootsInNeedOfPosKroots.size <<"): " << tempS;
   if (!displayEpsilons)
     this->theChoicesWeMake.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->theChoicesWeMake,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nThe choices we make: "<< tempS;
+  out <<"\r\nThe choices we make("<<this->theChoicesWeMake.size <<"): "<< tempS;
 	if (!displayEpsilons)
     this->BKSingularGmodLRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->BKSingularGmodLRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nBK singular g mod l roots: "<< tempS;
+  out <<"\r\nBK singular g mod l roots("<< this->BKSingularGmodLRoots.size<<"): "<< tempS;
 	if (!displayEpsilons)
     this->nonAlphas.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonAlphas,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon-alphas: "<< tempS;
+  out <<"\r\nNon-alphas("<< this->nonAlphas.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonBetas.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon-betas: "<< tempS;
+  out <<"\r\nNon-betas("<<this->nonBetas.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonBKSingularGmodLRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonBKSingularGmodLRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nnon BK-singular g mod l roots: "<< tempS;
+  out <<"\r\nnon BK-singular g mod l roots("<< this->nonBKSingularGmodLRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->NilradicalRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->NilradicalRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out << "\r\nNilradical roots: "<< tempS;
+  out << "\r\nNilradical roots("<< this->NilradicalRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonNilradicalRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonNilradicalRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out << "\r\nnon-nilradical roots: "<< tempS;
+  out << "\r\nnon-nilradical roots("<< this->nonNilradicalRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->PositiveKroots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->PositiveKroots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out << "\r\nPositive roots of K: "<< tempS;
+  out << "\r\nPositive roots of K("<<this->PositiveKroots.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonKRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonKRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon-roots of K: "<< tempS;
+  out <<"\r\nNon-roots of K("<<this->nonKRoots.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonPositiveKRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonPositiveKRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon-positive roots of K: "<< tempS;
+  out <<"\r\nNon-positive roots of K("<< this->nonPositiveKRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonLRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonLRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon-L roots: "<< tempS;
+  out <<"\r\nNon-L roots("<<this->nonLRoots.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonLNonSingularRoots.ElementToString(tempS);
   else
   { theWeyl.GetEpsilonCoords(this->nonLNonSingularRoots,tempRoots,TheGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
-  out <<"\r\nNon-L non-singular roots: "<< tempS;
+  out <<"\r\nNon-L non-singular roots("<< this->nonLNonSingularRoots.size<<"): "<< tempS;
   if (!this->StateIsPossible)
 		out << "\r\n I am Impossible!";
   if (this->StateIsComplete)
@@ -1135,8 +1188,7 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
 	out <<"...     (a_i,b_i>0)\r\n";
 	root tempRoot; roots tempRoots;
 	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
-	{	theWeyl.GetEpsilonCoords
-      (this->PartialRelation.Alphas.TheObjects[i],tempRoot,TheGlobalVariables);
+	{	theWeyl.GetEpsilonCoords(this->PartialRelation.Alphas.TheObjects[i],tempRoot,TheGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS,false,false);
 		out << "a_"<<i+1<<"("<<tempS <<") + ";
 	}
@@ -1258,10 +1310,8 @@ void minimalRelationsProverStates::ComputePreferredDualBasis(char WeylLetter, in
   int oldsize=PreferredDualBasis.size;
   for (int i=0;i<oldsize;i++)
     PreferredDualBasis.AddObjectOnTop(-PreferredDualBasis.TheObjects[i]);
-  this->theWeylGroup.GetEpsilonCoords
-    ( this->PreferredDualBasis, this->PreferredDualBasisEpsilonCoords, TheGlobalVariables);
-	this->PreferredDualBasisEpsilonCoords.ElementToStringEpsilonForm
-    ( this->PreferredDualBasisEpsilonCoords.DebugString, false, false, false);
+  this->theWeylGroup.GetEpsilonCoords( this->PreferredDualBasis, this->PreferredDualBasisEpsilonCoords, TheGlobalVariables);
+	this->PreferredDualBasisEpsilonCoords.ElementToStringEpsilonForm( this->PreferredDualBasisEpsilonCoords.DebugString, false, false, false);
 }
 
 void minimalRelationsProverStates::initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
@@ -1276,7 +1326,9 @@ void minimalRelationsProverStates::initShared(WeylGroup& theWeyl, GlobalVariable
 }
 
 void minimalRelationsProverStates::GenerateStartingState( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
-{	minimalRelationsProverState tempState;
+{	if (this->flagComputationIsInitialized)
+		return;	
+	minimalRelationsProverState tempState;
   this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
   this->PreferredDualBasis.size=0;
 	this->initShared(this->theWeylGroup, TheGlobalVariables);
@@ -1340,12 +1392,10 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
-	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-    ( *this->theGlobalVariablesContainer->Default(), 'E', 6, true, true);
+	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism( *this->theGlobalVariablesContainer->Default(), 'E', 6, true, true);
   this->theRootSubalgebras.ComputeDebugString(true, false,true,0,0,*this->theGlobalVariablesContainer->Default() );
   if (this->theRootSubalgebras.flagComputeConeCondition)
-    this->theRootSubalgebras.ComputeLProhibitingRelations
-      (*this->theGlobalVariablesContainer->Default(), 0, this->theRootSubalgebras.size-1);
+    this->theRootSubalgebras.ComputeLProhibitingRelations(*this->theGlobalVariablesContainer->Default(), 0, this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
@@ -1385,10 +1435,10 @@ void WeylGroup::GetEpsilonCoords(root &input, root &output, GlobalVariables &the
 	output.Assign(tempOutput.TheObjects[0]);
 }
 
-bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
-	(	minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
+bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(	minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 {	//return true;
   theState.SortAlphasAndBetas(theGlobalVariables, theWeyl);
+	theState.ComputeScalarProductsMatrix(theGlobalVariables,theWeyl);
 	minimalRelationsProverState& theOtherState=this->TheObjects[indexOther];
 	//rootSubalgebra& theRootSA=theGlobalVariables.rootSAProverIsos;
 	roots& theAlphas = theState.PartialRelation.Alphas;
@@ -1418,8 +1468,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
   this->GetIsoTypicComponents(theOtherAlphas, theOtherBetas, tempPermAlphas, theOtherState, theWeyl,  theGlobalVariables);
   this->GetIsoTypicComponents(theOtherBetas, theOtherAlphas, tempPermBetas, theOtherState, theWeyl, theGlobalVariables);
   this->GetIsoTypicComponents(theOtherKroots, theOtherAlphas, tempPermK, theOtherState, theWeyl, theGlobalVariables);
-  if (!thePermAlphas.HasSameMaxMultiplicities(tempPermAlphas) || !thePermBetas.HasSameMaxMultiplicities(tempPermBetas) ||
-      !thePermK.HasSameMaxMultiplicities(tempPermK))
+  if (!thePermAlphas.HasSameMaxMultiplicities(tempPermAlphas) || !thePermBetas.HasSameMaxMultiplicities(tempPermBetas) || !thePermK.HasSameMaxMultiplicities(tempPermK))
     return false;
 	int NumCyclesAlphas = thePermAlphas.getTotalNumSubsets();
 	int NumCyclesBetas  = thePermBetas.getTotalNumSubsets();
@@ -1462,13 +1511,10 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem
           theDomain.AddObjectOnTop(tempRoot);
         }
   //			theDomain.ComputeDebugString();
-        this->MakeProgressReportIsos
-          ( indexOther, (l*NumCyclesAlphas+ i)*NumCyclesBetas+j, NumCyclesK*NumCyclesBetas*NumCyclesAlphas,
-            theGlobalVariables,theWeyl);
-        theState.ComputeScalarProductsMatrix(theGlobalVariables, theWeyl,thePermutedAlphas,thePermutedBetas,thisMatrix);
+        this->MakeProgressReportIsos( indexOther, (l*NumCyclesAlphas+ i)*NumCyclesBetas+j, NumCyclesK*NumCyclesBetas*NumCyclesAlphas, theGlobalVariables, theWeyl);
+        theState.ComputeScalarProductsMatrix(theGlobalVariables, theWeyl, thePermutedAlphas, thePermutedBetas, thisMatrix);
         if (thisMatrix.IsEqualTo(theOtherMatrix))
-        {	if (this->isomorphismComputer.attemptExtensionToIsomorphism
-                (theDomain, theRange,	theGlobalVariables, 0, false, theWeyl, &DomainAndRangeGenerateNonIsoSAs))
+        {	if (this->isomorphismComputer.attemptExtensionToIsomorphism(theDomain, theRange,	theGlobalVariables, 0, false, theWeyl, &DomainAndRangeGenerateNonIsoSAs))
             return true;
           else
             if (DomainAndRangeGenerateNonIsoSAs)
@@ -1538,9 +1584,7 @@ void minimalRelationsProverStatesFixedK::GetIsoTypicComponents
 	outputComponents.initPermutation(tempList,theRoots.size);
 }
 
-bool rootSubalgebra::attemptExtensionToIsomorphism
-	( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,	ReflectionSubgroupWeylGroup* outputAutomorphisms,
-    bool actOnCentralizerOnly, WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs)
+bool rootSubalgebra::attemptExtensionToIsomorphism( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables,	ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly, WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs)
 { if (outputAutomorphisms!=0)
 		outputAutomorphisms->ExternalAutomorphisms.size=0;
 	if (DomainAndRangeGenerateNonIsoSAs!=0)
@@ -1554,8 +1598,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   theRangeRootSA.genK.CopyFromBase(Range);
 	theDomainRootSA.ComputeAllButAmbientWeyl();
 	theRangeRootSA.ComputeAllButAmbientWeyl();
-	if (theDomainRootSA.theDynkinDiagram.DebugString!= theRangeRootSA.theDynkinDiagram.DebugString ||
-			theDomainRootSA.theCentralizerDiagram.DebugString!=theRangeRootSA.theCentralizerDiagram.DebugString)
+	if (theDomainRootSA.theDynkinDiagram.DebugString!= theRangeRootSA.theDynkinDiagram.DebugString || theDomainRootSA.theCentralizerDiagram.DebugString!=theRangeRootSA.theCentralizerDiagram.DebugString)
   {	if (DomainAndRangeGenerateNonIsoSAs!=0)
 			*DomainAndRangeGenerateNonIsoSAs=true;
 		return false;
@@ -1563,7 +1606,6 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   roots isoDomain, isoRange;
   permutation permComponentsCentralizer;
   ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
-
 	SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > CentralizerDiagramAutomorphisms;
   theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
@@ -1571,12 +1613,10 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
 	for (int i=0; i<CentralizerDiagramAutomorphisms.size; i++)
 		tempAutosCentralizer.MaxMultiplicities.TheObjects[i] = CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
-  tempList.SetSizeExpandOnTopNoObjectInit
-    (theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size);
+  tempList.SetSizeExpandOnTopNoObjectInit(theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size);
   int tempSize=0;
   for (int i=0;i<theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size;i++)
-  { tempList.TheObjects[i]=
-			theDomainRootSA.theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
+  { tempList.TheObjects[i]=theDomainRootSA.theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
     tempSize+=tempList.TheObjects[i];
   }
   permComponentsCentralizer.initPermutation(tempList,tempSize);
@@ -1596,17 +1636,12 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
 	for(int j=0;j<tempI2;j++)
   {	for(int l=0;l<NumAutosCentralizer;l++)
 		{	isoDomain.size=givenSize; isoRange.size=givenSize;
-			theDomainRootSA.theCentralizerDiagram.GetMapFromPermutation
-				(	isoDomain,isoRange,tempPermutation2,CentralizerDiagramAutomorphisms,
-					tempAutosCentralizer, theRangeRootSA.theCentralizerDiagram);
-			if (theDomainRootSA.attemptExtensionToIsomorphismNoCentralizer
-						(	isoDomain, isoRange, theGlobalVariables, 0, outputAutomorphisms,
-							false, 0, &Domain, &Range))//GenerateAllAutos))
+			theDomainRootSA.theCentralizerDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation2,CentralizerDiagramAutomorphisms, tempAutosCentralizer, theRangeRootSA.theCentralizerDiagram);
+			if (theDomainRootSA.attemptExtensionToIsomorphismNoCentralizer(	isoDomain, isoRange, theGlobalVariables, 0, outputAutomorphisms, false, 0, &Domain, &Range))//GenerateAllAutos))
 				if (outputAutomorphisms==0)
 					return true;
 			if (outputAutomorphisms!=0)
-				theDomainRootSA.MakeProgressReportGenAutos
-					( l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
+				theDomainRootSA.MakeProgressReportGenAutos( l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
 			tempAutosCentralizer.IncrementSubset();
 		}
 		permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);

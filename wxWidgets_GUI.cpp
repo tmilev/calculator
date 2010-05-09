@@ -936,6 +936,7 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
 
 void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
+	MainWindow1->theComputationSetup.flagProverDoingFullRecursion=false;
   MainWindow1->theComputationSetup.flagProverUseFixedK=false;
   MainWindow1->RunTheComputation();
 }
@@ -971,8 +972,10 @@ void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
   MainWindow1->theComputationSetup.flagOpenProverData=false;  
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
-  MainWindow1->theComputationSetup.theProver.ProverFileName=MainWindow1GlobalPath;
-  MainWindow1->theComputationSetup.theProver.ProverFileName.append( "theProver.txt");
+  MainWindow1->theComputationSetup.theProver.FileHeaderString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileBodyString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileHeaderString.append("theProverHeader.txt");
+  MainWindow1->theComputationSetup.theProver.FileBodyString.append("theProverBody.txt");
   MainWindow1->RunTheComputation();
 }
 
@@ -983,8 +986,10 @@ void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent &ev)
   MainWindow1->theComputationSetup.flagSavingProverData=false;  
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
-  MainWindow1->theComputationSetup.theProver.ProverFileName=MainWindow1GlobalPath;
-  MainWindow1->theComputationSetup.theProver.ProverFileName.append( "theProver.txt");
+  MainWindow1->theComputationSetup.theProver.FileHeaderString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileBodyString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileHeaderString.append("theProverHeader.txt");
+  MainWindow1->theComputationSetup.theProver.FileBodyString.append("theProverBody.txt");
   MainWindow1->RunTheComputation();
 }
 

@@ -235,9 +235,9 @@ public:
 	{	int result=1;
 		for (int i =0; i<k;i++)
 		{	result*=(n-i);
-			result/=(i+1); 
+			result/=(i+1);
 		}
-		return result; 
+		return result;
 	};
 	static int KToTheNth(int k, int n);
 	inline static int parity(int n){if (n%2==0) return 1; else return -1;};
@@ -1297,7 +1297,7 @@ ParallelComputing::GlobalPointerCounter++;
 	bool ShrinkExtendedPartIfPossible()
 	{ if (this->Extended==0)
 			return true;
-		if (		this->Extended->num.value.size>1 ||	this->Extended->den.size>1 ||	this->Extended->num.value.TheObjects[0]>=(unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound||	
+		if (		this->Extended->num.value.size>1 ||	this->Extended->den.size>1 ||	this->Extended->num.value.TheObjects[0]>=(unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound||
 						this->Extended->den.TheObjects[0]>= (unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
 			return false;
 		this->NumShort= this->Extended->num.GetIntValueTruncated();
@@ -1338,7 +1338,7 @@ public:
 		this->NumShort=n; this->DenShort=d; this->FreeExtended(); this->Simplify();
 	};
 	void DivideBy(const Rational& r);
-	void DivideByInteger(int x)	
+	void DivideByInteger(int x)
 	{	int tempDen; signed char tempSign;
 		if (x<0) {tempDen=(-x); tempSign=-1;} else {tempDen=x; tempSign=1;}
 		if (this->TryToMultiplyQuickly(tempSign,tempDen))
@@ -1427,7 +1427,7 @@ public:
 	~Rational(){this->FreeExtended();};
 	//the below must be called only with positive arguments!
 	static int gcd(int a, int b)
-	{	int temp; 
+	{	int temp;
 		while(b>0)
 		{ temp= a % b; a=b; b=temp; }
 		return a;
@@ -1437,7 +1437,7 @@ public:
 	{ if (this->Extended==0) return true;
     if (this->DenShort<0) return false;
     if (((unsigned)this->DenShort)>LargeIntUnsigned::CarryOverBound) return false;
-		return true; 
+		return true;
 	};
 	inline void operator =(const Rational& right){this->Assign(right);};
 	inline bool operator ==(const Rational& right){return this->IsEqualTo(right);};
@@ -1872,7 +1872,7 @@ void ListBasicObjects<Object>::swap(ListBasicObjects<Object>&l1, ListBasicObject
 	ListBasicObjects<Object>* smallL;
 	int smallSize;
 	if (l1.size<l2.size)
-	{	smallL=&l1; 
+	{	smallL=&l1;
 		bigL=&l2;
 		smallSize=l1.size;
 	} else
@@ -2536,7 +2536,7 @@ public:
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex,root& ChamberIndicator,
 			std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void DrawOutputProjective
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, 
+		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator,
 			std::fstream* outputLatex, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void drawOutputAffine
 		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction,
@@ -2726,7 +2726,7 @@ public:
 	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
   int TotalDegree();
 	int GetIndexMaxMonomial();
-	void ComponentInFrontOfVariableToPower 
+	void ComponentInFrontOfVariableToPower
 		(int VariableIndex, ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
   int FindMaxPowerOfVariableIndex(int VariableIndex);
 	//has to be rewritten please don't use!
@@ -4865,7 +4865,7 @@ public:
 	void operator=(const partFraction& right);
 	void initFromRootSystem(	partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
 	int ElementToString (	partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-	int ElementToStringBasisChange 
+	int ElementToStringBasisChange
 		( partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand,
 			bool includeNumerator, GlobalVariables& theGlobalVariables);
 	void ReadFromFile (	partFractions& owner, std::fstream &input, GlobalVariables&  theGlobalVariables, int theDimension);
@@ -4940,7 +4940,7 @@ public:
 			bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringOutputToFile(	std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringBasisChangeOutputToFile
-		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, 
+		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat,
 			bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot
 		(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
@@ -5277,7 +5277,7 @@ public:
 	std::string stringConnectedComponents;
 	void ComputeDiagramRelAndK(rootSubalgebra& owner);
 	void FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational>& coeffs);
-	void RelationOneSideToString 
+	void RelationOneSideToString
 		(	std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
 	void GetEpsilonCoords(	roots& input, roots& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
 	int ElementToString(	std::string &output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
@@ -5803,11 +5803,9 @@ public:
 		( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-  void ComputeScalarProductsMatrix
-    ( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
+  void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
   bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
-  bool CanBeShortened
-    ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool CanBeShortened( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverStateFixedK& right);
 	bool RootIsGoodForPreferredSimpleRoot	( root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
@@ -5919,11 +5917,11 @@ public:
 	//roots UndecidedRoots;
   coneRelation PartialRelation;
   MatrixLargeRational theScalarProducts;
+  bool StateIsInternallyPossible;
   bool StateIsPossible;
   bool StateIsComplete;
   //bool StateIsDubious;
   ListBasicObjects<int> PossibleChildStates;
-  ListBasicObjects<int> ImpossibleChildStates;
   ListBasicObjects<int> CompleteChildStates;
   int activeChild;
   minimalRelationsProverStates* owner;
@@ -5976,6 +5974,7 @@ public:
   rootsCollection PrecomputedIsoDomains;
   rootsCollection PrecomputedIsoRanges;
   int sizeByLastSave;
+  int sizeByLastPurge;
   std::fstream theFileHeader;
   std::fstream theFileBody;
   std::string FileHeaderString;
@@ -5989,8 +5988,7 @@ public:
   void initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GetIsoTypicComponents
-    ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl,
-      GlobalVariables& TheGlobalVariables);
+    ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
@@ -6003,8 +6001,7 @@ public:
   void BranchByAddingKRoots(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   static int CountNumSeparatingNormals(roots& theAlphas, roots& theBetas, WeylGroup& theWeyl);
 	void TestAddingExtraRoot
-		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot,
-			root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
+		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
   bool GetNormalSeparatingConesFromPreferredBasis
     ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
 	static bool GetSeparatingRootIfExistsFromSet
@@ -6022,11 +6019,13 @@ public:
     this->MinNumDifferentBetas=-1;
     this->flagSearchForOptimalSeparatingRoot=true;
     this->sizeByLastSave=0;
+    this->sizeByLastPurge=0;
   };
  	void ReadFromFile(std::fstream &inputHeader, std::fstream &inputBody, GlobalVariables &theGlobalVariables);
 	void WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables &theGlobalVariables);
 	void WriteToFileAppend(GlobalVariables&  theGlobalVariables);
 	void ReadFromFile (GlobalVariables&  theGlobalVariables);
+  void PurgeImpossibleStates();
 };
 
 struct ComputationSetup

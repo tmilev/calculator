@@ -5920,14 +5920,17 @@ public:
   bool StateIsInternallyPossible;
   bool StateIsPossible;
   bool StateIsComplete;
+  bool InternalStateIsComputed;
   //bool StateIsDubious;
   ListBasicObjects<int> PossibleChildStates;
   ListBasicObjects<int> CompleteChildStates;
+  int NumImpossibleChildren;
   int activeChild;
   minimalRelationsProverStates* owner;
   bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void ComputeIsPossible(minimalRelationsProverStates& theOwner);
   static void GetNumberScalarProductsData
 		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);

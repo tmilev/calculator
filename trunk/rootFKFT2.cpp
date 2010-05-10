@@ -328,6 +328,8 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
     { int tempI= newIndices.TheObjects[theState.PossibleChildStates.TheObjects[j]];
       if (tempI!=-1)
       { theState.PossibleChildStates.TheObjects[counter]=tempI;
+        if (j==theState.activeChild)
+          theState.activeChild=counter;
         counter++;
       }
     }
@@ -340,7 +342,12 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
         counter++;
       }
     }
+//    theState.activeChild= newIndices.TheObjects[theState.activeChild];
     theState.CompleteChildStates.size=counter;
+  }
+  for (int i=0; i<this->theIndexStack.size; i++)
+  { assert(newIndices.TheObjects[this->theIndexStack.TheObjects[i]]!=-1);
+    this->theIndexStack.TheObjects[i]=newIndices.TheObjects[this->theIndexStack.TheObjects[i]];
   }
   this->sizeByLastPurge=this->size;
 }
@@ -357,6 +364,10 @@ int minimalRelationsProverStates::CountNumSeparatingNormals(roots& theAlphas, ro
 void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
 { int index= *this->theIndexStack.LastObject();
   this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+	if (!this->TheObjects[index].StateIsInternallyPossible || this->TheObjects[index].StateIsComplete)
+    return;
+  if (!this->TheObjects[index].InternalStateIsComputed)
+    this->TheObjects[index].ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
 	if (!this->TheObjects[index].StateIsInternallyPossible || this->TheObjects[index].StateIsComplete)
     return;
 //	this->BranchByAddingKRoots(index, theWeyl, TheGlobalVariables);
@@ -440,18 +451,10 @@ void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVari
 	if(this->TheObjects[currentIndex].activeChild>=this->TheObjects[currentIndex].PossibleChildStates.size-1)
 	{	this->theIndexStack.PopLastObject();
     minimalRelationsProverState& theState= this->TheObjects[currentIndex];
-    if (!theState.StateIsInternallyPossible)
-      theState.StateIsPossible=false;
-    else
-    { theState.StateIsPossible=false;
-      if (theState.CompleteChildStates.size>0)
-        theState.StateIsPossible=true;
-      else
-        for (int i=0;i<theState.CompleteChildStates.size;i++)
-          if (this->TheObjects[theState.CompleteChildStates.TheObjects[i]].StateIsPossible)
-          { theState.StateIsPossible=true;
-            break;
-          }
+    theState.ComputeIsPossible(*this);
+    if (!theState.StateIsPossible)
+    { if (this->theIndexStack.size>0)
+        this->TheObjects[*this->theIndexStack.LastObject()].NumImpossibleChildren++;
     }
 	}
 	else
@@ -559,7 +562,8 @@ void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl,
         if(this->TheObjects[currentNewIndex].StateIsInternallyPossible)
           this->TheObjects[index].CompleteChildStates.AddObjectOnTop(currentNewIndex);
     }
-  }
+  } else
+    this->TheObjects[index].NumImpossibleChildren++;
 }
 
 bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet

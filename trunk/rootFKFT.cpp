@@ -173,6 +173,7 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots
 
 bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsInternallyPossible=true;
+  this->InternalStateIsComputed=true;
 //  this->StateIsDubious=false;
   this->NilradicalRoots.AddRootSnoRepetition(this->PartialRelation.Betas);
   this->BKSingularGmodLRoots.AddRootSnoRepetition(this->PartialRelation.Alphas);
@@ -435,10 +436,13 @@ void minimalRelationsProverState::WriteToFile(std::fstream& output, GlobalVariab
 	output<<"\nActive_child(non-updated_see_header_for_true_data): " << this->activeChild <<" "<< this->PossibleChildStates.size<<" ";
 	for (int i=0; i<this->PossibleChildStates.size; i++)
 		output<< this->PossibleChildStates.TheObjects[i]<<" ";
-	output<<"\nBk_singular: ";
-	this->BKSingularGmodLRoots.WriteToFile(output, theGlobalVariables);
+	output<<"\nThe_choices_we_make: ";
+	this->theChoicesWeMake.WriteToFile(output, theGlobalVariables);
 	output<<"\nChosen_positive_Kroots: ";
 	this->ChosenPositiveKroots.WriteToFile(output, theGlobalVariables);
+	output<<"\nState_possible: "<<this->StateIsInternallyPossible;
+	/*output<<"\nBk_singular: ";
+	this->BKSingularGmodLRoots.WriteToFile(output, theGlobalVariables);
 	output<<"\nChosen_normal_eps_form: ";
 	this->currentSeparatingNormalEpsilonForm.WriteToFile(output);
 	output<<"\nNeedsPosKroots: "<<this->flagNeedsAdditionOfPositiveKroots;
@@ -465,10 +469,7 @@ void minimalRelationsProverState::WriteToFile(std::fstream& output, GlobalVariab
 	output<<"\nNon_PosKroots: ";
 	this->nonPositiveKRoots.WriteToFile(output, theGlobalVariables);
 	output<<"\nPosKroots: ";
-	this->PositiveKroots.WriteToFile(output, theGlobalVariables);
-	output<<"\nThe_choices_we_make: ";
-	this->theChoicesWeMake.WriteToFile(output, theGlobalVariables);
-	output<<"\nState_possible: "<<this->StateIsInternallyPossible;
+	this->PositiveKroots.WriteToFile(output, theGlobalVariables);*/
 }
 
 void minimalRelationsProverState::ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables)
@@ -482,9 +483,14 @@ void minimalRelationsProverState::ReadFromFile(std::fstream& input, GlobalVariab
 	for (int i=0; i<this->PossibleChildStates.size; i++)
 		input>> this->PossibleChildStates.TheObjects[i];
 	input>> tempS;
-	this->BKSingularGmodLRoots.ReadFromFile(input, theGlobalVariables);
+	this->theChoicesWeMake.ReadFromFile(input, theGlobalVariables);
 	input>> tempS;
 	this->ChosenPositiveKroots.ReadFromFile(input, theGlobalVariables);
+	input>> tempS>>this->StateIsInternallyPossible;
+	assert(tempS=="State_possible:");
+/*
+	input>> tempS;
+	this->BKSingularGmodLRoots.ReadFromFile(input, theGlobalVariables);
 	input>> tempS;
 	this->currentSeparatingNormalEpsilonForm.ReadFromFile(input);
 	input>> tempS>>this->flagNeedsAdditionOfPositiveKroots;
@@ -511,11 +517,7 @@ void minimalRelationsProverState::ReadFromFile(std::fstream& input, GlobalVariab
 	input>> tempS;
 	this->nonPositiveKRoots.ReadFromFile(input, theGlobalVariables);
 	input>> tempS;
-	this->PositiveKroots.ReadFromFile(input, theGlobalVariables);
-	input>> tempS;
-	this->theChoicesWeMake.ReadFromFile(input, theGlobalVariables);
-	input>> tempS>>this->StateIsInternallyPossible;
-	assert(tempS=="State_possible:");
+	this->PositiveKroots.ReadFromFile(input, theGlobalVariables);*/
 }
 
 void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl)
@@ -638,6 +640,7 @@ void minimalRelationsProverStates::WriteToFileAppend(std::fstream& outputHeader,
 	{	outputHeader<<"\nChild_index "<<i<<" size: "<< this->TheObjects[i].CompleteChildStates.size<<" ";
 		for (int j=0; j<this->TheObjects[i].CompleteChildStates.size; j++)
 			outputHeader<< this->TheObjects[i].CompleteChildStates.TheObjects[j]<<" ";
+    outputHeader<<"Num_impossible: "<< this->TheObjects[i].NumImpossibleChildren<<" ";
 	}
 	for (int i=this->sizeByLastSave; i<this->size; i++)
 	{	outputBody<<"\n\n\nState_index: "<< i<<" \n";
@@ -688,6 +691,8 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream &inputHeader, std::
 		theCompleteChildStates.TheObjects[i].SetSizeExpandOnTopNoObjectInit(tempI);
 		for (int j=0; j<tempI; j++)
 			inputHeader>> theCompleteChildStates.TheObjects[i].TheObjects[j];
+    inputHeader>>tempS>>this->TheObjects[i].NumImpossibleChildren;
+    assert(tempS=="Num_impossible:");
 	}
 	for (int i=0; i<this->size; i++)
 	{	inputBody>> tempS>>tempI;
@@ -741,12 +746,26 @@ void minimalRelationsProverState::initFromParent(const minimalRelationsProverSta
   this->nonLNonSingularRootsInNeedOfPosKroots=right.nonLNonSingularRootsInNeedOfPosKroots;
 }
 
+void minimalRelationsProverState::ComputeIsPossible(minimalRelationsProverStates& theOwner)
+{ if (this->CompleteChildStates.size>0)
+  { this->StateIsPossible=true;
+    return;
+  }
+  this->StateIsPossible=false;
+  for (int i=0;i<this->PossibleChildStates.size;i++)
+    if (theOwner.TheObjects[this->PossibleChildStates.TheObjects[i]].StateIsPossible)
+    { this->StateIsPossible=true;
+      return;
+    }
+}
+
 void minimalRelationsProverState::Assign(const minimalRelationsProverState& right)
 { this->initFromParent(right);
   this->theScalarProducts.Assign(right.theScalarProducts);
   this->currentSeparatingNormalEpsilonForm.Assign(right.currentSeparatingNormalEpsilonForm);
   this->PossibleChildStates= right.PossibleChildStates;
   this->CompleteChildStates= right.CompleteChildStates;
+  this->NumImpossibleChildren=right.NumImpossibleChildren;
   this->activeChild=right.activeChild;
 }
 
@@ -970,7 +989,9 @@ minimalRelationsProverState::minimalRelationsProverState()
 { this->StateIsComplete=false;
   this->StateIsPossible=true;
   this->flagNeedsAdditionOfPositiveKroots=false;
+  this->NumImpossibleChildren=0;
 	this->activeChild=-1;
+	this->InternalStateIsComputed=false;
 }
 
 minimalRelationsProverStateFixedK::minimalRelationsProverStateFixedK()
@@ -1056,7 +1077,7 @@ void minimalRelationsProverState::ElementToString( std::string& output, WeylGrou
 	out <<"...";
   this->currentSeparatingNormalEpsilonForm.ElementToStringEpsilonForm(tempS,false,false);
   out <<"\nCurrent separating normal: " << tempS;
-  out <<"\r\nChildren states: "<<  this->PossibleChildStates.size <<" possible, "<< this->CompleteChildStates.size
+  out <<"\r\nChildren states: "<<  this->PossibleChildStates.size <<" possible, "<< this->NumImpossibleChildren <<" impossible, "<< this->CompleteChildStates.size
         <<" complete. Index next possible child to explore: " << this->activeChild+2;
   roots AlphaChildren, BetaChildren, Kchildren;
   for (int i=0;i<this->PossibleChildStates.size;i++)

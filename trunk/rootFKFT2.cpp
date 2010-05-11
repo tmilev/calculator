@@ -311,15 +311,21 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
 { ListBasicObjects<int> newIndices;
   newIndices.SetSizeExpandOnTopNoObjectInit(this->size);
   int counter=0;
+  int LastIndexStack=-1;
+  if (this->theIndexStack.size>0)
+    LastIndexStack=*this->theIndexStack.LastObject();
   for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].StateIsPossible)
+    if (this->TheObjects[i].StateIsPossible|| i==LastIndexStack)
     { newIndices.TheObjects[i]=counter;
       if (counter!=i)
         this->TheObjects[counter].Assign(this->TheObjects[i]);
       counter++;
     }
     else
-      newIndices.TheObjects[i]=-1;
+    { newIndices.TheObjects[i]=-1;
+      if (this->theIndexStack.ContainsObject(i))
+        assert(!this->theIndexStack.ContainsObject(i));
+    }
   this->size=counter;
   for(int i=0; i<this->size; i++)
   { minimalRelationsProverState& theState=this->TheObjects[i];
@@ -346,8 +352,9 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
     theState.CompleteChildStates.size=counter;
   }
   for (int i=0; i<this->theIndexStack.size; i++)
-  { assert(newIndices.TheObjects[this->theIndexStack.TheObjects[i]]!=-1);
-    this->theIndexStack.TheObjects[i]=newIndices.TheObjects[this->theIndexStack.TheObjects[i]];
+  { int tempI=newIndices.TheObjects[this->theIndexStack.TheObjects[i]];
+    assert(tempI!=-1);
+    this->theIndexStack.TheObjects[i]=tempI;
   }
   this->sizeByLastPurge=this->size;
 }
@@ -452,10 +459,8 @@ void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVari
 	{	this->theIndexStack.PopLastObject();
     minimalRelationsProverState& theState= this->TheObjects[currentIndex];
     theState.ComputeIsPossible(*this);
-    if (!theState.StateIsPossible)
-    { if (this->theIndexStack.size>0)
-        this->TheObjects[*this->theIndexStack.LastObject()].NumImpossibleChildren++;
-    }
+    if (!theState.StateIsPossible && this->theIndexStack.size>0)
+      this->TheObjects[*this->theIndexStack.LastObject()].NumImpossibleChildren++;
 	}
 	else
 	{ this->TheObjects[currentIndex].activeChild++;

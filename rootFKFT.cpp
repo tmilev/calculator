@@ -597,7 +597,7 @@ void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, Glo
 }
 
 void minimalRelationsProverStates::WriteToFileAppend( GlobalVariables&  theGlobalVariables)
-{	if ( this->size-this->sizeByLastPurge >5)
+{	if ( this->size-this->sizeByLastPurge >1)
   { this->sizeByLastSave=0;
     this->PurgeImpossibleStates();
   }

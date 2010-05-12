@@ -311,11 +311,8 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
 { ListBasicObjects<int> newIndices;
   newIndices.SetSizeExpandOnTopNoObjectInit(this->size);
   int counter=0;
-  int LastIndexStack=-1;
-  if (this->theIndexStack.size>0)
-    LastIndexStack=*this->theIndexStack.LastObject();
   for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].StateIsPossible|| i==LastIndexStack)
+    if (this->TheObjects[i].StateIsPossible|| this->theIndexStack.ContainsObject(i))
     { newIndices.TheObjects[i]=counter;
       if (counter!=i)
         this->TheObjects[counter].Assign(this->TheObjects[i]);
@@ -438,7 +435,9 @@ void minimalRelationsProverStates::TheFullRecursion(	WeylGroup& theWeyl, GlobalV
 	{ this->RecursionStep(theWeyl, TheGlobalVariables);
 		if (this->theIndexStack.size>0)
 			this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), TheGlobalVariables, theWeyl);
+    this->CheckConsistencyOfTree();
 		this->WriteToFileAppend(TheGlobalVariables);
+		this->CheckConsistencyOfTree();
 	}
 }
 
@@ -461,6 +460,7 @@ void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVari
     theState.ComputeIsPossible(*this);
     if (!theState.StateIsPossible && this->theIndexStack.size>0)
       this->TheObjects[*this->theIndexStack.LastObject()].NumImpossibleChildren++;
+    theState.activeChild=-2;
 	}
 	else
 	{ this->TheObjects[currentIndex].activeChild++;

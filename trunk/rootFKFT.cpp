@@ -597,7 +597,7 @@ void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, Glo
 }
 
 void minimalRelationsProverStates::WriteToFileAppend( GlobalVariables&  theGlobalVariables)
-{	if ( this->size-this->sizeByLastPurge >1)
+{	if ( this->size-this->sizeByLastPurge >30)
   { this->sizeByLastSave=0;
     this->PurgeImpossibleStates();
   }
@@ -606,6 +606,7 @@ void minimalRelationsProverStates::WriteToFileAppend( GlobalVariables&  theGloba
 	else
 		CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, true, false);
 	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, true, false);
+	assert(this->theFileHeader.is_open());
 	this->WriteToFileAppend(this->theFileHeader, this->theFileBody, theGlobalVariables);
 	this->theFileHeader.close();
 	this->theFileBody.close();
@@ -722,6 +723,29 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream &inputHeader, std::
 	this->sizeByLastSave=this->size;
 }
 
+void minimalRelationsProverState::ComputeIsPossible(minimalRelationsProverStates& theOwner)
+{ if (this->CompleteChildStates.size>0)
+  { this->StateIsPossible=true;
+    return;
+  }
+  this->StateIsPossible=false;
+  for (int i=0;i<this->PossibleChildStates.size;i++)
+    if (theOwner.TheObjects[this->PossibleChildStates.TheObjects[i]].StateIsPossible)
+    { this->StateIsPossible=true;
+      return;
+    }
+}
+
+void minimalRelationsProverState::Assign(const minimalRelationsProverState& right)
+{ this->initFromParent(right);
+  this->StateIsPossible=right.StateIsPossible;
+  this->theScalarProducts.Assign(right.theScalarProducts);
+  this->currentSeparatingNormalEpsilonForm.Assign(right.currentSeparatingNormalEpsilonForm);
+  this->PossibleChildStates= right.PossibleChildStates;
+  this->CompleteChildStates= right.CompleteChildStates;
+  this->NumImpossibleChildren=right.NumImpossibleChildren;
+  this->activeChild=right.activeChild;
+}
 
 void minimalRelationsProverState::initFromParent(const minimalRelationsProverState& right)
 { this->PartialRelation=right.PartialRelation;
@@ -745,30 +769,6 @@ void minimalRelationsProverState::initFromParent(const minimalRelationsProverSta
   this->nonLNonSingularRoots=right.nonLNonSingularRoots;
   this->nonLNonSingularRootsInNeedOfPosKroots=right.nonLNonSingularRootsInNeedOfPosKroots;
 }
-
-void minimalRelationsProverState::ComputeIsPossible(minimalRelationsProverStates& theOwner)
-{ if (this->CompleteChildStates.size>0)
-  { this->StateIsPossible=true;
-    return;
-  }
-  this->StateIsPossible=false;
-  for (int i=0;i<this->PossibleChildStates.size;i++)
-    if (theOwner.TheObjects[this->PossibleChildStates.TheObjects[i]].StateIsPossible)
-    { this->StateIsPossible=true;
-      return;
-    }
-}
-
-void minimalRelationsProverState::Assign(const minimalRelationsProverState& right)
-{ this->initFromParent(right);
-  this->theScalarProducts.Assign(right.theScalarProducts);
-  this->currentSeparatingNormalEpsilonForm.Assign(right.currentSeparatingNormalEpsilonForm);
-  this->PossibleChildStates= right.PossibleChildStates;
-  this->CompleteChildStates= right.CompleteChildStates;
-  this->NumImpossibleChildren=right.NumImpossibleChildren;
-  this->activeChild=right.activeChild;
-}
-
 void minimalRelationsProverStateFixedK::Assign(const minimalRelationsProverStateFixedK& right)
 { this->theNilradicalModules.Assign(right.theNilradicalModules);
   this->theGmodLmodules.Assign(right.theGmodLmodules);
@@ -988,10 +988,10 @@ bool minimalRelationsProverState::RootIsGoodForPreferredSimpleRoot
 minimalRelationsProverState::minimalRelationsProverState()
 { this->StateIsComplete=false;
   this->StateIsPossible=true;
-  this->flagNeedsAdditionOfPositiveKroots=false;
+	this->InternalStateIsComputed=false;
+	this->flagNeedsAdditionOfPositiveKroots=false;
   this->NumImpossibleChildren=0;
 	this->activeChild=-1;
-	this->InternalStateIsComputed=false;
 }
 
 minimalRelationsProverStateFixedK::minimalRelationsProverStateFixedK()
@@ -1368,6 +1368,7 @@ void minimalRelationsProverStates::initShared(WeylGroup& theWeyl, GlobalVariable
 void minimalRelationsProverStates::GenerateStartingState( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
 {	if (this->flagComputationIsInitialized)
 		return;
+  this->WriteToFileAppend(TheGlobalVariables);
 	minimalRelationsProverState tempState;
   this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
   this->PreferredDualBasis.size=0;
@@ -1473,6 +1474,17 @@ void WeylGroup::GetEpsilonCoords(root &input, root &output, GlobalVariables &the
 	}
 	this->GetEpsilonCoordsWRTsubalgebra(tempRoots,tempInput,tempOutput,theGlobalVariables);
 	output.Assign(tempOutput.TheObjects[0]);
+}
+
+bool minimalRelationsProverStates::CheckConsistencyOfTree()
+{ bool result=true;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].activeChild>-1 && this->TheObjects[i].activeChild<this->TheObjects[i].PossibleChildStates.size)
+      if (!this->theIndexStack.ContainsObject(i))
+      { result=false;
+        assert(false);
+      }
+  return  result;
 }
 
 bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(	minimalRelationsProverState& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)

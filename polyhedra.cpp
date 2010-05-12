@@ -730,17 +730,17 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::st
 bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
 	{	if (openAsBinary)
-			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
+			theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
 		else
-			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out|std::fstream::app);
+			theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app);
   } else
   { if (openAsBinary)
-			theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::binary);
+			theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::binary);
 		else
 		{	if (truncate)
-				theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out| std::fstream::trunc);
+				theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::trunc);
 			else
-				theFile.open(theFileName.c_str(),std::fstream::in|std::fstream::out);
+				theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
 		}
   }
   if(theFile.is_open())

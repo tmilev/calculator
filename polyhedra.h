@@ -6017,6 +6017,7 @@ public:
 	void MakeProgressReportIsos( int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportCurrentState( int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportChildStates( int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  bool CheckConsistencyOfTree();
   minimalRelationsProverStates()
   { this->flagComputationIsInitialized=false;
     this->MinNumDifferentBetas=-1;

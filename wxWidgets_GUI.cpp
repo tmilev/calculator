@@ -187,7 +187,7 @@ public:
 	::wxButton* Button12ProverOneStepFixedK;
 	::wxButton* Button13ProverFullComputationFixedK;
 	::wxButton* Button14ProverFixedKSave;
-	::wxButton* Button15ProverFixedKOpen;	
+	::wxButton* Button15ProverFixedKOpen;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -938,6 +938,12 @@ void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
 	MainWindow1->theComputationSetup.flagProverDoingFullRecursion=false;
   MainWindow1->theComputationSetup.flagProverUseFixedK=false;
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
+  MainWindow1->theComputationSetup.theProver.FileHeaderString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileBodyString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileHeaderString.append("theProverHeader.txt");
+  MainWindow1->theComputationSetup.theProver.FileBodyString.append("theProverBody.txt");
   MainWindow1->RunTheComputation();
 }
 
@@ -945,6 +951,12 @@ void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagProverUseFixedK=false;
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
+  MainWindow1->theComputationSetup.theProver.FileHeaderString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileBodyString=MainWindow1GlobalPath;
+  MainWindow1->theComputationSetup.theProver.FileHeaderString.append("theProverHeader.txt");
+  MainWindow1->theComputationSetup.theProver.FileBodyString.append("theProverBody.txt");
   MainWindow1->RunTheComputation();
 }
 
@@ -953,7 +965,7 @@ void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent &ev)
 	MainWindow1->theComputationSetup.flagProverDoingFullRecursion=false;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->theComputationSetup.flagOpenProverData=false;
-  MainWindow1->theComputationSetup.flagSavingProverData=false;  
+  MainWindow1->theComputationSetup.flagSavingProverData=false;
   MainWindow1->RunTheComputation();
 }
 
@@ -962,14 +974,14 @@ void guiMainWindow::onButton13ProverFullComputationFixedK(wxCommandEvent &ev)
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
   MainWindow1->theComputationSetup.flagOpenProverData=false;
-  MainWindow1->theComputationSetup.flagSavingProverData=false;  
+  MainWindow1->theComputationSetup.flagSavingProverData=false;
   MainWindow1->RunTheComputation();
 }
 
 void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagSavingProverData=true;
-  MainWindow1->theComputationSetup.flagOpenProverData=false;  
+  MainWindow1->theComputationSetup.flagOpenProverData=false;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
   MainWindow1->theComputationSetup.theProver.FileHeaderString=MainWindow1GlobalPath;
@@ -983,7 +995,7 @@ void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent &ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagOpenProverData=true;
-  MainWindow1->theComputationSetup.flagSavingProverData=false;  
+  MainWindow1->theComputationSetup.flagSavingProverData=false;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
   MainWindow1->theComputationSetup.theProver.FileHeaderString=MainWindow1GlobalPath;

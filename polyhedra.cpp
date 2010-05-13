@@ -1155,15 +1155,14 @@ void ComputationSetup::DoTheRootSAComputation()
 	else
 		this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
 	this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	this->theRootSubalgebras.flagComputeConeCondition=false;
-	this->theRootSubalgebras.flagLookingForMinimalRels=true;
+	this->theRootSubalgebras.flagComputeConeCondition=true;
+	this->theRootSubalgebras.flagLookingForMinimalRels=false;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
-	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism
-		( *this->theGlobalVariablesContainer->Default(), this->WeylGroupLetter, this->WeylGroupIndex, true, true);
+	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism( *this->theGlobalVariablesContainer->Default(), this->WeylGroupLetter, this->WeylGroupIndex, true, true);
 	//this->theRootSubalgebras.ComputeLProhibitingRelations
 	//	(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
@@ -2138,31 +2137,31 @@ bool root::MakeAffineProjectionFromNormal(affineHyperplane& output)
 }
 
 void root::DivByInteger(int a)
-{	for (int i =0; i<this->size;i++)
+{	for (int i =0; i<this->size; i++)
 		this->TheObjects[i].DivideByInteger(a);
 }
 
 int root::getIndexFirstNonZeroCoordinate()
-{	for (int i =0; i<this->size;i++)
+{	for (int i =0; i<this->size; i++)
 		if (!this->TheObjects[i].IsEqualToZero())
 			return i;
 	return -1;
 }
 
 void root::DivByLargeInt(LargeInt& a)
-{	for (int i =0; i<this->size;i++)
+{	for (int i =0; i<this->size; i++)
 		this->TheObjects[i].DivideByLargeInteger(a);
 }
 
 void root::DivByLargeRational(const Rational& a)
-{	for (int i =0; i<this->size;i++)
+{	for (int i =0; i<this->size; i++)
 		this->TheObjects[i].DivideBy(a);
 }
 
-bool root::HasStronglyPerpendicularDecompositionWRT
-	(	roots& theSet, WeylGroup& theWeylGroup, roots& output,
-		ListBasicObjects<Rational>& outputCoeffs)
-{ if (this->IsEqualToZero())
+bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,	roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs)
+{ if ( UpperBoundNumBetas>0 && output.size>UpperBoundNumBetas)
+    return false;
+  if (this->IsEqualToZero())
 		return true;
 	if (theSet.size==0)
 		return false;
@@ -2177,34 +2176,28 @@ bool root::HasStronglyPerpendicularDecompositionWRT
 		output.MakeActualSizeAtLeastExpandOnTop(theSet.size);
 		outputCoeffs.MakeActualSizeAtLeastExpandOnTop(theSet.size);
 	}
-//	this->ComputeDebugString();
-//	theSet.ComputeDebugString();
 	roots theNewSet;
 	theNewSet.MakeActualSizeAtLeastExpandOnTop(theSet.size);
 	root tempRoot;
 	Rational tempRat, tempRat2;
 	for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
 	{	root& currentRoot = theSet.TheObjects[indexFirstNonZeroRoot];
-		theWeylGroup.RootScalarKillingFormMatrixRoot
-			(*this,currentRoot,tempRat);
+		theWeylGroup.RootScalarKillingFormMatrixRoot(*this,currentRoot,tempRat);
 		if (tempRat.IsPositive())
 		{	theNewSet.size=0;
-			for (int i=indexFirstNonZeroRoot;i<theSet.size;i++)
-			{ if (currentRoot.IsStronglyPerpendicularTo(theSet.TheObjects[i],theWeylGroup))
+			for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
+        if (currentRoot.IsStronglyPerpendicularTo(theSet.TheObjects[i],theWeylGroup))
 					theNewSet.AddRoot(theSet.TheObjects[i]);
-			}
 			tempRoot.Assign(currentRoot);
 			tempRoot.MinusRoot();
 			tempRoot.MultiplyByLargeRational(tempRat);
 			outputCoeffs.AddObjectOnTop(tempRat);
-			theWeylGroup.RootScalarKillingFormMatrixRoot
-				(currentRoot,currentRoot,tempRat);
+			theWeylGroup.RootScalarKillingFormMatrixRoot(currentRoot,currentRoot,tempRat);
 			tempRoot.DivByLargeRational(tempRat);
 			tempRoot.Add(*this);
 			outputCoeffs.LastObject()->DivideBy(tempRat);
 			output.AddRoot(currentRoot);
-			if (	tempRoot.HasStronglyPerpendicularDecompositionWRT
-							(theNewSet,theWeylGroup,output,outputCoeffs))
+			if (tempRoot.HasStronglyPerpendicularDecompositionWRT(UpperBoundNumBetas, theNewSet, theWeylGroup, output, outputCoeffs))
 				return true;
 			output.size--;
 			outputCoeffs.size--;
@@ -2215,18 +2208,18 @@ bool root::HasStronglyPerpendicularDecompositionWRT
 
 int MatrixLargeRational::FindPositiveLCMCoefficientDenominatorsTruncated()
 { int result=1;
-	for (int i=0;i<this->NumRows;i++)
-		for (int j=0;j<this->NumCols;j++)
-			result*=(this->elements[i][j].DenShort/Rational::gcdSigned(result,this->elements[i][j].DenShort));
+	for (int i=0; i<this->NumRows; i++)
+		for (int j=0; j<this->NumCols; j++)
+			result*=(this->elements[i][j].DenShort/Rational::gcdSigned(result, this->elements[i][j].DenShort));
 	return result;
 }
 
 int MatrixLargeRational::FindPositiveGCDCoefficientNumeratorsTruncated()
 { int result=1;
-	for (int i=0;i<this->NumRows;i++)
-		for (int j=0;j<this->NumCols;j++)
+	for (int i=0; i<this->NumRows; i++)
+		for (int j=0; j<this->NumCols; j++)
 			if (this->elements[i][j].NumShort!=0)
-				result=Rational::gcdSigned(result,this->elements[i][j].NumShort);
+				result=Rational::gcdSigned(result, this->elements[i][j].NumShort);
 	assert(result!=0);
 	if (result<0)
 		result=-result;
@@ -2235,9 +2228,7 @@ int MatrixLargeRational::FindPositiveGCDCoefficientNumeratorsTruncated()
 
 void MatrixLargeRational::ScaleToIntegralForMinRationalHeightNoSignChange()
 { Rational tempRat;
-	tempRat.AssignNumeratorAndDenominator
-		(	this->FindPositiveLCMCoefficientDenominatorsTruncated(),
-      this->FindPositiveGCDCoefficientNumeratorsTruncated());
+	tempRat.AssignNumeratorAndDenominator(this->FindPositiveLCMCoefficientDenominatorsTruncated(), this->FindPositiveGCDCoefficientNumeratorsTruncated());
 	this->MultiplyByLargeRational(tempRat);
 }
 
@@ -2260,15 +2251,12 @@ void MatrixLargeRational::ComputeDeterminantOverwriteMatrix(Rational &output)
 		output.MultiplyBy(tempRat);
 		tempRat.Invert();
 		this->RowTimesScalar(i, tempRat);
-		//this->ComputeDebugString();
 		for (int j = i+1; j<dim; j++)
-		{	if (!this->elements[j][i].IsEqualToZero())
+      if (!this->elements[j][i].IsEqualToZero())
 			{ tempRat.Assign(this->elements[j][i]);
 				tempRat.Minus();
 				this->AddTwoRows (i, j, i, tempRat);
 			}
-		}
-		//this->ComputeDebugString();
 	}
 }
 
@@ -2289,15 +2277,15 @@ void MatrixLargeRational::MultiplyByInt(int x)
 
 void MatrixLargeRational::MultiplyByLargeRational(Rational& x)
 { Rational tempRat; tempRat.Assign(x);
-	for (int i=0;i<this->NumCols;i++)
-		for (int j=0;j<this->NumRows;j++)
+	for (int i=0; i<this->NumCols; i++)
+		for (int j=0; j<this->NumRows; j++)
 			this->elements[j][i].MultiplyBy(tempRat);
 }
 
 void MatrixLargeRational::DivideByRational(Rational& x)
 {	Rational tempRat; tempRat.Assign(x);
-	for (int i=0;i<this->NumCols;i++)
-		for (int j=0;j<this->NumRows;j++)
+	for (int i=0; i<this->NumCols; i++)
+		for (int j=0; j<this->NumRows; j++)
 			this->elements[j][i].DivideBy(tempRat);
 }
 
@@ -2305,29 +2293,29 @@ void MatrixLargeRational::ActOnAroot(root& input, root& output)
 { assert(&input!=&output);
   assert(this->NumCols==input.size);
   output.MakeZero(this->NumRows);
-  for (int i=0;i<this->NumRows;i++)
-    for(int j=0;j<this->NumCols;j++)
+  for (int i=0; i<this->NumRows; i++)
+    for(int j=0; j<this->NumCols; j++)
       output.TheObjects[i]=output.TheObjects[i]+ this->elements[i][j]*input.TheObjects[j];
 
 }
 
 void MatrixLargeRational::ActOnRoots(roots& input, roots&output)
 { output.SetSizeExpandOnTopNoObjectInit(input.size);
-  for (int i=0;i<input.size;i++)
+  for (int i=0; i<input.size; i++)
     this->ActOnAroot(input.TheObjects[i],output.TheObjects[i]);
 }
 
 void MatrixLargeRational::AssignMatrixIntWithDen(MatrixIntTightMemoryFit &theMat, int Den)
 { this->init(theMat.NumRows,theMat.NumCols);
-	for (int i=0;i<this->NumRows;i++)
-		for (int j=0;j<this->NumCols;j++)
+	for (int i=0; i<this->NumRows; i++)
+		for (int j=0; j<this->NumCols; j++)
 			this->elements[i][j].AssignNumeratorAndDenominator(theMat.elements[i][j],Den);
 }
 
 void MatrixLargeRational::NonPivotPointsToRoot(Selection& TheNonPivotPoints, int OutputDimension, root& output)
 {	int RowCounter=0;
 	output.SetSizeExpandOnTopLight(OutputDimension);
-	for (int i=0;i<OutputDimension;i++)
+	for (int i=0; i<OutputDimension; i++)
 	{	if (!TheNonPivotPoints.selected[i])
 		{	output.TheObjects[i].MakeZero();
 			for (int j=0;j<TheNonPivotPoints.CardinalitySelection;j++ )
@@ -2342,18 +2330,15 @@ void MatrixLargeRational::NonPivotPointsToRoot(Selection& TheNonPivotPoints, int
 void MatrixLargeRational::NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, MatrixLargeRational& output)
 {	int RowCounter=0;
 	output.init(this->NumCols,1);
-	//output.ComputeDebugString();
 	for (int i=0;i<this->NumCols;i++)
 	{	if (!TheNonPivotPoints.selected[i])
 		{	output.elements[i][0].MakeZero();
 			for (int j=0;j<TheNonPivotPoints.CardinalitySelection;j++ )
 				output.elements[i][0].Subtract(this->elements[RowCounter][TheNonPivotPoints.elements[j]]);
 			RowCounter++;
-			//output.ComputeDebugString();
 		}
 		else
 			output.elements[i][0].Assign(ROne);
-		//output.ComputeDebugString();
 	}
 }
 
@@ -2369,13 +2354,13 @@ int MathRoutines::lcm(int a, int b)
 
 int MathRoutines::TwoToTheNth(int n)
 {	int result=1;
-	for(int i=0;i<n;i++){result*=2;}
+	for(int i=0; i<n; i++){result*=2;}
 	return result;
 }
 
 int MathRoutines::KToTheNth(int k, int n)
 {	int result=1;
-	for(int i=0;i<n;i++){result*=k;}
+	for(int i=0; i<n; i++){result*=k;}
 	return result;
 }
 
@@ -2383,7 +2368,7 @@ int MathRoutines::BinomialCoefficientMultivariate(int N, ListBasicObjects<int> &
 { int ChoiceIndex=0;
 	int denominator=1;
 	int result=0;
-	for( int i=N;i>0;i--)
+	for( int i=N; i>0; i--)
 	{ result*=i;
 		result/=denominator;
 		denominator++;
@@ -2429,7 +2414,7 @@ void Selection::init(int maxNumElements)
 void roots::SubSelection(Selection& theSelection, roots& output)
 { assert(&output!=this);
 	output.SetSizeExpandOnTopNoObjectInit(theSelection.CardinalitySelection);
-	for(int i=0;i<theSelection.CardinalitySelection;i++)
+	for(int i=0; i<theSelection.CardinalitySelection; i++)
 		output.TheObjects[i].Assign(this->TheObjects[theSelection.elements[i]]);
 }
 
@@ -2438,9 +2423,8 @@ void roots::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matr
 	this->SelectionToMatrixAppend(theSelection,OutputDimension,output,0);
 }
 
-void roots::SelectionToMatrixAppend
-				(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex)
-{ for(int i=0;i<theSelection.CardinalitySelection;i++)
+void roots::SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex)
+{ for(int i=0; i<theSelection.CardinalitySelection; i++)
 	{	root& tempRoot=this->TheObjects[theSelection.elements[i]];
 		for (int j=0;j<OutputDimension;j++)
 			output.elements[StartRowIndex+i][j].Assign(tempRoot.TheObjects[j]);
@@ -2675,8 +2659,7 @@ void Selection::incrementSelectionFixedCardinality(int card)
 		selected[elements[CardinalitySelection-i-1]]=false;
 	for(int i=0;i<NumOnesAfterLastZeroWithOneBefore+1;i++)
 	{	selected[i+ IndexLastZeroWithOneBefore]=true;
-		elements[CardinalitySelection+i-NumOnesAfterLastZeroWithOneBefore-1]
-			= i+ IndexLastZeroWithOneBefore;
+		elements[CardinalitySelection+i-NumOnesAfterLastZeroWithOneBefore-1] = i+ IndexLastZeroWithOneBefore;
 	}
 }
 
@@ -2705,8 +2688,6 @@ void Selection::MakeSubSelection(Selection &theSelection, Selection &theSubSelec
 		this->AddSelectionAppendNewIndex(theSelection.elements[theSubSelection.elements[i]]);
 }
 
-
-
 void Selection::Assign(const Selection& right)
 { if (this==&right)
 		return;
@@ -2714,7 +2695,7 @@ void Selection::Assign(const Selection& right)
 		this->init(right.MaxSize);
 	else
 		this->initNoMemoryAllocation();
-	for (int i=0; i<right.CardinalitySelection;i++)
+	for (int i=0; i<right.CardinalitySelection; i++)
 	{ this->elements[i]=right.elements[i];
 		this->selected[this->elements[i]]=true;
 	}
@@ -2724,7 +2705,7 @@ void Selection::Assign(const Selection& right)
 int Selection::HashFunction() const
 { int tempMin=Minimum(SomeRandomPrimesSize, this->MaxSize);
   int result=0;
-  for (int i=0;i<tempMin;i++)
+  for (int i=0; i<tempMin; i++)
     if (this->selected[i])
       result+=i*SomeRandomPrimes[i];
   return result;
@@ -2733,10 +2714,9 @@ int Selection::HashFunction() const
 bool Selection::operator==(const Selection& right)
 { if (this->MaxSize!=right.MaxSize || this->CardinalitySelection!=right.CardinalitySelection)
     return false;
-  for (int i=0;i<this->CardinalitySelection;i++)
-  { if (this->selected[this->elements[i]]!=right.selected[this->elements[i]])
+  for (int i=0; i<this->CardinalitySelection; i++)
+    if (this->selected[this->elements[i]]!=right.selected[this->elements[i]])
       return false;
-  }
   return true;
 }
 
@@ -2753,21 +2733,20 @@ void root::RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& outp
 }
 
 void root::RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, Rational& output)
-{	static Rational tempRat;
+{	Rational tempRat;
 	assert(r1.size==KillingForm.NumRows && r1.size==r2.size && r1.size==KillingForm.NumCols);
 	output.MakeZero();
 	for (int i=0; i<KillingForm.NumRows; i++)
-	{	for(int j =0; j<KillingForm.NumCols; j++)
+		for(int j =0; j<KillingForm.NumCols; j++)
 		{	tempRat.Assign(r1.TheObjects[i]);
 			tempRat.MultiplyBy(KillingForm.elements[i][j]);
 			tempRat.MultiplyBy(r2.TheObjects[j]);
 			output.Add(tempRat);
 		}
-	}
 }
 
 void root::RootScalarEuclideanRoot(const root& r1, const  root& r2, Rational& output)
-{	static Rational tempRat;
+{	Rational tempRat;
 	assert(r1.size==r2.size);
 	output.MakeZero();
 	for(int i=0;i<r1.size;i++)
@@ -2839,8 +2818,7 @@ inline void roots::AddIntRoot(intRoot &r)
 	this->TheObjects[this->size-1].AssignIntRoot(r);
 }
 
-bool roots::PerturbVectorToRegular
-	(	root& output, GlobalVariables& theGlobalVariables, int theDimension)
+bool roots::PerturbVectorToRegular(	root& output, GlobalVariables& theGlobalVariables, int theDimension)
 { root normal;
   bool result=false;
 	while (!this->IsRegular(output,normal, theGlobalVariables,theDimension))
@@ -2863,17 +2841,12 @@ int roots::GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)
 	return (theDimension-NonPivotPoints.CardinalitySelection);
 }
 
-bool roots::GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex
-	(MatrixLargeRational &outputTheLinearCombination, int theIndex)
-{
-	return false;
+bool roots::GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(MatrixLargeRational &outputTheLinearCombination, int theIndex)
+{	return false;
 }
 
 
-void roots::GetLinearDependenceRunTheLinearAlgebra
-	(	MatrixLargeRational &outputTheLinearCombination,
-		MatrixLargeRational &outputTheSystem,
-		Selection &outputNonPivotPoints)
+void roots::GetLinearDependenceRunTheLinearAlgebra(	MatrixLargeRational &outputTheLinearCombination, MatrixLargeRational &outputTheSystem,	Selection &outputNonPivotPoints)
 { if (this->size==0)
 		return;
 	short Dimension=(short) this->TheObjects[0].size;
@@ -2899,8 +2872,7 @@ bool roots::GetLinearDependence(MatrixLargeRational& outputTheLinearCombination)
 	return true;
 }
 
-void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix,
-																									 Selection& outputNonPivotPoints, int theDimension)
+void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension)
 {	inputMatrix.init((short)this->size,(short)theDimension);
 	MatrixLargeRational matOutputEmpty;
 	matOutputEmpty.init(-1,-1);
@@ -2920,7 +2892,8 @@ void roots::ComputeNormal(root& output)
 	NonPivotPoints.init(theDimension);
 	output.SetSizeExpandOnTopLight(theDimension);
 	this->GaussianEliminationForNormalComputation(tempMatrix,NonPivotPoints,theDimension);
-	if (NonPivotPoints.CardinalitySelection!=1) {return;}
+	if (NonPivotPoints.CardinalitySelection!=1)
+    return;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 }
 
@@ -2929,17 +2902,14 @@ bool roots::IsRegular(root &r, GlobalVariables& theGlobalVariables, int theDimen
 	return this->IsRegular(r,tempRoot,theGlobalVariables,theDimension);
 }
 
-bool roots::IsRegular
-	(	root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables,
-		int theDimension)
+bool roots::IsRegular( root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension)
 { Selection& WallSelection=theGlobalVariables.selWallSelection;
 	WallSelection.init(this->size);
 	int x= MathRoutines::NChooseK(this->size, theDimension-1);
 	for (int i=0;i<x;i++)
 	{ WallSelection.incrementSelectionFixedCardinality(theDimension-1);
 		root tempRoot;
-		if (this->ComputeNormalFromSelection
-					(tempRoot,WallSelection, theGlobalVariables, theDimension))
+		if (this->ComputeNormalFromSelection(tempRoot,WallSelection, theGlobalVariables, theDimension))
 		{ Rational tempRat;
 			root::RootScalarEuclideanRoot(tempRoot, r, tempRat);
 			if (tempRat.IsEqualToZero())
@@ -2973,8 +2943,7 @@ bool roots::ComputeNormalExcludingIndex(root& output, int index, GlobalVariables
 	return true;
 }
 
-bool roots::ComputeNormalFromSelection
-	(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension)
+bool roots::ComputeNormalFromSelection(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension)
 {	MatrixLargeRational& tempMatrix= theGlobalVariables.matComputeNormalFromSelection;
 	MatrixLargeRational& matOutputEmpty=theGlobalVariables.matOutputEmpty;
 	Selection& NonPivotPoints=theGlobalVariables.selComputeNormalFromSelection;
@@ -2982,64 +2951,56 @@ bool roots::ComputeNormalFromSelection
 	output.SetSizeExpandOnTopLight(theDimension);
 	tempMatrix.init((short)theSelection.CardinalitySelection,(short)theDimension);
 	for(int i=0;i<theSelection.CardinalitySelection;i++)
-	{	for(int j=0;j<theDimension;j++)
-			tempMatrix.elements[i][j].Assign
-				(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
-
-	}
+    for(int j=0;j<theDimension;j++)
+			tempMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
 	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection!=1) return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 	return true;
 }
 
-bool roots::ComputeNormalFromSelectionAndExtraRoot
-	(root& output,root& ExtraRoot,Selection& theSelection, GlobalVariables& theGlobalVariables)
+bool roots::ComputeNormalFromSelectionAndExtraRoot(root& output,root& ExtraRoot,Selection& theSelection, GlobalVariables& theGlobalVariables)
 {	if (this->size==0)
 		return false;
 	int theDimension= this->TheObjects[0].size;
 	output.SetSizeExpandOnTopLight(theDimension);
-	MatrixLargeRational& tempMatrix=
-		theGlobalVariables.matComputeNormalFromSelectionAndExtraRoot;
+	MatrixLargeRational& tempMatrix=theGlobalVariables.matComputeNormalFromSelectionAndExtraRoot;
 	MatrixLargeRational	matOutputEmpty;
 	Selection& NonPivotPoints=theGlobalVariables.selComputeNormalFromSelectionAndExtraRoot;
 	tempMatrix.init((short)theSelection.CardinalitySelection+1,(short)theDimension);
 	matOutputEmpty.init(-1,-1);
 	for(int j=0;j<theDimension;j++)
 	{	for(int i=0;i<theSelection.CardinalitySelection;i++)
-			tempMatrix.elements[i][j].Assign
-				(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
-		tempMatrix.elements[theSelection.CardinalitySelection][j].Assign
-			(ExtraRoot.TheObjects[j]);
+			tempMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
+		tempMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot.TheObjects[j]);
 	}
 	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
-	if (NonPivotPoints.CardinalitySelection!=1) return false;
+	if (NonPivotPoints.CardinalitySelection!=1)
+    return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 	return true;
 }
 
 
-bool roots::ComputeNormalFromSelectionAndTwoExtraRoots
-  ( root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection,
-    GlobalVariables& theGlobalVariables)
-{	MatrixLargeRational& tempMatrix=
-		theGlobalVariables.matComputeNormalFromSelectionAndTwoExtraRoots;
+bool roots::ComputeNormalFromSelectionAndTwoExtraRoots( root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables)
+{	MatrixLargeRational& tempMatrix= theGlobalVariables.matComputeNormalFromSelectionAndTwoExtraRoots;
 	MatrixLargeRational matOutputEmpty;
-	Selection& NonPivotPoints=
-		theGlobalVariables.selComputeNormalFromSelectionAndTwoExtraRoots;
-	if (this->size==0) return false; int theDimension= this->TheObjects[0].size;
+	Selection& NonPivotPoints= theGlobalVariables.selComputeNormalFromSelectionAndTwoExtraRoots;
+	if (this->size==0)
+    return false;
+  int theDimension= this->TheObjects[0].size;
 	output.SetSizeExpandOnTopLight(theDimension);
 	matOutputEmpty.init(-1,-1);
 	tempMatrix.init((short)theSelection.CardinalitySelection+2,(short)theDimension);
 	for(int j=0;j<theDimension;j++)
 	{	for(int i=0;i<theSelection.CardinalitySelection;i++)
-			tempMatrix.elements[i][j].Assign
-				(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
+			tempMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
 		tempMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot1.TheObjects[j]);
 		tempMatrix.elements[theSelection.CardinalitySelection+1][j].Assign(ExtraRoot2.TheObjects[j]);
 	}
 	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
-	if (NonPivotPoints.CardinalitySelection!=1) return false;
+	if (NonPivotPoints.CardinalitySelection!=1)
+    return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 	return true;
 }
@@ -3238,7 +3199,7 @@ int roots::ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVari
 inline bool Rational::IsEqualTo(const Rational& b) const
 {	if (this->Extended==0 && b.Extended==0)
     return (this->NumShort*b.DenShort==b.NumShort*this->DenShort);
-  static Rational tempRat;
+  Rational tempRat;
   tempRat.Assign(*this);
   tempRat.Subtract(b);
   return tempRat.IsEqualToZero();
@@ -3247,7 +3208,7 @@ inline bool Rational::IsEqualTo(const Rational& b) const
 inline bool Rational::IsGreaterThanOrEqualTo(Rational &right)
 {	if (this->Extended==0 && right.Extended==0)
     return (this->NumShort*right.DenShort>=right.NumShort*this->DenShort);
-  static Rational tempRat;
+  Rational tempRat;
   tempRat.Assign(*this);
   tempRat.Subtract(right);
 	return tempRat.IsNonNegative();
@@ -3258,8 +3219,7 @@ inline void Rational::ElementToString(std::string& output)
   if (this->Extended==0)
 	{ out <<this->NumShort;
     if (this->DenShort!=1)
-    {	out <<"/"<<this->DenShort;
-    }
+      out <<"/"<<this->DenShort;
 	} else
 	{ std::string tempS;
 	  this->Extended->num.ElementToString(tempS);
@@ -3271,10 +3231,8 @@ inline void Rational::ElementToString(std::string& output)
   output = out.str();
 }
 
-void CombinatorialChamber::AddInternalWall
-	(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal,
-		root &direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables )
-{	static Rational tempRat;
+void CombinatorialChamber::AddInternalWall(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables )
+{	Rational tempRat;
 	root::RootScalarEuclideanRoot(direction, TheFacetBeingKilledNormal,tempRat);
 	root tempRoot; tempRoot.Assign(TheKillerFacetNormal);
 	tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
@@ -3285,12 +3243,10 @@ void CombinatorialChamber::AddInternalWall
 			owner->PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->IndexInOwnerComplex);
 }
 
-bool CombinatorialChamber::CheckSplittingPointCandidate
-	(Selection &SelectionTargetSimplex, Selection &SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension)
+bool CombinatorialChamber::CheckSplittingPointCandidate(Selection &SelectionTargetSimplex, Selection &SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension)
 {	for (int i=0; i<SelectionStartSimplex.CardinalitySelection;i++)
-	{	if (outputColumn.elements[i][0].IsNonPositive())
+		if (outputColumn.elements[i][0].IsNonPositive())
 			return false;
-	}
 	if (outputColumn.elements[Dimension-1 ][0].IsNonPositive())
 		return false;
 	return true;
@@ -3314,13 +3270,11 @@ void CombinatorialChamber::ChamberNumberToString(std::string& output, Combinator
   output=out.str();
 }
 
-bool CombinatorialChamber::ElementToString
-	(std::string& output, CombinatorialChamberContainer* owner)
+bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer* owner)
 { return this->ElementToString(output,owner,false,false);
 }
 
-void CombinatorialChamber::ElementToInequalitiesString
-	(std::string& output,CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
+void CombinatorialChamber::ElementToInequalitiesString(std::string& output,CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
 { int theDimension=owner.AmbientDimension;
 	std::string tempS; std::stringstream out;
 	if (useLatex)
@@ -3354,8 +3308,7 @@ void CombinatorialChamber::ElementToInequalitiesString
 	output=out.str();
 }
 
-bool CombinatorialChamber::ElementToString
-	(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml)
+bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml)
 {	std::stringstream out;
   std::string tempS;
 	//assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
@@ -3394,11 +3347,10 @@ bool CombinatorialChamber::ElementToString
 	this->FindAllNeighbors(outputChambers);
 	out<<"Neighbors: ";
 	for (int i=0;i<outputChambers.size;i++)
-	{	if (outputChambers.TheObjects[i]!=0)
+		if (outputChambers.TheObjects[i]!=0)
 		{	outputChambers.TheObjects[i]->ChamberNumberToString(tempS,*owner);
 			out <<tempS<<", ";
 		}
-	}
 	PolyFormatLocal.cutOffString=false;
 	if (this->flagIncludeVerticesInDebugString)
 	{ out << endOfLine<<"Vertices: ";
@@ -3430,13 +3382,12 @@ bool CombinatorialChamber::ElementToString
 
 bool CombinatorialChamber::ConsistencyCheck(int theDimension)
 { for (int i=0;i<this->Externalwalls.size;i++)
-	{ if (!this->Externalwalls.TheObjects[i].ConsistencyCheck(this))
+	 if (!this->Externalwalls.TheObjects[i].ConsistencyCheck(this))
 			return false;
-	}
 	if (this->flagPermanentlyZero)
 		return true;
 	if (CombinatorialChamber::DisplayingGraphics)
-	{ for (int i=0;i<this->Externalwalls.size;i++)
+    for (int i=0;i<this->Externalwalls.size;i++)
 		{ Rational tempRat;
 			this->ComputeInternalPointMethod2(this->InternalPoint,theDimension);
 			root::RootScalarEuclideanRoot(this->InternalPoint,this->Externalwalls.TheObjects[i].normal,tempRat);
@@ -3445,7 +3396,6 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension)
 				return false;
 			}
 		}
-	}
 	return true;
 }
 
@@ -3459,33 +3409,28 @@ CombinatorialChamber::CombinatorialChamber()
 	this->NumTrueAffineVertices=-1;
 }
 
-bool CombinatorialChamber::ProjectToDefaultAffineSpace
-	(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
 { this->affineExternalWalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size);
 	this->affineVertices.MakeActualSizeAtLeastExpandOnTop(this->AllVertices.size);
 	this->affineExternalWalls.size=0;
 	this->affineVertices.size=0;
 	root tempCrossSectionNormal, tempAffinePoint;
-	tempCrossSectionNormal.AssignWithoutLastCoordinate
-		(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal);
-	tempAffinePoint.AssignWithoutLastCoordinate
-		(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint);
+	tempCrossSectionNormal.AssignWithoutLastCoordinate(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal);
+	tempAffinePoint.AssignWithoutLastCoordinate(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint);
 	for (int i=0;i<this->Externalwalls.size;i++)
 	{ affineHyperplane tempAH;
 		if (this->Externalwalls.TheObjects[i].normal.MakeAffineProjectionFromNormal(tempAH))
 			this->affineExternalWalls.AddObjectOnTop(tempAH);
 	}
 	Rational tempScalarProd1, tempRat;
-	root::RootScalarEuclideanRoot
-		(tempCrossSectionNormal,tempAffinePoint,tempScalarProd1);
+	root::RootScalarEuclideanRoot(tempCrossSectionNormal,tempAffinePoint,tempScalarProd1);
 	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal.ComputeDebugString();
 	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.ComputeDebugString();
 	//this->ComputeDebugString(owner);
 	root tempRoot;
 	for (int i=0;i<this->AllVertices.size;i++)
-		 if (this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
-		{ root::RootScalarEuclideanRoot
-				(	tempCrossSectionNormal,tempRoot, tempRat);
+		if (this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
+		{ root::RootScalarEuclideanRoot(	tempCrossSectionNormal,tempRoot, tempRat);
 			if (tempRat.IsEqualTo(tempScalarProd1))
 			{	//for (int i=0;i<owner->StartingCrossSections.size;i++)
 				{	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.MultiplyByInteger(2);
@@ -3511,32 +3456,27 @@ void CombinatorialChamber::PurgeInternalWalls()
 { this->InternalWalls.size=0;
 }
 
-void CombinatorialChamber::ComputeAffineInfinityPointApproximation
-	(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
+void CombinatorialChamber::ComputeAffineInfinityPointApproximation(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
 { root candidateVertex;
 	Selection& subSelection = theGlobalVariables.selComputeAffineInfinityPointApproximation1;
 	Selection& tempSel = theGlobalVariables.selComputeAffineInfinityPointApproximation2;
 	tempSel.init(selectedExternalWalls.CardinalitySelection);
-	int tempI = MathRoutines::NChooseK
-		(selectedExternalWalls.CardinalitySelection, owner->AmbientDimension-2);
+	int tempI = MathRoutines::NChooseK(selectedExternalWalls.CardinalitySelection, owner->AmbientDimension-2);
 	for (int i=0;i<tempI;i++)
 	{ tempSel.incrementSelectionFixedCardinality(owner->AmbientDimension-2);
-		tempSel.ComputeDebugString();
 		subSelection.MakeSubSelection(selectedExternalWalls,tempSel);
 		if (this->LinearAlgebraForVertexComputationOneAffinePlane(subSelection,candidateVertex,theGlobalVariables,owner))
 			this->affineVertices.AddObjectOnTop(candidateVertex);
 	}
 }
 
-void CombinatorialChamber::findWallsIncidentWithVertexExcludeWallAtInfinity
-	(root& theVertex, Selection &output, CombinatorialChamberContainer* owner)
+void CombinatorialChamber::findWallsIncidentWithVertexExcludeWallAtInfinity(root& theVertex, Selection &output, CombinatorialChamberContainer* owner)
 { output.init(this->Externalwalls.size);
 	root tempRoot;
 	tempRoot.MakeZero(owner->AmbientDimension);
 	tempRoot.LastObject()->MakeOne();
 	for (int i=0;i<this->Externalwalls.size;i++)
-		if (	theVertex.OurScalarProductIsZero(this->Externalwalls.TheObjects[i].normal)
-				&&!this->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot))
+		if (	theVertex.OurScalarProductIsZero(this->Externalwalls.TheObjects[i].normal)&&!this->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot))
 			output.AddSelectionAppendNewIndex(i);
 }
 
@@ -3559,8 +3499,7 @@ int CombinatorialChamber::getIndexVertexIncidentWithSelection(Selection&theSel)
 
 bool CombinatorialChamber::VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel)
 { for(int i=0; i<theSel.CardinalitySelection;i++)
-		if (!this->Externalwalls.TheObjects[theSel.elements[i]]
-					.normal.OurScalarProductIsZero(VertexCandidate))
+		if (!this->Externalwalls.TheObjects[theSel.elements[i]].normal.OurScalarProductIsZero(VertexCandidate))
 			return false;
 	return true;
 }
@@ -3589,9 +3528,7 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 		this->Externalwalls.TheObjects[i].indexInOwnerChamber=i;
 }
 
-void CombinatorialChamber::drawOutputAffine
-	(	DrawingVariables& TDV,CombinatorialChamberContainer& owner,
-		std::fstream* LaTeXoutput,drawLineFunction theDrawFunction,drawTextFunction drawTextIn)
+void CombinatorialChamber::drawOutputAffine(	DrawingVariables& TDV,CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput,drawLineFunction theDrawFunction,drawTextFunction drawTextIn)
 { if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomial)
 		return;
 	TDV.ApplyScale(0.3);
@@ -3599,13 +3536,10 @@ void CombinatorialChamber::drawOutputAffine
   { for(int j=0;j<this->affineVertices.size;j++)
     { affineHyperplane* AreInAWall=0;
       for (int k=0;k<this->affineExternalWalls.size;k++)
-      { if (this->affineExternalWalls.TheObjects[k].ContainsPoint(this->affineVertices.TheObjects[i])
-            &&
-            this->affineExternalWalls.TheObjects[k].ContainsPoint(this->affineVertices.TheObjects[j]))
+       if (this->affineExternalWalls.TheObjects[k].ContainsPoint(this->affineVertices.TheObjects[i]) && this->affineExternalWalls.TheObjects[k].ContainsPoint(this->affineVertices.TheObjects[j]))
         { AreInAWall=&this->affineExternalWalls.TheObjects[k];
           break;
         }
-      }
       if (AreInAWall!=0)
 			{ int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex,LaTeXoutput);
 				int penStyle = TDV.DrawStyle;
@@ -3613,10 +3547,7 @@ void CombinatorialChamber::drawOutputAffine
 					penStyle= TDV.DrawStyleInvisibles;
 				if (owner.AffineWallsOfWeylChambers.IndexOfObjectHash(*AreInAWall)!=-1)
 					color= TDV.ColorWeylChamberWalls;
-				TDV.drawlineBetweenTwoVectors
-					(	this->affineVertices.TheObjects[i],
-						this->affineVertices.TheObjects[j],penStyle,color,LaTeXoutput,
-						theDrawFunction);
+				TDV.drawlineBetweenTwoVectors (this->affineVertices.TheObjects[i], this->affineVertices.TheObjects[j],penStyle, color, LaTeXoutput, theDrawFunction);
 				root tempRoot; this->ComputeAffineInternalPoint(tempRoot,owner.AmbientDimension-1);
 				std::stringstream out;
 				out << this->DisplayNumber;
@@ -3633,33 +3564,26 @@ void CombinatorialChamber::drawOutputAffine
   }
 }
 
-void CombinatorialChamber::ComputeVerticesFromNormals
-	(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
+void CombinatorialChamber::ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
 {	for (int i =0;i<this->Externalwalls.size;i++)
-	{	this->AllVertices.size=0;
-	}
+    this->AllVertices.size=0;
 	Selection theSelection;
 	theSelection.init(this->Externalwalls.size);
 	root VertexCandidate;
 	int NumCandidates = MathRoutines::NChooseK(this->Externalwalls.size, owner.AmbientDimension-1);
 	for (int i=0;i<NumCandidates; i++)
 	{	theSelection.incrementSelectionFixedCardinality(owner.AmbientDimension-1);
-		if (this->LinearAlgebraForVertexComputation
-					(theSelection,VertexCandidate,theGlobalVariables,owner.AmbientDimension))
-		{	if (this->PlusMinusPointIsInChamber(VertexCandidate))
-			{	for (int j=0;j<theSelection.CardinalitySelection;j++ )
+		if (this->LinearAlgebraForVertexComputation(theSelection,VertexCandidate,theGlobalVariables,owner.AmbientDimension))
+			if (this->PlusMinusPointIsInChamber(VertexCandidate))
+				for (int j=0;j<theSelection.CardinalitySelection;j++ )
 				{	this->ScaleVertexToFitCrossSection(VertexCandidate,owner);
 					this->AllVertices.AddRootNoRepetition(VertexCandidate);
 				}
-			}
-		}
 	}
 }
 
-bool CombinatorialChamber::ComputeVertexFromSelection
-	( GlobalVariables& theGlobalVariables, root& output, Selection& theSelection, int theDimension)
-{ if (this->LinearAlgebraForVertexComputation
-					(theSelection,output,theGlobalVariables,theDimension))
+bool CombinatorialChamber::ComputeVertexFromSelection( GlobalVariables& theGlobalVariables, root& output, Selection& theSelection, int theDimension)
+{ if (this->LinearAlgebraForVertexComputation(theSelection,output,theGlobalVariables,theDimension))
 		if (this->PlusMinusPointIsInChamber(output))
 			return true;
 	return false;
@@ -3674,19 +3598,15 @@ bool CombinatorialChamber::PlusMinusPointIsInChamber(root&point)
 	return false;
 }
 
-bool CombinatorialChamber::ScaleVertexToFitCrossSection
-	(root& point, CombinatorialChamberContainer& owner)
-{	static Rational tempRat;
+bool CombinatorialChamber::ScaleVertexToFitCrossSection(root& point, CombinatorialChamberContainer& owner)
+{	Rational tempRat;
 	if (this->IndexStartingCrossSectionNormal==-1)
 		return false;
-	root::RootScalarEuclideanRoot
-		(point,	owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,tempRat);
+	root::RootScalarEuclideanRoot(point,	owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,tempRat);
 	if (tempRat.IsEqualToZero()){return false;}
 	point.DivByLargeRational(tempRat);
 	root::RootScalarEuclideanRoot
-		(	owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,
-			owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,
-			tempRat);
+    (	owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint, tempRat);
 	point.MultiplyByLargeRational(tempRat);
 	return true;
 }
@@ -3701,9 +3621,7 @@ bool CombinatorialChamber::PointIsInChamber(root&point)
 	return true;
 }
 
-bool CombinatorialChamber::IsABogusNeighbor
-	(WallData& NeighborWall, CombinatorialChamber* Neighbor,
-    CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
 {	if (NeighborWall.NeighborsAlongWall.size==1)
 		return false;
 	roots& ExternalWallsConglomerate= theGlobalVariables.rootsIsABogusNeighbor1;
@@ -3715,13 +3633,11 @@ bool CombinatorialChamber::IsABogusNeighbor
 	root tempRoot; tempRoot.Assign(NeighborWall.normal); tempRoot.MinusRoot();
 	for (int i=0;i<Neighbor->Externalwalls.size;i++)
 		if (!(Neighbor->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot)))
-			ExternalWallsConglomerate.AddRootNoRepetition
-				(Neighbor->Externalwalls.TheObjects[i].normal);
+			ExternalWallsConglomerate.AddRootNoRepetition(Neighbor->Externalwalls.TheObjects[i].normal);
 	Selection& theSelection=theGlobalVariables.selIsBogusNeighbor;
 	theSelection.init(ExternalWallsConglomerate.size);
 	int NumPossibilities;
-	NumPossibilities =
-		MathRoutines::NChooseK(ExternalWallsConglomerate.size,ownerComplex.AmbientDimension-2);
+	NumPossibilities =MathRoutines::NChooseK(ExternalWallsConglomerate.size,ownerComplex.AmbientDimension-2);
 	root VertexCandidate; VertexCandidate.SetSizeExpandOnTopLight(ownerComplex.AmbientDimension);
 	int OldRank; OldRank= 0;
 	FoundVertices.size=0;
@@ -3731,8 +3647,7 @@ bool CombinatorialChamber::IsABogusNeighbor
 	}
 	for (int i=0;i<NumPossibilities;i++)
 	{	theSelection.incrementSelectionFixedCardinality(ownerComplex.AmbientDimension-2);
-		if(	ExternalWallsConglomerate.ComputeNormalFromSelectionAndExtraRoot
-					(VertexCandidate,NeighborWall.normal,theSelection,theGlobalVariables))
+		if(	ExternalWallsConglomerate.ComputeNormalFromSelectionAndExtraRoot(VertexCandidate,NeighborWall.normal,theSelection,theGlobalVariables))
 			if (this->PlusMinusPointIsInChamber(VertexCandidate))
 				if (Neighbor->PointIsInChamber(VertexCandidate))
 					if(FoundVertices.AddRootNoRepetition(VertexCandidate))
@@ -3745,27 +3660,24 @@ bool CombinatorialChamber::IsABogusNeighbor
 						else
               FoundVertices.size--;
 						if (OldRank==ownerComplex.AmbientDimension-1)
-						{return false;}
+              return false;
 					}
 	}
 	return true;
 }
 
 
-bool CombinatorialChamber::LinearAlgebraForVertexComputation
-			(Selection& theSelection,  root& output, GlobalVariables& theGlobalVariables, int theDimension)
+bool CombinatorialChamber::LinearAlgebraForVertexComputation(Selection& theSelection,  root& output, GlobalVariables& theGlobalVariables, int theDimension)
 { output.SetSizeExpandOnTopLight(theDimension);
 	assert(theDimension -1== theSelection.CardinalitySelection);
-	MatrixLargeRational& RMinus1ByR=
-		theGlobalVariables.matLinearAlgebraForVertexComputation;
+	MatrixLargeRational& RMinus1ByR=theGlobalVariables.matLinearAlgebraForVertexComputation;
 	MatrixLargeRational	matOutputEmpty;
 	RMinus1ByR.init((short)(theDimension-1),(short)theDimension);
 	matOutputEmpty.init(-1,-1);
 	Selection& NonPivotPoints= theGlobalVariables.selLinearAlgebraForVertexComputation;
 	for (int i =0;i<theDimension-1;i++)
 		for (int j=0; j<theDimension;j++)
-			RMinus1ByR.elements[i][j].Assign
-				(this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
+			RMinus1ByR.elements[i][j].Assign(this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
 	MatrixLargeRational::GaussianEliminationByRows(RMinus1ByR,matOutputEmpty,NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection==1)
 	{	RMinus1ByR.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
@@ -3774,34 +3686,26 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputation
 	return false;
 }
 
-bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane
-	(	Selection& theSelection, root& output,
-		GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner)
+bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner)
 { assert(theSelection.CardinalitySelection==owner->AmbientDimension-2);
-	MatrixLargeRational& tempMat=
-		theGlobalVariables.matComputationBufferLinAlgOneAffinePlane;
+	MatrixLargeRational& tempMat=theGlobalVariables.matComputationBufferLinAlgOneAffinePlane;
 	MatrixLargeRational& tempColumn=theGlobalVariables.matComputationBufferLinAlgAffinePart;
 	tempMat.init(owner->AmbientDimension, owner->AmbientDimension);
 	tempColumn.init(owner->AmbientDimension,1);
 	for (int i=0;i<theSelection.CardinalitySelection;i++)
 	{ for (int j=0;j<owner->AmbientDimension;j++)
-			tempMat.elements[i][j].Assign
-				(	this->Externalwalls.TheObjects[theSelection.elements[i]]
-						.normal.TheObjects[j]);
+			tempMat.elements[i][j].Assign(	this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
 		tempColumn.elements[i][0].MakeZero();
 	}
 	tempColumn.elements[owner->AmbientDimension-2][0].MakeOne();
 	Rational tempRat; Rational tempOne; tempOne.MakeOne();
 	root::RootScalarEuclideanRoot
-		(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,
-			owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,tempRat);
+		(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal, owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,tempRat);
 	tempRat.Subtract(tempOne);
 	tempColumn.elements[owner->AmbientDimension-1][0].Assign(tempRat);
 	for (int i=0;i<owner->AmbientDimension-1;i++)
 	{ tempMat.elements[owner->AmbientDimension-2][i].MakeZero();
-		tempMat.elements[owner->AmbientDimension-1][i].Assign
-			(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal]
-					.normal.TheObjects[i]);
+		tempMat.elements[owner->AmbientDimension-1][i].Assign(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal.TheObjects[i]);
 	}
 	tempMat.elements[owner->AmbientDimension-2][owner->AmbientDimension-1].MakeOne();
 	tempMat.elements[owner->AmbientDimension-1][owner->AmbientDimension-1].MakeZero();
@@ -3820,10 +3724,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane
 	return true;
 }
 
-bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
-																						int CurrentIndex,CombinatorialChamberContainer& output,
-																						hashedRoots& FacetOutput,
-																						GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions, int CurrentIndex,CombinatorialChamberContainer& output, hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables)
 {	if (!(this->Externalwalls.size>=output.AmbientDimension))
 	{	this->ComputeDebugString(&output);
 //		CombinatorialChamberContainer::TheBigDump<<this->DebugString;
@@ -3849,14 +3750,12 @@ bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
 					canHaveZeroPoly= canHaveZeroPoly|| tempBool;
 				}
 				for (int j=i+1; j<this->Externalwalls.size;j++)
-				{	if(this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction))
+					if(this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction))
 					{	bool tempBool;
 						this->Externalwalls.TheObjects[j].EveryNeigborIsExplored(tempBool);
 						canHaveZeroPoly= canHaveZeroPoly|| tempBool;
 						root candidateNormal;
-						tempBool=this->MakeFacetFromEdgeAndDirection
-							(	this->Externalwalls.TheObjects[i],this->Externalwalls.TheObjects[j],output,
-								direction,directions,CurrentIndex,candidateNormal, theGlobalVariables);
+						tempBool=this->MakeFacetFromEdgeAndDirection(this->Externalwalls.TheObjects[i], this->Externalwalls.TheObjects[j],output, direction, directions, CurrentIndex, candidateNormal, theGlobalVariables);
 						if (tempBool)
 						{	if (this->SplitChamber(candidateNormal,output,direction, theGlobalVariables))
 								return true;
@@ -3866,7 +3765,6 @@ bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
 							}
 						}
 					}
-				}
 			}
 		}
 	}
@@ -3876,8 +3774,7 @@ bool CombinatorialChamber::SliceInDirection(root& direction,roots& directions,
 	return false;
 }
 
-void CombinatorialChamber::FindAllNeighbors(
-	     ListObjectPointers<CombinatorialChamber>& TheNeighbors)
+void CombinatorialChamber::FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors)
 {	for (int i=0;i<this->Externalwalls.size;i++)
 		for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size;j++)
 			TheNeighbors.AddObjectOnTop(this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]);
@@ -3891,15 +3788,12 @@ bool CombinatorialChamber::TestPossibilityToSlice(root& direction)
 		return false;
 	}
 	for (int j=0;j<this->Externalwalls.size;j++)
-		if(	this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction) &&
-	      (!this->Externalwalls.TheObjects[j].EveryNeigborIsExplored(tempBool)))
+		if(	this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction) && (!this->Externalwalls.TheObjects[j].EveryNeigborIsExplored(tempBool)))
 			return false;
 	return true;
 }
 
-bool CombinatorialChamber::SplitChamber
-	(	root& theKillerPlaneNormal,CombinatorialChamberContainer& output,
-		root& direction, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::SplitChamber(	root& theKillerPlaneNormal,CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables)
 {	//	 roots PositiveVertices, NegativeVertices
 	if (output.flagSliceWithAWallIgnorePermanentlyZero && this->flagPermanentlyZero)
 		return false;
@@ -3909,10 +3803,8 @@ bool CombinatorialChamber::SplitChamber
 	rootsCollection& LocalContainerPlusVertices=theGlobalVariables.rootsCollectionSplitChamber1;
 	rootsCollection& LocalContainerMinusVertices=theGlobalVariables.rootsCollectionSplitChamber2;
 	roots& LocalLinearAlgebra= theGlobalVariables.rootsSplitChamber1;
-	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors=
-		theGlobalVariables.listCombinatorialChamberPtSplitChamber;
-	ListBasicObjects<WallData*>& PossibleBogusWalls=
-		theGlobalVariables.listWallDataPtSplitChamber;
+	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors=theGlobalVariables.listCombinatorialChamberPtSplitChamber;
+	ListBasicObjects<WallData*>& PossibleBogusWalls=theGlobalVariables.listWallDataPtSplitChamber;
 	CombinatorialChamber* NewPlusChamber;
 	CombinatorialChamber* NewMinusChamber;
 	PossibleBogusNeighbors.size=0;
@@ -3947,8 +3839,7 @@ bool CombinatorialChamber::SplitChamber
 	for (int i=0;i<NumCandidates;i++)
 	{	root VertexCandidate; VertexCandidate.SetSizeExpandOnTopLight(output.AmbientDimension);
 		theSelection.incrementSelectionFixedCardinality(output.AmbientDimension-1);
-		if (	LocalLinearAlgebra.ComputeNormalFromSelection
-						(VertexCandidate,theSelection, theGlobalVariables,output.AmbientDimension))
+		if (	LocalLinearAlgebra.ComputeNormalFromSelection(VertexCandidate,theSelection, theGlobalVariables,output.AmbientDimension))
 		{	if (this->PlusMinusPointIsInChamber(VertexCandidate))
 			{	Rational tempRat; bool IsPositive; bool IsNegative;
 				root::RootScalarEuclideanRoot(VertexCandidate,theKillerPlaneNormal,tempRat);
@@ -3958,13 +3849,11 @@ bool CombinatorialChamber::SplitChamber
 				hasNegative = (hasNegative || IsNegative);
 				for (int j=0;j<output.AmbientDimension-1;j++)
 				{	if (!IsNegative)
-					{	LocalContainerPlusVertices.TheObjects[theSelection.elements[j]]
-							.AddRootNoRepetition(VertexCandidate);
+					{	LocalContainerPlusVertices.TheObjects[theSelection.elements[j]].AddRootNoRepetition(VertexCandidate);
 						PositiveChamberInternalPoint.Add(VertexCandidate);
 					}
 					if(!IsPositive)
-					{	LocalContainerMinusVertices.TheObjects[theSelection.elements[j]]
-							.AddRootNoRepetition(VertexCandidate);
+					{	LocalContainerMinusVertices.TheObjects[theSelection.elements[j]].AddRootNoRepetition(VertexCandidate);
 						NegativeChamberInternalPoint.Add(VertexCandidate);
 					}
 				}
@@ -3978,20 +3867,16 @@ bool CombinatorialChamber::SplitChamber
 	if (!(hasPositive && hasNegative))
 	{	if (output.flagMakingASingleHyperplaneSlice && output.flagSliceWithAWallInitDone)
 		{ if (hasPositive)
-				this->PropagateSlicingWallThroughNonExploredNeighbors
-					(theKillerPlaneNormal,LocalContainerMinusVertices,output,theGlobalVariables);
+				this->PropagateSlicingWallThroughNonExploredNeighbors(theKillerPlaneNormal,LocalContainerMinusVertices,output,theGlobalVariables);
 			else
-				this->PropagateSlicingWallThroughNonExploredNeighbors
-					(theKillerPlaneNormal,LocalContainerPlusVertices,output,theGlobalVariables);
+				this->PropagateSlicingWallThroughNonExploredNeighbors(theKillerPlaneNormal,LocalContainerPlusVertices,output,theGlobalVariables);
 			this->flagExplored=true;
 		}
 		return false;
 	}
 	if (!output.flagMakingASingleHyperplaneSlice)
-	{	if (!CombinatorialChamberContainer::startingCones.SeparatePoints
-					( PositiveChamberInternalPoint, NegativeChamberInternalPoint,&theKillerPlaneNormal))
-		{	return false;}
-	}
+		if (!CombinatorialChamberContainer::startingCones.SeparatePoints( PositiveChamberInternalPoint, NegativeChamberInternalPoint,&theKillerPlaneNormal))
+      return false;
 //	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
 //	{ LocalContainerPlusVertices.ComputeDebugString();
 //		LocalContainerMinusVertices.ComputeDebugString();
@@ -4016,10 +3901,8 @@ bool CombinatorialChamber::SplitChamber
 	{	LocalContainerPlusVertices.Average(NewPlusChamber->InternalPoint,LocalLinearAlgebra.size,output.AmbientDimension);
 		LocalContainerMinusVertices.Average(NewMinusChamber->InternalPoint,LocalLinearAlgebra.size,output.AmbientDimension);
 		for (int i=0;i<LocalLinearAlgebra.size;i++)
-		{	NewPlusChamber->AllVertices.AddRootSnoRepetition
-				(LocalContainerPlusVertices.TheObjects[i]);
-			NewMinusChamber->AllVertices.AddRootSnoRepetition
-				(LocalContainerMinusVertices.TheObjects[i]);
+		{	NewPlusChamber->AllVertices.AddRootSnoRepetition(LocalContainerPlusVertices.TheObjects[i]);
+			NewMinusChamber->AllVertices.AddRootSnoRepetition(LocalContainerMinusVertices.TheObjects[i]);
 		}
 	}
 	PossibleBogusNeighbors.size=0;
@@ -4027,12 +3910,9 @@ bool CombinatorialChamber::SplitChamber
 	if (output.flagAnErrorHasOcurredTimeToPanic)
 		this->ComputeDebugString(&output);
 	for (int i=0;i<this->Externalwalls.size;i++)
-	{	Externalwalls.TheObjects[i].SplitWall(this,	NewPlusChamber,NewMinusChamber,&output,
-																		LocalContainerPlusVertices.TheObjects[i],
-																		LocalContainerMinusVertices.TheObjects[i],
-																		theKillerPlaneNormal,direction,
-																		PossibleBogusNeighbors,
-																		&PossibleBogusWalls,theGlobalVariables);
+	{	Externalwalls.TheObjects[i].SplitWall
+      ( this,	NewPlusChamber,NewMinusChamber,&output, LocalContainerPlusVertices.TheObjects[i], LocalContainerMinusVertices.TheObjects[i], theKillerPlaneNormal, direction,
+				PossibleBogusNeighbors, &PossibleBogusWalls,theGlobalVariables);
 		if (output.flagAnErrorHasOcurredTimeToPanic)
 		{ NewPlusChamber->ComputeDebugString(&output);
 			NewMinusChamber->ComputeDebugString(&output);
@@ -4060,18 +3940,10 @@ bool CombinatorialChamber::SplitChamber
 		//{	PossibleBogusWalls.TheObjects[i]->ComputeDebugString();
 		//	PossibleBogusNeighbors.TheObjects[i]->ComputeDebugString();
 		//}
-		if (NewPlusChamber->IsABogusNeighbor(*PossibleBogusWalls.TheObjects[i],
-			                                   PossibleBogusNeighbors.TheObjects[i],
-																				 output,theGlobalVariables))
-		{	PossibleBogusWalls.TheObjects[i]->RemoveNeighborhoodBothSides
-				(PossibleBogusNeighbors.TheObjects[i],NewPlusChamber);
-		}
-		if (NewMinusChamber->IsABogusNeighbor(*PossibleBogusWalls.TheObjects[i],
-			                                    PossibleBogusNeighbors.TheObjects[i],
-																					output,theGlobalVariables ) )
-		{	PossibleBogusWalls.TheObjects[i]->RemoveNeighborhoodBothSides
-				(PossibleBogusNeighbors.TheObjects[i],NewMinusChamber);
-		}
+		if (NewPlusChamber->IsABogusNeighbor(*PossibleBogusWalls.TheObjects[i], PossibleBogusNeighbors.TheObjects[i], output,theGlobalVariables))
+      PossibleBogusWalls.TheObjects[i]->RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i],NewPlusChamber);
+		if (NewMinusChamber->IsABogusNeighbor(*PossibleBogusWalls.TheObjects[i], PossibleBogusNeighbors.TheObjects[i], output,theGlobalVariables ) )
+			PossibleBogusWalls.TheObjects[i]->RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i],NewMinusChamber);
 	}
 	assert(NewPlusChamber->Externalwalls.size>=output.AmbientDimension);
 	assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);
@@ -4083,25 +3955,20 @@ bool CombinatorialChamber::SplitChamber
 	return true;
 }
 
-void CombinatorialChamber::PropagateSlicingWallThroughNonExploredNeighbors
-	(	root& theKillerNormal,rootsCollection &CuttingPlaneVertices,
-		::CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
+void CombinatorialChamber::PropagateSlicingWallThroughNonExploredNeighbors(root& theKillerNormal,rootsCollection &CuttingPlaneVertices, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
 { for (int i=0;i<this->Externalwalls.size;i++)
 	{ bool mustPropagate=false;
 		for (int j=0;j<CuttingPlaneVertices.TheObjects[i].size;j++)
-		{	if (this->Externalwalls.TheObjects[i].ContainsPoint(CuttingPlaneVertices.TheObjects[i].TheObjects[j]))
+      if (this->Externalwalls.TheObjects[i].ContainsPoint(CuttingPlaneVertices.TheObjects[i].TheObjects[j]))
 			{ mustPropagate=true;
 				break;
 			}
-		}
 		if (mustPropagate)
 			for (int j=0;j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size;j++)
 				if (this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]!=0)
 					if(!this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]->flagExplored)
 					{	root tempRoot; tempRoot.MakeZero(owner.AmbientDimension);
-						this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]
-							->AddInternalWall(theKillerNormal,this->Externalwalls.TheObjects[i]
-								.MirrorWall.TheObjects[j]->normal,tempRoot,&owner,theGlobalVariables);
+						this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]->AddInternalWall(theKillerNormal,this->Externalwalls.TheObjects[i].MirrorWall.TheObjects[j]->normal,tempRoot,&owner,theGlobalVariables);
 					}
 	}
 }
@@ -4113,8 +3980,7 @@ void CombinatorialChamberContainer::ConvertHasZeroPolyToPermanentlyZero()
 				this->TheObjects[i]->flagPermanentlyZero=true;
 }
 
-void CombinatorialChamberContainer::AddWeylChamberWallsToHyperplanes
-	(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup)
+void CombinatorialChamberContainer::AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup)
 { MatrixLargeRational tempMat;
 	tempMat.AssignMatrixIntWithDen(theWeylGroup.KillingFormMatrix,1);
 	tempMat.Invert(theGlobalVariables);
@@ -4135,8 +4001,7 @@ void CombinatorialChamberContainer::AddWeylChamberWallsToHyperplanes
 }
 
 
-void CombinatorialChamberContainer::AddChamberPointerSetUpPreferredIndices
-	(CombinatorialChamber* theChamber, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber, GlobalVariables& theGlobalVariables)
 {	theChamber->IndexInOwnerComplex=this->size;
 	this->AddObjectOnTop(theChamber);
 	if (!theChamber->flagPermanentlyZero)
@@ -4145,29 +4010,24 @@ void CombinatorialChamberContainer::AddChamberPointerSetUpPreferredIndices
 		theChamber->flagExplored=true;
 }
 
-void CombinatorialChamber::MakeNewMutualNeighbors
-	(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal)
+void CombinatorialChamber::MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal)
 {	WallData tempWall; tempWall.normal.Assign(normal);
 	tempWall.NeighborsAlongWall.AddObjectOnTop(NewMinusChamber);
 	NewPlusChamber->Externalwalls.AddObjectOnTop(tempWall);
 	tempWall.normal.MinusRoot(); tempWall.NeighborsAlongWall.TheObjects[0]=NewPlusChamber;
 	NewMinusChamber->Externalwalls.AddObjectOnTop(tempWall);
-	NewPlusChamber->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop
-		(	NewMinusChamber->Externalwalls.LastObject());
-	NewMinusChamber->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop
-		(	NewPlusChamber->Externalwalls.LastObject());
+	NewPlusChamber->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop(	NewMinusChamber->Externalwalls.LastObject());
+	NewMinusChamber->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop(	NewPlusChamber->Externalwalls.LastObject());
 //	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
 //	{ NewPlusChamber->ComputeDebugString();
 //		NewMinusChamber->ComputeDebugString();
 //	}
 }
 
-void CombinatorialChamberContainer::SliceWithAWall
-	(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
 { this->SliceWithAWallInit(TheKillerFacetNormal,theGlobalVariables);
 	while (this->PreferredNextChambers.size>0)
-	{ this->SliceWithAWallOneIncrement(TheKillerFacetNormal,theGlobalVariables);
-	}
+    this->SliceWithAWallOneIncrement(TheKillerFacetNormal,theGlobalVariables);
 	this->PurgeZeroPointers();
 	this->PurgeInternalWalls();
 }
@@ -4178,8 +4038,7 @@ void CombinatorialChamberContainer::PurgeInternalWalls()
 			this->TheObjects[i]->PurgeInternalWalls();
 }
 
-void CombinatorialChamberContainer::SliceWithAWallInit
-	(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
 { this->flagMakingASingleHyperplaneSlice=true;
 	this->flagSliceWithAWallInitDone=false;
 	this->PurgeZeroPointers();
@@ -4204,19 +4063,16 @@ void CombinatorialChamberContainer::SliceWithAWallInit
 		}
 	}
 	if (this->PreferredNextChambers.size>0)
-	{	this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
-	} else
-	{	this->indexNextChamberToSlice=-1;
-	}
+    this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
+  else
+    this->indexNextChamberToSlice=-1;
 	this->flagSliceWithAWallInitDone=true;
 }
 
-void CombinatorialChamberContainer::SliceWithAWallOneIncrement
-	(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
 {	root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
 	if (!this->flagSliceWithAWallInitDone)
-	{ this->SliceWithAWallInit(TheKillerFacetNormal,theGlobalVariables);
-	}
+    this->SliceWithAWallInit(TheKillerFacetNormal,theGlobalVariables);
 	else
 	{	if(this->PreferredNextChambers.size>0)
 		{ if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]!=0)
@@ -4237,14 +4093,12 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement
 		}
 	}
 	if (this->PreferredNextChambers.size>0)
-	{	this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
-	} else
-	{	this->indexNextChamberToSlice=-1;
-	}
+    this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
+	else
+    this->indexNextChamberToSlice=-1;
 }
 
-bool CombinatorialChamberContainer::IsSurelyOutsideGlobalCone
-					(rootsCollection& TheVertices)
+bool CombinatorialChamberContainer::IsSurelyOutsideGlobalCone(rootsCollection& TheVertices)
 { return this->TheGlobalConeNormals.IsSurelyOutsideCone(TheVertices);
 }
 
@@ -4263,13 +4117,11 @@ void CombinatorialChamberContainer::MakeExtraProjectivePlane()
 	}*/
 }
 
-void CombinatorialChamberContainer::MakeReportOneSlice
-  (GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGlobalVariables)
 {	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
 		return;
 	std::stringstream out5;
-  out5<< "Slicing index: " << this->indexNextChamberToSlice
-				<<" Total #: "<< this->size;
+  out5<< "Slicing index: " << this->indexNextChamberToSlice<<" Total #: "<< this->size;
   IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
@@ -4342,12 +4194,10 @@ bool CombinatorialChamberContainer::ConsistencyCheck()
 	return true;
 }
 
-void CombinatorialChamberContainer::WriteToFile
-  (DrawingVariables& TDV, roots& directions, std::fstream& output)
+void CombinatorialChamberContainer::WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output)
 { if (!output.is_open())
 		return;
-	this->drawOutput
-		(TDV,*this,directions,0,this->IndicatorRoot,&output,&drawlineDummy, &drawtextDummy);
+	this->drawOutput(TDV,*this,directions,0,this->IndicatorRoot,&output,&drawlineDummy, &drawtextDummy);
 	std::string tempS;
 	output	<< "Nilradical simple coords:\\\\\n ";
 	for (int i=0;i<directions.size;i++)
@@ -4373,13 +4223,10 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
   if (useHtml)
     endOfLine="\n<br>\n";
   this->PurgeZeroPointers();
-	out << "Number of visible chambers: "
-			<< this->GetNumVisibleChambersAndLabelChambersForDisplay()
-			<< endOfLine;
+	out << "Number of visible chambers: "<< this->GetNumVisibleChambersAndLabelChambersForDisplay()<< endOfLine;
 	if (this->AffineWallsOfWeylChambers.size>0)
 	{	int tempI=this->GetNumChambersInWeylChamberAndLabelChambers(this->WeylChamber);
-		out << "Number of chambers with internal point in Weyl chamber: "
-				<< tempI<< endOfLine;
+		out << "Number of chambers with internal point in Weyl chamber: "<< tempI<< endOfLine;
 		out <<"Weyl chamber walls and their images: "<< endOfLine;
 		for (int i=0;i<this->AffineWallsOfWeylChambers.size;i++)
 		{	this->AffineWallsOfWeylChambers.TheObjects[i].ElementToString(tempS);
@@ -4412,16 +4259,14 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
 		}
 	} else
 	{ for (int i=0;i<sortedIndices.size;i++)
-		{ this->TheObjects[sortedIndices.TheObjects[i]]->ElementToString
-				(tempS, this,useLatex,useHtml);
+		{ this->TheObjects[sortedIndices.TheObjects[i]]->ElementToString(tempS, this,useLatex,useHtml);
 			out <<tempS <<endOfLine;
 		}
 	}
 	output= out.str();
 }
 
-void CombinatorialChamberContainer::WireChamberAdjacencyInfoAsIn
-	(CombinatorialChamberContainer& input)
+void CombinatorialChamberContainer::WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input)
 { assert(this->size==input.size);
 	input.LabelChamberIndicesProperly();
 	this->LabelChamberIndicesProperly();
@@ -4433,8 +4278,7 @@ void CombinatorialChamberContainer::WireChamberAdjacencyInfoAsIn
 	}
 }
 
-void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
-	(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables)
 { this->init();
 	this->flagMakingASingleHyperplaneSlice=true;
 	this->AmbientDimension=input.AmbientDimension+1;
@@ -4445,10 +4289,8 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
 	{ this->StartingCrossSections.TheObjects[i].affinePoint.SetSizeExpandOnTopLight(input.AmbientDimension+1);
 		this->StartingCrossSections.TheObjects[i].normal.SetSizeExpandOnTopLight(input.AmbientDimension+1);
 		for (int j=0;j<input.AmbientDimension;j++)
-		{ this->StartingCrossSections.TheObjects[i].affinePoint.TheObjects[j].Assign(
-				input.StartingCrossSections.TheObjects[i].affinePoint.TheObjects[j]);
-			this->StartingCrossSections.TheObjects[i].normal.TheObjects[j].Assign(
-				input.StartingCrossSections.TheObjects[i].normal.TheObjects[j]);
+		{ this->StartingCrossSections.TheObjects[i].affinePoint.TheObjects[j].Assign(input.StartingCrossSections.TheObjects[i].affinePoint.TheObjects[j]);
+			this->StartingCrossSections.TheObjects[i].normal.TheObjects[j].Assign(input.StartingCrossSections.TheObjects[i].normal.TheObjects[j]);
 		}
 		this->StartingCrossSections.TheObjects[i].normal.TheObjects[input.AmbientDimension].MakeOne();
 		this->StartingCrossSections.TheObjects[i].affinePoint.TheObjects[input.AmbientDimension].MakeOne();
@@ -4460,10 +4302,7 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
 		input.ComputeDebugString();
 	}
 	for (int i=0;i<this->size;i++)
-  { this->TheObjects[i]->
-			InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
-				(*input.TheObjects[i],*this);
-  }
+    this->TheObjects[i]->InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo(*input.TheObjects[i],*this);
   this->theHyperplanes.ClearTheObjects();
   //this->ComputeDebugString();
   for (int i=0;i<input.theHyperplanes.size;i++)
@@ -4486,11 +4325,10 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize
 
 void CombinatorialChamberContainer::LabelChamberIndicesProperly()
 { for(int i=0;i<this->size;i++)
-	{ if (this->TheObjects[i]!=0)
+    if (this->TheObjects[i]!=0)
 		{	this->TheObjects[i]->IndexInOwnerComplex=i;
 			this->TheObjects[i]->LabelWallIndicesProperly();
 		}
-  }
 }
 
 CombinatorialChamberContainer::CombinatorialChamberContainer()
@@ -14517,8 +14355,7 @@ bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
 	return false;
 }
 void rootSubalgebra::GeneratePossibleNilradicalsRecursive
-	( GlobalVariables &theGlobalVariables, multTableKmods &multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections,
-		ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
+	( GlobalVariables &theGlobalVariables, multTableKmods &multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
 { int RecursionDepth=0;
 	std::string tempSsel, tempSopposite;
 	ListBasicObjects<Selection> tempSels;
@@ -14555,8 +14392,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 	}
 }
 
-bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven
-	(int index, ListBasicObjects<int>& tempList, Selection& tempSel)
+bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicObjects<int>& tempList, Selection& tempSel)
 {	for (int j=0;j<tempList.size;j++)
 		if (tempList.TheObjects[j]<index)
 			if (!tempSel.selected[tempList.TheObjects[j]])
@@ -14575,8 +14411,7 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 		for (int i=0; i<targetSel.CardinalitySelection;i++ )
 		{	if (targetSel.selected[oppositeKmods.TheObjects[targetSel.elements[i]]])
 				return false;
-			ListBasicObjects<int>& tempList=
-				multTable.TheObjects[tempI].TheObjects[targetSel.elements[i]];
+			ListBasicObjects<int>& tempList=multTable.TheObjects[tempI].TheObjects[targetSel.elements[i]];
 			for (int j=0;j<tempList.size;j++)
 			{	if (tempList.TheObjects[j]<startIndex && !originalSel.selected[tempList.TheObjects[j]])
 					return false;
@@ -14585,21 +14420,19 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious
 			}
 		}
 	}
-	if (!owner.ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical
-				(targetSel,theGlobalVariables))
+	if (!owner.ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(targetSel,theGlobalVariables))
 		return false;
 	return true;
 }
 
-void rootSubalgebra::PossibleNilradicalComputation
-	(	GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::PossibleNilradicalComputation(	GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner)
 { this->NumNilradicalsAllowed++;
 	//this->ComputeDebugString();
 	if (this->flagFirstRoundCounting)
 		this->NumTotalSubalgebras=this->NumNilradicalsAllowed;
 	if (!this->flagFirstRoundCounting)
 	{	this->NilradicalKmods.Assign(selKmods);
-    if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner,owner.flagComputingLprohibitingWeights))
+    if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner, owner.flagComputingLprohibitingWeights))
 		{ this->NumConeConditionFailures++;
 			owner.NumConeConditionFailures++;
 		}
@@ -14660,9 +14493,9 @@ void rootSubalgebra::GenerateKmodMultTable(	ListBasicObjects<ListBasicObjects< L
 { output.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	oppositeKmods.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	int numTotal= this->kModules.size* this->kModules.size;
-	for (int i=0;i<this->kModules.size;i++)
+	for (int i=0; i<this->kModules.size; i++)
 	{ output.TheObjects[i].SetSizeExpandOnTopNoObjectInit(this->kModules.size);
-		for (int j=0;j<this->kModules.size;j++)
+		for (int j=0; j<this->kModules.size; j++)
 		{	this->KmodTimesKmod(i, j, oppositeKmods, output.TheObjects[i].TheObjects[j]);
 			this->MakeProgressReportMultTable(i*this->kModules.size+j, numTotal, theGlobalVariables);
 		}
@@ -14886,7 +14719,7 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, roots& nilradi
 	bool tempBool; int tempI;
 	for (int i=0;i<this->kModules.size;i++)
 		if (!this->NilradicalKmods.selected[i])
-			for (int j=i+1;j<this->kModules.size;j++)
+			for (int j=i+1; j<this->kModules.size; j++)
 			{ if (!this->NilradicalKmods.selected[j])
 				{	tempRoot.Assign(this->HighestWeightsGmodK.TheObjects[i]);
 					tempRoot.Add(this->HighestWeightsGmodK.TheObjects[j]);
@@ -14901,8 +14734,7 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, roots& nilradi
 							theRel.BetaCoeffs.TheObjects[0].MakeOne();
 							theRel.Betas.TheObjects[0].Assign(nilradicalRoots.TheObjects[tempI]);
 						} else
-							tempBool=	tempRoot.HasStronglyPerpendicularDecompositionWRT
-								(nilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs);
+							tempBool=	tempRoot.HasStronglyPerpendicularDecompositionWRT(-1, nilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs);
 						if (tempBool)
 						{	theRel.Alphas.size=0;
 							theRel.AlphaCoeffs.size=0;
@@ -14941,8 +14773,7 @@ void rootSubalgebra::MatrixToRelation( coneRelation& output, MatrixLargeRational
 		}
 }
 
-void rootSubalgebra::ExtractRelations
-	( MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular)
+void rootSubalgebra::ExtractRelations( MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular)
 { int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
 	if (this->flagAnErrorHasOccuredTimeToPanic)
 	{ this->NilradicalKmods.ComputeDebugString();
@@ -14951,21 +14782,12 @@ void rootSubalgebra::ExtractRelations
 	}
 	root tempRoot; tempRoot.MakeZero(theDimension);
 	coneRelation theRel; theRel.IndexOwnerRootSubalgebra=indexInOwner;
-  if( !this->CheckForSmallRelations(theRel,NilradicalRoots))
-       this->MatrixToRelation(theRel, matA,matX,theDimension,NilradicalRoots);
 	if (owner.flagLookingForMinimalRels)
 	{ theRel.FixRightHandSide(*this,NilradicalRoots);
 		theRel.MakeLookCivilized(*this,NilradicalRoots);
 		owner.theMinRels.AddRelationNoRepetition(theRel,owner,indexInOwner);
 	}
-//	this->MakeSureAlphasDontSumToRoot(theRel,NilradicalRoots);
-	this->MakeGeneratingSingularVectors(theRel, NilradicalRoots);
-	root AccumRoot;
-	theRel.GetSumAlphas(AccumRoot,this->AmbientWeyl.KillingFormMatrix.NumRows);
-	theRel.BetaCoeffs.size=0; theRel.Betas.size=0;
-	bool tempBool=AccumRoot.HasStronglyPerpendicularDecompositionWRT(NilradicalRoots,this->AmbientWeyl,theRel.Betas, theRel.BetaCoeffs);
-	if (!tempBool)
-    tempBool=this->AttemptTheTripleTrick(theRel,NilradicalRoots,theGlobalVariables);
+  bool tempBool=this->AttemptTheTripleTrick(theRel, NilradicalRoots, theGlobalVariables);
 	if (tempBool)
 	{	this->NumRelationsWithStronglyPerpendicularDecomposition++;
 		theRel.MakeLookCivilized(*this,NilradicalRoots);
@@ -15041,30 +14863,38 @@ bool rootSubalgebra::AttemptTheTripleTrick(coneRelation& theRel, roots& Nilradic
 		if (!this->NilradicalKmods.selected[i])
 			if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
 				tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-	return this->AttemptTheTripleTrickWRTSubalgebra(theRel,tempRoots,NilradicalRoots,theGlobalVariables);
+	return this->AttemptTheTripleTrickWRTSubalgebra(theRel, tempRoots, NilradicalRoots, theGlobalVariables);
 }
 
 bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(	coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables)
-{ root tempRoot,Accum;
-  ::SelectionWithMaxMultiplicity tempSel;
-  for (int i=2;i<6;i++)
-  {	tempSel.initMe2(highestWeightsAllowed.size,i);
+{ root tempRoot, Accum;
+  SelectionWithMaxMultiplicity tempSel;
+  for (int i=2; i<this->AmbientWeyl.KillingFormMatrix.NumRows; i++)
+  {	tempSel.initMe2(highestWeightsAllowed.size, i);
 		int NumElts=tempSel.NumCombinationsOfCardinality(i);
-		for (int j=0;j<NumElts;j++)
+		for (int j=0; j<NumElts; j++)
 		{ tempSel.IncrementSubsetFixedCardinality(i);
 			Accum.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
-			for (int k=0;k<tempSel.elements.size;k++)
+			for (int k=0; k<tempSel.elements.size; k++)
 			{ tempRoot.Assign(highestWeightsAllowed.TheObjects[tempSel.elements.TheObjects[k]]);
 				tempRoot.MultiplyByInteger(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
 				Accum.Add(tempRoot);
 			}
 			theRel.Betas.size=0; theRel.BetaCoeffs.size=0;
 			if (!Accum.IsEqualToZero())
-				if (Accum.HasStronglyPerpendicularDecompositionWRT(NilradicalRoots,this->AmbientWeyl,theRel.Betas,theRel.BetaCoeffs))
-				{	Accum.ComputeDebugString();
-					theRel.Alphas.SetSizeExpandOnTopNoObjectInit(tempSel.CardinalitySelectionWithoutMultiplicities());
+				if (Accum.HasStronglyPerpendicularDecompositionWRT(-1, NilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs))
+				{	int startNumBetas=theRel.Betas.size;
+          int numAlphas=tempSel.CardinalitySelectionWithoutMultiplicities();
+				  int numParticipatingRoots=numAlphas+startNumBetas;
+          if (numParticipatingRoots>5)
+          {	int goalNumBetas= 5-numAlphas;
+            for (int l=goalNumBetas-1; l<numParticipatingRoots; l++)
+              if (Accum.HasStronglyPerpendicularDecompositionWRT(l+1, NilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs))
+                break;
+          }
+				  theRel.Alphas.SetSizeExpandOnTopNoObjectInit(tempSel.CardinalitySelectionWithoutMultiplicities());
 					theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(theRel.Alphas.size);
-					for (int k=0;k<tempSel.elements.size;k++)
+					for (int k=0; k<tempSel.elements.size; k++)
 					{ theRel.Alphas.TheObjects[k].Assign(highestWeightsAllowed.TheObjects[tempSel.elements.TheObjects[k]]);
 						theRel.AlphaCoeffs.TheObjects[k].AssignInteger(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
 					}
@@ -15758,7 +15588,7 @@ void rootSubalgebra::ElementToString ( std::string &output, bool useLatex, bool 
 bool rootSubalgebra::IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots)
 { root& currentRoot=this->HighestWeightsGmodK.TheObjects[indexKmod];
   root tempRoot;
-  for (int i=0;i<NilradicalRoots.size;i++)
+  for (int i=0; i<NilradicalRoots.size; i++)
   { tempRoot.Assign(currentRoot);
     tempRoot.Add(NilradicalRoots.TheObjects[i]);
     if (this->IsARootOrZero(tempRoot))
@@ -17517,8 +17347,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(	rootSubalgebra& owner, roots& Ni
 	NilradicalRoots.intersectWith(tempRoots,NilradicalIntersection);
 	NilradicalIntersection.ComputeDebugString();
 	for (int i=0;i<owner.HighestWeightsGmodK.size;i++)
-		if (	!owner.NilradicalKmods.selected[i] && tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i]) &&
-					owner.IsGeneratingSingularVectors(i,NilradicalIntersection))
+		if (	!owner.NilradicalKmods.selected[i] && tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i]) && owner.IsGeneratingSingularVectors(i,NilradicalIntersection))
 			genSingHW.AddObjectOnTop(owner.HighestWeightsGmodK.TheObjects[i]);
 	genSingHW.ComputeDebugString();
 	if (owner.ConeConditionHolds(	theGlobalVariables, owners, indexInOwner, NilradicalIntersection, genSingHW, false))
@@ -17534,7 +17363,9 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(	rootSubalgebra& owner, roots& Ni
 
 
 void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots)
-{	roots tempRoots;
+{	if (this->Alphas.size==0 || this->Betas.size==0)
+    return;
+  roots tempRoots;
 	tempRoots.CopyFromBase(this->Alphas);
 	tempRoots.AddListOnTop(this->Betas);
 	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
@@ -17753,14 +17584,12 @@ void permutation::GetPermutation(ListBasicObjects<int>& output)
     MathRoutines::swap(output.TheObjects[i],output.TheObjects[i+this->Multiplicities.TheObjects[i]]);
 }
 
-void rootSubalgebras::ComputeKmodMultTables
-	(GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ComputeKmodMultTables(GlobalVariables& theGlobalVariables)
 { for (int i=0;i<this->size;i++)
 		this->TheObjects[i].GenerateKmodMultTable(	this->TheObjects[i].theMultTable, this->TheObjects[i].theOppositeKmods,theGlobalVariables);
 }
 
-void rootSubalgebras::ComputeLProhibitingRelations
-	(GlobalVariables &theGlobalVariables,int StartingIndex, int NumToBeProcessed)
+void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables &theGlobalVariables,int StartingIndex, int NumToBeProcessed)
 { this->NumSubalgebrasProcessed=0;
 	this->NumConeConditionFailures=0;
 	this->NumSubalgebrasCounted=0;
@@ -17780,9 +17609,8 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 		SortingArray.TheObjects[i]=i;
 	for (int i=0;i<this->size;i++)
 		for (int j=i+1;j<this->size;j++)
-		{	if(this->TheObjects[SortingArray.TheObjects[j]].theDynkinDiagram.IsGreaterThan(this->TheObjects[SortingArray.TheObjects[i]].theDynkinDiagram))
+			if(this->TheObjects[SortingArray.TheObjects[j]].theDynkinDiagram.IsGreaterThan(this->TheObjects[SortingArray.TheObjects[i]].theDynkinDiagram))
 				SortingArray.SwapTwoIndices(i,j);
-		}
 	inverseOfSortingArray.SetSizeExpandOnTopNoObjectInit(SortingArray.size);
 	for(int i=0;i<SortingArray.size;i++)
 		inverseOfSortingArray.TheObjects[SortingArray.TheObjects[i]]=i;
@@ -17892,8 +17720,7 @@ void rootSubalgebras::ElementToString
 	this->DynkinTableToString(useLatex, useHtml,htmlPathPhysical,htmlPathServer,tempS);
 	out <<tempS;
 	for (int i=0;i<this->size; i++)
-	{	this->TheObjects[i].ElementToString
-      (tempS,useLatex,useHtml,includeKEpsCoords,theGlobalVariables);
+	{	this->TheObjects[i].ElementToString(tempS,useLatex,useHtml,includeKEpsCoords,theGlobalVariables);
 		out << tempS <<"\n\n";
 	}
 	output= out.str();
@@ -17911,8 +17738,7 @@ void rootSubalgebras::pathToHtmlFileNameElements (	int index, std::string* htmlP
 	output=out.str();
 }
 
-void rootSubalgebras::pathToHtmlReference(	int index,std::string& DisplayString, std::string* htmlPathServer,
-		std::string& output)
+void rootSubalgebras::pathToHtmlReference(	int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output)
 { if(htmlPathServer==0)
 	{ output.clear();
 		return;
@@ -18039,8 +17865,7 @@ void coneRelations::GetLatexHeaderAndFooter(std::string& outputHeader, std::stri
 	outputFooter.append("\\end{tabular}");
 }
 
-void coneRelations::ElementToString
-	(	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS, header, footer;
 	roots tempAlphas, tempBetas;
@@ -18067,7 +17892,7 @@ void coneRelations::ElementToString
 		if (this->flagIncludeCoordinateRepresentation)
 		{ lineCounter++;
       this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Alphas,tempAlphas,owners.AmbientWeyl,theGlobalVariables);
-		 this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Betas,tempBetas,owners.AmbientWeyl,theGlobalVariables);
+      this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Betas,tempBetas,owners.AmbientWeyl,theGlobalVariables);
 			this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].AlphaCoeffs,tempAlphas,true);
 			out <<"\\multicolumn{5}{c}{"<<tempS;
 			this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].BetaCoeffs,tempBetas,true);
@@ -18250,27 +18075,21 @@ void SimpleLieAlgebra::ComputeOneChevalleyConstant
   root& minusZeta=this->theWeyl.RootSystem.TheObjects[indexMinusZeta];
   assert(eta==gamma+delta);
   assert(this->theWeyl.IsARoot(eta+minusEpsilon));
-  assert
-    ( this->Computed.elements[indexDelta][indexMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma] &&
-      this->Computed.elements[indexGamma][indexDelta] );
+  assert( this->Computed.elements[indexDelta][indexMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma] && this->Computed.elements[indexGamma][indexDelta] );
   assert(!this->ChevalleyConstants.elements[indexGamma][indexDelta].IsEqualToZero());
   int indexDeltaMinusEpsilon= this->theWeyl.RootSystem.IndexOfObjectHash(delta+minusEpsilon);
   int indexGammaMinusEpsilon= this->theWeyl.RootSystem.IndexOfObjectHash(gamma+minusEpsilon);
   Rational FirstSummand, SecondSummand;
   if (indexDeltaMinusEpsilon!=-1)
-  {	assert
-			(	this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] && this->Computed.elements[indexDelta][indexMinusEpsilon]);
+  {	assert(	this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] && this->Computed.elements[indexDelta][indexMinusEpsilon]);
 		FirstSummand=
 			this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon]*
 			this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else
 		FirstSummand.MakeZero();
   if (indexGammaMinusEpsilon!=-1)
-  {	assert
-			(	this->Computed.elements[indexDelta][indexGammaMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma]);
-		SecondSummand =
-			this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*
-			this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
+  {	assert(	this->Computed.elements[indexDelta][indexGammaMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma]);
+		SecondSummand =this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else
 		SecondSummand.MakeZero();
   this->ChevalleyConstants.elements[indexMinusEpsilon][indexMinusZeta]=
@@ -18370,7 +18189,6 @@ bool SimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& root
 	outputH=(root1*2)/this->theWeyl.RootScalarKillingFormMatrixRoot(root1,root1);
 	return false;
 }
-
 
 void getZuckermansArrayE8(roots& output)
 { //below follow Dynkin's sl(2) characteristics for E8, as taken from tables 16-20 from

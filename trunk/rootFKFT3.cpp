@@ -269,9 +269,8 @@ void minimalRelationsProverStatesFixedK::ExtensionStepFixedK( int index, WeylGro
   }
 }
 
-bool minimalRelationsProverStatesFixedK::AddObjectOnTopNoRepetitionOfObjectFixedK
-  ( int ParentIndex, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{ for (int i=0;i<this->size;i++)
+bool minimalRelationsProverStatesFixedK::AddObjectOnTopNoRepetitionOfObjectFixedK( int ParentIndex, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+{ for (int i=0; i<this->size; i++)
     if (this->ExtendToIsomorphismRootSystemFixedK(theState,i,TheGlobalVariables,theWeyl))
       return false;
   this->AddObjectOnTop(theState);
@@ -384,7 +383,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
   int theDimension=theWeyl.KillingFormMatrix.NumRows;
   Rational tempRat;
   roots theNilradicalRoots, tempRoots;
-  this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl);  
+  this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl);
   if (!roots::ConesIntersect( TheGlobalVariables, theNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, theDimension))
   { root NormalSeparatingCones;
     bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
@@ -397,7 +396,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 			root tempNormal;
 			bool tempBetaPos;
 			for (int i=-1;	i<theWeyl.RootsOfBorel.size; i++)
-			{ if (i!=-1) 
+			{ if (i!=-1)
 					tempNormal= theWeyl.RootsOfBorel.TheObjects[i];
 				else
 					tempNormal= NormalSeparatingCones;

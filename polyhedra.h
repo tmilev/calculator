@@ -4231,12 +4231,10 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeExponentSubstitution
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeSubstitutionLastVariableToEndPoint
-			 (short numVars,Polynomial<ElementOfCommutativeRingWithIdentity>& EndPoint)
+void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeSubstitutionLastVariableToEndPoint(short numVars,Polynomial<ElementOfCommutativeRingWithIdentity>& EndPoint)
 { this->SetSizeExpandOnTopNoObjectInit(numVars);
 	for (int i=0;i<numVars-1;i++)
-		this->TheObjects[i].MakeNVarDegOnePoly
-			(numVars, i, ElementOfCommutativeRingWithIdentity::TheRingUnit);
+		this->TheObjects[i].MakeNVarDegOnePoly(numVars, i, ElementOfCommutativeRingWithIdentity::TheRingUnit);
 	this->TheObjects[numVars-1].CopyFromPoly(EndPoint);
 }
 
@@ -4916,11 +4914,9 @@ public:
 	void IncreaseHighestIndex(int increment);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
 	int ElementToString( std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-	int ElementToStringBasisChange
-		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+	int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringOutputToFile(	std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-	int ElementToStringBasisChangeOutputToFile
-		(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+	int ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
 	bool VerifyFileComputedContributions(GlobalVariables&  theGlobalVariables);
 	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
@@ -4936,8 +4932,7 @@ public:
 	void MakeProgressReportRemovingRedundantRoots(FeedDataToIndicatorWindow reportFunction);
 	void MakeProgressReportUncoveringBrackets(FeedDataToIndicatorWindow reportFunction);
 	void MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction);
-	void ComputeKostantFunctionFromWeylGroup
-    (	char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables);
+	void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables);
 };
 
 class ElementWeylGroup: public ListBasicObjects<int>
@@ -5095,15 +5090,11 @@ public:
 	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
 	void ComputeRootsOfBorel(roots& output);
-  bool IsARoot(const root& input)
-  { return this->RootSystem.ContainsObjectHash(input);
-  };
+  bool IsARoot(const root& input)  { return this->RootSystem.ContainsObjectHash(input); };
   void GenerateRootSubsystem(roots& theRoots);
-	void GenerateOrbitAlg
-    ( root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights);
+	void GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights);
 	void GenerateOrbit(	roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho);
-	void GenerateOrbit
-		(	roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
+	void GenerateOrbit(	roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
 	void GenerateRootSystemFromKillingFormMatrix();
 	void ActOnAffineHyperplaneByGroupElement(	int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
 	//theRoot is a list of the simple coordinates of the root
@@ -5138,13 +5129,15 @@ public:
 	void ComputeDebugString(){this->ElementToString(DebugString);};
 	void ElementToString(std::string& output);
 	bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
-	void ComputeSubGroupFromGeneratingReflections		( roots& generators, rootsCollection& ExternalAutos,	GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
+	void ComputeSubGroupFromGeneratingReflections	(roots& generators, rootsCollection& ExternalAutos,	GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
 	void ComputeRootSubsystem();
 	void ActByElement(int index, root& theRoot);
 	void ActByElement(int index, root& input, root& output);
 	void ActByElement(int index, roots& input, roots& output);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+	void Assign(const ReflectionSubgroupWeylGroup& other);
+	void operator=(const ReflectionSubgroupWeylGroup& other)	{ this->Assign(other);  };
 };
 
 class LaTeXProcedures
@@ -5256,9 +5249,7 @@ public:
 	int ElementToString(	std::string &output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
 	int RootsToScalarProductString (	roots& inputLeft, roots& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex, rootSubalgebra& owner);
 	void ComputeConnectedComponents(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
-	void ComputeDebugString(	rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts)
-	{	this->ElementToString(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);
-	};
+	void ComputeDebugString(	rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts){	this->ElementToString(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);	};
 	void MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots);
 	bool IsStrictlyWeaklyProhibiting(	rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner);
 	void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
@@ -5407,22 +5398,17 @@ public:
 	void MakeProgressReportGenAutos( int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString( GlobalVariables& theGlobalVariables);
 	void ComputeDebugString( bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
-	{ this->ElementToString( this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
-  };
-	bool IndexIsCompatibleWithPrevious
-		( int startIndex, int RecursionDepth,	multTableKmods &multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
+	{ this->ElementToString( this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);  };
+	bool IndexIsCompatibleWithPrevious( int startIndex, int RecursionDepth,	multTableKmods &multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism( roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
-	bool ListHasNonSelectedIndexLowerThanGiven(	int index,ListBasicObjects<int>& tempList, Selection& tempSel);
-	void GeneratePossibleNilradicalsRecursive
-    ( GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+	bool ListHasNonSelectedIndexLowerThanGiven( int index,ListBasicObjects<int>& tempList, Selection& tempSel);
+	void GeneratePossibleNilradicalsRecursive( GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
 	bool ConeConditionHolds( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
 	bool ConeConditionHolds( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
 	void PossibleNilradicalComputation( GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
 	void ElementToStringHeaderFooter( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
-	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)
-	{ this->ElementToString(output,false,false,false,theGlobalVariables);
-	};
+	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)	{ this->ElementToString(output,false,false,false,theGlobalVariables);};
 	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
 	void ElementToString( std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
@@ -5456,6 +5442,8 @@ public:
 	coneRelations theGoodRelations;
 	coneRelations theMinRels;
 	ListBasicObjects< ListBasicObjects <int> > ActionsNormalizerCentralizerNilradical;
+	ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
+	ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
 	//ListBasicObjects< ListBasicObjects <int> > OrbitsUnderNormalizerCentralizerNilradical;
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
@@ -5489,6 +5477,7 @@ public:
 	void pathToHtmlFileNameElements( int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
 	void pathToHtmlReference( int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
 	void ElementToHtml( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables);
+	void ElementToStringCentralizerIsomorphisms(std::string& output, GlobalVariables& theGlobalVariables);
 	void ElementToString( std::string& output, bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString( bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)

@@ -181,6 +181,8 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 	this->truncated=false;
 	this->ClearTheObjects();
 	orbitRho.ClearTheObjects();
+	if (this->AmbientWeyl.KillingFormMatrix.NumRows<1)
+    return;
 	if (recomputeAmbientRho)
 		this->AmbientWeyl.ComputeRho(false);
 	this->simpleGenerators.CopyFromBase(generators);

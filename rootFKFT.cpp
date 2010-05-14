@@ -1433,7 +1433,7 @@ void ComputationSetup::DoTheRootSAComputationCustom()
 	this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
 	this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
 	this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
-	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism(*this->theGlobalVariablesContainer->Default(), 'E', 6, true, true);
+	this->theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism(*this->theGlobalVariablesContainer->Default(), 'F', 4, true, true);
   this->theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, *this->theGlobalVariablesContainer->Default());
   if (this->theRootSubalgebras.flagComputeConeCondition)
     this->theRootSubalgebras.ComputeLProhibitingRelations(*this->theGlobalVariablesContainer->Default(), 0, this->theRootSubalgebras.size-1);

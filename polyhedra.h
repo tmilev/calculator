@@ -5303,7 +5303,7 @@ public:
   };
 	void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
 	coneRelations()
-	{	this->NumAllowedLatexLines=44;
+	{ this->NumAllowedLatexLines=44;
 		this->flagIncludeSmallerRelations=true;
 		this->flagIncludeCoordinateRepresentation=false;
 		this->flagIncludeSubalgebraDataInDebugString=false;
@@ -5458,6 +5458,7 @@ public:
 	bool flagComputingLprohibitingWeights;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
 	bool flagUsingActionsNormalizerCentralizerNilradical;
+	bool flagUsingONLYActionsNormalizerCentralizerNilradical;
 	bool flagComputeConeCondition;
 	bool flagLookingForMinimalRels;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
@@ -5487,6 +5488,7 @@ public:
 	void MakeProgressReportAutomorphisms( ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
 	{ this->flagUseDynkinClassificationForIsomorphismComputation=false;
+    this->flagUsingONLYActionsNormalizerCentralizerNilradical=false;
     this->flagComputingLprohibitingWeights=false;
 		this->flagComputeConeCondition=false;
 		this->flagUsingActionsNormalizerCentralizerNilradical=true;

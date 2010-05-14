@@ -14047,7 +14047,11 @@ void rootSubalgebra::GenerateParabolicsInCentralizerAndPossibleNilradicals(Globa
 	this->flagFirstRoundCounting=true;
 	this->NumTotalSubalgebras=0;
 	this->AmbientWeyl.ComputeRho(false);
-	owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel,*this,theGlobalVariables);
+	if (owner.flagUsingONLYActionsNormalizerCentralizerNilradical)
+    owner.UpperLimitNumElementsWeyl=0;
+  owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel,*this,theGlobalVariables);
+	if (owner.flagUsingONLYActionsNormalizerCentralizerNilradical)
+    return;
 	theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
 	for (int l=0; l<2; l++)
 	{ if (l==1 && !this->flagComputeConeCondition)
@@ -14190,13 +14194,12 @@ bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
 }
 */
 
-void rootSubalgebra::GeneratePossibleNilradicalsRecursive
-	( GlobalVariables &theGlobalVariables, multTableKmods &multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicalsRecursive( GlobalVariables &theGlobalVariables, multTableKmods &multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
 { int RecursionDepth=0;
 	std::string tempSsel, tempSopposite;
 	ListBasicObjects<Selection> tempSels;
 	if (this->flagAnErrorHasOccuredTimeToPanic)
-	{	multTable.ComputeDebugString(*this);
+	{ multTable.ComputeDebugString(*this);
 		std::stringstream out; out <<"\n\t";
 		for (int i=0;i<oppositeKmods.size;i++)
 			out <<i <<" / " << oppositeKmods.TheObjects[i]<< "\t";
@@ -14207,14 +14210,14 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive
 	counters.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
 	counters.TheObjects[0]=StartIndex;
 	while (RecursionDepth>-1)
-	{	while(counters.TheObjects[RecursionDepth]<this->kModules.size)
-		{	if (! impliedSelections.TheObjects[RecursionDepth].selected[counters.TheObjects[RecursionDepth]])
+	{ while(counters.TheObjects[RecursionDepth]<this->kModules.size)
+		{ if (! impliedSelections.TheObjects[RecursionDepth].selected[counters.TheObjects[RecursionDepth]])
         if ( this->IndexIsCompatibleWithPrevious(counters.TheObjects[RecursionDepth],RecursionDepth,multTable, impliedSelections,oppositeKmods,owner,theGlobalVariables))
-				{	RecursionDepth++;
+				{ RecursionDepth++;
 					counters.TheObjects[RecursionDepth]=counters.TheObjects[RecursionDepth-1];
 				}
 			if (this->flagAnErrorHasOccuredTimeToPanic)
-			{	impliedSelections.ElementToStringGeneric(tempSsel,RecursionDepth+1);
+			{ impliedSelections.ElementToStringGeneric(tempSsel,RecursionDepth+1);
 				impliedSelections.TheObjects[RecursionDepth].ComputeDebugString();
 			}
 			counters.TheObjects[RecursionDepth]++;

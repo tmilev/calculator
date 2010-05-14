@@ -195,7 +195,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 	// rho is invariant under external graph automorphisms (!)
 	//Hence the below lines. Needs to be fixed (mathematically).
   //for the time being the below lines remain, until I think of how to do it properly.
-	tempRoot.MultiplyByInteger(3);
+	tempRoot.MultiplyByInteger(50);
 	tempRoot.TheObjects[0].AddInteger(1);
 	orbitRho.AddObjectOnTopHash(tempRoot);
 	this->AddObjectOnTopHash(tempEW);

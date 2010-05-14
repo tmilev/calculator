@@ -884,7 +884,7 @@ void guiMainWindow::RunTheComputation()
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 { this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
-  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
+  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=false;
   this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
   this->RunTheComputation();
 }

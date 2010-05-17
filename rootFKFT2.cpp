@@ -356,8 +356,22 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
   this->sizeByLastPurge=this->size;
 }
 
+void minimalRelationsProverStates::ReduceMemoryUse(GlobalVariables& theGlobalVariables)
+{ for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ReduceMemoryUse();
+    if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+    { std::stringstream out;
+      out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
+      IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
+      IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
+      theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+    }
+  }
+  this->NumFullyComputed=0;
+}
+
 int minimalRelationsProverStates::CountNumSeparatingNormals(roots& theAlphas, roots& theBetas, WeylGroup& theWeyl)
-{	int counter=0;
+{ int counter=0;
 	bool tempBool;
 	for (int i=0;i<theWeyl.RootsOfBorel.size;i++)
 		if (minimalRelationsProverStateFixedK::IsSeparatingCones(theWeyl.RootsOfBorel.TheObjects[i],theAlphas, theBetas, tempBool, theWeyl))
@@ -371,9 +385,12 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 	if (!this->TheObjects[index].StateIsInternallyPossible || this->TheObjects[index].StateIsComplete)
     return;
   if (!this->TheObjects[index].InternalStateIsComputed)
-    this->TheObjects[index].ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
+    this->TheObjects[index].ComputeStateReturnFalseIfDubious(*this, TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
+	this->NumFullyComputed++;
 	if (!this->TheObjects[index].StateIsInternallyPossible || this->TheObjects[index].StateIsComplete)
     return;
+  if (this->NumFullyComputed>4000)
+    this->ReduceMemoryUse(TheGlobalVariables);
 //	this->BranchByAddingKRoots(index, theWeyl, TheGlobalVariables);
 	root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
 	this->TheObjects[index].PossibleChildStates.size=0;
@@ -388,7 +405,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 		bool addFirstAlpha=true;
 		flagSearchForOptimalSeparatingRoot=false;//(this->TheObjects[index].PartialRelation.Alphas.size+this->TheObjects[index].PartialRelation.Betas.size<7);
     if (this->flagSearchForOptimalSeparatingRoot)
-		{	int minNumChildren=theWeyl.RootSystem.size;
+		{ int minNumChildren=theWeyl.RootSystem.size;
 			int oldSize=this->size;
 			root tempNormal;
 			bool tempBetaPos;
@@ -400,10 +417,10 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 				else
 					tempNormal= NormalSeparatingCones;
 				if (this->TheObjects[index].IsSeparatingCones(tempNormal, tempBetaPos, theWeyl))
-				{	counter++;
+				{ counter++;
 					this->InvokeExtensionOfState(index, minNumChildren, tempBetaPos, tempNormal, true, theWeyl, TheGlobalVariables);
 					if (this->size-oldSize<minNumChildren)
-					{	NormalSeparatingCones.Assign(tempNormal);
+					{ NormalSeparatingCones.Assign(tempNormal);
 						NormalSeparatingCones.ComputeDebugString();
 						theWeyl.GetEpsilonCoords(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
 						oneBetaIsPositive=tempBetaPos;
@@ -412,7 +429,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 					this->size=oldSize;
 					this->TheObjects[index].PossibleChildStates.size=0;
 					if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-					{	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+					{ IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 						std::stringstream out3;
 						out3<< counter+1 <<" out of  "<< NumNormalsToCheck<<" normals tested, best hit "<<minNumChildren<<" children";
 						IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
@@ -549,7 +566,7 @@ void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK
 }
 
 void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverState& newState)
-{ newState.ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
+{ newState.ComputeStateReturnFalseIfDubious(*this, TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
   if (newState.StateIsInternallyPossible)
   { int currentNewIndex=this->size;
     if (this->AddObjectOnTopNoRepetitionOfObject(index, newState, theWeyl, TheGlobalVariables))

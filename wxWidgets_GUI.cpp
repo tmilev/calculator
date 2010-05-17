@@ -884,9 +884,11 @@ void guiMainWindow::RunTheComputation()
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 { this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
-  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=false;
+  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
   this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
-  this->theComputationSetup.theRootSubalgebras.flagUsingONLYActionsNormalizerCentralizerNilradical=true;
+  this->theComputationSetup.theRootSubalgebras.flagUsingONLYActionsNormalizerCentralizerNilradical=false;
+  this->theComputationSetup.WeylGroupIndex=6;
+  this->theComputationSetup.WeylGroupLetter='C';
   this->RunTheComputation();
 }
 

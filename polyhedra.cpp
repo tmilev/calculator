@@ -15539,12 +15539,14 @@ bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, 
       return false;
     if (letter1=='B')
       return true;
+    else
+      return false;
   }
   return letter1>letter2;
 }
 
 bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& right)
-{	if (this->RankTotal()>right.RankTotal())
+{ if (this->RankTotal()>right.RankTotal())
 		return true;
 	if (this->RankTotal()<right.RankTotal())
 		return false;

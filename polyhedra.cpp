@@ -14635,57 +14635,23 @@ void rootSubalgebra::ExtractRelations( MatrixLargeRational& matA, MatrixLargeRat
 		theRel.FixRightHandSide(*this,NilradicalRoots);
 		theRel.MakeLookCivilized(*this,NilradicalRoots);
     theRel.ComputeDebugString(owner,true,true);
-		if (theRel.theDiagram.DebugString=="$C_3$")
-		{ Selection tempSel;
-			tempSel.init(Ksingular.size);
-			int tempNum=::MathRoutines::NChooseK(Ksingular.size,2);
-			for (int i=0;i<tempNum;i++)
-			{ tempSel.incrementSelectionFixedCardinality(2);
-				theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
-				theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
-				theRel.Betas.size=0;
-				theRel.BetaCoeffs.size=0;
-				for (int j=0;j<tempSel.CardinalitySelection;j++)
-					theRel.Alphas.TheObjects[j].Assign(Ksingular.TheObjects[tempSel.elements[j]]);
-				if (theRel.IsStrictlyWeaklyProhibiting(*this,NilradicalRoots,theGlobalVariables,owner,indexInOwner))
-          break;
-			}
-			/*root theLongAlpha; root theShortAlpha;
-		  Rational tempRat;
-      for (int i=0;i<2;i++)
-      { this->AmbientWeyl.RootScalarKillingFormMatrixRoot
-          (theRel.Alphas.TheObjects[i],theRel.Alphas.TheObjects[i], tempRat);
-        if (tempRat==2)
-          theShortAlpha.Assign(theRel.Alphas.TheObjects[i]);
-        else
-          theLongAlpha.Assign(theRel.Alphas.TheObjects[i]);
-      }
-			root firstBeta; root tempRoot;
-      for (int i=0;i<2;i++)
-      {	firstBeta.Assign(theRel.Betas.TheObjects[i]);
-				tempRoot.Assign(firstBeta);
-				tempRoot.MultiplyByInteger(2);
-				tempRoot.Subtract(theLongAlpha);
-				assert(!NilradicalRoots.ContainsObject(tempRoot));
-				//}
-				theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
-				theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
-				theRel.Alphas.TheObjects[0].Assign(theLongAlpha);
-				theRel.Alphas.TheObjects[1].Assign(tempRoot);
-				theRel.AlphaCoeffs.TheObjects[0].MakeOne();
-				theRel.AlphaCoeffs.TheObjects[1].MakeOne();
-				theRel.Betas.SetSizeExpandOnTopNoObjectInit(1);
-				theRel.BetaCoeffs.SetSizeExpandOnTopNoObjectInit(1);
-				theRel.BetaCoeffs.TheObjects[0]=2;
-				theRel.Betas.TheObjects[0].Assign(firstBeta);
-				bool tempBool=theRel.IsStrictlyWeaklyProhibiting(*this,NilradicalRoots,theGlobalVariables);
-				if (tempBool)
-					break;
-			}*/
+    if (true)
+      if (theRel.theDiagram.DebugString=="$C_3$")
+      { Selection tempSel;
+        tempSel.init(Ksingular.size);
+        int tempNum=MathRoutines::NChooseK(Ksingular.size,2);
+        for (int i=0; i<tempNum; i++)
+        { tempSel.incrementSelectionFixedCardinality(2);
+          theRel.Alphas.SetSizeExpandOnTopNoObjectInit(2);
+          theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
+          theRel.Betas.size=0;
+          theRel.BetaCoeffs.size=0;
+          for (int j=0;j<tempSel.CardinalitySelection;j++)
+            theRel.Alphas.TheObjects[j].Assign(Ksingular.TheObjects[tempSel.elements[j]]);
+          if (theRel.IsStrictlyWeaklyProhibiting(*this,NilradicalRoots,theGlobalVariables,owner,indexInOwner))
+            break;
+        }
 			assert(theRel.CheckForBugs(*this,NilradicalRoots));
-			//NilradicalRoots.ComputeDebugString();
-			//this->NilradicalKmods.ComputeDebugString();
-		//	this->ComputeDebugString(true,false,false,theGlobalVariables);
 		}
 		owner.theBadRelations.AddObjectOnTopHash(theRel);
 	}

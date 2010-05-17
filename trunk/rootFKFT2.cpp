@@ -357,16 +357,17 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
 }
 
 void minimalRelationsProverStates::ReduceMemoryUse(GlobalVariables& theGlobalVariables)
-{ for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ReduceMemoryUse();
-    if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-    { std::stringstream out;
-      out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
-      IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
-      IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-      theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+{ if (false)
+    for (int i=0; i<this->size; i++)
+    { this->TheObjects[i].ReduceMemoryUse();
+      if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+      { std::stringstream out;
+        out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
+        IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
+        IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
+        theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+      }
     }
-  }
   this->NumFullyComputed=0;
 }
 

@@ -5302,7 +5302,7 @@ public:
   };
 	void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
 	coneRelations()
-	{ this->NumAllowedLatexLines=44;
+	{ this->NumAllowedLatexLines=40;
 		this->flagIncludeSmallerRelations=true;
 		this->flagIncludeCoordinateRepresentation=false;
 		this->flagIncludeSubalgebraDataInDebugString=false;

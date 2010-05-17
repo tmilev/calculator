@@ -168,15 +168,14 @@ void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariab
 }
 
 void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{	std::string tempS;
+{ std::string tempS;
 	input>> tempS;
 	this->simpleGenerators.ReadFromFile(input, theGlobalVariables);
 	input>> tempS;
 	this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
 }
 
-void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
-	( roots& generators, rootsCollection& ExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,	bool recomputeAmbientRho)
+void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections( roots& generators, rootsCollection& ExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,	bool recomputeAmbientRho)
 { hashedRoots& orbitRho = theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
 	this->truncated=false;
 	this->ClearTheObjects();

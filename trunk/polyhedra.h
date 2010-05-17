@@ -530,7 +530,7 @@ public:
 	int NumCols; int ActualNumCols;
 	Element** elements;
 	void init(int r,int c);
-	void Free();
+	void ReleaseMemory();
 	bool IsEqualTo(MatrixElementaryLooseMemoryFit<Element>& right);
 	void Resize(int r, int c, bool PreserveValues);
 	void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
@@ -551,7 +551,7 @@ MatrixElementaryLooseMemoryFit<Element>::MatrixElementaryLooseMemoryFit()
 
 template <typename Element>
 MatrixElementaryLooseMemoryFit<Element>::~MatrixElementaryLooseMemoryFit()
-{ this->Free();
+{ this->ReleaseMemory();
 }
 
 template <typename Element>
@@ -582,14 +582,13 @@ void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
 }
 
 template <typename Element>
-inline void MatrixElementaryLooseMemoryFit<Element>::Resize
-	(int r, int c, bool PreserveValues)
+inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool PreserveValues)
 { if (r<0) r=0;
 	if (c<0) c=0;
 	if (r==this->NumRows && c== this->NumCols)
 		return;
 	if (r==0 || c==0)
-	{	this->NumRows=0;
+	{ this->NumRows=0;
 		this->NumCols=0;
 		return;
 	}
@@ -603,7 +602,7 @@ ParallelComputing::GlobalPointerCounter+=newActualNumRows;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		for (int i=0;i<newActualNumRows;i++)
-		{	newElements[i]= new Element[newActualNumCols];
+		{ newElements[i]= new Element[newActualNumCols];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumCols;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
@@ -615,7 +614,7 @@ ParallelComputing::GlobalPointerCounter+=newActualNumCols;
 			for (int i=::Minimum(this->NumCols,c)-1;i>=0;i--)
 				newElements[j][i]= this->elements[j][i];
 	if (newElements!=0)
-	{	this->Free();
+	{ this->ReleaseMemory();
 		this->elements = newElements;
 		this->ActualNumCols=newActualNumCols;
 		this->ActualNumRows=newActualNumRows;
@@ -634,7 +633,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Assign(const MatrixElementa
 }
 
 template <typename Element>
-inline void MatrixElementaryLooseMemoryFit<Element>::Free()
+inline void MatrixElementaryLooseMemoryFit<Element>::ReleaseMemory()
 { for (int i=0;i<this->ActualNumRows;i++)
 		delete [] this->elements[i];
 	delete [] this->elements;
@@ -695,7 +694,7 @@ public:
 	//returns true if the system has a solution, false otherwise
 	bool RowEchelonFormToLinearSystemSolution( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
 	inline static void GaussianEliminationByRows(	Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
-	{	Matrix<Element>::GaussianEliminationByRows(theMatrix,otherMatrix,outputNonPivotPoints,true);
+	{ Matrix<Element>::GaussianEliminationByRows(theMatrix,otherMatrix,outputNonPivotPoints,true);
 	};
 	static void GaussianEliminationByRows(	Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
@@ -5872,19 +5871,19 @@ public:
   int NumImpossibleChildren;
   int activeChild;
   minimalRelationsProverStates* owner;
+  void ReduceMemoryUse();
   bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeIsPossible(minimalRelationsProverStates& theOwner);
   static void GetNumberScalarProductsData
-		(	root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
+		( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
       int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	static bool Root1IsGreaterThanRoot2	(	int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
   void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix(	GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
-  bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
-  bool CanBeShortened
-    ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool ComputeStateReturnFalseIfDubious( minimalRelationsProverStates& owner, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool CanBeShortened( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
@@ -5923,6 +5922,7 @@ public:
   rootsCollection PrecomputedIsoRanges;
   int sizeByLastSave;
   int sizeByLastPurge;
+  int NumFullyComputed;
   std::fstream theFileHeader;
   std::fstream theFileBody;
   std::string FileHeaderString;
@@ -5935,8 +5935,7 @@ public:
   void PrepareKIsos();
   void initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void GetIsoTypicComponents
-    ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void GetIsoTypicComponents( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
@@ -5948,6 +5947,7 @@ public:
   void ExtensionStep(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
   void BranchByAddingKRoots(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   static int CountNumSeparatingNormals(roots& theAlphas, roots& theBetas, WeylGroup& theWeyl);
+  void ReduceMemoryUse(GlobalVariables& theGlobalVariables);
 	void TestAddingExtraRoot
 		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
   bool GetNormalSeparatingConesFromPreferredBasis
@@ -5969,6 +5969,7 @@ public:
     this->flagSearchForOptimalSeparatingRoot=true;
     this->sizeByLastSave=0;
     this->sizeByLastPurge=0;
+    this->NumFullyComputed=0;
   };
  	void ReadFromFile(std::fstream &inputHeader, std::fstream &inputBody, GlobalVariables &theGlobalVariables);
 	void WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables &theGlobalVariables);

@@ -39,6 +39,7 @@
 		<Unit filename="rootFKFT.cpp" />
 		<Unit filename="rootFKFT2.cpp" />
 		<Unit filename="rootFKFT3.cpp" />
+		<Unit filename="to_be_merged_in_main.cpp" />
 		<Unit filename="wxWidgets_GUI.cpp" />
 		<Extensions>
 			<code_completion />

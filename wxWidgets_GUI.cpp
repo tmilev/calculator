@@ -41,6 +41,10 @@
 
 #include "polyhedra.h"
 
+//#include "to_be_merged_in_main.cpp"
+extern void main_test_function();
+
+
 extern DrawingVariables TDV;
 
 class guiMainWindow;
@@ -77,21 +81,16 @@ public:
 class wxComboBoxWheel : public wxComboBox
 {
 public:
-  wxComboBoxWheel
-    ( wxWindow *parent, wxWindowID id, const wxString& value= wxT(""), const wxPoint& pos = wxDefaultPosition,
-      const wxSize& size = wxDefaultSize, const int n=0, const wxString choices[]=0, const long style = wxWANTS_CHARS,
-      const wxValidator& validator=wxDefaultValidator, const wxString& name = wxT(""));
-    void OnMouseWheel(wxMouseEvent& event);
-    DECLARE_EVENT_TABLE()
+  wxComboBoxWheel( wxWindow *parent, wxWindowID id, const wxString& value= wxT(""), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, const int n=0, const wxString choices[]=0, const long style = wxWANTS_CHARS, const wxValidator& validator=wxDefaultValidator, const wxString& name = wxT(""));
+  void OnMouseWheel(wxMouseEvent& event);
+  DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(wxComboBoxWheel, wxComboBox)
     EVT_MOUSEWHEEL(wxComboBoxWheel::OnMouseWheel)
 END_EVENT_TABLE()
 
-wxComboBoxWheel::wxComboBoxWheel
-  ( wxWindow *parent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size, const int n ,const wxString choices[], const long style, const wxValidator& validator, const wxString& name )
-      :wxComboBox(parent,id,value,pos,size,n,choices,style,validator,name)
+wxComboBoxWheel::wxComboBoxWheel( wxWindow *parent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size, const int n ,const wxString choices[], const long style, const wxValidator& validator, const wxString& name ):wxComboBox(parent, id, value, pos, size, n, choices, style, validator, name)
 {
 }
 
@@ -188,6 +187,7 @@ public:
 	::wxButton* Button13ProverFullComputationFixedK;
 	::wxButton* Button14ProverFixedKSave;
 	::wxButton* Button15ProverFixedKOpen;
+	::wxButton* Button16Custom2;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -209,6 +209,7 @@ public:
   void onButton2Eval(wxCommandEvent& ev);
   void onButton1Go(wxCommandEvent& ev);
   void onButton3Custom (wxCommandEvent& ev);
+  void onButton16Custom2 (wxCommandEvent& ev);
   void onButton6OneSlice (wxCommandEvent& ev);
   void onButton7SliceIncrement (wxCommandEvent& ev);
   void onButton8FullChop(wxCommandEvent& ev);
@@ -274,6 +275,7 @@ public:
     ID_CheckBox1,
     ID_CheckBoxesGraphics,
     ID_Button3Custom,
+    ID_Button16Custom2,
     ID_Paint,
   };
   DECLARE_EVENT_TABLE()
@@ -352,11 +354,11 @@ bool guiApp::OnInit()
 }
 
 BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
-    EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom,
-                     guiMainWindow::onToggleButton1UsingCustom)
+    EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
     EVT_BUTTON(guiMainWindow::ID_Buton2Eval, guiMainWindow::onButton2Eval)
     EVT_BUTTON(guiMainWindow::ID_Button1Go, guiMainWindow::onButton1Go)
     EVT_BUTTON(guiMainWindow::ID_Button3Custom, guiMainWindow::onButton3Custom)
+    EVT_BUTTON(guiMainWindow::ID_Button16Custom2, guiMainWindow::onButton16Custom2)
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
@@ -477,10 +479,7 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output);
 
-guiMainWindow::guiMainWindow()
-        : wxFrame
-						(	(wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("Vector partition function v0.101 (eating RAM for breakfast)"),
-							wxPoint(100,100), wxSize(800,600), wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
+guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("Vector partition function v0.101 (eating RAM for breakfast)"), wxPoint(100,100), wxSize(800,600), wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
 {	//this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
@@ -541,9 +540,10 @@ guiMainWindow::guiMainWindow()
       ,0,0,wxCB_DROPDOWN  );
   this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
-  this->Button1Go= new ::wxButton(this,this->ID_Button1Go,wxT("Go"));
+  this->Button1Go= new ::wxButton(this, this->ID_Button1Go, wxT("Go"));
   this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
-  this->Button3Custom= new wxButton(this,this->ID_Button3Custom,wxT("Experiments"));
+  this->Button3Custom= new wxButton(this, this->ID_Button3Custom, wxT("Experiments"));
+  this->Button16Custom2= new wxButton(this, this->ID_Button16Custom2, wxT("Experiments 2"));
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
   //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
@@ -551,12 +551,10 @@ guiMainWindow::guiMainWindow()
   this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
   this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
   this->Dialog1OutputPF= new ::wxDialogOutput ( this,guiMainWindow::ID_Dialog1, wxT("Partial fractions"), ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
-  this->Dialog2StatusString1=  new ::wxDialogOutput
-    ( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
+  this->Dialog2StatusString1=  new ::wxDialogOutput( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
   this->Text3PartialFractions= new ::wxTextCtrl (	this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
   this->Text4StatusString1 = new wxTextCtrl ( this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize, wxTE_MULTILINE);
-  this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton
-		(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, wxT("Switch to chamber data"));
+  this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, wxT("Switch to chamber data"));
   this->Button4SaveReadable = new ::wxButton (this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
   this->Button5SaveComputer = new ::wxButton (this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
 	this->Button10ProverOneStep = new ::wxButton(this->Dialog2StatusString1,this->ID_Button10ProverOneStep,wxT("Prover one step "));
@@ -597,6 +595,7 @@ guiMainWindow::guiMainWindow()
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox3ComputeChambers);
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox7UseIndicatorForPFDecomposition);
 		this->BoxSizer11VerticalOptions->Add(this->Button3Custom);
+		this->BoxSizer11VerticalOptions->Add(this->Button16Custom2);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
   this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
   this->BoxSizer12VerticalProgressReports->Add(this->Label2ProgressReport);
@@ -887,7 +886,18 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
   this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
   this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
   this->theComputationSetup.theRootSubalgebras.flagUsingONLYActionsNormalizerCentralizerNilradical=false;
-  this->theComputationSetup.WeylGroupIndex=5;
+  this->theComputationSetup.WeylGroupIndex=6;
+  this->theComputationSetup.WeylGroupLetter='B';
+  this->RunTheComputation();
+}
+
+void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
+{ this->theComputationSetup.flagDoCustomComputation=true;
+  this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
+  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
+  this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
+  this->theComputationSetup.theRootSubalgebras.flagUsingONLYActionsNormalizerCentralizerNilradical=false;
+  this->theComputationSetup.WeylGroupIndex=3;
   this->theComputationSetup.WeylGroupLetter='B';
   this->RunTheComputation();
 }

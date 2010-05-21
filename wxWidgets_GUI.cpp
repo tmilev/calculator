@@ -42,7 +42,7 @@
 #include "polyhedra.h"
 
 //#include "to_be_merged_in_main.cpp"
-extern void main_test_function();
+extern void main_test_function(std::string& output, GlobalVariables& theGlobalVariables);
 
 
 extern DrawingVariables TDV;
@@ -892,14 +892,10 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
-{ this->theComputationSetup.flagDoCustomComputation=true;
-  this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
-  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
-  this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
-  this->theComputationSetup.theRootSubalgebras.flagUsingONLYActionsNormalizerCentralizerNilradical=false;
-  this->theComputationSetup.WeylGroupIndex=3;
-  this->theComputationSetup.WeylGroupLetter='B';
-  this->RunTheComputation();
+{ std::string tempS;
+  main_test_function(tempS, *(MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()));
+  wxString tempWS(tempS.c_str(),wxConvUTF8);
+  MainWindow1->Text1Output->SetValue(tempWS);
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent &ev)
@@ -1390,8 +1386,7 @@ void guiMainWindow::ReadSettingsIfAvailable()
 }
 
 void guiMainWindow::ArrangeWindows()
-{
-    this->ReadSettingsIfAvailable();
+{ this->ReadSettingsIfAvailable();
 }
 
 void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
@@ -1400,8 +1395,7 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
   MainWindow1->Text1Output->SetValue(tempWS);
   int old= this->Text3PartialFractions->GetLastPosition();
   if (this->theComputationSetup.flagDisplayingPartialFractions)
-  { wxString tempWS
-      (MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(),wxConvUTF8);
+  { wxString tempWS(MainWindow1->theComputationSetup.thePartialFraction.DebugString.c_str(),wxConvUTF8);
     MainWindow1->Text3PartialFractions->SetValue(tempWS);
   } else
     if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)

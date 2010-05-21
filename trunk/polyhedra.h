@@ -802,6 +802,7 @@ public:
 	int getTotalNumSubsets();
 	int TotalMultiplicity();
 	int MaxTotalMultiplicity();
+	void initFromInts(int* theMaxMults, int NumberMaxMults);
 	bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other)
 	{ return this->MaxMultiplicities.IsEqualTo(other.MaxMultiplicities);
   };
@@ -1412,6 +1413,8 @@ public:
 	void WriteToFile (std::fstream& output);
 	void ReadFromFile(std::fstream&  input);
 	inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus();};
+	static Rational NChooseK(int n, int k);
+	static Rational Factorial(int n);
 	void RaiseToPower(int x);
 	static Rational TheRingUnit;
 	static Rational TheRingZero;
@@ -2710,23 +2713,18 @@ public:
 	void MakeNVarDegOnePoly (short NVar, int NonZeroIndex,ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& ConstantTerm);
 	void MakeLinPolyFromRoot(root& r);
 	void TimesInteger(int a);
-	void DivideBy
-		(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient,
-			Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
+	void DivideBy(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
 	void AddConstant(ElementOfCommutativeRingWithIdentity& theConst);
 	void IncreaseNumVariables(short increase);
 	void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
 	void DecreaseNumVariables(short increment,Polynomial<ElementOfCommutativeRingWithIdentity>& output);
-	void Substitution
-		(	ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output,
-			short NumVarTarget);
+	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
 	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
   int TotalDegree();
 	int GetIndexMaxMonomial();
-	void ComponentInFrontOfVariableToPower
-		(int VariableIndex, ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
+	void ComponentInFrontOfVariableToPower(int VariableIndex, ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
   int FindMaxPowerOfVariableIndex(int VariableIndex);
 	//has to be rewritten please don't use!
 	bool IsGreaterThanZeroLexicographicOrder();
@@ -3185,13 +3183,19 @@ public:
 	void TimesInteger(int x);
 	void operator=(const PolynomialRationalCoeff& right);
 	bool operator==(const PolynomialRationalCoeff& right);
+	void Subtract(const PolynomialRationalCoeff& other)
+	{ PolynomialRationalCoeff tempP;
+    tempP.Assign(other);
+    Rational tempRat; tempRat.MakeMOne();
+    tempP.TimesConstant(tempRat);
+    this->AddPolynomial(tempP);
+  }
 };
 
 class QuasiPolynomials:public Polynomials<QuasiNumber>
 {
 public:
-	void IntegrateDiscreteInDirectionFromZeroTo
-		(	root& direction, PolynomialRationalCoeff& EndPoint, QuasiPolynomial& output, QuasiPolynomial& input, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+	void IntegrateDiscreteInDirectionFromZeroTo(	root& direction, PolynomialRationalCoeff& EndPoint, QuasiPolynomial& output, QuasiPolynomial& input, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -6226,6 +6230,9 @@ public:
 	Selection selSimplexAlg2;
 	Selection selApproveSelAgainstOneGenerator;
 	Selection selIsBogusNeighbor;
+
+	SelectionWithDifferentMaxMultiplicities selWeylAlgebra1;
+
 	ReflectionSubgroupWeylGroup subGroupActionNormalizerCentralizer;
 
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;

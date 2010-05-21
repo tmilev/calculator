@@ -7620,6 +7620,24 @@ void Rational::AssignInteger(int x)
   this->NumShort=x;
 }
 
+Rational Rational::Factorial(int n)
+{ Rational result;
+  result.MakeOne();
+  for (int i=0;i<n;i++)
+    result.MultiplyByInt(i+1);
+  return result;
+}
+
+Rational Rational::NChooseK(int n, int k)
+{ Rational result;
+  result.MakeOne();
+  for (int i=0;i<k;i++)
+  { result.MultiplyByInt(n-i);
+    result.DivideByInteger(i+1);
+  }
+  return result;
+}
+
 double Rational::DoubleValue()
 { if (this->Extended==0)
     return (double)this->NumShort/(double)this->DenShort;
@@ -11591,6 +11609,14 @@ int ::SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
 		result*=(this->MaxMultiplicities.TheObjects[i]+1);
 	assert(result>=0);
 	return result;
+}
+
+void SelectionWithDifferentMaxMultiplicities::initFromInts(int* theMaxMults, int NumberMaxMults)
+{ this->Multiplicities.initFillInObject(NumberMaxMults, 0);
+  this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumberMaxMults);
+  for (int i=0; i<this->MaxMultiplicities.size; i++)
+    this->MaxMultiplicities.TheObjects[i]=theMaxMults[i];
+  this->elements.initFillInObject(NumberMaxMults,0);
 }
 
 int ::SelectionWithDifferentMaxMultiplicities::TotalMultiplicity()

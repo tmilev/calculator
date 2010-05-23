@@ -3,11 +3,11 @@
 // The reason I would recommend that is because the file polyhedra.cpp compiles very slowly (around 30 seconds), so small modifications
 // take a long time to check. Using a separate file and linking it to the GUI is the solution I chose (may not be the best, see below for discussion).
 // If the code you write here reaches the mature phase where you have realized all functions you think it should have
-// and you are generally satisfied with it, simply cut & paste it in the main files (the clas declarations in polyhedra.h and the implementation in polyhedra.cpp).
+// and you are generally satisfied with it, simply cut & paste it in the main files (the class declarations in polyhedra.h and the implementation in polyhedra.cpp).
 
 //Discussion: other options for speeding up the compilation that I have considered.
 //1. Cut up the main files polyhedra.h and polyhedra.cpp into small quick-to-compile pieces. This might be the best solution in the long run. However, I do not want to
-//   do it just yet, because 1) I am not sure what should those pieces be - it is not yet clear in my head how to partition the code in conceptually distinct pieces
+//   do it just yet, because 1) I am not sure what should those parts be - it is not yet clear in my head how to partition the code in conceptually distinct pieces
 //   2) this would certainly create additional maintainance work 3) this will increase the learning curve for a person wanting to just use the program and wanting to eventually
 //   modify some tiny bit of it and 4) I got an advice on the c++ forum I go to, www.cplusplus.com, that partitioning the .h file will eventually lead to slower compile times
 //   on all pieces of code that use it, especially with the massive use of templates that I do. Therefore, such a partitioning should not be done before the code reaches
@@ -27,9 +27,9 @@ private:
   PolynomialRationalCoeff StandardOrder;
 public:
   std::string DebugString;
-  void ComputeDebugString(){this->ElementToString(this->DebugString, true);};
-	void ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet);
-	void ElementToString(std::string& output, bool useXYs);
+  void ComputeDebugString(bool useBeginEqnArray){this->ElementToString(this->DebugString, true, true, useBeginEqnArray);};
+	void ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
+	void ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
   int NumVariables;
   void MakeGEpsPlusEps(int i, int j, int NumVars);
   void MakeGEpsMinusEps(int i, int j, int NumVars);
@@ -98,9 +98,13 @@ void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, 
   this->StandardOrder.Assign(Accum);
 }
 
-void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet)
+void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
 { std::stringstream out;
   std::string tempS;
+  int numLettersSinceLastNewLine=0;
+  if (useLatex && useBeginEqnArray)
+  { out << "\\begin{eqnarray*}&&";
+  }
   for (int i=0; i<this->StandardOrder.size; i++)
   { this->StandardOrder.TheObjects[i].Coefficient.ElementToString(tempS);
     bool hasMinus=(tempS[0]=='-');
@@ -127,11 +131,18 @@ void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<s
         if (tempI!=1)
           out <<"^{" <<tempI<<"}";
       }
+    numLettersSinceLastNewLine+=this->NumVariables;
+    if (numLettersSinceLastNewLine>20 && i!= this->StandardOrder.size-1 && useLatex)
+    { numLettersSinceLastNewLine=0;
+      out <<"\\\\&&\n";
+    }
   }
+  if (useLatex && useBeginEqnArray)
+    out << "\\end{eqnarray*}";
   output=out.str();
 }
 
-void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs)
+void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray)
 { ListBasicObjects<std::string> alphabet;
   alphabet.SetSizeExpandOnTopNoObjectInit(this->NumVariables);
   int numCycles=this->NumVariables;
@@ -148,7 +159,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs)
       alphabet.TheObjects[i+numCycles]= out2.str();
     }
   }
-  this->ElementToString(output, alphabet);
+  this->ElementToString(output, alphabet, useLatex, useBeginEqnArray);
 }
 
 void ElementWeylAlgebra::MakeGEpsPlusEps(int i, int j, int NumVars)
@@ -206,36 +217,105 @@ void ElementWeylAlgebra::Nullify(int NumVars)
 
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4;
+  ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4, tempEl5, Accum;
   tempEl1.MakeGEpsPlusEps(0,1, 4);
-  tempEl1.ComputeDebugString();
-  out <<"\\documentclass{article}\n\\begin{document}";
-  out<<"\n\\begin{eqnarray*}\ng^{\\varepsilon_1+\\varepsilon_2}= ";
-  out <<tempEl1.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
   tempEl2.MakeGEpsMinusEps(0,1,4);
-  tempEl2.ComputeDebugString();
-  out <<"\\begin{eqnarray*}\ng^{\\varepsilon_1-\\varepsilon_2}= ";
+  tempEl3.MakeGEpsPlusEps(2,3, 4);
+  tempEl4.MakeGEpsMinusEps(2,3,4);
+  tempEl5.MakeGMinusEpsMinusEps(0,2,4);
+  tempEl1.ComputeDebugString(false);
+  tempEl2.ComputeDebugString(false);
+  tempEl3.ComputeDebugString(false);
+  tempEl4.ComputeDebugString(false);
+  tempEl5.ComputeDebugString(false);
+
+  out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
+  out<< "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
+  out<<"\\begin{document}";
+
+
+  ElementWeylAlgebra theH, tempEl6;
+  theH.MakeGEpsPlusEps(0,2,4);
+  tempEl6.MakeGMinusEpsMinusEps(0,2,4);
+  theH.LieBracketOnTheLeft(tempEl6, theGlobalVariables);
+  theH.ComputeDebugString(false);
+  out<<"\n\\begin{eqnarray*}&&h=";
+  out <<theH.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+  tempEl6.Assign(theH);
+  tempEl6.LieBracketOnTheLeft(theH, theGlobalVariables);
+  tempEl6.ComputeDebugString(false);
+  out<<"\n\\begin{eqnarray*}&&[h,h]=";
+  out <<tempEl6.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+  out<<"\n\\begin{eqnarray*}&&-[h,g^{-\\varepsilon_1-\\varepsilon_3}]=\n\\\\";
+  out<<"&&-["<<theH.DebugString<<","<<tempEl5.DebugString <<"]=\n\\\\";
+  tempEl6.Assign(theH);
+  tempEl6.LieBracketOnTheLeft(tempEl5, theGlobalVariables);
+  tempEl6.ComputeDebugString(false);
+  out <<tempEl6.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+  out<<"\n\\begin{eqnarray*}\n&&(g^{-\\varepsilon_1-\\varepsilon_3})^2 g ^{\\varepsilon_1+\\varepsilon_2}g ^{\\varepsilon_1-\\varepsilon_2}g ^{\\varepsilon_3+\\varepsilon_4}g ^{\\varepsilon_3-\\varepsilon_4}\\\\\n ";
+  out <<"&&=("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
+         << tempEl3.DebugString <<")("<< tempEl4.DebugString<<")=\\\\";
+  Accum.Assign(tempEl4);
+  Accum.MultiplyOnTheLeft(tempEl3, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out <<"&&("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
+         << Accum.DebugString<<")=";
+  out <<"\\end{eqnarray*}\n";
+  out<<"\n\\begin{eqnarray*}&&\n";
+  Accum.MultiplyOnTheLeft(tempEl2, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out <<"("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<< Accum.DebugString<<")=\\\\\n";
+  out <<"\\end{eqnarray*}\n";
+  out<<"\n\\begin{eqnarray*}&&\n";
+  Accum.MultiplyOnTheLeft(tempEl1, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out <<"("<<tempEl5.DebugString<<")^2("<< Accum.DebugString<<")=\\\\\n";
+  out <<"\\end{eqnarray*}\n";
+  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
+  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out<<"\n\\begin{eqnarray*}&&\n";
+  out <<Accum.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+
+
+  out<<"\n\\begin{eqnarray*}&&[h,\\bullet]=\n";
+  theH.LieBracketOnTheLeft(Accum, theGlobalVariables);
+  theH.ComputeDebugString(false);
+  out <<theH.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+  tempEl2.MakeGEpsMinusEps(0,1,4);
+  tempEl2.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1-\\varepsilon_2}= ";
   out <<tempEl2.DebugString;
   out <<"\n\\end{eqnarray*}\n";
   tempEl3.MakeGMinusEpsMinusEps(0,1,4);
-  tempEl3.ComputeDebugString();
-  out <<"\\begin{eqnarray*}\ng^{-\\varepsilon_1-\\varepsilon_2}= ";
+  tempEl3.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\ng^{-\\varepsilon_1-\\varepsilon_2}= ";
   out <<tempEl3.DebugString;
   out <<"\n\\end{eqnarray*}\n";
   tempEl4.Assign(tempEl3);
   tempEl4.MultiplyOnTheLeft(tempEl1,theGlobalVariables);
-  tempEl4.ComputeDebugString();
-  out <<"\\begin{eqnarray*}\ng^{\\varepsilon_1+\\varepsilon_2}g^{-\\varepsilon_1-\\varepsilon_2}= ";
+  tempEl4.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1+\\varepsilon_2}g^{-\\varepsilon_1-\\varepsilon_2}= ";
   out <<tempEl4.DebugString;
   out <<"\n\\end{eqnarray*}\n";
 
   tempEl4.Assign(tempEl3);
   tempEl4.LieBracketOnTheLeft(tempEl1,theGlobalVariables);
-  tempEl4.ComputeDebugString();
-  out <<"\\begin{eqnarray*}\n[g^{\\varepsilon_1+\\varepsilon_2},g^{-\\varepsilon_1-\\varepsilon_2}]= ";
+  tempEl4.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\n[g^{\\varepsilon_1+\\varepsilon_2},g^{-\\varepsilon_1-\\varepsilon_2}]= ";
   out <<tempEl4.DebugString;
   out <<"\n\\end{eqnarray*}\n";
+
+
 
   out<<"\\end{document}";
   output=out.str();

@@ -889,6 +889,7 @@ ComputationSetup::ComputationSetup()
 	this->flagDoCustomNilradical=false;
 	this->flagOneSteChamberSliceInitialized=false;
 	this->flagDoCustomComputation=false;
+	this->flagDoingWeylGroupAction=false;
 	this->NextDirectionIndex=0;
 	this->WeylGroupLetter='A';
 	this->WeylGroupIndex=3;
@@ -2983,13 +2984,21 @@ void roots::intersectWith(roots& right,roots& output)
 			output.AddRoot(this->TheObjects[i]);
 }
 
-bool roots::ContainsARootConnectedTo(root& input, WeylGroup& theWeyl)
+bool roots::ContainsARootNonPerpendicularTo(root& input, WeylGroup& theWeyl)
 { Rational tempRat;
 	for (int i=0;i<this->size;i++)
 	{	theWeyl.RootScalarKillingFormMatrixRoot(this->TheObjects[i],input,tempRat);
 		if(!tempRat.IsEqualToZero())
 			return true;
 	}
+	return false;
+}
+
+bool roots::ContainsARootNonStronglyPerpendicularTo(root& input, WeylGroup& theWeyl)
+{ Rational tempRat;
+	for (int i=0; i<this->size; i++)
+		if (theWeyl.IsARoot(this->TheObjects[i]+input))
+			return true;
 	return false;
 }
 
@@ -14690,13 +14699,14 @@ bool rootSubalgebra::AttemptTheTripleTrick(coneRelation& theRel, roots& Nilradic
 		if (!this->NilradicalKmods.selected[i])
 			if (this->IsGeneratingSingularVectors(i,NilradicalRoots))
 				tempRoots.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
+	//tempRoots.ComputeDebugString();
 	return this->AttemptTheTripleTrickWRTSubalgebra(theRel, tempRoots, NilradicalRoots, theGlobalVariables);
 }
 
 bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(	coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables)
 { root tempRoot, Accum;
   SelectionWithMaxMultiplicity tempSel;
-  roots& chosenAlphas= theGlobalVariables.rootsAttemptTheTripleTrick;
+  roots& chosenAlphas= theGlobalVariables.rootsAttepmtTheTripleTrickWRTSA;
   for (int i=2; i<this->AmbientWeyl.KillingFormMatrix.NumRows; i++)
   { tempSel.initMe2(highestWeightsAllowed.size, i);
 		int NumElts=tempSel.NumCombinationsOfCardinality(i);
@@ -14718,6 +14728,8 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(	coneRelation& theRel, r
 				  //int numParticipatingRoots=numAlphas+startNumBetas;
           DynkinDiagramRootSubalgebra& theDiagram= theGlobalVariables.dynAttemptTheTripleTrick;
           chosenAlphas.AddListOnTop(theRel.Betas);
+          //chosenAlphas.ComputeDebugString();
+          //theRel.Betas.ComputeDebugString();
           theDiagram.ComputeDiagramType(chosenAlphas, this->AmbientWeyl);
           int theRank=theDiagram.RankTotal();
           if (theRank>4 || theDiagram.DebugString=="$B_4$" || theDiagram.DebugString=="$C_4$")
@@ -14733,6 +14745,8 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(	coneRelation& theRel, r
 					{ theRel.Alphas.TheObjects[k].Assign(highestWeightsAllowed.TheObjects[tempSel.elements.TheObjects[k]]);
 						theRel.AlphaCoeffs.TheObjects[k].AssignInteger(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
 					}
+					//theRel.Alphas.ComputeDebugString();
+					//theRel.Betas.ComputeDebugString();
 					return true;
 				}
 		}
@@ -15501,13 +15515,15 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 }
 
 void ::DynkinDiagramRootSubalgebra::ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl)
-{ theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
+{	simpleBasisInput.ComputeDebugString();
+	theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
+	simpleBasisInput.ComputeDebugString();
   this->SimpleBasesConnectedComponents.size=0;
 	this->SimpleBasesConnectedComponents.MakeActualSizeAtLeastExpandOnTop(simpleBasisInput.size);
 	for (int i=0;i<simpleBasisInput.size;i++)
 	{ int indexFirstComponentConnectedToRoot=-1;
 		for (int j=0;j<this->SimpleBasesConnectedComponents.size;j++)
-			if (this->SimpleBasesConnectedComponents.TheObjects[j].ContainsARootConnectedTo(simpleBasisInput.TheObjects[i],theWeyl))
+			if (this->SimpleBasesConnectedComponents.TheObjects[j].ContainsARootNonPerpendicularTo(simpleBasisInput.TheObjects[i],theWeyl))
 			{ if (indexFirstComponentConnectedToRoot==-1)
 				{ indexFirstComponentConnectedToRoot=j;
 					this->SimpleBasesConnectedComponents.TheObjects[j].AddObjectOnTop(simpleBasisInput.TheObjects[i]);
@@ -17128,7 +17144,7 @@ void coneRelation::ComputeConnectedComponents(roots& input, rootSubalgebra& owne
 	for (int i=0;i<input.size;i++)
 	{ output.TheObjects[i].size=0;
 		for (int j=0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size;j++)
-			if (owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j].ContainsARootConnectedTo(input.TheObjects[i],owner.AmbientWeyl))
+			if (owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j].ContainsARootNonPerpendicularTo(input.TheObjects[i],owner.AmbientWeyl))
 				output.TheObjects[i].AddObjectOnTop(j);
 	}
 }
@@ -17175,12 +17191,15 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoo
 { if (this->Alphas.size==0 || this->Betas.size==0)
     return;
   roots tempRoots;
+  this->Alphas.ComputeDebugString();
+  this->Betas.ComputeDebugString();
 	tempRoots.CopyFromBase(this->Alphas);
 	tempRoots.AddListOnTop(this->Betas);
 	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
 	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
 	if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
-	{ assert(false);
+	{ this->ComputeDiagramRelAndK(owner);
+		assert(false);
     Stop();
 	}
 	this->SortRelation(owner);
@@ -17280,7 +17299,7 @@ void coneRelation::ComputeKComponents(roots& input, ListBasicObjects<ListBasicOb
 	for(int i=0; i<input.size;i++)
 	{ output.TheObjects[i].size=0;
 		for(int j=0;j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size;j++)
-			if (	owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j].ContainsARootConnectedTo( input.TheObjects[i],owner.AmbientWeyl))
+			if (	owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j].ContainsARootNonPerpendicularTo( input.TheObjects[i],owner.AmbientWeyl))
 				output.TheObjects[i].AddObjectOnTop(j);
 	}
 }
@@ -18266,7 +18285,7 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
 		{ for (int k=0;k<this->theWeylGroup.RootSystem.size;k++)
       { root::RootScalarEuclideanRoot(hCandidate,this->theWeylGroup.RootSystem.TheObjects[k],tempRat);
         if (tempRat.IsEqualToZero())
-          if (!rootsHavingScalarProd2WithH.ContainsARootConnectedTo (this->theWeylGroup.RootSystem.TheObjects[k],this->theWeylGroup))
+          if (!rootsHavingScalarProd2WithH.ContainsARootNonPerpendicularTo (this->theWeylGroup.RootSystem.TheObjects[k],this->theWeylGroup))
             RootSpacesThatCommuteWithAllRootsInTheSlTwo.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[k]);
       }
       BufferDecomposition.DifferenceTwoHsimpleRootsIsARoot=false;
@@ -18282,14 +18301,11 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
 					BufferDecomposition.theModulesMultiplicities.AddObjectOnTop (this->MultiplicitiesFixedHweight.TheObjects[j]);
 				}
       BufferDecomposition.hCharacteristic.Assign(hCandidate);
-			invertedCartan.ActOnAroot
-				(hCandidate,BufferDecomposition.hElementCorrespondingToCharacteristic);
+			invertedCartan.ActOnAroot(hCandidate,BufferDecomposition.hElementCorrespondingToCharacteristic);
 			BufferDecomposition.hCommutingRootSpaces.CopyFromBase(hCommutingRoots);
-      BufferDecomposition.DiagramM.ComputeDiagramType(hCommutingRoots,this->theWeylGroup);
-      BufferDecomposition.CentralizerDiagram.ComputeDiagramType
-        (RootSpacesThatCommuteWithAllRootsInTheSlTwo,this->theWeylGroup);
-      BufferDecomposition.RootsHavingScalarProduct2WithH.CopyFromBase
-        (rootsHavingScalarProd2WithH);
+      BufferDecomposition.DiagramM.ComputeDiagramType(hCommutingRoots, this->theWeylGroup);
+      BufferDecomposition.CentralizerDiagram.ComputeDiagramType(RootSpacesThatCommuteWithAllRootsInTheSlTwo, this->theWeylGroup);
+      BufferDecomposition.RootsHavingScalarProduct2WithH.CopyFromBase(rootsHavingScalarProd2WithH);
       BufferDecomposition.ComputeDynkinsEpsilon(this->theWeylGroup);
 			if (this->AddObjectOnTopNoRepetitionOfObjectHash(BufferDecomposition))
 			{
@@ -18315,19 +18331,10 @@ void SltwoSubalgebras::ElementToString(std::string &output, GlobalVariables &the
       this->TheObjects[i].hCharacteristic.ElementToString(tempS);
       out << "\n\nSubalgebra "<<i+1<<" h characteristic: " << tempS;
       root& r=this->TheObjects[i].hCharacteristic;
-      out <<"$\\begin{array}{ccccccc}"
-          << r.TheObjects[7].ElementToString() <<" & "
-          << r.TheObjects[6].ElementToString() <<" & "
-          << r.TheObjects[5].ElementToString() <<" & "
-          << r.TheObjects[4].ElementToString() <<" & "
-          << r.TheObjects[3].ElementToString() <<" & "
-          << r.TheObjects[2].ElementToString() <<" & "
-          << r.TheObjects[0].ElementToString()
-          <<"\\\\&&&&"
-          << r.TheObjects[1].ElementToString()
-          <<"\\end{array}$\n\n";
-      out << "Corresponding h: " << this->TheObjects[i].hElementCorrespondingToCharacteristic.ElementToString();
-      out << "\n\n sl(2) - module decomposition: ";
+      out	<<"$\\begin{array}{ccccccc}" << r.TheObjects[7].ElementToString() <<" & " << r.TheObjects[6].ElementToString() <<" & " << r.TheObjects[5].ElementToString() <<" & "
+						<< r.TheObjects[4].ElementToString() <<" & " << r.TheObjects[3].ElementToString() <<" & " << r.TheObjects[2].ElementToString() <<" & "
+						<< r.TheObjects[0].ElementToString() <<"\\\\&&&&"<< r.TheObjects[1].ElementToString()<<"\\end{array}$\n\n";
+      out	<< "Corresponding h: " << this->TheObjects[i].hElementCorrespondingToCharacteristic.ElementToString() << "\n\n sl(2) - module decomposition: ";
       int DimensionCentralizer=0;
       for (int j=0;j<this->TheObjects[i].theModulesHighestWeights.size;j++)
       {	if ( this->TheObjects[i].theModulesMultiplicities.TheObjects[j]!=1)
@@ -18336,10 +18343,8 @@ void SltwoSubalgebras::ElementToString(std::string &output, GlobalVariables &the
         if (this->TheObjects[i].theModulesHighestWeights.TheObjects[j]==0)
           DimensionCentralizer= this->TheObjects[i].theModulesMultiplicities.TheObjects[j];
       }
-      int easyCentralizerDim=this->TheObjects[i].CentralizerDiagram.NumRootsGeneratedByDiagram()+
-        this->TheObjects[i].CentralizerDiagram.RankTotal();
-      int dimM=this->TheObjects[i].DiagramM.NumRootsGeneratedByDiagram()+
-        this->TheObjects[i].DiagramM.RankTotal();
+      int easyCentralizerDim=this->TheObjects[i].CentralizerDiagram.NumRootsGeneratedByDiagram() + this->TheObjects[i].CentralizerDiagram.RankTotal();
+      int dimM=this->TheObjects[i].DiagramM.NumRootsGeneratedByDiagram() + this->TheObjects[i].DiagramM.RankTotal();
       out <<"\n\nm is of type: " << this->TheObjects[i].DiagramM.DebugString<<" Dimension of m: "<< dimM<< "\n\n";
       if (dimM<=DimensionCentralizer)
       { out <<"\n\n~ {This subalgebra satisfies $\\mathrm{dim} m< \\mathrm{dim} V_0 $}\\\\~\\\\~\\\\~ ";
@@ -18406,8 +18411,7 @@ void SltwoDecomposition::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
 
 void ElementSimpleLieAlgebra::operator+=(const ElementSimpleLieAlgebra& other)
 { for(int i=0;i<other.NonZeroElements.CardinalitySelection;i++)
-    this->coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]].Add
-      (other.coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]]);
+    this->coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]].Add(other.coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]]);
   this->Hcomponent.Add(other.Hcomponent);
 }
 
@@ -18472,8 +18476,7 @@ void SimpleLieAlgebra::LieBracket( const ElementSimpleLieAlgebra& g1, const Elem
   element1=&g1; element2=&g2;
   for (int l=0;l<2;l++)
 	{	for (int j=0;j<element2->NonZeroElements.CardinalitySelection;j++)
-		{ this->theWeyl.RootScalarKillingFormMatrixRoot
-				( this->theWeyl.RootSystem.TheObjects[element2->NonZeroElements.elements[j]], element1->Hcomponent,tempRat);
+		{ this->theWeyl.RootScalarKillingFormMatrixRoot( this->theWeyl.RootSystem.TheObjects[element2->NonZeroElements.elements[j]], element1->Hcomponent,tempRat);
 			tempRat.MultiplyBy(element2->coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]]);
 			tempRat.MultiplyBy(order);
 			output.coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]].Add(tempRat);

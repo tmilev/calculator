@@ -414,9 +414,8 @@ void RunComputationalThread()
 #else
 void* RunComputationalThread(void*ptr)
 #endif
-{ MainWindow1->ReadVPVectorsAndOptions();
-    MainWindow1->theComputationSetup.Run();
-    ::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxComputationOver);
+{	MainWindow1->theComputationSetup.Run();
+  wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxComputationOver);
 #ifndef WIN32
     pthread_exit(NULL);
 #endif
@@ -901,6 +900,7 @@ void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
 void guiMainWindow::onButton1Go(wxCommandEvent &ev)
 { this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
   this->theComputationSetup.flagDoCustomComputation=false;
+  this->ReadVPVectorsAndOptions();
   this->RunTheComputation();
 }
 
@@ -1036,19 +1036,19 @@ void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
   if (candidateDim!= this->theComputationSetup.WeylGroupIndex || candidateNumVectors!=this->NumVectors)
   { if (candidateDim<1)
     { candidateDim=1;
-       this->Spin1Dim->SetValue(1);
+      this->Spin1Dim->SetValue(1);
     }
     if (candidateNumVectors<1)
     { candidateNumVectors=1;
-       this->Spin2NumVect->SetValue(1);
+      this->Spin2NumVect->SetValue(1);
     }
     if (candidateDim>this->Table1Input->maxNumCols)
     { candidateDim=this->Table1Input->maxNumCols;
-       this->Spin1Dim->SetValue(this->Table1Input->maxNumCols);
+      this->Spin1Dim->SetValue(this->Table1Input->maxNumCols);
     }
     if (candidateNumVectors>this->Table1Input->maxNumRows)
     { candidateNumVectors=this->Table1Input->maxNumRows;
-       this->Spin2NumVect->SetValue(this->Table1Input->maxNumRows);
+      this->Spin2NumVect->SetValue(this->Table1Input->maxNumRows);
     }
     this->initTableFromRowsAndColumns(candidateNumVectors,candidateDim);
   }

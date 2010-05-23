@@ -1613,13 +1613,13 @@ public:
 	void Sum(root& output);
 	void Pop(int index);
 	void intersectWith(roots& right, roots& output);
-	bool ContainsARootConnectedTo(root& input, WeylGroup& theWeyl);
+	bool ContainsARootNonPerpendicularTo(root& input, WeylGroup& theWeyl);
+	bool ContainsARootNonStronglyPerpendicularTo(root& input, WeylGroup& theWeyl);
 	int NumRootsConnectedTo(root& input, WeylGroup& theWeyl);
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
 	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(	MatrixLargeRational& outputTheLinearCombination, int theIndex);
-	void GetLinearDependenceRunTheLinearAlgebra
-		(	MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints);
+	void GetLinearDependenceRunTheLinearAlgebra	(	MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints);
 	int GetDimensionOfElements();
 	//Strict cone: The zero linear combination is not allowed.
 	//Non-Strict cone: the zero linear combination is allowed.
@@ -6147,6 +6147,7 @@ public:
   roots rootsProverStateComputation4;
   roots rootsProverStateComputation5;
   roots rootsAttepmtTheTripleTrick;
+  roots rootsAttepmtTheTripleTrickWRTSA;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;

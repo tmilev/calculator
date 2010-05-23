@@ -14672,7 +14672,7 @@ void rootSubalgebra::ExtractRelations( MatrixLargeRational& matA, MatrixLargeRat
           theRel.AlphaCoeffs.SetSizeExpandOnTopNoObjectInit(2);
           theRel.Betas.size=0;
           theRel.BetaCoeffs.size=0;
-          for (int j=0;j<tempSel.CardinalitySelection;j++)
+          for (int j=0; j<tempSel.CardinalitySelection; j++)
             theRel.Alphas.TheObjects[j].Assign(Ksingular.TheObjects[tempSel.elements[j]]);
           if (theRel.IsStrictlyWeaklyProhibiting(*this,NilradicalRoots,theGlobalVariables,owner,indexInOwner))
             break;

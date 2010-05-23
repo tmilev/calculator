@@ -6146,6 +6146,7 @@ public:
   roots rootsProverStateComputation3;
   roots rootsProverStateComputation4;
   roots rootsProverStateComputation5;
+  roots rootsAttepmtTheTripleTrick;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -6238,6 +6239,7 @@ public:
 	HashedListBasicObjects<Selection> hashedSelSimplexAlg;
 
   DynkinDiagramRootSubalgebra dynGetEpsCoords;
+  DynkinDiagramRootSubalgebra dynAttemptTheTripleTrick;
 
 	GlobalVariables();
 	~GlobalVariables();

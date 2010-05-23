@@ -3189,7 +3189,7 @@ public:
     Rational tempRat; tempRat.MakeMOne();
     tempP.TimesConstant(tempRat);
     this->AddPolynomial(tempP);
-  }
+  };
 };
 
 class QuasiPolynomials:public Polynomials<QuasiNumber>

@@ -1580,6 +1580,10 @@
 			Name="Source Files"
 			>
 			<File
+				RelativePath=".\custom_code_here.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\polyhedra.cpp"
 				>
 			</File>

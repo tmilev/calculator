@@ -63,10 +63,13 @@ void ElementWeylAlgebra::MultiplyTwoMonomials( Monomial<Rational>& left, Monomia
   assert(left.NumVariables==right.NumVariables);
   OrderedOutput.Nullify(left.NumVariables);
   int numCycles= tempSel.getTotalNumSubsets();
+  Rational coeffProd;
+  coeffProd.Assign(left.Coefficient);
+  coeffProd.MultiplyBy(right.Coefficient);
   for (int i=0; i<numCycles; i++)
-  { buffer.Coefficient.MakeOne();
+  { buffer.Coefficient.Assign(coeffProd);
     for (int k=0; k< theDimension; k++)
-    { int multDrop=tempSel.Multiplicities.TheObjects[k];
+    { short multDrop=(short)tempSel.Multiplicities.TheObjects[k];
       buffer.Coefficient.MultiplyBy(Rational::NChooseK(left.degrees[theDimension+k], multDrop)*Rational::NChooseK(right.degrees[k], multDrop)* Rational::Factorial(multDrop));
       buffer.degrees[k]=left.degrees[k]+right.degrees[k]-multDrop;
       buffer.degrees[k+theDimension]= left.degrees[k+theDimension]+right.degrees[k+theDimension]-multDrop;
@@ -80,16 +83,19 @@ void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1.Assign(*this);
   tempEl1.MultiplyOnTheLeft(standsOnTheLeft, theGlobalVariables);
+  //tempEl1.ComputeDebugString(false);
   tempEl2.Assign(standsOnTheLeft);
   tempEl2.MultiplyOnTheLeft(*this, theGlobalVariables);
+  //tempEl2.ComputeDebugString(false);
   this->Assign(tempEl1);
   this->Subtract(tempEl2);
+  //this->ComputeDebugString(false);
 }
 
 void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
 { PolynomialRationalCoeff buffer;
   PolynomialRationalCoeff Accum;
-  Accum.Nullify(this->NumVariables*2);
+  Accum.Nullify((short) this->NumVariables*2);
   for (int j=0; j<standsOnTheLeft.StandardOrder.size; j++)
     for (int i=0; i<this->StandardOrder.size; i++)
     { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder.TheObjects[j], this->StandardOrder.TheObjects[i], buffer, theGlobalVariables);
@@ -127,12 +133,12 @@ void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<s
     for (int k=0; k<this->NumVariables; k++)
       if (this->StandardOrder.TheObjects[i].degrees[this->NumVariables+ k]!=0)
       { out <<"\\partial_{"<<alphabet.TheObjects[k]<<"}";
+				numLettersSinceLastNewLine++;
         int tempI=this->StandardOrder.TheObjects[i].degrees[this->NumVariables+k];
         if (tempI!=1)
           out <<"^{" <<tempI<<"}";
       }
-    numLettersSinceLastNewLine+=this->NumVariables;
-    if (numLettersSinceLastNewLine>20 && i!= this->StandardOrder.size-1 && useLatex)
+    if (numLettersSinceLastNewLine>12 && i!= this->StandardOrder.size-1 && useLatex)
     { numLettersSinceLastNewLine=0;
       out <<"\\\\&&\n";
     }
@@ -166,13 +172,13 @@ void ElementWeylAlgebra::MakeGEpsPlusEps(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial(this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]=1;
   tempMon.degrees[j+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon);
 
   tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial(this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[j]=1;
   tempMon.degrees[i+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon);
@@ -182,13 +188,13 @@ void ElementWeylAlgebra::MakeGEpsMinusEps(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial(this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]=1;
   tempMon.degrees[j+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon);
 
   tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial(this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[j+NumVars]=1;
   tempMon.degrees[i+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon);
@@ -198,13 +204,13 @@ void ElementWeylAlgebra::MakeGMinusEpsMinusEps(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial(this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i+NumVars]=1;
   tempMon.degrees[j+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon);
 
   tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial(this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[j+NumVars]=1;
   tempMon.degrees[i+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon);
@@ -212,7 +218,7 @@ void ElementWeylAlgebra::MakeGMinusEpsMinusEps(int i, int j, int NumVars)
 
 void ElementWeylAlgebra::Nullify(int NumVars)
 { this->NumVariables=NumVars;
-  this->StandardOrder.Nullify (this->NumVariables*2);
+  this->StandardOrder.Nullify ((short)this->NumVariables*2);
 }
 
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
@@ -285,7 +291,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
 
 
 
-  out<<"\n\\begin{eqnarray*}&&[h,\\bullet]=\n";
+  out<<"\n\\begin{eqnarray*}&&[h,\\bullet]=";
   theH.LieBracketOnTheLeft(Accum, theGlobalVariables);
   theH.ComputeDebugString(false);
   out <<theH.DebugString;

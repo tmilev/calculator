@@ -27,13 +27,16 @@ private:
   PolynomialRationalCoeff StandardOrder;
 public:
   std::string DebugString;
-  void ComputeDebugString(bool useBeginEqnArray){this->ElementToString(this->DebugString, true, true, useBeginEqnArray);};
-	void ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
+  void ComputeDebugString(bool useBeginEqnArray, bool useXYs){this->ElementToString(this->DebugString, useXYs, true, useBeginEqnArray);};
+  void ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
 	void ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
   int NumVariables;
-  void MakeGEpsPlusEps(int i, int j, int NumVars);
-  void MakeGEpsMinusEps(int i, int j, int NumVars);
-  void MakeGMinusEpsMinusEps(int i, int j, int NumVars);
+  void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
+  void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
+  void MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
+  void Makexixj(int i, int j, int NumVars);
+  void Makedidj(int i, int j, int NumVars);
+  void Makexidj(int i, int j, int NumVars);
   void Nullify(int NumVars);
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
@@ -168,7 +171,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool 
   this->ElementToString(output, alphabet, useLatex, useBeginEqnArray);
 }
 
-void ElementWeylAlgebra::MakeGEpsPlusEps(int i, int j, int NumVars)
+void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
@@ -184,7 +187,7 @@ void ElementWeylAlgebra::MakeGEpsPlusEps(int i, int j, int NumVars)
   this->StandardOrder.AddMonomial(tempMon);
 }
 
-void ElementWeylAlgebra::MakeGEpsMinusEps(int i, int j, int NumVars)
+void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
@@ -200,7 +203,7 @@ void ElementWeylAlgebra::MakeGEpsMinusEps(int i, int j, int NumVars)
   this->StandardOrder.AddMonomial(tempMon);
 }
 
-void ElementWeylAlgebra::MakeGMinusEpsMinusEps(int i, int j, int NumVars)
+void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
@@ -216,6 +219,26 @@ void ElementWeylAlgebra::MakeGMinusEpsMinusEps(int i, int j, int NumVars)
   this->StandardOrder.AddMonomial(tempMon);
 }
 
+void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
+{ this->Nullify(NumVars*2);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables, tempMon.Coefficient);
+  tempMon.degrees[i+NumVars]=1;
+  tempMon.degrees[j+NumVars]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
+{ this->Nullify(NumVars*2);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables, tempMon.Coefficient);
+  tempMon.degrees[i]=1;
+  tempMon.degrees[j]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
 void ElementWeylAlgebra::Nullify(int NumVars)
 { this->NumVariables=NumVars;
   this->StandardOrder.Nullify ((short)this->NumVariables*2);
@@ -224,25 +247,32 @@ void ElementWeylAlgebra::Nullify(int NumVars)
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4, tempEl5, Accum;
-  tempEl1.MakeGEpsPlusEps(0,1, 4);
-  tempEl2.MakeGEpsMinusEps(0,1,4);
-  tempEl3.MakeGEpsPlusEps(2,3, 4);
-  tempEl4.MakeGEpsMinusEps(2,3,4);
-  tempEl5.MakeGMinusEpsMinusEps(0,2,4);
+  out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
+  out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
+  out <<"\\begin{document}";
+  theElement.Makexixj(0,1,4);
+  tempEl2.Makedidj(0,1,4);
+  theElement.LieBracketOnTheLeft(tempEl2, theGlobalVariables);
+  theElement.ComputeDebugString(false, false);
+  out <<"\n\\begin{eqnarray*}&&[\\partial_{x_i}\\partial_{x_j},x_ix_j]="<<theElement.DebugString<<"\n\\end{eqnarray*}";
+
+
+  /*tempEl1.MakeGEpsPlusEpsInTypeD(0,1, 4);
+  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
+  tempEl3.MakeGEpsPlusEpsInTypeD(2,3, 4);
+  tempEl4.MakeGEpsMinusEpsInTypeD(2,3,4);
+  tempEl5.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
   tempEl1.ComputeDebugString(false);
   tempEl2.ComputeDebugString(false);
   tempEl3.ComputeDebugString(false);
   tempEl4.ComputeDebugString(false);
   tempEl5.ComputeDebugString(false);
 
-  out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
-  out<< "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
-  out<<"\\begin{document}";
 
 
   ElementWeylAlgebra theH, tempEl6;
-  theH.MakeGEpsPlusEps(0,2,4);
-  tempEl6.MakeGMinusEpsMinusEps(0,2,4);
+  theH.MakeGEpsPlusEpsInTypeD(0,2,4);
+  tempEl6.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
   theH.LieBracketOnTheLeft(tempEl6, theGlobalVariables);
   theH.ComputeDebugString(false);
   out<<"\n\\begin{eqnarray*}&&h=";
@@ -265,12 +295,12 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
 
   out<<"\n\\begin{eqnarray*}\n&&(g^{-\\varepsilon_1-\\varepsilon_3})^2 g ^{\\varepsilon_1+\\varepsilon_2}g ^{\\varepsilon_1-\\varepsilon_2}g ^{\\varepsilon_3+\\varepsilon_4}g ^{\\varepsilon_3-\\varepsilon_4}\\\\\n ";
   out <<"&&=("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
-         << tempEl3.DebugString <<")("<< tempEl4.DebugString<<")=\\\\";
+      << tempEl3.DebugString <<")("<< tempEl4.DebugString<<")=\\\\";
   Accum.Assign(tempEl4);
   Accum.MultiplyOnTheLeft(tempEl3, theGlobalVariables);
   Accum.ComputeDebugString(false);
   out <<"&&("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
-         << Accum.DebugString<<")=";
+      << Accum.DebugString<<")=";
   out <<"\\end{eqnarray*}\n";
   out<<"\n\\begin{eqnarray*}&&\n";
   Accum.MultiplyOnTheLeft(tempEl2, theGlobalVariables);
@@ -297,12 +327,12 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out <<theH.DebugString;
   out <<"\n\\end{eqnarray*}\n";
 
-  tempEl2.MakeGEpsMinusEps(0,1,4);
+  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
   tempEl2.ComputeDebugString(false);
   out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1-\\varepsilon_2}= ";
   out <<tempEl2.DebugString;
   out <<"\n\\end{eqnarray*}\n";
-  tempEl3.MakeGMinusEpsMinusEps(0,1,4);
+  tempEl3.MakeGMinusEpsMinusEpsInTypeD(0,1,4);
   tempEl3.ComputeDebugString(false);
   out <<"\\begin{eqnarray*}&&\ng^{-\\varepsilon_1-\\varepsilon_2}= ";
   out <<tempEl3.DebugString;
@@ -319,9 +349,9 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   tempEl4.ComputeDebugString(false);
   out <<"\\begin{eqnarray*}&&\n[g^{\\varepsilon_1+\\varepsilon_2},g^{-\\varepsilon_1-\\varepsilon_2}]= ";
   out <<tempEl4.DebugString;
+
   out <<"\n\\end{eqnarray*}\n";
-
-
+*/
 
   out<<"\\end{document}";
   output=out.str();

@@ -20,6 +20,23 @@
 //
 // To whomever might be reading this (if anyone): happy hacking and I hope you find my code useful, that it didn't cause you many headaches, and that you
 // did something useful with it! Cheers!
+class WeylParser;
+class WeylParserNode
+{
+  public:
+  WeylParser* owner;
+  int indexParent;
+  ListBasicObjects<int> children;
+  void operator=(const WeylParserNode& other)
+  { this->owner=other.owner;
+    this->children.CopyFromBase(other.children);
+    this->indexParent=other.indexParent;
+  };
+};
+
+class WeylParser
+{
+};
 
 class ElementWeylAlgebra
 {
@@ -38,8 +55,14 @@ public:
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   void Nullify(int NumVars);
+  void TimesConstant(Rational& theConstant)
+  { this->StandardOrder.TimesConstant(theConstant);
+  };
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
+  void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
+  void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
+  void LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
   void Assign(const ElementWeylAlgebra& other)
   { this->StandardOrder.Assign(other.StandardOrder);
     this->NumVariables=other.NumVariables;
@@ -50,7 +73,24 @@ public:
   void MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
   ElementWeylAlgebra()
   { this->NumVariables=0; };
+  void operator=(const std::string& input);
+  bool IsLetter(char theLetter);
+  bool IsIndex(char theIndex);
+  bool IsNumber(char theNumber);
 };
+
+bool ElementWeylAlgebra::IsLetter(char theLetter)
+{
+  return false;
+}
+
+void ElementWeylAlgebra::operator=(const std::string& input)
+{ /*for (int i=0; i<input.size(); i++)
+  { std::ostream formatter;
+    if (input.at(i)=='x')
+
+  }*/
+}
 
 void ElementWeylAlgebra::MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables)
 { Monomial<Rational> buffer;
@@ -82,6 +122,28 @@ void ElementWeylAlgebra::MultiplyTwoMonomials( Monomial<Rational>& left, Monomia
   }
 }
 
+void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report)
+{ std::stringstream out;
+  this->ComputeDebugString(false, false);
+  standsOnTheLeft.ComputeDebugString(false, false);
+  out << "\\begin{eqnarray*}&&["<< standsOnTheLeft.DebugString<<" , "<< this->DebugString<< " ]= ";
+  this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
+  this->ComputeDebugString(false, false);
+  out << this->DebugString<<"\\end{eqnarray*}\n";
+  report=out.str();
+}
+
+void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report)
+{ std::stringstream out;
+  this->ComputeDebugString(false, false);
+  standsOnTheRight.ComputeDebugString(false, false);
+  out << "\\begin{eqnarray*}&&["<< this->DebugString<< " , "<<standsOnTheRight.DebugString<<" ]= ";
+  this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
+  this->ComputeDebugString(false, false);
+  out << this->DebugString<<"\\end{eqnarray*}\n";
+  report=out.str();
+}
+
 void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1.Assign(*this);
@@ -89,6 +151,19 @@ void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft
   //tempEl1.ComputeDebugString(false);
   tempEl2.Assign(standsOnTheLeft);
   tempEl2.MultiplyOnTheLeft(*this, theGlobalVariables);
+  //tempEl2.ComputeDebugString(false);
+  this->Assign(tempEl1);
+  this->Subtract(tempEl2);
+  //this->ComputeDebugString(false);
+}
+
+void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
+{ ElementWeylAlgebra tempEl1, tempEl2;
+  tempEl1.Assign(standsOnTheRight);
+  tempEl1.MultiplyOnTheLeft(*this, theGlobalVariables);
+  //tempEl1.ComputeDebugString(false);
+  tempEl2.Assign(*this);
+  tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
   //tempEl2.ComputeDebugString(false);
   this->Assign(tempEl1);
   this->Subtract(tempEl2);
@@ -112,8 +187,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<s
   std::string tempS;
   int numLettersSinceLastNewLine=0;
   if (useLatex && useBeginEqnArray)
-  { out << "\\begin{eqnarray*}&&";
-  }
+    out << "\\begin{eqnarray*}&&";
   for (int i=0; i<this->StandardOrder.size; i++)
   { this->StandardOrder.TheObjects[i].Coefficient.ElementToString(tempS);
     bool hasMinus=(tempS[0]=='-');
@@ -220,22 +294,32 @@ void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
 }
 
 void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
-{ this->Nullify(NumVars*2);
+{ this->Nullify(NumVars);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables, tempMon.Coefficient);
-  tempMon.degrees[i+NumVars]=1;
-  tempMon.degrees[j+NumVars]=1;
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i+NumVars]++;
+  tempMon.degrees[j+NumVars]++;
   this->StandardOrder.AddMonomial(tempMon);
 }
 
 void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
-{ this->Nullify(NumVars*2);
+{ this->Nullify(NumVars);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i]++;
+  tempMon.degrees[j]++;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
+{ this->Nullify(NumVars);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]=1;
-  tempMon.degrees[j]=1;
+  tempMon.degrees[NumVars+j]=1;
   this->StandardOrder.AddMonomial(tempMon);
 }
 
@@ -246,17 +330,45 @@ void ElementWeylAlgebra::Nullify(int NumVars)
 
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
+  std::string tempS;
   ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4, tempEl5, Accum;
   out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
   out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
   out <<"\\begin{document}";
-  theElement.Makexixj(0,1,4);
+  theElement="x_1+x_1";
+  tempEl1.Makexixj(0,1,4);
+  Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
-  theElement.LieBracketOnTheLeft(tempEl2, theGlobalVariables);
-  theElement.ComputeDebugString(false, false);
-  out <<"\n\\begin{eqnarray*}&&[\\partial_{x_i}\\partial_{x_j},x_ix_j]="<<theElement.DebugString<<"\n\\end{eqnarray*}";
-
-
+  tempEl2.TimesConstant(tempRat);
+  theElement.Assign(tempEl2);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl1, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.Assign(tempEl2);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl2, theGlobalVariables, tempS);
+  out << tempS;
+  tempEl3.Makexixj(0,0,4);
+  tempEl4.Makedidj(0,0,4);
+  tempEl4.TimesConstant(tempRat);
+  theElement.Assign(tempEl4);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
+  out <<tempS;
+  theElement.Assign(tempEl4);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl3, theGlobalVariables, tempS);
+  out <<tempS;
+  tempEl3.Makexidj(0,1,4);
+//  tempEl3.TimesConstant(tempRat);
+  tempEl4.Makexidj(1,0,4);
+  theElement.Assign(tempEl3);
+  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
+  out << tempS;
   /*tempEl1.MakeGEpsPlusEpsInTypeD(0,1, 4);
   tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
   tempEl3.MakeGEpsPlusEpsInTypeD(2,3, 4);

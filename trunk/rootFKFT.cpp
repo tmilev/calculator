@@ -7,6 +7,10 @@ int ::minimalRelationsProverStates::ProblemCounter=0;
 template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjectsActualSizeIncrement=800;
 extern ::IndicatorWindowVariables IndicatorWindowGlobalVariables;
 
+bool StopDebug()
+{ return true;
+}
+
 
 bool minimalRelationsProverState::SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl)
 { root tempRoot;
@@ -705,6 +709,9 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream &inputHeader, std::
 		this->TheObjects[i].CompleteChildStates.CopyFromBase(theCompleteChildStates.TheObjects[i]);
 		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
 		{ std::stringstream out3;
+      if (i+1==12361)
+      { StopDebug();
+      }
 			out3<< i+1<<" out of "<< this->size<< " states read from disk";
 			IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
 			IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;

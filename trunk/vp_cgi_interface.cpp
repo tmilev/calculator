@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=12";
 	//inputString ="textType=E&textRank=6&buttonGoRootSA=rootSA+diagrams";
 	//inputString ="SLtwos";
-
+//  inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -119,8 +119,7 @@ int main(int argc, char **argv)
   getPath(argv[0],inputPath);
   ComputationSetup theComputationSetup;
   theComputationSetup.flagDoCustomComputation=false;
-  int choice =::CGIspecificRoutines::ReadDataFromCGIinput
-    (inputString, theComputationSetup,inputPath);
+  int choice =::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup,inputPath);
   //std::cout<< "choice " <<choice <<"       ";
   std::string latexCommand1;
   std::string latexCommand2;    //std::cout<<inputString;
@@ -142,7 +141,7 @@ int main(int argc, char **argv)
       std::fstream pfFile;
       pfFileName=inputPath;
       pfFileName.append("partial_fraction.tex");
-      CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(pfFile,pfFileName,false,false);
+      CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(pfFile, pfFileName, false, true, false);
       pfFile<< theComputationSetup.thePartialFraction.DebugString;
       pfFile.close();
       latexCommand1.append("pdflatex -output-directory=");
@@ -153,12 +152,12 @@ int main(int argc, char **argv)
       //std::cout.flush();
       //std::cout<<"time for second report";
       if (theComputationSetup.flagComputingVectorPartitions)
-			{	CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
+			{ CGIspecificRoutines::MakeVPReportFromComputationSetup(theComputationSetup);
         std::string vpFileName;
         std::fstream vpFile;
         vpFileName=inputPath;
         vpFileName.append("vector_partition.tex");
-        CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(vpFile,vpFileName,false,false);
+        CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(vpFile, vpFileName, false, true, false);
         vpFile<< theComputationSetup.theOutput.DebugString;
         vpFile.close();
         latexCommand2.clear();
@@ -171,16 +170,11 @@ int main(int argc, char **argv)
       std::fstream chamberFile;
       chamberFileName=inputPath;
       chamberFileName.append("chambers.html");
-      CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(chamberFile,chamberFileName,false,false);
+      CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(chamberFile, chamberFileName, false, true, false);
       chamberFile<<"<HTML><BODY>"<< theComputationSetup.theChambers.DebugString<<"</BODY></HTML>";
       chamberFile.close();
-      if (  theComputationSetup.DisplayNumberChamberOfInterest==-1 &&
-            theComputationSetup.flagComputingVectorPartitions)
-        theComputationSetup.DisplayNumberChamberOfInterest=
-          theComputationSetup.theChambers.TheObjects
-            [theComputationSetup.theChambers.RootBelongsToChamberIndex
-               (theComputationSetup.IndicatorRoot,0)]
-                 ->DisplayNumber;
+      if (  theComputationSetup.DisplayNumberChamberOfInterest==-1 && theComputationSetup.flagComputingVectorPartitions)
+        theComputationSetup.DisplayNumberChamberOfInterest= theComputationSetup.theChambers.TheObjects[theComputationSetup.theChambers.RootBelongsToChamberIndex(theComputationSetup.IndicatorRoot,0)]->DisplayNumber;
         //std::cout <<"Run ok!";
     }
     else
@@ -197,8 +191,7 @@ int main(int argc, char **argv)
     std::cout<<"\tvar rootsArrayDim=" <<theComputationSetup.theChambers.AmbientDimension<<";\n";
     std::cout<< "\tvar rootsArray= new Array(" <<theComputationSetup.VPVectors.size << ");";
     for (int i=0;i<theComputationSetup.VPVectors.size;i++)
-    { std::cout	<< "\n\trootsArray["<<i<<"]= new Array("
-                << theComputationSetup.theChambers.AmbientDimension<<");\n";
+    { std::cout	<< "\n\trootsArray["<<i<<"]= new Array(" << theComputationSetup.theChambers.AmbientDimension<<");\n";
       //std::cout.flush();
       for (int j=0;j<theComputationSetup.theChambers.AmbientDimension;j++)
       { //std::cout.flush();
@@ -207,10 +200,8 @@ int main(int argc, char **argv)
       }
   //    std::cout.flush();
     }
-    std::cout	<< "\n\tgeneratePageFromDimAndNum("
-              << theComputationSetup.theChambers.AmbientDimension<<","
-              << theComputationSetup.VPVectors.size <<","<<-1<<","
-              << theComputationSetup.DisplayNumberChamberOfInterest<<");\n</script>\n";
+    std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<<","<< theComputationSetup.VPVectors.size <<","<<-1<<","
+                    << theComputationSetup.DisplayNumberChamberOfInterest<<");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
   } else if (choice==2)
   { if (theComputationSetup.WeylGroupIndex<9)
@@ -218,13 +209,11 @@ int main(int argc, char **argv)
 //      theComputationSetup.theRootSubalgebras.ComputeDebugString();
       //inputPath.append("../tmp/WeylHtml.html");
       std::stringstream outServerPath;
-      outServerPath<<"/tmp/"<< theComputationSetup.WeylGroupLetter
-                  <<theComputationSetup.WeylGroupIndex <<"/";
+      outServerPath<<"/tmp/"<< theComputationSetup.WeylGroupLetter<<theComputationSetup.WeylGroupIndex <<"/";
       std::string serverPath=outServerPath.str();
       std::stringstream outPhysicalPath;
       std::string PhysicalPath;
-      outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter
-                      << theComputationSetup.WeylGroupIndex <<"/";
+      outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/";
       PhysicalPath=outPhysicalPath.str();
       std::string MkDirCommand;
       std::stringstream outMkDirCommand;
@@ -235,33 +224,21 @@ int main(int argc, char **argv)
       std::stringstream tempOut;
       header="http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi?";
       header.append(inputString);
-      tempOut <<"Permanent link to this page: <br>\n"<<"<a href=\""
-              << header<<"\">"<<header<<"</a>\n<br>\n"
-              <<"Main page: <br>\n"
-              <<"<a href=\"http://vector-partition.jacobs-university.de"
-              <<"/cgi-bin/vector_partition_linux_cgi\">"
-              <<"http://vector-partition.jacobs-university.de"
-              <<"/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
+      tempOut <<"Permanent link to this page: <br>\n"<<"<a href=\"" << header<<"\">"<<header<<"</a>\n<br>\n" <<"Main page: <br>\n" <<"<a href=\"http://vector-partition.jacobs-university.de"
+                      <<"/cgi-bin/vector_partition_linux_cgi\">" <<"http://vector-partition.jacobs-university.de" <<"/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
       header=tempOut.str();
-      theComputationSetup.theRootSubalgebras.ElementToHtml
-        ( header,PhysicalPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
-      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; "
-                << "url="<<serverPath<< "rootHtml.html\"> <BODY>"
-                << serverPath <<"<br> input string: <br>\n"
-                << inputString << "<br>"<<PhysicalPath;
+      theComputationSetup.theRootSubalgebras.ElementToHtml( header,PhysicalPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
+      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; " << "url="<<serverPath<< "rootHtml.html\"> <BODY>"
+                      << serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<PhysicalPath;
     }
   } else if (choice==3)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n"
-              <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n"
-              << "Dimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n"
-              << "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n"
-              << "</FORM>\n";
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n" <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n"
+              << "Dimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n"<< "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n"<< "</FORM>\n";
   } else if (choice==4)
   { std::cout <<"Choice 4 taken!";
 		SltwoSubalgebras tempSAs;
 		tempSAs.Compute(*theComputationSetup.theGlobalVariablesContainer->Default(),true);
-		tempSAs.ComputeDebugString
-			( *theComputationSetup.theGlobalVariablesContainer->Default(), tempSAs.theWeylGroup, false, false);
+		tempSAs.ComputeDebugString( *theComputationSetup.theGlobalVariablesContainer->Default(), tempSAs.theWeylGroup, false, false);
 		std::cout <<"\n<br>\n"<<tempSAs.DebugString;
   }
   std::cout<<"</BODY>\n</HTML>";

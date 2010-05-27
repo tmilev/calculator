@@ -12066,10 +12066,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra(	roots& generators, ListBasicObjec
   }
   basisChange.Resize(0,0,true);
   for (int i=0;i<tempDyn.SimpleBasesConnectedComponents.size;i++)
-  { this->GetEpsilonMatrix
-      ( tempDyn.DynkinTypeStrings.TheObjects[i].at(1),
-        tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size,
-        theGlobalVariables,tempMat);
+  { this->GetEpsilonMatrix( tempDyn.DynkinTypeStrings.TheObjects[i].at(1), tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size, theGlobalVariables,tempMat);
     basisChange.DirectSumWith(tempMat);
     //basisChange.ComputeDebugString();
   }
@@ -12100,12 +12097,12 @@ void WeylGroup::GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBas
 }
 
 void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output)
-{	//longer root has always smaller index
+{ //longer root has always smaller index
 	if (WeylLetter=='A')
 	{ output.init(WeylRank+1,WeylRank);
 		output.NullifyAll();
 		for (int i=0;i<WeylRank;i++)
-		{	output.elements[i][i]=1;
+		{ output.elements[i][i]=1;
 			output.elements[i+1][i]=-1;
 		}
 		output.elements[WeylRank][WeylRank-1]=-1;
@@ -12136,7 +12133,7 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
 		output.init(WeylRank,WeylRank);
 		output.NullifyAll();
 		for (int i=0;i<WeylRank-2;i++)
-		{	output.elements[i][WeylRank-3-i]=1;
+		{ output.elements[i][WeylRank-3-i]=1;
 			if (i!=0)
 				output.elements[i][WeylRank-2-i]=-1;
 		//	output.ComputeDebugString();
@@ -12264,6 +12261,17 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
     output.elements[3][1]=-1;
     output.elements[3][2]=1;
     output.elements[3][3]=RMHalf;
+	}
+	if (WeylLetter=='G')
+	{ // longer roots have smaller indices
+	  output.init(3,2);
+    output.NullifyAll();
+    output.elements[0][0]=1;
+    output.elements[1][0]=-1;
+
+    output.elements[0][1]=-1; output.elements[0][1].DivideByInteger(3);
+    output.elements[1][1]=2; output.elements[1][1].DivideByInteger(3);
+    output.elements[2][1]=-1; output.elements[2][1].DivideByInteger(3);
 	}
 }
 

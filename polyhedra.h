@@ -6256,8 +6256,6 @@ public:
 
 void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
-
-
 //extern GlobalVariablesContainer StaticGlobalVariablesContainer;
 
 //to be merged in later.

@@ -1075,7 +1075,7 @@ void guiMainWindow::updateInputButtons()
 }
 
 void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
-{	if (this->theComputationSetup.flagUsingCustomVectors)
+{ if (this->theComputationSetup.flagUsingCustomVectors)
 		return;
   std::string tempS;
   unsigned char newWeylGroupIndex=0;
@@ -1137,9 +1137,9 @@ void guiMainWindow::WriteIndicatorWeight(root& tempRoot)
 
 
 void guiMainWindow::initWeylGroupInfo()
-{	if (!this->theComputationSetup.flagUsingCustomVectors)
-  {	if (!this->theComputationSetup.flagDoCustomNilradical)
-		{	WeylGroup tempW;
+{ if (!this->theComputationSetup.flagUsingCustomVectors)
+  { if (!this->theComputationSetup.flagDoCustomNilradical)
+		{ WeylGroup tempW;
 			tempW.MakeArbitrary(this->theComputationSetup.WeylGroupLetter,this->theComputationSetup.WeylGroupIndex);
 			tempW.ComputeRho(true);
 			this->theComputationSetup.VPVectors.CopyFromBase(tempW.RootsOfBorel);

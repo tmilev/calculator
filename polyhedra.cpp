@@ -71,6 +71,11 @@ void GlobalVariables::operator =(const GlobalVariables &G_V)
 	this->matTransposeBuffer.Assign(G_V.matTransposeBuffer);
 }
 
+bool Stop()
+{ return true;
+}
+
+
 int ParallelComputing::GlobalPointerCounter=0;
 Integer Integer::TheRingUnit  (1) ;
 Integer Integer::TheRingMUnit (-1);
@@ -278,21 +283,17 @@ pthread_mutex_t ParallelComputing::mutex1;
 pthread_cond_t ParallelComputing::continueCondition;
 #endif
 
-bool Stop()
-{	return true;
-}
-
 void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
-{	if (index==rank-1)
-	{	this->MakeStartingChambers(directions, theIndicatorRoot, theGlobalVariables);
+{ if (index==rank-1)
+	{ this->MakeStartingChambers(directions, theIndicatorRoot, theGlobalVariables);
 		index++;
 		this->ComputeNextIndexToSlice(directions.TheObjects[index]);
 	}
 	else
-	{	if (index<directions.size)
-		{	if(this->indexNextChamberToSlice!=-1)
-			{	if (this->TheObjects[this->indexNextChamberToSlice]->SliceInDirection(directions.TheObjects[index],directions,index,*this, this->theHyperplanes, theGlobalVariables))
-				{	delete this->TheObjects[this->indexNextChamberToSlice];
+	{ if (index<directions.size)
+		{ if(this->indexNextChamberToSlice!=-1)
+			{ if (this->TheObjects[this->indexNextChamberToSlice]->SliceInDirection(directions.TheObjects[index],directions,index,*this, this->theHyperplanes, theGlobalVariables))
+				{ delete this->TheObjects[this->indexNextChamberToSlice];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
@@ -305,7 +306,7 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
 				}
 			}
 			else
-			{	this->PreferredNextChambers.size=0;
+			{ this->PreferredNextChambers.size=0;
 				this->PurgeZeroPointers();
 				index++;
 				this->LabelAllUnexplored();

@@ -135,7 +135,7 @@ bool minimalRelationsProverState::CanBeShortened
 }
 
 bool minimalRelationsProverStateFixedK::CanBeShortened
-  (	coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
+  ( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 {	//selAlphas.ComputeDebugString();
 	//selBetas.ComputeDebugString();
 	if (selBetas.CardinalitySelectionWithMultiplicities()==0 && selAlphas.CardinalitySelectionWithMultiplicities()==0)
@@ -152,8 +152,7 @@ bool minimalRelationsProverStateFixedK::CanBeShortened
 		tempRoot.MultiplyByInteger(selAlphas.Multiplicities.TheObjects[selAlphas.elements.TheObjects[i]]);
 		Candidate.Add(tempRoot);
   }
-  bool bothSelsAreMaximal =
-    ( selBetas.CardinalitySelectionWithoutMultiplicities() == theRelation.Betas.size ) && ( selAlphas.CardinalitySelectionWithoutMultiplicities()== theRelation.Alphas.size) ;
+  bool bothSelsAreMaximal = ( selBetas.CardinalitySelectionWithoutMultiplicities() == theRelation.Betas.size ) && ( selAlphas.CardinalitySelectionWithoutMultiplicities()== theRelation.Alphas.size) ;
   bool bothSelsHaveZeroesAndOnes= selBetas.HasMultiplicitiesZeroAndOneOnly() && selAlphas.HasMultiplicitiesZeroAndOneOnly();
   if (Candidate.IsEqualToZero())
   { if (	bothSelsAreMaximal && selBetas.CardinalitySelectionWithMultiplicities()!=0)
@@ -243,8 +242,7 @@ bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOne
   roots posAlphas, posBetas, theCertainNilradicalRoots, theCertainGmodLhighestRoots;
   theState.GetPossibleAlphasAndBetas(posAlphas, posBetas, theWeyl);
   theState.GetCertainGmodLhighestAndNilradicalRoots(theCertainGmodLhighestRoots, theCertainNilradicalRoots, theWeyl);
-  if(!this->GetNormalSeparatingConesFromPreferredBasis
-        (index, theState.theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
+  if(!this->GetNormalSeparatingConesFromPreferredBasis(index, theState.theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
 	//	if(!this->GetNormalSeparatingConesFromPreferredBasis
 	//			(index, this->theK.SimpleBasisCentralizerRoots, outputNormal, theWeyl, TheGlobalVariables, result))
 //		if(!this->GetNormalSeparatingConesFromPreferredBasis
@@ -269,8 +267,7 @@ bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOne
 	return result;
 }
 
-bool minimalRelationsProverState::StateAllowsPositiveKChoice
-  (root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+bool minimalRelationsProverState::StateAllowsPositiveKChoice  (root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 { if ( this->nonPositiveKRoots.ContainsObject(theCandidate) ||  !theWeyl.IsARoot(theCandidate+theNonSingularRoot))
     return  false;
   assert(! this->PositiveKroots.ContainsObject(theCandidate) );
@@ -358,16 +355,16 @@ void minimalRelationsProverStates::PurgeImpossibleStates()
 
 void minimalRelationsProverStates::ReduceMemoryUse(GlobalVariables& theGlobalVariables)
 { if (false)
-    for (int i=0; i<this->size; i++)
-    { this->TheObjects[i].ReduceMemoryUse();
-      if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-      { std::stringstream out;
-        out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
-        IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
-        IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-        theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-      }
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ReduceMemoryUse();
+    if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+    { std::stringstream out;
+      out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
+      IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
+      IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
+      theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
     }
+  }
   this->NumFullyComputed=0;
 }
 
@@ -503,8 +500,7 @@ void minimalRelationsProverStatesFixedK::RecursionStepFixedK (WeylGroup& theWeyl
 }
 
 
-void minimalRelationsProverStates::TestAddingExtraRoot
-	( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
+void minimalRelationsProverStates::TestAddingExtraRoot( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
 { minimalRelationsProverState newState;
   bool tempBool;
   Rational tempRat=theWeyl.RootScalarKillingFormMatrixRoot(theRoot, normalSeparatingCones);
@@ -533,8 +529,7 @@ void minimalRelationsProverStates::TestAddingExtraRoot
   }
 }
 
-void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK
-	( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
+void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
 { minimalRelationsProverStateFixedK newState;
   bool tempBool;
   int indexModule= this->theK.GetIndexKmoduleContainingRoot(theRoot);
@@ -638,8 +633,7 @@ bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet
 	return false;
 }
 
-bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis
-  ( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
+bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
 { minimalRelationsProverState& theRel=this->TheObjects[theIndex];
   roots& theAlphas = theRel.PartialRelation.Alphas;
   roots& theBetas = theRel.PartialRelation.Betas;
@@ -660,8 +654,7 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis
   return result;
 }
 
-bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBasis
-  ( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
+bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
 { minimalRelationsProverStateFixedK& theRel=this->TheObjects[theIndex];
   roots& theAlphas = theRel.PartialRelation.Alphas;
   roots& theBetas = theRel.PartialRelation.Betas;
@@ -673,8 +666,7 @@ bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBa
     output.Assign(rootCandidate);
     result=true;
   }
-  if(  minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet
-      ( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
+  if(  minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
 		if (!(result && firstChoiceSeparated1<firstChoiceSeparated2))
     { result=true;
       oneBetaIsPositive=true;

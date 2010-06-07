@@ -866,7 +866,7 @@ void guiMainWindow::RunTheComputation()
       MainWindow1->Button1Go->SetLabel(wxT("Pause"));
       MainWindow1->WorkThread1.isRunning=true;
 #ifdef WIN32
-      ::ResumeThread(MainWindow1->WorkThread1.ComputationalThread);
+      ResumeThread(MainWindow1->WorkThread1.ComputationalThread);
 #else
       pthread_cond_signal(&ParallelComputing::continueCondition);
 #endif
@@ -885,7 +885,7 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
   this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
   this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
   this->theComputationSetup.theRootSubalgebras.flagUsingONLYActionsNormalizerCentralizerNilradical=false;
-  this->theComputationSetup.WeylGroupIndex=7;
+  this->theComputationSetup.WeylGroupIndex=6;
   this->theComputationSetup.WeylGroupLetter='E';
   this->RunTheComputation();
 }

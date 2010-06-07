@@ -20,23 +20,7 @@
 //
 // To whomever might be reading this (if anyone): happy hacking and I hope you find my code useful, that it didn't cause you many headaches, and that you
 // did something useful with it! Cheers!
-class WeylParser;
-class WeylParserNode
-{
-  public:
-  WeylParser* owner;
-  int indexParent;
-  ListBasicObjects<int> children;
-  void operator=(const WeylParserNode& other)
-  { this->owner=other.owner;
-    this->children.CopyFromBase(other.children);
-    this->indexParent=other.indexParent;
-  };
-};
 
-class WeylParser
-{
-};
 
 class ElementWeylAlgebra
 {
@@ -52,6 +36,7 @@ public:
   void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
   void MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
   void Makexixj(int i, int j, int NumVars);
+  void Makexi(int i, int NumVars);
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   void Nullify(int NumVars);
@@ -77,6 +62,41 @@ public:
   bool IsLetter(char theLetter);
   bool IsIndex(char theIndex);
   bool IsNumber(char theNumber);
+};
+
+class WeylParser;
+class WeylParserNode
+{
+  public:
+  WeylParser* owner;
+  int indexParent;
+  ListBasicObjects<int> children;
+  ElementWeylAlgebra Value;
+  void operator=(const WeylParserNode& other)
+  { this->owner=other.owner;
+    this->children.CopyFromBase(other.children);
+    this->indexParent=other.indexParent;
+  };
+};
+
+//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
+class WeylParser: public ListBasicObjects<WeylParserNode>
+{
+  public:
+  enum tokenTypes
+  { tokenExpression, tokenEmpty, tokenDigit, tokenPlus, tokenMinus, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenX, tokenPartialDerivative
+  };
+  ListBasicObjects<int> TokenBuffer;
+  ListBasicObjects<int> ValueBuffer;
+  ListBasicObjects<int> TokenStack;
+  ListBasicObjects<int> ValueStack;
+
+  void ParserInit(const std::string& input);
+  void Parse(const std::string& input);
+  void ApplyRules(int lookAheadToken);
+  void AddLetterOnTop(int index);
+  void DecreaseStackSetExpressionLastNode(int Decrease);
 };
 
 bool ElementWeylAlgebra::IsLetter(char theLetter)
@@ -313,6 +333,15 @@ void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
   this->StandardOrder.AddMonomial(tempMon);
 }
 
+void ElementWeylAlgebra::Makexi(int i, int NumVars)
+{ this->Nullify(NumVars);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i]++;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
 void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
 { this->Nullify(NumVars);
   Monomial<Rational> tempMon;
@@ -336,6 +365,8 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
   out <<"\\begin{document}";
   theElement="x_1+x_1";
+  WeylParser theParser;
+  theParser.Parse("x_1+x_1");
   tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
@@ -467,4 +498,80 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
 
   out<<"\\end{document}";
   output=out.str();
+}
+
+
+void WeylParser::ParserInit(const std::string& input)
+{ this->TokenStack.MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->TokenStack.size=0;
+  this->ValueStack.size=0;
+  this->size=0;
+  for (int i=0; i<(signed) input.size(); i++)
+  { switch (input.at(i))
+    { case '0': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(0); break;
+      case '1': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(1); break;
+      case '2': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(2); break;
+      case '3': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(3); break;
+      case '4': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(4); break;
+      case '5': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(5); break;
+      case '6': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(6); break;
+      case '7': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(7); break;
+      case '8': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(8); break;
+      case '9': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(9); break;
+      case '[': this->TokenStack.AddObjectOnTop(WeylParser::tokenOpenLieBracket); this->ValueStack.AddObjectOnTop(0); break;
+      case ']': this->TokenStack.AddObjectOnTop(WeylParser::tokenCloseLieBracket); this->ValueStack.AddObjectOnTop(0); break;
+      case '(': this->TokenStack.AddObjectOnTop(WeylParser::tokenOpenBracket); this->ValueStack.AddObjectOnTop(0); break;
+      case ')': this->TokenStack.AddObjectOnTop(WeylParser::tokenCloseBracket); this->ValueStack.AddObjectOnTop(0); break;
+      case '^': this->TokenStack.AddObjectOnTop(WeylParser::tokenPower); this->ValueStack.AddObjectOnTop(0); break;
+      case '+': this->TokenStack.AddObjectOnTop(WeylParser::tokenPlus); this->ValueStack.AddObjectOnTop(0); break;
+      case '-': this->TokenStack.AddObjectOnTop(WeylParser::tokenMinus); this->ValueStack.AddObjectOnTop(0); break;
+      case '_': this->TokenStack.AddObjectOnTop(WeylParser::tokenUnderscore); this->ValueStack.AddObjectOnTop(0); break;
+      case '/': this->TokenStack.AddObjectOnTop(WeylParser::tokenDivide); this->ValueStack.AddObjectOnTop(0); break;
+      case 'x': this->TokenStack.AddObjectOnTop(WeylParser::tokenX); this->ValueStack.AddObjectOnTop(0); break;
+      case 'd': this->TokenStack.AddObjectOnTop(WeylParser::tokenPartialDerivative); this->ValueStack.AddObjectOnTop(0); break;
+    }
+  }
+}
+
+void WeylParser::Parse(const std::string& input)
+{ this->ParserInit(input);
+  this->ValueStack.size=0;
+  this->TokenStack.size=0;
+  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(this->ValueBuffer.size);
+  this->TokenStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
+  for (int i=0;i<5;i++)
+    this->TokenStack.AddObjectOnTop(this->tokenEmpty);
+  for (int i=0; i<this->size; i++)
+  { this->ValueStack.AddObjectOnTop(this->ValueBuffer.TheObjects[i]);
+    this->TokenStack.AddObjectOnTop(this->TokenBuffer.TheObjects[i]);
+    int lookAheadToken=this->tokenEmpty;
+    if (i<this->size-1)
+      lookAheadToken=this->TokenBuffer.TheObjects[i+1];
+    this->ApplyRules(lookAheadToken);
+  }
+}
+
+void WeylParser::ApplyRules(int lookAheadToken)
+{ if (this->TokenStack.size<2)
+    return;
+  int IndexLast=this->TokenStack.size-1;
+  if (this->TokenStack.TheObjects[IndexLast-1]==this->tokenUnderscore && this->TokenStack.TheObjects[IndexLast]==this->tokenDigit && this->TokenStack.TheObjects[IndexLast-2]==this->tokenX)
+  { this->AddLetterOnTop(this->ValueStack.TheObjects[IndexLast]);
+    this->DecreaseStackSetExpressionLastNode(2);
+    return;
+  }
+}
+
+void WeylParser::DecreaseStackSetExpressionLastNode(int Decrease)
+{ this->TokenStack.size-=Decrease;
+  this->ValueStack.size-=Decrease;
+  *this->TokenStack.LastObject()=this->tokenExpression;
+  *this->ValueStack.LastObject()=this->size-1;
+}
+
+void WeylParser::AddLetterOnTop(int index)
+{ this->SetSizeExpandOnTopNoObjectInit(this->size+1);
+  this->LastObject()->Value.Makexi(index, index+1);
 }

@@ -39,7 +39,6 @@
 #define polyhedra_h_already_included
 #include <assert.h>
 #include <sstream>
-//#include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>

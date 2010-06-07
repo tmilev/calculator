@@ -55,6 +55,9 @@ public:
   void Subtract(ElementWeylAlgebra& other)
   { this->StandardOrder.Subtract(other.StandardOrder);
   };
+  void Add(ElementWeylAlgebra& other)
+  { this->StandardOrder.AddPolynomial(other.StandardOrder);
+  };
   void MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
   ElementWeylAlgebra()
   { this->NumVariables=0; };
@@ -72,11 +75,14 @@ class WeylParserNode
   int indexParent;
   ListBasicObjects<int> children;
   ElementWeylAlgebra Value;
+  int Operation; //using tokenTypes from class WeylParser
   void operator=(const WeylParserNode& other)
   { this->owner=other.owner;
     this->children.CopyFromBase(other.children);
     this->indexParent=other.indexParent;
   };
+  void Evaluate();
+  WeylParserNode();
 };
 
 //the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
@@ -91,12 +97,22 @@ class WeylParser: public ListBasicObjects<WeylParserNode>
   ListBasicObjects<int> ValueBuffer;
   ListBasicObjects<int> TokenStack;
   ListBasicObjects<int> ValueStack;
-
+  int numEmptyTokensAtBeginning;
+  ElementWeylAlgebra Value;
   void ParserInit(const std::string& input);
+  void Evaluate();
   void Parse(const std::string& input);
-  void ApplyRules(int lookAheadToken);
+  void ParseAndCompute(const std::string& input, std::string& output);
+  bool ApplyRules(int lookAheadToken);
+  bool lookAheadTokenProhibitsPlus(int theToken);
   void AddLetterOnTop(int index);
+  void Own(int indexParent, int indexChild1, int indexChild2);
+  void ExtendOnTop(int numNew);
+  void AddPlusOnTop();
   void DecreaseStackSetExpressionLastNode(int Decrease);
+  WeylParser()
+  { this->numEmptyTokensAtBeginning=5;
+  };
 };
 
 bool ElementWeylAlgebra::IsLetter(char theLetter)
@@ -366,8 +382,9 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out <<"\\begin{document}";
   theElement="x_1+x_1";
   WeylParser theParser;
-  theParser.Parse("x_1+x_1");
-  tempEl1.Makexixj(0,1,4);
+  theParser.ParseAndCompute("x_1+x_1", tempS);
+  out << tempS;
+/*  tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
   tempEl2.TimesConstant(tempRat);
@@ -399,7 +416,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   tempEl4.Makexidj(1,0,4);
   theElement.Assign(tempEl3);
   theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
-  out << tempS;
+  out << tempS;*/
   /*tempEl1.MakeGEpsPlusEpsInTypeD(0,1, 4);
   tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
   tempEl3.MakeGEpsPlusEpsInTypeD(2,3, 4);
@@ -541,7 +558,7 @@ void WeylParser::Parse(const std::string& input)
   this->TokenStack.size=0;
   this->ValueStack.MakeActualSizeAtLeastExpandOnTop(this->ValueBuffer.size);
   this->TokenStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
-  for (int i=0;i<5;i++)
+  for (int i=0; i<this->numEmptyTokensAtBeginning; i++)
     this->TokenStack.AddObjectOnTop(this->tokenEmpty);
   for (int i=0; i<this->size; i++)
   { this->ValueStack.AddObjectOnTop(this->ValueBuffer.TheObjects[i]);
@@ -549,19 +566,36 @@ void WeylParser::Parse(const std::string& input)
     int lookAheadToken=this->tokenEmpty;
     if (i<this->size-1)
       lookAheadToken=this->TokenBuffer.TheObjects[i+1];
-    this->ApplyRules(lookAheadToken);
+    while(this->ApplyRules(lookAheadToken)){}
   }
 }
 
-void WeylParser::ApplyRules(int lookAheadToken)
+bool WeylParser::lookAheadTokenProhibitsPlus(int theToken)
+{ if (theToken==this->tokenPlus)
+    return true;
+  if (theToken==this->tokenCloseBracket)
+    return true;
+  if (theToken==this->tokenCloseLieBracket)
+    return true;
+  if (theToken==this->tokenEmpty)
+    return true;
+  return false;
+}
+
+bool WeylParser::ApplyRules(int lookAheadToken)
 { if (this->TokenStack.size<2)
-    return;
+    return false;
   int IndexLast=this->TokenStack.size-1;
   if (this->TokenStack.TheObjects[IndexLast-1]==this->tokenUnderscore && this->TokenStack.TheObjects[IndexLast]==this->tokenDigit && this->TokenStack.TheObjects[IndexLast-2]==this->tokenX)
   { this->AddLetterOnTop(this->ValueStack.TheObjects[IndexLast]);
-    this->DecreaseStackSetExpressionLastNode(2);
-    return;
+    return true;
   }
+  if ( this->TokenStack.TheObjects[IndexLast-1]==this->tokenPlus && this->TokenStack.TheObjects[IndexLast]==this->tokenExpression &&
+        this->TokenStack.TheObjects[IndexLast-2]==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
+  { this->AddPlusOnTop();
+    return true;
+  }
+  return false;
 }
 
 void WeylParser::DecreaseStackSetExpressionLastNode(int Decrease)
@@ -572,6 +606,64 @@ void WeylParser::DecreaseStackSetExpressionLastNode(int Decrease)
 }
 
 void WeylParser::AddLetterOnTop(int index)
-{ this->SetSizeExpandOnTopNoObjectInit(this->size+1);
+{ this->ExtendOnTop(1);
   this->LastObject()->Value.Makexi(index, index+1);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void WeylParser::AddPlusOnTop()
+{ this->ExtendOnTop(1);
+  WeylParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenPlus;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3],this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void WeylParser::ParseAndCompute(const std::string& input, std::string& output)
+{ std::stringstream out; std::string tempS;
+  this->Parse(input);
+  out <<"\\begin{eqnarray*}&&" << input<<" = \\\\\n";
+  this->Evaluate();
+  this->Value.ElementToString(tempS, false, true, true);
+  out <<tempS;
+  out <<"\\end{eqnarray*}";
+  output=out.str();
+}
+
+void WeylParser::Own(int indexParent, int indexChild1, int indexChild2)
+{ WeylParserNode* theNode= & this->TheObjects[indexParent];
+  theNode->children.SetSizeExpandOnTopNoObjectInit(2);
+  theNode->children.TheObjects[0]=indexChild1;
+  theNode->children.TheObjects[1]=indexChild2;
+  this->TheObjects[indexChild1].indexParent= indexParent;
+  this->TheObjects[indexChild2].indexParent= indexParent;
+}
+
+void WeylParser::Evaluate()
+{ if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
+  { WeylParserNode* theNode=&this->TheObjects[this->TokenStack.TheObjects[this->numEmptyTokensAtBeginning]];
+    theNode->Evaluate();
+    this->Value.Assign(theNode->Value);
+  }
+}
+
+void WeylParser::ExtendOnTop(int numNew)
+{ this->SetSizeExpandOnTopNoObjectInit(this->size+numNew);
+  for (int i=0; i<numNew; i++)
+  { this->TheObjects[this->size-i].owner=this;
+  }
+}
+
+void WeylParserNode::Evaluate()
+{ if (this->Operation==WeylParser::tokenPlus)
+  { this->Value.Nullify(4);
+    for (int i=0; i<this->children.size; i++)
+    { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate();
+      this->Value.Add(this->owner->TheObjects[this->children.TheObjects[i]].Value);
+    }
+  }
+}
+
+WeylParserNode::WeylParserNode()
+{ this->Operation= WeylParser::tokenEmpty;
 }

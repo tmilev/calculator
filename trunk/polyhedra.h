@@ -1509,14 +1509,12 @@ public:
 	bool MakeAffineProjectionFromNormal(affineHyperplane& output);
 	//the below returns false
 	bool ProjectToAffineSpace(root& output);
-	bool HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas, roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs);
+	bool HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas, roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs, bool IntegralCoefficientsOnly);
 	void DivByLargeRational(const Rational& a);
 	void GetHeight(Rational& output);
 	Rational GetHeight();
 	void ElementToString(std::string& output);
-	std::string ElementToString()
-	{ std::string tempS; this->ElementToString(tempS); return tempS;
-  };
+	std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; };
 	void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output, bool useLaTeX);
 	bool CheckForElementSanity();

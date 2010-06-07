@@ -2022,7 +2022,7 @@ void root::DivByLargeRational(const Rational& a)
 		this->TheObjects[i].DivideBy(a);
 }
 
-bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,	roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs)
+bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,	roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs, bool IntegralCoefficientsOnly)
 { if ( UpperBoundNumBetas>0 && output.size>UpperBoundNumBetas)
     return false;
   if (this->IsEqualToZero())
@@ -2046,25 +2046,27 @@ bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,	root
 	Rational tempRat, tempRat2;
 	for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
 	{ root& currentRoot = theSet.TheObjects[indexFirstNonZeroRoot];
-		theWeylGroup.RootScalarKillingFormMatrixRoot(*this,currentRoot,tempRat);
+		theWeylGroup.RootScalarKillingFormMatrixRoot(*this, currentRoot, tempRat);
 		if (tempRat.IsPositive())
-    { theNewSet.size=0;
-			for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
-        if (currentRoot.IsStronglyPerpendicularTo(theSet.TheObjects[i],theWeylGroup))
-					theNewSet.AddRoot(theSet.TheObjects[i]);
-			tempRoot.Assign(currentRoot);
-			tempRoot.MinusRoot();
-			tempRoot.MultiplyByLargeRational(tempRat);
-			outputCoeffs.AddObjectOnTop(tempRat);
-			theWeylGroup.RootScalarKillingFormMatrixRoot(currentRoot,currentRoot,tempRat);
-			tempRoot.DivByLargeRational(tempRat);
-			tempRoot.Add(*this);
-			outputCoeffs.LastObject()->DivideBy(tempRat);
-			output.AddRoot(currentRoot);
-			if (tempRoot.HasStronglyPerpendicularDecompositionWRT(UpperBoundNumBetas, theNewSet, theWeylGroup, output, outputCoeffs))
-				return true;
-			output.size--;
-			outputCoeffs.size--;
+    { if (!IntegralCoefficientsOnly || tempRat.DenShort==1)
+       { theNewSet.size=0;
+        for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
+          if (currentRoot.IsStronglyPerpendicularTo(theSet.TheObjects[i], theWeylGroup))
+            theNewSet.AddRoot(theSet.TheObjects[i]);
+        tempRoot.Assign(currentRoot);
+        tempRoot.MinusRoot();
+        tempRoot.MultiplyByLargeRational(tempRat);
+        outputCoeffs.AddObjectOnTop(tempRat);
+        theWeylGroup.RootScalarKillingFormMatrixRoot(currentRoot, currentRoot, tempRat);
+        tempRoot.DivByLargeRational(tempRat);
+        tempRoot.Add(*this);
+        outputCoeffs.LastObject()->DivideBy(tempRat);
+        output.AddRoot(currentRoot);
+        if (tempRoot.HasStronglyPerpendicularDecompositionWRT(UpperBoundNumBetas, theNewSet, theWeylGroup, output, outputCoeffs, IntegralCoefficientsOnly))
+          return true;
+        output.size--;
+        outputCoeffs.size--;
+       }
 		}
 	}
 	return false;
@@ -14615,7 +14617,7 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, roots& nilradi
 							theRel.BetaCoeffs.TheObjects[0].MakeOne();
 							theRel.Betas.TheObjects[0].Assign(nilradicalRoots.TheObjects[tempI]);
 						} else
-							tempBool=	tempRoot.HasStronglyPerpendicularDecompositionWRT(-1, nilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs);
+							tempBool=	tempRoot.HasStronglyPerpendicularDecompositionWRT(-1, nilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs, true);
 						if (tempBool)
 						{	theRel.Alphas.size=0;
 							theRel.AlphaCoeffs.size=0;
@@ -14733,7 +14735,7 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(	coneRelation& theRel, r
 			}
 			theRel.Betas.size=0; theRel.BetaCoeffs.size=0;
 			if (!Accum.IsEqualToZero())
-				if (Accum.HasStronglyPerpendicularDecompositionWRT(-1, NilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs))
+				if (Accum.HasStronglyPerpendicularDecompositionWRT(-1, NilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs, true))
 				{ int startNumBetas=theRel.Betas.size;
           //int numAlphas=tempSel.CardinalitySelectionWithoutMultiplicities();
 				  //int numParticipatingRoots=numAlphas+startNumBetas;
@@ -14747,7 +14749,7 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(	coneRelation& theRel, r
           { int goalNumBetas= 2;
             theRel.Betas.size=0; theRel.BetaCoeffs.size=0;
             for (int l=goalNumBetas-1; l<startNumBetas; l++)
-              if (Accum.HasStronglyPerpendicularDecompositionWRT(l+1, NilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs))
+              if (Accum.HasStronglyPerpendicularDecompositionWRT(l+1, NilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs, true))
                 break;
           }
 				  theRel.Alphas.SetSizeExpandOnTopNoObjectInit(tempSel.CardinalitySelectionWithoutMultiplicities());

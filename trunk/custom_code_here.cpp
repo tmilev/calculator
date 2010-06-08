@@ -89,6 +89,9 @@ class WeylParserNode
 class WeylParser: public ListBasicObjects<WeylParserNode>
 {
   public:
+  std::string DebugString;
+  void ComputeDebugString(){this->ElementToString(DebugString);};
+  void ElementToString(std::string& output);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenDigit, tokenPlus, tokenMinus, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenX, tokenPartialDerivative
@@ -102,6 +105,7 @@ class WeylParser: public ListBasicObjects<WeylParserNode>
   void ParserInit(const std::string& input);
   void Evaluate();
   void Parse(const std::string& input);
+  void ParseNoInit(int indexFrom, int indexTo);
   void ParseAndCompute(const std::string& input, std::string& output);
   bool ApplyRules(int lookAheadToken);
   bool lookAheadTokenProhibitsPlus(int theToken);
@@ -373,6 +377,9 @@ void ElementWeylAlgebra::Nullify(int NumVars)
   this->StandardOrder.Nullify ((short)this->NumVariables*2);
 }
 
+int DebugCounter=-1;
+WeylParser debugParser;
+
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
@@ -380,10 +387,20 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
   out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
   out <<"\\begin{document}";
-  theElement="x_1+x_1";
-  WeylParser theParser;
-  theParser.ParseAndCompute("x_1+x_1", tempS);
-  out << tempS;
+/*  WeylParser theParser;
+  theParser.ParseAndCompute("x_1+x_1", tempS);*/
+  if (DebugCounter==-1)
+    debugParser.ParserInit("x_1+x_1");
+  else
+    debugParser.ParseNoInit(DebugCounter, DebugCounter);
+  DebugCounter++;
+  debugParser.ComputeDebugString();
+  out << debugParser.DebugString;
+  out << "\n";
+  if (DebugCounter> debugParser.TokenBuffer.size)
+    debugParser.Evaluate();
+  debugParser.Value.ComputeDebugString(false,false);
+  out << debugParser.Value.DebugString;
 /*  tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
@@ -527,46 +544,56 @@ void WeylParser::ParserInit(const std::string& input)
   this->size=0;
   for (int i=0; i<(signed) input.size(); i++)
   { switch (input.at(i))
-    { case '0': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(0); break;
-      case '1': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(1); break;
-      case '2': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(2); break;
-      case '3': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(3); break;
-      case '4': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(4); break;
-      case '5': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(5); break;
-      case '6': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(6); break;
-      case '7': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(7); break;
-      case '8': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(8); break;
-      case '9': this->TokenStack.AddObjectOnTop(WeylParser::tokenDigit); this->ValueStack.AddObjectOnTop(9); break;
-      case '[': this->TokenStack.AddObjectOnTop(WeylParser::tokenOpenLieBracket); this->ValueStack.AddObjectOnTop(0); break;
-      case ']': this->TokenStack.AddObjectOnTop(WeylParser::tokenCloseLieBracket); this->ValueStack.AddObjectOnTop(0); break;
-      case '(': this->TokenStack.AddObjectOnTop(WeylParser::tokenOpenBracket); this->ValueStack.AddObjectOnTop(0); break;
-      case ')': this->TokenStack.AddObjectOnTop(WeylParser::tokenCloseBracket); this->ValueStack.AddObjectOnTop(0); break;
-      case '^': this->TokenStack.AddObjectOnTop(WeylParser::tokenPower); this->ValueStack.AddObjectOnTop(0); break;
-      case '+': this->TokenStack.AddObjectOnTop(WeylParser::tokenPlus); this->ValueStack.AddObjectOnTop(0); break;
-      case '-': this->TokenStack.AddObjectOnTop(WeylParser::tokenMinus); this->ValueStack.AddObjectOnTop(0); break;
-      case '_': this->TokenStack.AddObjectOnTop(WeylParser::tokenUnderscore); this->ValueStack.AddObjectOnTop(0); break;
-      case '/': this->TokenStack.AddObjectOnTop(WeylParser::tokenDivide); this->ValueStack.AddObjectOnTop(0); break;
-      case 'x': this->TokenStack.AddObjectOnTop(WeylParser::tokenX); this->ValueStack.AddObjectOnTop(0); break;
-      case 'd': this->TokenStack.AddObjectOnTop(WeylParser::tokenPartialDerivative); this->ValueStack.AddObjectOnTop(0); break;
+    { case '0': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '1': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(1); break;
+      case '2': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(2); break;
+      case '3': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(3); break;
+      case '4': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(4); break;
+      case '5': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(5); break;
+      case '6': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(6); break;
+      case '7': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(7); break;
+      case '8': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(8); break;
+      case '9': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(9); break;
+      case '[': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenOpenLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ']': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenCloseLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '(': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenOpenBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ')': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenCloseBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '^': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPower); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '+': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '-': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenMinus); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '_': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenUnderscore); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '/': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'x': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenX); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'd': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPartialDerivative); this->ValueBuffer.AddObjectOnTop(0); break;
     }
   }
-}
-
-void WeylParser::Parse(const std::string& input)
-{ this->ParserInit(input);
   this->ValueStack.size=0;
   this->TokenStack.size=0;
   this->ValueStack.MakeActualSizeAtLeastExpandOnTop(this->ValueBuffer.size);
   this->TokenStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
   for (int i=0; i<this->numEmptyTokensAtBeginning; i++)
-    this->TokenStack.AddObjectOnTop(this->tokenEmpty);
-  for (int i=0; i<this->size; i++)
+  { this->TokenStack.AddObjectOnTop(this->tokenEmpty);
+    this->ValueStack.AddObjectOnTop(0);
+  }
+}
+
+void WeylParser::Parse(const std::string& input)
+{ this->ParserInit(input);
+  this->ParseNoInit(0, this->TokenBuffer.size-1);
+}
+
+void WeylParser::ParseNoInit(int indexFrom, int indexTo)
+{ if (indexFrom<0 || indexTo>= this->TokenBuffer.size)
+    return;
+  for (int i=indexFrom; i<=indexTo; i++)
   { this->ValueStack.AddObjectOnTop(this->ValueBuffer.TheObjects[i]);
     this->TokenStack.AddObjectOnTop(this->TokenBuffer.TheObjects[i]);
     int lookAheadToken=this->tokenEmpty;
-    if (i<this->size-1)
+    if (i<this->TokenBuffer.size-1)
       lookAheadToken=this->TokenBuffer.TheObjects[i+1];
-    while(this->ApplyRules(lookAheadToken)){}
+    while(this->ApplyRules(lookAheadToken))
+    {
+    }
   }
 }
 
@@ -576,8 +603,6 @@ bool WeylParser::lookAheadTokenProhibitsPlus(int theToken)
   if (theToken==this->tokenCloseBracket)
     return true;
   if (theToken==this->tokenCloseLieBracket)
-    return true;
-  if (theToken==this->tokenEmpty)
     return true;
   return false;
 }
@@ -650,8 +675,7 @@ void WeylParser::Evaluate()
 void WeylParser::ExtendOnTop(int numNew)
 { this->SetSizeExpandOnTopNoObjectInit(this->size+numNew);
   for (int i=0; i<numNew; i++)
-  { this->TheObjects[this->size-i].owner=this;
-  }
+    this->TheObjects[this->size-1-i].owner=this;
 }
 
 void WeylParserNode::Evaluate()
@@ -666,4 +690,26 @@ void WeylParserNode::Evaluate()
 
 WeylParserNode::WeylParserNode()
 { this->Operation= WeylParser::tokenEmpty;
+}
+
+
+void WeylParser::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  out <<"\nToken stack: ";
+  for (int i=this->numEmptyTokensAtBeginning; i<this->TokenStack.size; i++)
+  { switch(this->TokenStack.TheObjects[i])
+    { case WeylParser::tokenX: out <<"x"; break;
+      case WeylParser::tokenDigit: out <<"D"; break;
+      case WeylParser::tokenPlus: out <<"+"; break;
+      case WeylParser::tokenUnderscore: out <<"_"; break;
+      case WeylParser::tokenEmpty: out <<" "; break;
+      case WeylParser::tokenExpression: out<<"E"; break;
+    }
+    out <<", ";
+  }
+  out <<"\nValue stack: ";
+  for (int i=this->numEmptyTokensAtBeginning; i<this->ValueStack.size; i++)
+    out <<this->ValueStack.TheObjects[i]<<", ";
+  out <<"\n";
+  output=out.str();
 }

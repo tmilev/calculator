@@ -3247,11 +3247,11 @@ ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	if(this->NumVariables!=nv)
-	{	NumVariables=nv;
+	{	this->NumVariables=nv;
 		delete [] degrees;
-		degrees= new short[NumVariables];
+		degrees= new short[this->NumVariables];
 	}
-	for (int i=0;i<NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		degrees[i]=0;
 }
 

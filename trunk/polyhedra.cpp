@@ -379,7 +379,7 @@ void CombinatorialChamberContainer::SliceOneDirection( roots& directions, int& i
 	}
 }
 
-void CombinatorialChamberContainer::SliceTheEuclideanSpace( roots& directions,int &index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceTheEuclideanSpace( roots& directions, int &index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
 { if (directions.size==0)
 		return;
 	if (directions.TheObjects[0].size==1)
@@ -2655,12 +2655,45 @@ void roots::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariable
 	output<< "Num_roots|Dim: "<< this->size<<" "<< theDimension<<" ";
 	if (this->size<1)
 		return;
-	for ( int i=0;i<this->size;i++)
-		for (int j=0;j<theDimension;j++)
+	for ( int i=0; i<this->size; i++)
+		for (int j=0; j<theDimension; j++)
 		{ this->TheObjects[i].TheObjects[j].WriteToFile(output);
 			output<<" ";
 		}
 	output<<"\n";
+}
+
+void roots::ReadCivilizedHumanReadableFormat(std::stringstream& input)
+{ int numRoots, theDimension;
+  std::string tempS;
+  tempS=input.str();
+  std::stringstream tempI;
+  bool firstOpenBracketFound=false;
+  int numClosedBrackets=0;
+  int numCommas=0;
+  for (int i=0; i<(signed) tempS.size(); i++)
+  { if (tempS.at(i)=='(' && ! firstOpenBracketFound)
+      firstOpenBracketFound=true;
+    if(tempS.at(i)==')' )
+      numClosedBrackets++;
+    if(tempS.at(i)==',' && numClosedBrackets==0 && firstOpenBracketFound)
+      numCommas++;
+    if (tempS.at(i)=='(' || tempS.at(i)==')' || tempS.at(i)==',')
+      tempS[i]=' ';
+  }
+  theDimension=numCommas+1;
+  numRoots=numClosedBrackets;
+  tempI<<tempS;
+  tempI.seekg(0);
+  this->SetSizeExpandOnTopNoObjectInit(numRoots);
+  for (int i=0; i<numRoots; i++)
+  { this->TheObjects[i].MakeZero(theDimension);
+    for(int j=0; j<theDimension; j++)
+    { int x;
+      tempI>> x;
+      this->TheObjects[i].TheObjects[j]=x;
+    }
+  }
 }
 
 void roots::ReadFromFile (std::fstream &input, GlobalVariables&  theGlobalVariables)

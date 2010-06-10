@@ -1617,6 +1617,7 @@ public:
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
 	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(	MatrixLargeRational& outputTheLinearCombination, int theIndex);
 	void GetLinearDependenceRunTheLinearAlgebra	(	MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints);
+  void ReadCivilizedHumanReadableFormat(std::stringstream& input);
 	int GetDimensionOfElements();
 	//Strict cone: The zero linear combination is not allowed.
 	//Non-Strict cone: the zero linear combination is allowed.

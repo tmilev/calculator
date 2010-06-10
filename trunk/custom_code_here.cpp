@@ -46,6 +46,7 @@ public:
   { this->StandardOrder.TimesConstant(theConstant);
   };
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
+  void MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
   void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
@@ -57,6 +58,7 @@ public:
   void Subtract(ElementWeylAlgebra& other)
   { this->StandardOrder.Subtract(other.StandardOrder);
   };
+  void MakeConst (int NumVars, Rational& theConst);
   void Add(ElementWeylAlgebra& other)
   { this->StandardOrder.AddPolynomial(other.StandardOrder);
   };
@@ -86,7 +88,7 @@ class WeylParserNode
     this->children.CopyFromBase(other.children);
     this->indexParent=other.indexParent;
   };
-  void Evaluate();
+  void Evaluate(GlobalVariables& theGlobalVariables);
   WeylParserNode();
 };
 
@@ -109,10 +111,10 @@ class WeylParser: public ListBasicObjects<WeylParserNode>
   int NumVariables;
   ElementWeylAlgebra Value;
   void ParserInit(const std::string& input);
-  void Evaluate();
+  void Evaluate(GlobalVariables& theGlobalVariables);
   void Parse(const std::string& input);
   void ParseNoInit(int indexFrom, int indexTo);
-  void ParseAndCompute(const std::string& input, std::string& output);
+  void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);
   bool ApplyRules(int lookAheadToken);
   bool lookAheadTokenProhibitsPlus(int theToken);
   bool lookAheadTokenProhibitsTimes(int theToken);
@@ -210,6 +212,14 @@ void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft
   //this->ComputeDebugString(false);
 }
 
+void ElementWeylAlgebra::MakeConst(int NumVars, Rational& theConst)
+{ this->Nullify(NumVariables);
+  Monomial<Rational> tempM;
+  tempM.init(this->NumVariables*2);
+  tempM.Coefficient.Assign(theConst);
+  this->StandardOrder.AddMonomial(tempM);
+}
+
 void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1.Assign(standsOnTheRight);
@@ -230,6 +240,18 @@ void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, 
   for (int j=0; j<standsOnTheLeft.StandardOrder.size; j++)
     for (int i=0; i<this->StandardOrder.size; i++)
     { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder.TheObjects[j], this->StandardOrder.TheObjects[i], buffer, theGlobalVariables);
+      Accum.AddPolynomial(buffer);
+    }
+  this->StandardOrder.Assign(Accum);
+}
+
+void ElementWeylAlgebra::MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
+{ PolynomialRationalCoeff buffer;
+  PolynomialRationalCoeff Accum;
+  Accum.Nullify((short) this->NumVariables*2);
+  for (int j=0; j<standsOnTheRight.StandardOrder.size; j++)
+    for (int i=0; i<this->StandardOrder.size; i++)
+    { this->MultiplyTwoMonomials(this->StandardOrder.TheObjects[i], standsOnTheRight.StandardOrder.TheObjects[j], buffer, theGlobalVariables);
       Accum.AddPolynomial(buffer);
     }
   this->StandardOrder.Assign(Accum);
@@ -432,7 +454,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
 /*  WeylParser theParser;
   theParser.ParseAndCompute("x_1+x_1", tempS);*/
   if (DebugCounter==-1)
-    debugParser.ParserInit("[x_1x_2,x_1d_1-x_2d_2]");
+    debugParser.ParserInit("[x_1x_2, x_3d_2]");
   else
     debugParser.ParseNoInit(DebugCounter, DebugCounter);
   DebugCounter++;
@@ -441,10 +463,13 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n";
   if (DebugCounter> debugParser.TokenBuffer.size)
   { debugParser.ComputeNumberOfVariablesAndAdjustNodes();
-    debugParser.Evaluate();
+    debugParser.Evaluate(theGlobalVariables);
   }
+  WeylParser theParser;
+  theParser.ParseAndCompute("[x_1x_2, x_3d_2]", tempS, theGlobalVariables);
   debugParser.Value.ComputeDebugString(false,false);
   out << debugParser.Value.DebugString;
+  out << "\n\n"<<tempS;
 /*  tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
@@ -625,7 +650,7 @@ void WeylParser::ParserInit(const std::string& input)
 void WeylParser::Parse(const std::string& input)
 { this->ParserInit(input);
   this->ParseNoInit(0, this->TokenBuffer.size-1);
-
+  this->ComputeNumberOfVariablesAndAdjustNodes();
 }
 
 void WeylParser::ParseNoInit(int indexFrom, int indexTo)
@@ -665,6 +690,11 @@ bool WeylParser::ApplyRules(int lookAheadToken)
 { if (this->TokenStack.size<2)
     return false;
   int IndexLast=this->TokenStack.size-1;
+  if (this->TokenStack.TheObjects[IndexLast]==this->tokenEmpty)
+  { this->TokenStack.PopLastObject();
+    this->ValueStack.PopLastObject();
+    return true;
+  }
   if (this->TokenStack.TheObjects[IndexLast]== this->tokenCloseLieBracket && this->TokenStack.TheObjects[IndexLast-1]==this->tokenExpression &&
       this->TokenStack.TheObjects[IndexLast-2]==this->tokenComma && this->TokenStack.TheObjects[IndexLast-3]==this->tokenExpression &&
       this->TokenStack.TheObjects[IndexLast-4]==this->tokenOpenLieBracket)
@@ -704,14 +734,18 @@ void WeylParser::DecreaseStackSetExpressionLastNode(int Decrease)
 }
 
 void WeylParser::AddLetterOnTop(int index)
-{ this->ExtendOnTop(1);
-  this->LastObject()->Value.Makexi(index, index+1);
+{ if (index<=0)
+    return;
+  this->ExtendOnTop(1);
+  this->LastObject()->Value.Makexi(index-1, index);
   this->DecreaseStackSetExpressionLastNode(2);
 }
 
 void WeylParser::AddPartialOnTop(int index)
-{ this->ExtendOnTop(1);
-  this->LastObject()->Value.Makedi(index, index+1);
+{ if (index<=0)
+    return;
+  this->ExtendOnTop(1);
+  this->LastObject()->Value.Makedi(index-1, index);
   this->DecreaseStackSetExpressionLastNode(2);
 }
 
@@ -747,12 +781,12 @@ void WeylParser::AddLieBracketOnTop()
   this->DecreaseStackSetExpressionLastNode(4);
 }
 
-void WeylParser::ParseAndCompute(const std::string& input, std::string& output)
+void WeylParser::ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   this->Parse(input);
   out <<"\\begin{eqnarray*}&&" << input<<" = \\\\\n";
-  this->Evaluate();
-  this->Value.ElementToString(tempS, false, true, true);
+  this->Evaluate(theGlobalVariables);
+  this->Value.ElementToString(tempS, false, true, false);
   out <<tempS;
   out <<"\\end{eqnarray*}";
   output=out.str();
@@ -767,11 +801,11 @@ void WeylParser::Own(int indexParent, int indexChild1, int indexChild2)
   this->TheObjects[indexChild2].indexParent= indexParent;
 }
 
-void WeylParser::Evaluate()
+void WeylParser::Evaluate(GlobalVariables& theGlobalVariables)
 { if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
   { if (*this->TokenStack.LastObject()==this->tokenExpression)
     { WeylParserNode* theNode=&this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
-      theNode->Evaluate();
+      theNode->Evaluate(theGlobalVariables);
       this->Value.Assign(theNode->Value);
     }
   }
@@ -783,14 +817,30 @@ void WeylParser::ExtendOnTop(int numNew)
     this->TheObjects[this->size-1-i].owner=this;
 }
 
-void WeylParserNode::Evaluate()
-{ if (this->Operation==WeylParser::tokenPlus)
-  { this->Value.Nullify(owner->NumVariables);
-    for (int i=0; i<this->children.size; i++)
-    { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate();
-      this->Value.Add(this->owner->TheObjects[this->children.TheObjects[i]].Value);
+void WeylParserNode::Evaluate(GlobalVariables& theGlobalVariables)
+{ Rational tempRat;
+  switch (this->Operation)
+  { case WeylParser::tokenPlus: this->Value.Nullify(owner->NumVariables);
+      for (int i=0; i<this->children.size; i++)
+      { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+        this->Value.Add(this->owner->TheObjects[this->children.TheObjects[i]].Value);
+      }
+      break;
+    case WeylParser::tokenTimes: tempRat.MakeOne();
+      this->Value.MakeConst(owner->NumVariables, tempRat);
+      for (int i=0; i<this->children.size; i++)
+      { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+        this->Value.MultiplyOnTheRight(this->owner->TheObjects[this->children.TheObjects[i]].Value, theGlobalVariables);
+      }
+      break;
+    case WeylParser::tokenLieBracket:
+      this->owner->TheObjects[children.TheObjects[0]].Evaluate(theGlobalVariables);
+      this->owner->TheObjects[children.TheObjects[1]].Evaluate(theGlobalVariables);
+      this->Value.Assign(owner->TheObjects[children.TheObjects[0]].Value);
+      this->Value.LieBracketOnTheRight(owner->TheObjects[children.TheObjects[1]].Value, theGlobalVariables);
+      break;
     }
-  }
+
 }
 
 WeylParserNode::WeylParserNode()
@@ -854,4 +904,47 @@ void WeylParserNode::ElementToString(std::string& output)
     out << this->children.TheObjects[i]<<", ";
   out <<"\n";
   output=out.str();
+}
+
+class DyckPath
+{
+  public:
+  ListBasicObjectsLight<int> thePath;
+  void Assign(const DyckPath& other);
+  void operator=(const DyckPath& other){this->Assign(other);};
+};
+
+class DyckPaths: public ListBasicObjects<DyckPath>
+{
+  public:
+  WeylGroup AmbientWeyl;
+  ListBasicObjects<int> pathGraph;
+
+  void GenerateAllDyckPaths();
+  void initPathGraph();
+  void GenerateAllDyckPathsRecursive(int currentPath);
+};
+
+void DyckPath::Assign(const DyckPath& other)
+{ this->thePath.AssignLight(other.thePath);
+}
+
+void DyckPaths::initPathGraph()
+{ root tempRoot;
+  hashedRoots PositiveRoots;
+  PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
+}
+
+void DyckPaths::GenerateAllDyckPaths()
+{ this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
+  this->SetSizeExpandOnTopNoObjectInit(1+this->AmbientWeyl.KillingFormMatrix.NumRows);
+  this->TheObjects[0].thePath.size=0;
+  this->initPathGraph();
+  for (int i=1; i<=this->AmbientWeyl.KillingFormMatrix.NumRows; i++)
+  { DyckPath* currentPath=this->TheObjects[i];
+    tempRoot.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
+    tempRoot.TheObjects[i-1]=1;
+    currentPath.thePath.SetSizeExpandOnTopLight(1);
+    currentPath.thePath.TheObjects[0]=
+  }
 }

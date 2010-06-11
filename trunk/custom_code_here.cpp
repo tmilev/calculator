@@ -453,6 +453,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out <<"\\begin{document}";
 /*  WeylParser theParser;
   theParser.ParseAndCompute("x_1+x_1", tempS);*/
+  /*
   if (DebugCounter==-1)
     debugParser.ParserInit("[x_1x_2, x_3d_2]");
   else
@@ -469,7 +470,12 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   theParser.ParseAndCompute("[x_1x_2, x_3d_2]", tempS, theGlobalVariables);
   debugParser.Value.ComputeDebugString(false,false);
   out << debugParser.Value.DebugString;
-  out << "\n\n"<<tempS;
+  out << "\n\n"<<tempS;*/
+  WeylGroup tempWeyl;
+  tempWeyl.MakeEn(8);
+  tempWeyl.ComputeRho(true);
+  tempWeyl.ComputeDebugString();
+  out << tempWeyl.DebugString;
 /*  tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
@@ -918,7 +924,8 @@ class DyckPaths: public ListBasicObjects<DyckPath>
 {
   public:
   WeylGroup AmbientWeyl;
-  ListBasicObjects<int> pathGraph;
+  ListBasicObjects<ListBasicObjects<int> > pathGraph;
+  ListBasicObjects<int> startingRoots;
 
   void GenerateAllDyckPaths();
   void initPathGraph();
@@ -926,13 +933,30 @@ class DyckPaths: public ListBasicObjects<DyckPath>
 };
 
 void DyckPath::Assign(const DyckPath& other)
-{ this->thePath.AssignLight(other.thePath);
+{ this->thePath.CopyFromLight(other.thePath);
 }
 
 void DyckPaths::initPathGraph()
 { root tempRoot;
   hashedRoots PositiveRoots;
+  int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
   PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
+  this->startingRoots.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { tempRoot.MakeZero(theDimension);
+    tempRoot.TheObjects[i]=1;
+    this->startingRoots.TheObjects[i]=PositiveRoots.IndexOfObjectHash(tempRoot);
+  }
+  this->pathGraph.SetSizeExpandOnTopNoObjectInit(PositiveRoots.size);
+  for (int i=0; i<this->size; i++)
+  { this->pathGraph.TheObjects[i].size=0;
+    root& theRoot= PositiveRoots.TheObjects[i];
+    int firstNonZeroIndex= theRoot.getIndexFirstNonZeroCoordinate();
+
+    for (int i=0; i<theDimension; i++)
+    {
+    }
+  }
 }
 
 void DyckPaths::GenerateAllDyckPaths()
@@ -941,10 +965,7 @@ void DyckPaths::GenerateAllDyckPaths()
   this->TheObjects[0].thePath.size=0;
   this->initPathGraph();
   for (int i=1; i<=this->AmbientWeyl.KillingFormMatrix.NumRows; i++)
-  { DyckPath* currentPath=this->TheObjects[i];
-    tempRoot.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
-    tempRoot.TheObjects[i-1]=1;
-    currentPath.thePath.SetSizeExpandOnTopLight(1);
-    currentPath.thePath.TheObjects[0]=
+  { DyckPath* currentPath=&this->TheObjects[i];
+
   }
 }

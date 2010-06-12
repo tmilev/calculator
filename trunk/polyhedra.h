@@ -2421,6 +2421,7 @@ public:
 	};
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
+	void ElementToString(std::string& output, bool useHtml);
 };
 
 
@@ -5948,6 +5949,43 @@ public:
 	void ReadFromFile (GlobalVariables&  theGlobalVariables);
   void PurgeImpossibleStates();
 };
+
+class DyckPaths;
+class DyckPath
+{
+  public:
+  std::string DebugString;
+  void ComputeDebugString(DyckPaths& owner, bool useHtml, bool WithDetail){this->ElementToString(DebugString, owner, useHtml, WithDetail);};
+  void ElementToString(std::string& output, DyckPaths& owner,  bool useHtml, bool WithDetail);
+  ListBasicObjectsLight<int> thePathNodes;
+  ListBasicObjectsLight<int> thePathEdgesTaken;
+  void Assign(const DyckPath& other);
+  bool IamComplete(DyckPaths& owner);
+  void operator=(const DyckPath& other){this->Assign(other);};
+};
+
+class DyckPaths: public ListBasicObjects<DyckPath>
+{
+  public:
+  std::string DebugString;
+  void ComputeDebugString(bool useHtml){this->ElementToString(DebugString, useHtml);};
+  void ElementToString(std::string& output, bool useHtml);
+  int NumCompletePaths;
+  WeylGroup AmbientWeyl;
+  Selection AllowedEndNodes;
+  ListBasicObjects<ListBasicObjects<int> > pathGraphPairsOfNodes;
+  ListBasicObjects<ListBasicObjects<int> > pathGraphEdgeLabels;
+  roots startingRoots;
+  hashedRoots PositiveRoots;
+  int LastNonExploredIndex;
+  void GenerateAllDyckPathsTypesABC();
+  void initPathGraphTypesABC();
+  void GenerateAllDyckPathsTypesABCRecursive();
+  bool SimpleRootAllowedToBeAddedTypesABC(int simpleRootIndex, root& output);
+  bool SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, root& output);
+};
+
+
 
 struct ComputationSetup
 {	roots InputRoots;

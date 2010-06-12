@@ -472,7 +472,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << debugParser.Value.DebugString;
   out << "\n\n"<<tempS;*/
   WeylGroup tempWeyl;
-  tempWeyl.MakeEn(8);
+  tempWeyl.MakeArbitrary('E',5);
   tempWeyl.ComputeRho(true);
   tempWeyl.ComputeDebugString();
   out << tempWeyl.DebugString;
@@ -925,11 +925,14 @@ class DyckPaths: public ListBasicObjects<DyckPath>
   public:
   WeylGroup AmbientWeyl;
   ListBasicObjects<ListBasicObjects<int> > pathGraph;
-  ListBasicObjects<int> startingRoots;
-
+  roots startingRoots;
+  ListBasicObjects<ListBasicObjects<int > > partialOrderSimpleRoots;
   void GenerateAllDyckPaths();
   void initPathGraph();
   void GenerateAllDyckPathsRecursive(int currentPath);
+  void FindMinInPartialOrder(root& theRoot, ListBasicObjects<int> output);
+  bool SimpleRootAllowedToBeAdded(int simpleRootIndex, root& output);
+  bool SimpleRootAllowedToBeSubtracted(int simpleRootIndex, root& output);
 };
 
 void DyckPath::Assign(const DyckPath& other)
@@ -937,24 +940,31 @@ void DyckPath::Assign(const DyckPath& other)
 }
 
 void DyckPaths::initPathGraph()
-{ root tempRoot;
+{ root tempRoot, tempRoot2;
   hashedRoots PositiveRoots;
   int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
   PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
-  this->startingRoots.SetSizeExpandOnTopNoObjectInit(theDimension);
-  for (int i=0; i<theDimension; i++)
-  { tempRoot.MakeZero(theDimension);
-    tempRoot.TheObjects[i]=1;
-    this->startingRoots.TheObjects[i]=PositiveRoots.IndexOfObjectHash(tempRoot);
-  }
+  this->AmbientWeyl.GetPartialOrderOnSimpleRootsInducedByDynkinDiagram(this->partialOrderSimpleRoots, this->startingRoots);
   this->pathGraph.SetSizeExpandOnTopNoObjectInit(PositiveRoots.size);
+  ListBasicObjects<int> tempList;
   for (int i=0; i<this->size; i++)
   { this->pathGraph.TheObjects[i].size=0;
     root& theRoot= PositiveRoots.TheObjects[i];
-    int firstNonZeroIndex= theRoot.getIndexFirstNonZeroCoordinate();
-
-    for (int i=0; i<theDimension; i++)
-    {
+    for (int j=0; j<theDimension; j++)
+    { tempRoot.MakeZero(theDimension);
+      tempRoot.TheObjects[j]=1;
+      tempRoot2=theRoot+ tempRoot;
+      if (PositiveRoots.ContainsObjectHash(tempRoot2))
+        if (this->SimpleRootAllowedToBeSubtracted(j, tempRoot))
+          this->pathGraph.TheObjects[i].AddObjectOnTop(PositiveRoots.IndexOfObjectHash(tempRoot2));
+    }
+    for (int j=0; j<theDimension; j++)
+    { tempRoot.MakeZero(theDimension);
+      tempRoot.TheObjects[j]=1;
+      tempRoot2=theRoot+ tempRoot;
+      if (PositiveRoots.ContainsObjectHash(tempRoot2))
+        if (this->SimpleRootAllowedToBeAdded(j, tempRoot))
+          this->pathGraph.TheObjects[i].AddObjectOnTop(PositiveRoots.IndexOfObjectHash(tempRoot2));
     }
   }
 }
@@ -965,7 +975,75 @@ void DyckPaths::GenerateAllDyckPaths()
   this->TheObjects[0].thePath.size=0;
   this->initPathGraph();
   for (int i=1; i<=this->AmbientWeyl.KillingFormMatrix.NumRows; i++)
-  { DyckPath* currentPath=&this->TheObjects[i];
+  {// DyckPath* currentPath=&this->TheObjects[i];
 
   }
+}
+
+void WeylGroup::GetPartialOrderOnSimpleRootsInducedByDynkinDiagram(ListBasicObjects<ListBasicObjects<int > >& outputOrder, roots& outputSimpleBasis)
+{ int theDimension= this->KillingFormMatrix.NumRows;
+  outputSimpleBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { outputSimpleBasis.TheObjects[i].MakeZero(theDimension);
+    outputSimpleBasis.TheObjects[i].TheObjects[i]=1;
+  }
+  ListBasicObjects<int> StackNonExplored;
+  StackNonExplored.size=0;
+  if (this->WeylLetter=='A')
+    StackNonExplored.AddObjectOnBottom(0);
+  if (this->WeylLetter=='B')
+    StackNonExplored.AddObjectOnBottom(0);
+  if (this->WeylLetter=='C')
+    StackNonExplored.AddObjectOnBottom(0);
+  if (this->WeylLetter=='D')
+    StackNonExplored.AddObjectOnBottom(0);
+  if (this->WeylLetter=='E')
+    StackNonExplored.AddObjectOnBottom(theDimension-1);
+  if (this->WeylLetter=='F')
+    StackNonExplored.AddObjectOnBottom(0);
+  outputOrder.SetSizeExpandOnTopNoObjectInit(theDimension);
+  ListBasicObjects<bool> Explored;
+  Explored.initFillInObject(theDimension, false);
+  while(StackNonExplored.size>0)
+  { int currentIndex = *StackNonExplored.LastObject();
+    outputOrder.TheObjects[currentIndex].size=0;
+    Explored.TheObjects[currentIndex]=true;
+    for (int i=0; i<theDimension; i++)
+      if (this->KillingFormMatrix.elements[currentIndex][i]>0)
+        if (!Explored.TheObjects[i])
+        { StackNonExplored.AddObjectOnBottom(i);
+          outputOrder.TheObjects[currentIndex].AddObjectOnTop(i);
+        }
+    StackNonExplored.PopLastObject();
+  }
+}
+
+void DyckPaths::FindMinInPartialOrder(root& theRoot,  ListBasicObjects<int> output)
+{ int theDimension= theRoot.size;
+  output.size=0;
+  ListBasicObjects<bool> MinimalOnes;
+  MinimalOnes.initFillInObject(theDimension, true);
+  for (int i=0; i<theDimension; i++)
+    if (!this->startingRoots.TheObjects[i].IsEqualToZero())
+    { ListBasicObjects<int>& larger=this->partialOrderSimpleRoots.TheObjects[i];
+      for (int j=0; j< larger.size; j++)
+        MinimalOnes.TheObjects[larger.TheObjects[j]]=false;
+    } else
+      MinimalOnes.TheObjects[i]=false;
+    for (int i=0; i<theDimension; i++)
+      if (MinimalOnes.TheObjects[i])
+        output.AddObjectOnTop(i);
+}
+
+bool DyckPaths::SimpleRootAllowedToBeAdded(int simpleRootIndex, root& output)
+{ if (output.TheObjects[simpleRootIndex].IsPositive())
+    return true;
+  //if (this-
+  return false;
+}
+
+bool DyckPaths::SimpleRootAllowedToBeSubtracted(int simpleRootIndex, root& output)
+{ if (output.TheObjects[simpleRootIndex].IsPositive())
+    return true;
+  return false;
 }

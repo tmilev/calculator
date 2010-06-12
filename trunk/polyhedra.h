@@ -5084,6 +5084,7 @@ public:
 	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
 	void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
 	void SimpleReflectionRootAlg(	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
+	void GetPartialOrderOnSimpleRootsInducedByDynkinDiagram(ListBasicObjects<ListBasicObjects<int > >& outputOrder, roots& outputSimpleBasis);
 	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
 	void RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output);
 	Rational RootScalarKillingFormMatrixRoot(const root& r1, const root& r2)

@@ -12414,13 +12414,21 @@ void intRoots::BubbleSort(intRoot* weights)
 }
 
 void hashedRoots::ElementToString(std::string &output)
+{ this->ElementToString(output, false);
+}
+
+void hashedRoots::ElementToString(std::string &output, bool useHtml)
 { std::stringstream  out;
 	std::string tempS;
 	out <<"Number of vectors: "<<this->size<<"\n";
+	if (useHtml)
+    out <<"\n<br>\n";
 	for (int i=0;i<this->size;i++)
 	{ this->TheObjects[i].ElementToString(tempS);
 		out<<tempS<<"\n";
-	}
+    if (useHtml)
+      out <<"\n<br>\n";
+  }
 	output= out.str();
 }
 
@@ -21754,6 +21762,259 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
       }
     }
   return true;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Code for generation of Dyck paths
+//motivational article:  E. Feigin, G. Fourier, P. Littelmann, "PBW filtration and bases for irreducible modules in type A_n", preprint 2009
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+template <> int ListBasicObjects<DyckPath>::ListBasicObjectsActualSizeIncrement=2000;
+
+bool DyckPath::IamComplete(DyckPaths& owner)
+{ if (this->thePathNodes.size<=0)
+    return false;
+  if (owner.AllowedEndNodes.selected[*this->thePathNodes.LastObject()])
+    return true;
+  return false;
+}
+
+void DyckPath::Assign(const DyckPath& other)
+{ this->thePathNodes.CopyFromLight(other.thePathNodes);
+  this->thePathEdgesTaken.CopyFromLight(other.thePathEdgesTaken);
+}
+
+void DyckPaths::initPathGraphTypesABC()
+{ root tempRoot, tempRoot2;
+  int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+  this->NumCompletePaths=theDimension;
+  this->AmbientWeyl.ComputeRho(true);
+  this->PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
+  this->pathGraphPairsOfNodes.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
+  this->pathGraphEdgeLabels.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
+  ListBasicObjects<int> tempList;
+  this->AllowedEndNodes.init(this->PositiveRoots.size);
+  for (int i=0; i<this->pathGraphPairsOfNodes.size; i++)
+  { this->pathGraphPairsOfNodes.TheObjects[i].size=0;
+    this->pathGraphEdgeLabels.TheObjects[i].size=0;
+    root& theRoot= this->PositiveRoots.TheObjects[i];
+    for (int j=0; j<theDimension; j++)
+    { tempRoot.MakeEi(theDimension, j);
+      //tempRoot.ComputeDebugString();
+      tempRoot2=theRoot-tempRoot;
+      //tempRoot2.ComputeDebugString();
+      if (this->PositiveRoots.ContainsObjectHash(tempRoot2))
+        if (this->SimpleRootAllowedToBeSubtractedTypesABC(j, theRoot))
+        { this->pathGraphPairsOfNodes.TheObjects[i].AddObjectOnTop(this->PositiveRoots.IndexOfObjectHash(tempRoot2));
+          this->pathGraphEdgeLabels.TheObjects[i].AddObjectOnTop(-j-1);
+        }
+      tempRoot2=theRoot+tempRoot;
+      //tempRoot2.ComputeDebugString();
+      if (this->PositiveRoots.ContainsObjectHash(tempRoot2))
+        if (this->SimpleRootAllowedToBeAddedTypesABC(j, theRoot))
+        { this->pathGraphPairsOfNodes.TheObjects[i].AddObjectOnTop(this->PositiveRoots.IndexOfObjectHash(tempRoot2));
+          this->pathGraphEdgeLabels.TheObjects[i].AddObjectOnTop(j+1);
+        }
+    }
+    if (this->pathGraphPairsOfNodes.TheObjects[i].size==0)
+      this->AllowedEndNodes.AddSelectionAppendNewIndex(i);
+  }
+}
+
+void DyckPaths::GenerateAllDyckPathsTypesABC()
+{ int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+  this->SetSizeExpandOnTopNoObjectInit(1+theDimension);
+  this->TheObjects[0].thePathNodes.size=0;
+  this->TheObjects[0].thePathEdgesTaken.size=0;
+  this->initPathGraphTypesABC();
+  root tempRoot;
+  this->LastNonExploredIndex=1;
+  for (int i=0; i<theDimension; i++)
+  { tempRoot.MakeEi(theDimension, i);
+    this->TheObjects[i+1].thePathNodes.SetSizeExpandOnTopLight(1);
+    this->TheObjects[i+1].thePathEdgesTaken.SetSizeExpandOnTopLight(1);
+    int tempI=this->PositiveRoots.IndexOfObjectHash(tempRoot);
+    this->TheObjects[i+1].thePathNodes.TheObjects[0]=tempI;
+    this->AllowedEndNodes.AddSelectionAppendNewIndex(tempI);
+    this->TheObjects[i+1].thePathEdgesTaken.TheObjects[0]=i+1;
+  }
+  this->GenerateAllDyckPathsTypesABCRecursive();
+}
+
+bool DyckPaths::SimpleRootAllowedToBeAddedTypesABC(int simpleRootIndex, root& output)
+{ int lastNonZeroCoord=output.getIndexLastNonZeroCoordinate();
+  if (simpleRootIndex>=lastNonZeroCoord+1)
+    return true;
+  if (output.TheObjects[simpleRootIndex]>0)
+    return true;
+  return false;
+}
+
+bool DyckPaths::SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, root& output)
+{ int firstNonZeroCoord=output.getIndexFirstNonZeroCoordinate();
+  if (simpleRootIndex==firstNonZeroCoord)
+    if (output.TheObjects[simpleRootIndex]==1)
+      return true;
+  return false;
+}
+
+void DyckPaths::GenerateAllDyckPathsTypesABCRecursive()
+{ ListBasicObjects<int> pathEdgesTaken;
+	ListBasicObjects<int> pathNodes;
+  while (this->LastNonExploredIndex<this->size)
+  { //this->ComputeDebugString();
+		pathEdgesTaken.AssignLight(this->TheObjects[this->LastNonExploredIndex].thePathEdgesTaken);
+		pathNodes.AssignLight(this->TheObjects[this->LastNonExploredIndex].thePathNodes);
+    int NewNodeNumber=pathEdgesTaken.size+1;
+    pathEdgesTaken.SetSizeExpandOnTopNoObjectInit(NewNodeNumber);
+    pathNodes.SetSizeExpandOnTopNoObjectInit(NewNodeNumber);
+    int currentRootIndex=*this->TheObjects[this->LastNonExploredIndex].thePathNodes.LastObject();
+    for (int i=0; i<this->pathGraphPairsOfNodes.TheObjects[currentRootIndex].size; i++)
+    { *pathEdgesTaken.LastObject()=this->pathGraphEdgeLabels.TheObjects[currentRootIndex].TheObjects[i];
+      *pathNodes.LastObject()=this->pathGraphPairsOfNodes.TheObjects[currentRootIndex].TheObjects[i];
+      this->SetSizeExpandOnTopNoObjectInit(this->size+1);
+      this->LastObject()->thePathEdgesTaken.CopyFromHeavy(pathEdgesTaken);
+      this->LastObject()->thePathNodes.CopyFromHeavy(pathNodes);
+      if (this->AllowedEndNodes.selected[*pathNodes.LastObject()])
+        this->NumCompletePaths++;
+    }
+    this->LastNonExploredIndex++;
+  }
+}
+
+void DyckPaths::ElementToString(std::string& output,  bool useHtml)
+{ std::stringstream out; std::string tempS;
+  this->PositiveRoots.ElementToString(tempS, useHtml);
+  out <<"Positive roots:\n ";
+  if (useHtml)
+    out << "<br>\n";
+  out << tempS;
+  if (useHtml)
+    out << "\n<br>\n";
+  out <<"\nHalf sum of positive roots: " << this->AmbientWeyl.rho.ElementToString()<<"\n";
+  if (useHtml)
+    out << "\n<br><br><br>\n";
+  out <<"\n\n\n*********************************************************************";
+  if (useHtml)
+    out << "\n<br>\n ";
+  out << "The allowed starting roots are the simple ones";
+  if (useHtml)
+    out << "\n<br>\n ";
+  out << "The allowed ending roots are: ";
+  for (int i=0; i<this->AllowedEndNodes.CardinalitySelection; i++)
+    out <<this->PositiveRoots.TheObjects[this->AllowedEndNodes.elements[i]].ElementToString()<<", ";
+  if (useHtml)
+    out << "\n<br><br><br>\n";
+  out <<"\n\n\n*********************************************************************";
+  if (useHtml)
+    out << "\n<br>\n";
+  out<<"\nNumber complete paths (not including the zero path): "<< this->NumCompletePaths;
+  if (useHtml)
+    out << "\n<br>\n";
+  out << "List of complete paths: ";
+  if (useHtml)
+    out << "\n<br>\n";
+  int counter=0;
+  for (int i=0; i<this->size; i++)
+  { if (this->TheObjects[i].IamComplete(*this))
+    { counter++;
+      this->TheObjects[i].ElementToString(tempS, *this, useHtml, false);
+      if (useHtml)
+        out << "\n<br>\n";
+      out << "\nPath counter " << counter <<": "<< tempS<<"\n";
+    }
+  }
+
+
+  if (useHtml)
+    out << "\n<br><br><br>\n";
+  out <<"\n\n\n*********************************************************************";
+  if (useHtml)
+    out << "\n<br>\n";
+  out<<"\nFull number of paths (including the zero path): "<< this->size;
+  if (useHtml)
+    out << "\n<br>\n";
+  out << "Full list of paths: ";
+  if (useHtml)
+    out << "\n<br>\n";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS, *this, useHtml, false);
+    if (useHtml)
+      out << "\n<br>\n";
+    out << "\nPath index " << i <<": "<< tempS<<"\n";
+  }
+  if (useHtml)
+    out << "\n<br>\n<br>\n<br>\n*********************************************************************<br>\n";
+  out << "Path list with internal node/edge information: ";
+  if (useHtml)
+    out << "\n<br>\n";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS, *this, useHtml, true);
+    if (useHtml)
+      out << "\n<br>\n";
+    out << "\nPath index " << i <<": "<< tempS<<"\n";
+  }
+
+  if (useHtml)
+    out << "\n<br><br><br>\n";
+  out <<"\n\n\n*********************************************************************";
+  if (useHtml)
+    out << "\n<br>\n";
+
+  if (useHtml)
+    out << "\n<br>\n";
+  for (int i=0; i<this->pathGraphPairsOfNodes.size; i++)
+  { if (useHtml)
+      out << "\n<br>\n";
+    out << "\nNode " << i<< " linked to: ";
+    for (int j=0; j<this->pathGraphPairsOfNodes.TheObjects[i].size; j++)
+      out << this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]<< ", ";
+    if (useHtml)
+      out << "\n<br>\n";
+    out <<"\nCoordiante form: ";
+    for (int j=0; j<this->pathGraphPairsOfNodes.TheObjects[i].size; j++)
+			out << this->PositiveRoots.TheObjects[i].ElementToString()<<"->"<< this->PositiveRoots.TheObjects[this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]].ElementToString()<<"; ";
+    if (useHtml)
+      out << "\n<br>\n";
+    out << "\nCorresponding edges: ";
+    for (int j=0; j<this->pathGraphEdgeLabels.TheObjects[i].size; j++)
+      out << this->pathGraphEdgeLabels.TheObjects[i].TheObjects[j]<< ", ";
+  }
+
+
+  output=out.str();
+}
+
+void DyckPath::ElementToString(std::string& output, DyckPaths& owner,  bool useHtml, bool WithDetail)
+{ std::stringstream out; std::string tempS;
+  if (WithDetail)
+  { if (useHtml)
+    out << "\n<br>\n";
+    out <<"\nNodes: ";
+    for (int i=0; i<this->thePathNodes.size; i++)
+      out << this->thePathNodes.TheObjects[i]<<", ";
+    if (useHtml)
+      out << "\n<br>\n";
+    out <<"\nPaths: ";
+    for (int i=0; i<this->thePathEdgesTaken.size; i++)
+      out << this->thePathEdgesTaken.TheObjects[i]<<", ";
+    if (useHtml)
+      out << "\n<br>\n";
+    out << "\nCoordinate form: ";
+  }
+  for (int i=0; i<this->thePathNodes.size; i++)
+  {	out << owner.PositiveRoots.TheObjects[this->thePathNodes.TheObjects[i]].ElementToString();
+    if (i!=this->thePathNodes.size-1)
+			out <<"->";
+	}
+  output=out.str();
 }
 
 

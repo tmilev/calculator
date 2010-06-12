@@ -21,6 +21,37 @@
 // To whomever might be reading this (if anyone): happy hacking and I hope you find my code useful, that it didn't cause you many headaches, and that you
 // did something useful with it! Cheers!
 
+class DyckPaths;
+class DyckPath
+{
+  public:
+  std::string DebugString;
+  void ComputeDebugString(DyckPaths& owner){this->ElementToString(DebugString, owner);};
+  void ElementToString(std::string& output, DyckPaths& owner);
+  ListBasicObjectsLight<int> thePathNodes;
+  ListBasicObjectsLight<int> thePathEdgesTaken;
+  void Assign(const DyckPath& other);
+  void operator=(const DyckPath& other){this->Assign(other);};
+};
+
+class DyckPaths: public ListBasicObjects<DyckPath>
+{
+  public:
+  std::string DebugString;
+  void ComputeDebugString(){this->ElementToString(DebugString);};
+  void ElementToString(std::string& output);
+  WeylGroup AmbientWeyl;
+  ListBasicObjects<ListBasicObjects<int> > pathGraphPairsOfNodes;
+  ListBasicObjects<ListBasicObjects<int> > pathGraphEdgeLabels;
+  roots startingRoots;
+  hashedRoots PositiveRoots;
+  int LastNonExploredIndex;
+  void GenerateAllDyckPathsTypesABC();
+  void initPathGraphTypesABC();
+  void GenerateAllDyckPathsTypesABCRecursive();
+  bool SimpleRootAllowedToBeAddedTypesABC(int simpleRootIndex, root& output);
+  bool SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, root& output);
+};
 
 class ElementWeylAlgebra
 {
@@ -471,11 +502,12 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   debugParser.Value.ComputeDebugString(false,false);
   out << debugParser.Value.DebugString;
   out << "\n\n"<<tempS;*/
-  WeylGroup tempWeyl;
-  tempWeyl.MakeArbitrary('E',5);
-  tempWeyl.ComputeRho(true);
-  tempWeyl.ComputeDebugString();
-  out << tempWeyl.DebugString;
+
+  DyckPaths thePaths;
+  thePaths.AmbientWeyl.MakeArbitrary('A', 2);
+  thePaths.GenerateAllDyckPathsTypesABC();
+  thePaths.ComputeDebugString();
+  out << thePaths.DebugString;
 /*  tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
@@ -912,138 +944,128 @@ void WeylParserNode::ElementToString(std::string& output)
   output=out.str();
 }
 
-class DyckPath
-{
-  public:
-  ListBasicObjectsLight<int> thePath;
-  void Assign(const DyckPath& other);
-  void operator=(const DyckPath& other){this->Assign(other);};
-};
 
-class DyckPaths: public ListBasicObjects<DyckPath>
-{
-  public:
-  WeylGroup AmbientWeyl;
-  ListBasicObjects<ListBasicObjects<int> > pathGraph;
-  roots startingRoots;
-  ListBasicObjects<ListBasicObjects<int > > partialOrderSimpleRoots;
-  void GenerateAllDyckPaths();
-  void initPathGraph();
-  void GenerateAllDyckPathsRecursive(int currentPath);
-  void FindMinInPartialOrder(root& theRoot, ListBasicObjects<int> output);
-  bool SimpleRootAllowedToBeAdded(int simpleRootIndex, root& output);
-  bool SimpleRootAllowedToBeSubtracted(int simpleRootIndex, root& output);
-};
+
+
+template <> int ListBasicObjects<DyckPath>::ListBasicObjectsActualSizeIncrement=2000;
 
 void DyckPath::Assign(const DyckPath& other)
-{ this->thePath.CopyFromLight(other.thePath);
+{ this->thePathNodes.CopyFromLight(other.thePathNodes);
+  this->thePathEdgesTaken.CopyFromLight(other.thePathEdgesTaken);
 }
 
-void DyckPaths::initPathGraph()
+void DyckPaths::initPathGraphTypesABC()
 { root tempRoot, tempRoot2;
-  hashedRoots PositiveRoots;
   int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
-  PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
-  this->AmbientWeyl.GetPartialOrderOnSimpleRootsInducedByDynkinDiagram(this->partialOrderSimpleRoots, this->startingRoots);
-  this->pathGraph.SetSizeExpandOnTopNoObjectInit(PositiveRoots.size);
+  this->PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
+  this->pathGraphPairsOfNodes.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
+  this->pathGraphEdgeLabels.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
   ListBasicObjects<int> tempList;
-  for (int i=0; i<this->size; i++)
-  { this->pathGraph.TheObjects[i].size=0;
-    root& theRoot= PositiveRoots.TheObjects[i];
+  for (int i=0; i<this->pathGraphPairsOfNodes.size; i++)
+  { this->pathGraphPairsOfNodes.TheObjects[i].size=0;
+    this->pathGraphEdgeLabels.TheObjects[i].size=0;
+    root& theRoot= this->PositiveRoots.TheObjects[i];
     for (int j=0; j<theDimension; j++)
-    { tempRoot.MakeZero(theDimension);
-      tempRoot.TheObjects[j]=1;
-      tempRoot2=theRoot+ tempRoot;
-      if (PositiveRoots.ContainsObjectHash(tempRoot2))
-        if (this->SimpleRootAllowedToBeSubtracted(j, tempRoot))
-          this->pathGraph.TheObjects[i].AddObjectOnTop(PositiveRoots.IndexOfObjectHash(tempRoot2));
-    }
-    for (int j=0; j<theDimension; j++)
-    { tempRoot.MakeZero(theDimension);
-      tempRoot.TheObjects[j]=1;
-      tempRoot2=theRoot+ tempRoot;
-      if (PositiveRoots.ContainsObjectHash(tempRoot2))
-        if (this->SimpleRootAllowedToBeAdded(j, tempRoot))
-          this->pathGraph.TheObjects[i].AddObjectOnTop(PositiveRoots.IndexOfObjectHash(tempRoot2));
-    }
-  }
-}
-
-void DyckPaths::GenerateAllDyckPaths()
-{ this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
-  this->SetSizeExpandOnTopNoObjectInit(1+this->AmbientWeyl.KillingFormMatrix.NumRows);
-  this->TheObjects[0].thePath.size=0;
-  this->initPathGraph();
-  for (int i=1; i<=this->AmbientWeyl.KillingFormMatrix.NumRows; i++)
-  {// DyckPath* currentPath=&this->TheObjects[i];
-
-  }
-}
-
-void WeylGroup::GetPartialOrderOnSimpleRootsInducedByDynkinDiagram(ListBasicObjects<ListBasicObjects<int > >& outputOrder, roots& outputSimpleBasis)
-{ int theDimension= this->KillingFormMatrix.NumRows;
-  outputSimpleBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
-  for (int i=0; i<theDimension; i++)
-  { outputSimpleBasis.TheObjects[i].MakeZero(theDimension);
-    outputSimpleBasis.TheObjects[i].TheObjects[i]=1;
-  }
-  ListBasicObjects<int> StackNonExplored;
-  StackNonExplored.size=0;
-  if (this->WeylLetter=='A')
-    StackNonExplored.AddObjectOnBottom(0);
-  if (this->WeylLetter=='B')
-    StackNonExplored.AddObjectOnBottom(0);
-  if (this->WeylLetter=='C')
-    StackNonExplored.AddObjectOnBottom(0);
-  if (this->WeylLetter=='D')
-    StackNonExplored.AddObjectOnBottom(0);
-  if (this->WeylLetter=='E')
-    StackNonExplored.AddObjectOnBottom(theDimension-1);
-  if (this->WeylLetter=='F')
-    StackNonExplored.AddObjectOnBottom(0);
-  outputOrder.SetSizeExpandOnTopNoObjectInit(theDimension);
-  ListBasicObjects<bool> Explored;
-  Explored.initFillInObject(theDimension, false);
-  while(StackNonExplored.size>0)
-  { int currentIndex = *StackNonExplored.LastObject();
-    outputOrder.TheObjects[currentIndex].size=0;
-    Explored.TheObjects[currentIndex]=true;
-    for (int i=0; i<theDimension; i++)
-      if (this->KillingFormMatrix.elements[currentIndex][i]>0)
-        if (!Explored.TheObjects[i])
-        { StackNonExplored.AddObjectOnBottom(i);
-          outputOrder.TheObjects[currentIndex].AddObjectOnTop(i);
+    { tempRoot.MakeEi(theDimension, j);
+      tempRoot2=theRoot-tempRoot;
+      if (this->PositiveRoots.ContainsObjectHash(tempRoot2))
+        if (this->SimpleRootAllowedToBeSubtractedTypesABC(j, tempRoot))
+        { this->pathGraphPairsOfNodes.TheObjects[i].AddObjectOnTop(this->PositiveRoots.IndexOfObjectHash(tempRoot2));
+          this->pathGraphEdgeLabels.TheObjects[i].AddObjectOnTop(-j-1);
         }
-    StackNonExplored.PopLastObject();
+      tempRoot2=theRoot+tempRoot;
+      if (this->PositiveRoots.ContainsObjectHash(tempRoot2))
+        if (this->SimpleRootAllowedToBeAddedTypesABC(j, tempRoot))
+        { this->pathGraphPairsOfNodes.TheObjects[i].AddObjectOnTop(this->PositiveRoots.IndexOfObjectHash(tempRoot2));
+          this->pathGraphEdgeLabels.TheObjects[i].AddObjectOnTop(j+1);
+        }
+    }
   }
 }
 
-void DyckPaths::FindMinInPartialOrder(root& theRoot,  ListBasicObjects<int> output)
-{ int theDimension= theRoot.size;
-  output.size=0;
-  ListBasicObjects<bool> MinimalOnes;
-  MinimalOnes.initFillInObject(theDimension, true);
+void DyckPaths::GenerateAllDyckPathsTypesABC()
+{ this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
+  int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+  this->SetSizeExpandOnTopNoObjectInit(1+theDimension);
+  this->TheObjects[0].thePathNodes.size=0;
+  this->TheObjects[0].thePathEdgesTaken.size=0;
+  this->initPathGraphTypesABC();
+  root tempRoot;
+  this->LastNonExploredIndex=1;
   for (int i=0; i<theDimension; i++)
-    if (!this->startingRoots.TheObjects[i].IsEqualToZero())
-    { ListBasicObjects<int>& larger=this->partialOrderSimpleRoots.TheObjects[i];
-      for (int j=0; j< larger.size; j++)
-        MinimalOnes.TheObjects[larger.TheObjects[j]]=false;
-    } else
-      MinimalOnes.TheObjects[i]=false;
-    for (int i=0; i<theDimension; i++)
-      if (MinimalOnes.TheObjects[i])
-        output.AddObjectOnTop(i);
+  { tempRoot.MakeEi(theDimension, i);
+    this->TheObjects[i+1].thePathNodes.SetSizeExpandOnTopLight(1);
+    this->TheObjects[i+1].thePathEdgesTaken.SetSizeExpandOnTopLight(1);
+    this->TheObjects[i+1].thePathNodes.TheObjects[0]=this->PositiveRoots.IndexOfObjectHash(tempRoot);
+    this->TheObjects[i+1].thePathEdgesTaken.TheObjects[0]=i+1;
+  }
+  this->GenerateAllDyckPathsTypesABCRecursive();
 }
 
-bool DyckPaths::SimpleRootAllowedToBeAdded(int simpleRootIndex, root& output)
-{ if (output.TheObjects[simpleRootIndex].IsPositive())
+bool DyckPaths::SimpleRootAllowedToBeAddedTypesABC(int simpleRootIndex, root& output)
+{ int lastNonZeroCoord=output.getIndexLastNonZeroCoordinate();
+  if (simpleRootIndex==lastNonZeroCoord+1)
     return true;
-  //if (this-
+  if (output.TheObjects[simpleRootIndex]>0)
+    return true;
+  return false;
+}
+
+bool DyckPaths::SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, root& output)
+{ int firstNonZeroCoord=output.getIndexFirstNonZeroCoordinate();
+  if (simpleRootIndex==firstNonZeroCoord)
+    if (output.TheObjects[simpleRootIndex]==1)
+      return true;
   return false;
 }
 
-bool DyckPaths::SimpleRootAllowedToBeSubtracted(int simpleRootIndex, root& output)
-{ if (output.TheObjects[simpleRootIndex].IsPositive())
-    return true;
-  return false;
+void DyckPaths::GenerateAllDyckPathsTypesABCRecursive()
+{ DyckPath tempPath;
+  while (this->LastNonExploredIndex<this->size)
+  { this->ComputeDebugString();
+    tempPath.Assign(this->TheObjects[this->LastNonExploredIndex]);
+    int NewNodeNumber=tempPath.thePathEdgesTaken.size+1;
+    tempPath.thePathEdgesTaken.SetSizeExpandOnTopLight(NewNodeNumber);
+    tempPath.thePathNodes.SetSizeExpandOnTopLight(NewNodeNumber);
+    for (int i=0; i<this->pathGraphPairsOfNodes.TheObjects[this->LastNonExploredIndex].size; i++)
+    { *tempPath.thePathEdgesTaken.LastObject()=this->pathGraphEdgeLabels.TheObjects[this->LastNonExploredIndex].TheObjects[i];
+      *tempPath.thePathNodes.LastObject()=this->pathGraphPairsOfNodes.TheObjects[this->LastNonExploredIndex].TheObjects[i];
+      this->AddObjectOnTop(tempPath);
+    }
+    this->LastNonExploredIndex++;
+  }
+}
+
+void DyckPaths::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  this->PositiveRoots.ElementToString(tempS);
+  out <<"Positive roots: "<< tempS;
+  for (int i=0; i<this->pathGraphPairsOfNodes.size; i++)
+  { out << "\nNode " << i<< " linked to: ";
+    for (int j=0; j<this->pathGraphPairsOfNodes.size; j++)
+      out << this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]<< ", ";
+    out << "\nCorresponding edges: ";
+    for (int j=0; j<this->pathGraphEdgeLabels.size; j++)
+      out << this->pathGraphEdgeLabels.TheObjects[i].TheObjects[j]<< ", ";
+  }
+  out <<"\nNumber of paths: "<< this->size;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS, *this);
+    out << "\nPath index " << i <<": "<< tempS;
+  }
+  output=out.str();
+}
+
+void DyckPath::ElementToString(std::string& output, DyckPaths& owner)
+{ std::stringstream out; std::string tempS;
+  out <<"\nNodes: ";
+  for (int i=0; i<this->thePathNodes.size; i++)
+    out << this->thePathNodes.TheObjects[i];
+  out <<"\nPaths: ";
+  for (int i=0; i<this->thePathEdgesTaken.size; i++)
+    out << this->thePathEdgesTaken.TheObjects[i];
+  out << "\nNodes (coordinate form): ";
+  for (int i=0; i<this->thePathNodes.size; i++)
+    out << owner.PositiveRoots.TheObjects[*this->thePathNodes.LastObject()].ElementToString() <<"->";
+  output=out.str();
 }

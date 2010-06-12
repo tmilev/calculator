@@ -1498,8 +1498,11 @@ public:
 	void MultiplyByLargeRational(const Rational& a);
 	void ComputeDebugString();
 	void MakeZero(int DesiredDimension);
+	void MakeEi(int DesiredDimension, int NonZeroIndex);
 	void Add(const root& r);
 	int getIndexFirstNonZeroCoordinate();
+	int getIndexLastNonZeroCoordinate();
+	void GetHeight(Rational& output);
 	void DivByInteger(int a);
 	void DivByLargeInt(LargeInt& a);
 	void DivByLargeIntUnsigned(LargeIntUnsigned& a);
@@ -1511,7 +1514,6 @@ public:
 	bool ProjectToAffineSpace(root& output);
 	bool HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas, roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs, bool IntegralCoefficientsOnly);
 	void DivByLargeRational(const Rational& a);
-	void GetHeight(Rational& output);
 	Rational GetHeight();
 	void ElementToString(std::string& output);
 	std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; };
@@ -1524,8 +1526,8 @@ public:
 	void FindLCMDenominators(LargeIntUnsigned& output);
 	int FindLCMDenominatorsTruncateToInt();
 	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5);
-	void InitFromIntegers(	int Dimension, int x1, int x2, int x3, int x4, int x5,int x6, int x7, int x8);
-	void InitFromIntegers(	int Dimension, int x1, int x2, int x3, int x4, int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
+	void InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x5,int x6, int x7, int x8);
+	void InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	void MultiplyByInteger(int a);
 	void MultiplyByLargeInt(LargeInt& right);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
@@ -1548,7 +1550,7 @@ public:
 	bool IsPositiveOrZero() const;
 	bool IsNegativeOrZero();
 	bool IsEqualToZero() const
-	{	for (int i=0;i<this->size;i++)
+	{ for (int i=0;i<this->size;i++)
       if (!this->TheObjects[i].IsEqualToZero())
         return false;
 		return true;
@@ -1574,10 +1576,10 @@ public:
   inline void operator-=(const root& right){ this->Subtract(right);};
 	inline bool operator!=(const root& right) const{ return !this->IsEqualTo(right);};
 	root operator*(int right)const
-	{	root tempRoot; tempRoot.Assign(*this); tempRoot.MultiplyByInteger(right); return tempRoot;
+	{ root tempRoot; tempRoot.Assign(*this); tempRoot.MultiplyByInteger(right); return tempRoot;
 	};
 	root operator/(const Rational& right)const
-	{	root tempRoot; tempRoot.Assign(*this); tempRoot.DivByLargeRational(right); return tempRoot;
+	{ root tempRoot; tempRoot.Assign(*this); tempRoot.DivByLargeRational(right); return tempRoot;
 	};
 };
 
@@ -5084,7 +5086,6 @@ public:
 	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
 	void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
 	void SimpleReflectionRootAlg(	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
-	void GetPartialOrderOnSimpleRootsInducedByDynkinDiagram(ListBasicObjects<ListBasicObjects<int > >& outputOrder, roots& outputSimpleBasis);
 	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
 	void RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output);
 	Rational RootScalarKillingFormMatrixRoot(const root& r1, const root& r2)

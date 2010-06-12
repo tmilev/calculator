@@ -246,7 +246,7 @@ void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft
 void ElementWeylAlgebra::MakeConst(int NumVars, Rational& theConst)
 { this->Nullify(NumVariables);
   Monomial<Rational> tempM;
-  tempM.init(this->NumVariables*2);
+  tempM.init((short)this->NumVariables*2);
   tempM.Coefficient.Assign(theConst);
   this->StandardOrder.AddMonomial(tempM);
 }
@@ -355,11 +355,11 @@ void ElementWeylAlgebra::SetNumVariablesPreserveExistingOnes(int newNumVars)
 { if (newNumVars<this->NumVariables)
     this->NumVariables=newNumVars;
   PolynomialRationalCoeff Accum;
-  Accum.Nullify(newNumVars*2);
+  Accum.Nullify((short)newNumVars*2);
   Accum.MakeActualSizeAtLeastExpandOnTop(this->StandardOrder.size);
   Monomial<Rational> tempM;
   for (int i=0; i<this->StandardOrder.size; i++)
-  { tempM.init(newNumVars*2);
+  { tempM.init((short)newNumVars*2);
     for (int j=0; j< this->NumVariables; j++)
     { tempM.degrees[j]=this->StandardOrder.TheObjects[i].degrees[j];
       tempM.degrees[j+newNumVars]=this->StandardOrder.TheObjects[i].degrees[j+this->NumVariables];
@@ -475,171 +475,6 @@ void ElementWeylAlgebra::Nullify(int NumVars)
 int DebugCounter=-1;
 WeylParser debugParser;
 
-void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  std::string tempS;
-  ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4, tempEl5, Accum;
-  out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
-  out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
-  out <<"\\begin{document}";
-/*  WeylParser theParser;
-  theParser.ParseAndCompute("x_1+x_1", tempS);*/
-  /*
-  if (DebugCounter==-1)
-    debugParser.ParserInit("[x_1x_2, x_3d_2]");
-  else
-    debugParser.ParseNoInit(DebugCounter, DebugCounter);
-  DebugCounter++;
-  debugParser.ComputeDebugString();
-  out << debugParser.DebugString;
-  out << "\n";
-  if (DebugCounter> debugParser.TokenBuffer.size)
-  { debugParser.ComputeNumberOfVariablesAndAdjustNodes();
-    debugParser.Evaluate(theGlobalVariables);
-  }
-  WeylParser theParser;
-  theParser.ParseAndCompute("[x_1x_2, x_3d_2]", tempS, theGlobalVariables);
-  debugParser.Value.ComputeDebugString(false,false);
-  out << debugParser.Value.DebugString;
-  out << "\n\n"<<tempS;*/
-
-  DyckPaths thePaths;
-  thePaths.AmbientWeyl.MakeArbitrary('A', 2);
-  thePaths.GenerateAllDyckPathsTypesABC();
-  thePaths.ComputeDebugString();
-  out << thePaths.DebugString;
-/*  tempEl1.Makexixj(0,1,4);
-  Rational tempRat=-1;
-  tempEl2.Makedidj(0,1,4);
-  tempEl2.TimesConstant(tempRat);
-  theElement.Assign(tempEl2);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl1, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.Assign(tempEl2);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl2, theGlobalVariables, tempS);
-  out << tempS;
-  tempEl3.Makexixj(0,0,4);
-  tempEl4.Makedidj(0,0,4);
-  tempEl4.TimesConstant(tempRat);
-  theElement.Assign(tempEl4);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
-  out <<tempS;
-  theElement.Assign(tempEl4);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl3, theGlobalVariables, tempS);
-  out <<tempS;
-  tempEl3.Makexidj(0,1,4);
-//  tempEl3.TimesConstant(tempRat);
-  tempEl4.Makexidj(1,0,4);
-  theElement.Assign(tempEl3);
-  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
-  out << tempS;*/
-  /*tempEl1.MakeGEpsPlusEpsInTypeD(0,1, 4);
-  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
-  tempEl3.MakeGEpsPlusEpsInTypeD(2,3, 4);
-  tempEl4.MakeGEpsMinusEpsInTypeD(2,3,4);
-  tempEl5.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
-  tempEl1.ComputeDebugString(false);
-  tempEl2.ComputeDebugString(false);
-  tempEl3.ComputeDebugString(false);
-  tempEl4.ComputeDebugString(false);
-  tempEl5.ComputeDebugString(false);
-
-
-
-  ElementWeylAlgebra theH, tempEl6;
-  theH.MakeGEpsPlusEpsInTypeD(0,2,4);
-  tempEl6.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
-  theH.LieBracketOnTheLeft(tempEl6, theGlobalVariables);
-  theH.ComputeDebugString(false);
-  out<<"\n\\begin{eqnarray*}&&h=";
-  out <<theH.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-  tempEl6.Assign(theH);
-  tempEl6.LieBracketOnTheLeft(theH, theGlobalVariables);
-  tempEl6.ComputeDebugString(false);
-  out<<"\n\\begin{eqnarray*}&&[h,h]=";
-  out <<tempEl6.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  out<<"\n\\begin{eqnarray*}&&-[h,g^{-\\varepsilon_1-\\varepsilon_3}]=\n\\\\";
-  out<<"&&-["<<theH.DebugString<<","<<tempEl5.DebugString <<"]=\n\\\\";
-  tempEl6.Assign(theH);
-  tempEl6.LieBracketOnTheLeft(tempEl5, theGlobalVariables);
-  tempEl6.ComputeDebugString(false);
-  out <<tempEl6.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  out<<"\n\\begin{eqnarray*}\n&&(g^{-\\varepsilon_1-\\varepsilon_3})^2 g ^{\\varepsilon_1+\\varepsilon_2}g ^{\\varepsilon_1-\\varepsilon_2}g ^{\\varepsilon_3+\\varepsilon_4}g ^{\\varepsilon_3-\\varepsilon_4}\\\\\n ";
-  out <<"&&=("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
-      << tempEl3.DebugString <<")("<< tempEl4.DebugString<<")=\\\\";
-  Accum.Assign(tempEl4);
-  Accum.MultiplyOnTheLeft(tempEl3, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out <<"&&("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
-      << Accum.DebugString<<")=";
-  out <<"\\end{eqnarray*}\n";
-  out<<"\n\\begin{eqnarray*}&&\n";
-  Accum.MultiplyOnTheLeft(tempEl2, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out <<"("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<< Accum.DebugString<<")=\\\\\n";
-  out <<"\\end{eqnarray*}\n";
-  out<<"\n\\begin{eqnarray*}&&\n";
-  Accum.MultiplyOnTheLeft(tempEl1, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out <<"("<<tempEl5.DebugString<<")^2("<< Accum.DebugString<<")=\\\\\n";
-  out <<"\\end{eqnarray*}\n";
-  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
-  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out<<"\n\\begin{eqnarray*}&&\n";
-  out <<Accum.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-
-
-  out<<"\n\\begin{eqnarray*}&&[h,\\bullet]=";
-  theH.LieBracketOnTheLeft(Accum, theGlobalVariables);
-  theH.ComputeDebugString(false);
-  out <<theH.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
-  tempEl2.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1-\\varepsilon_2}= ";
-  out <<tempEl2.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-  tempEl3.MakeGMinusEpsMinusEpsInTypeD(0,1,4);
-  tempEl3.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\ng^{-\\varepsilon_1-\\varepsilon_2}= ";
-  out <<tempEl3.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-  tempEl4.Assign(tempEl3);
-  tempEl4.MultiplyOnTheLeft(tempEl1,theGlobalVariables);
-  tempEl4.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1+\\varepsilon_2}g^{-\\varepsilon_1-\\varepsilon_2}= ";
-  out <<tempEl4.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  tempEl4.Assign(tempEl3);
-  tempEl4.LieBracketOnTheLeft(tempEl1,theGlobalVariables);
-  tempEl4.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\n[g^{\\varepsilon_1+\\varepsilon_2},g^{-\\varepsilon_1-\\varepsilon_2}]= ";
-  out <<tempEl4.DebugString;
-
-  out <<"\n\\end{eqnarray*}\n";
-*/
-
-  out<<"\\end{document}";
-  output=out.str();
-}
 
 
 void WeylParser::ParserInit(const std::string& input)
@@ -957,6 +792,7 @@ void DyckPath::Assign(const DyckPath& other)
 void DyckPaths::initPathGraphTypesABC()
 { root tempRoot, tempRoot2;
   int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+  this->AmbientWeyl.ComputeRho(true);
   this->PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
   this->pathGraphPairsOfNodes.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
   this->pathGraphEdgeLabels.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
@@ -967,15 +803,18 @@ void DyckPaths::initPathGraphTypesABC()
     root& theRoot= this->PositiveRoots.TheObjects[i];
     for (int j=0; j<theDimension; j++)
     { tempRoot.MakeEi(theDimension, j);
+      //tempRoot.ComputeDebugString();
       tempRoot2=theRoot-tempRoot;
+      //tempRoot2.ComputeDebugString();
       if (this->PositiveRoots.ContainsObjectHash(tempRoot2))
-        if (this->SimpleRootAllowedToBeSubtractedTypesABC(j, tempRoot))
+        if (this->SimpleRootAllowedToBeSubtractedTypesABC(j, theRoot))
         { this->pathGraphPairsOfNodes.TheObjects[i].AddObjectOnTop(this->PositiveRoots.IndexOfObjectHash(tempRoot2));
           this->pathGraphEdgeLabels.TheObjects[i].AddObjectOnTop(-j-1);
         }
       tempRoot2=theRoot+tempRoot;
+      //tempRoot2.ComputeDebugString();
       if (this->PositiveRoots.ContainsObjectHash(tempRoot2))
-        if (this->SimpleRootAllowedToBeAddedTypesABC(j, tempRoot))
+        if (this->SimpleRootAllowedToBeAddedTypesABC(j, theRoot))
         { this->pathGraphPairsOfNodes.TheObjects[i].AddObjectOnTop(this->PositiveRoots.IndexOfObjectHash(tempRoot2));
           this->pathGraphEdgeLabels.TheObjects[i].AddObjectOnTop(j+1);
         }
@@ -984,8 +823,7 @@ void DyckPaths::initPathGraphTypesABC()
 }
 
 void DyckPaths::GenerateAllDyckPathsTypesABC()
-{ this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
-  int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
+{ int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
   this->SetSizeExpandOnTopNoObjectInit(1+theDimension);
   this->TheObjects[0].thePathNodes.size=0;
   this->TheObjects[0].thePathEdgesTaken.size=0;
@@ -1004,7 +842,7 @@ void DyckPaths::GenerateAllDyckPathsTypesABC()
 
 bool DyckPaths::SimpleRootAllowedToBeAddedTypesABC(int simpleRootIndex, root& output)
 { int lastNonZeroCoord=output.getIndexLastNonZeroCoordinate();
-  if (simpleRootIndex==lastNonZeroCoord+1)
+  if (simpleRootIndex>=lastNonZeroCoord+1)
     return true;
   if (output.TheObjects[simpleRootIndex]>0)
     return true;
@@ -1020,17 +858,22 @@ bool DyckPaths::SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, roo
 }
 
 void DyckPaths::GenerateAllDyckPathsTypesABCRecursive()
-{ DyckPath tempPath;
+{ ListBasicObjects<int> pathEdgesTaken;
+	ListBasicObjects<int> pathNodes;
   while (this->LastNonExploredIndex<this->size)
-  { this->ComputeDebugString();
-    tempPath.Assign(this->TheObjects[this->LastNonExploredIndex]);
-    int NewNodeNumber=tempPath.thePathEdgesTaken.size+1;
-    tempPath.thePathEdgesTaken.SetSizeExpandOnTopLight(NewNodeNumber);
-    tempPath.thePathNodes.SetSizeExpandOnTopLight(NewNodeNumber);
-    for (int i=0; i<this->pathGraphPairsOfNodes.TheObjects[this->LastNonExploredIndex].size; i++)
-    { *tempPath.thePathEdgesTaken.LastObject()=this->pathGraphEdgeLabels.TheObjects[this->LastNonExploredIndex].TheObjects[i];
-      *tempPath.thePathNodes.LastObject()=this->pathGraphPairsOfNodes.TheObjects[this->LastNonExploredIndex].TheObjects[i];
-      this->AddObjectOnTop(tempPath);
+  { //this->ComputeDebugString();
+		pathEdgesTaken.AssignLight(this->TheObjects[this->LastNonExploredIndex].thePathEdgesTaken);
+		pathNodes.AssignLight(this->TheObjects[this->LastNonExploredIndex].thePathNodes);
+    int NewNodeNumber=pathEdgesTaken.size+1;
+    pathEdgesTaken.SetSizeExpandOnTopNoObjectInit(NewNodeNumber);
+    pathNodes.SetSizeExpandOnTopNoObjectInit(NewNodeNumber);
+    int currentRootIndex=*this->TheObjects[this->LastNonExploredIndex].thePathNodes.LastObject();
+    for (int i=0; i<this->pathGraphPairsOfNodes.TheObjects[currentRootIndex].size; i++)
+    { *pathEdgesTaken.LastObject()=this->pathGraphEdgeLabels.TheObjects[currentRootIndex].TheObjects[i];
+      *pathNodes.LastObject()=this->pathGraphPairsOfNodes.TheObjects[currentRootIndex].TheObjects[i];
+      this->SetSizeExpandOnTopNoObjectInit(this->size+1);
+      this->LastObject()->thePathEdgesTaken.CopyFromHeavy(pathEdgesTaken);
+      this->LastObject()->thePathNodes.CopyFromHeavy(pathNodes);
     }
     this->LastNonExploredIndex++;
   }
@@ -1039,19 +882,23 @@ void DyckPaths::GenerateAllDyckPathsTypesABCRecursive()
 void DyckPaths::ElementToString(std::string& output)
 { std::stringstream out; std::string tempS;
   this->PositiveRoots.ElementToString(tempS);
-  out <<"Positive roots: "<< tempS;
+  out <<"Positive roots:\n "<< tempS;
+  out <<"\nHalf sum of positive roots: " << this->AmbientWeyl.rho.ElementToString()<<"\n";
   for (int i=0; i<this->pathGraphPairsOfNodes.size; i++)
   { out << "\nNode " << i<< " linked to: ";
-    for (int j=0; j<this->pathGraphPairsOfNodes.size; j++)
+    for (int j=0; j<this->pathGraphPairsOfNodes.TheObjects[i].size; j++)
       out << this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]<< ", ";
+    out <<"\nCoordiante form: ";
+    for (int j=0; j<this->pathGraphPairsOfNodes.TheObjects[i].size; j++)
+			out << this->PositiveRoots.TheObjects[i].ElementToString()<<"->"<< this->PositiveRoots.TheObjects[this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]].ElementToString()<<"; "; 
     out << "\nCorresponding edges: ";
-    for (int j=0; j<this->pathGraphEdgeLabels.size; j++)
-      out << this->pathGraphEdgeLabels.TheObjects[i].TheObjects[j]<< ", ";
+    for (int j=0; j<this->pathGraphEdgeLabels.TheObjects[i].size; j++)
+      out << this->pathGraphEdgeLabels.TheObjects[i].TheObjects[j]<< ", ";    
   }
-  out <<"\nNumber of paths: "<< this->size;
+  out <<"\n\n\n*********************************************************************\nNumber of paths (including the zero path): "<< this->size;
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS, *this);
-    out << "\nPath index " << i <<": "<< tempS;
+    out << "\nPath index " << i <<": "<< tempS<<"\n";
   }
   output=out.str();
 }
@@ -1060,12 +907,182 @@ void DyckPath::ElementToString(std::string& output, DyckPaths& owner)
 { std::stringstream out; std::string tempS;
   out <<"\nNodes: ";
   for (int i=0; i<this->thePathNodes.size; i++)
-    out << this->thePathNodes.TheObjects[i];
+    out << this->thePathNodes.TheObjects[i]<<", ";
   out <<"\nPaths: ";
   for (int i=0; i<this->thePathEdgesTaken.size; i++)
-    out << this->thePathEdgesTaken.TheObjects[i];
-  out << "\nNodes (coordinate form): ";
+    out << this->thePathEdgesTaken.TheObjects[i]<<", ";
+  out << "\nCoordinate form: ";
   for (int i=0; i<this->thePathNodes.size; i++)
-    out << owner.PositiveRoots.TheObjects[*this->thePathNodes.LastObject()].ElementToString() <<"->";
+  {	out << owner.PositiveRoots.TheObjects[this->thePathNodes.TheObjects[i]].ElementToString();
+    if (i!=this->thePathNodes.size-1)
+			out <<"->";
+	}
+  output=out.str();
+}
+
+
+void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  std::string tempS;
+  ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4, tempEl5, Accum;
+  out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
+  out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
+  out <<"\\begin{document}";
+/*  WeylParser theParser;
+  theParser.ParseAndCompute("x_1+x_1", tempS);*/
+  /*
+  if (DebugCounter==-1)
+    debugParser.ParserInit("[x_1x_2, x_3d_2]");
+  else
+    debugParser.ParseNoInit(DebugCounter, DebugCounter);
+  DebugCounter++;
+  debugParser.ComputeDebugString();
+  out << debugParser.DebugString;
+  out << "\n";
+  if (DebugCounter> debugParser.TokenBuffer.size)
+  { debugParser.ComputeNumberOfVariablesAndAdjustNodes();
+    debugParser.Evaluate(theGlobalVariables);
+  }
+  WeylParser theParser;
+  theParser.ParseAndCompute("[x_1x_2, x_3d_2]", tempS, theGlobalVariables);
+  debugParser.Value.ComputeDebugString(false,false);
+  out << debugParser.Value.DebugString;
+  out << "\n\n"<<tempS;*/
+
+  DyckPaths thePaths;
+  thePaths.AmbientWeyl.MakeArbitrary('E', 8);
+  thePaths.GenerateAllDyckPathsTypesABC();
+  thePaths.ComputeDebugString();
+  out << thePaths.DebugString;
+/*  tempEl1.Makexixj(0,1,4);
+  Rational tempRat=-1;
+  tempEl2.Makedidj(0,1,4);
+  tempEl2.TimesConstant(tempRat);
+  theElement.Assign(tempEl2);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl1, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.Assign(tempEl2);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl2, theGlobalVariables, tempS);
+  out << tempS;
+  tempEl3.Makexixj(0,0,4);
+  tempEl4.Makedidj(0,0,4);
+  tempEl4.TimesConstant(tempRat);
+  theElement.Assign(tempEl4);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
+  out <<tempS;
+  theElement.Assign(tempEl4);
+  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
+  out << tempS;
+  theElement.LieBracketOnTheRightMakeReport(tempEl3, theGlobalVariables, tempS);
+  out <<tempS;
+  tempEl3.Makexidj(0,1,4);
+//  tempEl3.TimesConstant(tempRat);
+  tempEl4.Makexidj(1,0,4);
+  theElement.Assign(tempEl3);
+  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
+  out << tempS;*/
+  /*tempEl1.MakeGEpsPlusEpsInTypeD(0,1, 4);
+  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
+  tempEl3.MakeGEpsPlusEpsInTypeD(2,3, 4);
+  tempEl4.MakeGEpsMinusEpsInTypeD(2,3,4);
+  tempEl5.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
+  tempEl1.ComputeDebugString(false);
+  tempEl2.ComputeDebugString(false);
+  tempEl3.ComputeDebugString(false);
+  tempEl4.ComputeDebugString(false);
+  tempEl5.ComputeDebugString(false);
+
+
+
+  ElementWeylAlgebra theH, tempEl6;
+  theH.MakeGEpsPlusEpsInTypeD(0,2,4);
+  tempEl6.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
+  theH.LieBracketOnTheLeft(tempEl6, theGlobalVariables);
+  theH.ComputeDebugString(false);
+  out<<"\n\\begin{eqnarray*}&&h=";
+  out <<theH.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+  tempEl6.Assign(theH);
+  tempEl6.LieBracketOnTheLeft(theH, theGlobalVariables);
+  tempEl6.ComputeDebugString(false);
+  out<<"\n\\begin{eqnarray*}&&[h,h]=";
+  out <<tempEl6.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+  out<<"\n\\begin{eqnarray*}&&-[h,g^{-\\varepsilon_1-\\varepsilon_3}]=\n\\\\";
+  out<<"&&-["<<theH.DebugString<<","<<tempEl5.DebugString <<"]=\n\\\\";
+  tempEl6.Assign(theH);
+  tempEl6.LieBracketOnTheLeft(tempEl5, theGlobalVariables);
+  tempEl6.ComputeDebugString(false);
+  out <<tempEl6.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+  out<<"\n\\begin{eqnarray*}\n&&(g^{-\\varepsilon_1-\\varepsilon_3})^2 g ^{\\varepsilon_1+\\varepsilon_2}g ^{\\varepsilon_1-\\varepsilon_2}g ^{\\varepsilon_3+\\varepsilon_4}g ^{\\varepsilon_3-\\varepsilon_4}\\\\\n ";
+  out <<"&&=("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
+      << tempEl3.DebugString <<")("<< tempEl4.DebugString<<")=\\\\";
+  Accum.Assign(tempEl4);
+  Accum.MultiplyOnTheLeft(tempEl3, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out <<"&&("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
+      << Accum.DebugString<<")=";
+  out <<"\\end{eqnarray*}\n";
+  out<<"\n\\begin{eqnarray*}&&\n";
+  Accum.MultiplyOnTheLeft(tempEl2, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out <<"("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<< Accum.DebugString<<")=\\\\\n";
+  out <<"\\end{eqnarray*}\n";
+  out<<"\n\\begin{eqnarray*}&&\n";
+  Accum.MultiplyOnTheLeft(tempEl1, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out <<"("<<tempEl5.DebugString<<")^2("<< Accum.DebugString<<")=\\\\\n";
+  out <<"\\end{eqnarray*}\n";
+  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
+  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
+  Accum.ComputeDebugString(false);
+  out<<"\n\\begin{eqnarray*}&&\n";
+  out <<Accum.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+
+
+  out<<"\n\\begin{eqnarray*}&&[h,\\bullet]=";
+  theH.LieBracketOnTheLeft(Accum, theGlobalVariables);
+  theH.ComputeDebugString(false);
+  out <<theH.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
+  tempEl2.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1-\\varepsilon_2}= ";
+  out <<tempEl2.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+  tempEl3.MakeGMinusEpsMinusEpsInTypeD(0,1,4);
+  tempEl3.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\ng^{-\\varepsilon_1-\\varepsilon_2}= ";
+  out <<tempEl3.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+  tempEl4.Assign(tempEl3);
+  tempEl4.MultiplyOnTheLeft(tempEl1,theGlobalVariables);
+  tempEl4.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1+\\varepsilon_2}g^{-\\varepsilon_1-\\varepsilon_2}= ";
+  out <<tempEl4.DebugString;
+  out <<"\n\\end{eqnarray*}\n";
+
+  tempEl4.Assign(tempEl3);
+  tempEl4.LieBracketOnTheLeft(tempEl1,theGlobalVariables);
+  tempEl4.ComputeDebugString(false);
+  out <<"\\begin{eqnarray*}&&\n[g^{\\varepsilon_1+\\varepsilon_2},g^{-\\varepsilon_1-\\varepsilon_2}]= ";
+  out <<tempEl4.DebugString;
+
+  out <<"\n\\end{eqnarray*}\n";
+*/
+
+  out<<"\\end{document}";
   output=out.str();
 }

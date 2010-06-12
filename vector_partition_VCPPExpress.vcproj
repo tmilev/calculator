@@ -1588,18 +1588,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\rootFKFT.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\rootFKFT2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\rootFKFT3.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\wxWidgets_GUI.cpp"
 				>
 				<FileConfiguration

@@ -1849,24 +1849,29 @@ bool root::OurScalarProductIsZero(root& right)
 
 void root::Subtract(const root&r)
 { assert(r.size==this->size);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i].Subtract(r.TheObjects[i]);
 }
 
 void root::MakeZero(int DesiredDimension)
-{	this->SetSizeExpandOnTopLight(DesiredDimension);
-	for (int i=0;i<this->size;i++)
+{ this->SetSizeExpandOnTopLight(DesiredDimension);
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i].MakeZero();
+}
+
+void root::MakeEi(int DesiredDimension, int NonZeroIndex)
+{ this->MakeZero(DesiredDimension);
+  this->TheObjects[NonZeroIndex].MakeOne();
 }
 
 void root::AssignIntRoot(intRoot& r)
 { this->SetSizeExpandOnTopLight(r.dimension);
-	for (int i=0;i<r.dimension;i++)
+	for (int i=0; i<r.dimension; i++)
 		this->TheObjects[i].AssignInteger(r.elements[i]);
 }
 
 bool root::CheckForElementSanity()
-{ for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].CheckForElementSanity())
       return false;
   return true;
@@ -1874,11 +1879,11 @@ bool root::CheckForElementSanity()
 
 void root::AssignWithoutLastCoordinate(root& right)
 { this->SetSizeExpandOnTopLight(right.size-1);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i].Assign(right.TheObjects[i]);
 }
 
-void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5)
+void root::InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x5)
 { this->SetSizeExpandOnTopLight(5);
 	this->TheObjects[0].AssignInteger(x1);
 	this->TheObjects[1].AssignInteger(x2);
@@ -1888,7 +1893,7 @@ void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5)
 	this->SetSizeExpandOnTopLight(Dimension);
 }
 
-void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8)
+void root::InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8)
 { this->SetSizeExpandOnTopLight(8);
 	this->TheObjects[0].AssignInteger(x1);
 	this->TheObjects[1].AssignInteger(x2);
@@ -1901,7 +1906,7 @@ void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5,i
 	this->SetSizeExpandOnTopLight(Dimension);
 }
 
-void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5,int x6, int x7, int x8, int x9, int x10, int x11, int x12)
+void root::InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12)
 { this->SetSizeExpandOnTopLight(12);
 	this->TheObjects[0].AssignInteger(x1);
 	this->TheObjects[1].AssignInteger(x2);
@@ -1920,7 +1925,7 @@ void root::InitFromIntegers(int Dimension,int x1,int x2, int x3,int x4, int x5,i
 
 void root::GetHeight(Rational& output)
 { output.MakeZero();
-  for(int i=0;i<this->size;i++)
+  for(int i=0; i<this->size; i++)
     output.Add(this->TheObjects[i]);
 }
 
@@ -2006,12 +2011,18 @@ void root::DivByInteger(int a)
 }
 
 int root::getIndexFirstNonZeroCoordinate()
-{ for (int i =0; i<this->size; i++)
+{ for(int i=0; i<this->size; i++)
 		if (!this->TheObjects[i].IsEqualToZero())
 			return i;
 	return -1;
 }
 
+int root::getIndexLastNonZeroCoordinate()
+{ for(int i=this->size-1; i>=0; i--)
+		if (!this->TheObjects[i].IsEqualToZero())
+			return i;
+	return -1;
+}
 void root::DivByLargeInt(LargeInt& a)
 { for (int i =0; i<this->size; i++)
 		this->TheObjects[i].DivideByLargeInteger(a);

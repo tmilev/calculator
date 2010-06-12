@@ -9749,10 +9749,9 @@ int partFraction::HashFunction() const
 
 bool partFraction::operator==(const partFraction& right)
 {	if (this->size!= right.size) return false;
-	for (int i=0;i<this->size;i++)
-	{ if (! (this->TheObjects[i]==right.TheObjects[i]))
+	for (int i=0; i<this->size; i++)
+    if (! (this->TheObjects[i]==right.TheObjects[i]))
 			return false;
-	}
 /*	for(int i=0;i<root::AmbientDimension;i++)
 	{ if (this->RootShift[i]!=right.RootShift[i])
 			return false;
@@ -9787,21 +9786,18 @@ int partFractions::SizeWithoutDebugString()
 	Accum+=	this->HashedListBasicObjects<partFraction>::SizeWithoutObjects();
 	for (int i=0;i<this->ActualSize;i++)
 		Accum+=this->TheActualObjects[i].SizeWithoutDebugString();
-	Accum+=	sizeof(this->HighestIndex)+
-					sizeof(this->IndexLowestNonProcessed);
+	Accum+=	sizeof(this->HighestIndex)+sizeof(this->IndexLowestNonProcessed);
 	return Accum;
 }
 
-bool partFractions::AssureIndicatorRegularity
-  (GlobalVariables& theGlobalVariables, root& theIndicator)
+bool partFractions::AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator)
 {	roots tempRoots;
 	tempRoots.AssignHashedIntRoots(this->RootsToIndices);
 	if (theIndicator.IsEqualToZero())
   { tempRoots.Average(theIndicator, this->AmbientDimension);
     theIndicator.MultiplyByInteger(tempRoots.size);
   }
-  return	tempRoots.PerturbVectorToRegular
-		(	theIndicator, theGlobalVariables,theIndicator.size);
+  return	tempRoots.PerturbVectorToRegular(	theIndicator, theGlobalVariables,theIndicator.size);
 }
 
 void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariables, root* Indicator)
@@ -9832,8 +9828,7 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 }
 
 bool partFractions::ShouldIgnore(GlobalVariables& theGlobalVariables, root*Indicator)
-{ bool shouldIgnore=!this->TheObjects[this->IndexLowestNonProcessed].rootIsInFractionCone
-			(*this,Indicator,theGlobalVariables);
+{ bool shouldIgnore=!this->TheObjects[this->IndexLowestNonProcessed].rootIsInFractionCone(*this,Indicator,theGlobalVariables);
 	if (shouldIgnore)
 	{ if (this->flagDiscardingFractions)
 			this->PopIndexSwapWithLastHash(this->IndexLowestNonProcessed);
@@ -9865,8 +9860,7 @@ void partFractions::PrepareCheckSums(GlobalVariables& theGlobalVariables)
 	this->ComputeOneCheckSum(this->StartCheckSum,theGlobalVariables);
 }
 
-void partFractions::initFromOtherPartFractions
-  (partFractions& input, GlobalVariables& theGlobalVariables)
+void partFractions::initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables)
 { this->RootsToIndices.CopyFromHash(input.RootsToIndices);
 	this->IndexLowestNonProcessed=0;
 	this->IndexCurrentlyProcessed=0;
@@ -9978,8 +9972,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 			else
 			{//	if (ProblemCounter==17)
 				//	this->ComputeDebugString(theGlobalVariables);//				if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-				this->PopIndexHashAndAccount
-          ( this->IndexCurrentlyProcessed,theGlobalVariables, Indicator);
+				this->PopIndexHashAndAccount( this->IndexCurrentlyProcessed,theGlobalVariables, Indicator);
 //				{ this->ComputeDebugString();
 //				}
 			}
@@ -10033,8 +10026,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 	return false;
 }
 
-bool partFractions::splitClassicalRootSystem
-  (bool ShouldElongate, GlobalVariables& theGlobalVariables, root*Indicator)
+bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, root*Indicator)
 { this->IndexLowestNonProcessed=0;
 	this->PrepareIndicatorVariables();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic= true;
@@ -10053,9 +10045,7 @@ bool partFractions::splitClassicalRootSystem
 			//this->ComputeDebugString();
 			//tempF.ComputeDebugString();
 			if (! (tempF.reduceOnceTotalOrderMethod(*this,theGlobalVariables, Indicator)))
-			{ if (this->TheObjects[this->IndexLowestNonProcessed].IndicesNonZeroMults.size
-						-this->TheObjects[this->IndexLowestNonProcessed].GetNumProportionalVectorsClassicalRootSystems(*this)
-						>this->AmbientDimension)
+			{ if (this->TheObjects[this->IndexLowestNonProcessed].IndicesNonZeroMults.size-this->TheObjects[this->IndexLowestNonProcessed].GetNumProportionalVectorsClassicalRootSystems(*this)>this->AmbientDimension)
 				{ this->TheObjects[this->IndexLowestNonProcessed].ComputeDebugString(*this,theGlobalVariables);
 					this->NumRelevantNonReducedFractions++;
 				}
@@ -10080,8 +10070,7 @@ bool partFractions::splitClassicalRootSystem
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(Indicator, theGlobalVariables);
 }
 
-bool partFractions::CheckForMinimalityDecompositionWithRespectToRoot
-  (root *theRoot, GlobalVariables& theGlobalVariables)
+bool partFractions::CheckForMinimalityDecompositionWithRespectToRoot(root *theRoot, GlobalVariables& theGlobalVariables)
 {	for (int i=0;i<this->size;i++)
     if (this->TheObjects[i].IndicesNonZeroMults.size>this->AmbientDimension)
       if (this->TheObjects[i].rootIsInFractionCone(*this,theRoot,theGlobalVariables))
@@ -10091,10 +10080,9 @@ bool partFractions::CheckForMinimalityDecompositionWithRespectToRoot
 	return true;
 }
 
-void partFraction::initFromRootSystem
-	(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights)
-{	static IntegerPoly ComputationalBufferCoefficient;
-	static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+void partFraction::initFromRootSystem(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights)
+{	IntegerPoly ComputationalBufferCoefficient;
+	PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
 	if (theFraction.size==0)
 		return;
 	int theDimension = theFraction.TheObjects[0].dimension;
@@ -10146,8 +10134,7 @@ partFractions::partFractions()
 }
 
 void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables)
-{ this->ElementToString
-		(owner,this->DebugString, PolynomialOutputFormat::UsingLatexFormat,false,true, theGlobalVariables);
+{ this->ElementToString(owner,this->DebugString, PolynomialOutputFormat::UsingLatexFormat,false,true, theGlobalVariables);
 }
 
 /*void partFraction::InsertNewRootIndex(int index)
@@ -10155,8 +10142,7 @@ void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables& the
 	this->TheObjects[index].Multiplicities.TheObjects[0]=0;
 }*/
 
-void partFractions::PopIndexHashAndAccount
-  (int index, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator)
 { this->AccountPartFractionInternals(-1, index,Indicator, theGlobalVariables);
 	if (index>=this->IndexLowestNonProcessed )
 		this->PopIndexSwapWithLastHash(index);
@@ -10170,8 +10156,7 @@ void partFractions::PopIndexHashAndAccount
 	}
 }
 
-void partFractions::AccountPartFractionInternals
-  (int sign, int index, root* Indicator, GlobalVariables& theGlobalVariables)
+void partFractions::AccountPartFractionInternals(int sign, int index, root* Indicator, GlobalVariables& theGlobalVariables)
 {	partFraction& tempFrac= this->TheObjects[index];
 	if (tempFrac.rootIsInFractionCone(*this, Indicator, theGlobalVariables ))
 	{	if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
@@ -10200,8 +10185,7 @@ void partFractions::AccountPartFractionInternals
 		this->NumMonomialsInTheNumerators+=sign*tempFrac.CoefficientNonExpanded.size;
 }
 
-void partFraction::ReduceMonomialByMonomial
-	(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator)
 {	partFraction tempFrac;
 	//tempFrac.Assign(*this);
 	Rational StartCheckSum, theDiff;
@@ -10226,9 +10210,7 @@ void partFraction::ReduceMonomialByMonomial
 	tempMat.init(owner.AmbientDimension,(short) this->IndicesNonZeroMults.size);
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 		for (int j=0;j<owner.AmbientDimension;j++)
-			tempMat.elements[j][i].AssignInteger(owner.RootsToIndices
-				.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]*
-					this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
+			tempMat.elements[j][i].AssignInteger(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]*this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
 	if (this->flagAnErrorHasOccurredTimeToPanic)
 	{	this->ComputeDebugString(owner,theGlobalVariables);
 		tempMat.ComputeDebugString();
@@ -10243,7 +10225,7 @@ void partFraction::ReduceMonomialByMonomial
 	ListBasicObjects<int> thePowersSigned;
 	thePowersSigned.SetSizeExpandOnTopNoObjectInit(this->IndicesNonZeroMults.size);
 	thePowers.initIncomplete(this->IndicesNonZeroMults.size);
-	for (int k=0;k<this->Coefficient.size;k++)
+	for (int k=0; k<this->Coefficient.size; k++)
 	{ this->Coefficient.TheObjects[k].MonomialExponentToColumnMatrix(matColumn);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 			matColumn.ComputeDebugString();
@@ -10253,31 +10235,21 @@ void partFraction::ReduceMonomialByMonomial
 		tempFrac.AssignDenominatorOnly(*this);
 		tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
 		tempFrac.Coefficient.TheObjects[0].Assign(this->Coefficient.TheObjects[k]);
-		if (	tempMat.RowEchelonFormToLinearSystemSolution
-						(tempSel,matColumn,matLinComb))
+		if (	tempMat.RowEchelonFormToLinearSystemSolution(tempSel,matColumn,matLinComb))
 		{ tempMon.Assign(this->Coefficient.TheObjects[k]);
 			if (this->flagAnErrorHasOccurredTimeToPanic)
 				matLinComb.ComputeDebugString();
 			for (int i=0;i<matLinComb.NumRows;i++)
 			{	thePowers.MaxMultiplicities.TheObjects[i]=0;
-				if (	matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) ||
-							matLinComb.elements[i][0].IsNegative() )
+				if (	matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) || matLinComb.elements[i][0].IsNegative() )
         { int tempI=matLinComb.elements[i][0].floor();
           thePowersSigned.TheObjects[i]=tempI;
           if (tempI<0)
-						thePowers.MaxMultiplicities.TheObjects[i]=
-							this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
-								.GetMultiplicityLargestElongation();
+						thePowers.MaxMultiplicities.TheObjects[i]=this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetMultiplicityLargestElongation();
 					else
-						thePowers.MaxMultiplicities.TheObjects[i]=MathRoutines::Minimum
-							(	tempI,this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
-									.GetMultiplicityLargestElongation());
-					tempRoot=owner.RootsToIndices.TheObjects
-						[this->IndicesNonZeroMults.TheObjects[i]];
-					tempRoot.MultiplyByInteger
-						(	thePowersSigned.TheObjects[i]*
-							this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]]
-								.GetLargestElongation());
+						thePowers.MaxMultiplicities.TheObjects[i]=MathRoutines::Minimum(tempI, this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetMultiplicityLargestElongation());
+					tempRoot=owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]];
+					tempRoot.MultiplyByInteger(thePowersSigned.TheObjects[i]*this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
 					tempMon.DivideByExponentOnly(tempRoot);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 						tempMon.ComputeDebugString();
@@ -10306,8 +10278,7 @@ void partFraction::ReduceMonomialByMonomial
 					tempFrac.AssignDenominatorOnly(*this);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 						thePowers.ComputeDebugString();
-					tempFrac.ReduceMonomialByMonomialModifyOneMonomial
-						(owner, theGlobalVariables,thePowers,thePowersSigned,tempMon);
+					tempFrac.ReduceMonomialByMonomialModifyOneMonomial(owner, theGlobalVariables,thePowers,thePowersSigned,tempMon);
 					if (this->flagAnErrorHasOccurredTimeToPanic)
 						tempFrac.ComputeDebugString(owner,theGlobalVariables);
 					tempFrac.ReduceMonomialByMonomial(owner,-1,theGlobalVariables, Indicator);
@@ -10334,39 +10305,29 @@ void partFraction::ReduceMonomialByMonomial
 	}
 }
 
-void partFraction::ReduceMonomialByMonomialModifyOneMonomial
-	(	partFractions &Accum, GlobalVariables &theGlobalVariables,
-		SelectionWithDifferentMaxMultiplicities &thePowers,
-		ListBasicObjects<int> &thePowersSigned, Monomial<Integer> &input)
-{	IntegerPoly& theNumerator=
-		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial1;
-	IntegerPoly& tempP=
-		theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial2;
+void partFraction::ReduceMonomialByMonomialModifyOneMonomial(	partFractions &Accum, GlobalVariables &theGlobalVariables, SelectionWithDifferentMaxMultiplicities &thePowers, ListBasicObjects<int> &thePowersSigned, Monomial<Integer> &input)
+{	IntegerPoly& theNumerator=theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial1;
+	IntegerPoly& tempP=theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial2;
 	theNumerator.Nullify((short)Accum.AmbientDimension);
 	theNumerator.AddMonomial(input);
 	assert(thePowersSigned.size== thePowers.Multiplicities.size);
 	if (this->flagAnErrorHasOccurredTimeToPanic)
 		theNumerator.ComputeDebugString();
-	for (int j=0;j<thePowers.Multiplicities.size;j++)
+	for (int j=0; j<thePowers.Multiplicities.size; j++)
 	{ int currentIndexInFraction = this->IndicesNonZeroMults.TheObjects[j];
-		int currentElongation=
-			this->TheObjects[currentIndexInFraction].GetLargestElongation();
+		int currentElongation= this->TheObjects[currentIndexInFraction].GetLargestElongation();
 		int MultChange= thePowers.Multiplicities.TheObjects[j];
-		int MaxMultchange=
-			this->TheObjects[currentIndexInFraction].GetMultiplicityLargestElongation();
+		int MaxMultchange= this->TheObjects[currentIndexInFraction].GetMultiplicityLargestElongation();
 		intRoot tempRoot;
 		tempRoot= Accum.RootsToIndices.TheObjects[currentIndexInFraction];
 		tempRoot.MultiplyByInteger(currentElongation);
-		this->GetPolyReduceMonomialByMonomial
-			(	Accum, theGlobalVariables,tempRoot,thePowersSigned.TheObjects[j],MultChange,
-				MaxMultchange,tempP);
+		this->GetPolyReduceMonomialByMonomial(	Accum, theGlobalVariables, tempRoot, thePowersSigned.TheObjects[j], MultChange, MaxMultchange,tempP);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 			tempP.ComputeDebugString();
 		theNumerator.MultiplyBy(tempP);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 			theNumerator.ComputeDebugString();
-		this->TheObjects[currentIndexInFraction].AddMultiplicity
-			(-MultChange,currentElongation);
+		this->TheObjects[currentIndexInFraction].AddMultiplicity(-MultChange,currentElongation);
 	}
 	this->Coefficient.AssignPolynomial(theNumerator);
 	this->ComputeIndicesNonZeroMults();
@@ -10374,10 +10335,7 @@ void partFraction::ReduceMonomialByMonomialModifyOneMonomial
 		this->ComputeDebugString(Accum, theGlobalVariables);
 }
 
-void partFraction::GetPolyReduceMonomialByMonomial
-	(	partFractions& owner, GlobalVariables& theGlobalVariables,
-		intRoot& theExponent, int StartMonomialPower, int DenPowerReduction,
-		int startDenominatorPower,IntegerPoly& output)
+void partFraction::GetPolyReduceMonomialByMonomial(	partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower,IntegerPoly& output)
 { if (StartMonomialPower==0)
 	{	output.MakeNVarConst((short)owner.AmbientDimension,IOne);
 		return;
@@ -10386,8 +10344,7 @@ void partFraction::GetPolyReduceMonomialByMonomial
 	output.Nullify((short)owner.AmbientDimension);
 	if (StartMonomialPower>0)
 	{	if (DenPowerReduction!=startDenominatorPower)
-		{	tempMon.Coefficient.value= MathRoutines::NChooseK
-				(StartMonomialPower,DenPowerReduction);
+		{	tempMon.Coefficient.value= MathRoutines::NChooseK(StartMonomialPower,DenPowerReduction);
 			tempMon.Coefficient.value*=MathRoutines::parity(DenPowerReduction);
 			output.AddMonomial(tempMon);
 		} else
@@ -10396,24 +10353,21 @@ void partFraction::GetPolyReduceMonomialByMonomial
 			for (int k=0;k<=StartMonomialPower-startDenominatorPower;k++)
 			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(k);
 				tempMon.MakeFromRoot(IOne,tempRoot);
-				tempMon.Coefficient.value= MathRoutines::parity(startDenominatorPower)*
-					MathRoutines::NChooseK(StartMonomialPower-1-k,startDenominatorPower-1);
+				tempMon.Coefficient.value= MathRoutines::parity(startDenominatorPower)*MathRoutines::NChooseK(StartMonomialPower-1-k,startDenominatorPower-1);
 				output.AddMonomial(tempMon);
 			}
 		}
 	}
 	if (StartMonomialPower<0 )
 	{ if (DenPowerReduction!=startDenominatorPower)
-		{	tempMon.Coefficient.value= MathRoutines::NChooseK
-				(-StartMonomialPower-1+DenPowerReduction,DenPowerReduction);
+		{	tempMon.Coefficient.value= MathRoutines::NChooseK(-StartMonomialPower-1+DenPowerReduction,DenPowerReduction);
 			output.AddMonomial(tempMon);
 		} else
 		{ intRoot tempRoot;
 			for (int k=1;k<=-StartMonomialPower;k++)
 			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(-k);
 				tempMon.MakeFromRoot(IOne,tempRoot);
-				tempMon.Coefficient.value= MathRoutines::NChooseK
-					(startDenominatorPower-StartMonomialPower-1-k,startDenominatorPower-1);
+				tempMon.Coefficient.value= MathRoutines::NChooseK(startDenominatorPower-StartMonomialPower-1-k,startDenominatorPower-1);
 				output.AddMonomial(tempMon);
 			}
 		}
@@ -10428,48 +10382,36 @@ void partFractions::AddAndReduce(partFraction &f, GlobalVariables& theGlobalVari
 		this->AddAlreadyReduced(f,theGlobalVariables, Indicator);
 }
 
-void partFractions::AddAlreadyReduced
-  (partFraction &f, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGlobalVariables, root* Indicator)
 { bool shouldAttemptReduction=false;
 	int tempI=this->IndexOfObjectHash(f);
 	if (tempI==-1)
 	{ this->AddObjectOnTopHash(f);
 		tempI= this->size-1;
 		this->TheObjects[tempI].RelevanceIsComputed=false;
-		this->AccountPartFractionInternals
-      (1,tempI, Indicator, theGlobalVariables);
+		this->AccountPartFractionInternals(1, tempI, Indicator, theGlobalVariables);
 	}
 	else
-	{ IntegerPoly& ComputationalBufferCoefficient1 =
-			theGlobalVariables.IPComputationalBufferAddPartFraction1;
-		IntegerPoly& ComputationalBufferCoefficient2 =
-			theGlobalVariables.IPComputationalBufferAddPartFraction2;
-		PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded1
-			=theGlobalVariables.PPFNAddPartFraction1;
-		PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded2
-			=theGlobalVariables.PPFNAddPartFraction2;
+	{ IntegerPoly& ComputationalBufferCoefficient1 =theGlobalVariables.IPComputationalBufferAddPartFraction1;
+		IntegerPoly& ComputationalBufferCoefficient2 =theGlobalVariables.IPComputationalBufferAddPartFraction2;
+		PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded1=theGlobalVariables.PPFNAddPartFraction1;
+		PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded2=theGlobalVariables.PPFNAddPartFraction2;
 		//Accounting
 		this->AccountPartFractionInternals(-1,tempI, Indicator, theGlobalVariables);
 		//end of accounting
 		ComputationalBufferCoefficient1.AssignPolynomialLight(this->TheObjects[tempI].Coefficient);
 		ComputationalBufferCoefficient2.AssignPolynomialLight(f.Coefficient);
-		this->TheObjects[tempI].CoefficientNonExpanded.ComputePolyPartFractionNumerator
-			(ComputationalBufferCoefficientNonExpanded1,this->AmbientDimension);
-		f.CoefficientNonExpanded.ComputePolyPartFractionNumerator
-			(ComputationalBufferCoefficientNonExpanded2,this->AmbientDimension);
-		ComputationalBufferCoefficient1.AddPolynomial
-			(ComputationalBufferCoefficient2);
+		this->TheObjects[tempI].CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded1,this->AmbientDimension);
+		f.CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded2,this->AmbientDimension);
+		ComputationalBufferCoefficient1.AddPolynomial(ComputationalBufferCoefficient2);
 		if (ComputationalBufferCoefficient1.EvaluateAtOne()==0)
 		{	if (this->flagAnErrorHasOccurredTimeToPanic)
 				ComputationalBufferCoefficient1.ComputeDebugString();
 			shouldAttemptReduction=true;
 		}
-		ComputationalBufferCoefficientNonExpanded1.AddPolynomial
-			(ComputationalBufferCoefficientNonExpanded2);
-		this->TheObjects[tempI].Coefficient.AssignPolynomial
-			(ComputationalBufferCoefficient1);
-		this->TheObjects[tempI].CoefficientNonExpanded.AssignPolyPartFractionNumerator
-			(ComputationalBufferCoefficientNonExpanded1);
+		ComputationalBufferCoefficientNonExpanded1.AddPolynomial (ComputationalBufferCoefficientNonExpanded2);
+		this->TheObjects[tempI].Coefficient.AssignPolynomial (ComputationalBufferCoefficient1);
+		this->TheObjects[tempI].CoefficientNonExpanded.AssignPolyPartFractionNumerator (ComputationalBufferCoefficientNonExpanded1);
 		this->AccountPartFractionInternals(1,tempI,Indicator,theGlobalVariables);
 	}
 	if (this->flagSplitTestModeNoNumerators)
@@ -10487,27 +10429,17 @@ void partFractions::AddAlreadyReduced
 	}
 }
 
-int partFractions::ElementToString(std::string& output, bool LatexFormat,
-																		bool includeVPsummand, bool includeNumerator,
-																		GlobalVariables& theGlobalVariables)
-{ static MatrixIntTightMemoryFit tempMat;
-	return this->ElementToStringBasisChange
-		(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator, theGlobalVariables);
+int partFractions::ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
+{ MatrixIntTightMemoryFit tempMat;
+	return this->ElementToStringBasisChange (tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator, theGlobalVariables);
 }
 
-int partFractions::ElementToStringOutputToFile
-	(	std::fstream& output, bool LatexFormat, bool includeVPsummand,
-		bool includeNumerator, GlobalVariables& theGlobalVariables)
-{ static MatrixIntTightMemoryFit tempMat;
-	return this->ElementToStringBasisChangeOutputToFile
-		(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator,theGlobalVariables);
+int partFractions::ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
+{ MatrixIntTightMemoryFit tempMat;
+	return this->ElementToStringBasisChangeOutputToFile(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator,theGlobalVariables);
 }
 
-int partFractions::ElementToStringBasisChange
-	(	MatrixIntTightMemoryFit& VarChange,
-		bool UsingVarChange, std::string& output,
-		bool LatexFormat,bool includeVPsummand,
-		bool includeNumerator, GlobalVariables& theGlobalVariables )
+int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables )
 { std::stringstream out;
 	std::string tempS;
 	int TotalLines=0;
@@ -10517,9 +10449,7 @@ int partFractions::ElementToStringBasisChange
 	int LastCutOff=0;
 	for (int i=0;i<this->size;i++)
 	{ if (this->TheObjects[i].Coefficient.size>0 )
-		{ TotalLines+=this->TheObjects[i].ElementToStringBasisChange
-				(	*this, VarChange, UsingVarChange,tempS, LatexFormat,
-					includeVPsummand,includeNumerator,theGlobalVariables);
+		{ TotalLines+=this->TheObjects[i].ElementToStringBasisChange(*this, VarChange, UsingVarChange,tempS, LatexFormat, includeVPsummand,includeNumerator,theGlobalVariables);
 			if (LatexFormat)
 				out <<"&&";
 			if (tempS[0]!='-'){out<<"+";}
@@ -10530,15 +10460,13 @@ int partFractions::ElementToStringBasisChange
 			}
 			else
 			{out <<"\n";}
-			if	( LatexFormat &&
-						(TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
+			if	( LatexFormat &&(TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
 			{ out<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
 				LastCutOff=TotalLines;
 			}
 		}
 		if (TotalLines>this->flagMaxNumStringOutputLines)
-		{ out<< "\n Number of lines exceeded " << this->flagMaxNumStringOutputLines
-				 << "; The rest of the output was suppressed.";
+		{ out<< "\n Number of lines exceeded " << this->flagMaxNumStringOutputLines<< "; The rest of the output was suppressed.";
 			break;
 		}
 	}
@@ -10554,23 +10482,18 @@ int partFractions::ElementToStringBasisChange
 	return TotalLines;
 }
 
-int partFractions::ElementToStringBasisChangeOutputToFile
-	(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange,
-		std::fstream& output, bool LatexFormat,bool includeVPsummand,
-		bool includeNumerator,GlobalVariables& theGlobalVariables)
+int partFractions::ElementToStringBasisChangeOutputToFile(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { std::string tempS;
 	int TotalLines=0;
 	PolyFormatLocal.ExtraLinesCounterLatex=0;
 	if (LatexFormat)
-	{ output << "\\begin{eqnarray*}\n";}
+    output << "\\begin{eqnarray*}\n";
 	int LastCutOff=0;
 	for (int i=0;i<this->size;i++)
 	{ if (this->TheObjects[i].Coefficient.size>0 )
-		{ TotalLines+=this->TheObjects[i].ElementToStringBasisChange
-				(	*this,VarChange, UsingVarChange,tempS, LatexFormat,
-					includeVPsummand,includeNumerator, theGlobalVariables);
+		{ TotalLines+=this->TheObjects[i].ElementToStringBasisChange(	*this,VarChange, UsingVarChange,tempS, LatexFormat, includeVPsummand,includeNumerator, theGlobalVariables);
 			if (LatexFormat)
-			{ output <<"&&"; }
+        output <<"&&";
 			if (tempS[0]!='-'){output<<"+";}
 			output<<tempS;
 			if (LatexFormat)
@@ -10578,10 +10501,8 @@ int partFractions::ElementToStringBasisChangeOutputToFile
 				TotalLines++;
 			}
 			else
-			{output <<"\n";}
-			if	( LatexFormat &&
-						(TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine
-					)
+        output <<"\n";
+			if	( LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
 			{ output<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
 				LastCutOff=TotalLines;
 			}
@@ -10601,8 +10522,7 @@ int partFraction::ControlLineSizeFracs(std::string& output)
 	int LastCutOffIndex=0;
 	int NumLinesAdded=0;
 	for (int i=0;i<numCutOffs;i++)
-	{ for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength;
-					j< ((int) output.size())-1;j++)
+	{ for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength; j< ((int) output.size())-1; j++)
 		{ if (output[j]=='\\'&&output[j+1]=='f')
 			{ output.insert(j,"\\\\\n&&");
 				NumLinesAdded++;
@@ -10618,9 +10538,8 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 { int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
 	int LastCutOffIndex=0;
 	int NumLinesAdded=0;
-	for (int i=0;i<numCutOffs;i++)
-	{ for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength;
-					j<(int)(output.size())-1;j++)
+	for (int i=0; i<numCutOffs; i++)
+	{ for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength; j<(int)(output.size())-1; j++)
 		{ if ((output[j]=='+'||output[j]=='-')&&output[j-1]!='{')
 			{ output.insert(j,"\\\\\n&&");
 				NumLinesAdded++;
@@ -10636,24 +10555,19 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 #endif
 void partFractions::MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindow reportFunction)
 { std::stringstream out1,out2,out3;
-	out1<< this->NumberRelevantReducedFractions << " relevant reduced + "
-			<< this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
+	out1<< this->NumberRelevantReducedFractions << " relevant reduced + "<< this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
 	if (this->NumRelevantNonReducedFractions!=0)
 	{ out1<<" + " << this->NumRelevantNonReducedFractions <<" relevant unreduced ";
 	}
 	out1<<" out of "<<this->size <<" total fractions";
 	IndicatorWindowGlobalVariables.ProgressReportString1= out1.str();
-	out2<<this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
-			<< this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
-			<< this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions
-			<<" out of "<<this->NumMonomialsInTheNumerators
+	out2<<this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + " << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
+			<< this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions <<" out of "<<this->NumMonomialsInTheNumerators
 			<<" total monomials in the numerators";
 	IndicatorWindowGlobalVariables.ProgressReportString2= out2.str();
 	if (this->NumGeneratorsInTheNumerators!=0)
-	{	out3<<this->NumGeneratorsRelevenatFractions << " relevant reduced + "
-			<< this->NumGeneratorsIrrelevantFractions << " disjoint = "
-			<< this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions
-			<<" out of "<<this->NumGeneratorsInTheNumerators
+	{	out3<<this->NumGeneratorsRelevenatFractions << " relevant reduced + " << this->NumGeneratorsIrrelevantFractions << " disjoint = "
+			<< this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions <<" out of "<<this->NumGeneratorsInTheNumerators
 			<<" total generators in the numerators";
 		IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
 	} else
@@ -10666,8 +10580,7 @@ void partFractions::MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindo
 void partFractions::MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction)
 { this->NumProcessedForVPFfractions++;
 	std::stringstream out2, out3;
-	out2	<< "Processed " << this->NumProcessedForVPFfractions<<" out of " <<this->NumberRelevantReducedFractions
-				<< " relevant fractions";
+	out2	<< "Processed " << this->NumProcessedForVPFfractions<<" out of " <<this->NumberRelevantReducedFractions << " relevant fractions";
 //	out3	<< "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //				<< " relevant fractions";
 	::IndicatorWindowGlobalVariables.ProgressReportString2= out2.str();
@@ -10740,8 +10653,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 {	partFraction tempFrac;
 	for (int i=0;i<this->size;i++)
 	{ tempFrac.Assign(this->TheObjects[i]);
-		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem
-			(*this,Indicator,theGlobalVariables,this->AmbientDimension))
+		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem(*this,Indicator,theGlobalVariables,this->AmbientDimension))
 		{	this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
 			this->AddAlreadyReduced(tempFrac,theGlobalVariables, Indicator);
 		}
@@ -10777,8 +10689,7 @@ bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalV
 	return(tempSize>=tempI);
 }
 
-bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile,
-		bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance)
+bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance)
 {	if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
 	{ IndicatorWindowGlobalVariables.flagRootIsModified=true;
 	  IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(newIndicator);
@@ -10789,8 +10700,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomi
     IndicatorWindowGlobalVariables.flagRootIsModified=false;
   if(ResetRelevance)
     this->ResetRelevanceIsComputed();
-  if (!this->CheckForMinimalityDecompositionWithRespectToRoot
-        (&newIndicator,theGlobalVariables))
+  if (!this->CheckForMinimalityDecompositionWithRespectToRoot(&newIndicator,theGlobalVariables))
     return false;
 	this->NumProcessedForVPFfractions=0;
 	Rational oldCheckSum;
@@ -10816,15 +10726,11 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomi
 		//{ this->TheObjects[i].ComputeDebugString();
 		//}
 		if (this->TheObjects[i].rootIsInFractionCone(*this,&newIndicator,theGlobalVariables))
-		{ this->TheObjects[i].partFractionToPartitionFunctionSplit
-				(*this,tempQP,true,StoreToFile,theGlobalVariables,this->AmbientDimension);
+		{ this->TheObjects[i].partFractionToPartitionFunctionSplit(*this,tempQP,true,StoreToFile,theGlobalVariables,this->AmbientDimension);
 			if (StoreToFile)
-			{ this->WriteToFileComputedContributions
-          (partFractions::ComputedContributionsList,theGlobalVariables);
-				FileSetPutPointerToEnd
-					(partFractions::ComputedContributionsList, StoreToFile);
-				FileSetPutPointerToEnd
-					(partFraction::TheBigDump, StoreToFile);
+			{ this->WriteToFileComputedContributions(partFractions::ComputedContributionsList,theGlobalVariables);
+				FileSetPutPointerToEnd(partFractions::ComputedContributionsList, StoreToFile);
+				FileSetPutPointerToEnd(partFraction::TheBigDump, StoreToFile);
 			}
 /*			if(partFraction::MakingConsistencyCheck)
 			{	Rational tempLRat2, tempLRat3, tempLRat4;
@@ -10879,31 +10785,25 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomi
 	}*/
 	if (StoreToFile)
 	{ partFraction::TheBigDump.flush();
-
 	}
 	return true;
 }
 
 void partFractions::ComputeDebugString(GlobalVariables& theGlobalVariables)
-{ this->ElementToString
-		(	this->DebugString,PolynomialOutputFormat::UsingLatexFormat,
-			false,true,theGlobalVariables);
+{ this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
 }
 
 void partFractions::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
-{ this->ElementToString
-		(	output,PolynomialOutputFormat::UsingLatexFormat,
-			false,true,theGlobalVariables);
+{ this->ElementToString(output,PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
 }
 
 
 void partFractions::ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables)
-{ this->ElementToString
-		(this->DebugString,PolynomialOutputFormat::UsingLatexFormat,false,false,theGlobalVariables);
+{ this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, false, theGlobalVariables);
 }
 
 void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables)
-{ this->ElementToString(this->DebugString,PolynomialOutputFormat::UsingLatexFormat,true,true,theGlobalVariables);
+{ this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat,true,true,theGlobalVariables);
 }
 
 void partFractions::WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables)
@@ -10980,8 +10880,7 @@ void partFractions::ComputeSupport( ListBasicObjects<roots>& output, std::string
 		tempRoots.ComputeDebugString();
 		for (int j=0;j<this->TheObjects[i].IndicesNonZeroMults.size;j++)
 		{ root tempRoot, tempRoot3;
-			tempRoot.AssignIntRoot(this->RootsToIndices.
-					TheObjects[this->TheObjects[i].IndicesNonZeroMults.TheObjects[j]]);
+			tempRoot.AssignIntRoot(this->RootsToIndices.TheObjects[this->TheObjects[i].IndicesNonZeroMults.TheObjects[j]]);
 			intRoot tempRoot2;
 			tempRoot.DivByInteger(2);
 			tempRoot2.AssignRoot(tempRoot);
@@ -10999,15 +10898,10 @@ void partFractions::ComputeSupport( ListBasicObjects<roots>& output, std::string
 }
 
 void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange, GlobalVariables&  theGlobalVariables)
-{ this->ElementToStringBasisChange( VarChange,true,
-																		this->DebugString,
-																		PolynomialOutputFormat::UsingLatexFormat,false,true, theGlobalVariables);
+{ this->ElementToStringBasisChange( VarChange, true, this->DebugString, PolynomialOutputFormat::UsingLatexFormat,false,true, theGlobalVariables);
 }
 
-void partFractions::ComputeKostantFunctionFromWeylGroup
-				(	char WeylGroupLetter, int WeylGroupNumber,
-					QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData,
-					bool StoreToFile, GlobalVariables&  theGlobalVariables)
+void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables)
 {	intRoots theBorel,theVPbasis;
 	intRoot tempWeight;
 	roots tempRoots;
@@ -11033,19 +10927,13 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
 	{ tempW.MakeF4();
 		partFractions::ListBasicObjectsActualSizeIncrement=35000;
 	}
-	if (WeylGroupLetter=='A'||
-			WeylGroupLetter=='B'||
-			WeylGroupLetter=='C'||
-			WeylGroupLetter=='D'||
-			WeylGroupLetter=='F')
+	if (WeylGroupLetter=='A'|| WeylGroupLetter=='B'|| WeylGroupLetter=='C'|| WeylGroupLetter=='D'|| WeylGroupLetter=='F')
 	{	for (int i=0;i<this->AmbientDimension;i++)
-		{ tempWeight.elements[i]=MathRoutines::KToTheNth(8,this->AmbientDimension-i-1);
-		}
+      tempWeight.elements[i]=MathRoutines::KToTheNth(8,this->AmbientDimension-i-1);
 	}
 	else
 	{	for (int i=0;i<this->AmbientDimension;i++)
-		{ tempWeight.elements[i]=1;//KToTheNth(8,root::AmbientDimension-i-1);
-		}
+      tempWeight.elements[i]=1;//KToTheNth(8,root::AmbientDimension-i-1);
 	}
 	//tempW.ComputeWeylGroup();
 	tempW.ComputeRootsOfBorel(tempRoots);
@@ -11142,8 +11030,7 @@ int oneFracWithMultiplicitiesAndElongations::HashFunction() const
 { return this->GetTotalMultiplicity();
 }
 
-void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator
-	(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent)
+void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent)
 { assert(MultiplicityIndex<this->Multiplicities.size);
 	Monomial<Integer> tempM;
 	output.MakeNVarConst((short)theExponent.dimension,IOne);
@@ -11182,10 +11069,9 @@ int oneFracWithMultiplicitiesAndElongations::GetTotalMultiplicity() const
 
 int oneFracWithMultiplicitiesAndElongations::IndexLargestElongation()
 { int result=0;
-	for (int i=1;i<this->Elongations.size;i++)
-	{ if (this->Elongations.TheObjects[i]>this->Elongations.TheObjects[result])
+	for (int i=1; i<this->Elongations.size; i++)
+    if (this->Elongations.TheObjects[i]>this->Elongations.TheObjects[result])
 			result=i;
-	}
 	return result;
 }
 
@@ -11220,12 +11106,10 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& outpu
 		tempRat.Subtract(tempRat2);
 		tempRat.RaiseToPower(this->Multiplicities.TheObjects[i]);
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-		{ tempRat.ElementToString(tempS);
-		}
+      tempRat.ElementToString(tempS);
 		output.MultiplyBy(tempRat);
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-		{ output.ElementToString(tempS);
-		}
+      output.ElementToString(tempS);
 	}
 	if (output.IsEqualToZero())
 	{ std::string tempS;
@@ -11233,32 +11117,28 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& outpu
 	}
 	output.Invert();
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-	{ output.ElementToString(tempS);
-	}
+    output.ElementToString(tempS);
 }
 
 int oneFracWithMultiplicitiesAndElongations::GetMultiplicityLargestElongation()
 { int result=0;
 	int LargestElongationFound=0;
-	for (int i=0;i<this->Elongations.size;i++)
-	{ if (LargestElongationFound<this->Elongations.TheObjects[i])
+	for (int i=0; i<this->Elongations.size; i++)
+    if (LargestElongationFound<this->Elongations.TheObjects[i])
 		{ LargestElongationFound= this->Elongations.TheObjects[i];
 			result= this->Multiplicities.TheObjects[i];
 		}
-	}
 	return result;
 }
 
-void oneFracWithMultiplicitiesAndElongations::AddMultiplicity
-	(int MultiplicityIncrement, int Elongation)
+void oneFracWithMultiplicitiesAndElongations::AddMultiplicity	(int MultiplicityIncrement, int Elongation)
 { if (MultiplicityIncrement==0) return;
 	int ElongationIndex=-1;
-	for (int i=0;i<this->Elongations.size;i++)
-	{ if (this->Elongations.TheObjects[i]==Elongation)
+	for (int i=0; i<this->Elongations.size; i++)
+    if (this->Elongations.TheObjects[i]==Elongation)
 		{ ElongationIndex=i;
 			break;
 		}
-	}
 	if (ElongationIndex==-1)
 	{ this->Elongations.AddObjectOnTopLight(Elongation);
 		int tempI=0;
@@ -11273,9 +11153,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity
 	}
 }
 
-void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
-	(	partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange,
-		std::string& output, bool LatexFormat, int indexInFraction, int theDimension)
+void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension)
 { std::stringstream  out;
 	std::string tempS;
 	intRoot tempRoot2, tempRoot;
@@ -11286,8 +11164,7 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
 		for (int i=0;i<NumCoords;i++)
 		{ tempRoot.elements[i]=0;
 			for (int j=0;j<theDimension;j++)
-			{ tempRoot.elements[i]+=VarChange.elements[i][j]*tempRoot2.elements[j];
-			}
+        tempRoot.elements[i]+=VarChange.elements[i][j]*tempRoot2.elements[j];
 		}
 	}
 	else
@@ -11314,12 +11191,10 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
 	output= out.str();
 }
 
-void oneFracWithMultiplicitiesAndElongations::ElementToStringBasisChange
-			( partFractions& owner, MatrixIntTightMemoryFit& VarChange,
-				bool UsingVarChange, std::string& output,
-				bool LatexFormat, int index, int theDimension)
+void oneFracWithMultiplicitiesAndElongations::ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int index, int theDimension)
 {	if (this->Multiplicities.size==0)
-	{	output.clear(); return;
+	{	output.clear();
+    return;
 	}
 	std::string tempS;
 	std::stringstream out;
@@ -11331,8 +11206,7 @@ void oneFracWithMultiplicitiesAndElongations::ElementToStringBasisChange
 	output= out.str();
 }
 
-bool oneFracWithMultiplicitiesAndElongations::operator ==
-			(oneFracWithMultiplicitiesAndElongations &right)
+bool oneFracWithMultiplicitiesAndElongations::operator ==	(oneFracWithMultiplicitiesAndElongations &right)
 {	if (this->Elongations.size!=right.Elongations.size)
 		return false;
 	for (int i=0;i<this->Elongations.size;i++)
@@ -11707,8 +11581,8 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, roo
 	alphaShift.MakeZero(); lengthA.MakeZero();
 	if (RhoAction)
 		result.Add(this->rho);
-	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
-		for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
+	for (int i=0; i<this->KillingFormMatrix.NumRows; i++)
+		for (int j=0; j<this->KillingFormMatrix.NumCols; j++)
 		{ tempRat.Assign(result.TheObjects[j]);
 			tempRat.MultiplyBy(alpha.TheObjects[i]);
 			tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[i][j]*2);
@@ -11720,7 +11594,7 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, roo
 		}
 	alphaShift.DivideBy(lengthA);
 	Output.SetSizeExpandOnTopLight(this->KillingFormMatrix.NumRows);
-	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
+	for (int i=0; i<this->KillingFormMatrix.NumCols; i++)
 	{ tempRat.Assign(alphaShift);
 		tempRat.MultiplyBy(alpha.TheObjects[i]);
 		tempRat.Add(result.TheObjects[i]);
@@ -11731,7 +11605,7 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, roo
 }
 
 void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
-{	static Rational coefficient, tempRat;
+{	Rational coefficient, tempRat;
 	coefficient.Assign(DualSpaceElement.TheObjects[index]);
 	coefficient.DivideByInteger(this->KillingFormMatrix.elements[index][index]);
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
@@ -11741,9 +11615,8 @@ void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
 	}
 }
 
-void WeylGroup::SimpleReflectionRoot
-	(int index, root& theRoot,bool RhoAction, bool UseMinusRho)
-{ static Rational alphaShift, tempRat;
+void WeylGroup::SimpleReflectionRoot(int index, root& theRoot,bool RhoAction, bool UseMinusRho)
+{ Rational alphaShift, tempRat;
 	alphaShift.MakeZero();
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
 	{ tempRat.Assign(theRoot.TheObjects[i]);
@@ -11764,11 +11637,9 @@ void WeylGroup::SimpleReflectionRoot
 	theRoot.TheObjects[index].Add(alphaShift);
 }
 
-void WeylGroup::SimpleReflectionRootAlg
-					(	int index, PolynomialsRationalCoeff& theRoot,
-						bool RhoAction)
+void WeylGroup::SimpleReflectionRootAlg( int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
 {	int lengthA=this->KillingFormMatrix.elements[index][index];
-	static PolynomialRationalCoeff AscalarB, tempP;
+	PolynomialRationalCoeff AscalarB, tempP;
 	AscalarB.Nullify((short)this->KillingFormMatrix.NumRows);
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
 	{ tempP.Nullify((short)this->KillingFormMatrix.NumRows);
@@ -11782,24 +11653,20 @@ void WeylGroup::SimpleReflectionRootAlg
 	if (RhoAction){theRoot.TheObjects[index].AddConstant(RMOne);}
 }
 
-void WeylGroup::ActOnAffineHyperplaneByGroupElement
-	(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
+void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
 { int tempI= this->TheObjects[index].size;
-	for (int i=0; i<tempI;i++)
-	{	this->SimpleReflectionRoot
-			(this->TheObjects[index].TheObjects[i],output.affinePoint,RhoAction, UseMinusRho);
+	for (int i=0; i<tempI; i++)
+	{	this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i],output.affinePoint,RhoAction, UseMinusRho);
 //		output.affinePoint.ComputeDebugString();
-		this->SimpleReflectionDualSpace
-			(this->TheObjects[index].TheObjects[tempI-i-1],output.normal);
+		this->SimpleReflectionDualSpace(this->TheObjects[index].TheObjects[tempI-i-1],output.normal);
 	}
 }
 
-void WeylGroup::GenerateAdditivelyClosedSubset
-  (roots& input, roots& output)
+void WeylGroup::GenerateAdditivelyClosedSubset(roots& input, roots& output)
 { output.CopyFromBase(input);
   root tempRoot;
-  for (int i=0;i<output.size;i++)
-    for (int j=i+1; j<output.size;j++)
+  for (int i=0; i<output.size; i++)
+    for (int j=i+1; j<output.size; j++)
     { tempRoot=output.TheObjects[i]+output.TheObjects[j];
       if (this->IsARoot(tempRoot))
         output.AddObjectOnTopNoRepetitionOfObject(tempRoot);
@@ -11808,14 +11675,11 @@ void WeylGroup::GenerateAdditivelyClosedSubset
 
 void WeylGroup::Assign(const WeylGroup& right)
 { this->WeylLetter=right.WeylLetter;
-
   this->LongRootLength.Assign(right.LongRootLength);
 //  this->ShortRootLength.Assign(right.ShortRootLength);
-
 //  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
 //  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
 //  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
-
   this->KillingFormMatrix.Assign(right.KillingFormMatrix);
 	this->CopyFromHash(right);
 	this->RootSystem.CopyFromHash(right.RootSystem);
@@ -11823,9 +11687,8 @@ void WeylGroup::Assign(const WeylGroup& right)
 	this->rho.Assign(right.rho);
 }
 
-void WeylGroup::ActOnRootByGroupElement
-	(	int index,root &theRoot, bool RhoAction, bool UseMinusRho)
-{ for (int i=0;i<this->TheObjects[index].size;i++)
+void WeylGroup::ActOnRootByGroupElement(int index,root &theRoot, bool RhoAction, bool UseMinusRho)
+{ for (int i=0; i<this->TheObjects[index].size; i++)
 		this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i],theRoot,RhoAction, UseMinusRho);
 }
 
@@ -11845,16 +11708,12 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 			this->RootsOfBorel.AddRoot(this->RootSystem.TheObjects[i]);
 }
 
-void WeylGroup::GenerateOrbit
-  (roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho)
-{ static WeylGroup tempW;
+void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho)
+{ WeylGroup tempW;
 	this->GenerateOrbit(theRoots,RhoAction,output,false,tempW, UseMinusRho,0);
 }
 
-void WeylGroup::GenerateOrbit
-  ( roots& theRoots, bool RhoAction,
-		hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
-		WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
+void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
 {	for (int i=0;i<theRoots.size;i++)
     output.AddObjectOnTopHash(theRoots.TheObjects[i]);
 	root currentRoot;
@@ -11896,7 +11755,7 @@ void WeylGroup::RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, 
 { output.MakeZero();
 	for (int i=0;i<this->KillingFormMatrix.NumRows;i++)
 	{	for (int j=0;j<this->KillingFormMatrix.NumCols;j++)
-		{ static Rational tempRat;
+		{ Rational tempRat;
 			tempRat.Assign(r1.TheObjects[i]);
 			tempRat.MultiplyBy(r2.TheObjects[j]);
 			tempRat.MultiplyByInt(this->KillingFormMatrix.elements[i][j]);
@@ -11905,16 +11764,13 @@ void WeylGroup::RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, 
 	}
 }
 
-void WeylGroup::GenerateOrbitAlg
-	( root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output,
-		bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights)
+void WeylGroup::GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights)
 { hashedRoots TheIndicatorsOrbit;
 	WeylGroup OrbitGeneratingSubset;
-	static roots tempRoots;
+	roots tempRoots;
 	tempRoots.size=0;
 	tempRoots.AddRoot(ChamberIndicator);
-	this->GenerateOrbit(tempRoots,RhoAction,TheIndicatorsOrbit,
-											true,OrbitGeneratingSubset,false,0);
+	this->GenerateOrbit(tempRoots,RhoAction,TheIndicatorsOrbit, true,OrbitGeneratingSubset,false,0);
 	TheIndicatorsOrbit.ComputeDebugString();
 	roots TempTest;
 	root tempRoot;
@@ -11924,7 +11780,7 @@ void WeylGroup::GenerateOrbitAlg
 		TempTest.AddRoot(tempRoot);
 	}
 	TempTest.ComputeDebugString();
-	static PolynomialsRationalCoeff theRoot;
+	PolynomialsRationalCoeff theRoot;
 	PolyFormatLocal.MakeAlphabetxi();
 	output.size=0;
 	output.ChamberIndicators.size=0;
@@ -11933,8 +11789,7 @@ void WeylGroup::GenerateOrbitAlg
 	for (int i=0;i<OrbitGeneratingSubset.size;i++)
 	{	bool tempBool= TheIndicatorsOrbit.TheObjects[i].IsPositiveOrZero()||(!PositiveWeightsOnly);
 		if (LimitingCone!=0)
-		{ tempBool = tempBool && LimitingCone->IsInCone(TheIndicatorsOrbit.TheObjects[i]);
-		}
+      tempBool = tempBool && LimitingCone->IsInCone(TheIndicatorsOrbit.TheObjects[i]);
 		if (onlyLowerWeights)
 		{ root tempRoot2;
 			tempRoot2.Assign(ChamberIndicator);
@@ -11951,8 +11806,7 @@ void WeylGroup::GenerateOrbitAlg
 	output.ComputeDubugString(this->KillingFormMatrix.NumRows);
 }
 
-void WeylGroup::ActOnRootAlgByGroupElement
-	(	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
+void WeylGroup::ActOnRootAlgByGroupElement (	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
 {	for (int i=0;i<this->TheObjects[index].size;i++)
 		this->SimpleReflectionRootAlg(this->TheObjects[index].TheObjects[i],theRoot,RhoAction);
 }
@@ -11960,7 +11814,7 @@ void WeylGroup::ActOnRootAlgByGroupElement
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(roots& output)
 {	this->ComputeWeylGroup();
 	output.size=0;
-	for (int i=0;i<this->RootSystem.size;i++)
+	for (int i=0; i<this->RootSystem.size; i++)
 		if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
 			output.AddRoot(this->RootSystem.TheObjects[i]);
 }

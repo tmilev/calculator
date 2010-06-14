@@ -5661,6 +5661,7 @@ public:
   //the root at the j^th position, then
   //the chevalley constant N_{\alpha\beta} given by [g^\alpha,g^\beta]=N_{\alpha\beta}g^{\alpha+\beta}
   //will be located at the ij^{th} entry in the below matrix.
+  //Reference: Samelson, Notes on Lie algebras, pages 46-51
   MatrixLargeRational ChevalleyConstants;
   Matrix<bool> Computed;
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
@@ -5978,6 +5979,8 @@ class DyckPaths: public ListBasicObjects<DyckPath>
   roots startingRoots;
   hashedRoots PositiveRoots;
   int LastNonExploredIndex;
+  ListBasicObjects<int> GoodPaths;
+  void ComputeGoodPaths();
   void GenerateAllDyckPathsTypesABC();
   void initPathGraphTypesABC();
   void GenerateAllDyckPathsTypesABCRecursive();

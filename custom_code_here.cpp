@@ -643,12 +643,11 @@ void WeylParser::Own(int indexParent, int indexChild1, int indexChild2)
 
 void WeylParser::Evaluate(GlobalVariables& theGlobalVariables)
 { if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
-  { if (*this->TokenStack.LastObject()==this->tokenExpression)
+    if (*this->TokenStack.LastObject()==this->tokenExpression)
     { WeylParserNode* theNode=&this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
       theNode->Evaluate(theGlobalVariables);
       this->Value.Assign(theNode->Value);
     }
-  }
 }
 
 void WeylParser::ExtendOnTop(int numNew)
@@ -747,6 +746,41 @@ void WeylParserNode::ElementToString(std::string& output)
 }
 
 
+class IrreducibleFiniteDimensionalModule
+{
+  public:
+  DyckPaths thePaths;//the Weyl group inside the Dyck paths is assumed to parametrize the module.
+  MatrixLargeRational thePathMatrix;
+  MatrixLargeRational theMatrix;
+  void ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl);
+  std::string DebugString;
+  void ComputeDebugString(){this->ElementToString(this->DebugString);};
+  void ElementToString(std::string& output);
+};
+
+void IrreducibleFiniteDimensionalModule::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  this->thePathMatrix.ElementToSting(tempS);
+  out <<"The matrix of the polytope:\n "<< tempS<<"\n\n";
+
+  this->thePaths.ElementToString(tempS, false);
+  out << tempS;
+  output = out.str();
+}
+
+void IrreducibleFiniteDimensionalModule::ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl)
+{// reference:  E. Feigin, G. Fourier, P. Littelmann, "PBW filtration and bases for irreducible modules in type A_n", preprint 2009
+  int theDimension= IndexWeyl;
+  this->thePaths.AmbientWeyl.MakeAn(theDimension);
+  this->thePaths.GenerateAllDyckPathsTypesABC();
+  this->thePaths.ComputeGoodPaths();
+  this->thePathMatrix.init( this->thePaths.GoodPaths.size, this->thePaths.PositiveRoots.size);
+  this->thePathMatrix.NullifyAll(0);
+  for (int i=0; i<this->thePaths.GoodPaths.size; i++)
+    for (int j=0; j<this->thePaths.TheObjects[i].thePathNodes.size; j++)
+      this->thePathMatrix.elements[i][this->thePaths.TheObjects[i].thePathNodes.TheObjects[j]]=1;
+}
+
 
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
@@ -776,11 +810,11 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << debugParser.Value.DebugString;
   out << "\n\n"<<tempS;*/
 
-  DyckPaths thePaths;
-  thePaths.AmbientWeyl.MakeArbitrary('E', 8);
-  thePaths.GenerateAllDyckPathsTypesABC();
-  thePaths.ComputeDebugString();
-  out << thePaths.DebugString;
+  QuasiPolynomial tempP;
+  IrreducibleFiniteDimensionalModule theModule;
+  theModule.ComputeCharacterAsFunctionOfHighestWeightTypeA(tempP, 3);
+  theModule.ComputeDebugString();
+  out << theModule.DebugString;
 /*  tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
@@ -912,4 +946,18 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
 
   out<<"\\end{document}";
   output=out.str();
+}
+
+
+
+void DyckPaths::ComputeGoodPaths()
+{ int counter=0;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].IamComplete(*this)|| this->TheObjects[i].thePathNodes.size==0)
+      counter++;
+  this->GoodPaths.MakeActualSizeAtLeastExpandOnTop(counter);
+  this->GoodPaths.size=0;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].IamComplete(*this)|| this->TheObjects[i].thePathNodes.size==0)
+      this->GoodPaths.AddObjectOnTop(i);
 }

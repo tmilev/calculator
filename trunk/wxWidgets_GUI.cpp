@@ -891,13 +891,13 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
-{ std::string tempS;
-  main_test_function(tempS, *(MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()));
-  wxString tempWS(tempS.c_str(),wxConvUTF8);
-  MainWindow1->Text1Output->SetValue(tempWS);
+{ this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
+  this->theComputationSetup.flagDoCustomComputation=false;
+  this->theComputationSetup.flagRunningExperiments2=true;
+  this->RunTheComputation();
 }
 
-void guiMainWindow::onButton1Go(wxCommandEvent &ev)
+void guiMainWindow::onButton1Go(wxCommandEvent& ev)
 { this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
   this->theComputationSetup.flagDoCustomComputation=false;
   this->ReadVPVectorsAndOptions();
@@ -916,7 +916,7 @@ void guiMainWindow::OpenFile(std::fstream& output)
   OpenDialog->Destroy();
 }
 
-void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
+void guiMainWindow::onButton2Eval(wxCommandEvent& ev)
 { if (this->theComputationSetup.theOutput.NumVars!=this->Table3Values->GetNumberCols())
     return;
   intRoot tempRoot;
@@ -927,7 +927,7 @@ void guiMainWindow::onButton2Eval(wxCommandEvent &ev)
   return;
 }
 
-void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
+void guiMainWindow::onButton6OneSlice(wxCommandEvent& ev)
 { this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.oneStepChamberSlice(*this->theComputationSetup.theGlobalVariablesContainer->Default());
@@ -935,7 +935,7 @@ void guiMainWindow::onButton6OneSlice(wxCommandEvent &ev)
   this->Refresh();
 }
 
-void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
+void guiMainWindow::onButton7SliceIncrement(wxCommandEvent& ev)
 { this->ReadVPVectorsAndOptions();
 	this->theComputationSetup.flagDoCustomNilradical=false;
 	this->theComputationSetup.oneIncrement(*this->theComputationSetup.theGlobalVariablesContainer->Default());
@@ -943,7 +943,7 @@ void guiMainWindow::onButton7SliceIncrement(wxCommandEvent &ev)
   this->Refresh();
 }
 
-void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
+void guiMainWindow::onButton10ProverOneStep(wxCommandEvent& ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
 	MainWindow1->theComputationSetup.flagProverDoingFullRecursion=false;
   MainWindow1->theComputationSetup.flagProverUseFixedK=false;
@@ -956,7 +956,7 @@ void guiMainWindow::onButton10ProverOneStep(wxCommandEvent &ev)
   MainWindow1->RunTheComputation();
 }
 
-void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
+void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent& ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagProverUseFixedK=false;
@@ -969,7 +969,7 @@ void guiMainWindow::onButton11ProverFullComputation(wxCommandEvent &ev)
   MainWindow1->RunTheComputation();
 }
 
-void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent &ev)
+void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent& ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
 	MainWindow1->theComputationSetup.flagProverDoingFullRecursion=false;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
@@ -978,7 +978,7 @@ void guiMainWindow::onButton12ProverOneStepFixedK(wxCommandEvent &ev)
   MainWindow1->RunTheComputation();
 }
 
-void guiMainWindow::onButton13ProverFullComputationFixedK(wxCommandEvent &ev)
+void guiMainWindow::onButton13ProverFullComputationFixedK(wxCommandEvent& ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagProverUseFixedK=true;
@@ -987,7 +987,7 @@ void guiMainWindow::onButton13ProverFullComputationFixedK(wxCommandEvent &ev)
   MainWindow1->RunTheComputation();
 }
 
-void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
+void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent& ev)
 { MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagSavingProverData=true;
   MainWindow1->theComputationSetup.flagOpenProverData=false;
@@ -1000,7 +1000,7 @@ void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent &ev)
   MainWindow1->RunTheComputation();
 }
 
-void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent &ev)
+void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent& ev)
 { MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
   MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
   MainWindow1->theComputationSetup.flagOpenProverData=true;
@@ -1399,8 +1399,7 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
     MainWindow1->Text3PartialFractions->SetValue(tempWS);
   } else
     if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
-    { out <<"\\documentclass{article}\\begin{document}"
-          <<this->theComputationSetup.theChambers.DebugString<<"\\end{document}";
+    { out <<"\\documentclass{article}\\begin{document}"<<this->theComputationSetup.theChambers.DebugString<<"\\end{document}";
       MainWindow1->bufferString1=out.str();
       wxString tempWS(MainWindow1->bufferString1.c_str(),wxConvUTF8);
       MainWindow1->Text3PartialFractions->SetValue(tempWS);
@@ -1483,7 +1482,7 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
 		return;
   MainWindow1->progressReportVariables.Busy=true;
   MainWindow1->progressReportVariables.Assign(output);
-  ::wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxProgressReportEvent);
+  wxPostEvent(MainWindow1->GetEventHandler(), MainWindow1->wxProgressReportEvent);
   MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
   MainWindow1->progressReportVariables.Busy=false;
 }

@@ -1020,14 +1020,12 @@ void WallData::WriteToFile(std::fstream& output)
 { output << this->indexInOwnerChamber <<" ";
   this->normal.WriteToFile(output);
   output<< " "<< this->NeighborsAlongWall.size;
-  assert(this->NeighborsAlongWall.size==this->MirrorWall.size);
+  assert(this->NeighborsAlongWall.size==this->IndicesMirrorWalls.size);
   for (int i=0; this->NeighborsAlongWall.size; i++ )
     if (this->NeighborsAlongWall.TheObjects[i]==0)
-    { output<< -1<<" "<<-1;
-      assert(this->MirrorWall.TheObjects[i]==0);
-    }
+			output<< -1<<" "<<-1;
     else
-    { assert(this->MirrorWall.TheObjects[i]!=0);
-      output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->MirrorWall.TheObjects[i]->indexInOwnerChamber;
+    { //assert(this->MirrorWall.TheObjects[i]!=0);
+      output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->IndicesMirrorWalls.TheObjects[i];
     }
 }

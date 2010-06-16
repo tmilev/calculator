@@ -1657,23 +1657,22 @@ public:
 	int indexInOwnerChamber;
 	root normal;
 	ListBasicObjects<CombinatorialChamber*> NeighborsAlongWall;
-	ListBasicObjects<WallData*> MirrorWall;
+	ListBasicObjects<int> IndicesMirrorWalls;
 	static bool flagDisplayWallDetails;
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void ElementToString(std::string& output);
 	void RemoveNeighborhoodBothSides(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
 	void RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer);
-	void AddNeighbor(CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
+	void AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
 	void operator=(const WallData& right);
 	bool IsInFacetNoBoundaries(root &point);
 	bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
-	void SubstituteNeighbor(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
+	void SubstituteNeighbor(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
 	bool IsExternalWithRespectToDirection(root &direction);
 	inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point);};
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
 	bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
-	bool ContainsMirrorWallExactlyOnce(WallData* theWall);
-	bool SplitWall(CombinatorialChamber *BossChamber, CombinatorialChamber *NewPlusChamber, CombinatorialChamber *NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction,	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<WallData*>* PossibleBogusWalls, GlobalVariables& theGlobalVariables);
+	bool SplitWall(CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction,	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
 	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 	void WriteToFile(std::fstream& output);
@@ -6131,8 +6130,8 @@ public:
 	hashedRoots hashedRootsComputeSubGroupFromGeneratingReflections;
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
-	ListBasicObjects<WallData*> listWallDataPtSplitChamber;
-
+	ListBasicObjects<int> listWallDataPtSplitChamber;
+	
 	Monomial<Rational> monMakePolyExponentFromIntRoot;
 	Monomial<Rational> monMakePolyFromDirectionAndNormal;
 

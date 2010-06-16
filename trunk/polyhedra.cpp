@@ -3749,7 +3749,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,Combinatorial
 	rootsCollection& LocalContainerMinusVertices=theGlobalVariables.rootsCollectionSplitChamber2;
 	roots& LocalLinearAlgebra= theGlobalVariables.rootsSplitChamber1;
 	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors=theGlobalVariables.listCombinatorialChamberPtSplitChamber;
-	ListBasicObjects<WallData*>& PossibleBogusWalls=theGlobalVariables.listWallDataPtSplitChamber;
+	ListBasicObjects<int>& PossibleBogusWalls=theGlobalVariables.listWallDataPtSplitChamber;
 	CombinatorialChamber* NewPlusChamber;
 	CombinatorialChamber* NewMinusChamber;
 	PossibleBogusNeighbors.size=0;
@@ -3856,7 +3856,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,Combinatorial
 	if (output.flagAnErrorHasOcurredTimeToPanic)
 		this->ComputeDebugString(&output);
 	for (int i=0; i<this->Externalwalls.size; i++)
-	{	Externalwalls.TheObjects[i].SplitWall(this, NewPlusChamber, NewMinusChamber, &output, LocalContainerPlusVertices.TheObjects[i], LocalContainerMinusVertices.TheObjects[i], theKillerPlaneNormal, direction, PossibleBogusNeighbors, &PossibleBogusWalls, theGlobalVariables);
+	{	Externalwalls.TheObjects[i].SplitWall(this, NewPlusChamber, NewMinusChamber, &output, LocalContainerPlusVertices.TheObjects[i], LocalContainerMinusVertices.TheObjects[i], theKillerPlaneNormal, direction, PossibleBogusNeighbors, PossibleBogusWalls, theGlobalVariables);
 		if (output.flagAnErrorHasOcurredTimeToPanic)
 		{ NewPlusChamber->ComputeDebugString(&output);
 			NewMinusChamber->ComputeDebugString(&output);
@@ -3884,10 +3884,11 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,Combinatorial
 		//{	PossibleBogusWalls.TheObjects[i]->ComputeDebugString();
 		//	PossibleBogusNeighbors.TheObjects[i]->ComputeDebugString();
 		//}
-		if (NewPlusChamber->IsABogusNeighbor(*PossibleBogusWalls.TheObjects[i], PossibleBogusNeighbors.TheObjects[i], output,theGlobalVariables))
-      PossibleBogusWalls.TheObjects[i]->RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i],NewPlusChamber);
-		if (NewMinusChamber->IsABogusNeighbor(*PossibleBogusWalls.TheObjects[i], PossibleBogusNeighbors.TheObjects[i], output,theGlobalVariables ) )
-			PossibleBogusWalls.TheObjects[i]->RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i],NewMinusChamber);
+		WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
+		if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output,theGlobalVariables))
+      possibleBadWall.RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
+		if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output,theGlobalVariables ) )
+			possibleBadWall.RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i],NewMinusChamber);
 	}
 	assert(NewPlusChamber->Externalwalls.size>=output.AmbientDimension);
 	assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);
@@ -3900,25 +3901,26 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,Combinatorial
 }
 
 void CombinatorialChamber::PropagateSlicingWallThroughNonExploredNeighbors(root& theKillerNormal,rootsCollection &CuttingPlaneVertices, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
-{ for (int i=0;i<this->Externalwalls.size;i++)
+{ for (int i=0; i<this->Externalwalls.size; i++)
 	{ bool mustPropagate=false;
-		for (int j=0;j<CuttingPlaneVertices.TheObjects[i].size;j++)
+		for (int j=0; j<CuttingPlaneVertices.TheObjects[i].size; j++)
       if (this->Externalwalls.TheObjects[i].ContainsPoint(CuttingPlaneVertices.TheObjects[i].TheObjects[j]))
 			{ mustPropagate=true;
 				break;
 			}
 		if (mustPropagate)
-			for (int j=0;j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size;j++)
+			for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
 				if (this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]!=0)
 					if(!this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]->flagExplored)
 					{	root tempRoot; tempRoot.MakeZero(owner.AmbientDimension);
-						this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]->AddInternalWall(theKillerNormal,this->Externalwalls.TheObjects[i].MirrorWall.TheObjects[j]->normal,tempRoot,&owner,theGlobalVariables);
+						root& otherNormal= this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]->Externalwalls.TheObjects[this->Externalwalls.TheObjects[i].IndicesMirrorWalls.TheObjects[j]].normal;
+						this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]->AddInternalWall(theKillerNormal, otherNormal, tempRoot, &owner, theGlobalVariables);
 					}
 	}
 }
 
 void CombinatorialChamberContainer::ConvertHasZeroPolyToPermanentlyZero()
-{ for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]!=0)
 			if (this->TheObjects[i]->flagHasZeroPolynomial)
 				this->TheObjects[i]->flagPermanentlyZero=true;
@@ -3926,15 +3928,15 @@ void CombinatorialChamberContainer::ConvertHasZeroPolyToPermanentlyZero()
 
 void CombinatorialChamberContainer::AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup)
 { MatrixLargeRational tempMat;
-	tempMat.AssignMatrixIntWithDen(theWeylGroup.KillingFormMatrix,1);
+	tempMat.AssignMatrixIntWithDen(theWeylGroup.KillingFormMatrix, 1);
 	tempMat.Invert(theGlobalVariables);
 	tempMat.ComputeDebugString();
 	this->NumProjectiveHyperplanesBeforeWeylChamberWalls=this->theHyperplanes.size;
 	roots tempRoots;
 	this->WeylChamber.ReleaseMemory();
-	for (int i=0;i<tempMat.NumCols;i++)
+	for (int i=0; i<tempMat.NumCols; i++)
 	{ root tempRoot; tempRoot.SetSizeExpandOnTopLight(tempMat.NumRows);
-		for (int j=0; j<tempMat.NumRows;j++)
+		for (int j=0; j<tempMat.NumRows; j++)
 			tempRoot.TheObjects[j].Assign(tempMat.elements[j][i]);
 		tempRoots.AddRoot(tempRoot);
 	}
@@ -3960,8 +3962,8 @@ void CombinatorialChamber::MakeNewMutualNeighbors(CombinatorialChamber* NewPlusC
 	NewPlusChamber->Externalwalls.AddObjectOnTop(tempWall);
 	tempWall.normal.MinusRoot(); tempWall.NeighborsAlongWall.TheObjects[0]=NewPlusChamber;
 	NewMinusChamber->Externalwalls.AddObjectOnTop(tempWall);
-	NewPlusChamber->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop(NewMinusChamber->Externalwalls.LastObject());
-	NewMinusChamber->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop(NewPlusChamber->Externalwalls.LastObject());
+	NewPlusChamber->Externalwalls.LastObject()->IndicesMirrorWalls.AddObjectOnTop(NewMinusChamber->Externalwalls.size-1);
+	NewMinusChamber->Externalwalls.LastObject()->IndicesMirrorWalls.AddObjectOnTop(NewPlusChamber->Externalwalls.size-1);
 //	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
 //	{ NewPlusChamber->ComputeDebugString();
 //		NewMinusChamber->ComputeDebugString();
@@ -3969,7 +3971,7 @@ void CombinatorialChamber::MakeNewMutualNeighbors(CombinatorialChamber* NewPlusC
 }
 
 void CombinatorialChamberContainer::SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ this->SliceWithAWallInit(TheKillerFacetNormal,theGlobalVariables);
+{ this->SliceWithAWallInit(TheKillerFacetNormal, theGlobalVariables);
 	while (this->PreferredNextChambers.size>0)
     this->SliceWithAWallOneIncrement(TheKillerFacetNormal,theGlobalVariables);
 	this->PurgeZeroPointers();
@@ -4442,7 +4444,7 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 				{ minusOwner= this->TheObjects[tempI];
           plusOwner= this->TheObjects[tempI2];
 				}
-				this->TheObjects[tempI]->MakeNewMutualNeighbors(	plusOwner, minusOwner,this->theHyperplanes.TheObjects[this->AmbientDimension-j-1]);
+				this->TheObjects[tempI]->MakeNewMutualNeighbors(	plusOwner, minusOwner, this->theHyperplanes.TheObjects[this->AmbientDimension-j-1]);
 			} else
         this->TheObjects[tempI]->AllVertices.LastObject()->MinusRoot();
 //			if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -4576,27 +4578,23 @@ bool Cone::IsSurelyOutsideCone(::rootsCollection& TheVertices)
 	}
 }*/
 
-void CombinatorialChamber::
-	InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo
-		(CombinatorialChamber& input, CombinatorialChamberContainer& owner)
+void CombinatorialChamber::InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo(CombinatorialChamber& input, CombinatorialChamberContainer& owner)
 { root ZeroRoot; ZeroRoot.MakeZero(owner.AmbientDimension-1);
 	this->Externalwalls.SetSizeExpandOnTopNoObjectInit(input.Externalwalls.size+1);
 	if (owner.flagAnErrorHasOcurredTimeToPanic)
 		input.ComputeDebugString(&owner);
 	assert(input.IndexInOwnerComplex==this->IndexInOwnerComplex);
 	//the extra dimension is going to be the last dimension
-	for (int i=0;i<input.Externalwalls.size;i++)
-	{ this->Externalwalls.TheObjects[i].normal
-			.MakeNormalInProjectivizationFromPointAndNormal
-				(ZeroRoot,input.Externalwalls.TheObjects[i].normal);
+	for (int i=0; i<input.Externalwalls.size; i++)
+	{ this->Externalwalls.TheObjects[i].normal.MakeNormalInProjectivizationFromPointAndNormal(ZeroRoot, input.Externalwalls.TheObjects[i].normal);
 		this->Externalwalls.TheObjects[i].NeighborsAlongWall.size=0;
-		this->Externalwalls.TheObjects[i].MirrorWall.size=0;
+		this->Externalwalls.TheObjects[i].IndicesMirrorWalls.size=0;
 	}
 	//this->ComputeDebugString(&owner);
 	this->Externalwalls.LastObject()->normal.MakeZero(owner.AmbientDimension);
 	this->Externalwalls.LastObject()->normal.TheObjects[owner.AmbientDimension-1].MakeOne();
-	this->Externalwalls.LastObject()->MirrorWall.size=0;
-	this->Externalwalls.LastObject()->MirrorWall.AddObjectOnTop(0);
+	this->Externalwalls.LastObject()->IndicesMirrorWalls.size=0;
+	this->Externalwalls.LastObject()->IndicesMirrorWalls.AddObjectOnTop(-1);
 	this->Externalwalls.LastObject()->NeighborsAlongWall.size=0;
 	this->Externalwalls.LastObject()->NeighborsAlongWall.AddObjectOnTop(0);
 	this->flagHasZeroPolynomial= input.flagHasZeroPolynomial;
@@ -4604,40 +4602,31 @@ void CombinatorialChamber::
 	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
 
-void CombinatorialChamber::WireChamberAndWallAdjacencyData
-	(	CombinatorialChamberContainer &owner,
-		CombinatorialChamber *input)
+void CombinatorialChamber::WireChamberAndWallAdjacencyData(CombinatorialChamberContainer &owner, CombinatorialChamber *input)
 {	this->LabelWallIndicesProperly();
 	input->LabelWallIndicesProperly();
-	assert(	this->Externalwalls.size==input->Externalwalls.size+1);
-	for (int i=0;i<input->Externalwalls.size;i++)
+	assert(this->Externalwalls.size==input->Externalwalls.size+1);
+	for (int i=0; i<input->Externalwalls.size; i++)
 	{ WallData& currentWall= this->Externalwalls.TheObjects[i];
 		WallData& originalWall= input->Externalwalls.TheObjects[i];
-		currentWall.NeighborsAlongWall.SetSizeExpandOnTopNoObjectInit
-				(originalWall.NeighborsAlongWall.size);
-		currentWall.MirrorWall.SetSizeExpandOnTopNoObjectInit
-				(originalWall.NeighborsAlongWall.size);
-		assert(originalWall.MirrorWall.size==originalWall.NeighborsAlongWall.size);
-		for (int j=0;j<currentWall.NeighborsAlongWall.size;j++)
+		currentWall.NeighborsAlongWall.SetSizeExpandOnTopNoObjectInit(originalWall.NeighborsAlongWall.size);
+		currentWall.IndicesMirrorWalls.SetSizeExpandOnTopNoObjectInit(originalWall.NeighborsAlongWall.size);
+		assert(originalWall.IndicesMirrorWalls.size==originalWall.NeighborsAlongWall.size);
+		for (int j=0; j<currentWall.NeighborsAlongWall.size; j++)
       if (originalWall.NeighborsAlongWall.TheObjects[j]==0)
 			{ currentWall.NeighborsAlongWall.TheObjects[j]=0;
-				currentWall.MirrorWall.TheObjects[j]=0;
-			}else
-			{ currentWall.NeighborsAlongWall.TheObjects[j]=
-					owner.TheObjects[originalWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex];
-				assert(currentWall.NeighborsAlongWall.TheObjects[j]->Externalwalls.size
-								==
-								originalWall.NeighborsAlongWall.TheObjects[j]->Externalwalls.size+1);
+				currentWall.IndicesMirrorWalls.TheObjects[j]=-1;
+			} else
+			{ currentWall.NeighborsAlongWall.TheObjects[j]=owner.TheObjects[originalWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex];
+				assert(currentWall.NeighborsAlongWall.TheObjects[j]->Externalwalls.size == originalWall.NeighborsAlongWall.TheObjects[j]->Externalwalls.size+1);
 				currentWall.NeighborsAlongWall.TheObjects[j]->LabelWallIndicesProperly();
-				currentWall.MirrorWall.TheObjects[j]=&
-					currentWall.NeighborsAlongWall.TheObjects[j]->Externalwalls.TheObjects
-						[originalWall.MirrorWall.TheObjects[j]->indexInOwnerChamber];
+				currentWall.IndicesMirrorWalls.TheObjects[j]= originalWall.IndicesMirrorWalls.TheObjects[j];
 			}
 	}
 }
 
 bool Cone::IsInCone(root& r)
-{ for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
 	{	Rational tempRat;
 		root::RootScalarEuclideanRoot(r,this->TheObjects[i],tempRat);
 		if (tempRat.IsNegative()){return false;}
@@ -4727,36 +4716,34 @@ void WallData::RemoveNeighborhoodBothSides(CombinatorialChamber* owner, Combinat
 	//{	assert(this->ContainsNeighborAtMostOnce(NeighborPointer));
 	//	assert(owner->OwnsAWall(this));
 	//}
-	for (int i=0;i<this->NeighborsAlongWall.size;i++)
-	{ if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
-		{ this->NeighborsAlongWall.PopIndexSwapWithLast(i);
-			this->MirrorWall.TheObjects[i]->RemoveNeighborOneSide(owner);
-			this->MirrorWall.PopIndexSwapWithLast(i);
+	for (int i=0; i<this->NeighborsAlongWall.size; i++)
+		if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
+		{ this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[ this->IndicesMirrorWalls.TheObjects[i]].RemoveNeighborOneSide(owner);
+			this->NeighborsAlongWall.TheObjects[i]=0;
+			this->IndicesMirrorWalls.TheObjects[i]=-1;
 			return;
 		}
-	}
 	assert(false);
 }
 
 void WallData::RemoveNeighborOneSide(CombinatorialChamber *NeighborPointer)
 { assert(this->ContainsNeighborAtMostOnce(NeighborPointer));
-	for (int i=0;i<this->NeighborsAlongWall.size;i++)
+	for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
-		{ this->NeighborsAlongWall.PopIndexSwapWithLast(i);
-			this->MirrorWall.PopIndexSwapWithLast(i);
+		{ this->NeighborsAlongWall.TheObjects[i]=0;
+			this->IndicesMirrorWalls.TheObjects[i]=-1;
 			return;
 		}
 	assert(false);
 }
 
 bool WallData::ConsistencyCheck(CombinatorialChamber* owner)
-{ for (int i=0;i<this->NeighborsAlongWall.size;i++)
+{ for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]!=0)
-		{	if (!(	this->MirrorWall.TheObjects[i]->ContainsNeighborExactlyOnce(owner)
-						||this->MirrorWall.TheObjects[i]->ContainsMirrorWallExactlyOnce(this)))
-				return false;
-			root tempRoot; tempRoot.Assign(this->normal); tempRoot.MinusRoot();
-			if(!tempRoot.IsEqualTo(this->MirrorWall.TheObjects[i]->normal))
+		{	WallData& otherWall= this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]];
+			root tempRoot; tempRoot.Assign(this->normal); 
+			tempRoot.MinusRoot();
+			if(!tempRoot.IsEqualTo(otherWall.normal))
 			{	assert(false);
 				return false;
 			}
@@ -4766,7 +4753,7 @@ bool WallData::ConsistencyCheck(CombinatorialChamber* owner)
 
 bool WallData::ContainsNeighborAtMostOnce(CombinatorialChamber *neighbor)
 { int NumNeighbors=0;
-	for (int i=0;i<this->NeighborsAlongWall.size;i++)
+	for (int i=0; i<this->NeighborsAlongWall.size; i++)
 	{ if (this->NeighborsAlongWall.TheObjects[i]==neighbor)
 			NumNeighbors++;
 		if (NumNeighbors>1)
@@ -4777,22 +4764,8 @@ bool WallData::ContainsNeighborAtMostOnce(CombinatorialChamber *neighbor)
 	return true;
 }
 
-bool WallData::ContainsMirrorWallExactlyOnce(WallData* theWall)
-{ bool result=false;
-	for (int i=0;i<this->NeighborsAlongWall.size;i++)
-	{ if (this->MirrorWall.TheObjects[i]==theWall)
-		{	result=!result;
-			if (!result)
-			{	assert(false);
-				return false;
-			}
-		}
-	}
-	return result;
-}
-
 bool WallData::ContainsNeighborExactlyOnce(CombinatorialChamber *neighbor)
-{int NumNeighbors=0;
+{	int NumNeighbors=0;
 	for (int i=0;i<this->NeighborsAlongWall.size;i++)
 	{ if (this->NeighborsAlongWall.TheObjects[i]==neighbor)
 			NumNeighbors++;
@@ -4807,50 +4780,38 @@ void WallData::operator =(const WallData& right)
 		return;
 	this->normal.Assign(right.normal);
 	this->NeighborsAlongWall.CopyFromBase(right.NeighborsAlongWall);
-	this->MirrorWall.CopyFromBase(right.MirrorWall);
+	this->IndicesMirrorWalls.CopyFromBase(right.IndicesMirrorWalls);
 }
 
-void WallData::SubstituteNeighbor
-	(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall)
+void WallData::SubstituteNeighbor	(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall)
 {	//assert(this->ContainsNeighborAtMostOnce(oldNeighbor));
-	for (int i=0;i<this->NeighborsAlongWall.size;i++)
-	{ if (this->NeighborsAlongWall.TheObjects[i]==oldNeighbor)
+	for (int i=0; i<this->NeighborsAlongWall.size; i++)
+		if (this->NeighborsAlongWall.TheObjects[i]==oldNeighbor)
 		{ this->NeighborsAlongWall.TheObjects[i]=newNeighbor;
-			this->MirrorWall.TheObjects[i]= newNeighborWall;
+			this->IndicesMirrorWalls.TheObjects[i]= IndexNewNeighborWall;
 			return;
 		}
-	}
 	assert(false);
 }
 
-void WallData::AddNeighbor(CombinatorialChamber* newNeighbor, WallData* newNeighborWall)
+void WallData::AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall)
 { this->NeighborsAlongWall.AddObjectOnTop(newNeighbor);
-	this->MirrorWall.AddObjectOnTop(newNeighborWall);
+	this->IndicesMirrorWalls.AddObjectOnTop(IndexNewNeighborWall);
 }
 
-bool WallData::SplitWall(CombinatorialChamber *BossChamber,
-											CombinatorialChamber *NewPlusChamber,
-											CombinatorialChamber *NewMinusChamber,
-											CombinatorialChamberContainer* ownerComplex,
-											roots& ThePlusVertices, roots& TheMinusVertices,
-											root& TheKillerFacet, root& direction,
-											ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors,
-											ListBasicObjects<WallData*>* PossibleBogusWalls,
-											GlobalVariables& theGlobalVariables)
+bool WallData::SplitWall(CombinatorialChamber *BossChamber, CombinatorialChamber *NewPlusChamber, CombinatorialChamber *NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables)
 {	bool IsPositive, IsNegative; IsPositive = false;	IsNegative = false;
 	Rational tempRat;
-	for (int j=0;j<ThePlusVertices.size;j++)
-	{	if (TheKillerFacet.OurScalarProductIsPositive(ThePlusVertices.TheObjects[j]))
+	for (int j=0; j<ThePlusVertices.size; j++)
+		if (TheKillerFacet.OurScalarProductIsPositive(ThePlusVertices.TheObjects[j]))
 		{	IsPositive=true;
 			break;
 		}
-	}
 	for (int j=0;j<TheMinusVertices.size;j++)
-	{	if(TheKillerFacet.OurScalarProductIsNegative(TheMinusVertices.TheObjects[j]))
+		if(TheKillerFacet.OurScalarProductIsNegative(TheMinusVertices.TheObjects[j]))
 		{	IsNegative=true;
 			break;
 		}
-	}
 	if (!(IsPositive || IsNegative))
 	{	this->ComputeDebugString();
 		TheKillerFacet.ComputeDebugString();
@@ -4865,35 +4826,30 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 	}
 	assert(IsPositive || IsNegative);
 	if (ownerComplex->flagAnErrorHasOcurredTimeToPanic)
-	{ this->ComputeDebugString();
-	}
+		this->ComputeDebugString();
 	if (IsPositive && IsNegative)
 	{//we must split the face
 		NewPlusChamber->Externalwalls.AddObjectOnTopCreateNew();
 		NewMinusChamber->Externalwalls.AddObjectOnTopCreateNew();
-		WallData* NewPlusWall;
-		WallData* NewMinusWall;
-		NewPlusWall  = NewPlusChamber->Externalwalls.LastObject();
-		NewMinusWall = NewMinusChamber->Externalwalls.LastObject();
-		NewPlusWall->normal.Assign(this->normal);
-		NewMinusWall->normal.Assign(this->normal);
-		for (int i=0; i<this->NeighborsAlongWall.size;i++)
-		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
-			{	this->MirrorWall.TheObjects[i]->SubstituteNeighbor(BossChamber,NewPlusChamber,NewPlusWall);
-				this->MirrorWall.TheObjects[i]->AddNeighbor(NewMinusChamber,NewMinusWall);
-				PossibleBogusNeighbors.AddObjectOnTopNoRepetitionOfObject(this->NeighborsAlongWall.TheObjects[i]);
-				PossibleBogusWalls->AddObjectOnTopNoRepetitionOfObject(this->MirrorWall.TheObjects[i]);
-			}
-			NewPlusWall->AddNeighbor(this->NeighborsAlongWall.TheObjects[i],this->MirrorWall.TheObjects[i]);
-			NewMinusWall->AddNeighbor(this->NeighborsAlongWall.TheObjects[i],this->MirrorWall.TheObjects[i]);
-			assert(PossibleBogusNeighbors.size==PossibleBogusWalls->size);
+		int IndexNewPlusWall;
+		int IndexNewMinusWall;
+		IndexNewPlusWall  = NewPlusChamber->Externalwalls.size-1;
+		IndexNewMinusWall = NewMinusChamber->Externalwalls.size-1;
+		NewPlusChamber->Externalwalls.LastObject()->normal.Assign(this->normal);
+		NewMinusChamber->Externalwalls.LastObject()->normal.Assign(this->normal);
+		for (int i=0; i<this->NeighborsAlongWall.size; i++)
 			if (this->NeighborsAlongWall.TheObjects[i]!=0)
-			{	if (!this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero)
-				{	this->NeighborsAlongWall.TheObjects[i]->AddInternalWall
-						(TheKillerFacet,this->MirrorWall.TheObjects[i]->normal,direction,ownerComplex, theGlobalVariables);
-				}
+			{	WallData& MirrorWall = this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]];
+				MirrorWall.SubstituteNeighbor(BossChamber, NewPlusChamber, IndexNewPlusWall);
+				MirrorWall.AddNeighbor(NewMinusChamber, IndexNewMinusWall);
+				if(PossibleBogusNeighbors.AddObjectOnTopNoRepetitionOfObject(this->NeighborsAlongWall.TheObjects[i]))
+					PossibleBogusWalls.AddObjectOnTop(this->IndicesMirrorWalls.TheObjects[i]);
+				NewPlusChamber->Externalwalls.LastObject()->AddNeighbor(this->NeighborsAlongWall.TheObjects[i], this->IndicesMirrorWalls.TheObjects[i]);
+				NewMinusChamber->Externalwalls.LastObject()->AddNeighbor(this->NeighborsAlongWall.TheObjects[i], this->IndicesMirrorWalls.TheObjects[i]);
+				assert(PossibleBogusNeighbors.size==PossibleBogusWalls.size);
+				if (!this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero)
+					this->NeighborsAlongWall.TheObjects[i]->AddInternalWall(TheKillerFacet, MirrorWall.normal, direction, ownerComplex, theGlobalVariables);
 			}
-		}
 		return true;
 	}
 	else
@@ -4905,19 +4861,16 @@ bool WallData::SplitWall(CombinatorialChamber *BossChamber,
 		else
       tempC= NewMinusChamber;
 		tempC->Externalwalls.AddObjectOnTop(*this);
-		for (int i=0;i<this->NeighborsAlongWall.size;i++)
+		for (int i=0; i<this->NeighborsAlongWall.size; i++)
       if (this->NeighborsAlongWall.TheObjects[i]!=0)
-				tempC->Externalwalls.LastObject()->MirrorWall.TheObjects[i]->SubstituteNeighbor
-					(BossChamber,tempC,tempC->Externalwalls.LastObject());
+			{	WallData& theMirrorWall= this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]];
+				theMirrorWall.SubstituteNeighbor(BossChamber, tempC, tempC->Externalwalls.size - 1);
+			}
 		return false;
 	}
 }
 
-bool CombinatorialChamber::MakeFacetFromEdgeAndDirection
-	(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner,
-		root& direction,
-		roots & directions, int CurrentIndex,
-		root& outputNormal,GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::MakeFacetFromEdgeAndDirection(WallData& Wall1, WallData& Wall2, CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal, GlobalVariables& theGlobalVariables)
 {	root NewFacetNormal;
 //	tempNormal1.SetSizeExpandOnTopLight(root::AmbientDimension);
 //	tempNormal2.SetSizeExpandOnTopLight(root::AmbientDimension);
@@ -4932,8 +4885,7 @@ bool CombinatorialChamber::MakeFacetFromEdgeAndDirection
 	b.Minus();
 	root::RootPlusRootTimesScalar(Wall1.normal,Wall2.normal,b,NewFacetNormal);
 	NewFacetNormal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-	if (!this->IsAValidCandidateForNormalOfAKillerFacet
-				(NewFacetNormal,directions,CurrentIndex,owner,theGlobalVariables))
+	if (!this->IsAValidCandidateForNormalOfAKillerFacet(NewFacetNormal,directions,CurrentIndex,owner,theGlobalVariables))
 		return false;
 	outputNormal.Assign(NewFacetNormal);
 	return true;

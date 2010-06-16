@@ -20,6 +20,8 @@
 //
 // To whomever might be reading this (if anyone): happy hacking and I hope you find my code useful, that it didn't cause you many headaches, and that you
 // did something useful with it! Cheers!
+
+extern IndicatorWindowVariables IndicatorWindowGlobalVariables;
 class ElementWeylAlgebra
 {
 private:
@@ -752,7 +754,9 @@ class IrreducibleFiniteDimensionalModule
   DyckPaths thePaths;//the Weyl group inside the Dyck paths is assumed to parametrize the module.
   MatrixLargeRational thePathMatrix;
   MatrixLargeRational theMatrix;
-  void ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl);
+  roots theColumnsOfTheMatrix;
+  CombinatorialChamberContainer theChambers;
+  void ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl, GlobalVariables& theGlobalVariables);
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(this->DebugString);};
   void ElementToString(std::string& output);
@@ -760,25 +764,45 @@ class IrreducibleFiniteDimensionalModule
 
 void IrreducibleFiniteDimensionalModule::ElementToString(std::string& output)
 { std::stringstream out; std::string tempS;
+  this->theMatrix.ElementToSting(tempS);
+  out <<"The matrix :\n "<< tempS<<"\n\n";
   this->thePathMatrix.ElementToSting(tempS);
   out <<"The matrix of the polytope:\n "<< tempS<<"\n\n";
-
   this->thePaths.ElementToString(tempS, false);
   out << tempS;
   output = out.str();
 }
 
-void IrreducibleFiniteDimensionalModule::ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl)
+void IrreducibleFiniteDimensionalModule::ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl, GlobalVariables& theGlobalVariables)
 {// reference:  E. Feigin, G. Fourier, P. Littelmann, "PBW filtration and bases for irreducible modules in type A_n", preprint 2009
   int theDimension= IndexWeyl;
   this->thePaths.AmbientWeyl.MakeAn(theDimension);
   this->thePaths.GenerateAllDyckPathsTypesABC();
-  this->thePaths.ComputeGoodPaths();
+  this->thePaths.ComputeGoodPathsExcludeTrivialPath();
   this->thePathMatrix.init( this->thePaths.GoodPaths.size, this->thePaths.PositiveRoots.size);
   this->thePathMatrix.NullifyAll(0);
   for (int i=0; i<this->thePaths.GoodPaths.size; i++)
-    for (int j=0; j<this->thePaths.TheObjects[i].thePathNodes.size; j++)
-      this->thePathMatrix.elements[i][this->thePaths.TheObjects[i].thePathNodes.TheObjects[j]]=1;
+    for (int j=0; j<this->thePaths.TheObjects[this->thePaths.GoodPaths.TheObjects[i]].thePathNodes.size; j++)
+      this->thePathMatrix.elements[i][this->thePaths.TheObjects[this->thePaths.GoodPaths.TheObjects[i]].thePathNodes.TheObjects[j]]=1;
+  this->theMatrix.Assign(this->thePathMatrix);
+  this->theMatrix.Resize(this->thePaths.GoodPaths.size + theDimension, this->thePaths.PositiveRoots.size+this->thePaths.GoodPaths.size, true);
+  for (int j=0; j<theDimension; j++)
+  { for (int i=0; i<this->thePaths.PositiveRoots.size; i++)
+      this->theMatrix.elements[j+this->thePaths.GoodPaths.size][i]= this->thePaths.PositiveRoots.TheObjects[i].TheObjects[j];
+    for (int i=0; i<this->thePaths.GoodPaths.size; i++)
+      this->theMatrix.elements[j+this->thePaths.GoodPaths.size][i+this->thePaths.PositiveRoots.size]=0;
+  }
+  for (int i=0; i<this->thePaths.GoodPaths.size; i++)
+    for (int j=0; j<this->thePaths.GoodPaths.size; j++)
+      this->theMatrix.elements[i][j+this->thePaths.PositiveRoots.size]=(i==j)? 1 : 0;
+  this->theColumnsOfTheMatrix.AssignMatrixColumns(this->theMatrix);
+  int tempI= this->theMatrix.NumRows;
+  tempI--;
+  this->theChambers.flagAnErrorHasOcurredTimeToPanic=true;
+  this->theChambers.SliceTheEuclideanSpace(this->theColumnsOfTheMatrix, tempI, tempI+1, 0, theGlobalVariables);
+  std::fstream theFile;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, "./chambers.txt", false, true, false);
+  this->theChambers.WriteToFile(theFile, theGlobalVariables);
 }
 
 
@@ -812,7 +836,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
 
   QuasiPolynomial tempP;
   IrreducibleFiniteDimensionalModule theModule;
-  theModule.ComputeCharacterAsFunctionOfHighestWeightTypeA(tempP, 3);
+  theModule.ComputeCharacterAsFunctionOfHighestWeightTypeA(tempP, 2, theGlobalVariables);
   theModule.ComputeDebugString();
   out << theModule.DebugString;
 /*  tempEl1.Makexixj(0,1,4);
@@ -946,18 +970,64 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
 
   out<<"\\end{document}";
   output=out.str();
+  IndicatorWindowGlobalVariables.StatusString1=output;
+  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+  if(theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
-
-
-void DyckPaths::ComputeGoodPaths()
+void DyckPaths::ComputeGoodPathsExcludeTrivialPath()
 { int counter=0;
   for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].IamComplete(*this)|| this->TheObjects[i].thePathNodes.size==0)
+    if (this->TheObjects[i].IamComplete(*this))
       counter++;
   this->GoodPaths.MakeActualSizeAtLeastExpandOnTop(counter);
   this->GoodPaths.size=0;
   for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].IamComplete(*this)|| this->TheObjects[i].thePathNodes.size==0)
+    if (this->TheObjects[i].IamComplete(*this))
       this->GoodPaths.AddObjectOnTop(i);
+}
+
+
+void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "Flags_and_indices: ";
+  output << this->flagHasZeroPolynomial << " "<< this->flagExplored<< " " <<this->flagPermanentlyZero <<" ";
+  output << this->IndexInOwnerComplex << " "<< this->IndexStartingCrossSectionNormal <<" ";
+  output << this->DisplayNumber <<"\n";
+  output <<"Vertices:\n";
+  this->AllVertices.WriteToFile(output, theGlobalVariables);
+  output << "InternalWalls:\n";
+  this->InternalWalls.WriteToFile(output, theGlobalVariables);
+  for (int i=0; i<this->Externalwalls.size; i++)
+    this->Externalwalls.TheObjects[i].WriteToFile(output);
+}
+
+void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output <<"Num_pointers: ";
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+    { output <<"Chamber:\n";
+      this->TheObjects[i]->WriteToFile(output, theGlobalVariables);
+    } else
+      output <<"Empty\n";
+}
+
+void CombinatorialChamberContainer::ReadFromFile(std::fstream& input)
+{
+}
+
+void WallData::WriteToFile(std::fstream& output)
+{ output << this->indexInOwnerChamber <<" ";
+  this->normal.WriteToFile(output);
+  output<< " "<< this->NeighborsAlongWall.size;
+  assert(this->NeighborsAlongWall.size==this->MirrorWall.size);
+  for (int i=0; this->NeighborsAlongWall.size; i++ )
+    if (this->NeighborsAlongWall.TheObjects[i]==0)
+    { output<< -1<<" "<<-1;
+      assert(this->MirrorWall.TheObjects[i]==0);
+    }
+    else
+    { assert(this->MirrorWall.TheObjects[i]!=0);
+      output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->MirrorWall.TheObjects[i]->indexInOwnerChamber;
+    }
 }

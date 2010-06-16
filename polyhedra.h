@@ -62,8 +62,7 @@ const int MaxRank=12;
 const int MaxNumberOfRoots= 100;
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
-const int SomeRandomPrimes[SomeRandomPrimesSize]=
-  { 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911};
+const int SomeRandomPrimes[SomeRandomPrimesSize]={ 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911};
 class CompositeComplexQNSub;
 class affineCone;
 class affineHyperplane;
@@ -217,12 +216,12 @@ public:
 	void SetCoordsForB2();
 	void SetCoordsForA2();
 	void SetCoordsForC2();
-	void drawText( double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
+	void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
 	//if the LatexOutFile is zero then the procedure defaults to the screen
-	void drawLine(	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
-	void drawlineBetweenTwoVectors(	root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
+	void drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
+	void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 //	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
-	void drawTextAtVector(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
+	void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
 };
 
 class MathRoutines
@@ -317,7 +316,7 @@ ParallelComputing::GlobalPointerCounter+=theSize;
 	int CopyUpTo= this->size;
 	if (this->size>theSize)
 		CopyUpTo= theSize;
-	for (int i=0;i<CopyUpTo;i++)
+	for (int i=0; i<CopyUpTo; i++)
 		newArray[i]=this->TheObjects[i];
 	delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
@@ -715,16 +714,10 @@ public:
 	void ActOnAroot(root& input, root& output);
 	void ActOnRoots(roots& input, roots& output);
 	void DivideByRational(Rational& x);
-	static bool SystemLinearInequalitiesHasSolution
-		(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
-	static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-		(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
-	static void ComputePotentialChangeGradient
-	(	MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient,
-		bool &hasAPotentialLeavingVariable);
-	static void GetMaxMovementAndLeavingVariableRow
-	(	Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA,
-		MatrixLargeRational& matX, Selection& BaseVariables);
+	static bool SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
+	static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
+	static void ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient, bool &hasAPotentialLeavingVariable);
+	static void GetMaxMovementAndLeavingVariableRow( Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables);
 	int FindPositiveLCMCoefficientDenominatorsTruncated();
 	int FindPositiveGCDCoefficientNumeratorsTruncated();
 };
@@ -883,8 +876,7 @@ void Matrix<Element>::MultiplyOnTheLeft(Matrix<Element>& input)
 }
 
 template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft
-	(Matrix<Element>& input, Matrix<Element>& output)
+void Matrix<Element>::MultiplyOnTheLeft(Matrix<Element>& input, Matrix<Element>& output)
 { assert(&output!=this && &output!=&input);
 	assert(this->NumRows==input.NumCols);
 	Element tempEl;
@@ -958,8 +950,7 @@ inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex, int Ro
 
 
 template <typename Element>
-inline void Matrix<Element>::AddTwoRows
-	(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar)
+inline void Matrix<Element>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar)
 {	Element tempElement;
 	for (int i = StartColIndex; i< this->NumCols; i++)
 	{	tempElement.Assign(this->elements[fromRowIndex][i]);
@@ -1218,8 +1209,7 @@ class Rational
 	  else
 			thisNumAbs=this->NumShort;
 		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
-				(	this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  ||
-					this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound ||OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound||
+				(	this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound ||OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound||
 					OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
       return false;
     register int N= this->NumShort*OtherDen+this->DenShort*OtherNum;
@@ -1251,8 +1241,7 @@ class Rational
 	  else
 			thisNumAbs=this->NumShort;
 		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
-				(	this->Extended!=0 ||thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound ||
-					this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound ||OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound||
+				(	this->Extended!=0 ||thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound ||OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound||
 					OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
       return false;
     register int N = this->NumShort*OtherNum;
@@ -1296,8 +1285,8 @@ ParallelComputing::GlobalPointerCounter++;
 	bool ShrinkExtendedPartIfPossible()
 	{ if (this->Extended==0)
 			return true;
-		if (		this->Extended->num.value.size>1 ||	this->Extended->den.size>1 ||	this->Extended->num.value.TheObjects[0]>=(unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound||
-						this->Extended->den.TheObjects[0]>= (unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
+		if (  this->Extended->num.value.size>1 ||	this->Extended->den.size>1 ||	this->Extended->num.value.TheObjects[0]>=(unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound||
+					this->Extended->den.TheObjects[0]>= (unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
 			return false;
 		this->NumShort= this->Extended->num.GetIntValueTruncated();
 		this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
@@ -1371,10 +1360,10 @@ public:
 			return this->Extended->num.IsNonNegative();
 	};
 	bool IsNegative()
-	{  if (this->Extended==0)
-				return this->NumShort<0;
-      else
-				return this->Extended->num.IsNegative();
+	{ if (this->Extended==0)
+      return this->NumShort<0;
+    else
+      return this->Extended->num.IsNegative();
   };
 	bool IsNonPositive()
 	{ if (this->Extended==0)
@@ -1406,11 +1395,11 @@ public:
 		} else
 			return this->NumShort/this->DenShort;
 	};
-	void MakeZero()	{this->NumShort=0;	this->DenShort=1; this->FreeExtended(); };
-	void MakeOne()	{this->NumShort=1;	this->DenShort=1; this->FreeExtended(); };
-	void MakeMOne()	{this->NumShort=-1; this->DenShort=1; this->FreeExtended(); };
+	void MakeZero(){this->NumShort=0;	this->DenShort=1; this->FreeExtended(); };
+	void MakeOne(){this->NumShort=1;	this->DenShort=1; this->FreeExtended(); };
+	void MakeMOne(){this->NumShort=-1; this->DenShort=1; this->FreeExtended(); };
 	void WriteToFile (std::fstream& output);
-	void ReadFromFile(std::fstream&  input);
+	void ReadFromFile(std::fstream& input);
 	inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus();};
 	static Rational NChooseK(int n, int k);
 	static Rational Factorial(int n);
@@ -1440,12 +1429,12 @@ public:
     if (((unsigned)this->DenShort)>LargeIntUnsigned::CarryOverBound) return false;
 		return true;
 	};
-	inline void operator =(const Rational& right){this->Assign(right);};
-	inline bool operator ==(const Rational& right){return this->IsEqualTo(right);};
+	inline void operator=(const Rational& right){this->Assign(right);};
+	inline bool operator==(const Rational& right){return this->IsEqualTo(right);};
 	inline void operator+=(const Rational& right){this->Add(right);};
 	inline void operator+=(int right){this->AddInteger(right);};
-	inline bool operator ==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
-	inline void operator = (int right){this->AssignInteger(right);};
+	inline bool operator==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat);};
+	inline void operator=(int right){this->AssignInteger(right);};
 	Rational operator*(const Rational& right)const;
 	Rational operator*(int right)const
 	{	Rational tempRat; tempRat.Assign(*this); tempRat.MultiplyByInt(right); return tempRat;
@@ -1462,7 +1451,7 @@ public:
 	bool operator<(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this);};
 };
 
-/*WFT The below doesn't link
+/*WFT The below doesn't link on the Microsoft compiler...
 GGGGGGGGGGGGRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrrr
 RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
 RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
@@ -1598,6 +1587,7 @@ public:
 	void AssignIntRoots(intRoots& r);
 	void AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r);
 	void AssignMatrixRows(MatrixLargeRational& mat);
+	void AssignMatrixColumns(MatrixLargeRational& mat);
 	void ComputeDebugString();
 	int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables);
 	void AddRoot(root& r);
@@ -1617,8 +1607,8 @@ public:
 	int NumRootsConnectedTo(root& input, WeylGroup& theWeyl);
 	bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
 	bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
-	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(	MatrixLargeRational& outputTheLinearCombination, int theIndex);
-	void GetLinearDependenceRunTheLinearAlgebra	(	MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints);
+	bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(MatrixLargeRational& outputTheLinearCombination, int theIndex);
+	void GetLinearDependenceRunTheLinearAlgebra(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints);
   void ReadCivilizedHumanReadableFormat(std::stringstream& input);
 	int GetDimensionOfElements();
 	//Strict cone: The zero linear combination is not allowed.
@@ -1628,9 +1618,8 @@ public:
 	// The left hand side is allowed to have zero number of summands (hence "non-strict" cone - contains 0)
 	//The right hand side is NOT allowed to have zero number of summands.
 	//If the strict cone has zero elements, the function returns false.
-	static bool ConesIntersect(	GlobalVariables& theGlobalVariables,  ListBasicObjects<root>& StrictCone, ListBasicObjects<root>& NonStrictCone, int theDimension);
-	static bool GetNormalSeparatingCones
-		(	GlobalVariables& theGlobalVariables, int theDimension, ListBasicObjects<root>& coneStrictlyPositiveCoeffs, ListBasicObjects<root>& coneNonNegativeCoeffs, root& outputNormal);
+	static bool ConesIntersect(GlobalVariables& theGlobalVariables,  ListBasicObjects<root>& StrictCone, ListBasicObjects<root>& NonStrictCone, int theDimension);
+	static bool GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int theDimension, ListBasicObjects<root>& coneStrictlyPositiveCoeffs, ListBasicObjects<root>& coneNonNegativeCoeffs, root& outputNormal);
 	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
 	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)
@@ -1678,19 +1667,17 @@ public:
 	void operator=(const WallData& right);
 	bool IsInFacetNoBoundaries(root &point);
 	bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
-	void SubstituteNeighbor
-		(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
+	void SubstituteNeighbor(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor,WallData* newNeighborWall);
 	bool IsExternalWithRespectToDirection(root &direction);
 	inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point);};
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
-	bool ContainsNeighborExactlyOnce(CombinatorialChamber *neighbor);
+	bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
 	bool ContainsMirrorWallExactlyOnce(WallData* theWall);
-	bool SplitWall
-		(	CombinatorialChamber *BossChamber, CombinatorialChamber *NewPlusChamber, CombinatorialChamber *NewMinusChamber,
-			CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction,
-			ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<WallData*>* PossibleBogusWalls, GlobalVariables& theGlobalVariables);
+	bool SplitWall(CombinatorialChamber *BossChamber, CombinatorialChamber *NewPlusChamber, CombinatorialChamber *NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction,	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<WallData*>* PossibleBogusWalls, GlobalVariables& theGlobalVariables);
 	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
+	void WriteToFile(std::fstream& output);
+	void ReadFromFile(std::fstream& input);
 };
 
 class affineHyperplane
@@ -1748,7 +1735,6 @@ public:
 	void ProjectFromCombinatorialChambers(CombinatorialChamberContainer& input);
 };
 
-
 class CombinatorialChamber
 {
 public:
@@ -1771,8 +1757,6 @@ public:
 	static bool DisplayingGraphics;
 	static bool flagIncludeVerticesInDebugString;
 	static bool flagAnErrorHasOccurredTimeToPanic;
-	static int MethodUsed;//1. normals vertices and boundaries
-												//2. normals only
 	static bool flagPrintWallDetails;
 //	static bool flagMakingASingleHyperplaneSlice;
 	bool PointLiesInMoreThanOneWall(root& point);
@@ -1784,17 +1768,17 @@ public:
 	void ChamberNumberToString(std::string& out, CombinatorialChamberContainer& owner);
 	bool ConsistencyCheck(int theDimension);
 	//bool FacetIsInternal(Facet* f);
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+	void ReadFromFile(std::fstream& input);
 	void LabelWallIndicesProperly();
 	int getIndexInfiniteHyperplane(CombinatorialChamberContainer* owner);
 	int getIndexVertexIncidentWithSelection(Selection& theSel);
 	bool VertexIsIncidentWithSelection(root& VertexCandidate,Selection& theSel);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
-	bool SplitChamber
-    ( root& theKillerPlaneNormal,CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
-	bool IsABogusNeighbor
-		(	WallData& NeighborWall,CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
-	void ComputeVerticesFromNormals(	CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
-	bool ComputeVertexFromSelection(	GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
+	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
+	bool IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
+	void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
+	bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
 	//the below function returns false if the cross-section affine walls have been modified
 	//and aborts its execution
 	bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
@@ -1802,26 +1786,21 @@ public:
 	void findWallsIncidentWithVertexExcludeWallAtInfinity (root& theVertex, Selection& output, CombinatorialChamberContainer* owner);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
 	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberContainer& owner);
-	void ComputeAffineInfinityPointApproximation (Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
+	void ComputeAffineInfinityPointApproximation(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	void PurgeInternalWalls();
-	bool LinearAlgebraForVertexComputation (Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension);
-	bool LinearAlgebraForVertexComputationOneAffinePlane
-		(	Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner);
+	bool LinearAlgebraForVertexComputation(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension);
+	bool LinearAlgebraForVertexComputationOneAffinePlane(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner);
 	//returns false if the vectors were linearly dependent
-	bool SliceInDirection
-    ( root& direction,roots& directions, int CurrentIndex, CombinatorialChamberContainer& output, hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables);
-	void PropagateSlicingWallThroughNonExploredNeighbors
-		(	root& theKillerNormal,rootsCollection &CuttingPlaneVertices, ::CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
+	bool SliceInDirection(root& direction, roots& directions, int CurrentIndex, CombinatorialChamberContainer& output, hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables);
+	void PropagateSlicingWallThroughNonExploredNeighbors(root& theKillerNormal, rootsCollection& CuttingPlaneVertices, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	//the below function will automatically add the candidate to the
 	//list of used hyperplanes if the candidate is an allowed one
-	bool IsAValidCandidateForNormalOfAKillerFacet
-		(	root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
-	bool HasHSignVertex(root& h,int sign);
-	bool CheckSplittingPointCandidate		(	Selection &SelectionTargetSimplex,Selection &SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension);
-	void AddInternalWall
-		(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
+	bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
+	bool HasHSignVertex(root& h, int sign);
+	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,Selection &SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension);
+	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
 //	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
 	void ComputeInternalPointMethod2(root& InternalPoint, int theDimension);
@@ -1829,12 +1808,8 @@ public:
 	bool OwnsAWall(WallData* theWall);
 	void MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
 	bool TestPossibilityToSlice(root& direction);
-	bool MakeFacetFromEdgeAndDirection
-    (	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex,
-			root& outputNormal,GlobalVariables& theGlobalVariables);
-  void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction,
-			drawTextFunction drawTextIn);
+	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal,GlobalVariables& theGlobalVariables);
+  void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	void WireChamberAndWallAdjacencyData(	CombinatorialChamberContainer &owner, CombinatorialChamber* input);
 	void Assign(const  CombinatorialChamber& right);
 	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
@@ -2022,8 +1997,6 @@ void ListBasicObjects<Object>::PopLastObject()
 	this->size--;
 }
 
-
-
 template <class Object>
 ListBasicObjects<Object>::ListBasicObjects()
 {	this->ActualSize=0;
@@ -2067,7 +2040,7 @@ void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
@@ -2296,7 +2269,7 @@ void ListObjectPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
 ParallelComputing::GlobalPointerCounter+=increase;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
-		for (int i=0;i<this->size;i++)
+		for (int i=0; i<this->size; i++)
 			newArray[i]=this->TheObjects[i];
 		delete [] this->TheObjects;
 		this->TheObjects= newArray;
@@ -2311,7 +2284,7 @@ template<class Object>
 void ListObjectPointers<Object>::initAndCreateNewObjects(int d)
 { this->KillAllElements();
 	this->SetSizeExpandOnTopNoObjectInit(d);
-	for (int i=0;i<d;i++)
+	for (int i=0; i<d; i++)
 		this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=d;
@@ -2332,7 +2305,7 @@ ParallelComputing::GlobalPointerCounter--;
 
 template<class Object>
 int ListObjectPointers<Object>::ObjectPointerToIndex(Object* o)
-{	for (int i=0;i<this->size;i++)
+{	for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]==o)
 			return i;
 	return -1;
@@ -2344,7 +2317,7 @@ void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
 {	if (increase<=0){return;}
 	int oldsize= this->size;
 	this->SetSizeExpandOnTopNoObjectInit(this->size+increase);
-	for (int i=oldsize;i<this->size;i++)
+	for (int i=oldsize; i<this->size; i++)
 		this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
@@ -2354,7 +2327,7 @@ ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
 
 template<class Object>
 void ListObjectPointers<Object>::KillAllElements()
-{	for (int i =0;i<this->size;i++)
+{	for (int i =0; i<this->size; i++)
 	{	delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
     if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
@@ -2376,7 +2349,7 @@ bool ListObjectPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
 
 template<class Object>
 bool ListObjectPointers<Object>::IsAnElementOf(Object* o)
-{	for(int i=0;i<this->size;i++)
+{	for(int i=0; i<this->size; i++)
 		if (this->TheObjects[i]==o)
 			return true;
 	return false;
@@ -2384,13 +2357,13 @@ bool ListObjectPointers<Object>::IsAnElementOf(Object* o)
 template<class Object>
 void CopyOntoObject(ListObjectPointers<Object>* FromList)
 {	init(FromList->size);
-	for(int i=0; i<FromList->size;i++)
+	for(int i=0; i<FromList->size; i++)
 		AddObject(FromList->TheObjects[i]);
 }
 
 template <class Object>
 void ListObjectPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
-{ for (int i =0; i<this->size;i++)
+{ for (int i =0; i<this->size; i++)
 		if (o==this->TheObjects[i])
     { this->TheObjects[i]=this->TheObjects[this->size-1];
       this->size--;
@@ -2497,7 +2470,7 @@ public:
 	void SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices);
 	void QuickSortIndicesByDisplayNumber (ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex);
 	void AddWeylChamberWallsToHyperplanes (GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
-	void SliceTheEuclideanSpace (	roots& directions, int& index, int rank,root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void SliceTheEuclideanSpace(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
 	int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
 	void SliceOneDirection (	roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
@@ -2511,12 +2484,14 @@ public:
   void LabelChamberIndicesProperly();
 	void ElementToString(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output);
-	void WriteToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
+	void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void ComputeDebugString(bool LatexFormat) {this->ElementToString(this->DebugString,LatexFormat,false);};
 	void ComputeDebugString(bool useLatex, bool useHtml) {this->ElementToString(this->DebugString,useLatex,useHtml);};
 	void init();
 	void Free();
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+	void ReadFromFile(std::fstream& input);
 	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
@@ -2530,23 +2505,15 @@ public:
 	bool ConsistencyCheck();
 	void PurgeZeroPointers();
 	void PurgeInternalWalls();
-	void MakeReportOneSlice(GlobalVariables& theGlobalVariables);
+	void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots);
 	void ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables);
 	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables& theGlobalVariables);
 	void PrintThePolys(std::string& output);
 	void ComputeGlobalCone(roots& directions, GlobalVariables& theGlobalVariables);
-	static void drawOutput
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex,root& ChamberIndicator,
-			std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-	static void DrawOutputProjective
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator,
-			std::fstream* outputLatex, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-	static void drawOutputAffine
-		(	DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction,
-			drawTextFunction drawTextIn);
-	static void drawFacetVerticesMethod2
-		(	DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes,
-			drawLineFunction theDrawFunction, std::fstream* outputLatex);
+	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex,root& ChamberIndicator, std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
+	static void DrawOutputProjective(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, std::fstream* outputLatex, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
+	static void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
+	static void drawFacetVerticesMethod2(DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, drawLineFunction theDrawFunction, std::fstream* outputLatex);
 	bool TestPossibleIndexToSlice(root&direction, int index);
 	CombinatorialChamberContainer();
 	~CombinatorialChamberContainer();
@@ -2604,9 +2571,7 @@ public:
 	void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m, Monomial<ElementOfCommutativeRingWithIdentity>& output);
 	bool HasSameExponent(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	void Assign(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
-	void Substitution
-		(	ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output,
-			short NumVarTarget);
+	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
 	void MakeMonomialOneLetter(short NumVars,int LetterIndex, short Power, ElementOfCommutativeRingWithIdentity& Coeff);
 	void IncreaseNumVariables(short increase);
 	bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
@@ -2888,7 +2853,7 @@ public:
   //elongation zero means we are looking for x^exponent
   //other elongations means we are looking for p_elongation(x^exponent), where p is
   // the numerator in the geometric series sum corresponding to elongation
-  static void GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation, MonomialInCommutativeAlgebra<	Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>& output);
+  static void GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation, MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>& output);
 	std::string DebugString;
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat, int theDimension);
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
@@ -2916,9 +2881,7 @@ public:
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
 	int HashFunction() const;
 	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity&coeff);
-	void MultiplyBy
-		( MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra,GeneratorsOfAlgebraRecord>& m,
-			MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
+	void MultiplyBy( MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra,GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
 	void MultiplyBy(	MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
 	//the below functions return 1 if no reduction has occured
 	//i.e. the generator is not in zeroth power after the multiplication
@@ -2944,8 +2907,7 @@ bool MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, Generat
 
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>
-	::StringStreamPrintOutAppend(std::stringstream& out,::PolynomialOutputFormat& PolyFormat)
+void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::StringStreamPrintOutAppend(std::stringstream& out,::PolynomialOutputFormat& PolyFormat)
 { std::stringstream out1;
 	std::string tempS;
 	for(int i=0;i<this->size;i++)
@@ -2959,8 +2921,7 @@ void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, Generat
 	std::string tempS2;
 	this->Coefficient.ElementToString(tempS2);
 	if (tempS=="")
-	{ out<<tempS2;
-	}
+    out<<tempS2;
 	else
 	{ if (tempS2=="1")
 		{ out<< tempS;
@@ -3004,9 +2965,7 @@ void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, Generat
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy
-		( MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m,
-			MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output)
+void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy( MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output)
 { assert(&m!=&output);
   if (&output!= this)
 		output.Assign(*this);
@@ -3070,24 +3029,21 @@ void MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, Genera
 
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-inline void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::Assign
-	(const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
+inline void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::Assign(const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
 { this->CopyFromHash(right);
 	this->Coefficient.Assign(right.Coefficient);
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-inline void MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::operator =
-	(const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
+inline void MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::operator =(const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
 { this->Assign(right);
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-inline bool MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::operator ==
-	(const MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
+inline bool MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::operator ==(const MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
 { MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord> tempM;
 	tempM.Assign(*this);
-	for (int i=0;i<right.size;i++)
+	for (int i=0; i<right.size; i++)
 	{ GeneratorsOfAlgebra tempG;
 		tempG= right.TheObjects[i];
 		tempG.GeneratorPower=- tempG.GeneratorPower;
@@ -3102,7 +3058,7 @@ inline bool MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity,
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy( MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m)
 { this->MakeActualSizeAtLeastExpandOnTop(this->size+m.size);
-	for (int i=0;i<m.size;i++)
+	for (int i=0; i<m.size; i++)
 		this->MultiplyByGenerator(m.TheObjects[i]);
   this->Coefficient.MultiplyBy(m.Coefficient);
 }
@@ -3319,7 +3275,7 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::DegreesToIndexRecursive(int 
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>&m)
 { assert(this->NumVariables == m.NumVariables);
-	for (int i=0;i<m.NumVariables;i++)
+	for (int i=0; i<m.NumVariables; i++)
 		if (this->degrees[i]<m.degrees[i])
 			return false;
 	return true;
@@ -3328,7 +3284,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity> &m)
 { assert(this->NumVariables==m.NumVariables);
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 	{ if (this->degrees[i]>m.degrees[i])
 			return true;
 		if (this->degrees[i]<m.degrees[i])
@@ -3369,14 +3325,14 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MultiplyBy (Monomial<Elemen
 	output.init(this->NumVariables);
 	output.Coefficient.Assign(m.Coefficient);
 	output.Coefficient.MultiplyBy(this->Coefficient);
-	for(int i=0; i< m.NumVariables;i++)
+	for(int i=0; i<m.NumVariables;i++)
 		output.degrees[i]=this->degrees[i]+m.degrees[i];
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::HasSameExponent(Monomial& m)
 { assert(m.NumVariables == this->NumVariables);
-	for(int i=0; i< m.NumVariables; i++)
+	for(int i=0; i<m.NumVariables; i++)
 		if (this->degrees[i]!=m.degrees[i])
 			return false;
 	return true;
@@ -3432,7 +3388,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot (ElementOfCommutativeRingWithIdentity& coeff, intRoot& input)
 { this->init((short)input.dimension);
 	this->Coefficient.Assign(coeff);
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		this->degrees[i]=(short) input.elements[i];
 }
 
@@ -3460,7 +3416,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(intR
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::DivideByExponentOnly(	intRoot& input)
 { assert(input.dimension==this->NumVariables);
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		this->degrees[i]-=(short)input.elements[i];
 }
 
@@ -3469,7 +3425,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy(	Monomial<ElementO
 { output.init(this->NumVariables);
 	output.Coefficient.Assign(this->Coefficient);
 	output.Coefficient.DivideBy(input.Coefficient);
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		output.degrees[i]=this->degrees[i]-input.degrees[i];
 }
 
@@ -3481,7 +3437,7 @@ ParallelComputing::GlobalPointerCounter-=increment;
 	if(ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	short* newDegrees= new short[NumVariables-increment];
-	for(int i=0;i<this->NumVariables-increment;i++)
+	for(int i=0; i<this->NumVariables-increment; i++)
 		newDegrees[i]=degrees[i];
 	this->NumVariables-=increment;
 	delete [] degrees;
@@ -4307,7 +4263,7 @@ public:
 //	void AddBasicComplexNumber(BasicComplexNumber& b);
 //	void MultiplyByTauSameDenMethod1(int* tau, int k);
 	void Assign(const BasicQN& p);
-	int InvertModN( int d, int p);
+	int InvertModN(int d, int p);
 	void SwitchTwoRows(int rowI1,int rowI2, int StartCol);
 	void RowPlusScalarTimesRow(int rowInd, int scalar, int otherRowInd, int StartCol);
 	void MultiplyRowBy(int rowInd, int scalar, int StartColInd);
@@ -4324,7 +4280,7 @@ public:
 	bool IsEqualToZero();
 	void MakeConst(Rational& Coeff, short NumV);
 	void MakeFromNormalAndDirection(root& normal, root& direction, int theMod, Rational& coeff);
-	void MakePureQN(short NumVariables,int NonZeroIndex, Rational&coeff, int theExp, int Num, int theDen);
+	void MakePureQN(short NumVariables, int NonZeroIndex, Rational& coeff, int theExp, int Num, int theDen);
 	void BasicQNToComplexQN(CompositeComplexQN& output);
 	//for format of the substitution see class qQPSub
 	void LinearSubstitution(QPSub& theSub);
@@ -4483,9 +4439,9 @@ public:
 	void MakeTauknp(int k, int n);
 	void MakePureQuasiPolynomial(PolynomialRationalCoeff& p, int NumVars);
 	void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output);
-	void IntegrateDiscreteFromZeroTo (QPSub& EndPointSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-	void IntegrateDiscreteInDirectionFromZeroTo (	QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-	void IntegrateDiscreteInDirectionFromOldChamber(	root &direction,root& normal,QuasiPolynomial& OldChamberPoly, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+	void IntegrateDiscreteFromZeroTo(QPSub& EndPointSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+	void IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+	void IntegrateDiscreteInDirectionFromOldChamber(root &direction,root& normal,QuasiPolynomial& OldChamberPoly, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
 	void WriteComplexFormToDebugString();
 	void TimesInteger(int x);
 	void DivByInteger(int x);
@@ -4665,8 +4621,8 @@ public:
 	void ElementToString(std::string& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
 	void BubbleSort()
-	{ for (int i=0;this->size;i++)
-			for (int j=i+1;j<this->size;j++)
+	{ for (int i=0; this->size; i++)
+			for (int j=i+1; j<this->size; j++)
 				if (this->TheObjects[j].IsGreaterThanOrEqualTo(this->TheObjects[i]))
 				{ rootWithMultiplicity tempRoot;
 					tempRoot= this->TheObjects[i];
@@ -4778,15 +4734,13 @@ public:
 	void MultiplyCoeffBy(Rational& r);
 	void decomposeAMinusNB(	int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool DecomposeFromLinRelation( MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-	void ComputeOneCheckSum(	partFractions& owner,Rational &output, int theDimension, GlobalVariables& theGlobalVariables);
+	void ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension, GlobalVariables& theGlobalVariables);
 	void AttemptReduction( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ReduceMonomialByMonomial( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ApplySzenesVergneFormula
-		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex,
-			partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ApplyGeneralizedSzenesVergneFormula
-		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int> &theGreatestElongations, ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex,
-			int ElongationGainingMultiplicityIndex, partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int> &theGreatestElongations, ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod(	partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
@@ -4812,10 +4766,8 @@ public:
 	//void swap(int indexA,int indexB);
 	partFraction();
 	~partFraction();
-	void GetPolyReduceMonomialByMonomial
-		(	partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower,IntegerPoly& output);
-	void ReduceMonomialByMonomialModifyOneMonomial
-		(	partFractions& Accum,GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, ListBasicObjects<int>&thePowersSigned, Monomial<Integer>& input);
+	void GetPolyReduceMonomialByMonomial(partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower,IntegerPoly& output);
+	void ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum,GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, ListBasicObjects<int>&thePowersSigned, Monomial<Integer>& input);
 	void GetAlphaMinusNBetaPoly(	partFractions& owner, int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
 	void GetNElongationPolyWithMonomialContribution
 		(	partFractions& owner, ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theCoefficients, ListBasicObjects<int>& theGreatestElongations, int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
@@ -5980,7 +5932,7 @@ class DyckPaths: public ListBasicObjects<DyckPath>
   hashedRoots PositiveRoots;
   int LastNonExploredIndex;
   ListBasicObjects<int> GoodPaths;
-  void ComputeGoodPaths();
+  void ComputeGoodPathsExcludeTrivialPath();
   void GenerateAllDyckPathsTypesABC();
   void initPathGraphTypesABC();
   void GenerateAllDyckPathsTypesABCRecursive();
@@ -6011,6 +5963,7 @@ public:
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
+	bool flagRunningExperiments2;
 	bool flagSavingProverData;
 	bool flagOpenProverData;
 	bool flagProverUseFixedK;
@@ -6107,7 +6060,7 @@ public:
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables,rootSubalgebras& input, std::string& path);
- 	static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+ 	static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
 	static void clearDollarSigns(std::string& theString, std::string& output);
 	static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
 	static bool CheckForInputSanity(ComputationSetup& input);

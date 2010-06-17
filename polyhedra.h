@@ -1652,6 +1652,10 @@ public:
 
 class WallData
 {
+// we consider a wall that has no neighbors to be an external wall of the chamber complex
+// a wall that has a 0 pointer neighbor is a bogus wall, and must be deleted.
+// it is allowed since deleting bogus neighbors upon discovery means one must rewire all neighbors of the wall, which is a
+// lot of operations
 public:
 	std::string DebugString;
 	int indexInOwnerChamber;
@@ -1665,10 +1669,10 @@ public:
 	void RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer);
 	void AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
 	void operator=(const WallData& right);
-	bool IsInFacetNoBoundaries(root &point);
+	bool IsInFacetNoBoundaries(root& point);
 	bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
 	void SubstituteNeighbor(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
-	bool IsExternalWithRespectToDirection(root &direction);
+	bool IsExternalWithRespectToDirection(root& direction);
 	inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point);};
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
 	bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
@@ -1775,7 +1779,7 @@ public:
 	bool VertexIsIncidentWithSelection(root& VertexCandidate,Selection& theSel);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
 	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
-	bool IsABogusNeighbor(WallData& NeighborWall,CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
+	bool IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
 	void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
 	//the below function returns false if the cross-section affine walls have been modified
@@ -6131,7 +6135,7 @@ public:
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
 	ListBasicObjects<int> listWallDataPtSplitChamber;
-	
+
 	Monomial<Rational> monMakePolyExponentFromIntRoot;
 	Monomial<Rational> monMakePolyFromDirectionAndNormal;
 

@@ -998,8 +998,11 @@ void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& th
   this->AllVertices.WriteToFile(output, theGlobalVariables);
   output << "InternalWalls:\n";
   this->InternalWalls.WriteToFile(output, theGlobalVariables);
+  output<<"\n";
   for (int i=0; i<this->Externalwalls.size; i++)
-    this->Externalwalls.TheObjects[i].WriteToFile(output);
+  { this->Externalwalls.TheObjects[i].WriteToFile(output);
+    output<<" ";
+  }
 }
 
 void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
@@ -1021,7 +1024,7 @@ void WallData::WriteToFile(std::fstream& output)
   this->normal.WriteToFile(output);
   output<< " "<< this->NeighborsAlongWall.size;
   assert(this->NeighborsAlongWall.size==this->IndicesMirrorWalls.size);
-  for (int i=0; this->NeighborsAlongWall.size; i++ )
+  for (int i=0; i<this->NeighborsAlongWall.size; i++ )
     if (this->NeighborsAlongWall.TheObjects[i]==0)
 			output<< -1<<" "<<-1;
     else

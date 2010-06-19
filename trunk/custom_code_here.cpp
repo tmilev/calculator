@@ -755,8 +755,7 @@ class IrreducibleFiniteDimensionalModule
   MatrixLargeRational thePathMatrix;
   MatrixLargeRational theMatrix;
   roots theColumnsOfTheMatrix;
-  CombinatorialChamberContainer theChambers;
-  void ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl, GlobalVariables& theGlobalVariables);
+  void InitAndPrepareTheChambersForComputation(int IndexWeyl, CombinatorialChamberContainer& theChambers, GlobalVariables& theGlobalVariables);
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(this->DebugString);};
   void ElementToString(std::string& output);
@@ -773,7 +772,7 @@ void IrreducibleFiniteDimensionalModule::ElementToString(std::string& output)
   output = out.str();
 }
 
-void IrreducibleFiniteDimensionalModule::ComputeCharacterAsFunctionOfHighestWeightTypeA(QuasiPolynomial& output, int IndexWeyl, GlobalVariables& theGlobalVariables)
+void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation(int IndexWeyl, CombinatorialChamberContainer& theChambers, GlobalVariables& theGlobalVariables)
 {// reference:  E. Feigin, G. Fourier, P. Littelmann, "PBW filtration and bases for irreducible modules in type A_n", preprint 2009
   int theDimension= IndexWeyl;
   this->thePaths.AmbientWeyl.MakeAn(theDimension);
@@ -796,23 +795,18 @@ void IrreducibleFiniteDimensionalModule::ComputeCharacterAsFunctionOfHighestWeig
     for (int j=0; j<this->thePaths.GoodPaths.size; j++)
       this->theMatrix.elements[i][j+this->thePaths.PositiveRoots.size]=(i==j)? 1 : 0;
   this->theColumnsOfTheMatrix.AssignMatrixColumns(this->theMatrix);
-  int tempI= this->theMatrix.NumRows;
-  tempI--;
-  this->theChambers.flagAnErrorHasOcurredTimeToPanic=true;
-  this->theChambers.SliceTheEuclideanSpace(this->theColumnsOfTheMatrix, tempI, tempI+1, 0, theGlobalVariables);
-  std::fstream theFile;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, "./chambers.txt", false, true, false);
-  this->theChambers.WriteToFile(theFile, theGlobalVariables);
+  theChambers.theDirections.CopyFromBase(this->theColumnsOfTheMatrix);
+  theChambers.AmbientDimension= IndexWeyl;
+  theChambers.CurrentIndex=IndexWeyl-1;
 }
 
-
-void main_test_function(std::string& output, GlobalVariables& theGlobalVariables)
+void main_test_function(std::string& output, GlobalVariables& theGlobalVariables, ComputationSetup& theSetup, bool flagComputationAlreadyLoaded)
 { std::stringstream out;
   std::string tempS;
   ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4, tempEl5, Accum;
-  out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
-  out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
-  out <<"\\begin{document}";
+  //out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
+  //out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
+ // out <<"\\begin{document}";
 /*  WeylParser theParser;
   theParser.ParseAndCompute("x_1+x_1", tempS);*/
   /*
@@ -833,12 +827,15 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   debugParser.Value.ComputeDebugString(false,false);
   out << debugParser.Value.DebugString;
   out << "\n\n"<<tempS;*/
-
-  QuasiPolynomial tempP;
   IrreducibleFiniteDimensionalModule theModule;
-  theModule.ComputeCharacterAsFunctionOfHighestWeightTypeA(tempP, 2, theGlobalVariables);
-  theModule.ComputeDebugString();
-  out << theModule.DebugString;
+  QuasiPolynomial tempP;
+  if (!flagComputationAlreadyLoaded)
+    theModule.InitAndPrepareTheChambersForComputation(3, theSetup.theChambers,theGlobalVariables);
+  theSetup.theChambers.flagMustStop=false;
+  theSetup.theChambers.flagIsRunning=true;
+  theSetup.theChambers.flagReachSafePointASAP=false;
+  theSetup.flagExperiment2ChambersAlreadyLoaded=true;
+  theSetup.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
 /*  tempEl1.Makexixj(0,1,4);
   Rational tempRat=-1;
   tempEl2.Makedidj(0,1,4);
@@ -968,7 +965,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out <<"\n\\end{eqnarray*}\n";
 */
 
-  out<<"\\end{document}";
+//  out<<"\\end{document}";
   output=out.str();
   IndicatorWindowGlobalVariables.StatusString1=output;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
@@ -992,21 +989,46 @@ void DyckPaths::ComputeGoodPathsExcludeTrivialPath()
 void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Flags_and_indices: ";
   output << this->flagHasZeroPolynomial << " "<< this->flagExplored<< " " <<this->flagPermanentlyZero <<" ";
-  output << this->IndexInOwnerComplex << " "<< this->IndexStartingCrossSectionNormal <<" ";
-  output << this->DisplayNumber <<"\n";
-  output <<"Vertices:\n";
+  output << this->IndexInOwnerComplex << " "<< this->IndexStartingCrossSectionNormal <<" "<< this->DisplayNumber <<"\nVertices:\n";
   this->AllVertices.WriteToFile(output, theGlobalVariables);
   output << "InternalWalls:\n";
   this->InternalWalls.WriteToFile(output, theGlobalVariables);
-  output<<"\n";
+  output<<"\n" << this->Externalwalls.size<<"\n";
   for (int i=0; i<this->Externalwalls.size; i++)
   { this->Externalwalls.TheObjects[i].WriteToFile(output);
     output<<" ";
   }
 }
 
+void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner)
+{ std::string tempS;
+  int tempI;
+  input >> tempS;
+  input >> this->flagHasZeroPolynomial >> this->flagExplored>>this->flagPermanentlyZero;
+  input >> this->IndexInOwnerComplex >> this->IndexStartingCrossSectionNormal;
+  input >> this->DisplayNumber;
+  input >> tempS;
+  this->AllVertices.ReadFromFile(input, theGlobalVariables);
+  input >> tempS;
+  assert(tempS =="InternalWalls:");
+  this->InternalWalls.ReadFromFile(input, theGlobalVariables);
+  input >> tempI;
+  this->Externalwalls.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->Externalwalls.size; i++)
+    this->Externalwalls.TheObjects[i].ReadFromFile(input, owner);
+}
+
 void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output <<"Num_pointers: ";
+{ output <<"Num_pointers: "<< this->size<<"\n";
+///////////////////////////////////////////////////
+  output << "CurrentIndex: "<< this->CurrentIndex<<"\n";
+  output << "Directions:\n";
+  this->theDirections.WriteToFile(output, theGlobalVariables);
+  output <<"\nNext_index_to_slice: "<< this->indexNextChamberToSlice<<"\n";
+  output <<"FirstNonExploredIndex: " << this->FirstNonExploredIndex<<" ";
+  this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
+  output <<"\n";
+////////////////////////////////////////////////////
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
     { output <<"Chamber:\n";
@@ -1015,20 +1037,111 @@ void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVari
       output <<"Empty\n";
 }
 
-void CombinatorialChamberContainer::ReadFromFile(std::fstream& input)
-{
+void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS;
+  input.seekg(0);
+  this->KillAllElements();
+  int tempI;
+  input >> tempS >> tempI;
+  this->initAndCreateNewObjects(tempI);
+///////////////////////////////////////////////////
+  input >> tempS>> this->CurrentIndex;
+  input >> tempS;
+  this->theDirections.ReadFromFile(input, theGlobalVariables);
+  input >> tempS >> this->indexNextChamberToSlice;
+  input >> tempS >> this->FirstNonExploredIndex;
+  this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
+////////////////////////////////////////////////////
+  for (int i=0; i<this->size; i++)
+  { input >> tempS;
+    if (tempS=="Chamber:")
+      this->TheObjects[i]->ReadFromFile(input, theGlobalVariables, *this);
+    else
+    { assert (tempS=="Empty");
+      delete this->TheObjects[i];
+      this->TheObjects[i]=0;
+    }
+  }
+  this->flagIsRunning=true;
+  this->flagMustStop=false;
+  this->flagReachSafePointASAP=false;
 }
 
 void WallData::WriteToFile(std::fstream& output)
 { output << this->indexInOwnerChamber <<" ";
   this->normal.WriteToFile(output);
-  output<< " "<< this->NeighborsAlongWall.size;
+  output<< " "<< this->NeighborsAlongWall.size<<" ";
   assert(this->NeighborsAlongWall.size==this->IndicesMirrorWalls.size);
   for (int i=0; i<this->NeighborsAlongWall.size; i++ )
     if (this->NeighborsAlongWall.TheObjects[i]==0)
-			output<< -1<<" "<<-1;
+			output<< -1<<" "<<-1<<" ";
     else
     { //assert(this->MirrorWall.TheObjects[i]!=0);
-      output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->IndicesMirrorWalls.TheObjects[i];
+      output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->IndicesMirrorWalls.TheObjects[i]<<" ";
     }
+}
+
+
+void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner)
+{ input >>this->indexInOwnerChamber;
+  this->normal.ReadFromFile(input);
+  int tempI, indexN, indexW;
+  input >>tempI;
+  this->NeighborsAlongWall.SetSizeExpandOnTopNoObjectInit(tempI);
+  this->IndicesMirrorWalls.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->NeighborsAlongWall.size; i++ )
+  { input >> indexN>> indexW;
+    if (indexN==-1)
+    { this->NeighborsAlongWall.TheObjects[i]=0;
+      this->IndicesMirrorWalls.TheObjects[i]=-1;
+    }
+    else
+    { this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[i];
+      this->IndicesMirrorWalls.TheObjects[i]=indexW;
+    }
+  }
+}
+
+void CombinatorialChamberContainer::WriteToDefaultFile()
+{ std::fstream tempF;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, true, false);
+  GlobalVariables theGlobalVariables;
+  this->WriteToFile(tempF, theGlobalVariables);
+  tempF.close();
+}
+
+void CombinatorialChamberContainer::ReadFromDefaultFile()
+{ std::fstream tempF;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false);
+  GlobalVariables theGlobalVariables;
+  this->ReadFromFile(tempF, theGlobalVariables);
+  tempF.close();
+}
+
+void CombinatorialChamberContainer::PauseSlicing()
+{
+#ifdef WIN32
+#else
+  pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
+  this->flagReachSafePointASAP=true;
+  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
+  while (!this->flagIsRunning)
+  {}
+#endif
+}
+
+void CombinatorialChamberContainer::ResumeSlicing()
+{
+#ifdef WIN32
+#else
+  pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
+  this->flagIsRunning=true;
+  pthread_cond_signal(&this->condContinue);
+  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
+#endif
+}
+
+
+void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
+{ this->SliceTheEuclideanSpace(this->theDirections, this->CurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
 }

@@ -42,6 +42,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+
 #ifndef WIN32
 #include <pthread.h>
 #endif
@@ -124,6 +125,10 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//The documentation of pthreads.h can be found at:
+// https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class ParallelComputing
 {
@@ -1680,7 +1685,7 @@ public:
 	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 	void WriteToFile(std::fstream& output);
-	void ReadFromFile(std::fstream& input);
+	void ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner);
 };
 
 class affineHyperplane
@@ -1772,7 +1777,7 @@ public:
 	bool ConsistencyCheck(int theDimension);
 	//bool FacetIsInternal(Facet* f);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-	void ReadFromFile(std::fstream& input);
+	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
 	void LabelWallIndicesProperly();
 	int getIndexInfiniteHyperplane(CombinatorialChamberContainer* owner);
 	int getIndexVertexIncidentWithSelection(Selection& theSel);
@@ -2452,6 +2457,29 @@ public:
 	int NumAffineHyperplanesBeforeWeylChamberWalls;
 	int NumProjectiveHyperplanesBeforeWeylChamberWalls;
 	affineHyperplanes StartingCrossSections;
+	//needed to run the algorithm independently of input variables
+	int CurrentIndex;
+	roots theDirections;
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//flags to facilitate mutlitasking. Those are the internal ones.
+// the actual mutexes used to syncronize the communation properly are system dependent and
+// follow.
+	bool flagReachSafePointASAP;
+	bool flagIsRunning;
+	bool flagMustStop;
+// the implementation of the following two has #ifdef's and is system dependent
+// Unfortunately there is no system independent way in C++ to do this (as far as I know)
+// Let's hope that will be fixed with the new C++ standard!
+	void PauseSlicing();
+	void ResumeSlicing();
+#ifdef WIN32
+#else
+    pthread_mutex_t mutexFlagCriticalSectionEntered;
+    pthread_cond_t condContinue;
+#endif
+/////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 	bool flagMakingASingleHyperplaneSlice;
 	bool flagSliceWithAWallInitDone;
 	bool flagSliceWithAWallIgnorePermanentlyZero;
@@ -2471,13 +2499,14 @@ public:
 	static int flagMaxNumCharsAllowedInStringOutput;
 	void ConvertHasZeroPolyToPermanentlyZero();
 	void SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices);
-	void QuickSortIndicesByDisplayNumber (ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex);
-	void AddWeylChamberWallsToHyperplanes (GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
+	void QuickSortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex);
+	void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
 	void SliceTheEuclideanSpace(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables);
 	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
 	int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
-	void SliceOneDirection (	roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
-	void OneSlice ( roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void SliceOneDirection(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void OneSlice(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
   void InduceFromLowerDimensionalAndProjectivize ( CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
   void MakeExtraProjectivePlane();
 	int GetNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
@@ -2493,8 +2522,10 @@ public:
 	void ComputeDebugString(bool useLatex, bool useHtml) {this->ElementToString(this->DebugString,useLatex,useHtml);};
 	void init();
 	void Free();
+	void WriteToDefaultFile();
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-	void ReadFromFile(std::fstream& input);
+	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+	void ReadFromDefaultFile();
 	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
@@ -5966,6 +5997,7 @@ public:
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
+	bool flagExperiment2ChambersAlreadyLoaded;
 	bool flagRunningExperiments2;
 	bool flagSavingProverData;
 	bool flagOpenProverData;

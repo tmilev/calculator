@@ -796,8 +796,8 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
       this->theMatrix.elements[i][j+this->thePaths.PositiveRoots.size]=(i==j)? 1 : 0;
   this->theColumnsOfTheMatrix.AssignMatrixColumns(this->theMatrix);
   theChambers.theDirections.CopyFromBase(this->theColumnsOfTheMatrix);
-  theChambers.AmbientDimension= IndexWeyl;
-  theChambers.CurrentIndex=IndexWeyl-1;
+  theChambers.AmbientDimension= this->theMatrix.NumRows;
+  theChambers.CurrentIndex=theChambers.AmbientDimension-1;
 }
 
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables, ComputationSetup& theSetup, bool flagComputationAlreadyLoaded)

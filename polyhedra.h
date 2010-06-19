@@ -2924,7 +2924,7 @@ public:
 	int MultiplyByGenerator(GeneratorsOfAlgebra& g);
 	int MultiplyByGenerator(GeneratorsOfAlgebraRecord& g, int Power);
 	int MultiplyByGenerator(int GeneratorIndex, int GeneratorPower);
-	void Assign (	const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
+	void Assign (const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
 	bool IsEqualToZero();
 	MonomialInCommutativeAlgebra(){};
 	//IMPORTANT: the coefficients of two monomials are not compared, that is,

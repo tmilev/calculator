@@ -21975,8 +21975,6 @@ void DyckPaths::ElementToString(std::string& output,  bool useHtml)
     for (int j=0; j<this->pathGraphEdgeLabels.TheObjects[i].size; j++)
       out << this->pathGraphEdgeLabels.TheObjects[i].TheObjects[j]<< ", ";
   }
-
-
   output=out.str();
 }
 

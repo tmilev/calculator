@@ -798,6 +798,8 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
   theChambers.theDirections.CopyFromBase(this->theColumnsOfTheMatrix);
   theChambers.AmbientDimension= this->theMatrix.NumRows;
   theChambers.CurrentIndex=theChambers.AmbientDimension-1;
+  theChambers.theDirections.ComputeDebugString();
+  
 }
 
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables, ComputationSetup& theSetup, bool flagComputationAlreadyLoaded)
@@ -991,7 +993,9 @@ void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& th
   output << this->flagHasZeroPolynomial << " "<< this->flagExplored<< " " <<this->flagPermanentlyZero <<" ";
   output << this->IndexInOwnerComplex << " "<< this->IndexStartingCrossSectionNormal <<" "<< this->DisplayNumber <<"\nVertices:\n";
   this->AllVertices.WriteToFile(output, theGlobalVariables);
-  output << "InternalWalls:\n";
+  output <<"Internal_point: ";
+  this->InternalPoint.WriteToFile(output);
+  output << "\nInternalWalls:\n";
   this->InternalWalls.WriteToFile(output, theGlobalVariables);
   output<<"\n" << this->Externalwalls.size<<"\n";
   for (int i=0; i<this->Externalwalls.size; i++)
@@ -1009,6 +1013,8 @@ void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& th
   input >> this->DisplayNumber;
   input >> tempS;
   this->AllVertices.ReadFromFile(input, theGlobalVariables);
+  input>>tempS;
+  this->InternalPoint.ReadFromFile(input);
   input >> tempS;
   assert(tempS =="InternalWalls:");
   this->InternalWalls.ReadFromFile(input, theGlobalVariables);
@@ -1019,19 +1025,22 @@ void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& th
 }
 
 void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output <<"Num_pointers: "<< this->size<<"\n";
+{ this->LabelChamberIndicesProperly();
+  output <<"Num_pointers: "<< this->size<<"\n";
 ///////////////////////////////////////////////////
+  output<<"Dimension: "<< this->AmbientDimension<<" ";
   output << "CurrentIndex: "<< this->CurrentIndex<<"\n";
   output << "Directions:\n";
   this->theDirections.WriteToFile(output, theGlobalVariables);
   output <<"\nNext_index_to_slice: "<< this->indexNextChamberToSlice<<"\n";
   output <<"FirstNonExploredIndex: " << this->FirstNonExploredIndex<<" ";
   this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
-  output <<"\n";
+  output<<"\n";
+  this->startingCones.WriteToFile(output, theGlobalVariables);
 ////////////////////////////////////////////////////
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
-    { output <<"Chamber:\n";
+    { output <<"\nChamber:\n";
       this->TheObjects[i]->WriteToFile(output, theGlobalVariables);
     } else
       output <<"Empty\n";
@@ -1045,12 +1054,14 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   input >> tempS >> tempI;
   this->initAndCreateNewObjects(tempI);
 ///////////////////////////////////////////////////
-  input >> tempS>> this->CurrentIndex;
+  input >> tempS >> this->AmbientDimension;
+  input >> tempS >> this->CurrentIndex;
   input >> tempS;
   this->theDirections.ReadFromFile(input, theGlobalVariables);
   input >> tempS >> this->indexNextChamberToSlice;
   input >> tempS >> this->FirstNonExploredIndex;
   this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
+  this->startingCones.ReadFromFile(input, theGlobalVariables);
 ////////////////////////////////////////////////////
   for (int i=0; i<this->size; i++)
   { input >> tempS;
@@ -1068,7 +1079,7 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
 }
 
 void WallData::WriteToFile(std::fstream& output)
-{ output << this->indexInOwnerChamber <<" ";
+{ //output << this->indexInOwnerChamber <<" ";
   this->normal.WriteToFile(output);
   output<< " "<< this->NeighborsAlongWall.size<<" ";
   assert(this->NeighborsAlongWall.size==this->IndicesMirrorWalls.size);
@@ -1081,9 +1092,10 @@ void WallData::WriteToFile(std::fstream& output)
     }
 }
 
+void Stop(){};
 
 void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner)
-{ input >>this->indexInOwnerChamber;
+{ //input >>this->indexInOwnerChamber;
   this->normal.ReadFromFile(input);
   int tempI, indexN, indexW;
   input >>tempI;
@@ -1096,7 +1108,10 @@ void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& 
       this->IndicesMirrorWalls.TheObjects[i]=-1;
     }
     else
-    { this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[i];
+    { if (indexN==1026)
+      { Stop();
+      }
+      this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[indexN];
       this->IndicesMirrorWalls.TheObjects[i]=indexW;
     }
   }
@@ -1121,6 +1136,11 @@ void CombinatorialChamberContainer::ReadFromDefaultFile()
 void CombinatorialChamberContainer::PauseSlicing()
 {
 #ifdef WIN32
+/*  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
+  this->flagReachSafePointASAP=true;
+  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
+  while(!this->flagIsRunning)
+  {}*/
 #else
   pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
   this->flagReachSafePointASAP=true;
@@ -1133,6 +1153,10 @@ void CombinatorialChamberContainer::PauseSlicing()
 void CombinatorialChamberContainer::ResumeSlicing()
 {
 #ifdef WIN32
+//  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
+//  this->flagIsRunning=true;
+//  SetEvent(this->condContinue);
+//  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
 #else
   pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
   this->flagIsRunning=true;
@@ -1144,4 +1168,83 @@ void CombinatorialChamberContainer::ResumeSlicing()
 
 void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
 { this->SliceTheEuclideanSpace(this->theDirections, this->CurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
+}
+
+void Cone::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariables)
+{ this->roots::WriteToFile(output, theGlobalVariables);
+  output <<"\nChamberTestArray: "<<this->ChamberTestArray.size<<" ";
+  for (int i=0; i<this->ChamberTestArray.size; i++)
+    output<< this->ChamberTestArray.TheObjects[i]<<" ";
+}
+
+void Cone::ReadFromFile(std::fstream &input, GlobalVariables &theGlobalVariables)
+{ std::string tempS; int tempI;
+  this->roots::ReadFromFile(input, theGlobalVariables);
+  input >> tempS>> tempI;
+  this->ChamberTestArray.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->ChamberTestArray.size; i++)
+    input >> this->ChamberTestArray.TheObjects[i];
+}
+
+void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->theFacets.WriteToFile(output);
+  output <<"\nConesHavingFixedNormal: ";
+  output << this->ConesHavingFixedNormal.size<<" ";
+  for (int i=0; i<this->ConesHavingFixedNormal.size; i++)
+  { output << this->ConesHavingFixedNormal.TheObjects[i].size<<" ";
+    for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
+      output<< this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j]<<" ";
+  }
+  output <<"\ntheCones: "<<this->size<< " ";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+    output <<" ";
+  }  
+}
+
+void simplicialCones::ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables)
+{ std::string tempS; int tempI;
+  this->theFacets.ReadFromFile(input);
+  input >>tempS; 
+  assert(tempS=="ConesHavingFixedNormal:");
+  input >> tempI;
+  this->ConesHavingFixedNormal.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->ConesHavingFixedNormal.size; i++)
+  { input >> tempI;
+    this->ConesHavingFixedNormal.TheObjects[i].SetSizeExpandOnTopNoObjectInit(tempI);
+    for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
+      input>>this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j];
+   }
+  input>>tempS>>tempI;
+  assert(tempS=="theCones:");
+  this->SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+}
+
+void hashedRoots::WriteToFile(std::fstream &output)
+{ int theDimension=0;
+  if (this->size>0)
+    theDimension= this->TheObjects[0].size;
+  output << "Num|dim: " <<this->size<<" "<< theDimension<<" ";
+  for (int i=0; i<this->size; i++)
+    for (int j=0; j<theDimension; j++)
+    { this->TheObjects[i].TheObjects[j].WriteToFile(output);
+      output<<" ";
+    } 
+}
+
+void hashedRoots::ReadFromFile(std::fstream &input)
+{ int theDimension; std::string tempS;
+  int theSize;
+  this->ClearTheObjects();
+  input >> tempS >> theSize>> theDimension;
+  this->MakeActualSizeAtLeastExpandOnTop(theSize);
+  root tempRoot; 
+  tempRoot.SetSizeExpandOnTopLight(theDimension);
+  for (int i=0; i<theSize; i++)
+  { for (int j=0; j<theDimension; j++)
+      tempRoot.TheObjects[j].ReadFromFile(input);
+    this->AddObjectOnTopHash(tempRoot);
+   }
 }

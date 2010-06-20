@@ -123,7 +123,6 @@ PrecomputedQuasiPolynomialIntegrals::PreComputedBernoulli;
 PolynomialsRationalCoeff PreComputedBernoulliLocal;
 PrecomputedTauknPointersKillOnExit PrecomputedTausLocal;
 
-simplicialCones CombinatorialChamberContainer::startingCones;
 bool CombinatorialChamber::flagPrintWallDetails=true;
 bool CombinatorialChamber::DisplayingGraphics=true;
 bool CombinatorialChamberContainer::PrintLastChamberOnly=true;
@@ -327,7 +326,12 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
     if (this->flagReachSafePointASAP)
     {
 #ifdef WIN32
-
+/*      WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
+      this->flagIsRunning=false;
+      ReleaseMutex(this->mutexFlagCriticalSectionEntered);
+      ::WaitForSingleObjectEx(this->condContinue, INFINITE, TRUE);
+      ::ResetEvent(this->condContinue);
+      ReleaseMutex(this->mutexFlagCriticalSectionEntered);*/
 #else
 //Explanation: the first lock will pause this thread until the mutex is unlocked; then it will lock up the lock, will set up the internal flag
 //will call conditional wait. The conditional wait MUST be called with a locked mutex. The conditional wait will unlock the mutex once it has paused the thread.
@@ -3752,7 +3756,7 @@ bool CombinatorialChamber::TestPossibilityToSlice(root& direction)
 	return true;
 }
 
-bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables)
 {	//	 roots PositiveVertices, NegativeVertices
 	if (output.flagSliceWithAWallIgnorePermanentlyZero && this->flagPermanentlyZero)
 		return false;
@@ -3835,7 +3839,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal,Combinatorial
 		return false;
 	}
 	if (!output.flagMakingASingleHyperplaneSlice)
-		if (!CombinatorialChamberContainer::startingCones.SeparatePoints( PositiveChamberInternalPoint, NegativeChamberInternalPoint,&theKillerPlaneNormal))
+		if (!output.startingCones.SeparatePoints( PositiveChamberInternalPoint, NegativeChamberInternalPoint,&theKillerPlaneNormal))
       return false;
 //	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
 //	{ LocalContainerPlusVertices.ComputeDebugString();
@@ -4291,6 +4295,8 @@ void CombinatorialChamberContainer::LabelChamberIndicesProperly()
 CombinatorialChamberContainer::CombinatorialChamberContainer()
 { this->init();
 #ifdef WIN32
+//  this->mutexFlagCriticalSectionEntered=CreateMutex(NULL, FALSE, NULL);
+//  this->condContinue=CreateEvent(0, 0, 0, 0);
 #else
 	pthread_mutex_init(&this->mutexFlagCriticalSectionEntered, 0);
 	pthread_cond_init(&this->condContinue, 0);
@@ -4322,6 +4328,9 @@ void CombinatorialChamberContainer::init()
 CombinatorialChamberContainer::~CombinatorialChamberContainer()
 {	this->Free();
 #ifdef WIN32
+/*  ::CloseHandle(this->mutexFlagCriticalSectionEntered);
+  ::CloseHandle(this->condContinue);*/
+  //perhaps I should also delete the condition variable ? No such thing was documented in MSDN... go figure.
 #else
 	pthread_mutex_destroy(&this->mutexFlagCriticalSectionEntered);
 	pthread_cond_destroy(&this->condContinue);
@@ -4685,7 +4694,7 @@ bool WallData::IsExternalWithRespectToDirection(root& direction)
 
 bool WallData::EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly)
 { aNeighborHasNonZeroPoly=false;
-	for (int i=0;i<this->NeighborsAlongWall.size;i++)
+	for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]!=0)
 		{ if ((!this->NeighborsAlongWall.TheObjects[i]->flagExplored)&&(!this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero))
 				return false;
@@ -4694,18 +4703,6 @@ bool WallData::EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly)
 		}
 	return true;
 }
-
-/*void Facet::InduceFromFacetLowerDimension(Facet& input, CombinatorialChamberContainer& ownerComplex)
-{ this->normal.MakeNormalInProjectivizationFromPointAndNormal(ZeroRoot,input.normal);
-	for(int i=0;i<input.Owners.size;i++)
-	{ CombinatorialChamber* tempPlus;
-		CombinatorialChamber* tempMinus;
-		tempPlus=ownerComplex.TheObjects[input.Owners.TheObjects[i].PlusOwner->IndexInOwnerComplex];
-		tempMinus=ownerComplex.TheObjects[input.Owners.TheObjects[i].MinusOwner->IndexInOwnerComplex];
-		this->Owners.AddCouple(tempPlus,tempMinus);
-	}
-	this->ComputeDebugString();
-}*/
 
 bool WallData::FacetContainsChamberOnlyOnce(CombinatorialChamber *owner)
 { bool FoundOnce= false;
@@ -5124,8 +5121,7 @@ void CompositeComplexQN::MakePureQN(int numVars,int NonZeroIndex, Rational&coeff
 { this->MakePureQN(numVars,NonZeroIndex,Exp,RZero,coeff);
 }
 
-void CompositeComplexQN::MakePureQN(int numVars,int NonZeroIndex, Rational&coeffExp, Rational&ConstExp,
-														 Rational& Coeff)
+void CompositeComplexQN::MakePureQN(int numVars,int NonZeroIndex, Rational&coeffExp, Rational&ConstExp, Rational& Coeff)
 { this->size=0;
 	this->NumVariables=numVars;
 	static ComplexQN tempQ(numVars);
@@ -5380,8 +5376,7 @@ void PolynomialRationalCoeff::AssignIntegerPoly(IntegerPoly& p)
 	}
 }
 
-void PolynomialRationalCoeff::MakePolyFromDirectionAndNormal
-				(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables)
+void PolynomialRationalCoeff::MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables)
 {	Rational tempRat2;
 	root::RootScalarEuclideanRoot(direction,normal,tempRat2);
 	this->ClearTheObjects();
@@ -5479,13 +5474,11 @@ void PolynomialsRationalCoeff::MakeSubAddExtraVarForIntegration(root& direction)
 {	this->SetSizeExpandOnTopNoObjectInit(direction.size);
 	for (int i=0;i<direction.size;i++)
 	{	Rational tempRat; tempRat.Assign(direction.TheObjects[i]); tempRat.Minus();
-		this->TheObjects[i].MakeNVarDegOnePoly
-						((short)(direction.size+1),i,direction.size,ROne,tempRat);
+		this->TheObjects[i].MakeNVarDegOnePoly((short)(direction.size+1),i,direction.size,ROne,tempRat);
 	}
 }
 
-void PolynomialsRationalCoeff::MakeSubNVarForOtherChamber
-         (root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables)
+void PolynomialsRationalCoeff::MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables)
 {	this->SetSizeExpandOnTopNoObjectInit(direction.size);
 	static PolynomialRationalCoeff TempPoly;
 	TempPoly.MakePolyFromDirectionAndNormal(direction,normal, Correction,theGlobalVariables);
@@ -5499,8 +5492,7 @@ void PolynomialsRationalCoeff::MakeSubNVarForOtherChamber
 	}
 }
 
-void PolynomialsRationalCoeff::MakeLinearSubOnLastVariable
-            (short NumVars,PolynomialRationalCoeff& LastVarSub)
+void PolynomialsRationalCoeff::MakeLinearSubOnLastVariable(short NumVars,PolynomialRationalCoeff& LastVarSub)
 { this->SetSizeExpandOnTopNoObjectInit(NumVars);
 	for (int i=0;i<NumVars-1;i++)
     this->TheObjects[i].MakeNVarDegOnePoly(NumVars,i,ROne);
@@ -5651,10 +5643,7 @@ void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& o
 
 //We are integrating with respect to the last variable always!
 
-void QuasiMonomial::IntegrateDiscreteInDirectionFromZeroTo
-					(QPSub& EndPointSub, QPSub& DirectionSub,
-					QuasiPolynomial &output,
-					PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals)
+void QuasiMonomial::IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals)
 {/*	static QuasiPolynomial SubstitutedQP;
 	this->RationalLinearSubstitution(DirectionSub,SubstitutedQP);
 	SubstitutedQP.IntegrateDiscreteFromZeroTo(EndPointSub,output,PrecomputedDiscreteIntegrals);*/
@@ -5886,9 +5875,8 @@ void QuasiPolynomial::WriteComplexFormToDebugString()
 }
 
 void QuasiPolynomial::Simplify()
-{for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].Coefficient.Simplify();
-	}
+{ for (int i=0; i<this->size; i++)
+	  this->TheObjects[i].Coefficient.Simplify();
 }
 
 void QuasiPolynomial::TimesInteger(int x)
@@ -5910,7 +5898,7 @@ void QuasiPolynomial::Evaluate(intRoot& values, Rational& output)
 		{	this->TheObjects[i].ComputeDebugString();
 		}*/
 		for (int j=0; j<this->NumVars;j++)
-		{ for (int k=0;k<this->TheObjects[i].degrees[j];k++)
+		{ for (int k=0; k<this->TheObjects[i].degrees[j]; k++)
 			{	/*if (Rational::flagAnErrorHasOccurredTimeToPanic)
 				{ if (this->TheObjects[i].DebugString=="-1/2ac^{2}")
 					{ tempLRat.ElementToString(tempS);
@@ -5957,10 +5945,9 @@ void QuasiPolynomial::DivByInteger(int x)
 	this->TimesConstant(tempQN);
 }
 
-void QuasiPolynomial::RationalLinearSubstitution
-												(QPSub& TheSub,QuasiPolynomial& output)
-{	static QuasiPolynomial tempQP;
-	static QuasiPolynomial Accum;
+void QuasiPolynomial::RationalLinearSubstitution(QPSub& TheSub,QuasiPolynomial& output)
+{	QuasiPolynomial tempQP;
+	QuasiPolynomial Accum;
 	Accum.ClearTheObjects();
 	Accum.NumVars= (short)TheSub.TheQNSub.NumRows;
 	for (int i=0;i<this->size;i++)
@@ -5979,18 +5966,17 @@ QuasiPolynomial::QuasiPolynomial()
 };
 
 void QuasiPolynomial::MakeTauknp(int k, int n)
-{ static QuasiNumber tempQN;
+{ QuasiNumber tempQN;
 	tempQN.MakePureQN(1,0,ROne,1,k,n);
 	this->MakeNVarConst(1,tempQN);
 }
 
 void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplexQN& output)
 {	for (int i=0;i<this->size;i++)
-	{	if (this->TheObjects[i]->k==k && this->TheObjects[i]->n==n)
+	  if (this->TheObjects[i]->k==k && this->TheObjects[i]->n==n)
 		{	output.Assign(this->TheObjects[i]->Taukn);
 			return;
 		}
-	}
 	this->ComputeTaukn(k,n,output);
 	PrecomputedTaukn* NewMember = new PrecomputedTaukn;
 #ifdef CGIversionLimitRAMuse
@@ -6079,8 +6065,7 @@ void rootsCollection::Average(root& output, int Number, int theDimension)
 	output.DivByInteger(this->size);
 }
 
-void CompositeComplexQNSub::MakeLinearSubIntegrand
-	(root &normal,root &direction,Rational& Correction,GlobalVariables& theGlobalVariables)
+void CompositeComplexQNSub::MakeLinearSubIntegrand(root &normal, root &direction, Rational& Correction, GlobalVariables& theGlobalVariables)
 { PolynomialRationalCoeff EndPoint;
 	EndPoint.MakePolyFromDirectionAndNormal(direction,normal,Correction,theGlobalVariables);
 	this->RationalPolyForm.MakeSubstitutionLastVariableToEndPoint(1,EndPoint);
@@ -6106,8 +6091,7 @@ void CompositeComplexQNSub::MakeSubAddExtraVarForIntegration(root &direction)
 }
 
 void CompositeComplexQNSub::MakeSubNVarForOtherChamber(root &direction, root &normal, Rational &Correction,GlobalVariables& theGlobalVariables)
-{ this->RationalPolyForm.MakeSubNVarForOtherChamber
-		(direction,normal,Correction, theGlobalVariables);
+{ this->RationalPolyForm.MakeSubNVarForOtherChamber(direction,normal,Correction, theGlobalVariables);
 	this->MatrixForCoeffs.init((short)direction.size+1,(short)direction.size);
 	Rational tempLargeRat;
 	root::RootScalarEuclideanRoot(direction,normal,tempLargeRat);
@@ -6193,21 +6177,20 @@ void BasicComplexNumber::ElementToString(std::string& output)
 
 void CompositeComplex::Add(CompositeComplex &c)
 { for (int i=0;i<c.size;i++)
-	{ this->AddBasicComplex(c.TheObjects[i]);
-	}
+	  this->AddBasicComplex(c.TheObjects[i]);
 	this->Simplify();
 }
 
 void CompositeComplex::MakeBasicComplex(Rational& coeff, Rational & exp)
-{ static BasicComplexNumber tempB;
+{ BasicComplexNumber tempB;
 	tempB.init(coeff, exp);
 	this->size=0;
 	this->AddObjectOnTop(tempB);
 }
 
 void CompositeComplex::MultiplyBy(CompositeComplex& c)
-{ static CompositeComplex Accum;
-	static BasicComplexNumber tempB;
+{ CompositeComplex Accum;
+	BasicComplexNumber tempB;
 	Accum.size=0;
 	for (int i=0;i<c.size;i++)
 	{ for (int j=0;j<this->size;j++)
@@ -6225,8 +6208,7 @@ void CompositeComplex::AddLargeRational(Rational& r)
 	{ if(this->TheObjects[i].Exp.IsEqualTo(RZero))
 		{ this->TheObjects[i].Coeff.Add(r);
 			if (this->TheObjects[i].Coeff.IsEqualToZero())
-			{ this->PopIndexSwapWithLast(i);
-			}
+			  this->PopIndexSwapWithLast(i);
 			return;
 		}
 	}
@@ -6242,8 +6224,7 @@ void CompositeComplex::ElementToString(std::string& output)
 	{	this->TheObjects[i].ElementToString(tempS);
 		if (!(tempS[0]=='0'))
 		{ if(!(tempS[0]=='-'))
-			{ out <<"+";
-			}
+			  out <<"+";
 			out<<tempS;
 		}
 	}
@@ -6298,7 +6279,7 @@ bool CompositeComplex::SimplifyTrue()
 int CompositeComplex::FindMaxDenExp()
 { int result=0;
 	for (int i=0;i<this->size;i++)
-	{ result = Maximum(result,this->TheObjects[i].Exp.DenShort);}
+	  result = Maximum(result,this->TheObjects[i].Exp.DenShort);
 	return result;
 }
 
@@ -6351,8 +6332,7 @@ void CompositeComplex::AddBasicComplex(BasicComplexNumber& b)
 	{ if (this->TheObjects[i].Exp.IsEqualTo(b.Exp))
 		{ this->TheObjects[i].Coeff.Add(b.Coeff);
 			if (this->TheObjects[i].Coeff.IsEqualToZero())
-			{ this->PopIndexSwapWithLast(i);
-			}
+			  this->PopIndexSwapWithLast(i);
 			return;
 		}
 	}
@@ -6364,12 +6344,11 @@ void CompositeComplex::AddRational(Rational& r)
 	{ if(this->TheObjects[i].Exp.IsEqualTo(RZero))
 		{ this->TheObjects[i].Coeff.Add(r);
 			if (this->TheObjects[i].Coeff.IsEqualToZero())
-			{ this->PopIndexSwapWithLast(i);
-			}
+			  this->PopIndexSwapWithLast(i);
 			return;
 		}
 	}
-	static BasicComplexNumber tempB;
+	BasicComplexNumber tempB;
 	tempB.AssignRational(r);
 	this->AddObjectOnTop(tempB);
 }
@@ -6387,19 +6366,16 @@ void CompositeComplex::ComputeDebugString()
 
 void CompositeComplex::MultiplyByBasicComplex(BasicComplexNumber &b)
 {	for (int i=0;i<this->size;i++)
-	{ this->TheObjects[i].MultiplyBy(b);
-	}
+	  this->TheObjects[i].MultiplyBy(b);
 }
 
-void CyclotomicList::DivOneVarByOneVarPoly(PolynomialRationalCoeff& p, PolynomialRationalCoeff& q,
-																					 PolynomialRationalCoeff& quotient, PolynomialRationalCoeff& remainder)
+void CyclotomicList::DivOneVarByOneVarPoly(PolynomialRationalCoeff& p, PolynomialRationalCoeff& q, PolynomialRationalCoeff& quotient, PolynomialRationalCoeff& remainder)
 { remainder.CopyFromPoly(p);
 	Monomial<Rational> HighestM;
 	HighestM.Assign(q.TheObjects[0]);
 	for (int i=1;i<q.size;i++)
-	{ if (HighestM.degrees[0]<q.TheObjects[i].degrees[0])
-		{	HighestM.Assign(q.TheObjects[i]);}
-	}
+	  if (HighestM.degrees[0]<q.TheObjects[i].degrees[0])
+		  HighestM.Assign(q.TheObjects[i]);
 	int index;
 	quotient.ClearTheObjects();
 	while(remainder.HasGEQMonomial(HighestM,index))
@@ -6554,12 +6530,10 @@ short BasicQN::GaussianEliminationByRowsCol(int Col, bool MoveToRight)
 
 void BasicQN::RowPlusScalarTimesRow(int rowInd, int scalar, int otherRowInd, int StartCol)
 { for (int i=StartCol;i<this->NumVars;i++)
-	{ this->Exp.elements[rowInd][i]= (this->Exp.elements[rowInd][i]+
-																			scalar*this->Exp.elements[otherRowInd][i])%(this->Den);
+	{ this->Exp.elements[rowInd][i]= (this->Exp.elements[rowInd][i]+scalar*this->Exp.elements[otherRowInd][i])%(this->Den);
 		if (this->Exp.elements[rowInd][i]<0) {this->Exp.elements[rowInd][i]+=this->Den;}
 	}
-	this->Nums.elements[rowInd][0]=(	this->Nums.elements[rowInd][0]+
-																scalar*this->Nums.elements[otherRowInd][0])%(this->Den);
+	this->Nums.elements[rowInd][0]=(	this->Nums.elements[rowInd][0]+scalar*this->Nums.elements[otherRowInd][0])%(this->Den);
 	if (this->Nums.elements[rowInd][0]<0){this->Nums.elements[rowInd][0]+=this->Den;}
 }
 
@@ -6569,8 +6543,7 @@ void BasicQN::WriteToFile(std::fstream& output)
 	output<<this->Den<<" "<<this->Exp.NumRows<<" | ";
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{ for (int j=0;j<this->Exp.NumCols;j++)
-		{ output<<this->Exp.elements[i][j]<<" ";
-		}
+		  output<<this->Exp.elements[i][j]<<" ";
 		output<<"~ "<< this->Nums.elements[i][0]<<" | ";
 	}
 }
@@ -6585,16 +6558,14 @@ void BasicQN::ReadFromFile(std::fstream& input, short NumV)
 	this->NumVars=NumV;
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{ for (int j=0;j<NumV;j++)
-		{ input>>this->Exp.elements[i][j];
-		}
+		  input>>this->Exp.elements[i][j];
 		input>>tempS>>this->Nums.elements[i][0]>>tempS;
 	}
 }
 
 void BasicQN::SetPivotRow(int index, int PivotRowIndex, int Col)
 { if (index!=PivotRowIndex)
-	{ this->SwitchTwoRows(index,PivotRowIndex,0);
-	}
+	  this->SwitchTwoRows(index, PivotRowIndex,0);
 //	int PivotElt = this->Exp.elements[PivotRowIndex][Col];
 //	int Scale= PivotElt/(gcd(PivotElt,this->Den));
 //	if (Scale!=1)
@@ -6606,10 +6577,12 @@ void BasicQN::SetPivotRow(int index, int PivotRowIndex, int Col)
 void BasicQN::MultiplyRowBy(int rowInd, int scalar, int StartColInd)
 { for (int i=StartColInd;i<this->NumVars;i++)
 	{ this->Exp.elements[rowInd][i]=(this->Exp.elements[rowInd][i]*scalar)%this->Den;
-		if (this->Exp.elements[rowInd][i]<0){this->Exp.elements[rowInd][i]+=this->Den;}
+		if (this->Exp.elements[rowInd][i]<0)
+		  this->Exp.elements[rowInd][i]+=this->Den;
 	}
 	this->Nums.elements[rowInd][0]= (this->Nums.elements[rowInd][0]*scalar)%this->Den;
-	if (this->Nums.elements[rowInd][0]<0){this->Nums.elements[rowInd][0]+=this->Den;}
+	if (this->Nums.elements[rowInd][0]<0)
+	  this->Nums.elements[rowInd][0]+=this->Den;
 }
 
 void BasicQN::MultiplyBySameDen(BasicQN& q)
@@ -6618,8 +6591,7 @@ void BasicQN::MultiplyBySameDen(BasicQN& q)
 	this->Nums.Resize(this->Exp.NumRows,1,true);
 	for (int i =0;i<newRows;i++ )
 	{ for (int j=0;j<q.NumVars;j++)
-		{ this->Exp.elements[this->Exp.NumRows-newRows+i][j]= q.Exp.elements[i][j];
-		}
+		  this->Exp.elements[this->Exp.NumRows-newRows+i][j]= q.Exp.elements[i][j];
 		this->Nums.elements[this->Exp.NumRows-newRows+i][0]= q.Nums.elements[i][0];
 	}
 	this->Coefficient.MultiplyBy(q.Coefficient);
@@ -6627,8 +6599,7 @@ void BasicQN::MultiplyBySameDen(BasicQN& q)
 }
 
 int BasicQN::InvertModN( int X, int N)
-{ static int q,r,p,d; // d - divisor, q - quotient, r - remainder,
-											// p is the number to be divided
+{ static int q,r,p,d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
 	static int vD[2],vP[2], temp;
 	vP[0]=1; vP[1]=0;// at any given moment, p=vP[0]*N+vP[1]*X
 	vD[0]=0; vD[1]=1;	 // at any given moment, d=vD[0]*N+vD[1]*X
@@ -6644,10 +6615,10 @@ int BasicQN::InvertModN( int X, int N)
 			vD[i]= temp-q*vD[i];
 		}
 	}
-	assert(p==1);//if d and p were relatively prime this should be so.
-							 //Otherwise the function was not called properly.
+	assert(p==1);//if d and p were relatively prime this should be so. Otherwise the function was not called properly.
 	p=vP[1]%N;
-	if (p<0){p+=N;}
+	if (p<0)
+	  p+=N;
 	return p;
 }
 
@@ -6678,25 +6649,21 @@ void BasicQN::ElementToString(std::string &output,PolynomialOutputFormat& PolyFo
 	if (tempS=="1") tempS.clear();
 	if (tempS=="-1") tempS="-";
 	if (!PolyFormat.UsingLatexFormat )
-	{ out<<tempS<<"t_"<<this->Den<< "["; }
+	  out<<tempS<<"t_"<<this->Den<< "[";
 	else
-	{ out <<tempS<<"{\\tau_{"<<this->Den<<"}}_{[";
-	}
+	  out <<tempS<<"{\\tau_{"<<this->Den<<"}}_{[";
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{	std::stringstream out2;
 		out2<<"(";
 		for (int j=0;j<this->NumVars;j++)
 		{ if (this->Exp.elements[i][j]!=0)
 			{	if (this->Exp.elements[i][j]>0)
-				{ out2<<"+";
-				}
+				  out2<<"+";
 				if (this->Exp.elements[i][j]!=1)
 				{ if (this->Exp.elements[i][j]==-1)
-					{ out2<<"-";
-					}
+					  out2<<"-";
 					else
-					{ out2<<this->Exp.elements[i][j];
-					}
+					  out2<<this->Exp.elements[i][j];
 				}
 				out2<< PolyFormatLocal.alphabet[j];
 			}
@@ -6704,8 +6671,7 @@ void BasicQN::ElementToString(std::string &output,PolynomialOutputFormat& PolyFo
 		out2<<"="<<this->Nums.elements[i][0]<<")";
 		tempS= out2.str();
 		if (tempS[1]=='+')
-		{ tempS.erase(1,1);
-		}
+		  tempS.erase(1,1);
 		out<<tempS;
 	}
 	out<<"]}";
@@ -6718,32 +6684,29 @@ inline bool BasicQN::ExponentIsEqualToZero()
 
 inline bool BasicQN::HasSameExponent(BasicQN &q)
 { if (this->Exp.NumRows!=q.Exp.NumRows)
-	{ return false;
-	}
+	  return false;
 	if (this->Den!=q.Den)
-	{ return false;
-	}
+	  return false;
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{ if (this->Nums.elements[i][0]!=q.Nums.elements[i][0])
 			return false;
 		for (int j=0;j<this->NumVars;j++)
-		{ if (this->Exp.elements[i][j]!=q.Exp.elements[i][j])
+		  if (this->Exp.elements[i][j]!=q.Exp.elements[i][j])
 				return false;
-		}
 	}
 	return true;
 }
 
-inline void BasicQN::Evaluate(int*theVars, Rational& output)
+inline void BasicQN::Evaluate(int* theVars, Rational& output)
 { output.MakeZero();
-	for (int i=0;i<this->Exp.NumRows;i++)
+	for (int i=0; i<this->Exp.NumRows; i++)
 	{ int Accum=0;
-		for (int j=0;j<this->NumVars;j++)
-		{ Accum += this->Exp.elements[i][j]*theVars[j];
-		}
+		for (int j=0; j<this->NumVars; j++)
+		  Accum += this->Exp.elements[i][j]*theVars[j];
 		Accum-=this->Nums.elements[i][0];
 		Accum%=this->Den;
-		if (Accum<0){Accum+=this->Den;}
+		if (Accum<0)
+		  Accum+=this->Den;
 		if (Accum!=0)
 			return;
 	}
@@ -6788,26 +6751,24 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
 	this->Nums.init(theMat.NumRows,1);
 	int tempLCM= 1;
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-	{	theMat.ComputeDebugString();
-	}
-	for (int i=0;i<theMat.NumRows;i++)
-	{	for (int j=0;j<theMat.NumCols;j++)
-		{ tempLCM= MathRoutines::lcm(tempLCM,theMat.elements[i][j].DenShort);
-		}
+	  theMat.ComputeDebugString();
+	for (int i=0; i<theMat.NumRows; i++)
+	{	for (int j=0; j<theMat.NumCols; j++)
+		  tempLCM= MathRoutines::lcm(tempLCM,theMat.elements[i][j].DenShort);
 		tempLCM= MathRoutines::lcm(tempLCM,column.TheObjects[i].DenShort);
 	}
 	this->Den=tempLCM;
 	for (int i=0;i<this->Exp.NumRows;i++)
 	{ for (int j=0; j<theDimension;j++)
-		{ this->Exp.elements[i][j]=(theMat.elements[i][j].NumShort*tempLCM)/
-																theMat.elements[i][j].DenShort;
+		{ this->Exp.elements[i][j]=(theMat.elements[i][j].NumShort*tempLCM)/theMat.elements[i][j].DenShort;
 			this->Exp.elements[i][j]%=tempLCM;
-			if (this->Exp.elements[i][j]<0) {this->Exp.elements[i][j]+=tempLCM;}
+			if (this->Exp.elements[i][j]<0) 
+			  this->Exp.elements[i][j]+=tempLCM;
 		}
-		this->Nums.elements[i][0]= (column.TheObjects[i].NumShort*tempLCM)/
-											column.TheObjects[i].DenShort;
+		this->Nums.elements[i][0]= (column.TheObjects[i].NumShort*tempLCM)/column.TheObjects[i].DenShort;
 		this->Nums.elements[i][0]%=tempLCM;
-		if (this->Nums.elements[i][0]<0){this->Nums.elements[i][0]+=tempLCM;}
+		if (this->Nums.elements[i][0]<0)
+		  this->Nums.elements[i][0]+=tempLCM;
 	}
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 	{	this->ComputeDebugString();
@@ -6823,16 +6784,15 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
 
 
 void BasicQN::BasicQNToComplexQN(CompositeComplexQN& output)
-{ static CompositeComplexQN tempC;
+{ CompositeComplexQN tempC;
 	MatrixLargeRational TheSub;
 	TheSub.init(this->NumVars+1,1);
 	output.MakeConst(ROne,this->NumVars);
 //	tempC.MakeConst(RZero,this->NumVars);
-	for (int i=0;i<this->Exp.NumRows;i++)
+	for (int i=0; i<this->Exp.NumRows; i++)
 	{ PrecomputedTausLocal.GetTaukn(this->Nums.elements[i][0],this->Den,tempC);
 		for (int j=0;j<this->NumVars;j++)
-		{ TheSub.elements[j+1][0].AssignNumeratorAndDenominator(this->Exp.elements[i][j],1);
-		}
+		  TheSub.elements[j+1][0].AssignNumeratorAndDenominator(this->Exp.elements[i][j],1);
 		TheSub.elements[0][0].MakeZero();
 		tempC.LinearSubstitution(TheSub);
 		output.MultiplyBy(tempC);
@@ -6872,22 +6832,21 @@ inline void BasicQN::SwitchTwoRows(int rowI1, int rowI2, int StartCol)
 void BasicQN::Simplify()
 {	short FirstZeroRow=this->GaussianEliminationByRows();
 	if (partFractions::flagAnErrorHasOccurredTimeToPanic)
-	{ this->ComputeDebugString();
-	}
-	if (Den==1){FirstZeroRow=0;}
-	for (int i=FirstZeroRow;i<this->Exp.NumRows;i++)
-	{ if (this->Nums.elements[i][0]!=0)
+	  this->ComputeDebugString();
+	if (Den==1)
+	  FirstZeroRow=0;
+	for (int i=FirstZeroRow; i<this->Exp.NumRows; i++)
+	  if (this->Nums.elements[i][0]!=0)
 		{ this->MakeConst(RZero,this->NumVars);
 			return;
 		}
-	}
 	this->Exp.Resize(FirstZeroRow,this->NumVars,true);
 	this->Nums.Resize(FirstZeroRow,1,true);
 }
 
 void BasicQN::LinearSubstitution(QPSub& theSub)
 {	assert(this->NumVars== theSub.TheQNSub.NumCols);
-	static BasicQN tempOutput;
+	BasicQN tempOutput;
 	int LastRowIndex=theSub.TheQNSub.NumRows-1;
 	tempOutput.Exp.init(this->Exp.NumRows,LastRowIndex);
 	tempOutput.Nums.init(LastRowIndex,1);
@@ -6896,17 +6855,16 @@ void BasicQN::LinearSubstitution(QPSub& theSub)
 	{ for (int k=0;k<LastRowIndex;k++)
 		{	tempOutput.Exp.elements[i][k]=0;
 			for (int j=0;j<this->NumVars;j++)
-			{ tempOutput.Exp.elements[i][k]+=(this->Exp.elements[i][j]/theSub.QNSubDen)*
-										theSub.TheQNSub.elements[k][j];
-			}
+			  tempOutput.Exp.elements[i][k]+=(this->Exp.elements[i][j]/theSub.QNSubDen)*theSub.TheQNSub.elements[k][j];
 			tempOutput.Exp.elements[i][k]%=this->Den;
-			if (tempOutput.Exp.elements[i][k]<0){tempOutput.Exp.elements[i][k]+=this->Den;}
+			if (tempOutput.Exp.elements[i][k]<0)
+			  tempOutput.Exp.elements[i][k]+=this->Den;
 		}
 		for (int j=0;j<this->NumVars;j++)
-			tempOutput.Nums.elements[i][0]-=(this->Exp.elements[i][j]/theSub.QNSubDen)*
-											theSub.TheQNSub.elements[LastRowIndex][j];
+			tempOutput.Nums.elements[i][0]-=(this->Exp.elements[i][j]/theSub.QNSubDen)*theSub.TheQNSub.elements[LastRowIndex][j];
 		tempOutput.Nums.elements[i][0]%= this->Den;
-		if (tempOutput.Nums.elements[i][0]<0){tempOutput.Nums.elements[i][0]+=this->Den;}
+		if (tempOutput.Nums.elements[i][0]<0)
+		  tempOutput.Nums.elements[i][0]+=this->Den;
 	}
 	this->Exp.Assign(tempOutput.Exp);
 	this->Nums.Assign(tempOutput.Nums);
@@ -6923,8 +6881,7 @@ void BasicQN::MakeConst(Rational& Coeff, short NumV)
 	this->NumVars=NumV;
 }
 
-void BasicQN::MakeFromNormalAndDirection(root& normal, root& direction,
-																				 int theMod, Rational& coeff)
+void BasicQN::MakeFromNormalAndDirection(root& normal, root& direction, int theMod, Rational& coeff)
 { root tempRoot;
 	Rational tempLargeRat;
 	int theDimension = direction.size;
@@ -6938,22 +6895,19 @@ void BasicQN::MakeFromNormalAndDirection(root& normal, root& direction,
 	this->Coefficient.Assign(coeff);
 	this->NumVars= (short)theDimension;
 	this->Nums.elements[0][0]=theMod;
-	for (int i=0;i<theDimension;i++)
-	{ this->Exp.elements[0][i]=tempRoot.TheObjects[i].NumShort;
-	}
+	for (int i=0; i<theDimension; i++)
+	  this->Exp.elements[0][i]=tempRoot.TheObjects[i].NumShort;
 	this->Simplify();
 }
 
 int BasicQN::HashFunction() const
 { int result=0;
 	for (int i=0;i<this->Exp.NumRows;i++)
-	{ result+=SomeRandomPrimes[i]*this->Exp.elements[i][this->NumVars-i-1];
-	}
+	  result+=SomeRandomPrimes[i]*this->Exp.elements[i][this->NumVars-i-1];
 	return result;
 }
 
-void BasicQN::MakePureQN(	short NumVariables,int NonZeroIndex,
-													Rational&coeff, int theExp, int Num, int theDen)
+void BasicQN::MakePureQN(short NumVariables,int NonZeroIndex, Rational&coeff, int theExp, int Num, int theDen)
 { this->NumVars= NumVariables;
 	this->Exp.init(1,NumVariables);
 	this->Nums.init(1,1);
@@ -7012,26 +6966,24 @@ void QuasiNumber::ElementToString(std::string &output, PolynomialOutputFormat& P
 }
 
 void QuasiNumber::Add(QuasiNumber &q)
-{ for (int i=0;i<q.size;i++)
-	{	this->AddBasicQuasiNumber(q.TheObjects[i]);
-	}
+{ for (int i=0; i<q.size; i++)
+	  this->AddBasicQuasiNumber(q.TheObjects[i]);
 }
 
 void QuasiNumber::WriteToFile(std::fstream& output)
 { output<< this->size<<" "<< this->NumVariables<<" | ";
-	for(int i=0;i<this->size;i++)
-	{ this->TheObjects[i].WriteToFile(output);
-	}
+	for(int i=0; i<this->size; i++)
+	  this->TheObjects[i].WriteToFile(output);
 }
 
 void QuasiNumber::ReadFromFile(std::fstream& input)
 {	int NeededSize;
 	std::string tempS;
 	input>> NeededSize >> this->NumVariables>>tempS;
-	static BasicQN tempQN;
+	BasicQN tempQN;
 	this->MakeConst(RZero,this->NumVariables);
 	this->MakeActualSizeAtLeastExpandOnTop(NeededSize);
-	for(int i=0;i<NeededSize;i++)
+	for(int i=0; i<NeededSize; i++)
 	{ tempQN.ReadFromFile(input,this->NumVariables);
 		this->AddBasicQuasiNumber(tempQN);
 	}
@@ -7045,15 +6997,13 @@ void QuasiNumber::AddBasicQuasiNumber(BasicQN &q)
 	int tempH= q.HashFunction()%this->HashSize;
 	if (tempH<0){tempH+=this->HashSize;}
 	if (q.Coefficient.IsEqualToZero())
-	{	return;
-	}
+	  return;
 	for (int i=0;i<this->TheHashedArrays[tempH].size;i++)
 	{	int tempI = this->TheHashedArrays[tempH].TheObjects[i];
 		if (this->TheObjects[tempI].HasSameExponent(q))
 		{	this->TheObjects[tempI].Coefficient.Add(q.Coefficient);
 			if (this->TheObjects[tempI].Coefficient.IsEqualToZero())
-			{	this->PopIndexSwapWithLastHash(tempI);
-			}
+			  this->PopIndexSwapWithLastHash(tempI);
 			return;
 		}
 	}
@@ -7074,8 +7024,7 @@ void QuasiNumber::Assign(const QuasiNumber &q)
 }
 
 bool QuasiNumber::ComputeDebugString()
-{
-	this->DebugString.clear();
+{	this->DebugString.clear();
 	this->ElementToString(this->DebugString);
 	return true;
 }
@@ -7097,16 +7046,15 @@ void QuasiNumber::DivideByRational(Rational& r)
 }
 
 void QuasiNumber::MultiplyBy(QuasiNumber& q)
-{	static QuasiNumber Accum;
-	static BasicQN tempQ;
+{	QuasiNumber Accum;
+	BasicQN tempQ;
 	Accum.MakeZero(this->NumVariables);
 	for (int i=0;i<q.size;i++)
-	{ for (int j=0;j<this->size;j++)
+	  for (int j=0;j<this->size;j++)
 		{ tempQ.Assign(this->TheObjects[j]);
 			tempQ.MultiplyBy(q.TheObjects[i]);
 			Accum.AddBasicQuasiNumber(tempQ);
 		}
-	}
 	this->Assign(Accum);
 }
 
@@ -7122,8 +7070,7 @@ void QuasiNumber::QNtoComplex(CompositeComplexQN& output)
 bool QuasiNumber::IsEqualTo(QuasiNumber&q)
 {	//the below line is just for speed
 	if (&q==&QuasiNumber::TheRingZero)
-	{ return this->IsEqualToZero();
-	}
+	  return this->IsEqualToZero();
 	QuasiNumber tempQN(q.NumVariables) ;
 	tempQN.Assign(q);
 	tempQN.MultiplyByLargeRational(RMOne);
@@ -7143,10 +7090,10 @@ bool QuasiNumber::IsEqualToZero()
 }
 
 void QuasiNumber::LinearSubstitution(QPSub& TheSub)
-{	static QuasiNumber Accum;
-	static BasicQN tempQ;
+{	QuasiNumber Accum;
+	BasicQN tempQ;
 	Accum.MakeZero((short)(TheSub.TheQNSub.NumRows-1));
-	for(int i=0;i<this->size;i++)
+	for(int i=0; i<this->size; i++)
 	{	tempQ.Assign(this->TheObjects[i]);
 		tempQ.LinearSubstitution(TheSub);
 		Accum.AddBasicQuasiNumber(tempQ);
@@ -7169,12 +7116,13 @@ void QuasiNumber::MakeZero(short NumVars)
 
 void QuasiNumber::Simplify()
 { this->ComputeDebugString();
-	if (this->size==0){return;}
+	if (this->size==0)
+	  return;
 	int theLCM=1;
-	for (int i=0;i<this->size;i++)
-	{ theLCM=MathRoutines::lcm(theLCM,this->TheObjects[i].Den);
-	}
-	if (theLCM>4) {return;}
+	for (int i=0; i<this->size; i++)
+	  theLCM=MathRoutines::lcm(theLCM,this->TheObjects[i].Den);
+	if (theLCM>4)
+	  return;
 	int NumCycles = MathRoutines::KToTheNth(theLCM,this->NumVariables);
 	SelectionWithMaxMultiplicity theSubset;
 	theSubset.initMe2(this->NumVariables, theLCM-1);
@@ -7185,7 +7133,7 @@ void QuasiNumber::Simplify()
 	{ theValue.ElementToString(tempS);
 		tempRat.ElementToString(tempS2);
 		if (i==0)
-		{ this->Evaluate(theSubset.Multiplicities.TheObjects,theValue);}
+		  this->Evaluate(theSubset.Multiplicities.TheObjects,theValue);
 		else
 		{ this->Evaluate(theSubset.Multiplicities.TheObjects,tempRat);
 			if (!tempRat.IsEqualTo(theValue)) {return;}
@@ -7197,7 +7145,7 @@ void QuasiNumber::Simplify()
 }
 
 void QuasiNumber::AssignLargeRational(short NumVars, Rational& coeff)
-{	static BasicQN q;
+{	BasicQN q;
 	this->MakeZero(NumVars);
 	q.MakeConst(coeff,NumVars);
 	this->AddBasicQuasiNumber(q);
@@ -7205,13 +7153,12 @@ void QuasiNumber::AssignLargeRational(short NumVars, Rational& coeff)
 
 void QuasiNumber::MakePureQN(short NumVar,int NonZeroIndex, Rational&coeff, int theExp, int Num, int theDen)
 { this->MakeZero(NumVar);
-	static BasicQN tempQ;
+	BasicQN tempQ;
 	tempQ.MakePureQN(NumVar,NonZeroIndex,coeff,theExp,Num,theDen);
 	this->AddBasicQuasiNumber(tempQ);
 }
 
-void QuasiNumber::MakeFromNormalAndDirection(root& normal, root& direction,
-																						 int theMod, Rational& coeff)
+void QuasiNumber::MakeFromNormalAndDirection(root& normal, root& direction, int theMod, Rational& coeff)
 { this->MakeZero((short)normal.size);
 	BasicQN tempQ;
 	tempQ.MakeFromNormalAndDirection(normal,direction,theMod,coeff);
@@ -7219,7 +7166,7 @@ void QuasiNumber::MakeFromNormalAndDirection(root& normal, root& direction,
 }
 
 void QuasiNumber::MakeConst(Rational& Coeff, short NumV)
-{	static BasicQN q;
+{	BasicQN q;
 	this->MakeZero(NumV);
 	q.MakeConst(Coeff,NumV);
 	this->AddBasicQuasiNumber(q);
@@ -7242,8 +7189,8 @@ void QuasiNumber::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& c
 }
 
 void QuasiNumber::MultiplyByBasicQuasiNumber(BasicQN&q)
-{ static QuasiNumber Accum;
-	static BasicQN tempQ;
+{ QuasiNumber Accum;
+	BasicQN tempQ;
 	Accum.MakeZero(this->NumVariables);
 	for (int i=0;i<this->size;i++)
 	{	tempQ.Assign(this->TheObjects[i]);
@@ -7259,15 +7206,12 @@ void QuasiNumber::MultiplyByLargeRational(Rational &r)
 		return;
 	}
 	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i].MultiplyByLargeRational(r);
-	}
+	  this->TheObjects[i].MultiplyByLargeRational(r);
 }
 
-void QPSub::MakeLinearSubIntegrand
-	(root &normal,root &direction,Rational& Correction, GlobalVariables& theGlobalVariables)
+void QPSub::MakeLinearSubIntegrand(root &normal, root &direction, Rational& Correction, GlobalVariables& theGlobalVariables)
 { PolynomialRationalCoeff EndPoint;
-	EndPoint.MakePolyFromDirectionAndNormal
-		(direction,normal,Correction, theGlobalVariables);
+	EndPoint.MakePolyFromDirectionAndNormal(direction,normal,Correction, theGlobalVariables);
 	this->RationalPolyForm.MakeSubstitutionLastVariableToEndPoint(1,EndPoint);
 	this->TheQNSub.init((short)(normal.size+1),1);
 	Rational tempRat;
@@ -7282,11 +7226,11 @@ void QPSub::MakeLinearSubIntegrand
 	this->TheQNSub.elements [normal.size][0]=-(Correction.NumShort*tempDen)/Correction.DenShort;
 	this->TheQNSub.elements [normal.size][0]%=tempDen;
 	if (this->TheQNSub.elements [normal.size][0]<0)
-	{	this->TheQNSub.elements[normal.size][0]+=tempDen;
-	}
+	  this->TheQNSub.elements[normal.size][0]+=tempDen;
 	for (int i=0;i<this->TheQNSub.NumRows;i++)
 	{ this->TheQNSub.elements[i][0]=(normal.TheObjects[i].NumShort)%this->QNSubDen;
-		if (this->TheQNSub.elements[i][0]<0){this->TheQNSub.elements[i][0]+=tempDen;}
+		if (this->TheQNSub.elements[i][0]<0)
+		  this->TheQNSub.elements[i][0]+=tempDen;
 	}
 }
 
@@ -7316,29 +7260,27 @@ void QPSub::MakeSubFromPolynomialsRationalCoeff(PolynomialsRationalCoeff& input)
 		this->RationalPolyForm.TheObjects[i].CopyFromPoly(input.TheObjects[i]);
 	this->TheQNSub.init((short)theDimension+1,(short)theDimension);
 	this->TheQNSub.NullifyAll();
-	for (int i=0;i<input.size;i++)
-	{ for (int k=0;k<input.TheObjects[i].size;k++)
-		{	for (int j=0;j<theDimension;j++)
+	for (int i=0; i<input.size; i++)
+	{ for (int k=0; k<input.TheObjects[i].size; k++)
+		{	for (int j=0; j<theDimension; j++)
 			{ bool IsAConstantTerm=true;
-				assert(	input.TheObjects[i].TheObjects[k].degrees[j]==1 ||
-								input.TheObjects[i].TheObjects[k].degrees[j]==0);
+				assert(	input.TheObjects[i].TheObjects[k].degrees[j]==1 || input.TheObjects[i].TheObjects[k].degrees[j]==0);
 				if (input.TheObjects[i].TheObjects[k].degrees[j]==1)
 				{ this->TheQNSub.elements[i][j]=input.TheObjects[i].TheObjects[k].Coefficient.NumShort;
 					assert(IsAConstantTerm);
 					IsAConstantTerm=false;
 				}
 				if (IsAConstantTerm)
-				{ this->TheQNSub.elements[theDimension][i]=input.TheObjects[i].TheObjects[k].Coefficient.NumShort;  }
+				  this->TheQNSub.elements[theDimension][i]=input.TheObjects[i].TheObjects[k].Coefficient.NumShort;
 			}
 		}
 	}
 }
 
 void QPSub::MakeSubNVarForOtherChamber(root &direction, root &normal, Rational &Correction, GlobalVariables& theGlobalVariables)
-{ this->RationalPolyForm.MakeSubNVarForOtherChamber
-		(direction,normal,Correction, theGlobalVariables);
+{ this->RationalPolyForm.MakeSubNVarForOtherChamber(direction,normal,Correction, theGlobalVariables);
 	int theDimension= direction.size;
-	this->TheQNSub.init((short)theDimension+1,(short)theDimension);
+	this->TheQNSub.init((short)theDimension+1, (short)theDimension);
 	Rational tempRat;
 	root::RootScalarEuclideanRoot(direction,normal,tempRat);
 	root tempRoot; tempRoot.SetSizeExpandOnTopLight(theDimension);
@@ -7352,31 +7294,27 @@ void QPSub::MakeSubNVarForOtherChamber(root &direction, root &normal, Rational &
 	this->TheQNSub.NullifyAll();
 	this->QNSubDen=tempDen;
 	for (int i=0;i<theDimension;i++)
-	{ this->TheQNSub.elements[theDimension][i]=
-			(direction.TheObjects[i].NumShort*Corr)%tempDen;
+	{ this->TheQNSub.elements[theDimension][i]=(direction.TheObjects[i].NumShort*Corr)%tempDen;
 		if (this->TheQNSub.elements[theDimension][i]<0)
 			this->TheQNSub.elements[theDimension][i]+=tempDen;
 		for(int j=0;j<theDimension;j++)
-		{ this->TheQNSub.elements[i][j]=
-				tempRoot.TheObjects[j].NumShort*direction.TheObjects[j].NumShort;
+		{ this->TheQNSub.elements[i][j]=tempRoot.TheObjects[j].NumShort*direction.TheObjects[j].NumShort;
 			if (i==j)
 				this->TheQNSub.elements[i][j]+=1;
 			TheQNSub.elements[i][j]%=tempDen;
-			if (TheQNSub.elements[i][j]<0){TheQNSub.elements[i][j]+=tempDen;}
+			if (TheQNSub.elements[i][j]<0)
+			  TheQNSub.elements[i][j]+=tempDen;
 		}
 	}
 }
 
 void SortedQPs::AddToEntry(int x, int y, int z, QuasiMonomial &QM)
 { if (x>this->FakeSize-1)
-	{ this->setFakeSize(x+1,QM.NumVariables);
-	}
+	  this->setFakeSize(x+1,QM.NumVariables);
 	if (y>this->TheObjects[x]->FakeSize-1)
-	{ this->TheObjects[x]->setFakeSize(y+1,QM.NumVariables);
-	}
+	  this->TheObjects[x]->setFakeSize(y+1,QM.NumVariables);
 	if(z>this->TheObjects[x]->TheObjects[y]->FakeSize-1)
-	{ this->TheObjects[x]->TheObjects[y]->setFakeSize(z+1,QM.NumVariables);
-	}
+	  this->TheObjects[x]->TheObjects[y]->setFakeSize(z+1,QM.NumVariables);
 	this->TheObjects[x]->TheObjects[y]->TheObjects[z]->AddMonomial(QM);
 }
 
@@ -7443,8 +7381,7 @@ void Rational::ReadFromFile(std::fstream& input)
 	int positionInTempS=0;
 	this->MakeZero();
   if (tempS=="0")
-	{ return;
-	}
+	  return;
 	if (tempS[0]=='-')
 	{ positionInTempS++;
 	}
@@ -7457,7 +7394,7 @@ void Rational::ReadFromFile(std::fstream& input)
 		if (a=='/')
 		{ readingNumerator=false;
 			tempDen.MakeZero();
-		}else
+		} else
 		{	if (readingNumerator)
 			{ tempNum.MultiplyByUInt(10);
 				unsigned int x=std::atoi(&a);
@@ -7473,8 +7410,7 @@ void Rational::ReadFromFile(std::fstream& input)
 	this->DivideByLargeIntegerUnsigned(tempDen);
 	this->MultiplyByLargeIntUnsigned(tempNum);
 	if (tempS[0]=='-')
-	{ this->Minus();
-	}
+	  this->Minus();
 }
 
 root Rational::operator *(const root& right)const
@@ -7492,9 +7428,8 @@ inline void Rational::MultiplyByInt(int x)
 
 inline void Rational::MultiplyBy(const Rational &r)
 { if (r.Extended==0)
-	{ if (this->TryToMultiplyQuickly(r.NumShort,r.DenShort))
-		{	return;}
-	}
+	  if (this->TryToMultiplyQuickly(r.NumShort,r.DenShort))
+		  return;
 	this->InitExtendedFromShortIfNeeded();
 	if (r.Extended!=0)
 	{	this->Extended->num.MultiplyBy(r.Extended->num);
@@ -7566,8 +7501,7 @@ void Rational::GetDenExtended(LargeIntUnsigned& output)
 		output.AssignShiftedUInt(tempI,0);
   }
   else
-  { output.Assign(this->Extended->den);
-  }
+    output.Assign(this->Extended->den);
 }
 
 void Rational::GetNumExtendedUnsigned(LargeIntUnsigned& output)
@@ -7578,8 +7512,7 @@ void Rational::GetNumExtendedUnsigned(LargeIntUnsigned& output)
       output.AssignShiftedUInt((unsigned int) this->NumShort,0);
   }
   else
-  { output.Assign(this->Extended->num.value);
-  }
+    output.Assign(this->Extended->num.value);
 }
 
 //Rational::Rational(const Rational& right)
@@ -7629,18 +7562,24 @@ void Rational::Assign(const Rational &r)
 
 inline void Rational::AssignFracValue()
 { if (this->Extended==0)
-  { if (this->NumShort==0) return;
+  { if (this->NumShort==0) 
+      return;
     if (this->DenShort==1)
-    {this->NumShort=0; this->DenShort=1; return;}
+    { this->NumShort=0; 
+      this->DenShort=1; 
+      return;
+    }
     this->NumShort=this->NumShort% this->DenShort;
     if (this->NumShort<0)
-    { this->NumShort+=this->DenShort;
-    }
+      this->NumShort+=this->DenShort;
     return;
   }
-  if (this->IsEqualToZero()) return;
+  if (this->IsEqualToZero()) 
+    return;
 	if (this->Extended->den.IsEqualToOne())
-	{this->MakeZero(); return;}
+	{ this->MakeZero(); 
+	  return;
+	}
 	LargeIntUnsigned newNum, tempI;
 	this->Extended->num.value.DivPositive(this->Extended->den,tempI,newNum);
 	this->Extended->num.value.Assign(newNum);
@@ -7664,7 +7603,7 @@ bool Rational::IsGreaterThan(const Rational& r) const
 }
 
 void Rational::Subtract(const Rational& r)
-{ static Rational temp;
+{ Rational temp;
 	temp.Assign(r);
 	temp.Minus();
 	this->Add(temp);
@@ -7704,18 +7643,17 @@ double Rational::DoubleValue()
 void Rational::Add(const Rational &r)
 { //static std::string tempS1,tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
 	if (r.Extended==0)
-	{	if (this->TryToAddQuickly(r.NumShort,
-															r.DenShort))
-		{	return;}
-	}
+	  if (this->TryToAddQuickly(r.NumShort, r.DenShort))
+		  return;
 	if (this==&r)
-	{ this->MultiplyByInt(2); return;
+	{ this->MultiplyByInt(2); 
+	  return;
 	}
 	this->InitExtendedFromShortIfNeeded();
-	static Rational tempRat;
+	Rational tempRat;
 	tempRat.Assign(r);
 	tempRat.InitExtendedFromShortIfNeeded();
-	static LargeInt tempI;
+	LargeInt tempI;
 	tempI.Assign(tempRat.Extended->num);
 	tempI.value.MultiplyBy(this->Extended->den);
 	this->Extended->num.value.MultiplyBy(tempRat.Extended->den);
@@ -7727,16 +7665,13 @@ void Rational::Add(const Rational &r)
 void Rational::Simplify()
 { if (this->Extended==0)
 	{ if (this->NumShort==0)
-    { this->DenShort=1;
-    }
+      this->DenShort=1;
     else
     { int tempGCD;
       if (this->NumShort>0)
-      {  tempGCD= this->gcd(this->NumShort,this->DenShort);
-      }
+        tempGCD= this->gcd(this->NumShort,this->DenShort);
       else
-      {  tempGCD= this->gcd(-this->NumShort, this->DenShort);
-      }
+        tempGCD= this->gcd(-this->NumShort, this->DenShort);
       this->NumShort/=tempGCD;
       this->DenShort/=tempGCD;
     }
@@ -7746,14 +7681,14 @@ void Rational::Simplify()
 	{ this->MakeZero();
     return;
   }
-	static LargeIntUnsigned tempI;
+	LargeIntUnsigned tempI;
 	LargeIntUnsigned::gcd(this->Extended->den, this->Extended->num.value,tempI);
 	/*if (Rational::flagAnErrorHasOccurredTimeToPanic)
 	{ std::string tempS1,tempS2,tempS3;
 		tempI.ElementToString(tempS1);
 		this->ElementToString(tempS2);
 	}*/
-	static LargeIntUnsigned tempI2;
+	LargeIntUnsigned tempI2;
 	this->Extended->den.DivPositive(tempI,this->Extended->den,tempI2);
 	this->Extended->num.value.DivPositive(tempI,this->Extended->num.value,tempI2);
 	this->ShrinkExtendedPartIfPossible();
@@ -7761,7 +7696,8 @@ void Rational::Simplify()
 
 inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
 {	if (x==0)
-	{ this->MakeZero(); return;
+	{ this->MakeZero(); 
+	  return;
 	}
 	this->SetSizeExpandOnTopNoObjectInit(shift+1);
 	for (int i=0;i<shift;i++)
@@ -7780,8 +7716,7 @@ inline void LargeIntUnsigned::AddNoFitSize(LargeIntUnsigned &x)
 { int oldsize= this->size;
 	this->SetSizeExpandOnTopNoObjectInit(Maximum(this->size,x.size)+1);
 	for (int i=oldsize;i<this->size;i++)
-	{ this->TheObjects[i]=0;
-	}
+	  this->TheObjects[i]=0;
 	unsigned int CarryOver=0;
 	for(int i=0;i<x.size;i++)
 	{ this->TheObjects[i]+=x.TheObjects[i]+CarryOver;
@@ -7796,8 +7731,7 @@ inline void LargeIntUnsigned::AddNoFitSize(LargeIntUnsigned &x)
 	{	for(int i=x.size;i<this->size;i++)
 		{ this->TheObjects[i]+=1;
 			if (this->TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
-			{ this->TheObjects[i]-=LargeIntUnsigned::CarryOverBound;
-			}
+			  this->TheObjects[i]-=LargeIntUnsigned::CarryOverBound;
 			else
 				break;
 		}
@@ -7830,8 +7764,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(LargeIntUnsigned& x)
 				break;
 			}
 			else
-			{ this->TheObjects[i]=LargeIntUnsigned::CarryOverBound-1;
-			}
+			  this->TheObjects[i]=LargeIntUnsigned::CarryOverBound-1;
 		}
 	}
 	this->FitSize();
@@ -7853,17 +7786,16 @@ void LargeIntUnsigned::SubtractSmallerPositive(LargeIntUnsigned& x)
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned &x, LargeIntUnsigned &output)
 { assert(this!=&output);
 	output.SetSizeExpandOnTopNoObjectInit(x.size+output.size);
-	for(int i=0;i<output.size;i++)
-	{ output.TheObjects[i]=0;
-	}
-	for (int i=0;i<this->size;i++)
-	{ for(int j=0;j<x.size;j++)
+	for(int i=0; i<output.size; i++)
+	  output.TheObjects[i]=0;
+	for (int i=0; i<this->size; i++)
+	{ for(int j=0; j<x.size; j++)
 		{ unsigned long long tempLong= this->TheObjects[i];
 			unsigned long long tempLong2= x.TheObjects[j];
 			tempLong= tempLong*tempLong2;
 			unsigned long long lowPart= tempLong%LargeIntUnsigned::CarryOverBound;
 			unsigned long long highPart= tempLong/LargeIntUnsigned::CarryOverBound;
-			static LargeIntUnsigned tempI;
+			LargeIntUnsigned tempI;
 			tempI.AssignShiftedUInt((unsigned int) lowPart,i+j);
 			output.AddNoFitSize(tempI);
 			tempI.AssignShiftedUInt((unsigned int) highPart,i+j+1);
@@ -7877,25 +7809,22 @@ void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned &x, LargeIntUnsigned &output)
 void LargeIntUnsigned::FitSize()
 {	int newSize=this->size;
 	for (int i=this->size-1;i>=1;i--)
-	{ if (this->TheObjects[i]==0)
-		{	newSize--;
-		}
+	  if (this->TheObjects[i]==0)
+		  newSize--;
 		else
-		{ break;
-		}
-	}
+		  break;
 	this->SetSizeExpandOnTopNoObjectInit(newSize);
 //	assert(this->CheckForConsistensy());
 }
 
 void LargeIntUnsigned::MultiplyByUInt(unsigned int x)
-{ static LargeIntUnsigned tempLI;
+{ LargeIntUnsigned tempLI;
 	tempLI.AssignShiftedUInt(x,0);
 	this->MultiplyBy(tempLI);
 }
 
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned &x)
-{ static LargeIntUnsigned tempInt;
+{ LargeIntUnsigned tempInt;
 	this->MultiplyBy(x,tempInt);
 	this->Assign(tempInt);
 //	assert(this->CheckForConsistensy());
@@ -7915,7 +7844,7 @@ void LargeIntUnsigned::ElementToString(std::string &output)
 	{ output="0";
 		return;
 	}
-	static LargeIntUnsigned tempInt;
+	LargeIntUnsigned tempInt;
 	tempInt.Assign(*this);
 	std::string tempS;
 	std::stringstream out;
@@ -7927,15 +7856,16 @@ void LargeIntUnsigned::ElementToString(std::string &output)
 	tempS= out.str();
 	output.resize(tempS.size());
 	for (unsigned int i=0; i<tempS.size();i++)
-	{ output[i]=tempS[tempS.size()-1-i];
-	}
+	   output[i]=tempS[tempS.size()-1-i];
 //	assert(this->CheckForConsistensy());
 }
 
 bool LargeInt::IsEqualTo(LargeInt& x)
 {	if (x.sign!=this->sign)
 	{ if (x.IsEqualToZero() && this->IsEqualToZero())
-		return true; else	return false;
+		  return true; 
+		else	
+		  return false;
 	}
 	return this->value.IsEqualTo(x.value);
 }
@@ -7944,9 +7874,8 @@ bool LargeInt::CheckForConsistensy()
 { if (this->sign!=-1 && this->sign!=1)
 		return false;
 	for (int i=0;i<this->value.size;i++)
-	{ if (this->value.TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
+	  if (this->value.TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
 			return false;
-	}
 	return true;
 }
 
@@ -7970,18 +7899,20 @@ void LargeInt::ElementToString(std::string& output)
 
 void LargeInt::AssignInt(int x)
 { if (x==0)
-	{ this->MakeZero(); return;
+	{ this->MakeZero(); 
+	  return;
 	}
 	this->sign=1;
 	if (x<0)
-	{ this->sign=-1; x=-x;
+	{ this->sign=-1; 
+	  x=-x;
 	}
 	this->value.AssignShiftedUInt( (unsigned int)x,0);
 //	assert(this->CheckForConsistensy());
 }
 
 inline void LargeInt::AddInt(int x)
-{ static LargeInt tempInt;
+{ LargeInt tempInt;
 	tempInt.AssignInt(x);
 	this->Add(tempInt);
 }
@@ -7992,8 +7923,7 @@ void LargeInt::AddLargeIntUnsigned(LargeIntUnsigned& x)
     return;
   }
   if (this->value.IsGEQ(x))
-  { this->value.SubtractSmallerPositive(x);
-  }
+    this->value.SubtractSmallerPositive(x);
   else
   { LargeIntUnsigned tempI;
     tempI.Assign(x);
@@ -8004,12 +7934,10 @@ void LargeInt::AddLargeIntUnsigned(LargeIntUnsigned& x)
 
 void LargeInt::Add(LargeInt &x)
 { if (this->sign==x.sign)
-	{ this->value.Add(x.value);
-	}
+	  this->value.Add(x.value);
 	else
 	{ if (this->value.IsGEQ(x.value))
-		{	this->value.SubtractSmallerPositive(x.value);
-		}
+		  this->value.SubtractSmallerPositive(x.value);
 		else
 		{ LargeIntUnsigned tempI;
 			tempI.Assign(this->value);
@@ -8040,25 +7968,21 @@ void LargeInt::Minus_qDivisor
 #ifdef WIN32
 #pragma warning(disable:4244)//warning 4244: data loss from conversion
 #endif
-void LargeIntUnsigned::DivPositive
-			(	LargeIntUnsigned &x,
-				LargeIntUnsigned& quotientOutput,
-				LargeIntUnsigned& remainderOutput) const
-{	static LargeIntUnsigned remainder,quotient,divisor;
+void LargeIntUnsigned::DivPositive(LargeIntUnsigned &x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const
+{	LargeIntUnsigned remainder,quotient,divisor;
 	remainder.Assign(*this);
 	divisor.Assign(x);
 	quotient.MakeZero();
 	while (remainder.IsGEQ(divisor))
 	{	unsigned int q;
-		static LargeIntUnsigned current, Total;
+		LargeIntUnsigned current, Total;
 		if (	 remainder.TheObjects[remainder.size-1]> divisor.TheObjects[divisor.size-1])
 		{	q=remainder.TheObjects[remainder.size-1]/(divisor.TheObjects[divisor.size-1]+1);
 			current.AssignShiftedUInt(q,remainder.size-divisor.size);
 		}
 		else
 		{ if (remainder.size==divisor.size)
-			{ current.AssignShiftedUInt(1,0);
-			}
+			  current.AssignShiftedUInt(1,0);
 			else
 			{	q=this->CarryOverBound/(divisor.TheObjects[divisor.size-1]+1);
 				current.AssignShiftedUInt(q, remainder.size- divisor.size-1);
@@ -8083,8 +8007,9 @@ int LargeIntUnsigned::GetUnsignedIntValueTruncated()
 }
 
 bool LargeIntUnsigned::IsEqualTo(LargeIntUnsigned &right)
-{ if (this->size!=right.size) return false;
-	for (int i=0;i<this->size;i++)
+{ if (this->size!=right.size) 
+    return false;
+	for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]!=right.TheObjects[i])
 			return false;
 	return true;
@@ -8096,8 +8021,8 @@ double LargeIntUnsigned::GetDoubleValue()
 }
 
 void LargeIntUnsigned::gcd(LargeIntUnsigned &a, LargeIntUnsigned &b, LargeIntUnsigned &output)
-{ static LargeIntUnsigned p,q,r,temp;
-	static std::string tempSP, tempSQ, tempSR, tempS;
+{ LargeIntUnsigned p,q,r,temp;
+	std::string tempSP, tempSQ, tempSR, tempS;
 	p.Assign(a);
 	q.Assign(b);
 	/*if (Rational::flagAnErrorHasOccurredTimeToPanic)
@@ -8176,20 +8101,20 @@ int LargeInt::operator%(int x)
 	LargeIntUnsigned result;
 	LargeIntUnsigned remainder;
 	LargeIntUnsigned tempX;
-	if (x<0) {x=-x;}
+	if (x<0) 
+	  x=-x;
 	tempX.AssignShiftedUInt(x,0);
 	this->value.DivPositive(tempX,result,remainder);
 	if (remainder.size ==0)
-	{return 0;
-	}else
-	{ return remainder.TheObjects[0];
-	}
+	  return 0;
+	else
+	  return remainder.TheObjects[0];
 }
 
 LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
-{ static LargeIntUnsigned result;
-	static LargeIntUnsigned remainder;
-	static LargeIntUnsigned tempX;
+{ LargeIntUnsigned result;
+	LargeIntUnsigned remainder;
+	LargeIntUnsigned tempX;
 	tempX.AssignShiftedUInt(x,0);
 	this->DivPositive(tempX,result,remainder);
 //	assert(result.CheckForConsistensy());
@@ -8197,16 +8122,16 @@ LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
 }
 
 LargeIntUnsigned LargeIntUnsigned::operator/(LargeIntUnsigned& x)const
-{ static LargeIntUnsigned result;
-	static LargeIntUnsigned remainder;
+{ LargeIntUnsigned result;
+	LargeIntUnsigned remainder;
 	this->DivPositive(x,result,remainder);
 	return result;
 }
 
 int LargeIntUnsigned::operator%(unsigned int x)
-{ static LargeIntUnsigned result;
-	static LargeIntUnsigned remainder;
-	static LargeIntUnsigned tempX;
+{ LargeIntUnsigned result;
+	LargeIntUnsigned remainder;
+	LargeIntUnsigned tempX;
 	tempX.AssignShiftedUInt(x,0);
 	this->DivPositive(tempX,result,remainder);
 	return remainder.TheObjects[0];
@@ -8242,7 +8167,7 @@ bool LargeIntUnsigned::IsGEQ(LargeIntUnsigned& x)
 }
 
 void CompositeComplexQNPoly::AssignQP(QuasiPolynomial &q)
-{ static Monomial<CompositeComplexQN> tempM;
+{ Monomial<CompositeComplexQN> tempM;
 	tempM.init(q.NumVars);
 	this->ClearTheObjects();
 	this->NumVars= q.NumVars;
@@ -8254,22 +8179,19 @@ void CompositeComplexQNPoly::AssignQP(QuasiPolynomial &q)
 	}
 }
 
-void partFractionPolynomials::ComputeQuasiPolynomial
-			(QuasiPolynomial &output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables)
+void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomial &output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables)
 {	output.Nullify((short)theDimension);
 	for (int i=0;i<this->size;i++)
 	{	if (RecordNumMonomials)
 		{	std::stringstream out;
 			out<<i<<" out of "<<this->size<<" accounted for";
-			::IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
+			IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
 		}
-		QuasiPolynomial& tempQP	= theGlobalVariables.QPComputeQuasiPolynomial;
-		QuasiNumber& tempQN			= theGlobalVariables.QNComputeQuasiPolynomial;
+		QuasiPolynomial& tempQP	 = theGlobalVariables.QPComputeQuasiPolynomial;
+		QuasiNumber& tempQN	= theGlobalVariables.QNComputeQuasiPolynomial;
 		tempQP.AssignPolynomialRationalCoeff(this->TheObjects[i]);
 		//tempQP.ComputeDebugString();
-		tempQN.MakeQNFromMatrixAndColumn
-			(	this->theNormals,
-				this->LatticeIndicators.TheObjects[i]);
+		tempQN.MakeQNFromMatrixAndColumn(this->theNormals, this->LatticeIndicators.TheObjects[i]);
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 			tempQN.ComputeDebugString();
 		//tempQN.ComputeDebugString();
@@ -8289,18 +8211,14 @@ void partFractionPolynomials::ComputeQuasiPolynomial
 	}
 }
 
-void partFractionPolynomials::initLatticeIndicatorsFromPartFraction
-	(partFractions& ownerExpression,partFraction &owner,GlobalVariables& theGlobalVariables, int theDimension)
+void partFractionPolynomials::initLatticeIndicatorsFromPartFraction(partFractions& ownerExpression, partFraction &owner, GlobalVariables& theGlobalVariables, int theDimension)
 {	this->LatticeIndicators.size=0;
 	this->theNormals.init((short)theDimension,(short)theDimension);
 	for (int i=0;i<theDimension;i++)
 	{ int tempI=owner.IndicesNonZeroMults.TheObjects[i];
 		assert(owner.TheObjects[tempI].Elongations.size==1);
 		for(int j=0;j<theDimension;j++)
-			this->theNormals.elements[j][i].AssignInteger
-					(ownerExpression.RootsToIndices.TheObjects
-						[tempI].elements[j]*
-						owner.TheObjects[tempI].Elongations.TheObjects[0]);
+			this->theNormals.elements[j][i].AssignInteger(ownerExpression.RootsToIndices.TheObjects[tempI].elements[j]*owner.TheObjects[tempI].Elongations.TheObjects[0]);
 	}
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 		theNormals.ComputeDebugString();
@@ -8310,25 +8228,22 @@ void partFractionPolynomials::initLatticeIndicatorsFromPartFraction
 	this->size=0;
 }
 
-void partFractionPolynomials::AddPolynomialLargeRational
-				(root& rootLatticeIndicator,PolynomialRationalCoeff& input)
+void partFractionPolynomials::AddPolynomialLargeRational(root& rootLatticeIndicator,PolynomialRationalCoeff& input)
 {	root tempRoot, tempRoot2;
 	int theDimension= rootLatticeIndicator.size;
 	tempRoot.SetSizeExpandOnTopLight(theDimension);
 	tempRoot2.SetSizeExpandOnTopLight(theDimension);
-	static Rational tempRat, tempRat2;
+	Rational tempRat, tempRat2;
 	//if (partFraction::MakingConsistencyCheck)
 	//{ this->CheckConsistency(rootLatticeIndicator,input);
 	//}
 	//tempRoot.MakeZero();
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-	{ this->theNormals.ComputeDebugString();
-	}
+	  this->theNormals.ComputeDebugString();
 	for(int i=0;i<this->theNormals.NumRows;i++)
 	{ tempRoot.TheObjects[i].MakeZero();
 		if (partFraction::MakingConsistencyCheck)
-		{ tempRoot2.TheObjects[i].MakeZero();
-		}
+		  tempRoot2.TheObjects[i].MakeZero();
 		for(int j=0;j<theDimension;j++)
 		{ tempRat.Assign(this->theNormals.elements[i][j]);
 			tempRat.MultiplyBy(rootLatticeIndicator.TheObjects[j]);
@@ -8390,8 +8305,7 @@ void partFractionPolynomials::AddPolynomialLargeRational
 	}
 }
 
-void partFractionPolynomials::CheckConsistency
-				(root& RootLatticeIndicator,PolynomialRationalCoeff& input)
+void partFractionPolynomials::CheckConsistency(root& RootLatticeIndicator, PolynomialRationalCoeff& input)
 { root tempRoot2;
 	int theDimension= RootLatticeIndicator.size;
 	tempRoot2.AssignIntRoot(partFraction::theVectorToBePartitioned);
@@ -8418,20 +8332,18 @@ void partFractionPolynomials::CheckConsistency
 	}
 }
 
-bool partFraction::RemoveRedundantShortRootsClassicalRootSystem
-	(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension)
+bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension)
 { bool result=false;
 	if (Indicator!=0)
 		if (!this->rootIsInFractionCone(owner,Indicator, theGlobalVariables))
 			return false;
-	for (int i=0;i<owner.RootsToIndices.
-										IndicesRedundantShortRoots.CardinalitySelection;i++  )
+	IntegerPoly ComputationalBuffer;
+	for (int i=0;i<owner.RootsToIndices.IndicesRedundantShortRoots.CardinalitySelection; i++  )
 	{ int tempI1, tempI2;
 		tempI1= owner.RootsToIndices.IndicesRedundantShortRoots.elements[i];
 		tempI2= owner.RootsToIndices.IndicesDoublesOfRedundantShortRoots[tempI1];
 		if(tempI2!=-1)
-		{	if (	this->TheObjects[tempI1].Multiplicities.size>0 &&
-						this->TheObjects[tempI2].Multiplicities.size>0)
+		{	if (	this->TheObjects[tempI1].Multiplicities.size>0 && this->TheObjects[tempI2].Multiplicities.size>0)
 			{ IntegerPoly& tempP=theGlobalVariables.IPRemoveRedundantShortRootsClassicalRootSystem;
 				assert(this->TheObjects[tempI1].Multiplicities.size==1 && this->TheObjects[tempI2].Multiplicities.size==1);
 				tempP.ClearTheObjects();
@@ -8439,9 +8351,8 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem
 				tempP.MakePolyExponentFromIntRoot(owner.RootsToIndices.TheObjects[tempI1]);
 				tempP.AddConstant(IOne);
 				//tempP.ComputeDebugString();
-				static IntegerPoly ComputationalBuffer;
 				ComputationalBuffer.AssignPolynomialLight(this->Coefficient);
-				for (int j=0;j<this->TheObjects[tempI1].Multiplicities.TheObjects[0];j++)
+				for (int j=0; j<this->TheObjects[tempI1].Multiplicities.TheObjects[0]; j++)
 					ComputationalBuffer.MultiplyBy(tempP);
 				this->Coefficient.AssignPolynomial(ComputationalBuffer);
 				//this->Coefficient.ComputeDebugString();
@@ -8456,8 +8367,7 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem
 	return result;
 }
 
-bool partFraction::RemoveRedundantShortRoots
-	(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension)
+bool partFraction::RemoveRedundantShortRoots(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension)
 { bool result=false;
 	Rational StartCheckSum,LocalCheckSum, LocalCheckSum2;
 	//if (partFraction::MakingConsistencyCheck)
@@ -8466,16 +8376,13 @@ bool partFraction::RemoveRedundantShortRoots
 	//}
 	if (!this->rootIsInFractionCone(owner,Indicator,theGlobalVariables))
 		return false;
-	static IntegerPoly ComputationalBufferCoefficient;
-	static ::PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+	IntegerPoly ComputationalBufferCoefficient, tempIP;
+	PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded, tempPP;
 	ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
-	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator
-		(ComputationalBufferCoefficientNonExpanded, theDimension);
-
-	for (int k=0;k<this->IndicesNonZeroMults.size;k++  )
+	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded, theDimension);
+	for (int k=0; k<this->IndicesNonZeroMults.size; k++  )
 	{ int currentIndex=this->IndicesNonZeroMults.TheObjects[k];
-		::oneFracWithMultiplicitiesAndElongations& currentFrac =
-				 this->TheObjects[currentIndex];
+		::oneFracWithMultiplicitiesAndElongations& currentFrac = this->TheObjects[currentIndex];
 		int LCMElongations = currentFrac.GetLCMElongations();
 		std::string tempS, tempS1, tempS2;
 		owner.RootsToIndices.TheObjects[currentIndex].ElementToString(tempS);
@@ -8485,15 +8392,14 @@ bool partFraction::RemoveRedundantShortRoots
 				if (ElongationValue!=LCMElongations)
 				{ int numSummands=LCMElongations/ElongationValue;
 					if (this->UncoveringBrackets)
-					{	static IntegerPoly tempP;
-						this->GetNElongationPoly(owner,currentIndex,ElongationValue,numSummands,tempP,theDimension);
+					{	this->GetNElongationPoly(owner,currentIndex,ElongationValue, numSummands, tempIP, theDimension);
 						//tempP.ComputeDebugString();
-						tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
+						tempPP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
 						//tempP.ComputeDebugString();
-						ComputationalBufferCoefficient.MultiplyBy(tempP);
+						ComputationalBufferCoefficient.MultiplyBy(tempIP);
 					}
 					else
-					{ static ::PolyPartFractionNumerator tempP;
+					{ PolyPartFractionNumerator tempP;
 						this->GetNElongationPoly(owner,currentIndex, ElongationValue, numSummands, tempP,theDimension);
 						tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
 //						this->CoefficientNonExpanded.ComputeDebugString();
@@ -8519,28 +8425,18 @@ bool partFraction::RemoveRedundantShortRoots
 	return result;
 }
 
-bool partFraction::reduceOnceTotalOrderMethod
-  (partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator)
-{ for (int i=0;i<this->IndicesNonZeroMults.size;i++)
-	{ for (int j=0;j<this->IndicesNonZeroMults.size;j++)
+bool partFraction::reduceOnceTotalOrderMethod(partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator)
+{ for (int i=0; i<this->IndicesNonZeroMults.size; i++)
+	{ for (int j=0; j<this->IndicesNonZeroMults.size; j++)
 		{ //assert (this->IndicesNonZeroMults[i]<this->IndicesNonZeroMults[j]);
-			int AminusBindex = Accum.RootsToIndices.
-												 TableAllowedAminusB[this->IndicesNonZeroMults.TheObjects[i]]
-												 [this->IndicesNonZeroMults.TheObjects[j]];
-			int Aminus2Bindex = Accum.RootsToIndices.
-												  TableAllowedAminus2B[this->IndicesNonZeroMults.TheObjects[i]]
-												  [this->IndicesNonZeroMults.TheObjects[j]];
+			int AminusBindex = Accum.RootsToIndices.TableAllowedAminusB[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
+			int Aminus2Bindex = Accum.RootsToIndices.TableAllowedAminus2B[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
 			if (AminusBindex!=-1 &&	AminusBindex>this->IndicesNonZeroMults.TheObjects[j])
-			{ this->decomposeAMinusNB
-          ( this->IndicesNonZeroMults.TheObjects[i],
-						this->IndicesNonZeroMults.TheObjects[j],1,
-						AminusBindex, Accum,theGlobalVariables, Indicator);
+			{ this->decomposeAMinusNB(this->IndicesNonZeroMults.TheObjects[i], this->IndicesNonZeroMults.TheObjects[j], 1, AminusBindex, Accum,theGlobalVariables, Indicator);
 				return true;
 			}
 			if (Aminus2Bindex!=-1 &&	Aminus2Bindex>this->IndicesNonZeroMults.TheObjects[j])
-			{ this->decomposeAMinusNB
-          ( this->IndicesNonZeroMults.TheObjects[i],this->IndicesNonZeroMults.TheObjects[j],2,
-						Aminus2Bindex, Accum, theGlobalVariables, Indicator);
+			{ this->decomposeAMinusNB( this->IndicesNonZeroMults.TheObjects[i],this->IndicesNonZeroMults.TheObjects[j],2, Aminus2Bindex, Accum, theGlobalVariables, Indicator);
 				return true;
 			}
 		}
@@ -8569,21 +8465,18 @@ bool partFraction::reduceOnceTotalOrderMethod
 	}
 }*/
 
-bool partFraction::reduceOnceGeneralMethodNoOSBasis
-	(partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator)
-{ static roots tempRoots;
-	static MatrixLargeRational tempMat;
+bool partFraction::reduceOnceGeneralMethodNoOSBasis	(partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator)
+{ roots& tempRoots=theGlobalVariables.rootsreduceOnceGeneralMethod;
+	MatrixLargeRational& tempMat= theGlobalVariables.matreduceOnceGeneralMethod;
 	tempRoots.size=0;
 	int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 	{ intRoot tempRoot; tempRoot.dimension= Accum.AmbientDimension;
 		int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
 		if (currentIndex== this->LastDistinguishedIndex)
-		{ IndexInLinRelationOfLastGainingMultiplicityIndex=i;
-		}
+		  IndexInLinRelationOfLastGainingMultiplicityIndex=i;
 		tempRoot= Accum.RootsToIndices.TheObjects[currentIndex];
-		tempRoot.MultiplyByInteger
-			(this->TheObjects[currentIndex].GetLargestElongation());
+		tempRoot.MultiplyByInteger(this->TheObjects[currentIndex].GetLargestElongation());
 		tempRoots.AddIntRoot(tempRoot);
 		bool ShouldDecompose;
 		ShouldDecompose = tempRoots.GetLinearDependence(tempMat);
@@ -8609,15 +8502,13 @@ bool partFraction::reduceOnceGeneralMethodNoOSBasis
 	//tempRoots.r
 }
 
-bool partFraction::reduceOnceGeneralMethod
-  (partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator)
-{ static roots tempRoots;
-	static MatrixLargeRational tempMat;
+bool partFraction::reduceOnceGeneralMethod(partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator)
+{ roots& tempRoots = theGlobalVariables.rootsreduceOnceGeneralMethod;
+	MatrixLargeRational& tempMat = theGlobalVariables.matreduceOnceGeneralMethod;
 	tempRoots.size=0;
 	if (this->flagAnErrorHasOccurredTimeToPanic)
 		this->ComputeDebugString(Accum,theGlobalVariables);
-	this->LastDistinguishedIndex=
-		this->getSmallestNonZeroIndexGreaterThanOrEqualTo(Accum,this->LastDistinguishedIndex);
+	this->LastDistinguishedIndex=this->getSmallestNonZeroIndexGreaterThanOrEqualTo(Accum,this->LastDistinguishedIndex);
 	int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
 	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
 	{ intRoot tempRoot; tempRoot.dimension= Accum.AmbientDimension;
@@ -8625,8 +8516,7 @@ bool partFraction::reduceOnceGeneralMethod
 		if (currentIndex== this->LastDistinguishedIndex)
 			IndexInLinRelationOfLastGainingMultiplicityIndex=i;
 		tempRoot= Accum.RootsToIndices.TheObjects[currentIndex];
-		tempRoot.MultiplyByInteger
-			(this->TheObjects[currentIndex].GetLargestElongation());
+		tempRoot.MultiplyByInteger(this->TheObjects[currentIndex].GetLargestElongation());
 		tempRoots.AddIntRoot(tempRoot);
 		bool ShouldDecompose;
 		ShouldDecompose = tempRoots.GetLinearDependence(tempMat);
@@ -8634,15 +8524,12 @@ bool partFraction::reduceOnceGeneralMethod
 	//	{ tempMat.ComputeDebugString();
 	//	}
 	//	tempMat.ComputeDebugString();
-		if ( ShouldDecompose &&
-				 (this->LastDistinguishedIndex!=-1 ||
-					this->LastDistinguishedIndex==Accum.RootsToIndices.size))
+		if ( ShouldDecompose && (this->LastDistinguishedIndex!=-1 || this->LastDistinguishedIndex==Accum.RootsToIndices.size))
 		{ if (IndexInLinRelationOfLastGainingMultiplicityIndex==-1)
 				ShouldDecompose=false;
 			else
 				ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
 		}
-
 		if (ShouldDecompose)
 		{	if (this->flagAnErrorHasOccurredTimeToPanic)
 			{ this->ComputeDebugString(Accum,theGlobalVariables);
@@ -16075,10 +15962,9 @@ void simplicialCones::initFromDirections(roots &directions,GlobalVariables& theG
 
 bool simplicialCones::SeparatePoints(root &point1, root &point2, root *PreferredNormal)
 { if (PreferredNormal==0)
-	{ for (int i=0;this->size;i++)
-		{ if (this->TheObjects[i].SeparatesPoints(point1,point2))
+	{ for (int i=0; this->size; i++)
+		  if (this->TheObjects[i].SeparatesPoints(point1,point2))
 				return true;
-		}
 	}
 	else
 	{ root tempRoot;
@@ -16087,7 +15973,7 @@ bool simplicialCones::SeparatePoints(root &point1, root &point2, root *Preferred
 		int x= this->theFacets.IndexOfObjectHash(tempRoot);
 		assert(x!=-1);
 		int theSize=this->ConesHavingFixedNormal.TheObjects[x].size;
-		for (int i=0;i<theSize;i++)
+		for (int i=0; i<theSize; i++)
 		{ int y= this->ConesHavingFixedNormal.TheObjects[x].TheObjects[i];
 			if (this->TheObjects[y].SeparatesPoints(point1,point2))
 				return true;

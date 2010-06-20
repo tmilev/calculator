@@ -45,6 +45,8 @@
 
 #ifndef WIN32
 #include <pthread.h>
+#else
+ #include<windows.h>
 #endif
 
 #ifdef WIN32
@@ -1783,7 +1785,7 @@ public:
 	int getIndexVertexIncidentWithSelection(Selection& theSel);
 	bool VertexIsIncidentWithSelection(root& VertexCandidate,Selection& theSel);
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
-	bool SplitChamber(root& theKillerPlaneNormal,CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
+	bool SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
 	bool IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
 	void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
@@ -1822,6 +1824,7 @@ public:
 	void Assign(const  CombinatorialChamber& right);
 	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
 	CombinatorialChamber();
+//	~CombinatorialChamber(){this->IndexInOwnerComplex=-2;};
 };
 
 template <class Object>
@@ -2397,9 +2400,11 @@ class hashedRoots: public HashedListBasicObjects<root>
 public:
 	std::string DebugString;
 	void AddRootsOnTopHash(roots& input)
-	{ for (int i=0;i<input.size;i++)
+	{ for (int i=0; i<input.size; i++)
 		this->AddObjectOnTopHash(input.TheObjects[i]);
 	};
+	void WriteToFile (std::fstream& output);
+	void ReadFromFile(std::fstream& input);
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
 	void ElementToString(std::string& output, bool useHtml);
@@ -2419,6 +2424,8 @@ public:
 	bool IsSurelyOutsideConeAccordingToChamberTestArray();
 	bool IsInCone(root& r);
 	bool SeparatesPoints(root& point1, root& point2);
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 //	int HashFunction() const;
 	ListBasicObjects<int> ChamberTestArray;
 	void operator =(Cone& right);
@@ -2435,6 +2442,8 @@ public:
 	void ElementToString(std::string& output);
 	void initFromDirections(roots& directions,GlobalVariables& theGlobalVariables);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
 
 class CombinatorialChamberContainer: public ListObjectPointers<CombinatorialChamber>
@@ -2446,6 +2455,7 @@ public:
 	hashedRoots theHyperplanes;
 	Cone TheGlobalConeNormals;
 	Cone WeylChamber;
+	simplicialCones startingCones;
 	roots NewHyperplanesToSliceWith;
 	HashedListBasicObjects<affineHyperplane> AffineWallsOfWeylChambers;
 	affineHyperplanes theWeylGroupAffineHyperplaneImages;
@@ -2474,9 +2484,11 @@ public:
 	void PauseSlicing();
 	void ResumeSlicing();
 #ifdef WIN32
+//  HANDLE mutexFlagCriticalSectionEntered;
+//  HANDLE condContinue;
 #else
-    pthread_mutex_t mutexFlagCriticalSectionEntered;
-    pthread_cond_t condContinue;
+  pthread_mutex_t mutexFlagCriticalSectionEntered;
+  pthread_cond_t condContinue;
 #endif
 /////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -2490,7 +2502,6 @@ public:
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
 	static int DefragSpacing;
 	static int LastReportedMemoryUse;
-	static simplicialCones startingCones;
 	static std::fstream TheBigDump;
 	static root PositiveLinearFunctional;
 	static bool PrintLastChamberOnly;
@@ -6144,6 +6155,7 @@ public:
   roots rootsProverStateComputation5;
   roots rootsAttepmtTheTripleTrick;
   roots rootsAttepmtTheTripleTrickWRTSA;
+  roots rootsreduceOnceGeneralMethod;
 
 	rootsCollection rootsCollectionSplitChamber1;
 	rootsCollection rootsCollectionSplitChamber2;
@@ -6197,6 +6209,7 @@ public:
 	MatrixLargeRational matGetEpsilonCoords2;
 	MatrixLargeRational matGetEpsilonCoords3;
 	MatrixLargeRational matComputeEpsCoordsWRTk;
+  MatrixLargeRational matreduceOnceGeneralMethod;
 
 	partFraction fracReduceMonomialByMonomial;
 	partFraction fracSplit1;

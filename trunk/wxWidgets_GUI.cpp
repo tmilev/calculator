@@ -914,6 +914,7 @@ void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
 { this->theComputationSetup.theChambers.ReadFromDefaultFile();
   this->theComputationSetup.flagRunningExperiments2=true;
   this->theComputationSetup.flagExperiment2ChambersAlreadyLoaded=true;
+  this->theComputationSetup.WeylGroupIndex=this->theComputationSetup.theChambers.AmbientDimension;
   this->RunTheComputation();
 }
 

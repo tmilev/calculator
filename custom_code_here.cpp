@@ -829,7 +829,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
 
-  theG.FindSl2Subalgebras('D', 4, theGlobalVariables);
+  theG.FindSl2Subalgebras('D', 6, theGlobalVariables);
   IndicatorWindowGlobalVariables.StatusString1= theG.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
@@ -1251,12 +1251,12 @@ void hashedRoots::ReadFromFile(std::fstream &input)
 
 void slTwo::ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
 { std::stringstream out;  std::string tempS;
+  this->theH.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out <<"\n\n$h=$" <<tempS;
   this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"$h=$" <<tempS;
-  this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"$e=$" <<tempS;
+  out <<"\n\n$e=$" <<tempS;
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"$f=$" <<tempS;
+  out <<"\n\n$f=$" <<tempS;
   output = out.str();
 }
 
@@ -1276,8 +1276,8 @@ void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalV
   //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   //theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
   theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables);
-  tempSl2s.ComputeDebugString(theGlobalVariables, theRootSAs.TheObjects[0].AmbientWeyl, false, false);
-  this->DebugString= theRootSAs.DebugString;
+  tempSl2s.ComputeDebugString(theGlobalVariables, theRootSAs.AmbientWeyl, false, false);
+  this->DebugString= tempSl2s.DebugString;
 
 }
 
@@ -1302,8 +1302,8 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
   roots relativeRootSystem;
   this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, theGlobalVariables);
   slTwo theSl2;
-  for (int i=0; i<numCycles; i++)
-  { theRootsWithZeroCharacteristic.incrementSelection();
+  for (int i=0; i<numCycles; i++, theRootsWithZeroCharacteristic.incrementSelection())
+  { tempRoots.size=0;
     for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
       tempRoots.AddObjectOnTop(this->SimpleBasisK.TheObjects[theRootsWithZeroCharacteristic.elements[j]]);
     tempDiagram.ComputeDiagramType(tempRoots, this->AmbientWeyl);
@@ -1319,10 +1319,11 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
       if (DimTwoSpace==1)
         theSlack++;
     }
-    int theDynkinEpsilon = tempDiagram.NumRootsGeneratedByDiagram() - tempDiagram.RankTotal() - theSlack;
+    int theDynkinEpsilon = tempDiagram.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is (but generators still have to be found)
     //this is done in the below code.
+    theRootsWithZeroCharacteristic.ComputeDebugString();
     if (theDynkinEpsilon==0)
     { theSl2.theE.Nullify(theLieAlgebra);
       theSl2.theH.Nullify(theLieAlgebra);
@@ -1337,6 +1338,7 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
       theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
       for (int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
+      theSl2.ComputeDebugString(false, false, theGlobalVariables);
       if(theLieAlgebra.AttemptExtendingHEtoHEF(theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theGlobalVariables))
         output.AddObjectOnTopHash(theSl2);
     }

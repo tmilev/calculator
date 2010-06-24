@@ -185,7 +185,7 @@ template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::Prefe
 template < > int HashedListBasicObjects<Selection>::PreferredHashSize=20;
 template < > int HashedListBasicObjects<affineHyperplane>::PreferredHashSize=100;
 template < > int HashedListBasicObjects<coneRelation>::PreferredHashSize=1000;
-template < > int HashedListBasicObjects<SltwoDecomposition>::PreferredHashSize=1000;
+template < > int HashedListBasicObjects<slTwo>::PreferredHashSize=1000;
 template < > int HashedListBasicObjects<ElementSimpleLieAlgebra>::PreferredHashSize=100;
 
 template < > int ListBasicObjects<affineCone>::ListBasicObjectsActualSizeIncrement=1;
@@ -229,7 +229,7 @@ template < > int ListBasicObjects<coneRelation>::ListBasicObjectsActualSizeIncre
 template < > int ListBasicObjects<DynkinDiagramRootSubalgebra>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<rootSubalgebra>::ListBasicObjectsActualSizeIncrement=77;
 template < > int ListBasicObjects<ListBasicObjects<int> >::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<SltwoDecomposition>::ListBasicObjectsActualSizeIncrement=1000;
+template < > int ListBasicObjects<slTwo>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<ElementSimpleLieAlgebra>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<ReflectionSubgroupWeylGroup>::ListBasicObjectsActualSizeIncrement=5;
 template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjectsActualSizeIncrement=800;
@@ -273,7 +273,6 @@ bool IntegerPoly::flagAnErrorHasOccurredTimeToPanic=false;
 root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
 bool ParallelComputing::SafePointReached=false;
 bool ParallelComputing::ReachSafePointASAP=false;
-FeedDataToIndicatorWindow GlobalVariables::FeedDataToIndicatorWindowDefault=0;
 bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
 
@@ -930,7 +929,7 @@ ComputationSetup::ComputationSetup()
 	this->NumRowsNilradical=2;
 	this->NumColsNilradical=2;
 	this->theGlobalVariablesContainer= new GlobalVariablesContainer;
-	std::stringstream out1,out2,out3,out4;
+	std::stringstream out1, out2, out3, out4;
 	out1	<<"Denote by $P_I(x_1,\\dots,x_n)$ the number of ways to split the vector with coordinates $(x_1,\\dots,x_n)$ into non-negative integral sum of the integral vectors $I$, where $I$ is the set given by the following list.\n\n";
 	out2	<< " \n\n For given integers $N$, $m$ and integral matrices $A:=\\left(\\begin{array}{ccc}a_{11}&\\dots&a_{1n}\\\\ &\\dots& \\\\ a_{m1}&\\dots& a_{mn}\\end{array}\\right)$,"
           <<" $B:=\\left( \\begin{array}{c} b_1\\\\\\vdots\\\\b_m\\end{array}\\right)$,let \n\\[{\\tau_{N}}_{[(a_{11}x_1+\\dots a_{1n}x_n=b_1),\\dots, (a_{m1}x_1+\\dots a_{mn}x_n=b_m) ]} "
@@ -953,6 +952,7 @@ ComputationSetup::ComputationSetup()
 
 ComputationSetup::~ComputationSetup()
 {	delete this->theGlobalVariablesContainer;
+  this->theGlobalVariablesContainer=0;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
@@ -1137,7 +1137,7 @@ void ComputationSetup::Run()
 	if (this->flagRunningExperiments2)
 	{ std::string tempS;
 
-	  main_test_function(tempS,*this->theGlobalVariablesContainer->Default(),*this, this->flagExperiment2ChambersAlreadyLoaded);
+	  main_test_function(tempS, *this->theGlobalVariablesContainer->Default(), *this, this->flagExperiment2ChambersAlreadyLoaded);
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;
@@ -2882,7 +2882,8 @@ bool roots::ComputeNormalExcludingIndex(root& output, int index, GlobalVariables
 		}
 	tempMatrix.ComputeDebugString();
 	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
-	if (NonPivotPoints.CardinalitySelection!=1) return false;
+	if (NonPivotPoints.CardinalitySelection!=1)
+    return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 	return true;
 }
@@ -2898,7 +2899,8 @@ bool roots::ComputeNormalFromSelection(root& output, Selection& theSelection, Gl
     for(int j=0; j<theDimension; j++)
 			tempMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
 	MatrixLargeRational::GaussianEliminationByRows(tempMatrix, matOutputEmpty, NonPivotPoints);
-	if (NonPivotPoints.CardinalitySelection!=1) return false;
+	if (NonPivotPoints.CardinalitySelection!=1)
+    return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 	return true;
 }
@@ -6762,7 +6764,7 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
 	{ for (int j=0; j<theDimension;j++)
 		{ this->Exp.elements[i][j]=(theMat.elements[i][j].NumShort*tempLCM)/theMat.elements[i][j].DenShort;
 			this->Exp.elements[i][j]%=tempLCM;
-			if (this->Exp.elements[i][j]<0) 
+			if (this->Exp.elements[i][j]<0)
 			  this->Exp.elements[i][j]+=tempLCM;
 		}
 		this->Nums.elements[i][0]= (column.TheObjects[i].NumShort*tempLCM)/column.TheObjects[i].DenShort;
@@ -7562,11 +7564,11 @@ void Rational::Assign(const Rational &r)
 
 inline void Rational::AssignFracValue()
 { if (this->Extended==0)
-  { if (this->NumShort==0) 
+  { if (this->NumShort==0)
       return;
     if (this->DenShort==1)
-    { this->NumShort=0; 
-      this->DenShort=1; 
+    { this->NumShort=0;
+      this->DenShort=1;
       return;
     }
     this->NumShort=this->NumShort% this->DenShort;
@@ -7574,10 +7576,10 @@ inline void Rational::AssignFracValue()
       this->NumShort+=this->DenShort;
     return;
   }
-  if (this->IsEqualToZero()) 
+  if (this->IsEqualToZero())
     return;
 	if (this->Extended->den.IsEqualToOne())
-	{ this->MakeZero(); 
+	{ this->MakeZero();
 	  return;
 	}
 	LargeIntUnsigned newNum, tempI;
@@ -7646,7 +7648,7 @@ void Rational::Add(const Rational &r)
 	  if (this->TryToAddQuickly(r.NumShort, r.DenShort))
 		  return;
 	if (this==&r)
-	{ this->MultiplyByInt(2); 
+	{ this->MultiplyByInt(2);
 	  return;
 	}
 	this->InitExtendedFromShortIfNeeded();
@@ -7696,7 +7698,7 @@ void Rational::Simplify()
 
 inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
 {	if (x==0)
-	{ this->MakeZero(); 
+	{ this->MakeZero();
 	  return;
 	}
 	this->SetSizeExpandOnTopNoObjectInit(shift+1);
@@ -7863,8 +7865,8 @@ void LargeIntUnsigned::ElementToString(std::string &output)
 bool LargeInt::IsEqualTo(LargeInt& x)
 {	if (x.sign!=this->sign)
 	{ if (x.IsEqualToZero() && this->IsEqualToZero())
-		  return true; 
-		else	
+		  return true;
+		else
 		  return false;
 	}
 	return this->value.IsEqualTo(x.value);
@@ -7899,12 +7901,12 @@ void LargeInt::ElementToString(std::string& output)
 
 void LargeInt::AssignInt(int x)
 { if (x==0)
-	{ this->MakeZero(); 
+	{ this->MakeZero();
 	  return;
 	}
 	this->sign=1;
 	if (x<0)
-	{ this->sign=-1; 
+	{ this->sign=-1;
 	  x=-x;
 	}
 	this->value.AssignShiftedUInt( (unsigned int)x,0);
@@ -8007,7 +8009,7 @@ int LargeIntUnsigned::GetUnsignedIntValueTruncated()
 }
 
 bool LargeIntUnsigned::IsEqualTo(LargeIntUnsigned &right)
-{ if (this->size!=right.size) 
+{ if (this->size!=right.size)
     return false;
 	for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]!=right.TheObjects[i])
@@ -8101,7 +8103,7 @@ int LargeInt::operator%(int x)
 	LargeIntUnsigned result;
 	LargeIntUnsigned remainder;
 	LargeIntUnsigned tempX;
-	if (x<0) 
+	if (x<0)
 	  x=-x;
 	tempX.AssignShiftedUInt(x,0);
 	this->value.DivPositive(tempX,result,remainder);
@@ -11608,8 +11610,8 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
 	this->GenerateOrbit(theRoots,RhoAction,output,false,tempW, UseMinusRho,0);
 }
 
-void WeylGroup::GenerateOrbit( roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
-{	for (int i=0;i<theRoots.size;i++)
+void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
+{	for (int i=0; i<theRoots.size; i++)
     output.AddObjectOnTopHash(theRoots.TheObjects[i]);
 	root currentRoot;
 	ElementWeylGroup tempEW;
@@ -14618,30 +14620,30 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
   roots& simpleBasisG=theGlobalVariables.rootsComputeEpsCoordsWRTk2;
   int theDimension=this->AmbientWeyl.KillingFormMatrix.NumRows;
   simpleBasisG.SetSizeExpandOnTopNoObjectInit(theDimension);
-  for (int i=0;i<theDimension;i++)
+  for (int i=0; i<theDimension; i++)
   { simpleBasisG.TheObjects[i].MakeZero(theDimension);
     simpleBasisG.TheObjects[i].TheObjects[i]=1;
   }
   MatrixLargeRational& InvertedGramMatrix=theGlobalVariables.matComputeEpsCoordsWRTk;
-  this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix,this->AmbientWeyl);
+  this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix, this->AmbientWeyl);
   InvertedGramMatrix.Invert(theGlobalVariables);
   roots& tempRoots=theGlobalVariables.rootsComputeEpsCoordsWRTk;
   root tempRoot, tempRoot2,tempRoot3;
-  for(int i=0;i<this->kModules.size;i++)
+  for(int i=0; i<this->kModules.size; i++)
   { tempRoots.size=0;
-		for (int j=0;j<this->kModules.TheObjects[i].size;j++)
+		for (int j=0; j<this->kModules.TheObjects[i].size; j++)
 		{ tempRoot.SetSizeExpandOnTopLight(this->SimpleBasisK.size);
-			for (int k=0;k<this->SimpleBasisK.size;k++)
+			for (int k=0; k<this->SimpleBasisK.size; k++)
 				this->AmbientWeyl.RootScalarKillingFormMatrixRoot(	this->kModules.TheObjects[i].TheObjects[j],this->SimpleBasisK.TheObjects[k], tempRoot.TheObjects[k]);
-			InvertedGramMatrix.ActOnAroot(tempRoot,tempRoot3);
+			InvertedGramMatrix.ActOnAroot(tempRoot, tempRoot3);
 			tempRoot2.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
-			for (int j=0;j<this->SimpleBasisK.size;j++)
-				tempRoot2= tempRoot2+tempRoot3.TheObjects[j]*this->SimpleBasisK.TheObjects[j];
+			for (int j=0; j<this->SimpleBasisK.size; j++)
+				tempRoot2+= tempRoot3.TheObjects[j]*this->SimpleBasisK.TheObjects[j];
 			tempRoots.AddObjectOnTop(tempRoot2);
 		}
 //		tempRoots.ComputeDebugString();
-		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra( this->SimpleBasisK, tempRoots, this->kModulesKepsCoords.TheObjects[i], theGlobalVariables);
-		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra( simpleBasisG,this->kModules.TheObjects[i],this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
+		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, tempRoots, this->kModulesKepsCoords.TheObjects[i], theGlobalVariables);
+		this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->kModules.TheObjects[i], this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
     root tempRoot;
     this->kModulesKepsCoords.TheObjects[i].Average(tempRoot, this->kModulesKepsCoords.TheObjects[i].TheObjects[0].size);
     assert(tempRoot.IsEqualToZero());
@@ -14650,8 +14652,8 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
     //assert(tempRoot.IsEqualToZero());
 	//	this->kModulesEpsCoords.TheObjects[i].ComputeDebugString();
   }
-  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK,this->SimpleBasisK,this->SimpleBasisKEpsCoords,theGlobalVariables);
-  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG,this->SimpleBasisK,this->SimpleBasisgEpsCoords,theGlobalVariables);
+  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, this->SimpleBasisK, this->SimpleBasisKEpsCoords,theGlobalVariables);
+  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->SimpleBasisK, this->SimpleBasisgEpsCoords,theGlobalVariables);
 }
 
 void rootSubalgebra::Assign(const rootSubalgebra& right)
@@ -15591,7 +15593,7 @@ void ::DynkinDiagramRootSubalgebra::GetAutomorphisms(ListBasicObjects<ListBasicO
 
 int DynkinDiagramRootSubalgebra::RankTotal()
 { int result=0;
-	for (int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
+	for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
 		result+=this->SimpleBasesConnectedComponents.TheObjects[i].size;
 	return result;
 }
@@ -15603,8 +15605,7 @@ int DynkinDiagramRootSubalgebra::NumRootsGeneratedByDiagram()
   { int Rank=this->SimpleBasesConnectedComponents.TheObjects[i].size;
     if (this->DynkinTypeStrings.TheObjects[i].at(1)=='A')
       result+=Rank*(Rank+1);
-    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='B'||
-        this->DynkinTypeStrings.TheObjects[i].at(1)=='C')
+    if (this->DynkinTypeStrings.TheObjects[i].at(1)=='B'|| this->DynkinTypeStrings.TheObjects[i].at(1)=='C')
       result+=Rank*Rank*2;
     if (this->DynkinTypeStrings.TheObjects[i].at(1)=='D')
       result+=Rank*(Rank-1)*2;
@@ -17826,7 +17827,7 @@ bool SimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& root
 	return false;
 }
 
-void getZuckermansArrayE8(roots& output)
+void SltwoSubalgebras::getZuckermansArrayE8(roots& output)
 { //below follow Dynkin's sl(2) characteristics for E8, as taken from tables 16-20 from
   //semisimple Lie algebras of simple Lie algebras.
   output.MakeActualSizeAtLeastExpandOnTop(70);
@@ -18007,7 +18008,7 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
 	roots RootSpacesThatCommuteWithAllRootsInTheSlTwo;
 	Rational tempRat;
   this->IndexZeroWeight=this->theWeylGroup.RootsOfBorel.size;
-	::SltwoDecomposition BufferDecomposition;
+	::slTwo BufferDecomposition;
 	hCommutingRoots.MakeActualSizeAtLeastExpandOnTop(this->theWeylGroup.RootsOfBorel.size);
 	roots preComputedDynkinHs;
 	MatrixLargeRational invertedCartan;
@@ -18110,23 +18111,21 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
 	this->ComputeDebugString(theGlobalVariables,this->theWeylGroup,false,false);
 }
 
-void SltwoSubalgebras::ElementToString(std::string &output, GlobalVariables &theGlobalVariables, WeylGroup &theWeyl, bool useLatex, bool UseHtml)
+void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml)
 {	std::string tempS; std::stringstream out;
   int Zcounter=0;
   int numGood=0;
 	out <<"Number sl(2)s: "<< this->size<<"\n\n";
 	//for (int k=0;k<2;k++)
 	//{	//bool tempBool=(k==0);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
   //  if (!this->TheObjects[i].DifferenceTwoHsimpleRootsIsARoot)//)==tempBool)
     { //if(this->TheObjects[i].DynkinsEpsilon==0)
       numGood++;
       this->TheObjects[i].hCharacteristic.ElementToString(tempS);
       out << "\n\nSubalgebra "<<i+1<<" h characteristic: " << tempS;
       root& r=this->TheObjects[i].hCharacteristic;
-      out	<<"$\\begin{array}{ccccccc}" << r.TheObjects[7].ElementToString() <<" & " << r.TheObjects[6].ElementToString() <<" & " << r.TheObjects[5].ElementToString() <<" & "
-						<< r.TheObjects[4].ElementToString() <<" & " << r.TheObjects[3].ElementToString() <<" & " << r.TheObjects[2].ElementToString() <<" & "
-						<< r.TheObjects[0].ElementToString() <<"\\\\&&&&"<< r.TheObjects[1].ElementToString()<<"\\end{array}$\n\n";
+      out	<<"$\\begin{array}{ccccccc}" << r.TheObjects[7].ElementToString() <<" & " << r.TheObjects[6].ElementToString() <<" & " << r.TheObjects[5].ElementToString() << " & " << r.TheObjects[4].ElementToString() << " & " << r.TheObjects[3].ElementToString() << " & " << r.TheObjects[2].ElementToString() << " & " << r.TheObjects[0].ElementToString() <<"\\\\&&&&"<< r.TheObjects[1].ElementToString()<<"\\end{array}$\n\n";
       out	<< "Corresponding h: " << this->TheObjects[i].hElementCorrespondingToCharacteristic.ElementToString() << "\n\n sl(2) - module decomposition: ";
       int DimensionCentralizer=0;
       for (int j=0;j<this->TheObjects[i].theModulesHighestWeights.size;j++)
@@ -18145,11 +18144,10 @@ void SltwoSubalgebras::ElementToString(std::string &output, GlobalVariables &the
       }
       else
         out <<"\n\nDimension of m is smaller than the total dim of  $V_0$";
-      if (  DimensionCentralizer==easyCentralizerDim  )
+      if(DimensionCentralizer==easyCentralizerDim)
         out <<"\n\n\n   Dynkin Diagram centralizer: "<< this->TheObjects[i].CentralizerDiagram.DebugString;
       else
-        out <<"\n\n\n  Centralizer contains "<<" the root spaces commuting with " <<" the entire 2-eigenspace of $h$. The latter generate subalgebra of type "
-            << this->TheObjects[i].CentralizerDiagram.DebugString <<" of dimension " << easyCentralizerDim;
+        out <<"\n\n\n  Centralizer contains "<<" the root spaces commuting with " <<" the entire 2-eigenspace of $h$. The latter generate subalgebra of type " << this->TheObjects[i].CentralizerDiagram.DebugString <<" of dimension " << easyCentralizerDim;
       if (DimensionCentralizer<easyCentralizerDim)
         out <<"aaaaaaaarrrrrrrrrrrrrggggggggggggggggghhhhhhhhh";
       out <<"\n\n\\rule{\\textwidth}{0.4pt}";
@@ -18161,7 +18159,7 @@ void SltwoSubalgebras::ElementToString(std::string &output, GlobalVariables &the
 
 void SltwoSubalgebras::ComputeDebugStringCurrent()
 {	std::string tempS; std::stringstream out;
-	for (int i=0;i<this->MultiplicitiesFixedHweight.size;i++)
+	for (int i=0; i<this->MultiplicitiesFixedHweight.size; i++)
 		out << i-this->IndexZeroWeight<<": "<<this->MultiplicitiesFixedHweight.TheObjects[i] <<"\n";
 	this->DebugString=out.str();
 }
@@ -18176,16 +18174,17 @@ void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables 
 	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
 
-void SltwoDecomposition::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
-{ this->DynkinsEpsilon = this->DiagramM.NumRootsGeneratedByDiagram()+this->DiagramM.RankTotal();
+void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
+{//outdates, must be erased as soon as I implement an equivalent
+  this->DynkinsEpsilon = this->DiagramM.NumRootsGeneratedByDiagram()+this->DiagramM.RankTotal();
   int r=0;
-  for (int i=0;i<this->hCharacteristic.size;i++)
+  for (int i=0; i<this->hCharacteristic.size; i++)
     if (!this->hCharacteristic.TheObjects[i].IsEqualToZero())
       r++;
   this->DynkinsEpsilon+= r;
-  for (int i=0;i<theWeyl.RootSystem.size;i++)
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
   { int NumNonZeroFound=0;
-    for (int j=0;j<this->hCharacteristic.size;j++)
+    for (int j=0; j<this->hCharacteristic.size; j++)
     { if (theWeyl.RootSystem.TheObjects[i].TheObjects[j]==1)
         NumNonZeroFound++;
       if(NumNonZeroFound>1)
@@ -18195,21 +18194,20 @@ void SltwoDecomposition::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
       this->DynkinsEpsilon--;
   }
   this->DynkinsEpsilon=0;
-  for (int i=0;i<this->hCharacteristic.size;i++)
+  for (int i=0; i<this->hCharacteristic.size; i++)
     if (this->hCharacteristic.TheObjects[i]==1)
       this->DynkinsEpsilon=-1;
   this->DynkinsEpsilon=0;
-
 }
 
 void ElementSimpleLieAlgebra::operator+=(const ElementSimpleLieAlgebra& other)
-{ for(int i=0;i<other.NonZeroElements.CardinalitySelection;i++)
+{ for(int i=0; i<other.NonZeroElements.CardinalitySelection; i++)
     this->coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]].Add(other.coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]]);
   this->Hcomponent.Add(other.Hcomponent);
 }
 
 bool ElementSimpleLieAlgebra::IsEqualToZero()const
-{ for (int i=0;i<this->NonZeroElements.CardinalitySelection;i++)
+{ for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
     if(!this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].IsEqualToZero())
       return false;
   if (!this->Hcomponent.IsEqualToZero())
@@ -18226,7 +18224,7 @@ void ElementSimpleLieAlgebra::init (SimpleLieAlgebra& owner)
 void ElementSimpleLieAlgebra::Nullify(SimpleLieAlgebra& owner)
 { this->init(owner);
   this->Hcomponent.MakeZero(owner.theWeyl.KillingFormMatrix.NumRows);
-  for(int j=0; j<this->coeffsRootSpaces.size;j++)
+  for(int j=0; j<this->coeffsRootSpaces.size; j++)
     this->coeffsRootSpaces.TheObjects[j].MakeZero();
   this->NonZeroElements.init(this->coeffsRootSpaces.size);
 }
@@ -18267,8 +18265,8 @@ void SimpleLieAlgebra::LieBracket( const ElementSimpleLieAlgebra& g1, const Elem
   ElementSimpleLieAlgebra const* element2;
   Rational order; order.MakeOne();
   element1=&g1; element2=&g2;
-  for (int l=0;l<2;l++)
-	{	for (int j=0;j<element2->NonZeroElements.CardinalitySelection;j++)
+  for (int l=0; l<2; l++)
+	{	for (int j=0; j<element2->NonZeroElements.CardinalitySelection; j++)
 		{ this->theWeyl.RootScalarKillingFormMatrixRoot( this->theWeyl.RootSystem.TheObjects[element2->NonZeroElements.elements[j]], element1->Hcomponent,tempRat);
 			tempRat.MultiplyBy(element2->coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]]);
 			tempRat.MultiplyBy(order);
@@ -18330,7 +18328,7 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, E
   return hasSolution;
 }
 
-bool SimpleLieAlgebra::AttemptExtendingHEtoHEF( root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+bool SimpleLieAlgebra::AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
 { assert(e.Hcomponent.IsEqualToZero());
   e.ComputeNonZeroElements();
   root Difference;
@@ -18603,8 +18601,8 @@ void SimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, G
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
-void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates)
-{ this->ComputeChevalleyConstants(WeylLetter, WeylRank ,theGlobalVariables );
+void SimpleLieAlgebra::FindSl2SubalgebrasOld(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates)
+{ this->ComputeChevalleyConstants(WeylLetter, WeylRank, theGlobalVariables);
 //  this->theChevalleyConstantComputer.TestForConsistency
 //    ( *this->theGlobalVariablesContainer->Default());
  // this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
@@ -18613,10 +18611,10 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
 	ElementSimpleLieAlgebra e,f,h;
 	roots thefoundHs;
 	Rational tempRat;
-	ListBasicObjects< ElementSimpleLieAlgebra> goodHs, goodEs, goodFs;
-	ListBasicObjects< ElementSimpleLieAlgebra> goodHPrimes, goodEPrimes, goodFPrimes;
-	ListBasicObjects< ElementSimpleLieAlgebra> badHs, badEs, badFs;
-	ListBasicObjects< ElementSimpleLieAlgebra> badHPrimes, badEPrimes, badFPrimes;
+	ListBasicObjects<ElementSimpleLieAlgebra> goodHs, goodEs, goodFs;
+	ListBasicObjects<ElementSimpleLieAlgebra> goodHPrimes, goodEPrimes, goodFPrimes;
+	ListBasicObjects<ElementSimpleLieAlgebra> badHs, badEs, badFs;
+	ListBasicObjects<ElementSimpleLieAlgebra> badHPrimes, badEPrimes, badFPrimes;
 	ListBasicObjects<int> goodSLtwos, badSltwos;
 	int NumCandidates=inputCandidates.size;
 	//NumCandidates=5;
@@ -18635,8 +18633,8 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
 	int NumFound=0;
 	roots tempRoots;
 	Selection selRoots;
-	for (int i=0;i<NumCandidates;i++)
-	{	SltwoDecomposition& theSl2= inputCandidates.TheObjects[i];
+	for (int i=0; i<NumCandidates; i++)
+	{	slTwo& theSl2= inputCandidates.TheObjects[i];
 		e.Nullify(*this);
 		theSl2.RootsHavingScalarProduct2WithH.ComputeDebugString();
 		//int tempRank=theSl2.RootsHavingScalarProduct2WithH.GetRankOfSpanOfElements(theGlobalVariables);
@@ -18644,12 +18642,12 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
     selRoots.init(theSl2.RootsHavingScalarProduct2WithH.size);
     int NumCycles= MathRoutines::TwoToTheNth(theSl2.RootsHavingScalarProduct2WithH.size);
     bool found=false;
-    for (int j=0;j<NumCycles;j++)
+    for (int j=0; j<NumCycles; j++)
     { e.Nullify(*this);
       this->MakeSl2ProgressReportNumCycles(j, NumCycles,theGlobalVariables);
-      for (int k=0;k<theSl2.RootsHavingScalarProduct2WithH.size;k++)
+      for (int k=0; k<theSl2.RootsHavingScalarProduct2WithH.size; k++)
         if(!selRoots.selected[k])
-          e.SetCoefficient( theSl2.RootsHavingScalarProduct2WithH.TheObjects[k],1,*this);
+          e.SetCoefficient(theSl2.RootsHavingScalarProduct2WithH.TheObjects[k], 1, *this);
    		if (this->AttemptExtendingHEtoHEF(theSl2.hElementCorrespondingToCharacteristic, e, f, theGlobalVariables))
       { found=true;
         break;
@@ -18670,8 +18668,8 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
         h.MultiplyByRational(*this,tempRat);
         f.MultiplyByRational(*this,tempRat);
         ElementSimpleLieAlgebra Eprime, Fprime, Eprime2, Fprime2;
-        this->LieBracket(h,e,Eprime);
-        this->LieBracket(h,f,Fprime);
+        this->LieBracket(h, e, Eprime);
+        this->LieBracket(h, f, Fprime);
         Eprime2=Eprime; Fprime2=Fprime;
         tempRat.AssignNumeratorAndDenominator(-1,2);
         Eprime2.MultiplyByRational(*this,tempRat);
@@ -18679,7 +18677,7 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
         Fprime2.MultiplyByRational(*this,tempRat);
         Eprime2+=e;
         Fprime2+=f;
-        if (Eprime2.IsEqualToZero()&& Fprime2.IsEqualToZero())
+        if (Eprime2.IsEqualToZero() && Fprime2.IsEqualToZero())
         { goodHs.AddObjectOnTop(h);
           goodEs.AddObjectOnTop(e);
           goodFs.AddObjectOnTop(f);
@@ -18702,7 +18700,7 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
 	}
 	out <<"Good cases found: "<<goodHs.size << " bad cases: "<< badHs.size<< "; total: " << badHs.size+goodHs.size;
 	out <<"\\section{Good cases}";
-	for(int i=0;i<goodHs.size;i++)
+	for(int i=0; i<goodHs.size; i++)
 	{ out <<"\n\n\\textbf{Good case " <<i+1<<"}";
 	  goodHs.TheObjects[i].ComputeDebugString(*this, false, true);
     goodEs.TheObjects[i].ComputeDebugString(*this, false, true);
@@ -18712,15 +18710,15 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
     out << "\n\nh:=[e,f]="<<goodHs.TheObjects[i].DebugString<<"\n\n";
     out << "e= " << goodEs.TheObjects[i].DebugString <<"\n\n";
     out << "f= "<<goodFs.TheObjects[i].DebugString<<"\n\n";
-    out<< "[h,f]= "<<goodFPrimes.TheObjects[i].DebugString<<"\n\n";
+    out << "[h,f]= "<<goodFPrimes.TheObjects[i].DebugString<<"\n\n";
     out << "[h,e]= "<<goodEPrimes.TheObjects[i].DebugString<<"\n\n";
     int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
     root tempRoot;
     out <<"Characteristic: (";
-    for (int j=0;j<theDimension;j++)
+    for (int j=0; j<theDimension; j++)
     { tempRoot.MakeZero(theDimension);
       tempRoot.TheObjects[j]=1;
-      this->theWeyl.RootScalarKillingFormMatrixRoot(tempRoot, goodHs.TheObjects[i].Hcomponent,tempRat);
+      this->theWeyl.RootScalarKillingFormMatrixRoot(tempRoot, goodHs.TheObjects[i].Hcomponent, tempRat);
       out << tempRat.ElementToString();
       if (j!=theDimension-1)
         out<<",";
@@ -18728,19 +18726,19 @@ void SimpleLieAlgebra::FindSl2Subalgebras(	char WeylLetter, int WeylRank, Global
     out <<")\n\n\\rule{\\textwidth}{0.4pt}\n\n";
 	}
 	out <<"\\section{Bad cases}";
-	for(int i=0;i<badHs.size;i++)
+	for(int i=0; i<badHs.size; i++)
 	{ out <<"\n\n\\textbf{Bad case" <<i+1<<"}";
-	  badHs.TheObjects[i].ComputeDebugString(*this,false,true);
-    badEs.TheObjects[i].ComputeDebugString(*this,false, true);
-    badFs.TheObjects[i].ComputeDebugString(*this,false, true);
-    badEPrimes.TheObjects[i].ComputeDebugString(*this,false,true);
-    badFPrimes.TheObjects[i].ComputeDebugString(*this,false,true);
-    out <<"\n\nh:=[e,f]="<<badHs.TheObjects[i].DebugString<<"\n\n";
-    out <<"e= " << badEs.TheObjects[i].DebugString <<"\n\n";
+	  badHs.TheObjects[i].ComputeDebugString(*this, false, true);
+    badEs.TheObjects[i].ComputeDebugString(*this, false, true);
+    badFs.TheObjects[i].ComputeDebugString(*this, false, true);
+    badEPrimes.TheObjects[i].ComputeDebugString(*this, false, true);
+    badFPrimes.TheObjects[i].ComputeDebugString(*this, false, true);
+    out << "\n\nh:=[e,f]="<<badHs.TheObjects[i].DebugString<<"\n\n";
+    out << "e= " << badEs.TheObjects[i].DebugString <<"\n\n";
     out << "f= "<<badFs.TheObjects[i].DebugString<<"\n\n";
-    out<<"[h,f]= "<<badFPrimes.TheObjects[i].DebugString<<"\n\n";
-    out<<"[h,e]= "<<badEPrimes.TheObjects[i].DebugString<<"\n\n";
-    out <<"\n\n\\rule{\\textwidth}{0.4pt}\n\n";
+    out << "[h,f]= "<<badFPrimes.TheObjects[i].DebugString<<"\n\n";
+    out << "[h,e]= "<<badEPrimes.TheObjects[i].DebugString<<"\n\n";
+    out << "\n\n\\rule{\\textwidth}{0.4pt}\n\n";
 	}
 	this->DebugString=out.str();
 }
@@ -20221,7 +20219,7 @@ void WeylGroup::GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, G
 	this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output, theGlobalVariables);
 }
 
-void WeylGroup::GetEpsilonCoords(root &input, root &output, GlobalVariables &theGlobalVariables)
+void WeylGroup::GetEpsilonCoords(root& input, root& output, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
 	roots tempInput, tempOutput;
 	tempInput.AddObjectOnTop(input);

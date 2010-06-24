@@ -1271,9 +1271,13 @@ void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalV
 { rootSubalgebras theRootSAs;
   SltwoSubalgebras tempSl2s;
   theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
+  theRootSAs.ComputeDebugString(false, false, false, 0, 0,theGlobalVariables);
+//  IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
+  //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+  //theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
   theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables);
   tempSl2s.ComputeDebugString(theGlobalVariables, theRootSAs.TheObjects[0].AmbientWeyl, false, false);
-  this->DebugString= tempSl2s.DebugString;
+  this->DebugString= theRootSAs.DebugString;
 
 }
 
@@ -1312,7 +1316,7 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
           if (DimTwoSpace>1)
             break;
         }
-      if (!(DimTwoSpace==1))
+      if (DimTwoSpace==1)
         theSlack++;
     }
     int theDynkinEpsilon = tempDiagram.NumRootsGeneratedByDiagram() - tempDiagram.RankTotal() - theSlack;

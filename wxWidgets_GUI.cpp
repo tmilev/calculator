@@ -105,9 +105,7 @@ public:
   void OnPaint(wxPaintEvent& ev);
   int ClickToleranceX;
   int ClickToleranceY;
-  drawCanvas
-    ( wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-      long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr)
+  drawCanvas(wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr)
   {	this->Create(parent,winid,pos,size,style,name);
   };
   void onMouseDownOnCanvas(wxMouseEvent &ev);
@@ -296,7 +294,7 @@ guiMainWindow *MainWindow1;
 // 2 = dotted line
 // 5 = invisible line (no line)
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
-{	::wxWindowDC dc(MainWindow1->Canvas1); wxPen tempPen;
+{	wxWindowDC dc(MainWindow1->Canvas1); wxPen tempPen;
   switch (thePenStyle)
   {	case 0: tempPen.SetStyle(::wxSOLID); break;
 		case 1:	tempPen.SetStyle(::wxSHORT_DASH); break;
@@ -310,7 +308,7 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
 }
 
 void drawtext(double X1, double Y1, const char* text, int length, int color)
-{	::wxWindowDC dc(MainWindow1->Canvas1);
+{	wxWindowDC dc(MainWindow1->Canvas1);
   dc.SetFont(*MainWindow1->theFont);
   dc.SetTextForeground(color);
   //dc.setcolo(color);
@@ -405,8 +403,7 @@ BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
     EVT_BUTTON(guiMainWindow::ID_Button15ProverFixedKOpen, guiMainWindow::onButton15ProverFixedKOpen)
 END_EVENT_TABLE()
 
-wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title, const wxPoint & position, const wxSize & size, long style )
-        : wxDialog( parent, id, title, position, size, style)
+wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title, const wxPoint & position, const wxSize & size, long style ) : wxDialog( parent, id, title, position, size, style)
 {
 }
 
@@ -443,13 +440,12 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
   {	double tempX, tempY;
     int tempXi, tempYi;
     int tempXi2, tempYi2;
-    for (int i=0;i<MaxRank;i++)
+    for (int i=0; i<MaxRank; i++)
     {	tempXi=(int)TDV.Projections[i][0];
       tempYi=(int)TDV.Projections[i][1];
       tempXi2=Realx-((int)TDV.centerX);
       tempYi2=((int) TDV.centerY)-Realy;
-      if (((tempXi2-ClickToleranceX)<=tempXi) && (tempXi<=(tempXi2+ClickToleranceX)) &&
-					((tempYi2-ClickToleranceY)<=tempYi) && (tempYi<=(tempYi2+ClickToleranceY)))
+      if (((tempXi2-ClickToleranceX)<=tempXi) && (tempXi<=(tempXi2+ClickToleranceX)) &&((tempYi2-ClickToleranceY)<=tempYi) && (tempYi<=(tempYi2+ClickToleranceY)))
 			{	TDV.Selected=i;
         break;
       }
@@ -458,8 +454,7 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
     tempY=TDV.centerY;
     tempXi=(int)tempX;
     tempYi=(int)tempY;
-    if (((Realx-ClickToleranceX)<=tempXi) && (tempXi<=(Realx+ClickToleranceX)) &&
-        ((Realy-ClickToleranceY)<=tempYi) && (tempYi<=(Realy+ClickToleranceY)))
+    if (((Realx-ClickToleranceX)<=tempXi) && (tempXi<=(Realx+ClickToleranceX)) &&((Realy-ClickToleranceY)<=tempYi) && (tempYi<=(Realy+ClickToleranceY)))
 			TDV.Selected=-1;
   }	else
 	{	if (TDV.Selected==-1)
@@ -766,7 +761,7 @@ void* RunrootFKFTComputationLocal(void*)
 #endif
 {	rootFKFTComputationLocal.RunA2A1A1inD5beta12221();
 #ifndef WIN32
-    return 0;
+  return 0;
 #endif
 }
 
@@ -787,8 +782,7 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
-	{	MainWindow1->theComputationSetup.WriteReportToFile(::TDV,tempFile,*MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
-	}
+    MainWindow1->theComputationSetup.WriteReportToFile(::TDV,tempFile,*MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
 	tempFile.close();
 }
 
@@ -821,15 +815,13 @@ void guiMainWindow::onRePaint(wxPaintEvent& ev)
 }
 
 void drawCanvas::OnPaint(::wxPaintEvent& ev)
-{	::wxPaintDC  dc(this);
+{	wxPaintDC  dc(this);
 	if (MainWindow1==0)
 		return;
   if (MainWindow1->theComputationSetup.flagAllowRepaint)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
     dc.DrawRectangle(wxPoint(0,0),this->GetSize());
-    ::CombinatorialChamberContainer::drawOutput
-			(	::TDV,MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.InputRoots, MainWindow1->theComputationSetup.NextDirectionIndex,
-				MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
+    CombinatorialChamberContainer::drawOutput(	TDV,MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.InputRoots, MainWindow1->theComputationSetup.NextDirectionIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
   }
 }
 
@@ -932,7 +924,7 @@ void guiMainWindow::OpenFile(std::fstream& output)
   if (OpenDialog->ShowModal() == wxID_OK)
   { wxString CurrentDocPath = OpenDialog->GetPath();
     std::string tempS(CurrentDocPath.mb_str());
-    output.open(tempS.c_str(),std::fstream::out|std::fstream::trunc);
+    output.open(tempS.c_str(), std::fstream::out|std::fstream::trunc);
     output.clear();
   }
   OpenDialog->Destroy();
@@ -942,7 +934,7 @@ void guiMainWindow::onButton2Eval(wxCommandEvent& ev)
 { if (this->theComputationSetup.theOutput.NumVars!=this->Table3Values->GetNumberCols())
     return;
   intRoot tempRoot;
-  for (int i=0;i<this->theComputationSetup.theOutput.NumVars;i++)
+  for (int i=0; i<this->theComputationSetup.theOutput.NumVars; i++)
     this->theComputationSetup.ValueRoot.elements[i]= wxAtoi(this->Table3Values->GetCellValue(0,i));
   this->theComputationSetup.EvaluatePoly();
   this->Text2Values->SetValue(wxString(this->theComputationSetup.ValueString.c_str(),wxConvUTF8));
@@ -1214,8 +1206,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   this->theComputationSetup.flagComputingChambers= this->CheckBox3ComputeChambers->GetValue();
   bool tempBool = this->CheckBox8DoTheWeylGroup->GetValue();
   if(	!(this->theComputationSetup.flagDoingWeylGroupAction== tempBool))
-	{ this->theComputationSetup.Reset();
-	}
+    this->theComputationSetup.Reset();
   this->theComputationSetup.flagDoingWeylGroupAction= tempBool;
   this->theComputationSetup.flagUsingIndicatorRoot=!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
   this->ReadRBData();
@@ -1251,8 +1242,7 @@ void guiMainWindow::TurnOnAllDangerousButtons()
     this->Spin2NumVect->Enable();
   }
   else
-  {	this->ListBox1WeylGroup->Enable();
-  }
+    this->ListBox1WeylGroup->Enable();
   this->ToggleButton1UsingCustom->Enable();
 }
 
@@ -1335,9 +1325,9 @@ void wxGridExtra::SetNumRowsAndCols(int r, int c)
 void WorkThreadClass::run()
 {
 #ifdef WIN32
-    ::RunComputationalThread();
+  RunComputationalThread();
 #else
-    RunComputationalThread(0);
+  RunComputationalThread(0);
 #endif
 }
 

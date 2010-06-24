@@ -9,8 +9,8 @@
 //1. Cut up the main files polyhedra.h and polyhedra.cpp into small quick-to-compile pieces. This might be the best solution in the long run. However, I do not want to
 //   do it just yet, because 1) I am not sure what should those parts be - it is not yet clear in my head how to partition the code in conceptually distinct pieces
 //   2) this would certainly create additional maintainance work 3) this will increase the learning curve for a person wanting to just use the program and wanting to eventually
-//   modify some tiny bit of it and 4) I got an advice on the c++ forum I go to, www.cplusplus.com, that partitioning the .h file will eventually lead to slower compile times
-//   on all pieces of code that use it, especially with the massive use of templates that I do. Therefore, such a partitioning should not be done before the code reaches
+//   modify some tiny bit and 4) I got an advice on the c++ forum www.cplusplus.com that partitioning the .h file will eventually lead to slower compile times,
+//   especially with the massive use of templates that I do. Therefore, such a partitioning should not be done before the code reaches
 //   greater maturity (see also point (1) ).
 //2. Use precompiled headers or some other voodoo. I am tocally against that. Those are compiler specific, will require me to learn extra unnecessary info which might
 //    be out of date in a few years, and will make even higher entry learning curve for another to join the project. This is bad.
@@ -444,8 +444,6 @@ void ElementWeylAlgebra::Nullify(int NumVars)
 int DebugCounter=-1;
 WeylParser debugParser;
 
-
-
 void WeylParser::ParserInit(const std::string& input)
 { this->TokenStack.MakeActualSizeAtLeastExpandOnTop(input.size());
   this->ValueStack.MakeActualSizeAtLeastExpandOnTop(input.size());
@@ -799,7 +797,7 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
   theChambers.AmbientDimension= this->theMatrix.NumRows;
   theChambers.CurrentIndex=theChambers.AmbientDimension-1;
   theChambers.theDirections.ComputeDebugString();
-  
+
 }
 
 void main_test_function(std::string& output, GlobalVariables& theGlobalVariables, ComputationSetup& theSetup, bool flagComputationAlreadyLoaded)
@@ -829,6 +827,13 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   debugParser.Value.ComputeDebugString(false,false);
   out << debugParser.Value.DebugString;
   out << "\n\n"<<tempS;*/
+  SimpleLieAlgebra theG;
+
+  theG.FindSl2Subalgebras('D', 4, theGlobalVariables);
+  IndicatorWindowGlobalVariables.StatusString1= theG.DebugString;
+  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  return;
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
   if (!flagComputationAlreadyLoaded)
@@ -1092,8 +1097,6 @@ void WallData::WriteToFile(std::fstream& output)
     }
 }
 
-void Stop(){};
-
 void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner)
 { //input >>this->indexInOwnerChamber;
   this->normal.ReadFromFile(input);
@@ -1108,10 +1111,7 @@ void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& 
       this->IndicesMirrorWalls.TheObjects[i]=-1;
     }
     else
-    { if (indexN==1026)
-      { Stop();
-      }
-      this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[indexN];
+    { this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[indexN];
       this->IndicesMirrorWalls.TheObjects[i]=indexW;
     }
   }
@@ -1199,13 +1199,13 @@ void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlob
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
     output <<" ";
-  }  
+  }
 }
 
 void simplicialCones::ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables)
 { std::string tempS; int tempI;
   this->theFacets.ReadFromFile(input);
-  input >>tempS; 
+  input >>tempS;
   assert(tempS=="ConesHavingFixedNormal:");
   input >> tempI;
   this->ConesHavingFixedNormal.SetSizeExpandOnTopNoObjectInit(tempI);
@@ -1231,7 +1231,7 @@ void hashedRoots::WriteToFile(std::fstream &output)
     for (int j=0; j<theDimension; j++)
     { this->TheObjects[i].TheObjects[j].WriteToFile(output);
       output<<" ";
-    } 
+    }
 }
 
 void hashedRoots::ReadFromFile(std::fstream &input)
@@ -1240,11 +1240,101 @@ void hashedRoots::ReadFromFile(std::fstream &input)
   this->ClearTheObjects();
   input >> tempS >> theSize>> theDimension;
   this->MakeActualSizeAtLeastExpandOnTop(theSize);
-  root tempRoot; 
+  root tempRoot;
   tempRoot.SetSizeExpandOnTopLight(theDimension);
   for (int i=0; i<theSize; i++)
   { for (int j=0; j<theDimension; j++)
       tempRoot.TheObjects[j].ReadFromFile(input);
     this->AddObjectOnTopHash(tempRoot);
    }
+}
+
+void slTwo::ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;  std::string tempS;
+  this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out <<"$h=$" <<tempS;
+  this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out <<"$e=$" <<tempS;
+  this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out <<"$f=$" <<tempS;
+  output = out.str();
+}
+
+void slTwo::ElementToHtml(std::string& filePath)
+{ std::fstream theFile;
+  std::string theFileName=filePath;
+  theFileName.append("theSlTwo.txt");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
+}
+
+void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
+{ rootSubalgebras theRootSAs;
+  SltwoSubalgebras tempSl2s;
+  theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
+  theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables);
+  tempSl2s.ComputeDebugString(theGlobalVariables, theRootSAs.TheObjects[0].AmbientWeyl, false, false);
+  this->DebugString= tempSl2s.DebugString;
+
+}
+
+void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+{ //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
+  Selection theRootsWithZeroCharacteristic;
+  DynkinDiagramRootSubalgebra tempDiagram;
+  int theRelativeDimension = this->SimpleBasisK.size;
+  theRootsWithZeroCharacteristic.init(theRelativeDimension);
+  SimpleLieAlgebra theLieAlgebra;
+  MatrixLargeRational InvertedRelativeKillingForm;
+  InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
+  for (int k=0; k<theRelativeDimension; k++)
+    for (int j=0; j<theRelativeDimension; j++)
+      InvertedRelativeKillingForm.elements[k][j]=this->AmbientWeyl.RootScalarKillingFormMatrixRoot(this->SimpleBasisK.TheObjects[k], this->SimpleBasisK.TheObjects[j]);
+  InvertedRelativeKillingForm.Invert(theGlobalVariables);
+  theLieAlgebra.ComputeChevalleyConstants(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.KillingFormMatrix.NumRows, theGlobalVariables);
+  //int relativeDimension =
+  int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
+  roots tempRoots;
+  tempRoots.MakeActualSizeAtLeastExpandOnTop(theRootsWithZeroCharacteristic.MaxSize);
+  roots relativeRootSystem;
+  this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, theGlobalVariables);
+  slTwo theSl2;
+  for (int i=0; i<numCycles; i++)
+  { theRootsWithZeroCharacteristic.incrementSelection();
+    for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
+      tempRoots.AddObjectOnTop(this->SimpleBasisK.TheObjects[theRootsWithZeroCharacteristic.elements[j]]);
+    tempDiagram.ComputeDiagramType(tempRoots, this->AmbientWeyl);
+    int theSlack=0;
+    for (int j=0; j<relativeRootSystem.size; j++)
+    { Rational DimTwoSpace=0;
+      for (int k=0; k<theRelativeDimension; k++)
+        if (!theRootsWithZeroCharacteristic.selected[k])
+        { DimTwoSpace+=relativeRootSystem.TheObjects[j].TheObjects[k];
+          if (DimTwoSpace>1)
+            break;
+        }
+      if (!(DimTwoSpace==1))
+        theSlack++;
+    }
+    int theDynkinEpsilon = tempDiagram.NumRootsGeneratedByDiagram() - tempDiagram.RankTotal() - theSlack;
+    //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
+    //otherwise, as far as I understand, it always is (but generators still have to be found)
+    //this is done in the below code.
+    if (theDynkinEpsilon==0)
+    { theSl2.theE.Nullify(theLieAlgebra);
+      theSl2.theH.Nullify(theLieAlgebra);
+      root tempRoot, tempRoot2;
+      tempRoot.MakeZero(theRelativeDimension);
+      for (int k=0; k<theRelativeDimension; k++)
+        if(!theRootsWithZeroCharacteristic.selected[k])
+        { theSl2.theE.SetCoefficient(this->SimpleBasisK.TheObjects[k], 1, theLieAlgebra);
+          tempRoot.TheObjects[k]=2;
+        }
+      InvertedRelativeKillingForm.ActOnAroot(tempRoot, tempRoot2);
+      theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
+      for (int j=0; j<theRelativeDimension; j++)
+        theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
+      if(theLieAlgebra.AttemptExtendingHEtoHEF(theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theGlobalVariables))
+        output.AddObjectOnTopHash(theSl2);
+    }
+  }
 }

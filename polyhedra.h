@@ -122,6 +122,8 @@ class affineCones;
 struct IndicatorWindowVariables;
 class rootSubalgebras;
 struct ComputationSetup;
+class slTwo;
+class SltwoSubalgebras;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
@@ -816,8 +818,8 @@ class MatrixIntTightMemoryFit : public ::MatrixElementaryTightMemoryFit<int>
 {
 public:
 	void NullifyAll()
-	{ for (int i=0;i<this->NumRows;i++)
-			for (int j=0; j<this->NumCols;j++)
+	{ for (int i=0; i<this->NumRows; i++)
+			for (int j=0; j<this->NumCols; j++)
 				this->elements[i][j]=0;
 	};
 };
@@ -827,8 +829,8 @@ template <typename Element>
 inline void MatrixElementaryTightMemoryFit<Element>::Assign(const MatrixElementaryTightMemoryFit<Element>& m)
 { if (this==&m) return;
 	this->init(m.NumRows, m.NumCols);
-	for (int i=0;i<this->NumRows;i++)
-		for (int j=0;j<this->NumCols;j++)
+	for (int i=0; i<this->NumRows; i++)
+		for (int j=0; j<this->NumCols; j++)
 			this->elements[i][j]=m.elements[i][j];
 }
 
@@ -841,7 +843,7 @@ MatrixElementaryTightMemoryFit<Element>::MatrixElementaryTightMemoryFit()
 
 template <typename Element>
 inline void MatrixElementaryTightMemoryFit<Element>::Free()
-{ for (int i=0;i<this->NumRows;i++)
+{ for (int i=0; i<this->NumRows; i++)
 		delete [] this->elements[i];
 	delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
@@ -919,11 +921,11 @@ void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
 { assert(this!=&m1 && this!=&m2);
   this->Resize(m1.NumRows+m2.NumRows,m1.NumCols+m2.NumCols,false);
   this->NullifyAll();
-  for(int i=0;i<m1.NumRows;i++)
-    for(int j=0;j<m1.NumCols;j++)
+  for(int i=0; i<m1.NumRows; i++)
+    for(int j=0; j<m1.NumCols; j++)
       this->elements[i][j]=m1.elements[i][j];
-  for(int i=0;i<m2.NumRows;i++)
-    for(int j=0;j<m2.NumCols;j++)
+  for(int i=0; i<m2.NumRows; i++)
+    for(int j=0; j<m2.NumCols; j++)
       this->elements[i+m1.NumRows][j+m1.NumCols]=m2.elements[i][j];
 }
 
@@ -931,14 +933,14 @@ template<typename Element>
 void Matrix<Element>::DirectSumWith(Matrix<Element>& m2)
 { int oldNumRows=this->NumRows; int oldNumCols=this->NumCols;
   this->Resize(this->NumRows+m2.NumRows,this->NumCols+m2.NumCols,true);
-  for(int i=0;i<m2.NumRows;i++)
-  { for(int j=0;j<m2.NumCols;j++)
+  for(int i=0; i<m2.NumRows; i++)
+  { for(int j=0; j<m2.NumCols; j++)
       this->elements[i+oldNumRows][j+oldNumCols]=m2.elements[i][j];
-    for(int j=0;j<oldNumCols;j++)
+    for(int j=0; j<oldNumCols; j++)
       this->elements[i+oldNumRows][j]=0;
   }
-  for(int j=0;j<oldNumRows;j++)
-		for (int i=oldNumCols;i<this->NumCols;i++)
+  for(int j=0; j<oldNumRows; j++)
+		for (int i=oldNumCols; i<this->NumCols; i++)
       this->elements[j][i]=0;
 }
 
@@ -949,7 +951,7 @@ inline void Matrix<Element>::ComputeDebugString()
 
 template <typename Element>
 inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex )
-{	for(int i = RowStartIndex;i<= RowEndIndex; i++)
+{	for(int i = RowStartIndex; i<= RowEndIndex; i++)
 		if (!this->elements[i][columnIndex].IsEqualToZero())
 			return i;
 	return -1;
@@ -999,14 +1001,14 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution( Selection& inputPivo
 	//inputPivotPoints.ComputeDebugString();
 	outputSolution.init(this->NumCols,1);
 	int NumPivots=0;
-	for (int i=0;i<this->NumCols;i++)
+	for (int i=0; i<this->NumCols; i++)
 		if (inputPivotPoints.selected[i])
 		{	outputSolution.elements[i][0].Assign(inputRightHandSide.elements[NumPivots][0]);
 			NumPivots++;
 		}
 		else
 			outputSolution.elements[i][0].MakeZero();
-	for (int i=NumPivots;i<this->NumRows;i++)
+	for (int i=NumPivots; i<this->NumRows; i++)
 		if (!inputRightHandSide.elements[i][0].IsEqualToZero())
 			return false;
 	return true;
@@ -1064,8 +1066,8 @@ MatrixElementaryTightMemoryFit<Element>::~MatrixElementaryTightMemoryFit()
 
 template <typename Element>
 inline void Matrix<Element>::NullifyAll()
-{ for (int i=0;i<this->NumRows;i++)
-		for (int j=0; j<this->NumCols;j++)
+{ for (int i=0; i<this->NumRows; i++)
+		for (int j=0; j<this->NumCols; j++)
 			this->elements[i][j].MakeZero();
 }
 
@@ -1102,8 +1104,8 @@ ParallelComputing::GlobalPointerCounter+=c;
 #endif
 	}
 	if (PreserveValues)
-		for (int j=Minimum(this->NumRows,r)-1;j>=0;j--)
-			for (int i=Minimum(this->NumCols,c)-1;i>=0;i--)
+		for (int j=Minimum(this->NumRows,r)-1; j>=0; j--)
+			for (int i=Minimum(this->NumCols,c)-1; i>=0; i--)
 				newElements[j][i]= this->elements[j][i];
 	this->Free();
 	this->NumCols= c;
@@ -1215,9 +1217,7 @@ class Rational
 			thisNumAbs=-this->NumShort;
 	  else
 			thisNumAbs=this->NumShort;
-		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
-				(	this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound ||OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound||
-					OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
+		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&(this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
       return false;
     register int N= this->NumShort*OtherDen+this->DenShort*OtherNum;
 		register int D= this->DenShort*OtherDen;
@@ -1247,9 +1247,7 @@ class Rational
 			thisNumAbs=-this->NumShort;
 	  else
 			thisNumAbs=this->NumShort;
-		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&
-				(	this->Extended!=0 ||thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound ||OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound||
-					OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
+		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&(	this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
       return false;
     register int N = this->NumShort*OtherNum;
 		register int D = this->DenShort*OtherDen;
@@ -1292,8 +1290,7 @@ ParallelComputing::GlobalPointerCounter++;
 	bool ShrinkExtendedPartIfPossible()
 	{ if (this->Extended==0)
 			return true;
-		if (  this->Extended->num.value.size>1 ||	this->Extended->den.size>1 ||	this->Extended->num.value.TheObjects[0]>=(unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound||
-					this->Extended->den.TheObjects[0]>= (unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
+		if (this->Extended->num.value.size>1 ||	this->Extended->den.size>1 ||	this->Extended->num.value.TheObjects[0]>=(unsigned int) LargeIntUnsigned::SquareRootOfCarryOverBound || this->Extended->den.TheObjects[0]>= (unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
 			return false;
 		this->NumShort= this->Extended->num.GetIntValueTruncated();
 		this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
@@ -1538,7 +1535,7 @@ public:
 	inline void Assign(const root& right)
 	{ if (this->size!=right.size)
 			this->SetSizeExpandOnTopLight(right.size);
-		for (int i=0;i<this->size;i++)
+		for (int i=0; i<this->size; i++)
 			this->TheObjects[i].Assign(right.TheObjects[i]);
 	};
 	void AssignIntRoot(intRoot& right);
@@ -1546,7 +1543,7 @@ public:
 	bool IsPositiveOrZero() const;
 	bool IsNegativeOrZero();
 	bool IsEqualToZero() const
-	{ for (int i=0;i<this->size;i++)
+	{ for (int i=0; i<this->size; i++)
       if (!this->TheObjects[i].IsEqualToZero())
         return false;
 		return true;
@@ -1573,6 +1570,9 @@ public:
 	inline bool operator!=(const root& right) const{ return !this->IsEqualTo(right);};
 	root operator*(int right)const
 	{ root tempRoot; tempRoot.Assign(*this); tempRoot.MultiplyByInteger(right); return tempRoot;
+	};
+	root operator*(const Rational& right)const
+	{ root tempRoot; tempRoot.Assign(*this); tempRoot.MultiplyByLargeRational(right); return tempRoot;
 	};
 	root operator/(const Rational& right)const
 	{ root tempRoot; tempRoot.Assign(*this); tempRoot.DivByLargeRational(right); return tempRoot;
@@ -1914,8 +1914,8 @@ inline Object* ListBasicObjects<Object>::LastObject()
 
 template <class Object>
 bool ListBasicObjects<Object>::HasACommonElementWith(ListBasicObjects<Object>& right)
-{ for(int i=0;i<this->size;i++)
-    for (int j=0;j<right.size;j++)
+{ for(int i=0; i<this->size; i++)
+    for (int j=0; j<right.size; j++)
       if (this->TheObjects[i]==right.TheObjects[j])
         return true;
   return false;
@@ -1933,7 +1933,7 @@ void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From
 { if (this==&From)
     return;
   this->SetSizeExpandOnTopNoObjectInit(From.size);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i]= From.TheObjects[i];
 }
 
@@ -1947,7 +1947,7 @@ void ListBasicObjects<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
 
 template <class Object>
 void ListBasicObjects<Object>::PopFirstOccurenceObjectSwapWithLast(Object& o)
-{ for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
 		if (o==this->TheObjects[i])
 		{ this->PopIndexSwapWithLast(i);
 			return;
@@ -1966,11 +1966,10 @@ inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output
 }
 
 template <class Object>
-inline void ListBasicObjects<Object>::ElementToStringGeneric
-	(std::string& output, int NumElementsToPrint)
+inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output, int NumElementsToPrint)
 { std::stringstream out; std::string tempS;
-	int Upper= ::MathRoutines::Minimum(NumElementsToPrint,this->size);
-	for (int i=0;i<Upper;i++)
+	int Upper=MathRoutines::Minimum(NumElementsToPrint,this->size);
+	for (int i=0; i<Upper; i++)
 	{	this->TheObjects[i].ElementToString(tempS);
 		out<< tempS<< "\n";
 	}
@@ -1987,7 +1986,7 @@ void ListBasicObjects<Object>::PopIndexShiftUp(int index)
 {	if (size==0)
 		return;
 	this->size--;
-	for (int i=index;i>=1;i--)
+	for (int i=index; i>=1; i--)
 		this->TheObjects[i]=this->TheObjects[i-1];
 	this->TheObjects++;
 	IndexOfVirtualZero++;
@@ -2088,7 +2087,7 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 template <class Object>
 void ListBasicObjects<Object>::ReverseOrderElements()
 { int tempI= this->size/2;
-  for (int i=0;i<tempI;i++)
+  for (int i=0; i<tempI; i++)
     this->SwapTwoIndices(i,this->size-i-1);
 }
 
@@ -2144,26 +2143,26 @@ void HashedListBasicObjects<Object>::CopyFromHash (const HashedListBasicObjects<
 	this->SetHashSize(From.HashSize);
   this->::ListBasicObjects<Object>::CopyFromBase(From);
   if (this->size<this->HashSize)
-  	for (int i=0;i<this->size;i++)
+  	for (int i=0; i<this->size; i++)
 		{	int hashIndex= this->TheObjects[i].HashFunction()% this->HashSize;
 			if (hashIndex<0){hashIndex+=this->HashSize;}
 			this->TheHashedArrays[hashIndex].
 				CopyFromBase(From.TheHashedArrays[hashIndex]);
 		}
 	else
-		for (int i=0;i<this->HashSize;i++)
+		for (int i=0; i<this->HashSize; i++)
 			this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
 }
 template <class Object>
 void HashedListBasicObjects<Object>::ClearHashes()
 { if (this->size<this->HashSize)
-		for (int i=0;i<this->size;i++)
+		for (int i=0; i<this->size; i++)
 		{ int hashIndex=this->TheObjects[i].HashFunction()%this->HashSize;
 			if (hashIndex<0){hashIndex+=this->HashSize;}
 			this->TheHashedArrays[hashIndex].size=0;
 		}
 	else
-		for (int i=0;i<this->HashSize;i++)
+		for (int i=0; i<this->HashSize; i++)
 			this->TheHashedArrays[i].size=0;
 }
 
@@ -2176,7 +2175,7 @@ void HashedListBasicObjects<Object>::ClearTheObjects()
 template <class Object>
 void HashedListBasicObjects<Object>::initHash()
 { this->size=0;
-	for (int i=0;i<this->HashSize;i++)
+	for (int i=0; i<this->HashSize; i++)
 		this->TheHashedArrays[i].size=0;
 }
 
@@ -2184,7 +2183,7 @@ template <class Object>
 int HashedListBasicObjects<Object>::IndexOfObjectHash(const Object &o)
 {	int hashIndex = o.HashFunction()%this->HashSize;
 	if (hashIndex<0){hashIndex+=this->HashSize;}
-	for (int i=0;i<this->TheHashedArrays[hashIndex].size;i++)
+	for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
 	{ int j=this->TheHashedArrays[hashIndex].TheObjects[i];
 		if(this->TheObjects[j]==o)
 			return j;
@@ -2228,7 +2227,7 @@ void HashedListBasicObjects<Object>::PopIndexSwapWithLastHash(int index)
 	if (hashIndexTop<0){hashIndexTop+=this->HashSize;}
 	this->TheHashedArrays[hashIndexTop].PopFirstOccurenceObjectSwapWithLast(tempI);
 	this->TheHashedArrays[hashIndexTop].AddObjectOnTop(index);
-	this->::ListBasicObjects<Object>::PopIndexSwapWithLast(index);
+	this->ListBasicObjects<Object>::PopIndexSwapWithLast(index);
 }
 
 template <class Object>
@@ -2606,8 +2605,8 @@ public:
 	void init(short nv);
 	void initNoDegreesInit(short nv);
 	void NullifyDegrees();
-	void DivideBy(	Monomial<ElementOfCommutativeRingWithIdentity>& input, Monomial<ElementOfCommutativeRingWithIdentity>& output);
-	void DivideByExponentOnly(	intRoot& input);
+	void DivideBy(Monomial<ElementOfCommutativeRingWithIdentity>& input, Monomial<ElementOfCommutativeRingWithIdentity>& output);
+	void DivideByExponentOnly(intRoot& input);
 	void MonomialExponentToRoot(root& output);
 	void MonomialExponentToRoot(intRoot& output);
 	void MakeFromRoot(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
@@ -2714,14 +2713,14 @@ class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWit
 {
 public:
 	static bool flagAnErrorHasOccuredTimeToPanic;
-	void FindCoeffInFrontOfLinearTermVariableIndex(int index, ElementOfCommutativeRingWithIdentity& output );
+	void FindCoeffInFrontOfLinearTermVariableIndex(int index, ElementOfCommutativeRingWithIdentity& output);
 	void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
 	void MakeMonomialOneLetter(short NumVars, int LetterIndex, short Power, ElementOfCommutativeRingWithIdentity& Coeff);
 	Polynomial(){};
 	Polynomial(int degree, ElementOfCommutativeRingWithIdentity& coeff);
-	void MakeNVarDegOnePoly (short NVar, int NonZeroIndex,ElementOfCommutativeRingWithIdentity& coeff);
+	void MakeNVarDegOnePoly(short NVar, int NonZeroIndex,ElementOfCommutativeRingWithIdentity& coeff);
 	void MakeNVarDegOnePoly(short NVar, int NonZeroIndex1, int NonZeroIndex2, ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& coeff2);
-	void MakeNVarDegOnePoly (short NVar, int NonZeroIndex,ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& ConstantTerm);
+	void MakeNVarDegOnePoly(short NVar, int NonZeroIndex,ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& ConstantTerm);
 	void MakeLinPolyFromRoot(root& r);
 	void TimesInteger(int a);
 	void DivideBy(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
@@ -2781,7 +2780,7 @@ public:
 
 template <class ElementOfCommutativeRingWithIdentity>
 inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output)
-{ static Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
+{ Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
 	tempP.AssignPolynomialLight(*this);
 	tempP.ComputeDebugString();
 	output= tempP.DebugString;
@@ -2819,14 +2818,14 @@ inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::MakeConst(Ele
 
 template <class ElementOfCommutativeRingWithIdentity>
 void PolynomialLight<ElementOfCommutativeRingWithIdentity>::WriteToFile(std::fstream& output)
-{ static Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
+{ Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
   ComputationalBuffer.AssignPolynomialLight(*this);
   ComputationalBuffer.WriteToFile(output);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
 void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, short numV)
-{ static Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
+{ Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
   ComputationalBuffer.ReadFromFile(input, numV);
   this->AssignPolynomial(ComputationalBuffer);
 }
@@ -2853,7 +2852,7 @@ public:
       this->elements[i]*=x;
 	};
 	void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
-	void initFromInt (	int theDimension, int x1,int x2,int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
+	void initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	//remark: zero is considered to be a positive vector!
 	bool IsPositive();
 	void AddRoot(intRoot& theRoot);
@@ -2926,8 +2925,8 @@ public:
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
 	int HashFunction() const;
 	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity&coeff);
-	void MultiplyBy( MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra,GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
-	void MultiplyBy(	MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
+	void MultiplyBy(MonomialInCommutativeAlgebra < ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra,GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
+	void MultiplyBy(MonomialInCommutativeAlgebra < ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
 	//the below functions return 1 if no reduction has occured
 	//i.e. the generator is not in zeroth power after the multiplication
 	//If the generator is in zero-th power after the multiplication and reduction has occured,
@@ -2941,8 +2940,8 @@ public:
 	//IMPORTANT: the coefficients of two monomials are not compared, that is,
 	//two monomials are equal if they have the same
 	//generators at same powers
-	bool operator==(const MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
-  void operator=(const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
+	bool operator==(const MonomialInCommutativeAlgebra< ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
+  void operator=(const MonomialInCommutativeAlgebra  < ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
 };
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
@@ -3204,7 +3203,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObjec
 	{ output.MakeNVarConst(NumVarTarget,this->Coefficient);
 		return;
 	}
-	static Polynomial<ElementOfCommutativeRingWithIdentity> tempPoly;
+	Polynomial<ElementOfCommutativeRingWithIdentity> tempPoly;
 	output.MakeNVarConst(NumVarTarget,this->Coefficient);
 //	output.ComputeDebugString();
 	for (int i=0;i<this->NumVariables;i++)
@@ -3407,6 +3406,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::GetMonomialWithCoeffOne( Mo
 	for (int i=0; i< this->NumVariables; i++)
 		output.degrees[i]=this->degrees[i];
 }
+
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::operator ==(const Monomial<ElementOfCommutativeRingWithIdentity>&  m)
 { for(int i=0; i<this->NumVariables; i++)
@@ -3540,7 +3540,7 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::SizeWithoutCoefficient()
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::Assign(const Monomial<ElementOfCommutativeRingWithIdentity>& m)
 { this->initNoDegreesInit(m.NumVariables);
-	for (int i=0;i<NumVariables;i++)
+	for (int i=0; i<NumVariables; i++)
 		this->degrees[i]=m.degrees[i];
 	this->Coefficient.Assign (m.Coefficient);
 }
@@ -3549,14 +3549,14 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::Assign(const Monomial<Eleme
 template <class ElementOfCommutativeRingWithIdentity>
 int Polynomial<ElementOfCommutativeRingWithIdentity>::FindMaxPowerOfVariableIndex(int VariableIndex)
 { int result=0;
-	for (int i=0;i<this->size;i++)
-		result= Maximum(result,this->TheObjects[i].degrees[VariableIndex]);
+	for (int i=0; i<this->size; i++)
+		result= Maximum(result, this->TheObjects[i].degrees[VariableIndex]);
 	return result;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::FindCoeffInFrontOfLinearTermVariableIndex (int index, ElementOfCommutativeRingWithIdentity& output)
-{ for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i].degrees[index]=1)
 		{ bool FoundLinearTerm= true;
 			for (int j=0;j<this->NumVars;j++)
@@ -3585,15 +3585,14 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 { this->CopyFromPoly(right);
 }
 
-
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::WriteToFile(std::fstream& output)
 { output<< "|/-- "<<this->size <<"\n";
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ output <<"| ";
 		this->TheObjects[i].Coefficient.WriteToFile(output);
 		output <<" | ";
-		for (int j=0;j<this->NumVars;j++)
+		for (int j=0; j<this->NumVars; j++)
 			output<< this->TheObjects[i].degrees[j]<<" ";
 		output <<"\n";
 	}
@@ -3612,12 +3611,12 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 	int tempSize;
 	input>>tempSize;
 	Buffer.MakeActualSizeAtLeastExpandOnTop(tempSize);
-	for (int i=0;i<tempSize;i++)
+	for (int i=0; i<tempSize; i++)
 	{ input >>tempS;
 		tempM.Coefficient.ReadFromFile(input);
 //		tempM.Coefficient.ComputeDebugString();
 		input>>tempS;
-		for (int j=0;j<NumV;j++)
+		for (int j=0; j<NumV; j++)
 			input >> tempM.degrees[j];
 		Buffer.AddMonomial(tempM);
 	}
@@ -3633,7 +3632,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(shor
 	Accum.Nullify(this->NumVars+increase);
 	Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ tempM.CopyFrom(this->TheObjects[i]);
 		tempM.IncreaseNumVariables(increase);
 		Accum.AddMonomial(tempM);
@@ -3645,7 +3644,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(short increment,Polynomial<ElementOfCommutativeRingWithIdentity>& output)
 { output.ClearTheObjects();
 	Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ tempM.CopyFrom(this->TheObjects[i]);
 		tempM.DecreaseNumVariables(increment);
 		output.AddMonomial(tempM);
@@ -3663,8 +3662,8 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 	Accum.MakeActualSizeAtLeastExpandOnTop(this->size*p.size);
 	Accum.ClearTheObjects();
 	Accum.NumVars= p.NumVars;
-	for (int i=0;i<p.size;i++)
-		for (int j=0;j<this->size;j++)
+	for (int i=0; i<p.size; i++)
+		for (int j=0; j<this->size; j++)
 		{ this->TheObjects[j].MultiplyBy(p.TheObjects[i],tempM);
 //			tempM.ComputeDebugString(PolyFormatLocal);
 //			Accum.ComputeDebugString();
@@ -3702,7 +3701,7 @@ template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> ::IsEqualToZero()
 { if(this->size==0)
 		return true;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		if (!this->TheObjects[i].IsEqualToZero())
 			return false;
 	return true;
@@ -3731,7 +3730,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeLinPolyFromRoot(root& r)
 { this->Nullify((short)r.size);
 	Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-	for (int i=0;i<r.size;i++)
+	for (int i=0; i<r.size; i++)
 	{ tempM.MakeNVarFirstDegree(i,(short)r.size, ElementOfCommutativeRingWithIdentity::TheRingUnit);
 		tempM.Coefficient.Assign(r.TheObjects[i]);
 		this->AddMonomial(tempM);
@@ -3799,7 +3798,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> ::HasGEQMonomial(TemplateMonomial& m, int& WhichIndex)
-{ for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i].IsGEQpartialOrder(m))
 		{ WhichIndex=i;
 			return true;
@@ -3808,7 +3807,7 @@ bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> 
 	return false;
 }
 
-template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
+template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend (std::string& output, PolynomialOutputFormat& PolyFormat)
 { std::stringstream out;
 	int NumChars=0;
@@ -3818,9 +3817,10 @@ int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::
 //	if (PolyFormat.UsingLatexFormat)
 //	{ out <<LatexBeginString;
 //	}
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].ElementToString(tempS,PolyFormat);
-		if (tempS[0]=='0'){tempS.erase(0,1);}
+		if (tempS[0]=='0')
+      tempS.erase(0,1);
 		if (tempS.size()!=0)
 		{ if (tempS[0]!='-'){out <<"+";}
 			out <<tempS;
@@ -3866,7 +3866,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::TimesConstant (ElementOfCommutativeRingWithIdentity& r)
 { if(r.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
 		this->ClearTheObjects();
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i].Coefficient.MultiplyBy(r);
 }
 
@@ -3883,7 +3883,7 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>::GetIndexMaxMonomial()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity> &outputScale)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale)
 { outputScale.init(this->NumVars);
 	outputScale.Coefficient.Assign(ElementOfCommutativeRingWithIdentity::TheRingUnit);
 	for (int i=0;i<this->NumVars;i++)
@@ -3898,7 +3898,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials(
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<ElementOfCommutativeRingWithIdentity> &inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity> &outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity> &outputRemainder)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder)
 { assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
 	outputRemainder.Assign(*this);
 	Monomial<ElementOfCommutativeRingWithIdentity> scaleRemainder;
@@ -3949,7 +3949,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<Eleme
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideByConstant (ElementOfCommutativeRingWithIdentity& r)
-{ for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
 		this->TheObjects[i].Coefficient.DivideBy(r);
 }
 
@@ -3987,7 +3987,7 @@ void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::MultiplyByMonomial(TemplateMonomial& m)
-{ this->MultiplyByMonomial(m,*this);
+{ this->MultiplyByMonomial(m, *this);
 }
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
@@ -4001,7 +4001,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity >
 	Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
 	Accum.ClearTheObjects();
 	Accum.NumVars= this->NumVars;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].MultiplyBy(m,tempM);
 		Accum.AddMonomial(tempM);
 	}
@@ -4010,7 +4010,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity >
 
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
-void TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d,TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>& output)
+void TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d, TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>& output)
 { assert(d>=0);
 	if (d==0)
 	{ short nv=this->NumVars;
@@ -4019,7 +4019,7 @@ void TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>::
 	}
 	TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity> Accum;
 	Accum.CopyFromPoly(*this);
-	for (int i=0;i<d-1;i++)
+	for (int i=0; i<d-1; i++)
 		Accum.MultiplyBy(*this);
 	output.CopyFromPoly(Accum);
 }
@@ -4032,7 +4032,7 @@ void TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>::
 template <class ElementOfCommutativeRingWithIdentity>
 int Polynomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
 { int result=0;
-	for (int i=0;i<this->TheMonomials.size;i++)
+	for (int i=0; i<this->TheMonomials.size; i++)
 		result=Maximum(this->TheMonomials.TheObjects[i]->TotalDegree(),result);
 	return result;
 }
@@ -4049,7 +4049,7 @@ bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsGreaterThanZeroLexicogr
 	tCoeff.Assign(ElementOfCommutativeRingWithIdentity::TheRingZero);
 	sCoeff.Assign(ElementOfCommutativeRingWithIdentity::TheRingZero);
 	Coeff.Assign(ElementOfCommutativeRingWithIdentity::TheRingZero);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i].degrees[0]==1)
 			tCoeff.Add(this->TheObjects[i].Coefficient);
 		else
@@ -4074,7 +4074,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from)
 { this->Nullify(from.NumVars);
 	this->MakeActualSizeAtLeastExpandOnTop(from.size);
-	for (int i=0;i<from.size;i++)
+	for (int i=0; i<from.size; i++)
 		this->AddMonomial(from.TheObjects[i]);
 }
 
@@ -4082,15 +4082,15 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight(con
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::ComponentInFrontOfVariableToPower(int VariableIndex, ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower)
 { Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-	for (int i=0;i<UpToPower;i++)
+	for (int i=0; i<UpToPower; i++)
 		output.TheObjects[i]->initHash();
 	if (this->size ==0){return;}
 	tempM.initNoDegreesInit(this->NumVars-1);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ int Power = this->TheObjects[i].degrees[VariableIndex];
 		if (Power<=UpToPower)
 		{ int k=0;
-			for (int j=0;j<this->NumVars;j++)
+			for (int j=0; j<this->NumVars; j++)
 				if (j!=VariableIndex)
 				{	tempM.degrees[k]=this->TheObjects[i].degrees[j];
 					k++;
@@ -4102,12 +4102,11 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::ComponentInFrontOfVariabl
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution
-	(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget)
 { Polynomial<ElementOfCommutativeRingWithIdentity> Accum, TempPoly;
 	Accum.ClearTheObjects();
 	Accum.NumVars=NumVarTarget;
-	for(int i=0;i<this->size;i++)
+	for(int i=0; i<this->size; i++)
 	{ this->TheObjects[i].Substitution(TheSubstitution, TempPoly, NumVarTarget);
 		Accum.AddPolynomial(TempPoly);
 	}
@@ -4116,7 +4115,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget)
-{ this->Substitution(TheSubstitution,*this,NumVarTarget);
+{ this->Substitution(TheSubstitution, *this, NumVarTarget);
 }
 
 
@@ -4130,8 +4129,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short 
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly
-	(short NVar, int NonZeroIndex1,int NonZeroIndex2, ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& coeff2)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex1,int NonZeroIndex2, ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& coeff2)
 { this->ClearTheObjects();
 	this->NumVars=NVar;
 	Monomial<ElementOfCommutativeRingWithIdentity> tempM;
@@ -4172,7 +4170,7 @@ Polynomial<ElementOfCommutativeRingWithIdentity>::Polynomial(int degree, Element
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomials<ElementOfCommutativeRingWithIdentity>::PrintPolys(std::string &output, ElementOfCommutativeRingWithIdentity& TheRingUnit, ElementOfCommutativeRingWithIdentity& TheRingZero)
 {	std::stringstream out;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{	std::string tempS;
 		out << i<<". ";
 		this->TheObjects[i]->StringPrintOutAppend(tempS,PolyFormatLocal);
@@ -4187,7 +4185,7 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeLinearSubstitution(E
 	{	this->KillAllElements();
 		this->initAndCreateNewObjects(NumStartVar);
 	}
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ Monomial<ElementOfCommutativeRingWithIdentity> tempM;
 		Polynomial<ElementOfCommutativeRingWithIdentity>* tempP=this->TheObjects[i]->ClearTheObjects();
 	  tempP->MakeNVarConst(NumTargetVar,coeffs[0][i]);
@@ -4206,8 +4204,8 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeExponentSubstitution
 	tempM.Coefficient.Assign(ElementOfCommutativeRingWithIdentity::TheRingUnit);
 	this->size=0;
 	this->SetSizeExpandOnTopNoObjectInit(theSub.NumCols);
-	for (int i=0;i<theSub.NumCols;i++)
-	{ for (int j=0;j<theSub.NumRows;j++)
+	for (int i=0; i<theSub.NumCols; i++)
+	{ for (int j=0; j<theSub.NumRows; j++)
 			tempM.degrees[j]=(short) theSub.elements[j][i];
 		tempP.Nullify((short)theSub.NumRows);
 		tempP.AddMonomial(tempM);
@@ -4219,7 +4217,7 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeExponentSubstitution
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeSubstitutionLastVariableToEndPoint(short numVars,Polynomial<ElementOfCommutativeRingWithIdentity>& EndPoint)
 { this->SetSizeExpandOnTopNoObjectInit(numVars);
-	for (int i=0;i<numVars-1;i++)
+	for (int i=0; i<numVars-1; i++)
 		this->TheObjects[i].MakeNVarDegOnePoly(numVars, i, ElementOfCommutativeRingWithIdentity::TheRingUnit);
 	this->TheObjects[numVars-1].CopyFromPoly(EndPoint);
 }
@@ -4247,7 +4245,7 @@ class CyclotomicList : private PolynomialsRationalCoeff
 public:
 	void ComputeCyclotomic(short n);
 	void GetSumPrimitiveRoots(short n, Rational& output);
-	void DivOneVarByOneVarPoly	(	PolynomialRationalCoeff& p, PolynomialRationalCoeff& q, PolynomialRationalCoeff& quotient, PolynomialRationalCoeff& remainder);
+	void DivOneVarByOneVarPoly(PolynomialRationalCoeff& p, PolynomialRationalCoeff& q, PolynomialRationalCoeff& quotient, PolynomialRationalCoeff& remainder);
 	int EulerPhi(short n);
 };
 
@@ -4361,7 +4359,7 @@ public:
 	void DivideByRational(Rational& r);
 //	void DecreaseNumVars(int decrease);
 	void MultiplyByLargeRational(Rational& r);
-	void MakePureQN(	short NumVar,int NonZeroIndex, Rational&coeff, int theExp, int Num,int theDen);
+	void MakePureQN(	short NumVar, int NonZeroIndex, Rational& coeff, int theExp, int Num, int theDen);
 	void MakeFromNormalAndDirection(root& normal, root& direction, int theMod, Rational& coeff);
 	void LinearSubstitution(QPSub& TheSub);
 	static QuasiNumber TheRingUnit;
@@ -4418,8 +4416,7 @@ public:
 	void MakeConst(Rational& Coeff, int NumVars);
 	void MakePureQN(Rational* expArg, int NumVars);
 //	void MakePureQN(int NumVars,int NonZeroIndex, Rational&coeff, Rational&ConstExp);
-	void MakePureQN
-		(int NumVars,int NonZeroIndex, Rational&coeff, Rational&ConstExp, Rational& Exp);
+	void MakePureQN(int NumVars, int NonZeroIndex, Rational& coeff, Rational& ConstExp, Rational& Exp);
 	//see PolynomialPointersKillOnExit::MakeLinearSubstitution
 	//for the substitution format!
 	void LinearSubstitution(MatrixLargeRational& TheSub);
@@ -4448,11 +4445,11 @@ public:
 	void DivideByRational(Rational& r);
 	void Simplify();
 	void MultiplyByLargeRational(Rational& r);
-	void MakePureQN(Rational* expArg,int numVars);
-	void MakePureQN(Rational* expArg,int numVars, Rational& coeff);
-	void MakePureQN(Rational& constExp,int numVars, Rational&coeff);
-	void MakePureQN(int numVars,int NonZeroIndex, Rational&coeff, Rational&Exp);
-	void MakePureQN(int numVars,int NonZeroIndex, Rational&coeffExp, Rational& ConstExp, Rational& Coeff);
+	void MakePureQN(Rational* expArg, int numVars);
+	void MakePureQN(Rational* expArg, int numVars, Rational& coeff);
+	void MakePureQN(Rational& constExp, int numVars, Rational& coeff);
+	void MakePureQN(int numVars, int NonZeroIndex, Rational&coeff, Rational& Exp);
+	void MakePureQN(int numVars, int NonZeroIndex, Rational&coeffExp, Rational& ConstExp, Rational& Coeff);
 	//see PolynomialPointersKillOnExit::MakeLinearSubstitution
 	//for the substitution format!
 	void LinearSubstitution(MatrixLargeRational& TheSub);
@@ -4486,7 +4483,7 @@ public:
 	void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output);
 	void IntegrateDiscreteFromZeroTo(QPSub& EndPointSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
 	void IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-	void IntegrateDiscreteInDirectionFromOldChamber(root &direction,root& normal,QuasiPolynomial& OldChamberPoly, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+	void IntegrateDiscreteInDirectionFromOldChamber(root& direction,root& normal,QuasiPolynomial& OldChamberPoly, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
 	void WriteComplexFormToDebugString();
 	void TimesInteger(int x);
 	void DivByInteger(int x);
@@ -4503,8 +4500,8 @@ class CompositeComplexQNSub
 public:
 	MatrixLargeRational MatrixForCoeffs;
 	PolynomialsRationalCoeff RationalPolyForm;
-	void MakeLinearSubIntegrand(	root& normal, root&direction, Rational& Correction, GlobalVariables& theGlobalVariables);
-	void MakeSubNVarForOtherChamber (	root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakeLinearSubIntegrand(root& normal, root&direction, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 };
 
@@ -4609,7 +4606,6 @@ public:
 	void AddToEntry(int x, int y, int z, QuasiMonomial& QM);
 };
 
-
 class oneFracWithMultiplicitiesAndElongations
 {
 public:
@@ -4635,8 +4631,7 @@ public:
 	bool operator==(oneFracWithMultiplicitiesAndElongations& right);
 	void ElementToString(std::string& output, int index, bool LatexFormat);
 	void ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int index, int theDimension);
-	void OneFracToStringBasisChange
-		(	partFractions& owner,int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension);
+	void OneFracToStringBasisChange(partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension);
 };
 
 class rootWithMultiplicity: public root
@@ -4726,9 +4721,9 @@ public:
 	roots LatticeIndicators;
 	MatrixLargeRational theNormals;
 	void CheckConsistency(root& RootLatticeIndicator,PolynomialRationalCoeff& input);
-	void initLatticeIndicatorsFromPartFraction (	partFractions& ownerExpression,partFraction &owner, GlobalVariables& theGlobalVariables, int theDimension);
-	void AddPolynomialLargeRational (	root& rootLatticeIndicator, PolynomialRationalCoeff& input);
-	void ComputeQuasiPolynomial(	QuasiPolynomial& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables);
+	void initLatticeIndicatorsFromPartFraction(partFractions& ownerExpression,partFraction &owner, GlobalVariables& theGlobalVariables, int theDimension);
+	void AddPolynomialLargeRational(root& rootLatticeIndicator, PolynomialRationalCoeff& input);
+	void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables);
 };
 
 class partFraction: ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongations>
@@ -4750,8 +4745,8 @@ public:
 	ListBasicObjects<int> IndicesNonZeroMults;
 	IntegerPolyLight Coefficient;
 	PolyPartFractionNumeratorLight CoefficientNonExpanded;
-	bool RemoveRedundantShortRootsClassicalRootSystem(	partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
-	bool RemoveRedundantShortRoots(	partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+	bool RemoveRedundantShortRootsClassicalRootSystem(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+	bool RemoveRedundantShortRoots(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
 	bool AlreadyAccountedForInGUIDisplay;
 	static	bool flagAnErrorHasOccurredTimeToPanic;
 //	static	bool flagUsingPrecomputedOrlikSolomonBases;
@@ -4762,12 +4757,12 @@ public:
 	static Rational CheckSum, CheckSum2;
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
-	void ComputePolyCorrespondingToOneMonomial(	PolynomialRationalCoeff &output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
-	static void MakePolynomialFromOneNormal(	root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
-	void ComputeNormals(	partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
-	int ComputeGainingMultiplicityIndexInLinearRelation(	partFractions& owner,	MatrixLargeRational& theLinearRelation);
-	void UncoverBracketsNumerator(GlobalVariables&  theGlobalVariables, int theDimension);
-	void partFractionToPartitionFunctionSplit(	partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
+	void ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff &output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
+	static void MakePolynomialFromOneNormal(root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
+	void ComputeNormals(partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
+	int ComputeGainingMultiplicityIndexInLinearRelation(partFractions& owner,	MatrixLargeRational& theLinearRelation);
+	void UncoverBracketsNumerator(GlobalVariables& theGlobalVariables, int theDimension);
+	void partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
 	//void partFractionToPartitionFunctionStoreAnswer
 	//			(	QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
 	//				bool StoreToFile);
@@ -4777,20 +4772,18 @@ public:
 	//void InsertNewRootIndex(int index);
 	//void MultiplyMinusRootShiftBy (int* theRoot, int Multiplicity);
 	void MultiplyCoeffBy(Rational& r);
-	void decomposeAMinusNB(	int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-	bool DecomposeFromLinRelation( MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	void decomposeAMinusNB(int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool DecomposeFromLinRelation(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ComputeOneCheckSum(partFractions& owner,Rational &output, int theDimension, GlobalVariables& theGlobalVariables);
-	void AttemptReduction( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
-	void ReduceMonomialByMonomial( partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
-	void ApplySzenesVergneFormula
-		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-	void ApplyGeneralizedSzenesVergneFormula
-		(	ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int> &theGreatestElongations, ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
+	void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
+	void ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	void ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int> &theGreatestElongations, ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
-	bool reduceOnceTotalOrderMethod(	partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool reduceOnceTotalOrderMethod(partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
-	bool reduceOnceGeneralMethodNoOSBasis(	partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-	bool reduceOnceGeneralMethod(	partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool reduceOnceGeneralMethodNoOSBasis(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	bool reduceOnceGeneralMethod(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool AreEqual(partFraction& p);
 	bool IsReduced();
 	int HashFunction() const;
@@ -4801,11 +4794,11 @@ public:
 	bool DecreasePowerOneFrac(int index, int increment);
 	//void GetNumerator(PolynomialRationalCoeff& output);
 	//void SetNumerator(PolynomialRationalCoeff& input);
-	void PrepareFraction(	int indexA, int indexB,  int AminusNBindex, bool indexAisNullified, partFraction &output, IntegerPoly& AminusNbetaPoly);
-	void Assign(const partFraction&p);
+	void PrepareFraction(int indexA, int indexB,  int AminusNBindex, bool indexAisNullified, partFraction& output, IntegerPoly& AminusNbetaPoly);
+	void Assign(const partFraction& p);
 	void AssignDenominatorOnly(const partFraction& p);
-	void AssignNoIndicesNonZeroMults(partFraction&p);
-	int getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner,int minIndex);
+	void AssignNoIndicesNonZeroMults(partFraction& p);
+	int getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner, int minIndex);
 	int ControlLineSizeFracs(std::string& output);
 	int ControlLineSizeStringPolys(std::string& output);
 	//void swap(int indexA,int indexB);
@@ -4813,20 +4806,18 @@ public:
 	~partFraction();
 	void GetPolyReduceMonomialByMonomial(partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower,IntegerPoly& output);
 	void ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum,GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, ListBasicObjects<int>&thePowersSigned, Monomial<Integer>& input);
-	void GetAlphaMinusNBetaPoly(	partFractions& owner, int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
-	void GetNElongationPolyWithMonomialContribution
-		(	partFractions& owner, ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theCoefficients, ListBasicObjects<int>& theGreatestElongations, int theIndex,// int theIndexBaseElongation, int lengthGeometricSeries,
-			IntegerPoly& output, int theDimension);
-	void GetNElongationPoly (	partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
-	static void GetNElongationPoly (intRoot& exponent, int n, IntegerPoly& output, int theDimension);
-	void GetNElongationPoly(	partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries, PolyPartFractionNumerator& output, int theDimension);
+	void GetAlphaMinusNBetaPoly(partFractions& owner, int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
+	void GetNElongationPolyWithMonomialContribution(partFractions& owner, ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theCoefficients, ListBasicObjects<int>& theGreatestElongations, int theIndex, IntegerPoly& output, int theDimension);
+	void GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
+	static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output, int theDimension);
+	void GetNElongationPoly(partFractions& owner, int index,int baseElongation,int LengthOfGeometricSeries, PolyPartFractionNumerator& output, int theDimension);
 	int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
 	bool operator==(const partFraction& right);
 	void operator=(const partFraction& right);
-	void initFromRootSystem(	partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
-	int ElementToString (	partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-	int ElementToStringBasisChange( partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-	void ReadFromFile (	partFractions& owner, std::fstream &input, GlobalVariables&  theGlobalVariables, int theDimension);
+	void initFromRootSystem(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
+	int ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+	int ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+	void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables&  theGlobalVariables, int theDimension);
 	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	int GetNumMonomialsInNumerator();
 	int SizeWithoutDebugString();
@@ -4876,7 +4867,7 @@ public:
 	void ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange,GlobalVariables& theGlobalVariables);
-	void initFromRootSystem(	intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables);
+	void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables);
 	//row index is the index of the root; column(second) index is the coordinate index
 	void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, root* Indicator);
 	void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, root* Indicator);
@@ -4886,17 +4877,17 @@ public:
 	void ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables);
 	void AccountPartFractionInternals(int sign, int index,root* Indicator, GlobalVariables& theGlobalVariables);
 	void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
-	void AddAlreadyReduced (partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
+	void AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
 	void PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator);
 	void PrepareIndicatorVariables();
 	void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
 	void IncreaseHighestIndex(int increment);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
-	int ElementToString( std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+	int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-	int ElementToStringOutputToFile(	std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+	int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-	bool partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
+	bool partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
 	bool VerifyFileComputedContributions(GlobalVariables&  theGlobalVariables);
 	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
@@ -4911,7 +4902,7 @@ public:
 	void MakeProgressReportRemovingRedundantRoots(FeedDataToIndicatorWindow reportFunction);
 	void MakeProgressReportUncoveringBrackets(FeedDataToIndicatorWindow reportFunction);
 	void MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction);
-	void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator,bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables);
+	void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables& theGlobalVariables);
 };
 
 class ElementWeylGroup: public ListBasicObjects<int>
@@ -4934,7 +4925,6 @@ public:
 	void ElementToString(std::string& output);
 	void ElementToString(std::string& output, int KLindex);
 };
-
 
 //this class is in effect a remake of Polynomial<int>; Use only to minimize RAM usage.
 //The OneVarIntPolynomial assumes coefficients do not exceed int size.
@@ -5060,25 +5050,25 @@ public:
 	void MakeF4();
 	void MakeG2();
 	//void GetLongRootLength(Rational& output);
-	void GetEpsilonCoords(	char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
-	void GetEpsilonCoords(	root& input, root& output, GlobalVariables& theGlobalVariables);
-	void GetEpsilonCoords(	ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonCoordsWRTsubalgebra(	roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonCoords(root& input, root& output, GlobalVariables& theGlobalVariables);
+	void GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
+  void GetEpsilonCoordsWRTsubalgebra(roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,MatrixLargeRational& output);
 	void ComputeWeylGroup();
 	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
 	void ComputeRootsOfBorel(roots& output);
-  bool IsARoot(const root& input)  { return this->RootSystem.ContainsObjectHash(input); };
+  bool IsARoot(const root& input){ return this->RootSystem.ContainsObjectHash(input); };
   void GenerateRootSubsystem(roots& theRoots);
-	void GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights);
-	void GenerateOrbit(	roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho);
-	void GenerateOrbit(	roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
+	void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights);
+	void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho);
+	void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
 	void GenerateRootSystemFromKillingFormMatrix();
-	void ActOnAffineHyperplaneByGroupElement(	int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
+	void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
 	//theRoot is a list of the simple coordinates of the root
 	//theRoot serves as both input and output
-	void ActOnRootAlgByGroupElement( int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
+	void ActOnRootAlgByGroupElement(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
 	void ActOnRootByGroupElement(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
 	void ActOnDualSpaceElementByGroupElement(int index, root& theDualSpaceElement, bool RhoAction);
 	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
@@ -5116,7 +5106,7 @@ public:
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 	void Assign(const ReflectionSubgroupWeylGroup& other);
-	void operator=(const ReflectionSubgroupWeylGroup& other)	{ this->Assign(other);  };
+	void operator=(const ReflectionSubgroupWeylGroup& other){ this->Assign(other);  };
 };
 
 class LaTeXProcedures
@@ -5129,8 +5119,8 @@ public:
 	static const int FigureCenterCoordSystemY=8;//in centimeters
 	static const int TextPrintCenteringAdjustmentX=3;
 	static const int TextPrintCenteringAdjustmentY=3;
-	static void drawline(	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput);
-	static void drawText(	double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
+	static void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput);
+	static void drawText(double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
 	static void beginDocument(std::fstream& output);
 	static void endLatexDocument(std::fstream& output);
 	static void beginPSTricks(std::fstream& output);
@@ -5190,6 +5180,9 @@ public:
 	int NumRootsGeneratedByDiagram();
 	void Sort();
 	bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
+	//the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
+	//root subsystem. Note: the simleBasisInput is required to be a set of simple roots. The procedure calls a
+	//transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't simple as required!
 	void ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl);
 	void ComputeDynkinStrings(WeylGroup& theWeyl);
 	void ComputeDynkinString(int indexComponent, WeylGroup& theWeyl);
@@ -5198,8 +5191,8 @@ public:
 	inline void operator=(const DynkinDiagramRootSubalgebra& right){this->Assign(right);};
 	bool operator==(const DynkinDiagramRootSubalgebra& right) const;
 	bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
-	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output,int index);
-	void GetAutomorphisms(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output);
+	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> >& output,int index);
+	void GetAutomorphisms(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& output);
 	void GetMapFromPermutation( roots& domain, roots& range, ListBasicObjects< int >& thePerm, ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right);
 };
 
@@ -5219,19 +5212,18 @@ public:
 	std::string DebugString;
 	std::string stringConnectedComponents;
 	void ComputeDiagramRelAndK(rootSubalgebra& owner);
-	void FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational>& coeffs);
-	void RelationOneSideToString
-		(	std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
-	void GetEpsilonCoords(	roots& input, roots& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
-	int ElementToString(	std::string &output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
-	int RootsToScalarProductString (	roots& inputLeft, roots& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex, rootSubalgebra& owner);
+	void FixRepeatingRoots(roots& theRoots, ListBasicObjects<Rational>& coeffs);
+	void RelationOneSideToString(std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
+	void GetEpsilonCoords(roots& input, roots& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
+	int ElementToString(std::string &output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
+	int RootsToScalarProductString(roots& inputLeft, roots& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex, rootSubalgebra& owner);
 	void ComputeConnectedComponents(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
-	void ComputeDebugString(	rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts){	this->ElementToString(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);	};
+	void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts){	this->ElementToString(this->DebugString,owner,true,includeScalarsProducts,includeMixedScalarProducts);	};
 	void MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots);
-	bool IsStrictlyWeaklyProhibiting(	rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner);
+	bool IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner);
 	void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
 	bool leftSortedBiggerThanOrEqualToRight(ListBasicObjects<int>& left,ListBasicObjects<int>& right);
-	void ComputeKComponents(	roots& input, ListBasicObjects<ListBasicObjects<int> >& output, rootSubalgebra& owner);
+	void ComputeKComponents(roots& input, ListBasicObjects<ListBasicObjects<int> >& output, rootSubalgebra& owner);
 	void RelationOneSideToStringCoordForm(std::string& output,	ListBasicObjects<Rational>& coeffs,	roots& theRoots, bool EpsilonForm);
 	void GetSumAlphas(root& output, int theDimension);
 	bool CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots);
@@ -5271,11 +5263,11 @@ public:
 	std::string DebugString;
 	ListBasicObjects<std::string> CoordinateReps;
 	void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
-	void ElementToString (	std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
-	void ComputeDebugString(	rootSubalgebras& owners,std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+	void ElementToString (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
+	void ComputeDebugString(rootSubalgebras& owners,std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 	{ this->ElementToString (this->DebugString,owners,true,false, htmlPathPhysical,htmlPathServer,theGlobalVariables);
 	};
-	void ComputeDebugString(	rootSubalgebras& owners,GlobalVariables& theGlobalVariables)
+	void ComputeDebugString(rootSubalgebras& owners,GlobalVariables& theGlobalVariables)
   { this->ComputeDebugString(owners,0,0,theGlobalVariables);
   };
 	void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
@@ -5350,16 +5342,12 @@ public:
 	bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, root& input);
 	void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrick(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
-	bool AttemptTheTripleTrickWRTSubalgebra( coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
-	void ExtractRelations( MatrixLargeRational& matA,MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular);
-  bool GenerateAutomorphisms( rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
+	bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
+	void ExtractRelations(MatrixLargeRational& matA,MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular);
+  bool GenerateAutomorphisms(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
 	void MakeGeneratingSingularVectors(coneRelation &theRelation, roots& nilradicalRoots);
-  bool attemptExtensionToIsomorphismNoCentralizer
-		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms,
-			bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange);
-  static bool attemptExtensionToIsomorphism
-		( roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly,
-			WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs);
+  bool attemptExtensionToIsomorphismNoCentralizer(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange);
+  static bool attemptExtensionToIsomorphism(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly, WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs);
 	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
@@ -5368,31 +5356,32 @@ public:
 	void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
 	void ComputeCentralizerFromKModulesAndSortKModules();
-	void MatrixToRelation(	coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, int theDimension, roots& NilradicalRoots);
+	void MatrixToRelation(coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, int theDimension, roots& NilradicalRoots);
 	void GenerateParabolicsInCentralizerAndPossibleNilradicals( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
-	void DoKRootsEnumerationRecursively( int indexEnumeration, GlobalVariables& theGlobalVariables);
-	void MakeProgressReportPossibleNilradicalComputation( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
-	void MakeProgressReportGenAutos( int progress,int outOf,int found, GlobalVariables& theGlobalVariables);
-	void ComputeDebugString( GlobalVariables& theGlobalVariables);
-	void ComputeDebugString( bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
-	{ this->ElementToString( this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);  };
-	bool IndexIsCompatibleWithPrevious( int startIndex, int RecursionDepth,	multTableKmods &multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
-	bool IsAnIsomorphism( roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
+	void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
+	void MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+	void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
+	void ComputeDebugString(GlobalVariables& theGlobalVariables);
+	void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
+	{ this->ElementToString(this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);  };
+	bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,	multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
+	bool IsAnIsomorphism(roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
 	bool ListHasNonSelectedIndexLowerThanGiven( int index,ListBasicObjects<int>& tempList, Selection& tempSel);
-	void GeneratePossibleNilradicalsRecursive( GlobalVariables& theGlobalVariables, multTableKmods & multTable,	int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
-	bool ConeConditionHolds( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
-	bool ConeConditionHolds( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
-	void PossibleNilradicalComputation( GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-	void ElementToStringHeaderFooter( std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
+	void GeneratePossibleNilradicalsRecursive( GlobalVariables& theGlobalVariables, multTableKmods& multTable,	int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+	bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
+	bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
+	void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
+	void ElementToStringHeaderFooter(std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
 	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)	{ this->ElementToString(output,false,false,false,theGlobalVariables);};
 	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
-	void ElementToString( std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
+	void ElementToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
-	void GenerateKmodMultTable( ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,	ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
+	void GenerateKmodMultTable(ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,	ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
   void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
-	void KmodTimesKmod(	int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int> & output);
+	void KmodTimesKmod(int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
+	void GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables);
 	void ComputeAllButAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
@@ -5406,7 +5395,7 @@ public:
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
 	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2 (	GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
-	bool LinCombToStringDistinguishedIndex(	int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
+	bool LinCombToStringDistinguishedIndex(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
 	void WriteMultTableAndOppositeKmodsToFile	(std::fstream& output, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& inMultTable,ListBasicObjects<int>& inOpposites );
 	void ReadMultTableAndOppositeKmodsToFile	(std::fstream& input, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& outMultTable,ListBasicObjects<int>& outOpposites );
 };
@@ -5418,7 +5407,7 @@ public:
 	coneRelations theBadRelations;
 	coneRelations theGoodRelations;
 	coneRelations theMinRels;
-	ListBasicObjects< ListBasicObjects <int> > ActionsNormalizerCentralizerNilradical;
+	ListBasicObjects<ListBasicObjects<int> > ActionsNormalizerCentralizerNilradical;
 	ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
 	ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
 	//ListBasicObjects< ListBasicObjects <int> > OrbitsUnderNormalizerCentralizerNilradical;
@@ -5439,30 +5428,30 @@ public:
 	bool flagComputeConeCondition;
 	bool flagLookingForMinimalRels;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
-	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical( Selection& targetSel,	GlobalVariables& theGlobalVariables);
-	bool ApproveSelAgainstOneGenerator( ListBasicObjects<int>& generator,	Selection& targetSel, GlobalVariables& theGlobalVariables);
-	void RaiseSelectionUntilApproval( Selection& targetSel, GlobalVariables& theGlobalVariables);
-	void ApplyOneGenerator( ListBasicObjects<int>& generator, Selection& targetSel,	GlobalVariables& theGlobalVariables);
-	void ComputeActionNormalizerOfCentralizerIntersectNilradical( Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-	void GenerateAllRootSubalgebrasUpToIsomorphism( GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank,  bool sort, bool computeEpsCoords);
+	bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel, GlobalVariables& theGlobalVariables);
+	bool ApproveSelAgainstOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
+	void RaiseSelectionUntilApproval(Selection& targetSel, GlobalVariables& theGlobalVariables);
+	void ApplyOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
+	void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+	void GenerateAllRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
-	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism( rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
-	void DynkinTableToString( bool useLatex, bool useHtml,std::string* htmlPathPhysical, std::string* htmlPathServer,std::string& output);
-	void GetTableHeaderAndFooter( std::string& outputHeader,std::string& outputFooter, bool useLatex,	bool useHtml);
+	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
+	void DynkinTableToString(bool useLatex, bool useHtml,std::string* htmlPathPhysical, std::string* htmlPathServer,std::string& output);
+	void GetTableHeaderAndFooter(std::string& outputHeader,std::string& outputFooter, bool useLatex,	bool useHtml);
 	void SortDescendingOrderBySSRank();
-	void initDynkinDiagramsNonDecided( WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
-	void pathToHtmlFileNameElements( int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
-	void pathToHtmlReference( int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
-	void ElementToHtml( std::string& header,	std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables);
+	void initDynkinDiagramsNonDecided(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
+	void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
+	void pathToHtmlReference(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
+	void ElementToHtml(std::string& header, std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ElementToStringCentralizerIsomorphisms(std::string& output, GlobalVariables& theGlobalVariables);
-	void ElementToString( std::string& output, bool useLatex, bool useHtml,bool includeKEpsCoords, std::string* htmlPathPhysical,std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
+	void ElementToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
-	void ComputeDebugString( bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
-	{ this->ElementToString( this->DebugString,useLatex, useHtml,includeKEpsCoords, htmlPathPhysical, htmlPathServer,theGlobalVariables);
+	void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+	{ this->ElementToString(this->DebugString,useLatex, useHtml,includeKEpsCoords, htmlPathPhysical, htmlPathServer,theGlobalVariables);
 	};
-	void MakeProgressReportGenerationSubalgebras( rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables, int currentIndex, int TotalIndex);
-	void MakeProgressReportAutomorphisms( ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+	void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
+	void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
 	{ this->flagUseDynkinClassificationForIsomorphismComputation=false;
     this->flagUsingONLYActionsNormalizerCentralizerNilradical=false;
@@ -5496,10 +5485,10 @@ public:
 	rootFKFTcomputation();
 	~rootFKFTcomputation();
 	void SearchForMinimalRelations(std::string& output);
-	bool PartialRelationCouldBeMinimal( coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables);
-  void GetImpliedMembers( coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables, roots& impliedNilradical, roots& impliedK, roots& impliedGmodL, roots impliedBKSingular);
-	static bool OpenDataFile( std::fstream& theFileOutput, std::string& theFileName);
-	static bool OpenDataFileOrCreateIfNotPresent2( std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
+	bool PartialRelationCouldBeMinimal(coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables);
+  void GetImpliedMembers(coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables, roots& impliedNilradical, roots& impliedK, roots& impliedGmodL, roots impliedBKSingular);
+	static bool OpenDataFile(std::fstream& theFileOutput, std::string& theFileName);
+	static bool OpenDataFileOrCreateIfNotPresent2(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
 	void MakeRootFKFTsub(root& direction, QPSub& theSub);
 	void initA2A1A1inD5();
   void RunA2A1A1inD5beta12221();
@@ -5513,7 +5502,7 @@ public:
 	//of the orbit with Borel-positive weights
 	//give a Limiting cone if you want only to observe weights lying in a
 	//certain cone. Set 0 if there is no particular cone of interest.
-	void MakeTheRootFKFTSum( root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
+	void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
 };
 
 struct IndicatorWindowVariables
@@ -5554,51 +5543,9 @@ public:
 	};
 };
 
-class SltwoDecomposition
-{
-public:
-	ListBasicObjects<int> theModulesHighestWeights;
-	ListBasicObjects<int> theModulesMultiplicities;
-	root hCharacteristic;
-	root hElementCorrespondingToCharacteristic;
-	roots hCommutingRootSpaces;
-	roots RootsHavingScalarProduct2WithH;
-	DynkinDiagramRootSubalgebra DiagramM;
-	DynkinDiagramRootSubalgebra CentralizerDiagram;
-  bool DifferenceTwoHsimpleRootsIsARoot;
-  int DynkinsEpsilon;
-  void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
-	void operator=(const SltwoDecomposition& right)
-	{ this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
-		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
-		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
-		this->CentralizerDiagram.Assign(right.CentralizerDiagram);
-		this->DiagramM.Assign(right.DiagramM);
-		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
-		this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
-		this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
-		this->DynkinsEpsilon=right.DynkinsEpsilon;
-		this->hCharacteristic.Assign(right.hCharacteristic);
-		this->hElementCorrespondingToCharacteristic.Assign(right.hElementCorrespondingToCharacteristic);
-	};
-	bool  operator==(const SltwoDecomposition& right)
-	{ return
-			this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) && this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
-	};
-	int HashFunction() const
-	{ int tempI=::MathRoutines::Minimum(SomeRandomPrimesSize, this->theModulesHighestWeights.size);
-		int result=0;
-		for (int i=0; i<tempI;i++)
-		{ result+=
-			this->theModulesHighestWeights.TheObjects[i]*
-			this->theModulesMultiplicities.TheObjects[i]*
-			SomeRandomPrimes[i];
-		}
-		return result;
-	};
-};
+class slTwo;
 
-class SltwoSubalgebras : public HashedListBasicObjects<SltwoDecomposition>
+class SltwoSubalgebras : public HashedListBasicObjects<slTwo>
 {
 public:
 	std::string DebugString;
@@ -5609,9 +5556,10 @@ public:
 	void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
 	{ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml);
 	};
+	void getZuckermansArrayE8(roots& output);
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringCurrent();
-	void ElementToString(	std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml);
 	void Compute(GlobalVariables& theGlobalVariables, bool flagUsingDynkinHardCodedTables);
 };
 
@@ -5637,12 +5585,59 @@ public:
   void init(SimpleLieAlgebra& owner);
   void Nullify(SimpleLieAlgebra& owner);
   bool operator==(const ElementSimpleLieAlgebra& other) const
-  { return
-      this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) &&
-      this->Hcomponent.IsEqualTo(other.Hcomponent);
+  { return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);
   };
   void operator+=(const ElementSimpleLieAlgebra& other);
 };
+
+class slTwo
+{
+public:
+	std::string DebugString;
+	void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables);
+	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){	this->ElementToString(this->DebugString,useHtml, useLatex, theGlobalVariables);};
+	ListBasicObjects<int> theModulesHighestWeights;
+	ListBasicObjects<int> theModulesMultiplicities;
+	ElementSimpleLieAlgebra theH, theE, theF;
+	SimpleLieAlgebra* owner;
+	root hCharacteristic;
+	root hElementCorrespondingToCharacteristic;
+	roots hCommutingRootSpaces;
+	roots RootsHavingScalarProduct2WithH;
+	DynkinDiagramRootSubalgebra DiagramM;
+	DynkinDiagramRootSubalgebra CentralizerDiagram;
+  bool DifferenceTwoHsimpleRootsIsARoot;
+  int DynkinsEpsilon;
+  //the below is outdated, must be deleted as soon as equivalent code is written.
+  void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
+	void ElementToHtml(std::string& filePath);
+	void operator=(const slTwo& right)
+	{ this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
+		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
+		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
+		this->CentralizerDiagram.Assign(right.CentralizerDiagram);
+		this->DiagramM.Assign(right.DiagramM);
+		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
+		this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
+		this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
+		this->DynkinsEpsilon=right.DynkinsEpsilon;
+		this->hCharacteristic.Assign(right.hCharacteristic);
+		this->hElementCorrespondingToCharacteristic.Assign(right.hElementCorrespondingToCharacteristic);
+		this->owner = right.owner;
+	};
+	bool  operator==(const slTwo& right)
+	{ return this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) && this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
+	};
+	int HashFunction() const
+	{ int tempI=::MathRoutines::Minimum(SomeRandomPrimesSize, this->theModulesHighestWeights.size);
+		int result=0;
+		for (int i=0; i<tempI;i++)
+      result+= this->theModulesHighestWeights.TheObjects[i]* this->theModulesMultiplicities.TheObjects[i]*SomeRandomPrimes[i];
+		return result;
+	};
+};
+
+
 
 class SimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
 {
@@ -5674,13 +5669,15 @@ public:
   //returns true if returning constant, false if returning element of h
   bool GetConstantOrHElement(const root& root1, const root& root2, Rational& outputRat, root& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
-  bool FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
-  bool AttemptExtendingHEtoHEF( root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
-  void FindSl2Subalgebras(	char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates);
+  bool FindComplementaryNilpotent(ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
+  void FindSl2SubalgebrasOld(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates);
+  void FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
+  void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
   void GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e);
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
-  void MakeSl2ProgressReport(	int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
-  void MakeSl2ProgressReportNumCycles(	int progress, int outOf,	GlobalVariables& theGlobalVariables);
+  void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
+  void MakeSl2ProgressReportNumCycles(int progress, int outOf,	GlobalVariables& theGlobalVariables);
 };
 
 class minimalRelationsProverStatesFixedK;
@@ -5716,29 +5713,27 @@ public:
   void initFromParentState(minimalRelationsProverStateFixedK& parent);
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-  bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
-  static bool IsSeparatingCones( root& input, roots& theAlphas, roots& theBetas, bool& oneBetaIsPositive, WeylGroup& theWeyl);
-  void GetNumberScalarProductsData
-		( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue,
-      int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-  void ComputeScalarProductsMatrix( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
-  bool ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
-  bool CanBeShortened( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool IsSeparatingCones(root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
+  static bool IsSeparatingCones(root& input, roots& theAlphas, roots& theBetas, bool& oneBetaIsPositive, WeylGroup& theWeyl);
+  void GetNumberScalarProductsData(root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
+  bool ComputeStateReturnFalseIfDubious(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool CanBeShortened(coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverStateFixedK& right);
-	bool RootIsGoodForPreferredSimpleRoot	( root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
+	bool RootIsGoodForPreferredSimpleRoot(root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
 	void GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl);
-	bool RootIsGoodForProblematicIndex	( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
-	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
+	bool RootIsGoodForProblematicIndex(root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
+	bool FindBetaWithoutTwoAlphas(root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverStateFixedK& right){this->Assign(right);};
   minimalRelationsProverStateFixedK();
   void MakeProgressReportCanBeShortened( int checked, int outOf, GlobalVariables& theGlobalVariables);
-	void ReadFromFile (	std::fstream &input, GlobalVariables&  theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
 	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 };
 
@@ -5771,21 +5766,20 @@ public:
   int GetModuleIndex(root& input);
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void GetIsoTypicComponents
-    ( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
+  void GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   bool AddObjectOnTopNoRepetitionOfObjectFixedK( int ParentIndex, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void InvokeExtensionOfState	(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void GenerateStartingStatesFixedK ( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
+  void InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void GenerateStartingStatesFixedK(ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStepFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void ExtensionStepFixedK (int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState);
-	void TestAddingExtraRootFixedK( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
+  void ExtensionStepFixedK(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState);
+	void TestAddingExtraRootFixedK(int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
   bool GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
-  void RemoveDoubt(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-	bool StateIsEqualTo( minimalRelationsProverStateFixedK& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void RemoveDoubt(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+	bool StateIsEqualTo(minimalRelationsProverStateFixedK& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportIsos( int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
 	void MakeProgressReportCurrentState( int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
@@ -5847,9 +5841,8 @@ public:
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeIsPossible(minimalRelationsProverStates& theOwner);
-  static void GetNumberScalarProductsData
-		( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	static bool Root1IsGreaterThanRoot2	(	int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl);
+  static void GetNumberScalarProductsData( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	static bool Root1IsGreaterThanRoot2(	int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
   bool ComputeStateReturnFalseIfDubious( minimalRelationsProverStates& owner, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
@@ -5858,9 +5851,9 @@ public:
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
   void initFromParent(const minimalRelationsProverState& right);
-	bool RootIsGoodForPreferredSimpleRoot(	root& input,int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
+	bool RootIsGoodForPreferredSimpleRoot(root& input, int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
-	bool RootIsGoodForProblematicIndex	( root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
+	bool RootIsGoodForProblematicIndex(root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
 	bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
@@ -5869,7 +5862,7 @@ public:
   void operator=(const minimalRelationsProverState& right){this->Assign(right);};
   minimalRelationsProverState();
   void MakeProgressReportCanBeShortened( int checked, int outOf, GlobalVariables& theGlobalVariables);
-  void ReadFromFile (	std::fstream &input, GlobalVariables&  theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
 	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 };
 
@@ -5905,33 +5898,29 @@ public:
   void PrepareKIsos();
   void initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void GetIsoTypicComponents( roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void ComputeDebugString( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
+  void GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
   bool AddObjectOnTopNoRepetitionOfObject( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void GenerateStartingState( ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
+  void GenerateStartingState(ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStep(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void TheFullRecursion (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void TheFullRecursion(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStep(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,	minimalRelationsProverState& newState);
   void BranchByAddingKRoots(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   static int CountNumSeparatingNormals(roots& theAlphas, roots& theBetas, WeylGroup& theWeyl);
   void ReduceMemoryUse(GlobalVariables& theGlobalVariables);
-	void TestAddingExtraRoot
-		( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
-  bool GetNormalSeparatingConesFromPreferredBasis
-    ( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
-	static bool GetSeparatingRootIfExistsFromSet
-		( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output,
-      WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
-  void InvokeExtensionOfState	(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void RemoveDoubt(	int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-	bool StateIsEqualTo( minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+	void TestAddingExtraRoot(int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
+  bool GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
+	static bool GetSeparatingRootIfExistsFromSet( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
+  void InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void RemoveDoubt(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+	bool StateIsEqualTo(minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	void MakeProgressReportIsos( int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	void MakeProgressReportCurrentState( int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	void MakeProgressReportChildStates( int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportCurrentState(int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   bool CheckConsistencyOfTree();
   minimalRelationsProverStates()
   { this->flagComputationIsInitialized=false;
@@ -6096,13 +6085,13 @@ public:
 	static int shiftX;
 	static int shiftY;
 	static int scale;
-	static void outputLineJavaScriptSpecific(	const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter );
+	static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter );
   static void MakeVPReportFromComputationSetup(ComputationSetup& input);
 	static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
 	static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
 	static void CivilizedStringTranslation(std::string& input, std::string& output);
 	static void MakePFAndChamberReportFromComputationSetup(ComputationSetup& input);
-	static void drawlineInOutputStreamBetweenTwoRoots(	root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
+	static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,	unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables,rootSubalgebras& input, std::string& path);
@@ -6253,7 +6242,7 @@ public:
 
 	GlobalVariables();
 	~GlobalVariables();
-	static FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
+	FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
 	void operator=(const GlobalVariables& G_V);
 };
 

@@ -17402,7 +17402,7 @@ void rootSubalgebras::DynkinTableToString(	bool useLatex, bool useHtml,std::stri
 		CGIspecificRoutines::clearDollarSigns(tempS,tempS);
 	}
 	out << tempS <<"\n\n";
-	for (int i=1;i<this->size;i++)
+	for (int i=1; i<this->size; i++)
 	{ if (col==0 && row==0)
 			out << header;
 		this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
@@ -17447,7 +17447,7 @@ void rootSubalgebras::DynkinTableToString(	bool useLatex, bool useHtml,std::stri
     if (useHtml)
       out<<"\n<br>\n";
 		int counter=0;
-		for(int j=0;j<this->TheObjects[i].indicesSubalgebrasContainingK.size;j++)
+		for(int j=0; j<this->TheObjects[i].indicesSubalgebrasContainingK.size; j++)
 		{ int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
 			this->TheObjects[tempI].theDynkinDiagram.ElementToString(tempS);
 			if (useLatex)

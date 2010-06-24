@@ -5624,6 +5624,9 @@ public:
 		this->hCharacteristic.Assign(right.hCharacteristic);
 		this->hElementCorrespondingToCharacteristic.Assign(right.hElementCorrespondingToCharacteristic);
 		this->owner = right.owner;
+    this->theE= right.theE;
+    this->theH= right.theH;
+    this->theF= right.theF;
 	};
 	bool  operator==(const slTwo& right)
 	{ return this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) && this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);

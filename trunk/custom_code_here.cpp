@@ -1336,11 +1336,33 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
         }
       InvertedRelativeKillingForm.ActOnAroot(tempRoot, tempRoot2);
       theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
-      for (int j=0; j<theRelativeDimension; j++)
+      for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
       theSl2.ComputeDebugString(false, false, theGlobalVariables);
-      if(theLieAlgebra.AttemptExtendingHEtoHEF(theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theGlobalVariables))
+      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theGlobalVariables))
         output.AddObjectOnTopHash(theSl2);
     }
   }
+}
+
+bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+{ roots SelectedExtraPositiveRoots;
+  roots RootsCharacteristicTwo;
+  SelectedExtraPositiveRoots.size=0;
+  assert(simpleBasisSA.size==theZeroCharacteristics.MaxSize);
+  root tempRoot;
+  for (int i=0; i<theZeroCharacteristics.CardinalitySelection; i++)
+    if (!theZeroCharacteristics.selected[i])
+      RootsCharacteristicTwo.AddObjectOnTop(simpleBasisSA.TheObjects[i]);
+    else
+      for (int j=0; j<simpleBasisSA.size; j++)
+        if (!theZeroCharacteristics.selected[j])
+        { tempRoot= simpleBasisSA.TheObjects[i]+simpleBasisSA.TheObjects[j];
+          if (this->theWeyl.IsARoot(tempRoot))
+            SelectedExtraPositiveRoots.AddObjectOnTop(tempRoot);
+        }
+  PolynomialsRationalCoeff theSystemThatNeedsToBeSolved;
+  theSystemThatNeedsToBeSolved.SetSizeExpandOnTopNoObjectInit(simpleBasisSA.size+theZeroCharacteristics.CardinalitySelection*2);
+  //for (int i=0; i<theZeroCharacteristics.selected[])
+  return false;
 }

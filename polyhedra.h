@@ -5574,8 +5574,8 @@ public:
   root Hcomponent;
   void MultiplyByRational(SimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
-  void SetCoefficient( root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
-  void SetCoefficient( root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
+  void SetCoefficient(root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
+  void SetCoefficient(root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
   bool IsEqualToZero()const;
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
@@ -5632,22 +5632,20 @@ public:
 	{ return this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) && this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
 	};
 	int HashFunction() const
-	{ int tempI=::MathRoutines::Minimum(SomeRandomPrimesSize, this->theModulesHighestWeights.size);
+	{ int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->theModulesHighestWeights.size);
 		int result=0;
-		for (int i=0; i<tempI;i++)
+		for (int i=0; i<tempI; i++)
       result+= this->theModulesHighestWeights.TheObjects[i]* this->theModulesMultiplicities.TheObjects[i]*SomeRandomPrimes[i];
 		return result;
 	};
 };
-
-
 
 class SimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
 {
 public:
 	std::string DebugString;
 	void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables);
-	void ComputeDebugString( bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){	this->ElementToString(this->DebugString,useHtml, useLatex, theGlobalVariables);};
+	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){	this->ElementToString(this->DebugString,useHtml, useLatex, theGlobalVariables);};
 	bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //format:
@@ -5662,7 +5660,7 @@ public:
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
   //then the below function computes n_{-\epsilon, -\zeta}
-  void LieBracket( const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output);
+  void LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output);
   void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta );
 	void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
@@ -5674,6 +5672,7 @@ public:
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent(ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   void FindSl2SubalgebrasOld(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates);
   void FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
@@ -5684,7 +5683,6 @@ public:
 };
 
 class minimalRelationsProverStatesFixedK;
-
 
 class minimalRelationsProverStateFixedK
 {

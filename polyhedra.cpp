@@ -3658,8 +3658,8 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane(Selec
 	MatrixLargeRational& tempColumn=theGlobalVariables.matComputationBufferLinAlgAffinePart;
 	tempMat.init(owner->AmbientDimension, owner->AmbientDimension);
 	tempColumn.init(owner->AmbientDimension,1);
-	for (int i=0;i<theSelection.CardinalitySelection;i++)
-	{ for (int j=0;j<owner->AmbientDimension;j++)
+	for (int i=0; i<theSelection.CardinalitySelection; i++)
+	{ for (int j=0; j<owner->AmbientDimension; j++)
 			tempMat.elements[i][j].Assign(	this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
 		tempColumn.elements[i][0].MakeZero();
 	}
@@ -3668,7 +3668,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane(Selec
 	root::RootScalarEuclideanRoot(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal, owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint,tempRat);
 	tempRat.Subtract(tempOne);
 	tempColumn.elements[owner->AmbientDimension-1][0].Assign(tempRat);
-	for (int i=0;i<owner->AmbientDimension-1;i++)
+	for (int i=0; i<owner->AmbientDimension-1; i++)
 	{ tempMat.elements[owner->AmbientDimension-2][i].MakeZero();
 		tempMat.elements[owner->AmbientDimension-1][i].Assign(	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal.TheObjects[i]);
 	}
@@ -3683,7 +3683,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane(Selec
 	output.SetSizeExpandOnTopLight(owner->AmbientDimension-1);
 	tempMat.ComputeDebugString();
 	tempColumn.ComputeDebugString();
-	for (int i=0;i<owner->AmbientDimension-1;i++)
+	for (int i=0; i<owner->AmbientDimension-1; i++)
 		output.TheObjects[i].Assign(tempColumn.elements[i][0]);
 	assert(tempColumn.elements[owner->AmbientDimension-1][0].IsEqualTo(ROne));
 	return true;
@@ -6235,7 +6235,7 @@ void CompositeComplex::ElementToString(std::string& output)
 
 void CompositeComplex::MultiplyByLargeRational(Rational &r)
 { if(r.IsEqualTo(RZero))
-	{	this->size=0; 
+	{	this->size=0;
 		return;
 	}
 	for (int i=0;i<this->size;i++)
@@ -6248,7 +6248,7 @@ void CompositeComplex::Simplify()
 
 bool CompositeComplex::SimplifyTrue()
 { bool result = false;
-	if (this->size==0) 
+	if (this->size==0)
 		return result;
 /*	static Rational CommonFactor;*/
 	this->TheObjects[0].Simplify();
@@ -6476,7 +6476,7 @@ short BasicQN::GaussianEliminationByRowsCol(int Col, bool MoveToRight)
 		int PivotRow=-1;
 		for (int i=Row;i<this->Exp.NumRows;i++)
 			if(this->Exp.elements[i][Col]!=0)
-			{ PivotRow=i; 
+			{ PivotRow=i;
 				break;
 			}
 		if (PivotRow!=-1)
@@ -6515,7 +6515,7 @@ short BasicQN::GaussianEliminationByRowsCol(int Col, bool MoveToRight)
 void BasicQN::RowPlusScalarTimesRow(int rowInd, int scalar, int otherRowInd, int StartCol)
 { for (int i=StartCol;i<this->NumVars;i++)
 	{ this->Exp.elements[rowInd][i]= (this->Exp.elements[rowInd][i]+scalar*this->Exp.elements[otherRowInd][i])%(this->Den);
-		if (this->Exp.elements[rowInd][i]<0) 
+		if (this->Exp.elements[rowInd][i]<0)
 			this->Exp.elements[rowInd][i]+=this->Den;
 	}
 	this->Nums.elements[rowInd][0]=(this->Nums.elements[rowInd][0]+scalar*this->Nums.elements[otherRowInd][0])%(this->Den);
@@ -10978,7 +10978,7 @@ bool oneFracWithMultiplicitiesAndElongations::operator ==	(oneFracWithMultiplici
 			{ if(this->Multiplicities.TheObjects[i]!=right.Multiplicities.TheObjects[j])
 					return false;
 				else
-				{ Found=true; 
+				{ Found=true;
           break;
 				}
 			}
@@ -17978,7 +17978,7 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS, false, false, theGlobalVariables);
     out<< "Index "<< i<<": "<<tempS<<"\n\n";
-  }  
+  }
   output=out.str();
   return;
   int Zcounter=0;

@@ -829,7 +829,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
 
-  theG.FindSl2Subalgebras('D', 6, theGlobalVariables);
+  theG.FindSl2Subalgebras('D', 5, theGlobalVariables);
   IndicatorWindowGlobalVariables.StatusString1= theG.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
@@ -1170,14 +1170,14 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theG
 { this->SliceTheEuclideanSpace(this->theDirections, this->CurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
 }
 
-void Cone::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariables)
+void Cone::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { this->roots::WriteToFile(output, theGlobalVariables);
   output <<"\nChamberTestArray: "<<this->ChamberTestArray.size<<" ";
   for (int i=0; i<this->ChamberTestArray.size; i++)
     output<< this->ChamberTestArray.TheObjects[i]<<" ";
 }
 
-void Cone::ReadFromFile(std::fstream &input, GlobalVariables &theGlobalVariables)
+void Cone::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS; int tempI;
   this->roots::ReadFromFile(input, theGlobalVariables);
   input >> tempS>> tempI;
@@ -1202,7 +1202,7 @@ void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlob
   }
 }
 
-void simplicialCones::ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables)
+void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS; int tempI;
   this->theFacets.ReadFromFile(input);
   input >>tempS;
@@ -1222,7 +1222,7 @@ void simplicialCones::ReadFromFile(std::fstream &input, GlobalVariables& theGlob
     this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
 }
 
-void hashedRoots::WriteToFile(std::fstream &output)
+void hashedRoots::WriteToFile(std::fstream& output)
 { int theDimension=0;
   if (this->size>0)
     theDimension= this->TheObjects[0].size;
@@ -1234,7 +1234,7 @@ void hashedRoots::WriteToFile(std::fstream &output)
     }
 }
 
-void hashedRoots::ReadFromFile(std::fstream &input)
+void hashedRoots::ReadFromFile(std::fstream& input)
 { int theDimension; std::string tempS;
   int theSize;
   this->ClearTheObjects();
@@ -1257,6 +1257,10 @@ void slTwo::ElementToString(std::string& output, bool useHtml, bool useLatex, Gl
   out <<"\n\n$e=$" <<tempS;
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
   out <<"\n\n$f=$" <<tempS;
+  this->theSystemMatrixForm.ElementToSting(tempS);
+  out <<"\nSystem matrix form we try to solve:\n"<< tempS;
+  this->theSystemToBeSolved.ElementToString(tempS);
+  out << "\nThe actual system we need to solve:\n"<< tempS;
   output = out.str();
 }
 
@@ -1339,30 +1343,76 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
       for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
       theSl2.ComputeDebugString(false, false, theGlobalVariables);
-      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theGlobalVariables))
+      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theGlobalVariables))
         output.AddObjectOnTopHash(theSl2);
     }
   }
 }
 
-bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, GlobalVariables& theGlobalVariables)
 { roots SelectedExtraPositiveRoots;
   roots RootsCharacteristicTwo;
   SelectedExtraPositiveRoots.size=0;
-  assert(simpleBasisSA.size==theZeroCharacteristics.MaxSize);
-  root tempRoot;
-  for (int i=0; i<theZeroCharacteristics.CardinalitySelection; i++)
+  int theRelativeDimension = simpleBasisSA.size;
+  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+  assert(theRelativeDimension==theZeroCharacteristics.MaxSize);
+  root tempRoot, tempRoot2;
+  //format. We are looking for an sl(2) for which e= a_0 g^\alpha_0+\dots a_kg^\alpha_k, and f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
+  //where the first \alpha's are the simple roots of characteristic 2, and the last \alpha's are the members of SelectedExtraPositiveRoots
+  //(i.e. roots equal to the sum of one simple root of characteristic 2 a simple root of characteristic 0).
+  // Then the first k variables of the polynomials below will be a_0,..., a_k., and the last k variables will be the b_i's
+  // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2}, where l/2 is the index of the root of SelectedExtraPositiveRoots, if l is even, and to the
+  // coefficient of  g^{-\alpha_{(l+1)/2}} otherwise
+  for (int i=0; i<theRelativeDimension; i++)
     if (!theZeroCharacteristics.selected[i])
       RootsCharacteristicTwo.AddObjectOnTop(simpleBasisSA.TheObjects[i]);
     else
-      for (int j=0; j<simpleBasisSA.size; j++)
+      for (int j=0; j<theRelativeDimension; j++)
         if (!theZeroCharacteristics.selected[j])
         { tempRoot= simpleBasisSA.TheObjects[i]+simpleBasisSA.TheObjects[j];
           if (this->theWeyl.IsARoot(tempRoot))
             SelectedExtraPositiveRoots.AddObjectOnTop(tempRoot);
         }
-  PolynomialsRationalCoeff theSystemThatNeedsToBeSolved;
-  theSystemThatNeedsToBeSolved.SetSizeExpandOnTopNoObjectInit(simpleBasisSA.size+theZeroCharacteristics.CardinalitySelection*2);
-  //for (int i=0; i<theZeroCharacteristics.selected[])
-  return false;
+  outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(theZeroCharacteristics.CardinalitySelection*2 + theDimension);
+  int numRootsChar2 = theRelativeDimension-theZeroCharacteristics.CardinalitySelection;
+  int halfNumberVariables = SelectedExtraPositiveRoots.size + numRootsChar2;
+  int numberVariables = halfNumberVariables*2;
+  outputSystemToBeSolved.NullifyAll(numberVariables);
+  outputMatrixSystemToBeSolved.init(theZeroCharacteristics.CardinalitySelection*2 + theDimension, halfNumberVariables);
+  outputMatrixSystemToBeSolved.NullifyAll();
+  Monomial<Rational> tempM;
+  Rational tempRat;
+  for (int j=0; j<theRelativeDimension; j++)
+    if (!theZeroCharacteristics.selected[j])
+      for (int i=0; i<theZeroCharacteristics.CardinalitySelection; i++)
+      { tempRoot= simpleBasisSA.TheObjects[theZeroCharacteristics.elements[i]]+simpleBasisSA.TheObjects[j];
+        int theIndex = SelectedExtraPositiveRoots.IndexOfObject(tempRoot);
+        if (theIndex!=-1)
+        { tempM.init(numberVariables);
+          tempM.degrees[i]=1;
+          tempM.degrees[theIndex+numRootsChar2+halfNumberVariables]=1;
+          tempM.Coefficient= this->GetConstant(simpleBasisSA.TheObjects[j], -tempRoot);
+          outputSystemToBeSolved.TheObjects[i*2].AddMonomial(tempM);
+          outputMatrixSystemToBeSolved.elements[i*2][i]= tempM.Coefficient;
+          tempM.degrees[i]=0;
+          tempM.degrees[theIndex+numRootsChar2+halfNumberVariables]=0;
+          tempM.degrees[theIndex+numRootsChar2]=1;
+          tempM.degrees[i+halfNumberVariables]=1;
+          tempM.Coefficient = this->GetConstant(tempRoot, - simpleBasisSA.TheObjects[j]);
+          outputSystemToBeSolved.TheObjects[i*2+1].AddMonomial(tempM);
+          outputMatrixSystemToBeSolved.elements[i*2+1][theIndex+numRootsChar2]=tempM.Coefficient;
+        }
+      }
+  for (int i=0; i<SelectedExtraPositiveRoots.size; i++)
+  { this->GetConstantOrHElement(SelectedExtraPositiveRoots.TheObjects[i], -SelectedExtraPositiveRoots.TheObjects[i], tempRat, tempRoot);
+    for (int j=0; j<tempRoot.size; j++)
+    { tempM.init(numberVariables);
+      tempM.degrees[i+numRootsChar2]=1;
+      tempM.degrees[i+numRootsChar2+halfNumberVariables]=1;
+      tempM.Coefficient= tempRoot.TheObjects[j];
+      outputSystemToBeSolved.TheObjects[j+SelectedExtraPositiveRoots.size*2].AddMonomial(tempM);
+      outputMatrixSystemToBeSolved.elements[j+SelectedExtraPositiveRoots.size*2][i+numRootsChar2]= tempM.Coefficient;
+    }
+  }
+  return true;
 }

@@ -12183,9 +12183,9 @@ void hashedRoots::ComputeDebugString()
 { this->ElementToString(this->DebugString);
 }
 
-void PolynomialsRationalCoeff::ElementToString(std::string &output)
+void PolynomialsRationalCoeff::ElementToString(std::string& output)
 { output.clear();
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].StringPrintOutAppend(output,PolyFormatLocal);
 		output.append(", ");
 	}
@@ -12216,11 +12216,11 @@ void PolynomialsRationalCoeff::ComputeB(PolynomialRationalCoeff& output, int cut
 	}
 }
 
-void PolynomialsRationalCoeffCollection::ElementToString(std::string &output, int theDimension)
+void PolynomialsRationalCoeffCollection::ElementToString(std::string& output, int theDimension)
 { this->ElementToStringComputeFunctionB(output,false, theDimension);
 }
 
-void PolynomialsRationalCoeffCollection::ElementToStringComputeFunctionB(std::string &output, bool computingB, int theDimension)
+void PolynomialsRationalCoeffCollection::ElementToStringComputeFunctionB(std::string& output, bool computingB, int theDimension)
 { std::string tempS;
 	std::stringstream  out;
 	out<<"Number of elements: "<<this->size<<"\n";

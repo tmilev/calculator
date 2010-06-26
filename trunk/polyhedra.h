@@ -536,7 +536,7 @@ public:
 	int NumRows; int ActualNumRows;
 	int NumCols; int ActualNumCols;
 	Element** elements;
-	void init(int r,int c);
+	void init(int r, int c);
 	void ReleaseMemory();
 	bool IsEqualTo(MatrixElementaryLooseMemoryFit<Element>& right);
 	void Resize(int r, int c, bool PreserveValues);
@@ -696,12 +696,12 @@ public:
 	//corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
 	//this means you write the matrix m1 in the upper left corner m2 in the lower right
 	// and everything else you fill with zeros
-	void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>&m2);
-	void DirectSumWith( Matrix<Element>&m2);
+	void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
+	void DirectSumWith( Matrix<Element>& m2);
 	//returns true if the system has a solution, false otherwise
 	bool RowEchelonFormToLinearSystemSolution( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
 	inline static void GaussianEliminationByRows(	Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
-	{ Matrix<Element>::GaussianEliminationByRows(theMatrix,otherMatrix,outputNonPivotPoints,true);
+	{ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);
 	};
 	static void GaussianEliminationByRows(	Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
@@ -1847,15 +1847,15 @@ void ListBasicObjects<Object>::SwapTwoIndices(int index1, int index2)
 }
 
 template<class Object>
-int ListBasicObjects<Object>::IndexOfObject(const Object &o)
-{ for (int i=0;i<this->size;i++)
+int ListBasicObjects<Object>::IndexOfObject(const Object& o)
+{ for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]==o)
 			return i;
 	return -1;
 }
 
 template <class Object>
-void ListBasicObjects<Object>::swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2)
+void ListBasicObjects<Object>::swap(ListBasicObjects<Object>& l1, ListBasicObjects<Object>& l2)
 { ListBasicObjects<Object>* bigL;
 	ListBasicObjects<Object>* smallL;
 	int smallSize;
@@ -1869,13 +1869,13 @@ void ListBasicObjects<Object>::swap(ListBasicObjects<Object>&l1, ListBasicObject
 		smallSize=l2.size;
 	}
 	Object tempO;
-	for(int i=0;i<smallL->size;i++)
+	for(int i=0; i<smallL->size; i++)
 	{ tempO=smallL->TheObjects[i];
 		smallL->TheObjects[i]=bigL->TheObjects[i];
 		bigL->TheObjects[i]=tempO;
 	}
 	smallL->SetSizeExpandOnTopNoObjectInit(bigL->size);
-	for(int i=smallSize;i<bigL->size;i++)
+	for(int i=smallSize; i<bigL->size; i++)
 		smallL->TheObjects[i]=bigL->TheObjects[i];
 	bigL->size=smallSize;
 }
@@ -1888,14 +1888,14 @@ int ListBasicObjects<Object>::SizeWithoutObjects()
 template <class Object>
 void ListBasicObjects<Object>::ShiftUpExpandOnTop(int StartingIndex)
 { this->SetSizeExpandOnTopNoObjectInit(this->size+1);
-	for (int i=this->size-1;i>StartingIndex;i--)
+	for (int i=this->size-1; i>StartingIndex; i--)
 		this->TheObjects[i]= this->TheObjects[i-1];
 }
 
 template <class Object>
 void ListBasicObjects<Object>::initFillInObject(int theSize, const Object& o)
 { this->SetSizeExpandOnTopNoObjectInit(theSize);
-	for (int i=0; i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i]=o;
 }
 
@@ -1924,7 +1924,7 @@ bool ListBasicObjects<Object>::HasACommonElementWith(ListBasicObjects<Object>& r
 template <class Object>
 void ListBasicObjects<Object>::AssignLight(const ListBasicObjectsLight<Object>& From)
 { this->SetSizeExpandOnTopNoObjectInit(From.size);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i]= From.TheObjects[i];
 }
 
@@ -2321,7 +2321,6 @@ int ListObjectPointers<Object>::ObjectPointerToIndex(Object* o)
 	return -1;
 }
 
-
 template<class Object>
 void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
 {	if (increase<=0){return;}
@@ -2563,8 +2562,6 @@ public:
 	~CombinatorialChamberContainer();
 };
 
-
-
 struct PolynomialOutputFormat
 {
 public:
@@ -2678,7 +2675,6 @@ public:
 	bool operator== (const TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>& right);
 };
 
-
 //**********************************************************
 /*To use Polynomial<ElementOfCommutativeRingWithIdentity> you MUST define:
 //Absolutely necessary:
@@ -2706,7 +2702,6 @@ int ListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::ListBasicO
 //void ElementOfCommutativeRingWithIdentity::ReadFromFile(std::fstream& input);
 //void ElementOfCommutativeRingWithIdentity::AssignRational(Rational& r);
 */
-
 
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWithIdentity>, ElementOfCommutativeRingWithIdentity >
@@ -2741,7 +2736,6 @@ public:
   bool IsEqualTo(Polynomial<ElementOfCommutativeRingWithIdentity>& p);
 };
 
-
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >
 {	public:
@@ -2759,6 +2753,10 @@ class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWi
 	void AddConstant(ElementOfCommutativeRingWithIdentity& theConst);
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
+	void NullifyAll(int NumVars)
+	{ for (int i=0; i<this->size; i++)
+      this->TheObjects[i].Nullify(NumVars);
+  };
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3106,8 +3104,6 @@ void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, Generat
 		this->MultiplyByGenerator(m.TheObjects[i]);
   this->Coefficient.MultiplyBy(m.Coefficient);
 }
-
-
 
 class PolynomialsRationalCoeff: public Polynomials<Rational>
 {
@@ -3560,11 +3556,10 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::FindCoeffInFrontOfLinearT
 		if (this->TheObjects[i].degrees[index]=1)
 		{ bool FoundLinearTerm= true;
 			for (int j=0;j<this->NumVars;j++)
-			{ if (this->TheObjects[i].degrees[j]!=0 && j!=index)
+        if (this->TheObjects[i].degrees[j]!=0 && j!=index)
 				{ FoundLinearTerm=false;
 					break;
 				}
-			}
 			if (FoundLinearTerm)
 			{ output.Assign(this->TheObjects[i].Coefficient);
 				return;
@@ -3771,7 +3766,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 		tempRat.ElementToString(tempS);
 		//	currentList->AddObjectOnTop(tempS);
 	}*/
-	for (int i=0;i<p.size;i++)
+	for (int i=0; i<p.size; i++)
 	{	/*if (QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic)
 		{	std::string tempS;
 			Rational tempRat;
@@ -3876,7 +3871,7 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>::GetIndexMaxMonomial()
 		return -1;
 	int result;
 	result = 0;
-	for (int i=1;i<this->size;i++)
+	for (int i=1; i<this->size; i++)
 		if (this->TheObjects[i].IsGEQ(this->TheObjects[result]))
 			result=i;
 	return result;
@@ -3886,9 +3881,9 @@ template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale)
 { outputScale.init(this->NumVars);
 	outputScale.Coefficient.Assign(ElementOfCommutativeRingWithIdentity::TheRingUnit);
-	for (int i=0;i<this->NumVars;i++)
+	for (int i=0; i<this->NumVars; i++)
 	{ outputScale.degrees[i]= 0;
-		for (int j=0;j<this->size;j++)
+		for (int j=0; j<this->size; j++)
 			outputScale.degrees[i]= ::MathRoutines::Minimum(outputScale.degrees[i], this->TheObjects[j].degrees[i]);
 	}
 	Monomial<ElementOfCommutativeRingWithIdentity> tempMon;
@@ -4221,7 +4216,6 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeSubstitutionLastVari
 		this->TheObjects[i].MakeNVarDegOnePoly(numVars, i, ElementOfCommutativeRingWithIdentity::TheRingUnit);
 	this->TheObjects[numVars-1].CopyFromPoly(EndPoint);
 }
-
 
 class BasicComplexNumber
 {
@@ -5606,6 +5600,8 @@ public:
 	roots RootsHavingScalarProduct2WithH;
 	DynkinDiagramRootSubalgebra DiagramM;
 	DynkinDiagramRootSubalgebra CentralizerDiagram;
+	PolynomialsRationalCoeff theSystemToBeSolved;
+	MatrixLargeRational theSystemMatrixForm;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
   //the below is outdated, must be deleted as soon as equivalent code is written.
@@ -5627,6 +5623,8 @@ public:
     this->theE= right.theE;
     this->theH= right.theH;
     this->theF= right.theF;
+    this->theSystemToBeSolved=right.theSystemToBeSolved;
+    this->theSystemMatrixForm=right.theSystemMatrixForm;
 	};
 	bool  operator==(const slTwo& right)
 	{ return this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) && this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
@@ -5672,7 +5670,7 @@ public:
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent(ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
-  bool AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, GlobalVariables& theGlobalVariables);
   void FindSl2SubalgebrasOld(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates);
   void FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);

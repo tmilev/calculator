@@ -699,8 +699,8 @@ public:
 	void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
 	void DirectSumWith( Matrix<Element>& m2);
 	//returns true if the system has a solution, false otherwise
-	bool RowEchelonFormToLinearSystemSolution( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
-	inline static void GaussianEliminationByRows(	Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
+	bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
+	inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
 	{ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);
 	};
 	static void GaussianEliminationByRows(	Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
@@ -1206,7 +1206,7 @@ public:
 };
 
 class Rational
-{	inline bool TryToAddQuickly ( int OtherNum, int OtherDen)
+{ inline bool TryToAddQuickly ( int OtherNum, int OtherDen)
 	{ register int OtherNumAbs, thisNumAbs;
 		assert(this->DenShort>0 && OtherDen>0);
 	  if (OtherNum<0)
@@ -1226,7 +1226,7 @@ class Rational
       this->DenShort=1;
     }
     else
-    {	register int tempGCD;
+    { register int tempGCD;
       if (N>0)
 				tempGCD= Rational::gcd(N,D);
       else
@@ -1331,7 +1331,7 @@ public:
 	};
 	void DivideBy(const Rational& r);
 	void DivideByInteger(int x)
-	{	int tempDen; signed char tempSign;
+	{ int tempDen; signed char tempSign;
 		if (x<0) {tempDen=(-x); tempSign=-1;} else {tempDen=x; tempSign=1;}
 		if (this->TryToMultiplyQuickly(tempSign,tempDen))
 			return;
@@ -1343,7 +1343,7 @@ public:
 		this->Extended->num.sign*=x.sign; this->Simplify();
 	};
 	void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x)
-	{	this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x); this->Simplify();
+	{ this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x); this->Simplify();
 	};
 	void ElementToString(std::string& output);
 	std::string ElementToString()
@@ -1391,8 +1391,8 @@ public:
   };
 	double DoubleValue();
 	int floor()
-	{	if (NumShort<0)
-		{	if (DenShort!=1)
+	{ if (NumShort<0)
+		{ if (DenShort!=1)
 				return (this->NumShort/ this->DenShort)-1;
 			else
 				return this->NumShort/ this->DenShort;
@@ -1421,9 +1421,12 @@ public:
 	~Rational(){this->FreeExtended();};
 	//the below must be called only with positive arguments!
 	static int gcd(int a, int b)
-	{	int temp;
+	{ int temp;
 		while(b>0)
-		{ temp= a % b; a=b; b=temp; }
+		{ temp= a % b;
+      a=b;
+      b=temp;
+		}
 		return a;
 	};
 	static int gcdSigned(int a, int b){if (a<0) {a*=-1;} if (b<0){b*=-1;} return Rational::gcd(a,b);};
@@ -1441,10 +1444,10 @@ public:
 	inline void operator=(int right){this->AssignInteger(right);};
 	Rational operator*(const Rational& right)const;
 	Rational operator*(int right)const
-	{	Rational tempRat; tempRat.Assign(*this); tempRat.MultiplyByInt(right); return tempRat;
+	{ Rational tempRat; tempRat.Assign(*this); tempRat.MultiplyByInt(right); return tempRat;
 	};
 	Rational operator/(int right)const
-	{	Rational tempRat; tempRat.Assign(*this); tempRat.DivideByInteger(right); return tempRat;
+	{ Rational tempRat; tempRat.Assign(*this); tempRat.DivideByInteger(right); return tempRat;
 	};
 	root operator*(const root& right) const;
 	Rational operator+(const Rational& right) const;
@@ -2181,7 +2184,7 @@ void HashedListBasicObjects<Object>::initHash()
 
 template <class Object>
 int HashedListBasicObjects<Object>::IndexOfObjectHash(const Object &o)
-{	int hashIndex = o.HashFunction()%this->HashSize;
+{ int hashIndex = o.HashFunction()%this->HashSize;
 	if (hashIndex<0){hashIndex+=this->HashSize;}
 	for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
 	{ int j=this->TheHashedArrays[hashIndex].TheObjects[i];
@@ -5568,8 +5571,8 @@ public:
   root Hcomponent;
   void MultiplyByRational(SimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
-  void SetCoefficient(root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
-  void SetCoefficient(root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
+  void SetCoefficient(const root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
+  void SetCoefficient(const root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
   bool IsEqualToZero()const;
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
@@ -5602,6 +5605,7 @@ public:
 	DynkinDiagramRootSubalgebra CentralizerDiagram;
 	PolynomialsRationalCoeff theSystemToBeSolved;
 	MatrixLargeRational theSystemMatrixForm;
+	MatrixLargeRational theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
   //the below is outdated, must be deleted as soon as equivalent code is written.
@@ -5625,6 +5629,7 @@ public:
     this->theF= right.theF;
     this->theSystemToBeSolved=right.theSystemToBeSolved;
     this->theSystemMatrixForm=right.theSystemMatrixForm;
+    this->theSystemColumnVector= right.theSystemColumnVector;
 	};
 	bool  operator==(const slTwo& right)
 	{ return this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) && this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
@@ -5670,11 +5675,12 @@ public:
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent(ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
-  bool AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables);
   void FindSl2SubalgebrasOld(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates);
   void FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
   void GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e);
+  void initHEFSystemFromECoeffs(int theRelativeDimension,  Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved);
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReportNumCycles(int progress, int outOf,	GlobalVariables& theGlobalVariables);
@@ -5689,7 +5695,7 @@ public:
   static int ProblemCounter;
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons);
-  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  {	this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);};
+  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables){ this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);};
   bool flagNeedsAdditionOfPositiveKroots;
   Selection theGmodLmodules;
   Selection theNilradicalModules;

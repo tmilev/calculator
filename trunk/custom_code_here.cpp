@@ -1371,7 +1371,10 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
+      { theSl2.ComputeDebugString(false, false, theGlobalVariables);
         output.AddObjectOnTopHash(theSl2);
+        output.LastObject()->ComputeDebugString(false, false, theGlobalVariables);
+      }
     }
   }
 }
@@ -1471,6 +1474,7 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
   outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(oldSize+this->theWeyl.KillingFormMatrix.NumRows);
   for(int i=oldSize; i<outputSystemToBeSolved.size; i++)
     outputSystemToBeSolved.TheObjects[i].Nullify((short)numberVariables);
+  outputSystemToBeSolved.ComputeDubugString();
   for (int i=0; i<rootsInPlay.size; i++)
   { this->GetConstantOrHElement(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[i], tempRat, tempRoot);
     for (int j=0; j<this->theWeyl.KillingFormMatrix.NumRows; j++)
@@ -1506,4 +1510,5 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
         outputMatrixSystemToBeSolved.elements[i][lowerIndex]=theMonomial.Coefficient* inputFCoeffs.elements[0][higherIndex-halfNumberVariables];
     }
   }
+  outputSystemToBeSolved.ComputeDubugString();
 }

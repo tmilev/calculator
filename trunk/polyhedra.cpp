@@ -12186,7 +12186,7 @@ void hashedRoots::ComputeDebugString()
 void PolynomialsRationalCoeff::ElementToString(std::string& output)
 { output.clear();
 	for (int i=0; i<this->size; i++)
-	{ this->TheObjects[i].StringPrintOutAppend(output,PolyFormatLocal);
+	{ this->TheObjects[i].StringPrintOutAppend(output, PolyFormatLocal);
 		output.append("\n");
 	}
 }
@@ -12196,7 +12196,7 @@ void PolynomialsRationalCoeff::ComputeDubugString()
 }
 
 void PolynomialsRationalCoeff::ComputeB(PolynomialRationalCoeff& output, int cutOffIndex, int theDimension)
-{ static PolynomialsRationalCoeff EpsForm;
+{ PolynomialsRationalCoeff EpsForm;
 	PolynomialRationalCoeff tempP;
 	EpsForm.SetSizeExpandOnTopNoObjectInit(theDimension);
 	EpsForm.TheObjects[0].CopyFromPoly(this->TheObjects[0]);

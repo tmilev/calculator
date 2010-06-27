@@ -2741,7 +2741,8 @@ public:
 
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >
-{	public:
+{
+  public:
 	//the format of the linear substitution is:
 	//coeff is a MatrixLargeRational whose number of rows minus 1 must equal the # number of
 	//target variables and whose number of columns must equal the number of variables in
@@ -3574,7 +3575,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::FindCoeffInFrontOfLinearT
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::AddConstant(const ElementOfCommutativeRingWithIdentity& theConst)
 { Monomial<ElementOfCommutativeRingWithIdentity> tempMon;
-	tempMon.MakeConstantMonomial(this->NumVars,theConst);
+	tempMon.MakeConstantMonomial(this->NumVars, theConst);
 	this->AddMonomial(tempMon);
 }
 
@@ -3751,7 +3752,7 @@ inline int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIden
 }
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
-void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddPolynomial (TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p)
+void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddPolynomial(TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p)
 { this->MakeActualSizeAtLeastExpandOnTop(p.size+this->size);
 	//std::string tempS1;
 	/*if (QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic)
@@ -3806,7 +3807,7 @@ bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> 
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend (std::string& output, PolynomialOutputFormat& PolyFormat)
+int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat)
 { std::stringstream out;
 	int NumChars=0;
 	int TotalNumLines=0;
@@ -3969,9 +3970,11 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 	this->NumVars= p.NumVars;
 }
 
-template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
+template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddMonomial(TemplateMonomial& m)
-{ int j= this->IndexOfObjectHash(m);
+{ if (m.Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
+    return;
+  int j= this->IndexOfObjectHash(m);
 	if (j==-1)
 	{ if (!m.IsEqualToZero())
 			this->AddObjectOnTopHash(m);

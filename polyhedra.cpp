@@ -18135,7 +18135,7 @@ void SimpleLieAlgebra::LieBracket( const ElementSimpleLieAlgebra& g1, const Elem
   element1=&g1; element2=&g2;
   for (int l=0; l<2; l++)
 	{ for (int j=0; j<element2->NonZeroElements.CardinalitySelection; j++)
-		{ this->theWeyl.RootScalarKillingFormMatrixRoot( this->theWeyl.RootSystem.TheObjects[element2->NonZeroElements.elements[j]], element1->Hcomponent,tempRat);
+		{ this->theWeyl.RootScalarKillingFormMatrixRoot(this->theWeyl.RootSystem.TheObjects[element2->NonZeroElements.elements[j]], element1->Hcomponent,tempRat);
 			tempRat.MultiplyBy(element2->coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]]);
 			tempRat.MultiplyBy(order);
 			output.coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]].Add(tempRat);
@@ -18149,7 +18149,7 @@ void SimpleLieAlgebra::LieBracket( const ElementSimpleLieAlgebra& g1, const Elem
 
 void ElementSimpleLieAlgebra::ComputeNonZeroElements()
 { this->NonZeroElements.init(this->coeffsRootSpaces.size);
-  for (int i=0;i<this->coeffsRootSpaces.size;i++)
+  for (int i=0; i<this->coeffsRootSpaces.size; i++)
     if (!this->coeffsRootSpaces.TheObjects[i].IsEqualToZero())
       this->NonZeroElements.AddSelectionAppendNewIndex(i);
 }

@@ -1257,16 +1257,18 @@ void slTwo::ElementToString(std::string& output, bool useHtml, bool useLatex, Gl
   out <<"\n\n$e=$ $" <<tempS<<"$";
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
   out <<"\n\n$f=$ $" <<tempS<<"$";
-  ElementSimpleLieAlgebra tempEl;
-  this->owner->LieBracket(this->theE, this->theF, tempEl);
-  tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n$[e,f]=$ $" <<tempS <<"$";
-  this->owner->LieBracket(this->theH, this->theE, tempEl);
-  tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n$[h,e]=$ $" <<tempS <<"$";
-  this->owner->LieBracket(this->theH, this->theF, tempEl);
-  tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n$[h,f]=$ $" <<tempS <<"$";
+  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
+  { ElementSimpleLieAlgebra tempEl;
+    this->owner->LieBracket(this->theE, this->theF, tempEl);
+    tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
+    out << "\n\n$[e,f]=$ $" <<tempS <<"$";
+    this->owner->LieBracket(this->theH, this->theE, tempEl);
+    tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
+    out << "\n\n$[h,e]=$ $" <<tempS <<"$";
+    this->owner->LieBracket(this->theH, this->theF, tempEl);
+    tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
+    out << "\n\n$[h,f]=$ $" <<tempS <<"$";
+  }
   this->theSystemMatrixForm.ElementToSting(tempS);
   out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   this->theSystemColumnVector.ElementToSting(tempS);
@@ -1291,19 +1293,18 @@ void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalV
 //  IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
   //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   //theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-  theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables);
-  tempSl2s.ComputeDebugString(theGlobalVariables, theRootSAs.AmbientWeyl, false, false);
+  theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
+  tempSl2s.ComputeDebugString(theGlobalVariables, this->theWeyl, false, false);
   this->DebugString= tempSl2s.DebugString;
 
 }
 
-void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
 { //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   DynkinDiagramRootSubalgebra tempDiagram;
   int theRelativeDimension = this->SimpleBasisK.size;
   theRootsWithZeroCharacteristic.init(theRelativeDimension);
-  SimpleLieAlgebra theLieAlgebra;
   MatrixLargeRational InvertedRelativeKillingForm;
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
   for (int k=0; k<theRelativeDimension; k++)
@@ -1318,6 +1319,7 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
   roots relativeRootSystem;
   this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, theGlobalVariables);
   slTwo theSl2;
+  theSl2.owner = &theLieAlgebra;
   for (int i=0; i<numCycles; i++, theRootsWithZeroCharacteristic.incrementSelection())
   { tempRoots.size=0;
     for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
@@ -1354,7 +1356,7 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
       theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
       for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
-      theSl2.ComputeDebugString(false, false, theGlobalVariables);
+      //theSl2.ComputeDebugString(false, false, theGlobalVariables);
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
         output.AddObjectOnTopHash(theSl2);
     }
@@ -1391,31 +1393,20 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRoot
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
-  outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(theZeroCharacteristics.CardinalitySelection*2 + theDimension);
-  outputSystemToBeSolved.NullifyAll(numberVariables);
-  outputMatrixSystemToBeSolved.init(theZeroCharacteristics.CardinalitySelection*2 + theDimension, halfNumberVariables);
-  outputSystemColumnVector.init(outputMatrixSystemToBeSolved.NumRows, 1);
-  outputMatrixSystemToBeSolved.NullifyAll();
-  outputSystemColumnVector.NullifyAll();
   Monomial<Rational> tempM;
-  tempM.init(numberVariables);
-  for (int i=0; i<theDimension; i++)
-  { tempM.Coefficient = h.TheObjects[i]*(-1);
-    outputSystemToBeSolved.TheObjects[i+theZeroCharacteristics.CardinalitySelection*2].AddMonomial(tempM);
-    outputSystemColumnVector.elements[i+theZeroCharacteristics.CardinalitySelection*2][0]= h.TheObjects[i];
-  }
+  tempM.init((short)numberVariables);
   MatrixLargeRational coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i=0; i<coeffsF.NumCols; i++)
-    coeffsF.elements[0][i]=1;
-  this->initHEFSystemFromECoeffs
-    (theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots,
-      numberVariables, numRootsChar2, halfNumberVariables, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
+    coeffsF.elements[0][i]=i+1;
+  this->initHEFSystemFromECoeffs(theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables, h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
   MatrixLargeRational tempMat, tempMatColumn, tempMatResult;
   tempMat.Assign(outputMatrixSystemToBeSolved);
   tempMatColumn.Assign(outputSystemColumnVector);
   outputF.Nullify(*this);
-  if(MatrixLargeRational::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
+  outputE.Nullify(*this);
+//  if(MatrixLargeRational::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
+  if(MatrixLargeRational::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat, tempMatColumn, tempMatResult))
   { for (int i=0; i<rootsInPlay.size; i++)
     { outputF.SetCoefficient(-rootsInPlay.TheObjects[i], coeffsF.elements[0][i], *this);
       outputE.SetCoefficient(rootsInPlay.TheObjects[i], tempMatResult.elements[i][0], *this);
@@ -1425,41 +1416,75 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRoot
   return true;
 }
 
-void SimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension,  Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
+void SimpleLieAlgebra::initHEFSystemFromECoeffs
+  ( int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, 
+    int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, 
+    MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
 { root tempRoot;
   Monomial<Rational> tempM;
-  tempM.init(numberVariables);
   Rational tempRat;
-  for (int j=0; j<theRelativeDimension; j++)
-    if (!theZeroCharacteristics.selected[j])
-      for (int i=0; i<theZeroCharacteristics.CardinalitySelection; i++)
-      { tempRoot= simpleBasisSA.TheObjects[theZeroCharacteristics.elements[i]]+simpleBasisSA.TheObjects[j];
-        int theIndex = SelectedExtraPositiveRoots.IndexOfObject(tempRoot);
-        if (theIndex!=-1)
-        { tempM.init(numberVariables);
-          tempM.degrees[i]=1;
-          tempM.degrees[theIndex+numRootsChar2+halfNumberVariables]=1;
-          tempM.Coefficient= this->GetConstant(simpleBasisSA.TheObjects[j], -tempRoot);
-          outputSystemToBeSolved.TheObjects[i*2].AddMonomial(tempM);
-          outputMatrixSystemToBeSolved.elements[i*2][i]= tempM.Coefficient*inputFCoeffs.elements[0][i];
-          tempM.degrees[i]=0;
-          tempM.degrees[theIndex+numRootsChar2+halfNumberVariables]=0;
-          tempM.degrees[theIndex+numRootsChar2]=1;
-          tempM.degrees[i+halfNumberVariables]=1;
-          tempM.Coefficient = this->GetConstant(tempRoot, - simpleBasisSA.TheObjects[j]);
-          outputSystemToBeSolved.TheObjects[i*2+1].AddMonomial(tempM);
-          outputMatrixSystemToBeSolved.elements[i*2+1][theIndex+numRootsChar2]=tempM.Coefficient*inputFCoeffs.elements[0][theIndex+numRootsChar2];
+  hashedRoots RootSpacesThatNeedToBeKilled;
+  ListBasicObjects<int> IndicesEquationsByRootSpace;
+  RootSpacesThatNeedToBeKilled.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
+  IndicesEquationsByRootSpace.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
+  outputSystemToBeSolved.size=0;
+  outputMatrixSystemToBeSolved.init(0, numberVariables);
+  for (int i=0; i<rootsInPlay.size; i++)
+    for (int j=0; j<rootsInPlay.size; j++)
+    { tempRoot= rootsInPlay.TheObjects[i]-rootsInPlay.TheObjects[j];
+      if (this->theWeyl.IsARoot(tempRoot))
+      { int indexEquation= RootSpacesThatNeedToBeKilled.IndexOfObjectHash(tempRoot);
+        if (indexEquation==-1)
+        { RootSpacesThatNeedToBeKilled.AddObjectOnTopHash(tempRoot);
+          indexEquation=outputSystemToBeSolved.size;
+          IndicesEquationsByRootSpace.AddObjectOnTop(indexEquation);
+          outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(outputSystemToBeSolved.size+1);         
+          outputSystemToBeSolved.LastObject()->Nullify((short)numberVariables);
         }
+        tempM.init((short)numberVariables);
+        tempM.degrees[i]=1;
+        tempM.degrees[j+halfNumberVariables]=1;
+        tempM.Coefficient= this->GetConstant(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[j]);
+        outputSystemToBeSolved.LastObject()->AddMonomial(tempM);        
       }
+    }
+  int oldSize=outputSystemToBeSolved.size;
+  outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(oldSize+this->theWeyl.KillingFormMatrix.NumRows);
+  for(int i=oldSize; i<outputSystemToBeSolved.size; i++)
+    outputSystemToBeSolved.TheObjects[i].Nullify((short)numberVariables);
   for (int i=0; i<rootsInPlay.size; i++)
   { this->GetConstantOrHElement(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[i], tempRat, tempRoot);
-    for (int j=0; j<tempRoot.size; j++)
-    { tempM.init(numberVariables);
+    for (int j=0; j<this->theWeyl.KillingFormMatrix.NumRows; j++)
+    { tempM.init((short)numberVariables);
       tempM.degrees[i]=1;
       tempM.degrees[i+halfNumberVariables]=1;
       tempM.Coefficient= tempRoot.TheObjects[j];
-      outputSystemToBeSolved.TheObjects[j+theZeroCharacteristics.CardinalitySelection*2].AddMonomial(tempM);
-      outputMatrixSystemToBeSolved.elements[j+theZeroCharacteristics.CardinalitySelection*2][i]= tempM.Coefficient* inputFCoeffs.elements[0][i];
+      outputSystemToBeSolved.TheObjects[j+oldSize].AddMonomial(tempM);
+    }
+  }
+  for (int i=0; i<this->theWeyl.KillingFormMatrix.NumRows; i++)
+    outputSystemToBeSolved.TheObjects[i+oldSize].AddConstant(targetH.TheObjects[i]*(-1));
+  outputMatrixSystemToBeSolved.init(outputSystemToBeSolved.size, halfNumberVariables);
+  outputSystemColumnVector.init(outputSystemToBeSolved.size, 1);
+  outputMatrixSystemToBeSolved.NullifyAll();
+  outputSystemColumnVector.NullifyAll();
+  for (int i=0; i<outputSystemToBeSolved.size; i++)
+  { for (int j=0; j<outputSystemToBeSolved.TheObjects[i].size; j++)
+    { int lowerIndex=-1; int higherIndex=-1;
+      Monomial<Rational>& theMonomial= outputSystemToBeSolved.TheObjects[i].TheObjects[j];
+      for (int k=0; k<numberVariables; k++)
+        if (theMonomial.degrees[k]==1)
+        { if (k<halfNumberVariables)
+            lowerIndex=k;
+          else
+          { higherIndex=k;
+            break;
+          }  
+        }
+      if (lowerIndex==-1)
+        outputSystemColumnVector.elements[i][0]= theMonomial.Coefficient*(-1);
+      else
+        outputMatrixSystemToBeSolved.elements[i][lowerIndex]=theMonomial.Coefficient* inputFCoeffs.elements[0][higherIndex-halfNumberVariables];
     }
   }
 }

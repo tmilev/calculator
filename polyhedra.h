@@ -2595,13 +2595,13 @@ public:
 	short* degrees;
 	static bool InitWithZero;
 	std::string DebugString;
-	bool ComputeDebugString(PolynomialOutputFormat &PolyFormat);
+	bool ComputeDebugString(PolynomialOutputFormat& PolyFormat);
 	bool ComputeDebugString();
 	ElementOfCommutativeRingWithIdentity Coefficient;
 	int HashFunction() const;
 //	int DegreesToIndex(int MaxDeg);
-	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity&coeff);
-	void MakeNVarFirstDegree(int LetterIndex,short NumVars,ElementOfCommutativeRingWithIdentity& coeff);
+	void MakeConstantMonomial(short Nvar, const ElementOfCommutativeRingWithIdentity& coeff);
+	void MakeNVarFirstDegree(int LetterIndex, short NumVars, ElementOfCommutativeRingWithIdentity& coeff);
 	void init(short nv);
 	void initNoDegreesInit(short nv);
 	void NullifyDegrees();
@@ -2616,7 +2616,7 @@ public:
 	bool HasSameExponent(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	void Assign(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
-	void MakeMonomialOneLetter(short NumVars,int LetterIndex, short Power, ElementOfCommutativeRingWithIdentity& Coeff);
+	void MakeMonomialOneLetter(short NumVars, int LetterIndex, short Power, ElementOfCommutativeRingWithIdentity& Coeff);
 	void IncreaseNumVariables(short increase);
 	bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	bool IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity>& m);
@@ -2724,7 +2724,7 @@ public:
 	void DivideBy(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
-	void AddConstant(ElementOfCommutativeRingWithIdentity& theConst);
+	void AddConstant(const ElementOfCommutativeRingWithIdentity& theConst);
 	void IncreaseNumVariables(short increase);
 	void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
 	void DecreaseNumVariables(short increment,Polynomial<ElementOfCommutativeRingWithIdentity>& output);
@@ -2758,7 +2758,7 @@ class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWi
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
 	void NullifyAll(int NumVars)
 	{ for (int i=0; i<this->size; i++)
-      this->TheObjects[i].Nullify(NumVars);
+      this->TheObjects[i].Nullify((short)NumVars);
   };
 };
 
@@ -3512,7 +3512,7 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::HashFunction() const
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::MakeConstantMonomial(short Nvar, ElementOfCommutativeRingWithIdentity& coeff)
+void Monomial<ElementOfCommutativeRingWithIdentity>::MakeConstantMonomial(short Nvar, const ElementOfCommutativeRingWithIdentity& coeff)
 { this->init(Nvar);
 	this->Coefficient.Assign (coeff);
 }
@@ -3572,7 +3572,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::FindCoeffInFrontOfLinearT
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::AddConstant(ElementOfCommutativeRingWithIdentity& theConst)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::AddConstant(const ElementOfCommutativeRingWithIdentity& theConst)
 { Monomial<ElementOfCommutativeRingWithIdentity> tempMon;
 	tempMon.MakeConstantMonomial(this->NumVars,theConst);
 	this->AddMonomial(tempMon);
@@ -5378,7 +5378,7 @@ public:
   void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void KmodTimesKmod(int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
-	void GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables);
+	void GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
 	void ComputeAllButAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
@@ -5680,7 +5680,7 @@ public:
   void FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
   void GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e);
-  void initHEFSystemFromECoeffs(int theRelativeDimension,  Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved);
+  void initHEFSystemFromECoeffs(int theRelativeDimension,  Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved);
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReportNumCycles(int progress, int outOf,	GlobalVariables& theGlobalVariables);

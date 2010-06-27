@@ -487,7 +487,7 @@ public:
 	void initHash();
 	inline int FitHashSize( int i){i%=this->HashSize; if (i<0) i+=this->HashSize; return i;};
 	void ClearTheObjects();
-	void AddObjectOnTopHash(Object& o);
+	void AddObjectOnTopHash(const Object& o);
 	bool AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
 	void AddListOnTopNoRepetitionOfObjectHash(const ListBasicObjects<Object>& theList);
 	void PopIndexSwapWithLastHash(int index);
@@ -512,13 +512,13 @@ public:
 	static Integer TheRingMUnit;
 	static Integer TheRingZero;
 	inline void ComputeDebugString(){};
-	inline void Add(Integer& y){this->value+=y.value;};
+	inline void Add(const Integer& y){this->value+=y.value;};
 	inline void MultiplyBy(Integer& y){this->value*=y.value;};
 	inline void operator=(const Integer& y){this->value=y.value;};
 	inline bool operator==(Integer& y){return this->value==y.value;};
 	inline void Assign(const Integer&y){this->value=y.value;};
-	inline bool IsEqualTo(Integer&y){return this->value==y.value;};
-	inline bool IsEqualToZero(){return this->value==0;}
+	inline bool IsEqualTo(const Integer&y)const {return this->value==y.value;};
+	inline bool IsEqualToZero() const {return this->value==0;}
 	inline void DivideBy(Integer&y){this->value/=y.value;};
 	inline void WriteToFile(std::fstream& output){output<<this->value;};
 	inline void ReadFromFile(std::fstream& input){input>>this->value;};
@@ -2195,7 +2195,7 @@ int HashedListBasicObjects<Object>::IndexOfObjectHash(const Object &o)
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::AddObjectOnTopHash(Object &o)
+void HashedListBasicObjects<Object>::AddObjectOnTopHash(const Object &o)
 { int hashIndex = o.HashFunction()% this->HashSize;
 	if (hashIndex<0) {hashIndex+=this->HashSize;}
 	this->TheHashedArrays[hashIndex].AddObjectOnTop(this->size);
@@ -2567,10 +2567,13 @@ public:
 
 struct PolynomialOutputFormat
 {
+  ListBasicObjects<std::string> alphabet;
 public:
-	std::string alphabet[26];
+  std::string GetLetterIndex(int index);
+  void SetLetterIndex(const std::string& theLetter, int index);
 	PolynomialOutputFormat();
 	void MakeNumPartFrac();
+	void MakeAlphabetArbitraryWithIndex(const std::string& theLetter);
 	void MakeAlphabetxi();
 	void MakeAlphabetyi();
 	void MakeRegularAlphabet();
@@ -2620,7 +2623,7 @@ public:
 	void IncreaseNumVariables(short increase);
 	bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
 	bool IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity>& m);
-	bool IsEqualToZero();
+	bool IsEqualToZero() const;
 	bool IsPositive();
 	void DecreaseNumVariables(short increment);
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
@@ -2651,7 +2654,7 @@ public:
 	short NumVars;
 	void MultiplyByMonomial(TemplateMonomial& m);
 	void MultiplyByMonomial(TemplateMonomial& m, TemplatePolynomial<	TemplateMonomial,ElementOfCommutativeRingWithIdentity >& output);
-	void AddMonomial(TemplateMonomial& m);
+	void AddMonomial(const TemplateMonomial& m);
 	void CopyFromPoly(const TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>& p);
 	void Assign(const TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>& p);
 	std::string DebugString;
@@ -2937,7 +2940,7 @@ public:
 	int MultiplyByGenerator(GeneratorsOfAlgebraRecord& g, int Power);
 	int MultiplyByGenerator(int GeneratorIndex, int GeneratorPower);
 	void Assign (const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
-	bool IsEqualToZero();
+	bool IsEqualToZero()const ;
 	MonomialInCommutativeAlgebra(){};
 	//IMPORTANT: the coefficients of two monomials are not compared, that is,
 	//two monomials are equal if they have the same
@@ -2947,7 +2950,7 @@ public:
 };
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-bool MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::IsEqualToZero()
+bool MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::IsEqualToZero()const
 { return this->Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero);
 }
 
@@ -3290,7 +3293,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(
 	out <<tempS;
 	for (int i=0;i<this->NumVariables;i++)
 		if (this->degrees[i]!=0)
-		{ out<<	PolyFormat.alphabet[i];
+		{ out<<	PolyFormat.GetLetterIndex(i);
 			if (!PolynomialOutputFormat::UsingLatexFormat)
 			{ if (this->degrees[i]!=1)
 					out << "^"<<this->degrees[i];
@@ -3500,7 +3503,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsPositive()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsEqualToZero()
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsEqualToZero() const 
 { return this->Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero);
 }
 
@@ -3515,7 +3518,7 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::HashFunction() const
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::MakeConstantMonomial(short Nvar, const ElementOfCommutativeRingWithIdentity& coeff)
 { this->init(Nvar);
-	this->Coefficient.Assign (coeff);
+	this->Coefficient.Assign(coeff);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3971,7 +3974,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddMonomial(TemplateMonomial& m)
+void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddMonomial(const TemplateMonomial& m)
 { if (m.Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
     return;
   int j= this->IndexOfObjectHash(m);
@@ -3984,7 +3987,6 @@ void TemplatePolynomial<	TemplateMonomial, ElementOfCommutativeRingWithIdentity>
 			this->PopIndexSwapWithLastHash(j);
 	}
 }
-
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::MultiplyByMonomial(TemplateMonomial& m)
@@ -4343,11 +4345,11 @@ public:
 	std::string DebugString;
 	short NumVariables;
 	bool ComputeDebugString();
-	bool IsEqualTo(QuasiNumber& q);
-	bool IsEqualToZero();
+	bool IsEqualTo(const QuasiNumber& q)const;
+	bool IsEqualToZero()const;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	void AddBasicQuasiNumber(BasicQN& q);
-	void Add(QuasiNumber &q);
+	void Add(const QuasiNumber &q);
 	void MultiplyByBasicQuasiNumber(BasicQN& q);
 	void MultiplyBy(QuasiNumber& q);
 	void Assign(const QuasiNumber& q);
@@ -4433,10 +4435,10 @@ public:
 	std::string DebugString;
 	int NumVariables;
 	bool ComputeDebugString();
-	bool IsEqualTo(CompositeComplexQN& q);
-	bool IsEqualToZero();
+	bool IsEqualTo(const CompositeComplexQN& q)const;
+	bool IsEqualToZero()const;
 	void AddComplexQN(ComplexQN& q);
-	void Add(CompositeComplexQN &q);
+	void Add(const CompositeComplexQN &q);
 	void MultiplyByComplexQN(ComplexQN& q);
 	void MultiplyBy(CompositeComplexQN& q);
 	void Assign(const CompositeComplexQN& q);

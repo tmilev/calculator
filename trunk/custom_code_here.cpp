@@ -1406,9 +1406,11 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCha
         { tempRoot= simpleBasisSA.TheObjects[i]+simpleBasisSA.TheObjects[j];
           if (this->theWeyl.IsARoot(tempRoot))
             SelectedExtraPositiveRoots.AddObjectOnTop(tempRoot);
-        }
-  SelectedExtraPositiveRoots.CopyFromBase(RootsWithCharacteristic2);
-
+        }      
+  SelectedExtraPositiveRoots.size=0;
+  for (int i=0; i<RootsWithCharacteristic2.size; i++)
+    if (!simpleBasisSA.ContainsObject(RootsWithCharacteristic2.TheObjects[i]))
+      SelectedExtraPositiveRoots.AddObjectOnTop(RootsWithCharacteristic2.TheObjects[i]);
   int numRootsChar2 = rootsInPlay.size;
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
   int halfNumberVariables = rootsInPlay.size;
@@ -1443,14 +1445,21 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
     int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs,
     MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
 { root tempRoot;
+  static int ProblemCounter=0;
+  ProblemCounter++;
+  if (ProblemCounter==4)
+  { ProblemCounter=4;
+  }
   Monomial<Rational> tempM;
   Rational tempRat;
   hashedRoots RootSpacesThatNeedToBeKilled;
-  ListBasicObjects<int> IndicesEquationsByRootSpace;
+  RootSpacesThatNeedToBeKilled.ClearTheObjects();
+  //ListBasicObjects<int> IndicesEquationsByRootSpace;
   RootSpacesThatNeedToBeKilled.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
-  IndicesEquationsByRootSpace.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
+//  IndicesEquationsByRootSpace.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
   outputSystemToBeSolved.size=0;
   outputMatrixSystemToBeSolved.init(0, numberVariables);
+  outputSystemToBeSolved.ComputeDubugString();
   for (int i=0; i<rootsInPlay.size; i++)
     for (int j=0; j<rootsInPlay.size; j++)
     { tempRoot= rootsInPlay.TheObjects[i]-rootsInPlay.TheObjects[j];
@@ -1459,7 +1468,7 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
         if (indexEquation==-1)
         { RootSpacesThatNeedToBeKilled.AddObjectOnTopHash(tempRoot);
           indexEquation=outputSystemToBeSolved.size;
-          IndicesEquationsByRootSpace.AddObjectOnTop(indexEquation);
+//          IndicesEquationsByRootSpace.AddObjectOnTop(indexEquation);
           outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(outputSystemToBeSolved.size+1);
           outputSystemToBeSolved.LastObject()->Nullify((short)numberVariables);
         }
@@ -1467,7 +1476,8 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
         tempM.degrees[i]=1;
         tempM.degrees[j+halfNumberVariables]=1;
         tempM.Coefficient= this->GetConstant(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[j]);
-        outputSystemToBeSolved.LastObject()->AddMonomial(tempM);
+        outputSystemToBeSolved.TheObjects[indexEquation].AddMonomial(tempM);
+        outputSystemToBeSolved.ComputeDubugString();
       }
     }
   int oldSize=outputSystemToBeSolved.size;
@@ -1476,7 +1486,8 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
     outputSystemToBeSolved.TheObjects[i].Nullify((short)numberVariables);
   outputSystemToBeSolved.ComputeDubugString();
   for (int i=0; i<rootsInPlay.size; i++)
-  { this->GetConstantOrHElement(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[i], tempRat, tempRoot);
+  { assert(rootsInPlay.size==halfNumberVariables);
+    this->GetConstantOrHElement(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[i], tempRat, tempRoot);
     for (int j=0; j<this->theWeyl.KillingFormMatrix.NumRows; j++)
     { tempM.init((short)numberVariables);
       tempM.degrees[i]=1;

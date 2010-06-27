@@ -3262,7 +3262,7 @@ void CombinatorialChamber::ElementToInequalitiesString(std::string& output,Combi
 					if (tempS.size()!=0)
 						if (tempS[0]!='-')
 							out <<'+';
-				out << tempS<<PolyFormatLocal.alphabet[j];
+				out << tempS<<PolyFormatLocal.GetLetterIndex(j);
 			}
 		}
 		if (useLatex)
@@ -5075,7 +5075,7 @@ void CompositeComplexQN::AddComplexQN(ComplexQN& q)
 	this->AddObjectOnTop(q);
 }
 
-void CompositeComplexQN::Add(CompositeComplexQN &q)
+void CompositeComplexQN::Add(const CompositeComplexQN &q)
 { for(int i=0; i<q.size; i++)
 		this->AddComplexQN(q.TheObjects[i]);
 }
@@ -5140,7 +5140,7 @@ void CompositeComplexQN::MultiplyByLargeRational(Rational &r)
     this->TheObjects[i].MultiplyByLargeRational(r);
 }
 
-bool CompositeComplexQN::IsEqualToZero()
+bool CompositeComplexQN::IsEqualToZero()const
 { for (int i=0;i<this->size;i++)
     if (!this->TheObjects[i].IsEqualToZero())
       return false;
@@ -5160,7 +5160,7 @@ int CompositeComplexQN::NumNonZeroElements()
 	return result;
 }
 
-bool CompositeComplexQN::IsEqualTo(CompositeComplexQN&q)
+bool CompositeComplexQN::IsEqualTo(const CompositeComplexQN& q) const
 {	CompositeComplexQN tempQN(q.NumVariables) ;
 	tempQN.Assign(q);
 	tempQN.MultiplyByLargeRational(RMOne);
@@ -5260,7 +5260,7 @@ void ComplexQN::LinPartToString(std::string& output)
 			}
 			else
 				out<<"+";
-			out<<PolyFormatLocal.alphabet[i];
+			out<<PolyFormatLocal.GetLetterIndex(i);
 		}
 	output= out.str();
 	if (output.size()!=0)
@@ -5501,101 +5501,79 @@ void PolynomialsRationalCoeff::MakeLinearSubOnLastVariable(short NumVars,Polynom
 }
 
 PolynomialOutputFormat::PolynomialOutputFormat()
-{ this->MakeRegularAlphabet();
+{ this->MakeAlphabetxi();
 	this->ExtraLinesCounterLatex=0;
 }
 
 void PolynomialOutputFormat::MakeRegularAlphabet()
-{	this->alphabet[0]='a';
-	this->alphabet[1]='b';
-	this->alphabet[2]='c';
-	this->alphabet[3]='d';
-	this->alphabet[4]='e';
-	this->alphabet[5]='f';
-	this->alphabet[6]='g';
-	this->alphabet[7]='h';
-	this->alphabet[8]='i';
-	this->alphabet[9]='j';
-	this->alphabet[10]='k';
-	this->alphabet[11]='l';
-	this->alphabet[12]='m';
-	this->alphabet[13]='n';
-	this->alphabet[14]='o';
-	this->alphabet[15]='p';
-	this->alphabet[16]='q';
-	this->alphabet[17]='r';
-	this->alphabet[18]='s';
-	this->alphabet[19]='t';
-	this->alphabet[20]='u';
-	this->alphabet[21]='v';
-	this->alphabet[22]='w';
-	this->alphabet[23]='x';
-	this->alphabet[24]='y';
-	this->alphabet[25]='z';
+{	this->alphabet.SetSizeExpandOnTopNoObjectInit(26);
+  this->alphabet.TheObjects[0]='a';
+  this->alphabet.TheObjects[1]='b';
+	this->alphabet.TheObjects[2]='c';
+	this->alphabet.TheObjects[3]='d';
+	this->alphabet.TheObjects[4]='e';
+	this->alphabet.TheObjects[5]='f';
+	this->alphabet.TheObjects[6]='g';
+	this->alphabet.TheObjects[7]='h';
+	this->alphabet.TheObjects[8]='i';
+	this->alphabet.TheObjects[9]='j';
+	this->alphabet.TheObjects[10]='k';
+	this->alphabet.TheObjects[11]='l';
+	this->alphabet.TheObjects[12]='m';
+	this->alphabet.TheObjects[13]='n';
+	this->alphabet.TheObjects[14]='o';
+	this->alphabet.TheObjects[15]='p';
+	this->alphabet.TheObjects[16]='q';
+	this->alphabet.TheObjects[17]='r';
+	this->alphabet.TheObjects[18]='s';
+	this->alphabet.TheObjects[19]='t';
+	this->alphabet.TheObjects[20]='u';
+	this->alphabet.TheObjects[21]='v';
+	this->alphabet.TheObjects[22]='w';
+	this->alphabet.TheObjects[23]='x';
+	this->alphabet.TheObjects[24]='y';
+	this->alphabet.TheObjects[25]='z';
 	this->cutOffString=false;
 	this->cutOffSize=500;
+}
+
+std::string PolynomialOutputFormat::GetLetterIndex(int index)
+{ if (index<this->alphabet.size)
+    return this->alphabet.TheObjects[index];
+  std::stringstream out;
+  out << "x_{"<<index+1<<"}";
+  std::string tempS=out.str();
+  return tempS;
+}
+
+void PolynomialOutputFormat::SetLetterIndex(const std::string& theLetter, int index)
+{ if (index<this->alphabet.size)
+    this->alphabet.TheObjects[index]=theLetter;
+}
+
+void PolynomialOutputFormat::MakeAlphabetArbitraryWithIndex(const std::string& theLetter)
+{	this->alphabet.SetSizeExpandOnTopNoObjectInit(1000);
+  for (int i=0; i<this->alphabet.size; i++)
+  { std::stringstream out;
+    out << theLetter <<"_";
+     if (i>=9)
+      out <<"{";
+    out<<i+1;
+     if (i>=9)
+      out <<"}";
+    this->alphabet.TheObjects[i]=out.str();
+  }
+	this->cutOffString=false;
+	this->cutOffSize=500;
+}
+
+
+void PolynomialOutputFormat::MakeAlphabetyi()
+{ this->MakeAlphabetArbitraryWithIndex("y");
 }
 
 void PolynomialOutputFormat::MakeAlphabetxi()
-{	this->alphabet[0]="x_1";
-	this->alphabet[1]="x_2";
-	this->alphabet[2]="x_3";
-	this->alphabet[3]="x_4";
-	this->alphabet[4]="x_5";
-	this->alphabet[5]="x_6";
-	this->alphabet[6]="x_7";
-	this->alphabet[7]="x_8";
-	this->alphabet[8]="x_9";
-	this->alphabet[9]="x_{10}";
-	this->alphabet[10]="x_{11}";
-	this->alphabet[11]="x_{12}";
-	this->alphabet[12]="x_{13}";
-	this->alphabet[13]="x_{14}";
-	this->alphabet[14]="x_{15}";
-	this->alphabet[15]="x_{16}";
-	this->alphabet[16]="x_{17}";
-	this->alphabet[17]="x_{18}";
-	this->alphabet[18]="x_{19}";
-	this->alphabet[19]="x_{20}";
-	this->alphabet[20]="x_{21}";
-	this->alphabet[21]="x_{22}";
-	this->alphabet[22]="x_{23}";
-	this->alphabet[23]="x_{24}";
-	this->alphabet[24]="x_{25}";
-	this->alphabet[25]="x_{26}";
-	this->cutOffString=false;
-	this->cutOffSize=500;
-}
-
-void PolynomialOutputFormat::MakeAlphabetyi()
-{	this->alphabet[0]="y_1";
-	this->alphabet[1]="y_2";
-	this->alphabet[2]="y_3";
-	this->alphabet[3]="y_4";
-	this->alphabet[4]="y_5";
-	this->alphabet[5]="y_6";
-	this->alphabet[6]="y_7";
-	this->alphabet[7]="y_8";
-	this->alphabet[8]="y_9";
-	this->alphabet[9]="y_{10}";
-	this->alphabet[10]="y_{11}";
-	this->alphabet[11]="y_{12}";
-	this->alphabet[12]="y_{13}";
-	this->alphabet[13]="y_{14}";
-	this->alphabet[14]="y_{15}";
-	this->alphabet[15]="y_{16}";
-	this->alphabet[16]="y_{17}";
-	this->alphabet[17]="y_{18}";
-	this->alphabet[18]="y_{19}";
-	this->alphabet[19]="y_{20}";
-	this->alphabet[20]="y_{21}";
-	this->alphabet[21]="y_{22}";
-	this->alphabet[22]="y_{23}";
-	this->alphabet[23]="y_{24}";
-	this->alphabet[24]="y_{25}";
-	this->alphabet[25]="y_{26}";
-	this->cutOffString=false;
-	this->cutOffSize=500;
+{ this->MakeAlphabetArbitraryWithIndex("x");
 }
 
 /*int PolynomialRationalCoeff::FindGCMCoefficientDenominators()
@@ -6651,7 +6629,7 @@ void BasicQN::ElementToString(std::string &output,PolynomialOutputFormat& PolyFo
 					else
 					  out2<<this->Exp.elements[i][j];
 				}
-				out2<< PolyFormatLocal.alphabet[j];
+				out2<< PolyFormatLocal.GetLetterIndex(j);
 			}
 		}
 		out2<<"="<<this->Nums.elements[i][0]<<")";
@@ -6951,7 +6929,7 @@ void QuasiNumber::ElementToString(std::string &output, PolynomialOutputFormat& P
 			output.erase(0,1);
 }
 
-void QuasiNumber::Add(QuasiNumber &q)
+void QuasiNumber::Add(const QuasiNumber &q)
 { for (int i=0; i<q.size; i++)
 	  this->AddBasicQuasiNumber(q.TheObjects[i]);
 }
@@ -7053,7 +7031,7 @@ void QuasiNumber::QNtoComplex(CompositeComplexQN& output)
 	}
 }
 
-bool QuasiNumber::IsEqualTo(QuasiNumber&q)
+bool QuasiNumber::IsEqualTo(const QuasiNumber& q) const
 {	//the below line is just for speed
 	if (&q==&QuasiNumber::TheRingZero)
 	  return this->IsEqualToZero();
@@ -7065,7 +7043,7 @@ bool QuasiNumber::IsEqualTo(QuasiNumber&q)
 }
 
 
-bool QuasiNumber::IsEqualToZero()
+bool QuasiNumber::IsEqualToZero()const
 { return (this->size==0);
 	/*for (int i=0;i<this->size;i++)
 	{	if (!this->TheObjects[i].IsEqualToZero())
@@ -10580,7 +10558,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables&  theGloba
 	}
 	output<<"Alphabet_used:\n";
 	for (int i=0;i<this->AmbientDimension;i++)
-		output<<PolyFormatLocal.alphabet[i]<<" ";
+		output<<PolyFormatLocal.GetLetterIndex(i)<<" ";
 	output<<"\n"<<"Number_of_fractions: " <<this->size<<"\n";
 	for (int i=0;i<this->size;i++)
 		this->TheObjects[i].WriteToFile(output, theGlobalVariables);
@@ -10620,7 +10598,7 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables&  theGloba
 	this->RootsToIndices.initFromRoots(tempRoots,0);
 	for (int i=0;i<this->AmbientDimension;i++)
 	{ input>>tempS;
-		PolyFormatLocal.alphabet[i]=tempS;
+		PolyFormatLocal.SetLetterIndex(tempS,i);
 	}
 	int tempI;
 	input>>tempS;
@@ -10941,7 +10919,7 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFra
 	{ out <<"\\frac{1}{(1-";}
 	for(int i=0;i<NumCoords;i++)
 	{ if (tempRoot.elements[i]!=0)
-		{ out <<PolyFormatLocal.alphabet[i];
+		{ out <<PolyFormatLocal.GetLetterIndex(i);
 			if (tempRoot.elements[i]!=1)
 			  out<<"^{"<<tempRoot.elements[i]<<"}";
 		}
@@ -12518,7 +12496,7 @@ void VermaModulesWithMultiplicities::initFromWeyl(WeylGroup* theWeylGroup)
 
 void VermaModulesWithMultiplicities::ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex)
 {	this->GeneratePartialBruhatOrder();
-	PolyFormatLocal.alphabet[0]="q";
+	PolyFormatLocal.SetLetterIndex("q", 0);
 	this->ComputeRPolys();
 //	this->ComputeDebugString();
 	this->KLPolys.SetSizeExpandOnTopNoObjectInit(this->size);
@@ -15972,9 +15950,9 @@ void GeneratorPFAlgebraRecord::ElementToString(std::string& output,PolynomialOut
 	for (int i=0;i<theDimension;i++)
 		if (this->GeneratorRoot.elements[i]!=0)
 		{	if (this->GeneratorRoot.elements[i]==1)
-				out1<< PolyFormat.alphabet[i];
+				out1<< PolyFormat.GetLetterIndex(i);
 			else
-				out1<< PolyFormat.alphabet[i]<<"^{"<<this->GeneratorRoot.elements[i]<<"}";
+				out1<< PolyFormat.GetLetterIndex(i)<<"^{"<<this->GeneratorRoot.elements[i]<<"}";
 		}
 	if (this->Elongation==0)
 	{ output= out1.str();

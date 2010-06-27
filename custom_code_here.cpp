@@ -829,7 +829,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
 
-  theG.FindSl2Subalgebras('D', 4, theGlobalVariables);
+  theG.FindSl2Subalgebras('E', 8, theGlobalVariables);
   IndicatorWindowGlobalVariables.StatusString1= theG.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
@@ -1288,12 +1288,20 @@ void slTwo::ElementToHtml(std::string& filePath)
 void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
 { rootSubalgebras theRootSAs;
   SltwoSubalgebras tempSl2s;
-  theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
-  theRootSAs.ComputeDebugString(false, false, false, 0, 0,theGlobalVariables);
+  rootSubalgebra tempRootSA;
+  tempRootSA.genK.SetSizeExpandOnTopNoObjectInit(WeylRank);
+  tempRootSA.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
+  for (int i=0; i<tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows; i++)
+    tempRootSA.genK.TheObjects[i].MakeEi(tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows, i);
+  tempRootSA.ComputeAll();
+  //theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
+  //theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
+
 //  IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
   //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   //theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-  theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
+//  theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
+  tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
   tempSl2s.ComputeDebugString(theGlobalVariables, this->theWeyl, false, false);
   this->DebugString= tempSl2s.DebugString;
 
@@ -1302,6 +1310,8 @@ void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalV
 void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
 { //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
+  roots RootsWithCharacteristic2;
+  RootsWithCharacteristic2.MakeActualSizeAtLeastExpandOnTop(this->PositiveRootsK.size);
   DynkinDiagramRootSubalgebra tempDiagram;
   int theRelativeDimension = this->SimpleBasisK.size;
   theRootsWithZeroCharacteristic.init(theRelativeDimension);
@@ -1326,6 +1336,7 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
       tempRoots.AddObjectOnTop(this->SimpleBasisK.TheObjects[theRootsWithZeroCharacteristic.elements[j]]);
     tempDiagram.ComputeDiagramType(tempRoots, this->AmbientWeyl);
     int theSlack=0;
+    RootsWithCharacteristic2.size=0;
     for (int j=0; j<relativeRootSystem.size; j++)
     { Rational DimTwoSpace=0;
       for (int k=0; k<theRelativeDimension; k++)
@@ -1335,7 +1346,9 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
             break;
         }
       if (DimTwoSpace==1)
-        theSlack++;
+      { theSlack++;
+        RootsWithCharacteristic2.AddObjectOnTop(this->PositiveRootsK.TheObjects[j]);
+      }
     }
     int theDynkinEpsilon = tempDiagram.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
@@ -1357,21 +1370,23 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
       for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
-      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
+      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
         output.AddObjectOnTopHash(theSl2);
     }
   }
 }
 
-bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
 { roots SelectedExtraPositiveRoots;
   roots rootsInPlay;
   rootsInPlay.size=0;
   SelectedExtraPositiveRoots.size=0;
   int theRelativeDimension = simpleBasisSA.size;
-  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+//  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
   assert(theRelativeDimension==theZeroCharacteristics.MaxSize);
   root tempRoot, tempRoot2;
+
+
   //format. We are looking for an sl(2) for which e= a_0 g^\alpha_0+\dots a_kg^\alpha_k, and f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
   //where the first \alpha's are ordered as in rootsInPlay.
   //Those are ordered as such: first come  the simple roots of characteristic 2, and the last \alpha's are the members of SelectedExtraPositiveRoots
@@ -1389,6 +1404,8 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRoot
           if (this->theWeyl.IsARoot(tempRoot))
             SelectedExtraPositiveRoots.AddObjectOnTop(tempRoot);
         }
+  SelectedExtraPositiveRoots.CopyFromBase(RootsWithCharacteristic2);
+
   int numRootsChar2 = rootsInPlay.size;
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
   int halfNumberVariables = rootsInPlay.size;
@@ -1397,8 +1414,10 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRoot
   tempM.init((short)numberVariables);
   MatrixLargeRational coeffsF;
   coeffsF.init(1, halfNumberVariables);
-  for (int i=0; i<coeffsF.NumCols; i++)
-    coeffsF.elements[0][i]=i+1;
+  for (int i=0; i<numRootsChar2; i++)
+    coeffsF.elements[0][i]=1;//(i%2==0)? 1: 2;
+  for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
+    coeffsF.elements[0][i]=1;
   this->initHEFSystemFromECoeffs(theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables, h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
   MatrixLargeRational tempMat, tempMatColumn, tempMatResult;
   tempMat.Assign(outputMatrixSystemToBeSolved);
@@ -1417,8 +1436,8 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& relativeRoot
 }
 
 void SimpleLieAlgebra::initHEFSystemFromECoeffs
-  ( int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, 
-    int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, 
+  ( int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots,
+    int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs,
     MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
 { root tempRoot;
   Monomial<Rational> tempM;
@@ -1438,14 +1457,14 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
         { RootSpacesThatNeedToBeKilled.AddObjectOnTopHash(tempRoot);
           indexEquation=outputSystemToBeSolved.size;
           IndicesEquationsByRootSpace.AddObjectOnTop(indexEquation);
-          outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(outputSystemToBeSolved.size+1);         
+          outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(outputSystemToBeSolved.size+1);
           outputSystemToBeSolved.LastObject()->Nullify((short)numberVariables);
         }
         tempM.init((short)numberVariables);
         tempM.degrees[i]=1;
         tempM.degrees[j+halfNumberVariables]=1;
         tempM.Coefficient= this->GetConstant(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[j]);
-        outputSystemToBeSolved.LastObject()->AddMonomial(tempM);        
+        outputSystemToBeSolved.LastObject()->AddMonomial(tempM);
       }
     }
   int oldSize=outputSystemToBeSolved.size;
@@ -1479,7 +1498,7 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
           else
           { higherIndex=k;
             break;
-          }  
+          }
         }
       if (lowerIndex==-1)
         outputSystemColumnVector.elements[i][0]= theMonomial.Coefficient*(-1);

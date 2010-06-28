@@ -1300,7 +1300,7 @@ void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalV
   IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-  for (int i=0; i<theRootSAs.size; i++)
+  for (int i=0; i<theRootSAs.size-1; i++)
     theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(tempSl2s, theGlobalVariables, *this);
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
 
@@ -1364,12 +1364,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
         if(!theRootsWithZeroCharacteristic.selected[k])
           tempRoot.TheObjects[k]=2;
       InvertedRelativeKillingForm.ActOnAroot(tempRoot, tempRoot2);
+      theSl2.theH.Nullify(theLieAlgebra);
       theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
       for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
-      if (output.ContainsCharacteristic(theSl2.theH.Hcomponent, 0))
+      if (!output.ContainsCharacteristic(theSl2.theH.Hcomponent, 0))
       { theSl2.theE.Nullify(theLieAlgebra);
-        theSl2.theH.Nullify(theLieAlgebra);
         theSl2.theF.Nullify(theLieAlgebra);
         //theSl2.ComputeDebugString(false, false, theGlobalVariables);
         if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))

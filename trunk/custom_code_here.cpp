@@ -1296,17 +1296,14 @@ void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalV
 //  tempRootSA.ComputeAll();
   theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
   theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
-
   IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
   for (int i=0; i<theRootSAs.size-1; i++)
     theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(tempSl2s, theGlobalVariables, *this);
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
-
   tempSl2s.ComputeDebugString(theGlobalVariables, this->theWeyl, false, false);
   this->DebugString= tempSl2s.DebugString;
-
 }
 
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
@@ -1391,8 +1388,6 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCha
 //  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
   assert(theRelativeDimension==theZeroCharacteristics.MaxSize);
   root tempRoot, tempRoot2;
-
-
   //format. We are looking for an sl(2) for which e= a_0 g^\alpha_0+\dots a_kg^\alpha_k, and f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
   //where the first \alpha's are ordered as in rootsInPlay.
   //Those are ordered as such: first come  the simple roots of characteristic 2, and the last \alpha's are the members of SelectedExtraPositiveRoots

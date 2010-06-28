@@ -11521,7 +11521,7 @@ void WeylGroup::GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoe
 	output.size=0;
 	output.ChamberIndicators.size=0;
 	output.MakeActualSizeAtLeastExpandOnTop(OrbitGeneratingSubset.size);
-	input.ComputeDubugString();
+	input.ComputeDebugString();
 	for (int i=0;i<OrbitGeneratingSubset.size;i++)
 	{	bool tempBool= TheIndicatorsOrbit.TheObjects[i].IsPositiveOrZero()||(!PositiveWeightsOnly);
 		if (LimitingCone!=0)
@@ -11539,7 +11539,7 @@ void WeylGroup::GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoe
 			output.ChamberIndicators.AddRoot(TheIndicatorsOrbit.TheObjects[i]);
 		}
 	}
-	output.ComputeDubugString(this->KillingFormMatrix.NumRows);
+	output.ComputeDebugString(this->KillingFormMatrix.NumRows);
 }
 
 void WeylGroup::ActOnRootAlgByGroupElement (	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
@@ -12169,7 +12169,7 @@ void PolynomialsRationalCoeff::ElementToString(std::string& output)
 	}
 }
 
-void PolynomialsRationalCoeff::ComputeDubugString()
+void PolynomialsRationalCoeff::ComputeDebugString()
 { this->ElementToString(this->DebugString);
 }
 
@@ -12222,7 +12222,7 @@ void PolynomialsRationalCoeffCollection::Substitution(PolynomialsRationalCoeff& 
 	}
 }
 
-void PolynomialsRationalCoeffCollection::ComputeDubugString(int theDimension)
+void PolynomialsRationalCoeffCollection::ComputeDebugString(int theDimension)
 { this->ElementToString(this->DebugString, theDimension);
 }
 

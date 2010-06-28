@@ -829,7 +829,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
 
-  theG.FindSl2Subalgebras('E', 8, theGlobalVariables);
+  theG.FindSl2Subalgebras('D', 4, theGlobalVariables);
   IndicatorWindowGlobalVariables.StatusString1= theG.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
@@ -1288,26 +1288,27 @@ void slTwo::ElementToHtml(std::string& filePath)
 void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
 { rootSubalgebras theRootSAs;
   SltwoSubalgebras tempSl2s;
-  rootSubalgebra tempRootSA;
-  tempRootSA.genK.SetSizeExpandOnTopNoObjectInit(WeylRank);
-  tempRootSA.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
-  for (int i=0; i<tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows; i++)
-    tempRootSA.genK.TheObjects[i].MakeEi(tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows, i);
-  tempRootSA.ComputeAll();
-  //theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
-  //theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
+//  rootSubalgebra tempRootSA;
+//  tempRootSA.genK.SetSizeExpandOnTopNoObjectInit(WeylRank);
+//  tempRootSA.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
+//  for (int i=0; i<tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows; i++)
+ //   tempRootSA.genK.TheObjects[i].MakeEi(tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows, i);
+//  tempRootSA.ComputeAll();
+  theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
+  theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
 
-//  IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
-  //IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  //theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-//  theRootSAs.TheObjects[0].GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
-  tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
+  IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
+  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  for (int i=0; i<theRootSAs.size; i++)
+    theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(tempSl2s, theGlobalVariables, *this);
+  //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
   tempSl2s.ComputeDebugString(theGlobalVariables, this->theWeyl, false, false);
   this->DebugString= tempSl2s.DebugString;
 
 }
 
-void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
+void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
 { //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   roots RootsWithCharacteristic2;
@@ -1356,9 +1357,7 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
     //this is done in the below code.
     theRootsWithZeroCharacteristic.ComputeDebugString();
     if (theDynkinEpsilon==0)
-    { theSl2.theE.Nullify(theLieAlgebra);
-      theSl2.theH.Nullify(theLieAlgebra);
-      root tempRoot, tempRoot2;
+    { root tempRoot, tempRoot2;
       tempRoot.MakeZero(theRelativeDimension);
       for (int k=0; k<theRelativeDimension; k++)
         if(!theRootsWithZeroCharacteristic.selected[k])
@@ -1369,11 +1368,15 @@ void rootSubalgebra::GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariable
       theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
       for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
-      //theSl2.ComputeDebugString(false, false, theGlobalVariables);
-      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
-      { theSl2.ComputeDebugString(false, false, theGlobalVariables);
-        output.AddObjectOnTopHash(theSl2);
-        output.LastObject()->ComputeDebugString(false, false, theGlobalVariables);
+      if (output.ContainsCharacteristic(theSl2.theH.Hcomponent, 0))
+      { theSl2.theE.Nullify(theLieAlgebra);
+        theSl2.theH.Nullify(theLieAlgebra);
+        //theSl2.ComputeDebugString(false, false, theGlobalVariables);
+        if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
+        { theSl2.ComputeDebugString(false, false, theGlobalVariables);
+          output.AddObjectOnTopHash(theSl2);
+          output.LastObject()->ComputeDebugString(false, false, theGlobalVariables);
+        }
       }
     }
   }
@@ -1406,7 +1409,7 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCha
         { tempRoot= simpleBasisSA.TheObjects[i]+simpleBasisSA.TheObjects[j];
           if (this->theWeyl.IsARoot(tempRoot))
             SelectedExtraPositiveRoots.AddObjectOnTop(tempRoot);
-        }      
+        }
   SelectedExtraPositiveRoots.size=0;
   for (int i=0; i<RootsWithCharacteristic2.size; i++)
     if (!simpleBasisSA.ContainsObject(RootsWithCharacteristic2.TheObjects[i]))
@@ -1420,9 +1423,9 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCha
   MatrixLargeRational coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i=0; i<numRootsChar2; i++)
-    coeffsF.elements[0][i]=1;//(i%2==0)? 1: 2;
+    coeffsF.elements[0][i]=i+1;//(i%2==0)? 1: 2;
   for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
-    coeffsF.elements[0][i]=1;
+    coeffsF.elements[0][i]=i+1;
   this->initHEFSystemFromECoeffs(theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables, h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
   MatrixLargeRational tempMat, tempMatColumn, tempMatResult;
   tempMat.Assign(outputMatrixSystemToBeSolved);
@@ -1440,16 +1443,10 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCha
   return true;
 }
 
-void SimpleLieAlgebra::initHEFSystemFromECoeffs
-  ( int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots,
-    int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs,
-    MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
+void SimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA, roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
 { root tempRoot;
   static int ProblemCounter=0;
   ProblemCounter++;
-  if (ProblemCounter==4)
-  { ProblemCounter=4;
-  }
   Monomial<Rational> tempM;
   Rational tempRat;
   hashedRoots RootSpacesThatNeedToBeKilled;
@@ -1459,7 +1456,7 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
 //  IndicesEquationsByRootSpace.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
   outputSystemToBeSolved.size=0;
   outputMatrixSystemToBeSolved.init(0, numberVariables);
-  outputSystemToBeSolved.ComputeDubugString();
+  //outputSystemToBeSolved.ComputeDebugString();
   for (int i=0; i<rootsInPlay.size; i++)
     for (int j=0; j<rootsInPlay.size; j++)
     { tempRoot= rootsInPlay.TheObjects[i]-rootsInPlay.TheObjects[j];
@@ -1477,14 +1474,14 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
         tempM.degrees[j+halfNumberVariables]=1;
         tempM.Coefficient= this->GetConstant(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[j]);
         outputSystemToBeSolved.TheObjects[indexEquation].AddMonomial(tempM);
-        outputSystemToBeSolved.ComputeDubugString();
+        //outputSystemToBeSolved.ComputeDebugString();
       }
     }
   int oldSize=outputSystemToBeSolved.size;
   outputSystemToBeSolved.SetSizeExpandOnTopNoObjectInit(oldSize+this->theWeyl.KillingFormMatrix.NumRows);
   for(int i=oldSize; i<outputSystemToBeSolved.size; i++)
     outputSystemToBeSolved.TheObjects[i].Nullify((short)numberVariables);
-  outputSystemToBeSolved.ComputeDubugString();
+  //outputSystemToBeSolved.ComputeDebugString();
   for (int i=0; i<rootsInPlay.size; i++)
   { assert(rootsInPlay.size==halfNumberVariables);
     this->GetConstantOrHElement(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[i], tempRat, tempRoot);
@@ -1521,5 +1518,17 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs
         outputMatrixSystemToBeSolved.elements[i][lowerIndex]=theMonomial.Coefficient* inputFCoeffs.elements[0][higherIndex-halfNumberVariables];
     }
   }
-  outputSystemToBeSolved.ComputeDubugString();
+  outputSystemToBeSolved.ComputeDebugString();
+}
+
+bool SltwoSubalgebras::ContainsCharacteristic(root& theCharacteristic, int* outputIndex)
+{ if (outputIndex!=0)
+    *outputIndex=-1;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].theH.Hcomponent==theCharacteristic)
+    { if (outputIndex!=0)
+        *outputIndex=i;
+      return true;
+    }
+  return false;
 }

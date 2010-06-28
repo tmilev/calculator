@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="vp_fox_gui" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/vp_fox_gui" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="fox/src" />
+			<Add directory="fox/include" />
+		</Compiler>
+		<Linker>
+			<Add library="fox/src/.libs/libFOX-1.6.0.0.37.so" />
+			<Add directory="fox/src/.libs" />
+			<Add directory="fox/src" />
+		</Linker>
+		<Unit filename="fox/include/fx.h" />
+		<Unit filename="fox_gui.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

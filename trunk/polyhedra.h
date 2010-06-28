@@ -3117,7 +3117,7 @@ class PolynomialsRationalCoeff: public Polynomials<Rational>
 public:
 	std::string DebugString;
 	void ElementToString(std::string& output);
-	void ComputeDubugString();
+	void ComputeDebugString();
 	void operator=(const PolynomialsRationalCoeff& right);
 	bool operator==(const PolynomialsRationalCoeff& right);
 	void ComputeB(PolynomialRationalCoeff& output,int cutOffIndex, int theDimension);
@@ -3141,7 +3141,7 @@ public:
 	std::string DebugString;
 	void ElementToString(std::string& output, int theDimension);
 	void ElementToStringComputeFunctionB(std::string& output, bool computingB, int theDimension);
-	void ComputeDubugString(int theDimension);
+	void ComputeDebugString(int theDimension);
 	void Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget);
 };
 
@@ -3503,7 +3503,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsPositive()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsEqualToZero() const 
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsEqualToZero() const
 { return this->Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero);
 }
 
@@ -5383,7 +5383,7 @@ public:
   void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void KmodTimesKmod(int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int> & output);
 	void initFromAmbientWeyl();
-	void GetSsl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
+	void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
 	void ComputeAllButAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
@@ -5561,6 +5561,7 @@ public:
 	void getZuckermansArrayE8(roots& output);
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringCurrent();
+  bool ContainsCharacteristic(root& theCharacteristic, int* outputIndex);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml);
 	void Compute(GlobalVariables& theGlobalVariables, bool flagUsingDynkinHardCodedTables);
 };

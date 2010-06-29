@@ -2210,11 +2210,23 @@ void MatrixLargeRational::ActOnRoots(roots& input, roots&output)
     this->ActOnAroot(input.TheObjects[i],output.TheObjects[i]);
 }
 
-void MatrixLargeRational::AssignMatrixIntWithDen(MatrixIntTightMemoryFit &theMat, int Den)
+void MatrixLargeRational::AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den)
 { this->init(theMat.NumRows,theMat.NumCols);
 	for (int i=0; i<this->NumRows; i++)
 		for (int j=0; j<this->NumCols; j++)
 			this->elements[i][j].AssignNumeratorAndDenominator(theMat.elements[i][j],Den);
+}
+
+void MatrixLargeRational::AssignRootsToRowsOfMatrix(const roots& input)
+{ if (input.size<=0)
+  { this->init(0,0);
+    return;
+  }
+  int theDimension= input.TheObjects[0].size;
+  this->init(input.size, theDimension);
+  for (int i=0; i< this->NumRows; i++)
+    for (int j=0; j<theDimension; j++)
+      this->elements[i][j].Assign(input.TheObjects[i].TheObjects[j]);
 }
 
 void MatrixLargeRational::NonPivotPointsToRoot(Selection& TheNonPivotPoints, int OutputDimension, root& output)
@@ -2762,7 +2774,7 @@ inline void roots::AddIntRoot(intRoot &r)
 	this->TheObjects[this->size-1].AssignIntRoot(r);
 }
 
-bool roots::PerturbVectorToRegular(	root& output, GlobalVariables& theGlobalVariables, int theDimension)
+bool roots::PerturbVectorToRegular(root& output, GlobalVariables& theGlobalVariables, int theDimension)
 { root normal;
   bool result=false;
 	while (!this->IsRegular(output,normal, theGlobalVariables,theDimension))
@@ -2775,22 +2787,21 @@ bool roots::PerturbVectorToRegular(	root& output, GlobalVariables& theGlobalVari
 	return result;
 }
 
-int roots::GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)
+int roots::GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)const
 { Selection& NonPivotPoints= theGlobalVariables.selGetRankOfSpanOfElements;
 	MatrixLargeRational& tempMatrix=theGlobalVariables.matGetRankOfSpanOfElements;
 	if (this->size==0)
 		return 0;
 	int theDimension= this->TheObjects[0].size;
-	this->GaussianEliminationForNormalComputation(tempMatrix,NonPivotPoints,theDimension);
+	this->GaussianEliminationForNormalComputation(tempMatrix, NonPivotPoints, theDimension);
 	return (theDimension-NonPivotPoints.CardinalitySelection);
 }
 
-bool roots::GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(MatrixLargeRational &outputTheLinearCombination, int theIndex)
+bool roots::GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(MatrixLargeRational& outputTheLinearCombination, int theIndex)
 { return false;
 }
 
-
-void roots::GetLinearDependenceRunTheLinearAlgebra(	MatrixLargeRational &outputTheLinearCombination, MatrixLargeRational &outputTheSystem,	Selection &outputNonPivotPoints)
+void roots::GetLinearDependenceRunTheLinearAlgebra(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints)
 { if (this->size==0)
 		return;
 	short Dimension=(short) this->TheObjects[0].size;
@@ -2808,15 +2819,15 @@ void roots::GetLinearDependenceRunTheLinearAlgebra(	MatrixLargeRational &outputT
 bool roots::GetLinearDependence(MatrixLargeRational& outputTheLinearCombination)
 { MatrixLargeRational tempMat;
 	Selection nonPivotPoints;
-	this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination,tempMat,nonPivotPoints);
+	this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
 	if (nonPivotPoints.CardinalitySelection==0)
 		return false;
-	tempMat.NonPivotPointsToEigenVector(nonPivotPoints,outputTheLinearCombination);
+	tempMat.NonPivotPointsToEigenVector(nonPivotPoints, outputTheLinearCombination);
 	//outputTheLinearCombination.ComputeDebugString();
 	return true;
 }
 
-void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension)
+void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const
 { inputMatrix.init((short)this->size,(short)theDimension);
 	MatrixLargeRational matOutputEmpty;
 	matOutputEmpty.init(-1,-1);
@@ -2841,9 +2852,9 @@ void roots::ComputeNormal(root& output)
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
 }
 
-bool roots::IsRegular(root &r, GlobalVariables& theGlobalVariables, int theDimension)
+bool roots::IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension)
 { root tempRoot;
-	return this->IsRegular(r,tempRoot,theGlobalVariables,theDimension);
+	return this->IsRegular(r, tempRoot,theGlobalVariables, theDimension);
 }
 
 bool roots::IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension)
@@ -2951,7 +2962,7 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots( root& output, root& Extr
 	return true;
 }
 
-void roots::GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl)
+void roots::GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl)const
 {	output.Resize(this->size, this->size, false);
 	for (int i=0; i<this->size; i++)
 		for(int j=i; j<this->size; j++)
@@ -3112,7 +3123,13 @@ int roots::NumRootsConnectedTo(root& input, WeylGroup& theWeyl)
 	return result;
 }
 
-void roots::MakeBasisChange(root& input, root& output)
+void roots::MakeEiBasis(int theDimension)
+{ this->SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].MakeEi(theDimension, i);
+}
+
+void roots::MakeBasisChange(root& input, root& output)const
 {	int theDimension=input.size;
 	assert(theDimension==this->size);
 	assert(&input!=&output);
@@ -3125,7 +3142,7 @@ void roots::MakeBasisChange(root& input, root& output)
 	}
 }
 
-void roots::MakeBasisChange(roots& input, roots& output)
+void roots::MakeBasisChange(roots& input, roots& output)const
 { assert(&input!=&output);
   output.SetSizeExpandOnTopNoObjectInit(input.size);
  	for (int i=0; i<input.size; i++)
@@ -11683,7 +11700,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra(	roots& generators, ListBasicObjec
   roots& simpleBasis=theGlobalVariables.rootsGetEpsCoords2;
   roots& coordsInNewBasis=theGlobalVariables.rootsGetEpsCoords3;
   simpleBasis.CopyFromBase(generators);
-  tempDyn.ComputeDiagramType(simpleBasis,*this);
+  tempDyn.ComputeDiagramTypeModifyInput(simpleBasis,*this);
   bool tempBool=true;
   if (generators.size==0)
     tempBool=false;
@@ -13611,8 +13628,8 @@ void rootSubalgebra::ComputeAllButAmbientWeyl()
 	this->ComputeKModules();
 	this->ComputeCentralizerFromKModulesAndSortKModules();
 	this->NilradicalKmods.init(this->kModules.size);
-	this->theDynkinDiagram.ComputeDiagramType(this->SimpleBasisK,this->AmbientWeyl);
-	this->theCentralizerDiagram.ComputeDiagramType(this->SimpleBasisCentralizerRoots,this->AmbientWeyl);
+	this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK,this->AmbientWeyl);
+	this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots,this->AmbientWeyl);
 }
 
 void rootSubalgebra::ComputeAll()
@@ -13668,6 +13685,39 @@ void WeylGroup::TransformToSimpleBasisGenerators(roots& theGens)
 				}
 				if (this->RootSystem.IndexOfObjectHash(tempRoot)!=-1)
 				{ if (!tempRoot.IsPositiveOrZero())
+					{ tempRoot.MinusRoot();
+						theGens.TheObjects[j].Assign(tempRoot);
+					}
+					else
+						theGens.TheObjects[i].Assign(tempRoot);
+					reductionOccured=true;
+				}
+			}
+	}
+}
+
+void WeylGroup::TransformToSimpleBasisGeneratorsWRTh(roots& theGens, root& theH)
+{ for (int i=0;i<theGens.size;i++)
+		if (!this->IsPositiveOrPerpWRTh( theGens.TheObjects[i], theH))
+			theGens.TheObjects[i].MinusRoot();
+	bool reductionOccured=true;
+	root tempRoot;
+	while (reductionOccured)
+	{ reductionOccured= false;
+		for (int i=0; i<theGens.size; i++)
+			for (int j=i+1; j<theGens.size; j++)
+			{// if (this->flagAnErrorHasOccuredTimeToPanic)
+				//	theGens.ComputeDebugString();
+				tempRoot.Assign(theGens.TheObjects[i]);
+				tempRoot.Subtract(theGens.TheObjects[j]);
+				//if (this->flagAnErrorHasOccuredTimeToPanic)
+					//tempRoot.ComputeDebugString();
+				if (tempRoot.IsEqualToZero())
+				{ theGens.PopIndexSwapWithLast(j);
+					reductionOccured=true;
+				}
+				if (this->RootSystem.IndexOfObjectHash(tempRoot)!=-1)
+				{ if (!this->IsPositiveOrPerpWRTh(tempRoot, theH))
 					{ tempRoot.MinusRoot();
 						theGens.TheObjects[j].Assign(tempRoot);
 					}
@@ -13798,7 +13848,7 @@ bool rootSubalgebra::rootIsInCentralizer(root& input)
   return true;
 }
 
-void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile (std::fstream &output, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites )
+void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile(std::fstream &output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites)
 { output<< "pairing_table_size: "<< inMultTable.size<<"\n";
 	for (int i=0;i<inMultTable.size;i++)
 		for (int j=0;j<inMultTable.size;j++)
@@ -13811,7 +13861,7 @@ void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile (std::fstream &output,
 		output<< inOpposites.TheObjects[i]<<" ";
 }
 
-void rootSubalgebra::ReadMultTableAndOppositeKmodsToFile(std::fstream& input, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites )
+void rootSubalgebra::ReadMultTableAndOppositeKmodsToFile(std::fstream& input, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites)
 { std::string tempS;
 	int tempI, theSize;
 	input>> tempS>> theSize;
@@ -13874,7 +13924,7 @@ bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
 }
 */
 
-void rootSubalgebra::GeneratePossibleNilradicalsRecursive( GlobalVariables &theGlobalVariables, multTableKmods &multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicalsRecursive(GlobalVariables &theGlobalVariables, multTableKmods &multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, int indexInOwner)
 { int RecursionDepth=0;
 	std::string tempSsel, tempSopposite;
 	ListBasicObjects<Selection> tempSels;
@@ -13919,7 +13969,7 @@ bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicO
 	return true;
 }
 
-bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,	multTableKmods & multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int> &oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables)
+bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,	multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables)
 { Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
 	Selection& originalSel=impliedSelections.TheObjects[RecursionDepth];
 	targetSel.Assign(originalSel);
@@ -13943,7 +13993,7 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int Recursion
 	return true;
 }
 
-void rootSubalgebra::PossibleNilradicalComputation(	GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner)
 { this->NumNilradicalsAllowed++;
 	//this->ComputeDebugString();
 	if (this->flagFirstRoundCounting)
@@ -13958,7 +14008,7 @@ void rootSubalgebra::PossibleNilradicalComputation(	GlobalVariables& theGlobalVa
 	this->MakeProgressReportPossibleNilradicalComputation(theGlobalVariables,owner,indexInOwner);
 }
 
-void rootSubalgebra::MakeProgressReportGenAutos(int progress,int outOf,int found, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
 		return;
 	std::stringstream out4, out5;
@@ -13979,7 +14029,7 @@ void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVar
 	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
 }
 
-void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables,rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
 { if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
 		return;
 	if (this->flagMakingProgressReport)
@@ -14007,7 +14057,7 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
 	}
 }
 
-void rootSubalgebra::GenerateKmodMultTable(	ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > >& output, ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::GenerateKmodMultTable(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& output, ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables)
 { output.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	oppositeKmods.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	int numTotal= this->kModules.size* this->kModules.size;
@@ -14030,7 +14080,7 @@ bool rootSubalgebra::IsARootOrZero(root& input)
 { return input.IsEqualToZero() || this->IsARoot(input);
 }
 
-void rootSubalgebra::KmodTimesKmod(int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int>& output)
+void rootSubalgebra::KmodTimesKmod(int index1, int index2, ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int>& output)
 { root tempRoot;
 	output.size=0;
 	for (int i=0;i<this->kModules.TheObjects[index1].size;i++)
@@ -14194,7 +14244,7 @@ bool roots::ConesIntersect(	GlobalVariables& theGlobalVariables, ListBasicObject
 	return MatrixLargeRational::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA,matb,matX,theGlobalVariables);
 }
 
-bool rootSubalgebra::ConeConditionHolds( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations)
+bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations)
 { if (roots::ConesIntersect(	theGlobalVariables, NilradicalRoots, Ksingular, this->AmbientWeyl.KillingFormMatrix.NumRows))
 	{ if (doExtractRelations)
       this->ExtractRelations( theGlobalVariables.matConeCondition1, theGlobalVariables.matConeCondition3,NilradicalRoots, owner,indexInOwner, theGlobalVariables, Ksingular);
@@ -14203,7 +14253,7 @@ bool rootSubalgebra::ConeConditionHolds( GlobalVariables& theGlobalVariables, ro
 		return true;
 }
 
-bool rootSubalgebra::ConeConditionHolds( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations)
+bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations)
 { roots& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots;
 	roots& Ksingular=theGlobalVariables.rootsConeConditionHolds2;
 	if (this->kModules.size==0)
@@ -14287,7 +14337,7 @@ void rootSubalgebra::MatrixToRelation( coneRelation& output, MatrixLargeRational
 		}
 }
 
-void rootSubalgebra::ExtractRelations( MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular)
+void rootSubalgebra::ExtractRelations(MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular)
 { int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
   if (this->flagAnErrorHasOccuredTimeToPanic)
 	{ this->NilradicalKmods.ComputeDebugString();
@@ -14374,7 +14424,7 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(	coneRelation& theRel, r
           chosenAlphas.AddListOnTop(theRel.Betas);
           //chosenAlphas.ComputeDebugString();
           //theRel.Betas.ComputeDebugString();
-          theDiagram.ComputeDiagramType(chosenAlphas, this->AmbientWeyl);
+          theDiagram.ComputeDiagramTypeModifyInput(chosenAlphas, this->AmbientWeyl);
           int theRank=theDiagram.RankTotal();
           if (theRank>4 || theDiagram.DebugString=="$B_4$" || theDiagram.DebugString=="$C_4$")
           { int goalNumBetas= 2;
@@ -14878,7 +14928,7 @@ bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariable
 	return true;
 }
 
-void rootSubalgebra::ElementToHtml(int index, std::string &path, GlobalVariables &theGlobalVariables)
+void rootSubalgebra::ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables)
 { std::fstream output; std::string tempS;
   std::string MyPath, childrenPath;
   MyPath=path; childrenPath=path;
@@ -14922,7 +14972,7 @@ void rootSubalgebra::ElementToStringHeaderFooter( std::string& outputHeader,std:
 	}
 }
 
-void rootSubalgebra::ElementToString ( std::string &output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::ElementToString(std::string &output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
@@ -15156,11 +15206,8 @@ void ::DynkinDiagramRootSubalgebra::Sort()
 	}
 }
 
-void ::DynkinDiagramRootSubalgebra::ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl)
-{ simpleBasisInput.ComputeDebugString();
-	theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
-	simpleBasisInput.ComputeDebugString();
-  this->SimpleBasesConnectedComponents.size=0;
+void ::DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(roots& simpleBasisInput, WeylGroup& theWeyl)
+{ this->SimpleBasesConnectedComponents.size=0;
 	this->SimpleBasesConnectedComponents.MakeActualSizeAtLeastExpandOnTop(simpleBasisInput.size);
 	for (int i=0;i<simpleBasisInput.size;i++)
 	{ int indexFirstComponentConnectedToRoot=-1;
@@ -15221,15 +15268,15 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
 	return this->DebugString>right.DebugString;
 }
 
-void DynkinDiagramRootSubalgebra::GetMapFromPermutation (roots& domain, roots& range, ListBasicObjects< int >& thePerm, ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right)
-{ for(int i=0;i<this->SimpleBasesConnectedComponents.size;i++)
-    for (int j=0;j<this->SimpleBasesConnectedComponents.TheObjects[i].size;j++)
-    { assert(	this->SimpleBasesConnectedComponents.TheObjects[i].size==right.SimpleBasesConnectedComponents.TheObjects[thePerm.TheObjects[i]].size);
+void DynkinDiagramRootSubalgebra::GetMapFromPermutation(roots& domain, roots& range, ListBasicObjects<int>& thePerm, ListBasicObjects<ListBasicObjects<ListBasicObjects<int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right)
+{ for(int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
+    for (int j=0; j<this->SimpleBasesConnectedComponents.TheObjects[i].size;j++)
+    { assert(this->SimpleBasesConnectedComponents.TheObjects[i].size==right.SimpleBasesConnectedComponents.TheObjects[thePerm.TheObjects[i]].size);
 			domain.AddObjectOnTop( this->SimpleBasesConnectedComponents.TheObjects[i].TheObjects[j]);
       int indexTargetComponent=thePerm.TheObjects[i];
       int indexAutomorphismInComponent=theAutosPerm.Multiplicities.TheObjects[i];
       int indexRoot=theAutos.TheObjects[i].TheObjects[indexAutomorphismInComponent].TheObjects[j];
-      range.AddObjectOnTop( right.SimpleBasesConnectedComponents.TheObjects[indexTargetComponent].TheObjects[indexRoot]);
+      range.AddObjectOnTop(right.SimpleBasesConnectedComponents.TheObjects[indexTargetComponent].TheObjects[indexRoot]);
     }
 }
 
@@ -15266,7 +15313,7 @@ void ::DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, Weyl
 		tempRoots.CopyFromBase(currentComponent);
 		tempRoots.PopIndexSwapWithLast(tripleNodeindex);
 		DynkinDiagramRootSubalgebra	tempDiagram;
-		tempDiagram.ComputeDiagramType(tempRoots,theWeyl);
+		tempDiagram.ComputeDiagramTypeModifyInput(tempRoots,theWeyl);
 		assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
 		ListBasicObjects<int> indicesLongComponents;
 		indicesLongComponents.size=0;
@@ -15586,7 +15633,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
 	this->DebugString=out.str();
 }
 
-bool rootSubalgebra::LinCombToString(root& alphaRoot, int coeff, root &linComb, std::string &output)
+bool rootSubalgebra::LinCombToString(root& alphaRoot, int coeff, root& linComb, std::string& output)
 { int theDimension = this->AmbientWeyl.KillingFormMatrix.NumRows;
 	if (coeff==1)
 		return false;
@@ -16792,7 +16839,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(	rootSubalgebra& owner, roots& Ni
 	tempRoots.AddListOnTop(this->Betas);
 	tempRoots.AddListOnTop(owner.genK);
 	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
-	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
+	this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
 	if (this->theDiagram.DebugString=="$F_4$")
 		return false;
 	if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
@@ -16833,7 +16880,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoo
 	tempRoots.CopyFromBase(this->Alphas);
 	tempRoots.AddListOnTop(this->Betas);
 	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
-	this->theDiagram.ComputeDiagramType(tempRoots, owner.AmbientWeyl);
+	this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
 	if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
 	{ this->ComputeDiagramRelAndK(owner);
 		assert(false);
@@ -16949,7 +16996,7 @@ void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
 	for (int i=0;i<this->theDiagram.SimpleBasesConnectedComponents.size;i++)
 		tempRoots.AddListOnTop(this->theDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
 	//owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
-	this->theDiagramRelAndK.ComputeDiagramType(tempRoots,owner.AmbientWeyl);
+	this->theDiagramRelAndK.ComputeDiagramTypeModifyInput(tempRoots,owner.AmbientWeyl);
 }
 
 void coneRelation::FixRepeatingRoots( roots& theRoots, ListBasicObjects<Rational>& coeffs)
@@ -17866,9 +17913,8 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
 		//theHselection.ComputeDebugString();
 		hCandidate.MakeZero(theDimension);
 		this->MultiplicitiesFixedHweight.initFillInObject(this->theWeylGroup.RootSystem.size+1,0);
-		this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight]
-			=theDimension;
-		for (int j=0;j<theDimension;j++)
+		this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight]=theDimension;
+		for (int j=0; j<theDimension; j++)
 			hCandidate.TheObjects[j]=theHselection.Multiplicities.TheObjects[j];
     if (flagUsingDynkinHardCodedTables)
       hCandidate.Assign(preComputedDynkinHs.TheObjects[i]);
@@ -17936,8 +17982,8 @@ void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsi
       BufferDecomposition.hCharacteristic.Assign(hCandidate);
 			invertedCartan.ActOnAroot(hCandidate,BufferDecomposition.hElementCorrespondingToCharacteristic);
 			BufferDecomposition.hCommutingRootSpaces.CopyFromBase(hCommutingRoots);
-      BufferDecomposition.DiagramM.ComputeDiagramType(hCommutingRoots, this->theWeylGroup);
-      BufferDecomposition.CentralizerDiagram.ComputeDiagramType(RootSpacesThatCommuteWithAllRootsInTheSlTwo, this->theWeylGroup);
+      BufferDecomposition.DiagramM.ComputeDiagramTypeModifyInput(hCommutingRoots, this->theWeylGroup);
+      BufferDecomposition.CentralizerDiagram.ComputeDiagramTypeModifyInput(RootSpacesThatCommuteWithAllRootsInTheSlTwo, this->theWeylGroup);
       BufferDecomposition.RootsHavingScalarProduct2WithH.CopyFromBase(rootsHavingScalarProd2WithH);
       BufferDecomposition.ComputeDynkinsEpsilon(this->theWeylGroup);
 			if (this->AddObjectOnTopNoRepetitionOfObjectHash(BufferDecomposition))
@@ -17954,53 +18000,11 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
 {	std::string tempS; std::stringstream out;
   out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, false, false, theGlobalVariables);
+  { this->TheObjects[i].ElementToString(tempS, UseHtml, useLatex, theGlobalVariables);
     out<< "Index "<< i<<": "<<tempS<<"\n\n";
   }
   output=out.str();
   return;
-  int Zcounter=0;
-  int numGood=0;
-	out <<"Number sl(2)s: "<< this->size<<"\n\n";
-	//for (int k=0;k<2;k++)
-	//{	//bool tempBool=(k==0);
-	for (int i=0; i<this->size; i++)
-  //  if (!this->TheObjects[i].DifferenceTwoHsimpleRootsIsARoot)//)==tempBool)
-    { //if(this->TheObjects[i].DynkinsEpsilon==0)
-      numGood++;
-      this->TheObjects[i].hCharacteristic.ElementToString(tempS);
-      out << "\n\nSubalgebra "<<i+1<<" h characteristic: " << tempS;
-      root& r=this->TheObjects[i].hCharacteristic;
-      out	<<"$\\begin{array}{ccccccc}" << r.TheObjects[7].ElementToString() <<" & " << r.TheObjects[6].ElementToString() <<" & " << r.TheObjects[5].ElementToString() << " & " << r.TheObjects[4].ElementToString() << " & " << r.TheObjects[3].ElementToString() << " & " << r.TheObjects[2].ElementToString() << " & " << r.TheObjects[0].ElementToString() <<"\\\\&&&&"<< r.TheObjects[1].ElementToString()<<"\\end{array}$\n\n";
-      out	<< "Corresponding h: " << this->TheObjects[i].hElementCorrespondingToCharacteristic.ElementToString() << "\n\n sl(2) - module decomposition: ";
-      int DimensionCentralizer=0;
-      for (int j=0;j<this->TheObjects[i].theModulesHighestWeights.size;j++)
-      {	if ( this->TheObjects[i].theModulesMultiplicities.TheObjects[j]!=1)
-          out << this->TheObjects[i].theModulesMultiplicities.TheObjects[j];
-        out	<<"$V_{" << this->TheObjects[i].theModulesHighestWeights.TheObjects[j]<<"}$;   ";
-        if (this->TheObjects[i].theModulesHighestWeights.TheObjects[j]==0)
-          DimensionCentralizer= this->TheObjects[i].theModulesMultiplicities.TheObjects[j];
-      }
-      int easyCentralizerDim=this->TheObjects[i].CentralizerDiagram.NumRootsGeneratedByDiagram() + this->TheObjects[i].CentralizerDiagram.RankTotal();
-      int dimM=this->TheObjects[i].DiagramM.NumRootsGeneratedByDiagram() + this->TheObjects[i].DiagramM.RankTotal();
-      out <<"\n\nm is of type: " << this->TheObjects[i].DiagramM.DebugString<<" Dimension of m: "<< dimM<< "\n\n";
-      if (dimM<=DimensionCentralizer)
-      { out <<"\n\n~ {This subalgebra satisfies $\\mathrm{dim} m< \\mathrm{dim} V_0 $}\\\\~\\\\~\\\\~ ";
-        Zcounter++;
-      }
-      else
-        out <<"\n\nDimension of m is smaller than the total dim of  $V_0$";
-      if(DimensionCentralizer==easyCentralizerDim)
-        out <<"\n\n\n   Dynkin Diagram centralizer: "<< this->TheObjects[i].CentralizerDiagram.DebugString;
-      else
-        out <<"\n\n\n  Centralizer contains "<<" the root spaces commuting with " <<" the entire 2-eigenspace of $h$. The latter generate subalgebra of type " << this->TheObjects[i].CentralizerDiagram.DebugString <<" of dimension " << easyCentralizerDim;
-      if (DimensionCentralizer<easyCentralizerDim)
-        out <<"aaaaaaaarrrrrrrrrrrrrggggggggggggggggghhhhhhhhh";
-      out <<"\n\n\\rule{\\textwidth}{0.4pt}";
-    }
-	out <<  "\n\n Num subalgebras satisfying your inequality= "<< Zcounter;
-	out <<  "\n\nNum good subalgebras: "<< numGood;
-	output=out.str();
 }
 
 void SltwoSubalgebras::ComputeDebugStringCurrent()
@@ -18875,7 +18879,7 @@ void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, 
 		theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
 }
 
-void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables &theGlobalVariables)
+void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables)
 { std::stringstream out5;
 	out5<<checked+1 << " checked out of " << outOf;
 	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
@@ -18917,7 +18921,7 @@ bool minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, bool& one
 {	return this->IsSeparatingCones(input, this->PartialRelation.Alphas, this->PartialRelation.Betas, oneBetaIsPositive, theWeyl);
 }
 
-bool minimalRelationsProverStateFixedK::IsSeparatingCones( root& input, roots& theAlphas, roots& theBetas, bool& oneBetaIsPositive, WeylGroup& theWeyl)
+bool minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, roots& theAlphas, roots& theBetas, bool& oneBetaIsPositive, WeylGroup& theWeyl)
 {	bool foundPosBeta=false;
 	bool foundNegBeta=false;
 	bool foundPosAlpha=false;
@@ -18955,7 +18959,7 @@ bool minimalRelationsProverStateFixedK::IsSeparatingCones( root& input, roots& t
 	return true;
 }
 
-void minimalRelationsProverStateFixedK::WriteToFile(std::fstream &output, GlobalVariables &theGlobalVariables)
+void minimalRelationsProverStateFixedK::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output <<"\n\n\n\nNum_isos: " << this->indicesIsosRespectingInitialNilradicalChoice.size<<"\n";
 	for (int i=0;i<this->indicesIsosRespectingInitialNilradicalChoice.size;i++)
 		output <<this->indicesIsosRespectingInitialNilradicalChoice.TheObjects[i]<<" ";
@@ -20110,9 +20114,9 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(	minimalRelatio
     return false;
   DynkinDiagramRootSubalgebra diagram1, diagram2;
   roots tempRoots; tempRoots.CopyFromBase(theState.PositiveKroots);
-  diagram1.ComputeDiagramType(tempRoots, theWeyl);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots, theWeyl);
   tempRoots.CopyFromBase(theState.PositiveKroots);
-  diagram2.ComputeDiagramType(tempRoots, theWeyl);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots, theWeyl);
   if (!(diagram1==diagram2))
     return false;
 	ListBasicObjects<int> tempList;
@@ -21243,21 +21247,21 @@ bool minimalRelationsProverStatesFixedK::ExtendToIsomorphismRootSystemFixedK( mi
   DynkinDiagramRootSubalgebra diagram1, diagram2;
   roots tempRoots1, tempRoots2;
   tempRoots1.CopyFromBase(this->theK.SimpleBasisK);  tempRoots1.AddListOnTop(theAlphas);
-  diagram1.ComputeDiagramType(tempRoots1, this->theWeylGroup);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup);
   tempRoots2.CopyFromBase(this->theK.SimpleBasisK); tempRoots2.AddListOnTop(theOtherAlphas);
-  diagram2.ComputeDiagramType(tempRoots2, this->theWeylGroup);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup);
   if (!(diagram1==diagram2))
     return false;
   tempRoots1.AddListOnTop(theBetas);
-  diagram1.ComputeDiagramType(tempRoots1, this->theWeylGroup);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup);
   tempRoots2.AddListOnTop(theOtherBetas);
-  diagram2.ComputeDiagramType(tempRoots2, this->theWeylGroup);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup);
   if (!(diagram1==diagram2))
     return false;
   tempRoots1.CopyFromBase(this->theK.SimpleBasisK);  tempRoots1.AddListOnTop(theBetas);
-  diagram1.ComputeDiagramType(tempRoots1, this->theWeylGroup);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup);
   tempRoots2.CopyFromBase(this->theK.SimpleBasisK); tempRoots2.AddListOnTop(theOtherBetas);
-  diagram2.ComputeDiagramType(tempRoots2, this->theWeylGroup);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup);
   if (!(diagram1==diagram2))
     return false;
   ListBasicObjects<int> tempList;

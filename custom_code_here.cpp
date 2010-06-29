@@ -1251,24 +1251,20 @@ void hashedRoots::ReadFromFile(std::fstream& input)
 
 void slTwo::ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
 { std::stringstream out;  std::string tempS;
+  this->hCharacteristic.ElementToString(tempS);
+  out <<"h-characteristic: "<<  tempS;
   this->theH.ElementToString(tempS, *this->owner, useHtml, useLatex);
   out <<"\n\n$h=$ $" <<tempS<<"$";
   this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
   out <<"\n\n$e=$ $" <<tempS<<"$";
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
   out <<"\n\n$f=$ $" <<tempS<<"$";
-  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
-  { ElementSimpleLieAlgebra tempEl;
-    this->owner->LieBracket(this->theE, this->theF, tempEl);
-    tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
-    out << "\n\n$[e,f]=$ $" <<tempS <<"$";
-    this->owner->LieBracket(this->theH, this->theE, tempEl);
-    tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
-    out << "\n\n$[h,e]=$ $" <<tempS <<"$";
-    this->owner->LieBracket(this->theH, this->theF, tempEl);
-    tempEl.ElementToString(tempS, *this->owner, useHtml, useLatex);
-    out << "\n\n$[h,f]=$ $" <<tempS <<"$";
-  }
+  this->bufferEFnotCopiedAutomatically.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out << "\n\n$[e,f]=$ $" <<tempS <<"$";
+  this->bufferHEnotCopiedAutomatically.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out << "\n\n$[h,e]=$ $" <<tempS <<"$";
+  this->bufferHFnotCopiedAutomatically.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out << "\n\n$[h,f]=$ $" <<tempS <<"$";
   this->theSystemMatrixForm.ElementToSting(tempS);
   out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   this->theSystemColumnVector.ElementToSting(tempS);
@@ -1333,7 +1329,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   { tempRoots.size=0;
     for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
       tempRoots.AddObjectOnTop(this->SimpleBasisK.TheObjects[theRootsWithZeroCharacteristic.elements[j]]);
-    tempDiagram.ComputeDiagramType(tempRoots, this->AmbientWeyl);
+    tempDiagram.ComputeDiagramTypeModifyInput(tempRoots, this->AmbientWeyl);
     int theSlack=0;
     RootsWithCharacteristic2.size=0;
     for (int j=0; j<relativeRootSystem.size; j++)
@@ -1365,13 +1361,16 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
       theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
       for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
-      if (!output.ContainsCharacteristic(theSl2.theH.Hcomponent, 0))
+      if (!output.ContainsSl2WithGivenH(theSl2.theH.Hcomponent, 0))
       { theSl2.theE.Nullify(theLieAlgebra);
         theSl2.theF.Nullify(theLieAlgebra);
         //theSl2.ComputeDebugString(false, false, theGlobalVariables);
         if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
         { theSl2.ComputeDebugString(false, false, theGlobalVariables);
           output.AddObjectOnTopHash(theSl2);
+          this->PositiveRootsK.Sum(tempRoot);
+          tempRoot.DivByInteger(2);
+          output.LastObject()->MakeReportPrecomputations(theGlobalVariables, tempRoot);
           output.LastObject()->ComputeDebugString(false, false, theGlobalVariables);
         }
       }
@@ -1379,7 +1378,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   }
 }
 
-bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra( roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
 { roots SelectedExtraPositiveRoots;
   roots rootsInPlay;
   rootsInPlay.size=0;
@@ -1516,14 +1515,109 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Select
   outputSystemToBeSolved.ComputeDebugString();
 }
 
-bool SltwoSubalgebras::ContainsCharacteristic(root& theCharacteristic, int* outputIndex)
+bool SltwoSubalgebras::ContainsSl2WithGivenH(root& theH, int* outputIndex)
 { if (outputIndex!=0)
     *outputIndex=-1;
   for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].theH.Hcomponent==theCharacteristic)
+    if (this->TheObjects[i].theH.Hcomponent==theH)
     { if (outputIndex!=0)
         *outputIndex=i;
       return true;
     }
   return false;
 }
+
+void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, root& rhoMinimalContainingRegularSubalgebra)
+{ int theDimension=this->owner->theWeyl.KillingFormMatrix.NumRows;
+  this->hCharacteristic.SetSizeExpandOnTopLight(theDimension);
+  this->owner->theWeyl.PerturbWeightToRegularWRTrootSystem(rhoMinimalContainingRegularSubalgebra, this->perturbedRhoForSimpleBasisOfAmbient);
+  roots tempRoots;
+  tempRoots.MakeEiBasis(theDimension);
+  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->perturbedRhoForSimpleBasisOfAmbient);
+  this->hCharacteristic.SetSizeExpandOnTopLight(theDimension);
+  for (int i=0; i<theDimension; i++)
+    this->hCharacteristic.TheObjects[i]=this->owner->theWeyl.RootScalarKillingFormMatrixRoot(this->theH.Hcomponent, tempRoots.TheObjects[i]);
+
+/*  if (foundNegative)
+  { this->owner->theWeyl.PerturbWeightToRegularWRTrootSystem(this->theH.Hcomponent, tempRoot);
+    roots range, domain;
+    range.MakeEiBasis(theDimension);
+    domain.MakeEiBasis(theDimension);
+    this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(range, tempRoot);
+    DynkinDiagramRootSubalgebra theDiagram;
+    theDiagram.ComputeDiagramTypeKeepInput(range, this->owner->theWeyl);
+    theDiagram.SimpleBasesConnectedComponents.CollectionToRoots(range);
+    theDiagram.ComputeDiagramTypeModifyInput(domain, this->owner->theWeyl);
+    theDiagram.SimpleBasesConnectedComponents.CollectionToRoots(domain);
+    this->theE.TransformInduceFromMapsOfRootSystems(domain, range, *this->owner, theGlobalVariables);
+    this->theF.TransformInduceFromMapsOfRootSystems(domain, range, *this->owner, theGlobalVariables);
+    this->theH.TransformInduceFromMapsOfRootSystems(domain, range, *this->owner, theGlobalVariables);
+    this->MakeReportPrecomputations(theGlobalVariables);
+    return;
+  }*/
+  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
+  { this->owner->LieBracket(this->theE, this->theF, this->bufferEFnotCopiedAutomatically);
+    this->owner->LieBracket(this->theH, this->theE, this->bufferHEnotCopiedAutomatically);
+    this->owner->LieBracket(this->theH, this->theF, this->bufferHFnotCopiedAutomatically);
+  }
+}
+
+void WeylGroup::PerturbWeightToRegularWRTrootSystem(const root& inputH, root& output)
+{ output.Assign(inputH);
+  int indexFirstNonRegular;
+  while(!this->IsRegular(output, &indexFirstNonRegular))
+  { root& theBadRoot= this->RootSystem.TheObjects[indexFirstNonRegular];
+    Rational maxMovement=0; Rational tempRat1, tempRat2, tempMaxMovement;
+    for (int i=0; i<this->RootsOfBorel.size; i++)
+    { this->RootScalarKillingFormMatrixRoot(theBadRoot, this->RootSystem.TheObjects[i], tempRat1);
+      this->RootScalarKillingFormMatrixRoot(output, this->RootSystem.TheObjects[i], tempRat2);
+      if ((!tempRat1.IsEqualToZero()) && (!tempRat2.IsEqualToZero()))
+      { tempMaxMovement = tempRat2/tempRat1;
+        tempMaxMovement.AssignAbsoluteValue();
+        if ((tempMaxMovement< maxMovement) || maxMovement.IsEqualToZero())
+          maxMovement = tempMaxMovement;
+      }
+    }
+    output+=theBadRoot*maxMovement/2;
+  }
+}
+
+bool WeylGroup::IsRegular(root& input, int* indexFirstPerpendicularRoot)
+{ if (indexFirstPerpendicularRoot!=0)
+    *indexFirstPerpendicularRoot=-1;
+  for (int i=0; i<this->RootSystem.size; i++)
+    if (this->RootScalarKillingFormMatrixRoot(input, this->RootSystem.TheObjects[i]).IsEqualToZero())
+    { if (indexFirstPerpendicularRoot!=0)
+        *indexFirstPerpendicularRoot=i;
+      return false;
+    }
+  return true;
+}
+
+/*void ElementSimpleLieAlgebra::TransformInduceFromMapsOfRootSystems(const roots& domain, const roots& range, SimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+{ int theDimension=owner.theWeyl.KillingFormMatrix.NumRows;
+  assert(range.size==owner.theWeyl.KillingFormMatrix.NumRows);
+  assert(theDimension==range.GetRankOfSpanOfElements(theGlobalVariables));
+  root tempRoot;
+  ElementSimpleLieAlgebra buffer;
+  buffer.Nullify(owner);
+  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
+  { root& theRoot= owner.theWeyl.RootSystem.TheObjects[this->NonZeroElements.elements[i]];
+    range.MakeBasisChange(theRoot, tempRoot);
+    buffer.SetCoefficient(tempRoot, this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]], owner);
+  }
+  root hCharacteristic;
+  roots tempRoots;
+  tempRoots.MakeEiBasis(theDimension);
+  hCharacteristic.SetSizeExpandOnTopLight(theDimension);
+  for(int i=0; i<theDimension; i++)
+    hCharacteristic.TheObjects[i]=owner.theWeyl.RootScalarKillingFormMatrixRoot(tempRoots.TheObjects[i], this->Hcomponent);
+  MatrixLargeRational matB, tempMat;
+  range.GetGramMatrix(matB, owner.theWeyl);
+  tempMat.AssignMatrixIntWithDen(owner.theWeyl.KillingFormMatrix, 1);
+  //assert(matB==owner.)
+  matB.AssignRootsToRowsOfMatrix(range);
+  matB.Invert(theGlobalVariables);
+  matB.ActOnAroot(hCharacteristic, tempRoot);
+}
+*/

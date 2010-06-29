@@ -717,6 +717,7 @@ public:
 	void Transpose(GlobalVariables& theGlobalVariables);
 	void MultiplyByInt(int x);
 	void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
+	void AssignRootsToRowsOfMatrix(const roots& input);
 	void ScaleToIntegralForMinRationalHeightNoSignChange();
 	void ComputeDebugString();
 	void MultiplyByLargeRational(Rational& x);
@@ -1449,13 +1450,14 @@ public:
 	Rational operator/(int right)const
 	{ Rational tempRat; tempRat.Assign(*this); tempRat.DivideByInteger(right); return tempRat;
 	};
-	root operator*(const root& right) const;
-	Rational operator+(const Rational& right) const;
-	Rational operator-(const Rational& right) const;
-	Rational operator/(const Rational& right) const;
-	bool operator>(const Rational& right) const{return this->IsGreaterThan(right);};
-	bool operator>(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat);};
-	bool operator<(const int right) const{ Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this);};
+	root operator*(const root& right)const;
+	Rational operator+(const Rational& right)const;
+	Rational operator-(const Rational& right)const;
+	Rational operator/(const Rational& right)const;
+	inline bool operator>(const Rational& right)const{return this->IsGreaterThan(right);};
+	inline bool operator<(const Rational& right)const{return right.IsGreaterThan(*this);};
+	inline bool operator>(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat);};
+	inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this);};
 };
 
 /*WFT The below doesn't link on the Microsoft compiler...
@@ -1599,7 +1601,7 @@ public:
 	void AssignMatrixRows(MatrixLargeRational& mat);
 	void AssignMatrixColumns(MatrixLargeRational& mat);
 	void ComputeDebugString();
-	int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables);
+	int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)const;
 	void AddRoot(root& r);
 	void AddIntRoot(intRoot& r);
 	void AddRootSnoRepetition(roots& r);
@@ -1630,13 +1632,14 @@ public:
 	//If the strict cone has zero elements, the function returns false.
 	static bool ConesIntersect(GlobalVariables& theGlobalVariables,  ListBasicObjects<root>& StrictCone, ListBasicObjects<root>& NonStrictCone, int theDimension);
 	static bool GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int theDimension, ListBasicObjects<root>& coneStrictlyPositiveCoeffs, ListBasicObjects<root>& coneNonNegativeCoeffs, root& outputNormal);
-	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl);
+	void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl)const;
 	//the following two functions assume the first dimension vectors are the images of the
 	// vectors (1,0,...,0),..., (0,...,0,1)
-	void MakeBasisChange(root& input, root& output);
-	void MakeBasisChange(roots& input, roots& output);
+	void MakeBasisChange(root& input, root& output)const;
+	void MakeBasisChange(roots& input, roots& output)const;
+	void MakeEiBasis(int theDimension);
 	bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
-	void GaussianEliminationForNormalComputation (MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension);
+	void GaussianEliminationForNormalComputation (MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
 	// the below function is slow
 	int ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables);
 	void rootsToMatrix(MatrixLargeRational& output);
@@ -5076,14 +5079,22 @@ public:
 	void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
 	void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
 	void SimpleReflectionRootAlg(	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
+	bool IsPositiveOrPerpWRTh(const root& input, const root& theH)
+	{ return this->RootScalarKillingFormMatrixRoot(input, theH).IsNonNegative();
+  };
 	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
+	bool IsRegular(root& input, int* indexFirstPerpendicularRoot);
 	void RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output);
+	//the below functions perturbs input so that inputH has non-zero scalar product with roots of the root system,
+	//without changing the inputH-sign of any root that had a non-zero scalar product to begin with
+	void PerturbWeightToRegularWRTrootSystem(const root& inputH, root& output);
 	Rational RootScalarKillingFormMatrixRoot(const root& r1, const root& r2)
 	{ Rational tempRat;
     this->RootScalarKillingFormMatrixRoot(r1, r2, tempRat);
     return tempRat;
   };
 	void TransformToSimpleBasisGenerators(roots& theGens);
+	void TransformToSimpleBasisGeneratorsWRTh(roots& theGens, root& theH);
 	int length(int index);
 };
 
@@ -5185,7 +5196,12 @@ public:
 	//the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
 	//root subsystem. Note: the simleBasisInput is required to be a set of simple roots. The procedure calls a
 	//transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't simple as required!
-	void ComputeDiagramType(roots& simpleBasisInput, WeylGroup& theWeyl);
+	inline void ComputeDiagramTypeModifyInput(roots& simpleBasisInput, WeylGroup& theWeyl)
+	{ theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
+    this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl);
+	};
+	//the below function is just as the above but doesn't modify simpleBasisInput
+	void ComputeDiagramTypeKeepInput(roots& simpleBasisInput, WeylGroup& theWeyl);
 	void ComputeDynkinStrings(WeylGroup& theWeyl);
 	void ComputeDynkinString(int indexComponent, WeylGroup& theWeyl);
 	int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
@@ -5193,9 +5209,9 @@ public:
 	inline void operator=(const DynkinDiagramRootSubalgebra& right){this->Assign(right);};
 	bool operator==(const DynkinDiagramRootSubalgebra& right) const;
 	bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
-	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> >& output,int index);
+	void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> >& output, int index);
 	void GetAutomorphisms(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& output);
-	void GetMapFromPermutation( roots& domain, roots& range, ListBasicObjects< int >& thePerm, ListBasicObjects< ListBasicObjects< ListBasicObjects< int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right);
+	void GetMapFromPermutation(roots& domain, roots& range, ListBasicObjects<int>& thePerm, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right);
 };
 
 class coneRelation
@@ -5369,8 +5385,8 @@ public:
 	bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,	multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism(roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
-	bool ListHasNonSelectedIndexLowerThanGiven( int index,ListBasicObjects<int>& tempList, Selection& tempSel);
-	void GeneratePossibleNilradicalsRecursive( GlobalVariables& theGlobalVariables, multTableKmods& multTable,	int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+	bool ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicObjects<int>& tempList, Selection& tempSel);
+	void GeneratePossibleNilradicalsRecursive(GlobalVariables& theGlobalVariables, multTableKmods& multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
 	void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
@@ -5379,9 +5395,9 @@ public:
 	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
 	void ElementToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
-	void GenerateKmodMultTable(ListBasicObjects<ListBasicObjects< ListBasicObjects<int> > > & output,	ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
+	void GenerateKmodMultTable(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output,	ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
   void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
-	void KmodTimesKmod(int index1, int index2,ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int> & output);
+	void KmodTimesKmod(int index1, int index2, ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int>& output);
 	void initFromAmbientWeyl();
 	void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
 	void ComputeAllButAmbientWeyl();
@@ -5396,10 +5412,10 @@ public:
 	void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
 	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2 (	GlobalVariables& theGlobalVariables);
-	bool LinCombToString(root& alphaRoot, int coeff, root& linComb,std::string& output);
+	bool LinCombToString(root& alphaRoot, int coeff, root& linComb, std::string& output);
 	bool LinCombToStringDistinguishedIndex(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
-	void WriteMultTableAndOppositeKmodsToFile	(std::fstream& output, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& inMultTable,ListBasicObjects<int>& inOpposites );
-	void ReadMultTableAndOppositeKmodsToFile	(std::fstream& input, ListBasicObjects< ListBasicObjects<ListBasicObjects<int> > >& outMultTable,ListBasicObjects<int>& outOpposites );
+	void WriteMultTableAndOppositeKmodsToFile	(std::fstream& output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites);
+	void ReadMultTableAndOppositeKmodsToFile	(std::fstream& input, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites);
 };
 
 class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
@@ -5561,7 +5577,7 @@ public:
 	void getZuckermansArrayE8(roots& output);
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringCurrent();
-  bool ContainsCharacteristic(root& theCharacteristic, int* outputIndex);
+  bool ContainsSl2WithGivenH(root& theH, int* outputIndex);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml);
 	void Compute(GlobalVariables& theGlobalVariables, bool flagUsingDynkinHardCodedTables);
 };
@@ -5573,12 +5589,15 @@ public:
 	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex);
 	void ComputeDebugString(SimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString,owner, useHtml, useLatex);	};
   Selection NonZeroElements;
+  // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   ListBasicObjects<Rational> coeffsRootSpaces;
   root Hcomponent;
   void MultiplyByRational(SimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
   void SetCoefficient(const root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
   void SetCoefficient(const root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
+  //range is the image of the vectors e_i
+  void TransformInduceFromMapsOfRootSystems(const roots& domain, const roots& range, SimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
   bool IsEqualToZero()const;
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
@@ -5602,7 +5621,9 @@ public:
 	ListBasicObjects<int> theModulesHighestWeights;
 	ListBasicObjects<int> theModulesMultiplicities;
 	ElementSimpleLieAlgebra theH, theE, theF;
+	ElementSimpleLieAlgebra bufferHEnotCopiedAutomatically, bufferHFnotCopiedAutomatically, bufferEFnotCopiedAutomatically;
 	SimpleLieAlgebra* owner;
+	root perturbedRhoForSimpleBasisOfAmbient;
 	root hCharacteristic;
 	root hElementCorrespondingToCharacteristic;
 	roots hCommutingRootSpaces;
@@ -5614,6 +5635,7 @@ public:
 	MatrixLargeRational theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
+  void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, root& rhoMinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
 	void ElementToHtml(std::string& filePath);
@@ -5743,7 +5765,7 @@ public:
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverStateFixedK& right){this->Assign(right);};
   minimalRelationsProverStateFixedK();
-  void MakeProgressReportCanBeShortened( int checked, int outOf, GlobalVariables& theGlobalVariables);
+  void MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
 	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 };

@@ -2,68 +2,6 @@
 #include "polyhedra.h"
 
 extern int GlobalPointerCounter;
-/*
-struct bmpfile_magic {
-  unsigned char magic[2];
-};
-
-struct bmpfile_header {
-	unsigned int filesz;
-	unsigned short creator1;
-	unsigned short creator2;
-	unsigned int bmp_offset;
-};
-
-struct bmp_dib_v3_header_t
-{ unsigned int header_sz;
-	unsigned int width;
-	unsigned int height;
-	unsigned short nplanes;
-	unsigned short bitspp;
-	unsigned int compress_type;
-	unsigned int bmp_bytesz;
-	unsigned int hres;
-	unsigned int vres;
-	unsigned int ncolors;
-	unsigned int nimpcolors;
-};
-
-void MakeABitmap(std::string& fileName, std::fstream& outputFileOpenWithPreparedHeader)
-{	//	format taken from http://en.wikipedia.org/wiki/BMP_file_format , Feb 18, 2010
-  outputFileOpenWithPreparedHeader.open(fileName.c_str(),std::fstream::trunc|std::fstream::out| std::fstream::binary);
-	outputFileOpenWithPreparedHeader.clear(std::ios::goodbit);// false);
-	::bmpfile_magic h1;
-	::bmpfile_header h2;
-	::bmp_dib_v3_header_t h3;
-	int size=10000;
-	h1.magic[0]='B'; h1.magic[1]='M';
-	h2.bmp_offset=14;
-	h2.creator1=0;
-	h2.creator2=0;
-	h2.filesz=size*3+54;
-	h3.width=100;
-	h3.height=100;
-	h3.header_sz=40;
-	h3.nplanes=1;
-	h3.bitspp=24;
-	h3.bmp_bytesz=size*3;
-	h3.compress_type=0;
-	h3.hres=2835;
-	h3.vres=2835;
-	h3.nimpcolors=0;
-	h3.ncolors=0;
-	outputFileOpenWithPreparedHeader.write((char*)(&h1),2);
-	outputFileOpenWithPreparedHeader.write((char*)(&h2),12);
-	outputFileOpenWithPreparedHeader.write((char*)(&h3),40);
-	for (int i=0;i<size;i++)
-	{	char tempUI=100;
-		outputFileOpenWithPreparedHeader.write(&tempUI,1);
-		outputFileOpenWithPreparedHeader.write(&tempUI,1);
-		outputFileOpenWithPreparedHeader.write(&tempUI,1);
-	}
-	outputFileOpenWithPreparedHeader.close();
-}
-*/
 
 void getPath(char* path, std::string& output)
 { if (path==0) return;
@@ -111,7 +49,8 @@ int main(int argc, char **argv)
 	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=12";
 	//inputString ="textType=E&textRank=6&buttonGoRootSA=rootSA+diagrams";
 	//inputString ="SLtwos";
-//  inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
+ //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
+  //inputString="textType=D&textRank=4&buttonGoSl2SAs=sl%282%29+subalgebras";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -124,13 +63,13 @@ int main(int argc, char **argv)
   std::string latexCommand1;
   std::string latexCommand2;    //std::cout<<inputString;
   inputPath.append("../htdocs/tmp/");
-  if (choice ==0 || choice==1)
+  if (choice ==CGIspecificRoutines::choiceDefaultNeedComputation || choice==CGIspecificRoutines::choiceInitAndDisplayMainPage)
   { std::stringstream tempSS;
     static_html1(tempSS);
     std::string tempS;
     tempS=tempSS.str();
     std::cout<<tempS;
-    if (choice==0)//default choice
+    if (choice==CGIspecificRoutines::choiceDefaultNeedComputation)//default choice
     {	//std::cout<<"before computation setup";
     //	theComputationSetup.flagComputingPartialFractions=false;
     //	std::cout <<"before Run!";
@@ -203,7 +142,7 @@ int main(int argc, char **argv)
     std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<<","<< theComputationSetup.VPVectors.size <<","<<-1<<","
                     << theComputationSetup.DisplayNumberChamberOfInterest<<");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
-  } else if (choice==2)
+  } else if (choice==CGIspecificRoutines::choiceGenerateDynkinTables)
   { if (theComputationSetup.WeylGroupIndex<9)
     { theComputationSetup.DoTheRootSAComputation();
 //      theComputationSetup.theRootSubalgebras.ComputeDebugString();
@@ -219,27 +158,40 @@ int main(int argc, char **argv)
       std::stringstream outMkDirCommand;
       outMkDirCommand<< "mkdir " <<PhysicalPath;
       MkDirCommand=outMkDirCommand.str();
-      ::system(MkDirCommand.c_str());
+      system(MkDirCommand.c_str());
       std::string header;
       std::stringstream tempOut;
       header="http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi?";
       header.append(inputString);
-      tempOut <<"Permanent link to this page: <br>\n"<<"<a href=\"" << header<<"\">"<<header<<"</a>\n<br>\n" <<"Main page: <br>\n" <<"<a href=\"http://vector-partition.jacobs-university.de"
-                      <<"/cgi-bin/vector_partition_linux_cgi\">" <<"http://vector-partition.jacobs-university.de" <<"/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
+      tempOut <<"Permanent link to this page: <br>\n<a href=\"" << header<<"\">"<<header<<"</a>\n<br>\nMain page: <br>\n<a href=\"http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi\"> http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
       header=tempOut.str();
-      theComputationSetup.theRootSubalgebras.ElementToHtml( header,PhysicalPath,serverPath,*theComputationSetup.theGlobalVariablesContainer->Default());
-      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; " << "url="<<serverPath<< "rootHtml.html\"> <BODY>"
-                      << serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<PhysicalPath;
+      theComputationSetup.theRootSubalgebras.ElementToHtml(header, PhysicalPath, serverPath, *theComputationSetup.theGlobalVariablesContainer->Default());
+      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "rootHtml.html\"> <BODY>"<< serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<PhysicalPath;
     }
-  } else if (choice==3)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n" <<" Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\n"
-              << "Dimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n"<< "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n"<< "</FORM>\n";
-  } else if (choice==4)
-  { std::cout <<"Choice 4 taken!";
-		SltwoSubalgebras tempSAs;
-		tempSAs.Compute(*theComputationSetup.theGlobalVariablesContainer->Default(),true);
-		tempSAs.ComputeDebugString( *theComputationSetup.theGlobalVariablesContainer->Default(), tempSAs.theWeylGroup, false, false);
-		std::cout <<"\n<br>\n"<<tempSAs.DebugString;
+  } else if (choice==CGIspecificRoutines::choiceDisplayRootSApage)
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n<br><input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n</FORM>\n";
+  } else if (choice==CGIspecificRoutines::choiceGosl2)
+  { SltwoSubalgebras theSl2s;
+    SimpleLieAlgebra theSimpleLieAlgebra;
+//    std::cout<<"<br>"<< theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex;
+    std::cout.flush();
+    theSimpleLieAlgebra.FindSl2Subalgebras(theSl2s, theComputationSetup.WeylGroupLetter, theComputationSetup.WeylGroupIndex, *theComputationSetup.theGlobalVariablesContainer->Default());
+    ////////////////////getting paths to output html
+    std::stringstream outServerPath;
+    outServerPath<<"/tmp/"<< theComputationSetup.WeylGroupLetter<<theComputationSetup.WeylGroupIndex <<"/sl2s/";
+    std::string serverPath=outServerPath.str();
+    std::stringstream outPhysicalPath;
+    std::string PhysicalPath;
+    outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/sl2s/";
+    PhysicalPath=outPhysicalPath.str();
+    std::string MkDirCommand;
+    std::stringstream outMkDirCommand;
+    outMkDirCommand<< "mkdir " <<PhysicalPath;
+    MkDirCommand=outMkDirCommand.str();
+    system(MkDirCommand.c_str());
+    theSl2s.ElementToHtml(*theComputationSetup.theGlobalVariablesContainer->Default(), theSimpleLieAlgebra.theWeyl, true, PhysicalPath, serverPath);
+    theSl2s.ComputeDebugString(*theComputationSetup.theGlobalVariablesContainer->Default(), theSimpleLieAlgebra.theWeyl, false, true);
+    std::cout<<theSl2s.DebugString;
   }
   std::cout<<"</BODY>\n</HTML>";
 	std::cout<<"<!--";

@@ -46,7 +46,7 @@ output <<" Additional functionality of the program:\n";
 output <<" <br>\n";
 output <<" <a href=\"/cgi-bin/vector_partition_linux_cgi?rootSAs\">Root subalgebra tables</a>\n";
 output <<" <br>\n";
-output <<" <!-- <a href=\"cgi-bin/vector_partition_linux_cgi?SLtwos\">sl(2) subalgebras of E8</a>  -->\n";
+output <<" <a href=\"/cgi-bin/vector_partition_linux_cgi?rootSAs\">sl(2) subalgebras of simple Lie algebras </a>\n";
 output <<" </td>\n";
 output <<" </tr>\n";
 output <<" </table>\n";

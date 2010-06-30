@@ -677,8 +677,9 @@ public:
 	static bool flagComputingDebugInfo;
 	static std::string MatrixElementSeparator;
 	void ComputeDebugString();
-	void ElementToSting(std::string& output);
-	void SwitchTwoRows( int row1, int row2);
+	void ElementToString(std::string& output);
+	void ElementToString(std::string& output, bool useHtml, bool useLatex);
+	void SwitchTwoRows(int row1, int row2);
 	int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
 	void RowTimesScalar(int rowIndex, Element& scalar);
 	void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
@@ -902,17 +903,49 @@ void Matrix<Element>::MultiplyOnTheLeft(Matrix<Element>& input, Matrix<Element>&
 }
 
 template <typename Element>
-inline void Matrix<Element>::ElementToSting(std::string& output)
+inline void Matrix<Element>::ElementToString(std::string& output)
+{ this->ElementToString(output, false, false);
+}
+
+template <typename Element>
+inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, bool useLatex)
 { std::stringstream out;
 	std::string tempS;
-	for (int i=0;i<this->NumRows;i++)
-	{ for (int j=0;j<this->NumCols;j++)
+	if (useHtml)
+    out << "<table>";
+  if (useLatex)
+  { out <<"$\\begin{array}{";
+    for (int j=0; j<this->NumCols; j++)
+      out <<"c";
+    out <<"}";
+  }
+	for (int i=0; i<this->NumRows; i++)
+	{ if (useHtml)
+      out <<"<tr>";
+	  for (int j=0; j<this->NumCols; j++)
 		{ this->elements[i][j].ElementToString(tempS);
+			if (useHtml)
+        out <<"<td>";
 			out<< tempS;
-			out<< this->MatrixElementSeparator;
+			if (useLatex)
+      { if (j!=this->NumCols-1)
+          out <<" & ";
+      }
+      else
+   			out<< this->MatrixElementSeparator;
+			if (useHtml)
+        out <<"</td>";
 		}
-		out <<"\n";
+		if (useHtml)
+      out <<"</tr>";
+    if (useLatex)
+      out <<"\\\\\n";
+	  out <<"\n";
 	}
+	if (useHtml)
+    out <<"</table>";
+  if (useLatex)
+    out <<"\\end{array}$";
 	output= out.str();
 }
 
@@ -946,7 +979,7 @@ void Matrix<Element>::DirectSumWith(Matrix<Element>& m2)
 
 template <typename Element>
 inline void Matrix<Element>::ComputeDebugString()
-{ this->ElementToSting(this->DebugString);
+{ this->ElementToString(this->DebugString);
 }
 
 template <typename Element>
@@ -4878,20 +4911,20 @@ public:
 	int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	int ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
 	bool partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
-	bool VerifyFileComputedContributions(GlobalVariables&  theGlobalVariables);
+	bool VerifyFileComputedContributions(GlobalVariables& theGlobalVariables);
 	void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
 	int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
-	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
-	void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 	void UncoverBracketsNumerators(GlobalVariables& theGlobalVariables, root* Indicator);
-	void ResetRelevanceIsComputed(){for (int i=0;i<this->size;i++){this->TheObjects[i].RelevanceIsComputed=false;};};
+	void ResetRelevanceIsComputed(){for (int i=0; i<this->size; i++){this->TheObjects[i].RelevanceIsComputed=false;};};
 	partFractions();
 	int SizeWithoutDebugString();
 	bool CheckForMinimalityDecompositionWithRespectToRoot(root *theRoot, GlobalVariables& theGlobalVariables);
-	void MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindow reportFunction);
-	void MakeProgressReportRemovingRedundantRoots(FeedDataToIndicatorWindow reportFunction);
-	void MakeProgressReportUncoveringBrackets(FeedDataToIndicatorWindow reportFunction);
-	void MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction);
+	void MakeProgressReportSplittingMainPart(GlobalVariables& theGlobalVariables);
+	void MakeProgressReportRemovingRedundantRoots(GlobalVariables& theGlobalVariables);
+	void MakeProgressReportUncoveringBrackets(GlobalVariables& theGlobalVariables);
+	void MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables);
 	void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables& theGlobalVariables);
 };
 
@@ -5562,23 +5595,29 @@ public:
 	ListBasicObjects<int> MultiplicitiesFixedHweight;
 	int IndexZeroWeight;
 	void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
-	{ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml);
+	{ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);
 	};
+	ListBasicObjects<std::string> texFileNamesForPNG;
+	ListBasicObjects<std::string> texStringsEachFile;
+	ListBasicObjects<std::string> listSystemCommands;
 	void getZuckermansArrayE8(roots& output);
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(root& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(root& theHCharacteristic, int* outputIndex);
-	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml);
-	void Compute(GlobalVariables& theGlobalVariables, bool flagUsingDynkinHardCodedTables);
+  void ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 
 class ElementSimpleLieAlgebra
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex);
-	void ComputeDebugString(SimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString,owner, useHtml, useLatex);	};
+	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
+	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex)
+	{ this->ElementToString(output, owner, useHtml, useLatex, false, 0, 0);
+  };
+	void ComputeDebugString(SimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex,false, 0, 0);	};
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   ListBasicObjects<Rational> coeffsRootSpaces;
@@ -5607,12 +5646,16 @@ class slTwo
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables);
-	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){	this->ElementToString(this->DebugString,useHtml, useLatex, theGlobalVariables);};
-	ListBasicObjects<int> theModulesHighestWeights;
-	ListBasicObjects<int> theModulesMultiplicities;
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml)
+	{ this->ElementToString(output, theGlobalVariables, container, useLatex, useHtml, false, 0, 0);
+  };
+	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){	this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml);};
+	ListBasicObjects<int> HighestWeights;
+	ListBasicObjects<int> MultiplicitiesHighestWeights;
+	ListBasicObjects<int> WeightSpaceDimensions;
 	ElementSimpleLieAlgebra theH, theE, theF;
-	ElementSimpleLieAlgebra bufferHEnotCopiedAutomatically, bufferHFnotCopiedAutomatically, bufferEFnotCopiedAutomatically;
+	ElementSimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
 	SimpleLieAlgebra* owner;
 	ListBasicObjects<DynkinDiagramRootSubalgebra> DiagramsContainingRegularSAs;
   roots preferredAmbientSimpleBasis;
@@ -5627,13 +5670,15 @@ public:
 	MatrixLargeRational theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
+  void ComputeModuleDecomposition();
   void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
 	void ElementToHtml(std::string& filePath);
 	void operator=(const slTwo& right)
-	{ this->theModulesHighestWeights.CopyFromBase(right.theModulesHighestWeights);
-		this->theModulesMultiplicities.CopyFromBase(right.theModulesMultiplicities);
+	{ this->HighestWeights.CopyFromBase(right.HighestWeights);
+    this->MultiplicitiesHighestWeights.CopyFromBase(right.MultiplicitiesHighestWeights);
+		this->WeightSpaceDimensions.CopyFromBase(right.WeightSpaceDimensions);
 		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
 		this->CentralizerDiagram.Assign(right.CentralizerDiagram);
 		this->DiagramM.Assign(right.DiagramM);
@@ -5647,6 +5692,9 @@ public:
     this->theE= right.theE;
     this->theH= right.theH;
     this->theF= right.theF;
+    this->bufferEbracketF= right.bufferEbracketF;
+    this->bufferHbracketE=right.bufferHbracketE;
+    this->bufferHbracketF=right.bufferHbracketF;
     this->theSystemToBeSolved=right.theSystemToBeSolved;
     this->theSystemMatrixForm=right.theSystemMatrixForm;
     this->theSystemColumnVector= right.theSystemColumnVector;
@@ -5654,13 +5702,14 @@ public:
     this->preferredAmbientSimpleBasis= right.preferredAmbientSimpleBasis;
 	};
 	bool  operator==(const slTwo& right)
-	{ return this->theModulesHighestWeights.IsEqualTo( right.theModulesHighestWeights) && this->theModulesMultiplicities.IsEqualTo( right.theModulesMultiplicities);
+	{// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
+	   return this->hCharacteristic.IsEqualTo(right.hCharacteristic);
 	};
 	int HashFunction() const
-	{ int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->theModulesHighestWeights.size);
+	{ int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
 		int result=0;
 		for (int i=0; i<tempI; i++)
-      result+= this->theModulesHighestWeights.TheObjects[i]* this->theModulesMultiplicities.TheObjects[i]*SomeRandomPrimes[i];
+      result+= this->hCharacteristic.TheObjects[i].NumShort*SomeRandomPrimes[i];
 		return result;
 	};
 };
@@ -5698,8 +5747,7 @@ public:
   bool FindComplementaryNilpotent(ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables);
-  void FindSl2SubalgebrasOld(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates);
-  void FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
+  void FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
   void GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e);
   void initHEFSystemFromECoeffs(int theRelativeDimension,  Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved);
@@ -6126,7 +6174,9 @@ public:
 	static void clearDollarSigns(std::string& theString, std::string& output);
 	static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
 	static bool CheckForInputSanity(ComputationSetup& input);
-
+  enum TheChoicesWeMake
+  { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2
+  };
 };
 
 class RandomCodeIDontWantToDelete
@@ -6149,6 +6199,8 @@ public:
 
 class GlobalVariables
 {
+private:
+	FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
 public:
 	roots rootsWallBasis;
 	roots rootsIsABogusNeighbor1;
@@ -6269,7 +6321,16 @@ public:
 
 	GlobalVariables();
 	~GlobalVariables();
-	FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
+	inline void SetFeedDataToIndicatorWindowDefault(FeedDataToIndicatorWindow input)
+	{ this->FeedDataToIndicatorWindowDefault=input;
+  };
+  inline FeedDataToIndicatorWindow GetFeedDataToIndicatorWindowDefault()
+  { return this->FeedDataToIndicatorWindowDefault;
+  };
+	inline void FeedIndicatorWindow(IndicatorWindowVariables& input)
+	{ if (this->FeedDataToIndicatorWindowDefault!=0)
+      this->FeedDataToIndicatorWindowDefault(input);
+  };
 	void operator=(const GlobalVariables& G_V);
 };
 

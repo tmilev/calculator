@@ -769,15 +769,10 @@ bool CGIspecificRoutines::CheckForInputSanity(ComputationSetup& input)
   return true;
 }
 
-//outputs:
-//0 = default choice, computation needed
-//1 = page not initialized fill in initial data
-//2 = Generate Dynkin tables
-//3 = Go to root subalgebras page
-//4 = Generate SL two subalgebras
+//outputs: one of the tokens in CGIspecificRoutines::TheChoicesWeMake
 int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath)
 { if (inputBad.length()<2)
-		return 1;
+		return CGIspecificRoutines::choiceInitAndDisplayMainPage;
 	std::string inputGood;
   std::string tempS3;
 	tempS3=inputBad;
@@ -795,11 +790,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   CGIspecificRoutines::CivilizedStringTranslation(inputBad,inputGood);
   //std::cout<<inputGood;
   if (tempS3=="rootSAs")
-		return 3;
-	if (tempS3=="SLtwos")
-	{ InputDataOK=true;
-		return 4;
-  }
+		return CGIspecificRoutines::choiceDisplayRootSApage;
   if (tempS3=="textTyp")
   { std::stringstream tempStream1;
     tempStream1 << inputGood;
@@ -819,13 +810,22 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
       InputDataOK=false;
     if (!InputDataOK)
     { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
-      return 1;
+      return CGIspecificRoutines::choiceInitAndDisplayMainPage;
     }
-    std::cout<<inputGood;
+    tempStream1>> tempS;
+    int theChoiceIsYours=CGIspecificRoutines::choiceInitAndDisplayMainPage;
+    if (tempS=="buttonGoRootSA")
+      theChoiceIsYours=CGIspecificRoutines::choiceGenerateDynkinTables;
+    if (tempS=="buttonGoSl2SAs")
+      theChoiceIsYours=CGIspecificRoutines::choiceGosl2;
+    //std::cout<<tempS<<"<br>";
+    //std::cout<<inputGood<<"<br>";
+    //std::cout<<"<br><br>"<< "The choices we make: " << theChoiceIsYours;
+    std::cout.flush();
 #ifdef CGIversionLimitRAMuse
     cgiLimitRAMuseNumPointersInListBasicObjects=12000000;
 #endif
-    return 2;
+    return theChoiceIsYours;
   }
   if (!InputDataOK==true)
   { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
@@ -1966,7 +1966,8 @@ Rational root::GetHeight()
 
 int root::HashFunction() const
 { int result=0;
-	for (int i=0;i<this->size;i++)
+  int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
+	for (int i=0; i<theSize; i++)
 		result+=	this->TheObjects[i].HashFunction()*	::SomeRandomPrimes[i];
 	return result;
 }
@@ -2260,7 +2261,7 @@ void MatrixLargeRational::NonPivotPointsToEigenVector(Selection& TheNonPivotPoin
 }
 
 void MatrixLargeRational::ComputeDebugString()
-{ this->ElementToSting(this->DebugString);
+{ this->ElementToString(this->DebugString);
 }
 
 int MathRoutines::lcm(int a, int b)
@@ -4098,7 +4099,7 @@ void CombinatorialChamberContainer::MakeExtraProjectivePlane()
 }
 
 void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots)
-{	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{	if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out5;
 	std::stringstream out4;
@@ -4106,7 +4107,7 @@ void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGloba
   out5<< "Chamber index: " << this->indexNextChamberToSlice<<" Total #: "<< this->size;
   IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
   IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void CombinatorialChamberContainer::ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables)
@@ -9321,8 +9322,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner,Qua
 			out3	<<" Processed " << partFractions::NumProcessedForVPFMonomialsTotal <<" out of " <<partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
 			::IndicatorWindowGlobalVariables.ProgressReportString4= out4.str();
 			::IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
 	SplitPowerSeriesCoefficient->ComputeQuasiPolynomial(output, RecordNumMonomials,theDimension,theGlobalVariables);
@@ -9573,8 +9573,7 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 			out <<"Uncovering brackets"<< i+1 <<" out of " << this->size;
 			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
 			changeOfNumMonomials-=this->TheObjects[i].Coefficient.size;
-			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 		this->AccountPartFractionInternals(-1, i, Indicator,theGlobalVariables);
 		this->TheObjects[i].UncoverBracketsNumerator(theGlobalVariables, this->AmbientDimension);
@@ -9584,8 +9583,7 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 			std::stringstream out;
 			out <<"Number actual monomials"<< changeOfNumMonomials;
 			IndicatorWindowGlobalVariables.ProgressReportString5=out.str();
-			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
 }
@@ -9757,7 +9755,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 			tempS= out.str();
 			this->CompareCheckSums(theGlobalVariables);
 		}
-		this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
+		this->MakeProgressReportSplittingMainPart(theGlobalVariables);
 	//	this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
 	}
@@ -9785,7 +9783,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 	//this->ComputeDebugString();
 	this->CompareCheckSums(theGlobalVariables);
 	this->IndexLowestNonProcessed= this->size;
-	this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
+	this->MakeProgressReportSplittingMainPart(theGlobalVariables);
 	return false;
 }
 
@@ -9816,7 +9814,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 			}
 			else
 				this->PopIndexHashAndAccount( this->IndexLowestNonProcessed,theGlobalVariables, Indicator);
-			this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
+			this->MakeProgressReportSplittingMainPart(theGlobalVariables);
 		}
 //		this->ComputeDebugString();
 //		x= this->SizeWithoutDebugString();
@@ -9829,7 +9827,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 	}
 	this->CompareCheckSums(theGlobalVariables);
 	this->IndexLowestNonProcessed= this->size;
-	this->MakeProgressReportSplittingMainPart(theGlobalVariables.FeedDataToIndicatorWindowDefault);
+	this->MakeProgressReportSplittingMainPart(theGlobalVariables);
 	return this->CheckForMinimalityDecompositionWithRespectToRoot(Indicator, theGlobalVariables);
 }
 
@@ -10312,8 +10310,10 @@ int partFraction::ControlLineSizeStringPolys(std::string& output)
 #ifdef WIN32
 #pragma warning(default:4018)//grrrrr
 #endif
-void partFractions::MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindow reportFunction)
-{ std::stringstream out1,out2,out3;
+void partFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlobalVariables)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
+    return;
+  std::stringstream out1,out2,out3;
 	out1<< this->NumberRelevantReducedFractions << " relevant reduced + "<< this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
 	if (this->NumRelevantNonReducedFractions!=0)
 	{ out1<<" + " << this->NumRelevantNonReducedFractions <<" relevant unreduced ";
@@ -10332,27 +10332,27 @@ void partFractions::MakeProgressReportSplittingMainPart(FeedDataToIndicatorWindo
 	} else
 	{ IndicatorWindowGlobalVariables.ProgressReportString3.clear();
 	}
-	if (reportFunction!=0)
-		reportFunction(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
-void partFractions::MakeProgressVPFcomputation(FeedDataToIndicatorWindow reportFunction)
+void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables)
 { this->NumProcessedForVPFfractions++;
+	if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
+    return;
 	std::stringstream out2, out3;
 	out2	<< "Processed " << this->NumProcessedForVPFfractions<<" out of " <<this->NumberRelevantReducedFractions << " relevant fractions";
 //	out3	<< "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //				<< " relevant fractions";
 	::IndicatorWindowGlobalVariables.ProgressReportString2= out2.str();
 	//::IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-	if (reportFunction!=0)
-		reportFunction(::IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
-void partFractions::ComputeOneCheckSum(Rational &output,GlobalVariables& theGlobalVariables)
+void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables)
 { output.MakeZero();
 	for(int i=0;i<this->size;i++)
 	{ Rational tempRat;
-		this->TheObjects[i].ComputeOneCheckSum(*this,tempRat, this->AmbientDimension,theGlobalVariables);
+		this->TheObjects[i].ComputeOneCheckSum(*this,tempRat, this->AmbientDimension, theGlobalVariables);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
 		{ std::string tempS;
 			tempRat.ElementToString(tempS);
@@ -10362,8 +10362,7 @@ void partFractions::ComputeOneCheckSum(Rational &output,GlobalVariables& theGlob
 		{ std::stringstream out;
 			out <<"Checksum "<<i+1<<" out of "<<this->size;
 			IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
-			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
 }
@@ -10395,8 +10394,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
 			{ std::stringstream out;
 				out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
 				IndicatorWindowGlobalVariables.ProgressReportString3=out.str();
-				if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-					theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+				theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 			}
  		}
 	}
@@ -10419,8 +10417,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 		{ std::stringstream out;
 			out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
 			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
-			if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-				theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+      theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
 	for (int i=0;i<this->size;i++)
@@ -10452,8 +10449,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomi
 	{ IndicatorWindowGlobalVariables.flagRootIsModified=true;
 	  IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(newIndicator);
 		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
-		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-			theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+		theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 	} else
     IndicatorWindowGlobalVariables.flagRootIsModified=false;
   if(ResetRelevance)
@@ -10533,7 +10529,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomi
 				oldCheckSum.Assign(partFractions::CheckSum);
 				oldOutput.Assign(output);
 			}*/
-			this->MakeProgressVPFcomputation(theGlobalVariables.FeedDataToIndicatorWindowDefault);
+			this->MakeProgressVPFcomputation(theGlobalVariables);
 		}
 	}
 /*	if (partFraction::MakingConsistencyCheck)
@@ -10626,11 +10622,11 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables&  theGloba
 	for(int i=0;i<tempI;i++)
 	{ tempFrac.ReadFromFile(*this,input, theGlobalVariables,this->AmbientDimension);
 		this->AddAlreadyReduced(tempFrac, theGlobalVariables, 0);
-		this->MakeProgressVPFcomputation(theGlobalVariables.FeedDataToIndicatorWindowDefault);
+		this->MakeProgressVPFcomputation(theGlobalVariables);
 	}
 }
 
-void partFractions::ComputeSupport( ListBasicObjects<roots>& output, std::stringstream& outputString)
+void partFractions::ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString)
 { output.size=0;
 	output.MakeActualSizeAtLeastExpandOnTop(this->size);
 	for (int i=0;i<this->size;i++)
@@ -13609,7 +13605,7 @@ void thePFcomputation::ComputeDeterminantSelection(int theDimension)
 void thePFcomputation::SelectionToString(std::string &output, int theDimension)
 { MatrixLargeRational tempMat;
 	this->SelectionToMatrixRational(tempMat,theDimension);
-	tempMat.ElementToSting(output);
+	tempMat.ElementToString(output);
 }
 
 void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational &output, int theDimension)
@@ -14009,28 +14005,28 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
 }
 
 void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out4, out5;
 	out5<< progress+1 << " out of "<< outOf <<" checked; ";
 	out5<< found << " found pos. generators";
 	//::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out5;
 	out5<<"Computing pairing table: "<< index+1 << " out of "<< outOf;
 	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	if (this->flagMakingProgressReport)
 	{ std::stringstream out1, out2,out3,out4, out5;
@@ -14053,7 +14049,7 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
 		::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
 		::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
 		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-		theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+		theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 	}
 }
 
@@ -14613,7 +14609,7 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism(r
 }
 
 void rootSubalgebras::MakeProgressReportGenerationSubalgebras(	rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables, int currentIndex, int TotalIndex)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out1, out2, out3,out4,out5;
 	std::stringstream* tempOut;
@@ -14635,11 +14631,11 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(	rootSubalgebras& 
 	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
-void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup &theSubgroup, rootSubalgebra &theRootSA, GlobalVariables &theGlobalVariables)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out4, out1;
 	out1<<"k_ss: "<<theRootSA.theDynkinDiagram.DebugString <<" C(k_ss): "<<theRootSA.theCentralizerDiagram.DebugString;
@@ -14649,10 +14645,10 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGrou
 	out4<<"group preserving k: "<< theSubgroup.size;
 	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
 	IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
-void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(	Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { roots selectedRootsBasisCentralizer; root tempRoot;
 	selectedRootsBasisCentralizer.size=0;
 	for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
@@ -17222,7 +17218,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   output= out.str();
 }
 
-void rootSubalgebras::ElementToHtml(	std::string& header,	std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::fstream output; std::string tempS;
   std::string MyPathPhysical, childrenPathPhysical;
   std::string MyPathServer, childrenPathServer;
@@ -17710,300 +17706,6 @@ bool SimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& root
 	return false;
 }
 
-void SltwoSubalgebras::getZuckermansArrayE8(roots& output)
-{ //below follow Dynkin's sl(2) characteristics for E8, as taken from tables 16-20 from
-  //semisimple Lie algebras of simple Lie algebras.
-  output.MakeActualSizeAtLeastExpandOnTop(70);
-  root r;
-  r.InitFromIntegers(8, 1,0,0,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,0,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,1,0,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,0,0,0,0,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,0,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,0,0,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,1,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,0,0,1,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,1,0,0,0,0,1,
-                                0); output.AddObjectOnTop(r);
-
-  r.InitFromIntegers(8, 2,0,0,0,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,1,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,1,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,2,0,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,0,0,0,1,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,1,0,0,0,0,0,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,1,0,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,0,1,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,0,0,0,0,
-                                2); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,0,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-
-  r.InitFromIntegers(8, 0,0,0,1,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,1,0,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,0,0,1,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,2,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,1,0,0,1,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,0,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,1,0,0,0,0,0,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,1,0,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,1,0,0,1,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,0,0,1,0,0,
-                                0); output.AddObjectOnTop(r);
-
-  r.InitFromIntegers(8, 2,0,0,0,0,0,0,
-                                2); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,1,0,0,1,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,1,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,0,0,1,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,2,0,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,1,0,1,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,1,0,0,0,1,0,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,1,0,1,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,0,2,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,0,2,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-
-  r.InitFromIntegers(8, 0,0,1,0,1,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,1,0,1,0,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,1,0,0,0,1,0,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,1,0,1,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,0,2,0,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 1,0,1,0,1,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,1,1,0,1,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,2,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,1,0,1,0,1,
-                                0); output.AddObjectOnTop(r);
-
-  r.InitFromIntegers(8, 2,0,0,0,2,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,1,0,0,0,1,2,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,1,0,1,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,0,2,0,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,2,0,0,2,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,2,0,0,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,1,0,1,0,1,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,1,0,1,0,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,0,2,0,0,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,0,1,1,1,
-                                0); output.AddObjectOnTop(r);
-
-  r.InitFromIntegers(8, 1,0,1,1,0,1,2,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 0,2,0,0,2,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,1,0,1,2,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,0,2,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,0,2,0,2,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,2,1,0,1,2,
-                                1); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,2,0,2,0,2,
-                                0); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,0,2,0,2,2,
-                                2); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,2,2,0,2,2,
-                                2); output.AddObjectOnTop(r);
-  r.InitFromIntegers(8, 2,2,2,2,2,2,2,
-                                2); output.AddObjectOnTop(r);
-  root tempRoot; tempRoot.SetSizeExpandOnTopLight(8);
-  for(int i=0;i<output.size;i++)
-  { tempRoot.TheObjects[0]=output.TheObjects[i].TheObjects[6];
-    tempRoot.TheObjects[1]=output.TheObjects[i].TheObjects[7];
-    tempRoot.TheObjects[2]=output.TheObjects[i].TheObjects[5];
-    tempRoot.TheObjects[3]=output.TheObjects[i].TheObjects[4];
-    tempRoot.TheObjects[4]=output.TheObjects[i].TheObjects[3];
-    tempRoot.TheObjects[5]=output.TheObjects[i].TheObjects[2];
-    tempRoot.TheObjects[6]=output.TheObjects[i].TheObjects[1];
-    tempRoot.TheObjects[7]=output.TheObjects[i].TheObjects[0];
-    output.TheObjects[i].Assign(tempRoot);
-  }
-}
-
-//The below code is related to sl(2) subalgebras of simple Lie algebras
-void SltwoSubalgebras::Compute(GlobalVariables& theGlobalVariables, bool flagUsingDynkinHardCodedTables)
-{	this->theWeylGroup.MakeEn(8);
-	int theDimension= this->theWeylGroup.KillingFormMatrix.NumRows;
-	this->theWeylGroup.ComputeRho(true);
-	this->ClearHashes();
-  SelectionWithMaxMultiplicity theHselection;
-	theHselection.initMe2(theDimension,2);
-	int NumCycles= ::MathRoutines::KToTheNth(3,theDimension)-1;
-	//NumCycles=5;
-	root hCandidate;
-	roots rootsHavingScalarProd2WithH;
-	roots hCommutingRoots;
-	roots RootSpacesThatCommuteWithAllRootsInTheSlTwo;
-	Rational tempRat;
-  this->IndexZeroWeight=this->theWeylGroup.RootsOfBorel.size;
-	::slTwo BufferDecomposition;
-	hCommutingRoots.MakeActualSizeAtLeastExpandOnTop(this->theWeylGroup.RootsOfBorel.size);
-	roots preComputedDynkinHs;
-	MatrixLargeRational invertedCartan;
-	invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
-	invertedCartan.Invert(theGlobalVariables);
-	if (flagUsingDynkinHardCodedTables)
-  { getZuckermansArrayE8(preComputedDynkinHs);
-    NumCycles=preComputedDynkinHs.size;
-  }
-	for (int i=0; i<NumCycles;i++)
-	{ this->MakeProgressReport(i,NumCycles,theGlobalVariables);
-		theHselection.IncrementSubset();
-		hCommutingRoots.size=0;
-		rootsHavingScalarProd2WithH.size=0;
-		RootSpacesThatCommuteWithAllRootsInTheSlTwo.size=0;
-		//theHselection.ComputeDebugString();
-		hCandidate.MakeZero(theDimension);
-		this->MultiplicitiesFixedHweight.initFillInObject(this->theWeylGroup.RootSystem.size+1,0);
-		this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight]=theDimension;
-		for (int j=0; j<theDimension; j++)
-			hCandidate.TheObjects[j]=theHselection.Multiplicities.TheObjects[j];
-    if (flagUsingDynkinHardCodedTables)
-      hCandidate.Assign(preComputedDynkinHs.TheObjects[i]);
-		//hCandidate.ComputeDebugString();
-		bool possible=true;
-		for (int k=0; k<this->theWeylGroup.RootSystem.size;k++)
-		{ //this->theWeylGroup.RootScalarKillingFormMatrixRoot
-			root::RootScalarEuclideanRoot(hCandidate, this->theWeylGroup.RootSystem.TheObjects[k], tempRat);
-			assert(tempRat.DenShort==1);
-			if (tempRat.NumShort>theWeylGroup.RootSystem.size)
-			{	possible=false;
-				break;
-			}
-			this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight+tempRat.NumShort]++;
-			if (tempRat.NumShort==2)
-        rootsHavingScalarProd2WithH.AddObjectOnTop(theWeylGroup.RootSystem.TheObjects[k]);
-      if (tempRat.IsEqualToZero())
-        hCommutingRoots.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[k]);
-		}
-		//this->ComputeDebugStringCurrent();
-    if (this->MultiplicitiesFixedHweight.TheObjects[2+this->IndexZeroWeight]<=this->MultiplicitiesFixedHweight.TheObjects[4+this->IndexZeroWeight])
-      possible=false;
-    if (possible)
-      for (int j=this->MultiplicitiesFixedHweight.size-1; j>=this->IndexZeroWeight;j--)
-      { int topMult=this->MultiplicitiesFixedHweight.TheObjects[j];
-        if (topMult<0)
-        { possible=false;
-          break;
-        }
-        if (topMult>0)
-        {	if (j!=this->IndexZeroWeight)
-            this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight*2-j]-=topMult;
-          for (int k=j-2;k>=this->IndexZeroWeight;k-=2)
-          {	this->MultiplicitiesFixedHweight.TheObjects[k]-=topMult;
-            if (k!=this->IndexZeroWeight)
-              this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight*2-k]-=topMult;
-            assert(	this->MultiplicitiesFixedHweight.TheObjects[k]==this->MultiplicitiesFixedHweight.TheObjects[this->IndexZeroWeight*2-k]);
-            if(this->MultiplicitiesFixedHweight.TheObjects[k]<0)
-            { possible=false;
-              break;
-            }
-          }
-        }
-      }
-		//this->ComputeDebugStringCurrent();
-		if (possible)
-		{ for (int k=0;k<this->theWeylGroup.RootSystem.size;k++)
-      { root::RootScalarEuclideanRoot(hCandidate,this->theWeylGroup.RootSystem.TheObjects[k],tempRat);
-        if (tempRat.IsEqualToZero())
-          if (!rootsHavingScalarProd2WithH.ContainsARootNonPerpendicularTo (this->theWeylGroup.RootSystem.TheObjects[k],this->theWeylGroup))
-            RootSpacesThatCommuteWithAllRootsInTheSlTwo.AddObjectOnTop(this->theWeylGroup.RootSystem.TheObjects[k]);
-      }
-      BufferDecomposition.DifferenceTwoHsimpleRootsIsARoot=false;
-      for (int k=0;k<rootsHavingScalarProd2WithH.size;k++)
-        for(int j=k+1;j<rootsHavingScalarProd2WithH.size;j++)
-          if(this->theWeylGroup.IsARoot( rootsHavingScalarProd2WithH.TheObjects[j]- rootsHavingScalarProd2WithH.TheObjects[k]))
-            BufferDecomposition.DifferenceTwoHsimpleRootsIsARoot=true;
-      BufferDecomposition.theModulesHighestWeights.size=0;
-			BufferDecomposition.theModulesMultiplicities.size=0;
-			for (int j=this->MultiplicitiesFixedHweight.size-1; j>=0;j--)
-				if (this->MultiplicitiesFixedHweight.TheObjects[j]>0)
-				{ BufferDecomposition.theModulesHighestWeights.AddObjectOnTop(j-this->IndexZeroWeight);
-					BufferDecomposition.theModulesMultiplicities.AddObjectOnTop (this->MultiplicitiesFixedHweight.TheObjects[j]);
-				}
-      BufferDecomposition.hCharacteristic.Assign(hCandidate);
-			invertedCartan.ActOnAroot(hCandidate,BufferDecomposition.hElementCorrespondingToCharacteristic);
-			BufferDecomposition.hCommutingRootSpaces.CopyFromBase(hCommutingRoots);
-      BufferDecomposition.DiagramM.ComputeDiagramTypeModifyInput(hCommutingRoots, this->theWeylGroup);
-      BufferDecomposition.CentralizerDiagram.ComputeDiagramTypeModifyInput(RootSpacesThatCommuteWithAllRootsInTheSlTwo, this->theWeylGroup);
-      BufferDecomposition.RootsHavingScalarProduct2WithH.CopyFromBase(rootsHavingScalarProd2WithH);
-      BufferDecomposition.ComputeDynkinsEpsilon(this->theWeylGroup);
-			if (this->AddObjectOnTopNoRepetitionOfObjectHash(BufferDecomposition))
-			{
-			}
-			//this->AddObjectOnTopHash(BufferDecomposition);
-			//this->theHelements.AddObjectOnTop(hCandidate);
-		}
-	}
-	this->ComputeDebugString(theGlobalVariables,this->theWeylGroup,false,false);
-}
-
-void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml)
-{	std::string tempS; std::stringstream out;
-  out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, UseHtml, useLatex, theGlobalVariables);
-    out<< "Index "<< i<<": "<<tempS<<"\n\n";
-  }
-  output=out.str();
-  return;
-}
-
 void SltwoSubalgebras::ComputeDebugStringCurrent()
 {	std::string tempS; std::stringstream out;
 	for (int i=0; i<this->MultiplicitiesFixedHweight.size; i++)
@@ -18012,13 +17714,13 @@ void SltwoSubalgebras::ComputeDebugStringCurrent()
 }
 
 void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables &theGlobalVariables)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out;
 	out <<index <<" out of "<< outOf <<" =3^8-1 computed";
 	::IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
 	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-	theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
@@ -18252,7 +17954,7 @@ void ElementSimpleLieAlgebra::MultiplyByRational(SimpleLieAlgebra& owner, const 
 		this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].MultiplyBy(theNumber);
 }
 
-void ElementSimpleLieAlgebra::ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex)
+void ElementSimpleLieAlgebra::ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::stringstream out; std::string tempS;
 	if (useLatex)
 		out <<"$";
@@ -18402,13 +18104,13 @@ void ::SimpleLieAlgebra::ElementToString(std::string &output, bool useHtml, bool
 	}
 	if (useLatex)
 		out <<"\\end{tabular}";
-	//this->ChevalleyConstants.ElementToSting(tempS);
+	//this->ChevalleyConstants.ElementToString(tempS);
 	//out <<"\n"<< tempS<<"\n";
 	output=out.str();
 }
 
 void SimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out2,out3;
   out2<< "found "<<found<< " out of "<<progress+1<<" processed out of total " << outOf<<" candidates";
@@ -18417,21 +18119,21 @@ void SimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundG
   IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
   IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
   IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void SimpleLieAlgebra::MakeSl2ProgressReportNumCycles(	int progress, int outOf,	GlobalVariables& theGlobalVariables)
-{	if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{	if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out4;
   out4<< "Searching fixed characteristic: " << progress<<" out of "<< outOf;
   IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
   IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void SimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.FeedDataToIndicatorWindowDefault==0)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out2,out3;
   int x=(i*Total*Total+j*Total+k+1);
@@ -18446,149 +18148,7 @@ void SimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, G
   //{ IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
    // IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
   //}
-  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
-}
-
-void SimpleLieAlgebra::FindSl2SubalgebrasOld(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, SltwoSubalgebras& inputCandidates)
-{ this->ComputeChevalleyConstants(WeylLetter, WeylRank, theGlobalVariables);
-//  this->theChevalleyConstantComputer.TestForConsistency
-//    ( *this->theGlobalVariablesContainer->Default());
- // this->theSltwoSubalgebras.Compute(*this->theGlobalVariablesContainer->Default(),true);
-	inputCandidates.Compute(theGlobalVariables,true);
-  std::stringstream out;
-	ElementSimpleLieAlgebra e,f,h;
-	roots thefoundHs;
-	Rational tempRat;
-	ListBasicObjects<ElementSimpleLieAlgebra> goodHs, goodEs, goodFs;
-	ListBasicObjects<ElementSimpleLieAlgebra> goodHPrimes, goodEPrimes, goodFPrimes;
-	ListBasicObjects<ElementSimpleLieAlgebra> badHs, badEs, badFs;
-	ListBasicObjects<ElementSimpleLieAlgebra> badHPrimes, badEPrimes, badFPrimes;
-	ListBasicObjects<int> goodSLtwos, badSltwos;
-	int NumCandidates=inputCandidates.size;
-	//NumCandidates=5;
-	goodHs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodEs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodFs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badHs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badEs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badFs.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	//goodHPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodEPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	goodFPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	//badHPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badEPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	badFPrimes.MakeActualSizeAtLeastExpandOnTop(NumCandidates);
-	int NumFound=0;
-	roots tempRoots;
-	Selection selRoots;
-	for (int i=0; i<NumCandidates; i++)
-	{	slTwo& theSl2= inputCandidates.TheObjects[i];
-		e.Nullify(*this);
-		theSl2.RootsHavingScalarProduct2WithH.ComputeDebugString();
-		//int tempRank=theSl2.RootsHavingScalarProduct2WithH.GetRankOfSpanOfElements(theGlobalVariables);
-    tempRoots.size=0;
-    selRoots.init(theSl2.RootsHavingScalarProduct2WithH.size);
-    int NumCycles= MathRoutines::TwoToTheNth(theSl2.RootsHavingScalarProduct2WithH.size);
-    bool found=false;
-    for (int j=0; j<NumCycles; j++)
-    { e.Nullify(*this);
-      this->MakeSl2ProgressReportNumCycles(j, NumCycles,theGlobalVariables);
-      for (int k=0; k<theSl2.RootsHavingScalarProduct2WithH.size; k++)
-        if(!selRoots.selected[k])
-          e.SetCoefficient(theSl2.RootsHavingScalarProduct2WithH.TheObjects[k], 1, *this);
-   		if (this->AttemptExtendingHEtoHEF(theSl2.hElementCorrespondingToCharacteristic, e, f, theGlobalVariables))
-      { found=true;
-        break;
-      }
-      selRoots.incrementSelection();
-    }
-    this->MakeSl2ProgressReportNumCycles(NumCycles, NumCycles,theGlobalVariables);
-//		if (this->AttemptExtendingHEtoHEF
-  //        (theSl2.hElementCorrespondingToCharacteristic, e, f, theGlobalVariables))
-    if (found)
-		{ NumFound++;
-		  this->LieBracket(e,f,h);
-			this->theWeyl.RootScalarKillingFormMatrixRoot(	this->theWeyl.RootSystem.TheObjects[e.NonZeroElements.elements[0]],h.Hcomponent, tempRat);
-      if (!tempRat.IsEqualToZero())
-      { assert(!tempRat.IsEqualToZero());
-        tempRat.Invert();
-        tempRat.MultiplyByInt(2);
-        h.MultiplyByRational(*this,tempRat);
-        f.MultiplyByRational(*this,tempRat);
-        ElementSimpleLieAlgebra Eprime, Fprime, Eprime2, Fprime2;
-        this->LieBracket(h, e, Eprime);
-        this->LieBracket(h, f, Fprime);
-        Eprime2=Eprime; Fprime2=Fprime;
-        tempRat.AssignNumeratorAndDenominator(-1,2);
-        Eprime2.MultiplyByRational(*this,tempRat);
-        tempRat.AssignNumeratorAndDenominator(1,2);
-        Fprime2.MultiplyByRational(*this,tempRat);
-        Eprime2+=e;
-        Fprime2+=f;
-        if (Eprime2.IsEqualToZero() && Fprime2.IsEqualToZero())
-        { goodHs.AddObjectOnTop(h);
-          goodEs.AddObjectOnTop(e);
-          goodFs.AddObjectOnTop(f);
-          goodEPrimes.AddObjectOnTop(Eprime);
-          goodFPrimes.AddObjectOnTop(Fprime);
-          thefoundHs.AddObjectOnTopNoRepetitionOfObject(h.Hcomponent);
-          goodSLtwos.AddObjectOnTop(i);
-        }
-        else
-        { badHs.AddObjectOnTop(h);
-          badEs.AddObjectOnTop(e);
-          badFs.AddObjectOnTop(f);
-          badEPrimes.AddObjectOnTop(Eprime);
-          badFPrimes.AddObjectOnTop(Fprime);
-          badSltwos.AddObjectOnTop(i);
-        }
-      }
-		}
-    this->MakeSl2ProgressReport( i, NumFound, goodHs.size,thefoundHs.size, inputCandidates.size, theGlobalVariables);
-	}
-	out <<"Good cases found: "<<goodHs.size << " bad cases: "<< badHs.size<< "; total: " << badHs.size+goodHs.size;
-	out <<"\\section{Good cases}";
-	for(int i=0; i<goodHs.size; i++)
-	{ out <<"\n\n\\textbf{Good case " <<i+1<<"}";
-	  goodHs.TheObjects[i].ComputeDebugString(*this, false, true);
-    goodEs.TheObjects[i].ComputeDebugString(*this, false, true);
-    goodFs.TheObjects[i].ComputeDebugString(*this, false, true);
-    goodEPrimes.TheObjects[i].ComputeDebugString(*this, false, true);
-    goodFPrimes.TheObjects[i].ComputeDebugString(*this, false, true);
-    out << "\n\nh:=[e,f]="<<goodHs.TheObjects[i].DebugString<<"\n\n";
-    out << "e= " << goodEs.TheObjects[i].DebugString <<"\n\n";
-    out << "f= "<<goodFs.TheObjects[i].DebugString<<"\n\n";
-    out << "[h,f]= "<<goodFPrimes.TheObjects[i].DebugString<<"\n\n";
-    out << "[h,e]= "<<goodEPrimes.TheObjects[i].DebugString<<"\n\n";
-    int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
-    root tempRoot;
-    out <<"Characteristic: (";
-    for (int j=0; j<theDimension; j++)
-    { tempRoot.MakeZero(theDimension);
-      tempRoot.TheObjects[j]=1;
-      this->theWeyl.RootScalarKillingFormMatrixRoot(tempRoot, goodHs.TheObjects[i].Hcomponent, tempRat);
-      out << tempRat.ElementToString();
-      if (j!=theDimension-1)
-        out<<",";
-    }
-    out <<")\n\n\\rule{\\textwidth}{0.4pt}\n\n";
-	}
-	out <<"\\section{Bad cases}";
-	for(int i=0; i<badHs.size; i++)
-	{ out <<"\n\n\\textbf{Bad case" <<i+1<<"}";
-	  badHs.TheObjects[i].ComputeDebugString(*this, false, true);
-    badEs.TheObjects[i].ComputeDebugString(*this, false, true);
-    badFs.TheObjects[i].ComputeDebugString(*this, false, true);
-    badEPrimes.TheObjects[i].ComputeDebugString(*this, false, true);
-    badFPrimes.TheObjects[i].ComputeDebugString(*this, false, true);
-    out << "\n\nh:=[e,f]="<<badHs.TheObjects[i].DebugString<<"\n\n";
-    out << "e= " << badEs.TheObjects[i].DebugString <<"\n\n";
-    out << "f= "<<badFs.TheObjects[i].DebugString<<"\n\n";
-    out << "[h,f]= "<<badFPrimes.TheObjects[i].DebugString<<"\n\n";
-    out << "[h,e]= "<<badEPrimes.TheObjects[i].DebugString<<"\n\n";
-    out << "\n\n\\rule{\\textwidth}{0.4pt}\n\n";
-	}
-	this->DebugString=out.str();
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 //////////////////////////////////////////////////////////////
@@ -18872,8 +18432,7 @@ void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, 
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
 	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables)
@@ -18886,8 +18445,7 @@ void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int che
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
 	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverState::GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl)
@@ -19159,13 +18717,13 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 	this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theIsos.simpleGenerators,this->theIsos.ExternalAutomorphisms	,theGlobalVariables, -1, false);
 	this->theK.ComputeAll();
 	this->flagComputationIsInitialized=true;
-	if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+	if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
 		if (this->theIndexStack.size>0)
 		{ int tempI= *this->theIndexStack.LastObject();
 			this->TheObjects[tempI].ComputeDebugString(this->theWeylGroup, theGlobalVariables);
 			IndicatorWindowGlobalVariables.StatusString1=this->TheObjects[tempI].DebugString;
 			IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-			theGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	//this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods, theGlobalVariables);
 }
@@ -19233,12 +18791,12 @@ void minimalRelationsProverStates::WriteToFileAppend(std::fstream& outputHeader,
 	for (int i=this->sizeByLastSave; i<this->size; i++)
 	{ outputBody<<"\n\n\nState_index: "<< i<<" \n";
 		this->TheObjects[i].WriteToFile(outputBody, theGlobalVariables);
-		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
 		{ std::stringstream out3;
 			out3<< i+1<<" out of "<< this->size<< " states stored to disk";
 			IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
 			IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-			theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
 	this->sizeByLastSave=this->size;
@@ -19290,7 +18848,7 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream &inputHeader, std::
 		this->TheObjects[i].activeChild=theActiveChildren.TheObjects[i];
 		this->TheObjects[i].PossibleChildStates.CopyFromBase(thePossibleChildStates.TheObjects[i]);
 		this->TheObjects[i].CompleteChildStates.CopyFromBase(theCompleteChildStates.TheObjects[i]);
-		if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+		if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
 		{ std::stringstream out3;
       if (i+1==12361)
       { StopDebug();
@@ -19299,7 +18857,7 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream &inputHeader, std::
 			IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
 			IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 			IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-			theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 		}
 	}
 	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
@@ -19429,8 +18987,7 @@ void minimalRelationsProverStates::MakeProgressReportCurrentState(	int index, Gl
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
   IndicatorWindowGlobalVariables.StatusString1=out.str();
 	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 }
 
@@ -19440,8 +18997,7 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportCurrentState(	int ind
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
   IndicatorWindowGlobalVariables.StatusString1=out.str();
 	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
 }
 
@@ -19454,8 +19010,7 @@ void minimalRelationsProverStates::MakeProgressReportIsos(int progress, int numS
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStatesFixedK::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
@@ -19467,8 +19022,7 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportIsos(int progress, in
 	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	//::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStates::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
@@ -19482,8 +19036,7 @@ void minimalRelationsProverStates::MakeProgressReportChildStates(int numSearched
 //	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStatesFixedK::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
@@ -19497,8 +19050,7 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportChildStates(int numSe
 //	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 void minimalRelationsProverStates::MakeProgressReportStack( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out1, out2, out3, out4;
@@ -19523,8 +19075,7 @@ void minimalRelationsProverStates::MakeProgressReportStack( GlobalVariables& The
 	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	TheGlobalVariables.FeedIndicatorWindow(::IndicatorWindowGlobalVariables);
 }
 
 void minimalRelationsProverStatesFixedK::MakeProgressReportStack	( GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
@@ -19550,8 +19101,7 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportStack	( GlobalVariabl
 	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
 //	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
 	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-		TheGlobalVariables.FeedDataToIndicatorWindowDefault(::IndicatorWindowGlobalVariables);
+	TheGlobalVariables.FeedIndicatorWindow(::IndicatorWindowGlobalVariables);
 }
 
 bool minimalRelationsProverState::RootIsGoodForProblematicIndex(root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl)
@@ -20640,12 +20190,12 @@ void minimalRelationsProverStates::ReduceMemoryUse(GlobalVariables& theGlobalVar
 { if (false)
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ReduceMemoryUse();
-    if (theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
       IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
       IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-      theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+      theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
     }
   }
   this->NumFullyComputed=0;
@@ -20709,12 +20259,12 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 					}
 					this->size=oldSize;
 					this->TheObjects[index].PossibleChildStates.size=0;
-					if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+					if (TheGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
 					{ IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 						std::stringstream out3;
 						out3<< counter+1 <<" out of  "<< NumNormalsToCheck<<" normals tested, best hit "<<minNumChildren<<" children";
 						IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-						TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+						TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 					}
 				}
 			}
@@ -21362,12 +20912,12 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 					}
 					this->size=oldSize;
 					this->TheObjects[index].PossibleChildStates.size=0;
-					if (TheGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
+					if (TheGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
 					{ IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
 						std::stringstream out3;
 						out3<< i+1 <<" out of  "<< theWeyl.RootsOfBorel.size<<" normals tested, best hit "<<minNumChildren<<" children";
 						IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-						TheGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+						TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 					}
 				}
 			}

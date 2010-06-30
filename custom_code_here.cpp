@@ -761,9 +761,9 @@ class IrreducibleFiniteDimensionalModule
 
 void IrreducibleFiniteDimensionalModule::ElementToString(std::string& output)
 { std::stringstream out; std::string tempS;
-  this->theMatrix.ElementToSting(tempS);
+  this->theMatrix.ElementToString(tempS);
   out <<"The matrix :\n "<< tempS<<"\n\n";
-  this->thePathMatrix.ElementToSting(tempS);
+  this->thePathMatrix.ElementToString(tempS);
   out <<"The matrix of the polytope:\n "<< tempS<<"\n\n";
   this->thePaths.ElementToString(tempS, false);
   out << tempS;
@@ -828,11 +828,12 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << debugParser.Value.DebugString;
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
-
-  theG.FindSl2Subalgebras('E', 8, theGlobalVariables);
-  IndicatorWindowGlobalVariables.StatusString1= theG.DebugString;
+  SltwoSubalgebras tempSl2s;
+  theG.FindSl2Subalgebras(tempSl2s, 'D', 4, theGlobalVariables);
+  tempSl2s.ComputeDebugString(theGlobalVariables, theG.theWeyl, false, false);
+  IndicatorWindowGlobalVariables.StatusString1= tempSl2s.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
   return;
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
@@ -976,8 +977,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   output=out.str();
   IndicatorWindowGlobalVariables.StatusString1=output;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  if(theGlobalVariables.FeedDataToIndicatorWindowDefault!=0)
-    theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 
 void DyckPaths::ComputeGoodPathsExcludeTrivialPath()
@@ -1249,38 +1249,75 @@ void hashedRoots::ReadFromFile(std::fstream& input)
    }
 }
 
-void slTwo::ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
+void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::stringstream out;  std::string tempS;
   this->hCharacteristic.ElementToString(tempS);
   out <<"h-characteristic: "<<  tempS;
   this->preferredAmbientSimpleBasis.ElementToString(tempS);
+  if (useHtml)
+    out << "<br>";
   out<<"\nSimple basis ambient algebra w.r.t defining h: "<< tempS;
   roots tempRoots;
   MatrixLargeRational tempMat;
   for (int i=0; i<this->DiagramsContainingRegularSAs.size; i++)
   { this->DiagramsContainingRegularSAs.TheObjects[i].GetSimpleBasisInBourbakiOrder(tempRoots);
+    if (useHtml)
+      out << "<br>";
     out << "\nContaining regular subalgebra number " <<i+1<<": "<< this->DiagramsContainingRegularSAs.TheObjects[i].DebugString;
-    tempRoots.ElementToString(tempS);
-    out << "  Simple basis subalgebra: " << tempS;
+    tempRoots.ElementToString(tempS, useLatex, useHtml, false);
+    if (useHtml)
+      out << "<br>";
+    out << "\nSimple basis subalgebra: " << tempS;
     this->DiagramsContainingRegularSAs.TheObjects[i].GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
-    tempMat.ElementToSting(tempS);
-    out <<"\nSymmetric Cartan matrix in Bourbaki order:\n"<< tempS;
+    if (!usePNG)
+      tempMat.ElementToString(tempS, useHtml, useLatex);
+    else
+      tempMat.ElementToString(tempS, false, true);
+    if (useHtml)
+      out << "<br>";
+    out <<"\nSymmetric Cartan matrix in Bourbaki order:\n";
+    if (useHtml)
+    { out << "<br>";
+      if (usePNG)
+      { std::stringstream tempStream;
+        container.texFileNamesForPNG.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size+1);
+        container.texStringsEachFile.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size);
+        (*container.texStringsEachFile.LastObject())=tempS;
+        tempStream<<(*physicalPath) <<"fla";
+        tempStream<<container.texFileNamesForPNG.size<<".tex";
+        container.texFileNamesForPNG.TheObjects[container.texFileNamesForPNG.size-1]=tempStream.str();
+        out <<"<img src=\""<< (*htmlPathServer) <<"fla"<<container.texFileNamesForPNG.size<<".png\">";
+      }
+      else
+        out<<tempS;
+    } else
+      out <<tempS;
   }
+  out <<"sl(2)-module decomposition of Ambient Lie algebra: ";
+  for (int i=0; i<this->HighestWeights.size; i++)
+  { if (this->MultiplicitiesHighestWeights.TheObjects[i]>1)
+      out<< this->MultiplicitiesHighestWeights.TheObjects[i];
+    out << "V_{"<<this->HighestWeights.TheObjects[i]<<"}";
+    if (i!=this->HighestWeights.size-1)
+      out <<"+";
+  }
+  out <<"\nThe below list one possible realization of the sl(2) subalgebra.";
   this->theH.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"\n\n$h=$ $" <<tempS<<"$";
+  out <<"\n$h=$ $" <<tempS<<"$";
   this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"\n\n$e=$ $" <<tempS<<"$";
+  out <<"\n$e=$ $" <<tempS<<"$";
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"\n\n$f=$ $" <<tempS<<"$";
-  this->bufferEFnotCopiedAutomatically.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n\n$[e,f]=$ $" <<tempS <<"$";
-  this->bufferHEnotCopiedAutomatically.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n\n$[h,e]=$ $" <<tempS <<"$";
-  this->bufferHFnotCopiedAutomatically.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n\n$[h,f]=$ $" <<tempS <<"$";
-  this->theSystemMatrixForm.ElementToSting(tempS);
+  out <<"\n$f=$ $" <<tempS<<"$";
+  out <<"\n\nThe below are the Lie brackets of the above elements. Printed to check for debug purposes.";
+  this->bufferEbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out << "\n$[e,f]=$ $" <<tempS <<"$";
+  this->bufferHbracketE.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out << "\n$[h,e]=$ $" <<tempS <<"$";
+  this->bufferHbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
+  out << "\n$[h,f]=$ $" <<tempS <<"$";
+  this->theSystemMatrixForm.ElementToString(tempS);
   out <<"\nSystem matrix form we try to solve:\n"<< tempS;
-  this->theSystemColumnVector.ElementToSting(tempS);
+  this->theSystemColumnVector.ElementToString(tempS);
   out <<"\nColumn vector of the system:\n"<<tempS;
   this->theSystemToBeSolved.ElementToString(tempS);
   out << "\nThe actual system we need to solve:\n"<< tempS;
@@ -1294,9 +1331,8 @@ void slTwo::ElementToHtml(std::string& filePath)
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
-void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
+void SimpleLieAlgebra::FindSl2Subalgebras( SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
 { rootSubalgebras theRootSAs;
-  SltwoSubalgebras tempSl2s;
 //  rootSubalgebra tempRootSA;
 //  tempRootSA.genK.SetSizeExpandOnTopNoObjectInit(WeylRank);
 //  tempRootSA.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
@@ -1307,12 +1343,10 @@ void SimpleLieAlgebra::FindSl2Subalgebras(char WeylLetter, int WeylRank, GlobalV
   theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
   for (int i=0; i<theRootSAs.size-1; i++)
-    theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(tempSl2s, theGlobalVariables, *this);
+    theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(output, theGlobalVariables, *this);
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
-  tempSl2s.ComputeDebugString(theGlobalVariables, this->theWeyl, false, false);
-  this->DebugString= tempSl2s.DebugString;
 }
 
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
@@ -1569,10 +1603,11 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables,  root
     this->hCharacteristic.TheObjects[i]=this->owner->theWeyl.RootScalarKillingFormMatrixRoot(this->theH.Hcomponent, this->preferredAmbientSimpleBasis.TheObjects[i]);
   this->hCharacteristic.ComputeDebugString();
   if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
-  { this->owner->LieBracket(this->theE, this->theF, this->bufferEFnotCopiedAutomatically);
-    this->owner->LieBracket(this->theH, this->theE, this->bufferHEnotCopiedAutomatically);
-    this->owner->LieBracket(this->theH, this->theF, this->bufferHFnotCopiedAutomatically);
+  { this->owner->LieBracket(this->theE, this->theF, this->bufferEbracketF);
+    this->owner->LieBracket(this->theH, this->theE, this->bufferHbracketE);
+    this->owner->LieBracket(this->theH, this->theF, this->bufferHbracketF);
   }
+  this->ComputeModuleDecomposition();
 }
 
 void WeylGroup::PerturbWeightToRegularWRTrootSystem(const root& inputH, root& output)
@@ -1690,4 +1725,109 @@ void DynkinDiagramRootSubalgebra::GetKillingFormMatrixUseBourbakiOrder(MatrixLar
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       output.elements[i][j]=theWeyl.RootScalarKillingFormMatrixRoot(tempRoots.TheObjects[i], tempRoots.TheObjects[j]);
+}
+
+//The below code is related to sl(2) subalgebras of simple Lie algebras
+void slTwo::ComputeModuleDecomposition()
+{	int theDimension= this->owner->theWeyl.KillingFormMatrix.NumRows;
+  int IndexZeroWeight=this->owner->theWeyl.RootsOfBorel.size;
+	this->WeightSpaceDimensions.initFillInObject(this->owner->theWeyl.RootSystem.size+1,0);
+	this->WeightSpaceDimensions.TheObjects[IndexZeroWeight]=theDimension;
+	ListBasicObjects<int> BufferHighestWeights;
+	bool possible=true;
+	Rational tempRat;
+	for (int k=0; k<this->owner->theWeyl.RootSystem.size;k++)
+	{ root::RootScalarEuclideanRoot(this->hCharacteristic, this->owner->theWeyl.RootSystem.TheObjects[k], tempRat);
+    assert(tempRat.DenShort==1);
+		if (tempRat.NumShort>this->owner->theWeyl.RootSystem.size)
+		{	possible=false;
+      break;
+    }
+    this->WeightSpaceDimensions.TheObjects[IndexZeroWeight+tempRat.NumShort]++;
+	}
+	BufferHighestWeights.CopyFromBase(this->WeightSpaceDimensions);
+	this->HighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootsOfBorel.size);
+  this->MultiplicitiesHighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootsOfBorel.size);
+  this->HighestWeights.size=0;
+  this->MultiplicitiesHighestWeights.size=0;
+  for (int j=BufferHighestWeights.size-1; j>=IndexZeroWeight; j--)
+  { int topMult = BufferHighestWeights.TheObjects[j];
+    if (topMult<0)
+    { possible=false;
+      break;
+    }
+    if (topMult>0)
+    {	this->HighestWeights.AddObjectOnTop(j-IndexZeroWeight);
+      this->MultiplicitiesHighestWeights.AddObjectOnTop(topMult);
+      if (j!=IndexZeroWeight)
+        BufferHighestWeights.TheObjects[IndexZeroWeight*2-j]-=topMult;
+      for (int k=j-2; k>=IndexZeroWeight; k-=2)
+      {	BufferHighestWeights.TheObjects[k]-=topMult;
+        if (k!=IndexZeroWeight)
+           BufferHighestWeights.TheObjects[IndexZeroWeight*2-k]-=topMult;
+        assert(BufferHighestWeights.TheObjects[k]==BufferHighestWeights.TheObjects[IndexZeroWeight*2-k]);
+        if(BufferHighestWeights.TheObjects[k]<0)
+        { possible=false;
+          break;
+        }
+      }
+    }
+  }
+  assert (possible);
+}
+
+void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+{	std::string tempS; std::stringstream out;
+  if(UseHtml)
+    out<<"<br>";
+  out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
+  if(UseHtml)
+    out<<"<br><br>";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables,*this, useLatex, UseHtml);
+    out<< "Index "<< i<<": ";
+    if(UseHtml)
+      out<<"<br>";
+    out<<tempS;
+    if(UseHtml)
+      out<<"<br><br>";
+  }
+  output=out.str();
+  return;
+}
+
+void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer)
+{ if(usePNG)
+  { int numExpectedFiles= this->size*5;
+    this->texFileNamesForPNG.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
+    this->texStringsEachFile.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
+    this->listSystemCommands.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
+  }
+  this->texFileNamesForPNG.size=0;
+  this->texStringsEachFile.size=0;
+  this->listSystemCommands.size=0;
+  std::stringstream out;
+  std::string tempS, fileName;
+  std::fstream theFile, fileFlas;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, false, true, usePNG, &physicalPath, &htmlPathServer);
+    out<<tempS;
+  }
+  for (int i=0; i<this->texFileNamesForPNG.size; i++)
+  { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
+    fileFlas<< "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n"<< this->texStringsEachFile.TheObjects[i]<<"\n\\end{document}";
+    fileFlas.close();
+  }
+  fileName= physicalPath;
+  fileName.append("sl2s.html");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  fileName= physicalPath;
+  fileName.append("sl2s_nopng.html");
+  tempS= out.str();
+  theFile<< "<HMTL><BODY><a url=\""<< fileName<< "\"> "<<"plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
+  theFile.close();
+  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, 0, 0);
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  theFile<< "<HMTL><BODY>"<<tempS<<"</HTML></BODY>";
+  theFile.close();
 }

@@ -829,7 +829,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
 
-  theG.FindSl2Subalgebras('D', 4, theGlobalVariables);
+  theG.FindSl2Subalgebras('E', 8, theGlobalVariables);
   IndicatorWindowGlobalVariables.StatusString1= theG.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedDataToIndicatorWindowDefault(IndicatorWindowGlobalVariables);
@@ -1253,6 +1253,19 @@ void slTwo::ElementToString(std::string& output, bool useHtml, bool useLatex, Gl
 { std::stringstream out;  std::string tempS;
   this->hCharacteristic.ElementToString(tempS);
   out <<"h-characteristic: "<<  tempS;
+  this->preferredAmbientSimpleBasis.ElementToString(tempS);
+  out<<"\nSimple basis ambient algebra w.r.t defining h: "<< tempS;
+  roots tempRoots;
+  MatrixLargeRational tempMat;
+  for (int i=0; i<this->DiagramsContainingRegularSAs.size; i++)
+  { this->DiagramsContainingRegularSAs.TheObjects[i].GetSimpleBasisInBourbakiOrder(tempRoots);
+    out << "\nContaining regular subalgebra number " <<i+1<<": "<< this->DiagramsContainingRegularSAs.TheObjects[i].DebugString;
+    tempRoots.ElementToString(tempS);
+    out << "  Simple basis subalgebra: " << tempS;
+    this->DiagramsContainingRegularSAs.TheObjects[i].GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
+    tempMat.ElementToSting(tempS);
+    out <<"\nSymmetric Cartan matrix in Bourbaki order:\n"<< tempS;
+  }
   this->theH.ElementToString(tempS, *this->owner, useHtml, useLatex);
   out <<"\n\n$h=$ $" <<tempS<<"$";
   this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
@@ -1361,18 +1374,16 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
       theSl2.theH.Hcomponent.MakeZero(this->AmbientWeyl.KillingFormMatrix.NumRows);
       for(int j=0; j<theRelativeDimension; j++)
         theSl2.theH.Hcomponent+= this->SimpleBasisK.TheObjects[j]*tempRoot2.TheObjects[j];
-      if (!output.ContainsSl2WithGivenH(theSl2.theH.Hcomponent, 0))
-      { theSl2.theE.Nullify(theLieAlgebra);
-        theSl2.theF.Nullify(theLieAlgebra);
-        //theSl2.ComputeDebugString(false, false, theGlobalVariables);
-        if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
-        { theSl2.ComputeDebugString(false, false, theGlobalVariables);
+      theSl2.theE.Nullify(theLieAlgebra);
+      theSl2.theF.Nullify(theLieAlgebra);
+      //theSl2.ComputeDebugString(false, false, theGlobalVariables);
+      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
+      { theSl2.MakeReportPrecomputations(theGlobalVariables,*this);
+        int indexIsoSl2;
+        if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
+          output.TheObjects[indexIsoSl2].DiagramsContainingRegularSAs.AddListOnTop(theSl2.DiagramsContainingRegularSAs);
+       else
           output.AddObjectOnTopHash(theSl2);
-          this->PositiveRootsK.Sum(tempRoot);
-          tempRoot.DivByInteger(2);
-          output.LastObject()->MakeReportPrecomputations(theGlobalVariables, tempRoot);
-          output.LastObject()->ComputeDebugString(false, false, theGlobalVariables);
-        }
       }
     }
   }
@@ -1494,7 +1505,7 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Select
   outputMatrixSystemToBeSolved.NullifyAll();
   outputSystemColumnVector.NullifyAll();
   for (int i=0; i<outputSystemToBeSolved.size; i++)
-  { for (int j=0; j<outputSystemToBeSolved.TheObjects[i].size; j++)
+    for (int j=0; j<outputSystemToBeSolved.TheObjects[i].size; j++)
     { int lowerIndex=-1; int higherIndex=-1;
       Monomial<Rational>& theMonomial= outputSystemToBeSolved.TheObjects[i].TheObjects[j];
       for (int k=0; k<numberVariables; k++)
@@ -1511,7 +1522,6 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Select
       else
         outputMatrixSystemToBeSolved.elements[i][lowerIndex]=theMonomial.Coefficient* inputFCoeffs.elements[0][higherIndex-halfNumberVariables];
     }
-  }
   outputSystemToBeSolved.ComputeDebugString();
 }
 
@@ -1527,34 +1537,37 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(root& theH, int* outputIndex)
   return false;
 }
 
-void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, root& rhoMinimalContainingRegularSubalgebra)
+bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(root& theHCharacteristic, int* outputIndex)
+{ if (outputIndex!=0)
+    *outputIndex=-1;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].hCharacteristic==theHCharacteristic)
+    { if (outputIndex!=0)
+        *outputIndex=i;
+      return true;
+    }
+  return false;
+}
+
+void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables,  rootSubalgebra& MinimalContainingRegularSubalgebra)
 { int theDimension=this->owner->theWeyl.KillingFormMatrix.NumRows;
-  this->hCharacteristic.SetSizeExpandOnTopLight(theDimension);
-  this->owner->theWeyl.PerturbWeightToRegularWRTrootSystem(rhoMinimalContainingRegularSubalgebra, this->perturbedRhoForSimpleBasisOfAmbient);
+  this->DiagramsContainingRegularSAs.size=0;
   roots tempRoots;
+  tempRoots.CopyFromBase(MinimalContainingRegularSubalgebra.SimpleBasisK);
+  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.Hcomponent);
+  DynkinDiagramRootSubalgebra theDiagram;
+  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
+  theDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
+  this->DiagramsContainingRegularSAs.AddObjectOnTop(theDiagram);
   tempRoots.MakeEiBasis(theDimension);
-  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->perturbedRhoForSimpleBasisOfAmbient);
+  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots,  this->theH.Hcomponent);
+  DynkinDiagramRootSubalgebra tempDiagram;
+  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
+  tempDiagram.GetSimpleBasisInBourbakiOrder(this->preferredAmbientSimpleBasis);
   this->hCharacteristic.SetSizeExpandOnTopLight(theDimension);
   for (int i=0; i<theDimension; i++)
-    this->hCharacteristic.TheObjects[i]=this->owner->theWeyl.RootScalarKillingFormMatrixRoot(this->theH.Hcomponent, tempRoots.TheObjects[i]);
-
-/*  if (foundNegative)
-  { this->owner->theWeyl.PerturbWeightToRegularWRTrootSystem(this->theH.Hcomponent, tempRoot);
-    roots range, domain;
-    range.MakeEiBasis(theDimension);
-    domain.MakeEiBasis(theDimension);
-    this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(range, tempRoot);
-    DynkinDiagramRootSubalgebra theDiagram;
-    theDiagram.ComputeDiagramTypeKeepInput(range, this->owner->theWeyl);
-    theDiagram.SimpleBasesConnectedComponents.CollectionToRoots(range);
-    theDiagram.ComputeDiagramTypeModifyInput(domain, this->owner->theWeyl);
-    theDiagram.SimpleBasesConnectedComponents.CollectionToRoots(domain);
-    this->theE.TransformInduceFromMapsOfRootSystems(domain, range, *this->owner, theGlobalVariables);
-    this->theF.TransformInduceFromMapsOfRootSystems(domain, range, *this->owner, theGlobalVariables);
-    this->theH.TransformInduceFromMapsOfRootSystems(domain, range, *this->owner, theGlobalVariables);
-    this->MakeReportPrecomputations(theGlobalVariables);
-    return;
-  }*/
+    this->hCharacteristic.TheObjects[i]=this->owner->theWeyl.RootScalarKillingFormMatrixRoot(this->theH.Hcomponent, this->preferredAmbientSimpleBasis.TheObjects[i]);
+  this->hCharacteristic.ComputeDebugString();
   if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
   { this->owner->LieBracket(this->theE, this->theF, this->bufferEFnotCopiedAutomatically);
     this->owner->LieBracket(this->theH, this->theE, this->bufferHEnotCopiedAutomatically);
@@ -1569,8 +1582,8 @@ void WeylGroup::PerturbWeightToRegularWRTrootSystem(const root& inputH, root& ou
   { root& theBadRoot= this->RootSystem.TheObjects[indexFirstNonRegular];
     Rational maxMovement=0; Rational tempRat1, tempRat2, tempMaxMovement;
     for (int i=0; i<this->RootsOfBorel.size; i++)
-    { this->RootScalarKillingFormMatrixRoot(theBadRoot, this->RootSystem.TheObjects[i], tempRat1);
-      this->RootScalarKillingFormMatrixRoot(output, this->RootSystem.TheObjects[i], tempRat2);
+    { this->RootScalarKillingFormMatrixRoot(theBadRoot, this->RootsOfBorel.TheObjects[i], tempRat1);
+      this->RootScalarKillingFormMatrixRoot(output, this->RootsOfBorel.TheObjects[i], tempRat2);
       if ((!tempRat1.IsEqualToZero()) && (!tempRat2.IsEqualToZero()))
       { tempMaxMovement = tempRat2/tempRat1;
         tempMaxMovement.AssignAbsoluteValue();
@@ -1578,7 +1591,10 @@ void WeylGroup::PerturbWeightToRegularWRTrootSystem(const root& inputH, root& ou
           maxMovement = tempMaxMovement;
       }
     }
-    output+=theBadRoot*maxMovement/2;
+    int tempInt=2;
+    if (this->RootScalarKillingFormMatrixRoot(theBadRoot, inputH).IsNegative())
+      tempInt=-2;
+    output+=theBadRoot*maxMovement/tempInt;
   }
 }
 
@@ -1621,3 +1637,57 @@ bool WeylGroup::IsRegular(root& input, int* indexFirstPerpendicularRoot)
   matB.ActOnAroot(hCharacteristic, tempRoot);
 }
 */
+
+void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrder(roots& output)
+{ output.size=0;
+  output.MakeActualSizeAtLeastExpandOnTop(this->RankTotal());
+  for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
+    this->GetSimpleBasisInBourbakiOrderOneComponentAppend(output, i);
+}
+
+void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrderOneComponentAppend(roots& outputAppend, int index)
+{ std::string& theString= this->DynkinTypeStrings.TheObjects[index];
+  // the order implemented here I took from the atlas of lie groups (http://www.liegroups.org/dissemination/spherical/explorer/rootSystem.cgi)
+  // which should be the Bourbaki order. The order is as follows:
+  // type A all roots are from left to right (or the other way round, whichever is your orientation)
+  // in type B and F first come the long roots in the order they appear in the diagram;
+  // in types C and G first come the short roots
+  // in type D first comes the long string, with the end node with lowest index;
+  // then come the two end one-root strings in any order.
+  // in type E the order is as below
+  //  2
+  //13456(78)
+  //(2 is connected to 4)
+  //The format of this function is in accordance with WeylGroup::GetEpsilonMatrix
+  assert(theString.size()>0);
+  if (theString.at(1)=='A'|| theString.at(1)=='B' || theString.at(1)=='F')
+    outputAppend.AddListOnTop(this->SimpleBasesConnectedComponents.TheObjects[index]);
+  if (theString.at(1)=='C' || theString.at(1)=='G')
+    for (int i=this->SimpleBasesConnectedComponents.TheObjects[index].size-1; i>=0; i--)
+      outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
+  if (theString.at(1)=='D')
+  { int componentRank=this->SimpleBasesConnectedComponents.TheObjects[index].size;
+    for (int i=componentRank-3; i>=0; i--)
+      outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
+    outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-2]);
+    outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-1]);
+  }
+  if (theString.at(1)=='E')
+  { int componentRank=this->SimpleBasesConnectedComponents.TheObjects[index].size;
+    outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-2]);
+    outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-1]);
+    outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-3]);
+    for (int i=0; i<componentRank-3; i++)
+      outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
+  }
+}
+
+void DynkinDiagramRootSubalgebra::GetKillingFormMatrixUseBourbakiOrder(MatrixLargeRational& output, WeylGroup& theWeyl)
+{ roots tempRoots;
+  int theDimension= this->RankTotal();
+  output.init(theDimension, theDimension);
+  this->GetSimpleBasisInBourbakiOrder(tempRoots);
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      output.elements[i][j]=theWeyl.RootScalarKillingFormMatrixRoot(tempRoots.TheObjects[i], tempRoots.TheObjects[j]);
+}

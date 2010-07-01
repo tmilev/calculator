@@ -1,4 +1,7 @@
 #include <iostream>
+#ifndef WIN32
+#include <unistd.h>
+#endif
 #include "polyhedra.h"
 
 extern int GlobalPointerCounter;
@@ -51,6 +54,7 @@ int main(int argc, char **argv)
 	//inputString ="SLtwos";
  //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
   //inputString="textType=D&textRank=4&buttonGoSl2SAs=sl%282%29+subalgebras";
+  inputString="textType=B&textRank=3&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -112,12 +116,12 @@ int main(int argc, char **argv)
       CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(chamberFile, chamberFileName, false, true, false);
       chamberFile<<"<HTML><BODY>"<< theComputationSetup.theChambers.DebugString<<"</BODY></HTML>";
       chamberFile.close();
-      if (  theComputationSetup.DisplayNumberChamberOfInterest==-1 && theComputationSetup.flagComputingVectorPartitions)
+      if(theComputationSetup.DisplayNumberChamberOfInterest==-1 && theComputationSetup.flagComputingVectorPartitions)
         theComputationSetup.DisplayNumberChamberOfInterest= theComputationSetup.theChambers.TheObjects[theComputationSetup.theChambers.RootBelongsToChamberIndex(theComputationSetup.IndicatorRoot,0)]->DisplayNumber;
         //std::cout <<"Run ok!";
     }
     else
-    {	WeylGroup tempWeyl;
+    { WeylGroup tempWeyl;
       theComputationSetup.WeylGroupIndex=4;
       theComputationSetup.theChambers.AmbientDimension=4;
       tempWeyl.MakeArbitrary('A',theComputationSetup.theChambers.AmbientDimension);
@@ -139,8 +143,7 @@ int main(int argc, char **argv)
       }
   //    std::cout.flush();
     }
-    std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<<","<< theComputationSetup.VPVectors.size <<","<<-1<<","
-                    << theComputationSetup.DisplayNumberChamberOfInterest<<");\n</script>\n";
+    std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<<","<< theComputationSetup.VPVectors.size <<","<<-1<<","<< theComputationSetup.DisplayNumberChamberOfInterest<<");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
   } else if (choice==CGIspecificRoutines::choiceGenerateDynkinTables)
   { if (theComputationSetup.WeylGroupIndex<9)
@@ -169,7 +172,8 @@ int main(int argc, char **argv)
       std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "rootHtml.html\"> <BODY>"<< serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<PhysicalPath;
     }
   } else if (choice==CGIspecificRoutines::choiceDisplayRootSApage)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n<br><input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n</FORM>\n";
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n"
+        <<"<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n<br><input type=\"checkbox\" name=\"usePNG\">Use_png(slow!)<input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n</FORM>\n";
   } else if (choice==CGIspecificRoutines::choiceGosl2)
   { SltwoSubalgebras theSl2s;
     SimpleLieAlgebra theSimpleLieAlgebra;
@@ -182,16 +186,27 @@ int main(int argc, char **argv)
     std::string serverPath=outServerPath.str();
     std::stringstream outPhysicalPath;
     std::string PhysicalPath;
-    outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/sl2s/";
+    outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/";
     PhysicalPath=outPhysicalPath.str();
-    std::string MkDirCommand;
-    std::stringstream outMkDirCommand;
-    outMkDirCommand<< "mkdir " <<PhysicalPath;
-    MkDirCommand=outMkDirCommand.str();
-    system(MkDirCommand.c_str());
-    theSl2s.ElementToHtml(*theComputationSetup.theGlobalVariablesContainer->Default(), theSimpleLieAlgebra.theWeyl, true, PhysicalPath, serverPath);
+    std::string MkDirCommand1, MkDirCommand2;
+    std::stringstream outMkDirCommand1, outMkDirCommand2;
+    outMkDirCommand1<< "mkdir " <<PhysicalPath;
+    PhysicalPath.append("sl2s/");
+    outMkDirCommand2<< "mkdir " <<PhysicalPath;
+    MkDirCommand1=outMkDirCommand1.str();
+    MkDirCommand2=outMkDirCommand2.str();
+    system(MkDirCommand1.c_str());
+    system(MkDirCommand2.c_str());
+    theSl2s.ElementToHtml(*theComputationSetup.theGlobalVariablesContainer->Default(), theSimpleLieAlgebra.theWeyl, theComputationSetup.flagExecuteSystemCommandsCGIapplication, PhysicalPath, serverPath);
     theSl2s.ComputeDebugString(*theComputationSetup.theGlobalVariablesContainer->Default(), theSimpleLieAlgebra.theWeyl, false, true);
-    std::cout<<theSl2s.DebugString;
+    if (theComputationSetup.flagExecuteSystemCommandsCGIapplication)
+    { for (int i=0; i<theSl2s.listSystemCommandsLatex.size; i++)
+      { system(theSl2s.listSystemCommandsLatex.TheObjects[i].c_str());
+        system(theSl2s.listSystemCommandsDVIPNG.TheObjects[i].c_str());
+      }
+      std::cout<<"<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "sl2s.html\"></BODY></HTML>";
+    } else
+      std::cout<<"<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "sl2s_nopng.html\"></BODY></HTML>";
   }
   std::cout<<"</BODY>\n</HTML>";
 	std::cout<<"<!--";

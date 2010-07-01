@@ -1768,8 +1768,8 @@ void DynkinDiagramRootSubalgebra::GetKillingFormMatrixUseBourbakiOrder(MatrixLar
 //The below code is related to sl(2) subalgebras of simple Lie algebras
 void slTwo::ComputeModuleDecomposition()
 {	int theDimension= this->owner->theWeyl.KillingFormMatrix.NumRows;
-  int IndexZeroWeight=this->owner->theWeyl.RootsOfBorel.size;
-	this->WeightSpaceDimensions.initFillInObject(this->owner->theWeyl.RootSystem.size+1,0);
+  int IndexZeroWeight=this->owner->theWeyl.RootSystem.size;
+	this->WeightSpaceDimensions.initFillInObject(2*this->owner->theWeyl.RootSystem.size+1,0);
 	this->WeightSpaceDimensions.TheObjects[IndexZeroWeight]=theDimension;
 	ListBasicObjects<int> BufferHighestWeights;
 	bool possible=true;

@@ -699,7 +699,7 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->initWeylGroupInfo();
   this->updateInputButtons();
   this->SetSizer(this->BoxSizer1HorizontalBackground);
-  this->theComputationSetup.theGlobalVariablesContainer->Default()->FeedDataToIndicatorWindowDefault=&FeedDataToIndicatorWindowWX;
+  this->theComputationSetup.theGlobalVariablesContainer->Default()->SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
 #ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);

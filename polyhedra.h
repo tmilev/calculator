@@ -914,7 +914,7 @@ inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, 
 	if (useHtml)
     out << "<table>";
   if (useLatex)
-  { out <<"$\\begin{array}{";
+  { out <<"$\\left(\\begin{array}{";
     for (int j=0; j<this->NumCols; j++)
       out <<"c";
     out <<"}";
@@ -945,7 +945,7 @@ inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, 
 	if (useHtml)
     out <<"</table>";
   if (useLatex)
-    out <<"\\end{array}$";
+    out <<"\\end{array}\\right)$";
 	output= out.str();
 }
 
@@ -5599,7 +5599,8 @@ public:
 	};
 	ListBasicObjects<std::string> texFileNamesForPNG;
 	ListBasicObjects<std::string> texStringsEachFile;
-	ListBasicObjects<std::string> listSystemCommands;
+	ListBasicObjects<std::string> listSystemCommandsLatex;
+	ListBasicObjects<std::string> listSystemCommandsDVIPNG;
 	void getZuckermansArrayE8(roots& output);
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringCurrent();
@@ -5617,7 +5618,7 @@ public:
 	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex)
 	{ this->ElementToString(output, owner, useHtml, useLatex, false, 0, 0);
   };
-	void ComputeDebugString(SimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex,false, 0, 0);	};
+	void ComputeDebugString(SimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex, false, 0, 0);	};
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   ListBasicObjects<Rational> coeffsRootSpaces;
@@ -5675,6 +5676,7 @@ public:
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
 	void ElementToHtml(std::string& filePath);
+	void ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer);
 	void operator=(const slTwo& right)
 	{ this->HighestWeights.CopyFromBase(right.HighestWeights);
     this->MultiplicitiesHighestWeights.CopyFromBase(right.MultiplicitiesHighestWeights);
@@ -6101,6 +6103,7 @@ public:
 	bool flagDisplayingPartialFractions;
 	bool flagComputationIsDoneStepwise;
 	bool flagHavingNotationExplanation;
+	bool flagExecuteSystemCommandsCGIapplication;
 	//bool flagAffineComputationDone;
 	bool flagSuperimposingComplexes;
 	bool flagCustomNilradicalInitted;

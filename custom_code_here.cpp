@@ -829,7 +829,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
   SltwoSubalgebras tempSl2s;
-  theG.FindSl2Subalgebras(tempSl2s, 'D', 4, theGlobalVariables);
+  theG.FindSl2Subalgebras(tempSl2s, 'B', 3, theGlobalVariables);
   tempSl2s.ComputeDebugString(theGlobalVariables, theG.theWeyl, false, false);
   IndicatorWindowGlobalVariables.StatusString1= tempSl2s.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
@@ -1249,11 +1249,30 @@ void hashedRoots::ReadFromFile(std::fstream& input)
    }
 }
 
+void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)
+{ if (!usePNG)
+  { output<<formulaTex;
+    if (useHtml)
+      output<<"\n<br>\n";
+    return;
+  }
+  std::stringstream tempStream;
+  container.texFileNamesForPNG.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size+1);
+  container.texStringsEachFile.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size);
+  (*container.texStringsEachFile.LastObject())=formulaTex;
+  tempStream<<(*physicalPath) <<"fla";
+  tempStream<<container.texFileNamesForPNG.size<<".tex";
+  container.texFileNamesForPNG.TheObjects[container.texFileNamesForPNG.size-1]=tempStream.str();
+  output <<"<img src=\""<< (*htmlPathServer) <<"fla"<<container.texFileNamesForPNG.size<<".png\">";
+  if (useHtml)
+    output<<"\n<br>\n";
+}
+
 void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::stringstream out;  std::string tempS;
   this->hCharacteristic.ElementToString(tempS);
   out <<"h-characteristic: "<<  tempS;
-  this->preferredAmbientSimpleBasis.ElementToString(tempS);
+  this->preferredAmbientSimpleBasis.ElementToString(tempS, false, false, false);
   if (useHtml)
     out << "<br>";
   out<<"\nSimple basis ambient algebra w.r.t defining h: "<< tempS;
@@ -1278,49 +1297,68 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     out <<"\nSymmetric Cartan matrix in Bourbaki order:\n";
     if (useHtml)
     { out << "<br>";
-      if (usePNG)
-      { std::stringstream tempStream;
-        container.texFileNamesForPNG.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size+1);
-        container.texStringsEachFile.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size);
-        (*container.texStringsEachFile.LastObject())=tempS;
-        tempStream<<(*physicalPath) <<"fla";
-        tempStream<<container.texFileNamesForPNG.size<<".tex";
-        container.texFileNamesForPNG.TheObjects[container.texFileNamesForPNG.size-1]=tempStream.str();
-        out <<"<img src=\""<< (*htmlPathServer) <<"fla"<<container.texFileNamesForPNG.size<<".png\">";
-      }
-      else
-        out<<tempS;
+      this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
     } else
       out <<tempS;
   }
-  out <<"sl(2)-module decomposition of Ambient Lie algebra: ";
+  out <<"\nsl(2)-module decomposition of the ambient Lie algebra: ";
+  std::stringstream tempStream2;
+  if (useLatex || usePNG)
+    tempStream2<<"$";
   for (int i=0; i<this->HighestWeights.size; i++)
   { if (this->MultiplicitiesHighestWeights.TheObjects[i]>1)
-      out<< this->MultiplicitiesHighestWeights.TheObjects[i];
-    out << "V_{"<<this->HighestWeights.TheObjects[i]<<"}";
+      tempStream2<< this->MultiplicitiesHighestWeights.TheObjects[i];
+    tempStream2 << "V_{"<<this->HighestWeights.TheObjects[i]<<"}";
     if (i!=this->HighestWeights.size-1)
-      out <<"+";
+      tempStream2 <<"+";
   }
+  if (useLatex || usePNG)
+    tempStream2<<"$";
+  tempS= tempStream2.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   out <<"\nThe below list one possible realization of the sl(2) subalgebra.";
+  if (useHtml)
+    out <<"\n<br>\n";
+  std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   this->theH.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"\n$h=$ $" <<tempS<<"$";
+  tempStreamH<<"\n$h=$ $" <<tempS<<"$";
+  tempS= tempStreamH.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"\n$e=$ $" <<tempS<<"$";
+  tempStreamE<<"\n$e=$ $" <<tempS<<"$";
+  tempS= tempStreamE.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out <<"\n$f=$ $" <<tempS<<"$";
+  tempStreamF <<"\n$f=$ $" <<tempS<<"$";
+  tempS= tempStreamF.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS,out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   out <<"\n\nThe below are the Lie brackets of the above elements. Printed to check for debug purposes.";
+  if (useHtml)
+    out <<"\n<br>\n";
   this->bufferEbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n$[e,f]=$ $" <<tempS <<"$";
+  tempStreamEF<< "\n$[e,f]=$ $" <<tempS <<"$";
+  tempS= tempStreamEF.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->bufferHbracketE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n$[h,e]=$ $" <<tempS <<"$";
+  tempStreamHE<< "\n$[h,e]=$ $" <<tempS <<"$";
+  tempS= tempStreamHE.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->bufferHbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  out << "\n$[h,f]=$ $" <<tempS <<"$";
-  this->theSystemMatrixForm.ElementToString(tempS);
-  out <<"\nSystem matrix form we try to solve:\n"<< tempS;
-  this->theSystemColumnVector.ElementToString(tempS);
-  out <<"\nColumn vector of the system:\n"<<tempS;
+  tempStreamHF<< "\n$[h,f]=$ $" <<tempS <<"$";
+  tempS= tempStreamHF.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
+  //this->theSystemMatrixForm.ElementToString(tempS);
+  //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
+  //this->theSystemColumnVector.ElementToString(tempS);
+  //out <<"\nColumn vector of the system:\n"<<tempS;
+  std::stringstream tempStreamActual;
   this->theSystemToBeSolved.ElementToString(tempS);
-  out << "\nThe actual system we need to solve:\n"<< tempS;
+  tempStreamActual<<"$"<< tempS<<"$";
+  out << "\nThe system we need to solve:\n";
+  if (useHtml)
+    out <<"\n<br>\n";
+  tempS= tempStreamActual.str();
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   output = out.str();
 }
 
@@ -1416,7 +1454,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
         int indexIsoSl2;
         if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
           output.TheObjects[indexIsoSl2].DiagramsContainingRegularSAs.AddListOnTop(theSl2.DiagramsContainingRegularSAs);
-       else
+        else
           output.AddObjectOnTopHash(theSl2);
       }
     }
@@ -1801,11 +1839,13 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   { int numExpectedFiles= this->size*5;
     this->texFileNamesForPNG.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
     this->texStringsEachFile.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
-    this->listSystemCommands.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
+    this->listSystemCommandsLatex.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
+    this->listSystemCommandsDVIPNG.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
   }
   this->texFileNamesForPNG.size=0;
   this->texStringsEachFile.size=0;
-  this->listSystemCommands.size=0;
+  this->listSystemCommandsLatex.size=0;
+  this->listSystemCommandsDVIPNG.size=0;
   std::stringstream out;
   std::string tempS, fileName;
   std::fstream theFile, fileFlas;
@@ -1813,21 +1853,32 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, false, true, usePNG, &physicalPath, &htmlPathServer);
     out<<tempS;
   }
-  for (int i=0; i<this->texFileNamesForPNG.size; i++)
-  { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
-    fileFlas<< "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n"<< this->texStringsEachFile.TheObjects[i]<<"\n\\end{document}";
-    fileFlas.close();
+  if (usePNG)
+  { this->listSystemCommandsLatex.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);
+    this->listSystemCommandsDVIPNG.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);
+    for (int i=0; i<this->texFileNamesForPNG.size; i++)
+    { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
+      fileFlas<< "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n"<< this->texStringsEachFile.TheObjects[i]<<"\n\\end{document}";
+      std::stringstream tempStreamLatex, tempStreamPNG;
+      tempStreamLatex << "latex "<< " -output-directory="<< physicalPath<<" "<< this->texFileNamesForPNG.TheObjects[i];
+      tempS= this->texFileNamesForPNG.TheObjects[i];
+      tempS.resize(tempS.size()-4);
+      tempStreamPNG << "dvipng "<< tempS <<".dvi -o " << tempS<<".png -T tight";
+      this->listSystemCommandsLatex.TheObjects[i]= tempStreamLatex.str();
+      this->listSystemCommandsDVIPNG.TheObjects[i]=tempStreamPNG.str();
+      fileFlas.close();
+    }
+    fileName= physicalPath;
+    fileName.append("sl2s.html");
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+    tempS= out.str();
+    theFile<< "<HMTL><BODY><a href=\""<< htmlPathServer<< "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
+    theFile.close();
   }
   fileName= physicalPath;
-  fileName.append("sl2s.html");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
-  fileName= physicalPath;
   fileName.append("sl2s_nopng.html");
-  tempS= out.str();
-  theFile<< "<HMTL><BODY><a url=\""<< fileName<< "\"> "<<"plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
-  theFile.close();
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, 0, 0);
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
-  theFile<< "<HMTL><BODY>"<<tempS<<"</HTML></BODY>";
+  theFile<< "<HMTL><BODY><a href=\""<< htmlPathServer<< "sl2s.html\"> "<<".png rich html for your viewing pleasure (might take a while to load; available only if you checked the check box)</a><br>\n" <<tempS<<"</HTML></BODY>";
   theFile.close();
 }

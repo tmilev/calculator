@@ -17722,8 +17722,8 @@ void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables 
 		return;
 	std::stringstream out;
 	out <<index <<" out of "<< outOf <<" =3^8-1 computed";
-	::IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
-	::IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
+	IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
+	IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
 	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 }
 

@@ -829,7 +829,7 @@ void main_test_function(std::string& output, GlobalVariables& theGlobalVariables
   out << "\n\n"<<tempS;*/
   SimpleLieAlgebra theG;
   SltwoSubalgebras tempSl2s;
-  theG.FindSl2Subalgebras(tempSl2s, 'B', 3, theGlobalVariables);
+  theG.FindSl2Subalgebras(tempSl2s, 'A', 3, theGlobalVariables);
   tempSl2s.ComputeDebugString(theGlobalVariables, theG.theWeyl, false, false);
   IndicatorWindowGlobalVariables.StatusString1= tempSl2s.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
@@ -1278,10 +1278,15 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   out<<"\nSimple basis ambient algebra w.r.t defining h: "<< tempS;
   roots tempRoots;
   MatrixLargeRational tempMat;
+  if (useHtml)
+    out << "<br>";
+  if (this->DiagramsContainingRegularSAs.size>1)
+  { out <<"Number of containing regular subalgebras: " << this->DiagramsContainingRegularSAs.size;
+    if (useHtml)
+    out << "<br>";
+  }
   for (int i=0; i<this->DiagramsContainingRegularSAs.size; i++)
   { this->DiagramsContainingRegularSAs.TheObjects[i].GetSimpleBasisInBourbakiOrder(tempRoots);
-    if (useHtml)
-      out << "<br>";
     out << "\nContaining regular subalgebra number " <<i+1<<": "<< this->DiagramsContainingRegularSAs.TheObjects[i].DebugString;
     tempRoots.ElementToString(tempS, useLatex, useHtml, false);
     if (useHtml)
@@ -1332,7 +1337,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   tempStreamF <<"\n$f=$ $" <<tempS<<"$";
   tempS= tempStreamF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS,out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  out <<"\n\nThe below are the Lie brackets of the above elements. Printed to check for debug purposes.";
+  out <<"\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out <<"\n<br>\n";
   this->bufferEbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
@@ -1352,8 +1357,17 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   //this->theSystemColumnVector.ElementToString(tempS);
   //out <<"\nColumn vector of the system:\n"<<tempS;
   std::stringstream tempStreamActual;
-  this->theSystemToBeSolved.ElementToString(tempS);
-  tempStreamActual<<"$"<< tempS<<"$";
+  for (int i=0; i<this->theSystemToBeSolved.size; i++)
+  { this->theSystemToBeSolved.TheObjects[i].ElementToString(tempS);
+    if (tempS=="")
+    { if (useLatex || usePNG)
+        tempStreamActual<<"~\\\\";
+      else
+        tempStreamActual<<"\n\n";
+    }
+    else
+      tempStreamActual<<"\\noindent $"<< tempS<<"=0$\n\n";
+  }
   out << "\nThe system we need to solve:\n";
   if (useHtml)
     out <<"\n<br>\n";
@@ -1683,34 +1697,6 @@ bool WeylGroup::IsRegular(root& input, int* indexFirstPerpendicularRoot)
   return true;
 }
 
-/*void ElementSimpleLieAlgebra::TransformInduceFromMapsOfRootSystems(const roots& domain, const roots& range, SimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
-{ int theDimension=owner.theWeyl.KillingFormMatrix.NumRows;
-  assert(range.size==owner.theWeyl.KillingFormMatrix.NumRows);
-  assert(theDimension==range.GetRankOfSpanOfElements(theGlobalVariables));
-  root tempRoot;
-  ElementSimpleLieAlgebra buffer;
-  buffer.Nullify(owner);
-  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
-  { root& theRoot= owner.theWeyl.RootSystem.TheObjects[this->NonZeroElements.elements[i]];
-    range.MakeBasisChange(theRoot, tempRoot);
-    buffer.SetCoefficient(tempRoot, this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]], owner);
-  }
-  root hCharacteristic;
-  roots tempRoots;
-  tempRoots.MakeEiBasis(theDimension);
-  hCharacteristic.SetSizeExpandOnTopLight(theDimension);
-  for(int i=0; i<theDimension; i++)
-    hCharacteristic.TheObjects[i]=owner.theWeyl.RootScalarKillingFormMatrixRoot(tempRoots.TheObjects[i], this->Hcomponent);
-  MatrixLargeRational matB, tempMat;
-  range.GetGramMatrix(matB, owner.theWeyl);
-  tempMat.AssignMatrixIntWithDen(owner.theWeyl.KillingFormMatrix, 1);
-  //assert(matB==owner.)
-  matB.AssignRootsToRowsOfMatrix(range);
-  matB.Invert(theGlobalVariables);
-  matB.ActOnAroot(hCharacteristic, tempRoot);
-}
-*/
-
 void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrder(roots& output)
 { output.size=0;
   output.MakeActualSizeAtLeastExpandOnTop(this->RankTotal());
@@ -1822,13 +1808,13 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   if(UseHtml)
     out<<"<br><br>";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables,*this, useLatex, UseHtml);
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables,*this, useLatex, UseHtml, usePNG, physicalPath, htmlPathServer);
     out<< "Index "<< i<<": ";
     if(UseHtml)
       out<<"<br>";
     out<<tempS;
     if(UseHtml)
-      out<<"<br><br>";
+      out<<"<HR width=\"100%\">";
   }
   output=out.str();
   return;
@@ -1849,10 +1835,8 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   std::stringstream out;
   std::string tempS, fileName;
   std::fstream theFile, fileFlas;
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, false, true, usePNG, &physicalPath, &htmlPathServer);
-    out<<tempS;
-  }
+  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
+  out <<tempS;
   if (usePNG)
   { this->listSystemCommandsLatex.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);

@@ -173,7 +173,7 @@ int main(int argc, char **argv)
     }
   } else if (choice==CGIspecificRoutines::choiceDisplayRootSApage)
   { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n"
-        <<"<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n<br><input type=\"checkbox\" name=\"usePNG\">Use_png(slow!)<input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n</FORM>\n";
+        <<"<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n<br><input type=\"checkbox\" name=\"usePNG\">Use .png(.png use is SLOW - up to 5-6 min for E8! If you want to check out the precomputed output click <a href=\"/tmp/\">here</a>)<br><input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n</FORM>\n";
   } else if (choice==CGIspecificRoutines::choiceGosl2)
   { SltwoSubalgebras theSl2s;
     SimpleLieAlgebra theSimpleLieAlgebra;

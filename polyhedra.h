@@ -2695,6 +2695,10 @@ public:
 	std::string DebugString;
 	// returns the number of lines used
 	int StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat);
+	void ElementToString(std::string& output)
+	{ output.clear();
+	  this->StringPrintOutAppend(output, PolyFormatLocal);
+  };
 	bool ComputeDebugString();
 	int TotalDegree();
 	bool IsEqualTo(TemplatePolynomial<TemplateMonomial,ElementOfCommutativeRingWithIdentity>& p);

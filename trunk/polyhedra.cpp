@@ -11449,17 +11449,25 @@ void WeylGroup::ActOnRootByGroupElement(int index,root &theRoot, bool RhoAction,
 void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 { root tempRoot;
 	roots startRoots;
-	this->RootSystem.ClearTheObjects();
-	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
+	hashedRoots tempHashedRoots;
+	for (int i=0; i<this->KillingFormMatrix.NumCols; i++)
 	{	tempRoot.MakeZero(this->KillingFormMatrix.NumRows);
 		tempRoot.TheObjects[i].AssignInteger(1);
 		startRoots.AddRoot(tempRoot);
 	}
-	this->GenerateOrbit(startRoots,false,this->RootSystem,false);
+	this->GenerateOrbit(startRoots, false, tempHashedRoots, false);
+	this->RootSystem.ClearTheObjects();
 	this->RootsOfBorel.size=0;
-	for (int i=0;i<this->RootSystem.size;i++)
-		if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
-			this->RootsOfBorel.AddRoot(this->RootSystem.TheObjects[i]);
+	this->RootsOfBorel.MakeActualSizeAtLeastExpandOnTop(tempHashedRoots.size/2);
+	this->RootSystem.MakeActualSizeAtLeastExpandOnTop(tempHashedRoots.size);
+	for (int i=0; i<tempHashedRoots.size; i++)
+		if (tempHashedRoots.TheObjects[i].IsPositiveOrZero())
+		{ this->RootsOfBorel.AddRoot(tempHashedRoots.TheObjects[i]);
+      this->RootSystem.AddObjectOnTopHash(tempHashedRoots.TheObjects[i]);
+		}
+	for (int i=0; i<tempHashedRoots.size; i++)
+		if (! tempHashedRoots.TheObjects[i].IsPositiveOrZero())
+      this->RootSystem.AddObjectOnTopHash(tempHashedRoots.TheObjects[i]);
 }
 
 void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho)
@@ -14597,7 +14605,7 @@ void rootSubalgebras::GenerateAllRootSubalgebrasContainingInputUpToIsomorphism(r
 	bufferSAs.TheObjects[RecursionDepth]=bufferSAs.TheObjects[RecursionDepth-1];
 	//if (RecursionDepth>4)
    // return;
-	for (int k=0;k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size;k++)
+	for (int k=0; k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size;k++)
 		if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
 		{ bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
 			bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
@@ -14914,7 +14922,7 @@ bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariable
 	return true;
 }
 
-void rootSubalgebra::ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebras* sl2s, GlobalVariables& theGlobalVariables)
 { std::fstream output; std::string tempS;
   std::string MyPath, childrenPath;
   MyPath=path; childrenPath=path;
@@ -14924,8 +14932,8 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, GlobalVariables
   out << ".html";
   MyPath=out.str();
 	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPath, false, true, false);
-  this->ComputeDebugString(false, true, true, theGlobalVariables);
-  output<< this->DebugString;
+  this->ElementToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
+  output<< tempS;
   output.close();
 }
 
@@ -14958,12 +14966,14 @@ void rootSubalgebra::ElementToStringHeaderFooter( std::string& outputHeader,std:
 	}
 }
 
-void rootSubalgebra::ElementToString(std::string &output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::ElementToString(std::string &output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
+	if (this->SimpleBasisgEpsCoords.size!=this->SimpleBasisK.size || this->SimpleBasisKEpsCoords.size!= this->SimpleBasisK.size || this->kModulesgEpsCoords.size!= this->kModules.size || this->kModulesKepsCoords.size!= this->kModules.size)
+    includeKEpsCoords=false;
 	int LatexLineCounter=0;
-	this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml,includeKEpsCoords);
+	this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
 	this->theDynkinDiagram.ElementToString(tempS);
   if (useLatex)
     out <<"\\noindent$\\mathfrak{k}_{ss}:$ ";
@@ -14972,16 +14982,16 @@ void rootSubalgebra::ElementToString(std::string &output, bool useLatex, bool us
 		CGIspecificRoutines::clearDollarSigns(tempS,tempS);
   }
   out << tempS;
-  this->SimpleBasisK.ElementToString(tempS,useLatex,useHtml,false);
+  this->SimpleBasisK.ElementToString(tempS, useLatex, useHtml, false);
   if (useHtml)
 		out <<"\n<br>\n";
   if (useLatex)
     out <<"\n\\noindent";
 	out <<" Simple basis: "<<tempS;
-	this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(tempS,useLatex,useHtml,false);
+	this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(tempS, useLatex, useHtml, false);
 	if (useHtml)
     out <<"\n<br>\nSimple basis epsilon form: "<< tempS;
-	this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS,useLatex,useHtml,false);
+	this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS, useLatex, useHtml, false);
 	if (useHtml)
     out <<"\n<br>\nSimple basis epsilon form with respect to k: "<< tempS;
 	this->theCentralizerDiagram.ElementToString(tempS);
@@ -15011,6 +15021,17 @@ void rootSubalgebra::ElementToString(std::string &output, bool useLatex, bool us
 		out<<"; simple basis centralizer: ";
 	this->SimpleBasisCentralizerRoots.ElementToString(tempS,true,true,false);
 	out <<tempS;
+	if (sl2s!=0)
+  { if (useHtml)
+      out <<"\n<br>\n";
+    if (useHtml)
+      out <<"\n<br>";
+    out << "\nCharacteristics of sl(2) subalgebras that have no centralizer in k (total " <<sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].size<<"): ";
+    for (int i=0; i<sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].size; i++)
+    { int tempI= sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].TheObjects[i];
+      out <<sl2s->TheObjects[tempI].hCharacteristic.ElementToString() <<", ";
+    }
+  }
 	if (useHtml)
 		out << "<br>\n Number g/k k-submodules: ";
 	if (useLatex)
@@ -15022,7 +15043,7 @@ void rootSubalgebra::ElementToString(std::string &output, bool useLatex, bool us
 		out <<"\n\n";
 	out << latexHeader;
 	this->kModulesgEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
-	for (int i=0;i<this->kModules.size;i++)
+	for (int i=0; i<this->kModules.size; i++)
 	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,useLatex);
     if (useHtml)
       out <<"\n<tr><td>";
@@ -15066,7 +15087,7 @@ void rootSubalgebra::ElementToString(std::string &output, bool useLatex, bool us
         out << "<td>";
       if (useLatex)
         out <<" & ";
-      this->kModulesKepsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS,useLatex,useHtml,true);
+      this->kModulesKepsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS, useLatex, useHtml, true);
       out<<tempS;
 			if (useHtml)
         out <<"</td>";
@@ -17222,7 +17243,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   output= out.str();
 }
 
-void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables)
 { std::fstream output; std::string tempS;
   std::string MyPathPhysical, childrenPathPhysical;
   std::string MyPathServer, childrenPathServer;
@@ -17231,26 +17252,25 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
   MyPathPhysical.append("rootHtml.html"); MyPathServer.append("rootHtml.html");
   childrenPathPhysical.append("rootHtml_");childrenPathServer.append("rootHtml_");
 	CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
-  this->ComputeDebugString(false,true,true,&childrenPathPhysical,&childrenPathServer,theGlobalVariables);
+  this->ComputeDebugString(false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables);
   output<< "<HTML><BODY>"<<header<<this->DebugString<<"</BODY></HTML>";
   output.close();
-  for (int i=0;i<this->size;i++)
-  	this->TheObjects[i].ElementToHtml(i,childrenPathPhysical,theGlobalVariables);
+  for (int i=0; i<this->size; i++)
+  	this->TheObjects[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);
 }
 
-void rootSubalgebras::ElementToString
-	(	std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
-	this->DynkinTableToString(useLatex, useHtml,htmlPathPhysical,htmlPathServer,tempS);
+	this->DynkinTableToString(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
 	out <<tempS;
-	for (int i=0;i<this->size; i++)
-	{	this->TheObjects[i].ElementToString(tempS,useLatex,useHtml,includeKEpsCoords,theGlobalVariables);
+	for (int i=0; i<this->size; i++)
+	{	this->TheObjects[i].ElementToString(tempS, sl2s, i, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
 		out << tempS <<"\n\n";
 	}
 	output= out.str();
 };
 
-void rootSubalgebras::pathToHtmlFileNameElements (	int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml)
+void rootSubalgebras::pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml)
 { if (htmlPathServer==0)
 	{ output.clear();
 		return;
@@ -17262,7 +17282,7 @@ void rootSubalgebras::pathToHtmlFileNameElements (	int index, std::string* htmlP
 	output=out.str();
 }
 
-void rootSubalgebras::pathToHtmlReference(	int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output)
+void rootSubalgebras::pathToHtmlReference(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output)
 { if(htmlPathServer==0)
 	{ output.clear();
 		return;
@@ -17273,7 +17293,7 @@ void rootSubalgebras::pathToHtmlReference(	int index,std::string& DisplayString,
 	output=out.str();
 }
 
-void rootSubalgebras::DynkinTableToString(	bool useLatex, bool useHtml,std::string* htmlPathPhysical, std::string* htmlPathServer,std::string& output)
+void rootSubalgebras::DynkinTableToString(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output)
 { std::stringstream out; std::string header, footer, tempS, tempS2,tempS3;
 	this->GetTableHeaderAndFooter(header, footer,useLatex,useHtml);
 	int col=0; int row=0;
@@ -17398,7 +17418,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
 		out <<header;
 	int oldIndex=-1;
 	int lineCounter=0;
-	for(int i=0;i<this->size;i++)
+	for(int i=0; i<this->size; i++)
 	{ if (oldIndex!=this->TheObjects[i].IndexOwnerRootSubalgebra)
 		{ oldIndex=this->TheObjects[i].IndexOwnerRootSubalgebra;
 			if (useLatex)
@@ -17438,7 +17458,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
 	if (useLatex)
 		out <<footer;
 	if (this->flagIncludeSubalgebraDataInDebugString)
-	{ owners.ElementToString(tempS,useLatex, useHtml, false, htmlPathPhysical, htmlPathServer,theGlobalVariables);
+	{ owners.ElementToString(tempS, 0, useLatex, useHtml, false, htmlPathPhysical, htmlPathServer,theGlobalVariables);
 		out <<"\n\n\\newpage"<<tempS;
 	}
 	output=out.str();
@@ -17860,11 +17880,11 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, E
   assert(e.Hcomponent.IsEqualToZero());
   this->GetAdNilpotentElement(theSystem,e);
   theSystem.MultiplyOnTheLeft(theSystem,adESquaredadE);
-  for (int i=0;i<e.NonZeroElements.CardinalitySelection;i++)
+  for (int i=0; i<e.NonZeroElements.CardinalitySelection; i++)
     targetElt.elements[e.NonZeroElements.elements[i]][0].Assign(e.coeffsRootSpaces.TheObjects[e.NonZeroElements.elements[i]]*(-2));
   adESquaredadE.Resize(NumRows+NumRoots, NumRows,true);
-  for (int i= 0; i<NumRoots;i++)
-    for(int j=0;j<NumRows;j++)
+  for (int i= 0; i<NumRoots; i++)
+    for(int j=0; j<NumRows; j++)
       adESquaredadE.elements[i+NumRows][j].Assign(theSystem.elements[i][j]);
   //targetH.ComputeDebugString();
 	//theSystem.ComputeDebugString();
@@ -17874,7 +17894,7 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, E
   if (hasSolution)
   { output.Nullify(*this);
 		output.Hcomponent.MakeZero(theDimension);
-    for (int i=0;i<this->theWeyl.RootSystem.size;i++)
+    for (int i=0; i<this->theWeyl.RootSystem.size; i++)
       output.coeffsRootSpaces.TheObjects[i].Assign(result.elements[i][0]);
     output.ComputeNonZeroElements();
   }
@@ -18008,26 +18028,36 @@ void ElementSimpleLieAlgebra::SetCoefficient(const root& indexingRoot, int theCo
   this->SetCoefficient(indexingRoot,tempRat, owner);
 }
 
-void ::SimpleLieAlgebra::ElementToString(std::string &output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
+void ::SimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings)
+{ std::stringstream outTable, outNotation;
 	std::string tempS;
+	if (physicalPath==0 || htmlServerPath==0 || outputPNGFileNames==0 || outputLatexToPNGstrings==0)
+    usePNG=false;
+  if(usePNG)
+  { useHtml=true;
+    useLatex=true;
+  }
 	int numRoots=this->theWeyl.RootSystem.size;
 	int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
 	roots theBasis;
 	theBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
-	for (int i=0; i<theDimension; i++)
-	{ out <<"$\\alpha_{"<< i+1<<"} := $ ";
-		theBasis.TheObjects[i].MakeZero(theDimension);
+	if (usePNG)
+    outNotation<<"\\begin{tabular}{l}";
+  for (int i=0; i<theDimension; i++)
+	{ theBasis.TheObjects[i].MakeZero(theDimension);
 		theBasis.TheObjects[i].TheObjects[i].MakeOne();
-		out <<theBasis.TheObjects[i].ElementToString()<<"\n\n";
+		outNotation <<theBasis.TheObjects[i].ElementToString();
+		outNotation <<"$=:\\alpha_{"<< i+1<<"}$ \\\\";
 	}
 	root tempRoot;
-	for (int i=theDimension;i<numRoots;i++)
-	{ this->theWeyl.RootSystem.TheObjects[i].GetCoordsInBasis(theBasis,tempRoot,theGlobalVariables);
+	for (int i=theDimension; i<numRoots; i++)
+	{ this->theWeyl.RootSystem.TheObjects[i].GetCoordsInBasis(theBasis, tempRoot, theGlobalVariables);
 		//this->theWeyl.RootSystem.TheObjects[i].ComputeDebugString();
 		//tempRoot.ComputeDebugString();
-		out <<"$\\alpha_"<<i+1<<" := ";
-		for (int j=0;j<theDimension;j++)
+		this->theWeyl.RootSystem.TheObjects[i].ElementToString(tempS);
+		outNotation <<tempS<<"=";
+		outNotation <<"$";
+		for (int j=0; j<theDimension; j++)
 		{ tempRoot.TheObjects[j].ElementToString(tempS);
 			if (tempS!="0")
 			{ if (tempS=="1")
@@ -18037,37 +18067,38 @@ void ::SimpleLieAlgebra::ElementToString(std::string &output, bool useHtml, bool
 				if (j!=0)
 				{ if (tempS!="")
 					{ if (tempS[0]!='-')
-							out <<"+";
+							outNotation <<"+";
 					} else
-						out <<"+";
+						outNotation <<"+";
 				}
-				out<<tempS<< "\\alpha_{" <<j+1<<"}";
+				outNotation<<tempS<< "\\alpha_{" <<j+1<<"}";
 			}
 		}
-		out <<"$";
-		this->theWeyl.RootSystem.TheObjects[i].ElementToString(tempS);
-		out <<"="<<tempS<< "\n\n";
+		outNotation <<"=: \\alpha_{"<<i+1<<"} $";
+		if (usePNG)
+      outNotation<<"\\\\";
 	}
-	for (int i=0;i<theDimension;i++)
-	{ out <<"$h_{\\alpha_"<< i+1<<"} (g^{\\gamma}) := \\langle\\gamma,\\alpha_{" << i+1 <<" } \\rangle g^{\\gamma}$, for any $\\gamma$.\n\n";
-	}
-	out <<"\n\n";
+	if (usePNG)
+    outNotation<<"\\end{tabular}";
+	for (int i=0; i<theDimension; i++)
+    outTable <<"$h_{\\alpha_"<< i+1<<"} (g^{\\gamma}) := \\langle\\gamma,\\alpha_{" << i+1 <<" } \\rangle g^{\\gamma}$, for any $\\gamma$.\n\n";
+	outTable <<"\n\n";
 	if (useLatex)
-	{ out <<"\\begin{tabular}{c";
+	{ outTable <<"\\begin{tabular}{c";
 		for(int i=0;i<numRoots;i++)
-			out <<"c";
-		out <<"}";
-		out <<"$[\\bullet,\\bullet]$&";
+			outTable <<"c";
+		outTable <<"}";
+		outTable <<"$[\\bullet,\\bullet]$&";
 	}
-	for (int i=0;i<numRoots;i++)
-	{ out <<"$g^{\\alpha_{"<<i+1<<"}}$";
+	for (int i=0; i<numRoots; i++)
+	{ outTable <<"$g^{\\alpha_{"<<i+1<<"}}$";
 		if (i!=numRoots-1)
-			out<<"&";
+			outTable<<"&";
 	}
-	out <<"\\\\\n";
+	outTable <<"\\\\\n";
 	Rational tempRat;
-	for (int i=0;i<this->ChevalleyConstants.NumRows;i++)
-	{ out <<"$g^{\\alpha_{"<<i+1<<"}}$&";
+	for (int i=0; i<this->ChevalleyConstants.NumRows; i++)
+	{ outTable <<"$g^{\\alpha_{"<<i+1<<"}}$&";
 		for (int j=0; j<this->ChevalleyConstants.NumCols;j++)
 		{ if (this->Computed.elements[i][j])
 			{ this->ChevalleyConstants.elements[i][j].ElementToString(tempS);
@@ -18076,11 +18107,11 @@ void ::SimpleLieAlgebra::ElementToString(std::string &output, bool useHtml, bool
 				if (tempS=="-1")
 					tempS="-";
 				if (tempS=="0")
-					out <<"0,";
+					outTable <<"0,";
 				else
 				{ tempRoot=this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
 					int index=this->theWeyl.RootSystem.IndexOfObjectHash(tempRoot);
-					out <<"$"<<tempS<<"g^{\\alpha_{" << index+1<<"}}$, ";
+					outTable <<"$"<<tempS<<"g^{\\alpha_{" << index+1<<"}}$, ";
 				}
 			}
 			else
@@ -18094,23 +18125,48 @@ void ::SimpleLieAlgebra::ElementToString(std::string &output, bool useHtml, bool
 					tempS="";
 				if (tempS=="-1")
 					tempS="-";
-				out << "$"<<tempS<< "h_{\\alpha_{" <<i+1<<"}}$";
+				outTable << "$"<<tempS<< "h_{\\alpha_{" <<i+1<<"}}$";
 			}
 			if (useLatex && j!=this->ChevalleyConstants.NumCols-1)
-				out<<" & ";
+				outTable<<" & ";
 			else
 				if(!useLatex)
-					out<<"\t";
+					outTable<<"\t";
 		}
 		if (useLatex)
-			out<<"\\\\";
-		out <<"\n";
+			outTable<<"\\\\";
+		outTable <<"\n";
 	}
 	if (useLatex)
-		out <<"\\end{tabular}";
+		outTable <<"\\end{tabular}";
 	//this->ChevalleyConstants.ElementToString(tempS);
 	//out <<"\n"<< tempS<<"\n";
-	output=out.str();
+	if (usePNG)
+  { std::stringstream out2;
+    out2<< "<BODY><HTML></BODY>";
+    ///////////////////////////
+    tempS=outNotation.str();
+    outputLatexToPNGstrings->AddObjectOnTop(tempS);
+    tempS=*physicalPath;
+    tempS.append("notation.tex");
+    outputPNGFileNames->AddObjectOnTop(tempS);
+    out2<<"<img src=\""<<(*htmlServerPath)<<"notation.png\">\n<br>\n";
+    ///////////////////////////
+    tempS= outTable.str();
+    outputLatexToPNGstrings->AddObjectOnTop(tempS);
+    tempS=*physicalPath;
+    tempS.append("StructureConstants_latex.tex");
+    outputPNGFileNames->AddObjectOnTop(tempS);
+    out2<<"<img src=\""<<(*htmlServerPath)<<"StructureConstants_latex.png\">";
+    ///////////////////////////
+    out2<<"</BODY></HTML>";
+    output=out2.str();
+  }
+	else
+  { tempS=outTable.str();
+    outNotation<< tempS;
+    output=outNotation.str();
+  }
 }
 
 void SimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables)
@@ -18170,7 +18226,7 @@ bool StopDebug()
 
 bool minimalRelationsProverState::SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl)
 { root tempRoot;
-  for (int j=0;j<this->PositiveKroots.size;j++)
+  for (int j=0; j<this->PositiveKroots.size; j++)
   { tempRoot=input+this->PositiveKroots.TheObjects[j];
     if(theWeyl.IsARoot(tempRoot))
       return false;
@@ -18182,7 +18238,7 @@ bool minimalRelationsProverState::IsBKSingularImplied(root& input, WeylGroup& th
 { if (!this->SumWithNoPosRootIsARoot(input, theWeyl))
     return false;
   root tempRoot;
-  for (int j=0;j<theWeyl.RootSystem.size;j++)
+  for (int j=0; j<theWeyl.RootSystem.size; j++)
 		if (!this->nonPositiveKRoots.ContainsObject( theWeyl.RootSystem.TheObjects[j]))
 		{ tempRoot=input+theWeyl.RootSystem.TheObjects[j];
 			if(theWeyl.IsARoot(tempRoot))
@@ -18194,12 +18250,12 @@ bool minimalRelationsProverState::IsBKSingularImplied(root& input, WeylGroup& th
 void minimalRelationsProverState::SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
 { roots& theAlphas = this->PartialRelation.Alphas;
 	roots& theBetas  = this->PartialRelation.Betas;
-	for(int i=0;i<theAlphas.size;i++)
-		for (int j=i+1;j<theAlphas.size;j++)
+	for(int i=0; i<theAlphas.size; i++)
+		for (int j=i+1; j<theAlphas.size;j++)
 			if (this->Root1IsGreaterThanRoot2(j,i,theAlphas,theBetas,TheGlobalVariables,theWeyl))
 				theAlphas.SwapTwoIndices(i,j);
-	for(int i=0;i<theBetas.size;i++)
-		for (int j=i+1;j<theBetas.size;j++)
+	for(int i=0;i<theBetas.size; i++)
+		for (int j=i+1; j<theBetas.size; j++)
 			if (this->Root1IsGreaterThanRoot2(j,i,theBetas,theAlphas,TheGlobalVariables,theWeyl))
 				theBetas.SwapTwoIndices(i,j);
 }

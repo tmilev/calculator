@@ -53,13 +53,13 @@ int main(int argc, char **argv)
 	//inputString ="textType=E&textRank=6&buttonGoRootSA=rootSA+diagrams";
 	//inputString ="SLtwos";
   //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
-  //inputString="textType=E&textRank=8&buttonGoSl2SAs=sl%282%29+subalgebras";
+  //inputString="textType=E&textRank=6&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=F&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
   //inputString="textType=A&textRank=4";
-  getPath(argv[0],inputPath);
+  getPath(argv[0], inputPath);
   ComputationSetup theComputationSetup;
   theComputationSetup.flagDoCustomComputation=false;
   int choice =::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup,inputPath);

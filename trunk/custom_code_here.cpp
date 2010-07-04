@@ -1399,6 +1399,8 @@ void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLet
 { output.theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSizeExpandOnTopNoObjectInit(output.theRootSAs.size);
+  for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
+    output.IndicesSl2sContainedInRootSA.TheObjects[i].size=0;
   IndicatorWindowGlobalVariables.StatusString1=output.theRootSAs.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
@@ -1477,7 +1479,9 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
           output.IndicesSl2sContainedInRootSA.TheObjects[indexInContainer].AddObjectOnTop(indexIsoSl2);
         }
         else
+        { output.IndicesSl2sContainedInRootSA.TheObjects[indexInContainer].AddObjectOnTop(output.size);
           output.AddObjectOnTopHash(theSl2);
+        }
       }
     }
   }
@@ -1655,8 +1659,6 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, Sltwo
   theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
   theDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
   this->IndicesContainingRootSAs.AddObjectOnTop(indexMinimalContainingRegularSA);
-  container.IndicesSl2sContainedInRootSA.TheObjects[indexMinimalContainingRegularSA].size=0;
-  container.IndicesSl2sContainedInRootSA.TheObjects[indexMinimalContainingRegularSA].AddObjectOnTop(indexInContainer);
   tempRoots.MakeEiBasis(theDimension);
   this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.Hcomponent);
   DynkinDiagramRootSubalgebra tempDiagram;

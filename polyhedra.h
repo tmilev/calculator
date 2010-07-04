@@ -5414,17 +5414,18 @@ public:
 	void GeneratePossibleNilradicalsRecursive(GlobalVariables& theGlobalVariables, multTableKmods& multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
 	bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
-	void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables,Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-	void ElementToStringHeaderFooter(std::string& outputHeader,std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
-	void ElementToString(std::string& output,GlobalVariables& theGlobalVariables)	{ this->ElementToString(output,false,false,false,theGlobalVariables);};
-	void ElementToHtml(int index, std::string& path, GlobalVariables& theGlobalVariables);
-	void ElementToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
+	void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
+	void ElementToStringHeaderFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables){this->ElementToString(output, false, false, false, theGlobalVariables);};
+	void ElementToHtml(int index, std::string& path, SltwoSubalgebras* sl2s, GlobalVariables& theGlobalVariables);
+	void ElementToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables){this->ElementToString(output, 0, 0, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);};
+	void ElementToString(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
 	bool RootsDefineASubalgebra(roots& theRoots);
-	void GenerateKmodMultTable(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output,	ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
+	void GenerateKmodMultTable(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& output, ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
   void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void KmodTimesKmod(int index1, int index2, ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int>& output);
 	void initFromAmbientWeyl();
-	void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
+	void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
 	void ComputeAllButAmbientWeyl();
 	void ComputeAll();
 	void ComputeRootsOfK();
@@ -5438,7 +5439,7 @@ public:
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
 	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2 (	GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb, std::string& output);
-	bool LinCombToStringDistinguishedIndex(int distinguished,root& alphaRoot, int coeff, root &linComb, std::string &output);
+	bool LinCombToStringDistinguishedIndex(int distinguished, root& alphaRoot, int coeff, root& linComb, std::string& output);
 	void WriteMultTableAndOppositeKmodsToFile	(std::fstream& output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites);
 	void ReadMultTableAndOppositeKmodsToFile	(std::fstream& input, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites);
 };
@@ -5461,8 +5462,6 @@ public:
 	int NumColsPerTableLatex;
 	int UpperLimitNumElementsWeyl;
 	static int ProblemCounter;
-	ListBasicObjects<std::string> theBadDiagrams;
-	ListBasicObjects<int> numFoundBadDiagrams;
 	WeylGroup AmbientWeyl;
 	bool flagComputingLprohibitingWeights;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
@@ -5488,12 +5487,12 @@ public:
   //void initDynkinDiagramsNonDecided(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
 	void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
 	void pathToHtmlReference(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
-	void ElementToHtml(std::string& header, std::string& pathPhysical,std::string& htmlPathServer, GlobalVariables& theGlobalVariables);
+	void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
 	void ElementToStringCentralizerIsomorphisms(std::string& output, GlobalVariables& theGlobalVariables);
-	void ElementToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
+	void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
-	{ this->ElementToString(this->DebugString,useLatex, useHtml,includeKEpsCoords, htmlPathPhysical, htmlPathServer,theGlobalVariables);
+	{ this->ElementToString(this->DebugString, 0, useLatex, useHtml,includeKEpsCoords, htmlPathPhysical, htmlPathServer,theGlobalVariables);
 	};
 	void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
 	void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
@@ -5588,32 +5587,6 @@ public:
 	};
 };
 
-class slTwo;
-
-class SltwoSubalgebras : public HashedListBasicObjects<slTwo>
-{
-public:
-	std::string DebugString;
-	WeylGroup theWeylGroup;
-//	ListBasicObjects< int > hSingularWeights;
-	ListBasicObjects<int> MultiplicitiesFixedHweight;
-	int IndexZeroWeight;
-	void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
-	{ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);
-	};
-	ListBasicObjects<std::string> texFileNamesForPNG;
-	ListBasicObjects<std::string> texStringsEachFile;
-	ListBasicObjects<std::string> listSystemCommandsLatex;
-	ListBasicObjects<std::string> listSystemCommandsDVIPNG;
-	void getZuckermansArrayE8(roots& output);
-	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
-	void ComputeDebugStringCurrent();
-  bool ContainsSl2WithGivenH(root& theH, int* outputIndex);
-  bool ContainsSl2WithGivenHCharacteristic(root& theHCharacteristic, int* outputIndex);
-  void ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer);
-	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
-};
-
 class ElementSimpleLieAlgebra
 {
 public:
@@ -5662,7 +5635,7 @@ public:
 	ElementSimpleLieAlgebra theH, theE, theF;
 	ElementSimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
 	SimpleLieAlgebra* owner;
-	ListBasicObjects<DynkinDiagramRootSubalgebra> DiagramsContainingRegularSAs;
+	ListBasicObjects<int> IndicesContainingRootSAs;
   roots preferredAmbientSimpleBasis;
 	root hCharacteristic;
 	root hElementCorrespondingToCharacteristic;
@@ -5676,7 +5649,7 @@ public:
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
   void ComputeModuleDecomposition();
-  void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, rootSubalgebra& MinimalContainingRegularSubalgebra);
+  void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
 	void ElementToHtml(std::string& filePath);
@@ -5704,7 +5677,7 @@ public:
     this->theSystemToBeSolved=right.theSystemToBeSolved;
     this->theSystemMatrixForm=right.theSystemMatrixForm;
     this->theSystemColumnVector= right.theSystemColumnVector;
-    this->DiagramsContainingRegularSAs.CopyFromBase(right.DiagramsContainingRegularSAs);
+    this->IndicesContainingRootSAs.CopyFromBase(right.IndicesContainingRootSAs);
     this->preferredAmbientSimpleBasis= right.preferredAmbientSimpleBasis;
 	};
 	bool  operator==(const slTwo& right)
@@ -5724,7 +5697,8 @@ class SimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables);
+	void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables,0,0,0,0);};
+	void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings);
 	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){	this->ElementToString(this->DebugString,useHtml, useLatex, theGlobalVariables);};
 	bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
@@ -5760,6 +5734,32 @@ public:
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReportNumCycles(int progress, int outOf,	GlobalVariables& theGlobalVariables);
+};
+
+class SltwoSubalgebras : public HashedListBasicObjects<slTwo>
+{
+public:
+	std::string DebugString;
+//	ListBasicObjects< int > hSingularWeights;
+	ListBasicObjects<int> MultiplicitiesFixedHweight;
+	ListBasicObjects<ListBasicObjects<int> > IndicesSl2sContainedInRootSA;
+	int IndexZeroWeight;
+	SimpleLieAlgebra owner;
+	rootSubalgebras theRootSAs;
+	void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
+	{ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);
+	};
+	ListBasicObjects<std::string> texFileNamesForPNG;
+	ListBasicObjects<std::string> texStringsEachFile;
+	ListBasicObjects<std::string> listSystemCommandsLatex;
+	ListBasicObjects<std::string> listSystemCommandsDVIPNG;
+	void getZuckermansArrayE8(roots& output);
+	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
+	void ComputeDebugStringCurrent();
+  bool ContainsSl2WithGivenH(root& theH, int* outputIndex);
+  bool ContainsSl2WithGivenHCharacteristic(root& theHCharacteristic, int* outputIndex);
+  void ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 
 class minimalRelationsProverStatesFixedK;

@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	//inputString="textDim=4&textNumVectors=10&textCoord0=1&textCoord0=0&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord2=0&textCoord3=0&textCoord3=0&textCoord3=0&textCoord3=1&textCoord4=1&textCoord4=1&textCoord4=0&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&textCoord5=0&textCoord6=0&textCoord6=0&textCoord6=1&textCoord6=1&textCoord7=1&textCoord7=1&textCoord7=1&textCoord7=0&textCoord8=0&textCoord8=1&textCoord8=1&textCoord8=1&textCoord9=1&textCoord9=1&textCoord9=1&textCoord9=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=12";
 	//inputString ="textType=E&textRank=6&buttonGoRootSA=rootSA+diagrams";
 	//inputString ="SLtwos";
- //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
+  //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
   //inputString="textType=D&textRank=4&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=B&textRank=3&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
 	std::cout << "Content-Type: text/html\n\n";
@@ -133,10 +133,10 @@ int main(int argc, char **argv)
     std::cout<<"\tvar rootsArraySize=" <<theComputationSetup.VPVectors.size<<";\n";
     std::cout<<"\tvar rootsArrayDim=" <<theComputationSetup.theChambers.AmbientDimension<<";\n";
     std::cout<< "\tvar rootsArray= new Array(" <<theComputationSetup.VPVectors.size << ");";
-    for (int i=0;i<theComputationSetup.VPVectors.size;i++)
+    for (int i=0; i<theComputationSetup.VPVectors.size; i++)
     { std::cout	<< "\n\trootsArray["<<i<<"]= new Array(" << theComputationSetup.theChambers.AmbientDimension<<");\n";
       //std::cout.flush();
-      for (int j=0;j<theComputationSetup.theChambers.AmbientDimension;j++)
+      for (int j=0; j<theComputationSetup.theChambers.AmbientDimension; j++)
       { //std::cout.flush();
         theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
         std::cout<< "\trootsArray["<<i<< "]["<<j <<"]="<<tempS<<";";
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
       header.append(inputString);
       tempOut <<"Permanent link to this page: <br>\n<a href=\"" << header<<"\">"<<header<<"</a>\n<br>\nMain page: <br>\n<a href=\"http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi\"> http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
       header=tempOut.str();
-      theComputationSetup.theRootSubalgebras.ElementToHtml(header, PhysicalPath, serverPath, *theComputationSetup.theGlobalVariablesContainer->Default());
+      theComputationSetup.theRootSubalgebras.ElementToHtml(header, PhysicalPath, serverPath, 0, *theComputationSetup.theGlobalVariablesContainer->Default());
       std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "rootHtml.html\"> <BODY>"<< serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<PhysicalPath;
     }
   } else if (choice==CGIspecificRoutines::choiceDisplayRootSApage)
@@ -176,10 +176,9 @@ int main(int argc, char **argv)
         <<"<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n<br><input type=\"checkbox\" name=\"usePNG\">Use .png(.png use is SLOW - up to 5-6 min for E8! If you want to check out the precomputed output click <a href=\"/tmp/\">here</a>)<br><input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n</FORM>\n";
   } else if (choice==CGIspecificRoutines::choiceGosl2)
   { SltwoSubalgebras theSl2s;
-    SimpleLieAlgebra theSimpleLieAlgebra;
 //    std::cout<<"<br>"<< theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex;
     std::cout.flush();
-    theSimpleLieAlgebra.FindSl2Subalgebras(theSl2s, theComputationSetup.WeylGroupLetter, theComputationSetup.WeylGroupIndex, *theComputationSetup.theGlobalVariablesContainer->Default());
+    theSl2s.owner.FindSl2Subalgebras(theSl2s, theComputationSetup.WeylGroupLetter, theComputationSetup.WeylGroupIndex, *theComputationSetup.theGlobalVariablesContainer->Default());
     ////////////////////getting paths to output html
     std::stringstream outServerPath;
     outServerPath<<"/tmp/"<< theComputationSetup.WeylGroupLetter<<theComputationSetup.WeylGroupIndex <<"/sl2s/";
@@ -197,8 +196,8 @@ int main(int argc, char **argv)
     MkDirCommand2=outMkDirCommand2.str();
     system(MkDirCommand1.c_str());
     system(MkDirCommand2.c_str());
-    theSl2s.ElementToHtml(*theComputationSetup.theGlobalVariablesContainer->Default(), theSimpleLieAlgebra.theWeyl, theComputationSetup.flagExecuteSystemCommandsCGIapplication, PhysicalPath, serverPath);
-    theSl2s.ComputeDebugString(*theComputationSetup.theGlobalVariablesContainer->Default(), theSimpleLieAlgebra.theWeyl, false, true);
+    theSl2s.ElementToHtml(*theComputationSetup.theGlobalVariablesContainer->Default(), theSl2s.owner.theWeyl, theComputationSetup.flagExecuteSystemCommandsCGIapplication, PhysicalPath, serverPath);
+    theSl2s.ComputeDebugString(*theComputationSetup.theGlobalVariablesContainer->Default(),  theSl2s.owner.theWeyl, false, true);
     if (theComputationSetup.flagExecuteSystemCommandsCGIapplication)
     { for (int i=0; i<theSl2s.listSystemCommandsLatex.size; i++)
       { system(theSl2s.listSystemCommandsLatex.TheObjects[i].c_str());

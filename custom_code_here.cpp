@@ -1273,6 +1273,10 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   this->hCharacteristic.ElementToString(tempS);
   out <<"h-characteristic: "<<  tempS;
   this->preferredAmbientSimpleBasis.ElementToString(tempS, false, false, false);
+  if (physicalPath==0 || htmlPathServer==0)
+  { usePNG=false;
+    useHtml=false;
+  }
   if (useHtml)
     out << "<br>";
   out<<"\nSimple basis ambient algebra w.r.t defining h: "<< tempS;
@@ -1280,19 +1284,28 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   MatrixLargeRational tempMat;
   if (useHtml)
     out << "<br>";
-  if (this->DiagramsContainingRegularSAs.size>1)
-  { out <<"Number of containing regular subalgebras: " << this->DiagramsContainingRegularSAs.size;
+  if (this->IndicesContainingRootSAs.size>1)
+  { out <<"Number of containing regular subalgebras: " << this->IndicesContainingRootSAs.size;
     if (useHtml)
     out << "<br>";
   }
-  for (int i=0; i<this->DiagramsContainingRegularSAs.size; i++)
-  { this->DiagramsContainingRegularSAs.TheObjects[i].GetSimpleBasisInBourbakiOrder(tempRoots);
-    out << "\nContaining regular subalgebra number " <<i+1<<": "<< this->DiagramsContainingRegularSAs.TheObjects[i].DebugString;
+  for (int i=0; i<this->IndicesContainingRootSAs.size; i++)
+  { out << "\nContaining regular subalgebra number " <<i+1<<": ";
+    rootSubalgebra& currentSA= container.theRootSAs.TheObjects[this->IndicesContainingRootSAs.TheObjects[i]];
+    if (useHtml)
+    { out <<"<a href=\""<<(*htmlPathServer)<<"../rootHtml_rootSA"<< this->IndicesContainingRootSAs.TheObjects[i]<<".html\">";
+      currentSA.theDynkinDiagram.ElementToString(tempS);
+      CGIspecificRoutines::clearDollarSigns(tempS, tempS);
+    }
+    currentSA.theDynkinDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
+    out <<tempS;
+    if(useHtml)
+      out <<"</a>";
     tempRoots.ElementToString(tempS, useLatex, useHtml, false);
     if (useHtml)
       out << "<br>";
     out << "\nSimple basis subalgebra: " << tempS;
-    this->DiagramsContainingRegularSAs.TheObjects[i].GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
+    currentSA.theDynkinDiagram.GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
     if (!usePNG)
       tempMat.ElementToString(tempS, useHtml, useLatex);
     else
@@ -1366,7 +1379,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
         tempStreamActual<<"\n\n";
     }
     else
-      tempStreamActual<<"\\noindent $"<< tempS<<"=0$\n\n";
+      tempStreamActual<<"\\noindent \\begin{eqnarray*}&&"<< tempS<<"=0\\end{eqnarray*}\n\n";
   }
   out << "\nThe system we need to solve:\n";
   if (useHtml)
@@ -1383,25 +1396,19 @@ void slTwo::ElementToHtml(std::string& filePath)
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
-void SimpleLieAlgebra::FindSl2Subalgebras( SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
-{ rootSubalgebras theRootSAs;
-//  rootSubalgebra tempRootSA;
-//  tempRootSA.genK.SetSizeExpandOnTopNoObjectInit(WeylRank);
-//  tempRootSA.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
-//  for (int i=0; i<tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows; i++)
- //   tempRootSA.genK.TheObjects[i].MakeEi(tempRootSA.AmbientWeyl.KillingFormMatrix.NumRows, i);
-//  tempRootSA.ComputeAll();
-  theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, false);
-  theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
-  IndicatorWindowGlobalVariables.StatusString1=theRootSAs.DebugString;
+void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
+{ output.theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, true);
+  //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
+  output.IndicesSl2sContainedInRootSA.SetSizeExpandOnTopNoObjectInit(output.theRootSAs.size);
+  IndicatorWindowGlobalVariables.StatusString1=output.theRootSAs.DebugString;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
-  for (int i=0; i<theRootSAs.size-1; i++)
-    theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(output, theGlobalVariables, *this);
+  for (int i=0; i<output.theRootSAs.size-1; i++)
+    output.theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables, *this);
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
 }
 
-void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
+void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
 { //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   roots RootsWithCharacteristic2;
@@ -1464,12 +1471,15 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
       theSl2.theF.Nullify(theLieAlgebra);
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
-      { theSl2.MakeReportPrecomputations(theGlobalVariables,*this);
-        int indexIsoSl2;
+      { int indexIsoSl2;
         if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
-          output.TheObjects[indexIsoSl2].DiagramsContainingRegularSAs.AddListOnTop(theSl2.DiagramsContainingRegularSAs);
+        { output.TheObjects[indexIsoSl2].IndicesContainingRootSAs.AddListOnTop(theSl2.IndicesContainingRootSAs);
+          output.IndicesSl2sContainedInRootSA.TheObjects[indexInContainer].AddObjectOnTop(indexIsoSl2);
+        }
         else
+        { theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
           output.AddObjectOnTopHash(theSl2);
+        }
       }
     }
   }
@@ -1608,7 +1618,7 @@ void SimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Select
       else
         outputMatrixSystemToBeSolved.elements[i][lowerIndex]=theMonomial.Coefficient* inputFCoeffs.elements[0][higherIndex-halfNumberVariables];
     }
-  outputSystemToBeSolved.ComputeDebugString();
+//  outputSystemToBeSolved.ComputeDebugString();
 }
 
 bool SltwoSubalgebras::ContainsSl2WithGivenH(root& theH, int* outputIndex)
@@ -1635,18 +1645,20 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(root& theHCharacteris
   return false;
 }
 
-void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables,  rootSubalgebra& MinimalContainingRegularSubalgebra)
+void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
 { int theDimension=this->owner->theWeyl.KillingFormMatrix.NumRows;
-  this->DiagramsContainingRegularSAs.size=0;
+  this->IndicesContainingRootSAs.size=0;
   roots tempRoots;
   tempRoots.CopyFromBase(MinimalContainingRegularSubalgebra.SimpleBasisK);
   this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.Hcomponent);
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
   theDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
-  this->DiagramsContainingRegularSAs.AddObjectOnTop(theDiagram);
+  this->IndicesContainingRootSAs.AddObjectOnTop(indexMinimalContainingRegularSA);
+  container.IndicesSl2sContainedInRootSA.TheObjects[indexMinimalContainingRegularSA].size=0;
+  container.IndicesSl2sContainedInRootSA.TheObjects[indexMinimalContainingRegularSA].AddObjectOnTop(indexInContainer);
   tempRoots.MakeEiBasis(theDimension);
-  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots,  this->theH.Hcomponent);
+  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.Hcomponent);
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
   tempDiagram.GetSimpleBasisInBourbakiOrder(this->preferredAmbientSimpleBasis);
@@ -1821,7 +1833,15 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
 }
 
 void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer)
-{ if(usePNG)
+{ std::string physicalPathSAs;
+  std::string htmlPathServerSAs;
+  physicalPathSAs= physicalPath;
+  physicalPathSAs.append("../");
+  htmlPathServerSAs= htmlPathServer;
+  htmlPathServerSAs.append("../");
+  std::string tempS;
+  this->theRootSAs.ElementToHtml(tempS, physicalPathSAs, htmlPathServerSAs, this, theGlobalVariables);
+  if(usePNG)
   { int numExpectedFiles= this->size*5;
     this->texFileNamesForPNG.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
     this->texStringsEachFile.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
@@ -1832,11 +1852,33 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   this->texStringsEachFile.size=0;
   this->listSystemCommandsLatex.size=0;
   this->listSystemCommandsDVIPNG.size=0;
-  std::stringstream out;
-  std::string tempS, fileName;
+  std::stringstream out, outNotation;
+  std::string fileName;
   std::fstream theFile, fileFlas;
+  outNotation<< "<a href=\""<<htmlPathServer<<"StructureConstants.html\">"<<"Notation, structure constants and Weyl group info</a><br>";
+  std::string notation= outNotation.str();
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
   out <<tempS;
+  if(usePNG)
+  { fileName= physicalPath;
+    fileName.append("sl2s.html");
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+    tempS= out.str();
+    theFile<< "<HMTL><BODY>"<<notation<<"<a href=\""<< htmlPathServer<< "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
+    theFile.close();
+  }
+  fileName= physicalPath;
+  fileName.append("sl2s_nopng.html");
+  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, 0, 0);
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  theFile<< "<HMTL><BODY>"<<notation<<"<a href=\""<< htmlPathServer<< "sl2s.html\"> "<<".png rich html for your viewing pleasure (might take a while to load; available only if you checked the check box)</a><br>\n" <<tempS<<"</HTML></BODY>";
+  theFile.close();
+  fileName= physicalPath;
+  fileName.append("StructureConstants.html");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  this->owner.ElementToString(tempS, true, false, usePNG, theGlobalVariables, &physicalPath, &htmlPathServer, &this->texFileNamesForPNG, &this->texStringsEachFile);
+  theFile<< tempS;
+  theFile.close();
   if (usePNG)
   { this->listSystemCommandsLatex.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);
@@ -1852,17 +1894,5 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
       this->listSystemCommandsDVIPNG.TheObjects[i]=tempStreamPNG.str();
       fileFlas.close();
     }
-    fileName= physicalPath;
-    fileName.append("sl2s.html");
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
-    tempS= out.str();
-    theFile<< "<HMTL><BODY><a href=\""<< htmlPathServer<< "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
-    theFile.close();
   }
-  fileName= physicalPath;
-  fileName.append("sl2s_nopng.html");
-  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, 0, 0);
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
-  theFile<< "<HMTL><BODY><a href=\""<< htmlPathServer<< "sl2s.html\"> "<<".png rich html for your viewing pleasure (might take a while to load; available only if you checked the check box)</a><br>\n" <<tempS<<"</HTML></BODY>";
-  theFile.close();
 }

@@ -2363,7 +2363,7 @@ void roots::ComputeDebugString()
 }
 
 void roots::ElementToString(std::string& output)
-{ this->ElementToString(output,false,false,false);
+{ this->ElementToString(output, false, false, false);
 }
 
 void roots::ElementToLinearCombinationString(std::string& output)
@@ -14951,8 +14951,7 @@ void rootSubalgebra::ElementToStringHeaderFooter( std::string& outputHeader,std:
 	}
   if(useLatex)
   {	if (!includeKEpsCoords)
-      outputHeader.append
-        ("\n\n\\noindent\\begin{tabular}{|cccccc|} \n \\multicolumn{5}{c}{");
+      outputHeader.append("\n\n\\noindent\\begin{tabular}{|cccccc|} \n \\multicolumn{5}{c}{");
 		else
       outputHeader.append("\n\n\\noindent\\begin{tabular}{|ccccccc|} \n \\multicolumn{6}{c}{");
 		outputHeader.append("$\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules} \\\\");
@@ -15044,7 +15043,7 @@ void rootSubalgebra::ElementToString(std::string &output, SltwoSubalgebras* sl2s
 	out << latexHeader;
 	this->kModulesgEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
 	for (int i=0; i<this->kModules.size; i++)
-	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS,useLatex);
+	{ this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS, useLatex);
     if (useHtml)
       out <<"\n<tr><td>";
     if (useLatex)

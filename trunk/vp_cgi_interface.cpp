@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 	//inputString ="SLtwos";
   //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
   //inputString="textType=D&textRank=4&buttonGoSl2SAs=sl%282%29+subalgebras";
-  //inputString="textType=B&textRank=3&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
+  //inputString="textType=F&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();

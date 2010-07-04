@@ -1165,7 +1165,6 @@ void CombinatorialChamberContainer::ResumeSlicing()
 #endif
 }
 
-
 void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
 { this->SliceTheEuclideanSpace(this->theDirections, this->CurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
 }
@@ -1252,8 +1251,8 @@ void hashedRoots::ReadFromFile(std::fstream& input)
 void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)
 { if (!usePNG)
   { output<<formulaTex;
-    if (useHtml)
-      output<<"\n<br>\n";
+    //if (useHtml)
+      //output<<"\n<br>\n";
     return;
   }
   std::stringstream tempStream;
@@ -1472,21 +1471,22 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra(RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK, theSl2.theH.Hcomponent, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
       { int indexIsoSl2;
+        theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
         if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
-        { output.TheObjects[indexIsoSl2].IndicesContainingRootSAs.AddListOnTop(theSl2.IndicesContainingRootSAs);
+        { output.TheObjects[indexIsoSl2].IndicesContainingRootSAs.AddObjectOnTop(indexInContainer);
           output.IndicesSl2sContainedInRootSA.TheObjects[indexInContainer].AddObjectOnTop(indexIsoSl2);
         }
         else
-        { theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
           output.AddObjectOnTopHash(theSl2);
-        }
       }
     }
   }
 }
 
-bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra( roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
-{ roots SelectedExtraPositiveRoots;
+bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+{ if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
+    return false;
+  roots SelectedExtraPositiveRoots;
   roots rootsInPlay;
   rootsInPlay.size=0;
   SelectedExtraPositiveRoots.size=0;
@@ -1721,8 +1721,8 @@ void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrderOneComponentAppen
   // the order implemented here I took from the atlas of lie groups (http://www.liegroups.org/dissemination/spherical/explorer/rootSystem.cgi)
   // which should be the Bourbaki order. The order is as follows:
   // type A all roots are from left to right (or the other way round, whichever is your orientation)
-  // in type B and F first come the long roots in the order they appear in the diagram;
-  // in types C and G first come the short roots
+  // in type B first comes the long roots in the order they appear in the diagram;
+  // in types C, F and G first come the short roots
   // in type D first comes the long string, with the end node with lowest index;
   // then come the two end one-root strings in any order.
   // in type E the order is as below
@@ -1731,9 +1731,9 @@ void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrderOneComponentAppen
   //(2 is connected to 4)
   //The format of this function is in accordance with WeylGroup::GetEpsilonMatrix
   assert(theString.size()>0);
-  if (theString.at(1)=='A'|| theString.at(1)=='B' || theString.at(1)=='F')
+  if (theString.at(1)=='A'|| theString.at(1)=='B' )
     outputAppend.AddListOnTop(this->SimpleBasesConnectedComponents.TheObjects[index]);
-  if (theString.at(1)=='C' || theString.at(1)=='G')
+  if (theString.at(1)=='C' || theString.at(1)=='G' || theString.at(1)=='F')
     for (int i=this->SimpleBasesConnectedComponents.TheObjects[index].size-1; i>=0; i--)
       outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
   if (theString.at(1)=='D')
@@ -1786,6 +1786,20 @@ void slTwo::ComputeModuleDecomposition()
   this->MultiplicitiesHighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootsOfBorel.size);
   this->HighestWeights.size=0;
   this->MultiplicitiesHighestWeights.size=0;
+//  this->hCharacteristic.ComputeDebugString();
+
+/*	std::string stop;
+  if (this->hCharacteristic.DebugString=="(2,2,0,2)")
+  { std::stringstream debug1;
+    for (int i=0; i<IndexZeroWeight; i++)
+    { debug1<< BufferHighestWeights.TheObjects[i]<<", ";
+    }
+    debug1<<"\n";
+    for (int i=IndexZeroWeight+1; i<BufferHighestWeights.size; i++)
+    { debug1<< BufferHighestWeights.TheObjects[i]<<", ";
+    }
+    stop=debug1.str();
+  }*/
   for (int j=BufferHighestWeights.size-1; j>=IndexZeroWeight; j--)
   { int topMult = BufferHighestWeights.TheObjects[j];
     if (topMult<0)
@@ -1869,7 +1883,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   }
   fileName= physicalPath;
   fileName.append("sl2s_nopng.html");
-  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, 0, 0);
+  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, &physicalPath, &htmlPathServer);
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile<< "<HMTL><BODY>"<<notation<<"<a href=\""<< htmlPathServer<< "sl2s.html\"> "<<".png rich html for your viewing pleasure (might take a while to load; available only if you checked the check box)</a><br>\n" <<tempS<<"</HTML></BODY>";
   theFile.close();

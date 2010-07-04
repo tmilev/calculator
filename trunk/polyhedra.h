@@ -58,7 +58,7 @@
 #endif
 
 #ifdef CGIversionLimitRAMuse
-static int cgiLimitRAMuseNumPointersInListBasicObjects=9000000;
+static int cgiLimitRAMuseNumPointersInListBasicObjects=12000000;
 #endif
 
 const int MaxRank=12;

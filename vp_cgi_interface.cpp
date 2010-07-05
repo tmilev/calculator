@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 #ifdef WIN32
     char buffer[2000];
 		size_t tempI=1500;
-		::getenv_s(&tempI, buffer,1500,"QUERY_STRING");
+		::getenv_s(&tempI, buffer, 1500, "QUERY_STRING");
 		inputString=buffer;
 #else
 		inputString=::getenv("QUERY_STRING");
@@ -55,6 +55,7 @@ int main(int argc, char **argv)
   //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
   //inputString="textType=E&textRank=6&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=F&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
+  //inputString="textType=d&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -124,7 +125,7 @@ int main(int argc, char **argv)
     { WeylGroup tempWeyl;
       theComputationSetup.WeylGroupIndex=4;
       theComputationSetup.theChambers.AmbientDimension=4;
-      tempWeyl.MakeArbitrary('A',theComputationSetup.theChambers.AmbientDimension);
+      tempWeyl.MakeArbitrary('A', theComputationSetup.theChambers.AmbientDimension);
       tempWeyl.ComputeRho(true);
       theComputationSetup.VPVectors.CopyFromBase(tempWeyl.RootsOfBorel);
     }

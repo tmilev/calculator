@@ -1267,10 +1267,10 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
     output<<"\n<br>\n";
 }
 
-void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::stringstream out;  std::string tempS;
   this->hCharacteristic.ElementToString(tempS);
-  out <<"h-characteristic: "<<  tempS;
+  out <<"<a name=\"sl2index" << indexInContainer<< "\">h-characteristic: "<<  tempS <<"</a>";
   this->preferredAmbientSimpleBasis.ElementToString(tempS, false, false, false);
   if (physicalPath==0 || htmlPathServer==0)
   { usePNG=false;
@@ -1836,7 +1836,7 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   if(UseHtml)
     out<<"<br><br>";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables,*this, useLatex, UseHtml, usePNG, physicalPath, htmlPathServer);
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables,*this, i, useLatex, UseHtml, usePNG, physicalPath, htmlPathServer);
     out<< "Index "<< i<<": ";
     if(UseHtml)
       out<<"<br>";
@@ -1912,3 +1912,28 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
     }
   }
 }
+
+void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ rootSubalgebra tempSA;
+  inputData.theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
+	inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
+	inputData.theRootSubalgebras.flagCountingNilradicalsOnlyNoComputation=true;
+	inputData.theRootSubalgebras.UpperLimitNumElementsWeyl=0;
+	inputData.theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+//  inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
+  inputData.theRootSubalgebras.numNilradicalsBySA.initFillInObject(inputData.theRootSubalgebras.size, 0);
+  inputData.theRootSubalgebras.ComputeAllRootSubalgebrasUpToIso(theGlobalVariables, 0, inputData.theRootSubalgebras.size);
+  std::stringstream out;
+  int total=0;
+  for (int i=0; i<inputData.theRootSubalgebras.size; i++)
+  { rootSubalgebra& currentSA= inputData.theRootSubalgebras.TheObjects[i];
+    out << currentSA.theDynkinDiagram.DebugString<< ": " << inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i]<<" nilradicals allowed up to iso\n\n";
+    total+=inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i];
+  }
+  out <<"Total: " <<total<<" nilradicals up to iso";
+  IndicatorWindowGlobalVariables.StatusString1=out.str();
+  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+}
+

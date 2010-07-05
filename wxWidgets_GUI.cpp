@@ -188,6 +188,7 @@ public:
 	::wxButton* Button16Custom2;
 	::wxButton* Button17Custom2PauseSaveResume;
 	::wxButton* Button18Custom2Load;
+	::wxButton* Button19CountNilradicals;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -212,6 +213,7 @@ public:
   void onButton16Custom2 (wxCommandEvent& ev);
   void onButton17Custom2PauseSaveResume(wxCommandEvent& ev);
   void onButton18Custom2Load(wxCommandEvent& ev);
+  void onButton19CountNilradicals(wxCommandEvent& ev);
   void onButton6OneSlice (wxCommandEvent& ev);
   void onButton7SliceIncrement (wxCommandEvent& ev);
   void onButton8FullChop(wxCommandEvent& ev);
@@ -280,6 +282,7 @@ public:
     ID_Button16Custom2,
     ID_Button17Custom2PauseSaveResume,
     ID_Button18Custom2Load,
+    ID_Button19CountNilradicals,
     ID_Paint,
   };
   DECLARE_EVENT_TABLE()
@@ -364,6 +367,7 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_BUTTON(guiMainWindow::ID_Button16Custom2, guiMainWindow::onButton16Custom2)
     EVT_BUTTON(guiMainWindow::ID_Button17Custom2PauseSaveResume, guiMainWindow::onButton17Custom2PauseSaveResume)
     EVT_BUTTON(guiMainWindow::ID_Button18Custom2Load, guiMainWindow::onButton18Custom2Load)
+    EVT_BUTTON(guiMainWindow::ID_Button19CountNilradicals, guiMainWindow::onButton19CountNilradicals)
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
@@ -540,6 +544,7 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->Button16Custom2= new wxButton(this, this->ID_Button16Custom2, wxT("Experiments 2"));
   this->Button17Custom2PauseSaveResume= new wxButton(this, this->ID_Button17Custom2PauseSaveResume, wxT("Experiments 2 Pause+Save"));
   this->Button18Custom2Load= new wxButton(this, this->ID_Button18Custom2Load, wxT("Experiments 2 Load+Resume"));
+  this->Button19CountNilradicals= new wxButton(this, this->ID_Button19CountNilradicals, wxT("Count Nilradicals"));
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
   //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
@@ -590,6 +595,7 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox2CheckSums);
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox3ComputeChambers);
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox7UseIndicatorForPFDecomposition);
+		this->BoxSizer11VerticalOptions->Add(this->Button19CountNilradicals);
 		this->BoxSizer11VerticalOptions->Add(this->Button3Custom);
 		this->BoxSizer11VerticalOptions->Add(this->Button16Custom2);
 		this->BoxSizer11VerticalOptions->Add(this->Button17Custom2PauseSaveResume);
@@ -880,9 +886,15 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
   this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
   this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
   this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
-  this->theComputationSetup.theRootSubalgebras.flagUsingONLYActionsNormalizerCentralizerNilradical=false;
-  this->theComputationSetup.WeylGroupIndex=6;
-  this->theComputationSetup.WeylGroupLetter='E';
+  this->theComputationSetup.WeylGroupIndex=4;
+  this->theComputationSetup.WeylGroupLetter='D';
+  this->RunTheComputation();
+}
+
+void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
+{ this->theComputationSetup.WeylGroupIndex=4;
+  this->theComputationSetup.WeylGroupLetter='D';
+  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.CountNilradicals;
   this->RunTheComputation();
 }
 
@@ -909,7 +921,6 @@ void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
   this->theComputationSetup.WeylGroupIndex=this->theComputationSetup.theChambers.AmbientDimension;
   this->RunTheComputation();
 }
-
 
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)
 { this->theComputationSetup.flagUsingProverDoNotCallOthers=false;

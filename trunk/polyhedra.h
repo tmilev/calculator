@@ -5386,12 +5386,12 @@ public:
 	void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrick(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
-	void ExtractRelations(MatrixLargeRational& matA,MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular);
+	void ExtractRelations(MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular);
   bool GenerateAutomorphisms(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
 	void MakeGeneratingSingularVectors(coneRelation &theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphismNoCentralizer(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange);
   static bool attemptExtensionToIsomorphism(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly, WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs);
-	bool CheckForSmallRelations(coneRelation& theRel,roots& nilradicalRoots);
+	bool CheckForSmallRelations(coneRelation& theRel, roots& nilradicalRoots);
 	int NumRootsInNilradical();
 	void MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots);
 	bool IsARoot(const root& input);
@@ -5400,7 +5400,7 @@ public:
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
 	void ComputeCentralizerFromKModulesAndSortKModules();
 	void MatrixToRelation(coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, int theDimension, roots& NilradicalRoots);
-	void GenerateParabolicsInCentralizerAndPossibleNilradicals( GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
+	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
 	void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
@@ -5455,6 +5455,7 @@ public:
 	ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
 	ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
 	//ListBasicObjects< ListBasicObjects <int> > OrbitsUnderNormalizerCentralizerNilradical;
+	ListBasicObjects<int> numNilradicalsBySA;
 	int NumSubalgebrasProcessed;
 	int NumConeConditionFailures;
 	int NumSubalgebrasCounted;
@@ -5466,7 +5467,8 @@ public:
 	bool flagComputingLprohibitingWeights;
 	bool flagUseDynkinClassificationForIsomorphismComputation;
 	bool flagUsingActionsNormalizerCentralizerNilradical;
-	bool flagUsingONLYActionsNormalizerCentralizerNilradical;
+	bool flagCountingNilradicalsOnlyNoComputation;
+//	bool flagUsingONLYActionsNormalizerCentralizerNilradical;
 	bool flagComputeConeCondition;
 	bool flagLookingForMinimalRels;
 	void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
@@ -5474,38 +5476,40 @@ public:
 	bool ApproveSelAgainstOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void RaiseSelectionUntilApproval(Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void ApplyOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
+	void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void GenerateAllRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
-	void GenerateAllRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
-	void DynkinTableToString(bool useLatex, bool useHtml,std::string* htmlPathPhysical, std::string* htmlPathServer,std::string& output);
-	void GetTableHeaderAndFooter(std::string& outputHeader,std::string& outputFooter, bool useLatex,	bool useHtml);
+	void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
+	void DynkinTableToString(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output);
+	void GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml);
 	void SortDescendingOrderBySSRank();
 	//the below commented out function turned out to be non-necessary.
 	//The proof is done through running the program without optimization, as described in Chapter 5 of Todor Milev's phd thesis
   //void initDynkinDiagramsNonDecided(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
 	void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
-	void pathToHtmlReference(int index,std::string& DisplayString, std::string* htmlPathServer, std::string& output);
+	void pathToHtmlReference(int index, std::string& DisplayString, std::string* htmlPathServer, std::string& output);
 	void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
 	void ElementToStringCentralizerIsomorphisms(std::string& output, GlobalVariables& theGlobalVariables);
 	void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
+	void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
-	{ this->ElementToString(this->DebugString, 0, useLatex, useHtml,includeKEpsCoords, htmlPathPhysical, htmlPathServer,theGlobalVariables);
+	{ this->ElementToString(this->DebugString, 0, useLatex, useHtml, includeKEpsCoords, htmlPathPhysical, htmlPathServer, theGlobalVariables);
 	};
 	void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
 	void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	rootSubalgebras()
 	{ this->flagUseDynkinClassificationForIsomorphismComputation=true;
-    this->flagUsingONLYActionsNormalizerCentralizerNilradical=false;
+    this->flagCountingNilradicalsOnlyNoComputation = false;
     this->flagComputingLprohibitingWeights=false;
 		this->flagComputeConeCondition=false;
 		this->flagUsingActionsNormalizerCentralizerNilradical=true;
 		this->flagLookingForMinimalRels=false;
 		this->NumLinesPerTableLatex=20;
 		this->NumColsPerTableLatex=4;
-		this->UpperLimitNumElementsWeyl=10000;
+		this->UpperLimitNumElementsWeyl=0;
 	};
 };
 
@@ -5624,9 +5628,9 @@ class slTwo
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml)
-	{ this->ElementToString(output, theGlobalVariables, container, useLatex, useHtml, false, 0, 0);
+	{ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0);
   };
 	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){	this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml);};
 	ListBasicObjects<int> HighestWeights;
@@ -6055,11 +6059,12 @@ class DyckPaths: public ListBasicObjects<DyckPath>
   bool SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, root& output);
 };
 
-
+typedef void (*Runnable) (ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 
 struct ComputationSetup
 {	roots InputRoots;
 public:
+  Runnable theFunctionToRun;
 	partFractions thePartialFraction;
 	QuasiPolynomial theOutput;
 	rootSubalgebras theRootSubalgebras;
@@ -6130,10 +6135,10 @@ public:
 	int getNextEqualityIndex(std::string& input, int index);
 	bool IsAnInteger(char a);
 	int GetDigitFromChar(char a);
-	int readNextIntData(std::string&input, int index, int& endIndex);
+	int readNextIntData(std::string& input, int index, int& endIndex);
 	void InitComputationSetup();
 	void ExitComputationSetup();
-	void WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables);
+	void WriteReportToFile(DrawingVariables& TDV, std::fstream& theFile, GlobalVariables& theGlobalVariables);
 	void oneStepChamberSlice(GlobalVariables& theGlobalVariables);
 	void oneIncrement(GlobalVariables& theGlobalVariables);
 	void initWeylActionSpecifics(GlobalVariables& theGlobalVariables);
@@ -6144,6 +6149,7 @@ public:
 	void Reset();
 	void DoTheRootSAComputation();
 	void DoTheRootSAComputationCustom();
+	static void CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	ComputationSetup();
 	~ComputationSetup();
 };

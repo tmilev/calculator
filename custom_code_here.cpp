@@ -1396,7 +1396,7 @@ void slTwo::ElementToHtml(std::string& filePath)
 }
 
 void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
-{ output.theRootSAs.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, true);
+{ output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSizeExpandOnTopNoObjectInit(output.theRootSAs.size);
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
@@ -1919,7 +1919,7 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
 	inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
 	inputData.theRootSubalgebras.flagCountingNilradicalsOnlyNoComputation=true;
 	inputData.theRootSubalgebras.UpperLimitNumElementsWeyl=0;
-	inputData.theRootSubalgebras.GenerateAllRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+	inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
 //  inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
   inputData.theRootSubalgebras.numNilradicalsBySA.initFillInObject(inputData.theRootSubalgebras.size, 0);
   inputData.theRootSubalgebras.ComputeAllRootSubalgebrasUpToIso(theGlobalVariables, 0, inputData.theRootSubalgebras.size);
@@ -1937,3 +1937,52 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
+void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables)
+{ std::stringstream out; std::string tempS;
+  //W'' stands for the graph isomorphisms of C(k_ss) extending to root system isomorphisms of the entire algebra.
+  for (int i=fromIndex; i<NumToProcess; i++)
+    this->GenerateActionKintersectBIsos(this->TheObjects[i], theGlobalVariables);
+  if (useLatex)
+    out <<"\\begin{tabular}{ccccc}$\\mathfrak{k}_{ss}$& $C(k_{ss})_{ss}$ & $\\#W''$ &$\\#W'''$&$\\#(W'''\\rtimes W'')$\\\\\\hline";
+  if (useHtml)
+    out << "<br><table><tr><td>k_{ss}</td><td></td><td>Weyl group of C(k_{ss})_{ss}</td><td>Outer automorphisms of C(k_{ss})_{ss}<td></tr>";
+  for (int i=fromIndex; i<NumToProcess; i++)
+  { rootSubalgebra& current= this->TheObjects[i];
+    ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms.TheObjects[i];
+    ReflectionSubgroupWeylGroup& theIsos= this->CentralizerIsomorphisms.TheObjects[i];
+    theOuterIsos.ComputeSubGroupFromGeneratingReflections(theOuterIsos.simpleGenerators, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    theIsos.ComputeSubGroupFromGeneratingReflections(theIsos.simpleGenerators, theIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    if (useHtml)
+      out <<"<td>";
+    out << current.theDynkinDiagram.DebugString;
+    if (useHtml)
+      out <<"</td><td>";
+    if (useLatex)
+      out <<" & ";
+    out << current.theCentralizerDiagram.DebugString;
+    if (useHtml)
+      out <<"</td><td>";
+    if (useLatex)
+      out <<" & ";
+    out << theOuterIsos.size;
+    if (useHtml)
+      out <<"</td><td>";
+    if (useLatex)
+      out <<" & ";
+    out << theIsos.size/theOuterIsos.size;
+    if (useHtml)
+      out <<"</td><td>";
+    if (useLatex)
+      out <<" & ";
+    out << theIsos.size;
+    if (useHtml)
+      out <<"</td></tr>";
+    if (useLatex)
+      out <<" \\\\\n";
+  }
+  if (useLatex)
+    out << "\\end{tabular}";
+  if(useHtml)
+    out << "</table><br>";
+  output= out.str();
+}

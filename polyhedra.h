@@ -5063,11 +5063,11 @@ public:
 	hashedRoots RootSystem;
 	roots RootsOfBorel;
 	static bool flagAnErrorHasOcurredTimeToPanic;
-	void Assign(const WeylGroup &right);
+	void Assign(const WeylGroup& right);
 	void ComputeRho(bool Recompute);
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
-	void MakeArbitrary(char WeylGroupLetter,int n);
+	void MakeArbitrary(char WeylGroupLetter, int n);
 	void GenerateAdditivelyClosedSubset(roots& input, roots& output);
 	void MakeAn(int n);
 	void MakeEn(int n);
@@ -5081,7 +5081,7 @@ public:
 	void GetEpsilonCoords(root& input, root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonCoordsWRTsubalgebra(roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
-	void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,MatrixLargeRational& output);
+	void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
 	void ComputeWeylGroup();
 	void ComputeWeylGroup(int UpperLimitNumElements);
 	void ComputeWeylGroupAndRootsOfBorel(roots& output);
@@ -5104,7 +5104,7 @@ public:
 	bool IsPositiveOrPerpWRTh(const root& input, const root& theH)
 	{ return this->RootScalarKillingFormMatrixRoot(input, theH).IsNonNegative();
   };
-	void ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, root& Output);
+	void ReflectBetaWRTAlpha(root& alpha, root& Beta, bool RhoAction, root& Output);
 	bool IsRegular(root& input, int* indexFirstPerpendicularRoot);
 	void RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output);
 	//the below functions perturbs input so that inputH has non-zero scalar product with roots of the root system,
@@ -5388,7 +5388,7 @@ public:
 	bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
 	void ExtractRelations(MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular);
   bool GenerateAutomorphisms(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
-	void MakeGeneratingSingularVectors(coneRelation &theRelation, roots& nilradicalRoots);
+	void MakeGeneratingSingularVectors(coneRelation& theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphismNoCentralizer(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange);
   static bool attemptExtensionToIsomorphism(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly, WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs);
 	bool CheckForSmallRelations(coneRelation& theRel, roots& nilradicalRoots);
@@ -5406,7 +5406,7 @@ public:
 	void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(GlobalVariables& theGlobalVariables);
 	void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
-	{ this->ElementToString(this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);  };
+	{ this->ElementToString(this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables); };
 	bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,	multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
 	bool IsAnIsomorphism(roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
 //	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
@@ -5478,7 +5478,7 @@ public:
 	void ApplyOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
 	void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-	void GenerateAllRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
+	void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
@@ -5491,7 +5491,7 @@ public:
 	void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
 	void pathToHtmlReference(int index, std::string& DisplayString, std::string* htmlPathServer, std::string& output);
 	void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
-	void ElementToStringCentralizerIsomorphisms(std::string& output, GlobalVariables& theGlobalVariables);
+	void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
 	void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
 	void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
 	void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
@@ -6150,6 +6150,8 @@ public:
 	void DoTheRootSAComputation();
 	void DoTheRootSAComputationCustom();
 	static void CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+	static void ComputeRootSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+	static void ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	ComputationSetup();
 	~ComputationSetup();
 };

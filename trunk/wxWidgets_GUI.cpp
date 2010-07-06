@@ -886,15 +886,17 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
   this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
   this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
   this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
-  this->theComputationSetup.WeylGroupIndex=4;
-  this->theComputationSetup.WeylGroupLetter='D';
+  this->theComputationSetup.WeylGroupIndex=6;
+  this->theComputationSetup.WeylGroupLetter='E';
   this->RunTheComputation();
 }
 
 void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
-{ this->theComputationSetup.WeylGroupIndex=4;
-  this->theComputationSetup.WeylGroupLetter='D';
+{ this->theComputationSetup.WeylGroupIndex=6;
+  this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.CountNilradicals;
+//  this->theComputationSetup.theFunctionToRun=& this->theComputationSetup.ComputeRootSAs;
+//  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeGroupPreservingKintersectBIsos;
   this->RunTheComputation();
 }
 
@@ -918,7 +920,7 @@ void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
 { this->theComputationSetup.theChambers.ReadFromDefaultFile();
   this->theComputationSetup.flagRunningExperiments2=true;
   this->theComputationSetup.flagExperiment2ChambersAlreadyLoaded=true;
-  this->theComputationSetup.WeylGroupIndex=this->theComputationSetup.theChambers.AmbientDimension;
+  this->theComputationSetup.WeylGroupIndex = this->theComputationSetup.theChambers.AmbientDimension;
   this->RunTheComputation();
 }
 

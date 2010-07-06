@@ -56,6 +56,7 @@ int main(int argc, char **argv)
   //inputString="textType=E&textRank=6&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=F&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
   //inputString="textType=d&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
+ // inputString="textType=E&textRank=6&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -140,11 +141,11 @@ int main(int argc, char **argv)
       for (int j=0; j<theComputationSetup.theChambers.AmbientDimension; j++)
       { //std::cout.flush();
         theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
-        std::cout<< "\trootsArray["<<i<< "]["<<j <<"]="<<tempS<<";";
+        std::cout << "\trootsArray[" << i << "][" << j << "]=" << tempS << ";";
       }
   //    std::cout.flush();
     }
-    std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<<","<< theComputationSetup.VPVectors.size <<","<<-1<<","<< theComputationSetup.DisplayNumberChamberOfInterest<<");\n</script>\n";
+    std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<< "," << theComputationSetup.VPVectors.size << "," << -1 << "," << theComputationSetup.DisplayNumberChamberOfInterest << ");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
   } else if (choice==CGIspecificRoutines::choiceGenerateDynkinTables)
   { if (theComputationSetup.WeylGroupIndex<9)
@@ -182,17 +183,17 @@ int main(int argc, char **argv)
     theSl2s.owner.FindSl2Subalgebras(theSl2s, theComputationSetup.WeylGroupLetter, theComputationSetup.WeylGroupIndex, *theComputationSetup.theGlobalVariablesContainer->Default());
     ////////////////////getting paths to output html
     std::stringstream outServerPath;
-    outServerPath<<"/tmp/"<< theComputationSetup.WeylGroupLetter<<theComputationSetup.WeylGroupIndex <<"/sl2s/";
+    outServerPath << "/tmp/" << theComputationSetup.WeylGroupLetter << theComputationSetup.WeylGroupIndex << "/sl2s/";
     std::string serverPath=outServerPath.str();
     std::stringstream outPhysicalPath;
     std::string PhysicalPath;
     outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/";
-    PhysicalPath=outPhysicalPath.str();
+    PhysicalPath = outPhysicalPath.str();
     std::string MkDirCommand1, MkDirCommand2;
     std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1<< "mkdir " <<PhysicalPath;
+    outMkDirCommand1 << "mkdir " << PhysicalPath;
     PhysicalPath.append("sl2s/");
-    outMkDirCommand2<< "mkdir " <<PhysicalPath;
+    outMkDirCommand2 << "mkdir " << PhysicalPath;
     MkDirCommand1=outMkDirCommand1.str();
     MkDirCommand2=outMkDirCommand2.str();
     system(MkDirCommand1.c_str());
@@ -204,12 +205,12 @@ int main(int argc, char **argv)
       { system(theSl2s.listSystemCommandsLatex.TheObjects[i].c_str());
         system(theSl2s.listSystemCommandsDVIPNG.TheObjects[i].c_str());
       }
-      std::cout<<"<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "sl2s.html\"></BODY></HTML>";
+      std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPath << "sl2s.html\"></BODY></HTML>";
     } else
-      std::cout<<"<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "sl2s_nopng.html\"></BODY></HTML>";
+      std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPath << "sl2s_nopng.html\"></BODY></HTML>";
   }
-  std::cout<<"</BODY>\n</HTML>";
-	std::cout<<"<!--";
+  std::cout << "</BODY>\n</HTML>";
+	std::cout << "<!--";
 	std::cout.flush();
 #ifndef WIN32
   ::system(latexCommand1.c_str());

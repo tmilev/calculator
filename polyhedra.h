@@ -2116,7 +2116,7 @@ void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
 	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse

@@ -427,7 +427,8 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
 }
 
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
-{ this->flagLaTeXDraw= false;
+{ this->theDrawFunction=0;
+  this->flagLaTeXDraw= false;
 	this->ColorDashes=RGB(200,200,200);
 	this->flag2DprojectionDraw=true;
 	this->ColorChamberIndicator=RGB(220,220,0);
@@ -525,6 +526,14 @@ void DrawingVariables::SetCoordsForA2()
 	Projections[0][1]=0;
 	Projections[1][0]=-50;
 	Projections[1][1]=86.66;
+}
+
+void DrawingVariables::SetCoordsOrthogonal()
+{ this->scale=1;
+	Projections[0][0]=100;
+	Projections[0][1]=0;
+	Projections[1][0]=0;
+	Projections[1][1]=100;
 }
 
 void DrawingVariables::SetCoordsForB2()
@@ -1129,8 +1138,6 @@ void ComputationSetup::DoTheRootSAComputation()
   //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
 
-extern void main_test_function(std::string& output, GlobalVariables& theGlobalVariables, ComputationSetup& theSetup, bool flagComputationAlreadyLoaded);
-
 void ComputationSetup::Run()
 { this->flagAllowRepaint=false;
 	this->InitComputationSetup();
@@ -1144,17 +1151,7 @@ void ComputationSetup::Run()
     this->flagComputationInProgress=false;
 	  return;
   }
-
 	this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
-	if (this->flagRunningExperiments2)
-	{ std::string tempS;
-
-	  main_test_function(tempS, *this->theGlobalVariablesContainer->Default(), *this, this->flagExperiment2ChambersAlreadyLoaded);
-    this->ExitComputationSetup();
-    this->flagAllowRepaint=true;
-    this->flagComputationInProgress=false;
-	  return;
-  }
   if (this->flagUsingProverDoNotCallOthers)
   { if (this->flagSavingProverData)
 		{ this->theProverFixedK.WriteToFile(this->theProverFixedK.ProverFileName, *this->theGlobalVariablesContainer->Default());
@@ -1373,8 +1370,7 @@ void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyl
 	{ double x1,x2,y1,y2;
 		this->GetCoordsForDrawing(*this,r1,x1,y1);
 		this->GetCoordsForDrawing(*this,r2,x2,y2);
-		this->drawLine
-			(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile, theDrawFunction);
+		this->drawLineOld(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile, theDrawFunction);
 	}
 	else
 	{ int r,g,b;
@@ -1402,7 +1398,7 @@ void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, 
 	}
 }
 
-void DrawingVariables::drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction)
+void DrawingVariables::drawLineOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction)
 { if (theDrawFunction!=0)
 		(*theDrawFunction)(X1,Y1,X2,Y2,thePenStyle, ColorIndex);
 	if (LatexOutFile!=0)
@@ -1570,11 +1566,11 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
 			TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator,tempRootX,directions);
 			double tmpX,tmpY;
 			TDV.GetCoordsForDrawing(TDV,tempRootX,tmpX,tmpY);
-			TDV.drawLine(	tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex, theDrawFunction);
-			TDV.drawLine(	tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex, theDrawFunction);
+			TDV.drawLineOld(	tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex, theDrawFunction);
+			TDV.drawLineOld(	tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex, theDrawFunction);
 			tmpX=(tmpX-TDV.centerX)*1.5+TDV.centerX;
 			tmpY=(tmpY-TDV.centerY)*1.5+TDV.centerY;
-			TDV.drawLine( TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle, TDV.ColorChamberIndicator,outputLatex,theDrawFunction);
+			TDV.drawLineOld( TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle, TDV.ColorChamberIndicator,outputLatex,theDrawFunction);
 			std::string tempS="Indicator";
 			if (drawTextIn!=0)
         drawTextIn(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
@@ -13482,8 +13478,7 @@ void LaTeXProcedures::endLatexDocument(std::fstream& output)
 { output <<"\\end{document}";
 }
 
-void LaTeXProcedures::GetStringFromColorIndex
-  (int ColorIndex, std::string &output, DrawingVariables& drawInput)
+void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput)
 { switch(ColorIndex)
 	{ case 0: output.assign("black"); break;
 		case 1: output.assign("blue"); break;
@@ -13522,7 +13517,7 @@ void LaTeXProcedures::drawText(	double X1, double Y1, std::string& theText, int 
 	output	<< "\\put("<<X1-LaTeXProcedures::FigureCenterCoordSystemX<<","<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<"){\\tiny{"<<theText<<"}}";
 }
 
-void LaTeXProcedures::drawline(	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output,	DrawingVariables& drawInput)
+void LaTeXProcedures::drawline(	double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput)
 { if ((int)thePenStyle== DrawingVariables::PenStyleInvisible)
 		return;
 	output.precision(4);
@@ -13776,7 +13771,7 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(root& input, root& outputL
 { this->ComputeExtremeWeightInTheSameKMod(input,outputLW,false);
 }
 
-void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner)
 {	//this->ComputeAll();
   this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods,theGlobalVariables);
 	if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -13790,6 +13785,8 @@ void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVaria
 	this->flagFirstRoundCounting=true;
 	this->NumTotalSubalgebras=0;
   owner.GenerateActionKintersectBIsos(*this, theGlobalVariables);
+  if (ComputeGroupsOnly)
+    return;
 	int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
 	theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
 	if (useParabolicsInNilradical)
@@ -14192,20 +14189,20 @@ bool roots::GetNormalSeparatingCones(	GlobalVariables& theGlobalVariables, int t
 	//matA.ComputeDebugString();
 	//matb.ComputeDebugString();
 	//matX.ComputeDebugString();
-	bool result=MatrixLargeRational::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA,matb,matX,theGlobalVariables);
+	bool result=MatrixLargeRational::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, matX, theGlobalVariables);
 	//matA.ComputeDebugString();
 	//matb.ComputeDebugString();
 	//matX.ComputeDebugString();
 	outputNormal.MakeZero(theDimension);
-	for (int i=0;i<theDimension;i++)
+	for (int i=0; i<theDimension; i++)
 		outputNormal.TheObjects[i]=matX.elements[i][0]-matX.elements[i+theDimension][0];
 	if (result)
 	{ Rational tempRat;
-		for(int i=0;i<coneStrictlyPositiveCoeffs.size;i++)
+		for(int i=0; i<coneStrictlyPositiveCoeffs.size; i++)
 		{ root::RootScalarEuclideanRoot(coneStrictlyPositiveCoeffs.TheObjects[i],outputNormal,tempRat);
 			assert(tempRat.IsPositive());
 		}
-		for(int i=0;i<coneNonNegativeCoeffs.size;i++)
+		for(int i=0; i<coneNonNegativeCoeffs.size; i++)
 		{ root::RootScalarEuclideanRoot(coneNonNegativeCoeffs.TheObjects[i],outputNormal,tempRat);
 			assert(tempRat.IsNonPositive());
 		}
@@ -17154,7 +17151,7 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
 	this->NumSubalgebrasCounted=0;
 	for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
 	{ this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-		this->TheObjects[i].GeneratePossibleNilradicals(theGlobalVariables, false, *this, i);
+		this->TheObjects[i].GeneratePossibleNilradicals(theGlobalVariables, false, true, *this, i);
 	}
 }
 
@@ -17164,7 +17161,7 @@ void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVar
 	this->NumSubalgebrasCounted=0;
 	for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
 	{ this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-		this->TheObjects[i].GeneratePossibleNilradicals(theGlobalVariables, true,  *this, i);
+		this->TheObjects[i].GeneratePossibleNilradicals(theGlobalVariables, true, false, *this, i);
 	}
 }
 

@@ -56,7 +56,7 @@ int main(int argc, char **argv)
   //inputString="textType=E&textRank=6&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=F&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
   //inputString="textType=d&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
- // inputString="textType=E&textRank=6&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
+  inputString="textType=G&textRank=2&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();

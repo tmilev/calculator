@@ -1289,17 +1289,17 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     out << "<br>";
   }
   for (int i=0; i<this->IndicesContainingRootSAs.size; i++)
-  { out << "\nContaining regular subalgebra number " <<i+1<<": ";
+  { out << "\nContaining regular subalgebra number " << i+1 << ": ";
     rootSubalgebra& currentSA= container.theRootSAs.TheObjects[this->IndicesContainingRootSAs.TheObjects[i]];
     if (useHtml)
-    { out <<"<a href=\""<<(*htmlPathServer)<<"../rootHtml_rootSA"<< this->IndicesContainingRootSAs.TheObjects[i]<<".html\">";
+    { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA" << this->IndicesContainingRootSAs.TheObjects[i] << ".html\">";
       currentSA.theDynkinDiagram.ElementToString(tempS);
       CGIspecificRoutines::clearDollarSigns(tempS, tempS);
     }
     currentSA.theDynkinDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
-    out <<tempS;
+    out << tempS;
     if(useHtml)
-      out <<"</a>";
+      out << "</a>";
     tempRoots.ElementToString(tempS, useLatex, useHtml, false);
     if (useHtml)
       out << "<br>";
@@ -1311,7 +1311,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
       tempMat.ElementToString(tempS, false, true);
     if (useHtml)
       out << "<br>";
-    out <<"\nSymmetric Cartan matrix in Bourbaki order:\n";
+    out << "\nSymmetric Cartan matrix in Bourbaki order:\n";
     if (useHtml)
     { out << "<br>";
       this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
@@ -1333,6 +1333,8 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     tempStream2<<"$";
   tempS= tempStream2.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
+  container.IndicesSl2decompositionFlas.SetSizeExpandOnTopNoObjectInit(container.size);
+  container.IndicesSl2decompositionFlas.TheObjects[indexInContainer]=container.texFileNamesForPNG.size-1;
   out <<"\nThe below list one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out <<"\n<br>\n";
@@ -1399,6 +1401,7 @@ void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLet
 { output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSizeExpandOnTopNoObjectInit(output.theRootSAs.size);
+  output.IndicesSl2sContainedInRootSA.MakeActualSizeAtLeastExpandOnTop(output.theRootSAs.size*2);
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
     output.IndicesSl2sContainedInRootSA.TheObjects[i].size=0;
   IndicatorWindowGlobalVariables.StatusString1=output.theRootSAs.DebugString;
@@ -1406,6 +1409,25 @@ void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLet
   theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
   for (int i=0; i<output.theRootSAs.size-1; i++)
     output.theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables, *this);
+  for (int i=0; i<output.size; i++)
+  { slTwo& theSl2= output.TheObjects[i];
+    theSl2.IndicesMinimalContainingRootSA.MakeActualSizeAtLeastExpandOnTop(theSl2.IndicesContainingRootSAs.size);
+    theSl2.IndicesMinimalContainingRootSA.size=0;
+    for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
+    { bool isMinimalContaining=true;
+//      rootSubalgebra& currentRootSA = output.theRootSAs.TheObjects[];
+      for (int k=0; k<theSl2.IndicesContainingRootSAs.size; k++)
+      { rootSubalgebra& theOtherRootSA = output.theRootSAs.TheObjects[theSl2.IndicesContainingRootSAs.TheObjects[k]];
+        if (theOtherRootSA.indicesSubalgebrasContainingK.ContainsObject(theSl2.IndicesContainingRootSAs.TheObjects[j]))
+        { isMinimalContaining=false;
+          break;
+        }
+      }
+      if (isMinimalContaining)
+        theSl2.IndicesMinimalContainingRootSA.AddObjectOnTopNoRepetitionOfObject(theSl2.IndicesContainingRootSAs.TheObjects[j]);
+    }
+  }
+
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
 }
 
@@ -1673,6 +1695,7 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, Sltwo
     this->owner->LieBracket(this->theH, this->theE, this->bufferHbracketE);
     this->owner->LieBracket(this->theH, this->theF, this->bufferHbracketF);
   }
+  //theSl2.hCharacteristic.ComputeDebugString();
   this->ComputeModuleDecomposition();
 }
 
@@ -1828,22 +1851,53 @@ void slTwo::ComputeModuleDecomposition()
   assert (possible);
 }
 
-void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
-{	std::string tempS; std::stringstream out;
-  if(UseHtml)
+void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+{	std::string tempS; std::stringstream out; std::stringstream body;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
+    body<< "Index "<< i<<": ";
+    if(useHtml)
+      body<<"<br>";
+    body<<tempS;
+    if(useHtml)
+      body<<"<HR width=\"100%\">";
+  }
+  if(useHtml)
     out<<"<br>";
   out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
-  if(UseHtml)
-    out<<"<br><br>";
+  if(useHtml)
+    out<<"<br><br><table><tr><td style=\"padding-right:20px\">Characteristic  </td><td align=\"center\"> h</td><td>Decomposition of ambient Lie algebra</td> <td>Minimal containing regular SAs</td><td>Containing regular SAs </td> </tr>";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables,*this, i, useLatex, UseHtml, usePNG, physicalPath, htmlPathServer);
-    out<< "Index "<< i<<": ";
-    if(UseHtml)
-      out<<"<br>";
-    out<<tempS;
-    if(UseHtml)
-      out<<"<HR width=\"100%\">";
+  { slTwo& theSl2= this->TheObjects[i];
+    if (useHtml)
+      out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index"<< i << "\">";
+    out << theSl2.hCharacteristic.ElementToString();
+    if (useHtml)
+      out << "</a></td><td>";
+    out << theSl2.theH.Hcomponent.ElementToString();
+    if (useHtml)
+      out << "</td><td>";
+    if (useHtml && usePNG)
+      out << "<img src=\"./fla"<< this->IndicesSl2decompositionFlas.TheObjects[i]+1 <<  ".png\"></td><td>";
+    for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
+    { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesMinimalContainingRootSA.TheObjects[j]];
+      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DebugString, tempS);
+      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA.TheObjects[j] << ".html\">" <<tempS<< "</a>"<<";  ";
+    }
+    if (useHtml)
+      out<<"</td><td>";
+    for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
+    { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesContainingRootSAs.TheObjects[j]];
+      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DebugString, tempS);
+      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesContainingRootSAs.TheObjects[j] << ".html\">" <<tempS<< "</a>"<<";  ";
+    }
+    if (useHtml)
+      out <<"</td></tr>\n";
   }
+  if (useHtml)
+    out << "</table><HR width=\"100%\">";
+  tempS=body.str();
+  out <<tempS;
   output=out.str();
   return;
 }
@@ -1871,7 +1925,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   std::stringstream out, outNotation;
   std::string fileName;
   std::fstream theFile, fileFlas;
-  outNotation<< "<a href=\""<<htmlPathServer<<"StructureConstants.html\">"<<"Notation, structure constants and Weyl group info</a><br>";
+  outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">" << "Notation, structure constants and Weyl group info</a><br>";
   std::string notation= outNotation.str();
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
   out <<tempS;

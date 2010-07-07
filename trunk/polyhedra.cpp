@@ -14988,7 +14988,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   { out <<" &nbsp&nbsp&nbsp Contained in: ";
     for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
     { if (useHtml)
-        out <<"<a href=\"./rootHtml_rootSA"<<this->indicesSubalgebrasContainingK.TheObjects[i]<<"\">";
+        out <<"<a href=\"./rootHtml_rootSA"<<this->indicesSubalgebrasContainingK.TheObjects[i]<<".html\">";
       rootSubalgebra& largerSA= sl2s->theRootSAs.TheObjects[this->indicesSubalgebrasContainingK.TheObjects[i]];
       CGIspecificRoutines::clearDollarSigns(largerSA.theDynkinDiagram.DebugString, tempS);
       out << tempS;

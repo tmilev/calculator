@@ -1912,7 +1912,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   std::string tempS;
   this->theRootSAs.ElementToHtml(tempS, physicalPathSAs, htmlPathServerSAs, this, theGlobalVariables);
   if(usePNG)
-  { int numExpectedFiles= this->size*5;
+  { int numExpectedFiles= this->size*8;
     this->texFileNamesForPNG.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
     this->texStringsEachFile.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
     this->listSystemCommandsLatex.MakeActualSizeAtLeastExpandOnTop(numExpectedFiles);
@@ -1976,17 +1976,22 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
 	inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
 //  inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
   inputData.theRootSubalgebras.numNilradicalsBySA.initFillInObject(inputData.theRootSubalgebras.size, 0);
-  inputData.theRootSubalgebras.ComputeAllRootSubalgebrasUpToIso(theGlobalVariables, 0, inputData.theRootSubalgebras.size);
+  inputData.theRootSubalgebras.ComputeAllRootSubalgebrasUpToIso(theGlobalVariables, 0, inputData.theRootSubalgebras.size-6);
   std::stringstream out;
   int total=0;
-  for (int i=0; i<inputData.theRootSubalgebras.size; i++)
+  for (int i=0; i<inputData.theRootSubalgebras.size-6; i++)
   { rootSubalgebra& currentSA= inputData.theRootSubalgebras.TheObjects[i];
-    out << currentSA.theDynkinDiagram.DebugString<< ": " << inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i]<<" nilradicals allowed up to iso\n\n";
+    out << currentSA.theDynkinDiagram.DebugString<< " & " <<currentSA.theCentralizerDiagram.DebugString<<" & " << inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i]<<" \\\\\n";
     total+=inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i];
   }
   out <<"Total: " <<total<<" nilradicals up to iso";
-  IndicatorWindowGlobalVariables.StatusString1=out.str();
+  std::string tempS;
+  inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-4, theGlobalVariables);
+  IndicatorWindowGlobalVariables.StatusString1=tempS;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
   theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
 //		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
 }
@@ -2004,8 +2009,8 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   { rootSubalgebra& current= this->TheObjects[i];
     ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms.TheObjects[i];
     ReflectionSubgroupWeylGroup& theIsos= this->CentralizerIsomorphisms.TheObjects[i];
-    theOuterIsos.ComputeSubGroupFromGeneratingReflections(theOuterIsos.simpleGenerators, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
-    theIsos.ComputeSubGroupFromGeneratingReflections(theIsos.simpleGenerators, theIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    //theOuterIsos.ComputeSubGroupFromGeneratingReflections(theOuterIsos.simpleGenerators, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    //theIsos.ComputeSubGroupFromGeneratingReflections(theIsos.simpleGenerators, theIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
     if (useHtml)
       out <<"<td>";
     out << current.theDynkinDiagram.DebugString;
@@ -2039,4 +2044,48 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   if(useHtml)
     out << "</table><br>";
   output= out.str();
+}
+
+bool IsRegularWRT(roots& input, root& h1, root& h2, WeylGroup& theWeyl)
+{ for (int i=0; i<input.size; i++)
+    if (theWeyl.RootScalarKillingFormMatrixRoot(h1, input.TheObjects[i]).IsEqualToZero() && theWeyl.RootScalarKillingFormMatrixRoot(h2, input.TheObjects[i]).IsEqualToZero())
+      return false;
+  return true;
+}
+
+void ComputationSetup::ExperimentWithH(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ SimpleLieAlgebra theG;
+  SltwoSubalgebras tempSl2s;
+  theG.FindSl2Subalgebras(tempSl2s, inputData.WeylGroupLetter, inputData.WeylGroupIndex, theGlobalVariables);
+  roots h1s, h2s;
+  for (int i=0; i<tempSl2s.size; i++)
+    for (int j=i+1; j<tempSl2s.size; j++)
+    { root& h1= tempSl2s.TheObjects[i].theH.Hcomponent;
+      root& h2= tempSl2s.TheObjects[j].theH.Hcomponent;
+      if (tempSl2s.theRootSAs.AmbientWeyl.RootScalarKillingFormMatrixRoot(h1, h2).IsEqualToZero())
+        if (IsRegularWRT(tempSl2s.theRootSAs.AmbientWeyl.RootsOfBorel, h1, h2, tempSl2s.theRootSAs.AmbientWeyl))
+        { h1s.AddObjectOnTop(h1);
+          h2s.AddObjectOnTop(h2);
+        }
+    }
+  std::stringstream out;
+  tempSl2s.theRootSAs.AmbientWeyl.ProjectOnTwoPlane(h1s.TheObjects[0], h2s.TheObjects[0], theGlobalVariables);
+  for (int i=0; i<h1s.size; i++)
+    out << "h1: " << h1s.TheObjects[i].ElementToString() << " h2: " << h2s.TheObjects[i].ElementToString() <<"\n\n";
+  IndicatorWindowGlobalVariables.StatusString1 = out.str();
+  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+}
+
+void WeylGroup::ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonormalBasisVector2, GlobalVariables& theGlobalVariables)
+{ for (int i=0; i<this->RootSystem.size; i++)
+  { double x= this->RootScalarKillingFormMatrixRoot(orthonormalBasisVector1, this->RootSystem.TheObjects[i]).DoubleValue()*10;
+    double y= this->RootScalarKillingFormMatrixRoot(orthonormalBasisVector2, this->RootSystem.TheObjects[i]).DoubleValue()*10;
+    theGlobalVariables.theDrawingVariables.drawLine(0, 0, x, y, 0, 0);
+  }
+}
+
+void DrawingVariables::drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+{ if (this->theDrawFunction!=0)
+    this->theDrawFunction(X1+ this->centerX, Y1+ this->centerY, X2+ this->centerX, Y2+ this->centerY, thePenStyle, ColorIndex);
 }

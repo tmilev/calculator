@@ -174,6 +174,8 @@ typedef void (*FeedDataToIndicatorWindow)	(	IndicatorWindowVariables& input);
 
 struct DrawingVariables
 {
+private:
+	drawLineFunction theDrawFunction;
 public:
 	static const int NumColors=8;
 	//color styles (taken from windows.h and substituted for independence of the .h file):
@@ -210,24 +212,28 @@ public:
 	int DrawStyleDashes;
 	int DrawStyleInvisibles;
 	int DrawStyleDashesInvisibles;
-	void drawCoordSystem(	DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
+	void drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
 	void initDrawingVariables(int cX1, int cY1);
 	int ColorsR[DrawingVariables::NumColors];
 	int ColorsG[DrawingVariables::NumColors];
 	int ColorsB[DrawingVariables::NumColors];
 	int Colors[DrawingVariables::NumColors];
 	DrawingVariables(int cx, int cy){this->initDrawingVariables(cx,cy);};
+	DrawingVariables(){this->initDrawingVariables(100, 100);};
+	void SetDrawingFunction(drawLineFunction theFunction){this->theDrawFunction=theFunction;};
 	int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
-	static void GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y);
+	static void GetCoordsForDrawing(DrawingVariables& TDV, root& r, double& x, double& y);
 	static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
 	void ApplyScale(double inputScale);
+	void SetCoordsOrthogonal();
 	void SetCoordsForG2();
 	void SetCoordsForB2();
 	void SetCoordsForA2();
 	void SetCoordsForC2();
+	void drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
 	void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
 	//if the LatexOutFile is zero then the procedure defaults to the screen
-	void drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
+	void drawLineOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 	void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
 //	void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
 	void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
@@ -5093,6 +5099,7 @@ public:
 	void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
 	void GenerateRootSystemFromKillingFormMatrix();
 	void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
+	void ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
 	//theRoot is a list of the simple coordinates of the root
 	//theRoot serves as both input and output
 	void ActOnRootAlgByGroupElement(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
@@ -5400,7 +5407,7 @@ public:
 	void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
 	void ComputeCentralizerFromKModulesAndSortKModules();
 	void MatrixToRelation(coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, int theDimension, roots& NilradicalRoots);
-	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
+	void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
 	void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
 	void MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
 	void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
@@ -6154,6 +6161,7 @@ public:
 	static void CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	static void ComputeRootSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	static void ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+	static void ExperimentWithH(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	ComputationSetup();
 	~ComputationSetup();
 };
@@ -6336,6 +6344,7 @@ public:
   DynkinDiagramRootSubalgebra dynGetEpsCoords;
   DynkinDiagramRootSubalgebra dynAttemptTheTripleTrick;
 
+  DrawingVariables theDrawingVariables;
 	GlobalVariables();
 	~GlobalVariables();
 	inline void SetFeedDataToIndicatorWindowDefault(FeedDataToIndicatorWindow input)

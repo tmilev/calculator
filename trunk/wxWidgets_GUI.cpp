@@ -706,6 +706,7 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->updateInputButtons();
   this->SetSizer(this->BoxSizer1HorizontalBackground);
   this->theComputationSetup.theGlobalVariablesContainer->Default()->SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
+  this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables.SetDrawingFunction(&drawline);
 #ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutex1, NULL);
   pthread_cond_init (&ParallelComputing::continueCondition, NULL);
@@ -824,11 +825,11 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 {	wxPaintDC  dc(this);
 	if (MainWindow1==0)
 		return;
-  if (MainWindow1->theComputationSetup.flagAllowRepaint)
+/*  if (MainWindow1->theComputationSetup.flagAllowRepaint)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
     dc.DrawRectangle(wxPoint(0,0),this->GetSize());
     CombinatorialChamberContainer::drawOutput(	TDV,MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.InputRoots, MainWindow1->theComputationSetup.NextDirectionIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
-  }
+  }*/
 }
 
 void guiMainWindow::RunTheComputation()
@@ -892,11 +893,12 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
-{ this->theComputationSetup.WeylGroupIndex=6;
+{ this->theComputationSetup.WeylGroupIndex=8;
   this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.CountNilradicals;
 //  this->theComputationSetup.theFunctionToRun=& this->theComputationSetup.ComputeRootSAs;
 //  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeGroupPreservingKintersectBIsos;
+ // this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ExperimentWithH;
   this->RunTheComputation();
 }
 
@@ -1334,7 +1336,6 @@ void wxGridExtra::SetNumRowsAndCols(int r, int c)
   }
 }
 
-
 void WorkThreadClass::run()
 {
 #ifdef WIN32
@@ -1343,8 +1344,6 @@ void WorkThreadClass::run()
   RunComputationalThread(0);
 #endif
 }
-
-
 
 void outputText(std::string& theOutput)
 {
@@ -1449,7 +1448,7 @@ void guiMainWindow::onComputationOver(wxCommandEvent& ev)
 { this->updatePartialFractionAndCombinatorialChamberTextData();
   MainWindow1->TurnOnAllDangerousButtons();
   MainWindow1->Button1Go->SetLabel(wxT("Go"));
-  MainWindow1->Refresh();
+ // MainWindow1->Refresh();
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)

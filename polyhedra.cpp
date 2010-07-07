@@ -14968,7 +14968,7 @@ void rootSubalgebra::ElementToStringHeaderFooter( std::string& outputHeader,std:
 	}
 }
 
-void rootSubalgebra::ElementToString(std::string &output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 	std::string tempS;
 	std::string latexFooter, latexHeader;
@@ -14978,24 +14978,36 @@ void rootSubalgebra::ElementToString(std::string &output, SltwoSubalgebras* sl2s
 	this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
 	this->theDynkinDiagram.ElementToString(tempS);
   if (useLatex)
-    out <<"\\noindent$\\mathfrak{k}_{ss}:$ ";
+    out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
 	{ out << "k_{ss}: ";
 		CGIspecificRoutines::clearDollarSigns(tempS, tempS);
   }
   out << tempS;
+  if (sl2s!=0)
+  { out <<" &nbsp&nbsp&nbsp Contained in: ";
+    for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
+    { if (useHtml)
+        out <<"<a href=\"./rootHtml_rootSA"<<this->indicesSubalgebrasContainingK.TheObjects[i]<<"\">";
+      rootSubalgebra& largerSA= sl2s->theRootSAs.TheObjects[this->indicesSubalgebrasContainingK.TheObjects[i]];
+      CGIspecificRoutines::clearDollarSigns(largerSA.theDynkinDiagram.DebugString, tempS);
+      out << tempS;
+      if (useHtml)
+        out <<"</a>, ";
+    }
+  }
   this->SimpleBasisK.ElementToString(tempS, useLatex, useHtml, false);
   if (useHtml)
-		out <<"\n<br>\n";
+		out << "\n<br>\n";
   if (useLatex)
-    out <<"\n\\noindent";
-	out <<" Simple basis: "<<tempS;
+    out << "\n\\noindent";
+	out << " Simple basis: "<<tempS;
 	this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(tempS, useLatex, useHtml, false);
 	if (useHtml)
-    out <<"\n<br>\nSimple basis epsilon form: "<< tempS;
+    out << "\n<br>\nSimple basis epsilon form: " << tempS;
 	this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS, useLatex, useHtml, false);
 	if (useHtml)
-    out <<"\n<br>\nSimple basis epsilon form with respect to k: "<< tempS;
+    out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
 	this->theCentralizerDiagram.ElementToString(tempS);
   if(!useLatex)
     CGIspecificRoutines::clearDollarSigns(tempS,tempS);
@@ -15018,17 +15030,18 @@ void rootSubalgebra::ElementToString(std::string &output, SltwoSubalgebras* sl2s
 	//		out <<"+h_"<<CartanPieceSize;
 	//}
 	if (useHtml)
-		out <<"<br>\n simple basis centralizer: ";
+		out << "<br>\n simple basis centralizer: ";
 	if (useLatex)
-		out<<"; simple basis centralizer: ";
-	this->SimpleBasisCentralizerRoots.ElementToString(tempS,true,true,false);
+		out<< "; simple basis centralizer: ";
+	this->SimpleBasisCentralizerRoots.ElementToString(tempS, true, true, false);
 	out <<tempS;
 	if (sl2s!=0)
   { if (useHtml)
       out <<"\n<br>\n";
     if (useHtml)
       out <<"\n<br>";
-    ListBasicObjects<int>hCharacteristics_S_subalgebras;
+    ListBasicObjects<int> hCharacteristics_S_subalgebras;
+    //this->ComputeIndicesSl2s(indexInOwner, *sl2s, hCharacteristics_S_subalgebras);
     hCharacteristics_S_subalgebras.size=0;
     out << "\nCharacteristics of sl(2) subalgebras that have no centralizer in k (total " <<sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].size<<"): ";
     for (int i=0; i<sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].size; i++)

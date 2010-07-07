@@ -1239,7 +1239,7 @@ public:
 };
 
 class Rational
-{ inline bool TryToAddQuickly ( int OtherNum, int OtherDen)
+{ inline bool TryToAddQuickly (int OtherNum, int OtherDen)
 	{ register int OtherNumAbs, thisNumAbs;
 		assert(this->DenShort>0 && OtherDen>0);
 	  if (OtherNum<0)
@@ -1269,7 +1269,7 @@ class Rational
     }
 		return true;
 	};
-	inline bool TryToMultiplyQuickly(	int OtherNum, int OtherDen)
+	inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen)
 	{ register int OtherNumAbs, thisNumAbs;
 		assert(this->DenShort>0 && OtherDen>0);
 	  if (OtherNum<0)
@@ -1280,7 +1280,7 @@ class Rational
 			thisNumAbs=-this->NumShort;
 	  else
 			thisNumAbs=this->NumShort;
-		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&(	this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
+		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&(this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
       return false;
     register int N = this->NumShort*OtherNum;
 		register int D = this->DenShort*OtherDen;
@@ -1291,9 +1291,9 @@ class Rational
     else
     { register int tempGCD;
       if (N>0)
-				tempGCD= Rational::gcd(N,D);
+				tempGCD= Rational::gcd(N, D);
       else
-				tempGCD= Rational::gcd(-N,D);
+				tempGCD= Rational::gcd(-N, D);
       this->NumShort= (N/((signed int)tempGCD));
       this->DenShort= (D/tempGCD);
     }
@@ -5640,6 +5640,7 @@ public:
 	ElementSimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
 	SimpleLieAlgebra* owner;
 	ListBasicObjects<int> IndicesContainingRootSAs;
+	ListBasicObjects<int> IndicesMinimalContainingRootSA;
   roots preferredAmbientSimpleBasis;
 	root hCharacteristic;
 	root hElementCorrespondingToCharacteristic;
@@ -5747,6 +5748,7 @@ public:
 //	ListBasicObjects< int > hSingularWeights;
 	ListBasicObjects<int> MultiplicitiesFixedHweight;
 	ListBasicObjects<ListBasicObjects<int> > IndicesSl2sContainedInRootSA;
+	ListBasicObjects<int> IndicesSl2decompositionFlas;
 	int IndexZeroWeight;
 	SimpleLieAlgebra owner;
 	rootSubalgebras theRootSAs;
@@ -5763,7 +5765,7 @@ public:
   bool ContainsSl2WithGivenH(root& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(root& theHCharacteristic, int* outputIndex);
   void ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer);
-	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool UseHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
+	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 
 class minimalRelationsProverStatesFixedK;

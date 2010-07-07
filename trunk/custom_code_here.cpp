@@ -1689,7 +1689,7 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, Sltwo
   this->hCharacteristic.SetSizeExpandOnTopLight(theDimension);
   for (int i=0; i<theDimension; i++)
     this->hCharacteristic.TheObjects[i]=this->owner->theWeyl.RootScalarKillingFormMatrixRoot(this->theH.Hcomponent, this->preferredAmbientSimpleBasis.TheObjects[i]);
-  this->hCharacteristic.ComputeDebugString();
+  //this->hCharacteristic.ComputeDebugString();
   if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
   { this->owner->LieBracket(this->theE, this->theF, this->bufferEbracketF);
     this->owner->LieBracket(this->theH, this->theE, this->bufferHbracketE);
@@ -1792,7 +1792,7 @@ void DynkinDiagramRootSubalgebra::GetKillingFormMatrixUseBourbakiOrder(MatrixLar
 void slTwo::ComputeModuleDecomposition()
 {	int theDimension= this->owner->theWeyl.KillingFormMatrix.NumRows;
   int IndexZeroWeight=this->owner->theWeyl.RootSystem.size;
-	this->WeightSpaceDimensions.initFillInObject(2*this->owner->theWeyl.RootSystem.size+1,0);
+	this->WeightSpaceDimensions.initFillInObject(2*(this->owner->theWeyl.RootSystem.size)+1,0);
 	this->WeightSpaceDimensions.TheObjects[IndexZeroWeight]=theDimension;
 	ListBasicObjects<int> BufferHighestWeights;
 	bool possible=true;
@@ -1807,24 +1807,24 @@ void slTwo::ComputeModuleDecomposition()
     this->WeightSpaceDimensions.TheObjects[IndexZeroWeight+tempRat.NumShort]++;
 	}
 	BufferHighestWeights.CopyFromBase(this->WeightSpaceDimensions);
-	this->HighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootsOfBorel.size);
+  this->HighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootSystem.size);
   this->MultiplicitiesHighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootsOfBorel.size);
   this->HighestWeights.size=0;
   this->MultiplicitiesHighestWeights.size=0;
 //  this->hCharacteristic.ComputeDebugString();
 
-/*	std::string stop;
-  if (this->hCharacteristic.DebugString=="(2,2,0,2)")
+	std::string stop;
+  if (true)
   { std::stringstream debug1;
     for (int i=0; i<IndexZeroWeight; i++)
     { debug1<< BufferHighestWeights.TheObjects[i]<<", ";
     }
-    debug1<<"\n";
+    debug1<<"\n"<<BufferHighestWeights.TheObjects[IndexZeroWeight]<<"\n";
     for (int i=IndexZeroWeight+1; i<BufferHighestWeights.size; i++)
     { debug1<< BufferHighestWeights.TheObjects[i]<<", ";
     }
     stop=debug1.str();
-  }*/
+  }
   for (int j=BufferHighestWeights.size-1; j>=IndexZeroWeight; j--)
   { int topMult = BufferHighestWeights.TheObjects[j];
     if (topMult<0)
@@ -1848,7 +1848,7 @@ void slTwo::ComputeModuleDecomposition()
       }
     }
   }
-  assert (possible);
+  //assert (possible);
 }
 
 void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)

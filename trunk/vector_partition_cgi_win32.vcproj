@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="vector_partition_cgi_win32"
 	ProjectGUID="{0869D5CC-82DE-4304-9B14-DCF87BC2A488}"
 	RootNamespace="vector_partition_cgi_win32"
@@ -174,23 +174,15 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\custom_code_here.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\polyhedra.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\polyhedra.h"
-			>
-		</File>
-		<File
-			RelativePath=".\rootFKFT.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\rootFKFT.h"
-			>
-		</File>
-		<File
-			RelativePath=".\rootFKFT2.cpp"
 			>
 		</File>
 		<File

@@ -1756,9 +1756,9 @@ void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrderOneComponentAppen
   //(2 is connected to 4)
   //The format of this function is in accordance with WeylGroup::GetEpsilonMatrix
   assert(theString.size()>0);
-  if (theString.at(1)=='A'|| theString.at(1)=='B' )
+  if (theString.at(1)=='A'|| theString.at(1)=='B' || theString.at(1)=='G')
     outputAppend.AddListOnTop(this->SimpleBasesConnectedComponents.TheObjects[index]);
-  if (theString.at(1)=='C' || theString.at(1)=='G' || theString.at(1)=='F')
+  if (theString.at(1)=='C' || theString.at(1)=='F')
     for (int i=this->SimpleBasesConnectedComponents.TheObjects[index].size-1; i>=0; i--)
       outputAppend.AddObjectOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
   if (theString.at(1)=='D')
@@ -1848,7 +1848,7 @@ void slTwo::ComputeModuleDecomposition()
       }
     }
   }
-  //assert (possible);
+  assert(possible);
 }
 
 void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)

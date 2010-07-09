@@ -5489,7 +5489,7 @@ public:
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
-	void DynkinTableToString(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output);
+	void ElementToStringDynkinTable(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output);
 	void GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml);
 	void SortDescendingOrderBySSRank();
 	//the below commented out function turned out to be non-necessary.
@@ -6203,6 +6203,9 @@ public:
 	static void clearDollarSigns(std::string& theString, std::string& output);
 	static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
 	static bool CheckForInputSanity(ComputationSetup& input);
+	static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
+	static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result;};
+	static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true);};
   enum TheChoicesWeMake
   { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2
   };

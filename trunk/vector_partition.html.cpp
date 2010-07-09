@@ -1,12 +1,13 @@
 #include<sstream>
 void static_html1(std::stringstream& output){
 output <<" <HTML>\n";
-output <<" <HEAD><TITLE>Vector partition revision 566, 7 July 2010</TITLE>\n";
+output <<" <HEAD><TITLE>Vector partition revision 567, 9 July 2010</TITLE>\n";
 output <<" </HEAD>\n";
 output <<" <BODY>\n";
 output <<" <table>\n";
 output <<" <tr valign=\"top\">\n";
 output <<" <td width=\"400\">\n";
+output <<" Enter below the coordinates of the vectors defining the vector partition function. Default = positive root system of A4 (i.e. Kostant partition function for A4).\n";
 output <<" <FORM method=\"GET\" name=\"formMain\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n";
 output <<" Dimension(<=3): <input type=\"text\" size =\"1\" name=\"textDim\" onkeyup=\"generatePageFromDimAndNum(this.value,formMain.textNumVectors.value,this.size);\">\n";
 output <<" Num Vectors(<=10): <input type=\"text\" size=\"1\" name=\"textNumVectors\" onkeyup=\"generatePageFromDimAndNum(formMain.textDim.value,this.value,this.size);\">\n";

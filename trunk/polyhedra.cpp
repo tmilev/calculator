@@ -712,9 +712,9 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::st
   //  return;
   if (tempSize>1000)
     return;
-  for (int i=0;i<tempSize;i++)
+  for (int i=0; i<tempSize; i++)
 	{ if (input[i]=='=')
-		{ for (int j=oldindex;j<i;j++)
+		{ for (int j=oldindex; j<i; j++)
       { if (input[j]=='&')
           output.append(" ");
         else
@@ -724,7 +724,7 @@ void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::st
       output.append(" = ");
 		}
 	}
-	for (int j=oldindex;j<tempSize;j++)
+	for (int j=oldindex; j<tempSize; j++)
     output.push_back(input.at(j));
 }
 
@@ -752,12 +752,21 @@ bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile
 			return true;
   }
 	theFile.close();
-	theFile.open(theFileName.c_str(),std::fstream::out |std::fstream::in| std::fstream::trunc);
+	theFile.open(theFileName.c_str(), std::fstream::out | std::fstream::in | std::fstream::trunc);
 	theFile.clear();
 	return false;
 }
 
-void CGIspecificRoutines::WeylGroupToHtml(WeylGroup&input, std::string& path)
+bool CGIspecificRoutines::FileExists(const std::string& theFileName)
+{ std::fstream theFile;
+  theFile.open(theFileName.c_str(), std::fstream::in);
+  if(theFile.is_open())
+    return true;
+  else
+    return false;
+}
+
+void CGIspecificRoutines::WeylGroupToHtml(WeylGroup& input, std::string& path)
 { std::fstream output;
   std::string tempS;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, path, false, true, false);
@@ -791,14 +800,14 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
 	if (tempS3=="textDim")
     InputDataOK=true;
   //std::cout.flush();
-  //std::cout<< inputBad<<"\n<br>\n";
+//  std::cout<< inputBad<<"\n<br>\n";
   //std::cout.flush();
 //  std::cout <<"  tempS3: "<< tempS3<<"   ";
 #ifdef CGIversionLimitRAMuse
   cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
 #endif
   CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
-  //std::cout<<inputGood;
+//  std::cout<<inputGood;
   if (tempS3=="rootSAs")
 		return CGIspecificRoutines::choiceDisplayRootSApage;
   if (tempS3=="textTyp")
@@ -819,18 +828,28 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
     if (output.WeylGroupIndex<1 || output.WeylGroupIndex>8)
       InputDataOK=false;
     if (!InputDataOK)
-    { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
+    { std::cout << "<br><b>Bad input:</b> " <<   inputBad << "<br>\n";
       return CGIspecificRoutines::choiceInitAndDisplayMainPage;
     }
     tempStream1>> tempS;
     int theChoiceIsYours=CGIspecificRoutines::choiceInitAndDisplayMainPage;
     if (tempS=="buttonGoRootSA")
       theChoiceIsYours=CGIspecificRoutines::choiceGenerateDynkinTables;
-    if (tempS=="buttonGoSl2SAs" || tempS=="usePNG")
+    if (tempS=="buttonGoSl2SAs")
       theChoiceIsYours=CGIspecificRoutines::choiceGosl2;
-    if (tempS=="usePNG")
-      output.flagExecuteSystemCommandsCGIapplication=true;
-    //std::cout<<tempS<<"<br>";
+    tempStream1 >> tempS >> tempS;
+    output.flagExecuteSystemCommandsCGIapplication=false;
+    output.flagCGIRecomputeAll = true;
+    for (int i=0; i<2; i++)
+    { tempStream1>> tempS;
+      if (tempS=="checkUsePNG")
+        output.flagExecuteSystemCommandsCGIapplication=true;
+      if (tempS=="checkUseDatabase")
+        output.flagCGIRecomputeAll=false;
+      tempStream1 >> tempS >> tempS;
+    }
+//    std::cout << "<br>Usepng: " << output.flagExecuteSystemCommandsCGIapplication;
+//    std::cout << "<br>Recompute: " << output.flagCGIRecomputeAll;
     //std::cout<<inputGood<<"<br>";
     //std::cout<<"<br><br>"<< "The choices we make: " << theChoiceIsYours;
     std::cout.flush();
@@ -848,8 +867,8 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
 	//std::cout<<"\n<br>\n input good: <br>\n"<<inputGood<<"\n<br>\n";
 	tempStream << inputGood;
 	std::string tempS; int tempI;	tempStream.seekg(0);
-	tempStream >> tempS>>tempS>> output.theChambers.AmbientDimension;
-	tempStream >> tempS>>tempS>> tempI;
+	tempStream >> tempS >> tempS >> output.theChambers.AmbientDimension;
+	tempStream >> tempS >> tempS >> tempI;
 	output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
 	//std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
 	for (int i=0; i<output.VPVectors.size; i++)
@@ -860,17 +879,17 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
 		}
 	}
   if (!CGIspecificRoutines::CheckForInputSanity(output))
-  { std::cout<<"<br><b>Bad input:</b> "<<   inputBad <<"<br>\n";
+  { std::cout <<"<br><b>Bad input:</b> " <<   inputBad << "<br>\n";
     return CGIspecificRoutines::choiceInitAndDisplayMainPage;
   }
-  tempStream>> tempS;
+  tempStream >> tempS;
  	output.flagComputingVectorPartitions=true;
   output.DisplayNumberChamberOfInterest=-1;
   if (tempS=="buttonGo" || tempS=="buttonSplitChambers")
     if (tempS=="buttonSplitChambers")
       output.flagComputingVectorPartitions=false;
   if (tempS=="buttonOneChamber")
-  { tempStream>> tempS>>tempS>>tempS>>tempS>>output.DisplayNumberChamberOfInterest;
+  { tempStream >> tempS >> tempS>>tempS>>tempS>>output.DisplayNumberChamberOfInterest;
    // std::cout<< "Chamber of interest: "<< output.DisplayNumberChamberOfInterest;
   }
   if (output.flagComputingVectorPartitions && output.DisplayNumberChamberOfInterest==-1)
@@ -14786,18 +14805,17 @@ void rootSubalgebra::ComputeDebugString(GlobalVariables& theGlobalVariables)
 
 int rootSubalgebra::ProblemCounter2=0;
 
-bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth,ReflectionSubgroupWeylGroup* outputAutomorphisms,
-		bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange)
+bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange)
 {	int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
 	assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));
 	if (abortKmodule!=0)
     *abortKmodule=false;
 	if (CurrentRank==this->AmbientWeyl.KillingFormMatrix.NumRows)
-		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables, outputAutomorphisms,additionalDomain, additionalRange);
+		return this->IsAnIsomorphism(Domain, Range, theGlobalVariables, outputAutomorphisms, additionalDomain, additionalRange);
 	if (RecursionDepth>=theGlobalVariables.rootsAttemptExtensionIso1.size)
 	{ int theDimension= this->AmbientWeyl.KillingFormMatrix.NumRows;
-		theGlobalVariables.rootsAttemptExtensionIso1.SetSizeExpandOnTopNoObjectInit(	theGlobalVariables.rootsAttemptExtensionIso1.size+theDimension);
-		theGlobalVariables.rootsAttemptExtensionIso2.SetSizeExpandOnTopNoObjectInit(	theGlobalVariables.rootsAttemptExtensionIso2.size+theDimension);
+		theGlobalVariables.rootsAttemptExtensionIso1.SetSizeExpandOnTopNoObjectInit(theGlobalVariables.rootsAttemptExtensionIso1.size+theDimension);
+		theGlobalVariables.rootsAttemptExtensionIso2.SetSizeExpandOnTopNoObjectInit(theGlobalVariables.rootsAttemptExtensionIso2.size+theDimension);
 		theGlobalVariables.rootSAAttemptExtensionIso1.SetSizeExpandOnTopNoObjectInit(theGlobalVariables.rootSAAttemptExtensionIso1.size+theDimension);
 		theGlobalVariables.rootSAAttemptExtensionIso2.SetSizeExpandOnTopNoObjectInit(theGlobalVariables.rootSAAttemptExtensionIso2.size+theDimension);
     theGlobalVariables.rootsAttemptExtensionIso3.SetSizeExpandOnTopNoObjectInit(theGlobalVariables.rootsAttemptExtensionIso3.size+theDimension);
@@ -14860,7 +14878,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(roots& Domain, r
       for (int j=0;j<firstKmodLeft.size;j++)
       { rangeRec.AddObjectOnTop(rightSA.kModules.TheObjects[i].TheObjects[j]);
         if (rangeRec.GetRankOfSpanOfElements(theGlobalVariables)==(CurrentRank+1))
-        { if (this->attemptExtensionToIsomorphismNoCentralizer(	domainRec, rangeRec, theGlobalVariables, RecursionDepth+1, outputAutomorphisms, GenerateAllpossibleExtensions, &tempBool, additionalDomain, additionalRange))
+        { if (this->attemptExtensionToIsomorphismNoCentralizer(domainRec, rangeRec, theGlobalVariables, RecursionDepth+1, outputAutomorphisms, GenerateAllpossibleExtensions, &tempBool, additionalDomain, additionalRange))
           { if (!GenerateAllpossibleExtensions)
               return true;
             else
@@ -14992,6 +15010,8 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       if (useHtml)
         out <<"</a>, ";
     }
+    if (useHtml)
+      out <<"<br> <a href=\"./rootHtml.html\">Back to root subsystem table </a> ";
   }
   this->SimpleBasisK.ElementToString(tempS, useLatex, useHtml, false);
   if (useHtml)
@@ -17286,13 +17306,13 @@ void rootSubalgebras::ElementToString(std::string& output, SltwoSubalgebras* sl2
 { std::stringstream out; std::string tempS;
 	this->DynkinTableToString(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
 	out <<tempS;
-	this->AmbientWeyl.ComputeRho(true);
+	//this->AmbientWeyl.ComputeRho(true);
   //this->ElementToStringCentralizerIsomorphisms(tempS, useLatex, useHtml, theGlobalVariables);
-	out << tempS;
-	for (int i=0; i<this->size; i++)
+	//out << tempS;
+/*	for (int i=0; i<this->size; i++)
 	{	this->TheObjects[i].ElementToString(tempS, sl2s, i, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
 		out << tempS <<"\n\n";
-	}
+	}*/
 	output= out.str();
 }
 
@@ -18788,7 +18808,7 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 	this->theIsos.ReadFromFile(input, theGlobalVariables);
 	input>>tempS>>tempI;
 	this->theIndexStack.SetSizeExpandOnTopNoObjectInit(tempI);
-	for (int i=0;i<this->theIndexStack.size;i++)
+	for (int i=0; i<this->theIndexStack.size; i++)
 		input>>this->theIndexStack.TheObjects[i];
 	input>> tempS>> tempI;
 	this->SetSizeExpandOnTopNoObjectInit(tempI);
@@ -18799,7 +18819,7 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 	this->theK.ReadMultTableAndOppositeKmodsToFile(input, this->theK.theMultTable, this->theK.theOppositeKmods);
 	this->theWeylGroup.ComputeRho(true);
 	this->initShared(this->theWeylGroup, theGlobalVariables);
-	this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theIsos.simpleGenerators,this->theIsos.ExternalAutomorphisms	,theGlobalVariables, -1, false);
+	this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theIsos.simpleGenerators, this->theIsos.ExternalAutomorphisms, theGlobalVariables, -1, false);
 	this->theK.ComputeAll();
 	this->flagComputationIsInitialized=true;
 	if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
@@ -20621,7 +20641,7 @@ bool rootSubalgebra::GenerateAutomorphisms(rootSubalgebra& right, GlobalVariable
   { tempList.TheObjects[i]= this->theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
     tempSize+=tempList.TheObjects[i];
   }
-  permComponentsCentralizer.initPermutation(tempList,tempSize);
+  permComponentsCentralizer.initPermutation(tempList, tempSize);
 	int tempI1;
 	int NumAutos;
   tempI1= permComponents.getTotalNumSubsets();
@@ -20635,9 +20655,9 @@ bool rootSubalgebra::GenerateAutomorphisms(rootSubalgebra& right, GlobalVariable
     { for (int k=0; k<NumAutos; k++)
 			{ for(int l=0; l<NumAutosCentralizer; l++)
 				{ isoDomain.size=0; isoRange.size=0;
-					this->theDynkinDiagram.GetMapFromPermutation(isoDomain,isoRange,tempPermutation1,DiagramAutomorphisms, tempAutos, right.theDynkinDiagram);
+					this->theDynkinDiagram.GetMapFromPermutation(isoDomain,isoRange, tempPermutation1, DiagramAutomorphisms, tempAutos, right.theDynkinDiagram);
 					this->theCentralizerDiagram.GetMapFromPermutation(isoDomain, isoRange, tempPermutation2, CentralizerDiagramAutomorphisms, tempAutosCentralizer, right.theCentralizerDiagram);
-					if (this->attemptExtensionToIsomorphismNoCentralizer(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms,false,0,0,0))//GenerateAllAutos))
+					if (this->attemptExtensionToIsomorphismNoCentralizer(isoDomain,isoRange,theGlobalVariables,0, outputAutomorphisms, false, 0, 0, 0))//GenerateAllAutos))
 						if (outputAutomorphisms==0)
 							return true;
 					if (outputAutomorphisms!=0)
@@ -20664,7 +20684,7 @@ void minimalRelationsProverStatesFixedK::initShared(WeylGroup& theWeyl, GlobalVa
 { this->theK.AmbientWeyl.Assign(this->theWeylGroup);
 	this->theK.ComputeAll();
   this->IndexKmoduleByRoots.SetSizeExpandOnTopNoObjectInit(this->theWeylGroup.RootSystem.size);
-  for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
+  for (int i=0; i<this->theWeylGroup.RootSystem.size; i++)
 		this->IndexKmoduleByRoots.TheObjects[i]=this->theK.GetIndexKmoduleContainingRoot(this->theWeylGroup.RootSystem.TheObjects[i]);
   this->theIsos.AmbientWeyl.Assign(this->theWeylGroup);
 
@@ -20800,13 +20820,13 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots
 			{ this->truncated=true;
 				return;
 			}
-    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+/*    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Generated: " << i+1<<" elements";
       IndicatorWindowGlobalVariables.StatusString1=out.str();
       IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
       theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
-    }
+    }*/
 	}
 }
 
@@ -20835,7 +20855,7 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(root& inpu
 	return result;
 }
 
-void minimalRelationsProverStatesFixedK::ExtensionStepFixedK( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState)
+void minimalRelationsProverStatesFixedK::ExtensionStepFixedK(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState)
 { newState.ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
   if (newState.StateIsPossible)
   { int currentNewIndex=this->size;
@@ -20861,7 +20881,7 @@ bool minimalRelationsProverStatesFixedK::AddObjectOnTopNoRepetitionOfObjectFixed
   return true;
 }
 
-bool minimalRelationsProverStatesFixedK::ExtendToIsomorphismRootSystemFixedK( minimalRelationsProverStateFixedK& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
+bool minimalRelationsProverStatesFixedK::ExtendToIsomorphismRootSystemFixedK(minimalRelationsProverStateFixedK& theState, int indexOther, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { theState.SortAlphasAndBetas(theGlobalVariables, theWeyl);
 	minimalRelationsProverStateFixedK& theOtherState=this->TheObjects[indexOther];
 	roots& theAlphas = theState.PartialRelation.Alphas;

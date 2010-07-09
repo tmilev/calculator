@@ -704,6 +704,13 @@ void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(Computation
                   <<"<a href=\"/tmp/partial_fraction.pdf\">pdf</a>\n<br>\n<textarea name=\"pf_output\" cols=\"50\" rows=\"30\">" << input.thePartialFraction.DebugString << "</textarea>";
 }
 
+void CGIspecificRoutines::ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml)
+{ std::stringstream out;
+  if (useHtml)
+    out << "<span title=\"" << inputTooltip << "\">" << input<<"</span>";
+  output=out.str();
+}
+
 void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::string& output)
 { output.clear();
   int oldindex=0;
@@ -17272,8 +17279,8 @@ void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::st
 		for (int i=0;i<this->NumColsPerTableLatex;i++)
 		{ out1<<"<col width=\"80\">";
 		}
-		out1<<"</colgroup><tr><td>";
-		out2 <<"</table>";
+		out1<<"</colgroup><tr>";
+		out2 <<"</td></tr></table>";
 	}
 	if (useLatex)
 	{	out1 << "\n\n \\begin{tabular}{";
@@ -17304,8 +17311,9 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
 
 void rootSubalgebras::ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
-	this->DynkinTableToString(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
-	out <<tempS;
+	out << "<a href=\"../../manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+	this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
+	out << tempS;
 	//this->AmbientWeyl.ComputeRho(true);
   //this->ElementToStringCentralizerIsomorphisms(tempS, useLatex, useHtml, theGlobalVariables);
 	//out << tempS;
@@ -17339,9 +17347,10 @@ void rootSubalgebras::pathToHtmlReference(int index, std::string& DisplayString,
 	output=out.str();
 }
 
-void rootSubalgebras::DynkinTableToString(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output)
-{ std::stringstream out; std::string header, footer, tempS, tempS2,tempS3;
-	this->GetTableHeaderAndFooter(header, footer,useLatex,useHtml);
+void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output)
+{ std::stringstream out; std::string header, footer, tempS, tempS2, tempS3;
+	std::string tooltipSAs="h - fixed Cartan subalgebra. k - subalgebra containing h. k_{ss}=[k,k] - regular semisimple subalgebra in the sense of Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. k_{ss} is parametrized by a root subsytem of \\Delta(g). C(k_{ss}) consists root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h";
+	this->GetTableHeaderAndFooter(header, footer, useLatex, useHtml);
 	int col=0; int row=0;
 	this->TheObjects[0].theDynkinDiagram.ElementToString(tempS);
 	if (useLatex)
@@ -17353,64 +17362,64 @@ void rootSubalgebras::DynkinTableToString(bool useLatex, bool useHtml, std::stri
 	out << tempS <<"\n\n";
 	for (int i=1; i<this->size; i++)
 	{ if (col==0 && row==0)
-			out << header;
+			out << header << "<td title=\"" << tooltipSAs << "\">";
 		this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
 		this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
 		if (tempS=="") tempS="-";
 		if (useLatex)
-		{ CGIspecificRoutines::subEqualitiesWithSimeq(tempS,tempS);
-			CGIspecificRoutines::subEqualitiesWithSimeq(tempS2,tempS2);
-			out << "\\begin{tabular}{p{2cm}}\n $\\mathfrak{k}_{ss}$: "<<tempS;
-			out <<"\\\\\n";
+		{ CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
+			CGIspecificRoutines::subEqualitiesWithSimeq(tempS2, tempS2);
+			out << "\\begin{tabular}{p{2cm}}\n $\\mathfrak{k}_{ss}$: " << tempS;
+			out << "\\\\\n";
 		}
 		else
-		{ CGIspecificRoutines::clearDollarSigns(tempS,tempS);
-			CGIspecificRoutines::clearDollarSigns(tempS2,tempS2);
-			out <<"k_{ss}: ";
+		{ CGIspecificRoutines::clearDollarSigns(tempS, tempS);
+			CGIspecificRoutines::clearDollarSigns(tempS2, tempS2);
+			out << "k_{ss}: ";
 			if (!useHtml)
-        out	<<tempS;
+        out	<< tempS;
 			else
-			{ this->pathToHtmlReference(i,tempS,htmlPathServer, tempS3);
+			{ this->pathToHtmlReference(i, tempS, htmlPathServer, tempS3);
 				out	<< tempS3;
 			}
 		}
 		if (useLatex)
-			out <<"$C(\\mathfrak{k_{ss}})_{ss}$: ";
+			out << "$C(\\mathfrak{k_{ss}})_{ss}$: ";
 		else
 		{ if (useHtml)
-        out <<"\n<br>\n";
-		  out <<"C(k_{ss})_{ss}: ";
+        out << "\n<br>\n";
+		  out << "C(k_{ss})_{ss}: ";
 		}
 		if (tempS2=="") tempS2="-";
 		out << tempS2;
 		if (useLatex)
-			out<<"\\\\\n";
+			out << "\\\\\n";
     if (useHtml)
-      out <<"\n<br>\n";
+      out << "\n<br>\n";
     if (useLatex)
-      out<<"\n$\\mathfrak{k}$ lies in: ";
+      out << "\n$\\mathfrak{k}$ lies in: ";
 		else
-      out <<"\n k lies in: ";
+      out << "\n k lies in: ";
 		if (useLatex)
-			out<<	"\\\\\n";
+			out <<	"\\\\\n";
     if (useHtml)
-      out<<"\n<br>\n";
+      out << "\n<br>\n";
 		int counter=0;
 		for(int j=0; j<this->TheObjects[i].indicesSubalgebrasContainingK.size; j++)
 		{ int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
 			this->TheObjects[tempI].theDynkinDiagram.ElementToString(tempS);
 			if (useLatex)
-				CGIspecificRoutines::subEqualitiesWithSimeq(tempS,tempS);
+				CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
 			counter+=(signed)tempS.length();
 			if (!useHtml)
-				out<<tempS<<", ";
+				out << tempS << ", ";
 			else
 			{ if (!useLatex)
-					CGIspecificRoutines::clearDollarSigns(tempS,tempS);
-				this->pathToHtmlReference(tempI,tempS,htmlPathServer,tempS3);
-				out << tempS3<<" , ";
+					CGIspecificRoutines::clearDollarSigns(tempS, tempS);
+				this->pathToHtmlReference(tempI, tempS, htmlPathServer, tempS3);
+				out << tempS3 << " , ";
 			}
-			if (useLatex&& counter>20)
+			if (useLatex && counter>20)
 			{ counter=0;
 				out<<"\\\\\n";
 			}
@@ -17423,18 +17432,20 @@ void rootSubalgebras::DynkinTableToString(bool useLatex, bool useHtml, std::stri
 			row=0;
 		if (col==0 && row!=0)
 		{ if (useLatex)
-				out <<"\\\\\n\\hline";
+				out << "\\\\\n\\hline";
 			if (useHtml)
-			{ out <<"</td></tr>";
+			{ out << "</td></tr>";
 				if(i!=this->size-1)
-					out<< "<tr><td>";
+					out<< "<tr><td title=\"" << tooltipSAs << "\">";
 			}
 		}
 		if (col!=0)
 		{	if (useLatex)
-				out <<" & ";
-			if(useHtml)
-				out <<"</td><td>";
+				out << " & ";
+      if(useHtml)
+				out << "</td>";
+			if (i!=this->size-1)
+        out<<"<td title=\"" << tooltipSAs << "\">";
 		}
 		if (row==0 && col==0)
 			out <<footer;

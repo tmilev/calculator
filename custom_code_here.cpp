@@ -1855,6 +1855,8 @@ void slTwo::ComputeModuleDecomposition()
 
 void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 {	std::string tempS; std::stringstream out; std::stringstream body;
+  std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1,...,\\alpha_n be simple roots w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h),...,\\alpha_n(h))";
+  std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
     body<< "Index "<< i<<": ";
@@ -1868,7 +1870,7 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
     out<<"<br>";
   out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
   if(useHtml)
-    out<<"<br><br><table><tr><td style=\"padding-right:20px\">Characteristic  </td><td align=\"center\"> h</td><td>Decomposition of ambient Lie algebra</td> <td>Minimal containing regular SAs</td><td>Containing regular SAs </td> </tr>";
+    out<<"<br><br><table><tr><td style=\"padding-right:20px\">" << CGIspecificRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)  << "</td><td align=\"center\"> h</td><td style=\"padding-left:20px\" title=\""<<tooltipVDecomposition<<"\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular SAs</td><td>Containing regular SAs </td> </tr>";
   if (this->BadHCharacteristics.size>0)
   { if (useHtml)
       out <<"<tr><td>Bad values of h</td><td>";
@@ -1880,13 +1882,13 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   for (int i=0; i<this->size; i++)
   { slTwo& theSl2= this->TheObjects[i];
     if (useHtml)
-      out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index"<< i << "\">";
+      out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index"<< i << "\"title=\"" << tooltipHchar <<"\" >";
     out << theSl2.hCharacteristic.ElementToString();
     if (useHtml)
       out << "</a></td><td>";
     out << theSl2.theH.Hcomponent.ElementToString();
     if (useHtml)
-      out << "</td><td>";
+      out << "</td><td style=\"padding-left:20px\" title=\""<<tooltipVDecomposition<<"\">";
     if (useHtml && usePNG)
       out << "<img src=\"./fla"<< this->IndicesSl2decompositionFlas.TheObjects[i]+1 <<  ".png\"></td><td>";
     else

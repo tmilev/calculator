@@ -147,67 +147,56 @@ int main(int argc, char **argv)
     }
     std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<< "," << theComputationSetup.VPVectors.size << "," << -1 << "," << theComputationSetup.DisplayNumberChamberOfInterest << ");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
-  } else if (choice==CGIspecificRoutines::choiceGenerateDynkinTables)
-  { if (theComputationSetup.WeylGroupIndex<9)
-    { theComputationSetup.DoTheRootSAComputation();
-//      theComputationSetup.theRootSubalgebras.ComputeDebugString();
-      //inputPath.append("../tmp/WeylHtml.html");
-      std::stringstream outServerPath;
-      outServerPath<<"/tmp/"<< theComputationSetup.WeylGroupLetter<<theComputationSetup.WeylGroupIndex <<"/";
-      std::string serverPath=outServerPath.str();
-      std::stringstream outPhysicalPath;
-      std::string PhysicalPath;
-      outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/";
-      PhysicalPath=outPhysicalPath.str();
-      std::string MkDirCommand;
-      std::stringstream outMkDirCommand;
-      outMkDirCommand<< "mkdir " <<PhysicalPath;
-      MkDirCommand=outMkDirCommand.str();
-      system(MkDirCommand.c_str());
-      std::string header;
-      std::stringstream tempOut;
-      header="http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi?";
-      header.append(inputString);
-      tempOut <<"Permanent link to this page: <br>\n<a href=\"" << header<<"\">"<<header<<"</a>\n<br>\nMain page: <br>\n<a href=\"http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi\"> http://vector-partition.jacobs-university.de/cgi-bin/vector_partition_linux_cgi</a> <br>\n";
-      header=tempOut.str();
-      theComputationSetup.theRootSubalgebras.ElementToHtml(header, PhysicalPath, serverPath, 0, *theComputationSetup.theGlobalVariablesContainer->Default());
-      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "rootHtml.html\"> <BODY>"<< serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<PhysicalPath;
-    }
   } else if (choice==CGIspecificRoutines::choiceDisplayRootSApage)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n"
-        <<"<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	>\n<br><input type=\"checkbox\" name=\"usePNG\">Use .png(.png use is SLOW - up to 5-6 min for E8! If you want to check out the precomputed output click <a href=\"/tmp/\">here</a>)<br><input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n</FORM>\n";
-  } else if (choice==CGIspecificRoutines::choiceGosl2)
-  { SltwoSubalgebras theSl2s;
-//    std::cout<<"<br>"<< theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex;
-    std::cout.flush();
-    theSl2s.owner.FindSl2Subalgebras(theSl2s, theComputationSetup.WeylGroupLetter, theComputationSetup.WeylGroupIndex, *theComputationSetup.theGlobalVariablesContainer->Default());
+  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n";
+    std::cout << "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	> ";
+    std::cout << "<input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n<br>\n";
+    std::cout << "<input type=\"checkbox\" name=\"checkUseDatabase\" checked=\"checked\">Use precomputed database<br>";
+    std::cout << "<input type=\"checkbox\" name=\"checkUsePNG\" checked=\"checked\">Use .png(.png *together* with recomputation is *slow*- up to 5-6 min for E8!)\n</FORM>";
+    std::cout << "<br>The database is located <a href=\"/tmp/\">here</a>.";
+  } else if (choice==CGIspecificRoutines::choiceGosl2 || choice==CGIspecificRoutines::choiceGenerateDynkinTables)
+  { std::cout.flush();
     ////////////////////getting paths to output html
     std::stringstream outServerPath;
-    outServerPath << "/tmp/" << theComputationSetup.WeylGroupLetter << theComputationSetup.WeylGroupIndex << "/sl2s/";
+    outServerPath << "/tmp/" << theComputationSetup.WeylGroupLetter << theComputationSetup.WeylGroupIndex << "/";
     std::string serverPath=outServerPath.str();
+    std::string serverPathSl2s = serverPath;
+    serverPathSl2s.append("sl2s/");
     std::stringstream outPhysicalPath;
-    std::string PhysicalPath;
+    std::string thePhysicalPath, thePhysicalPathSl2s;
     outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/";
-    PhysicalPath = outPhysicalPath.str();
-    std::string MkDirCommand1, MkDirCommand2;
-    std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << PhysicalPath;
-    PhysicalPath.append("sl2s/");
-    outMkDirCommand2 << "mkdir " << PhysicalPath;
-    MkDirCommand1=outMkDirCommand1.str();
-    MkDirCommand2=outMkDirCommand2.str();
-    system(MkDirCommand1.c_str());
-    system(MkDirCommand2.c_str());
-    theSl2s.ElementToHtml(*theComputationSetup.theGlobalVariablesContainer->Default(), theSl2s.owner.theWeyl, theComputationSetup.flagExecuteSystemCommandsCGIapplication, PhysicalPath, serverPath);
-    theSl2s.ComputeDebugString(*theComputationSetup.theGlobalVariablesContainer->Default(),  theSl2s.owner.theWeyl, false, true);
-    if (theComputationSetup.flagExecuteSystemCommandsCGIapplication)
-    { for (int i=0; i<theSl2s.listSystemCommandsLatex.size; i++)
-      { system(theSl2s.listSystemCommandsLatex.TheObjects[i].c_str());
-        system(theSl2s.listSystemCommandsDVIPNG.TheObjects[i].c_str());
-      }
-      std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPath << "sl2s.html\"></BODY></HTML>";
-    } else
-      std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPath << "sl2s_nopng.html\"></BODY></HTML>";
+    thePhysicalPath = outPhysicalPath.str();
+    bool alreadyExists=CGIspecificRoutines::FileExists(thePhysicalPath);
+    if (theComputationSetup.flagCGIRecomputeAll || !alreadyExists)
+    { std::string MkDirCommand1, MkDirCommand2;
+      std::stringstream outMkDirCommand1, outMkDirCommand2;
+      theComputationSetup.flagExecuteSystemCommandsCGIapplication=true;
+      outMkDirCommand1 << "mkdir " << thePhysicalPath;
+      thePhysicalPathSl2s=thePhysicalPath;
+      thePhysicalPathSl2s.append("sl2s/");
+      outMkDirCommand2 << "mkdir " << thePhysicalPathSl2s;
+      MkDirCommand1=outMkDirCommand1.str();
+      MkDirCommand2=outMkDirCommand2.str();
+      system(MkDirCommand1.c_str());
+      system(MkDirCommand2.c_str());
+      SltwoSubalgebras theSl2s;
+      theSl2s.owner.FindSl2Subalgebras(theSl2s, theComputationSetup.WeylGroupLetter, theComputationSetup.WeylGroupIndex, *theComputationSetup.theGlobalVariablesContainer->Default());
+      theSl2s.ElementToHtml(*theComputationSetup.theGlobalVariablesContainer->Default(), theSl2s.owner.theWeyl, theComputationSetup.flagExecuteSystemCommandsCGIapplication, thePhysicalPathSl2s, serverPathSl2s);
+//      theSl2s.ComputeDebugString(*theComputationSetup.theGlobalVariablesContainer->Default(),  theSl2s.owner.theWeyl, false, true);
+      if (theComputationSetup.flagExecuteSystemCommandsCGIapplication)
+        for (int i=0; i<theSl2s.listSystemCommandsLatex.size; i++)
+        { system(theSl2s.listSystemCommandsLatex.TheObjects[i].c_str());
+          system(theSl2s.listSystemCommandsDVIPNG.TheObjects[i].c_str());
+        }
+    }
+    if (choice==CGIspecificRoutines::choiceGenerateDynkinTables)
+      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "rootHtml.html\"> <BODY>"<< serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<thePhysicalPath;
+    else
+    { if (theComputationSetup.flagExecuteSystemCommandsCGIapplication)
+        std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPathSl2s << "sl2s.html\">";
+      else
+        std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPathSl2s << "sl2s_nopng.html\">";
+    }
   }
   std::cout << "</BODY>\n</HTML>";
 	std::cout << "<!--";

@@ -1505,6 +1505,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
           output.AddObjectOnTopHash(theSl2);
         }
       }
+      else
+        output.BadHCharacteristics.AddObjectOnTop(theSl2.theH.Hcomponent);
     }
   }
 }
@@ -1867,6 +1869,14 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
   if(useHtml)
     out<<"<br><br><table><tr><td style=\"padding-right:20px\">Characteristic  </td><td align=\"center\"> h</td><td>Decomposition of ambient Lie algebra</td> <td>Minimal containing regular SAs</td><td>Containing regular SAs </td> </tr>";
+  if (this->BadHCharacteristics.size>0)
+  { if (useHtml)
+      out <<"<tr><td>Bad values of h</td><td>";
+    this->BadHCharacteristics.ElementToString(tempS);
+    out << tempS;
+    if (useHtml)
+      out <<"</td></tr>";
+  }
   for (int i=0; i<this->size; i++)
   { slTwo& theSl2= this->TheObjects[i];
     if (useHtml)
@@ -1879,6 +1889,9 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
       out << "</td><td>";
     if (useHtml && usePNG)
       out << "<img src=\"./fla"<< this->IndicesSl2decompositionFlas.TheObjects[i]+1 <<  ".png\"></td><td>";
+    else
+      if (useHtml)
+        out <<"</td><td>";
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesMinimalContainingRootSA.TheObjects[j]];
       CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DebugString, tempS);
@@ -1925,7 +1938,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   std::stringstream out, outNotation;
   std::string fileName;
   std::fstream theFile, fileFlas;
-  outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">" << "Notation, structure constants and Weyl group info</a><br>";
+  outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a><br> <a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
   out <<tempS;
@@ -1986,7 +1999,7 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
   }
   out <<"Total: " <<total<<" nilradicals up to iso";
   std::string tempS;
-  inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-4, theGlobalVariables);
+  inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-6, theGlobalVariables);
   IndicatorWindowGlobalVariables.StatusString1=tempS;
   IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
 
@@ -2009,8 +2022,8 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   { rootSubalgebra& current= this->TheObjects[i];
     ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms.TheObjects[i];
     ReflectionSubgroupWeylGroup& theIsos= this->CentralizerIsomorphisms.TheObjects[i];
-    //theOuterIsos.ComputeSubGroupFromGeneratingReflections(theOuterIsos.simpleGenerators, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
-    //theIsos.ComputeSubGroupFromGeneratingReflections(theIsos.simpleGenerators, theIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    theOuterIsos.ComputeSubGroupFromGeneratingReflections(theOuterIsos.simpleGenerators, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    theIsos.ComputeSubGroupFromGeneratingReflections(theIsos.simpleGenerators, theIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
     if (useHtml)
       out <<"<td>";
     out << current.theDynkinDiagram.DebugString;

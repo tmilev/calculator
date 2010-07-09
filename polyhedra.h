@@ -5756,6 +5756,7 @@ public:
 	ListBasicObjects<int> MultiplicitiesFixedHweight;
 	ListBasicObjects<ListBasicObjects<int> > IndicesSl2sContainedInRootSA;
 	ListBasicObjects<int> IndicesSl2decompositionFlas;
+	roots BadHCharacteristics;
 	int IndexZeroWeight;
 	SimpleLieAlgebra owner;
 	rootSubalgebras theRootSAs;
@@ -6092,6 +6093,9 @@ public:
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
+	bool flagCGIRecomputeAll;
+	bool flagExecuteSystemCommandsCGIapplication;
+
 	bool flagExperiment2ChambersAlreadyLoaded;
 	bool flagRunningExperiments2;
 	bool flagSavingProverData;
@@ -6121,7 +6125,6 @@ public:
 	bool flagDisplayingPartialFractions;
 	bool flagComputationIsDoneStepwise;
 	bool flagHavingNotationExplanation;
-	bool flagExecuteSystemCommandsCGIapplication;
 	//bool flagAffineComputationDone;
 	bool flagSuperimposingComplexes;
 	bool flagCustomNilradicalInitted;
@@ -6195,6 +6198,7 @@ public:
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables,rootSubalgebras& input, std::string& path);
+  static bool FileExists(const std::string& theFileName);
  	static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
 	static void clearDollarSigns(std::string& theString, std::string& output);
 	static void subEqualitiesWithSimeq(std::string& theString, std::string& output);

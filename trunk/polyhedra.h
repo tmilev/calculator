@@ -6093,11 +6093,11 @@ public:
 	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
+	bool flagComputationInProgress;
+//  bool flagComputationPaused;
 	bool flagCGIRecomputeAll;
 	bool flagExecuteSystemCommandsCGIapplication;
-
-	bool flagExperiment2ChambersAlreadyLoaded;
-	bool flagRunningExperiments2;
+	bool flagDyckPathComputationLoaded;
 	bool flagSavingProverData;
 	bool flagOpenProverData;
 	bool flagProverUseFixedK;
@@ -6106,7 +6106,6 @@ public:
 	bool flagAllowRepaint;
 	bool flagDoCustomComputation;
 	bool flagComputationInitialized;
-	bool flagComputationInProgress;
 	bool flagComputationDone;
 	bool flagOneStepOnly;
 	bool flagUseHtml;
@@ -6165,6 +6164,7 @@ public:
 	static void ComputeRootSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	static void ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	static void ExperimentWithH(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+	static void DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	ComputationSetup();
 	~ComputationSetup();
 };

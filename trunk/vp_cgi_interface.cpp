@@ -154,7 +154,7 @@ int main(int argc, char **argv)
     std::cout << "<input type=\"checkbox\" name=\"checkUseDatabase\" checked=\"checked\">Use precomputed database<br>";
     std::cout << "<input type=\"checkbox\" name=\"checkUsePNG\" checked=\"checked\">Use .png(.png *together* with recomputation is *slow*- up to 5-6 min for E8!)\n</FORM>";
     std::cout << "<br>The database is located <a href=\"/tmp/\">here</a>.<br><br>";
-    std::cout << "<a href=\"../htdocs/manual_vector_partition.pdf\">Working file for notations and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+    std::cout << "<a href=\"/tmp/manual_vector_partition.pdf\">Working file for notations and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   } else if (choice==CGIspecificRoutines::choiceGosl2 || choice==CGIspecificRoutines::choiceGenerateDynkinTables)
   { std::cout.flush();
     ////////////////////getting paths to output html

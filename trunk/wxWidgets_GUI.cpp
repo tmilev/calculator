@@ -903,9 +903,7 @@ void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
-{ this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
-  this->theComputationSetup.flagDoCustomComputation=false;
-  this->theComputationSetup.flagRunningExperiments2=true;
+{ this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.DyckPathPolytopeComputation;
   this->RunTheComputation();
 }
 
@@ -920,8 +918,8 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 
 void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
 { this->theComputationSetup.theChambers.ReadFromDefaultFile();
-  this->theComputationSetup.flagRunningExperiments2=true;
-  this->theComputationSetup.flagExperiment2ChambersAlreadyLoaded=true;
+  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.DyckPathPolytopeComputation;
+  this->theComputationSetup.flagDyckPathComputationLoaded=true;
   this->theComputationSetup.WeylGroupIndex = this->theComputationSetup.theChambers.AmbientDimension;
   this->RunTheComputation();
 }

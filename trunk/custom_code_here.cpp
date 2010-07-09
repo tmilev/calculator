@@ -800,186 +800,6 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
 
 }
 
-void main_test_function(std::string& output, GlobalVariables& theGlobalVariables, ComputationSetup& theSetup, bool flagComputationAlreadyLoaded)
-{ std::stringstream out;
-  std::string tempS;
-  ElementWeylAlgebra theElement, tempEl1, tempEl2, tempEl3, tempEl4, tempEl5, Accum;
-  //out <<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\\usepackage{amsmath}\n";
-  //out << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}";
- // out <<"\\begin{document}";
-/*  WeylParser theParser;
-  theParser.ParseAndCompute("x_1+x_1", tempS);*/
-  /*
-  if (DebugCounter==-1)
-    debugParser.ParserInit("[x_1x_2, x_3d_2]");
-  else
-    debugParser.ParseNoInit(DebugCounter, DebugCounter);
-  DebugCounter++;
-  debugParser.ComputeDebugString();
-  out << debugParser.DebugString;
-  out << "\n";
-  if (DebugCounter> debugParser.TokenBuffer.size)
-  { debugParser.ComputeNumberOfVariablesAndAdjustNodes();
-    debugParser.Evaluate(theGlobalVariables);
-  }
-  WeylParser theParser;
-  theParser.ParseAndCompute("[x_1x_2, x_3d_2]", tempS, theGlobalVariables);
-  debugParser.Value.ComputeDebugString(false,false);
-  out << debugParser.Value.DebugString;
-  out << "\n\n"<<tempS;*/
-  SimpleLieAlgebra theG;
-  SltwoSubalgebras tempSl2s;
-  theG.FindSl2Subalgebras(tempSl2s, 'A', 3, theGlobalVariables);
-  tempSl2s.ComputeDebugString(theGlobalVariables, theG.theWeyl, false, false);
-  IndicatorWindowGlobalVariables.StatusString1= tempSl2s.DebugString;
-  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
-  return;
-  IrreducibleFiniteDimensionalModule theModule;
-  QuasiPolynomial tempP;
-  if (!flagComputationAlreadyLoaded)
-    theModule.InitAndPrepareTheChambersForComputation(3, theSetup.theChambers,theGlobalVariables);
-  theSetup.theChambers.flagMustStop=false;
-  theSetup.theChambers.flagIsRunning=true;
-  theSetup.theChambers.flagReachSafePointASAP=false;
-  theSetup.flagExperiment2ChambersAlreadyLoaded=true;
-  theSetup.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
-/*  tempEl1.Makexixj(0,1,4);
-  Rational tempRat=-1;
-  tempEl2.Makedidj(0,1,4);
-  tempEl2.TimesConstant(tempRat);
-  theElement.Assign(tempEl2);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl1, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.Assign(tempEl2);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl1, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl2, theGlobalVariables, tempS);
-  out << tempS;
-  tempEl3.Makexixj(0,0,4);
-  tempEl4.Makedidj(0,0,4);
-  tempEl4.TimesConstant(tempRat);
-  theElement.Assign(tempEl4);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
-  out <<tempS;
-  theElement.Assign(tempEl4);
-  theElement.LieBracketOnTheLeftMakeReport(tempEl3, theGlobalVariables, tempS);
-  out << tempS;
-  theElement.LieBracketOnTheRightMakeReport(tempEl3, theGlobalVariables, tempS);
-  out <<tempS;
-  tempEl3.Makexidj(0,1,4);
-//  tempEl3.TimesConstant(tempRat);
-  tempEl4.Makexidj(1,0,4);
-  theElement.Assign(tempEl3);
-  theElement.LieBracketOnTheRightMakeReport(tempEl4, theGlobalVariables, tempS);
-  out << tempS;*/
-  /*tempEl1.MakeGEpsPlusEpsInTypeD(0,1, 4);
-  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
-  tempEl3.MakeGEpsPlusEpsInTypeD(2,3, 4);
-  tempEl4.MakeGEpsMinusEpsInTypeD(2,3,4);
-  tempEl5.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
-  tempEl1.ComputeDebugString(false);
-  tempEl2.ComputeDebugString(false);
-  tempEl3.ComputeDebugString(false);
-  tempEl4.ComputeDebugString(false);
-  tempEl5.ComputeDebugString(false);
-
-
-
-  ElementWeylAlgebra theH, tempEl6;
-  theH.MakeGEpsPlusEpsInTypeD(0,2,4);
-  tempEl6.MakeGMinusEpsMinusEpsInTypeD(0,2,4);
-  theH.LieBracketOnTheLeft(tempEl6, theGlobalVariables);
-  theH.ComputeDebugString(false);
-  out<<"\n\\begin{eqnarray*}&&h=";
-  out <<theH.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-  tempEl6.Assign(theH);
-  tempEl6.LieBracketOnTheLeft(theH, theGlobalVariables);
-  tempEl6.ComputeDebugString(false);
-  out<<"\n\\begin{eqnarray*}&&[h,h]=";
-  out <<tempEl6.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  out<<"\n\\begin{eqnarray*}&&-[h,g^{-\\varepsilon_1-\\varepsilon_3}]=\n\\\\";
-  out<<"&&-["<<theH.DebugString<<","<<tempEl5.DebugString <<"]=\n\\\\";
-  tempEl6.Assign(theH);
-  tempEl6.LieBracketOnTheLeft(tempEl5, theGlobalVariables);
-  tempEl6.ComputeDebugString(false);
-  out <<tempEl6.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  out<<"\n\\begin{eqnarray*}\n&&(g^{-\\varepsilon_1-\\varepsilon_3})^2 g ^{\\varepsilon_1+\\varepsilon_2}g ^{\\varepsilon_1-\\varepsilon_2}g ^{\\varepsilon_3+\\varepsilon_4}g ^{\\varepsilon_3-\\varepsilon_4}\\\\\n ";
-  out <<"&&=("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
-      << tempEl3.DebugString <<")("<< tempEl4.DebugString<<")=\\\\";
-  Accum.Assign(tempEl4);
-  Accum.MultiplyOnTheLeft(tempEl3, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out <<"&&("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<<tempEl2.DebugString <<")("
-      << Accum.DebugString<<")=";
-  out <<"\\end{eqnarray*}\n";
-  out<<"\n\\begin{eqnarray*}&&\n";
-  Accum.MultiplyOnTheLeft(tempEl2, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out <<"("<<tempEl5.DebugString<<")^2("<<tempEl1.DebugString<< ")("<< Accum.DebugString<<")=\\\\\n";
-  out <<"\\end{eqnarray*}\n";
-  out<<"\n\\begin{eqnarray*}&&\n";
-  Accum.MultiplyOnTheLeft(tempEl1, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out <<"("<<tempEl5.DebugString<<")^2("<< Accum.DebugString<<")=\\\\\n";
-  out <<"\\end{eqnarray*}\n";
-  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
-  Accum.MultiplyOnTheLeft(tempEl5, theGlobalVariables);
-  Accum.ComputeDebugString(false);
-  out<<"\n\\begin{eqnarray*}&&\n";
-  out <<Accum.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-
-
-  out<<"\n\\begin{eqnarray*}&&[h,\\bullet]=";
-  theH.LieBracketOnTheLeft(Accum, theGlobalVariables);
-  theH.ComputeDebugString(false);
-  out <<theH.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  tempEl2.MakeGEpsMinusEpsInTypeD(0,1,4);
-  tempEl2.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1-\\varepsilon_2}= ";
-  out <<tempEl2.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-  tempEl3.MakeGMinusEpsMinusEpsInTypeD(0,1,4);
-  tempEl3.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\ng^{-\\varepsilon_1-\\varepsilon_2}= ";
-  out <<tempEl3.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-  tempEl4.Assign(tempEl3);
-  tempEl4.MultiplyOnTheLeft(tempEl1,theGlobalVariables);
-  tempEl4.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\ng^{\\varepsilon_1+\\varepsilon_2}g^{-\\varepsilon_1-\\varepsilon_2}= ";
-  out <<tempEl4.DebugString;
-  out <<"\n\\end{eqnarray*}\n";
-
-  tempEl4.Assign(tempEl3);
-  tempEl4.LieBracketOnTheLeft(tempEl1,theGlobalVariables);
-  tempEl4.ComputeDebugString(false);
-  out <<"\\begin{eqnarray*}&&\n[g^{\\varepsilon_1+\\varepsilon_2},g^{-\\varepsilon_1-\\varepsilon_2}]= ";
-  out <<tempEl4.DebugString;
-
-  out <<"\n\\end{eqnarray*}\n";
-*/
-
-//  out<<"\\end{document}";
-  output=out.str();
-  IndicatorWindowGlobalVariables.StatusString1=output;
-  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
-}
-
 void DyckPaths::ComputeGoodPathsExcludeTrivialPath()
 { int counter=0;
   for (int i=0; i<this->size; i++)
@@ -991,7 +811,6 @@ void DyckPaths::ComputeGoodPathsExcludeTrivialPath()
     if (this->TheObjects[i].IamComplete(*this))
       this->GoodPaths.AddObjectOnTop(i);
 }
-
 
 void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Flags_and_indices: ";
@@ -1749,7 +1568,9 @@ void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrderOneComponentAppen
   // which should be the Bourbaki order. The order is as follows:
   // type A all roots are from left to right (or the other way round, whichever is your orientation)
   // in type B first comes the long roots in the order they appear in the diagram;
-  // in types C, F and G first come the short roots
+  // in types C,
+  // Types F and G there were some recent changes due to different order choice in different parts of the code.
+  // The info for F and G needs to be updated!
   // in type D first comes the long string, with the end node with lowest index;
   // then come the two end one-root strings in any order.
   // in type E the order is as below
@@ -1799,7 +1620,7 @@ void slTwo::ComputeModuleDecomposition()
 	ListBasicObjects<int> BufferHighestWeights;
 	bool possible=true;
 	Rational tempRat;
-	for (int k=0; k<this->owner->theWeyl.RootSystem.size;k++)
+	for (int k=0; k<this->owner->theWeyl.RootSystem.size; k++)
 	{ root::RootScalarEuclideanRoot(this->hCharacteristic, this->owner->theWeyl.RootSystem.TheObjects[k], tempRat);
     assert(tempRat.DenShort==1);
 		if (tempRat.NumShort>this->owner->theWeyl.RootSystem.size)
@@ -2103,4 +1924,17 @@ void WeylGroup::ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonorm
 void DrawingVariables::drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { if (this->theDrawFunction!=0)
     this->theDrawFunction(X1+ this->centerX, Y1+ this->centerY, X2+ this->centerX, Y2+ this->centerY, thePenStyle, ColorIndex);
+}
+
+void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ inputData.theChambers.ReadFromDefaultFile();
+  IrreducibleFiniteDimensionalModule theModule;
+  QuasiPolynomial tempP;
+  if (!inputData.flagDyckPathComputationLoaded)
+    theModule.InitAndPrepareTheChambersForComputation(3, inputData.theChambers, theGlobalVariables);
+  inputData.theChambers.flagMustStop=false;
+  inputData.theChambers.flagIsRunning=true;
+  inputData.theChambers.flagReachSafePointASAP=false;
+  inputData.flagDyckPathComputationLoaded=true;
+  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
 }

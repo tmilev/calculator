@@ -926,8 +926,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
 ComputationSetup::ComputationSetup()
 { this->theFunctionToRun=0;
   this->flagExecuteSystemCommandsCGIapplication=false;
-  this->flagRunningExperiments2=false;
-  this->flagExperiment2ChambersAlreadyLoaded=false;
+  this->flagDyckPathComputationLoaded=false;
   this->flagOpenProverData=false;
 	this->flagSavingProverData=false;
 	this->flagProverUseFixedK=false;
@@ -17276,7 +17275,7 @@ void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::st
 { std::stringstream out1,out2; std::string tempS;
 	if (useHtml)
 	{ out1 <<"<table border=\"1\">\n <colgroup>";
-		for (int i=0;i<this->NumColsPerTableLatex;i++)
+		for (int i=0; i<this->NumColsPerTableLatex; i++)
 		{ out1<<"<col width=\"80\">";
 		}
 		out1<<"</colgroup><tr>";
@@ -17284,7 +17283,7 @@ void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::st
 	}
 	if (useLatex)
 	{	out1 << "\n\n \\begin{tabular}{";
-		for (int i=0;i<this->NumColsPerTableLatex;i++)
+		for (int i=0; i<this->NumColsPerTableLatex; i++)
 			out1 <<"c";
 		out1 <<"}\n";
 		out2 << "\\end{tabular}";
@@ -17311,7 +17310,7 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
 
 void rootSubalgebras::ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
-	out << "<a href=\"../../manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+	out << "<a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
 	this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
 	out << tempS;
 	//this->AmbientWeyl.ComputeRho(true);
@@ -20809,7 +20808,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots
 	for (int i=0; i<this->size; i++)
 	{ tempEW=this->TheObjects[i];
 		for (int j=0; j<this->simpleGenerators.size; j++)
-		{ this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j],orbitRho.TheObjects[i],false,currentRoot);
+		{ this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j], orbitRho.TheObjects[i], false, currentRoot);
 			if (!orbitRho.ContainsObjectHash(currentRoot))
 			{ orbitRho.AddObjectOnTopHash(currentRoot);
 				tempEW.AddObjectOnTop(j);
@@ -20981,7 +20980,7 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
 	if (this->TheObjects[index].PartialRelation.Alphas.size==0 && this->TheObjects[index].PartialRelation.Betas.size==0)
 	{ minimalRelationsProverStateFixedK theNewState;
-		for (int i=0;i<this->theK.HighestWeightsGmodK.size;i++)
+		for (int i=0; i<this->theK.HighestWeightsGmodK.size; i++)
 		{ theNewState.initFromParentState(this->TheObjects[index]);
 			theNewState.PartialRelation.Alphas.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
 			theNewState.theChoicesWeMake.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);

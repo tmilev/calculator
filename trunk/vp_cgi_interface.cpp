@@ -165,7 +165,7 @@ int main(int argc, char **argv)
     serverPathSl2s.append("sl2s/");
     std::stringstream outPhysicalPath;
     std::string thePhysicalPath, thePhysicalPathSl2s;
-    outPhysicalPath << inputPath<<theComputationSetup.WeylGroupLetter<< theComputationSetup.WeylGroupIndex <<"/";
+    outPhysicalPath << inputPath << theComputationSetup.WeylGroupLetter << theComputationSetup.WeylGroupIndex << "/";
     thePhysicalPath = outPhysicalPath.str();
     bool alreadyExists=CGIspecificRoutines::FileExists(thePhysicalPath);
     if (theComputationSetup.flagCGIRecomputeAll || !alreadyExists)

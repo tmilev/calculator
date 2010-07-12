@@ -157,7 +157,6 @@ int PolynomialOutputFormat::LatexCutOffLine=15;
 bool PolynomialOutputFormat::UsingLatexFormat=true;
 bool PolynomialOutputFormat::CarriageReturnRegular=true;
 PolynomialOutputFormat PolyFormatNumFrac;
-IndicatorWindowVariables IndicatorWindowGlobalVariables;
 int QuasiPolynomial::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
 
@@ -167,7 +166,6 @@ int BasicQN::NumTotalCreated=0;
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Integer>::flagAnErrorHasOccuredTimeToPanic=true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
-
 template < > int HashedListBasicObjects<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
 template < > int HashedListBasicObjects<BasicQN>::PreferredHashSize= 1;
 template < > int HashedListBasicObjects<partFraction>::PreferredHashSize=10000;
@@ -192,6 +190,7 @@ template < > int ListBasicObjects<affineCone>::ListBasicObjectsActualSizeIncreme
 template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<ComplexQN>::ListBasicObjectsActualSizeIncrement=1;
 template < > int ListBasicObjects<int>::ListBasicObjectsActualSizeIncrement=1;
+template < > int ListBasicObjects<char>::ListBasicObjectsActualSizeIncrement=5;
 template < > int ListBasicObjects<Monomial<CompositeComplexQN> >::ListBasicObjectsActualSizeIncrement=10;
 template < > int ListBasicObjects<BasicQN*>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<ComplexQN*>::ListBasicObjectsActualSizeIncrement=10000;
@@ -229,18 +228,12 @@ template < > int ListBasicObjects<coneRelation>::ListBasicObjectsActualSizeIncre
 template < > int ListBasicObjects<DynkinDiagramRootSubalgebra>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<rootSubalgebra>::ListBasicObjectsActualSizeIncrement=77;
 template < > int ListBasicObjects<ListBasicObjects<int> >::ListBasicObjectsActualSizeIncrement=10;
+template < > int ListBasicObjects<ListBasicObjects<char> >::ListBasicObjectsActualSizeIncrement=30;
 template < > int ListBasicObjects<slTwo>::ListBasicObjectsActualSizeIncrement=1000;
 template < > int ListBasicObjects<ElementSimpleLieAlgebra>::ListBasicObjectsActualSizeIncrement=100;
 template < > int ListBasicObjects<ReflectionSubgroupWeylGroup>::ListBasicObjectsActualSizeIncrement=5;
 template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjectsActualSizeIncrement=800;
 template < > int ListBasicObjects< minimalRelationsProverStateFixedK>::ListBasicObjectsActualSizeIncrement=10;
-
-
-ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList1;
-ListBasicObjects<std::string> RandomCodeIDontWantToDelete::EvilList2;
-bool RandomCodeIDontWantToDelete::UsingEvilList1=true;
-std::string RandomCodeIDontWantToDelete::theFirstEvilString;
-std::string RandomCodeIDontWantToDelete::theSecondEvilString;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
@@ -1136,7 +1129,7 @@ void ComputationSetup::InitComputationSetup()
 		this->flagComputationInProgress=true;
 		this->theChambers.NumAffineHyperplanesProcessed=0;
 		PolyFormatLocal.MakeAlphabetxi();
-		::IndicatorWindowGlobalVariables.Nullify();
+		this->theGlobalVariablesContainer->Default()->theIndicatorVariables.Nullify();
 		PolynomialOutputFormat::LatexMaxLineLength=100;
 		PolynomialOutputFormat::UsingLatexFormat=true;
 		this->flagDoneComputingPartialFractions=false;
@@ -3999,7 +3992,7 @@ void CombinatorialChamberContainer::ConvertHasZeroPolyToPermanentlyZero()
 
 void CombinatorialChamberContainer::AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup)
 { MatrixLargeRational tempMat;
-	tempMat.AssignMatrixIntWithDen(theWeylGroup.KillingFormMatrix, 1);
+	tempMat.Assign(theWeylGroup.KillingFormMatrix);
 	tempMat.Invert(theGlobalVariables);
 	tempMat.ComputeDebugString();
 	this->NumProjectiveHyperplanesBeforeWeylChamberWalls=this->theHyperplanes.size;
@@ -4138,9 +4131,9 @@ void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGloba
 	std::stringstream out4;
 	out4<< "Direction index: " << currentIndex<< " out of " << totalRoots;
   out5<< "Chamber index: " << this->indexNextChamberToSlice<<" Total #: "<< this->size;
-  IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-  IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void CombinatorialChamberContainer::ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables)
@@ -8196,7 +8189,7 @@ void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomial &output, bo
 	{	if (RecordNumMonomials)
 		{	std::stringstream out;
 			out<<i<<" out of "<<this->size<<" accounted for";
-			IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
+			theGlobalVariables.theIndicatorVariables.ProgressReportString4= out.str();
 		}
 		QuasiPolynomial& tempQP	 = theGlobalVariables.QPComputeQuasiPolynomial;
 		QuasiNumber& tempQN	= theGlobalVariables.QNComputeQuasiPolynomial;
@@ -8290,8 +8283,6 @@ void partFractionPolynomials::AddPolynomialLargeRational(root& rootLatticeIndica
 			partFraction::CheckSum.Add(tempLRat);
 			if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 			{ partFraction::CheckSum.ElementToString(tempS1);
-				RandomCodeIDontWantToDelete::theFirstEvilString.append(tempS1);
-				RandomCodeIDontWantToDelete::theFirstEvilString.append("\n");
 			}
 		}
 	}
@@ -8605,7 +8596,7 @@ void partFraction::AssignNoIndicesNonZeroMults(partFraction& p)
 
 int partFraction::ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { MatrixIntTightMemoryFit tempMat;
-	return this->ElementToStringBasisChange(owner,tempMat,false,output,LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
+	return this->ElementToStringBasisChange(owner, tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
 }
 
 int partFraction::GetNumMonomialsInNumerator()
@@ -8616,14 +8607,12 @@ int partFraction::GetNumMonomialsInNumerator()
 }
 
 
-void partFraction::WriteToFile(std::fstream &output, GlobalVariables&  theGlobalVariables)
-{ output<<"Fraction_start: " <<this->size<<"\n";
-	for (int j=0;j<this->size;j++)
+void partFraction::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "Fraction_start: " << this->size << "\n";
+	for (int j=0; j<this->size; j++)
 	{ output <<this->TheObjects[j].Multiplicities.size <<" ";
-	  for (int i=0;i<this->TheObjects[j].Multiplicities.size;i++)
-	  { output << this->TheObjects[j].Multiplicities.TheObjects[i] <<" "
-             << this->TheObjects[j].Elongations.TheObjects[i] <<" ";
-	  }
+	  for (int i=0; i<this->TheObjects[j].Multiplicities.size; i++)
+      output << this->TheObjects[j].Multiplicities.TheObjects[i] <<" "<< this->TheObjects[j].Elongations.TheObjects[i] <<" ";
 	}
 	output<<"\nCoefficient:\n";
 	this->Coefficient.WriteToFile(output);
@@ -8633,31 +8622,29 @@ void partFraction::WriteToFile(std::fstream &output, GlobalVariables&  theGlobal
 void partFraction::ReadFromFile(partFractions& owner,std::fstream &input, GlobalVariables&  theGlobalVariables, int theDimension)
 { std::string tempS;
   int tempI;
-  input>>tempS >>tempI;
+  input >> tempS >> tempI;
   assert(tempI==owner.RootsToIndices.size);
   this->init(tempI);
-	for (int j=0;j<this->size;j++)
+	for (int j=0; j<this->size; j++)
 	{ input >>tempI;
     this->TheObjects[j].Multiplicities.SetSizeExpandOnTopLight(tempI);
     this->TheObjects[j].Elongations.SetSizeExpandOnTopLight(tempI);
-	  for (int i=0;i<this->TheObjects[j].Multiplicities.size;i++)
-	  { input >> this->TheObjects[j].Multiplicities.TheObjects[i]
-             >> this->TheObjects[j].Elongations.TheObjects[i];
-	  }
+	  for (int i=0; i<this->TheObjects[j].Multiplicities.size; i++)
+      input >> this->TheObjects[j].Multiplicities.TheObjects[i] >> this->TheObjects[j].Elongations.TheObjects[i];
 	}
 	input >>tempS;
-	this->Coefficient.ReadFromFile(input,(short)theDimension);
+	this->Coefficient.ReadFromFile(input, (short)theDimension);
 	input>>tempS;
 	this->ComputeIndicesNonZeroMults();
 }
 
-void partFraction::UncoverBracketsNumerator(GlobalVariables&  theGlobalVariables, int theDimension)
+void partFraction::UncoverBracketsNumerator(GlobalVariables& theGlobalVariables, int theDimension)
 { if (this->UncoveringBrackets)
 		return;
 //	this->CoefficientNonExpanded.ComputeDebugString();
-	::IntegerPoly ComputationalBufferCoefficient;
-	::PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
-	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator	(ComputationalBufferCoefficientNonExpanded,theDimension);
+	IntegerPoly ComputationalBufferCoefficient;
+	PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+	this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded, theDimension);
 	//ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
 	ComputationalBufferCoefficientNonExpanded.ConvertToIntegerPoly(ComputationalBufferCoefficient, theDimension);
 	//ComputationalBufferCoefficient.ComputeDebugString();
@@ -8733,7 +8720,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
 	stringPoly= out2.str();
 //	this->intRootToString(out,this->RootShift,false);
 	out<<" ";
-	for (int i =0;i<this->size;i++)
+	for (int i =0; i<this->size; i++)
 	{ this->TheObjects[i].ElementToStringBasisChange(owner,VarChange,UsingVarChange,tempS,LatexFormat,i,theDimension);
 		out<<tempS;
 	}
@@ -8817,7 +8804,7 @@ bool partFraction::rootIsInFractionCone(partFractions& owner, root*theRoot, Glob
 	static MatrixLargeRational tempMat, MatOneCol;
 	static Selection NonPivotPoints;
 	Cone tempCone; roots tempRoots;
-	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
+	for (int i=0; i<this->IndicesNonZeroMults.size; i++)
 	{ int tempI= this->IndicesNonZeroMults.TheObjects[i];
 		tempRoots.AddIntRoot(owner.RootsToIndices.TheObjects[tempI]);
 	}
@@ -8838,7 +8825,7 @@ void partFraction::PrepareFraction( int indexA, int indexB,  int AminusNBindex, 
 		powerDropB=0;
 	else
 		powerDropA=0;
-	for (int i=0;i<powerDropB;i++)
+	for (int i=0; i<powerDropB; i++)
 		ComputationalBufferCoefficient.MultiplyBy(AminusNbetaPoly);
 	output.DecreasePowerOneFrac(indexA,powerDropA);
 	output.DecreasePowerOneFrac(indexB,powerDropB);
@@ -8848,7 +8835,7 @@ void partFraction::PrepareFraction( int indexA, int indexB,  int AminusNBindex, 
 
 int partFraction::GetNumProportionalVectorsClassicalRootSystems(partFractions& owner)
 { int result=0;
-	for (int i=0;i<owner.RootsToIndices.IndicesRedundantShortRoots.CardinalitySelection;i++)
+	for (int i=0; i<owner.RootsToIndices.IndicesRedundantShortRoots.CardinalitySelection; i++)
 	{ int tempI = owner.RootsToIndices.IndicesRedundantShortRoots.elements[i];
 		int tempI2= owner.RootsToIndices.getIndexDoubleOfARoot
 			(owner.RootsToIndices.TheObjects[tempI]);
@@ -8859,9 +8846,9 @@ int partFraction::GetNumProportionalVectorsClassicalRootSystems(partFractions& o
 	return result;
 }
 
-int partFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner,int minIndex)
+int partFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner, int minIndex)
 { int result=owner.RootsToIndices.size;
-	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
+	for (int i=0; i<this->IndicesNonZeroMults.size; i++)
 	{ int tempI=this->IndicesNonZeroMults.TheObjects[i];
 		if (this->TheObjects[tempI].Multiplicities.size>0)
 			if (tempI>=minIndex && tempI<result)
@@ -8873,7 +8860,7 @@ int partFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& own
 int partFraction::ComputeGainingMultiplicityIndexInLinearRelation(partFractions& owner,	MatrixLargeRational& theLinearRelation)
 {	int DesireToSelectAsGainingMultiplicity=-1;
 	int result=-1;
-	for( int i=0;i<theLinearRelation.NumRows;i++)
+	for( int i=0; i<theLinearRelation.NumRows; i++)
 	{ if(! theLinearRelation.elements[i][0].IsEqualToZero())
 		{	int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
 			int candidateDesire;
@@ -8892,7 +8879,7 @@ int partFraction::ComputeGainingMultiplicityIndexInLinearRelation(partFractions&
 	return result;
 }
 
-bool partFraction::CheckForOrlikSolomonAdmissibility(ListBasicObjects<int> &theSelectedIndices)
+bool partFraction::CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices)
 { return true;
 	/*if (!this->flagUsingPrecomputedOrlikSolomonBases)
 		return true;
@@ -8973,8 +8960,8 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 	while (hasImprovement)
 	{ hasImprovement=false;
 		numerator.ComputeDebugString();
-		for (int i=0;i<tempFrac.IndicesNonZeroMults.size;i++)
-			for (int j=0;j<tempFrac.TheObjects[IndicesNonZeroMults.TheObjects[i]].Multiplicities.size;j++)
+		for (int i=0; i<tempFrac.IndicesNonZeroMults.size; i++)
+			for (int j=0; j<tempFrac.TheObjects[IndicesNonZeroMults.TheObjects[i]].Multiplicities.size; j++)
 			{	tempFrac.TheObjects[IndicesNonZeroMults.TheObjects[i]].GetPolyDenominator(tempP1,j,owner.RootsToIndices.TheObjects[IndicesNonZeroMults.TheObjects[i]]);
 				tempP1.ComputeDebugString();
 				numerator.DivideBy(tempP1,tempP2, tempP3);
@@ -9008,12 +8995,10 @@ void partFraction::GetNElongationPolyWithMonomialContribution(partFractions& own
 	static IntegerPoly tempP;
 	tempM.init((short)theDimension);
 	tempM.Coefficient.value=1;
-	for (int i=0;i<theIndex;i++)
+	for (int i=0; i<theIndex; i++)
 	{ int tempI= theSelectedIndices.TheObjects[i];
-		for (int j=0;j<theDimension;j++)
-		{ tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]*
-																owner.RootsToIndices.TheObjects[tempI].elements[j]);
-		}
+		for (int j=0; j<theDimension; j++)
+      tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]*owner.RootsToIndices.TheObjects[tempI].elements[j]);
 	}
 	this->GetNElongationPoly(owner,theSelectedIndices.TheObjects[theIndex], theGreatestElongations.TheObjects[theIndex], theCoefficients.TheObjects[theIndex], output,theDimension);
 	output.MultiplyByMonomial(tempM);
@@ -9036,17 +9021,17 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int> &th
   TheBigBadIndexingSet.initIncomplete(theSelectedIndices.size);
   static int TotalMultiplicity;
   TotalMultiplicity=0;
-  for (int i=0;i<theSelectedIndices.size;i++)
+  for (int i=0; i<theSelectedIndices.size; i++)
   { int tempI= this->TheObjects[theSelectedIndices.TheObjects[i]].GetMultiplicityLargestElongation()-1;
 		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=tempI;
 		TotalMultiplicity+=tempI;
   }
-  for (int i=0;i<theSelectedIndices.size;i++)
+  for (int i=0; i<theSelectedIndices.size; i++)
   {	TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
 		int oldMaxMultiplicity= TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i];
 		TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=0;
 		int NumSubsets=TheBigBadIndexingSet.getTotalNumSubsets();
-		for (int j=0;j<NumSubsets;j++)
+		for (int j=0; j<NumSubsets; j++)
 		{	tempFrac.Assign(*this);
 			tempFrac.RelevanceIsComputed=false;
 			if (this->UncoveringBrackets)
@@ -9056,7 +9041,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int> &th
 			int tempN= TheBigBadIndexingSet.TotalMultiplicity()+oldMaxMultiplicity;
 			if (this->flagAnErrorHasOccurredTimeToPanic)
 				TheBigBadIndexingSet.ComputeDebugString();
-			for (int k=0;k<theSelectedIndices.size;k++)
+			for (int k=0; k<theSelectedIndices.size; k++)
 			{	int multiplicityChange;
 				if (k!=i)
 					multiplicityChange= TheBigBadIndexingSet.Multiplicities.TheObjects[k];
@@ -9105,7 +9090,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int> &th
 	}
 }
 
-void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
 {	static partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
 	static IntegerPoly tempP;
   static PolyPartFractionNumerator tempNum;
@@ -9118,7 +9103,7 @@ void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIn
 	{ Accum.ComputeOneCheckSum(StartCheckSum,theGlobalVariables);
 		this->ComputeOneCheckSum(Accum,theDiff,Accum.AmbientDimension,theGlobalVariables);
 	}
-	for(int i=0;i<theSelectedIndices.size;i++)
+	for(int i=0; i<theSelectedIndices.size; i++)
 	{	tempFrac.Assign(*this);
 		tempFrac.RelevanceIsComputed=false;
 		ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
@@ -9131,9 +9116,9 @@ void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIn
 		if (this->UncoveringBrackets)
 		{ tempM.init((short)Accum.AmbientDimension);
       tempM.Coefficient.Assign(IOne);
-      for (int j=0;j<i;j++)
+      for (int j=0; j<i; j++)
       {	short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
-        for (int k=0;k<Accum.AmbientDimension;k++)
+        for (int k=0; k<Accum.AmbientDimension; k++)
           tempM.degrees[k]+=(short)theElongations.TheObjects[j]*tempElongation*(short)Accum.RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]].elements[k];
       }
       ParallelComputing::SafePoint();
@@ -9149,7 +9134,7 @@ void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIn
 //			}
 			tempM.Coefficient.Assign(IOne);
 			tempM.ClearTheObjects();
-			for (int j=0;j<i;j++)
+			for (int j=0; j<i; j++)
 			{	short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
 				intRoot tempRoot;
 				tempRoot= Accum.RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]];
@@ -9194,7 +9179,7 @@ void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIn
 
 //void partFraction::GetNElongationPoly
 
-void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,int indexAminusNB, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFraction::decomposeAMinusNB(int indexA, int indexB, int n, int indexAminusNB, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
 {	static partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
 	static IntegerPoly AminusNbetaPoly;
 	static IntegerPoly ComputationalBufferCoefficient;
@@ -9217,10 +9202,10 @@ void partFraction::decomposeAMinusNB(int indexA, int indexB, int n,int indexAmin
 	//		tempFrac.ComputeDebugString();
 		}
 	}
-	this->PrepareFraction(indexA,indexB,indexAminusNB,false,tempFrac,AminusNbetaPoly);
+	this->PrepareFraction(indexA, indexB, indexAminusNB, false, tempFrac, AminusNbetaPoly);
 //	tempFrac.ComputeDebugString();
 	ComputationalBufferCoefficient.AssignPolynomialLight(tempFrac.Coefficient);
-	for (int i=powerA;i>=1;i--)
+	for (int i=powerA; i>=1; i--)
 	{	Integer tempInt(MathRoutines::NChooseK(powerA+powerB-i-1,powerB-1));
 		ComputationalBufferCoefficient.TimesConstant(tempInt);
 		tempFrac.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
@@ -9244,7 +9229,7 @@ bool partFraction::DecreasePowerOneFrac(int index, int increment)
 
 void partFraction::ComputeIndicesNonZeroMults()
 { this->IndicesNonZeroMults.size=0;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	  if(this->TheObjects[i].Multiplicities.size>0)
 		  this->IndicesNonZeroMults.AddObjectOnTop(i);
 }
@@ -9254,21 +9239,21 @@ void partFraction::GetAlphaMinusNBetaPoly(partFractions& owner, int indexA, int 
 	Monomial<Integer> tempM;
 	tempM.init((short)theDimension);
 	tempM.Coefficient.Assign(IMOne);
-	for (int i=0;i<n;i++)
-	{ for (int j=0;j<theDimension;j++)
+	for (int i=0; i<n; i++)
+	{ for (int j=0; j<theDimension; j++)
 			tempM.degrees[j]= (short)(owner.RootsToIndices.TheObjects[indexA].elements[j]- (i+1)*owner.RootsToIndices.TheObjects[indexB].elements[j]);
 		output.AddMonomial(tempM);
 	}
 }
 
-void partFraction::GetNElongationPoly(partFractions& owner,int index,int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output,int theDimension)
+void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output, int theDimension)
 {	output.Nullify((short)theDimension);
 	Monomial<Integer> tempM;
 	tempM.init((short)theDimension);
 	if (LengthOfGeometricSeries>0)
 	{	tempM.Coefficient.Assign(IOne);
-		for (int i=0;i<LengthOfGeometricSeries;i++)
-		{ for (int j=0;j<theDimension;j++)
+		for (int i=0; i<LengthOfGeometricSeries; i++)
+		{ for (int j=0; j<theDimension; j++)
 			  tempM.degrees[j]=(short)(baseElongation*i*owner.RootsToIndices.TheObjects[index].elements[j]);
 			output.AddMonomial(tempM);
 		}
@@ -9276,8 +9261,8 @@ void partFraction::GetNElongationPoly(partFractions& owner,int index,int baseElo
 	else
 	{ assert(LengthOfGeometricSeries<0);
 		tempM.Coefficient.Assign(IMOne);
-		for (int i=-1;i>=LengthOfGeometricSeries;i--)
-		{ for (int j=0;j<theDimension;j++)
+		for (int i=-1; i>=LengthOfGeometricSeries; i--)
+		{ for (int j=0; j<theDimension; j++)
 			  tempM.degrees[j]=short(baseElongation*i*owner.RootsToIndices.TheObjects[index].elements[j]);
 			output.AddMonomial(tempM);
 		}
@@ -9296,22 +9281,7 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
 	output.AddMonomial(tempM);
 }
 
-/*void partFraction::partFractionToPartitionFunctionStoreAnswer
-				(QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient, bool StoreToFile)
-{	//if (!this->PowerSeriesCoefficientIsComputed)
-	{ this->partFractionToPartitionFunctionSplit
-			(output,true,RecordSplitPowerSeriesCoefficient, StoreToFile);
-//		this->PowerSeriesCoefficient.CopyFromPoly(output);
-		this->PowerSeriesCoefficientIsComputed=true;
-		IndicatorWindowGlobalVariables.NumComputedContributions++;
-		FeedDataToIndicatorWindow(IndicatorWindowGlobalVariables);
-	}
-	else
-	{ output.CopyFromPoly(this->PowerSeriesCoefficient);
-	}
-}*/
-
-void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner,QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension)
+void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension)
 {	static PolynomialRationalCoeff shiftedPoly, tempP;
 	static roots normals;
 	static partFractionPolynomials tempSplitPowerSeriesCoefficient;
@@ -9325,7 +9295,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner,Qua
 		if (RecordNumMonomials && ! this->AlreadyAccountedForInGUIDisplay)
 		{ this->AlreadyAccountedForInGUIDisplay=true;
 			partFractions::NumProcessedForVPFMonomialsTotal+=this->Coefficient.size;
-			//IndicatorWindowGlobalVariables.NumProcessedMonomials+=this->Coefficient.size;
+			//theGlobalVariables.theIndicatorVariables.NumProcessedMonomials+=this->Coefficient.size;
 		}
 //		output.ComputeDebugString();
 		return;
@@ -9338,7 +9308,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner,Qua
 	else*/
 	{ SplitPowerSeriesCoefficient= &tempSplitPowerSeriesCoefficient;
 	}
-	SplitPowerSeriesCoefficient->initLatticeIndicatorsFromPartFraction(owner,*this,theGlobalVariables,theDimension);
+	SplitPowerSeriesCoefficient->initLatticeIndicatorsFromPartFraction(owner, *this,theGlobalVariables, theDimension);
 //	SplitPowerSeriesCoefficient->InvertedMatrixRoots.ComputeDebugString();
 	normals.AssignMatrixRows(SplitPowerSeriesCoefficient->theNormals);
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -9346,16 +9316,16 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner,Qua
 		normals.ComputeDebugString();
 		Stop();
 	}
-	for (int i=0;i<this->Coefficient.size;i++)
+	for (int i=0; i<this->Coefficient.size; i++)
 	{	this->ComputePolyCorrespondingToOneMonomial(shiftedPoly,i,normals,SplitPowerSeriesCoefficient,theDimension);
 		if (RecordNumMonomials)
 		{ std::stringstream out4,out3;
 			out4 <<"Current fraction: "<<i+1<<" out of "<<this->Coefficient.size <<" processed";
 			partFractions::NumProcessedForVPFMonomialsTotal++;
 			out3	<<" Processed " << partFractions::NumProcessedForVPFMonomialsTotal <<" out of " <<partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
-			::IndicatorWindowGlobalVariables.ProgressReportString4= out4.str();
-			::IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			theGlobalVariables.theIndicatorVariables.ProgressReportString4= out4.str();
+			theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+			theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 	}
 	SplitPowerSeriesCoefficient->ComputeQuasiPolynomial(output, RecordNumMonomials,theDimension,theGlobalVariables);
@@ -9377,10 +9347,10 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner,Qua
 //	Accum.ComputeDebugString();
 }
 
-void partFraction::ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff &output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension)
+void partFraction::ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff& output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension)
 { root shiftRational; shiftRational.SetSizeExpandOnTopLight(theDimension);
 	static PolynomialRationalCoeff tempP;
-	for (int j=0;j<theDimension;j++)
+	for (int j=0; j<theDimension; j++)
 	  shiftRational.TheObjects[j].AssignInteger(this->Coefficient.TheObjects[index].degrees[j]);
 	if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 	{	shiftRational.ComputeDebugString();
@@ -9390,7 +9360,7 @@ void partFraction::ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff
 	Rational tempRat;
 	tempRat.AssignInteger(this->Coefficient.TheObjects[index].Coefficient.value);
 	output.MakeNVarConst((short)theDimension, tempRat);
-	for (int i=0;i<theDimension;i++)
+	for (int i=0; i<theDimension; i++)
 	{ static root beta; beta.SetSizeExpandOnTopLight(theDimension);
 		static Rational tempRat,tempRat2;
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -9446,7 +9416,7 @@ void partFraction::MakePolynomialFromOneNormal(root& normal, root& shiftRational
 	output.MakeNVarConst((short)theDimension,LROne);
 	if (theMult==1) return;
 	root::RootScalarEuclideanRoot(normal,shiftRational,tempRat);
-	for (int j=0;j<theMult-1;j++)
+	for (int j=0; j<theMult-1; j++)
 	{ tempP.MakeLinPolyFromRoot(normal);
 		if (partFraction::flagAnErrorHasOccurredTimeToPanic)
 		{ tempP.ComputeDebugString();
@@ -9473,12 +9443,12 @@ void partFraction::ComputeNormals(partFractions& owner, roots& output, int theDi
 	root tempRoot; tempRoot.SetSizeExpandOnTopLight(theDimension);
 	dens.size=0;
 	output.size=0;
-	for (int i=0;i<theDimension;i++)
+	for (int i=0; i<theDimension; i++)
 	{	tempRoot.AssignIntRoot
 			(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]]);
 		dens.AddRoot(tempRoot);
 	}
-	for (int i=0;i<theDimension;i++)
+	for (int i=0; i<theDimension; i++)
 	{ static Rational tempRat, tempRat2;
 		dens.ComputeNormalExcludingIndex(tempRoot, i,theGlobalVariables);
 		root::RootScalarEuclideanRoot(tempRoot, dens.TheObjects[i],tempRat);
@@ -9510,7 +9480,7 @@ void partFraction::init(int numRoots)
 {	this->IndicesNonZeroMults.MakeActualSizeAtLeastExpandOnTop(numRoots);
 	this->IndicesNonZeroMults.size=0;
 	this->SetSizeExpandOnTopLight(numRoots);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].Elongations.SetSizeExpandOnTopLight(0);
 		this->TheObjects[i].Multiplicities.SetSizeExpandOnTopLight(0);
 	}
@@ -9559,28 +9529,10 @@ void partFraction::operator =(const partFraction &right)
 { this->Assign(right);
 }
 
-/*void partFraction::findPivot()
-{ int theRow=-1;
-	for (int i=this->currentPivot+1; i<this->size; i++)
-	{	if ( this->TheObjects[i].den[this->currentPivot]>0 &&
-			   ( this->TheObjects[this->currentPivot].den[this->currentPivot]==0
-					 ||
-					 ( this->TheObjects[this->currentPivot].den[this->currentPivot]!=0
-						 &&
-						 this->TheObjects[this->currentPivot].IsHigherThan(this->TheObjects[i])
-					 )
-				 )
-			 )
-		{ this->swap(i,this->currentPivot);
-		}
-	}
-	this->EliminationStart= this->currentPivot+1;
-}*/
-
 int partFractions::SizeWithoutDebugString()
 { int Accum=0;
 	Accum+=	this->HashedListBasicObjects<partFraction>::SizeWithoutObjects();
-	for (int i=0;i<this->ActualSize;i++)
+	for (int i=0; i<this->ActualSize; i++)
 		Accum+=this->TheActualObjects[i].SizeWithoutDebugString();
 	Accum+=	sizeof(this->HighestIndex)+sizeof(this->IndexLowestNonProcessed);
 	return Accum;
@@ -9600,13 +9552,13 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 { if (partFraction::UncoveringBrackets)
 		return;
 	int changeOfNumMonomials=0;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{	if (this->flagMakingProgressReport)
 		{	std::stringstream out;
 			out <<"Uncovering brackets"<< i+1 <<" out of " << this->size;
-			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
+			theGlobalVariables.theIndicatorVariables.ProgressReportString4=out.str();
 			changeOfNumMonomials-=this->TheObjects[i].Coefficient.size;
-			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 		this->AccountPartFractionInternals(-1, i, Indicator,theGlobalVariables);
 		this->TheObjects[i].UncoverBracketsNumerator(theGlobalVariables, this->AmbientDimension);
@@ -9615,14 +9567,14 @@ void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariabl
 		{	changeOfNumMonomials+=this->TheObjects[i].Coefficient.size;
 			std::stringstream out;
 			out <<"Number actual monomials"<< changeOfNumMonomials;
-			IndicatorWindowGlobalVariables.ProgressReportString5=out.str();
-			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			theGlobalVariables.theIndicatorVariables.ProgressReportString5=out.str();
+			theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 	}
 }
 
-bool partFractions::ShouldIgnore(GlobalVariables& theGlobalVariables, root*Indicator)
-{ bool shouldIgnore=!this->TheObjects[this->IndexLowestNonProcessed].rootIsInFractionCone(*this,Indicator,theGlobalVariables);
+bool partFractions::ShouldIgnore(GlobalVariables& theGlobalVariables, root* Indicator)
+{ bool shouldIgnore=!this->TheObjects[this->IndexLowestNonProcessed].rootIsInFractionCone(*this, Indicator, theGlobalVariables);
 	if (shouldIgnore)
 	{ if (this->flagDiscardingFractions)
 			this->PopIndexSwapWithLastHash(this->IndexLowestNonProcessed);
@@ -9706,7 +9658,6 @@ void partFractions::PrepareIndicatorVariables()
 	this->NumProcessedForVPFMonomialsTotal=0;
 	this->NumProcessedForVPFfractions=0;
 	this->NumRunsReduceMonomialByMonomial=0;
-	::IndicatorWindowGlobalVariables.Nullify();
 }
 
 bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
@@ -9755,13 +9706,12 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 			if (this->flagUsingOrlikSolomonBasis)
 				tempBool=tempFrac.reduceOnceGeneralMethod(*this, theGlobalVariables, Indicator);
 			else
-				tempBool = tempFrac.reduceOnceGeneralMethodNoOSBasis(*this,theGlobalVariables, Indicator);
+				tempBool = tempFrac.reduceOnceGeneralMethodNoOSBasis(*this, theGlobalVariables, Indicator);
 			if (! tempBool)
 			{ if (tempFrac.IndicesNonZeroMults.size<=this->AmbientDimension)
 					this->IndexLowestNonProcessed++;
 				else
-					this->TheObjects[this->IndexLowestNonProcessed].LastDistinguishedIndex=
-						tempFrac.LastDistinguishedIndex;
+					this->TheObjects[this->IndexLowestNonProcessed].LastDistinguishedIndex=tempFrac.LastDistinguishedIndex;
 			}
 			else
 			{//	if (ProblemCounter==17)
@@ -9820,7 +9770,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 	return false;
 }
 
-bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, root*Indicator)
+bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, root* Indicator)
 { this->IndexLowestNonProcessed=0;
 	this->PrepareIndicatorVariables();
 	//partFraction::flagAnErrorHasOccurredTimeToPanic= true;
@@ -9840,7 +9790,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
 			//tempF.ComputeDebugString();
 			if (! (tempF.reduceOnceTotalOrderMethod(*this,theGlobalVariables, Indicator)))
 			{ if (this->TheObjects[this->IndexLowestNonProcessed].IndicesNonZeroMults.size-this->TheObjects[this->IndexLowestNonProcessed].GetNumProportionalVectorsClassicalRootSystems(*this)>this->AmbientDimension)
-				{ this->TheObjects[this->IndexLowestNonProcessed].ComputeDebugString(*this,theGlobalVariables);
+				{ this->TheObjects[this->IndexLowestNonProcessed].ComputeDebugString(*this, theGlobalVariables);
 					this->NumRelevantNonReducedFractions++;
 				}
 				this->IndexLowestNonProcessed++;
@@ -9886,23 +9836,23 @@ void partFraction::initFromRootSystem(partFractions& owner, intRoots& theFractio
 	this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
 	owner.RootsToIndices.initFromRoots(theAlgorithmBasis,weights);
 	this->init(owner.RootsToIndices.size);
-	for(int i=0;i<owner.RootsToIndices.size;i++)
+	for(int i=0; i<owner.RootsToIndices.size; i++)
 		this->TheObjects[i].init();
-	for (int i=0;i<theFraction.size;i++)
+	for (int i=0; i<theFraction.size; i++)
 	{ int index = owner.RootsToIndices.getIndex(theFraction.TheObjects[i]);
 		this->TheObjects[index].AddMultiplicity(1,1);
 	}
 	this->ComputeIndicesNonZeroMults();
 }
 
-int partFractions::ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables)
+int partFractions::ReadFromFileComputedContributions(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS;
 	input.seekg(0);
-	input>>tempS;
+	input >> tempS;
 	int lastNonZero=-1;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ int x;
-		input>>x>>this->TheObjects[i].FileStoragePosition;
+		input >> x >> this->TheObjects[i].FileStoragePosition;
 		if (this->TheObjects[i].FileStoragePosition>lastNonZero)
 			lastNonZero=this->TheObjects[i].FileStoragePosition;
 		assert(x==i);
@@ -9913,7 +9863,7 @@ int partFractions::ReadFromFileComputedContributions(std::fstream& input, Global
 void partFractions::WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables)
 { output.seekp(0);
 	output<< "Partial_fraction_index/file_storage_position\n";
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		output<< i<<" "<<this->TheObjects[i].FileStoragePosition<<"\n";
 }
 
@@ -9930,11 +9880,6 @@ partFractions::partFractions()
 void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables)
 { this->ElementToString(owner,this->DebugString, PolynomialOutputFormat::UsingLatexFormat,false,true, theGlobalVariables);
 }
-
-/*void partFraction::InsertNewRootIndex(int index)
-{ this->ShiftUpExpandOnTop(index);
-	this->TheObjects[index].Multiplicities.TheObjects[0]=0;
-}*/
 
 void partFractions::PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator)
 { this->AccountPartFractionInternals(-1, index,Indicator, theGlobalVariables);
@@ -10002,8 +9947,8 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
 	Selection& tempSel= theGlobalVariables.selReduceMonomialByMonomial;
 	Monomial<Integer> tempMon; intRoot tempRoot;
 	tempMat.init(owner.AmbientDimension,(short) this->IndicesNonZeroMults.size);
-	for (int i=0;i<this->IndicesNonZeroMults.size;i++)
-		for (int j=0;j<owner.AmbientDimension;j++)
+	for (int i=0; i<this->IndicesNonZeroMults.size; i++)
+		for (int j=0; j<owner.AmbientDimension; j++)
 			tempMat.elements[j][i].AssignInteger(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]*this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
 	if (this->flagAnErrorHasOccurredTimeToPanic)
 	{	this->ComputeDebugString(owner,theGlobalVariables);
@@ -10066,7 +10011,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
 					tempFrac.Coefficient.AddObjectOnTopLight(this->Coefficient.TheObjects[k]);
 					tempFrac.ComputeOneCheckSum(owner,tempDiff,owner.AmbientDimension,theGlobalVariables);
 				}
-				for (int l=0;l<numSummands;l++)
+				for (int l=0; l<numSummands; l++)
 				{	if (ProblemCounter==8 )
 						Stop();
 					tempFrac.AssignDenominatorOnly(*this);
@@ -10144,24 +10089,24 @@ void partFraction::GetPolyReduceMonomialByMonomial(	partFractions& owner, Global
 		} else
 		{	intRoot tempRoot;
 			assert(StartMonomialPower>=startDenominatorPower);
-			for (int k=0;k<=StartMonomialPower-startDenominatorPower;k++)
+			for (int k=0; k<=StartMonomialPower-startDenominatorPower; k++)
 			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(k);
 				tempMon.MakeFromRoot(IOne,tempRoot);
-				tempMon.Coefficient.value= MathRoutines::parity(startDenominatorPower)*MathRoutines::NChooseK(StartMonomialPower-1-k,startDenominatorPower-1);
+				tempMon.Coefficient.value= MathRoutines::parity(startDenominatorPower)*MathRoutines::NChooseK(StartMonomialPower-1-k, startDenominatorPower-1);
 				output.AddMonomial(tempMon);
 			}
 		}
 	}
 	if (StartMonomialPower<0 )
 	{ if (DenPowerReduction!=startDenominatorPower)
-		{	tempMon.Coefficient.value= MathRoutines::NChooseK(-StartMonomialPower-1+DenPowerReduction,DenPowerReduction);
+		{	tempMon.Coefficient.value= MathRoutines::NChooseK(-StartMonomialPower-1+DenPowerReduction, DenPowerReduction);
 			output.AddMonomial(tempMon);
 		} else
 		{ intRoot tempRoot;
-			for (int k=1;k<=-StartMonomialPower;k++)
+			for (int k=1; k<=-StartMonomialPower; k++)
 			{ tempRoot= theExponent; tempRoot.MultiplyByInteger(-k);
 				tempMon.MakeFromRoot(IOne,tempRoot);
-				tempMon.Coefficient.value= MathRoutines::NChooseK(startDenominatorPower-StartMonomialPower-1-k,startDenominatorPower-1);
+				tempMon.Coefficient.value= MathRoutines::NChooseK(startDenominatorPower-StartMonomialPower-1-k, startDenominatorPower-1);
 				output.AddMonomial(tempMon);
 			}
 		}
@@ -10169,14 +10114,14 @@ void partFraction::GetPolyReduceMonomialByMonomial(	partFractions& owner, Global
 	output.ComputeDebugString();
 }
 
-void partFractions::AddAndReduce(partFraction &f, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator)
 {	if (this->flagUsingOrlikSolomonBasis)
-		f.ReduceMonomialByMonomial(*this,-1,theGlobalVariables, Indicator);
+		f.ReduceMonomialByMonomial(*this, -1, theGlobalVariables, Indicator);
 	else
 		this->AddAlreadyReduced(f,theGlobalVariables, Indicator);
 }
 
-void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator)
 { bool shouldAttemptReduction=false;
 	int tempI=this->IndexOfObjectHash(f);
 	if (tempI==-1)
@@ -10216,21 +10161,21 @@ void partFractions::AddAlreadyReduced(partFraction &f, GlobalVariables& theGloba
 	}
 	if (shouldAttemptReduction&& this->flagUsingOrlikSolomonBasis)
 	{	if (this->flagAnErrorHasOccurredTimeToPanic)
-			this->TheObjects[tempI].ComputeDebugString(*this,theGlobalVariables);
-		this->TheObjects[tempI].AttemptReduction(*this,tempI,theGlobalVariables, Indicator);
+			this->TheObjects[tempI].ComputeDebugString(*this, theGlobalVariables);
+		this->TheObjects[tempI].AttemptReduction(*this, tempI, theGlobalVariables, Indicator);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
-			this->TheObjects[tempI].ComputeDebugString(*this,theGlobalVariables);
+			this->TheObjects[tempI].ComputeDebugString(*this, theGlobalVariables);
 	}
 }
 
 int partFractions::ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { MatrixIntTightMemoryFit tempMat;
-	return this->ElementToStringBasisChange (tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator, theGlobalVariables);
+	return this->ElementToStringBasisChange (tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
 }
 
 int partFractions::ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { MatrixIntTightMemoryFit tempMat;
-	return this->ElementToStringBasisChangeOutputToFile(tempMat,false,output,LatexFormat,includeVPsummand,includeNumerator,theGlobalVariables);
+	return this->ElementToStringBasisChangeOutputToFile(tempMat, false, output, LatexFormat, includeVPsummand,includeNumerator, theGlobalVariables);
 }
 
 int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables )
@@ -10241,20 +10186,21 @@ int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange
 	if (LatexFormat)
 	{ out << "\\begin{eqnarray*}\n";}
 	int LastCutOff=0;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ if (this->TheObjects[i].Coefficient.size>0 )
 		{ TotalLines+=this->TheObjects[i].ElementToStringBasisChange(*this, VarChange, UsingVarChange,tempS, LatexFormat, includeVPsummand,includeNumerator,theGlobalVariables);
 			if (LatexFormat)
 				out <<"&&";
-			if (tempS[0]!='-'){out<<"+";}
+			if (tempS[0]!='-')
+        out<<"+";
 			out<<tempS;
 			if (LatexFormat)
 			{ out<<"\\\\ \n";
 				TotalLines++;
 			}
 			else
-			{out <<"\n";}
-			if	( LatexFormat &&(TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
+        out <<"\n";
+			if (LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
 			{ out<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
 				LastCutOff=TotalLines;
 			}
@@ -10276,19 +10222,20 @@ int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange
 	return TotalLines;
 }
 
-int partFractions::ElementToStringBasisChangeOutputToFile(	MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
+int partFractions::ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { std::string tempS;
 	int TotalLines=0;
 	PolyFormatLocal.ExtraLinesCounterLatex=0;
 	if (LatexFormat)
     output << "\\begin{eqnarray*}\n";
 	int LastCutOff=0;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ if (this->TheObjects[i].Coefficient.size>0 )
 		{ TotalLines+=this->TheObjects[i].ElementToStringBasisChange(	*this,VarChange, UsingVarChange,tempS, LatexFormat, includeVPsummand,includeNumerator, theGlobalVariables);
 			if (LatexFormat)
         output <<"&&";
-			if (tempS[0]!='-'){output<<"+";}
+			if (tempS[0]!='-')
+        output<<"+";
 			output<<tempS;
 			if (LatexFormat)
 			{ output<<"\\\\ \n";
@@ -10296,15 +10243,14 @@ int partFractions::ElementToStringBasisChangeOutputToFile(	MatrixIntTightMemoryF
 			}
 			else
         output <<"\n";
-			if	( LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
+			if (LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
 			{ output<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
 				LastCutOff=TotalLines;
 			}
 		}
 	}
 	if (LatexFormat)
-	{ output << "\\end{eqnarray*}";
-	}
+    output << "\\end{eqnarray*}";
 	return TotalLines;
 }
 
@@ -10315,10 +10261,10 @@ int partFraction::ControlLineSizeFracs(std::string& output)
 { int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
 	int LastCutOffIndex=0;
 	int NumLinesAdded=0;
-	for (int i=0;i<numCutOffs;i++)
-	  for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength; j< ((int) output.size())-1; j++)
-		  if (output[j]=='\\'&&output[j+1]=='f')
-			{ output.insert(j,"\\\\\n&&");
+	for (int i=0; i<numCutOffs; i++)
+	  for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength; j<((int) output.size())-1; j++)
+		  if (output[j]=='\\' && output[j+1]=='f')
+			{ output.insert(j, "\\\\\n&&");
 				NumLinesAdded++;
 				LastCutOffIndex=j+5;
 				break;
@@ -10349,23 +10295,20 @@ void partFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlob
   std::stringstream out1,out2,out3;
 	out1<< this->NumberRelevantReducedFractions << " relevant reduced + "<< this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
 	if (this->NumRelevantNonReducedFractions!=0)
-	{ out1<<" + " << this->NumRelevantNonReducedFractions <<" relevant unreduced ";
-	}
+    out1<<" + " << this->NumRelevantNonReducedFractions <<" relevant unreduced ";
 	out1<<" out of "<<this->size <<" total fractions";
-	IndicatorWindowGlobalVariables.ProgressReportString1= out1.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString1= out1.str();
 	out2<<this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + " << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
 			<< this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions <<" out of "<<this->NumMonomialsInTheNumerators
 			<<" total monomials in the numerators";
-	IndicatorWindowGlobalVariables.ProgressReportString2= out2.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString2= out2.str();
 	if (this->NumGeneratorsInTheNumerators!=0)
 	{	out3<<this->NumGeneratorsRelevenatFractions << " relevant reduced + " << this->NumGeneratorsIrrelevantFractions << " disjoint = "
-			<< this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions <<" out of "<<this->NumGeneratorsInTheNumerators
-			<<" total generators in the numerators";
-		IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
+			<< this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions <<" out of "<<this->NumGeneratorsInTheNumerators << " total generators in the numerators";
+		theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
 	} else
-	{ IndicatorWindowGlobalVariables.ProgressReportString3.clear();
-	}
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+    theGlobalVariables.theIndicatorVariables.ProgressReportString3.clear();
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables)
@@ -10376,14 +10319,14 @@ void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariabl
 	out2	<< "Processed " << this->NumProcessedForVPFfractions<<" out of " <<this->NumberRelevantReducedFractions << " relevant fractions";
 //	out3	<< "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //				<< " relevant fractions";
-	::IndicatorWindowGlobalVariables.ProgressReportString2= out2.str();
-	//::IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.ProgressReportString2= out2.str();
+	//::theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables)
 { output.MakeZero();
-	for(int i=0;i<this->size;i++)
+	for(int i=0; i<this->size; i++)
 	{ Rational tempRat;
 		this->TheObjects[i].ComputeOneCheckSum(*this,tempRat, this->AmbientDimension, theGlobalVariables);
 		if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -10393,28 +10336,28 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
 		output.Add(tempRat);
 		if (this->flagMakingProgressReport)
 		{ std::stringstream out;
-			out <<"Checksum "<<i+1<<" out of "<<this->size;
-			IndicatorWindowGlobalVariables.ProgressReportString4= out.str();
-			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			out << "Checksum " << i+1 << " out of " << this->size;
+			theGlobalVariables.theIndicatorVariables.ProgressReportString4= out.str();
+			theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 	}
 }
 
-void partFractions::initFromRootSystem	(	intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables)
+void partFractions::initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables)
 { this->ClearTheObjects();
 	this->RootsToIndices.ClearTheObjects();
 	partFraction f;
 	this->AmbientDimension= theFraction.TheObjects[0].dimension;
 	f.initFromRootSystem(*this,theFraction,theAlgorithmBasis, weights);
-	this->AddAlreadyReduced(f,theGlobalVariables, 0);
+	this->AddAlreadyReduced(f, theGlobalVariables, 0);
 }
 
 void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, root* Indicator)
 {	partFraction tempFrac;
-	Rational startCheckSum,tempCheckSum, tempCheckSum2,tempCheckSum3;
+	Rational startCheckSum,tempCheckSum, tempCheckSum2, tempCheckSum3;
 	if (partFraction::MakingConsistencyCheck)
 		this->ComputeOneCheckSum(startCheckSum,theGlobalVariables);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ tempFrac.Assign(this->TheObjects[i]);
 		if(tempFrac.RemoveRedundantShortRoots(*this,Indicator,theGlobalVariables,this->AmbientDimension))
 		{	this->AccountPartFractionInternals(-1, i, Indicator, theGlobalVariables);
@@ -10426,8 +10369,8 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
 			if (this->flagMakingProgressReport)
 			{ std::stringstream out;
 				out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
-				IndicatorWindowGlobalVariables.ProgressReportString3=out.str();
-				theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+				theGlobalVariables.theIndicatorVariables.ProgressReportString3=out.str();
+				theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 			}
  		}
 	}
@@ -10440,7 +10383,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
 
 void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, root* Indicator)
 {	partFraction tempFrac;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ tempFrac.Assign(this->TheObjects[i]);
 		if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem(*this,Indicator,theGlobalVariables,this->AmbientDimension))
 		{	this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
@@ -10449,11 +10392,11 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 		if (this->flagMakingProgressReport)
 		{ std::stringstream out;
 			out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
-			IndicatorWindowGlobalVariables.ProgressReportString4=out.str();
-      theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			theGlobalVariables.theIndicatorVariables.ProgressReportString4=out.str();
+      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 	}
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i].Coefficient.IsEqualToZero())
 		{ this->PopIndexHashAndAccount(i,theGlobalVariables, Indicator);
 			i--;
@@ -10472,19 +10415,19 @@ void FileSetPutPointerToEnd(std::fstream& theFile, bool StoreToFile)
 bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalVariables)
 {	int tempI= this->ReadFromFileComputedContributions(partFractions::ComputedContributionsList,theGlobalVariables);
 	std::filebuf* pbuf = partFraction::TheBigDump.rdbuf();
-	int tempSize = pbuf->pubseekoff(0,std::fstream::end);
+	int tempSize = pbuf->pubseekoff(0, std::fstream::end);
 	partFraction::TheBigDump.seekp(tempSize);
 	return(tempSize>=tempI);
 }
 
 bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance)
 {	if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
-	{ IndicatorWindowGlobalVariables.flagRootIsModified=true;
-	  IndicatorWindowGlobalVariables.modifiedRoot.AssignRoot(newIndicator);
-		IndicatorWindowGlobalVariables.ProgressReportString5="Indicator modified to regular";
-		theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	{ theGlobalVariables.theIndicatorVariables.flagRootIsModified=true;
+	  theGlobalVariables.theIndicatorVariables.modifiedRoot.AssignRoot(newIndicator);
+		theGlobalVariables.theIndicatorVariables.ProgressReportString5="Indicator modified to regular";
+		theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 	} else
-    IndicatorWindowGlobalVariables.flagRootIsModified=false;
+    theGlobalVariables.theIndicatorVariables.flagRootIsModified=false;
   if(ResetRelevance)
     this->ResetRelevanceIsComputed();
   if (!this->CheckForMinimalityDecompositionWithRespectToRoot(&newIndicator,theGlobalVariables))
@@ -10494,11 +10437,11 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomi
 	QuasiPolynomial oldOutput;
 	if (partFraction::MakingConsistencyCheck)
 		partFractions::CheckSum.MakeZero();
-	if (StoreToFile&& UseOldData)
+	if (StoreToFile && UseOldData)
 	{ bool tempBool = this->VerifyFileComputedContributions(theGlobalVariables);
 		assert(tempBool);
 	}
-	IndicatorWindowGlobalVariables.NumProcessedMonomialsCurrentFraction=0;
+	theGlobalVariables.theIndicatorVariables.NumProcessedMonomialsCurrentFraction=0;
 	output.Nullify((short)this->AmbientDimension);
 	///////////////////////////////////////////////
 	//this->flagAnErrorHasOccurredTimeToPanic=true;
@@ -10506,7 +10449,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(	QuasiPolynomi
 	//this->ComputeDebugString();
 	///////////////////////////////////////////////
 	static QuasiPolynomial tempQP;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ assert(partFraction::TheBigDump.is_open()||!StoreToFile);
 		assert(partFractions::ComputedContributionsList.is_open()||!StoreToFile);
 		//if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -10593,7 +10536,7 @@ void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalV
 { this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat,true,true,theGlobalVariables);
 }
 
-void partFractions::WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables)
+void partFractions::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { std::string tempS;
 	output<<"Dimension: ";
 	output<<this->AmbientDimension<<"\n";
@@ -10610,7 +10553,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables&  theGloba
 		this->TheObjects[i].WriteToFile(output, theGlobalVariables);
 }
 
-void partFractions::ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables)
+void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { intRoots tempRoots;
 	this->PrepareIndicatorVariables();
 	//input.seekg(0,std::ios::end);
@@ -10684,8 +10627,8 @@ void partFractions::ComputeSupport(ListBasicObjects<roots>& output, std::strings
 	}
 }
 
-void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange, GlobalVariables&  theGlobalVariables)
-{ this->ElementToStringBasisChange( VarChange, true, this->DebugString, PolynomialOutputFormat::UsingLatexFormat,false,true, theGlobalVariables);
+void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange, GlobalVariables& theGlobalVariables)
+{ this->ElementToStringBasisChange( VarChange, true, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
 }
 
 void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables)
@@ -10719,9 +10662,8 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
       tempWeight.elements[i]=MathRoutines::KToTheNth(8,this->AmbientDimension-i-1);
 	}
 	else
-	{	for (int i=0;i<this->AmbientDimension;i++)
+    for (int i=0;i<this->AmbientDimension;i++)
       tempWeight.elements[i]=1;//KToTheNth(8,root::AmbientDimension-i-1);
-	}
 	//tempW.ComputeWeylGroup();
 	tempW.ComputeRootsOfBorel(tempRoots);
 	theBorel.AssignRoots(tempRoots);
@@ -10784,8 +10726,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
     tempRoot.Assign(*ChamberIndicator);
   else
     tempRoot.MakeZero(this->AmbientDimension);
-	if(!this->partFractionsToPartitionFunctionAdaptedToRoot
-      (output,tempRoot,StoreToFile,UseOldData,theGlobalVariables,false))
+	if(!this->partFractionsToPartitionFunctionAdaptedToRoot(output, tempRoot, StoreToFile, UseOldData, theGlobalVariables, false))
 	{ this->ComputeDebugStringNoNumerator(theGlobalVariables);
 		assert(false);
 	}
@@ -11368,11 +11309,11 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, roo
 		for (int j=0; j<this->KillingFormMatrix.NumCols; j++)
 		{ tempRat.Assign(result.TheObjects[j]);
 			tempRat.MultiplyBy(alpha.TheObjects[i]);
-			tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[i][j]*2);
+			tempRat.MultiplyBy(this->KillingFormMatrix.elements[i][j]*(-2));
 			alphaShift.Add(tempRat);
 			tempRat.Assign(alpha.TheObjects[i]);
 			tempRat.MultiplyBy(alpha.TheObjects[j]);
-			tempRat.MultiplyByInt(this->KillingFormMatrix.elements[i][j]);
+			tempRat.MultiplyBy(this->KillingFormMatrix.elements[i][j]);
 			lengthA.Add(tempRat);
 		}
 	alphaShift.DivideBy(lengthA);
@@ -11390,27 +11331,27 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, roo
 void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
 {	Rational coefficient, tempRat;
 	coefficient.Assign(DualSpaceElement.TheObjects[index]);
-	coefficient.DivideByInteger(this->KillingFormMatrix.elements[index][index]);
+	coefficient.DivideBy(this->KillingFormMatrix.elements[index][index]);
 	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
 	{ tempRat.Assign(coefficient);
-		tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[index][i]*2);
+		tempRat.MultiplyBy(this->KillingFormMatrix.elements[index][i]*(-2));
 		DualSpaceElement.TheObjects[i].Add(tempRat);
 	}
 }
 
-void WeylGroup::SimpleReflectionRoot(int index, root& theRoot,bool RhoAction, bool UseMinusRho)
+void WeylGroup::SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho)
 { Rational alphaShift, tempRat;
 	alphaShift.MakeZero();
-	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
+	for (int i=0; i<this->KillingFormMatrix.NumCols; i++)
 	{ tempRat.Assign(theRoot.TheObjects[i]);
-		tempRat.MultiplyByInt(-this->KillingFormMatrix.elements[index][i]*2);
+		tempRat.MultiplyBy(this->KillingFormMatrix.elements[index][i]*(-2));
 		alphaShift.Add(tempRat);
 	}
 	if (this->flagAnErrorHasOcurredTimeToPanic)
 	{ std::string tempS;
 		alphaShift.ElementToString(tempS);
 	}
-	alphaShift.DivideByInteger(this->KillingFormMatrix.elements[index][index]);
+	alphaShift.DivideBy(this->KillingFormMatrix.elements[index][index]);
 	if (RhoAction)
 	{	if(UseMinusRho)
 			alphaShift.AddInteger(1);
@@ -11421,13 +11362,13 @@ void WeylGroup::SimpleReflectionRoot(int index, root& theRoot,bool RhoAction, bo
 }
 
 void WeylGroup::SimpleReflectionRootAlg( int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
-{	int lengthA=this->KillingFormMatrix.elements[index][index];
+{	int lengthA=this->KillingFormMatrix.elements[index][index].NumShort;
 	PolynomialRationalCoeff AscalarB, tempP;
 	AscalarB.Nullify((short)this->KillingFormMatrix.NumRows);
-	for (int i=0;i<this->KillingFormMatrix.NumCols;i++)
+	for (int i=0; i<this->KillingFormMatrix.NumCols; i++)
 	{ tempP.Nullify((short)this->KillingFormMatrix.NumRows);
 		tempP.CopyFromPoly(theRoot.TheObjects[i]);
-		tempP.TimesInteger(KillingFormMatrix.elements[index][i]);
+		tempP.TimesConstant(KillingFormMatrix.elements[index][i]);
 		AscalarB.AddPolynomial(tempP);
 	}
 	AscalarB.TimesInteger(-2);
@@ -11549,24 +11490,24 @@ void WeylGroup::RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, 
 		{ Rational tempRat;
 			tempRat.Assign(r1.TheObjects[i]);
 			tempRat.MultiplyBy(r2.TheObjects[j]);
-			tempRat.MultiplyByInt(this->KillingFormMatrix.elements[i][j]);
+			tempRat.MultiplyBy(this->KillingFormMatrix.elements[i][j]);
 			output.Add(tempRat);
 		}
 }
 
-void WeylGroup::GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights)
+void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights)
 { hashedRoots TheIndicatorsOrbit;
 	WeylGroup OrbitGeneratingSubset;
 	roots tempRoots;
 	tempRoots.size=0;
 	tempRoots.AddRoot(ChamberIndicator);
-	this->GenerateOrbit(tempRoots,RhoAction,TheIndicatorsOrbit, true,OrbitGeneratingSubset,false,0);
+	this->GenerateOrbit(tempRoots, RhoAction, TheIndicatorsOrbit, true, OrbitGeneratingSubset, false, 0);
 	TheIndicatorsOrbit.ComputeDebugString();
 	roots TempTest;
 	root tempRoot;
-	for (int i=0;i<OrbitGeneratingSubset.size;i++)
-	{ tempRoot= ChamberIndicator;
-		OrbitGeneratingSubset.ActOnRootByGroupElement(i,tempRoot,RhoAction,false);
+	for (int i=0; i<OrbitGeneratingSubset.size; i++)
+	{ tempRoot = ChamberIndicator;
+		OrbitGeneratingSubset.ActOnRootByGroupElement(i, tempRoot, RhoAction, false);
 		TempTest.AddRoot(tempRoot);
 	}
 	TempTest.ComputeDebugString();
@@ -11576,7 +11517,7 @@ void WeylGroup::GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoe
 	output.ChamberIndicators.size=0;
 	output.MakeActualSizeAtLeastExpandOnTop(OrbitGeneratingSubset.size);
 	input.ComputeDebugString();
-	for (int i=0;i<OrbitGeneratingSubset.size;i++)
+	for (int i=0; i<OrbitGeneratingSubset.size; i++)
 	{	bool tempBool= TheIndicatorsOrbit.TheObjects[i].IsPositiveOrZero()||(!PositiveWeightsOnly);
 		if (LimitingCone!=0)
       tempBool = tempBool && LimitingCone->IsInCone(TheIndicatorsOrbit.TheObjects[i]);
@@ -11596,8 +11537,8 @@ void WeylGroup::GenerateOrbitAlg( root& ChamberIndicator, PolynomialsRationalCoe
 	output.ComputeDebugString(this->KillingFormMatrix.NumRows);
 }
 
-void WeylGroup::ActOnRootAlgByGroupElement (	int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
-{	for (int i=0;i<this->TheObjects[index].size;i++)
+void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
+{	for (int i=0; i<this->TheObjects[index].size; i++)
 		this->SimpleReflectionRootAlg(this->TheObjects[index].TheObjects[i],theRoot,RhoAction);
 }
 
@@ -11619,21 +11560,39 @@ void WeylGroup::ComputeRootsOfBorel(roots& output)
 void WeylGroup::ElementToString(std::string& output)
 { std::string tempS;
 	std::stringstream out;
-	out <<"Size: "<<this->size<<"\n";
+	out << "Size: " << this->size << "\n";
 //	out <<"Number of roots: "<<this->RootSystem.size<<"\n";
 	this->rho.ElementToString(tempS);
-	out <<"rho:"<<tempS<<"\n";
+	out << "rho:" << tempS << "\n";
 	this->RootSystem.ElementToString(tempS);
-	out<<"Root system:\n"<< tempS<<"\n";
-	out <<"Elements of the group:\n";
-	for (int i=0;i<this->size;i++)
+	out<< "Root system:\n" << tempS << "\n";
+	out << "Elements of the group:\n";
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].ElementToString(tempS);
-		out << i<<". "<<tempS<<"\n";
+		out << i << ". " << tempS << "\n";
 	}
 	output= out.str();
 }
 
-void WeylGroup::MakeArbitrary(char WeylGroupLetter,int n)
+bool WeylGroup::IsAddmisibleDynkinType(char candidateLetter, int n)
+{ if (candidateLetter=='A' && n>0)
+    return true;
+  if (candidateLetter=='B' && n>1)
+    return true;
+  if (candidateLetter=='C' && n>1)
+    return true;
+  if (candidateLetter=='D' && n>3)
+    return true;
+  if (candidateLetter=='E' && n>5 && n<9)
+    return true;
+  if (candidateLetter=='F' && n==4)
+    return true;
+  if (candidateLetter=='G' && n==2)
+    return true;
+  return false;
+}
+
+void WeylGroup::MakeArbitrary(char WeylGroupLetter, int n)
 { switch(WeylGroupLetter)
 	{ case 'A': this->MakeAn(n);
 		break;
@@ -11731,31 +11690,31 @@ void WeylGroup::MakeG2()
 }
 
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra(	roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables)
-{ MatrixLargeRational& basisChange=theGlobalVariables.matGetEpsilonCoords2;
-  MatrixLargeRational& tempMat= theGlobalVariables.matGetEpsilonCoords3;
-  DynkinDiagramRootSubalgebra& tempDyn= theGlobalVariables.dynGetEpsCoords;
-  roots& simpleBasis=theGlobalVariables.rootsGetEpsCoords2;
-  roots& coordsInNewBasis=theGlobalVariables.rootsGetEpsCoords3;
+{ MatrixLargeRational& basisChange = theGlobalVariables.matGetEpsilonCoords2;
+  MatrixLargeRational& tempMat = theGlobalVariables.matGetEpsilonCoords3;
+  DynkinDiagramRootSubalgebra& tempDyn = theGlobalVariables.dynGetEpsCoords;
+  roots& simpleBasis = theGlobalVariables.rootsGetEpsCoords2;
+  roots& coordsInNewBasis = theGlobalVariables.rootsGetEpsCoords3;
   simpleBasis.CopyFromBase(generators);
-  tempDyn.ComputeDiagramTypeModifyInput(simpleBasis,*this);
-  bool tempBool=true;
+  tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this);
+  bool tempBool = true;
   if (generators.size==0)
-    tempBool=false;
+    tempBool = false;
   if (!tempBool)
   { output.SetSizeExpandOnTopNoObjectInit(input.size);
-    for(int i=0;i<input.size;i++)
+    for(int i=0; i<input.size; i++)
       output.TheObjects[i].MakeZero(0);
     return;
   }
-  basisChange.Resize(0,0,true);
-  for (int i=0;i<tempDyn.SimpleBasesConnectedComponents.size;i++)
+  basisChange.Resize(0, 0, true);
+  for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
   { this->GetEpsilonMatrix( tempDyn.DynkinTypeStrings.TheObjects[i].at(1), tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size, theGlobalVariables,tempMat);
     basisChange.DirectSumWith(tempMat);
     //basisChange.ComputeDebugString();
   }
   tempDyn.SimpleBasesConnectedComponents.CollectionToRoots(simpleBasis);
   coordsInNewBasis.SetSizeExpandOnTopNoObjectInit(input.size);
-  for (int i=0;i<input.size;i++)
+  for (int i=0; i<input.size; i++)
 		input.TheObjects[i].GetCoordsInBasis(simpleBasis, coordsInNewBasis.TheObjects[i], theGlobalVariables);
   //basisChange.ComputeDebugString();
   //coordsInNewBasis.ComputeDebugString();
@@ -11765,12 +11724,12 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra(	roots& generators, ListBasicObjec
 
 void WeylGroup::GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& tempMat=theGlobalVariables.matGetEpsilonCoords;
-	this->GetEpsilonMatrix(WeylLetter,WeylRank,theGlobalVariables, tempMat);
+	this->GetEpsilonMatrix(WeylLetter, WeylRank, theGlobalVariables, tempMat);
 //	tempMat.ComputeDebugString();
 	root result; result.MakeZero(tempMat.NumRows);
 	Rational tempRat;
-	for (int i=0;i<tempMat.NumRows;i++)
-		for (int j=0;j<input.size;j++)
+	for (int i=0; i<tempMat.NumRows; i++)
+		for (int j=0; j<input.size; j++)
 		{ tempRat.Assign(tempMat.elements[i][j]);
 			tempRat.MultiplyBy(input.TheObjects[j]);
 			result.TheObjects[i].Add(tempRat);
@@ -11782,7 +11741,7 @@ void WeylGroup::GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBas
 void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output)
 { //longer root has always smaller index
 	if (WeylLetter=='A')
-	{ output.init(WeylRank+1,WeylRank);
+	{ output.init(WeylRank+1, WeylRank);
 		output.NullifyAll();
 		for (int i=0; i<WeylRank; i++)
 		{ output.elements[i][i]=1;
@@ -11793,7 +11752,7 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
 	if (WeylLetter=='B')
 	{ output.init(WeylRank,WeylRank);
 		output.NullifyAll();
-		for (int i=0;i<WeylRank-1;i++)
+		for (int i=0; i<WeylRank-1; i++)
 		{ output.elements[i][i]=1;
 			output.elements[i+1][i]=-1;
 		}
@@ -11802,7 +11761,7 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
 	if (WeylLetter=='C')
 	{ output.init(WeylRank,WeylRank);
 		output.NullifyAll();
-		for (int i=0;i<WeylRank-1;i++)
+		for (int i=0; i<WeylRank-1; i++)
 		{ output.elements[i][i]=1;
 			output.elements[i][i+1]=-1;
 		}
@@ -11815,7 +11774,7 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
 		//smaller index
 		output.init(WeylRank,WeylRank);
 		output.NullifyAll();
-		for (int i=0;i<WeylRank-2;i++)
+		for (int i=0; i<WeylRank-2; i++)
 		{ output.elements[i][WeylRank-3-i]=1;
 			if (i!=0)
 				output.elements[i][WeylRank-2-i]=-1;
@@ -12742,187 +12701,6 @@ void OneVarPolynomials::ElementToString(std::string& output,int KLindex)
 	output= out.str();
 }
 
-void RandomCodeIDontWantToDelete::KLPolysRandomCode()
-{ std::string tempS;
-	WeylGroup tempW;
-	tempW.MakeAn(3);
-	tempW.ComputeWeylGroup();
-	tempW.ComputeDebugString();
-	VermaModulesWithMultiplicities M;
-	M.ComputeKLPolys(& tempW, false);
-	M.RPolysToString(tempS);
-}
-
-void RandomCodeIDontWantToDelete::SomeRandomTests6()
-{ WeylGroup tempW;
-	tempW.MakeF4();
-	MatrixLargeRational tempMat;
-	tempMat.AssignMatrixIntWithDen(tempW.KillingFormMatrix,1);
-	tempMat.ComputeDebugString();
-	Rational tempRat;
-	tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
-	tempMat.ComputeDebugString();
-}
-
-void RandomCodeIDontWantToDelete::SomeRandomTests5()
-{
-}
-
-void RandomCodeIDontWantToDelete::SomeRandomTests4()
-{ OneVarIntPolynomial tempP1,tempP2;
-	tempP1.MakeMonomial(1,-1);
-	tempP1.ComputeDebugString();
-	tempP2.MakeMonomial(1,1);
-	tempP2.ComputeDebugString();
-	tempP1.AddPolynomial(tempP2);
-	tempP1.ComputeDebugString();
-	tempP2.Assign(tempP1);
-	for (int i=0;i<20;i++)
-	{ tempP1.MultiplyBy(tempP2);
-		tempP1.ComputeDebugString();
-	}
-	tempP1.SubstitutionOneOverX();
-	tempP1.ComputeDebugString();
-	tempP1.MakeMonomial(1,1);
-	tempP1.ComputeDebugString();
-	tempP1.SubstitutionOneOverX();
-	tempP1.ComputeDebugString();
-	tempP1.MakeMonomial(1,0);
-	tempP1.ComputeDebugString();
-	tempP1.SubstitutionOneOverX();
-	tempP1.ComputeDebugString();
-	tempP1.MakeMonomial(1,-1);
-	tempP1.ComputeDebugString();
-	tempP1.SubstitutionOneOverX();
-	tempP1.ComputeDebugString();
-	tempP2.MakeConst(4);
-	tempP2.ComputeDebugString();
-	tempP1.MakeQuadratic(1,2,3);
-	tempP1.ComputeDebugString();
-	tempP2.SubstitutionOneOverX();
-	tempP2.ComputeDebugString();
-	tempP1.SubstitutionOneOverX();
-	tempP1.ComputeDebugString();
-	tempP2.MultiplyBy(tempP1);
-	tempP2.ComputeDebugString();
-	tempP2.SubstitutionOneOverX();
-	tempP2.ComputeDebugString();
-	tempP1.AddPolynomial(tempP2);
-	tempP1.ComputeDebugString();
-	tempP1.SubstitutionOneOverX();
-////////////////////////////////////////
-}
-
-void RandomCodeIDontWantToDelete::SomeRandomTests3()
-{
-}
-
-void RandomCodeIDontWantToDelete::RevealTheEvilConspiracy()
-{
-}
-
-void RandomCodeIDontWantToDelete::SomeRandomTests2()
-{ Rational tempRat;
-	std::string tempS;
-	tempRat.AssignNumeratorAndDenominator(10,2);
-	tempRat.AssignFracValue();
-	tempRat.ElementToString(tempS);
-	tempRat.AssignNumeratorAndDenominator(-10,2);
-	tempRat.AssignFracValue();
-	tempRat.ElementToString(tempS);
-	tempRat.AssignNumeratorAndDenominator(-12,7);
-	tempRat.AssignFracValue();
-	tempRat.ElementToString(tempS);
-	tempRat.AssignNumeratorAndDenominator(1,2);
-	tempRat.AssignFracValue();
-	tempRat.ElementToString(tempS);
-	tempRat.AssignNumeratorAndDenominator(0,2);
-	tempRat.AssignFracValue();
-	tempRat.ElementToString(tempS);
-	tempRat.AssignNumeratorAndDenominator(-9,14);
-	//Rational::flagAnErrorHasOccurredTimeToPanic=true;
-	/*tempRat.RaiseToPower(100);
-	tempRat.ElementToString(tempS);
-	tempRat.MakeOne();
-	for (int i=0;i<200;i++)
-	{ Rational tempR;
-		tempR.AssignNumeratorAndDenominator(1,i+1);
-		tempRat.MultiplyBy(tempR);
-	}
-	tempRat.ElementToString(tempS);
-	Rational tempRat2;
-	tempRat2.MakeOne();
-	for (int i=0;i<201;i++)
-	{ Rational tempR;
-		tempR.AssignNumeratorAndDenominator(1,i+1);
-		tempRat2.MultiplyBy(tempR);
-	}
-	tempRat2.ElementToString(tempS);
-	tempRat2.Subtract(tempRat);
-	tempRat2.ElementToString(tempS);
-	Stop();*/
-	affineCone tempCone;
-	MatrixLargeRational tempA, tempb, output;
-	tempA.init(5,2);
-	tempb.init(5,1);
-	MatrixLargeRational::MatrixElementSeparator=",\t";
-	tempA.elements[0][0].AssignInteger( 0); tempA.elements[0][1].AssignInteger(-1); tempb.elements[0][0].AssignInteger(-2);
-	tempA.elements[1][0].AssignInteger(1);	tempA.elements[1][1].AssignInteger(-1); tempb.elements[1][0].AssignInteger(-1);
-	tempA.elements[2][0].AssignInteger(1);	tempA.elements[2][1].AssignInteger( 0); tempb.elements[2][0].AssignInteger(2);
-	tempA.elements[3][0].AssignInteger(-1); tempA.elements[3][1].AssignInteger( 0); tempb.elements[3][0].AssignInteger(0);
-	tempA.elements[4][0].AssignInteger(1);	tempA.elements[4][1].AssignInteger( 1); tempb.elements[4][0].AssignInteger(2);
-	tempA.ComputeDebugString();
-	tempb.ComputeDebugString();
-	output.ComputeDebugString();
-//	tempCone.SystemLinearInequalitiesHasSolution(tempA,tempb,output);
-	PolynomialRationalCoeff tempP1,tempP2,tempP3,tempP4;
-	tempP1.DivideBy(tempP2, tempP3, tempP4);
-}
-
-void RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo()
-{	QuasiNumber p,r,q,s,t,u;
-	q.MakeConst(ROne,3);
-	p.MakePureQN(3,0,ROne,2,3,3);
-	p.ComputeDebugString();
-	r.MakePureQN(3,1,ROne,1,1,3);
-	r.ComputeDebugString();
-	s.MakePureQN(3,2,RMOne,2,1,3);
-	s.ComputeDebugString();
-	s.Add(p);
-	s.ComputeDebugString();
-	s.MultiplyBy(r);
-	s.ComputeDebugString();
-	s.Add(r);
-	s.ComputeDebugString();
-	r.MakePureQN(1,0,ROne,1,2,3);
-	r.ComputeDebugString();
-	s.MakePureQN(1,0,ROne,2,2,3);
-	s.ComputeDebugString();
-	QPSub TheSub;
-	TheSub.TheQNSub.init(4,1);
-	TheSub.QNSubDen=3;
-	TheSub.TheQNSub.elements[0][0]=1;
-	TheSub.TheQNSub.elements[1][0]=2;
-	TheSub.TheQNSub.elements[2][0]=1;
-	TheSub.TheQNSub.elements[3][0]=1;
-	TheSub.TheQNSub.elements[0][0]=1;
-	r.LinearSubstitution(TheSub);
-	r.ComputeDebugString();
-	r.MultiplyBy(r);
-	r.ComputeDebugString();
-	TheSub.TheQNSub.elements[0][0]=1;
-	TheSub.TheQNSub.elements[1][0]=0;
-	TheSub.TheQNSub.elements[2][0]=2;
-	s.LinearSubstitution(TheSub);
-	s.ComputeDebugString();
-	r.MultiplyBy(s);
-	r.ComputeDebugString();
-	CompositeComplexQN tempC;
-	r.QNtoComplex(tempC);
-	tempC.ComputeDebugString();
-
-}
-
 void rootFKFTcomputation::initA2A1A1inD5()
 {	//	int j=0;
 	intRoot tempRoot;
@@ -12997,8 +12775,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 {	this->initA2A1A1inD5();
 //	RandomCodeIDontWantToDelete::SomeRandomTests2();
 	if (this->useOutputFileForFinalAnswer)
-	{ RandomCodeIDontWantToDelete::SomeRandomTestsIWroteMonthsAgo();
-		std::fstream tempFile;
+	{ std::fstream tempFile;
 		tempFile.open(this->OutputFile.c_str(),std::fstream::in | std::fstream::out | std::fstream::app);
 		QuasiPolynomial tempQP;
 		tempQP.ReadFromFile(tempFile,5);
@@ -13164,7 +12941,7 @@ void rootFKFTcomputation::MakeRootFKFTsub(root& direction, QPSub& theSub)
 void rootFKFTcomputation::MakeTheRootFKFTSum (	root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs,	QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical)
 { PolynomialsRationalCoeffCollection TheChambersInTheGame;
 	PolynomialsRationalCoeff StartingRoot;
-	//::IndicatorWindowGlobalVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
+	//::theGlobalVariables.theIndicatorVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
 	Cone TheNilradicalCone;
 	TheNilradicalCone.ComputeFromDirections(theNilradical,*this->TheGlobalVariables,5);
 	TheNilradicalCone.ComputeDebugString();
@@ -13559,8 +13336,7 @@ void LaTeXProcedures::drawline(	double X1, double Y1, double X2, double Y2, unsi
 }
 
 void thePFcomputation::Run()
-{ RandomCodeIDontWantToDelete::SomeRandomTests6();
-	this->theWeylGroup.MakeEn(6);
+{ this->theWeylGroup.MakeEn(6);
 	this->theWeylGroup.GenerateRootSystemFromKillingFormMatrix();
 	this->theWeylGroup.RootSystem.ComputeDebugString();
 	this->ComputeTableAllowed();
@@ -13587,10 +13363,10 @@ void thePFcomputation::ElementToString(std::string& output)
 
 void thePFcomputation::ComputeTableAllowed()
 { this->tableForbidden.SetSizeExpandOnTopNoObjectInit(this->theWeylGroup.RootSystem.size);
-	this->theKillingForm.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
+	this->theKillingForm.Assign(this->theWeylGroup.KillingFormMatrix);
 	this->theKillingForm.ComputeDebugString();
 	this->theForbiddenSelections.SetSizeExpandOnTopNoObjectInit(this->theWeylGroup.RootSystem.size);
-	for (int i=0;i<this->theWeylGroup.RootSystem.size;i++)
+	for (int i=0; i<this->theWeylGroup.RootSystem.size;i++)
 	{ this->tableForbidden.TheObjects[i].init(this->theWeylGroup.RootSystem.size);
 		for (int j=0; j<this->theWeylGroup.RootSystem.size;j++)
 		{ Rational tempRat;
@@ -13648,11 +13424,21 @@ void thePFcomputation::SelectionToString(std::string &output, int theDimension)
 	tempMat.ElementToString(output);
 }
 
-void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational &output, int theDimension)
+void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational& output, int theDimension)
 {	output.init((short)theDimension,(short)theDimension);
-	for (int i=0;i<theDimension;i++)
-		for (int j=0;j<theDimension;j++)
+	for (int i=0; i<theDimension; i++)
+		for (int j=0; j<theDimension; j++)
 			output.elements[i][j].Assign(this->theWeylGroup.RootSystem.TheObjects[this->theSelection.elements[i]].TheObjects[j]);
+}
+
+void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
+{ this->SimpleBasisK.CopyFromBase(this->genK);
+  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl);
+  this->SimpleBasisCentralizerRoots.size=0;
+  for (int i=0; i<this->AmbientWeyl.RootsOfBorel.size; i++)
+    if (this->rootIsInCentralizer(this->AmbientWeyl.RootsOfBorel.TheObjects[i]))
+      this->SimpleBasisCentralizerRoots.AddObjectOnTop(this->AmbientWeyl.RootsOfBorel.TheObjects[i]);
+  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->AmbientWeyl);
 }
 
 void rootSubalgebra::ComputeAllButAmbientWeyl()
@@ -13673,7 +13459,6 @@ void rootSubalgebra::ComputeAll()
 	this->ComputeAllButAmbientWeyl();
 	//this->ComputeDebugString();
 }
-
 
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
 { this->CentralizerKmods.init(this->kModules.size);
@@ -13866,7 +13651,7 @@ bool rootSubalgebra::RootsDefineASubalgebra(roots& theRoots)
 
 bool rootSubalgebra::IsBKhighest(root& input)
 { for (int i=0; i<this->SimpleBasisK.size; i++)
-		if (this->IsARoot(input+this->SimpleBasisK.TheObjects[i]))
+		if (this->IsARoot(input + this->SimpleBasisK.TheObjects[i]))
 			return false;
 	return true;
 }
@@ -13875,10 +13660,10 @@ bool rootSubalgebra::rootIsInCentralizer(root& input)
 { root tempRoot;
   for(int i=0; i<this->SimpleBasisK.size; i++)
   { tempRoot=input+this->SimpleBasisK.TheObjects[i];
-    if (this->IsARoot(tempRoot))
+    if (this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
       return false;
     tempRoot=input-this->SimpleBasisK.TheObjects[i];
-    if (this->IsARoot(tempRoot))
+    if (this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
       return false;
   }
   return true;
@@ -14035,9 +13820,9 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 	std::stringstream out4, out5;
 	out5<< progress+1 << " out of "<< outOf <<" checked; ";
 	out5<< found << " found pos. generators";
-	//::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	//::theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables)
@@ -14045,9 +13830,9 @@ void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVar
 		return;
 	std::stringstream out5;
 	out5<<"Computing pairing table: "<< index+1 << " out of "<< outOf;
-	::IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
-	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
@@ -14068,13 +13853,13 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
 			out3<<  "Total # subalgebras processed: "<< owner.NumSubalgebrasProcessed;
 			out4<< "Num cone condition failures: " << owner.NumConeConditionFailures;
 			out5<<"Num failures to find l-prohibiting relations: " <<owner.theBadRelations.size;
-			::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-			::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
+			theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+			theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
 		}
-		::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-		::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
-		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-		theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+		theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
+		theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+		theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+		theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 	}
 }
 
@@ -14601,7 +14386,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalV
 	theGlobalVariables.rootSAsGenerateAll.TheObjects[0].genK.size=0;
 	theGlobalVariables.rootSAsGenerateAll.TheObjects[0].AmbientWeyl.Assign(this->AmbientWeyl);
 	theGlobalVariables.rootSAsGenerateAll.TheObjects[0].ComputeAll();
-	this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(theGlobalVariables.rootSAsGenerateAll,1,theGlobalVariables);
+	this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(theGlobalVariables.rootSAsGenerateAll, 1, theGlobalVariables);
   if (sort)
     this->SortDescendingOrderBySSRank();
   if(computeEpsCoords)
@@ -14609,37 +14394,39 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalV
       this->TheObjects[i].ComputeEpsCoordsWRTk(theGlobalVariables);
 }
 
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables)
+void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)
 { this->AddObjectOnTop(bufferSAs.TheObjects[RecursionDepth-1]);
 	int currentAlgebraIndex=this->size-1;
 	rootSubalgebra::ProblemCounter++;
 	if (RecursionDepth>=bufferSAs.size)
 		bufferSAs.SetSizeExpandOnTopNoObjectInit(bufferSAs.size+this->AmbientWeyl.KillingFormMatrix.NumRows);
-	bufferSAs.TheObjects[RecursionDepth]=bufferSAs.TheObjects[RecursionDepth-1];
+	bufferSAs.TheObjects[RecursionDepth].genK = bufferSAs.TheObjects[RecursionDepth-1].genK;
+	bufferSAs.TheObjects[RecursionDepth].AmbientWeyl.Assign(this->AmbientWeyl);
 	//if (RecursionDepth>4)
    // return;
-	for (int k=0; k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size;k++)
+	for (int k=0; k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size; k++)
 		if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
 		{ bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
-			bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
-			this->MakeProgressReportGenerationSubalgebras(	bufferSAs,RecursionDepth,theGlobalVariables, k, bufferSAs.TheObjects[RecursionDepth-1].kModules.size);
+			bufferSAs.TheObjects[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
+			this->MakeProgressReportGenerationSubalgebras(bufferSAs, RecursionDepth, theGlobalVariables, k, bufferSAs.TheObjects[RecursionDepth-1].kModules.size/2);
 			int indexSA= this->IndexSubalgebra(theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth], theGlobalVariables);
 			if (indexSA==-1)
-			{ this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddObjectOnTopNoRepetitionOfObject(this->size);
-				this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(	bufferSAs,RecursionDepth+1,theGlobalVariables);
+			{ bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
+			  this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddObjectOnTopNoRepetitionOfObject(this->size);
+				this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(bufferSAs, RecursionDepth+1, theGlobalVariables);
 			} else
 				this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddObjectOnTopNoRepetitionOfObject(indexSA);
 			bufferSAs.TheObjects[RecursionDepth].genK.PopIndexSwapWithLast(bufferSAs.TheObjects[RecursionDepth].genK.size-1);
 		}
 }
 
-void rootSubalgebras::MakeProgressReportGenerationSubalgebras(	rootSubalgebras& bufferSAs, int RecursionDepth,GlobalVariables &theGlobalVariables, int currentIndex, int TotalIndex)
+void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out1, out2, out3,out4,out5;
 	std::stringstream* tempOut;
 	tempOut=&out1;
-	for (int i=0;i<=RecursionDepth;i++)
+	for (int i=0; i<=RecursionDepth; i++)
 	{ (*tempOut)<<bufferSAs.TheObjects[i].theDynkinDiagram.DebugString;
 		if (i!=RecursionDepth)
 			(*tempOut)<< ": ";
@@ -14650,13 +14437,13 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(	rootSubalgebras& 
 		if (i==8)
 			tempOut=&out4;
 	}
-	out5<< "Included root " << currentIndex<< " out of "<< TotalIndex <<" Total found SAs: "<<this->size;
-	::IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	::IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	out5<< "Included root " << currentIndex+1<< " out of "<< TotalIndex <<" Total found SAs: "<<this->size;
+	theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
@@ -14668,9 +14455,9 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGrou
 	if (theSubgroup.truncated)
 		out4<<"truncated ";
 	out4<<"group preserving k: "<< theSubgroup.size;
-	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void rootSubalgebras::GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
@@ -14692,9 +14479,9 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
 	theRootSA.GenerateAutomorphisms(theRootSA, theGlobalVariables, &theSubgroup, true);
 	//std::string tempS;
 	//theSubgroup.ElementToString(tempS);
-	//IndicatorWindowGlobalVariables.StatusString1=tempS;
-	//IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-	//theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	//theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
+	//theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+	//theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 	theSubgroup.ComputeSubGroupFromGeneratingReflections(selectedRootsBasisCentralizer, theSubgroup.ExternalAutomorphisms, theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
 	this->CentralizerIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
 	this->CentralizerOuterIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
@@ -14769,13 +14556,15 @@ int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input, GlobalVariables& the
 	//if (this->ProblemCounter==49)
 		//Stop();
 	int result=-1;
-	for (int j=0;j<this->size;j++)
+	for (int j=0; j<this->size; j++)
 	{ rootSubalgebra& right=this->TheObjects[j];
 		if (input.theDynkinDiagram.DebugString == right.theDynkinDiagram.DebugString && input.theCentralizerDiagram.DebugString == right.theCentralizerDiagram.DebugString)
 		{ result=j;
 			if (!this->flagUseDynkinClassificationForIsomorphismComputation)
+      { input.ComputeAllButAmbientWeyl();
         if(!input.GenerateAutomorphisms(right, theGlobalVariables, 0, false))
 					result=-1;
+      }
 			if (result!=-1)
 				return result;
 		}
@@ -17798,9 +17587,9 @@ void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables&
 		return;
 	std::stringstream out;
 	out <<index <<" out of "<< outOf <<" =3^8-1 computed";
-	IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
-	IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
+	theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
@@ -18234,11 +18023,11 @@ void SimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundG
 	std::stringstream out2,out3;
   out2<< "found "<<found<< " out of "<<progress+1<<" processed out of total " << outOf<<" candidates";
   out3<< foundGood<<" good subalgebras realizing " <<DifferentHs <<" different h's";
-  IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
-  IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-  IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
-  IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+  theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void SimpleLieAlgebra::MakeSl2ProgressReportNumCycles(	int progress, int outOf,	GlobalVariables& theGlobalVariables)
@@ -18246,9 +18035,9 @@ void SimpleLieAlgebra::MakeSl2ProgressReportNumCycles(	int progress, int outOf,	
 		return;
 	std::stringstream out4;
   out4<< "Searching fixed characteristic: " << progress<<" out of "<< outOf;
-  IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-  IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+  theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void SimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
@@ -18258,16 +18047,16 @@ void SimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, G
   int x=(i*Total*Total+j*Total+k+1);
   out2<< "i: "<<i+1<<" of "<< Total << " j: "<<j+1<<" of "<< Total << " k: "<<k+1<<" of "<< Total;
   out3<< "Total progress: " << x<<" out of "<< (Total*Total*Total);
-  IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
-  IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
   //if (x%100==0)
-  { IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
-    IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+  { theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+    theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
   } //else
-  //{ IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-   // IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
+  //{ theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
+   // theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
   //}
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 //////////////////////////////////////////////////////////////
@@ -18306,39 +18095,39 @@ bool minimalRelationsProverState::IsBKSingularImplied(root& input, WeylGroup& th
   return true;
 }
 
-void minimalRelationsProverState::SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverState::SortAlphasAndBetas(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { roots& theAlphas = this->PartialRelation.Alphas;
 	roots& theBetas  = this->PartialRelation.Betas;
 	for(int i=0; i<theAlphas.size; i++)
 		for (int j=i+1; j<theAlphas.size;j++)
-			if (this->Root1IsGreaterThanRoot2(j,i,theAlphas,theBetas,TheGlobalVariables,theWeyl))
+			if (this->Root1IsGreaterThanRoot2(j,i,theAlphas,theBetas,theGlobalVariables,theWeyl))
 				theAlphas.SwapTwoIndices(i,j);
 	for(int i=0;i<theBetas.size; i++)
 		for (int j=i+1; j<theBetas.size; j++)
-			if (this->Root1IsGreaterThanRoot2(j,i,theBetas,theAlphas,TheGlobalVariables,theWeyl))
+			if (this->Root1IsGreaterThanRoot2(j,i,theBetas,theAlphas,theGlobalVariables,theWeyl))
 				theBetas.SwapTwoIndices(i,j);
 }
 
-void minimalRelationsProverStateFixedK::SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStateFixedK::SortAlphasAndBetas(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { roots& theAlphas = this->PartialRelation.Alphas;
 	roots& theBetas  = this->PartialRelation.Betas;
 	for(int i=0;i<theAlphas.size;i++)
 		for (int j=i+1;j<theAlphas.size;j++)
-			if (minimalRelationsProverState::Root1IsGreaterThanRoot2(j,i,theAlphas,theBetas,TheGlobalVariables,theWeyl))
+			if (minimalRelationsProverState::Root1IsGreaterThanRoot2(j,i,theAlphas,theBetas,theGlobalVariables,theWeyl))
 				theAlphas.SwapTwoIndices(i,j);
 	for(int i=0;i<theBetas.size;i++)
 		for (int j=i+1;j<theBetas.size;j++)
-			if (minimalRelationsProverState::Root1IsGreaterThanRoot2(j,i,theBetas,theAlphas,TheGlobalVariables,theWeyl))
+			if (minimalRelationsProverState::Root1IsGreaterThanRoot2(j,i,theBetas,theAlphas,theGlobalVariables,theWeyl))
 				theBetas.SwapTwoIndices(i,j);
 }
 
-bool minimalRelationsProverState::Root1IsGreaterThanRoot2	(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &TheGlobalVariables, WeylGroup &theWeyl)
+bool minimalRelationsProverState::Root1IsGreaterThanRoot2	(	int index1, int index2,roots& setWeBelongTo, roots& setOtherSet, GlobalVariables &theGlobalVariables, WeylGroup &theWeyl)
 { root& root1=setWeBelongTo.TheObjects[index1];
 	root& root2=setWeBelongTo.TheObjects[index2];
 	bool IsLong1, IsLong2;
 	int NumLongValue1, NumMixedValue1, NumShortValue1,  NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1, NumLongValue2, NumMixedValue2, NumShortValue2,	NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2;
-	minimalRelationsProverState::GetNumberScalarProductsData(	root1,setWeBelongTo, IsLong1, NumLongValue1, NumMixedValue1, NumShortValue1, NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1, TheGlobalVariables, theWeyl);
-	minimalRelationsProverState::GetNumberScalarProductsData(	root2,setWeBelongTo, IsLong2, NumLongValue2, NumMixedValue2, NumShortValue2,		NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2, TheGlobalVariables, theWeyl);
+	minimalRelationsProverState::GetNumberScalarProductsData(	root1,setWeBelongTo, IsLong1, NumLongValue1, NumMixedValue1, NumShortValue1, NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1, theGlobalVariables, theWeyl);
+	minimalRelationsProverState::GetNumberScalarProductsData(	root2,setWeBelongTo, IsLong2, NumLongValue2, NumMixedValue2, NumShortValue2,		NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2, theGlobalVariables, theWeyl);
 	if (IsLong1> IsLong2) return true;
 	if (IsLong1< IsLong2) return false;
 	if (NumLongValue1>NumLongValue2) return true;
@@ -18356,7 +18145,7 @@ bool minimalRelationsProverState::Root1IsGreaterThanRoot2	(	int index1, int inde
 	return false;
 }
 
-void minimalRelationsProverState::GetNumberScalarProductsData(root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue, int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue, int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverState::GetNumberScalarProductsData(root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue, int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue, int& NumMinusShortValue, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { Rational tempRat = theWeyl.RootScalarKillingFormMatrixRoot(input,input);
 	isLong=false; NumMinusShortValue=0;
 	NumLongValue=0; NumMixedValue=0; NumShortValue=0; NumMinusLongValue=0;
@@ -18395,10 +18184,10 @@ void minimalRelationsProverState::GetNumberScalarProductsData(root& input, roots
 		}
 }
 
-bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots	(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots	(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 {	root tempRoot;
 	//this->nonBKSingularGmodLRoots.ComputeDebugString();
-	//this->ComputeDebugString(theWeyl, TheGlobalVariables);
+	//this->ComputeDebugString(theWeyl, theGlobalVariables);
 	for (int i=0;i<this->nonLNonSingularRoots.size;i++)
 	{ root& theRoot= this->nonLNonSingularRoots.TheObjects[i];
     int LastFoundIndex=-1;
@@ -18433,7 +18222,7 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots	(WeylGroup& theW
 	return true;
 }
 
-bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelationsProverStates& owner, GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
+bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelationsProverStates& owner, GlobalVariables& theGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsInternallyPossible=true;
   this->InternalStateIsComputed=true;
 //  this->StateIsDubious=false;
@@ -18445,7 +18234,7 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelati
   selAlphas.initMe2(this->PartialRelation.Alphas.size,1);
   int NumAlphas= MathRoutines::KToTheNth(selAlphas.MaxMultiplicity+1,this->PartialRelation.Alphas.size);
   int NumBetas=MathRoutines::KToTheNth(selBetas.MaxMultiplicity+1,this->PartialRelation.Betas.size);
-//  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+//  this->ComputeDebugString(theWeyl, theGlobalVariables);
   for (int i=0;i<NumAlphas;i++)
   { for (int j=0;j<NumBetas;j++)
 		{ if (this->CanBeShortened(this->PartialRelation, selAlphas, selBetas, theWeyl, AssumeGlobalMinimalityRHS))
@@ -18453,21 +18242,21 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelati
         return false;
       }
       selBetas.IncrementSubset();
-      this->MakeProgressReportCanBeShortened(i*NumBetas+j,NumAlphas*NumBetas,TheGlobalVariables);
+      this->MakeProgressReportCanBeShortened(i*NumBetas+j,NumAlphas*NumBetas,theGlobalVariables);
     }
     selAlphas.IncrementSubset();
   }
-//  this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	if (! this->ComputeCommonSenseImplicationsReturnFalseIfContradiction(theWeyl, TheGlobalVariables))
+//  this->ComputeDebugString(theWeyl, theGlobalVariables);
+	if (! this->ComputeCommonSenseImplicationsReturnFalseIfContradiction(theWeyl, theGlobalVariables))
 	{ this->StateIsInternallyPossible=false;
 		return false;
 	}
-//  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+//  this->ComputeDebugString(theWeyl, theGlobalVariables);
 	roots tempRoots;
 	tempRoots.AddListOnTop(this->PartialRelation.Alphas);
 	tempRoots.AddListOnTop(this->PartialRelation.Betas);
-	if (tempRoots.GetRankOfSpanOfElements(TheGlobalVariables)< this->PartialRelation.Betas.size+this->PartialRelation.Alphas.size)
-	{ if (!roots::ConesIntersect(TheGlobalVariables, this->PartialRelation.Betas, this->PartialRelation.Alphas, theWeyl.KillingFormMatrix.NumRows))
+	if (tempRoots.GetRankOfSpanOfElements(theGlobalVariables)< this->PartialRelation.Betas.size+this->PartialRelation.Alphas.size)
+	{ if (!roots::ConesIntersect(theGlobalVariables, this->PartialRelation.Betas, this->PartialRelation.Alphas, theWeyl.KillingFormMatrix.NumRows))
 		{ this->StateIsInternallyPossible=false;
 			return false;
 		}
@@ -18476,15 +18265,15 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelati
 	}
  	roots possibleAlphas, possibleBetas;
 	this->GetPossibleAlphasAndBetas(possibleAlphas, possibleBetas, theWeyl);
-	if (!roots::ConesIntersect(TheGlobalVariables, possibleBetas, possibleAlphas, theWeyl.KillingFormMatrix.NumRows))
+	if (!roots::ConesIntersect(theGlobalVariables, possibleBetas, possibleAlphas, theWeyl.KillingFormMatrix.NumRows))
 	{ this->StateIsInternallyPossible=false;
 		return false;
 	}
-  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+  this->ComputeDebugString(theWeyl, theGlobalVariables);
   return true;
 }
 
-bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( GlobalVariables& TheGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
+bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( GlobalVariables& theGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsPossible=true;
 //  this->StateIsDubious=false;
 	for (int i=0;i<this->PartialRelation.Betas.size;i++)
@@ -18496,7 +18285,7 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( Global
   selAlphas.initMe2(this->PartialRelation.Alphas.size,1);
   int NumAlphas= MathRoutines::KToTheNth(selAlphas.MaxMultiplicity+1,this->PartialRelation.Alphas.size);
   int NumBetas=MathRoutines::KToTheNth(selBetas.MaxMultiplicity+1,this->PartialRelation.Betas.size);
-//  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+//  this->ComputeDebugString(theWeyl, theGlobalVariables);
   for (int i=0;i<NumAlphas;i++)
   { for (int j=0;j<NumBetas;j++)
 		{ if (this->CanBeShortened(this->PartialRelation, selAlphas,selBetas,theWeyl,AssumeGlobalMinimalityRHS))
@@ -18504,22 +18293,22 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( Global
         return false;
       }
       selBetas.IncrementSubset();
-      this->MakeProgressReportCanBeShortened(i*NumBetas+j,NumAlphas*NumBetas,TheGlobalVariables);
+      this->MakeProgressReportCanBeShortened(i*NumBetas+j,NumAlphas*NumBetas,theGlobalVariables);
     }
     selAlphas.IncrementSubset();
   }
-//  this->ComputeDebugString(theWeyl, TheGlobalVariables);
-	if (! this->ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(theWeyl, TheGlobalVariables))
+//  this->ComputeDebugString(theWeyl, theGlobalVariables);
+	if (! this->ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(theWeyl, theGlobalVariables))
 	{ this->StateIsPossible=false;
 		return false;
 	}
-//  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+//  this->ComputeDebugString(theWeyl, theGlobalVariables);
 	//A relation consists always of minimally linearly dependent vectors, hence the below check.
 	roots tempRoots;
 	tempRoots.AddListOnTop(this->PartialRelation.Alphas);
 	tempRoots.AddListOnTop(this->PartialRelation.Betas);
-	if (tempRoots.GetRankOfSpanOfElements(TheGlobalVariables)< this->PartialRelation.Betas.size+this->PartialRelation.Alphas.size)
-	{ if (!roots::ConesIntersect(TheGlobalVariables, this->PartialRelation.Betas, this->PartialRelation.Alphas, theWeyl.KillingFormMatrix.NumRows))
+	if (tempRoots.GetRankOfSpanOfElements(theGlobalVariables)< this->PartialRelation.Betas.size+this->PartialRelation.Alphas.size)
+	{ if (!roots::ConesIntersect(theGlobalVariables, this->PartialRelation.Betas, this->PartialRelation.Alphas, theWeyl.KillingFormMatrix.NumRows))
 		{ this->StateIsPossible=false;
 			return false;
 		}
@@ -18529,38 +18318,38 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( Global
 
  	roots possibleAlphas, possibleBetas;
 	this->GetPossibleAlphasAndBetas(possibleAlphas, possibleBetas, theWeyl);
-	if (!roots::ConesIntersect(TheGlobalVariables, possibleBetas, possibleAlphas, theWeyl.KillingFormMatrix.NumRows))
+	if (!roots::ConesIntersect(theGlobalVariables, possibleBetas, possibleAlphas, theWeyl.KillingFormMatrix.NumRows))
 	{ this->StateIsPossible=false;
 		return false;
 	}
-  this->ComputeDebugString(theWeyl, TheGlobalVariables);
+  this->ComputeDebugString(theWeyl, theGlobalVariables);
   return true;
 }
 
 void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables &theGlobalVariables)
 { std::stringstream out5;
 	out5<<checked+1 << " checked out of " << outOf;
-	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
-	IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+	//::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
+	theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables)
 { std::stringstream out5;
 	out5<<checked+1 << " checked out of " << outOf;
-	IndicatorWindowGlobalVariables.ProgressReportString5=out5.str();
-	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
-	IndicatorWindowGlobalVariables.String5NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+	//::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
+	theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void minimalRelationsProverState::GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl)
@@ -18836,9 +18625,9 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 		if (this->theIndexStack.size>0)
 		{ int tempI= *this->theIndexStack.LastObject();
 			this->TheObjects[tempI].ComputeDebugString(this->theWeylGroup, theGlobalVariables);
-			IndicatorWindowGlobalVariables.StatusString1=this->TheObjects[tempI].DebugString;
-			IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			theGlobalVariables.theIndicatorVariables.StatusString1=this->TheObjects[tempI].DebugString;
+			theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+			theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 	//this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods, theGlobalVariables);
 }
@@ -18909,9 +18698,9 @@ void minimalRelationsProverStates::WriteToFileAppend(std::fstream& outputHeader,
 		if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
 		{ std::stringstream out3;
 			out3<< i+1<<" out of "<< this->size<< " states stored to disk";
-			IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-			IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+			theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+			theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 	}
 	this->sizeByLastSave=this->size;
@@ -18966,13 +18755,13 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream& inputHeader, std::
 		if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
 		{ std::stringstream out3;
 			out3<< i+1<<" out of "<< this->size<< " states read from disk";
-			IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-			IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-			IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-			theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+			theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+			theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+			theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+			theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 		}
 	}
-	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
 	this->initShared(this->theWeylGroup, theGlobalVariables);
 	if (this->theIndexStack.size>0)
 	{ int currentI=*this->theIndexStack.LastObject();
@@ -19093,77 +18882,77 @@ void minimalRelationsProverStateFixedK::initFromParentState(minimalRelationsProv
   this->SeparatingNormalUsed.MakeZero(0);
 }
 
-void minimalRelationsProverStates::MakeProgressReportCurrentState(int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStates::MakeProgressReportCurrentState(int index, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out; std::string tempS;
   out << this->TheObjects[index].DebugString;
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
-  IndicatorWindowGlobalVariables.StatusString1=out.str();
-	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
-	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+	//::theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
 }
 
-void minimalRelationsProverStatesFixedK::MakeProgressReportCurrentState(	int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStatesFixedK::MakeProgressReportCurrentState(	int index, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out; std::string tempS;
   out << this->TheObjects[index].DebugString;
   out<<"\r\nPreferred dual basis: "<<this->PreferredDualBasisEpsilonCoords.DebugString;
-  IndicatorWindowGlobalVariables.StatusString1=out.str();
-	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
-	//::IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+	//::theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
 }
 
-void minimalRelationsProverStates::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStates::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out3;
 	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "<< numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
-	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+	//::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+	theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void minimalRelationsProverStatesFixedK::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStatesFixedK::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out3;
 	out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "<< numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
-	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-	//::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String4NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	//::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+	//::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+	//::theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void minimalRelationsProverStates::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
-{ this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
+void minimalRelationsProverStates::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
+{ this->MakeProgressReportStack(theGlobalVariables, theWeyl);
 	std::stringstream out4;
 	out4<<"Computing children states: "<< numSearched+1<<" out of "<< outOf << "; "<< this->TheObjects[*this->theIndexStack.LastObject()].PossibleChildStates.size<<" possible ";
-	::IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-//	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-//	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-//	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
-//	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-  TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
+//	::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+//	::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
+//	::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
+//	::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+	theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void minimalRelationsProverStatesFixedK::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
-{ this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
+void minimalRelationsProverStatesFixedK::MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
+{ this->MakeProgressReportStack(theGlobalVariables, theWeyl);
 	std::stringstream out4;
 	out4<<"Computing children states: "<< numSearched+1<<" out of "<< outOf << "; " << this->TheObjects[*this->theIndexStack.LastObject()].PossibleChildStates.size<<" possible, "
 				<< this->TheObjects[*this->theIndexStack.LastObject()].ImpossibleChildStates.size<<" impossible ";
-	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-//	::IndicatorWindowGlobalVariables.String1NeedsRefresh=false;
-//	::IndicatorWindowGlobalVariables.String2NeedsRefresh=false;
-//	::IndicatorWindowGlobalVariables.String3NeedsRefresh=false;
-//	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+	theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
+//	::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+//	::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
+//	::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
+//	::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+	theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
-void minimalRelationsProverStates::MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStates::MakeProgressReportStack(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out1, out2, out3, out4;
 	std::stringstream* tempOut1=&out1;
 	for (int i=0;i<this->theIndexStack.size;i++)
@@ -19175,21 +18964,21 @@ void minimalRelationsProverStates::MakeProgressReportStack(GlobalVariables& TheG
 	}
 	if (theIndexStack.size!=0)
     (*tempOut1)<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size<<" alphas + ... = "<<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size<<" betas + ...";
-	IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
 	if (this->theIndexStack.size>8)
-		IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-//	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	TheGlobalVariables.FeedIndicatorWindow(::IndicatorWindowGlobalVariables);
+		theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+	theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
+//	::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void minimalRelationsProverStatesFixedK::MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+void minimalRelationsProverStatesFixedK::MakeProgressReportStack(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out1, out2, out3, out4;
 	std::stringstream* tempOut1=&out1;
 	for (int i=0;i<this->theIndexStack.size;i++)
@@ -19201,18 +18990,18 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportStack(GlobalVariables
 	}
 	if (theIndexStack.size!=0)
     (*tempOut1)<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size <<" alphas + ... = " <<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size <<" betas + ...";
-	IndicatorWindowGlobalVariables.ProgressReportString1=out1.str();
-	IndicatorWindowGlobalVariables.ProgressReportString2=out2.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
 	if (this->theIndexStack.size>8)
-		::IndicatorWindowGlobalVariables.ProgressReportString3=out3.str();
-	IndicatorWindowGlobalVariables.ProgressReportString4=out4.str();
-	IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.String2NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
-	IndicatorWindowGlobalVariables.String4NeedsRefresh=true;
-//	::IndicatorWindowGlobalVariables.String5NeedsRefresh=false;
-	IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=false;
-	TheGlobalVariables.FeedIndicatorWindow(::IndicatorWindowGlobalVariables);
+		theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+	theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+	theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+	theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
+//	::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 bool minimalRelationsProverState::RootIsGoodForProblematicIndex(root& input, int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl)
@@ -19230,7 +19019,7 @@ bool minimalRelationsProverState::RootIsGoodForProblematicIndex(root& input, int
 	return false;
 }
 
-bool minimalRelationsProverState::RootIsGoodForPreferredSimpleRoot(root& input, int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas)
+bool minimalRelationsProverState::RootIsGoodForPreferredSimpleRoot(root& input, int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, root& AlphasMinusBetas)
 { Rational tempRat1, tempRat2;
 	tempRat2=AlphasMinusBetas.TheObjects[preferredIndex]; tempRat2.AssignAbsoluteValue();
 	tempRat1= AlphasMinusBetas.TheObjects[preferredIndex]-input.TheObjects[preferredIndex];
@@ -19265,7 +19054,7 @@ minimalRelationsProverStateFixedK::minimalRelationsProverStateFixedK()
 	this->activeChild=-1;
 }
 
-bool minimalRelationsProverState::IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverState::IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots,this->PositiveKroots);
   for (int i=0; i<this->BKSingularGmodLRoots.size; i++)
     if (!this->SumWithNoPosRootIsARoot(this->BKSingularGmodLRoots.TheObjects[i], theWeyl))
@@ -19282,25 +19071,25 @@ bool minimalRelationsProverState::FindBetaWithoutTwoAlphas(root& outputBeta, roo
   return false;
 }
 
-bool minimalRelationsProverStates::StateIsEqualTo(minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
-{ return this->ExtendToIsomorphismRootSystem(theState, IndexOther, TheGlobalVariables, theWeyl);
+bool minimalRelationsProverStates::StateIsEqualTo(minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
+{ return this->ExtendToIsomorphismRootSystem(theState, IndexOther, theGlobalVariables, theWeyl);
 }
 
-bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject(int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject(int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { if (theState.PartialRelation.Alphas.size+theState.PartialRelation.Betas.size<7)
 		for (int i=0; i<this->size; i++)
-			if (this->StateIsEqualTo(theState,i,theWeyl,TheGlobalVariables))
+			if (this->StateIsEqualTo(theState,i,theWeyl,theGlobalVariables))
 				return false;
   this->AddObjectOnTop(theState);
   return true;
 }
 
-void minimalRelationsProverState::ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
-{ return this->ComputeScalarProductsMatrix(	TheGlobalVariables, theWeyl, this->PartialRelation.Alphas, this->PartialRelation.Betas, this->theScalarProducts);
+void minimalRelationsProverState::ComputeScalarProductsMatrix(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
+{ return this->ComputeScalarProductsMatrix(	theGlobalVariables, theWeyl, this->PartialRelation.Alphas, this->PartialRelation.Betas, this->theScalarProducts);
 }
 
-void minimalRelationsProverState::ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output)
-{ roots& tempRoots=TheGlobalVariables.rootsProverStateComputation1;
+void minimalRelationsProverState::ComputeScalarProductsMatrix(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output)
+{ roots& tempRoots=theGlobalVariables.rootsProverStateComputation1;
   tempRoots.size=0;
   tempRoots.AddListOnTop(theAlphas);
   tempRoots.AddListOnTop(theBetas);
@@ -19310,7 +19099,7 @@ void minimalRelationsProverState::ComputeScalarProductsMatrix(GlobalVariables& T
       theWeyl.RootScalarKillingFormMatrixRoot(tempRoots.TheObjects[i], tempRoots.TheObjects[j],output.elements[i][j]);
 }
 
-void minimalRelationsProverState::ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons)
+void minimalRelationsProverState::ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool displayEpsilons)
 { std::string tempS; std::stringstream out;
 	for(int i=0; i<this->PartialRelation.Alphas.size; i++)
 	{ this->PartialRelation.Alphas.TheObjects[i].ElementToString(tempS);
@@ -19324,13 +19113,13 @@ void minimalRelationsProverState::ElementToString( std::string& output, WeylGrou
 	out <<"...     (a_i,b_i>0)\r\n";
 	root tempRoot; roots tempRoots;
 	for(int i=0; i<this->PartialRelation.Alphas.size; i++)
-	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Alphas.TheObjects[i],tempRoot,TheGlobalVariables);
+	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Alphas.TheObjects[i],tempRoot,theGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS, false, false);
 		out << "a_"<<i+1<<"("<<tempS <<") + ";
 	}
 	out <<"... = ";
 	for(int i=0; i<this->PartialRelation.Betas.size; i++)
-	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Betas.TheObjects[i],tempRoot,TheGlobalVariables);
+	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Betas.TheObjects[i],tempRoot,theGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS, false, false);
 		out << "b_"<<i+1<<"("<<tempS <<") + ";
 	}
@@ -19343,15 +19132,15 @@ void minimalRelationsProverState::ElementToString( std::string& output, WeylGrou
   for (int i=0; i<this->PossibleChildStates.size; i++)
   { minimalRelationsProverState& child = owner->TheObjects[this->PossibleChildStates.TheObjects[i]];
 		if (this->PartialRelation.Alphas.size<child.PartialRelation.Alphas.size)
-		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
+		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,theGlobalVariables);
 			AlphaChildren.AddObjectOnTop(tempRoot);
 		}
 		if (this->PartialRelation.Betas.size<child.PartialRelation.Betas.size)
-		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
+		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,theGlobalVariables);
 			BetaChildren.AddObjectOnTop(tempRoot);
 		}
 		if (this->ChosenPositiveKroots.size<child.ChosenPositiveKroots.size)
-		{ theWeyl.GetEpsilonCoords(*child.ChosenPositiveKroots.LastObject(),tempRoot,TheGlobalVariables);
+		{ theWeyl.GetEpsilonCoords(*child.ChosenPositiveKroots.LastObject(),tempRoot,theGlobalVariables);
 			Kchildren.AddObjectOnTop(tempRoot);
 		}
   }
@@ -19371,98 +19160,98 @@ void minimalRelationsProverState::ElementToString( std::string& output, WeylGrou
   if(!displayEpsilons)
     this->ChosenPositiveKroots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->ChosenPositiveKroots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->ChosenPositiveKroots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nPositive choices for K-roots made("<<this->ChosenPositiveKroots.size<<"): " << tempS;
   if(!displayEpsilons)
     this->nonLNonSingularRootsInNeedOfPosKroots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonLNonSingularRootsInNeedOfPosKroots, tempRoots, TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonLNonSingularRootsInNeedOfPosKroots, tempRoots, theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nNon-L non-singular roots in need of a K- positive root("<<this->nonLNonSingularRootsInNeedOfPosKroots.size <<"): " << tempS;
   if (!displayEpsilons)
     this->theChoicesWeMake.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->theChoicesWeMake,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->theChoicesWeMake,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nThe choices we make("<<this->theChoicesWeMake.size <<"): "<< tempS;
 	if (!displayEpsilons)
     this->BKSingularGmodLRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->BKSingularGmodLRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->BKSingularGmodLRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nBK singular g mod l roots("<< this->BKSingularGmodLRoots.size<<"): "<< tempS;
 	if (!displayEpsilons)
     this->nonAlphas.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonAlphas,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonAlphas,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nNon-alphas("<< this->nonAlphas.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonBetas.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nNon-betas("<<this->nonBetas.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonBKSingularGmodLRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonBKSingularGmodLRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonBKSingularGmodLRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nnon BK-singular g mod l roots("<< this->nonBKSingularGmodLRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->NilradicalRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->NilradicalRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->NilradicalRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out << "\r\nNilradical roots("<< this->NilradicalRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonNilradicalRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonNilradicalRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonNilradicalRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out << "\r\nnon-nilradical roots("<< this->nonNilradicalRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->PositiveKroots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->PositiveKroots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->PositiveKroots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out << "\r\nPositive roots of K("<<this->PositiveKroots.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonKRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonKRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonKRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out <<"\r\nNon-roots of K("<<this->nonKRoots.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonPositiveKRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonPositiveKRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonPositiveKRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out <<"\r\nNon-positive roots of K("<< this->nonPositiveKRoots.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonLRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonLRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonLRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out <<"\r\nNon-L roots("<<this->nonLRoots.size <<"): "<< tempS;
   if (!displayEpsilons)
     this->nonLNonSingularRoots.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonLNonSingularRoots,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonLNonSingularRoots,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS,false,false,false);
   }
   out <<"\r\nNon-L non-singular roots("<< this->nonLNonSingularRoots.size<<"): "<< tempS;
@@ -19474,7 +19263,7 @@ void minimalRelationsProverState::ElementToString( std::string& output, WeylGrou
   output=out.str();
 }
 
-void minimalRelationsProverStateFixedK::ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons)
+void minimalRelationsProverStateFixedK::ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool displayEpsilons)
 { std::string tempS; std::stringstream out;
 	for(int i=0;i<this->PartialRelation.Alphas.size;i++)
 	{ this->PartialRelation.Alphas.TheObjects[i].ElementToString(tempS);
@@ -19488,13 +19277,13 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
 	out <<"...     (a_i,b_i>0)\r\n";
 	root tempRoot; roots tempRoots;
 	for(int i=0; i<this->PartialRelation.Alphas.size; i++)
-	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Alphas.TheObjects[i],tempRoot,TheGlobalVariables);
+	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Alphas.TheObjects[i],tempRoot,theGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS,false,false);
 		out << "a_"<<i+1<<"("<<tempS <<") + ";
 	}
 	out <<"... = ";
 	for(int i=0; i<this->PartialRelation.Betas.size; i++)
-	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Betas.TheObjects[i],tempRoot,TheGlobalVariables);
+	{ theWeyl.GetEpsilonCoords(this->PartialRelation.Betas.TheObjects[i],tempRoot,theGlobalVariables);
 		tempRoot.ElementToStringEpsilonForm(tempS,false,false);
 		out << "b_"<<i+1<<"("<<tempS <<") + ";
 	}
@@ -19507,11 +19296,11 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
   for (int i=0; i<this->PossibleChildStates.size; i++)
   { minimalRelationsProverStateFixedK& child = owner->TheObjects[this->PossibleChildStates.TheObjects[i]];
 		if (this->PartialRelation.Alphas.size<child.PartialRelation.Alphas.size)
-		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
+		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,theGlobalVariables);
 			AlphaChildren.AddObjectOnTop(tempRoot);
 		}
 		if (this->PartialRelation.Betas.size<child.PartialRelation.Betas.size)
-		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,TheGlobalVariables);
+		{ theWeyl.GetEpsilonCoords(*child.theChoicesWeMake.LastObject(),tempRoot,theGlobalVariables);
 			BetaChildren.AddObjectOnTop(tempRoot);
 		}
   }
@@ -19531,21 +19320,21 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
   if (!displayEpsilons)
     this->theChoicesWeMake.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->theChoicesWeMake, tempRoots, TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->theChoicesWeMake, tempRoots, theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nThe choices we make: "<< tempS;
   if (!displayEpsilons)
     this->nonAlphas.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonAlphas, tempRoots, TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonAlphas, tempRoots, theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nNon alphas("<< this->nonAlphas.size<<"): "<< tempS;
   if (!displayEpsilons)
     this->nonBetas.ElementToString(tempS);
   else
-  { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,TheGlobalVariables);
+  { theWeyl.GetEpsilonCoords(this->nonBetas,tempRoots,theGlobalVariables);
     tempRoots.ElementToStringEpsilonForm(tempS, false, false, false);
   }
   out <<"\r\nNon betas("<<this->nonBetas.size<<"): "<< tempS;
@@ -19569,16 +19358,16 @@ void minimalRelationsProverStateFixedK::ElementToString( std::string& output, We
   output=out.str();
 }
 
-void minimalRelationsProverStates::ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { std::string tempS; std::stringstream out;
 	for (int i=0; i<this->size; i++)
-	{ this->TheObjects[i].ElementToString(tempS, theWeyl, TheGlobalVariables, true);
+	{ this->TheObjects[i].ElementToString(tempS, theWeyl, theGlobalVariables, true);
 		out <<tempS<<"\n\n";
 	}
 	output=out.str();
 }
 
-void minimalRelationsProverStates::ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& theGlobalVariables)
 { this->PreferredDualBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
   for (int i=0; i<theDimension; i++)
 		this->PreferredDualBasis.TheObjects[i].MakeZero(theDimension);
@@ -19609,29 +19398,29 @@ void minimalRelationsProverStates::ComputePreferredDualBasis(char WeylLetter, in
   int oldsize=PreferredDualBasis.size;
   for (int i=0; i<oldsize; i++)
     PreferredDualBasis.AddObjectOnTop(-PreferredDualBasis.TheObjects[i]);
-  this->theWeylGroup.GetEpsilonCoords( this->PreferredDualBasis, this->PreferredDualBasisEpsilonCoords, TheGlobalVariables);
+  this->theWeylGroup.GetEpsilonCoords( this->PreferredDualBasis, this->PreferredDualBasisEpsilonCoords, theGlobalVariables);
 	this->PreferredDualBasisEpsilonCoords.ElementToStringEpsilonForm( this->PreferredDualBasisEpsilonCoords.DebugString, false, false, false);
 }
 
-void minimalRelationsProverStates::initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::initShared(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { this->theWeylGroup.ComputeRho(true);
   this->isomorphismComputer.AmbientWeyl.Assign(this->theWeylGroup);
   this->isomorphismComputer.ComputeAll();
   this->flagAssumeGlobalMinimalityRHS=false;
-  this->invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
-  this->invertedCartan.Invert(TheGlobalVariables);
+  this->invertedCartan.Assign(this->theWeylGroup.KillingFormMatrix);
+  this->invertedCartan.Invert(theGlobalVariables);
 	this->flagComputationIsInitialized=true;
 }
 
-void minimalRelationsProverStates::GenerateStartingState(ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
+void minimalRelationsProverStates::GenerateStartingState(ComputationSetup& theSetup, GlobalVariables& theGlobalVariables, char WeylLetter, int theDimension)
 { if (this->flagComputationIsInitialized)
 		return;
-  this->WriteToFileAppend(TheGlobalVariables);
+  this->WriteToFileAppend(theGlobalVariables);
 	minimalRelationsProverState tempState;
   this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
   this->PreferredDualBasis.size=0;
-	this->initShared(this->theWeylGroup, TheGlobalVariables);
-  this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
+	this->initShared(this->theWeylGroup, theGlobalVariables);
+  this->ComputePreferredDualBasis(WeylLetter, theDimension, theGlobalVariables);
   this->size=0;
   root tempRoot;
   tempRoot.Assign(this->theWeylGroup.RootSystem.TheObjects[7]);
@@ -19645,12 +19434,12 @@ void minimalRelationsProverStates::GenerateStartingState(ComputationSetup& theSe
   tempState.theChoicesWeMake.AddObjectOnTop(tempState.PartialRelation.Alphas.TheObjects[0]);
   tempState.owner=this;
   this->AddObjectOnTop(tempState);
-  this->LastObject()->ComputeStateReturnFalseIfDubious(*this, TheGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS);
-  this->LastObject()->ComputeScalarProductsMatrix(TheGlobalVariables, this->theWeylGroup);
-  this->LastObject()->ComputeDebugString(this->theWeylGroup,TheGlobalVariables);
+  this->LastObject()->ComputeStateReturnFalseIfDubious(*this, theGlobalVariables, this->theWeylGroup, this->flagAssumeGlobalMinimalityRHS);
+  this->LastObject()->ComputeScalarProductsMatrix(theGlobalVariables, this->theWeylGroup);
+  this->LastObject()->ComputeDebugString(this->theWeylGroup,theGlobalVariables);
   this->theIndexStack.AddObjectOnTop(0);
-  this->MakeProgressReportCurrentState(0,TheGlobalVariables, this->theWeylGroup);
-  this->ComputeLastStackIndex(this->theWeylGroup, TheGlobalVariables);
+  this->MakeProgressReportCurrentState(0,theGlobalVariables, this->theWeylGroup);
+  this->ComputeLastStackIndex(this->theWeylGroup, theGlobalVariables);
 }
 
 void ComputationSetup::RunCustom()
@@ -19678,9 +19467,9 @@ void ComputationSetup::RunCustom()
 		this->theOutput.DebugString.append(this->theRootSubalgebras.theMinRels.DebugString);
 	}
   this->theOutput.DebugString.append("\\end{document}");
-  IndicatorWindowGlobalVariables.StatusString1= this->theOutput.DebugString;
-  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  this->theGlobalVariablesContainer->Default()->FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  this->theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1= this->theOutput.DebugString;
+  this->theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1NeedsRefresh=true;
+  this->theGlobalVariablesContainer->Default()->FeedIndicatorWindow(this->theGlobalVariablesContainer->Default()->theIndicatorVariables);
 }
 
 void ComputationSetup::DoTheRootSAComputationCustom()
@@ -19845,7 +19634,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(minimalRelation
 	return false;
 }
 
-void minimalRelationsProverStates::GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { ListBasicObjects<int> tempList;
   if(theRoots.size==0)
   { tempList.size=0;
@@ -19853,14 +19642,14 @@ void minimalRelationsProverStates::GetIsoTypicComponents(roots& theRoots, roots&
     return;
   }
   tempList.MakeActualSizeAtLeastExpandOnTop(theRoots.size);
-	rootsCollection& isotypicPieces=TheGlobalVariables.rootsExtendToIsomorphismRootSystem1;
+	rootsCollection& isotypicPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem1;
 	isotypicPieces.MakeActualSizeAtLeastExpandOnTop(theRoots.size);
 	isotypicPieces.SetSizeExpandOnTopNoObjectInit(1);
 	isotypicPieces.TheObjects[0].size=0;
 	isotypicPieces.TheObjects[0].AddObjectOnTop(theRoots.TheObjects[0]);
 	tempList.size=0;
 	for (int i=1; i<theRoots.size; i++)
-	{ if (theState.Root1IsGreaterThanRoot2	(i-1,i,theRoots,theOtherTypeRoots,TheGlobalVariables,theWeyl))
+	{ if (theState.Root1IsGreaterThanRoot2	(i-1,i,theRoots,theOtherTypeRoots,theGlobalVariables,theWeyl))
 		{ tempList.AddObjectOnTop(isotypicPieces.LastObject()->size);
 			isotypicPieces.SetSizeExpandOnTopNoObjectInit(isotypicPieces.size+1);
 			isotypicPieces.LastObject()->size=0;
@@ -19871,7 +19660,7 @@ void minimalRelationsProverStates::GetIsoTypicComponents(roots& theRoots, roots&
 	outputComponents.initPermutation(tempList,theRoots.size);
 }
 
-void minimalRelationsProverStatesFixedK::GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStatesFixedK::GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { ListBasicObjects<int> tempList;
   if(theRoots.size==0)
   { tempList.size=0;
@@ -19879,14 +19668,14 @@ void minimalRelationsProverStatesFixedK::GetIsoTypicComponents(roots& theRoots, 
     return;
   }
   tempList.MakeActualSizeAtLeastExpandOnTop(theRoots.size);
-	rootsCollection& isotypicPieces=TheGlobalVariables.rootsExtendToIsomorphismRootSystem1;
+	rootsCollection& isotypicPieces=theGlobalVariables.rootsExtendToIsomorphismRootSystem1;
 	isotypicPieces.MakeActualSizeAtLeastExpandOnTop(theRoots.size);
 	isotypicPieces.SetSizeExpandOnTopNoObjectInit(1);
 	isotypicPieces.TheObjects[0].size=0;
 	isotypicPieces.TheObjects[0].AddObjectOnTop(theRoots.TheObjects[0]);
 	tempList.size=0;
 	for (int i=1; i<theRoots.size; i++)
-	{ if (::minimalRelationsProverState::Root1IsGreaterThanRoot2	(i-1,i,theRoots,theOtherTypeRoots,TheGlobalVariables,theWeyl))
+	{ if (::minimalRelationsProverState::Root1IsGreaterThanRoot2	(i-1,i,theRoots,theOtherTypeRoots,theGlobalVariables,theWeyl))
 		{ tempList.AddObjectOnTop(isotypicPieces.LastObject()->size);
 			isotypicPieces.SetSizeExpandOnTopNoObjectInit(isotypicPieces.size+1);
 			isotypicPieces.LastObject()->size=0;
@@ -19962,7 +19751,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(roots& Domain, roots& Range, 
   return false;
 }
 
-bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfContradiction(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { root tempRoot;
 	this->flagNeedsAdditionOfPositiveKroots=false;
 	for (int i=0; i<this->PositiveKroots.size; i++)
@@ -19981,7 +19770,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 				this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theWeyl.RootSystem.TheObjects[j]);
 	}
 	theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots,this->PositiveKroots);
-  roots& tempRoots=TheGlobalVariables.rootsProverStateComputation2;
+  roots& tempRoots=theGlobalVariables.rootsProverStateComputation2;
   tempRoots.CopyFromBase(this->PositiveKroots);
   theWeyl.GenerateRootSubsystem(tempRoots);
   tempRoots.AddListOnTop(this->NilradicalRoots);
@@ -20012,7 +19801,7 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(this->BKSingularGmodLRoots.TheObjects[i]);
 		this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(-this->BKSingularGmodLRoots.TheObjects[i]);
 	}
-  if (!this->SatisfyNonLnonBKSingularRoots(theWeyl, TheGlobalVariables))
+  if (!this->SatisfyNonLnonBKSingularRoots(theWeyl, theGlobalVariables))
 		return false;
   for (int i=0; i<this->PositiveKroots.size; i++)
 	{ this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject( this->PositiveKroots.TheObjects[i]);
@@ -20158,58 +19947,58 @@ bool minimalRelationsProverStateFixedK::CanBeShortened( coneRelation& theRelatio
   return false;
 }
 
-bool minimalRelationsProverStates::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverStates::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { bool result;
   int theDimension= theWeyl.KillingFormMatrix.NumRows;
-  if (!this->GetNormalSeparatingConesFromPreferredBasis(index, this->PreferredDualBasis, outputNormal, theWeyl, TheGlobalVariables, result))
-    if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
-      if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].BKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
-        if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].NilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
-          if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonLNonSingularRootsInNeedOfPosKroots, outputNormal, theWeyl, TheGlobalVariables, result))
-            if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonLNonSingularRoots, outputNormal, theWeyl, TheGlobalVariables, result))
-              if (!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonBKSingularGmodLRoots, outputNormal, theWeyl, TheGlobalVariables, result))
-                if (!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonNilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
-                  if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].ChosenPositiveKroots, outputNormal, theWeyl, TheGlobalVariables, result))
-                    if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->theWeylGroup.RootSystem, outputNormal, theWeyl, TheGlobalVariables, result))
+  if (!this->GetNormalSeparatingConesFromPreferredBasis(index, this->PreferredDualBasis, outputNormal, theWeyl, theGlobalVariables, result))
+    if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].theChoicesWeMake, outputNormal, theWeyl, theGlobalVariables, result))
+      if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].BKSingularGmodLRoots, outputNormal, theWeyl, theGlobalVariables, result))
+        if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].NilradicalRoots, outputNormal, theWeyl, theGlobalVariables, result))
+          if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonLNonSingularRootsInNeedOfPosKroots, outputNormal, theWeyl, theGlobalVariables, result))
+            if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonLNonSingularRoots, outputNormal, theWeyl, theGlobalVariables, result))
+              if (!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonBKSingularGmodLRoots, outputNormal, theWeyl, theGlobalVariables, result))
+                if (!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].nonNilradicalRoots, outputNormal, theWeyl, theGlobalVariables, result))
+                  if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->TheObjects[index].ChosenPositiveKroots, outputNormal, theWeyl, theGlobalVariables, result))
+                    if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->theWeylGroup.RootSystem, outputNormal, theWeyl, theGlobalVariables, result))
                     { root tempRoot;
-                      bool tempBool= roots::GetNormalSeparatingCones( TheGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, tempRoot);
+                      bool tempBool= roots::GetNormalSeparatingCones( theGlobalVariables, theDimension, this->TheObjects[index].NilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, tempRoot);
                       assert(tempBool);
                       this->invertedCartan.ActOnAroot(tempRoot, outputNormal);
                     }
-	theWeyl.GetEpsilonCoords(outputNormal, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
-	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
-	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+	theWeyl.GetEpsilonCoords(outputNormal, this->TheObjects[index].currentSeparatingNormalEpsilonForm, theGlobalVariables);
+	this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);
+	this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
 	return result;
 }
 
-bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { bool result;
   int theDimension= theWeyl.KillingFormMatrix.NumRows;
   minimalRelationsProverStateFixedK& theState= this->TheObjects[index];
   roots posAlphas, posBetas, theCertainNilradicalRoots, theCertainGmodLhighestRoots;
   theState.GetPossibleAlphasAndBetas(posAlphas, posBetas, theWeyl);
   theState.GetCertainGmodLhighestAndNilradicalRoots(theCertainGmodLhighestRoots, theCertainNilradicalRoots, theWeyl);
-  if(!this->GetNormalSeparatingConesFromPreferredBasis(index, theState.theChoicesWeMake, outputNormal, theWeyl, TheGlobalVariables, result))
+  if(!this->GetNormalSeparatingConesFromPreferredBasis(index, theState.theChoicesWeMake, outputNormal, theWeyl, theGlobalVariables, result))
 	//	if(!this->GetNormalSeparatingConesFromPreferredBasis
-	//			(index, this->theK.SimpleBasisCentralizerRoots, outputNormal, theWeyl, TheGlobalVariables, result))
+	//			(index, this->theK.SimpleBasisCentralizerRoots, outputNormal, theWeyl, theGlobalVariables, result))
 //		if(!this->GetNormalSeparatingConesFromPreferredBasis
-//				(index, this->theK.SimpleBasisK, outputNormal, theWeyl, TheGlobalVariables, result))
-		if(!this->GetNormalSeparatingConesFromPreferredBasis(index, theCertainGmodLhighestRoots, outputNormal, theWeyl, TheGlobalVariables, result))
-			if(!this->GetNormalSeparatingConesFromPreferredBasis(index, theCertainNilradicalRoots, outputNormal, theWeyl, TheGlobalVariables, result))
-				if(!this->GetNormalSeparatingConesFromPreferredBasis(index, posAlphas, outputNormal, theWeyl, TheGlobalVariables, result))
-					if(!this->GetNormalSeparatingConesFromPreferredBasis(index, posBetas, outputNormal, theWeyl, TheGlobalVariables, result))
-						if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->theWeylGroup.RootSystem, outputNormal, theWeyl, TheGlobalVariables, result))
+//				(index, this->theK.SimpleBasisK, outputNormal, theWeyl, theGlobalVariables, result))
+		if(!this->GetNormalSeparatingConesFromPreferredBasis(index, theCertainGmodLhighestRoots, outputNormal, theWeyl, theGlobalVariables, result))
+			if(!this->GetNormalSeparatingConesFromPreferredBasis(index, theCertainNilradicalRoots, outputNormal, theWeyl, theGlobalVariables, result))
+				if(!this->GetNormalSeparatingConesFromPreferredBasis(index, posAlphas, outputNormal, theWeyl, theGlobalVariables, result))
+					if(!this->GetNormalSeparatingConesFromPreferredBasis(index, posBetas, outputNormal, theWeyl, theGlobalVariables, result))
+						if(!this->GetNormalSeparatingConesFromPreferredBasis(index, this->theWeylGroup.RootSystem, outputNormal, theWeyl, theGlobalVariables, result))
 						{ root tempRoot;
-              bool tempBool= roots::GetNormalSeparatingCones( TheGlobalVariables, theDimension, theCertainNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, tempRoot);
+              bool tempBool= roots::GetNormalSeparatingCones( theGlobalVariables, theDimension, theCertainNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, tempRoot);
               assert(tempBool);
               this->invertedCartan.ActOnAroot(tempRoot, outputNormal);
             }
-	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
-	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+	this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);
+	this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
 	return result;
 }
 
-bool minimalRelationsProverState::StateAllowsPositiveKChoice  (root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl)
+bool minimalRelationsProverState::StateAllowsPositiveKChoice  (root& theCandidate, root& theNonSingularRoot, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { if ( this->nonPositiveKRoots.ContainsObject(theCandidate) ||  !theWeyl.IsARoot(theCandidate+theNonSingularRoot))
     return  false;
   assert(! this->PositiveKroots.ContainsObject(theCandidate) );
@@ -20220,7 +20009,7 @@ bool minimalRelationsProverState::StateAllowsPositiveKChoice  (root& theCandidat
   return true;
 }
 
-void minimalRelationsProverStates::BranchByAddingKRoots(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::BranchByAddingKRoots(int index, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { if (this->TheObjects[index].flagNeedsAdditionOfPositiveKroots)
 	{ minimalRelationsProverState& theState=this->TheObjects[index];
     minimalRelationsProverState newState;
@@ -20228,19 +20017,19 @@ void minimalRelationsProverStates::BranchByAddingKRoots(int index, WeylGroup& th
 		root& firstRoot=theState.nonLNonSingularRootsInNeedOfPosKroots.TheObjects[0];
 		firstRoot.ComputeDebugString();
 		theState.nonKRoots.ComputeDebugString();
-		theState.ComputeDebugString(theWeyl, TheGlobalVariables);
+		theState.ComputeDebugString(theWeyl, theGlobalVariables);
 		int TotalCounter=0; int Counter2=0;
 		for (int j=0; j<theWeyl.RootSystem.size; j++)
-		 if (theState.StateAllowsPositiveKChoice(theWeyl.RootSystem.TheObjects[j] ,firstRoot, TheGlobalVariables, theWeyl))
+		 if (theState.StateAllowsPositiveKChoice(theWeyl.RootSystem.TheObjects[j] ,firstRoot, theGlobalVariables, theWeyl))
 			 TotalCounter++;
 		for (int j=0; j<theWeyl.RootSystem.size; j++)
-		 if (theState.StateAllowsPositiveKChoice(theWeyl.RootSystem.TheObjects[j] ,firstRoot, TheGlobalVariables, theWeyl))
-		 { this->MakeProgressReportChildStates(Counter2,TotalCounter,this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		 if (theState.StateAllowsPositiveKChoice(theWeyl.RootSystem.TheObjects[j] ,firstRoot, theGlobalVariables, theWeyl))
+		 { this->MakeProgressReportChildStates(Counter2,TotalCounter,this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
 			 Counter2++;
 			 newState.initFromParent(theState);
 			 newState.ChosenPositiveKroots.AddObjectOnTop(theWeyl.RootSystem.TheObjects[j]);
 			 newState.nonLNonSingularsAleviatedByChosenPosKRoots.AddObjectOnTop(theWeyl.RootSystem.TheObjects[j]);
-			 this->ExtensionStep(index, theWeyl,TheGlobalVariables,newState);
+			 this->ExtensionStep(index, theWeyl,theGlobalVariables,newState);
 		 }
 	}
 }
@@ -20301,9 +20090,9 @@ void minimalRelationsProverStates::ReduceMemoryUse(GlobalVariables& theGlobalVar
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
-      IndicatorWindowGlobalVariables.ProgressReportString1=out.str();
-      IndicatorWindowGlobalVariables.String1NeedsRefresh=true;
-      theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+      theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
+      theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
   }
   this->NumFullyComputed=0;
@@ -20318,29 +20107,29 @@ int minimalRelationsProverStates::CountNumSeparatingNormals(roots& theAlphas, ro
 	return counter;
 }
 
-void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { int index= *this->theIndexStack.LastObject();
-  this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+  this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
 	if (!this->TheObjects[index].StateIsInternallyPossible || this->TheObjects[index].StateIsComplete)
     return;
   if (!this->TheObjects[index].InternalStateIsComputed)
-    this->TheObjects[index].ComputeStateReturnFalseIfDubious(*this, TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
+    this->TheObjects[index].ComputeStateReturnFalseIfDubious(*this, theGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
 	this->NumFullyComputed++;
 	if (!this->TheObjects[index].StateIsInternallyPossible || this->TheObjects[index].StateIsComplete)
     return;
   if (this->NumFullyComputed>4000)
-    this->ReduceMemoryUse(TheGlobalVariables);
-//	this->BranchByAddingKRoots(index, theWeyl, TheGlobalVariables);
+    this->ReduceMemoryUse(theGlobalVariables);
+//	this->BranchByAddingKRoots(index, theWeyl, theGlobalVariables);
 	root theBeta, theAlpha, theMinusAlpha, theMinusBeta;
 	this->TheObjects[index].PossibleChildStates.size=0;
 	minimalRelationsProverState newState;
 	int theDimension=theWeyl.KillingFormMatrix.NumRows;
 	Rational tempRat;
- 	if (!roots::ConesIntersect( TheGlobalVariables, this->TheObjects[index].PartialRelation.Alphas, this->TheObjects[index].NilradicalRoots, theDimension))
+ 	if (!roots::ConesIntersect( theGlobalVariables, this->TheObjects[index].PartialRelation.Alphas, this->TheObjects[index].NilradicalRoots, theDimension))
 	{ root NormalSeparatingCones;
-    bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
-    this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
-    this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+    bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, theGlobalVariables);
+    this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);
+    this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
 		bool addFirstAlpha=true;
 		flagSearchForOptimalSeparatingRoot=false;//(this->TheObjects[index].PartialRelation.Alphas.size+this->TheObjects[index].PartialRelation.Betas.size<7);
     if (this->flagSearchForOptimalSeparatingRoot)
@@ -20357,56 +20146,56 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 					tempNormal= NormalSeparatingCones;
 				if (this->TheObjects[index].IsSeparatingCones(tempNormal, tempBetaPos, theWeyl))
 				{ counter++;
-					this->InvokeExtensionOfState(index, minNumChildren, tempBetaPos, tempNormal, true, theWeyl, TheGlobalVariables);
+					this->InvokeExtensionOfState(index, minNumChildren, tempBetaPos, tempNormal, true, theWeyl, theGlobalVariables);
 					if (this->size-oldSize<minNumChildren)
 					{ NormalSeparatingCones.Assign(tempNormal);
 						NormalSeparatingCones.ComputeDebugString();
-						theWeyl.GetEpsilonCoords(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
+						theWeyl.GetEpsilonCoords(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, theGlobalVariables);
 						oneBetaIsPositive=tempBetaPos;
 						minNumChildren=this->size-oldSize;
 					}
 					this->size=oldSize;
 					this->TheObjects[index].PossibleChildStates.size=0;
-					if (TheGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-					{ IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+					if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+					{ theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
 						std::stringstream out3;
 						out3<< counter+1 <<" out of  "<< NumNormalsToCheck<<" normals tested, best hit "<<minNumChildren<<" children";
-						IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-						TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+						theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+						theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 					}
 				}
 			}
 		}
-		this->InvokeExtensionOfState(index, -1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, TheGlobalVariables);
+		this->InvokeExtensionOfState(index, -1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, theGlobalVariables);
 	}
 	else
-	{ this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+	{ this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
 		this->TheObjects[index].StateIsComplete=true;
 	}
-//	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
+//	this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);
 }
 
-void minimalRelationsProverStates::TheFullRecursion(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::TheFullRecursion(	WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { while (this->theIndexStack.size>0)
-	{ this->RecursionStep(theWeyl, TheGlobalVariables);
+	{ this->RecursionStep(theWeyl, theGlobalVariables);
 		if (this->theIndexStack.size>0)
-			this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), TheGlobalVariables, theWeyl);
+			this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), theGlobalVariables, theWeyl);
     this->CheckConsistencyOfTree();
-		this->WriteToFileAppend(TheGlobalVariables);
+		this->WriteToFileAppend(theGlobalVariables);
 		this->CheckConsistencyOfTree();
 	}
 }
 
-void minimalRelationsProverStatesFixedK::TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStatesFixedK::TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { while (this->theIndexStack.size>0)
-	{ this->RecursionStepFixedK(theWeyl, TheGlobalVariables);
+	{ this->RecursionStepFixedK(theWeyl, theGlobalVariables);
 		if (this->theIndexStack.size>0)
-			this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), TheGlobalVariables, theWeyl);
-		this->WriteToFile(this->ProverFileName, TheGlobalVariables);
+			this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), theGlobalVariables, theWeyl);
+		this->WriteToFile(this->ProverFileName, theGlobalVariables);
 	}
 }
 
-void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { if (this->theIndexStack.size<1)
 		return;
 	int currentIndex=*this->theIndexStack.LastObject();
@@ -20421,12 +20210,12 @@ void minimalRelationsProverStates::RecursionStep(	WeylGroup& theWeyl, GlobalVari
 	else
 	{ this->TheObjects[currentIndex].activeChild++;
 		this->theIndexStack.AddObjectOnTop(this->TheObjects[currentIndex].PossibleChildStates.TheObjects[this->TheObjects[currentIndex].activeChild]);
-		this->ComputeLastStackIndex(theWeyl, TheGlobalVariables);
-		this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
+		this->ComputeLastStackIndex(theWeyl, theGlobalVariables);
+		this->MakeProgressReportStack(theGlobalVariables, theWeyl);
 	}
 }
 
-void minimalRelationsProverStatesFixedK::RecursionStepFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStatesFixedK::RecursionStepFixedK (WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { if (this->theIndexStack.size<1)
 		return;
 	int currentIndex= *this->theIndexStack.LastObject();
@@ -20435,12 +20224,12 @@ void minimalRelationsProverStatesFixedK::RecursionStepFixedK (WeylGroup& theWeyl
 	else
 	{ this->TheObjects[currentIndex].activeChild++;
 		this->theIndexStack.AddObjectOnTop(this->TheObjects[currentIndex].PossibleChildStates.TheObjects[this->TheObjects[currentIndex].activeChild]);
-		this->ComputeLastStackIndexFixedK(theWeyl, TheGlobalVariables);
-		this->MakeProgressReportStack(TheGlobalVariables, theWeyl);
+		this->ComputeLastStackIndexFixedK(theWeyl, theGlobalVariables);
+		this->MakeProgressReportStack(theGlobalVariables, theWeyl);
 	}
 }
 
-void minimalRelationsProverStates::TestAddingExtraRoot( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
+void minimalRelationsProverStates::TestAddingExtraRoot( int Index, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
 { minimalRelationsProverState newState;
   bool tempBool;
   Rational tempRat=theWeyl.RootScalarKillingFormMatrixRoot(theRoot, normalSeparatingCones);
@@ -20465,11 +20254,11 @@ void minimalRelationsProverStates::TestAddingExtraRoot( int Index, WeylGroup& th
 		else
 			newState.PartialRelation.Betas.AddObjectOnTop(theRoot);
     newState.theChoicesWeMake.AddObjectOnTop(theRoot);
-		this->ExtensionStep(Index, theWeyl, TheGlobalVariables, newState);
+		this->ExtensionStep(Index, theWeyl, theGlobalVariables, newState);
   }
 }
 
-void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK( int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
+void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK( int Index, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingCones, bool oneBetaIsPositive)
 { minimalRelationsProverStateFixedK newState;
   bool tempBool;
   int indexModule= this->theK.GetIndexKmoduleContainingRoot(theRoot);
@@ -20497,22 +20286,22 @@ void minimalRelationsProverStatesFixedK::TestAddingExtraRootFixedK( int Index, W
 		else
 			newState.PartialRelation.Betas.AddObjectOnTop(theRoot);
     newState.theChoicesWeMake.AddObjectOnTop(theRoot);
-		this->ExtensionStepFixedK(Index, theWeyl, TheGlobalVariables, newState);
+		this->ExtensionStepFixedK(Index, theWeyl, theGlobalVariables, newState);
   }
 }
 
-void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverState& newState)
-{ newState.ComputeStateReturnFalseIfDubious(*this, TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
+void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, minimalRelationsProverState& newState)
+{ newState.ComputeStateReturnFalseIfDubious(*this, theGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
   if (newState.StateIsInternallyPossible)
   { int currentNewIndex=this->size;
-    if (this->AddObjectOnTopNoRepetitionOfObject(index, newState, theWeyl, TheGlobalVariables))
+    if (this->AddObjectOnTopNoRepetitionOfObject(index, newState, theWeyl, theGlobalVariables))
     { //this->TheObjects[currentNewIndex].ComputeStateReturnFalseIfDubious
-      //  (TheGlobalVariables, theWeyl,  this->flagAssumeGlobalMinimalityRHS);
-  //		this->ComputeDebugString(theWeyl, TheGlobalVariables);
-      this->TheObjects[currentNewIndex].ComputeDebugString(theWeyl,TheGlobalVariables);
+      //  (theGlobalVariables, theWeyl,  this->flagAssumeGlobalMinimalityRHS);
+  //		this->ComputeDebugString(theWeyl, theGlobalVariables);
+      this->TheObjects[currentNewIndex].ComputeDebugString(theWeyl,theGlobalVariables);
       if (this->TheObjects[currentNewIndex].StateIsInternallyPossible && !this->TheObjects[currentNewIndex].StateIsComplete)
       { //if (this->TheObjects[currentNewIndex].StateIsDubious)
-        //  this->RemoveDoubt(currentNewIndex,theWeyl,TheGlobalVariables);
+        //  this->RemoveDoubt(currentNewIndex,theWeyl,theGlobalVariables);
         //else
         this->TheObjects[index].PossibleChildStates.AddObjectOnTop(currentNewIndex);
         this->TheObjects[index].activeChild=-1;
@@ -20524,7 +20313,7 @@ void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl,
     this->TheObjects[index].NumImpossibleChildren++;
 }
 
-bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet(roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonPositive, root& output, WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates)
+bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet(roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonPositive, root& output, WeylGroup& TheWeyl, GlobalVariables& theGlobalVariables, ListBasicObjects<root>& theNormalCandidates)
 { Rational tempRat;
   bool foundSeparatingRoot=false;
   if (choicePreferrence!=0)
@@ -20572,19 +20361,19 @@ bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet(roots* choic
 	return false;
 }
 
-bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
+bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool& oneBetaIsPositive )
 { minimalRelationsProverState& theRel=this->TheObjects[theIndex];
   roots& theAlphas = theRel.PartialRelation.Alphas;
   roots& theBetas = theRel.PartialRelation.Betas;
   int firstChoiceSeparated1, firstChoiceSeparated2;
   root rootCandidate;
   bool result=false;
-  if( this->GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theBetas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
+  if( this->GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theBetas, rootCandidate, theWeyl, theGlobalVariables, inputPreferredBasis))
   { oneBetaIsPositive=false;
     output.Assign(rootCandidate);
     result=true;
   }
-  if( this->GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
+  if( this->GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, theGlobalVariables, inputPreferredBasis))
 		if (!(result && firstChoiceSeparated1<firstChoiceSeparated2))
     { result=true;
       oneBetaIsPositive=true;
@@ -20593,19 +20382,19 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis( i
   return result;
 }
 
-bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive )
+bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool& oneBetaIsPositive )
 { minimalRelationsProverStateFixedK& theRel=this->TheObjects[theIndex];
   roots& theAlphas = theRel.PartialRelation.Alphas;
   roots& theBetas = theRel.PartialRelation.Betas;
   int firstChoiceSeparated1, firstChoiceSeparated2;
   root rootCandidate;
   bool result=false;
-  if( minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theBetas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
+  if( minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated1, theAlphas, theBetas, rootCandidate, theWeyl, theGlobalVariables, inputPreferredBasis))
   { oneBetaIsPositive=false;
     output.Assign(rootCandidate);
     result=true;
   }
-  if(  minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, TheGlobalVariables, inputPreferredBasis))
+  if(  minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet( &theRel.theChoicesWeMake, &firstChoiceSeparated2, theBetas,theAlphas, rootCandidate, theWeyl, theGlobalVariables, inputPreferredBasis))
 		if (!(result && firstChoiceSeparated1<firstChoiceSeparated2))
     { result=true;
       oneBetaIsPositive=true;
@@ -20690,7 +20479,7 @@ int minimalRelationsProverStatesFixedK::GetModuleIndex(root& input)
 	return this->IndexKmoduleByRoots.TheObjects[tempI];
 }
 
-void minimalRelationsProverStatesFixedK::initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStatesFixedK::initShared(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { this->theK.AmbientWeyl.Assign(this->theWeylGroup);
 	this->theK.ComputeAll();
   this->IndexKmoduleByRoots.SetSizeExpandOnTopNoObjectInit(this->theWeylGroup.RootSystem.size);
@@ -20700,7 +20489,7 @@ void minimalRelationsProverStatesFixedK::initShared(WeylGroup& theWeyl, GlobalVa
 
 }
 
-void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK(ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension)
+void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK(ComputationSetup& theSetup, GlobalVariables& theGlobalVariables, char WeylLetter, int theDimension)
 { if (this->flagComputationIsInitialized)
 		return;
 	minimalRelationsProverStateFixedK tempState; tempState.owner=this;
@@ -20710,20 +20499,20 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK(Computatio
   this->isomorphismComputer.ComputeAll();
   this->PreferredDualBasis.size=0;
   this->flagAssumeGlobalMinimalityRHS=false;
-  this->invertedCartan.AssignMatrixIntWithDen(this->theWeylGroup.KillingFormMatrix,1);
-  this->invertedCartan.Invert(TheGlobalVariables);
-  //this->ComputePreferredDualBasis(WeylLetter, theDimension, TheGlobalVariables);
+  this->invertedCartan.Assign(this->theWeylGroup.KillingFormMatrix);
+  this->invertedCartan.Invert(theGlobalVariables);
+  //this->ComputePreferredDualBasis(WeylLetter, theDimension, theGlobalVariables);
   this->size=0;
   this->theK.genK.SetSizeExpandOnTopNoObjectInit(4);
   this->theK.genK.TheObjects[0].InitFromIntegers(8, 1,0,0,0,0,0,0,0);
   this->theK.genK.TheObjects[1].InitFromIntegers(8, 0,1,0,0,0,0,0,0);
   this->theK.genK.TheObjects[2].InitFromIntegers(8, 0,0,0,0,1,0,0,0);
   this->theK.genK.TheObjects[3].InitFromIntegers(8, 0,0,0,0,0,0,1,0);
-	this->initShared(this->theWeylGroup,TheGlobalVariables);
-	this->theK.GenerateAutomorphisms(this->theK, TheGlobalVariables, &this->theIsos, true);
-  this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods,TheGlobalVariables);
+	this->initShared(this->theWeylGroup,theGlobalVariables);
+	this->theK.GenerateAutomorphisms(this->theK, theGlobalVariables, &this->theIsos, true);
+  this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods,theGlobalVariables);
   this->theIsos.simpleGenerators.size=0;
-  this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, TheGlobalVariables, 20000, true);
+  this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, theGlobalVariables, 20000, true);
   tempState.theNilradicalModules.init(this->theK.kModules.size);
   tempState.theGmodLmodules.init(this->theK.kModules.size);
   this->AddObjectOnTop(tempState);
@@ -20755,13 +20544,13 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK(Computatio
       if (tempRoots2.size==tempRoots.size)
         tempState.indicesIsosRespectingInitialNilradicalChoice.AddObjectOnTop(i);
     }
-    this->ExtensionStepFixedK(0, theWeylGroup, TheGlobalVariables, tempState);
+    this->ExtensionStepFixedK(0, theWeylGroup, theGlobalVariables, tempState);
     selCentralizerNilradical.incrementSelection();
   }
 	this->theIndexStack.AddObjectOnTop(0);
 	this->TheObjects[0].activeChild=-1;
-  this->MakeProgressReportCurrentState(0,TheGlobalVariables, this->theWeylGroup);
-  //this->WriteToFile(TheGlobalVariables);
+  this->MakeProgressReportCurrentState(0,theGlobalVariables, this->theWeylGroup);
+  //this->WriteToFile(theGlobalVariables);
   this->theFile.flush();
   this->flagComputationIsInitialized=true;
 }
@@ -20833,9 +20622,9 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots
 /*    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Generated: " << i+1<<" elements";
-      IndicatorWindowGlobalVariables.StatusString1=out.str();
-      IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-      theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+      theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }*/
 	}
 }
@@ -20865,12 +20654,12 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(root& inpu
 	return result;
 }
 
-void minimalRelationsProverStatesFixedK::ExtensionStepFixedK(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState)
-{ newState.ComputeStateReturnFalseIfDubious(TheGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
+void minimalRelationsProverStatesFixedK::ExtensionStepFixedK(int index, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, minimalRelationsProverStateFixedK& newState)
+{ newState.ComputeStateReturnFalseIfDubious(theGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
   if (newState.StateIsPossible)
   { int currentNewIndex=this->size;
-    if (this->AddObjectOnTopNoRepetitionOfObjectFixedK(index, newState, theWeyl, TheGlobalVariables))
-    { this->TheObjects[currentNewIndex].ComputeDebugString(theWeyl,TheGlobalVariables);
+    if (this->AddObjectOnTopNoRepetitionOfObjectFixedK(index, newState, theWeyl, theGlobalVariables))
+    { this->TheObjects[currentNewIndex].ComputeDebugString(theWeyl,theGlobalVariables);
       if (this->TheObjects[currentNewIndex].StateIsPossible && !this->TheObjects[currentNewIndex].StateIsComplete)
       { this->TheObjects[index].PossibleChildStates.AddObjectOnTop(currentNewIndex);
         this->TheObjects[index].activeChild=-1;
@@ -20883,9 +20672,9 @@ void minimalRelationsProverStatesFixedK::ExtensionStepFixedK(int index, WeylGrou
   }
 }
 
-bool minimalRelationsProverStatesFixedK::AddObjectOnTopNoRepetitionOfObjectFixedK( int ParentIndex, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverStatesFixedK::AddObjectOnTopNoRepetitionOfObjectFixedK( int ParentIndex, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<this->size; i++)
-    if (this->ExtendToIsomorphismRootSystemFixedK(theState,i,TheGlobalVariables,theWeyl))
+    if (this->ExtendToIsomorphismRootSystemFixedK(theState,i,theGlobalVariables,theWeyl))
       return false;
   this->AddObjectOnTop(theState);
   return true;
@@ -20975,17 +20764,17 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, roots& input, roots& o
     this->ActByElement(index, input.TheObjects[i], output.TheObjects[i]);
 }
 
-void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { int index= *this->theIndexStack.LastObject();
-	this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+	this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
 	if (this->TheObjects[index].PartialRelation.Alphas.size==0 && this->TheObjects[index].PartialRelation.Betas.size==0)
 	{ minimalRelationsProverStateFixedK theNewState;
 		for (int i=0; i<this->theK.HighestWeightsGmodK.size; i++)
 		{ theNewState.initFromParentState(this->TheObjects[index]);
 			theNewState.PartialRelation.Alphas.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
 			theNewState.theChoicesWeMake.AddObjectOnTop(this->theK.HighestWeightsGmodK.TheObjects[i]);
-			this->ExtensionStepFixedK(index, theWeyl, TheGlobalVariables, theNewState);
-			this->MakeProgressReportChildStates( i, this->theK.HighestWeightsGmodK.size, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+			this->ExtensionStepFixedK(index, theWeyl, theGlobalVariables, theNewState);
+			this->MakeProgressReportChildStates( i, this->theK.HighestWeightsGmodK.size, this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
 		}
 		return;
 	}
@@ -20998,11 +20787,11 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
   Rational tempRat;
   roots theNilradicalRoots, tempRoots;
   this->TheObjects[index].GetCertainGmodLhighestAndNilradicalRoots(tempRoots, theNilradicalRoots, theWeyl);
-  if (!roots::ConesIntersect( TheGlobalVariables, theNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, theDimension))
+  if (!roots::ConesIntersect( theGlobalVariables, theNilradicalRoots, this->TheObjects[index].PartialRelation.Alphas, theDimension))
   { root NormalSeparatingCones;
-    bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, TheGlobalVariables);
-    this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);
-    this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+    bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, theGlobalVariables);
+    this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);
+    this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
     bool addFirstAlpha=true;
     if (this->flagSearchForOptimalSeparatingRoot)
 		{ int minNumChildren=theWeyl.RootSystem.size;
@@ -21015,71 +20804,71 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
 				else
 					tempNormal= NormalSeparatingCones;
 				if (this->TheObjects[index].IsSeparatingCones(tempNormal, tempBetaPos, theWeyl))
-				{ this->InvokeExtensionOfState(index, minNumChildren, tempBetaPos, tempNormal, true, theWeyl, TheGlobalVariables);
+				{ this->InvokeExtensionOfState(index, minNumChildren, tempBetaPos, tempNormal, true, theWeyl, theGlobalVariables);
 					if (this->size-oldSize<minNumChildren)
 					{ NormalSeparatingCones.Assign(tempNormal);
 						NormalSeparatingCones.ComputeDebugString();
-						theWeyl.GetEpsilonCoords(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, TheGlobalVariables);
+						theWeyl.GetEpsilonCoords(NormalSeparatingCones, this->TheObjects[index].currentSeparatingNormalEpsilonForm, theGlobalVariables);
 						oneBetaIsPositive=tempBetaPos;
 						minNumChildren=this->size-oldSize;
 					}
 					this->size=oldSize;
 					this->TheObjects[index].PossibleChildStates.size=0;
-					if (TheGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-					{ IndicatorWindowGlobalVariables.String3NeedsRefresh=true;
+					if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+					{ theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
 						std::stringstream out3;
 						out3<< i+1 <<" out of  "<< theWeyl.RootsOfBorel.size<<" normals tested, best hit "<<minNumChildren<<" children";
-						IndicatorWindowGlobalVariables.ProgressReportString3= out3.str();
-						TheGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+						theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+						theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 					}
 				}
 			}
 		}
 		this->TheObjects[index].SeparatingNormalUsed.Assign(NormalSeparatingCones);
-		this->InvokeExtensionOfState(index,-1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, TheGlobalVariables);
+		this->InvokeExtensionOfState(index,-1, oneBetaIsPositive, NormalSeparatingCones, addFirstAlpha, theWeyl, theGlobalVariables);
   }
   else
-  { this->MakeProgressReportCurrentState(index, TheGlobalVariables, theWeyl);
+  { this->MakeProgressReportCurrentState(index, theGlobalVariables, theWeyl);
     this->TheObjects[index].StateIsComplete=true;
   }
-//	this->TheObjects[index].ComputeDebugString(theWeyl, TheGlobalVariables);*/
+//	this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);*/
 }
 
-void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<theWeyl.RootSystem.size; i++)
 	{ if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
-		this->TestAddingExtraRootFixedK( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		this->TestAddingExtraRootFixedK( index, theWeyl, theGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
 	}
 	for (int i=0; i<theWeyl.RootSystem.size; i++)
 	{ if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
-		this->TestAddingExtraRootFixedK( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-		this->MakeProgressReportChildStates( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		this->TestAddingExtraRootFixedK( index, theWeyl, theGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
 	}
 }
 
-void ::minimalRelationsProverStates::InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+void ::minimalRelationsProverStates::InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<theWeyl.RootSystem.size; i++)
 	{ if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
-		this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		this->TestAddingExtraRoot( index, theWeyl, theGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
 	}
 	for (int i=0; i<theWeyl.RootSystem.size; i++)
 	{ if (UpperLimitChildren>=0)
 			if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
 				return;
-		this->TestAddingExtraRoot( index, theWeyl, TheGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-		this->MakeProgressReportChildStates( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, TheGlobalVariables, theWeyl);
+		this->TestAddingExtraRoot( index, theWeyl, theGlobalVariables, theWeyl.RootSystem.TheObjects[i], !addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
+		this->MakeProgressReportChildStates( i+theWeyl.RootSystem.size, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
 	}
 }
 
-bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)
+bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { root tempRoot;
 	rootSubalgebra& kAlg= this->owner->theK;
 	for (int i=0; i<this->theNilradicalModules.CardinalitySelection; i++)
@@ -21368,16 +21157,16 @@ void ComputationSetup::ComputeRootSAs(ComputationSetup& inputData, GlobalVariabl
 	inputData.theRootSubalgebras.flagComputeConeCondition=false;
 	inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
   inputData.theRootSubalgebras.ComputeDebugString(false, false, true, 0 , 0, theGlobalVariables);
-  IndicatorWindowGlobalVariables.StatusString1=inputData.theRootSubalgebras.DebugString;
-  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1=inputData.theRootSubalgebras.DebugString;
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void ComputationSetup::ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
   std::string tempS;
   inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size, theGlobalVariables);
-  IndicatorWindowGlobalVariables.StatusString1=tempS;
-  IndicatorWindowGlobalVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(IndicatorWindowGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }

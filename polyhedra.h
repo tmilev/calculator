@@ -282,6 +282,11 @@ public:
 	void PopIndexSwapWithLastLight(int index);
 	int SizeWithoutObjects();
 	void SetSizeExpandOnTopLight(int theSize);
+	inline void initFillInObject(int theSize, const Object& o)
+	{ this->SetSizeExpandOnTopLight(theSize);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i]=o;
+  };
 	void operator = (const ListBasicObjectsLight<Object>& right);
 	void operator == (const ListBasicObjectsLight<Object>& right);
 	inline Object* LastObject(){return &this->TheObjects[this->size-1];};
@@ -703,7 +708,7 @@ public:
 	//this means you write the matrix m1 in the upper left corner m2 in the lower right
 	// and everything else you fill with zeros
 	void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
-	void DirectSumWith( Matrix<Element>& m2);
+	void DirectSumWith(const Matrix<Element>& m2);
 	//returns true if the system has a solution, false otherwise
 	bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
 	inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
@@ -969,7 +974,7 @@ void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
 }
 
 template<typename Element>
-void Matrix<Element>::DirectSumWith(Matrix<Element>& m2)
+void Matrix<Element>::DirectSumWith(const Matrix<Element>& m2)
 { int oldNumRows=this->NumRows; int oldNumCols=this->NumCols;
   this->Resize(this->NumRows+m2.NumRows,this->NumCols+m2.NumCols,true);
   for(int i=0; i<m2.NumRows; i++)
@@ -5058,7 +5063,7 @@ class WeylGroup: public HashedListBasicObjects<ElementWeylGroup>
 {
 public:
 	std::string DebugString;
-	MatrixIntTightMemoryFit KillingFormMatrix;
+	MatrixLargeRational KillingFormMatrix;
 	root rho;
 	char WeylLetter;
 	Rational LongRootLength;
@@ -5082,7 +5087,10 @@ public:
 	void MakeDn(int n);
 	void MakeF4();
 	void MakeG2();
+	void MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks, ListBasicObjects<int>* theMultiplicities);
+	void MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0);};
 	//void GetLongRootLength(Rational& output);
+	static bool IsAddmisibleDynkinType(char candidateLetter, int n);
 	void GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonCoords(root& input, root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
@@ -5354,12 +5362,12 @@ public:
 	static int ProblemCounter;
 	static int ProblemCounter2;
 	ListBasicObjects<int> indicesSubalgebrasContainingK;
-	::multTableKmods theMultTable;
+	multTableKmods theMultTable;
 	ListBasicObjects<int> theOppositeKmods;
 	DynkinDiagramRootSubalgebra theDynkinDiagram;
 	DynkinDiagramRootSubalgebra theCentralizerDiagram;
-	ListBasicObjects< ListBasicObjects<int> > coneRelationsBuffer;
-	ListBasicObjects< int> coneRelationsNumSameTypeComponentsTaken;
+	ListBasicObjects<ListBasicObjects<int> > coneRelationsBuffer;
+	ListBasicObjects<int> coneRelationsNumSameTypeComponentsTaken;
 	ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
 	WeylGroup AmbientWeyl;
 	roots genK;
@@ -5434,6 +5442,7 @@ public:
 	void initFromAmbientWeyl();
 	void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
 	void ComputeAllButAmbientWeyl();
+	void ComputeDynkinDiagramKandCentralizer();
 	void ComputeAll();
 	void ComputeRootsOfK();
 	void ComputeKModules();
@@ -5444,7 +5453,7 @@ public:
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //	void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
-	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2 (	GlobalVariables& theGlobalVariables);
+	void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
 	bool LinCombToString(root& alphaRoot, int coeff, root& linComb, std::string& output);
 	bool LinCombToStringDistinguishedIndex(int distinguished, root& alphaRoot, int coeff, root& linComb, std::string& output);
 	void WriteMultTableAndOppositeKmodsToFile	(std::fstream& output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites);
@@ -5488,7 +5497,7 @@ public:
 	void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
-	void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables &theGlobalVariables);
+	void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
 	void ElementToStringDynkinTable(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output);
 	void GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml);
 	void SortDescendingOrderBySSRank();
@@ -5639,6 +5648,7 @@ public:
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml)
 	{ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0);
   };
+  void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
 	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){	this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml);};
 	ListBasicObjects<int> HighestWeights;
 	ListBasicObjects<int> MultiplicitiesHighestWeights;
@@ -5661,6 +5671,7 @@ public:
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
   void ComputeModuleDecomposition();
+  bool ModuleDecompositionFitsInto(const slTwo& other);
   void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
@@ -5776,6 +5787,33 @@ public:
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 
+class reductiveSubalgebra
+{
+  public:
+  int indexInOwner;
+};
+
+class reductiveSubalgebras
+{
+public:
+  SltwoSubalgebras theSl2s;
+//  ListBasicObjects<DynkinDiagramRootSubalgebra> thePossibleDynkinDiagrams;
+  ListBasicObjects<ListBasicObjects<int> > theRanks;
+  ListBasicObjects<ListBasicObjects<int> > theMultiplicities;
+  ListBasicObjects<ListBasicObjects<char> > theLetters;
+  ListBasicObjects<ListBasicObjects<int> > thePartitionValues;
+  ListBasicObjects<ListBasicObjects<int> > thePartitionMultiplicities;
+  SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
+  ListBasicObjects<SimpleLieAlgebra> theCandidateSubAlgebras;
+  void GenerateModuleDecompositionsPrincipalSl2s(int theRank);
+  void ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output);
+  void FindTheReductiveSubalgebras(int WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
+  void EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank);
+  void GenerateAllPartitions(int theRank);
+  void GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, ListBasicObjects<int>& ranksBuffer, ListBasicObjects<int>& multiplicitiesBuffer, ListBasicObjects<char>& lettersBuffer);
+  void GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, ListBasicObjects<int>& Multiplicities, ListBasicObjects<int>& Values);
+};
+
 class minimalRelationsProverStatesFixedK;
 
 class minimalRelationsProverStateFixedK
@@ -5822,7 +5860,7 @@ public:
 	void GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl);
 	bool RootIsGoodForProblematicIndex(root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
 	bool FindBetaWithoutTwoAlphas(root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
-  bool ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
+  bool ComputeCommonSenseImplicationsReturnFalseIfContradictionFixedK(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverStateFixedK& right){this->Assign(right);};
@@ -5876,19 +5914,19 @@ public:
   void RemoveDoubt(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	bool StateIsEqualTo(minimalRelationsProverStateFixedK& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
 	void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	void MakeProgressReportIsos( int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	void MakeProgressReportCurrentState( int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	void MakeProgressReportChildStates( int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportCurrentState(int index, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	void MakeProgressReportChildStates(int numSearched, int outOf, int NewFound, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   minimalRelationsProverStatesFixedK()
   { this->flagComputationIsInitialized=false;
     MinNumDifferentBetas=-1;
     this->flagSearchForOptimalSeparatingRoot=true;
     this->theWeylGroup.KillingFormMatrix.NumRows=-1;
   };
-	void ReadFromFile(std::fstream &input, GlobalVariables&  theGlobalVariables);
-	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
-	void WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables);
-	void ReadFromFile (std::string& fileName, GlobalVariables&  theGlobalVariables);
+	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+	void WriteToFile(std::string& fileName, GlobalVariables& theGlobalVariables);
+	void ReadFromFile (std::string& fileName, GlobalVariables& theGlobalVariables);
 };
 
 class minimalRelationsProverStates;
@@ -5899,7 +5937,7 @@ public:
   static int ProblemCounter;
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons);
-  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  {	this->ElementToString(this->DebugString, theWeyl, TheGlobalVariables, true);  };
+  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables){ this->ElementToString(this->DebugString, theWeyl, TheGlobalVariables, true);  };
   bool flagNeedsAdditionOfPositiveKroots;
   root currentSeparatingNormalEpsilonForm;
   roots theChoicesWeMake;
@@ -5932,16 +5970,16 @@ public:
   int activeChild;
   minimalRelationsProverStates* owner;
   void ReduceMemoryUse();
-  bool IsSeparatingCones( root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
+  bool IsSeparatingCones(root& input, bool& oneBetaIsPositive, WeylGroup& theWeyl);
   bool StateAllowsPositiveKChoice(root& theCandidate, root& theNonSingularRoot, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void SortAlphasAndBetas(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeIsPossible(minimalRelationsProverStates& theOwner);
-  static void GetNumberScalarProductsData( root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
-	static bool Root1IsGreaterThanRoot2(	int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+  static void GetNumberScalarProductsData(root& input, roots& theRoots, bool& isLong, int& NumLongValue, int& NumMixedValue,	int& NumShortValue, int& NumMinusLongValue, int& NumMinusMixedValue,	int& NumMinusShortValue, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
+	static bool Root1IsGreaterThanRoot2(int index1, int index2, roots& setWeBelongTo, roots& setOtherSet, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
   void ComputeScalarProductsMatrix(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, roots& theAlphas, roots& theBetas, MatrixLargeRational& output);
-  bool ComputeStateReturnFalseIfDubious( minimalRelationsProverStates& owner, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
-  bool CanBeShortened( coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool ComputeStateReturnFalseIfDubious(minimalRelationsProverStates& owner, GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
+  bool CanBeShortened(coneRelation& theRelation, SelectionWithMaxMultiplicity& selAlphas, SelectionWithMaxMultiplicity& selBetas, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS);
   bool SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl);
   bool IsBKSingularImplied(root& input, WeylGroup& theWeyl);
   void Assign(const minimalRelationsProverState& right);
@@ -5949,16 +5987,16 @@ public:
 	bool RootIsGoodForPreferredSimpleRoot(root& input, int preferredIndex, bool& GoodForAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& AlphasMinusBetas);
 	void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
 	bool RootIsGoodForProblematicIndex(root& input,int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
-	bool FindBetaWithoutTwoAlphas( root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
+	bool FindBetaWithoutTwoAlphas(root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
   bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
 	bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl,GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
   void operator=(const minimalRelationsProverState& right){this->Assign(right);};
   minimalRelationsProverState();
-  void MakeProgressReportCanBeShortened( int checked, int outOf, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
-	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
+  void MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 };
 
 class minimalRelationsProverStates: public ListBasicObjects<minimalRelationsProverState>
@@ -5994,10 +6032,10 @@ public:
   void initShared(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ElementToString(std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables)  { this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
-  bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive( int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables){ this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables);};
+  bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
-  bool AddObjectOnTopNoRepetitionOfObject( int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  bool AddObjectOnTopNoRepetitionOfObject(int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingState(ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStep(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -6025,10 +6063,10 @@ public:
     this->sizeByLastPurge=0;
     this->NumFullyComputed=0;
   };
- 	void ReadFromFile(std::fstream &inputHeader, std::fstream &inputBody, GlobalVariables &theGlobalVariables);
-	void WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables &theGlobalVariables);
-	void WriteToFileAppend(GlobalVariables&  theGlobalVariables);
-	void ReadFromFile (GlobalVariables&  theGlobalVariables);
+ 	void ReadFromFile(std::fstream &inputHeader, std::fstream& inputBody, GlobalVariables& theGlobalVariables);
+	void WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables& theGlobalVariables);
+	void WriteToFileAppend(GlobalVariables& theGlobalVariables);
+	void ReadFromFile (GlobalVariables& theGlobalVariables);
   void PurgeImpossibleStates();
 };
 
@@ -6038,7 +6076,7 @@ class DyckPath
   public:
   std::string DebugString;
   void ComputeDebugString(DyckPaths& owner, bool useHtml, bool WithDetail){this->ElementToString(DebugString, owner, useHtml, WithDetail);};
-  void ElementToString(std::string& output, DyckPaths& owner,  bool useHtml, bool WithDetail);
+  void ElementToString(std::string& output, DyckPaths& owner, bool useHtml, bool WithDetail);
   ListBasicObjectsLight<int> thePathNodes;
   ListBasicObjectsLight<int> thePathEdgesTaken;
   void Assign(const DyckPath& other);
@@ -6161,6 +6199,7 @@ public:
 	void DoTheRootSAComputation();
 	void DoTheRootSAComputationCustom();
 	static void CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+	static void ComputeReductiveSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	static void ComputeRootSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	static void ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 	static void ExperimentWithH(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
@@ -6188,7 +6227,7 @@ public:
 	static int shiftX;
 	static int shiftY;
 	static int scale;
-	static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter );
+	static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void MakeVPReportFromComputationSetup(ComputationSetup& input);
 	static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
 	static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
@@ -6209,24 +6248,6 @@ public:
   enum TheChoicesWeMake
   { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2
   };
-};
-
-class RandomCodeIDontWantToDelete
-{
-public:
-	static void SomeRandomTests2();
-	static void SomeRandomTests3();
-	static ListBasicObjects<std::string> EvilList1,EvilList2;
-	static bool UsingEvilList1;
-	void SomeRandomTests4();
-	static void SomeRandomTests5();
-	static void SomeRandomTests6();
-	void WeylChamberRandomCode();
-	void KLPolysRandomCode();
-	static void SomeRandomTestsIWroteMonthsAgo();
-	static std::string theFirstEvilString, theSecondEvilString;
-	QuasiPolynomial EvilPoly1, EvilPoly2;
-	void RevealTheEvilConspiracy();
 };
 
 class GlobalVariables
@@ -6351,6 +6372,7 @@ public:
   DynkinDiagramRootSubalgebra dynGetEpsCoords;
   DynkinDiagramRootSubalgebra dynAttemptTheTripleTrick;
 
+  IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
 	GlobalVariables();
 	~GlobalVariables();

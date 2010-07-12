@@ -837,7 +837,7 @@ void guiMainWindow::RunTheComputation()
   MainWindow1->TurnOffAllDangerousButtons();
 //#ifdef WIN32
 	if (!MainWindow1->theComputationSetup.flagComputationInProgress)
-  {	MainWindow1->theComputationSetup.flagComputationInProgress=true;
+  {	MainWindow1->theComputationSetup.flagComputationInProgress = true;
     MainWindow1->Button1Go->SetLabel(wxT("Pause"));
 #ifdef WIN32
     MainWindow1->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
@@ -857,7 +857,7 @@ void guiMainWindow::RunTheComputation()
       {}
       ParallelComputing::ReachSafePointASAP=false;
 #ifdef WIN32
-      ::SuspendThread(MainWindow1->WorkThread1.ComputationalThread);
+      SuspendThread(MainWindow1->WorkThread1.ComputationalThread);
 #endif
       MainWindow1->WorkThread1.isRunning=false;
       MainWindow1->Button1Go->SetLabel(wxT("Go"));
@@ -895,10 +895,11 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
 { this->theComputationSetup.WeylGroupIndex=8;
   this->theComputationSetup.WeylGroupLetter='E';
-  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.CountNilradicals;
+  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.CountNilradicals;
 //  this->theComputationSetup.theFunctionToRun=& this->theComputationSetup.ComputeRootSAs;
 //  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeGroupPreservingKintersectBIsos;
  // this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ExperimentWithH;
+  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeReductiveSAs;
   this->RunTheComputation();
 }
 
@@ -918,7 +919,7 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 
 void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
 { this->theComputationSetup.theChambers.ReadFromDefaultFile();
-  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.DyckPathPolytopeComputation;
+  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.DyckPathPolytopeComputation;
   this->theComputationSetup.flagDyckPathComputationLoaded=true;
   this->theComputationSetup.WeylGroupIndex = this->theComputationSetup.theChambers.AmbientDimension;
   this->RunTheComputation();
@@ -932,7 +933,7 @@ void guiMainWindow::onButton1Go(wxCommandEvent& ev)
 }
 
 void guiMainWindow::OpenFile(std::fstream& output)
-{ wxFileDialog* OpenDialog = new wxFileDialog ( this, wxT("Choose a file to open"), wxEmptyString, wxEmptyString, wxT("Text files (*.tex)|*.tex"),wxSAVE, wxDefaultPosition);
+{ wxFileDialog* OpenDialog = new wxFileDialog (this, wxT("Choose a file to open"), wxEmptyString, wxEmptyString, wxT("Text files (*.tex)|*.tex"),wxSAVE, wxDefaultPosition);
   output.close();
   if (OpenDialog->ShowModal() == wxID_OK)
   { wxString CurrentDocPath = OpenDialog->GetPath();

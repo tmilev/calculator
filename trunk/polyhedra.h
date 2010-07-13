@@ -421,7 +421,7 @@ public:
 	void SwapTwoIndices(int index1, int index2);
 	void ElementToStringGeneric(std::string& output);
 	void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
-	int IndexOfObject(const Object& o);
+	int IndexOfObject(const Object& o) const;
 	bool ContainsObject(const Object& o){return this->IndexOfObject(o)!=-1;};
 //	inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1;};
 	int SizeWithoutObjects();
@@ -1896,7 +1896,7 @@ void ListBasicObjects<Object>::SwapTwoIndices(int index1, int index2)
 }
 
 template<class Object>
-int ListBasicObjects<Object>::IndexOfObject(const Object& o)
+int ListBasicObjects<Object>::IndexOfObject(const Object& o) const
 { for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]==o)
 			return i;
@@ -1909,11 +1909,11 @@ void ListBasicObjects<Object>::swap(ListBasicObjects<Object>& l1, ListBasicObjec
 	ListBasicObjects<Object>* smallL;
 	int smallSize;
 	if (l1.size<l2.size)
-	{	smallL=&l1;
+	{ smallL=&l1;
 		bigL=&l2;
 		smallSize=l1.size;
 	} else
-	{	bigL=&l1;
+	{ bigL=&l1;
 		smallL=&l2;
 		smallSize=l2.size;
 	}
@@ -5649,15 +5649,18 @@ public:
 	{ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0);
   };
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
+  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
 	void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){	this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml);};
-	ListBasicObjects<int> HighestWeights;
-	ListBasicObjects<int> MultiplicitiesHighestWeights;
-	ListBasicObjects<int> WeightSpaceDimensions;
+	ListBasicObjects<int> highestWeights;
+	ListBasicObjects<int> multiplicitiesHighestWeights;
+	ListBasicObjects<int> weightSpaceDimensions;
 	ElementSimpleLieAlgebra theH, theE, theF;
 	ElementSimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
 	SimpleLieAlgebra* owner;
 	ListBasicObjects<int> IndicesContainingRootSAs;
 	ListBasicObjects<int> IndicesMinimalContainingRootSA;
+	ListBasicObjects<ListBasicObjects<int> > HighestWeightsDecompositionMinimalContainingRootSA;
+	ListBasicObjects<ListBasicObjects<int> > MultiplicitiesDecompositionMinimalContainingRootSA;
   roots preferredAmbientSimpleBasis;
 	root hCharacteristic;
 	root hElementCorrespondingToCharacteristic;
@@ -5670,17 +5673,22 @@ public:
 	MatrixLargeRational theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
-  void ComputeModuleDecomposition();
+  void ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, ListBasicObjects<int>& outputHighestWeights, ListBasicObjects<int>& outputMultiplicitiesHighestWeights, ListBasicObjects<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
+  void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
+  void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
   bool ModuleDecompositionFitsInto(const slTwo& other);
+  static bool ModuleDecompositionFitsInto(const ListBasicObjects<int>& highestWeightsLeft, const ListBasicObjects<int>& multiplicitiesHighestWeightsLeft, const ListBasicObjects<int>& highestWeightsRight, const ListBasicObjects<int>& multiplicitiesHighestWeightsRight);
   void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
 	void ElementToHtml(std::string& filePath);
 	void ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer);
 	void operator=(const slTwo& right)
-	{ this->HighestWeights.CopyFromBase(right.HighestWeights);
-    this->MultiplicitiesHighestWeights.CopyFromBase(right.MultiplicitiesHighestWeights);
-		this->WeightSpaceDimensions.CopyFromBase(right.WeightSpaceDimensions);
+	{ this->highestWeights.CopyFromBase(right.highestWeights);
+    this->multiplicitiesHighestWeights.CopyFromBase(right.multiplicitiesHighestWeights);
+		this->weightSpaceDimensions.CopyFromBase(right.weightSpaceDimensions);
+		this->HighestWeightsDecompositionMinimalContainingRootSA.CopyFromBase(right.HighestWeightsDecompositionMinimalContainingRootSA);
+		this->MultiplicitiesDecompositionMinimalContainingRootSA.CopyFromBase(right.MultiplicitiesDecompositionMinimalContainingRootSA);
 		this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
 		this->CentralizerDiagram.Assign(right.CentralizerDiagram);
 		this->DiagramM.Assign(right.DiagramM);
@@ -5778,6 +5786,14 @@ public:
 	ListBasicObjects<std::string> texStringsEachFile;
 	ListBasicObjects<std::string> listSystemCommandsLatex;
 	ListBasicObjects<std::string> listSystemCommandsDVIPNG;
+	void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
+	{ for(int i=0; i<this->size; i++)
+      this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
+  };
+  void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
+  {  for(int i=0; i<this->size; i++)
+        this->TheObjects[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
+  };
 	void getZuckermansArrayE8(roots& output);
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void ComputeDebugStringCurrent();
@@ -5805,11 +5821,17 @@ public:
   ListBasicObjects<ListBasicObjects<int> > thePartitionMultiplicities;
   SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
   ListBasicObjects<SimpleLieAlgebra> theCandidateSubAlgebras;
-  void GenerateModuleDecompositionsPrincipalSl2s(int theRank);
+  ListBasicObjects<ListBasicObjects<int> > IndicesMatchingSl2s;
+  ListBasicObjects<ListBasicObjects<int> > IndicesMatchingPartitionSl2s;
+  ListBasicObjects<ListBasicObjects<int> > IndicesMatchingActualSl2s;
+	void MatchRealSl2sToPartitionSl2s();
+	void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
+	void GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables);
   void ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output);
   void FindTheReductiveSubalgebras(int WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   void EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank);
-  void GenerateAllPartitions(int theRank);
+  void GenerateAllPartitionsUpTo(int theRank);
+  void GenerateAllPartitionsDontInit(int theRank);
   void GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, ListBasicObjects<int>& ranksBuffer, ListBasicObjects<int>& multiplicitiesBuffer, ListBasicObjects<char>& lettersBuffer);
   void GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, ListBasicObjects<int>& Multiplicities, ListBasicObjects<int>& Values);
 };
@@ -6107,10 +6129,135 @@ class DyckPaths: public ListBasicObjects<DyckPath>
   bool SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, root& output);
 };
 
+class ElementWeylAlgebra
+{
+private:
+  PolynomialRationalCoeff StandardOrder;
+public:
+  std::string DebugString;
+  void ComputeDebugString(bool useBeginEqnArray, bool useXYs){this->ElementToString(this->DebugString, useXYs, true, useBeginEqnArray);};
+  void ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
+	void ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
+  int NumVariables;
+  void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
+  void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
+  void MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
+  void Makexixj(int i, int j, int NumVars);
+  void Makexi(int i, int NumVars);
+  void Makedi(int i, int NumVars);
+  void Makedidj(int i, int j, int NumVars);
+  void Makexidj(int i, int j, int NumVars);
+  void Nullify(int NumVars);
+  void SetNumVariablesPreserveExistingOnes(int newNumVars);
+  void TimesConstant(Rational& theConstant)
+  { this->StandardOrder.TimesConstant(theConstant);
+  };
+  void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
+  void MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
+  void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
+  void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
+  void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
+  void LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
+  void Assign(const ElementWeylAlgebra& other)
+  { this->StandardOrder.Assign(other.StandardOrder);
+    this->NumVariables=other.NumVariables;
+  };
+  void Subtract(ElementWeylAlgebra& other)
+  { this->StandardOrder.Subtract(other.StandardOrder);
+  };
+  void MakeConst (int NumVars, Rational& theConst);
+  void Add(ElementWeylAlgebra& other)
+  { this->StandardOrder.AddPolynomial(other.StandardOrder);
+  };
+  void MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
+  ElementWeylAlgebra()
+  { this->NumVariables=0; };
+  void operator=(const std::string& input);
+  bool IsLetter(char theLetter);
+  bool IsIndex(char theIndex);
+  bool IsNumber(char theNumber);
+};
+
+class WeylParser;
+class WeylParserNode
+{
+  public:
+  std::string DebugString;
+  void ComputeDebugString(){this->ElementToString(DebugString);};
+  void ElementToString(std::string& output);
+  WeylParser* owner;
+  int indexParent;
+  ListBasicObjects<int> children;
+  ElementWeylAlgebra Value;
+  int Operation; //using tokenTypes from class WeylParser
+  void operator=(const WeylParserNode& other)
+  { this->owner=other.owner;
+    this->children.CopyFromBase(other.children);
+    this->indexParent=other.indexParent;
+  };
+  void Evaluate(GlobalVariables& theGlobalVariables);
+  WeylParserNode();
+};
+
+//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
+class WeylParser: public ListBasicObjects<WeylParserNode>
+{
+  public:
+  std::string DebugString;
+  void ComputeDebugString(){this->ElementToString(DebugString);};
+  void ElementToString(std::string& output);
+  enum tokenTypes
+  { tokenExpression, tokenEmpty, tokenDigit, tokenPlus, tokenMinus, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket
+  };
+  ListBasicObjects<int> TokenBuffer;
+  ListBasicObjects<int> ValueBuffer;
+  ListBasicObjects<int> TokenStack;
+  ListBasicObjects<int> ValueStack;
+  int numEmptyTokensAtBeginning;
+  int NumVariables;
+  ElementWeylAlgebra Value;
+  void ParserInit(const std::string& input);
+  void Evaluate(GlobalVariables& theGlobalVariables);
+  void Parse(const std::string& input);
+  void ParseNoInit(int indexFrom, int indexTo);
+  void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);
+  bool ApplyRules(int lookAheadToken);
+  bool lookAheadTokenProhibitsPlus(int theToken);
+  bool lookAheadTokenProhibitsTimes(int theToken);
+  void AddLetterOnTop(int index);
+  void AddPartialOnTop(int index);
+  void Own(int indexParent, int indexChild1, int indexChild2);
+  void ExtendOnTop(int numNew);
+  void TokenToStringStream(std::stringstream& out, int theToken);
+  void AddPlusOnTop();
+  void AddMinusOnTop();
+  void AddTimesOnTop();
+  void AddLieBracketOnTop();
+  void DecreaseStackSetExpressionLastNode(int Decrease);
+  void ComputeNumberOfVariablesAndAdjustNodes();
+  WeylParser()
+  { this->numEmptyTokensAtBeginning=5;
+  };
+};
+
+class IrreducibleFiniteDimensionalModule
+{
+  public:
+  DyckPaths thePaths;//the Weyl group inside the Dyck paths is assumed to parametrize the module.
+  MatrixLargeRational thePathMatrix;
+  MatrixLargeRational theMatrix;
+  roots theColumnsOfTheMatrix;
+  void InitAndPrepareTheChambersForComputation(int IndexWeyl, CombinatorialChamberContainer& theChambers, GlobalVariables& theGlobalVariables);
+  std::string DebugString;
+  void ComputeDebugString(){this->ElementToString(this->DebugString);};
+  void ElementToString(std::string& output);
+};
+
 typedef void (*Runnable) (ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 
 struct ComputationSetup
-{	roots InputRoots;
+{ roots InputRoots;
 public:
   Runnable theFunctionToRun;
 	partFractions thePartialFraction;
@@ -6246,7 +6393,7 @@ public:
 	static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result;};
 	static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true);};
   enum TheChoicesWeMake
-  { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2
+  { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
   };
 };
 

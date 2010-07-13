@@ -297,9 +297,9 @@ guiMainWindow *MainWindow1;
 // 2 = dotted line
 // 5 = invisible line (no line)
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
-{	wxWindowDC dc(MainWindow1->Canvas1); wxPen tempPen;
+{ wxWindowDC dc(MainWindow1->Canvas1); wxPen tempPen;
   switch (thePenStyle)
-  {	case 0: tempPen.SetStyle(::wxSOLID); break;
+  { case 0: tempPen.SetStyle(::wxSOLID); break;
 		case 1:	tempPen.SetStyle(::wxSHORT_DASH); break;
 		case 2:	tempPen.SetStyle(::wxDOT); break;
 		case 5: return;
@@ -311,7 +311,7 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
 }
 
 void drawtext(double X1, double Y1, const char* text, int length, int color)
-{	wxWindowDC dc(MainWindow1->Canvas1);
+{ wxWindowDC dc(MainWindow1->Canvas1);
   dc.SetFont(*MainWindow1->theFont);
   dc.SetTextForeground(color);
   //dc.setcolo(color);
@@ -336,7 +336,7 @@ bool guiApp::OnInit()
 #else
   wxString path =this->argv[0];
   if (!wxIsAbsolutePath(path))
-  {	wxPathList pathlist;
+  { wxPathList pathlist;
     pathlist.AddEnvList(wxT("PATH"));
     path = pathlist.FindAbsoluteValidPath(path);
   }
@@ -348,8 +348,8 @@ bool guiApp::OnInit()
 #endif
   int pathCutOffSize=0;
   for (int i=MainWindow1GlobalPath.size();i>=0;i--)
-  {	if (::MainWindow1GlobalPath[i]==directoryCharacter)
-    {	pathCutOffSize=i+1;
+  { if (::MainWindow1GlobalPath[i]==directoryCharacter)
+    { pathCutOffSize=i+1;
       break;
 		}
   }
@@ -438,19 +438,19 @@ void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
 
 
 void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
-{	int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop();
+{ int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop();
   int Realy=ev.GetY();//-this->GetRect().GetLeft();
   if (TDV.Selected==-2)
-  {	double tempX, tempY;
+  { double tempX, tempY;
     int tempXi, tempYi;
     int tempXi2, tempYi2;
     for (int i=0; i<MaxRank; i++)
-    {	tempXi=(int)TDV.Projections[i][0];
+    { tempXi=(int)TDV.Projections[i][0];
       tempYi=(int)TDV.Projections[i][1];
       tempXi2=Realx-((int)TDV.centerX);
       tempYi2=((int) TDV.centerY)-Realy;
       if (((tempXi2-ClickToleranceX)<=tempXi) && (tempXi<=(tempXi2+ClickToleranceX)) &&((tempYi2-ClickToleranceY)<=tempYi) && (tempYi<=(tempYi2+ClickToleranceY)))
-			{	TDV.Selected=i;
+			{ TDV.Selected=i;
         break;
       }
     }
@@ -460,12 +460,12 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
     tempYi=(int)tempY;
     if (((Realx-ClickToleranceX)<=tempXi) && (tempXi<=(Realx+ClickToleranceX)) &&((Realy-ClickToleranceY)<=tempYi) && (tempYi<=(Realy+ClickToleranceY)))
 			TDV.Selected=-1;
-  }	else
-	{	if (TDV.Selected==-1)
-    {	TDV.centerX = (double) Realx;
+  }else
+	{ if (TDV.Selected==-1)
+    { TDV.centerX = (double) Realx;
       TDV.centerY = (double) Realy;
 		} else
-    {	double tempx, tempy;
+    { double tempx, tempy;
       tempx=Realx;
       tempy=Realy;
       TDV.Projections[TDV.Selected][0]=tempx-TDV.centerX;
@@ -718,10 +718,10 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
 }
 
 void drawCanvas::onSizing(wxSizeEvent& ev)
-{	if (MainWindow1==0)
+{ if (MainWindow1==0)
 		return;
 	if (MainWindow1->Table1Input->GetNumberRows()>20)
-  {	MainWindow1->Table1Input->SetAutoLayout(false);
+  { MainWindow1->Table1Input->SetAutoLayout(false);
     MainWindow1->Table1Input->SetSize(0,70,220,500);
     MainWindow1->Table1Input->SetMaxSize(wxSize(220,500));
 	}
@@ -773,18 +773,18 @@ void* RunrootFKFTComputationLocal(void*)
 }
 
 void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
-{	if (!this->ToggleButton1UsingCustom->GetValue())
-  {	this->theComputationSetup.flagUsingCustomVectors=false;
+{ if (!this->ToggleButton1UsingCustom->GetValue())
+  { this->theComputationSetup.flagUsingCustomVectors=false;
     this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to custom"));
   } else
-	{	this->theComputationSetup.flagUsingCustomVectors=true;
+	{ this->theComputationSetup.flagUsingCustomVectors=true;
     this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to roots"));
   }
   this->updateInputButtons();
 }
 
 void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
-{	if (MainWindow1==0)
+{ if (MainWindow1==0)
 		return;
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
@@ -798,16 +798,16 @@ void wxDialogOutput::onButton5SaveComputer(wxCommandEvent &ev)
 }
 
 void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev)
-{	if (MainWindow1==0)
+{ if (MainWindow1==0)
 		return;
 	if (!MainWindow1->ToggleButton2ViewCombinatorialChambers->GetValue())
-  {	MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
+  { MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
     MainWindow1->theComputationSetup.flagDisplayingPartialFractions=true;
     MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to chamber data"));
     MainWindow1->Button4SaveReadable->Enable();
     MainWindow1->Button5SaveComputer->Disable();
   }	else
-	{	MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
+	{ MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
     MainWindow1->theComputationSetup.flagDisplayingPartialFractions=false;
     MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to partial fractions"));
     MainWindow1->Button4SaveReadable->Disable();
@@ -837,7 +837,7 @@ void guiMainWindow::RunTheComputation()
   MainWindow1->TurnOffAllDangerousButtons();
 //#ifdef WIN32
 	if (!MainWindow1->theComputationSetup.flagComputationInProgress)
-  {	MainWindow1->theComputationSetup.flagComputationInProgress = true;
+  { MainWindow1->theComputationSetup.flagComputationInProgress = true;
     MainWindow1->Button1Go->SetLabel(wxT("Pause"));
 #ifdef WIN32
     MainWindow1->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
@@ -845,7 +845,7 @@ void guiMainWindow::RunTheComputation()
     //RunComputationalThread(0);
     pthread_create(&MainWindow1->WorkThread1.ComputationalThreadLinux, NULL,RunComputationalThread, 0);
 #endif
-  }	else
+  } else
   { if (MainWindow1->WorkThread1.isRunning)
     {	//pthread_mutex_lock(&ParallelComputing::mutex1);
       MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered=true;
@@ -893,8 +893,8 @@ void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
-{ this->theComputationSetup.WeylGroupIndex=8;
-  this->theComputationSetup.WeylGroupLetter='E';
+{ this->theComputationSetup.WeylGroupIndex=4;
+  this->theComputationSetup.WeylGroupLetter='D';
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.CountNilradicals;
 //  this->theComputationSetup.theFunctionToRun=& this->theComputationSetup.ComputeRootSAs;
 //  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeGroupPreservingKintersectBIsos;
@@ -919,6 +919,7 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 
 void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
 { this->theComputationSetup.theChambers.ReadFromDefaultFile();
+  this->theComputationSetup.theChambers.ConsistencyCheck();
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.DyckPathPolytopeComputation;
   this->theComputationSetup.flagDyckPathComputationLoaded=true;
   this->theComputationSetup.WeylGroupIndex = this->theComputationSetup.theChambers.AmbientDimension;
@@ -1051,7 +1052,7 @@ void guiMainWindow::onButton8FullChop(wxCommandEvent &ev)
 }
 
 void guiMainWindow::onButton9CustomNilradical(wxCommandEvent& ev)
-{	this->theComputationSetup.flagDoCustomNilradical=true;
+{ this->theComputationSetup.flagDoCustomNilradical=true;
 	this->theComputationSetup.SetupCustomNilradicalInVPVectors(*this->theComputationSetup.theGlobalVariablesContainer->Default());
 	this->theComputationSetup.FullChop(*this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->Dialog1OutputPF->onToggleButton2ViewCombinatorialChambers(ev);
@@ -1059,7 +1060,7 @@ void guiMainWindow::onButton9CustomNilradical(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
-{	int candidateDim= this->Spin1Dim->GetValue();
+{ int candidateDim= this->Spin1Dim->GetValue();
   int candidateNumVectors= this->Spin2NumVect->GetValue();
   if (candidateDim!= this->theComputationSetup.WeylGroupIndex || candidateNumVectors!=this->NumVectors)
   { if (candidateDim<1)
@@ -1084,7 +1085,7 @@ void guiMainWindow::onSpinner1and2(wxSpinEvent & ev)
 
 void guiMainWindow::updateInputButtons()
 { if (this->theComputationSetup.flagUsingCustomVectors)
-  {	this->ListBox1WeylGroup->Disable();
+  { this->ListBox1WeylGroup->Disable();
     this->Spin1Dim->Enable();
     this->Spin2NumVect->Enable();
     this->Spin1Dim->SetValue(this->theComputationSetup.WeylGroupIndex);
@@ -1093,7 +1094,7 @@ void guiMainWindow::updateInputButtons()
     this->onListBox1Change(ev);
   }
   else
-  {	this->Spin1Dim->Disable();
+  { this->Spin1Dim->Disable();
     this->Spin2NumVect->Disable();
     this->ListBox1WeylGroup->Enable();
     wxCommandEvent ev;
@@ -1157,8 +1158,8 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 }
 
 void guiMainWindow::WriteIndicatorWeight(root& tempRoot)
-{	for (int i=0; i<tempRoot.size; i++)
-	{	std::string tempS;
+{ for (int i=0; i<tempRoot.size; i++)
+	{ std::string tempS;
     tempRoot.TheObjects[i].ElementToString(tempS);
     this->Table2Indicator->SetCellValue(0,i,wxString(tempS.c_str(),wxConvUTF8));
     this->Table2Indicator->SetCellAlignment(0,i,wxALIGN_CENTER);
@@ -1191,13 +1192,13 @@ void guiMainWindow::initWeylGroupInfo()
 }
 
 void guiMainWindow::initTableFromVPVectors()
-{	int theDimension=	this->theComputationSetup.WeylGroupIndex;
-  this->initTableFromRowsAndColumns(this->theComputationSetup.VPVectors.size,theDimension);
+{ int theDimension=	this->theComputationSetup.WeylGroupIndex;
+  this->initTableFromRowsAndColumns(this->theComputationSetup.VPVectors.size, theDimension);
 	root tempRoot;
   tempRoot.MakeZero(theDimension);
-  for (int i=0;i<this->theComputationSetup.VPVectors.size;i++)
-  {	for (int j=0;j<theDimension;j++)
-    {	std::string tempS;
+  for (int i=0; i<this->theComputationSetup.VPVectors.size; i++)
+  { for (int j=0; j<theDimension; j++)
+    { std::string tempS;
       this->theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
       this->Table1Input->SetCellValue(i,j,wxString(tempS.c_str(),wxConvUTF8));
       this->Table1Input->SetCellAlignment(i,j,wxALIGN_CENTRE);
@@ -1213,13 +1214,13 @@ void guiMainWindow::OnExit(wxCloseEvent &event)
 }
 
 void guiMainWindow::ReadVPVectorsAndOptions()
-{	if (!this->theComputationSetup.flagComputationDone)
+{ if (!this->theComputationSetup.flagComputationDone)
 		return;
 	this->theComputationSetup.flagComputingPartialFractions=! this->CheckBox1ComputePFs->GetValue();
   this->theComputationSetup.thePartialFraction.flagUsingCheckSum=this->CheckBox2CheckSums->GetValue();
   this->theComputationSetup.flagComputingChambers= this->CheckBox3ComputeChambers->GetValue();
   bool tempBool = this->CheckBox8DoTheWeylGroup->GetValue();
-  if(	!(this->theComputationSetup.flagDoingWeylGroupAction== tempBool))
+  if (!(this->theComputationSetup.flagDoingWeylGroupAction== tempBool))
     this->theComputationSetup.Reset();
   this->theComputationSetup.flagDoingWeylGroupAction= tempBool;
   this->theComputationSetup.flagUsingIndicatorRoot=!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
@@ -1228,12 +1229,12 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
   TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
   if (this->theComputationSetup.flagUsingCustomVectors)
-  {	int theDimension=this->Spin1Dim->GetValue();
+  { int theDimension=this->Spin1Dim->GetValue();
     this->theComputationSetup.WeylGroupIndex= theDimension;
     this->theComputationSetup.VPVectors.size=0;
-    for (int i=0;i<this->Spin2NumVect->GetValue();i++)
-    {	root tempRoot; tempRoot.SetSizeExpandOnTopLight(theDimension);
-      for (int j=0;j<theDimension;j++)
+    for (int i=0; i<this->Spin2NumVect->GetValue(); i++)
+    { root tempRoot; tempRoot.SetSizeExpandOnTopLight(theDimension);
+      for (int j=0; j<theDimension; j++)
       { int tempI=wxAtoi(this->Table1Input->GetCellValue(i,j));
         tempRoot.TheObjects[j].AssignInteger(tempI);
       }
@@ -1243,7 +1244,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   }
   this->theComputationSetup.IndicatorRoot.SetSizeExpandOnTopLight(this->theComputationSetup.WeylGroupIndex);
   for (int j=0;j<this->theComputationSetup.WeylGroupIndex;j++)
-  {	int tempI=wxAtoi(this->Table2Indicator->GetCellValue(0,j));
+  { int tempI=wxAtoi(this->Table2Indicator->GetCellValue(0, j));
     this->theComputationSetup.IndicatorRoot.TheObjects[j].AssignInteger(tempI);
   }
   this->theComputationSetup.IndicatorRoot.size=this->theComputationSetup.WeylGroupIndex;
@@ -1251,8 +1252,8 @@ void guiMainWindow::ReadVPVectorsAndOptions()
 
 
 void guiMainWindow::TurnOnAllDangerousButtons()
-{	if (this->theComputationSetup.flagUsingCustomVectors)
-  {	this->Spin1Dim->Enable();
+{ if (this->theComputationSetup.flagUsingCustomVectors)
+  { this->Spin1Dim->Enable();
     this->Spin2NumVect->Enable();
   }
   else
@@ -1261,7 +1262,7 @@ void guiMainWindow::TurnOnAllDangerousButtons()
 }
 
 void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
-{	this->NumVectors=r;
+{ this->NumVectors=r;
   this->theComputationSetup.WeylGroupIndex= c;
   this->Table2Indicator->SetNumRowsAndCols(1,c);
   this->Table3Values->SetNumRowsAndCols(1,c);
@@ -1269,7 +1270,7 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
   if (r==0)
 		return;
 	for (int j=0;j<c;j++)
-  {	this->Table1Input->SetColumnWidth(j,25);
+  { this->Table1Input->SetColumnWidth(j,25);
     this->Table2Indicator->SetColumnWidth(j,25);
     this->Table3Values->SetColumnWidth(j,25);
   }
@@ -1278,11 +1279,11 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
   for (int i=0;i<r;i++)
   	this->Table1Input->SetRowHeight(i,25);
   if (this->Table1Input->GetNumberRows()>20)
-  {	this->Table1Input->SetSize(0,70,220,500);
+  { this->Table1Input->SetSize(0,70,220,500);
     this->Table1Input->SetMaxSize(wxSize(220,500));
     this->SetAutoLayout(false);
-  }	else
-	{	this->BoxSizer2VerticalInputs->Layout();
+  } else
+	{ this->BoxSizer2VerticalInputs->Layout();
     this->BoxSizer8HorizontalEval->Layout();
     this->BoxSizer1HorizontalBackground->Layout();
   }
@@ -1300,37 +1301,37 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 }
 
 void guiMainWindow::TurnOffAllDangerousButtons()
-{	MainWindow1->ListBox1WeylGroup->Disable();
+{ MainWindow1->ListBox1WeylGroup->Disable();
   MainWindow1->Spin1Dim->Disable();
   MainWindow1->Spin2NumVect->Disable();
   MainWindow1->ToggleButton1UsingCustom->Disable();
 }
 
-wxGridExtra::wxGridExtra(	wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style, const wxString &name)
-{	this->maxNumCols=8;
+wxGridExtra::wxGridExtra(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+{ this->maxNumCols=8;
   this->maxNumRows=120;
   this->Create(parent,id,pos,size,style,name);
 }
 
 void wxGridExtra::SetNumRowsAndCols(int r, int c)
-{	if (r<0 || r>this->maxNumRows|| c<0 ||c>this->maxNumCols)
+{ if (r<0 || r>this->maxNumRows|| c<0 ||c>this->maxNumCols)
 		return;
   int oldNumRows=	this->GetNumberRows();
   int oldNumCols= this->GetNumberCols();
   if (oldNumRows>r)
-  {	this->DeleteRows(r,oldNumRows-r,true);
+  { this->DeleteRows(r,oldNumRows-r,true);
     oldNumRows=r;
   }
   if (oldNumRows<r)
-  {	this->InsertRows(oldNumRows-1,r-oldNumRows,true);
+  { this->InsertRows(oldNumRows-1,r-oldNumRows,true);
     oldNumRows=r;
   }
   if (oldNumCols>c)
-  {	this->DeleteCols(c,oldNumCols-c,true);
+  { this->DeleteCols(c,oldNumCols-c,true);
     oldNumCols=c;
   }
   if (oldNumCols<c)
-  {	this->InsertCols(oldNumCols-1,c-oldNumCols,true);
+  { this->InsertCols(oldNumCols-1,c-oldNumCols,true);
     oldNumCols=c;
   }
 }
@@ -1349,8 +1350,8 @@ void outputText(std::string& theOutput)
 }
 
 void guiMainWindow::WriteSettingsIfAvailable()
-{	if (this->fileSettings.is_open())
-  {	this->fileSettings.clear();
+{ if (this->fileSettings.is_open())
+  { this->fileSettings.clear();
     this->fileSettings.seekp(0);
     int x,y;
     this->GetPosition(&x,&y);
@@ -1370,14 +1371,14 @@ void guiMainWindow::WriteSettingsIfAvailable()
 }
 
 void guiMainWindow::ReadSettingsIfAvailable()
-{	if (::MainWindow1GlobalPath=="")
+{ if (::MainWindow1GlobalPath=="")
 		return;
   std::stringstream out;
   out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
   std::string tempS;
   tempS= out.str();
   if (rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent2(this->fileSettings,tempS,false,false))
-  {	wxPoint tempPt, tempPt2, tempPt3;
+  { wxPoint tempPt, tempPt2, tempPt3;
     wxSize tempSize, tempSize2, tempSize3;
     this->fileSettings.seekg(0);
     this->fileSettings>>tempS >> tempPt.x;
@@ -1424,7 +1425,7 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 }
 
 void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
-{	TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
+{ TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
   TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
   TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
   this->Refresh();
@@ -1442,7 +1443,6 @@ void guiMainWindow::onRBGroup1SlicingOptions(wxCommandEvent& ev)
 { this->ReadRBData();
 }
 
-
 void guiMainWindow::onComputationOver(wxCommandEvent& ev)
 { this->updatePartialFractionAndCombinatorialChamberTextData();
   MainWindow1->TurnOnAllDangerousButtons();
@@ -1451,37 +1451,37 @@ void guiMainWindow::onComputationOver(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
-{	IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
+{ IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
   //if (output.Busy)
 	//	return;
 	output.Busy=true;
 	if (output.String1NeedsRefresh)
-  {	wxString tempS1(output.ProgressReportString1.c_str(),wxConvUTF8);
+  { wxString tempS1(output.ProgressReportString1.c_str(),wxConvUTF8);
 		MainWindow1->Label1ProgressReport->SetLabel(tempS1);
   }
   if (output.String2NeedsRefresh)
-  {	wxString tempS2(output.ProgressReportString2.c_str(),wxConvUTF8);
+  { wxString tempS2(output.ProgressReportString2.c_str(),wxConvUTF8);
 		MainWindow1->Label2ProgressReport->SetLabel(tempS2);
   }
   if (output.String3NeedsRefresh)
-  {	wxString tempS3(output.ProgressReportString3.c_str(),wxConvUTF8);
+  { wxString tempS3(output.ProgressReportString3.c_str(),wxConvUTF8);
 		MainWindow1->Label3ProgressReport->SetLabel(tempS3);
   }
   if (output.String4NeedsRefresh)
-  {	wxString tempS4(output.ProgressReportString4.c_str(),wxConvUTF8);
+  { wxString tempS4(output.ProgressReportString4.c_str(),wxConvUTF8);
 		MainWindow1->Label4ProgressReport->SetLabel(tempS4);
   }
   if (output.String5NeedsRefresh)
-  {	wxString tempS5(output.ProgressReportString5.c_str(),wxConvUTF8);
+  { wxString tempS5(output.ProgressReportString5.c_str(),wxConvUTF8);
 		MainWindow1->Label5ProgressReport->SetLabel(tempS5);
   }
   if (output.StatusString1NeedsRefresh)
-  {	wxString tempS6(output.StatusString1.c_str(),wxConvUTF8);
+  { wxString tempS6(output.StatusString1.c_str(),wxConvUTF8);
 		MainWindow1->Text4StatusString1->SetValue(tempS6);
 		MainWindow1->Text4StatusString1->Refresh();
   }
   if (output.flagRootIsModified)
-  {	root tempRoot;
+  { root tempRoot;
     tempRoot.AssignIntRoot(output.modifiedRoot);
     MainWindow1->WriteIndicatorWeight(tempRoot);
   }
@@ -1489,9 +1489,9 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
-{	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
+{ MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
   if (MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered)
-  {	MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
+  { MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
     return;
   }
   if (MainWindow1->progressReportVariables.Busy)

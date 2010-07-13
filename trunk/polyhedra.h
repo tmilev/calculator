@@ -2487,7 +2487,7 @@ public:
 	std::string DebugString;
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
-	void initFromDirections(roots& directions,GlobalVariables& theGlobalVariables);
+	void initFromDirections(roots& directions, GlobalVariables& theGlobalVariables);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
@@ -2565,7 +2565,7 @@ public:
 	int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
 	void SliceOneDirection(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	void OneSlice(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
-  void InduceFromLowerDimensionalAndProjectivize ( CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
+  void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
   void MakeExtraProjectivePlane();
 	int GetNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
 	int GetNumVisibleChambersAndLabelChambersForDisplay();
@@ -2576,14 +2576,14 @@ public:
 	void ElementToString(std::string& output);
 	void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
 	void ComputeDebugString(){this->ElementToString(this->DebugString);};
-	void ComputeDebugString(bool LatexFormat) {this->ElementToString(this->DebugString,LatexFormat,false);};
-	void ComputeDebugString(bool useLatex, bool useHtml) {this->ElementToString(this->DebugString,useLatex,useHtml);};
+	void ComputeDebugString(bool LatexFormat) {this->ElementToString(this->DebugString, LatexFormat, false);};
+	void ComputeDebugString(bool useLatex, bool useHtml){this->ElementToString(this->DebugString, useLatex, useHtml);};
 	void init();
 	void Free();
-	void WriteToDefaultFile();
+	void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
-	void ReadFromDefaultFile();
+	bool ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
 	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
@@ -2606,7 +2606,7 @@ public:
 	static void DrawOutputProjective(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, std::fstream* outputLatex, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void drawFacetVerticesMethod2(DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, drawLineFunction theDrawFunction, std::fstream* outputLatex);
-	bool TestPossibleIndexToSlice(root&direction, int index);
+	bool TestPossibleIndexToSlice(root& direction, int index);
 	CombinatorialChamberContainer();
 	~CombinatorialChamberContainer();
 };

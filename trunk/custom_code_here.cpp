@@ -919,7 +919,7 @@ void DrawingVariables::drawLine(double X1, double Y1, double X2, double Y2, unsi
 }
 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ inputData.theChambers.ReadFromDefaultFile();
+{ inputData.flagDyckPathComputationLoaded=inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
   if (!inputData.flagDyckPathComputationLoaded)
@@ -1177,3 +1177,64 @@ void WeylGroup::MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasic
   }
 }
 
+
+void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->LabelChamberIndicesProperly();
+  output << "Num_pointers: "<< this->size<<"\n";
+///////////////////////////////////////////////////
+  output << "Dimension: "<< this->AmbientDimension<<" ";
+  output << "CurrentIndex: "<< this->CurrentIndex<<"\n";
+  output << "Directions:\n";
+  this->theDirections.WriteToFile(output, theGlobalVariables);
+  output << "\nNext_index_to_slice: "<< this->indexNextChamberToSlice<<"\n";
+  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex<<" ";
+  this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
+  output << "\n";
+  this->startingCones.WriteToFile(output, theGlobalVariables);
+////////////////////////////////////////////////////
+  output << "\nPreferredNextChambers: " << this->PreferredNextChambers.size << " ";
+  for (int i=0; i<this->PreferredNextChambers.size; i++)
+    output << this->PreferredNextChambers.TheObjects[i]<<" ";
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+    { output <<"\nChamber:\n";
+      this->TheObjects[i]->WriteToFile(output, theGlobalVariables);
+    } else
+      output <<"Empty\n";
+}
+
+void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS;
+  input.seekg(0);
+  this->KillAllElements();
+  int tempI;
+  input >> tempS >> tempI;
+  this->initAndCreateNewObjects(tempI);
+///////////////////////////////////////////////////
+  input >> tempS >> this->AmbientDimension;
+  input >> tempS >> this->CurrentIndex;
+  input >> tempS;
+  this->theDirections.ReadFromFile(input, theGlobalVariables);
+  input >> tempS >> this->indexNextChamberToSlice;
+  input >> tempS >> this->FirstNonExploredIndex;
+  this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
+  this->startingCones.ReadFromFile(input, theGlobalVariables);
+////////////////////////////////////////////////////
+  input >> tempS >> tempI;
+  this->PreferredNextChambers.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->PreferredNextChambers.size; i++)
+    input >> this->PreferredNextChambers.TheObjects[i];
+  for (int i=0; i<this->size; i++)
+  { input >> tempS;
+    if (tempS=="Chamber:")
+      this->TheObjects[i]->ReadFromFile(input, theGlobalVariables, *this);
+    else
+    { assert (tempS=="Empty");
+      delete this->TheObjects[i];
+      this->TheObjects[i]=0;
+    }
+  }
+  this->flagIsRunning=true;
+  this->flagMustStop=false;
+  this->flagReachSafePointASAP=false;
+}

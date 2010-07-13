@@ -4613,60 +4613,6 @@ void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& th
     this->Externalwalls.TheObjects[i].ReadFromFile(input, owner);
 }
 
-void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ this->LabelChamberIndicesProperly();
-  output << "Num_pointers: "<< this->size<<"\n";
-///////////////////////////////////////////////////
-  output << "Dimension: "<< this->AmbientDimension<<" ";
-  output << "CurrentIndex: "<< this->CurrentIndex<<"\n";
-  output << "Directions:\n";
-  this->theDirections.WriteToFile(output, theGlobalVariables);
-  output << "\nNext_index_to_slice: "<< this->indexNextChamberToSlice<<"\n";
-  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex<<" ";
-  this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
-  output << "\n";
-  this->startingCones.WriteToFile(output, theGlobalVariables);
-////////////////////////////////////////////////////
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]!=0)
-    { output <<"\nChamber:\n";
-      this->TheObjects[i]->WriteToFile(output, theGlobalVariables);
-    } else
-      output <<"Empty\n";
-}
-
-void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS;
-  input.seekg(0);
-  this->KillAllElements();
-  int tempI;
-  input >> tempS >> tempI;
-  this->initAndCreateNewObjects(tempI);
-///////////////////////////////////////////////////
-  input >> tempS >> this->AmbientDimension;
-  input >> tempS >> this->CurrentIndex;
-  input >> tempS;
-  this->theDirections.ReadFromFile(input, theGlobalVariables);
-  input >> tempS >> this->indexNextChamberToSlice;
-  input >> tempS >> this->FirstNonExploredIndex;
-  this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
-  this->startingCones.ReadFromFile(input, theGlobalVariables);
-////////////////////////////////////////////////////
-  for (int i=0; i<this->size; i++)
-  { input >> tempS;
-    if (tempS=="Chamber:")
-      this->TheObjects[i]->ReadFromFile(input, theGlobalVariables, *this);
-    else
-    { assert (tempS=="Empty");
-      delete this->TheObjects[i];
-      this->TheObjects[i]=0;
-    }
-  }
-  this->flagIsRunning=true;
-  this->flagMustStop=false;
-  this->flagReachSafePointASAP=false;
-}
-
 void WallData::WriteToFile(std::fstream& output)
 { //output << this->indexInOwnerChamber <<" ";
   this->normal.WriteToFile(output);
@@ -4701,20 +4647,21 @@ void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& 
   }
 }
 
-void CombinatorialChamberContainer::WriteToDefaultFile()
+void CombinatorialChamberContainer::WriteToDefaultFile(GlobalVariables& theGlobalVariables)
 { std::fstream tempF;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, true, false);
-  GlobalVariables theGlobalVariables;
   this->WriteToFile(tempF, theGlobalVariables);
   tempF.close();
 }
 
-void CombinatorialChamberContainer::ReadFromDefaultFile()
+bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables& theGlobalVariables)
 { std::fstream tempF;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false);
-  GlobalVariables theGlobalVariables;
-  this->ReadFromFile(tempF, theGlobalVariables);
-  tempF.close();
+  if (CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false))
+  { this->ReadFromFile(tempF, theGlobalVariables);
+    tempF.close();
+    return true;
+  }
+  return false;
 }
 
 void CombinatorialChamberContainer::PauseSlicing()

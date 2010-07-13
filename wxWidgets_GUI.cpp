@@ -535,21 +535,21 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->Table2Indicator->CreateGrid( 0, 0 );
   this->Table3Values->CreateGrid(0,0);
   this->theFont= new ::wxFont(10,wxDEFAULT, wxNORMAL,wxNORMAL);
-  this->ListBox1WeylGroup= new ::wxComboBoxWheel(this, this->ID_ListBox1,wxT("A3"), wxPoint(0,0),::wxDefaultSize,0,0,wxCB_DROPDOWN  );
-  this->Button2Eval= new ::wxButton(this,this->ID_Buton2Eval, wxT("Evaluate"));
+  this->ListBox1WeylGroup= new ::wxComboBoxWheel(this, this->ID_ListBox1, wxT("A3"), wxPoint(0,0),::wxDefaultSize, 0, 0, wxCB_DROPDOWN  );
+  this->Button2Eval= new ::wxButton(this, this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button1Go= new ::wxButton(this, this->ID_Button1Go, wxT("Go"));
   this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button3Custom= new wxButton(this, this->ID_Button3Custom, wxT("Experiments"));
-  this->Button16Custom2= new wxButton(this, this->ID_Button16Custom2, wxT("Experiments 2"));
+  this->Button16Custom2= new wxButton(this, this->ID_Button16Custom2, wxT("Dyck path polytope load+go"));
   this->Button17Custom2PauseSaveResume= new wxButton(this, this->ID_Button17Custom2PauseSaveResume, wxT("Experiments 2 Pause+Save"));
-  this->Button18Custom2Load= new wxButton(this, this->ID_Button18Custom2Load, wxT("Experiments 2 Load+Resume"));
+  this->Button18Custom2Load= new wxButton(this, this->ID_Button18Custom2Load, wxT("Empty"));
   this->Button19CountNilradicals= new wxButton(this, this->ID_Button19CountNilradicals, wxT("Count Nilradicals"));
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
   //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
 	//this->Button9CustomNilradical= new wxButton(this,this->ID_Button9CustomNilradical,wxT("Custom nilradical"));
-  this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY,wxT(""),::wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
+  this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
   this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
   this->Dialog1OutputPF= new ::wxDialogOutput ( this,guiMainWindow::ID_Dialog1, wxT("Partial fractions"), ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
   this->Dialog2StatusString1=  new ::wxDialogOutput( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
@@ -572,7 +572,7 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->BoxSizer4VerticalToggleButton1->Add(this->ToggleButton1UsingCustom,0,wxALIGN_TOP);
   this->BoxSizer4VerticalToggleButton1->Add(new ::wxBoxSizer(::wxVERTICAL),1,::wxEXPAND);
   this->BoxSizer4VerticalToggleButton1->Add(this->Spin1Dim,0,::wxALIGN_BOTTOM,0);
-  this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer7VerticalListBox1,0, wxEXPAND| wxALL,0);
+  this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer7VerticalListBox1, 0, wxEXPAND| wxALL, 0);
   this->BoxSizer7VerticalListBox1->Add(this->BoxSizer9HorizontalCombo1AndMainButton, wxEXPAND| wxALL);
   this->BoxSizer9HorizontalCombo1AndMainButton->Add(this->ListBox1WeylGroup);
   this->BoxSizer9HorizontalCombo1AndMainButton->Add(this->Button1Go);
@@ -910,7 +910,7 @@ void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
 
 void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 { this->theComputationSetup.theChambers.PauseSlicing();
-  this->theComputationSetup.theChambers.WriteToDefaultFile();
+  this->theComputationSetup.theChambers.WriteToDefaultFile(*this->theComputationSetup.theGlobalVariablesContainer->Default());
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxCANCEL)
     this->theComputationSetup.theChambers.flagMustStop=true;
@@ -918,12 +918,7 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
-{ this->theComputationSetup.theChambers.ReadFromDefaultFile();
-  this->theComputationSetup.theChambers.ConsistencyCheck();
-  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.DyckPathPolytopeComputation;
-  this->theComputationSetup.flagDyckPathComputationLoaded=true;
-  this->theComputationSetup.WeylGroupIndex = this->theComputationSetup.theChambers.AmbientDimension;
-  this->RunTheComputation();
+{
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)

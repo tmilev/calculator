@@ -314,6 +314,7 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
 				this->ComputeNextIndexToSlice(directions.TheObjects[index]);
 		}
     this->MakeReportOneSlice(theGlobalVariables, index, directions.size);
+    assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
     if (this->flagReachSafePointASAP)
     {
@@ -2826,7 +2827,7 @@ inline void roots::AddIntRoot(intRoot &r)
 bool roots::PerturbVectorToRegular(root& output, GlobalVariables& theGlobalVariables, int theDimension)
 { root normal;
   bool result=false;
-	while (!this->IsRegular(output,normal, theGlobalVariables,theDimension))
+	while (!this->IsRegular(output, normal, theGlobalVariables, theDimension))
 	{ result=true;
 		normal.DivByInteger(10);
 		output.Add(normal);
@@ -4578,14 +4579,14 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 
 void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Flags_and_indices: ";
-  output << this->flagHasZeroPolynomial << " "<< this->flagExplored<< " " <<this->flagPermanentlyZero <<" ";
-  output << this->IndexInOwnerComplex << " "<< this->IndexStartingCrossSectionNormal <<" "<< this->DisplayNumber <<"\nVertices:\n";
+  output << this->flagHasZeroPolynomial << " " << this->flagExplored<< " " <<this->flagPermanentlyZero << " ";
+  output << this->IndexInOwnerComplex << " " << this->IndexStartingCrossSectionNormal << " "<< this->DisplayNumber << "\nVertices:\n";
   this->AllVertices.WriteToFile(output, theGlobalVariables);
-  output <<"Internal_point: ";
+  output << "Internal_point: ";
   this->InternalPoint.WriteToFile(output);
   output << "\nInternalWalls:\n";
   this->InternalWalls.WriteToFile(output, theGlobalVariables);
-  output<<"\n" << this->Externalwalls.size<<"\n";
+  output<< "\n" << this->Externalwalls.size << "\n";
   for (int i=0; i<this->Externalwalls.size; i++)
   { this->Externalwalls.TheObjects[i].WriteToFile(output);
     output<<" ";

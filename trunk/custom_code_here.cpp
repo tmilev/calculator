@@ -42,10 +42,21 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   std::string tempS;
   if (useLatex)
     out<<"$";
-  for  (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
+  if (useHtml)
+  { out <<"<table><tr><td align=\"center\">Char.</td>";
+    for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
+    { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
+      CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DebugString, tempS);
+      out <<"<td align=\"center\">Decomp. "<< tempS<<"</td>";
+    }
+    out <<"</tr>\n";
+  }
+  out <<"<tr><td align=\"center\"> "<< this->hCharacteristic.ElementToString() << "</td>";
+  for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
   { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
     CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DebugString, tempS);
-    out << "Decomposition of regular SA " << tempS <<":  ";
+    if (useHtml)
+      out <<"<td align=\"center\">";
     for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size; i++)
     { if (this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i]>1)
         out << this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i];
@@ -54,9 +65,11 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
         out << "+";
     }
     if (useHtml)
-      out <<"\n<br>";
+      out <<"</td>";
     out <<"\n";
   }
+  if (useHtml)
+    out <<"</tr></table>";
   if (useLatex)
     out << "$";
   output=out.str();
@@ -661,6 +674,18 @@ void slTwo::ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, 
   assert(possible);
 }
 
+void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml)
+{ std::string tempS; std::stringstream out;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToStringModuleDecompositionMinimalContainingRegularSAs(useLatex, useHtml, *this, tempS);
+    out << tempS;
+    if (useHtml)
+      out <<"\n<br>";
+    out <<"\n";
+  }
+  output=out.str();
+}
+
 void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::string tempS; std::stringstream out; std::stringstream body;
   std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1,...,\\alpha_n be simple roots w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h),...,\\alpha_n(h))";
@@ -947,6 +972,8 @@ void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int Weyl
 //  theGlobalVariables.theIndicatorVariables.StatusString1= this->theSl2s.DebugString;
   this->ElementToStringCandidatePrincipalSl2s(false, true, tempS);
   out << tempS;
+  this->theSl2s.ElementToStringModuleDecompositionMinimalContainingRegularSAs(tempS, false, true);
+  out <<tempS;
   this->theSl2s.ElementToString(tempS, theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, true, false, 0, 0);
   out << tempS;
   theGlobalVariables.theIndicatorVariables.StatusString1.append(tempS);
@@ -965,6 +992,7 @@ void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank
     this->theCandidateSubAlgebras.TheObjects[i].theWeyl.GenerateRootSystemFromKillingFormMatrix();
     int theDimension = this->theCandidateSubAlgebras.TheObjects[i].theWeyl.KillingFormMatrix.NumRows;
     tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
+    tempSl2.preferredAmbientSimpleBasis.MakeEiBasis(theDimension);
     tempSl2.owner = &this->theCandidateSubAlgebras.TheObjects[i];
     tempSl2.ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
     this->CandidatesPrincipalSl2ofSubalgebra.AddObjectOnTopHash(tempSl2);
@@ -1153,10 +1181,13 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
     slTwo& theSl2= this->CandidatesPrincipalSl2ofSubalgebra.TheObjects[i];
     theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
     out << tempS;
-    theSl2.ElementToStringModuleDecompositionMinimalContainingRegularSAs(useLatex, useHtml, this->theSl2s, tempS);
-    if (useHtml)
-      out <<"\n<br>\n &nbsp;&nbsp;&nbsp;&nbsp;";
-    out <<tempS;
+    if (this->IndicesMatchingActualSl2s.size>0)
+    { out <<" Matching actual sl(2)'s: ";
+      for (int j=0; j<this->IndicesMatchingActualSl2s.TheObjects[i].size; j++)
+      { int tempI= this->IndicesMatchingActualSl2s.TheObjects[i].TheObjects[j];
+        out << this->theSl2s.TheObjects[tempI].hCharacteristic.ElementToString() <<", ";
+      }
+    }
     if (useHtml)
       out <<"\n<br>";
     out<<"\n";

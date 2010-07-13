@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 		::getenv_s(&tempI, buffer, 1500, "QUERY_STRING");
 		inputString=buffer;
 #else
-		inputString=::getenv("QUERY_STRING");
+		inputString=getenv("QUERY_STRING");
 //		inputString=::getenv("QUERY_STRING");
 #endif
 	}
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     //	std::cout <<"before Run!";
       theComputationSetup.flagPartialFractionSplitPrecomputed=false;
       theComputationSetup.Run();
-      ::CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
+      CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(theComputationSetup);
       std::string pfFileName;
       std::fstream pfFile;
       pfFileName=inputPath;
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
       else
         std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPathSl2s << "sl2s_nopng.html\">";
     }
-  }else if (choice==CGIspecificRoutines::choiceExperiments)
+  } else if (choice==CGIspecificRoutines::choiceExperiments)
   { theComputationSetup.WeylGroupIndex=4;
     theComputationSetup.WeylGroupLetter='D';
     theComputationSetup.theFunctionToRun= &theComputationSetup.ComputeReductiveSAs;

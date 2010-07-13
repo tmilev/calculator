@@ -1264,18 +1264,18 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
   this->Table1Input->SetNumRowsAndCols(this->NumVectors,this->theComputationSetup.WeylGroupIndex);
   if (r==0)
 		return;
-	for (int j=0;j<c;j++)
-  { this->Table1Input->SetColumnWidth(j,25);
-    this->Table2Indicator->SetColumnWidth(j,25);
-    this->Table3Values->SetColumnWidth(j,25);
+	for (int j=0; j<c; j++)
+  { this->Table1Input->SetColumnWidth(j, 25);
+    this->Table2Indicator->SetColumnWidth(j, 25);
+    this->Table3Values->SetColumnWidth(j, 25);
   }
-  this->Table2Indicator->SetRowHeight(0,25);
-  this->Table3Values->SetRowHeight(0,25);
-  for (int i=0;i<r;i++)
-  	this->Table1Input->SetRowHeight(i,25);
+  this->Table2Indicator->SetRowHeight(0, 25);
+  this->Table3Values->SetRowHeight(0, 25);
+  for (int i=0; i<r; i++)
+  	this->Table1Input->SetRowHeight(i, 25);
   if (this->Table1Input->GetNumberRows()>20)
-  { this->Table1Input->SetSize(0,70,220,500);
-    this->Table1Input->SetMaxSize(wxSize(220,500));
+  { this->Table1Input->SetSize(0, 70, 220, 500);
+    this->Table1Input->SetMaxSize(wxSize(220, 500));
     this->SetAutoLayout(false);
   } else
 	{ this->BoxSizer2VerticalInputs->Layout();

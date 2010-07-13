@@ -5800,6 +5800,7 @@ public:
   bool ContainsSl2WithGivenH(root& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(root& theHCharacteristic, int* outputIndex);
   void ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer);
+  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 

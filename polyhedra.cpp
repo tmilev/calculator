@@ -791,6 +791,9 @@ bool CGIspecificRoutines::CheckForInputSanity(ComputationSetup& input)
 int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath)
 { if (inputBad.length()<2)
 		return CGIspecificRoutines::choiceInitAndDisplayMainPage;
+	if (inputBad=="experiments")
+	{ return CGIspecificRoutines::choiceExperiments;
+  }
 	std::string inputGood;
   std::string tempS3;
 	tempS3=inputBad;
@@ -800,11 +803,11 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
 	if (tempS3=="textDim")
     InputDataOK=true;
   //std::cout.flush();
-//  std::cout<< inputBad<<"\n<br>\n";
+  //std::cout<< inputBad<<"\n<br>\n";
   //std::cout.flush();
-//  std::cout <<"  tempS3: "<< tempS3<<"   ";
+  //std::cout <<"  tempS3: "<< tempS3<<"   ";
 #ifdef CGIversionLimitRAMuse
-  cgiLimitRAMuseNumPointersInListBasicObjects=2000000;
+  cgiLimitRAMuseNumPointersInListBasicObjects=1000000;
 #endif
   CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
 //  std::cout<<inputGood;
@@ -854,7 +857,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
     //std::cout<<"<br><br>"<< "The choices we make: " << theChoiceIsYours;
     std::cout.flush();
 #ifdef CGIversionLimitRAMuse
-    cgiLimitRAMuseNumPointersInListBasicObjects=12000000;
+    cgiLimitRAMuseNumPointersInListBasicObjects=300000000;
 #endif
     return theChoiceIsYours;
   }
@@ -1366,6 +1369,25 @@ void ComputationSetup::Reset()
 { this->flagComputationInProgress=false;
 	this->flagComputationDone=true;
 	this->flagComputationInitialized=false;
+}
+
+void ComputationSetup::ComputeRootSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
+	inputData.theRootSubalgebras.flagComputeConeCondition=false;
+	inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+  inputData.theRootSubalgebras.ComputeDebugString(false, false, true, 0 , 0, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1=inputData.theRootSubalgebras.DebugString;
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+}
+
+void ComputationSetup::ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+  std::string tempS;
+  inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void ComputationSetup::EvaluatePoly()
@@ -3180,7 +3202,7 @@ void roots::GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVaria
 { assert(this!=&outputCoords);
   outputCoords.SetSizeExpandOnTopNoObjectInit(this->size);
   for(int i=0; i<this->size; i++)
-    this->TheObjects[i].GetCoordsInBasis(inputBasis,outputCoords.TheObjects[i],theGlobalVariables);
+    this->TheObjects[i].GetCoordsInBasis(inputBasis, outputCoords.TheObjects[i], theGlobalVariables);
 }
 
 int roots::ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables)
@@ -3320,7 +3342,7 @@ void CombinatorialChamber::ElementToInequalitiesString(std::string& output,Combi
 }
 
 bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml)
-{	std::stringstream out;
+{ std::stringstream out;
   std::string tempS;
 	//assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
 	std::string endOfLine;
@@ -3359,7 +3381,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 	out<<"Neighbors: ";
 	for (int i=0; i<outputChambers.size; i++)
 		if (outputChambers.TheObjects[i]!=0)
-		{	outputChambers.TheObjects[i]->ChamberNumberToString(tempS,*owner);
+		{ outputChambers.TheObjects[i]->ChamberNumberToString(tempS,*owner);
 			out <<tempS<<", ";
 		}
 	PolyFormatLocal.cutOffString=false;
@@ -3381,7 +3403,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 		}
 		out << "Affine vertices (true): "<<endOfLine;
 		for (int i=0;i<affineVertices.size;i++)
-		{	if (i==this->NumTrueAffineVertices)
+		{ if (i==this->NumTrueAffineVertices)
 				out << "Affine vertices representing pt(s) at infty: "<<endOfLine;
 			this->affineVertices.TheObjects[i].ElementToString(tempS);
 			out << tempS<<endOfLine;
@@ -3411,7 +3433,7 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension)
 }
 
 CombinatorialChamber::CombinatorialChamber()
-{	this->flagHasZeroPolynomial=true;
+{ this->flagHasZeroPolynomial=true;
   this->IndexInOwnerComplex=-1;
   this->IndexStartingCrossSectionNormal=-1;
 	this->flagExplored=false;
@@ -3521,7 +3543,6 @@ bool CombinatorialChamber::OwnsAWall(WallData* theWall)
 	return false;
 }
 
-
 void CombinatorialChamber::ComputeInternalPointMethod2(root &InternalPoint, int theDimension)
 {	InternalPoint.MakeZero(theDimension);
 	for (int i=0;i<this->AllVertices.size;i++)
@@ -3600,7 +3621,7 @@ bool CombinatorialChamber::ComputeVertexFromSelection( GlobalVariables& theGloba
 }
 
 bool CombinatorialChamber::PlusMinusPointIsInChamber(root&point)
-{	if (PointIsInChamber(point))
+{ if (PointIsInChamber(point))
     return true;
 	point.MinusRoot();
 	if (PointIsInChamber(point))
@@ -3609,7 +3630,7 @@ bool CombinatorialChamber::PlusMinusPointIsInChamber(root&point)
 }
 
 bool CombinatorialChamber::ScaleVertexToFitCrossSection(root& point, CombinatorialChamberContainer& owner)
-{	Rational tempRat;
+{ Rational tempRat;
 	if (this->IndexStartingCrossSectionNormal==-1)
 		return false;
 	root::RootScalarEuclideanRoot(point,	owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal,tempRat);
@@ -3675,7 +3696,6 @@ bool CombinatorialChamber::IsABogusNeighbor(WallData& NeighborWall, Combinatoria
 	}
 	return true;
 }
-
 
 bool CombinatorialChamber::LinearAlgebraForVertexComputation(Selection& theSelection,  root& output, GlobalVariables& theGlobalVariables, int theDimension)
 { output.SetSizeExpandOnTopLight(theDimension);
@@ -4218,7 +4238,7 @@ void CombinatorialChamberContainer::WriteReportToFile(DrawingVariables& TDV, roo
 }
 
 void CombinatorialChamberContainer::ElementToString(std::string& output)
-{ this->ElementToString(output,false,false);
+{ this->ElementToString(output, false, false);
 }
 
 void CombinatorialChamberContainer::ElementToString(std::string& output, bool useLatex, bool useHtml)
@@ -4333,7 +4353,7 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize(Co
 void CombinatorialChamberContainer::LabelChamberIndicesProperly()
 { for(int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
-		{	this->TheObjects[i]->IndexInOwnerComplex=i;
+		{ this->TheObjects[i]->IndexInOwnerComplex=i;
 			this->TheObjects[i]->LabelWallIndicesProperly();
 		}
 }
@@ -4372,7 +4392,7 @@ void CombinatorialChamberContainer::init()
 
 
 CombinatorialChamberContainer::~CombinatorialChamberContainer()
-{	this->Free();
+{ this->Free();
 #ifdef WIN32
 /*  ::CloseHandle(this->mutexFlagCriticalSectionEntered);
   ::CloseHandle(this->condContinue);*/
@@ -4384,9 +4404,9 @@ CombinatorialChamberContainer::~CombinatorialChamberContainer()
 }
 
 void CombinatorialChamberContainer::DumpAll()
-{	CombinatorialChamberContainer::TheBigDump.clear();
+{ CombinatorialChamberContainer::TheBigDump.clear();
 	for (int i=0;i<this->size;i++)
-	{	this->TheObjects[i]->ComputeDebugString(this);
+	{ this->TheObjects[i]->ComputeDebugString(this);
 //		CombinatorialChamberContainer::TheBigDump <<this->TheObjects[i]->DebugString;
 	}
 }
@@ -4395,12 +4415,12 @@ int CombinatorialChamberContainer::GetNumVisibleChambersAndLabelChambersForDispl
 { int NumZeroChambers=0;
 	int NumChambersNonZero=0;
 	for (int i=0;i<this->size;i++)
-	{	if (this->TheObjects[i]!=0)
+	{ if (this->TheObjects[i]!=0)
 		{ if (this->TheObjects[i]->flagHasZeroPolynomial)
 			{ NumZeroChambers++;
 				this->TheObjects[i]->DisplayNumber=NumZeroChambers;
 			} else
-			{	NumChambersNonZero++;
+			{ NumChambersNonZero++;
 				this->TheObjects[i]->DisplayNumber=NumChambersNonZero;
 			}
 		}
@@ -4451,15 +4471,14 @@ int CombinatorialChamberContainer::GetNumChambersInWeylChamberAndLabelChambers(C
 	}
 	NumChambersNonZeroNotInWeyl=0;
 	for (int i=0;i<this->size;i++)
-	{	if (this->TheObjects[i]!=0)
-		{	if (!this->TheObjects[i]->flagHasZeroPolynomial)
-			{	if (this->TheObjects[i]->affineVertices.size!=0)
-				{	root tempRoot;
+	{ if (this->TheObjects[i]!=0)
+		{ if (!this->TheObjects[i]->flagHasZeroPolynomial)
+			{ if (this->TheObjects[i]->affineVertices.size!=0)
+				{ root tempRoot;
 					this->TheObjects[i]->ComputeAffineInternalPoint(tempRoot, this->AmbientDimension-1);
 					if (!theWeylChamber.IsInCone(tempRoot))
-					{	NumChambersNonZeroNotInWeyl++;
-						this->TheObjects[i]->DisplayNumber=
-							NumChambersInWeyl+NumChambersNonZeroNotInWeyl;
+					{ NumChambersNonZeroNotInWeyl++;
+						this->TheObjects[i]->DisplayNumber = NumChambersInWeyl+NumChambersNonZeroNotInWeyl;
 					}
 				}
 			}
@@ -4469,11 +4488,11 @@ int CombinatorialChamberContainer::GetNumChambersInWeylChamberAndLabelChambers(C
 }
 
 void CombinatorialChamberContainer::Free()
-{	this->KillAllElements();
+{ this->KillAllElements();
 }
 
 void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
-{	this->flagMakingASingleHyperplaneSlice=false;
+{ this->flagMakingASingleHyperplaneSlice=false;
 	if (directions.size==0)
 		return;
 	this->AmbientDimension= directions.TheObjects[0].size;
@@ -4494,7 +4513,7 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 	this->theHyperplanes.ClearTheObjects();
 	this->theHyperplanes.MakeActualSizeAtLeastExpandOnTop(MathRoutines::NChooseK(directions.size,this->AmbientDimension-1));
 	for(int i=0; i<this->AmbientDimension; i++)
-	{	roots TempRoots;
+	{ roots TempRoots;
 		root TempRoot;
 		Rational tempRat;
 		theSelection.incrementSelectionFixedCardinality(this->AmbientDimension-1);
@@ -4508,12 +4527,12 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 	this->initAndCreateNewObjects(NumStartingChambers);
 	this->StartingCrossSections.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
 	for(int i=0; i<NumStartingChambers; i++)
-	{	int tempI= theSelection.SelectionToIndex();
+	{ int tempI= theSelection.SelectionToIndex();
 		this->TheObjects[tempI]->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->AmbientDimension);
 		for (int j=0; j<this->AmbientDimension; j++)
-		{	this->TheObjects[tempI]->AllVertices.AddRoot(directions.TheObjects[j]);
+		{ this->TheObjects[tempI]->AllVertices.AddRoot(directions.TheObjects[j]);
 			if (theSelection.selected[j])
-			{	int tempI2;
+			{ int tempI2;
 				theSelection.selected[j]=false;
 				tempI2=theSelection.SelectionToIndex();
 				theSelection.selected[j]=true;
@@ -4541,7 +4560,7 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 //			this->ComputeDebugString();
 	}
 	for(int i=0; i<NumStartingChambers; i++)
-	{	this->TheObjects[i]->IndexStartingCrossSectionNormal=i;
+	{ this->TheObjects[i]->IndexStartingCrossSectionNormal=i;
 		root Accum;	Accum.MakeZero(this->AmbientDimension);
 		for (int j=0; j<this->TheObjects[i]->Externalwalls.size; j++)
 			Accum.Add(this->TheObjects[i]->Externalwalls.TheObjects[j].normal);
@@ -4557,19 +4576,274 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 //		this->ComputeDebugString();
 }
 
+void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "Flags_and_indices: ";
+  output << this->flagHasZeroPolynomial << " "<< this->flagExplored<< " " <<this->flagPermanentlyZero <<" ";
+  output << this->IndexInOwnerComplex << " "<< this->IndexStartingCrossSectionNormal <<" "<< this->DisplayNumber <<"\nVertices:\n";
+  this->AllVertices.WriteToFile(output, theGlobalVariables);
+  output <<"Internal_point: ";
+  this->InternalPoint.WriteToFile(output);
+  output << "\nInternalWalls:\n";
+  this->InternalWalls.WriteToFile(output, theGlobalVariables);
+  output<<"\n" << this->Externalwalls.size<<"\n";
+  for (int i=0; i<this->Externalwalls.size; i++)
+  { this->Externalwalls.TheObjects[i].WriteToFile(output);
+    output<<" ";
+  }
+}
+
+void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner)
+{ std::string tempS;
+  int tempI;
+  input >> tempS;
+  input >> this->flagHasZeroPolynomial >> this->flagExplored>>this->flagPermanentlyZero;
+  input >> this->IndexInOwnerComplex >> this->IndexStartingCrossSectionNormal;
+  input >> this->DisplayNumber;
+  input >> tempS;
+  this->AllVertices.ReadFromFile(input, theGlobalVariables);
+  input>>tempS;
+  this->InternalPoint.ReadFromFile(input);
+  input >> tempS;
+  assert(tempS =="InternalWalls:");
+  this->InternalWalls.ReadFromFile(input, theGlobalVariables);
+  input >> tempI;
+  this->Externalwalls.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->Externalwalls.size; i++)
+    this->Externalwalls.TheObjects[i].ReadFromFile(input, owner);
+}
+
+void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->LabelChamberIndicesProperly();
+  output << "Num_pointers: "<< this->size<<"\n";
+///////////////////////////////////////////////////
+  output << "Dimension: "<< this->AmbientDimension<<" ";
+  output << "CurrentIndex: "<< this->CurrentIndex<<"\n";
+  output << "Directions:\n";
+  this->theDirections.WriteToFile(output, theGlobalVariables);
+  output << "\nNext_index_to_slice: "<< this->indexNextChamberToSlice<<"\n";
+  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex<<" ";
+  this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
+  output << "\n";
+  this->startingCones.WriteToFile(output, theGlobalVariables);
+////////////////////////////////////////////////////
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+    { output <<"\nChamber:\n";
+      this->TheObjects[i]->WriteToFile(output, theGlobalVariables);
+    } else
+      output <<"Empty\n";
+}
+
+void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS;
+  input.seekg(0);
+  this->KillAllElements();
+  int tempI;
+  input >> tempS >> tempI;
+  this->initAndCreateNewObjects(tempI);
+///////////////////////////////////////////////////
+  input >> tempS >> this->AmbientDimension;
+  input >> tempS >> this->CurrentIndex;
+  input >> tempS;
+  this->theDirections.ReadFromFile(input, theGlobalVariables);
+  input >> tempS >> this->indexNextChamberToSlice;
+  input >> tempS >> this->FirstNonExploredIndex;
+  this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
+  this->startingCones.ReadFromFile(input, theGlobalVariables);
+////////////////////////////////////////////////////
+  for (int i=0; i<this->size; i++)
+  { input >> tempS;
+    if (tempS=="Chamber:")
+      this->TheObjects[i]->ReadFromFile(input, theGlobalVariables, *this);
+    else
+    { assert (tempS=="Empty");
+      delete this->TheObjects[i];
+      this->TheObjects[i]=0;
+    }
+  }
+  this->flagIsRunning=true;
+  this->flagMustStop=false;
+  this->flagReachSafePointASAP=false;
+}
+
+void WallData::WriteToFile(std::fstream& output)
+{ //output << this->indexInOwnerChamber <<" ";
+  this->normal.WriteToFile(output);
+  output<< " "<< this->NeighborsAlongWall.size<<" ";
+  assert(this->NeighborsAlongWall.size==this->IndicesMirrorWalls.size);
+  for (int i=0; i<this->NeighborsAlongWall.size; i++ )
+    if (this->NeighborsAlongWall.TheObjects[i]==0)
+			output<< -1<<" "<<-1<<" ";
+    else
+    { //assert(this->MirrorWall.TheObjects[i]!=0);
+      output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->IndicesMirrorWalls.TheObjects[i]<<" ";
+    }
+}
+
+void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner)
+{ //input >>this->indexInOwnerChamber;
+  this->normal.ReadFromFile(input);
+  int tempI, indexN, indexW;
+  input >>tempI;
+  this->NeighborsAlongWall.SetSizeExpandOnTopNoObjectInit(tempI);
+  this->IndicesMirrorWalls.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->NeighborsAlongWall.size; i++ )
+  { input >> indexN>> indexW;
+    if (indexN==-1)
+    { this->NeighborsAlongWall.TheObjects[i]=0;
+      this->IndicesMirrorWalls.TheObjects[i]=-1;
+    }
+    else
+    { this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[indexN];
+      this->IndicesMirrorWalls.TheObjects[i]=indexW;
+    }
+  }
+}
+
+void CombinatorialChamberContainer::WriteToDefaultFile()
+{ std::fstream tempF;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, true, false);
+  GlobalVariables theGlobalVariables;
+  this->WriteToFile(tempF, theGlobalVariables);
+  tempF.close();
+}
+
+void CombinatorialChamberContainer::ReadFromDefaultFile()
+{ std::fstream tempF;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false);
+  GlobalVariables theGlobalVariables;
+  this->ReadFromFile(tempF, theGlobalVariables);
+  tempF.close();
+}
+
+void CombinatorialChamberContainer::PauseSlicing()
+{
+#ifdef WIN32
+/*  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
+  this->flagReachSafePointASAP=true;
+  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
+  while(!this->flagIsRunning)
+  {}*/
+#else
+  pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
+  this->flagReachSafePointASAP=true;
+  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
+  while (!this->flagIsRunning)
+  {}
+#endif
+}
+
+void CombinatorialChamberContainer::ResumeSlicing()
+{
+#ifdef WIN32
+//  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
+//  this->flagIsRunning=true;
+//  SetEvent(this->condContinue);
+//  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
+#else
+  pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
+  this->flagIsRunning=true;
+  pthread_cond_signal(&this->condContinue);
+  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
+#endif
+}
+
+void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
+{ this->SliceTheEuclideanSpace(this->theDirections, this->CurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
+}
+
+void Cone::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->roots::WriteToFile(output, theGlobalVariables);
+  output <<"\nChamberTestArray: "<<this->ChamberTestArray.size<<" ";
+  for (int i=0; i<this->ChamberTestArray.size; i++)
+    output<< this->ChamberTestArray.TheObjects[i]<<" ";
+}
+
+void Cone::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS; int tempI;
+  this->roots::ReadFromFile(input, theGlobalVariables);
+  input >> tempS>> tempI;
+  this->ChamberTestArray.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->ChamberTestArray.size; i++)
+    input >> this->ChamberTestArray.TheObjects[i];
+}
+
+void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->theFacets.WriteToFile(output);
+  output <<"\nConesHavingFixedNormal: ";
+  output << this->ConesHavingFixedNormal.size<<" ";
+  for (int i=0; i<this->ConesHavingFixedNormal.size; i++)
+  { output << this->ConesHavingFixedNormal.TheObjects[i].size<<" ";
+    for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
+      output<< this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j]<<" ";
+  }
+  output <<"\ntheCones: "<<this->size<< " ";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+    output <<" ";
+  }
+}
+
+void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS; int tempI;
+  this->theFacets.ReadFromFile(input);
+  input >>tempS;
+  assert(tempS=="ConesHavingFixedNormal:");
+  input >> tempI;
+  this->ConesHavingFixedNormal.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->ConesHavingFixedNormal.size; i++)
+  { input >> tempI;
+    this->ConesHavingFixedNormal.TheObjects[i].SetSizeExpandOnTopNoObjectInit(tempI);
+    for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
+      input>>this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j];
+   }
+  input>>tempS>>tempI;
+  assert(tempS=="theCones:");
+  this->SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+}
+
+void hashedRoots::WriteToFile(std::fstream& output)
+{ int theDimension=0;
+  if (this->size>0)
+    theDimension= this->TheObjects[0].size;
+  output << "Num|dim: " <<this->size<<" "<< theDimension<<" ";
+  for (int i=0; i<this->size; i++)
+    for (int j=0; j<theDimension; j++)
+    { this->TheObjects[i].TheObjects[j].WriteToFile(output);
+      output<<" ";
+    }
+}
+
+void hashedRoots::ReadFromFile(std::fstream& input)
+{ int theDimension; std::string tempS;
+  int theSize;
+  this->ClearTheObjects();
+  input >> tempS >> theSize>> theDimension;
+  this->MakeActualSizeAtLeastExpandOnTop(theSize);
+  root tempRoot;
+  tempRoot.SetSizeExpandOnTopLight(theDimension);
+  for (int i=0; i<theSize; i++)
+  { for (int j=0; j<theDimension; j++)
+      tempRoot.TheObjects[j].ReadFromFile(input);
+    this->AddObjectOnTopHash(tempRoot);
+   }
+}
+
 void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVariables, int theDimension)
-{	this->size=0;
-	int NumCandidates = MathRoutines::NChooseK(directions.size,theDimension-1);
+{ this->size=0;
+	int NumCandidates = MathRoutines::NChooseK(directions.size, theDimension-1);
 	Selection theSelection;
 	theSelection.init(directions.size);
 	root normalCandidate;
-	for (int i=0;i<NumCandidates;i++)
-	{	theSelection.incrementSelectionFixedCardinality(theDimension-1);
+	for (int i=0; i<NumCandidates; i++)
+	{ theSelection.incrementSelectionFixedCardinality(theDimension-1);
 		if (directions.ComputeNormalFromSelection(normalCandidate,theSelection, theGlobalVariables,theDimension))
-		{	bool hasPositive; bool hasNegative;
+		{ bool hasPositive; bool hasNegative;
 			hasPositive=false; hasNegative=false;
-			for (int j=0;j<directions.size;j++)
-			{	Rational tempRat;
+			for (int j=0; j<directions.size; j++)
+			{ Rational tempRat;
 				root::RootScalarEuclideanRoot(directions.TheObjects[j],normalCandidate,tempRat);
 				if (tempRat.IsNegative()){hasNegative=true;}
 				if (tempRat.IsPositive()){hasPositive=true;}
@@ -4580,7 +4854,7 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVa
 			if (!(hasNegative && hasPositive))
 			{	bool IsValid;
 				IsValid=true;
-				for (int j=0;j<this->size;j++)
+				for (int j=0; j<this->size; j++)
 				{	if (normalCandidate.IsProportianalTo( this->TheObjects[j]))
 						IsValid=false;
 				}
@@ -4598,29 +4872,28 @@ bool Cone::IsSurelyOutsideCone(roots& TheVertices)
 	return this->IsSurelyOutsideConeAccordingToChamberTestArray();
 }
 
-bool Cone::FillInChamberTestArray(roots &TheVertices, bool initChamberTestArray)
+bool Cone::FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray)
 { //init first the array we will use for check
   //values in the array: -1 undertermined, 0 - outside normal, +1 inside normal
 	if (initChamberTestArray)
 		for (int i=0;i<this->size;i++)
 			this->ChamberTestArray.TheObjects[i]=-1;
 	for (int j=0;j<TheVertices.size;j++)
-	{	bool TestedVertexIsStrictlyInsideGlobalCone;
+	{ bool TestedVertexIsStrictlyInsideGlobalCone;
 		TestedVertexIsStrictlyInsideGlobalCone= true;
 		for (int k=0;k<this->size;k++)
-		{	Rational tempRat;
-			root::RootScalarEuclideanRoot
-				(TheVertices.TheObjects[j],this->TheObjects[k],tempRat);
+		{ Rational tempRat;
+			root::RootScalarEuclideanRoot(TheVertices.TheObjects[j], this->TheObjects[k], tempRat);
 			int state;	state=-1;
 			if (tempRat.IsPositive())
 				state =1;
 			else
-			{	TestedVertexIsStrictlyInsideGlobalCone=false;
+			{ TestedVertexIsStrictlyInsideGlobalCone=false;
 				if (tempRat.IsNegative())
 					state=0;
 			}
 			if (state!=-1)
-			{	if (this->ChamberTestArray.TheObjects[k]==-1)
+			{ if (this->ChamberTestArray.TheObjects[k]==-1)
 					this->ChamberTestArray.TheObjects[k]=state;
 				else
 					if (this->ChamberTestArray.TheObjects[k]!=state)
@@ -4634,7 +4907,7 @@ bool Cone::FillInChamberTestArray(roots &TheVertices, bool initChamberTestArray)
 }
 
 bool Cone::IsSurelyOutsideConeAccordingToChamberTestArray()
-{	for (int i=0;i<this->size;i++)
+{ for (int i=0; i<this->size; i++)
 		if (this->ChamberTestArray.TheObjects[i]==0)
       return true;
 	return false;
@@ -4642,7 +4915,7 @@ bool Cone::IsSurelyOutsideConeAccordingToChamberTestArray()
 
 bool Cone::IsSurelyOutsideCone(::rootsCollection& TheVertices)
 { bool firstRun=true;
-	for (int i=0;i<TheVertices.size;i++)
+	for (int i=0; i<TheVertices.size; i++)
 	{	if (!this->FillInChamberTestArray(TheVertices.TheObjects[i],firstRun))
 			return false;
 		firstRun=true;
@@ -4683,8 +4956,8 @@ void CombinatorialChamber::InduceFromCombinatorialChamberLowerDimensionNoAdjacen
 	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
 
-void CombinatorialChamber::WireChamberAndWallAdjacencyData(CombinatorialChamberContainer &owner, CombinatorialChamber *input)
-{	this->LabelWallIndicesProperly();
+void CombinatorialChamber::WireChamberAndWallAdjacencyData(CombinatorialChamberContainer& owner, CombinatorialChamber* input)
+{ this->LabelWallIndicesProperly();
 	input->LabelWallIndicesProperly();
 	assert(this->Externalwalls.size==input->Externalwalls.size+1);
 	for (int i=0; i<input->Externalwalls.size; i++)
@@ -4814,26 +5087,31 @@ bool WallData::ConsistencyCheck(CombinatorialChamber* owner)
 			{ assert(false);
 				return false;
 			}
+			for (int i=0; i<this->NeighborsAlongWall.size; i++)
+        if (!this->ContainsNeighborAtMostOnce(this->NeighborsAlongWall.TheObjects[i]))
+        { assert(false);
+          return false;
+        }
 		}
 	return true;
 }
 
-bool WallData::ContainsNeighborAtMostOnce(CombinatorialChamber *neighbor)
+bool WallData::ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor)
 { int NumNeighbors=0;
 	for (int i=0; i<this->NeighborsAlongWall.size; i++)
 	{ if (this->NeighborsAlongWall.TheObjects[i]==neighbor)
 			NumNeighbors++;
 		if (NumNeighbors>1)
-		{	assert(false);
+		{ assert(false);
 			return false;
 		}
 	}
 	return true;
 }
 
-bool WallData::ContainsNeighborExactlyOnce(CombinatorialChamber *neighbor)
-{	int NumNeighbors=0;
-	for (int i=0;i<this->NeighborsAlongWall.size;i++)
+bool WallData::ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor)
+{ int NumNeighbors=0;
+	for (int i=0; i<this->NeighborsAlongWall.size; i++)
 	{ if (this->NeighborsAlongWall.TheObjects[i]==neighbor)
 			NumNeighbors++;
 		if (NumNeighbors>1)
@@ -12001,19 +12279,19 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 { this->RootSubsystem.ClearTheObjects();
 	this->RootSubsystem.AddRootsOnTopHash(this->simpleGenerators);
 	root currentRoot;
-	for (int i=0;i<this->RootSubsystem.size;i++)
-		for (int j=0; j<this->simpleGenerators.size;j++)
+	for (int i=0; i<this->RootSubsystem.size; i++)
+		for (int j=0; j<this->simpleGenerators.size; j++)
 		{	currentRoot.Assign(this->RootSubsystem.TheObjects[i]);
 			this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j],currentRoot,false,currentRoot);
 			this->RootSubsystem.AddObjectOnTopNoRepetitionOfObjectHash(currentRoot);
 		}
 }
 
-void ElementWeylGroup::operator =(const ElementWeylGroup &right)
+void ElementWeylGroup::operator =(const ElementWeylGroup& right)
 { this->CopyFromBase(right);
 }
 
-bool ElementWeylGroup::operator ==(const ElementWeylGroup &right)
+bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)
 { if (this->size!=right.size)
 		return false;
 	for (int i=0;i<this->size;i++)
@@ -12044,14 +12322,14 @@ void PolynomialsRationalCoeff::operator=(const PolynomialsRationalCoeff& right)
 void PolynomialsRationalCoeff::MakeUsualParametricRoot(int theDimension)
 { PolynomialRationalCoeff tempP;
 	for (int i=0; i<theDimension; i++)
-	{ tempP.MakeNVarDegOnePoly((short)theDimension,i,ROne);
+	{ tempP.MakeNVarDegOnePoly((short)theDimension, i, ROne);
 		this->AddObjectOnTop(tempP);
 	}
 }
 
 void PolynomialsRationalCoeff::Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget)
 { PolynomialRationalCoeff tempP;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].Substitution(theSub, tempP,NumVarsTarget);
 		this->TheObjects[i].CopyFromPoly(tempP);
 	}
@@ -12062,7 +12340,7 @@ void PolynomialsRationalCoeff::MakeOneParameterSubFromDirection(root& direction)
 	tempM.init(1);
 	tempM.degrees[0]=1;
 	this->SetSizeExpandOnTopNoObjectInit(direction.size);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].Nullify(1);
 		tempM.Coefficient.Assign(direction.TheObjects[i]);
 		this->TheObjects[i].AddMonomial(tempM);
@@ -12070,7 +12348,7 @@ void PolynomialsRationalCoeff::MakeOneParameterSubFromDirection(root& direction)
 }
 
 void PolynomialsRationalCoeff::MakeOneParameterSubFromDirectionInts(int x1,int x2,int x3, int x4, int x5)
-{	root tempRoot;
+{ root tempRoot;
 	tempRoot.InitFromIntegers(5,x1,x2,x3,x4,x5);
 	this->MakeOneParameterSubFromDirection(tempRoot);
 }
@@ -12096,10 +12374,10 @@ void PolynomialsRationalCoeff::MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFi
 
 void PolynomialsRationalCoeff::MakeSubFromMatrixRational(MatrixLargeRational &theMat)
 { this->SetSizeExpandOnTopNoObjectInit(theMat.NumCols);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ static Monomial<Rational> tempM;
 		this->TheObjects[i].Nullify((short)theMat.NumRows-1);
-		for (int j=0;j<theMat.NumRows-1;j++)
+		for (int j=0; j<theMat.NumRows-1; j++)
 		{ tempM.init((short)theMat.NumRows-1);
 			tempM.degrees[j]=1;
 			tempM.Coefficient.Assign(theMat.elements[j][i]);
@@ -12124,9 +12402,9 @@ void intRoots::ElementToString(std::string& output)
 	}
 }
 
-void intRoots::AssignRoots(roots&r)
+void intRoots::AssignRoots(roots& r)
 { this->SetSizeExpandOnTopNoObjectInit(r.size);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i].AssignRoot(r.TheObjects[i]);
 }
 
@@ -12136,8 +12414,8 @@ void intRoots::ComputeDebugString()
 
 void intRoots::BubbleSort(intRoot* weights)
 { intRoot tempRoot;
-	for (int i=0;i<this->size;i++)
-		for (int j=i+1;j<this->size;j++)
+	for (int i=0; i<this->size; i++)
+		for (int j=i+1; j<this->size; j++)
 		{ bool tempBool;
 			if (weights==0)
         tempBool = this->TheObjects[j].IsGEQNoWeight(this->TheObjects[i]);
@@ -12151,17 +12429,17 @@ void intRoots::BubbleSort(intRoot* weights)
 		}
 }
 
-void hashedRoots::ElementToString(std::string &output)
+void hashedRoots::ElementToString(std::string& output)
 { this->ElementToString(output, false);
 }
 
-void hashedRoots::ElementToString(std::string &output, bool useHtml)
+void hashedRoots::ElementToString(std::string& output, bool useHtml)
 { std::stringstream  out;
 	std::string tempS;
 	out <<"Number of vectors: "<<this->size<<"\n";
 	if (useHtml)
     out <<"\n<br>\n";
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 	{ this->TheObjects[i].ElementToString(tempS);
 		out<<tempS<<"\n";
     if (useHtml)
@@ -12191,14 +12469,14 @@ void PolynomialsRationalCoeff::ComputeB(PolynomialRationalCoeff& output, int cut
 	PolynomialRationalCoeff tempP;
 	EpsForm.SetSizeExpandOnTopNoObjectInit(theDimension);
 	EpsForm.TheObjects[0].CopyFromPoly(this->TheObjects[0]);
-	for (int i=1;i<theDimension;i++)
+	for (int i=1; i<theDimension; i++)
 	{ EpsForm.TheObjects[i].CopyFromPoly(this->TheObjects[i]);
 		tempP.CopyFromPoly(this->TheObjects[i-1]);
 		tempP.TimesConstant(RMOne);
 		EpsForm.TheObjects[i].AddPolynomial(tempP);
 	}
 	EpsForm.TheObjects[3].AddPolynomial(this->TheObjects[4]);
-	for (int j=cutOffIndex+1;j<theDimension;j++)
+	for (int j=cutOffIndex+1; j<theDimension; j++)
 		if (!EpsForm.TheObjects[j].IsGreaterThanZeroLexicographicOrder())
 			EpsForm.TheObjects[j].TimesConstant(RMOne);
 	output.Nullify(2);
@@ -12208,7 +12486,7 @@ void PolynomialsRationalCoeff::ComputeB(PolynomialRationalCoeff& output, int cut
 }
 
 void PolynomialsRationalCoeffCollection::ElementToString(std::string& output, int theDimension)
-{ this->ElementToStringComputeFunctionB(output,false, theDimension);
+{ this->ElementToStringComputeFunctionB(output, false, theDimension);
 }
 
 void PolynomialsRationalCoeffCollection::ElementToStringComputeFunctionB(std::string& output, bool computingB, int theDimension)
@@ -14512,18 +14790,18 @@ bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilr
 { if (!this->flagUsingActionsNormalizerCentralizerNilradical)
 		return true;
 	for (int i=0; i<this->ActionsNormalizerCentralizerNilradical.size; i++)
-		if (!this->ApproveSelAgainstOneGenerator(	this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel, theGlobalVariables))
+		if (!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel, theGlobalVariables))
 			return false;
 	return true;
 }
 
-void rootSubalgebras::RaiseSelectionUntilApproval(	Selection& targetSel, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::RaiseSelectionUntilApproval(Selection& targetSel, GlobalVariables& theGlobalVariables)
 { bool raised=true;
 	while (raised)
 	{ raised=false;
-		for (int i=0;i<this->ActionsNormalizerCentralizerNilradical.size;i++)
+		for (int i=0; i<this->ActionsNormalizerCentralizerNilradical.size; i++)
 			if(!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel, theGlobalVariables))
-			{ this->ApplyOneGenerator (	this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel,theGlobalVariables);
+			{ this->ApplyOneGenerator(this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel,theGlobalVariables);
 				raised=true;
 			}
 	}
@@ -17273,7 +17551,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
        //     <<"</tr>";
       //}
 		}
-		lineCounter+=this->TheObjects[i].ElementToString(	tempS,owners,	useLatex,true,true);
+		lineCounter+=this->TheObjects[i].ElementToString(tempS, owners, useLatex, true, true);
 		out << tempS;
 		if (useLatex)
 			out <<"\\\\";
@@ -17390,7 +17668,7 @@ void SimpleLieAlgebra::ComputeChevalleyConstants(char WeylLetter, int WeylIndex,
 //  this->TestForConsistency();
 }
 
-void SimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants	(int indexI, int indexJ)
+void SimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ)
 { root& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
 	root& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
 	assert(!(rootI+rootJ).IsEqualToZero());
@@ -17407,7 +17685,7 @@ void SimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants	(int indexI
   //this->ComputeDebugString();
 }
 
-void SimpleLieAlgebra::ExploitSymmetryChevalleyConstants  (int indexI, int indexJ)
+void SimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ)
 { root& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
 	root& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
 	assert(this->Computed.elements[indexI][indexJ]);
@@ -17444,7 +17722,7 @@ void SimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 	this->ExploitSymmetryChevalleyConstants(k,i);
 }
 
-int SimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(root &alpha, root &beta)
+int SimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta)
 { int result=-1;
   root tempRoot;
   tempRoot.Assign(beta);
@@ -17455,7 +17733,7 @@ int SimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(root &alpha, root &b
   return result;
 }
 
-void SimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta )
+void SimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta)
 {//using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
 	root& gamma= this->theWeyl.RootSystem.TheObjects[indexGamma];
   root& delta= this->theWeyl.RootSystem.TheObjects[indexDelta];
@@ -21152,21 +21430,664 @@ void DyckPath::ElementToString(std::string& output, DyckPaths& owner,  bool useH
   output=out.str();
 }
 
-void ComputationSetup::ComputeRootSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	inputData.theRootSubalgebras.flagComputeConeCondition=false;
-	inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
-  inputData.theRootSubalgebras.ComputeDebugString(false, false, true, 0 , 0, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.StatusString1=inputData.theRootSubalgebras.DebugString;
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+bool ElementWeylAlgebra::IsLetter(char theLetter)
+{
+  return false;
 }
 
-void ComputationSetup::ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+void ElementWeylAlgebra::operator=(const std::string& input)
+{ /*for (int i=0; i<input.size(); i++)
+  { std::ostream formatter;
+    if (input.at(i)=='x')
+
+  }*/
+}
+
+void ElementWeylAlgebra::MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables)
+{ Monomial<Rational> buffer;
+  SelectionWithDifferentMaxMultiplicities& tempSel=theGlobalVariables.selWeylAlgebra1;
+  assert(left.NumVariables%2==0);
+  int theDimension=left.NumVariables/2;
+  tempSel.Multiplicities.initFillInObject(theDimension, 0);
+  tempSel.MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<theDimension; i++)
+    tempSel.MaxMultiplicities.TheObjects[i]=left.degrees[theDimension+i];
+  tempSel.elements.initFillInObject(theDimension,0);
+  buffer.init(left.NumVariables);
+  assert(left.NumVariables==right.NumVariables);
+  OrderedOutput.Nullify(left.NumVariables);
+  int numCycles= tempSel.getTotalNumSubsets();
+  Rational coeffProd;
+  coeffProd.Assign(left.Coefficient);
+  coeffProd.MultiplyBy(right.Coefficient);
+  for (int i=0; i<numCycles; i++)
+  { buffer.Coefficient.Assign(coeffProd);
+    for (int k=0; k< theDimension; k++)
+    { short multDrop=(short)tempSel.Multiplicities.TheObjects[k];
+      buffer.Coefficient.MultiplyBy(Rational::NChooseK(left.degrees[theDimension+k], multDrop)*Rational::NChooseK(right.degrees[k], multDrop)* Rational::Factorial(multDrop));
+      buffer.degrees[k]=left.degrees[k]+right.degrees[k]-multDrop;
+      buffer.degrees[k+theDimension]= left.degrees[k+theDimension]+right.degrees[k+theDimension]-multDrop;
+    }
+    OrderedOutput.AddMonomial(buffer);
+    tempSel.IncrementSubset();
+  }
+}
+
+void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report)
+{ std::stringstream out;
+  this->ComputeDebugString(false, false);
+  standsOnTheLeft.ComputeDebugString(false, false);
+  out << "\\begin{eqnarray*}&&["<< standsOnTheLeft.DebugString<<" , "<< this->DebugString<< " ]= ";
+  this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
+  this->ComputeDebugString(false, false);
+  out << this->DebugString<<"\\end{eqnarray*}\n";
+  report=out.str();
+}
+
+void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report)
+{ std::stringstream out;
+  this->ComputeDebugString(false, false);
+  standsOnTheRight.ComputeDebugString(false, false);
+  out << "\\begin{eqnarray*}&&["<< this->DebugString<< " , "<<standsOnTheRight.DebugString<<" ]= ";
+  this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
+  this->ComputeDebugString(false, false);
+  out << this->DebugString<<"\\end{eqnarray*}\n";
+  report=out.str();
+}
+
+void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
+{ ElementWeylAlgebra tempEl1, tempEl2;
+  tempEl1.Assign(*this);
+  tempEl1.MultiplyOnTheLeft(standsOnTheLeft, theGlobalVariables);
+  //tempEl1.ComputeDebugString(false);
+  tempEl2.Assign(standsOnTheLeft);
+  tempEl2.MultiplyOnTheLeft(*this, theGlobalVariables);
+  //tempEl2.ComputeDebugString(false);
+  this->Assign(tempEl1);
+  this->Subtract(tempEl2);
+  //this->ComputeDebugString(false);
+}
+
+void ElementWeylAlgebra::MakeConst(int NumVars, Rational& theConst)
+{ this->Nullify(NumVariables);
+  Monomial<Rational> tempM;
+  tempM.init((short)this->NumVariables*2);
+  tempM.Coefficient.Assign(theConst);
+  this->StandardOrder.AddMonomial(tempM);
+}
+
+void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
+{ ElementWeylAlgebra tempEl1, tempEl2;
+  tempEl1.Assign(standsOnTheRight);
+  tempEl1.MultiplyOnTheLeft(*this, theGlobalVariables);
+  //tempEl1.ComputeDebugString(false);
+  tempEl2.Assign(*this);
+  tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
+  //tempEl2.ComputeDebugString(false);
+  this->Assign(tempEl1);
+  this->Subtract(tempEl2);
+  //this->ComputeDebugString(false);
+}
+
+void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
+{ PolynomialRationalCoeff buffer;
+  PolynomialRationalCoeff Accum;
+  Accum.Nullify((short) this->NumVariables*2);
+  for (int j=0; j<standsOnTheLeft.StandardOrder.size; j++)
+    for (int i=0; i<this->StandardOrder.size; i++)
+    { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder.TheObjects[j], this->StandardOrder.TheObjects[i], buffer, theGlobalVariables);
+      Accum.AddPolynomial(buffer);
+    }
+  this->StandardOrder.Assign(Accum);
+}
+
+void ElementWeylAlgebra::MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
+{ PolynomialRationalCoeff buffer;
+  PolynomialRationalCoeff Accum;
+  Accum.Nullify((short) this->NumVariables*2);
+  for (int j=0; j<standsOnTheRight.StandardOrder.size; j++)
+    for (int i=0; i<this->StandardOrder.size; i++)
+    { this->MultiplyTwoMonomials(this->StandardOrder.TheObjects[i], standsOnTheRight.StandardOrder.TheObjects[j], buffer, theGlobalVariables);
+      Accum.AddPolynomial(buffer);
+    }
+  this->StandardOrder.Assign(Accum);
+}
+
+void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
+{ std::stringstream out;
   std::string tempS;
-  inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  int numLettersSinceLastNewLine=0;
+  if (useLatex && useBeginEqnArray)
+    out << "\\begin{eqnarray*}&&";
+  for (int i=0; i<this->StandardOrder.size; i++)
+  { this->StandardOrder.TheObjects[i].Coefficient.ElementToString(tempS);
+    bool hasMinus=(tempS[0]=='-');
+    if (this->StandardOrder.TheObjects[i].TotalDegree()!=0)
+    { if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+    }
+    if (!hasMinus && i!=0)
+      out<<'+';
+    out << tempS;
+    for (int k=0; k<this->NumVariables; k++)
+      if (this->StandardOrder.TheObjects[i].degrees[k]!=0)
+      { out <<"{"<<alphabet.TheObjects[k]<<"}";
+        int tempI=(int) this->StandardOrder.TheObjects[i].degrees[k];
+        if (tempI!=1)
+          out <<"^{"<< tempI<<"}";
+      }
+    for (int k=0; k<this->NumVariables; k++)
+      if (this->StandardOrder.TheObjects[i].degrees[this->NumVariables+ k]!=0)
+      { out <<"\\partial_{"<<alphabet.TheObjects[k]<<"}";
+				numLettersSinceLastNewLine++;
+        int tempI=this->StandardOrder.TheObjects[i].degrees[this->NumVariables+k];
+        if (tempI!=1)
+          out <<"^{" <<tempI<<"}";
+      }
+    if (numLettersSinceLastNewLine>12 && i!= this->StandardOrder.size-1 && useLatex)
+    { numLettersSinceLastNewLine=0;
+      out <<"\\\\&&\n";
+    }
+  }
+  if (useLatex && useBeginEqnArray)
+    out << "\\end{eqnarray*}";
+  output=out.str();
+}
+
+void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray)
+{ ListBasicObjects<std::string> alphabet;
+  alphabet.SetSizeExpandOnTopNoObjectInit(this->NumVariables);
+  int numCycles=this->NumVariables;
+  if (useXYs)
+  { assert(this->NumVariables%2==0);
+    numCycles= this->NumVariables/2;
+  }
+  for (int i=0; i<numCycles; i++)
+  { std::stringstream out, out2;
+    out << "x_"<<i+1;
+    alphabet.TheObjects[i]= out.str();
+    if (useXYs)
+    { out2<< "y_"<< i+1;
+      alphabet.TheObjects[i+numCycles]= out2.str();
+    }
+  }
+  this->ElementToString(output, alphabet, useLatex, useBeginEqnArray);
+}
+
+void ElementWeylAlgebra::SetNumVariablesPreserveExistingOnes(int newNumVars)
+{ if (newNumVars<this->NumVariables)
+    this->NumVariables=newNumVars;
+  PolynomialRationalCoeff Accum;
+  Accum.Nullify((short)newNumVars*2);
+  Accum.MakeActualSizeAtLeastExpandOnTop(this->StandardOrder.size);
+  Monomial<Rational> tempM;
+  for (int i=0; i<this->StandardOrder.size; i++)
+  { tempM.init((short)newNumVars*2);
+    for (int j=0; j< this->NumVariables; j++)
+    { tempM.degrees[j]=this->StandardOrder.TheObjects[i].degrees[j];
+      tempM.degrees[j+newNumVars]=this->StandardOrder.TheObjects[i].degrees[j+this->NumVariables];
+    }
+    tempM.Coefficient.Assign(this->StandardOrder.TheObjects[i].Coefficient);
+    Accum.AddMonomial(tempM);
+  }
+  this->NumVariables= newNumVars;
+  this->StandardOrder.Assign(Accum);
+}
+
+void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
+{ this->Nullify(NumVars*2);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i]=1;
+  tempMon.degrees[j+this->NumVariables+NumVars]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+
+  tempMon.Coefficient.MakeMOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[j]=1;
+  tempMon.degrees[i+this->NumVariables+NumVars]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
+{ this->Nullify(NumVars*2);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i]=1;
+  tempMon.degrees[j+this->NumVariables]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+
+  tempMon.Coefficient.MakeMOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[j+NumVars]=1;
+  tempMon.degrees[i+this->NumVariables+NumVars]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
+{ this->Nullify(NumVars*2);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i+NumVars]=1;
+  tempMon.degrees[j+this->NumVariables]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+
+  tempMon.Coefficient.MakeMOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[j+NumVars]=1;
+  tempMon.degrees[i+this->NumVariables]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
+{ this->Nullify(NumVars);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i+NumVars]++;
+  tempMon.degrees[j+NumVars]++;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
+{ this->Nullify(NumVars);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i]++;
+  tempMon.degrees[j]++;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Makexi(int i, int NumVars)
+{ this->Nullify(NumVars);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i]++;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Makedi(int i, int NumVars)
+{ this->Nullify(NumVars);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i+NumVars]++;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
+{ this->Nullify(NumVars);
+  Monomial<Rational> tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.degrees[i]=1;
+  tempMon.degrees[NumVars+j]=1;
+  this->StandardOrder.AddMonomial(tempMon);
+}
+
+void ElementWeylAlgebra::Nullify(int NumVars)
+{ this->NumVariables=NumVars;
+  this->StandardOrder.Nullify ((short)this->NumVariables*2);
+}
+
+int DebugCounter=-1;
+WeylParser debugParser;
+
+void WeylParser::ParserInit(const std::string& input)
+{ this->TokenStack.MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->TokenStack.size=0;
+  this->ValueStack.size=0;
+  this->size=0;
+  for (int i=0; i<(signed) input.size(); i++)
+  { switch (input.at(i))
+    { case '0': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '1': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(1); break;
+      case '2': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(2); break;
+      case '3': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(3); break;
+      case '4': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(4); break;
+      case '5': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(5); break;
+      case '6': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(6); break;
+      case '7': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(7); break;
+      case '8': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(8); break;
+      case '9': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(9); break;
+      case '[': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenOpenLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ']': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenCloseLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '(': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenOpenBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ',': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenComma); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ')': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenCloseBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '^': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPower); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '+': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '-': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenMinus); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '_': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenUnderscore); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '/': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'x': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenX); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'd': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPartialDerivative); this->ValueBuffer.AddObjectOnTop(0); break;
+    }
+  }
+  this->ValueStack.size=0;
+  this->TokenStack.size=0;
+  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(this->ValueBuffer.size);
+  this->TokenStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
+  for (int i=0; i<this->numEmptyTokensAtBeginning; i++)
+  { this->TokenStack.AddObjectOnTop(this->tokenEmpty);
+    this->ValueStack.AddObjectOnTop(0);
+  }
+}
+
+void WeylParser::Parse(const std::string& input)
+{ this->ParserInit(input);
+  this->ParseNoInit(0, this->TokenBuffer.size-1);
+  this->ComputeNumberOfVariablesAndAdjustNodes();
+}
+
+void WeylParser::ParseNoInit(int indexFrom, int indexTo)
+{ if (indexFrom<0 || indexTo>= this->TokenBuffer.size)
+    return;
+  for (int i=indexFrom; i<=indexTo; i++)
+  { this->ValueStack.AddObjectOnTop(this->ValueBuffer.TheObjects[i]);
+    this->TokenStack.AddObjectOnTop(this->TokenBuffer.TheObjects[i]);
+    int lookAheadToken=this->tokenEmpty;
+    if (i<this->TokenBuffer.size-1)
+      lookAheadToken=this->TokenBuffer.TheObjects[i+1];
+    while(this->ApplyRules(lookAheadToken))
+    {
+    }
+  }
+}
+
+bool WeylParser::lookAheadTokenProhibitsPlus(int theToken)
+{ if (theToken==this->tokenPlus)
+    return false;
+  if (theToken==this->tokenMinus)
+    return false;
+  if (theToken==this->tokenCloseBracket)
+    return false;
+  if (theToken==this->tokenCloseLieBracket)
+    return false;
+  return true;
+}
+
+bool WeylParser::lookAheadTokenProhibitsTimes(int theToken)
+{ if (theToken==this->tokenPower)
+    return true;
+  return false;
+}
+
+bool WeylParser::ApplyRules(int lookAheadToken)
+{ if (this->TokenStack.size<2)
+    return false;
+  int IndexLast=this->TokenStack.size-1;
+  if (this->TokenStack.TheObjects[IndexLast]==this->tokenEmpty)
+  { this->TokenStack.PopLastObject();
+    this->ValueStack.PopLastObject();
+    return true;
+  }
+  if (this->TokenStack.TheObjects[IndexLast]== this->tokenCloseLieBracket && this->TokenStack.TheObjects[IndexLast-1]==this->tokenExpression &&
+      this->TokenStack.TheObjects[IndexLast-2]==this->tokenComma && this->TokenStack.TheObjects[IndexLast-3]==this->tokenExpression &&
+      this->TokenStack.TheObjects[IndexLast-4]==this->tokenOpenLieBracket)
+  { this->AddLieBracketOnTop();
+    return true;
+  }
+  if (this->TokenStack.TheObjects[IndexLast-1]==this->tokenUnderscore && this->TokenStack.TheObjects[IndexLast]==this->tokenDigit && this->TokenStack.TheObjects[IndexLast-2]==this->tokenPartialDerivative)
+  { this->AddPartialOnTop(this->ValueStack.TheObjects[IndexLast]);
+    return true;
+  }
+  if (this->TokenStack.TheObjects[IndexLast-1]==this->tokenUnderscore && this->TokenStack.TheObjects[IndexLast]==this->tokenDigit && this->TokenStack.TheObjects[IndexLast-2]==this->tokenX)
+  { this->AddLetterOnTop(this->ValueStack.TheObjects[IndexLast]);
+    return true;
+  }
+  if (this->TokenStack.TheObjects[IndexLast]==this->tokenExpression && this->TokenStack.TheObjects[IndexLast-1]==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
+  { this->AddTimesOnTop();
+    return true;
+  }
+  if( this->TokenStack.TheObjects[IndexLast-1]==this->tokenPlus && this->TokenStack.TheObjects[IndexLast]==this->tokenExpression &&
+      this->TokenStack.TheObjects[IndexLast-2]==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
+  { this->AddPlusOnTop();
+    return true;
+  }
+  if( this->TokenStack.TheObjects[IndexLast-1]==this->tokenMinus && this->TokenStack.TheObjects[IndexLast]==this->tokenExpression &&
+      this->TokenStack.TheObjects[IndexLast-2]==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
+  { this->AddMinusOnTop();
+    return true;
+  }
+  return false;
+}
+
+void WeylParser::DecreaseStackSetExpressionLastNode(int Decrease)
+{ this->TokenStack.size-=Decrease;
+  this->ValueStack.size-=Decrease;
+  *this->TokenStack.LastObject()=this->tokenExpression;
+  *this->ValueStack.LastObject()=this->size-1;
+}
+
+void WeylParser::AddLetterOnTop(int index)
+{ if (index<=0)
+    return;
+  this->ExtendOnTop(1);
+  this->LastObject()->Value.Makexi(index-1, index);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void WeylParser::AddPartialOnTop(int index)
+{ if (index<=0)
+    return;
+  this->ExtendOnTop(1);
+  this->LastObject()->Value.Makedi(index-1, index);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void WeylParser::AddPlusOnTop()
+{ this->ExtendOnTop(1);
+  WeylParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenPlus;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void WeylParser::AddMinusOnTop()
+{ this->ExtendOnTop(1);
+  WeylParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenMinus;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void WeylParser::AddTimesOnTop()
+{ this->ExtendOnTop(1);
+  WeylParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenTimes;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-2], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(1);
+}
+
+void WeylParser::AddLieBracketOnTop()
+{ this->ExtendOnTop(1);
+  WeylParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenLieBracket;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
+  this->DecreaseStackSetExpressionLastNode(4);
+}
+
+void WeylParser::ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables)
+{ std::stringstream out; std::string tempS;
+  this->Parse(input);
+  out <<"\\begin{eqnarray*}&&" << input<<" = \\\\\n";
+  this->Evaluate(theGlobalVariables);
+  this->Value.ElementToString(tempS, false, true, false);
+  out <<tempS;
+  out <<"\\end{eqnarray*}";
+  output=out.str();
+}
+
+void WeylParser::Own(int indexParent, int indexChild1, int indexChild2)
+{ WeylParserNode* theNode= & this->TheObjects[indexParent];
+  theNode->children.SetSizeExpandOnTopNoObjectInit(2);
+  theNode->children.TheObjects[0]=indexChild1;
+  theNode->children.TheObjects[1]=indexChild2;
+  this->TheObjects[indexChild1].indexParent= indexParent;
+  this->TheObjects[indexChild2].indexParent= indexParent;
+}
+
+void WeylParser::Evaluate(GlobalVariables& theGlobalVariables)
+{ if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
+    if (*this->TokenStack.LastObject()==this->tokenExpression)
+    { WeylParserNode* theNode=&this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
+      theNode->Evaluate(theGlobalVariables);
+      this->Value.Assign(theNode->Value);
+    }
+}
+
+void WeylParser::ExtendOnTop(int numNew)
+{ this->SetSizeExpandOnTopNoObjectInit(this->size+numNew);
+  for (int i=0; i<numNew; i++)
+    this->TheObjects[this->size-1-i].owner=this;
+}
+
+void WeylParserNode::Evaluate(GlobalVariables& theGlobalVariables)
+{ Rational tempRat;
+  switch (this->Operation)
+  { case WeylParser::tokenPlus: this->Value.Nullify(owner->NumVariables);
+      for (int i=0; i<this->children.size; i++)
+      { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+        this->Value.Add(this->owner->TheObjects[this->children.TheObjects[i]].Value);
+      }
+      break;
+    case WeylParser::tokenTimes: tempRat.MakeOne();
+      this->Value.MakeConst(owner->NumVariables, tempRat);
+      for (int i=0; i<this->children.size; i++)
+      { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+        this->Value.MultiplyOnTheRight(this->owner->TheObjects[this->children.TheObjects[i]].Value, theGlobalVariables);
+      }
+      break;
+    case WeylParser::tokenLieBracket:
+      this->owner->TheObjects[children.TheObjects[0]].Evaluate(theGlobalVariables);
+      this->owner->TheObjects[children.TheObjects[1]].Evaluate(theGlobalVariables);
+      this->Value.Assign(owner->TheObjects[children.TheObjects[0]].Value);
+      this->Value.LieBracketOnTheRight(owner->TheObjects[children.TheObjects[1]].Value, theGlobalVariables);
+      break;
+    }
+}
+
+WeylParserNode::WeylParserNode()
+{ this->Operation= WeylParser::tokenEmpty;
+}
+
+void WeylParser::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  out <<"\nToken stack: ";
+  for (int i=this->numEmptyTokensAtBeginning; i<this->TokenStack.size; i++)
+  { this->TokenToStringStream(out, this->TokenStack.TheObjects[i]);
+    out <<", ";
+  }
+  out <<"\nValue stack: ";
+  for (int i=this->numEmptyTokensAtBeginning; i<this->ValueStack.size; i++)
+    out <<this->ValueStack.TheObjects[i]<<", ";
+  out <<"\nElements: ";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS);
+    out << " Index: "<< i<<" " <<tempS<<"; ";
+  }
+  output=out.str();
+}
+
+void WeylParser::TokenToStringStream(std::stringstream& out, int theToken)
+{ switch(theToken)
+  { case WeylParser::tokenX: out <<"x"; break;
+    case WeylParser::tokenDigit: out <<"D"; break;
+    case WeylParser::tokenPlus: out <<"+"; break;
+    case WeylParser::tokenUnderscore: out <<"_"; break;
+    case WeylParser::tokenEmpty: out <<" "; break;
+    case WeylParser::tokenExpression: out<<"E"; break;
+    case WeylParser::tokenOpenLieBracket: out <<"["; break;
+    case WeylParser::tokenCloseLieBracket: out <<"]"; break;
+    case WeylParser::tokenLieBracket: out <<"[,]"; break;
+    case WeylParser::tokenComma: out <<","; break;
+    case WeylParser::tokenPartialDerivative: out <<"d"; break;
+    case WeylParser::tokenTimes: out << "*"; break;
+    case WeylParser::tokenMinus: out<< "-"; break;
+    default: out <<"?"; break;
+  }
+}
+
+void WeylParser::ComputeNumberOfVariablesAndAdjustNodes()
+{ this->NumVariables=0;
+  for(int i=0; i<this->size; i++)
+    if (this->NumVariables< this->TheObjects[i].Value.NumVariables)
+      this->NumVariables=this->TheObjects[i].Value.NumVariables;
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].Value.SetNumVariablesPreserveExistingOnes(this->NumVariables);
+}
+
+void WeylParserNode::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  owner->TokenToStringStream(out, this->Operation);
+  out <<" Value: ";
+  this->Value.ElementToString(tempS, false, false, false);
+  out << " " <<tempS<<" Children: ";
+  for (int i=0; i<this->children.size; i++)
+    out << this->children.TheObjects[i]<<", ";
+  out <<"\n";
+  output=out.str();
+}
+
+void IrreducibleFiniteDimensionalModule::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  this->theMatrix.ElementToString(tempS);
+  out <<"The matrix :\n "<< tempS<<"\n\n";
+  this->thePathMatrix.ElementToString(tempS);
+  out <<"The matrix of the polytope:\n "<< tempS<<"\n\n";
+  this->thePaths.ElementToString(tempS, false);
+  out << tempS;
+  output = out.str();
+}
+
+void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation(int IndexWeyl, CombinatorialChamberContainer& theChambers, GlobalVariables& theGlobalVariables)
+{// reference:  E. Feigin, G. Fourier, P. Littelmann, "PBW filtration and bases for irreducible modules in type A_n", preprint 2009
+  int theDimension= IndexWeyl;
+  this->thePaths.AmbientWeyl.MakeAn(theDimension);
+  this->thePaths.GenerateAllDyckPathsTypesABC();
+  this->thePaths.ComputeGoodPathsExcludeTrivialPath();
+  this->thePathMatrix.init( this->thePaths.GoodPaths.size, this->thePaths.PositiveRoots.size);
+  this->thePathMatrix.NullifyAll(0);
+  for (int i=0; i<this->thePaths.GoodPaths.size; i++)
+    for (int j=0; j<this->thePaths.TheObjects[this->thePaths.GoodPaths.TheObjects[i]].thePathNodes.size; j++)
+      this->thePathMatrix.elements[i][this->thePaths.TheObjects[this->thePaths.GoodPaths.TheObjects[i]].thePathNodes.TheObjects[j]]=1;
+  this->theMatrix.Assign(this->thePathMatrix);
+  this->theMatrix.Resize(this->thePaths.GoodPaths.size + theDimension, this->thePaths.PositiveRoots.size+this->thePaths.GoodPaths.size, true);
+  for (int j=0; j<theDimension; j++)
+  { for (int i=0; i<this->thePaths.PositiveRoots.size; i++)
+      this->theMatrix.elements[j+this->thePaths.GoodPaths.size][i]= this->thePaths.PositiveRoots.TheObjects[i].TheObjects[j];
+    for (int i=0; i<this->thePaths.GoodPaths.size; i++)
+      this->theMatrix.elements[j+this->thePaths.GoodPaths.size][i+this->thePaths.PositiveRoots.size]=0;
+  }
+  for (int i=0; i<this->thePaths.GoodPaths.size; i++)
+    for (int j=0; j<this->thePaths.GoodPaths.size; j++)
+      this->theMatrix.elements[i][j+this->thePaths.PositiveRoots.size]=(i==j)? 1 : 0;
+  this->theColumnsOfTheMatrix.AssignMatrixColumns(this->theMatrix);
+  theChambers.theDirections.CopyFromBase(this->theColumnsOfTheMatrix);
+  theChambers.AmbientDimension= this->theMatrix.NumRows;
+  theChambers.CurrentIndex=theChambers.AmbientDimension-1;
+  theChambers.theDirections.ComputeDebugString();
+
+}
+
+void DyckPaths::ComputeGoodPathsExcludeTrivialPath()
+{ int counter=0;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].IamComplete(*this))
+      counter++;
+  this->GoodPaths.MakeActualSizeAtLeastExpandOnTop(counter);
+  this->GoodPaths.size=0;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].IamComplete(*this))
+      this->GoodPaths.AddObjectOnTop(i);
 }

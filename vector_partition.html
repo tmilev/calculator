@@ -1,5 +1,5 @@
 <HTML>
-<HEAD><TITLE>Vector partition revision 567, 9 July 2010</TITLE>
+<HEAD><TITLE>Vector partition, updated 12 July 2010</TITLE>
 </HEAD>
 <BODY>
 <table>
@@ -68,9 +68,8 @@ Additional functionality of the program:
 	var selectedBasisIndex=-1;//-2 = center of coord system is selected
 	var GraphicsUnit=100;
 	var clickTolerance=0.1;
-	function ptsWithinClickTolerance(x1,y1,x2,y2)
-	{ if (x1-x2>clickTolerance || x2-x1>clickTolerance ||
-				y1-y2>clickTolerance || y2-y1>clickTolerance )
+	function ptsWithinClickTolerance(x1, y1, x2, y2)
+	{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )
 		{ return false;
 		}
 		return true;
@@ -88,8 +87,8 @@ Additional functionality of the program:
 		posx=(cx-divPosX+document.body.scrollLeft-Xshift)/GraphicsUnit;
 		posy=(cy-divPosY+document.body.scrollTop-Yshift)/GraphicsUnit;
 		if (!(selectedBasisIndex==-1))
-		{	if (selectedBasisIndex==-2)
-			{	Xshift=(cx-divPosX+document.body.scrollLeft);
+		{ if (selectedBasisIndex==-2)
+			{ Xshift=(cx-divPosX+document.body.scrollLeft);
 				Yshift=(cy-divPosY+document.body.scrollTop);
 			}
 			else
@@ -117,7 +116,7 @@ Additional functionality of the program:
 		num = Number(inputNum);
 //		alert("dim: "+dim+" num: "+num);s
 		if (dim<1 || dim>4 || num>15 || num<1)
-		{	return;
+		{ return;
 		}
 		document.formMain.chamberNumber.value=ChamberDisplayIndex;
 		if ((oldDimension!=dim) || (oldNumVectors!=num))
@@ -127,9 +126,9 @@ Additional functionality of the program:
 			document.formMain.textNumVectors.value=num;
 			totalCoords=dim*num+num+1;
 			if (NumElements!=totalCoords)
-			{	firstChildinLine=document.formMain.firstChild;
+			{ firstChildinLine=document.formMain.firstChild;
 				for (i=0;i<4;i++)
-				{	firstChildinLine=firstChildinLine.nextSibling;
+				{ firstChildinLine=firstChildinLine.nextSibling;
 				}
 	//			alert("Num elements to be killed:"+ NumElements);
 				for(i=0;i<NumElements;i++)
@@ -143,7 +142,7 @@ Additional functionality of the program:
 				document.formMain.insertBefore(mytext,formMain.buttonGo);
 				for (i=0;i<num;i++)
 				{ for (j=0;j<dim;j++)
-					{	mytext=document.createElement("input");
+					{ mytext=document.createElement("input");
 						mytext.type="text";
 						mytext.name= "textCoord"+i;
 						if (rootsArraySize>i && rootsArrayDim>j)
@@ -168,9 +167,9 @@ Additional functionality of the program:
 	Basis[3][0]=-0.8; Basis[3][1]=1.4;
 	Basis[4][0]=1.6; Basis[4][1]=0.9;
 	function getCoord(thePoint,Coord)
-	{	result=Number(0);
+	{ result=Number(0);
 		for (counterI=0;counterI<oldDimension;counterI++)
-		{	result= result+ thePoint[counterI]*Basis[counterI][Coord];
+		{ result= result+ thePoint[counterI]*Basis[counterI][Coord];
 		}
 		result=Math.floor(result);
 		return result;
@@ -178,14 +177,14 @@ Additional functionality of the program:
 	function drawOnCanvasMain()
 	{//	alert("paint");
 		for (CounterK=0;CounterK<numdaLines;CounterK++)
-		{	xCoord1=getCoord(da1[CounterK],0)+Xshift;
+		{ xCoord1=getCoord(da1[CounterK],0)+Xshift;
 			yCoord1=getCoord(da1[CounterK],1)+Yshift;
 			xCoord2=getCoord(da2[CounterK],0)+Xshift;
 			yCoord2=getCoord(da2[CounterK],1)+Yshift;
 			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(clrda[CounterK]);
 		}
 		for (CounterK=0;CounterK<numlLines;CounterK++)
-		{	xCoord1=getCoord(l1[CounterK],0)+Xshift;
+		{ xCoord1=getCoord(l1[CounterK],0)+Xshift;
 			yCoord1=getCoord(l1[CounterK],1)+Yshift;
 			xCoord2=getCoord(l2[CounterK],0)+Xshift;
 			yCoord2=getCoord(l2[CounterK],1)+Yshift;
@@ -193,7 +192,7 @@ Additional functionality of the program:
 		}
 	}
 	function drawOnCanvasMainPlusInit()
-	{	node = dojo.byId(canvasMain);
+	{ node = dojo.byId(canvasMain);
 		surface = dojox.gfx.createSurface(node, 400, 400);
 		drawOnCanvasMain();
 	}

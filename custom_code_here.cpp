@@ -21,1061 +21,41 @@
 // To whomever might be reading this (if anyone): happy hacking and I hope you find my code useful, that it didn't cause you many headaches, and that you
 // did something useful with it! Cheers!
 
-class ElementWeylAlgebra
-{
-private:
-  PolynomialRationalCoeff StandardOrder;
-public:
-  std::string DebugString;
-  void ComputeDebugString(bool useBeginEqnArray, bool useXYs){this->ElementToString(this->DebugString, useXYs, true, useBeginEqnArray);};
-  void ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
-	void ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
-  int NumVariables;
-  void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
-  void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
-  void MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
-  void Makexixj(int i, int j, int NumVars);
-  void Makexi(int i, int NumVars);
-  void Makedi(int i, int NumVars);
-  void Makedidj(int i, int j, int NumVars);
-  void Makexidj(int i, int j, int NumVars);
-  void Nullify(int NumVars);
-  void SetNumVariablesPreserveExistingOnes(int newNumVars);
-  void TimesConstant(Rational& theConstant)
-  { this->StandardOrder.TimesConstant(theConstant);
-  };
-  void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
-  void MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
-  void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
-  void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
-  void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
-  void LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
-  void Assign(const ElementWeylAlgebra& other)
-  { this->StandardOrder.Assign(other.StandardOrder);
-    this->NumVariables=other.NumVariables;
-  };
-  void Subtract(ElementWeylAlgebra& other)
-  { this->StandardOrder.Subtract(other.StandardOrder);
-  };
-  void MakeConst (int NumVars, Rational& theConst);
-  void Add(ElementWeylAlgebra& other)
-  { this->StandardOrder.AddPolynomial(other.StandardOrder);
-  };
-  void MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
-  ElementWeylAlgebra()
-  { this->NumVariables=0; };
-  void operator=(const std::string& input);
-  bool IsLetter(char theLetter);
-  bool IsIndex(char theIndex);
-  bool IsNumber(char theNumber);
-};
-
-class WeylParser;
-class WeylParserNode
-{
-  public:
-  std::string DebugString;
-  void ComputeDebugString(){this->ElementToString(DebugString);};
-  void ElementToString(std::string& output);
-  WeylParser* owner;
-  int indexParent;
-  ListBasicObjects<int> children;
-  ElementWeylAlgebra Value;
-  int Operation; //using tokenTypes from class WeylParser
-  void operator=(const WeylParserNode& other)
-  { this->owner=other.owner;
-    this->children.CopyFromBase(other.children);
-    this->indexParent=other.indexParent;
-  };
-  void Evaluate(GlobalVariables& theGlobalVariables);
-  WeylParserNode();
-};
-
-//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
-class WeylParser: public ListBasicObjects<WeylParserNode>
-{
-  public:
-  std::string DebugString;
-  void ComputeDebugString(){this->ElementToString(DebugString);};
-  void ElementToString(std::string& output);
-  enum tokenTypes
-  { tokenExpression, tokenEmpty, tokenDigit, tokenPlus, tokenMinus, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket
-  };
-  ListBasicObjects<int> TokenBuffer;
-  ListBasicObjects<int> ValueBuffer;
-  ListBasicObjects<int> TokenStack;
-  ListBasicObjects<int> ValueStack;
-  int numEmptyTokensAtBeginning;
-  int NumVariables;
-  ElementWeylAlgebra Value;
-  void ParserInit(const std::string& input);
-  void Evaluate(GlobalVariables& theGlobalVariables);
-  void Parse(const std::string& input);
-  void ParseNoInit(int indexFrom, int indexTo);
-  void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);
-  bool ApplyRules(int lookAheadToken);
-  bool lookAheadTokenProhibitsPlus(int theToken);
-  bool lookAheadTokenProhibitsTimes(int theToken);
-  void AddLetterOnTop(int index);
-  void AddPartialOnTop(int index);
-  void Own(int indexParent, int indexChild1, int indexChild2);
-  void ExtendOnTop(int numNew);
-  void TokenToStringStream(std::stringstream& out, int theToken);
-  void AddPlusOnTop();
-  void AddMinusOnTop();
-  void AddTimesOnTop();
-  void AddLieBracketOnTop();
-  void DecreaseStackSetExpressionLastNode(int Decrease);
-  void ComputeNumberOfVariablesAndAdjustNodes();
-  WeylParser()
-  { this->numEmptyTokensAtBeginning=5;
-  };
-};
-
-bool ElementWeylAlgebra::IsLetter(char theLetter)
-{
-  return false;
-}
-
-void ElementWeylAlgebra::operator=(const std::string& input)
-{ /*for (int i=0; i<input.size(); i++)
-  { std::ostream formatter;
-    if (input.at(i)=='x')
-
-  }*/
-}
-
-void ElementWeylAlgebra::MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables)
-{ Monomial<Rational> buffer;
-  SelectionWithDifferentMaxMultiplicities& tempSel=theGlobalVariables.selWeylAlgebra1;
-  assert(left.NumVariables%2==0);
-  int theDimension=left.NumVariables/2;
-  tempSel.Multiplicities.initFillInObject(theDimension, 0);
-  tempSel.MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(theDimension);
-  for (int i=0; i<theDimension; i++)
-    tempSel.MaxMultiplicities.TheObjects[i]=left.degrees[theDimension+i];
-  tempSel.elements.initFillInObject(theDimension,0);
-  buffer.init(left.NumVariables);
-  assert(left.NumVariables==right.NumVariables);
-  OrderedOutput.Nullify(left.NumVariables);
-  int numCycles= tempSel.getTotalNumSubsets();
-  Rational coeffProd;
-  coeffProd.Assign(left.Coefficient);
-  coeffProd.MultiplyBy(right.Coefficient);
-  for (int i=0; i<numCycles; i++)
-  { buffer.Coefficient.Assign(coeffProd);
-    for (int k=0; k< theDimension; k++)
-    { short multDrop=(short)tempSel.Multiplicities.TheObjects[k];
-      buffer.Coefficient.MultiplyBy(Rational::NChooseK(left.degrees[theDimension+k], multDrop)*Rational::NChooseK(right.degrees[k], multDrop)* Rational::Factorial(multDrop));
-      buffer.degrees[k]=left.degrees[k]+right.degrees[k]-multDrop;
-      buffer.degrees[k+theDimension]= left.degrees[k+theDimension]+right.degrees[k+theDimension]-multDrop;
-    }
-    OrderedOutput.AddMonomial(buffer);
-    tempSel.IncrementSubset();
-  }
-}
-
-void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report)
-{ std::stringstream out;
-  this->ComputeDebugString(false, false);
-  standsOnTheLeft.ComputeDebugString(false, false);
-  out << "\\begin{eqnarray*}&&["<< standsOnTheLeft.DebugString<<" , "<< this->DebugString<< " ]= ";
-  this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
-  this->ComputeDebugString(false, false);
-  out << this->DebugString<<"\\end{eqnarray*}\n";
-  report=out.str();
-}
-
-void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report)
-{ std::stringstream out;
-  this->ComputeDebugString(false, false);
-  standsOnTheRight.ComputeDebugString(false, false);
-  out << "\\begin{eqnarray*}&&["<< this->DebugString<< " , "<<standsOnTheRight.DebugString<<" ]= ";
-  this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
-  this->ComputeDebugString(false, false);
-  out << this->DebugString<<"\\end{eqnarray*}\n";
-  report=out.str();
-}
-
-void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
-{ ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1.Assign(*this);
-  tempEl1.MultiplyOnTheLeft(standsOnTheLeft, theGlobalVariables);
-  //tempEl1.ComputeDebugString(false);
-  tempEl2.Assign(standsOnTheLeft);
-  tempEl2.MultiplyOnTheLeft(*this, theGlobalVariables);
-  //tempEl2.ComputeDebugString(false);
-  this->Assign(tempEl1);
-  this->Subtract(tempEl2);
-  //this->ComputeDebugString(false);
-}
-
-void ElementWeylAlgebra::MakeConst(int NumVars, Rational& theConst)
-{ this->Nullify(NumVariables);
-  Monomial<Rational> tempM;
-  tempM.init((short)this->NumVariables*2);
-  tempM.Coefficient.Assign(theConst);
-  this->StandardOrder.AddMonomial(tempM);
-}
-
-void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
-{ ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1.Assign(standsOnTheRight);
-  tempEl1.MultiplyOnTheLeft(*this, theGlobalVariables);
-  //tempEl1.ComputeDebugString(false);
-  tempEl2.Assign(*this);
-  tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
-  //tempEl2.ComputeDebugString(false);
-  this->Assign(tempEl1);
-  this->Subtract(tempEl2);
-  //this->ComputeDebugString(false);
-}
-
-void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
-{ PolynomialRationalCoeff buffer;
-  PolynomialRationalCoeff Accum;
-  Accum.Nullify((short) this->NumVariables*2);
-  for (int j=0; j<standsOnTheLeft.StandardOrder.size; j++)
-    for (int i=0; i<this->StandardOrder.size; i++)
-    { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder.TheObjects[j], this->StandardOrder.TheObjects[i], buffer, theGlobalVariables);
-      Accum.AddPolynomial(buffer);
-    }
-  this->StandardOrder.Assign(Accum);
-}
-
-void ElementWeylAlgebra::MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
-{ PolynomialRationalCoeff buffer;
-  PolynomialRationalCoeff Accum;
-  Accum.Nullify((short) this->NumVariables*2);
-  for (int j=0; j<standsOnTheRight.StandardOrder.size; j++)
-    for (int i=0; i<this->StandardOrder.size; i++)
-    { this->MultiplyTwoMonomials(this->StandardOrder.TheObjects[i], standsOnTheRight.StandardOrder.TheObjects[j], buffer, theGlobalVariables);
-      Accum.AddPolynomial(buffer);
-    }
-  this->StandardOrder.Assign(Accum);
-}
-
-void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
-{ std::stringstream out;
-  std::string tempS;
-  int numLettersSinceLastNewLine=0;
-  if (useLatex && useBeginEqnArray)
-    out << "\\begin{eqnarray*}&&";
-  for (int i=0; i<this->StandardOrder.size; i++)
-  { this->StandardOrder.TheObjects[i].Coefficient.ElementToString(tempS);
-    bool hasMinus=(tempS[0]=='-');
-    if (this->StandardOrder.TheObjects[i].TotalDegree()!=0)
-    { if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-    }
-    if (!hasMinus && i!=0)
-      out<<'+';
-    out << tempS;
-    for (int k=0; k<this->NumVariables; k++)
-      if (this->StandardOrder.TheObjects[i].degrees[k]!=0)
-      { out <<"{"<<alphabet.TheObjects[k]<<"}";
-        int tempI=(int) this->StandardOrder.TheObjects[i].degrees[k];
-        if (tempI!=1)
-          out <<"^{"<< tempI<<"}";
-      }
-    for (int k=0; k<this->NumVariables; k++)
-      if (this->StandardOrder.TheObjects[i].degrees[this->NumVariables+ k]!=0)
-      { out <<"\\partial_{"<<alphabet.TheObjects[k]<<"}";
-				numLettersSinceLastNewLine++;
-        int tempI=this->StandardOrder.TheObjects[i].degrees[this->NumVariables+k];
-        if (tempI!=1)
-          out <<"^{" <<tempI<<"}";
-      }
-    if (numLettersSinceLastNewLine>12 && i!= this->StandardOrder.size-1 && useLatex)
-    { numLettersSinceLastNewLine=0;
-      out <<"\\\\&&\n";
-    }
-  }
-  if (useLatex && useBeginEqnArray)
-    out << "\\end{eqnarray*}";
-  output=out.str();
-}
-
-void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray)
-{ ListBasicObjects<std::string> alphabet;
-  alphabet.SetSizeExpandOnTopNoObjectInit(this->NumVariables);
-  int numCycles=this->NumVariables;
-  if (useXYs)
-  { assert(this->NumVariables%2==0);
-    numCycles= this->NumVariables/2;
-  }
-  for (int i=0; i<numCycles; i++)
-  { std::stringstream out, out2;
-    out << "x_"<<i+1;
-    alphabet.TheObjects[i]= out.str();
-    if (useXYs)
-    { out2<< "y_"<< i+1;
-      alphabet.TheObjects[i+numCycles]= out2.str();
-    }
-  }
-  this->ElementToString(output, alphabet, useLatex, useBeginEqnArray);
-}
-
-void ElementWeylAlgebra::SetNumVariablesPreserveExistingOnes(int newNumVars)
-{ if (newNumVars<this->NumVariables)
-    this->NumVariables=newNumVars;
-  PolynomialRationalCoeff Accum;
-  Accum.Nullify((short)newNumVars*2);
-  Accum.MakeActualSizeAtLeastExpandOnTop(this->StandardOrder.size);
-  Monomial<Rational> tempM;
-  for (int i=0; i<this->StandardOrder.size; i++)
-  { tempM.init((short)newNumVars*2);
-    for (int j=0; j< this->NumVariables; j++)
-    { tempM.degrees[j]=this->StandardOrder.TheObjects[i].degrees[j];
-      tempM.degrees[j+newNumVars]=this->StandardOrder.TheObjects[i].degrees[j+this->NumVariables];
-    }
-    tempM.Coefficient.Assign(this->StandardOrder.TheObjects[i].Coefficient);
-    Accum.AddMonomial(tempM);
-  }
-  this->NumVariables= newNumVars;
-  this->StandardOrder.Assign(Accum);
-}
-
-void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
-{ this->Nullify(NumVars*2);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i]=1;
-  tempMon.degrees[j+this->NumVariables+NumVars]=1;
-  this->StandardOrder.AddMonomial(tempMon);
-
-  tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[j]=1;
-  tempMon.degrees[i+this->NumVariables+NumVars]=1;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
-{ this->Nullify(NumVars*2);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i]=1;
-  tempMon.degrees[j+this->NumVariables]=1;
-  this->StandardOrder.AddMonomial(tempMon);
-
-  tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[j+NumVars]=1;
-  tempMon.degrees[i+this->NumVariables+NumVars]=1;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
-{ this->Nullify(NumVars*2);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i+NumVars]=1;
-  tempMon.degrees[j+this->NumVariables]=1;
-  this->StandardOrder.AddMonomial(tempMon);
-
-  tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[j+NumVars]=1;
-  tempMon.degrees[i+this->NumVariables]=1;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
-{ this->Nullify(NumVars);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i+NumVars]++;
-  tempMon.degrees[j+NumVars]++;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
-{ this->Nullify(NumVars);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i]++;
-  tempMon.degrees[j]++;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::Makexi(int i, int NumVars)
-{ this->Nullify(NumVars);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i]++;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::Makedi(int i, int NumVars)
-{ this->Nullify(NumVars);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i+NumVars]++;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
-{ this->Nullify(NumVars);
-  Monomial<Rational> tempMon;
-  tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
-  tempMon.degrees[i]=1;
-  tempMon.degrees[NumVars+j]=1;
-  this->StandardOrder.AddMonomial(tempMon);
-}
-
-void ElementWeylAlgebra::Nullify(int NumVars)
-{ this->NumVariables=NumVars;
-  this->StandardOrder.Nullify ((short)this->NumVariables*2);
-}
-
-int DebugCounter=-1;
-WeylParser debugParser;
-
-void WeylParser::ParserInit(const std::string& input)
-{ this->TokenStack.MakeActualSizeAtLeastExpandOnTop(input.size());
-  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(input.size());
-  this->MakeActualSizeAtLeastExpandOnTop(input.size());
-  this->TokenStack.size=0;
-  this->ValueStack.size=0;
-  this->size=0;
-  for (int i=0; i<(signed) input.size(); i++)
-  { switch (input.at(i))
-    { case '0': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '1': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(1); break;
-      case '2': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(2); break;
-      case '3': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(3); break;
-      case '4': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(4); break;
-      case '5': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(5); break;
-      case '6': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(6); break;
-      case '7': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(7); break;
-      case '8': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(8); break;
-      case '9': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDigit); this->ValueBuffer.AddObjectOnTop(9); break;
-      case '[': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenOpenLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case ']': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenCloseLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '(': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenOpenBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case ',': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenComma); this->ValueBuffer.AddObjectOnTop(0); break;
-      case ')': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenCloseBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '^': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPower); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '+': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '-': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenMinus); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '_': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenUnderscore); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '/': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'x': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenX); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'd': this->TokenBuffer.AddObjectOnTop(WeylParser::tokenPartialDerivative); this->ValueBuffer.AddObjectOnTop(0); break;
-    }
-  }
-  this->ValueStack.size=0;
-  this->TokenStack.size=0;
-  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(this->ValueBuffer.size);
-  this->TokenStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
-  for (int i=0; i<this->numEmptyTokensAtBeginning; i++)
-  { this->TokenStack.AddObjectOnTop(this->tokenEmpty);
-    this->ValueStack.AddObjectOnTop(0);
-  }
-}
-
-void WeylParser::Parse(const std::string& input)
-{ this->ParserInit(input);
-  this->ParseNoInit(0, this->TokenBuffer.size-1);
-  this->ComputeNumberOfVariablesAndAdjustNodes();
-}
-
-void WeylParser::ParseNoInit(int indexFrom, int indexTo)
-{ if (indexFrom<0 || indexTo>= this->TokenBuffer.size)
-    return;
-  for (int i=indexFrom; i<=indexTo; i++)
-  { this->ValueStack.AddObjectOnTop(this->ValueBuffer.TheObjects[i]);
-    this->TokenStack.AddObjectOnTop(this->TokenBuffer.TheObjects[i]);
-    int lookAheadToken=this->tokenEmpty;
-    if (i<this->TokenBuffer.size-1)
-      lookAheadToken=this->TokenBuffer.TheObjects[i+1];
-    while(this->ApplyRules(lookAheadToken))
-    {
-    }
-  }
-}
-
-bool WeylParser::lookAheadTokenProhibitsPlus(int theToken)
-{ if (theToken==this->tokenPlus)
-    return false;
-  if (theToken==this->tokenMinus)
-    return false;
-  if (theToken==this->tokenCloseBracket)
-    return false;
-  if (theToken==this->tokenCloseLieBracket)
-    return false;
-  return true;
-}
-
-bool WeylParser::lookAheadTokenProhibitsTimes(int theToken)
-{ if (theToken==this->tokenPower)
-    return true;
-  return false;
-}
-
-bool WeylParser::ApplyRules(int lookAheadToken)
-{ if (this->TokenStack.size<2)
-    return false;
-  int IndexLast=this->TokenStack.size-1;
-  if (this->TokenStack.TheObjects[IndexLast]==this->tokenEmpty)
-  { this->TokenStack.PopLastObject();
-    this->ValueStack.PopLastObject();
-    return true;
-  }
-  if (this->TokenStack.TheObjects[IndexLast]== this->tokenCloseLieBracket && this->TokenStack.TheObjects[IndexLast-1]==this->tokenExpression &&
-      this->TokenStack.TheObjects[IndexLast-2]==this->tokenComma && this->TokenStack.TheObjects[IndexLast-3]==this->tokenExpression &&
-      this->TokenStack.TheObjects[IndexLast-4]==this->tokenOpenLieBracket)
-  { this->AddLieBracketOnTop();
-    return true;
-  }
-  if (this->TokenStack.TheObjects[IndexLast-1]==this->tokenUnderscore && this->TokenStack.TheObjects[IndexLast]==this->tokenDigit && this->TokenStack.TheObjects[IndexLast-2]==this->tokenPartialDerivative)
-  { this->AddPartialOnTop(this->ValueStack.TheObjects[IndexLast]);
-    return true;
-  }
-  if (this->TokenStack.TheObjects[IndexLast-1]==this->tokenUnderscore && this->TokenStack.TheObjects[IndexLast]==this->tokenDigit && this->TokenStack.TheObjects[IndexLast-2]==this->tokenX)
-  { this->AddLetterOnTop(this->ValueStack.TheObjects[IndexLast]);
-    return true;
-  }
-  if (this->TokenStack.TheObjects[IndexLast]==this->tokenExpression && this->TokenStack.TheObjects[IndexLast-1]==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddTimesOnTop();
-    return true;
-  }
-  if( this->TokenStack.TheObjects[IndexLast-1]==this->tokenPlus && this->TokenStack.TheObjects[IndexLast]==this->tokenExpression &&
-      this->TokenStack.TheObjects[IndexLast-2]==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddPlusOnTop();
-    return true;
-  }
-  if( this->TokenStack.TheObjects[IndexLast-1]==this->tokenMinus && this->TokenStack.TheObjects[IndexLast]==this->tokenExpression &&
-      this->TokenStack.TheObjects[IndexLast-2]==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddMinusOnTop();
-    return true;
-  }
-  return false;
-}
-
-void WeylParser::DecreaseStackSetExpressionLastNode(int Decrease)
-{ this->TokenStack.size-=Decrease;
-  this->ValueStack.size-=Decrease;
-  *this->TokenStack.LastObject()=this->tokenExpression;
-  *this->ValueStack.LastObject()=this->size-1;
-}
-
-void WeylParser::AddLetterOnTop(int index)
-{ if (index<=0)
-    return;
-  this->ExtendOnTop(1);
-  this->LastObject()->Value.Makexi(index-1, index);
-  this->DecreaseStackSetExpressionLastNode(2);
-}
-
-void WeylParser::AddPartialOnTop(int index)
-{ if (index<=0)
-    return;
-  this->ExtendOnTop(1);
-  this->LastObject()->Value.Makedi(index-1, index);
-  this->DecreaseStackSetExpressionLastNode(2);
-}
-
-void WeylParser::AddPlusOnTop()
-{ this->ExtendOnTop(1);
-  WeylParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenPlus;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(2);
-}
-
-void WeylParser::AddMinusOnTop()
-{ this->ExtendOnTop(1);
-  WeylParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenMinus;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(2);
-}
-
-void WeylParser::AddTimesOnTop()
-{ this->ExtendOnTop(1);
-  WeylParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenTimes;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-2], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(1);
-}
-
-void WeylParser::AddLieBracketOnTop()
-{ this->ExtendOnTop(1);
-  WeylParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenLieBracket;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
-  this->DecreaseStackSetExpressionLastNode(4);
-}
-
-void WeylParser::ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables)
-{ std::stringstream out; std::string tempS;
-  this->Parse(input);
-  out <<"\\begin{eqnarray*}&&" << input<<" = \\\\\n";
-  this->Evaluate(theGlobalVariables);
-  this->Value.ElementToString(tempS, false, true, false);
-  out <<tempS;
-  out <<"\\end{eqnarray*}";
-  output=out.str();
-}
-
-void WeylParser::Own(int indexParent, int indexChild1, int indexChild2)
-{ WeylParserNode* theNode= & this->TheObjects[indexParent];
-  theNode->children.SetSizeExpandOnTopNoObjectInit(2);
-  theNode->children.TheObjects[0]=indexChild1;
-  theNode->children.TheObjects[1]=indexChild2;
-  this->TheObjects[indexChild1].indexParent= indexParent;
-  this->TheObjects[indexChild2].indexParent= indexParent;
-}
-
-void WeylParser::Evaluate(GlobalVariables& theGlobalVariables)
-{ if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
-    if (*this->TokenStack.LastObject()==this->tokenExpression)
-    { WeylParserNode* theNode=&this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
-      theNode->Evaluate(theGlobalVariables);
-      this->Value.Assign(theNode->Value);
-    }
-}
-
-void WeylParser::ExtendOnTop(int numNew)
-{ this->SetSizeExpandOnTopNoObjectInit(this->size+numNew);
-  for (int i=0; i<numNew; i++)
-    this->TheObjects[this->size-1-i].owner=this;
-}
-
-void WeylParserNode::Evaluate(GlobalVariables& theGlobalVariables)
-{ Rational tempRat;
-  switch (this->Operation)
-  { case WeylParser::tokenPlus: this->Value.Nullify(owner->NumVariables);
-      for (int i=0; i<this->children.size; i++)
-      { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
-        this->Value.Add(this->owner->TheObjects[this->children.TheObjects[i]].Value);
-      }
-      break;
-    case WeylParser::tokenTimes: tempRat.MakeOne();
-      this->Value.MakeConst(owner->NumVariables, tempRat);
-      for (int i=0; i<this->children.size; i++)
-      { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
-        this->Value.MultiplyOnTheRight(this->owner->TheObjects[this->children.TheObjects[i]].Value, theGlobalVariables);
-      }
-      break;
-    case WeylParser::tokenLieBracket:
-      this->owner->TheObjects[children.TheObjects[0]].Evaluate(theGlobalVariables);
-      this->owner->TheObjects[children.TheObjects[1]].Evaluate(theGlobalVariables);
-      this->Value.Assign(owner->TheObjects[children.TheObjects[0]].Value);
-      this->Value.LieBracketOnTheRight(owner->TheObjects[children.TheObjects[1]].Value, theGlobalVariables);
-      break;
-    }
-
-}
-
-WeylParserNode::WeylParserNode()
-{ this->Operation= WeylParser::tokenEmpty;
-}
-
-
-void WeylParser::ElementToString(std::string& output)
-{ std::stringstream out; std::string tempS;
-  out <<"\nToken stack: ";
-  for (int i=this->numEmptyTokensAtBeginning; i<this->TokenStack.size; i++)
-  { this->TokenToStringStream(out, this->TokenStack.TheObjects[i]);
-    out <<", ";
-  }
-  out <<"\nValue stack: ";
-  for (int i=this->numEmptyTokensAtBeginning; i<this->ValueStack.size; i++)
-    out <<this->ValueStack.TheObjects[i]<<", ";
-  out <<"\nElements: ";
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS);
-    out << " Index: "<< i<<" " <<tempS<<"; ";
-  }
-  output=out.str();
-}
-
-void WeylParser::TokenToStringStream(std::stringstream& out, int theToken)
-{ switch(theToken)
-  { case WeylParser::tokenX: out <<"x"; break;
-    case WeylParser::tokenDigit: out <<"D"; break;
-    case WeylParser::tokenPlus: out <<"+"; break;
-    case WeylParser::tokenUnderscore: out <<"_"; break;
-    case WeylParser::tokenEmpty: out <<" "; break;
-    case WeylParser::tokenExpression: out<<"E"; break;
-    case WeylParser::tokenOpenLieBracket: out <<"["; break;
-    case WeylParser::tokenCloseLieBracket: out <<"]"; break;
-    case WeylParser::tokenLieBracket: out <<"[,]"; break;
-    case WeylParser::tokenComma: out <<","; break;
-    case WeylParser::tokenPartialDerivative: out <<"d"; break;
-    case WeylParser::tokenTimes: out << "*"; break;
-    case WeylParser::tokenMinus: out<< "-"; break;
-    default: out <<"?"; break;
-  }
-}
-
-void WeylParser::ComputeNumberOfVariablesAndAdjustNodes()
-{ this->NumVariables=0;
-  for(int i=0; i<this->size; i++)
-    if (this->NumVariables< this->TheObjects[i].Value.NumVariables)
-      this->NumVariables=this->TheObjects[i].Value.NumVariables;
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].Value.SetNumVariablesPreserveExistingOnes(this->NumVariables);
-}
-
-void WeylParserNode::ElementToString(std::string& output)
-{ std::stringstream out; std::string tempS;
-  owner->TokenToStringStream(out, this->Operation);
-  out <<" Value: ";
-  this->Value.ElementToString(tempS, false, false, false);
-  out << " " <<tempS<<" Children: ";
-  for (int i=0; i<this->children.size; i++)
-    out << this->children.TheObjects[i]<<", ";
-  out <<"\n";
-  output=out.str();
-}
-
-
-class IrreducibleFiniteDimensionalModule
-{
-  public:
-  DyckPaths thePaths;//the Weyl group inside the Dyck paths is assumed to parametrize the module.
-  MatrixLargeRational thePathMatrix;
-  MatrixLargeRational theMatrix;
-  roots theColumnsOfTheMatrix;
-  void InitAndPrepareTheChambersForComputation(int IndexWeyl, CombinatorialChamberContainer& theChambers, GlobalVariables& theGlobalVariables);
-  std::string DebugString;
-  void ComputeDebugString(){this->ElementToString(this->DebugString);};
-  void ElementToString(std::string& output);
-};
-
-void IrreducibleFiniteDimensionalModule::ElementToString(std::string& output)
-{ std::stringstream out; std::string tempS;
-  this->theMatrix.ElementToString(tempS);
-  out <<"The matrix :\n "<< tempS<<"\n\n";
-  this->thePathMatrix.ElementToString(tempS);
-  out <<"The matrix of the polytope:\n "<< tempS<<"\n\n";
-  this->thePaths.ElementToString(tempS, false);
-  out << tempS;
-  output = out.str();
-}
-
-void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation(int IndexWeyl, CombinatorialChamberContainer& theChambers, GlobalVariables& theGlobalVariables)
-{// reference:  E. Feigin, G. Fourier, P. Littelmann, "PBW filtration and bases for irreducible modules in type A_n", preprint 2009
-  int theDimension= IndexWeyl;
-  this->thePaths.AmbientWeyl.MakeAn(theDimension);
-  this->thePaths.GenerateAllDyckPathsTypesABC();
-  this->thePaths.ComputeGoodPathsExcludeTrivialPath();
-  this->thePathMatrix.init( this->thePaths.GoodPaths.size, this->thePaths.PositiveRoots.size);
-  this->thePathMatrix.NullifyAll(0);
-  for (int i=0; i<this->thePaths.GoodPaths.size; i++)
-    for (int j=0; j<this->thePaths.TheObjects[this->thePaths.GoodPaths.TheObjects[i]].thePathNodes.size; j++)
-      this->thePathMatrix.elements[i][this->thePaths.TheObjects[this->thePaths.GoodPaths.TheObjects[i]].thePathNodes.TheObjects[j]]=1;
-  this->theMatrix.Assign(this->thePathMatrix);
-  this->theMatrix.Resize(this->thePaths.GoodPaths.size + theDimension, this->thePaths.PositiveRoots.size+this->thePaths.GoodPaths.size, true);
-  for (int j=0; j<theDimension; j++)
-  { for (int i=0; i<this->thePaths.PositiveRoots.size; i++)
-      this->theMatrix.elements[j+this->thePaths.GoodPaths.size][i]= this->thePaths.PositiveRoots.TheObjects[i].TheObjects[j];
-    for (int i=0; i<this->thePaths.GoodPaths.size; i++)
-      this->theMatrix.elements[j+this->thePaths.GoodPaths.size][i+this->thePaths.PositiveRoots.size]=0;
-  }
-  for (int i=0; i<this->thePaths.GoodPaths.size; i++)
-    for (int j=0; j<this->thePaths.GoodPaths.size; j++)
-      this->theMatrix.elements[i][j+this->thePaths.PositiveRoots.size]=(i==j)? 1 : 0;
-  this->theColumnsOfTheMatrix.AssignMatrixColumns(this->theMatrix);
-  theChambers.theDirections.CopyFromBase(this->theColumnsOfTheMatrix);
-  theChambers.AmbientDimension= this->theMatrix.NumRows;
-  theChambers.CurrentIndex=theChambers.AmbientDimension-1;
-  theChambers.theDirections.ComputeDebugString();
-
-}
-
-void DyckPaths::ComputeGoodPathsExcludeTrivialPath()
-{ int counter=0;
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].IamComplete(*this))
-      counter++;
-  this->GoodPaths.MakeActualSizeAtLeastExpandOnTop(counter);
-  this->GoodPaths.size=0;
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].IamComplete(*this))
-      this->GoodPaths.AddObjectOnTop(i);
-}
-
-void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output << "Flags_and_indices: ";
-  output << this->flagHasZeroPolynomial << " "<< this->flagExplored<< " " <<this->flagPermanentlyZero <<" ";
-  output << this->IndexInOwnerComplex << " "<< this->IndexStartingCrossSectionNormal <<" "<< this->DisplayNumber <<"\nVertices:\n";
-  this->AllVertices.WriteToFile(output, theGlobalVariables);
-  output <<"Internal_point: ";
-  this->InternalPoint.WriteToFile(output);
-  output << "\nInternalWalls:\n";
-  this->InternalWalls.WriteToFile(output, theGlobalVariables);
-  output<<"\n" << this->Externalwalls.size<<"\n";
-  for (int i=0; i<this->Externalwalls.size; i++)
-  { this->Externalwalls.TheObjects[i].WriteToFile(output);
-    output<<" ";
-  }
-}
-
-void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner)
-{ std::string tempS;
-  int tempI;
-  input >> tempS;
-  input >> this->flagHasZeroPolynomial >> this->flagExplored>>this->flagPermanentlyZero;
-  input >> this->IndexInOwnerComplex >> this->IndexStartingCrossSectionNormal;
-  input >> this->DisplayNumber;
-  input >> tempS;
-  this->AllVertices.ReadFromFile(input, theGlobalVariables);
-  input>>tempS;
-  this->InternalPoint.ReadFromFile(input);
-  input >> tempS;
-  assert(tempS =="InternalWalls:");
-  this->InternalWalls.ReadFromFile(input, theGlobalVariables);
-  input >> tempI;
-  this->Externalwalls.SetSizeExpandOnTopNoObjectInit(tempI);
-  for (int i=0; i<this->Externalwalls.size; i++)
-    this->Externalwalls.TheObjects[i].ReadFromFile(input, owner);
-}
-
-void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ this->LabelChamberIndicesProperly();
-  output << "Num_pointers: "<< this->size<<"\n";
-///////////////////////////////////////////////////
-  output << "Dimension: "<< this->AmbientDimension<<" ";
-  output << "CurrentIndex: "<< this->CurrentIndex<<"\n";
-  output << "Directions:\n";
-  this->theDirections.WriteToFile(output, theGlobalVariables);
-  output << "\nNext_index_to_slice: "<< this->indexNextChamberToSlice<<"\n";
-  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex<<" ";
-  this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
-  output << "\n";
-  this->startingCones.WriteToFile(output, theGlobalVariables);
-////////////////////////////////////////////////////
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]!=0)
-    { output <<"\nChamber:\n";
-      this->TheObjects[i]->WriteToFile(output, theGlobalVariables);
-    } else
-      output <<"Empty\n";
-}
-
-void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS;
-  input.seekg(0);
-  this->KillAllElements();
-  int tempI;
-  input >> tempS >> tempI;
-  this->initAndCreateNewObjects(tempI);
-///////////////////////////////////////////////////
-  input >> tempS >> this->AmbientDimension;
-  input >> tempS >> this->CurrentIndex;
-  input >> tempS;
-  this->theDirections.ReadFromFile(input, theGlobalVariables);
-  input >> tempS >> this->indexNextChamberToSlice;
-  input >> tempS >> this->FirstNonExploredIndex;
-  this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
-  this->startingCones.ReadFromFile(input, theGlobalVariables);
-////////////////////////////////////////////////////
-  for (int i=0; i<this->size; i++)
-  { input >> tempS;
-    if (tempS=="Chamber:")
-      this->TheObjects[i]->ReadFromFile(input, theGlobalVariables, *this);
-    else
-    { assert (tempS=="Empty");
-      delete this->TheObjects[i];
-      this->TheObjects[i]=0;
-    }
-  }
-  this->flagIsRunning=true;
-  this->flagMustStop=false;
-  this->flagReachSafePointASAP=false;
-}
-
-void WallData::WriteToFile(std::fstream& output)
-{ //output << this->indexInOwnerChamber <<" ";
-  this->normal.WriteToFile(output);
-  output<< " "<< this->NeighborsAlongWall.size<<" ";
-  assert(this->NeighborsAlongWall.size==this->IndicesMirrorWalls.size);
-  for (int i=0; i<this->NeighborsAlongWall.size; i++ )
-    if (this->NeighborsAlongWall.TheObjects[i]==0)
-			output<< -1<<" "<<-1<<" ";
-    else
-    { //assert(this->MirrorWall.TheObjects[i]!=0);
-      output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->IndicesMirrorWalls.TheObjects[i]<<" ";
-    }
-}
-
-void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner)
-{ //input >>this->indexInOwnerChamber;
-  this->normal.ReadFromFile(input);
-  int tempI, indexN, indexW;
-  input >>tempI;
-  this->NeighborsAlongWall.SetSizeExpandOnTopNoObjectInit(tempI);
-  this->IndicesMirrorWalls.SetSizeExpandOnTopNoObjectInit(tempI);
-  for (int i=0; i<this->NeighborsAlongWall.size; i++ )
-  { input >> indexN>> indexW;
-    if (indexN==-1)
-    { this->NeighborsAlongWall.TheObjects[i]=0;
-      this->IndicesMirrorWalls.TheObjects[i]=-1;
-    }
-    else
-    { this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[indexN];
-      this->IndicesMirrorWalls.TheObjects[i]=indexW;
-    }
-  }
-}
-
-void CombinatorialChamberContainer::WriteToDefaultFile()
-{ std::fstream tempF;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, true, false);
-  GlobalVariables theGlobalVariables;
-  this->WriteToFile(tempF, theGlobalVariables);
-  tempF.close();
-}
-
-void CombinatorialChamberContainer::ReadFromDefaultFile()
-{ std::fstream tempF;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false);
-  GlobalVariables theGlobalVariables;
-  this->ReadFromFile(tempF, theGlobalVariables);
-  tempF.close();
-}
-
-void CombinatorialChamberContainer::PauseSlicing()
-{
-#ifdef WIN32
-/*  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
-  this->flagReachSafePointASAP=true;
-  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
-  while(!this->flagIsRunning)
-  {}*/
-#else
-  pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
-  this->flagReachSafePointASAP=true;
-  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
-  while (!this->flagIsRunning)
-  {}
-#endif
-}
-
-void CombinatorialChamberContainer::ResumeSlicing()
-{
-#ifdef WIN32
-//  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
-//  this->flagIsRunning=true;
-//  SetEvent(this->condContinue);
-//  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
-#else
-  pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
-  this->flagIsRunning=true;
-  pthread_cond_signal(&this->condContinue);
-  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
-#endif
-}
-
-void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
-{ this->SliceTheEuclideanSpace(this->theDirections, this->CurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
-}
-
-void Cone::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ this->roots::WriteToFile(output, theGlobalVariables);
-  output <<"\nChamberTestArray: "<<this->ChamberTestArray.size<<" ";
-  for (int i=0; i<this->ChamberTestArray.size; i++)
-    output<< this->ChamberTestArray.TheObjects[i]<<" ";
-}
-
-void Cone::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS; int tempI;
-  this->roots::ReadFromFile(input, theGlobalVariables);
-  input >> tempS>> tempI;
-  this->ChamberTestArray.SetSizeExpandOnTopNoObjectInit(tempI);
-  for (int i=0; i<this->ChamberTestArray.size; i++)
-    input >> this->ChamberTestArray.TheObjects[i];
-}
-
-void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ this->theFacets.WriteToFile(output);
-  output <<"\nConesHavingFixedNormal: ";
-  output << this->ConesHavingFixedNormal.size<<" ";
-  for (int i=0; i<this->ConesHavingFixedNormal.size; i++)
-  { output << this->ConesHavingFixedNormal.TheObjects[i].size<<" ";
-    for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
-      output<< this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j]<<" ";
-  }
-  output <<"\ntheCones: "<<this->size<< " ";
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
-    output <<" ";
-  }
-}
-
-void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS; int tempI;
-  this->theFacets.ReadFromFile(input);
-  input >>tempS;
-  assert(tempS=="ConesHavingFixedNormal:");
-  input >> tempI;
-  this->ConesHavingFixedNormal.SetSizeExpandOnTopNoObjectInit(tempI);
-  for (int i=0; i<this->ConesHavingFixedNormal.size; i++)
-  { input >> tempI;
-    this->ConesHavingFixedNormal.TheObjects[i].SetSizeExpandOnTopNoObjectInit(tempI);
-    for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
-      input>>this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j];
-   }
-  input>>tempS>>tempI;
-  assert(tempS=="theCones:");
-  this->SetSizeExpandOnTopNoObjectInit(tempI);
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
-}
-
-void hashedRoots::WriteToFile(std::fstream& output)
-{ int theDimension=0;
-  if (this->size>0)
-    theDimension= this->TheObjects[0].size;
-  output << "Num|dim: " <<this->size<<" "<< theDimension<<" ";
-  for (int i=0; i<this->size; i++)
-    for (int j=0; j<theDimension; j++)
-    { this->TheObjects[i].TheObjects[j].WriteToFile(output);
-      output<<" ";
-    }
-}
-
-void hashedRoots::ReadFromFile(std::fstream& input)
-{ int theDimension; std::string tempS;
-  int theSize;
-  this->ClearTheObjects();
-  input >> tempS >> theSize>> theDimension;
-  this->MakeActualSizeAtLeastExpandOnTop(theSize);
-  root tempRoot;
-  tempRoot.SetSizeExpandOnTopLight(theDimension);
-  for (int i=0; i<theSize; i++)
-  { for (int j=0; j<theDimension; j++)
-      tempRoot.TheObjects[j].ReadFromFile(input);
-    this->AddObjectOnTopHash(tempRoot);
-   }
-}
-
 void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
 { std::stringstream out;
   if (useLatex)
     out<<"$";
-  for (int i=0; i<this->HighestWeights.size; i++)
-  { if (this->MultiplicitiesHighestWeights.TheObjects[i]>1)
-      out << this->MultiplicitiesHighestWeights.TheObjects[i];
-    out << "V_{"<<this->HighestWeights.TheObjects[i]<<"}";
-    if (i!=this->HighestWeights.size-1)
+  for (int i=0; i<this->highestWeights.size; i++)
+  { if (this->multiplicitiesHighestWeights.TheObjects[i]>1)
+      out << this->multiplicitiesHighestWeights.TheObjects[i];
+    out << "V_{"<<this->highestWeights.TheObjects[i]<<"}";
+    if (i!=this->highestWeights.size-1)
       out << "+";
+  }
+  if (useLatex)
+    out << "$";
+  output=out.str();
+}
+
+void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
+{ std::stringstream out;
+  std::string tempS;
+  if (useLatex)
+    out<<"$";
+  for  (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
+  { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
+    CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DebugString, tempS);
+    out << "Decomposition of regular SA " << tempS <<":  ";
+    for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size; i++)
+    { if (this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i]>1)
+        out << this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i];
+      out << "V_{"<<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i]<<"}";
+      if (i!=this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size-1)
+        out << "+";
+    }
+    if (useHtml)
+      out <<"\n<br>";
+    out <<"\n";
   }
   if (useLatex)
     out << "$";
@@ -1248,6 +228,7 @@ void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLet
       if (isMinimalContaining)
         theSl2.IndicesMinimalContainingRootSA.AddObjectOnTopNoRepetitionOfObject(theSl2.IndicesContainingRootSAs.TheObjects[j]);
     }
+    output.ComputeModuleDecompositionsOfAmbientLieAlgebra(theGlobalVariables);
   }
 
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
@@ -1520,7 +501,7 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, Sltwo
     this->owner->LieBracket(this->theH, this->theF, this->bufferHbracketF);
   }
   //theSl2.hCharacteristic.ComputeDebugString();
-  this->ComputeModuleDecomposition();
+//  this->ComputeModuleDecomposition();
 }
 
 void WeylGroup::PerturbWeightToRegularWRTrootSystem(const root& inputH, root& output)
@@ -1614,43 +595,46 @@ void DynkinDiagramRootSubalgebra::GetKillingFormMatrixUseBourbakiOrder(MatrixLar
       output.elements[i][j]=theWeyl.RootScalarKillingFormMatrixRoot(tempRoots.TheObjects[i], tempRoots.TheObjects[j]);
 }
 
+void slTwo::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
+{ this->ComputeModuleDecomposition(this->owner->theWeyl.RootsOfBorel, this->owner->theWeyl.KillingFormMatrix.NumRows, this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions, theGlobalVariables);
+}
+
+void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)
+{ this->MultiplicitiesDecompositionMinimalContainingRootSA.SetSizeExpandOnTopNoObjectInit(this->IndicesMinimalContainingRootSA.size);
+  this->HighestWeightsDecompositionMinimalContainingRootSA.SetSizeExpandOnTopNoObjectInit(this->IndicesMinimalContainingRootSA.size);
+  ListBasicObjects<int> buffer;
+  for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
+  { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
+    this->ComputeModuleDecomposition(theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[i], this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[i], buffer, theGlobalVariables);
+  }
+}
+
 //The below code is related to sl(2) subalgebras of simple Lie algebras
-void slTwo::ComputeModuleDecomposition()
-{	int theDimension= this->owner->theWeyl.KillingFormMatrix.NumRows;
-  int IndexZeroWeight=this->owner->theWeyl.RootSystem.size;
-	this->WeightSpaceDimensions.initFillInObject(2*(this->owner->theWeyl.RootSystem.size)+1, 0);
-	this->WeightSpaceDimensions.TheObjects[IndexZeroWeight]=theDimension;
+void slTwo::ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, ListBasicObjects<int>& outputHighestWeights, ListBasicObjects<int>& outputMultiplicitiesHighestWeights, ListBasicObjects<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
+{ int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
+	outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
+	outputWeightSpaceDimensions.TheObjects[IndexZeroWeight]=dimensionContainingRegularSA;
 	ListBasicObjects<int> BufferHighestWeights;
 	bool possible=true;
 	Rational tempRat;
-	for (int k=0; k<this->owner->theWeyl.RootSystem.size; k++)
-	{ root::RootScalarEuclideanRoot(this->hCharacteristic, this->owner->theWeyl.RootSystem.TheObjects[k], tempRat);
+	roots tempRoots;
+	positiveRootsContainingRegularSA.GetCoordsInBasis(this->preferredAmbientSimpleBasis, tempRoots, theGlobalVariables);
+	for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
+	{ root::RootScalarEuclideanRoot(this->hCharacteristic, tempRoots.TheObjects[k], tempRat);
     assert(tempRat.DenShort==1);
-		if (tempRat.NumShort>this->owner->theWeyl.RootSystem.size)
-		{	possible=false;
+		if (tempRat.NumShort>positiveRootsContainingRegularSA.size*2)
+		{ possible=false;
       break;
     }
-    this->WeightSpaceDimensions.TheObjects[IndexZeroWeight+tempRat.NumShort]++;
+    outputWeightSpaceDimensions.TheObjects[IndexZeroWeight+tempRat.NumShort]++;
+    outputWeightSpaceDimensions.TheObjects[IndexZeroWeight-tempRat.NumShort]++;
 	}
-	BufferHighestWeights.CopyFromBase(this->WeightSpaceDimensions);
-  this->HighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootSystem.size);
-  this->MultiplicitiesHighestWeights.MakeActualSizeAtLeastExpandOnTop(this->owner->theWeyl.RootsOfBorel.size);
-  this->HighestWeights.size=0;
-  this->MultiplicitiesHighestWeights.size=0;
+	BufferHighestWeights.CopyFromBase(outputWeightSpaceDimensions);
+  outputHighestWeights.MakeActualSizeAtLeastExpandOnTop(positiveRootsContainingRegularSA.size*2);
+  outputMultiplicitiesHighestWeights.MakeActualSizeAtLeastExpandOnTop(positiveRootsContainingRegularSA.size*2);
+  outputHighestWeights.size=0;
+  outputMultiplicitiesHighestWeights.size=0;
 //  this->hCharacteristic.ComputeDebugString();
-
-	std::string stop;
-  if (true)
-  { std::stringstream debug1;
-    for (int i=0; i<IndexZeroWeight; i++)
-    { debug1<< BufferHighestWeights.TheObjects[i]<<", ";
-    }
-    debug1<<"\n"<<BufferHighestWeights.TheObjects[IndexZeroWeight]<<"\n";
-    for (int i=IndexZeroWeight+1; i<BufferHighestWeights.size; i++)
-    { debug1<< BufferHighestWeights.TheObjects[i]<<", ";
-    }
-    stop=debug1.str();
-  }
   for (int j=BufferHighestWeights.size-1; j>=IndexZeroWeight; j--)
   { int topMult = BufferHighestWeights.TheObjects[j];
     if (topMult<0)
@@ -1658,12 +642,12 @@ void slTwo::ComputeModuleDecomposition()
       break;
     }
     if (topMult>0)
-    {	this->HighestWeights.AddObjectOnTop(j-IndexZeroWeight);
-      this->MultiplicitiesHighestWeights.AddObjectOnTop(topMult);
+    { outputHighestWeights.AddObjectOnTop(j-IndexZeroWeight);
+      outputMultiplicitiesHighestWeights.AddObjectOnTop(topMult);
       if (j!=IndexZeroWeight)
         BufferHighestWeights.TheObjects[IndexZeroWeight*2-j]-=topMult;
       for (int k=j-2; k>=IndexZeroWeight; k-=2)
-      {	BufferHighestWeights.TheObjects[k]-=topMult;
+      { BufferHighestWeights.TheObjects[k]-=topMult;
         if (k!=IndexZeroWeight)
            BufferHighestWeights.TheObjects[IndexZeroWeight*2-k]-=topMult;
         assert(BufferHighestWeights.TheObjects[k]==BufferHighestWeights.TheObjects[IndexZeroWeight*2-k]);
@@ -1678,7 +662,7 @@ void slTwo::ComputeModuleDecomposition()
 }
 
 void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
-{	std::string tempS; std::stringstream out; std::stringstream body;
+{ std::string tempS; std::stringstream out; std::stringstream body;
   std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1,...,\\alpha_n be simple roots w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h),...,\\alpha_n(h))";
   std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   std::string tooltipContainingRegular="A regular subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular subalgebra, but the regular subalgebra might fail to be minimal containing. This happens when another minimal containing regular subalgebra of equal rank nests as a root subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
@@ -1954,15 +938,24 @@ void ComputationSetup::ComputeReductiveSAs(ComputationSetup& inputData, GlobalVa
 
 void reductiveSubalgebras::FindTheReductiveSubalgebras(int WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
 { //this->theSl2s.owner.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylIndex, theGlobalVariables);
-  this->GenerateModuleDecompositionsPrincipalSl2s(WeylIndex);
+  this->theSl2s.owner.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylIndex, theGlobalVariables);
+  this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);
+  this->GenerateModuleDecompositionsPrincipalSl2s(WeylIndex, theGlobalVariables);
+  this->MatchActualSl2sFixedRootSAToPartitionSl2s(theGlobalVariables);
+  std::string tempS; std::stringstream out;
   //this->theSl2s.ComputeDebugString(theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, false);
 //  theGlobalVariables.theIndicatorVariables.StatusString1= this->theSl2s.DebugString;
-  this->ElementToStringCandidatePrincipalSl2s(false, false, theGlobalVariables.theIndicatorVariables.StatusString1);
+  this->ElementToStringCandidatePrincipalSl2s(false, true, tempS);
+  out << tempS;
+  this->theSl2s.ElementToString(tempS, theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, true, false, 0, 0);
+  out << tempS;
+  theGlobalVariables.theIndicatorVariables.StatusString1.append(tempS);
+  theGlobalVariables.theIndicatorVariables.StatusString1= out.str();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank)
+void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables)
 { this->EnumerateAllPossibleDynkinDiagramsOfRankUpTo(theRank);
   slTwo tempSl2;
   this->CandidatesPrincipalSl2ofSubalgebra.MakeActualSizeAtLeastExpandOnTop(this->theLetters.size);
@@ -1970,15 +963,16 @@ void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank
   for (int i=0; i<this->theLetters.size; i++)
   { this->theCandidateSubAlgebras.TheObjects[i].theWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
     this->theCandidateSubAlgebras.TheObjects[i].theWeyl.GenerateRootSystemFromKillingFormMatrix();
-    tempSl2.hCharacteristic.initFillInObject(theRank, 2);
+    int theDimension = this->theCandidateSubAlgebras.TheObjects[i].theWeyl.KillingFormMatrix.NumRows;
+    tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
     tempSl2.owner = &this->theCandidateSubAlgebras.TheObjects[i];
-    tempSl2.ComputeModuleDecomposition();
+    tempSl2.ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
     this->CandidatesPrincipalSl2ofSubalgebra.AddObjectOnTopHash(tempSl2);
   }
 }
 
 void reductiveSubalgebras::EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank)
-{ this->GenerateAllPartitions(theRank);
+{ this->GenerateAllPartitionsUpTo(theRank);
   this->theLetters.size=0;
   this->theMultiplicities.size=0;
   this->theRanks.size=0;
@@ -2045,6 +1039,51 @@ void reductiveSubalgebras::GenerateAllDiagramsForPartitionRecursive(int indexPar
   }
 }
 
+void reductiveSubalgebras::MatchRealSl2sToPartitionSl2s()
+{ this->IndicesMatchingSl2s.SetSizeExpandOnTopNoObjectInit(this->theLetters.size);
+  for (int i=0; i<this->CandidatesPrincipalSl2ofSubalgebra.size; i++)
+  { this->IndicesMatchingSl2s.TheObjects[i].size=0;
+    for (int j=0; j<this->theSl2s.size; j++)
+      if (this->CandidatesPrincipalSl2ofSubalgebra.TheObjects[i].ModuleDecompositionFitsInto(this->theSl2s.TheObjects[j]))
+        this->IndicesMatchingSl2s.TheObjects[i].AddObjectOnTop(j);
+  }
+}
+
+void reductiveSubalgebras::MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables)
+{ this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);
+  ListBasicObjects<int> tempL;
+  this->IndicesMatchingActualSl2s.initFillInObject(this->theLetters.size, tempL);
+  this->IndicesMatchingPartitionSl2s.initFillInObject(this->theSl2s.size, tempL);
+  for (int i=0; i<this->theSl2s.size; i++)
+  { slTwo& theSl2= this->theSl2s.TheObjects[i];
+    for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
+      for (int k=0; k<this->CandidatesPrincipalSl2ofSubalgebra.size; k++)
+      { slTwo& candidateSl2= this->CandidatesPrincipalSl2ofSubalgebra.TheObjects[k];
+        if (theSl2.ModuleDecompositionFitsInto(candidateSl2.highestWeights, candidateSl2.multiplicitiesHighestWeights, theSl2.HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[j], theSl2.MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[j]))
+        { this->IndicesMatchingActualSl2s.TheObjects[k].AddObjectOnTop(i);
+          this->IndicesMatchingPartitionSl2s.TheObjects[i].AddObjectOnTop(k);
+        }
+      }
+  }
+}
+
+bool slTwo::ModuleDecompositionFitsInto(const slTwo& other)
+{ return this->ModuleDecompositionFitsInto(this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
+}
+
+bool slTwo::ModuleDecompositionFitsInto(const ListBasicObjects<int>& highestWeightsLeft, const ListBasicObjects<int>& multiplicitiesHighestWeightsLeft, const ListBasicObjects<int>& highestWeightsRight, const ListBasicObjects<int>& multiplicitiesHighestWeightsRight)
+{ for (int i=0; i<highestWeightsLeft.size; i++)
+  { int theIndex= highestWeightsRight.IndexOfObject(highestWeightsLeft.TheObjects[i]);
+    if (theIndex==-1)
+      return false;
+    else
+      if (multiplicitiesHighestWeightsLeft.TheObjects[i]>multiplicitiesHighestWeightsRight.TheObjects[theIndex])
+        return false;
+  }
+  return true;
+}
+
+
 void reductiveSubalgebras::GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, ListBasicObjects<int>& Multiplicities, ListBasicObjects<int>& Values)
 { if (remainingToBePartitioned==0)
   { this->thePartitionMultiplicities.AddObjectOnTop(Multiplicities);
@@ -2068,10 +1107,15 @@ void reductiveSubalgebras::GenerateAllPartitionsRecursive(int remainingToBeParti
   }
 }
 
-void reductiveSubalgebras::GenerateAllPartitions(int theRank)
+void reductiveSubalgebras::GenerateAllPartitionsUpTo(int theRank)
 { this->thePartitionMultiplicities.size=0;
   this->thePartitionValues.size=0;
-  int upperLimit= MathRoutines::TwoToTheNth(theRank);
+  for (int i=1; i<=theRank; i++)
+    this->GenerateAllPartitionsDontInit(i);
+}
+
+void reductiveSubalgebras::GenerateAllPartitionsDontInit(int theRank)
+{ int upperLimit= MathRoutines::TwoToTheNth(theRank);
   this->thePartitionMultiplicities.MakeActualSizeAtLeastExpandOnTop(upperLimit);
   this->thePartitionValues.MakeActualSizeAtLeastExpandOnTop(upperLimit);
   ListBasicObjects<int> buffer1, buffer2;
@@ -2090,6 +1134,8 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
       if (j!=this->thePartitionValues.TheObjects[i].size-1)
         out <<"+ ";
     }
+    if (useHtml)
+      out <<"\n<br>";
     out <<"\n";
   }
   for (int i=0; i<this->theLetters.size; i++)
@@ -2107,14 +1153,20 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
     slTwo& theSl2= this->CandidatesPrincipalSl2ofSubalgebra.TheObjects[i];
     theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
     out << tempS;
+    theSl2.ElementToStringModuleDecompositionMinimalContainingRegularSAs(useLatex, useHtml, this->theSl2s, tempS);
+    if (useHtml)
+      out <<"\n<br>\n &nbsp;&nbsp;&nbsp;&nbsp;";
+    out <<tempS;
+    if (useHtml)
+      out <<"\n<br>";
     out<<"\n";
   }
   output=out.str();
 }
 
-void WeylGroup::MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks,  ListBasicObjects<int>* theMultiplicities)
+void WeylGroup::MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks, ListBasicObjects<int>* theMultiplicities)
 { WeylGroup tempW;
-  this->KillingFormMatrix.init(0,0);
+  this->KillingFormMatrix.init(0, 0);
   for (int i=0; i<theLetters.size; i++)
   { tempW.MakeArbitrary(theLetters.TheObjects[i], theRanks.TheObjects[i]);
     int numSummands=1;
@@ -2124,3 +1176,4 @@ void WeylGroup::MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasic
       this->KillingFormMatrix.DirectSumWith(tempW.KillingFormMatrix);
   }
 }
+

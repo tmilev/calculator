@@ -56,7 +56,8 @@ int main(int argc, char **argv)
   //inputString="textType=E&textRank=6&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=F&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
   //inputString="textType=d&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
-  //inputString="textType=G&textRank=2&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
+  //inputString="textType=G&textRank=2&buttonGoSl2SAs=sl%282%29+subalgebras&checkUsePNG=on";
+	inputString="experiments";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();
@@ -198,13 +199,19 @@ int main(int argc, char **argv)
       else
         std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPathSl2s << "sl2s_nopng.html\">";
     }
+  }else if (choice==CGIspecificRoutines::choiceExperiments)
+  { theComputationSetup.WeylGroupIndex=4;
+    theComputationSetup.WeylGroupLetter='D';
+    theComputationSetup.theFunctionToRun= &theComputationSetup.ComputeReductiveSAs;
+    theComputationSetup.Run();
+    std::cout<< theComputationSetup.theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1;
   }
   std::cout << "</BODY>\n</HTML>";
 	std::cout << "<!--";
 	std::cout.flush();
 #ifndef WIN32
-  ::system(latexCommand1.c_str());
-  ::system(latexCommand2.c_str());
+  system(latexCommand1.c_str());
+  system(latexCommand2.c_str());
 #endif
 	std::cout<<"-->";
 	std::cout.flush();

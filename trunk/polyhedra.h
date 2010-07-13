@@ -5828,7 +5828,7 @@ public:
 	void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
 	void GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables);
   void ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output);
-  void FindTheReductiveSubalgebras(int WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
+  void FindTheReductiveSubalgebras(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   void EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank);
   void GenerateAllPartitionsUpTo(int theRank);
   void GenerateAllPartitionsDontInit(int theRank);
@@ -5845,7 +5845,7 @@ public:
   static int ProblemCounter;
   bool flagAnErrorHasOccurredTimeToPanic;
   void ElementToString( std::string& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool displayEpsilons);
-  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables){ this->ElementToString(this->DebugString,theWeyl, TheGlobalVariables,true);};
+  void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables){ this->ElementToString(this->DebugString, theWeyl, TheGlobalVariables, true);};
   bool flagNeedsAdditionOfPositiveKroots;
   Selection theGmodLmodules;
   Selection theNilradicalModules;

@@ -936,7 +936,7 @@ void ComputationSetup::ComputeReductiveSAs(ComputationSetup& inputData, GlobalVa
   theRedSAs.FindTheReductiveSubalgebras(inputData.WeylGroupLetter, inputData.WeylGroupIndex, theGlobalVariables);
 }
 
-void reductiveSubalgebras::FindTheReductiveSubalgebras(int WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
+void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
 { //this->theSl2s.owner.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylIndex, theGlobalVariables);
   this->theSl2s.owner.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylIndex, theGlobalVariables);
   this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);

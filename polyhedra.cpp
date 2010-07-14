@@ -276,8 +276,8 @@ pthread_cond_t ParallelComputing::continueCondition;
 #endif
 
 void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
-{ //static int ProblemCounter=0;
-  //ProblemCounter++;
+{ static int ProblemCounter=0;
+  ProblemCounter++;
   if (this->flagMustStop)
     return;
   if (index==rank-1)
@@ -317,12 +317,12 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
 				this->ComputeNextIndexToSlice(directions.TheObjects[index]);
 		}
     this->MakeReportOneSlice(theGlobalVariables, index, directions.size);
-    assert(this->ConsistencyCheck());
+//    assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
     if (this->flagReachSafePointASAP)
     {
 #ifdef WIN32
-/*      WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
+/*    WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
       this->flagIsRunning=false;
       ReleaseMutex(this->mutexFlagCriticalSectionEntered);
       ::WaitForSingleObjectEx(this->condContinue, INFINITE, TRUE);
@@ -340,6 +340,8 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
 #endif
     }
 	}
+	if (ProblemCounter>1024)
+	  assert(this->ConsistencyCheck());
 }
 
 void CombinatorialChamberContainer::SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices)
@@ -385,7 +387,7 @@ void CombinatorialChamberContainer::PurgeZeroPointers()
 	this->size= ActualIndex;
 }
 
-void CombinatorialChamberContainer::SliceOneDirection( roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceOneDirection(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
 { if (index<directions.size)
 	{ int oldindex= index;
     this->PreferredNextChambers.MakeActualSizeAtLeastExpandOnTop(this->size*this->AmbientDimension+100);
@@ -402,7 +404,7 @@ void CombinatorialChamberContainer::SliceOneDirection( roots& directions, int& i
 	}
 }
 
-void CombinatorialChamberContainer::SliceTheEuclideanSpace( roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceTheEuclideanSpace(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
 { if (directions.size==0)
 		return;
 	if (directions.TheObjects[0].size==1)
@@ -410,7 +412,7 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace( roots& directions, i
 	while(index<directions.size)
 	{ if (this->flagMustStop)
       return;
-	  SliceOneDirection(directions,index,rank,theIndicatorRoot, theGlobalVariables);
+	  SliceOneDirection(directions, index, rank, theIndicatorRoot, theGlobalVariables);
 	}
 	this->ConsistencyCheck();
 }
@@ -568,7 +570,7 @@ void DrawingVariables::ApplyScale(double inputScale)
 	}
 }
 
-void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream &theFile, GlobalVariables &theGlobalVariables)
+void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream& theFile, GlobalVariables& theGlobalVariables)
 { theFile.clear();
 	LaTeXProcedures::beginDocument(theFile);
 	if (this->thePartialFraction.size>0)
@@ -647,9 +649,8 @@ void CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific(const std::string&
 void CGIspecificRoutines::outputLineJavaScriptSpecific
 	(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter )
 {	std::string tempS;
-	std::cout	<< "\n\t"		<< lineTypeName <<"1["	<< lineCounter <<"]= new Array(" << theDimension << ");" << "\t"		<< lineTypeName <<"2["	<< lineCounter <<"]= new Array("
-                  << theDimension << ");" << "\tclr"<< lineTypeName <<"["  	<< lineCounter <<"]= new Array(" << 3 << ");\n";
-	for (int j=0;j< theDimension;j++)
+	std::cout	<< "\n\t"		<< lineTypeName <<"1["	<< lineCounter <<"]= new Array(" << theDimension << ");" << "\t"		<< lineTypeName <<"2["	<< lineCounter <<"]= new Array(" << theDimension << ");" << "\tclr"<< lineTypeName <<"["  	<< lineCounter <<"]= new Array(" << 3 << ");\n";
+	for (int j=0; j< theDimension; j++)
 	{ CGIspecificRoutines::outputStream>> tempS;
 		std::cout << "\t"<< lineTypeName <<"1[" <<lineCounter<< "][" << j<<"]=" <<tempS <<";";
 		CGIspecificRoutines::outputStream>> tempS;
@@ -663,8 +664,7 @@ void CGIspecificRoutines::MakeVPReportFromComputationSetup(ComputationSetup& inp
 {	std::string tempS;
 	//input.thePartialFraction.IndicatorRoot.ComputeDebugString();
   input.theChambers.RootBelongsToChamberIndex(input.IndicatorRoot,&tempS);
-  std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n" << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>; " <<"&nbsp;&nbsp;&nbsp;<a href=\"/tmp/vector_partition.pdf\">pdf</a>\n<br>\n"
-                  <<"<textarea name=\"vp_output\" cols=\"50\" rows=\"30\">"<< input.theOutput.DebugString<< "</textarea>";
+  std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n" << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>; " <<"&nbsp;&nbsp;&nbsp;<a href=\"/tmp/vector_partition.pdf\">pdf</a>\n<br>\n" <<"<textarea name=\"vp_output\" cols=\"50\" rows=\"30\">"<< input.theOutput.DebugString<< "</textarea>";
 }
 
 void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(ComputationSetup& input)
@@ -4675,6 +4675,7 @@ void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& 
     else
     { this->NeighborsAlongWall.TheObjects[i]= owner.TheObjects[indexN];
       this->IndicesMirrorWalls.TheObjects[i]=indexW;
+      assert(this->NeighborsAlongWall.TheObjects[i]!=0);
     }
   }
 }
@@ -5058,9 +5059,12 @@ void WallData::RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer)
 }
 
 bool WallData::ConsistencyCheck(CombinatorialChamber* owner)
-{ for (int i=0; i<this->NeighborsAlongWall.size; i++)
+{ int trueNeighbors=0;
+  for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]!=0)
 		{ WallData& otherWall= this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]];
+		  assert(otherWall.ContainsNeighborExactlyOnce(owner));
+		  assert(this->ContainsNeighborExactlyOnce(this->NeighborsAlongWall.TheObjects[i]));
 			root tempRoot; tempRoot.Assign(this->normal);
 			tempRoot.MinusRoot();
 			if(!tempRoot.IsEqualTo(otherWall.normal))
@@ -5071,7 +5075,12 @@ bool WallData::ConsistencyCheck(CombinatorialChamber* owner)
       { assert(false);
         return false;
       }
+      trueNeighbors++;
 		}
+	if (trueNeighbors==0)
+	{ assert(false);
+	  return false;
+	}
 	return true;
 }
 

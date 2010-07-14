@@ -2547,7 +2547,7 @@ public:
 	bool flagDrawingProjective;
 	bool flagMakingReports;
 	static const int MaxNumHeaps=5000;
-	static const int GraphicsMaxNumChambers = 1000;
+	static const int GraphicsMaxNumChambers = 10000;
 	static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
 	static int DefragSpacing;
 	static int LastReportedMemoryUse;

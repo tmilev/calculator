@@ -911,6 +911,7 @@ void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
 void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 { this->theComputationSetup.theChambers.PauseSlicing();
   this->theComputationSetup.theChambers.WriteToDefaultFile(*this->theComputationSetup.theGlobalVariablesContainer->Default());
+  this->theComputationSetup.theChambers.ConsistencyCheck();
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxCANCEL)
     this->theComputationSetup.theChambers.flagMustStop=true;

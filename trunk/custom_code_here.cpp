@@ -1214,21 +1214,21 @@ void WeylGroup::MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasic
 
 void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { this->LabelChamberIndicesProperly();
-  output << "Num_pointers: "<< this->size<<"\n";
+  output << "Num_pointers: " << this->size<<"\n";
 ///////////////////////////////////////////////////
-  output << "Dimension: "<< this->AmbientDimension<<" ";
-  output << "CurrentIndex: "<< this->CurrentIndex<<"\n";
+  output << "Dimension: "<< this->AmbientDimension << " ";
+  output << "CurrentIndex: "<< this->theCurrentIndex << "\n";
   output << "Directions:\n";
   this->theDirections.WriteToFile(output, theGlobalVariables);
-  output << "\nNext_index_to_slice: "<< this->indexNextChamberToSlice<<"\n";
-  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex<<" ";
+  output << "\nNext_index_to_slice: "<< this->indexNextChamberToSlice << "\n";
+  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex <<" ";
   this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
   output << "\n";
   this->startingCones.WriteToFile(output, theGlobalVariables);
 ////////////////////////////////////////////////////
   output << "\nPreferredNextChambers: " << this->PreferredNextChambers.size << " ";
   for (int i=0; i<this->PreferredNextChambers.size; i++)
-    output << this->PreferredNextChambers.TheObjects[i]<<" ";
+    output << this->PreferredNextChambers.TheObjects[i] << " ";
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
     { output <<"\nChamber:\n";
@@ -1246,7 +1246,7 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   this->initAndCreateNewObjects(tempI);
 ///////////////////////////////////////////////////
   input >> tempS >> this->AmbientDimension;
-  input >> tempS >> this->CurrentIndex;
+  input >> tempS >> this->theCurrentIndex;
   input >> tempS;
   this->theDirections.ReadFromFile(input, theGlobalVariables);
   input >> tempS >> this->indexNextChamberToSlice;

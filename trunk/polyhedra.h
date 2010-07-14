@@ -2517,7 +2517,7 @@ public:
 	int NumProjectiveHyperplanesBeforeWeylChamberWalls;
 	affineHyperplanes StartingCrossSections;
 	//needed to run the algorithm independently of input variables
-	int CurrentIndex;
+	int theCurrentIndex;
 	roots theDirections;
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -2586,6 +2586,7 @@ public:
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 	bool ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
+	bool ConsistencyCheckNextIndicesToSlice();
 	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);

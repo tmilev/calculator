@@ -274,8 +274,8 @@ bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
 
 void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
-{ static int ProblemCounter=0;
-  ProblemCounter++;
+{ //static int ProblemCounter=0;
+  //ProblemCounter++;
   if (this->flagMustStop)
   { assert(this->ConsistencyCheck());
     return;
@@ -319,9 +319,9 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
 		}
     this->MakeReportOneSlice(theGlobalVariables, index, directions.size);
     //if (ProblemCounter>1024)
-      assert(this->ConsistencyCheck());
+     // assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
-    assert(this->ConsistencyCheckNextIndicesToSlice());
+    //assert(this->ConsistencyCheckNextIndicesToSlice());
     {
 #ifdef WIN32
 /*    WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
@@ -341,7 +341,7 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
     }
 	}
 	//if (ProblemCounter>1024)
-	  assert(this->ConsistencyCheck());
+	 // assert(this->ConsistencyCheck());
 }
 
 void CombinatorialChamberContainer::SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices)

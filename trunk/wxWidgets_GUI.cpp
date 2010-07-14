@@ -708,8 +708,7 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->theComputationSetup.theGlobalVariablesContainer->Default()->SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
   this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables.SetDrawingFunction(&drawline);
 #ifndef WIN32
-  pthread_mutex_init(&ParallelComputing::mutex1, NULL);
-  pthread_cond_init (&ParallelComputing::continueCondition, NULL);
+  pthread_mutex_init(&ParallelComputing::mutexLockThisMutexToSignalPause, NULL);
 #endif
   this->ReadSettingsIfAvailable();
   this->Dialog1OutputPF->Show();
@@ -738,8 +737,7 @@ guiMainWindow::~guiMainWindow()
   this->Dialog2StatusString1->Destroy();
   this->fileSettings.close();
 #ifndef WIN32
-  pthread_mutex_destroy(&ParallelComputing::mutex1);
-  pthread_cond_destroy(&ParallelComputing::continueCondition);
+  pthread_mutex_destroy(&ParallelComputing::mutexLockThisMutexToSignalPause);
 #endif
 }
 
@@ -842,44 +840,32 @@ void guiMainWindow::RunTheComputation()
 #ifdef WIN32
     MainWindow1->WorkThread1.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
 #else
-    //RunComputationalThread(0);
     pthread_create(&MainWindow1->WorkThread1.ComputationalThreadLinux, NULL,RunComputationalThread, 0);
 #endif
   } else
   { if (MainWindow1->WorkThread1.isRunning)
-    {	//pthread_mutex_lock(&ParallelComputing::mutex1);
-      MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered=true;
-      //return;
-      while (MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered)
-      {}
-      ParallelComputing::ReachSafePointASAP=true;
-      while (!ParallelComputing::SafePointReached)
-      {}
-      ParallelComputing::ReachSafePointASAP=false;
+    {
 #ifdef WIN32
       SuspendThread(MainWindow1->WorkThread1.ComputationalThread);
+#else
+      pthread_mutex_lock(&ParallelComputing::mutexLockThisMutexToSignalPause);
+      while(ParallelComputing::isRunning)
+      {}
 #endif
       MainWindow1->WorkThread1.isRunning=false;
       MainWindow1->Button1Go->SetLabel(wxT("Go"));
       MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
       MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered=false;
-      //pthread_mutex_unlock(&ParallelComputing::mutex1);
     }	else
-    {	//pthread_mutex_lock(&ParallelComputing::mutex1);
-      MainWindow1->Button1Go->SetLabel(wxT("Pause"));
+    { MainWindow1->Button1Go->SetLabel(wxT("Pause"));
       MainWindow1->WorkThread1.isRunning=true;
 #ifdef WIN32
       ResumeThread(MainWindow1->WorkThread1.ComputationalThread);
 #else
-      pthread_cond_signal(&ParallelComputing::continueCondition);
+      pthread_mutex_unlock(&ParallelComputing::mutexLockThisMutexToSignalPause);
 #endif
-      //pthread_mutex_unlock(&ParallelComputing::mutex1);
     }
   }
-//#else
-  //this->theComputationSetup.ComputationInProgress=true;
-//	this->WorkThread1.run();
-//#endif
 }
 
 void guiMainWindow::onButton3Custom(wxCommandEvent& ev)

@@ -137,23 +137,20 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 class ParallelComputing
 {
 public:
-	static bool ReachSafePointASAP;
-	static bool SafePointReached;
+	static bool isRunning;
 	static int GlobalPointerCounter;
 #ifndef WIN32
-	static pthread_mutex_t mutex1;
-  static pthread_cond_t continueCondition;
+	static pthread_mutex_t mutexLockThisMutexToSignalPause;
 #endif
 	inline static void SafePoint()
-	{ while(ParallelComputing::ReachSafePointASAP)
-		{ //pthread_mutex_lock(&ParallelComputing::mutex1);
-      ParallelComputing::SafePointReached=true;
+	{ ParallelComputing::isRunning=false;
 #ifndef WIN32
-      pthread_cond_wait(&ParallelComputing::continueCondition, &ParallelComputing::mutex1);
+	  pthread_mutex_lock(&ParallelComputing::mutexLockThisMutexToSignalPause);
 #endif
-      //pthread_mutex_unlock(&ParallelComputing::mutex1);
-		}
-		ParallelComputing::SafePointReached=false;
+    ParallelComputing::isRunning=true;
+#ifndef WIN32
+	  pthread_mutex_unlock(&ParallelComputing::mutexLockThisMutexToSignalPause);
+#endif
 	};
 };
 

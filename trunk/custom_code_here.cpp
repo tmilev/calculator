@@ -945,8 +945,9 @@ void DrawingVariables::drawLine(double X1, double Y1, double X2, double Y2, unsi
 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { inputData.flagDyckPathComputationLoaded=inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
+  inputData.theChambers.ComputeDebugString();
+//  inputData.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
   assert(inputData.theChambers.ConsistencyCheck());
-  inputData.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
   if (!inputData.flagDyckPathComputationLoaded)

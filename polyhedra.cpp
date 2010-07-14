@@ -37,6 +37,19 @@
 
 #include "polyhedra.h"
 
+#ifndef WIN32
+pthread_mutex_t ParallelComputing::mutexLockThisMutexToSignalPause;
+#endif
+bool ParallelComputing::isRunning=true;
+
+//taken from windows.h
+#ifndef RGB
+unsigned int RGB(int r, int g, int b)
+{ return r | (g<<8) | b<<16;
+}
+#endif
+//end of windows.h portion
+
 void outputTextDummy(std::string theOutput)
 {}
 
@@ -48,13 +61,6 @@ void drawlineDummy(double X1, double Y1, double X2, double Y2, unsigned long the
 
 void drawtextDummy(double X1, double Y1, const char* text, int length, int color)
 {}
-//taken from windows.h
-#ifndef RGB
-unsigned int RGB(int r, int g, int b)
-{ return r | (g<<8) | b<<16;
-}
-#endif
-//end of windows.h portion
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
@@ -264,16 +270,8 @@ DrawingVariables TDV(200,400);
 bool QuasiNumber::flagAnErrorHasOccurredTimeToPanic=false;
 bool IntegerPoly::flagAnErrorHasOccurredTimeToPanic=false;
 root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
-bool ParallelComputing::SafePointReached=false;
-bool ParallelComputing::ReachSafePointASAP=false;
 bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
-
-
-#ifndef WIN32
-pthread_mutex_t ParallelComputing::mutex1;
-pthread_cond_t ParallelComputing::continueCondition;
-#endif
 
 void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
 { static int ProblemCounter=0;
@@ -1368,7 +1366,6 @@ void ComputationSetup::ExitComputationSetup()
 			this->flagComputationDone=true;
 		//	this->flagComputationInitialized=false;
 		}
-	ParallelComputing::SafePointReached=true;
 }
 
 void ComputationSetup::Reset()

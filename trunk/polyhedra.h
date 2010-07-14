@@ -1849,6 +1849,8 @@ public:
 	bool PointIsInWallSelection(root &point, Selection& theSelection);
 	bool PlusMinusPointIsInChamber(root&point);
 	void PurgeInternalWalls();
+	bool HasNoNeighborsThatPointToThis();
+	bool HasAsNeighbor(CombinatorialChamber* candidateNeighbor);
 	bool LinearAlgebraForVertexComputation(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension);
 	bool LinearAlgebraForVertexComputationOneAffinePlane(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner);
 	//returns false if the vectors were linearly dependent
@@ -1881,7 +1883,7 @@ void ListBasicObjects<Object>::AddListOnTop(ListBasicObjects<Object>& theList)
 { int oldsize= this->size;
 	int otherSize=theList.size;
 	this->SetSizeExpandOnTopNoObjectInit(oldsize+otherSize);
-	for (int i=0;i<otherSize;i++)
+	for (int i=0; i<otherSize; i++)
 		this->TheObjects[i+oldsize]= theList.TheObjects[i];
 }
 
@@ -5604,6 +5606,7 @@ public:
 		this->StatusString1NeedsRefresh=false;
 		this->NumProcessedMonomialsCurrentFraction=0;
 		this->NumProcessedMonomialsTotal=0;
+		this->modifiedRoot.MakeZero(1);
 	};
 };
 

@@ -957,6 +957,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.theChambers.flagReachSafePointASAP=false;
   inputData.flagDyckPathComputationLoaded=true;
   inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
 }
 
 void ComputationSetup::ComputeReductiveSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)

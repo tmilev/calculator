@@ -111,12 +111,12 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   if (useHtml)
     out << "<br>";
   if (this->IndicesContainingRootSAs.size>1)
-  { out <<"Number of containing regular subalgebras: " << this->IndicesContainingRootSAs.size;
+  { out <<"Number of containing regular semisimple subalgebras: " << this->IndicesContainingRootSAs.size;
     if (useHtml)
     out << "<br>";
   }
   for (int i=0; i<this->IndicesContainingRootSAs.size; i++)
-  { out << "\nContaining regular subalgebra number " << i+1 << ": ";
+  { out << "\nContaining regular semisimple subalgebra number " << i+1 << ": ";
     rootSubalgebra& currentSA= container.theRootSAs.TheObjects[this->IndicesContainingRootSAs.TheObjects[i]];
     if (useHtml)
     { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA" << this->IndicesContainingRootSAs.TheObjects[i] << ".html\">";
@@ -212,7 +212,7 @@ void slTwo::ElementToHtml(std::string& filePath)
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
-void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
 { output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSizeExpandOnTopNoObjectInit(output.theRootSAs.size);
@@ -246,12 +246,12 @@ void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariab
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
 }
 
-void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
 { output.theRootSAs.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
   this->FindSl2Subalgebras(output, theGlobalVariables);
 }
 
-void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
+void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SemisimpleLieAlgebra& theLieAlgebra)
 { //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   roots RootsWithCharacteristic2;
@@ -265,7 +265,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     for (int j=0; j<theRelativeDimension; j++)
       InvertedRelativeKillingForm.elements[k][j]=this->AmbientWeyl.RootScalarKillingFormMatrixRoot(this->SimpleBasisK.TheObjects[k], this->SimpleBasisK.TheObjects[j]);
   InvertedRelativeKillingForm.Invert(theGlobalVariables);
-  theLieAlgebra.ComputeChevalleyConstants(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.KillingFormMatrix.NumRows, theGlobalVariables);
+  theLieAlgebra.ComputeChevalleyConstants(this->AmbientWeyl, theGlobalVariables);
   //int relativeDimension =
   int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
   roots tempRoots;
@@ -331,7 +331,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   }
 }
 
-bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
 { if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
     return false;
   roots SelectedExtraPositiveRoots;
@@ -392,7 +392,7 @@ bool SimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCha
   return true;
 }
 
-void SimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA, roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
+void SemisimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA, roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved)
 { root tempRoot;
   static int ProblemCounter=0;
   ProblemCounter++;
@@ -690,26 +690,17 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
   output=out.str();
 }
 
-void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
-{ std::string tempS; std::stringstream out; std::stringstream body;
+void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+{ std::string tempS; std::stringstream out;
   std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1,...,\\alpha_n be simple roots w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h),...,\\alpha_n(h))";
   std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
-  std::string tooltipContainingRegular="A regular subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular subalgebra, but the regular subalgebra might fail to be minimal containing. This happens when another minimal containing regular subalgebra of equal rank nests as a root subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
+  std::string tooltipContainingRegular="A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a root subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
   std::string tooltipHvalue="The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
-    body<< "Index "<< i<<": ";
-    if(useHtml)
-      body<<"<br>";
-    body<<tempS;
-    if(useHtml)
-      body<<"<HR width=\"100%\">";
-  }
-  if(useHtml)
-    out<<"<br>";
   out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
+  if (this->IndicesSl2decompositionFlas.size < this->size)
+    usePNG = false;
   if(useHtml)
-    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGIspecificRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)  << "</td><td align=\"center\" title=\""<<tooltipHvalue<<"\"> h</td><td style=\"padding-left:20px\" title=\""<<tooltipVDecomposition<<"\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular SAs</td><td title=\""<<tooltipContainingRegular<<"\">Containing regular SAs in which the sl(2) has no centralizer</td> </tr>";
+    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGIspecificRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)  << "</td><td align=\"center\" title=\""<<tooltipHvalue<<"\"> h</td><td style=\"padding-left:20px\" title=\""<<tooltipVDecomposition<<"\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular semisimple SAs</td><td title=\""<<tooltipContainingRegular<<"\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
   if (this->BadHCharacteristics.size>0)
   { if (useHtml)
       out << "<tr><td>Bad values of h</td><td>";
@@ -753,6 +744,24 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   }
   if (useHtml)
     out << "</table><HR width=\"100%\">";
+  output= out.str();
+}
+
+void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+{ std::string tempS; std::stringstream out; std::stringstream body;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
+    body<< "Index "<< i<<": ";
+    if(useHtml)
+      body<<"<br>";
+    body<<tempS;
+    if(useHtml)
+      body<<"<HR width=\"100%\">";
+  }
+  if(useHtml)
+    out<<"<br>";
+  this->ElementToStringNoGenerators(tempS, theGlobalVariables, theWeyl, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
+  out << tempS;
   tempS = body.str();
   out << tempS;
   output = out.str();
@@ -911,7 +920,7 @@ bool IsRegularWRT(roots& input, root& h1, root& h2, WeylGroup& theWeyl)
 }
 
 void ComputationSetup::ExperimentWithH(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ SimpleLieAlgebra theG;
+{ SemisimpleLieAlgebra theG;
   SltwoSubalgebras tempSl2s;
   theG.FindSl2Subalgebras(tempSl2s, inputData.WeylGroupLetter, inputData.WeylGroupIndex, theGlobalVariables);
   roots h1s, h2s;
@@ -979,10 +988,10 @@ void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int Weyl
   std::string tempS; std::stringstream out;
   //this->theSl2s.ComputeDebugString(theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, false);
 //  theGlobalVariables.theIndicatorVariables.StatusString1= this->theSl2s.DebugString;
-  this->ElementToStringCandidatePrincipalSl2s(false, true, tempS);
+  this->ElementToStringCandidatePrincipalSl2s(false, true, tempS, theGlobalVariables);
   out << tempS;
-  this->theSl2s.ElementToStringModuleDecompositionMinimalContainingRegularSAs(tempS, false, true);
-  out << tempS;
+//  this->theSl2s.ElementToStringModuleDecompositionMinimalContainingRegularSAs(tempS, false, true);
+//  out << tempS;
   this->theSl2s.ElementToString(tempS, theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, true, false, 0, 0);
   out << tempS;
   theGlobalVariables.theIndicatorVariables.StatusString1.append(tempS);
@@ -996,7 +1005,7 @@ void reductiveSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& th
   for (int i=0; i<this->theLetters.size; i++)
     if (this->IndicesMatchingActualSl2s.TheObjects[i].size>0)
     { this->RemainingCandidates.AddSelectionAppendNewIndex(i);
-      SimpleLieAlgebra& theSSLieAlgebra= this->theCandidateSubAlgebras.TheObjects[i].owner;
+      SemisimpleLieAlgebra& theSSLieAlgebra= this->theCandidateSubAlgebras.TheObjects[i].owner;
       theSSLieAlgebra.FindSl2Subalgebras(this->theCandidateSubAlgebras.TheObjects[i], theGlobalVariables);
     }
 }
@@ -1007,9 +1016,10 @@ void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank
   this->CandidatesPrincipalSl2ofSubalgebra.MakeActualSizeAtLeastExpandOnTop(this->theLetters.size);
   this->theCandidateSubAlgebras.SetSizeExpandOnTopNoObjectInit(this->theLetters.size);
   for (int i=0; i<this->theLetters.size; i++)
-  { this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
-    this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.GenerateRootSystemFromKillingFormMatrix();
-    int theDimension = this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.KillingFormMatrix.NumRows;
+  { this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
+    this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
+    this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.Assign(this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl);
+    int theDimension = this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.KillingFormMatrix.NumRows;
     tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
     tempSl2.preferredAmbientSimpleBasis.MakeEiBasis(theDimension);
     tempSl2.owner = &this->theCandidateSubAlgebras.TheObjects[i].owner;
@@ -1130,7 +1140,6 @@ bool slTwo::ModuleDecompositionFitsInto(const ListBasicObjects<int>& highestWeig
   return true;
 }
 
-
 void reductiveSubalgebras::GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, ListBasicObjects<int>& Multiplicities, ListBasicObjects<int>& Values)
 { if (remainingToBePartitioned==0)
   { this->thePartitionMultiplicities.AddObjectOnTop(Multiplicities);
@@ -1169,7 +1178,22 @@ void reductiveSubalgebras::GenerateAllPartitionsDontInit(int theRank)
   this->GenerateAllPartitionsRecursive(theRank, theRank, buffer1, buffer2);
 }
 
-void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output)
+void reductiveSubalgebras::ElementToStringDynkinType(int theIndex, bool useLatex, bool useHtml, std::string& output)
+{ std::stringstream out;
+  for (int j=0; j<this->theLetters.TheObjects[theIndex].size; j++)
+  { int theMult= this->theMultiplicities.TheObjects[theIndex].TheObjects[j];
+    int theRank= this->theRanks.TheObjects[theIndex].TheObjects[j];
+    char theLetter= this->theLetters.TheObjects[theIndex].TheObjects[j];
+    if (theMult!=1)
+      out << theMult;
+    out << theLetter << "_" <<theRank << " ";
+    if (j!=this->theLetters.TheObjects[theIndex].size-1)
+      out <<"+ ";
+  }
+  output=out.str();
+}
+
+void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   for (int i =0; i<this->thePartitionValues.size; i++)
   { for (int j=0; j< this->thePartitionValues.TheObjects[i].size; j++)
@@ -1186,17 +1210,8 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
     out <<"\n";
   }
   for (int i=0; i<this->theLetters.size; i++)
-  { for (int j=0; j<this->theLetters.TheObjects[i].size; j++)
-    { int theMult= this->theMultiplicities.TheObjects[i].TheObjects[j];
-      int theRank= this->theRanks.TheObjects[i].TheObjects[j];
-      char theLetter= this->theLetters.TheObjects[i].TheObjects[j];
-      if (theMult!=1)
-        out << theMult;
-      out <<theLetter<<"_"<<theRank<<" ";
-      if (j!=this->theLetters.TheObjects[i].size-1)
-        out <<"+ ";
-    }
-    out <<"     Module decomposition: ";
+  { this->ElementToStringDynkinType(i, useLatex, useHtml, tempS);
+    out << tempS <<"     Module decomposition: ";
     slTwo& theSl2= this->CandidatesPrincipalSl2ofSubalgebra.TheObjects[i];
     theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
     out << tempS;
@@ -1210,6 +1225,18 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
     if (useHtml)
       out <<"\n<br>";
     out<<"\n";
+  }
+  out <<"Remaining candidates:\n";
+  if (useHtml)
+    out <<"<br>\n";
+  for (int i=0; i<this->theCandidateSubAlgebras.size; i++)
+  { SltwoSubalgebras& currentSl2s= this->theCandidateSubAlgebras.TheObjects[i];
+    if (currentSl2s.size>0)
+    { this->ElementToStringDynkinType(i, useLatex, useHtml, tempS);
+      out << tempS;
+      currentSl2s.ElementToStringNoGenerators(tempS, theGlobalVariables, currentSl2s.theRootSAs.AmbientWeyl, useLatex, useHtml, false, 0, 0);
+      out << tempS;
+    }
   }
   output=out.str();
 }
@@ -1226,7 +1253,6 @@ void WeylGroup::MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasic
       this->KillingFormMatrix.DirectSumWith(tempW.KillingFormMatrix);
   }
 }
-
 
 void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { this->LabelChamberIndicesProperly();
@@ -1284,7 +1310,7 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
       this->TheObjects[i]=0;
     }
   }
-  this->flagIsRunning=true;
+  this->flagIsRunning=false;
   this->flagMustStop=false;
   this->flagReachSafePointASAP=false;
 }

@@ -41,6 +41,11 @@
 pthread_mutex_t ParallelComputing::mutexLockThisMutexToSignalPause;
 #endif
 bool ParallelComputing::isRunning=true;
+//the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
+//used to guard the web server from abuse.
+#ifdef CGIversionLimitRAMuse
+int ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=1000000;
+#endif
 
 //taken from windows.h
 #ifndef RGB
@@ -299,7 +304,7 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
             delete this->TheObjects[this->indexNextChamberToSlice];
   #ifdef CGIversionLimitRAMuse
     ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
   #endif
             this->TheObjects[this->indexNextChamberToSlice]=0;
             //if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -796,10 +801,11 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
 { if (inputBad.length()<2)
 		return CGIspecificRoutines::choiceInitAndDisplayMainPage;
 	if (inputBad=="experiments")
-	{ return CGIspecificRoutines::choiceExperiments;
+	{
 #ifdef CGIversionLimitRAMuse
-  cgiLimitRAMuseNumPointersInListBasicObjects=1000000000;
+    ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=1000000000;
 #endif
+    return CGIspecificRoutines::choiceExperiments;
   }
 	std::string inputGood;
   std::string tempS3;
@@ -814,7 +820,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   //std::cout.flush();
   //std::cout <<"  tempS3: "<< tempS3<<"   ";
 #ifdef CGIversionLimitRAMuse
-  cgiLimitRAMuseNumPointersInListBasicObjects=1000000;
+  ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=1000000;
 #endif
   CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
 //  std::cout<<inputGood;
@@ -865,7 +871,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
     //std::cout<<"<br><br>"<< "The choices we make: " << theChoiceIsYours;
     std::cout.flush();
 #ifdef CGIversionLimitRAMuse
-    cgiLimitRAMuseNumPointersInListBasicObjects=300000000;
+    ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=300000000;
 #endif
     return theChoiceIsYours;
   }
@@ -987,7 +993,7 @@ ComputationSetup::ComputationSetup()
 	this->NotationExplanationLatex4=out4.str();
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->theGlobalVariablesContainer->SetSizeExpandOnTopNoObjectInit(1);
 //	this->RankEuclideanSpaceGraphics=3;
@@ -998,7 +1004,7 @@ ComputationSetup::~ComputationSetup()
   this->theGlobalVariablesContainer=0;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -2379,7 +2385,7 @@ void Selection::init(int maxNumElements)
 		this->elements = new int[maxNumElements];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter+=(maxNumElements-this->MaxSize)*2;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		this->MaxSize =maxNumElements;
 	}
@@ -2535,7 +2541,7 @@ Selection::~Selection()
 	delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter-=this->MaxSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	//	delete [] elementsInverseSelection;
 	this->MaxSize=0;
@@ -2682,7 +2688,7 @@ void Selection::Assign(const Selection& right)
 }
 
 int Selection::HashFunction() const
-{ int tempMin=Minimum(SomeRandomPrimesSize, this->MaxSize);
+{ int tempMin=MathRoutines::Minimum(SomeRandomPrimesSize, this->MaxSize);
   int result=0;
   for (int i=0; i<tempMin; i++)
     if (this->selected[i])
@@ -3945,7 +3951,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
 	NewMinusChamber = new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter+=2;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	NewPlusChamber->flagPermanentlyZero = PlusChamberIsPermanentZero;
 	NewMinusChamber->flagPermanentlyZero = MinusChamberIsPermanentZero;
@@ -4124,7 +4130,7 @@ void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNorma
 			{ delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 				this->TheObjects[i]=0;
 				break;
@@ -4149,7 +4155,7 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
 				{ delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 					this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
 				}
@@ -6101,7 +6107,7 @@ void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplex
 	PrecomputedTaukn* NewMember = new PrecomputedTaukn;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->AddObjectOnTop(NewMember);
 	NewMember->k=k;
@@ -6399,7 +6405,7 @@ bool CompositeComplex::SimplifyTrue()
 int CompositeComplex::FindMaxDenExp()
 { int result=0;
 	for (int i=0; i<this->size; i++)
-	  result = Maximum(result,this->TheObjects[i].Exp.DenShort);
+	  result =MathRoutines::Maximum(result,this->TheObjects[i].Exp.DenShort);
 	return result;
 }
 
@@ -6546,7 +6552,7 @@ int CyclotomicList::EulerPhi(short n)
 { this->ComputeCyclotomic(n);
 	int result=0;
 	for(int i=0;i<this->TheObjects[n-1].size;i++)
-		result = Maximum(result,this->TheObjects[n-1].TheObjects[i].degrees[0]);
+		result = MathRoutines::Maximum(result, this->TheObjects[n-1].TheObjects[i].degrees[0]);
 	return result;
 }
 
@@ -7811,7 +7817,7 @@ inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
 
 inline void LargeIntUnsigned::AddNoFitSize(LargeIntUnsigned& x)
 { int oldsize= this->size;
-	this->SetSizeExpandOnTopNoObjectInit(Maximum(this->size, x.size)+1);
+	this->SetSizeExpandOnTopNoObjectInit(MathRoutines::Maximum(this->size, x.size)+1);
 	for (int i=oldsize;i<this->size;i++)
 	  this->TheObjects[i]=0;
 	unsigned int CarryOver=0;
@@ -12137,7 +12143,7 @@ void ElementWeylGroup::ElementToString(std::string& output)
 }
 
 int ElementWeylGroup::HashFunction() const
-{ int top = Minimum(this->size,::SomeRandomPrimesSize);
+{ int top = MathRoutines::Minimum(this->size,::SomeRandomPrimesSize);
 	int result =0;
 	for (int i=0;i<top;i++)
 		result+=this->TheObjects[i]*::SomeRandomPrimes[i];
@@ -12866,7 +12872,7 @@ rootFKFTcomputation::rootFKFTcomputation()
 	this->TheGlobalVariables= new GlobalVariables;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -12874,7 +12880,7 @@ rootFKFTcomputation::~rootFKFTcomputation()
 { delete this->TheGlobalVariables;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -15873,7 +15879,7 @@ GeneratorPFAlgebraRecord::GeneratorPFAlgebraRecord()
 	this->Value = new IntegerPoly;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -15881,7 +15887,7 @@ GeneratorPFAlgebraRecord::~GeneratorPFAlgebraRecord()
 {	delete this->Value; this->Value=0;
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter--;
-	if(ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if(ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 }
 
@@ -16058,14 +16064,14 @@ inline int affineCone::GetDimension()
 }
 
 inline int affineCone::HashFunction() const
-{ int tempMin=Minimum(this->theWalls.size, ::SomeRandomPrimesSize);
+{ int tempMin=MathRoutines::Minimum(this->theWalls.size, ::SomeRandomPrimesSize);
 	int result=0;
 	for (int i=0; i<tempMin; i++)
 		result+= this->theWalls.TheObjects[i].HashFunction()*::SomeRandomPrimes[i];
 	return result;
 }
 
-void MatrixLargeRational::ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient, bool &hasAPotentialLeavingVariable)
+void MatrixLargeRational::ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool &hasAPotentialLeavingVariable)
 { hasAPotentialLeavingVariable = false;
 	outputChangeGradient.MakeZero();
 	for (int j=0; j<matA.NumRows; j++)
@@ -17416,8 +17422,13 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
 	output=out.str();
 };
 
-void SimpleLieAlgebra::ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
 { this->theWeyl.MakeArbitrary(WeylLetter, WeylIndex);
+  this->ComputeChevalleyConstants(this->theWeyl, theGlobalVariables);
+}
+
+void SemisimpleLieAlgebra::ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables)
+{ this->theWeyl.KillingFormMatrix.Assign(input.KillingFormMatrix);
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
@@ -17497,7 +17508,7 @@ void SimpleLieAlgebra::ComputeChevalleyConstants(char WeylLetter, int WeylIndex,
 //  this->TestForConsistency();
 }
 
-void SimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ)
+void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ)
 { root& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
 	root& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
 	assert(!(rootI+rootJ).IsEqualToZero());
@@ -17514,7 +17525,7 @@ void SimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI,
   //this->ComputeDebugString();
 }
 
-void SimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ)
+void SemisimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ)
 { root& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
 	root& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
 	assert(this->Computed.elements[indexI][indexJ]);
@@ -17534,7 +17545,7 @@ void SimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ)
   //this->ComputeDebugString();
 }
 
-void SimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
+void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 { root& rootI= this->theWeyl.RootSystem.TheObjects[i];
 	root& rootK= this->theWeyl.RootSystem.TheObjects[k];
 	root& rootJ= this->theWeyl.RootSystem.TheObjects[j];
@@ -17551,7 +17562,7 @@ void SimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 	this->ExploitSymmetryChevalleyConstants(k,i);
 }
 
-int SimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta)
+int SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta)
 { int result=-1;
   root tempRoot;
   tempRoot.Assign(beta);
@@ -17562,7 +17573,7 @@ int SimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& b
   return result;
 }
 
-void SimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta)
+void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta)
 {//using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
 	root& gamma= this->theWeyl.RootSystem.TheObjects[indexGamma];
   root& delta= this->theWeyl.RootSystem.TheObjects[indexDelta];
@@ -17590,7 +17601,7 @@ void SimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int indexDel
   this->Computed.elements[indexMinusEpsilon][indexMinusZeta]=true;
 }
 
-bool SimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 { hashedRoots& theRoots=this->theWeyl.RootSystem;
   int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
   int TotalDim=theRoots.size+theDimension;
@@ -17657,7 +17668,7 @@ bool SimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 	return true;
 }
 
-Rational SimpleLieAlgebra::GetConstant(const root &root1, const  root &root2)
+Rational SemisimpleLieAlgebra::GetConstant(const root &root1, const  root &root2)
 { int index1=this->theWeyl.RootSystem.IndexOfObjectHash(root1);
 	int index2= this->theWeyl.RootSystem.IndexOfObjectHash(root2);
 	Rational tempRat;
@@ -17669,7 +17680,7 @@ Rational SimpleLieAlgebra::GetConstant(const root &root1, const  root &root2)
 	return tempRat;
 }
 
-bool SimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& root2, Rational& outputRat, root& outputH)
+bool SemisimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& root2, Rational& outputRat, root& outputH)
 { if (!(root1+root2).IsEqualToZero())
 	{ outputRat=this->GetConstant(root1, root2);
 		return true;
@@ -17740,13 +17751,13 @@ bool ElementSimpleLieAlgebra::IsEqualToZero()const
   return true;
 }
 
-void ElementSimpleLieAlgebra::init (SimpleLieAlgebra& owner)
+void ElementSimpleLieAlgebra::init (SemisimpleLieAlgebra& owner)
 { this->Hcomponent.SetSizeExpandOnTopLight(owner.theWeyl.KillingFormMatrix.NumRows);
   this->coeffsRootSpaces.SetSizeExpandOnTopNoObjectInit(owner.theWeyl.RootSystem.size);
   this->NonZeroElements.init(owner.theWeyl.RootSystem.size);
 }
 
-void ElementSimpleLieAlgebra::Nullify(SimpleLieAlgebra& owner)
+void ElementSimpleLieAlgebra::Nullify(SemisimpleLieAlgebra& owner)
 { this->init(owner);
   this->Hcomponent.MakeZero(owner.theWeyl.KillingFormMatrix.NumRows);
   for(int j=0; j<this->coeffsRootSpaces.size; j++)
@@ -17754,7 +17765,7 @@ void ElementSimpleLieAlgebra::Nullify(SimpleLieAlgebra& owner)
   this->NonZeroElements.init(this->coeffsRootSpaces.size);
 }
 
-void SimpleLieAlgebra::LieBracket( const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)
+void SemisimpleLieAlgebra::LieBracket( const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)
 { assert(&output!=&g1 && &output!=&g2);
   output.Nullify(*this);
   root tempRoot, root1plusRoot2;
@@ -17811,7 +17822,7 @@ void ElementSimpleLieAlgebra::ComputeNonZeroElements()
       this->NonZeroElements.AddSelectionAppendNewIndex(i);
 }
 
-bool SimpleLieAlgebra::FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra::FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
 { assert(e.Hcomponent.IsEqualToZero());
   e.ComputeNonZeroElements();
   root Difference;
@@ -17825,13 +17836,13 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, E
   MatrixLargeRational theSystem, adESquaredadE, targetElt;
   int NumRoots=this->theWeyl.RootSystem.size;
   int NumRows=NumRoots+theDimension;
-  theSystem.init( NumRows,NumRows);
-  targetElt.init(NumRoots*2+theDimension,1);
+  theSystem.init(NumRows, NumRows);
+  targetElt.init(NumRoots*2+theDimension, 1);
   targetElt.NullifyAll();
   theSystem.NullifyAll();
   assert(e.Hcomponent.IsEqualToZero());
-  this->GetAdNilpotentElement(theSystem,e);
-  theSystem.MultiplyOnTheLeft(theSystem,adESquaredadE);
+  this->GetAdNilpotentElement(theSystem, e);
+  theSystem.MultiplyOnTheLeft(theSystem, adESquaredadE);
   for (int i=0; i<e.NonZeroElements.CardinalitySelection; i++)
     targetElt.elements[e.NonZeroElements.elements[i]][0].Assign(e.coeffsRootSpaces.TheObjects[e.NonZeroElements.elements[i]]*(-2));
   adESquaredadE.Resize(NumRows+NumRoots, NumRows,true);
@@ -17853,7 +17864,7 @@ bool SimpleLieAlgebra::FindComplementaryNilpotent( ElementSimpleLieAlgebra& e, E
   return hasSolution;
 }
 
-bool SimpleLieAlgebra::AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
 { assert(e.Hcomponent.IsEqualToZero());
   e.ComputeNonZeroElements();
   root Difference;
@@ -17890,7 +17901,7 @@ bool SimpleLieAlgebra::AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra&
   return hasSolution;
 }
 
-void SimpleLieAlgebra::GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e)
+void SemisimpleLieAlgebra::GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e)
 { roots theBasis;
   int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
   theBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
@@ -17920,7 +17931,7 @@ void SimpleLieAlgebra::GetAdNilpotentElement(MatrixLargeRational& output, Elemen
    }
 }
 
-void ElementSimpleLieAlgebra::MultiplyByRational(SimpleLieAlgebra& owner, const Rational& theNumber)
+void ElementSimpleLieAlgebra::MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber)
 { if (theNumber.IsEqualToZero())
 	{	this->Nullify(owner);
 		return;
@@ -17930,7 +17941,7 @@ void ElementSimpleLieAlgebra::MultiplyByRational(SimpleLieAlgebra& owner, const 
 		this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].MultiplyBy(theNumber);
 }
 
-void ElementSimpleLieAlgebra::ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+void ElementSimpleLieAlgebra::ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::stringstream out; std::string tempS;
 	if (useLatex)
 		out <<"$";
@@ -17968,19 +17979,19 @@ void ElementSimpleLieAlgebra::ElementToString(std::string& output, SimpleLieAlge
   output= out.str();
 }
 
-void ElementSimpleLieAlgebra::SetCoefficient(const root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner)
+void ElementSimpleLieAlgebra::SetCoefficient(const root& indexingRoot, Rational& theCoeff, SemisimpleLieAlgebra& owner)
 { int index= owner.theWeyl.RootSystem.IndexOfObjectHash(indexingRoot);
   if (index!=-1)
     this->coeffsRootSpaces.TheObjects[index].Assign(theCoeff);
   this->ComputeNonZeroElements();
 }
 
-void ElementSimpleLieAlgebra::SetCoefficient(const root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner)
+void ElementSimpleLieAlgebra::SetCoefficient(const root& indexingRoot, int theCoeff, SemisimpleLieAlgebra& owner)
 { Rational tempRat=theCoeff;
   this->SetCoefficient(indexingRoot,tempRat, owner);
 }
 
-void ::SimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings)
+void ::SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings)
 { std::stringstream outTable, outNotation;
 	std::string tempS;
 	if (physicalPath==0 || htmlServerPath==0 || outputPNGFileNames==0 || outputLatexToPNGstrings==0)
@@ -18124,7 +18135,7 @@ void ::SimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool
   }
 }
 
-void SimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out2,out3;
@@ -18137,7 +18148,7 @@ void SimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundG
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void SimpleLieAlgebra::MakeSl2ProgressReportNumCycles(	int progress, int outOf,	GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::MakeSl2ProgressReportNumCycles(	int progress, int outOf,	GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out4;
@@ -18147,7 +18158,7 @@ void SimpleLieAlgebra::MakeSl2ProgressReportNumCycles(	int progress, int outOf,	
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void SimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out2,out3;

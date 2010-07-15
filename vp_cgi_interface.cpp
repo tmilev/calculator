@@ -53,11 +53,11 @@ int main(int argc, char **argv)
 	//inputString ="textType=E&textRank=6&buttonGoRootSA=rootSA+diagrams";
 	//inputString ="SLtwos";
   //inputString="textType = g textRank = 2 buttonGoRootSA = rootSA+diagrams";
-  //inputString="textType=E&textRank=6&buttonGoSl2SAs=sl%282%29+subalgebras";
+  //inputString="textType=E&textRank=8&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=F&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras ";
   //inputString="textType=d&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=G&textRank=2&buttonGoSl2SAs=sl%282%29+subalgebras&checkUsePNG=on";
-	//inputString="experiments";
+  //inputString="experiments";
 	std::cout << "Content-Type: text/html\n\n";
 	//std::cout << "inputString: "<<inputString;
 	std::cout.flush();

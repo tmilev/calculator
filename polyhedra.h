@@ -57,10 +57,6 @@
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
 #endif
 
-#ifdef CGIversionLimitRAMuse
-static int cgiLimitRAMuseNumPointersInListBasicObjects=12000000;
-#endif
-
 const int MaxRank=12;
 const int MaxNumberOfRoots= 100;
 const int SomeRandomPrimesSize= 25;
@@ -109,7 +105,7 @@ class SubsetWithMultiplicities;
 class hashedRoots;
 class WeylGroup;
 class intRoots;
-class SimpleLieAlgebra;
+class SemisimpleLieAlgebra;
 class GlobalVariables;
 class MathRoutines;
 class GlobalVariablesContainer;
@@ -139,6 +135,9 @@ class ParallelComputing
 public:
 	static bool isRunning;
 	static int GlobalPointerCounter;
+#ifdef CGIversionLimitRAMuse
+  static int cgiLimitRAMuseNumPointersInListBasicObjects;
+#endif
 #ifndef WIN32
 	static pthread_mutex_t mutexLockThisMutexToSignalPause;
 #endif
@@ -153,17 +152,6 @@ public:
 #endif
 	};
 };
-
-//#ifndef dont_define_Min_and_Max_in_polyhedra_h
-//grrrrrrrr: names conflict
-inline int Minimum(int a, int b)
-{ if (a>b) {return b;} else {return a;}
-}
-
-inline int Maximum(int a, int b)
-{ if (a>b) {return a;} else {return b;}
-}
-//#endif
 
 typedef void (*drawLineFunction)	(	double X1, double Y1, double X2, double Y2,	unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawTextFunction)	(	double X1, double Y1, const char* theText, int length, int ColorIndex);
@@ -255,7 +243,7 @@ public:
 	inline static int Maximum(int a, int b){	if (a>b) return a; else return b;};
 	template <typename T>
 	inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; };
-	inline static int Minimum(int a, int b){	if (a>b) return b; else return a;};
+	inline static int Minimum(int a, int b){ if (a>b) return b; else return a;};
 	inline static short Minimum(short a, short b){if (a>b) return b; else return a;};
 };
 
@@ -318,7 +306,7 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 	{
 #ifdef CGIversionLimitRAMuse
 	ParallelComputing::GlobalPointerCounter-=this->size;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		this->size=0;
 		delete [] this->TheObjects;
@@ -328,7 +316,7 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
 	Object* newArray= new Object[theSize];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=theSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	int CopyUpTo= this->size;
 	if (this->size>theSize)
@@ -338,7 +326,7 @@ ParallelComputing::GlobalPointerCounter+=theSize;
 	delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->size;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->TheObjects=newArray;
 	this->size= theSize;
@@ -355,7 +343,7 @@ ListBasicObjectsLight<Object>::~ListBasicObjectsLight()
 { delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->size;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->TheObjects=0;
 }
@@ -613,19 +601,19 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool P
 	{ newElements	= new Element*[newActualNumRows];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumRows;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		for (int i=0;i<newActualNumRows;i++)
 		{ newElements[i]= new Element[newActualNumCols];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumCols;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		}
 	}
 	if (PreserveValues && newElements!=0)
-		for (int j=::Minimum(this->NumRows,r)-1;j>=0;j--)
-			for (int i=::Minimum(this->NumCols,c)-1;i>=0;i--)
+		for (int j=MathRoutines::Minimum(this->NumRows,r)-1;j>=0;j--)
+			for (int i=MathRoutines::Minimum(this->NumCols,c)-1;i>=0;i--)
 				newElements[j][i]= this->elements[j][i];
 	if (newElements!=0)
 	{ this->ReleaseMemory();
@@ -653,7 +641,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::ReleaseMemory()
 	delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols+this->ActualNumRows;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->elements=0;
 	this->NumCols=0;
@@ -857,7 +845,7 @@ inline void MatrixElementaryTightMemoryFit<Element>::Free()
 	delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->NumRows*this->NumCols+this->NumRows;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->elements=0;
 	this->NumRows=0;
@@ -1059,7 +1047,7 @@ template <typename Element>
 void Matrix<Element>::GaussianEliminationByRows (	Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints)
 { int tempI;
 	int NumFoundPivots = 0;
-	int MaxRankMat = Minimum(mat.NumRows, mat.NumCols);
+	int MaxRankMat = MathRoutines::Minimum(mat.NumRows, mat.NumCols);
 	Element tempElement;
 	outputSelection.init(mat.NumCols);
 	for (int i=0; i<mat.NumCols; i++)
@@ -1135,18 +1123,18 @@ inline void MatrixElementaryTightMemoryFit<Element>::Resize(int r, int c, bool P
 	Element** newElements= new Element*[r];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=r;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
-	for (int i=0;i<r;i++)
+	for (int i=0; i<r; i++)
 	{ newElements[i]= new Element[c];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=c;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	}
 	if (PreserveValues)
-		for (int j=Minimum(this->NumRows,r)-1; j>=0; j--)
-			for (int i=Minimum(this->NumCols,c)-1; i>=0; i--)
+		for (int j=MathRoutines::Minimum(this->NumRows,r)-1; j>=0; j--)
+			for (int i=MathRoutines::Minimum(this->NumCols,c)-1; i>=0; i--)
 				newElements[j][i]= this->elements[j][i];
 	this->Free();
 	this->NumCols= c;
@@ -1173,7 +1161,7 @@ public:
 	//it is used for quick multiplication of LargeRationals.
 	static const int SquareRootOfCarryOverBound=32768;//=2^15
 	void ElementToString(std::string& output);
-	void DivPositive(LargeIntUnsigned &x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
+	void DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
 	void MakeOne();
 	void Add(LargeIntUnsigned& x);
 	void AddUInt(unsigned int x){static LargeIntUnsigned tempI; tempI.AssignShiftedUInt(x,0); this->Add(tempI);};
@@ -1183,7 +1171,7 @@ public:
 	bool IsPositive(){ return this->size>1 || this->TheObjects[0]>0;};
 	bool IsEqualToOne(){ return this->size==1 && this->TheObjects[0]==1;};
 	bool IsGEQ(LargeIntUnsigned& x);
-	static void gcd(LargeIntUnsigned&a,LargeIntUnsigned&b,LargeIntUnsigned& output);
+	static void gcd(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output);
 	void MultiplyBy(LargeIntUnsigned& right);
 	void MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output);
 	void MultiplyByUInt(unsigned int x);
@@ -1247,7 +1235,7 @@ public:
 };
 
 class Rational
-{ inline bool TryToAddQuickly (int OtherNum, int OtherDen)
+{ inline bool TryToAddQuickly(int OtherNum, int OtherDen)
 	{ register int OtherNumAbs, thisNumAbs;
 		assert(this->DenShort>0 && OtherDen>0);
 	  if (OtherNum<0)
@@ -1258,7 +1246,7 @@ class Rational
 			thisNumAbs=-this->NumShort;
 	  else
 			thisNumAbs=this->NumShort;
-		if (!this->flagMinorRoutinesOnDontUseFullPrecision &&(this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
+		if (!this->flagMinorRoutinesOnDontUseFullPrecision && (this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen>=LargeIntUnsigned::SquareRootOfCarryOverBound)	)
       return false;
     register int N= this->NumShort*OtherDen+this->DenShort*OtherNum;
 		register int D= this->DenShort*OtherDen;
@@ -1313,7 +1301,7 @@ class Rational
 		this->Extended= new LargeRationalExtended;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		this->Extended->den.AssignShiftedUInt((unsigned int)this->DenShort,0);
 		this->Extended->num.AssignInt(this->NumShort);
@@ -1325,13 +1313,13 @@ ParallelComputing::GlobalPointerCounter++;
 		delete this->Extended; this->Extended=0;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	}
 	bool ShrinkExtendedPartIfPossible()
 	{ if (this->Extended==0)
 			return true;
-		if (this->Extended->num.value.size>1 ||	this->Extended->den.size>1 ||	this->Extended->num.value.TheObjects[0]>=(unsigned int) LargeIntUnsigned::SquareRootOfCarryOverBound || this->Extended->den.TheObjects[0]>= (unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
+		if (this->Extended->num.value.size>1 || this->Extended->den.size>1 || this->Extended->num.value.TheObjects[0]>=(unsigned int) LargeIntUnsigned::SquareRootOfCarryOverBound || this->Extended->den.TheObjects[0]>= (unsigned int)	LargeIntUnsigned::SquareRootOfCarryOverBound)
 			return false;
 		this->NumShort= this->Extended->num.GetIntValueTruncated();
 		this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
@@ -1347,8 +1335,8 @@ public:
 	//changed it back to int. Grrrrr.
 	int DenShort;
 	LargeRationalExtended *Extended;
-	void GetDenExtended(LargeIntUnsigned & output);
-	void GetNumExtendedUnsigned(LargeIntUnsigned & output);
+	void GetDenExtended(LargeIntUnsigned& output);
+	void GetNumExtendedUnsigned(LargeIntUnsigned& output);
 //	inline int GetNumValueTruncated(){return this->NumShort;};
 //	inline int GetDenValueTruncated(){return this->denShort;};
 	static bool flagMinorRoutinesOnDontUseFullPrecision;
@@ -1699,8 +1687,8 @@ public:
 	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
 	bool operator==(const roots& right);
 	void operator = (const roots& right){this->CopyFromBase(right);};
-	void ReadFromFile (std::fstream &input, GlobalVariables&  theGlobalVariables);
-	void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
+	void ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariables);
+	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 };
 
 class WallData
@@ -1855,10 +1843,10 @@ public:
 	void PropagateSlicingWallThroughNonExploredNeighbors(root& theKillerNormal, rootsCollection& CuttingPlaneVertices, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	//the below function will automatically add the candidate to the
 	//list of used hyperplanes if the candidate is an allowed one
-	bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate,roots &directions, int CurrentIndex, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
+	bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate, roots& directions, int CurrentIndex, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	bool HasHSignVertex(root& h, int sign);
-	bool CheckSplittingPointCandidate(Selection &SelectionTargetSimplex,Selection &SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension);
-	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
+	bool CheckSplittingPointCandidate(Selection& SelectionTargetSimplex, Selection& SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension);
+	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root& direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
 //	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
 	void ComputeInternalPointMethod2(root& InternalPoint, int theDimension);
@@ -1868,7 +1856,7 @@ public:
 	bool TestPossibilityToSlice(root& direction);
 	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-	void WireChamberAndWallAdjacencyData(	CombinatorialChamberContainer &owner, CombinatorialChamber* input);
+	void WireChamberAndWallAdjacencyData(CombinatorialChamberContainer &owner, CombinatorialChamber* input);
 	void Assign(const  CombinatorialChamber& right);
 	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
 	CombinatorialChamber();
@@ -2069,7 +2057,7 @@ void ListBasicObjects<Object>::ReleaseMemory()
 { delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->ActualSize=0;
 	this->IndexOfVirtualZero=0;
@@ -2084,7 +2072,7 @@ ListBasicObjects<Object>::~ListBasicObjects()
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 	this->ActualSize=0;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->TheActualObjects=0;
 	this->TheObjects=0;
@@ -2096,14 +2084,14 @@ void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
 	Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	for (int i=0; i<this->size; i++)
 		newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
@@ -2118,14 +2106,14 @@ void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
 	Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	for (int i=0; i<this->size; i++)
 		newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
 	delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->TheActualObjects= newArray;
 	this->ActualSize+=increase;
@@ -2185,7 +2173,7 @@ int HashedListBasicObjects<Object>::SizeWithoutObjects()
 
 
 template <class Object>
-void HashedListBasicObjects<Object>::CopyFromHash (const HashedListBasicObjects<Object>& From)
+void HashedListBasicObjects<Object>::CopyFromHash(const HashedListBasicObjects<Object>& From)
 { if (&From==this){return;}
 	this->ClearHashes();
 	this->SetHashSize(From.HashSize);
@@ -2284,7 +2272,7 @@ void HashedListBasicObjects<Object>::SetHashSize(int HS)
 	{ delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		this->TheHashedArrays= new  ListBasicObjects<int>[HS];
 		this->HashSize=HS;
@@ -2305,7 +2293,7 @@ HashedListBasicObjects<Object>::~HashedListBasicObjects()
 {	delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->HashSize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->HashSize=0;
 	this->TheHashedArrays=0;
@@ -2325,7 +2313,7 @@ void ListObjectPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
 	{ Object** newArray= new Object*[this->size+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=increase;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		for (int i=0; i<this->size; i++)
 			newArray[i]=this->TheObjects[i];
@@ -2346,7 +2334,7 @@ void ListObjectPointers<Object>::initAndCreateNewObjects(int d)
 		this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=d;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -2355,7 +2343,7 @@ void ListObjectPointers<Object>::KillElementIndex(int i)
 {	delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	this->size--;
 	this->TheObjects[i]=this->TheObjects[this->size];
@@ -2378,7 +2366,7 @@ void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
 		this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -2388,7 +2376,7 @@ void ListObjectPointers<Object>::KillAllElements()
 	{	delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
     if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 		this->TheObjects[i]=0;
 	}
@@ -2605,7 +2593,7 @@ public:
 	static void drawOutput(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex,root& ChamberIndicator, std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void DrawOutputProjective(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, std::fstream* outputLatex, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	static void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-	static void drawFacetVerticesMethod2(DrawingVariables& TDV,roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, drawLineFunction theDrawFunction, std::fstream* outputLatex);
+	static void drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, drawLineFunction theDrawFunction, std::fstream* outputLatex);
 	bool TestPossibleIndexToSlice(root& direction, int index);
 	CombinatorialChamberContainer();
 	~CombinatorialChamberContainer();
@@ -2760,7 +2748,7 @@ int ListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::ListBasicO
 */
 
 template <class ElementOfCommutativeRingWithIdentity>
-class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWithIdentity>, ElementOfCommutativeRingWithIdentity >
+class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWithIdentity>, ElementOfCommutativeRingWithIdentity>
 {
 public:
 	static bool flagAnErrorHasOccuredTimeToPanic;
@@ -2774,7 +2762,7 @@ public:
 	void MakeNVarDegOnePoly(short NVar, int NonZeroIndex,ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& ConstantTerm);
 	void MakeLinPolyFromRoot(root& r);
 	void TimesInteger(int a);
-	void DivideBy(	Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
+	void DivideBy(Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
 	void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
 	void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
 	void AddConstant(const ElementOfCommutativeRingWithIdentity& theConst);
@@ -2907,7 +2895,7 @@ public:
       this->elements[i]*=x;
 	};
 	void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
-	void initFromInt(int theDimension, int x1,int x2,int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
+	void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
 	//remark: zero is considered to be a positive vector!
 	bool IsPositive();
 	void AddRoot(intRoot& theRoot);
@@ -2935,7 +2923,7 @@ public:
 	GeneratorPFAlgebraRecord();
 	~GeneratorPFAlgebraRecord();
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
-	void GetValue(IntegerPoly &output, int theDimension);
+	void GetValue(IntegerPoly& output, int theDimension);
   void operator = (const GeneratorPFAlgebraRecord& right);
   int HashFunction() const
   { return this->Elongation+ this->GeneratorRoot.HashFunction();
@@ -2979,9 +2967,9 @@ public:
 	void ElementToString(std::string& output,PolynomialOutputFormat& PolyFormat);
 	void StringStreamPrintOutAppend(std::stringstream& out,PolynomialOutputFormat& PolyFormat);
 	int HashFunction() const;
-	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity&coeff);
-	void MultiplyBy(MonomialInCommutativeAlgebra < ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra,GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
-	void MultiplyBy(MonomialInCommutativeAlgebra < ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
+	void MakeConstantMonomial(short Nvar,ElementOfCommutativeRingWithIdentity& coeff);
+	void MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra,GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
+	void MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
 	//the below functions return 1 if no reduction has occured
 	//i.e. the generator is not in zeroth power after the multiplication
 	//If the generator is in zero-th power after the multiplication and reduction has occured,
@@ -3009,8 +2997,8 @@ template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra,
 void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::StringStreamPrintOutAppend(std::stringstream& out,::PolynomialOutputFormat& PolyFormat)
 { std::stringstream out1;
 	std::string tempS;
-	for(int i=0;i<this->size;i++)
-	{ this->TheObjects[i].ElementToString(tempS,PolyFormat);
+	for(int i=0; i<this->size; i++)
+	{ this->TheObjects[i].ElementToString(tempS, PolyFormat);
 		if (tempS[0]=='-' && this->size>1)
 			out1<< "("<<tempS<<")";
 		else
@@ -3041,7 +3029,7 @@ void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, Generat
 	}
 }
 
-class PolyPartFractionNumerator: public TemplatePolynomial<	MonomialInCommutativeAlgebra<	Integer,GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord>, Integer >
+class PolyPartFractionNumerator: public TemplatePolynomial<	MonomialInCommutativeAlgebra<	Integer,GeneratorsPartialFractionAlgebra,GeneratorPFAlgebraRecord>, Integer>
 {
 public:
 	void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
@@ -3072,7 +3060,7 @@ void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, Generat
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-int MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(GeneratorsOfAlgebra& g)
+int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(GeneratorsOfAlgebra& g)
 { int x = this->IndexOfObjectHash(g);
   if (x==-1)
 		this->AddObjectOnTopHash(g);
@@ -3095,7 +3083,7 @@ int MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, Generat
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-int MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator (GeneratorsOfAlgebraRecord& g, int Power)
+int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator (GeneratorsOfAlgebraRecord& g, int Power)
 { GeneratorsPartialFractionAlgebra tempG;
 	tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.IndexOfObjectHash(g);
 	if (tempG.GeneratorIndex==-1)
@@ -3107,28 +3095,28 @@ int MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, Generat
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-int MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::HashFunction() const
+int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::HashFunction() const
 { int result=0;
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		result+=this->TheObjects[i].HashFunction()*this->TheObjects[i].GeneratorPower;
 	return result;
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::ElementToString(std::string &output, PolynomialOutputFormat &PolyFormat)
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
 { std::stringstream out;
 	this->StringStreamPrintOutAppend(out,PolyFormat);
 	output=out.str();
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::ComputeDebugString(PolynomialOutputFormat &PolyFormat)
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::ComputeDebugString(PolynomialOutputFormat& PolyFormat)
 { this->ElementToString(this->DebugString,PolyFormat);
 }
 
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-inline void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::Assign(const MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
+inline void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::Assign(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
 { this->CopyFromHash(right);
 	this->Coefficient.Assign(right.Coefficient);
 }
@@ -3139,8 +3127,8 @@ inline void MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity,
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-inline bool MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::operator ==(const MonomialInCommutativeAlgebra	<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
-{ MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord> tempM;
+inline bool MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::operator ==(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
+{ MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord> tempM;
 	tempM.Assign(*this);
 	for (int i=0; i<right.size; i++)
 	{ GeneratorsOfAlgebra tempG;
@@ -3155,7 +3143,7 @@ inline bool MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity,
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy( MonomialInCommutativeAlgebra <	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m)
+void MonomialInCommutativeAlgebra<	ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m)
 { this->MakeActualSizeAtLeastExpandOnTop(this->size+m.size);
 	for (int i=0; i<m.size; i++)
 		this->MultiplyByGenerator(m.TheObjects[i]);
@@ -3179,7 +3167,7 @@ public:
 	void MakeSubFromMatrixRational(MatrixLargeRational& theMat);
 	void ComputeDiscreteIntegrationUpTo(int d);
 	void MakeLinearSubOnLastVariable(short NumVars,PolynomialRationalCoeff& LastVarSub);
-	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakeSubNVarForOtherChamber(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 	void Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget);
 };
@@ -3216,9 +3204,9 @@ class PolynomialRationalCoeff: public Polynomial<Rational>
 public:
 	void AssignIntegerPoly(IntegerPoly& p);
 	void Evaluate(intRoot& values,Rational& output);
-	void MakePolyFromDirectionAndNormal(	root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
 	void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables);
-	void MakeLinPolyFromInt(int theDimension,int x1,int x2, int x3,int x4, int x5);
+	void MakeLinPolyFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
 	int FindGCMCoefficientDenominators();
 	void MakeLinearPoly(short NumVars);
 	int SizeWithoutDebugString();
@@ -3253,13 +3241,13 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution,Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget)
 { if (this->IsAConstant())
-	{ output.MakeNVarConst(NumVarTarget,this->Coefficient);
+	{ output.MakeNVarConst(NumVarTarget, this->Coefficient);
 		return;
 	}
 	Polynomial<ElementOfCommutativeRingWithIdentity> tempPoly;
-	output.MakeNVarConst(NumVarTarget,this->Coefficient);
+	output.MakeNVarConst(NumVarTarget, this->Coefficient);
 //	output.ComputeDebugString();
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		if (this->degrees[i]!=0)
 		{	//TheSubstitution.TheObjects[i]->ComputeDebugString();
 			TheSubstitution.TheObjects[i].RaiseToPower(degrees[i],tempPoly);
@@ -3281,7 +3269,7 @@ Monomial<ElementOfCommutativeRingWithIdentity>::Monomial()
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::InvertDegrees()
-{ for (int i=0;i<this->NumVariables;i++)
+{ for (int i=0; i<this->NumVariables; i++)
 		this->degrees[i]= - this->degrees[i];
 }
 
@@ -3290,7 +3278,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::init(short nv)
 { assert(nv>=0);
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	if(this->NumVariables!=nv)
 	{ NumVariables=nv;
@@ -3306,7 +3294,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::initNoDegreesInit(short nv)
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	if(this->NumVariables!=nv)
 	{	this->NumVariables=nv;
@@ -3320,7 +3308,7 @@ Monomial<ElementOfCommutativeRingWithIdentity>::~Monomial()
 { delete [] this->degrees;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->NumVariables;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 }
 
@@ -3341,7 +3329,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(
 	if (tempS=="1")
 		tempS.clear();
 	out <<tempS;
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		if (this->degrees[i]!=0)
 		{ out<<	PolyFormat.GetLetterIndex(i);
 			if (!PolynomialOutputFormat::UsingLatexFormat)
@@ -3356,7 +3344,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>&m)
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m)
 { assert(this->NumVariables == m.NumVariables);
 	for (int i=0; i<m.NumVariables; i++)
 		if (this->degrees[i]<m.degrees[i])
@@ -3365,7 +3353,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity> &m)
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity>& m)
 { assert(this->NumVariables==m.NumVariables);
 	for (int i=0; i<this->NumVariables; i++)
 	{ if (this->degrees[i]>m.degrees[i])
@@ -3377,28 +3365,28 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ(Monomial<ElementOfCom
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string &output, PolynomialOutputFormat &PolyFormat)
+void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
 { std::stringstream out;
 	this->StringStreamPrintOutAppend(out,PolyFormat);
 	output=out.str();
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string &output)
+void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output)
 { std::stringstream out;
 	this->StringStreamPrintOutAppend(out,PolyFormatLocal);
 	output=out.str();
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString(PolynomialOutputFormat &PolyFormat)
+bool Monomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString(PolynomialOutputFormat& PolyFormat)
 { this->ElementToString(this->DebugString,PolyFormat);
 	return true;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
-{ this->ElementToString(this->DebugString,PolyFormatLocal);
+{ this->ElementToString(this->DebugString, PolyFormatLocal);
 	return true;
 }
 
@@ -3408,7 +3396,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MultiplyBy (Monomial<Elemen
 	output.init(this->NumVariables);
 	output.Coefficient.Assign(m.Coefficient);
 	output.Coefficient.MultiplyBy(this->Coefficient);
-	for(int i=0; i<m.NumVariables;i++)
+	for(int i=0; i<m.NumVariables; i++)
 		output.degrees[i]=this->degrees[i]+m.degrees[i];
 }
 
@@ -3426,7 +3414,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(short 
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=increase;
-	if (ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
+	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
 	short* newDegrees= new short[NumVariables+increase];
 	for(int i=0; i<this->NumVariables; i++)
@@ -3498,14 +3486,14 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(intR
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::DivideByExponentOnly(	intRoot& input)
+void Monomial<ElementOfCommutativeRingWithIdentity>::DivideByExponentOnly(intRoot& input)
 { assert(input.dimension==this->NumVariables);
 	for (int i=0; i<this->NumVariables; i++)
 		this->degrees[i]-=(short)input.elements[i];
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy(	Monomial<ElementOfCommutativeRingWithIdentity> &input, Monomial<ElementOfCommutativeRingWithIdentity> &output)
+void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy(	Monomial<ElementOfCommutativeRingWithIdentity>& input, Monomial<ElementOfCommutativeRingWithIdentity>& output)
 { output.init(this->NumVariables);
 	output.Coefficient.Assign(this->Coefficient);
 	output.Coefficient.DivideBy(input.Coefficient);
@@ -3518,7 +3506,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(short 
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=increment;
-	if(ParallelComputing::GlobalPointerCounter>::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+	if(ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
 #endif
 	short* newDegrees= new short[NumVariables-increment];
 	for(int i=0; i<this->NumVariables-increment; i++)
@@ -3532,7 +3520,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::IsPositive()
 { if (this->Coefficient.IsEqualToZero())
 		return true;
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		if (this->degrees[i]<0)
 			return false;
 	return true;
@@ -3546,7 +3534,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsEqualToZero() const
 template <class ElementOfCommutativeRingWithIdentity>
 int Monomial<ElementOfCommutativeRingWithIdentity>::HashFunction() const
 { int result=0;
-	for (int i=0;i<this->NumVariables;i++)
+	for (int i=0; i<this->NumVariables; i++)
 		result+=this->degrees[i]*SomeRandomPrimes[i];
 	return result;
 }
@@ -3559,12 +3547,12 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MakeConstantMonomial(short 
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::MakeNVarFirstDegree(int LetterIndex, short NumVars, ElementOfCommutativeRingWithIdentity& coeff)
-{ this->MakeConstantMonomial(NumVars,coeff);
+{ this->MakeConstantMonomial(NumVars, coeff);
 	this->degrees[LetterIndex]=1;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::MakeMonomialOneLetter(short NumVars,int LetterIndex,short Power, ElementOfCommutativeRingWithIdentity& coeff)
+void Monomial<ElementOfCommutativeRingWithIdentity>::MakeMonomialOneLetter(short NumVars, int LetterIndex, short Power, ElementOfCommutativeRingWithIdentity& coeff)
 { this->init(NumVars);
 	this->degrees[LetterIndex]=Power;
 	this->Coefficient.Assign(coeff);
@@ -3663,7 +3651,6 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 	this->CopyFromPoly(Buffer);
 }
 
-
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(short increase)
 { Polynomial<ElementOfCommutativeRingWithIdentity> Accum;
@@ -3736,7 +3723,7 @@ bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsEqualTo(Polynomial<Elem
 }
 
 template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
-bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> ::IsEqualToZero()
+bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::IsEqualToZero()
 { if(this->size==0)
 		return true;
 	for (int i=0; i<this->size; i++)
@@ -3744,25 +3731,6 @@ bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> 
 			return false;
 	return true;
 }
-
-
-/*template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>
-			::AddMonomial(Monomial<ElementOfCommutativeRingWithIdentity>& m)
-{	int j= this->HasSameExponentMonomial(m);
-	if (j==-1)
-	{	if (!m.Coefficient.IsEqualTo(*ElementOfCommutativeRingWithIdentity::TheRingZero))
-			this->AddObjectOnTopHash(m);
-	}
-	else
-	{	this->TheObjects[j].Coefficient.Add(m.Coefficient);
-		if (this->TheObjects[j].Coefficient.IsEqualTo
-			   (*ElementOfCommutativeRingWithIdentity::TheRingZero))
-		{ this->PopIndexSwapWithLastHash(j);
-		}
-	}
-}*/
-
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeLinPolyFromRoot(root& r)
@@ -4076,7 +4044,7 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
 	return result;
 }
 
-template <class TemplateMonomial,class ElementOfCommutativeRingWithIdentity>
+template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::Nullify(short NVar)
 { this->ClearTheObjects();
 	this->NumVars= NVar;
@@ -4371,7 +4339,7 @@ public:
 	void GetCoeffInFrontOfLast(Rational& output);
 	void Evaluate(int* theVars, Rational& output);
 	void WriteToFile(std::fstream& output);
-	void ReadFromFile(std::fstream&  input, short NumV);
+	void ReadFromFile(std::fstream& input, short NumV);
 //	void MakeQN(PolynomialRationalCoeff& exp, Rational& coeff);
 };
 
@@ -4430,7 +4398,7 @@ public:
 		ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this);
 	};
 	ComplexQN()
-	{ this->NumVars=NumVars;ComplexQN::NumTotalCreated++;CreationNumber=NumTotalCreated;
+	{ this->NumVars=NumVars; ComplexQN::NumTotalCreated++; CreationNumber=NumTotalCreated;
 		ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this);
 	};
 	CompositeComplex Coefficient;
@@ -4546,8 +4514,8 @@ public:
 class QuasiMonomial: public Monomial<QuasiNumber>
 {
 public:
-	void IntegrateDiscreteInDirectionFromZeroTo(	QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals) ;
-	void IntegrateDiscreteFromZeroTo(	QPSub& EndPointSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+	void IntegrateDiscreteInDirectionFromZeroTo(	QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+	void IntegrateDiscreteFromZeroTo(	QPSub& EndPointSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
 	void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output);
 };
 
@@ -4608,8 +4576,8 @@ public:
 	void MakeSubFromMatrixInt(MatrixIntTightMemoryFit& theMat);
 	void MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit& theMat, int Den);
 	void MakeSubFromMatrixRational(MatrixLargeRational& theMat);
-	void MakeLinearSubIntegrand(root& normal, root&direction, Rational& Correction, GlobalVariables& theGlobalVariables);
-	void MakeSubNVarForOtherChamber(root& direction,root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakeLinearSubIntegrand(root& normal, root& direction, Rational& Correction, GlobalVariables& theGlobalVariables);
+	void MakeSubNVarForOtherChamber(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
 	void MakeSubAddExtraVarForIntegration(root& direction);
 	void MakeSubFromPolynomialsRationalCoeff(PolynomialsRationalCoeff& input);
 };
@@ -4633,7 +4601,7 @@ template <class Object>
 void ListObjectPointersKillOnExitFakeSize<Object>::setFakeSize(int theFakeSize, short param)
 { if (theFakeSize>this->size)
 		this->resizeToLargerCreateNewObjects(theFakeSize-this->size);
-	for (int i=this->FakeSize;i<theFakeSize;i++)
+	for (int i=this->FakeSize; i<theFakeSize; i++)
 		this->TheObjects[i]->Nullify(param);
 	this->FakeSize =theFakeSize;
 }
@@ -4663,7 +4631,7 @@ public:
 	void init();
 	static root CheckSumRoot;
 	int HashFunction() const;
-	void ComputeOneCheckSum(Rational &output, intRoot& theExp, int theDimension);
+	void ComputeOneCheckSum(Rational& output, intRoot& theExp, int theDimension);
 	bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
 	void operator=(oneFracWithMultiplicitiesAndElongations& right);
 	bool operator==(oneFracWithMultiplicitiesAndElongations& right);
@@ -4711,7 +4679,7 @@ public:
 	void GetSum(root& output, int theDimension)
 	{ output.MakeZero(theDimension);
 		root tempRoot;
-		for(int i=0;i<this->size;i++)
+		for(int i=0; i<this->size; i++)
 		{ this->TheObjects[i].GetSum(tempRoot);
 			output.Add(tempRoot);
 		}
@@ -4759,7 +4727,7 @@ public:
 	roots LatticeIndicators;
 	MatrixLargeRational theNormals;
 	void CheckConsistency(root& RootLatticeIndicator,PolynomialRationalCoeff& input);
-	void initLatticeIndicatorsFromPartFraction(partFractions& ownerExpression,partFraction& owner, GlobalVariables& theGlobalVariables, int theDimension);
+	void initLatticeIndicatorsFromPartFraction(partFractions& ownerExpression, partFraction& owner, GlobalVariables& theGlobalVariables, int theDimension);
 	void AddPolynomialLargeRational(root& rootLatticeIndicator, PolynomialRationalCoeff& input);
 	void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables);
 };
@@ -4795,7 +4763,7 @@ public:
 	static Rational CheckSum, CheckSum2;
 	static intRoot theVectorToBePartitioned;
 	static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
-	void ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff &output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
+	void ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff& output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
 	static void MakePolynomialFromOneNormal(root& normal, root& shiftRational, int theMult,	PolynomialRationalCoeff& output);
 	void ComputeNormals(partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
 	int ComputeGainingMultiplicityIndexInLinearRelation(partFractions& owner,	MatrixLargeRational& theLinearRelation);
@@ -4816,7 +4784,7 @@ public:
 	void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
 	void ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex,int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-	void ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int> &theGreatestElongations, ListBasicObjects<int> &theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions &Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+	void ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theGreatestElongations, ListBasicObjects<int>& theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 	bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
 	bool reduceOnceTotalOrderMethod(partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 //	void reduceOnceOrlikSolomonBasis(partFractions&Accum);
@@ -4862,7 +4830,7 @@ public:
 };
 
 class partFractions: public HashedListBasicObjects<partFraction>
-{ bool ShouldIgnore(GlobalVariables& theGlobalVariables, root*Indicator);
+{ bool ShouldIgnore(GlobalVariables& theGlobalVariables, root* Indicator);
 public:
 	int AmbientDimension;
 	int IndexLowestNonProcessed;
@@ -5442,7 +5410,7 @@ public:
   void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
 	void KmodTimesKmod(int index1, int index2, ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int>& output);
 	void initFromAmbientWeyl();
-	void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra);
+	void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SemisimpleLieAlgebra& theLieAlgebra);
 	void ComputeAllButAmbientWeyl();
 	void ComputeDynkinDiagramKandCentralizer();
 	void ComputeAll();
@@ -5615,29 +5583,29 @@ class ElementSimpleLieAlgebra
 {
 public:
 	std::string DebugString;
-	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
-	void ElementToString(std::string& output, SimpleLieAlgebra& owner, bool useHtml, bool useLatex)
+	void ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
+	void ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex)
 	{ this->ElementToString(output, owner, useHtml, useLatex, false, 0, 0);
   };
-	void ComputeDebugString(SimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex, false, 0, 0);	};
+	void ComputeDebugString(SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex, false, 0, 0);	};
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   ListBasicObjects<Rational> coeffsRootSpaces;
   root Hcomponent;
-  void MultiplyByRational(SimpleLieAlgebra& owner, const Rational& theNumber);
+  void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
-  void SetCoefficient(const root& indexingRoot, Rational& theCoeff, SimpleLieAlgebra& owner);
-  void SetCoefficient(const root& indexingRoot, int theCoeff, SimpleLieAlgebra& owner);
+  void SetCoefficient(const root& indexingRoot, Rational& theCoeff, SemisimpleLieAlgebra& owner);
+  void SetCoefficient(const root& indexingRoot, int theCoeff, SemisimpleLieAlgebra& owner);
   //range is the image of the vectors e_i
-  void TransformInduceFromMapsOfRootSystems(const roots& domain, const roots& range, SimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
+  void TransformInduceFromMapsOfRootSystems(const roots& domain, const roots& range, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
   bool IsEqualToZero()const;
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);
     this->NonZeroElements.Assign(other.NonZeroElements);
   };
-  void init(SimpleLieAlgebra& owner);
-  void Nullify(SimpleLieAlgebra& owner);
+  void init(SemisimpleLieAlgebra& owner);
+  void Nullify(SemisimpleLieAlgebra& owner);
   bool operator==(const ElementSimpleLieAlgebra& other) const
   { return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);
   };
@@ -5660,7 +5628,7 @@ public:
 	ListBasicObjects<int> weightSpaceDimensions;
 	ElementSimpleLieAlgebra theH, theE, theF;
 	ElementSimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
-	SimpleLieAlgebra* owner;
+	SemisimpleLieAlgebra* owner;
 	ListBasicObjects<int> IndicesContainingRootSAs;
 	ListBasicObjects<int> IndicesMinimalContainingRootSA;
 	ListBasicObjects<ListBasicObjects<int> > HighestWeightsDecompositionMinimalContainingRootSA;
@@ -5728,7 +5696,7 @@ public:
 	};
 };
 
-class SimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
+class SemisimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
 {
 public:
 	std::string DebugString;
@@ -5746,6 +5714,7 @@ public:
   //Reference: Samelson, Notes on Lie algebras, pages 46-51
   MatrixLargeRational ChevalleyConstants;
   Matrix<bool> Computed;
+  void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
   //then the below function computes n_{-\epsilon, -\zeta}
@@ -5782,7 +5751,7 @@ public:
 	ListBasicObjects<int> IndicesSl2decompositionFlas;
 	roots BadHCharacteristics;
 	int IndexZeroWeight;
-	SimpleLieAlgebra owner;
+	SemisimpleLieAlgebra owner;
 	rootSubalgebras theRootSAs;
 	void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
 	{ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);
@@ -5796,8 +5765,8 @@ public:
       this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
   };
   void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
-  {  for(int i=0; i<this->size; i++)
-        this->TheObjects[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
+  { for(int i=0; i<this->size; i++)
+      this->TheObjects[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
   };
 	void getZuckermansArrayE8(roots& output);
 	void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
@@ -5807,6 +5776,7 @@ public:
   void ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
 	void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
+	void ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 
 class reductiveSubalgebra
@@ -5835,7 +5805,8 @@ public:
 	void MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables);
 	void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
 	void GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables);
-  void ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output);
+  void ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output, GlobalVariables& theGlobalVariables);
+  void ElementToStringDynkinType(int theIndex, bool useLatex, bool useHtml, std::string& output);
   void FindTheReductiveSubalgebras(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   void EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank);
   void GenerateAllPartitionsUpTo(int theRank);
@@ -6272,7 +6243,7 @@ public:
 	QuasiPolynomial theOutput;
 	rootSubalgebras theRootSubalgebras;
 	CombinatorialChamberContainer theChambers;
-	SimpleLieAlgebra theChevalleyConstantComputer;
+	SemisimpleLieAlgebra theChevalleyConstantComputer;
 	minimalRelationsProverStates theProver;
 	minimalRelationsProverStatesFixedK theProverFixedK;
 	Rational Value;

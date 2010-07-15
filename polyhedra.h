@@ -5091,6 +5091,8 @@ public:
 	void MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0);};
 	//void GetLongRootLength(Rational& output);
 	static bool IsAddmisibleDynkinType(char candidateLetter, int n);
+	//the below will not do anything if the inputLetter is not a valid Dynkin letter
+	static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
 	void GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonCoords(root& input, root& output, GlobalVariables& theGlobalVariables);
 	void GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);

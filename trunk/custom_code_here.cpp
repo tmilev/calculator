@@ -961,7 +961,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.theChambers.flagReachSafePointASAP=false;
   inputData.flagDyckPathComputationLoaded=true;
   inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
-  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
+//  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
 }
 
 void ComputationSetup::ComputeReductiveSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
@@ -982,7 +982,7 @@ void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int Weyl
   this->ElementToStringCandidatePrincipalSl2s(false, true, tempS);
   out << tempS;
   this->theSl2s.ElementToStringModuleDecompositionMinimalContainingRegularSAs(tempS, false, true);
-  out <<tempS;
+  out << tempS;
   this->theSl2s.ElementToString(tempS, theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, true, false, 0, 0);
   out << tempS;
   theGlobalVariables.theIndicatorVariables.StatusString1.append(tempS);

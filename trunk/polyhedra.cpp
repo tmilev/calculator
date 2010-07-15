@@ -774,7 +774,7 @@ void CGIspecificRoutines::WeylGroupToHtml(WeylGroup& input, std::string& path)
 { std::fstream output;
   std::string tempS;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, path, false, true, false);
-  output<< "<HTML><BODY>In preparation</BODY></HTML>";
+  output << "<HTML><BODY>In preparation</BODY></HTML>";
   output.close();
 }
 
@@ -785,7 +785,7 @@ bool CGIspecificRoutines::CheckForInputSanity(ComputationSetup& input)
     return false;
   if (!input.VPVectors.CheckForElementSanity())
     return false;
-  for (int i=0;i<input.VPVectors.size;i++)
+  for (int i=0; i<input.VPVectors.size; i++)
     if (input.VPVectors.TheObjects[i].IsEqualToZero())
       return false;
   return true;
@@ -797,6 +797,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
 		return CGIspecificRoutines::choiceInitAndDisplayMainPage;
 	if (inputBad=="experiments")
 	{ return CGIspecificRoutines::choiceExperiments;
+#ifdef CGIversionLimitRAMuse
+  cgiLimitRAMuseNumPointersInListBasicObjects=1000000000;
+#endif
   }
 	std::string inputGood;
   std::string tempS3;
@@ -834,6 +837,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
       InputDataOK=true;
     if (output.WeylGroupIndex<1 || output.WeylGroupIndex>8)
       InputDataOK=false;
+    WeylGroup::TransformToAdmissibleDynkinType(output.WeylGroupLetter, output.WeylGroupIndex);
     if (!InputDataOK)
     { std::cout << "<br><b>Bad input:</b> " <<   inputBad << "<br>\n";
       return CGIspecificRoutines::choiceInitAndDisplayMainPage;
@@ -1399,7 +1403,7 @@ void ComputationSetup::EvaluatePoly()
 	this->Value.ElementToString(this->ValueString);
 }
 
-void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r,double& x, double& y)
+void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r, double& x, double& y)
 { x=TDV.centerX;
 	y=TDV.centerY;
 	for (int k=0; k<r.size; k++)
@@ -1411,9 +1415,9 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r,double
 void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile, drawLineFunction theDrawFunction)
 { if (this->flag2DprojectionDraw)
 	{ double x1,x2,y1,y2;
-		this->GetCoordsForDrawing(*this,r1,x1,y1);
-		this->GetCoordsForDrawing(*this,r2,x2,y2);
-		this->drawLineOld(x1,y1,x2,y2,PenStyle,PenColor, LatexOutFile, theDrawFunction);
+		this->GetCoordsForDrawing(*this, r1, x1, y1);
+		this->GetCoordsForDrawing(*this, r2, x2, y2);
+		this->drawLineOld(x1, y1, x2, y2, PenStyle, PenColor, LatexOutFile, theDrawFunction);
 	}
 	else
 	{ int r,g,b;
@@ -1426,10 +1430,10 @@ void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyl
 
 void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile, drawTextFunction drawTextIn)
 { Rational Epsilon; Epsilon.AssignNumeratorAndDenominator(-1,5);
-	for (int i=0;i<theDimension;i++)
+	for (int i=0; i<theDimension; i++)
 	{ root tempRoot; tempRoot.MakeZero(theDimension);
 		root tempRoot2; tempRoot2.MakeZero(theDimension);
-		for(int j=0;j<theDimension;j++)
+		for(int j=0; j<theDimension; j++)
 			tempRoot.TheObjects[j].Assign(Epsilon);
 		tempRoot.TheObjects[i].MakeOne();
 		tempRoot2.TheObjects[i].MakeOne();
@@ -1445,12 +1449,12 @@ void DrawingVariables::drawLineOld(double X1, double Y1, double X2, double Y2, u
 { if (theDrawFunction!=0)
 		(*theDrawFunction)(X1,Y1,X2,Y2,thePenStyle, ColorIndex);
 	if (LatexOutFile!=0)
-		LaTeXProcedures::drawline(X1,Y1, X2, Y2, thePenStyle, ColorIndex,*LatexOutFile,*this);
+		LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
 }
 
 void DrawingVariables::drawTextAtVector(	root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, drawTextFunction drawTextIn)
 { double x,y; this->GetCoordsForDrawing(*this, point, x, y);
-	this->drawText(x,y,inputText,textColor,LatexOutFile,drawTextIn);
+	this->drawText(x, y, inputText,textColor, LatexOutFile, drawTextIn);
 }
 
 void DrawingVariables::drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile, drawTextFunction drawTextIn)
@@ -2464,7 +2468,7 @@ void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bo
   if (useHtml && makeTable)
     out <<"<table>";
 	for (int i=0; i<this->size;i++)
-	{	this->TheObjects[i].ElementToString(tempS,useLaTeX);
+	{ this->TheObjects[i].ElementToString(tempS,useLaTeX);
 		if (useHtml&& makeTable)
       out <<"<tr><td>";
 		out<<tempS;
@@ -2939,12 +2943,12 @@ bool roots::ComputeNormalExcludingIndex(root& output, int index, GlobalVariables
 	int k=-1;
 	for(int i=0; i<this->size; i++)
 		if (i!=index)
-		{	k++;
+		{ k++;
 			for(int j=0; j<theDimension; j++)
 				tempMatrix.elements[k][j].Assign(this->TheObjects[i].TheObjects[j]);
 		}
 	tempMatrix.ComputeDebugString();
-	MatrixLargeRational::GaussianEliminationByRows(tempMatrix,matOutputEmpty,NonPivotPoints);
+	MatrixLargeRational::GaussianEliminationByRows(tempMatrix, matOutputEmpty, NonPivotPoints);
 	if (NonPivotPoints.CardinalitySelection!=1)
     return false;
 	tempMatrix.NonPivotPointsToRoot(NonPivotPoints,theDimension,output);
@@ -2969,7 +2973,7 @@ bool roots::ComputeNormalFromSelection(root& output, Selection& theSelection, Gl
 }
 
 bool roots::ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables)
-{	if (this->size==0)
+{ if (this->size==0)
 		return false;
 	int theDimension= this->TheObjects[0].size;
 	output.SetSizeExpandOnTopLight(theDimension);
@@ -3015,7 +3019,7 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots( root& output, root& Extr
 }
 
 void roots::GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl)const
-{	output.Resize(this->size, this->size, false);
+{ output.Resize(this->size, this->size, false);
 	for (int i=0; i<this->size; i++)
 		for(int j=i; j<this->size; j++)
 		{ theWeyl.RootScalarKillingFormMatrixRoot(this->TheObjects[i],this->TheObjects[j],output.elements[i][j]);
@@ -3081,7 +3085,7 @@ bool roots::ContainsOppositeRoots()
 }
 
 void roots::AddRootSnoRepetition(roots &r)
-{	for (int i=0; i<r.size; i++)
+{ for (int i=0; i<r.size; i++)
 		this->AddRootNoRepetition(r.TheObjects[i]);
 }
 
@@ -3121,8 +3125,8 @@ bool roots::CheckForElementSanity()
 }
 
 bool roots::AddRootNoRepetition(root& r)
-{	if (this->IndexOfObject(r)==-1)
-	{	this->AddObjectOnTop(r);
+{ if (this->IndexOfObject(r)==-1)
+	{ this->AddObjectOnTop(r);
 		return true;
 	}
 	return false;
@@ -3168,7 +3172,7 @@ int roots::NumRootsConnectedTo(root& input, WeylGroup& theWeyl)
 { Rational tempRat;
 	int result=0;
 	for (int i=0; i<this->size; i++)
-	{	theWeyl.RootScalarKillingFormMatrixRoot(this->TheObjects[i],input,tempRat);
+	{ theWeyl.RootScalarKillingFormMatrixRoot(this->TheObjects[i],input,tempRat);
 		if(!tempRat.IsEqualToZero())
 			result++;
 	}
@@ -3182,7 +3186,7 @@ void roots::MakeEiBasis(int theDimension)
 }
 
 void roots::MakeBasisChange(root& input, root& output)const
-{	int theDimension=input.size;
+{ int theDimension=input.size;
 	assert(theDimension==this->size);
 	assert(&input!=&output);
 	root tempRoot2;
@@ -3209,7 +3213,7 @@ void roots::GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVaria
 }
 
 int roots::ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables)
-{	if (this->size==0)
+{ if (this->size==0)
 		return 0;
 	int theDimension= this->GetDimensionOfElements();
 	Selection NonPivotPoints;
@@ -4420,7 +4424,7 @@ void CombinatorialChamberContainer::init()
 { //initializations required for multitasking  syncronization
   this->flagReachSafePointASAP=false;
   this->flagMustStop=false;
-  this->flagIsRunning=true;
+  this->flagIsRunning=false;
   ///////////////////////////////////////////////////////////////////////////
   this->KillAllElements();
 	this->ReleaseMemory();
@@ -4737,7 +4741,9 @@ void CombinatorialChamberContainer::ResumeSlicing()
 }
 
 void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
-{ this->SliceTheEuclideanSpace(this->theDirections, this->theCurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
+{ this->flagIsRunning=true;
+  this->SliceTheEuclideanSpace(this->theDirections, this->theCurrentIndex, this->AmbientDimension, 0, theGlobalVariables);
+  this->flagIsRunning=false;
 }
 
 void Cone::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
@@ -11672,6 +11678,25 @@ bool WeylGroup::IsAddmisibleDynkinType(char candidateLetter, int n)
   if (candidateLetter=='G' && n==2)
     return true;
   return false;
+}
+
+void WeylGroup::TransformToAdmissibleDynkinType(char inputLetter, int& outputRank)
+{ if (inputLetter=='G')
+    outputRank=2;
+  if (inputLetter=='F')
+    outputRank=4;
+  if (inputLetter=='E')
+  { if (outputRank>8)
+      outputRank=8;
+    if(outputRank<6)
+      outputRank=6;
+  }
+  if (inputLetter=='C' || inputLetter=='B')
+    if (outputRank<2)
+      outputRank=2;
+  if (inputLetter=='D')
+    if (outputRank<4)
+      outputRank=4;
 }
 
 void WeylGroup::MakeArbitrary(char WeylGroupLetter, int n)

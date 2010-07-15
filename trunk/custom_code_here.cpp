@@ -212,8 +212,8 @@ void slTwo::ElementToHtml(std::string& filePath)
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
-void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
-{ output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, WeylRank, true, true);
+void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+{ output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSizeExpandOnTopNoObjectInit(output.theRootSAs.size);
   output.IndicesSl2sContainedInRootSA.MakeActualSizeAtLeastExpandOnTop(output.theRootSAs.size*2);
@@ -243,8 +243,12 @@ void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLet
     }
     output.ComputeModuleDecompositionsOfAmbientLieAlgebra(theGlobalVariables);
   }
-
   //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
+}
+
+void SimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
+{ output.theRootSAs.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
+  this->FindSl2Subalgebras(output, theGlobalVariables);
 }
 
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SimpleLieAlgebra& theLieAlgebra)
@@ -971,6 +975,7 @@ void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int Weyl
   this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);
   this->GenerateModuleDecompositionsPrincipalSl2s(WeylIndex, theGlobalVariables);
   this->MatchActualSl2sFixedRootSAToPartitionSl2s(theGlobalVariables);
+  this->MakeSelectionBasedOnPrincipalSl2s(theGlobalVariables);
   std::string tempS; std::stringstream out;
   //this->theSl2s.ComputeDebugString(theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, false);
 //  theGlobalVariables.theIndicatorVariables.StatusString1= this->theSl2s.DebugString;
@@ -986,18 +991,28 @@ void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int Weyl
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
+void reductiveSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables)
+{ this->RemainingCandidates.init(this->theLetters.size);
+  for (int i=0; i<this->theLetters.size; i++)
+    if (this->IndicesMatchingActualSl2s.TheObjects[i].size>0)
+    { this->RemainingCandidates.AddSelectionAppendNewIndex(i);
+      SimpleLieAlgebra& theSSLieAlgebra= this->theCandidateSubAlgebras.TheObjects[i].owner;
+      theSSLieAlgebra.FindSl2Subalgebras(this->theCandidateSubAlgebras.TheObjects[i], theGlobalVariables);
+    }
+}
+
 void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables)
 { this->EnumerateAllPossibleDynkinDiagramsOfRankUpTo(theRank);
   slTwo tempSl2;
   this->CandidatesPrincipalSl2ofSubalgebra.MakeActualSizeAtLeastExpandOnTop(this->theLetters.size);
   this->theCandidateSubAlgebras.SetSizeExpandOnTopNoObjectInit(this->theLetters.size);
   for (int i=0; i<this->theLetters.size; i++)
-  { this->theCandidateSubAlgebras.TheObjects[i].theWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
-    this->theCandidateSubAlgebras.TheObjects[i].theWeyl.GenerateRootSystemFromKillingFormMatrix();
-    int theDimension = this->theCandidateSubAlgebras.TheObjects[i].theWeyl.KillingFormMatrix.NumRows;
+  { this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
+    this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.GenerateRootSystemFromKillingFormMatrix();
+    int theDimension = this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.KillingFormMatrix.NumRows;
     tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
     tempSl2.preferredAmbientSimpleBasis.MakeEiBasis(theDimension);
-    tempSl2.owner = &this->theCandidateSubAlgebras.TheObjects[i];
+    tempSl2.owner = &this->theCandidateSubAlgebras.TheObjects[i].owner;
     tempSl2.ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
     this->CandidatesPrincipalSl2ofSubalgebra.AddObjectOnTopHash(tempSl2);
   }

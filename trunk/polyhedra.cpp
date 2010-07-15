@@ -14454,13 +14454,8 @@ void rootSubalgebra::Assign(const rootSubalgebra& right)
 	this->indicesSubalgebrasContainingK.CopyFromBase(right.indicesSubalgebrasContainingK);
 }
 
-inline void rootSubalgebra::operator =(const rootSubalgebra& right)
-{ this->Assign(right);
-}
-
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords)
+void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
 { this->size=0;
-	this->AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
   this->AmbientWeyl.ComputeRho(true);
   //the below is not needed. See proposition Chapter 5 of Todor Milev's phd thesis.
 	//this->initDynkinDiagramsNonDecided(this->AmbientWeyl,WeylLetter,WeylRank);
@@ -14474,6 +14469,11 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalV
   if(computeEpsCoords)
     for(int i=0; i<this->size; i++)
       this->TheObjects[i].ComputeEpsCoordsWRTk(theGlobalVariables);
+}
+
+void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords)
+{ this->AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
+  this->GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, sort, computeEpsCoords);
 }
 
 void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)

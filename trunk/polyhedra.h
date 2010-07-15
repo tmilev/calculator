@@ -5448,7 +5448,7 @@ public:
 	void ComputeKModules();
 	void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
 	void ComputeExtremeWeightInTheSameKMod(root& input, root& outputW, bool lookingForHighest);
-	inline void operator=(const rootSubalgebra& right);
+	inline void operator=(const rootSubalgebra& right){this->Assign(right);};
 	void Assign(const rootSubalgebra& right);
 	void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
 	void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
@@ -5495,6 +5495,7 @@ public:
 	void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 	void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
+	void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
 	bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
 	void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
@@ -5760,9 +5761,10 @@ public:
   bool AttemptExtendingHEtoHEF(root& h, ElementSimpleLieAlgebra& e, ElementSimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWithCharacteristic2, roots& relativeRootSystem, Selection& theZeroCharacteristics, roots& simpleBasisSA, root& h, ElementSimpleLieAlgebra& outputE, ElementSimpleLieAlgebra& outputF, MatrixLargeRational& outputMatrixSystemToBeSolved, PolynomialsRationalCoeff& outputSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, GlobalVariables& theGlobalVariables);
   void FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
+  void FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables);
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
   void GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e);
-  void initHEFSystemFromECoeffs(int theRelativeDimension,  Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved);
+  void initHEFSystemFromECoeffs(int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved);
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReportNumCycles(int progress, int outOf,	GlobalVariables& theGlobalVariables);
@@ -5815,18 +5817,20 @@ class reductiveSubalgebras
 {
 public:
   SltwoSubalgebras theSl2s;
+  SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
+  Selection RemainingCandidates;
 //  ListBasicObjects<DynkinDiagramRootSubalgebra> thePossibleDynkinDiagrams;
   ListBasicObjects<ListBasicObjects<int> > theRanks;
   ListBasicObjects<ListBasicObjects<int> > theMultiplicities;
   ListBasicObjects<ListBasicObjects<char> > theLetters;
   ListBasicObjects<ListBasicObjects<int> > thePartitionValues;
   ListBasicObjects<ListBasicObjects<int> > thePartitionMultiplicities;
-  SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
-  ListBasicObjects<SimpleLieAlgebra> theCandidateSubAlgebras;
+  ListBasicObjects<SltwoSubalgebras> theCandidateSubAlgebras;
   ListBasicObjects<ListBasicObjects<int> > IndicesMatchingSl2s;
   ListBasicObjects<ListBasicObjects<int> > IndicesMatchingPartitionSl2s;
   ListBasicObjects<ListBasicObjects<int> > IndicesMatchingActualSl2s;
 	void MatchRealSl2sToPartitionSl2s();
+	void MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables);
 	void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
 	void GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables);
   void ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output);

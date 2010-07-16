@@ -1103,7 +1103,7 @@ void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
 		case 5: newWeylGroupIndex=2;  newWeylGroupLetter='B'; break;
 		case 6: newWeylGroupIndex=3;  newWeylGroupLetter='B'; break;
 		case 7: newWeylGroupIndex=4;  newWeylGroupLetter='B'; break;
-		case 8: newWeylGroupIndex=5;  newWeylGroupLetter='B'; break;//CombinatorialChamber::DisplayingGraphics=false; break;
+		case 8: newWeylGroupIndex=5;  newWeylGroupLetter='B'; break;
 		case 9: newWeylGroupIndex=2;  newWeylGroupLetter='C'; break;
 		case 10: newWeylGroupIndex=3; newWeylGroupLetter='C'; break;
 		case 11: newWeylGroupIndex=4; newWeylGroupLetter='C'; break;
@@ -1430,7 +1430,7 @@ void guiMainWindow::onComputationOver(wxCommandEvent& ev)
 { this->updatePartialFractionAndCombinatorialChamberTextData();
   MainWindow1->TurnOnAllDangerousButtons();
   MainWindow1->Button1Go->SetLabel(wxT("Go"));
- // MainWindow1->Refresh();
+  MainWindow1->Refresh();
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)

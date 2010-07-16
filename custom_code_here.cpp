@@ -1004,9 +1004,26 @@ void reductiveSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& th
 { this->RemainingCandidates.init(this->theLetters.size);
   for (int i=0; i<this->theLetters.size; i++)
     if (this->IndicesMatchingActualSl2s.TheObjects[i].size>0)
-    { this->RemainingCandidates.AddSelectionAppendNewIndex(i);
-      SemisimpleLieAlgebra& theSSLieAlgebra= this->theCandidateSubAlgebras.TheObjects[i].owner;
-      theSSLieAlgebra.FindSl2Subalgebras(this->theCandidateSubAlgebras.TheObjects[i], theGlobalVariables);
+    { SltwoSubalgebras& theCurrentAlgebrasSl2s= this->theCandidateSubAlgebras.TheObjects[i];
+      SemisimpleLieAlgebra& theSSLieAlgebra= theCurrentAlgebrasSl2s.owner;
+      theSSLieAlgebra.FindSl2Subalgebras(theCurrentAlgebrasSl2s, theGlobalVariables);
+      bool DoesFit=true;
+      for (int j=0; j<theCurrentAlgebrasSl2s.size; j++)
+      { slTwo& currentSl2= theCurrentAlgebrasSl2s.TheObjects[j];
+        bool currentSl2Fits=false;
+        for (int k=0; k<this->theSl2s.size; k++)
+        { slTwo& other= this->theSl2s.TheObjects[k];
+          currentSl2Fits=currentSl2.ModuleDecompositionFitsInto(currentSl2.highestWeights, currentSl2.multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
+          if (currentSl2Fits)
+            break;
+        }
+        if (!currentSl2Fits)
+        { DoesFit=false;
+          break;
+        }
+      }
+      if (DoesFit)
+        this->RemainingCandidates.AddSelectionAppendNewIndex(i);
     }
 }
 
@@ -1234,6 +1251,12 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
     if (currentSl2s.size>0)
     { this->ElementToStringDynkinType(i, useLatex, useHtml, tempS);
       out << tempS;
+      if (this->RemainingCandidates.selected[i])
+        out << " orbits fit\n";
+      else
+        out <<" orbits do not fit, embedding impossible\n";
+      if (useHtml)
+        out<<"<br>\n";
       currentSl2s.ElementToStringNoGenerators(tempS, theGlobalVariables, currentSl2s.theRootSAs.AmbientWeyl, useLatex, useHtml, false, 0, 0);
       out << tempS;
     }

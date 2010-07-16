@@ -321,7 +321,9 @@ void CombinatorialChamberContainer::OneSlice(roots& directions, int& index, int 
 			if (index<directions.size)
 				this->ComputeNextIndexToSlice(directions.TheObjects[index]);
 		}
-    this->MakeReportOneSlice(theGlobalVariables, index, directions.size);
+		if (index<directions.size)
+      this->MakeReportOneSlice(theGlobalVariables, index, directions.size, directions.TheObjects[index]);
+
     //if (ProblemCounter>1024)
      // assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
@@ -352,7 +354,7 @@ void CombinatorialChamberContainer::SortIndicesByDisplayNumber(ListBasicObjects<
 { outputSortedIndices.MakeActualSizeAtLeastExpandOnTop(this->size);
 	for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]!=0)
-			if (!this->TheObjects[i]->flagHasZeroPolynomial)
+			if (!this->TheObjects[i]->flagHasZeroPolynomiaL)
 				outputSortedIndices.AddObjectOnTop(i);
 	this->QuickSortIndicesByDisplayNumber(outputSortedIndices, 0, outputSortedIndices.size-1);
 }
@@ -436,8 +438,8 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 	this->flag2DprojectionDraw=true;
 	this->ColorChamberIndicator=RGB(220,220,0);
 	this->ColorWeylChamberWalls=RGB(220,220,0);
-	this->DeadChamberTextColor= RGB(200,100,100);
-	this->ZeroChamberTextColor= RGB(220,120,120);
+	this->DeadChamberTextColor= RGB(250,220,220);
+	this->ZeroChamberTextColor= RGB(200,100,100);
 	this->TextColor= RGB(0,0,0);
 	this->DrawStyleDashes= 1;
 	this->DrawStyleDashesInvisibles= 1;
@@ -1247,14 +1249,19 @@ void ComputationSetup::Run()
 	//this->VPVectors.ComputeDebugString();
 	this->IndexChamberOfInterest=-1;
   if (this->flagComputingChambers)
-	{ if (!this->flagDoingWeylGroupAction)
+	{ if (this->InputRoots.TheObjects[0].TheObjects[1].IsEqualToZero())
+      this->InputRoots.ReverseOrderElements();
+    //this->InputRoots.ElementToString(this->theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1);
+    //this->theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1NeedsRefresh=true;
+    //this->theGlobalVariablesContainer->Default()->FeedIndicatorWindow(this->theGlobalVariablesContainer->Default()->theIndicatorVariables);
+	  if (!this->flagDoingWeylGroupAction)
 		{ if (this->flagFullChop)
-			{ this->theChambers.SliceTheEuclideanSpace(	this->InputRoots,this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
+			{ this->theChambers.SliceTheEuclideanSpace(this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
 			} else
 			{ if (this->flagOneIncrementOnly)
-					this->theChambers.SliceOneDirection(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
+					this->theChambers.SliceOneDirection(this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
 				else
-					this->theChambers.OneSlice(	this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
+					this->theChambers.OneSlice(this->InputRoots, this->NextDirectionIndex,this->theChambers.AmbientDimension, 0, *this->theGlobalVariablesContainer->Default());
 			}
 			this->theChambers.ComputeDebugString(false,this->flagUseHtml);
 			if (this->DisplayNumberChamberOfInterest!=-1)
@@ -1296,10 +1303,10 @@ void ComputationSetup::Run()
         { roots tempRoots;
 					tempRoots.AssignHashedIntRoots(this->thePartialFraction.RootsToIndices);
 					root oldIndicator; oldIndicator.Assign(this->IndicatorRoot);
-					tempRoots.PerturbVectorToRegular(	this->IndicatorRoot,*this->theGlobalVariablesContainer->Default(), this->theChambers.AmbientDimension);
+					tempRoots.PerturbVectorToRegular(this->IndicatorRoot,*this->theGlobalVariablesContainer->Default(), this->theChambers.AmbientDimension);
 					while (!this->theChambers.TheObjects[this->IndexChamberOfInterest]->PointIsInChamber(this->IndicatorRoot))
 						this->IndicatorRoot.Add(oldIndicator);
-					while (!tempRoots.IsRegular(	this->IndicatorRoot, *this->theGlobalVariablesContainer->Default(), this->theChambers.AmbientDimension))
+					while (!tempRoots.IsRegular(this->IndicatorRoot, *this->theGlobalVariablesContainer->Default(), this->theChambers.AmbientDimension))
 						this->IndicatorRoot.Add(oldIndicator);
 					//this->thePartialFraction.IndicatorRoot.ComputeDebugString();
         }
@@ -1323,9 +1330,9 @@ void ComputationSetup::Run()
       { out<<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\n " <<"\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}\\addtolength{\\voffset}{-3.5cm}"
                 <<"\\addtolength{\\textheight}{7cm} \\begin{document}";
 				if (this->flagHavingNotationExplanation)
-        { this->VPVectors.ElementToString(tempS,true,false,false);
+        { this->VPVectors.ElementToString(tempS, true, false, false);
           out	<< this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
-          if (this->flagComputingChambers )
+          if (this->flagComputingChambers)
           { int tempI =this->theChambers.RootBelongsToChamberIndex(this->IndicatorRoot,0);
             this->theChambers.TheObjects[tempI]->ElementToInequalitiesString(tempS,this->theChambers,true,false);
             out<< tempS;
@@ -1434,19 +1441,14 @@ void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyl
 }
 
 void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile, drawTextFunction drawTextIn)
-{ Rational Epsilon; Epsilon.AssignNumeratorAndDenominator(-1,5);
-	for (int i=0; i<theDimension; i++)
-	{ root tempRoot; tempRoot.MakeZero(theDimension);
-		root tempRoot2; tempRoot2.MakeZero(theDimension);
-		for(int j=0; j<theDimension; j++)
-			tempRoot.TheObjects[j].Assign(Epsilon);
-		tempRoot.TheObjects[i].MakeOne();
-		tempRoot2.TheObjects[i].MakeOne();
+{ for (int i=0; i<theDimension; i++)
+	{ root tempRoot;
+    tempRoot.MakeEi(theDimension, i);
 		std::string tempS; std::stringstream out;
-		tempRoot2.ElementToString(tempS);
-		out <<"("<<tempS<<")";
+		tempRoot.ElementToString(tempS);
+		out << tempS;
 		tempS=out.str();
-		TDV.drawTextAtVector(tempRoot,tempS, 0,LatexOutFile, drawTextIn);
+		TDV.drawTextAtVector(tempRoot, tempS, 0, LatexOutFile, drawTextIn);
 	}
 }
 
@@ -1531,9 +1533,9 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
 	int NumTrueChambers=0;
 	//int NumTrueChambers2=0;
 	int NumZeroChambers=0;
-	for (int j=0; j<output.size;j++)
+	for (int j=0; j<output.size; j++)
 		if (output.TheObjects[j]!=0)
-		{ if (!output.TheObjects[j]->flagHasZeroPolynomial)
+		{ if (!output.TheObjects[j]->flagHasZeroPolynomiaL)
 			{ NumTrueChambers++;
 				output.TheObjects[j]->DisplayNumber=NumTrueChambers;
 			}
@@ -1545,25 +1547,27 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
 	if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
 		output.ComputeDebugString();
 	std::string tempS;
-	std::stringstream out,out1,out3, out2;
+	std::stringstream out, out1, out3, out2;
 	out<<"#Drawn chambers: "<<NumTrueChambers;
 	tempS=out.str();
-	drawTextIn(TDV.textX,TDV.textY, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawTextIn(TDV.textX, TDV.textY, tempS.c_str(), tempS.length(), TDV.TextColor);
 	out1<<"#Zero chambers: "<< NumZeroChambers;
 	tempS=out1.str();
-	drawTextIn(TDV.textX,TDV.textY+30, tempS.c_str(), tempS.length(),TDV.TextColor);
+	drawTextIn(TDV.textX, TDV.textY+30, tempS.c_str(), tempS.length(), TDV.TextColor);
 	out2<<"#Next chamber: ";
 	if (output.indexNextChamberToSlice!=-1)
 		if (output.TheObjects[output.indexNextChamberToSlice]!=0)
-		{ if (output.TheObjects[output.indexNextChamberToSlice]->flagHasZeroPolynomial)
-				out2 << "i"; else out2 <<"c";
+		{ if (output.TheObjects[output.indexNextChamberToSlice]->flagHasZeroPolynomiaL)
+				out2 << "i";
+      else
+        out2 <<"c";
 			out2 << output.TheObjects[output.indexNextChamberToSlice]->DisplayNumber;
 		}
 	if (output.flagMakingASingleHyperplaneSlice)
     out2	<< "; "<< "Plane: " << output.NumAffineHyperplanesProcessed+1 << " out of "<< output.theWeylGroupAffineHyperplaneImages.size;
 	tempS=out2.str();
 	if(drawTextIn!=0)
-    drawTextIn(TDV.textX,TDV.textY+15, tempS.c_str(), tempS.length(),TDV.TextColor);
+    drawTextIn(TDV.textX, TDV.textY+15, tempS.c_str(), tempS.length(), TDV.TextColor);
   //if (outputLatex!=0)
   //  LaTeXProcedures::drawText(TDV.textX,TDV.textY+15,tempS,0,outputLatex);
 	//int NumTrueChambers=0;
@@ -1572,9 +1576,9 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
 	if (output.size>1000)
 		return;
 	if (output.flagStoringVertices)
-	{ for (int j=0; j<output.size;j++)
+	{ for (int j=0; j<output.size; j++)
 		{ if (output.TheObjects[j]!=0)
-			{ bool hasZeroPoly= output.TheObjects[j]->flagHasZeroPolynomial;
+			{ bool hasZeroPoly= output.TheObjects[j]->flagHasZeroPolynomiaL;
 				int DrawingStyle;
 				int DrawingStyleDashes;
 				if (!hasZeroPoly)
@@ -1593,41 +1597,43 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
 						DrawingStyleDashes= 5;
 					}
 				}
-				if (output.TheObjects[j]->flagPermanentlyZero){color = TDV.DeadChamberTextColor;}
+				if (output.TheObjects[j]->flagPermanentlyZero)
+          color = TDV.DeadChamberTextColor;
 				if (TDV.DrawChamberIndices)
 				{ if ((!hasZeroPoly)||(TDV.DrawingInvisibles))
 					{ root tempRoot;
-						output.TheObjects[j]->ComputeInternalPointMethod2(tempRoot,output.AmbientDimension);
+						output.TheObjects[j]->ComputeInternalPointMethod2(tempRoot, output.AmbientDimension);
 						root Proj;
-						TDV.ProjectOnToHyperPlaneGraphics(tempRoot,Proj,directions);
+						TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Proj, directions);
 						std::stringstream out; std::string tempS;
 						if (TDV.DisplayingChamberCreationNumbers)
 							out<<output.TheObjects[j]->CreationNumber;
 						else
 							out<<output.TheObjects[j]->DisplayNumber;
 						tempS=out.str();
-						TDV.drawTextAtVector(Proj,tempS,color,outputLatex,drawTextIn);
+						TDV.drawTextAtVector(Proj, tempS, color, outputLatex, drawTextIn);
 					}
 				}
-				for (int i =0;i< output.TheObjects[j]->Externalwalls.size;i++)
-          CombinatorialChamberContainer::drawFacetVerticesMethod2( TDV, output.TheObjects[j]->AllVertices, directions,j, output.TheObjects[j]->Externalwalls.TheObjects[i], DrawingStyle,DrawingStyleDashes,theDrawFunction,outputLatex);
+				for (int i =0; i<output.TheObjects[j]->Externalwalls.size; i++)
+          CombinatorialChamberContainer::drawFacetVerticesMethod2(TDV, output.TheObjects[j]->AllVertices, directions, j, output.TheObjects[j]->Externalwalls.TheObjects[i], DrawingStyle, DrawingStyleDashes, theDrawFunction, outputLatex);
 			}
 		}
 		if (output.size>0 && ChamberIndicator.size==output.AmbientDimension && TDV.flag2DprojectionDraw)
 		{ root tempRootX;
-			TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator,tempRootX,directions);
-			double tmpX,tmpY;
+			TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator, tempRootX, directions);
+			double tmpX, tmpY;
 			TDV.GetCoordsForDrawing(TDV,tempRootX,tmpX,tmpY);
-			TDV.drawLineOld(	tmpX-2,tmpY-2,tmpX+2,tmpY+2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex, theDrawFunction);
-			TDV.drawLineOld(	tmpX-2,tmpY+2,tmpX+2,tmpY-2,TDV.DrawStyle,TDV.ColorChamberIndicator,outputLatex, theDrawFunction);
+			TDV.drawLineOld(tmpX-2, tmpY-2, tmpX+2, tmpY+2, TDV.DrawStyle, TDV.ColorChamberIndicator, outputLatex, theDrawFunction);
+			TDV.drawLineOld(tmpX-2, tmpY+2, tmpX+2, tmpY-2, TDV.DrawStyle, TDV.ColorChamberIndicator, outputLatex, theDrawFunction);
 			tmpX=(tmpX-TDV.centerX)*1.5+TDV.centerX;
 			tmpY=(tmpY-TDV.centerY)*1.5+TDV.centerY;
-			TDV.drawLineOld( TDV.centerX,TDV.centerY,tmpX,tmpY,TDV.DrawStyle, TDV.ColorChamberIndicator,outputLatex,theDrawFunction);
+			TDV.drawLineOld(TDV.centerX, TDV.centerY, tmpX, tmpY, TDV.DrawStyle, TDV.ColorChamberIndicator, outputLatex, theDrawFunction);
 			std::string tempS="Indicator";
 			if (drawTextIn!=0)
-        drawTextIn(tmpX,tmpY,tempS.c_str(),tempS.size(),TDV.TextColor);
+        drawTextIn(tmpX, tmpY, tempS.c_str(), tempS.size(), TDV.TextColor);
 		}
 	}
+	TDV.drawCoordSystem(TDV, output.AmbientDimension, outputLatex, drawTextIn);
 	Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 }
 
@@ -1735,7 +1741,7 @@ void root::ScaleForMinHeightHeavy()
 			else
 			{ LargeIntUnsigned tempI;
 				this->TheObjects[i].GetNumExtendedUnsigned(tempI);
-				LargeIntUnsigned::gcd(d,tempI,d);
+				LargeIntUnsigned::gcd(d, tempI, d);
 			}
 		}
 
@@ -1920,19 +1926,19 @@ void root::Add(const root&r)
 
 bool root::OurScalarProductIsPositive(root& right)
 { Rational tempRat;
-	root::RootScalarEuclideanRoot(*this,right,tempRat);
+	root::RootScalarEuclideanRoot(*this, right, tempRat);
 	return tempRat.IsPositive();
 }
 
 bool root::OurScalarProductIsNegative(root& right)
 { Rational tempRat;
-	root::RootScalarEuclideanRoot(*this,right,tempRat);
+	root::RootScalarEuclideanRoot(*this, right, tempRat);
 	return tempRat.IsNegative();
 }
 
 bool root::OurScalarProductIsZero(root& right)
 { Rational tempRat;
-	root::RootScalarEuclideanRoot(*this,right,tempRat);
+	root::RootScalarEuclideanRoot(*this, right, tempRat);
 	return tempRat.IsEqualToZero();
 }
 
@@ -3276,14 +3282,14 @@ inline void Rational::ElementToString(std::string& output)
   output = out.str();
 }
 
-void CombinatorialChamber::AddInternalWall(	root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root &direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables )
+void CombinatorialChamber::AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root& direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
 { Rational tempRat;
 	root::RootScalarEuclideanRoot(direction, TheFacetBeingKilledNormal,tempRat);
 	root tempRoot; tempRoot.Assign(TheKillerFacetNormal);
 	tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-	if ( !owner->flagMakingASingleHyperplaneSlice &&tempRat.IsPositive())
+	if (!owner->flagMakingASingleHyperplaneSlice &&tempRat.IsPositive())
 		this->InternalWalls.AddRootNoRepetition(tempRoot);
-	if (owner->flagMakingASingleHyperplaneSlice && !this->flagExplored )
+	if (owner->flagMakingASingleHyperplaneSlice && !this->flagExplored)
 		if (!owner->flagSliceWithAWallIgnorePermanentlyZero || !this->flagPermanentlyZero)
 			owner->PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->IndexInOwnerComplex);
 }
@@ -3297,14 +3303,14 @@ bool CombinatorialChamber::CheckSplittingPointCandidate(Selection &SelectionTarg
 	return true;
 }
 
-bool CombinatorialChamber::ComputeDebugString( CombinatorialChamberContainer* owner)
+bool CombinatorialChamber::ComputeDebugString(CombinatorialChamberContainer* owner)
 { this->ElementToString(this->DebugString, owner);
 	return true;
 }
 
 void CombinatorialChamber::ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner)
 { std::stringstream out;
-  if (this->flagHasZeroPolynomial)
+  if (this->flagHasZeroPolynomiaL)
     out<< "Invisible";
 	else
     out <<"c";
@@ -3312,6 +3318,10 @@ void CombinatorialChamber::ChamberNumberToString(std::string& output, Combinator
 		out<<this->DisplayNumber;
 	else
 		out<<this->CreationNumber;
+  if (this->flagPermanentlyZero)
+    out <<" (Permanently zero)";
+  if (this->flagExplored)
+    out <<"(Explored)";
   output=out.str();
 }
 
@@ -3389,7 +3399,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 		}
 	}*/
 	this->ElementToInequalitiesString(tempS, *owner, useLatex, useHtml);
-	out<<tempS<<"\n\n";
+	out<<tempS;
 	ListObjectPointers<CombinatorialChamber> outputChambers;
 	this->FindAllNeighbors(outputChambers);
 	out<<"Neighbors: ";
@@ -3453,8 +3463,8 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
 	if (checkVertices)
     for (int i=0; i<this->Externalwalls.size; i++)
 		{ Rational tempRat;
-			this->ComputeInternalPointMethod2(this->InternalPoint,theDimension);
-			root::RootScalarEuclideanRoot(this->InternalPoint,this->Externalwalls.TheObjects[i].normal,tempRat);
+			this->ComputeInternalPointMethod2(this->InternalPoint, theDimension);
+			root::RootScalarEuclideanRoot(this->InternalPoint, this->Externalwalls.TheObjects[i].normal, tempRat);
 			if (tempRat.IsNonPositive())
 			{ assert(false);
 				return false;
@@ -3464,7 +3474,7 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
 }
 
 CombinatorialChamber::CombinatorialChamber()
-{ this->flagHasZeroPolynomial=true;
+{ this->flagHasZeroPolynomiaL = true;
   this->IndexInOwnerComplex=-1;
   this->IndexStartingCrossSectionNormal=-1;
 	this->flagExplored=false;
@@ -3481,7 +3491,7 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace(CombinatorialChamberConta
 	root tempCrossSectionNormal, tempAffinePoint;
 	tempCrossSectionNormal.AssignWithoutLastCoordinate(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal);
 	tempAffinePoint.AssignWithoutLastCoordinate(owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint);
-	for (int i=0;i<this->Externalwalls.size;i++)
+	for (int i=0; i<this->Externalwalls.size; i++)
 	{ affineHyperplane tempAH;
 		if (this->Externalwalls.TheObjects[i].normal.MakeAffineProjectionFromNormal(tempAH))
 			this->affineExternalWalls.AddObjectOnTop(tempAH);
@@ -3492,9 +3502,9 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace(CombinatorialChamberConta
 	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.ComputeDebugString();
 	//this->ComputeDebugString(owner);
 	root tempRoot;
-	for (int i=0;i<this->AllVertices.size;i++)
+	for (int i=0; i<this->AllVertices.size; i++)
 		if (this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
-		{ root::RootScalarEuclideanRoot(	tempCrossSectionNormal,tempRoot, tempRat);
+		{ root::RootScalarEuclideanRoot(tempCrossSectionNormal, tempRoot, tempRat);
 			if (tempRat.IsEqualTo(tempScalarProd1))
 			{	//for (int i=0;i<owner->StartingCrossSections.size;i++)
 				{	owner->StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint.MultiplyByInteger(2);
@@ -3505,12 +3515,12 @@ bool CombinatorialChamber::ProjectToDefaultAffineSpace(CombinatorialChamberConta
 			this->affineVertices.AddObjectOnTop(tempRoot);
 		}
 	this->NumTrueAffineVertices= this->affineVertices.size;
-	for (int i=0;i<this->AllVertices.size;i++)
+	for (int i=0; i<this->AllVertices.size; i++)
 		if (!this->AllVertices.TheObjects[i].ProjectToAffineSpace(tempRoot))
 		{ Selection tempSel;
-			this->findWallsIncidentWithVertexExcludeWallAtInfinity(this->AllVertices.TheObjects[i],tempSel, owner);
-			assert(	tempSel.CardinalitySelection>=owner->AmbientDimension-2);
-			this->ComputeAffineInfinityPointApproximation(tempSel,owner,theGlobalVariables);
+			this->findWallsIncidentWithVertexExcludeWallAtInfinity(this->AllVertices.TheObjects[i], tempSel, owner);
+			assert(tempSel.CardinalitySelection>=owner->AmbientDimension-2);
+			this->ComputeAffineInfinityPointApproximation(tempSel, owner, theGlobalVariables);
 		}
 	//this->ComputeDebugString(owner);
 	return true;
@@ -3520,16 +3530,16 @@ void CombinatorialChamber::PurgeInternalWalls()
 { this->InternalWalls.size=0;
 }
 
-void CombinatorialChamber::ComputeAffineInfinityPointApproximation(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
+void CombinatorialChamber::ComputeAffineInfinityPointApproximation(Selection& selectedExternalWalls, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
 { root candidateVertex;
 	Selection& subSelection = theGlobalVariables.selComputeAffineInfinityPointApproximation1;
 	Selection& tempSel = theGlobalVariables.selComputeAffineInfinityPointApproximation2;
 	tempSel.init(selectedExternalWalls.CardinalitySelection);
 	int tempI = MathRoutines::NChooseK(selectedExternalWalls.CardinalitySelection, owner->AmbientDimension-2);
-	for (int i=0;i<tempI;i++)
+	for (int i=0; i<tempI; i++)
 	{ tempSel.incrementSelectionFixedCardinality(owner->AmbientDimension-2);
-		subSelection.MakeSubSelection(selectedExternalWalls,tempSel);
-		if (this->LinearAlgebraForVertexComputationOneAffinePlane(subSelection,candidateVertex,theGlobalVariables,owner))
+		subSelection.MakeSubSelection(selectedExternalWalls, tempSel);
+		if (this->LinearAlgebraForVertexComputationOneAffinePlane(subSelection, candidateVertex, theGlobalVariables, owner))
 			this->affineVertices.AddObjectOnTop(candidateVertex);
 	}
 }
@@ -3591,7 +3601,7 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 }
 
 void CombinatorialChamber::drawOutputAffine(	DrawingVariables& TDV,CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput,drawLineFunction theDrawFunction,drawTextFunction drawTextIn)
-{ if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomial)
+{ if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomiaL)
 		return;
 	TDV.ApplyScale(0.3);
 	for (int i=0;i<this->affineVertices.size;i++)
@@ -3605,7 +3615,7 @@ void CombinatorialChamber::drawOutputAffine(	DrawingVariables& TDV,Combinatorial
       if (AreInAWall!=0)
 			{ int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex,LaTeXoutput);
 				int penStyle = TDV.DrawStyle;
-				if (this->flagHasZeroPolynomial || this->flagPermanentlyZero)
+				if (this->flagHasZeroPolynomiaL || this->flagPermanentlyZero)
 					penStyle= TDV.DrawStyleInvisibles;
 				if (owner.AffineWallsOfWeylChambers.IndexOfObjectHash(*AreInAWall)!=-1)
 					color= TDV.ColorWeylChamberWalls;
@@ -3615,7 +3625,7 @@ void CombinatorialChamber::drawOutputAffine(	DrawingVariables& TDV,Combinatorial
 				out << this->DisplayNumber;
 				std::string tempS;
 				tempS=out.str();
-				if (! this->flagHasZeroPolynomial)
+				if (! this->flagHasZeroPolynomiaL)
 					color=TDV.TextColor;
 				else
 					color= TDV.ZeroChamberTextColor;
@@ -3697,8 +3707,8 @@ bool CombinatorialChamber::ExtraPointRemovesDoubtForBogusWall(MatrixLargeRationa
 }
 
 bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
-{ if (NeighborWall.NeighborsAlongWall.size<=1)
-		return false;
+{// if (NeighborWall.NeighborsAlongWall.size<=1)
+		//return false;
 	int theDimension= ownerComplex.AmbientDimension;
 	MatrixLargeRational& tempMat= theGlobalVariables.matBogusNeighbors;
 	MatrixLargeRational& emptyMat= theGlobalVariables.matBogusNeighborsEmpty;
@@ -3813,7 +3823,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane(Selec
 	Selection tempSel;
 	tempMat.ComputeDebugString();
 	tempColumn.ComputeDebugString();
-	Matrix<Rational>::GaussianEliminationByRows(tempMat,tempColumn, tempSel);
+	Matrix<Rational>::GaussianEliminationByRows(tempMat, tempColumn, tempSel);
 	if(tempSel.CardinalitySelection!=0)
 		return false;
 	output.SetSizeExpandOnTopLight(owner->AmbientDimension-1);
@@ -3843,10 +3853,10 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
 	else
 		for (int i=0; i<this->Externalwalls.size; i++)
 		  if(this->Externalwalls.TheObjects[i].IsExternalWithRespectToDirection(direction))
-			{ if (this->flagHasZeroPolynomial)
+			{ if (this->flagHasZeroPolynomiaL)
 				{ bool tempBool;
 					this->Externalwalls.TheObjects[i].EveryNeigborIsExplored(tempBool);
-					canHaveZeroPoly = canHaveZeroPoly || tempBool;
+					canHaveZeroPoly = canHaveZeroPoly && tempBool;
 				}
 				for (int j=i+1; j<this->Externalwalls.size; j++)
 					if(this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction))
@@ -3865,8 +3875,8 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
 						}
 					}
 		  }
-	if (this->flagHasZeroPolynomial)
-		this->flagHasZeroPolynomial= canHaveZeroPoly;
+	if (this->flagHasZeroPolynomiaL)
+		this->flagHasZeroPolynomiaL= canHaveZeroPoly;
 	this->flagExplored=true;
 	return false;
 }
@@ -3996,8 +4006,8 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
 	NewMinusChamber->flagPermanentlyZero = MinusChamberIsPermanentZero;
 	NewPlusChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
 	NewMinusChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->Externalwalls.size+1);
-	NewPlusChamber->flagHasZeroPolynomial = this->flagHasZeroPolynomial;
-	NewMinusChamber->flagHasZeroPolynomial = this->flagHasZeroPolynomial;
+	NewPlusChamber->flagHasZeroPolynomiaL = this->flagHasZeroPolynomiaL;
+	NewMinusChamber->flagHasZeroPolynomiaL = this->flagHasZeroPolynomiaL;
 	NewPlusChamber->IndexStartingCrossSectionNormal = this->IndexStartingCrossSectionNormal;
 	NewMinusChamber->IndexStartingCrossSectionNormal = this->IndexStartingCrossSectionNormal;
 	output.AddChamberPointerSetUpPreferredIndices(NewPlusChamber, theGlobalVariables);
@@ -4044,7 +4054,8 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
 		//	PossibleBogusNeighbors.TheObjects[i]->ComputeDebugString();
 		//}
 		WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
-		if (!output.flagStoringVertices)
+//		if (!output.flagStoringVertices)
+    if (true)
 		{ if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
         possibleBadWall.RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
       if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
@@ -4098,7 +4109,7 @@ void CombinatorialChamber::PropagateSlicingWallThroughNonExploredNeighbors(root&
 void CombinatorialChamberContainer::ConvertHasZeroPolyToPermanentlyZero()
 { for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]!=0)
-			if (this->TheObjects[i]->flagHasZeroPolynomial)
+			if (this->TheObjects[i]->flagHasZeroPolynomiaL)
 				this->TheObjects[i]->flagPermanentlyZero=true;
 }
 
@@ -4222,7 +4233,7 @@ bool CombinatorialChamberContainer::IsSurelyOutsideGlobalCone(rootsCollection& T
 }
 
 void CombinatorialChamberContainer::ComputeGlobalCone(roots& directions, GlobalVariables& theGlobalVariables)
-{ this->TheGlobalConeNormals.ComputeFromDirections(directions, theGlobalVariables,this->AmbientDimension);
+{ this->TheGlobalConeNormals.ComputeFromDirections(directions, theGlobalVariables, this->AmbientDimension);
 }
 
 void CombinatorialChamberContainer::MakeExtraProjectivePlane()
@@ -4236,12 +4247,12 @@ void CombinatorialChamberContainer::MakeExtraProjectivePlane()
 	}*/
 }
 
-void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots)
+void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots, root& theCurrentDirection)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
 		return;
 	std::stringstream out5;
 	std::stringstream out4;
-	out4<< "Direction index: " << currentIndex<< " out of " << totalRoots;
+	out4<< "Direction index: " << currentIndex<< " out of " << totalRoots <<" current direction: "<<theCurrentDirection.ElementToString();
   out5<< "Chamber index: " << this->indexNextChamberToSlice<<" Total #: "<< this->size;
   theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
@@ -4296,11 +4307,11 @@ void CombinatorialChamberContainer::ComputeNextIndexToSlice(root& direction)
 	bool foundUnexplored=false;
 	for (int i=this->FirstNonExploredIndex; i<size; i++)
     if (this->TheObjects[i]!=0)
-		{ if(!foundUnexplored && !this->TheObjects[i]->flagExplored )
+		{ if(!foundUnexplored && !this->TheObjects[i]->flagExplored)
 			{ this->FirstNonExploredIndex=i;
 				foundUnexplored=true;
 			}
-			if (this->TheObjects[i]->TestPossibilityToSlice (direction))
+			if (this->TheObjects[i]->TestPossibilityToSlice(direction))
 			{ this->indexNextChamberToSlice= i;
 				return;
 			}
@@ -4378,7 +4389,7 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
 	if (!useLatex)
 	{ for (int i=0; i<this->size; i++)
 		  if (this->TheObjects[i]!=0)
-			  if (!this->TheObjects[i]->flagHasZeroPolynomial || !useHtml)
+			  if (!this->TheObjects[i]->flagHasZeroPolynomiaL || !useHtml)
 			  { this->TheObjects[i]->ElementToString(tempS, this, useLatex, useHtml);
           out <<tempS;
           if (useHtml)
@@ -4519,7 +4530,7 @@ int CombinatorialChamberContainer::GetNumVisibleChambersAndLabelChambersForDispl
 	int NumChambersNonZero=0;
 	for (int i=0; i<this->size; i++)
 	{ if (this->TheObjects[i]!=0)
-		{ if (this->TheObjects[i]->flagHasZeroPolynomial)
+		{ if (this->TheObjects[i]->flagHasZeroPolynomiaL)
 			{ NumZeroChambers++;
 				this->TheObjects[i]->DisplayNumber=NumZeroChambers;
 			} else
@@ -4534,7 +4545,7 @@ int CombinatorialChamberContainer::GetNumVisibleChambersAndLabelChambersForDispl
 int CombinatorialChamberContainer::FindVisibleChamberWithDisplayNumber(int inputDisplayNumber)
 { for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]!=0)
-			if (!this->TheObjects[i]->flagHasZeroPolynomial)
+			if (!this->TheObjects[i]->flagHasZeroPolynomiaL)
 				if (this->TheObjects[i]->DisplayNumber==inputDisplayNumber)
       return i;
   return -1;
@@ -4544,7 +4555,7 @@ int CombinatorialChamberContainer::GetNumVisibleChambersNoLabeling()
 { int NumChambersNonZero=0;
 	for (int i=0; i<this->size; i++)
 		if (this->TheObjects[i]!=0)
-			if (!this->TheObjects[i]->flagHasZeroPolynomial)
+			if (!this->TheObjects[i]->flagHasZeroPolynomiaL)
 				NumChambersNonZero++;
 	return NumChambersNonZero;
 }
@@ -4556,7 +4567,7 @@ int CombinatorialChamberContainer::GetNumChambersInWeylChamberAndLabelChambers(C
 //	theWeylChamber.ComputeDebugString();
 	for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
-		{ if (this->TheObjects[i]->flagHasZeroPolynomial)
+		{ if (this->TheObjects[i]->flagHasZeroPolynomiaL)
 			{ NumZeroChambers++;
 				this->TheObjects[i]->DisplayNumber=NumZeroChambers;
 			} else
@@ -4574,7 +4585,7 @@ int CombinatorialChamberContainer::GetNumChambersInWeylChamberAndLabelChambers(C
 	NumChambersNonZeroNotInWeyl=0;
 	for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
-		 if (!this->TheObjects[i]->flagHasZeroPolynomial)
+		 if (!this->TheObjects[i]->flagHasZeroPolynomiaL)
 			 if (this->TheObjects[i]->affineVertices.size!=0)
 				{ root tempRoot;
 					this->TheObjects[i]->ComputeAffineInternalPoint(tempRoot, this->AmbientDimension-1);
@@ -4610,7 +4621,7 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 	Selection theSelection;
 	theSelection.init(this->AmbientDimension);
 	this->theHyperplanes.ClearTheObjects();
-	this->theHyperplanes.MakeActualSizeAtLeastExpandOnTop(MathRoutines::NChooseK(directions.size,this->AmbientDimension-1));
+	this->theHyperplanes.MakeActualSizeAtLeastExpandOnTop(MathRoutines::NChooseK(directions.size, this->AmbientDimension-1));
 	for(int i=0; i<this->AmbientDimension; i++)
 	{ roots TempRoots;
 		root TempRoot;
@@ -4670,14 +4681,20 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 		if (this->TheGlobalConeNormals.IsSurelyOutsideCone(this->TheObjects[i]->AllVertices))
 			this->TheObjects[i]->flagPermanentlyZero=true;
 	}
-	this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomial=false;
+	this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomiaL=false;
+/*	this->TheGlobalConeNormals.ElementToString(theGlobalVariables.theIndicatorVariables.StatusString1);
+	this->ComputeDebugString(false);
+	theGlobalVariables.theIndicatorVariables.StatusString1.append(this->DebugString);
+	theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+	theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+*/
 //	if (this->flagAnErrorHasOcurredTimeToPanic)
 //		this->ComputeDebugString();
 }
 
 void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Flags_and_indices: ";
-  output << this->flagHasZeroPolynomial << " " << this->flagExplored<< " " <<this->flagPermanentlyZero << " ";
+  output << this->flagHasZeroPolynomiaL << " " << this->flagExplored<< " " <<this->flagPermanentlyZero << " ";
   output << this->IndexInOwnerComplex << " " << this->IndexStartingCrossSectionNormal << " "<< this->DisplayNumber << "\nVertices:\n";
   this->AllVertices.WriteToFile(output, theGlobalVariables);
   output << "Internal_point: ";
@@ -4695,7 +4712,7 @@ void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& th
 { std::string tempS;
   int tempI;
   input >> tempS;
-  input >> this->flagHasZeroPolynomial >> this->flagExplored>>this->flagPermanentlyZero;
+  input >> this->flagHasZeroPolynomiaL >> this->flagExplored>>this->flagPermanentlyZero;
   input >> this->IndexInOwnerComplex >> this->IndexStartingCrossSectionNormal;
   input >> this->DisplayNumber;
   input >> tempS;
@@ -4886,25 +4903,25 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVa
 	root normalCandidate;
 	for (int i=0; i<NumCandidates; i++)
 	{ theSelection.incrementSelectionFixedCardinality(theDimension-1);
-		if (directions.ComputeNormalFromSelection(normalCandidate,theSelection, theGlobalVariables,theDimension))
+		if (directions.ComputeNormalFromSelection(normalCandidate, theSelection, theGlobalVariables, theDimension))
 		{ bool hasPositive; bool hasNegative;
 			hasPositive=false; hasNegative=false;
 			for (int j=0; j<directions.size; j++)
 			{ Rational tempRat;
-				root::RootScalarEuclideanRoot(directions.TheObjects[j],normalCandidate,tempRat);
-				if (tempRat.IsNegative()){hasNegative=true;}
-				if (tempRat.IsPositive()){hasPositive=true;}
+				root::RootScalarEuclideanRoot(directions.TheObjects[j], normalCandidate, tempRat);
+				if (tempRat.IsNegative())
+          hasNegative=true;
+				if (tempRat.IsPositive())
+          hasPositive=true;
 			}
+			normalCandidate.ScaleToIntegralMinHeight();
 			if ((hasNegative && !hasPositive))
         normalCandidate.MinusRoot();
-			normalCandidate.ScaleToIntegralMinHeight();
 			if (!(hasNegative && hasPositive))
-			{	bool IsValid;
-				IsValid=true;
+			{	bool IsValid=true;
 				for (int j=0; j<this->size; j++)
-				{	if (normalCandidate.IsProportianalTo( this->TheObjects[j]))
+          if (normalCandidate.IsProportianalTo(this->TheObjects[j]))
 						IsValid=false;
-				}
 				if (IsValid)
           this->AddRootNoRepetition(normalCandidate);
 			}
@@ -4914,33 +4931,31 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVa
 }
 
 bool Cone::IsSurelyOutsideCone(roots& TheVertices)
-{ if (!this->FillInChamberTestArray(TheVertices,true))
+{ if (!this->FillInChamberTestArray(TheVertices, true))
 		return false;
 	return this->IsSurelyOutsideConeAccordingToChamberTestArray();
 }
 
 bool Cone::FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray)
 { //init first the array we will use for check
-  //values in the array: -1 undertermined, 0 - outside normal, +1 inside normal
+  //values in the array: 0 undertermined, -1 - outside with respect to the normal of the particular wall, +1 inside with respect to the normal of the particular wall
 	if (initChamberTestArray)
-		for (int i=0;i<this->size;i++)
-			this->ChamberTestArray.TheObjects[i]=-1;
-	for (int j=0;j<TheVertices.size;j++)
-	{ bool TestedVertexIsStrictlyInsideGlobalCone;
-		TestedVertexIsStrictlyInsideGlobalCone= true;
-		for (int k=0;k<this->size;k++)
+    this->ChamberTestArray.initFillInObject(this->size, 0);
+	for (int j=0; j<TheVertices.size; j++)
+	{ bool TestedVertexIsStrictlyInsideGlobalCone = true;
+		for (int k=0; k<this->size; k++)
 		{ Rational tempRat;
 			root::RootScalarEuclideanRoot(TheVertices.TheObjects[j], this->TheObjects[k], tempRat);
-			int state;	state=-1;
+			int state;	state=0;
 			if (tempRat.IsPositive())
 				state =1;
 			else
 			{ TestedVertexIsStrictlyInsideGlobalCone=false;
 				if (tempRat.IsNegative())
-					state=0;
+					state=-1;
 			}
-			if (state!=-1)
-			{ if (this->ChamberTestArray.TheObjects[k]==-1)
+			if (state!=0)
+			{ if (this->ChamberTestArray.TheObjects[k]==0)
 					this->ChamberTestArray.TheObjects[k]=state;
 				else
 					if (this->ChamberTestArray.TheObjects[k]!=state)
@@ -4955,17 +4970,17 @@ bool Cone::FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray)
 
 bool Cone::IsSurelyOutsideConeAccordingToChamberTestArray()
 { for (int i=0; i<this->size; i++)
-		if (this->ChamberTestArray.TheObjects[i]==0)
+		if (this->ChamberTestArray.TheObjects[i]==-1)
       return true;
 	return false;
 }
 
-bool Cone::IsSurelyOutsideCone(::rootsCollection& TheVertices)
+bool Cone::IsSurelyOutsideCone(rootsCollection& TheVertices)
 { bool firstRun=true;
 	for (int i=0; i<TheVertices.size; i++)
-	{	if (!this->FillInChamberTestArray(TheVertices.TheObjects[i],firstRun))
+	{	if (!this->FillInChamberTestArray(TheVertices.TheObjects[i], firstRun))
 			return false;
-		firstRun=true;
+		firstRun=false;
 	}
 	return this->IsSurelyOutsideConeAccordingToChamberTestArray();
 }
@@ -4998,7 +5013,7 @@ void CombinatorialChamber::InduceFromCombinatorialChamberLowerDimensionNoAdjacen
 	this->Externalwalls.LastObject()->IndicesMirrorWalls.AddObjectOnTop(-1);
 	this->Externalwalls.LastObject()->NeighborsAlongWall.size=0;
 	this->Externalwalls.LastObject()->NeighborsAlongWall.AddObjectOnTop(0);
-	this->flagHasZeroPolynomial= input.flagHasZeroPolynomial;
+	this->flagHasZeroPolynomiaL= input.flagHasZeroPolynomiaL;
 	this->flagPermanentlyZero= input.flagPermanentlyZero;
 	this->IndexStartingCrossSectionNormal= input.IndexStartingCrossSectionNormal;
 }
@@ -5029,7 +5044,7 @@ void CombinatorialChamber::WireChamberAndWallAdjacencyData(CombinatorialChamberC
 bool Cone::IsInCone(root& r)
 { for (int i=0; i<this->size; i++)
 	{ Rational tempRat;
-		root::RootScalarEuclideanRoot(r,this->TheObjects[i],tempRat);
+		root::RootScalarEuclideanRoot(r, this->TheObjects[i], tempRat);
 		if (tempRat.IsNegative())
       return false;
 	}
@@ -5058,14 +5073,15 @@ bool WallData::IsExternalWithRespectToDirection(root& direction)
 { return this->normal.OurScalarProductIsPositive(direction);
 }
 
-bool WallData::EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly)
-{ aNeighborHasNonZeroPoly=false;
+bool WallData::EveryNeigborIsExplored(bool& allNeighborsHaveZeroPoly)
+{ allNeighborsHaveZeroPoly=true;
 	for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]!=0)
 		{ if ((!this->NeighborsAlongWall.TheObjects[i]->flagExplored)&&(!this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero))
 				return false;
 			else
-				aNeighborHasNonZeroPoly=aNeighborHasNonZeroPoly	|| this->NeighborsAlongWall.TheObjects[i]->flagHasZeroPolynomial;
+        if(!this->NeighborsAlongWall.TheObjects[i]->flagHasZeroPolynomiaL && !this->NeighborsAlongWall.TheObjects[i]->flagPermanentlyZero)
+          allNeighborsHaveZeroPoly=false;
 		}
 	return true;
 }
@@ -5081,14 +5097,14 @@ bool WallData::FacetContainsChamberOnlyOnce(CombinatorialChamber *owner)
 	return FoundOnce;
 }
 
-void WallData::ElementToString(std::string &output)
+void WallData::ElementToString(std::string& output)
 { std::stringstream out;
 	std::string tempS; this->normal.ElementToString(tempS);
 	out<< "normal: "<< tempS << " Neighbors: ";
 	if (this->flagDisplayWallDetails)
     for (int i=0;i<this->NeighborsAlongWall.size;i++)
 		{ if (this->NeighborsAlongWall.TheObjects[i]!=0)
-			{ if (this->NeighborsAlongWall.TheObjects[i]->flagHasZeroPolynomial)
+			{ if (this->NeighborsAlongWall.TheObjects[i]->flagHasZeroPolynomiaL)
 					out <<"Invisible";
 				else
 					out <<"c";

@@ -1560,6 +1560,7 @@ public:
 	void MultiplyByLargeInt(LargeInt& right);
 	void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
 	bool OurScalarProductIsPositive(root& right);
+	bool OurScalarProductIsNonNegative(root& right){return !this->OurScalarProductIsNegative(right);};
 	bool OurScalarProductIsNegative(root& right);
 	bool OurScalarProductIsZero(root& right);
 	void MinusRoot();
@@ -1685,8 +1686,8 @@ public:
 	void ComputeNormal(root& output);
 	bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables& theGlobalVariables);
 	bool ComputeNormalFromSelection(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension);
-	bool ComputeNormalFromSelectionAndExtraRoot(root& output,root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
-	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output,root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
+	bool ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
+	bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output, root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
 	bool operator==(const roots& right);
 	void operator = (const roots& right){this->CopyFromBase(right);};
 	void ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariables);
@@ -1721,7 +1722,7 @@ public:
 	bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
 	bool SplitWall(int indexInOwner, ListBasicObjects<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
 	bool ConsistencyCheck(CombinatorialChamber* owner);
-	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
+	bool EveryNeigborIsExplored(bool& allNeighborsHaveZeroPoly);
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner);
 };
@@ -1785,7 +1786,7 @@ class CombinatorialChamber
 {
 public:
 	std::string DebugString;
-	bool flagHasZeroPolynomial;
+	bool flagHasZeroPolynomiaL;
 	bool flagExplored;
 	bool flagPermanentlyZero;
 	//QuasiPolynomial* ThePolynomial;
@@ -1809,8 +1810,8 @@ public:
 	bool ComputeDebugString(CombinatorialChamberContainer* owner);
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner);
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml);
-	void ElementToInequalitiesString (std::string& output,CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
-	void ChamberNumberToString(std::string& out, CombinatorialChamberContainer& owner);
+	void ElementToInequalitiesString (std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
+	void ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner);
 	bool ConsistencyCheck(int theDimension, bool checkVertices);
 	//bool FacetIsInternal(Facet* f);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
@@ -2589,7 +2590,7 @@ public:
 	bool ConsistencyCheck();
 	void PurgeZeroPointers();
 	void PurgeInternalWalls();
-	void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots);
+	void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots, root& theCurrentDirection);
 	void ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables);
 	bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables& theGlobalVariables);
 	void PrintThePolys(std::string& output);

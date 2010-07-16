@@ -558,15 +558,15 @@ MatrixElementaryLooseMemoryFit<Element>::~MatrixElementaryLooseMemoryFit()
 
 template <typename Element>
 inline void MatrixElementaryLooseMemoryFit<Element>::init(int r, int c)
-{ this->Resize(r,c,false);
+{ this->Resize(r, c, false);
 }
 
 template <typename Element>
 bool MatrixElementaryLooseMemoryFit<Element>::IsEqualTo(MatrixElementaryLooseMemoryFit<Element> &right)
 { if (this->NumCols!=right.NumCols || this->NumRows!=right.NumRows)
 		return false;
-	for (int i=0;i<this->NumRows;i++)
-		for (int j=0; j<this->NumCols;j++)
+	for (int i=0; i<this->NumRows; i++)
+		for (int j=0; j<this->NumCols; j++)
 			if(!(this->elements[i][j]==right.elements[i][j]))
 				return false;
 	return true;
@@ -575,8 +575,8 @@ bool MatrixElementaryLooseMemoryFit<Element>::IsEqualTo(MatrixElementaryLooseMem
 template <typename Element>
 void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
 { this->init(theDimension, theDimension);
-	for (int i=0;i<theDimension;i++)
-		for (int j=0;j<theDimension;j++)
+	for (int i=0; i<theDimension; i++)
+		for (int j=0; j<theDimension; j++)
 			if (j!=i)
 				this->elements[i][j].Assign(Element::TheRingZero);
 			else
@@ -585,8 +585,10 @@ void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
 
 template <typename Element>
 inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool PreserveValues)
-{ if (r<0) r=0;
-	if (c<0) c=0;
+{ if (r<0)
+    r=0;
+	if (c<0)
+    c=0;
 	if (r==this->NumRows && c== this->NumCols)
 		return;
 	if (r==0 || c==0)
@@ -595,15 +597,15 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool P
 		return;
 	}
 	Element** newElements=0;
-	int newActualNumCols= MathRoutines::Maximum(this->ActualNumCols,c);
-	int newActualNumRows= MathRoutines::Maximum(this->ActualNumRows,r);
+	int newActualNumCols= MathRoutines::Maximum(this->ActualNumCols, c);
+	int newActualNumRows= MathRoutines::Maximum(this->ActualNumRows, r);
 	if (r>this->ActualNumRows || c>this->ActualNumCols)
 	{ newElements	= new Element*[newActualNumRows];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumRows;
 	if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0);}
 #endif
-		for (int i=0;i<newActualNumRows;i++)
+		for (int i=0; i<newActualNumRows; i++)
 		{ newElements[i]= new Element[newActualNumCols];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumCols;
@@ -612,8 +614,8 @@ ParallelComputing::GlobalPointerCounter+=newActualNumCols;
 		}
 	}
 	if (PreserveValues && newElements!=0)
-		for (int j=MathRoutines::Minimum(this->NumRows,r)-1;j>=0;j--)
-			for (int i=MathRoutines::Minimum(this->NumCols,c)-1;i>=0;i--)
+		for (int j=MathRoutines::Minimum(this->NumRows, r)-1; j>=0; j--)
+			for (int i=MathRoutines::Minimum(this->NumCols, c)-1; i>=0; i--)
 				newElements[j][i]= this->elements[j][i];
 	if (newElements!=0)
 	{ this->ReleaseMemory();
@@ -629,14 +631,14 @@ template <typename Element>
 inline void MatrixElementaryLooseMemoryFit<Element>::Assign(const MatrixElementaryLooseMemoryFit<Element>& m)
 { if (this==&m) return;
 	this->Resize(m.NumRows, m.NumCols, false);
-	for (int i=0;i<this->NumRows;i++)
-		for (int j=0;j<this->NumCols;j++)
+	for (int i=0; i<this->NumRows; i++)
+		for (int j=0; j<this->NumCols; j++)
 			this->elements[i][j]=m.elements[i][j];
 }
 
 template <typename Element>
 inline void MatrixElementaryLooseMemoryFit<Element>::ReleaseMemory()
-{ for (int i=0;i<this->ActualNumRows;i++)
+{ for (int i=0; i<this->ActualNumRows; i++)
 		delete [] this->elements[i];
 	delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
@@ -657,7 +659,7 @@ public:
 	int NumRows;
 	int NumCols;
 	Element** elements;
-	void init(int r,int c);
+	void init(int r, int c);
 	void Free();
 	void Resize(int r, int c, bool PreserveValues);
 	void Assign(const MatrixElementaryTightMemoryFit<Element>& m);
@@ -1044,7 +1046,7 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution( Selection& inputPivo
 }
 
 template <typename Element>
-void Matrix<Element>::GaussianEliminationByRows (	Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints)
+void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints)
 { int tempI;
 	int NumFoundPivots = 0;
 	int MaxRankMat = MathRoutines::Minimum(mat.NumRows, mat.NumCols);
@@ -1072,8 +1074,8 @@ void Matrix<Element>::GaussianEliminationByRows (	Matrix<Element>& mat, Matrix<E
 				{ if (!mat.elements[j][i].IsEqualToZero())
 					{ tempElement.Assign(mat.elements[j][i]);
 						tempElement.Minus();
-						mat.AddTwoRows (NumFoundPivots, j, i, tempElement);
-	          output.AddTwoRows (NumFoundPivots, j, 0, tempElement);
+						mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
+	          output.AddTwoRows(NumFoundPivots, j, 0, tempElement);
 	          //mat.ComputeDebugString();
 					}
 				}
@@ -1717,7 +1719,7 @@ public:
 	inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point);};
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
 	bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
-	bool SplitWall(CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction,	ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
+	bool SplitWall(int indexInOwner, ListBasicObjects<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
 	bool ConsistencyCheck(CombinatorialChamber* owner);
 	bool EveryNeigborIsExplored(bool& aNeighborHasNonZeroPoly);
 	void WriteToFile(std::fstream& output);
@@ -1798,7 +1800,6 @@ public:
 	root InternalPoint;
 	int IndexStartingCrossSectionNormal;
 	int NumTrueAffineVertices;
-	static bool DisplayingGraphics;
 	static bool flagIncludeVerticesInDebugString;
 	static bool flagAnErrorHasOccurredTimeToPanic;
 	static bool flagPrintWallDetails;
@@ -1810,7 +1811,7 @@ public:
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml);
 	void ElementToInequalitiesString (std::string& output,CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
 	void ChamberNumberToString(std::string& out, CombinatorialChamberContainer& owner);
-	bool ConsistencyCheck(int theDimension);
+	bool ConsistencyCheck(int theDimension, bool checkVertices);
 	//bool FacetIsInternal(Facet* f);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
@@ -1821,18 +1822,20 @@ public:
 	void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
 	bool SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
 	bool IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
+	bool IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
 	void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
 	//the below function returns false if the cross-section affine walls have been modified
 	//and aborts its execution
 	bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
-	bool PointIsInChamber(root&point);
+	bool PointIsInChamber(root& point);
 	void findWallsIncidentWithVertexExcludeWallAtInfinity (root& theVertex, Selection& output, CombinatorialChamberContainer* owner);
 //	bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
-	bool ScaleVertexToFitCrossSection(root&point, CombinatorialChamberContainer& owner);
+	bool ScaleVertexToFitCrossSection(root& point, CombinatorialChamberContainer& owner);
 	void ComputeAffineInfinityPointApproximation(Selection& selectedExternalWalls,CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
-	bool PointIsInWallSelection(root &point, Selection& theSelection);
-	bool PlusMinusPointIsInChamber(root&point);
+	bool PointIsInWallSelection(root& point, Selection& theSelection);
+	bool PlusMinusPointIsInChamber(root& point);
+	bool ExtraPointRemovesDoubtForBogusWall(MatrixLargeRational& theMatrix, MatrixLargeRational& emptyMat, Selection& bufferSel, root& theRoot);
 	void PurgeInternalWalls();
 	bool HasNoNeighborsThatPointToThis();
 	bool HasAsNeighbor(CombinatorialChamber* candidateNeighbor);
@@ -1854,9 +1857,9 @@ public:
 	bool OwnsAWall(WallData* theWall);
 	void MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
 	bool TestPossibilityToSlice(root& direction);
-	bool MakeFacetFromEdgeAndDirection(	WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal,GlobalVariables& theGlobalVariables);
+	bool MakeFacetFromEdgeAndDirection(WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-	void WireChamberAndWallAdjacencyData(CombinatorialChamberContainer &owner, CombinatorialChamber* input);
+	void WireChamberAndWallAdjacencyData(CombinatorialChamberContainer& owner, CombinatorialChamber* input);
 	void Assign(const  CombinatorialChamber& right);
 	inline void operator=(const CombinatorialChamber& right){this->Assign(right);};
 	CombinatorialChamber();
@@ -2512,6 +2515,7 @@ public:
 	bool flagReachSafePointASAP;
 	bool flagIsRunning;
 	bool flagMustStop;
+	bool flagStoringVertices;
 // the implementation of the following two has #ifdef's and is system dependent
 // Unfortunately there is no system independent way in C++ to do this (as far as I know)
 // Let's hope that will be fixed with the new C++ standard!
@@ -6426,6 +6430,7 @@ public:
 
 	ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
 	ListBasicObjects<int> listWallDataPtSplitChamber;
+	ListBasicObjects<int> listWallDataPtSplitChamber2;
 
 	Monomial<Rational> monMakePolyExponentFromIntRoot;
 	Monomial<Rational> monMakePolyFromDirectionAndNormal;
@@ -6457,6 +6462,8 @@ public:
 	MatrixLargeRational matGetEpsilonCoords3;
 	MatrixLargeRational matComputeEpsCoordsWRTk;
   MatrixLargeRational matreduceOnceGeneralMethod;
+  MatrixLargeRational matBogusNeighbors;
+  MatrixLargeRational matBogusNeighborsEmpty;
 
 	partFraction fracReduceMonomialByMonomial;
 	partFraction fracSplit1;
@@ -6487,7 +6494,7 @@ public:
 	Selection selSimplexAlg1;
 	Selection selSimplexAlg2;
 	Selection selApproveSelAgainstOneGenerator;
-	Selection selIsBogusNeighbor;
+	Selection selBogusNeighbor;
 
 	SelectionWithDifferentMaxMultiplicities selWeylAlgebra1;
 

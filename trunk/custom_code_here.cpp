@@ -1290,6 +1290,8 @@ void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVari
   this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
   output << "\n";
   this->startingCones.WriteToFile(output, theGlobalVariables);
+  output<<"\nTheFacets: ";
+  this->theHyperplanes.WriteToFile(output);
 ////////////////////////////////////////////////////
   output << "\nPreferredNextChambers: " << this->PreferredNextChambers.size << " ";
   for (int i=0; i<this->PreferredNextChambers.size; i++)
@@ -1318,6 +1320,8 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   input >> tempS >> this->FirstNonExploredIndex;
   this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
   this->startingCones.ReadFromFile(input, theGlobalVariables);
+  input>>tempS;
+  this->theHyperplanes.ReadFromFile(input);
 ////////////////////////////////////////////////////
   input >> tempS >> tempI;
   this->PreferredNextChambers.SetSizeExpandOnTopNoObjectInit(tempI);

@@ -1281,12 +1281,14 @@ void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVari
 { this->LabelChamberIndicesProperly();
   output << "Num_pointers: " << this->size<<"\n";
 ///////////////////////////////////////////////////
-  output << "Dimension: "<< this->AmbientDimension << " ";
+  output << "Dimension: "<< this->AmbientDimension << "\n";
   output << "CurrentIndex: "<< this->theCurrentIndex << "\n";
   output << "Directions:\n";
   this->theDirections.WriteToFile(output, theGlobalVariables);
-  output << "\nNext_index_to_slice: "<< this->indexNextChamberToSlice << "\n";
-  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex <<" ";
+  output << "\nNext_index_to_slice: " << this->indexNextChamberToSlice << "\n";
+  output <<"\nLowestNonCheckedForGlueing: " << this->indexLowestNonCheckedForGlueing<< "\n";
+  output <<"\nTotalGlued: " << this->NumTotalGlued<< "\n";
+  output << "FirstNonExploredIndex: " << this->FirstNonExploredIndex <<"\n";
   this->TheGlobalConeNormals.WriteToFile(output, theGlobalVariables);
   output << "\n";
   this->startingCones.WriteToFile(output, theGlobalVariables);
@@ -1317,6 +1319,8 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   input >> tempS;
   this->theDirections.ReadFromFile(input, theGlobalVariables);
   input >> tempS >> this->indexNextChamberToSlice;
+  input >> tempS >> this->indexLowestNonCheckedForGlueing;
+  input >> tempS >> this->NumTotalGlued;
   input >> tempS >> this->FirstNonExploredIndex;
   this->TheGlobalConeNormals.ReadFromFile(input, theGlobalVariables);
   this->startingCones.ReadFromFile(input, theGlobalVariables);

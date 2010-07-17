@@ -45,8 +45,6 @@
 extern void main_test_function(std::string& output, GlobalVariables& theGlobalVariables);
 
 
-extern DrawingVariables TDV;
-
 class guiMainWindow;
 class wxDialogOutput;
 class guiApp : public wxApp
@@ -436,10 +434,12 @@ void wxComboBoxWheel::OnMouseWheel(wxMouseEvent& event)
   MainWindow1->onListBox1Change(ev);
 }
 
-
 void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 { int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop();
   int Realy=ev.GetY();//-this->GetRect().GetLeft();
+  if (MainWindow1==0)
+    return;
+  DrawingVariables& TDV= MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
   if (TDV.Selected==-2)
   { double tempX, tempY;
     int tempXi, tempYi;
@@ -692,7 +692,6 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->Canvas1->ClickToleranceY=10;
   this->WorkThread1.CriticalSectionPauseButtonEntered=false;
   this->WorkThread1.CriticalSectionWorkThreadEntered=false;
-  TDV.initDrawingVariables(250,250);
   //this->Button3Custom->Disable();
   this->wxProgressReportEvent.SetId(this->GetId());
   this->wxProgressReportEvent.SetEventObject(this);
@@ -710,6 +709,8 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
 #ifndef WIN32
   pthread_mutex_init(&ParallelComputing::mutexLockThisMutexToSignalPause, NULL);
 #endif
+  DrawingVariables& TDV= this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
+  TDV.initDrawingVariables(250, 250);
   this->ReadSettingsIfAvailable();
   this->Dialog1OutputPF->Show();
   this->Dialog2StatusString1->Show();
@@ -787,7 +788,7 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
-    MainWindow1->theComputationSetup.WriteReportToFile(::TDV,tempFile,*MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
+    MainWindow1->theComputationSetup.WriteReportToFile(MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables, tempFile, *MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
 	tempFile.close();
 }
 
@@ -826,7 +827,7 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
   if (MainWindow1->theComputationSetup.flagAllowRepaint)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
     dc.DrawRectangle(wxPoint(0,0), this->GetSize());
-    CombinatorialChamberContainer::drawOutput(TDV, MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.theChambers.theDirections, MainWindow1->theComputationSetup.theChambers.theCurrentIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
+    CombinatorialChamberContainer::drawOutput(MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables, MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.theChambers.theDirections, MainWindow1->theComputationSetup.theChambers.theCurrentIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
   }
 }
 
@@ -1208,6 +1209,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   this->theComputationSetup.flagDoingWeylGroupAction= tempBool;
   this->theComputationSetup.flagUsingIndicatorRoot=!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
   this->ReadRBData();
+  DrawingVariables& TDV = this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
   TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
   TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
   TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
@@ -1401,14 +1403,15 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
     if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
     { out <<"\\documentclass{article}\\begin{document}"<<this->theComputationSetup.theChambers.DebugString<<"\\end{document}";
       MainWindow1->bufferString1=out.str();
-      wxString tempWS(MainWindow1->bufferString1.c_str(),wxConvUTF8);
+      wxString tempWS(MainWindow1->bufferString1.c_str(), wxConvUTF8);
       MainWindow1->Text3PartialFractions->SetValue(tempWS);
     }
   this->Text3PartialFractions->ShowPosition(old);
 }
 
 void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
-{ TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
+{ DrawingVariables& TDV= this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
+  TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
   TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
   TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
   this->Refresh();

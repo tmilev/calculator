@@ -825,8 +825,8 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 		return;
   if (MainWindow1->theComputationSetup.flagAllowRepaint)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
-    dc.DrawRectangle(wxPoint(0,0),this->GetSize());
-    CombinatorialChamberContainer::drawOutput(	TDV,MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.InputRoots, MainWindow1->theComputationSetup.NextDirectionIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
+    dc.DrawRectangle(wxPoint(0,0), this->GetSize());
+    CombinatorialChamberContainer::drawOutput(TDV, MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.theChambers.theDirections, MainWindow1->theComputationSetup.theChambers.theCurrentIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
   }
 }
 

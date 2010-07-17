@@ -47,6 +47,8 @@
 #include <pthread.h>
 #else
  #include<windows.h>
+/* #include <unistd.h>
+ #include <Pthread.h> */
 #endif
 
 #ifdef WIN32
@@ -153,9 +155,9 @@ public:
 	};
 };
 
-typedef void (*drawLineFunction)	(	double X1, double Y1, double X2, double Y2,	unsigned long thePenStyle, int ColorIndex);
-typedef void (*drawTextFunction)	(	double X1, double Y1, const char* theText, int length, int ColorIndex);
-typedef void (*FeedDataToIndicatorWindow)	(	IndicatorWindowVariables& input);
+typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2,	unsigned long thePenStyle, int ColorIndex);
+typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex);
+typedef void (*FeedDataToIndicatorWindow)(IndicatorWindowVariables& input);
 
 struct DrawingVariables
 {
@@ -231,7 +233,7 @@ public:
 	static int TwoToTheNth(int n);
 	static int NChooseK(int n, int k)
 	{ int result=1;
-		for (int i =0; i<k;i++)
+		for (int i =0; i<k; i++)
 		{ result*=(n-i);
 			result/=(i+1);
 		}
@@ -351,14 +353,14 @@ ParallelComputing::GlobalPointerCounter-=this->size;
 template <class Object>
 void ListBasicObjectsLight<Object>::CopyFromHeavy(const ListBasicObjects<Object>& from)
 { this->SetSizeExpandOnTopLight(from.size);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i]= from.TheObjects[i];
 }
 
 template <class Object>
 void ListBasicObjectsLight<Object>::CopyFromLight(const ListBasicObjectsLight<Object>& from)
 { this->SetSizeExpandOnTopLight(from.size);
-	for (int i=0;i<this->size;i++)
+	for (int i=0; i<this->size; i++)
 		this->TheObjects[i]= from.TheObjects[i];
 }
 
@@ -419,7 +421,7 @@ public:
 	bool IsEqualTo(const ListBasicObjects<Object>& Other) const
 	{ if (this->size!=Other.size)
 			return false;
-		for (int i=0;i<Other.size;i++)
+		for (int i=0; i<Other.size; i++)
 			if (!(this->TheObjects[i]==Other.TheObjects[i]))
 				return false;
 		return true;
@@ -723,9 +725,9 @@ public:
 	void ActOnRoots(roots& input, roots& output);
 	void DivideByRational(Rational& x);
 	static bool SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
-	static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(	MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
+	static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
 	static void ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient, bool &hasAPotentialLeavingVariable);
-	static void GetMaxMovementAndLeavingVariableRow( Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables);
+	static void GetMaxMovementAndLeavingVariableRow(Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables);
 	int FindPositiveLCMCoefficientDenominatorsTruncated();
 	int FindPositiveGCDCoefficientNumeratorsTruncated();
 };
@@ -813,7 +815,7 @@ public:
 	};
 };
 
-class MatrixIntTightMemoryFit : public ::MatrixElementaryTightMemoryFit<int>
+class MatrixIntTightMemoryFit : public MatrixElementaryTightMemoryFit<int>
 {
 public:
 	void NullifyAll()
@@ -863,9 +865,9 @@ bool Matrix<Element>::Invert(GlobalVariables& theGlobalVariables)
 	static Selection NonPivotPts;
 	tempMatrix.init(this->NumRows, this->NumCols);
 	tempMatrix.NullifyAll();
-	for (int i=0;i<this->NumCols;i++)
+	for (int i=0; i<this->NumCols; i++)
 		tempMatrix.elements[i][i].MakeOne();
-	this->GaussianEliminationByRows(*this,tempMatrix,NonPivotPts);
+	this->GaussianEliminationByRows(*this, tempMatrix, NonPivotPts);
 	if(NonPivotPts.CardinalitySelection!=0)
 		return false;
 	else
@@ -1552,6 +1554,7 @@ public:
 	void ScaleToIntegralMinHeight();
 	void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
 	void FindLCMDenominators(LargeIntUnsigned& output);
+	std::string* ElementToStringDebuggerCallOnly();
 	int FindLCMDenominatorsTruncateToInt();
 	void InitFromIntegers(int Dimension, int x1,int x2, int x3,int x4, int x5);
 	void InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x5,int x6, int x7, int x8);
@@ -1680,6 +1683,10 @@ public:
 	void ElementToString(std::string& output);
 	void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable);
 	void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable);
+  std::string* ElementToStringDebuggerCallOnly()
+	{ this->ComputeDebugString();
+	  return &this->DebugString;
+	};
 	void SubSelection(Selection& theSelection, roots& output);
 	void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
 	void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
@@ -1720,8 +1727,8 @@ public:
 	inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point);};
 	bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
 	bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
-	bool SplitWall(int indexInOwner, ListBasicObjects<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer* ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
-	bool ConsistencyCheck(CombinatorialChamber* owner);
+	bool SplitWall(int indexInOwner, ListBasicObjects<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer& ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
+	bool ConsistencyCheck(CombinatorialChamber& owner, CombinatorialChamberContainer& ownerComplex);
 	bool EveryNeigborIsExplored(bool& allNeighborsHaveZeroPoly);
 	void WriteToFile(std::fstream& output);
 	void ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner);
@@ -1812,7 +1819,7 @@ public:
 	bool ElementToString(std::string& output, CombinatorialChamberContainer* owner, bool useLatex, bool useHtml);
 	void ElementToInequalitiesString (std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
 	void ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner);
-	bool ConsistencyCheck(int theDimension, bool checkVertices);
+	bool ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex);
 	//bool FacetIsInternal(Facet* f);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
@@ -1850,14 +1857,14 @@ public:
 	bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate, roots& directions, int CurrentIndex, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 	bool HasHSignVertex(root& h, int sign);
 	bool CheckSplittingPointCandidate(Selection& SelectionTargetSimplex, Selection& SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension);
-	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root& direction, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
+	void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root& direction, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 //	void InduceFromAffineConeAddExtraDimension(affineCone& input);
 	void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo(CombinatorialChamber& input,CombinatorialChamberContainer& owner);
 	void ComputeInternalPointMethod2(root& InternalPoint, int theDimension);
 	void ComputeAffineInternalPoint(root& outputPoint, int theDimension);
 	bool OwnsAWall(WallData* theWall);
 	void MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
-	bool TestPossibilityToSlice(root& direction);
+	bool TestPossibilityToSlice(root& direction, CombinatorialChamberContainer& owner);
 	bool MakeFacetFromEdgeAndDirection(WallData& Wall1, WallData& Wall2,CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal,GlobalVariables& theGlobalVariables);
   void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
 	void WireChamberAndWallAdjacencyData(CombinatorialChamberContainer& owner, CombinatorialChamber* input);
@@ -2460,8 +2467,11 @@ public:
 	bool FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray);
 	bool IsSurelyOutsideCone(roots& TheVertices);
 	bool IsSurelyOutsideConeAccordingToChamberTestArray();
-	bool IsInCone(root& r);
+	bool IsInCone(const root& r);	
+	bool IsOnConeBorder(const root& r);
+	bool IsStrictlyInsideCone(const root& r);
 	bool SeparatesPoints(root& point1, root& point2);
+	//bool SeparatesPoints()
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 //	int HashFunction() const;
@@ -2478,7 +2488,7 @@ public:
 	std::string DebugString;
 	void ComputeDebugString();
 	void ElementToString(std::string& output);
-	void initFromDirections(roots& directions, GlobalVariables& theGlobalVariables);
+	void initFromDirections(roots& directions, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
 	bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
 	void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 	void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
@@ -2517,6 +2527,7 @@ public:
 	bool flagIsRunning;
 	bool flagMustStop;
 	bool flagStoringVertices;
+	bool flagSpanTheEntireSpace;
 // the implementation of the following two has #ifdef's and is system dependent
 // Unfortunately there is no system independent way in C++ to do this (as far as I know)
 // Let's hope that will be fixed with the new C++ standard!
@@ -2547,16 +2558,17 @@ public:
 	static bool flagAnErrorHasOcurredTimeToPanic;
 	static bool flagMakingConsistencyCheck;
 	static int flagMaxNumCharsAllowedInStringOutput;
+	bool isAValidVertexInGeneral(const root& candidate, roots& theNormalsInvolved, Selection& theSelectedNormals);
 	void ConvertHasZeroPolyToPermanentlyZero();
 	void SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices);
 	void QuickSortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex);
 	void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
-	void SliceTheEuclideanSpace(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
-	void SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables);
 	bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
 	int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
-	void SliceOneDirection(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
-	void OneSlice(roots& directions, int& index, int rank, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void SliceTheEuclideanSpace(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables);
+	void SliceOneDirection(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
   void MakeExtraProjectivePlane();
 	int GetNumChambersInWeylChamberAndLabelChambers(Cone& theWeylChamber);
@@ -2579,12 +2591,15 @@ public:
 	bool ConsistencyCheckNextIndicesToSlice();
 	int RootBelongsToChamberIndex(root& input, std::string* outputString);
 	void MakeStartingChambers(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void MakeStartingChambersSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+	void MakeStartingChambersDontSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
 	void ComputeNextIndexToSlice(root& direction);
 	void ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables);
 	void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
 	void SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
 	void SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
 	void AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber, GlobalVariables& theGlobalVariables);
+	void GlueOverSubdividedChambers(GlobalVariables& theGlobalVariables);
 	void LabelAllUnexplored();
 	void DumpAll();
 	bool ConsistencyCheck();
@@ -6241,7 +6256,7 @@ class IrreducibleFiniteDimensionalModule
 typedef void (*Runnable) (ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 
 struct ComputationSetup
-{ roots InputRoots;
+{ 
 public:
   Runnable theFunctionToRun;
 	partFractions thePartialFraction;
@@ -6259,7 +6274,6 @@ public:
 	std::string NotationExplanationLatex3;
 	std::string NotationExplanationLatex4;
 	intRoot ValueRoot;
-	int NextDirectionIndex;
 	roots VPVectors;
 	GlobalVariablesContainer *theGlobalVariablesContainer;
 	bool flagComputationInProgress;

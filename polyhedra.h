@@ -513,10 +513,10 @@ public:
   inline void MultiplyBy(Integer& y){this->value*=y.value;};
   inline void operator=(const Integer& y){this->value=y.value;};
   inline bool operator==(Integer& y){return this->value==y.value;};
-  inline void Assign(const Integer&y){this->value=y.value;};
+  inline void Assign(const Integer& y){this->value=y.value;};
   inline bool IsEqualTo(const Integer&y)const {return this->value==y.value;};
   inline bool IsEqualToZero() const {return this->value==0;}
-  inline void DivideBy(Integer&y){this->value/=y.value;};
+  inline void DivideBy(Integer& y){this->value/=y.value;};
   inline void WriteToFile(std::fstream& output){output<<this->value;};
   inline void ReadFromFile(std::fstream& input){input>>this->value;};
   inline void ElementToString(std::string& output)
@@ -564,7 +564,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::init(int r, int c)
 }
 
 template <typename Element>
-bool MatrixElementaryLooseMemoryFit<Element>::IsEqualTo(MatrixElementaryLooseMemoryFit<Element> &right)
+bool MatrixElementaryLooseMemoryFit<Element>::IsEqualTo(MatrixElementaryLooseMemoryFit<Element>& right)
 { if (this->NumCols!=right.NumCols || this->NumRows!=right.NumRows)
     return false;
   for (int i=0; i<this->NumRows; i++)
@@ -726,8 +726,8 @@ public:
   void DivideByRational(Rational& x);
   static bool SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution,GlobalVariables& theGlobalVariables);
-  static void ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational &outputChangeGradient, bool &hasAPotentialLeavingVariable);
-  static void GetMaxMovementAndLeavingVariableRow(Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables);
+  static void ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
+  static void GetMaxMovementAndLeavingVariableRow(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables);
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
 };
@@ -1826,7 +1826,10 @@ public:
   void LabelWallIndicesProperly();
   int getIndexInfiniteHyperplane(CombinatorialChamberContainer* owner);
   int getIndexVertexIncidentWithSelection(Selection& theSel);
-  bool VertexIsIncidentWithSelection(root& VertexCandidate,Selection& theSel);
+  bool VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel);
+  bool IsSeparatedByStartingConesFrom(CombinatorialChamberContainer& owner, CombinatorialChamber& Neighbor, GlobalVariables& theGlobalVariables);
+  int GetIndexFirstNonSeparableChamber(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables);
+  void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamber* newChamber, int indexIgnoreWall, CombinatorialChamber* ignoreChamber);
   void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
   bool SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
   bool IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
@@ -1836,7 +1839,8 @@ public:
   //the below function returns false if the cross-section affine walls have been modified
   //and aborts its execution
   bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
-  bool PointIsInChamber(root& point);
+  bool PointIsInChamber(const root& point);
+  bool PointIsOnChamberBorder(const root& point);
   void findWallsIncidentWithVertexExcludeWallAtInfinity (root& theVertex, Selection& output, CombinatorialChamberContainer* owner);
 //  bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
   bool ScaleVertexToFitCrossSection(root& point, CombinatorialChamberContainer& owner);
@@ -2467,7 +2471,7 @@ public:
   bool FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray);
   bool IsSurelyOutsideCone(roots& TheVertices);
   bool IsSurelyOutsideConeAccordingToChamberTestArray();
-  bool IsInCone(const root& r);  
+  bool IsInCone(const root& r);
   bool IsOnConeBorder(const root& r);
   bool IsStrictlyInsideCone(const root& r);
   bool SeparatesPoints(root& point1, root& point2);
@@ -2514,6 +2518,8 @@ public:
   int NumAffineHyperplanesProcessed;
   int NumAffineHyperplanesBeforeWeylChamberWalls;
   int NumProjectiveHyperplanesBeforeWeylChamberWalls;
+  int indexLowestNonCheckedForGlueing;
+  int NumTotalGlued;
   affineHyperplanes StartingCrossSections;
   //needed to run the algorithm independently of input variables
   int theCurrentIndex;
@@ -2599,13 +2605,15 @@ public:
   void SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
   void SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
   void AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber, GlobalVariables& theGlobalVariables);
-  void GlueOverSubdividedChambers(GlobalVariables& theGlobalVariables);
+  void GlueOverSubdividedChambersCheckLowestIndex(GlobalVariables& theGlobalVariables);
+  void Glue(CombinatorialChamber* left, CombinatorialChamber* right, int indexTouchingWallInLeft, int  indexTouchingWallInRight, GlobalVariables& theGlobalVariables);
   void LabelAllUnexplored();
   void DumpAll();
   bool ConsistencyCheck();
   void PurgeZeroPointers();
   void PurgeInternalWalls();
   void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots, root& theCurrentDirection);
+  void MakeReportGlueing(GlobalVariables& theGlobalVariables, int currentIndex, int TotalNumGlueingsSoFar);
   void ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables);
   bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables& theGlobalVariables);
   void PrintThePolys(std::string& output);
@@ -6256,7 +6264,7 @@ class IrreducibleFiniteDimensionalModule
 typedef void (*Runnable) (ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 
 struct ComputationSetup
-{ 
+{
 public:
   Runnable theFunctionToRun;
   partFractions thePartialFraction;

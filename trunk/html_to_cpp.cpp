@@ -4,12 +4,7 @@
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-//This is needed since it is practically impossible to read
-//a static file on the file system in a system independent fashion.
-//I have neither the time nor the inclination to write
-//code for opening a file in every possible system and circumstance.
-//After all, I want to keep my file i/o routines to less than 10k lines of code
-//(does it actually suffice to write 10k lines of code to open a file?)
+//This is needed since to avoid reading a static file on the file system
 
 #include <assert.h>
 #include <sstream>
@@ -56,11 +51,13 @@ void htmlTocpp(std::string& input, std::string& output)
 }
 
 int main(int argc, char **argv)
-{ std::string tempS,tempS2;
-  getPathTemp(argv[0],tempS);
+{ std::string tempS, tempS2, tempS3;
+  getPathTemp(argv[0], tempS);
   tempS2=tempS;
+  tempS3=tempS;
   tempS.append("../vector_partition.html");
   tempS2.append("../vector_partition.html.cpp");
+  tempS3.append("../polyhedra.cpp");
   std::stringstream BufferIO;
   std::fstream fileHeaderHtml;
   std::fstream fileout;
@@ -72,7 +69,7 @@ int main(int argc, char **argv)
   char buffer[10000];
   while (!fileHeaderHtml.eof())
   { fileHeaderHtml.read(buffer,5000);
-		BufferIO.write(buffer,fileHeaderHtml.gcount());
+		BufferIO.write(buffer, fileHeaderHtml.gcount());
   }
   fileHeaderHtml.close();
   BufferIO <<"\n<EndOfFile>";
@@ -90,5 +87,7 @@ int main(int argc, char **argv)
   fileout <<"}";
   fileout.flush();
   fileout.close();
+  
+  
   return 0;
 }

@@ -165,20 +165,20 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
   tempStreamF <<"\n$f=$ $" <<tempS<<"$";
   tempS= tempStreamF.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS,out, usePNG, useHtml, container, physicalPath, htmlPathServer);
+  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   out <<"\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out <<"\n<br>\n";
   this->bufferEbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamEF<< "\n$[e,f]=$ $" <<tempS <<"$";
+  tempStreamEF<< "\n$[e, f]=$ $" <<tempS <<"$";
   tempS= tempStreamEF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->bufferHbracketE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamHE<< "\n$[h,e]=$ $" <<tempS <<"$";
+  tempStreamHE<< "\n$[h, e]=$ $" <<tempS <<"$";
   tempS= tempStreamHE.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->bufferHbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamHF<< "\n$[h,f]=$ $" <<tempS <<"$";
+  tempStreamHF<< "\n$[h, f]=$ $" <<tempS <<"$";
   tempS= tempStreamHF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   //this->theSystemMatrixForm.ElementToString(tempS);
@@ -346,7 +346,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWit
   //where the first \alpha's are ordered as in rootsInPlay.
   //Those are ordered as such: first come  the simple roots of characteristic 2, and the last \alpha's are the members of SelectedExtraPositiveRoots
   //(i.e. roots equal to the sum of one simple root of characteristic 2 a simple root of characteristic 0).
-  // Then the first k variables of the polynomials below will be a_0,..., a_k., and the last k variables will be the b_i's
+  // Then the first k variables of the polynomials below will be a_0, ..., a_k., and the last k variables will be the b_i's
   // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2}, where l/2 is the index of the root of SelectedExtraPositiveRoots, if l is even, and to the
   // coefficient of  g^{-\alpha_{(l+1)/2}} otherwise
   for (int i=0; i<theRelativeDimension; i++)
@@ -372,7 +372,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWit
   MatrixLargeRational coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i=0; i<numRootsChar2; i++)
-    coeffsF.elements[0][i]=i+1;//(i%2==0)? 1: 2;
+    coeffsF.elements[0][i]=i+1; //(i%2==0)? 1: 2;
   for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
     coeffsF.elements[0][i]=i+1;
   this->initHEFSystemFromECoeffs(theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables, h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
@@ -629,24 +629,24 @@ void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalge
 //The below code is related to sl(2) subalgebras of simple Lie algebras
 void slTwo::ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, ListBasicObjects<int>& outputHighestWeights, ListBasicObjects<int>& outputMultiplicitiesHighestWeights, ListBasicObjects<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
 { int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
-	outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
-	outputWeightSpaceDimensions.TheObjects[IndexZeroWeight]=dimensionContainingRegularSA;
-	ListBasicObjects<int> BufferHighestWeights;
-	bool possible=true;
-	Rational tempRat;
-	roots tempRoots;
-	positiveRootsContainingRegularSA.GetCoordsInBasis(this->preferredAmbientSimpleBasis, tempRoots, theGlobalVariables);
-	for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
-	{ root::RootScalarEuclideanRoot(this->hCharacteristic, tempRoots.TheObjects[k], tempRat);
+  outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
+  outputWeightSpaceDimensions.TheObjects[IndexZeroWeight]=dimensionContainingRegularSA;
+  ListBasicObjects<int> BufferHighestWeights;
+  bool possible=true;
+  Rational tempRat;
+  roots tempRoots;
+  positiveRootsContainingRegularSA.GetCoordsInBasis(this->preferredAmbientSimpleBasis, tempRoots, theGlobalVariables);
+  for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
+  { root::RootScalarEuclideanRoot(this->hCharacteristic, tempRoots.TheObjects[k], tempRat);
     assert(tempRat.DenShort==1);
-		if (tempRat.NumShort>positiveRootsContainingRegularSA.size*2)
-		{ possible=false;
+    if (tempRat.NumShort>positiveRootsContainingRegularSA.size*2)
+    { possible=false;
       break;
     }
     outputWeightSpaceDimensions.TheObjects[IndexZeroWeight+tempRat.NumShort]++;
     outputWeightSpaceDimensions.TheObjects[IndexZeroWeight-tempRat.NumShort]++;
-	}
-	BufferHighestWeights.CopyFromBase(outputWeightSpaceDimensions);
+  }
+  BufferHighestWeights.CopyFromBase(outputWeightSpaceDimensions);
   outputHighestWeights.MakeActualSizeAtLeastExpandOnTop(positiveRootsContainingRegularSA.size*2);
   outputMultiplicitiesHighestWeights.MakeActualSizeAtLeastExpandOnTop(positiveRootsContainingRegularSA.size*2);
   outputHighestWeights.size=0;
@@ -692,7 +692,7 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
 
 void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::string tempS; std::stringstream out;
-  std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1,...,\\alpha_n be simple roots w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h),...,\\alpha_n(h))";
+  std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n be simple roots w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
   std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   std::string tooltipContainingRegular="A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a root subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
   std::string tooltipHvalue="The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
@@ -836,10 +836,10 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
 void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { rootSubalgebra tempSA;
   inputData.theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=true;
-	inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-	inputData.theRootSubalgebras.flagCountingNilradicalsOnlyNoComputation=true;
-	inputData.theRootSubalgebras.UpperLimitNumElementsWeyl=0;
-	inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+  inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
+  inputData.theRootSubalgebras.flagCountingNilradicalsOnlyNoComputation=true;
+  inputData.theRootSubalgebras.UpperLimitNumElementsWeyl=0;
+  inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
 //  inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
   inputData.theRootSubalgebras.numNilradicalsBySA.initFillInObject(inputData.theRootSubalgebras.size, 0);
   inputData.theRootSubalgebras.ComputeAllRootSubalgebrasUpToIso(theGlobalVariables, 0, inputData.theRootSubalgebras.size-6);
@@ -859,7 +859,7 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-//		(*this->theGlobalVariablesContainer->Default(),0,this->theRootSubalgebras.size-1);
+//    (*this->theGlobalVariablesContainer->Default(), 0, this->theRootSubalgebras.size-1);
 }
 
 void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables)

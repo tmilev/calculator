@@ -12,7 +12,7 @@ void getPath(char* path, std::string& output)
   output= path;
   while (output[length]!=0 && length<150)
     length++;
-  for (int i=length-1;i>=0;i--)
+  for (int i=length-1; i>=0; i--)
   {
 #ifdef WIN32
 		if (output[i]=='\\' )
@@ -28,13 +28,12 @@ void getPath(char* path, std::string& output)
   }
 }
 
-
 int main(int argc, char **argv)
 { std::string inputString, inputPath, tempS;
   getPath(argv[0], inputPath);
-  inputPath.append("../polyhedra.h");
+  inputPath.append("../custom_code_here.cpp");
   CGIspecificRoutines::FormatCPPSourceCode(inputPath);
   std::cout << inputPath;
-  std::cin>>inputPath;
+  std::cin >> inputPath;
 	return 0;   // To avoid Apache errors.
 }

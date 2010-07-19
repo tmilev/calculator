@@ -1591,6 +1591,11 @@ public:
   bool IsEqualTo(const root& right) const;
   bool IsStronglyPerpendicularTo(root& right, WeylGroup& theWeyl);
   static void RootScalarEuclideanRoot(const root& r1, const root& r2, Rational& output);
+  static inline Rational RootScalarEuclideanRoot(const root& r1, const root& r2)
+  { Rational tempRat;
+    root::RootScalarEuclideanRoot(r1, r2, tempRat);
+    return tempRat;
+  };
   static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, Rational& output);
 //  static void RootScalarRoot(root& r1, root& r2, MatrixIntTightMemoryFit& KillingForm, Rational& output);
   static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
@@ -1725,6 +1730,7 @@ public:
   void SubstituteNeighborOneOccurenceNeighborOnly(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   void SubstituteNeighborOneAllowNeighborAppearingNotOnce(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   bool IsExternalWithRespectToDirection(root& direction);
+  int GetIndexWallToNeighbor(CombinatorialChamber* neighbor);
   inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point); };
   bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
   bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
@@ -1832,6 +1838,8 @@ public:
   bool VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel);
   bool IsSeparatedByStartingConesFrom(CombinatorialChamberContainer& owner, CombinatorialChamber& Neighbor, GlobalVariables& theGlobalVariables);
   int GetIndexFirstNonSeparableChamber(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables);
+  int GetIndexFirstNonSeparableChamberGluesConvexNoLinesThroughOrigin(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables);
+  bool UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables);
   void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, int indexIgnoreWall, CombinatorialChamber* ignoreChamber);
   void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
   bool SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
@@ -2613,7 +2621,6 @@ public:
   void LabelAllUnexplored();
   void DumpAll();
   bool ConsistencyCheck();
-  void CheckThatFuckingShit();
   void PurgeZeroPointers();
   void PurgeInternalWalls();
   void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots, root& theCurrentDirection);

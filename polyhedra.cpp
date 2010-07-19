@@ -279,6 +279,7 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
         break;
     }
   }
+//  int indexFirstNonSeparableChamber= this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetIndexFirstNonSeparableChamberGluesConvexNoLinesThroughOrigin(*this, indexWallToGlueAlong, indexWallToGlueAlongInNeighbor, theGlobalVariables);
   int indexFirstNonSeparableChamber= this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetIndexFirstNonSeparableChamber(*this, indexWallToGlueAlong, indexWallToGlueAlongInNeighbor, theGlobalVariables);
   if (indexFirstNonSeparableChamber!=-1)
   { this->Glue(this->TheObjects[this->indexLowestNonCheckedForGlueing], this->TheObjects[indexFirstNonSeparableChamber], indexWallToGlueAlong, indexWallToGlueAlongInNeighbor, theGlobalVariables);
@@ -290,51 +291,45 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
   this->ConsistencyCheck();
 }
 
-void CombinatorialChamberContainer::CheckThatFuckingShit()
-{ if (this->TheObjects[1]!=0)
-  { WallData& fuckingshit=this->TheObjects[1]->Externalwalls.TheObjects[0];
-    
-  }
-}
-
 void CombinatorialChamberContainer::Glue(CombinatorialChamber* left, CombinatorialChamber* right, int indexTouchingWallInLeft, int  indexTouchingWallInRight, GlobalVariables& theGlobalVariables)
 { CombinatorialChamber* newChamber= new CombinatorialChamber;
-  left->ComputeDebugString(*this); 
-  right->ComputeDebugString(*this);
+  //left->ComputeDebugString(*this);
+  //right->ComputeDebugString(*this);
   newChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(right->Externalwalls.size+left->Externalwalls.size-2);
   newChamber->IndexInOwnerComplex= this->size;
   this->AddObjectOnTop(newChamber);
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   left->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, indexTouchingWallInLeft, right);
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   right->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, indexTouchingWallInRight, left);
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   newChamber->AllVertices.AddRootSnoRepetition(left->AllVertices);
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   newChamber->AllVertices.AddRootSnoRepetition(right->AllVertices);
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   for (int i=0; i<newChamber->AllVertices.size; i++)
     if (!newChamber->PointIsOnChamberBorder(newChamber->AllVertices.TheObjects[i]))
     { newChamber->AllVertices.PopIndexSwapWithLast(i);
       i--;
-      this->ComputeDebugString();
+      //this->ComputeDebugString();
     }
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   newChamber->AllVertices.Average(newChamber->InternalPoint, this->AmbientDimension);
   newChamber->flagExplored=true;
   newChamber->flagHasZeroPolynomiaL= left->flagHasZeroPolynomiaL || right->flagHasZeroPolynomiaL;
   newChamber->IndexStartingCrossSectionNormal= left->IndexStartingCrossSectionNormal;
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   this->TheObjects[left->IndexInOwnerComplex]=0;
   this->TheObjects[right->IndexInOwnerComplex]=0;
   delete left;
   delete right;
-  this->ComputeDebugString();
+  this->NumTotalGlued++;
+  //this->ComputeDebugString();
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
 #endif
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
 }
 
 void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
@@ -4001,38 +3996,37 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
 
 void CombinatorialChamber::ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, int indexIgnoreWall, CombinatorialChamber* ignoreChamber)
 { owner.LabelChambersForDisplayAndGetNumVisibleChambers();
-  this->ComputeDebugString(owner);
+  //this->ComputeDebugString(owner);
   newChamber->ComputeDebugString(owner);
   for (int i=0; i<this->Externalwalls.size; i++)
-//    if(i!=indexIgnoreWall)
-    { WallData& currentWall =  this->Externalwalls.TheObjects[i];
-      bool shouldInclude= (currentWall.NeighborsAlongWall.size==0) || (currentWall.NeighborsAlongWall.size>1);
-      if (!shouldInclude)
-        shouldInclude = (currentWall.NeighborsAlongWall.TheObjects[0]!=ignoreChamber);
-      if(shouldInclude)
-      { int indexWallInNewChamber=newChamber->GetIndexWallWithNormal(currentWall.normal);
-        if (indexWallInNewChamber==-1)
-        { indexWallInNewChamber=newChamber->Externalwalls.size;
-          newChamber->Externalwalls.AddObjectOnTopCreateNew();
-          newChamber->Externalwalls.LastObject()->normal.Assign(currentWall.normal);
-        }
-        WallData& WalllnNewChamber= newChamber->Externalwalls.TheObjects[indexWallInNewChamber];
-        for (int j=0; j<currentWall.NeighborsAlongWall.size; j++)
-        { CombinatorialChamber* other= currentWall.NeighborsAlongWall.TheObjects[j];
-          if (other!=0 && other!=ignoreChamber)
-          { other->ComputeDebugString(owner);
-            WallData& otherWall = other->Externalwalls.TheObjects[currentWall.IndicesMirrorWalls.TheObjects[j]];
-            otherWall.SubstituteNeighborOneAllowNeighborAppearingNotOnce(this, newChamber, indexWallInNewChamber);
-            WalllnNewChamber.AddNeighbor(other, currentWall.IndicesMirrorWalls.TheObjects[j]);
-            otherWall.RemoveNeighborExtraOcurrences(newChamber);
-            WalllnNewChamber.RemoveNeighborExtraOcurrences(other);
-            other->ComputeDebugString(owner);
-          }
+  { WallData& currentWall =  this->Externalwalls.TheObjects[i];
+    bool shouldInclude= (currentWall.NeighborsAlongWall.size==0) || (currentWall.NeighborsAlongWall.size>1);
+    if (!shouldInclude)
+      shouldInclude = (currentWall.NeighborsAlongWall.TheObjects[0]!=ignoreChamber);
+    if(shouldInclude)
+    { int indexWallInNewChamber=newChamber->GetIndexWallWithNormal(currentWall.normal);
+      if (indexWallInNewChamber==-1)
+      { indexWallInNewChamber=newChamber->Externalwalls.size;
+        newChamber->Externalwalls.AddObjectOnTopCreateNew();
+        newChamber->Externalwalls.LastObject()->normal.Assign(currentWall.normal);
+      }
+      WallData& WalllnNewChamber= newChamber->Externalwalls.TheObjects[indexWallInNewChamber];
+      for (int j=0; j<currentWall.NeighborsAlongWall.size; j++)
+      { CombinatorialChamber* other= currentWall.NeighborsAlongWall.TheObjects[j];
+        if (other!=0 && other!=ignoreChamber)
+        { other->ComputeDebugString(owner);
+          WallData& otherWall = other->Externalwalls.TheObjects[currentWall.IndicesMirrorWalls.TheObjects[j]];
+          otherWall.SubstituteNeighborOneAllowNeighborAppearingNotOnce(this, newChamber, indexWallInNewChamber);
+          WalllnNewChamber.AddNeighbor(other, currentWall.IndicesMirrorWalls.TheObjects[j]);
+          otherWall.RemoveNeighborExtraOcurrences(newChamber);
+          WalllnNewChamber.RemoveNeighborExtraOcurrences(other);
+          //other->ComputeDebugString(owner);
         }
       }
-      this->ComputeDebugString(owner);
-      newChamber->ComputeDebugString(owner);
     }
+    //this->ComputeDebugString(owner);
+    //newChamber->ComputeDebugString(owner);
+  }
 }
 
 void CombinatorialChamber::FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors)
@@ -4084,6 +4078,38 @@ int CombinatorialChamber::GetIndexFirstNonSeparableChamber(CombinatorialChamberC
         }
   }
   return -1;
+}
+
+int CombinatorialChamber::GetIndexFirstNonSeparableChamberGluesConvexNoLinesThroughOrigin(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables)
+{ for (int i=0; i<this->Externalwalls.size; i++)
+  { WallData& theWall= this->Externalwalls.TheObjects[i];
+    if (theWall.NeighborsAlongWall.size==1)
+      if (theWall.NeighborsAlongWall.TheObjects[0]!=0)
+        if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[0], theGlobalVariables))
+          if (this->UnionAlongWallIsConvex(*theWall.NeighborsAlongWall.TheObjects[0], i, theGlobalVariables))
+          { indexWallToGlueAlong= i;
+            indexWallToGlueAlongInNeighbor=theWall.IndicesMirrorWalls.TheObjects[i];
+            return theWall.NeighborsAlongWall.TheObjects[0]->IndexInOwnerComplex;
+          }
+  }
+  return -1;
+}
+
+bool CombinatorialChamber::UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables)
+{ for(int i=0; i<this->Externalwalls.size; i++)
+    if (i!= indexWall)
+      for (int j=0; j<other.AllVertices.size; j++)
+        if (root::RootScalarEuclideanRoot(this->Externalwalls.TheObjects[i].normal, other.AllVertices.TheObjects[j]).IsNegative())
+          return false;
+  WallData& theWall= this->Externalwalls.TheObjects[indexWall];
+  int indexOtherWall = theWall.GetIndexWallToNeighbor(&other);
+  assert(indexOtherWall!=-1);
+  for(int i=0; i<other.Externalwalls.size; i++)
+    if (i!= indexOtherWall)
+      for (int j=0; j<this->AllVertices.size; j++)
+        if (root::RootScalarEuclideanRoot(other.Externalwalls.TheObjects[i].normal, this->AllVertices.TheObjects[j]).IsNegative())
+          return false;
+  return true;
 }
 
 bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables)
@@ -4460,7 +4486,7 @@ void CombinatorialChamberContainer::MakeReportGlueing(GlobalVariables& theGlobal
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out3;
-  out3 << "Glueing: checking chamber index: " << currentIndex << " out of " << this->size;
+  out3 << "Glueing: checking chamber index: " << currentIndex << " out of " << this->size << " Total glueings: " << TotalNumGlueingsSoFar;
   theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
@@ -5521,6 +5547,13 @@ void WallData::SubstituteNeighborOneAllowNeighborAppearingNotOnce(CombinatorialC
     { this->NeighborsAlongWall.TheObjects[i]=newNeighbor;
       this->IndicesMirrorWalls.TheObjects[i]= IndexNewNeighborWall;
     }
+}
+
+int WallData::GetIndexWallToNeighbor(CombinatorialChamber* neighbor)
+{ int tempI= this->NeighborsAlongWall.IndexOfObject(neighbor);
+  if (tempI==-1)
+    return -1;
+  return this->IndicesMirrorWalls.TheObjects[tempI];
 }
 
 void WallData::AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall)

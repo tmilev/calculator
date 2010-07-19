@@ -1725,6 +1725,17 @@ public:
   void RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer);
   void AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   void operator=(const WallData& right);
+  bool HasOneTrueNeighbor(int& outputIndex)
+  { outputIndex=-1;
+    for (int i=0; i<this->NeighborsAlongWall.size; i++)
+      if (this->NeighborsAlongWall.TheObjects[i]!=0)
+      { if (outputIndex!=-1)
+          return false;
+        else
+          outputIndex=i;
+      } 
+    return outputIndex!=-1;
+  };
   bool IsInFacetNoBoundaries(root& point);
   bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
   void SubstituteNeighborOneOccurenceNeighborOnly(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);

@@ -132,6 +132,15 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 // https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//the below class is a wrapper for mutexes. All system dependent machinery for mutexes should be put here.
+class MutexWrapper
+{
+private:
+
+public:
+
+};
+
 class ParallelComputing
 {
 public:
@@ -1733,7 +1742,7 @@ public:
           return false;
         else
           outputIndex=i;
-      } 
+      }
     return outputIndex!=-1;
   };
   bool IsInFacetNoBoundaries(root& point);

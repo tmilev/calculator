@@ -392,6 +392,7 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
     if (this->theCurrentIndex<this->theDirections.size)
       this->MakeReportOneSlice(theGlobalVariables, this->theCurrentIndex, this->theDirections.size, this->theDirections.TheObjects[this->theCurrentIndex]);
     //if (ProblemCounter>1024)
+    this->ComputeDebugString();
     assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
     //assert(this->ConsistencyCheckNextIndicesToSlice());
@@ -3500,11 +3501,12 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
       out <<"f"<<i<<": "<< tempS<<endOfLine;
     }
   }*/
+  out << "index in owner: " << this->IndexInOwnerComplex << "\n";
   this->ElementToInequalitiesString(tempS, owner, useLatex, useHtml);
-  out<<tempS;
+  out << tempS;
 //  ListObjectPointers<CombinatorialChamber> outputChambers;
 //  this->FindAllNeighbors(outputChambers);
-  out<<"Neighbors: ";
+  out << "Neighbors: ";
   for (int i=0; i<this->Externalwalls.size; i++)
   { out <<"wall "<< i+1 <<": "; 
     for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
@@ -4302,6 +4304,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
       NewMinusChamber->ComputeDebugString(output);
     }
   }
+  output.ComputeDebugString();
   assert(NewPlusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(this->HasNoNeighborsThatPointToThis());
@@ -5448,7 +5451,7 @@ void WallData::RemoveNeighborhoodBothSides(CombinatorialChamber* owner, Combinat
     if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
     { this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]].RemoveNeighborOneSide(owner);
       this->NeighborsAlongWall.PopIndexSwapWithLast(i);
-      this->IndicesMirrorWalls.PopFirstOccurenceObjectSwapWithLast(i);      
+      this->IndicesMirrorWalls.PopIndexSwapWithLast(i);      
       //this->NeighborsAlongWall.TheObjects[i]=0;
       //this->IndicesMirrorWalls.TheObjects[i]=-1;
       return;
@@ -5544,8 +5547,8 @@ void WallData::SubstituteNeighborOneOccurenceNeighborOnly(CombinatorialChamber* 
 { assert(this->ContainsNeighborAtMostOnce(oldNeighbor));
   for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]==oldNeighbor)
-    { this->NeighborsAlongWall.TheObjects[i]=newNeighbor;
-      this->IndicesMirrorWalls.TheObjects[i]= IndexNewNeighborWall;
+    { this->NeighborsAlongWall.TheObjects[i] = newNeighbor;
+      this->IndicesMirrorWalls.TheObjects[i] = IndexNewNeighborWall;
       return;
     }
   assert(false);
@@ -5554,8 +5557,8 @@ void WallData::SubstituteNeighborOneOccurenceNeighborOnly(CombinatorialChamber* 
 void WallData::SubstituteNeighborOneAllowNeighborAppearingNotOnce(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall)
 { for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]==oldNeighbor)
-    { this->NeighborsAlongWall.TheObjects[i]=newNeighbor;
-      this->IndicesMirrorWalls.TheObjects[i]= IndexNewNeighborWall;
+    { this->NeighborsAlongWall.TheObjects[i] = newNeighbor;
+      this->IndicesMirrorWalls.TheObjects[i] = IndexNewNeighborWall;
     }
 }
 
@@ -11597,7 +11600,7 @@ void SelectionWithMaxMultiplicity::IncrementSubset()
     }
     else
     { this->Multiplicities.TheObjects[i]=0;
-      this->elements.PopFirstOccurenceObjectSwapWithLast(i);
+      this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
   }
 }
@@ -11658,7 +11661,7 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
     }
     else
     { this->Multiplicities.TheObjects[i]=0;
-      this->elements.PopFirstOccurenceObjectSwapWithLast(i);
+      this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
 }
 

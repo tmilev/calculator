@@ -412,7 +412,10 @@ public:
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
   void PopLastObject();
-  void PopFirstOccurenceObjectSwapWithLast(Object& o);
+  // the below function is named a bit awkwardly because otherwise there is a risk of confusion 
+  // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time, 
+  // so the awkward name is necessary.
+  void RemoveFirstOccurenceSwapWithLast(Object& o);
   bool HasACommonElementWith(ListBasicObjects<Object>& right);
   void SwapTwoIndices(int index1, int index2);
   void ElementToStringGeneric(std::string& output);
@@ -470,7 +473,7 @@ private:
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
-  void PopFirstOccurenceObjectSwapWithLast(Object& o);
+  void RemoveFirstOccurenceSwapWithLast(Object& o);
   void CopyFromBase (const ListBasicObjects<Object>& From);
   void SwapTwoIndices(int index1, int index2);
   void operator=(const ListBasicObjects<Object>& right){this->CopyFromBase(right); };
@@ -2028,7 +2031,7 @@ void ListBasicObjects<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::PopFirstOccurenceObjectSwapWithLast(Object& o)
+void ListBasicObjects<Object>::RemoveFirstOccurenceSwapWithLast(Object& o)
 { for (int i=0; i<this->size; i++)
     if (o==this->TheObjects[i])
     { this->PopIndexSwapWithLast(i);
@@ -2197,8 +2200,8 @@ void HashedListBasicObjects<Object>::SwapTwoIndicesHash(int i1, int i2)
   int i1Hash = this->TheObjects[i1].HashFunction();
   int i2Hash = this->TheObjects[i2].HashFunction();
   this->FitHashSize(i1Hash); this->FitHashSize(i2Hash);
-  this->TheHashedArrays[i1Hash].PopFirstOccurenceObjectSwapWithLast(i1);
-  this->TheHashedArrays[i2Hash].PopFirstOccurenceObjectSwapWithLast(i2);
+  this->TheHashedArrays[i1Hash].RemoveFirstOccurenceSwapWithLast(i1);
+  this->TheHashedArrays[i2Hash].RemoveFirstOccurenceSwapWithLast(i2);
   tempO= this->TheObjects[i1];
   this->TheObjects[i1]=this->TheObjects[i2];
   this->TheObjects[i2]=tempO;
@@ -2301,13 +2304,13 @@ void HashedListBasicObjects<Object>::PopIndexSwapWithLastHash(int index)
 { Object* oPop= &this->TheObjects[index];
   int hashIndexPop = oPop->HashFunction()% this->HashSize;
   if (hashIndexPop<0) {hashIndexPop+=this->HashSize; }
-  this->TheHashedArrays[hashIndexPop].PopFirstOccurenceObjectSwapWithLast(index);
+  this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
   if (index==this->size-1){this->size--; return; }
   int tempI=this->size-1;
   Object* oTop= &this->TheObjects[tempI];
   int hashIndexTop= oTop->HashFunction()% this->HashSize;
   if (hashIndexTop<0){hashIndexTop+=this->HashSize; }
-  this->TheHashedArrays[hashIndexTop].PopFirstOccurenceObjectSwapWithLast(tempI);
+  this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
   this->TheHashedArrays[hashIndexTop].AddObjectOnTop(index);
   this->ListBasicObjects<Object>::PopIndexSwapWithLast(index);
 }

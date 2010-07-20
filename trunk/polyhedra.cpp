@@ -287,15 +287,15 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
   }
   this->MakeReportGlueing(theGlobalVariables, this->indexLowestNonCheckedForGlueing, this->NumTotalGlued);
   this->indexLowestNonCheckedForGlueing++;
-  this->ComputeDebugString();
-  this->ConsistencyCheck();
+  //this->ComputeDebugString();
+  //this->ConsistencyCheck();
 }
 
 void CombinatorialChamberContainer::Glue(CombinatorialChamber* left, CombinatorialChamber* right, int indexTouchingWallInLeft, int  indexTouchingWallInRight, GlobalVariables& theGlobalVariables)
 { this->ConsistencyCheck();
   CombinatorialChamber* newChamber= new CombinatorialChamber;
-  left->ComputeDebugString(*this);
-  right->ComputeDebugString(*this);
+  //left->ComputeDebugString(*this);
+  //right->ComputeDebugString(*this);
   newChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(right->Externalwalls.size+left->Externalwalls.size-2);
   newChamber->IndexInOwnerComplex= this->size;
   this->AddObjectOnTop(newChamber);
@@ -329,9 +329,9 @@ void CombinatorialChamberContainer::Glue(CombinatorialChamber* left, Combinatori
   ParallelComputing::GlobalPointerCounter--;
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
 #endif
-  this->ComputeDebugString();
-  newChamber->ComputeDebugString(*this);
-  this->ConsistencyCheck();
+  //this->ComputeDebugString();
+  //newChamber->ComputeDebugString(*this);
+  //this->ConsistencyCheck();
 }
 
 void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
@@ -392,7 +392,7 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
     if (this->theCurrentIndex<this->theDirections.size)
       this->MakeReportOneSlice(theGlobalVariables, this->theCurrentIndex, this->theDirections.size, this->theDirections.TheObjects[this->theCurrentIndex]);
     //if (ProblemCounter>1024)
-    this->ComputeDebugString();
+    //this->ComputeDebugString();
     assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
     //assert(this->ConsistencyCheckNextIndicesToSlice());
@@ -1349,9 +1349,9 @@ void ComputationSetup::Run()
   //this->VPVectors.ComputeDebugString();
   this->IndexChamberOfInterest=-1;
   if (this->flagComputingChambers)
-  { root tempRoot; tempRoot.MakeEi(this->theChambers.AmbientDimension, 0);
+  { /*root tempRoot; tempRoot.MakeEi(this->theChambers.AmbientDimension, 0);
     if (this->theChambers.theDirections.TheObjects[0].IsEqualTo(tempRoot))
-      this->theChambers.theDirections.ReverseOrderElements();
+      this->theChambers.theDirections.ReverseOrderElements();*/
     if (!this->flagDoingWeylGroupAction)
     { if (this->flagFullChop)
         this->theChambers.SliceTheEuclideanSpace(0, *this->theGlobalVariablesContainer->Default());
@@ -3508,7 +3508,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 //  this->FindAllNeighbors(outputChambers);
   out << "Neighbors: ";
   for (int i=0; i<this->Externalwalls.size; i++)
-  { out <<"wall "<< i+1 <<": "; 
+  { out <<"wall "<< i+1 <<": ";
     for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
     { CombinatorialChamber* currentChamber = this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j];
       if (currentChamber!=0)
@@ -4304,7 +4304,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
       NewMinusChamber->ComputeDebugString(output);
     }
   }
-  output.ComputeDebugString();
+//  output.ComputeDebugString();
   assert(NewPlusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(this->HasNoNeighborsThatPointToThis());
@@ -5451,7 +5451,7 @@ void WallData::RemoveNeighborhoodBothSides(CombinatorialChamber* owner, Combinat
     if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
     { this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]].RemoveNeighborOneSide(owner);
       this->NeighborsAlongWall.PopIndexSwapWithLast(i);
-      this->IndicesMirrorWalls.PopIndexSwapWithLast(i);      
+      this->IndicesMirrorWalls.PopIndexSwapWithLast(i);
       //this->NeighborsAlongWall.TheObjects[i]=0;
       //this->IndicesMirrorWalls.TheObjects[i]=-1;
       return;

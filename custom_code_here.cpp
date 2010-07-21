@@ -947,13 +947,13 @@ void WeylGroup::ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonorm
 { for (int i=0; i<this->RootSystem.size; i++)
   { double x= this->RootScalarKillingFormMatrixRoot(orthonormalBasisVector1, this->RootSystem.TheObjects[i]).DoubleValue()*10;
     double y= this->RootScalarKillingFormMatrixRoot(orthonormalBasisVector2, this->RootSystem.TheObjects[i]).DoubleValue()*10;
-    theGlobalVariables.theDrawingVariables.drawLine(0, 0, x, y, 0, 0);
+    theGlobalVariables.theDrawingVariables.drawLineDirectly(0, 0, x, y, 0, 0);
   }
 }
 
-void DrawingVariables::drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
-{ if (this->theDrawFunction!=0)
-    this->theDrawFunction(X1+ this->centerX, Y1+ this->centerY, X2+ this->centerX, Y2+ this->centerY, thePenStyle, ColorIndex);
+void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+{ if (this->theDrawLineFunction!=0)
+    this->theDrawLineFunction(X1+ this->centerX, Y1+ this->centerY, X2+ this->centerX, Y2+ this->centerY, thePenStyle, ColorIndex);
 }
 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
@@ -972,7 +972,9 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.theChambers.flagIsRunning=true;
   inputData.theChambers.flagReachSafePointASAP=false;
   inputData.flagDyckPathComputationLoaded=true;
-  inputData.thePartialFraction.LimitSplittingSteps=1;
+  inputData.thePartialFraction.LimitSplittingSteps=100000;
+  inputData.thePartialFraction.flagUsingCheckSum=true;
+  inputData.thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
   inputData.thePartialFraction.Run(inputData.theChambers.theDirections, theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -1353,4 +1355,88 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   this->flagIsRunning=false;
   this->flagMustStop=false;
   this->flagReachSafePointASAP=false;
+}
+
+
+/*class MathTypesetting
+{
+  template <typename Element>
+  void drawPoly(Polynomial<Element>& thePoly, GlobalVariables& theGlobalVariables);
+};
+
+template <typename Element>
+void drawPoly(Polynomial<Element>& thePoly, GlobalVariables& theGlobalVariables)
+{
+}
+*/
+
+void DrawOperations::drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex)
+{ this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawLineBetweenTwoVectors);
+  this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
+  this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
+  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
+}
+
+void DrawOperations::drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex)
+{ this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawTextAtVector);
+  this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextAtVectorOperations.size);
+  this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
+  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex);
+}
+
+void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+{ this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawLine);
+  this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawLineOperations.size);
+  this->theDrawLineOperations.AddObjectOnTopCreateNew();
+  this->theDrawLineOperations.LastObject()->init(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
+}
+
+void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex)
+{ this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawText);
+  this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextOperations.size);
+  this->theDrawTextOperations.AddObjectOnTopCreateNew();
+  this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex);
+}
+
+void DrawingVariables::drawBuffer()
+{ double x1, x2, y1, y2;
+  for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
+    switch (this->theBuffer.TypeNthDrawOperation.TheObjects[i])
+    { case DrawOperations::typeDrawText:
+        if (this->theDrawTextFunction!=0)
+        { DrawTextOperation& theDrawTextOp= this->theBuffer.theDrawTextOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          this->theDrawTextFunction(theDrawTextOp.X1, theDrawTextOp.Y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex);
+        }
+        break;
+      case DrawOperations::typeDrawLine:
+        if (this->theDrawLineFunction!=0)
+        { DrawLineOperation& theDrawLineOp= this->theBuffer.theDrawLineOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          this->theDrawLineFunction(theDrawLineOp.X1, theDrawLineOp.Y1, theDrawLineOp.X2, theDrawLineOp.Y2, theDrawLineOp.thePenStyle, theDrawLineOp.ColorIndex);
+        }
+        break;
+      case DrawOperations::typeDrawLineBetweenTwoVectors:
+        if (this->theDrawLineFunction!=0)
+        { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp= this->theBuffer.theDrawLineBetweenTwoRootsOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          this->GetCoordsForDrawing(*this, theDrawLineBnTwoOp.v1, x1, y1);
+          this->GetCoordsForDrawing(*this, theDrawLineBnTwoOp.v2, x2, y2);
+          this->theDrawLineFunction(x1, y1, x2, y2, theDrawLineBnTwoOp.thePenStyle, theDrawLineBnTwoOp.ColorIndex);
+        }
+        break;
+      case DrawOperations::typeDrawTextAtVector:
+        if (this->theDrawTextFunction!=0)
+        { DrawTextAtVectorOperation& theDrawTextOp= this->theBuffer.theDrawTextAtVectorOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          this->GetCoordsForDrawing(*this, theDrawTextOp.theVector, x1, y1);
+          this->theDrawTextFunction(x1, y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex);
+        }
+        break;
+      default: break;
+    }
+}
+
+void DrawingVariables::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
+}
+
+void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
+{ this->theBuffer.drawTextBuffer(X1, Y1, inputText, color);
 }

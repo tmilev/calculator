@@ -59,8 +59,6 @@
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
 #endif
 
-const int MaxRank=12;
-const int MaxNumberOfRoots= 100;
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
 const int SomeRandomPrimes[SomeRandomPrimesSize]={ 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911};
@@ -122,6 +120,7 @@ class rootSubalgebras;
 struct ComputationSetup;
 class slTwo;
 class SltwoSubalgebras;
+class DrawingVariables;
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
@@ -136,9 +135,46 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 class MutexWrapper
 {
 private:
-
+#ifndef WIN32
+  pthread_mutex_t theMutex;
+#else
+//This is not guaranteed to work on Windows. Might cause crash. Must be fixed to a proper set of Windows routines.
+//This is not possible at the moment since none of my legally owned (but outdated) versions of Windows support the multitasking routines
+//that are officially documented at Microsoft's network. (i.e. I must buy Microsoft's most recent version of Windows so that I can develop
+//software that will *increase* the value of Windows. No thank you, I can always tell my colleagues to install Linux instead. It's free, you know.)
+  bool locked;
+#endif
 public:
+  void LockMe()
+  {
+#ifndef WIN32
+    pthread_mutex_lock(&this->theMutex);
+#else
+    while(this->locked)
+    {}
+    this->locked=true;
+#endif
+  };
+  void UnlockMe()
+  {
+#ifndef WIN32
+    pthread_mutex_unlock(&this->theMutex);
+#else
+    this->locked=false;
+#endif
+  };
+  MutexWrapper()
+  {
+#ifndef WIN32
+    pthread_mutex_unlock(&this->theMutex);
+#else
+    this->locked=false;
+#endif
+  };
+  ~MutexWrapper()
+  {
 
+  };
 };
 
 class ParallelComputing
@@ -146,94 +182,21 @@ class ParallelComputing
 public:
   static bool isRunning;
   static int GlobalPointerCounter;
+  static MutexWrapper mutexLockThisMutexToSignalPause;
 #ifdef CGIversionLimitRAMuse
   static int cgiLimitRAMuseNumPointersInListBasicObjects;
 #endif
-#ifndef WIN32
-  static pthread_mutex_t mutexLockThisMutexToSignalPause;
-#endif
   inline static void SafePoint()
   { ParallelComputing::isRunning=false;
-#ifndef WIN32
-    pthread_mutex_lock(&ParallelComputing::mutexLockThisMutexToSignalPause);
-#endif
+    mutexLockThisMutexToSignalPause.LockMe();
     ParallelComputing::isRunning=true;
-#ifndef WIN32
-    pthread_mutex_unlock(&ParallelComputing::mutexLockThisMutexToSignalPause);
-#endif
+    mutexLockThisMutexToSignalPause.UnlockMe();
   };
 };
 
 typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2,  unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex);
 typedef void (*FeedDataToIndicatorWindow)(IndicatorWindowVariables& input);
-
-struct DrawingVariables
-{
-private:
-  drawLineFunction theDrawFunction;
-public:
-  static const int NumColors=8;
-  //color styles (taken from windows.h and substituted for independence of the .h file):
-  // 0 = normal line
-  // 1 = dashed line
-  // 2 = dotted line
-  // 5 = invisible line (no line)
-  static const int PenStyleInvisible= 5;
-  static const int PenStyleDashed= 1;
-  static const int PenStyleDotted= 2;
-  static const int PenStyleNormal= 0;
-  int ColorDashes;
-  bool flagLaTeXDraw;
-  bool flag2DprojectionDraw;
-  bool DrawDashes;
-  bool DrawChamberIndices;
-  bool DrawingInvisibles;
-  bool DisplayingChamberCreationNumbers;
-  int Selected;
-  double centerX;
-  double centerY;
-  int textX;
-  int textY;
-  double Projections[MaxRank][2];
-  double scale;
-  int TextColor;
-  int ZeroChamberTextColor;
-  int DeadChamberTextColor;
-  int ColorChamberIndicator;
-  int ColorWeylChamberWalls;
-  int TextOutStyle;
-  int TextOutStyleInvisibles;
-  int DrawStyle;
-  int DrawStyleDashes;
-  int DrawStyleInvisibles;
-  int DrawStyleDashesInvisibles;
-  void drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
-  void initDrawingVariables(int cX1, int cY1);
-  int ColorsR[DrawingVariables::NumColors];
-  int ColorsG[DrawingVariables::NumColors];
-  int ColorsB[DrawingVariables::NumColors];
-  int Colors[DrawingVariables::NumColors];
-  DrawingVariables(int cx, int cy){this->initDrawingVariables(cx, cy); };
-  DrawingVariables(){this->initDrawingVariables(100, 100); };
-  void SetDrawingFunction(drawLineFunction theFunction){this->theDrawFunction=theFunction; };
-  int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
-  static void GetCoordsForDrawing(DrawingVariables& TDV, root& r, double& x, double& y);
-  static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
-  void ApplyScale(double inputScale);
-  void SetCoordsOrthogonal();
-  void SetCoordsForG2();
-  void SetCoordsForB2();
-  void SetCoordsForA2();
-  void SetCoordsForC2();
-  void drawLine(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
-  void drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
-  //if the LatexOutFile is zero then the procedure defaults to the screen
-  void drawLineOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
-  void drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile, drawLineFunction theDrawFunction);
-//  void drawlineBetweenTwoVectorsColorIndex(root& r1, root& r2, int PenStyle, int ColorIndex, std::fstream* LatexOutFile);
-  void drawTextAtVector(root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, drawTextFunction drawTextIn);
-};
 
 class MathRoutines
 {
@@ -438,8 +401,11 @@ public:
         return false;
     return true;
   };
-  bool operator!=(const ListBasicObjects<Object>& other) const
+  inline bool operator!=(const ListBasicObjects<Object>& other) const
   { return !this->IsEqualTo(other);
+  };
+  inline bool operator==(const ListBasicObjects<Object>& other) const
+  { return this->IsEqualTo(other);
   };
   void ShiftUpExpandOnTop(int StartingIndex);
   ListBasicObjects();
@@ -1904,7 +1870,7 @@ public:
   void MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
   bool TestPossibilityToSlice(root& direction, CombinatorialChamberContainer& owner);
   bool MakeFacetFromEdgeAndDirection(WallData& Wall1, WallData& Wall2, CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal, GlobalVariables& theGlobalVariables);
-  void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
+  void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput);
   void WireChamberAndWallAdjacencyData(CombinatorialChamberContainer& owner, CombinatorialChamber* input);
   void Assign(const  CombinatorialChamber& right);
   inline void operator=(const CombinatorialChamber& right){this->Assign(right); };
@@ -2448,12 +2414,6 @@ bool ListObjectPointers<Object>::IsAnElementOf(Object* o)
       return true;
   return false;
 }
-template<class Object>
-void CopyOntoObject(ListObjectPointers<Object>* FromList)
-{  init(FromList->size);
-  for(int i=0; i<FromList->size; i++)
-    AddObject(FromList->TheObjects[i]);
-}
 
 template <class Object>
 void ListObjectPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
@@ -2573,13 +2533,7 @@ public:
 // Let's hope that will be fixed with the new C++ standard!
   void PauseSlicing();
   void ResumeSlicing();
-#ifdef WIN32
-//  HANDLE mutexFlagCriticalSectionEntered;
-//  HANDLE condContinue;
-#else
-  pthread_mutex_t mutexFlagCriticalSectionEntered;
-  pthread_cond_t condContinue;
-#endif
+  MutexWrapper thePauseMutex;
 /////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
   bool flagMakingASingleHyperplaneSlice;
@@ -2652,10 +2606,11 @@ public:
   bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables& theGlobalVariables);
   void PrintThePolys(std::string& output);
   void ComputeGlobalCone(roots& directions, GlobalVariables& theGlobalVariables);
-  static void drawOutput(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-  static void DrawOutputProjective(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, std::fstream* outputLatex, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-  static void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn);
-  static void drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, drawLineFunction theDrawFunction, std::fstream* outputLatex);
+  void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root& output);
+  void drawOutput(DrawingVariables& TDV, root& ChamberIndicator, std::fstream* LaTeXOutput);
+  void DrawOutputProjective(DrawingVariables& TDV, root& ChamberIndicator, std::fstream* outputLatex);
+  void drawOutputAffine(DrawingVariables& TDV, std::fstream* LaTeXoutput);
+  void drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, std::fstream* outputLatex);
   bool TestPossibleIndexToSlice(root& direction, int index);
   CombinatorialChamberContainer();
   ~CombinatorialChamberContainer();
@@ -2940,12 +2895,10 @@ inline bool PolynomialLight<ElementOfCommutativeRingWithIdentity>::IsEqualToZero
 { return this->size==0;
 }
 
-class intRoot
+class intRoot :public ListBasicObjects<int>
 {
 private:
 public:
-  int dimension;
-  int elements[MaxRank];
   void AssignRoot(root&r);
   int HashFunction() const;
   void ElementToString(std::string& output);
@@ -2953,16 +2906,14 @@ public:
   bool IsGEQNoWeight(intRoot& r);
   void MakeZero(int  theDimension);
   void MultiplyByInteger(int x)
-  { for (int i=0; i<this->dimension; i++)
-      this->elements[i]*=x;
+  { for (int i=0; i<this->size; i++)
+      this->TheObjects[i]*=x;
   };
   void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
   void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
   //remark: zero is considered to be a positive vector!
   bool IsPositive();
   void AddRoot(intRoot& theRoot);
-  void operator=(const intRoot& right);
-  bool operator==(const intRoot& right);
   intRoot(){};
 };
 
@@ -3519,11 +3470,11 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot (ElementOfCommutativeRingWithIdentity& coeff, intRoot& input)
-{ this->init((short)input.dimension);
+void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input)
+{ this->init((short)input.size);
   this->Coefficient.Assign(coeff);
   for (int i=0; i<this->NumVariables; i++)
-    this->degrees[i]=(short) input.elements[i];
+    this->degrees[i]=(short) input.TheObjects[i];
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3542,16 +3493,16 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(root
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::MonomialExponentToRoot(intRoot& output)
-{ output.dimension=this->NumVariables;
+{ output.SetSizeExpandOnTopNoObjectInit(this->NumVariables);
   for (int i=0; i<this->NumVariables; i++)
-    output.elements[i]=this->degrees[i];
+    output.TheObjects[i]=this->degrees[i];
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::DivideByExponentOnly(intRoot& input)
-{ assert(input.dimension==this->NumVariables);
+{ assert(input.size==this->NumVariables);
   for (int i=0; i<this->NumVariables; i++)
-    this->degrees[i]-=(short)input.elements[i];
+    this->degrees[i]-=(short)input.TheObjects[i];
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4399,7 +4350,7 @@ public:
   bool operator ==(BasicQN& q);
   void Simplify();
   void GetCoeffInFrontOfLast(Rational& output);
-  void Evaluate(int* theVars, Rational& output);
+  void Evaluate(ListBasicObjects<int>& theVars, Rational& output);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, short NumV);
 //  void MakeQN(PolynomialRationalCoeff& exp, Rational& coeff);
@@ -4427,7 +4378,7 @@ public:
   void DivideByRational(Rational& r);
 //  void DecreaseNumVars(int decrease);
   void MultiplyByLargeRational(Rational& r);
-  void MakePureQN(  short NumVar, int NonZeroIndex, Rational& coeff, int theExp, int Num, int theDen);
+  void MakePureQN(short NumVar, int NonZeroIndex, Rational& coeff, int theExp, int Num, int theDen);
   void MakeFromNormalAndDirection(root& normal, root& direction, int theMod, Rational& coeff);
   void LinearSubstitution(QPSub& TheSub);
   static QuasiNumber TheRingUnit;
@@ -4435,7 +4386,7 @@ public:
   static QuasiNumber TheRingMUnit;
   void MakeZero(short NumVars);
   void Simplify();
-  void Evaluate(int* theVars, Rational& output);
+  void Evaluate(ListBasicObjects<int>& theVars, Rational& output);
   int FindGCMDens();
   void QNtoComplex(CompositeComplexQN& output);
   void MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column);
@@ -4464,7 +4415,7 @@ public:
     ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this);
   };
   CompositeComplex Coefficient;
-  Rational Exponent[MaxRank+1];
+  ListBasicObjects<Rational> Exponent;
   int NumVars;
 //  void AddBasicComplexNumber(BasicComplexNumber& b);
   void MultiplyBy(ComplexQN& q);
@@ -4769,10 +4720,10 @@ public:
 class RootToIndexTable : public HashedListBasicObjects<intRoot>
 {
 public:
-  int TableAllowedAminusB[MaxNumberOfRoots][MaxNumberOfRoots];
-  int TableAllowedAminus2B[MaxNumberOfRoots][MaxNumberOfRoots];
+  MatrixIntTightMemoryFit TableAllowedAminusB;
+  MatrixIntTightMemoryFit TableAllowedAminus2B;
   Selection IndicesRedundantShortRoots;
-  int IndicesDoublesOfRedundantShortRoots[MaxNumberOfRoots];
+  ListBasicObjects<int> IndicesDoublesOfRedundantShortRoots;
   int NumNonRedundantShortRoots;
   intRoot weights;
   void initFromRoots(intRoots& theAlgorithmBasis, intRoot* theWeights);
@@ -5211,7 +5162,7 @@ public:
   static const int TextPrintCenteringAdjustmentX=3;
   static const int TextPrintCenteringAdjustmentY=3;
   static void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput);
-  static void drawText(double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output);
+  static void drawTextDirectly(double X1, double Y1, const std::string& theText, int ColorIndex, std::fstream& output);
   static void beginDocument(std::fstream& output);
   static void endLatexDocument(std::fstream& output);
   static void beginPSTricks(std::fstream& output);
@@ -6304,6 +6255,159 @@ class IrreducibleFiniteDimensionalModule
   void ElementToString(std::string& output);
 };
 
+class DrawTextOperation
+{
+public:
+  double X1; double Y1; std::string theText; int ColorIndex;
+  void init(double x1, double y1, const std::string& inputText, int color)
+  { this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color;
+  };
+  void operator=(const DrawTextOperation& other)
+  { this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex;
+  };
+};
+
+class DrawLineOperation
+{
+public:
+  double X1;
+  double Y1;
+  double X2;
+  double Y2;
+  int thePenStyle;
+  int ColorIndex;
+  inline void init(double x1, double y1, double x2, double y2, unsigned long PenStyle, int colorIndex)
+  { this->X1=x1; this->Y1= y1; this->X2=x2; this->Y2=y2; this->thePenStyle=PenStyle; this->ColorIndex= colorIndex;
+  };
+  void operator=(const DrawLineOperation& other)
+  { this->X1=other.X1; this->Y1=other.Y1; this->X2=other.X2; this->Y2=other.Y2; this->thePenStyle=other.thePenStyle; this->ColorIndex=other.ColorIndex;
+  };
+};
+
+class DrawLineBetweenTwoRootsOperation
+{
+public:
+  root v1;
+  root v2;
+  int thePenStyle;
+  int ColorIndex;
+  void init(root& input1, root& input2, unsigned long PenStyle, int colorIndex)
+  { this->v1=input1; this->v2=input2; this->thePenStyle=PenStyle; this->ColorIndex=colorIndex;
+  };
+  void operator=(const DrawLineBetweenTwoRootsOperation& other)
+  { this->v1=other.v1; this->v2=other.v2; this->thePenStyle=other.thePenStyle; this->ColorIndex=other.ColorIndex;
+  };
+};
+
+class DrawTextAtVectorOperation
+{
+public:
+  root theVector;
+  std::string theText;
+  int ColorIndex;
+  void init(root& input, const std::string& inputText, int colorIndex)
+  { this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText;
+  };
+  void operator=(const DrawTextAtVectorOperation& other)
+  { this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText;
+  };
+};
+
+class DrawOperations
+{
+  public:
+  ListBasicObjects<int> IndexNthDrawOperation;
+  ListBasicObjects<int> TypeNthDrawOperation;
+  ListBasicObjects<DrawTextOperation> theDrawTextOperations;
+  ListBasicObjects<DrawLineOperation> theDrawLineOperations;
+  ListBasicObjects<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
+  ListBasicObjects<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
+  void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
+  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex);
+  void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
+  void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex);
+  void init()
+  { this->IndexNthDrawOperation.size=0; this->TypeNthDrawOperation.size=0;
+    this->theDrawTextOperations.size=0; this->theDrawLineOperations.size=0; this->theDrawLineBetweenTwoRootsOperations.size=0; this->theDrawTextAtVectorOperations.size=0;
+  }
+  enum DrawOperationType
+  { typeDrawLine,
+    typeDrawText,
+    typeDrawLineBetweenTwoVectors,
+    typeDrawTextAtVector,
+  };
+};
+
+class DrawingVariables
+{
+private:
+  drawLineFunction theDrawLineFunction;
+  drawTextFunction theDrawTextFunction;
+public:
+  static const int NumColors=8;
+  enum PenStyles
+  { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal };
+  int ColorDashes;
+  bool flagLaTeXDraw;
+  bool flag2DprojectionDraw;
+  bool DrawDashes;
+  bool DrawChamberIndices;
+  bool DrawingInvisibles;
+  bool DisplayingChamberCreationNumbers;
+  int Selected;
+  double centerX;
+  double centerY;
+  int textX;
+  int textY;
+  Matrix<double> Projections;
+  double scale;
+  int TextColor;
+  int ZeroChamberTextColor;
+  int DeadChamberTextColor;
+  int ColorChamberIndicator;
+  int ColorWeylChamberWalls;
+  int TextOutStyle;
+  int TextOutStyleInvisibles;
+  int DrawStyle;
+  int DrawStyleDashes;
+  int DrawStyleInvisibles;
+  int DrawStyleDashesInvisibles;
+  void initDrawingVariables(int cX1, int cY1);
+  int ColorsR[DrawingVariables::NumColors];
+  int ColorsG[DrawingVariables::NumColors];
+  int ColorsB[DrawingVariables::NumColors];
+  int Colors[DrawingVariables::NumColors];
+  DrawingVariables(int cx, int cy){this->initDrawingVariables(cx, cy); };
+  DrawingVariables(){this->initDrawingVariables(100, 100); };
+  void SetDrawLineFunction(drawLineFunction theFunction){ this->theDrawLineFunction=theFunction; };
+  void SetDrawTextFunction(drawTextFunction theFunction){ this->theDrawTextFunction=theFunction; };
+  int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
+  static void GetCoordsForDrawing(DrawingVariables& TDV, root& r, double& x, double& y);
+  static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
+  void ApplyScale(double inputScale);
+  void SetCoordsOrthogonal();
+  void SetCoordsForG2();
+  void SetCoordsForB2();
+  void SetCoordsForA2();
+  void SetCoordsForC2();
+  DrawOperations theBuffer;
+  void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
+  void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
+  void drawLineDirectly(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
+  void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
+  void drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
+  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
+  void drawBuffer();
+  //if the LatexOutFile is zero then the procedure defaults to the screen
+  void drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
+  void drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile);
+  void drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, std::fstream* LatexOutFile);
+  void operator=(const DrawingVariables& other)
+  { this->theDrawLineFunction=other.theDrawLineFunction;
+    this->theDrawTextFunction=other.theDrawTextFunction;
+  };
+};
+
 typedef void (*Runnable) (ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 
 struct ComputationSetup
@@ -6381,6 +6485,7 @@ public:
   bool IsAnInteger(char a);
   int GetDigitFromChar(char a);
   int readNextIntData(std::string& input, int index, int& endIndex);
+  GlobalVariables* GetGlobalVars();
   void InitComputationSetup();
   void ExitComputationSetup();
   void WriteReportToFile(DrawingVariables& TDV, std::fstream& theFile, GlobalVariables& theGlobalVariables);
@@ -6434,13 +6539,16 @@ public:
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path);
   static bool FileExists(const std::string& theFileName);
-   static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static bool CheckForInputSanity(ComputationSetup& input);
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true); };
+  static inline int RedGreenBlue(int r, int g, int b)
+  { return r | (g<<8) | b<<16;
+  };
   static void FormatCPPSourceCode(const std::string& FileName);
   enum TheChoicesWeMake
   { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
@@ -6508,9 +6616,9 @@ public:
   MatrixLargeRational matComputeNormalFromSelection;
   MatrixLargeRational matOutputEmpty;
   MatrixLargeRational matIdMatrix;
-  MatrixLargeRational  matComputeNormalExcludingIndex;
+  MatrixLargeRational matComputeNormalExcludingIndex;
   MatrixLargeRational matLinearAlgebraForVertexComputation;
-  MatrixLargeRational  matComputeNormalFromSelectionAndExtraRoot;
+  MatrixLargeRational matComputeNormalFromSelectionAndExtraRoot;
   MatrixLargeRational matComputeNormalFromSelectionAndTwoExtraRoots;
   MatrixLargeRational matGetRankOfSpanOfElements;
   MatrixLargeRational matReduceMonomialByMonomial;
@@ -6575,7 +6683,13 @@ public:
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
   GlobalVariables();
-  ~GlobalVariables();
+  void operator=(const GlobalVariables& other)
+  { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;
+    this->theDrawingVariables=other.theDrawingVariables;
+  };
+  inline void DrawBuffer()
+  { this->theDrawingVariables.drawBuffer();
+  };
   inline void SetFeedDataToIndicatorWindowDefault(FeedDataToIndicatorWindow input)
   { this->FeedDataToIndicatorWindowDefault=input;
   };
@@ -6590,7 +6704,6 @@ public:
   { if (this->FeedDataToIndicatorWindowDefault!=0)
       this->FeedDataToIndicatorWindowDefault(this->theIndicatorVariables);
   }
-  void operator=(const GlobalVariables& G_V);
 };
 
 class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
@@ -6598,8 +6711,6 @@ class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
 public:
   GlobalVariables* Default(){return & this->TheObjects[0]; };
 };
-
-void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root&output);
 
 //extern GlobalVariablesContainer StaticGlobalVariablesContainer;
 

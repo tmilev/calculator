@@ -79,7 +79,7 @@ public:
 class wxComboBoxWheel : public wxComboBox
 {
 public:
-  wxComboBoxWheel( wxWindow *parent, wxWindowID id, const wxString& value= wxT(""), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, const int n=0, const wxString choices[]=0, const long style = wxWANTS_CHARS, const wxValidator& validator=wxDefaultValidator, const wxString& name = wxT(""));
+  wxComboBoxWheel(wxWindow *parent, wxWindowID id, const wxString& value= wxT(""), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, const int n=0, const wxString choices[]=0, const long style = wxWANTS_CHARS, const wxValidator& validator=wxDefaultValidator, const wxString& name = wxT(""));
   void OnMouseWheel(wxMouseEvent& event);
   DECLARE_EVENT_TABLE()
 };
@@ -440,13 +440,14 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
   if (MainWindow1==0)
     return;
   DrawingVariables& TDV= MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
+  int theDimension=MainWindow1->theComputationSetup.theChambers.AmbientDimension;
   if (TDV.Selected==-2)
   { double tempX, tempY;
     int tempXi, tempYi;
     int tempXi2, tempYi2;
-    for (int i=0; i<MaxRank; i++)
-    { tempXi=(int)TDV.Projections[i][0];
-      tempYi=(int)TDV.Projections[i][1];
+    for (int i=0; i<theDimension; i++)
+    { tempXi=(int)TDV.Projections.elements[i][0];
+      tempYi=(int)TDV.Projections.elements[i][1];
       tempXi2=Realx-((int)TDV.centerX);
       tempYi2=((int) TDV.centerY)-Realy;
       if (((tempXi2-ClickToleranceX)<=tempXi) && (tempXi<=(tempXi2+ClickToleranceX)) &&((tempYi2-ClickToleranceY)<=tempYi) && (tempYi<=(tempYi2+ClickToleranceY)))
@@ -468,8 +469,8 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
     { double tempx, tempy;
       tempx=Realx;
       tempy=Realy;
-      TDV.Projections[TDV.Selected][0]=tempx-TDV.centerX;
-      TDV.Projections[TDV.Selected][1]=TDV.centerY-tempy;
+      TDV.Projections.elements[TDV.Selected][0]=tempx-TDV.centerX;
+      TDV.Projections.elements[TDV.Selected][1]=TDV.centerY-tempy;
     }
     TDV.Selected=-2;
     //wxPaintEvent tempev;
@@ -705,12 +706,10 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->updateInputButtons();
   this->SetSizer(this->BoxSizer1HorizontalBackground);
   this->theComputationSetup.theGlobalVariablesContainer->Default()->SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
-  this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables.SetDrawingFunction(&drawline);
-#ifndef WIN32
-  pthread_mutex_init(&ParallelComputing::mutexLockThisMutexToSignalPause, NULL);
-#endif
   DrawingVariables& TDV= this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
   TDV.initDrawingVariables(250, 250);
+  this->theComputationSetup.GetGlobalVars()->theDrawingVariables.SetDrawLineFunction(&drawline);
+  this->theComputationSetup.GetGlobalVars()->theDrawingVariables.SetDrawTextFunction(&drawtext);
   this->ReadSettingsIfAvailable();
   this->Dialog1OutputPF->Show();
   this->Dialog2StatusString1->Show();
@@ -737,9 +736,6 @@ guiMainWindow::~guiMainWindow()
   this->Dialog1OutputPF->Destroy();
   this->Dialog2StatusString1->Destroy();
   this->fileSettings.close();
-#ifndef WIN32
-  pthread_mutex_destroy(&ParallelComputing::mutexLockThisMutexToSignalPause);
-#endif
 }
 
 void RunA_voidFunctionFromFunctionAddress
@@ -827,7 +823,8 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
   if (MainWindow1->theComputationSetup.flagAllowRepaint)
   {	dc.SetBackground(MainWindow1->GetBackgroundColour());
     dc.DrawRectangle(wxPoint(0,0), this->GetSize());
-    CombinatorialChamberContainer::drawOutput(MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables, MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.theChambers.theDirections, MainWindow1->theComputationSetup.theChambers.theCurrentIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
+    MainWindow1->theComputationSetup.GetGlobalVars()->DrawBuffer();
+//    CombinatorialChamberContainer::drawOutput(MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables, MainWindow1->theComputationSetup.theChambers, MainWindow1->theComputationSetup.theChambers.theDirections, MainWindow1->theComputationSetup.theChambers.theCurrentIndex, MainWindow1->theComputationSetup.theChambers.IndicatorRoot,0, &drawline, &drawtext);
   }
 }
 
@@ -845,13 +842,11 @@ void guiMainWindow::RunTheComputation()
 #endif
   } else
   { if (MainWindow1->WorkThread1.isRunning)
-    {
-#ifdef WIN32
-      SuspendThread(MainWindow1->WorkThread1.ComputationalThread);
-#else
-      pthread_mutex_lock(&ParallelComputing::mutexLockThisMutexToSignalPause);
+    { ParallelComputing::mutexLockThisMutexToSignalPause.LockMe();
       while(ParallelComputing::isRunning)
       {}
+#ifdef WIN32
+      SuspendThread(MainWindow1->WorkThread1.ComputationalThread);
 #endif
       MainWindow1->WorkThread1.isRunning=false;
       MainWindow1->Button1Go->SetLabel(wxT("Go"));
@@ -860,10 +855,9 @@ void guiMainWindow::RunTheComputation()
     }	else
     { MainWindow1->Button1Go->SetLabel(wxT("Pause"));
       MainWindow1->WorkThread1.isRunning=true;
+      ParallelComputing::mutexLockThisMutexToSignalPause.UnlockMe();
 #ifdef WIN32
       ResumeThread(MainWindow1->WorkThread1.ComputationalThread);
-#else
-      pthread_mutex_unlock(&ParallelComputing::mutexLockThisMutexToSignalPause);
 #endif
     }
   }
@@ -932,9 +926,9 @@ void guiMainWindow::OpenFile(std::fstream& output)
 void guiMainWindow::onButton2Eval(wxCommandEvent& ev)
 { if (this->theComputationSetup.theOutput.NumVars!=this->Table3Values->GetNumberCols())
     return;
-  intRoot tempRoot;
+  intRoot tempRoot; tempRoot.SetSizeExpandOnTopNoObjectInit(this->theComputationSetup.theOutput.NumVars);
   for (int i=0; i<this->theComputationSetup.theOutput.NumVars; i++)
-    this->theComputationSetup.ValueRoot.elements[i]= wxAtoi(this->Table3Values->GetCellValue(0,i));
+    this->theComputationSetup.ValueRoot.TheObjects[i]= wxAtoi(this->Table3Values->GetCellValue(0,i));
   this->theComputationSetup.EvaluatePoly();
   this->Text2Values->SetValue(wxString(this->theComputationSetup.ValueString.c_str(),wxConvUTF8));
   return;

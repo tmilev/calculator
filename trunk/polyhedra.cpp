@@ -37,9 +37,6 @@
 
 #include "polyhedra.h"
 
-#ifndef WIN32
-pthread_mutex_t ParallelComputing::mutexLockThisMutexToSignalPause;
-#endif
 bool ParallelComputing::isRunning=true;
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.
@@ -47,32 +44,15 @@ bool ParallelComputing::isRunning=true;
 int ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=1000000;
 #endif
 
-//taken from windows.h
-#ifndef RGB
-unsigned int RGB(int r, int g, int b)
-{ return r | (g<<8) | b<<16;
-}
-#endif
-//end of windows.h portion
+MutexWrapper ParallelComputing::mutexLockThisMutexToSignalPause;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
 }
 
-GlobalVariables::~GlobalVariables()
-{
-}
-
-void GlobalVariables::operator =(const GlobalVariables &G_V)
-{ if(this==&G_V)
-    return;
-  this->matTransposeBuffer.Assign(G_V.matTransposeBuffer);
-}
-
 bool Stop()
 { return true;
 }
-
 
 int ParallelComputing::GlobalPointerCounter=0;
 Integer Integer::TheRingUnit  (1) ;
@@ -395,27 +375,11 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
     //this->ComputeDebugString();
     assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
-    //assert(this->ConsistencyCheckNextIndicesToSlice());
-    {
-#ifdef WIN32
-/*    WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
-      this->flagIsRunning=false;
-      ReleaseMutex(this->mutexFlagCriticalSectionEntered);
-      ::WaitForSingleObjectEx(this->condContinue, INFINITE, TRUE);
-      ::ResetEvent(this->condContinue);
-      ReleaseMutex(this->mutexFlagCriticalSectionEntered); */
-#else
-      //Explanation we lock and unlock the mutex. To pause the computation one simply needs to lock the mutex so that here we can't lock it.
-      this->flagIsRunning=false;
-      pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
-      this->flagIsRunning=true;
-      pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
-  //    this->flagReachSafePointASAP=false;
-#endif
-    }
+    this->flagIsRunning=false;
+    this->thePauseMutex.LockMe();
+    this->flagIsRunning=true;
+    this->thePauseMutex.UnlockMe();
   }
-  //if (ProblemCounter>1024)
-   // assert(this->ConsistencyCheck());
 }
 
 void CombinatorialChamberContainer::SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices)
@@ -500,15 +464,16 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
 }
 
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
-{ this->theDrawFunction=0;
+{ this->theDrawLineFunction=0;
+  this->theDrawTextFunction=0;
   this->flagLaTeXDraw= false;
-  this->ColorDashes=RGB(200, 200, 200);
+  this->ColorDashes=CGIspecificRoutines::RedGreenBlue(200, 200, 200);
   this->flag2DprojectionDraw=true;
-  this->ColorChamberIndicator=RGB(220, 220, 0);
-  this->ColorWeylChamberWalls=RGB(220, 220, 0);
-  this->DeadChamberTextColor= RGB(250, 220, 220);
-  this->ZeroChamberTextColor= RGB(200, 100, 100);
-  this->TextColor= RGB(0, 0, 0);
+  this->ColorChamberIndicator=CGIspecificRoutines::RedGreenBlue(220, 220, 0);
+  this->ColorWeylChamberWalls=CGIspecificRoutines::RedGreenBlue(220, 220, 0);
+  this->DeadChamberTextColor= CGIspecificRoutines::RedGreenBlue(250, 220, 220);
+  this->ZeroChamberTextColor= CGIspecificRoutines::RedGreenBlue(200, 100, 100);
+  this->TextColor= CGIspecificRoutines::RedGreenBlue(0, 0, 0);
   this->DrawStyleDashes= 1;
   this->DrawStyleDashesInvisibles= 1;
   this->DrawChamberIndices= true;
@@ -529,24 +494,25 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 //  Projections[1][1]=(87-50)*tempI;
 //  Projections[2][0]=(100+50)*tempI;
 //  Projections[2][1]=(0-50)*tempI;
-  Projections[0][0]=100;
-  Projections[0][1]=0;
-  Projections[1][0]=-50;
-  Projections[1][1]=86.66;
+  this->Projections.init(100, 2);
+  this->Projections.elements[0][0]=100;
+  this->Projections.elements[0][1]=0;
+  this->Projections.elements[1][0]=-50;
+  this->Projections.elements[1][1]=86.66;
 //  this->Projections[0][0]=200;
 //  this->Projections[0][1]=-200;
 //  this->Projections[1][0]=200;
 //  this->Projections[1][1]=200;
-  this->Projections[2][0]=0;
-  this->Projections[2][1]=100;
-  this->Projections[3][0]=92;
-  this->Projections[3][1]=-29;
-  this->Projections[4][0]=88;
-  this->Projections[4][1]=-49;
-  this->Projections[5][0]=50;
-  this->Projections[5][1]=-88;
-  this->Projections[6][0]=28;
-  this->Projections[6][1]=-92;
+  this->Projections.elements[2][0]=0;
+  this->Projections.elements[2][1]=100;
+  this->Projections.elements[3][0]=92;
+  this->Projections.elements[3][1]=-29;
+  this->Projections.elements[4][0]=88;
+  this->Projections.elements[4][1]=-49;
+  this->Projections.elements[5][0]=50;
+  this->Projections.elements[5][1]=-88;
+  this->Projections.elements[6][0]=28;
+  this->Projections.elements[6][1]=-92;
   this->ApplyScale(1);
   int i=0;
   this->ColorsR[i]=0;
@@ -589,48 +555,48 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->ColorsB[i]=200;
   i++;
   for (int i=0; i<DrawingVariables::NumColors; i++)
-    this->Colors[i]=RGB(this->ColorsR[i], this->ColorsG[i], this->ColorsB[i]);
+    this->Colors[i]=CGIspecificRoutines::RedGreenBlue(this->ColorsR[i], this->ColorsG[i], this->ColorsB[i]);
 ////////////////////
 }
 
 void DrawingVariables::SetCoordsForA2()
 { this->scale=1;
-  Projections[0][0]=100;
-  Projections[0][1]=0;
-  Projections[1][0]=-50;
-  Projections[1][1]=86.66;
+  this->Projections.elements[0][0]=100;
+  this->Projections.elements[0][1]=0;
+  this->Projections.elements[1][0]=-50;
+  this->Projections.elements[1][1]=86.66;
 }
 
 void DrawingVariables::SetCoordsOrthogonal()
 { this->scale=1;
-  Projections[0][0]=100;
-  Projections[0][1]=0;
-  Projections[1][0]=0;
-  Projections[1][1]=100;
+  this->Projections.elements[0][0]=100;
+  this->Projections.elements[0][1]=0;
+  this->Projections.elements[1][0]=0;
+  this->Projections.elements[1][1]=100;
 }
 
 void DrawingVariables::SetCoordsForB2()
 { this->scale=1;
-  Projections[0][0]=120;
-  Projections[0][1]=0;
-  Projections[1][0]=-60;
-  Projections[1][1]=60;
+  this->Projections.elements[0][0]=120;
+  this->Projections.elements[0][1]=0;
+  this->Projections.elements[1][0]=-60;
+  this->Projections.elements[1][1]=60;
 }
 
 void DrawingVariables::SetCoordsForC2()
 { this->scale=1;
-  Projections[0][0]=100;
-  Projections[0][1]=0;
-  Projections[1][0]=-100;
-  Projections[1][1]=100;
+  this->Projections.elements[0][0]=100;
+  this->Projections.elements[0][1]=0;
+  this->Projections.elements[1][0]=-100;
+  this->Projections.elements[1][1]=100;
 }
 
 void DrawingVariables::SetCoordsForG2()
 { this->scale=1;
-  Projections[0][0]=120;
-  Projections[0][1]=0;
-  Projections[1][0]=-60;
-  Projections[1][1]=34.64;
+  this->Projections.elements[0][0]=120;
+  this->Projections.elements[0][1]=0;
+  this->Projections.elements[1][0]=-60;
+  this->Projections.elements[1][1]=34.64;
 }
 
 void DrawingVariables::ApplyScale(double inputScale)
@@ -639,8 +605,8 @@ void DrawingVariables::ApplyScale(double inputScale)
   double ScaleChange= inputScale/this->scale;
   this->scale= inputScale;
   for (int i =0; i<7; i++)
-  { this->Projections[i][0]*=ScaleChange;
-    this->Projections[i][1]*=ScaleChange;
+  { this->Projections.elements[i][0]*=ScaleChange;
+    this->Projections.elements[i][1]*=ScaleChange;
   }
 }
 
@@ -747,7 +713,7 @@ void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(Computation
   CGIspecificRoutines::numDottedLines=0;
   GlobalVariables& theGlobalVariables=*input.theGlobalVariablesContainer->Default();
   theGlobalVariables.theDrawingVariables.flag2DprojectionDraw=false;
-  input.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, input.theChambers, input.VPVectors, -1, input.theChambers.IndicatorRoot, 0, 0, 0);
+  input.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, input.theChambers.IndicatorRoot, 0);
   std::string tempS;
   std::string stringColor;
   CGIspecificRoutines::outputStream.seekg(0);
@@ -1256,6 +1222,12 @@ void ComputationSetup::InitComputationSetup()
   //                            this->thePartialFraction.IndicatorRoot);
   //    this->theChambers.ComputeDebugString();
   }
+  //the below line clears the drawing buffer
+  this->GetGlobalVars()->theDrawingVariables.theBuffer.init();
+}
+
+GlobalVariables* ComputationSetup::GetGlobalVars()
+{ return this->theGlobalVariablesContainer->Default();
 }
 
 void ComputationSetup::DoTheRootSAComputation()
@@ -1383,6 +1355,7 @@ void ComputationSetup::Run()
           this->oneStepChamberSlice(*this->theGlobalVariablesContainer->Default());
       }
     }
+    this->theChambers.drawOutput(this->GetGlobalVars()->theDrawingVariables, this->IndicatorRoot, 0);
   }
   if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
   { if (!this->flagUsingCustomVectors)
@@ -1515,17 +1488,17 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r, doubl
 { x=TDV.centerX;
   y=TDV.centerY;
   for (int k=0; k<r.size; k++)
-  { x+=(r.TheObjects[k].DoubleValue())*(TDV.Projections[k][0]);
-    y-=(r.TheObjects[k].DoubleValue())*(TDV.Projections[k][1]);
+  { x+=(r.TheObjects[k].DoubleValue())*(TDV.Projections.elements[k][0]);
+    y-=(r.TheObjects[k].DoubleValue())*(TDV.Projections.elements[k][1]);
   }
 }
 
-void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile, drawLineFunction theDrawFunction)
+void DrawingVariables::drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile)
 { if (this->flag2DprojectionDraw)
-  { double x1, x2, y1, y2;
-    this->GetCoordsForDrawing(*this, r1, x1, y1);
-    this->GetCoordsForDrawing(*this, r2, x2, y2);
-    this->drawLineOld(x1, y1, x2, y2, PenStyle, PenColor, LatexOutFile, theDrawFunction);
+  { this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);
+    if (LatexOutFile!=0)
+    {//to do: this block of code!
+    }
   }
   else
   { int r, g, b;
@@ -1536,7 +1509,7 @@ void DrawingVariables::drawlineBetweenTwoVectors(root& r1, root& r2, int PenStyl
   }
 }
 
-void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile, drawTextFunction drawTextIn)
+void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile)
 { for (int i=0; i<theDimension; i++)
   { root tempRoot;
     tempRoot.MakeEi(theDimension, i);
@@ -1544,30 +1517,28 @@ void DrawingVariables::drawCoordSystem(DrawingVariables& TDV, int theDimension, 
     tempRoot.ElementToString(tempS);
     out << tempS;
     tempS=out.str();
-    TDV.drawTextAtVector(tempRoot, tempS, 0, LatexOutFile, drawTextIn);
+    TDV.drawTextAtVectorBuffer(tempRoot, tempS, 0, LatexOutFile);
   }
 }
 
-void DrawingVariables::drawLineOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile, drawLineFunction theDrawFunction)
-{ if (theDrawFunction!=0)
-    (*theDrawFunction)(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
+void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
+{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
   if (LatexOutFile!=0)
     LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
 }
 
-void DrawingVariables::drawTextAtVector(  root& point, std::string& inputText, int textColor, std::fstream* LatexOutFile, drawTextFunction drawTextIn)
-{ double x, y; this->GetCoordsForDrawing(*this, point, x, y);
-  this->drawText(x, y, inputText, textColor, LatexOutFile, drawTextIn);
+void DrawingVariables::drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, std::fstream* LatexOutFile)
+{ this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor);
 }
 
-void DrawingVariables::drawText(double X1, double Y1, std::string& inputText, int color, std::fstream* LatexOutFile, drawTextFunction drawTextIn)
-{  if (drawTextIn!=0)
-    drawTextIn(X1-7, Y1-7, inputText.c_str(), inputText.length(), color);
+void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
+{ if (this->theDrawTextFunction!=0)
+    this->theDrawTextFunction(X1-7, Y1-7, inputText.c_str(), inputText.length(), color);
   if (LatexOutFile!=0)
-    LaTeXProcedures::drawText(X1, Y1, inputText, color, *LatexOutFile);
+    LaTeXProcedures::drawTextDirectly(X1, Y1, inputText, color, *LatexOutFile);
 }
 
-void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, drawLineFunction theDrawFunction, std::fstream* outputLatex)
+void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, std::fstream* outputLatex)
 { root tempRoot;
   root Projection1;
   root tempRoot2;
@@ -1578,103 +1549,92 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
     { tempRoot.Assign(r.TheObjects[i]);
       TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Projection1, directions);
       if (TDV.DrawDashes)
-        TDV.drawlineBetweenTwoVectors(zeroRoot, Projection1, DrawingStyleDashes, TDV.ColorDashes, outputLatex, theDrawFunction);
+        TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, Projection1, DrawingStyleDashes, TDV.ColorDashes, outputLatex);
       for (int j=i+1; j<r.size; j++)
         if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
         { tempRoot2.Assign(r.TheObjects[j]);
           TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
-          TDV.drawlineBetweenTwoVectors(Projection1, Projection2,  DrawingStyle, TDV.Colors[ChamberIndex%TDV.NumColors], outputLatex, theDrawFunction);
+          TDV.drawLineBetweenTwoVectorsBuffer(Projection1, Projection2,  DrawingStyle, TDV.Colors[ChamberIndex%TDV.NumColors], outputLatex);
         }
     }
 }
 
-void CombinatorialChamberContainer::drawOutput( DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, std::fstream* LaTeXOutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn)
+void CombinatorialChamberContainer::drawOutput(DrawingVariables& TDV, root& ChamberIndicator, std::fstream* LaTeXOutput)
 { if (LaTeXOutput!=0)
     LaTeXProcedures::beginPSTricks(*LaTeXOutput);
-  for(int i=0; i<output.size; i++)
-    if (output.TheObjects[i]!=0)
-      output.TheObjects[i]->DisplayNumber=i;
-  if (output.flagDrawingProjective)
-    CombinatorialChamberContainer::DrawOutputProjective(TDV, output, directions, directionIndex, ChamberIndicator, LaTeXOutput, theDrawFunction, drawTextIn);
+  for(int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+      this->TheObjects[i]->DisplayNumber=i;
+  if (this->flagDrawingProjective)
+    CombinatorialChamberContainer::DrawOutputProjective(TDV, ChamberIndicator, LaTeXOutput);
   else
-    CombinatorialChamberContainer::drawOutputAffine(TDV, output, LaTeXOutput, theDrawFunction, drawTextIn);
+    CombinatorialChamberContainer::drawOutputAffine(TDV, LaTeXOutput);
   if (LaTeXOutput!=0)
     LaTeXProcedures::endPSTricks(*LaTeXOutput);
 }
 
-//color styles (taken from windows.h and substituted for independence of the .h file):
-// 0 = normal line
-// 1 = dashed line
-// 2 = dotted line
-// 5 = invisible line (no line)
-void CombinatorialChamberContainer::drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& output, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn)
-{ if(output.AffineWallsOfWeylChambers.size>0)
-    output.LabelChambersAndGetNumChambersInWeylChamber(output.WeylChamber);
+void CombinatorialChamberContainer::drawOutputAffine(DrawingVariables& TDV, std::fstream* LaTeXoutput)
+{ if(this->AffineWallsOfWeylChambers.size>0)
+    this->LabelChambersAndGetNumChambersInWeylChamber(this->WeylChamber);
   else
-    output.LabelChambersForDisplayAndGetNumVisibleChambers();
-  for(int i=0; i<output.size; i++)
-    if (output.TheObjects[i]!=0)
-      output.TheObjects[i]->drawOutputAffine(TDV, output, LaTeXoutput, theDrawFunction, drawTextIn);
-  TDV.drawCoordSystem(TDV, output.AmbientDimension-1, LaTeXoutput, drawTextIn);
+    this->LabelChambersForDisplayAndGetNumVisibleChambers();
+  for(int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+      this->TheObjects[i]->drawOutputAffine(TDV, *this, LaTeXoutput);
+  TDV.drawCoordSystemBuffer(TDV, this->AmbientDimension-1, LaTeXoutput);
 }
 
-//color styles (taken from windows.h and substituted for independence of the .h file):
-// 0 = normal line
-// 1 = dashed line
-// 2 = dotted line
-// 5 = invisible line (no line)
-void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, CombinatorialChamberContainer& output, roots& directions, int directionIndex, root& ChamberIndicator, std::fstream* outputLatex, drawLineFunction theDrawFunction, drawTextFunction drawTextIn)
+void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, root& ChamberIndicator, std::fstream* outputLatex)
 { int color=0;
   Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
   int NumTrueChambers=0;
   //int NumTrueChambers2=0;
   int NumZeroChambers=0;
-  for (int j=0; j<output.size; j++)
-    if (output.TheObjects[j]!=0)
-    { if (!output.TheObjects[j]->flagHasZeroPolynomiaL)
+  for (int j=0; j<this->size; j++)
+    if (this->TheObjects[j]!=0)
+    { if (!this->TheObjects[j]->flagHasZeroPolynomiaL)
       { NumTrueChambers++;
-        output.TheObjects[j]->DisplayNumber=NumTrueChambers;
+        this->TheObjects[j]->DisplayNumber=NumTrueChambers;
       }
       else
       { NumZeroChambers++;
-        output.TheObjects[j]->DisplayNumber=NumZeroChambers;
+        this->TheObjects[j]->DisplayNumber=NumZeroChambers;
       }
     }
   if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
-    output.ComputeDebugString();
+    this->ComputeDebugString();
   std::string tempS;
   std::stringstream out, out1, out3, out2;
   out<<"#Drawn chambers: "<<NumTrueChambers;
   tempS=out.str();
-  drawTextIn(TDV.textX, TDV.textY, tempS.c_str(), tempS.length(), TDV.TextColor);
+  TDV.drawTextBuffer(TDV.textX, TDV.textY, tempS, TDV.TextColor, 0);
   out1<<"#Zero chambers: "<< NumZeroChambers;
   tempS=out1.str();
-  drawTextIn(TDV.textX, TDV.textY+30, tempS.c_str(), tempS.length(), TDV.TextColor);
+  TDV.drawTextBuffer(TDV.textX, TDV.textY+30, tempS, TDV.TextColor, 0);
   out2<<"#Next chamber: ";
-  if (output.indexNextChamberToSlice!=-1)
-    if (output.TheObjects[output.indexNextChamberToSlice]!=0)
-    { if (output.TheObjects[output.indexNextChamberToSlice]->flagHasZeroPolynomiaL)
+  if (this->indexNextChamberToSlice!=-1)
+    if (this->TheObjects[this->indexNextChamberToSlice]!=0)
+    { if (this->TheObjects[this->indexNextChamberToSlice]->flagHasZeroPolynomiaL)
         out2 << "i";
       else
         out2 <<"c";
-      out2 << output.TheObjects[output.indexNextChamberToSlice]->DisplayNumber;
+      out2 << this->TheObjects[this->indexNextChamberToSlice]->DisplayNumber;
     }
-  if (output.flagMakingASingleHyperplaneSlice)
-    out2  << "; "<< "Plane: " << output.NumAffineHyperplanesProcessed+1 << " out of "<< output.theWeylGroupAffineHyperplaneImages.size;
+  if (this->flagMakingASingleHyperplaneSlice)
+    out2  << "; "<< "Plane: " << this->NumAffineHyperplanesProcessed+1 << " out of "<< this->theWeylGroupAffineHyperplaneImages.size;
   tempS=out2.str();
-  if(drawTextIn!=0)
-    drawTextIn(TDV.textX, TDV.textY+15, tempS.c_str(), tempS.length(), TDV.TextColor);
+  TDV.drawTextBuffer(TDV.textX, TDV.textY+15, tempS, TDV.TextColor, 0);
   //if (outputLatex!=0)
-  //  LaTeXProcedures::drawText(TDV.textX, TDV.textY+15, tempS, 0, outputLatex);
+  //  LaTeXProcedures::drawTextDirectly(TDV.textX, TDV.textY+15, tempS, 0, outputLatex);
   //int NumTrueChambers=0;
   //int NumTrueChambers2=0;
   //int NumZeroChambers=0;
-  if (output.size>1000)
+  if (this->size>1000)
     return;
-  if (output.flagStoringVertices)
-  { for (int j=0; j<output.size; j++)
-    { if (output.TheObjects[j]!=0)
-      { bool hasZeroPoly= output.TheObjects[j]->flagHasZeroPolynomiaL;
+  if (this->flagStoringVertices)
+  { for (int j=0; j<this->size; j++)
+    { if (this->TheObjects[j]!=0)
+      { bool hasZeroPoly= this->TheObjects[j]->flagHasZeroPolynomiaL;
         int DrawingStyle;
         int DrawingStyleDashes;
         if (!hasZeroPoly)
@@ -1688,48 +1648,41 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
           if (TDV.DrawingInvisibles)
           { DrawingStyle = TDV.DrawStyleInvisibles;
             DrawingStyleDashes= TDV.DrawStyleDashesInvisibles;
-          }else
+          } else
           { DrawingStyle = 5;
             DrawingStyleDashes= 5;
           }
         }
-        if (output.TheObjects[j]->flagPermanentlyZero)
+        if (this->TheObjects[j]->flagPermanentlyZero)
           color = TDV.DeadChamberTextColor;
         if (TDV.DrawChamberIndices)
         { if ((!hasZeroPoly)||(TDV.DrawingInvisibles))
           { root tempRoot;
-            output.TheObjects[j]->ComputeInternalPointMethod2(tempRoot, output.AmbientDimension);
+            this->TheObjects[j]->ComputeInternalPointMethod2(tempRoot, this->AmbientDimension);
             root Proj;
-            TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Proj, directions);
+            TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Proj, this->theDirections);
             std::stringstream out; std::string tempS;
             if (TDV.DisplayingChamberCreationNumbers)
-              out<<output.TheObjects[j]->CreationNumber;
+              out<<this->TheObjects[j]->CreationNumber;
             else
-              out<<output.TheObjects[j]->DisplayNumber;
+              out<<this->TheObjects[j]->DisplayNumber;
             tempS=out.str();
-            TDV.drawTextAtVector(Proj, tempS, color, outputLatex, drawTextIn);
+            TDV.drawTextAtVectorBuffer(Proj, tempS, color, outputLatex);
           }
         }
-        for (int i =0; i<output.TheObjects[j]->Externalwalls.size; i++)
-          CombinatorialChamberContainer::drawFacetVerticesMethod2(TDV, output.TheObjects[j]->AllVertices, directions, j, output.TheObjects[j]->Externalwalls.TheObjects[i], DrawingStyle, DrawingStyleDashes, theDrawFunction, outputLatex);
+        for (int i =0; i<this->TheObjects[j]->Externalwalls.size; i++)
+          CombinatorialChamberContainer::drawFacetVerticesMethod2(TDV, this->TheObjects[j]->AllVertices, this->theDirections, j, this->TheObjects[j]->Externalwalls.TheObjects[i], DrawingStyle, DrawingStyleDashes, outputLatex);
       }
     }
-    if (output.size>0 && ChamberIndicator.size==output.AmbientDimension && TDV.flag2DprojectionDraw)
+    if (this->size>0 && ChamberIndicator.size==this->AmbientDimension && TDV.flag2DprojectionDraw)
     { root tempRootX;
-      TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator, tempRootX, directions);
-      double tmpX, tmpY;
-      TDV.GetCoordsForDrawing(TDV, tempRootX, tmpX, tmpY);
-      TDV.drawLineOld(tmpX-2, tmpY-2, tmpX+2, tmpY+2, TDV.DrawStyle, TDV.ColorChamberIndicator, outputLatex, theDrawFunction);
-      TDV.drawLineOld(tmpX-2, tmpY+2, tmpX+2, tmpY-2, TDV.DrawStyle, TDV.ColorChamberIndicator, outputLatex, theDrawFunction);
-      tmpX=(tmpX-TDV.centerX)*1.5+TDV.centerX;
-      tmpY=(tmpY-TDV.centerY)*1.5+TDV.centerY;
-      TDV.drawLineOld(TDV.centerX, TDV.centerY, tmpX, tmpY, TDV.DrawStyle, TDV.ColorChamberIndicator, outputLatex, theDrawFunction);
-      std::string tempS="Indicator";
-      if (drawTextIn!=0)
-        drawTextIn(tmpX, tmpY, tempS.c_str(), tempS.size(), TDV.TextColor);
+      root zeroRoot; zeroRoot.MakeZero(this->AmbientDimension);
+      TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator, tempRootX, this->theDirections);
+      TDV.drawTextAtVectorBuffer(tempRootX, "Indicator", TDV.TextColor, 0);
+      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRootX, TDV.DrawStyle, TDV.ColorChamberIndicator, 0);
     }
   }
-  TDV.drawCoordSystem(TDV, output.AmbientDimension, outputLatex, drawTextIn);
+  TDV.drawCoordSystemBuffer(TDV, this->AmbientDimension, outputLatex);
   Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 }
 
@@ -2057,9 +2010,9 @@ void root::MakeEi(int DesiredDimension, int NonZeroIndex)
 }
 
 void root::AssignIntRoot(intRoot& r)
-{ this->SetSizeExpandOnTopLight(r.dimension);
-  for (int i=0; i<r.dimension; i++)
-    this->TheObjects[i].AssignInteger(r.elements[i]);
+{ this->SetSizeExpandOnTopLight(r.size);
+  for (int i=0; i<r.size; i++)
+    this->TheObjects[i].AssignInteger(r.TheObjects[i]);
 }
 
 bool root::CheckForElementSanity()
@@ -3710,7 +3663,7 @@ void CombinatorialChamber::LabelWallIndicesProperly()
     this->Externalwalls.TheObjects[i].indexInOwnerChamber=i;
 }
 
-void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput, drawLineFunction theDrawFunction, drawTextFunction drawTextIn)
+void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput)
 { if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomiaL)
     return;
   TDV.ApplyScale(0.3);
@@ -3729,7 +3682,7 @@ void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, Combinatorial
           penStyle= TDV.DrawStyleInvisibles;
         if (owner.AffineWallsOfWeylChambers.IndexOfObjectHash(*AreInAWall)!=-1)
           color= TDV.ColorWeylChamberWalls;
-        TDV.drawlineBetweenTwoVectors (this->affineVertices.TheObjects[i], this->affineVertices.TheObjects[j], penStyle, color, LaTeXoutput, theDrawFunction);
+        TDV.drawLineBetweenTwoVectorsBuffer(this->affineVertices.TheObjects[i], this->affineVertices.TheObjects[j], penStyle, color, LaTeXoutput);
         root tempRoot; this->ComputeAffineInternalPoint(tempRoot, owner.AmbientDimension-1);
         std::stringstream out;
         out << this->DisplayNumber;
@@ -3740,7 +3693,7 @@ void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, Combinatorial
         else
           color= TDV.ZeroChamberTextColor;
         if(TDV.DrawChamberIndices)
-          TDV.drawTextAtVector(tempRoot, tempS, color, LaTeXoutput, drawTextIn);
+          TDV.drawTextAtVectorBuffer(tempRoot, tempS, color, LaTeXoutput);
       }
     }
   }
@@ -4604,7 +4557,7 @@ bool CombinatorialChamberContainer::ConsistencyCheck()
 void CombinatorialChamberContainer::WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output)
 { if (!output.is_open())
     return;
-  this->drawOutput(TDV, *this, directions, 0, this->IndicatorRoot, &output, 0, 0);
+  this->drawOutput(TDV, this->IndicatorRoot, &output);
   std::string tempS;
   output << "Nilradical simple coords:\\\\\n ";
   for (int i=0; i<directions.size; i++)
@@ -4737,13 +4690,6 @@ void CombinatorialChamberContainer::LabelChamberIndicesProperly()
 
 CombinatorialChamberContainer::CombinatorialChamberContainer()
 { this->init();
-#ifdef WIN32
-//  this->mutexFlagCriticalSectionEntered=CreateMutex(NULL, FALSE, NULL);
-//  this->condContinue=CreateEvent(0, 0, 0, 0);
-#else
-  pthread_mutex_init(&this->mutexFlagCriticalSectionEntered, 0);
-  pthread_cond_init(&this->condContinue, 0);
-#endif
 }
 
 void CombinatorialChamberContainer::init()
@@ -4771,14 +4717,6 @@ void CombinatorialChamberContainer::init()
 
 CombinatorialChamberContainer::~CombinatorialChamberContainer()
 { this->Free();
-#ifdef WIN32
-/*  ::CloseHandle(this->mutexFlagCriticalSectionEntered);
-  ::CloseHandle(this->condContinue); */
-  //perhaps I should also delete the condition variable ? No such thing was documented in MSDN... go figure.
-#else
-  pthread_mutex_destroy(&this->mutexFlagCriticalSectionEntered);
-  pthread_cond_destroy(&this->condContinue);
-#endif
 }
 
 void CombinatorialChamberContainer::DumpAll()
@@ -5086,33 +5024,13 @@ bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables& theGlob
 }
 
 void CombinatorialChamberContainer::PauseSlicing()
-{
-#ifdef WIN32
-/*  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
-  this->flagReachSafePointASAP=true;
-  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
-  while(!this->flagIsRunning)
-  {}*/
-#else
-  pthread_mutex_lock(&this->mutexFlagCriticalSectionEntered);
+{ this->thePauseMutex.LockMe();
   while (this->flagIsRunning)
   {}
-#endif
 }
 
 void CombinatorialChamberContainer::ResumeSlicing()
-{
-#ifdef WIN32
-//  WaitForSingleObject(this->mutexFlagCriticalSectionEntered, INFINITE);
-//  this->flagIsRunning=true;
-//  SetEvent(this->condContinue);
-//  ReleaseMutex(this->mutexFlagCriticalSectionEntered);
-#else
-  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
-//  this->flagIsRunning=true;
-//  pthread_cond_signal(&this->condContinue);
-//  pthread_mutex_unlock(&this->mutexFlagCriticalSectionEntered);
-#endif
+{ this->thePauseMutex.UnlockMe();
 }
 
 void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
@@ -5700,7 +5618,7 @@ void ComplexQN::MultiplyByBasicComplex(BasicComplexNumber& b)
 void ComplexQN::CopyFrom(const ComplexQN& q)
 { this->NumVars = q.NumVars;
   for (int i=0; i<this->NumVars; i++)
-    this->Exponent[i].Assign(q.Exponent[i]);
+    this->Exponent.TheObjects[i].Assign(q.Exponent.TheObjects[i]);
   this->Coefficient.Assign(q.Coefficient);
 }
 
@@ -5708,24 +5626,24 @@ void ComplexQN::MakePureQN(Rational* expArg, int NumVars)
 { this->NumVars=NumVars;
   this->MakeConst(ROne, NumVars);
   for(int i=0; i<this->NumVars; i++)
-    this->Exponent[i].Assign(expArg[i]);
+    this->Exponent.TheObjects[i].Assign(expArg[i]);
   this->Simplify();
   this->CheckCoefficient();
 }
 
-void ComplexQN::MakePureQN(int NumVars, int NonZeroIndex, Rational&coeff, Rational&ConstExp, Rational& Exp)
+void ComplexQN::MakePureQN(int NumVars, int NonZeroIndex, Rational& coeff, Rational& ConstExp, Rational& Exp)
 { this->NumVars =NumVars;
   for(int i=0; i<this->NumVars; i++)
-    this->Exponent[i].MakeZero();
+    this->Exponent.TheObjects[i].MakeZero();
   this->Coefficient.MakeBasicComplex(coeff, ConstExp) ;
-  this->Exponent[NonZeroIndex].Assign(Exp);
+  this->Exponent.TheObjects[NonZeroIndex].Assign(Exp);
   this->Simplify();
 }
 
 bool ComplexQN::ExponentIsEqualToZero()
 { this->CheckCoefficient();
   for (int i=0; i<this->NumVars; i++)
-    if (!this->Exponent[i].IsEqualTo(RZero))
+    if (!this->Exponent.TheObjects[i].IsEqualTo(RZero))
       return false;
   return true;
 }
@@ -5736,13 +5654,13 @@ void ComplexQN::ComputeDebugString()
 
 bool ComplexQN::HasSameExponent(ComplexQN& q)
 { for (int i=0; i<this->NumVars; i++)
-    if (!this->Exponent[i].IsEqualTo(q.Exponent[i]))
+    if (!this->Exponent.TheObjects[i].IsEqualTo(q.Exponent.TheObjects[i]))
       return false;
   return true;
 }
 
 void ComplexQN::MultiplyByLargeRational(Rational& r)
-{  this->Coefficient.MultiplyByLargeRational(r);
+{ this->Coefficient.MultiplyByLargeRational(r);
 }
 
 void ComplexQN::operator =(const ComplexQN& q)
@@ -5753,14 +5671,14 @@ void ComplexQN::operator =(const ComplexQN& q)
 bool ComplexQN::operator ==(ComplexQN& q)
 { this->CheckCoefficient();
   for (int i=0; i<this->NumVars+1; i++)
-    if (!(this->Exponent[i].IsEqualTo(q.Exponent[i])))
+    if (!(this->Exponent.TheObjects[i].IsEqualTo(q.Exponent.TheObjects[i])))
       return false;
   return true;
 }
 
-void ComplexQN::MultiplyBy(ComplexQN &q)
+void ComplexQN::MultiplyBy(ComplexQN& q)
 { for (int i=0; i<this->NumVars; i++)
-    this->Exponent[i].Add(q.Exponent[i]);
+    this->Exponent.TheObjects[i].Add(q.Exponent.TheObjects[i]);
   this->Coefficient.MultiplyBy(q.Coefficient);
   this->Simplify();
 }
@@ -5769,7 +5687,7 @@ void ComplexQN::MakeConst(Rational& Coeff, int NumVars)
 { this->Coefficient.AssignRational(Coeff);
   this->NumVars =NumVars;
   for (int i=0; i<this->NumVars; i++)
-    this->Exponent[i].MakeZero();
+    this->Exponent.TheObjects[i].MakeZero();
 }
 
 void CompositeComplexQN::MakeConst(Rational& Coeff, int numVars)
@@ -5997,11 +5915,11 @@ void ComplexQN::LinPartToString(std::string& output)
   std::stringstream out;
   std::string tempS;
   for (int i=0; i<this->NumVars; i++)
-    if (!this->Exponent[i].IsEqualTo(RZero))
-    { if (!this->Exponent[i].IsEqualTo(ROne))
+    if (!this->Exponent.TheObjects[i].IsEqualTo(RZero))
+    { if (!this->Exponent.TheObjects[i].IsEqualTo(ROne))
       { tempS.clear();
-        if (!this->Exponent[i].IsEqualTo(RMOne))
-          this->Exponent[i].ElementToString(tempS);
+        if (!this->Exponent.TheObjects[i].IsEqualTo(RMOne))
+          this->Exponent.TheObjects[i].ElementToString(tempS);
         else
           tempS.assign("-");
         if (tempS[0]!='-')
@@ -6019,27 +5937,28 @@ void ComplexQN::LinPartToString(std::string& output)
 }
 
 void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
-{ Rational tempExponent[MaxRank+1];
+{ ListBasicObjects<Rational> tempExponent;
+  tempExponent.SetSizeExpandOnTopNoObjectInit(TheSub.NumRows);
   Rational tempRat;
   BasicComplexNumber tempBC;
   tempBC.Coeff.MakeOne();
   tempBC.Exp.Assign(RZero);
   assert(TheSub.NumCols==this->NumVars);
   for (int i=0; i<TheSub.NumRows-1; i++)
-    tempExponent[i].MakeZero();
+    tempExponent.TheObjects[i].MakeZero();
   for (int i=0; i<this->NumVars; i++)
   { tempRat.Assign(TheSub.elements[0][i]);
-    tempRat.MultiplyBy(this->Exponent[i]);
+    tempRat.MultiplyBy(this->Exponent.TheObjects[i]);
     tempBC.Exp.Add(tempRat);
     for (int j=1; j<TheSub.NumRows; j++)
     { tempRat.Assign(TheSub.elements[j][i]);
-      tempRat.MultiplyBy(this->Exponent[i]);
-      tempExponent[j-1].Add(tempRat);
+      tempRat.MultiplyBy(this->Exponent.TheObjects[i]);
+      tempExponent.TheObjects[j-1].Add(tempRat);
     }
   }
   this->NumVars= TheSub.NumRows-1;
   for (int i=0; i<this->NumVars; i++)
-    this->Exponent[i].Assign(tempExponent[i]);
+    this->Exponent.TheObjects[i].Assign(tempExponent.TheObjects[i]);
   this->Coefficient.MultiplyByBasicComplex(tempBC);
   this->Simplify();
 }
@@ -6047,7 +5966,7 @@ void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
 void ComplexQN::Simplify()
 { this->Coefficient.Simplify();
   for (int i=0; i<this->NumVars; i++)
-    this->Exponent[i].AssignFracValue();
+    this->Exponent.TheObjects[i].AssignFracValue();
 }
 
 bool ComplexQN::IsBasicComplex()
@@ -6083,12 +6002,12 @@ void PolynomialRationalCoeff::operator=(const PolynomialRationalCoeff& right)
 
 void PolynomialRationalCoeff::MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables)
 { this->ClearTheObjects();
-  this->NumVars=(short)r.dimension;
+  this->NumVars=(short)r.size;
   Monomial<Rational>& tempM=theGlobalVariables.monMakePolyExponentFromIntRoot;
-  tempM.init((short)r.dimension);
+  tempM.init((short)r.size);
   tempM.Coefficient.Assign(ROne);
-  for (int i=0; i<r.dimension; i++)
-    tempM.degrees[i]=(short) r.elements[i];
+  for (int i=0; i<r.size; i++)
+    tempM.degrees[i]=(short) r.TheObjects[i];
   this->AddMonomial(tempM);
 }
 
@@ -6437,7 +6356,7 @@ void QuasiPolynomial::Evaluate(intRoot& values, Rational& output)
           { tempLRat.ElementToString(tempS);
           }
         }*/
-        tempLRat.MultiplyByInt(values.elements[j]);
+        tempLRat.MultiplyByInt(values.TheObjects[j]);
       /*  if (Rational::flagAnErrorHasOccurredTimeToPanic)
         { if (this->TheObjects[i].DebugString=="-1/2ac^{2}")
           { tempLRat.ElementToString(tempS);
@@ -6445,7 +6364,7 @@ void QuasiPolynomial::Evaluate(intRoot& values, Rational& output)
         }*/
       }
     }
-    this->TheObjects[i].Coefficient.Evaluate(values.elements, tempLRat2);
+    this->TheObjects[i].Coefficient.Evaluate(values, tempLRat2);
 /*    if (Rational::flagAnErrorHasOccurredTimeToPanic)
     {  this->TheObjects[i].ComputeDebugString();
       if (this->TheObjects[i].DebugString=="-1/2ac^{2}")
@@ -7220,12 +7139,12 @@ inline bool BasicQN::HasSameExponent(BasicQN &q)
   return true;
 }
 
-inline void BasicQN::Evaluate(int* theVars, Rational& output)
+inline void BasicQN::Evaluate(ListBasicObjects<int>& theVars, Rational& output)
 { output.MakeZero();
   for (int i=0; i<this->Exp.NumRows; i++)
   { int Accum=0;
     for (int j=0; j<this->NumVars; j++)
-      Accum += this->Exp.elements[i][j]*theVars[j];
+      Accum += this->Exp.elements[i][j]*theVars.TheObjects[j];
     Accum-=this->Nums.elements[i][0];
     Accum%=this->Den;
     if (Accum<0)
@@ -7552,7 +7471,7 @@ bool QuasiNumber::ComputeDebugString()
   return true;
 }
 
-void QuasiNumber::Evaluate(int *theVars, Rational& output)
+void QuasiNumber::Evaluate(ListBasicObjects<int>& theVars, Rational& output)
 { output.MakeZero();
   Rational tempRat;
   for (int i=0; i<this->size; i++)
@@ -7656,9 +7575,9 @@ void QuasiNumber::Simplify()
   { theValue.ElementToString(tempS);
     tempRat.ElementToString(tempS2);
     if (i==0)
-      this->Evaluate(theSubset.Multiplicities.TheObjects, theValue);
+      this->Evaluate(theSubset.Multiplicities, theValue);
     else
-    { this->Evaluate(theSubset.Multiplicities.TheObjects, tempRat);
+    { this->Evaluate(theSubset.Multiplicities, tempRat);
       if (!tempRat.IsEqualTo(theValue)) {return; }
       theSubset.IncrementSubset();
     }
@@ -8699,7 +8618,7 @@ void partFractionPolynomials::initLatticeIndicatorsFromPartFraction(partFraction
   { int tempI=owner.IndicesNonZeroMults.TheObjects[i];
     assert(owner.TheObjects[tempI].Elongations.size==1);
     for(int j=0; j<theDimension; j++)
-      this->theNormals.elements[j][i].AssignInteger(ownerExpression.RootsToIndices.TheObjects[tempI].elements[j]*owner.TheObjects[tempI].Elongations.TheObjects[0]);
+      this->theNormals.elements[j][i].AssignInteger(ownerExpression.RootsToIndices.TheObjects[tempI].TheObjects[j]*owner.TheObjects[tempI].Elongations.TheObjects[0]);
   }
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
     theNormals.ComputeDebugString();
@@ -8730,10 +8649,10 @@ void partFractionPolynomials::AddPolynomialLargeRational(root& rootLatticeIndica
       tempRat.MultiplyBy(rootLatticeIndicator.TheObjects[j]);
       tempRoot.TheObjects[i].Add(tempRat);
       if (partFraction::MakingConsistencyCheck)
-      {  if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+      { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
         { Stop();
         }
-        tempRat2.AssignInteger(partFraction::theVectorToBePartitioned.elements[j]);
+        tempRat2.AssignInteger(partFraction::theVectorToBePartitioned.TheObjects[j]);
         tempRat2.MultiplyBy(this->theNormals.elements[i][j]);
         tempRoot2.TheObjects[i].Add(tempRat2);
       }
@@ -8819,7 +8738,7 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(partFractions& o
   for (int i=0; i<owner.RootsToIndices.IndicesRedundantShortRoots.CardinalitySelection; i++  )
   { int tempI1, tempI2;
     tempI1= owner.RootsToIndices.IndicesRedundantShortRoots.elements[i];
-    tempI2= owner.RootsToIndices.IndicesDoublesOfRedundantShortRoots[tempI1];
+    tempI2= owner.RootsToIndices.IndicesDoublesOfRedundantShortRoots.TheObjects[tempI1];
     if(tempI2!=-1)
     { if (  this->TheObjects[tempI1].Multiplicities.size>0 && this->TheObjects[tempI2].Multiplicities.size>0)
       { IntegerPoly& tempP=theGlobalVariables.IPRemoveRedundantShortRootsClassicalRootSystem;
@@ -8907,8 +8826,8 @@ bool partFraction::reduceOnceTotalOrderMethod(partFractions& Accum, GlobalVariab
 { for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { for (int j=0; j<this->IndicesNonZeroMults.size; j++)
     { //assert (this->IndicesNonZeroMults[i]<this->IndicesNonZeroMults[j]);
-      int AminusBindex = Accum.RootsToIndices.TableAllowedAminusB[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
-      int Aminus2Bindex = Accum.RootsToIndices.TableAllowedAminus2B[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
+      int AminusBindex = Accum.RootsToIndices.TableAllowedAminusB.elements[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
+      int Aminus2Bindex = Accum.RootsToIndices.TableAllowedAminus2B.elements[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
       if (AminusBindex!=-1 &&  AminusBindex>this->IndicesNonZeroMults.TheObjects[j])
       { this->decomposeAMinusNB(this->IndicesNonZeroMults.TheObjects[i], this->IndicesNonZeroMults.TheObjects[j], 1, AminusBindex, Accum, theGlobalVariables, Indicator);
         return true;
@@ -8929,7 +8848,7 @@ bool partFraction::reduceOnceGeneralMethodNoOSBasis(partFractions& Accum, Global
   tempRoots.size=0;
   int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
-  { intRoot tempRoot; tempRoot.dimension= Accum.AmbientDimension;
+  { intRoot tempRoot; tempRoot.SetSizeExpandOnTopNoObjectInit(Accum.AmbientDimension);
     int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
     if (currentIndex== this->LastDistinguishedIndex)
       IndexInLinRelationOfLastGainingMultiplicityIndex=i;
@@ -8969,7 +8888,7 @@ bool partFraction::reduceOnceGeneralMethod(partFractions& Accum, GlobalVariables
   this->LastDistinguishedIndex=this->getSmallestNonZeroIndexGreaterThanOrEqualTo(Accum, this->LastDistinguishedIndex);
   int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
-  { intRoot tempRoot; tempRoot.dimension= Accum.AmbientDimension;
+  { intRoot tempRoot; tempRoot.SetSizeExpandOnTopNoObjectInit(Accum.AmbientDimension);
     int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
     if (currentIndex== this->LastDistinguishedIndex)
       IndexInLinRelationOfLastGainingMultiplicityIndex=i;
@@ -9142,7 +9061,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
   {output.clear(); return 0; }
   int NumLinesUsed=0;
 //  int OldCutOff=0;
-  int theDimension= owner.RootsToIndices.TheObjects[0].dimension;
+  int theDimension= owner.RootsToIndices.TheObjects[0].size;
   IntegerPoly& ComputationalBufferCoefficient=theGlobalVariables.IPElementToStringBasisChange;
   PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded= theGlobalVariables.PPFNElementToStringBasisChange;
   ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
@@ -9426,7 +9345,7 @@ void partFraction::GetNElongationPolyWithMonomialContribution(partFractions& own
   for (int i=0; i<theIndex; i++)
   { int tempI= theSelectedIndices.TheObjects[i];
     for (int j=0; j<theDimension; j++)
-      tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]*owner.RootsToIndices.TheObjects[tempI].elements[j]);
+      tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]*owner.RootsToIndices.TheObjects[tempI].TheObjects[j]);
   }
   this->GetNElongationPoly(owner, theSelectedIndices.TheObjects[theIndex], theGreatestElongations.TheObjects[theIndex], theCoefficients.TheObjects[theIndex], output, theDimension);
   output.MultiplyByMonomial(tempM);
@@ -9547,7 +9466,7 @@ void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int>& theSelectedIn
       for (int j=0; j<i; j++)
       { short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
         for (int k=0; k<Accum.AmbientDimension; k++)
-          tempM.degrees[k]+=(short)theElongations.TheObjects[j]*tempElongation*(short)Accum.RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]].elements[k];
+          tempM.degrees[k]+=(short)theElongations.TheObjects[j]*tempElongation*(short)Accum.RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]].TheObjects[k];
       }
       ParallelComputing::SafePoint();
       ComputationalBufferCoefficient.MultiplyByMonomial(tempM);
@@ -9669,7 +9588,7 @@ void partFraction::GetAlphaMinusNBetaPoly(partFractions& owner, int indexA, int 
   tempM.Coefficient.Assign(IMOne);
   for (int i=0; i<n; i++)
   { for (int j=0; j<theDimension; j++)
-      tempM.degrees[j]= (short)(owner.RootsToIndices.TheObjects[indexA].elements[j]- (i+1)*owner.RootsToIndices.TheObjects[indexB].elements[j]);
+      tempM.degrees[j]= (short)(owner.RootsToIndices.TheObjects[indexA].TheObjects[j]- (i+1)*owner.RootsToIndices.TheObjects[indexB].TheObjects[j]);
     output.AddMonomial(tempM);
   }
 }
@@ -9682,7 +9601,7 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
   { tempM.Coefficient.Assign(IOne);
     for (int i=0; i<LengthOfGeometricSeries; i++)
     { for (int j=0; j<theDimension; j++)
-        tempM.degrees[j]=(short)(baseElongation*i*owner.RootsToIndices.TheObjects[index].elements[j]);
+        tempM.degrees[j]=(short)(baseElongation*i*owner.RootsToIndices.TheObjects[index].TheObjects[j]);
       output.AddMonomial(tempM);
     }
   }
@@ -9691,7 +9610,7 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
     tempM.Coefficient.Assign(IMOne);
     for (int i=-1; i>=LengthOfGeometricSeries; i--)
     { for (int j=0; j<theDimension; j++)
-        tempM.degrees[j]=short(baseElongation*i*owner.RootsToIndices.TheObjects[index].elements[j]);
+        tempM.degrees[j]=short(baseElongation*i*owner.RootsToIndices.TheObjects[index].TheObjects[j]);
       output.AddMonomial(tempM);
     }
   }
@@ -10020,10 +9939,16 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
     tempRat2.ElementToString(tempS2);
     tempRat.ElementToString(tempS1);
   }*/
-    if (this->flagAnErrorHasOccurredTimeToPanic)
+    if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic)
     { std::string tempS1, tempS2;
       this->StartCheckSum.ElementToString(tempS1);
       this->EndCheckSum.ElementToString(tempS2);
+      std::stringstream out1, out2;
+      out1 << "Starting checksum: " << tempS1;
+      out2 << "  Ending checksum: " << tempS2;
+      theGlobalVariables.theIndicatorVariables.ProgressReportString1= out1.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+      theGlobalVariables.MakeReport();
     }
     assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
 #ifdef CGIversionLimitRAMuse
@@ -10239,7 +10164,7 @@ void partFraction::initFromRootSystem(partFractions& owner, intRoots& theFractio
   PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
   if (theFraction.size==0)
     return;
-  int theDimension = theFraction.TheObjects[0].dimension;
+  int theDimension = theFraction.TheObjects[0].size;
   ComputationalBufferCoefficient.MakeNVarConst((short)theDimension, IOne);
   this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
   ComputationalBufferCoefficientNonExpanded.MakeNVarConst((short)theDimension, IOne);
@@ -10308,9 +10233,10 @@ partFractions::partFractions()
   this->flagSplitTestModeNoNumerators=false;
   this->flagDiscardingFractions=false;
   this->flagUsingCheckSum=false;
-  this->flagUsingOrlikSolomonBasis=true;
+  this->flagUsingOrlikSolomonBasis=false;
   this->flagInitialized=false;
   this->SplitStepsCounter=0;
+  this->LimitSplittingSteps=0;
 }
 
 void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables)
@@ -10385,7 +10311,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
   tempMat.init(owner.AmbientDimension, (short) this->IndicesNonZeroMults.size);
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
     for (int j=0; j<owner.AmbientDimension; j++)
-      tempMat.elements[j][i].AssignInteger(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].elements[j]*this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
+      tempMat.elements[j][i].AssignInteger(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].TheObjects[j]*this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
   if (this->flagAnErrorHasOccurredTimeToPanic)
   {  this->ComputeDebugString(owner, theGlobalVariables);
     tempMat.ComputeDebugString();
@@ -10775,12 +10701,20 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
   }
+  if (this->flagMakingProgressReport)
+  { std::stringstream out;
+    out <<"Checksum: " << output.ElementToString();
+    theGlobalVariables.theIndicatorVariables.ProgressReportString5= out.str();
+    theGlobalVariables.MakeReport();
+  }
 }
 
 void partFractions::initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables)
 { this->initCommon();
+  if (theFraction.size<1)
+    return;
   partFraction f;
-  this->AmbientDimension= theFraction.TheObjects[0].dimension;
+  this->AmbientDimension= theFraction.TheObjects[0].size;
   f.initFromRootSystem(*this, theFraction, theAlgorithmBasis, weights);
   this->AddAlreadyReduced(f, theGlobalVariables, 0);
 }
@@ -11038,7 +10972,7 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobal
     input>>tempI;
     input>>tempS;
     for (int i=0; i<this->AmbientDimension; i++)
-    { input>>tempRoot.elements[i];
+    { input>>tempRoot.TheObjects[i];
       input>>tempS;
     }
     tempRoots.AddObjectOnTop(tempRoot);
@@ -11092,8 +11026,8 @@ void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarCh
 }
 
 void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables)
-{  intRoots theBorel, theVPbasis;
-  intRoot tempWeight;
+{ intRoots theBorel, theVPbasis;
+  intRoot tempWeight; tempWeight.SetSizeExpandOnTopNoObjectInit(WeylGroupNumber);
   roots tempRoots;
   WeylGroup tempW;
   this->ClearTheObjects();
@@ -11119,11 +11053,11 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
   }
   if (WeylGroupLetter=='A'|| WeylGroupLetter=='B'|| WeylGroupLetter=='C'|| WeylGroupLetter=='D'|| WeylGroupLetter=='F')
   { for (int i=0; i<this->AmbientDimension; i++)
-      tempWeight.elements[i]=MathRoutines::KToTheNth(8, this->AmbientDimension-i-1);
+      tempWeight.TheObjects[i]=MathRoutines::KToTheNth(8, this->AmbientDimension-i-1);
   }
   else
     for (int i=0; i<this->AmbientDimension; i++)
-      tempWeight.elements[i]=1; //KToTheNth(8, root::AmbientDimension-i-1);
+      tempWeight.TheObjects[i]=1; //KToTheNth(8, root::AmbientDimension-i-1);
   //tempW.ComputeWeylGroup();
   tempW.ComputeRootsOfBorel(tempRoots);
   theBorel.AssignRoots(tempRoots);
@@ -11144,18 +11078,18 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
   if (WeylGroupLetter=='D')
   { intRoot tempRoot;
     tempRoot.MakeZero(this->AmbientDimension);
-    tempRoot.elements[this->AmbientDimension-1]=1;
-    tempRoot.elements[this->AmbientDimension-2]=-1;
+    tempRoot.TheObjects[this->AmbientDimension-1]=1;
+    tempRoot.TheObjects[this->AmbientDimension-2]=-1;
     theVPbasis.AddObjectOnTop(tempRoot);
-    tempRoot.elements[this->AmbientDimension-1]=1;
-    tempRoot.elements[this->AmbientDimension-2]=1;
+    tempRoot.TheObjects[this->AmbientDimension-1]=1;
+    tempRoot.TheObjects[this->AmbientDimension-2]=1;
     theVPbasis.AddObjectOnTop(tempRoot);
     for(int i=this->AmbientDimension-3; i>=0; i--)
-    { tempRoot.elements[i]=2;
+    { tempRoot.TheObjects[i]=2;
       theVPbasis.AddObjectOnBottom(tempRoot);
     }
-    tempWeight.elements[this->AmbientDimension-2]=7;
-    tempWeight.elements[this->AmbientDimension-1]=8;
+    tempWeight.TheObjects[this->AmbientDimension-2]=7;
+    tempWeight.TheObjects[this->AmbientDimension-1]=8;
   }
   theVPbasis.BubbleSort(&tempWeight);
   theVPbasis.ComputeDebugString();
@@ -11205,11 +11139,11 @@ int oneFracWithMultiplicitiesAndElongations::HashFunction() const
 void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent)
 { assert(MultiplicityIndex<this->Multiplicities.size);
   Monomial<Integer> tempM;
-  output.MakeNVarConst((short)theExponent.dimension, IOne);
-  tempM.init((short)theExponent.dimension);
+  output.MakeNVarConst((short)theExponent.size, IOne);
+  tempM.init((short)theExponent.size);
   tempM.Coefficient.Assign(IMOne);
-  for (int i=0; i<theExponent.dimension; i++)
-    tempM.degrees[i]=(short)(theExponent.elements[i]*this->Elongations.TheObjects[MultiplicityIndex]);
+  for (int i=0; i<theExponent.size; i++)
+    tempM.degrees[i]=(short)(theExponent.TheObjects[i]*this->Elongations.TheObjects[MultiplicityIndex]);
   output.AddMonomial(tempM);
 }
 
@@ -11265,7 +11199,7 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& outpu
       }
       tempRat3.Assign(oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[j]);
       if (!tempRat3.IsEqualToZero())
-        tempRat3.RaiseToPower(theExp.elements[j]*this->Elongations.TheObjects[i]);
+        tempRat3.RaiseToPower(theExp.TheObjects[j]*this->Elongations.TheObjects[i]);
       tempRat2.MultiplyBy(tempRat3);
       if (partFraction::flagAnErrorHasOccurredTimeToPanic)
       { tempRat2.ElementToString(tempS);
@@ -11328,14 +11262,16 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFra
 { std::stringstream  out;
   std::string tempS;
   intRoot tempRoot2, tempRoot;
+  tempRoot.SetSizeExpandOnTopNoObjectInit(theDimension);
+  tempRoot2.SetSizeExpandOnTopNoObjectInit(theDimension);
   int NumCoords;
   if (UsingVarChange)
   { NumCoords= VarChange.NumRows;
     tempRoot2=owner.RootsToIndices.TheObjects[indexInFraction];
     for (int i=0; i<NumCoords; i++)
-    { tempRoot.elements[i]=0;
+    { tempRoot.TheObjects[i]=0;
       for (int j=0; j<theDimension; j++)
-        tempRoot.elements[i]+=VarChange.elements[i][j]*tempRoot2.elements[j];
+        tempRoot.TheObjects[i]+=VarChange.elements[i][j]*tempRoot2.TheObjects[j];
     }
   }
   else
@@ -11348,10 +11284,10 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFra
   else
     out <<"\\frac{1}{(1-";
   for(int i=0; i<NumCoords; i++)
-    if (tempRoot.elements[i]!=0)
+    if (tempRoot.TheObjects[i]!=0)
     { out <<PolyFormatLocal.GetLetterIndex(i);
-      if (tempRoot.elements[i]!=1)
-        out<<"^{"<<tempRoot.elements[i]<<"}";
+      if (tempRoot.TheObjects[i]!=1)
+        out<<"^{"<<tempRoot.TheObjects[i]<<"}";
     }
   out <<")";
   if (this->Multiplicities.TheObjects[indexElongation]>1)
@@ -11396,29 +11332,30 @@ bool oneFracWithMultiplicitiesAndElongations::operator ==  (oneFracWithMultiplic
 }
 
 void intRoot::MakeZero(int theDimension)
-{ this->dimension=theDimension;
-  for (int i=0; i<this->dimension; i++)
-    this->elements[i]=0;
+{ this->SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<theDimension; i++)
+    this->TheObjects[i]=0;
 }
 
 void intRoot::AddRoot(intRoot& theRoot)
-{ for (int i=0; i<this->dimension; i++)
-    this->elements[i]+=theRoot.elements[i];
+{ assert(this->size==theRoot.size);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i]+=theRoot.TheObjects[i];
 }
 
 int intRoot::HashFunction() const
-{  int result=0;
-  for (int i=0; i<this->dimension; i++)
-    result+=::SomeRandomPrimes[i]*this->elements[i];
+{ int result=0;
+  for (int i=0; i<this->size; i++)
+    result+=SomeRandomPrimes[i]*this->TheObjects[i];
   return result;
 }
 
 void intRoot::ElementToString(std::string& output)
 { std::stringstream out;
   out<<"( ";
-  for (int i=0; i<this->dimension; i++)
-  { out<<this->elements[i];
-    if (i!=this->dimension-1)
+  for (int i=0; i<this->size; i++)
+  { out<<this->TheObjects[i];
+    if (i!=this->size-1)
       out <<" , ";
   }
   out<<" )";
@@ -11426,83 +11363,69 @@ void intRoot::ElementToString(std::string& output)
 }
 
 void intRoot::AssignRoot(root& r)
-{ this->dimension= r.size;
-  for (int i=0; i<this->dimension; i++)
-    this->elements[i]= r.TheObjects[i].NumShort;
+{ this->SetSizeExpandOnTopNoObjectInit(r.size);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i]= r.TheObjects[i].NumShort;
 }
 
 bool intRoot::IsPositive()
-{ for (int i=0; i<this->dimension; i++)
-    if (this->elements[i]<0)
+{ for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]<0)
       return false;
   return true;
 }
 
 void intRoot::initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5)
-{ this->dimension= theDimension;
-  this->elements[0]=x1;
-  this->elements[1]=x2;
-  this->elements[2]=x3;
-  this->elements[3]=x4;
-  this->elements[4]=x5;
+{ this->SetSizeExpandOnTopNoObjectInit(theDimension);
+  this->TheObjects[0]=x1;
+  this->TheObjects[1]=x2;
+  this->TheObjects[2]=x3;
+  this->TheObjects[3]=x4;
+  this->TheObjects[4]=x5;
 }
 
 void intRoot::initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12)
-{ this->dimension=theDimension;
-  this->elements[0]=x1;
-  this->elements[1]=x2;
-  this->elements[2]=x3;
-  this->elements[3]=x4;
-  this->elements[4]=x5;
-  this->elements[5]=x6;
-  this->elements[6]=x7;
-  this->elements[7]=x8;
-  this->elements[8]=x9;
-  this->elements[9]=x10;
-  this->elements[10]=x11;
-  this->elements[11]=x12;
+{ this->SetSizeExpandOnTopNoObjectInit(theDimension);
+  this->TheObjects[0]=x1;
+  this->TheObjects[1]=x2;
+  this->TheObjects[2]=x3;
+  this->TheObjects[3]=x4;
+  this->TheObjects[4]=x5;
+  this->TheObjects[5]=x6;
+  this->TheObjects[6]=x7;
+  this->TheObjects[7]=x8;
+  this->TheObjects[8]=x9;
+  this->TheObjects[9]=x10;
+  this->TheObjects[10]=x11;
+  this->TheObjects[11]=x12;
 }
 
 inline bool intRoot::IsGEQNoWeight(intRoot& r)
-{ assert(this->dimension==r.dimension);
-  for (int i=0; i<this->dimension; i++)
-    if (r.elements[i]>this->elements[i])
+{ assert(this->size==r.size);
+  for (int i=0; i<this->size; i++)
+    if (r.TheObjects[i]>this->TheObjects[i])
       return false;
   return true;
 }
 
 inline bool intRoot::IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights)
-{  assert(this->dimension == r.dimension);
+{  assert(this->size == r.size);
   int accum=0;
-  for (int i=0; i<this->dimension; i++)
-    accum+=(this->elements[i]-r.elements[i])*theWeights.elements[i];
+  for (int i=0; i<this->size; i++)
+    accum+=(this->TheObjects[i]-r.TheObjects[i])*theWeights.TheObjects[i];
   return (accum>0);
-}
-
-void intRoot::operator =(const intRoot& right)
-{ this->dimension=right.dimension;
-  for (int i=0; i<this->dimension; i++)
-    this->elements[i]=right.elements[i];
-}
-
-bool intRoot::operator ==(const intRoot& right)
-{ if (this->dimension!=right.dimension)
-    return false;
-  for (int i=0; i<this->dimension; i++)
-    if (this->elements[i]!=right.elements[i])
-      return false;
-  return true;
 }
 
 void RootToIndexTable::initFromRoots(intRoots& theAlgorithmBasis, intRoot* theWeights)
 { if (theAlgorithmBasis.size==0)
     return;
-  int theDimension= theAlgorithmBasis.TheObjects[0].dimension;
-  if (theWeights!=0) {this->weights=*theWeights; }
+  int theDimension= theAlgorithmBasis.TheObjects[0].size;
+  if (theWeights!=0)
+    this->weights=*theWeights;
   for (int i=0; i<theAlgorithmBasis.size; i++)
   { int x= this->IndexOfObjectHash(theAlgorithmBasis.TheObjects[i]);
     if (x==-1)
-    {  if (theWeights!=0)
+    { if (theWeights!=0)
         this->AddRootAndSort(theAlgorithmBasis.TheObjects[i]);
       else
         this->AddRootPreserveOrder(theAlgorithmBasis.TheObjects[i]);
@@ -11514,22 +11437,24 @@ void RootToIndexTable::initFromRoots(intRoots& theAlgorithmBasis, intRoot* theWe
 
 void RootToIndexTable::ComputeTable(int theDimension)
 { intRoot tempR, tempR2, tempR3;
-  tempR.dimension=theDimension; tempR2.dimension= theDimension;
-  tempR3.dimension= theDimension;
+  tempR.SetSizeExpandOnTopNoObjectInit(theDimension);  tempR2.SetSizeExpandOnTopNoObjectInit(theDimension); tempR3.SetSizeExpandOnTopNoObjectInit(theDimension);
   this->IndicesRedundantShortRoots.init(this->size);
+  this->IndicesDoublesOfRedundantShortRoots.SetSizeExpandOnTopNoObjectInit(this->size);
+  this->TableAllowedAminus2B.init(this->size, this->size);
+  this->TableAllowedAminusB.init(this->size, this->size);
   for (int i=0; i<this->size; i++)
   { for (int j=0; j<this->size; j++)
     { for (int k=0; k<theDimension; k++)
-      { tempR.elements[k] = this->TheObjects[i].elements[k]-this->TheObjects[j].elements[k];
-        tempR2.elements[k] = this->TheObjects[i].elements[k]-2*this->TheObjects[j].elements[k];
+      { tempR.TheObjects[k] = this->TheObjects[i].TheObjects[k]-this->TheObjects[j].TheObjects[k];
+        tempR2.TheObjects[k] = this->TheObjects[i].TheObjects[k]-2*this->TheObjects[j].TheObjects[k];
       }
-      this->TableAllowedAminusB[i][j]  = this->getIndex(tempR);
-      this->TableAllowedAminus2B[i][j] = this->getIndex(tempR2);
+      this->TableAllowedAminusB.elements[i][j]=this->getIndex(tempR);
+      this->TableAllowedAminus2B.elements[i][j]=this->getIndex(tempR2);
     }
     tempR3=this->TheObjects[i];
     tempR3.MultiplyByInteger(2);
-    this->IndicesDoublesOfRedundantShortRoots[i] = this->getIndex(tempR3);
-    if (IndicesDoublesOfRedundantShortRoots[i]!=-1)
+    this->IndicesDoublesOfRedundantShortRoots.TheObjects[i] = this->getIndex(tempR3);
+    if (IndicesDoublesOfRedundantShortRoots.TheObjects[i]!=-1)
       this->IndicesRedundantShortRoots.AddSelectionAppendNewIndex(i);
   }
 }
@@ -13699,12 +13624,12 @@ void IntegerPoly::Evaluate(root& values, Rational& output)
 
 void IntegerPoly::MakePolyExponentFromIntRoot(intRoot&r)
 { this->ClearTheObjects();
-  this->NumVars=(short)r.dimension;
-  static Monomial<Integer> tempM;
-  tempM.init((short)r.dimension);
+  this->NumVars=(short)r.size;
+  Monomial<Integer> tempM;
+  tempM.init((short)r.size);
   tempM.Coefficient.Assign(IOne);
-  for (int i=0; i<r.dimension; i++)
-    tempM.degrees[i]=(short) r.elements[i];
+  for (int i=0; i<r.size; i++)
+    tempM.degrees[i]=(short) r.TheObjects[i];
   this->AddMonomial(tempM);
 }
 
@@ -13764,7 +13689,7 @@ void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &outpu
     output.assign("cyan");
 }
 
-void LaTeXProcedures::drawText(  double X1, double Y1, std::string& theText, int ColorIndex, std::fstream& output)
+void LaTeXProcedures::drawTextDirectly(double X1, double Y1, const std::string& theText, int ColorIndex, std::fstream& output)
 { output.precision(4);
   X1-=theText.length()* LaTeXProcedures::TextPrintCenteringAdjustmentX;
   Y1+=LaTeXProcedures::TextPrintCenteringAdjustmentY;
@@ -13772,7 +13697,7 @@ void LaTeXProcedures::drawText(  double X1, double Y1, std::string& theText, int
   output  << "\\put("<<X1-LaTeXProcedures::FigureCenterCoordSystemX<<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<"){\\tiny{"<<theText<<"}}";
 }
 
-void LaTeXProcedures::drawline(  double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput)
+void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput)
 { if ((int)thePenStyle== DrawingVariables::PenStyleInvisible)
     return;
   output.precision(4);
@@ -13783,9 +13708,7 @@ void LaTeXProcedures::drawline(  double X1, double Y1, double X2, double Y2, uns
     tempS="lightgray";
   else
     LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS, drawInput);
-  output  <<"\\psline[linewidth=0.3pt, linecolor="<<tempS <<"]"
-    <<"("<<X1-LaTeXProcedures::FigureCenterCoordSystemX <<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<")"
-    <<"("<<X2-LaTeXProcedures::FigureCenterCoordSystemX <<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y2<<")\n";
+  output  <<"\\psline[linewidth=0.3pt, linecolor="<<tempS <<"]("<<X1-LaTeXProcedures::FigureCenterCoordSystemX <<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<")"<<"("<<X2-LaTeXProcedures::FigureCenterCoordSystemX <<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y2<<")\n";
 }
 
 void thePFcomputation::Run()
@@ -15484,7 +15407,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors( coneRelation &theRelation, r
   }
 }
 
-void ::DynkinDiagramRootSubalgebra::Sort()
+void DynkinDiagramRootSubalgebra::Sort()
 { //doing bubble sort
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
   { for (int j=i+1; j<this->SimpleBasesConnectedComponents.size; j++)
@@ -15596,12 +15519,12 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(roots& domain, roots& ra
     }
 }
 
-void ::DynkinDiagramRootSubalgebra::ComputeDynkinStrings(WeylGroup& theWeyl)
+void DynkinDiagramRootSubalgebra::ComputeDynkinStrings(WeylGroup& theWeyl)
 { for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
     this->ComputeDynkinString(i, theWeyl);
 }
 
-void ::DynkinDiagramRootSubalgebra::ElementToString(std::string& output)
+void DynkinDiagramRootSubalgebra::ElementToString(std::string& output)
 { std::stringstream out;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
   { out <<this->DynkinTypeStrings.TheObjects[i];
@@ -15611,7 +15534,7 @@ void ::DynkinDiagramRootSubalgebra::ElementToString(std::string& output)
   output=out.str();
 }
 
-void ::DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGroup& theWeyl)
+void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGroup& theWeyl)
 { assert(indexComponent<this->SimpleBasesConnectedComponents.size);
   std::stringstream out;
   out <<"$";
@@ -15751,7 +15674,7 @@ void DynkinDiagramRootSubalgebra::Assign(const DynkinDiagramRootSubalgebra& righ
   this->sameTypeComponents.CopyFromBase(right.sameTypeComponents);
 }
 
-void ::DynkinDiagramRootSubalgebra::GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output, int index)
+void DynkinDiagramRootSubalgebra::GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output, int index)
 { roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[index];
   std::string& currentString=this->DynkinTypeStrings.TheObjects[index];
   ListBasicObjects<int> thePermutation;
@@ -15790,7 +15713,7 @@ void ::DynkinDiagramRootSubalgebra::GetAutomorphism(ListBasicObjects<ListBasicOb
   }
 }
 
-void ::DynkinDiagramRootSubalgebra::GetAutomorphisms(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output)
+void DynkinDiagramRootSubalgebra::GetAutomorphisms(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output)
 { output.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
     this->GetAutomorphism( output.TheObjects[i], i);
@@ -16083,7 +16006,7 @@ void PolynomialRationalCoeff::Evaluate(intRoot &values, Rational &output)
   { tempLRat.Assign(this->TheObjects[i].Coefficient);
     for (int j=0; j<this->NumVars; j++)
       for (int k=0; k<this->TheObjects[i].degrees[j]; k++)
-      { tempLRat.MultiplyByInt(values.elements[j]);
+      { tempLRat.MultiplyByInt(values.TheObjects[j]);
         ParallelComputing::SafePoint();
       }
     output.Add(tempLRat);
@@ -16194,14 +16117,14 @@ bool simplicialCones::SeparatePoints(root& point1, root& point2, root* Preferred
 void  GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation, MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>& output)
 { output.ClearTheObjects();
   output.Coefficient.Assign(IOne);
-  int theDimension= exponent.dimension;
+  int theDimension= exponent.size;
   if (elongation==0 || elongation==-1)
   { for (int i=0; i<theDimension; i++)
-    { if (exponent.elements[i]!=0)
+    { if (exponent.TheObjects[i]!=0)
       { GeneratorPFAlgebraRecord tempGen;
-        tempGen.GeneratorRoot.MakeZero(theDimension); tempGen.GeneratorRoot.elements[i]=1;
+        tempGen.GeneratorRoot.MakeZero(theDimension); tempGen.GeneratorRoot.TheObjects[i]=1;
         tempGen.Elongation=0;
-        int tempI= exponent.elements[i];
+        int tempI= exponent.TheObjects[i];
         if (elongation==-1) tempI=-tempI;
         output.MultiplyByGenerator(tempGen, tempI);
       }
@@ -16289,12 +16212,12 @@ bool GeneratorsPartialFractionAlgebra::operator ==(const GeneratorsPartialFracti
 { return this->GeneratorIndex== right.GeneratorIndex;
 }
 
-void GeneratorsPartialFractionAlgebra::operator =(const GeneratorsPartialFractionAlgebra &right)
+void GeneratorsPartialFractionAlgebra::operator =(const GeneratorsPartialFractionAlgebra& right)
 { this->GeneratorIndex= right.GeneratorIndex;
   this->GeneratorPower= right.GeneratorPower;
 }
 
-void ::PolyPartFractionNumerator::ConvertToIntegerPoly(IntegerPoly &output, int theDimension)
+void PolyPartFractionNumerator::ConvertToIntegerPoly(IntegerPoly& output, int theDimension)
 { output.Nullify((short)theDimension);
   IntegerPoly tempP;
   IntegerPoly tempP2;
@@ -16314,13 +16237,13 @@ void ::PolyPartFractionNumerator::ConvertToIntegerPoly(IntegerPoly &output, int 
 
 void GeneratorPFAlgebraRecord::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
 { std::stringstream out1, out2;
-  int theDimension= this->GeneratorRoot.dimension;
+  int theDimension= this->GeneratorRoot.size;
   for (int i=0; i<theDimension; i++)
-    if (this->GeneratorRoot.elements[i]!=0)
-    {  if (this->GeneratorRoot.elements[i]==1)
+    if (this->GeneratorRoot.TheObjects[i]!=0)
+    { if (this->GeneratorRoot.TheObjects[i]==1)
         out1<< PolyFormat.GetLetterIndex(i);
       else
-        out1<< PolyFormat.GetLetterIndex(i)<<"^{"<<this->GeneratorRoot.elements[i]<<"}";
+        out1<< PolyFormat.GetLetterIndex(i)<<"^{"<<this->GeneratorRoot.TheObjects[i]<<"}";
     }
   if (this->Elongation==0)
   { output= out1.str();
@@ -16349,11 +16272,11 @@ void GeneratorPFAlgebraRecord::GetValue(IntegerPoly& output, int theDimension)
   for (int i=0; i<tempI; i++)
   { for (int j=0; j<theDimension; j++)
     { if ( this->Elongation<0)
-        tempM.degrees[j]=(short) (-this->GeneratorRoot.elements[j]*(i+1));
+        tempM.degrees[j]=(short) (-this->GeneratorRoot.TheObjects[j]*(i+1));
       if( this->Elongation>0)
-        tempM.degrees[j]=(short) (this->GeneratorRoot.elements[j]*i);
+        tempM.degrees[j]=(short) (this->GeneratorRoot.TheObjects[j]*i);
       if( this->Elongation==0)
-        tempM.degrees[j]=(short) (this->GeneratorRoot.elements[j]);
+        tempM.degrees[j]=(short) (this->GeneratorRoot.TheObjects[j]);
     }
     output.AddMonomial(tempM);
   }
@@ -18335,7 +18258,7 @@ void ElementSimpleLieAlgebra::SetCoefficient(const root& indexingRoot, int theCo
   this->SetCoefficient(indexingRoot, tempRat, owner);
 }
 
-void ::SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings)
+void SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings)
 { std::stringstream outTable, outNotation;
   std::string tempS;
   if (physicalPath==0 || htmlServerPath==0 || outputPNGFileNames==0 || outputLatexToPNGstrings==0)
@@ -18907,7 +18830,7 @@ void minimalRelationsProverStateFixedK::WriteToFile(std::fstream& output, Global
   this->nonBetas.WriteToFile(output, theGlobalVariables);
 }
 
-void ::minimalRelationsProverStateFixedK::ReadFromFile(  std::fstream &input, GlobalVariables&  theGlobalVariables)
+void ::minimalRelationsProverStateFixedK::ReadFromFile(std::fstream &input, GlobalVariables&  theGlobalVariables)
 { std::string tempS;
   int tempI;
   input>>tempS >> tempI;  assert(tempS=="Num_isos:");
@@ -21313,7 +21236,7 @@ void ::minimalRelationsProverStatesFixedK::InvokeExtensionOfState(int index, int
   }
 }
 
-void ::minimalRelationsProverStates::InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
+void minimalRelationsProverStates::InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<theWeyl.RootSystem.size; i++)
   { if (UpperLimitChildren>=0)
       if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
@@ -21922,7 +21845,6 @@ void ElementWeylAlgebra::Nullify(int NumVars)
 }
 
 int DebugCounter=-1;
-WeylParser debugParser;
 
 void WeylParser::ParserInit(const std::string& input)
 { this->TokenStack.MakeActualSizeAtLeastExpandOnTop(input.size());

@@ -881,6 +881,7 @@ void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
 //  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeGroupPreservingKintersectBIsos;
  // this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ExperimentWithH;
   this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeReductiveSAs;
+  this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.TestGraphicalOutputPolys;
   this->RunTheComputation();
 }
 

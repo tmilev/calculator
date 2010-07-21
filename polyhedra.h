@@ -166,14 +166,18 @@ public:
   MutexWrapper()
   {
 #ifndef WIN32
-    pthread_mutex_unlock(&this->theMutex);
+    pthread_mutex_init(&this->theMutex, NULL);
 #else
     this->locked=false;
 #endif
   };
   ~MutexWrapper()
   {
-
+#ifndef WIN32
+    pthread_mutex_destroy(&this->theMutex);
+#else
+    this->locked=false;
+#endif
   };
 };
 
@@ -219,6 +223,15 @@ public:
   inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; };
   inline static int Minimum(int a, int b){ if (a>b) return b; else return a; };
   inline static short Minimum(short a, short b){if (a>b) return b; else return a; };
+};
+
+class DrawElementInputOutput
+{
+ public:
+  int TopLeftCornerX;
+  int TopLeftCornerY;
+  int outputWidth;
+  int outputHeight;
 };
 
 //The below class is to be used together with ListBasicObjects.
@@ -340,7 +353,6 @@ template <class Object>
 int ListBasicObjectsLight<Object>::SizeWithoutObjects()
 { return sizeof(Object*)*this->size+sizeof(int);
 }
-
 
 //ListBasicObjects kills the objects it contains when it expires
 template <class Object>
@@ -1415,6 +1427,7 @@ public:
   void MakeMOne(){this->NumShort=-1; this->DenShort=1; this->FreeExtended(); };
   void WriteToFile (std::fstream& output);
   void ReadFromFile(std::fstream& input);
+  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus(); };
   static Rational NChooseK(int n, int k);
   static Rational Factorial(int n);
@@ -2682,6 +2695,7 @@ public:
   void ElementToString(std::string& output);
   bool IsAConstant();
   void InvertDegrees();
+  void DrawElement(GlobalVariables& output, DrawElementInputOutput& theDrawData);
   bool operator==(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   void operator=(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   int SizeWithoutCoefficient();
@@ -2789,6 +2803,7 @@ public:
   void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
   void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
   int TotalDegree();
+  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   int GetIndexMaxMonomial();
   void ComponentInFrontOfVariableToPower(int VariableIndex, ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
   int FindMaxPowerOfVariableIndex(int VariableIndex);
@@ -3385,6 +3400,11 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& output, DrawElementInputOutput& theDrawData)
+{
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output)
 { std::stringstream out;
   this->StringStreamPrintOutAppend(out, PolyFormatLocal);
@@ -3964,6 +3984,18 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<Eleme
   outputQuotient.MultiplyByMonomial(scaleInput);
   outputQuotient.MultiplyByMonomial(scaleRemainder);
   outputRemainder.MultiplyByMonomial(scaleRemainder);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
+{ DrawElementInputOutput changeData;
+  changeData.TopLeftCornerX = theDrawData.TopLeftCornerX;
+  changeData.TopLeftCornerY = theDrawData.TopLeftCornerY;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].DrawElement(theGlobalVariables, changeData);
+    changeData.TopLeftCornerX+=changeData.outputWidth;
+    changeData.TopLeftCornerY+=changeData.outputHeight;
+  }
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -6505,6 +6537,7 @@ public:
   static void ComputeGroupPreservingKintersectBIsos(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ExperimentWithH(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void TestGraphicalOutputPolys(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();
   ~ComputationSetup();
 };
@@ -6682,6 +6715,7 @@ public:
 
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
+  PolynomialOutputFormat thePolyFormat;
   GlobalVariables();
   void operator=(const GlobalVariables& other)
   { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;

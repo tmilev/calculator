@@ -412,8 +412,8 @@ public:
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
   void PopLastObject();
-  // the below function is named a bit awkwardly because otherwise there is a risk of confusion 
-  // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time, 
+  // the below function is named a bit awkwardly because otherwise there is a risk of confusion
+  // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
   void RemoveFirstOccurenceSwapWithLast(Object& o);
   bool HasACommonElementWith(ListBasicObjects<Object>& right);
@@ -4883,6 +4883,7 @@ public:
   bool operator==(const partFraction& right);
   void operator=(const partFraction& right);
   void initFromRootSystem(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
+  void initFromRoots(partFractions& owner, roots& input);
   int ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables&  theGlobalVariables, int theDimension);
@@ -4893,6 +4894,8 @@ public:
 
 class partFractions: public HashedListBasicObjects<partFraction>
 { bool ShouldIgnore(GlobalVariables& theGlobalVariables, root* Indicator);
+  bool splitPartial(GlobalVariables& theGlobalVariables, root* Indicator);
+  void initCommon();
 public:
   int AmbientDimension;
   int IndexLowestNonProcessed;
@@ -4922,12 +4925,15 @@ public:
   Rational EndCheckSum;
   static Rational CheckSum;
   bool flagDiscardingFractions;
+  bool flagUsingOrlikSolomonBasis;
+  bool flagInitialized;
+  int LimitSplittingSteps;
+  int SplitStepsCounter;
   static  bool flagSplitTestModeNoNumerators;
   static  bool flagAnErrorHasOccurredTimeToPanic;
   static  bool flagMakingProgressReport;
   static  bool flagUsingCheckSum;
   static int flagMaxNumStringOutputLines;
-  bool flagUsingOrlikSolomonBasis;
   void PrepareCheckSums(GlobalVariables& theGlobalVariables);
   bool AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
   void CompareCheckSums(GlobalVariables& theGlobalVariables);
@@ -4936,6 +4942,9 @@ public:
   void ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables);
   void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange, GlobalVariables& theGlobalVariables);
   void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables);
+  void initFromRoots(roots& input, GlobalVariables& theGlobalVariables);
+  void initAndSplit(roots& input, GlobalVariables& theGlobalVariables);
+  void Run(roots& input, GlobalVariables& theGlobalVariables);
   //row index is the index of the root; column(second) index is the coordinate index
   void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, root* Indicator);
   void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, root* Indicator);
@@ -6577,6 +6586,10 @@ public:
   { if (this->FeedDataToIndicatorWindowDefault!=0)
       this->FeedDataToIndicatorWindowDefault(input);
   };
+  inline void MakeReport()
+  { if (this->FeedDataToIndicatorWindowDefault!=0)
+      this->FeedDataToIndicatorWindowDefault(this->theIndicatorVariables);
+  }
   void operator=(const GlobalVariables& G_V);
 };
 

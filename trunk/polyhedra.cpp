@@ -10055,11 +10055,8 @@ void partFractions::PrepareIndicatorVariables()
   this->NumRunsReduceMonomialByMonomial=0;
 }
 
-bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
-{ //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
-  //this->flagAnErrorHasOccurredTimeToPanic=true;
-  partFraction& tempFrac= theGlobalVariables.fracSplit1;
-  this->IndexLowestNonProcessed=0;
+bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, root* Indicator)
+{ partFraction& tempFrac= theGlobalVariables.fracSplit1;
   partFraction tempF;
   std::string OldDebugString;
   int ProblemCounter=0;
@@ -10067,8 +10064,6 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
   //std::string tempS1, tempS2;
 //  this->ComputeDebugString();
 //  partFraction::MakingConsistencyCheck=true;
-  this->PrepareIndicatorVariables();
-  this->PrepareCheckSums(theGlobalVariables);
   //if (Indicator!=0)
   //  this->AssureIndicatorRegularity(theGlobalVariables, *Indicator);
   //this->IndicatorRoot.MakeZero();
@@ -10078,8 +10073,12 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
   //  this->ComputeDebugString();
   //}
   std::stringstream out; std::string tempS;
-  while (this->IndexLowestNonProcessed<this->size)
-  { //this->ComputeDebugString();
+  while (this->IndexLowestNonProcessed<this->size )
+  { if (this->SplitStepsCounter>= this->LimitSplittingSteps && this->LimitSplittingSteps>0)
+    { this->SplitStepsCounter=0;
+      return false;
+    }
+    //this->ComputeDebugString();
 //    bool ShouldIgnore=false;
     this->IndexCurrentlyProcessed= this->IndexLowestNonProcessed;
     if (!this->ShouldIgnore(theGlobalVariables, Indicator))
@@ -10136,7 +10135,9 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
     this->MakeProgressReportSplittingMainPart(theGlobalVariables);
   //  this->ComputeDebugString();
 //    x= this->SizeWithoutDebugString();
+    this->SplitStepsCounter++;
   }
+  this->SplitStepsCounter=0;
 //  this->RemoveRedundantShortRootsClassicalRootSystem();
 //  PolyFormatLocal.MakeAlphabetxi();
 //  this->ComputeDebugString();
@@ -10153,15 +10154,29 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
     tempRat.ElementToString(tempS1);
     assert(tempRat2.IsEqualTo(tempRat));
   }  */
-  //this->ComputeDebugString();
-  this->RemoveRedundantShortRoots(theGlobalVariables, Indicator);
-  //this->ComputeDebugString();
-  this->UncoverBracketsNumerators(theGlobalVariables, Indicator);
-  //partFraction::UncoveringBrackets=true;
-  //this->ComputeDebugString();
-  this->CompareCheckSums(theGlobalVariables);
-  this->IndexLowestNonProcessed= this->size;
-  this->MakeProgressReportSplittingMainPart(theGlobalVariables);
+  return true;
+}
+
+bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
+{ //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+  //this->flagAnErrorHasOccurredTimeToPanic=true;
+  if (!this->flagInitialized)
+  { this->IndexLowestNonProcessed=0;
+    this->PrepareIndicatorVariables();
+    this->PrepareCheckSums(theGlobalVariables);
+    this->flagInitialized=true;
+  }
+  if (this->splitPartial(theGlobalVariables, Indicator))
+  { //this->ComputeDebugString();
+    this->RemoveRedundantShortRoots(theGlobalVariables, Indicator);
+    //this->ComputeDebugString();
+    this->UncoverBracketsNumerators(theGlobalVariables, Indicator);
+    //partFraction::UncoveringBrackets=true;
+    //this->ComputeDebugString();
+    this->CompareCheckSums(theGlobalVariables);
+    this->IndexLowestNonProcessed= this->size;
+    this->MakeProgressReportSplittingMainPart(theGlobalVariables);
+  }
   return false;
 }
 
@@ -10240,6 +10255,29 @@ void partFraction::initFromRootSystem(partFractions& owner, intRoots& theFractio
   this->ComputeIndicesNonZeroMults();
 }
 
+void partFraction::initFromRoots(partFractions& owner, roots& input)
+{ IntegerPoly ComputationalBufferCoefficient;
+  PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+  if (input.size==0)
+    return;
+  int theDimension = input.TheObjects[0].size;
+  ComputationalBufferCoefficient.MakeNVarConst((short)theDimension, IOne);
+  this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+  ComputationalBufferCoefficientNonExpanded.MakeNVarConst((short)theDimension, IOne);
+  this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+  intRoots tempRoots;
+  tempRoots.AssignRoots(input);
+  owner.RootsToIndices.initFromRoots(tempRoots, 0);
+  this->init(owner.RootsToIndices.size);
+  for(int i=0; i<owner.RootsToIndices.size; i++)
+    this->TheObjects[i].init();
+  for (int i=0; i<input.size; i++)
+  { int index = owner.RootsToIndices.getIndex(tempRoots.TheObjects[i]);
+    this->TheObjects[index].AddMultiplicity(1, 1);
+  }
+  this->ComputeIndicesNonZeroMults();
+}
+
 int partFractions::ReadFromFileComputedContributions(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS;
   input.seekg(0);
@@ -10252,6 +10290,7 @@ int partFractions::ReadFromFileComputedContributions(std::fstream& input, Global
       lastNonZero=this->TheObjects[i].FileStoragePosition;
     assert(x==i);
   }
+  this->LimitSplittingSteps=0;
   return lastNonZero;
 }
 
@@ -10270,6 +10309,8 @@ partFractions::partFractions()
   this->flagDiscardingFractions=false;
   this->flagUsingCheckSum=false;
   this->flagUsingOrlikSolomonBasis=true;
+  this->flagInitialized=false;
+  this->SplitStepsCounter=0;
 }
 
 void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables)
@@ -10737,12 +10778,39 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
 }
 
 void partFractions::initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables)
-{ this->ClearTheObjects();
-  this->RootsToIndices.ClearTheObjects();
+{ this->initCommon();
   partFraction f;
   this->AmbientDimension= theFraction.TheObjects[0].dimension;
   f.initFromRootSystem(*this, theFraction, theAlgorithmBasis, weights);
   this->AddAlreadyReduced(f, theGlobalVariables, 0);
+}
+
+void partFractions::initCommon()
+{ this->ClearTheObjects();
+  this->RootsToIndices.ClearTheObjects();
+  this->flagInitialized=false;
+  this->SplitStepsCounter=1;
+}
+
+void partFractions::initFromRoots(roots& input, GlobalVariables& theGlobalVariables)
+{ this->initCommon();
+  if (input.size<1)
+    return;
+  partFraction f;
+  this->AmbientDimension= input.TheObjects[0].size;
+  f.initFromRoots(*this, input);
+  this->AddAlreadyReduced(f, theGlobalVariables, 0);
+}
+
+void partFractions::initAndSplit(roots& input, GlobalVariables& theGlobalVariables)
+{ this->initFromRoots(input, theGlobalVariables);
+  this->split(theGlobalVariables, 0);
+}
+
+void partFractions::Run(roots& input, GlobalVariables& theGlobalVariables)
+{ if (!this->flagInitialized)
+    this->initFromRoots(input, theGlobalVariables);
+  this->split(theGlobalVariables, 0);
 }
 
 void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, root* Indicator)

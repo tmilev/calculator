@@ -957,10 +957,13 @@ void DrawingVariables::drawLine(double X1, double Y1, double X2, double Y2, unsi
 }
 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ inputData.flagDyckPathComputationLoaded=inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
-  inputData.theChambers.ComputeDebugString();
-//  inputData.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
-  assert(inputData.theChambers.ConsistencyCheck());
+{ if (false)
+  { inputData.flagDyckPathComputationLoaded=inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
+    inputData.theChambers.ComputeDebugString();
+    inputData.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
+    assert(inputData.theChambers.ConsistencyCheck());
+  }
+  inputData.flagDyckPathComputationLoaded=false;
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
   if (!inputData.flagDyckPathComputationLoaded)
@@ -969,7 +972,13 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.theChambers.flagIsRunning=true;
   inputData.theChambers.flagReachSafePointASAP=false;
   inputData.flagDyckPathComputationLoaded=true;
-  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.thePartialFraction.LimitSplittingSteps=1;
+  inputData.thePartialFraction.Run(inputData.theChambers.theDirections, theGlobalVariables);
+  inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.StatusString1= inputData.thePartialFraction.DebugString;
+  theGlobalVariables.MakeReport();
+//  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
 //  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
 }
 

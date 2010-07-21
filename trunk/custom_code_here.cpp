@@ -984,6 +984,18 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
 //  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
 }
 
+void ComputationSetup::TestGraphicalOutputPolys(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ PolynomialRationalCoeff tempP;
+  Rational tempRat1=-1;
+  Rational tempRat2= 2;
+  tempP.MakeNVarDegOnePoly(5, 0, 4, tempRat1, tempRat2);
+  tempP.RaiseToPower(8);
+  DrawElementInputOutput theDrawData;
+  theDrawData.TopLeftCornerX=50;
+  theDrawData.TopLeftCornerY=50;
+  tempP.DrawElement(theGlobalVariables, theDrawData);
+}
+
 void ComputationSetup::ComputeReductiveSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { reductiveSubalgebras theRedSAs;
   theRedSAs.FindTheReductiveSubalgebras(inputData.WeylGroupLetter, inputData.WeylGroupIndex, theGlobalVariables);
@@ -1357,19 +1369,6 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   this->flagReachSafePointASAP=false;
 }
 
-
-/*class MathTypesetting
-{
-  template <typename Element>
-  void drawPoly(Polynomial<Element>& thePoly, GlobalVariables& theGlobalVariables);
-};
-
-template <typename Element>
-void drawPoly(Polynomial<Element>& thePoly, GlobalVariables& theGlobalVariables)
-{
-}
-*/
-
 void DrawOperations::drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
@@ -1439,4 +1438,12 @@ void DrawingVariables::drawLineBuffer(double X1, double Y1, double X2, double Y2
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
 { this->theBuffer.drawTextBuffer(X1, Y1, inputText, color);
+}
+
+void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
+{ std::string tempS;
+  this->ElementToString(tempS);
+  theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0);
+  theDrawData.outputHeight=10;
+  theDrawData.outputWidth=10*tempS.size();
 }

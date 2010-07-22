@@ -1376,11 +1376,11 @@ void DrawOperations::drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector
   this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
 }
 
-void DrawOperations::drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex)
+void DrawOperations::drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawTextAtVector);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextAtVectorOperations.size);
   this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
-  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex);
+  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize);
 }
 
 void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
@@ -1390,11 +1390,11 @@ void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, 
   this->theDrawLineOperations.LastObject()->init(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
 }
 
-void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex)
+void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawText);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextOperations.size);
   this->theDrawTextOperations.AddObjectOnTopCreateNew();
-  this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex);
+  this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex, theFontSize);
 }
 
 void DrawingVariables::drawBuffer()
@@ -1404,7 +1404,7 @@ void DrawingVariables::drawBuffer()
     { case DrawOperations::typeDrawText:
         if (this->theDrawTextFunction!=0)
         { DrawTextOperation& theDrawTextOp= this->theBuffer.theDrawTextOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
-          this->theDrawTextFunction(theDrawTextOp.X1, theDrawTextOp.Y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex);
+          this->theDrawTextFunction(theDrawTextOp.X1, theDrawTextOp.Y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
         }
         break;
       case DrawOperations::typeDrawLine:
@@ -1425,7 +1425,7 @@ void DrawingVariables::drawBuffer()
         if (this->theDrawTextFunction!=0)
         { DrawTextAtVectorOperation& theDrawTextOp= this->theBuffer.theDrawTextAtVectorOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
           this->GetCoordsForDrawing(*this, theDrawTextOp.theVector, x1, y1);
-          this->theDrawTextFunction(x1, y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex);
+          this->theDrawTextFunction(x1, y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
         }
         break;
       default: break;
@@ -1437,13 +1437,25 @@ void DrawingVariables::drawLineBuffer(double X1, double Y1, double X2, double Y2
 }
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
-{ this->theBuffer.drawTextBuffer(X1, Y1, inputText, color);
+{ this->theBuffer.drawTextBuffer(X1, Y1, inputText, color, this->fontSizeNormal);
+}
+
+void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize)
+{ theDrawData.outputHeight=0; theDrawData.outputWidth=0;
+  if (input=="")
+    return;
+  for (unsigned int i=0; i<input.size(); i++)
+  { std::string tempS;
+    tempS=input.at(i);
+    this->theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight+theDrawData.TopLeftCornerY, tempS, 0, theFontSize);
+    theDrawData.outputWidth+=(int)(((double) theFontSize)/1.15);
+  }
 }
 
 void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
 { std::string tempS;
   this->ElementToString(tempS);
-  theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0);
+  theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal);
   theDrawData.outputHeight=10;
   theDrawData.outputWidth=10*tempS.size();
 }

@@ -199,7 +199,7 @@ public:
 };
 
 typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2,  unsigned long thePenStyle, int ColorIndex);
-typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex);
+typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
 typedef void (*FeedDataToIndicatorWindow)(IndicatorWindowVariables& input);
 
 class MathRoutines
@@ -2695,7 +2695,7 @@ public:
   void ElementToString(std::string& output);
   bool IsAConstant();
   void InvertDegrees();
-  void DrawElement(GlobalVariables& output, DrawElementInputOutput& theDrawData);
+  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   bool operator==(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   void operator=(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   int SizeWithoutCoefficient();
@@ -3400,11 +3400,6 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& output, DrawElementInputOutput& theDrawData)
-{
-}
-
-template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output)
 { std::stringstream out;
   this->StringStreamPrintOutAppend(out, PolyFormatLocal);
@@ -3984,18 +3979,6 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<Eleme
   outputQuotient.MultiplyByMonomial(scaleInput);
   outputQuotient.MultiplyByMonomial(scaleRemainder);
   outputRemainder.MultiplyByMonomial(scaleRemainder);
-}
-
-template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
-{ DrawElementInputOutput changeData;
-  changeData.TopLeftCornerX = theDrawData.TopLeftCornerX;
-  changeData.TopLeftCornerY = theDrawData.TopLeftCornerY;
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].DrawElement(theGlobalVariables, changeData);
-    changeData.TopLeftCornerX+=changeData.outputWidth;
-    changeData.TopLeftCornerY+=changeData.outputHeight;
-  }
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -6290,12 +6273,12 @@ class IrreducibleFiniteDimensionalModule
 class DrawTextOperation
 {
 public:
-  double X1; double Y1; std::string theText; int ColorIndex;
-  void init(double x1, double y1, const std::string& inputText, int color)
-  { this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color;
+  double X1; double Y1; std::string theText; int ColorIndex; int fontSize;
+  void init(double x1, double y1, const std::string& inputText, int color, int theFontSize)
+  { this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color; this->fontSize=theFontSize;
   };
   void operator=(const DrawTextOperation& other)
-  { this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex;
+  { this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex; this->fontSize=other.fontSize;
   };
 };
 
@@ -6336,12 +6319,12 @@ class DrawTextAtVectorOperation
 public:
   root theVector;
   std::string theText;
-  int ColorIndex;
-  void init(root& input, const std::string& inputText, int colorIndex)
-  { this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText;
+  int ColorIndex; int fontSize;
+  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize)
+  { this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText; this->fontSize=theFontSize;
   };
   void operator=(const DrawTextAtVectorOperation& other)
-  { this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText;
+  { this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText; this->fontSize=other.fontSize;
   };
 };
 
@@ -6355,9 +6338,9 @@ class DrawOperations
   ListBasicObjects<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
   ListBasicObjects<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
-  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex);
+  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize);
   void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
-  void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex);
+  void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize);
   void init()
   { this->IndexNthDrawOperation.size=0; this->TypeNthDrawOperation.size=0;
     this->theDrawTextOperations.size=0; this->theDrawLineOperations.size=0; this->theDrawLineBetweenTwoRootsOperations.size=0; this->theDrawTextAtVectorOperations.size=0;
@@ -6391,6 +6374,8 @@ public:
   double centerY;
   int textX;
   int textY;
+  int fontSizeNormal;
+  int fontSizeSubscript;
   Matrix<double> Projections;
   double scale;
   int TextColor;
@@ -6423,6 +6408,7 @@ public:
   void SetCoordsForA2();
   void SetCoordsForC2();
   DrawOperations theBuffer;
+  void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawLineDirectly(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
@@ -6541,14 +6527,6 @@ public:
   ComputationSetup();
   ~ComputationSetup();
 };
-
-/*class SelectionList: public ListBasicObjects<Selection>
-{
-public:
-  std::string DebugString;
-  void ElementToString(std::string& output);
-  void ComputeDebugString(){this->ElementToString(DebugString); };
-}; */
 
 struct CGIspecificRoutines
 {
@@ -6716,6 +6694,7 @@ public:
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
   PolynomialOutputFormat thePolyFormat;
+
   GlobalVariables();
   void operator=(const GlobalVariables& other)
   { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;
@@ -6740,15 +6719,58 @@ public:
   }
 };
 
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
+{ theDrawData.outputHeight=0;
+  theDrawData.outputWidth=0;
+  std::string tempS, tempS3;
+  this->Coefficient.ElementToString(tempS);
+  if (tempS=="1" && !this->IsAConstant())
+    tempS="";
+  else
+    if (tempS=="-1" && !this->IsAConstant())
+      tempS="-";
+  theGlobalVariables.theDrawingVariables.drawString(theDrawData, tempS, theGlobalVariables.theDrawingVariables.fontSizeNormal);
+  for (int i=0; i<this->NumVariables; i++)
+  { if (this->degrees[i]!=0)
+    { theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight+theDrawData.TopLeftCornerY, "x", 0, theGlobalVariables.theDrawingVariables.fontSizeNormal);
+      theDrawData.outputWidth+=10;
+      std::stringstream out1, out2; std::string tempS1, tempS2;
+      out1 << i+1;
+      tempS1=out1.str();
+      theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX-3, theDrawData.outputHeight+theDrawData.TopLeftCornerY+9, tempS1, 0, theGlobalVariables.theDrawingVariables.fontSizeSubscript);
+      out2 << this->degrees[i];
+      tempS2 = out2.str();
+      theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX-3, theDrawData.outputHeight+theDrawData.TopLeftCornerY-1, tempS2, 0, theGlobalVariables.theDrawingVariables.fontSizeSubscript);
+      theDrawData.outputWidth+=5*MathRoutines::Maximum(tempS1.size(), tempS2.size());
+    }
+  }
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
+{ DrawElementInputOutput changeData;
+  changeData.TopLeftCornerX = theDrawData.TopLeftCornerX;
+  changeData.TopLeftCornerY = theDrawData.TopLeftCornerY;
+  std::string tempS;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].DrawElement(theGlobalVariables, changeData);
+    changeData.TopLeftCornerX+=changeData.outputWidth;
+    changeData.outputWidth=0;
+    if( i!=this->size-1)
+    { this->TheObjects[i+1].ElementToString(tempS);
+      if (tempS.at(0)!='-')
+        theGlobalVariables.theDrawingVariables.drawString(changeData, "+", theGlobalVariables.theDrawingVariables.fontSizeNormal);
+      changeData.TopLeftCornerX+=changeData.outputWidth+3;
+      changeData.outputWidth=0;
+    }
+  }
+}
+
 class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
 {
 public:
   GlobalVariables* Default(){return & this->TheObjects[0]; };
 };
 
-//extern GlobalVariablesContainer StaticGlobalVariablesContainer;
-
-//to be merged in later.
-// done in separate file to speed up compilation/autocomplete during development
-//#include "rootFKFT.h"
 #endif

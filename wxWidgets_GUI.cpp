@@ -118,6 +118,7 @@ END_EVENT_TABLE()
 
 class guiMainWindow : public wxFrame
 {
+  ListObjectPointers<wxFont> theFonts;
 public:
   std::fstream fileSettings;
   std::string bufferString1;
@@ -202,6 +203,7 @@ public:
   ::wxToggleButton* ToggleButton2ViewCombinatorialChambers;
   ::IndicatorWindowVariables progressReportVariables;
   //wxEVT_ProgressReport ProgressReportEvent;
+  wxFont* GetFont(int theSize);
   void OpenFile(std::fstream& output);
   void onToggleButton1UsingCustom( wxCommandEvent& ev);
   void onListBox1Change(wxCommandEvent& ev);
@@ -303,20 +305,32 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
 		case 5: return;
   }
   tempPen.SetColour(ColorIndex); dc.SetPen(tempPen);
-  dc.DrawLine((int)X1, (int)Y1,(int) X2,(int) Y2);
+  dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
 //	dc.setForeground(FXRGB(0,0,0));
 //  dc.fillRectangle(0,0,MainWindow1->Canvas1DrawCanvas->getWidth(),MainWindow1->Canvas1DrawCanvas->getHeight());
 }
 
-void drawtext(double X1, double Y1, const char* text, int length, int color)
+wxFont* guiMainWindow::GetFont(int theSize)
+{ if (this->theFonts.size<theSize)
+  { int oldsize=this->theFonts.size;
+    this->theFonts.SetSizeExpandOnTopNoObjectInit(theSize);
+    for (int i=oldsize; i<theSize; i++)
+      this->theFonts.TheObjects[i]=0;
+  }
+  if (this->theFonts.TheObjects[theSize-1]==0)
+    this->theFonts.TheObjects[theSize-1]= new wxFont(theSize,  wxDEFAULT, wxNORMAL, wxNORMAL);
+  return this->theFonts.TheObjects[theSize-1];
+}
+
+void drawtext(double X1, double Y1, const char* text, int length, int color, int fontSize)
 { wxWindowDC dc(MainWindow1->Canvas1);
-  dc.SetFont(*MainWindow1->theFont);
+  dc.SetFont(*MainWindow1->GetFont(fontSize));
   dc.SetTextForeground(color);
   //dc.setcolo(color);
   //dc.setBackground(MainWindow1->Canvas1DrawCanvas->getBackColor());
   //dc(FILL_STIPPLED);
   wxString temptext(text,wxConvUTF8 ,length);
-  dc.DrawText(temptext,(int)X1, (int)Y1);
+  dc.DrawText(temptext, (int)X1, (int)Y1);
 }
 
 std::string MainWindow1GlobalPath;
@@ -480,7 +494,7 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output);
 
-guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("Vector partition function v0.101 (eating RAM for breakfast)"), wxPoint(100,100), wxSize(800,600), wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
+guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("Vector partition function v0.101 (eating RAM for breakfast)"), wxPoint(100,100), wxSize(800,600), wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
 {	//this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
@@ -535,7 +549,7 @@ guiMainWindow::guiMainWindow(): wxFrame(	(wxFrame *)NULL, guiMainWindow::ID_Main
   this->Table1Input->CreateGrid( 0, 0 );
   this->Table2Indicator->CreateGrid( 0, 0 );
   this->Table3Values->CreateGrid(0,0);
-  this->theFont= new ::wxFont(10,wxDEFAULT, wxNORMAL,wxNORMAL);
+  this->theFont= new ::wxFont(10, wxDEFAULT, wxNORMAL,wxNORMAL);
   this->ListBox1WeylGroup= new ::wxComboBoxWheel(this, this->ID_ListBox1, wxT("A3"), wxPoint(0,0),::wxDefaultSize, 0, 0, wxCB_DROPDOWN  );
   this->Button2Eval= new ::wxButton(this, this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
@@ -735,6 +749,7 @@ guiMainWindow::~guiMainWindow()
   this->Canvas1->Destroy();
   this->Dialog1OutputPF->Destroy();
   this->Dialog2StatusString1->Destroy();
+  this->theFonts.KillAllElements();
   this->fileSettings.close();
 }
 
@@ -883,6 +898,7 @@ void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
   this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.ComputeReductiveSAs;
   this->theComputationSetup.theFunctionToRun= &this->theComputationSetup.TestGraphicalOutputPolys;
   this->RunTheComputation();
+//  this->onComputationOver(ev);
 }
 
 void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)

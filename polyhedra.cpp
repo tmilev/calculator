@@ -466,6 +466,8 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 { this->theDrawLineFunction=0;
   this->theDrawTextFunction=0;
+  this->fontSizeNormal=10;
+  this->fontSizeSubscript=6;
   this->flagLaTeXDraw= false;
   this->ColorDashes=CGIspecificRoutines::RedGreenBlue(200, 200, 200);
   this->flag2DprojectionDraw=true;
@@ -1528,12 +1530,12 @@ void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double
 }
 
 void DrawingVariables::drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, std::fstream* LatexOutFile)
-{ this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor);
+{ this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor, this->fontSizeNormal);
 }
 
 void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
 { if (this->theDrawTextFunction!=0)
-    this->theDrawTextFunction(X1-7, Y1-7, inputText.c_str(), inputText.length(), color);
+    this->theDrawTextFunction(X1-7, Y1-7, inputText.c_str(), inputText.length(), color, this->fontSizeNormal);
   if (LatexOutFile!=0)
     LaTeXProcedures::drawTextDirectly(X1, Y1, inputText, color, *LatexOutFile);
 }

@@ -253,6 +253,15 @@ public:
   void CopyFromLight(const ListBasicObjectsLight<Object>& from);
   void PopIndexSwapWithLastLight(int index);
   int SizeWithoutObjects();
+  int IndexInList(const Object& o)
+  { for (int i=0; i<this->size; i++)
+      if (this->TheObjects[i]==o)
+        return i;
+    return -1;
+  };
+  inline bool ContainsObject(const Object& o)
+  { return this->IndexInList(o)!=-1;
+  };
   void SetSizeExpandOnTopLight(int theSize);
   inline void initFillInObject(int theSize, const Object& o)
   { this->SetSizeExpandOnTopLight(theSize);
@@ -3068,7 +3077,7 @@ class PolyPartFractionNumeratorLight: public ListBasicObjectsLight<ListBasicObje
 public:
   ListBasicObjectsLight<int> Coefficients;
   void AssignPolyPartFractionNumerator(PolyPartFractionNumerator& from);
-  void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output, int theDimension);
+  void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output, int theDimension) const;
   void AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight& right);
   int NumGeneratorsUsed();
 };
@@ -4808,7 +4817,7 @@ public:
   void MultiplyCoeffBy(Rational& r);
   void decomposeAMinusNB(int indexA, int indexB, int n, int indexAminusNB, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
   bool DecomposeFromLinRelation(MatrixLargeRational& theLinearRelation, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-  void ComputeOneCheckSum(partFractions& owner, Rational &output, int theDimension, GlobalVariables& theGlobalVariables);
+  void ComputeOneCheckSum(partFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables);
   void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
   void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
   void ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
@@ -4820,6 +4829,9 @@ public:
   bool reduceOnceGeneralMethod(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
   bool AreEqual(partFraction& p);
   bool IsReduced();
+  //the other fraction must have the same denominator, of course
+  //owner is passed only in order to read the flags, not used in any other way
+  bool AddReturnShouldAttemptReduction(const partFraction& other, const partFractions& owner, GlobalVariables& theGlobalVariables);
   int HashFunction() const;
   int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
   void init(int numRoots);
@@ -4914,14 +4926,16 @@ public:
   //row index is the index of the root; column(second) index is the coordinate index
   void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, root* Indicator);
   void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, root* Indicator);
-  bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, root*Indicator);
+  bool RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVariables, root* Indicator, int theIndex);
+  bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, root* Indicator);
   bool split(GlobalVariables& theGlobalVariables, root* Indicator);
   void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
   void ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables);
   void AccountPartFractionInternals(int sign, int index, root* Indicator, GlobalVariables& theGlobalVariables);
   void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
   void AddAlreadyReduced(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
-  void PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator);
+  void PopIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator);
+  void PopIndexSwapLastHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator);
   void PrepareIndicatorVariables();
   void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
   void IncreaseHighestIndex(int increment);
@@ -6652,6 +6666,8 @@ public:
   MatrixLargeRational matBogusNeighborsEmpty;
 
   partFraction fracReduceMonomialByMonomial;
+  partFraction fracRemoveRedundantRootsBuffer1;
+ // partFraction fracRemoveRedundantRootsBuffer2;
   partFraction fracSplit1;
   QuasiPolynomial QPComputeQuasiPolynomial;
   QuasiNumber QNComputeQuasiPolynomial;

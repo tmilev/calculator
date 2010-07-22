@@ -8766,62 +8766,85 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(partFractions& o
   return result;
 }
 
-bool partFraction::RemoveRedundantShortRoots(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension)
-{ bool result=false;
-  Rational StartCheckSum, LocalCheckSum, LocalCheckSum2;
-  //if (partFraction::MakingConsistencyCheck)
-  //{  this->ComputeDebugString();
-  //  this->ComputeOneCheckSum(StartCheckSum);
-  //}
-  if (!this->rootIsInFractionCone(owner, Indicator, theGlobalVariables))
+bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVariables, root* Indicator, int theIndex)
+{ if (!this->TheObjects[theIndex].rootIsInFractionCone(*this, Indicator, theGlobalVariables))
     return false;
+  bool found=false;
+  for (int k=0; k < this->TheObjects[theIndex].IndicesNonZeroMults.size; k++)
+  { int currentIndex=this->TheObjects[theIndex].IndicesNonZeroMults.TheObjects[k];
+    oneFracWithMultiplicitiesAndElongations& currentFrac = this->TheObjects[theIndex].TheObjects[currentIndex];
+    if (currentFrac.Elongations.size>1)
+    { found=true;
+      break;
+    }
+  }
+  if (!found)
+    return false;
+  partFraction& thePF= theGlobalVariables.fracRemoveRedundantRootsBuffer1;
+  thePF.Assign(this->TheObjects[theIndex]);
+  this->PopIndexSwapLastHashAndAccount(theIndex, theGlobalVariables, Indicator);
+  Rational localStartCheckSum, localEndCheckSum;
+  std::string tempS, tempS1, tempS2;
   IntegerPoly ComputationalBufferCoefficient, tempIP;
   PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded, tempPP;
-  ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
-  this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded, theDimension);
-  for (int k=0; k<this->IndicesNonZeroMults.size; k++)
-  { int currentIndex=this->IndicesNonZeroMults.TheObjects[k];
-    oneFracWithMultiplicitiesAndElongations& currentFrac = this->TheObjects[currentIndex];
+  ComputationalBufferCoefficient.AssignPolynomialLight(thePF.Coefficient);
+  thePF.CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded, this->AmbientDimension);
+  if (this->flagMakingProgressReport || this->flagAnErrorHasOccurredTimeToPanic)
+  { thePF.ComputeOneCheckSum(*this, localStartCheckSum, this->AmbientDimension, theGlobalVariables);
+    localStartCheckSum.ElementToString(tempS2);
+  }
+  for (int k=0; k<thePF.IndicesNonZeroMults.size; k++)
+  { int currentIndex=thePF.IndicesNonZeroMults.TheObjects[k];
+    oneFracWithMultiplicitiesAndElongations& currentFrac = thePF.TheObjects[currentIndex];
     int LCMElongations = currentFrac.GetLCMElongations();
-    std::string tempS, tempS1, tempS2;
-    owner.RootsToIndices.TheObjects[currentIndex].ElementToString(tempS);
+    this->RootsToIndices.TheObjects[currentIndex].ElementToString(tempS);
     while (currentFrac.Elongations.size>1)
     { for (int i=0; i<currentFrac.Elongations.size; i++)
       { int ElongationValue=currentFrac.Elongations.TheObjects[i];
         if (ElongationValue!=LCMElongations)
         { int numSummands=LCMElongations/ElongationValue;
-          if (this->UncoveringBrackets)
-          { this->GetNElongationPoly(owner, currentIndex, ElongationValue, numSummands, tempIP, theDimension);
-            //tempP.ComputeDebugString();
-            tempPP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
-            //tempP.ComputeDebugString();
+          if (thePF.UncoveringBrackets)
+          { thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
+            tempIP.ComputeDebugString();
+            tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
+            tempIP.ComputeDebugString();
             ComputationalBufferCoefficient.MultiplyBy(tempIP);
           }
           else
           { PolyPartFractionNumerator tempP;
-            this->GetNElongationPoly(owner, currentIndex, ElongationValue, numSummands, tempP, theDimension);
+            thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempP, this->AmbientDimension);
             tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
 //            this->CoefficientNonExpanded.ComputeDebugString();
             ComputationalBufferCoefficientNonExpanded.MultiplyBy(tempP);
 //            this->CoefficientNonExpanded.ComputeDebugString();
           }
-          //this->Coefficient.ComputeDebugString();
+          ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
           currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i], LCMElongations);
           currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i], ElongationValue);
-          result=true;
+          thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+          thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
+          assert(localEndCheckSum.IsEqualTo(localStartCheckSum));
         }
       }
     }
-  /*  if (partFraction::MakingConsistencyCheck)
-    { this->ComputeOneCheckSum(LocalCheckSum2);
-      LocalCheckSum2.ElementToString(tempS1);
-      StartCheckSum.ElementToString(tempS2);
-      assert(LocalCheckSum2.IsEqualTo(StartCheckSum));
-    }*/
+    if (partFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic)
+    { thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+      thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
+      localEndCheckSum.ElementToString(tempS1);
+      assert(localStartCheckSum.IsEqualTo(localEndCheckSum));
+    }
   }
-  this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
-  this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-  return result;
+  thePF.CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+  thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+  int tempI = this->IndexOfObjectHash(thePF);
+  if (tempI==-1)
+    this->AddAlreadyReduced(thePF, theGlobalVariables, Indicator);
+  else
+  { this->AccountPartFractionInternals(-1, tempI, Indicator, theGlobalVariables);
+    this->TheObjects[tempI].AddReturnShouldAttemptReduction(thePF, *this, theGlobalVariables);
+    this->AccountPartFractionInternals(1, tempI, Indicator, theGlobalVariables);
+  }
+  return true;
 }
 
 bool partFraction::reduceOnceTotalOrderMethod(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
@@ -8942,6 +8965,29 @@ void partFraction::AssignDenominatorOnly(const partFraction& p)
 { this->CopyFromLight(p);
   this->Coefficient.NumVars=p.Coefficient.NumVars;
   this->ComputeIndicesNonZeroMults();
+}
+
+bool partFraction::AddReturnShouldAttemptReduction(const partFraction& other, const partFractions& owner, GlobalVariables& theGlobalVariables)
+{ assert(*this==other);
+  bool shouldAttemptReduction=false;
+  IntegerPoly& ComputationalBufferCoefficient1 = theGlobalVariables.IPComputationalBufferAddPartFraction1;
+  IntegerPoly& ComputationalBufferCoefficient2 = theGlobalVariables.IPComputationalBufferAddPartFraction2;
+  PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded1=theGlobalVariables.PPFNAddPartFraction1;
+  PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded2=theGlobalVariables.PPFNAddPartFraction2;
+  ComputationalBufferCoefficient1.AssignPolynomialLight(this->Coefficient);
+  ComputationalBufferCoefficient2.AssignPolynomialLight(other.Coefficient);
+  this->CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded1, owner.AmbientDimension);
+  other.CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded2, owner.AmbientDimension);
+  ComputationalBufferCoefficient1.AddPolynomial(ComputationalBufferCoefficient2);
+  if (ComputationalBufferCoefficient1.EvaluateAtOne()==0)
+  { if (this->flagAnErrorHasOccurredTimeToPanic)
+      ComputationalBufferCoefficient1.ComputeDebugString();
+    shouldAttemptReduction=true;
+  }
+  ComputationalBufferCoefficientNonExpanded1.AddPolynomial (ComputationalBufferCoefficientNonExpanded2);
+  this->Coefficient.AssignPolynomial (ComputationalBufferCoefficient1);
+  this->CoefficientNonExpanded.AssignPolyPartFractionNumerator (ComputationalBufferCoefficientNonExpanded1);
+  return shouldAttemptReduction;
 }
 
 void partFraction::Assign(const partFraction& p)
@@ -9329,7 +9375,7 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
     {//  owner.CompareCheckSums();
       owner.ComputeDebugString(theGlobalVariables);
     }
-    owner.PopIndexHashAndAccount(myIndex, theGlobalVariables, Indicator);
+    owner.PopIndexHashChooseSwapByLowestNonProcessedAndAccount(myIndex, theGlobalVariables, Indicator);
     tempFrac.Coefficient.AssignPolynomial(numerator);
     owner.AddAndReduce(tempFrac, theGlobalVariables, Indicator);
     if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -10037,7 +10083,7 @@ bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, root* Indi
       else
       {//  if (ProblemCounter==17)
         //  this->ComputeDebugString(theGlobalVariables); //        if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-        this->PopIndexHashAndAccount( this->IndexCurrentlyProcessed, theGlobalVariables, Indicator);
+        this->PopIndexHashChooseSwapByLowestNonProcessedAndAccount( this->IndexCurrentlyProcessed, theGlobalVariables, Indicator);
 //        { this->ComputeDebugString();
 //        }
       }
@@ -10133,7 +10179,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
         this->IndexLowestNonProcessed++;
       }
       else
-        this->PopIndexHashAndAccount( this->IndexLowestNonProcessed, theGlobalVariables, Indicator);
+        this->PopIndexHashChooseSwapByLowestNonProcessedAndAccount( this->IndexLowestNonProcessed, theGlobalVariables, Indicator);
       this->MakeProgressReportSplittingMainPart(theGlobalVariables);
     }
 //    this->ComputeDebugString();
@@ -10245,9 +10291,14 @@ void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables& the
 { this->ElementToString(owner, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
 }
 
-void partFractions::PopIndexHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::PopIndexSwapLastHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator)
 { this->AccountPartFractionInternals(-1, index, Indicator, theGlobalVariables);
-  if (index>=this->IndexLowestNonProcessed )
+  this->PopIndexSwapWithLastHash(index);
+}
+
+void partFractions::PopIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator)
+{ this->AccountPartFractionInternals(-1, index, Indicator, theGlobalVariables);
+  if (index>=this->IndexLowestNonProcessed)
     this->PopIndexSwapWithLastHash(index);
   else
   { assert(this->IndexLowestNonProcessed!=0);
@@ -10495,32 +10546,18 @@ void partFractions::AddAlreadyReduced(partFraction& f, GlobalVariables& theGloba
     this->AccountPartFractionInternals(1, tempI, Indicator, theGlobalVariables);
   }
   else
-  { IntegerPoly& ComputationalBufferCoefficient1 =theGlobalVariables.IPComputationalBufferAddPartFraction1;
-    IntegerPoly& ComputationalBufferCoefficient2 =theGlobalVariables.IPComputationalBufferAddPartFraction2;
-    PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded1=theGlobalVariables.PPFNAddPartFraction1;
-    PolyPartFractionNumerator& ComputationalBufferCoefficientNonExpanded2=theGlobalVariables.PPFNAddPartFraction2;
-    //Accounting
+  { //Accounting
     this->AccountPartFractionInternals(-1, tempI, Indicator, theGlobalVariables);
     //end of accounting
-    ComputationalBufferCoefficient1.AssignPolynomialLight(this->TheObjects[tempI].Coefficient);
-    ComputationalBufferCoefficient2.AssignPolynomialLight(f.Coefficient);
-    this->TheObjects[tempI].CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded1, this->AmbientDimension);
-    f.CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded2, this->AmbientDimension);
-    ComputationalBufferCoefficient1.AddPolynomial(ComputationalBufferCoefficient2);
-    if (ComputationalBufferCoefficient1.EvaluateAtOne()==0)
-    { if (this->flagAnErrorHasOccurredTimeToPanic)
-        ComputationalBufferCoefficient1.ComputeDebugString();
-      shouldAttemptReduction=true;
-    }
-    ComputationalBufferCoefficientNonExpanded1.AddPolynomial (ComputationalBufferCoefficientNonExpanded2);
-    this->TheObjects[tempI].Coefficient.AssignPolynomial (ComputationalBufferCoefficient1);
-    this->TheObjects[tempI].CoefficientNonExpanded.AssignPolyPartFractionNumerator (ComputationalBufferCoefficientNonExpanded1);
+    shouldAttemptReduction=this->TheObjects[tempI].AddReturnShouldAttemptReduction(f, *this, theGlobalVariables);
+    //Accounting
     this->AccountPartFractionInternals(1, tempI, Indicator, theGlobalVariables);
+    //end of accounting
   }
   if (this->flagSplitTestModeNoNumerators)
     this->TheObjects[tempI].Coefficient.MakeConst(IOne, (short)this->AmbientDimension);
-  if ( this->TheObjects[tempI].IsEqualToZero())
-  { this->PopIndexHashAndAccount(tempI, theGlobalVariables, Indicator);
+  if (this->TheObjects[tempI].IsEqualToZero())
+  { this->PopIndexHashChooseSwapByLowestNonProcessedAndAccount(tempI, theGlobalVariables, Indicator);
     shouldAttemptReduction=false;
   }
   if (shouldAttemptReduction&& this->flagUsingOrlikSolomonBasis)
@@ -10755,14 +10792,8 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
   if (partFraction::MakingConsistencyCheck)
     this->ComputeOneCheckSum(startCheckSum, theGlobalVariables);
   for (int i=0; i<this->size; i++)
-  { tempFrac.Assign(this->TheObjects[i]);
-    if(tempFrac.RemoveRedundantShortRoots(*this, Indicator, theGlobalVariables, this->AmbientDimension))
-    { this->AccountPartFractionInternals(-1, i, Indicator, theGlobalVariables);
-      this->TheObjects[i].CoefficientNonExpanded.SetSizeExpandOnTopLight(0);
-      this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
-      int oldsize= this->size;
-      this->AddAlreadyReduced(tempFrac, theGlobalVariables, Indicator);
-      assert(oldsize<=this->size);
+    if(this->RemoveRedundantShortRootsIndex(theGlobalVariables, Indicator, i))
+    { i--;
       if (this->flagMakingProgressReport)
       { std::stringstream out;
         out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
@@ -10770,7 +10801,6 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
         theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
       }
      }
-  }
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].Coefficient.IsEqualToZero())
     { this->PopIndexSwapWithLastHash(i);
@@ -10795,7 +10825,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
   }
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].Coefficient.IsEqualToZero())
-    { this->PopIndexHashAndAccount(i, theGlobalVariables, Indicator);
+    { this->PopIndexHashChooseSwapByLowestNonProcessedAndAccount(i, theGlobalVariables, Indicator);
       i--;
     }
 }
@@ -11238,14 +11268,9 @@ int oneFracWithMultiplicitiesAndElongations::GetMultiplicityLargestElongation()
   return result;
 }
 
-void oneFracWithMultiplicitiesAndElongations::AddMultiplicity  (int MultiplicityIncrement, int Elongation)
+void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIncrement, int Elongation)
 { if (MultiplicityIncrement==0) return;
-  int ElongationIndex=-1;
-  for (int i=0; i<this->Elongations.size; i++)
-    if (this->Elongations.TheObjects[i]==Elongation)
-    { ElongationIndex=i;
-      break;
-    }
+  int ElongationIndex=this->Elongations.IndexInList(Elongation);
   if (ElongationIndex==-1)
   { this->Elongations.AddObjectOnTopLight(Elongation);
     int tempI=0;
@@ -16285,7 +16310,7 @@ void GeneratorPFAlgebraRecord::GetValue(IntegerPoly& output, int theDimension)
   this->Value->Assign(output);
 }
 
-void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumerator(PolyPartFractionNumerator &from)
+void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumerator(PolyPartFractionNumerator& from)
 { this->SetSizeExpandOnTopLight(from.size);
   this->Coefficients.SetSizeExpandOnTopLight(from.size);
   for (int i=0; i<this->size; i++)
@@ -16294,7 +16319,7 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumerator(PolyPartFra
   }
 }
 
-void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFractionNumerator &output, int theDimension)
+void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output, int theDimension) const
 { output.Nullify((short)theDimension);
   output.MakeActualSizeAtLeastExpandOnTop(this->size);
   for (int i=0; i<this->size; i++)
@@ -16313,16 +16338,16 @@ int PolyPartFractionNumeratorLight::NumGeneratorsUsed()
   return result;
 }
 
-void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight &right)
+void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight& right)
 { this->CopyFromLight(right);
   this->Coefficients.CopyFromLight(right.Coefficients);
 }
 
-bool affineCone::SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones &output)
+bool affineCone::SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output)
 { return true;
 }
 
-bool affineCone::WallIsInternalInCone(affineHyperplane &theKillerCandidate)
+bool affineCone::WallIsInternalInCone(affineHyperplane& theKillerCandidate)
 {  return true;
 }
 
@@ -16340,7 +16365,7 @@ inline int affineCone::HashFunction() const
   return result;
 }
 
-void MatrixLargeRational::ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool &hasAPotentialLeavingVariable)
+void MatrixLargeRational::ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable)
 { hasAPotentialLeavingVariable = false;
   outputChangeGradient.MakeZero();
   for (int j=0; j<matA.NumRows; j++)
@@ -16352,7 +16377,7 @@ void MatrixLargeRational::ComputePotentialChangeGradient(MatrixLargeRational& ma
     outputChangeGradient.Subtract(ROne);
 }
 
-void MatrixLargeRational::GetMaxMovementAndLeavingVariableRow(Rational &maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables)
+void MatrixLargeRational::GetMaxMovementAndLeavingVariableRow(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables)
 {  LeavingVariableRow=-1;
   maxMovement.MakeZero();
   for(int i=0; i<tempMatA.NumRows; i++)
@@ -16761,22 +16786,6 @@ void affineCones::ProjectFromCombinatorialChambers(CombinatorialChamberContainer
   }
 }
 
-//void FacetPointers::ConvertToAffineAndProjectivize
-//  (CombinatorialChamberContainer& input, CombinatorialChamberContainer& ownerComplex)
-/*{ assert(this!=&input.theHyperplanes);
-  this->initAndCreateNewObjects(input.theHyperplanes.size);
-  input.ComputeDebugString();
-  input.theHyperplanes.ComputeDebugString();
-  for (int i=0; i<input.theHyperplanes.size; i++)
-  { this->TheObjects[i]->InduceFromFacetLowerDimension
-      (*input.theHyperplanes.TheObjects[i], input);
-  }
-  root extraWallNormal;
-  extraWallNormal.MakeZero(root::AmbientDimension+1);
-  extraWallNormal.TheObjects[root::AmbientDimension].MakeOne();
-  this->NormalizeRootAndGetFacetCreateNewIfNeeded(extraWallNormal); */
-//}
-
 void affineHyperplanes::ElementToString(std::string& output)
 { std::stringstream out;
   for (int i=0; i<this->size; i++)
@@ -16831,19 +16840,19 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool us
     if (useHtml)
       out <<"</td>";
     for (int j=0; j<this->TheObjects[i].size; j++)
-    {  if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
-      {  if(useLaTeX)
+    { if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
+      { if(useLaTeX)
           out<<"\\multicolumn{1}{c|}{";
         if(useHtml)
           out <<"<td rhs=\"1\">";
       } else
-      {  if (useHtml)
+      { if (useHtml)
           out <<"<td>";
       }
       for (int k=0; k<this->TheObjects[i].TheObjects[j].size; k++)
         out << this->TheObjects[i].TheObjects[j].TheObjects[k] << ", ";
       if (useLaTeX )
-      {  if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
+      { if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
           out<<"}";
         if (j!=this->TheObjects[i].size-1)
           out <<" & ";
@@ -16870,7 +16879,7 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool us
     if (useHtml)
       out <<"</td>";
     if (useLaTeX)
-    {  if (i!=owner.theOppositeKmods.size-1)
+    { if (i!=owner.theOppositeKmods.size-1)
       { if (useLaTeX)
           out<<" & ";
         else
@@ -17029,14 +17038,14 @@ int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, 
   out << tempS;
   this->theDiagramRelAndK.ElementToString(tempS);
   if (useLatex)
-    out <<" & ";
+    out << " & ";
   out << tempS;
   if (includeScalarsProductsEachSide)
-  { out <<" & ";
+  { out << " & ";
     LatexLineCounter+=this->RootsToScalarProductString(  this->Alphas, this->Alphas, "\\alpha", "\\alpha", tempS, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
     out << tempS;
     LatexLineCounter+=this->RootsToScalarProductString(  this->Betas, this->Betas, "\\beta", "\\beta", tempS, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
-    out <<" "<< tempS;
+    out << " " << tempS;
   }
   if (includeMixedScalarProducts)
   { LatexLineCounter+= this->RootsToScalarProductString(  this->Alphas, this->Betas, "\\alpha", "\\beta", tempS, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
@@ -17057,7 +17066,7 @@ int coneRelation::RootsToScalarProductString(roots& inputLeft, roots& inputRight
       { owner.AmbientWeyl.RootScalarKillingFormMatrixRoot(inputLeft.TheObjects[i], inputRight.TheObjects[j], tempRat);
         if (!tempRat.IsEqualToZero())
         { tempRat.ElementToString(tempS);
-          out <<"$\\langle"<<letterTypeLeft<<"_"<< i+1<<", " <<letterTypeRight<<"_"<<j+1<<"\\rangle="<<tempS<< "$, ";
+          out << "$\\langle" << letterTypeLeft << "_" << i+1 << ", " << letterTypeRight << "_" << j+1 << "\\rangle=" << tempS << "$, ";
           numLinesLatex++;
         }
       }
@@ -17189,7 +17198,7 @@ bool coneRelation::CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots)
   return true;
 }
 
-void coneRelation::GetSumAlphas(root &output, int theDimension)
+void coneRelation::GetSumAlphas(root& output, int theDimension)
 { assert(this->AlphaCoeffs.size==this->Alphas.size);
   output.MakeZero(theDimension);
   root tempRoot;
@@ -17390,57 +17399,6 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
   for(int i=0; i<this->size; i++)
     this->TheObjects[i].Assign(output.TheObjects[i]);
 }
-
-//The below code is not needed due to a theorem in Todor Milev's thesis
-/*void rootSubalgebras::initDynkinDiagramsNonDecided(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank)
-{ //Dynkin: Semisimple subalgebras of simple Lie algebras, Table 11.
-  this->theBadDiagrams.size=0;
-  std::string tempS;
-  if (WeylLetter=='E' && WeylRank==8)
-  {//it's E8 folks!
-    this->theBadDiagrams.MakeActualSizeAtLeastExpandOnTop(5);
-    tempS="$A_7$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_3$+$A_3$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_5$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_3$+$A_1$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_1$+$A_1$+$A_1$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-  }
-  if (WeylLetter=='E' && WeylRank==7)
-  {//it's E7 folks!
-    this->theBadDiagrams.MakeActualSizeAtLeastExpandOnTop(6);
-    tempS="$A_5$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_5$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_3$+$A_1$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_3$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_1$+$A_1$+$A_1$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-    tempS="$A_1$+$A_1$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-  }
-  if (WeylLetter=='B' || WeylLetter=='C' || WeylLetter=='G' || WeylLetter=='F')
-  { tempS="$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-  }
-  if (WeylLetter=='F')
-  {  tempS="$A_2$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-  }
-  if (WeylLetter=='F')
-  {  tempS="$A_1$+$A_1$";
-    this->theBadDiagrams.AddObjectOnTop(tempS);
-  }
-  this->numFoundBadDiagrams.initFillInObject(this->theBadDiagrams.size, 0);
-}
-*/
 
 void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml)
 { std::stringstream out1, out2; std::string tempS;
@@ -17857,12 +17815,12 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
   int indexGammaMinusEpsilon= this->theWeyl.RootSystem.IndexOfObjectHash(gamma+minusEpsilon);
   Rational FirstSummand, SecondSummand;
   if (indexDeltaMinusEpsilon!=-1)
-  {  assert(this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] && this->Computed.elements[indexDelta][indexMinusEpsilon]);
+  { assert(this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] && this->Computed.elements[indexDelta][indexMinusEpsilon]);
     FirstSummand=this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon]*this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else
     FirstSummand.MakeZero();
   if (indexGammaMinusEpsilon!=-1)
-  {  assert(this->Computed.elements[indexDelta][indexGammaMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma]);
+  { assert(this->Computed.elements[indexDelta][indexGammaMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma]);
     SecondSummand =this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else
     SecondSummand.MakeZero();
@@ -17955,7 +17913,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& 
     return true;
   }
   if (this->theWeyl.RootSystem.IndexOfObjectHash(root1)==-1 || this->theWeyl.RootSystem.IndexOfObjectHash(root2)==-1)
-  {  outputRat.MakeZero();
+  { outputRat.MakeZero();
     return true;
   }
   outputH=(root1*2)/this->theWeyl.RootScalarKillingFormMatrixRoot(root1, root1);
@@ -17963,7 +17921,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& 
 }
 
 void SltwoSubalgebras::ComputeDebugStringCurrent()
-{  std::string tempS; std::stringstream out;
+{ std::string tempS; std::stringstream out;
   for (int i=0; i<this->MultiplicitiesFixedHweight.size; i++)
     out << i-this->IndexZeroWeight<<": "<<this->MultiplicitiesFixedHweight.TheObjects[i] <<"\n";
   this->DebugString=out.str();
@@ -18189,7 +18147,7 @@ void SemisimpleLieAlgebra::GetAdNilpotentElement(MatrixLargeRational& output, El
      { int indexRel = this->theWeyl.RootSystem.IndexOfObjectHash(relation);
        if (indexRel!=-1)
          output.elements[indexRel][i].Assign(  e.coeffsRootSpaces.TheObjects[indexE]*this->ChevalleyConstants.elements[indexE][i]);
-     }else
+     } else
      {  //if (h!=0)
       for (int k=0; k<theDimension; k++)
         output.elements[NumRoots+k][i].Assign(e.coeffsRootSpaces.TheObjects[indexE]*rootE.TheObjects[k]*2/this->theWeyl.RootScalarKillingFormMatrixRoot(rootE, rootE));
@@ -18202,7 +18160,7 @@ void SemisimpleLieAlgebra::GetAdNilpotentElement(MatrixLargeRational& output, El
 
 void ElementSimpleLieAlgebra::MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber)
 { if (theNumber.IsEqualToZero())
-  {  this->Nullify(owner);
+  { this->Nullify(owner);
     return;
   }
   this->Hcomponent.MultiplyByLargeRational(theNumber);

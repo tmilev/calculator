@@ -855,7 +855,6 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
   inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-6, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -1458,4 +1457,57 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
   theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal);
   theDrawData.outputHeight=10;
   theDrawData.outputWidth=10*tempS.size();
+}
+
+void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ rootSubalgebra tempSA;
+  //most important flags
+  inputData.theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
+  inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
+  inputData.theRootSubalgebras.flagComputeConeCondition=true;
+  inputData.theRootSubalgebras.flagComputingLprohibitingWeights=true;
+  inputData.theRootSubalgebras.flagLookingForMinimalRels=true;
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  inputData.theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=false;
+  inputData.theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=false;
+  inputData.theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=false;
+  inputData.theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
+  inputData.theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
+  inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+  inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
+  if (!inputData.theRootSubalgebras.flagNilradicalComputationInitialized)
+  { inputData.theRootSubalgebras.IndexCurrentSANilradicalsGeneration=0;
+    inputData.theRootSubalgebras.NumReductiveRootSAsToBeProcessedNilradicalsGeneration=inputData.theRootSubalgebras.size-1;
+    inputData.theRootSubalgebras.flagNilradicalComputationInitialized=true;
+  }
+  if (inputData.theRootSubalgebras.flagComputeConeCondition)
+    inputData.theRootSubalgebras.ComputeLProhibitingRelations(theGlobalVariables);
+  std::string tempS;
+  inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-1, theGlobalVariables);
+  inputData.theRootSubalgebras.DebugString.append(tempS);
+  inputData.theOutput.DebugString.append("\\documentclass{article}\n\\usepackage{amssymb}\n");
+  inputData.theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
+  inputData.theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
+  inputData.theOutput.DebugString.append("\\begin{document}~");
+  inputData.theRootSubalgebras.theBadRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
+  inputData.theRootSubalgebras.theGoodRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
+  //this->theRootSubalgebras.theMinRels.ComputeDebugString
+  //  (this->theRootSubalgebras, *this->theGlobalVariablesContainer->Default());
+  inputData.theOutput.DebugString.append(inputData.theRootSubalgebras.DebugString);
+  inputData.theOutput.DebugString.append("\n\n\n");
+  if (inputData.theRootSubalgebras.theGoodRelations.size!=0)
+    inputData.theOutput.DebugString.append(inputData.theRootSubalgebras.theGoodRelations.DebugString);
+  inputData.theOutput.DebugString.append("\n\n\n");
+  if (inputData.theRootSubalgebras.theBadRelations.size>0)
+  { inputData.theOutput.DebugString.append("The bad relations: \n\n");
+    inputData.theOutput.DebugString.append(inputData.theRootSubalgebras.theBadRelations.DebugString);
+  }
+  if (inputData.theRootSubalgebras.flagLookingForMinimalRels)
+  { inputData.theOutput.DebugString.append("\n\nMinimal relations: \n\n");
+    inputData.theOutput.DebugString.append(inputData.theRootSubalgebras.theMinRels.DebugString);
+  }
+  inputData.theOutput.DebugString.append("\\end{document}");
+  theGlobalVariables.theIndicatorVariables.StatusString1= inputData.theOutput.DebugString;
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.MakeReport();
 }

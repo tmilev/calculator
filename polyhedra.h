@@ -710,6 +710,8 @@ public:
   inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
   { Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);
   };
+  void WriteToFile(std::fstream& output);
+  void ReadFromFile(std::fstream& input);
   static void GaussianEliminationByRows(  Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
 };
@@ -774,7 +776,6 @@ public:
   ~Selection();
 };
 
-
 class SelectionWithMultiplicities
 {
 public:
@@ -832,7 +833,6 @@ public:
   };
 };
 
-
 template <typename Element>
 inline void MatrixElementaryTightMemoryFit<Element>::Assign(const MatrixElementaryTightMemoryFit<Element>& m)
 { if (this==&m) return;
@@ -861,6 +861,29 @@ ParallelComputing::GlobalPointerCounter-=this->NumRows*this->NumCols+this->NumRo
   this->elements=0;
   this->NumRows=0;
   this->NumCols=0;
+}
+
+template <typename Element>
+void Matrix<Element>::WriteToFile(std::fstream& output)
+{ output << "Matrix_NumRows: " << this->NumRows <<" Matrix_NumCols: " << this->NumCols << "\n";
+  for (int i=0; i<this->NumRows; i++)
+  { for (int j=0; j<this->NumCols; j++)
+    { this->elements[i][j].WriteToFile(output);
+      output << " ";
+    }
+    output <<"\n";
+  }
+}
+
+template <typename Element>
+void Matrix<Element>::ReadFromFile(std::fstream& input)
+{ int r, c; std::string tempS;
+  input >> tempS >> r >> tempS >>c;
+  assert(tempS=="Matrix_NumCols:");
+  this->init(r, c);
+  for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+      this->elements[i][j].ReadFromFile(input);
 }
 
 template <typename Element>
@@ -5448,14 +5471,15 @@ public:
   void MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
   void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables);
-  void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
-  { this->ElementToString(this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables); };
+  void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables); };
   bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
   bool IsAnIsomorphism(roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
-//  void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
   bool ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicObjects<int>& tempList, Selection& tempSel);
   void GeneratePossibleNilradicalsRecursive(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicals(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicals(MutexWrapper& PauseMutex, ListBasicObjects<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicalsInit(ListBasicObjects<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter);
+  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
+  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
   void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
@@ -5482,11 +5506,12 @@ public:
   void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
   void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //  void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
+  void initForNilradicalGeneration();
   void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
   bool LinCombToString(root& alphaRoot, int coeff, root& linComb, std::string& output);
   bool LinCombToStringDistinguishedIndex(int distinguished, root& alphaRoot, int coeff, root& linComb, std::string& output);
-  void WriteMultTableAndOppositeKmodsToFile  (std::fstream& output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites);
-  void ReadMultTableAndOppositeKmodsToFile  (std::fstream& input, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites);
+  void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites);
+  void ReadMultTableAndOppositeKmodsToFile(std::fstream& input, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites);
 };
 
 class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
@@ -5499,13 +5524,15 @@ public:
   ListBasicObjects<ListBasicObjects<int> > ActionsNormalizerCentralizerNilradical;
   ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
   ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
-  //ListBasicObjects< ListBasicObjects <int> > OrbitsUnderNormalizerCentralizerNilradical;
+  //Code used in nilradical generation:
+  Selection ParabolicsSelectionNilradicalGeneration;
+  ListBasicObjects<Selection> ImpiedSelectionsNilradical;
+  int parabolicsCounterNilradicalGeneration;
   ListBasicObjects<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;
   int NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
   ListBasicObjects<int> CountersNilradicalsGeneration;
   int RecursionDepthNilradicalsGeneration;
-  ListBasicObjects<Selection> ImpiedSelectionsNilradical;
   MutexWrapper mutexLockMeToPauseLProhibitingComputations;
   int NumSubalgebrasProcessed;
   int NumConeConditionFailures;
@@ -5543,6 +5570,10 @@ public:
   //void initDynkinDiagramsNonDecided(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
   void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
   void pathToHtmlReference(int index, std::string& DisplayString, std::string* htmlPathServer, std::string& output);
+  void WriteToDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables);
+  bool ReadFromDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables);
+  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables);
   void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
@@ -5553,6 +5584,15 @@ public:
   };
   void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
   void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+  void initForNilradicalGeneration()
+  { this->NumSubalgebrasProcessed=0;
+    this->NumConeConditionFailures=0;
+    this->NumSubalgebrasCounted=0;
+    this->IndexCurrentSANilradicalsGeneration=0;
+    this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration=this->size-1;
+    if (this->size>0)
+      this->TheObjects[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration);
+  };
   rootSubalgebras()
   { this->flagNilradicalComputationInitialized=false;
     this->flagUseDynkinClassificationForIsomorphismComputation=true;
@@ -5564,6 +5604,7 @@ public:
     this->NumLinesPerTableLatex=20;
     this->NumColsPerTableLatex=4;
     this->UpperLimitNumElementsWeyl=0;
+    this->initForNilradicalGeneration();
   };
 };
 

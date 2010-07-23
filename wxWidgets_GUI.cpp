@@ -148,6 +148,7 @@ public:
   wxBoxSizer* BoxSizer15HorizontalSlicingButtons;
   wxBoxSizer* BoxSizer16VerticalStatusString;
   wxBoxSizer* BoxSizer17HorizontalProverButtons;
+  wxBoxSizer* BoxSizer18LProhibiting;
  // wxRadioButton* RB1OneSlice;
  // wxRadioButton* RB2OneIncrement;
  // wxRadioButton* RB3FullChop;
@@ -171,7 +172,7 @@ public:
   ::wxComboBoxWheel* ListBox1WeylGroup;
   ::wxButton* Button1Go;
   ::wxButton* Button2Eval;
-  ::wxButton* Button3Custom;
+  ::wxButton* Button3LprohibitingGo;
   ::wxButton* Button4SaveReadable;
   ::wxButton* Button5SaveComputer;
   ::wxButton* Button6OneSlice;
@@ -186,7 +187,7 @@ public:
 	::wxButton* Button15ProverFixedKOpen;
 	::wxButton* Button16Custom2;
 	::wxButton* Button17Custom2PauseSaveResume;
-	::wxButton* Button18Custom2Load;
+	::wxButton* Button18LprohibitingPauseAndSave;
 	::wxButton* Button19CountNilradicals;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
@@ -209,10 +210,10 @@ public:
   void onListBox1Change(wxCommandEvent& ev);
   void onButton2Eval(wxCommandEvent& ev);
   void onButton1Go(wxCommandEvent& ev);
-  void onButton3Custom (wxCommandEvent& ev);
+  void onButton3LprohibitingGo (wxCommandEvent& ev);
   void onButton16Custom2 (wxCommandEvent& ev);
   void onButton17Custom2PauseSaveResume(wxCommandEvent& ev);
-  void onButton18Custom2Load(wxCommandEvent& ev);
+  void onButton18LprohibitingPauseAndSave(wxCommandEvent& ev);
   void onButton19CountNilradicals(wxCommandEvent& ev);
   void onButton6OneSlice (wxCommandEvent& ev);
   void onButton7SliceIncrement (wxCommandEvent& ev);
@@ -278,10 +279,10 @@ public:
     ID_ComputationUpdate,
     ID_CheckBox1,
     ID_CheckBoxesGraphics,
-    ID_Button3Custom,
+    ID_Button3LprohibitingGo,
     ID_Button16Custom2,
     ID_Button17Custom2PauseSaveResume,
-    ID_Button18Custom2Load,
+    ID_Button18LprohibitingPauseAndSave,
     ID_Button19CountNilradicals,
     ID_Paint,
   };
@@ -375,10 +376,10 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton1UsingCustom, guiMainWindow::onToggleButton1UsingCustom)
     EVT_BUTTON(guiMainWindow::ID_Buton2Eval, guiMainWindow::onButton2Eval)
     EVT_BUTTON(guiMainWindow::ID_Button1Go, guiMainWindow::onButton1Go)
-    EVT_BUTTON(guiMainWindow::ID_Button3Custom, guiMainWindow::onButton3Custom)
+    EVT_BUTTON(guiMainWindow::ID_Button3LprohibitingGo, guiMainWindow::onButton3LprohibitingGo)
     EVT_BUTTON(guiMainWindow::ID_Button16Custom2, guiMainWindow::onButton16Custom2)
     EVT_BUTTON(guiMainWindow::ID_Button17Custom2PauseSaveResume, guiMainWindow::onButton17Custom2PauseSaveResume)
-    EVT_BUTTON(guiMainWindow::ID_Button18Custom2Load, guiMainWindow::onButton18Custom2Load)
+    EVT_BUTTON(guiMainWindow::ID_Button18LprohibitingPauseAndSave, guiMainWindow::onButton18LprohibitingPauseAndSave)
     EVT_BUTTON(guiMainWindow::ID_Button19CountNilradicals, guiMainWindow::onButton19CountNilradicals)
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
@@ -517,16 +518,17 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->BoxSizer15HorizontalSlicingButtons= new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer16VerticalStatusString= new wxBoxSizer(wxVERTICAL);
   this->BoxSizer17HorizontalProverButtons=  new ::wxBoxSizer(wxHORIZONTAL);
+  this->BoxSizer18LProhibiting= new wxBoxSizer(wxHORIZONTAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
   this->Table3Values = new wxGridExtra( this,::wxID_ANY);
-  this->Label1ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Label2ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Label3ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Label4ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Label5ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Label9OutputVPF= new ::wxStaticText(this,wxID_ANY, wxT("Vector partition function LaTex format:"));
+  this->Label1ProgressReport = new ::wxStaticText(this, wxID_ANY,wxT(""));
+  this->Label2ProgressReport = new ::wxStaticText(this, wxID_ANY,wxT(""));
+  this->Label3ProgressReport = new ::wxStaticText(this, wxID_ANY,wxT(""));
+  this->Label4ProgressReport = new ::wxStaticText(this, wxID_ANY,wxT(""));
+  this->Label5ProgressReport = new ::wxStaticText(this, wxID_ANY,wxT(""));
+  this->Label9OutputVPF= new ::wxStaticText(this, wxID_ANY, wxT("Vector partition function LaTex format:"));
   this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
   this->Spin2NumVect= new wxSpinCtrl(this, this->ID_Spin2NumVect);
   this->CheckBox1ComputePFs= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Don't compute PF"));
@@ -546,19 +548,19 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   //this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
   //this->Label5ProgressReport = new ::wxStaticText(this,wxID_ANY,wxT(""));
-  this->Table1Input->CreateGrid( 0, 0 );
-  this->Table2Indicator->CreateGrid( 0, 0 );
-  this->Table3Values->CreateGrid(0,0);
+  this->Table1Input->CreateGrid(0, 0);
+  this->Table2Indicator->CreateGrid(0, 0);
+  this->Table3Values->CreateGrid(0, 0);
   this->theFont= new ::wxFont(10, wxDEFAULT, wxNORMAL,wxNORMAL);
-  this->ListBox1WeylGroup= new ::wxComboBoxWheel(this, this->ID_ListBox1, wxT("A3"), wxPoint(0,0),::wxDefaultSize, 0, 0, wxCB_DROPDOWN  );
+  this->ListBox1WeylGroup= new ::wxComboBoxWheel(this, this->ID_ListBox1, wxT("A3"), wxPoint(0, 0), wxDefaultSize, 0, 0, wxCB_DROPDOWN);
   this->Button2Eval= new ::wxButton(this, this->ID_Buton2Eval, wxT("Evaluate"));
   this->Button2Eval->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
   this->Button1Go= new ::wxButton(this, this->ID_Button1Go, wxT("Go"));
   this->Button1Go->SetSize(this->DefaultButtonWidth, this->DefaultButtonHeight);
-  this->Button3Custom= new wxButton(this, this->ID_Button3Custom, wxT("Experiments"));
+  this->Button3LprohibitingGo= new wxButton(this, this->ID_Button3LprohibitingGo, wxT("L prohibiting Go"));
   this->Button16Custom2= new wxButton(this, this->ID_Button16Custom2, wxT("Dyck path polytope load+go"));
   this->Button17Custom2PauseSaveResume= new wxButton(this, this->ID_Button17Custom2PauseSaveResume, wxT("Experiments 2 Pause+Save"));
-  this->Button18Custom2Load= new wxButton(this, this->ID_Button18Custom2Load, wxT("Empty"));
+  this->Button18LprohibitingPauseAndSave= new wxButton(this, this->ID_Button18LprohibitingPauseAndSave, wxT("L prohibiting pause+save"));
   this->Button19CountNilradicals= new wxButton(this, this->ID_Button19CountNilradicals, wxT("Count Nilradicals"));
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
@@ -566,13 +568,13 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 	//this->Button9CustomNilradical= new wxButton(this,this->ID_Button9CustomNilradical,wxT("Custom nilradical"));
   this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
   this->Text2Values= new ::wxTextCtrl(this,::wxID_ANY);
-  this->Dialog1OutputPF= new ::wxDialogOutput ( this,guiMainWindow::ID_Dialog1, wxT("Partial fractions"), ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
+  this->Dialog1OutputPF= new ::wxDialogOutput(this,guiMainWindow::ID_Dialog1, wxT("Partial fractions"), ::wxDefaultPosition, ::wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
   this->Dialog2StatusString1=  new ::wxDialogOutput( this, guiMainWindow::ID_Dialog2, wxT("Status"), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER| wxCAPTION);
-  this->Text3PartialFractions= new ::wxTextCtrl (	this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
-  this->Text4StatusString1 = new wxTextCtrl ( this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize, wxTE_MULTILINE);
+  this->Text3PartialFractions= new ::wxTextCtrl(this->Dialog1OutputPF,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize,wxTE_MULTILINE);
+  this->Text4StatusString1 = new wxTextCtrl(this->Dialog2StatusString1,::wxID_ANY,wxT(""), wxDefaultPosition, ::wxDefaultSize, wxTE_MULTILINE);
   this->ToggleButton2ViewCombinatorialChambers= new ::wxToggleButton(	this->Dialog1OutputPF,guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, wxT("Switch to chamber data"));
-  this->Button4SaveReadable = new ::wxButton (this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
-  this->Button5SaveComputer = new ::wxButton (this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
+  this->Button4SaveReadable = new ::wxButton(this->Dialog1OutputPF,this->ID_Button4SaveReadable,wxT("Save"));
+  this->Button5SaveComputer = new ::wxButton(this->Dialog1OutputPF,this->ID_Button5SaveComputer,wxT("Save computer format"));
 	this->Button10ProverOneStep = new ::wxButton(this->Dialog2StatusString1,this->ID_Button10ProverOneStep,wxT("Prover one step "));
 	this->Button11ProverFullComputation = new ::wxButton(this->Dialog2StatusString1,this->ID_Button11ProverFullComputation,wxT("Prover full go"));
 	this->Button12ProverOneStepFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button12ProverOneStepFixedK,wxT("Prover one step fixed K"));
@@ -593,10 +595,10 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->BoxSizer9HorizontalCombo1AndMainButton->Add(this->Button1Go);
   this->BoxSizer7VerticalListBox1->Add(this->Spin2NumVect);
   //this->BoxSizer7VerticalListBox1->Add(this->Spin2NumVect);
-  this->BoxSizer2VerticalInputs->Add(new wxStaticText(this,wxID_ANY,wxT("Chamber indicator")));
+  this->BoxSizer2VerticalInputs->Add(new wxStaticText(this,wxID_ANY, wxT("Chamber indicator")));
   this->BoxSizer2VerticalInputs->Add(this->Table2Indicator);//,0,wxEXPAND|wxALL);
   this->BoxSizer2VerticalInputs->Add(this->Table1Input);//,0,wxEXPAND|wxALL);
-  this->BoxSizer2VerticalInputs->Add(new wxStaticText(this,wxID_ANY,wxT("Evaluation")));
+  this->BoxSizer2VerticalInputs->Add(new wxStaticText(this,wxID_ANY, wxT("Evaluation")));
   this->BoxSizer2VerticalInputs->Add(this->BoxSizer8HorizontalEval);
   this->BoxSizer8HorizontalEval->Add(this->Table3Values);
   this->BoxSizer8HorizontalEval->Add(this->Button2Eval);
@@ -610,11 +612,12 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox2CheckSums);
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox3ComputeChambers);
 		this->BoxSizer11VerticalOptions->Add(this->CheckBox7UseIndicatorForPFDecomposition);
+		this->BoxSizer11VerticalOptions->Add(this->BoxSizer18LProhibiting);
+      this->BoxSizer18LProhibiting->Add(this->Button18LprohibitingPauseAndSave);
+      this->BoxSizer18LProhibiting->Add(this->Button3LprohibitingGo);
 		this->BoxSizer11VerticalOptions->Add(this->Button19CountNilradicals);
-		this->BoxSizer11VerticalOptions->Add(this->Button3Custom);
 		this->BoxSizer11VerticalOptions->Add(this->Button16Custom2);
 		this->BoxSizer11VerticalOptions->Add(this->Button17Custom2PauseSaveResume);
-		this->BoxSizer11VerticalOptions->Add(this->Button18Custom2Load);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
   this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
   this->BoxSizer12VerticalProgressReports->Add(this->Label2ProgressReport);
@@ -707,7 +710,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Canvas1->ClickToleranceY=10;
   this->WorkThread1.CriticalSectionPauseButtonEntered=false;
   this->WorkThread1.CriticalSectionWorkThreadEntered=false;
-  //this->Button3Custom->Disable();
+  //this->Button3LprohibitingGo->Disable();
   this->wxProgressReportEvent.SetId(this->GetId());
   this->wxProgressReportEvent.SetEventObject(this);
   this->wxProgressReportEvent.SetEventType(::wxEVT_ProgressReport);
@@ -878,16 +881,6 @@ void guiMainWindow::RunTheComputation()
   }
 }
 
-void guiMainWindow::onButton3Custom(wxCommandEvent& ev)
-{ this->theComputationSetup.flagDoCustomComputation=true;
-  this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
-  this->theComputationSetup.theRootSubalgebras.flagComputingLprohibitingWeights=true;
-  this->theComputationSetup.theRootSubalgebras.flagComputeConeCondition=true;
-  this->theComputationSetup.WeylGroupIndex=6;
-  this->theComputationSetup.WeylGroupLetter='E';
-  this->RunTheComputation();
-}
-
 void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
 { this->theComputationSetup.WeylGroupIndex=4;
   this->theComputationSetup.WeylGroupLetter='D';
@@ -917,13 +910,19 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
   this->theComputationSetup.theChambers.ResumeSlicing();
 }
 
-void guiMainWindow::onButton18Custom2Load(wxCommandEvent& ev)
+void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
+{ this->theComputationSetup.WeylGroupIndex=4;
+  this->theComputationSetup.WeylGroupLetter='D';
+  this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
+  this->RunTheComputation();
+}
+
+void guiMainWindow::onButton18LprohibitingPauseAndSave(wxCommandEvent& ev)
 {
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)
 { this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
-  this->theComputationSetup.flagDoCustomComputation=false;
   this->ReadVPVectorsAndOptions();
   this->RunTheComputation();
 }

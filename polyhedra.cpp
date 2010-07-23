@@ -1040,7 +1040,6 @@ ComputationSetup::ComputationSetup()
   this->flagCustomNilradicalInitted=false;
   this->flagDoCustomNilradical=false;
   this->flagOneSteChamberSliceInitialized=false;
-  this->flagDoCustomComputation=false;
   this->flagDoingWeylGroupAction=false;
   this->WeylGroupLetter='A';
   this->WeylGroupIndex=3;
@@ -1305,13 +1304,6 @@ void ComputationSetup::Run()
           this->theProverFixedK.MakeProgressReportCurrentState(*this->theProverFixedK.theIndexStack.LastObject(), *tgv, this->theProverFixedK.theWeylGroup);
       }
     }
-    this->ExitComputationSetup();
-    this->flagAllowRepaint=true;
-    this->flagComputationInProgress=false;
-    return;
-  }
-  if (this->flagDoCustomComputation)
-  { this->RunCustom();
     this->ExitComputationSetup();
     this->flagAllowRepaint=true;
     this->flagComputationInProgress=false;
@@ -5305,7 +5297,7 @@ bool Cone::SeparatesPoints(root& point1, root& point2)
   return !(tempB1==tempB2);
 }
 
-void Cone::operator=(Cone& right)
+void Cone::operator=(const Cone& right)
 { this->CopyFromBase(right);
   this->ChamberTestArray.CopyFromBase(right.ChamberTestArray);
 }
@@ -8950,8 +8942,6 @@ bool partFraction::reduceOnceGeneralMethod(partFractions& Accum, GlobalVariables
   //tempRoots.r
 }
 
-
-
 int partFraction::SizeWithoutDebugString()
 {  int Accum =0;
   Accum+=this->Coefficient.SizeWithoutObjects();
@@ -9006,17 +8996,6 @@ void partFraction::AssignNoIndicesNonZeroMults(partFraction& p)
   this->CoefficientNonExpanded.AssignPolyPartFractionNumeratorLight(p.CoefficientNonExpanded);
 }
 
-/*void partFraction::swap(int indexA, int indexB)
-{ for (int i=0; i<root::AmbientDimension; i++)
-  { int tempI = this->TheObjects[indexA].den[i];
-    this->TheObjects[indexA].den[i]= this->TheObjects[indexB].den[i];
-    this->TheObjects[indexB].den[i]= tempI;
-  }
-  int tempI= this->TheObjects[indexA].Mult;
-  this->TheObjects[indexA].Mult= this->TheObjects[indexB].Mult;
-  this->TheObjects[indexB].Mult= tempI;
-}*/
-
 int partFraction::ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { MatrixIntTightMemoryFit tempMat;
   return this->ElementToStringBasisChange(owner, tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
@@ -9028,7 +9007,6 @@ int partFraction::GetNumMonomialsInNumerator()
   else
     return this->CoefficientNonExpanded.size;
 }
-
 
 void partFraction::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Fraction_start: " << this->size << "\n";
@@ -9133,8 +9111,10 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
     tempP2.Substitution(tempSub, tempP, (short)VarChange.NumRows);
     NumLinesUsed+=tempP.StringPrintOutAppend(stringPoly, PolyFormatLocal);
   }
-  if (stringPoly=="1"){stringPoly=""; }
-  if (stringPoly=="-1"){stringPoly="-"; }
+  if (stringPoly=="1")
+    stringPoly="";
+  if (stringPoly=="-1")
+    stringPoly="-";
   if ((this->Coefficient.size>1 && this->UncoveringBrackets) || (this->CoefficientNonExpanded.size>1 && !this->UncoveringBrackets))
     out2<<"(";
   out2<<stringPoly;
@@ -9142,10 +9122,10 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
     out2<<")";
   stringPoly= out2.str();
 //  this->intRootToString(out, this->RootShift, false);
-  out<<" ";
+  out << " ";
   for (int i =0; i<this->size; i++)
   { this->TheObjects[i].ElementToStringBasisChange(owner, VarChange, UsingVarChange, tempS, LatexFormat, i, theDimension);
-    out<<tempS;
+    out << tempS;
   }
   if (includeVPsummand && LatexFormat)
   { std::string tempS2;
@@ -9157,10 +9137,10 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
     tempQP.StringPrintOutAppend(tempS2, PolyFormatLocal);
     PolyFormatLocal.MakeAlphabetxi();
     PolyFormatLocal.cutOffString=false;
-    out <<"\\\\\n&&[";
+    out << "\\\\\n&&[";
     NumLinesUsed++;
-    out <<tempS2;
-    out<<"]";
+    out << tempS2;
+    out << "]";
   }
   tempS= out.str();
   if (LatexFormat)
@@ -9667,7 +9647,7 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
 
 void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, PolyPartFractionNumerator& output, int theDimension)
 { MonomialInCommutativeAlgebra<Integer, ::GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> tempM;
-  assert (LengthOfGeometricSeries!=0);
+  assert(LengthOfGeometricSeries!=0);
   intRoot tempRoot;
   tempRoot= owner.RootsToIndices.TheObjects[index];
   tempRoot.MultiplyByInteger(baseElongation);
@@ -9682,7 +9662,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
   static partFractionPolynomials tempSplitPowerSeriesCoefficient;
   static partFractionPolynomials* SplitPowerSeriesCoefficient;
   if (partFraction::MakingConsistencyCheck)
-  {  partFraction::CheckSum.MakeZero();
+  { partFraction::CheckSum.MakeZero();
   }
   if (this->FileStoragePosition!=-1)
   { partFraction::TheBigDump.seekg(this->FileStoragePosition);
@@ -9781,7 +9761,8 @@ void partFraction::MakePolynomialFromOneNormal(root& normal, root& shiftRational
   static PolynomialRationalCoeff tempP;
   int theDimension= normal.size;
   output.MakeNVarConst((short)theDimension, LROne);
-  if (theMult==1) return;
+  if (theMult==1)
+    return;
   root::RootScalarEuclideanRoot(normal, shiftRational, tempRat);
   for (int j=0; j<theMult-1; j++)
   { tempP.MakeLinPolyFromRoot(normal);
@@ -9901,7 +9882,7 @@ int partFractions::SizeWithoutDebugString()
 }
 
 bool partFractions::AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator)
-{  roots tempRoots;
+{ roots tempRoots;
   tempRoots.AssignHashedIntRoots(this->RootsToIndices);
   if (theIndicator.IsEqualToZero())
   { tempRoots.Average(theIndicator, this->AmbientDimension);
@@ -13984,7 +13965,7 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(root& input, root& outputL
 { this->ComputeExtremeWeightInTheSameKMod(input, outputLW, false);
 }
 
-void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicals(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner)
 {  //this->ComputeAll();
   this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
   if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -14002,6 +13983,7 @@ void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVaria
     return;
   int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
   theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
+  owner.CountersNilradicalsGeneration.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
   if (useParabolicsInNilradical)
     for (int l=0; l<2; l++)
     { if (l==1 && !this->flagComputeConeCondition)
@@ -14025,14 +14007,18 @@ void rootSubalgebra::GeneratePossibleNilradicals(GlobalVariables& theGlobalVaria
         if (this->flagAnErrorHasOccuredTimeToPanic)
           tempSel.ComputeDebugString();
         //impliedSelections.TheObjects[0].ComputeDebugString();
-        this->GeneratePossibleNilradicalsRecursive(theGlobalVariables, this->theMultTable, this->CentralizerRoots.size, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
+        owner.RecursionDepthNilradicalsGeneration=0;
+        owner.CountersNilradicalsGeneration.TheObjects[0]=this->CentralizerRoots.size;
+        this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
         tempSel.incrementSelection();
       }
       this->flagFirstRoundCounting=false;
     }
   else
   { impliedSelections.TheObjects[0].init(this->kModules.size);
-    this->GeneratePossibleNilradicalsRecursive(theGlobalVariables, this->theMultTable, 0, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
+    owner.RecursionDepthNilradicalsGeneration=0;
+    owner.CountersNilradicalsGeneration.TheObjects[0]=0;
+    this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
   }
 }
 
@@ -14128,10 +14114,9 @@ bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
   return false;
 }
 
-void rootSubalgebra::GeneratePossibleNilradicalsRecursive(GlobalVariables& theGlobalVariables, multTableKmods& multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner)
-{ int RecursionDepth=0;
+void rootSubalgebra::GeneratePossibleNilradicalsRecursive(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner)
+{ int& RecursionDepth=owner.RecursionDepthNilradicalsGeneration;
   std::string tempSsel, tempSopposite;
-  ListBasicObjects<Selection> tempSels;
   if (this->flagAnErrorHasOccuredTimeToPanic)
   { multTable.ComputeDebugString(*this);
     std::stringstream out; out <<"\n\t";
@@ -14140,9 +14125,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive(GlobalVariables& theGl
     tempSopposite=out.str();
     multTable.DebugString.append(tempSopposite);
   }
-  ListBasicObjects<int> counters;
-  counters.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
-  counters.TheObjects[0]=StartIndex;
+  ListBasicObjects<int>& counters=owner.CountersNilradicalsGeneration;
   while (RecursionDepth>-1)
   { while(counters.TheObjects[RecursionDepth]<this->kModules.size)
     { if (!impliedSelections.TheObjects[RecursionDepth].selected[counters.TheObjects[RecursionDepth]])
@@ -14162,6 +14145,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive(GlobalVariables& theGl
     RecursionDepth--;
     if (RecursionDepth>-1)
       counters.TheObjects[RecursionDepth]++;
+    PauseMutex.SafePoint();
   }
 }
 
@@ -17357,17 +17341,17 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
   this->NumSubalgebrasCounted=0;
   for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
   { this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[i].GeneratePossibleNilradicals(theGlobalVariables, false, true, *this, i);
+    this->TheObjects[i].GeneratePossibleNilradicals(this->mutexLockMeToPauseLProhibitingComputations, theGlobalVariables, false, true, *this, i);
   }
 }
 
-void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed)
+void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
 { this->NumSubalgebrasProcessed=0;
   this->NumConeConditionFailures=0;
   this->NumSubalgebrasCounted=0;
-  for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
-  { this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[i].GeneratePossibleNilradicals(theGlobalVariables, true, false, *this, i);
+  for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
+  { this->TheObjects[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
+    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->mutexLockMeToPauseLProhibitingComputations, theGlobalVariables, true, false, *this, this->IndexCurrentSANilradicalsGeneration);
   }
 }
 
@@ -17439,7 +17423,8 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
 
 void rootSubalgebras::ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
-  out << "<a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+  if (useHtml)
+    out << "<a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
   out << tempS;
   //this->AmbientWeyl.ComputeRho(true);
@@ -17490,7 +17475,10 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
   out << tempS <<"\n\n";
   for (int i=1; i<this->size; i++)
   { if (col==0 && row==0)
-      out << header << "<td title=\"" << tooltipSAs << "\">";
+    { out << header;
+      if (useHtml)
+        out << "<td title=\"" << tooltipSAs << "\">";
+    }
     this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
     this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
     if (tempS=="") tempS="-";
@@ -17505,10 +17493,10 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       CGIspecificRoutines::clearDollarSigns(tempS2, tempS2);
       out << "k_{ss}: ";
       if (!useHtml)
-        out  << tempS;
+        out << tempS;
       else
       { this->pathToHtmlReference(i, tempS, htmlPathServer, tempS3);
-        out  << tempS3;
+        out << tempS3;
       }
     }
     if (useLatex)
@@ -17572,7 +17560,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
         out << " & ";
       if(useHtml)
         out << "</td>";
-      if (i!=this->size-1)
+      if (i!=this->size-1 && useHtml)
         out<<"<td title=\"" << tooltipSAs << "\">";
     }
     if (row==0 && col==0)
@@ -17589,8 +17577,8 @@ void coneRelations::GetLatexHeaderAndFooter(std::string& outputHeader, std::stri
   outputFooter.clear();
   outputHeader.append("\\begin{tabular}{rcl p{1cm}p{1cm}p{3cm} } \\multicolumn{3}{c}");
   outputHeader.append("{ Relation / linked $\\mathfrak{k}$-components}");
-  outputHeader.append(" & relation lives in & rel and $\\mathfrak{k}$ live in& non-zero $\\langle, \\rangle$ ");
-  outputHeader.append("products (LHS/RHS only)\\\\");
+  outputHeader.append(" & Participating roots generate & adding $\\mathfrak{k}$ generates& non-zero $\\langle, \\rangle$ ");
+  outputHeader.append("Non-zero scalar products\\\\");
   outputFooter.append("\\end{tabular}");
 }
 
@@ -18138,24 +18126,24 @@ void SemisimpleLieAlgebra::GetAdNilpotentElement(MatrixLargeRational& output, El
   }
   int NumRoots= this->theWeyl.RootSystem.size;
   for (int i=0; i<NumRoots; i++)
-   for (int j=0; j<e.NonZeroElements.CardinalitySelection; j++)
-   { int indexE = e.NonZeroElements.elements[j];
-     root& rootE = this->theWeyl.RootSystem.TheObjects[indexE];
-     root& rootF= this->theWeyl.RootSystem.TheObjects[i];
-     root relation = rootE+rootF;
-     if (!relation.IsEqualToZero())
-     { int indexRel = this->theWeyl.RootSystem.IndexOfObjectHash(relation);
-       if (indexRel!=-1)
-         output.elements[indexRel][i].Assign(  e.coeffsRootSpaces.TheObjects[indexE]*this->ChevalleyConstants.elements[indexE][i]);
-     } else
-     {  //if (h!=0)
-      for (int k=0; k<theDimension; k++)
-        output.elements[NumRoots+k][i].Assign(e.coeffsRootSpaces.TheObjects[indexE]*rootE.TheObjects[k]*2/this->theWeyl.RootScalarKillingFormMatrixRoot(rootE, rootE));
-     }
-     for(int j=0; j<theDimension; j++)
-     { output.elements[indexE][j+NumRoots].Assign( this->theWeyl.RootScalarKillingFormMatrixRoot(theBasis.TheObjects[j], rootE)*e.coeffsRootSpaces.TheObjects[indexE]*(-1));
-     }
-   }
+    for (int j=0; j<e.NonZeroElements.CardinalitySelection; j++)
+    { int indexE = e.NonZeroElements.elements[j];
+      root& rootE = this->theWeyl.RootSystem.TheObjects[indexE];
+      root& rootF= this->theWeyl.RootSystem.TheObjects[i];
+      root relation = rootE+rootF;
+      if (!relation.IsEqualToZero())
+      { int indexRel = this->theWeyl.RootSystem.IndexOfObjectHash(relation);
+        if (indexRel!=-1)
+          output.elements[indexRel][i].Assign(  e.coeffsRootSpaces.TheObjects[indexE]*this->ChevalleyConstants.elements[indexE][i]);
+      } else
+      {  //if (h!=0)
+        for (int k=0; k<theDimension; k++)
+          output.elements[NumRoots+k][i].Assign(e.coeffsRootSpaces.TheObjects[indexE]*rootE.TheObjects[k]*2/this->theWeyl.RootScalarKillingFormMatrixRoot(rootE, rootE));
+      }
+      for(int j=0; j<theDimension; j++)
+      { output.elements[indexE][j+NumRoots].Assign(this->theWeyl.RootScalarKillingFormMatrixRoot(theBasis.TheObjects[j], rootE)*e.coeffsRootSpaces.TheObjects[indexE]*(-1));
+      }
+    }
 }
 
 void ElementSimpleLieAlgebra::MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber)
@@ -18321,43 +18309,43 @@ void SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bo
         outTable << "$"<<tempS<< "h_{\\alpha_{" <<i+1<<"}}$";
       }
       if (useLatex && j!=this->ChevalleyConstants.NumCols-1)
-        outTable<<" & ";
+        outTable << " & ";
       else
         if(!useLatex)
           outTable<<"\t";
     }
     if (useLatex)
-      outTable<<"\\\\";
-    outTable <<"\n";
+      outTable << "\\\\";
+    outTable << "\n";
   }
   if (useLatex)
-    outTable <<"\\end{tabular}";
+    outTable << "\\end{tabular}";
   //this->ChevalleyConstants.ElementToString(tempS);
   //out <<"\n"<< tempS<<"\n";
   if (usePNG)
   { std::stringstream out2;
-    out2<< "<BODY><HTML></BODY>";
+    out2 << "<BODY><HTML></BODY>";
     ///////////////////////////
     tempS=outNotation.str();
     outputLatexToPNGstrings->AddObjectOnTop(tempS);
     tempS=*physicalPath;
     tempS.append("notation.tex");
     outputPNGFileNames->AddObjectOnTop(tempS);
-    out2<<"<img src=\""<<(*htmlServerPath)<<"notation.png\">\n<br>\n";
+    out2 << "<img src=\"" << (*htmlServerPath) << "notation.png\">\n<br>\n";
     ///////////////////////////
     tempS= outTable.str();
     outputLatexToPNGstrings->AddObjectOnTop(tempS);
     tempS=*physicalPath;
     tempS.append("StructureConstants_latex.tex");
     outputPNGFileNames->AddObjectOnTop(tempS);
-    out2<<"<img src=\""<<(*htmlServerPath)<<"StructureConstants_latex.png\">";
+    out2 << "<img src=\"" << (*htmlServerPath) << "StructureConstants_latex.png\">";
     ///////////////////////////
-    out2<<"</BODY></HTML>";
+    out2 << "</BODY></HTML>";
     output=out2.str();
   }
   else
   { tempS=outTable.str();
-    outNotation<< tempS;
+    outNotation << tempS;
     output=outNotation.str();
   }
 }
@@ -18366,8 +18354,8 @@ void SemisimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int fo
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out2, out3;
-  out2<< "found "<<found<< " out of "<<progress+1<<" processed out of total " << outOf<<" candidates";
-  out3<< foundGood<<" good subalgebras realizing " <<DifferentHs <<" different h's";
+  out2 << "found " << found << " out of " << progress+1 << " processed out of total " << outOf<<" candidates";
+  out3 << foundGood << " good subalgebras realizing " << DifferentHs << " different h's";
   theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
   theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
@@ -18379,7 +18367,7 @@ void SemisimpleLieAlgebra::MakeSl2ProgressReportNumCycles(  int progress, int ou
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out4;
-  out4<< "Searching fixed characteristic: " << progress<<" out of "<< outOf;
+  out4 << "Searching fixed characteristic: " << progress << " out of " << outOf;
   theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
   theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -18390,8 +18378,8 @@ void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Tota
     return;
   std::stringstream out2, out3;
   int x=(i*Total*Total+j*Total+k+1);
-  out2<< "i: "<<i+1<<" of "<< Total << " j: "<<j+1<<" of "<< Total << " k: "<<k+1<<" of "<< Total;
-  out3<< "Total progress: " << x<<" out of "<< (Total*Total*Total);
+  out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of " << Total << " k: " << k+1 << " of " << Total;
+  out3 << "Total progress: " << x << " out of " << (Total*Total*Total);
   theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
   //if (x%100==0)
@@ -18415,7 +18403,6 @@ int ::minimalRelationsProverStates::ProblemCounter=0;
 bool StopDebug()
 { return true;
 }
-
 
 bool minimalRelationsProverState::SumWithNoPosRootIsARoot(root& input, WeylGroup& theWeyl)
 { root tempRoot;
@@ -18471,8 +18458,8 @@ bool minimalRelationsProverState::Root1IsGreaterThanRoot2  (  int index1, int in
   root& root2=setWeBelongTo.TheObjects[index2];
   bool IsLong1, IsLong2;
   int NumLongValue1, NumMixedValue1, NumShortValue1,  NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1, NumLongValue2, NumMixedValue2, NumShortValue2,  NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2;
-  minimalRelationsProverState::GetNumberScalarProductsData(  root1, setWeBelongTo, IsLong1, NumLongValue1, NumMixedValue1, NumShortValue1, NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1, theGlobalVariables, theWeyl);
-  minimalRelationsProverState::GetNumberScalarProductsData(  root2, setWeBelongTo, IsLong2, NumLongValue2, NumMixedValue2, NumShortValue2,    NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2, theGlobalVariables, theWeyl);
+  minimalRelationsProverState::GetNumberScalarProductsData(root1, setWeBelongTo, IsLong1, NumLongValue1, NumMixedValue1, NumShortValue1, NumMinusLongValue1, NumMinusMixedValue1, NumMinusShortValue1, theGlobalVariables, theWeyl);
+  minimalRelationsProverState::GetNumberScalarProductsData(root2, setWeBelongTo, IsLong2, NumLongValue2, NumMixedValue2, NumShortValue2, NumMinusLongValue2, NumMinusMixedValue2, NumMinusShortValue2, theGlobalVariables, theWeyl);
   if (IsLong1> IsLong2) return true;
   if (IsLong1< IsLong2) return false;
   if (NumLongValue1>NumLongValue2) return true;
@@ -18529,7 +18516,7 @@ void minimalRelationsProverState::GetNumberScalarProductsData(root& input, roots
     }
 }
 
-bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots  (WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
+bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 {  root tempRoot;
   //this->nonBKSingularGmodLRoots.ComputeDebugString();
   //this->ComputeDebugString(theWeyl, theGlobalVariables);
@@ -18567,7 +18554,7 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots  (WeylGroup& the
   return true;
 }
 
-bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelationsProverStates& owner, GlobalVariables& theGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
+bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelationsProverStates& owner, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsInternallyPossible=true;
   this->InternalStateIsComputed=true;
 //  this->StateIsDubious=false;
@@ -18618,7 +18605,7 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelati
   return true;
 }
 
-bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( GlobalVariables& theGlobalVariables,  WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
+bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool AssumeGlobalMinimalityRHS)
 { this->StateIsPossible=true;
 //  this->StateIsDubious=false;
   for (int i=0; i<this->PartialRelation.Betas.size; i++)
@@ -18671,9 +18658,9 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious( Global
   return true;
 }
 
-void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables &theGlobalVariables)
+void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables)
 { std::stringstream out5;
-  out5<<checked+1 << " checked out of " << outOf;
+  out5 << checked+1 << " checked out of " << outOf;
   theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
   //::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
   //::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
@@ -18686,7 +18673,7 @@ void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, 
 
 void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables)
 { std::stringstream out5;
-  out5<<checked+1 << " checked out of " << outOf;
+  out5 << checked+1 << " checked out of " << outOf;
   theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
   //::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
   //::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
@@ -19785,56 +19772,6 @@ void minimalRelationsProverStates::GenerateStartingState(ComputationSetup& theSe
   this->theIndexStack.AddObjectOnTop(0);
   this->MakeProgressReportCurrentState(0, theGlobalVariables, this->theWeylGroup);
   this->ComputeLastStackIndex(this->theWeylGroup, theGlobalVariables);
-}
-
-void ComputationSetup::RunCustom()
-{ this->DoTheRootSAComputationCustom();
-//    this->theRootSubalgebras.ComputeDebugString(true);
-  this->theOutput.DebugString.append(  "\\documentclass{article}\n\\usepackage{amssymb}\n");
-  this->theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
-  this->theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
-  this->theOutput.DebugString.append("\\begin{document}~");
-  this->theRootSubalgebras.theBadRelations.ComputeDebugString(this->theRootSubalgebras, *this->theGlobalVariablesContainer->Default());
-  this->theRootSubalgebras.theGoodRelations.ComputeDebugString(this->theRootSubalgebras, *this->theGlobalVariablesContainer->Default());
-  //this->theRootSubalgebras.theMinRels.ComputeDebugString
-  //  (this->theRootSubalgebras, *this->theGlobalVariablesContainer->Default());
-  this->theOutput.DebugString.append(this->theRootSubalgebras.DebugString);
-  this->theOutput.DebugString.append("\n\n\n");
-  if (this->theRootSubalgebras.theGoodRelations.size!=0)
-    this->theOutput.DebugString.append(this->theRootSubalgebras.theGoodRelations.DebugString);
-  this->theOutput.DebugString.append("\n\n\n");
-  if (this->theRootSubalgebras.theBadRelations.size>0)
-  { this->theOutput.DebugString.append("The bad relations: \n\n");
-    this->theOutput.DebugString.append(this->theRootSubalgebras.theBadRelations.DebugString);
-  }
-  if (this->theRootSubalgebras.flagLookingForMinimalRels)
-  { this->theOutput.DebugString.append("\n\nMinimal relations: \n\n");
-    this->theOutput.DebugString.append(this->theRootSubalgebras.theMinRels.DebugString);
-  }
-  this->theOutput.DebugString.append("\\end{document}");
-  this->theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1= this->theOutput.DebugString;
-  this->theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1NeedsRefresh=true;
-  this->theGlobalVariablesContainer->Default()->FeedIndicatorWindow(this->theGlobalVariablesContainer->Default()->theIndicatorVariables);
-}
-
-void ComputationSetup::DoTheRootSAComputationCustom()
-{ rootSubalgebra tempSA;
-  this->theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
-  this->theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
-  this->theRootSubalgebras.flagLookingForMinimalRels=true;
-  this->theRootSubalgebras.theGoodRelations.flagIncludeCoordinateRepresentation=true;
-  this->theRootSubalgebras.theBadRelations.flagIncludeCoordinateRepresentation=true;
-  this->theRootSubalgebras.theMinRels.flagIncludeCoordinateRepresentation=true;
-  this->theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
-  this->theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
-  this->theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(*this->theGlobalVariablesContainer->Default(), this->WeylGroupLetter, this->WeylGroupIndex, true, true);
-  this->theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, *this->theGlobalVariablesContainer->Default());
-  if (this->theRootSubalgebras.flagComputeConeCondition)
-    this->theRootSubalgebras.ComputeLProhibitingRelations(*this->theGlobalVariablesContainer->Default(), 0, this->theRootSubalgebras.size-1);
-  std::string tempS;
-  this->theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, this->theRootSubalgebras.size-1, *this->theGlobalVariablesContainer->Default());
-  this->theRootSubalgebras.DebugString.append(tempS);
-//    (*this->theGlobalVariablesContainer->Default(), 0, this->theRootSubalgebras.size-1);
 }
 
 void WeylGroup::GenerateRootSubsystem(roots& theRoots)

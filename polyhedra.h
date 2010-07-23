@@ -145,6 +145,7 @@ private:
   bool locked;
 #endif
 public:
+  bool IsRunning;
   void LockMe()
   {
 #ifndef WIN32
@@ -163,12 +164,19 @@ public:
     this->locked=false;
 #endif
   };
+  inline void SafePoint()
+  { this->IsRunning=false;
+    this->LockMe();
+    this->IsRunning=true;
+    this->UnlockMe();
+  };
   MutexWrapper()
   {
 #ifndef WIN32
     pthread_mutex_init(&this->theMutex, NULL);
 #else
     this->locked=false;
+    this->IsRunning=true;
 #endif
   };
   ~MutexWrapper()
@@ -2044,7 +2052,7 @@ inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output
   int Upper=MathRoutines::Minimum(NumElementsToPrint, this->size);
   for (int i=0; i<Upper; i++)
   {  this->TheObjects[i].ElementToString(tempS);
-    out<< tempS<< "\n";
+    out << tempS<< "\n";
   }
   output= out.str();
 }
@@ -2082,7 +2090,7 @@ void ListBasicObjects<Object>::PopLastObject()
 
 template <class Object>
 ListBasicObjects<Object>::ListBasicObjects()
-{  this->ActualSize=0;
+{ this->ActualSize=0;
   this->IndexOfVirtualZero=0;
   this->size=0;
   this->TheObjects=0;
@@ -2166,7 +2174,7 @@ void ListBasicObjects<Object>::ReverseOrderElements()
 
 template <class Object>
 void ListBasicObjects<Object>::AddObjectOnBottom(const Object& o)
-{  if (this->IndexOfVirtualZero==0)
+{ if (this->IndexOfVirtualZero==0)
     this->ExpandArrayOnBottom(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
   this->IndexOfVirtualZero--;
   this->TheObjects--;
@@ -2217,7 +2225,7 @@ void HashedListBasicObjects<Object>::CopyFromHash(const HashedListBasicObjects<O
   this->::ListBasicObjects<Object>::CopyFromBase(From);
   if (this->size<this->HashSize)
     for (int i=0; i<this->size; i++)
-    {  int hashIndex= this->TheObjects[i].HashFunction()% this->HashSize;
+    { int hashIndex= this->TheObjects[i].HashFunction()% this->HashSize;
       if (hashIndex<0){hashIndex+=this->HashSize; }
       this->TheHashedArrays[hashIndex].
         CopyFromBase(From.TheHashedArrays[hashIndex]);
@@ -2319,7 +2327,7 @@ ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
 
 template <class Object>
 HashedListBasicObjects<Object>::HashedListBasicObjects()
-{  this->HashSize=0;
+{ this->HashSize=0;
   this->TheHashedArrays=0;
   this->SetHashSize(HashedListBasicObjects<Object>::PreferredHashSize);
   this->initHash();
@@ -2327,7 +2335,7 @@ HashedListBasicObjects<Object>::HashedListBasicObjects()
 
 template <class Object>
 HashedListBasicObjects<Object>::~HashedListBasicObjects()
-{  delete [] this->TheHashedArrays;
+{ delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->HashSize;
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
@@ -2377,7 +2385,7 @@ ParallelComputing::GlobalPointerCounter+=d;
 
 template<class Object>
 void ListObjectPointers<Object>::KillElementIndex(int i)
-{  delete this->TheObjects[i];
+{ delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
@@ -2388,7 +2396,7 @@ ParallelComputing::GlobalPointerCounter--;
 
 template<class Object>
 int ListObjectPointers<Object>::ObjectPointerToIndex(Object* o)
-{  for (int i=0; i<this->size; i++)
+{ for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]==o)
       return i;
   return -1;
@@ -2396,7 +2404,8 @@ int ListObjectPointers<Object>::ObjectPointerToIndex(Object* o)
 
 template<class Object>
 void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
-{  if (increase<=0){return; }
+{ if (increase<=0)
+    return;
   int oldsize= this->size;
   this->SetSizeExpandOnTopNoObjectInit(this->size+increase);
   for (int i=oldsize; i<this->size; i++)
@@ -2409,8 +2418,8 @@ ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
 
 template<class Object>
 void ListObjectPointers<Object>::KillAllElements()
-{  for (int i =0; i<this->size; i++)
-  {  delete this->TheObjects[i];
+{ for (int i =0; i<this->size; i++)
+  { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
     if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
     if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
@@ -2423,7 +2432,7 @@ void ListObjectPointers<Object>::KillAllElements()
 template<class Object>
 bool ListObjectPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
 { if (this->ContainsObject(o)==-1)
-  {  this->AddObjectOnTop(o);
+  { this->AddObjectOnTop(o);
     return true;
   }
   return false;
@@ -2496,9 +2505,8 @@ public:
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 //  int HashFunction() const;
   ListBasicObjects<int> ChamberTestArray;
-  void operator =(Cone& right);
+  void operator=(const Cone& right);
 };
-
 
 class simplicialCones : public ListBasicObjects<Cone>
 {
@@ -5436,7 +5444,6 @@ public:
   void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
   void ComputeCentralizerFromKModulesAndSortKModules();
   void MatrixToRelation(coneRelation& output, MatrixLargeRational& matA, MatrixLargeRational& matX, int theDimension, roots& NilradicalRoots);
-  void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
   void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
   void MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
   void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
@@ -5447,7 +5454,8 @@ public:
   bool IsAnIsomorphism(roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
 //  void GeneratePossibleNilradicals(GlobalVariables& theGlobalVariables);
   bool ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicObjects<int>& tempList, Selection& tempSel);
-  void GeneratePossibleNilradicalsRecursive(GlobalVariables& theGlobalVariables, multTableKmods& multTable, int StartIndex, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicalsRecursive(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicals(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
   void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
@@ -5493,6 +5501,12 @@ public:
   ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
   //ListBasicObjects< ListBasicObjects <int> > OrbitsUnderNormalizerCentralizerNilradical;
   ListBasicObjects<int> numNilradicalsBySA;
+  int IndexCurrentSANilradicalsGeneration;
+  int NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
+  ListBasicObjects<int> CountersNilradicalsGeneration;
+  int RecursionDepthNilradicalsGeneration;
+  ListBasicObjects<Selection> ImpiedSelectionsNilradical;
+  MutexWrapper mutexLockMeToPauseLProhibitingComputations;
   int NumSubalgebrasProcessed;
   int NumConeConditionFailures;
   int NumSubalgebrasCounted;
@@ -5504,6 +5518,7 @@ public:
   bool flagComputingLprohibitingWeights;
   bool flagUseDynkinClassificationForIsomorphismComputation;
   bool flagUsingActionsNormalizerCentralizerNilradical;
+  bool flagNilradicalComputationInitialized;
   bool flagCountingNilradicalsOnlyNoComputation;
 //  bool flagUsingONLYActionsNormalizerCentralizerNilradical;
   bool flagComputeConeCondition;
@@ -5531,7 +5546,7 @@ public:
   void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
-  void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
+  void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
   void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
   void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
   { this->ElementToString(this->DebugString, 0, useLatex, useHtml, includeKEpsCoords, htmlPathPhysical, htmlPathServer, theGlobalVariables);
@@ -5539,7 +5554,8 @@ public:
   void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
   void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   rootSubalgebras()
-  { this->flagUseDynkinClassificationForIsomorphismComputation=true;
+  { this->flagNilradicalComputationInitialized=false;
+    this->flagUseDynkinClassificationForIsomorphismComputation=true;
     this->flagCountingNilradicalsOnlyNoComputation = false;
     this->flagComputingLprohibitingWeights=false;
     this->flagComputeConeCondition=false;
@@ -6474,7 +6490,6 @@ public:
   bool flagUsingProverDoNotCallOthers;
   bool flagProverDoingFullRecursion;
   bool flagAllowRepaint;
-  bool flagDoCustomComputation;
   bool flagComputationInitialized;
   bool flagComputationDone;
   bool flagOneStepOnly;
@@ -6512,7 +6527,6 @@ public:
   void AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariables& theDV);
   void EvaluatePoly();
   void Run();
-  void RunCustom();
   int getNextEqualityIndex(std::string& input, int index);
   bool IsAnInteger(char a);
   int GetDigitFromChar(char a);
@@ -6530,7 +6544,7 @@ public:
   void WriteToFilePFdecomposition(std::fstream& output, bool includeLatexHeaderAndFooter);
   void Reset();
   void DoTheRootSAComputation();
-  void DoTheRootSAComputationCustom();
+  static void LProhibitingWeightsComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ComputeReductiveSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ComputeRootSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);

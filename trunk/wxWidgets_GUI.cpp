@@ -918,7 +918,13 @@ void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton18LprohibitingPauseAndSave(wxCommandEvent& ev)
-{
+{ this->theComputationSetup.theRootSubalgebras.mutexLockMeToPauseLProhibitingComputations.LockMe();
+  while (this->theComputationSetup.theRootSubalgebras.mutexLockMeToPauseLProhibitingComputations.IsRunning)
+  {}
+  this->theComputationSetup.theRootSubalgebras.WriteToDefaultFileNilradicalGeneration(*this->theComputationSetup.theGlobalVariablesContainer->Default());
+  int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
+  if (tempI==wxOK)
+    this->theComputationSetup.theRootSubalgebras.mutexLockMeToPauseLProhibitingComputations.UnlockMe();
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)

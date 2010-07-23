@@ -2820,7 +2820,7 @@ inline void roots::AddRoot(root &r)
 { this->AddObjectOnTop(r);
 }
 
-void roots::WriteToFile(std::fstream &output, GlobalVariables& theGlobalVariables)
+void roots::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { int theDimension=0;
   if (this->size>0)
     theDimension= this->TheObjects[0].size;
@@ -13965,63 +13965,6 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(root& input, root& outputL
 { this->ComputeExtremeWeightInTheSameKMod(input, outputLW, false);
 }
 
-void rootSubalgebra::GeneratePossibleNilradicals(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner)
-{  //this->ComputeAll();
-  this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
-  if (this->flagAnErrorHasOccuredTimeToPanic)
-    this->theMultTable.ComputeDebugString(*this);
-  ListBasicObjects<Selection> impliedSelections;
-  impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
-  Selection tempSel;
-  tempSel.init(this->SimpleBasisCentralizerRoots.size);
-  if (this->flagAnErrorHasOccuredTimeToPanic)
-    this->ComputeDebugString(theGlobalVariables);
-  this->flagFirstRoundCounting=true;
-  this->NumTotalSubalgebras=0;
-  owner.GenerateActionKintersectBIsos(*this, theGlobalVariables);
-  if (ComputeGroupsOnly)
-    return;
-  int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
-  theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
-  owner.CountersNilradicalsGeneration.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
-  if (useParabolicsInNilradical)
-    for (int l=0; l<2; l++)
-    { if (l==1 && !this->flagComputeConeCondition)
-        break;
-      this->NumNilradicalsAllowed=0;
-      this->NumConeConditionFailures=0;
-      this->NumRelationsWithStronglyPerpendicularDecomposition=0;
-      for (int i=0; i<numCycles; i++)
-      { roots tempRootsTest; tempRootsTest.size=0;
-        impliedSelections.TheObjects[0].init(this->kModules.size);
-        for (int j=0; j<this->CentralizerRoots.size; j++)
-          if (this->rootIsInNilradicalParabolicCentralizer(tempSel, this->CentralizerRoots.TheObjects[j]))
-            impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
-        if (owner.flagUsingActionsNormalizerCentralizerNilradical)
-          owner.RaiseSelectionUntilApproval(impliedSelections.TheObjects[0], theGlobalVariables);
-        std::string tempS; std::stringstream out;
-        for (int s=0; s<impliedSelections.TheObjects[0].CardinalitySelection; s++)
-          tempRootsTest.AddObjectOnTop(this->kModules.TheObjects[impliedSelections.TheObjects[0].elements[s]].TheObjects[0]);
-        tempS=out.str();
-        assert(this->RootsDefineASubalgebra(tempRootsTest));
-        if (this->flagAnErrorHasOccuredTimeToPanic)
-          tempSel.ComputeDebugString();
-        //impliedSelections.TheObjects[0].ComputeDebugString();
-        owner.RecursionDepthNilradicalsGeneration=0;
-        owner.CountersNilradicalsGeneration.TheObjects[0]=this->CentralizerRoots.size;
-        this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
-        tempSel.incrementSelection();
-      }
-      this->flagFirstRoundCounting=false;
-    }
-  else
-  { impliedSelections.TheObjects[0].init(this->kModules.size);
-    owner.RecursionDepthNilradicalsGeneration=0;
-    owner.CountersNilradicalsGeneration.TheObjects[0]=0;
-    this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
-  }
-}
-
 bool rootSubalgebra::RootsDefineASubalgebra(roots& theRoots)
 { root tempRoot;
   for (int i=0; i<theRoots.size; i++)
@@ -16881,11 +16824,16 @@ rootSubalgebra::rootSubalgebra()
   this->NumGmodKtableRowsAllowedLatex=35;
   this->flagMakingProgressReport=true;
   this->flagComputeConeCondition=true;
+  this->initForNilradicalGeneration();
 }
 
-/*void SelectionList::ElementToString(std::string &output)
-{ for ()
-}*/
+void rootSubalgebra::initForNilradicalGeneration()
+{ this->NumNilradicalsAllowed=0;
+  this->NumConeConditionFailures=0;
+  this->NumRelationsWithStronglyPerpendicularDecomposition=0;
+  this->flagFirstRoundCounting=true;
+}
+
 void rootsWithMultiplicitiesContainer::ElementToString(std::string &output)
 { std::stringstream out;
   std::string tempS;
@@ -16918,7 +16866,7 @@ void rootsWithMultiplicity::ElementToString(std::string &output)
   output=out.str();
 }
 
-void coneRelation::RelationOneSideToStringCoordForm(std::string& output,  ListBasicObjects<Rational>& coeffs,  roots& theRoots, bool EpsilonForm)
+void coneRelation::RelationOneSideToStringCoordForm(std::string& output, ListBasicObjects<Rational>& coeffs, roots& theRoots, bool EpsilonForm)
 { std::stringstream out;
   std::string tempS;
   for (int i=0; i<theRoots.size; i++)
@@ -17341,18 +17289,27 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
   this->NumSubalgebrasCounted=0;
   for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
   { this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[i].GeneratePossibleNilradicals(this->mutexLockMeToPauseLProhibitingComputations, theGlobalVariables, false, true, *this, i);
+    this->TheObjects[i].GeneratePossibleNilradicals
+      ( this->mutexLockMeToPauseLProhibitingComputations,
+        this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration,
+        theGlobalVariables, false, true, *this, i);
+    if (i!=NumToBeProcessed+StartingIndex-1)
+      this->TheObjects[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, ParabolicsSelectionNilradicalGeneration, parabolicsCounterNilradicalGeneration);
   }
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
-{ this->NumSubalgebrasProcessed=0;
-  this->NumConeConditionFailures=0;
-  this->NumSubalgebrasCounted=0;
+{ this->mutexLockMeToPauseLProhibitingComputations.IsRunning=true;
   for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
   { this->TheObjects[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->mutexLockMeToPauseLProhibitingComputations, theGlobalVariables, true, false, *this, this->IndexCurrentSANilradicalsGeneration);
+    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals
+      ( this->mutexLockMeToPauseLProhibitingComputations,
+        this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration,
+        theGlobalVariables, true, false, *this, this->IndexCurrentSANilradicalsGeneration);
+    if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration-1)
+      this->TheObjects[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration);
   }
+  this->mutexLockMeToPauseLProhibitingComputations.IsRunning=false;
 }
 
 void rootSubalgebras::SortDescendingOrderBySSRank()
@@ -17577,7 +17534,7 @@ void coneRelations::GetLatexHeaderAndFooter(std::string& outputHeader, std::stri
   outputFooter.clear();
   outputHeader.append("\\begin{tabular}{rcl p{1cm}p{1cm}p{3cm} } \\multicolumn{3}{c}");
   outputHeader.append("{ Relation / linked $\\mathfrak{k}$-components}");
-  outputHeader.append(" & Participating roots generate & adding $\\mathfrak{k}$ generates& non-zero $\\langle, \\rangle$ ");
+  outputHeader.append(" & Participating roots generate & adding $\\mathfrak{k}$ generates&");
   outputHeader.append("Non-zero scalar products\\\\");
   outputFooter.append("\\end{tabular}");
 }

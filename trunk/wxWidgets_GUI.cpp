@@ -44,7 +44,6 @@
 //#include "to_be_merged_in_main.cpp"
 extern void main_test_function(std::string& output, GlobalVariables& theGlobalVariables);
 
-
 class guiMainWindow;
 class wxDialogOutput;
 class guiApp : public wxApp
@@ -336,9 +335,8 @@ void drawtext(double X1, double Y1, const char* text, int length, int color, int
 
 std::string MainWindow1GlobalPath;
 
-
 bool guiApp::OnInit()
-{	char directoryCharacter;
+{ char directoryCharacter;
 #ifdef WIN32
   char path[500];
   ::GetModuleFileName(NULL,path,499);
@@ -408,8 +406,8 @@ public:
     DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE( wxDialogOutput, wxDialog )
-    EVT_TOGGLEBUTTON(	guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, wxDialogOutput::onToggleButton2ViewCombinatorialChambers)
+BEGIN_EVENT_TABLE(wxDialogOutput, wxDialog )
+    EVT_TOGGLEBUTTON(guiMainWindow::ID_ToggleButton2ViewCombinatorialChambers, wxDialogOutput::onToggleButton2ViewCombinatorialChambers)
     EVT_BUTTON(guiMainWindow::ID_Button4SaveReadable, wxDialogOutput::onButton4SaveReadable)
     EVT_BUTTON(guiMainWindow::ID_Button5SaveComputer, wxDialogOutput::onButton5SaveComputer)
     EVT_BUTTON(guiMainWindow::ID_Button10ProverOneStep, guiMainWindow::onButton10ProverOneStep)
@@ -423,7 +421,6 @@ END_EVENT_TABLE()
 wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title, const wxPoint & position, const wxSize & size, long style ) : wxDialog( parent, id, title, position, size, style)
 {
 }
-
 
 #ifdef WIN32
 void RunComputationalThread()
@@ -496,7 +493,7 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output);
 
 guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainWindow, wxT("Vector partition function v0.101 (eating RAM for breakfast)"), wxPoint(100,100), wxSize(800,600), wxRESIZE_BORDER| wxCAPTION | wxSYSTEM_MENU| wxCLOSE_BOX | wxMINIMIZE_BOX)
-{	//this->theComputationSetup.flagDoCustomComputation=true;
+{ //this->theComputationSetup.flagDoCustomComputation=true;
   this->theComputationSetup.flagHavingNotationExplanation=false;
   this->theComputationSetup.flagComputingVectorPartitions=true;
   this->theComputationSetup.flagHavingStartingExpression=true;
@@ -738,15 +735,15 @@ void drawCanvas::onSizing(wxSizeEvent& ev)
 		return;
 	if (MainWindow1->Table1Input->GetNumberRows()>20)
   { MainWindow1->Table1Input->SetAutoLayout(false);
-    MainWindow1->Table1Input->SetSize(0,70,220,500);
-    MainWindow1->Table1Input->SetMaxSize(wxSize(220,500));
+    MainWindow1->Table1Input->SetSize(0, 70, 220, 500);
+    MainWindow1->Table1Input->SetMaxSize(wxSize(220, 500));
 	}
   MainWindow1->Layout();
   this->Refresh();//true,&tempRect);
 }
 
 guiMainWindow::~guiMainWindow()
-{	//this->theFont
+{ //this->theFont
   this->theComputationSetup.flagAllowRepaint=false;
   this->WriteSettingsIfAvailable();
   this->Canvas1->Destroy();
@@ -766,7 +763,7 @@ void RunA_voidFunctionFromFunctionAddress
 )
 {
 #ifdef WIN32
-    ComputationalThreadEntry=CreateThread(0,0, (LPTHREAD_START_ROUTINE)(*RunAThread),0,0,0);
+    ComputationalThreadEntry=CreateThread(0,0, (LPTHREAD_START_ROUTINE)(*RunAThread), 0, 0, 0);
 #else
     //RunComputationalThread(0);
     pthread_create(ComputationalThreadLinux, NULL,*RunAThread, 0);
@@ -779,13 +776,13 @@ void RunrootFKFTComputationLocal()
 #else
 void* RunrootFKFTComputationLocal(void*)
 #endif
-{	rootFKFTComputationLocal.RunA2A1A1inD5beta12221();
+{ rootFKFTComputationLocal.RunA2A1A1inD5beta12221();
 #ifndef WIN32
   return 0;
 #endif
 }
 
-void guiMainWindow::onToggleButton1UsingCustom( wxCommandEvent& ev)
+void guiMainWindow::onToggleButton1UsingCustom(wxCommandEvent& ev)
 { if (!this->ToggleButton1UsingCustom->GetValue())
   { this->theComputationSetup.flagUsingCustomVectors=false;
     this->ToggleButton1UsingCustom->SetLabel(wxT("Switch to custom"));
@@ -806,11 +803,11 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
 	tempFile.close();
 }
 
-void wxDialogOutput::onButton5SaveComputer(wxCommandEvent &ev)
+void wxDialogOutput::onButton5SaveComputer(wxCommandEvent& ev)
 {
 }
 
-void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev)
+void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent& ev)
 { if (MainWindow1==0)
 		return;
 	if (!MainWindow1->ToggleButton2ViewCombinatorialChambers->GetValue())
@@ -830,12 +827,12 @@ void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent &ev
 }
 
 void guiMainWindow::onRePaint(wxPaintEvent& ev)
-{ ::wxPaintDC dc;
+{ wxPaintDC dc;
   this->Refresh();
 }
 
 void drawCanvas::OnPaint(::wxPaintEvent& ev)
-{	wxPaintDC  dc(this);
+{ wxPaintDC  dc(this);
 	if (MainWindow1==0)
 		return;
   if (MainWindow1->theComputationSetup.flagAllowRepaint)
@@ -911,8 +908,8 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
-{ this->theComputationSetup.WeylGroupIndex=4;
-  this->theComputationSetup.WeylGroupLetter='D';
+{ this->theComputationSetup.WeylGroupIndex=6;
+  this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
   this->RunTheComputation();
 }

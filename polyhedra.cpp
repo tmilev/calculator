@@ -826,6 +826,7 @@ bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile
   if(theFile.is_open())
   { theFile.clear(std::ios::goodbit); // false);
     theFile.seekp(0, std::ios_base::end);
+    //theFile.seekg(0);
     int tempI=theFile.tellp();
     if (tempI>=1)
       return true;
@@ -2632,15 +2633,15 @@ void Selection::ComputeDebugString()
 void Selection::WriteToFile(std::fstream& output)
 { output<<"Sel_max_size: " << this->MaxSize<<" cardinality: "<< this->CardinalitySelection<<" ";
   for (int i=0; i<this->CardinalitySelection; i++)
-    output<<this->elements[i]<<" ";
+    output << this->elements[i]<<" ";
 }
 
 void Selection::ReadFromFile(std::fstream& input)
 { std::string tempS; int tempI, card;
-  input>>tempS >>tempI;
+  input >> tempS >> tempI;
   this->init(tempI);
-  assert(tempI==72);
-  input>>tempS >>card;
+  input >> tempS >> card;
+  assert(tempS=="cardinality:");
   for (int i=0; i<card; i++)
   { input>>tempI;
     this->AddSelectionAppendNewIndex(tempI);
@@ -2649,9 +2650,9 @@ void Selection::ReadFromFile(std::fstream& input)
 
 void Selection::ElementToString(std::string& output)
 { std::stringstream out;
-  out<<"Cardinality: "<<this->CardinalitySelection<<"\n";
+  out << "Cardinality: " << this->CardinalitySelection << "\n";
   for (int i=0; i<this->CardinalitySelection; i++)
-    out << this->elements[i]<<", ";
+    out << this->elements[i] << ", ";
   output=out.str();
 }
 
@@ -2678,7 +2679,7 @@ void Selection::incrementSelectionFixedCardinality(int card)
     this->CardinalitySelection=card;
     return;
   }
-  if(card==this->MaxSize|| card==0)
+  if(card==this->MaxSize || card==0)
     return;
   int IndexLastZeroWithOneBefore=-1;
   int NumOnesAfterLastZeroWithOneBefore=0;
@@ -2692,7 +2693,8 @@ void Selection::incrementSelectionFixedCardinality(int card)
     else
       IndexLastZeroWithOneBefore=i;
   }
-  if (IndexLastZeroWithOneBefore==0){return; }
+  if (IndexLastZeroWithOneBefore==0)
+    return;
   for(int i=0; i<NumOnesAfterLastZeroWithOneBefore+1; i++)
     this->selected[elements[CardinalitySelection-i-1]]=false;
   for(int i=0; i<NumOnesAfterLastZeroWithOneBefore+1; i++)
@@ -2824,10 +2826,10 @@ void roots::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariable
 { int theDimension=0;
   if (this->size>0)
     theDimension= this->TheObjects[0].size;
-  output<< "Num_roots|Dim: "<< this->size<<" "<< theDimension<<" ";
+  output << "Num_roots|Dim: " << this->size << " " << theDimension << " ";
   if (this->size<1)
     return;
-  for ( int i=0; i<this->size; i++)
+  for (int i=0; i<this->size; i++)
     for (int j=0; j<theDimension; j++)
     { this->TheObjects[i].TheObjects[j].WriteToFile(output);
       output<<" ";
@@ -2855,7 +2857,7 @@ void roots::ReadCivilizedHumanReadableFormat(std::stringstream& input)
   }
   theDimension=numCommas+1;
   numRoots=numClosedBrackets;
-  tempI<<tempS;
+  tempI << tempS;
   tempI.seekg(0);
   this->SetSizeExpandOnTopNoObjectInit(numRoots);
   for (int i=0; i<numRoots; i++)
@@ -2873,7 +2875,7 @@ void roots::ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariabl
   input >> tempS;
   assert (tempS=="Num_roots|Dim:");
   int theDim, theSize;
-  input>> theSize>>theDim;
+  input >> theSize >> theDim;
   if (theSize<0)
     theSize=0;
   this->SetSizeExpandOnTopNoObjectInit(theSize);
@@ -2884,7 +2886,7 @@ void roots::ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariabl
   }
 }
 
-inline void roots::AddIntRoot(intRoot &r)
+inline void roots::AddIntRoot(intRoot& r)
 { this->SetSizeExpandOnTopNoObjectInit(this->size+1);
   this->TheObjects[this->size-1].AssignIntRoot(r);
 }
@@ -2942,7 +2944,7 @@ bool roots::GetLinearDependence(MatrixLargeRational& outputTheLinearCombination)
   return true;
 }
 
-void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const
+void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const
 { inputMatrix.init((short)this->size, (short)theDimension);
   MatrixLargeRational matOutputEmpty;
   matOutputEmpty.init(-1, -1);
@@ -3079,7 +3081,7 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots( root& output, root& Extr
   return true;
 }
 
-void roots::GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl)const
+void roots::GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl) const
 { output.Resize(this->size, this->size, false);
   for (int i=0; i<this->size; i++)
     for(int j=i; j<this->size; j++)
@@ -3114,7 +3116,7 @@ void roots::AssignMatrixColumns(MatrixLargeRational& mat)
 }
 
 void roots::Average(root& output, int theDimension)
-{  this->Sum(output, theDimension);
+{ this->Sum(output, theDimension);
   if (this->size==0)
     return;
   output.DivByInteger(this->size);
@@ -17130,6 +17132,26 @@ bool coneRelation::CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots)
   return true;
 }
 
+void coneRelation::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->AlphaCoeffs.WriteToFile(output);
+  this->Alphas.WriteToFile(output, theGlobalVariables);
+  this->BetaCoeffs.WriteToFile(output);
+  this->Betas.WriteToFile(output, theGlobalVariables);
+  output << "Index_owner_root_SA: " << this->IndexOwnerRootSubalgebra << " ";
+
+}
+
+void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner)
+{ std::string tempS;
+  this->AlphaCoeffs.ReadFromFile(input);
+  this->Alphas.ReadFromFile(input, theGlobalVariables);
+  this->BetaCoeffs.ReadFromFile(input);
+  this->Betas.ReadFromFile(input, theGlobalVariables);
+  input >> tempS >> this->IndexOwnerRootSubalgebra;
+  assert(tempS=="Index_owner_root_SA:");
+  this->ComputeDebugString(owner, true, true);
+}
+
 void coneRelation::GetSumAlphas(root& output, int theDimension)
 { assert(this->AlphaCoeffs.size==this->Alphas.size);
   output.MakeZero(theDimension);
@@ -17162,7 +17184,7 @@ void coneRelation::SortRelation(rootSubalgebra& owner)
 }
 
 void coneRelation::ComputeKComponents(roots& input, ListBasicObjects<ListBasicObjects<int> >& output, rootSubalgebra& owner)
-{  output.SetSizeExpandOnTopNoObjectInit(input.size);
+{ output.SetSizeExpandOnTopNoObjectInit(input.size);
   for(int i=0; i<input.size; i++)
   { output.TheObjects[i].size=0;
     for(int j=0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size; j++)
@@ -17205,7 +17227,7 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight(ListBasicObjects<int>& lef
   if (right.size>left.size)
     return false;
   for(int i=0; i<right.size; i++)
-  {  if (right.TheObjects[i]>left.TheObjects[i])
+  { if (right.TheObjects[i]>left.TheObjects[i])
       return false;
     if (left.TheObjects[i]>right.TheObjects[i])
       return true;
@@ -17230,7 +17252,7 @@ void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras
   int i=this->FitHashSize(input.HashFunction());
   ListBasicObjects<int>& theIndices= this->TheHashedArrays[i];
   for (int j=0; j<theIndices.size; j++)
-  {  if(  this->TheObjects[theIndices.TheObjects[j]].GenerateAutomorphisms(input, owners))
+  { if(  this->TheObjects[theIndices.TheObjects[j]].GenerateAutomorphisms(input, owners))
       return;
   }
   if (!this->flagIncludeSmallerRelations)
@@ -17289,10 +17311,7 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
   this->NumSubalgebrasCounted=0;
   for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
   { this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[i].GeneratePossibleNilradicals
-      ( this->mutexLockMeToPauseLProhibitingComputations,
-        this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration,
-        theGlobalVariables, false, true, *this, i);
+    this->TheObjects[i].GeneratePossibleNilradicals( this->mutexLockMeToPauseLProhibitingComputations, this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, true, *this, i);
     if (i!=NumToBeProcessed+StartingIndex-1)
       this->TheObjects[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, ParabolicsSelectionNilradicalGeneration, parabolicsCounterNilradicalGeneration);
   }
@@ -17513,7 +17532,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       }
     }
     if (col!=0)
-    {  if (useLatex)
+    { if (useLatex)
         out << " & ";
       if(useHtml)
         out << "</td>";
@@ -17561,17 +17580,17 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
     lineCounter+=this->TheObjects[i].ElementToString(tempS, owners, useLatex, true, true);
     out << tempS;
     if (useLatex)
-      out <<"\\\\";
-    out<<"\n";
+      out << "\\\\";
+    out << "\n";
     if (this->flagIncludeCoordinateRepresentation)
     { lineCounter+=2;
-      out<<"\\multicolumn{5}{c}{$\\varepsilon$-form~relative~to~the~subalgebra~generated~by~$\\mathfrak{k}$~and~the~relation}\\\\\n";
+      out << "\\multicolumn{5}{c}{$\\varepsilon$-form~relative~to~the~subalgebra~generated~by~$\\mathfrak{k}$~and~the~relation}\\\\\n";
       this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Alphas, tempAlphas, owners.AmbientWeyl, theGlobalVariables);
       this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Betas, tempBetas, owners.AmbientWeyl, theGlobalVariables);
       this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].AlphaCoeffs, tempAlphas, true);
       out<<"\\multicolumn{5}{c}{" <<tempS;
       this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].BetaCoeffs, tempBetas, true);
-      out <<"="<<tempS; //<<"~~~~";
+      out << "=" << tempS; //<<"~~~~";
     //  this->TheObjects[i].RelationOneSideToStringCoordForm
     //    (tempS, this->TheObjects[i].AlphaCoeffs, this->TheObjects[i].Alphas, false);
     //  out <<tempS;
@@ -17581,18 +17600,35 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
       out<<"}\\\\\\hline\n";
     }
     if (lineCounter>this->NumAllowedLatexLines)
-    { out <<footer<< "\n\n\n"<<header;
+    { out << footer << "\n\n\n" << header;
       lineCounter=0;
     }
   }
   if (useLatex)
-    out <<footer;
+    out << footer;
   if (this->flagIncludeSubalgebraDataInDebugString)
   { owners.ElementToString(tempS, 0, useLatex, useHtml, false, htmlPathPhysical, htmlPathServer, theGlobalVariables);
-    out <<"\n\n\\newpage"<<tempS;
+    out << "\n\n\\newpage" << tempS;
   }
   output=out.str();
-};
+}
+
+void coneRelations::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "num_rels: " << this->size;
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+}
+
+void coneRelations::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner)
+{ std::string tempS; int tempI;
+  this->ClearTheObjects();
+  input >> tempS >> tempI;
+  coneRelation tempRel;
+  for (int i=0; i<tempI; i++)
+  { tempRel.ReadFromFile(input, theGlobalVariables, owner);
+    this->AddRelationNoRepetition(tempRel, owner, tempRel.IndexOwnerRootSubalgebra);
+  }
+}
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
 { this->theWeyl.MakeArbitrary(WeylLetter, WeylIndex);

@@ -414,6 +414,8 @@ public:
   void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
   int IndexOfObject(const Object& o) const;
   bool ContainsObject(const Object& o){return this->IndexOfObject(o)!=-1; };
+  void ReadFromFile(std::fstream& input);
+  void WriteToFile(std::fstream& output);
 //  inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1; };
   int SizeWithoutObjects();
   inline Object* LastObject();
@@ -1058,7 +1060,7 @@ bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists( 
 
 template <typename Element>
 bool Matrix<Element>::RowEchelonFormToLinearSystemSolution( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution)
-{ assert(  inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1 && inputRightHandSide.NumRows==this->NumRows);
+{ assert(inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1 && inputRightHandSide.NumRows==this->NumRows);
   //this->ComputeDebugString();
   //inputRightHandSide.ComputeDebugString();
   //inputPivotPoints.ComputeDebugString();
@@ -1177,7 +1179,7 @@ ParallelComputing::GlobalPointerCounter+=c;
 }
 
 class LargeIntUnsigned: public ListBasicObjects<unsigned int>
-{  void AddNoFitSize(LargeIntUnsigned& x);
+{   void AddNoFitSize(LargeIntUnsigned& x);
 public:
   // Carry over bound is the "base" over which we work
   //Requirements on the CarryOverBound:
@@ -2062,6 +2064,25 @@ template <class Object>
 void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
 { this->MakeActualSizeAtLeastExpandOnTop(theSize);
   size=theSize;
+}
+
+template <class Object>
+void ListBasicObjects<Object>::WriteToFile(std::fstream& output)
+{ output <<"ListBasicObjects_size: " << this->size <<"\n";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].WriteToFile(output);
+    output<<" ";
+  }
+}
+
+template <class Object>
+void ListBasicObjects<Object>::ReadFromFile(std::fstream& input)
+{ std::string tempS; int tempI;
+  input >> tempS >> tempI;
+  assert(tempS=="ListBasicObjects_size:");
+  this->SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].ReadFromFile(input);
 }
 
 template <class Object>
@@ -5321,20 +5342,22 @@ public:
   DynkinDiagramRootSubalgebra theDiagramRelAndK;
   std::string DebugString;
   std::string stringConnectedComponents;
+  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ComputeDiagramRelAndK(rootSubalgebra& owner);
   void FixRepeatingRoots(roots& theRoots, ListBasicObjects<Rational>& coeffs);
   void RelationOneSideToString(std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
   void GetEpsilonCoords(roots& input, roots& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
-  int ElementToString(std::string &output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts );
+  int ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts);
   int RootsToScalarProductString(roots& inputLeft, roots& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex, rootSubalgebra& owner);
   void ComputeConnectedComponents(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
-  void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts){  this->ElementToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);  };
+  void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts){ this->ElementToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);  };
   void MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots);
   bool IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner);
   void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
   bool leftSortedBiggerThanOrEqualToRight(ListBasicObjects<int>& left, ListBasicObjects<int>& right);
   void ComputeKComponents(roots& input, ListBasicObjects<ListBasicObjects<int> >& output, rootSubalgebra& owner);
-  void RelationOneSideToStringCoordForm(std::string& output,  ListBasicObjects<Rational>& coeffs,  roots& theRoots, bool EpsilonForm);
+  void RelationOneSideToStringCoordForm(std::string& output,  ListBasicObjects<Rational>& coeffs, roots& theRoots, bool EpsilonForm);
   void GetSumAlphas(root& output, int theDimension);
   bool CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots);
   void SortRelation(rootSubalgebra& owner);
@@ -5380,6 +5403,8 @@ public:
   void ComputeDebugString(rootSubalgebras& owners, GlobalVariables& theGlobalVariables)
   { this->ComputeDebugString(owners, 0, 0, theGlobalVariables);
   };
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
   void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
   coneRelations()
   { this->NumAllowedLatexLines=40;
@@ -5645,7 +5670,7 @@ public:
   //of the orbit with Borel-positive weights
   //give a Limiting cone if you want only to observe weights lying in a
   //certain cone. Set 0 if there is no particular cone of interest.
-  void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs,  QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
+  void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs, QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
 };
 
 struct IndicatorWindowVariables

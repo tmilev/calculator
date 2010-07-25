@@ -1474,10 +1474,10 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   inputData.theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
   inputData.theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
   if (!inputData.theRootSubalgebras.flagNilradicalComputationInitialized)
-  { inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
     if (!inputData.theRootSubalgebras.ReadFromDefaultFileNilradicalGeneration(theGlobalVariables))
-      inputData.theRootSubalgebras.initForNilradicalGeneration();
-  }
+    { inputData.theRootSubalgebras.initForNilradicalGeneration();
+      inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
+    }
   inputData.theRootSubalgebras.ComputeLProhibitingRelations(theGlobalVariables);
   std::string tempS;
   inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
@@ -1513,7 +1513,8 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables)
 { std::fstream theFile;
   if (CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
-  { this->ReadFromFileNilradicalGeneration(theFile, theGlobalVariables);
+  { theFile.seekg(0);
+    this->ReadFromFileNilradicalGeneration(theFile, theGlobalVariables);
     return true;
   }
   return false;
@@ -1531,6 +1532,12 @@ void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, Glob
   //////////////////////////////////////////////////////////////////////////////////////
   output << "Index_current_SA_nilradicals_generation: " << this->IndexCurrentSANilradicalsGeneration<<"\n";
   output << "Parabolics_counter_nilradical_generation: " << this->parabolicsCounterNilradicalGeneration<<"\n";
+  output << "Implied_selections: ";
+  this->ImpiedSelectionsNilradical.WriteToFile(output);
+  output << "Parabolics_selection: ";
+  this->ParabolicsSelectionNilradicalGeneration.WriteToFile(output);
+  this->theGoodRelations.WriteToFile(output, theGlobalVariables);
+  this->theBadRelations.WriteToFile(output, theGlobalVariables);
   ////////////////////////////////////////////////////////////////////////////////////////
   for (int  i=0; i<this->size; i++)
     this->TheObjects[i].WriteToFileNilradicalGeneration(output, theGlobalVariables, *this);
@@ -1540,12 +1547,18 @@ void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, Glob
 { std::string tempS; int tempI;
   this->AmbientWeyl.KillingFormMatrix.ReadFromFile(input);
   this->AmbientWeyl.ComputeRho(true);
-  input >>  tempS >> tempI;
+  input >> tempS >> tempI;
   assert(tempS=="Number_subalgebras:");
   this->SetSizeExpandOnTopNoObjectInit(tempI);
   //////////////////////////////////////////////////////////////////////////////////////
   input >> tempS >> this->IndexCurrentSANilradicalsGeneration;
   input >> tempS >> this->parabolicsCounterNilradicalGeneration;
+  input >> tempS;
+  this->ImpiedSelectionsNilradical.ReadFromFile(input);
+  input >> tempS;
+  this->ParabolicsSelectionNilradicalGeneration.ReadFromFile(input);
+  this->theGoodRelations.ReadFromFile(input, theGlobalVariables, *this);
+  this->theBadRelations.ReadFromFile(input, theGlobalVariables, *this);
   /////////////////////////////////////////////////////////////////////////////////////
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ReadFromFileNilradicalGeneration(input, theGlobalVariables, *this);

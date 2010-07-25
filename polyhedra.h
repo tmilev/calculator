@@ -371,10 +371,18 @@ int ListBasicObjectsLight<Object>::SizeWithoutObjects()
 { return sizeof(Object*)*this->size+sizeof(int);
 }
 
+template <class Object>
+std::fstream& operator<<(std::fstream& output, const ListBasicObjects<Object>& theList);
+
+template <class Object>
+std::fstream& operator>>(std::fstream& input, ListBasicObjects<Object>& theList);
+
 //ListBasicObjects kills the objects it contains when it expires
 template <class Object>
 class ListBasicObjects
 {
+  friend std::fstream& operator<< <Object> (std::fstream& output, const ListBasicObjects<Object>& theList);
+  friend std::fstream& operator>> <Object>(std::fstream& input, ListBasicObjects<Object>& theList);
 private:
   friend class PolynomialRationalCoeff;
   friend class IntegerPoly;
@@ -442,6 +450,25 @@ public:
   ListBasicObjects();
   ~ListBasicObjects();
 };
+
+template <class Object>
+std::fstream& operator<< (std::fstream& output, const ListBasicObjects<Object>& theList)
+{ output << "size: " << theList.size << "\n";
+  for (int i=0; i<theList.size; i++)
+    output << theList.TheObjects[i]<<" ";
+  return output;
+}
+
+template <class Object>
+std::fstream& operator >> (std::fstream& input, ListBasicObjects<Object>& theList)
+{ std::string tempS; int tempI;
+  input >> tempS >> tempI;
+  assert(tempS=="size:");
+  theList.SetSizeExpandOnTopNoObjectInit(tempI);
+  for (int i=0; i<theList.size; i++)
+    input >> theList.TheObjects[i];
+  return input;
+}
 
 template <class Object>
 class ListObjectPointers: public ListBasicObjects<Object*>
@@ -2068,10 +2095,10 @@ void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
 
 template <class Object>
 void ListBasicObjects<Object>::WriteToFile(std::fstream& output)
-{ output <<"ListBasicObjects_size: " << this->size <<"\n";
+{ output << "ListBasicObjects_size: " << this->size <<"\n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output);
-    output<<" ";
+    output << " ";
   }
 }
 
@@ -5344,6 +5371,7 @@ public:
   std::string stringConnectedComponents;
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner);
   void ComputeDiagramRelAndK(rootSubalgebra& owner);
   void FixRepeatingRoots(roots& theRoots, ListBasicObjects<Rational>& coeffs);
   void RelationOneSideToString(std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
@@ -5572,7 +5600,6 @@ public:
   bool flagUsingActionsNormalizerCentralizerNilradical;
   bool flagNilradicalComputationInitialized;
   bool flagCountingNilradicalsOnlyNoComputation;
-//  bool flagUsingONLYActionsNormalizerCentralizerNilradical;
   bool flagComputeConeCondition;
   bool flagLookingForMinimalRels;
   void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
@@ -5590,9 +5617,6 @@ public:
   void ElementToStringDynkinTable(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output);
   void GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml);
   void SortDescendingOrderBySSRank();
-  //the below commented out function turned out to be non-necessary.
-  //The proof is done through running the program without optimization, as described in Chapter 5 of Todor Milev's phd thesis
-  //void initDynkinDiagramsNonDecided(WeylGroup& theWeylGroup, char WeylLetter, int WeylRank);
   void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
   void pathToHtmlReference(int index, std::string& DisplayString, std::string* htmlPathServer, std::string& output);
   void WriteToDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables);

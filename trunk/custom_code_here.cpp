@@ -1621,7 +1621,7 @@ void rootSubalgebra::GeneratePossibleNilradicals(MutexWrapper& PauseMutex, ListB
       impliedSelections.TheObjects[0].init(this->kModules.size);
       for (int j=0; j<this->CentralizerRoots.size; j++)
         if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsSelection, this->CentralizerRoots.TheObjects[j]))
-          impliedSelections.TheObjects[0].AddSelectionAppfixeendNewIndex(j);
+          impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
       if (owner.flagUsingActionsNormalizerCentralizerNilradical)
         owner.RaiseSelectionUntilApproval(impliedSelections.TheObjects[0], theGlobalVariables);
       std::string tempS; std::stringstream out;

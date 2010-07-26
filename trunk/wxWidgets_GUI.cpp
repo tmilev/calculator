@@ -857,9 +857,7 @@ void guiMainWindow::RunTheComputation()
 #endif
   } else
   { if (MainWindow1->WorkThread1.isRunning)
-    { ParallelComputing::mutexLockThisMutexToSignalPause.LockMe();
-      while(ParallelComputing::isRunning)
-      {}
+    { ParallelComputing::controllerLockThisMutexToSignalPause.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
 #ifdef WIN32
       SuspendThread(MainWindow1->WorkThread1.ComputationalThread);
 #endif
@@ -870,7 +868,7 @@ void guiMainWindow::RunTheComputation()
     }	else
     { MainWindow1->Button1Go->SetLabel(wxT("Pause"));
       MainWindow1->WorkThread1.isRunning=true;
-      ParallelComputing::mutexLockThisMutexToSignalPause.UnlockMe();
+      ParallelComputing::controllerLockThisMutexToSignalPause.UnlockSafePoint();
 #ifdef WIN32
       ResumeThread(MainWindow1->WorkThread1.ComputationalThread);
 #endif
@@ -908,20 +906,27 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
-{ this->theComputationSetup.WeylGroupIndex=6;
+{ if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsRunning())
+  { this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
+    return;
+  }
+  this->theComputationSetup.WeylGroupIndex=8;
   this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
   this->RunTheComputation();
 }
 
 void guiMainWindow::onButton18LprohibitingPauseAndSave(wxCommandEvent& ev)
-{ this->theComputationSetup.theRootSubalgebras.mutexLockMeToPauseLProhibitingComputations.LockMe();
-  while (this->theComputationSetup.theRootSubalgebras.mutexLockMeToPauseLProhibitingComputations.IsRunning)
-  {}
+{ if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsPausedWhileRunning())
+    return;
+  if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsRunning())
+    this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+  if (this->theComputationSetup.theRootSubalgebras.size==0)
+    return;
   this->theComputationSetup.theRootSubalgebras.WriteToDefaultFileNilradicalGeneration(*this->theComputationSetup.theGlobalVariablesContainer->Default());
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxOK)
-    this->theComputationSetup.theRootSubalgebras.mutexLockMeToPauseLProhibitingComputations.UnlockMe();
+    this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)

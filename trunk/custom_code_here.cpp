@@ -400,7 +400,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Se
   Rational tempRat;
   hashedRoots RootSpacesThatNeedToBeKilled;
   RootSpacesThatNeedToBeKilled.ClearTheObjects();
-  //ListBasicObjects<int> IndicesEquationsByRootSpace;
+  //List<int> IndicesEquationsByRootSpace;
   RootSpacesThatNeedToBeKilled.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
 //  IndicesEquationsByRootSpace.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
   outputSystemToBeSolved.size=0;
@@ -619,7 +619,7 @@ void slTwo::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlob
 void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)
 { this->MultiplicitiesDecompositionMinimalContainingRootSA.SetSizeExpandOnTopNoObjectInit(this->IndicesMinimalContainingRootSA.size);
   this->HighestWeightsDecompositionMinimalContainingRootSA.SetSizeExpandOnTopNoObjectInit(this->IndicesMinimalContainingRootSA.size);
-  ListBasicObjects<int> buffer;
+  List<int> buffer;
   for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
   { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
     this->ComputeModuleDecomposition(theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[i], this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[i], buffer, theGlobalVariables);
@@ -627,11 +627,11 @@ void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalge
 }
 
 //The below code is related to sl(2) subalgebras of simple Lie algebras
-void slTwo::ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, ListBasicObjects<int>& outputHighestWeights, ListBasicObjects<int>& outputMultiplicitiesHighestWeights, ListBasicObjects<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
+void slTwo::ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
 { int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
   outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
   outputWeightSpaceDimensions.TheObjects[IndexZeroWeight]=dimensionContainingRegularSA;
-  ListBasicObjects<int> BufferHighestWeights;
+  List<int> BufferHighestWeights;
   bool possible=true;
   Rational tempRat;
   roots tempRoots;
@@ -1072,15 +1072,15 @@ void reductiveSubalgebras::EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theR
   this->theLetters.size=0;
   this->theMultiplicities.size=0;
   this->theRanks.size=0;
-  ListBasicObjects<int> ranksBuffer, multiplicitiesBuffer;
-  ListBasicObjects<char> lettersBuffer;
+  List<int> ranksBuffer, multiplicitiesBuffer;
+  List<char> lettersBuffer;
   for (int i=0; i<this->thePartitionMultiplicities.size; i++)
     this->GenerateAllDiagramsForPartitionRecursive(i, 0, ranksBuffer, multiplicitiesBuffer, lettersBuffer);
 }
 
-void reductiveSubalgebras::GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, ListBasicObjects<int>& ranksBuffer, ListBasicObjects<int>& multiplicitiesBuffer, ListBasicObjects<char>& lettersBuffer)
-{ ListBasicObjects<int>& partitionValues= this->thePartitionValues.TheObjects[indexPartition];
-  ListBasicObjects<int>& partitionMults= this->thePartitionMultiplicities.TheObjects[indexPartition];
+void reductiveSubalgebras::GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, List<int>& ranksBuffer, List<int>& multiplicitiesBuffer, List<char>& lettersBuffer)
+{ List<int>& partitionValues= this->thePartitionValues.TheObjects[indexPartition];
+  List<int>& partitionMults= this->thePartitionMultiplicities.TheObjects[indexPartition];
   if (indexInPartition>= partitionValues.size)
   { this->theLetters.AddObjectOnTop(lettersBuffer);
     this->theMultiplicities.AddObjectOnTop(multiplicitiesBuffer);
@@ -1091,7 +1091,7 @@ void reductiveSubalgebras::GenerateAllDiagramsForPartitionRecursive(int indexPar
   int theMult = partitionMults.TheObjects[indexInPartition];
   int theRank = partitionValues.TheObjects[indexInPartition];
   int numLetters;
-  ListBasicObjects<char> lettersAvailable; lettersAvailable.SetSizeExpandOnTopNoObjectInit(5);
+  List<char> lettersAvailable; lettersAvailable.SetSizeExpandOnTopNoObjectInit(5);
   lettersAvailable.TheObjects[0]='A';
   lettersAvailable.TheObjects[1]='B';
   lettersAvailable.TheObjects[2]='C';
@@ -1147,7 +1147,7 @@ void reductiveSubalgebras::MatchRealSl2sToPartitionSl2s()
 
 void reductiveSubalgebras::MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables)
 { this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);
-  ListBasicObjects<int> tempL;
+  List<int> tempL;
   this->IndicesMatchingActualSl2s.initFillInObject(this->theLetters.size, tempL);
   this->IndicesMatchingPartitionSl2s.initFillInObject(this->theSl2s.size, tempL);
   for (int i=0; i<this->theSl2s.size; i++)
@@ -1167,7 +1167,7 @@ bool slTwo::ModuleDecompositionFitsInto(const slTwo& other)
 { return this->ModuleDecompositionFitsInto(this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
 }
 
-bool slTwo::ModuleDecompositionFitsInto(const ListBasicObjects<int>& highestWeightsLeft, const ListBasicObjects<int>& multiplicitiesHighestWeightsLeft, const ListBasicObjects<int>& highestWeightsRight, const ListBasicObjects<int>& multiplicitiesHighestWeightsRight)
+bool slTwo::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
 { for (int i=0; i<highestWeightsLeft.size; i++)
   { int theIndex= highestWeightsRight.IndexOfObject(highestWeightsLeft.TheObjects[i]);
     if (theIndex==-1)
@@ -1179,7 +1179,7 @@ bool slTwo::ModuleDecompositionFitsInto(const ListBasicObjects<int>& highestWeig
   return true;
 }
 
-void reductiveSubalgebras::GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, ListBasicObjects<int>& Multiplicities, ListBasicObjects<int>& Values)
+void reductiveSubalgebras::GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, List<int>& Multiplicities, List<int>& Values)
 { if (remainingToBePartitioned==0)
   { this->thePartitionMultiplicities.AddObjectOnTop(Multiplicities);
     this->thePartitionValues.AddObjectOnTop(Values);
@@ -1213,7 +1213,7 @@ void reductiveSubalgebras::GenerateAllPartitionsDontInit(int theRank)
 { int upperLimit= MathRoutines::TwoToTheNth(theRank);
   this->thePartitionMultiplicities.MakeActualSizeAtLeastExpandOnTop(upperLimit);
   this->thePartitionValues.MakeActualSizeAtLeastExpandOnTop(upperLimit);
-  ListBasicObjects<int> buffer1, buffer2;
+  List<int> buffer1, buffer2;
   this->GenerateAllPartitionsRecursive(theRank, theRank, buffer1, buffer2);
 }
 
@@ -1286,7 +1286,7 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
   output=out.str();
 }
 
-void WeylGroup::MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks, ListBasicObjects<int>* theMultiplicities)
+void WeylGroup::MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities)
 { WeylGroup tempW;
   this->KillingFormMatrix.init(0, 0);
   for (int i=0; i<theLetters.size; i++)
@@ -1460,7 +1460,9 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 }
 
 void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ inputData.theRootSubalgebras.mutexLockMeToPauseLProhibitingComputations.IsRunning=true;
+{ if (inputData.theRootSubalgebras.controllerLProhibitingRelations.IsRunning())
+    return;
+  inputData.theRootSubalgebras.controllerLProhibitingRelations.InitComputation();
   rootSubalgebra tempSA;
   //most important flags
   inputData.theRootSubalgebras.flagUseDynkinClassificationForIsomorphismComputation=false;
@@ -1509,6 +1511,7 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   theGlobalVariables.theIndicatorVariables.StatusString1= inputData.theOutput.DebugString;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
+  inputData.theRootSubalgebras.controllerLProhibitingRelations.ExitComputation();
 }
 
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables)
@@ -1528,7 +1531,7 @@ void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables& th
 }
 
 void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.KillingFormMatrix.WriteToFile(output);
+{ this->AmbientWeyl.WriteToFile(output);
   output << "Number_subalgebras: " << this->size << "\n";
   //////////////////////////////////////////////////////////////////////////////////////
   output << "Index_current_SA_nilradicals_generation: " << this->IndexCurrentSANilradicalsGeneration << "\n";
@@ -1552,7 +1555,7 @@ void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, Glob
 
 void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS; int tempI;
-  this->AmbientWeyl.KillingFormMatrix.ReadFromFile(input);
+  this->AmbientWeyl.ReadFromFile(input);
   this->AmbientWeyl.ComputeRho(true);
   input >> tempS >> tempI;
   assert(tempS=="Number_subalgebras:");
@@ -1593,13 +1596,13 @@ void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, Globa
   this->ComputeAll();
 }
 
-void rootSubalgebra::GeneratePossibleNilradicalsInit(ListBasicObjects<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter)
+void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter)
 { impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
   ParabolicsSelection.init(this->SimpleBasisCentralizerRoots.size);
   parabolicsCounter=0;
 }
 
-void rootSubalgebra::GeneratePossibleNilradicals(MutexWrapper& PauseMutex, ListBasicObjects<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner)
 {  //this->ComputeAll();
   this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
   if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -1612,25 +1615,28 @@ void rootSubalgebra::GeneratePossibleNilradicals(MutexWrapper& PauseMutex, ListB
     return;
   int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
   theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
-  owner.CountersNilradicalsGeneration.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
+  if (!owner.flagNilradicalComputationInitialized)
+    owner.CountersNilradicalsGeneration.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
   roots tempRootsTest;
   if (useParabolicsInNilradical)
   { this->flagFirstRoundCounting=false;
-    for (; parabolicsCounter<numCycles; parabolicsCounter++, ParabolicsSelection.incrementSelection())
-    { tempRootsTest.size=0;
-      impliedSelections.TheObjects[0].init(this->kModules.size);
-      for (int j=0; j<this->CentralizerRoots.size; j++)
-        if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsSelection, this->CentralizerRoots.TheObjects[j]))
-          impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
+    for (; parabolicsCounter<numCycles; parabolicsCounter++, ParabolicsSelection.incrementSelection(), owner.flagNilradicalComputationInitialized=false)
+    { if (!owner.flagNilradicalComputationInitialized)
+      { impliedSelections.TheObjects[0].init(this->kModules.size);
+        for (int j=0; j<this->CentralizerRoots.size; j++)
+          if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsSelection, this->CentralizerRoots.TheObjects[j]))
+            impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
+        owner.RecursionDepthNilradicalsGeneration=0;
+        owner.CountersNilradicalsGeneration.TheObjects[0]=this->CentralizerRoots.size;
+      }
       if (owner.flagUsingActionsNormalizerCentralizerNilradical)
         owner.RaiseSelectionUntilApproval(impliedSelections.TheObjects[0], theGlobalVariables);
+/*      tempRootsTest.size=0;
       std::string tempS; std::stringstream out;
       for (int s=0; s<impliedSelections.TheObjects[0].CardinalitySelection; s++)
         tempRootsTest.AddObjectOnTop(this->kModules.TheObjects[impliedSelections.TheObjects[0].elements[s]].TheObjects[0]);
       tempS=out.str();
-      assert(this->RootsDefineASubalgebra(tempRootsTest));
-      owner.RecursionDepthNilradicalsGeneration=0;
-      owner.CountersNilradicalsGeneration.TheObjects[0]=this->CentralizerRoots.size;
+      assert(this->RootsDefineASubalgebra(tempRootsTest));*/
       this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
     }
   }
@@ -1681,4 +1687,22 @@ void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalV
   assert(tempS=="Index_owner_root_SA:");
   this->ComputeTheDiagramAndDiagramRelAndK(owner.TheObjects[this->IndexOwnerRootSubalgebra]);
   this->ComputeDebugString(owner, true, true);
+}
+
+void WeylGroup::WriteToFile(std::fstream& output)
+{ output << "Weyl_group: ";
+  output << this->WeylLetter << " " << this->KillingFormMatrix.NumRows << "\n";
+  output << "Long_root_length: ";
+  this->LongRootLength.WriteToFile(output);
+  output << "\n";
+  this->KillingFormMatrix.WriteToFile(output);
+}
+
+void WeylGroup::ReadFromFile(std::fstream& input)
+{ std::string tempS; int tempI;
+  input >> tempS;
+  input >> this->WeylLetter >> tempI >> tempS;
+  assert(tempS=="Long_root_length:");
+  this->LongRootLength.ReadFromFile(input);
+  this->KillingFormMatrix.ReadFromFile(input);
 }

@@ -37,14 +37,13 @@
 
 #include "polyhedra.h"
 
-bool ParallelComputing::isRunning=true;
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.
 #ifdef CGIversionLimitRAMuse
-int ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=1000000;
+int ParallelComputing::cgiLimitRAMuseNumPointersInList=1000000;
 #endif
 
-MutexWrapper ParallelComputing::mutexLockThisMutexToSignalPause;
+Controller ParallelComputing::controllerLockThisMutexToSignalPause;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
@@ -144,74 +143,74 @@ int BasicQN::NumTotalCreated=0;
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Integer>::flagAnErrorHasOccuredTimeToPanic=true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
-template < > int HashedListBasicObjects<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
-template < > int HashedListBasicObjects<BasicQN>::PreferredHashSize= 1;
-template < > int HashedListBasicObjects<partFraction>::PreferredHashSize=10000;
-template < > int HashedListBasicObjects<intRoot>::PreferredHashSize = 10000;
-template < > int HashedListBasicObjects<oneFracWithMultiplicitiesAndElongations>::PreferredHashSize= 10;
-template < > int HashedListBasicObjects<ElementWeylGroup>::PreferredHashSize=10000;
-template < > int HashedListBasicObjects<root>::PreferredHashSize=1000;
-template < > int HashedListBasicObjects<Monomial<LargeInt> >::PreferredHashSize=1;
-template < > int HashedListBasicObjects<Monomial<Rational> >::PreferredHashSize=10000;
-template < > int HashedListBasicObjects<Monomial<Integer> >::PreferredHashSize=100;
-template < > int HashedListBasicObjects<Monomial<QuasiNumber> >::PreferredHashSize=1000;
-template < > int HashedListBasicObjects<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> >::PreferredHashSize=100;
-template < > int HashedListBasicObjects<GeneratorPFAlgebraRecord>::PreferredHashSize = 1000;
-template < > int HashedListBasicObjects<GeneratorsPartialFractionAlgebra>::PreferredHashSize=100;
-template < > int HashedListBasicObjects<Selection>::PreferredHashSize=20;
-template < > int HashedListBasicObjects<affineHyperplane>::PreferredHashSize=100;
-template < > int HashedListBasicObjects<coneRelation>::PreferredHashSize=1000;
-template < > int HashedListBasicObjects<slTwo>::PreferredHashSize=1000;
-template < > int HashedListBasicObjects<ElementSimpleLieAlgebra>::PreferredHashSize=100;
+template < > int HashedList<Monomial<CompositeComplexQN> >::PreferredHashSize=1000;
+template < > int HashedList<BasicQN>::PreferredHashSize= 1;
+template < > int HashedList<partFraction>::PreferredHashSize=10000;
+template < > int HashedList<intRoot>::PreferredHashSize = 10000;
+template < > int HashedList<oneFracWithMultiplicitiesAndElongations>::PreferredHashSize= 10;
+template < > int HashedList<ElementWeylGroup>::PreferredHashSize=10000;
+template < > int HashedList<root>::PreferredHashSize=1000;
+template < > int HashedList<Monomial<LargeInt> >::PreferredHashSize=1;
+template < > int HashedList<Monomial<Rational> >::PreferredHashSize=10000;
+template < > int HashedList<Monomial<Integer> >::PreferredHashSize=100;
+template < > int HashedList<Monomial<QuasiNumber> >::PreferredHashSize=1000;
+template < > int HashedList<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> >::PreferredHashSize=100;
+template < > int HashedList<GeneratorPFAlgebraRecord>::PreferredHashSize = 1000;
+template < > int HashedList<GeneratorsPartialFractionAlgebra>::PreferredHashSize=100;
+template < > int HashedList<Selection>::PreferredHashSize=20;
+template < > int HashedList<affineHyperplane>::PreferredHashSize=100;
+template < > int HashedList<coneRelation>::PreferredHashSize=1000;
+template < > int HashedList<slTwo>::PreferredHashSize=1000;
+template < > int HashedList<ElementSimpleLieAlgebra>::PreferredHashSize=100;
 
-template < > int ListBasicObjects<affineCone>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<CombinatorialChamber*>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<ComplexQN>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<int>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<char>::ListBasicObjectsActualSizeIncrement=5;
-template < > int ListBasicObjects<Monomial<CompositeComplexQN> >::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<BasicQN*>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<ComplexQN*>::ListBasicObjectsActualSizeIncrement=10000;
-template < > int ListBasicObjects<QuasiPolynomial*>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<PrecomputedTaukn*>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<BasicComplexNumber>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> >::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<GeneratorsPartialFractionAlgebra>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<GeneratorPFAlgebraRecord>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<BasicQN>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<Monomial<QuasiNumber> >::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<intRoot>::ListBasicObjectsActualSizeIncrement= 20;
-template < > int ListBasicObjects<oneFracWithMultiplicitiesAndElongations>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<ElementWeylGroup>::ListBasicObjectsActualSizeIncrement= 101680;
-template < > int ListBasicObjects<PolynomialsRationalCoeff>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<root>::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<QuasiPolynomial>::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<PolynomialRationalCoeff>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<Monomial<LargeInt> >::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<Polynomial<Rational> >::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<Monomial<Integer> >::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<Monomial<Rational> >::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<rootWithMultiplicity>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<std::string>::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<unsigned int>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<roots>::ListBasicObjectsActualSizeIncrement=5;
-template < > int ListBasicObjects<Selection>::ListBasicObjectsActualSizeIncrement=5;
-template < > int ListBasicObjects<affineHyperplane>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<WallData*>::ListBasicObjectsActualSizeIncrement=1;
-template < > int ListBasicObjects<WallData>::ListBasicObjectsActualSizeIncrement=6;
-template < > int ListBasicObjects<rootsWithMultiplicity>::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<Rational>::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<coneRelation>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<DynkinDiagramRootSubalgebra>::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<rootSubalgebra>::ListBasicObjectsActualSizeIncrement=77;
-template < > int ListBasicObjects<ListBasicObjects<int> >::ListBasicObjectsActualSizeIncrement=10;
-template < > int ListBasicObjects<ListBasicObjects<char> >::ListBasicObjectsActualSizeIncrement=30;
-template < > int ListBasicObjects<slTwo>::ListBasicObjectsActualSizeIncrement=1000;
-template < > int ListBasicObjects<ElementSimpleLieAlgebra>::ListBasicObjectsActualSizeIncrement=100;
-template < > int ListBasicObjects<ReflectionSubgroupWeylGroup>::ListBasicObjectsActualSizeIncrement=5;
-template < > int ListBasicObjects<minimalRelationsProverState>::ListBasicObjectsActualSizeIncrement=800;
-template < > int ListBasicObjects<minimalRelationsProverStateFixedK>::ListBasicObjectsActualSizeIncrement=10;
+template < > int List<affineCone>::ListActualSizeIncrement=1;
+template < > int List<CombinatorialChamber*>::ListActualSizeIncrement=1000;
+template < > int List<ComplexQN>::ListActualSizeIncrement=1;
+template < > int List<int>::ListActualSizeIncrement=1;
+template < > int List<char>::ListActualSizeIncrement=5;
+template < > int List<Monomial<CompositeComplexQN> >::ListActualSizeIncrement=10;
+template < > int List<BasicQN*>::ListActualSizeIncrement=1000;
+template < > int List<ComplexQN*>::ListActualSizeIncrement=10000;
+template < > int List<QuasiPolynomial*>::ListActualSizeIncrement=1;
+template < > int List<PrecomputedTaukn*>::ListActualSizeIncrement=1;
+template < > int List<BasicComplexNumber>::ListActualSizeIncrement=1;
+template < > int List<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> >::ListActualSizeIncrement=100;
+template < > int List<GeneratorsPartialFractionAlgebra>::ListActualSizeIncrement=1;
+template < > int List<GeneratorPFAlgebraRecord>::ListActualSizeIncrement=1;
+template < > int List<partFraction>::ListActualSizeIncrement=1000;
+template < > int List<BasicQN>::ListActualSizeIncrement=1;
+template < > int List<Monomial<QuasiNumber> >::ListActualSizeIncrement=1000;
+template < > int List<intRoot>::ListActualSizeIncrement= 20;
+template < > int List<oneFracWithMultiplicitiesAndElongations>::ListActualSizeIncrement=1;
+template < > int List<ElementWeylGroup>::ListActualSizeIncrement= 101680;
+template < > int List<PolynomialsRationalCoeff>::ListActualSizeIncrement=1;
+template < > int List<root>::ListActualSizeIncrement=10;
+template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
+template < > int List<PolynomialRationalCoeff>::ListActualSizeIncrement=1;
+template < > int List<Monomial<LargeInt> >::ListActualSizeIncrement=1;
+template < > int List<Polynomial<Rational> >::ListActualSizeIncrement=1;
+template < > int List<Monomial<Integer> >::ListActualSizeIncrement=10;
+template < > int List<Monomial<Rational> >::ListActualSizeIncrement=100;
+template < > int List<rootWithMultiplicity>::ListActualSizeIncrement=1;
+template < > int List<std::string>::ListActualSizeIncrement=100;
+template < > int List<unsigned int>::ListActualSizeIncrement=1;
+template < > int List<roots>::ListActualSizeIncrement=5;
+template < > int List<Selection>::ListActualSizeIncrement=5;
+template < > int List<affineHyperplane>::ListActualSizeIncrement=1000;
+template < > int List<WallData*>::ListActualSizeIncrement=1;
+template < > int List<WallData>::ListActualSizeIncrement=6;
+template < > int List<rootsWithMultiplicity>::ListActualSizeIncrement=10;
+template < > int List<Rational>::ListActualSizeIncrement=10;
+template < > int List<coneRelation>::ListActualSizeIncrement=1000;
+template < > int List<DynkinDiagramRootSubalgebra>::ListActualSizeIncrement=100;
+template < > int List<rootSubalgebra>::ListActualSizeIncrement=77;
+template < > int List<List<int> >::ListActualSizeIncrement=10;
+template < > int List<List<char> >::ListActualSizeIncrement=30;
+template < > int List<slTwo>::ListActualSizeIncrement=1000;
+template < > int List<ElementSimpleLieAlgebra>::ListActualSizeIncrement=100;
+template < > int List<ReflectionSubgroupWeylGroup>::ListActualSizeIncrement=5;
+template < > int List<minimalRelationsProverState>::ListActualSizeIncrement=800;
+template < > int List<minimalRelationsProverStateFixedK>::ListActualSizeIncrement=10;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
@@ -233,7 +232,7 @@ bool QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
-HashedListBasicObjects<GeneratorPFAlgebraRecord> GeneratorsPartialFractionAlgebra::theGenerators;
+HashedList<GeneratorPFAlgebraRecord> GeneratorsPartialFractionAlgebra::theGenerators;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 bool WallData::flagDisplayWallDetails=true;
 int RankGlobal;
@@ -307,7 +306,7 @@ void CombinatorialChamberContainer::Glue(CombinatorialChamber* left, Combinatori
   //this->ComputeDebugString();
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
@@ -342,7 +341,7 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
             delete this->TheObjects[this->indexNextChamberToSlice];
   #ifdef CGIversionLimitRAMuse
     ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
   #endif
             this->TheObjects[this->indexNextChamberToSlice]=0;
             //if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -375,14 +374,11 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
     //this->ComputeDebugString();
     assert(this->ConsistencyCheck());
     //below follows the code to pause the computation
-    this->flagIsRunning=false;
-    this->thePauseMutex.LockMe();
-    this->flagIsRunning=true;
-    this->thePauseMutex.UnlockMe();
+    this->thePauseController.SafePoint();
   }
 }
 
-void CombinatorialChamberContainer::SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices)
+void CombinatorialChamberContainer::SortIndicesByDisplayNumber(List<int>& outputSortedIndices)
 { outputSortedIndices.MakeActualSizeAtLeastExpandOnTop(this->size);
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
@@ -391,7 +387,7 @@ void CombinatorialChamberContainer::SortIndicesByDisplayNumber(ListBasicObjects<
   this->QuickSortIndicesByDisplayNumber(outputSortedIndices, 0, outputSortedIndices.size-1);
 }
 
-void CombinatorialChamberContainer::QuickSortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex)
+void CombinatorialChamberContainer::QuickSortIndicesByDisplayNumber(List<int>& outputSortedIndices, int BottomIndex, int TopIndex)
 { if (TopIndex<=BottomIndex)
     return;
   int HighIndex=TopIndex;
@@ -874,7 +870,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   if (inputBad=="experiments")
   {
 #ifdef CGIversionLimitRAMuse
-    ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=1000000000;
+    ParallelComputing::cgiLimitRAMuseNumPointersInList=1000000000;
 #endif
     return CGIspecificRoutines::choiceExperiments;
   }
@@ -891,7 +887,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   //std::cout.flush();
   //std::cout <<"  tempS3: "<< tempS3<<"   ";
 #ifdef CGIversionLimitRAMuse
-  ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=1000000;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=1000000;
 #endif
   CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
 //  std::cout<<inputGood;
@@ -942,7 +938,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
     //std::cout<<"<br><br>"<< "The choices we make: " << theChoiceIsYours;
     std::cout.flush();
 #ifdef CGIversionLimitRAMuse
-    ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects=300000000;
+    ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
 #endif
     return theChoiceIsYours;
   }
@@ -1062,7 +1058,7 @@ ComputationSetup::ComputationSetup()
   this->NotationExplanationLatex4 = out4.str();
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->theGlobalVariablesContainer->SetSizeExpandOnTopNoObjectInit(1);
 //  this->RankEuclideanSpaceGraphics=3;
@@ -1073,7 +1069,7 @@ ComputationSetup::~ComputationSetup()
   this->theGlobalVariablesContainer=0;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
 }
 
@@ -1431,7 +1427,7 @@ void ComputationSetup::Run()
   //TheBigOutput.InduceFromLowerDimensionalAndProjectivize(this->theChambers);
   this->ExitComputationSetup();
   //std::stringstream out;
-  //ListBasicObjects<roots> tempRoots;
+  //List<roots> tempRoots;
   //this->thePartialFraction.ComputeSupport(tempRoots, out);
   //std::string tempS;
 //  tempS=out.str();
@@ -2179,7 +2175,7 @@ void root::DivByLargeRational(const Rational& a)
     this->TheObjects[i].DivideBy(a);
 }
 
-bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,  roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs, bool IntegralCoefficientsOnly)
+bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,  roots& theSet, WeylGroup& theWeylGroup, roots& output, List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly)
 { if ( UpperBoundNumBetas>0 && output.size>UpperBoundNumBetas)
     return false;
   if (this->IsEqualToZero())
@@ -2402,7 +2398,7 @@ int MathRoutines::KToTheNth(int k, int n)
   return result;
 }
 
-int MathRoutines::BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices)
+int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
 { int ChoiceIndex=0;
   int denominator=1;
   int result=0;
@@ -2440,7 +2436,7 @@ void Selection::init(int maxNumElements)
     this->elements = new int[maxNumElements];
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter+=(maxNumElements-this->MaxSize)*2;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
     this->MaxSize =maxNumElements;
   }
@@ -2595,7 +2591,7 @@ Selection::~Selection()
   delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter-=this->MaxSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   //  delete [] elementsInverseSelection;
   this->MaxSize=0;
@@ -3171,7 +3167,7 @@ void roots::AssignIntRoots(intRoots& r)
   }
 }
 
-void roots::AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r)
+void roots::AssignHashedIntRoots(HashedList<intRoot>& r)
 { this->size=0;
   root tempRoot;
   for (int i=0; i<r.size; i++)
@@ -4081,9 +4077,9 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   rootsCollection& LocalContainerPlusVertices=theGlobalVariables.rootsCollectionSplitChamber1;
   rootsCollection& LocalContainerMinusVertices=theGlobalVariables.rootsCollectionSplitChamber2;
   roots& LocalLinearAlgebra= theGlobalVariables.rootsSplitChamber1;
-  ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors=theGlobalVariables.listCombinatorialChamberPtSplitChamber;
-  ListBasicObjects<int>& PossibleBogusWalls=theGlobalVariables.listWallDataPtSplitChamber;
-  ListBasicObjects<int>& IndicesPossibleBogusWallsThisChamber=theGlobalVariables.listWallDataPtSplitChamber2;
+  List<CombinatorialChamber*>& PossibleBogusNeighbors=theGlobalVariables.listCombinatorialChamberPtSplitChamber;
+  List<int>& PossibleBogusWalls=theGlobalVariables.listWallDataPtSplitChamber;
+  List<int>& IndicesPossibleBogusWallsThisChamber=theGlobalVariables.listWallDataPtSplitChamber2;
   CombinatorialChamber* NewPlusChamber;
   CombinatorialChamber* NewMinusChamber;
   PossibleBogusNeighbors.size=0;
@@ -4180,7 +4176,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   NewMinusChamber = new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter+=2;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   NewPlusChamber->flagPermanentlyZero = PlusChamberIsPermanentZero;
   NewMinusChamber->flagPermanentlyZero = MinusChamberIsPermanentZero;
@@ -4368,7 +4364,7 @@ void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNorma
       { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
         this->TheObjects[i]=0;
         break;
@@ -4393,7 +4389,7 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
         { delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
           this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
         }
@@ -4591,7 +4587,7 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
       out << tempS << endOfLine;
     }
   }
-  ListBasicObjects<int> sortedIndices;
+  List<int> sortedIndices;
   this->SortIndicesByDisplayNumber(sortedIndices);
   if (this->size>this->GraphicsMaxNumChambers)
   {  out << "Detailed chamber data too large for display";
@@ -5020,13 +5016,11 @@ bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables& theGlob
 }
 
 void CombinatorialChamberContainer::PauseSlicing()
-{ this->thePauseMutex.LockMe();
-  while (this->flagIsRunning)
-  {}
+{ this->thePauseController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
 }
 
 void CombinatorialChamberContainer::ResumeSlicing()
-{ this->thePauseMutex.UnlockMe();
+{ this->thePauseController.UnlockSafePoint();
 }
 
 void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
@@ -5488,7 +5482,7 @@ void WallData::AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighb
   this->IndicesMirrorWalls.AddObjectOnTop(IndexNewNeighborWall);
 }
 
-bool WallData::SplitWall(int indexInOwner, ListBasicObjects<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer& ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables)
+bool WallData::SplitWall(int indexInOwner, List<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer& ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, List<CombinatorialChamber*>& PossibleBogusNeighbors, List<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables)
 { bool IsPositive, IsNegative; IsPositive = false;  IsNegative = false;
   //static int ProblemCounter=0;
   //ProblemCounter++;
@@ -5933,7 +5927,7 @@ void ComplexQN::LinPartToString(std::string& output)
 }
 
 void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
-{ ListBasicObjects<Rational> tempExponent;
+{ List<Rational> tempExponent;
   tempExponent.SetSizeExpandOnTopNoObjectInit(TheSub.NumRows);
   Rational tempRat;
   BasicComplexNumber tempBC;
@@ -6009,7 +6003,7 @@ void PolynomialRationalCoeff::MakePolyExponentFromIntRoot(intRoot& r, GlobalVari
 
 int PolynomialRationalCoeff::SizeWithoutDebugString()
 { int Accum=0;
-  Accum+=this->HashedListBasicObjects<Monomial<Rational> >::SizeWithoutObjects();
+  Accum+=this->HashedList<Monomial<Rational> >::SizeWithoutObjects();
   Accum+=  sizeof(this->NumVars);
   for (int i=0; i<this->ActualSize; i++)
     Accum+=this->TheActualObjects[i].SizeWithoutCoefficient()+sizeof(Rational);
@@ -6429,7 +6423,7 @@ void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplex
   PrecomputedTaukn* NewMember = new PrecomputedTaukn;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->AddObjectOnTop(NewMember);
   NewMember->k=k;
@@ -7135,7 +7129,7 @@ inline bool BasicQN::HasSameExponent(BasicQN &q)
   return true;
 }
 
-inline void BasicQN::Evaluate(ListBasicObjects<int>& theVars, Rational& output)
+inline void BasicQN::Evaluate(List<int>& theVars, Rational& output)
 { output.MakeZero();
   for (int i=0; i<this->Exp.NumRows; i++)
   { int Accum=0;
@@ -7467,7 +7461,7 @@ bool QuasiNumber::ComputeDebugString()
   return true;
 }
 
-void QuasiNumber::Evaluate(ListBasicObjects<int>& theVars, Rational& output)
+void QuasiNumber::Evaluate(List<int>& theVars, Rational& output)
 { output.MakeZero();
   Rational tempRat;
   for (int i=0; i<this->size; i++)
@@ -8947,7 +8941,7 @@ bool partFraction::reduceOnceGeneralMethod(partFractions& Accum, GlobalVariables
 int partFraction::SizeWithoutDebugString()
 {  int Accum =0;
   Accum+=this->Coefficient.SizeWithoutObjects();
-  Accum+=this->::ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongations>::SizeWithoutObjects();
+  Accum+=this->::ListLight<oneFracWithMultiplicitiesAndElongations>::SizeWithoutObjects();
   Accum+=this->size*sizeof(oneFracWithMultiplicitiesAndElongations);
   Accum+=  this->IndicesNonZeroMults.SizeWithoutObjects();
   return Accum;
@@ -9256,7 +9250,7 @@ int partFraction::ComputeGainingMultiplicityIndexInLinearRelation(partFractions&
   return result;
 }
 
-bool partFraction::CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices)
+bool partFraction::CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices)
 { return true;
   /*if (!this->flagUsingPrecomputedOrlikSolomonBases)
     return true;
@@ -9270,9 +9264,9 @@ bool partFraction::DecomposeFromLinRelation(MatrixLargeRational& theLinearRelati
   int GainingMultiplicityIndexInLinRelation=-1;
   int GainingMultiplicityIndex=-1;
   int ElongationGainingMultiplicityIndex=-1;
-  static ListBasicObjects<int> ParticipatingIndices;
-  static ListBasicObjects<int> theGreatestElongations;
-  static ListBasicObjects<int> theCoefficients;
+  static List<int> ParticipatingIndices;
+  static List<int> theGreatestElongations;
+  static List<int> theCoefficients;
   Rational oldCheckSum;
   ParticipatingIndices.size=0;
   theCoefficients.size=0;
@@ -9367,7 +9361,7 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
   }
 }
 
-void partFraction::GetNElongationPolyWithMonomialContribution(partFractions& owner, ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theCoefficients, ListBasicObjects<int>& theGreatestElongations, int theIndex, IntegerPoly& output, int theDimension)
+void partFraction::GetNElongationPolyWithMonomialContribution(partFractions& owner, List<int>& theSelectedIndices, List<int>& theCoefficients, List<int>& theGreatestElongations, int theIndex, IntegerPoly& output, int theDimension)
 { static Monomial<Integer> tempM;
   static IntegerPoly tempP;
   tempM.init((short)theDimension);
@@ -9381,7 +9375,7 @@ void partFraction::GetNElongationPolyWithMonomialContribution(partFractions& own
   output.MultiplyByMonomial(tempM);
 }
 
-void partFraction::ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theGreatestElongations, ListBasicObjects<int>& theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFraction::ApplyGeneralizedSzenesVergneFormula(List<int>& theSelectedIndices, List<int>& theGreatestElongations, List<int>& theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
 { static partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
   static IntegerPoly tempP;
   static PolyPartFractionNumerator tempNum;
@@ -9467,7 +9461,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int>& th
   }
 }
 
-void partFraction::ApplySzenesVergneFormula(ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
+void partFraction::ApplySzenesVergneFormula(List<int>& theSelectedIndices, List<int>& theElongations, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
 { static partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
   static IntegerPoly tempP;
   static PolyPartFractionNumerator tempNum;
@@ -9876,7 +9870,7 @@ void partFraction::operator =(const partFraction &right)
 
 int partFractions::SizeWithoutDebugString()
 { int Accum=0;
-  Accum+=  this->HashedListBasicObjects<partFraction>::SizeWithoutObjects();
+  Accum+=  this->HashedList<partFraction>::SizeWithoutObjects();
   for (int i=0; i<this->ActualSize; i++)
     Accum+=this->TheActualObjects[i].SizeWithoutDebugString();
   Accum+=  sizeof(this->HighestIndex)+sizeof(this->IndexLowestNonProcessed);
@@ -10359,7 +10353,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
     tempMat.ComputeDebugString();
   }
   SelectionWithDifferentMaxMultiplicities thePowers;
-  ListBasicObjects<int> thePowersSigned;
+  List<int> thePowersSigned;
   thePowersSigned.SetSizeExpandOnTopNoObjectInit(this->IndicesNonZeroMults.size);
   thePowers.initIncomplete(this->IndicesNonZeroMults.size);
   for (int k=0; k<this->Coefficient.size; k++)
@@ -10442,7 +10436,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
   }
 }
 
-void partFraction::ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, ListBasicObjects<int>& thePowersSigned, Monomial<Integer>& input)
+void partFraction::ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, List<int>& thePowersSigned, Monomial<Integer>& input)
 { IntegerPoly& theNumerator=theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial1;
   IntegerPoly& tempP=theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial2;
   theNumerator.Nullify((short)Accum.AmbientDimension);
@@ -11011,7 +11005,7 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobal
   }
 }
 
-void partFractions::ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString)
+void partFractions::ComputeSupport(List<roots>& output, std::stringstream& outputString)
 { output.size=0;
   output.MakeActualSizeAtLeastExpandOnTop(this->size);
   for (int i=0; i<this->size; i++)
@@ -11064,7 +11058,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
   }
   if (WeylGroupLetter=='F')
   { tempW.MakeF4();
-    partFractions::ListBasicObjectsActualSizeIncrement=35000;
+    partFractions::ListActualSizeIncrement=35000;
   }
   if (WeylGroupLetter=='A'|| WeylGroupLetter=='B'|| WeylGroupLetter=='C'|| WeylGroupLetter=='D'|| WeylGroupLetter=='F')
   { for (int i=0; i<this->AmbientDimension; i++)
@@ -11475,7 +11469,7 @@ int RootToIndexTable::AddRootPreserveOrder(intRoot& theRoot)
 }
 
 int RootToIndexTable::AddRootAndSort(intRoot& theRoot)
-{ ListBasicObjects<intRoot> tempList;
+{ List<intRoot> tempList;
   tempList.CopyFromBase(*this);
   int index=0;
   for (index=0; index<tempList.size; index++)
@@ -12077,7 +12071,7 @@ void WeylGroup::MakeG2()
   this->KillingFormMatrix.elements[0][1]=-3;
 }
 
-void WeylGroup::GetEpsilonCoordsWRTsubalgebra(  roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables)
+void WeylGroup::GetEpsilonCoordsWRTsubalgebra(  roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& basisChange = theGlobalVariables.matGetEpsilonCoords2;
   MatrixLargeRational& tempMat = theGlobalVariables.matGetEpsilonCoords3;
   DynkinDiagramRootSubalgebra& tempDyn = theGlobalVariables.dynGetEpsCoords;
@@ -12627,7 +12621,7 @@ void PolynomialsRationalCoeffCollection::ComputeDebugString(int theDimension)
 { this->ElementToString(this->DebugString, theDimension);
 }
 
-void VermaModulesWithMultiplicities::WriteKLCoeffsToFile(std::fstream& output, ListBasicObjects<int>& KLcoeff, int TopIndex)
+void VermaModulesWithMultiplicities::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex)
 { output.clear();
   output<< "Top_index: "<<TopIndex<<"\n";
   std::string tempS;
@@ -12635,7 +12629,7 @@ void VermaModulesWithMultiplicities::WriteKLCoeffsToFile(std::fstream& output, L
   output<<tempS;
 }
 
-int VermaModulesWithMultiplicities::ReadKLCoeffsFromFile(std::fstream& input, ListBasicObjects<int>& output)
+int VermaModulesWithMultiplicities::ReadKLCoeffsFromFile(std::fstream& input, List<int>& output)
 { std::string tempS;
   int TopIndex;
   input>>tempS>>TopIndex;
@@ -12645,7 +12639,7 @@ int VermaModulesWithMultiplicities::ReadKLCoeffsFromFile(std::fstream& input, Li
   return TopIndex;
 }
 
-void VermaModulesWithMultiplicities::KLcoeffsToString(ListBasicObjects<int>& theKLCoeffs, std::string& output)
+void VermaModulesWithMultiplicities::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output)
 { std::stringstream out;
   for (int i=0; i<theKLCoeffs.size; i++)
     out<< i<<".  "<<theKLCoeffs.TheObjects[i]<<"\n";
@@ -12807,7 +12801,7 @@ int VermaModulesWithMultiplicities::FindLowestBruhatNonExplored()
   return -1;
 }
 
-int VermaModulesWithMultiplicities::FindHighestBruhatNonExplored(ListBasicObjects<bool>& theExplored)
+int VermaModulesWithMultiplicities::FindHighestBruhatNonExplored(List<bool>& theExplored)
 { for (int i=0; i<this->size; i++)
     if (!theExplored.TheObjects[i])
     { bool isGood=true;
@@ -12842,7 +12836,7 @@ void VermaModulesWithMultiplicities::ComputeFullBruhatOrder()
   this->ExtendOrder();
 }
 
-void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromChamberIndicator(root& ChamberIndicator, ListBasicObjects<int>& output)
+void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromChamberIndicator(root& ChamberIndicator, List<int>& output)
 { this->ComputeKLcoefficientsFromIndex(this->ChamberIndicatorToIndex(ChamberIndicator), output);
 }
 
@@ -12877,7 +12871,7 @@ int VermaModulesWithMultiplicities::ChamberIndicatorToIndex(root &ChamberIndicat
   return -1;
 }
 
-void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromIndex(int ChamberIndex, ListBasicObjects<int>& output)
+void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromIndex(int ChamberIndex, List<int>& output)
 { output.SetSizeExpandOnTopNoObjectInit(this->size);
   this->ComputeKLPolys(this->TheWeylGroup, ChamberIndex);
   for (int i=0; i<this->KLPolys.TheObjects[ChamberIndex].size; i++ )
@@ -12920,7 +12914,7 @@ void VermaModulesWithMultiplicities::ComputeRPolys()
     this->RPolys.TheObjects[i].SetSizeExpandOnTopNoObjectInit(this->size);
   }
   this->LowestNonExplored=this->FindLowestBruhatNonExplored();
-  ListBasicObjects<bool> ExploredFromTop;
+  List<bool> ExploredFromTop;
   ExploredFromTop.SetSizeExpandOnTopNoObjectInit(this->size);
   while(this->LowestNonExplored!=-1)
   { for (int i=0; i<this->size; i++)
@@ -13147,7 +13141,7 @@ rootFKFTcomputation::rootFKFTcomputation()
   this->TheGlobalVariables= new GlobalVariables;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
 }
 
@@ -13155,7 +13149,7 @@ rootFKFTcomputation::~rootFKFTcomputation()
 { delete this->TheGlobalVariables;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
 }
 
@@ -13181,7 +13175,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
   assert(KLDump.is_open());
   assert(PartialFractionsFile.is_open());
   assert(partFractions::ComputedContributionsList.is_open());
-  ListBasicObjects<partFraction>::ListBasicObjectsActualSizeIncrement=13000;
+  List<partFraction>::ListActualSizeIncrement=13000;
   partFractions theVPfunction;
   //theVPfunction.SetSizeExpandOnTopNoObjectInit(8723);
   //assert(theVPfunction.VerifyFileComputedContributions());
@@ -13196,7 +13190,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
   tempV.initFromWeyl(&D5);
   root beta;
   beta.InitFromIntegers(5, 10, 20, 20, 20, 10);
-  ListBasicObjects<int> KLcoeff;
+  List<int> KLcoeff;
 //  int TopIndex=
   tempV.ChamberIndicatorToIndex(beta);
   if (KLDumpIsPresent)
@@ -13326,7 +13320,7 @@ void rootFKFTcomputation::MakeRootFKFTsub(root& direction, QPSub& theSub)
   theSub.MakeSubFromMatrixIntAndDen(tempMat, tempLCM);
 }
 
-void rootFKFTcomputation::MakeTheRootFKFTSum (  root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs,  QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical)
+void rootFKFTcomputation::MakeTheRootFKFTSum (  root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs,  QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical)
 { PolynomialsRationalCoeffCollection TheChambersInTheGame;
   PolynomialsRationalCoeff StartingRoot;
   //::theGlobalVariables.theIndicatorVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
@@ -13363,7 +13357,7 @@ void OneVarIntPolynomial::AddMonomial(int coeff, int power)
   this->FitSize();
 }
 
-void OneVarIntPolynomial::SetSizeAtLeastInitProperly(ListBasicObjects<int> &theArray, int desiredSize)
+void OneVarIntPolynomial::SetSizeAtLeastInitProperly(List<int> &theArray, int desiredSize)
 { if (theArray.size<desiredSize)
   { int oldSize=theArray.size;
     theArray.SetSizeExpandOnTopNoObjectInit(desiredSize);
@@ -13645,7 +13639,7 @@ void IntegerPoly::MakePolyExponentFromIntRoot(intRoot&r)
 
 int IntegerPoly::SizeWithoutDebugString()
 { int Accum=0;
-  Accum+=this->HashedListBasicObjects<Monomial<Integer> >::SizeWithoutObjects();
+  Accum+=this->HashedList<Monomial<Integer> >::SizeWithoutObjects();
   Accum+=  sizeof(this->NumVars);
   for (int i=0; i<this->ActualSize; i++)
     Accum+=this->TheActualObjects[i].SizeWithoutCoefficient()+sizeof(Integer);
@@ -13811,7 +13805,7 @@ void thePFcomputation::SelectionToString(std::string &output, int theDimension)
 }
 
 void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational& output, int theDimension)
-{  output.init((short)theDimension, (short)theDimension);
+{ output.init((short)theDimension, (short)theDimension);
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       output.elements[i][j].Assign(this->theWeylGroup.RootSystem.TheObjects[this->theSelection.elements[i]].TheObjects[j]);
@@ -13828,7 +13822,7 @@ void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
 }
 
 void rootSubalgebra::ComputeAllButAmbientWeyl()
-{  this->PosRootsKConnectedComponents.size=0;
+{ this->PosRootsKConnectedComponents.size=0;
   this->theKComponentRanks.size=0;
   this->theKEnumerations.size=0;
   this->SimpleBasisK.CopyFromBase(this->genK);
@@ -14003,7 +13997,7 @@ bool rootSubalgebra::rootIsInCentralizer(root& input)
   return true;
 }
 
-void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile(std::fstream &output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites)
+void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile(std::fstream &output, List<List<List<int> > >& inMultTable, List<int>& inOpposites)
 { output<< "pairing_table_size: "<< inMultTable.size<<"\n";
   for (int i=0; i<inMultTable.size; i++)
     for (int j=0; j<inMultTable.size; j++)
@@ -14016,10 +14010,10 @@ void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile(std::fstream &output, 
     output<< inOpposites.TheObjects[i]<<" ";
 }
 
-void rootSubalgebra::ReadMultTableAndOppositeKmodsToFile(std::fstream& input, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites)
+void rootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites)
 { std::string tempS;
   int tempI, theSize;
-  input>> tempS>> theSize;
+  input >> tempS >> theSize;
   outMultTable.SetSizeExpandOnTopNoObjectInit(theSize);
   outOpposites.SetSizeExpandOnTopNoObjectInit(theSize);
   for (int i=0; i<theSize; i++)
@@ -14028,7 +14022,7 @@ void rootSubalgebra::ReadMultTableAndOppositeKmodsToFile(std::fstream& input, Li
     { input>> tempI;
       outMultTable.TheObjects[i].TheObjects[j].SetSizeExpandOnTopNoObjectInit(tempI);
       for(int k=0; k<outMultTable.TheObjects[i].TheObjects[j].size; k++)
-        input>> outMultTable.TheObjects[i].TheObjects[j].TheObjects[k];
+        input >> outMultTable.TheObjects[i].TheObjects[j].TheObjects[k];
     }
   }
   input>> tempS;
@@ -14059,18 +14053,18 @@ bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
   return false;
 }
 
-void rootSubalgebra::GeneratePossibleNilradicalsRecursive(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner)
 { int& RecursionDepth=owner.RecursionDepthNilradicalsGeneration;
   std::string tempSsel, tempSopposite;
   if (this->flagAnErrorHasOccuredTimeToPanic)
   { multTable.ComputeDebugString(*this);
-    std::stringstream out; out <<"\n\t";
+    std::stringstream out; out << "\n\t";
     for (int i=0; i<oppositeKmods.size; i++)
-      out <<i <<" / " << oppositeKmods.TheObjects[i]<< "\t";
+      out << i << " / " << oppositeKmods.TheObjects[i] << "\t";
     tempSopposite=out.str();
     multTable.DebugString.append(tempSopposite);
   }
-  ListBasicObjects<int>& counters=owner.CountersNilradicalsGeneration;
+  List<int>& counters=owner.CountersNilradicalsGeneration;
   while (RecursionDepth>-1)
   { while(counters.TheObjects[RecursionDepth]<this->kModules.size)
     { if (!impliedSelections.TheObjects[RecursionDepth].selected[counters.TheObjects[RecursionDepth]])
@@ -14094,7 +14088,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsRecursive(MutexWrapper& PauseMut
   }
 }
 
-bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicObjects<int>& tempList, Selection& tempSel)
+bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel)
 { for (int j=0; j<tempList.size; j++)
     if (tempList.TheObjects[j]<index)
       if (!tempSel.selected[tempList.TheObjects[j]])
@@ -14102,7 +14096,7 @@ bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicO
   return true;
 }
 
-bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables)
+bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables)
 { Selection& targetSel= impliedSelections.TheObjects[RecursionDepth+1];
   Selection& originalSel=impliedSelections.TheObjects[RecursionDepth];
   targetSel.Assign(originalSel);
@@ -14112,7 +14106,7 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int Recursion
     for (int i=0; i<targetSel.CardinalitySelection; i++ )
     { if (targetSel.selected[oppositeKmods.TheObjects[targetSel.elements[i]]])
         return false;
-      ListBasicObjects<int>& tempList=multTable.TheObjects[tempI].TheObjects[targetSel.elements[i]];
+      List<int>& tempList=multTable.TheObjects[tempI].TheObjects[targetSel.elements[i]];
       for (int j=0; j<tempList.size; j++)
       { if (tempList.TheObjects[j]<startIndex && !originalSel.selected[tempList.TheObjects[j]])
           return false;
@@ -14195,14 +14189,14 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
   }
 }
 
-void rootSubalgebra::GenerateKmodMultTable(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& output, ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods, GlobalVariables& theGlobalVariables)
 { output.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
   oppositeKmods.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
   int numTotal= this->kModules.size* this->kModules.size;
   for (int i=0; i<this->kModules.size; i++)
   { output.TheObjects[i].SetSizeExpandOnTopNoObjectInit(this->kModules.size);
     for (int j=0; j<this->kModules.size; j++)
-    {  this->KmodTimesKmod(i, j, oppositeKmods, output.TheObjects[i].TheObjects[j]);
+    { this->KmodTimesKmod(i, j, oppositeKmods, output.TheObjects[i].TheObjects[j]);
       this->MakeProgressReportMultTable(i*this->kModules.size+j, numTotal, theGlobalVariables);
     }
   }
@@ -14218,7 +14212,7 @@ bool rootSubalgebra::IsARootOrZero(root& input)
 { return input.IsEqualToZero() || this->IsARoot(input);
 }
 
-void rootSubalgebra::KmodTimesKmod(int index1, int index2, ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int>& output)
+void rootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output)
 { root tempRoot;
   output.size=0;
   for (int i=0; i<this->kModules.TheObjects[index1].size; i++)
@@ -14234,7 +14228,7 @@ void rootSubalgebra::KmodTimesKmod(int index1, int index2, ListBasicObjects<int>
         if (this->IsARoot(tempRoot))
           for (int k=0; k<this->kModules.size; k++)
             if (this->kModules.TheObjects[k].IndexOfObject(tempRoot)!=-1)
-            {  output.AddObjectOnTopNoRepetitionOfObject(k);
+            { output.AddObjectOnTopNoRepetitionOfObject(k);
               break;
             }
     }
@@ -14299,7 +14293,7 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(root& input)
   return -1;
 }
 
-bool roots::GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int theDimension, ListBasicObjects<root>& coneStrictlyPositiveCoeffs, ListBasicObjects<root>& coneNonNegativeCoeffs, root& outputNormal)
+bool roots::GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int theDimension, List<root>& coneStrictlyPositiveCoeffs, List<root>& coneNonNegativeCoeffs, root& outputNormal)
 { MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
   MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
   MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
@@ -14353,7 +14347,7 @@ bool roots::GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int th
   return result;
 }
 
-bool roots::ConesIntersect(GlobalVariables& theGlobalVariables, ListBasicObjects<root>& StrictCone, ListBasicObjects<root>& NonStrictCone, int theDimension)
+bool roots::ConesIntersect(GlobalVariables& theGlobalVariables, List<root>& StrictCone, List<root>& NonStrictCone, int theDimension)
 { MatrixLargeRational& matA= theGlobalVariables.matConeCondition1;
   MatrixLargeRational& matb= theGlobalVariables.matConeCondition2;
   MatrixLargeRational& matX= theGlobalVariables.matConeCondition3;
@@ -14438,7 +14432,7 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, roots& nilradi
             } else
               tempBool=  tempRoot.HasStronglyPerpendicularDecompositionWRT(-1, nilradicalRoots, this->AmbientWeyl, theRel.Betas, theRel.BetaCoeffs, true);
             if (tempBool)
-            {  theRel.Alphas.size=0;
+            { theRel.Alphas.size=0;
               theRel.AlphaCoeffs.size=0;
               theRel.Alphas.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[i]);
               theRel.Alphas.AddObjectOnTop(this->HighestWeightsGmodK.TheObjects[j]);
@@ -14596,7 +14590,7 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& Ni
         beta1.Assign(theRel.Alphas.TheObjects[i]);
         beta1.Add(theRel.Alphas.TheObjects[j]);
         if (this->IsARootOrZero(beta1))
-        {  this->ComputeHighestWeightInTheSameKMod(beta1, tempRoot);
+        { this->ComputeHighestWeightInTheSameKMod(beta1, tempRoot);
           assert(tempRoot.IsEqualTo(tempRoot));
           if (NilradicalRoots.ContainsObject(beta1))
           { alpha1.Assign(theRel.Alphas.TheObjects[i]);
@@ -14769,7 +14763,7 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& b
     if (i==8)
       tempOut=&out4;
   }
-  out5<< "Included root " << currentIndex+1<< " out of "<< TotalIndex <<" Total found SAs: "<<this->size;
+  out5 << "Included root " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
   theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
@@ -14782,11 +14776,11 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGrou
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out4, out1;
-  out1<<"k_ss: "<<theRootSA.theDynkinDiagram.DebugString <<" C(k_ss): "<<theRootSA.theCentralizerDiagram.DebugString;
-  out4<< "Num elements ";
+  out1 << "k_ss: " << theRootSA.theDynkinDiagram.DebugString << " C(k_ss): " << theRootSA.theCentralizerDiagram.DebugString;
+  out4 << "Num elements ";
   if (theSubgroup.truncated)
-    out4<<"truncated ";
-  out4<<"group preserving k: "<< theSubgroup.size;
+    out4 << "truncated ";
+  out4 << "group preserving k: " << theSubgroup.size;
   theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -14861,7 +14855,7 @@ void rootSubalgebras::RaiseSelectionUntilApproval(Selection& targetSel, GlobalVa
   }
 }
 
-void rootSubalgebras::ApplyOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables)
 { Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator;
   tempSel.initNoMemoryAllocation();
   for (int i=0; i<targetSel.CardinalitySelection; i++)
@@ -14869,7 +14863,7 @@ void rootSubalgebras::ApplyOneGenerator(ListBasicObjects<int>& generator, Select
   targetSel.Assign(tempSel);
 }
 
-bool rootSubalgebras::ApproveSelAgainstOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables)
+bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables)
 { Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator;
   tempSel.initNoMemoryAllocation();
   for (int i=0; i<targetSel.CardinalitySelection; i++)
@@ -14933,7 +14927,7 @@ void rootSubalgebra::ComputeDebugString(GlobalVariables& theGlobalVariables)
 int rootSubalgebra::ProblemCounter2=0;
 
 bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange)
-{  int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
+{ int CurrentRank=Domain.GetRankOfSpanOfElements(theGlobalVariables);
   assert(CurrentRank==Range.GetRankOfSpanOfElements(theGlobalVariables));
   if (abortKmodule!=0)
     *abortKmodule=false;
@@ -14971,9 +14965,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(roots& Domain, r
   leftSA.genK.AddListOnTop(domainRec); rightSA.genK.AddListOnTop(rangeRec);
   leftSA.ComputeAllButAmbientWeyl(); rightSA.ComputeAllButAmbientWeyl();
   if (RecursionDepth!=0)
-    if (leftSA.theDynkinDiagram.DebugString!=rightSA.theDynkinDiagram.DebugString ||
-        leftSA.theCentralizerDiagram.DebugString!=rightSA.theCentralizerDiagram.DebugString ||
-        rightSA.kModules.size!=leftSA.kModules.size)
+    if (leftSA.theDynkinDiagram.DebugString!=rightSA.theDynkinDiagram.DebugString || leftSA.theCentralizerDiagram.DebugString!=rightSA.theCentralizerDiagram.DebugString || rightSA.kModules.size!=leftSA.kModules.size)
     { if (abortKmodule!=0)
         *abortKmodule=true;
       return false;
@@ -15053,7 +15045,7 @@ bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariable
   root tempRoot;
   if (additionalDomain!=0)
     for (int i=0; i<additionalDomain->size; i++)
-    {  tempRoots.MakeBasisChange(additionalDomain->TheObjects[i], tempRoot);
+    { tempRoots.MakeBasisChange(additionalDomain->TheObjects[i], tempRoot);
       if (!tempRoot.IsEqualTo(additionalRange->TheObjects[i]))
         return false;
     }
@@ -15072,17 +15064,17 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebra
   std::string MyPath, childrenPath;
   MyPath=path; childrenPath=path;
   std::stringstream out;
-  out <<path <<"rootSA" <<index;
+  out << path << "rootSA" << index;
   childrenPath=out.str();
   out << ".html";
   MyPath=out.str();
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPath, false, true, false);
   this->ElementToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
-  output<< tempS;
+  output << tempS;
   output.close();
 }
 
-void rootSubalgebra::ElementToStringHeaderFooter(std::string& outputHeader, std::string&  outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords)
+void rootSubalgebra::ElementToStringHeaderFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords)
 { outputHeader.clear();
   outputFooter.clear();
   if (useHtml)
@@ -15095,7 +15087,7 @@ void rootSubalgebra::ElementToStringHeaderFooter(std::string& outputHeader, std:
     outputFooter.append("</td></tr></table>");
   }
   if(useLatex)
-  {  if (!includeKEpsCoords)
+  { if (!includeKEpsCoords)
       outputHeader.append("\n\n\\noindent\\begin{tabular}{|cccccc|} \n \\multicolumn{5}{c}{");
     else
       outputHeader.append("\n\n\\noindent\\begin{tabular}{|ccccccc|} \n \\multicolumn{6}{c}{");
@@ -15184,7 +15176,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       out <<"\n<br>\n";
     if (useHtml)
       out <<"\n<br>";
-    ListBasicObjects<int> hCharacteristics_S_subalgebras;
+    List<int> hCharacteristics_S_subalgebras;
     //this->ComputeIndicesSl2s(indexInOwner, *sl2s, hCharacteristics_S_subalgebras);
     hCharacteristics_S_subalgebras.size=0;
     out << "\nCharacteristics of sl(2) subalgebras that have no centralizer in k (total " <<sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].size<<"): ";
@@ -15463,7 +15455,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
   return this->DebugString>right.DebugString;
 }
 
-void DynkinDiagramRootSubalgebra::GetMapFromPermutation(roots& domain, roots& range, ListBasicObjects<int>& thePerm, ListBasicObjects<ListBasicObjects<ListBasicObjects<int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right)
+void DynkinDiagramRootSubalgebra::GetMapFromPermutation(roots& domain, roots& range, List<int>& thePerm, List<List<List<int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right)
 { for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
     for (int j=0; j<this->SimpleBasesConnectedComponents.TheObjects[i].size; j++)
     { assert(this->SimpleBasesConnectedComponents.TheObjects[i].size==right.SimpleBasesConnectedComponents.TheObjects[thePerm.TheObjects[i]].size);
@@ -15495,7 +15487,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGr
   std::stringstream out;
   out <<"$";
   roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
-  ListBasicObjects<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
+  List<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
   if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
   {//type D or E
     //in type D first comes the triple node, then the long string, then the one-root strings
@@ -15513,7 +15505,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGr
     DynkinDiagramRootSubalgebra  tempDiagram;
     tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theWeyl);
     assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
-    ListBasicObjects<int> indicesLongComponents;
+    List<int> indicesLongComponents;
     indicesLongComponents.size=0;
     Rational tempRat;
     for (int i=0; i<3; i++)
@@ -15630,10 +15622,10 @@ void DynkinDiagramRootSubalgebra::Assign(const DynkinDiagramRootSubalgebra& righ
   this->sameTypeComponents.CopyFromBase(right.sameTypeComponents);
 }
 
-void DynkinDiagramRootSubalgebra::GetAutomorphism(ListBasicObjects<ListBasicObjects<int> > & output, int index)
+void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> > & output, int index)
 { roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[index];
   std::string& currentString=this->DynkinTypeStrings.TheObjects[index];
-  ListBasicObjects<int> thePermutation;
+  List<int> thePermutation;
   thePermutation.SetSizeExpandOnTopNoObjectInit(currentComponent.size);
   output.size=0;
   for (int i=0; i<currentComponent.size; i++)
@@ -15669,7 +15661,7 @@ void DynkinDiagramRootSubalgebra::GetAutomorphism(ListBasicObjects<ListBasicObje
   }
 }
 
-void DynkinDiagramRootSubalgebra::GetAutomorphisms(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > & output)
+void DynkinDiagramRootSubalgebra::GetAutomorphisms(List<List<List<int> > > & output)
 { output.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
     this->GetAutomorphism( output.TheObjects[i], i);
@@ -15745,7 +15737,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   std::stringstream out2;
   std::stringstream out;
   //this->ComputeDebugString(theGlobalVariables);
-  out2<<this->DebugString<<"\n";
+  out2 << this->DebugString << "\n";
   MatrixLargeRational tempMat;
   this->SimpleBasisK.rootsToMatrix(tempMat);
   tempMat.Invert(theGlobalVariables);
@@ -15767,16 +15759,16 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
       linComb.MultiplyByInteger(-x);
       std::string tempS;
       if (this->LinCombToString(AllRoots.TheObjects[i], x, linComb, tempS))
-      { out<<tempS<<"\n";
+      { out << tempS << "\n";
         counter++;
         if (this->LowestWeightsGmodK.IndexOfObject(AllRoots.TheObjects[i]) !=-1)
-          out2<< tempS<<"\n";
+          out2 << tempS << "\n";
       }
     }
   }
-  out << "\\multicolumn{2}{|c|}{Number of relations: "<<counter<<" }\\\\\\hline";
+  out << "\\multicolumn{2}{|c|}{Number of relations: " << counter << " }\\\\\\hline";
   std::string tempS=out.str();
-  out2 << "\n\n"<<tempS;
+  out2 << "\n\n" << tempS;
   this->DebugString=out2.str();
   if (DoEnumeration)
   { this->TestedRootsAlpha.CopyFromBase(this->LowestWeightsGmodK);
@@ -15820,12 +15812,12 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
           linComb.MultiplyByInteger(-x);
           std::string tempS;
           if (this->LinCombToStringDistinguishedIndex(l, AllRoots.TheObjects[i], x, linComb, tempS))
-          { out<<tempS<<"\n";
+          { out << tempS << "\n";
             counter++;
           }
         }
       }
-      out<<"\\multicolumn{2}{|c|}{Number of relations: "<<counter<<" }\\\\\\hline";
+      out << "\\multicolumn{2}{|c|}{Number of relations: " << counter << " }\\\\\\hline";
     }
   }
   this->DebugString=out.str();
@@ -15838,51 +15830,55 @@ bool rootSubalgebra::LinCombToString(root& alphaRoot, int coeff, root& linComb, 
   std::stringstream out;
   std::string tempS;
   alphaRoot.ElementToString(tempS);
-  out<<"("<<tempS<<")&$";
-  out<<coeff<<"\\alpha_"<<theDimension+1;
+  out << "(" << tempS << ")&$";
+  out << coeff << "\\alpha_" << theDimension+1;
   for (int i=0; i<theDimension; i++)
   {  //if (linComb.coordinates[i].IsEqualToZero())
     //  return false;
     linComb.TheObjects[i].ElementToString(tempS);
     if (tempS!="0")
-    { if (tempS=="-1") {tempS="-"; }
-      if (tempS=="1") {tempS="+"; }
+    { if (tempS=="-1")
+        tempS="-";
+      if (tempS=="1")
+        tempS="+";
       if (!(tempS[0]=='+')&& !(tempS[0]=='-'))
         tempS.insert(0, "+");
-      out<<tempS<<"\\beta_"<<i+1;
+      out << tempS << "\\beta_" << i+1;
     }
   }
-  out<<"=0$\\\\";
+  out << "=0$\\\\";
   output=out.str();
   return true;
 }
 
-bool rootSubalgebra::LinCombToStringDistinguishedIndex(int distinguished, root& alphaRoot, int coeff, root &linComb, std::string &output)
+bool rootSubalgebra::LinCombToStringDistinguishedIndex(int distinguished, root& alphaRoot, int coeff, root& linComb, std::string& output)
 { int theDimension = this->AmbientWeyl.KillingFormMatrix.NumRows;
   if (coeff==1)
     return false;
   std::stringstream out;
   std::string tempS;
   alphaRoot.ElementToString(tempS);
-  out<<"("<<tempS<<")&$";
-  out<<coeff<<"\\alpha_"<<theDimension+1;
+  out << "(" << tempS << ")&$";
+  out << coeff << "\\alpha_" << theDimension+1;
   for (int i=0; i<theDimension; i++)
   { //if (linComb.coordinates[i].IsEqualToZero())
     //  return false;
     linComb.TheObjects[i].ElementToString(tempS);
     if (tempS!="0")
-    { if (tempS=="-1") {tempS="-"; }
-      if (tempS=="1") {tempS="+"; }
-      if (!(tempS[0]=='+')&& !(tempS[0]=='-'))
+    { if (tempS=="-1")
+        tempS="-";
+      if (tempS=="1")
+        tempS="+";
+      if (!(tempS[0]=='+') && !(tempS[0]=='-'))
         tempS.insert(0, "+");
-      out <<tempS;
+      out << tempS;
       if (i!=distinguished)
-        out<<"\\beta_"<<i+1;
+        out << "\\beta_" << i+1;
       else
-        out<<"\\gamma";
+        out << "\\gamma";
     }
   }
-  out<<"=0$\\\\";
+  out << "=0$\\\\";
   output=out.str();
   return true;
 }
@@ -16102,15 +16098,15 @@ GeneratorPFAlgebraRecord::GeneratorPFAlgebraRecord()
   this->Value = new IntegerPoly;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
 }
 
 GeneratorPFAlgebraRecord::~GeneratorPFAlgebraRecord()
-{  delete this->Value; this->Value=0;
+{ delete this->Value; this->Value=0;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if(ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+  if(ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)std::exit(0);
 #endif
 }
 
@@ -16138,7 +16134,7 @@ void GeneratorsPartialFractionAlgebra::ElementToString(std::string& output, Poly
     return;
   }
   std::stringstream out;
-  out<<"("<<tempS<<")^{"<<this->GeneratorPower<<"}";
+  out << "(" << tempS << ")^{" << this->GeneratorPower << "}";
   output=out.str();
 }
 
@@ -16196,9 +16192,9 @@ void GeneratorPFAlgebraRecord::ElementToString(std::string& output, PolynomialOu
   for (int i=0; i<theDimension; i++)
     if (this->GeneratorRoot.TheObjects[i]!=0)
     { if (this->GeneratorRoot.TheObjects[i]==1)
-        out1<< PolyFormat.GetLetterIndex(i);
+        out1 << PolyFormat.GetLetterIndex(i);
       else
-        out1<< PolyFormat.GetLetterIndex(i)<<"^{"<<this->GeneratorRoot.TheObjects[i]<<"}";
+        out1 << PolyFormat.GetLetterIndex(i) << "^{" << this->GeneratorRoot.TheObjects[i] << "}";
     }
   if (this->Elongation==0)
   { output= out1.str();
@@ -16251,7 +16247,7 @@ void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFr
 { output.Nullify((short)theDimension);
   output.MakeActualSizeAtLeastExpandOnTop(this->size);
   for (int i=0; i<this->size; i++)
-  { MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>tempM;
+  { MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> tempM;
     tempM.Coefficient.value= this->Coefficients.TheObjects[i];
     for (int j=0; j<this->TheObjects[i].size; j++)
       tempM.MultiplyByGenerator(this->TheObjects[i].TheObjects[j]);
@@ -16343,7 +16339,7 @@ bool MatrixLargeRational  ::SystemLinearEqualitiesWithPositiveColumnVectorHasNon
   //tempMatb.Assign(matb);
   tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
   matX.init(tempMatA.NumCols, 1);
-  HashedListBasicObjects<Selection>& VisitedVertices = theGlobalVariables.hashedSelSimplexAlg;
+  HashedList<Selection>& VisitedVertices = theGlobalVariables.hashedSelSimplexAlg;
   VisitedVertices.ClearTheObjects();
   BaseVariables.init(tempMatA.NumCols);
   tempMatA.NullifyAll();  matX.NullifyAll();
@@ -16489,7 +16485,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRationa
   NumTrueVariables= matA.NumCols;
   tempMatA.init(matA.NumRows, NumTrueVariables*2+matA.NumRows+numExtraColumns);
   matX.init(tempMatA.NumCols, 1);
-  static HashedListBasicObjects<Selection> VisitedVertices;
+  static HashedList<Selection> VisitedVertices;
   VisitedVertices.ClearTheObjects();
   static Selection NonZeroSlackVariables;
   static Selection BaseVariables;
@@ -16689,9 +16685,9 @@ void affineHyperplane::ElementToString(std::string& output)
 { std::stringstream out;
   std::string tempS;
   this->affinePoint.ElementToString(tempS);
-  out<< "point: " << tempS;
+  out << "point: " << tempS;
   this->normal.ElementToString(tempS);
-  out<<" normal: "<< tempS;
+  out << " normal: " << tempS;
   output= out.str();
 }
 
@@ -16719,7 +16715,7 @@ void affineHyperplanes::ElementToString(std::string& output)
   for (int i=0; i<this->size; i++)
   { std::string tempS;
     this->TheObjects[i].ElementToString(tempS);
-    out<<"index: "<<i<<" "<< tempS<<"\n";
+    out << "index: " << i << " " << tempS << "\n";
   }
   output= out.str();
 }
@@ -16730,70 +16726,70 @@ void multTableKmods::ElementToString(std::string& output, rootSubalgebra& owner)
 
 void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool useHtml, rootSubalgebra& owner)
 {  std::stringstream out;
-  out <<"\t";
+  out << "\t";
   if (!(useLaTeX||useHtml))
     for (int i=0; i<this->size; i++)
-      out << i<<"\t";
+      out << i << "\t";
   else
   { if (useHtml)
-      out<<"<table><tr><th></th>";
+      out << "<table><tr><th></th>";
     if (useLaTeX)
-    {  out <<"\\begin{tabular}{c|";
+    { out << "\\begin{tabular}{c|";
       for (int i=0; i<this->size; i++)
         out << "c";
       out << "|} & ";
     }
     for (int i=0; i<this->size; i++)
     { if (useHtml)
-        out <<"<th>";
+        out << "<th>";
       out << i;
       if (useHtml)
-        out <<"</th>";
+        out << "</th>";
       else
-      {  if (i!=this->size-1)
-          out <<"&";
+      { if (i!=this->size-1)
+          out << "&";
       }
     }
     if (useHtml)
-      out <<"</tr>";
+      out << "</tr>";
     if (useLaTeX)
-      out<<"\\\\\\hline";
+      out << "\\\\\\hline";
   }
   for (int i=0; i<this->size; i++)
   { if (useHtml)
-      out <<"\n<tr><td>";
-    out <<"\n"<<i;
+      out << "\n<tr><td>";
+    out << "\n" << i;
     if (useLaTeX)
-      out<<" & ";
+      out << " & ";
     if (useHtml)
-      out <<"</td>";
+      out << "</td>";
     for (int j=0; j<this->TheObjects[i].size; j++)
     { if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
       { if(useLaTeX)
-          out<<"\\multicolumn{1}{c|}{";
+          out << "\\multicolumn{1}{c|}{";
         if(useHtml)
-          out <<"<td rhs=\"1\">";
+          out << "<td rhs=\"1\">";
       } else
       { if (useHtml)
-          out <<"<td>";
+          out << "<td>";
       }
       for (int k=0; k<this->TheObjects[i].TheObjects[j].size; k++)
         out << this->TheObjects[i].TheObjects[j].TheObjects[k] << ", ";
       if (useLaTeX )
       { if ((j==owner.CentralizerRoots.size-1) && (i<=owner.CentralizerRoots.size-1))
-          out<<"}";
+          out << "}";
         if (j!=this->TheObjects[i].size-1)
-          out <<" & ";
+          out << " & ";
       }
       if (useHtml)
-        out <<"</td>";
+        out << "</td>";
     }
     if (useHtml)
-      out <<"</tr>";
+      out << "</tr>";
     if (useLaTeX)
-    { out <<"\\\\";
+    { out << "\\\\";
       if (i==owner.CentralizerRoots.size-1)
-        out<<"\\cline{2-" << owner.CentralizerRoots.size+1<<"}";
+        out<< "\\cline{2-" << owner.CentralizerRoots.size+1 << "}";
     }
   }
   if (useLaTeX)
@@ -16867,7 +16863,7 @@ void rootsWithMultiplicity::ElementToString(std::string &output)
   output=out.str();
 }
 
-void coneRelation::RelationOneSideToStringCoordForm(std::string& output, ListBasicObjects<Rational>& coeffs, roots& theRoots, bool EpsilonForm)
+void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Rational>& coeffs, roots& theRoots, bool EpsilonForm)
 { std::stringstream out;
   std::string tempS;
   for (int i=0; i<theRoots.size; i++)
@@ -16888,7 +16884,7 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, ListBas
 }
 
 
-void coneRelation::RelationOneSideToString(std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner)
+void coneRelation::RelationOneSideToString(std::string& output, const std::string& letterType, List<Rational>& coeffs, List<List<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner)
 { assert(theRoots.size==coeffs.size);
   std::stringstream out;
   std::string tempS;
@@ -16906,45 +16902,45 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
     out<< tempS;
     if (!useLatex)
     { theRoots.TheObjects[i].ElementToString(tempS);
-      out <<"("<<tempS<<")";
+      out << "(" << tempS << ")";
       if (i!=theRoots.size-1)
-        out <<" + ";
+        out << " + ";
     } else
-    { out <<"$"<< letterType<<"_"<< i+1<<"$";
+    { out << "$" << letterType << "_" << i+1 << "$";
       if (i!=theRoots.size-1)
-        out <<"+ & ";
+        out << "+ & ";
     }
   }
   if (useLatex)
-    out <<"\\\\";
-  ListBasicObjects<int> TakenIndices;
-  ListBasicObjects<int> NumPrimesUniTypicComponent;
+    out << "\\\\";
+  List<int> TakenIndices;
+  List<int> NumPrimesUniTypicComponent;
   TakenIndices.initFillInObject(owner.theDynkinDiagram.SimpleBasesConnectedComponents.size, -1);
   NumPrimesUniTypicComponent.initFillInObject(owner.theDynkinDiagram.sameTypeComponents.size, -1);
   for (int i=0; i<kComponents.size; i++)
   { if (useLatex)
-      out <<"\\tiny{ ";
+      out << "\\tiny{ ";
     for (int j=0; j<kComponents.TheObjects[i].size; j++)
     { int index= kComponents.TheObjects[i].TheObjects[j];
       int indexUniComponent=owner.theDynkinDiagram.indexUniComponent.TheObjects[index];
-      out <<owner.theDynkinDiagram.DynkinTypeStrings.TheObjects[index];
+      out << owner.theDynkinDiagram.DynkinTypeStrings.TheObjects[index];
       if (TakenIndices.TheObjects[index]==-1)
       { NumPrimesUniTypicComponent.TheObjects[indexUniComponent]++;
         TakenIndices.TheObjects[index]=NumPrimesUniTypicComponent.TheObjects[indexUniComponent];
       }
       for (int k=0; k<TakenIndices.TheObjects[index]; k++)
-        out <<"'";
+        out << "'";
       if (j!=kComponents.TheObjects[i].size-1)
-        out<<"+";
+        out << "+";
     }
     if (useLatex)
-    { out <<" }";
+    { out << " }";
       if(i!=kComponents.size-1)
         out <<" & ";
     }
   }
   if (useLatex)
-    out <<"\\end{tabular}";
+    out << "\\end{tabular}";
   output=out.str();
 }
 
@@ -16959,7 +16955,7 @@ int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, 
   this->RelationOneSideToString(tempS, "\\alpha", this->AlphaCoeffs, this->AlphaKComponents, this->Alphas, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
   out << tempS;
   if (useLatex)
-    out <<" &\\begin{tabular}{c} ";
+    out << " &\\begin{tabular}{c} ";
   out << "=";
   if (useLatex)
     out <<" \\\\~ \\end{tabular} & ";
@@ -17007,7 +17003,7 @@ int coneRelation::RootsToScalarProductString(roots& inputLeft, roots& inputRight
   return numLinesLatex;
 }
 
-void coneRelation::ComputeConnectedComponents(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output)
+void coneRelation::ComputeConnectedComponents(roots& input, rootSubalgebra& owner, List<List<int> >& output)
 { output.SetSizeExpandOnTopNoObjectInit(input.size);
   for (int i=0; i<input.size; i++)
   { output.TheObjects[i].size=0;
@@ -17043,7 +17039,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(  rootSubalgebra& owner, roots& N
     if (!owner.NilradicalKmods.selected[i] && tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i]) && owner.IsGeneratingSingularVectors(i, NilradicalIntersection))
       genSingHW.AddObjectOnTop(owner.HighestWeightsGmodK.TheObjects[i]);
   genSingHW.ComputeDebugString();
-  if (owner.ConeConditionHolds(  theGlobalVariables, owners, indexInOwner, NilradicalIntersection, genSingHW, false))
+  if (owner.ConeConditionHolds(theGlobalVariables, owners, indexInOwner, NilradicalIntersection, genSingHW, false))
     return false;
   if (!owner.AttemptTheTripleTrickWRTSubalgebra(*this, genSingHW, NilradicalIntersection, theGlobalVariables))
     return false;
@@ -17169,7 +17165,7 @@ void coneRelation::SortRelation(rootSubalgebra& owner)
       }
 }
 
-void coneRelation::ComputeKComponents(roots& input, ListBasicObjects<ListBasicObjects<int> >& output, rootSubalgebra& owner)
+void coneRelation::ComputeKComponents(roots& input, List<List<int> >& output, rootSubalgebra& owner)
 { output.SetSizeExpandOnTopNoObjectInit(input.size);
   for(int i=0; i<input.size; i++)
   { output.TheObjects[i].size=0;
@@ -17190,7 +17186,7 @@ void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
   this->theDiagramRelAndK.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
 }
 
-void coneRelation::FixRepeatingRoots(roots& theRoots, ListBasicObjects<Rational>& coeffs)
+void coneRelation::FixRepeatingRoots(roots& theRoots, List<Rational>& coeffs)
 { for (int i=0; i<theRoots.size; i++)
   { if (coeffs.TheObjects[i].IsEqualToZero())
     { coeffs.PopIndexSwapWithLast(i);
@@ -17207,7 +17203,7 @@ void coneRelation::FixRepeatingRoots(roots& theRoots, ListBasicObjects<Rational>
   }
 }
 
-bool coneRelation::leftSortedBiggerThanOrEqualToRight(ListBasicObjects<int>& left, ListBasicObjects<int>& right)
+bool coneRelation::leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>& right)
 { if (left.size>right.size)
     return true;
   if (right.size>left.size)
@@ -17236,7 +17232,7 @@ bool coneRelation::GenerateAutomorphisms(coneRelation& right, rootSubalgebras& o
 void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras)
 { input.ComputeDebugString(owners, true, true);
   int i=this->FitHashSize(input.HashFunction());
-  ListBasicObjects<int>& theIndices= this->TheHashedArrays[i];
+  List<int>& theIndices= this->TheHashedArrays[i];
   for (int j=0; j<theIndices.size; j++)
   { if(this->TheObjects[theIndices.TheObjects[j]].GenerateAutomorphisms(input, owners))
       return;
@@ -17258,7 +17254,7 @@ void permutation::initPermutation(int n)
   }
 }
 
-void permutation::initPermutation(ListBasicObjects<int>& disjointSubsets, int TotalNumElements)
+void permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElements)
 { this->initIncomplete(TotalNumElements);
   int counter=0;
   for(int i=0; i<disjointSubsets.size; i++)
@@ -17272,12 +17268,12 @@ void permutation::initPermutation(ListBasicObjects<int>& disjointSubsets, int To
   assert(TotalNumElements==0);
 }
 
-void permutation::incrementAndGetPermutation(ListBasicObjects<int>& output)
+void permutation::incrementAndGetPermutation(List<int>& output)
 { this->IncrementSubset();
   this->GetPermutation(output);
 }
 
-void permutation::GetPermutation(ListBasicObjects<int>& output)
+void permutation::GetPermutation(List<int>& output)
 { int numElements=this->Multiplicities.size;
   output.SetSizeExpandOnTopNoObjectInit(numElements);
   for (int i=0; i<numElements; i++)
@@ -17297,31 +17293,26 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
   this->NumSubalgebrasCounted=0;
   for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
   { this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[i].GeneratePossibleNilradicals( this->mutexLockMeToPauseLProhibitingComputations, this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, true, *this, i);
+    this->TheObjects[i].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, true, *this, i);
     if (i!=NumToBeProcessed+StartingIndex-1)
       this->TheObjects[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, ParabolicsSelectionNilradicalGeneration, parabolicsCounterNilradicalGeneration);
   }
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
-{ this->mutexLockMeToPauseLProhibitingComputations.IsRunning=true;
-  for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
+{ for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
   { this->TheObjects[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals
-      ( this->mutexLockMeToPauseLProhibitingComputations,
-        this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration,
-        theGlobalVariables, true, false, *this, this->IndexCurrentSANilradicalsGeneration);
+    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, true, false, *this, this->IndexCurrentSANilradicalsGeneration);
     if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration-1)
       this->TheObjects[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration);
   }
-  this->mutexLockMeToPauseLProhibitingComputations.IsRunning=false;
 }
 
 void rootSubalgebras::SortDescendingOrderBySSRank()
 {//Bubble sort
   rootSubalgebras output;
-  ListBasicObjects<int> SortingArray;
-  ListBasicObjects<int> inverseOfSortingArray;
+  List<int> SortingArray;
+  List<int> inverseOfSortingArray;
   SortingArray.SetSizeExpandOnTopNoObjectInit(this->size);
   for (int i=0; i<this->size; i++)
     SortingArray.TheObjects[i]=i;
@@ -17335,8 +17326,8 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
   output.MakeActualSizeAtLeastExpandOnTop(this->size);
   for (int i=0; i<this->size; i++)
   { output.AddObjectOnTop(this->TheObjects[SortingArray.TheObjects[i]]);
-    ListBasicObjects<int>& otherArray=this->TheObjects[SortingArray.TheObjects[i]].indicesSubalgebrasContainingK;
-    ListBasicObjects<int>& currentArray=output.LastObject()->indicesSubalgebrasContainingK;
+    List<int>& otherArray=this->TheObjects[SortingArray.TheObjects[i]].indicesSubalgebrasContainingK;
+    List<int>& currentArray=output.LastObject()->indicesSubalgebrasContainingK;
     currentArray.MakeActualSizeAtLeastExpandOnTop(otherArray.size);
     currentArray.size=0;
     for(int j=0; j<otherArray.size; j++)
@@ -17503,10 +17494,10 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       }
     }
     if (useLatex)
-      out<<"\\end{tabular}";
-    row=(i)/this->NumColsPerTableLatex;
-    col=(i)% this->NumColsPerTableLatex;
-    if (row==this->NumLinesPerTableLatex)
+      out << "\\end{tabular}";
+    row = (i)/this->NumColsPerTableLatex;
+    col = (i)% this->NumColsPerTableLatex;
+    if (row == this->NumLinesPerTableLatex)
       row=0;
     if (col==0 && row!=0)
     { if (useLatex)
@@ -17523,14 +17514,14 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       if(useHtml)
         out << "</td>";
       if (i!=this->size-1 && useHtml)
-        out<<"<td title=\"" << tooltipSAs << "\">";
+        out << "<td title=\"" << tooltipSAs << "\">";
     }
     if (row==0 && col==0)
-      out <<footer;
+      out << footer;
   }
   if (!(col==0 && row==0))
-    out <<footer;
-  out <<"\n\n";
+    out << footer;
+  out << "\n\n";
   output=out.str();
 }
 
@@ -17557,7 +17548,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
   { if (oldIndex!=this->TheObjects[i].IndexOwnerRootSubalgebra)
     { oldIndex=this->TheObjects[i].IndexOwnerRootSubalgebra;
       if (useLatex)
-        out  <<"\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString<<"}\\\\\n\\hline\\hline";
+        out << "\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: " << owners.TheObjects[oldIndex].theDynkinDiagram.DebugString << "}\\\\\n\\hline\\hline";
       //if (useHtml)
       //{ out << "<table>" << "<tr>"<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString
        //     <<"</tr>";
@@ -18168,7 +18159,7 @@ void ElementSimpleLieAlgebra::SetCoefficient(const root& indexingRoot, int theCo
   this->SetCoefficient(indexingRoot, tempRat, owner);
 }
 
-void SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings)
+void SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings)
 { std::stringstream outTable, outNotation;
   std::string tempS;
   if (physicalPath==0 || htmlServerPath==0 || outputPNGFileNames==0 || outputLatexToPNGstrings==0)
@@ -18909,7 +18900,7 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
   { this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
     this->TheObjects[i].owner=this;
   }
-  this->theK.ReadMultTableAndOppositeKmodsToFile(input, this->theK.theMultTable, this->theK.theOppositeKmods);
+  this->theK.ReadMultTableAndOppositeKmodsFromFile(input, this->theK.theMultTable, this->theK.theOppositeKmods);
   this->theWeylGroup.ComputeRho(true);
   this->initShared(this->theWeylGroup, theGlobalVariables);
   this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theIsos.simpleGenerators, this->theIsos.ExternalAutomorphisms, theGlobalVariables, -1, false);
@@ -19010,8 +19001,8 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream& inputHeader, std::
   this->theIndexStack.SetSizeExpandOnTopNoObjectInit(tempI);
   for (int i=0; i<this->theIndexStack.size; i++)
     inputHeader>>this->theIndexStack.TheObjects[i];
-  ListBasicObjects<int> theActiveChildren;
-  ListBasicObjects< ListBasicObjects<int> > thePossibleChildStates, theCompleteChildStates;
+  List<int> theActiveChildren;
+  List< List<int> > thePossibleChildStates, theCompleteChildStates;
   theActiveChildren.SetSizeExpandOnTopNoObjectInit(this->size);
   thePossibleChildStates.SetSizeExpandOnTopNoObjectInit(this->size);
   theCompleteChildStates.SetSizeExpandOnTopNoObjectInit(this->size);
@@ -19749,7 +19740,7 @@ void WeylGroup::GenerateRootSubsystem(roots& theRoots)
     }
 }
 
-void WeylGroup::GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables)
+void WeylGroup::GetEpsilonCoords(List<root>& input, roots& output, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
   tempRoots.SetSizeExpandOnTopNoObjectInit(this->KillingFormMatrix.NumRows);
   for (int i=0; i<this->KillingFormMatrix.NumRows; i++)
@@ -19808,7 +19799,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(minimalRelation
   diagram2.ComputeDiagramTypeModifyInput(tempRoots, theWeyl);
   if (!(diagram1==diagram2))
     return false;
-  ListBasicObjects<int> tempList;
+  List<int> tempList;
   permutation thePermAlphas, thePermBetas, thePermK, tempPermAlphas, tempPermBetas, tempPermK;
   this->GetIsoTypicComponents(theAlphas, theBetas, thePermAlphas, theState, theWeyl,  theGlobalVariables);
   this->GetIsoTypicComponents(theBetas, theAlphas, thePermBetas, theState, theWeyl, theGlobalVariables);
@@ -19879,7 +19870,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(minimalRelation
 }
 
 void minimalRelationsProverStates::GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
-{ ListBasicObjects<int> tempList;
+{ List<int> tempList;
   if(theRoots.size==0)
   { tempList.size=0;
     outputComponents.initPermutation(tempList, 0);
@@ -19905,7 +19896,7 @@ void minimalRelationsProverStates::GetIsoTypicComponents(roots& theRoots, roots&
 }
 
 void minimalRelationsProverStatesFixedK::GetIsoTypicComponents(roots& theRoots, roots& theOtherTypeRoots, permutation& outputComponents, minimalRelationsProverStateFixedK& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
-{ ListBasicObjects<int> tempList;
+{ List<int> tempList;
   if(theRoots.size==0)
   { tempList.size=0;
     outputComponents.initPermutation(tempList, 0);
@@ -19951,9 +19942,9 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(roots& Domain, roots& Range, 
   }
   roots isoDomain, isoRange;
   permutation permComponentsCentralizer;
-  ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
+  List<int> tempList, tempPermutation1, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
-  ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > CentralizerDiagramAutomorphisms;
+  List<List<List<int> > > CentralizerDiagramAutomorphisms;
   theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
   theDomainRootSA.theCentralizerDiagram.ComputeDebugString();
   tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
@@ -20279,7 +20270,7 @@ void minimalRelationsProverStates::BranchByAddingKRoots(int index, WeylGroup& th
 }
 
 void minimalRelationsProverStates::PurgeImpossibleStates()
-{ ListBasicObjects<int> newIndices;
+{ List<int> newIndices;
   newIndices.SetSizeExpandOnTopNoObjectInit(this->size);
   int counter=0;
   for (int i=0; i<this->size; i++)
@@ -20557,7 +20548,7 @@ void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl,
     this->TheObjects[index].NumImpossibleChildren++;
 }
 
-bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet(roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonPositive, root& output, WeylGroup& TheWeyl, GlobalVariables& theGlobalVariables, ListBasicObjects<root>& theNormalCandidates)
+bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet(roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonPositive, root& output, WeylGroup& TheWeyl, GlobalVariables& theGlobalVariables, List<root>& theNormalCandidates)
 { Rational tempRat;
   bool foundSeparatingRoot=false;
   if (choicePreferrence!=0)
@@ -20605,7 +20596,7 @@ bool minimalRelationsProverStates::GetSeparatingRootIfExistsFromSet(roots* choic
   return false;
 }
 
-bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool& oneBetaIsPositive )
+bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis( int theIndex, List<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool& oneBetaIsPositive )
 { minimalRelationsProverState& theRel=this->TheObjects[theIndex];
   roots& theAlphas = theRel.PartialRelation.Alphas;
   roots& theBetas = theRel.PartialRelation.Betas;
@@ -20626,7 +20617,7 @@ bool minimalRelationsProverStates::GetNormalSeparatingConesFromPreferredBasis( i
   return result;
 }
 
-bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool& oneBetaIsPositive )
+bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBasis( int theIndex, List<root>&inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables, bool& oneBetaIsPositive )
 { minimalRelationsProverStateFixedK& theRel=this->TheObjects[theIndex];
   roots& theAlphas = theRel.PartialRelation.Alphas;
   roots& theBetas = theRel.PartialRelation.Betas;
@@ -20660,9 +20651,9 @@ bool rootSubalgebra::GenerateAutomorphisms(rootSubalgebra& right, GlobalVariable
   }
   roots isoDomain, isoRange;
   permutation permComponents, permComponentsCentralizer;
-  ListBasicObjects<int> tempList, tempPermutation1, tempPermutation2;
+  List<int> tempList, tempPermutation1, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutos, tempAutosCentralizer;
-  ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms;
+  List<List<List<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms;
   this->theDynkinDiagram.GetAutomorphisms(DiagramAutomorphisms);
   this->theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
   tempAutos.initIncomplete(DiagramAutomorphisms.size);
@@ -20957,7 +20948,7 @@ bool minimalRelationsProverStatesFixedK::ExtendToIsomorphismRootSystemFixedK(min
   diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup);
   if (!(diagram1==diagram2))
     return false;
-  ListBasicObjects<int> tempList;
+  List<int> tempList;
   permutation thePermAlphas, thePermBetas, tempPermAlphas, tempPermBetas;
   this->GetIsoTypicComponents(theAlphas, theBetas, thePermAlphas, theState, theWeyl,  theGlobalVariables);
   this->GetIsoTypicComponents(theBetas, theAlphas, thePermBetas, theState, theWeyl, theGlobalVariables);
@@ -21162,7 +21153,7 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <> int ListBasicObjects<DyckPath>::ListBasicObjectsActualSizeIncrement=2000;
+template <> int List<DyckPath>::ListActualSizeIncrement=2000;
 
 bool DyckPath::IamComplete(DyckPaths& owner)
 { if (this->thePathNodes.size<=0)
@@ -21185,7 +21176,7 @@ void DyckPaths::initPathGraphTypesABC()
   this->PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
   this->pathGraphPairsOfNodes.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
   this->pathGraphEdgeLabels.SetSizeExpandOnTopNoObjectInit(this->PositiveRoots.size);
-  ListBasicObjects<int> tempList;
+  List<int> tempList;
   this->AllowedEndNodes.init(this->PositiveRoots.size);
   for (int i=0; i<this->pathGraphPairsOfNodes.size; i++)
   { this->pathGraphPairsOfNodes.TheObjects[i].size=0;
@@ -21252,8 +21243,8 @@ bool DyckPaths::SimpleRootAllowedToBeSubtractedTypesABC(int simpleRootIndex, roo
 }
 
 void DyckPaths::GenerateAllDyckPathsTypesABCRecursive()
-{ ListBasicObjects<int> pathEdgesTaken;
-  ListBasicObjects<int> pathNodes;
+{ List<int> pathEdgesTaken;
+  List<int> pathNodes;
   while (this->LastNonExploredIndex<this->size)
   { //this->ComputeDebugString();
     pathEdgesTaken.AssignLight(this->TheObjects[this->LastNonExploredIndex].thePathEdgesTaken);
@@ -21519,7 +21510,7 @@ void ElementWeylAlgebra::MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight
   this->StandardOrder.Assign(Accum);
 }
 
-void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
+void ElementWeylAlgebra::ElementToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
 { std::stringstream out;
   std::string tempS;
   int numLettersSinceLastNewLine=0;
@@ -21563,7 +21554,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, ListBasicObjects<s
 }
 
 void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray)
-{ ListBasicObjects<std::string> alphabet;
+{ List<std::string> alphabet;
   alphabet.SetSizeExpandOnTopNoObjectInit(this->NumVariables);
   int numCycles=this->NumVariables;
   if (useXYs)
@@ -21885,7 +21876,7 @@ void WeylParser::AddLieBracketOnTop()
 void WeylParser::ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   this->Parse(input);
-  out <<"\\begin{eqnarray*}&&" << input<<" = \\\\\n";
+  out <<"\\begin{eqnarray*}&&" << input << " = \\\\\n";
   this->Evaluate(theGlobalVariables);
   this->Value.ElementToString(tempS, false, true, false);
   out <<tempS;
@@ -22021,7 +22012,7 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
   this->thePaths.AmbientWeyl.MakeAn(theDimension);
   this->thePaths.GenerateAllDyckPathsTypesABC();
   this->thePaths.ComputeGoodPathsExcludeTrivialPath();
-  this->thePathMatrix.init( this->thePaths.GoodPaths.size, this->thePaths.PositiveRoots.size);
+  this->thePathMatrix.init(this->thePaths.GoodPaths.size, this->thePaths.PositiveRoots.size);
   this->thePathMatrix.NullifyAll(0);
   for (int i=0; i<this->thePaths.GoodPaths.size; i++)
     for (int j=0; j<this->thePaths.TheObjects[this->thePaths.GoodPaths.TheObjects[i]].thePathNodes.size; j++)

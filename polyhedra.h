@@ -91,11 +91,11 @@ class roots;
 class rootsCollection;
 class coneRelation;
 template <class Object>
-class ListBasicObjects;
+class List;
 template <class Object>
 class ListObjectPointers;
 template <class Object>
-class HashedListBasicObjects;
+class HashedList;
 class PrecomputedTauknPointers;
 struct PolynomialOutputFormat;
 class Rational;
@@ -130,23 +130,35 @@ extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //The documentation of pthreads.h can be found at:
 // https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//the below class is a wrapper for mutexes. All system dependent machinery for mutexes should be put here.
+//The below class is a wrapper for mutexes. All system dependent machinery for mutexes should be put here.
+//MutexWrapper specification:
+//The mutex has two states: locked and unlocked.
+//When the caller calls UnlockMe() this unlocks the mutex if it were locked, otherwise does nothing, and immediately returns.
+//When the caller calls LockMe() there are two cases.
+//1) First, If the mutex is unlocked, the mutex state changes to locked and execution of the caller continues.
+//The preceding two operations are atomic: if the mutex happens to be unlocked, no other processor instruction
+//can be executed before the mutex's state is changed to locked.
+//2) Second, if the mutex is locked, the calling thread must pause execution, without consuming computational/processor power.
+// As soon as the mutex is unlocked (by another thread or by the system), the calling thread is allowed to wake up and perform the sequence described in 1).
+// The wake-up time is unspecified/not guaranteed to be immediate: another thread might "jump in" and overtake, again locking the calling thread.
+// In order to have guaranteed wake-up when coordinating two threads only, use the controller object (which uses two mutexes to achieve guaranteed wake-up).
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//This is not guaranteed to work on Windows. Might cause crash. Must be fixed to a proper set of Windows routines.
+//This is not possible at the moment since none of my legally owned (but outdated) versions of Windows support the multitasking routines
+//that are officially documented at Microsoft's network. (i.e. I must buy Microsoft's most recent version of Windows so that I can develop
+//software that will *increase* the value of Windows. No thank you, I can always tell my colleagues to install Linux instead. It's free, you know.)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MutexWrapper
 {
 private:
 #ifndef WIN32
   pthread_mutex_t theMutex;
 #else
-//This is not guaranteed to work on Windows. Might cause crash. Must be fixed to a proper set of Windows routines.
-//This is not possible at the moment since none of my legally owned (but outdated) versions of Windows support the multitasking routines
-//that are officially documented at Microsoft's network. (i.e. I must buy Microsoft's most recent version of Windows so that I can develop
-//software that will *increase* the value of Windows. No thank you, I can always tell my colleagues to install Linux instead. It's free, you know.)
   bool locked;
 #endif
 public:
-  bool IsRunning;
-  void LockMe()
+  //locks the mutex if the mutex is free. If not it suspends calling thread until mutex becomes free and then locks it.
+  inline void LockMe()
   {
 #ifndef WIN32
     pthread_mutex_lock(&this->theMutex);
@@ -156,7 +168,8 @@ public:
     this->locked=true;
 #endif
   };
-  void UnlockMe()
+  //unlocks the mutex.
+  inline void UnlockMe()
   {
 #ifndef WIN32
     pthread_mutex_unlock(&this->theMutex);
@@ -164,19 +177,12 @@ public:
     this->locked=false;
 #endif
   };
-  inline void SafePoint()
-  { this->IsRunning=false;
-    this->LockMe();
-    this->IsRunning=true;
-    this->UnlockMe();
-  };
   MutexWrapper()
   {
 #ifndef WIN32
     pthread_mutex_init(&this->theMutex, NULL);
 #else
     this->locked=false;
-    this->IsRunning=true;
 #endif
   };
   ~MutexWrapper()
@@ -189,20 +195,59 @@ public:
   };
 };
 
+class Controller
+{
+  MutexWrapper mutexLockMeToPauseCallersOfSafePoint;
+  MutexWrapper mutexSignalMeWhenReachingSafePoint;
+  bool flagIsRunning;
+  bool flagIsPausedWhileRunning;
+public:
+  inline void SafePoint()
+  { this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
+    this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
+    this->mutexSignalMeWhenReachingSafePoint.LockMe();
+    this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
+  };
+  inline void SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint()
+  { this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
+    this->mutexSignalMeWhenReachingSafePoint.LockMe();
+    this->flagIsPausedWhileRunning=true;
+    this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
+  };
+  inline void UnlockSafePoint()
+  { this->flagIsPausedWhileRunning=false;
+    this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
+  };
+  inline void InitComputation()
+  { this->mutexSignalMeWhenReachingSafePoint.LockMe();
+    this->flagIsRunning=true;
+  };
+  inline void ExitComputation()
+  { this->flagIsRunning=false;
+    this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
+  };
+  inline bool IsRunning()
+  { return this->flagIsRunning;
+  };
+  inline bool IsPausedWhileRunning()
+  { return this->flagIsPausedWhileRunning;
+  };
+  Controller()
+  { this->flagIsRunning=false;
+    this->flagIsPausedWhileRunning=false;
+  };
+};
+
 class ParallelComputing
 {
 public:
-  static bool isRunning;
   static int GlobalPointerCounter;
-  static MutexWrapper mutexLockThisMutexToSignalPause;
+  static Controller controllerLockThisMutexToSignalPause;
 #ifdef CGIversionLimitRAMuse
-  static int cgiLimitRAMuseNumPointersInListBasicObjects;
+  static int cgiLimitRAMuseNumPointersInList;
 #endif
   inline static void SafePoint()
-  { ParallelComputing::isRunning=false;
-    mutexLockThisMutexToSignalPause.LockMe();
-    ParallelComputing::isRunning=true;
-    mutexLockThisMutexToSignalPause.UnlockMe();
+  { ParallelComputing::controllerLockThisMutexToSignalPause.SafePoint();
   };
 };
 
@@ -225,7 +270,7 @@ public:
   };
   static int KToTheNth(int k, int n);
   inline static int parity(int n){if (n%2==0) return 1; else return -1; };
-  static int BinomialCoefficientMultivariate(int N, ListBasicObjects<int>& theChoices);
+  static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   inline static int Maximum(int a, int b){  if (a>b) return a; else return b; };
   template <typename T>
   inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; };
@@ -242,23 +287,23 @@ class DrawElementInputOutput
   int outputHeight;
 };
 
-//The below class is to be used together with ListBasicObjects.
+//The below class is to be used together with List.
 //The purpose of the class is to save up RAM memory use.
 //This is the "light" version it is to be used for storage purposes only.
-//To use it as a normal ListBasicObjects simply copy it to a buffer ListBasicObjects and there
-//use the full functionality of ListBasicObjects.
-//Then copy the buffer ListBasicObjects back to the light version to store to RAM.
+//To use it as a normal List simply copy it to a buffer List and there
+//use the full functionality of List.
+//Then copy the buffer List back to the light version to store to RAM.
 template <class Object>
-class ListBasicObjectsLight
+class ListLight
 {
 private:
-  ListBasicObjectsLight(const ListBasicObjectsLight<Object>& right);
+  ListLight(const ListLight<Object>& right);
 public:
   int size;
   Object* TheObjects;
   void AddObjectOnTopLight(const Object& o);
-  void CopyFromHeavy(const ListBasicObjects<Object>& from);
-  void CopyFromLight(const ListBasicObjectsLight<Object>& from);
+  void CopyFromHeavy(const List<Object>& from);
+  void CopyFromLight(const ListLight<Object>& from);
   void PopIndexSwapWithLastLight(int index);
   int SizeWithoutObjects();
   int IndexInList(const Object& o)
@@ -276,32 +321,32 @@ public:
     for (int i=0; i<this->size; i++)
       this->TheObjects[i]=o;
   };
-  void operator = (const ListBasicObjectsLight<Object>& right);
-  void operator == (const ListBasicObjectsLight<Object>& right);
+  void operator = (const ListLight<Object>& right);
+  void operator == (const ListLight<Object>& right);
   inline Object* LastObject(){return &this->TheObjects[this->size-1]; };
-  ListBasicObjectsLight();
-  ~ListBasicObjectsLight();
+  ListLight();
+  ~ListLight();
 };
 
 template <class Object>
-void ListBasicObjectsLight<Object>::AddObjectOnTopLight(const Object& o)
+void ListLight<Object>::AddObjectOnTopLight(const Object& o)
 { this->SetSizeExpandOnTopLight(this->size+1);
   this->TheObjects[this->size-1]=o;
 }
 
 template <class Object>
-void ListBasicObjectsLight<Object>::PopIndexSwapWithLastLight(int index)
+void ListLight<Object>::PopIndexSwapWithLastLight(int index)
 { this->TheObjects[index]=this->TheObjects[this->size-1];
   this->SetSizeExpandOnTopLight(this->size-1);
 }
 
 template <class Object>
-inline void ListBasicObjectsLight<Object>::operator =(const ListBasicObjectsLight<Object>& right)
+inline void ListLight<Object>::operator =(const ListLight<Object>& right)
 { this->CopyFromLight(right);
 }
 
 template <class Object>
-inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
+inline void ListLight<Object>::SetSizeExpandOnTopLight(int theSize)
 { if (theSize== this->size)
     return;
   if (theSize<0)
@@ -310,7 +355,7 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
   {
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter-=this->size;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
     this->size=0;
     delete [] this->TheObjects;
@@ -320,7 +365,7 @@ inline void ListBasicObjectsLight<Object>::SetSizeExpandOnTopLight(int theSize)
   Object* newArray= new Object[theSize];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=theSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   int CopyUpTo= this->size;
   if (this->size>theSize)
@@ -330,59 +375,59 @@ ParallelComputing::GlobalPointerCounter+=theSize;
   delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->size;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->TheObjects=newArray;
   this->size= theSize;
 }
 
 template <class Object>
-ListBasicObjectsLight<Object>::ListBasicObjectsLight()
+ListLight<Object>::ListLight()
 { this->size =0;
   this->TheObjects=0;
 }
 
 template <class Object>
-ListBasicObjectsLight<Object>::~ListBasicObjectsLight()
+ListLight<Object>::~ListLight()
 { delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->size;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->TheObjects=0;
 }
 
 template <class Object>
-void ListBasicObjectsLight<Object>::CopyFromHeavy(const ListBasicObjects<Object>& from)
+void ListLight<Object>::CopyFromHeavy(const List<Object>& from)
 { this->SetSizeExpandOnTopLight(from.size);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i]= from.TheObjects[i];
 }
 
 template <class Object>
-void ListBasicObjectsLight<Object>::CopyFromLight(const ListBasicObjectsLight<Object>& from)
+void ListLight<Object>::CopyFromLight(const ListLight<Object>& from)
 { this->SetSizeExpandOnTopLight(from.size);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i]= from.TheObjects[i];
 }
 
 template <class Object>
-int ListBasicObjectsLight<Object>::SizeWithoutObjects()
+int ListLight<Object>::SizeWithoutObjects()
 { return sizeof(Object*)*this->size+sizeof(int);
 }
 
 template <class Object>
-std::fstream& operator<<(std::fstream& output, const ListBasicObjects<Object>& theList);
+std::fstream& operator<<(std::fstream& output, const List<Object>& theList);
 
 template <class Object>
-std::fstream& operator>>(std::fstream& input, ListBasicObjects<Object>& theList);
+std::fstream& operator>>(std::fstream& input, List<Object>& theList);
 
-//ListBasicObjects kills the objects it contains when it expires
+//List kills the objects it contains when it expires
 template <class Object>
-class ListBasicObjects
+class List
 {
-  friend std::fstream& operator<< <Object> (std::fstream& output, const ListBasicObjects<Object>& theList);
-  friend std::fstream& operator>> <Object>(std::fstream& input, ListBasicObjects<Object>& theList);
+  friend std::fstream& operator<< <Object> (std::fstream& output, const List<Object>& theList);
+  friend std::fstream& operator>> <Object>(std::fstream& input, List<Object>& theList);
 private:
   friend class PolynomialRationalCoeff;
   friend class IntegerPoly;
@@ -391,22 +436,22 @@ private:
   int ActualSize;
   int IndexOfVirtualZero;
   Object* TheActualObjects;
-  ListBasicObjects(ListBasicObjects<Object>&);
+  List(List<Object>&);
   void ExpandArrayOnTop(int increase);
   void ExpandArrayOnBottom(int increase);
 public:
-  static int ListBasicObjectsActualSizeIncrement;
+  static int ListActualSizeIncrement;
   Object* TheObjects;
   int size;
 //  void AddObjectOnTop(Object o);
-  void AssignLight(const ListBasicObjectsLight<Object>& from);
+  void AssignLight(const ListLight<Object>& from);
   void SetSizeExpandOnTopNoObjectInit(int theSize);
   void initFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
   void MakeActualSizeAtLeastExpandOnTop(int theSize);
   void AddObjectOnBottom(const Object& o);
   void AddObjectOnTop(const Object& o);
-  void AddListOnTop(ListBasicObjects<Object>& theList);
+  void AddListOnTop(List<Object>& theList);
   bool AddObjectOnTopNoRepetitionOfObject(const Object& o);
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
@@ -416,7 +461,7 @@ public:
   // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
   void RemoveFirstOccurenceSwapWithLast(Object& o);
-  bool HasACommonElementWith(ListBasicObjects<Object>& right);
+  bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
   void ElementToStringGeneric(std::string& output);
   void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
@@ -428,11 +473,11 @@ public:
   int SizeWithoutObjects();
   inline Object* LastObject();
   void ReleaseMemory();
-  void operator=(const ListBasicObjects<Object>& right){this->CopyFromBase(right); };
-  static void swap(ListBasicObjects<Object>&l1, ListBasicObjects<Object>&l2);
+  void operator=(const List<Object>& right){this->CopyFromBase(right); };
+  static void swap(List<Object>&l1, List<Object>&l2);
   void ReverseOrderElements();
-  void CopyFromBase (const ListBasicObjects<Object>& From);
-  bool IsEqualTo(const ListBasicObjects<Object>& Other) const
+  void CopyFromBase (const List<Object>& From);
+  bool IsEqualTo(const List<Object>& Other) const
   { if (this->size!=Other.size)
       return false;
     for (int i=0; i<Other.size; i++)
@@ -440,19 +485,19 @@ public:
         return false;
     return true;
   };
-  inline bool operator!=(const ListBasicObjects<Object>& other) const
+  inline bool operator!=(const List<Object>& other) const
   { return !this->IsEqualTo(other);
   };
-  inline bool operator==(const ListBasicObjects<Object>& other) const
+  inline bool operator==(const List<Object>& other) const
   { return this->IsEqualTo(other);
   };
   void ShiftUpExpandOnTop(int StartingIndex);
-  ListBasicObjects();
-  ~ListBasicObjects();
+  List();
+  ~List();
 };
 
 template <class Object>
-std::fstream& operator<< (std::fstream& output, const ListBasicObjects<Object>& theList)
+std::fstream& operator<< (std::fstream& output, const List<Object>& theList)
 { output << "size: " << theList.size << "\n";
   for (int i=0; i<theList.size; i++)
     output << theList.TheObjects[i]<<" ";
@@ -460,7 +505,7 @@ std::fstream& operator<< (std::fstream& output, const ListBasicObjects<Object>& 
 }
 
 template <class Object>
-std::fstream& operator >> (std::fstream& input, ListBasicObjects<Object>& theList)
+std::fstream& operator >> (std::fstream& input, List<Object>& theList)
 { std::string tempS; int tempI;
   input >> tempS >> tempI;
   assert(tempS=="size:");
@@ -471,7 +516,7 @@ std::fstream& operator >> (std::fstream& input, ListBasicObjects<Object>& theLis
 }
 
 template <class Object>
-class ListObjectPointers: public ListBasicObjects<Object*>
+class ListObjectPointers: public List<Object*>
 {
 public:
   //ListObjectPointers();
@@ -487,21 +532,21 @@ public:
 };
 
 template <class Object>
-class HashedListBasicObjects : public ListBasicObjects<Object>
+class HashedList : public List<Object>
 {
 private:
   void AddObjectOnBottom(const Object& o);
   void AddObjectOnTop(const Object& o);
-  void AddListOnTop(ListBasicObjects<Object>& theList);
+  void AddListOnTop(List<Object>& theList);
   bool AddObjectOnTopNoRepetitionOfObject(const Object& o);
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
   void RemoveFirstOccurenceSwapWithLast(Object& o);
-  void CopyFromBase (const ListBasicObjects<Object>& From);
+  void CopyFromBase (const List<Object>& From);
   void SwapTwoIndices(int index1, int index2);
-  void operator=(const ListBasicObjects<Object>& right){this->CopyFromBase(right); };
-  void AssignLight(const ListBasicObjectsLight<Object>& from);
+  void operator=(const List<Object>& right){this->CopyFromBase(right); };
+  void AssignLight(const ListLight<Object>& from);
   void SetSizeExpandOnTopNoObjectInit(int theSize);
   int IndexOfObject(const Object& o);
   bool ContainsObject(const Object& o);
@@ -514,7 +559,7 @@ protected:
   friend class CombinatorialChamber;
   friend class QuasiPolynomial;
   void ClearHashes();
-  ListBasicObjects<int>* TheHashedArrays;
+  List<int>* TheHashedArrays;
 public:
   static int PreferredHashSize;
   int HashSize;
@@ -523,7 +568,7 @@ public:
   void ClearTheObjects();
   void AddObjectOnTopHash(const Object& o);
   bool AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
-  void AddListOnTopNoRepetitionOfObjectHash(const ListBasicObjects<Object>& theList);
+  void AddListOnTopNoRepetitionOfObjectHash(const List<Object>& theList);
   void PopIndexSwapWithLastHash(int index);
   //the below returns -1 if it doesn't contain the object,
   //else returns the object's index
@@ -532,9 +577,9 @@ public:
   int IndexOfObjectHash(const Object& o);
   void SetHashSize(int HS);
   int SizeWithoutObjects();
-  HashedListBasicObjects();
-  ~HashedListBasicObjects();
-  void CopyFromHash(const HashedListBasicObjects<Object>& From);
+  HashedList();
+  ~HashedList();
+  void CopyFromHash(const HashedList<Object>& From);
 };
 
 class Integer
@@ -641,13 +686,13 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool P
   { newElements  = new Element*[newActualNumRows];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumRows;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
     for (int i=0; i<newActualNumRows; i++)
     { newElements[i]= new Element[newActualNumCols];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumCols;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
     }
   }
@@ -681,7 +726,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::ReleaseMemory()
   delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols+this->ActualNumRows;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->elements=0;
   this->NumCols=0;
@@ -811,8 +856,8 @@ public:
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(this->DebugString); };
   void ElementToString(std::string& output);
-  ListBasicObjects<int> elements;
-  ListBasicObjects<int> Multiplicities;
+  List<int> elements;
+  List<int> Multiplicities;
   int CardinalitySelectionWithoutMultiplicities();
   void initMe(int NumElements);
   void ComputeElements();
@@ -834,7 +879,7 @@ public:
 class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultiplicities
 {
 public:
-  ListBasicObjects<int> MaxMultiplicities;
+  List<int> MaxMultiplicities;
   void initIncomplete(int NumElements){  this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements); this->initMe(NumElements); };
   void clearNoMaxMultiplicitiesChange();
   void IncrementSubset();
@@ -885,7 +930,7 @@ inline void MatrixElementaryTightMemoryFit<Element>::Free()
   delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->NumRows*this->NumCols+this->NumRows;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->elements=0;
   this->NumRows=0;
@@ -1186,13 +1231,13 @@ inline void MatrixElementaryTightMemoryFit<Element>::Resize(int r, int c, bool P
   Element** newElements= new Element*[r];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=r;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   for (int i=0; i<r; i++)
   { newElements[i]= new Element[c];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=c;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   }
   if (PreserveValues)
@@ -1205,7 +1250,7 @@ ParallelComputing::GlobalPointerCounter+=c;
   this->elements = newElements;
 }
 
-class LargeIntUnsigned: public ListBasicObjects<unsigned int>
+class LargeIntUnsigned: public List<unsigned int>
 {   void AddNoFitSize(LargeIntUnsigned& x);
 public:
   // Carry over bound is the "base" over which we work
@@ -1364,7 +1409,7 @@ class Rational
     this->Extended= new LargeRationalExtended;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
     this->Extended->den.AssignShiftedUInt((unsigned int)this->DenShort, 0);
     this->Extended->num.AssignInt(this->NumShort);
@@ -1376,7 +1421,7 @@ ParallelComputing::GlobalPointerCounter++;
     delete this->Extended; this->Extended=0;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   }
   bool ShrinkExtendedPartIfPossible()
@@ -1566,7 +1611,7 @@ Rational operator-(const Rational& argument)
   return tempRat;
 }*/
 
-class root :public ListBasicObjectsLight<Rational>
+class root :public ListLight<Rational>
 {
 private:
   void ScaleForMinHeightHeavy();
@@ -1602,7 +1647,7 @@ public:
   bool MakeAffineProjectionFromNormal(affineHyperplane& output);
   //the below returns false
   bool ProjectToAffineSpace(root& output);
-  bool HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas, roots& theSet, WeylGroup& theWeylGroup, roots& output, ListBasicObjects<Rational>& outputCoeffs, bool IntegralCoefficientsOnly);
+  bool HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas, roots& theSet, WeylGroup& theWeylGroup, roots& output, List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly);
   void DivByLargeRational(const Rational& a);
   Rational GetHeight();
   void ElementToString(std::string& output);
@@ -1690,13 +1735,13 @@ inline root operator-(const root& right)
   return tempRoot;
 };
 
-class roots : public ListBasicObjects<root>
+class roots : public List<root>
 {
 public:
   std::string DebugString;
   bool CheckForElementSanity();
   void AssignIntRoots(intRoots& r);
-  void AssignHashedIntRoots(HashedListBasicObjects<intRoot>& r);
+  void AssignHashedIntRoots(HashedList<intRoot>& r);
   void AssignMatrixRows(MatrixLargeRational& mat);
   void AssignMatrixColumns(MatrixLargeRational& mat);
   void ComputeDebugString();
@@ -1729,8 +1774,8 @@ public:
   // The left hand side is allowed to have zero number of summands (hence "non-strict" cone - contains 0)
   //The right hand side is NOT allowed to have zero number of summands.
   //If the strict cone has zero elements, the function returns false.
-  static bool ConesIntersect(GlobalVariables& theGlobalVariables,  ListBasicObjects<root>& StrictCone, ListBasicObjects<root>& NonStrictCone, int theDimension);
-  static bool GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int theDimension, ListBasicObjects<root>& coneStrictlyPositiveCoeffs, ListBasicObjects<root>& coneNonNegativeCoeffs, root& outputNormal);
+  static bool ConesIntersect(GlobalVariables& theGlobalVariables,  List<root>& StrictCone, List<root>& NonStrictCone, int theDimension);
+  static bool GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int theDimension, List<root>& coneStrictlyPositiveCoeffs, List<root>& coneNonNegativeCoeffs, root& outputNormal);
   void GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl)const;
   //the following two functions assume the first dimension vectors are the images of the
   // vectors (1, 0, ..., 0), ..., (0, ..., 0, 1)
@@ -1776,8 +1821,8 @@ public:
   std::string DebugString;
   int indexInOwnerChamber;
   root normal;
-  ListBasicObjects<CombinatorialChamber*> NeighborsAlongWall;
-  ListBasicObjects<int> IndicesMirrorWalls;
+  List<CombinatorialChamber*> NeighborsAlongWall;
+  List<int> IndicesMirrorWalls;
   static bool flagDisplayWallDetails;
   void ComputeDebugString(){this->ElementToString(this->DebugString); };
   void ElementToString(std::string& output);
@@ -1806,7 +1851,7 @@ public:
   bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
   bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
   void RemoveNeighborExtraOcurrences(CombinatorialChamber* neighbor);
-  bool SplitWall(int indexInOwner, ListBasicObjects<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer& ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, ListBasicObjects<CombinatorialChamber*>& PossibleBogusNeighbors, ListBasicObjects<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
+  bool SplitWall(int indexInOwner, List<int>& possibleBogusWallsThisSide, CombinatorialChamber* BossChamber, CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, CombinatorialChamberContainer& ownerComplex, roots& ThePlusVertices, roots& TheMinusVertices, root& TheKillerFacet, root& direction, List<CombinatorialChamber*>& PossibleBogusNeighbors, List<int>& PossibleBogusWalls, GlobalVariables& theGlobalVariables);
   bool ConsistencyCheck(CombinatorialChamber& owner, CombinatorialChamberContainer& ownerComplex);
   bool EveryNeigborIsExplored(bool& allNeighborsHaveZeroPoly);
   void WriteToFile(std::fstream& output);
@@ -1834,7 +1879,7 @@ public:
   inline bool operator==(const affineHyperplane& right);
 };
 
-class affineHyperplanes: public ListBasicObjects<affineHyperplane>
+class affineHyperplanes: public List<affineHyperplane>
 {
 public:
   std::string DebugString;
@@ -1861,7 +1906,7 @@ public:
   inline void operator=(const affineCone& right){this->Assign(right); };
 };
 
-class affineCones: public HashedListBasicObjects<affineCone>
+class affineCones: public HashedList<affineCone>
 {
 public:
   void SuperimposeAffineCones(affineCones& theOtherComplex);
@@ -1879,7 +1924,7 @@ public:
   int CreationNumber;
   int DisplayNumber;
   int IndexInOwnerComplex;
-  ListBasicObjects<WallData> Externalwalls;
+  List<WallData> Externalwalls;
   roots InternalWalls;
   roots AllVertices;
   roots affineVertices;
@@ -1961,7 +2006,7 @@ public:
 };
 
 template <class Object>
-void ListBasicObjects<Object>::AddListOnTop(ListBasicObjects<Object>& theList)
+void List<Object>::AddListOnTop(List<Object>& theList)
 { int oldsize= this->size;
   int otherSize=theList.size;
   this->SetSizeExpandOnTopNoObjectInit(oldsize+otherSize);
@@ -1970,7 +2015,7 @@ void ListBasicObjects<Object>::AddListOnTop(ListBasicObjects<Object>& theList)
 }
 
 template<class Object>
-void ListBasicObjects<Object>::SwapTwoIndices(int index1, int index2)
+void List<Object>::SwapTwoIndices(int index1, int index2)
 { if (index1==index2)
     return;
   Object tempO;
@@ -1980,7 +2025,7 @@ void ListBasicObjects<Object>::SwapTwoIndices(int index1, int index2)
 }
 
 template<class Object>
-int ListBasicObjects<Object>::IndexOfObject(const Object& o) const
+int List<Object>::IndexOfObject(const Object& o) const
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]==o)
       return i;
@@ -1988,9 +2033,9 @@ int ListBasicObjects<Object>::IndexOfObject(const Object& o) const
 }
 
 template <class Object>
-void ListBasicObjects<Object>::swap(ListBasicObjects<Object>& l1, ListBasicObjects<Object>& l2)
-{ ListBasicObjects<Object>* bigL;
-  ListBasicObjects<Object>* smallL;
+void List<Object>::swap(List<Object>& l1, List<Object>& l2)
+{ List<Object>* bigL;
+  List<Object>* smallL;
   int smallSize;
   if (l1.size<l2.size)
   { smallL=&l1;
@@ -2014,26 +2059,26 @@ void ListBasicObjects<Object>::swap(ListBasicObjects<Object>& l1, ListBasicObjec
 }
 
 template <class Object>
-int ListBasicObjects<Object>::SizeWithoutObjects()
+int List<Object>::SizeWithoutObjects()
 { return  sizeof(this->ActualSize)+ sizeof(this->IndexOfVirtualZero)+ sizeof(this->size)+ sizeof(this->TheActualObjects)+ sizeof(this->TheObjects);
 }
 
 template <class Object>
-void ListBasicObjects<Object>::ShiftUpExpandOnTop(int StartingIndex)
+void List<Object>::ShiftUpExpandOnTop(int StartingIndex)
 { this->SetSizeExpandOnTopNoObjectInit(this->size+1);
   for (int i=this->size-1; i>StartingIndex; i--)
     this->TheObjects[i]= this->TheObjects[i-1];
 }
 
 template <class Object>
-void ListBasicObjects<Object>::initFillInObject(int theSize, const Object& o)
+void List<Object>::initFillInObject(int theSize, const Object& o)
 { this->SetSizeExpandOnTopNoObjectInit(theSize);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i]=o;
 }
 
 template <class Object>
-bool  ListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObject(const Object& o)
+bool  List<Object>::AddObjectOnTopNoRepetitionOfObject(const Object& o)
 { if (this->IndexOfObject(o)!=-1)
     return false;
   this->AddObjectOnTop(o);
@@ -2041,12 +2086,12 @@ bool  ListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObject(const Object&
 }
 
 template <class Object>
-inline Object* ListBasicObjects<Object>::LastObject()
+inline Object* List<Object>::LastObject()
 { return &this->TheObjects[this->size-1];
 }
 
 template <class Object>
-bool ListBasicObjects<Object>::HasACommonElementWith(ListBasicObjects<Object>& right)
+bool List<Object>::HasACommonElementWith(List<Object>& right)
 { for(int i=0; i<this->size; i++)
     for (int j=0; j<right.size; j++)
       if (this->TheObjects[i]==right.TheObjects[j])
@@ -2055,14 +2100,14 @@ bool ListBasicObjects<Object>::HasACommonElementWith(ListBasicObjects<Object>& r
 }
 
 template <class Object>
-void ListBasicObjects<Object>::AssignLight(const ListBasicObjectsLight<Object>& From)
+void List<Object>::AssignLight(const ListLight<Object>& From)
 { this->SetSizeExpandOnTopNoObjectInit(From.size);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i]= From.TheObjects[i];
 }
 
 template <class Object>
-void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From)
+void List<Object>::CopyFromBase(const List<Object>& From)
 { if (this==&From)
     return;
   this->SetSizeExpandOnTopNoObjectInit(From.size);
@@ -2071,7 +2116,7 @@ void ListBasicObjects<Object>::CopyFromBase(const ListBasicObjects<Object>& From
 }
 
 template <class Object>
-void ListBasicObjects<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
+void List<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
 { if (!(this->ActualSize>= this->IndexOfVirtualZero+theSize))
   { ParallelComputing::SafePoint();
     this->ExpandArrayOnTop( this->IndexOfVirtualZero+theSize- this->ActualSize);
@@ -2079,7 +2124,7 @@ void ListBasicObjects<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::RemoveFirstOccurenceSwapWithLast(Object& o)
+void List<Object>::RemoveFirstOccurenceSwapWithLast(Object& o)
 { for (int i=0; i<this->size; i++)
     if (o==this->TheObjects[i])
     { this->PopIndexSwapWithLast(i);
@@ -2088,14 +2133,14 @@ void ListBasicObjects<Object>::RemoveFirstOccurenceSwapWithLast(Object& o)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
+void List<Object>::SetSizeExpandOnTopNoObjectInit(int theSize)
 { this->MakeActualSizeAtLeastExpandOnTop(theSize);
   size=theSize;
 }
 
 template <class Object>
-void ListBasicObjects<Object>::WriteToFile(std::fstream& output)
-{ output << "ListBasicObjects_size: " << this->size <<"\n";
+void List<Object>::WriteToFile(std::fstream& output)
+{ output << "List_size: " << this->size <<"\n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output);
     output << " ";
@@ -2103,22 +2148,22 @@ void ListBasicObjects<Object>::WriteToFile(std::fstream& output)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::ReadFromFile(std::fstream& input)
+void List<Object>::ReadFromFile(std::fstream& input)
 { std::string tempS; int tempI;
   input >> tempS >> tempI;
-  assert(tempS=="ListBasicObjects_size:");
+  assert(tempS=="List_size:");
   this->SetSizeExpandOnTopNoObjectInit(tempI);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ReadFromFile(input);
 }
 
 template <class Object>
-inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output)
+inline void List<Object>::ElementToStringGeneric(std::string& output)
 { this->ElementToStringGeneric(output, this->size);
 }
 
 template <class Object>
-inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output, int NumElementsToPrint)
+inline void List<Object>::ElementToStringGeneric(std::string& output, int NumElementsToPrint)
 { std::stringstream out; std::string tempS;
   int Upper=MathRoutines::Minimum(NumElementsToPrint, this->size);
   for (int i=0; i<Upper; i++)
@@ -2129,12 +2174,12 @@ inline void ListBasicObjects<Object>::ElementToStringGeneric(std::string& output
 }
 
 template <class Object>
-inline void ListBasicObjects<Object>::AddObjectOnTopCreateNew()
+inline void List<Object>::AddObjectOnTopCreateNew()
 { this->SetSizeExpandOnTopNoObjectInit(this->size+1);
 }
 
 template <class Object>
-void ListBasicObjects<Object>::PopIndexShiftUp(int index)
+void List<Object>::PopIndexShiftUp(int index)
 { if (size==0)
     return;
   this->size--;
@@ -2145,7 +2190,7 @@ void ListBasicObjects<Object>::PopIndexShiftUp(int index)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::PopIndexSwapWithLast(int index)
+void List<Object>::PopIndexSwapWithLast(int index)
 { if (this->size==0)
     return;
   this->size--;
@@ -2153,14 +2198,14 @@ void ListBasicObjects<Object>::PopIndexSwapWithLast(int index)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::PopLastObject()
+void List<Object>::PopLastObject()
 { if (this->size==0)
     return;
   this->size--;
 }
 
 template <class Object>
-ListBasicObjects<Object>::ListBasicObjects()
+List<Object>::List()
 { this->ActualSize=0;
   this->IndexOfVirtualZero=0;
   this->size=0;
@@ -2169,11 +2214,11 @@ ListBasicObjects<Object>::ListBasicObjects()
 }
 
 template <class Object>
-void ListBasicObjects<Object>::ReleaseMemory()
+void List<Object>::ReleaseMemory()
 { delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->ActualSize=0;
   this->IndexOfVirtualZero=0;
@@ -2183,31 +2228,31 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 }
 
 template <class Object>
-ListBasicObjects<Object>::~ListBasicObjects()
+List<Object>::~List()
 { delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
   this->ActualSize=0;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->TheActualObjects=0;
   this->TheObjects=0;
 }
 
 template <class Object>
-void ListBasicObjects<Object>::ExpandArrayOnBottom(int increase)
+void List<Object>::ExpandArrayOnBottom(int increase)
 { if (increase<=0) return;
   Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   for (int i=0; i<this->size; i++)
     newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
   delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->TheActualObjects= newArray;
   this->ActualSize+=increase;
@@ -2216,20 +2261,20 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 }
 
 template <class Object>
-void ListBasicObjects<Object>::ExpandArrayOnTop(int increase)
+void List<Object>::ExpandArrayOnTop(int increase)
 { if (increase<=0)
     return;
   Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   for (int i=0; i<this->size; i++)
     newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
   delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->TheActualObjects= newArray;
   this->ActualSize+=increase;
@@ -2237,16 +2282,16 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 }
 
 template <class Object>
-void ListBasicObjects<Object>::ReverseOrderElements()
+void List<Object>::ReverseOrderElements()
 { int tempI= this->size/2;
   for (int i=0; i<tempI; i++)
     this->SwapTwoIndices(i, this->size-i-1);
 }
 
 template <class Object>
-void ListBasicObjects<Object>::AddObjectOnBottom(const Object& o)
+void List<Object>::AddObjectOnBottom(const Object& o)
 { if (this->IndexOfVirtualZero==0)
-    this->ExpandArrayOnBottom(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
+    this->ExpandArrayOnBottom(List<Object>::ListActualSizeIncrement);
   this->IndexOfVirtualZero--;
   this->TheObjects--;
   this->TheObjects[0]=o;
@@ -2254,15 +2299,15 @@ void ListBasicObjects<Object>::AddObjectOnBottom(const Object& o)
 }
 
 template <class Object>
-void ListBasicObjects<Object>::AddObjectOnTop(const Object& o)
+void List<Object>::AddObjectOnTop(const Object& o)
 { if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
-    this->ExpandArrayOnTop(ListBasicObjects<Object>::ListBasicObjectsActualSizeIncrement);
+    this->ExpandArrayOnTop(List<Object>::ListActualSizeIncrement);
   this->TheObjects[size]=o;
   this->size++;
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::SwapTwoIndicesHash(int i1, int i2)
+void HashedList<Object>::SwapTwoIndicesHash(int i1, int i2)
 { Object tempO;
   int i1Hash = this->TheObjects[i1].HashFunction();
   int i2Hash = this->TheObjects[i2].HashFunction();
@@ -2277,9 +2322,9 @@ void HashedListBasicObjects<Object>::SwapTwoIndicesHash(int i1, int i2)
 }
 
 template <class Object>
-int HashedListBasicObjects<Object>::SizeWithoutObjects()
+int HashedList<Object>::SizeWithoutObjects()
 { int Accum=0;
-  Accum+=this->ListBasicObjects<Object>::SizeWithoutObjects();
+  Accum+=this->List<Object>::SizeWithoutObjects();
   Accum+=sizeof(this->TheHashedArrays)*this->HashSize;
   Accum+=sizeof(this->HashSize);
   for (int i=0; i<this->HashSize; i++)
@@ -2287,13 +2332,12 @@ int HashedListBasicObjects<Object>::SizeWithoutObjects()
   return Accum;
 }
 
-
 template <class Object>
-void HashedListBasicObjects<Object>::CopyFromHash(const HashedListBasicObjects<Object>& From)
+void HashedList<Object>::CopyFromHash(const HashedList<Object>& From)
 { if (&From==this){return; }
   this->ClearHashes();
   this->SetHashSize(From.HashSize);
-  this->::ListBasicObjects<Object>::CopyFromBase(From);
+  this->::List<Object>::CopyFromBase(From);
   if (this->size<this->HashSize)
     for (int i=0; i<this->size; i++)
     { int hashIndex= this->TheObjects[i].HashFunction()% this->HashSize;
@@ -2306,7 +2350,7 @@ void HashedListBasicObjects<Object>::CopyFromHash(const HashedListBasicObjects<O
       this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
 }
 template <class Object>
-void HashedListBasicObjects<Object>::ClearHashes()
+void HashedList<Object>::ClearHashes()
 { if (this->size<this->HashSize)
     for (int i=0; i<this->size; i++)
     { int hashIndex=this->TheObjects[i].HashFunction()%this->HashSize;
@@ -2319,20 +2363,20 @@ void HashedListBasicObjects<Object>::ClearHashes()
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::ClearTheObjects()
+void HashedList<Object>::ClearTheObjects()
 { this->ClearHashes();
   this->size=0;
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::initHash()
+void HashedList<Object>::initHash()
 { this->size=0;
   for (int i=0; i<this->HashSize; i++)
     this->TheHashedArrays[i].size=0;
 }
 
 template <class Object>
-int HashedListBasicObjects<Object>::IndexOfObjectHash(const Object &o)
+int HashedList<Object>::IndexOfObjectHash(const Object& o)
 { int hashIndex = o.HashFunction()%this->HashSize;
   if (hashIndex<0){hashIndex+=this->HashSize; }
   for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
@@ -2344,22 +2388,22 @@ int HashedListBasicObjects<Object>::IndexOfObjectHash(const Object &o)
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::AddObjectOnTopHash(const Object &o)
+void HashedList<Object>::AddObjectOnTopHash(const Object& o)
 { int hashIndex = o.HashFunction()% this->HashSize;
   if (hashIndex<0) {hashIndex+=this->HashSize; }
   this->TheHashedArrays[hashIndex].AddObjectOnTop(this->size);
-  this->::ListBasicObjects<Object>::AddObjectOnTop(o);
+  this->::List<Object>::AddObjectOnTop(o);
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::AddListOnTopNoRepetitionOfObjectHash(const ListBasicObjects<Object>& theList)
+void HashedList<Object>::AddListOnTopNoRepetitionOfObjectHash(const List<Object>& theList)
 { this->MakeActualSizeAtLeastExpandOnTop(this->size+theList.size);
   for (int i=0; i<theList.size; i++)
     this->AddObjectOnTopNoRepetitionOfObjectHash(theList.TheObjects[i]);
 }
 
 template <class Object>
-bool HashedListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object &o)
+bool HashedList<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object& o)
 { if (this->IndexOfObjectHash(o)!=-1)
     return false;
   this->AddObjectOnTopHash(o);
@@ -2367,7 +2411,7 @@ bool HashedListBasicObjects<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Obje
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::PopIndexSwapWithLastHash(int index)
+void HashedList<Object>::PopIndexSwapWithLastHash(int index)
 { Object* oPop= &this->TheObjects[index];
   int hashIndexPop = oPop->HashFunction()% this->HashSize;
   if (hashIndexPop<0) {hashIndexPop+=this->HashSize; }
@@ -2379,37 +2423,37 @@ void HashedListBasicObjects<Object>::PopIndexSwapWithLastHash(int index)
   if (hashIndexTop<0){hashIndexTop+=this->HashSize; }
   this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
   this->TheHashedArrays[hashIndexTop].AddObjectOnTop(index);
-  this->ListBasicObjects<Object>::PopIndexSwapWithLast(index);
+  this->List<Object>::PopIndexSwapWithLast(index);
 }
 
 template <class Object>
-void HashedListBasicObjects<Object>::SetHashSize(int HS)
+void HashedList<Object>::SetHashSize(int HS)
 { if (HS!=this->HashSize)
   { delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
-    this->TheHashedArrays= new  ListBasicObjects<int>[HS];
+    this->TheHashedArrays= new  List<int>[HS];
     this->HashSize=HS;
     this->size=0;
   }
 }
 
 template <class Object>
-HashedListBasicObjects<Object>::HashedListBasicObjects()
+HashedList<Object>::HashedList()
 { this->HashSize=0;
   this->TheHashedArrays=0;
-  this->SetHashSize(HashedListBasicObjects<Object>::PreferredHashSize);
+  this->SetHashSize(HashedList<Object>::PreferredHashSize);
   this->initHash();
 }
 
 template <class Object>
-HashedListBasicObjects<Object>::~HashedListBasicObjects()
+HashedList<Object>::~HashedList()
 { delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->HashSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->HashSize=0;
   this->TheHashedArrays=0;
@@ -2429,7 +2473,7 @@ void ListObjectPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
   { Object** newArray= new Object*[this->size+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
     for (int i=0; i<this->size; i++)
       newArray[i]=this->TheObjects[i];
@@ -2450,7 +2494,7 @@ void ListObjectPointers<Object>::initAndCreateNewObjects(int d)
     this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=d;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
 }
 
@@ -2459,7 +2503,7 @@ void ListObjectPointers<Object>::KillElementIndex(int i)
 { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   this->size--;
   this->TheObjects[i]=this->TheObjects[this->size];
@@ -2483,7 +2527,7 @@ void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
     this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
 }
 
@@ -2493,7 +2537,7 @@ void ListObjectPointers<Object>::KillAllElements()
   { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
     if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
     this->TheObjects[i]=0;
   }
@@ -2527,7 +2571,7 @@ void ListObjectPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
     }
 }
 
-class rootsCollection: public ListBasicObjects<roots>
+class rootsCollection: public List<roots>
 {
 public:
   std::string DebugString;
@@ -2540,7 +2584,7 @@ public:
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
 
-class hashedRoots: public HashedListBasicObjects<root>
+class hashedRoots: public HashedList<root>
 {
 public:
   std::string DebugString;
@@ -2575,15 +2619,15 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 //  int HashFunction() const;
-  ListBasicObjects<int> ChamberTestArray;
+  List<int> ChamberTestArray;
   void operator=(const Cone& right);
 };
 
-class simplicialCones : public ListBasicObjects<Cone>
+class simplicialCones : public List<Cone>
 {
 public:
   hashedRoots theFacets;
-  ListBasicObjects<ListBasicObjects<int> > ConesHavingFixedNormal;
+  List<List<int> > ConesHavingFixedNormal;
   std::string DebugString;
   void ComputeDebugString();
   void ElementToString(std::string& output);
@@ -2604,10 +2648,10 @@ public:
   Cone WeylChamber;
   simplicialCones startingCones;
   roots NewHyperplanesToSliceWith;
-  HashedListBasicObjects<affineHyperplane> AffineWallsOfWeylChambers;
+  HashedList<affineHyperplane> AffineWallsOfWeylChambers;
   affineHyperplanes theWeylGroupAffineHyperplaneImages;
   root IndicatorRoot;
-  ListBasicObjects<int> PreferredNextChambers;
+  List<int> PreferredNextChambers;
   std::fstream FileOutput;
   int indexNextChamberToSlice;
   int NumAffineHyperplanesProcessed;
@@ -2634,7 +2678,7 @@ public:
 // Let's hope that will be fixed with the new C++ standard!
   void PauseSlicing();
   void ResumeSlicing();
-  MutexWrapper thePauseMutex;
+  Controller thePauseController;
 /////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
   bool flagMakingASingleHyperplaneSlice;
@@ -2655,8 +2699,8 @@ public:
   static int flagMaxNumCharsAllowedInStringOutput;
   bool isAValidVertexInGeneral(const root& candidate, roots& theNormalsInvolved, Selection& theSelectedNormals);
   void ConvertHasZeroPolyToPermanentlyZero();
-  void SortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices);
-  void QuickSortIndicesByDisplayNumber(ListBasicObjects<int>& outputSortedIndices, int BottomIndex, int TopIndex);
+  void SortIndicesByDisplayNumber(List<int>& outputSortedIndices);
+  void QuickSortIndicesByDisplayNumber(List<int>& outputSortedIndices, int BottomIndex, int TopIndex);
   void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
   bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
   int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
@@ -2719,7 +2763,7 @@ public:
 
 struct PolynomialOutputFormat
 {
-  ListBasicObjects<std::string> alphabet;
+  List<std::string> alphabet;
 public:
   std::string GetLetterIndex(int index);
   void SetLetterIndex(const std::string& theLetter, int index);
@@ -2770,7 +2814,7 @@ public:
   void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m, Monomial<ElementOfCommutativeRingWithIdentity>& output);
   bool HasSameExponent(Monomial<ElementOfCommutativeRingWithIdentity>& m);
   void Assign(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
-  void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
+  void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
   void MakeMonomialOneLetter(short NumVars, int LetterIndex, short Power, ElementOfCommutativeRingWithIdentity& Coeff);
   void IncreaseNumVariables(short increase);
   bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
@@ -2799,7 +2843,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::InitWithZero=true;
 //The Template polynomial is assumed to be having coefficients in the ring given by ElementOfCommutativeRingWithIdentity
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-class TemplatePolynomial: public HashedListBasicObjects<TemplateMonomial>
+class TemplatePolynomial: public HashedList<TemplateMonomial>
 {
 private:
   TemplatePolynomial(TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>&){assert(false); };
@@ -2850,11 +2894,11 @@ void ElementOfCommutativeRingWithIdentity::ElementToString(std::string& output);
 ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingUnit;
 ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingMUnit;
 ElementOfCommutativeRingWithIdentity::ElementOfCommutativeRingWithIdentity TheRingZero;
-int HashedListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::PreferredHashSize;
+int HashedList<Monomial<ElementOfCommutativeRingWithIdentity>>::PreferredHashSize;
       //the above is the size of the hash table your polynomial will have. The larger the hash table -
       //the more RAM consumed - the faster the computation. Set 1 if you want min RAM usage. Set 10
       //if you got no good idea what this means.
-int ListBasicObjects<Monomial<ElementOfCommutativeRingWithIdentity>>::ListBasicObjectsActualSizeIncrement;
+int List<Monomial<ElementOfCommutativeRingWithIdentity>>::ListActualSizeIncrement;
       //the above is the size of the chunk of memory the polynomial class will allocate
       //whenever it needs more memory. For example, if you believe your polynomials
       //will have 1000+ monomials average, then set the above to 1000. Note: abuse of the above
@@ -2888,8 +2932,8 @@ public:
   void IncreaseNumVariables(short increase);
   void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
   void DecreaseNumVariables(short increment, Polynomial<ElementOfCommutativeRingWithIdentity>& output);
-  void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
-  void Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
+  void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
+  void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
   int TotalDegree();
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   int GetIndexMaxMonomial();
@@ -2901,7 +2945,7 @@ public:
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
-class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >
+class Polynomials: public List<Polynomial<ElementOfCommutativeRingWithIdentity> >
 {
   public:
   //the format of the linear substitution is:
@@ -2925,7 +2969,7 @@ class Polynomials: public ListBasicObjects<Polynomial<ElementOfCommutativeRingWi
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
-class PolynomialLight: public ListBasicObjectsLight<Monomial<ElementOfCommutativeRingWithIdentity> >
+class PolynomialLight: public ListLight<Monomial<ElementOfCommutativeRingWithIdentity> >
 {
 public:
   short NumVars;
@@ -2998,7 +3042,7 @@ inline bool PolynomialLight<ElementOfCommutativeRingWithIdentity>::IsEqualToZero
 { return this->size==0;
 }
 
-class intRoot :public ListBasicObjects<int>
+class intRoot :public List<int>
 {
 private:
 public:
@@ -3052,7 +3096,7 @@ public:
 class GeneratorsPartialFractionAlgebra
 {
 public:
-  static HashedListBasicObjects<GeneratorPFAlgebraRecord> theGenerators;
+  static HashedList<GeneratorPFAlgebraRecord> theGenerators;
   //elongation zero means we are looking for x^exponent
   //other elongations means we are looking for p_elongation(x^exponent), where p is
   // the numerator in the geometric series sum corresponding to elongation
@@ -3071,7 +3115,7 @@ public:
 };
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-class MonomialInCommutativeAlgebra: public HashedListBasicObjects<GeneratorsOfAlgebra>
+class MonomialInCommutativeAlgebra: public HashedList<GeneratorsOfAlgebra>
 {
 private:
   MonomialInCommutativeAlgebra(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>&){assert(false); };
@@ -3151,10 +3195,10 @@ public:
   void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
 };
 
-class PolyPartFractionNumeratorLight: public ListBasicObjectsLight<ListBasicObjectsLight<GeneratorsPartialFractionAlgebra> >
+class PolyPartFractionNumeratorLight: public ListLight<ListLight<GeneratorsPartialFractionAlgebra> >
 {
 public:
-  ListBasicObjectsLight<int> Coefficients;
+  ListLight<int> Coefficients;
   void AssignPolyPartFractionNumerator(PolyPartFractionNumerator& from);
   void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output, int theDimension) const;
   void AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight& right);
@@ -3199,7 +3243,7 @@ int MonomialInCommutativeAlgebra <  ElementOfCommutativeRingWithIdentity, Genera
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator (GeneratorsOfAlgebraRecord& g, int Power)
+int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(GeneratorsOfAlgebraRecord& g, int Power)
 { GeneratorsPartialFractionAlgebra tempG;
   tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.IndexOfObjectHash(g);
   if (tempG.GeneratorIndex==-1)
@@ -3259,7 +3303,7 @@ inline bool MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, G
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra<  ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m)
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m)
 { this->MakeActualSizeAtLeastExpandOnTop(this->size+m.size);
   for (int i=0; i<m.size; i++)
     this->MultiplyByGenerator(m.TheObjects[i]);
@@ -3288,7 +3332,7 @@ public:
   void Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget);
 };
 
-class PolynomialsRationalCoeffCollection: public ListBasicObjects<PolynomialsRationalCoeff>
+class PolynomialsRationalCoeffCollection: public List<PolynomialsRationalCoeff>
 {
 public:
   roots ChamberIndicators;
@@ -3355,7 +3399,7 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget)
+void Monomial<ElementOfCommutativeRingWithIdentity>::Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget)
 { if (this->IsAConstant())
   { output.MakeNVarConst(NumVarTarget, this->Coefficient);
     return;
@@ -3394,7 +3438,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::init(short nv)
 { assert(nv>=0);
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   if(this->NumVariables!=nv)
   { NumVariables=nv;
@@ -3410,7 +3454,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::initNoDegreesInit(short nv)
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   if(this->NumVariables!=nv)
   {  this->NumVariables=nv;
@@ -3424,7 +3468,7 @@ Monomial<ElementOfCommutativeRingWithIdentity>::~Monomial()
 { delete [] this->degrees;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->NumVariables;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
 }
 
@@ -3530,7 +3574,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(short 
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects; std::exit(0); }
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   short* newDegrees= new short[NumVariables+increase];
   for(int i=0; i<this->NumVariables; i++)
@@ -3551,14 +3595,14 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::GetMonomialWithCoeffOne( Mo
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::operator ==(const Monomial<ElementOfCommutativeRingWithIdentity>&  m)
+bool Monomial<ElementOfCommutativeRingWithIdentity>::operator ==(const Monomial<ElementOfCommutativeRingWithIdentity>& m)
 { for(int i=0; i<this->NumVariables; i++)
     if (this->degrees[i]!=m.degrees[i]) return false;
   return true;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::operator = (const Monomial<ElementOfCommutativeRingWithIdentity>&  m)
+void Monomial<ElementOfCommutativeRingWithIdentity>::operator = (const Monomial<ElementOfCommutativeRingWithIdentity>& m)
 { this->initNoDegreesInit(m.NumVariables);
   for (int i=0; i<NumVariables; i++)
     this->degrees[i]=m.degrees[i];
@@ -3622,7 +3666,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(short 
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=increment;
-  if(ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInListBasicObjects)std::exit(0);
+  if(ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)std::exit(0);
 #endif
   short* newDegrees= new short[NumVariables-increment];
   for(int i=0; i<this->NumVariables-increment; i++)
@@ -3919,7 +3963,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> ::HasGEQMonomial(TemplateMonomial& m, int& WhichIndex)
+bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::HasGEQMonomial(TemplateMonomial& m, int& WhichIndex)
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].IsGEQpartialOrder(m))
     { WhichIndex=i;
@@ -4083,7 +4127,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::TimesInteger(int a)
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::CopyFromPoly   (const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p)
+inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::CopyFromPoly(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p)
 { this->Assign(p);
 }
 
@@ -4225,7 +4269,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::ComponentInFrontOfVariabl
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget)
 { Polynomial<ElementOfCommutativeRingWithIdentity> Accum, TempPoly;
   Accum.ClearTheObjects();
   Accum.NumVars=NumVarTarget;
@@ -4237,7 +4281,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObj
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(ListBasicObjects<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget)
 { this->Substitution(TheSubstitution, *this, NumVarTarget);
 }
 
@@ -4371,7 +4415,7 @@ public:
   int EulerPhi(short n);
 };
 
-class CompositeComplex: public ListBasicObjects<BasicComplexNumber>
+class CompositeComplex: public List<BasicComplexNumber>
 {
 private:
   void AddBasicComplex(BasicComplexNumber& b);
@@ -4453,13 +4497,13 @@ public:
   bool operator ==(BasicQN& q);
   void Simplify();
   void GetCoeffInFrontOfLast(Rational& output);
-  void Evaluate(ListBasicObjects<int>& theVars, Rational& output);
+  void Evaluate(List<int>& theVars, Rational& output);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, short NumV);
 //  void MakeQN(PolynomialRationalCoeff& exp, Rational& coeff);
 };
 
-class QuasiNumber :public HashedListBasicObjects<BasicQN>
+class QuasiNumber :public HashedList<BasicQN>
 {
 public:
   std::string DebugString;
@@ -4489,7 +4533,7 @@ public:
   static QuasiNumber TheRingMUnit;
   void MakeZero(short NumVars);
   void Simplify();
-  void Evaluate(ListBasicObjects<int>& theVars, Rational& output);
+  void Evaluate(List<int>& theVars, Rational& output);
   int FindGCMDens();
   void QNtoComplex(CompositeComplexQN& output);
   void MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column);
@@ -4518,7 +4562,7 @@ public:
     ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this);
   };
   CompositeComplex Coefficient;
-  ListBasicObjects<Rational> Exponent;
+  List<Rational> Exponent;
   int NumVars;
 //  void AddBasicComplexNumber(BasicComplexNumber& b);
   void MultiplyBy(ComplexQN& q);
@@ -4549,7 +4593,7 @@ public:
 //  void MakeQN(PolynomialRationalCoeff& exp, Rational& coeff);
 };
 
-class CompositeComplexQN: public ListBasicObjects<ComplexQN>
+class CompositeComplexQN: public List<ComplexQN>
 {
 public:
   std::string DebugString;
@@ -4630,8 +4674,8 @@ public:
 class QuasiMonomial: public Monomial<QuasiNumber>
 {
 public:
-  void IntegrateDiscreteInDirectionFromZeroTo(  QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-  void IntegrateDiscreteFromZeroTo(  QPSub& EndPointSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void IntegrateDiscreteFromZeroTo(QPSub& EndPointSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
   void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output);
 };
 
@@ -4664,7 +4708,7 @@ public:
   void operator=(PrecomputedQuasiPolynomialIntegral& right);
 };
 
-class PrecomputedQuasiPolynomialIntegrals: public ListBasicObjects<PrecomputedQuasiPolynomialIntegral>
+class PrecomputedQuasiPolynomialIntegrals: public List<PrecomputedQuasiPolynomialIntegral>
 {
 public:
   static PolynomialsRationalCoeff* PreComputedBernoulli;
@@ -4732,8 +4776,8 @@ class oneFracWithMultiplicitiesAndElongations
 {
 public:
   std::string DebugString;
-  ListBasicObjectsLight<int> Multiplicities;
-  ListBasicObjectsLight<int> Elongations;
+  ListLight<int> Multiplicities;
+  ListLight<int> Elongations;
   void ComputeDebugString();
   void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange);
   void AddMultiplicity(int MultiplicityIncrement, int Elongation);
@@ -4776,7 +4820,7 @@ public:
   };
 };
 
-class rootsWithMultiplicity: public ListBasicObjects<rootWithMultiplicity>
+class rootsWithMultiplicity: public List<rootWithMultiplicity>
 {
 public:
   std::string DebugString;
@@ -4802,7 +4846,7 @@ public:
   };
 };
 
-class rootsWithMultiplicitiesContainer: public ListBasicObjects<rootsWithMultiplicity>
+class rootsWithMultiplicitiesContainer: public List<rootsWithMultiplicity>
 {
 public:
   std::string DebugString;
@@ -4810,7 +4854,7 @@ public:
   void ComputeDebugString(){this->ElementToString(this->DebugString); };
 };
 
-class intRoots: public ListBasicObjects<intRoot>
+class intRoots: public List<intRoot>
 {
 public:
   void AssignRoots(roots& r);
@@ -4820,13 +4864,13 @@ public:
   std::string DebugString;
 };
 
-class RootToIndexTable : public HashedListBasicObjects<intRoot>
+class RootToIndexTable : public HashedList<intRoot>
 {
 public:
   MatrixIntTightMemoryFit TableAllowedAminusB;
   MatrixIntTightMemoryFit TableAllowedAminus2B;
   Selection IndicesRedundantShortRoots;
-  ListBasicObjects<int> IndicesDoublesOfRedundantShortRoots;
+  List<int> IndicesDoublesOfRedundantShortRoots;
   int NumNonRedundantShortRoots;
   intRoot weights;
   void initFromRoots(intRoots& theAlgorithmBasis, intRoot* theWeights);
@@ -4837,7 +4881,7 @@ public:
   void ComputeTable(int theDimension);
 };
 
-class partFractionPolynomials: public ListBasicObjects<PolynomialRationalCoeff>
+class partFractionPolynomials: public List<PolynomialRationalCoeff>
 {
 public:
   roots LatticeIndicators;
@@ -4848,13 +4892,13 @@ public:
   void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables);
 };
 
-class partFraction: ListBasicObjectsLight<oneFracWithMultiplicitiesAndElongations>
+class partFraction: ListLight<oneFracWithMultiplicitiesAndElongations>
 {
 private:
   void findPivot();
   void findInitialPivot();
   //void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
-  bool rootIsInFractionCone (partFractions& owner,  root*theRoot, GlobalVariables& theGlobalVariables);
+  bool rootIsInFractionCone (partFractions& owner, root*theRoot, GlobalVariables& theGlobalVariables);
   friend class partFractions;
   friend class partFractionPolynomials;
 public:
@@ -4864,7 +4908,7 @@ public:
   bool PowerSeriesCoefficientIsComputed;
   bool IsIrrelevant;
   bool RelevanceIsComputed;
-  ListBasicObjects<int> IndicesNonZeroMults;
+  List<int> IndicesNonZeroMults;
   IntegerPolyLight Coefficient;
   PolyPartFractionNumeratorLight CoefficientNonExpanded;
   bool RemoveRedundantShortRootsClassicalRootSystem(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
@@ -4899,9 +4943,9 @@ public:
   void ComputeOneCheckSum(partFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables);
   void AttemptReduction(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
   void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, root* Indicator);
-  void ApplySzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theElongations, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-  void ApplyGeneralizedSzenesVergneFormula(ListBasicObjects<int> &theSelectedIndices, ListBasicObjects<int>& theGreatestElongations, ListBasicObjects<int>& theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
-  bool CheckForOrlikSolomonAdmissibility(ListBasicObjects<int>& theSelectedIndices);
+  void ApplySzenesVergneFormula(List<int> &theSelectedIndices, List<int>& theElongations, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+  void ApplyGeneralizedSzenesVergneFormula(List<int> &theSelectedIndices, List<int>& theGreatestElongations, List<int>& theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
+  bool CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod(partFractions&Accum, GlobalVariables& theGlobalVariables, root* Indicator);
 //  void reduceOnceOrlikSolomonBasis(partFractions&Accum);
   bool reduceOnceGeneralMethodNoOSBasis(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator);
@@ -4930,9 +4974,9 @@ public:
   partFraction();
   ~partFraction();
   void GetPolyReduceMonomialByMonomial(partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, IntegerPoly& output);
-  void ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, ListBasicObjects<int>&thePowersSigned, Monomial<Integer>& input);
+  void ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, List<int>&thePowersSigned, Monomial<Integer>& input);
   void GetAlphaMinusNBetaPoly(partFractions& owner, int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
-  void GetNElongationPolyWithMonomialContribution(partFractions& owner, ListBasicObjects<int>& theSelectedIndices, ListBasicObjects<int>& theCoefficients, ListBasicObjects<int>& theGreatestElongations, int theIndex, IntegerPoly& output, int theDimension);
+  void GetNElongationPolyWithMonomialContribution(partFractions& owner, List<int>& theSelectedIndices, List<int>& theCoefficients, List<int>& theGreatestElongations, int theIndex, IntegerPoly& output, int theDimension);
   void GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
   static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output, int theDimension);
   void GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, PolyPartFractionNumerator& output, int theDimension);
@@ -4949,7 +4993,7 @@ public:
   int SizeWithoutDebugString();
 };
 
-class partFractions: public HashedListBasicObjects<partFraction>
+class partFractions: public HashedList<partFraction>
 { bool ShouldIgnore(GlobalVariables& theGlobalVariables, root* Indicator);
   bool splitPartial(GlobalVariables& theGlobalVariables, root* Indicator);
   void initCommon();
@@ -5008,7 +5052,7 @@ public:
   bool RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVariables, root* Indicator, int theIndex);
   bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, root* Indicator);
   bool split(GlobalVariables& theGlobalVariables, root* Indicator);
-  void ComputeSupport(ListBasicObjects<roots>& output, std::stringstream& outputString);
+  void ComputeSupport(List<roots>& output, std::stringstream& outputString);
   void ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables);
   void AccountPartFractionInternals(int sign, int index, root* Indicator, GlobalVariables& theGlobalVariables);
   void AddAndReduce(partFraction& f, GlobalVariables& theGlobalVariables, root* Indicator);
@@ -5041,7 +5085,7 @@ public:
   void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables& theGlobalVariables);
 };
 
-class ElementWeylGroup: public ListBasicObjects<int>
+class ElementWeylGroup: public List<int>
 {
 public:
   std::string DebugString;
@@ -5052,7 +5096,7 @@ public:
   bool operator==(const ElementWeylGroup& right);
 };
 
-class OneVarPolynomials: public ListBasicObjects<Polynomial<LargeInt> >
+class OneVarPolynomials: public List<Polynomial<LargeInt> >
 {
 public:
   std::string DebugString;
@@ -5064,18 +5108,18 @@ public:
 
 //this class is in effect a remake of Polynomial<int>; Use only to minimize RAM usage.
 //The OneVarIntPolynomial assumes coefficients do not exceed int size.
-//The OneVarIntPolynomial has 2 times the basic size of ListBasicObjects of "service"
+//The OneVarIntPolynomial has 2 times the basic size of List of "service"
 //RAM usage. On a 32 bit machine that means it has 2*28=56 bytes of extra RAM besides the
 //coefficient storage.
 class OneVarIntPolynomial
 {
 public:
-  ListBasicObjects<int> PolynomialPart;
-  ListBasicObjects<int> RationalPart;
+  List<int> PolynomialPart;
+  List<int> RationalPart;
   std::string DebugString;
   void MakeConst(int c);
-  void MakeMonomial (int coeff, int power);
-  void AddMonomial  (int coeff, int power);
+  void MakeMonomial(int coeff, int power);
+  void AddMonomial(int coeff, int power);
   void MakeQuadratic(int x2Term, int x1Term, int constTerm);
   void Nullify();
   void ComputeDebugString();
@@ -5091,10 +5135,10 @@ public:
   void ReleaseMemory();
   void operator=(OneVarIntPolynomial& p){this->Assign(p); };
   void FitSize();
-  static void SetSizeAtLeastInitProperly(ListBasicObjects<int>& theArray, int desiredSize);
+  static void SetSizeAtLeastInitProperly(List<int>& theArray, int desiredSize);
 };
 
-class OneVarIntPolynomials: public ListBasicObjects<OneVarIntPolynomial>
+class OneVarIntPolynomials: public List<OneVarIntPolynomial>
 {
 public:
   std::string DebugString;
@@ -5108,25 +5152,25 @@ class VermaModulesWithMultiplicities: public hashedRoots
 {
 public:
   WeylGroup* TheWeylGroup;
-  ListBasicObjects<int> TheMultiplicities;
-  ListBasicObjects<bool> Explored;
+  List<int> TheMultiplicities;
+  List<bool> Explored;
   int NextToExplore;
   int LowestNonExplored;
-  ListBasicObjects<ListBasicObjects<int> > BruhatOrder;
-  ListBasicObjects<ListBasicObjects<int> > SimpleReflectionsActionList;
-  ListBasicObjects<ListBasicObjects<int> > InverseBruhatOrder;
+  List<List<int> > BruhatOrder;
+  List<List<int> > SimpleReflectionsActionList;
+  List<List<int> > InverseBruhatOrder;
   //important: in both the R- and KL-polynomials, if a polynomial Rxy is non-zero,
   //then x is bigger than y. This is the opposite to the usually accepted convention!
   //The reason for that is the following: if you want to compute
   //once you are done with computing with a given highest weight,
   //you want to be able to release the used memory; that is why the higher weight must
   //be the first, not the second index!
-  ListBasicObjects<OneVarIntPolynomials> KLPolys;
-  ListBasicObjects<OneVarIntPolynomials> RPolys;
-  void KLcoeffsToString(ListBasicObjects<int>& theKLCoeffs, std::string& output);
+  List<OneVarIntPolynomials> KLPolys;
+  List<OneVarIntPolynomials> RPolys;
+  void KLcoeffsToString(List<int>& theKLCoeffs, std::string& output);
   void FindNextToExplore();
   int FindLowestBruhatNonExplored();
-  int FindHighestBruhatNonExplored(ListBasicObjects<bool>& theExplored);
+  int FindHighestBruhatNonExplored(List<bool>& theExplored);
   void initTheMults();
   void Compute(int x);
   void Check();
@@ -5140,16 +5184,16 @@ public:
   void ElementToString(std::string& output);
   void MergeBruhatLists(int fromList, int toList);
   void KLPolysToString(std::string& output);
-  void ComputeKLcoefficientsFromIndex(int ChamberIndex, ListBasicObjects<int>& output);
-  void ComputeKLcoefficientsFromChamberIndicator(root& ChamberIndicator, ListBasicObjects<int>& output);
+  void ComputeKLcoefficientsFromIndex(int ChamberIndex, List<int>& output);
+  void ComputeKLcoefficientsFromChamberIndicator(root& ChamberIndicator, List<int>& output);
   int ChamberIndicatorToIndex(root& ChamberIndicator);
   void RPolysToString(std::string& output);
   void ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex);
   void ComputeRPolys();
   int ComputeProductfromSimpleReflectionsActionList(int x, int y);
-  void WriteKLCoeffsToFile(std::fstream& output, ListBasicObjects<int>& KLcoeff, int TopIndex);
+  void WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex);
   //returns the TopIndex of the KL coefficients
-  int ReadKLCoeffsFromFile(std::fstream& input, ListBasicObjects<int>& output);
+  int ReadKLCoeffsFromFile(std::fstream& input, List<int>& output);
   VermaModulesWithMultiplicities(){this->TheWeylGroup=0; };
   void GeneratePartialBruhatOrder();
   void ExtendOrder();
@@ -5157,7 +5201,7 @@ public:
   void initFromWeyl (WeylGroup* theWeylGroup);
 };
 
-class WeylGroup: public HashedListBasicObjects<ElementWeylGroup>
+class WeylGroup: public HashedList<ElementWeylGroup>
 {
 public:
   std::string DebugString;
@@ -5185,16 +5229,16 @@ public:
   void MakeDn(int n);
   void MakeF4();
   void MakeG2();
-  void MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks, ListBasicObjects<int>* theMultiplicities);
-  void MakeFromDynkinType(ListBasicObjects<char>& theLetters, ListBasicObjects<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); };
+  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
+  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); };
   //void GetLongRootLength(Rational& output);
   static bool IsAddmisibleDynkinType(char candidateLetter, int n);
   //the below will not do anything if the inputLetter is not a valid Dynkin letter
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
   void GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonCoords(root& input, root& output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonCoords(ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonCoordsWRTsubalgebra(roots& generators, ListBasicObjects<root>& input, roots& output, GlobalVariables& theGlobalVariables);
+  void GetEpsilonCoords(List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
+  void GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
   void ComputeWeylGroup(int UpperLimitNumElements);
@@ -5206,6 +5250,8 @@ public:
   void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho);
   void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
   void GenerateRootSystemFromKillingFormMatrix();
+  void WriteToFile(std::fstream& output);
+  void ReadFromFile(std::fstream& input);
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
   //theRoot is a list of the simple coordinates of the root
@@ -5215,7 +5261,7 @@ public:
   void ActOnDualSpaceElementByGroupElement(int index, root& theDualSpaceElement, bool RhoAction);
   void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
   void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
-  void SimpleReflectionRootAlg(  int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
+  void SimpleReflectionRootAlg(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
   bool IsPositiveOrPerpWRTh(const root& input, const root& theH)
   { return this->RootScalarKillingFormMatrixRoot(input, theH).IsNonNegative();
   };
@@ -5235,7 +5281,7 @@ public:
   int length(int index);
 };
 
-class ReflectionSubgroupWeylGroup: public HashedListBasicObjects<ElementWeylGroup>
+class ReflectionSubgroupWeylGroup: public HashedList<ElementWeylGroup>
 {
 public:
   bool truncated;
@@ -5283,8 +5329,8 @@ class thePFcomputation
 public:
   int LCMdeterminants;
   int TotalNumEnumerated;
-  ListBasicObjects<Selection> tableForbidden;
-  ListBasicObjects<Selection> theForbiddenSelections;
+  List<Selection> tableForbidden;
+  List<Selection> theForbiddenSelections;
   void ComputeDeterminantSelection(int theDimension);
   Selection theSelection;
   roots AllRoots;
@@ -5302,7 +5348,7 @@ public:
   void Run();
 };
 
-class multTableKmods : public ListBasicObjects<ListBasicObjects <ListBasicObjects<int> > >
+class multTableKmods : public List<List <List<int> > >
 {
 public:
   std::string DebugString;
@@ -5320,12 +5366,12 @@ public:
   rootsCollection SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
-  ListBasicObjects<std::string> DynkinTypeStrings;
-  ListBasicObjects<int> indicesThreeNodes;
-  ListBasicObjects<ListBasicObjects<int> > indicesEnds;
-  ListBasicObjects<ListBasicObjects<int> > sameTypeComponents;
-  ListBasicObjects<int> indexUniComponent;
-  ListBasicObjects<int> indexInUniComponent;
+  List<std::string> DynkinTypeStrings;
+  List<int> indicesThreeNodes;
+  List<List<int> > indicesEnds;
+  List<List<int> > sameTypeComponents;
+  List<int> indexUniComponent;
+  List<int> indexInUniComponent;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();
@@ -5349,9 +5395,9 @@ public:
   bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
   void GetSimpleBasisInBourbakiOrder(roots& output);
   void GetSimpleBasisInBourbakiOrderOneComponentAppend(roots& outputAppend, int index);
-  void GetAutomorphism(ListBasicObjects<ListBasicObjects<int> >& output, int index);
-  void GetAutomorphisms(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& output);
-  void GetMapFromPermutation(roots& domain, roots& range, ListBasicObjects<int>& thePerm, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right);
+  void GetAutomorphism(List<List<int> >& output, int index);
+  void GetAutomorphisms(List<List<List<int> > >& output);
+  void GetMapFromPermutation(roots& domain, roots& range, List<int>& thePerm, List<List<List<int> > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right);
 };
 
 class coneRelation
@@ -5359,10 +5405,10 @@ class coneRelation
 public:
   roots Alphas;
   roots Betas;
-  ListBasicObjects<Rational> AlphaCoeffs;
-  ListBasicObjects<Rational> BetaCoeffs;
-  ListBasicObjects<ListBasicObjects<int> > AlphaKComponents;
-  ListBasicObjects<ListBasicObjects<int> > BetaKComponents;
+  List<Rational> AlphaCoeffs;
+  List<Rational> BetaCoeffs;
+  List<List<int> > AlphaKComponents;
+  List<List<int> > BetaKComponents;
   int IndexOwnerRootSubalgebra;
   bool GenerateAutomorphisms(coneRelation& right, rootSubalgebras& owners);
   DynkinDiagramRootSubalgebra theDiagram;
@@ -5373,19 +5419,19 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner);
   void ComputeDiagramRelAndK(rootSubalgebra& owner);
-  void FixRepeatingRoots(roots& theRoots, ListBasicObjects<Rational>& coeffs);
-  void RelationOneSideToString(std::string& output, const std::string& letterType, ListBasicObjects<Rational>& coeffs, ListBasicObjects<ListBasicObjects<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
+  void FixRepeatingRoots(roots& theRoots, List<Rational>& coeffs);
+  void RelationOneSideToString(std::string& output, const std::string& letterType, List<Rational>& coeffs, List<List<int> >& kComponents, roots& theRoots, bool useLatex, rootSubalgebra& owner);
   void GetEpsilonCoords(roots& input, roots& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
   int ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts);
   int RootsToScalarProductString(roots& inputLeft, roots& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex, rootSubalgebra& owner);
-  void ComputeConnectedComponents(roots& input, rootSubalgebra& owner, ListBasicObjects<ListBasicObjects<int> >& output);
+  void ComputeConnectedComponents(roots& input, rootSubalgebra& owner, List<List<int> >& output);
   void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts){ this->ElementToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);  };
   void MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoots);
   bool IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner);
   void FixRightHandSide(rootSubalgebra& owner, roots& NilradicalRoots);
-  bool leftSortedBiggerThanOrEqualToRight(ListBasicObjects<int>& left, ListBasicObjects<int>& right);
-  void ComputeKComponents(roots& input, ListBasicObjects<ListBasicObjects<int> >& output, rootSubalgebra& owner);
-  void RelationOneSideToStringCoordForm(std::string& output,  ListBasicObjects<Rational>& coeffs, roots& theRoots, bool EpsilonForm);
+  bool leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>& right);
+  void ComputeKComponents(roots& input, List<List<int> >& output, rootSubalgebra& owner);
+  void RelationOneSideToStringCoordForm(std::string& output,  List<Rational>& coeffs, roots& theRoots, bool EpsilonForm);
   void GetSumAlphas(root& output, int theDimension);
   bool CheckForBugs(rootSubalgebra& owner, roots& NilradicalRoots);
   void SortRelation(rootSubalgebra& owner);
@@ -5414,7 +5460,7 @@ public:
   coneRelation(){this->IndexOwnerRootSubalgebra=-1; };
 };
 
-class coneRelations: public HashedListBasicObjects<coneRelation>
+class coneRelations: public HashedList<coneRelation>
 {
 public:
   int NumAllowedLatexLines;
@@ -5422,7 +5468,7 @@ public:
   bool flagIncludeCoordinateRepresentation;
   bool flagIncludeSubalgebraDataInDebugString;
   std::string DebugString;
-  ListBasicObjects<std::string> CoordinateReps;
+  List<std::string> CoordinateReps;
   void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
   void ElementToString (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(rootSubalgebras& owners, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
@@ -5446,9 +5492,9 @@ class permutation: public SelectionWithDifferentMaxMultiplicities
 {
 public:
   void initPermutation(int n);
-  void initPermutation(ListBasicObjects<int>& disjointSubsets, int TotalNumElements);
-  void incrementAndGetPermutation(ListBasicObjects<int>& output);
-  void GetPermutation(ListBasicObjects<int>& output);
+  void initPermutation(List<int>& disjointSubsets, int TotalNumElements);
+  void incrementAndGetPermutation(List<int>& output);
+  void GetPermutation(List<int>& output);
 };
 
 class rootSubalgebra
@@ -5466,14 +5512,14 @@ public:
   bool flagAnErrorHasOccuredTimeToPanic;
   static int ProblemCounter;
   static int ProblemCounter2;
-  ListBasicObjects<int> indicesSubalgebrasContainingK;
+  List<int> indicesSubalgebrasContainingK;
   multTableKmods theMultTable;
-  ListBasicObjects<int> theOppositeKmods;
+  List<int> theOppositeKmods;
   DynkinDiagramRootSubalgebra theDynkinDiagram;
   DynkinDiagramRootSubalgebra theCentralizerDiagram;
-  ListBasicObjects<ListBasicObjects<int> > coneRelationsBuffer;
-  ListBasicObjects<int> coneRelationsNumSameTypeComponentsTaken;
-  ListBasicObjects<DynkinDiagramRootSubalgebra> relationsDiagrams;
+  List<List<int> > coneRelationsBuffer;
+  List<int> coneRelationsNumSameTypeComponentsTaken;
+  List<DynkinDiagramRootSubalgebra> relationsDiagrams;
   WeylGroup AmbientWeyl;
   roots genK;
   roots SimpleBasisK;
@@ -5491,10 +5537,10 @@ public:
   roots SimpleBasisgEpsCoords;
   rootsCollection kModulesKepsCoords;
   rootsCollection kModulesgEpsCoords;
-  ListBasicObjects<roots> kModules;
-  ListBasicObjects<roots> PosRootsKConnectedComponents;
-  ListBasicObjects<Selection> theKEnumerations;
-  ListBasicObjects<int> theKComponentRanks;
+  List<roots> kModules;
+  List<roots> PosRootsKConnectedComponents;
+  List<Selection> theKEnumerations;
+  List<int> theKComponentRanks;
   std::string DebugString;
   rootSubalgebra();
   //returns -1 if the weight/root is not in g/k
@@ -5525,12 +5571,12 @@ public:
   void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables);
   void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, useLatex, useHtml, includeKEpsCoords, theGlobalVariables); };
-  bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
+  bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
   bool IsAnIsomorphism(roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
-  bool ListHasNonSelectedIndexLowerThanGiven(int index, ListBasicObjects<int>& tempList, Selection& tempSel);
-  void GeneratePossibleNilradicalsRecursive(MutexWrapper& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, ListBasicObjects<Selection>& impliedSelections, ListBasicObjects<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicals(MutexWrapper& PauseMutex, ListBasicObjects<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicalsInit(ListBasicObjects<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter);
+  bool ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel);
+  void GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter);
   void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
   void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
@@ -5542,9 +5588,9 @@ public:
   void ElementToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables){this->ElementToString(output, 0, 0, useLatex, useHtml, includeKEpsCoords, theGlobalVariables); };
   void ElementToString(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables);
   bool RootsDefineASubalgebra(roots& theRoots);
-  void GenerateKmodMultTable(ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& output, ListBasicObjects<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
+  void GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods, GlobalVariables& theGlobalVariables);
   void MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables);
-  void KmodTimesKmod(int index1, int index2, ListBasicObjects<int>& oppositeKmods, ListBasicObjects<int>& output);
+  void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
   void initFromAmbientWeyl();
   void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SemisimpleLieAlgebra& theLieAlgebra);
   void ComputeAllButAmbientWeyl();
@@ -5563,30 +5609,30 @@ public:
   void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
   bool LinCombToString(root& alphaRoot, int coeff, root& linComb, std::string& output);
   bool LinCombToStringDistinguishedIndex(int distinguished, root& alphaRoot, int coeff, root& linComb, std::string& output);
-  void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& inMultTable, ListBasicObjects<int>& inOpposites);
-  void ReadMultTableAndOppositeKmodsToFile(std::fstream& input, ListBasicObjects<ListBasicObjects<ListBasicObjects<int> > >& outMultTable, ListBasicObjects<int>& outOpposites);
+  void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites);
+  void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);
 };
 
-class rootSubalgebras: public ListBasicObjects<rootSubalgebra>
+class rootSubalgebras: public List<rootSubalgebra>
 {
 public:
   std::string DebugString;
   coneRelations theBadRelations;
   coneRelations theGoodRelations;
   coneRelations theMinRels;
-  ListBasicObjects<ListBasicObjects<int> > ActionsNormalizerCentralizerNilradical;
-  ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
-  ListBasicObjects<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
+  List<List<int> > ActionsNormalizerCentralizerNilradical;
+  List<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
+  List<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
   //Code used in nilradical generation:
   Selection ParabolicsSelectionNilradicalGeneration;
-  ListBasicObjects<Selection> ImpiedSelectionsNilradical;
+  List<Selection> ImpiedSelectionsNilradical;
   int parabolicsCounterNilradicalGeneration;
-  ListBasicObjects<int> numNilradicalsBySA;
+  List<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;
   int NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
-  ListBasicObjects<int> CountersNilradicalsGeneration;
+  List<int> CountersNilradicalsGeneration;
   int RecursionDepthNilradicalsGeneration;
-  MutexWrapper mutexLockMeToPauseLProhibitingComputations;
+  Controller controllerLProhibitingRelations;
   int NumSubalgebrasProcessed;
   int NumConeConditionFailures;
   int NumSubalgebrasCounted;
@@ -5604,9 +5650,9 @@ public:
   bool flagLookingForMinimalRels;
   void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
   bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel, GlobalVariables& theGlobalVariables);
-  bool ApproveSelAgainstOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
+  bool ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
   void RaiseSelectionUntilApproval(Selection& targetSel, GlobalVariables& theGlobalVariables);
-  void ApplyOneGenerator(ListBasicObjects<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
+  void ApplyOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
   void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
@@ -5694,7 +5740,7 @@ public:
   //of the orbit with Borel-positive weights
   //give a Limiting cone if you want only to observe weights lying in a
   //certain cone. Set 0 if there is no particular cone of interest.
-  void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, ListBasicObjects<int>& theKLCoeffs, QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
+  void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs, QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
 };
 
 struct IndicatorWindowVariables
@@ -5747,7 +5793,7 @@ public:
   void ComputeDebugString(SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex, false, 0, 0);  };
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
-  ListBasicObjects<Rational> coeffsRootSpaces;
+  List<Rational> coeffsRootSpaces;
   root Hcomponent;
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
@@ -5780,16 +5826,16 @@ public:
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){  this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml); };
-  ListBasicObjects<int> highestWeights;
-  ListBasicObjects<int> multiplicitiesHighestWeights;
-  ListBasicObjects<int> weightSpaceDimensions;
+  List<int> highestWeights;
+  List<int> multiplicitiesHighestWeights;
+  List<int> weightSpaceDimensions;
   ElementSimpleLieAlgebra theH, theE, theF;
   ElementSimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
   SemisimpleLieAlgebra* owner;
-  ListBasicObjects<int> IndicesContainingRootSAs;
-  ListBasicObjects<int> IndicesMinimalContainingRootSA;
-  ListBasicObjects<ListBasicObjects<int> > HighestWeightsDecompositionMinimalContainingRootSA;
-  ListBasicObjects<ListBasicObjects<int> > MultiplicitiesDecompositionMinimalContainingRootSA;
+  List<int> IndicesContainingRootSAs;
+  List<int> IndicesMinimalContainingRootSA;
+  List<List<int> > HighestWeightsDecompositionMinimalContainingRootSA;
+  List<List<int> > MultiplicitiesDecompositionMinimalContainingRootSA;
   roots preferredAmbientSimpleBasis;
   root hCharacteristic;
   root hElementCorrespondingToCharacteristic;
@@ -5802,11 +5848,11 @@ public:
   MatrixLargeRational theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
-  void ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, ListBasicObjects<int>& outputHighestWeights, ListBasicObjects<int>& outputMultiplicitiesHighestWeights, ListBasicObjects<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
+  void ComputeModuleDecomposition(roots& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
   bool ModuleDecompositionFitsInto(const slTwo& other);
-  static bool ModuleDecompositionFitsInto(const ListBasicObjects<int>& highestWeightsLeft, const ListBasicObjects<int>& multiplicitiesHighestWeightsLeft, const ListBasicObjects<int>& highestWeightsRight, const ListBasicObjects<int>& multiplicitiesHighestWeightsRight);
+  static bool ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight);
   void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
@@ -5853,12 +5899,12 @@ public:
   };
 };
 
-class SemisimpleLieAlgebra: public HashedListBasicObjects<ElementSimpleLieAlgebra>
+class SemisimpleLieAlgebra: public HashedList<ElementSimpleLieAlgebra>
 {
 public:
   std::string DebugString;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); };
-  void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, ListBasicObjects<std::string>* outputPNGFileNames, ListBasicObjects<std::string>* outputLatexToPNGstrings);
+  void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){  this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); };
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
@@ -5898,14 +5944,14 @@ public:
   void MakeSl2ProgressReportNumCycles(int progress, int outOf,  GlobalVariables& theGlobalVariables);
 };
 
-class SltwoSubalgebras : public HashedListBasicObjects<slTwo>
+class SltwoSubalgebras : public HashedList<slTwo>
 {
 public:
   std::string DebugString;
-//  ListBasicObjects< int > hSingularWeights;
-  ListBasicObjects<int> MultiplicitiesFixedHweight;
-  ListBasicObjects<ListBasicObjects<int> > IndicesSl2sContainedInRootSA;
-  ListBasicObjects<int> IndicesSl2decompositionFlas;
+//  List< int > hSingularWeights;
+  List<int> MultiplicitiesFixedHweight;
+  List<List<int> > IndicesSl2sContainedInRootSA;
+  List<int> IndicesSl2decompositionFlas;
   roots BadHCharacteristics;
   int IndexZeroWeight;
   SemisimpleLieAlgebra owner;
@@ -5913,10 +5959,10 @@ public:
   void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
   { this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);
   };
-  ListBasicObjects<std::string> texFileNamesForPNG;
-  ListBasicObjects<std::string> texStringsEachFile;
-  ListBasicObjects<std::string> listSystemCommandsLatex;
-  ListBasicObjects<std::string> listSystemCommandsDVIPNG;
+  List<std::string> texFileNamesForPNG;
+  List<std::string> texStringsEachFile;
+  List<std::string> listSystemCommandsLatex;
+  List<std::string> listSystemCommandsDVIPNG;
   void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
   { for(int i=0; i<this->size; i++)
       this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
@@ -5948,16 +5994,16 @@ public:
   SltwoSubalgebras theSl2s;
   SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
   Selection RemainingCandidates;
-//  ListBasicObjects<DynkinDiagramRootSubalgebra> thePossibleDynkinDiagrams;
-  ListBasicObjects<ListBasicObjects<int> > theRanks;
-  ListBasicObjects<ListBasicObjects<int> > theMultiplicities;
-  ListBasicObjects<ListBasicObjects<char> > theLetters;
-  ListBasicObjects<ListBasicObjects<int> > thePartitionValues;
-  ListBasicObjects<ListBasicObjects<int> > thePartitionMultiplicities;
-  ListBasicObjects<SltwoSubalgebras> theCandidateSubAlgebras;
-  ListBasicObjects<ListBasicObjects<int> > IndicesMatchingSl2s;
-  ListBasicObjects<ListBasicObjects<int> > IndicesMatchingPartitionSl2s;
-  ListBasicObjects<ListBasicObjects<int> > IndicesMatchingActualSl2s;
+//  List<DynkinDiagramRootSubalgebra> thePossibleDynkinDiagrams;
+  List<List<int> > theRanks;
+  List<List<int> > theMultiplicities;
+  List<List<char> > theLetters;
+  List<List<int> > thePartitionValues;
+  List<List<int> > thePartitionMultiplicities;
+  List<SltwoSubalgebras> theCandidateSubAlgebras;
+  List<List<int> > IndicesMatchingSl2s;
+  List<List<int> > IndicesMatchingPartitionSl2s;
+  List<List<int> > IndicesMatchingActualSl2s;
   void MatchRealSl2sToPartitionSl2s();
   void MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables);
   void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
@@ -5968,8 +6014,8 @@ public:
   void EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank);
   void GenerateAllPartitionsUpTo(int theRank);
   void GenerateAllPartitionsDontInit(int theRank);
-  void GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, ListBasicObjects<int>& ranksBuffer, ListBasicObjects<int>& multiplicitiesBuffer, ListBasicObjects<char>& lettersBuffer);
-  void GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, ListBasicObjects<int>& Multiplicities, ListBasicObjects<int>& Values);
+  void GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, List<int>& ranksBuffer, List<int>& multiplicitiesBuffer, List<char>& lettersBuffer);
+  void GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, List<int>& Multiplicities, List<int>& Values);
 };
 
 class minimalRelationsProverStatesFixedK;
@@ -5988,7 +6034,7 @@ public:
   root SeparatingNormalUsed;
   roots nonAlphas;
   roots nonBetas;
-  ListBasicObjects<int > indicesIsosRespectingInitialNilradicalChoice;
+  List<int > indicesIsosRespectingInitialNilradicalChoice;
   root currentSeparatingNormalEpsilonForm;
   roots theChoicesWeMake;
   coneRelation PartialRelation;
@@ -5996,9 +6042,9 @@ public:
   bool StateIsPossible;
   bool StateIsComplete;
   //bool StateIsDubious;
-  ListBasicObjects<int> PossibleChildStates;
-  ListBasicObjects<int> ImpossibleChildStates;
-  ListBasicObjects<int> CompleteChildStates;
+  List<int> PossibleChildStates;
+  List<int> ImpossibleChildStates;
+  List<int> CompleteChildStates;
   int activeChild;
   minimalRelationsProverStatesFixedK* owner;
   void initFromParentState(minimalRelationsProverStateFixedK& parent);
@@ -6028,7 +6074,7 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
 };
 
-class minimalRelationsProverStatesFixedK: public ListBasicObjects<minimalRelationsProverStateFixedK>
+class minimalRelationsProverStatesFixedK: public List<minimalRelationsProverStateFixedK>
 {
 public:
   std::string DebugString;
@@ -6037,8 +6083,8 @@ public:
   roots PreferredDualBasis;
   roots PreferredDualBasisEpsilonCoords;
   //int RecursionDepth;
-  ListBasicObjects<int> theIndexStack;
-  ListBasicObjects<int> IndexKmoduleByRoots;
+  List<int> theIndexStack;
+  List<int> IndexKmoduleByRoots;
   rootSubalgebra isomorphismComputer;
   MatrixLargeRational invertedCartan;
   WeylGroup theWeylGroup;
@@ -6068,7 +6114,7 @@ public:
   void TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ExtensionStepFixedK(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, minimalRelationsProverStateFixedK& newState);
   void TestAddingExtraRootFixedK(int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
-  bool GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
+  bool GetNormalSeparatingConesFromPreferredBasis( int theIndex, List<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
   void RemoveDoubt(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   bool StateIsEqualTo(minimalRelationsProverStateFixedK& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeProgressReportStack(GlobalVariables& TheGlobalVariables, WeylGroup& theWeyl);
@@ -6122,8 +6168,8 @@ public:
   bool StateIsComplete;
   bool InternalStateIsComputed;
   //bool StateIsDubious;
-  ListBasicObjects<int> PossibleChildStates;
-  ListBasicObjects<int> CompleteChildStates;
+  List<int> PossibleChildStates;
+  List<int> CompleteChildStates;
   int NumImpossibleChildren;
   int activeChild;
   minimalRelationsProverStates* owner;
@@ -6157,7 +6203,7 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 };
 
-class minimalRelationsProverStates: public ListBasicObjects<minimalRelationsProverState>
+class minimalRelationsProverStates: public List<minimalRelationsProverState>
 {
 public:
   std::string DebugString;
@@ -6166,7 +6212,7 @@ public:
   roots PreferredDualBasis;
   roots PreferredDualBasisEpsilonCoords;
   //int RecursionDepth;
-  ListBasicObjects<int> theIndexStack;
+  List<int> theIndexStack;
   rootSubalgebra isomorphismComputer;
   MatrixLargeRational invertedCartan;
   WeylGroup theWeylGroup;
@@ -6203,8 +6249,8 @@ public:
   static int CountNumSeparatingNormals(roots& theAlphas, roots& theBetas, WeylGroup& theWeyl);
   void ReduceMemoryUse(GlobalVariables& theGlobalVariables);
   void TestAddingExtraRoot(int Index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, root& theRoot, bool AddAlpha, int indexAddedRoot, root& normalSeparatingConesOneBetaPositive, bool oneBetaIsPositive);
-  bool GetNormalSeparatingConesFromPreferredBasis( int theIndex, ListBasicObjects<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
-  static bool GetSeparatingRootIfExistsFromSet( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, ListBasicObjects<root>& theNormalCandidates);
+  bool GetNormalSeparatingConesFromPreferredBasis( int theIndex, List<root>& inputPreferredBasis, root& output, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables, bool& oneBetaIsPositive );
+  static bool GetSeparatingRootIfExistsFromSet( roots* choicePreferrence, int* choiceIndex, roots& ConeOneStrictlyPositive, roots& ConeNonNegative, root& output, WeylGroup& TheWeyl, GlobalVariables& TheGlobalVariables, List<root>& theNormalCandidates);
   void InvokeExtensionOfState(int index, int UpperLimitChildren, bool oneBetaIsPositive, root& NormalSeparatingCones, bool addFirstAlpha, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void RemoveDoubt(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   bool StateIsEqualTo(minimalRelationsProverState& theState, int IndexOther, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -6235,14 +6281,14 @@ class DyckPath
   std::string DebugString;
   void ComputeDebugString(DyckPaths& owner, bool useHtml, bool WithDetail){this->ElementToString(DebugString, owner, useHtml, WithDetail); };
   void ElementToString(std::string& output, DyckPaths& owner, bool useHtml, bool WithDetail);
-  ListBasicObjectsLight<int> thePathNodes;
-  ListBasicObjectsLight<int> thePathEdgesTaken;
+  ListLight<int> thePathNodes;
+  ListLight<int> thePathEdgesTaken;
   void Assign(const DyckPath& other);
   bool IamComplete(DyckPaths& owner);
   void operator=(const DyckPath& other){this->Assign(other); };
 };
 
-class DyckPaths: public ListBasicObjects<DyckPath>
+class DyckPaths: public List<DyckPath>
 {
   public:
   std::string DebugString;
@@ -6251,12 +6297,12 @@ class DyckPaths: public ListBasicObjects<DyckPath>
   int NumCompletePaths;
   WeylGroup AmbientWeyl;
   Selection AllowedEndNodes;
-  ListBasicObjects<ListBasicObjects<int> > pathGraphPairsOfNodes;
-  ListBasicObjects<ListBasicObjects<int> > pathGraphEdgeLabels;
+  List<List<int> > pathGraphPairsOfNodes;
+  List<List<int> > pathGraphEdgeLabels;
   roots startingRoots;
   hashedRoots PositiveRoots;
   int LastNonExploredIndex;
-  ListBasicObjects<int> GoodPaths;
+  List<int> GoodPaths;
   void ComputeGoodPathsExcludeTrivialPath();
   void GenerateAllDyckPathsTypesABC();
   void initPathGraphTypesABC();
@@ -6272,7 +6318,7 @@ private:
 public:
   std::string DebugString;
   void ComputeDebugString(bool useBeginEqnArray, bool useXYs){this->ElementToString(this->DebugString, useXYs, true, useBeginEqnArray); };
-  void ElementToString(std::string& output, ListBasicObjects<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
+  void ElementToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
   void ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
   int NumVariables;
   void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
@@ -6323,7 +6369,7 @@ class WeylParserNode
   void ElementToString(std::string& output);
   WeylParser* owner;
   int indexParent;
-  ListBasicObjects<int> children;
+  List<int> children;
   ElementWeylAlgebra Value;
   int Operation; //using tokenTypes from class WeylParser
   void operator=(const WeylParserNode& other)
@@ -6336,7 +6382,7 @@ class WeylParserNode
 };
 
 //the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
-class WeylParser: public ListBasicObjects<WeylParserNode>
+class WeylParser: public List<WeylParserNode>
 {
   public:
   std::string DebugString;
@@ -6346,10 +6392,10 @@ class WeylParser: public ListBasicObjects<WeylParserNode>
   { tokenExpression, tokenEmpty, tokenDigit, tokenPlus, tokenMinus, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket
   };
-  ListBasicObjects<int> TokenBuffer;
-  ListBasicObjects<int> ValueBuffer;
-  ListBasicObjects<int> TokenStack;
-  ListBasicObjects<int> ValueStack;
+  List<int> TokenBuffer;
+  List<int> ValueBuffer;
+  List<int> TokenStack;
+  List<int> ValueStack;
   int numEmptyTokensAtBeginning;
   int NumVariables;
   ElementWeylAlgebra Value;
@@ -6451,12 +6497,12 @@ public:
 class DrawOperations
 {
   public:
-  ListBasicObjects<int> IndexNthDrawOperation;
-  ListBasicObjects<int> TypeNthDrawOperation;
-  ListBasicObjects<DrawTextOperation> theDrawTextOperations;
-  ListBasicObjects<DrawLineOperation> theDrawLineOperations;
-  ListBasicObjects<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
-  ListBasicObjects<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
+  List<int> IndexNthDrawOperation;
+  List<int> TypeNthDrawOperation;
+  List<DrawTextOperation> theDrawTextOperations;
+  List<DrawLineOperation> theDrawLineOperations;
+  List<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
+  List<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize);
   void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
@@ -6732,9 +6778,9 @@ public:
 
   hashedRoots hashedRootsComputeSubGroupFromGeneratingReflections;
 
-  ListBasicObjects<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
-  ListBasicObjects<int> listWallDataPtSplitChamber;
-  ListBasicObjects<int> listWallDataPtSplitChamber2;
+  List<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
+  List<int> listWallDataPtSplitChamber;
+  List<int> listWallDataPtSplitChamber2;
 
   Monomial<Rational> monMakePolyExponentFromIntRoot;
   Monomial<Rational> monMakePolyFromDirectionAndNormal;
@@ -6806,7 +6852,7 @@ public:
 
   ReflectionSubgroupWeylGroup subGroupActionNormalizerCentralizer;
 
-  HashedListBasicObjects<Selection> hashedSelSimplexAlg;
+  HashedList<Selection> hashedSelSimplexAlg;
 
   DynkinDiagramRootSubalgebra dynGetEpsCoords;
   DynkinDiagramRootSubalgebra dynAttemptTheTripleTrick;
@@ -6887,7 +6933,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariabl
   }
 }
 
-class GlobalVariablesContainer :public ListBasicObjects<GlobalVariables>
+class GlobalVariablesContainer :public List<GlobalVariables>
 {
 public:
   GlobalVariables* Default(){return & this->TheObjects[0]; };

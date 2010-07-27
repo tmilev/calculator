@@ -148,6 +148,7 @@ public:
   wxBoxSizer* BoxSizer16VerticalStatusString;
   wxBoxSizer* BoxSizer17HorizontalProverButtons;
   wxBoxSizer* BoxSizer18LProhibiting;
+  wxBoxSizer* BoxSizer19DyckPaths;
  // wxRadioButton* RB1OneSlice;
  // wxRadioButton* RB2OneIncrement;
  // wxRadioButton* RB3FullChop;
@@ -516,6 +517,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->BoxSizer16VerticalStatusString= new wxBoxSizer(wxVERTICAL);
   this->BoxSizer17HorizontalProverButtons=  new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer18LProhibiting= new wxBoxSizer(wxHORIZONTAL);
+  this->BoxSizer19DyckPaths = new wxBoxSizer(wxHORIZONTAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
@@ -612,9 +614,10 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 		this->BoxSizer11VerticalOptions->Add(this->BoxSizer18LProhibiting);
       this->BoxSizer18LProhibiting->Add(this->Button18LprohibitingPauseAndSave);
       this->BoxSizer18LProhibiting->Add(this->Button3LprohibitingGo);
+		this->BoxSizer11VerticalOptions->Add(this->BoxSizer19DyckPaths);
+      this->BoxSizer19DyckPaths->Add(this->Button16Custom2);
+      this->BoxSizer19DyckPaths->Add(this->Button17Custom2PauseSaveResume);
 		this->BoxSizer11VerticalOptions->Add(this->Button19CountNilradicals);
-		this->BoxSizer11VerticalOptions->Add(this->Button16Custom2);
-		this->BoxSizer11VerticalOptions->Add(this->Button17Custom2PauseSaveResume);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
   this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
   this->BoxSizer12VerticalProgressReports->Add(this->Label2ProgressReport);

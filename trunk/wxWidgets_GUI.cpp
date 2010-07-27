@@ -117,7 +117,7 @@ END_EVENT_TABLE()
 
 class guiMainWindow : public wxFrame
 {
-  ListObjectPointers<wxFont> theFonts;
+  ListPointers<wxFont> theFonts;
 public:
   std::fstream fileSettings;
   std::string bufferString1;
@@ -149,6 +149,7 @@ public:
   wxBoxSizer* BoxSizer17HorizontalProverButtons;
   wxBoxSizer* BoxSizer18LProhibiting;
   wxBoxSizer* BoxSizer19DyckPaths;
+  wxBoxSizer* BoxSizer20ChamberSplit;
  // wxRadioButton* RB1OneSlice;
  // wxRadioButton* RB2OneIncrement;
  // wxRadioButton* RB3FullChop;
@@ -189,6 +190,8 @@ public:
 	::wxButton* Button17Custom2PauseSaveResume;
 	::wxButton* Button18LprohibitingPauseAndSave;
 	::wxButton* Button19CountNilradicals;
+	::wxButton* Button20SplitChambers;
+	::wxButton* Button21SplitChambersPauseAndSave;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -225,6 +228,8 @@ public:
   void onButton13ProverFullComputationFixedK(wxCommandEvent& ev);
   void onButton14ProverProverFixedKSave(wxCommandEvent& ev);
   void onButton15ProverFixedKOpen(wxCommandEvent& ev);
+  void onButton20SplitChambers(wxCommandEvent& ev);
+  void onButton21SplitChambersPauseAndSave(wxCommandEvent& ev);
   void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
@@ -284,6 +289,8 @@ public:
     ID_Button17Custom2PauseSaveResume,
     ID_Button18LprohibitingPauseAndSave,
     ID_Button19CountNilradicals,
+    ID_Button20SplitChambers,
+    ID_Button21SplitChambersPauseAndSave,
     ID_Paint,
   };
   DECLARE_EVENT_TABLE()
@@ -380,6 +387,8 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_BUTTON(guiMainWindow::ID_Button17Custom2PauseSaveResume, guiMainWindow::onButton17Custom2PauseSaveResume)
     EVT_BUTTON(guiMainWindow::ID_Button18LprohibitingPauseAndSave, guiMainWindow::onButton18LprohibitingPauseAndSave)
     EVT_BUTTON(guiMainWindow::ID_Button19CountNilradicals, guiMainWindow::onButton19CountNilradicals)
+    EVT_BUTTON(guiMainWindow::ID_Button20SplitChambers, guiMainWindow::onButton20SplitChambers)
+    EVT_BUTTON(guiMainWindow::ID_Button21SplitChambersPauseAndSave, guiMainWindow::onButton21SplitChambersPauseAndSave)
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
@@ -518,6 +527,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->BoxSizer17HorizontalProverButtons=  new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer18LProhibiting= new wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer19DyckPaths = new wxBoxSizer(wxHORIZONTAL);
+  this->BoxSizer20ChamberSplit = new wxBoxSizer(wxHORIZONTAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
@@ -561,6 +571,8 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Button17Custom2PauseSaveResume= new wxButton(this, this->ID_Button17Custom2PauseSaveResume, wxT("Experiments 2 Pause+Save"));
   this->Button18LprohibitingPauseAndSave= new wxButton(this, this->ID_Button18LprohibitingPauseAndSave, wxT("L prohibiting pause+save"));
   this->Button19CountNilradicals= new wxButton(this, this->ID_Button19CountNilradicals, wxT("Count Nilradicals"));
+  this->Button20SplitChambers= new wxButton(this, this->ID_Button20SplitChambers, wxT("Load chambers+go"));
+  this->Button21SplitChambersPauseAndSave= new wxButton(this, this->ID_Button21SplitChambersPauseAndSave, wxT("Pause and save"));
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
   //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
@@ -617,6 +629,9 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 		this->BoxSizer11VerticalOptions->Add(this->BoxSizer19DyckPaths);
       this->BoxSizer19DyckPaths->Add(this->Button16Custom2);
       this->BoxSizer19DyckPaths->Add(this->Button17Custom2PauseSaveResume);
+    this->BoxSizer11VerticalOptions->Add(this->BoxSizer20ChamberSplit);
+      this->BoxSizer20ChamberSplit->Add(this->Button20SplitChambers);
+      this->BoxSizer20ChamberSplit->Add(this->Button21SplitChambersPauseAndSave);
 		this->BoxSizer11VerticalOptions->Add(this->Button19CountNilradicals);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
   this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
@@ -796,13 +811,13 @@ void guiMainWindow::onToggleButton1UsingCustom(wxCommandEvent& ev)
   this->updateInputButtons();
 }
 
-void wxDialogOutput::onButton4SaveReadable(wxCommandEvent &ev)
+void wxDialogOutput::onButton4SaveReadable(wxCommandEvent& ev)
 { if (MainWindow1==0)
 		return;
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
-    MainWindow1->theComputationSetup.WriteReportToFile(MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables, tempFile, *MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default());
+    MainWindow1->theComputationSetup.theChambers.WriteReportToFile(tempFile);
 	tempFile.close();
 }
 
@@ -932,6 +947,30 @@ void guiMainWindow::onButton18LprohibitingPauseAndSave(wxCommandEvent& ev)
     this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
 }
 
+void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
+{ if (this->theComputationSetup.theChambers.thePauseController.IsRunning())
+  { this->theComputationSetup.theChambers.thePauseController.UnlockSafePoint();
+    return;
+  }
+  this->ReadVPVectorsAndOptions();
+  this->theComputationSetup.theChambers.theDirections = this->theComputationSetup.VPVectors;
+  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;
+  this->RunTheComputation();
+}
+
+void guiMainWindow::onButton21SplitChambersPauseAndSave(wxCommandEvent& ev)
+{ if (this->theComputationSetup.theChambers.thePauseController.IsPausedWhileRunning())
+    return;
+  if (this->theComputationSetup.theChambers.thePauseController.IsRunning())
+    this->theComputationSetup.theChambers.thePauseController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+  if (this->theComputationSetup.theChambers.size==0)
+    return;
+  this->theComputationSetup.theChambers.WriteToDefaultFile(*this->theComputationSetup.GetGlobalVars());
+  int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
+  if (tempI==wxOK)
+    this->theComputationSetup.theChambers.thePauseController.UnlockSafePoint();
+}
+
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)
 { this->theComputationSetup.flagUsingProverDoNotCallOthers=false;
   this->ReadVPVectorsAndOptions();
@@ -939,7 +978,7 @@ void guiMainWindow::onButton1Go(wxCommandEvent& ev)
 }
 
 void guiMainWindow::OpenFile(std::fstream& output)
-{ wxFileDialog* OpenDialog = new wxFileDialog (this, wxT("Choose a file to open"), wxEmptyString, wxEmptyString, wxT("Text files (*.tex)|*.tex"),wxSAVE, wxDefaultPosition);
+{ wxFileDialog* OpenDialog = new wxFileDialog (this, wxT("Choose a file to open"), wxEmptyString, wxEmptyString, wxT("Text files (*.html)|*.html"),wxSAVE, wxDefaultPosition);
   output.close();
   if (OpenDialog->ShowModal() == wxID_OK)
   { wxString CurrentDocPath = OpenDialog->GetPath();

@@ -979,8 +979,8 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1= inputData.thePartialFraction.DebugString;
   theGlobalVariables.MakeReport();
-//  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
-//  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
+  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
 }
 
 void ComputationSetup::TestGraphicalOutputPolys(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
@@ -1705,4 +1705,154 @@ void WeylGroup::ReadFromFile(std::fstream& input)
   assert(tempS=="Long_root_length:");
   this->LongRootLength.ReadFromFile(input);
   this->KillingFormMatrix.ReadFromFile(input);
+}
+
+bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
+{ std::stringstream out;
+  std::string tempS;
+  //assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
+  std::string endOfLine;
+  endOfLine="\n";
+  if (useLatex)
+    endOfLine.assign("\\\\\n");
+  if(useHtml)
+    endOfLine.assign("\n<br>\n");
+  this->ChamberNumberToString(tempS, owner);
+  if(!useHtml)
+    out << tempS << "\n";
+  else
+    out << "<a name=\"" << tempS << "\">" << tempS << "</a>";
+  if (useLatex)
+    out << endOfLine << "Projective representation\n\n";
+  /*out <<endOfLine<<"External Walls:"<<endOfLine;
+  root tempNormal;
+  for (int i=0; i<this->Externalwalls.size; i++)
+  {  this->Externalwalls.TheObjects[i].ElementToString(tempS);
+    if (!useLatex)
+      out <<"f"<<i<<": "<< tempS<<endOfLine;
+    else
+      out << tempS <<endOfLine;
+  }
+  if (!useLatex && !useHtml)
+  {  out <<"Internal Walls:"<<endOfLine;
+    for (int i=0; i<this->InternalWalls.size; i++)
+    {  this->InternalWalls.TheObjects[i].ElementToString(tempS);
+      out <<"f"<<i<<": "<< tempS<<endOfLine;
+    }
+  }*/
+  out << " index in owner: " << this->IndexInOwnerComplex << "\n";
+  this->ElementToInequalitiesString(tempS, owner, useLatex, useHtml);
+  out << tempS;
+//  ListPointers<CombinatorialChamber> outputChambers;
+//  this->FindAllNeighbors(outputChambers);
+  out << "Neighbors: ";
+  for (int i=0; i<this->Externalwalls.size; i++)
+  { out << "wall " << i+1 << ": ";
+    for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
+    { CombinatorialChamber* currentChamber = this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j];
+      if (currentChamber!=0)
+      { currentChamber->ChamberNumberToString(tempS, owner);
+        if (useHtml)
+          out << "<a href=\"#" << tempS << "\">";
+        out << tempS << ", ";
+        if (useHtml)
+          out << "</a>";
+      }
+    }
+  }
+  PolyFormatLocal.cutOffString=false;
+  if (this->flagIncludeVerticesInDebugString)
+  { out << endOfLine << "Vertices: ";
+    for (int i=0; i<this->AllVertices.size; i++)
+    { this->AllVertices.TheObjects[i].ElementToString(tempS);
+      out << tempS << ", ";
+    }
+  }
+  out << endOfLine;
+  if (!owner.flagDrawingProjective)
+  { if (useLatex)
+    out << "Affine data" << endOfLine;
+    out << "Affine walls: " << endOfLine;
+    for (int i=0; i<this->affineExternalWalls.size; i++)
+    { out << "wall" << i+1 << ": ";
+      this->affineExternalWalls.TheObjects[i].ElementToString(tempS);
+      out << tempS << endOfLine;
+    }
+    out << "Affine vertices (true): " << endOfLine;
+    for (int i=0; i<affineVertices.size; i++)
+    { if (i==this->NumTrueAffineVertices)
+        out << "Affine vertices representing pt(s) at infty: " << endOfLine;
+      this->affineVertices.TheObjects[i].ElementToString(tempS);
+      out << tempS << endOfLine;
+    }
+  }
+  output=out.str();
+  return true;
+}
+
+void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ if (inputData.theChambers.thePauseController.IsRunning())
+    return;
+  inputData.theChambers.thePauseController.InitComputation();
+  inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
+  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.theChambers.QuickSortAscending();
+  inputData.theChambers.LabelChamberIndicesProperly();
+  inputData.IndicatorRoot.MakeZero(inputData.WeylGroupIndex);
+  inputData.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, inputData.IndicatorRoot, 0);
+  inputData.theChambers.thePauseController.ExitComputation();
+}
+
+bool CombinatorialChamber::operator>(const CombinatorialChamber& right) const
+{ if (!this->flagHasZeroPolynomiaL && right.flagHasZeroPolynomiaL)
+    return true;
+  if (this->flagHasZeroPolynomiaL && !right.flagHasZeroPolynomiaL)
+    return false;
+  if (this->Externalwalls.size> right.Externalwalls.size)
+    return true;
+  if (this->Externalwalls.size<right.Externalwalls.size)
+    return false;
+  for (int i=0; i<this->Externalwalls.size; i++)
+  { if (this->Externalwalls.TheObjects[i].normal> right.Externalwalls.TheObjects[i].normal)
+      return true;
+  if (right.Externalwalls.TheObjects[i].normal>this->Externalwalls.TheObjects[i].normal)
+      return false;
+  }
+  return false;
+}
+
+void ComputationSetup::TestQuickSort(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  List<int> tempList;
+  tempList.SetSizeExpandOnTopNoObjectInit(20);
+  tempList.TheObjects[0]=9;
+  tempList.TheObjects[1]=1;
+  tempList.TheObjects[2]=2;
+  tempList.TheObjects[3]=2;
+  tempList.TheObjects[4]=8;
+  tempList.TheObjects[5]=6;
+  tempList.TheObjects[6]=7;
+  tempList.TheObjects[7]=4;
+  tempList.TheObjects[8]=8;
+  tempList.TheObjects[9]=3;
+  tempList.TheObjects[10]=5;
+  tempList.TheObjects[11]=-1;
+  tempList.TheObjects[12]=10;
+  tempList.TheObjects[13]=12;
+  tempList.TheObjects[14]=3;
+  tempList.TheObjects[15]=6;
+  tempList.TheObjects[16]=18;
+  tempList.TheObjects[17]=-1;
+  tempList.TheObjects[18]=13;
+  tempList.TheObjects[19]=12;
+  out << "non sorted:\n";
+  for (int i=0; i < tempList.size; i++)
+    out << tempList.TheObjects[i] << " ";
+  out << "\nsorted:\n";
+  tempList.QuickSortAscending();
+  for (int i=0; i<tempList.size; i++)
+    out << tempList.TheObjects[i] << " ";
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.MakeReport();
 }

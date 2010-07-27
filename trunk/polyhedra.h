@@ -93,7 +93,7 @@ class coneRelation;
 template <class Object>
 class List;
 template <class Object>
-class ListObjectPointers;
+class ListPointers;
 template <class Object>
 class HashedList;
 class PrecomputedTauknPointers;
@@ -439,6 +439,7 @@ private:
   List(List<Object>&);
   void ExpandArrayOnTop(int increase);
   void ExpandArrayOnBottom(int increase);
+  void QuickSortAscending(int BottomIndex, int TopIndex);
 public:
   static int ListActualSizeIncrement;
   Object* TheObjects;
@@ -457,6 +458,7 @@ public:
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
   void PopLastObject();
+  void QuickSortAscending();
   // the below function is named a bit awkwardly because otherwise there is a risk of confusion
   // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
@@ -516,10 +518,12 @@ std::fstream& operator >> (std::fstream& input, List<Object>& theList)
 }
 
 template <class Object>
-class ListObjectPointers: public List<Object*>
+class ListPointers: public List<Object*>
 {
+private:
+  void QuickSortAscending(int BottomIndex, int TopIndex);
 public:
-  //ListObjectPointers();
+  //ListPointers();
   void KillAllElements();
   void KillElementIndex(int i);
   bool AddObjectNoRepetitionOfPointer(Object* o);
@@ -529,6 +533,7 @@ public:
   void IncreaseSizeWithZeroPointers(int increase);
   void initAndCreateNewObjects(int d);
   bool IsAnElementOf(Object* o);
+  void QuickSortAscending();
 };
 
 template <class Object>
@@ -553,6 +558,7 @@ private:
   void ReverseOrderElements();
   void ShiftUpExpandOnTop(int StartingIndex);
   void PopLastObject();
+  void QuickSort();
 protected:
   friend class partFractions;
   friend class QuasiMonomial;
@@ -1726,6 +1732,16 @@ public:
   root operator/(const Rational& right)const
   { root tempRoot; tempRoot.Assign(*this); tempRoot.DivByLargeRational(right); return tempRoot;
   };
+  bool operator>(const root& other) const
+  { assert(this->size==other.size);
+    for (int i=0; i<this->size; i++)
+    { if (this->TheObjects[i]>other.TheObjects[i])
+        return true;
+      if (other.TheObjects[i]>this->TheObjects[i])
+        return false;
+    }
+    return false;
+  };
 };
 
 inline root operator-(const root& right)
@@ -1957,7 +1973,7 @@ public:
   int GetIndexFirstNonSeparableChamberGluesConvexNoLinesThroughOrigin(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables);
   bool UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables);
   void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, int indexIgnoreWall, CombinatorialChamber* ignoreChamber);
-  void FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors);
+  void FindAllNeighbors(ListPointers<CombinatorialChamber>& TheNeighbors);
   bool SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
   bool IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
   bool IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
@@ -1991,7 +2007,7 @@ public:
   void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root& direction, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 //  void InduceFromAffineConeAddExtraDimension(affineCone& input);
   void InduceFromCombinatorialChamberLowerDimensionNoAdjacencyInfo(CombinatorialChamber& input, CombinatorialChamberContainer& owner);
-  void ComputeInternalPointMethod2(root& InternalPoint, int theDimension);
+  void ComputeInternalPoint(root& InternalPoint, int theDimension);
   void ComputeAffineInternalPoint(root& outputPoint, int theDimension);
   bool OwnsAWall(WallData* theWall);
   void MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
@@ -2001,9 +2017,60 @@ public:
   void WireChamberAndWallAdjacencyData(CombinatorialChamberContainer& owner, CombinatorialChamber* input);
   void Assign(const  CombinatorialChamber& right);
   inline void operator=(const CombinatorialChamber& right){this->Assign(right); };
+  bool operator==(const CombinatorialChamber& right) const;
+  bool operator<(const CombinatorialChamber& right) const;
+  bool operator>(const CombinatorialChamber& right) const;
   CombinatorialChamber();
 //  ~CombinatorialChamber(){this->IndexInOwnerComplex=-2; };
 };
+
+template <class Object>
+void List<Object>::QuickSortAscending()
+{ this->QuickSortAscending(0, this->size-1);
+}
+
+template <class Object>
+void List<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
+{ if (TopIndex<=BottomIndex)
+    return;
+  int LowIndex = BottomIndex+1;
+  int HighIndex = TopIndex;
+  for (; LowIndex<=HighIndex; LowIndex++)
+    if (this->TheObjects[LowIndex]>(this->TheObjects[BottomIndex]))
+    { this->SwapTwoIndices(LowIndex, HighIndex);
+      LowIndex--;
+      HighIndex--;
+    }
+  if (this->TheObjects[HighIndex]>this->TheObjects[BottomIndex])
+    HighIndex--;
+  this->SwapTwoIndices(BottomIndex, HighIndex);
+  this->QuickSortAscending(BottomIndex, HighIndex-1);
+  this->QuickSortAscending(HighIndex+1, TopIndex);
+}
+
+template <class Object>
+void ListPointers<Object>::QuickSortAscending()
+{ this->QuickSortAscending(0, this->size-1);
+}
+
+template <class Object>
+void ListPointers<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
+{ if (TopIndex<=BottomIndex)
+    return;
+  int LowIndex = BottomIndex+1;
+  int HighIndex = TopIndex;
+  for (; LowIndex<=HighIndex; LowIndex++)
+    if (this->TheObjects[LowIndex]->operator>(*this->TheObjects[BottomIndex]))
+    { this->SwapTwoIndices(LowIndex, HighIndex);
+      LowIndex--;
+      HighIndex--;
+    }
+  if (this->TheObjects[HighIndex]->operator>(*this->TheObjects[BottomIndex]))
+    HighIndex--;
+  this->SwapTwoIndices(BottomIndex, HighIndex);
+  this->QuickSortAscending(BottomIndex, HighIndex-1);
+  this->QuickSortAscending(HighIndex+1, TopIndex);
+}
 
 template <class Object>
 void List<Object>::AddListOnTop(List<Object>& theList)
@@ -2460,14 +2527,14 @@ ParallelComputing::GlobalPointerCounter-=this->HashSize;
 }
 
 template <class Object>
-class ListObjectPointersKillOnExit: public ListObjectPointers<Object>
+class ListPointersKillOnExit: public ListPointers<Object>
 {
 public:
-  ~ListObjectPointersKillOnExit(){this->KillAllElements(); };
+  ~ListPointersKillOnExit(){this->KillAllElements(); };
 };
 
 template<class Object>
-void ListObjectPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
+void ListPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
 { if (increase<=0){return; }
   if (this->ActualSize<this->size+increase)
   { Object** newArray= new Object*[this->size+increase];
@@ -2487,7 +2554,7 @@ ParallelComputing::GlobalPointerCounter+=increase;
 }
 
 template<class Object>
-void ListObjectPointers<Object>::initAndCreateNewObjects(int d)
+void ListPointers<Object>::initAndCreateNewObjects(int d)
 { this->KillAllElements();
   this->SetSizeExpandOnTopNoObjectInit(d);
   for (int i=0; i<d; i++)
@@ -2499,7 +2566,7 @@ ParallelComputing::GlobalPointerCounter+=d;
 }
 
 template<class Object>
-void ListObjectPointers<Object>::KillElementIndex(int i)
+void ListPointers<Object>::KillElementIndex(int i)
 { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
@@ -2510,7 +2577,7 @@ ParallelComputing::GlobalPointerCounter--;
 }
 
 template<class Object>
-int ListObjectPointers<Object>::ObjectPointerToIndex(Object* o)
+int ListPointers<Object>::ObjectPointerToIndex(Object* o)
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]==o)
       return i;
@@ -2518,7 +2585,7 @@ int ListObjectPointers<Object>::ObjectPointerToIndex(Object* o)
 }
 
 template<class Object>
-void ListObjectPointers<Object>::resizeToLargerCreateNewObjects(int increase)
+void ListPointers<Object>::resizeToLargerCreateNewObjects(int increase)
 { if (increase<=0)
     return;
   int oldsize= this->size;
@@ -2532,7 +2599,7 @@ ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
 }
 
 template<class Object>
-void ListObjectPointers<Object>::KillAllElements()
+void ListPointers<Object>::KillAllElements()
 { for (int i =0; i<this->size; i++)
   { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
@@ -2545,7 +2612,7 @@ void ListObjectPointers<Object>::KillAllElements()
 }
 
 template<class Object>
-bool ListObjectPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
+bool ListPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
 { if (this->ContainsObject(o)==-1)
   { this->AddObjectOnTop(o);
     return true;
@@ -2554,7 +2621,7 @@ bool ListObjectPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
 }
 
 template<class Object>
-bool ListObjectPointers<Object>::IsAnElementOf(Object* o)
+bool ListPointers<Object>::IsAnElementOf(Object* o)
 {  for(int i=0; i<this->size; i++)
     if (this->TheObjects[i]==o)
       return true;
@@ -2562,7 +2629,7 @@ bool ListObjectPointers<Object>::IsAnElementOf(Object* o)
 }
 
 template <class Object>
-void ListObjectPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
+void ListPointers<Object>::PopAllOccurrencesSwapWithLast(Object*o)
 { for (int i =0; i<this->size; i++)
     if (o==this->TheObjects[i])
     { this->TheObjects[i]=this->TheObjects[this->size-1];
@@ -2637,7 +2704,7 @@ public:
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
 
-class CombinatorialChamberContainer: public ListObjectPointers<CombinatorialChamber>
+class CombinatorialChamberContainer: public ListPointers<CombinatorialChamber>
 {
 public:
   int FirstNonExploredIndex;
@@ -2699,8 +2766,6 @@ public:
   static int flagMaxNumCharsAllowedInStringOutput;
   bool isAValidVertexInGeneral(const root& candidate, roots& theNormalsInvolved, Selection& theSelectedNormals);
   void ConvertHasZeroPolyToPermanentlyZero();
-  void SortIndicesByDisplayNumber(List<int>& outputSortedIndices);
-  void QuickSortIndicesByDisplayNumber(List<int>& outputSortedIndices, int BottomIndex, int TopIndex);
   void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
   bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
   int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
@@ -2718,6 +2783,7 @@ public:
   void ElementToString(std::string& output, bool useLatex, bool useHtml);
   void ElementToString(std::string& output);
   void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
+  void WriteReportToFile(std::fstream& output);
   void ComputeDebugString(){this->ElementToString(this->DebugString); };
   void ComputeDebugString(bool LatexFormat) {this->ElementToString(this->DebugString, LatexFormat, false); };
   void ComputeDebugString(bool useLatex, bool useHtml){this->ElementToString(this->DebugString, useLatex, useHtml); };
@@ -2937,7 +3003,7 @@ public:
   int TotalDegree();
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   int GetIndexMaxMonomial();
-  void ComponentInFrontOfVariableToPower(int VariableIndex, ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
+  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
   int FindMaxPowerOfVariableIndex(int VariableIndex);
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
@@ -4247,7 +4313,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::AssignPolynomialLight(con
 
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::ComponentInFrontOfVariableToPower(int VariableIndex, ListObjectPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower)
 { Monomial<ElementOfCommutativeRingWithIdentity> tempM;
   for (int i=0; i<UpToPower; i++)
     output.TheObjects[i]->initHash();
@@ -4447,7 +4513,7 @@ private:
   short GaussianEliminationByRowsCol(int Col, bool MoveToRight);
 public:
   static int NumTotalCreated;
-  static ListObjectPointers<BasicQN> GlobalCollectorsBasicQuasiNumbers;
+  static ListPointers<BasicQN> GlobalCollectorsBasicQuasiNumbers;
   int CreationNumber;
   std::string DebugString;
   BasicQN(short NumVars)
@@ -4550,7 +4616,7 @@ private:
   void CheckCoefficient(){};
 public:
   static int NumTotalCreated;
-  static ListObjectPointers<ComplexQN> GlobalCollectorsComplexQNs;
+  static ListPointers<ComplexQN> GlobalCollectorsComplexQNs;
   int CreationNumber;
   std::string DebugString;
   ComplexQN(int NumVars)
@@ -4638,7 +4704,7 @@ void AssignQP(QuasiPolynomial& q);
 class QuasiPolynomial: public Polynomial<QuasiNumber>
 {
 public:
-  static ListObjectPointers<QuasiPolynomial> GlobalCollectorsPolys;
+  static ListPointers<QuasiPolynomial> GlobalCollectorsPolys;
   static int TotalCreatedPolys;
   int CreationNumber; //for debug purposes
   static PrecomputedTauknPointersKillOnExit* PrecomputedTaus;
@@ -4688,7 +4754,7 @@ public:
   PrecomputedTaukn(){};
 };
 
-class PrecomputedTauknPointersKillOnExit: public ListObjectPointers<PrecomputedTaukn>
+class PrecomputedTauknPointersKillOnExit: public ListPointers<PrecomputedTaukn>
 {
 private:
   void ComputeTaukn(int k, int n, CompositeComplexQN& output);
@@ -4743,22 +4809,22 @@ public:
 };
 
 template <class Object>
-class ListObjectPointersKillOnExitFakeSize: public ListObjectPointersKillOnExit<Object>
+class ListPointersKillOnExitFakeSize: public ListPointersKillOnExit<Object>
 {
 public:
   int FakeSize;
-  ListObjectPointersKillOnExitFakeSize(){this->FakeSize=0; }
+  ListPointersKillOnExitFakeSize(){this->FakeSize=0; }
   void setFakeSize(int theFakeSize, short param);
   void Nullify(short param);
 };
 
 template <class Object>
-void ListObjectPointersKillOnExitFakeSize<Object>::Nullify(short param)
+void ListPointersKillOnExitFakeSize<Object>::Nullify(short param)
 { this->FakeSize=0;
 }
 
 template <class Object>
-void ListObjectPointersKillOnExitFakeSize<Object>::setFakeSize(int theFakeSize, short param)
+void ListPointersKillOnExitFakeSize<Object>::setFakeSize(int theFakeSize, short param)
 { if (theFakeSize>this->size)
     this->resizeToLargerCreateNewObjects(theFakeSize-this->size);
   for (int i=this->FakeSize; i<theFakeSize; i++)
@@ -4766,7 +4832,7 @@ void ListObjectPointersKillOnExitFakeSize<Object>::setFakeSize(int theFakeSize, 
   this->FakeSize =theFakeSize;
 }
 
-class SortedQPs : public ListObjectPointersKillOnExitFakeSize<ListObjectPointersKillOnExitFakeSize<ListObjectPointersKillOnExitFakeSize<QuasiPolynomial> > >
+class SortedQPs : public ListPointersKillOnExitFakeSize<ListPointersKillOnExitFakeSize<ListPointersKillOnExitFakeSize<QuasiPolynomial> > >
 {
 public:
   void AddToEntry(int x, int y, int z, QuasiMonomial& QM);
@@ -4922,7 +4988,7 @@ public:
   static  bool MakingConsistencyCheck;
   static Rational CheckSum, CheckSum2;
   static intRoot theVectorToBePartitioned;
-  static ListObjectPointers<partFraction> GlobalCollectorPartFraction;
+  static ListPointers<partFraction> GlobalCollectorPartFraction;
   void ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff& output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
   static void MakePolynomialFromOneNormal(root& normal, root& shiftRational, int theMult,  PolynomialRationalCoeff& output);
   void ComputeNormals(partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
@@ -6688,6 +6754,8 @@ public:
   static void ExperimentWithH(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TestGraphicalOutputPolys(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void TestQuickSort(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();
   ~ComputationSetup();
 };

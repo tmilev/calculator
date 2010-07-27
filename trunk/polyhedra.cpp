@@ -114,8 +114,8 @@ int CombinatorialChamberContainer::DefragSpacing;
 int CombinatorialChamberContainer::flagMaxNumCharsAllowedInStringOutput=100000; //16777216;
 std::fstream CombinatorialChamberContainer::TheBigDump;
 
-ListObjectPointers<QuasiPolynomial> QuasiPolynomial::GlobalCollectorsPolys;
-ListObjectPointers<ComplexQN> ComplexQN::GlobalCollectorsComplexQNs;
+ListPointers<QuasiPolynomial> QuasiPolynomial::GlobalCollectorsPolys;
+ListPointers<ComplexQN> ComplexQN::GlobalCollectorsComplexQNs;
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
 
@@ -138,7 +138,7 @@ int QuasiPolynomial::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
 
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
-ListObjectPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
+ListPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
 int BasicQN::NumTotalCreated=0;
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Integer>::flagAnErrorHasOccuredTimeToPanic=true;
@@ -216,8 +216,8 @@ std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
 template < > std::string Matrix<Rational>::MatrixElementSeparator= ", \t";
 
-//template < > int ListObjectPointers<partFraction>::MemoryAllocationIncrement=100;
-ListObjectPointers<partFraction> partFraction::GlobalCollectorPartFraction;
+//template < > int ListPointers<partFraction>::MemoryAllocationIncrement=100;
+ListPointers<partFraction> partFraction::GlobalCollectorPartFraction;
 bool partFraction::UseGlobalCollector=true;
 bool partFraction::flagAnErrorHasOccurredTimeToPanic=false;
 bool partFractions::flagSplitTestModeNoNumerators=false;
@@ -376,37 +376,6 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
     //below follows the code to pause the computation
     this->thePauseController.SafePoint();
   }
-}
-
-void CombinatorialChamberContainer::SortIndicesByDisplayNumber(List<int>& outputSortedIndices)
-{ outputSortedIndices.MakeActualSizeAtLeastExpandOnTop(this->size);
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]!=0)
-      if (!this->TheObjects[i]->flagHasZeroPolynomiaL)
-        outputSortedIndices.AddObjectOnTop(i);
-  this->QuickSortIndicesByDisplayNumber(outputSortedIndices, 0, outputSortedIndices.size-1);
-}
-
-void CombinatorialChamberContainer::QuickSortIndicesByDisplayNumber(List<int>& outputSortedIndices, int BottomIndex, int TopIndex)
-{ if (TopIndex<=BottomIndex)
-    return;
-  int HighIndex=TopIndex;
-  for (int i=BottomIndex+1; i<=HighIndex; i++)
-    if (  this->TheObjects[outputSortedIndices.TheObjects[i]]->DisplayNumber>this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber)
-    { for (; HighIndex>i && this->TheObjects[outputSortedIndices.TheObjects[HighIndex]]->DisplayNumber> this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber; HighIndex--)
-      {}
-      int tempI= outputSortedIndices.TheObjects[i];
-      outputSortedIndices.TheObjects[i]= outputSortedIndices.TheObjects[HighIndex];
-      outputSortedIndices.TheObjects[HighIndex]=tempI;
-    }
-  if (this->TheObjects[outputSortedIndices.TheObjects[HighIndex]]->DisplayNumber>this->TheObjects[outputSortedIndices.TheObjects[BottomIndex]]->DisplayNumber)
-    HighIndex--;
-  //swap HighIndex and Bottom Index:
-  int tempI= outputSortedIndices.TheObjects[BottomIndex];
-  outputSortedIndices.TheObjects[BottomIndex]= outputSortedIndices.TheObjects[HighIndex];
-  outputSortedIndices.TheObjects[HighIndex]=tempI;
-  this->QuickSortIndicesByDisplayNumber(outputSortedIndices, BottomIndex, HighIndex-1);
-  this->QuickSortIndicesByDisplayNumber(outputSortedIndices, HighIndex+1, TopIndex);
 }
 
 void CombinatorialChamberContainer::PurgeZeroPointers()
@@ -615,15 +584,15 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream& th
     this->WriteToFilePFdecomposition(theFile, false);
   std::string tempS;
   this->VPVectors.ElementToString(tempS);
-  theFile<<"\\title{"<<this->WeylGroupLetter<<(int)(this->WeylGroupIndex )<<"}" <<"\\maketitle ";
+  theFile << "\\title{" << this->WeylGroupLetter << (int)(this->WeylGroupIndex) << "}" << "\\maketitle ";
   this->theChambers.WriteReportToFile(TDV, this->VPVectors, theFile);
   this->thePartialFraction.ElementToString(tempS, theGlobalVariables);
-  theFile<<"\n\n";
-  theFile<< tempS;
-  theFile<<"\n\n";
+  theFile << "\n\n";
+  theFile << tempS;
+  theFile << "\n\n";
   tempS.clear();
   this->theOutput.StringPrintOutAppend(tempS, PolyFormatLocal);
-  theFile<< "\\begin{eqnarray*}&&"<< tempS<< "\\end{eqnarray*}";
+  theFile << "\\begin{eqnarray*}&&" << tempS << "\\end{eqnarray*}";
   LaTeXProcedures::endLatexDocument(theFile);
 }
 
@@ -1328,7 +1297,7 @@ void ComputationSetup::Run()
       if (this->DisplayNumberChamberOfInterest!=-1)
       { this->IndexChamberOfInterest=this->theChambers.FindVisibleChamberWithDisplayNumber(this->DisplayNumberChamberOfInterest);
         if (this->IndexChamberOfInterest!=-1)
-          this->theChambers.TheObjects[this->IndexChamberOfInterest]->ComputeInternalPointMethod2(this->IndicatorRoot, this->theChambers.AmbientDimension);
+          this->theChambers.TheObjects[this->IndexChamberOfInterest]->ComputeInternalPoint(this->IndicatorRoot, this->theChambers.AmbientDimension);
         else
         { this->IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
           this->DisplayNumberChamberOfInterest=-1;
@@ -1596,13 +1565,13 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
     this->ComputeDebugString();
   std::string tempS;
   std::stringstream out, out1, out3, out2;
-  out<<"#Drawn chambers: "<<NumTrueChambers;
+  out << "#Drawn chambers: " << NumTrueChambers;
   tempS=out.str();
   TDV.drawTextBuffer(TDV.textX, TDV.textY, tempS, TDV.TextColor, 0);
-  out1<<"#Zero chambers: "<< NumZeroChambers;
+  out1 << "#Zero chambers: " << NumZeroChambers;
   tempS=out1.str();
   TDV.drawTextBuffer(TDV.textX, TDV.textY+30, tempS, TDV.TextColor, 0);
-  out2<<"#Next chamber: ";
+  out2 << "#Next chamber: ";
   if (this->indexNextChamberToSlice!=-1)
     if (this->TheObjects[this->indexNextChamberToSlice]!=0)
     { if (this->TheObjects[this->indexNextChamberToSlice]->flagHasZeroPolynomiaL)
@@ -1612,7 +1581,7 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
       out2 << this->TheObjects[this->indexNextChamberToSlice]->DisplayNumber;
     }
   if (this->flagMakingASingleHyperplaneSlice)
-    out2  << "; "<< "Plane: " << this->NumAffineHyperplanesProcessed+1 << " out of "<< this->theWeylGroupAffineHyperplaneImages.size;
+    out2  << "; " << "Plane: " << this->NumAffineHyperplanesProcessed+1 << " out of " << this->theWeylGroupAffineHyperplaneImages.size;
   tempS=out2.str();
   TDV.drawTextBuffer(TDV.textX, TDV.textY+15, tempS, TDV.TextColor, 0);
   //if (outputLatex!=0)
@@ -1649,7 +1618,7 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
         if (TDV.DrawChamberIndices)
         { if ((!hasZeroPoly)||(TDV.DrawingInvisibles))
           { root tempRoot;
-            this->TheObjects[j]->ComputeInternalPointMethod2(tempRoot, this->AmbientDimension);
+            this->TheObjects[j]->ComputeInternalPoint(tempRoot, this->AmbientDimension);
             root Proj;
             TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Proj, this->theDirections);
             std::stringstream out; std::string tempS;
@@ -3390,106 +3359,27 @@ void CombinatorialChamber::ElementToInequalitiesString(std::string& output, Comb
       if (tempS!="0")
       { if (tempS=="1")
         {  tempS="";
-          out <<'+';
+          out << '+';
         }
         if (tempS=="-1")
           tempS="-";
         if (j!=0)
           if (tempS.size()!=0)
             if (tempS[0]!='-')
-              out <<'+';
-        out << tempS<<PolyFormatLocal.GetLetterIndex(j);
+              out << '+';
+        out << tempS << PolyFormatLocal.GetLetterIndex(j);
       }
     }
     if (useLatex)
-      out <<"& \\geq & 0\\\\";
+      out << "& \\geq & 0\\\\";
     if (useHtml)
-      out<<" >= 0\n<br>\n";
+      out << " >= 0\n<br>\n";
     if (!(useHtml || useLatex))
-      out<<">=0\n";
+      out << ">=0\n";
   }
   if (useLatex)
     out << "\\end{eqnarray*}";
   output=out.str();
-}
-
-bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
-{ std::stringstream out;
-  std::string tempS;
-  //assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
-  std::string endOfLine;
-  endOfLine="\n";
-  if (useLatex)
-    endOfLine.assign("\\\\\n");
-  if(useHtml)
-    endOfLine.assign("\n<br>\n");
-  this->ChamberNumberToString(tempS, owner);
-  if(!useHtml)
-    out<<tempS <<"\n";
-  else
-    out << "<a name=\""<<tempS<<"\">"<<tempS<<"</a>";
-  if (useLatex)
-    out << endOfLine << "Projective representation\n\n";
-  /*out <<endOfLine<<"External Walls:"<<endOfLine;
-  root tempNormal;
-  for (int i=0; i<this->Externalwalls.size; i++)
-  {  this->Externalwalls.TheObjects[i].ElementToString(tempS);
-    if (!useLatex)
-      out <<"f"<<i<<": "<< tempS<<endOfLine;
-    else
-      out << tempS <<endOfLine;
-  }
-  if (!useLatex && !useHtml)
-  {  out <<"Internal Walls:"<<endOfLine;
-    for (int i=0; i<this->InternalWalls.size; i++)
-    {  this->InternalWalls.TheObjects[i].ElementToString(tempS);
-      out <<"f"<<i<<": "<< tempS<<endOfLine;
-    }
-  }*/
-  out << "index in owner: " << this->IndexInOwnerComplex << "\n";
-  this->ElementToInequalitiesString(tempS, owner, useLatex, useHtml);
-  out << tempS;
-//  ListObjectPointers<CombinatorialChamber> outputChambers;
-//  this->FindAllNeighbors(outputChambers);
-  out << "Neighbors: ";
-  for (int i=0; i<this->Externalwalls.size; i++)
-  { out <<"wall "<< i+1 <<": ";
-    for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
-    { CombinatorialChamber* currentChamber = this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j];
-      if (currentChamber!=0)
-      { currentChamber->ChamberNumberToString(tempS, owner);
-        out <<tempS<<", ";
-      }
-    }
-  }
-  PolyFormatLocal.cutOffString=false;
-  if (this->flagIncludeVerticesInDebugString)
-  { out << endOfLine<<"Vertices: ";
-    for (int i=0; i<this->AllVertices.size; i++)
-    { this->AllVertices.TheObjects[i].ElementToString(tempS);
-      out << tempS <<", ";
-    }
-  }
-  out<<endOfLine;
-  if (!owner.flagDrawingProjective)
-  { if (useLatex)
-    out << "Affine data" << endOfLine;
-    out << "Affine walls: " <<endOfLine;
-    for (int i=0; i<this->affineExternalWalls.size; i++)
-    { out <<"wall" << i+1 <<": ";
-      this->affineExternalWalls.TheObjects[i].ElementToString(tempS);
-      out << tempS <<endOfLine;
-    }
-    out << "Affine vertices (true): "<<endOfLine;
-    for (int i=0; i<affineVertices.size; i++)
-    { if (i==this->NumTrueAffineVertices)
-        out << "Affine vertices representing pt(s) at infty: "<<endOfLine;
-      this->affineVertices.TheObjects[i].ElementToString(tempS);
-      out << tempS<<endOfLine;
-    }
-  }
-  output=out.str();
-  return true;
 }
 
 bool CombinatorialChamber::HasAsNeighbor(CombinatorialChamber* candidateNeighbor)
@@ -3518,7 +3408,7 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
   if (checkVertices)
     for (int i=0; i<this->Externalwalls.size; i++)
     { Rational tempRat;
-      this->ComputeInternalPointMethod2(this->InternalPoint, theDimension);
+      this->ComputeInternalPoint(this->InternalPoint, theDimension);
       root::RootScalarEuclideanRoot(this->InternalPoint, this->Externalwalls.TheObjects[i].normal, tempRat);
       if (tempRat.IsNonPositive())
       { assert(false);
@@ -3639,7 +3529,7 @@ bool CombinatorialChamber::OwnsAWall(WallData* theWall)
   return false;
 }
 
-void CombinatorialChamber::ComputeInternalPointMethod2(root& InternalPoint, int theDimension)
+void CombinatorialChamber::ComputeInternalPoint(root& InternalPoint, int theDimension)
 { InternalPoint.MakeZero(theDimension);
   for (int i=0; i<this->AllVertices.size; i++)
     InternalPoint.Add(this->AllVertices.TheObjects[i]);
@@ -3982,7 +3872,7 @@ void CombinatorialChamber::ReplaceMeByAddExtraWallsToNewChamber(CombinatorialCha
   }
 }
 
-void CombinatorialChamber::FindAllNeighbors(ListObjectPointers<CombinatorialChamber>& TheNeighbors)
+void CombinatorialChamber::FindAllNeighbors(ListPointers<CombinatorialChamber>& TheNeighbors)
 { for (int i=0; i<this->Externalwalls.size; i++)
     for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
       TheNeighbors.AddObjectOnTop(this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j]);
@@ -4230,7 +4120,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
     //  PossibleBogusNeighbors.TheObjects[i]->ComputeDebugString();
     //}
     WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
-//    if (!output.flagStoringVertices)
+    //if (!output.flagStoringVertices)
     if (true)
     { if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
         possibleBadWall.RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
@@ -4560,6 +4450,13 @@ void CombinatorialChamberContainer::WriteReportToFile(DrawingVariables& TDV, roo
   output << tempS;
 }
 
+void CombinatorialChamberContainer::WriteReportToFile(std::fstream& output)
+{ std::string tempS;
+  this->QuickSortAscending();
+  this->ElementToString(tempS, false, true);
+  output << tempS;
+}
+
 void CombinatorialChamberContainer::ElementToString(std::string& output)
 { this->ElementToString(output, false, false);
 }
@@ -4577,43 +4474,40 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
   else
     endOfLine="\n";
 //  this->PurgeZeroPointers();
-  out << "Number of visible chambers: "<< this->LabelChambersForDisplayAndGetNumVisibleChambers()<< endOfLine;
+  if (useHtml)
+  { out << "<html><title> Chambers </title><body>";
+  }
+  out << "Number of visible chambers: " << this->LabelChambersForDisplayAndGetNumVisibleChambers() << endOfLine;
   if (this->AffineWallsOfWeylChambers.size>0)
   { int tempI=this->LabelChambersAndGetNumChambersInWeylChamber(this->WeylChamber);
-    out << "Number of chambers with internal point in Weyl chamber: "<< tempI<< endOfLine;
-    out << "Weyl chamber walls and their images: "<< endOfLine;
+    out << "Number of chambers with internal point in Weyl chamber: " << tempI << endOfLine;
+    out << "Weyl chamber walls and their images: " << endOfLine;
     for (int i=0; i<this->AffineWallsOfWeylChambers.size; i++)
     { this->AffineWallsOfWeylChambers.TheObjects[i].ElementToString(tempS);
       out << tempS << endOfLine;
     }
   }
-  List<int> sortedIndices;
-  this->SortIndicesByDisplayNumber(sortedIndices);
   if (this->size>this->GraphicsMaxNumChambers)
-  {  out << "Detailed chamber data too large for display";
+  { out << "Detailed chamber data too large for display";
     output=out.str();
     return;
   }
-  if (!useLatex)
-  { for (int i=0; i<this->size; i++)
-      if (this->TheObjects[i]!=0)
-        if (!this->TheObjects[i]->flagHasZeroPolynomiaL || !useHtml)
-        { this->TheObjects[i]->ElementToString(tempS, *this, useLatex, useHtml);
-          out <<tempS;
-          if (useHtml)
-          { this->TheObjects[i]->ComputeInternalPointMethod2(tempRoot, this->AmbientDimension);
-            tempRoot.ElementToString(tempS, true);
-            out << "Internal point: "<<tempS;
-          }
-          out << endOfLine<< endOfLine;
-          if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput && !useHtml)
-            break;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+      //if (!this->TheObjects[i]->flagHasZeroPolynomiaL || !useHtml)
+      { this->TheObjects[i]->ElementToString(tempS, *this, useLatex, useHtml);
+        out << tempS;
+        if (useHtml)
+        { this->TheObjects[i]->ComputeInternalPoint(tempRoot, this->AmbientDimension);
+          tempRoot.ElementToString(tempS, true);
+          out << "Internal point: " << tempS;
         }
-  } else
-    for (int i=0; i<sortedIndices.size; i++)
-    { this->TheObjects[sortedIndices.TheObjects[i]]->ElementToString(tempS, *this, useLatex, useHtml);
-      out <<tempS <<endOfLine;
-    }
+        out << endOfLine << endOfLine;
+        if (out.gcount()>this->flagMaxNumCharsAllowedInStringOutput && !useHtml)
+          break;
+      }
+  if (useHtml)
+    out << "</body></html>";
   output= out.str();
 }
 
@@ -4723,7 +4617,7 @@ int CombinatorialChamberContainer::LabelChambersForDisplayAndGetNumVisibleChambe
 { int NumZeroChambers=0;
   int NumChambersNonZero=0;
   for (int i=0; i<this->size; i++)
-  { if (this->TheObjects[i]!=0)
+    if (this->TheObjects[i]!=0)
     { if (this->TheObjects[i]->flagHasZeroPolynomiaL)
       { NumZeroChambers++;
         this->TheObjects[i]->DisplayNumber=NumZeroChambers;
@@ -4732,7 +4626,6 @@ int CombinatorialChamberContainer::LabelChambersForDisplayAndGetNumVisibleChambe
         this->TheObjects[i]->DisplayNumber=NumChambersNonZero;
       }
     }
-  }
   return NumChambersNonZero;
 }
 
@@ -4929,17 +4822,17 @@ void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& d
 
 void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Flags_and_indices: ";
-  output << this->flagHasZeroPolynomiaL << " " << this->flagExplored<< " " <<this->flagPermanentlyZero << " ";
-  output << this->IndexInOwnerComplex << " " << this->IndexStartingCrossSectionNormal << " "<< this->DisplayNumber << "\nVertices:\n";
+  output << this->flagHasZeroPolynomiaL << " " << this->flagExplored << " " << this->flagPermanentlyZero << " ";
+  output << this->IndexInOwnerComplex << " " << this->IndexStartingCrossSectionNormal << " " << this->DisplayNumber << "\nVertices:\n";
   this->AllVertices.WriteToFile(output, theGlobalVariables);
   output << "Internal_point: ";
   this->InternalPoint.WriteToFile(output);
   output << "\nInternalWalls:\n";
   this->InternalWalls.WriteToFile(output, theGlobalVariables);
-  output<< "\n" << this->Externalwalls.size << "\n";
+  output << "\n" << this->Externalwalls.size << "\n";
   for (int i=0; i<this->Externalwalls.size; i++)
   { this->Externalwalls.TheObjects[i].WriteToFile(output);
-    output<<" ";
+    output << " ";
   }
 }
 
@@ -4952,7 +4845,7 @@ void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& th
   input >> this->DisplayNumber;
   input >> tempS;
   this->AllVertices.ReadFromFile(input, theGlobalVariables);
-  input>>tempS;
+  input >> tempS;
   this->InternalPoint.ReadFromFile(input);
   input >> tempS;
   assert(tempS =="InternalWalls:");
@@ -4966,11 +4859,11 @@ void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& th
 void WallData::WriteToFile(std::fstream& output)
 { //output << this->indexInOwnerChamber <<" ";
   this->normal.WriteToFile(output);
-  output<< " "<< this->NeighborsAlongWall.size<<" ";
+  output << " " << this->NeighborsAlongWall.size << " ";
   assert(this->NeighborsAlongWall.size==this->IndicesMirrorWalls.size);
   for (int i=0; i<this->NeighborsAlongWall.size; i++ )
     if (this->NeighborsAlongWall.TheObjects[i]==0)
-      output<< -1<<" "<<-1<<" ";
+      output << -1 << " " << -1 << " ";
     else
     { //assert(this->MirrorWall.TheObjects[i]!=0);
       output << this->NeighborsAlongWall.TheObjects[i]->IndexInOwnerComplex << " " << this->IndicesMirrorWalls.TheObjects[i]<<" ";
@@ -4981,11 +4874,11 @@ void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& 
 { //input >>this->indexInOwnerChamber;
   this->normal.ReadFromFile(input);
   int tempI, indexN, indexW;
-  input >>tempI;
+  input >> tempI;
   this->NeighborsAlongWall.SetSizeExpandOnTopNoObjectInit(tempI);
   this->IndicesMirrorWalls.SetSizeExpandOnTopNoObjectInit(tempI);
   for (int i=0; i<this->NeighborsAlongWall.size; i++ )
-  { input >> indexN>> indexW;
+  { input >> indexN >> indexW;
     if (indexN==-1)
     { this->NeighborsAlongWall.TheObjects[i]=0;
       this->IndicesMirrorWalls.TheObjects[i]=-1;
@@ -5031,15 +4924,15 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theG
 
 void Cone::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { this->roots::WriteToFile(output, theGlobalVariables);
-  output <<"\nChamberTestArray: "<<this->ChamberTestArray.size<<" ";
+  output << "\nChamberTestArray: " << this->ChamberTestArray.size << " ";
   for (int i=0; i<this->ChamberTestArray.size; i++)
-    output<< this->ChamberTestArray.TheObjects[i]<<" ";
+    output << this->ChamberTestArray.TheObjects[i] << " ";
 }
 
 void Cone::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS; int tempI;
   this->roots::ReadFromFile(input, theGlobalVariables);
-  input >> tempS>> tempI;
+  input >> tempS >> tempI;
   this->ChamberTestArray.SetSizeExpandOnTopNoObjectInit(tempI);
   for (int i=0; i<this->ChamberTestArray.size; i++)
     input >> this->ChamberTestArray.TheObjects[i];
@@ -5047,24 +4940,24 @@ void Cone::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables
 
 void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { this->theFacets.WriteToFile(output);
-  output <<"\nConesHavingFixedNormal: ";
-  output << this->ConesHavingFixedNormal.size<<" ";
+  output << "\nConesHavingFixedNormal: ";
+  output << this->ConesHavingFixedNormal.size << " ";
   for (int i=0; i<this->ConesHavingFixedNormal.size; i++)
-  { output << this->ConesHavingFixedNormal.TheObjects[i].size<<" ";
+  { output << this->ConesHavingFixedNormal.TheObjects[i].size << " ";
     for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
-      output<< this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j]<<" ";
+      output << this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j] << " ";
   }
-  output <<"\ntheCones: "<<this->size<< " ";
+  output << "\ntheCones: "<< this->size << " ";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
-    output <<" ";
+    output << " ";
   }
 }
 
 void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS; int tempI;
   this->theFacets.ReadFromFile(input);
-  input >>tempS;
+  input >> tempS;
   assert(tempS=="ConesHavingFixedNormal:");
   input >> tempI;
   this->ConesHavingFixedNormal.SetSizeExpandOnTopNoObjectInit(tempI);
@@ -5072,9 +4965,9 @@ void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables& theGlob
   { input >> tempI;
     this->ConesHavingFixedNormal.TheObjects[i].SetSizeExpandOnTopNoObjectInit(tempI);
     for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
-      input>>this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j];
+      input >> this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j];
    }
-  input>>tempS>>tempI;
+  input >> tempS >> tempI;
   assert(tempS=="theCones:");
   this->SetSizeExpandOnTopNoObjectInit(tempI);
   for (int i=0; i<this->size; i++)
@@ -5085,11 +4978,11 @@ void hashedRoots::WriteToFile(std::fstream& output)
 { int theDimension=0;
   if (this->size>0)
     theDimension= this->TheObjects[0].size;
-  output << "Num|dim: " <<this->size<<" "<< theDimension<<" ";
+  output << "Num|dim: " <<this->size << " " << theDimension << " ";
   for (int i=0; i<this->size; i++)
     for (int j=0; j<theDimension; j++)
     { this->TheObjects[i].TheObjects[j].WriteToFile(output);
-      output<<" ";
+      output << " ";
     }
 }
 
@@ -5097,7 +4990,7 @@ void hashedRoots::ReadFromFile(std::fstream& input)
 { int theDimension; std::string tempS;
   int theSize;
   this->ClearTheObjects();
-  input >> tempS >> theSize>> theDimension;
+  input >> tempS >> theSize >> theDimension;
   this->MakeActualSizeAtLeastExpandOnTop(theSize);
   root tempRoot;
   tempRoot.SetSizeExpandOnTopLight(theDimension);
@@ -5191,7 +5084,7 @@ bool Cone::IsSurelyOutsideConeAccordingToChamberTestArray()
 bool Cone::IsSurelyOutsideCone(rootsCollection& TheVertices)
 { bool firstRun=true;
   for (int i=0; i<TheVertices.size; i++)
-  {  if (!this->FillInChamberTestArray(TheVertices.TheObjects[i], firstRun))
+  { if (!this->FillInChamberTestArray(TheVertices.TheObjects[i], firstRun))
       return false;
     firstRun=false;
   }
@@ -5322,14 +5215,14 @@ bool WallData::EveryNeigborIsExplored(bool& allNeighborsHaveZeroPoly)
   return true;
 }
 
-bool WallData::FacetContainsChamberOnlyOnce(CombinatorialChamber *owner)
+bool WallData::FacetContainsChamberOnlyOnce(CombinatorialChamber* owner)
 { bool FoundOnce= false;
   for (int i=0; i<this->NeighborsAlongWall.size; i++)
-  { if (this->NeighborsAlongWall.TheObjects[i]==owner)
+    if (this->NeighborsAlongWall.TheObjects[i]==owner)
     { FoundOnce= !FoundOnce;
-      if (!FoundOnce){return false; }
+      if (!FoundOnce)
+        return false;
     }
-  }
   return FoundOnce;
 }
 
@@ -15122,15 +15015,15 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   { out <<" &nbsp&nbsp&nbsp Contained in: ";
     for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
     { if (useHtml)
-        out <<"<a href=\"./rootHtml_rootSA"<<this->indicesSubalgebrasContainingK.TheObjects[i]<<".html\">";
+        out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK.TheObjects[i] << ".html\">";
       rootSubalgebra& largerSA= sl2s->theRootSAs.TheObjects[this->indicesSubalgebrasContainingK.TheObjects[i]];
       CGIspecificRoutines::clearDollarSigns(largerSA.theDynkinDiagram.DebugString, tempS);
       out << tempS;
       if (useHtml)
-        out <<"</a>, ";
+        out << "</a>, ";
     }
     if (useHtml)
-      out <<"<br> <a href=\"./rootHtml.html\">Back to root subsystem table </a> ";
+      out << "<br> <a href=\"./rootHtml.html\">Back to root subsystem table </a> ";
   }
   this->SimpleBasisK.ElementToString(tempS, useLatex, useHtml, false);
   if (useHtml)
@@ -15148,14 +15041,14 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   if(!useLatex)
     CGIspecificRoutines::clearDollarSigns(tempS, tempS);
   if (useLatex)
-    out <<"\n\n\\noindent ";
+    out << "\n\n\\noindent ";
   if (useHtml)
     out << "<br>\n";
   if (useLatex)
-    out<<"$C(\\mathfrak{k_{ss}})_{ss}$: ";
+    out<< "$C(\\mathfrak{k_{ss}})_{ss}$: ";
   else
-    out <<"C(k_{ss})_{ss}: ";
-  out   <<tempS;
+    out << "C(k_{ss})_{ss}: ";
+  out << tempS;
   //int CartanPieceSize=
     //this->AmbientWeyl.KillingFormMatrix.NumRows- this->SimpleBasisCentralizerRoots.size-
     //  this->SimpleBasisK.size;
@@ -15168,14 +15061,14 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   if (useHtml)
     out << "<br>\n simple basis centralizer: ";
   if (useLatex)
-    out<< "; simple basis centralizer: ";
+    out << "; simple basis centralizer: ";
   this->SimpleBasisCentralizerRoots.ElementToString(tempS, true, true, false);
-  out <<tempS;
+  out << tempS;
   if (sl2s!=0)
   { if (useHtml)
-      out <<"\n<br>\n";
+      out << "\n<br>\n";
     if (useHtml)
-      out <<"\n<br>";
+      out << "\n<br>";
     List<int> hCharacteristics_S_subalgebras;
     //this->ComputeIndicesSl2s(indexInOwner, *sl2s, hCharacteristics_S_subalgebras);
     hCharacteristics_S_subalgebras.size=0;
@@ -15184,10 +15077,10 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     { int theSl2index=sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].TheObjects[i];
       slTwo& theSl2 = sl2s->TheObjects[theSl2index];
       if (useHtml)
-        out <<"<a href=\"./sl2s/sl2s.html#sl2index" << theSl2index <<"\">";
-      out <<theSl2.hCharacteristic.ElementToString() <<", ";
+        out << "<a href=\"./sl2s/sl2s.html#sl2index" << theSl2index << "\">";
+      out << theSl2.hCharacteristic.ElementToString() << ", ";
       if (useHtml)
-        out <<"</a>";
+        out << "</a>";
       bool isS_subalgebra=true;
 //      theSl2.hCharacteristic.ComputeDebugString();
       for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
@@ -15201,92 +15094,92 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
         hCharacteristics_S_subalgebras.AddObjectOnTop(sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].TheObjects[i]);
     }
     if (useHtml)
-      out<< "\n<br>\n";
-    out << "\nS-sl(2) subalgebras in k (total " <<hCharacteristics_S_subalgebras.size<<"): ";
+      out << "\n<br>\n";
+    out << "\nS-sl(2) subalgebras in k (total " << hCharacteristics_S_subalgebras.size << "): ";
     for (int i=0; i<hCharacteristics_S_subalgebras.size; i++)
-      out <<sl2s->TheObjects[hCharacteristics_S_subalgebras.TheObjects[i]].hCharacteristic.ElementToString() << ", ";
+      out << sl2s->TheObjects[hCharacteristics_S_subalgebras.TheObjects[i]].hCharacteristic.ElementToString() << ", ";
   }
   if (useHtml)
     out << "<br>\n Number g/k k-submodules: ";
   if (useLatex)
-    out <<"\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
-  out<<this->LowestWeightsGmodK.size ;
+    out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
+  out << this->LowestWeightsGmodK.size ;
   if (useHtml)
     out << "<br>\n";
   if (useLatex)
-    out <<"\n\n";
+    out << "\n\n";
   out << latexHeader;
   this->kModulesgEpsCoords.SetSizeExpandOnTopNoObjectInit(this->kModules.size);
   for (int i=0; i<this->kModules.size; i++)
   { this->LowestWeightsGmodK.TheObjects[i].ElementToString(tempS, useLatex);
     if (useHtml)
-      out <<"\n<tr><td>";
+      out << "\n<tr><td>";
     if (useLatex)
-      out <<"\\hline ";
+      out << "\\hline ";
     out<<i;
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & ";
+      out << " & ";
     out << this->kModules.TheObjects[i].size;
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & ";
+      out << " & ";
     out << tempS;
     this->HighestWeightsGmodK.TheObjects[i].ElementToString(tempS, useLatex);
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & ";
+      out << " & ";
     out  << tempS;
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & \n";
+      out << " & \n";
     this->kModules.TheObjects[i].ElementToString(tempS, useLatex, useHtml, true);
     out << tempS;
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (i>=this->kModulesgEpsCoords.size)
       this->AmbientWeyl.GetEpsilonCoords(this->kModules.TheObjects[i], this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
     this->kModulesgEpsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS, useLatex, useHtml, true);
     out << tempS;
     if (useLatex)
-      out <<" & \n";
+      out << " & \n";
     if (useHtml)
-      out <<"</td>";
+      out << "</td>";
     if (includeKEpsCoords)
     { if (useHtml)
         out << "<td>";
       if (useLatex)
-        out <<" & ";
+        out << " & ";
       this->kModulesKepsCoords.TheObjects[i].ElementToStringEpsilonForm(tempS, useLatex, useHtml, true);
-      out<<tempS;
+      out << tempS;
       if (useHtml)
-        out <<"</td>";
+        out << "</td>";
       if (useLatex)
-        out <<"\\\\\n";
+        out << "\\\\\n";
     }
     if (useHtml)
-      out <<"</tr>";
+      out << "</tr>";
     if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
     { LatexLineCounter=0;
-      out <<latexFooter<<latexHeader;
+      out << latexFooter << latexHeader;
     }
     if (i!=this->kModules.size-1)
     { LatexLineCounter+=this->kModules.TheObjects[i].size;
       if (useLatex)
        if ((LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules.TheObjects[i].size))
-        { out <<latexFooter<<latexHeader;
-          LatexLineCounter=this->kModules.TheObjects[i].size;
+        { out << latexFooter << latexHeader;
+          LatexLineCounter = this->kModules.TheObjects[i].size;
         }
     }
   }
   if (useHtml)
     out <<"</table>";
   if (useLatex)
-    out<<latexFooter;
+    out << latexFooter;
   if ((useLatex|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
     this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
   if (this->theMultTable.size!=0)
@@ -15295,7 +15188,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     if (useLatex)
       out << "\n\n\\noindent Pairing table:\n\n\\noindent";
     this->theMultTable.ElementToString(tempS, useLatex, useHtml, *this);
-    out << tempS <<"\n";
+    out << tempS << "\n";
   }
   output=out.str();
 }
@@ -15313,7 +15206,7 @@ bool rootSubalgebra::IsGeneratingSingularVectors(int indexKmod, roots& Nilradica
   return true;
 }
 
-void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation &theRelation, roots& nilradicalRoots)
+void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, roots& nilradicalRoots)
 { bool isMaximal=false;
   root beta, tempRoot;
   //theRelation.ComputeDebugString(*this);
@@ -15410,17 +15303,17 @@ void ::DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(const roots& sim
       this->SimpleBasesConnectedComponents.LastObject()->AddObjectOnTop(simpleBasisInput.TheObjects[i]);
     }
   }
-  this->SimpleBasesConnectedComponents.ComputeDebugString();
+//  this->SimpleBasesConnectedComponents.ComputeDebugString();
   this->indicesThreeNodes.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
-  this->SimpleBasesConnectedComponents.ComputeDebugString();
+//  this->SimpleBasesConnectedComponents.ComputeDebugString();
   this->DynkinTypeStrings.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
-  this->SimpleBasesConnectedComponents.ComputeDebugString();
+//  this->SimpleBasesConnectedComponents.ComputeDebugString();
   this->indicesEnds.SetSizeExpandOnTopNoObjectInit(this->SimpleBasesConnectedComponents.size);
-  this->SimpleBasesConnectedComponents.ComputeDebugString();
+//  this->SimpleBasesConnectedComponents.ComputeDebugString();
   this->ComputeDynkinStrings(theWeyl);
-  this->SimpleBasesConnectedComponents.ComputeDebugString();
+  //this->SimpleBasesConnectedComponents.ComputeDebugString();
   this->Sort();
-  this->SimpleBasesConnectedComponents.ComputeDebugString();
+  //this->SimpleBasesConnectedComponents.ComputeDebugString();
   this->ComputeDebugString();
 }
 
@@ -15527,11 +15420,11 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGr
     for (int i=0; i<3; i++)
       currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
     if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
-      out<<"D_" <<currentComponent.size;
+      out<< "D_" << currentComponent.size;
     else
     {//type E
       assert(indicesLongComponents.size==2);
-      out <<"E_" <<currentComponent.size;
+      out << "E_" << currentComponent.size;
     }
   }else
   { Rational length1, length2, tempRat;
@@ -15548,9 +15441,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGr
     }
     if (numLength2==0 )
     { //type A
-      out<< "A_"<<numLength1;
+      out << "A_" << numLength1;
       if (!length1.IsEqualTo(theWeyl.LongRootLength))
-        out <<"'";
+        out << "'";
     }
     else
     {//the longer root should have smaller index
@@ -15569,20 +15462,20 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGr
       if (numLength1==numLength2)
       {//B2, C2, F4 or G2
         if (numLength1!=1)
-        { out <<"F_4";
+        { out << "F_4";
           assert(numLength1==2);
         }
         else
         { if (length1.NumShort==6 || length2.NumShort==6)
-            out<<"G_2";
+            out << "G_2";
           else
-            out<<"B_2=C_2";
+            out << "B_2=C_2";
         }
       } else
       { if (numGreaterLength>numSmallerLength)
-          out <<"B_"<< currentComponent.size;
+          out << "B_" << currentComponent.size;
         else
-          out <<"C_"<< currentComponent.size;
+          out << "C_" << currentComponent.size;
       }
     }
     currentComponent.SwapTwoIndices(0, currentEnds.TheObjects[0]);
@@ -15595,7 +15488,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGr
         }
       }
   }
-  out <<"$";
+  out << "$";
   this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
 }
 
@@ -15622,7 +15515,7 @@ void DynkinDiagramRootSubalgebra::Assign(const DynkinDiagramRootSubalgebra& righ
   this->sameTypeComponents.CopyFromBase(right.sameTypeComponents);
 }
 
-void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> > & output, int index)
+void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int index)
 { roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[index];
   std::string& currentString=this->DynkinTypeStrings.TheObjects[index];
   List<int> thePermutation;
@@ -15949,8 +15842,7 @@ void rootSubalgebra::KEnumerationsToLinComb(GlobalVariables& theGlobalVariables)
   }
 }
 
-
-void PolynomialRationalCoeff::Evaluate(intRoot &values, Rational &output)
+void PolynomialRationalCoeff::Evaluate(intRoot& values, Rational& output)
 { output.MakeZero();
   std::string tempS;
   Rational tempLRat, tempLRat2;
@@ -16378,7 +16270,7 @@ bool MatrixLargeRational  ::SystemLinearEqualitiesWithPositiveColumnVectorHasNon
     }
     if (EnteringVariable!=-1)
     { int LeavingVariableRow;  Rational MaxMovement;
-      MatrixLargeRational::GetMaxMovementAndLeavingVariableRow(  MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
+      MatrixLargeRational::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
       Rational tempRat, tempTotalChange;
       assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
@@ -16831,7 +16723,7 @@ void rootSubalgebra::initForNilradicalGeneration()
   this->flagFirstRoundCounting=true;
 }
 
-void rootsWithMultiplicitiesContainer::ElementToString(std::string &output)
+void rootsWithMultiplicitiesContainer::ElementToString(std::string& output)
 { std::stringstream out;
   std::string tempS;
   out << "Num Elements: "<< this->size<<"    \n";
@@ -16851,7 +16743,7 @@ void rootWithMultiplicity::ElementToString(std::string& output)
   output=out.str();
 }
 
-void rootsWithMultiplicity::ElementToString(std::string &output)
+void rootsWithMultiplicity::ElementToString(std::string& output)
 { std::string tempS;
   std::stringstream out;
   for (int i=0; i<this->size; i++)
@@ -16944,7 +16836,7 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
   output=out.str();
 }
 
-int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts )
+int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts)
 { std::string tempS;
   std::stringstream out;
   assert(this->AlphaCoeffs.size==this->Alphas.size);
@@ -16958,7 +16850,7 @@ int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, 
     out << " &\\begin{tabular}{c} ";
   out << "=";
   if (useLatex)
-    out <<" \\\\~ \\end{tabular} & ";
+    out << " \\\\~ \\end{tabular} & ";
   this->RelationOneSideToString(tempS, "\\beta", this->BetaCoeffs, this->BetaKComponents, this->Betas, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
   out << tempS;
   if (useLatex)
@@ -17013,7 +16905,7 @@ void coneRelation::ComputeConnectedComponents(roots& input, rootSubalgebra& owne
   }
 }
 
-bool coneRelation::IsStrictlyWeaklyProhibiting(  rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner)
+bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, roots& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner)
 { roots tempRoots;
   tempRoots.CopyFromBase(this->Alphas);
   tempRoots.AddListOnTop(this->Betas);
@@ -17348,10 +17240,10 @@ void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::st
     out2 <<"</td></tr></table>";
   }
   if (useLatex)
-  {  out1 << "\n\n \\begin{tabular}{";
+  { out1 << "\n\n \\begin{tabular}{";
     for (int i=0; i<this->NumColsPerTableLatex; i++)
-      out1 <<"c";
-    out1 <<"}\n";
+      out1 << "c";
+    out1 << "}\n";
     out2 << "\\end{tabular}";
   }
   outputFooter=out2.str();
@@ -17368,7 +17260,7 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
   childrenPathPhysical.append("rootHtml_"); childrenPathServer.append("rootHtml_");
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   this->ComputeDebugString(false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables);
-  output<< "<HTML><BODY>"<<header<<this->DebugString<<"</BODY></HTML>";
+  output << "<HTML><BODY>" << header << this->DebugString << "</BODY></HTML>";
   output.close();
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);
@@ -17422,10 +17314,10 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
   if (useLatex)
     out << "$\\mathfrak{g}$: ";
   else
-  { out <<"g: ";
+  { out << "g: ";
     CGIspecificRoutines::clearDollarSigns(tempS, tempS);
   }
-  out << tempS <<"\n\n";
+  out << tempS << "\n\n";
   for (int i=1; i<this->size; i++)
   { if (col==0 && row==0)
     { out << header;
@@ -17490,7 +17382,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       }
       if (useLatex && counter>20)
       { counter=0;
-        out<<"\\\\\n";
+        out << "\\\\\n";
       }
     }
     if (useLatex)
@@ -17505,7 +17397,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       if (useHtml)
       { out << "</td></tr>";
         if(i!=this->size-1)
-          out<< "<tr><td title=\"" << tooltipSAs << "\">";
+          out << "<tr><td title=\"" << tooltipSAs << "\">";
       }
     }
     if (col!=0)
@@ -17541,7 +17433,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
   roots tempAlphas, tempBetas;
   this->GetLatexHeaderAndFooter(header, footer);
   if (useLatex)
-    out <<header;
+    out << header;
   int oldIndex=-1;
   int lineCounter=0;
   for(int i=0; i<this->size; i++)
@@ -17565,7 +17457,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
       this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Alphas, tempAlphas, owners.AmbientWeyl, theGlobalVariables);
       this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Betas, tempBetas, owners.AmbientWeyl, theGlobalVariables);
       this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].AlphaCoeffs, tempAlphas, true);
-      out<<"\\multicolumn{5}{c}{" <<tempS;
+      out << "\\multicolumn{5}{c}{" << tempS;
       this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].BetaCoeffs, tempBetas, true);
       out << "=" << tempS; //<<"~~~~";
     //  this->TheObjects[i].RelationOneSideToStringCoordForm
@@ -17574,7 +17466,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
     //  this->TheObjects[i].RelationOneSideToStringCoordForm
     //    (tempS, this->TheObjects[i].BetaCoeffs, this->TheObjects[i].Betas, false);
     //  out <<"="<<tempS<<"}\\\\\n";
-      out<<"}\\\\\\hline\n";
+      out << "}\\\\\\hline\n";
     }
     if (lineCounter>this->NumAllowedLatexLines)
     { out << footer << "\n\n\n" << header;

@@ -24,11 +24,11 @@
 void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
 { std::stringstream out;
   if (useLatex)
-    out<<"$";
+    out << "$";
   for (int i=0; i<this->highestWeights.size; i++)
   { if (this->multiplicitiesHighestWeights.TheObjects[i]>1)
       out << this->multiplicitiesHighestWeights.TheObjects[i];
-    out << "V_{"<<this->highestWeights.TheObjects[i]<<"}";
+    out << "V_{" << this->highestWeights.TheObjects[i] << "}";
     if (i!=this->highestWeights.size-1)
       out << "+";
   }
@@ -47,11 +47,11 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
     for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
     { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
       CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DebugString, tempS);
-      out <<"<td align=\"center\">Decomp. "<< tempS<<"</td>";
+      out << "<td align=\"center\">Decomp. " << tempS <<"</td>";
     }
-    out <<"</tr>\n";
+    out << "</tr>\n";
   }
-  out <<"<tr><td align=\"center\"> "<< this->hCharacteristic.ElementToString() << "</td>";
+  out << "<tr><td align=\"center\"> " << this->hCharacteristic.ElementToString() << "</td>";
   for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
   { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
     CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DebugString, tempS);
@@ -65,11 +65,11 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
         out << "+";
     }
     if (useHtml)
-      out <<"</td>";
-    out <<"\n";
+      out << "</td>";
+    out << "\n";
   }
   if (useHtml)
-    out <<"</tr></table>";
+    out << "</tr></table>";
   if (useLatex)
     out << "$";
   output=out.str();
@@ -86,18 +86,18 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
   container.texFileNamesForPNG.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size+1);
   container.texStringsEachFile.SetSizeExpandOnTopNoObjectInit(container.texFileNamesForPNG.size);
   (*container.texStringsEachFile.LastObject())=formulaTex;
-  tempStream<<(*physicalPath) <<"fla";
-  tempStream<<container.texFileNamesForPNG.size<<".tex";
+  tempStream << (*physicalPath) << "fla";
+  tempStream << container.texFileNamesForPNG.size << ".tex";
   container.texFileNamesForPNG.TheObjects[container.texFileNamesForPNG.size-1]=tempStream.str();
-  output <<"<img src=\""<< (*htmlPathServer) <<"fla"<<container.texFileNamesForPNG.size<<".png\">";
+  output << "<img src=\"" << (*htmlPathServer) << "fla" << container.texFileNamesForPNG.size << ".png\">";
   if (useHtml)
-    output<<"\n<br>\n";
+    output << "\n<br>\n";
 }
 
 void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::stringstream out;  std::string tempS;
   this->hCharacteristic.ElementToString(tempS);
-  out <<"<a name=\"sl2index" << indexInContainer<< "\">h-characteristic: "<<  tempS <<"</a>";
+  out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<  tempS << "</a>";
   this->preferredAmbientSimpleBasis.ElementToString(tempS, false, false, false);
   if (physicalPath==0 || htmlPathServer==0)
   { usePNG=false;
@@ -105,13 +105,13 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   }
   if (useHtml)
     out << "<br>";
-  out<<"\nSimple basis ambient algebra w.r.t defining h: "<< tempS;
+  out << "\nSimple basis ambient algebra w.r.t defining h: " << tempS;
   roots tempRoots;
   MatrixLargeRational tempMat;
   if (useHtml)
     out << "<br>";
   if (this->IndicesContainingRootSAs.size>1)
-  { out <<"Number of containing regular semisimple subalgebras: " << this->IndicesContainingRootSAs.size;
+  { out << "Number of containing regular semisimple subalgebras: " << this->IndicesContainingRootSAs.size;
     if (useHtml)
     out << "<br>";
   }
@@ -143,14 +143,14 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     { out << "<br>";
       this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
     } else
-      out <<tempS;
+      out << tempS;
   }
-  out <<"\nsl(2)-module decomposition of the ambient Lie algebra: ";
+  out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   this->ElementToStringModuleDecomposition(useLatex || usePNG, useHtml, tempS);
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   container.IndicesSl2decompositionFlas.SetSizeExpandOnTopNoObjectInit(container.size);
   container.IndicesSl2decompositionFlas.TheObjects[indexInContainer]=container.texFileNamesForPNG.size-1;
-  out <<"\nThe below list one possible realization of the sl(2) subalgebra.";
+  out << "\nThe below list one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out <<"\n<br>\n";
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
@@ -1711,6 +1711,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 { std::stringstream out;
   std::string tempS;
   //assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
+  this->SortNormals();
   std::string endOfLine;
   endOfLine="\n";
   if (useLatex)
@@ -1724,32 +1725,15 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
     out << "<a name=\"" << tempS << "\">" << tempS << "</a>";
   if (useLatex)
     out << endOfLine << "Projective representation\n\n";
-  /*out <<endOfLine<<"External Walls:"<<endOfLine;
-  root tempNormal;
-  for (int i=0; i<this->Externalwalls.size; i++)
-  {  this->Externalwalls.TheObjects[i].ElementToString(tempS);
-    if (!useLatex)
-      out <<"f"<<i<<": "<< tempS<<endOfLine;
-    else
-      out << tempS <<endOfLine;
-  }
-  if (!useLatex && !useHtml)
-  {  out <<"Internal Walls:"<<endOfLine;
-    for (int i=0; i<this->InternalWalls.size; i++)
-    {  this->InternalWalls.TheObjects[i].ElementToString(tempS);
-      out <<"f"<<i<<": "<< tempS<<endOfLine;
-    }
-  }*/
   out << " index in owner: " << this->IndexInOwnerComplex << "\n";
   this->ElementToInequalitiesString(tempS, owner, useLatex, useHtml);
   out << tempS;
-//  ListPointers<CombinatorialChamber> outputChambers;
-//  this->FindAllNeighbors(outputChambers);
   out << "Neighbors: ";
-  for (int i=0; i<this->Externalwalls.size; i++)
-  { out << "wall " << i+1 << ": ";
-    for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
-    { CombinatorialChamber* currentChamber = this->Externalwalls.TheObjects[i].NeighborsAlongWall.TheObjects[j];
+  for (int k=0; k<this->Externalwalls.size; k++)
+  { int theWallIndex= this->IndicesCorrespondingNonSortedWalls.TheObjects[k];
+    out << "wall " << k+1 << ": ";
+    for (int j=0; j<this->Externalwalls.TheObjects[theWallIndex].NeighborsAlongWall.size; j++)
+    { CombinatorialChamber* currentChamber = this->Externalwalls.TheObjects[theWallIndex].NeighborsAlongWall.TheObjects[j];
       if (currentChamber!=0)
       { currentChamber->ChamberNumberToString(tempS, owner);
         if (useHtml)
@@ -1791,10 +1775,12 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 }
 
 void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (inputData.theChambers.thePauseController.IsRunning())
+{ ComputationSetup::TestQuickSort(inputData, theGlobalVariables);
+  if (inputData.theChambers.thePauseController.IsRunning())
     return;
   inputData.theChambers.thePauseController.InitComputation();
   inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
+  inputData.theChambers.theDirections.ReverseOrderElements();
   inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
   inputData.theChambers.QuickSortAscending();
   inputData.theChambers.LabelChamberIndicesProperly();
@@ -1803,7 +1789,23 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
   inputData.theChambers.thePauseController.ExitComputation();
 }
 
-bool CombinatorialChamber::operator>(const CombinatorialChamber& right) const
+void CombinatorialChamber::SortNormals()
+{ if (this->flagNormalsAreSorted)
+    return;
+  roots originalRoots;
+  this->ExternalwallsNormalsSorted.SetSizeExpandOnTopNoObjectInit(this->Externalwalls.size);
+  originalRoots.SetSizeExpandOnTopNoObjectInit(this->Externalwalls.size);
+  this->IndicesCorrespondingNonSortedWalls.SetSizeExpandOnTopNoObjectInit(this->Externalwalls.size);
+  for (int i=0; i<this->Externalwalls.size; i++)
+  { this->ExternalwallsNormalsSorted.TheObjects[i] = this->Externalwalls.TheObjects[i].normal;
+    originalRoots.TheObjects[i] = this->Externalwalls.TheObjects[i].normal;
+  }
+  this->ExternalwallsNormalsSorted.QuickSortAscending();
+  for (int i=0; i<this->ExternalwallsNormalsSorted.size; i++)
+    this->IndicesCorrespondingNonSortedWalls.TheObjects[i]=originalRoots.IndexOfObject(this->ExternalwallsNormalsSorted.TheObjects[i]);
+}
+
+bool CombinatorialChamber::operator>(CombinatorialChamber& right)
 { if (!this->flagHasZeroPolynomiaL && right.flagHasZeroPolynomiaL)
     return true;
   if (this->flagHasZeroPolynomiaL && !right.flagHasZeroPolynomiaL)
@@ -1812,10 +1814,12 @@ bool CombinatorialChamber::operator>(const CombinatorialChamber& right) const
     return true;
   if (this->Externalwalls.size<right.Externalwalls.size)
     return false;
+  this->SortNormals();
+  right.SortNormals();
   for (int i=0; i<this->Externalwalls.size; i++)
-  { if (this->Externalwalls.TheObjects[i].normal> right.Externalwalls.TheObjects[i].normal)
+  { if (this->ExternalwallsNormalsSorted.TheObjects[i] > right.ExternalwallsNormalsSorted.TheObjects[i])
       return true;
-  if (right.Externalwalls.TheObjects[i].normal>this->Externalwalls.TheObjects[i].normal)
+    if (right.ExternalwallsNormalsSorted.TheObjects[i] > this->ExternalwallsNormalsSorted.TheObjects[i])
       return false;
   }
   return false;
@@ -1825,10 +1829,10 @@ void ComputationSetup::TestQuickSort(ComputationSetup& inputData, GlobalVariable
 { std::stringstream out;
   List<int> tempList;
   tempList.SetSizeExpandOnTopNoObjectInit(20);
-  tempList.TheObjects[0]=9;
-  tempList.TheObjects[1]=1;
-  tempList.TheObjects[2]=2;
-  tempList.TheObjects[3]=2;
+  tempList.TheObjects[0]=4;
+  tempList.TheObjects[1]=2;
+  tempList.TheObjects[2]=3;
+  tempList.TheObjects[3]=1;
   tempList.TheObjects[4]=8;
   tempList.TheObjects[5]=6;
   tempList.TheObjects[6]=7;

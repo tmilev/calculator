@@ -493,6 +493,7 @@ public:
   inline bool operator==(const List<Object>& other) const
   { return this->IsEqualTo(other);
   };
+  bool operator>(const List<Object>& other) const;
   void ShiftUpExpandOnTop(int StartingIndex);
   List();
   ~List();
@@ -1846,7 +1847,7 @@ public:
   void RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer);
   void AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   void operator=(const WallData& right);
-  bool HasOneTrueNeighbor(int& outputIndex)
+  bool HasExactlyOneTrueNeighbor(int& outputIndex)
   { outputIndex=-1;
     for (int i=0; i<this->NeighborsAlongWall.size; i++)
       if (this->NeighborsAlongWall.TheObjects[i]!=0)
@@ -1936,11 +1937,14 @@ public:
   bool flagHasZeroPolynomiaL;
   bool flagExplored;
   bool flagPermanentlyZero;
+  bool flagNormalsAreSorted;
   //QuasiPolynomial* ThePolynomial;
   int CreationNumber;
   int DisplayNumber;
   int IndexInOwnerComplex;
   List<WallData> Externalwalls;
+  roots ExternalwallsNormalsSorted;
+  List<int> IndicesCorrespondingNonSortedWalls;
   roots InternalWalls;
   roots AllVertices;
   roots affineVertices;
@@ -1954,10 +1958,11 @@ public:
 //  static bool flagMakingASingleHyperplaneSlice;
   bool PointLiesInMoreThanOneWall(root& point);
   //bool InduceFromAffineCone(affineCone& input);
+  void SortNormals();
   bool ComputeDebugString(CombinatorialChamberContainer& owner);
   bool ElementToString(std::string& output, CombinatorialChamberContainer& owner);
   bool ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
-  void ElementToInequalitiesString (std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
+  void ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
   void ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner);
   bool ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex);
   //bool FacetIsInternal(Facet* f);
@@ -1969,8 +1974,8 @@ public:
   int GetIndexWallWithNormal(root& theNormal);
   bool VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel);
   bool IsSeparatedByStartingConesFrom(CombinatorialChamberContainer& owner, CombinatorialChamber& Neighbor, GlobalVariables& theGlobalVariables);
-  int GetIndexFirstNonSeparableChamber(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables);
-  int GetIndexFirstNonSeparableChamberGluesConvexNoLinesThroughOrigin(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables);
+  bool GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
+  bool GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
   bool UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables);
   void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, int indexIgnoreWall, CombinatorialChamber* ignoreChamber);
   void FindAllNeighbors(ListPointers<CombinatorialChamber>& TheNeighbors);
@@ -2018,8 +2023,8 @@ public:
   void Assign(const  CombinatorialChamber& right);
   inline void operator=(const CombinatorialChamber& right){this->Assign(right); };
   bool operator==(const CombinatorialChamber& right) const;
-  bool operator<(const CombinatorialChamber& right) const;
-  bool operator>(const CombinatorialChamber& right) const;
+  bool operator<(CombinatorialChamber& right);
+  bool operator>(CombinatorialChamber& right);
   CombinatorialChamber();
 //  ~CombinatorialChamber(){this->IndexInOwnerComplex=-2; };
 };
@@ -2128,6 +2133,21 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2)
 template <class Object>
 int List<Object>::SizeWithoutObjects()
 { return  sizeof(this->ActualSize)+ sizeof(this->IndexOfVirtualZero)+ sizeof(this->size)+ sizeof(this->TheActualObjects)+ sizeof(this->TheObjects);
+}
+
+template <class Object>
+bool  List<Object>::operator>(const List<Object>& other) const
+{ if (this->size>other.size)
+    return true;
+  if (other.size>this->size)
+    return false;
+  for (int i=0; i<this->size; i++)
+  { if (this->TheObjects[i]>other.TheObjects[i])
+      return true;
+    if (other.TheObjects[i]>this->TheObjects[i])
+      return false;
+  }
+  return false;
 }
 
 template <class Object>
@@ -6574,7 +6594,11 @@ class DrawOperations
   void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
   void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize);
   void init()
-  { this->IndexNthDrawOperation.size=0; this->TypeNthDrawOperation.size=0;
+  { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(40000);
+    this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(40000);
+    this->theDrawLineBetweenTwoRootsOperations.MakeActualSizeAtLeastExpandOnTop(40000);
+    this->theDrawTextAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(5000);
+    this->IndexNthDrawOperation.size=0; this->TypeNthDrawOperation.size=0;
     this->theDrawTextOperations.size=0; this->theDrawLineOperations.size=0; this->theDrawLineBetweenTwoRootsOperations.size=0; this->theDrawTextAtVectorOperations.size=0;
   }
   enum DrawOperationType

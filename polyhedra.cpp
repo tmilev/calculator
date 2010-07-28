@@ -53,6 +53,30 @@ bool Stop()
 { return true;
 }
 
+
+template <class Key, class Value>
+struct Entry
+{
+  Key key;
+  Value value;
+};
+
+template<class Key, class Value>
+class BinaryTreeMap;
+template<class Entry>
+class BinaryTree;
+
+template<class Key, class Value>
+std::stringstream &operator>>(std::stringstream  &in, Entry<Key, Value> &entry);
+
+template<class Key, class Value>
+class BinaryTreeMap
+{
+private:
+  BinaryTree<Entry<Key, Value> > tree;
+  friend std::stringstream & operator >><Key, Value>(std::stringstream  &in, Entry<Key, Value> &entry);
+};
+
 int ParallelComputing::GlobalPointerCounter=0;
 Integer Integer::TheRingUnit  (1) ;
 Integer Integer::TheRingMUnit (-1);
@@ -3330,15 +3354,15 @@ void CombinatorialChamber::ChamberNumberToString(std::string& output, Combinator
   if (this->flagHasZeroPolynomiaL)
     out<< "Invisible";
   else
-    out <<"c";
+    out << "c";
   if (this->DisplayNumber!=-1)
-    out<<this->DisplayNumber;
+    out << this->DisplayNumber;
   else
-    out<<this->CreationNumber;
+    out << this->CreationNumber;
   if (this->flagPermanentlyZero)
-    out <<" (Permanently zero)";
+    out << " (Permanently zero)";
   if (this->flagExplored)
-    out <<"(Explored)";
+    out << "(Explored)";
   output=out.str();
 }
 
@@ -3348,17 +3372,19 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 
 void CombinatorialChamber::ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
 { int theDimension=owner.AmbientDimension;
+  this->SortNormals();
   std::string tempS; std::stringstream out;
   if (useLatex)
     out << "\n\\begin{eqnarray*}\n";
   if (useHtml)
     out << "\n<br>\n";
   for (int i=0; i<this->Externalwalls.size; i++)
-  { for (int j=0; j<theDimension; j++)
-    { this->Externalwalls.TheObjects[i].normal.TheObjects[j].ElementToString(tempS);
+  { root& currentNormal= this->ExternalwallsNormalsSorted.TheObjects[i];
+    for (int j=0; j<theDimension; j++)
+    { currentNormal.TheObjects[j].ElementToString(tempS);
       if (tempS!="0")
       { if (tempS=="1")
-        {  tempS="";
+        { tempS="";
           out << '+';
         }
         if (tempS=="-1")
@@ -3419,7 +3445,8 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
 }
 
 CombinatorialChamber::CombinatorialChamber()
-{ this->flagHasZeroPolynomiaL = true;
+{ this->flagNormalsAreSorted=false;
+  this->flagHasZeroPolynomiaL = true;
   this->IndexInOwnerComplex=-1;
   this->IndexStartingCrossSectionNormal=-1;
   this->flagExplored=false;
@@ -3495,7 +3522,7 @@ void CombinatorialChamber::findWallsIncidentWithVertexExcludeWallAtInfinity(root
   tempRoot.MakeZero(owner->AmbientDimension);
   tempRoot.LastObject()->MakeOne();
   for (int i=0; i<this->Externalwalls.size; i++)
-    if (  theVertex.OurScalarProductIsZero(this->Externalwalls.TheObjects[i].normal)&&!this->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot))
+    if (theVertex.OurScalarProductIsZero(this->Externalwalls.TheObjects[i].normal)&&!this->Externalwalls.TheObjects[i].normal.IsEqualTo(tempRoot))
       output.AddSelectionAppendNewIndex(i);
 }
 
@@ -3909,33 +3936,27 @@ int CombinatorialChamber::GetIndexWallWithNormal(root& normal)
   return -1;
 }
 
-int CombinatorialChamber::GetIndexFirstNonSeparableChamber(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
+{ outputIndicesChambersToGlue.size=0;
+  outputRedundantNormals.size=0;
+  return this->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, outputRedundantNormals, theGlobalVariables);
+}
+
+bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<this->Externalwalls.size; i++)
   { WallData& theWall= this->Externalwalls.TheObjects[i];
     for(int j=0; j<theWall.NeighborsAlongWall.size; j++)
       if (theWall.NeighborsAlongWall.TheObjects[j]!=0)
-        if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[j], theGlobalVariables))
-        { indexWallToGlueAlong= i;
-          indexWallToGlueAlongInNeighbor=theWall.IndicesMirrorWalls.TheObjects[i];
-          return theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex;
-        }
+        if (theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex>=owner.indexLowestNonCheckedForGlueing)
+          if (!outputIndicesChambersToGlue.ContainsObject(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex))
+            if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[j], theGlobalVariables))
+            { outputIndicesChambersToGlue.AddObjectOnTop(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex);
+              outputRedundantNormals.AddObjectOnTopNoRepetition(theWall.normal);
+              outputRedundantNormals.AddObjectOnTopNoRepetition(-theWall.normal);
+              theWall.NeighborsAlongWall.TheObjects[j]->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, outputRedundantNormals, theGlobalVariables);
+            }
   }
-  return -1;
-}
-
-int CombinatorialChamber::GetIndexFirstNonSeparableChamberGluesConvexNoLinesThroughOrigin(CombinatorialChamberContainer& owner, int& indexWallToGlueAlong, int& indexWallToGlueAlongInNeighbor, GlobalVariables& theGlobalVariables)
-{ int indexTrueNeighbor;
-  for (int i=0; i<this->Externalwalls.size; i++)
-  { WallData& theWall= this->Externalwalls.TheObjects[i];
-    if (theWall.HasOneTrueNeighbor(indexTrueNeighbor))
-      if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[indexTrueNeighbor], theGlobalVariables))
-        if (this->UnionAlongWallIsConvex(*theWall.NeighborsAlongWall.TheObjects[indexTrueNeighbor], i, theGlobalVariables))
-        { indexWallToGlueAlong= i;
-          indexWallToGlueAlongInNeighbor=theWall.IndicesMirrorWalls.TheObjects[i];
-          return theWall.NeighborsAlongWall.TheObjects[indexTrueNeighbor]->IndexInOwnerComplex;
-        }
-  }
-  return -1;
+  return outputIndicesChambersToGlue.size>0;
 }
 
 bool CombinatorialChamber::UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables)

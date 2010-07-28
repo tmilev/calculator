@@ -453,7 +453,7 @@ public:
   void AddObjectOnBottom(const Object& o);
   void AddObjectOnTop(const Object& o);
   void AddListOnTop(List<Object>& theList);
-  bool AddObjectOnTopNoRepetitionOfObject(const Object& o);
+  bool AddOnTopNoRepetition(const Object& o);
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
@@ -544,7 +544,7 @@ private:
   void AddObjectOnBottom(const Object& o);
   void AddObjectOnTop(const Object& o);
   void AddListOnTop(List<Object>& theList);
-  bool AddObjectOnTopNoRepetitionOfObject(const Object& o);
+  bool AddOnTopNoRepetition(const Object& o);
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
@@ -1974,10 +1974,10 @@ public:
   int GetIndexWallWithNormal(root& theNormal);
   bool VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel);
   bool IsSeparatedByStartingConesFrom(CombinatorialChamberContainer& owner, CombinatorialChamber& Neighbor, GlobalVariables& theGlobalVariables);
-  bool GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
-  bool GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
+  bool GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
+  bool GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, GlobalVariables& theGlobalVariables);
   bool UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables);
-  void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, int indexIgnoreWall, CombinatorialChamber* ignoreChamber);
+  void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, List<int>& IndicesGluedChambers, roots& redundantNormals);
   void FindAllNeighbors(ListPointers<CombinatorialChamber>& TheNeighbors);
   bool SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
   bool IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
@@ -2165,7 +2165,7 @@ void List<Object>::initFillInObject(int theSize, const Object& o)
 }
 
 template <class Object>
-bool  List<Object>::AddObjectOnTopNoRepetitionOfObject(const Object& o)
+bool  List<Object>::AddOnTopNoRepetition(const Object& o)
 { if (this->IndexOfObject(o)!=-1)
     return false;
   this->AddObjectOnTop(o);
@@ -2802,13 +2802,14 @@ public:
   int LabelChambersForDisplayAndGetNumVisibleChambers();
   void ElementToString(std::string& output, bool useLatex, bool useHtml);
   void ElementToString(std::string& output);
-  void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
-  void WriteReportToFile(std::fstream& output);
   void ComputeDebugString(){this->ElementToString(this->DebugString); };
   void ComputeDebugString(bool LatexFormat) {this->ElementToString(this->DebugString, LatexFormat, false); };
   void ComputeDebugString(bool useLatex, bool useHtml){this->ElementToString(this->DebugString, useLatex, useHtml); };
   void init();
   void Free();
+  void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
+  void WriteReportToFile(std::fstream& output);
+  void WriteReportToFile(const std::string& FileNameOutput);
   void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
@@ -2825,10 +2826,10 @@ public:
   void SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
   void AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber, GlobalVariables& theGlobalVariables);
   void GlueOverSubdividedChambersCheckLowestIndex(GlobalVariables& theGlobalVariables);
-  void Glue(CombinatorialChamber* left, CombinatorialChamber* right, int indexTouchingWallInLeft, int  indexTouchingWallInRight, GlobalVariables& theGlobalVariables);
+  void Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables);
   void LabelAllUnexplored();
   void DumpAll();
-  bool ConsistencyCheck();
+  bool ConsistencyCheck(bool CheckForConvexityChambers);
   void PurgeZeroPointers();
   void PurgeInternalWalls();
   void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots, root& theCurrentDirection);
@@ -6325,7 +6326,7 @@ public:
   void ComputeDebugString(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables){ this->ElementToString(this->DebugString, theWeyl, TheGlobalVariables); };
   bool GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(int index, root& outputNormal, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputePreferredDualBasis(char WeylLetter, int theDimension, GlobalVariables& TheGlobalVariables);
-  bool AddObjectOnTopNoRepetitionOfObject(int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  bool AddOnTopNoRepetition(int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingState(ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStep(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
@@ -6849,6 +6850,7 @@ public:
   roots rootsAttepmtTheTripleTrick;
   roots rootsAttepmtTheTripleTrickWRTSA;
   roots rootsreduceOnceGeneralMethod;
+  roots rootsGlueingGetNonSeparableChambers;
 
   rootsCollection rootsCollectionSplitChamber1;
   rootsCollection rootsCollectionSplitChamber2;

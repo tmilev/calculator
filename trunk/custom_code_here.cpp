@@ -239,7 +239,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
         }
       }
       if (isMinimalContaining)
-        theSl2.IndicesMinimalContainingRootSA.AddObjectOnTopNoRepetitionOfObject(theSl2.IndicesContainingRootSAs.TheObjects[j]);
+        theSl2.IndicesMinimalContainingRootSA.AddOnTopNoRepetition(theSl2.IndicesContainingRootSAs.TheObjects[j]);
     }
     output.ComputeModuleDecompositionsOfAmbientLieAlgebra(theGlobalVariables);
   }
@@ -960,7 +960,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   { inputData.flagDyckPathComputationLoaded=inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
     inputData.theChambers.ComputeDebugString();
     inputData.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
-    assert(inputData.theChambers.ConsistencyCheck());
+    assert(inputData.theChambers.ConsistencyCheck(true));
   }
   inputData.flagDyckPathComputationLoaded=false;
   IrreducibleFiniteDimensionalModule theModule;
@@ -1806,7 +1806,10 @@ void CombinatorialChamber::SortNormals()
 }
 
 bool CombinatorialChamber::operator>(CombinatorialChamber& right)
-{ if (!this->flagHasZeroPolynomiaL && right.flagHasZeroPolynomiaL)
+{ //used to allow to sort lists of pointers including eventually zero pointers. This code might be changed in the future (although it seems safe and fine to me now).
+  if (this==0)
+    return false;
+  if (!this->flagHasZeroPolynomiaL && right.flagHasZeroPolynomiaL)
     return true;
   if (this->flagHasZeroPolynomiaL && !right.flagHasZeroPolynomiaL)
     return false;
@@ -1860,3 +1863,35 @@ void ComputationSetup::TestQuickSort(ComputationSetup& inputData, GlobalVariable
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
 }
+
+void CombinatorialChamber::ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, List<int>& IndicesGluedChambers, roots& redundantNormals)
+{ //owner.LabelChambersForDisplayAndGetNumVisibleChambers();
+  //this->ComputeDebugString(owner);
+  //newChamber->ComputeDebugString(owner);
+  for (int i=0; i<this->Externalwalls.size; i++)
+  { WallData& currentWall =  this->Externalwalls.TheObjects[i];
+    if (!redundantNormals.ContainsObject(currentWall.normal))
+    { int indexWallInNewChamber=newChamber->GetIndexWallWithNormal(currentWall.normal);
+      if (indexWallInNewChamber==-1)
+      { indexWallInNewChamber=newChamber->Externalwalls.size;
+        newChamber->Externalwalls.AddObjectOnTopCreateNew();
+        newChamber->Externalwalls.LastObject()->normal.Assign(currentWall.normal);
+        newChamber->Externalwalls.LastObject()->NeighborsAlongWall.size=0;
+        newChamber->Externalwalls.LastObject()->IndicesMirrorWalls.size=0;
+      }
+      WallData& WalllnNewChamber= newChamber->Externalwalls.TheObjects[indexWallInNewChamber];
+      for (int j=0; j<currentWall.NeighborsAlongWall.size; j++)
+      { CombinatorialChamber* other= currentWall.NeighborsAlongWall.TheObjects[j];
+        WallData& otherWall = other->Externalwalls.TheObjects[currentWall.IndicesMirrorWalls.TheObjects[j]];
+        otherWall.SubstituteNeighborOneAllowNeighborAppearingNotOnce(this, newChamber, indexWallInNewChamber);
+        WalllnNewChamber.AddNeighbor(other, currentWall.IndicesMirrorWalls.TheObjects[j]);
+        otherWall.RemoveNeighborExtraOcurrences(newChamber);
+        WalllnNewChamber.RemoveNeighborExtraOcurrences(other);
+        //other->ComputeDebugString(owner);
+      }
+    }
+//    this->ComputeDebugString(owner);
+//    newChamber->ComputeDebugString(owner);
+  }
+}
+

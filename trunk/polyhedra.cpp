@@ -269,8 +269,7 @@ bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
 
 void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(GlobalVariables& theGlobalVariables)
-{ int indexWallToGlueAlong, indexWallToGlueAlongInNeighbor;
-  for (; ; )
+{ for (; ; )
   { if (this->indexLowestNonCheckedForGlueing>=this->size)
       return;
     if (this->TheObjects[this->indexLowestNonCheckedForGlueing]==0)
@@ -282,10 +281,9 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
         break;
     }
   }
-  int indexFirstNonSeparableChamber= this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetIndexFirstNonSeparableChamberGluesConvexNoLinesThroughOrigin(*this, indexWallToGlueAlong, indexWallToGlueAlongInNeighbor, theGlobalVariables);
-//  int indexFirstNonSeparableChamber= this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetIndexFirstNonSeparableChamber(*this, indexWallToGlueAlong, indexWallToGlueAlongInNeighbor, theGlobalVariables);
-  if (indexFirstNonSeparableChamber!=-1)
-  { this->Glue(this->TheObjects[this->indexLowestNonCheckedForGlueing], this->TheObjects[indexFirstNonSeparableChamber], indexWallToGlueAlong, indexWallToGlueAlongInNeighbor, theGlobalVariables);
+  List<int> IndicesToGlue; roots theNormalsToBeKilled;
+  if (this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetNonSeparableChamberIndices(*this, this->indexLowestNonCheckedForGlueing, IndicesToGlue, theNormalsToBeKilled, theGlobalVariables))
+  { this->Glue(IndicesToGlue, theNormalsToBeKilled, theGlobalVariables);
     this->NumTotalGlued++;
   }
   this->MakeReportGlueing(theGlobalVariables, this->indexLowestNonCheckedForGlueing, this->NumTotalGlued);
@@ -294,54 +292,51 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
   //this->ConsistencyCheck();
 }
 
-void CombinatorialChamberContainer::Glue(CombinatorialChamber* left, CombinatorialChamber* right, int indexTouchingWallInLeft, int  indexTouchingWallInRight, GlobalVariables& theGlobalVariables)
-{ this->ConsistencyCheck();
+void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables)
+{ this->ConsistencyCheck(true);
   CombinatorialChamber* newChamber= new CombinatorialChamber;
-  //left->ComputeDebugString(*this);
-  //right->ComputeDebugString(*this);
-  newChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(right->Externalwalls.size+left->Externalwalls.size-2);
+#ifdef CGIversionLimitRAMuse
+  ParallelComputing::GlobalPointerCounter++;
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+#endif
+  int totalWalls=0;
+  for (int i=0; i<IndicesToGlue.size; i++)
+    totalWalls+= this->TheObjects[IndicesToGlue.TheObjects[i]]->Externalwalls.size;
+  newChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(totalWalls-normalsToBeKilled.size);
   newChamber->IndexInOwnerComplex= this->size;
   this->AddObjectOnTop(newChamber);
-  //this->ComputeDebugString();
-  left->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, indexTouchingWallInLeft, right);
-  //this->ComputeDebugString();
-  right->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, indexTouchingWallInRight, left);
-  //this->ComputeDebugString();
-  newChamber->AllVertices.AddRootSnoRepetition(left->AllVertices);
-  //this->ComputeDebugString();
-  newChamber->AllVertices.AddRootSnoRepetition(right->AllVertices);
-  //this->ComputeDebugString();
+  for (int i=0; i<IndicesToGlue.size; i++)
+  { this->TheObjects[IndicesToGlue.TheObjects[i]]->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, IndicesToGlue, normalsToBeKilled);
+    newChamber->AllVertices.AddRootSnoRepetition(this->TheObjects[IndicesToGlue.TheObjects[i]]->AllVertices);
+  }
   for (int i=0; i<newChamber->AllVertices.size; i++)
     if (!newChamber->PointIsOnChamberBorder(newChamber->AllVertices.TheObjects[i]))
     { newChamber->AllVertices.PopIndexSwapWithLast(i);
       i--;
-      //this->ComputeDebugString();
     }
-  //this->ComputeDebugString();
   newChamber->AllVertices.Average(newChamber->InternalPoint, this->AmbientDimension);
   newChamber->flagExplored=true;
-  newChamber->flagHasZeroPolynomiaL= left->flagHasZeroPolynomiaL || right->flagHasZeroPolynomiaL;
-  newChamber->IndexStartingCrossSectionNormal= left->IndexStartingCrossSectionNormal;
-  //this->ComputeDebugString();
-  this->TheObjects[left->IndexInOwnerComplex]=0;
-  this->TheObjects[right->IndexInOwnerComplex]=0;
-  delete left;
-  delete right;
-  //this->ComputeDebugString();
+  newChamber->flagHasZeroPolynomiaL= this->TheObjects[IndicesToGlue.TheObjects[0]]->flagHasZeroPolynomiaL;
+  newChamber->IndexStartingCrossSectionNormal= this->TheObjects[IndicesToGlue.TheObjects[0]]->IndexStartingCrossSectionNormal;
+  for (int i=0; i<IndicesToGlue.size; i++)
+  { delete this->TheObjects[IndicesToGlue.TheObjects[i]];
+    this->TheObjects[IndicesToGlue.TheObjects[i]]=0;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
+  }
+  //this->ComputeDebugString();
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
-  //this->ConsistencyCheck();
+  this->ConsistencyCheck(true);
 }
 
 void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
 { //static int ProblemCounter=0;
   //ProblemCounter++;
   if (this->flagMustStop)
-  { assert(this->ConsistencyCheck());
+  { assert(this->ConsistencyCheck(true));
     return;
   }
   if (this->theCurrentIndex==this->AmbientDimension-1)
@@ -396,7 +391,7 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
       this->MakeReportOneSlice(theGlobalVariables, this->theCurrentIndex, this->theDirections.size, this->theDirections.TheObjects[this->theCurrentIndex]);
     //if (ProblemCounter>1024)
     //this->ComputeDebugString();
-    assert(this->ConsistencyCheck());
+    assert(this->ConsistencyCheck(true));
     //below follows the code to pause the computation
     this->thePauseController.SafePoint();
   }
@@ -441,7 +436,7 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoo
       return;
     this->SliceOneDirection(theIndicatorRoot, theGlobalVariables);
   }
-  this->ConsistencyCheck();
+  this->ConsistencyCheck(true);
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)
@@ -1131,7 +1126,7 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith(GlobalVariables
 //      tempWeyl.ActOnAffineHyperplaneByGroupElement(j, tempH, true, true);
       tempWeyl.ActOnRootByGroupElement(j, tempH.affinePoint, true, true);
       if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
-        if (this->theChambers.theWeylGroupAffineHyperplaneImages.AddObjectOnTopNoRepetitionOfObject(tempH))
+        if (this->theChambers.theWeylGroupAffineHyperplaneImages.AddOnTopNoRepetition(tempH))
           if (start==0)
             this->theChambers.AffineWallsOfWeylChambers.AddObjectOnTopNoRepetitionOfObjectHash(tempH);
       //tempH.ComputeDebugString();
@@ -3332,7 +3327,7 @@ void CombinatorialChamber::AddInternalWall(root& TheKillerFacetNormal, root& The
     this->InternalWalls.AddRootNoRepetition(tempRoot);
   if (owner.flagMakingASingleHyperplaneSlice && !this->flagExplored)
     if (!owner.flagSliceWithAWallIgnorePermanentlyZero || !this->flagPermanentlyZero)
-      owner.PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->IndexInOwnerComplex);
+      owner.PreferredNextChambers.AddOnTopNoRepetition(this->IndexInOwnerComplex);
 }
 
 bool CombinatorialChamber::CheckSplittingPointCandidate(Selection& SelectionTargetSimplex, Selection& SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension)
@@ -3437,7 +3432,8 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
       this->ComputeInternalPoint(this->InternalPoint, theDimension);
       root::RootScalarEuclideanRoot(this->InternalPoint, this->Externalwalls.TheObjects[i].normal, tempRat);
       if (tempRat.IsNonPositive())
-      { assert(false);
+      { ownerComplex.WriteReportToFile("./ChambersNonConvexError.html");
+        assert(false);
         return false;
       }
     }
@@ -3866,39 +3862,6 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
   return false;
 }
 
-void CombinatorialChamber::ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, int indexIgnoreWall, CombinatorialChamber* ignoreChamber)
-{ owner.LabelChambersForDisplayAndGetNumVisibleChambers();
-  this->ComputeDebugString(owner);
-  newChamber->ComputeDebugString(owner);
-  for (int i=0; i<this->Externalwalls.size; i++)
-  { WallData& currentWall =  this->Externalwalls.TheObjects[i];
-    bool shouldInclude= !currentWall.NeighborsAlongWall.ContainsObject(ignoreChamber);
-    if(shouldInclude)
-    { int indexWallInNewChamber=newChamber->GetIndexWallWithNormal(currentWall.normal);
-      if (indexWallInNewChamber==-1)
-      { indexWallInNewChamber=newChamber->Externalwalls.size;
-        newChamber->Externalwalls.AddObjectOnTopCreateNew();
-        newChamber->Externalwalls.LastObject()->normal.Assign(currentWall.normal);
-      }
-      WallData& WalllnNewChamber= newChamber->Externalwalls.TheObjects[indexWallInNewChamber];
-      for (int j=0; j<currentWall.NeighborsAlongWall.size; j++)
-      { CombinatorialChamber* other= currentWall.NeighborsAlongWall.TheObjects[j];
-        if (other!=0 && other!=ignoreChamber)
-        { other->ComputeDebugString(owner);
-          WallData& otherWall = other->Externalwalls.TheObjects[currentWall.IndicesMirrorWalls.TheObjects[j]];
-          otherWall.SubstituteNeighborOneAllowNeighborAppearingNotOnce(this, newChamber, indexWallInNewChamber);
-          WalllnNewChamber.AddNeighbor(other, currentWall.IndicesMirrorWalls.TheObjects[j]);
-          otherWall.RemoveNeighborExtraOcurrences(newChamber);
-          WalllnNewChamber.RemoveNeighborExtraOcurrences(other);
-          other->ComputeDebugString(owner);
-        }
-      }
-    }
-    this->ComputeDebugString(owner);
-    newChamber->ComputeDebugString(owner);
-  }
-}
-
 void CombinatorialChamber::FindAllNeighbors(ListPointers<CombinatorialChamber>& TheNeighbors)
 { for (int i=0; i<this->Externalwalls.size; i++)
     for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
@@ -3929,20 +3892,37 @@ bool CombinatorialChamber::IsSeparatedByStartingConesFrom(CombinatorialChamberCo
   return owner.startingCones.SeparatePoints(this->InternalPoint, Neighbor.InternalPoint, 0);
 }
 
-int CombinatorialChamber::GetIndexWallWithNormal(root& normal)
+int CombinatorialChamber::GetIndexWallWithNormal(root& theNormal)
 { for (int i=0; i<this->Externalwalls.size; i++)
-    if (this->Externalwalls.TheObjects[i].normal.IsEqualTo(normal))
+    if (this->Externalwalls.TheObjects[i].normal.IsEqualTo(theNormal))
       return i;
   return -1;
 }
 
-bool CombinatorialChamber::GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
 { outputIndicesChambersToGlue.size=0;
+  outputIndicesChambersToGlue.AddObjectOnTop(IndexInOwnerComplex);
   outputRedundantNormals.size=0;
-  return this->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, outputRedundantNormals, theGlobalVariables);
+  if (!this->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables))
+    return false;
+  roots& theNormals= theGlobalVariables.rootsGlueingGetNonSeparableChambers;
+  theNormals.size=0;
+  for (int i=0; i<outputIndicesChambersToGlue.size; i++)
+    for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
+    { root& theNormal=owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.TheObjects[j].normal;
+      if (theNormals.ContainsObject(-theNormal))
+      { outputRedundantNormals.AddOnTopNoRepetition(theNormal);
+        outputRedundantNormals.AddOnTopNoRepetition(-theNormal);
+      }
+      theNormals.AddOnTopNoRepetition(theNormal);
+    }
+  for (int i=0; i<outputIndicesChambersToGlue.size; i++)
+    for (int j=i+1; j<outputIndicesChambersToGlue.size; j++)
+      assert(!owner.startingCones.SeparatePoints(owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->InternalPoint, owner.TheObjects[outputIndicesChambersToGlue.TheObjects[j]]->InternalPoint,0));
+  return true;
 }
 
-bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<this->Externalwalls.size; i++)
   { WallData& theWall= this->Externalwalls.TheObjects[i];
     for(int j=0; j<theWall.NeighborsAlongWall.size; j++)
@@ -3951,12 +3931,10 @@ bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(Combinatorial
           if (!outputIndicesChambersToGlue.ContainsObject(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex))
             if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[j], theGlobalVariables))
             { outputIndicesChambersToGlue.AddObjectOnTop(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex);
-              outputRedundantNormals.AddObjectOnTopNoRepetition(theWall.normal);
-              outputRedundantNormals.AddObjectOnTopNoRepetition(-theWall.normal);
-              theWall.NeighborsAlongWall.TheObjects[j]->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, outputRedundantNormals, theGlobalVariables);
+              theWall.NeighborsAlongWall.TheObjects[j]->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables);
             }
   }
-  return outputIndicesChambersToGlue.size>0;
+  return outputIndicesChambersToGlue.size>1;
 }
 
 bool CombinatorialChamber::UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables)
@@ -4226,7 +4204,7 @@ void CombinatorialChamberContainer::AddChamberPointerSetUpPreferredIndices(Combi
 { theChamber->IndexInOwnerComplex=this->size;
   this->AddObjectOnTop(theChamber);
   if (!theChamber->flagPermanentlyZero)
-    this->PreferredNextChambers.AddObjectOnTopNoRepetitionOfObject(this->size-1);
+    this->PreferredNextChambers.AddOnTopNoRepetition(this->size-1);
   else
     theChamber->flagExplored=true;
 }
@@ -4449,10 +4427,10 @@ bool CombinatorialChamberContainer::ConsistencyCheckNextIndicesToSlice()
   return true;
 }
 
-bool CombinatorialChamberContainer::ConsistencyCheck()
+bool CombinatorialChamberContainer::ConsistencyCheck(bool CheckForConvexityChambers)
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
-      if (!this->TheObjects[i]->ConsistencyCheck(this->AmbientDimension, false, *this))
+      if (!this->TheObjects[i]->ConsistencyCheck(this->AmbientDimension, CheckForConvexityChambers, *this))
         return false;
   return true;
 }
@@ -4471,8 +4449,15 @@ void CombinatorialChamberContainer::WriteReportToFile(DrawingVariables& TDV, roo
   output << tempS;
 }
 
+void CombinatorialChamberContainer::WriteReportToFile(const std::string& FileNameOutput)
+{ std::fstream tempF;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileNameOutput, false, true, false);
+  this->WriteReportToFile(tempF);
+}
+
 void CombinatorialChamberContainer::WriteReportToFile(std::fstream& output)
 { std::string tempS;
+  this->PurgeZeroPointers();
   this->QuickSortAscending();
   this->ElementToString(tempS, false, true);
   output << tempS;
@@ -4581,10 +4566,10 @@ void CombinatorialChamberContainer::InduceFromLowerDimensionalAndProjectivize(Co
   //this->ComputeDebugString();
   this->WireChamberAdjacencyInfoAsIn(input);
   //this->ComputeDebugString();
-  if (!this->ConsistencyCheck())
+  if (!this->ConsistencyCheck(true))
   { this->flagAnErrorHasOcurredTimeToPanic=true;
   }
-  assert(this->ConsistencyCheck());
+  assert(this->ConsistencyCheck(true));
 }
 
 void CombinatorialChamberContainer::LabelChamberIndicesProperly()
@@ -4923,6 +4908,7 @@ bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables& theGlob
 { std::fstream tempF;
   if (CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false))
   { this->ReadFromFile(tempF, theGlobalVariables);
+    assert(this->ConsistencyCheck(true));
     tempF.close();
     return true;
   }
@@ -5433,7 +5419,7 @@ bool WallData::SplitWall(int indexInOwner, List<int>& possibleBogusWallsThisSide
         MirrorWall.AddNeighbor(NewMinusChamber, IndexNewMinusWall);
         if (ownerComplex.flagAnErrorHasOcurredTimeToPanic)
           MirrorWall.ComputeDebugString();
-        if(PossibleBogusNeighbors.AddObjectOnTopNoRepetitionOfObject(this->NeighborsAlongWall.TheObjects[i]))
+        if(PossibleBogusNeighbors.AddOnTopNoRepetition(this->NeighborsAlongWall.TheObjects[i]))
         { PossibleBogusWalls.AddObjectOnTop(this->IndicesMirrorWalls.TheObjects[i]);
           possibleBogusWallsThisSide.AddObjectOnTop(indexInOwner);
         }
@@ -10934,10 +10920,10 @@ void partFractions::ComputeSupport(List<roots>& output, std::stringstream& outpu
       tempRoot3.AssignIntRoot(tempRoot2);
       if (!tempRoot3.IsEqualTo(tempRoot))
         tempRoot.MultiplyByInteger(2);
-      tempRoots.AddObjectOnTopNoRepetitionOfObject(tempRoot);
+      tempRoots.AddOnTopNoRepetition(tempRoot);
       tempRoots.ComputeDebugString();
     }
-    if (output.AddObjectOnTopNoRepetitionOfObject(tempRoots))
+    if (output.AddOnTopNoRepetition(tempRoots))
     { tempRoots.ComputeDebugString();
       outputString<< tempRoots.DebugString << "\n\n\n";
     }
@@ -11670,7 +11656,7 @@ void WeylGroup::GenerateAdditivelyClosedSubset(roots& input, roots& output)
     for (int j=i+1; j<output.size; j++)
     { tempRoot=output.TheObjects[i]+output.TheObjects[j];
       if (this->IsARoot(tempRoot))
-        output.AddObjectOnTopNoRepetitionOfObject(tempRoot);
+        output.AddOnTopNoRepetition(tempRoot);
     }
 }
 
@@ -14142,7 +14128,7 @@ void rootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKm
         if (this->IsARoot(tempRoot))
           for (int k=0; k<this->kModules.size; k++)
             if (this->kModules.TheObjects[k].IndexOfObject(tempRoot)!=-1)
-            { output.AddObjectOnTopNoRepetitionOfObject(k);
+            { output.AddOnTopNoRepetition(k);
               break;
             }
     }
@@ -14652,10 +14638,10 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
       int indexSA= this->IndexSubalgebra(theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth], theGlobalVariables);
       if (indexSA==-1)
       { bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
-        this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddObjectOnTopNoRepetitionOfObject(this->size);
+        this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->size);
         this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(bufferSAs, RecursionDepth+1, theGlobalVariables);
       } else
-        this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddObjectOnTopNoRepetitionOfObject(indexSA);
+        this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
       bufferSAs.TheObjects[RecursionDepth].genK.PopIndexSwapWithLast(bufferSAs.TheObjects[RecursionDepth].genK.size-1);
     }
 }
@@ -18409,13 +18395,13 @@ bool minimalRelationsProverState::SatisfyNonLnonBKSingularRoots(WeylGroup& theWe
       return false;
     }
     if (NumFoundIndices==1)
-      this->PositiveKroots.AddObjectOnTopNoRepetitionOfObject(theWeyl.RootSystem.TheObjects[LastFoundIndex]);
+      this->PositiveKroots.AddOnTopNoRepetition(theWeyl.RootSystem.TheObjects[LastFoundIndex]);
   }
   this->nonLNonSingularRootsInNeedOfPosKroots.size=0;
   for (int i=0; i<this->nonLNonSingularRoots.size; i++)
     if (this->SumWithNoPosRootIsARoot(this->nonLNonSingularRoots.TheObjects[i], theWeyl))
     { this->flagNeedsAdditionOfPositiveKroots=true;
-      this->nonLNonSingularRootsInNeedOfPosKroots.AddObjectOnTopNoRepetitionOfObject(this->nonLNonSingularRoots.TheObjects[i]);
+      this->nonLNonSingularRootsInNeedOfPosKroots.AddOnTopNoRepetition(this->nonLNonSingularRoots.TheObjects[i]);
     }
   return true;
 }
@@ -19273,7 +19259,7 @@ bool minimalRelationsProverStates::StateIsEqualTo(minimalRelationsProverState& t
 { return this->ExtendToIsomorphismRootSystem(theState, IndexOther, theGlobalVariables, theWeyl);
 }
 
-bool minimalRelationsProverStates::AddObjectOnTopNoRepetitionOfObject(int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
+bool minimalRelationsProverStates::AddOnTopNoRepetition(int ParentIndex, minimalRelationsProverState& theState, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { if (theState.PartialRelation.Alphas.size+theState.PartialRelation.Betas.size<7)
     for (int i=0; i<this->size; i++)
       if (this->StateIsEqualTo(theState, i, theWeyl, theGlobalVariables))
@@ -19644,12 +19630,12 @@ void WeylGroup::GenerateRootSubsystem(roots& theRoots)
 { root tempRoot;
   int oldsize=theRoots.size;
   for (int i=0; i<oldsize; i++)
-    theRoots.AddObjectOnTopNoRepetitionOfObject(-theRoots.TheObjects[i]);
+    theRoots.AddOnTopNoRepetition(-theRoots.TheObjects[i]);
   for (int i =0; i<theRoots.size; i++)
     for (int j=0; j<theRoots.size; j++)
     { tempRoot= theRoots.TheObjects[i]+theRoots.TheObjects[j];
       if (this->IsARoot(tempRoot))
-        theRoots.AddObjectOnTopNoRepetitionOfObject(tempRoot);
+        theRoots.AddOnTopNoRepetition(tempRoot);
     }
 }
 
@@ -19903,19 +19889,19 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
 { root tempRoot;
   this->flagNeedsAdditionOfPositiveKroots=false;
   for (int i=0; i<this->PositiveKroots.size; i++)
-    this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(-this->PositiveKroots.TheObjects[i]);
+    this->nonPositiveKRoots.AddOnTopNoRepetition(-this->PositiveKroots.TheObjects[i]);
   for (int j=0; j<theWeyl.RootSystem.size; j++)
   { root& tested=theWeyl.RootSystem.TheObjects[j];
     for (int i=0; i<this->BKSingularGmodLRoots.size; i++)
     { tempRoot = this->BKSingularGmodLRoots.TheObjects[i]+tested;
       if (theWeyl.IsARoot(tempRoot))
-      { this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(tested);
-        this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(tested);
+      { this->nonPositiveKRoots.AddOnTopNoRepetition(tested);
+        this->nonAlphas.AddOnTopNoRepetition(tested);
       }
     }
     for (int i=0; i<this->PartialRelation.Betas.size; i++)
       if (theWeyl.IsARoot(this->PartialRelation.Betas.TheObjects[i]+tested))
-        this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theWeyl.RootSystem.TheObjects[j]);
+        this->nonBetas.AddOnTopNoRepetition(theWeyl.RootSystem.TheObjects[j]);
   }
   theWeyl.GenerateAdditivelyClosedSubset(this->PositiveKroots, this->PositiveKroots);
   roots& tempRoots=theGlobalVariables.rootsProverStateComputation2;
@@ -19929,33 +19915,33 @@ bool minimalRelationsProverState::ComputeCommonSenseImplicationsReturnFalseIfCon
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { root& theRoot=theWeyl.RootSystem.TheObjects[i];
     if (this->nonPositiveKRoots.ContainsObject(theRoot) && this->nonPositiveKRoots.ContainsObject(-theRoot))
-    { this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
-      this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(theRoot);
+    { this->nonKRoots.AddOnTopNoRepetition(theRoot);
+      this->nonKRoots.AddOnTopNoRepetition(theRoot);
     }
   }
   this->nonKRoots.intersectWith(this->nonNilradicalRoots, this->nonLRoots);
   for (int i=0; i<this->nonLRoots.size; i++)
     if (this->IsBKSingularImplied(this->nonLRoots.TheObjects[i], theWeyl))
-      this->BKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(this->nonLRoots.TheObjects[i]);
+      this->BKSingularGmodLRoots.AddOnTopNoRepetition(this->nonLRoots.TheObjects[i]);
   this->nonLRoots.intersectWith(this->nonBKSingularGmodLRoots, this->nonLNonSingularRoots);
   for (int i=0; i<this->NilradicalRoots.size; i++)
-  { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(-this->NilradicalRoots.TheObjects[i]);
-    this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(this->NilradicalRoots.TheObjects[i]);
-    this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(-this->NilradicalRoots.TheObjects[i]);
-    this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(this->NilradicalRoots.TheObjects[i]);
+  { this->nonNilradicalRoots.AddOnTopNoRepetition(-this->NilradicalRoots.TheObjects[i]);
+    this->nonBKSingularGmodLRoots.AddOnTopNoRepetition(this->NilradicalRoots.TheObjects[i]);
+    this->nonPositiveKRoots.AddOnTopNoRepetition(-this->NilradicalRoots.TheObjects[i]);
+    this->nonPositiveKRoots.AddOnTopNoRepetition(this->NilradicalRoots.TheObjects[i]);
   }
   for (int i=0; i<this->BKSingularGmodLRoots.size; i++)
-  { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(this->BKSingularGmodLRoots.TheObjects[i]);
-    this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(this->BKSingularGmodLRoots.TheObjects[i]);
-    this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(-this->BKSingularGmodLRoots.TheObjects[i]);
+  { this->nonNilradicalRoots.AddOnTopNoRepetition(this->BKSingularGmodLRoots.TheObjects[i]);
+    this->nonPositiveKRoots.AddOnTopNoRepetition(this->BKSingularGmodLRoots.TheObjects[i]);
+    this->nonPositiveKRoots.AddOnTopNoRepetition(-this->BKSingularGmodLRoots.TheObjects[i]);
   }
   if (!this->SatisfyNonLnonBKSingularRoots(theWeyl, theGlobalVariables))
     return false;
   for (int i=0; i<this->PositiveKroots.size; i++)
-  { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject( this->PositiveKroots.TheObjects[i]);
-    this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(-this->PositiveKroots.TheObjects[i]);
-    this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject( this->PositiveKroots.TheObjects[i]);
-    this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(-this->PositiveKroots.TheObjects[i]);
+  { this->nonNilradicalRoots.AddOnTopNoRepetition( this->PositiveKroots.TheObjects[i]);
+    this->nonNilradicalRoots.AddOnTopNoRepetition(-this->PositiveKroots.TheObjects[i]);
+    this->nonBKSingularGmodLRoots.AddOnTopNoRepetition( this->PositiveKroots.TheObjects[i]);
+    this->nonBKSingularGmodLRoots.AddOnTopNoRepetition(-this->PositiveKroots.TheObjects[i]);
   }
   this->nonAlphas.AddRootSnoRepetition(this->nonBKSingularGmodLRoots);
   this->nonBetas.AddRootSnoRepetition(this->nonNilradicalRoots);
@@ -19998,32 +19984,32 @@ bool minimalRelationsProverState::CanBeShortened(coneRelation& theRelation, Sele
   }
   root MinusCandidate = -Candidate;
   if (theWeyl.IsARoot(Candidate))
-  {  this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+  {  this->nonPositiveKRoots.AddOnTopNoRepetition(Candidate);
     if( !bothSelsAreMaximal)
-    { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+    { this->nonNilradicalRoots.AddOnTopNoRepetition(Candidate);
       if (this->NilradicalRoots.ContainsObject(Candidate))
         return true;
     }
     if(bothSelsHaveZeroesAndOnes && ( selAlphas.CardinalitySelectionWithMultiplicities()>0 || selBetas.CardinalitySelectionWithMultiplicities()>1))
-    { this->nonNilradicalRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
+    { this->nonNilradicalRoots.AddOnTopNoRepetition(MinusCandidate);
       if (this->NilradicalRoots.ContainsObject(MinusCandidate))
         return true;
     }
     if(bothSelsHaveZeroesAndOnes && (selAlphas.elements.size>1 || ( AssumeGlobalMinimalityRHS && selBetas.elements.size>0 && selAlphas.elements.size==1 )))
-    { this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
+    { this->nonBKSingularGmodLRoots.AddOnTopNoRepetition(Candidate);
       if (this->BKSingularGmodLRoots.ContainsObject(Candidate))
         return true;
     }
     if (!bothSelsAreMaximal && selBetas.CardinalitySelectionWithMultiplicities()>0)
-    { this->nonBKSingularGmodLRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
+    { this->nonBKSingularGmodLRoots.AddOnTopNoRepetition(MinusCandidate);
       if (this->BKSingularGmodLRoots.ContainsObject(MinusCandidate))
         return true;
     }
     if (selAlphas.elements.size==1)
-    { this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
-      this->nonPositiveKRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
-      this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(Candidate);
-      this->nonKRoots.AddObjectOnTopNoRepetitionOfObject(MinusCandidate);
+    { this->nonPositiveKRoots.AddOnTopNoRepetition(Candidate);
+      this->nonPositiveKRoots.AddOnTopNoRepetition(MinusCandidate);
+      this->nonKRoots.AddOnTopNoRepetition(Candidate);
+      this->nonKRoots.AddOnTopNoRepetition(MinusCandidate);
     }
   }
   return false;
@@ -20442,7 +20428,7 @@ void minimalRelationsProverStates::ExtensionStep( int index, WeylGroup& theWeyl,
 { newState.ComputeStateReturnFalseIfDubious(*this, theGlobalVariables, theWeyl, this->flagAssumeGlobalMinimalityRHS);
   if (newState.StateIsInternallyPossible)
   { int currentNewIndex=this->size;
-    if (this->AddObjectOnTopNoRepetitionOfObject(index, newState, theWeyl, theGlobalVariables))
+    if (this->AddOnTopNoRepetition(index, newState, theWeyl, theGlobalVariables))
     { //this->TheObjects[currentNewIndex].ComputeStateReturnFalseIfDubious
       //  (theGlobalVariables, theWeyl,  this->flagAssumeGlobalMinimalityRHS);
   //    this->ComputeDebugString(theWeyl, theGlobalVariables);
@@ -21042,7 +21028,7 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
     if (!this->theNilradicalModules.selected[i]&& !this->theGmodLmodules.selected[i])
     { for (int k=0; k<this->PartialRelation.Alphas.size; k++)
         if (theWeyl.IsARoot(this->PartialRelation.Alphas.TheObjects[k]+this->owner->theK.HighestWeightsGmodK.TheObjects[i]))
-        { this->nonAlphas.AddObjectOnTopNoRepetitionOfObject(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
+        { this->nonAlphas.AddOnTopNoRepetition(this->owner->theK.HighestWeightsGmodK.TheObjects[i]);
           break;
         }
       for (int j=0; j<this->owner->theK.kModules.TheObjects[i].size; j++)
@@ -21050,7 +21036,7 @@ bool minimalRelationsProverStateFixedK::ComputeCommonSenseImplicationsReturnFals
         for (int k=0; k<this->PartialRelation.Betas.size; k++)
         { theRoot.ComputeDebugString();  this->PartialRelation.Betas.TheObjects[k].ComputeDebugString();
           if (theWeyl.IsARoot(this->PartialRelation.Betas.TheObjects[k]+theRoot))
-          { this->nonBetas.AddObjectOnTopNoRepetitionOfObject(theRoot);
+          { this->nonBetas.AddOnTopNoRepetition(theRoot);
             break;
           }
          }

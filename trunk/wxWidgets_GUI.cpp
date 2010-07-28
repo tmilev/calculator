@@ -594,7 +594,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 	this->Button15ProverFixedKOpen= new ::wxButton(this->Dialog2StatusString1,this->ID_Button15ProverFixedKOpen,wxT("Open provers"));
 	this->Button5SaveComputer->Disable();
   //this->BoxSizer1HorizontalBackground->Fit(this);
-  this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs,0,wxEXPAND|::wxBOTTOM);
+  this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs, 0, wxEXPAND|::wxBOTTOM);
   this->BoxSizer2VerticalInputs->Add(this->BoxSizer6HorizontalInputsBlock,0, wxEXPAND| wxALL,0);
   this->BoxSizer6HorizontalInputsBlock->Add(this->BoxSizer4VerticalToggleButton1,0,wxEXPAND);
   this->BoxSizer4VerticalToggleButton1->Add(this->ToggleButton1UsingCustom,0,wxALIGN_TOP);

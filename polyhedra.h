@@ -47,8 +47,8 @@
 #include <pthread.h>
 #else
  #include<windows.h>
-/* #include <unistd.h>
- #include <Pthread.h> */
+// #include <unistd.h>
+// #include <Pthread.h> 
 #endif
 
 #ifdef WIN32
@@ -190,7 +190,6 @@ public:
 #ifndef WIN32
     pthread_mutex_destroy(&this->theMutex);
 #else
-    this->locked=false;
 #endif
   };
 };
@@ -1957,6 +1956,7 @@ public:
   static bool flagPrintWallDetails;
 //  static bool flagMakingASingleHyperplaneSlice;
   bool PointLiesInMoreThanOneWall(root& point);
+  bool PointIsAVertex(const root& point);
   //bool InduceFromAffineCone(affineCone& input);
   void SortNormals();
   bool ComputeDebugString(CombinatorialChamberContainer& owner);
@@ -1974,7 +1974,7 @@ public:
   int GetIndexWallWithNormal(root& theNormal);
   bool VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel);
   bool IsSeparatedByStartingConesFrom(CombinatorialChamberContainer& owner, CombinatorialChamber& Neighbor, GlobalVariables& theGlobalVariables);
-  bool GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
+  bool GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
   bool GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, GlobalVariables& theGlobalVariables);
   bool UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables);
   void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, List<int>& IndicesGluedChambers, roots& redundantNormals);

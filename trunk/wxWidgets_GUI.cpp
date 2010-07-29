@@ -817,7 +817,7 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent& ev)
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
-    MainWindow1->theComputationSetup.theChambers.WriteReportToFile(tempFile);
+    MainWindow1->theComputationSetup.theChambers.WriteReportToFile(tempFile, true);
 	tempFile.close();
 }
 

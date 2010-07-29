@@ -53,30 +53,6 @@ bool Stop()
 { return true;
 }
 
-
-template <class Key, class Value>
-struct Entry
-{
-  Key key;
-  Value value;
-};
-
-template<class Key, class Value>
-class BinaryTreeMap;
-template<class Entry>
-class BinaryTree;
-
-template<class Key, class Value>
-std::stringstream &operator>>(std::stringstream  &in, Entry<Key, Value> &entry);
-
-template<class Key, class Value>
-class BinaryTreeMap
-{
-private:
-  BinaryTree<Entry<Key, Value> > tree;
-  friend std::stringstream & operator >><Key, Value>(std::stringstream  &in, Entry<Key, Value> &entry);
-};
-
 int ParallelComputing::GlobalPointerCounter=0;
 Integer Integer::TheRingUnit  (1) ;
 Integer Integer::TheRingMUnit (-1);

@@ -282,7 +282,7 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
     }
   }
   List<int> IndicesToGlue; roots theNormalsToBeKilled;
-  if (this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(*this, this->indexLowestNonCheckedForGlueing, IndicesToGlue, theNormalsToBeKilled, theGlobalVariables))
+  if (this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(*this, IndicesToGlue, theNormalsToBeKilled, theGlobalVariables))
   { this->Glue(IndicesToGlue, theNormalsToBeKilled, theGlobalVariables);
     this->NumTotalGlued++;
   }
@@ -294,7 +294,7 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
 
 void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables)
 { this->ConsistencyCheck(true);
-//  this->WriteReportToFile("BadMoment.html");
+  this->WriteReportToFile("BadMoment.html", false);
   this->ComputeDebugString();
   CombinatorialChamber* newChamber= new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
@@ -335,6 +335,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   this->ComputeDebugString();
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
+  this->WriteReportToFile("BadMoment2.html", false);
   this->ConsistencyCheck(true);
 }
 
@@ -3433,16 +3434,24 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
   if (this->flagPermanentlyZero)
     return true;
   if (checkVertices)
-    for (int i=0; i<this->Externalwalls.size; i++)
+  { for (int i=0; i<this->Externalwalls.size; i++)
     { Rational tempRat;
       this->ComputeInternalPoint(this->InternalPoint, theDimension);
       root::RootScalarEuclideanRoot(this->InternalPoint, this->Externalwalls.TheObjects[i].normal, tempRat);
       if (tempRat.IsNonPositive())
-      { ownerComplex.WriteReportToFile("./ChambersNonConvexError.html");
+      { ownerComplex.WriteReportToFile("./ChambersNonConvexError.html", false);
         assert(false);
         return false;
       }
     }
+   /* for (int i=0; i<ownerComplex.size; i++)
+      if (ownerComplex.TheObjects[i]!=0 && ownerComplex.TheObjects[i]!=this)
+        if (this->PointIsInChamber(ownerComplex.TheObjects[i]->InternalPoint))
+        { ownerComplex.WriteReportToFile("./ChambersNonConvexError.html", false);
+          assert(false);
+          return false;
+        }*/
+  }
   return true;
 }
 
@@ -3916,9 +3925,9 @@ int CombinatorialChamber::GetIndexWallWithNormal(root& theNormal)
   return -1;
 }
 
-bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
 { outputIndicesChambersToGlue.size=0;
-  outputIndicesChambersToGlue.AddObjectOnTop(IndexInOwnerComplex);
+  outputIndicesChambersToGlue.AddObjectOnTop(this->IndexInOwnerComplex);
   outputRedundantNormals.size=0;
   if (!this->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables))
     return false;
@@ -3927,10 +3936,16 @@ bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotC
   roots theVertices;
   for (int i=0; i<outputIndicesChambersToGlue.size; i++)
   { for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
-    { root& theNormal=owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.TheObjects[j].normal;
+    { WallData& currentWall=owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.TheObjects[j];
+      root& theNormal=currentWall.normal;
       if (theNormals.ContainsObject(-theNormal))
       { outputRedundantNormals.AddOnTopNoRepetition(theNormal);
         outputRedundantNormals.AddOnTopNoRepetition(-theNormal);
+        for (int k=0; k<currentWall.NeighborsAlongWall.size; k++)
+          if (!outputIndicesChambersToGlue.ContainsObject(currentWall.NeighborsAlongWall.TheObjects[k]->IndexInOwnerComplex))
+            return false;
+            //the chamber borders with another that is not in among the set of chambers to be glued,
+            //along a wall that is to be deleted. Therefore the union of the chambers to be glued cannot be convex.
       }
       theNormals.AddOnTopNoRepetition(theNormal);
     }
@@ -3952,12 +3967,13 @@ bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(Combinatorial
   { WallData& theWall= this->Externalwalls.TheObjects[i];
     for(int j=0; j<theWall.NeighborsAlongWall.size; j++)
       if (theWall.NeighborsAlongWall.TheObjects[j]!=0)
-        if (theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex>=owner.indexLowestNonCheckedForGlueing)
-          if (!outputIndicesChambersToGlue.ContainsObject(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex))
-            if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[j], theGlobalVariables))
-            { outputIndicesChambersToGlue.AddObjectOnTop(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex);
-              theWall.NeighborsAlongWall.TheObjects[j]->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables);
-            }
+        if (!theWall.NeighborsAlongWall.TheObjects[j]->flagHasZeroPolynomiaL)
+          if (theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex>=owner.indexLowestNonCheckedForGlueing)
+            if (!outputIndicesChambersToGlue.ContainsObject(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex))
+              if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[j], theGlobalVariables))
+              { outputIndicesChambersToGlue.AddObjectOnTop(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex);
+                theWall.NeighborsAlongWall.TheObjects[j]->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables);
+              }
   }
   return outputIndicesChambersToGlue.size>1;
 }
@@ -4474,14 +4490,18 @@ void CombinatorialChamberContainer::WriteReportToFile(DrawingVariables& TDV, roo
   output << tempS;
 }
 
-void CombinatorialChamberContainer::WriteReportToFile(const std::string& FileNameOutput)
+void CombinatorialChamberContainer::WriteReportToFile(const std::string& FileNameOutput, bool DoPurgeZeroPointers)
 { std::fstream tempF;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileNameOutput, false, true, false);
-  this->WriteReportToFile(tempF);
+  this->WriteReportToFile(tempF, DoPurgeZeroPointers);
 }
 
-void CombinatorialChamberContainer::WriteReportToFile(std::fstream& output)
+void CombinatorialChamberContainer::WriteReportToFile(std::fstream& output, bool DoPurgeZeroPointers)
 { std::string tempS;
+  if (DoPurgeZeroPointers)
+  { this->PurgeZeroPointers();
+    this->LabelChamberIndicesProperly();
+  }
   this->ElementToString(tempS, false, true);
   output << tempS;
 }

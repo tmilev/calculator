@@ -48,7 +48,7 @@
 #else
  #include<windows.h>
 // #include <unistd.h>
-// #include <Pthread.h> 
+// #include <Pthread.h>
 #endif
 
 #ifdef WIN32
@@ -1974,7 +1974,7 @@ public:
   int GetIndexWallWithNormal(root& theNormal);
   bool VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel);
   bool IsSeparatedByStartingConesFrom(CombinatorialChamberContainer& owner, CombinatorialChamber& Neighbor, GlobalVariables& theGlobalVariables);
-  bool GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
+  bool GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
   bool GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, GlobalVariables& theGlobalVariables);
   bool UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables);
   void ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, List<int>& IndicesGluedChambers, roots& redundantNormals);
@@ -2808,8 +2808,8 @@ public:
   void init();
   void Free();
   void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
-  void WriteReportToFile(std::fstream& output);
-  void WriteReportToFile(const std::string& FileNameOutput);
+  void WriteReportToFile(std::fstream& output, bool DoPurgeZeroPointers);
+  void WriteReportToFile(const std::string& FileNameOutput, bool DoPurgeZeroPointers);
   void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);

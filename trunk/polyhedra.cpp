@@ -282,7 +282,7 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
     }
   }
   List<int> IndicesToGlue; roots theNormalsToBeKilled;
-  if (this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetNonSeparableChamberIndices(*this, this->indexLowestNonCheckedForGlueing, IndicesToGlue, theNormalsToBeKilled, theGlobalVariables))
+  if (this->TheObjects[this->indexLowestNonCheckedForGlueing]->GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(*this, this->indexLowestNonCheckedForGlueing, IndicesToGlue, theNormalsToBeKilled, theGlobalVariables))
   { this->Glue(IndicesToGlue, theNormalsToBeKilled, theGlobalVariables);
     this->NumTotalGlued++;
   }
@@ -294,6 +294,8 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
 
 void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables)
 { this->ConsistencyCheck(true);
+//  this->WriteReportToFile("BadMoment.html");
+  this->ComputeDebugString();
   CombinatorialChamber* newChamber= new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
@@ -302,15 +304,19 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   int totalWalls=0;
   for (int i=0; i<IndicesToGlue.size; i++)
     totalWalls+= this->TheObjects[IndicesToGlue.TheObjects[i]]->Externalwalls.size;
+  this->ComputeDebugString();
   newChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(totalWalls-normalsToBeKilled.size);
   newChamber->IndexInOwnerComplex= this->size;
   this->AddObjectOnTop(newChamber);
   for (int i=0; i<IndicesToGlue.size; i++)
-  { this->TheObjects[IndicesToGlue.TheObjects[i]]->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, IndicesToGlue, normalsToBeKilled);
+  { this->TheObjects[IndicesToGlue.TheObjects[i]]->ComputeDebugString(*this);
+    this->TheObjects[IndicesToGlue.TheObjects[i]]->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, IndicesToGlue, normalsToBeKilled);
     newChamber->AllVertices.AddRootSnoRepetition(this->TheObjects[IndicesToGlue.TheObjects[i]]->AllVertices);
   }
+  newChamber->ComputeDebugString(*this);
+  newChamber->AllVertices.ComputeDebugString();
   for (int i=0; i<newChamber->AllVertices.size; i++)
-    if (!newChamber->PointIsOnChamberBorder(newChamber->AllVertices.TheObjects[i]))
+    if (!newChamber->PointIsAVertex(newChamber->AllVertices.TheObjects[i]))
     { newChamber->AllVertices.PopIndexSwapWithLast(i);
       i--;
     }
@@ -326,7 +332,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   }
-  //this->ComputeDebugString();
+  this->ComputeDebugString();
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
   this->ConsistencyCheck(true);
@@ -3674,6 +3680,17 @@ bool CombinatorialChamber::PointIsOnChamberBorder(const root& point)
   return found;
 }
 
+bool CombinatorialChamber::PointIsAVertex(const root& point)
+{ int numFound=0;
+  for (int i=0; i<this->Externalwalls.size; i++)
+  { if (root::RootScalarEuclideanRoot(this->Externalwalls.TheObjects[i].normal, point).IsEqualToZero())
+      numFound++;
+    if (numFound==point.size-1)
+      return true;
+  }
+  return false;
+}
+
 bool CombinatorialChamber::ExtraPointRemovesDoubtForBogusWall(MatrixLargeRational& theMatrix, MatrixLargeRational& emptyMat, Selection& bufferSel, root& theRoot)
 { int oldNumRows = theMatrix.NumRows;
   theMatrix.Resize(oldNumRows+1, theRoot.size, true);
@@ -3899,7 +3916,7 @@ int CombinatorialChamber::GetIndexWallWithNormal(root& theNormal)
   return -1;
 }
 
-bool CombinatorialChamber::GetNonSeparableChamberIndices(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, int IndexInOwnerComplex, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
 { outputIndicesChambersToGlue.size=0;
   outputIndicesChambersToGlue.AddObjectOnTop(IndexInOwnerComplex);
   outputRedundantNormals.size=0;
@@ -3907,8 +3924,9 @@ bool CombinatorialChamber::GetNonSeparableChamberIndices(CombinatorialChamberCon
     return false;
   roots& theNormals= theGlobalVariables.rootsGlueingGetNonSeparableChambers;
   theNormals.size=0;
+  roots theVertices;
   for (int i=0; i<outputIndicesChambersToGlue.size; i++)
-    for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
+  { for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
     { root& theNormal=owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.TheObjects[j].normal;
       if (theNormals.ContainsObject(-theNormal))
       { outputRedundantNormals.AddOnTopNoRepetition(theNormal);
@@ -3916,6 +3934,13 @@ bool CombinatorialChamber::GetNonSeparableChamberIndices(CombinatorialChamberCon
       }
       theNormals.AddOnTopNoRepetition(theNormal);
     }
+    theVertices.AddRootSnoRepetition(owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->AllVertices);
+  }
+  for (int i=0; i<theNormals.size; i++)
+    if (!outputRedundantNormals.ContainsObject(theNormals.TheObjects[i]))
+      for (int j=0; j<theVertices.size; j++)
+        if (root::RootScalarEuclideanRoot(theNormals.TheObjects[i], theVertices.TheObjects[j]).IsNegative())
+          return false;
   for (int i=0; i<outputIndicesChambersToGlue.size; i++)
     for (int j=i+1; j<outputIndicesChambersToGlue.size; j++)
       assert(!owner.startingCones.SeparatePoints(owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->InternalPoint, owner.TheObjects[outputIndicesChambersToGlue.TheObjects[j]]->InternalPoint,0));
@@ -4457,8 +4482,6 @@ void CombinatorialChamberContainer::WriteReportToFile(const std::string& FileNam
 
 void CombinatorialChamberContainer::WriteReportToFile(std::fstream& output)
 { std::string tempS;
-  this->PurgeZeroPointers();
-  this->QuickSortAscending();
   this->ElementToString(tempS, false, true);
   output << tempS;
 }
@@ -4908,6 +4931,7 @@ bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables& theGlob
 { std::fstream tempF;
   if (CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false))
   { this->ReadFromFile(tempF, theGlobalVariables);
+    //this->WriteReportToFile("Loaded.html");
     assert(this->ConsistencyCheck(true));
     tempF.close();
     return true;

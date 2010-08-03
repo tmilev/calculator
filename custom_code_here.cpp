@@ -957,30 +957,30 @@ void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double 
 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { if (false)
-  { inputData.flagDyckPathComputationLoaded=inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
-    inputData.theChambers.ComputeDebugString();
-    inputData.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
-    assert(inputData.theChambers.ConsistencyCheck(true));
+  { inputData.flagDyckPathComputationLoaded=inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
+    inputData.thePartialFraction.theChambers.ComputeDebugString();
+    inputData.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
+    assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(true));
   }
   inputData.flagDyckPathComputationLoaded=false;
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
   if (!inputData.flagDyckPathComputationLoaded)
-    theModule.InitAndPrepareTheChambersForComputation(3, inputData.theChambers, theGlobalVariables);
-  inputData.theChambers.flagMustStop=false;
-  inputData.theChambers.flagIsRunning=true;
-  inputData.theChambers.flagReachSafePointASAP=false;
+    theModule.InitAndPrepareTheChambersForComputation(3, inputData.thePartialFraction.theChambers, theGlobalVariables);
+  inputData.thePartialFraction.theChambers.flagMustStop=false;
+  inputData.thePartialFraction.theChambers.flagIsRunning=true;
+  inputData.thePartialFraction.theChambers.flagReachSafePointASAP=false;
   inputData.flagDyckPathComputationLoaded=true;
   inputData.thePartialFraction.LimitSplittingSteps=100000;
   inputData.thePartialFraction.flagUsingCheckSum=true;
   inputData.thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
-  inputData.thePartialFraction.Run(inputData.theChambers.theDirections, theGlobalVariables);
+  inputData.thePartialFraction.Run(inputData.thePartialFraction.theChambers.theDirections, theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1= inputData.thePartialFraction.DebugString;
   theGlobalVariables.MakeReport();
-  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
-  inputData.theChambers.WriteToDefaultFile(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.WriteToDefaultFile(theGlobalVariables);
 }
 
 void ComputationSetup::TestGraphicalOutputPolys(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
@@ -1375,11 +1375,11 @@ void DrawOperations::drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector
   this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
 }
 
-void DrawOperations::drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize)
+void DrawOperations::drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawTextAtVector);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextAtVectorOperations.size);
   this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
-  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize);
+  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
 void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
@@ -1389,40 +1389,52 @@ void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, 
   this->theDrawLineOperations.LastObject()->init(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
 }
 
-void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize)
+void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawText);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextOperations.size);
   this->theDrawTextOperations.AddObjectOnTopCreateNew();
-  this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex, theFontSize);
+  this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
 void DrawingVariables::drawBuffer()
-{ double x1, x2, y1, y2;
+{ double x1, x2, y1, y2; int currentPenStyle, currentTextStyle;
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
     switch (this->theBuffer.TypeNthDrawOperation.TheObjects[i])
     { case DrawOperations::typeDrawText:
         if (this->theDrawTextFunction!=0)
         { DrawTextOperation& theDrawTextOp= this->theBuffer.theDrawTextOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          currentTextStyle=this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
+          if (currentTextStyle==this->TextStyleInvisible)
+            break;
           this->theDrawTextFunction(theDrawTextOp.X1, theDrawTextOp.Y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
         }
         break;
       case DrawOperations::typeDrawLine:
         if (this->theDrawLineFunction!=0)
         { DrawLineOperation& theDrawLineOp= this->theBuffer.theDrawLineOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
-          this->theDrawLineFunction(theDrawLineOp.X1, theDrawLineOp.Y1, theDrawLineOp.X2, theDrawLineOp.Y2, theDrawLineOp.thePenStyle, theDrawLineOp.ColorIndex);
+          currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineOp.thePenStyle);
+          if (currentPenStyle==this->PenStyleInvisible)
+            break;
+          this->theDrawLineFunction(theDrawLineOp.X1, theDrawLineOp.Y1, theDrawLineOp.X2, theDrawLineOp.Y2, currentPenStyle, theDrawLineOp.ColorIndex);
         }
         break;
       case DrawOperations::typeDrawLineBetweenTwoVectors:
         if (this->theDrawLineFunction!=0)
         { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp= this->theBuffer.theDrawLineBetweenTwoRootsOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineBnTwoOp.thePenStyle);
+          if (currentPenStyle==this->PenStyleInvisible)
+            break;
           this->GetCoordsForDrawing(*this, theDrawLineBnTwoOp.v1, x1, y1);
           this->GetCoordsForDrawing(*this, theDrawLineBnTwoOp.v2, x2, y2);
-          this->theDrawLineFunction(x1, y1, x2, y2, theDrawLineBnTwoOp.thePenStyle, theDrawLineBnTwoOp.ColorIndex);
+          this->theDrawLineFunction(x1, y1, x2, y2, currentPenStyle, theDrawLineBnTwoOp.ColorIndex);
         }
         break;
       case DrawOperations::typeDrawTextAtVector:
         if (this->theDrawTextFunction!=0)
         { DrawTextAtVectorOperation& theDrawTextOp= this->theBuffer.theDrawTextAtVectorOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          currentTextStyle= this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
+          if (currentTextStyle==this->TextStyleInvisible)
+            break;
           this->GetCoordsForDrawing(*this, theDrawTextOp.theVector, x1, y1);
           this->theDrawTextFunction(x1, y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
         }
@@ -1431,22 +1443,57 @@ void DrawingVariables::drawBuffer()
     }
 }
 
+int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle)
+{ if (inputPenStyle==this->PenStyleInvisible)
+    return this->PenStyleInvisible;
+  if (inputPenStyle== this->PenStyleDashed)
+    return this->PenStyleDashed;
+  if (inputPenStyle==this->PenStyleDotted)
+    return this->PenStyleDotted;
+  if (inputPenStyle==this->PenStyleNormal)
+    return this->PenStyleNormal;
+  if (!this->flagDrawingInvisibles)
+    if (inputPenStyle == this->PenStyleLinkToOriginPermanentlyZeroChamber || inputPenStyle == this->PenStyleLinkToOriginZeroChamber || inputPenStyle == this->PenStyleZeroChamber || inputPenStyle == this->PenStylePermanentlyZeroChamber)
+      return this->PenStyleInvisible;
+  if (inputPenStyle==this->PenStyleLinkToOrigin || inputPenStyle==this->PenStyleLinkToOriginPermanentlyZeroChamber || inputPenStyle==this->PenStyleLinkToOriginZeroChamber)
+  { if (this->flagDrawingLinkToOrigin)
+      return this->PenStyleDashed;
+    else
+      return this->PenStyleInvisible;
+  }
+  if (inputPenStyle==this->PenStylePermanentlyZeroChamber || inputPenStyle==this->PenStyleZeroChamber)
+    return this->PenStyleDotted;
+  return this->PenStyleNormal;
+}
+
+int DrawingVariables::GetActualTextStyleFromFlagsAnd(int inputTextStyle)
+{ if (inputTextStyle==this->TextStyleInvisible)
+    return this->TextStyleInvisible;
+  if (inputTextStyle==this->TextStyleNormal)
+    return this->TextStyleNormal;
+  if (!this->flagDrawChamberIndices && (inputTextStyle==this->TextStyleChamber || inputTextStyle==this->TextStylePermanentlyZeroChamber || inputTextStyle==this->TextStyleZeroChamber))
+    return this->TextStyleInvisible;
+  if (!this->flagDrawingInvisibles && (inputTextStyle==this->TextStylePermanentlyZeroChamber || inputTextStyle==this->TextStyleZeroChamber))
+    return this->TextStyleInvisible;
+  return this->TextStyleNormal;
+}
+
 void DrawingVariables::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
 }
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
-{ this->theBuffer.drawTextBuffer(X1, Y1, inputText, color, this->fontSizeNormal);
+{ this->theBuffer.drawTextBuffer(X1, Y1, inputText, color, this->fontSizeNormal, this->TextStyleNormal);
 }
 
-void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize)
+void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle)
 { theDrawData.outputHeight=0; theDrawData.outputWidth=0;
   if (input=="")
     return;
   for (unsigned int i=0; i<input.size(); i++)
   { std::string tempS;
     tempS=input.at(i);
-    this->theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight+theDrawData.TopLeftCornerY, tempS, 0, theFontSize);
+    this->theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight+theDrawData.TopLeftCornerY, tempS, 0, theFontSize, theTextStyle);
     theDrawData.outputWidth+=(int)(((double) theFontSize)/1.15);
   }
 }
@@ -1454,7 +1501,7 @@ void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std
 void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
 { std::string tempS;
   this->ElementToString(tempS);
-  theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal);
+  theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
   theDrawData.outputHeight=10;
   theDrawData.outputWidth=10*tempS.size();
 }
@@ -1775,18 +1822,18 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 }
 
 void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ ComputationSetup::TestQuickSort(inputData, theGlobalVariables);
-  if (inputData.theChambers.thePauseController.IsRunning())
+{ //ComputationSetup::TestQuickSort(inputData, theGlobalVariables);
+  if (inputData.thePartialFraction.theChambers.thePauseController.IsRunning())
     return;
-  inputData.theChambers.thePauseController.InitComputation();
-  inputData.theChambers.ReadFromDefaultFile(theGlobalVariables);
-  inputData.theChambers.theDirections.ReverseOrderElements();
-  inputData.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
-  inputData.theChambers.QuickSortAscending();
-  inputData.theChambers.LabelChamberIndicesProperly();
+  inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
+  inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
+  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.QuickSortAscending();
+  inputData.thePartialFraction.theChambers.LabelChamberIndicesProperly();
   inputData.IndicatorRoot.MakeZero(inputData.WeylGroupIndex);
-  inputData.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, inputData.IndicatorRoot, 0);
-  inputData.theChambers.thePauseController.ExitComputation();
+  inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, inputData.IndicatorRoot, 0);
+  inputData.thePartialFraction.theChambers.thePauseController.ExitComputation();
 }
 
 void CombinatorialChamber::SortNormals()
@@ -1895,3 +1942,28 @@ void CombinatorialChamber::ReplaceMeByAddExtraWallsToNewChamber(CombinatorialCha
   }
 }
 
+void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables, roots& toBePartitioned)
+{ if (toBePartitioned.size<1)
+    return;
+  this->AmbientDimension= toBePartitioned.TheObjects[0].size;
+  this->theChambers.AmbientDimension= this->AmbientDimension;
+  this->theChambers.theDirections.CopyFromBase(toBePartitioned);
+  this->DoTheFullComputation(theGlobalVariables);
+}
+
+void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables)
+{ this->theChambers.thePauseController.InitComputation();
+  this->theChambers.ReadFromDefaultFile(theGlobalVariables);
+  this->theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  this->theChambers.QuickSortAscending();
+  this->theChambers.LabelChamberIndicesProperly();
+  root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
+  tempRoot.MakeZero(this->AmbientDimension);
+  this->theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+  this->theChambers.thePauseController.ExitComputation();
+  this->initAndSplit(this->theChambers.theDirections, theGlobalVariables);
+  QuasiPolynomial tempQP;
+  for (int i=0; i<this->theChambers.size; i++)
+    if (this->theChambers.TheObjects[i]!=0)
+      this->partFractionsToPartitionFunctionAdaptedToRoot(tempQP, this->theChambers.TheObjects[i]->InternalPoint, false, false, theGlobalVariables, true);
+}

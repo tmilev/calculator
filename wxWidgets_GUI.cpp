@@ -307,10 +307,17 @@ guiMainWindow *MainWindow1;
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { wxWindowDC dc(MainWindow1->Canvas1); wxPen tempPen;
   switch (thePenStyle)
-  { case 0: tempPen.SetStyle(::wxSOLID); break;
-		case 1:	tempPen.SetStyle(::wxSHORT_DASH); break;
-		case 2:	tempPen.SetStyle(::wxDOT); break;
-		case 5: return;
+  { case DrawingVariables::PenStyleNormal:
+      tempPen.SetStyle(::wxSOLID);
+      break;
+		case DrawingVariables::PenStyleDashed:
+      tempPen.SetStyle(::wxSHORT_DASH);
+      break;
+		case DrawingVariables::PenStyleDotted:
+      tempPen.SetStyle(::wxDOT);
+      break;
+		default:
+      return;
   }
   tempPen.SetColour(ColorIndex); dc.SetPen(tempPen);
   dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
@@ -462,7 +469,7 @@ void drawCanvas::onMouseDownOnCanvas(wxMouseEvent &ev)
   if (MainWindow1==0)
     return;
   DrawingVariables& TDV= MainWindow1->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
-  int theDimension=MainWindow1->theComputationSetup.theChambers.AmbientDimension;
+  int theDimension=MainWindow1->theComputationSetup.thePartialFraction.theChambers.AmbientDimension;
   if (TDV.Selected==-2)
   { double tempX, tempY;
     int tempXi, tempYi;
@@ -817,7 +824,7 @@ void wxDialogOutput::onButton4SaveReadable(wxCommandEvent& ev)
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
-    MainWindow1->theComputationSetup.theChambers.WriteReportToFile(tempFile, true);
+    MainWindow1->theComputationSetup.thePartialFraction.theChambers.WriteReportToFile(tempFile, true);
 	tempFile.close();
 }
 
@@ -913,14 +920,14 @@ void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
-{ this->theComputationSetup.theChambers.PauseSlicing();
-  this->theComputationSetup.theChambers.ConsistencyCheck(true);
-  this->theComputationSetup.theChambers.WriteToDefaultFile(*this->theComputationSetup.theGlobalVariablesContainer->Default());
-  this->theComputationSetup.theChambers.ConsistencyCheck(true);
+{ this->theComputationSetup.thePartialFraction.theChambers.PauseSlicing();
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true);
+  this->theComputationSetup.thePartialFraction.theChambers.WriteToDefaultFile(*this->theComputationSetup.theGlobalVariablesContainer->Default());
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true);
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxCANCEL)
-    this->theComputationSetup.theChambers.flagMustStop=true;
-  this->theComputationSetup.theChambers.ResumeSlicing();
+    this->theComputationSetup.thePartialFraction.theChambers.flagMustStop=true;
+  this->theComputationSetup.thePartialFraction.theChambers.ResumeSlicing();
 }
 
 void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
@@ -948,27 +955,27 @@ void guiMainWindow::onButton18LprohibitingPauseAndSave(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
-{ if (this->theComputationSetup.theChambers.thePauseController.IsRunning())
-  { this->theComputationSetup.theChambers.thePauseController.UnlockSafePoint();
+{ if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunning())
+  { this->theComputationSetup.thePartialFraction.theChambers.thePauseController.UnlockSafePoint();
     return;
   }
   this->ReadVPVectorsAndOptions();
-  this->theComputationSetup.theChambers.theDirections = this->theComputationSetup.VPVectors;
+  this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;
   this->RunTheComputation();
 }
 
 void guiMainWindow::onButton21SplitChambersPauseAndSave(wxCommandEvent& ev)
-{ if (this->theComputationSetup.theChambers.thePauseController.IsPausedWhileRunning())
+{ if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsPausedWhileRunning())
     return;
-  if (this->theComputationSetup.theChambers.thePauseController.IsRunning())
-    this->theComputationSetup.theChambers.thePauseController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
-  if (this->theComputationSetup.theChambers.size==0)
+  if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunning())
+    this->theComputationSetup.thePartialFraction.theChambers.thePauseController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+  if (this->theComputationSetup.thePartialFraction.theChambers.size==0)
     return;
-  this->theComputationSetup.theChambers.WriteToDefaultFile(*this->theComputationSetup.GetGlobalVars());
+  this->theComputationSetup.thePartialFraction.theChambers.WriteToDefaultFile(*this->theComputationSetup.GetGlobalVars());
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxOK)
-    this->theComputationSetup.theChambers.thePauseController.UnlockSafePoint();
+    this->theComputationSetup.thePartialFraction.theChambers.thePauseController.UnlockSafePoint();
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)
@@ -1270,9 +1277,9 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   this->theComputationSetup.flagUsingIndicatorRoot=!this->CheckBox7UseIndicatorForPFDecomposition->GetValue();
   this->ReadRBData();
   DrawingVariables& TDV = this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
-  TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
-  TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
-  TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
+  TDV.flagDrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
+  TDV.flagDrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
+  TDV.flagDrawingLinkToOrigin = this->CheckBox6Dashes->GetValue();
   if (this->theComputationSetup.flagUsingCustomVectors)
   { int theDimension=this->Spin1Dim->GetValue();
     this->theComputationSetup.WeylGroupIndex= theDimension;
@@ -1461,7 +1468,7 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
     MainWindow1->Text3PartialFractions->SetValue(tempWS);
   } else
     if (this->theComputationSetup.flagDisplayingCombinatorialChambersTextData)
-    { out <<"\\documentclass{article}\\begin{document}"<<this->theComputationSetup.theChambers.DebugString<<"\\end{document}";
+    { out << "\\documentclass{article}\\begin{document}" << this->theComputationSetup.thePartialFraction.theChambers.DebugString << "\\end{document}";
       MainWindow1->bufferString1=out.str();
       wxString tempWS(MainWindow1->bufferString1.c_str(), wxConvUTF8);
       MainWindow1->Text3PartialFractions->SetValue(tempWS);
@@ -1470,18 +1477,18 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 }
 
 void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
-{ DrawingVariables& TDV= this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
-  TDV.DrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
-  TDV.DrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
-  TDV.DrawDashes = this->CheckBox6Dashes->GetValue();
+{ DrawingVariables& TDV = this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
+  TDV.flagDrawChamberIndices = this->CheckBox4ChamberLabels->GetValue();
+  TDV.flagDrawingInvisibles = this->CheckBox5InvisibleChambers->GetValue();
+  TDV.flagDrawingLinkToOrigin = this->CheckBox6Dashes->GetValue();
   this->Refresh();
 }
 
 void guiMainWindow::ReadRBData()
 {	switch(this->RBGroup1SlicingOptions->GetSelection())
-	{ case 0: this->theComputationSetup.flagFullChop=true; break;
-		case 1: this->theComputationSetup.flagFullChop=false; this->theComputationSetup.flagOneIncrementOnly=true;	break;
-		case 2: this->theComputationSetup.flagFullChop=false; this->theComputationSetup.flagOneIncrementOnly=false; break;
+	{ case 0: this->theComputationSetup.flagFullChop = true; break;
+		case 1: this->theComputationSetup.flagFullChop = false; this->theComputationSetup.flagOneIncrementOnly=true;	break;
+		case 2: this->theComputationSetup.flagFullChop = false; this->theComputationSetup.flagOneIncrementOnly=false; break;
 	}
 }
 

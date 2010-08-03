@@ -2021,6 +2021,7 @@ public:
   void drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput);
   void WireChamberAndWallAdjacencyData(CombinatorialChamberContainer& owner, CombinatorialChamber* input);
   void Assign(const  CombinatorialChamber& right);
+//  void GetStylesAndColors(int& theTextStyle, int& theTextColor, int& thePenStyle, int& thePenStyleLinkToOrigin, int& thePenColor);
   inline void operator=(const CombinatorialChamber& right){this->Assign(right); };
   bool operator==(const CombinatorialChamber& right) const;
   bool operator<(CombinatorialChamber& right);
@@ -5117,12 +5118,15 @@ public:
   bool flagInitialized;
   int LimitSplittingSteps;
   int SplitStepsCounter;
+  CombinatorialChamberContainer theChambers;
   static  bool flagSplitTestModeNoNumerators;
   static  bool flagAnErrorHasOccurredTimeToPanic;
   static  bool flagMakingProgressReport;
   static  bool flagUsingCheckSum;
   static int flagMaxNumStringOutputLines;
   void PrepareCheckSums(GlobalVariables& theGlobalVariables);
+  void DoTheFullComputation(GlobalVariables& theGlobalVariables);
+  void DoTheFullComputation(GlobalVariables& theGlobalVariables, roots& toBePartitioned);
   bool AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
   void CompareCheckSums(GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables);
@@ -6526,12 +6530,12 @@ class IrreducibleFiniteDimensionalModule
 class DrawTextOperation
 {
 public:
-  double X1; double Y1; std::string theText; int ColorIndex; int fontSize;
-  void init(double x1, double y1, const std::string& inputText, int color, int theFontSize)
-  { this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color; this->fontSize=theFontSize;
+  double X1; double Y1; std::string theText; int ColorIndex; int fontSize; int TextStyle;
+  void init(double x1, double y1, const std::string& inputText, int color, int theFontSize, int theTextStyle)
+  { this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color; this->fontSize=theFontSize; this->TextStyle=theTextStyle;
   };
   void operator=(const DrawTextOperation& other)
-  { this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex; this->fontSize=other.fontSize;
+  { this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle;
   };
 };
 
@@ -6572,12 +6576,14 @@ class DrawTextAtVectorOperation
 public:
   root theVector;
   std::string theText;
-  int ColorIndex; int fontSize;
-  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize)
-  { this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText; this->fontSize=theFontSize;
+  int ColorIndex;
+  int fontSize;
+  int TextStyle;
+  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
+  { this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText; this->fontSize=theFontSize; this->TextStyle=theTextStyle;
   };
   void operator=(const DrawTextAtVectorOperation& other)
-  { this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText; this->fontSize=other.fontSize;
+  { this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle;
   };
 };
 
@@ -6591,14 +6597,14 @@ class DrawOperations
   List<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
   List<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
-  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize);
+  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
-  void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize);
+  void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void init()
-  { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(40000);
-    this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(40000);
-    this->theDrawLineBetweenTwoRootsOperations.MakeActualSizeAtLeastExpandOnTop(40000);
-    this->theDrawTextAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(5000);
+  { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(160000);
+    this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(160000);
+    this->theDrawLineBetweenTwoRootsOperations.MakeActualSizeAtLeastExpandOnTop(160000);
+    this->theDrawTextAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(15000);
     this->IndexNthDrawOperation.size=0; this->TypeNthDrawOperation.size=0;
     this->theDrawTextOperations.size=0; this->theDrawLineOperations.size=0; this->theDrawLineBetweenTwoRootsOperations.size=0; this->theDrawTextAtVectorOperations.size=0;
   }
@@ -6618,14 +6624,16 @@ private:
 public:
   static const int NumColors=8;
   enum PenStyles
-  { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal };
+  { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal, PenStyleZeroChamber, PenStylePermanentlyZeroChamber, PenStyleLinkToOriginZeroChamber, PenStyleLinkToOrigin, PenStyleLinkToOriginPermanentlyZeroChamber };
+  enum TextStyles
+  { TextStyleNormal, TextStyleInvisible, TextStyleChamber, TextStyleZeroChamber, TextStylePermanentlyZeroChamber };
   int ColorDashes;
   bool flagLaTeXDraw;
   bool flag2DprojectionDraw;
-  bool DrawDashes;
-  bool DrawChamberIndices;
-  bool DrawingInvisibles;
-  bool DisplayingChamberCreationNumbers;
+  bool flagDisplayingCreationNumbersInsteadOfDisplayNumbers;
+  bool flagDrawChamberIndices;
+  bool flagDrawingInvisibles;
+  bool flagDrawingLinkToOrigin;
   int Selected;
   double centerX;
   double centerY;
@@ -6635,17 +6643,11 @@ public:
   int fontSizeSubscript;
   Matrix<double> Projections;
   double scale;
-  int TextColor;
-  int ZeroChamberTextColor;
-  int DeadChamberTextColor;
+  int ColorTextDefault;
+  int ColorTextZeroChamber;
+  int ColorTextPermanentlyZeroChamber;
   int ColorChamberIndicator;
   int ColorWeylChamberWalls;
-  int TextOutStyle;
-  int TextOutStyleInvisibles;
-  int DrawStyle;
-  int DrawStyleDashes;
-  int DrawStyleInvisibles;
-  int DrawStyleDashesInvisibles;
   void initDrawingVariables(int cX1, int cY1);
   int ColorsR[DrawingVariables::NumColors];
   int ColorsG[DrawingVariables::NumColors];
@@ -6665,7 +6667,9 @@ public:
   void SetCoordsForA2();
   void SetCoordsForC2();
   DrawOperations theBuffer;
-  void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize);
+  inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
+  inline int GetActualTextStyleFromFlagsAnd(int inputTextStyle);
+  void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawLineDirectly(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
@@ -6676,7 +6680,7 @@ public:
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
   void drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile);
-  void drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, std::fstream* LatexOutFile);
+  void drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
   void operator=(const DrawingVariables& other)
   { this->theDrawLineFunction=other.theDrawLineFunction;
     this->theDrawTextFunction=other.theDrawTextFunction;
@@ -6692,7 +6696,6 @@ public:
   partFractions thePartialFraction;
   QuasiPolynomial theOutput;
   rootSubalgebras theRootSubalgebras;
-  CombinatorialChamberContainer theChambers;
   SemisimpleLieAlgebra theChevalleyConstantComputer;
   minimalRelationsProverStates theProver;
   minimalRelationsProverStatesFixedK theProverFixedK;
@@ -6814,9 +6817,7 @@ public:
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true); };
-  static inline int RedGreenBlue(int r, int g, int b)
-  { return r | (g<<8) | b<<16;
-  };
+  static inline int RedGreenBlue(int r, int g, int b){ return r | (g<<8) | b<<16;};
   static void FormatCPPSourceCode(const std::string& FileName);
   enum TheChoicesWeMake
   { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
@@ -6990,18 +6991,18 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables
   else
     if (tempS=="-1" && !this->IsAConstant())
       tempS="-";
-  theGlobalVariables.theDrawingVariables.drawString(theDrawData, tempS, theGlobalVariables.theDrawingVariables.fontSizeNormal);
+  theGlobalVariables.theDrawingVariables.drawString(theDrawData, tempS, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
   for (int i=0; i<this->NumVariables; i++)
   { if (this->degrees[i]!=0)
-    { theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight+theDrawData.TopLeftCornerY, "x", 0, theGlobalVariables.theDrawingVariables.fontSizeNormal);
+    { theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight+theDrawData.TopLeftCornerY, "x", 0, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
       theDrawData.outputWidth+=10;
       std::stringstream out1, out2; std::string tempS1, tempS2;
       out1 << i+1;
       tempS1=out1.str();
-      theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX-3, theDrawData.outputHeight+theDrawData.TopLeftCornerY+9, tempS1, 0, theGlobalVariables.theDrawingVariables.fontSizeSubscript);
+      theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX-3, theDrawData.outputHeight+theDrawData.TopLeftCornerY+9, tempS1, 0, theGlobalVariables.theDrawingVariables.fontSizeSubscript, theGlobalVariables.theDrawingVariables.TextStyleNormal);
       out2 << this->degrees[i];
       tempS2 = out2.str();
-      theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX-3, theDrawData.outputHeight+theDrawData.TopLeftCornerY-1, tempS2, 0, theGlobalVariables.theDrawingVariables.fontSizeSubscript);
+      theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX-3, theDrawData.outputHeight+theDrawData.TopLeftCornerY-1, tempS2, 0, theGlobalVariables.theDrawingVariables.fontSizeSubscript, theGlobalVariables.theDrawingVariables.TextStyleNormal);
       theDrawData.outputWidth+=5*MathRoutines::Maximum(tempS1.size(), tempS2.size());
     }
   }
@@ -7020,7 +7021,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariabl
     if( i!=this->size-1)
     { this->TheObjects[i+1].ElementToString(tempS);
       if (tempS.at(0)!='-')
-        theGlobalVariables.theDrawingVariables.drawString(changeData, "+", theGlobalVariables.theDrawingVariables.fontSizeNormal);
+        theGlobalVariables.theDrawingVariables.drawString(changeData, "+", theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
       changeData.TopLeftCornerX+=changeData.outputWidth+3;
       changeData.outputWidth=0;
     }
@@ -7030,7 +7031,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariabl
 class GlobalVariablesContainer :public List<GlobalVariables>
 {
 public:
-  GlobalVariables* Default(){return & this->TheObjects[0]; };
+  GlobalVariables* Default(){return &this->TheObjects[0]; };
 };
 
 #endif

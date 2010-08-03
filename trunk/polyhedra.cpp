@@ -270,7 +270,7 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
 
 void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables)
 { this->ConsistencyCheck(true);
-  this->WriteReportToFile("BadMoment.html", false);
+  //this->WriteReportToFile("BadMoment.html", false);
   this->ComputeDebugString();
   CombinatorialChamber* newChamber= new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
@@ -311,7 +311,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   this->ComputeDebugString();
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
-  this->WriteReportToFile("BadMoment2.html", false);
+  //this->WriteReportToFile("BadMoment2.html", false);
   this->ConsistencyCheck(true);
 }
 
@@ -374,7 +374,7 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
       this->MakeReportOneSlice(theGlobalVariables, this->theCurrentIndex, this->theDirections.size, this->theDirections.TheObjects[this->theCurrentIndex]);
     //if (ProblemCounter>1024)
     //this->ComputeDebugString();
-    assert(this->ConsistencyCheck(true));
+    assert(this->ConsistencyCheck(false));
     //below follows the code to pause the computation
     this->thePauseController.SafePoint();
   }
@@ -436,21 +436,17 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->fontSizeNormal=10;
   this->fontSizeSubscript=6;
   this->flagLaTeXDraw= false;
+  this->flagDisplayingCreationNumbersInsteadOfDisplayNumbers=false;
+  this->flagDrawChamberIndices=true;
+  this->flagDrawingInvisibles=false;
+  this->flagDrawingLinkToOrigin=true;
   this->ColorDashes=CGIspecificRoutines::RedGreenBlue(200, 200, 200);
   this->flag2DprojectionDraw=true;
   this->ColorChamberIndicator=CGIspecificRoutines::RedGreenBlue(220, 220, 0);
   this->ColorWeylChamberWalls=CGIspecificRoutines::RedGreenBlue(220, 220, 0);
-  this->DeadChamberTextColor= CGIspecificRoutines::RedGreenBlue(250, 220, 220);
-  this->ZeroChamberTextColor= CGIspecificRoutines::RedGreenBlue(200, 100, 100);
-  this->TextColor= CGIspecificRoutines::RedGreenBlue(0, 0, 0);
-  this->DrawStyleDashes= 1;
-  this->DrawStyleDashesInvisibles= 1;
-  this->DrawChamberIndices= true;
-  this->DisplayingChamberCreationNumbers =false;
-  this->DrawDashes=true;
-  this->DrawStyleInvisibles=2;
-  this->DrawStyle= 0;
-  this->TextOutStyle= 0;
+  this->ColorTextPermanentlyZeroChamber = CGIspecificRoutines::RedGreenBlue(250, 220, 220);
+  this->ColorTextZeroChamber = CGIspecificRoutines::RedGreenBlue(200, 100, 100);
+  this->ColorTextDefault= CGIspecificRoutines::RedGreenBlue(0, 0, 0);
   this->Selected=-2;
   this->textX=0;
   this->textY=15;
@@ -587,7 +583,7 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream& th
   std::string tempS;
   this->VPVectors.ElementToString(tempS);
   theFile << "\\title{" << this->WeylGroupLetter << (int)(this->WeylGroupIndex) << "}" << "\\maketitle ";
-  this->theChambers.WriteReportToFile(TDV, this->VPVectors, theFile);
+  this->thePartialFraction.theChambers.WriteReportToFile(TDV, this->VPVectors, theFile);
   this->thePartialFraction.ElementToString(tempS, theGlobalVariables);
   theFile << "\n\n";
   theFile << tempS;
@@ -672,7 +668,7 @@ void CGIspecificRoutines::outputLineJavaScriptSpecific
 void CGIspecificRoutines::MakeVPReportFromComputationSetup(ComputationSetup& input)
 {  std::string tempS;
   //input.thePartialFraction.IndicatorRoot.ComputeDebugString();
-  input.theChambers.RootBelongsToChamberIndex(input.IndicatorRoot, &tempS);
+  input.thePartialFraction.theChambers.RootBelongsToChamberIndex(input.IndicatorRoot, &tempS);
   std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n" << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>; " <<"&nbsp; &nbsp; &nbsp; <a href=\"/tmp/vector_partition.pdf\">pdf</a>\n<br>\n" <<"<textarea name=\"vp_output\" cols=\"50\" rows=\"30\">"<< input.theOutput.DebugString<< "</textarea>";
 }
 
@@ -682,7 +678,7 @@ void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(Computation
   CGIspecificRoutines::numDottedLines=0;
   GlobalVariables& theGlobalVariables=*input.theGlobalVariablesContainer->Default();
   theGlobalVariables.theDrawingVariables.flag2DprojectionDraw=false;
-  input.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, input.theChambers.IndicatorRoot, 0);
+  input.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, input.thePartialFraction.theChambers.IndicatorRoot, 0);
   std::string tempS;
   std::string stringColor;
   CGIspecificRoutines::outputStream.seekg(0);
@@ -691,7 +687,7 @@ void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(Computation
   CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("l", CGIspecificRoutines::numRegularLines);
   CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("da", CGIspecificRoutines::numDashedLines);
   CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("do", CGIspecificRoutines::numDottedLines);
-  int theDimension=input.theChambers.AmbientDimension;
+  int theDimension=input.thePartialFraction.theChambers.AmbientDimension;
   int numLlines=0;  int numDalines=0;  int numDolines=0;
   for (int i=0; i<CGIspecificRoutines::numLines; i++)
   { CGIspecificRoutines::outputStream>> tempS>> stringColor;
@@ -824,7 +820,7 @@ void CGIspecificRoutines::WeylGroupToHtml(WeylGroup& input, std::string& path)
 bool CGIspecificRoutines::CheckForInputSanity(ComputationSetup& input)
 { if (input.VPVectors.size>15 || input.VPVectors.size<1)
     return false;
-  if (input.theChambers.AmbientDimension>10 || input.theChambers.AmbientDimension<1)
+  if (input.thePartialFraction.theChambers.AmbientDimension>10 || input.thePartialFraction.theChambers.AmbientDimension<1)
     return false;
   if (!input.VPVectors.CheckForElementSanity())
     return false;
@@ -922,13 +918,13 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   //std::cout<<"\n<br>\n input good: <br>\n"<<inputGood<<"\n<br>\n";
   tempStream << inputGood;
   std::string tempS; int tempI;  tempStream.seekg(0);
-  tempStream >> tempS >> tempS >> output.theChambers.AmbientDimension;
+  tempStream >> tempS >> tempS >> output.thePartialFraction.theChambers.AmbientDimension;
   tempStream >> tempS >> tempS >> tempI;
   output.VPVectors.SetSizeExpandOnTopNoObjectInit(tempI);
   //std::cout<<"Dim: "<<output.theChambers.AmbientDimension<<"Num: "<<tempI;
   for (int i=0; i<output.VPVectors.size; i++)
-  { output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.theChambers.AmbientDimension);
-    for(int j=0; j<(signed int)output.theChambers.AmbientDimension; j++)
+  { output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.thePartialFraction.theChambers.AmbientDimension);
+    for(int j=0; j<(signed int)output.thePartialFraction.theChambers.AmbientDimension; j++)
     { tempStream>> tempS>>tempS>>tempI;
       output.VPVectors.TheObjects[i].TheObjects[j].AssignInteger(tempI);
     }
@@ -948,13 +944,13 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
    // std::cout<< "Chamber of interest: "<< output.DisplayNumberChamberOfInterest;
   }
   if (output.flagComputingVectorPartitions && output.DisplayNumberChamberOfInterest==-1)
-  { output.VPVectors.Average(output.IndicatorRoot, output.theChambers.AmbientDimension);
+  { output.VPVectors.Average(output.IndicatorRoot, output.thePartialFraction.theChambers.AmbientDimension);
     output.IndicatorRoot.MultiplyByInteger(output.VPVectors.size);
   }
   //output.VPVectors.ComputeDebugString();
   //std::cout<<output.VPVectors.size<<output.theChambers.AmbientDimension<< output.VPVectors.DebugString;
   output.flagComputationInitialized=false;
-  output.WeylGroupIndex=output.theChambers.AmbientDimension;
+  output.WeylGroupIndex=output.thePartialFraction.theChambers.AmbientDimension;
   output.flagComputingPartialFractions=true;
   output.thePartialFraction.flagUsingOrlikSolomonBasis=false;
   output.flagUsingCustomVectors=true;
@@ -1054,52 +1050,52 @@ void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output, bool inc
 
 void ComputationSetup::oneIncrement(GlobalVariables& theGlobalVariables)
 { this->flagAllowRepaint=false;
-  for (this->oneStepChamberSlice(theGlobalVariables); this->theChambers.PreferredNextChambers.size!=0; this->oneStepChamberSlice(theGlobalVariables))
+  for (this->oneStepChamberSlice(theGlobalVariables); this->thePartialFraction.theChambers.PreferredNextChambers.size!=0; this->oneStepChamberSlice(theGlobalVariables))
   {}
   this->flagAllowRepaint=true;
 }
 
 void ComputationSetup::FullChop(GlobalVariables& theGlobalVariables)
 { this->flagAllowRepaint=false;
-  this->theChambers.flagDrawingProjective=true;
-  while (this->theChambers.flagDrawingProjective)
+  this->thePartialFraction.theChambers.flagDrawingProjective=true;
+  while (this->thePartialFraction.theChambers.flagDrawingProjective)
     this->oneIncrement(theGlobalVariables);
   this->flagAllowRepaint=true;
 }
 
 void ComputationSetup::initWeylActionSpecifics(GlobalVariables& theGlobalVariables)
-{ this->theChambers.flagDrawingProjective=true;
+{ this->thePartialFraction.theChambers.flagDrawingProjective=true;
   CombinatorialChamberContainer tempComplex;
-  this->theChambers.NumAffineHyperplanesProcessed=-1;
-  this->theChambers.AmbientDimension=this->WeylGroupIndex;
-  this->theChambers.theDirections.CopyFromBase(this->VPVectors);
-  this->theChambers.theCurrentIndex= this->theChambers.AmbientDimension-1;
+  this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed=-1;
+  this->thePartialFraction.theChambers.AmbientDimension=this->WeylGroupIndex;
+  this->thePartialFraction.theChambers.theDirections.CopyFromBase(this->VPVectors);
+  this->thePartialFraction.theChambers.theCurrentIndex= this->thePartialFraction.theChambers.AmbientDimension-1;
   tempComplex.SliceTheEuclideanSpace(&this->IndicatorRoot, *this->theGlobalVariablesContainer->Default());
   this->initGenerateWeylAndHyperplanesToSliceWith(theGlobalVariables, tempComplex);
   this->flagComputationInitialized=true;
-  this->theChambers.flagSliceWithAWallInitDone=false;
+  this->thePartialFraction.theChambers.flagSliceWithAWallInitDone=false;
 }
 
 void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith(GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& inputComplex)
-{ assert(&inputComplex!=&this->theChambers);
-  this->theChambers.flagDrawingProjective=true;
+{ assert(&inputComplex!=&this->thePartialFraction.theChambers);
+  this->thePartialFraction.theChambers.flagDrawingProjective=true;
   this->flagAllowRepaint=false;
-  this->theChambers.InduceFromLowerDimensionalAndProjectivize(inputComplex, *this->theGlobalVariablesContainer->Default());
-  this->theChambers.ConvertHasZeroPolyToPermanentlyZero();
+  this->thePartialFraction.theChambers.InduceFromLowerDimensionalAndProjectivize(inputComplex, *this->theGlobalVariablesContainer->Default());
+  this->thePartialFraction.theChambers.ConvertHasZeroPolyToPermanentlyZero();
   WeylGroup tempWeyl;
   tempWeyl.MakeArbitrary(this->WeylGroupLetter, this->WeylGroupIndex);
   tempWeyl.ComputeWeylGroup();
   tempWeyl.ComputeDebugString();
-  this->theChambers.theWeylGroupAffineHyperplaneImages.SetSizeExpandOnTopNoObjectInit(0);
-  this->theChambers.AffineWallsOfWeylChambers.ClearTheObjects();
+  this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.SetSizeExpandOnTopNoObjectInit(0);
+  this->thePartialFraction.theChambers.AffineWallsOfWeylChambers.ClearTheObjects();
   inputComplex.AddWeylChamberWallsToHyperplanes(theGlobalVariables, tempWeyl);
-  this->theChambers.WeylChamber.CopyFromBase(inputComplex.WeylChamber);
+  this->thePartialFraction.theChambers.WeylChamber.CopyFromBase(inputComplex.WeylChamber);
   for (int i=0; i<inputComplex.theHyperplanes.size; i++)
   { affineHyperplane tempH;
     root tempRoot; tempRoot.MakeZero(inputComplex.AmbientDimension);
     int start = 1;
     if (i>=inputComplex.NumProjectiveHyperplanesBeforeWeylChamberWalls)
-    { this->theChambers.NumAffineHyperplanesBeforeWeylChamberWalls = this->theChambers.theWeylGroupAffineHyperplaneImages.size;
+    { this->thePartialFraction.theChambers.NumAffineHyperplanesBeforeWeylChamberWalls = this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.size;
       start= 0;
     }
     inputComplex.theHyperplanes.ComputeDebugString();
@@ -1109,45 +1105,45 @@ void ComputationSetup::initGenerateWeylAndHyperplanesToSliceWith(GlobalVariables
 //      tempWeyl.ActOnAffineHyperplaneByGroupElement(j, tempH, true, true);
       tempWeyl.ActOnRootByGroupElement(j, tempH.affinePoint, true, true);
       if (tempH.HasACommonPointWithPositiveTwoToTheNth_ant())
-        if (this->theChambers.theWeylGroupAffineHyperplaneImages.AddOnTopNoRepetition(tempH))
+        if (this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.AddOnTopNoRepetition(tempH))
           if (start==0)
-            this->theChambers.AffineWallsOfWeylChambers.AddObjectOnTopNoRepetitionOfObjectHash(tempH);
+            this->thePartialFraction.theChambers.AffineWallsOfWeylChambers.AddObjectOnTopNoRepetitionOfObjectHash(tempH);
       //tempH.ComputeDebugString();
     }
     std::string tempS;
-    this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
-    this->theChambers.AffineWallsOfWeylChambers.ElementToStringGeneric(tempS);
-    this->theChambers.ComputeDebugString();
+    this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
+    this->thePartialFraction.theChambers.AffineWallsOfWeylChambers.ElementToStringGeneric(tempS);
+    this->thePartialFraction.theChambers.ComputeDebugString();
   }
-  this->theChambers.NewHyperplanesToSliceWith.size=0;
-  this->theChambers.NewHyperplanesToSliceWith.MakeActualSizeAtLeastExpandOnTop(this->theChambers.theWeylGroupAffineHyperplaneImages.size);
-  this->theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
-  for (int i=0; i<this->theChambers.theWeylGroupAffineHyperplaneImages.size; i++)
+  this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.size=0;
+  this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.MakeActualSizeAtLeastExpandOnTop(this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.size);
+  this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.ComputeDebugString();
+  for (int i=0; i<this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.size; i++)
   { root tempRoot;
-    tempRoot.MakeNormalInProjectivizationFromAffineHyperplane(theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
+    tempRoot.MakeNormalInProjectivizationFromAffineHyperplane(this->thePartialFraction.theChambers.theWeylGroupAffineHyperplaneImages.TheObjects[i]);
     //tempRoot.ComputeDebugString();
     tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-    this->theChambers.NewHyperplanesToSliceWith.AddRootNoRepetition(tempRoot);
+    this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.AddRootNoRepetition(tempRoot);
   }
-  this->theChambers.flagSliceWithAWallInitDone=false;
+  this->thePartialFraction.theChambers.flagSliceWithAWallInitDone=false;
 }
 
 void ComputationSetup::oneStepChamberSlice(GlobalVariables& theGlobalVariables)
 { this->flagAllowRepaint=false;
   this->flagComputationInProgress=true;
-  this->theChambers.flagDrawingProjective=true;
-  if (this->theChambers.PreferredNextChambers.size==0 && this->theChambers.NumAffineHyperplanesProcessed  < this->theChambers.NewHyperplanesToSliceWith.size)
-    this->theChambers.NumAffineHyperplanesProcessed++;
-  if (this->theChambers.NumAffineHyperplanesProcessed  < this->theChambers.NewHyperplanesToSliceWith.size)
-  { if (this->theChambers.PreferredNextChambers.size==0)
-      this->theChambers.SliceWithAWallInit(this->theChambers.NewHyperplanesToSliceWith.TheObjects[this->theChambers.NumAffineHyperplanesProcessed], *this->theGlobalVariablesContainer->Default());
+  this->thePartialFraction.theChambers.flagDrawingProjective=true;
+  if (this->thePartialFraction.theChambers.PreferredNextChambers.size==0 && this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed  < this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.size)
+    this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed++;
+  if (this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed  < this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.size)
+  { if (this->thePartialFraction.theChambers.PreferredNextChambers.size==0)
+      this->thePartialFraction.theChambers.SliceWithAWallInit(this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.TheObjects[this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed], theGlobalVariables);
     else
-      this->theChambers.SliceWithAWallOneIncrement(this->theChambers.NewHyperplanesToSliceWith.TheObjects[this->theChambers.NumAffineHyperplanesProcessed], theGlobalVariables);
+      this->thePartialFraction.theChambers.SliceWithAWallOneIncrement(this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.TheObjects[this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed], theGlobalVariables);
   } else
-  { this->theChambers.flagDrawingProjective=false;
-    this->theChambers.ProjectToDefaultAffineSpace(theGlobalVariables);
+  { this->thePartialFraction.theChambers.flagDrawingProjective=false;
+    this->thePartialFraction.theChambers.ProjectToDefaultAffineSpace(theGlobalVariables);
     this->flagComputationDone=true;
-    this->theChambers.ComputeDebugString();
+    this->thePartialFraction.theChambers.ComputeDebugString();
   }
  // this->theChambers.ComputeDebugString();
   this->flagAllowRepaint=true;
@@ -1168,19 +1164,19 @@ void ComputationSetup::AdjustGraphicsForTwoDimensionalLieAlgebras(DrawingVariabl
 
 void ComputationSetup::InitComputationSetup()
 { if(!this->flagComputationInitialized)
-  { this->theChambers.flagDrawingProjective=!this->flagDoingWeylGroupAction;
+  { this->thePartialFraction.theChambers.flagDrawingProjective=!this->flagDoingWeylGroupAction;
     if (this->flagDoingWeylGroupAction)
       this->initWeylActionSpecifics(*this->theGlobalVariablesContainer->Default());
     else
-    { this->theChambers.AmbientDimension=this->WeylGroupIndex;
-      this->theChambers.theDirections.CopyFromBase(this->VPVectors);
-      this->theChambers.theCurrentIndex=this->WeylGroupIndex-1;
+    { this->thePartialFraction.theChambers.AmbientDimension=this->WeylGroupIndex;
+      this->thePartialFraction.theChambers.theDirections.CopyFromBase(this->VPVectors);
+      this->thePartialFraction.theChambers.theCurrentIndex=this->WeylGroupIndex-1;
     }
     this->AdjustGraphicsForTwoDimensionalLieAlgebras(this->theGlobalVariablesContainer->Default()->theDrawingVariables);
     this->flagComputationInitialized=true;
     this->flagComputationDone=false;
     this->flagComputationInProgress=true;
-    this->theChambers.NumAffineHyperplanesProcessed=0;
+    this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed=0;
     PolyFormatLocal.MakeAlphabetxi();
     this->theGlobalVariablesContainer->Default()->theIndicatorVariables.Nullify();
     PolynomialOutputFormat::LatexMaxLineLength=100;
@@ -1288,25 +1284,25 @@ void ComputationSetup::Run()
       this->theChambers.theDirections.ReverseOrderElements();*/
     if (!this->flagDoingWeylGroupAction)
     { if (this->flagFullChop)
-        this->theChambers.SliceTheEuclideanSpace(0, *this->theGlobalVariablesContainer->Default());
+        this->thePartialFraction.theChambers.SliceTheEuclideanSpace(0, *this->theGlobalVariablesContainer->Default());
       else
       { if (this->flagOneIncrementOnly)
-          this->theChambers.SliceOneDirection(0, *this->theGlobalVariablesContainer->Default());
+          this->thePartialFraction.theChambers.SliceOneDirection(0, *this->theGlobalVariablesContainer->Default());
         else
-          this->theChambers.OneSlice(0, *this->theGlobalVariablesContainer->Default());
+          this->thePartialFraction.theChambers.OneSlice(0, *this->theGlobalVariablesContainer->Default());
       }
-      this->theChambers.ComputeDebugString(false, this->flagUseHtml);
+      this->thePartialFraction.theChambers.ComputeDebugString(false, this->flagUseHtml);
       if (this->DisplayNumberChamberOfInterest!=-1)
-      { this->IndexChamberOfInterest=this->theChambers.FindVisibleChamberWithDisplayNumber(this->DisplayNumberChamberOfInterest);
+      { this->IndexChamberOfInterest=this->thePartialFraction.theChambers.FindVisibleChamberWithDisplayNumber(this->DisplayNumberChamberOfInterest);
         if (this->IndexChamberOfInterest!=-1)
-          this->theChambers.TheObjects[this->IndexChamberOfInterest]->ComputeInternalPoint(this->IndicatorRoot, this->theChambers.AmbientDimension);
+          this->thePartialFraction.theChambers.TheObjects[this->IndexChamberOfInterest]->ComputeInternalPoint(this->IndicatorRoot, this->thePartialFraction.theChambers.AmbientDimension);
         else
-        { this->IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
+        { this->IndicatorRoot.MakeZero(this->thePartialFraction.theChambers.AmbientDimension);
           this->DisplayNumberChamberOfInterest=-1;
         }
         //this->thePartialFraction.IndicatorRoot.ComputeDebugString();
       } else
-        this->IndicatorRoot.MakeZero(this->theChambers.AmbientDimension);
+        this->IndicatorRoot.MakeZero(this->thePartialFraction.theChambers.AmbientDimension);
     } else
     { if (this->flagFullChop)
         this->FullChop(*this->theGlobalVariablesContainer->Default());
@@ -1317,7 +1313,7 @@ void ComputationSetup::Run()
           this->oneStepChamberSlice(*this->theGlobalVariablesContainer->Default());
       }
     }
-    this->theChambers.drawOutput(this->GetGlobalVars()->theDrawingVariables, this->IndicatorRoot, 0);
+    this->thePartialFraction.theChambers.drawOutput(this->GetGlobalVars()->theDrawingVariables, this->IndicatorRoot, 0);
   }
   if (this->flagComputingPartialFractions && ! this->flagDoneComputingPartialFractions)
   { if (!this->flagUsingCustomVectors)
@@ -1335,10 +1331,10 @@ void ComputationSetup::Run()
         { roots tempRoots;
           tempRoots.AssignHashedIntRoots(this->thePartialFraction.RootsToIndices);
           root oldIndicator; oldIndicator.Assign(this->IndicatorRoot);
-          tempRoots.PerturbVectorToRegular(this->IndicatorRoot, *this->theGlobalVariablesContainer->Default(), this->theChambers.AmbientDimension);
-          while (!this->theChambers.TheObjects[this->IndexChamberOfInterest]->PointIsInChamber(this->IndicatorRoot))
+          tempRoots.PerturbVectorToRegular(this->IndicatorRoot, *this->theGlobalVariablesContainer->Default(), this->thePartialFraction.theChambers.AmbientDimension);
+          while (!this->thePartialFraction.theChambers.TheObjects[this->IndexChamberOfInterest]->PointIsInChamber(this->IndicatorRoot))
             this->IndicatorRoot.Add(oldIndicator);
-          while (!tempRoots.IsRegular(this->IndicatorRoot, *this->theGlobalVariablesContainer->Default(), this->theChambers.AmbientDimension))
+          while (!tempRoots.IsRegular(this->IndicatorRoot, *this->theGlobalVariablesContainer->Default(), this->thePartialFraction.theChambers.AmbientDimension))
             this->IndicatorRoot.Add(oldIndicator);
           //this->thePartialFraction.IndicatorRoot.ComputeDebugString();
         }
@@ -1352,7 +1348,7 @@ void ComputationSetup::Run()
     }
     if (this->flagComputingVectorPartitions)
     { this->thePartialFraction.partFractionsToPartitionFunctionAdaptedToRoot(this->theOutput, this->IndicatorRoot, false, false, *this->theGlobalVariablesContainer->Default(), !this->flagUsingIndicatorRoot);
-      this->IndexChamberOfInterest=this->theChambers.RootBelongsToChamberIndex(this->IndicatorRoot, 0);
+      this->IndexChamberOfInterest=this->thePartialFraction.theChambers.RootBelongsToChamberIndex(this->IndicatorRoot, 0);
       this->theOutput.ComputeDebugString();
     }
     if (this->flagHavingBeginEqnForLaTeXinStrings)
@@ -1364,18 +1360,18 @@ void ComputationSetup::Run()
         { this->VPVectors.ElementToString(tempS, true, false, false);
           out  << this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
           if (this->flagComputingChambers)
-          { int tempI =this->theChambers.RootBelongsToChamberIndex(this->IndicatorRoot, 0);
-            this->theChambers.TheObjects[tempI]->ElementToInequalitiesString(tempS, this->theChambers, true, false);
-            out<< tempS;
+          { int tempI =this->thePartialFraction.theChambers.RootBelongsToChamberIndex(this->IndicatorRoot, 0);
+            this->thePartialFraction.theChambers.TheObjects[tempI]->ElementToInequalitiesString(tempS, this->thePartialFraction.theChambers, true, false);
+            out << tempS;
           } else
-            out <<"\n\n(Inequalities missing)\n\n";
+            out << "\n\n(Inequalities missing)\n\n";
           out << this->NotationExplanationLatex4;
         }
       }
-      out <<"\\begin{eqnarray*}&&\n"<<this->theOutput.DebugString<< "\\end{eqnarray*}";
+      out << "\\begin{eqnarray*}&&\n" << this->theOutput.DebugString << "\\end{eqnarray*}";
       if (this->IndexChamberOfInterest!=-1 && !this->flagHavingNotationExplanation)
-      { this->theChambers.TheObjects[this->IndexChamberOfInterest]->ElementToInequalitiesString(tempS, this->theChambers, true, false);
-        out <<"\n\n\n" <<tempS;
+      { this->thePartialFraction.theChambers.TheObjects[this->IndexChamberOfInterest]->ElementToInequalitiesString(tempS, this->thePartialFraction.theChambers, true, false);
+        out << "\n\n\n" << tempS;
       }
       if (this->flagHavingDocumentClassForLaTeX)
         out<< "\n\\end{document}";
@@ -1384,13 +1380,13 @@ void ComputationSetup::Run()
     if (this->flagDisplayingPartialFractions)
     { std::stringstream out2;
       if (this->flagHavingBeginEqnForLaTeXinStrings)
-        out2<<"\\documentclass{article}\n "<<"\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}"<<"\\addtolength{\\voffset}{-3.5cm}"<<"\\addtolength{\\textheight}{7cm} \\begin{document}";
+        out2 << "\\documentclass{article}\n \\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm} \\begin{document}";
       if (this->flagHavingStartingExpression)
-        out2<< BeginString<<"=";
+        out2 << BeginString << "=";
       this->thePartialFraction.ComputeDebugString(*this->theGlobalVariablesContainer->Default());
-      out2<<this->thePartialFraction.DebugString;
+      out2 << this->thePartialFraction.DebugString;
       if (this->flagHavingBeginEqnForLaTeXinStrings)
-         out2<< "\n\\end{document}";
+         out2 << "\n\\end{document}";
       this->thePartialFraction.DebugString= out2.str();
     }
     this->flagDoneComputingPartialFractions=true;
@@ -1406,7 +1402,7 @@ void ComputationSetup::Run()
 
 void ComputationSetup::ExitComputationSetup()
 { if (!this->flagDoingWeylGroupAction)
-    if(this->theChambers.theCurrentIndex>=this->theChambers.theDirections.size)
+    if(this->thePartialFraction.theChambers.theCurrentIndex>=this->thePartialFraction.theChambers.theDirections.size)
     { //Computation is done and we must reset
       this->flagComputationDone=true;
     //  this->flagComputationInitialized=false;
@@ -1479,7 +1475,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
     tempRoot.ElementToString(tempS);
     out << tempS;
     tempS=out.str();
-    TDV.drawTextAtVectorBuffer(tempRoot, tempS, 0, LatexOutFile);
+    TDV.drawTextAtVectorBuffer(tempRoot, tempS, 0, TDV.TextStyleNormal, LatexOutFile);
   }
 }
 
@@ -1489,8 +1485,8 @@ void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double
     LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
 }
 
-void DrawingVariables::drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, std::fstream* LatexOutFile)
-{ this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor, this->fontSizeNormal);
+void DrawingVariables::drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile)
+{ this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
 }
 
 void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
@@ -1510,8 +1506,7 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
     if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[i]))
     { tempRoot.Assign(r.TheObjects[i]);
       TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Projection1, directions);
-      if (TDV.DrawDashes)
-        TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, Projection1, DrawingStyleDashes, TDV.ColorDashes, outputLatex);
+      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, Projection1, DrawingStyleDashes, TDV.ColorDashes, outputLatex);
       for (int j=i+1; j<r.size; j++)
         if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
         { tempRoot2.Assign(r.TheObjects[j]);
@@ -1547,8 +1542,7 @@ void CombinatorialChamberContainer::drawOutputAffine(DrawingVariables& TDV, std:
 }
 
 void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, root& ChamberIndicator, std::fstream* outputLatex)
-{ int color=0;
-  Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
+{ Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
   int NumTrueChambers=0;
   //int NumTrueChambers2=0;
   int NumZeroChambers=0;
@@ -1569,79 +1563,61 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
   std::stringstream out, out1, out3, out2;
   out << "#Drawn chambers: " << NumTrueChambers;
   tempS=out.str();
-  TDV.drawTextBuffer(TDV.textX, TDV.textY, tempS, TDV.TextColor, 0);
+  TDV.drawTextBuffer(TDV.textX, TDV.textY, tempS, TDV.ColorTextDefault, 0);
   out1 << "#Zero chambers: " << NumZeroChambers;
   tempS=out1.str();
-  TDV.drawTextBuffer(TDV.textX, TDV.textY+30, tempS, TDV.TextColor, 0);
+  TDV.drawTextBuffer(TDV.textX, TDV.textY+30, tempS, TDV.ColorTextDefault, 0);
   out2 << "#Next chamber: ";
   if (this->indexNextChamberToSlice!=-1)
     if (this->TheObjects[this->indexNextChamberToSlice]!=0)
     { if (this->TheObjects[this->indexNextChamberToSlice]->flagHasZeroPolynomiaL)
         out2 << "i";
       else
-        out2 <<"c";
+        out2 << "c";
       out2 << this->TheObjects[this->indexNextChamberToSlice]->DisplayNumber;
     }
   if (this->flagMakingASingleHyperplaneSlice)
     out2  << "; " << "Plane: " << this->NumAffineHyperplanesProcessed+1 << " out of " << this->theWeylGroupAffineHyperplaneImages.size;
   tempS=out2.str();
-  TDV.drawTextBuffer(TDV.textX, TDV.textY+15, tempS, TDV.TextColor, 0);
-  //if (outputLatex!=0)
-  //  LaTeXProcedures::drawTextDirectly(TDV.textX, TDV.textY+15, tempS, 0, outputLatex);
-  //int NumTrueChambers=0;
-  //int NumTrueChambers2=0;
-  //int NumZeroChambers=0;
+  TDV.drawTextBuffer(TDV.textX, TDV.textY+15, tempS, TDV.ColorTextDefault, 0);
   if (this->size>1000)
     return;
   if (this->flagStoringVertices)
   { for (int j=0; j<this->size; j++)
     { if (this->TheObjects[j]!=0)
-      { bool hasZeroPoly= this->TheObjects[j]->flagHasZeroPolynomiaL;
-        int DrawingStyle;
-        int DrawingStyleDashes;
-        if (!hasZeroPoly)
-        { DrawingStyle = TDV.DrawStyle;
-          DrawingStyleDashes= TDV.DrawStyleDashes;
-          color = TDV.TextColor;
-          //NumTrueChambers2++;
-        }
+      { root tempRoot;
+        this->TheObjects[j]->ComputeInternalPoint(tempRoot, this->AmbientDimension);
+        root Proj;
+        TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Proj, this->theDirections);
+        std::stringstream out; std::string tempS;
+        if (TDV.flagDisplayingCreationNumbersInsteadOfDisplayNumbers)
+          out << this->TheObjects[j]->CreationNumber;
         else
-        { color= TDV.ZeroChamberTextColor;
-          if (TDV.DrawingInvisibles)
-          { DrawingStyle = TDV.DrawStyleInvisibles;
-            DrawingStyleDashes= TDV.DrawStyleDashesInvisibles;
-          } else
-          { DrawingStyle = 5;
-            DrawingStyleDashes= 5;
-          }
+          out << this->TheObjects[j]->DisplayNumber;
+        tempS=out.str();
+        int TextColor = TDV.ColorTextDefault;
+        int TextStyle = TDV.TextStyleChamber;
+        int thePenStyle = TDV.PenStyleNormal;
+        int thePenStyleLinkToOrigin= TDV.PenStyleLinkToOrigin;
+        if (this->TheObjects[j]->flagHasZeroPolynomiaL)
+        { TextColor = TDV.ColorTextZeroChamber; TextStyle = TDV.TextStyleZeroChamber;
+          thePenStyle = TDV.PenStyleZeroChamber; thePenStyleLinkToOrigin = TDV.PenStyleLinkToOriginZeroChamber;
         }
         if (this->TheObjects[j]->flagPermanentlyZero)
-          color = TDV.DeadChamberTextColor;
-        if (TDV.DrawChamberIndices)
-        { if ((!hasZeroPoly)||(TDV.DrawingInvisibles))
-          { root tempRoot;
-            this->TheObjects[j]->ComputeInternalPoint(tempRoot, this->AmbientDimension);
-            root Proj;
-            TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Proj, this->theDirections);
-            std::stringstream out; std::string tempS;
-            if (TDV.DisplayingChamberCreationNumbers)
-              out<<this->TheObjects[j]->CreationNumber;
-            else
-              out<<this->TheObjects[j]->DisplayNumber;
-            tempS=out.str();
-            TDV.drawTextAtVectorBuffer(Proj, tempS, color, outputLatex);
-          }
+        { TextColor = TDV.ColorTextPermanentlyZeroChamber; TextStyle = TDV.TextStylePermanentlyZeroChamber;
+          thePenStyle = TDV.PenStylePermanentlyZeroChamber; thePenStyleLinkToOrigin = TDV.PenStyleLinkToOriginPermanentlyZeroChamber;
         }
+        TDV.drawTextAtVectorBuffer(Proj, tempS, TextColor, TextStyle, outputLatex);
         for (int i =0; i<this->TheObjects[j]->Externalwalls.size; i++)
-          CombinatorialChamberContainer::drawFacetVerticesMethod2(TDV, this->TheObjects[j]->AllVertices, this->theDirections, j, this->TheObjects[j]->Externalwalls.TheObjects[i], DrawingStyle, DrawingStyleDashes, outputLatex);
+          CombinatorialChamberContainer::drawFacetVerticesMethod2(TDV, this->TheObjects[j]->AllVertices, this->theDirections, j, this->TheObjects[j]->Externalwalls.TheObjects[i], thePenStyle, thePenStyleLinkToOrigin, outputLatex);
       }
     }
     if (this->size>0 && ChamberIndicator.size==this->AmbientDimension && TDV.flag2DprojectionDraw)
     { root tempRootX;
       root zeroRoot; zeroRoot.MakeZero(this->AmbientDimension);
       TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator, tempRootX, this->theDirections);
-      TDV.drawTextAtVectorBuffer(tempRootX, "Indicator", TDV.TextColor, 0);
-      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRootX, TDV.DrawStyle, TDV.ColorChamberIndicator, 0);
+      TDV.drawTextAtVectorBuffer(tempRootX, "Indicator", TDV.ColorTextDefault, TDV.TextStyleNormal, 0);
+      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRootX, TDV.PenStyleNormal, TDV.ColorChamberIndicator, 0);
     }
   }
   TDV.drawCoordSystemBuffer(TDV, this->AmbientDimension, outputLatex);
@@ -3215,7 +3191,7 @@ void roots::MakeEiBasis(int theDimension)
     this->TheObjects[i].MakeEi(theDimension, i);
 }
 
-void roots::MakeBasisChange(root& input, root& output)const
+void roots::MakeBasisChange(root& input, root& output) const
 { int theDimension=input.size;
   assert(theDimension==this->size);
   assert(&input!=&output);
@@ -3287,16 +3263,16 @@ inline bool Rational::IsGreaterThanOrEqualTo(Rational& right)
 inline void Rational::ElementToString(std::string& output)
 { std::stringstream out;
   if (this->Extended==0)
-  { out <<this->NumShort;
+  { out << this->NumShort;
     if (this->DenShort!=1)
-      out <<"/"<<this->DenShort;
+      out << "/" << this->DenShort;
   } else
   { std::string tempS;
     this->Extended->num.ElementToString(tempS);
     out << tempS;
     this->Extended->den.ElementToString(tempS);
     if (tempS!="1")
-      out<<"/"<<tempS;
+      out << "/" << tempS;
   }
   output = out.str();
 }
@@ -3330,7 +3306,7 @@ bool CombinatorialChamber::ComputeDebugString(CombinatorialChamberContainer& own
 void CombinatorialChamber::ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner)
 { std::stringstream out;
   if (this->flagHasZeroPolynomiaL)
-    out<< "Invisible";
+    out << "Invisible";
   else
     out << "c";
   if (this->DisplayNumber!=-1)
@@ -3560,9 +3536,7 @@ void CombinatorialChamber::LabelWallIndicesProperly()
 }
 
 void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, CombinatorialChamberContainer& owner, std::fstream* LaTeXoutput)
-{ if (!TDV.DrawingInvisibles && this->flagHasZeroPolynomiaL)
-    return;
-  TDV.ApplyScale(0.3);
+{ TDV.ApplyScale(0.3);
   for (int i=0; i<this->affineVertices.size; i++)
   { for(int j=0; j<this->affineVertices.size; j++)
     { affineHyperplane* AreInAWall=0;
@@ -3573,23 +3547,20 @@ void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, Combinatorial
         }
       if (AreInAWall!=0)
       { int color = TDV.GetColorFromChamberIndex(this->IndexInOwnerComplex, LaTeXoutput);
-        int penStyle = TDV.DrawStyle;
+        int penStyle = TDV.PenStyleNormal;
         if (this->flagHasZeroPolynomiaL || this->flagPermanentlyZero)
-          penStyle= TDV.DrawStyleInvisibles;
+          penStyle= TDV.PenStyleInvisible;
         if (owner.AffineWallsOfWeylChambers.IndexOfObjectHash(*AreInAWall)!=-1)
-          color= TDV.ColorWeylChamberWalls;
+          color = TDV.ColorWeylChamberWalls;
         TDV.drawLineBetweenTwoVectorsBuffer(this->affineVertices.TheObjects[i], this->affineVertices.TheObjects[j], penStyle, color, LaTeXoutput);
         root tempRoot; this->ComputeAffineInternalPoint(tempRoot, owner.AmbientDimension-1);
         std::stringstream out;
         out << this->DisplayNumber;
         std::string tempS;
         tempS=out.str();
-        if (! this->flagHasZeroPolynomiaL)
-          color=TDV.TextColor;
-        else
-          color= TDV.ZeroChamberTextColor;
-        if(TDV.DrawChamberIndices)
-          TDV.drawTextAtVectorBuffer(tempRoot, tempS, color, LaTeXoutput);
+        color = (!this->flagHasZeroPolynomiaL) ? TDV.ColorTextDefault : TDV.ColorTextZeroChamber;
+        int textStyle = (!this->flagHasZeroPolynomiaL) ? TDV.TextStyleNormal : TDV.TextStyleInvisible;
+        TDV.drawTextAtVectorBuffer(tempRoot, tempS, color, textStyle, LaTeXoutput);
       }
     }
   }
@@ -4136,8 +4107,8 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
     //  PossibleBogusNeighbors.TheObjects[i]->ComputeDebugString();
     //}
     WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
-    //if (!output.flagStoringVertices)
-    if (true)
+    if (!output.flagStoringVertices)
+    //if (true)
     { if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
         possibleBadWall.RemoveNeighborhoodBothSides(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
       if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))

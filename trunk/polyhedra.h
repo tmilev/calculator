@@ -424,8 +424,7 @@ std::fstream& operator>>(std::fstream& input, List<Object>& theList);
 //List kills the objects it contains when it expires
 template <class Object>
 class List
-{
-  friend std::fstream& operator<< <Object> (std::fstream& output, const List<Object>& theList);
+{ friend std::fstream& operator<< <Object> (std::fstream& output, const List<Object>& theList);
   friend std::fstream& operator>> <Object>(std::fstream& input, List<Object>& theList);
 private:
   friend class PolynomialRationalCoeff;
@@ -450,6 +449,7 @@ public:
   inline void AddObjectOnTopCreateNew();
   void MakeActualSizeAtLeastExpandOnTop(int theSize);
   void AddObjectOnBottom(const Object& o);
+  void AddOnBottomNoRepetition(const Object& o) {if (!this->ContainsObject(o)) this->AddObjectOnBottom(o);};
   void AddObjectOnTop(const Object& o);
   void AddListOnTop(List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);

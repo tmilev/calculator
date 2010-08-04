@@ -1827,7 +1827,7 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
     return;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
-  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
+//  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
   inputData.thePartialFraction.theChambers.QuickSortAscending();
   inputData.thePartialFraction.theChambers.LabelChamberIndicesProperly();

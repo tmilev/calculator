@@ -1842,8 +1842,10 @@ public:
   static bool flagDisplayWallDetails;
   void ComputeDebugString(){this->ElementToString(this->DebugString); };
   void ElementToString(std::string& output);
-  void RemoveNeighborhoodBothSides(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
-  void RemoveNeighborOneSide(CombinatorialChamber* NeighborPointer);
+  void RemoveNeighborhoodBothSidesNoRepetitionNeighbors(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
+  void RemoveNeighborhoodBothSidesAllowRepetitions(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
+  void RemoveNeighborOneSideAllowRepetitions(CombinatorialChamber* owner);
+  void RemoveNeighborOneSideNoRepetitions(CombinatorialChamber* NeighborPointer);
   void AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   void operator=(const WallData& right);
   bool HasExactlyOneTrueNeighbor(int& outputIndex)
@@ -2015,6 +2017,7 @@ public:
   void ComputeInternalPoint(root& InternalPoint, int theDimension);
   void ComputeAffineInternalPoint(root& outputPoint, int theDimension);
   bool OwnsAWall(WallData* theWall);
+  void CheckForAndRemoveBogusNeighbors(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   void MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal);
   bool TestPossibilityToSlice(root& direction, CombinatorialChamberContainer& owner);
   bool MakeFacetFromEdgeAndDirection(WallData& Wall1, WallData& Wall2, CombinatorialChamberContainer& owner, root& direction, roots & directions, int CurrentIndex, root& outputNormal, GlobalVariables& theGlobalVariables);
@@ -2740,6 +2743,8 @@ public:
   affineHyperplanes theWeylGroupAffineHyperplaneImages;
   root IndicatorRoot;
   List<int> PreferredNextChambers;
+  List<int> IndicesInActualNonConvexChamber;
+  List<List<int> > NonConvexActualChambers;
   std::fstream FileOutput;
   int indexNextChamberToSlice;
   int NumAffineHyperplanesProcessed;
@@ -2759,8 +2764,6 @@ public:
   bool flagReachSafePointASAP;
   bool flagIsRunning;
   bool flagMustStop;
-  bool flagStoringVertices;
-  bool flagSpanTheEntireSpace;
 // the implementation of the following two has #ifdef's and is system dependent
 // Unfortunately there is no system independent way in C++ to do this (as far as I know)
 // Let's hope that will be fixed with the new C++ standard!
@@ -2769,6 +2772,9 @@ public:
   Controller thePauseController;
 /////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
+  bool flagStoringVertices;
+  bool flagUsingVerticesToDetermineBogusNeighborsIfPossible;
+  bool flagSpanTheEntireSpace;
   bool flagMakingASingleHyperplaneSlice;
   bool flagSliceWithAWallInitDone;
   bool flagSliceWithAWallIgnorePermanentlyZero;
@@ -2838,6 +2844,7 @@ public:
   void ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables);
   bool ProjectToDefaultAffineSpaceModifyCrossSections(GlobalVariables& theGlobalVariables);
   void PrintThePolys(std::string& output);
+  void CheckForAndRemoveBogusNeighbors(GlobalVariables& theGlobalVariables);
   void ComputeGlobalCone(roots& directions, GlobalVariables& theGlobalVariables);
   void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection, root& output);
   void drawOutput(DrawingVariables& TDV, root& ChamberIndicator, std::fstream* LaTeXOutput);
@@ -2845,6 +2852,7 @@ public:
   void drawOutputAffine(DrawingVariables& TDV, std::fstream* LaTeXoutput);
   void drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, std::fstream* outputLatex);
   bool TestPossibleIndexToSlice(root& direction, int index);
+  void ComputeNonConvexActualChambers(GlobalVariables& theGlobalVariables);
   CombinatorialChamberContainer();
   ~CombinatorialChamberContainer();
 };

@@ -312,79 +312,10 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
   this->WriteReportToFile("BadMoment2.html", false);
-  newChamber->CheckForAndRemoveBogusNeighbors(*this, theGlobalVariables);
+/*  if (!this->flagSpanTheEntireSpace && this->flagStoringVertices && this->flagUsingVerticesToDetermineBogusNeighborsIfPossible)
+    newChamber->CheckForAndRemoveBogusNeighbors(*this, theGlobalVariables);*/
   this->WriteReportToFile("BadMoment2.html", false);
   this->ConsistencyCheck(true);
-}
-
-void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
-{ //static int ProblemCounter=0;
-  //ProblemCounter++;
-  if (this->flagMustStop)
-  { assert(this->ConsistencyCheck(true));
-    return;
-  }
-  if (this->theCurrentIndex==this->AmbientDimension-1)
-  { this->MakeStartingChambers(this->theDirections, theIndicatorRoot, theGlobalVariables);
-    this->indexLowestNonCheckedForGlueing=0;
-    this->NumTotalGlued=0;
-    this->theCurrentIndex++;
-    this->ComputeNextIndexToSlice(this->theDirections.TheObjects[this->theCurrentIndex]);
-  /*  if (this->flagAnErrorHasOcurredTimeToPanic)
-    { std::fstream tempF;
-      GlobalVariables tempG;
-      this->WriteToFile(tempF, tempG);
-    }*/
-  }
-  else
-  { if (this->theCurrentIndex<this->theDirections.size)
-    { if(this->indexNextChamberToSlice!=-1)
-      { if (this->TheObjects[this->indexNextChamberToSlice]!=0)
-          if (this->TheObjects[this->indexNextChamberToSlice]->SliceInDirection(this->theDirections.TheObjects[this->theCurrentIndex], this->theDirections, this->theCurrentIndex, *this, this->theHyperplanes, theGlobalVariables))
-          { assert(this->TheObjects[this->indexNextChamberToSlice]->HasNoNeighborsThatPointToThis());
-            delete this->TheObjects[this->indexNextChamberToSlice];
-  #ifdef CGIversionLimitRAMuse
-    ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
-  #endif
-            this->TheObjects[this->indexNextChamberToSlice]=0;
-            //if (this->flagAnErrorHasOcurredTimeToPanic)
-            //{  this->ComputeDebugString();
-            //  this->ConsistencyCheck();
-            //}
-          }
-        if (this->theCurrentIndex<this->theDirections.size)
-          this->ComputeNextIndexToSlice(this->theDirections.TheObjects[this->theCurrentIndex]);
-      }
-      else
-      { this->PreferredNextChambers.size=0;
-        if (this->indexLowestNonCheckedForGlueing==0)
-        { this->LabelChamberIndicesProperly();
-          if (this->flagStoringVertices && !this->flagSpanTheEntireSpace && this->flagUsingVerticesToDetermineBogusNeighborsIfPossible)
-            this->CheckForAndRemoveBogusNeighbors(theGlobalVariables);
-          assert(this->ConsistencyCheck(true));
-        }
-        if (this->indexLowestNonCheckedForGlueing<this->size)
-          this->GlueOverSubdividedChambersCheckLowestIndex(theGlobalVariables);
-        else
-        { this->PurgeZeroPointers();
-          this->theCurrentIndex++;
-          this->indexLowestNonCheckedForGlueing=0;
-          this->NumTotalGlued=0;
-          this->LabelAllUnexplored();
-          if (this->theCurrentIndex<this->theDirections.size)
-            this->ComputeNextIndexToSlice(this->theDirections.TheObjects[this->theCurrentIndex]);
-        }
-      }
-    }
-    if (this->theCurrentIndex<this->theDirections.size)
-      this->MakeReportOneSlice(theGlobalVariables, this->theCurrentIndex, this->theDirections.size, this->theDirections.TheObjects[this->theCurrentIndex]);
-    //if (ProblemCounter>1024)
-    //this->ComputeDebugString();
-    assert(this->ConsistencyCheck(false));
-    //below follows the code to pause the computation
-    this->thePauseController.SafePoint();
-  }
 }
 
 void CombinatorialChamberContainer::PurgeZeroPointers()
@@ -427,6 +358,8 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoo
     this->SliceOneDirection(theIndicatorRoot, theGlobalVariables);
   }
   this->ComputeNonConvexActualChambers(theGlobalVariables);
+  this->LabelChambersForDisplayAndGetNumVisibleChambers();
+  this->ComputeDebugString(false);
   this->ConsistencyCheck(true);
 }
 
@@ -434,19 +367,21 @@ void CombinatorialChamberContainer::ComputeNonConvexActualChambers(GlobalVariabl
 { this->NonConvexActualChambers.MakeActualSizeAtLeastExpandOnTop(this->size);
   this->NonConvexActualChambers.size=0;
   this->IndicesInActualNonConvexChamber.initFillInObject(this->size, -1);
+  int oldLowestIndexNonCheckedForGlueing=this->indexLowestNonCheckedForGlueing;
+  this->indexLowestNonCheckedForGlueing=-1;
   this->LabelChamberIndicesProperly();
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0 && this->IndicesInActualNonConvexChamber.TheObjects[i]==-1)
       if (!this->TheObjects[i]->flagHasZeroPolynomiaL)
-      { CombinatorialChamber& currentChamber = *this->TheObjects[i];
-        this->IndicesInActualNonConvexChamber.TheObjects[i]=this->NonConvexActualChambers.size;
+      { this->IndicesInActualNonConvexChamber.TheObjects[i]=this->NonConvexActualChambers.size;
         this->NonConvexActualChambers.AddObjectOnTopCreateNew();
         this->NonConvexActualChambers.LastObject()->size=0;
         this->NonConvexActualChambers.LastObject()->AddObjectOnTop(i);
-        currentChamber.GetNonSeparableChamberIndicesAppendList(*this, *this->NonConvexActualChambers.LastObject(), theGlobalVariables);
-        for (int j=0; this->NonConvexActualChambers.LastObject()->size; j++)
+        this->TheObjects[i]->GetNonSeparableChamberIndicesAppendList(*this, *this->NonConvexActualChambers.LastObject(), theGlobalVariables);
+        for (int j=0; j<this->NonConvexActualChambers.LastObject()->size; j++)
           this->IndicesInActualNonConvexChamber.TheObjects[this->NonConvexActualChambers.LastObject()->TheObjects[j]]=this->NonConvexActualChambers.size-1;
       }
+    this->indexLowestNonCheckedForGlueing=oldLowestIndexNonCheckedForGlueing;
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)
@@ -1096,7 +1031,7 @@ void ComputationSetup::initWeylActionSpecifics(GlobalVariables& theGlobalVariabl
   this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed=-1;
   this->thePartialFraction.theChambers.AmbientDimension=this->WeylGroupIndex;
   this->thePartialFraction.theChambers.theDirections.CopyFromBase(this->VPVectors);
-  this->thePartialFraction.theChambers.theCurrentIndex= this->thePartialFraction.theChambers.AmbientDimension-1;
+  this->thePartialFraction.theChambers.theCurrentIndex = -1;
   tempComplex.SliceTheEuclideanSpace(&this->IndicatorRoot, *this->theGlobalVariablesContainer->Default());
   this->initGenerateWeylAndHyperplanesToSliceWith(theGlobalVariables, tempComplex);
   this->flagComputationInitialized=true;
@@ -1197,7 +1132,7 @@ void ComputationSetup::InitComputationSetup()
     else
     { this->thePartialFraction.theChambers.AmbientDimension=this->WeylGroupIndex;
       this->thePartialFraction.theChambers.theDirections.CopyFromBase(this->VPVectors);
-      this->thePartialFraction.theChambers.theCurrentIndex=this->WeylGroupIndex-1;
+      this->thePartialFraction.theChambers.theCurrentIndex=-1;
     }
     this->AdjustGraphicsForTwoDimensionalLieAlgebras(this->theGlobalVariablesContainer->Default()->theDrawingVariables);
     this->flagComputationInitialized=true;
@@ -1570,20 +1505,12 @@ void CombinatorialChamberContainer::drawOutputAffine(DrawingVariables& TDV, std:
 
 void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, root& ChamberIndicator, std::fstream* outputLatex)
 { Rational::flagMinorRoutinesOnDontUseFullPrecision=true;
-  int NumTrueChambers=0;
-  //int NumTrueChambers2=0;
+  int NumTrueChambers=this->LabelChambersForDisplayAndGetNumVisibleChambers();
   int NumZeroChambers=0;
   for (int j=0; j<this->size; j++)
     if (this->TheObjects[j]!=0)
-    { if (!this->TheObjects[j]->flagHasZeroPolynomiaL)
-      { NumTrueChambers++;
-        this->TheObjects[j]->DisplayNumber=NumTrueChambers;
-      }
-      else
-      { NumZeroChambers++;
-        this->TheObjects[j]->DisplayNumber=NumZeroChambers;
-      }
-    }
+      if (this->TheObjects[j]->flagHasZeroPolynomiaL)
+        NumZeroChambers++;
   if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
     this->ComputeDebugString();
   std::string tempS;
@@ -3860,58 +3787,6 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputationOneAffinePlane(Selec
   return true;
 }
 
-bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, int CurrentIndex, CombinatorialChamberContainer& output, hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables)
-{ if (!(this->Externalwalls.size>=output.AmbientDimension))
-  { this->ComputeDebugString(output);
-//    CombinatorialChamberContainer::TheBigDump<<this->DebugString;
-  }
-  assert(this->Externalwalls.size>=output.AmbientDimension);
-  this->flagExplored=false;
-  bool canHaveZeroPoly=true;
-  if (this->InternalWalls.size!=0)
-  { if (this->SplitChamber(this->InternalWalls.TheObjects[0], output, direction, theGlobalVariables))
-      return true;
-    else
-      this->InternalWalls.PopIndexSwapWithLast(0);
-    return false;
-  }
-  else
-    for (int i=0; i<this->Externalwalls.size; i++)
-      if(this->Externalwalls.TheObjects[i].IsExternalWithRespectToDirection(direction))
-      { if (this->flagHasZeroPolynomiaL)
-        { bool tempBool;
-          this->Externalwalls.TheObjects[i].EveryNeigborIsExplored(tempBool);
-          canHaveZeroPoly = canHaveZeroPoly && tempBool;
-        }
-        for (int j=i+1; j<this->Externalwalls.size; j++)
-          if(this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction))
-          { bool tempBool;
-            this->Externalwalls.TheObjects[j].EveryNeigborIsExplored(tempBool);
-            canHaveZeroPoly= canHaveZeroPoly && tempBool;
-            root candidateNormal;
-            tempBool=this->MakeFacetFromEdgeAndDirection(this->Externalwalls.TheObjects[i], this->Externalwalls.TheObjects[j], output, direction, directions, CurrentIndex, candidateNormal, theGlobalVariables);
-            if (tempBool)
-            { if (this->SplitChamber(candidateNormal, output, direction, theGlobalVariables))
-                return true;
-              else
-              { this->flagExplored=true;
-                return false;
-              }
-            }
-          }
-      }
-  if (this->flagHasZeroPolynomiaL)
-    this->flagHasZeroPolynomiaL= canHaveZeroPoly;
-  if (!this->flagHasZeroPolynomiaL)
-  { if(output.flagSpanTheEntireSpace)
-       this->IndexStartingCrossSectionNormal= MathRoutines::TwoToTheNth(output.AmbientDimension)-1;
-    else
-       this->IndexStartingCrossSectionNormal=0;
-  }
-  this->flagExplored=true;
-  return false;
-}
-
 void CombinatorialChamber::FindAllNeighbors(ListPointers<CombinatorialChamber>& TheNeighbors)
 { for (int i=0; i<this->Externalwalls.size; i++)
     for (int j=0; j<this->Externalwalls.TheObjects[i].NeighborsAlongWall.size; j++)
@@ -3926,10 +3801,10 @@ bool CombinatorialChamber::TestPossibilityToSlice(root& direction, Combinatorial
   { this->flagExplored=true;
     return false;
   }
-  if (!owner.flagSpanTheEntireSpace)
+  /*if (!owner.flagSpanTheEntireSpace)
     for (int j=0; j<this->Externalwalls.size; j++)
       if (this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction) && owner.TheGlobalConeNormals.ContainsObject(this->Externalwalls.TheObjects[j].normal))
-        return true;
+        return true;*/
   for (int j=0; j<this->Externalwalls.size; j++)
     if (this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(direction) && (!this->Externalwalls.TheObjects[j].EveryNeigborIsExplored(tempBool)))
       return false;
@@ -4174,14 +4049,14 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
     assert(NewMinusChamber->ConsistencyCheck(output.AmbientDimension, true, output));
     output.ComputeDebugString();
   }
-  if (output.flagSpanTheEntireSpace || !output.flagStoringVertices || !output.flagUsingVerticesToDetermineBogusNeighborsIfPossible)
-    for (int i=0; i<PossibleBogusNeighbors.size; i++)
-    { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
-      if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
-      if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
-    }
+//  if (output.flagSpanTheEntireSpace || !output.flagStoringVertices || !output.flagUsingVerticesToDetermineBogusNeighborsIfPossible)
+  for (int i=0; i<PossibleBogusNeighbors.size; i++)
+  { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
+    if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+      possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
+    if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+      possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
+  }
 //  output.ComputeDebugString();
   assert(NewPlusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);
@@ -4425,7 +4300,7 @@ void CombinatorialChamberContainer::ComputeNextIndexToSlice(root& direction)
   }
   this->indexNextChamberToSlice=-1;
   bool foundUnexplored=false;
-  for (int i=this->FirstNonExploredIndex; i<size; i++)
+  for (int i=this->FirstNonExploredIndex; i<this->size; i++)
     if (this->TheObjects[i]!=0)
     { if(!foundUnexplored && !this->TheObjects[i]->flagExplored)
       { this->FirstNonExploredIndex=i;
@@ -4647,9 +4522,13 @@ void CombinatorialChamberContainer::init()
   this->flagMustStop=false;
   this->flagIsRunning=false;
   ///////////////////////////////////////////////////////////////////////////
+  //these flags are kept for legacy purposes. The only supported combination under which the program runs is this!
+  //The flags were originally set otherwise, however I ran into some algorithmic problems - just look at the code
+  // where those flags are used and so some *heavy* thinking. I am still not exactly sure what goes wrong with
+  // setting this->flagSpanTheEntireSpace to false, - the smallest example that goes bad is B4 ...
   this->flagStoringVertices=true;
   this->flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
-  this->flagSpanTheEntireSpace= false;
+  ///////////////////////////////////////////////////////////////////////////
   this->KillAllElements();
   this->ReleaseMemory();
   this->FirstNonExploredIndex=0;
@@ -4770,10 +4649,10 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
   //this->TheGlobalConeNormals.ComputeDebugString();
   this->PreferredNextChambers.ReleaseMemory();
   this->KillAllElements();
-  if (this->flagSpanTheEntireSpace)
+/*  if (this->flagSpanTheEntireSpace)
     this->MakeStartingChambersSpanEntireSpace(directions, theIndicatorRoot, theGlobalVariables);
-   else
-    this->MakeStartingChambersDontSpanEntireSpace(directions, theIndicatorRoot, theGlobalVariables);
+   else*/
+  this->MakeStartingChambersDontSpanEntireSpace(directions, theIndicatorRoot, theGlobalVariables);
 }
 
 void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
@@ -4802,13 +4681,17 @@ void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(root
       theStartingChamber.AllVertices.AddObjectOnTop(tempRoot);
   }
   theStartingChamber.flagExplored=false;
-  tempRoots.CopyFromBase(directions);
-  tempRoot.MakeZero(this->AmbientDimension);
-  directions.initFillInObject(this->AmbientDimension, tempRoot);
-  directions.AddListOnTop(tempRoots);
+  this->initNextIndex();
+  tempSel.init(this->AmbientDimension);
+  tempRoots.CopyFromBase(this->theDirections);
+  tempRoots.size=this->AmbientDimension;
+  for (int i=0; i<this->AmbientDimension; i++)
+  { tempRoots.ComputeNormalExcludingIndex(tempRoot, i, theGlobalVariables);
+    theStartingChamber.InternalWalls.AddObjectOnTop(tempRoot);
+  }
 }
 
-void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
+/*void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
 { Selection theSelection;
   theSelection.init(this->AmbientDimension);
   this->theHyperplanes.ClearTheObjects();
@@ -4874,15 +4757,15 @@ void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& d
     this->TheObjects[i]->AllVertices.Average(this->TheObjects[i]->InternalPoint, this->AmbientDimension);
   }
   this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomiaL=false;
-/*  this->TheGlobalConeNormals.ElementToString(theGlobalVariables.theIndicatorVariables.StatusString1);
+  this->TheGlobalConeNormals.ElementToString(theGlobalVariables.theIndicatorVariables.StatusString1);
   this->ComputeDebugString(false);
   theGlobalVariables.theIndicatorVariables.StatusString1.append(this->DebugString);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-*/
+
 //  if (this->flagAnErrorHasOcurredTimeToPanic)
 //    this->ComputeDebugString();
-}
+}*/
 
 void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Flags_and_indices: ";
@@ -5377,10 +5260,6 @@ bool WallData::ConsistencyCheck(CombinatorialChamber& owner, CombinatorialChambe
       }
       trueNeighbors++;
     }
-  if (trueNeighbors==0 && ownerComplex.flagSpanTheEntireSpace)
-  { assert(false);
-    return false;
-  }
   return true;
 }
 
@@ -22008,7 +21887,7 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
   this->theColumnsOfTheMatrix.AssignMatrixColumns(this->theMatrix);
   theChambers.theDirections.CopyFromBase(this->theColumnsOfTheMatrix);
   theChambers.AmbientDimension= this->theMatrix.NumRows;
-  theChambers.theCurrentIndex=theChambers.AmbientDimension-1;
+  theChambers.theCurrentIndex=-1;
   theChambers.theDirections.ComputeDebugString();
 
 }

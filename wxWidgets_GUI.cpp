@@ -150,9 +150,9 @@ public:
   wxBoxSizer* BoxSizer18LProhibiting;
   wxBoxSizer* BoxSizer19DyckPaths;
   wxBoxSizer* BoxSizer20ChamberSplit;
- // wxRadioButton* RB1OneSlice;
- // wxRadioButton* RB2OneIncrement;
- // wxRadioButton* RB3FullChop;
+  //wxRadioButton* RB1OneSlice;
+  //wxRadioButton* RB2OneIncrement;
+  //wxRadioButton* RB3FullChop;
   wxRadioBox* RBGroup1SlicingOptions;
   wxTextCtrl* Text1Output;
   wxTextCtrl* Text2Values;
@@ -198,7 +198,7 @@ public:
   ::wxCheckBox* CheckBox2CheckSums;
   ::wxCheckBox* CheckBox3ComputeChambers;
   ::wxCheckBox* CheckBox4ChamberLabels;
-  ::wxCheckBox* CheckBox5InvisibleChambers;
+  //::wxCheckBox* CheckBox5InvisibleChambers;
   ::wxCheckBox* CheckBox6Dashes;
   ::wxCheckBox* CheckBox7UseIndicatorForPFDecomposition;
   ::wxCheckBox* CheckBox8DoTheWeylGroup;
@@ -556,7 +556,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->RBGroup1SlicingOptions= new wxRadioBox(this, this->ID_RBGroup1SliceOptions, wxT("Slicing options"), wxDefaultPosition, wxDefaultSize, 3, tempS);
   this->CheckBox3ComputeChambers= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Compute chambers"));
   this->CheckBox4ChamberLabels=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Chamber labels"));
-  this->CheckBox5InvisibleChambers=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
+//  this->CheckBox5InvisibleChambers=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
   this->CheckBox6Dashes=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
   this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
 	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Act by Weyl group"));
@@ -647,7 +647,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->BoxSizer12VerticalProgressReports->Add(this->Label4ProgressReport);
   this->BoxSizer12VerticalProgressReports->Add(this->Label5ProgressReport);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox4ChamberLabels);
-		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox5InvisibleChambers);
+//		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox5InvisibleChambers);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox6Dashes);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->CheckBox8DoTheWeylGroup);
 		this->BoxSizer5VerticalCanvasAndProgressReport->Add(this->BoxSizer15HorizontalSlicingButtons);
@@ -701,7 +701,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->CheckBox2CheckSums->SetValue(true);
   this->CheckBox3ComputeChambers->SetValue(true);
   this->CheckBox4ChamberLabels->SetValue(true);
-  this->CheckBox5InvisibleChambers->SetValue(false);
+//  this->CheckBox5InvisibleChambers->SetValue(false);
   this->CheckBox7UseIndicatorForPFDecomposition->SetValue(true);
   this->CheckBox6Dashes->SetValue(true);
   this->CheckBox8DoTheWeylGroup->SetValue(false);
@@ -1278,7 +1278,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
   this->ReadRBData();
   DrawingVariables& TDV = this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
   TDV.flagDrawChamberIndices= this->CheckBox4ChamberLabels->GetValue();
-  TDV.flagDrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
+//  TDV.flagDrawingInvisibles= this->CheckBox5InvisibleChambers->GetValue();
   TDV.flagDrawingLinkToOrigin = this->CheckBox6Dashes->GetValue();
   if (this->theComputationSetup.flagUsingCustomVectors)
   { int theDimension=this->Spin1Dim->GetValue();
@@ -1479,7 +1479,7 @@ void guiMainWindow::updatePartialFractionAndCombinatorialChamberTextData()
 void guiMainWindow::onCheckBoxesGraphics(wxCommandEvent& ev)
 { DrawingVariables& TDV = this->theComputationSetup.theGlobalVariablesContainer->Default()->theDrawingVariables;
   TDV.flagDrawChamberIndices = this->CheckBox4ChamberLabels->GetValue();
-  TDV.flagDrawingInvisibles = this->CheckBox5InvisibleChambers->GetValue();
+//  TDV.flagDrawingInvisibles = this->CheckBox5InvisibleChambers->GetValue();
   TDV.flagDrawingLinkToOrigin = this->CheckBox6Dashes->GetValue();
   this->Refresh();
 }

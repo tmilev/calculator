@@ -269,9 +269,9 @@ void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(G
 }
 
 void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables)
-{ this->ConsistencyCheck(true);
-  this->WriteReportToFile("BadMoment.html", false);
-  this->ComputeDebugString();
+{ //this->ConsistencyCheck(true);
+//  this->WriteReportToFile("BadMoment.html", false);
+//  this->ComputeDebugString();
   CombinatorialChamber* newChamber= new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
@@ -280,7 +280,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   int totalWalls=0;
   for (int i=0; i<IndicesToGlue.size; i++)
     totalWalls+= this->TheObjects[IndicesToGlue.TheObjects[i]]->Externalwalls.size;
-  this->ComputeDebugString();
+  //this->ComputeDebugString();
   newChamber->Externalwalls.MakeActualSizeAtLeastExpandOnTop(totalWalls-normalsToBeKilled.size);
   newChamber->IndexInOwnerComplex= this->size;
   this->AddObjectOnTop(newChamber);
@@ -289,7 +289,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
     this->TheObjects[IndicesToGlue.TheObjects[i]]->ReplaceMeByAddExtraWallsToNewChamber(*this, newChamber, IndicesToGlue, normalsToBeKilled);
     newChamber->AllVertices.AddRootSnoRepetition(this->TheObjects[IndicesToGlue.TheObjects[i]]->AllVertices);
   }
-  newChamber->ComputeDebugString(*this);
+  //newChamber->ComputeDebugString(*this);
   newChamber->AllVertices.ComputeDebugString();
   for (int i=0; i<newChamber->AllVertices.size; i++)
     if (!newChamber->PointIsAVertex(newChamber->AllVertices.TheObjects[i]))
@@ -308,14 +308,14 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   }
-  this->ComputeDebugString();
+//  this->ComputeDebugString();
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
-  this->WriteReportToFile("BadMoment2.html", false);
+  //this->WriteReportToFile("BadMoment2.html", false);
 /*  if (!this->flagSpanTheEntireSpace && this->flagStoringVertices && this->flagUsingVerticesToDetermineBogusNeighborsIfPossible)
     newChamber->CheckForAndRemoveBogusNeighbors(*this, theGlobalVariables);*/
-  this->WriteReportToFile("BadMoment2.html", false);
-  this->ConsistencyCheck(true);
+  //this->WriteReportToFile("BadMoment2.html", false);
+  //this->ConsistencyCheck(true);
 }
 
 void CombinatorialChamberContainer::PurgeZeroPointers()
@@ -4687,6 +4687,7 @@ void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(root
   tempRoots.size=this->AmbientDimension;
   for (int i=0; i<this->AmbientDimension; i++)
   { tempRoots.ComputeNormalExcludingIndex(tempRoot, i, theGlobalVariables);
+    tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
     theStartingChamber.InternalWalls.AddObjectOnTop(tempRoot);
   }
 }

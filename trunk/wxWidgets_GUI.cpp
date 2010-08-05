@@ -58,7 +58,7 @@ public:
 	int maxNumCols;
 	int maxNumRows;
 	void SetNumRowsAndCols(int r, int c);
-	wxGridExtra( wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxWANTS_CHARS, const wxString& name = wxT("") );
+	wxGridExtra(wxWindow *parent, wxWindowID id, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxWANTS_CHARS, const wxString& name=wxT(""));
 };
 
 class WorkThreadClass
@@ -103,7 +103,7 @@ public:
   int ClickToleranceX;
   int ClickToleranceY;
   drawCanvas(wxWindow *parent, wxWindowID winid = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, const wxString& name = wxPanelNameStr)
-  {	this->Create(parent,winid,pos,size,style,name);
+  {	this->Create(parent, winid, pos, size, style, name);
   };
   void onMouseDownOnCanvas(wxMouseEvent &ev);
   void onSizing(::wxSizeEvent&ev);
@@ -758,11 +758,11 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 void drawCanvas::onSizing(wxSizeEvent& ev)
 { if (MainWindow1==0)
 		return;
-	if (MainWindow1->Table1Input->GetNumberRows()>20)
+/*	if (MainWindow1->Table1Input->GetNumberRows()>20)
   { MainWindow1->Table1Input->SetAutoLayout(false);
     MainWindow1->Table1Input->SetSize(0, 70, 220, 500);
     MainWindow1->Table1Input->SetMaxSize(wxSize(220, 500));
-	}
+	}*/
   MainWindow1->Layout();
   this->Refresh();//true,&tempRect);
 }
@@ -1154,7 +1154,7 @@ void guiMainWindow::updateInputButtons()
   }
 }
 
-void guiMainWindow::onListBox1Change(wxCommandEvent &ev)
+void guiMainWindow::onListBox1Change(wxCommandEvent& ev)
 { if (this->theComputationSetup.flagUsingCustomVectors)
 		return;
   std::string tempS;
@@ -1316,12 +1316,12 @@ void guiMainWindow::TurnOnAllDangerousButtons()
 void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
 { this->NumVectors=r;
   this->theComputationSetup.WeylGroupIndex= c;
-  this->Table2Indicator->SetNumRowsAndCols(1,c);
-  this->Table3Values->SetNumRowsAndCols(1,c);
+  this->Table2Indicator->SetNumRowsAndCols(1, c);
+  this->Table3Values->SetNumRowsAndCols(1, c);
   this->Table1Input->SetNumRowsAndCols(this->NumVectors,this->theComputationSetup.WeylGroupIndex);
   if (r==0)
 		return;
-	for (int j=0; j<c; j++)
+/*	for (int j=0; j<c; j++)
   { this->Table1Input->SetColumnWidth(j, 25);
     this->Table2Indicator->SetColumnWidth(j, 25);
     this->Table3Values->SetColumnWidth(j, 25);
@@ -1334,7 +1334,7 @@ void guiMainWindow::initTableFromRowsAndColumns(int r, int c)
   { this->Table1Input->SetSize(0, 70, 220, 500);
     this->Table1Input->SetMaxSize(wxSize(220, 500));
     this->SetAutoLayout(false);
-  } else
+  } else*/
 	{ this->BoxSizer2VerticalInputs->Layout();
     this->BoxSizer8HorizontalEval->Layout();
     this->BoxSizer1HorizontalBackground->Layout();
@@ -1362,7 +1362,7 @@ void guiMainWindow::TurnOffAllDangerousButtons()
 wxGridExtra::wxGridExtra(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
 { this->maxNumCols=8;
   this->maxNumRows=120;
-  this->Create(parent,id,pos,size,style,name);
+  this->Create(parent, id, pos, size, style, name);
 }
 
 void wxGridExtra::SetNumRowsAndCols(int r, int c)
@@ -1386,6 +1386,8 @@ void wxGridExtra::SetNumRowsAndCols(int r, int c)
   { this->InsertCols(oldNumCols-1,c-oldNumCols,true);
     oldNumCols=c;
   }
+
+//  this->Refresh(false, 0);
 }
 
 void WorkThreadClass::run()

@@ -1827,7 +1827,7 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
     return;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
-  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
+ // inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
   inputData.thePartialFraction.theChambers.QuickSortAscending();
   inputData.thePartialFraction.theChambers.LabelChamberIndicesProperly();
@@ -1983,13 +1983,12 @@ bool CombinatorialChamber::GetSplittingFacet(root& output, CombinatorialChamberC
   root& currentDirection= owner.theDirections.TheObjects[owner.theCurrentIndex];
   bool tempBool;
   for (int i=0; i<this->Externalwalls.size; i++)
-    if (this->Externalwalls.TheObjects[i].IsExternalWithRespectToDirection(currentDirection))
+    if (this->Externalwalls.TheObjects[i].IsExternalWithRespectToDirection(currentDirection) && this->Externalwalls.TheObjects[i].EveryNeigborIsExplored(tempBool))
       for (int j=i+1; j<this->Externalwalls.size; j++)
-        if (this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(currentDirection))
-          if (this->Externalwalls.TheObjects[j].EveryNeigborIsExplored(tempBool))
-            if (this->MakeFacetFromEdgeAndDirection(this->Externalwalls.TheObjects[i], this->Externalwalls.TheObjects[j], owner, currentDirection, owner.theDirections, owner.theCurrentIndex, output, theGlobalVariables))
-              if (this->HasHPositiveAndHNegativeVertex(output))
-                return true;
+        if (this->Externalwalls.TheObjects[j].IsExternalWithRespectToDirection(currentDirection) && this->Externalwalls.TheObjects[j].EveryNeigborIsExplored(tempBool))
+          if (this->MakeFacetFromEdgeAndDirection(this->Externalwalls.TheObjects[i], this->Externalwalls.TheObjects[j], owner, currentDirection, owner.theDirections, owner.theCurrentIndex, output, theGlobalVariables))
+            if (this->HasHPositiveAndHNegativeVertex(output))
+              return true;
   //}
   return false;
 }
@@ -2023,8 +2022,7 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
     else
       this->InternalWalls.PopIndexSwapWithLast(0);
     return false;
-  }
-  else
+  } else
     if (this->GetSplittingFacet(KillerFacet, output, theGlobalVariables))
       if(this->SplitChamber(KillerFacet, output, direction, theGlobalVariables))
         return true;
@@ -2087,14 +2085,16 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
         if (this->indexLowestNonCheckedForGlueing<this->size)
           this->GlueOverSubdividedChambersCheckLowestIndex(theGlobalVariables);
         else
-          this->initNextIndex();
+        { this->initNextIndex();
+          this->ConsistencyCheck(false);
+        }
       }
     }
     if (this->theCurrentIndex<this->theDirections.size)
       this->MakeReportOneSlice(theGlobalVariables, this->theCurrentIndex, this->theDirections.size, this->theDirections.TheObjects[this->theCurrentIndex]);
     //if (ProblemCounter>1024)
     //this->ComputeDebugString();
-    assert(this->ConsistencyCheck(false));
+//    assert(this->ConsistencyCheck(false));
     //below follows the code to pause the computation
     this->thePauseController.SafePoint();
   }

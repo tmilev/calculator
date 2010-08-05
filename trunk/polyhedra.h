@@ -1961,6 +1961,7 @@ public:
   bool PointIsAVertex(const root& point);
   //bool InduceFromAffineCone(affineCone& input);
   void SortNormals();
+  bool GetSplittingFacet(root& output, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   bool ComputeDebugString(CombinatorialChamberContainer& owner);
   bool ElementToString(std::string& output, CombinatorialChamberContainer& owner);
   bool ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
@@ -1986,6 +1987,7 @@ public:
   bool IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
   void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
+  void ComputeHyperplanesCurrentDirection(GlobalVariables& theGlobalVariables);
   //the below function returns false if the cross-section affine walls have been modified
   //and aborts its execution
   bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
@@ -2009,7 +2011,7 @@ public:
   //the below function will automatically add the candidate to the
   //list of used hyperplanes if the candidate is an allowed one
   bool IsAValidCandidateForNormalOfAKillerFacet(root& normalCandidate, roots& directions, int CurrentIndex, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
-  bool HasHSignVertex(root& h, int sign);
+  bool HasHPositiveAndHNegativeVertex(root& h);
   bool CheckSplittingPointCandidate(Selection& SelectionTargetSimplex, Selection& SelectionStartSimplex, MatrixLargeRational& outputColumn, int Dimension);
   void AddInternalWall(root& TheKillerFacetNormal, root& TheFacetBeingKilledNormal, root& direction, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
 //  void InduceFromAffineConeAddExtraDimension(affineCone& input);
@@ -2729,12 +2731,16 @@ public:
 };
 
 class CombinatorialChamberContainer: public ListPointers<CombinatorialChamber>
-{
+{ bool flagStoringVertices;
+  bool flagUsingVerticesToDetermineBogusNeighborsIfPossible;
+  friend class CombinatorialChamber;
+  friend class WallData;
 public:
   int FirstNonExploredIndex;
   int AmbientDimension;
   std::string DebugString;
   hashedRoots theHyperplanes;
+  roots HyperplanesComingFromCurrentDirectionAndSmallerIndices;
   Cone TheGlobalConeNormals;
   Cone WeylChamber;
   simplicialCones startingCones;
@@ -2772,9 +2778,6 @@ public:
   Controller thePauseController;
 /////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-  bool flagStoringVertices;
-  bool flagUsingVerticesToDetermineBogusNeighborsIfPossible;
-  bool flagSpanTheEntireSpace;
   bool flagMakingASingleHyperplaneSlice;
   bool flagSliceWithAWallInitDone;
   bool flagSliceWithAWallIgnorePermanentlyZero;
@@ -2813,6 +2816,7 @@ public:
   void ComputeDebugString(bool LatexFormat) {this->ElementToString(this->DebugString, LatexFormat, false); };
   void ComputeDebugString(bool useLatex, bool useHtml){this->ElementToString(this->DebugString, useLatex, useHtml); };
   void init();
+  void initNextIndex();
   void Free();
   void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
   void WriteReportToFile(std::fstream& output, bool DoPurgeZeroPointers);

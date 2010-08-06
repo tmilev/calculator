@@ -290,7 +290,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
     newChamber->AllVertices.AddRootSnoRepetition(this->TheObjects[IndicesToGlue.TheObjects[i]]->AllVertices);
   }
   //newChamber->ComputeDebugString(*this);
-  newChamber->AllVertices.ComputeDebugString();
+//  newChamber->AllVertices.ComputeDebugString();
   for (int i=0; i<newChamber->AllVertices.size; i++)
     if (!newChamber->PointIsAVertex(newChamber->AllVertices.TheObjects[i]))
     { newChamber->AllVertices.PopIndexSwapWithLast(i);
@@ -308,6 +308,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   }
+  newChamber->ConsistencyCheck(this->AmbientDimension, true, *this);
 //  this->ComputeDebugString();
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
@@ -3353,6 +3354,11 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
         assert(false);
         return false;
       }
+      for (int i=0; i<this->AllVertices.size; i++)
+        if(!this->PointIsAVertex(this->AllVertices.TheObjects[i]))
+        { assert(false);
+          return false;
+        }
 /*      WallData& currentWall= this->Externalwalls.TheObjects[i];
       for (int l=0; l<currentWall.NeighborsAlongWall.size; l++)
         if (currentWall.NeighborsAlongWall.TheObjects[l])
@@ -4062,8 +4068,8 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(this->HasNoNeighborsThatPointToThis());
   assert(output.TheObjects[output.indexNextChamberToSlice]==this);
-  assert(NewPlusChamber->ConsistencyCheck(output.AmbientDimension, false, output));
-  assert(NewMinusChamber->ConsistencyCheck(output.AmbientDimension, false, output));
+  assert(NewPlusChamber->ConsistencyCheck(output.AmbientDimension, true, output));
+  assert(NewMinusChamber->ConsistencyCheck(output.AmbientDimension, true, output));
   //if (output.flagAnErrorHasOcurredTimeToPanic)
   //{  output.ComputeDebugString();
     //assert(NewPlusChamber->ConsistencyCheck());

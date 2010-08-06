@@ -1773,6 +1773,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
   if (useLatex)
     out << endOfLine << "Projective representation\n\n";
   out << " index in owner: " << this->IndexInOwnerComplex << "\n";
+  out << "Hash_id: " << this->GetHashFromSortedNormals() << "\n";
   this->ElementToInequalitiesString(tempS, owner, useLatex, useHtml);
   out << tempS;
   out << "Neighbors: ";
@@ -1835,6 +1836,15 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
   inputData.IndicatorRoot.MakeZero(inputData.WeylGroupIndex);
   inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, inputData.IndicatorRoot, 0);
   inputData.thePartialFraction.theChambers.thePauseController.ExitComputation();
+}
+
+int CombinatorialChamber::GetHashFromSortedNormals()
+{ this->SortNormals();
+  int result=0;
+  int topBound= MathRoutines::Minimum(SomeRandomPrimesSize, this->ExternalwallsNormalsSorted.size);
+  for (int i=0; i<topBound; i++)
+    result+=SomeRandomPrimes[i]*this->ExternalwallsNormalsSorted.TheObjects[i].HashFunction();
+  return result;
 }
 
 void CombinatorialChamber::SortNormals()
@@ -2099,3 +2109,22 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
     this->thePauseController.SafePoint();
   }
 }
+
+bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, GlobalVariables& theGlobalVariables)
+{ if (this->GetHashFromSortedNormals()==58238520)
+    MathRoutines::KToTheNth(1,1);
+  for (int i=0; i<this->Externalwalls.size; i++)
+  { WallData& theWall= this->Externalwalls.TheObjects[i];
+    for(int j=0; j<theWall.NeighborsAlongWall.size; j++)
+      if (theWall.NeighborsAlongWall.TheObjects[j]!=0)
+        if (!theWall.NeighborsAlongWall.TheObjects[j]->flagHasZeroPolynomiaL)
+          if (theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex>=owner.indexLowestNonCheckedForGlueing)
+            if (!outputIndicesChambersToGlue.ContainsObject(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex))
+              if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[j], theGlobalVariables))
+              { outputIndicesChambersToGlue.AddObjectOnTop(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex);
+                theWall.NeighborsAlongWall.TheObjects[j]->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables);
+              }
+  }
+  return outputIndicesChambersToGlue.size>1;
+}
+

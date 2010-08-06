@@ -1972,6 +1972,7 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
   void LabelWallIndicesProperly();
+  int GetHashFromSortedNormals();
   int getIndexInfiniteHyperplane(CombinatorialChamberContainer& owner);
   int getIndexVertexIncidentWithSelection(Selection& theSel);
   int GetIndexWallWithNormal(root& theNormal);
@@ -4581,8 +4582,8 @@ public:
   void MultiplyBy(BasicQN& q);
   void MultiplyByLargeRational(Rational& r);
   void ComputeDebugString();
-   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
-   void ElementToString(std::string& output);
+  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output);
   bool HasSameExponent(BasicQN& q);
   bool ExponentIsEqualToZero();
   void DecreaseNumVars(short decrease);

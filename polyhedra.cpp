@@ -300,6 +300,8 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   newChamber->flagExplored=true;
   newChamber->flagHasZeroPolynomiaL= this->TheObjects[IndicesToGlue.TheObjects[0]]->flagHasZeroPolynomiaL;
   newChamber->IndexStartingCrossSectionNormal= this->TheObjects[IndicesToGlue.TheObjects[0]]->IndexStartingCrossSectionNormal;
+  if (newChamber->GetHashFromSortedNormals()==485222045)
+    Stop();
   for (int i=0; i<IndicesToGlue.size; i++)
   { delete this->TheObjects[IndicesToGlue.TheObjects[i]];
     this->TheObjects[IndicesToGlue.TheObjects[i]]=0;
@@ -309,6 +311,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
 #endif
   }
   newChamber->ConsistencyCheck(this->AmbientDimension, true, *this);
+
 //  this->ComputeDebugString();
   //this->ComputeDebugString();
   //newChamber->ComputeDebugString(*this);
@@ -3831,7 +3834,9 @@ int CombinatorialChamber::GetIndexWallWithNormal(root& theNormal)
 }
 
 bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
-{ outputIndicesChambersToGlue.size=0;
+{ if (this->IndexInOwnerComplex==443)
+    Stop();
+  outputIndicesChambersToGlue.size=0;
   outputIndicesChambersToGlue.AddObjectOnTop(this->IndexInOwnerComplex);
   outputRedundantNormals.size=0;
   if (!this->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables))
@@ -3859,28 +3864,12 @@ bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotC
   for (int i=0; i<theNormals.size; i++)
     if (!outputRedundantNormals.ContainsObject(theNormals.TheObjects[i]))
       for (int j=0; j<theVertices.size; j++)
-        if (root::RootScalarEuclideanRoot(theNormals.TheObjects[i], theVertices.TheObjects[j]).IsNegative())
+        if (theNormals.TheObjects[i].OurScalarProductIsNegative(theVertices.TheObjects[j]))
           return false;
   for (int i=0; i<outputIndicesChambersToGlue.size; i++)
     for (int j=i+1; j<outputIndicesChambersToGlue.size; j++)
       assert(!owner.startingCones.SeparatePoints(owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->InternalPoint, owner.TheObjects[outputIndicesChambersToGlue.TheObjects[j]]->InternalPoint,0));
   return true;
-}
-
-bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, GlobalVariables& theGlobalVariables)
-{ for (int i=0; i<this->Externalwalls.size; i++)
-  { WallData& theWall= this->Externalwalls.TheObjects[i];
-    for(int j=0; j<theWall.NeighborsAlongWall.size; j++)
-      if (theWall.NeighborsAlongWall.TheObjects[j]!=0)
-        if (!theWall.NeighborsAlongWall.TheObjects[j]->flagHasZeroPolynomiaL)
-          if (theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex>=owner.indexLowestNonCheckedForGlueing)
-            if (!outputIndicesChambersToGlue.ContainsObject(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex))
-              if (!this->IsSeparatedByStartingConesFrom(owner, *theWall.NeighborsAlongWall.TheObjects[j], theGlobalVariables))
-              { outputIndicesChambersToGlue.AddObjectOnTop(theWall.NeighborsAlongWall.TheObjects[j]->IndexInOwnerComplex);
-                theWall.NeighborsAlongWall.TheObjects[j]->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables);
-              }
-  }
-  return outputIndicesChambersToGlue.size>1;
 }
 
 bool CombinatorialChamber::UnionAlongWallIsConvex(CombinatorialChamber& other, int indexWall, GlobalVariables& theGlobalVariables)
@@ -4070,6 +4059,11 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   assert(output.TheObjects[output.indexNextChamberToSlice]==this);
   assert(NewPlusChamber->ConsistencyCheck(output.AmbientDimension, true, output));
   assert(NewMinusChamber->ConsistencyCheck(output.AmbientDimension, true, output));
+  if (NewPlusChamber->GetHashFromSortedNormals()==485222045)
+    Stop();
+  if (NewMinusChamber->GetHashFromSortedNormals()==485222045)
+    Stop();
+
   //if (output.flagAnErrorHasOcurredTimeToPanic)
   //{  output.ComputeDebugString();
     //assert(NewPlusChamber->ConsistencyCheck());

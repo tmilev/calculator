@@ -1823,19 +1823,49 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 }
 
 void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ //ComputationSetup::TestQuickSort(inputData, theGlobalVariables);
-  if (inputData.thePartialFraction.theChambers.thePauseController.IsRunning())
+{ if (inputData.thePartialFraction.theChambers.thePauseController.IsRunning())
     return;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
-//  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
-  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
-  inputData.thePartialFraction.theChambers.QuickSortAscending();
-  inputData.thePartialFraction.theChambers.LabelChamberIndicesProperly();
-  inputData.thePartialFraction.theChambers.ComputeDebugString(false);
-  inputData.IndicatorRoot.MakeZero(inputData.WeylGroupIndex);
-  inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, inputData.IndicatorRoot, 0);
+  //inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
+  inputData.thePartialFraction.theChambers.SliceAndComputeDebugString(theGlobalVariables);
   inputData.thePartialFraction.theChambers.thePauseController.ExitComputation();
+}
+
+void CombinatorialChamberContainer::SliceAndComputeDebugString(GlobalVariables& theGlobalVariables)
+{ this->SliceTheEuclideanSpace(theGlobalVariables);
+  this->QuickSortAscending();
+  this->LabelChamberIndicesProperly();
+  this->ComputeDebugString(false);
+  root tempRoot;
+  theGlobalVariables.theDrawingVariables.theBuffer.init();
+  tempRoot.MakeZero(this->AmbientDimension);
+  this->drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+}
+
+void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables )
+{ std::string tempS;
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, false, theGlobalVariables);
+  tempS= inputData.thePartialFraction.theChambers.DebugString;
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables);
+  if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
+    logstream << WeylLetter << Dimension << " test NOT ok !!!\n";
+  else
+    logstream <<  WeylLetter << Dimension << " test OK\n";
+  theGlobalVariables.theIndicatorVariables.StatusString1= logstream.str();
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.MakeReport();
+}
+
+void ComputationSetup::TestUnitCombinatorialChambersChambers(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 2, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 3, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'B', 2, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'B', 3, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'C', 3, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 4, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'D', 4, inputData, theGlobalVariables);
 }
 
 int CombinatorialChamber::GetHashFromSortedNormals()

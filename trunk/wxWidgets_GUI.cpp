@@ -192,6 +192,7 @@ public:
 	::wxButton* Button19CountNilradicals;
 	::wxButton* Button20SplitChambers;
 	::wxButton* Button21SplitChambersPauseAndSave;
+	::wxButton* Button22TestChambers;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -230,6 +231,7 @@ public:
   void onButton15ProverFixedKOpen(wxCommandEvent& ev);
   void onButton20SplitChambers(wxCommandEvent& ev);
   void onButton21SplitChambersPauseAndSave(wxCommandEvent& ev);
+  void onButton22TestChambers(wxCommandEvent& ev);
   void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
@@ -291,6 +293,7 @@ public:
     ID_Button19CountNilradicals,
     ID_Button20SplitChambers,
     ID_Button21SplitChambersPauseAndSave,
+    ID_Button22TestChambers,
     ID_Paint,
   };
   DECLARE_EVENT_TABLE()
@@ -396,6 +399,7 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_BUTTON(guiMainWindow::ID_Button19CountNilradicals, guiMainWindow::onButton19CountNilradicals)
     EVT_BUTTON(guiMainWindow::ID_Button20SplitChambers, guiMainWindow::onButton20SplitChambers)
     EVT_BUTTON(guiMainWindow::ID_Button21SplitChambersPauseAndSave, guiMainWindow::onButton21SplitChambersPauseAndSave)
+    EVT_BUTTON(guiMainWindow::ID_Button22TestChambers, guiMainWindow::onButton22TestChambers)
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
@@ -580,6 +584,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Button19CountNilradicals= new wxButton(this, this->ID_Button19CountNilradicals, wxT("Count Nilradicals"));
   this->Button20SplitChambers= new wxButton(this, this->ID_Button20SplitChambers, wxT("Load chambers+go"));
   this->Button21SplitChambersPauseAndSave= new wxButton(this, this->ID_Button21SplitChambersPauseAndSave, wxT("Pause and save"));
+  this->Button22TestChambers= new wxButton(this, this->ID_Button22TestChambers, wxT("Test chambers algorithm (very slow, 30+min)"));
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
   //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
@@ -639,6 +644,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
     this->BoxSizer11VerticalOptions->Add(this->BoxSizer20ChamberSplit);
       this->BoxSizer20ChamberSplit->Add(this->Button20SplitChambers);
       this->BoxSizer20ChamberSplit->Add(this->Button21SplitChambersPauseAndSave);
+      this->BoxSizer20ChamberSplit->Add(this->Button22TestChambers);
 		this->BoxSizer11VerticalOptions->Add(this->Button19CountNilradicals);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
   this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
@@ -976,6 +982,11 @@ void guiMainWindow::onButton21SplitChambersPauseAndSave(wxCommandEvent& ev)
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxOK)
     this->theComputationSetup.thePartialFraction.theChambers.thePauseController.UnlockSafePoint();
+}
+
+void guiMainWindow::onButton22TestChambers(wxCommandEvent& ev)
+{ this->theComputationSetup.theFunctionToRun = & this->theComputationSetup.TestUnitCombinatorialChambersChambers;
+  this->RunTheComputation();
 }
 
 void guiMainWindow::onButton1Go(wxCommandEvent& ev)
@@ -1502,6 +1513,7 @@ void guiMainWindow::onComputationOver(wxCommandEvent& ev)
 { this->updatePartialFractionAndCombinatorialChamberTextData();
   MainWindow1->TurnOnAllDangerousButtons();
   MainWindow1->Button1Go->SetLabel(wxT("Go"));
+  MainWindow1->theComputationSetup.GetGlobalVars()->MakeReport();
   MainWindow1->Refresh();
 }
 

@@ -2821,6 +2821,12 @@ public:
   int GetNumVisibleChambersNoLabeling();
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
+  void SetupRootsOfBorel(char WeylLetter, int Dimension, bool reverseOrderElementsForTest);
+  void SliceAndComputeDebugString(GlobalVariables& theGlobalVariables);
+  void SetupBorelAndSlice(char WeylLetter, int Dimension, bool reverseOrderElementsForTest, GlobalVariables& theGlobalVariables)
+  { this->SetupRootsOfBorel(WeylLetter, Dimension, reverseOrderElementsForTest);
+    this->SliceAndComputeDebugString(theGlobalVariables);
+  };
   int LabelChambersAndGetNumChambersInWeylChamber(Cone& theWeylChamber);
   int LabelChambersForDisplayAndGetNumVisibleChambers();
   void ElementToString(std::string& output, bool useLatex, bool useHtml);
@@ -2853,7 +2859,7 @@ public:
   void Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables);
   void LabelAllUnexplored();
   void DumpAll();
-  bool GrandMasterConsistencyCheck(GlobalVariables& theGlobalVariables); 
+  bool GrandMasterConsistencyCheck(GlobalVariables& theGlobalVariables);
   bool ConsistencyCheck(bool CheckForConvexityChambers);
   void PurgeZeroPointers();
   void PurgeInternalWalls();
@@ -6810,6 +6816,9 @@ public:
   static void TestGraphicalOutputPolys(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TestQuickSort(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void TestUnitCombinatorialChambersChambers(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  static void TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();
   ~ComputationSetup();
 };

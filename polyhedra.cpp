@@ -1246,9 +1246,9 @@ void ComputationSetup::Run()
   //this->VPVectors.ComputeDebugString();
   this->IndexChamberOfInterest=-1;
   if (this->flagComputingChambers)
-  { root tempRoot; tempRoot.MakeEi(this->thePartialFraction.theChambers.AmbientDimension, 0);
+  { /*root tempRoot; tempRoot.MakeEi(this->thePartialFraction.theChambers.AmbientDimension, 0);
     if (this->thePartialFraction.theChambers.theDirections.TheObjects[0].IsEqualTo(tempRoot))
-      this->thePartialFraction.theChambers.theDirections.ReverseOrderElements();
+      this->thePartialFraction.theChambers.theDirections.ReverseOrderElements();*/
     if (!this->flagDoingWeylGroupAction)
     { if (this->flagFullChop)
         this->thePartialFraction.theChambers.SliceTheEuclideanSpace(0, *this->theGlobalVariablesContainer->Default());
@@ -1308,7 +1308,7 @@ void ComputationSetup::Run()
         root* tempPt=0;
         if (this->flagUsingIndicatorRoot)
         { this->thePartialFraction.AssureIndicatorRegularity(*this->theGlobalVariablesContainer->Default(), this->IndicatorRoot);
-          tempPt=&this->IndicatorRoot;
+          tempPt = &this->IndicatorRoot;
         }
         this->thePartialFraction.split(*this->theGlobalVariablesContainer->Default(), tempPt);
       }
@@ -1322,10 +1322,10 @@ void ComputationSetup::Run()
     { std::stringstream out;
       std::string tempS;
       if (this->flagHavingDocumentClassForLaTeX)
-      { out<<"\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\n " <<"\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}\\addtolength{\\voffset}{-3.5cm} \\addtolength{\\textheight}{7cm} \\begin{document}\n";
+      { out << "\\documentclass{article}\\usepackage{latexsym}\\usepackage{amssymb}\n\\addtolength{\\hoffset}{-3.8cm}\\addtolength{\\textwidth}{7.3cm}\\addtolength{\\voffset}{-3.5cm} \\addtolength{\\textheight}{7cm} \\begin{document}\n";
         if (this->flagHavingNotationExplanation)
         { this->VPVectors.ElementToString(tempS, true, false, false);
-          out  << this->NotationExplanationLatex1<< tempS<<this->NotationExplanationLatex2<< this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
+          out  << this->NotationExplanationLatex1 << tempS << this->NotationExplanationLatex2 << this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
           if (this->flagComputingChambers)
           { int tempI =this->thePartialFraction.theChambers.RootBelongsToChamberIndex(this->IndicatorRoot, 0);
             this->thePartialFraction.theChambers.TheObjects[tempI]->ElementToInequalitiesString(tempS, this->thePartialFraction.theChambers, true, false);
@@ -3231,6 +3231,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 void CombinatorialChamber::ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
 { int theDimension=owner.AmbientDimension;
   this->SortNormals();
+  this->AllVertices.QuickSortAscending();
   std::string tempS; std::stringstream out;
   if (useLatex)
     out << "\n\\begin{eqnarray*}\n";
@@ -4459,6 +4460,15 @@ void CombinatorialChamberContainer::LabelChamberIndicesProperly()
       this->TheObjects[i]->LabelWallIndicesProperly();
     }
 }
+
+ void CombinatorialChamberContainer::SetupRootsOfBorel(char WeylLetter, int Dimension, bool reverseOrderElementsForTest)
+  { WeylGroup tempW;
+    tempW.MakeArbitrary(WeylLetter, Dimension);
+    tempW.ComputeRootsOfBorel(this->theDirections);
+    this->theCurrentIndex=-1;
+    if (reverseOrderElementsForTest)
+      this->theDirections.ReverseOrderElements();
+  }
 
 CombinatorialChamberContainer::CombinatorialChamberContainer()
 { this->init();

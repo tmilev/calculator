@@ -1375,11 +1375,11 @@ void wxGridExtra::SetNumRowsAndCols(int r, int c)
     oldNumRows=r;
   }
   if (oldNumRows<r)
-  { this->InsertRows(oldNumRows-1,r-oldNumRows,true);
+  { this->InsertRows(oldNumRows-1, r-oldNumRows, true);
     oldNumRows=r;
   }
   if (oldNumCols>c)
-  { this->DeleteCols(c,oldNumCols-c,true);
+  { this->DeleteCols(c, oldNumCols-c, true);
     oldNumCols=c;
   }
   if (oldNumCols<c)
@@ -1408,18 +1408,18 @@ void guiMainWindow::WriteSettingsIfAvailable()
   { this->fileSettings.clear();
     this->fileSettings.seekp(0);
     int x,y;
-    this->GetPosition(&x,&y);
+    this->GetPosition(&x, &y);
     this->fileSettings  <<"  Main_window_top_left_corner_x " <<x<<"   \nMain_window_top_left_corner_y " <<y<<"    ";
     this->GetSize(& x, & y);
-    this->fileSettings  <<"  \nMain_window_width " <<x<<"   \nMain_window_height "  <<y<<"    ";
+    this->fileSettings  << "  \nMain_window_width " <<x<<"   \nMain_window_height "  <<y<<"    ";
     this->Dialog1OutputPF->GetPosition(&x,&y);
-    this->fileSettings  <<"  \nPartial_fraction_window_top_left_corner_x " <<x<<"   \nPartial_fraction_window_top_left_corner_y "  <<y<<"    ";
+    this->fileSettings  << "  \nPartial_fraction_window_top_left_corner_x " <<x<<"   \nPartial_fraction_window_top_left_corner_y "  <<y<<"    ";
     this->Dialog1OutputPF->GetSize(&x,&y);
-    this->fileSettings  <<"  \nPartial_fraction_window_width " <<x<<"   \nPartial_fraction_window_height "  <<y <<"    ";
+    this->fileSettings  << "  \nPartial_fraction_window_width " <<x<<"   \nPartial_fraction_window_height "  <<y <<"    ";
     this->Dialog2StatusString1->GetPosition(&x,&y);
-    this->fileSettings  <<"  \nStatus_string1_window_top_left_corner_x " <<x <<"   \nStatus_string1_top_left_corner_y "  <<y<<"    ";
+    this->fileSettings  << "  \nStatus_string1_window_top_left_corner_x " <<x <<"   \nStatus_string1_top_left_corner_y "  <<y<<"    ";
     this->Dialog2StatusString1->GetSize(&x,&y);
-    this->fileSettings <<"\nStatus_string1_window_width " <<x <<"   \nStatus_string1_window_height "  <<y <<"    ";
+    this->fileSettings << " \nStatus_string1_window_width " <<x <<"   \nStatus_string1_window_height "  <<y <<"    ";
     this->fileSettings.flush();
   }
 }
@@ -1428,7 +1428,7 @@ void guiMainWindow::ReadSettingsIfAvailable()
 { if (::MainWindow1GlobalPath=="")
 		return;
   std::stringstream out;
-  out << ::MainWindow1GlobalPath<<"vector_partition_settings.txt";
+  out << ::MainWindow1GlobalPath << "vector_partition_settings.txt";
   std::string tempS;
   tempS= out.str();
   if (rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent2(this->fileSettings,tempS,false,false))

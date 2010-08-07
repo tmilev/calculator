@@ -365,6 +365,7 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoo
   this->LabelChambersForDisplayAndGetNumVisibleChambers();
   this->ComputeDebugString(false);
   this->ConsistencyCheck(true);
+  this->GrandMasterConsistencyCheck(theGlobalVariables);
 }
 
 void CombinatorialChamberContainer::ComputeNonConvexActualChambers(GlobalVariables& theGlobalVariables)
@@ -1679,41 +1680,29 @@ void root::MultiplyByLargeIntUnsigned(LargeIntUnsigned& a)
     this->TheObjects[i].MultiplyByLargeIntUnsigned(a);
 }
 
-void root::ScaleForMinHeightHeavy()
-{ LargeIntUnsigned d;
-  this->FindLCMDenominatorsHeavy(d);
-  this->MultiplyByLargeIntUnsigned(d);
-  d.MakeZero();
+void root::ScaleToIntegralMinHeight()
+{ LargeIntUnsigned denLCM, numLCM, tempUI;
+  denLCM.MakeOne(); numLCM.MakeOne();
+  bool foundNonZero=false;
   for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].IsEqualToZero())
-    { if (d.IsEqualToZero())
-        this->TheObjects[i].GetNumExtendedUnsigned(d);
-      else
-      { LargeIntUnsigned tempI;
-        this->TheObjects[i].GetNumExtendedUnsigned(tempI);
-        LargeIntUnsigned::gcd(d, tempI, d);
+    { if (foundNonZero)
+      { this->TheObjects[i].GetNumUnsigned(tempUI);
+        LargeIntUnsigned::gcd(numLCM, tempUI, numLCM);
+      } else
+      { this->TheObjects[i].GetNumUnsigned(numLCM);
+        foundNonZero=true;
       }
+      this->TheObjects[i].GetDen(tempUI);
+      if (!tempUI.IsEqualToOne())
+        LargeIntUnsigned::lcm(tempUI, denLCM, denLCM);
     }
-  this->DivByLargeIntUnsigned(d);
-}
-
-void root::ScaleForMinHeightLight()
-{ int d= this->FindLCMDenominatorsTruncateToInt();
-  this->MultiplyByInteger(d);
-  d=0;
-  for (int i=0; i<this->size; i++)
-  { if (!this->TheObjects[i].IsEqualToZero())
-    { assert(this->TheObjects[i].Extended==0);
-      if (d==0)
-        d=this->TheObjects[i].NumShort;
-      else
-      { int tempI=this->TheObjects[i].NumShort;
-        if (tempI<0) tempI=-tempI;
-        d= Rational::gcd(tempI, d);
-      }
-    }
+  if (foundNonZero)
+  { if (!numLCM.IsEqualToOne())
+      this->DivByLargeIntUnsigned(numLCM);
+    if (!denLCM.IsEqualToOne())
+      this->MultiplyByLargeIntUnsigned(denLCM);
   }
-  this->DivByInteger(d);
 }
 
 bool root::IsStronglyPerpendicularTo(root &right, WeylGroup& theWeyl)
@@ -1757,11 +1746,11 @@ bool root::IsProportianalTo(root& r)
   return tempRoot.IsEqualTo(r);
 }
 
-void root::FindLCMDenominatorsHeavy(LargeIntUnsigned& output)
-{ output.MakeOne();
+void root::FindLCMDenominators(LargeIntUnsigned& output)
+{ LargeIntUnsigned tempI, tempI2;
+  output.MakeOne();
   for (int i=0; i<this->size; i++)
-  { LargeIntUnsigned tempI, tempI2;
-    this->TheObjects[i].GetDenExtended(tempI2);
+  { this->TheObjects[i].GetDen(tempI2);
     LargeIntUnsigned::gcd(output, tempI2, tempI);
     output.MultiplyBy(tempI2);
     output.DivPositive(tempI, output, tempI2);
@@ -1777,26 +1766,6 @@ int root::FindLCMDenominatorsTruncateToInt()
   return result;
 }
 
-void root::ScaleToIntegralHeavy()
-{ LargeIntUnsigned x;
-  this->FindLCMDenominatorsHeavy(x);
-  this->MultiplyByLargeIntUnsigned(x);
-}
-
-void root::ScaleToIntegralLight()
-{ this->MultiplyByInteger(this->FindLCMDenominatorsTruncateToInt());
-}
-
-void root::ScaleToIntegralMinHeightHeavy()
-{ this->ScaleToIntegralHeavy();
-  this->ScaleForMinHeightHeavy();
-}
-
-void root::ScaleToIntegralMinHeightLight()
-{ this->ScaleToIntegralLight();
-  this->ScaleForMinHeightLight();
-}
-
 void root::ScaleToFirstNonZeroCoordinatePositive()
 { for (int i=0; i<this->size; i++)
   { if (this->TheObjects[i].IsPositive())
@@ -1808,35 +1777,9 @@ void root::ScaleToFirstNonZeroCoordinatePositive()
   }
 }
 
-void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveHeavy()
-{ this->ScaleToIntegralMinHeightHeavy();
-  this->ScaleToFirstNonZeroCoordinatePositive();
-}
-
-void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight()
-{ this->ScaleToIntegralMinHeightLight();
-  this->ScaleToFirstNonZeroCoordinatePositive();
-}
-
-bool root::HasSmallCoordinates()
-{ for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].Extended!=0)
-      return false;
-  return true;
-}
-
 void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive()
-{ if (this->HasSmallCoordinates())
-    this->ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight();
-  else
-    this->ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveHeavy();
-}
-
-void root::ScaleToIntegralMinHeight()
-{ if (this->HasSmallCoordinates())
-    this->ScaleToIntegralMinHeightLight();
-  else
-    this->ScaleToIntegralMinHeightHeavy();
+{ this->ScaleToIntegralMinHeight();
+  this->ScaleToFirstNonZeroCoordinatePositive();
 }
 
 void root::ReadFromFile(std::fstream& input)
@@ -1850,7 +1793,7 @@ void root::ReadFromFile(std::fstream& input)
 }
 
 void root::WriteToFile(std::fstream& output)
-{ output<<"root_dim: " << this->size<<" ";
+{ output << "root_dim: " << this->size << " ";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output);
     output<<" ";
@@ -3551,8 +3494,7 @@ void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, Combinatorial
 }
 
 void CombinatorialChamber::ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
-{ for (int i=0; i<this->Externalwalls.size; i++)
-    this->AllVertices.size=0;
+{ this->AllVertices.size=0;
   Selection theSelection;
   theSelection.init(this->Externalwalls.size);
   root VertexCandidate;
@@ -3560,9 +3502,9 @@ void CombinatorialChamber::ComputeVerticesFromNormals(CombinatorialChamberContai
   for (int i=0; i<NumCandidates; i++)
   { theSelection.incrementSelectionFixedCardinality(owner.AmbientDimension-1);
     if (this->LinearAlgebraForVertexComputation(theSelection, VertexCandidate, theGlobalVariables, owner.AmbientDimension))
-      if (this->PlusMinusPointIsInChamber(VertexCandidate))
+      if (this->PlusMinusPointIsInChamberModifyInput(VertexCandidate))
         for (int j=0; j<theSelection.CardinalitySelection; j++ )
-        { this->ScaleVertexToFitCrossSection(VertexCandidate, owner);
+        { //this->ScaleVertexToFitCrossSection(VertexCandidate, owner);
           this->AllVertices.AddRootNoRepetition(VertexCandidate);
         }
   }
@@ -3570,17 +3512,21 @@ void CombinatorialChamber::ComputeVerticesFromNormals(CombinatorialChamberContai
 
 bool CombinatorialChamber::ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSelection, int theDimension)
 { if (this->LinearAlgebraForVertexComputation(theSelection, output, theGlobalVariables, theDimension))
-    if (this->PlusMinusPointIsInChamber(output))
+    if (this->PlusMinusPointIsInChamberModifyInput(output))
       return true;
   return false;
 }
 
-bool CombinatorialChamber::PlusMinusPointIsInChamber(root& point)
+bool CombinatorialChamber::PlusMinusPointIsInChamberModifyInput(root& point)
 { if (this->PointIsInChamber(point))
+  { point.ScaleToIntegralMinHeight();
     return true;
+  }
   point.MinusRoot();
   if (this->PointIsInChamber(point))
+  { point.ScaleToIntegralMinHeight();
     return true;
+  }
   return false;
 }
 
@@ -3722,7 +3668,7 @@ bool CombinatorialChamber::IsABogusNeighbor(WallData& NeighborWall, Combinatoria
   for (int i=0; i<NumPossibilities; i++)
   { theSelection.incrementSelectionFixedCardinality(ownerComplex.AmbientDimension-2);
     if(ExternalWallsConglomerate.ComputeNormalFromSelectionAndExtraRoot(VertexCandidate, NeighborWall.normal, theSelection, theGlobalVariables))
-      if (this->PlusMinusPointIsInChamber(VertexCandidate))
+      if (this->PlusMinusPointIsInChamberModifyInput(VertexCandidate))
         if (Neighbor->PointIsInChamber(VertexCandidate))
           if(FoundVertices.AddRootNoRepetition(VertexCandidate))
           { int NewRank;
@@ -3949,7 +3895,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   { root VertexCandidate; VertexCandidate.SetSizeExpandOnTopLight(output.AmbientDimension);
     theSelection.incrementSelectionFixedCardinality(output.AmbientDimension-1);
     if (LocalLinearAlgebra.ComputeNormalFromSelection(VertexCandidate, theSelection, theGlobalVariables, output.AmbientDimension))
-      if (this->PlusMinusPointIsInChamber(VertexCandidate))
+      if (this->PlusMinusPointIsInChamberModifyInput(VertexCandidate))
       { Rational tempRat; bool IsPositive; bool IsNegative;
         root::RootScalarEuclideanRoot(VertexCandidate, theKillerPlaneNormal, tempRat);
         IsPositive = tempRat.IsPositive();
@@ -7774,26 +7720,6 @@ inline void Rational::DivideBy(const Rational& r)
   this->Simplify();
 }
 
-void Rational::GetDenExtended(LargeIntUnsigned& output)
-{ if (this->Extended==0)
-  { unsigned int tempI= (unsigned int) this->DenShort;
-    output.AssignShiftedUInt(tempI, 0);
-  }
-  else
-    output.Assign(this->Extended->den);
-}
-
-void Rational::GetNumExtendedUnsigned(LargeIntUnsigned& output)
-{ if (this->Extended==0)
-  { if (this->NumShort<0)
-      output.AssignShiftedUInt((unsigned int)(-this->NumShort), 0);
-    else
-      output.AssignShiftedUInt((unsigned int) this->NumShort, 0);
-  }
-  else
-    output.Assign(this->Extended->num.value);
-}
-
 //Rational::Rational(const Rational& right)
 //{ this->Assign(right);
 //}
@@ -8050,12 +7976,12 @@ void LargeIntUnsigned::SubtractSmallerPositive(LargeIntUnsigned& x)
 }
 
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output)
-{ assert(this!=&output);
+{ assert(this!=&output && this!=&x && this!=&output);
   output.SetSizeExpandOnTopNoObjectInit(x.size+output.size);
   for(int i=0; i<output.size; i++)
     output.TheObjects[i]=0;
   for (int i=0; i<this->size; i++)
-  { for(int j=0; j<x.size; j++)
+    for(int j=0; j<x.size; j++)
     { unsigned long long tempLong= this->TheObjects[i];
       unsigned long long tempLong2= x.TheObjects[j];
       tempLong= tempLong*tempLong2;
@@ -8067,7 +7993,6 @@ void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output)
       tempI.AssignShiftedUInt((unsigned int) highPart, i+j+1);
       output.AddNoFitSize(tempI);
     }
-  }
   output.FitSize();
 //  assert(this->CheckForConsistensy());
 }

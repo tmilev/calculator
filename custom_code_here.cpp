@@ -1828,7 +1828,7 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
     return;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
-  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
+//  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
   inputData.thePartialFraction.theChambers.QuickSortAscending();
   inputData.thePartialFraction.theChambers.LabelChamberIndicesProperly();
@@ -2128,3 +2128,18 @@ bool CombinatorialChamber::GetNonSeparableChamberIndicesAppendList(Combinatorial
   return outputIndicesChambersToGlue.size>1;
 }
 
+bool CombinatorialChamberContainer::GrandMasterConsistencyCheck(GlobalVariables& theGlobalVariables)
+{ roots OldVertices;
+  roots tempRoots;
+  for (int i=0; i<this->size; i++)
+  { OldVertices.CopyFromBase(this->TheObjects[i]->AllVertices);
+    this->TheObjects[i]->ComputeVerticesFromNormals(*this, theGlobalVariables);
+    OldVertices.intersectWith(this->TheObjects[i]->AllVertices, tempRoots);
+    if (tempRoots.size!=OldVertices.size || OldVertices.size!=this->TheObjects[i]->AllVertices.size)
+    { this->TheObjects[i]->ComputeDebugString(*this);
+      assert(false);
+      return false;
+    }
+  }
+  return true;
+}

@@ -3834,7 +3834,7 @@ int CombinatorialChamber::GetIndexWallWithNormal(root& theNormal)
 }
 
 bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
-{ if (this->IndexInOwnerComplex==443)
+{ if (this->GetHashFromSortedNormals()==58238520)
     Stop();
   outputIndicesChambersToGlue.size=0;
   outputIndicesChambersToGlue.AddObjectOnTop(this->IndexInOwnerComplex);
@@ -3845,7 +3845,9 @@ bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotC
   theNormals.size=0;
   roots theVertices;
   for (int i=0; i<outputIndicesChambersToGlue.size; i++)
-  { for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
+  { if (this->GetHashFromSortedNormals()==58238520)
+      owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->ComputeDebugString(owner);
+    for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
     { WallData& currentWall=owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.TheObjects[j];
       root& theNormal=currentWall.normal;
       if (theNormals.ContainsObject(-theNormal))

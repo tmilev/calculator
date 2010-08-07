@@ -1257,7 +1257,7 @@ ParallelComputing::GlobalPointerCounter+=c;
 }
 
 class LargeIntUnsigned: public List<unsigned int>
-{   void AddNoFitSize(LargeIntUnsigned& x);
+{ void AddNoFitSize(LargeIntUnsigned& x);
 public:
   // Carry over bound is the "base" over which we work
   //Requirements on the CarryOverBound:
@@ -1286,6 +1286,14 @@ public:
   bool IsEqualToOne(){ return this->size==1 && this->TheObjects[0]==1; };
   bool IsGEQ(LargeIntUnsigned& x);
   static void gcd(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output);
+  static void lcm(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output)
+  { LargeIntUnsigned tempUI, tempUI2;
+    LargeIntUnsigned::gcd(a, b, tempUI);
+    a.MultiplyBy(b, tempUI2);
+    output.Assign(tempUI2);
+    output.DivPositive(tempUI, output, tempUI2);
+    assert(!output.IsEqualToZero());
+  };
   void MultiplyBy(LargeIntUnsigned& right);
   void MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output);
   void MultiplyByUInt(unsigned int x);
@@ -1449,8 +1457,24 @@ public:
   //changed it back to int. Grrrrr.
   int DenShort;
   LargeRationalExtended *Extended;
-  void GetDenExtended(LargeIntUnsigned& output);
-  void GetNumExtendedUnsigned(LargeIntUnsigned& output);
+  inline void GetDen(LargeIntUnsigned& output)
+  { if (this->Extended==0)
+    { unsigned int tempI= (unsigned int) this->DenShort;
+      output.AssignShiftedUInt(tempI, 0);
+    }
+    else
+      output.Assign(this->Extended->den);
+  }
+  inline void GetNumUnsigned(LargeIntUnsigned& output)
+  { if (this->Extended==0)
+    { if (this->NumShort<0)
+        output.AssignShiftedUInt((unsigned int)(-this->NumShort), 0);
+      else
+        output.AssignShiftedUInt((unsigned int) this->NumShort, 0);
+    }
+    else
+      output.Assign(this->Extended->num.value);
+  }
 //  inline int GetNumValueTruncated(){return this->NumShort; };
 //  inline int GetDenValueTruncated(){return this->denShort; };
   static bool flagMinorRoutinesOnDontUseFullPrecision;
@@ -1619,19 +1643,6 @@ Rational operator-(const Rational& argument)
 
 class root :public ListLight<Rational>
 {
-private:
-  void ScaleForMinHeightHeavy();
-  void ScaleToIntegralHeavy();
-  void ScaleToIntegralMinHeightHeavy();
-  void ScaleToFirstNonZeroCoordinatePositive();
-  void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveHeavy();
-  void FindLCMDenominatorsHeavy(LargeIntUnsigned& output);
-  void ScaleForMinHeightLight();
-  void ScaleToIntegralLight();
-  void ScaleToIntegralMinHeightLight();
-  void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositiveLight();
-  void FindLCMDenominatorsLight(LargeIntUnsigned& output);
-  bool HasSmallCoordinates();
 public:
 //the below is to facilitate operator overloading
   root(const root& right){this->Assign(right); };
@@ -1662,6 +1673,7 @@ public:
   void ElementToString(std::string& output, bool useLaTeX);
   bool CheckForElementSanity();
   //void RootToLinPolyToString(std::string& output, PolynomialOutputFormat& PolyOutput);
+  void ScaleToFirstNonZeroCoordinatePositive();
   void ScaleToIntegralMinHeight();
   void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   void FindLCMDenominators(LargeIntUnsigned& output);
@@ -1999,7 +2011,7 @@ public:
   bool ScaleVertexToFitCrossSection(root& point, CombinatorialChamberContainer& owner);
   void ComputeAffineInfinityPointApproximation(Selection& selectedExternalWalls, CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
   bool PointIsInWallSelection(root& point, Selection& theSelection);
-  bool PlusMinusPointIsInChamber(root& point);
+  bool PlusMinusPointIsInChamberModifyInput(root& point);
   bool ExtraPointRemovesDoubtForBogusWall(MatrixLargeRational& theMatrix, MatrixLargeRational& emptyMat, Selection& bufferSel, root& theRoot);
   void PurgeInternalWalls();
   bool HasNoNeighborsThatPointToThis();
@@ -2841,6 +2853,7 @@ public:
   void Glue(List<int>& IndicesToGlue, roots& normalsToBeKilled, GlobalVariables& theGlobalVariables);
   void LabelAllUnexplored();
   void DumpAll();
+  bool GrandMasterConsistencyCheck(GlobalVariables& theGlobalVariables); 
   bool ConsistencyCheck(bool CheckForConvexityChambers);
   void PurgeZeroPointers();
   void PurgeInternalWalls();

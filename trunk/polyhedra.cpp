@@ -365,7 +365,8 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoo
   this->LabelChambersForDisplayAndGetNumVisibleChambers();
   this->ComputeDebugString(false);
   this->ConsistencyCheck(true);
-  this->GrandMasterConsistencyCheck(theGlobalVariables);
+  if (this->flagMakeGrandMasterConsistencyCheck)
+    this->GrandMasterConsistencyCheck(theGlobalVariables);
 }
 
 void CombinatorialChamberContainer::ComputeNonConvexActualChambers(GlobalVariables& theGlobalVariables)
@@ -1816,25 +1817,25 @@ void root::Add(const root&r)
     this->TheObjects[i].Add(r.TheObjects[i]);
 }
 
-bool root::OurScalarProductIsPositive(root& right)
+bool root::OurScalarProductIsPositive(const root& right)
 { Rational tempRat;
   root::RootScalarEuclideanRoot(*this, right, tempRat);
   return tempRat.IsPositive();
 }
 
-bool root::OurScalarProductIsNegative(root& right)
+bool root::OurScalarProductIsNegative(const root& right)
 { Rational tempRat;
   root::RootScalarEuclideanRoot(*this, right, tempRat);
   return tempRat.IsNegative();
 }
 
-bool root::OurScalarProductIsZero(root& right)
+bool root::OurScalarProductIsZero(const root& right)
 { Rational tempRat;
   root::RootScalarEuclideanRoot(*this, right, tempRat);
   return tempRat.IsEqualToZero();
 }
 
-void root::Subtract(const root&r)
+void root::Subtract(const root& r)
 { assert(r.size==this->size);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].Subtract(r.TheObjects[i]);
@@ -3284,6 +3285,12 @@ bool CombinatorialChamber::HasNoNeighborsThatPointToThis()
   return true;
 }
 
+void CombinatorialChamber::GetWallNormals(roots& output)
+{ output.SetSizeExpandOnTopNoObjectInit(this->Externalwalls.size);
+  for (int i=0; i<this->Externalwalls.size; i++)
+    output.TheObjects[i].Assign(this->Externalwalls.TheObjects[i].normal);
+}
+
 bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex)
 { for (int i=0; i<this->Externalwalls.size; i++)
    if (!this->Externalwalls.TheObjects[i].ConsistencyCheck(*this, ownerComplex))
@@ -3541,6 +3548,16 @@ bool CombinatorialChamber::ScaleVertexToFitCrossSection(root& point, Combinatori
   point.DivByLargeRational(tempRat);
   root::RootScalarEuclideanRoot(owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].normal, owner.StartingCrossSections.TheObjects[this->IndexStartingCrossSectionNormal].affinePoint, tempRat);
   point.MultiplyByLargeRational(tempRat);
+  return true;
+}
+
+bool CombinatorialChamber::PointIsStrictlyInsideChamber(const root& point)
+{ for (int i=0; i<this->Externalwalls.size; i++)
+  { Rational tempRat;
+    root::RootScalarEuclideanRoot(this->Externalwalls.TheObjects[i].normal, point, tempRat);
+    if (tempRat.IsNonPositive())
+      return false;
+  }
   return true;
 }
 
@@ -4486,6 +4503,7 @@ void CombinatorialChamberContainer::init()
   // setting this->flagSpanTheEntireSpace to false, - the smallest example that goes bad is B4 ...
   this->flagStoringVertices=true;
   this->flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
+  this->flagMakeGrandMasterConsistencyCheck=false;
   ///////////////////////////////////////////////////////////////////////////
   this->KillAllElements();
   this->ReleaseMemory();
@@ -5062,6 +5080,13 @@ bool Cone::IsInCone(const root& r)
     if (tempRat.IsNegative())
       return false;
   }
+  return true;
+}
+
+bool Cone::IsInCone(const roots& theRoots)
+{ for (int i=0; i<theRoots.size; i++)
+    if (!this->IsInCone(theRoots.TheObjects[i]))
+      return false;
   return true;
 }
 

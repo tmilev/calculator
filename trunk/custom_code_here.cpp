@@ -2162,14 +2162,67 @@ bool CombinatorialChamberContainer::GrandMasterConsistencyCheck(GlobalVariables&
 { roots OldVertices;
   roots tempRoots;
   for (int i=0; i<this->size; i++)
-  { OldVertices.CopyFromBase(this->TheObjects[i]->AllVertices);
-    this->TheObjects[i]->ComputeVerticesFromNormals(*this, theGlobalVariables);
-    OldVertices.intersectWith(this->TheObjects[i]->AllVertices, tempRoots);
-    if (tempRoots.size!=OldVertices.size || OldVertices.size!=this->TheObjects[i]->AllVertices.size)
-    { this->TheObjects[i]->ComputeDebugString(*this);
-      assert(false);
-      return false;
+    if (this->TheObjects[i]!=0)
+    { CombinatorialChamber& theChamber = *this->TheObjects[i];
+      OldVertices.CopyFromBase(this->TheObjects[i]->AllVertices);
+      this->TheObjects[i]->ComputeVerticesFromNormals(*this, theGlobalVariables);
+      OldVertices.intersectWith(this->TheObjects[i]->AllVertices, tempRoots);
+      if (tempRoots.size!=OldVertices.size || OldVertices.size!=this->TheObjects[i]->AllVertices.size)
+      { this->TheObjects[i]->ComputeDebugString(*this);
+        assert(false);
+        return false;
+      }
+      /////////////////////////check that for each chamber and each of the starting cone, either the chamber and the cone have zero measure intersection, or the chamber lies entirely in the cone
+      for (int j=0; j<this->startingCones.size; j++)
+      { if (!this->startingCones.TheObjects[i].IsInCone(theChamber.AllVertices))
+          if (theChamber.ChambersHaveNonZeroMeasureIntersection(this->startingCones.TheObjects[j], theGlobalVariables))
+          { theChamber.ComputeDebugString(*this);
+            this->startingCones.TheObjects[i].ComputeDebugString();
+            assert(false);
+            return false;
+          }
+        std::stringstream out;
+        out << "Checking consistency chamber " << i+1 << " out of " << this->size << " cone " << j+1 << " out of " << this->startingCones.size;
+        theGlobalVariables.theIndicatorVariables.ProgressReportString1= out.str();
+        theGlobalVariables.MakeReport();
+      }
     }
-  }
+  return true;
+}
+
+bool CombinatorialChamber::ChambersHaveNonZeroMeasureIntersection(roots& WallsOther, GlobalVariables& theGlobalVariables)
+{ Selection VertexSelection;
+  if (this->Externalwalls.size<1)
+    return false;
+  int theDimension = this->Externalwalls.TheObjects[0].normal.size;
+  roots theWalls;
+  this->GetWallNormals(theWalls);
+  theWalls.AddRootSnoRepetition(WallsOther);
+  int numCandidates = MathRoutines::NChooseK(theWalls.size, theDimension-1);
+  root tempRoot; root newInternalPoint;
+  newInternalPoint.MakeZero(theDimension);
+  VertexSelection.init(theWalls.size);
+  for (int i=0; i<numCandidates; VertexSelection.incrementSelectionFixedCardinality(theDimension-1), i++)
+    if (theWalls.ComputeNormalFromSelection(tempRoot, VertexSelection, theGlobalVariables, theDimension))
+      if (this->PlusMinusPointIsInChamberModifyInput(tempRoot))
+        if (WallsOther.ElementsHaveNonNegativeScalarProduct(tempRoot))
+        { newInternalPoint.Add(tempRoot);
+          if (this->PointIsStrictlyInsideChamber(newInternalPoint) && WallsOther.ElementsHavePositiveScalarProduct(newInternalPoint))
+            return true;
+        }
+  return false;
+}
+
+bool roots::ElementsHaveNonNegativeScalarProduct(const root& theRoot) const
+{ for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].OurScalarProductIsNegative(theRoot))
+      return false;
+  return true;
+}
+
+bool roots::ElementsHavePositiveScalarProduct(const root& theRoot) const
+{ for (int i=0; i<this->size; i++)
+    if (!this->TheObjects[i].OurScalarProductIsPositive(theRoot))
+      return false;
   return true;
 }

@@ -965,6 +965,7 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
   { this->theComputationSetup.thePartialFraction.theChambers.thePauseController.UnlockSafePoint();
     return;
   }
+  this->theComputationSetup.thePartialFraction.theChambers.flagMakeGrandMasterConsistencyCheck=true;
   this->ReadVPVectorsAndOptions();
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;

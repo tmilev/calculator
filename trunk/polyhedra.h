@@ -1685,10 +1685,10 @@ public:
   void MultiplyByInteger(int a);
   void MultiplyByLargeInt(LargeInt& right);
   void MultiplyByLargeIntUnsigned(LargeIntUnsigned& right);
-  bool OurScalarProductIsPositive(root& right);
-  bool OurScalarProductIsNonNegative(root& right){return !this->OurScalarProductIsNegative(right); };
-  bool OurScalarProductIsNegative(root& right);
-  bool OurScalarProductIsZero(root& right);
+  bool OurScalarProductIsPositive(const root& right);
+  bool OurScalarProductIsNonNegative(const root& right){return !this->OurScalarProductIsNegative(right); };
+  bool OurScalarProductIsNegative(const root& right);
+  bool OurScalarProductIsZero(const root& right);
   void MinusRoot();
   void Subtract(const root& r);
   void AssignWithoutLastCoordinate(root& right);
@@ -1778,6 +1778,8 @@ public:
   void AddIntRoot(intRoot& r);
   void AddRootSnoRepetition(roots& r);
   bool AddRootNoRepetition(root& r);
+  bool ElementsHaveNonNegativeScalarProduct(const root& theRoot) const;
+  bool ElementsHavePositiveScalarProduct(const root& theRoot) const;
   bool ContainsOppositeRoots();
   bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
@@ -1984,10 +1986,13 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
   void LabelWallIndicesProperly();
+  void GetWallNormals(roots& output);
   int GetHashFromSortedNormals();
   int getIndexInfiniteHyperplane(CombinatorialChamberContainer& owner);
   int getIndexVertexIncidentWithSelection(Selection& theSel);
   int GetIndexWallWithNormal(root& theNormal);
+  bool ChambersHaveNonZeroMeasureIntersection(CombinatorialChamber& other, GlobalVariables& theGlobalVariables);
+  bool ChambersHaveNonZeroMeasureIntersection(roots& WallsOther, GlobalVariables& theGlobalVariables);
   bool VertexIsIncidentWithSelection(root& VertexCandidate, Selection& theSel);
   bool IsSeparatedByStartingConesFrom(CombinatorialChamberContainer& owner, CombinatorialChamber& Neighbor, GlobalVariables& theGlobalVariables);
   bool GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables);
@@ -2005,6 +2010,7 @@ public:
   //and aborts its execution
   bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
   bool PointIsInChamber(const root& point);
+  bool PointIsStrictlyInsideChamber(const root& point);
   bool PointIsOnChamberBorder(const root& point);
   void findWallsIncidentWithVertexExcludeWallAtInfinity (root& theVertex, Selection& output, CombinatorialChamberContainer* owner);
 //  bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
@@ -2717,6 +2723,7 @@ public:
   bool FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray);
   bool IsSurelyOutsideCone(roots& TheVertices);
   bool IsSurelyOutsideConeAccordingToChamberTestArray();
+  bool IsInCone(const roots& theRoots);
   bool IsInCone(const root& r);
   bool IsOnConeBorder(const root& r);
   bool IsStrictlyInsideCone(const root& r);
@@ -2796,6 +2803,7 @@ public:
   bool flagSliceWithAWallIgnorePermanentlyZero;
   bool flagDrawingProjective;
   bool flagMakingReports;
+  bool flagMakeGrandMasterConsistencyCheck;
   static const int MaxNumHeaps=5000;
   static const int GraphicsMaxNumChambers = 10000;
   static int NumTotalCreatedCombinatorialChambersAtLastDefrag;

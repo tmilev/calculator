@@ -960,7 +960,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   { inputData.flagDyckPathComputationLoaded=inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
     inputData.thePartialFraction.theChambers.ComputeDebugString();
     inputData.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
-    assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(true));
+    assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(true, theGlobalVariables));
   }
   inputData.flagDyckPathComputationLoaded=false;
   IrreducibleFiniteDimensionalModule theModule;
@@ -1827,7 +1827,7 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
     return;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
-  //inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
+  inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   inputData.thePartialFraction.theChambers.SliceAndComputeDebugString(theGlobalVariables);
   inputData.thePartialFraction.theChambers.thePauseController.ExitComputation();
 }
@@ -1836,6 +1836,7 @@ void CombinatorialChamberContainer::SliceAndComputeDebugString(GlobalVariables& 
 { this->SliceTheEuclideanSpace(theGlobalVariables);
   this->QuickSortAscending();
   this->LabelChamberIndicesProperly();
+  this->PurgeInternalWalls();
   this->ComputeDebugString(false);
   root tempRoot;
   theGlobalVariables.theDrawingVariables.theBuffer.init();
@@ -1849,9 +1850,9 @@ void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstr
   tempS= inputData.thePartialFraction.theChambers.DebugString;
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
-    logstream << WeylLetter << Dimension << " test NOT ok !!!\n";
+    logstream << WeylLetter << Dimension << " test NOT ok !!! Total chambers: "<< inputData.thePartialFraction.theChambers.size << "\n";
   else
-    logstream <<  WeylLetter << Dimension << " test OK\n";
+    logstream <<  WeylLetter << Dimension << " test OK. Total chambers: "<< inputData.thePartialFraction.theChambers.size <<"\n";
   theGlobalVariables.theIndicatorVariables.StatusString1= logstream.str();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
@@ -1859,6 +1860,7 @@ void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstr
 
 void ComputationSetup::TestUnitCombinatorialChambersChambers(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 5, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 2, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 3, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'B', 2, inputData, theGlobalVariables);
@@ -1866,6 +1868,7 @@ void ComputationSetup::TestUnitCombinatorialChambersChambers(ComputationSetup& i
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'C', 3, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 4, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'D', 4, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'B', 4, inputData, theGlobalVariables);
 }
 
 int CombinatorialChamber::GetHashFromSortedNormals()
@@ -2066,6 +2069,7 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
     if (this->GetSplittingFacet(KillerFacet, output, theGlobalVariables))
       if(this->SplitChamber(KillerFacet, output, direction, theGlobalVariables))
         return true;
+  assert(this->TestPossibilityToSlice(direction, output));
   this->flagExplored=true;
   return false;
 }
@@ -2090,7 +2094,7 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
 { //static int ProblemCounter=0;
   //ProblemCounter++;
   if (this->flagMustStop)
-  { assert(this->ConsistencyCheck(true));
+  { assert(this->ConsistencyCheck(true, theGlobalVariables));
     return;
   }
   if (this->theCurrentIndex==-1)
@@ -2118,15 +2122,15 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
           this->indexLowestNonCheckedForGlueing=this->size;
         if (this->indexLowestNonCheckedForGlueing==0)
         { this->LabelChamberIndicesProperly();
-/*          if (this->flagStoringVertices && !this->flagSpanTheEntireSpace && this->flagUsingVerticesToDetermineBogusNeighborsIfPossible)
-            this->CheckForAndRemoveBogusNeighbors(theGlobalVariables);*/
-          assert(this->ConsistencyCheck(true));
+          //if (this->flagMakeGrandMasterConsistencyCheck && this->theCurrentIndex==this->theDirections.size-1)
+          //  this->GrandMasterConsistencyCheck(theGlobalVariables);
+          assert(this->ConsistencyCheck(true, theGlobalVariables));
         }
         if (this->indexLowestNonCheckedForGlueing<this->size)
           this->GlueOverSubdividedChambersCheckLowestIndex(theGlobalVariables);
         else
         { this->initNextIndex();
-          this->ConsistencyCheck(false);
+          this->ConsistencyCheck(false, theGlobalVariables);
         }
       }
     }
@@ -2174,10 +2178,10 @@ bool CombinatorialChamberContainer::GrandMasterConsistencyCheck(GlobalVariables&
       }
       /////////////////////////check that for each chamber and each of the starting cone, either the chamber and the cone have zero measure intersection, or the chamber lies entirely in the cone
       for (int j=0; j<this->startingCones.size; j++)
-      { if (!this->startingCones.TheObjects[i].IsInCone(theChamber.AllVertices))
+      { if (!this->startingCones.TheObjects[j].IsInCone(theChamber.AllVertices))
           if (theChamber.ChambersHaveNonZeroMeasureIntersection(this->startingCones.TheObjects[j], theGlobalVariables))
           { theChamber.ComputeDebugString(*this);
-            this->startingCones.TheObjects[i].ComputeDebugString();
+            this->startingCones.TheObjects[j].ComputeDebugString();
             assert(false);
             return false;
           }

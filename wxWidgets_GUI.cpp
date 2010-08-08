@@ -439,7 +439,7 @@ BEGIN_EVENT_TABLE(wxDialogOutput, wxDialog )
     EVT_BUTTON(guiMainWindow::ID_Button15ProverFixedKOpen, guiMainWindow::onButton15ProverFixedKOpen)
 END_EVENT_TABLE()
 
-wxDialogOutput::wxDialogOutput ( wxWindow * parent, wxWindowID id, const wxString & title, const wxPoint & position, const wxSize & size, long style ) : wxDialog( parent, id, title, position, size, style)
+wxDialogOutput::wxDialogOutput (wxWindow * parent, wxWindowID id, const wxString & title, const wxPoint & position, const wxSize & size, long style) : wxDialog( parent, id, title, position, size, style)
 {
 }
 
@@ -451,7 +451,7 @@ void* RunComputationalThread(void*ptr)
 {	MainWindow1->theComputationSetup.Run();
   wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxComputationOver);
 #ifndef WIN32
-    pthread_exit(NULL);
+  pthread_exit(NULL);
 #endif
 }
 
@@ -602,8 +602,8 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 	this->Button11ProverFullComputation = new ::wxButton(this->Dialog2StatusString1,this->ID_Button11ProverFullComputation,wxT("Prover full go"));
 	this->Button12ProverOneStepFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button12ProverOneStepFixedK,wxT("Prover one step fixed K"));
 	this->Button13ProverFullComputationFixedK = new ::wxButton(this->Dialog2StatusString1,this->ID_Button13ProverFullComputationFixedK,wxT("Prover full go Fixed K"));
-	this->Button14ProverFixedKSave= new ::wxButton(this->Dialog2StatusString1,this->ID_Button14ProverFixedKSave,wxT("Save provers"));
-	this->Button15ProverFixedKOpen= new ::wxButton(this->Dialog2StatusString1,this->ID_Button15ProverFixedKOpen,wxT("Open provers"));
+	this->Button14ProverFixedKSave= new ::wxButton(this->Dialog2StatusString1, this->ID_Button14ProverFixedKSave,wxT("Save provers"));
+	this->Button15ProverFixedKOpen= new ::wxButton(this->Dialog2StatusString1, this->ID_Button15ProverFixedKOpen,wxT("Open provers"));
 	this->Button5SaveComputer->Disable();
   //this->BoxSizer1HorizontalBackground->Fit(this);
   this->BoxSizer1HorizontalBackground->Add(this->BoxSizer2VerticalInputs, 0, wxEXPAND|::wxBOTTOM);
@@ -927,9 +927,9 @@ void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
 
 void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 { this->theComputationSetup.thePartialFraction.theChambers.PauseSlicing();
-  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true);
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.theGlobalVariablesContainer->Default());
   this->theComputationSetup.thePartialFraction.theChambers.WriteToDefaultFile(*this->theComputationSetup.theGlobalVariablesContainer->Default());
-  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true);
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.theGlobalVariablesContainer->Default());
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxCANCEL)
     this->theComputationSetup.thePartialFraction.theChambers.flagMustStop=true;
@@ -965,9 +965,10 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
   { this->theComputationSetup.thePartialFraction.theChambers.thePauseController.UnlockSafePoint();
     return;
   }
-  this->theComputationSetup.thePartialFraction.theChambers.flagMakeGrandMasterConsistencyCheck=true;
+//  this->theComputationSetup.thePartialFraction.theChambers.flagMakeGrandMasterConsistencyCheck=true;
   this->ReadVPVectorsAndOptions();
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
+  //this->theComputationSetup.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;
   this->RunTheComputation();
 }

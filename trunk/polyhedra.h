@@ -1356,8 +1356,10 @@ public:
   LargeIntUnsigned den;
 };
 
+Rational operator-(Rational& argument);
 class Rational
-{ inline bool TryToAddQuickly(int OtherNum, int OtherDen)
+{ friend Rational operator-(Rational& argument);
+  inline bool TryToAddQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
     assert(this->DenShort>0 && OtherDen>0);
     if (OtherNum<0)
@@ -1626,20 +1628,6 @@ public:
   inline bool operator>(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat); };
   inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this); };
 };
-
-/*WTF The below doesn't link on the Microsoft compiler...
-GGGGGGGGGGGGRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrrr
-RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
-RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
-RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRrr
-RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
-Rational operator-(const Rational& argument)
-{ Rational tempRat;
-  tempRat.Assign(argument);
-  tempRat.Minus();
-  return tempRat;
-}*/
 
 class root :public ListLight<Rational>
 {
@@ -1972,7 +1960,7 @@ public:
   static bool flagPrintWallDetails;
 //  static bool flagMakingASingleHyperplaneSlice;
   bool PointLiesInMoreThanOneWall(root& point);
-  bool PointIsAVertex(const root& point);
+  bool PointIsAVertex(const root& point, GlobalVariables& theGlobalVariables);
   //bool InduceFromAffineCone(affineCone& input);
   void SortNormals();
   bool GetSplittingFacet(root& output, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
@@ -1981,7 +1969,7 @@ public:
   bool ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
   void ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
   void ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner);
-  bool ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex);
+  bool ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
   //bool FacetIsInternal(Facet* f);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
@@ -2868,7 +2856,7 @@ public:
   void LabelAllUnexplored();
   void DumpAll();
   bool GrandMasterConsistencyCheck(GlobalVariables& theGlobalVariables);
-  bool ConsistencyCheck(bool CheckForConvexityChambers);
+  bool ConsistencyCheck(bool CheckForConvexityChambers, GlobalVariables& theGlobalVariables);
   void PurgeZeroPointers();
   void PurgeInternalWalls();
   void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots, root& theCurrentDirection);

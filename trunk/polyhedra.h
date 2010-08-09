@@ -6802,6 +6802,7 @@ public:
   void WriteToFilePFdecomposition(std::fstream& output, bool includeLatexHeaderAndFooter);
   void Reset();
   void DoTheRootSAComputation();
+  static void ProverOpenAndGo(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void LProhibitingWeightsComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void CountNilradicals(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ComputeReductiveSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);

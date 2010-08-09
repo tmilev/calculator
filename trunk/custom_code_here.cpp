@@ -2230,3 +2230,9 @@ bool roots::ElementsHavePositiveScalarProduct(const root& theRoot) const
       return false;
   return true;
 }
+
+void ComputationSetup::ProverOpenAndGo(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ inputData.theProverFixedK.ReadFromFile(inputData.theProverFixedK.ProverFileName, theGlobalVariables);
+  inputData.theProver.ReadFromFile(theGlobalVariables);
+  inputData.theProver.RecursionStep(inputData.theProver.theWeylGroup, theGlobalVariables);
+}

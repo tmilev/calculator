@@ -1208,7 +1208,7 @@ void ComputationSetup::Run()
       { if (!this->flagProverUseFixedK && !this->theProver.flagComputationIsInitialized)
           this->theProver.GenerateStartingState (*this, *tgv, 'E', 8);
         if(!this->flagProverUseFixedK && this->theProver.flagComputationIsInitialized )
-            this->theProver.RecursionStep(this->theProver.theWeylGroup, *tgv);
+          this->theProver.RecursionStep(this->theProver.theWeylGroup, *tgv);
         if (!this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
           this->theProverFixedK.GenerateStartingStatesFixedK(*this, *tgv, 'E', 8);
         if (this->theProverFixedK.flagComputationIsInitialized && this->flagProverUseFixedK)
@@ -1690,7 +1690,7 @@ void root::ScaleToIntegralMinHeight()
       { if(!numGCD.IsEqualToOne())
         { this->TheObjects[i].GetNumUnsigned(tempUI);
           LargeIntUnsigned::gcd(numGCD, tempUI, numGCD);
-        } 
+        }
       } else
       { this->TheObjects[i].GetNumUnsigned(numGCD);
         foundNonZero=true;
@@ -1701,7 +1701,7 @@ void root::ScaleToIntegralMinHeight()
     }
   if (foundNonZero)
     if (!numGCD.IsEqualToOne())
-      this->DivByLargeIntUnsigned(numGCD);  
+      this->DivByLargeIntUnsigned(numGCD);
 }
 
 bool root::IsStronglyPerpendicularTo(root &right, WeylGroup& theWeyl)
@@ -3184,7 +3184,7 @@ void CombinatorialChamber::AddInternalWall(root& TheKillerFacetNormal, root& The
 { //Warning: the below code is false!
   //if (this->flagExplored)
   //  return;
-  //Explanation: 
+  //Explanation:
   root tempRoot; tempRoot.Assign(TheKillerFacetNormal);
   tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   if (!owner.flagMakingASingleHyperplaneSlice)

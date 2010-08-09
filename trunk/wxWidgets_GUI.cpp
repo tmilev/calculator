@@ -1094,10 +1094,7 @@ void guiMainWindow::onButton14ProverProverFixedKSave(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton15ProverFixedKOpen(wxCommandEvent& ev)
-{ MainWindow1->theComputationSetup.flagProverDoingFullRecursion=true;
-  MainWindow1->theComputationSetup.flagUsingProverDoNotCallOthers=true;
-  MainWindow1->theComputationSetup.flagOpenProverData=true;
-  MainWindow1->theComputationSetup.flagSavingProverData=false;
+{ MainWindow1->theComputationSetup.theFunctionToRun= &MainWindow1->theComputationSetup.ProverOpenAndGo;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName=MainWindow1GlobalPath;
   MainWindow1->theComputationSetup.theProverFixedK.ProverFileName.append( "theProverFixedK.txt");
   MainWindow1->theComputationSetup.theProver.FileHeaderString=MainWindow1GlobalPath;

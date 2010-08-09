@@ -1768,6 +1768,7 @@ public:
   bool AddRootNoRepetition(root& r);
   bool ElementsHaveNonNegativeScalarProduct(const root& theRoot) const;
   bool ElementsHavePositiveScalarProduct(const root& theRoot) const;
+  bool ElementsHaveNonPositiveScalarProduct(const root& theRoot) const;
   bool ContainsOppositeRoots();
   bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
@@ -1815,6 +1816,7 @@ public:
   { this->ComputeDebugString();
     return &this->DebugString;
   };
+  //The below function is required to preserve the order of elements given by theSelection.elements.
   void SubSelection(Selection& theSelection, roots& output);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
   void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
@@ -1972,7 +1974,7 @@ public:
   bool ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
   //bool FacetIsInternal(Facet* f);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
+  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
   void LabelWallIndicesProperly();
   void GetWallNormals(roots& output);
   int GetHashFromSortedNormals();
@@ -1994,6 +1996,7 @@ public:
   void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
   void ComputeHyperplanesCurrentDirection(GlobalVariables& theGlobalVariables);
+  void Triangulate(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   //the below function returns false if the cross-section affine walls have been modified
   //and aborts its execution
   bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
@@ -2719,6 +2722,10 @@ public:
   //bool SeparatesPoints()
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  static bool PointIsAVertex(const roots& coneNormals, root& thePoint, GlobalVariables& theGlobalVariables);
+  bool PointIsAVertex(root& thePoint, GlobalVariables& theGlobalVariables)
+  { return this->PointIsAVertex(*this, thePoint, theGlobalVariables);
+  };
 //  int HashFunction() const;
   List<int> ChamberTestArray;
   void operator=(const Cone& right);
@@ -2838,7 +2845,9 @@ public:
   void WriteReportToFile(const std::string& FileNameOutput, bool DoPurgeZeroPointers);
   void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  bool WriteToFile(const std::string& FileName, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  bool ReadFromFile(const std::string& FileName, GlobalVariables& theGlobalVariables);
   bool ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
   bool ConsistencyCheckNextIndicesToSlice();
   int RootBelongsToChamberIndex(root& input, std::string* outputString);

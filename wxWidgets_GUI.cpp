@@ -927,9 +927,9 @@ void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
 
 void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 { this->theComputationSetup.thePartialFraction.theChambers.PauseSlicing();
-  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.theGlobalVariablesContainer->Default());
-  this->theComputationSetup.thePartialFraction.theChambers.WriteToDefaultFile(*this->theComputationSetup.theGlobalVariablesContainer->Default());
-  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.theGlobalVariablesContainer->Default());
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.GetGlobalVars());
+  this->theComputationSetup.thePartialFraction.theChambers.WriteToFile("./DyckPathPolytope.txt", *this->theComputationSetup.GetGlobalVars());
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.GetGlobalVars());
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxCANCEL)
     this->theComputationSetup.thePartialFraction.theChambers.flagMustStop=true;

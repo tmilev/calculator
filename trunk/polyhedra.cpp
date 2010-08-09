@@ -338,13 +338,8 @@ void CombinatorialChamberContainer::SliceOneDirection(root* theIndicatorRoot, Gl
 { if (this->theCurrentIndex<this->theDirections.size)
   { int oldindex= this->theCurrentIndex;
     this->PreferredNextChambers.MakeActualSizeAtLeastExpandOnTop(this->size*this->AmbientDimension+100);
-//    int counter=0;
     while(oldindex==this->theCurrentIndex)
-    { //counter++;
-//      if (counter==8)
-//      {CombinatorialChamberContainer::AnErrorHasOcurredTimeToPanic=true;
-//      }
-      if (this->flagMustStop)
+    { if (this->flagMustStop)
         return;
       this->OneSlice(theIndicatorRoot, theGlobalVariables);
     }
@@ -576,7 +571,7 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
   this->VPVectors.ComputeDebugString();
 }
 
-::std::stringstream  CGIspecificRoutines::outputStream;
+std::stringstream  CGIspecificRoutines::outputStream;
 int CGIspecificRoutines::numLines;
 int CGIspecificRoutines::shiftX=0;
 int CGIspecificRoutines::numDashedLines=0;
@@ -2295,6 +2290,7 @@ void Selection::init(int maxNumElements)
   this->CardinalitySelection=0;
 }
 
+//The below function is required to preserve the order of elements given by theSelection.elements.
 void roots::SubSelection(Selection& theSelection, roots& output)
 { assert(&output!=this);
   output.SetSizeExpandOnTopNoObjectInit(theSelection.CardinalitySelection);
@@ -3598,6 +3594,20 @@ bool CombinatorialChamber::PointIsAVertex(const root& point, GlobalVariables& th
   return false;
 }
 
+bool Cone::PointIsAVertex(const roots& coneNormals, root& thePoint, GlobalVariables& theGlobalVariables)
+{ roots WallsContainingPoint; WallsContainingPoint.MakeActualSizeAtLeastExpandOnTop(thePoint.size-1);
+  for (int i=0; i<coneNormals.size; i++)
+  { if (coneNormals.TheObjects[i].OurScalarProductIsZero(thePoint))
+      WallsContainingPoint.AddObjectOnTop(coneNormals.TheObjects[i]);
+    int rank=WallsContainingPoint.GetRankOfSpanOfElements(theGlobalVariables);
+    if (rank<WallsContainingPoint.size)
+      WallsContainingPoint.PopLastObject();
+    if (rank==thePoint.size-1)
+      return true;
+  }
+  return false;
+}
+
 bool CombinatorialChamber::ExtraPointRemovesDoubtForBogusWall(MatrixLargeRational& theMatrix, MatrixLargeRational& emptyMat, Selection& bufferSel, root& theRoot)
 { int oldNumRows = theMatrix.NumRows;
   theMatrix.Resize(oldNumRows+1, theRoot.size, true);
@@ -4625,43 +4635,6 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
   this->MakeStartingChambersDontSpanEntireSpace(directions, theIndicatorRoot, theGlobalVariables);
 }
 
-void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
-{ this->initAndCreateNewObjects(1);
-  CombinatorialChamber& theStartingChamber= *this->TheObjects[0];
-  theStartingChamber.Externalwalls.SetSizeExpandOnTopNoObjectInit(this->TheGlobalConeNormals.size);
-  theStartingChamber.flagHasZeroPolynomiaL=false;
-  theStartingChamber.flagPermanentlyZero=false;
-  for (int i=0; i<this->TheGlobalConeNormals.size; i++)
-    theStartingChamber.Externalwalls.TheObjects[i].normal.Assign(this->TheGlobalConeNormals.TheObjects[i]);
-  this->StartingCrossSections.SetSizeExpandOnTopNoObjectInit(1);
-  theStartingChamber.IndexStartingCrossSectionNormal=0;
-  this->TheGlobalConeNormals.Average(this->StartingCrossSections.TheObjects[0].normal, this->AmbientDimension);
-  this->StartingCrossSections.TheObjects[0].affinePoint.Assign(directions.TheObjects[0]);
-  Selection tempSel;
-  tempSel.init(this->TheGlobalConeNormals.size);
-  int NumCycles= MathRoutines::NChooseK(tempSel.MaxSize, this->AmbientDimension-1);
-  roots tempRoots;
-  root tempRoot;
-  for (int i=0; i<NumCycles; i++)
-  { tempSel.incrementSelectionFixedCardinality(this->AmbientDimension-1);
-    this->TheGlobalConeNormals.ComputeNormalFromSelection(tempRoot, tempSel, theGlobalVariables, this->AmbientDimension);
-    if (!this->TheGlobalConeNormals.IsInCone(tempRoot))
-      tempRoot.MinusRoot();
-    if (this->TheGlobalConeNormals.IsInCone(tempRoot)&& !this->TheGlobalConeNormals.IsStrictlyInsideCone(tempRoot))
-      theStartingChamber.AllVertices.AddObjectOnTop(tempRoot);
-  }
-  theStartingChamber.flagExplored=false;
-  this->initNextIndex();
-  tempSel.init(this->AmbientDimension);
-  tempRoots.CopyFromBase(this->theDirections);
-  tempRoots.size=this->AmbientDimension;
-  for (int i=0; i<this->AmbientDimension; i++)
-  { tempRoots.ComputeNormalExcludingIndex(tempRoot, i, theGlobalVariables);
-    tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-    theStartingChamber.InternalWalls.AddObjectOnTop(tempRoot);
-  }
-}
-
 /*void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
 { Selection theSelection;
   theSelection.init(this->AmbientDimension);
@@ -4754,8 +4727,10 @@ void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& th
   }
 }
 
-void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner)
-{ std::string tempS;
+bool CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner)
+{ if (!input.is_open())
+    return false;
+  std::string tempS;
   int tempI;
   input >> tempS;
   input >> this->flagHasZeroPolynomiaL >> this->flagExplored>>this->flagPermanentlyZero;
@@ -4772,6 +4747,7 @@ void CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& th
   this->Externalwalls.SetSizeExpandOnTopNoObjectInit(tempI);
   for (int i=0; i<this->Externalwalls.size; i++)
     this->Externalwalls.TheObjects[i].ReadFromFile(input, owner);
+  return true;
 }
 
 void WallData::WriteToFile(std::fstream& output)
@@ -4810,22 +4786,30 @@ void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& 
 }
 
 void CombinatorialChamberContainer::WriteToDefaultFile(GlobalVariables& theGlobalVariables)
+{ this->WriteToFile("./theChambers.txt", theGlobalVariables);
+}
+
+bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, GlobalVariables& theGlobalVariables)
 { std::fstream tempF;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, true, false);
+  if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false))
+    return false;
   this->WriteToFile(tempF, theGlobalVariables);
   tempF.close();
+  return true;
+}
+
+bool CombinatorialChamberContainer::ReadFromFile(const std::string& FileName, GlobalVariables& theGlobalVariables)
+{ std::fstream tempF;
+  if (!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false))
+    return false;
+  this->ReadFromFile(tempF, theGlobalVariables);
+  assert(this->ConsistencyCheck(true, theGlobalVariables));
+  tempF.close();
+  return true;
 }
 
 bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables& theGlobalVariables)
-{ std::fstream tempF;
-  if (CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, "./theChambers.txt", false, false, false))
-  { this->ReadFromFile(tempF, theGlobalVariables);
-    //this->WriteReportToFile("Loaded.html");
-    assert(this->ConsistencyCheck(true, theGlobalVariables));
-    tempF.close();
-    return true;
-  }
-  return false;
+{ return this->ReadFromFile("./theChambers.txt", theGlobalVariables);
 }
 
 void CombinatorialChamberContainer::PauseSlicing()

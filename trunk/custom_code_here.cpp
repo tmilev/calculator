@@ -956,12 +956,10 @@ void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double 
 }
 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (false)
-  { inputData.flagDyckPathComputationLoaded=inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
-    inputData.thePartialFraction.theChambers.ComputeDebugString();
-    inputData.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
-    assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(true, theGlobalVariables));
-  }
+{ inputData.flagDyckPathComputationLoaded=inputData.thePartialFraction.theChambers.ReadFromFile("./DyckPathPolytope.txt", theGlobalVariables);
+  inputData.thePartialFraction.theChambers.ComputeDebugString();
+  inputData.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
+  assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(true, theGlobalVariables));
   inputData.flagDyckPathComputationLoaded=false;
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
@@ -974,13 +972,14 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.thePartialFraction.LimitSplittingSteps=100000;
   inputData.thePartialFraction.flagUsingCheckSum=true;
   inputData.thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
-  inputData.thePartialFraction.Run(inputData.thePartialFraction.theChambers.theDirections, theGlobalVariables);
+  inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
+  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.WriteToDefaultFile(theGlobalVariables);
+  inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1= inputData.thePartialFraction.DebugString;
   theGlobalVariables.MakeReport();
-  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
-  inputData.thePartialFraction.theChambers.WriteToDefaultFile(theGlobalVariables);
 }
 
 void ComputationSetup::TestGraphicalOutputPolys(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
@@ -1227,7 +1226,7 @@ void reductiveSubalgebras::ElementToStringDynkinType(int theIndex, bool useLatex
       out << theMult;
     out << theLetter << "_" <<theRank << " ";
     if (j!=this->theLetters.TheObjects[theIndex].size-1)
-      out <<"+ ";
+      out << "+ ";
   }
   output=out.str();
 }
@@ -1239,35 +1238,35 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
     { int mult= this->thePartitionMultiplicities.TheObjects[i].TheObjects[j];
       int val= this->thePartitionValues.TheObjects[i].TheObjects[j];
       if (mult!=1)
-        out << mult <<" x ";
-      out << val <<" ";
+        out << mult << " x ";
+      out << val << " ";
       if (j!=this->thePartitionValues.TheObjects[i].size-1)
-        out <<"+ ";
+        out << "+ ";
     }
     if (useHtml)
-      out <<"\n<br>";
-    out <<"\n";
+      out << "\n<br>";
+    out << "\n";
   }
   for (int i=0; i<this->theLetters.size; i++)
   { this->ElementToStringDynkinType(i, useLatex, useHtml, tempS);
-    out << tempS <<"     Module decomposition: ";
+    out << tempS << "     Module decomposition: ";
     slTwo& theSl2= this->CandidatesPrincipalSl2ofSubalgebra.TheObjects[i];
     theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
     out << tempS;
     if (this->IndicesMatchingActualSl2s.size>0)
-    { out <<" Matching actual sl(2)'s: ";
+    { out << " Matching actual sl(2)'s: ";
       for (int j=0; j<this->IndicesMatchingActualSl2s.TheObjects[i].size; j++)
       { int tempI= this->IndicesMatchingActualSl2s.TheObjects[i].TheObjects[j];
-        out << this->theSl2s.TheObjects[tempI].hCharacteristic.ElementToString() <<", ";
+        out << this->theSl2s.TheObjects[tempI].hCharacteristic.ElementToString() << ", ";
       }
     }
     if (useHtml)
-      out <<"\n<br>";
-    out<<"\n";
+      out << "\n<br>";
+    out << "\n";
   }
-  out <<"Remaining candidates:\n";
+  out << "Remaining candidates:\n";
   if (useHtml)
-    out <<"<br>\n";
+    out << "<br>\n";
   for (int i=0; i<this->theCandidateSubAlgebras.size; i++)
   { SltwoSubalgebras& currentSl2s= this->theCandidateSubAlgebras.TheObjects[i];
     if (currentSl2s.size>0)
@@ -1276,9 +1275,9 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
       if (this->RemainingCandidates.selected[i])
         out << " orbits fit\n";
       else
-        out <<" orbits do not fit, embedding impossible\n";
+        out << " orbits do not fit, embedding impossible\n";
       if (useHtml)
-        out<<"<br>\n";
+        out<< "<br>\n";
       currentSl2s.ElementToStringNoGenerators(tempS, theGlobalVariables, currentSl2s.theRootSAs.AmbientWeyl, useLatex, useHtml, false, 0, 0);
       out << tempS;
     }
@@ -2224,6 +2223,13 @@ bool roots::ElementsHaveNonNegativeScalarProduct(const root& theRoot) const
   return true;
 }
 
+bool roots::ElementsHaveNonPositiveScalarProduct(const root& theRoot) const
+{ for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].OurScalarProductIsPositive(theRoot))
+      return false;
+  return true;
+}
+
 bool roots::ElementsHavePositiveScalarProduct(const root& theRoot) const
 { for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].OurScalarProductIsPositive(theRoot))
@@ -2235,4 +2241,109 @@ void ComputationSetup::ProverOpenAndGo(ComputationSetup& inputData, GlobalVariab
 { inputData.theProverFixedK.ReadFromFile(inputData.theProverFixedK.ProverFileName, theGlobalVariables);
   inputData.theProver.ReadFromFile(theGlobalVariables);
   inputData.theProver.RecursionStep(inputData.theProver.theWeylGroup, theGlobalVariables);
+}
+
+void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
+{ this->initAndCreateNewObjects(1);
+  CombinatorialChamber& theStartingChamber= *this->TheObjects[0];
+  theStartingChamber.Externalwalls.SetSizeExpandOnTopNoObjectInit(this->TheGlobalConeNormals.size);
+  theStartingChamber.flagHasZeroPolynomiaL=false;
+  theStartingChamber.flagPermanentlyZero=false;
+  for (int i=0; i<this->TheGlobalConeNormals.size; i++)
+    theStartingChamber.Externalwalls.TheObjects[i].normal.Assign(this->TheGlobalConeNormals.TheObjects[i]);
+  this->StartingCrossSections.SetSizeExpandOnTopNoObjectInit(1);
+  theStartingChamber.IndexStartingCrossSectionNormal=0;
+  this->TheGlobalConeNormals.Average(this->StartingCrossSections.TheObjects[0].normal, this->AmbientDimension);
+  this->StartingCrossSections.TheObjects[0].affinePoint.Assign(directions.TheObjects[0]);
+  Selection tempSel;
+  tempSel.init(this->TheGlobalConeNormals.size);
+  roots tempRoots;
+  root tempRoot;
+  for (int i=0; i<directions.size; i++)
+    if (this->TheGlobalConeNormals.PointIsAVertex(directions.TheObjects[i], theGlobalVariables))
+      theStartingChamber.AllVertices.AddObjectOnTop(directions.TheObjects[i]);
+  tempSel.init(this->AmbientDimension);
+  tempRoots.CopyFromBase(this->theDirections);
+  tempRoots.size=this->AmbientDimension;
+  for (int i=0; i<this->AmbientDimension; i++)
+  { tempRoots.ComputeNormalExcludingIndex(tempRoot, i, theGlobalVariables);
+    tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+    theStartingChamber.InternalWalls.AddObjectOnTop(tempRoot);
+  }
+  // we need to triangulate the starting chamber, else we got computational trouble.
+  theStartingChamber.Triangulate(*this, theGlobalVariables);
+  this->initNextIndex();
+}
+
+void CombinatorialChamber::Triangulate(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
+{ /*if (this->AllVertices.size<= owner.AmbientDimension)
+    return;
+  //note: this algorithm can be improved, with ideas along the lines of the simplex algorithm. I have implemented instead a simpler but slow algorithm - I simply enumerate all
+  // owner.AmbientDimension-tuples until I find one that gives a simplex that is allowed.
+  roots remainingVertices;
+  remainingVertices.CopyFromBase(this->AllVertices);
+  int NumNewChambers = this->AllVertices.size+1-owner.AmbientDimension;
+  int oldSize=owner.size;
+  owner.MakeActualSizeAtLeastExpandOnTop(owner.size+ NumNewChambers);
+  Selection tempSel;
+  roots candidateSimplexNormals;
+  candidateSimplexNormals.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
+  for (int l =0; l<NumNewChambers; l++)
+  { owner.AddObjectOnTop(new CombinatorialChamber);
+    CombinatorialChamber& currentChamber = *owner.LastObject();
+    tempSel.init(owner.AmbientDimension);
+    roots& candidateSimplexVertices=currentChamber.AllVertices;
+    int numCycles = MathRoutines::NChooseK(tempSel.MaxSize, owner.AmbientDimension);
+    int indexDistinguishedVertex;
+    for (int i=0, tempSel.incrementSelectionFixedCardinality(owner.AmbientDimension); i<NumCycles; i++, tempSel.incrementSelectionFixedCardinality(owner.AmbientDimension))
+    { remainingVertices.SubSelection(tempSel, candidateSimplexVertices);
+      if (candidateSimplexVertices.GetRankOfSpanOfElements(theGlobalVariables)<owner.AmbientDimension)
+        continue;
+      int numInternalWalls=0;
+      for (int j=0; j<candidateSimplexVertices.size; j++)
+      { root& currentNormal= candidateSimplexNormals.TheObjects[j];
+        candidateSimplexVertices.ComputeNormalExcludingIndex(currentNormal, j, theGlobalVariables);
+        if (!remainingVertices.ElementsHaveNonNegativeScalarProduct(currentNormal) && !remainingVertices.ElementsHaveNonPositiveScalarProduct(currentNormal))
+        { numInternalWalls++;
+          indexDistinguishedVertex=j;
+          if (currentNormal.OurScalarProductIsNegative(candidateSimplexVertices.TheObjects[j]))
+            candidateSimplexVertices.TheObjects[j].MinusRoot();
+        }
+        if (numInternalWalls>1)
+          break;
+      }
+      if (numInternalWalls==1)
+        break;
+    }
+    currentChamber.Externalwalls.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
+    for (int i=0; i<currentChamber.Externalwalls.size; i++)
+      currentChamber.Externalwalls.TheObjects[i].normal.Assign(candidateSimplexNormals.TheObjects[i]);
+    remainingVertices.PopIndexSwapWithLast(tempSel.elements[indexDistinguishedVertex]);
+  }
+  roots theStartingNormals;
+  this->GetWallNormals(theStartingNormals);
+  for (int i=oldSize; i<owner.size; i++)
+  { CombinatorialChamber& currentChamber= *owner.TheObjects[i];
+    for (int j=0; j<owner.AmbientDimension; j++)
+    { WallData& newWall = currentChamber.Externalwalls.TheObjects[j];
+      int indexOriginalWall = theStartingNormals.IndexOfObject(newWall.normal);
+      if (indexOriginalWall==-1)
+      { indexOriginalWall= theStartingNormals.IndexOfObject(-newWall.normal));
+        if (indexOriginalWall!=-1)
+          theStartingNormals.TheObjects[j].nomal.MinusRoot();
+      }
+      if (indexOriginalWall!=-1)
+      { WallData& originalWall = this->Externalwalls.TheObjects[indexOriginalWall];
+        for (int k=0; k<originalWall.NeighborsAlongWall.size; k++)
+          if (originalWall.NeighborsAlongWall.TheObjects[k]!=0)
+          { CombinatorialChamber* neighbor = originalWall.NeighborsAlongWall.TheObjects[k];
+            WallData& neighborWall= neighbor->Externalwalls.TheObjects[originalWall.IndicesMirrorWalls.TheObjects[k]];
+            neighborWall.AddNeighbor(owner.TheObjects[i], j);
+            newWall.AddNeighbor(neighbor, originalWall.IndicesMirrorWalls.TheObjects[k]);
+          }
+      } else
+      { for (int k=oldSize; k
+      }
+    }
+  }*/
 }

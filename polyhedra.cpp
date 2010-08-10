@@ -346,11 +346,14 @@ void CombinatorialChamberContainer::SliceOneDirection(root* theIndicatorRoot, Gl
   }
 }
 
-void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoot, GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace)
 { if (this->theDirections.size==0)
     return;
   if (this->theDirections.TheObjects[0].size==1)
     return;
+  if (this->theCurrentIndex==-1)
+    this->flagSpanTheEntireSpace=SpanTheEntireSpace;
+  this->flagSpanTheEntireSpace=SpanTheEntireSpace;
   while(this->theCurrentIndex<this->theDirections.size)
   { if (this->flagMustStop)
       return;
@@ -1033,7 +1036,7 @@ void ComputationSetup::initWeylActionSpecifics(GlobalVariables& theGlobalVariabl
   this->thePartialFraction.theChambers.AmbientDimension=this->WeylGroupIndex;
   this->thePartialFraction.theChambers.theDirections.CopyFromBase(this->VPVectors);
   this->thePartialFraction.theChambers.theCurrentIndex = -1;
-  tempComplex.SliceTheEuclideanSpace(&this->IndicatorRoot, *this->theGlobalVariablesContainer->Default());
+  tempComplex.SliceTheEuclideanSpace(&this->IndicatorRoot, *this->theGlobalVariablesContainer->Default(), false);
   this->initGenerateWeylAndHyperplanesToSliceWith(theGlobalVariables, tempComplex);
   this->flagComputationInitialized=true;
   this->thePartialFraction.theChambers.flagSliceWithAWallInitDone=false;
@@ -1247,7 +1250,7 @@ void ComputationSetup::Run()
       this->thePartialFraction.theChambers.theDirections.ReverseOrderElements();*/
     if (!this->flagDoingWeylGroupAction)
     { if (this->flagFullChop)
-        this->thePartialFraction.theChambers.SliceTheEuclideanSpace(0, *this->theGlobalVariablesContainer->Default());
+        this->thePartialFraction.theChambers.SliceTheEuclideanSpace(0, *this->theGlobalVariablesContainer->Default(), false);
       else
       { if (this->flagOneIncrementOnly)
           this->thePartialFraction.theChambers.SliceOneDirection(0, *this->theGlobalVariablesContainer->Default());
@@ -4519,6 +4522,7 @@ void CombinatorialChamberContainer::init()
   this->startingCones.ReleaseMemory();
   this->theWeylGroupAffineHyperplaneImages.size=0;
   this->flagMakingASingleHyperplaneSlice=false;
+  this->flagSpanTheEntireSpace=false;
   this->flagMakingReports=true;
   this->flagDrawingProjective=true;
   this->flagSliceWithAWallIgnorePermanentlyZero=true;
@@ -4629,10 +4633,10 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
   //this->TheGlobalConeNormals.ComputeDebugString();
   this->PreferredNextChambers.ReleaseMemory();
   this->KillAllElements();
-/*  if (this->flagSpanTheEntireSpace)
+  if (this->flagSpanTheEntireSpace)
     this->MakeStartingChambersSpanEntireSpace(directions, theIndicatorRoot, theGlobalVariables);
-   else*/
-  this->MakeStartingChambersDontSpanEntireSpace(directions, theIndicatorRoot, theGlobalVariables);
+  else
+    this->MakeStartingChambersDontSpanEntireSpace(directions, theIndicatorRoot, theGlobalVariables);
 }
 
 /*void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
@@ -4820,9 +4824,9 @@ void CombinatorialChamberContainer::ResumeSlicing()
 { this->thePauseController.UnlockSafePoint();
 }
 
-void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace)
 { this->flagIsRunning=true;
-  this->SliceTheEuclideanSpace(0, theGlobalVariables);
+  this->SliceTheEuclideanSpace(0, theGlobalVariables, SpanTheEntireSpace);
   this->flagIsRunning=false;
 }
 
@@ -4851,7 +4855,7 @@ void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlob
     for (int j=0; j<this->ConesHavingFixedNormal.TheObjects[i].size; j++)
       output << this->ConesHavingFixedNormal.TheObjects[i].TheObjects[j] << " ";
   }
-  output << "\ntheCones: "<< this->size << " ";
+  output << "\ntheCones: " << this->size << " ";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
     output << " ";

@@ -2798,6 +2798,7 @@ public:
   bool flagSliceWithAWallIgnorePermanentlyZero;
   bool flagDrawingProjective;
   bool flagMakingReports;
+  bool flagSpanTheEntireSpace;
   bool flagMakeGrandMasterConsistencyCheck;
   static const int MaxNumHeaps=5000;
   static const int GraphicsMaxNumChambers = 10000;
@@ -2815,8 +2816,8 @@ public:
   void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
   bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
   int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
-  void SliceTheEuclideanSpace(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
-  void SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables);
+  void SliceTheEuclideanSpace(root* theIndicatorRoot, GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace);
+  void SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace);
   void SliceOneDirection(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
   void OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);

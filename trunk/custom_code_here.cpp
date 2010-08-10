@@ -973,7 +973,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.thePartialFraction.flagUsingCheckSum=true;
   inputData.thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
-  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
   inputData.thePartialFraction.theChambers.WriteToDefaultFile(theGlobalVariables);
   inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
@@ -1832,7 +1832,7 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
 }
 
 void CombinatorialChamberContainer::SliceAndComputeDebugString(GlobalVariables& theGlobalVariables)
-{ this->SliceTheEuclideanSpace(theGlobalVariables);
+{ this->SliceTheEuclideanSpace(theGlobalVariables, false);
   this->QuickSortAscending();
   this->LabelChamberIndicesProperly();
   this->PurgeInternalWalls();
@@ -1849,9 +1849,10 @@ void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstr
   tempS= inputData.thePartialFraction.theChambers.DebugString;
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
-    logstream << WeylLetter << Dimension << " test NOT ok !!! Total chambers: "<< inputData.thePartialFraction.theChambers.size << "\n";
+    logstream << WeylLetter << Dimension << " test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
-    logstream <<  WeylLetter << Dimension << " test OK. Total chambers: "<< inputData.thePartialFraction.theChambers.size <<"\n";
+    logstream <<  WeylLetter << Dimension << " test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+
   theGlobalVariables.theIndicatorVariables.StatusString1= logstream.str();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
@@ -1859,7 +1860,6 @@ void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstr
 
 void ComputationSetup::TestUnitCombinatorialChambersChambers(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 5, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 2, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 3, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'B', 2, inputData, theGlobalVariables);
@@ -1868,6 +1868,7 @@ void ComputationSetup::TestUnitCombinatorialChambersChambers(ComputationSetup& i
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 4, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'D', 4, inputData, theGlobalVariables);
   inputData.TestUnitCombinatorialChamberHelperFunction(out, 'B', 4, inputData, theGlobalVariables);
+  inputData.TestUnitCombinatorialChamberHelperFunction(out, 'A', 5, inputData, theGlobalVariables);
 }
 
 int CombinatorialChamber::GetHashFromSortedNormals()
@@ -1997,7 +1998,7 @@ void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables, ro
 void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables)
 { this->theChambers.thePauseController.InitComputation();
   this->theChambers.ReadFromDefaultFile(theGlobalVariables);
-  this->theChambers.SliceTheEuclideanSpace(theGlobalVariables);
+  this->theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
   this->theChambers.QuickSortAscending();
   this->theChambers.LabelChamberIndicesProperly();
   root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
@@ -2270,80 +2271,5 @@ void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(root
     tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
     theStartingChamber.InternalWalls.AddObjectOnTop(tempRoot);
   }
-  // we need to triangulate the starting chamber, else we got computational trouble.
-  theStartingChamber.Triangulate(*this, theGlobalVariables);
   this->initNextIndex();
-}
-
-void CombinatorialChamber::Triangulate(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
-{ /*if (this->AllVertices.size<= owner.AmbientDimension)
-    return;
-  //note: this algorithm can be improved, with ideas along the lines of the simplex algorithm. I have implemented instead a simpler but slow algorithm - I simply enumerate all
-  // owner.AmbientDimension-tuples until I find one that gives a simplex that is allowed.
-  roots remainingVertices;
-  remainingVertices.CopyFromBase(this->AllVertices);
-  int NumNewChambers = this->AllVertices.size+1-owner.AmbientDimension;
-  int oldSize=owner.size;
-  owner.MakeActualSizeAtLeastExpandOnTop(owner.size+ NumNewChambers);
-  Selection tempSel;
-  roots candidateSimplexNormals;
-  candidateSimplexNormals.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
-  for (int l =0; l<NumNewChambers; l++)
-  { owner.AddObjectOnTop(new CombinatorialChamber);
-    CombinatorialChamber& currentChamber = *owner.LastObject();
-    tempSel.init(owner.AmbientDimension);
-    roots& candidateSimplexVertices=currentChamber.AllVertices;
-    int numCycles = MathRoutines::NChooseK(tempSel.MaxSize, owner.AmbientDimension);
-    int indexDistinguishedVertex;
-    for (int i=0, tempSel.incrementSelectionFixedCardinality(owner.AmbientDimension); i<NumCycles; i++, tempSel.incrementSelectionFixedCardinality(owner.AmbientDimension))
-    { remainingVertices.SubSelection(tempSel, candidateSimplexVertices);
-      if (candidateSimplexVertices.GetRankOfSpanOfElements(theGlobalVariables)<owner.AmbientDimension)
-        continue;
-      int numInternalWalls=0;
-      for (int j=0; j<candidateSimplexVertices.size; j++)
-      { root& currentNormal= candidateSimplexNormals.TheObjects[j];
-        candidateSimplexVertices.ComputeNormalExcludingIndex(currentNormal, j, theGlobalVariables);
-        if (!remainingVertices.ElementsHaveNonNegativeScalarProduct(currentNormal) && !remainingVertices.ElementsHaveNonPositiveScalarProduct(currentNormal))
-        { numInternalWalls++;
-          indexDistinguishedVertex=j;
-          if (currentNormal.OurScalarProductIsNegative(candidateSimplexVertices.TheObjects[j]))
-            candidateSimplexVertices.TheObjects[j].MinusRoot();
-        }
-        if (numInternalWalls>1)
-          break;
-      }
-      if (numInternalWalls==1)
-        break;
-    }
-    currentChamber.Externalwalls.SetSizeExpandOnTopNoObjectInit(owner.AmbientDimension);
-    for (int i=0; i<currentChamber.Externalwalls.size; i++)
-      currentChamber.Externalwalls.TheObjects[i].normal.Assign(candidateSimplexNormals.TheObjects[i]);
-    remainingVertices.PopIndexSwapWithLast(tempSel.elements[indexDistinguishedVertex]);
-  }
-  roots theStartingNormals;
-  this->GetWallNormals(theStartingNormals);
-  for (int i=oldSize; i<owner.size; i++)
-  { CombinatorialChamber& currentChamber= *owner.TheObjects[i];
-    for (int j=0; j<owner.AmbientDimension; j++)
-    { WallData& newWall = currentChamber.Externalwalls.TheObjects[j];
-      int indexOriginalWall = theStartingNormals.IndexOfObject(newWall.normal);
-      if (indexOriginalWall==-1)
-      { indexOriginalWall= theStartingNormals.IndexOfObject(-newWall.normal));
-        if (indexOriginalWall!=-1)
-          theStartingNormals.TheObjects[j].nomal.MinusRoot();
-      }
-      if (indexOriginalWall!=-1)
-      { WallData& originalWall = this->Externalwalls.TheObjects[indexOriginalWall];
-        for (int k=0; k<originalWall.NeighborsAlongWall.size; k++)
-          if (originalWall.NeighborsAlongWall.TheObjects[k]!=0)
-          { CombinatorialChamber* neighbor = originalWall.NeighborsAlongWall.TheObjects[k];
-            WallData& neighborWall= neighbor->Externalwalls.TheObjects[originalWall.IndicesMirrorWalls.TheObjects[k]];
-            neighborWall.AddNeighbor(owner.TheObjects[i], j);
-            newWall.AddNeighbor(neighbor, originalWall.IndicesMirrorWalls.TheObjects[k]);
-          }
-      } else
-      { for (int k=oldSize; k
-      }
-    }
-  }*/
 }

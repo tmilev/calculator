@@ -2003,6 +2003,7 @@ public:
   bool PointIsInChamber(const root& point);
   bool PointIsStrictlyInsideChamber(const root& point);
   bool PointIsOnChamberBorder(const root& point);
+  bool BordersViaExternalWRTDirectionNonZeroNeighbor(const root& theDirection);
   void findWallsIncidentWithVertexExcludeWallAtInfinity (root& theVertex, Selection& output, CombinatorialChamberContainer* owner);
 //  bool ScaledVertexIsInWallSelection(root &point, Selection& theSelection);
   bool ScaleVertexToFitCrossSection(root& point, CombinatorialChamberContainer& owner);
@@ -2826,10 +2827,10 @@ public:
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
   void SetupRootsOfBorel(char WeylLetter, int Dimension, bool reverseOrderElementsForTest);
-  void SliceAndComputeDebugString(GlobalVariables& theGlobalVariables);
-  void SetupBorelAndSlice(char WeylLetter, int Dimension, bool reverseOrderElementsForTest, GlobalVariables& theGlobalVariables)
+  void SliceAndComputeDebugString(GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace);
+  void SetupBorelAndSlice(char WeylLetter, int Dimension, bool reverseOrderElementsForTest, GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace)
   { this->SetupRootsOfBorel(WeylLetter, Dimension, reverseOrderElementsForTest);
-    this->SliceAndComputeDebugString(theGlobalVariables);
+    this->SliceAndComputeDebugString(theGlobalVariables, SpanTheEntireSpace);
   };
   int LabelChambersAndGetNumChambersInWeylChamber(Cone& theWeylChamber);
   int LabelChambersForDisplayAndGetNumVisibleChambers();
@@ -6760,10 +6761,9 @@ public:
   bool flagAllowRepaint;
   bool flagComputationInitialized;
   bool flagComputationDone;
-  bool flagOneStepOnly;
   bool flagUseHtml;
-  bool flagOneIncrementOnly;
-  bool flagFullChop;
+  bool flagChopFully;
+  bool flagChopOneDirection;
   bool flagUsingCustomVectors;
   bool flagComputingPartialFractions;
   bool flagDoneComputingPartialFractions;

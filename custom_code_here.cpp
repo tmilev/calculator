@@ -1827,12 +1827,26 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
   inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
-  inputData.thePartialFraction.theChambers.SliceAndComputeDebugString(theGlobalVariables);
+  root tempRoot;
+  theGlobalVariables.theDrawingVariables.theBuffer.init();
+  if (inputData.flagChopFully)
+    inputData.thePartialFraction.theChambers.SliceAndComputeDebugString(theGlobalVariables, true);
+  else if (inputData.flagChopOneDirection)
+  { inputData.thePartialFraction.theChambers.SliceOneDirection(0, theGlobalVariables);
+    inputData.thePartialFraction.theChambers.ComputeDebugString(false, false);
+    tempRoot.MakeZero(inputData.thePartialFraction.theChambers.AmbientDimension);
+    inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+  } else
+  { inputData.thePartialFraction.theChambers.OneSlice(0, theGlobalVariables);
+    inputData.thePartialFraction.theChambers.ComputeDebugString(false, false);
+    tempRoot.MakeZero(inputData.thePartialFraction.theChambers.AmbientDimension);
+    inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+  }
   inputData.thePartialFraction.theChambers.thePauseController.ExitComputation();
 }
 
-void CombinatorialChamberContainer::SliceAndComputeDebugString(GlobalVariables& theGlobalVariables)
-{ this->SliceTheEuclideanSpace(theGlobalVariables, false);
+void CombinatorialChamberContainer::SliceAndComputeDebugString(GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace)
+{ this->SliceTheEuclideanSpace(theGlobalVariables, SpanTheEntireSpace);
   this->QuickSortAscending();
   this->LabelChamberIndicesProperly();
   this->PurgeInternalWalls();
@@ -1845,13 +1859,23 @@ void CombinatorialChamberContainer::SliceAndComputeDebugString(GlobalVariables& 
 
 void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables )
 { std::string tempS;
-  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, false, theGlobalVariables);
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, false, theGlobalVariables, false);
   tempS= inputData.thePartialFraction.theChambers.DebugString;
-  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables);
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, false);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
-    logstream << WeylLetter << Dimension << " test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+    logstream << WeylLetter << Dimension << " reverse order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
-    logstream <<  WeylLetter << Dimension << " test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+    logstream << WeylLetter << Dimension << " reverse order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, false, theGlobalVariables, true);
+  if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
+    logstream << WeylLetter << Dimension << " span entire space regular order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+  else
+    logstream << WeylLetter << Dimension << " span entire space regular order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, true);
+  if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
+    logstream << WeylLetter << Dimension << " span entire space reverse order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+  else
+    logstream << WeylLetter << Dimension << " span entire space reverse order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
 
   theGlobalVariables.theIndicatorVariables.StatusString1= logstream.str();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -1919,42 +1943,6 @@ bool CombinatorialChamber::operator>(CombinatorialChamber& right)
   return false;
 }
 
-void ComputationSetup::TestQuickSort(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  List<int> tempList;
-  tempList.SetSizeExpandOnTopNoObjectInit(20);
-  tempList.TheObjects[0]=4;
-  tempList.TheObjects[1]=2;
-  tempList.TheObjects[2]=3;
-  tempList.TheObjects[3]=1;
-  tempList.TheObjects[4]=8;
-  tempList.TheObjects[5]=6;
-  tempList.TheObjects[6]=7;
-  tempList.TheObjects[7]=4;
-  tempList.TheObjects[8]=8;
-  tempList.TheObjects[9]=3;
-  tempList.TheObjects[10]=5;
-  tempList.TheObjects[11]=-1;
-  tempList.TheObjects[12]=10;
-  tempList.TheObjects[13]=12;
-  tempList.TheObjects[14]=3;
-  tempList.TheObjects[15]=6;
-  tempList.TheObjects[16]=18;
-  tempList.TheObjects[17]=-1;
-  tempList.TheObjects[18]=13;
-  tempList.TheObjects[19]=12;
-  out << "non sorted:\n";
-  for (int i=0; i < tempList.size; i++)
-    out << tempList.TheObjects[i] << " ";
-  out << "\nsorted:\n";
-  tempList.QuickSortAscending();
-  for (int i=0; i<tempList.size; i++)
-    out << tempList.TheObjects[i] << " ";
-  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.MakeReport();
-}
-
 void CombinatorialChamber::ReplaceMeByAddExtraWallsToNewChamber(CombinatorialChamberContainer& owner, CombinatorialChamber* newChamber, List<int>& IndicesGluedChambers, roots& redundantNormals)
 { //owner.LabelChambersForDisplayAndGetNumVisibleChambers();
   //this->ComputeDebugString(owner);
@@ -2013,17 +2001,7 @@ void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables)
 }
 
 bool CombinatorialChamber::GetSplittingFacet(root& output, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
-{/* if (!owner.flagUsingEdgeToMakeSlice)
-  { for (int i=0; i<owner.HyperplanesComingFromCurrentDirectionAndSmallerIndices.size; i++)
-    { root& candidateFacet = owner.HyperplanesComingFromCurrentDirectionAndSmallerIndices.TheObjects[i];
-      if (this->HasHPositiveAndHNegativeVertex(candidateFacet))
-      { output.Assign(candidateFacet);
-        return true;
-      }
-    }
-  } else
-  { */
-  root& currentDirection= owner.theDirections.TheObjects[owner.theCurrentIndex];
+{ root& currentDirection= owner.theDirections.TheObjects[owner.theCurrentIndex];
   bool tempBool;
   for (int i=0; i<this->Externalwalls.size; i++)
     if (this->Externalwalls.TheObjects[i].IsExternalWithRespectToDirection(currentDirection) && this->Externalwalls.TheObjects[i].EveryNeigborIsExplored(tempBool))
@@ -2032,7 +2010,6 @@ bool CombinatorialChamber::GetSplittingFacet(root& output, CombinatorialChamberC
           if (this->MakeFacetFromEdgeAndDirection(this->Externalwalls.TheObjects[i], this->Externalwalls.TheObjects[j], owner, currentDirection, owner.theDirections, owner.theCurrentIndex, output, theGlobalVariables))
             if (this->HasHPositiveAndHNegativeVertex(output))
               return true;
-  //}
   return false;
 }
 
@@ -2067,10 +2044,14 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
     return false;
   } else
     if (this->GetSplittingFacet(KillerFacet, output, theGlobalVariables))
-      if(this->SplitChamber(KillerFacet, output, direction, theGlobalVariables))
+      if (this->SplitChamber(KillerFacet, output, direction, theGlobalVariables))
         return true;
+  this->ComputeDebugString(output);
+  direction.ComputeDebugString();
   assert(this->TestPossibilityToSlice(direction, output));
   this->flagExplored=true;
+  if (this->flagHasZeroPolynomiaL && !this->flagPermanentlyZero)
+    this->flagHasZeroPolynomiaL= this->BordersViaExternalWRTDirectionNonZeroNeighbor(direction);
   return false;
 }
 
@@ -2081,13 +2062,7 @@ void CombinatorialChamberContainer::initNextIndex()
   this->NumTotalGlued=0;
   this->LabelAllUnexplored();
   if (this->theCurrentIndex<this->theDirections.size)
-  { this->ComputeNextIndexToSlice(this->theDirections.TheObjects[this->theCurrentIndex]);
-/*    this->HyperplanesComingFromCurrentDirectionAndSmallerIndices.MakeActualSizeAtLeastExpandOnTop(this->theHyperplanes.size);
-    this->HyperplanesComingFromCurrentDirectionAndSmallerIndices.size=0;
-    for (int i=0; i<this->theHyperplanes.size; i++)
-      if (this->theHyperplanes.TheObjects[i].OurScalarProductIsZero(this->theDirections.TheObjects[this->theCurrentIndex]))
-        this->HyperplanesComingFromCurrentDirectionAndSmallerIndices.AddObjectOnTop(this->theHyperplanes.TheObjects[i]);*/
-  }
+    this->ComputeNextIndexToSlice(this->theDirections.TheObjects[this->theCurrentIndex]);
 }
 
 void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
@@ -2272,4 +2247,80 @@ void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(root
     theStartingChamber.InternalWalls.AddObjectOnTop(tempRoot);
   }
   this->initNextIndex();
+}
+
+void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)
+{ Selection theSelection;
+  theSelection.init(this->AmbientDimension);
+  this->theHyperplanes.ClearTheObjects();
+  this->theHyperplanes.MakeActualSizeAtLeastExpandOnTop(MathRoutines::NChooseK(directions.size, this->AmbientDimension-1));
+  for(int i=0; i<this->AmbientDimension; i++)
+  { roots TempRoots;
+    root TempRoot;
+    Rational tempRat;
+    theSelection.incrementSelectionFixedCardinality(this->AmbientDimension-1);
+    directions.SubSelection(theSelection, TempRoots);
+    TempRoots.ComputeNormal(TempRoot);
+    TempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+    this->theHyperplanes.AddObjectOnTopHash(TempRoot);
+  }
+  theSelection.initNoMemoryAllocation();
+  int NumStartingChambers=MathRoutines::TwoToTheNth(this->AmbientDimension);
+  this->initAndCreateNewObjects(NumStartingChambers);
+  this->StartingCrossSections.SetSizeExpandOnTopNoObjectInit(NumStartingChambers);
+  for(int i=0; i<NumStartingChambers; i++)
+  { int tempI= theSelection.SelectionToIndex();
+    this->TheObjects[tempI]->Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->AmbientDimension);
+    for (int j=0; j<this->AmbientDimension; j++)
+    { this->TheObjects[tempI]->AllVertices.AddRoot(directions.TheObjects[j]);
+      if (theSelection.selected[j])
+      { int tempI2;
+        theSelection.selected[j]=false;
+        tempI2=theSelection.SelectionToIndex();
+        theSelection.selected[j]=true;
+        CombinatorialChamber* plusOwner; CombinatorialChamber* minusOwner;
+        if (this->theHyperplanes.TheObjects[this->AmbientDimension-j-1].OurScalarProductIsPositive(directions.TheObjects[j]))
+        { plusOwner= this->TheObjects[tempI];
+          minusOwner= this->TheObjects[tempI2];
+        } else
+        { minusOwner= this->TheObjects[tempI];
+          plusOwner= this->TheObjects[tempI2];
+        }
+        this->TheObjects[tempI]->MakeNewMutualNeighbors(plusOwner, minusOwner, this->theHyperplanes.TheObjects[this->AmbientDimension-j-1]);
+      } else
+        this->TheObjects[tempI]->AllVertices.LastObject()->MinusRoot();
+//      if (this->flagAnErrorHasOcurredTimeToPanic)
+  //      this->ComputeDebugString();
+    }
+    root tempRoot;
+    tempRoot.Assign(directions.TheObjects[0]);
+    if (!theSelection.selected[0])
+      tempRoot.MinusRoot();
+    this->StartingCrossSections.TheObjects[tempI].affinePoint.Assign(tempRoot);
+    theSelection.incrementSelection();
+//    if (this->flagAnErrorHasOcurredTimeToPanic)
+//      this->ComputeDebugString();
+  }
+  for(int i=0; i<NumStartingChambers; i++)
+  { this->TheObjects[i]->IndexStartingCrossSectionNormal=i;
+    root Accum;  Accum.MakeZero(this->AmbientDimension);
+    for (int j=0; j<this->TheObjects[i]->Externalwalls.size; j++)
+      Accum.Add(this->TheObjects[i]->Externalwalls.TheObjects[j].normal);
+    this->StartingCrossSections.TheObjects[i].normal.Assign(Accum);
+//    if (this->flagAnErrorHasOcurredTimeToPanic)
+//      Accum.ComputeDebugString();
+    assert(this->TheObjects[i]->ConsistencyCheck(this->AmbientDimension, false, *this, theGlobalVariables));
+    if (this->TheGlobalConeNormals.IsSurelyOutsideCone(this->TheObjects[i]->AllVertices))
+      this->TheObjects[i]->flagPermanentlyZero=true;
+    this->TheObjects[i]->AllVertices.Average(this->TheObjects[i]->InternalPoint, this->AmbientDimension);
+  }
+  this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomiaL=false;
+  this->TheGlobalConeNormals.ElementToString(theGlobalVariables.theIndicatorVariables.StatusString1);
+  this->ComputeDebugString(false);
+  theGlobalVariables.theIndicatorVariables.StatusString1.append(this->DebugString);
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  this->initNextIndex();
+//  if (this->flagAnErrorHasOcurredTimeToPanic)
+//    this->ComputeDebugString();
 }

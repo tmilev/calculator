@@ -955,8 +955,8 @@ ComputationSetup::ComputationSetup()
   this->flagComputationInProgress=false;
   this->flagComputationDone=true;
   this->flagComputationInitialized=false;
-  this->flagOneIncrementOnly=false;
-  this->flagFullChop=true;
+  this->flagChopOneDirection=false;
+  this->flagChopFully=true;
   this->flagHavingBeginEqnForLaTeXinStrings=true;
   this->flagSliceTheEuclideanSpaceInitialized=false;
   this->flagDisplayingPartialFractions=true;
@@ -1249,10 +1249,10 @@ void ComputationSetup::Run()
     if (this->thePartialFraction.theChambers.theDirections.TheObjects[0].IsEqualTo(tempRoot))
       this->thePartialFraction.theChambers.theDirections.ReverseOrderElements();*/
     if (!this->flagDoingWeylGroupAction)
-    { if (this->flagFullChop)
+    { if (this->flagChopFully)
         this->thePartialFraction.theChambers.SliceTheEuclideanSpace(0, *this->theGlobalVariablesContainer->Default(), false);
       else
-      { if (this->flagOneIncrementOnly)
+      { if (this->flagChopOneDirection)
           this->thePartialFraction.theChambers.SliceOneDirection(0, *this->theGlobalVariablesContainer->Default());
         else
           this->thePartialFraction.theChambers.OneSlice(0, *this->theGlobalVariablesContainer->Default());
@@ -1270,10 +1270,10 @@ void ComputationSetup::Run()
       } else
         this->IndicatorRoot.MakeZero(this->thePartialFraction.theChambers.AmbientDimension);
     } else
-    { if (this->flagFullChop)
+    { if (this->flagChopFully)
         this->FullChop(*this->theGlobalVariablesContainer->Default());
       else
-      { if (this->flagOneIncrementOnly)
+      { if (this->flagChopOneDirection)
           this->oneIncrement(*this->theGlobalVariablesContainer->Default());
         else
           this->oneStepChamberSlice(*this->theGlobalVariablesContainer->Default());
@@ -3624,6 +3624,18 @@ bool CombinatorialChamber::ExtraPointRemovesDoubtForBogusWall(MatrixLargeRationa
   return false;
 }
 
+bool CombinatorialChamber::BordersViaExternalWRTDirectionNonZeroNeighbor(const root& theDirection)
+{ for (int i=0; i<this->Externalwalls.size; i++)
+  { WallData& currentWall= this->Externalwalls.TheObjects[i];
+    if (currentWall.normal.OurScalarProductIsPositive(theDirection))
+      for (int j=0; j<currentWall.NeighborsAlongWall.size; j++)
+        if (currentWall.NeighborsAlongWall.TheObjects[j]!=0)
+          if (!currentWall.NeighborsAlongWall.TheObjects[j]->flagHasZeroPolynomiaL)
+            return true;
+  }
+  return false;
+}
+
 bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
 {// if (NeighborWall.NeighborsAlongWall.size<=1)
     //return false;
@@ -4522,7 +4534,7 @@ void CombinatorialChamberContainer::init()
   this->startingCones.ReleaseMemory();
   this->theWeylGroupAffineHyperplaneImages.size=0;
   this->flagMakingASingleHyperplaneSlice=false;
-  this->flagSpanTheEntireSpace=false;
+  this->flagSpanTheEntireSpace=true;
   this->flagMakingReports=true;
   this->flagDrawingProjective=true;
   this->flagSliceWithAWallIgnorePermanentlyZero=true;

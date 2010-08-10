@@ -2240,7 +2240,7 @@ bool roots::ElementsHavePositiveScalarProduct(const root& theRoot) const
 void ComputationSetup::ProverOpenAndGo(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { inputData.theProverFixedK.ReadFromFile(inputData.theProverFixedK.ProverFileName, theGlobalVariables);
   inputData.theProver.ReadFromFile(theGlobalVariables);
-  inputData.theProver.RecursionStep(inputData.theProver.theWeylGroup, theGlobalVariables);
+  inputData.theProver.TheFullRecursion(inputData.theProver.theWeylGroup, theGlobalVariables);
 }
 
 void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables)

@@ -6320,7 +6320,7 @@ public:
   void GetPossibleAlphasAndBetas(roots& outputAlphas, roots& outputBetas, WeylGroup& theWeyl);
   bool RootIsGoodForProblematicIndex(root& input, int problemIndex, bool AddingAlphas, bool NeedPositiveContribution, roots& theDualBasis, WeylGroup& theWeyl);
   bool FindBetaWithoutTwoAlphas(root& outputBeta, roots& inputBetas, roots& inputAlphas, WeylGroup& theWeyl);
-  bool ComputeCommonSenseImplicationsReturnFalseIfContradiction( WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  bool ComputeCommonSenseImplicationsReturnFalseIfContradiction(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   bool SatisfyNonLnonBKSingularRoots(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   bool IsAGoodPosRootsKChoice(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void MakeAlphaBetaMatrix(MatrixLargeRational& output);
@@ -6371,7 +6371,7 @@ public:
   void ComputeLastStackIndex(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   void GenerateStartingState(ComputationSetup& theSetup, GlobalVariables& TheGlobalVariables, char WeylLetter, int theDimension);
   void RecursionStep(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
-  void TheFullRecursion(WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
+  void TheFullRecursion(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
   void ExtensionStep(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables,  minimalRelationsProverState& newState);
   void BranchByAddingKRoots(int index, WeylGroup& theWeyl, GlobalVariables& TheGlobalVariables);
   static int CountNumSeparatingNormals(roots& theAlphas, roots& theBetas, WeylGroup& theWeyl);

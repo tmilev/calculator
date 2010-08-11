@@ -822,6 +822,8 @@ void guiMainWindow::onToggleButton1UsingCustom(wxCommandEvent& ev)
 void wxDialogOutput::onButton4SaveReadable(wxCommandEvent& ev)
 { if (MainWindow1==0)
 		return;
+	if (MainWindow1->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunning())
+    return;
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
   if (tempFile.is_open())
@@ -840,13 +842,11 @@ void wxDialogOutput::onToggleButton2ViewCombinatorialChambers(wxCommandEvent& ev
   { MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=false;
     MainWindow1->theComputationSetup.flagDisplayingPartialFractions=true;
     MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to chamber data"));
-    MainWindow1->Button4SaveReadable->Enable();
     MainWindow1->Button5SaveComputer->Disable();
   }	else
 	{ MainWindow1->theComputationSetup.flagDisplayingCombinatorialChambersTextData=true;
     MainWindow1->theComputationSetup.flagDisplayingPartialFractions=false;
     MainWindow1->ToggleButton2ViewCombinatorialChambers->SetLabel(wxT("Switch to partial fractions"));
-    MainWindow1->Button4SaveReadable->Disable();
     MainWindow1->Button5SaveComputer->Disable();
   }
   MainWindow1->updatePartialFractionAndCombinatorialChamberTextData();
@@ -962,6 +962,7 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
   }
 //  this->theComputationSetup.thePartialFraction.theChambers.flagMakeGrandMasterConsistencyCheck=true;
   this->ReadVPVectorsAndOptions();
+  this->theComputationSetup.thePartialFraction.theChambers.flagSpanTheEntireSpace=true;
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   //this->theComputationSetup.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;

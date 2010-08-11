@@ -1848,7 +1848,7 @@ public:
   void ElementToString(std::string& output);
   void RemoveNeighborhoodBothSidesNoRepetitionNeighbors(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
   void RemoveNeighborhoodBothSidesAllowRepetitions(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
-  void RemoveNeighborOneSideAllowRepetitions(CombinatorialChamber* owner);
+  void RemoveNeighborOneSideAllowRepetitions(CombinatorialChamber* NeighborPointer);
   void RemoveNeighborOneSideNoRepetitions(CombinatorialChamber* NeighborPointer);
   void AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   void operator=(const WallData& right);
@@ -2870,6 +2870,7 @@ public:
   bool ConsistencyCheck(bool CheckForConvexityChambers, GlobalVariables& theGlobalVariables);
   void PurgeZeroPointers();
   void PurgeInternalWalls();
+  void PurgeZeroPolyChambers(GlobalVariables& theGlobalVariables);
   void MakeReportOneSlice(GlobalVariables& theGlobalVariables, int currentIndex, int totalRoots, root& theCurrentDirection);
   void MakeReportGlueing(GlobalVariables& theGlobalVariables, int currentIndex, int TotalNumGlueingsSoFar);
   void ProjectToDefaultAffineSpace(GlobalVariables& theGlobalVariables);

@@ -1828,18 +1828,23 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
   inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   root tempRoot;
+  tempRoot.MakeZero(inputData.thePartialFraction.theChambers.AmbientDimension);
   theGlobalVariables.theDrawingVariables.theBuffer.init();
   if (inputData.flagChopFully)
-    inputData.thePartialFraction.theChambers.SliceAndComputeDebugString(theGlobalVariables, true);
+    inputData.thePartialFraction.theChambers.SliceAndComputeDebugString(theGlobalVariables, inputData.thePartialFraction.theChambers.flagSpanTheEntireSpace);
   else if (inputData.flagChopOneDirection)
   { inputData.thePartialFraction.theChambers.SliceOneDirection(0, theGlobalVariables);
     inputData.thePartialFraction.theChambers.ComputeDebugString(false, false);
-    tempRoot.MakeZero(inputData.thePartialFraction.theChambers.AmbientDimension);
     inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
   } else
   { inputData.thePartialFraction.theChambers.OneSlice(0, theGlobalVariables);
     inputData.thePartialFraction.theChambers.ComputeDebugString(false, false);
-    tempRoot.MakeZero(inputData.thePartialFraction.theChambers.AmbientDimension);
+    inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+  }
+  if (inputData.thePartialFraction.theChambers.theCurrentIndex>= inputData.thePartialFraction.theChambers.theDirections.size)
+  { inputData.thePartialFraction.theChambers.PurgeZeroPolyChambers(theGlobalVariables);
+    inputData.thePartialFraction.theChambers.ComputeDebugString(false);
+    theGlobalVariables.theDrawingVariables.theBuffer.init();
     inputData.thePartialFraction.theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
   }
   inputData.thePartialFraction.theChambers.thePauseController.ExitComputation();
@@ -1867,11 +1872,15 @@ void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstr
   else
     logstream << WeylLetter << Dimension << " reverse order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, false, theGlobalVariables, true);
+  inputData.thePartialFraction.theChambers.PurgeZeroPolyChambers(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.ComputeDebugString(false);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
     logstream << WeylLetter << Dimension << " span entire space regular order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
     logstream << WeylLetter << Dimension << " span entire space regular order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, true);
+  inputData.thePartialFraction.theChambers.PurgeZeroPolyChambers(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.ComputeDebugString(false);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
     logstream << WeylLetter << Dimension << " span entire space reverse order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
@@ -2051,7 +2060,7 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
   assert(this->TestPossibilityToSlice(direction, output));
   this->flagExplored=true;
   if (this->flagHasZeroPolynomiaL && !this->flagPermanentlyZero)
-    this->flagHasZeroPolynomiaL= this->BordersViaExternalWRTDirectionNonZeroNeighbor(direction);
+    this->flagHasZeroPolynomiaL= !this->BordersViaExternalWRTDirectionNonZeroNeighbor(direction);
   return false;
 }
 
@@ -2315,12 +2324,37 @@ void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& d
     this->TheObjects[i]->AllVertices.Average(this->TheObjects[i]->InternalPoint, this->AmbientDimension);
   }
   this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomiaL=false;
-  this->TheGlobalConeNormals.ElementToString(theGlobalVariables.theIndicatorVariables.StatusString1);
-  this->ComputeDebugString(false);
-  theGlobalVariables.theIndicatorVariables.StatusString1.append(this->DebugString);
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   this->initNextIndex();
 //  if (this->flagAnErrorHasOcurredTimeToPanic)
 //    this->ComputeDebugString();
+}
+
+void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGlobalVariables)
+{ this->ConsistencyCheck(false, theGlobalVariables);
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+    { CombinatorialChamber& currentChamber= *this->TheObjects[i];
+      if (currentChamber.flagHasZeroPolynomiaL || currentChamber.flagPermanentlyZero)
+      { for (int j=0; j<currentChamber.Externalwalls.size; j++)
+        { WallData& currentWall= currentChamber.Externalwalls.TheObjects[j];
+          for (int k=0; k<currentWall.NeighborsAlongWall.size; k++)
+            currentWall.RemoveNeighborhoodBothSidesAllowRepetitions(this->TheObjects[i], currentWall.NeighborsAlongWall.TheObjects[k]);
+        }
+      }
+    }
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+    { CombinatorialChamber& currentChamber= *this->TheObjects[i];
+      if (currentChamber.flagHasZeroPolynomiaL || currentChamber.flagPermanentlyZero)
+      {
+#ifdef CGIversionLimitRAMuse
+  ParallelComputing::GlobalPointerCounter--;
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+#endif
+        delete this->TheObjects[i];
+        this->TheObjects[i]=0;
+      }
+    }
+  this->PurgeZeroPointers();
+  this->ConsistencyCheck(false, theGlobalVariables);
 }

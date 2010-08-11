@@ -11910,7 +11910,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra(  roots& generators, List<root>& i
   }
   basisChange.Resize(0, 0, true);
   for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
-  { this->GetEpsilonMatrix( tempDyn.DynkinTypeStrings.TheObjects[i].at(1), tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size, theGlobalVariables, tempMat);
+  { this->GetEpsilonMatrix(tempDyn.DynkinTypeStrings.TheObjects[i].at(1), tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size, theGlobalVariables, tempMat);
     basisChange.DirectSumWith(tempMat);
     //basisChange.ComputeDebugString();
   }
@@ -13955,6 +13955,34 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
     if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner, owner.flagComputingLprohibitingWeights))
     { this->NumConeConditionFailures++;
       owner.NumConeConditionFailures++;
+    } else
+    {//the below commented out code should be incapsulated. It computes whether a given nilradical is a nilradical of a parabolic subalgebra.
+      //this task is pushed on the end of the to-do list.
+      /* owner.NumConeConditionHoldsBySSpart.TheObjects[indexInOwner]++;
+      if (owner.ReportStringNonNilradicalParabolic=="")
+      { this->ComputeRootsOfK();
+        roots tempNilradical; roots tempOthers; roots tempK;
+        for (int i=0; i<this->kModules.size; i++)
+          if (this->NilradicalKmods.selected[i])
+            tempNilradical.AddListOnTop(this->kModules.TheObjects[i]);
+          else
+            tempOthers.AddListOnTop(this->kModules.TheObjects[i]);
+        for (int i=0; i<this->PositiveRootsK.size; i++)
+        { tempOthers.AddObjectOnTop(this->PositiveRootsK.TheObjects[i]);
+          tempOthers.AddObjectOnTop(-this->PositiveRootsK.TheObjects[i]);
+          tempK.AddObjectOnTop(this->PositiveRootsK.TheObjects[i]);
+        }
+        if (roots::ConesIntersect(theGlobalVariables, tempNilradical, tempOthers, owner.AmbientWeyl.KillingFormMatrix.NumRows))
+        { roots tempRoots; std::stringstream out; std::string tempS;
+          this->AmbientWeyl.GetEpsilonCoords(tempNilradical, tempRoots, theGlobalVariables);
+          tempRoots.ElementToStringEpsilonForm(tempS, true, false, false);
+          out << tempS;
+          this->AmbientWeyl.GetEpsilonCoords(tempK, tempRoots, theGlobalVariables);
+          tempRoots.ElementToStringEpsilonForm(tempS, true, false, false);
+          out << "\n\n" << tempS;
+          owner.ReportStringNonNilradicalParabolic=out.str();
+        }
+      }*/
     }
   }
   this->MakeProgressReportPossibleNilradicalComputation(theGlobalVariables, owner, indexInOwner);
@@ -19561,11 +19589,7 @@ void WeylGroup::GenerateRootSubsystem(roots& theRoots)
 
 void WeylGroup::GetEpsilonCoords(List<root>& input, roots& output, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
-  tempRoots.SetSizeExpandOnTopNoObjectInit(this->KillingFormMatrix.NumRows);
-  for (int i=0; i<this->KillingFormMatrix.NumRows; i++)
-  { tempRoots.TheObjects[i].MakeZero(this->KillingFormMatrix.NumRows);
-    tempRoots.TheObjects[i].TheObjects[i].MakeOne();
-  }
+  tempRoots.MakeEiBasis(this->KillingFormMatrix.NumRows);
   this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output, theGlobalVariables);
 }
 

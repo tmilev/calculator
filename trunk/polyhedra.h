@@ -2271,7 +2271,7 @@ inline void List<Object>::ElementToStringGeneric(std::string& output, int NumEle
 { std::stringstream out; std::string tempS;
   int Upper=MathRoutines::Minimum(NumElementsToPrint, this->size);
   for (int i=0; i<Upper; i++)
-  {  this->TheObjects[i].ElementToString(tempS);
+  { this->TheObjects[i].ElementToString(tempS);
     out << tempS<< "\n";
   }
   output= out.str();
@@ -5762,6 +5762,7 @@ public:
   int IndexCurrentSANilradicalsGeneration;
   int NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
   List<int> CountersNilradicalsGeneration;
+  List<int> NumConeConditionHoldsBySSpart;
   int RecursionDepthNilradicalsGeneration;
   Controller controllerLProhibitingRelations;
   int NumSubalgebrasProcessed;
@@ -5772,6 +5773,7 @@ public:
   int UpperLimitNumElementsWeyl;
   static int ProblemCounter;
   WeylGroup AmbientWeyl;
+  std::string ReportStringNonNilradicalParabolic;
   bool flagComputingLprohibitingWeights;
   bool flagUseDynkinClassificationForIsomorphismComputation;
   bool flagUsingActionsNormalizerCentralizerNilradical;
@@ -5815,9 +5817,12 @@ public:
     this->NumConeConditionFailures=0;
     this->NumSubalgebrasCounted=0;
     this->IndexCurrentSANilradicalsGeneration=0;
+    this->ReportStringNonNilradicalParabolic="";
     this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration=this->size-1;
     if (this->size>0)
-      this->TheObjects[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration);
+    { this->TheObjects[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration);
+      this->NumConeConditionHoldsBySSpart.initFillInObject(this->size, 0);
+    }
   };
   rootSubalgebras()
   { this->flagNilradicalComputationInitialized=false;

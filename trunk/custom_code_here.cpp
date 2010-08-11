@@ -1508,6 +1508,7 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { if (inputData.theRootSubalgebras.controllerLProhibitingRelations.IsRunning())
     return;
+  rootSubalgebras& theRootSAs= inputData.theRootSubalgebras;
   inputData.theRootSubalgebras.controllerLProhibitingRelations.InitComputation();
   rootSubalgebra tempSA;
   //most important flags
@@ -1536,6 +1537,17 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   inputData.theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
   inputData.theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
   inputData.theOutput.DebugString.append("\\begin{document}~");
+  std::stringstream out;
+  out << "Number subalgebras satisfying cone condition: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed - inputData.theRootSubalgebras.NumConeConditionFailures << "\n";
+  out << "Number subalgebras failing the cone condition: " << inputData.theRootSubalgebras.NumConeConditionFailures << "\n";
+  out << "Total subalgebras processed: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed << "\n";
+  out << "\n" << theRootSAs.ReportStringNonNilradicalParabolic;
+  out << "\nNum cone conditions hold by ss part: ";
+  for (int i=0; i< theRootSAs.size; i++)
+    out << theRootSAs.TheObjects[i].theDynkinDiagram.DebugString << " " << theRootSAs.NumConeConditionHoldsBySSpart.TheObjects[i] << ";   ";
+  out << "\n\n";
+  tempS = out.str();
+  inputData.theOutput.DebugString.append(tempS);
   inputData.theRootSubalgebras.theBadRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
   inputData.theRootSubalgebras.theGoodRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
   //this->theRootSubalgebras.theMinRels.ComputeDebugString

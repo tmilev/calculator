@@ -936,8 +936,8 @@ void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
   { this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
     return;
   }
-  this->theComputationSetup.WeylGroupIndex=8;
-  this->theComputationSetup.WeylGroupLetter='E';
+  this->theComputationSetup.WeylGroupIndex=4;
+  this->theComputationSetup.WeylGroupLetter='D';
   this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
   this->RunTheComputation();
 }

@@ -977,14 +977,13 @@ ComputationSetup::ComputationSetup()
   this->NumColsNilradical=2;
   this->theGlobalVariablesContainer= new GlobalVariablesContainer;
   std::stringstream out1, out2, out3, out4;
-  out1  <<"Denote by $P_I(x_1, \\dots, x_n)$ the number of ways to split the vector with coordinates $(x_1, \\dots, x_n)$ into non-negative integral sum of the integral vectors $I$, where $I$ is the set given by the following list.\n\n";
-  out2  << " \n\n For given integers $N$, $m$ and integral matrices $A:=\\left(\\begin{array}{ccc}a_{11}&\\dots&a_{1n}\\\\ &\\dots& \\\\ a_{m1}&\\dots& a_{mn}\\end{array}\\right)$, "
-          <<" $B:=\\left( \\begin{array}{c} b_1\\\\\\vdots\\\\b_m\\end{array}\\right)$, let \n\\[{\\tau_{N}}_{[(a_{11}x_1+\\dots a_{1n}x_n=b_1), \\dots, (a_{m1}x_1+\\dots a_{mn}x_n=b_m) ]} "
-          <<" (x_1, \\dots, x_n)\\]\n denote the function that takes value 1 if $A\\left( \\begin{array}{c} x_1\\\\\\vdots\\\\x_n\\end{array}\\right)\\equiv B"
-          <<" (\\textrm{mod}~ N\\mathbb{Z}^n)$ and zero otherwise (where $N\\mathbb{Z}^n$ stands for an integral stretch of the starting integral lattice). "
-          <<" The arguments of the $\\tau$ function will be suppressed in the output. Let $n= ";
-  out3 <<"$. Let in addition $x_1, \\dots x_n$ satisfty the following inequalities. ";
-  out4 <<"\n\n Then $P_I(x_1, \\dots, x_n)$ equals:";
+  out1 << "Denote by $P_I(x_1, \\dots, x_n)$ the number of ways to split the vector with coordinates $(x_1, \\dots, x_n)$ into non-negative integral sum of the integral vectors $I$, where $I$ is the set given by the following list.\n\n";
+  out2 << " \n\n For given integers $N$, $m$ and integral matrices $A:=\\left(\\begin{array}{ccc}a_{11}&\\dots&a_{1n}\\\\ &\\dots& \\\\ a_{m1}&\\dots& a_{mn}\\end{array}\\right)$, "
+           << " $B:=\\left( \\begin{array}{c} b_1\\\\\\vdots\\\\b_m\\end{array}\\right)$, let \n\\[{\\tau_{N}}_{[(a_{11}x_1+\\dots a_{1n}x_n=b_1), \\dots, (a_{m1}x_1+\\dots a_{mn}x_n=b_m) ]} "
+           << " (x_1, \\dots, x_n)\\]\n denote the function that takes value 1 if $A\\left( \\begin{array}{c} x_1\\\\\\vdots\\\\x_n\\end{array}\\right)\\equiv B (\\textrm{mod}~ N\\mathbb{Z}^n)$ and zero otherwise (where $N\\mathbb{Z}^n$ stands for an integral stretch of the starting integral lattice). "
+           << " The arguments of the $\\tau$ function will be suppressed in the output. Let $n= ";
+  out3 << "$. Let in addition $x_1, \\dots x_n$ satisfty the following inequalities. ";
+  out4 << "\n\n Then $P_I(x_1, \\dots, x_n)$ equals:";
   this->NotationExplanationLatex1 = out1.str();
   this->NotationExplanationLatex2 = out2.str();
   this->NotationExplanationLatex3 = out3.str();
@@ -3630,7 +3629,7 @@ bool CombinatorialChamber::BordersViaExternalWRTDirectionNonZeroNeighbor(const r
     if (currentWall.normal.OurScalarProductIsPositive(theDirection))
       for (int j=0; j<currentWall.NeighborsAlongWall.size; j++)
         if (currentWall.NeighborsAlongWall.TheObjects[j]!=0)
-          if (!currentWall.NeighborsAlongWall.TheObjects[j]->flagHasZeroPolynomiaL)
+          if (!currentWall.NeighborsAlongWall.TheObjects[j]->flagHasZeroPolynomiaL && !currentWall.NeighborsAlongWall.TheObjects[j]->flagPermanentlyZero)
             return true;
   }
   return false;

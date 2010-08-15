@@ -973,7 +973,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.thePartialFraction.flagUsingCheckSum=true;
   inputData.thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
-  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
+  inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, true);
   inputData.thePartialFraction.theChambers.WriteToDefaultFile(theGlobalVariables);
   inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
@@ -1880,23 +1880,23 @@ void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstr
   tempS= inputData.thePartialFraction.theChambers.DebugString;
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, false);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
-    logstream << WeylLetter << Dimension << " reverse order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+    logstream << WeylLetter << Dimension << " reverse order no span IS DIFFERENT FROM regular order no span !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
-    logstream << WeylLetter << Dimension << " reverse order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+    logstream << WeylLetter << Dimension << " reverse order no span same as regular order no span. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, false, theGlobalVariables, true);
   inputData.thePartialFraction.theChambers.PurgeZeroPolyChambers(theGlobalVariables);
   inputData.thePartialFraction.theChambers.ComputeDebugString(false);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
-    logstream << WeylLetter << Dimension << " span entire space regular order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+    logstream << WeylLetter << Dimension << " span entire space regular order full span IS DIFFERENT FROM regular order no span!!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
-    logstream << WeylLetter << Dimension << " span entire space regular order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+    logstream << WeylLetter << Dimension << " span entire space regular order full span same as regular order no span. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, true);
   inputData.thePartialFraction.theChambers.PurgeZeroPolyChambers(theGlobalVariables);
   inputData.thePartialFraction.theChambers.ComputeDebugString(false);
   if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
-    logstream << WeylLetter << Dimension << " span entire space reverse order test NOT ok !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+    logstream << WeylLetter << Dimension << " span entire space reverse order full span IS DIFFERENT FROM regular order no span !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
-    logstream << WeylLetter << Dimension << " span entire space reverse order test OK. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+    logstream << WeylLetter << Dimension << " span entire space reverse order full span same as regular order no span. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
 
   theGlobalVariables.theIndicatorVariables.StatusString1= logstream.str();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -2342,7 +2342,8 @@ void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& d
 }
 
 void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGlobalVariables)
-{ this->ConsistencyCheck(false, theGlobalVariables);
+{ //this->ConsistencyCheck(false, theGlobalVariables);
+  //this->WriteReportToFile("./Debug_A3_before_purge.html", false);
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
     { CombinatorialChamber& currentChamber= *this->TheObjects[i];
@@ -2350,7 +2351,7 @@ void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGl
       { for (int j=0; j<currentChamber.Externalwalls.size; j++)
         { WallData& currentWall= currentChamber.Externalwalls.TheObjects[j];
           for (int k=0; k<currentWall.NeighborsAlongWall.size; k++)
-            currentWall.RemoveNeighborhoodBothSidesAllowRepetitions(this->TheObjects[i], currentWall.NeighborsAlongWall.TheObjects[k]);
+            k-=currentWall.RemoveNeighborhoodBothSidesAllowRepetitionsReturnNeighborsDecrease(this->TheObjects[i], currentWall.NeighborsAlongWall.TheObjects[k]);
         }
       }
     }
@@ -2367,6 +2368,8 @@ void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGl
         this->TheObjects[i]=0;
       }
     }
+//  this->WriteReportToFile("./Debug_A3.html", false);
+  //this->ConsistencyCheck(false, theGlobalVariables);
   this->PurgeZeroPointers();
   this->ConsistencyCheck(false, theGlobalVariables);
 }

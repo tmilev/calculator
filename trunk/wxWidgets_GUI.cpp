@@ -936,8 +936,8 @@ void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
   { this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
     return;
   }
-  this->theComputationSetup.WeylGroupIndex=4;
-  this->theComputationSetup.WeylGroupLetter='D';
+  this->theComputationSetup.WeylGroupIndex=7;
+  this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
   this->RunTheComputation();
 }
@@ -964,7 +964,6 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
   this->ReadVPVectorsAndOptions();
   this->theComputationSetup.thePartialFraction.theChambers.flagSpanTheEntireSpace=true;
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
-  //this->theComputationSetup.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;
   this->RunTheComputation();
 }

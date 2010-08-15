@@ -1847,7 +1847,7 @@ public:
   void ComputeDebugString(){this->ElementToString(this->DebugString); };
   void ElementToString(std::string& output);
   void RemoveNeighborhoodBothSidesNoRepetitionNeighbors(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
-  void RemoveNeighborhoodBothSidesAllowRepetitions(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
+  int RemoveNeighborhoodBothSidesAllowRepetitionsReturnNeighborsDecrease(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
   void RemoveNeighborOneSideAllowRepetitions(CombinatorialChamber* NeighborPointer);
   void RemoveNeighborOneSideNoRepetitions(CombinatorialChamber* NeighborPointer);
   void AddNeighbor(CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);

@@ -3676,7 +3676,7 @@ void CombinatorialChamber::CheckForAndRemoveBogusNeighbors(CombinatorialChamberC
         }
         owner.ConsistencyCheck(false, theGlobalVariables);
         if (VerticesBelongingToCurrentWall.GetRankOfSpanOfElements(theGlobalVariables)<theDimension-1)
-          currentWall.RemoveNeighborhoodBothSidesAllowRepetitions(this, currentWall.NeighborsAlongWall.TheObjects[k]);
+          k-=currentWall.RemoveNeighborhoodBothSidesAllowRepetitionsReturnNeighborsDecrease(this, currentWall.NeighborsAlongWall.TheObjects[k]);
         owner.ConsistencyCheck(false, theGlobalVariables);
       }
   }
@@ -5186,14 +5186,18 @@ void WallData::RemoveNeighborhoodBothSidesNoRepetitionNeighbors(CombinatorialCha
   assert(false);
 }
 
-void WallData::RemoveNeighborhoodBothSidesAllowRepetitions(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer)
-{ for (int i=0; i<this->NeighborsAlongWall.size; i++)
+int WallData::RemoveNeighborhoodBothSidesAllowRepetitionsReturnNeighborsDecrease(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer)
+{ int NumFoundNeighbors=0;
+  for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]==NeighborPointer)
-    { this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]].RemoveNeighborOneSideAllowRepetitions(owner);
+    { if (this->NeighborsAlongWall.TheObjects[i]!=0)
+        this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]].RemoveNeighborOneSideAllowRepetitions(owner);
       this->NeighborsAlongWall.PopIndexSwapWithLast(i);
       this->IndicesMirrorWalls.PopIndexSwapWithLast(i);
       i--;
+      NumFoundNeighbors++;
     }
+  return NumFoundNeighbors;
 }
 
 void WallData::RemoveNeighborOneSideNoRepetitions(CombinatorialChamber* NeighborPointer)

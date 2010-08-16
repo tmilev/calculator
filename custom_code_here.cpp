@@ -958,9 +958,7 @@ void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { inputData.flagDyckPathComputationLoaded=inputData.thePartialFraction.theChambers.ReadFromFile("./DyckPathPolytope.txt", theGlobalVariables);
   inputData.thePartialFraction.theChambers.ComputeDebugString();
-  inputData.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
-  assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(true, theGlobalVariables));
-  inputData.flagDyckPathComputationLoaded=false;
+  assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(false, theGlobalVariables));
   IrreducibleFiniteDimensionalModule theModule;
   QuasiPolynomial tempP;
   if (!inputData.flagDyckPathComputationLoaded)
@@ -974,7 +972,6 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, true);
-  inputData.thePartialFraction.theChambers.WriteToDefaultFile(theGlobalVariables);
   inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -2055,6 +2052,12 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
   { this->ComputeDebugString(output);
 //    CombinatorialChamberContainer::TheBigDump<<this->DebugString;
   }
+  if (output.flagUsingIsFinalOptimization)
+    if (output.IsFinalChamber(*this))
+    { this->flagExplored=true;
+      output.NumExplored++;
+      return false;
+    }
   assert(this->Externalwalls.size>=output.AmbientDimension);
   this->flagExplored=false;
   root KillerFacet;
@@ -2072,6 +2075,7 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
   direction.ComputeDebugString();
   assert(this->TestPossibilityToSlice(direction, output));
   this->flagExplored=true;
+  output.NumExplored++;
   if (this->flagHasZeroPolynomiaL && !this->flagPermanentlyZero)
     this->flagHasZeroPolynomiaL= !this->BordersViaExternalWRTDirectionNonZeroNeighbor(direction);
   return false;

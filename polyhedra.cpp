@@ -3308,7 +3308,9 @@ bool CombinatorialChamber::ConsistencyCheck(int theDimension, bool checkVertices
       }
       for (int i=0; i<this->AllVertices.size; i++)
         if(!this->PointIsAVertex(this->AllVertices.TheObjects[i], theGlobalVariables))
-        { assert(false);
+        { this->PointIsAVertex(this->AllVertices.TheObjects[i], theGlobalVariables);
+          this->ComputeDebugString(ownerComplex);
+          assert(false);
           return false;
         }
 /*      WallData& currentWall= this->Externalwalls.TheObjects[i];
@@ -3349,6 +3351,7 @@ CombinatorialChamber::CombinatorialChamber()
   this->DisplayNumber=-1;
   this->flagPermanentlyZero=false;
   this->NumTrueAffineVertices=-1;
+  this->flagIsFinal=false;
 }
 
 bool CombinatorialChamber::ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
@@ -4013,8 +4016,8 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
     { NewPlusChamber->ComputeDebugString(output);
       NewMinusChamber->ComputeDebugString(output);
       this->ComputeDebugString(output);
-      NewPlusChamber->ConsistencyCheck(output.AmbientDimension, true, output, theGlobalVariables);
-      NewMinusChamber->ConsistencyCheck(output.AmbientDimension, true, output, theGlobalVariables);
+      NewPlusChamber->ConsistencyCheck(output.AmbientDimension, false, output, theGlobalVariables);
+      NewMinusChamber->ConsistencyCheck(output.AmbientDimension, false, output, theGlobalVariables);
       output.ComputeDebugString();
     }
   }
@@ -4198,6 +4201,27 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
     this->indexNextChamberToSlice=-1;
 }
 
+bool CombinatorialChamberContainer::IsFinalChamber(CombinatorialChamber& theChamber)
+{ if (theChamber.flagIsFinal)
+    return true;
+  this->ChamberTestArrayBuffer.initFillInObject(this->startingCones.size, 0);
+  Rational tempRat;
+  for (int i=0; i<theChamber.AllVertices.size; i++)
+  { root& currentVertex= theChamber.AllVertices.TheObjects[i];
+    for (int j=0; j<this->startingCones.size; j++)
+    { Cone& currentCone= this->startingCones.TheObjects[j];
+      int currentSign=currentCone.GetSignWRTCone(currentVertex);
+      if (this->ChamberTestArrayBuffer.TheObjects[j]==0)
+        this->ChamberTestArrayBuffer.TheObjects[j]=currentSign;
+      else
+        if (currentSign*this->ChamberTestArrayBuffer.TheObjects[j]==-1)
+          return false;
+    }
+  }
+  theChamber.flagIsFinal=true;
+  return true;
+}
+
 bool CombinatorialChamberContainer::IsSurelyOutsideGlobalCone(rootsCollection& TheVertices)
 { return this->TheGlobalConeNormals.IsSurelyOutsideCone(TheVertices);
 }
@@ -4223,7 +4247,7 @@ void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGloba
   std::stringstream out5;
   std::stringstream out4;
   out4 << "Direction index: " << currentIndex << " out of " << totalRoots << " current direction: " << theCurrentDirection.ElementToString();
-  out5 << "Chamber index: " << this->indexNextChamberToSlice << " Total #: " << this->size;
+  out5 << "Chamber index: " << this->indexNextChamberToSlice << " Explored " << this->NumExplored << " out of " << this->GetNumNonZeroPointers();
   theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -4521,6 +4545,7 @@ void CombinatorialChamberContainer::init()
   // setting this->flagSpanTheEntireSpace to false, - the smallest example that goes bad is B4 ...
   this->flagStoringVertices=true;
   this->flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
+  this->flagUsingIsFinalOptimization=false;
   this->flagMakeGrandMasterConsistencyCheck=false;
   ///////////////////////////////////////////////////////////////////////////
   this->KillAllElements();
@@ -4583,6 +4608,14 @@ int CombinatorialChamberContainer::GetNumVisibleChambersNoLabeling()
       if (!this->TheObjects[i]->flagHasZeroPolynomiaL)
         NumChambersNonZero++;
   return NumChambersNonZero;
+}
+
+int CombinatorialChamberContainer::GetNumNonZeroPointers()
+{ int result=0;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+     result++;
+  return result;
 }
 
 int CombinatorialChamberContainer::LabelChambersAndGetNumChambersInWeylChamber(Cone& theWeylChamber)
@@ -4806,8 +4839,7 @@ void CombinatorialChamberContainer::WriteToDefaultFile(GlobalVariables& theGloba
 
 bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, GlobalVariables& theGlobalVariables)
 { std::fstream tempF;
-  if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false))
-    return false;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false);
   this->WriteToFile(tempF, theGlobalVariables);
   tempF.close();
   return true;
@@ -4815,10 +4847,10 @@ bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, Glo
 
 bool CombinatorialChamberContainer::ReadFromFile(const std::string& FileName, GlobalVariables& theGlobalVariables)
 { std::fstream tempF;
-  if (!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false))
+  if (!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, false, false))
     return false;
   this->ReadFromFile(tempF, theGlobalVariables);
-  assert(this->ConsistencyCheck(true, theGlobalVariables));
+  assert(this->ConsistencyCheck(false, theGlobalVariables));
   tempF.close();
   return true;
 }
@@ -5083,6 +5115,21 @@ bool Cone::IsInCone(const roots& theRoots)
   return true;
 }
 
+int Cone::GetSignWRTCone(const root& r)
+{ Rational tempRat;
+  bool allPositive=true;
+  for (int i=0; i<this->size; i++)
+  { r.RootScalarEuclideanRoot(this->TheObjects[i], r, tempRat);
+    if (tempRat.IsNegative())
+      return -1;
+    if (tempRat.IsEqualToZero())
+      allPositive=false;
+  }
+  if (allPositive)
+    return 1;
+  return 0;
+}
+
 bool Cone::IsOnConeBorder(const root& r)
 { bool found=false;
   for (int i=0; i<this->size; i++)
@@ -5121,7 +5168,8 @@ void CombinatorialChamberContainer::LabelAllUnexplored()
 { for (int i =0; i<size; i++)
     if (!this->TheObjects[i]->flagPermanentlyZero || this->flagMakingASingleHyperplaneSlice)
       this->TheObjects[i]->flagExplored =false;
-  FirstNonExploredIndex=0;
+  this->FirstNonExploredIndex=0;
+  this->NumExplored=0;
 }
 
 bool WallData::IsExternalWithRespectToDirection(root& direction)

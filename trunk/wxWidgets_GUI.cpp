@@ -922,9 +922,9 @@ void guiMainWindow::onButton16Custom2(wxCommandEvent& ev)
 
 void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 { this->theComputationSetup.thePartialFraction.theChambers.PauseSlicing();
-  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.GetGlobalVars());
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(false, *this->theComputationSetup.GetGlobalVars());
   this->theComputationSetup.thePartialFraction.theChambers.WriteToFile("./DyckPathPolytope.txt", *this->theComputationSetup.GetGlobalVars());
-  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(true, *this->theComputationSetup.GetGlobalVars());
+  this->theComputationSetup.thePartialFraction.theChambers.ConsistencyCheck(false, *this->theComputationSetup.GetGlobalVars());
   int tempI= wxMessageBox(wxT("Saved! Press OK to continue with the computation, Cancel to quit."), wxT("Saved"), wxOK | wxCANCEL);
   if (tempI==wxCANCEL)
     this->theComputationSetup.thePartialFraction.theChambers.flagMustStop=true;
@@ -963,6 +963,7 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
 //  this->theComputationSetup.thePartialFraction.theChambers.flagMakeGrandMasterConsistencyCheck=true;
   this->ReadVPVectorsAndOptions();
   this->theComputationSetup.thePartialFraction.theChambers.flagSpanTheEntireSpace=true;
+//  this->theComputationSetup.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;
   this->RunTheComputation();

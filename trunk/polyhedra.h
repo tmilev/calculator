@@ -1940,6 +1940,7 @@ class CombinatorialChamber
 public:
   std::string DebugString;
   bool flagHasZeroPolynomiaL;
+  bool flagIsFinal;
   bool flagExplored;
   bool flagPermanentlyZero;
   bool flagNormalsAreSorted;
@@ -2720,6 +2721,8 @@ public:
   bool IsOnConeBorder(const root& r);
   bool IsStrictlyInsideCone(const root& r);
   bool SeparatesPoints(root& point1, root& point2);
+  //returns 0 if root is on cone border, +1 if it is strictly inside the cone, -1 in the remaining case.
+  int GetSignWRTCone(const root& r);
   //bool SeparatesPoints()
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
@@ -2767,12 +2770,14 @@ public:
   List<int> PreferredNextChambers;
   List<int> IndicesInActualNonConvexChamber;
   List<List<int> > NonConvexActualChambers;
+  List<int> ChamberTestArrayBuffer;
   std::fstream FileOutput;
   int indexNextChamberToSlice;
   int NumAffineHyperplanesProcessed;
   int NumAffineHyperplanesBeforeWeylChamberWalls;
   int NumProjectiveHyperplanesBeforeWeylChamberWalls;
   int indexLowestNonCheckedForGlueing;
+  int NumExplored;
   int NumTotalGlued;
   affineHyperplanes StartingCrossSections;
   //needed to run the algorithm independently of input variables
@@ -2801,6 +2806,7 @@ public:
   bool flagMakingReports;
   bool flagSpanTheEntireSpace;
   bool flagMakeGrandMasterConsistencyCheck;
+  bool flagUsingIsFinalOptimization;
   static const int MaxNumHeaps=5000;
   static const int GraphicsMaxNumChambers = 10000;
   static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -2812,6 +2818,7 @@ public:
   static bool flagAnErrorHasOcurredTimeToPanic;
   static bool flagMakingConsistencyCheck;
   static int flagMaxNumCharsAllowedInStringOutput;
+  bool IsFinalChamber(CombinatorialChamber& theChamber);
   bool isAValidVertexInGeneral(const root& candidate, roots& theNormalsInvolved, Selection& theSelectedNormals);
   void ConvertHasZeroPolyToPermanentlyZero();
   void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
@@ -2824,6 +2831,7 @@ public:
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
   void MakeExtraProjectivePlane();
   int GetNumVisibleChambersNoLabeling();
+  int GetNumNonZeroPointers();
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
   void LabelChamberIndicesProperly();
   void SetupRootsOfBorel(char WeylLetter, int Dimension, bool reverseOrderElementsForTest);

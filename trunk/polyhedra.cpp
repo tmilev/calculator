@@ -14683,6 +14683,12 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
     //    assert(tempI==theRootSA.GetIndexKmoduleContainingRoot(tempRoot));
     //  }
     }
+    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+    { std::stringstream out;
+      out << "Computing action of element " << i+1 << " out of " << theSubgroup.size;
+      theGlobalVariables.theIndicatorVariables.ProgressReportString4 = out.str();
+      theGlobalVariables.MakeReport();
+    }
   }
 }
 

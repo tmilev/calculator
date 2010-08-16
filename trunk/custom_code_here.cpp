@@ -1543,8 +1543,9 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   out << "Total subalgebras processed: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed << "\n";
   out << "\n" << theRootSAs.ReportStringNonNilradicalParabolic;
   out << "\nNum cone conditions hold by ss part: ";
-  for (int i=0; i< theRootSAs.size; i++)
-    out << theRootSAs.TheObjects[i].theDynkinDiagram.DebugString << " " << theRootSAs.NumConeConditionHoldsBySSpart.TheObjects[i] << ";   ";
+  if (theRootSAs.NumConeConditionHoldsBySSpart.size==theRootSAs.size)
+    for (int i=0; i< theRootSAs.size; i++)
+      out << theRootSAs.TheObjects[i].theDynkinDiagram.DebugString << " " << theRootSAs.NumConeConditionHoldsBySSpart.TheObjects[i] << ";   ";
   out << "\n\n";
   tempS = out.str();
   inputData.theOutput.DebugString.append(tempS);

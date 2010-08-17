@@ -2378,3 +2378,31 @@ void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGl
   this->PurgeZeroPointers();
   this->ConsistencyCheck(false, theGlobalVariables);
 }
+
+bool CombinatorialChamberContainer::IsFinalChamber(CombinatorialChamber& theChamber)
+{ if (theChamber.flagIsFinalIsComputed)
+    return theChamber.flagIsFinal;
+  theChamber.flagIsFinalIsComputed=true;
+  if (theChamber.flagPermanentlyZero)
+  { theChamber.flagIsFinal=true;
+    return true;
+  }
+  //this->ChamberTestArrayBuffer.initFillInObject(this->startingCones.size, 0);
+  theChamber.AllVertices.ComputeDebugString();
+  for (int j=0; j<this->startingCones.size; j++)
+  { Cone& currentCone= this->startingCones.TheObjects[j];
+    currentCone.ComputeDebugString();
+    int theSign=0;
+    for (int i=0; i<theChamber.AllVertices.size; i++)
+    { root& currentVertex= theChamber.AllVertices.TheObjects[i];
+      int currentSign=currentCone.GetSignWRTCone(currentVertex);
+      if (theSign==0)
+        theSign=currentSign;
+      else
+        if (currentSign*theSign==-1)
+          return false;
+    }
+  }
+  theChamber.flagIsFinal=true;
+  return true;
+}

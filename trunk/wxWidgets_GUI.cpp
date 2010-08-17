@@ -963,6 +963,7 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
 //  this->theComputationSetup.thePartialFraction.theChambers.flagMakeGrandMasterConsistencyCheck=true;
   this->ReadVPVectorsAndOptions();
   this->theComputationSetup.thePartialFraction.theChambers.flagSpanTheEntireSpace=true;
+//  this->theComputationSetup.thePartialFraction.theChambers.flagUsingIsFinalOptimization=true;
 //  this->theComputationSetup.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;

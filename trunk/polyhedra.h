@@ -1940,8 +1940,6 @@ class CombinatorialChamber
 public:
   std::string DebugString;
   bool flagHasZeroPolynomiaL;
-  bool flagIsFinal;
-  bool flagIsFinalIsComputed;
   bool flagExplored;
   bool flagPermanentlyZero;
   bool flagNormalsAreSorted;
@@ -2807,7 +2805,7 @@ public:
   bool flagMakingReports;
   bool flagSpanTheEntireSpace;
   bool flagMakeGrandMasterConsistencyCheck;
-  bool flagUsingIsFinalOptimization;
+  bool flagUsingStartingConesSeparation;
   static const int MaxNumHeaps=5000;
   static const int GraphicsMaxNumChambers = 10000;
   static int NumTotalCreatedCombinatorialChambersAtLastDefrag;
@@ -2819,7 +2817,6 @@ public:
   static bool flagAnErrorHasOcurredTimeToPanic;
   static bool flagMakingConsistencyCheck;
   static int flagMaxNumCharsAllowedInStringOutput;
-  bool IsFinalChamber(CombinatorialChamber& theChamber);
   bool isAValidVertexInGeneral(const root& candidate, roots& theNormalsInvolved, Selection& theSelectedNormals);
   void ConvertHasZeroPolyToPermanentlyZero();
   void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);

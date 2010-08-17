@@ -1872,8 +1872,9 @@ void CombinatorialChamberContainer::SliceAndComputeDebugString(GlobalVariables& 
   this->drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
 }
 
-void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables )
+void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { std::string tempS;
+  inputData.thePartialFraction.theChambers.flagUsingStartingConesSeparation=false;
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, false, theGlobalVariables, false);
   tempS= inputData.thePartialFraction.theChambers.DebugString;
   inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, false);
@@ -1895,6 +1896,21 @@ void ComputationSetup::TestUnitCombinatorialChamberHelperFunction(std::stringstr
     logstream << WeylLetter << Dimension << " span entire space reverse order full span IS DIFFERENT FROM regular order no span !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
   else
     logstream << WeylLetter << Dimension << " span entire space reverse order full span same as regular order no span. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+
+  inputData.thePartialFraction.theChambers.flagUsingStartingConesSeparation=true;
+
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, false);
+  if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
+    logstream << WeylLetter << Dimension << " reverse order no span with cone separation optimization IS DIFFERENT FROM regular order no span !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+  else
+    logstream << WeylLetter << Dimension << " reverse order no span with cone separation optimization same as regular order no span. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
+  inputData.thePartialFraction.theChambers.SetupBorelAndSlice(WeylLetter, Dimension, true, theGlobalVariables, true);
+  inputData.thePartialFraction.theChambers.PurgeZeroPolyChambers(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.ComputeDebugString(false);
+  if (tempS!=inputData.thePartialFraction.theChambers.DebugString)
+    logstream << WeylLetter << Dimension << " span entire space reverse order full span with cone separation optimization IS DIFFERENT FROM regular order no span !!! Total chambers: " << inputData.thePartialFraction.theChambers.size << "\n";
+  else
+    logstream << WeylLetter << Dimension << " span entire space reverse order full span with cone separation optimization same as regular order no span. Total chambers: " << inputData.thePartialFraction.theChambers.size <<"\n";
 
   theGlobalVariables.theIndicatorVariables.StatusString1= logstream.str();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -2052,12 +2068,6 @@ bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, 
   { this->ComputeDebugString(output);
 //    CombinatorialChamberContainer::TheBigDump<<this->DebugString;
   }
-  if (output.flagUsingIsFinalOptimization)
-    if (output.IsFinalChamber(*this))
-    { this->flagExplored=true;
-      output.NumExplored++;
-      return false;
-    }
   assert(this->Externalwalls.size>=output.AmbientDimension);
   this->flagExplored=false;
   root KillerFacet;
@@ -2377,32 +2387,4 @@ void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGl
   //this->ConsistencyCheck(false, theGlobalVariables);
   this->PurgeZeroPointers();
   this->ConsistencyCheck(false, theGlobalVariables);
-}
-
-bool CombinatorialChamberContainer::IsFinalChamber(CombinatorialChamber& theChamber)
-{ if (theChamber.flagIsFinalIsComputed)
-    return theChamber.flagIsFinal;
-  theChamber.flagIsFinalIsComputed=true;
-  if (theChamber.flagPermanentlyZero)
-  { theChamber.flagIsFinal=true;
-    return true;
-  }
-  //this->ChamberTestArrayBuffer.initFillInObject(this->startingCones.size, 0);
-  theChamber.AllVertices.ComputeDebugString();
-  for (int j=0; j<this->startingCones.size; j++)
-  { Cone& currentCone= this->startingCones.TheObjects[j];
-    currentCone.ComputeDebugString();
-    int theSign=0;
-    for (int i=0; i<theChamber.AllVertices.size; i++)
-    { root& currentVertex= theChamber.AllVertices.TheObjects[i];
-      int currentSign=currentCone.GetSignWRTCone(currentVertex);
-      if (theSign==0)
-        theSign=currentSign;
-      else
-        if (currentSign*theSign==-1)
-          return false;
-    }
-  }
-  theChamber.flagIsFinal=true;
-  return true;
 }

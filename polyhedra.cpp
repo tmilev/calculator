@@ -3351,8 +3351,6 @@ CombinatorialChamber::CombinatorialChamber()
   this->DisplayNumber=-1;
   this->flagPermanentlyZero=false;
   this->NumTrueAffineVertices=-1;
-  this->flagIsFinal=false;
-  this->flagIsFinalIsComputed=false;
 }
 
 bool CombinatorialChamber::ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
@@ -3977,10 +3975,11 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   {  PositiveChamberInternalPoint.ComputeDebugString();
     NegativeChamberInternalPoint.ComputeDebugString();
   }*/
-/*  if (!output.flagMakingASingleHyperplaneSlice)
-    if (!output.flagSpanTheEntireSpace || output.TheGlobalConeNormals.IsInCone(PositiveChamberInternalPoint) && output.TheGlobalConeNormals.IsInCone(NegativeChamberInternalPoint))
-      if (!output.startingCones.SeparatePoints(PositiveChamberInternalPoint, NegativeChamberInternalPoint, 0))//&theKillerPlaneNormal))
-        return false; */
+  if (output.flagUsingStartingConesSeparation)
+    if (!output.flagMakingASingleHyperplaneSlice)
+      if (!this->flagHasZeroPolynomiaL && !this->flagPermanentlyZero)
+        if (!output.startingCones.SeparatePoints(PositiveChamberInternalPoint, NegativeChamberInternalPoint, 0))//&theKillerPlaneNormal))
+          return false;
 //  if (CombinatorialChamberContainer::flagAnErrorHasOcurredTimeToPanic)
 //  { LocalContainerPlusVertices.ComputeDebugString();
 //    LocalContainerMinusVertices.ComputeDebugString();
@@ -4525,7 +4524,6 @@ void CombinatorialChamberContainer::init()
   // setting this->flagSpanTheEntireSpace to false, - the smallest example that goes bad is B4 ...
   this->flagStoringVertices=true;
   this->flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
-  this->flagUsingIsFinalOptimization=false;
   this->flagMakeGrandMasterConsistencyCheck=false;
   ///////////////////////////////////////////////////////////////////////////
   this->KillAllElements();
@@ -4542,6 +4540,7 @@ void CombinatorialChamberContainer::init()
   this->flagMakingReports=true;
   this->flagDrawingProjective=true;
   this->flagSliceWithAWallIgnorePermanentlyZero=true;
+  this->flagUsingStartingConesSeparation=false;
 }
 
 CombinatorialChamberContainer::~CombinatorialChamberContainer()

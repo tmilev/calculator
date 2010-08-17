@@ -1941,6 +1941,7 @@ public:
   std::string DebugString;
   bool flagHasZeroPolynomiaL;
   bool flagIsFinal;
+  bool flagIsFinalIsComputed;
   bool flagExplored;
   bool flagPermanentlyZero;
   bool flagNormalsAreSorted;
@@ -2770,7 +2771,7 @@ public:
   List<int> PreferredNextChambers;
   List<int> IndicesInActualNonConvexChamber;
   List<List<int> > NonConvexActualChambers;
-  List<int> ChamberTestArrayBuffer;
+//  List<int> ChamberTestArrayBuffer;
   std::fstream FileOutput;
   int indexNextChamberToSlice;
   int NumAffineHyperplanesProcessed;

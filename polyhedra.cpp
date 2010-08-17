@@ -3352,6 +3352,7 @@ CombinatorialChamber::CombinatorialChamber()
   this->flagPermanentlyZero=false;
   this->NumTrueAffineVertices=-1;
   this->flagIsFinal=false;
+  this->flagIsFinalIsComputed=false;
 }
 
 bool CombinatorialChamber::ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables)
@@ -4199,27 +4200,6 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
     this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
   else
     this->indexNextChamberToSlice=-1;
-}
-
-bool CombinatorialChamberContainer::IsFinalChamber(CombinatorialChamber& theChamber)
-{ if (theChamber.flagIsFinal)
-    return true;
-  this->ChamberTestArrayBuffer.initFillInObject(this->startingCones.size, 0);
-  Rational tempRat;
-  for (int i=0; i<theChamber.AllVertices.size; i++)
-  { root& currentVertex= theChamber.AllVertices.TheObjects[i];
-    for (int j=0; j<this->startingCones.size; j++)
-    { Cone& currentCone= this->startingCones.TheObjects[j];
-      int currentSign=currentCone.GetSignWRTCone(currentVertex);
-      if (this->ChamberTestArrayBuffer.TheObjects[j]==0)
-        this->ChamberTestArrayBuffer.TheObjects[j]=currentSign;
-      else
-        if (currentSign*this->ChamberTestArrayBuffer.TheObjects[j]==-1)
-          return false;
-    }
-  }
-  theChamber.flagIsFinal=true;
-  return true;
 }
 
 bool CombinatorialChamberContainer::IsSurelyOutsideGlobalCone(rootsCollection& TheVertices)

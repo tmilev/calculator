@@ -1726,10 +1726,15 @@ public:
   root operator*(int right)const
   { root tempRoot; tempRoot.Assign(*this); tempRoot.MultiplyByInteger(right); return tempRoot;
   };
-  root operator*(const Rational& right)const
+  root operator*(const Rational& right) const
   { root tempRoot; tempRoot.Assign(*this); tempRoot.MultiplyByLargeRational(right); return tempRoot;
   };
-  root operator/(const Rational& right)const
+  Rational operator*(const root& right) const
+  { Rational tempRat;
+    this->RootScalarEuclideanRoot(*this, right, tempRat);
+    return tempRat;
+  };
+  root operator/(const Rational& right) const
   { root tempRoot; tempRoot.Assign(*this); tempRoot.DivByLargeRational(right); return tempRoot;
   };
   bool operator>(const root& other) const

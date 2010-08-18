@@ -2022,8 +2022,8 @@ void root::DivByLargeRational(const Rational& a)
     this->TheObjects[i].DivideBy(a);
 }
 
-bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,  roots& theSet, WeylGroup& theWeylGroup, roots& output, List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly)
-{ if ( UpperBoundNumBetas>0 && output.size>UpperBoundNumBetas)
+bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas, roots& theSet, WeylGroup& theWeylGroup, roots& output, List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly)
+{ if (UpperBoundNumBetas>0 && output.size>UpperBoundNumBetas)
     return false;
   if (this->IsEqualToZero())
     return true;
@@ -2043,31 +2043,24 @@ bool root::HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas,  roo
   roots theNewSet;
   theNewSet.MakeActualSizeAtLeastExpandOnTop(theSet.size);
   root tempRoot;
-  Rational tempRat, tempRat2;
+  Rational tempRat;
   for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
   { root& currentRoot = theSet.TheObjects[indexFirstNonZeroRoot];
-    theWeylGroup.RootScalarKillingFormMatrixRoot(*this, currentRoot, tempRat);
+    tempRat= theWeylGroup.RootScalarKillingFormMatrixRoot(*this, currentRoot)/theWeylGroup.RootScalarKillingFormMatrixRoot(currentRoot, currentRoot);
     if (tempRat.IsPositive())
-    { if (!IntegralCoefficientsOnly || tempRat.DenShort==1)
+      if (!IntegralCoefficientsOnly || tempRat.DenShort==1)
        { theNewSet.size=0;
         for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
           if (currentRoot.IsStronglyPerpendicularTo(theSet.TheObjects[i], theWeylGroup))
             theNewSet.AddRoot(theSet.TheObjects[i]);
-        tempRoot.Assign(currentRoot);
-        tempRoot.MinusRoot();
-        tempRoot.MultiplyByLargeRational(tempRat);
         outputCoeffs.AddObjectOnTop(tempRat);
-        theWeylGroup.RootScalarKillingFormMatrixRoot(currentRoot, currentRoot, tempRat);
-        tempRoot.DivByLargeRational(tempRat);
-        tempRoot.Add(*this);
-        outputCoeffs.LastObject()->DivideBy(tempRat);
         output.AddRoot(currentRoot);
+        tempRoot = (*this)-currentRoot*tempRat;
         if (tempRoot.HasStronglyPerpendicularDecompositionWRT(UpperBoundNumBetas, theNewSet, theWeylGroup, output, outputCoeffs, IntegralCoefficientsOnly))
           return true;
         output.size--;
         outputCoeffs.size--;
        }
-    }
   }
   return false;
 }
@@ -14458,6 +14451,7 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, ro
   }
   return false;
 }
+
 void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, roots& NilradicalRoots)
 { root alpha1, alpha2, beta1, tempRoot;
   bool madeChange=true;
@@ -16875,7 +16869,7 @@ int coneRelation::RootsToScalarProductString(roots& inputLeft, roots& inputRight
   Rational tempRat;
   for (int i=0; i<inputLeft.size; i++)
     for(int j=0; j<inputRight.size; j++)
-      if (!(letterTypeLeft==letterTypeRight && i==j))
+      if ( i<j || letterTypeLeft!=letterTypeRight)
       { owner.AmbientWeyl.RootScalarKillingFormMatrixRoot(inputLeft.TheObjects[i], inputRight.TheObjects[j], tempRat);
         if (!tempRat.IsEqualToZero())
         { tempRat.ElementToString(tempS);
@@ -17054,7 +17048,7 @@ void coneRelation::ComputeKComponents(roots& input, List<List<int> >& output, ro
   for(int i=0; i<input.size; i++)
   { output.TheObjects[i].size=0;
     for(int j=0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size; j++)
-      if (owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j].ContainsARootNonPerpendicularTo( input.TheObjects[i], owner.AmbientWeyl))
+      if (owner.theDynkinDiagram.SimpleBasesConnectedComponents.TheObjects[j].ContainsARootNonPerpendicularTo(input.TheObjects[i], owner.AmbientWeyl))
         output.TheObjects[i].AddObjectOnTop(j);
   }
 }

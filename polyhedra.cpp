@@ -1386,7 +1386,7 @@ void ComputationSetup::ComputeRootSAs(ComputationSetup& inputData, GlobalVariabl
 { inputData.theRootSubalgebras.flagUsingActionsNormalizerCentralizerNilradical=true;
   inputData.theRootSubalgebras.flagComputeConeCondition=false;
   inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
-  inputData.theRootSubalgebras.ComputeDebugString(false, false, true, 0 , 0, theGlobalVariables);
+  inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0 , 0, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1=inputData.theRootSubalgebras.DebugString;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -17350,9 +17350,9 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
     if (useHtml)
       out << "\n<br>\n";
     if (useLatex)
-      out << "\n$\\mathfrak{k}$ lies in: ";
+      out << "\n$\\mathfrak{k}_{ss}$ lies in: ";
     else
-      out << "\n k lies in: ";
+      out << "\n k_ss lies in: ";
     if (useLatex)
       out <<  "\\\\\n";
     if (useHtml)

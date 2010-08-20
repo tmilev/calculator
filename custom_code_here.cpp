@@ -120,7 +120,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     rootSubalgebra& currentSA= container.theRootSAs.TheObjects[this->IndicesContainingRootSAs.TheObjects[i]];
     if (useHtml)
     { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA" << this->IndicesContainingRootSAs.TheObjects[i] << ".html\">";
-      currentSA.theDynkinDiagram.ElementToString(tempS);
+      currentSA.theDynkinDiagram.ElementToString(tempS, true);
       CGIspecificRoutines::clearDollarSigns(tempS, tempS);
     }
     currentSA.theDynkinDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
@@ -556,6 +556,42 @@ bool WeylGroup::IsRegular(root& input, int* indexFirstPerpendicularRoot)
   return true;
 }
 
+Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula()
+{ Rational output=1;
+  for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
+    output*=WeylGroup::GetSizeWeylByFormula(this->DynkinTypeStrings.TheObjects[i].at(1), this->SimpleBasesConnectedComponents.TheObjects[i].size);
+  return output;
+}
+
+Rational WeylGroup::GetSizeWeylByFormula(char weylLetter, int theDim)
+{ //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
+  Rational theOutput=1;
+  if (weylLetter=='A')
+    theOutput= Rational::Factorial(theDim+1);
+  if (weylLetter=='B' || weylLetter=='C')
+    theOutput= Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim);
+  if (weylLetter=='D')
+    theOutput= Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim-1);
+  if (weylLetter=='E')
+  { if (theDim==6)
+      theOutput= 51840;
+    if (theDim==7)
+    { theOutput=1024;
+      theOutput*=81*35;
+    }
+    if (theDim==8)
+    { theOutput=1024*16;
+      theOutput*=81*3;
+      theOutput*=25*7;
+    }
+  }
+  if (weylLetter=='F')
+    theOutput=128*9;
+  if (weylLetter=='G')
+    theOutput=12;
+  return theOutput;
+}
+
 void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrder(roots& output)
 { output.size=0;
   output.MakeActualSizeAtLeastExpandOnTop(this->RankTotal());
@@ -847,10 +883,10 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
   int total=0;
   for (int i=0; i<inputData.theRootSubalgebras.size-6; i++)
   { rootSubalgebra& currentSA= inputData.theRootSubalgebras.TheObjects[i];
-    out << currentSA.theDynkinDiagram.DebugString<< " & " <<currentSA.theCentralizerDiagram.DebugString<<" & " << inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i]<<" \\\\\n";
+    out << currentSA.theDynkinDiagram.DebugString << " & " << currentSA.theCentralizerDiagram.DebugString << " & " << inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i] << " \\\\\n";
     total+=inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i];
   }
-  out <<"Total: " <<total<<" nilradicals up to iso";
+  out <<"Total: " << total << " nilradicals up to iso";
   std::string tempS;
   inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-6, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
@@ -865,44 +901,46 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
 { std::stringstream out; std::string tempS;
   //W'' stands for the graph isomorphisms of C(k_ss) extending to root system isomorphisms of the entire algebra.
   for (int i=fromIndex; i<NumToProcess; i++)
-    this->GenerateActionKintersectBIsos(this->TheObjects[i], theGlobalVariables);
+  { this->GenerateActionKintersectBIsos(this->TheObjects[i], theGlobalVariables);
+  }
   if (useLatex)
-    out <<"\\begin{tabular}{ccccc}$\\mathfrak{k}_{ss}$& $C(k_{ss})_{ss}$ & $\\#W''$ &$\\#W'''$&$\\#(W'''\\rtimes W'')$\\\\\\hline";
+    out << "\\begin{tabular}{ccccc}$\\mathfrak{k}_{ss}$& $C(k_{ss})_{ss}$ & $\\#W''$ &$\\#W'''$&$\\#(W'''\\rtimes W'')$\\\\\\hline";
   if (useHtml)
     out << "<br><table><tr><td>k_{ss}</td><td></td><td>Weyl group of C(k_{ss})_{ss}</td><td>Outer automorphisms of C(k_{ss})_{ss}<td></tr>";
   for (int i=fromIndex; i<NumToProcess; i++)
   { rootSubalgebra& current= this->TheObjects[i];
     ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms.TheObjects[i];
-    ReflectionSubgroupWeylGroup& theIsos= this->CentralizerIsomorphisms.TheObjects[i];
     theOuterIsos.ComputeSubGroupFromGeneratingReflections(theOuterIsos.simpleGenerators, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
-    theIsos.ComputeSubGroupFromGeneratingReflections(theIsos.simpleGenerators, theIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
-      out <<"<td>";
-    out << current.theDynkinDiagram.DebugString;
+      out << "<td>";
+    current.theDynkinDiagram.ElementToString(tempS, true);
+    out << tempS;
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & ";
-    out << current.theCentralizerDiagram.DebugString;
+      out << " & ";
+    current.theCentralizerDiagram.ElementToString(tempS, true);
+    out << tempS;
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & ";
+      out << " & ";
     out << theOuterIsos.size;
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & ";
-    out << theIsos.size/theOuterIsos.size;
+      out << " & ";
+    out << numInnerIsos.ElementToString();
     if (useHtml)
-      out <<"</td><td>";
+      out << "</td><td>";
     if (useLatex)
-      out <<" & ";
-    out << theIsos.size;
+      out << " & ";
+    out << (numInnerIsos*theOuterIsos.size).ElementToString();
     if (useHtml)
-      out <<"</td></tr>";
+      out << "</td></tr>";
     if (useLatex)
-      out <<" \\\\\n";
+      out << " \\\\\n";
   }
   if (useLatex)
     out << "\\end{tabular}";
@@ -971,6 +1009,10 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.thePartialFraction.flagUsingCheckSum=true;
   inputData.thePartialFraction.flagAnErrorHasOccurredTimeToPanic=true;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
+  inputData.thePartialFraction.theChambers.theDirections.ComputeDebugString();
+  theGlobalVariables.theIndicatorVariables.StatusString1=inputData.thePartialFraction.theChambers.theDirections.DebugString;
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.MakeReport();
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, true);
   inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
@@ -1358,6 +1400,10 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
       delete this->TheObjects[i];
       this->TheObjects[i]=0;
     }
+    std::stringstream out;
+    out << "reading chamber " << i+1 <<" out of " << this->size;
+    theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
+    theGlobalVariables.MakeReport();
   }
   this->flagIsRunning=false;
   this->flagMustStop=false;

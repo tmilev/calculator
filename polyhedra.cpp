@@ -2266,8 +2266,10 @@ void ProjectOntoHyperPlane(root& input, root& normal, root& ProjectionDirection,
 }
 
 void Selection::init(int maxNumElements)
-{ if (maxNumElements==0)
-    this->MaxSize=0;
+{ if (maxNumElements<=0)
+  { this->MaxSize=0;
+    maxNumElements=0;
+  }
   if (maxNumElements>0 && maxNumElements!=this->MaxSize)
   { delete [] selected;
     delete [] elements;
@@ -7887,6 +7889,17 @@ Rational Rational::Factorial(int n)
   return result;
 }
 
+Rational Rational::TwoToTheNth(int n)
+{ Rational result=1;
+  if (n>=0)
+    for (int i=0; i<n; i++)
+      result.MultiplyByInt(2);
+  else
+    for (int i=0; i>n; i--)
+      result.DivideByInteger(2);
+  return result;
+}
+
 Rational Rational::NChooseK(int n, int k)
 { Rational result;
   result.MakeOne();
@@ -7894,6 +7907,12 @@ Rational Rational::NChooseK(int n, int k)
   { result.MultiplyByInt(n-i);
     result.DivideByInteger(i+1);
   }
+  return result;
+}
+
+Rational Rational::NtoTheKth(int n, int k)
+{ Rational result=n;
+  result.RaiseToPower(k);
   return result;
 }
 
@@ -14662,35 +14681,14 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGrou
 void rootSubalgebras::GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Selection emptySel;
   emptySel.init(theRootSA.SimpleBasisCentralizerRoots.size);
-  this->ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel, theRootSA, theGlobalVariables);
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(false, emptySel, theRootSA, theGlobalVariables);
 }
 
 void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
-{ roots selectedRootsBasisCentralizer; root tempRoot;
-  selectedRootsBasisCentralizer.size=0;
-  for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
-    if (!SelectedBasisRoots.selected[i])
-      selectedRootsBasisCentralizer.AddObjectOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
-  ReflectionSubgroupWeylGroup& theSubgroup=theGlobalVariables.subGroupActionNormalizerCentralizer;
-  theSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
-  this->MakeProgressReportAutomorphisms(theSubgroup, theRootSA, theGlobalVariables);
-  theSubgroup.AmbientWeyl.Assign(this->AmbientWeyl);
-  theRootSA.GenerateAutomorphisms(theRootSA, theGlobalVariables, &theSubgroup, true);
-  //std::string tempS;
-  //theSubgroup.ElementToString(tempS);
-  //theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
-  //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-  theSubgroup.ComputeSubGroupFromGeneratingReflections(selectedRootsBasisCentralizer, theSubgroup.ExternalAutomorphisms, theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
-  this->CentralizerIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
-  this->CentralizerOuterIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
-  this->CentralizerIsomorphisms.AddObjectOnTop(theSubgroup);
-  this->CentralizerOuterIsomorphisms.SetSizeExpandOnTopNoObjectInit(this->CentralizerIsomorphisms.size);
-  this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms.CopyFromBase(theSubgroup.ExternalAutomorphisms);
-  this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl.Assign(this->AmbientWeyl);
-  this->MakeProgressReportAutomorphisms(theSubgroup, theRootSA, theGlobalVariables);
-  //theSubgroup.ComputeDebugString();
+{ ReflectionSubgroupWeylGroup& theSubgroup=theGlobalVariables.subGroupActionNormalizerCentralizer;
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(false, SelectedBasisRoots, theRootSA, theGlobalVariables);
   this->ActionsNormalizerCentralizerNilradical.SetSizeExpandOnTopNoObjectInit(theSubgroup.size-1);
+  root tempRoot;
   for(int i=0; i<theSubgroup.size-1; i++)
   { this->ActionsNormalizerCentralizerNilradical.TheObjects[i].SetSizeExpandOnTopNoObjectInit(theRootSA.kModules.size);
     for (int j=0; j<theRootSA.kModules.size; j++)
@@ -14711,6 +14709,36 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
       theGlobalVariables.MakeReport();
     }
   }
+}
+
+void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(bool ComputeGeneratorsOnly, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
+{ roots selectedRootsBasisCentralizer;
+  selectedRootsBasisCentralizer.size=0;
+  for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
+    if (!SelectedBasisRoots.selected[i])
+      selectedRootsBasisCentralizer.AddObjectOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
+  ReflectionSubgroupWeylGroup& theSubgroup=theGlobalVariables.subGroupActionNormalizerCentralizer;
+  theSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
+  this->MakeProgressReportAutomorphisms(theSubgroup, theRootSA, theGlobalVariables);
+  theSubgroup.AmbientWeyl.Assign(this->AmbientWeyl);
+  theRootSA.GenerateAutomorphisms(theRootSA, theGlobalVariables, &theSubgroup, true);
+  //std::string tempS;
+  //theSubgroup.ElementToString(tempS);
+  //theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
+  //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  if (ComputeGeneratorsOnly)
+    theSubgroup.ComputeSubGroupFromGeneratingReflections(selectedRootsBasisCentralizer, theSubgroup.ExternalAutomorphisms, theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
+  else
+    theSubgroup.simpleGenerators.CopyFromBase(selectedRootsBasisCentralizer);
+  this->CentralizerIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
+  this->CentralizerOuterIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
+  this->CentralizerIsomorphisms.AddObjectOnTop(theSubgroup);
+  this->CentralizerOuterIsomorphisms.SetSizeExpandOnTopNoObjectInit(this->CentralizerIsomorphisms.size);
+  this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms.CopyFromBase(theSubgroup.ExternalAutomorphisms);
+  this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl.Assign(this->AmbientWeyl);
+  this->MakeProgressReportAutomorphisms(theSubgroup, theRootSA, theGlobalVariables);
+  //theSubgroup.ComputeDebugString();
 }
 
 bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel, GlobalVariables& theGlobalVariables)
@@ -14989,7 +15017,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     includeKEpsCoords=false;
   int LatexLineCounter=0;
   this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
-  this->theDynkinDiagram.ElementToString(tempS);
+  this->theDynkinDiagram.ElementToString(tempS, true);
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
@@ -15023,7 +15051,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS, useLatex, useHtml, false);
   if (useHtml)
     out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
-  this->theCentralizerDiagram.ElementToString(tempS);
+  this->theCentralizerDiagram.ElementToString(tempS, true);
   if(!useLatex)
     CGIspecificRoutines::clearDollarSigns(tempS, tempS);
   if (useLatex)
@@ -15351,13 +15379,23 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinStrings(WeylGroup& theWeyl)
     this->ComputeDynkinString(i, theWeyl);
 }
 
-void DynkinDiagramRootSubalgebra::ElementToString(std::string& output)
+void DynkinDiagramRootSubalgebra::ElementToString(std::string& output, bool CombineIsoComponents)
 { std::stringstream out;
-  for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-  { out <<this->DynkinTypeStrings.TheObjects[i];
-    if (i!=this->SimpleBasesConnectedComponents.size-1)
-      out <<"+";
-  }
+  if (!CombineIsoComponents)
+    for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
+    { out << this->DynkinTypeStrings.TheObjects[i];
+      if (i!=this->SimpleBasesConnectedComponents.size-1)
+        out << "+";
+    }
+  else
+    for (int j=0; j<this->sameTypeComponents.size; j++)
+    { int numSameTypeComponents= this->sameTypeComponents.TheObjects[j].size;
+      if (numSameTypeComponents!=1)
+        out << numSameTypeComponents;
+      out << this->DynkinTypeStrings.TheObjects[this->sameTypeComponents.TheObjects[j].TheObjects[0]];
+      if (j!=this->sameTypeComponents.size-1)
+        out << "+";
+    }
   output=out.str();
 }
 
@@ -16841,9 +16879,9 @@ int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, 
   out << tempS;
   if (useLatex)
     out << " & ";
-  this->theDiagram.ElementToString(tempS);
+  this->theDiagram.ElementToString(tempS, true);
   out << tempS;
-  this->theDiagramRelAndK.ElementToString(tempS);
+  this->theDiagramRelAndK.ElementToString(tempS, true);
   if (useLatex)
     out << " & ";
   out << tempS;
@@ -17296,7 +17334,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
   std::string tooltipSAs="h - fixed Cartan subalgebra. k - subalgebra containing h. k_{ss}=[k, k] - regular semisimple subalgebra in the sense of Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. k_{ss} is parametrized by a root subsytem of \\Delta(g). C(k_{ss}) consists root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h";
   this->GetTableHeaderAndFooter(header, footer, useLatex, useHtml);
   int col=0; int row=0;
-  this->TheObjects[0].theDynkinDiagram.ElementToString(tempS);
+  this->TheObjects[0].theDynkinDiagram.ElementToString(tempS, true);
   if (useLatex)
     out << "$\\mathfrak{g}$: ";
   else
@@ -17310,8 +17348,8 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       if (useHtml)
         out << "<td title=\"" << tooltipSAs << "\">";
     }
-    this->TheObjects[i].theDynkinDiagram.ElementToString(tempS);
-    this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2);
+    this->TheObjects[i].theDynkinDiagram.ElementToString(tempS, true);
+    this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2, true);
     if (tempS=="") tempS="-";
     if (useLatex)
     { CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
@@ -17354,7 +17392,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
     int counter=0;
     for(int j=0; j<this->TheObjects[i].indicesSubalgebrasContainingK.size; j++)
     { int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
-      this->TheObjects[tempI].theDynkinDiagram.ElementToString(tempS);
+      this->TheObjects[tempI].theDynkinDiagram.ElementToString(tempS, true);
       if (useLatex)
         CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
       counter+=(signed)tempS.length();
@@ -21904,6 +21942,7 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
       this->theMatrix.elements[i][j+this->thePaths.PositiveRoots.size]=(i==j)? 1 : 0;
   this->theColumnsOfTheMatrix.AssignMatrixColumns(this->theMatrix);
   theChambers.theDirections.CopyFromBase(this->theColumnsOfTheMatrix);
+  theChambers.theDirections.ReverseOrderElements();
   theChambers.AmbientDimension= this->theMatrix.NumRows;
   theChambers.theCurrentIndex=-1;
   theChambers.theDirections.ComputeDebugString();

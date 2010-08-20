@@ -64,7 +64,6 @@ int main(int argc, char **argv)
   //inputString="textType=A&textRank=4";
   getPath(argv[0], inputPath);
   ComputationSetup theComputationSetup;
-  theComputationSetup.flagDoCustomComputation=false;
   int choice =::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup,inputPath);
   //std::cout<< "choice " <<choice <<"       ";
   std::string latexCommand1;
@@ -117,36 +116,36 @@ int main(int argc, char **argv)
       chamberFileName=inputPath;
       chamberFileName.append("chambers.html");
       CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(chamberFile, chamberFileName, false, true, false);
-      chamberFile<<"<HTML><BODY>"<< theComputationSetup.theChambers.DebugString<<"</BODY></HTML>";
+      chamberFile << "<HTML><BODY>" << theComputationSetup.thePartialFraction.theChambers.DebugString << "</BODY></HTML>";
       chamberFile.close();
       if(theComputationSetup.DisplayNumberChamberOfInterest==-1 && theComputationSetup.flagComputingVectorPartitions)
-        theComputationSetup.DisplayNumberChamberOfInterest= theComputationSetup.theChambers.TheObjects[theComputationSetup.theChambers.RootBelongsToChamberIndex(theComputationSetup.IndicatorRoot,0)]->DisplayNumber;
+        theComputationSetup.DisplayNumberChamberOfInterest= theComputationSetup.thePartialFraction.theChambers.TheObjects[theComputationSetup.thePartialFraction.theChambers.RootBelongsToChamberIndex(theComputationSetup.IndicatorRoot,0)]->DisplayNumber;
         //std::cout <<"Run ok!";
     }
     else
     { WeylGroup tempWeyl;
       theComputationSetup.WeylGroupIndex=4;
-      theComputationSetup.theChambers.AmbientDimension=4;
-      tempWeyl.MakeArbitrary('A', theComputationSetup.theChambers.AmbientDimension);
+      theComputationSetup.thePartialFraction.theChambers.AmbientDimension=4;
+      tempWeyl.MakeArbitrary('A', theComputationSetup.thePartialFraction.theChambers.AmbientDimension);
       tempWeyl.ComputeRho(true);
       theComputationSetup.VPVectors.CopyFromBase(tempWeyl.RootsOfBorel);
     }
     //std::cout.flush();
-    std::cout<<"<script type=\"text/javascript\">\n";
-    std::cout<<"\tvar rootsArraySize=" <<theComputationSetup.VPVectors.size<<";\n";
-    std::cout<<"\tvar rootsArrayDim=" <<theComputationSetup.theChambers.AmbientDimension<<";\n";
-    std::cout<< "\tvar rootsArray= new Array(" <<theComputationSetup.VPVectors.size << ");";
+    std::cout << "<script type=\"text/javascript\">\n";
+    std::cout << "\tvar rootsArraySize=" << theComputationSetup.VPVectors.size << ";\n";
+    std::cout << "\tvar rootsArrayDim=" << theComputationSetup.thePartialFraction.theChambers.AmbientDimension << ";\n";
+    std::cout << "\tvar rootsArray= new Array(" << theComputationSetup.VPVectors.size << ");";
     for (int i=0; i<theComputationSetup.VPVectors.size; i++)
-    { std::cout	<< "\n\trootsArray["<<i<<"]= new Array(" << theComputationSetup.theChambers.AmbientDimension<<");\n";
+    { std::cout	<< "\n\trootsArray[" << i << "]= new Array(" << theComputationSetup.thePartialFraction.theChambers.AmbientDimension << ");\n";
       //std::cout.flush();
-      for (int j=0; j<theComputationSetup.theChambers.AmbientDimension; j++)
+      for (int j=0; j<theComputationSetup.thePartialFraction.theChambers.AmbientDimension; j++)
       { //std::cout.flush();
         theComputationSetup.VPVectors.TheObjects[i].TheObjects[j].ElementToString(tempS);
         std::cout << "\trootsArray[" << i << "][" << j << "]=" << tempS << ";";
       }
   //    std::cout.flush();
     }
-    std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.theChambers.AmbientDimension<< "," << theComputationSetup.VPVectors.size << "," << -1 << "," << theComputationSetup.DisplayNumberChamberOfInterest << ");\n</script>\n";
+    std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.thePartialFraction.theChambers.AmbientDimension << "," << theComputationSetup.VPVectors.size << "," << -1 << "," << theComputationSetup.DisplayNumberChamberOfInterest << ");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
   } else if (choice==CGIspecificRoutines::choiceDisplayRootSApage)
   { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n";

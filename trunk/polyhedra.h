@@ -1432,7 +1432,7 @@ ParallelComputing::GlobalPointerCounter++;
     return true;
   };
   inline void FreeExtended()
-  {  if (this->Extended==0)
+  { if (this->Extended==0)
       return;
     delete this->Extended; this->Extended=0;
 #ifdef CGIversionLimitRAMuse
@@ -1521,13 +1521,13 @@ public:
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(Rational& right);
   inline bool IsEqualToZero()const
-  {  if (this->Extended==0)
+  { if (this->Extended==0)
       return this->NumShort==0;
     else
       return this->Extended->num.IsEqualToZero();
   };
   inline bool IsNonNegative()
-  {  if (this->Extended==0)
+  { if (this->Extended==0)
       return this->NumShort>=0;
     else
       return this->Extended->num.IsNonNegative();
@@ -1577,6 +1577,8 @@ public:
   inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus(); };
   static Rational NChooseK(int n, int k);
   static Rational Factorial(int n);
+  static Rational TwoToTheNth(int n);
+  static Rational NtoTheKth(int n, int k);
   void RaiseToPower(int x);
   static Rational TheRingUnit;
   static Rational TheRingZero;
@@ -1609,6 +1611,7 @@ public:
   inline void operator=(const Rational& right){this->Assign(right); };
   inline bool operator==(const Rational& right){return this->IsEqualTo(right); };
   inline void operator+=(const Rational& right){this->Add(right); };
+  inline void operator*=(const Rational& right){this->MultiplyBy(right); };
   inline void operator+=(int right){this->AddInteger(right); };
   inline bool operator==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat); };
   inline void operator=(int right){this->AssignInteger(right); };
@@ -5386,6 +5389,7 @@ public:
   void ComputeWeylGroup(int UpperLimitNumElements);
   void ComputeWeylGroupAndRootsOfBorel(roots& output);
   void ComputeRootsOfBorel(roots& output);
+  static Rational GetSizeWeylByFormula(char weylLetter, int theDim);
   bool IsARoot(const root& input){ return this->RootSystem.ContainsObjectHash(input); };
   void GenerateRootSubsystem(roots& theRoots);
   void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights);
@@ -5503,8 +5507,9 @@ class DynkinDiagramRootSubalgebra
 {
 public:
   std::string DebugString;
-  void ElementToString(std::string& output);
-  void ComputeDebugString(){this->ElementToString(this->DebugString); };
+  void ElementToString(std::string& output, bool CombineIsoComponents);
+  void ComputeDebugString(){this->ElementToString(this->DebugString, false); };
+  void ComputeDebugString(bool CombineIsoComponents){this->ElementToString(this->DebugString, CombineIsoComponents); };
   rootsCollection SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
@@ -5535,6 +5540,7 @@ public:
   inline void operator=(const DynkinDiagramRootSubalgebra& right){this->Assign(right); };
   bool operator==(const DynkinDiagramRootSubalgebra& right) const;
   bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
+  Rational GetSizeCorrespondingWeylGroupByFormula();
   void GetSimpleBasisInBourbakiOrder(roots& output);
   void GetSimpleBasisInBourbakiOrderOneComponentAppend(roots& outputAppend, int index);
   void GetAutomorphism(List<List<int> >& output, int index);
@@ -5799,6 +5805,7 @@ public:
   void ApplyOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
   void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+  void ComputeNormalizerOfCentralizerIntersectNilradical(bool ComputeGeneratorsOnly, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
   void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
   bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);

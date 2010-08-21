@@ -903,7 +903,7 @@ void guiMainWindow::RunTheComputation()
 }
 
 void guiMainWindow::onButton19CountNilradicals(wxCommandEvent& ev)
-{ this->theComputationSetup.WeylGroupIndex=8;
+{ this->theComputationSetup.WeylGroupIndex=6;
   this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.CountNilradicals;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ComputeRootSAs;
@@ -936,8 +936,8 @@ void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
   { this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
     return;
   }
-  this->theComputationSetup.WeylGroupIndex=4;
-  this->theComputationSetup.WeylGroupLetter='F';
+  this->theComputationSetup.WeylGroupIndex=7;
+  this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
   this->RunTheComputation();
 }

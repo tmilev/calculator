@@ -849,19 +849,19 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   fileName.append("StructureConstants.html");
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
   this->owner.ElementToString(tempS, true, false, usePNG, theGlobalVariables, &physicalPath, &htmlPathServer, &this->texFileNamesForPNG, &this->texStringsEachFile);
-  theFile<< tempS;
+  theFile << tempS;
   theFile.close();
   if (usePNG)
   { this->listSystemCommandsLatex.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSizeExpandOnTopNoObjectInit(this->texFileNamesForPNG.size);
     for (int i=0; i<this->texFileNamesForPNG.size; i++)
     { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
-      fileFlas<< "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n"<< this->texStringsEachFile.TheObjects[i]<<"\n\\end{document}";
+      fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile.TheObjects[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
-      tempStreamLatex << "latex "<< " -output-directory="<< physicalPath<<" "<< this->texFileNamesForPNG.TheObjects[i];
+      tempStreamLatex << "latex "<< " -output-directory=" << physicalPath << " " << this->texFileNamesForPNG.TheObjects[i];
       tempS= this->texFileNamesForPNG.TheObjects[i];
       tempS.resize(tempS.size()-4);
-      tempStreamPNG << "dvipng "<< tempS <<".dvi -o " << tempS<<".png -T tight";
+      tempStreamPNG << "dvipng " << tempS << ".dvi -o " << tempS << ".png -T tight";
       this->listSystemCommandsLatex.TheObjects[i]= tempStreamLatex.str();
       this->listSystemCommandsDVIPNG.TheObjects[i]=tempStreamPNG.str();
       fileFlas.close();
@@ -886,7 +886,7 @@ void ComputationSetup::CountNilradicals(ComputationSetup& inputData, GlobalVaria
     out << currentSA.theDynkinDiagram.DebugString << " & " << currentSA.theCentralizerDiagram.DebugString << " & " << inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i] << " \\\\\n";
     total+=inputData.theRootSubalgebras.numNilradicalsBySA.TheObjects[i];
   }
-  out <<"Total: " << total << " nilradicals up to iso";
+  out << "Total: " << total << " nilradicals up to iso";
   std::string tempS;
   inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-6, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
@@ -901,16 +901,17 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
 { std::stringstream out; std::string tempS;
   //W'' stands for the graph isomorphisms of C(k_ss) extending to root system isomorphisms of the entire algebra.
   for (int i=fromIndex; i<NumToProcess; i++)
-  { this->GenerateActionKintersectBIsos(this->TheObjects[i], theGlobalVariables);
-  }
+    this->GenerateKintersectBOuterIsos(this->TheObjects[i], theGlobalVariables);
   if (useLatex)
     out << "\\begin{tabular}{ccccc}$\\mathfrak{k}_{ss}$& $C(k_{ss})_{ss}$ & $\\#W''$ &$\\#W'''$&$\\#(W'''\\rtimes W'')$\\\\\\hline";
   if (useHtml)
     out << "<br><table><tr><td>k_{ss}</td><td></td><td>Weyl group of C(k_{ss})_{ss}</td><td>Outer automorphisms of C(k_{ss})_{ss}<td></tr>";
+  roots emptyRoots;
+  emptyRoots.size=0;
   for (int i=fromIndex; i<NumToProcess; i++)
   { rootSubalgebra& current= this->TheObjects[i];
     ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms.TheObjects[i];
-    theOuterIsos.ComputeSubGroupFromGeneratingReflections(theOuterIsos.simpleGenerators, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    theOuterIsos.ComputeSubGroupFromGeneratingReflections(emptyRoots, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
       out << "<td>";
@@ -1581,23 +1582,21 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   inputData.theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
   inputData.theOutput.DebugString.append("\\begin{document}~");
   std::stringstream out;
-  out << "Number subalgebras satisfying cone condition: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed - inputData.theRootSubalgebras.NumConeConditionFailures << "\n";
-  out << "Number subalgebras failing the cone condition: " << inputData.theRootSubalgebras.NumConeConditionFailures << "\n";
-  out << "Total subalgebras processed: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed << "\n";
-  out << "\n" << theRootSAs.ReportStringNonNilradicalParabolic;
-  out << "\nNum cone conditions hold by ss part: ";
   if (theRootSAs.NumConeConditionHoldsBySSpart.size==theRootSAs.size)
     for (int i=0; i< theRootSAs.size; i++)
       out << theRootSAs.TheObjects[i].theDynkinDiagram.DebugString << " " << theRootSAs.NumConeConditionHoldsBySSpart.TheObjects[i] << ";   ";
+  out << "\n\n\\noindent Number of different subalgebras up to $\\gG$-automorphism such that $\\nn\\cap C(\\kk_{ss})$ is a nilradical of a parabolic subalgebra of $\\kk$: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed << "\n";
+  out << "\n\n\\noindent Among them " << inputData.theRootSubalgebras.NumSubalgebrasProcessed - inputData.theRootSubalgebras.NumConeConditionFailures << " satisfy the cone condition and " << inputData.theRootSubalgebras.NumConeConditionFailures << " do not." ;
   out << "\n\n";
-  tempS = out.str();
-  inputData.theOutput.DebugString.append(tempS);
   inputData.theRootSubalgebras.theBadRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
   inputData.theRootSubalgebras.theGoodRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
   //this->theRootSubalgebras.theMinRels.ComputeDebugString
   //  (this->theRootSubalgebras, *this->theGlobalVariablesContainer->Default());
   inputData.theOutput.DebugString.append(inputData.theRootSubalgebras.DebugString);
   inputData.theOutput.DebugString.append("\n\n\n");
+  tempS = out.str();
+  inputData.theOutput.DebugString.append(tempS);
+
   if (inputData.theRootSubalgebras.theGoodRelations.size!=0)
     inputData.theOutput.DebugString.append(inputData.theRootSubalgebras.theGoodRelations.DebugString);
   inputData.theOutput.DebugString.append("\n\n\n");
@@ -1643,8 +1642,6 @@ void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, Glob
   output << "Num_cone_condition_failures: " << this->NumConeConditionFailures << "\n";
   output << "Implied_selections: ";
   this->ImpiedSelectionsNilradical.WriteToFile(output);
-  output << "Parabolics_selection: ";
-  this->ParabolicsSelectionNilradicalGeneration.WriteToFile(output);
   output << "Counters_nilradicals_generation: ";
   output << this->CountersNilradicalsGeneration;
   output << "\nRecursion_depth: " << this->RecursionDepthNilradicalsGeneration << "\n";
@@ -1671,8 +1668,6 @@ void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, Glob
   input >> tempS;
   this->ImpiedSelectionsNilradical.ReadFromFile(input);
   input >> tempS;
-  this->ParabolicsSelectionNilradicalGeneration.ReadFromFile(input);
-  input >> tempS;
   input >> this->CountersNilradicalsGeneration;
   input >> tempS >> this->RecursionDepthNilradicalsGeneration;
   /////////////////////////////////////////////////////////////////////////////////////
@@ -1698,13 +1693,12 @@ void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, Globa
   this->ComputeAll();
 }
 
-void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter)
+void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter)
 { impliedSelections.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
-  ParabolicsSelection.init(this->SimpleBasisCentralizerRoots.size);
   parabolicsCounter=0;
 }
 
-void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner)
 {  //this->ComputeAll();
   this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
   if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -1712,33 +1706,43 @@ void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Se
   if (this->flagAnErrorHasOccuredTimeToPanic)
     this->ComputeDebugString(theGlobalVariables);
   this->NumTotalSubalgebras=0;
-  owner.GenerateActionKintersectBIsos(*this, theGlobalVariables);
-  if (ComputeGroupsOnly)
-    return;
+  Selection emptySel;
+  emptySel.init(this->SimpleBasisCentralizerRoots.size);
+  owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel, *this, theGlobalVariables);
   int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
   theGlobalVariables.selApproveSelAgainstOneGenerator.init(this->kModules.size);
+  List<Selection> StartingNilradicalsNoRepetition;
+  StartingNilradicalsNoRepetition.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  Selection tempSel, ParabolicsGenerator;
   if (!owner.flagNilradicalComputationInitialized)
     owner.CountersNilradicalsGeneration.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
   roots tempRootsTest;
   if (useParabolicsInNilradical)
   { this->flagFirstRoundCounting=false;
-    for (; parabolicsCounter<numCycles; parabolicsCounter++, ParabolicsSelection.incrementSelection(), owner.flagNilradicalComputationInitialized=false)
-    { if (!owner.flagNilradicalComputationInitialized)
-      { impliedSelections.TheObjects[0].init(this->kModules.size);
-        for (int j=0; j<this->CentralizerRoots.size; j++)
-          if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsSelection, this->CentralizerRoots.TheObjects[j]))
-            impliedSelections.TheObjects[0].AddSelectionAppendNewIndex(j);
-        owner.RecursionDepthNilradicalsGeneration=0;
-        owner.CountersNilradicalsGeneration.TheObjects[0]=this->CentralizerRoots.size;
-      }
+    ParabolicsGenerator.init(this->SimpleBasisCentralizerRoots.size);
+    for (int i=0; i<numCycles; i++, ParabolicsGenerator.incrementSelection())
+    { tempSel.init(this->kModules.size);
+      for (int j=0; j<this->CentralizerRoots.size; j++)
+        if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsGenerator, this->CentralizerRoots.TheObjects[j]))
+          tempSel.AddSelectionAppendNewIndex(j);
       if (owner.flagUsingActionsNormalizerCentralizerNilradical)
-        owner.RaiseSelectionUntilApproval(impliedSelections.TheObjects[0], theGlobalVariables);
+        owner.RaiseSelectionUntilApproval(tempSel, theGlobalVariables);
+      StartingNilradicalsNoRepetition.AddOnTopNoRepetition(tempSel);
+      //StartingNilradicalsNoRepetition.AddObjectOnTop(tempSel);
+    }
+
 /*      tempRootsTest.size=0;
       std::string tempS; std::stringstream out;
       for (int s=0; s<impliedSelections.TheObjects[0].CardinalitySelection; s++)
         tempRootsTest.AddObjectOnTop(this->kModules.TheObjects[impliedSelections.TheObjects[0].elements[s]].TheObjects[0]);
       tempS=out.str();
       assert(this->RootsDefineASubalgebra(tempRootsTest));*/
+    for (; parabolicsCounter<StartingNilradicalsNoRepetition.size; parabolicsCounter++, owner.flagNilradicalComputationInitialized=false)
+    { if (!owner.flagNilradicalComputationInitialized)
+      { impliedSelections.TheObjects[0].Assign(StartingNilradicalsNoRepetition.TheObjects[parabolicsCounter]);
+        owner.RecursionDepthNilradicalsGeneration=0;
+        owner.CountersNilradicalsGeneration.TheObjects[0]=this->CentralizerRoots.size;
+      }
       this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
     }
   }

@@ -850,7 +850,14 @@ public:
   inline void operator=(const Selection& right){this->Assign(right); };
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
-  inline bool operator==(const Selection& right);
+  inline bool operator==(const Selection& right) const
+  { if (this->MaxSize!=right.MaxSize || this->CardinalitySelection!=right.CardinalitySelection)
+      return false;
+    for (int i=0; i<this->CardinalitySelection; i++)
+      if (this->selected[this->elements[i]]!=right.selected[this->elements[i]])
+        return false;
+    return true;
+  };
   Selection();
   Selection(int m);
   ~Selection();
@@ -5723,8 +5730,8 @@ public:
   bool IsAnIsomorphism(roots& domain, roots& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, roots* additionalDomain, roots* additionalRange);
   bool ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel);
   void GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, bool ComputeGroupsOnly, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, Selection& ParabolicsSelection, int& parabolicsCounter);
+  void GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter);
   void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
   void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
@@ -5772,7 +5779,6 @@ public:
   List<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
   List<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
   //Code used in nilradical generation:
-  Selection ParabolicsSelectionNilradicalGeneration;
   List<Selection> ImpiedSelectionsNilradical;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
@@ -5804,8 +5810,9 @@ public:
   void RaiseSelectionUntilApproval(Selection& targetSel, GlobalVariables& theGlobalVariables);
   void ApplyOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
   void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+  void GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void ComputeNormalizerOfCentralizerIntersectNilradical(bool ComputeGeneratorsOnly, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+  void ComputeNormalizerOfCentralizerIntersectNilradical(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords);
   void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
   bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
@@ -5838,7 +5845,7 @@ public:
     this->ReportStringNonNilradicalParabolic="";
     this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration=this->size-1;
     if (this->size>0)
-    { this->TheObjects[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration);
+    { this->TheObjects[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
       this->NumConeConditionHoldsBySSpart.initFillInObject(this->size, 0);
     }
   };

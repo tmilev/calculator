@@ -2590,15 +2590,6 @@ int Selection::HashFunction() const
   return result;
 }
 
-bool Selection::operator==(const Selection& right)
-{ if (this->MaxSize!=right.MaxSize || this->CardinalitySelection!=right.CardinalitySelection)
-    return false;
-  for (int i=0; i<this->CardinalitySelection; i++)
-    if (this->selected[this->elements[i]]!=right.selected[this->elements[i]])
-      return false;
-  return true;
-}
-
 void root::RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output)
 { Rational tempRat;
   assert(r1.size==r2.size);
@@ -14681,12 +14672,19 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGrou
 void rootSubalgebras::GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Selection emptySel;
   emptySel.init(theRootSA.SimpleBasisCentralizerRoots.size);
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(false, emptySel, theRootSA, theGlobalVariables);
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(theGlobalVariables.subGroupActionNormalizerCentralizer, emptySel, theRootSA, theGlobalVariables);
+}
+
+void rootSubalgebras::GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
+{ Selection fullSel;
+  fullSel.init(theRootSA.SimpleBasisCentralizerRoots.size);
+  fullSel.incrementSelectionFixedCardinality(theRootSA.SimpleBasisCentralizerRoots.size);
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(theGlobalVariables.subGroupActionNormalizerCentralizer, fullSel, theRootSA, theGlobalVariables);
 }
 
 void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { ReflectionSubgroupWeylGroup& theSubgroup=theGlobalVariables.subGroupActionNormalizerCentralizer;
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(false, SelectedBasisRoots, theRootSA, theGlobalVariables);
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(theSubgroup, SelectedBasisRoots, theRootSA, theGlobalVariables);
   this->ActionsNormalizerCentralizerNilradical.SetSizeExpandOnTopNoObjectInit(theSubgroup.size-1);
   root tempRoot;
   for(int i=0; i<theSubgroup.size-1; i++)
@@ -14711,33 +14709,30 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
   }
 }
 
-void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(bool ComputeGeneratorsOnly, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { roots selectedRootsBasisCentralizer;
   selectedRootsBasisCentralizer.size=0;
   for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
     if (!SelectedBasisRoots.selected[i])
       selectedRootsBasisCentralizer.AddObjectOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
-  ReflectionSubgroupWeylGroup& theSubgroup=theGlobalVariables.subGroupActionNormalizerCentralizer;
-  theSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
-  this->MakeProgressReportAutomorphisms(theSubgroup, theRootSA, theGlobalVariables);
-  theSubgroup.AmbientWeyl.Assign(this->AmbientWeyl);
-  theRootSA.GenerateAutomorphisms(theRootSA, theGlobalVariables, &theSubgroup, true);
+  outputSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
+  this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
+  outputSubgroup.AmbientWeyl.Assign(this->AmbientWeyl);
+  theRootSA.GenerateAutomorphisms(theRootSA, theGlobalVariables, &outputSubgroup, true);
   //std::string tempS;
   //theSubgroup.ElementToString(tempS);
   //theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
   //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-  if (ComputeGeneratorsOnly)
-    theSubgroup.ComputeSubGroupFromGeneratingReflections(selectedRootsBasisCentralizer, theSubgroup.ExternalAutomorphisms, theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
-  else
-    theSubgroup.simpleGenerators.CopyFromBase(selectedRootsBasisCentralizer);
+  outputSubgroup.ComputeSubGroupFromGeneratingReflections(selectedRootsBasisCentralizer, outputSubgroup.ExternalAutomorphisms, theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
+  outputSubgroup.simpleGenerators.CopyFromBase(selectedRootsBasisCentralizer);
   this->CentralizerIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
   this->CentralizerOuterIsomorphisms.MakeActualSizeAtLeastExpandOnTop(this->size);
-  this->CentralizerIsomorphisms.AddObjectOnTop(theSubgroup);
+  this->CentralizerIsomorphisms.AddObjectOnTop(outputSubgroup);
   this->CentralizerOuterIsomorphisms.SetSizeExpandOnTopNoObjectInit(this->CentralizerIsomorphisms.size);
-  this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms.CopyFromBase(theSubgroup.ExternalAutomorphisms);
+  this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms.CopyFromBase(outputSubgroup.ExternalAutomorphisms);
   this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl.Assign(this->AmbientWeyl);
-  this->MakeProgressReportAutomorphisms(theSubgroup, theRootSA, theGlobalVariables);
+  this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   //theSubgroup.ComputeDebugString();
 }
 
@@ -17209,18 +17204,18 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
   this->NumSubalgebrasCounted=0;
   for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
   { this->TheObjects[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[i].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, true, *this, i);
+    this->TheObjects[i].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, *this, i);
     if (i!=NumToBeProcessed+StartingIndex-1)
-      this->TheObjects[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, ParabolicsSelectionNilradicalGeneration, parabolicsCounterNilradicalGeneration);
+      this->TheObjects[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
 { for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
   { this->TheObjects[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, true, false, *this, this->IndexCurrentSANilradicalsGeneration);
+    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, true, *this, this->IndexCurrentSANilradicalsGeneration);
     if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration-1)
-      this->TheObjects[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->ParabolicsSelectionNilradicalGeneration, this->parabolicsCounterNilradicalGeneration);
+      this->TheObjects[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }
 }
 
@@ -17312,9 +17307,9 @@ void rootSubalgebras::pathToHtmlFileNameElements(int index, std::string* htmlPat
     return;
   }
   std::stringstream out;
-  out<< *htmlPathServer<< "rootSA"<<index;
+  out << *htmlPathServer << "rootSA" << index;
   if (includeDotHtml)
-    out <<".html";
+    out << ".html";
   output=out.str();
 }
 

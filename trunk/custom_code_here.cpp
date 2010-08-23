@@ -1014,6 +1014,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   theGlobalVariables.theIndicatorVariables.StatusString1=inputData.thePartialFraction.theChambers.theDirections.DebugString;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
+  inputData.thePartialFraction.theChambers.flagUsingStartingConesSeparation=true;
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, true);
   inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
@@ -1343,6 +1344,7 @@ void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVari
   output << "Num_pointers: " << this->size << "\n";
 ///////////////////////////////////////////////////
   output << "Dimension: " << this->AmbientDimension << "\n";
+  output << "Using_separating_cones: " << this->flagUsingStartingConesSeparation << "\n";
   output << "CurrentIndex: " << this->theCurrentIndex << "\n";
   output << "Directions:\n";
   this->theDirections.WriteToFile(output, theGlobalVariables);
@@ -1376,6 +1378,7 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   this->initAndCreateNewObjects(tempI);
 ///////////////////////////////////////////////////
   input >> tempS >> this->AmbientDimension;
+  input >> tempS >> this->flagUsingStartingConesSeparation;
   input >> tempS >> this->theCurrentIndex;
   input >> tempS;
   this->theDirections.ReadFromFile(input, theGlobalVariables);

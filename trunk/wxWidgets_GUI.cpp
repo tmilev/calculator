@@ -936,7 +936,8 @@ void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
   { this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
     return;
   }
-  this->theComputationSetup.WeylGroupIndex=7;
+  this->theComputationSetup.theRootSubalgebras.flagUsingParabolicsInCentralizers=false;
+  this->theComputationSetup.WeylGroupIndex=6;
   this->theComputationSetup.WeylGroupLetter='E';
   this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
   this->RunTheComputation();
@@ -964,6 +965,7 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
   this->ReadVPVectorsAndOptions();
   this->theComputationSetup.thePartialFraction.theChambers.flagSpanTheEntireSpace=true;
   this->theComputationSetup.thePartialFraction.theChambers.flagUsingStartingConesSeparation=true;
+  this->theComputationSetup.thePartialFraction.theChambers.flagUsingVerticesToDetermineBogusNeighborsIfPossible=true;
 //  this->theComputationSetup.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;

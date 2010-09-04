@@ -1015,6 +1015,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
   inputData.thePartialFraction.theChambers.flagUsingStartingConesSeparation=true;
+  inputData.thePartialFraction.theChambers.flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, true);
   inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
@@ -1750,7 +1751,8 @@ void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Se
     }
   }
   else
-  { impliedSelections.TheObjects[0].init(this->kModules.size);
+  { this->flagFirstRoundCounting=false;
+    impliedSelections.TheObjects[0].init(this->kModules.size);
     owner.RecursionDepthNilradicalsGeneration=0;
     owner.CountersNilradicalsGeneration.TheObjects[0]=0;
     this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);

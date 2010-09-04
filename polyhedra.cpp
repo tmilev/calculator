@@ -3623,7 +3623,7 @@ bool CombinatorialChamber::BordersViaExternalWRTDirectionNonZeroNeighbor(const r
   return false;
 }
 
-bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
 {// if (NeighborWall.NeighborsAlongWall.size<=1)
     //return false;
   int theDimension= ownerComplex.AmbientDimension;
@@ -3632,18 +3632,14 @@ bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(roots& relevantVert
   Selection& tempSel= theGlobalVariables.selBogusNeighbor;
   emptyMat.init(0, 0);
   tempMat.init(0, theDimension);
-  for (int i=0; i<Neighbor->AllVertices.size; i++)
-  { root& current = Neighbor->AllVertices.TheObjects[i];
-    if (NeighborWall.ContainsPoint(current) && this->PointIsInChamber(current))
-      if (this->ExtraPointRemovesDoubtForBogusWall(tempMat, emptyMat, tempSel, current))
-        return false;
-  }
-  for (int i=0; i<relevantVerticesCurrentWall.size; i++)
-  { root& current= relevantVerticesCurrentWall.TheObjects[i];
-    if (Neighbor->PointIsInChamber(current))
-      if (this->ExtraPointRemovesDoubtForBogusWall(tempMat, emptyMat, tempSel, current))
-        return false;
-  }
+  roots* currentVertices=&Neighbor->AllVertices;
+  for (int k=0; k<2; k++, currentVertices=&this->AllVertices)
+    for (int i=0; i<currentVertices->size; i++)
+    { root& current = currentVertices->TheObjects[i];
+      if (this->PointIsInChamber(current) && Neighbor->PointIsInChamber(current))
+        if (this->ExtraPointRemovesDoubtForBogusWall(tempMat, emptyMat, tempSel, current))
+          return false;
+    }
   return true;
 }
 
@@ -3867,7 +3863,7 @@ bool CombinatorialChamber::UnionAlongWallIsConvex(CombinatorialChamber& other, i
 }
 
 bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables)
-{  //   roots PositiveVertices, NegativeVertices
+{ //   roots PositiveVertices, NegativeVertices
   //static int ProblemCounter=0;
   //ProblemCounter++;
   assert(output.TheObjects[output.indexNextChamberToSlice]==this);
@@ -4022,14 +4018,23 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
     assert(NewMinusChamber->ConsistencyCheck(output.AmbientDimension, true, output, theGlobalVariables));
     output.ComputeDebugString();
   }
-//  if (output.flagSpanTheEntireSpace || !output.flagStoringVertices || !output.flagUsingVerticesToDetermineBogusNeighborsIfPossible)
-  for (int i=0; i<PossibleBogusNeighbors.size; i++)
-  { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
-    if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-      possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
-    if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-      possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
-  }
+  if (!output.flagStoringVertices || !output.flagUsingVerticesToDetermineBogusNeighborsIfPossible)
+    for (int i=0; i<PossibleBogusNeighbors.size; i++)
+    { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
+      if (NewPlusChamber->IsABogusNeighborUseStoredVertices(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
+      if (NewMinusChamber->IsABogusNeighborUseStoredVertices(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
+    }
+  else
+    for (int i=0; i<PossibleBogusNeighbors.size; i++)
+    { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
+      if (NewPlusChamber->IsABogusNeighborUseStoredVertices(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
+      if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
+    }
+
 //  output.ComputeDebugString();
   assert(NewPlusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);
@@ -4505,11 +4510,8 @@ void CombinatorialChamberContainer::init()
   this->flagIsRunning=false;
   ///////////////////////////////////////////////////////////////////////////
   //these flags are kept for legacy purposes. The only supported combination under which the program runs is this!
-  //The flags were originally set otherwise, however I ran into some algorithmic problems - just look at the code
-  // where those flags are used and so some *heavy* thinking. I am still not exactly sure what goes wrong with
-  // setting this->flagSpanTheEntireSpace to false, - the smallest example that goes bad is B4 ...
+  ////////////////////////////////////////////////////////////////////////////////
   this->flagStoringVertices=true;
-  this->flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
   this->flagMakeGrandMasterConsistencyCheck=false;
   ///////////////////////////////////////////////////////////////////////////
   this->KillAllElements();
@@ -4522,6 +4524,7 @@ void CombinatorialChamberContainer::init()
   this->startingCones.ReleaseMemory();
   this->theWeylGroupAffineHyperplaneImages.size=0;
   this->flagMakingASingleHyperplaneSlice=false;
+  this->flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
   this->flagSpanTheEntireSpace=true;
   this->flagMakingReports=true;
   this->flagDrawingProjective=true;
@@ -17213,7 +17216,7 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
 { for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
   { this->TheObjects[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, true, *this, this->IndexCurrentSANilradicalsGeneration);
+    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, this->flagUsingParabolicsInCentralizers, *this, this->IndexCurrentSANilradicalsGeneration);
     if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration-1)
       this->TheObjects[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }

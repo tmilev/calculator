@@ -667,9 +667,9 @@ void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       if (j!=i)
-        this->elements[i][j].Assign(Element::TheRingZero);
+        this->elements[i][j]=0;
       else
-        this->elements[i][j].Assign(Element::TheRingUnit);
+        this->elements[i][j]=1;
 }
 
 template <typename Element>
@@ -1616,7 +1616,7 @@ public:
     return true;
   };
   inline void operator=(const Rational& right){this->Assign(right); };
-  inline bool operator==(const Rational& right){return this->IsEqualTo(right); };
+  inline bool operator==(const Rational& right) const {return this->IsEqualTo(right); };
   inline void operator+=(const Rational& right){this->Add(right); };
   inline void operator*=(const Rational& right){this->MultiplyBy(right); };
   inline void operator+=(int right){this->AddInteger(right); };
@@ -1633,6 +1633,9 @@ public:
   Rational operator+(const Rational& right)const;
   Rational operator-(const Rational& right)const;
   Rational operator/(const Rational& right)const;
+  bool operator!=(const int& right) const
+  { return !((*this)==right);
+  };
   inline bool operator>(const Rational& right)const{return this->IsGreaterThan(right); };
   inline bool operator<(const Rational& right)const{return right.IsGreaterThan(*this); };
   inline bool operator>(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat); };
@@ -5780,6 +5783,7 @@ public:
   List<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
+  List<List<List<int> > > storedNilradicals;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;
@@ -5805,6 +5809,7 @@ public:
   bool flagCountingNilradicalsOnlyNoComputation;
   bool flagComputeConeCondition;
   bool flagLookingForMinimalRels;
+  bool flagStoringNilradicals;
   void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
   bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel, GlobalVariables& theGlobalVariables);
   bool ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
@@ -5828,6 +5833,8 @@ public:
   bool ReadFromDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables);
   void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void ElementToStringRootSpaces(std::string& output, roots& input, GlobalVariables& theGlobalVariables);
+  void ElementToStringConeConditionNotSatisfying(std::string& output, GlobalVariables& theGlobalVariables);
   void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
@@ -5852,6 +5859,7 @@ public:
   };
   rootSubalgebras()
   { this->flagNilradicalComputationInitialized=false;
+    this->flagStoringNilradicals=false;
     this->flagUsingParabolicsInCentralizers=true;
     this->flagUseDynkinClassificationForIsomorphismComputation=true;
     this->flagCountingNilradicalsOnlyNoComputation = false;

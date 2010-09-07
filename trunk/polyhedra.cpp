@@ -1631,6 +1631,7 @@ void root::ElementToString(std::string& output, bool useLaTeX)
 void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)
 { std::stringstream out;
   std::string tempS;
+  bool found=false;
   for(int i=0; i<this->size; i++)
   { if (!this->TheObjects[i].IsEqualToZero())
     { this->TheObjects[i].ElementToString(tempS);
@@ -1638,21 +1639,22 @@ void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool u
         tempS="";
       if (tempS=="-1")
         tempS="-";
-      if (i!=0)
+      if (found)
       { if (tempS.size()>0)
         { if (tempS[0]!='-')
-            out<<"+";
+            out << "+";
         } else
-          out<<"+";
+          out << "+";
       }
-      out <<tempS;
+      found=true;
+      out << tempS;
       if (useLatex)
-        out <<"$\\varepsilon_{";
+        out << "$\\varepsilon_{";
       else
-        out <<"e_";
-      out <<i+1;
+        out << "e_";
+      out << i+1;
       if (useLatex)
-        out<<"}$";
+        out << "}$";
     }
   }
   output=out.str();
@@ -2332,29 +2334,33 @@ void roots::ElementToLinearCombinationString(std::string& output)
 void roots::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable)
 { std::string tempS; std::stringstream out;
   if (useHtml && makeTable)
-    out <<"<table>";
+    out << "<table>";
   if (useLatex && makeTable)
-    out <<"\\begin{tabular}{c}";
+    out << "\\begin{tabular}{c}";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToStringEpsilonForm(tempS, useLatex, useHtml);
     if (useHtml && makeTable)
-      out<<"<tr><td>";
-    out <<"("<<tempS<<")";
+      out << "<tr><td>";
+    if (!useLatex || useHtml)
+      out << "(";
+    out << tempS;
+    if (!useLatex || useHtml)
+      out << ")";
     if (useLatex && makeTable)
-      out<<"\\\\";
+      out << "\\\\";
     if (useHtml && makeTable)
-      out <<"</td></tr>";
+      out << "</td></tr>";
     if (!makeTable)
     { if (i!=this->size-1)
-        out <<", ";
+        out << ", ";
     }
     else
-      out <<"\n";
+      out << "\n";
   }
   if (useHtml && makeTable)
-    out <<"</table>";
+    out << "</table>";
   if (useLatex && makeTable)
-    out <<"\\end{tabular}";
+    out << "\\end{tabular}";
   output=out.str();
 }
 
@@ -13992,8 +13998,21 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
     if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner, owner.flagComputingLprohibitingWeights))
     { this->NumConeConditionFailures++;
       owner.NumConeConditionFailures++;
+      if (owner.flagStoringNilradicals)
+      { List<List<int> >& currentSAList = owner.storedNilradicals.TheObjects[indexInOwner];
+        List<int> newNilradical;
+        newNilradical.SetSizeExpandOnTopNoObjectInit(selKmods.CardinalitySelection);
+        for (int i=0; i<selKmods.CardinalitySelection; i++)
+          newNilradical.TheObjects[i]=selKmods.elements[i];
+        int oldIncrement= List<List<int> >::ListActualSizeIncrement;
+        List<List<int> >::ListActualSizeIncrement=100;
+        currentSAList.AddObjectOnTop(newNilradical);
+        List<List<int> >::ListActualSizeIncrement=oldIncrement;
+      }
     } else
-    {//the below commented out code should be incapsulated. It computes whether a given nilradical is a nilradical of a parabolic subalgebra.
+    {
+
+      //the below commented out code should be incapsulated. It computes whether a given nilradical is a nilradical of a parabolic subalgebra.
       //this task is pushed on the end of the to-do list.
       /* owner.NumConeConditionHoldsBySSpart.TheObjects[indexInOwner]++;
       if (owner.ReportStringNonNilradicalParabolic=="")
@@ -14418,7 +14437,7 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, ro
 { root tempRoot, Accum;
   SelectionWithMaxMultiplicity tempSel;
   roots& chosenAlphas= theGlobalVariables.rootsAttepmtTheTripleTrickWRTSA;
-  for (int i=2; i<this->AmbientWeyl.KillingFormMatrix.NumRows; i++)
+  for (int i=2; i<=MathRoutines::Maximum(highestWeightsAllowed.size, this->AmbientWeyl.KillingFormMatrix.NumRows); i++)
   { tempSel.initMe2(highestWeightsAllowed.size, i);
     int NumElts=tempSel.NumCombinationsOfCardinality(i);
     for (int j=0; j<NumElts; j++)
@@ -17214,7 +17233,10 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
-{ for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
+{ if (this->flagStoringNilradicals)
+  { this->storedNilradicals.SetSizeExpandOnTopNoObjectInit(this->size);
+  }
+  for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
   { this->TheObjects[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
     this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, this->flagUsingParabolicsInCentralizers, *this, this->IndexCurrentSANilradicalsGeneration);
     if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration-1)

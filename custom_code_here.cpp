@@ -1577,6 +1577,9 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
       inputData.theRootSubalgebras.initForNilradicalGeneration();
     }
   inputData.theRootSubalgebras.ComputeLProhibitingRelations(theGlobalVariables);
+  std::string stringConeConditionSatisfying;
+  if (theRootSAs.flagStoringNilradicals)
+    theRootSAs.ElementToStringConeConditionNotSatisfying(stringConeConditionSatisfying, theGlobalVariables);
   std::string tempS;
   inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
   inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-1, theGlobalVariables);
@@ -1589,9 +1592,10 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   if (theRootSAs.NumConeConditionHoldsBySSpart.size==theRootSAs.size)
     for (int i=0; i< theRootSAs.size; i++)
       out << theRootSAs.TheObjects[i].theDynkinDiagram.DebugString << " " << theRootSAs.NumConeConditionHoldsBySSpart.TheObjects[i] << ";   ";
-  out << "\n\n\\noindent Number of different subalgebras up to $\\gG$-automorphism such that $\\nn\\cap C(\\kk_{ss})$ is a nilradical of a parabolic subalgebra of $\\kk$: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed << "\n";
+  out << "\n\n\\noindent Number of different subalgebras up to $\\mathfrak{g}$-automorphism such that $\\mathfrak{n}\\cap C(\\mathfrak{k}_{ss})$ is a nilradical of a parabolic subalgebra of $\\mathfrak{k}$: " << inputData.theRootSubalgebras.NumSubalgebrasProcessed << "\n";
   out << "\n\n\\noindent Among them " << inputData.theRootSubalgebras.NumSubalgebrasProcessed - inputData.theRootSubalgebras.NumConeConditionFailures << " satisfy the cone condition and " << inputData.theRootSubalgebras.NumConeConditionFailures << " do not." ;
   out << "\n\n";
+  out << stringConeConditionSatisfying << "\n\n";
   inputData.theRootSubalgebras.theBadRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
   inputData.theRootSubalgebras.theGoodRelations.ComputeDebugString(inputData.theRootSubalgebras, theGlobalVariables);
   //this->theRootSubalgebras.theMinRels.ComputeDebugString
@@ -1720,6 +1724,8 @@ void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Se
   Selection tempSel, ParabolicsGenerator;
   if (!owner.flagNilradicalComputationInitialized)
     owner.CountersNilradicalsGeneration.SetSizeExpandOnTopNoObjectInit(this->kModules.size+1);
+  if (owner.flagStoringNilradicals)
+    owner.storedNilradicals.TheObjects[indexInOwner].size=0;
   roots tempRootsTest;
   if (useParabolicsInNilradical)
   { this->flagFirstRoundCounting=false;
@@ -2442,4 +2448,213 @@ void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGl
   //this->ConsistencyCheck(false, theGlobalVariables);
   this->PurgeZeroPointers();
   this->ConsistencyCheck(false, theGlobalVariables);
+}
+
+void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& output, GlobalVariables& theGlobalVariables)
+{ roots tempRoots, tempRoots2;
+  std::stringstream out;
+  std::stringstream out2;
+  std::string tempS;
+  int numNonSolvableNonReductive=0;
+  if (this->AmbientWeyl.WeylLetter=='B')
+    out << "$\\mathrm{so}(2n+1)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c|c}A&\\begin{array}{c}v_1\\\\ \\vdots \\\\ v_n\\end{array} &C=-C^T \\\\\\hline \\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& \\begin{array}{ccc}-v_n &\\dots&  -v_1\\end{array} \\\\\\hline D=-D^T&\\begin{array}{c}-w_n\\\\ \\vdots \\\\ -w_1\\end{array} & -A^T\\end{array}\\right)\\right\\}$.\n\n";
+  if (this->AmbientWeyl.WeylLetter=='C')
+    out << "$\\mathrm{sp}(2n)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}\\right)| C=C^T, D=D^T\\right\\}.$";
+ out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can be chosen to consist of the diagonal matrices of the above form.\n\n";
+  for (int i=0; i<this->size-1; i++)
+    if (this->storedNilradicals.TheObjects[i].size>0)
+    { rootSubalgebra& currentRootSA=this->TheObjects[i];
+      tempRoots.size=0;
+      for (int j=0; j<currentRootSA.PositiveRootsK.size; j++)
+      { tempRoots.AddObjectOnTop(currentRootSA.PositiveRootsK.TheObjects[j]);
+        tempRoots.AddObjectOnTop(-currentRootSA.PositiveRootsK.TheObjects[j]);
+      }
+      out << "\n\n\\noindent\\rule{\\textwidth}{1.5pt}\n\n$\\Delta(\\mathfrak{k})$ is of type " << currentRootSA.theDynkinDiagram.DebugString << "; ";
+      currentRootSA.AmbientWeyl.GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2, theGlobalVariables);
+      tempRoots2.ElementToStringEpsilonForm(tempS, true, false, false);
+      out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS << "\n\n\\noindent\\rule{\\textwidth}{0.3pt}\n\n";
+      int numNonReductiveCurrent=0;
+      for (int j=0; j<this->storedNilradicals.TheObjects[i].size; j++)
+      { List<int>& currentNilrad= this->storedNilradicals.TheObjects[i].TheObjects[j];
+        if (currentNilrad.size>0)
+        { numNonSolvableNonReductive++;
+          numNonReductiveCurrent++;
+          tempRoots.size= currentRootSA.PositiveRootsK.size*2;
+          for(int k=0; k<currentNilrad.size; k++)
+            tempRoots.AddListOnTop(currentRootSA.kModules.TheObjects[currentNilrad.TheObjects[k]]);
+          this->ElementToStringRootSpaces(tempS, tempRoots, theGlobalVariables);
+          out << tempS << "\n";
+          if (numNonReductiveCurrent%2==0)
+            out << "\n\n";
+        }
+      }
+    }
+  out2 << "\n\nThe number of non-conjugate non-solvable non-reductive root subalgebras not satisfying the cone condition is: " << numNonSolvableNonReductive << "\n\n";
+  tempS = out.str();
+  out2 << tempS;
+  output=out2.str();
+}
+
+void rootSubalgebras::ElementToStringRootSpaces(std::string& output, roots& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS; std::stringstream out;
+  roots epsCoords;
+  Matrix<int> tempMat;
+  int theDimension=this->AmbientWeyl.KillingFormMatrix.NumRows;
+  if (this->AmbientWeyl.WeylLetter=='B')
+  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords, theGlobalVariables);
+    tempMat.MakeIdMatrix(theDimension*2+1);
+    tempMat.elements[theDimension][theDimension]=0;
+    for (int i=0; i<epsCoords.size; i++)
+    { bool isShort=false;
+      int firstIndex;
+      int secondIndex;
+      bool firstSignIsPositive=true;
+      bool secondSignIsPositive=true;
+      root& currentRoot=epsCoords.TheObjects[i];
+      epsCoords.ComputeDebugString();
+      for (int j=0; j<theDimension; j++)
+      { if (currentRoot.TheObjects[j]!=0)
+        { isShort=!isShort;
+          if(isShort)
+          { if (currentRoot.TheObjects[j].IsPositive())
+              firstSignIsPositive=true;
+            else
+              firstSignIsPositive=false;
+            firstIndex=j;
+          } else
+          { if (currentRoot.TheObjects[j].IsPositive())
+              secondSignIsPositive=true;
+            else
+              secondSignIsPositive=false;
+            secondIndex=j;
+          }
+        }
+      }
+      if (!isShort)
+      { bool signsAreDifferent=(firstSignIsPositive!=secondSignIsPositive);
+        if (signsAreDifferent)
+        { int positiveIndex, negativeIndex;
+          if (firstSignIsPositive)
+          { positiveIndex= firstIndex;
+            negativeIndex=secondIndex;
+          } else
+          { positiveIndex= secondIndex;
+            negativeIndex=firstIndex;
+          }
+          tempMat.elements[positiveIndex][negativeIndex]=1;
+          tempMat.elements[theDimension+1+negativeIndex][theDimension+1+positiveIndex]=-1;
+        } else
+        { if (firstSignIsPositive)
+          { tempMat.elements[firstIndex][secondIndex+theDimension+1]=1;
+            tempMat.elements[secondIndex][firstIndex+theDimension+1]=-1;
+          } else
+          { tempMat.elements[theDimension+1+firstIndex][secondIndex]=1;
+            tempMat.elements[theDimension+1+secondIndex][firstIndex]=-1;
+          }
+        }
+      } else
+      { if (firstSignIsPositive)
+        { tempMat.elements[firstIndex][theDimension]=1;
+          tempMat.elements[theDimension][theDimension+1+firstIndex]=-1;
+        } else
+        { tempMat.elements[theDimension][firstIndex]=1;
+          tempMat.elements[firstIndex+1+theDimension][theDimension]=-1;
+        }
+      }
+    }
+  }
+  if (this->AmbientWeyl.WeylLetter=='C')
+  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords, theGlobalVariables);
+    tempMat.MakeIdMatrix(theDimension*2);
+    for (int i=0; i<epsCoords.size; i++)
+    { bool isLong=false;
+      int firstIndex;
+      int secondIndex;
+      bool firstSignIsPositive=true;
+      bool secondSignIsPositive=true;
+      root& currentRoot=epsCoords.TheObjects[i];
+      epsCoords.ComputeDebugString();
+      for (int j=0; j<theDimension; j++)
+      { if (currentRoot.TheObjects[j]!=0)
+        { isLong=!isLong;
+          if(isLong)
+          { if (currentRoot.TheObjects[j].IsPositive())
+              firstSignIsPositive=true;
+            else
+              firstSignIsPositive=false;
+            firstIndex=j;
+          } else
+          { if (currentRoot.TheObjects[j].IsPositive())
+              secondSignIsPositive=true;
+            else
+              secondSignIsPositive=false;
+            secondIndex=j;
+          }
+        }
+      }
+      if (!isLong)
+      { bool signsAreDifferent=(firstSignIsPositive!=secondSignIsPositive);
+        if (signsAreDifferent)
+        { int positiveIndex, negativeIndex;
+          if (firstSignIsPositive)
+          { positiveIndex= firstIndex;
+            negativeIndex=secondIndex;
+          } else
+          { positiveIndex= secondIndex;
+            negativeIndex=firstIndex;
+          }
+          tempMat.elements[positiveIndex][negativeIndex]=1;
+          tempMat.elements[theDimension+negativeIndex][theDimension+positiveIndex]=-1;
+        } else
+        { if (firstSignIsPositive)
+          { tempMat.elements[firstIndex][secondIndex+theDimension]=1;
+            tempMat.elements[secondIndex][firstIndex+theDimension]=1;
+          } else
+          { tempMat.elements[theDimension+firstIndex][secondIndex]=1;
+            tempMat.elements[theDimension+secondIndex][firstIndex]=1;
+          }
+        }
+      } else
+      { if (firstSignIsPositive)
+          tempMat.elements[firstIndex][theDimension+firstIndex]=1;
+        else
+          tempMat.elements[theDimension+firstIndex][firstIndex]=1;
+      }
+    }
+  }
+  out << "\\begin{tabular}{cc} \\begin{tabular}{l} $\\Delta(\\mathfrak{n})=$ \\\\";
+  int numNilradicalRootSpaces=0;
+  for (int i=0; i<epsCoords.size; i++)
+  { root& currentRoot=epsCoords.TheObjects[i];
+    currentRoot.ElementToStringEpsilonForm(tempS, true, false);
+    if (!epsCoords.ContainsObject(-currentRoot))
+    { out << tempS << ",";
+      numNilradicalRootSpaces++;
+    }
+    if (numNilradicalRootSpaces%2==0 && numNilradicalRootSpaces!=0)
+      out << "\\\\";
+  }
+  out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
+  for (int i=0; i<tempMat.NumCols; i++)
+  { out << "c";
+    if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension-1 || i==theDimension))
+      out  << "|";
+  }
+  out << "}";
+  for (int i=0; i< tempMat.NumRows; i++)
+  { if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension || i==theDimension+1))
+      out  << "\\hline";
+    for (int j=0; j<tempMat.NumCols; j++)
+    { if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]==0)
+        out << "\\blacktriangle";
+      if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]!=0)
+        out << "\\bullet";
+      if (j!=tempMat.NumCols-1)
+        out << "&";
+      else
+        out << "\\\\";
+    }
+  }
+  out << "\\end{array}\\right)$ \\end{tabular}  ";
+  output=out.str();
 }

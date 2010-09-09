@@ -1579,12 +1579,12 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   inputData.theRootSubalgebras.ComputeLProhibitingRelations(theGlobalVariables);
   std::string stringConeConditionSatisfying;
   if (theRootSAs.flagStoringNilradicals)
-    theRootSAs.ElementToStringConeConditionNotSatisfying(stringConeConditionSatisfying, theGlobalVariables);
+    theRootSAs.ElementToStringConeConditionNotSatisfying(stringConeConditionSatisfying, false, theGlobalVariables);
   std::string tempS;
   inputData.theRootSubalgebras.ComputeDebugString(true, false, true, 0, 0, theGlobalVariables);
   inputData.theRootSubalgebras.ElementToStringCentralizerIsomorphisms(tempS, true, false, 0, inputData.theRootSubalgebras.size-1, theGlobalVariables);
   inputData.theRootSubalgebras.DebugString.append(tempS);
-  inputData.theOutput.DebugString.append("\\documentclass{article}\n\\usepackage{amssymb}\n");
+  inputData.theOutput.DebugString.append("\\documentclass{article}\n\\usepackage{amssymb}\n\\usepackage{longtable}\n");
   inputData.theOutput.DebugString.append("\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{7cm}");
   inputData.theOutput.DebugString.append("\\addtolength{\\voffset}{-3.5cm}\\addtolength{\\textheight}{7cm}");
   inputData.theOutput.DebugString.append("\\begin{document}~");
@@ -2450,7 +2450,7 @@ void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGl
   this->ConsistencyCheck(false, theGlobalVariables);
 }
 
-void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& output, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm, GlobalVariables& theGlobalVariables)
 { roots tempRoots, tempRoots2;
   std::stringstream out;
   std::stringstream out2;
@@ -2460,7 +2460,15 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
     out << "$\\mathrm{so}(2n+1)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c|c}A&\\begin{array}{c}v_1\\\\ \\vdots \\\\ v_n\\end{array} &C=-C^T \\\\\\hline \\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& \\begin{array}{ccc}-v_n &\\dots&  -v_1\\end{array} \\\\\\hline D=-D^T&\\begin{array}{c}-w_n\\\\ \\vdots \\\\ -w_1\\end{array} & -A^T\\end{array}\\right)\\right\\}$.\n\n";
   if (this->AmbientWeyl.WeylLetter=='C')
     out << "$\\mathrm{sp}(2n)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}\\right)| C=C^T, D=D^T\\right\\}.$";
- out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can be chosen to consist of the diagonal matrices of the above form.\n\n";
+  out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can be chosen to consist of the diagonal matrices of the above form.\n\n";
+  if (!includeMatrixForm)
+  { out << "\n\\begin{longtable}{r|l}\n\\multicolumn{2}{c}{";
+    if (this->AmbientWeyl.WeylLetter=='B')
+      out << " $ \\mathfrak{g}\\simeq \\mathrm{so("<<this->AmbientWeyl.KillingFormMatrix.NumRows*2+1 << ")}$";
+    if (this->AmbientWeyl.WeylLetter=='C')
+      out << " $\\mathfrak{g}\\simeq \\mathrm{sp("<<this->AmbientWeyl.KillingFormMatrix.NumRows*2 << ")}$";
+    out << "} \\\\\\hline";
+  }
   for (int i=0; i<this->size-1; i++)
     if (this->storedNilradicals.TheObjects[i].size>0)
     { rootSubalgebra& currentRootSA=this->TheObjects[i];
@@ -2469,10 +2477,20 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       { tempRoots.AddObjectOnTop(currentRootSA.PositiveRootsK.TheObjects[j]);
         tempRoots.AddObjectOnTop(-currentRootSA.PositiveRootsK.TheObjects[j]);
       }
-      out << "\n\n\\noindent\\rule{\\textwidth}{1.5pt}\n\n$\\Delta(\\mathfrak{k})$ is of type " << currentRootSA.theDynkinDiagram.DebugString << "; ";
+      if (includeMatrixForm)
+        out << "\n\n\\noindent\\rule{\\textwidth}{1.5pt}\n\n";
+      else
+        out << "\\hline\\begin{tabular}{r}";
+      out << "$\\Delta(\\mathfrak{k})$ is of type " << currentRootSA.theDynkinDiagram.DebugString << "; ";
+      if (!includeMatrixForm)
+        out <<"\\\\";
       currentRootSA.AmbientWeyl.GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2, theGlobalVariables);
       tempRoots2.ElementToStringEpsilonForm(tempS, true, false, false);
-      out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS << "\n\n\\noindent\\rule{\\textwidth}{0.3pt}\n\n";
+      out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS;
+      if (includeMatrixForm)
+        out << "\n\n\\noindent\\rule{\\textwidth}{0.3pt}\n\n";
+      else
+        out << "\\end{tabular} &\n\\begin{tabular}{l}";
       int numNonReductiveCurrent=0;
       for (int j=0; j<this->storedNilradicals.TheObjects[i].size; j++)
       { List<int>& currentNilrad= this->storedNilradicals.TheObjects[i].TheObjects[j];
@@ -2482,20 +2500,27 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
           tempRoots.size= currentRootSA.PositiveRootsK.size*2;
           for(int k=0; k<currentNilrad.size; k++)
             tempRoots.AddListOnTop(currentRootSA.kModules.TheObjects[currentNilrad.TheObjects[k]]);
-          this->ElementToStringRootSpaces(tempS, tempRoots, theGlobalVariables);
+          this->ElementToStringRootSpaces(tempS, includeMatrixForm, tempRoots, theGlobalVariables);
           out << tempS << "\n";
           if (numNonReductiveCurrent%2==0)
-            out << "\n\n";
+          { out << "\n\n";
+            if (!includeMatrixForm)
+              out <<"\\\\";
+          }
         }
       }
+      if (!includeMatrixForm)
+        out << "\\end{tabular}\n\n\\\\";
     }
+  if (!includeMatrixForm)
+    out << "\n\\end{longtable}";
   out2 << "\n\nThe number of non-conjugate non-solvable non-reductive root subalgebras not satisfying the cone condition is: " << numNonSolvableNonReductive << "\n\n";
   tempS = out.str();
   out2 << tempS;
   output=out2.str();
 }
 
-void rootSubalgebras::ElementToStringRootSpaces(std::string& output, roots& input, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, roots& input, GlobalVariables& theGlobalVariables)
 { std::string tempS; std::stringstream out;
   roots epsCoords;
   Matrix<int> tempMat;
@@ -2622,39 +2647,46 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, roots& inpu
       }
     }
   }
-  out << "\\begin{tabular}{cc} \\begin{tabular}{l} $\\Delta(\\mathfrak{n})=$ \\\\";
+  if (includeMatrixForm)
+    out << "\\begin{tabular}{cc} \\begin{tabular}{l}";
+  out << "$\\Delta(\\mathfrak{n})=$";
+  if (includeMatrixForm)
+    out <<"\\\\";
   int numNilradicalRootSpaces=0;
   for (int i=0; i<epsCoords.size; i++)
   { root& currentRoot=epsCoords.TheObjects[i];
     currentRoot.ElementToStringEpsilonForm(tempS, true, false);
     if (!epsCoords.ContainsObject(-currentRoot))
-    { out << tempS << ",";
+    { out << tempS << ", ";
       numNilradicalRootSpaces++;
     }
-    if (numNilradicalRootSpaces%2==0 && numNilradicalRootSpaces!=0)
-      out << "\\\\";
-  }
-  out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
-  for (int i=0; i<tempMat.NumCols; i++)
-  { out << "c";
-    if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension-1 || i==theDimension))
-      out  << "|";
-  }
-  out << "}";
-  for (int i=0; i< tempMat.NumRows; i++)
-  { if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension || i==theDimension+1))
-      out  << "\\hline";
-    for (int j=0; j<tempMat.NumCols; j++)
-    { if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]==0)
-        out << "\\blacktriangle";
-      if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]!=0)
-        out << "\\bullet";
-      if (j!=tempMat.NumCols-1)
-        out << "&";
-      else
+    if (includeMatrixForm)
+      if (numNilradicalRootSpaces%2==0 && numNilradicalRootSpaces!=0)
         out << "\\\\";
-    }
   }
-  out << "\\end{array}\\right)$ \\end{tabular}  ";
+  if (includeMatrixForm)
+  { out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
+    for (int i=0; i<tempMat.NumCols; i++)
+    { out << "c";
+      if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension-1 || i==theDimension))
+        out  << "|";
+    }
+    out << "}";
+    for (int i=0; i< tempMat.NumRows; i++)
+    { if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension || i==theDimension+1))
+        out  << "\\hline";
+      for (int j=0; j<tempMat.NumCols; j++)
+      { if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]==0)
+          out << "\\blacktriangle";
+        if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]!=0)
+        out << "\\bullet";
+        if (j!=tempMat.NumCols-1)
+          out << "&";
+        else
+          out << "\\\\";
+      }
+    }
+    out << "\\end{array}\\right)$ \\end{tabular}  ";
+  }
   output=out.str();
 }

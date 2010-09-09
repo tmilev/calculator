@@ -5833,8 +5833,8 @@ public:
   bool ReadFromDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables);
   void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables);
-  void ElementToStringRootSpaces(std::string& output, roots& input, GlobalVariables& theGlobalVariables);
-  void ElementToStringConeConditionNotSatisfying(std::string& output, GlobalVariables& theGlobalVariables);
+  void ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, roots& input, GlobalVariables& theGlobalVariables);
+  void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm, GlobalVariables& theGlobalVariables);
   void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);

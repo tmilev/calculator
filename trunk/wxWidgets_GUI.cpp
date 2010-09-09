@@ -939,7 +939,7 @@ void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
   this->theComputationSetup.theRootSubalgebras.flagUsingParabolicsInCentralizers=false;
   this->theComputationSetup.theRootSubalgebras.flagStoringNilradicals=true;
   this->theComputationSetup.WeylGroupIndex=3;
-  this->theComputationSetup.WeylGroupLetter='B';
+  this->theComputationSetup.WeylGroupLetter='C';
   this->theComputationSetup.theFunctionToRun=&this->theComputationSetup.LProhibitingWeightsComputation;
   this->RunTheComputation();
 }

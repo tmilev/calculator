@@ -966,7 +966,6 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
   this->ReadVPVectorsAndOptions();
   this->theComputationSetup.thePartialFraction.theChambers.flagSpanTheEntireSpace=true;
   this->theComputationSetup.thePartialFraction.theChambers.flagUsingStartingConesSeparation=true;
-  this->theComputationSetup.thePartialFraction.theChambers.flagUsingVerticesToDetermineBogusNeighborsIfPossible=true;
 //  this->theComputationSetup.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;

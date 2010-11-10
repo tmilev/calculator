@@ -1015,7 +1015,6 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
   inputData.thePartialFraction.theChambers.flagUsingStartingConesSeparation=true;
-  inputData.thePartialFraction.theChambers.flagUsingVerticesToDetermineBogusNeighborsIfPossible=false;
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, true);
   inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);

@@ -2010,7 +2010,7 @@ public:
   void FindAllNeighbors(ListPointers<CombinatorialChamber>& TheNeighbors);
   bool SplitChamber(root& theKillerPlaneNormal, CombinatorialChamberContainer& output, root& direction, GlobalVariables& theGlobalVariables);
   bool IsABogusNeighbor(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
-  bool IsABogusNeighborUseStoredVertices(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
+  bool IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
   void ComputeVerticesFromNormals(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
   void ComputeHyperplanesCurrentDirection(GlobalVariables& theGlobalVariables);
@@ -2768,6 +2768,7 @@ public:
 
 class CombinatorialChamberContainer: public ListPointers<CombinatorialChamber>
 { bool flagStoringVertices;
+  bool flagUsingVerticesToDetermineBogusNeighborsIfPossible;
   friend class CombinatorialChamber;
   friend class WallData;
 public:
@@ -2815,7 +2816,6 @@ public:
   Controller thePauseController;
 /////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-  bool flagUsingVerticesToDetermineBogusNeighborsIfPossible;
   bool flagMakingASingleHyperplaneSlice;
   bool flagSliceWithAWallInitDone;
   bool flagSliceWithAWallIgnorePermanentlyZero;

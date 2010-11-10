@@ -3629,7 +3629,7 @@ bool CombinatorialChamber::BordersViaExternalWRTDirectionNonZeroNeighbor(const r
   return false;
 }
 
-bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(roots& relevantVerticesCurrentWall, WallData& NeighborWall, CombinatorialChamber* Neighbor, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables)
 {// if (NeighborWall.NeighborsAlongWall.size<=1)
     //return false;
   int theDimension= ownerComplex.AmbientDimension;
@@ -3638,14 +3638,18 @@ bool CombinatorialChamber::IsABogusNeighborUseStoredVertices(WallData& NeighborW
   Selection& tempSel= theGlobalVariables.selBogusNeighbor;
   emptyMat.init(0, 0);
   tempMat.init(0, theDimension);
-  roots* currentVertices=&Neighbor->AllVertices;
-  for (int k=0; k<2; k++, currentVertices=&this->AllVertices)
-    for (int i=0; i<currentVertices->size; i++)
-    { root& current = currentVertices->TheObjects[i];
-      if (this->PointIsInChamber(current) && Neighbor->PointIsInChamber(current))
-        if (this->ExtraPointRemovesDoubtForBogusWall(tempMat, emptyMat, tempSel, current))
-          return false;
-    }
+  for (int i=0; i<Neighbor->AllVertices.size; i++)
+  { root& current = Neighbor->AllVertices.TheObjects[i];
+    if (NeighborWall.ContainsPoint(current) && this->PointIsInChamber(current))
+      if (this->ExtraPointRemovesDoubtForBogusWall(tempMat, emptyMat, tempSel, current))
+        return false;
+  }
+  for (int i=0; i<relevantVerticesCurrentWall.size; i++)
+  { root& current= relevantVerticesCurrentWall.TheObjects[i];
+    if (Neighbor->PointIsInChamber(current))
+      if (this->ExtraPointRemovesDoubtForBogusWall(tempMat, emptyMat, tempSel, current))
+        return false;
+  }
   return true;
 }
 
@@ -4024,23 +4028,14 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
     assert(NewMinusChamber->ConsistencyCheck(output.AmbientDimension, true, output, theGlobalVariables));
     output.ComputeDebugString();
   }
-  if (!output.flagStoringVertices || !output.flagUsingVerticesToDetermineBogusNeighborsIfPossible)
-    for (int i=0; i<PossibleBogusNeighbors.size; i++)
-    { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
-      if (NewPlusChamber->IsABogusNeighborUseStoredVertices(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
-      if (NewMinusChamber->IsABogusNeighborUseStoredVertices(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
-    }
-  else
-    for (int i=0; i<PossibleBogusNeighbors.size; i++)
-    { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
-      if (NewPlusChamber->IsABogusNeighborUseStoredVertices(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
-      if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
-        possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
-    }
-
+//  if (output.flagSpanTheEntireSpace || !output.flagStoringVertices || !output.flagUsingVerticesToDetermineBogusNeighborsIfPossible)
+  for (int i=0; i<PossibleBogusNeighbors.size; i++)
+  { WallData& possibleBadWall = PossibleBogusNeighbors.TheObjects[i]->Externalwalls.TheObjects[PossibleBogusWalls.TheObjects[i]];
+    if (NewPlusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+      possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewPlusChamber);
+    if (NewMinusChamber->IsABogusNeighbor(possibleBadWall, PossibleBogusNeighbors.TheObjects[i], output, theGlobalVariables))
+      possibleBadWall.RemoveNeighborhoodBothSidesNoRepetitionNeighbors(PossibleBogusNeighbors.TheObjects[i], NewMinusChamber);
+  }
 //  output.ComputeDebugString();
   assert(NewPlusChamber->Externalwalls.size>=output.AmbientDimension);
   assert(NewMinusChamber->Externalwalls.size>=output.AmbientDimension);

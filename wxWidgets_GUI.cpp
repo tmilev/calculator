@@ -193,6 +193,7 @@ public:
 	::wxButton* Button20SplitChambers;
 	::wxButton* Button21SplitChambersPauseAndSave;
 	::wxButton* Button22TestChambers;
+	::wxButton* Button23Experiments;
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -232,6 +233,7 @@ public:
   void onButton20SplitChambers(wxCommandEvent& ev);
   void onButton21SplitChambersPauseAndSave(wxCommandEvent& ev);
   void onButton22TestChambers(wxCommandEvent& ev);
+  void onButton23Experiments(wxCommandEvent& ev);
   void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
@@ -294,6 +296,7 @@ public:
     ID_Button20SplitChambers,
     ID_Button21SplitChambersPauseAndSave,
     ID_Button22TestChambers,
+    ID_Button23Experiments,
     ID_Paint,
   };
   DECLARE_EVENT_TABLE()
@@ -395,6 +398,7 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_BUTTON(guiMainWindow::ID_Button20SplitChambers, guiMainWindow::onButton20SplitChambers)
     EVT_BUTTON(guiMainWindow::ID_Button21SplitChambersPauseAndSave, guiMainWindow::onButton21SplitChambersPauseAndSave)
     EVT_BUTTON(guiMainWindow::ID_Button22TestChambers, guiMainWindow::onButton22TestChambers)
+    EVT_BUTTON(guiMainWindow::ID_Button23Experiments, guiMainWindow::onButton23Experiments)
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
@@ -580,6 +584,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Button20SplitChambers= new wxButton(this, this->ID_Button20SplitChambers, wxT("Load chambers+go"));
   this->Button21SplitChambersPauseAndSave= new wxButton(this, this->ID_Button21SplitChambersPauseAndSave, wxT("Pause and save"));
   this->Button22TestChambers= new wxButton(this, this->ID_Button22TestChambers, wxT("Test chambers algorithm (very slow, 30+min)"));
+  this->Button23Experiments= new wxButton(this, this->ID_Button23Experiments, wxT("Experiments"));
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
   //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
@@ -641,6 +646,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
       this->BoxSizer20ChamberSplit->Add(this->Button21SplitChambersPauseAndSave);
       this->BoxSizer20ChamberSplit->Add(this->Button22TestChambers);
 		this->BoxSizer11VerticalOptions->Add(this->Button19CountNilradicals);
+		this->BoxSizer11VerticalOptions->Add(this->Button23Experiments);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
   this->BoxSizer12VerticalProgressReports->Add(this->Label1ProgressReport);
   this->BoxSizer12VerticalProgressReports->Add(this->Label2ProgressReport);
@@ -987,6 +993,11 @@ void guiMainWindow::onButton21SplitChambersPauseAndSave(wxCommandEvent& ev)
 
 void guiMainWindow::onButton22TestChambers(wxCommandEvent& ev)
 { this->theComputationSetup.theFunctionToRun = & this->theComputationSetup.TestUnitCombinatorialChambersChambers;
+  this->RunTheComputation();
+}
+
+void guiMainWindow::onButton23Experiments(wxCommandEvent& ev)
+{ this->theComputationSetup.theFunctionToRun = & this->theComputationSetup.G2InD4Experiment;
   this->RunTheComputation();
 }
 

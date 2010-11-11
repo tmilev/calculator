@@ -7650,21 +7650,19 @@ inline void Rational::Invert()
   this->Extended->num.value.Assign(tempI);
 }
 
-void Rational::ReadFromFile(std::fstream& input)
-{ std::string tempS;
-  input>> tempS;
-  int positionInTempS=0;
+void Rational::AssignString(const std::string& input)
+{ int positionInTempS=0;
   this->MakeZero();
-  if (tempS=="0")
+  if (input=="0")
     return;
-  if (tempS[0]=='-')
+  if (input[0]=='-')
     positionInTempS++;
   LargeIntUnsigned tempNum, tempDen;
   tempNum.MakeZero();
   tempDen.MakeOne();
   bool readingNumerator=true;
-  for (unsigned i=positionInTempS; i<tempS.length(); i++)
-  { char a= tempS[i];
+  for (unsigned i=positionInTempS; i<input.length(); i++)
+  { char a= input[i];
     if (a=='/')
     { readingNumerator=false;
       tempDen.MakeZero();
@@ -7683,8 +7681,14 @@ void Rational::ReadFromFile(std::fstream& input)
   this->MakeOne();
   this->DivideByLargeIntegerUnsigned(tempDen);
   this->MultiplyByLargeIntUnsigned(tempNum);
-  if (tempS[0]=='-')
+  if (input[0]=='-')
     this->Minus();
+}
+
+void Rational::ReadFromFile(std::fstream& input)
+{ std::string tempS;
+  input>> tempS;
+  this->AssignString(tempS);
 }
 
 root Rational::operator *(const root& right)const
@@ -11632,7 +11636,7 @@ void WeylGroup::Assign(const WeylGroup& right)
   this->rho.Assign(right.rho);
 }
 
-void WeylGroup::ActOnRootByGroupElement(int index, root &theRoot, bool RhoAction, bool UseMinusRho)
+void WeylGroup::ActOnRootByGroupElement(int index, root& theRoot, bool RhoAction, bool UseMinusRho)
 { for (int i=0; i<this->TheObjects[index].size; i++)
     this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], theRoot, RhoAction, UseMinusRho);
 }

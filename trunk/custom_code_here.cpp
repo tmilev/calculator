@@ -787,7 +787,7 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
 { std::string tempS; std::stringstream out; std::stringstream body;
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
-    body<< "Index "<< i<<": ";
+  //  body<< "Index "<< i<<": ";
     if(useHtml)
       body<<"<br>";
     body<<tempS;
@@ -2688,4 +2688,83 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     out << "\\end{array}\\right)$ \\end{tabular}  ";
   }
   output=out.str();
+}
+
+void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  out << "\\documentclass{article}\\begin{document}";
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  SemisimpleLieAlgebra theLie;
+  theLie.ComputeChevalleyConstants('G',  2, theGlobalVariables);
+  theLie.ComputeDebugString(false, true, theGlobalVariables);
+  out << theLie.DebugString;
+  theLie.theWeyl.ComputeWeylGroup(-1);
+  root tempHW="(0,1)";
+  tempHW.ComputeDebugString();
+  roots tempRoots;
+  theLie.GenerateWeightSupport(tempHW, tempRoots, theGlobalVariables);
+  tempRoots.ComputeDebugString();
+  out << "\n\n\n" << tempRoots.DebugString << "\n\n\n";
+  out << "\\end{document}";
+
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.MakeReport();
+}
+
+//void SemisimpleLieAlgebra::ComputeD
+
+bool SemisimpleLieAlgebra::IsInTheWeightSupport(root& theWeight, root& highestWeight, GlobalVariables& theGlobalVariables)
+{ root correspondingDominant= theWeight;
+  this->theWeyl.RaiseToHighestWeight(correspondingDominant);
+
+  root theDiff= highestWeight - correspondingDominant;
+  correspondingDominant.ComputeDebugString();
+  highestWeight.ComputeDebugString();
+  theDiff.ComputeDebugString();
+  if (!theDiff.IsPositiveOrZero())
+    return false;
+  return true;
+}
+
+bool WeylGroup::IsDominantWeight(root& theWeight)
+{ int theDimension= this->KillingFormMatrix.NumRows;
+  root tempRoot;
+  for (int i=0; i<theDimension; i++)
+  { tempRoot.MakeEi(theDimension, i);
+    if (this->RootScalarKillingFormMatrixRoot(tempRoot, theWeight)<0)
+      return false;
+  }
+  return true;
+}
+
+void SemisimpleLieAlgebra::GenerateWeightSupport(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables)
+{ int indexFirstNonExplored=0;
+  this->theWeyl.RaiseToHighestWeight(theHighestWeight);
+  output.size=0;
+  output.AddObjectOnTop(theHighestWeight);
+  roots simpleBasis;
+  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+  simpleBasis.MakeEiBasis(theDimension);
+  root current;
+  while (indexFirstNonExplored<output.size)
+  { for (int i=0; i<theDimension; i++)
+    { current= output.TheObjects[indexFirstNonExplored]-simpleBasis.TheObjects[i];
+      current.ComputeDebugString();
+      if (this->IsInTheWeightSupport(current, theHighestWeight, theGlobalVariables))
+        output.AddOnTopNoRepetition(current);
+    }
+    indexFirstNonExplored++;
+  }
+}
+
+void WeylGroup::RaiseToHighestWeight(root& theWeight)
+{ root correspondingDominant;
+  for (int i=0; i<this->size; i++)
+  { correspondingDominant= theWeight;
+    this->ActOnRootByGroupElement(i, correspondingDominant, false, false);
+    if (this->IsDominantWeight(correspondingDominant))
+    { theWeight=correspondingDominant;
+      break;
+    }
+  }
 }

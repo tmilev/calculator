@@ -1491,6 +1491,7 @@ public:
   void Subtract(const Rational& r);
   void Add(const Rational& r);
   void AddInteger(int x);
+  void AssignString(const std::string& input);
   void AssignFracValue();
   void MultiplyBy(const Rational& r);
   int HashFunction() const{return this->NumShort*::SomeRandomPrimes[0]+this->DenShort*::SomeRandomPrimes[1]; };
@@ -1678,6 +1679,7 @@ public:
   void ScaleToIntegralMinHeight();
   void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   void FindLCMDenominators(LargeIntUnsigned& output);
+//  root(const char* input){std::string tempS=input; this->operator=(tempS);}
   std::string* ElementToStringDebuggerCallOnly();
   int FindLCMDenominatorsTruncateToInt();
   void InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x5);
@@ -1725,7 +1727,35 @@ public:
   static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
   int HashFunction() const;
   root(){};
+  root(const std::string& input){this->AssignString(input);};
+  root(const char* input){std::string tempS; tempS=input; this->AssignString(tempS);};
+  void operator=(const std::string& input){this->AssignString(input);};
+  void operator=(const char* input){std::string tempS; tempS=input; this->AssignString(input);};
   inline void operator=(const root& right){this->Assign(right); };
+  void AssignString(const std::string& input)
+  { unsigned int startIndex=0;
+    for (; startIndex<input.size(); startIndex++)
+      if (input[startIndex]=='(')
+        break;
+    startIndex++;
+    this->SetSizeExpandOnTopLight(0);
+    Rational tempRat;
+    std::string tempS;
+    tempS.resize(input.size());
+    tempS="";
+    for (; startIndex<input.size(); startIndex++)
+    { if (input[startIndex]==')' || input[startIndex]==',')
+      { tempRat.AssignString(tempS);
+        tempS="";
+        this->AddObjectOnTopLight(tempRat);
+      } else
+      { tempS.resize(tempS.size()+1);
+        tempS[tempS.size()-1]=input[startIndex];
+      }
+      if (input[startIndex]==')')
+        break;
+    }
+  };
   inline bool operator==(const root& right){return IsEqualTo(right); };
   inline root operator+(const root& right) const
   { root result; result.Assign(*this); result.Add(right); return result;
@@ -5384,6 +5414,7 @@ public:
   void MakeDn(int n);
   void MakeF4();
   void MakeG2();
+  void RaiseToHighestWeight(root& theWeight);
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); };
   //void GetLongRootLength(Rational& output);
@@ -5418,15 +5449,14 @@ public:
   void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
   void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
-  bool IsPositiveOrPerpWRTh(const root& input, const root& theH)
-  { return this->RootScalarKillingFormMatrixRoot(input, theH).IsNonNegative();
-  };
+  bool IsPositiveOrPerpWRTh(const root& input, const root& theH){ return this->RootScalarKillingFormMatrixRoot(input, theH).IsNonNegative(); };
   void ReflectBetaWRTAlpha(root& alpha, root& Beta, bool RhoAction, root& Output);
   bool IsRegular(root& input, int* indexFirstPerpendicularRoot);
   void RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output);
   //the below functions perturbs input so that inputH has non-zero scalar product with roots of the root system,
   //without changing the inputH-sign of any root that had a non-zero scalar product to begin with
   void PerturbWeightToRegularWRTrootSystem(const root& inputH, root& output);
+  bool IsDominantWeight(root& theWeight);
   Rational RootScalarKillingFormMatrixRoot(const root& r1, const root& r2)
   { Rational tempRat;
     this->RootScalarKillingFormMatrixRoot(r1, r2, tempRat);
@@ -6108,11 +6138,14 @@ public:
   void FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables);
   void FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables);
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
+  int ComputeVectorPartitionFunctionSmall(root& theRoot, roots& theRoots);
   void GetAdNilpotentElement(MatrixLargeRational& output, ElementSimpleLieAlgebra& e);
   void initHEFSystemFromECoeffs(int theRelativeDimension, Selection& theZeroCharacteristics, roots& rootsInPlay, roots& simpleBasisSA,  roots& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, root& targetH, MatrixLargeRational& inputFCoeffs, MatrixLargeRational& outputMatrixSystemToBeSolved, MatrixLargeRational& outputSystemColumnVector, PolynomialsRationalCoeff& outputSystemToBeSolved);
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
-  void MakeSl2ProgressReportNumCycles(int progress, int outOf,  GlobalVariables& theGlobalVariables);
+  void MakeSl2ProgressReportNumCycles(int progress, int outOf, GlobalVariables& theGlobalVariables);
+  bool IsInTheWeightSupport(root& theWeight, root& highestWeight, GlobalVariables& theGlobalVariables);
+  void GenerateWeightSupport(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables);
 };
 
 class SltwoSubalgebras : public HashedList<slTwo>
@@ -6865,6 +6898,7 @@ public:
   static void TestQuickSort(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TestUnitCombinatorialChambersChambers(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void G2InD4Experiment(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   static void TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();

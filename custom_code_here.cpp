@@ -2702,13 +2702,108 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
   root tempHW="(0,1)";
   tempHW.ComputeDebugString();
   roots tempRoots;
-  theLie.GenerateWeightSupport(tempHW, tempRoots, theGlobalVariables);
-  tempRoots.ComputeDebugString();
-  out << "\n\n\n" << tempRoots.DebugString << "\n\n\n";
+  theLie.CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(tempHW, theGlobalVariables);
+  std::string tempS;
+  if (theLie.CheckClosedness(tempS, theGlobalVariables))
+    out << "Lie bracket is good! ";
+  else
+    out << tempS;
+  theLie.ElementToStringEmbedding(tempS);
+  out << "\n\n\n" << tempS << "\n\n\n";
+ // theLie.
   out << "\\end{document}";
 
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
+}
+
+void ElementSimpleLieAlgebra::ElementToVectorRootSpacesFirstThenCartan(root& output)
+{ output.MakeZero(this->coeffsRootSpaces.size+ this->Hcomponent.size);
+  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
+  { int theIndex=this->NonZeroElements.elements[i];
+    output.TheObjects[theIndex]= this->coeffsRootSpaces.TheObjects[theIndex];
+  }
+  for (int i=0; i<this->Hcomponent.size; i++)
+    output.TheObjects[i+this->coeffsRootSpaces.size]= this->Hcomponent.TheObjects[i];
+}
+
+void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto)
+{ rootSubalgebra theRootSA;
+  theRootSA.AmbientWeyl.Assign(this->theWeyl);
+  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+  theRootSA.genK.MakeEiBasis(theDimension);
+  ReflectionSubgroupWeylGroup theAutos;
+  theRootSA.GenerateAutomorphismsPreservingBorel(theGlobalVariables, theAutos);
+  MatrixLargeRational mapOnRootSpaces;
+  mapOnRootSpaces.AssignRootsToRowsOfMatrix(theAutos.ExternalAutomorphisms.TheObjects[0]);
+  mapOnRootSpaces.Transpose(theGlobalVariables);
+  Selection NonExplored;
+  int numRoots= this->theWeyl.RootSystem.size;
+  NonExplored.init(numRoots);
+  NonExplored.MakeFullSelection();
+  root domainRoot, rangeRoot;
+  this->ComputeChevalleyConstants(this->theWeyl, theGlobalVariables);
+  List<ElementSimpleLieAlgebra> Domain, Range;
+  Range.SetSizeExpandOnTopNoObjectInit(numRoots+theDimension);
+  Domain.SetSizeExpandOnTopNoObjectInit(numRoots+theDimension);
+  ElementSimpleLieAlgebra tempElt;
+  for (int i=0; i<theDimension; i++)
+  { domainRoot.MakeEi(theDimension, i);
+    mapOnRootSpaces.ActOnAroot(domainRoot, rangeRoot);
+    for (int i=0; i<2; i++, domainRoot.MinusRoot(), rangeRoot.MinusRoot())
+    { int theIndex= this->theWeyl.RootSystem.IndexOfObjectHash(rangeRoot);
+      tempElt.Nullify(*this);
+      tempElt.SetCoefficient(rangeRoot, Rational::TheRingUnit, *this);
+      Range.TheObjects[theIndex]=tempElt;
+      theIndex= this->theWeyl.RootSystem.IndexOfObjectHash(domainRoot);
+      tempElt.Nullify(*this);
+      tempElt.SetCoefficient(domainRoot, Rational::TheRingUnit, *this);
+      Domain.TheObjects[theIndex]=tempElt;
+      NonExplored.RemoveSelection(theIndex);
+    }
+  }
+  root left, right;
+  while(NonExplored.CardinalitySelection>0)
+  { for (int i=0; i<NonExplored.CardinalitySelection; i++)
+    { int theIndex = NonExplored.elements[i];
+      root& current = this->theWeyl.RootSystem.TheObjects[theIndex];
+      for (int j=0; j<theDimension; j++)
+      { left.MakeEi(theDimension, j);
+        right= current-left;
+        if (this->theWeyl.IsARoot(right))
+        { int leftIndex= this->theWeyl.RootSystem.IndexOfObjectHash(left);
+          int rightIndex= this->theWeyl.RootSystem.IndexOfObjectHash(right);
+          if (!NonExplored.selected[rightIndex])
+          { ElementSimpleLieAlgebra& leftDomainElt=Domain.TheObjects[leftIndex];
+            ElementSimpleLieAlgebra& rightDomainElt= Domain.TheObjects[rightIndex];
+            this->LieBracket(leftDomainElt, rightDomainElt, Domain.TheObjects[theIndex]);
+            ElementSimpleLieAlgebra& leftRangeElt=Range.TheObjects[leftIndex];
+            ElementSimpleLieAlgebra& rightRangeElt= Range.TheObjects[rightIndex];
+            this->LieBracket(leftRangeElt, rightRangeElt, Range.TheObjects[theIndex]);
+            NonExplored.RemoveSelection(rightIndex);
+          }
+        }
+      }
+    }
+  }
+  roots vectorsLeft, vectorsRight;
+  vectorsLeft.SetSizeExpandOnTopNoObjectInit(Range.size);
+  vectorsRight.SetSizeExpandOnTopNoObjectInit(Range.size);
+  for (int i=0; i<Range.size; i++)
+  { Range.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
+    Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
+  }
+  outputAuto.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight, theGlobalVariables);
+}
+
+void MatrixLargeRational::MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational A;
+  MatrixLargeRational B;
+  A.AssignRootsToRowsOfMatrix(domain);
+  B.AssignRootsToRowsOfMatrix(range);
+  A.Invert(theGlobalVariables);
+  (*this)=A*B;
+  this->Transpose(theGlobalVariables);
 }
 
 //void SemisimpleLieAlgebra::ComputeD
@@ -2767,4 +2862,277 @@ void WeylGroup::RaiseToHighestWeight(root& theWeight)
       break;
     }
   }
+}
+
+void SemisimpleLieAlgebra::GenerateOneMonomialPerWeightInTheWeightSupport(root& theHighestWeight, GlobalVariables& theGlobalVariables)
+{ roots weightSupport;
+  this->GenerateWeightSupport(theHighestWeight, weightSupport, theGlobalVariables);
+  List<bool> Explored;
+  Explored.initFillInObject(weightSupport.size, false);
+  this->VermaMonomials.SetSizeExpandOnTopNoObjectInit(1);
+  this->VermaMonomials.TheObjects[0].MakeConst(theHighestWeight, Rational::TheRingUnit, this);
+  roots simpleBasis;
+  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+  simpleBasis.MakeEiBasis(theDimension);
+  root current, tempRoot;
+  VermaModuleMonomial tempMon;
+  for (int indexLowestNonExplored=0; indexLowestNonExplored<this->VermaMonomials.size; indexLowestNonExplored++)
+  { Explored.TheObjects[indexLowestNonExplored]=true;
+    for (int i=0; i<theDimension; i++)
+    { this->VermaMonomials.TheObjects[indexLowestNonExplored].GetWeight(current);
+      current.ComputeDebugString();
+      current-=simpleBasis.TheObjects[i];
+      current.ComputeDebugString();
+      int index=weightSupport.IndexOfObject(current);
+      if (index!=-1)
+        if (!Explored.TheObjects[index])
+        { Explored.TheObjects[index]=true;
+          this->VermaMonomials.TheObjects[indexLowestNonExplored].MultiplyBySimpleGenerator(i, tempMon);
+          this->VermaMonomials.AddObjectOnTop(tempMon);
+        }
+    }
+  }
+}
+
+void VermaModuleMonomial::GetWeight(root& output)
+{ int theDimension= this->owner->theWeyl.KillingFormMatrix.NumRows;
+  roots simpleBasis;
+  simpleBasis.MakeEiBasis(theDimension);
+  output=this->theHighestWeight;
+  for (int i=0; i<this->theSimpleGenerators.size; i++)
+    output-=simpleBasis.TheObjects[this->theSimpleGenerators.TheObjects[i]]*this->thePowers.TheObjects[i];
+}
+
+void VermaModuleMonomial::MultiplyBySimpleGenerator(int index, VermaModuleMonomial& output)
+{ output=*this;
+  bool tempBool=true;
+  if (this->theSimpleGenerators.size==0)
+    tempBool=false;
+  else
+    tempBool=(*this->theSimpleGenerators.LastObject()==index);
+  if (tempBool)
+    (*output.thePowers.LastObject())++;
+  else
+  { output.theSimpleGenerators.AddObjectOnTop(index);
+    output.thePowers.AddObjectOnTop(1);
+  }
+}
+
+void VermaModuleMonomial::MakeConst(root& highestWeight, Rational& theCoeff, SemisimpleLieAlgebra* theOwner)
+{ this->theHighestWeight=highestWeight;
+  this->coeff= theCoeff;
+  this->owner=theOwner;
+  this->thePowers.size=0;
+  this->theSimpleGenerators.size=0;
+}
+
+void VermaModuleMonomial::operator=(const VermaModuleMonomial& right)
+{ this->owner= right.owner;
+  this->theHighestWeight= right.theHighestWeight;
+  this->thePowers= right.thePowers;
+  this->theSimpleGenerators= right.theSimpleGenerators;
+  this->coeff= right.coeff;
+}
+
+void SemisimpleLieAlgebra::ElementToStringVermaMonomials(std::string& output)
+{ std::stringstream out;
+  for (int i=0; i<this->VermaMonomials.size; i++)
+  { VermaModuleMonomial& tempMon= this->VermaMonomials.TheObjects[i];
+    out << "$" << tempMon.ElementToString() << "$\n\n";
+  }
+  output=out.str();
+}
+
+void VermaModuleMonomial::ElementToString(std::string& output)
+{ std::stringstream out;
+  for (int i=0; i<this->theSimpleGenerators.size; i++)
+  { int thePower= this->thePowers.TheObjects[i];
+    int theGen= this->theSimpleGenerators.TheObjects[i];
+    if (thePower>1)
+      out << "(";
+    out << "g^{-\\alpha_{" << theGen+1 << "}}";
+    if (thePower>1)
+      out << ")^{" << thePower << "}";
+  }
+  if (this->theSimpleGenerators.size>0)
+    out << "\\cdot";
+  out << " v";
+  output=out.str();
+}
+
+void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables)
+{ roots weightSupport;
+  this->GenerateWeightSupport(theHighestWeight, weightSupport, theGlobalVariables);
+  int highestWeight, distanceToHW;
+  this->EmbeddingsRootSpaces.SetSizeExpandOnTopNoObjectInit(this->theWeyl.RootSystem.size);
+  int theDimension= this->theWeyl.KillingFormMatrix.NumRows;
+  List<bool> Explored;
+  Explored.initFillInObject(this->theWeyl.RootSystem.size, false);
+  int numExplored=0;
+  for (int i=0; i<this->theWeyl.RootSystem.size; i++)
+  { root& current= this->theWeyl.RootSystem.TheObjects[i];
+    if (current.SumCoordinates()==1 || current.SumCoordinates()==-1)
+    { numExplored++;
+      Explored.TheObjects[i]=true;
+      MatrixLargeRational& currentMat= this->EmbeddingsRootSpaces.TheObjects[i];
+      currentMat.init(weightSupport.size, weightSupport.size);
+      currentMat.NullifyAll();
+      for (int j=0; j<weightSupport.size; j++)
+      { int indexTarget= weightSupport.IndexOfObject(current+weightSupport.TheObjects[j]);
+        if (indexTarget!=-1)
+        { highestWeight = -1+ this->GetLengthStringAlongAlphaThroughBeta(current, weightSupport.TheObjects[j], distanceToHW, weightSupport);
+          if (current.IsNegativeOrZero())
+            currentMat.elements[indexTarget][j]=1;
+          else
+            currentMat.elements[indexTarget][j]=(highestWeight-distanceToHW+1)*distanceToHW;
+        }
+      }
+    }
+  }
+  roots simpleBasis;
+  simpleBasis.MakeEiBasis(theDimension);
+  while (numExplored<this->theWeyl.RootSystem.size)
+  { for (int i=0; i<this->theWeyl.RootSystem.size; i++)
+      if (Explored.TheObjects[i])
+        for (int j=0; j<this->theWeyl.RootSystem.size; j++)
+          if (Explored.TheObjects[j])
+          { root tempRoot= this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
+            if (this->theWeyl.IsARoot(tempRoot))
+            { int index= this->theWeyl.RootSystem.IndexOfObjectHash(tempRoot);
+              if (!Explored.TheObjects[index])
+              { Explored.TheObjects[index]=true;
+                numExplored++;
+                this->EmbeddingsRootSpaces.TheObjects[index]= this->EmbeddingsRootSpaces.TheObjects[i];
+                this->EmbeddingsRootSpaces.TheObjects[index].LieBracketWith(this->EmbeddingsRootSpaces.TheObjects[j]);
+              }
+            }
+          }
+  }
+  this->EmbeddingsCartan.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { MatrixLargeRational& current= this->EmbeddingsCartan.TheObjects[i];
+    current.init(weightSupport.size, weightSupport.size);
+    current.NullifyAll();
+    root tempRoot;
+    tempRoot.MakeEi(theDimension, i);
+    for (int j=0; j<weightSupport.size; j++)
+      current.elements[j][j]=this->theWeyl.RootScalarKillingFormMatrixRoot(tempRoot, weightSupport.TheObjects[j]);
+  }
+}
+
+int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(root& alpha, root& beta, int& distanceToHighestWeight, roots& weightSupport)
+{ root tempRoot=beta;
+  for (int i=0; ; i++)
+  { tempRoot+= alpha;
+    if (!weightSupport.ContainsObject(tempRoot))
+    { distanceToHighestWeight=i;
+      break;
+    }
+  }
+  for (int i=0; ; i++)
+  { tempRoot-= alpha;
+    if (!weightSupport.ContainsObject(tempRoot))
+      return i;
+  }
+  assert(false);
+  return -1;
+}
+
+void SemisimpleLieAlgebra::ElementToStringEmbedding(std::string& output)
+{ std::stringstream out;
+  std::string tempS;
+  for (int i=0; i<this->EmbeddingsRootSpaces.size; i++)
+  { MatrixLargeRational& theMat = this->EmbeddingsRootSpaces.TheObjects[i];
+    theMat.ElementToString(tempS, false, true);
+    out << " $g^{\\alpha_{" << i+1 << "}}\\mapsto$ " << tempS << " \n\n";
+  }
+  for (int i=0; i<this->EmbeddingsCartan.size; i++)
+  { MatrixLargeRational& theMat = this->EmbeddingsCartan.TheObjects[i];
+    theMat.ElementToString(tempS, false, true);
+    out << " $h_{" << i+1 << "}\\mapsto$ " << tempS << " \n\n";
+  }
+  output = out.str();
+}
+
+void MatrixLargeRational::LieBracketWith(MatrixLargeRational& right)
+{ MatrixLargeRational tempMat, tempMat2, tempMat3;
+  tempMat2=((*this)*right );
+  tempMat2.ComputeDebugString();
+  tempMat3= (right*(*this));
+  tempMat3.ComputeDebugString();
+  tempMat=tempMat2-tempMat3;
+  tempMat.ComputeDebugString();
+  this->Assign(tempMat);
+}
+
+bool roots::LinSpanContainsRoot(root& input, GlobalVariables& theGlobalVariables)
+{ roots tempRoots;
+  tempRoots.CopyFromBase(*this);
+  tempRoots.AddObjectOnTop(input);
+  return this->GetRankOfSpanOfElements(theGlobalVariables)==tempRoots.GetRankOfSpanOfElements(theGlobalVariables);
+}
+
+bool SemisimpleLieAlgebra::CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables)
+{ List<MatrixLargeRational> tempElts;
+  tempElts.size=0;
+  tempElts.AddListOnTop(this->EmbeddingsCartan);
+  tempElts.AddListOnTop(this->EmbeddingsRootSpaces);
+  roots tempRoots;
+  tempRoots.SetSizeExpandOnTopNoObjectInit(tempElts.size);
+  for (int i=0; i<tempElts.size; i++)
+    tempElts.TheObjects[i].MatrixToRoot(tempRoots.TheObjects[i]);
+  MatrixLargeRational tempMat;
+  for (int i=0; i<tempElts.size; i++)
+    for (int j=0; j<tempElts.size; j++)
+    { tempMat= tempElts.TheObjects[i];
+      tempMat.ComputeDebugString();
+      tempElts.TheObjects[j].ComputeDebugString();
+      tempMat.LieBracketWith(tempElts.TheObjects[j]);
+      tempMat.ComputeDebugString();
+      root tempRoot;
+      tempMat.MatrixToRoot(tempRoot);
+      bool isGood=tempRoots.LinSpanContainsRoot(tempRoot, theGlobalVariables);
+      if (!isGood)
+      { std::stringstream out;
+        std::string tempS1, tempS2, tempS3;
+        tempMat.ElementToString(tempS1, false, true);
+        tempElts.TheObjects[i].ElementToString(tempS2, false, true);
+        tempElts.TheObjects[j].ElementToString(tempS3, false, true);
+        out << "First bad: " << tempS1 << "=[" << tempS2 << "," << tempS3 << "]";
+        output=out.str();
+        return false;
+      }
+    }
+  return true;
+}
+
+bool MatrixLargeRational::IsProportionalTo(MatrixLargeRational& right)
+{ Rational coeff=0;
+  bool found=false;
+  for (int i=0; i<this->NumRows; i++)
+    for(int j=0; j<this->NumCols; j++)
+      if (this->elements[i][j]==0)
+      { if (right.elements[i][j]!=0)
+          return false;
+      } else
+      { if (!found)
+        { found=true;
+          coeff = right.elements[i][j]/this->elements[i][j];
+        } else
+        { if (coeff!=(right.elements[i][j]/this->elements[i][j]))
+            return false;
+        }
+      }
+  return true;
+}
+
+void MatrixLargeRational::MatrixToRoot(root& output)
+{ output.SetSizeExpandOnTopLight(this->NumRows*this->NumCols);
+  for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+      output.TheObjects[i*this->NumRows+j]=this->elements[i][j];
+}
+
+void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup& outputAutomorphisms)
+{ this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);
 }

@@ -770,8 +770,8 @@ public:
   int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
   void RowTimesScalar(int rowIndex, Element& scalar);
   void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
-  void MultiplyOnTheLeft(Matrix<Element>& input, Matrix<Element>& output);
-  void MultiplyOnTheLeft(Matrix<Element>& input);
+  void MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output);
+  void MultiplyOnTheLeft(const Matrix<Element>& input);
   //returns true if successful, false otherwise
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<Element>& inputColumn, Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
@@ -785,10 +785,29 @@ public:
   // and everything else you fill with zeros
   void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
   void DirectSumWith(const Matrix<Element>& m2);
+  bool IsEqualToZero()
+  { for(int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        if (this->elements[i][j]!=0)
+          return false;
+    return true;
+  };
   //returns true if the system has a solution, false otherwise
   bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
   inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
   { Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);
+  };
+  void Add(const Matrix<Element>& right)
+  { assert(this->NumRows==right.NumRows && this->NumCols==right.NumCols);
+    for (int i=0; i< this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        this->elements[i][j].Add(right.elements[i][j]);
+  };
+  void Subtract(const Matrix<Element>& right)
+  { assert(this->NumRows==right.NumRows && this->NumCols==right.NumCols);
+    for (int i=0; i< this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        this->elements[i][j].Subtract(right.elements[i][j]);
   };
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
@@ -810,15 +829,41 @@ public:
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void ComputeDebugString();
   void MultiplyByLargeRational(Rational& x);
+  void MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables);
   void ActOnAroot(root& input, root& output);
   void ActOnRoots(roots& input, roots& output);
   void DivideByRational(Rational& x);
+  bool IsProportionalTo(MatrixLargeRational& right);
+  void LieBracketWith(MatrixLargeRational& right);
+  void MatrixToRoot(root& output);
+//  MatrixLargeRational LieBracketWith(MatrixLargeRational& right)
+//  { MatrixLargeRational tempMat;
+//    tempMat.Assign(*this);
+ //   tempMat.LieBracketWith(right);
+//    return tempMat;
+//  }
   static bool SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution, GlobalVariables& theGlobalVariables);
   static void ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
   static void GetMaxMovementAndLeavingVariableRow(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables);
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
+  MatrixLargeRational(const MatrixLargeRational& right){this->Assign(right);};
+  MatrixLargeRational(){};
+  MatrixLargeRational operator-(const MatrixLargeRational& right)const
+  { MatrixLargeRational tempMat;
+    tempMat.Assign(*this);
+    tempMat.Subtract(right);
+    return tempMat;
+  }
+  MatrixLargeRational operator*(const MatrixLargeRational& right)const
+  { MatrixLargeRational tempMat;
+    tempMat.Assign(right);
+    tempMat.ComputeDebugString();
+    tempMat.MultiplyOnTheLeft(*this);
+    tempMat.ComputeDebugString();
+    return tempMat;
+  };
 };
 
 class Selection
@@ -831,6 +876,16 @@ public:
   int CardinalitySelection;
   void AddSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
+  void RemoveSelection(int index)
+  { this->selected[index]=false;
+    this->ComputeIndicesFromSelection();
+  };
+  void MakeFullSelection()
+  { for (int i=0; i<this->MaxSize; i++)
+    { this->elements[i]=i;
+      this->selected[i]=true;
+    }
+  };
   void init(int maxNumElements);
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
@@ -996,14 +1051,14 @@ bool Matrix<Element>::Invert(GlobalVariables& theGlobalVariables)
 }
 
 template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft(Matrix<Element>& input)
+void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input)
 { Matrix<Element> tempMat;
   this->MultiplyOnTheLeft(input, tempMat);
   this->Assign(tempMat);
 }
 
 template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft(Matrix<Element>& input, Matrix<Element>& output)
+void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output)
 { assert(&output!=this && &output!=&input);
   assert(this->NumRows==input.NumCols);
   Element tempEl;
@@ -1634,6 +1689,9 @@ public:
   Rational operator+(const Rational& right)const;
   Rational operator-(const Rational& right)const;
   Rational operator/(const Rational& right)const;
+  bool operator!=(const Rational& right) const
+  { return !this->IsEqualTo(right);
+  };
   bool operator!=(const int& right) const
   { return !((*this)==right);
   };
@@ -1669,6 +1727,12 @@ public:
   bool HasStronglyPerpendicularDecompositionWRT(int UpperBoundNumBetas, roots& theSet, WeylGroup& theWeylGroup, roots& output, List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly);
   void DivByLargeRational(const Rational& a);
   Rational GetHeight();
+  Rational SumCoordinates()
+  { Rational result=0;
+    for (int i=0; i<this->size; i++)
+      result+=this->TheObjects[i];
+    return result;
+  }
   void ElementToString(std::string& output);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; };
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
@@ -1828,6 +1892,7 @@ public:
   bool ContainsARootNonPerpendicularTo(root& input, WeylGroup& theWeyl);
   bool ContainsARootNonStronglyPerpendicularTo(root& input, WeylGroup& theWeyl);
   int NumRootsConnectedTo(root& input, WeylGroup& theWeyl);
+  bool LinSpanContainsRoot(root& input, GlobalVariables& theGlobalVariables);
   bool IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension);
   bool IsRegular(root& r, root& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension);
   bool GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(MatrixLargeRational& outputTheLinearCombination, int theIndex);
@@ -5474,6 +5539,8 @@ public:
   WeylGroup AmbientWeyl;
   WeylGroup Elements;
   roots simpleGenerators;
+  //format of the externalAutomorphisms:
+  // For a fixed external automorphism (of type roots) the i^th entry gives the image of the simple root with 1 on the i^th coordinate
   rootsCollection ExternalAutomorphisms;
   hashedRoots RootSubsystem;
   std::string DebugString;
@@ -5741,7 +5808,8 @@ public:
   bool AttemptTheTripleTrick(coneRelation& theRel, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
   bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, roots& highestWeightsAllowed, roots& NilradicalRoots, GlobalVariables& theGlobalVariables);
   void ExtractRelations(MatrixLargeRational& matA, MatrixLargeRational& matX, roots& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, roots& Ksingular);
-  bool GenerateAutomorphisms(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
+  bool GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
+  void GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup& outputAutomorphisms);
   void MakeGeneratingSingularVectors(coneRelation& theRelation, roots& nilradicalRoots);
   bool attemptExtensionToIsomorphismNoCentralizer(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, roots* additionalDomain, roots* additionalRange);
   static bool attemptExtensionToIsomorphism(roots& Domain, roots& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly, WeylGroup& theWeyl, bool *DomainAndRangeGenerateNonIsoSAs);
@@ -5996,6 +6064,7 @@ public:
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   List<Rational> coeffsRootSpaces;
   root Hcomponent;
+  void ElementToVectorRootSpacesFirstThenCartan(root& output);
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
   void SetCoefficient(const root& indexingRoot, Rational& theCoeff, SemisimpleLieAlgebra& owner);
@@ -6100,6 +6169,34 @@ public:
   };
 };
 
+class VermaModuleMonomial
+{
+public:
+  std::string DebugString;
+  Rational coeff;
+  SemisimpleLieAlgebra* owner;
+  List<int> theSimpleGenerators;
+  List<int> thePowers;
+  root theHighestWeight;
+  VermaModuleMonomial(){this->owner=0;};
+  void GetWeight(root& output);
+  void MakeConst(root& highestWeight, Rational& theCoeff, SemisimpleLieAlgebra* theOwner);
+  void MultiplyBySimpleGenerator(int index, VermaModuleMonomial& output);
+  void operator=(const VermaModuleMonomial& right);
+  void ElementToString(std::string& output);
+  std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS;};
+};
+
+class VermaModuleWord : public List<VermaModuleMonomial>
+{
+public:
+//  void MakeConst(Rational& theConst)
+//  { this->SetSizeExpandOnTopNoObjectInit(1);
+//    this->TheObjects[0].SetSizeExpandOnTopNoObjectInit(0);
+//    this->TheObjects[0].coeff=theConst;
+//  };
+};
+
 class SemisimpleLieAlgebra: public HashedList<ElementSimpleLieAlgebra>
 {
 public:
@@ -6109,6 +6206,10 @@ public:
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){  this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); };
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
+  //List<VermaModuleWord> VermaWords;
+  List<VermaModuleMonomial> VermaMonomials;
+  List<MatrixLargeRational> EmbeddingsRootSpaces;
+  List<MatrixLargeRational> EmbeddingsCartan;
   //format:
   //the Chevalley constants are listed in the same order as the root system of the Weyl group
   // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
@@ -6118,6 +6219,7 @@ public:
   //Reference: Samelson, Notes on Lie algebras, pages 46-51
   MatrixLargeRational ChevalleyConstants;
   Matrix<bool> Computed;
+  void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
@@ -6129,6 +6231,9 @@ public:
   void ExploitTheCyclicTrick(int i, int j, int k);
   int GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta);
   Rational GetConstant(const root& root1, const root& root2);
+  bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
+  void ElementToStringVermaMonomials(std::string& output);
+  void ElementToStringEmbedding(std::string& output);
   //returns true if returning constant, false if returning element of h
   bool GetConstantOrHElement(const root& root1, const root& root2, Rational& outputRat, root& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
@@ -6146,6 +6251,10 @@ public:
   void MakeSl2ProgressReportNumCycles(int progress, int outOf, GlobalVariables& theGlobalVariables);
   bool IsInTheWeightSupport(root& theWeight, root& highestWeight, GlobalVariables& theGlobalVariables);
   void GenerateWeightSupport(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables);
+  void GenerateOneMonomialPerWeightInTheWeightSupport(root& theHighestWeight, GlobalVariables& theGlobalVariables);
+  void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables);
+  int GetLengthStringAlongAlphaThroughBeta(root& alpha, root& beta, int& distanceToHighestWeight, roots& weightSupport);
+  void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto);
 };
 
 class SltwoSubalgebras : public HashedList<slTwo>
@@ -6160,9 +6269,7 @@ public:
   int IndexZeroWeight;
   SemisimpleLieAlgebra owner;
   rootSubalgebras theRootSAs;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml)
-  { this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);
-  };
+  void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml){ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);};
   List<std::string> texFileNamesForPNG;
   List<std::string> texStringsEachFile;
   List<std::string> listSystemCommandsLatex;

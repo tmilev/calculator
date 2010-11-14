@@ -211,6 +211,7 @@ template < > int List<ElementSimpleLieAlgebra>::ListActualSizeIncrement=100;
 template < > int List<ReflectionSubgroupWeylGroup>::ListActualSizeIncrement=5;
 template < > int List<minimalRelationsProverState>::ListActualSizeIncrement=800;
 template < > int List<minimalRelationsProverStateFixedK>::ListActualSizeIncrement=10;
+template < > int List<VermaModuleMonomial>::ListActualSizeIncrement=10;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
@@ -2151,12 +2152,13 @@ void MatrixLargeRational::DivideByRational(Rational& x)
 }
 
 void MatrixLargeRational::ActOnAroot(root& input, root& output)
-{ assert(&input!=&output);
-  assert(this->NumCols==input.size);
-  output.MakeZero(this->NumRows);
+{ assert(this->NumCols==input.size);
+  root result;
+  result.MakeZero(this->NumRows);
   for (int i=0; i<this->NumRows; i++)
     for(int j=0; j<this->NumCols; j++)
-      output.TheObjects[i]=output.TheObjects[i]+ this->elements[i][j]*input.TheObjects[j];
+      result.TheObjects[i]=result.TheObjects[i]+ this->elements[i][j]*input.TheObjects[j];
+  output = result;
 }
 
 void MatrixLargeRational::ActOnRoots(roots& input, roots&output)
@@ -14739,7 +14741,7 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(Reflecti
   outputSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   outputSubgroup.AmbientWeyl.Assign(this->AmbientWeyl);
-  theRootSA.GenerateAutomorphisms(theRootSA, theGlobalVariables, &outputSubgroup, true);
+  theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, theGlobalVariables, &outputSubgroup, true);
   //std::string tempS;
   //theSubgroup.ElementToString(tempS);
   //theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
@@ -14811,7 +14813,7 @@ int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input, GlobalVariables& the
     { result=j;
       if (!this->flagUseDynkinClassificationForIsomorphismComputation)
       { input.ComputeAllButAmbientWeyl();
-        if(!input.GenerateAutomorphisms(right, theGlobalVariables, 0, false))
+        if(!input.GenerateIsomorphismsPreservingBorel(right, theGlobalVariables, 0, false))
           result=-1;
       }
       if (result!=-1)
@@ -20570,7 +20572,7 @@ bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBa
 }
 
 int rootSubalgebra::ProblemCounter=0;
-bool rootSubalgebra::GenerateAutomorphisms(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly)
+bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly)
 { if (this->theDynkinDiagram.DebugString!= right.theDynkinDiagram.DebugString)
     return false;
   if (this->theCentralizerDiagram.DebugString!= right.theCentralizerDiagram.DebugString)
@@ -20675,7 +20677,7 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK(Computatio
   this->theK.genK.TheObjects[2].InitFromIntegers(8, 0, 0, 0, 0, 1, 0, 0, 0);
   this->theK.genK.TheObjects[3].InitFromIntegers(8, 0, 0, 0, 0, 0, 0, 1, 0);
   this->initShared(this->theWeylGroup, theGlobalVariables);
-  this->theK.GenerateAutomorphisms(this->theK, theGlobalVariables, &this->theIsos, true);
+  this->theK.GenerateIsomorphismsPreservingBorel(this->theK, theGlobalVariables, &this->theIsos, true);
   this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods, theGlobalVariables);
   this->theIsos.simpleGenerators.size=0;
   this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theK.SimpleBasisCentralizerRoots, this->theIsos.ExternalAutomorphisms, theGlobalVariables, 20000, true);

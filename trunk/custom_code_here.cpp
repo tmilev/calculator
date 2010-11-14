@@ -2711,6 +2711,11 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
   theLie.ElementToStringEmbedding(tempS);
   out << "\n\n\n" << tempS << "\n\n\n";
  // theLie.
+  MatrixLargeRational theAuto;
+  theLie.ComputeChevalleyConstants('D', 4, theGlobalVariables);
+  theLie.ComputeOneAutomorphism(theGlobalVariables, theAuto);
+  theAuto.ElementToString(tempS, false, true);
+  out << tempS;
   out << "\\end{document}";
 
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
@@ -2735,8 +2740,10 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   ReflectionSubgroupWeylGroup theAutos;
   theRootSA.GenerateAutomorphismsPreservingBorel(theGlobalVariables, theAutos);
   MatrixLargeRational mapOnRootSpaces;
-  mapOnRootSpaces.AssignRootsToRowsOfMatrix(theAutos.ExternalAutomorphisms.TheObjects[0]);
+  int theAutoIndex= theAutos.ExternalAutomorphisms.size>1? 1 : 0;
+  mapOnRootSpaces.AssignRootsToRowsOfMatrix(theAutos.ExternalAutomorphisms.TheObjects[theAutoIndex]);
   mapOnRootSpaces.Transpose(theGlobalVariables);
+  mapOnRootSpaces.ComputeDebugString();
   Selection NonExplored;
   int numRoots= this->theWeyl.RootSystem.size;
   NonExplored.init(numRoots);
@@ -2750,6 +2757,11 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   for (int i=0; i<theDimension; i++)
   { domainRoot.MakeEi(theDimension, i);
     mapOnRootSpaces.ActOnAroot(domainRoot, rangeRoot);
+    tempElt.Nullify(*this);
+    tempElt.Hcomponent= domainRoot;
+    Domain.TheObjects[numRoots+i]=tempElt;
+    tempElt.Hcomponent= rangeRoot;
+    Range.TheObjects[numRoots+i]=tempElt;
     for (int i=0; i<2; i++, domainRoot.MinusRoot(), rangeRoot.MinusRoot())
     { int theIndex= this->theWeyl.RootSystem.IndexOfObjectHash(rangeRoot);
       tempElt.Nullify(*this);
@@ -2769,18 +2781,20 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
       root& current = this->theWeyl.RootSystem.TheObjects[theIndex];
       for (int j=0; j<theDimension; j++)
       { left.MakeEi(theDimension, j);
-        right= current-left;
-        if (this->theWeyl.IsARoot(right))
-        { int leftIndex= this->theWeyl.RootSystem.IndexOfObjectHash(left);
-          int rightIndex= this->theWeyl.RootSystem.IndexOfObjectHash(right);
-          if (!NonExplored.selected[rightIndex])
-          { ElementSimpleLieAlgebra& leftDomainElt=Domain.TheObjects[leftIndex];
-            ElementSimpleLieAlgebra& rightDomainElt= Domain.TheObjects[rightIndex];
-            this->LieBracket(leftDomainElt, rightDomainElt, Domain.TheObjects[theIndex]);
-            ElementSimpleLieAlgebra& leftRangeElt=Range.TheObjects[leftIndex];
-            ElementSimpleLieAlgebra& rightRangeElt= Range.TheObjects[rightIndex];
-            this->LieBracket(leftRangeElt, rightRangeElt, Range.TheObjects[theIndex]);
-            NonExplored.RemoveSelection(rightIndex);
+        for (int k=0; k<2; k++, left.MinusRoot())
+        { right= current-left;
+          if (this->theWeyl.IsARoot(right))
+          { int leftIndex= this->theWeyl.RootSystem.IndexOfObjectHash(left);
+            int rightIndex= this->theWeyl.RootSystem.IndexOfObjectHash(right);
+            if (!NonExplored.selected[rightIndex])
+            { ElementSimpleLieAlgebra& leftDomainElt=Domain.TheObjects[leftIndex];
+              ElementSimpleLieAlgebra& rightDomainElt= Domain.TheObjects[rightIndex];
+              this->LieBracket(leftDomainElt, rightDomainElt, Domain.TheObjects[theIndex]);
+              ElementSimpleLieAlgebra& leftRangeElt=Range.TheObjects[leftIndex];
+              ElementSimpleLieAlgebra& rightRangeElt= Range.TheObjects[rightIndex];
+              this->LieBracket(leftRangeElt, rightRangeElt, Range.TheObjects[theIndex]);
+              NonExplored.RemoveSelection(theIndex);
+            }
           }
         }
       }
@@ -3134,5 +3148,6 @@ void MatrixLargeRational::MatrixToRoot(root& output)
 }
 
 void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup& outputAutomorphisms)
-{ this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);
+{ this->ComputeAll();
+  this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);
 }

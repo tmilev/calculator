@@ -15573,11 +15573,11 @@ void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int 
   if (currentString[1]=='D')
   { if (currentComponent.size==4)
     {//the automorphism group of the Dynkin Diagram is S3
+      thePermutation.TheObjects[1]=2; thePermutation.TheObjects[2]=3; thePermutation.TheObjects[3]=1;
+      output.AddObjectOnTop(thePermutation);
       thePermutation.TheObjects[1]=1; thePermutation.TheObjects[2]=3; thePermutation.TheObjects[3]=2;
       output.AddObjectOnTop(thePermutation);
       thePermutation.TheObjects[1]=2; thePermutation.TheObjects[2]=1; thePermutation.TheObjects[3]=3;
-      output.AddObjectOnTop(thePermutation);
-      thePermutation.TheObjects[1]=2; thePermutation.TheObjects[2]=3; thePermutation.TheObjects[3]=1;
       output.AddObjectOnTop(thePermutation);
       thePermutation.TheObjects[1]=3; thePermutation.TheObjects[2]=1; thePermutation.TheObjects[3]=2;
       output.AddObjectOnTop(thePermutation);

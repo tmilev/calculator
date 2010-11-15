@@ -2767,7 +2767,6 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
       tempElt.Nullify(*this);
       tempElt.SetCoefficient(rangeRoot, Rational::TheRingUnit, *this);
       Range.TheObjects[theIndex]=tempElt;
-      theIndex= this->theWeyl.RootSystem.IndexOfObjectHash(domainRoot);
       tempElt.Nullify(*this);
       tempElt.SetCoefficient(domainRoot, Rational::TheRingUnit, *this);
       Domain.TheObjects[theIndex]=tempElt;
@@ -2808,6 +2807,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
     Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
   }
   outputAuto.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight, theGlobalVariables);
+
 }
 
 void MatrixLargeRational::MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables)

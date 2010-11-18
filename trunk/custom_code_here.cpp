@@ -2716,10 +2716,42 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
   theLie.ComputeOneAutomorphism(theGlobalVariables, theAuto);
   theAuto.ElementToString(tempS, false, true);
   out << tempS;
+  MatrixLargeRational tempMat;
+  tempMat.MakeIdMatrix(theAuto.NumRows);
+  theAuto= theAuto-tempMat;
+  theAuto.FindZeroEigenSpace(tempRoots, theGlobalVariables);
+  tempMat.AssignRootsToRowsOfMatrix(tempRoots);
+  tempMat.Transpose(theGlobalVariables);
+  tempMat= theAuto*tempMat;
+  tempMat.ElementToString(tempS, false, true);
+  std::string tempS2;
+  tempRoots.ElementToString(tempS2, true, false, true);
+  out << "\n\n" << tempS2 << "\n\n" << tempS;
+
   out << "\\end{document}";
 
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
+}
+
+void MatrixLargeRational::FindZeroEigenSpace(roots& output, GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational tempMat=*this;
+  MatrixLargeRational emptyMat;
+  Selection nonPivotPts;
+  tempMat.GaussianEliminationByRows(tempMat, emptyMat, nonPivotPts);
+  output.SetSizeExpandOnTopNoObjectInit(nonPivotPts.CardinalitySelection);
+  for (int i=0; i<nonPivotPts.CardinalitySelection; i++)
+  { root& current= output.TheObjects[i];
+    current.MakeZero(this->NumCols);
+    int currentPivotIndex = nonPivotPts.elements[i];
+    current.TheObjects[currentPivotIndex]=1;
+    int rowCounter=0;
+    for (int j=0; j<this->NumCols; j++)
+      if (!nonPivotPts.selected[j])
+      { current.TheObjects[j]=-tempMat.elements[rowCounter][currentPivotIndex];
+        rowCounter++;
+      }
+  }
 }
 
 void ElementSimpleLieAlgebra::ElementToVectorRootSpacesFirstThenCartan(root& output)

@@ -1557,6 +1557,7 @@ public:
   void MultiplyByLargeIntUnsigned(LargeIntUnsigned& x);
   void Assign(const Rational& r);
   void AssignInteger(int x);
+  bool IsInteger();
   bool IsGreaterThan(const Rational& r) const;
   inline void AssignNumeratorAndDenominator( int n, int d)
   { if (d<0){ d=-d; n=-n; }
@@ -1915,6 +1916,7 @@ public:
   void MakeBasisChange(root& input, root& output)const;
   void MakeBasisChange(roots& input, roots& output)const;
   void MakeEiBasis(int theDimension);
+  //the below function returns a n row 1 column matrix with the coefficients in the obvious order
   bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
   void GaussianEliminationForNormalComputation (MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
   // the below function is slow
@@ -1924,6 +1926,7 @@ public:
   void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString, false, false, false); };
   void ElementToLinearCombinationString(std::string& output);
   void ElementToString(std::string& output);
+  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable);
   void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable);
   std::string* ElementToStringDebuggerCallOnly()
@@ -1943,6 +1946,24 @@ public:
   void operator = (const roots& right){this->CopyFromBase(right); };
   void ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+};
+
+class Lattice
+{
+public:
+  roots LatticeBasis;
+  roots RepresentativesQuotient;
+  void GetStructureQuotientRootCase(WeylGroup& theWeyl, std::string& output, List<int>& outputIndices, List<int>& outputMults, GlobalVariables& theGlobalVariables);
+  int GetRankElementRepresentedBy(root& elementRepresentative);
+  bool IsInLattice(const root& input);
+  void GetZnModLatticeRepresentatives(WeylGroup* theWeyl, roots& representativesOutput, GlobalVariables& theGlobalVariables);
+  void GetZnModLatticeRepresentatives(GlobalVariables& theGlobalVariables){this->GetZnModLatticeRepresentatives(0, this->RepresentativesQuotient, theGlobalVariables);};
+  void GetZnModLatticeRepresentativesRootCase(WeylGroup& theWeyl, roots& representativesOutput, GlobalVariables& theGlobalVariables){ this->GetZnModLatticeRepresentatives(&theWeyl, this->RepresentativesQuotient, theGlobalVariables);};
+  void GetZnModLatticeRepresentativesRootCase(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables){this->GetZnModLatticeRepresentativesRootCase(theWeyl, this->RepresentativesQuotient, theGlobalVariables);};
+  bool ContainsConjugacyClassRepresentedBy(roots& representatives, root& input);
+  int GetIndexFirstElementOfMaxRank(int& outputRank);
+  void DuflosComputation(List<char>& WeylLetters, List<int>& ranks, std::string& output, GlobalVariables& theGlobalVariables);
+  void DuflosComputationOneSA(char WeylLetter, int rank, std::string& outputTable, std::string& outputBody, GlobalVariables& theGlobalVariables);
 };
 
 class WallData
@@ -7007,6 +7028,7 @@ public:
   static void ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TestUnitCombinatorialChambersChambers(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void G2InD4Experiment(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void DuflosComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   static void TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();

@@ -997,7 +997,7 @@ void guiMainWindow::onButton22TestChambers(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton23Experiments(wxCommandEvent& ev)
-{ this->theComputationSetup.theFunctionToRun = & this->theComputationSetup.G2InD4Experiment;
+{ this->theComputationSetup.theFunctionToRun = & this->theComputationSetup.DuflosComputation;
   this->RunTheComputation();
 }
 

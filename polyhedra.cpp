@@ -7815,8 +7815,8 @@ Rational Rational::operator-(const Rational& right) const
 }
 
 void Rational::Assign(const Rational& r)
-{ this->NumShort= r.NumShort;
-  this->DenShort= r.DenShort;
+{ this->NumShort = r.NumShort;
+  this->DenShort = r.DenShort;
   if (r.Extended==0)
   { if (this->Extended==0) return;
     this->FreeExtended();
@@ -7915,6 +7915,13 @@ Rational Rational::NtoTheKth(int n, int k)
 { Rational result=n;
   result.RaiseToPower(k);
   return result;
+}
+
+bool Rational::IsInteger()
+{ if (this->Extended==0)
+    return this->DenShort==1;
+  else
+    return this->Extended->den.IsEqualToOne();
 }
 
 double Rational::DoubleValue()

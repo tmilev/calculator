@@ -3183,3 +3183,190 @@ void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGl
 { this->ComputeAll();
   this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);
 }
+
+void Lattice::DuflosComputation(List<char>& WeylLetters, List<int>& ranks, std::string& output, GlobalVariables& theGlobalVariables)
+{ std::stringstream body, tables;
+  std::string tempBody, tempTable;
+  tables << "\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}\n";
+  for (int i=0; i<WeylLetters.size; i++)
+  { this->DuflosComputationOneSA(WeylLetters.TheObjects[i], ranks.TheObjects[i], tempTable, tempBody, theGlobalVariables);
+    tables << tempTable << "\n\n";
+    body << tempBody;
+  }
+  tables << body.str();
+  tables << "\n\\end{document}";
+  output = tables.str();
+}
+
+void Lattice::DuflosComputationOneSA(char WeylLetter, int rank, std::string& outputTable, std::string& outputBody, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  std::stringstream niceTable;
+  rootSubalgebras theRootSubalgebras;
+  theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, WeylLetter, rank, true, true);
+  WeylGroup& theWeyl= theRootSubalgebras.AmbientWeyl;
+  int theDimension= theWeyl.KillingFormMatrix.NumRows;
+  niceTable << "\\begin{tabular}{cc}\n\\multicolumn{2}{c}{Root system $\\Delta$ of type" << theRootSubalgebras.TheObjects[0].theDynkinDiagram.DebugString << "} \\\\\\hline\n Dynkin type subsystem $\\Delta'$ & Structure of $\\Lambda(\\Delta)/\\Lambda(\\Delta')$\\\\\\hline\n";
+  out << "\n\nRoot system of "<< theRootSubalgebras.TheObjects[0].theDynkinDiagram.DebugString << ":\n\n";
+  roots tempRoots;
+  tempRoots.CopyFromBase(theWeyl.RootSystem);
+  out << tempRoots.ElementToString() << "\n\n";
+  for (int i=1; i<theRootSubalgebras.size; i++)
+  { rootSubalgebra& currentSA=theRootSubalgebras.TheObjects[i];
+    if (currentSA.SimpleBasisK.size==theDimension)
+    { this->LatticeBasis= currentSA.SimpleBasisK;
+      this->GetZnModLatticeRepresentativesRootCase(theWeyl, this->RepresentativesQuotient, theGlobalVariables);
+      //std::string tempS;
+      out << "\n\nType subsystem: " << currentSA.theDynkinDiagram.DebugString << "\n\n Cardinality quotient: " << this->RepresentativesQuotient.size;
+      out << "\n\nSimple basis root subsystem: " << currentSA.SimpleBasisK.ElementToString();
+      out << "\n\nRepresentatives elements in quotient: " << this->RepresentativesQuotient.ElementToString();
+      std::string tempS;
+      List<int> list1, list2;
+      this->GetStructureQuotientRootCase(currentSA.AmbientWeyl, tempS, list1, list2, theGlobalVariables);
+      out << "\n\nStructure: "<< tempS;
+      niceTable << currentSA.theDynkinDiagram.DebugString << " & " << tempS <<" \\\\\n";
+    }
+  }
+  niceTable << "\\end{tabular}";
+  outputTable = niceTable.str();
+  outputBody = out.str();
+}
+
+void ComputationSetup::DuflosComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ std::string tempS;
+  Lattice tempLattice;
+  List<char> WeylLetters;
+  List<int> ranks;
+ /* WeylLetters.AddObjectOnTop('E');
+  ranks.AddObjectOnTop(8);
+*/
+  WeylLetters.AddObjectOnTop('G');
+  ranks.AddObjectOnTop(2);
+  WeylLetters.AddObjectOnTop('D');
+  ranks.AddObjectOnTop(4);
+  WeylLetters.AddObjectOnTop('F');
+  ranks.AddObjectOnTop(4);
+  WeylLetters.AddObjectOnTop('E');
+  ranks.AddObjectOnTop(6);
+  WeylLetters.AddObjectOnTop('E');
+  ranks.AddObjectOnTop(7);
+  WeylLetters.AddObjectOnTop('E');
+  ranks.AddObjectOnTop(8);
+  tempLattice.DuflosComputation(WeylLetters, ranks, tempS, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
+  theGlobalVariables.MakeReport();
+}
+
+bool Lattice::IsInLattice(const root& input)
+{ roots tempRoots;
+  tempRoots = this->LatticeBasis;
+  int theDimension = this->LatticeBasis.size;
+  tempRoots.AddObjectOnTop(input);
+  MatrixLargeRational tempMat;
+  tempRoots.GetLinearDependence(tempMat);
+  Rational coeffInFrontOfInput= tempMat.elements[theDimension][0];
+  tempMat.ComputeDebugString();
+  tempRoots.ComputeDebugString();
+  if (coeffInFrontOfInput==0)
+    return false;
+  for (int i=0; i<theDimension; i++)
+    if (!(tempMat.elements[i][0]/coeffInFrontOfInput).IsInteger())
+      return false;
+  return true;
+}
+
+void Lattice::GetZnModLatticeRepresentatives(WeylGroup* theWeyl, roots& representativesOutput, GlobalVariables& theGlobalVariables)
+{ int theDimension= this->LatticeBasis.size;
+  if (theDimension<1)
+    return;
+  if (theDimension!=this->LatticeBasis.TheObjects[0].size)
+    return;
+  if (theDimension!=this->LatticeBasis.GetRankOfSpanOfElements(theGlobalVariables))
+    return;
+  representativesOutput.size=0;
+  root tempRoot;
+  for (int i=0; i<theDimension; i++)
+  { tempRoot.MakeEi(theDimension, i);
+    if (!this->ContainsConjugacyClassRepresentedBy(representativesOutput, tempRoot))
+      representativesOutput.AddObjectOnTop(tempRoot);
+  }
+  for (int lowestNonExploredIndex=0; lowestNonExploredIndex<representativesOutput.size; lowestNonExploredIndex++)
+  { //root& current= representativesOutput.TheObjects[lowestNonExploredIndex];
+    for (int k=0; k<=lowestNonExploredIndex; k++)
+    { tempRoot= representativesOutput.TheObjects[lowestNonExploredIndex]+representativesOutput.TheObjects[k];
+      if (!this->ContainsConjugacyClassRepresentedBy(representativesOutput, tempRoot))
+      { if (theWeyl!=0)
+          for (int l=0; l<theWeyl->RootSystem.size; l++)
+          { if (this->IsInLattice(tempRoot- theWeyl->RootSystem.TheObjects[l]))
+            { representativesOutput.AddObjectOnTop(theWeyl->RootSystem.TheObjects[l]);
+              break;
+            }
+          }
+        else
+          representativesOutput.AddObjectOnTop(tempRoot);
+      }
+    }
+  }
+}
+
+bool Lattice::ContainsConjugacyClassRepresentedBy(roots& representatives, root& input)
+{ for (int i=0; i<representatives.size; i++)
+    if (this->IsInLattice(representatives.TheObjects[i]-input))
+      return true;
+  return false;
+}
+
+void Lattice::GetStructureQuotientRootCase(WeylGroup& theWeyl, std::string& output, List<int>& outputIndices, List<int>& outputMults, GlobalVariables& theGlobalVariables)
+{ Lattice tempLattice;
+  std::stringstream out;
+  tempLattice.LatticeBasis=this->LatticeBasis;
+  tempLattice.GetZnModLatticeRepresentativesRootCase(theWeyl, theGlobalVariables);
+  int maxRank=0;
+  rootSubalgebra tempSA;
+  tempSA.AmbientWeyl.Assign(theWeyl);
+  tempSA.genK=tempLattice.LatticeBasis;
+  tempSA.ComputeAll();
+  outputIndices.size=0;
+  outputMults.size=0;
+  out << "$";
+  for (int indexMaxRank=tempLattice.GetIndexFirstElementOfMaxRank(maxRank); maxRank>1; indexMaxRank=tempLattice.GetIndexFirstElementOfMaxRank(maxRank))
+  { if (outputIndices.size>0)
+      out << "+";
+    if (outputIndices.ContainsObject(maxRank))
+      outputMults.TheObjects[outputIndices.IndexOfObject(maxRank)]++;
+    else
+    { outputIndices.AddObjectOnTop(maxRank);
+      outputMults.AddObjectOnTop(1);
+    }
+    out << "\\mathbb{Z}_{" << maxRank << "}";
+    tempSA.genK.AddObjectOnTop(tempLattice.RepresentativesQuotient.TheObjects[indexMaxRank]);
+    tempSA.ComputeAllButAmbientWeyl();
+    tempLattice.LatticeBasis= tempSA.SimpleBasisK;
+    tempLattice.GetZnModLatticeRepresentativesRootCase(theWeyl, theGlobalVariables);
+  }
+  out << "$";
+  output=out.str();
+}
+
+int Lattice::GetIndexFirstElementOfMaxRank(int& outputRank)
+{ int result=-1;
+  outputRank=0;
+  for (int i=0; i<this->RepresentativesQuotient.size; i++)
+    if (outputRank< this->GetRankElementRepresentedBy(this->RepresentativesQuotient.TheObjects[i]))
+    { outputRank=this->GetRankElementRepresentedBy(this->RepresentativesQuotient.TheObjects[i]);
+      result=i;
+    }
+  return result;
+}
+
+int Lattice::GetRankElementRepresentedBy(root& elementRepresentative)
+{ root tempRoot;
+  tempRoot.MakeZero(elementRepresentative.size);
+  for (int result=1;;result++)
+  { tempRoot+=elementRepresentative;
+    if (this->IsInLattice(tempRoot))
+      return result;
+  }
+  assert(false);
+  return -1;
+}

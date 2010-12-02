@@ -1,9 +1,28 @@
 \documentclass{article}
+\usepackage{amssymb}
+\usepackage{hyperref}
 \title{Working file for a ``Vector partition'' manual}
 \author{Todor Milev}
 \begin{document}
 \maketitle
-All gothic letters have been substituted in the .html version with Latin letters. The letter $g$ stands for a simple Lie algebra.  The letter $k$ stands for a subalgebra containing a fixed Cartan subalgebra. $k_{ss}$ stands for semisimple (Levi) part of $k$ in $g$, if it exists (if it doesn't, the algebra is not ``splittable''; example: one dimensional subalgebra given by the span of a Jordan cell). 
+\tableofcontents
+
+\section{Root subalgebra/Root subsystem tables}
+In our table printouts, we use the following notation. 
+\begin{itemize}
+\item $g$ - the ambient simple complex Lie algebra.
+\item $h$ - a fixed Cartan subalgebra over $\mathbb{C}$.
+\item $k$ - a reductive subalgebra containing $h$. Thus $k$ is a reductive root subalgebra.
+\item $k\_\{ss\}:=[k,k]$ - the semisimple (Levi) part of $k$
+\item $C(k\_\{ss\}):=\{X\in g| [X,k]=0\}$ - the centralizer of $k\_ss$ in $g$. 
+\item $A\_n, B\_n,C\_n, D\_n, E\_n, F\_n, G\_n$ - type of root system. The notation conventions follow \cite[Chapter III]{Humphreys}.
+\item $A\_n'$ stands for a root subsystem consisting of short roots. The notation $A\_n$ is used only for a root subsystem consisting of long roots. 
+\end{itemize}
+
+\section{Vector partition functions}
+
+\bibliographystyle{hamsalpha}
+\bibliography{./TodorMilevsBibliography}
 
 
 \end{document}

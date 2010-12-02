@@ -2754,6 +2754,15 @@ void MatrixLargeRational::FindZeroEigenSpace(roots& output, GlobalVariables& the
   }
 }
 
+void ElementSimpleLieAlgebra::AssingVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner)
+{ this->Nullify(owner);
+  for (int i=0; i<this->coeffsRootSpaces.size; i++)
+    this->coeffsRootSpaces.TheObjects[i]=input.TheObjects[i];
+  for (int i=0; i<this->Hcomponent.size; i++)
+   this->Hcomponent.TheObjects[i]=input.TheObjects[i+this->coeffsRootSpaces.size];
+  this->ComputeNonZeroElements();
+}
+
 void ElementSimpleLieAlgebra::ElementToVectorRootSpacesFirstThenCartan(root& output)
 { output.MakeZero(this->coeffsRootSpaces.size+ this->Hcomponent.size);
   for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
@@ -2835,11 +2844,10 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   vectorsLeft.SetSizeExpandOnTopNoObjectInit(Range.size);
   vectorsRight.SetSizeExpandOnTopNoObjectInit(Range.size);
   for (int i=0; i<Range.size; i++)
-  { Range.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
-    Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
+  { Range.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
+    Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
   }
   outputAuto.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight, theGlobalVariables);
-
 }
 
 void MatrixLargeRational::MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables)
@@ -3115,6 +3123,9 @@ bool roots::LinSpanContainsRoot(root& input, GlobalVariables& theGlobalVariables
 { roots tempRoots;
   tempRoots.CopyFromBase(*this);
   tempRoots.AddObjectOnTop(input);
+  this->ComputeDebugString();
+  tempRoots.ComputeDebugString();
+  input.ComputeDebugString();
   return this->GetRankOfSpanOfElements(theGlobalVariables)==tempRoots.GetRankOfSpanOfElements(theGlobalVariables);
 }
 
@@ -3222,7 +3233,7 @@ void Lattice::DuflosComputationOneSA(char WeylLetter, int rank, std::string& out
       std::string tempS;
       List<int> list1, list2;
       this->GetStructureQuotientRootCase(currentSA.AmbientWeyl, tempS, list1, list2, theGlobalVariables);
-      out << "\n\nStructure: "<< tempS;
+      out << "\n\nStructure: " << tempS;
       niceTable << currentSA.theDynkinDiagram.DebugString << " & " << tempS <<" \\\\\n";
     }
   }
@@ -3362,7 +3373,7 @@ int Lattice::GetIndexFirstElementOfMaxRank(int& outputRank)
 int Lattice::GetRankElementRepresentedBy(root& elementRepresentative)
 { root tempRoot;
   tempRoot.MakeZero(elementRepresentative.size);
-  for (int result=1;;result++)
+  for (int result=1; ; result++)
   { tempRoot+=elementRepresentative;
     if (this->IsInLattice(tempRoot))
       return result;
@@ -3370,3 +3381,1005 @@ int Lattice::GetRankElementRepresentedBy(root& elementRepresentative)
   assert(false);
   return -1;
 }
+
+void Parser::ParseEvaluateAndAssign(const std::string& input, ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+{ //this->theLieAlgebra=owner;
+  this->theLieAlgebra.ComputeChevalleyConstants(this->DefaultWeylLetter, this->DefaultWeylRank, theGlobalVariables);
+  this->Parse(input);
+  this->ComputeDebugString(theGlobalVariables);
+  this->Evaluate(theGlobalVariables);
+  output= this->UEValue;
+}
+
+int DebugCounter=-1;
+
+void Parser::ParserInit(const std::string& input)
+{ this->TokenStack.MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->MakeActualSizeAtLeastExpandOnTop(input.size());
+  this->TokenStack.size=0;
+  this->ValueStack.size=0;
+  this->TokenBuffer.size=0;
+  this->ValueBuffer.size=0;
+  this->size=0;
+  for (int i=0; i<(signed) input.size(); i++)
+  { switch (input.at(i))
+    { case '0': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '1': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(1); break;
+      case '2': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(2); break;
+      case '3': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(3); break;
+      case '4': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(4); break;
+      case '5': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(5); break;
+      case '6': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(6); break;
+      case '7': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(7); break;
+      case '8': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(8); break;
+      case '9': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(9); break;
+      case '[': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ']': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '(': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ',': this->TokenBuffer.AddObjectOnTop(Parser::tokenComma); this->ValueBuffer.AddObjectOnTop(0); break;
+      case ')': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseBracket); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '^': this->TokenBuffer.AddObjectOnTop(Parser::tokenPower); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '+': this->TokenBuffer.AddObjectOnTop(Parser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '-': this->TokenBuffer.AddObjectOnTop(Parser::tokenMinus); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '_': this->TokenBuffer.AddObjectOnTop(Parser::tokenUnderscore); this->ValueBuffer.AddObjectOnTop(0); break;
+      case '/': this->TokenBuffer.AddObjectOnTop(Parser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'x': this->TokenBuffer.AddObjectOnTop(Parser::tokenX); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'd': this->TokenBuffer.AddObjectOnTop(Parser::tokenPartialDerivative); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'g': this->TokenBuffer.AddObjectOnTop(Parser::tokenG); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'h': this->TokenBuffer.AddObjectOnTop(Parser::tokenH); this->ValueBuffer.AddObjectOnTop(0); break;
+      default: this->TokenBuffer.AddObjectOnTop(Parser::tokenEmpty); this->ValueBuffer.AddObjectOnTop(0); break;
+    }
+  }
+  this->ValueStack.size=0;
+  this->TokenStack.size=0;
+  this->ValueStack.MakeActualSizeAtLeastExpandOnTop(this->ValueBuffer.size);
+  this->TokenStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
+  this->StringBeingParsed=input;
+  for (int i=0; i<this->numEmptyTokensAtBeginning; i++)
+  { this->TokenStack.AddObjectOnTop(this->tokenEmpty);
+    this->ValueStack.AddObjectOnTop(0);
+  }
+}
+
+void Parser::Parse(const std::string& input)
+{ this->ParserInit(input);
+  this->ParseNoInit(0, this->TokenBuffer.size-1);
+  this->ComputeNumberOfVariablesAndAdjustNodes();
+}
+
+void Parser::ParseNoInit(int indexFrom, int indexTo)
+{ if (indexFrom<0 || indexTo>= this->TokenBuffer.size)
+    return;
+  for (int i=indexFrom; i<=indexTo; i++)
+  { this->ValueStack.AddObjectOnTop(this->ValueBuffer.TheObjects[i]);
+    this->TokenStack.AddObjectOnTop(this->TokenBuffer.TheObjects[i]);
+    int lookAheadToken=this->tokenEnd;
+    if (i<this->TokenBuffer.size-1)
+      lookAheadToken=this->TokenBuffer.TheObjects[i+1];
+    while(this->ApplyRules(lookAheadToken))
+    {}
+  }
+}
+
+bool Parser::lookAheadTokenProhibitsPlus(int theToken)
+{ if (theToken==this->tokenEnd)
+    return false;
+  if (theToken==this->tokenExpression)
+    return false;
+  if (theToken==this->tokenPlus)
+    return false;
+  if (theToken==this->tokenMinus)
+    return false;
+  if (theToken==this->tokenCloseBracket)
+    return false;
+  if (theToken==this->tokenCloseLieBracket)
+    return false;
+  return true;
+}
+
+bool Parser::lookAheadTokenProhibitsTimes(int theToken)
+{ if (theToken==this->tokenPower)
+    return true;
+  if (theToken==this->tokenUnderscore)
+    return true;
+  return false;
+}
+
+bool Parser::ApplyRules(int lookAheadToken)
+{ if (this->TokenStack.size<2)
+    return false;
+//  this->ComputeDebugString();
+  int tokenLast=*this->TokenStack.LastObject();
+  int tokenSecondToLast= this->TokenStack.TheObjects[this->TokenStack.size-2];
+  int tokenThirdToLast=this->TokenStack.TheObjects[this->TokenStack.size-3];
+  int tokenFourthToLast=this->TokenStack.TheObjects[this->TokenStack.size-4];
+  int tokenFifthToLast=this->TokenStack.TheObjects[this->TokenStack.size-5];
+  if (tokenLast==this->tokenEmpty)
+  { this->TokenStack.PopLastObject();
+    this->ValueStack.PopLastObject();
+    return true;
+  }
+  if (tokenLast== this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenLieBracket)
+  { this->AddLieBracketOnTop();
+    return true;
+  }
+  if (tokenLast==this->tokenDigit)
+  { *this->TokenStack.LastObject()=this->tokenInteger;
+    if (tokenSecondToLast!=this->tokenInteger)
+      this->LargeIntegerReader=*this->ValueStack.LastObject();
+    else
+      this->MergeLastTwoIntegers();
+    return true;
+  }
+  if (tokenLast==this->tokenInteger && lookAheadToken!=this->tokenDigit)
+  { this->AddIntegerOnTopConvertToExpression();
+    return true;
+  }
+  if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenX || tokenLast==this->tokenH)
+  { this->AddLetterExpressionOnTop();
+    return true;
+  }
+  if (tokenSecondToLast==this->tokenUnderscore && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression)
+  { this->AddIndexingExpressionOnTop();
+    return true;
+  }
+ if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
+  { this->AddTimesOnTop();
+    return true;
+  }
+  if (tokenSecondToLast==this->tokenPlus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
+  { this->AddPlusOnTop();
+    return true;
+  }
+  if (tokenSecondToLast==this->tokenMinus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
+  { this->AddMinusOnTop();
+    return true;
+  }
+  return false;
+}
+
+void Parser::DecreaseStackSetExpressionLastNode(int Decrease)
+{ this->TokenStack.size-=Decrease;
+  this->ValueStack.size-=Decrease;
+  *this->TokenStack.LastObject()=this->tokenExpression;
+  *this->ValueStack.LastObject()=this->size-1;
+}
+
+void Parser::MergeLastTwoIntegers()
+{ this->LargeIntegerReader=this->LargeIntegerReader*10+(*this->ValueStack.LastObject());
+  this->TokenStack.size--;
+  this->ValueStack.size--;
+}
+
+void Parser::AddLetterExpressionOnTop()
+{ this->ExtendOnTop(1);
+  this->LastObject()->Clear();
+  this->LastObject()->Operation=*this->TokenStack.LastObject();
+  this->DecreaseStackSetExpressionLastNode(0);
+}
+
+void Parser::AddIntegerOnTopConvertToExpression()
+{ this->ExtendOnTop(1);
+  this->LastObject()->Clear();
+  this->LastObject()->rationalValue=this->LargeIntegerReader;
+  this->LastObject()->Operation=this->tokenInteger;
+  this->DecreaseStackSetExpressionLastNode(0);
+}
+
+void Parser::AddIndexingExpressionOnTop()
+{ this->ExtendOnTop(1);
+  this->LastObject()->Clear();
+  this->LastObject()->Operation = this->tokenUnderscore;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void Parser::AddPlusOnTop()
+{ this->ExtendOnTop(1);
+  ParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenPlus;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void Parser::AddMinusOnTop()
+{ this->ExtendOnTop(1);
+  ParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenMinus;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
+void Parser::AddTimesOnTop()
+{ this->ExtendOnTop(1);
+  ParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenTimes;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-2], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(1);
+}
+
+void Parser::AddLieBracketOnTop()
+{ this->ExtendOnTop(1);
+  ParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenLieBracket;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
+  this->DecreaseStackSetExpressionLastNode(4);
+}
+
+void Parser::ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables)
+{ std::stringstream out; std::string tempS;
+  this->Parse(input);
+  out << "\\begin{eqnarray*}&&" << input << " = \\\\\n";
+  this->Evaluate(theGlobalVariables);
+//  this->WeylAlgebraValue.ElementToString(tempS, false, true, false);
+  out << tempS;
+  out << "\\end{eqnarray*}";
+  output=out.str();
+}
+
+void Parser::Own(int indexParent, int indexChild1, int indexChild2)
+{ ParserNode* theNode= & this->TheObjects[indexParent];
+  theNode->children.SetSizeExpandOnTopNoObjectInit(2);
+  theNode->children.TheObjects[0]=indexChild1;
+  theNode->children.TheObjects[1]=indexChild2;
+  this->TheObjects[indexChild1].indexParent= indexParent;
+  this->TheObjects[indexChild2].indexParent= indexParent;
+}
+
+void Parser::Evaluate(GlobalVariables& theGlobalVariables)
+{ if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
+    if (*this->TokenStack.LastObject()==this->tokenExpression)
+    { this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].Evaluate(theGlobalVariables);
+//      this->WeylAlgebraValue.Assign(this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].WeylAlgebraElement);
+//      this->LieAlgebraValue= this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].LieAlgebraElement;
+      this->UEValue= this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].UEElement;
+    }
+//  this->WeylAlgebraValue.ComputeDebugString(false, false);
+}
+
+void Parser::ExtendOnTop(int numNew)
+{ this->SetSizeExpandOnTopNoObjectInit(this->size+numNew);
+  for (int i=0; i<numNew; i++)
+    this->TheObjects[this->size-1-i].owner=this;
+}
+
+void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
+{ this->UEElement.ComputeDebugString();
+  this->Evaluated=true;
+  for (int i=0; i<this->children.size; i++)
+    this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+  switch (this->Operation)
+  { case Parser::tokenPlus: this->EvaluatePlus(theGlobalVariables); break;
+    case Parser::tokenMinus: this->EvaluateMinus(theGlobalVariables); break;
+    case Parser::tokenTimes: this->EvaluateTimes(theGlobalVariables); break;
+    case Parser::tokenG: break;
+    case Parser::tokenH: break;
+    case Parser::tokenUnderscore: this->EvaluateUnderscore(theGlobalVariables); break;
+    case Parser::tokenPartialDerivative: this->ExpressionType=this->typeWeylAlgebraElement; break;
+    case Parser::tokenX: this->ExpressionType=this->typeWeylAlgebraElement; break;
+    case Parser::tokenInteger: this->EvaluateInteger(theGlobalVariables); break;
+    default: this->ExpressionType=this->typeError; return;
+  }
+}
+
+void ParserNode::EvaluateInteger(GlobalVariables& theGlobalVariables)
+{ if (this->rationalValue.Extended!=0)
+    this->ExpressionType=this->typeRational;
+  else
+  { this->ExpressionType= this->typeIntegerOrIndex;
+    this->intValue= this->rationalValue.NumShort;
+  }
+}
+
+void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
+{ this->ExpressionType=this->typeError;
+  if (this->children.size!=2)
+  { this->ExpressionType=this->typeError;
+    return;
+  }
+  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
+  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
+  if (rightNode.ExpressionType!=this->typeIntegerOrIndex)
+  { this->ExpressionType=this->typeError;
+    return;
+  }
+  int theIndex= rightNode.intValue-1;
+  int theDimension= owner->theLieAlgebra.theWeyl.KillingFormMatrix.NumRows;
+  if (leftNode.Operation==Parser::tokenH)
+  { if (theIndex>=theDimension)
+    { this->ExpressionType=this->typeError;
+      return;
+    }
+    root tempRoot;
+    tempRoot.MakeEi(theDimension, theIndex);
+    this->UEElement.AssignElementCartan(tempRoot, this->owner->theLieAlgebra);
+    this->ExpressionType=this->typeUEelement;
+    return;
+  }
+  if (leftNode.Operation==Parser::tokenG)
+  { theIndex=this->owner->theLieAlgebra.RootIndexToGeneratorIndex(theIndex);
+    if (theIndex==-1)
+    { this->ExpressionType=this->typeError;
+      return;
+    }
+    this->UEElement.MakeOneGeneratorCoeffOne(theIndex, this->owner->theLieAlgebra);
+    this->ExpressionType=this->typeUEelement;
+    return;
+  }
+}
+
+bool ParserNode::ConvertToType(int theType)
+{ if (this->ExpressionType==this->typeError)
+    return false;
+  if (theType==this->typeUndefined)
+    return false;
+  if (this->ExpressionType==theType)
+    return true;
+  if (this->ExpressionType> theType)
+    return false;
+  //we have eliminated the corner cases. Time to do some real conversion :)
+  if (this->ExpressionType==this->typeIntegerOrIndex)
+  { if (theType==this->typeRational)
+      this->rationalValue= this->intValue;
+    if (theType==this->typeUEelement)
+      this->UEElement.AssignInt(this->intValue, this->owner->theLieAlgebra);
+  }
+  if (this->ExpressionType==this->typeRational)
+  { if (theType==this->typeUEelement)
+      this->UEElement.AssignRational(this->rationalValue, this->owner->theLieAlgebra);
+  }
+  this->ExpressionType=theType;
+  return true;
+}
+
+void ParserNode::InitForAddition()
+{ this->intValue=0;
+  this->rationalValue.MakeZero();
+  this->UEElement.Nullify(& this->owner->theLieAlgebra);
+//  this->WeylAlgebraElement.Nullify(this->owner->NumVariables);
+}
+
+void ParserNode::InitForMultiplication()
+{ this->intValue=1;
+  this->rationalValue=1;
+  this->UEElement.AssignInt(1, this->owner->theLieAlgebra);
+}
+
+void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren()
+{ for (int i=0; i<this->children.size; i++)
+  { int childExpressionType=this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType;
+    if (childExpressionType>this->ExpressionType)
+      this->ExpressionType=childExpressionType;
+  }
+  for (int i=0; i<this->children.size; i++)
+    if(! this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(this->ExpressionType))
+    { this->ExpressionType=this->typeError;
+      return;
+    }
+}
+
+void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
+{ this->InitForAddition();
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  for (int i=0; i<this->children.size; i++)
+  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
+    switch (this->ExpressionType)
+    { case ParserNode::typeIntegerOrIndex: this->intValue+=currentChild.intValue; break;
+      case ParserNode::typeRational: this->rationalValue+=currentChild.rationalValue; break;
+      case ParserNode::typeUEelement: this->UEElement+=currentChild.UEElement; break;
+      default: this->ExpressionType=this->typeError; return;
+    }
+  }
+}
+
+void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
+{ this->InitForAddition();
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  for (int i=0; i<this->children.size; i++)
+  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
+    switch (this->ExpressionType)
+    { case ParserNode::typeIntegerOrIndex: if (i==0) this->intValue+=currentChild.intValue; else this->intValue-=currentChild.intValue; break;
+      case ParserNode::typeRational: if (i==0) this->rationalValue+=currentChild.rationalValue; else this->rationalValue-=currentChild.rationalValue; break;
+      case ParserNode::typeUEelement: if (i==0) this->UEElement+=currentChild.UEElement; else this->UEElement-=currentChild.UEElement; break;
+      default: this->ExpressionType=this->typeError; return;
+    }
+  }
+}
+
+void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
+{ this->InitForMultiplication();
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  for (int i=0; i<this->children.size; i++)
+  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
+    switch (this->ExpressionType)
+    { case ParserNode::typeIntegerOrIndex: this->intValue*=currentChild.intValue; break;
+      case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
+      case ParserNode::typeUEelement: this->UEElement*=currentChild.UEElement; break;
+      default: this->ExpressionType=this->typeError; return;
+    }
+  }
+}
+
+ParserNode::ParserNode()
+{ this->Clear();
+}
+
+void Parser::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
+{ std::stringstream out; std::string tempS;
+  out << "String: " << this->StringBeingParsed << "\n";
+  out << "Tokens: ";
+  for (int i=0; i<this->TokenBuffer.size; i++)
+  { this->TokenToStringStream(out, this->TokenBuffer.TheObjects[i]);
+    out << ", ";
+  }
+  out << "\nToken stack: ";
+  for (int i=this->numEmptyTokensAtBeginning; i<this->TokenStack.size; i++)
+  { this->TokenToStringStream(out, this->TokenStack.TheObjects[i]);
+    out << ", ";
+  }
+  out << "\nValue stack: ";
+  for (int i=this->numEmptyTokensAtBeginning; i<this->ValueStack.size; i++)
+    out << this->ValueStack.TheObjects[i] << ", ";
+  out << "\nElements:\n";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].ElementToString(tempS);
+    out << " Index: " << i << " " << tempS << ";\n";
+  }
+  this->UEValue.ComputeDebugString();
+  out << "\n\nUniveral Enveloping algebra value: " << this->UEValue.DebugString;
+
+//  this->WeylAlgebraValue.ComputeDebugString(false, false);
+//  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
+//  out << "\n\nWeyl algebra value: " << this->WeylAlgebraValue.DebugString;
+//  out << "\nLie algebra value: " << this->LieAlgebraValue.DebugString;
+  out << "\nAmbient Lie algebra details:\n";
+  out << this->theLieAlgebra.ElementToStringLieBracketPairing();
+  output=out.str();
+}
+
+void Parser::TokenToStringStream(std::stringstream& out, int theToken)
+{ //out << theToken << " ";
+  switch(theToken)
+  { case Parser::tokenX: out << "x"; break;
+    case Parser::tokenDigit: out << "D"; break;
+    case Parser::tokenPlus: out << "+"; break;
+    case Parser::tokenUnderscore: out << "_"; break;
+    case Parser::tokenEmpty: out << " "; break;
+    case Parser::tokenExpression: out << "E"; break;
+    case Parser::tokenOpenLieBracket: out << "["; break;
+    case Parser::tokenCloseLieBracket: out << "]"; break;
+    case Parser::tokenLieBracket: out << "[, ]"; break;
+    case Parser::tokenComma: out << ", "; break;
+    case Parser::tokenPartialDerivative: out << "d"; break;
+    case Parser::tokenTimes: out << "*"; break;
+    case Parser::tokenMinus: out << "-"; break;
+    case Parser::tokenG : out << "g"; break;
+    case Parser::tokenInteger: out << "Integer"; break;
+    case Parser::tokenH: out << "h"; break;
+    default: out << "?"; break;
+  }
+}
+
+void Parser::ComputeNumberOfVariablesAndAdjustNodes()
+{ this->NumVariables=0;
+  for(int i=0; i<this->size; i++)
+    if (this->NumVariables< this->TheObjects[i].WeylAlgebraElement.NumVariables)
+      this->NumVariables=this->TheObjects[i].WeylAlgebraElement.NumVariables;
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].WeylAlgebraElement.SetNumVariablesPreserveExistingOnes(this->NumVariables);
+}
+
+void ParserNode::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  owner->TokenToStringStream(out, this->Operation);
+  if (this->ExpressionType==this->typeRational)
+    out << " is the rational number " << this->rationalValue.ElementToString();
+  if (this->ExpressionType==this->typeIntegerOrIndex)
+    out << " is the integer " << this->intValue;
+  if (this->ExpressionType==this->typeUndefined)
+    out << " is of type undefined ";
+  if (this->ExpressionType==this->typeWeylAlgebraElement)
+  { this->WeylAlgebraElement.ElementToString(tempS, false, false, false);
+    out << " is the algebra element " << tempS << " ";
+  }
+  if (this->ExpressionType==this->typeUEelement)
+  { this->UEElement.ElementToString(tempS);
+    out << " is the universal enveloping algebra element: " << tempS;
+  }
+  if (this->children.size>0)
+  { out << " Its children are: ";
+    for (int i=0; i<this->children.size; i++)
+      out << this->children.TheObjects[i] << ", ";
+  }
+  output=out.str();
+}
+
+bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables)
+{ int theDomainDimension= this->theDomain.theWeyl.KillingFormMatrix.NumRows;
+  Selection NonExplored;
+  int numRoots= this->theDomain.theWeyl.RootSystem.size;
+  NonExplored.init(numRoots);
+  NonExplored.MakeFullSelection();
+  root domainRoot, rangeRoot;
+  this->theDomain.ComputeChevalleyConstants(this->theDomain.theWeyl, theGlobalVariables);
+  this->theRange.ComputeChevalleyConstants(this->theRange.theWeyl, theGlobalVariables);
+  List<ElementSimpleLieAlgebra> tempDomain, tempRange;
+  tempDomain.SetSizeExpandOnTopNoObjectInit(numRoots+theDomainDimension);
+  tempRange.SetSizeExpandOnTopNoObjectInit(numRoots+theDomainDimension);
+  root tempRoot;
+  for (int i=0; i<theDomainDimension; i++)
+  { tempRoot.MakeEi(theDomainDimension, i);
+    for (int j=0; j<2; j++, tempRoot.MinusRoot())
+    { int index= this->theDomain.theWeyl.RootSystem.IndexOfObjectHash(tempRoot);
+      tempDomain.TheObjects[index].Nullify(this->theDomain);
+      tempDomain.TheObjects[index].SetCoefficient(tempRoot, 1, this->theDomain);
+      tempRange.TheObjects[index] = this->ImagesSimpleChevalleyGenerators.TheObjects[i+j*theDomainDimension];
+      NonExplored.RemoveSelection(index);
+    }
+  }
+  ElementSimpleLieAlgebra tempElt;
+  root right;
+  while(NonExplored.CardinalitySelection>0)
+  { for (int i=0; i<NonExplored.CardinalitySelection; i++)
+    { int theIndex = NonExplored.elements[i];
+      root& current = this->theDomain.theWeyl.RootSystem.TheObjects[theIndex];
+      for (int j=0; j<NonExplored.MaxSize; j++)
+        if (!NonExplored.selected[j])
+        { root& left= this->theDomain.theWeyl.RootSystem.TheObjects[j];
+          right= current-left;
+          left.ComputeDebugString(); right.ComputeDebugString(); current.ComputeDebugString();
+          if (this->theDomain.theWeyl.IsARoot(right))
+          { int leftIndex= this->theDomain.theWeyl.RootSystem.IndexOfObjectHash(left);
+            int rightIndex= this->theDomain.theWeyl.RootSystem.IndexOfObjectHash(right);
+            if (!NonExplored.selected[rightIndex])
+            { ElementSimpleLieAlgebra& leftDomainElt=tempDomain.TheObjects[leftIndex];
+              ElementSimpleLieAlgebra& rightDomainElt= tempDomain.TheObjects[rightIndex];
+              this->theDomain.LieBracket(leftDomainElt, rightDomainElt, tempDomain.TheObjects[theIndex]);
+              ElementSimpleLieAlgebra& leftRangeElt=tempRange.TheObjects[leftIndex];
+              ElementSimpleLieAlgebra& rightRangeElt= tempRange.TheObjects[rightIndex];
+              this->theRange.LieBracket(leftRangeElt, rightRangeElt, tempRange.TheObjects[theIndex]);
+              NonExplored.RemoveSelection(theIndex);
+              break;
+            }
+          }
+        }
+    }
+  }
+  for (int i=0; i<theDomainDimension; i++)
+  { tempRoot.MakeEi(theDomainDimension, i);
+    int leftIndex= this->theDomain.theWeyl.RootSystem.IndexOfObjectHash(tempRoot);
+    int rightIndex= this->theDomain.theWeyl.RootSystem.IndexOfObjectHash(-tempRoot);
+    this->theDomain.LieBracket(tempDomain.TheObjects[leftIndex], tempDomain.TheObjects[rightIndex], tempDomain.TheObjects[numRoots+i]);
+    this->theRange.LieBracket(tempRange.TheObjects[leftIndex], tempRange.TheObjects[rightIndex], tempRange.TheObjects[numRoots+i]);
+  }
+
+  roots vectorsLeft, vectorsRight;
+  vectorsLeft.SetSizeExpandOnTopNoObjectInit(tempDomain.size);
+  vectorsRight.SetSizeExpandOnTopNoObjectInit(tempDomain.size);
+  for (int i=0; i<tempRange.size; i++)
+  { tempDomain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
+    tempRange.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
+  }
+  MatrixLargeRational tempMat;
+  tempMat.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight, theGlobalVariables);
+  root imageRoot;
+  this->theChevalleyGenerators.SetSizeExpandOnTopNoObjectInit(tempDomain.size);
+  this->ImagesAllChevalleyGenerators.SetSizeExpandOnTopNoObjectInit(tempDomain.size);
+  for (int i=0; i<this->theDomain.theWeyl.RootSystem.size; i++)
+  { tempElt.Nullify(this->theDomain);
+    tempElt.SetCoefficient(this->theDomain.theWeyl.RootSystem.TheObjects[i], 1, this->theDomain);
+    this->theChevalleyGenerators.TheObjects[i]=tempElt;
+  }
+  for (int i=0; i<theDomainDimension; i++)
+  { tempElt.Nullify(this->theDomain);
+    tempElt.Hcomponent.MakeEi(theDomainDimension, i);
+    this->theChevalleyGenerators.TheObjects[this->theDomain.theWeyl.RootSystem.size+i]=tempElt;
+  }
+  for (int i=0; i<this->ImagesAllChevalleyGenerators.size; i++)
+  { this->theChevalleyGenerators.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(tempRoot);
+    tempMat.ActOnAroot(tempRoot, imageRoot);
+    this->ImagesAllChevalleyGenerators.TheObjects[i].AssingVectorRootSpacesFirstThenCartan(imageRoot, this->theRange);
+  }
+  return true;
+}
+
+void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  std::string tempS, tempS2;
+  if (this->CheckClosednessLieBracket(theGlobalVariables))
+    out <<"Lie bracket closes, everything is good!";
+  else
+    out << "The Lie bracket is BAD BAD BAD!";
+  out << "Images simple Chevalley generators:\n\n";
+  for (int i=0; i<this->ImagesSimpleChevalleyGenerators.size; i++)
+  { this->ImagesSimpleChevalleyGenerators.TheObjects[i].ElementToString(tempS, this->theRange, false, false);
+    out << tempS << "\n\n";
+  }
+  out << "Maps of Chevalley generators:\n\n";
+  for (int i=0; i<this->theChevalleyGenerators.size; i++)
+  { this->ImagesAllChevalleyGenerators.TheObjects[i].ElementToString(tempS, this->theRange, false, false);
+    this->theChevalleyGenerators.TheObjects[i].ElementToString(tempS2, this->theDomain, false, false);
+    out << tempS2 << " \\mapsto " << tempS << "\n\n";
+  }
+
+  output=out.str();
+}
+
+void ComputationSetup::TestParser(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ std::string inputString;
+  Parser theParser;
+  HomomorphismSemisimpleLieAlgebra theHmm;
+  theHmm.theDomain.ComputeChevalleyConstants('G', 2, theGlobalVariables);
+  theHmm.theRange.ComputeChevalleyConstants('B', 3, theGlobalVariables);
+  theParser.DefaultWeylLetter='B';
+  theParser.DefaultWeylRank=3;
+  theHmm.ImagesSimpleChevalleyGenerators.SetSizeExpandOnTopNoObjectInit(4);
+//  int i=0;
+//  theParser.("g_2", theHmm.ImagesSimpleChevalleyGenerators.TheObjects[i], theHmm.theRange, theGlobalVariables); i++;
+//  theParser.ParseEvaluateAndAssign("g_3+g_1", theHmm.ImagesSimpleChevalleyGenerators.TheObjects[i], theHmm.theRange, theGlobalVariables); i++;
+//  theParser.ParseEvaluateAndAssign("g_11", theHmm.ImagesSimpleChevalleyGenerators.TheObjects[i], theHmm.theRange, theGlobalVariables); i++;
+//  theParser.ParseEvaluateAndAssign("g_12+g_10", theHmm.ImagesSimpleChevalleyGenerators.TheObjects[i], theHmm.theRange, theGlobalVariables); i++;
+//  theParser.ComputeDebugString();
+//  theHmm.ComputeDebugString(theGlobalVariables);
+//  theHmm.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
+//  theHmm.ComputeDebugString(theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
+//  theGlobalVariables.theIndicatorVariables.StatusString1 = theParser.DebugString;
+  ElementUniversalEnveloping tempU;
+  theParser.ParseEvaluateAndAssign("2h_1g_1g_2g_3-2g_3g_2g_1h_1", tempU, theHmm.theRange, theGlobalVariables);
+  theParser.ComputeDebugString(theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1 = theParser.DebugString;
+  theGlobalVariables.MakeReport();
+}
+
+bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables& theGlobalVariables)
+{ ElementSimpleLieAlgebra tempElt;
+  roots tempRoots; root tempRoot;
+  tempRoots.SetSizeExpandOnTopNoObjectInit(this->ImagesAllChevalleyGenerators.size);
+  for (int i=0; i<tempRoots.size; i++)
+    this->ImagesAllChevalleyGenerators.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(tempRoots.TheObjects[i]);
+  for (int i=0; i<this->ImagesAllChevalleyGenerators.size; i++)
+    for (int j=0; j<this->ImagesAllChevalleyGenerators.size; j++)
+    { this->theRange.LieBracket(this->ImagesAllChevalleyGenerators.TheObjects[i], this->ImagesAllChevalleyGenerators.TheObjects[j], tempElt);
+      tempElt.ElementToVectorRootSpacesFirstThenCartan(tempRoot);
+      if(!tempRoots.LinSpanContainsRoot(tempRoot, theGlobalVariables))
+        return false;
+    }
+  return true;
+}
+
+void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnveloping& output)
+{ int IndexlowestNonSimplified=output.size;
+  MonomialUniversalEnveloping buffer;
+  ElementUniversalEnveloping buffer2;
+  //simplified order is descending order
+  while (IndexlowestNonSimplified<output.size)
+  { bool reductionOccurred=false;
+    if (!output.TheObjects[IndexlowestNonSimplified].Coefficient.IsEqualToZero())
+      reductionOccurred=true;
+    else
+      for (int i=0; i<output.TheObjects[IndexlowestNonSimplified].generatorsIndices.size-1; i++)
+        if (output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i]<output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1])
+        { this->SwitchFirstPowerTwoConsequtiveIndices(i, buffer);
+          output.AddMonomialNoCleanUpZeroCoeff(buffer);
+          this->SubTwoConsequtiveGeneratorsForOne(i, buffer2);
+          for (int j=0; j<buffer2.size; j++)
+            output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
+          reductionOccurred=true;
+          break;
+        }
+    if (reductionOccurred)
+      output.PopIndexSwapWithLastHash(IndexlowestNonSimplified);
+  }
+  output.CleanUpZeroCoeff();
+}
+
+void MonomialUniversalEnveloping::Simplify(ElementUniversalEnveloping& output)
+{ output.ClearTheObjects();
+  output.AddObjectOnTopHash(*this);
+  output.owner=this->owner;
+  this->SimplifyAccumulateInOutputNoOutputInit(output);
+}
+
+void MonomialUniversalEnveloping::SwitchFirstPowerTwoConsequtiveIndices(int theIndex, MonomialUniversalEnveloping& output)
+{ if (theIndex==this->generatorsIndices.size-1)
+    return;
+  output.Coefficient=this->Coefficient;
+  output.owner=this->owner;
+  output.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  output.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  output.Powers.size=0;
+  output.generatorsIndices.size=0;
+  for (int i=0; i<theIndex; i++)
+    output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+  output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndex], this->Powers.TheObjects[theIndex]-1);
+  output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndex+1], 1);
+  output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndex], 1);
+  output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndex+1], this->Powers.TheObjects[theIndex+1]-1);
+  for (int i=theIndex+1; i<this->generatorsIndices.size; i++)
+    output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+}
+
+void MonomialUniversalEnveloping::MultiplyByNoSimplify(const MonomialUniversalEnveloping& other)
+{ this->generatorsIndices.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
+  this->Powers.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
+  for (int i=0; i<other.generatorsIndices.size; i++)
+    this->MultiplyByGeneratorPowerOnTheRight(other.generatorsIndices.TheObjects[i], other.Powers.TheObjects[i]);
+  this->Coefficient.MultiplyBy(other.Coefficient);
+}
+
+void MonomialUniversalEnveloping::SubTwoConsequtiveGeneratorsForOne(int theIndex, ElementUniversalEnveloping& output)
+{ if (theIndex==this->generatorsIndices.size-1)
+    return;
+  output.Nullify(this->owner);
+  MonomialUniversalEnveloping tempMon;
+  tempMon.Coefficient=this->Coefficient;
+  tempMon.owner=this->owner;
+  tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.Powers.size=0;
+  tempMon.generatorsIndices.size=0;
+  int leftGeneratorIndex= this->generatorsIndices.TheObjects[theIndex];
+  int rightGeneratorIndex= this->generatorsIndices.TheObjects[theIndex+1];
+  if (this->owner->OppositeRootSpaces.TheObjects[leftGeneratorIndex]!=rightGeneratorIndex)
+    if (this->owner->theLiebracketPairingIndices.elements[leftGeneratorIndex][rightGeneratorIndex]==-1)
+      return;
+  int leftSubstitutedIndexPower= this->Powers.TheObjects[theIndex]-1;
+  int rightSubstitutedIndexPower=this->Powers.TheObjects[theIndex+1]-1;
+  for (int i=0; i<theIndex; i++)
+    tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndex, leftSubstitutedIndexPower);
+  tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, rightSubstitutedIndexPower);
+  if (this->owner->OppositeRootSpaces.TheObjects[leftGeneratorIndex]!=rightGeneratorIndex)
+  { int theNewGeneratorIndex=this->owner->theLiebracketPairingIndices.elements[leftGeneratorIndex][rightGeneratorIndex];
+    tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex,1);
+    tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndex+1], this->Powers.TheObjects[theIndex+1]-1);
+    for (int i=theIndex+1; i<this->generatorsIndices.size; i++)
+      tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+    output.AddObjectOnTopHash(tempMon);
+  } else
+  { ElementSimpleLieAlgebra left, right, tempElt;
+    left.Nullify(*this->owner); right.Nullify(*this->owner);
+    root& leftRoot= this->owner->theWeyl.RootSystem.TheObjects[this->owner->IndexToRootIndex(leftGeneratorIndex)];
+    root& rightRoot=this->owner->theWeyl.RootSystem.TheObjects[this->owner->IndexToRootIndex(rightGeneratorIndex)];
+    left.SetCoefficient(leftRoot, 1, *this->owner);
+    right.SetCoefficient(rightRoot, 1, *this->owner);
+    this->owner->LieBracket(left, right, tempElt);
+    int theDimension=this->owner->theWeyl.KillingFormMatrix.NumRows;
+    int numPosRoots= this->owner->theWeyl.RootsOfBorel.size;
+    MonomialUniversalEnveloping tempMon2;
+    for (int i=0; i<theDimension; i++)
+    { tempMon2=tempMon;
+      if (!tempElt.Hcomponent.TheObjects[i].IsEqualToZero())
+      { tempMon2.MultiplyByGeneratorPowerOnTheRight(i+numPosRoots, 1);
+        tempMon2.Coefficient.MultiplyBy(tempElt.Hcomponent.TheObjects[i]);
+        output.AddObjectOnTopHash(tempMon2);
+      }
+    }
+  }
+}
+
+void MonomialUniversalEnveloping::MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower)
+{ if (thePower==0)
+    return;
+  if (this->generatorsIndices.size>0)
+    if (*this->generatorsIndices.LastObject()==theGeneratorIndex)
+    { *this->Powers.LastObject()+=thePower;
+      return;
+    }
+  this->Powers.AddObjectOnTop(thePower);
+  this->generatorsIndices.AddObjectOnTop(theGeneratorIndex);
+}
+
+void ElementUniversalEnveloping::AddMonomialNoCleanUpZeroCoeff(const MonomialUniversalEnveloping& input)
+{ int theIndex= this->IndexOfObjectHash(input);
+  if (theIndex==-1)
+    this->AddObjectOnTopHash(input);
+  else
+    this->TheObjects[theIndex].Coefficient+=input.Coefficient;
+}
+
+void ElementUniversalEnveloping::AddMonomial(const MonomialUniversalEnveloping& input)
+{ int theIndex= this->IndexOfObjectHash(input);
+  if (theIndex==-1)
+    this->AddObjectOnTopHash(input);
+  else
+  { this->TheObjects[theIndex].Coefficient+=input.Coefficient;
+    if (this->TheObjects[theIndex].Coefficient.IsEqualToZero())
+      this->PopIndexSwapWithLastHash(theIndex);
+  }
+}
+
+void ElementUniversalEnveloping::CleanUpZeroCoeff()
+{ for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i].Coefficient.IsEqualToZero())
+    { this->PopIndexSwapWithLastHash(i);
+      i--;
+    }
+}
+
+void ElementUniversalEnveloping::MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& theOwner)
+{ this->Nullify(&theOwner);
+  MonomialUniversalEnveloping tempMon;
+  tempMon.Coefficient.MakeOne();
+  tempMon.generatorsIndices.size=0;
+  tempMon.Powers.size=0;
+  tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, 1);
+  this->AddObjectOnTopHash(tempMon);
+}
+
+void ElementUniversalEnveloping::AssignElementCartan(const root& input, SemisimpleLieAlgebra& theOwner)
+{ MonomialUniversalEnveloping tempMon;
+  this->Nullify(&theOwner);
+  tempMon.owner=&theOwner;
+  int theDimension= theOwner.theWeyl.KillingFormMatrix.NumRows;
+  int numPosRoots=theOwner.theWeyl.RootsOfBorel.size;
+  tempMon.generatorsIndices.SetSizeExpandOnTopNoObjectInit(1);
+  tempMon.Powers.SetSizeExpandOnTopNoObjectInit(1);
+  for (int i=0; i<theDimension; i++)
+    if (!input.TheObjects[i].IsEqualToZero())
+    { (*tempMon.generatorsIndices.LastObject())=i+numPosRoots;
+      (*tempMon.Powers.LastObject())=1;
+      tempMon.Coefficient= input.TheObjects[i];
+      this->AddObjectOnTopHash(tempMon);
+    }
+}
+
+void ElementUniversalEnveloping::ElementToString(std::string& output)
+{ std::stringstream out;
+  std::string tempS;
+  if (this->size==0)
+    out << "0";
+  for (int i=0; i<this->size; i++)
+  { MonomialUniversalEnveloping& current=this->TheObjects[i];
+    tempS=current.ElementToString(false);
+    if (i!=0)
+      if (tempS.size()>0)
+        if (tempS[0]!='-')
+          out << '+';
+    out << tempS;
+  }
+  output=out.str();
+}
+
+std::string MonomialUniversalEnveloping::ElementToString(bool useLatex)
+{ std::stringstream out;
+  std::string tempS;
+  if (this->owner==0)
+    return "faulty monomial non-initialized owner";
+  tempS = this->Coefficient.ElementToString();
+  if (tempS=="1" && this->generatorsIndices.size>0)
+    tempS="";
+  out << tempS;
+  for (int i=0; i<this->generatorsIndices.size; i++)
+  { tempS=this->owner->getLetterFromGeneratorIndex(this->generatorsIndices.TheObjects[i], useLatex);
+    if (this->Powers.size>1)
+      out << "(";
+    out << tempS;
+    if (this->Powers.TheObjects[i]>1)
+    { out << "^";
+      if (useLatex)
+        out << "{";
+      out << this->Powers.TheObjects[i];
+      if (useLatex)
+        out << "}";
+    }
+  }
+  return out.str();
+}
+
+int MonomialUniversalEnveloping::HashFunction() const
+{ int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
+  int result=0;
+  for (int i=0; i<top; i++)
+    result+=SomeRandomPrimes[i]*this->generatorsIndices.TheObjects[i]*this->Powers.TheObjects[i];
+  return result;
+}
+
+void ParserNode::Clear()
+{ this->indexParent=-1;
+  this->intValue=0;
+  this->Operation= Parser::tokenEmpty;
+  this->Evaluated=false;
+  this->ExpressionType=this->typeUndefined;
+  this->children.size=0;
+  this->rationalValue.MakeZero();
+}
+
+std::string SemisimpleLieAlgebra::getLetterFromGeneratorIndex(int theIndex, bool useLatex)
+{ int numPosRoots= this->theWeyl.RootsOfBorel.size;
+  int rank= this->theWeyl.KillingFormMatrix.NumRows;
+  std::stringstream out;
+  if (theIndex<numPosRoots || theIndex>= numPosRoots+rank)
+  { out << "g";
+    if (useLatex)
+      out << "^{\\alpha_{" << theIndex+1 << "}}";
+    else
+      out << "_" << theIndex+1;
+  } else
+  { out << "h";
+    if (useLatex)
+      out << "_{\\alpha_{" << theIndex-numPosRoots+1 << "}}";
+    else
+      out << "_" <<theIndex-numPosRoots+1;
+  }
+  return out.str();
+}
+
+int SemisimpleLieAlgebra::RootIndexToGeneratorIndex(int theIndex)
+{ if (theIndex==-1)
+    return theIndex;
+  if (theIndex>=this->theWeyl.RootsOfBorel.size)
+    theIndex+=this->theWeyl.KillingFormMatrix.NumRows;
+  return theIndex;
+}
+
+int SemisimpleLieAlgebra::IndexToRootIndex(int theRootIndex)
+{ if (theRootIndex<this->theWeyl.RootsOfBorel.size)
+    return theRootIndex;
+  return theRootIndex+this->theWeyl.KillingFormMatrix.NumRows;
+}
+
+std::string SemisimpleLieAlgebra::ElementToStringLieBracketPairing()
+{ std::stringstream out;
+  std::string tempS;
+  out << "\nThe generator indices:\n ";
+  for (int i=0; i<this->theLiebracketPairingIndices.NumRows; i++)
+  { for (int j=0; j<this->theLiebracketPairingIndices.NumCols; j++)
+      out << this->theLiebracketPairingIndices.elements[i][j]+1 << ", ";
+    out << "\n";
+  }
+  this->theLiebracketPairingCoefficients.ElementToString(tempS);
+  out << "\nThe coefficients:\n" << tempS;
+  return out.str();
+}
+
+void ElementUniversalEnveloping::AssignRational(const Rational& coeff, SemisimpleLieAlgebra& theOwner)
+{ MonomialUniversalEnveloping tempMon;
+  this->ClearTheObjects();
+  tempMon.MakeConst(coeff, theOwner);
+  this->AddMonomialNoCleanUpZeroCoeff(tempMon);
+  this->CleanUpZeroCoeff();
+  this->owner=&theOwner;
+}
+
+void ElementUniversalEnveloping::Nullify(SemisimpleLieAlgebra* theOwner)
+{ this->ClearTheObjects();
+  this->owner=theOwner;
+}
+
+void ElementUniversalEnveloping::operator+=(const ElementUniversalEnveloping& other)
+{ this->MakeActualSizeAtLeastExpandOnTop(other.size);
+  for (int i=0; i<other.size; i++)
+    this->AddMonomialNoCleanUpZeroCoeff(other.TheObjects[i]);
+  this->CleanUpZeroCoeff();
+}
+
+void ElementUniversalEnveloping::operator-=(const ElementUniversalEnveloping& other)
+{ this->MakeActualSizeAtLeastExpandOnTop(other.size);
+  MonomialUniversalEnveloping tempMon;
+  for (int i=0; i<other.size; i++)
+  { tempMon=other.TheObjects[i];
+    tempMon.Coefficient.Minus();
+    this->AddMonomialNoCleanUpZeroCoeff(tempMon);
+  }
+  this->CleanUpZeroCoeff();
+}
+
+void ElementUniversalEnveloping::operator*=(const ElementUniversalEnveloping& other)
+{ this->MakeActualSizeAtLeastExpandOnTop(other.size*this->size);
+  ElementUniversalEnveloping output;
+  output.Nullify(this->owner);
+  MonomialUniversalEnveloping tempMon;
+  for (int i=0; i<this->size; i++)
+    for(int j=0; j<other.size; j++)
+    { tempMon=this->TheObjects[i];
+      tempMon.MultiplyByNoSimplify(other.TheObjects[j]);
+      output.AddMonomialNoCleanUpZeroCoeff(tempMon);
+    }
+}
+
+
+
+
+

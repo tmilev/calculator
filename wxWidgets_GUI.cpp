@@ -997,7 +997,8 @@ void guiMainWindow::onButton22TestChambers(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton23Experiments(wxCommandEvent& ev)
-{ this->theComputationSetup.theFunctionToRun = & this->theComputationSetup.DuflosComputation;
+{ //this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.DuflosComputation;
+  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.TestParser;
   this->RunTheComputation();
 }
 
@@ -1236,7 +1237,6 @@ void guiMainWindow::WriteIndicatorWeight(root& tempRoot)
     this->Table2Indicator->SetCellAlignment(0,i,wxALIGN_CENTER);
   }
 }
-
 
 void guiMainWindow::initWeylGroupInfo()
 { if (!this->theComputationSetup.flagUsingCustomVectors)

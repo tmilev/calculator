@@ -64,7 +64,7 @@ int main(int argc, char **argv)
   //inputString="textType=A&textRank=4";
   getPath(argv[0], inputPath);
   ComputationSetup theComputationSetup;
-  int choice =::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup,inputPath);
+  int choice =::CGIspecificRoutines::ReadDataFromCGIinput(inputString, theComputationSetup, inputPath);
   //std::cout<< "choice " <<choice <<"       ";
   std::string latexCommand1;
   std::string latexCommand2;    //std::cout<<inputString;

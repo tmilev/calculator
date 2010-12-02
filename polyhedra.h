@@ -455,7 +455,11 @@ public:
   void AddListOnTop(List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
   void PopIndexShiftUp(int index);
-  void PopIndexShiftDown(int index);
+  void PopIndexShiftDown(int index)
+  { for (int i=index; i<this->size-1; i++)
+      this->TheObjects[i]=this->TheObjects[i+1];
+    this->size--;
+  };
   void PopIndexSwapWithLast(int index);
   void PopLastObject();
   void QuickSortAscending();
@@ -1403,6 +1407,7 @@ public:
   int operator %(int x);
   inline void operator = (const LargeInt& x){ this->Assign(x);  };
   inline void operator*=(int x){ this->MultiplyByInt(x);};
+  inline void operator+=(int x){this->AddInt(x);};
   inline LargeInt operator+(const LargeInt& other){LargeInt tempInt; tempInt.Assign(*this); tempInt.Add(other); return tempInt;};
   inline LargeInt operator+(int x){LargeInt tempInt; tempInt.Assign(*this); tempInt.AddInt(x); return tempInt;};
   LargeInt operator*(int x){ LargeInt tempInt; tempInt.Assign(*this); tempInt.MultiplyByInt(x); return tempInt;};
@@ -6292,6 +6297,7 @@ private:
 public:
   std::string DebugString;
   std::string ElementToString(bool useLatex);
+  void ComputeDebugString(){this->DebugString=this->ElementToString(false);};
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
@@ -6301,6 +6307,7 @@ public:
   void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnveloping& output);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
+  void Nullify(SemisimpleLieAlgebra& theOwner);
   int HashFunction() const;
   void MakeConst(int theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
   void MakeConst(const Rational& theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
@@ -6332,6 +6339,7 @@ private:
 public:
   std::string DebugString;
   void ElementToString(std::string& output);
+  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
   void ComputeDebugString(){this->ElementToString(this->DebugString);};
   SemisimpleLieAlgebra* owner;
   void AddMonomial(const MonomialUniversalEnveloping& input);
@@ -6339,8 +6347,12 @@ public:
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& theOwner);
   void Nullify(SemisimpleLieAlgebra* theOwner);
   void AssignRational(const Rational& coeff, SemisimpleLieAlgebra& theOwner);
+  void Simplify();
   void AssignInt(int coeff, SemisimpleLieAlgebra& theOwner){ Rational tempRat=coeff; this->AssignRational(tempRat, theOwner);};
-  void operator=(const ElementUniversalEnveloping& other){ this->CopyFromHash(other);};
+  void operator=(const ElementUniversalEnveloping& other)
+  { this->CopyFromHash(other);
+    this->owner=other.owner;
+  };
   void operator+=(const ElementUniversalEnveloping& other);
   void operator+=(int other);
   void operator+=(const Rational& other);
@@ -6792,11 +6804,13 @@ class ParserNode
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex,  typeRational, typeLieAlgebraElement, typeUEelement, typeWeylAlgebraElement, typeError};
   void InitForAddition();
   void InitForMultiplication();
+  std::string ElementToStringValueOnly();
   void Evaluate(GlobalVariables& theGlobalVariables);
   void EvaluateTimes(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
+  void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluateDiv(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   ParserNode();
@@ -6811,6 +6825,7 @@ public:
   std::string StringBeingParsed;
   char DefaultWeylLetter;
   int DefaultWeylRank;
+  ParserNode theValue;
   SemisimpleLieAlgebra theLieAlgebra;
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, theGlobalVariables); };
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
@@ -6824,26 +6839,31 @@ public:
   List<int> ValueStack;
   int numEmptyTokensAtBeginning;
   int NumVariables;
-  ElementUniversalEnveloping UEValue;
 //  ElementSimpleLieAlgebra LieAlgebraValue;
 //  ElementWeylAlgebra WeylAlgebraValue;
+  void PopTokenAndValueStacksShiftDown(int theIndex){ this->ValueStack.PopIndexShiftDown(theIndex); this->TokenStack.PopIndexShiftDown(theIndex); };
+  void PopTokenAndValueStacksLast(){ this->ValueStack.PopLastObject(); this->TokenStack.PopLastObject();};
   void ParserInit(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
   void ParseEvaluateAndAssign(const std::string& input, ElementSimpleLieAlgebra& output, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
   void ParseEvaluateAndAssign(const std::string& input, ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
+  std::string ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables);
   void Parse(const std::string& input);
   void ParseNoInit(int indexFrom, int indexTo);
   void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);
   bool ApplyRules(int lookAheadToken);
   bool lookAheadTokenProhibitsPlus(int theToken);
   bool lookAheadTokenProhibitsTimes(int theToken);
+  bool TokenProhibitsUnaryMinus(int theToken);
   void AddIndexingExpressionOnTop();
   void AddLetterExpressionOnTop();
   void Own(int indexParent, int indexChild1, int indexChild2);
+  void Own(int indexParent, int indexChild1);
   void ExtendOnTop(int numNew);
   void TokenToStringStream(std::stringstream& out, int theToken);
   void AddPlusOnTop();
   void AddMinusOnTop();
+  void AddUnaryMinusOnTop();
   void AddTimesOnTop();
   void AddLieBracketOnTop();
   void PopLastAndThirdToLast();
@@ -7138,7 +7158,7 @@ struct CGIspecificRoutines
 {
 public:
   static std::stringstream outputStream;
-  static int numLines;
+  static int numLinesAll;
   static int numRegularLines;
   static int numDashedLines;
   static int numDottedLines;
@@ -7149,7 +7169,9 @@ public:
   static void MakeVPReportFromComputationSetup(ComputationSetup& input);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
-  static void CivilizedStringTranslation(std::string& input, std::string& output);
+  static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
+  static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
+  static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakePFAndChamberReportFromComputationSetup(ComputationSetup& input);
   static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);

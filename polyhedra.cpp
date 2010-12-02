@@ -578,7 +578,7 @@ void ComputationSetup::SetupCustomNilradicalInVPVectors(GlobalVariables& theGlob
 }
 
 std::stringstream  CGIspecificRoutines::outputStream;
-int CGIspecificRoutines::numLines;
+int CGIspecificRoutines::numLinesAll;
 int CGIspecificRoutines::shiftX=0;
 int CGIspecificRoutines::numDashedLines=0;
 int CGIspecificRoutines::numRegularLines=0;
@@ -590,47 +590,52 @@ void CGIspecificRoutines::clearDollarSigns(std::string& theString, std::string& 
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
     if(theString[i]!='$')
-      out<<theString[i];
+      out << theString[i];
   output=out.str();
 }
 void CGIspecificRoutines::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
     if(theString[i]!='=')
-      out<<theString[i];
+      out << theString[i];
     else
-      out <<"\\simeq ";
+      out << "\\simeq ";
   output=out.str();
 }
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2, unsigned long thePenStyle, int r, int g, int b)
-{ if (thePenStyle!=5)
-  { CGIspecificRoutines::outputStream << thePenStyle<<" ["<<r<<", "<<g<<", "<<b<<"] ";
+{ if (thePenStyle!=DrawingVariables::PenStyleInvisible)
+  { //do not add extra spaces in the following string! we use the fact that the string is one piece later in the code with the stringstream::operator>>
+    CGIspecificRoutines::outputStream << thePenStyle << " [" << r << "," << g << "," << b << "] ";
     for (int i=0; i<r1.size; i++)
       CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " " << (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
-    CGIspecificRoutines::numLines++;
+    CGIspecificRoutines::numLinesAll++;
     switch(thePenStyle)
-    { case 0: CGIspecificRoutines::numRegularLines++; break;
-      case 1: CGIspecificRoutines::numDashedLines++; break;
-      case 2: CGIspecificRoutines::numDottedLines++; break;
+    { case DrawingVariables::PenStyleNormal: CGIspecificRoutines::numRegularLines++; break;
+      case DrawingVariables::PenStyleLinkToOrigin:
+      case DrawingVariables::PenStyleDashed: CGIspecificRoutines::numDashedLines++; break;
+      case DrawingVariables::PenStyleZeroChamber:
+      case DrawingVariables::PenStyleLinkToOriginZeroChamber:
+      case DrawingVariables::PenStyleDotted: CGIspecificRoutines::numDottedLines++; break;
+      default: CGIspecificRoutines::numDottedLines++; break;
     }
   }
 }
 
 void CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
-{ std::cout  << "\n\tvar num"<< lineTypeName <<"Lines=" << numberLines <<"; ";
-  std::cout  << "\n\tvar "<< lineTypeName <<"1= new Array("<< numberLines <<"); " <<"  \tvar "<< lineTypeName <<"2= new Array("    << numberLines <<"); " << "  \tvar clr"  << lineTypeName <<"= new Array("  << numberLines <<"); ";
+{ std::cout << "\n\tvar num" << lineTypeName << "Lines=" << numberLines << "; ";
+  std::cout << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); " << "  \tvar " << lineTypeName << "2= new Array(" << numberLines << "); " << "  \tvar clr"  << lineTypeName << "= new Array("  << numberLines << "); ";
 }
-void CGIspecificRoutines::outputLineJavaScriptSpecific
-  (const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter )
-{  std::string tempS;
-  std::cout  << "\n\t"    << lineTypeName <<"1["  << lineCounter <<"]= new Array(" << theDimension << "); " << "\t"    << lineTypeName <<"2["  << lineCounter <<"]= new Array(" << theDimension << "); " << "\tclr"<< lineTypeName <<"["    << lineCounter <<"]= new Array(" << 3 << "); \n";
+
+void CGIspecificRoutines::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
+{ std::string tempS;
+  std::cout  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension << "); " << "\t" << lineTypeName << "2[" << lineCounter << "]= new Array(" << theDimension << "); " << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
   for (int j=0; j< theDimension; j++)
-  { CGIspecificRoutines::outputStream>> tempS;
-    std::cout << "\t"<< lineTypeName <<"1[" <<lineCounter<< "][" << j<<"]=" <<tempS <<"; ";
-    CGIspecificRoutines::outputStream>> tempS;
-    std::cout << "\t"<< lineTypeName <<"2[" <<lineCounter<< "][" << j<<"]=" <<tempS <<"; ";
+  { CGIspecificRoutines::outputStream >> tempS;
+    std::cout << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "]=" << tempS << "; ";
+    CGIspecificRoutines::outputStream >> tempS;
+    std::cout << "\t" << lineTypeName << "2[" << lineCounter << "][" << j << "]=" << tempS << "; ";
   }
-  std::cout << "\tclr"<< lineTypeName <<"[" <<lineCounter<< "]=" <<stringColor <<"; ";
+  std::cout << "\tclr" << lineTypeName << "[" << lineCounter << "]=" << stringColor << "; ";
   lineCounter++;
 }
 
@@ -638,11 +643,11 @@ void CGIspecificRoutines::MakeVPReportFromComputationSetup(ComputationSetup& inp
 {  std::string tempS;
   //input.thePartialFraction.IndicatorRoot.ComputeDebugString();
   input.thePartialFraction.theChambers.RootBelongsToChamberIndex(input.IndicatorRoot, &tempS);
-  std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n" << "of chamber <a href=\"/tmp/chambers.html#"<<tempS<<"\">"<< tempS <<"</a>; " <<"&nbsp; &nbsp; &nbsp; <a href=\"/tmp/vector_partition.pdf\">pdf</a>\n<br>\n" <<"<textarea name=\"vp_output\" cols=\"50\" rows=\"30\">"<< input.theOutput.DebugString<< "</textarea>";
+  std::cout << "\n<br>\nVector partition function in LaTeX format\n<br>\n" << "of chamber <a href=\"/tmp/chambers.html#" << tempS << "\">" << tempS << "</a>; " << "&nbsp; &nbsp; &nbsp; <a href=\"/tmp/vector_partition.pdf\">pdf</a>\n<br>\n" << "<textarea name=\"vp_output\" cols=\"50\" rows=\"30\">" << input.theOutput.DebugString << "</textarea>";
 }
 
 void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(ComputationSetup& input)
-{ CGIspecificRoutines::numLines=0;
+{ CGIspecificRoutines::numLinesAll=0;
   CGIspecificRoutines::numRegularLines=0;
   CGIspecificRoutines::numDottedLines=0;
   GlobalVariables& theGlobalVariables=*input.theGlobalVariablesContainer->Default();
@@ -652,38 +657,41 @@ void CGIspecificRoutines::MakePFAndChamberReportFromComputationSetup(Computation
   std::string stringColor;
   CGIspecificRoutines::outputStream.seekg(0);
   std::cout << "\n<script>";
-  std::cout  << "\n\tvar numDrawLines=" << CGIspecificRoutines::numLines<<"; ";
+  std::cout << "\n\tvar numDrawLines=" << CGIspecificRoutines::numLinesAll << "; ";
   CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("l", CGIspecificRoutines::numRegularLines);
   CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("da", CGIspecificRoutines::numDashedLines);
   CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific("do", CGIspecificRoutines::numDottedLines);
   int theDimension=input.thePartialFraction.theChambers.AmbientDimension;
   int numLlines=0;  int numDalines=0;  int numDolines=0;
-  for (int i=0; i<CGIspecificRoutines::numLines; i++)
-  { CGIspecificRoutines::outputStream>> tempS>> stringColor;
-    if (tempS=="0")
-      CGIspecificRoutines::outputLineJavaScriptSpecific("l", theDimension, stringColor, numLlines);
-    if (tempS=="1")
-      CGIspecificRoutines::outputLineJavaScriptSpecific("da", theDimension, stringColor, numDalines);
-    if (tempS=="2")
-      CGIspecificRoutines::outputLineJavaScriptSpecific("do", theDimension, stringColor, numDolines);
+  std::string debuggerBugger=outputStream.str();
+  int thePenStyle;
+  for (int i=0; i<CGIspecificRoutines::numLinesAll; i++)
+  { CGIspecificRoutines::outputStream >> thePenStyle >> stringColor;
+    switch(thePenStyle)
+    { case DrawingVariables::PenStyleNormal: CGIspecificRoutines::outputLineJavaScriptSpecific("l", theDimension, stringColor, numLlines); break;
+      case DrawingVariables::PenStyleLinkToOrigin:
+      case DrawingVariables::PenStyleDashed: CGIspecificRoutines::outputLineJavaScriptSpecific("da", theDimension, stringColor, numDalines); break;
+      case DrawingVariables::PenStyleLinkToOriginZeroChamber:
+      case DrawingVariables::PenStyleDotted: CGIspecificRoutines::outputLineJavaScriptSpecific("do", theDimension, stringColor, numDolines); break;
+      default: CGIspecificRoutines::outputLineJavaScriptSpecific("do", theDimension, stringColor, numDolines); break;
+    }
   }
-  std::cout <<"</script>";
+  std::cout << "</script>";
 #ifdef CGIversionLimitRAMuse
-  std::cout <<"<br>Total number of pointers allocated: "<< ::ParallelComputing::GlobalPointerCounter <<"<br>\n";
+  std::cout << "<br>Total number of pointers allocated: " << ::ParallelComputing::GlobalPointerCounter << "<br>\n";
 #endif
-  std::cout << "Number of partial fractions: " << input.thePartialFraction.size <<"<br>\n";
-  std::cout << "Number of monomials in the numerators: "<<input.thePartialFraction.NumMonomialsInTheNumerators <<"<br>\n" <<"Partial fraction decomposition &nbsp; &nbsp; &nbsp; "
-                  <<"<a href=\"/tmp/partial_fraction.pdf\">pdf</a>\n<br>\n<textarea name=\"pf_output\" cols=\"50\" rows=\"30\">" << input.thePartialFraction.DebugString << "</textarea>";
+  std::cout << "Number of partial fractions: " << input.thePartialFraction.size << "<br>\n";
+  std::cout << "Number of monomials in the numerators: " << input.thePartialFraction.NumMonomialsInTheNumerators << "<br>\n" << "Partial fraction decomposition &nbsp; &nbsp; &nbsp; " << "<a href=\"/tmp/partial_fraction.pdf\">pdf</a>\n<br>\n<textarea name=\"pf_output\" cols=\"50\" rows=\"30\">" << input.thePartialFraction.DebugString << "</textarea>";
 }
 
 void CGIspecificRoutines::ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml)
 { std::stringstream out;
   if (useHtml)
-    out << "<span title=\"" << inputTooltip << "\">" << input<<"</span>";
+    out << "<span title=\"" << inputTooltip << "\">" << input << "</span>";
   output=out.str();
 }
 
-void CGIspecificRoutines::CivilizedStringTranslation(std::string& input, std::string& output)
+void CGIspecificRoutines::CivilizedStringTranslationFromVPold(std::string& input, std::string& output)
 { output.clear();
   int oldindex=0;
   int tempSize=(signed) input.size();
@@ -823,9 +831,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   //std::cout.flush();
   //std::cout <<"  tempS3: "<< tempS3<<"   ";
 #ifdef CGIversionLimitRAMuse
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=1000000;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=2000000;
 #endif
-  CGIspecificRoutines::CivilizedStringTranslation(inputBad, inputGood);
+  CGIspecificRoutines::CivilizedStringTranslationFromVPold(inputBad, inputGood);
 //  std::cout<<inputGood;
   if (tempS3=="rootSAs")
     return CGIspecificRoutines::choiceDisplayRootSApage;
@@ -17837,7 +17845,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(const root& root1, const root& 
 void SltwoSubalgebras::ComputeDebugStringCurrent()
 { std::string tempS; std::stringstream out;
   for (int i=0; i<this->MultiplicitiesFixedHweight.size; i++)
-    out << i-this->IndexZeroWeight<<": "<<this->MultiplicitiesFixedHweight.TheObjects[i] <<"\n";
+    out << i-this->IndexZeroWeight << ": " << this->MultiplicitiesFixedHweight.TheObjects[i] << "\n";
   this->DebugString=out.str();
 }
 
@@ -17845,7 +17853,7 @@ void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables&
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out;
-  out <<index <<" out of "<< outOf <<" =3^8-1 computed";
+  out << index <<" out of "<< outOf <<" =3^8-1 computed";
   theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
   theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -18093,7 +18101,7 @@ void ElementSimpleLieAlgebra::MultiplyByRational(SemisimpleLieAlgebra& owner, co
 void ElementSimpleLieAlgebra::ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::stringstream out; std::string tempS;
   if (useLatex)
-    out <<"$";
+    out << "$";
   for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
   { this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].ElementToString(tempS);
     if (tempS=="1")
@@ -18103,11 +18111,11 @@ void ElementSimpleLieAlgebra::ElementToString(std::string& output, SemisimpleLie
     if (i!=0)
     { if (tempS!="")
       { if (tempS[0]!='-')
-          out <<"+";
+          out << "+";
       } else
-        out<<"+";
+        out << "+";
     }
-    out <<tempS<<"g^{\\alpha_{" << this->NonZeroElements.elements[i]+1<<"}}";
+    out << tempS << "g^{\\alpha_{" << this->NonZeroElements.elements[i]+1 << "}}";
   }
   for (int i=0; i<this->Hcomponent.size; i++)
     if (!this->Hcomponent.TheObjects[i].IsEqualToZero())
@@ -18118,13 +18126,13 @@ void ElementSimpleLieAlgebra::ElementToString(std::string& output, SemisimpleLie
         tempS="-";
       if (tempS!="")
       { if (tempS[0]!='-')
-          out <<"+";
+          out << "+";
       } else
-        out<<"+";
-      out <<tempS<<"h_{\\alpha_{"<<i+1<<"}}";
+        out << "+";
+      out << tempS << "h_{\\alpha_{" << i+1 << "}}";
     }
   if(useLatex)
-    out <<"$";
+    out << "$";
   output= out.str();
 }
 

@@ -1,7 +1,7 @@
 #include<sstream>
 void static_html1(std::stringstream& output){
 output <<" <HTML>\n";
-output <<" <HEAD><TITLE>Vector partition, updated 15 July 2010</TITLE>\n";
+output <<" <HEAD><TITLE>Vector partition, updated 02 December 2010</TITLE>\n";
 output <<" </HEAD>\n";
 output <<" <BODY>\n";
 output <<" <table>\n";

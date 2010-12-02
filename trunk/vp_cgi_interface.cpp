@@ -28,7 +28,7 @@ void getPath(char* path, std::string& output)
   }
 }
 
-extern void static_html1( std::stringstream& output);
+extern void static_html1(std::stringstream& output);
 
 int main(int argc, char **argv)
 { std::string inputString, inputPath, tempS;
@@ -58,8 +58,9 @@ int main(int argc, char **argv)
   //inputString="textType=d&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=G&textRank=2&buttonGoSl2SAs=sl%282%29+subalgebras&checkUsePNG=on";
   //inputString="experiments";
+	//inputString="textDim=3&textNumVectors=6&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=0&textCoord3=2&textCoord3=0&textCoord4=1&textCoord4=1&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=undefined";
 	std::cout << "Content-Type: text/html\n\n";
-	//std::cout << "inputString: "<<inputString;
+//	std::cout << "inputString: " << inputString;
 	std::cout.flush();
   //inputString="textType=A&textRank=4";
   getPath(argv[0], inputPath);
@@ -191,7 +192,7 @@ int main(int argc, char **argv)
         }
     }
     if (choice==CGIspecificRoutines::choiceGenerateDynkinTables)
-      std::cout << "<HTML>"<<"<META http-equiv=\"refresh\" content=\"0; url="<<serverPath<< "rootHtml.html\"> <BODY>"<< serverPath <<"<br> input string: <br>\n"<< inputString << "<br>"<<thePhysicalPath;
+      std::cout << "<HTML>" << "<META http-equiv=\"refresh\" content=\"0; url=" << serverPath << "rootHtml.html\"> <BODY>" << serverPath << "<br> input string: <br>\n" << inputString << "<br>" << thePhysicalPath;
     else
     { if (theComputationSetup.flagExecuteSystemCommandsCGIapplication)
         std::cout << "<HTML><BODY><META http-equiv=\"refresh\" content=\"0; url=" << serverPathSl2s << "sl2s.html\">";
@@ -203,7 +204,7 @@ int main(int argc, char **argv)
     theComputationSetup.WeylGroupLetter='D';
     theComputationSetup.theFunctionToRun= &theComputationSetup.ComputeReductiveSAs;
     theComputationSetup.Run();
-    std::cout<< theComputationSetup.theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1;
+    std::cout << theComputationSetup.theGlobalVariablesContainer->Default()->theIndicatorVariables.StatusString1;
   }
   std::cout << "</BODY>\n</HTML>";
 	std::cout << "<!--";
@@ -212,7 +213,7 @@ int main(int argc, char **argv)
   system(latexCommand1.c_str());
   system(latexCommand2.c_str());
 #endif
-	std::cout<<"-->";
+	std::cout << "-->";
 	std::cout.flush();
 	return 0;   // To avoid Apache errors.
 }

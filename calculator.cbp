@@ -19,6 +19,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add option="-DCGIversionLimitRAMuse" />
 		</Compiler>
 		<Unit filename="calculator.cpp" />
 		<Unit filename="custom_code_here.cpp" />

@@ -3387,7 +3387,7 @@ std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVar
   this->Parse(input);
   this->Evaluate(theGlobalVariables);
   this->theValue.UEElement.Simplify();
-  return this->theValue.ElementToStringValueOnly();
+  return this->theValue.ElementToStringValueOnly(true);
 }
 
 int DebugCounter=-1;
@@ -3413,6 +3413,7 @@ void Parser::ParserInit(const std::string& input)
       case '7': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(7); break;
       case '8': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(8); break;
       case '9': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(9); break;
+      case '*': this->TokenBuffer.AddObjectOnTop(Parser::tokenTimes); this->ValueBuffer.AddObjectOnTop(9); break;
       case '}': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseCurlyBracket); this->ValueBuffer.AddObjectOnTop(0); break;
       case '{': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenCurlyBracket); this->ValueBuffer.AddObjectOnTop(0); break;
       case '[': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
@@ -3494,9 +3495,8 @@ bool Parser::lookAheadTokenProhibitsTimes(int theToken)
 }
 
 bool Parser::ApplyRules(int lookAheadToken)
-{ if (this->TokenStack.size<2)
+{ if (this->TokenStack.size<=this->numEmptyTokensAtBeginning)
     return false;
-//  this->ComputeDebugString();
   int tokenLast=*this->TokenStack.LastObject();
   int tokenSecondToLast= this->TokenStack.TheObjects[this->TokenStack.size-2];
   int tokenThirdToLast=this->TokenStack.TheObjects[this->TokenStack.size-3];
@@ -3513,6 +3513,11 @@ bool Parser::ApplyRules(int lookAheadToken)
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMinus && !this->TokenProhibitsUnaryMinus(tokenThirdToLast))
   { this->AddUnaryMinusOnTop();
+    return true;
+  }
+  if (tokenLast==this->tokenCloseBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenOpenBracket)
+  { this->PopTokenAndValueStacksLast();
+    this->PopTokenAndValueStacksShiftDown(this->TokenStack.size-2);
     return true;
   }
   if (tokenLast== this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenLieBracket)
@@ -3535,11 +3540,24 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddLetterExpressionOnTop();
     return true;
   }
-  if (tokenSecondToLast==this->tokenUnderscore && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression)
+  if (tokenSecondToLast==this->tokenUnderscore && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && tokenFourthToLast!=this->tokenUnderscore)
   { this->AddIndexingExpressionOnTop();
     return true;
   }
- if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
+  if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenPower && tokenThirdToLast==this->tokenExpression)
+  { this->AddPowerOnTop();
+    return true;
+  }
+  if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenDivide && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
+  { this->AddDivideOnTop();
+    return true;
+  }
+  if (tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && tokenSecondToLast==tokenTimes && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
+  { this->PopTokenAndValueStacksShiftDown(this->TokenStack.size-2);
+    this->AddTimesOnTop();
+    return true;
+  }
+  if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
   { this->AddTimesOnTop();
     return true;
   }
@@ -3564,6 +3582,14 @@ void Parser::DecreaseStackSetExpressionLastNode(int Decrease)
 void Parser::MergeLastTwoIntegers()
 { this->LargeIntegerReader=this->LargeIntegerReader*10+(*this->ValueStack.LastObject());
   this->PopTokenAndValueStacksLast();
+}
+
+void Parser::AddPowerOnTop()
+{ this->ExtendOnTop(1);
+  this->LastObject()->Clear();
+  this->LastObject()->Operation=this->tokenPower;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
 }
 
 void Parser::AddLetterExpressionOnTop()
@@ -3596,6 +3622,15 @@ void Parser::AddPlusOnTop()
   this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
   this->DecreaseStackSetExpressionLastNode(2);
 }
+
+void Parser::AddDivideOnTop()
+{ this->ExtendOnTop(1);
+  ParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenDivide;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(2);
+}
+
 
 void Parser::AddMinusOnTop()
 { this->ExtendOnTop(1);
@@ -3658,12 +3693,14 @@ void Parser::Own(int indexParent, int indexChild1, int indexChild2)
 
 void Parser::Evaluate(GlobalVariables& theGlobalVariables)
 { if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
-    if (*this->TokenStack.LastObject()==this->tokenExpression)
+  { if (*this->TokenStack.LastObject()==this->tokenExpression)
     { this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].Evaluate(theGlobalVariables);
 //      this->WeylAlgebraValue.Assign(this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].WeylAlgebraElement);
 //      this->LieAlgebraValue= this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].LieAlgebraElement;
       this->theValue=this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
     }
+  } else
+    this->theValue.ExpressionType=ParserNode::typeError;
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 }
 
@@ -3674,10 +3711,15 @@ void Parser::ExtendOnTop(int numNew)
 }
 
 void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
-{ this->UEElement.ComputeDebugString();
+{ //this->UEElement.ComputeDebugString();
   this->Evaluated=true;
   for (int i=0; i<this->children.size; i++)
-    this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+  { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+    if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeError)
+    { this->CopyError(this->owner->TheObjects[this->children.TheObjects[i]]);
+      return;
+    }
+  }
   switch (this->Operation)
   { case Parser::tokenPlus: this->EvaluatePlus(theGlobalVariables); break;
     case Parser::tokenMinus: this->EvaluateMinus(theGlobalVariables); break;
@@ -3685,11 +3727,14 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenTimes: this->EvaluateTimes(theGlobalVariables); break;
     case Parser::tokenG: break;
     case Parser::tokenH: break;
+    case Parser::tokenDivide: this->EvaluateDivide(theGlobalVariables); break;
     case Parser::tokenUnderscore: this->EvaluateUnderscore(theGlobalVariables); break;
     case Parser::tokenPartialDerivative: this->ExpressionType=this->typeWeylAlgebraElement; break;
     case Parser::tokenX: this->ExpressionType=this->typeWeylAlgebraElement; break;
     case Parser::tokenInteger: this->EvaluateInteger(theGlobalVariables); break;
-    default: this->ExpressionType=this->typeError; return;
+    case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
+    case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
+    default: this->SetError(this->errorUnknownOperation); return;
   }
 }
 
@@ -3702,9 +3747,9 @@ void ParserNode::EvaluateInteger(GlobalVariables& theGlobalVariables)
   }
 }
 
-void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
+void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
 { this->ExpressionType=this->typeError;
-  if (this->children.size!=2)
+  if (this->children.size!=2 || !this->AllChildrenAreOfDefinedNonErrorType())
   { this->ExpressionType=this->typeError;
     return;
   }
@@ -3714,12 +3759,45 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
+  int thePower= rightNode.intValue;
+  switch(leftNode.ExpressionType)
+  { case ParserNode::typeIntegerOrIndex:
+      this->rationalValue=leftNode.intValue;
+      this->rationalValue.RaiseToPower(thePower);
+      this->ExpressionType=this->typeRational;
+      break;
+    case ParserNode::typeRational:
+      this->rationalValue=leftNode.rationalValue;
+      this->rationalValue.RaiseToPower(thePower);
+      this->ExpressionType=this->typeRational;
+      break;
+    case ParserNode::typeUEelement:
+      this->UEElement=leftNode.UEElement;
+      this->UEElement.RaiseToPower(thePower);
+      this->ExpressionType=this->typeUEelement;
+    break;
+    default: this->ExpressionType=this->typeError; return;
+  }
+}
+
+void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
+{ this->ExpressionType=this->typeError;
+  if (this->children.size!=2)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
+  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
+  if (rightNode.ExpressionType!=this->typeIntegerOrIndex)
+  { this->SetError(this->errorBadIndex);
+    return;
+  }
   int theIndex= rightNode.intValue;
   int theDimension= owner->theLieAlgebra.theWeyl.KillingFormMatrix.NumRows;
   if (leftNode.Operation==Parser::tokenH)
   { theIndex--;
     if (theIndex>=theDimension || theIndex<0)
-    { this->ExpressionType=this->typeError;
+    { this->SetError(this->errorBadIndex);
       return;
     }
     root tempRoot;
@@ -3735,7 +3813,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
       theIndex--;
     theIndex=this->owner->theLieAlgebra.RootIndexToGeneratorIndex(theIndex);
     if (theIndex==-1)
-    { this->ExpressionType=this->typeError;
+    { this->SetError(this->errorBadIndex);
       return;
     }
     this->UEElement.MakeOneGeneratorCoeffOne(theIndex, this->owner->theLieAlgebra);
@@ -3762,7 +3840,7 @@ bool ParserNode::ConvertToType(int theType)
   }
   if (this->ExpressionType==this->typeRational)
   { if (theType==this->typeUEelement)
-      this->UEElement.AssignRational(this->rationalValue, this->owner->theLieAlgebra);
+      this->UEElement.MakeConst(this->rationalValue, this->owner->theLieAlgebra);
   }
   this->ExpressionType=theType;
   return true;
@@ -3795,7 +3873,11 @@ void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren()
 }
 
 void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
-{ this->InitForAddition();
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->ExpressionType=this->typeError;
+    return;
+  }
+  this->InitForAddition();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)
@@ -3818,7 +3900,11 @@ void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
-{ this->InitForAddition();
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->ExpressionType=this->typeError;
+    return;
+  }
+  this->InitForAddition();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
@@ -3832,7 +3918,11 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
-{ this->InitForAddition();
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->ExpressionType=this->typeError;
+    return;
+  }
+  this->InitForAddition();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
   ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[0]];
   switch (this->ExpressionType)
@@ -3843,8 +3933,79 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
   }
 }
 
+bool ParserNode::AllChildrenAreOfDefinedNonErrorType()
+{ for (int i=0; i<this->children.size; i++)
+    if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeError || this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeUndefined)
+      return false;
+  return true;
+}
+
+void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
+{ if (this->children.size!=2 || !this->AllChildrenAreOfDefinedNonErrorType())
+  { this->ExpressionType=this->typeError;
+    return;
+  }
+  this->ExpressionType=this->typeUEelement;
+  for (int i=0; i<this->children.size; i++)
+  { ParserNode& current= this->owner->TheObjects[this->children.TheObjects[i]];
+    current.ConvertToType(this->typeUEelement);
+  }
+  ElementUniversalEnveloping& left= this->owner->TheObjects[this->children.TheObjects[0]].UEElement;
+  ElementUniversalEnveloping& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElement;
+  left.LieBracketOnTheRight(right, this->UEElement);
+}
+
+void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->SetError(this->errorOperationByUndefinedOrErrorType);
+    return;
+  }
+  if (this->children.size!=2)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  this->InitForMultiplication();
+  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
+  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
+  if (rightNode.ExpressionType==this->typeIntegerOrIndex)
+  { rightNode.ExpressionType=this->typeRational;
+    rightNode.rationalValue=rightNode.intValue;
+  }
+  if (rightNode.ExpressionType!=this->typeRational)
+  { this->SetError(this->errorDivisionByNonAllowedType);
+    return;
+  }
+  if (rightNode.rationalValue.IsEqualToZero())
+  { this->SetError(this->errorDivisionByZero);
+    return;
+  }
+  Rational& theDenominator= rightNode.rationalValue;
+  switch(leftNode.ExpressionType)
+  { case ParserNode::typeIntegerOrIndex:
+      this->rationalValue=leftNode.intValue;
+      this->rationalValue/=theDenominator;
+      this->ExpressionType=this->typeRational;
+      break;
+    case ParserNode::typeRational:
+      this->rationalValue=leftNode.rationalValue;
+      this->rationalValue/=theDenominator;
+      this->ExpressionType=this->typeRational;
+      break;
+    case ParserNode::typeUEelement:
+      this->UEElement=leftNode.UEElement;
+      this->UEElement/=theDenominator;
+      this->ExpressionType=this->typeUEelement;
+    break;
+    default: this->SetError(this->errorDivisionByNonAllowedType); return;
+  }
+}
+
 void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
-{ this->InitForMultiplication();
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->SetError(this->errorOperationByUndefinedOrErrorType);
+    return;
+  }
+  this->InitForMultiplication();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)
@@ -3870,35 +4031,45 @@ ParserNode::ParserNode()
 { this->Clear();
 }
 
-void Parser::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
+void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   out << "String: " << this->StringBeingParsed << "\n";
+  if (useHtml)
+    out << "<br>";
   out << "Tokens: ";
   for (int i=0; i<this->TokenBuffer.size; i++)
-  { this->TokenToStringStream(out, this->TokenBuffer.TheObjects[i]);
-    out << ", ";
-  }
+    this->TokenToStringStream(out, this->TokenBuffer.TheObjects[i]);
   out << "\nToken stack: ";
   for (int i=this->numEmptyTokensAtBeginning; i<this->TokenStack.size; i++)
-  { this->TokenToStringStream(out, this->TokenStack.TheObjects[i]);
-    out << ", ";
-  }
+    this->TokenToStringStream(out, this->TokenStack.TheObjects[i]);
+  if (useHtml)
+    out << "<br>";
   out << "\nValue stack: ";
   for (int i=this->numEmptyTokensAtBeginning; i<this->ValueStack.size; i++)
     out << this->ValueStack.TheObjects[i] << ", ";
+  if (useHtml)
+    out << "<br>";
   out << "\nElements:\n";
+  if (useHtml)
+    out << "<br>";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS);
     out << " Index: " << i << " " << tempS << ";\n";
+    if (useHtml)
+      out << "<br>";
   }
-  out << "\n\nValue: " << this->theValue.ElementToStringValueOnly();
+  if (useHtml)
+    out << "<br><br>";
+  out << "\n\nValue: " << this->theValue.ElementToStringValueOnly(true);
 
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 //  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
 //  out << "\n\nWeyl algebra value: " << this->WeylAlgebraValue.DebugString;
 //  out << "\nLie algebra value: " << this->LieAlgebraValue.DebugString;
-  out << "\nAmbient Lie algebra details:\n";
-  out << this->theLieAlgebra.ElementToStringLieBracketPairing();
+  if (!useHtml)
+  { out << "\nAmbient Lie algebra details:\n";
+    out << this->theLieAlgebra.ElementToStringLieBracketPairing();
+  }
   output=out.str();
 }
 
@@ -3917,12 +4088,16 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenComma: out << ", "; break;
     case Parser::tokenOpenCurlyBracket: out << "{"; break;
     case Parser::tokenCloseCurlyBracket: out << "}"; break;
+    case Parser::tokenOpenBracket: out << "("; break;
+    case Parser::tokenCloseBracket: out << ")"; break;
     case Parser::tokenPartialDerivative: out << "d"; break;
     case Parser::tokenTimes: out << "*"; break;
     case Parser::tokenMinus: out << "-"; break;
     case Parser::tokenG : out << "g"; break;
     case Parser::tokenInteger: out << "Integer"; break;
+    case Parser::tokenDivide: out << "/"; break;
     case Parser::tokenH: out << "h"; break;
+    case Parser::tokenPower: out << "^"; break;
     default: out << "?"; break;
   }
 }
@@ -3936,16 +4111,43 @@ void Parser::ComputeNumberOfVariablesAndAdjustNodes()
     this->TheObjects[i].WeylAlgebraElement.SetNumVariablesPreserveExistingOnes(this->NumVariables);
 }
 
-std::string ParserNode::ElementToStringValueOnly()
+std::string ParserNode::ElementToStringValueOnly(bool useHtml)
 { std::stringstream out;
   if (this->ExpressionType==this->typeIntegerOrIndex)
-    out << " an integer of value: " << this->intValue;
+  { if (!useHtml)
+      out << " an integer of value: " << this->intValue;
+    else
+      out << " an integer of value: <div class=\"math\">" << this->intValue << "</div>";
+  }
   if (this->ExpressionType==this->typeRational)
-    out << " a rational number of value: " << this->rationalValue.ElementToString();
+  { if (!useHtml)
+      out << " a rational number of value: " << this->rationalValue.ElementToString();
+    else
+      out << " a rational number of value: <div class=\"math\">" << this->rationalValue.ElementToString() << "</div>";
+  }
   if (this->ExpressionType==this->typeUEelement)
-    out << " an element of U(g) of value: " << this->UEElement.ElementToString();
+  { if (!useHtml)
+      out << " an element of U(g) of value: " << this->UEElement.ElementToString();
+    else
+      out << " an element of U(g) of value: <div class=\"math\">" << this->UEElement.ElementToString() << "</div>";
+  }
   if (this->ExpressionType==this->typeError)
-    out << " an error";
+    out << this->ElementToStringErrorCode(useHtml);
+  return out.str();
+}
+
+std::string ParserNode::ElementToStringErrorCode(bool useHtml)
+{ std::stringstream out;
+  switch (this->ErrorType)
+  { case ParserNode::errorDivisionByZero: out << "error: division by zero"; break;
+    case ParserNode::errorDivisionByNonAllowedType: out << "error: division of/by non-allowed type"; break;
+    case ParserNode::errorMultiplicationByNonAllowedTypes: out << "error: multiplication by non-allowed types"; break;
+    case ParserNode::errorNoError: out << "error: error type claims no error, but expression type claims error. Slap the programmer."; break;
+    case ParserNode::errorOperationByUndefinedOrErrorType: out << "error: division by an undefined type"; break;
+    case ParserNode::errorProgramming: out << "error: there has been some programming mistake (it's not your expression's fault). Slap the programmer!"; break;
+    case ParserNode::errorBadIndex: out << "error: bad index"; break;
+    default: out << "Non-documented error. Lazy programmers deserve no salaries.";
+  }
   return out.str();
 }
 
@@ -4284,6 +4486,16 @@ void ElementUniversalEnveloping::Simplify()
   *this=output;
 }
 
+void ElementUniversalEnveloping::LieBracketOnTheRight(const ElementUniversalEnveloping& right, ElementUniversalEnveloping& output)
+{ ElementUniversalEnveloping tempElt, tempElt2;
+  tempElt=*this;
+  tempElt*=right;
+  tempElt2=right;
+  tempElt2*=*this;
+  output=tempElt;
+  output-=tempElt2;
+}
+
 void ElementUniversalEnveloping::AddMonomial(const MonomialUniversalEnveloping& input)
 { int theIndex= this->IndexOfObjectHash(input);
   if (theIndex==-1)
@@ -4350,28 +4562,32 @@ std::string MonomialUniversalEnveloping::ElementToString(bool useLatex)
 { std::stringstream out;
   std::string tempS;
   if (this->owner==0)
-    return "faulty monomial non-initialized owner";
+    return "faulty monomial non-initialized owner. Slap the programmer.";
   tempS = this->Coefficient.ElementToString();
-  if (tempS=="1" && this->generatorsIndices.size>0)
-    tempS="";
+  if (this->generatorsIndices.size>0)
+  { if (tempS=="1")
+      tempS="";
+    if (tempS=="-1")
+      tempS="-";
+  }
   out << tempS;
   for (int i=0; i<this->generatorsIndices.size; i++)
   { int thePower=this->Powers.TheObjects[i];
     int theIndex=this->generatorsIndices.TheObjects[i];
     tempS=this->owner->getLetterFromGeneratorIndex(theIndex, useLatex);
-    if (thePower>1)
-      out << "(";
+    //if (thePower>1)
+    //  out << "(";
     out << tempS;
     if (thePower>1)
     { out << "^";
-      if (useLatex)
-        out << "{";
+     // if (useLatex)
+      out << "{";
       out << this->Powers.TheObjects[i];
-      if (useLatex)
-        out << "}";
+      //if (useLatex)
+      out << "}";
     }
-    if (thePower>1)
-      out << ")";
+    //if (thePower>1)
+    //  out << ")";
   }
   return out.str();
 }
@@ -4394,6 +4610,7 @@ int MonomialUniversalEnveloping::HashFunction() const
 void ParserNode::Clear()
 { this->indexParent=-1;
   this->intValue=0;
+  this->ErrorType=this->errorNoError;
   this->Operation= Parser::tokenEmpty;
   this->Evaluated=false;
   this->ExpressionType=this->typeUndefined;
@@ -4453,7 +4670,7 @@ std::string SemisimpleLieAlgebra::ElementToStringLieBracketPairing()
   return out.str();
 }
 
-void ElementUniversalEnveloping::AssignRational(const Rational& coeff, SemisimpleLieAlgebra& theOwner)
+void ElementUniversalEnveloping::MakeConst(const Rational& coeff, SemisimpleLieAlgebra& theOwner)
 { MonomialUniversalEnveloping tempMon;
   this->ClearTheObjects();
   tempMon.MakeConst(coeff, theOwner);
@@ -4485,6 +4702,11 @@ void ElementUniversalEnveloping::operator-=(const ElementUniversalEnveloping& ot
   this->CleanUpZeroCoeff();
 }
 
+void ElementUniversalEnveloping::operator/=(const Rational& other)
+{ for (int i=0; i<this->size; i++)
+    this->TheObjects[i].Coefficient/=other;
+}
+
 void ElementUniversalEnveloping::operator*=(const ElementUniversalEnveloping& other)
 { this->MakeActualSizeAtLeastExpandOnTop(other.size*this->size);
   ElementUniversalEnveloping output;
@@ -4500,7 +4722,14 @@ void ElementUniversalEnveloping::operator*=(const ElementUniversalEnveloping& ot
   *this=output;
 }
 
-
+void ElementUniversalEnveloping::RaiseToPower(int thePower)
+{ ElementUniversalEnveloping buffer;
+  buffer=*this;
+  Rational tempRat=1;
+  this->MakeConst(tempRat, *this->owner);
+  for (int i=0; i<thePower; i++)
+    this->operator*=(buffer);
+}
 
 
 

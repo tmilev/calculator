@@ -48,38 +48,57 @@ int main(int argc, char **argv)
 //	inputString="textInput=+asf&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><title>Vector partition calculator</title><body>";
+  std::cout << "<html><head><title>Vector partition calculator</title>";
+  std::cout << "<script src=\"../htdocs/easy/load.js\"></script></head> ";
+  std::cout << "<body>";
+
   std::string civilizedInput=inputString;
   std::string inputStringRaw=inputString;
 
   int tempInt=(signed)civilizedInput.size();
   int numNonRelevantStart=10;
-  int numNonRelevantEnd=12;
-  for (int i=0; i<tempInt; i++)
-  { if (i+numNonRelevantStart<tempInt)
-      civilizedInput[i]=civilizedInput[i+numNonRelevantStart];
-    else
-      civilizedInput[i]='|';
-  }
-  if (tempInt-numNonRelevantStart-numNonRelevantEnd>=0)
-    civilizedInput.resize(tempInt-numNonRelevantStart-numNonRelevantEnd);
+  int civilizedLength=0;
+  for (; civilizedLength<tempInt; civilizedLength++)
+    if (civilizedLength+numNonRelevantStart<tempInt)
+    { if (civilizedInput[civilizedLength+numNonRelevantStart]!='&')
+        civilizedInput[civilizedLength]=civilizedInput[civilizedLength+numNonRelevantStart];
+      else
+        break;
+    }
+  civilizedInput.resize(civilizedLength);
   if (civilizedInput!="")
     CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   Parser theParser;
   GlobalVariables theGlobalVariables;
   theParser.DefaultWeylLetter='B';
   theParser.DefaultWeylRank=3;
+  //For debugging:
+//  civilizedInput= "[g_4h_2, 6h_1]";
+//  civilizedInput= "[5g_2,6h_1g_2+5]";
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
+
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
-  std::cout << "<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" cols=\"50\" rows=\"30\" name=\"textInput\" value=\"" << civilizedInput << " \">\n<br>\n";
+  std::string beginMath="<DIV class=\"math\" scale=\"50\">";
+  std::string endMath ="</DIV>";
+  std::cout << "<table>\n <tr valign=\"top\">\n <td>";
+  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n";
+  std::cout << "<input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" value=\"" << civilizedInput << "\"></input>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
+//  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
   std::cout << "<br>result: " << theResult;
-  std::cout << "<br>raw input string: " << inputStringRaw;
+  std::cout <<"</td>";
+  std::cout << " <td></td>\n<td>\n";
+  theParser.theLieAlgebra.ElementToStringLieBracket(tempS, true, true, theGlobalVariables);
+  std::cout << tempS;
+
+  std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputStringRaw;
   std::cout << "<br>civilized input string: " << civilizedInput;
-  std::cout << "<br>Parser debug string: " <<theParser.DebugString;
+  std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
+  std::cout << "\n</td></table>";
   std::cout << "</body></html>";
-	return 0;   // To avoid Apache errors.
+	return 0;   // Toavoid Apache errors.
 }
 
 void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, std::string& output)
@@ -125,6 +144,18 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
   { out << ")";
     return true;
   }
+  if (readAhead=="%5B")
+  { out << "[";
+    return true;
+  }
+  if (readAhead=="%5D")
+  { out << "]";
+    return true;
+  }
+  if (readAhead=="%2C")
+  { out << ",";
+    return true;
+  }
   if (readAhead=="%7B")
   { out << "{";
     return true;
@@ -142,4 +173,49 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
     return true;
   }
   return false;
+}
+
+void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  std::string tempS;
+  root tempRoot;
+  std::string beginMath="<DIV class=\"math\" scale=\"50\">";
+  std::string endMath ="</DIV>";
+  int numRoots=this->theWeyl.RootSystem.size;
+  int theDimension = this->theWeyl.KillingFormMatrix.NumRows;
+//  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
+
+  out << beginMath << "\\begin{array}{";
+  ElementUniversalEnveloping tempElt1, tempElt2, tempElt3;
+  for (int i=0; i<numRoots+theDimension+1; i++)
+    out << "c";
+  out << "}[\\bullet, \\bullet]\n";
+  for (int i=0; i<this->theLiebracketPairingCoefficients.NumRows; i++)
+  { tempElt1.MakeOneGeneratorCoeffOne(i, *this);
+    tempElt1.ElementToString(tempS);
+    out << " & " << tempS;
+  }
+  out << "\\\\\n";
+  Rational tempRat;
+  for (int i=0; i<this->theLiebracketPairingCoefficients.NumRows; i++)
+  { tempElt1.MakeOneGeneratorCoeffOne(i, *this);
+    tempElt1.ElementToString(tempS);
+    out << tempS;
+    for (int j=0; j<this->theLiebracketPairingCoefficients.NumRows; j++)
+    { tempElt2.MakeOneGeneratorCoeffOne(j, *this);
+      tempElt1.LieBracketOnTheRight(tempElt2, tempElt3);
+      tempElt3.Simplify();
+      tempElt3.ElementToString(tempS);
+      out << "& " << tempS;
+    }
+    out << "\\\\\n";
+  }
+  out << "\\end{array}" << endMath;
+  output=out.str();
+}
+
+void CGIspecificRoutines::ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput)
+{ for (int i=0; i<(signed)inputOutput.size(); i++)
+    if (inputOutput[i]=='=' || inputOutput[i]=='&')
+      inputOutput[i]=' ';
 }

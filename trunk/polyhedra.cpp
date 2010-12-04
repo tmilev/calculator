@@ -887,7 +887,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
     return theChoiceIsYours;
   }
   if (!InputDataOK==true)
-  { std::cout<<"<br><b>Bad input:</b> "<< inputBad <<"<br>\n";
+  { std::cout << "<br><b>Bad input:</b> " << inputBad << "<br>\n";
     return CGIspecificRoutines::choiceInitAndDisplayMainPage;
   }
 //  std::cout<< input<<"\n";
@@ -13563,7 +13563,7 @@ void LaTeXProcedures::drawTextDirectly(double X1, double Y1, const std::string& 
   X1-=theText.length()* LaTeXProcedures::TextPrintCenteringAdjustmentX;
   Y1+=LaTeXProcedures::TextPrintCenteringAdjustmentY;
   X1/=LaTeXProcedures::ScaleFactor; Y1/=LaTeXProcedures::ScaleFactor;
-  output  << "\\put("<<X1-LaTeXProcedures::FigureCenterCoordSystemX<<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<"){\\tiny{"<<theText<<"}}";
+  output << "\\put(" << X1-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y1 << "){\\tiny{" << theText << "}}";
 }
 
 void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput)
@@ -13577,7 +13577,7 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
     tempS="lightgray";
   else
     LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS, drawInput);
-  output  <<"\\psline[linewidth=0.3pt, linecolor="<<tempS <<"]("<<X1-LaTeXProcedures::FigureCenterCoordSystemX <<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y1<<")"<<"("<<X2-LaTeXProcedures::FigureCenterCoordSystemX <<", "<<LaTeXProcedures::FigureCenterCoordSystemY-Y2<<")\n";
+  output  << "\\psline[linewidth=0.3pt, linecolor=" << tempS << "](" << X1-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y1 << ")" << "(" << X2-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y2 << ")\n";
 }
 
 void thePFcomputation::Run()
@@ -13596,12 +13596,12 @@ void thePFcomputation::ComputeDebugString()
 
 void thePFcomputation::ElementToString(std::string& output)
 { std::stringstream out;
-  out<<"tableForbidden:\n";
+  out << "tableForbidden:\n";
   for (int i=0; i<this->tableForbidden.size; i++)
-  { out <<i<<"\t\t\t";
+  { out << i << "\t\t\t";
     for (int j=0; j<this->tableForbidden.TheObjects[i].CardinalitySelection; j++)
-      out<<this->tableForbidden.TheObjects[i].elements[j]<<", ";
-    out<<"\n";
+      out << this->tableForbidden.TheObjects[i].elements[j] << ", ";
+    out << "\n";
   }
   output= out.str();
 }
@@ -13863,16 +13863,16 @@ bool rootSubalgebra::rootIsInCentralizer(root& input)
 }
 
 void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile(std::fstream &output, List<List<List<int> > >& inMultTable, List<int>& inOpposites)
-{ output<< "pairing_table_size: "<< inMultTable.size<<"\n";
+{ output << "pairing_table_size: " << inMultTable.size << "\n";
   for (int i=0; i<inMultTable.size; i++)
     for (int j=0; j<inMultTable.size; j++)
-    { output << inMultTable.TheObjects[i].TheObjects[j].size<<" ";
+    { output << inMultTable.TheObjects[i].TheObjects[j].size << " ";
       for(int k=0; k<inMultTable.TheObjects[i].TheObjects[j].size; k++)
-        output<< inMultTable.TheObjects[i].TheObjects[j].TheObjects[k]<<" ";
+        output << inMultTable.TheObjects[i].TheObjects[j].TheObjects[k] << " ";
     }
-  output<<"\nopposites: ";
+  output << "\nopposites: ";
   for (int i=0; i<inMultTable.size; i++)
-    output<< inOpposites.TheObjects[i]<<" ";
+    output << inOpposites.TheObjects[i] << " ";
 }
 
 void rootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites)
@@ -13890,9 +13890,9 @@ void rootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, 
         input >> outMultTable.TheObjects[i].TheObjects[j].TheObjects[k];
     }
   }
-  input>> tempS;
+  input >> tempS;
   for (int i=0; i<outMultTable.size; i++)
-    input>> outOpposites.TheObjects[i];
+    input >> outOpposites.TheObjects[i];
   assert(tempS=="opposites:");
 }
 
@@ -14050,8 +14050,8 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out4, out5;
-  out5<< progress+1 << " out of "<< outOf <<" checked; ";
-  out5<< found << " found pos. generators";
+  out5 << progress+1 << " out of " << outOf << " checked; ";
+  out5 << found << " found pos. generators";
   //::theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -14061,7 +14061,7 @@ void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVar
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out5;
-  out5<<"Computing pairing table: "<< index+1 << " out of "<< outOf;
+  out5 << "Computing pairing table: " << index+1 << " out of " << outOf;
   theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -14073,18 +14073,18 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
   if (this->flagMakingProgressReport)
   { std::stringstream out1, out2, out3, out4, out5;
     if (this->flagFirstRoundCounting)
-    { out1 <<"Counting ss part "<< this->theDynkinDiagram.DebugString;
-      out2 <<"# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
+    { out1 << "Counting ss part " << this->theDynkinDiagram.DebugString;
+      out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasCounted++;
-      out3 <<owner.NumSubalgebrasCounted <<" total subalgebras counted";
+      out3 << owner.NumSubalgebrasCounted << " total subalgebras counted";
     }
     else
-    { out1<<"Computing ss part "<< this->theDynkinDiagram.DebugString;
-      out2 << this->NumNilradicalsAllowed<<" Nilradicals processed out of "<< this->NumTotalSubalgebras;
+    { out1 << "Computing ss part " << this->theDynkinDiagram.DebugString;
+      out2 << this->NumNilradicalsAllowed << " Nilradicals processed out of " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasProcessed++;
-      out3<<  "Total # subalgebras processed: "<< owner.NumSubalgebrasProcessed;
-      out4<< "Num cone condition failures: " << owner.NumConeConditionFailures;
-      out5<<"Num failures to find l-prohibiting relations: " <<owner.theBadRelations.size;
+      out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
+      out4 << "Num cone condition failures: " << owner.NumConeConditionFailures;
+      out5 << "Num failures to find l-prohibiting relations: " << owner.theBadRelations.size;
       theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
       theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
     }
@@ -14660,9 +14660,9 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& b
   std::stringstream* tempOut;
   tempOut=&out1;
   for (int i=0; i<=RecursionDepth; i++)
-  { (*tempOut)<<bufferSAs.TheObjects[i].theDynkinDiagram.DebugString;
+  { (*tempOut) << bufferSAs.TheObjects[i].theDynkinDiagram.DebugString;
     if (i!=RecursionDepth)
-      (*tempOut)<< ": ";
+      (*tempOut) << ": ";
     if (i==4)
       tempOut=&out2;
     if (i==6)
@@ -15421,7 +15421,7 @@ void DynkinDiagramRootSubalgebra::ElementToString(std::string& output, bool Comb
 void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGroup& theWeyl)
 { assert(indexComponent<this->SimpleBasesConnectedComponents.size);
   std::stringstream out;
-  out <<"$";
+  out << "$";
   roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
   List<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
   if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
@@ -15463,7 +15463,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, WeylGr
     for (int i=0; i<3; i++)
       currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
     if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
-      out<< "D_" << currentComponent.size;
+      out << "D_" << currentComponent.size;
     else
     {//type E
       assert(indicesLongComponents.size==2);
@@ -15716,7 +15716,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
 void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables)
 { int theDimension = this->AmbientWeyl.KillingFormMatrix.NumRows;
   std::stringstream out;
-  out<<this->DebugString<<"\n\n";
+  out << this->DebugString << "\n\n";
   root tempRoot;
   tempRoot.Assign(this->SimpleBasisK.TheObjects[0]);
   this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
@@ -18162,12 +18162,12 @@ void SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bo
   roots theBasis;
   theBasis.SetSizeExpandOnTopNoObjectInit(theDimension);
   if (usePNG)
-    outNotation<<"\\begin{tabular}{l}";
+    outNotation << "\\begin{tabular}{l}";
   for (int i=0; i<theDimension; i++)
   { theBasis.TheObjects[i].MakeZero(theDimension);
     theBasis.TheObjects[i].TheObjects[i].MakeOne();
-    outNotation <<theBasis.TheObjects[i].ElementToString();
-    outNotation <<"$=:\\alpha_{"<< i+1<<"}$ \\\\";
+    outNotation << theBasis.TheObjects[i].ElementToString();
+    outNotation << "$=:\\alpha_{" << i+1 << "}$ \\\\";
   }
   root tempRoot;
   for (int i=theDimension; i<numRoots; i++)

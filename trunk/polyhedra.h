@@ -6197,6 +6197,7 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); };
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
+  void ElementToStringLieBracket(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables);
   std::string ElementToStringLieBracketPairing();
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){  this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); };
   bool flagAnErrorHasOccurredTimeToPanic;
@@ -6228,6 +6229,7 @@ public:
   int RootIndexToGeneratorIndex(int theIndex);
   int IndexToRootIndex(int theRootIndex);
   std::string getLetterFromGeneratorIndex(int theIndex, bool useLatex);
+  //std::string getStringFromOppositeRoots(root& theRoot, bool useLatex);
   void ComputeLiebracketPairingIndices();
   void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
@@ -6235,7 +6237,7 @@ public:
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
   //then the below function computes n_{-\epsilon, -\zeta}
   void LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output);
-  void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta );
+  void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
   void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void ExploitTheCyclicTrick(int i, int j, int k);
@@ -6346,9 +6348,11 @@ public:
   void AssignElementCartan(const root& input, SemisimpleLieAlgebra& theOwner);
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& theOwner);
   void Nullify(SemisimpleLieAlgebra* theOwner);
-  void AssignRational(const Rational& coeff, SemisimpleLieAlgebra& theOwner);
+  void MakeConst(const Rational& coeff, SemisimpleLieAlgebra& theOwner);
   void Simplify();
-  void AssignInt(int coeff, SemisimpleLieAlgebra& theOwner){ Rational tempRat=coeff; this->AssignRational(tempRat, theOwner);};
+  void RaiseToPower(int thePower);
+  void LieBracketOnTheRight(const ElementUniversalEnveloping& right, ElementUniversalEnveloping& output);
+  void AssignInt(int coeff, SemisimpleLieAlgebra& theOwner){ Rational tempRat=coeff; this->MakeConst(tempRat, theOwner);};
   void operator=(const ElementUniversalEnveloping& other)
   { this->CopyFromHash(other);
     this->owner=other.owner;
@@ -6358,6 +6362,7 @@ public:
   void operator+=(const Rational& other);
   void operator-=(const ElementUniversalEnveloping& other);
   void operator*=(const ElementUniversalEnveloping& other);
+  void operator/=(const Rational& other);
   ElementUniversalEnveloping(){this->owner=0;};
 };
 
@@ -6779,6 +6784,7 @@ class ParserNode
   int indexParent;
   int Operation; //using tokenTypes from class Parser
   int ExpressionType;
+  int ErrorType;
   bool Evaluated;
   List<int> children;
   int intValue;
@@ -6793,6 +6799,7 @@ class ParserNode
     this->Evaluated= other.Evaluated;
     this->children.CopyFromBase(other.children);
     this->intValue=other.intValue;
+    this->ErrorType=other.ErrorType;
     this->rationalValue=other.rationalValue;
     this->WeylAlgebraElement=other.WeylAlgebraElement;
     this->UEElement=other.UEElement;
@@ -6802,17 +6809,24 @@ class ParserNode
   bool ConvertToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex,  typeRational, typeLieAlgebraElement, typeUEelement, typeWeylAlgebraElement, typeError};
+  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex};
   void InitForAddition();
   void InitForMultiplication();
-  std::string ElementToStringValueOnly();
+  std::string ElementToStringValueOnly(bool useHtml);
+  std::string ElementToStringErrorCode(bool useHtml);
+  void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;};
+  void SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError;};
+  void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
   void Evaluate(GlobalVariables& theGlobalVariables);
   void EvaluateTimes(GlobalVariables& theGlobalVariables);
+  void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
-  void EvaluateDiv(GlobalVariables& theGlobalVariables);
+  void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
+  bool AllChildrenAreOfDefinedNonErrorType();
   ParserNode();
 };
 
@@ -6827,8 +6841,8 @@ public:
   int DefaultWeylRank;
   ParserNode theValue;
   SemisimpleLieAlgebra theLieAlgebra;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, theGlobalVariables); };
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
+  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); };
+  void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH
@@ -6861,7 +6875,9 @@ public:
   void Own(int indexParent, int indexChild1);
   void ExtendOnTop(int numNew);
   void TokenToStringStream(std::stringstream& out, int theToken);
+  void AddDivideOnTop();
   void AddPlusOnTop();
+  void AddPowerOnTop();
   void AddMinusOnTop();
   void AddUnaryMinusOnTop();
   void AddTimesOnTop();
@@ -7171,6 +7187,7 @@ public:
   static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
   static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
   static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
+  static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
   static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakePFAndChamberReportFromComputationSetup(ComputationSetup& input);
   static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);

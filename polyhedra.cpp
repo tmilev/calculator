@@ -54,9 +54,9 @@ bool Stop()
 }
 
 int ParallelComputing::GlobalPointerCounter=0;
-Integer Integer::TheRingUnit  (1) ;
-Integer Integer::TheRingMUnit (-1);
-Integer Integer::TheRingZero  (0) ;
+Integer Integer::TheRingUnit(1) ;
+Integer Integer::TheRingMUnit(-1);
+Integer Integer::TheRingZero(0) ;
 Integer& IOne =Integer::TheRingUnit ;
 Integer& IMOne=Integer::TheRingMUnit;
 Integer& IZero=Integer::TheRingZero ;
@@ -162,7 +162,7 @@ template < > int HashedList<affineHyperplane>::PreferredHashSize=100;
 template < > int HashedList<coneRelation>::PreferredHashSize=1000;
 template < > int HashedList<slTwo>::PreferredHashSize=1000;
 template < > int HashedList<ElementSimpleLieAlgebra>::PreferredHashSize=100;
-template < > int HashedList<MonomialUniversalEnveloping>::PreferredHashSize=100;
+template < > int HashedList<MonomialUniversalEnveloping>::PreferredHashSize=10000;
 
 template < > int List<affineCone>::ListActualSizeIncrement=1;
 template < > int List<CombinatorialChamber*>::ListActualSizeIncrement=1000;
@@ -20309,7 +20309,7 @@ void minimalRelationsProverStates::ReduceMemoryUse(GlobalVariables& theGlobalVar
   { this->TheObjects[i].ReduceMemoryUse();
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
-      out <<"Releasing memory " << i+1 << " out of "<< this->size<<" states";
+      out << "Releasing memory " << i+1 << " out of " << this->size << " states";
       theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
       theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -20345,7 +20345,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
   minimalRelationsProverState newState;
   int theDimension=theWeyl.SymmetricCartan.NumRows;
   Rational tempRat;
-   if (!roots::ConesIntersect( theGlobalVariables, this->TheObjects[index].PartialRelation.Alphas, this->TheObjects[index].NilradicalRoots, theDimension))
+   if (!roots::ConesIntersect(theGlobalVariables, this->TheObjects[index].PartialRelation.Alphas, this->TheObjects[index].NilradicalRoots, theDimension))
   { root NormalSeparatingCones;
     bool oneBetaIsPositive = this->GetNormalSeparatingConesReturnTrueIfOneBetaIsPositive(index, NormalSeparatingCones, theWeyl, theGlobalVariables);
     this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);
@@ -20379,7 +20379,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
           if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
           { theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
             std::stringstream out3;
-            out3<< counter+1 <<" out of  "<< NumNormalsToCheck<<" normals tested, best hit "<<minNumChildren<<" children";
+            out3 << counter+1 << " out of " << NumNormalsToCheck << " normals tested, best hit " << minNumChildren << " children";
             theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
             theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
           }
@@ -20395,7 +20395,7 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
 //  this->TheObjects[index].ComputeDebugString(theWeyl, theGlobalVariables);
 }
 
-void minimalRelationsProverStates::TheFullRecursion(  WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
+void minimalRelationsProverStates::TheFullRecursion(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { while (this->theIndexStack.size>0)
   { this->RecursionStep(theWeyl, theGlobalVariables);
     if (this->theIndexStack.size>0)
@@ -20406,7 +20406,7 @@ void minimalRelationsProverStates::TheFullRecursion(  WeylGroup& theWeyl, Global
   }
 }
 
-void minimalRelationsProverStatesFixedK::TheFullRecursionFixedK (WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
+void minimalRelationsProverStatesFixedK::TheFullRecursionFixedK(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { while (this->theIndexStack.size>0)
   { this->RecursionStepFixedK(theWeyl, theGlobalVariables);
     if (this->theIndexStack.size>0)
@@ -20415,7 +20415,7 @@ void minimalRelationsProverStatesFixedK::TheFullRecursionFixedK (WeylGroup& theW
   }
 }
 
-void minimalRelationsProverStates::RecursionStep(  WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
+void minimalRelationsProverStates::RecursionStep(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
 { if (this->theIndexStack.size<1)
     return;
   int currentIndex=*this->theIndexStack.LastObject();

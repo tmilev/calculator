@@ -77,7 +77,9 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
-  //civilizedInput="[c,g_7]";
+  civilizedInput="c*c";
+  theParser.DefaultWeylRank=4;
+  theParser.DefaultWeylLetter='F';
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
 

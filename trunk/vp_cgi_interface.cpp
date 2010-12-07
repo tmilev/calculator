@@ -104,7 +104,7 @@ int main(int argc, char **argv)
         vpFileName=inputPath;
         vpFileName.append("vector_partition.tex");
         CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(vpFile, vpFileName, false, true, false);
-        vpFile<< theComputationSetup.theOutput.DebugString;
+        vpFile << theComputationSetup.theOutput.DebugString;
         vpFile.close();
         latexCommand2.clear();
         latexCommand2.append("pdflatex -output-directory=");

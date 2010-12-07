@@ -5464,7 +5464,7 @@ class WeylGroup: public HashedList<ElementWeylGroup>
 {
 public:
   std::string DebugString;
-  MatrixLargeRational KillingFormMatrix;
+  MatrixLargeRational SymmetricCartan;
   root rho;
   char WeylLetter;
   Rational LongRootLength;
@@ -5523,15 +5523,15 @@ public:
   void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
   void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
-  bool IsPositiveOrPerpWRTh(const root& input, const root& theH){ return this->RootScalarKillingFormMatrixRoot(input, theH).IsNonNegative(); };
+  bool IsPositiveOrPerpWRTh(const root& input, const root& theH){ return this->RootScalarCartanRoot(input, theH).IsNonNegative(); };
   void ReflectBetaWRTAlpha(root& alpha, root& Beta, bool RhoAction, root& Output);
   bool IsRegular(root& input, int* indexFirstPerpendicularRoot);
-  void RootScalarKillingFormMatrixRoot(const root& r1, const root& r2, Rational& output);
+  void RootScalarCartanRoot(const root& r1, const root& r2, Rational& output);
   //the below functions perturbs input so that inputH has non-zero scalar product with roots of the root system,
   //without changing the inputH-sign of any root that had a non-zero scalar product to begin with
   void PerturbWeightToRegularWRTrootSystem(const root& inputH, root& output);
   bool IsDominantWeight(root& theWeight);
-  Rational RootScalarKillingFormMatrixRoot(const root& r1, const root& r2){ Rational tempRat; this->RootScalarKillingFormMatrixRoot(r1, r2, tempRat); return tempRat; };
+  Rational RootScalarCartanRoot(const root& r1, const root& r2){ Rational tempRat; this->RootScalarCartanRoot(r1, r2, tempRat); return tempRat; };
   void TransformToSimpleBasisGenerators(roots& theGens);
   void TransformToSimpleBasisGeneratorsWRTh(roots& theGens, root& theH);
   int length(int index);
@@ -6197,7 +6197,7 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); };
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
-  void ElementToStringLieBracket(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables);
+  void ElementToStringLieBracket(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables);
   std::string ElementToStringLieBracketPairing();
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){  this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); };
   bool flagAnErrorHasOccurredTimeToPanic;
@@ -6226,6 +6226,7 @@ public:
   Matrix<int> theLiebracketPairingIndices;
   MatrixLargeRational theLiebracketPairingCoefficients;
   List<int> OppositeRootSpaces;
+  int RootToIndexInUE(const root& input){ return this->RootIndexToGeneratorIndex(this->theWeyl.RootSystem.IndexOfObjectHash(input));};
   int RootIndexToGeneratorIndex(int theIndex);
   int IndexToRootIndex(int theRootIndex);
   std::string getLetterFromGeneratorIndex(int theIndex, bool useLatex);
@@ -6347,10 +6348,12 @@ public:
   void AddMonomial(const MonomialUniversalEnveloping& input);
   void AssignElementCartan(const root& input, SemisimpleLieAlgebra& theOwner);
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& theOwner);
+  void MakeOneGeneratorCoeffOne(root& rootSpace, SemisimpleLieAlgebra& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), theOwner);};
   void Nullify(SemisimpleLieAlgebra* theOwner);
   void MakeConst(const Rational& coeff, SemisimpleLieAlgebra& theOwner);
   void Simplify();
   void RaiseToPower(int thePower);
+  void MakeCasimir(SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheRight(const ElementUniversalEnveloping& right, ElementUniversalEnveloping& output);
   void AssignInt(int coeff, SemisimpleLieAlgebra& theOwner){ Rational tempRat=coeff; this->MakeConst(tempRat, theOwner);};
   void operator=(const ElementUniversalEnveloping& other)
@@ -6363,6 +6366,7 @@ public:
   void operator-=(const ElementUniversalEnveloping& other);
   void operator*=(const ElementUniversalEnveloping& other);
   void operator/=(const Rational& other);
+  void operator*=(const Rational& other);
   ElementUniversalEnveloping(){this->owner=0;};
 };
 
@@ -6545,7 +6549,7 @@ public:
   { this->flagComputationIsInitialized=false;
     MinNumDifferentBetas=-1;
     this->flagSearchForOptimalSeparatingRoot=true;
-    this->theWeylGroup.KillingFormMatrix.NumRows=-1;
+    this->theWeylGroup.SymmetricCartan.NumRows=-1;
   };
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
@@ -6845,7 +6849,7 @@ public:
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -7189,6 +7193,7 @@ public:
   static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
   static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
   static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
+  static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   static void MakePFAndChamberReportFromComputationSetup(ComputationSetup& input);
   static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
@@ -7199,6 +7204,7 @@ public:
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static bool CheckForInputSanity(ComputationSetup& input);
+  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output);
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true); };

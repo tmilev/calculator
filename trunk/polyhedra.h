@@ -6325,10 +6325,10 @@ public:
   void SubTwoConsequtiveGeneratorsForOne(int theIndex, ElementUniversalEnveloping& output);
   MonomialUniversalEnveloping(){this->owner=0;};
   bool operator==(const MonomialUniversalEnveloping& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;};
-  void operator=(const MonomialUniversalEnveloping& other)
-  { this->generatorsIndices=other.generatorsIndices;
-    this->Powers= other.Powers;
-    this->Coefficient= other.Coefficient;
+  inline void operator=(const MonomialUniversalEnveloping& other)
+  { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
+    this->Powers.CopyFromBase(other.Powers);
+    this->Coefficient.Assign(other.Coefficient);
     this->owner=other.owner;
   };
 };

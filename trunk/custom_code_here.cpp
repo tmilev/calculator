@@ -2530,8 +2530,8 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     tempMat.elements[theDimension][theDimension]=0;
     for (int i=0; i<epsCoords.size; i++)
     { bool isShort=false;
-      int firstIndex;
-      int secondIndex;
+      int firstIndex=-1;
+      int secondIndex=-1;
       bool firstSignIsPositive=true;
       bool secondSignIsPositive=true;
       root& currentRoot=epsCoords.TheObjects[i];
@@ -2592,8 +2592,8 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     tempMat.MakeIdMatrix(theDimension*2);
     for (int i=0; i<epsCoords.size; i++)
     { bool isLong=false;
-      int firstIndex;
-      int secondIndex;
+      int firstIndex=-1;
+      int secondIndex=-1;
       bool firstSignIsPositive=true;
       bool secondSignIsPositive=true;
       root& currentRoot=epsCoords.TheObjects[i];
@@ -2619,7 +2619,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
       if (!isLong)
       { bool signsAreDifferent=(firstSignIsPositive!=secondSignIsPositive);
         if (signsAreDifferent)
-        { int positiveIndex, negativeIndex;
+        { int positiveIndex=-1, negativeIndex=-1;
           if (firstSignIsPositive)
           { positiveIndex= firstIndex;
             negativeIndex=secondIndex;
@@ -3385,6 +3385,7 @@ int Lattice::GetRankElementRepresentedBy(root& elementRepresentative)
 std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables)
 { this->theLieAlgebra.ComputeChevalleyConstants(this->DefaultWeylLetter, this->DefaultWeylRank, theGlobalVariables);
   this->Parse(input);
+  this->ComputeDebugString(theGlobalVariables);
   this->Evaluate(theGlobalVariables);
   this->theValue.UEElement.Simplify();
   return this->theValue.ElementToStringValueOnly(true);
@@ -4372,9 +4373,19 @@ void MonomialUniversalEnveloping::SwitchFirstPowerTwoConsequtiveIndices(int theI
 void MonomialUniversalEnveloping::MultiplyByNoSimplify(const MonomialUniversalEnveloping& other)
 { this->generatorsIndices.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
   this->Powers.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
-  for (int i=0; i<other.generatorsIndices.size; i++)
-    this->MultiplyByGeneratorPowerOnTheRight(other.generatorsIndices.TheObjects[i], other.Powers.TheObjects[i]);
   this->Coefficient.MultiplyBy(other.Coefficient);
+  if (other.generatorsIndices.size==0)
+    return;
+  int firstIndex=other.generatorsIndices.TheObjects[0];
+  int i=1;
+  if (firstIndex==*this->generatorsIndices.LastObject())
+    *this->generatorsIndices.LastObject()+=other.Powers.TheObjects[0];
+  else
+    i=0;
+  for (; i<other.generatorsIndices.size; i++)
+  { this->Powers.AddObjectOnTop(other.Powers.TheObjects[i]);
+    this->generatorsIndices.AddObjectOnTop(other.generatorsIndices.TheObjects[i]);
+  }
 }
 
 void MonomialUniversalEnveloping::SubTwoConsequtiveGeneratorsForOne(int theIndex, ElementUniversalEnveloping& output)
@@ -4699,13 +4710,25 @@ void ElementUniversalEnveloping::operator*=(const ElementUniversalEnveloping& ot
   ElementUniversalEnveloping output;
   output.Nullify(this->owner);
   MonomialUniversalEnveloping tempMon;
+  int sizeOriginal=0, powerOriginal=0;
+  Rational CoeffOriginal;
   for (int i=0; i<this->size; i++)
+  { tempMon=this->TheObjects[i];
+    sizeOriginal=tempMon.generatorsIndices.size;
+    if (sizeOriginal>0)
+      powerOriginal=*tempMon.Powers.LastObject();
+    CoeffOriginal.Assign(tempMon.Coefficient);
     for(int j=0; j<other.size; j++)
-    { tempMon=this->TheObjects[i];
+    { tempMon.generatorsIndices.size=sizeOriginal;
+      tempMon.Powers.size=sizeOriginal;
+      if (sizeOriginal>0)
+        *tempMon.Powers.LastObject()=powerOriginal;
+      tempMon.Coefficient.Assign(CoeffOriginal);
       tempMon.MultiplyByNoSimplify(other.TheObjects[j]);
       //tempMon.ComputeDebugString();
       output.AddMonomialNoCleanUpZeroCoeff(tempMon);
     }
+  }
   *this=output;
 }
 

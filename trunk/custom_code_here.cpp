@@ -3431,6 +3431,7 @@ void Parser::ParserInit(const std::string& input)
       case 'g': this->TokenBuffer.AddObjectOnTop(Parser::tokenG); this->ValueBuffer.AddObjectOnTop(0); break;
       case 'h': this->TokenBuffer.AddObjectOnTop(Parser::tokenH); this->ValueBuffer.AddObjectOnTop(0); break;
       case 'c': this->TokenBuffer.AddObjectOnTop(Parser::tokenC); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'i': this->TokenBuffer.AddObjectOnTop(Parser::tokenI); this->ValueBuffer.AddObjectOnTop(0); break;
       default: this->TokenBuffer.AddObjectOnTop(Parser::tokenEmpty); this->ValueBuffer.AddObjectOnTop(0); break;
     }
   }
@@ -3537,7 +3538,7 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddIntegerOnTopConvertToExpression();
     return true;
   }
-  if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC)
+  if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC || tokenLast==tokenI)
   { this->AddLetterExpressionOnTop();
     return true;
   }
@@ -4102,6 +4103,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenH: out << "h"; break;
     case Parser::tokenPower: out << "^"; break;
     case Parser::tokenC: out << "c"; break;
+    case Parser::tokenI: out << "i"; break;
     default: out << "?"; break;
   }
 }
@@ -4881,6 +4883,16 @@ void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool u
     //  out << "\\end{tabular}\n\n\n" << tempHeader;
   }
   out << endMath;
+  if (usePNG)
+  { out << "\\begin{tabular}{cc}\\hline generator & corresponding root space\\\\\\hline";
+    for (int i=0; i<this->theWeyl.RootSystem.size; i++)
+    { int tempI=i+1;
+      if (tempI>this->theWeyl.RootsOfBorel.size)
+        tempI=-tempI+theWeyl.RootsOfBorel.size;
+      out << "$g_{" << tempI << "}$&" << this->theWeyl.RootSystem.TheObjects[i].ElementToString() << "\\\\";
+    }
+    out << "\\end{tabular}";
+  }
   output=out.str();
 }
 

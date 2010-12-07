@@ -45,59 +45,106 @@ int main(int argc, char **argv)
 //		inputString=::getenv("QUERY_STRING");
 #endif
 	}
+	getPath(argv[0], inputPath);
 //	inputString="textInput=+asf&buttonGo=Go";
+  //inputString="weylLetterInput=A&weyRankInput=1&textInput=&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><head><title>Vector partition calculator</title>";
   std::cout << "<script src=\"../htdocs/easy/load.js\"></script></head> ";
   std::cout << "<body>";
-
-  std::string civilizedInput=inputString;
-  std::string inputStringRaw=inputString;
-
-  int tempInt=(signed)civilizedInput.size();
-  int numNonRelevantStart=10;
-  int civilizedLength=0;
-  for (; civilizedLength<tempInt; civilizedLength++)
-    if (civilizedLength+numNonRelevantStart<tempInt)
-    { if (civilizedInput[civilizedLength+numNonRelevantStart]!='&')
-        civilizedInput[civilizedLength]=civilizedInput[civilizedLength+numNonRelevantStart];
-      else
-        break;
-    }
-  civilizedInput.resize(civilizedLength);
-  if (civilizedInput!="")
-    CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
+//  std::cout << inputString;
+  List<std::string> inputStrings;
+  CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
+  inputStrings.SetSizeExpandOnTopNoObjectInit(3);
+  std::string& civilizedInput= inputStrings.TheObjects[2];
+  std::string& inputRankString = inputStrings.TheObjects[1];
+  std::string& inputWeylString = inputStrings.TheObjects[0];
+  CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   Parser theParser;
   GlobalVariables theGlobalVariables;
-  theParser.DefaultWeylLetter='B';
-  theParser.DefaultWeylRank=3;
+  if (inputWeylString!="")
+    theParser.DefaultWeylLetter=inputWeylString[0];
+  else
+    theParser.DefaultWeylLetter='A';
+  if (inputRankString!="")
+  { std::stringstream tempStream;
+    tempStream << inputRankString;
+    tempStream.seekg(0);
+    tempStream >> theParser.DefaultWeylRank;
+  } else
+    theParser.DefaultWeylRank=1;
+  CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
-//  civilizedInput= "[g_4h_2, 6h_1]";
-//  civilizedInput= "[5g_2,6h_1g_2+5]";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
-
+  //civilizedInput="[c,g_7]";
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
+
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
+  if (civilizedInput!="")
+    CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
-  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n";
+  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
+  std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
+  std::cout << "<input type=\"text\" size =\"1\" name=\"weyRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>\n<br>\n";
   std::cout << "<input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" value=\"" << civilizedInput << "\"></input>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
   std::cout << "<br>result: " << theResult;
-  std::cout <<"</td>";
+  std::cout << "</td>";
   std::cout << " <td></td>\n<td>\n";
-  theParser.theLieAlgebra.ElementToStringLieBracket(tempS, true, true, theGlobalVariables);
-  std::cout << tempS;
-
-  std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputStringRaw;
-  std::cout << "<br>civilized input string: " << civilizedInput;
+  std::stringstream tempStream;
+  inputPath.append("../htdocs/");
+  tempStream  << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "table";
+  std::string fileNameLieBracketNoEnding=tempStream.str();
+  std::string fileNameLieBracketFullPathNoEnding=inputPath;
+  fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
+  std::cout << "<img src=\"/htdocs/" << fileNameLieBracketNoEnding << ".png\"></img>";
+  List<std::string> LatexCommands;
+  std::string latexCommandTemp;
+  std::string fileNameLieBracketFullPathPNGEnding;
+  fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
+  fileNameLieBracketFullPathPNGEnding.append(".png");
+  LatexCommands.size=0;
+  if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
+  { std::cout << "<br>the file: " << fileNameLieBracketFullPathNoEnding << " does not exist<br>";
+    std::fstream lieBracketFile;
+    std::string tempFileName= fileNameLieBracketFullPathNoEnding;
+    tempFileName.append(".tex");
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
+    theParser.theLieAlgebra.ElementToStringLieBracket(tempS, false, true, true, theGlobalVariables);
+    lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    lieBracketFile.close();
+    std::stringstream tempStreamLatex, tempStreamPNG;
+    tempStreamLatex << "latex  -output-directory=" << inputPath << " " << inputPath << fileNameLieBracketNoEnding << ".tex";
+    latexCommandTemp=tempStreamLatex.str();
+    LatexCommands.AddObjectOnTop(latexCommandTemp);
+    tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
+    latexCommandTemp= tempStreamPNG.str();
+    LatexCommands.AddObjectOnTop(latexCommandTemp);
+  }
+  std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
+  std::cout << "<br>civilized input strings: " << civilizedInput << "<br> chopped strings: <br>";
+  for (int i=0; i<inputStrings.size; i++)
+  { std::cout << "string " << i << ": " << inputStrings.TheObjects[i] << "<br>";
+  }
+  std::cout << "system commands: <br>";
+  for (int i=0; i<LatexCommands.size; i++)
+  { std::cout << LatexCommands.TheObjects[i] << "<br>";
+  }
   std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
   std::cout << "\n</td></table>";
   std::cout << "</body></html>";
+  std::string command1, command2;
+  std::cout << "<!--";
+  std::cout.flush();
+  for (int i=0; i<LatexCommands.size; i++)
+    system(LatexCommands.TheObjects[i].c_str());
+
+  std::cout << "-->";
 	return 0;   // Toavoid Apache errors.
 }
 
@@ -117,6 +164,23 @@ void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, 
     }
   }
   output=out.str();
+}
+
+void CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output)
+{ int inputLength= (signed) input.size();
+  bool reading=false;
+  output.SetSizeExpandOnTopNoObjectInit(1);
+  for (int i=0; i<inputLength; i++)
+  { if (input[i]=='=')
+      reading=!reading;
+    if (input[i]=='&')
+    { output.SetSizeExpandOnTopNoObjectInit(output.size+1);
+      output.LastObject()->reserve(1000);
+      reading=false;
+    }
+    if (input[i]!='=' && input[i]!='&' && reading)
+      output.LastObject()->push_back(input[i]);
+  }
 }
 
 bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
@@ -173,49 +237,4 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
     return true;
   }
   return false;
-}
-
-void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  std::string tempS;
-  root tempRoot;
-  std::string beginMath="<DIV class=\"math\" scale=\"50\">";
-  std::string endMath ="</DIV>";
-  int numRoots=this->theWeyl.RootSystem.size;
-  int theDimension = this->theWeyl.KillingFormMatrix.NumRows;
-//  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
-
-  out << beginMath << "\\begin{array}{";
-  ElementUniversalEnveloping tempElt1, tempElt2, tempElt3;
-  for (int i=0; i<numRoots+theDimension+1; i++)
-    out << "c";
-  out << "}[\\bullet, \\bullet]\n";
-  for (int i=0; i<this->theLiebracketPairingCoefficients.NumRows; i++)
-  { tempElt1.MakeOneGeneratorCoeffOne(i, *this);
-    tempElt1.ElementToString(tempS);
-    out << " & " << tempS;
-  }
-  out << "\\\\\n";
-  Rational tempRat;
-  for (int i=0; i<this->theLiebracketPairingCoefficients.NumRows; i++)
-  { tempElt1.MakeOneGeneratorCoeffOne(i, *this);
-    tempElt1.ElementToString(tempS);
-    out << tempS;
-    for (int j=0; j<this->theLiebracketPairingCoefficients.NumRows; j++)
-    { tempElt2.MakeOneGeneratorCoeffOne(j, *this);
-      tempElt1.LieBracketOnTheRight(tempElt2, tempElt3);
-      tempElt3.Simplify();
-      tempElt3.ElementToString(tempS);
-      out << "& " << tempS;
-    }
-    out << "\\\\\n";
-  }
-  out << "\\end{array}" << endMath;
-  output=out.str();
-}
-
-void CGIspecificRoutines::ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput)
-{ for (int i=0; i<(signed)inputOutput.size(); i++)
-    if (inputOutput[i]=='=' || inputOutput[i]=='&')
-      inputOutput[i]=' ';
 }

@@ -5464,7 +5464,7 @@ class WeylGroup: public HashedList<ElementWeylGroup>
 {
 public:
   std::string DebugString;
-  MatrixLargeRational SymmetricCartan;
+  MatrixLargeRational CartanSymmetric;
   root rho;
   char WeylLetter;
   Rational LongRootLength;
@@ -6231,7 +6231,6 @@ public:
   int IndexToRootIndex(int theRootIndex);
   std::string getLetterFromGeneratorIndex(int theIndex, bool useLatex);
   //std::string getStringFromOppositeRoots(root& theRoot, bool useLatex);
-  void ComputeLiebracketPairingIndices();
   void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
@@ -6272,6 +6271,8 @@ public:
   void Assign(const SemisimpleLieAlgebra& other);
 };
 
+class Parser;
+
 class HomomorphismSemisimpleLieAlgebra
 {
 public:
@@ -6285,6 +6286,7 @@ public:
   List<ElementSimpleLieAlgebra> theChevalleyGenerators;
   std::string DebugString;
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
+  void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);};
   std::string ElementToString(GlobalVariables& theGlobalVariables){ std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS; };
   bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables);
@@ -6312,6 +6314,12 @@ public:
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
   void Nullify(SemisimpleLieAlgebra& theOwner);
   int HashFunction() const;
+  int GetDegree()
+  { int result=0;
+    for (int i=0; i<this->generatorsIndices.size; i++)
+      result+=this->Powers.TheObjects[i];
+    return result;
+  };
   void MakeConst(int theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
   void MakeConst(const Rational& theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
   //we assume the standard order for being simplified to be Descending.
@@ -6341,6 +6349,7 @@ private:
   friend class MonomialUniversalEnveloping;
 public:
   std::string DebugString;
+  ElementUniversalEnveloping(const ElementUniversalEnveloping& other){this->operator=(other);};
   void ElementToString(std::string& output);
   std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
   void ComputeDebugString(){this->ElementToString(this->DebugString);};
@@ -6350,6 +6359,7 @@ public:
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& theOwner);
   void MakeOneGeneratorCoeffOne(root& rootSpace, SemisimpleLieAlgebra& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), theOwner);};
   void Nullify(SemisimpleLieAlgebra* theOwner);
+  bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
   void MakeConst(const Rational& coeff, SemisimpleLieAlgebra& theOwner);
   void Simplify();
   void RaiseToPower(int thePower);
@@ -6549,7 +6559,7 @@ public:
   { this->flagComputationIsInitialized=false;
     MinNumDifferentBetas=-1;
     this->flagSearchForOptimalSeparatingRoot=true;
-    this->theWeylGroup.SymmetricCartan.NumRows=-1;
+    this->theWeylGroup.CartanSymmetric.NumRows=-1;
   };
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
@@ -6864,9 +6874,8 @@ public:
   void PopTokenAndValueStacksLast(){ this->ValueStack.PopLastObject(); this->TokenStack.PopLastObject();};
   void ParserInit(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
-  void ParseEvaluateAndAssign(const std::string& input, ElementSimpleLieAlgebra& output, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
-  void ParseEvaluateAndAssign(const std::string& input, ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables);
+  ElementUniversalEnveloping ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables);
   void Parse(const std::string& input);
   void ParseNoInit(int indexFrom, int indexTo);
   void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);

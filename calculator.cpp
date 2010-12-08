@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	}
 	getPath(argv[0], inputPath);
 //	inputString="textInput=+asf&buttonGo=Go";
-  //inputString="weylLetterInput=A&weyRankInput=1&textInput=&buttonGo=Go";
+//  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><head><title>Vector partition calculator</title>";
@@ -77,16 +77,14 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
-  civilizedInput="c*c";
-  theParser.DefaultWeylRank=4;
-  theParser.DefaultWeylLetter='F';
+  //civilizedInput="c*c";
+  //theParser.DefaultWeylRank=3;
+  //theParser.DefaultWeylLetter='B';
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
 
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
-  if (civilizedInput!="")
-    CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
   std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
@@ -138,6 +136,8 @@ int main(int argc, char **argv)
   { std::cout << LatexCommands.TheObjects[i] << "<br>";
   }
   std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
+//  theParser.theLieAlgebra.ComputeDebugString();
+//  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();
   std::cout << "\n</td></table>";
   std::cout << "</body></html>";
   std::string command1, command2;
@@ -178,6 +178,7 @@ void CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(const std::string&
     if (input[i]=='&')
     { output.SetSizeExpandOnTopNoObjectInit(output.size+1);
       output.LastObject()->reserve(1000);
+      *output.LastObject()="";
       reading=false;
     }
     if (input[i]!='=' && input[i]!='&' && reading)

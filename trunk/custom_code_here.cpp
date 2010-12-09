@@ -3390,7 +3390,7 @@ ElementUniversalEnveloping Parser::ParseAndCompute(const std::string& input, Glo
 }
 
 std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables)
-{ this->theLieAlgebra.ComputeChevalleyConstants(this->DefaultWeylLetter, this->DefaultWeylRank, theGlobalVariables);
+{ this->theHmm.theRange.ComputeChevalleyConstants(this->DefaultWeylLetter, this->DefaultWeylRank, theGlobalVariables);
   this->Parse(input);
   this->ComputeDebugString(theGlobalVariables);
   this->Evaluate(theGlobalVariables);
@@ -3439,7 +3439,7 @@ void Parser::ParserInit(const std::string& input)
       case 'g': this->TokenBuffer.AddObjectOnTop(Parser::tokenG); this->ValueBuffer.AddObjectOnTop(0); break;
       case 'h': this->TokenBuffer.AddObjectOnTop(Parser::tokenH); this->ValueBuffer.AddObjectOnTop(0); break;
       case 'c': this->TokenBuffer.AddObjectOnTop(Parser::tokenC); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'i': this->TokenBuffer.AddObjectOnTop(Parser::tokenI); this->ValueBuffer.AddObjectOnTop(0); break;
+      case 'i': this->TokenBuffer.AddObjectOnTop(Parser::tokenMap); this->ValueBuffer.AddObjectOnTop(0); break;
       default: this->TokenBuffer.AddObjectOnTop(Parser::tokenEmpty); this->ValueBuffer.AddObjectOnTop(0); break;
     }
   }
@@ -3527,6 +3527,10 @@ bool Parser::ApplyRules(int lookAheadToken)
     this->PopTokenAndValueStacksShiftDown(this->TokenStack.size-2);
     return true;
   }
+  if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMap && lookAheadToken!=this->tokenUnderscore)
+  { this->AddMapOnTop();
+    return true;
+  }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMinus && !this->TokenProhibitsUnaryMinus(tokenThirdToLast) && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
   { this->AddUnaryMinusOnTop();
     return true;
@@ -3552,7 +3556,7 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddIntegerOnTopConvertToExpression();
     return true;
   }
-  if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC || tokenLast==tokenI)
+  if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC)
   { this->AddLetterExpressionOnTop();
     return true;
   }
@@ -3664,6 +3668,14 @@ void Parser::AddUnaryMinusOnTop()
   this->DecreaseStackSetExpressionLastNode(1);
 }
 
+void Parser::AddMapOnTop()
+{ this->ExtendOnTop(1);
+  ParserNode* theNode=this->LastObject();
+  theNode->Operation=this->tokenMap;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(1);
+}
+
 void Parser::AddTimesOnTop()
 { this->ExtendOnTop(1);
   ParserNode* theNode=this->LastObject();
@@ -3724,14 +3736,19 @@ void Parser::Evaluate(GlobalVariables& theGlobalVariables)
 void Parser::ExtendOnTop(int numNew)
 { this->SetSizeExpandOnTopNoObjectInit(this->size+numNew);
   for (int i=0; i<numNew; i++)
-    this->TheObjects[this->size-1-i].owner=this;
+  { this->TheObjects[this->size-1-i].owner=this;
+    this->TheObjects[this->size-1-i].Clear();
+  }
 }
 
 void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
 { //this->UEElement.ComputeDebugString();
   this->Evaluated=true;
   for (int i=0; i<this->children.size; i++)
-  { this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
+  { if (this->Operation==Parser::tokenMap)
+      this->ContextLieAlgebra=&this->owner->theHmm.theDomain;
+    this->owner->TheObjects[this->children.TheObjects[i]].ContextLieAlgebra=this->ContextLieAlgebra;
+    this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
     if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeError)
     { this->CopyError(this->owner->TheObjects[this->children.TheObjects[i]]);
       return;
@@ -3744,7 +3761,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenTimes: this->EvaluateTimes(theGlobalVariables); break;
     case Parser::tokenG: break;
     case Parser::tokenH: break;
-    case Parser::tokenC: this->ExpressionType=this->typeUEelement; this->UEElement.MakeCasimir(this->owner->theLieAlgebra, theGlobalVariables); break;
+    case Parser::tokenC: this->ExpressionType=this->typeUEelement; this->UEElement.MakeCasimir(*this->ContextLieAlgebra, theGlobalVariables); break;
     case Parser::tokenDivide: this->EvaluateDivide(theGlobalVariables); break;
     case Parser::tokenUnderscore: this->EvaluateUnderscore(theGlobalVariables); break;
     case Parser::tokenPartialDerivative: this->ExpressionType=this->typeWeylAlgebraElement; break;
@@ -3752,6 +3769,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenInteger: this->EvaluateInteger(theGlobalVariables); break;
     case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
+    case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
 }
@@ -3811,7 +3829,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     return;
   }
   int theIndex= rightNode.intValue;
-  int theDimension= owner->theLieAlgebra.theWeyl.CartanSymmetric.NumRows;
+  int theDimension= this->ContextLieAlgebra->theWeyl.CartanSymmetric.NumRows;
   if (leftNode.Operation==Parser::tokenH)
   { theIndex--;
     if (theIndex>=theDimension || theIndex<0)
@@ -3820,21 +3838,21 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     }
     root tempRoot;
     tempRoot.MakeEi(theDimension, theIndex);
-    this->UEElement.AssignElementCartan(tempRoot, this->owner->theLieAlgebra);
+    this->UEElement.AssignElementCartan(tempRoot, *this->ContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return;
   }
   if (leftNode.Operation==Parser::tokenG)
   { if (theIndex<0)
-      theIndex=this->owner->theLieAlgebra.theWeyl.RootsOfBorel.size -theIndex-1;
+      theIndex=this->ContextLieAlgebra->theWeyl.RootsOfBorel.size -theIndex-1;
     else
       theIndex--;
-    theIndex=this->owner->theLieAlgebra.RootIndexToGeneratorIndex(theIndex);
+    theIndex=this->ContextLieAlgebra->RootIndexToGeneratorIndex(theIndex);
     if (theIndex==-1)
     { this->SetError(this->errorBadIndex);
       return;
     }
-    this->UEElement.MakeOneGeneratorCoeffOne(theIndex, this->owner->theLieAlgebra);
+    this->UEElement.MakeOneGeneratorCoeffOne(theIndex, *this->ContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return;
   }
@@ -3854,11 +3872,11 @@ bool ParserNode::ConvertToType(int theType)
   { if (theType==this->typeRational)
       this->rationalValue= this->intValue;
     if (theType==this->typeUEelement)
-      this->UEElement.AssignInt(this->intValue, this->owner->theLieAlgebra);
+      this->UEElement.AssignInt(this->intValue, *this->ContextLieAlgebra);
   }
   if (this->ExpressionType==this->typeRational)
   { if (theType==this->typeUEelement)
-      this->UEElement.MakeConst(this->rationalValue, this->owner->theLieAlgebra);
+      this->UEElement.MakeConst(this->rationalValue, *this->ContextLieAlgebra);
   }
   this->ExpressionType=theType;
   return true;
@@ -3867,14 +3885,14 @@ bool ParserNode::ConvertToType(int theType)
 void ParserNode::InitForAddition()
 { this->intValue=0;
   this->rationalValue.MakeZero();
-  this->UEElement.Nullify(& this->owner->theLieAlgebra);
+  this->UEElement.Nullify(this->ContextLieAlgebra);
 //  this->WeylAlgebraElement.Nullify(this->owner->NumVariables);
 }
 
 void ParserNode::InitForMultiplication()
 { this->intValue=1;
   this->rationalValue=1;
-  this->UEElement.AssignInt(1, this->owner->theLieAlgebra);
+  this->UEElement.AssignInt(1, *this->ContextLieAlgebra);
 }
 
 void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren()
@@ -3973,6 +3991,23 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
   left.LieBracketOnTheRight(right, this->UEElement);
 }
 
+void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)
+{ if (!this->children.size==1)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  ParserNode& child= this->owner->TheObjects[this->children.TheObjects[0]];
+  if (child.ExpressionType!=this->typeUEelement)
+  { this->SetError(this->errorOperationByUndefinedOrErrorType);
+    return;
+  }
+  if (! this->owner->theHmm.ApplyHomomorphism(child.UEElement, this->UEElement, theGlobalVariables))
+  { this->SetError(this->errorBadIndex);
+    return;
+  }
+  this->ExpressionType=this->typeUEelement;
+}
+
 void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
@@ -4046,7 +4081,8 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
 }
 
 ParserNode::ParserNode()
-{ this->Clear();
+{ this->owner=0;
+  this->Clear();
 }
 
 void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
@@ -4086,7 +4122,7 @@ void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables&
 //  out << "\nLie algebra value: " << this->LieAlgebraValue.DebugString;
   if (!useHtml)
   { out << "\nAmbient Lie algebra details:\n";
-    out << this->theLieAlgebra.ElementToStringLieBracketPairing();
+    out << this->theHmm.theRange.ElementToStringLieBracketPairing();
   }
   output=out.str();
 }
@@ -4117,9 +4153,17 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenH: out << "h"; break;
     case Parser::tokenPower: out << "^"; break;
     case Parser::tokenC: out << "c"; break;
-    case Parser::tokenI: out << "i"; break;
+    case Parser::tokenMap: out << "i"; break;
+    case Parser::tokenMinusUnary: out << "-"; break;
     default: out << "?"; break;
   }
+}
+
+void Parser::Clear()
+{ this->theValue.Clear();
+  this->theValue.UEElement.Nullify(&this->theHmm.theRange);
+  this->TokenStack.size=0;
+  this->ValueStack.size=0;
 }
 
 void Parser::ComputeNumberOfVariablesAndAdjustNodes()
@@ -4270,12 +4314,12 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   for (int i=0; i<this->theDomain.theWeyl.RootSystem.size; i++)
   { tempElt.Nullify(this->theDomain);
     tempElt.SetCoefficient(this->theDomain.theWeyl.RootSystem.TheObjects[i], 1, this->theDomain);
-    this->theChevalleyGenerators.TheObjects[i]=tempElt;
+    this->theChevalleyGenerators.TheObjects[this->theDomain.RootIndexToGeneratorIndex(i)]=tempElt;
   }
   for (int i=0; i<theDomainDimension; i++)
   { tempElt.Nullify(this->theDomain);
     tempElt.Hcomponent.MakeEi(theDomainDimension, i);
-    this->theChevalleyGenerators.TheObjects[this->theDomain.theWeyl.RootSystem.size+i]=tempElt;
+    this->theChevalleyGenerators.TheObjects[this->theDomain.theWeyl.RootsOfBorel.size+i]=tempElt;
   }
   for (int i=0; i<this->ImagesAllChevalleyGenerators.size; i++)
   { this->theChevalleyGenerators.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(tempRoot);
@@ -4285,10 +4329,36 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   return true;
 }
 
+bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(MonomialUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables)
+{ ElementUniversalEnveloping tempElt;
+  output.Nullify(&this->theRange);
+  output.MakeConst(input.Coefficient, this->theRange);
+  for (int i=0; i<input.generatorsIndices.size; i++)
+  { if (input.generatorsIndices.TheObjects[i]>=this->ImagesAllChevalleyGenerators.size)
+      return false;
+    tempElt.AssignElementLieAlgebra(this->ImagesAllChevalleyGenerators.TheObjects[input.generatorsIndices.TheObjects[i]], this->theRange);
+    for (int j=0; j<input.Powers.TheObjects[i]; j++)
+      output*=tempElt;
+  }
+  return true;
+}
+
+bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(ElementUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables)
+{ assert(&output!=&input);
+  output.Nullify(&this->theRange);
+  ElementUniversalEnveloping tempElt;
+  for (int i=0; i<input.size; i++)
+  { if(!this->ApplyHomomorphism(input.TheObjects[i], tempElt, theGlobalVariables))
+      return false;
+    output+=tempElt;
+  }
+  return true;
+}
+
 void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables)
 { owner.DefaultWeylLetter='B';
   owner.DefaultWeylRank=3;
-  owner.theLieAlgebra.ComputeChevalleyConstants(owner.DefaultWeylLetter, owner.DefaultWeylRank, theGlobalVariables);
+  owner.theHmm.theRange.ComputeChevalleyConstants(owner.DefaultWeylLetter, owner.DefaultWeylRank, theGlobalVariables);
   this->theDomain.ComputeChevalleyConstants('G', 2, theGlobalVariables);
   this->theRange.ComputeChevalleyConstants('B', 3, theGlobalVariables);
   this->ImagesSimpleChevalleyGenerators.SetSizeExpandOnTopNoObjectInit(4);
@@ -4297,28 +4367,39 @@ void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables
   (owner.ParseAndCompute("g_{-2}", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->ImagesSimpleChevalleyGenerators.TheObjects[2]);
   (owner.ParseAndCompute("g_{-1}+g_{-3}", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->ImagesSimpleChevalleyGenerators.TheObjects[3]);
   this->ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
-  if (this->CheckClosednessLieBracket(theGlobalVariables))
-  { std::cout <<"good good good good!!!!";
-  }
+  owner.Clear();
+  //this->ComputeDebugString(true, theGlobalVariables);
+  //std::cout << this->DebugString;
+  //if (this->CheckClosednessLieBracket(theGlobalVariables))
+  //{ std::cout <<"good good good good!!!!";
+  //}
 }
 
-void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
+void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS, tempS2;
   if (this->CheckClosednessLieBracket(theGlobalVariables))
     out << "Lie bracket closes, everything is good!";
   else
     out << "The Lie bracket is BAD BAD BAD!";
+  if (useHtml)
+    out << "<br>";
   out << "Images simple Chevalley generators:\n\n";
+  if (useHtml)
+    out << "<br>";
   for (int i=0; i<this->ImagesSimpleChevalleyGenerators.size; i++)
   { this->ImagesSimpleChevalleyGenerators.TheObjects[i].ElementToString(tempS, this->theRange, false, false);
     out << tempS << "\n\n";
+    if (useHtml)
+      out << "<br>";
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i=0; i<this->theChevalleyGenerators.size; i++)
   { this->ImagesAllChevalleyGenerators.TheObjects[i].ElementToString(tempS, this->theRange, false, false);
     this->theChevalleyGenerators.TheObjects[i].ElementToString(tempS2, this->theDomain, false, false);
     out << tempS2 << " \\mapsto " << tempS << "\n\n";
+    if  (useHtml)
+      out <<"<br>";
   }
 
   output=out.str();
@@ -4565,6 +4646,22 @@ bool ElementUniversalEnveloping::ConvertToLieAlgebraElementIfPossible(ElementSim
   return true;
 }
 
+void ElementUniversalEnveloping::AssignElementLieAlgebra(const ElementSimpleLieAlgebra& input, SemisimpleLieAlgebra& theOwner)
+{ this->Nullify(&theOwner);
+  this->AssignElementCartan(input.Hcomponent, theOwner);
+  MonomialUniversalEnveloping tempMon;
+  tempMon.generatorsIndices.SetSizeExpandOnTopNoObjectInit(1);
+  tempMon.Powers.SetSizeExpandOnTopNoObjectInit(1);
+  tempMon.Powers.TheObjects[0]=1;
+  for (int i=0; i<input.NonZeroElements.CardinalitySelection; i++)
+  { int theIndex=input.NonZeroElements.elements[i];
+    int theGeneratorIndex=theOwner.RootIndexToGeneratorIndex(theIndex);
+    tempMon.Coefficient=input.coeffsRootSpaces.TheObjects[theIndex];
+    tempMon.generatorsIndices.TheObjects[0]=theGeneratorIndex;
+    this->AddObjectOnTopHash(tempMon);
+  }
+}
+
 void ElementUniversalEnveloping::AssignElementCartan(const root& input, SemisimpleLieAlgebra& theOwner)
 { MonomialUniversalEnveloping tempMon;
   this->Nullify(&theOwner);
@@ -4657,6 +4754,8 @@ void ParserNode::Clear()
   this->ExpressionType=this->typeUndefined;
   this->children.size=0;
   this->rationalValue.MakeZero();
+  if (this->owner!=0)
+    this->ContextLieAlgebra=&this->owner->theHmm.theRange;
 }
 
 std::string SemisimpleLieAlgebra::getLetterFromGeneratorIndex(int theIndex, bool useLatex)
@@ -4713,11 +4812,10 @@ std::string SemisimpleLieAlgebra::ElementToStringLieBracketPairing()
 
 void ElementUniversalEnveloping::MakeConst(const Rational& coeff, SemisimpleLieAlgebra& theOwner)
 { MonomialUniversalEnveloping tempMon;
-  this->ClearTheObjects();
+  this->Nullify(&theOwner);
   tempMon.MakeConst(coeff, theOwner);
   this->AddMonomialNoCleanUpZeroCoeff(tempMon);
   this->CleanUpZeroCoeff();
-  this->owner=&theOwner;
 }
 
 void ElementUniversalEnveloping::Nullify(SemisimpleLieAlgebra* theOwner)

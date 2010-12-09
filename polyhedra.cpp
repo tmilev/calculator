@@ -17306,7 +17306,12 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
   childrenPathPhysical.append("rootHtml_"); childrenPathServer.append("rootHtml_");
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   this->ComputeDebugString(false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables);
-  output << "<HTML><BODY>" << header << this->DebugString << "</BODY></HTML>";
+  output << "<HTML><title> Root subsystems of " << this->AmbientWeyl.WeylLetter << this->AmbientWeyl.CartanSymmetric.NumRows << "</title>";
+  output << "<meta name=\"keywords\" content=\"" << this->AmbientWeyl.WeylLetter << this->AmbientWeyl.CartanSymmetric.NumRows << " root subsystems, root subsystems, root systems";
+  if (this->AmbientWeyl.WeylLetter=='E' || this->AmbientWeyl.WeylLetter=='F' || this->AmbientWeyl.WeylLetter=='G' )
+    output << ", exceptional Lie algebra";
+  output << " \">";
+  output << "<BODY>" << header << this->DebugString << "</BODY></HTML>";
   output.close();
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);

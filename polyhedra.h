@@ -6272,6 +6272,8 @@ public:
 };
 
 class Parser;
+class ElementUniversalEnveloping;
+class MonomialUniversalEnveloping;
 
 class HomomorphismSemisimpleLieAlgebra
 {
@@ -6279,18 +6281,25 @@ public:
   SemisimpleLieAlgebra theDomain;
   SemisimpleLieAlgebra theRange;
   //Let rk:=Rank(Domain)
-  //format: the first rk elements give the images of the Chevalley generators corresponding to simple positive roots
+  //format of ImagesSimpleChevalleyGenerators: the first rk elements give the images of the Chevalley generators corresponding to simple positive roots
   //the second rk elements give the images of the Chevalley generators corresponding to simple negative roots
   List<ElementSimpleLieAlgebra> ImagesSimpleChevalleyGenerators;
+  //format of ImagesAllChevalleyGenerators: the first #positive roots elements give the images of the Chevalley generators corresponding to the positive roots
+  //the second rk elements give the images of the basis elements of the Cartan
+  //the third #positive roots elements give the images of the Chevalley generators corresponding to simple negative roots
   List<ElementSimpleLieAlgebra> ImagesAllChevalleyGenerators;
   List<ElementSimpleLieAlgebra> theChevalleyGenerators;
   std::string DebugString;
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables) {this->ElementToString(output, false, theGlobalVariables);};
+  void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);};
+  void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, useHtml, theGlobalVariables);};
   std::string ElementToString(GlobalVariables& theGlobalVariables){ std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS; };
   bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables);
   bool CheckClosednessLieBracket(GlobalVariables& theGlobalVariables);
+  bool ApplyHomomorphism(ElementUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
+  bool ApplyHomomorphism(MonomialUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
 };
 
 class ElementUniversalEnveloping;
@@ -6349,13 +6358,13 @@ private:
   friend class MonomialUniversalEnveloping;
 public:
   std::string DebugString;
-  ElementUniversalEnveloping(const ElementUniversalEnveloping& other){this->operator=(other);};
   void ElementToString(std::string& output);
   std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
   void ComputeDebugString(){this->ElementToString(this->DebugString);};
   SemisimpleLieAlgebra* owner;
   void AddMonomial(const MonomialUniversalEnveloping& input);
   void AssignElementCartan(const root& input, SemisimpleLieAlgebra& theOwner);
+  void AssignElementLieAlgebra(const ElementSimpleLieAlgebra& input, SemisimpleLieAlgebra& theOwner);
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& theOwner);
   void MakeOneGeneratorCoeffOne(root& rootSpace, SemisimpleLieAlgebra& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), theOwner);};
   void Nullify(SemisimpleLieAlgebra* theOwner);
@@ -6378,6 +6387,7 @@ public:
   void operator/=(const Rational& other);
   void operator*=(const Rational& other);
   ElementUniversalEnveloping(){this->owner=0;};
+  ElementUniversalEnveloping(const ElementUniversalEnveloping& other){this->operator=(other);};
 };
 
 class SltwoSubalgebras : public HashedList<slTwo>
@@ -6799,6 +6809,7 @@ class ParserNode
   int Operation; //using tokenTypes from class Parser
   int ExpressionType;
   int ErrorType;
+  SemisimpleLieAlgebra* ContextLieAlgebra;
   bool Evaluated;
   List<int> children;
   int intValue;
@@ -6817,6 +6828,7 @@ class ParserNode
     this->rationalValue=other.rationalValue;
     this->WeylAlgebraElement=other.WeylAlgebraElement;
     this->UEElement=other.UEElement;
+    this->ContextLieAlgebra=other.ContextLieAlgebra;
   };
   void Clear();
   void ConvertChildrenAndMyselfToStrongestExpressionChildren();
@@ -6840,6 +6852,7 @@ class ParserNode
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
+  void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
   bool AllChildrenAreOfDefinedNonErrorType();
   ParserNode();
 };
@@ -6855,12 +6868,12 @@ public:
   int DefaultWeylRank;
   ParserNode theValue;
   HomomorphismSemisimpleLieAlgebra theHmm;
-  SemisimpleLieAlgebra theLieAlgebra;
+//  SemisimpleLieAlgebra theLieAlgebra;
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); };
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenI
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -6894,11 +6907,13 @@ public:
   void AddPowerOnTop();
   void AddMinusOnTop();
   void AddUnaryMinusOnTop();
+  void AddMapOnTop();
   void AddTimesOnTop();
   void AddLieBracketOnTop();
   void PopLastAndThirdToLast();
   void AddIntegerOnTopConvertToExpression();
   void MergeLastTwoIntegers();
+  void Clear();
   void DecreaseStackSetExpressionLastNode(int Decrease);
   void ComputeNumberOfVariablesAndAdjustNodes();
   Parser(){ this->numEmptyTokensAtBeginning=5;};

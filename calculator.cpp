@@ -51,8 +51,8 @@ int main(int argc, char **argv)
 
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><head><title>Vector partition calculator</title>";
-  std::cout << "<script src=\"../htdocs/easy/load.js\"></script></head> ";
-  std::cout << "<body>";
+  std::cout << "<script src=\"../htdocs/easy/load.js\"></script> ";
+  std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
@@ -77,19 +77,25 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
-  //civilizedInput="c*c";
+  //civilizedInput="[i[g_2,g_-2],ig_2]";
   //theParser.DefaultWeylRank=3;
   //theParser.DefaultWeylLetter='B';
+  if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
+  { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  }
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
 
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
-  std::cout << "<table>\n <tr valign=\"top\">\n <td>";
+  std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td></td><td>";
+  std::cout << " <img src=\"../karlin.gif\" width=\"46\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
+  std::cout << "</td><tr valign=\"top\">\n<td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
   std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
-  std::cout << "<input type=\"text\" size =\"1\" name=\"weyRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>\n<br>\n";
-  std::cout << "<input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" value=\"" << civilizedInput << "\"></input>\n<br>\n";
+  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>\n<br>\n";
+  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">" << civilizedInput  << "</textarea>\n<br>\n";
+//  std::cout << "<input type=\"textarea\" size=\"20\" name=\"textInput\" value=\"" << civilizedInput << "\"></input>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
@@ -97,12 +103,15 @@ int main(int argc, char **argv)
   std::cout << "</td>";
   std::cout << " <td></td>\n<td>\n";
   std::stringstream tempStream;
-  inputPath.append("../htdocs/");
+  inputPath.append("../htdocs/tmp/");
+  std::stringstream tempStream2;
+  tempStream2 << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/";
+  inputPath.append(tempStream2.str());
   tempStream  << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "table";
   std::string fileNameLieBracketNoEnding=tempStream.str();
   std::string fileNameLieBracketFullPathNoEnding=inputPath;
   fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
-  std::cout << "<img src=\"/htdocs/" << fileNameLieBracketNoEnding << ".png\"></img>";
+  std::cout << "<img src=\"/htdocs/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
   List<std::string> LatexCommands;
   std::string latexCommandTemp;
   std::string fileNameLieBracketFullPathPNGEnding;
@@ -110,12 +119,12 @@ int main(int argc, char **argv)
   fileNameLieBracketFullPathPNGEnding.append(".png");
   LatexCommands.size=0;
   if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
-  { std::cout << "<br>the file: " << fileNameLieBracketFullPathNoEnding << " does not exist<br>";
+  { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";
     std::fstream lieBracketFile;
     std::string tempFileName= fileNameLieBracketFullPathNoEnding;
     tempFileName.append(".tex");
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
-    theParser.theLieAlgebra.ElementToStringLieBracket(tempS, false, true, true, theGlobalVariables);
+    theParser.theHmm.theRange.ElementToStringLieBracket(tempS, false, true, true, theGlobalVariables);
     lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     lieBracketFile.close();
     std::stringstream tempStreamLatex, tempStreamPNG;
@@ -125,6 +134,8 @@ int main(int argc, char **argv)
     tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
     latexCommandTemp= tempStreamPNG.str();
     LatexCommands.AddObjectOnTop(latexCommandTemp);
+  } else
+  { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " exists<br>";
   }
   std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
   std::cout << "<br>civilized input strings: " << civilizedInput << "<br> chopped strings: <br>";

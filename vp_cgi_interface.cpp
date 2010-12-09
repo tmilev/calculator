@@ -149,13 +149,13 @@ int main(int argc, char **argv)
     std::cout	<< "\n\tgeneratePageFromDimAndNum(" << theComputationSetup.thePartialFraction.theChambers.AmbientDimension << "," << theComputationSetup.VPVectors.size << "," << -1 << "," << theComputationSetup.DisplayNumberChamberOfInterest << ");\n</script>\n";
     //std::cout<<ParallelComputing::GlobalPointerCounter<<tempS1;
   } else if (choice==CGIspecificRoutines::choiceDisplayRootSApage)
-  { std::cout << "<FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n";
+  { std::cout << "<HTML><title>Simple Lie algebras tables</title> <BODY><table><tr><td><FORM method=\"POST\" name=\"formRootSAs\" action=\"/cgi-bin/vector_partition_linux_cgi\">\n Type(A,B,C,D,E,F,G): <input type=\"text\" size =\"1\" name=\"textType\" value=\"E\">\nDimension(<=8): <input type=\"text\" size=\"1\" name=\"textRank\" value=\"6\">\n<br>\n";
     std::cout << "<input type=\"submit\" name=\"buttonGoRootSA\" value=\"rootSA diagrams\"	> ";
     std::cout << "<input type=\"submit\" name=\"buttonGoSl2SAs\" value=\"sl(2) subalgebras\"	>\n<br>\n";
     std::cout << "<input type=\"checkbox\" name=\"checkUseDatabase\" checked=\"checked\">Use precomputed database<br>";
     std::cout << "<input type=\"checkbox\" name=\"checkUsePNG\" checked=\"checked\">Use .png(.png *together* with recomputation is *slow*- up to 5-6 min for E8!)\n</FORM>";
     std::cout << "<br>The database is located <a href=\"/tmp/\">here</a>.<br><br>";
-    std::cout << "<a href=\"/tmp/manual_vector_partition.pdf\">Working file for notations and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+    std::cout << "<a href=\"/tmp/manual_vector_partition.pdf\">Working file for notations and conventions (incomplete). Will evolve to a manual of the program.</a><br></td><td valign=\"top\"><img src=\"../jacobs_logo.png\"></img></td></tr></table>";
   } else if (choice==CGIspecificRoutines::choiceGosl2 || choice==CGIspecificRoutines::choiceGenerateDynkinTables)
   { std::cout.flush();
     ////////////////////getting paths to output html

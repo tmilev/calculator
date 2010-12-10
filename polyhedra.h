@@ -769,6 +769,7 @@ public:
   static bool flagComputingDebugInfo;
   static std::string MatrixElementSeparator;
   void ComputeDebugString();
+  void ComputeDebugString(bool useHtml, bool useLatex){this->ElementToString(this->DebugString, useHtml, useLatex);};
   void ElementToString(std::string& output);
   void ElementToString(std::string& output, bool useHtml, bool useLatex);
   void SwitchTwoRows(int row1, int row2);
@@ -832,7 +833,6 @@ public:
   void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
   void AssignRootsToRowsOfMatrix(const roots& input);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
-  void ComputeDebugString();
   void MultiplyByLargeRational(Rational& x);
   void MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables);
   void ActOnAroot(root& input, root& output);
@@ -6289,6 +6289,7 @@ public:
   //the third #positive roots elements give the images of the Chevalley generators corresponding to simple negative roots
   List<ElementSimpleLieAlgebra> ImagesAllChevalleyGenerators;
   List<ElementSimpleLieAlgebra> theChevalleyGenerators;
+  roots RestrictedRootSystem;
   std::string DebugString;
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables) {this->ElementToString(output, false, theGlobalVariables);};
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
@@ -6296,6 +6297,7 @@ public:
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);};
   void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, useHtml, theGlobalVariables);};
   std::string ElementToString(GlobalVariables& theGlobalVariables){ std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS; };
+  void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(roots& output, GlobalVariables& theGlobalVariables);
   bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables);
   bool CheckClosednessLieBracket(GlobalVariables& theGlobalVariables);
   bool ApplyHomomorphism(ElementUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);

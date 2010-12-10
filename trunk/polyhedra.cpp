@@ -2226,10 +2226,6 @@ void MatrixLargeRational::NonPivotPointsToEigenVector(Selection& TheNonPivotPoin
   }
 }
 
-void MatrixLargeRational::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
-}
-
 int MathRoutines::lcm(int a, int b)
 { if (a<0)
     a=-a;

@@ -4368,6 +4368,7 @@ void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables
   (owner.ParseAndCompute("g_{-1}+g_{-3}", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->ImagesSimpleChevalleyGenerators.TheObjects[3]);
   this->ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
   owner.Clear();
+  this->GetRestrictionAmbientRootSystemToTheSmallerCartanSA(this->RestrictedRootSystem, theGlobalVariables);
   //this->ComputeDebugString(true, theGlobalVariables);
   //std::cout << this->DebugString;
   //if (this->CheckClosednessLieBracket(theGlobalVariables))
@@ -4399,10 +4400,31 @@ void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, bool
     this->theChevalleyGenerators.TheObjects[i].ElementToString(tempS2, this->theDomain, false, false);
     out << tempS2 << " \\mapsto " << tempS << "\n\n";
     if  (useHtml)
-      out <<"<br>";
+      out << "<br>";
   }
 
   output=out.str();
+}
+
+void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmallerCartanSA(roots& output, GlobalVariables& theGlobalVariables)
+{ List<root>& theRootSystem= this->theRange.theWeyl.RootSystem;
+  int rankSA=this->theDomain.theWeyl.CartanSymmetric.NumRows;
+  MatrixLargeRational tempMat;
+  tempMat.Assign(this->theDomain.theWeyl.CartanSymmetric);
+  tempMat.Invert(theGlobalVariables);
+  int numPosRootsDomain=this->theDomain.theWeyl.RootsOfBorel.size;
+  output.SetSizeExpandOnTopNoObjectInit(theRootSystem.size);
+  root theScalarProducts;
+  theScalarProducts.SetSizeExpandOnTopLight(rankSA);
+//  tempMat.ComputeDebugString(true, false);
+//  std::cout << tempMat.DebugString << "<br>";
+  for (int i=0; i<theRootSystem.size; i++)
+  { for (int j=0; j<rankSA; j++)
+    { ElementSimpleLieAlgebra& currentH=this->ImagesAllChevalleyGenerators.TheObjects[j+numPosRootsDomain];
+      theScalarProducts.TheObjects[j]=this->theRange.theWeyl.RootScalarCartanRoot(currentH.Hcomponent, theRootSystem.TheObjects[i]);
+    }
+    tempMat.ActOnAroot(theScalarProducts, output.TheObjects[i]);
+  }
 }
 
 bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables& theGlobalVariables)

@@ -82,6 +82,8 @@ int main(int argc, char **argv)
   //theParser.DefaultWeylLetter='B';
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+   //theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);
+    //std::cout << tempS;
   }
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
@@ -111,7 +113,7 @@ int main(int argc, char **argv)
   std::string fileNameLieBracketNoEnding=tempStream.str();
   std::string fileNameLieBracketFullPathNoEnding=inputPath;
   fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
-  std::cout << "<img src=\"/htdocs/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
+  std::cout << "<img src=\"/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
   List<std::string> LatexCommands;
   std::string latexCommandTemp;
   std::string fileNameLieBracketFullPathPNGEnding;
@@ -123,6 +125,10 @@ int main(int argc, char **argv)
     std::fstream lieBracketFile;
     std::string tempFileName= fileNameLieBracketFullPathNoEnding;
     tempFileName.append(".tex");
+    std::stringstream tempCommand;
+    tempCommand << "mkdir " << inputPath;
+    tempS=tempCommand.str();
+    system(tempS.c_str());
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
     theParser.theHmm.theRange.ElementToStringLieBracket(tempS, false, true, true, theGlobalVariables);
     lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
@@ -135,7 +141,7 @@ int main(int argc, char **argv)
     latexCommandTemp= tempStreamPNG.str();
     LatexCommands.AddObjectOnTop(latexCommandTemp);
   } else
-  { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " exists<br>";
+  { std::cout << "<br><br><br>the file: " << fileNameLieBracketFullPathPNGEnding << " exists<br>";
   }
   std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
   std::cout << "<br>civilized input strings: " << civilizedInput << "<br> chopped strings: <br>";

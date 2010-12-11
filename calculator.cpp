@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><head><title>Vector partition calculator</title>";
-  std::cout << "<script src=\"../htdocs/easy/load.js\"></script> ";
+  std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;
   List<std::string> inputStrings;
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
   std::stringstream tempStream2;
   tempStream2 << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/";
   inputPath.append(tempStream2.str());
-  tempStream  << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "table";
+  tempStream << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "table";
   std::string fileNameLieBracketNoEnding=tempStream.str();
   std::string fileNameLieBracketFullPathNoEnding=inputPath;
   fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
@@ -141,17 +141,14 @@ int main(int argc, char **argv)
     latexCommandTemp= tempStreamPNG.str();
     LatexCommands.AddObjectOnTop(latexCommandTemp);
   } else
-  { std::cout << "<br><br><br>the file: " << fileNameLieBracketFullPathPNGEnding << " exists<br>";
-  }
+    std::cout << "<br><br><br>the file: " << fileNameLieBracketFullPathPNGEnding << " exists<br>";
   std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
   std::cout << "<br>civilized input strings: " << civilizedInput << "<br> chopped strings: <br>";
   for (int i=0; i<inputStrings.size; i++)
-  { std::cout << "string " << i << ": " << inputStrings.TheObjects[i] << "<br>";
-  }
+    std::cout << "string " << i << ": " << inputStrings.TheObjects[i] << "<br>";
   std::cout << "system commands: <br>";
   for (int i=0; i<LatexCommands.size; i++)
-  { std::cout << LatexCommands.TheObjects[i] << "<br>";
-  }
+    std::cout << LatexCommands.TheObjects[i] << "<br>";
   std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
 //  theParser.theLieAlgebra.ComputeDebugString();
 //  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();
@@ -162,7 +159,6 @@ int main(int argc, char **argv)
   std::cout.flush();
   for (int i=0; i<LatexCommands.size; i++)
     system(LatexCommands.TheObjects[i].c_str());
-
   std::cout << "-->";
 	return 0;   // Toavoid Apache errors.
 }

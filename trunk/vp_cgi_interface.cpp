@@ -75,7 +75,7 @@ int main(int argc, char **argv)
     static_html1(tempSS);
     std::string tempS;
     tempS=tempSS.str();
-    std::cout<<tempS;
+    std::cout << tempS;
     if (choice==CGIspecificRoutines::choiceDefaultNeedComputation)//default choice
     {	//std::cout<<"before computation setup";
     //	theComputationSetup.flagComputingPartialFractions=false;
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
       pfFileName=inputPath;
       pfFileName.append("partial_fraction.tex");
       CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(pfFile, pfFileName, false, true, false);
-      pfFile<< theComputationSetup.thePartialFraction.DebugString;
+      pfFile << theComputationSetup.thePartialFraction.DebugString;
       pfFile.close();
       latexCommand1.append("pdflatex -output-directory=");
       latexCommand1.append(inputPath);

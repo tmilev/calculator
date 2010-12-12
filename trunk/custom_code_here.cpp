@@ -4103,6 +4103,11 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
       this->rationalValue/=theDenominator;
       this->ExpressionType=this->typeRational;
       break;
+    case ParserNode::typePoly:
+      this->polyValue=leftNode.polyValue;
+      this->polyValue.DivByRational(theDenominator);
+      this->ExpressionType=this->typePoly;
+      break;
     case ParserNode::typeUEelement:
       this->UEElement=leftNode.UEElement;
       this->UEElement/=theDenominator;

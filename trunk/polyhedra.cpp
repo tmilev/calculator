@@ -7333,7 +7333,7 @@ void QuasiNumber::DivideByRational(Rational& r)
   this->MultiplyByLargeRational(tempRat);
 }
 
-void QuasiNumber::MultiplyBy(QuasiNumber& q)
+void QuasiNumber::MultiplyBy(const QuasiNumber& q)
 { QuasiNumber Accum;
   BasicQN tempQ;
   Accum.MakeZero(this->NumVariables);
@@ -8233,7 +8233,7 @@ void LargeIntUnsigned::DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotie
   { unsigned int q;
     LargeIntUnsigned current, Total;
     if (remainder.TheObjects[remainder.size-1]> divisor.TheObjects[divisor.size-1])
-    {  q=remainder.TheObjects[remainder.size-1]/(divisor.TheObjects[divisor.size-1]+1);
+    { q=remainder.TheObjects[remainder.size-1]/(divisor.TheObjects[divisor.size-1]+1);
       current.AssignShiftedUInt(q, remainder.size-divisor.size);
     }
     else
@@ -11643,25 +11643,25 @@ void WeylGroup::ActOnRootByGroupElement(int index, root& theRoot, bool RhoAction
 void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 { root tempRoot;
   roots startRoots;
-  hashedRoots tempHashedRoots;
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  {  tempRoot.MakeZero(this->CartanSymmetric.NumRows);
-    tempRoot.TheObjects[i].AssignInteger(1);
-    startRoots.AddRoot(tempRoot);
+  hashedRoots tempHashedRootS;
+  int theDimension=this->CartanSymmetric.NumCols;
+  for (int i=0; i<theDimension; i++)
+  { tempRoot.MakeEi(theDimension, i);
+    startRoots.AddObjectOnTop(tempRoot);
   }
-  this->GenerateOrbit(startRoots, false, tempHashedRoots, false);
+  this->GenerateOrbit(startRoots, false, tempHashedRootS, false);
   this->RootSystem.ClearTheObjects();
   this->RootsOfBorel.size=0;
-  this->RootsOfBorel.MakeActualSizeAtLeastExpandOnTop(tempHashedRoots.size/2);
-  this->RootSystem.MakeActualSizeAtLeastExpandOnTop(tempHashedRoots.size);
-  for (int i=0; i<tempHashedRoots.size; i++)
-    if (tempHashedRoots.TheObjects[i].IsPositiveOrZero())
-    { this->RootsOfBorel.AddRoot(tempHashedRoots.TheObjects[i]);
-      this->RootSystem.AddObjectOnTopHash(tempHashedRoots.TheObjects[i]);
-    }
-  for (int i=0; i<tempHashedRoots.size; i++)
-    if (! tempHashedRoots.TheObjects[i].IsPositiveOrZero())
-      this->RootSystem.AddObjectOnTopHash(tempHashedRoots.TheObjects[i]);
+  this->RootsOfBorel.MakeActualSizeAtLeastExpandOnTop(tempHashedRootS.size/2);
+  this->RootSystem.MakeActualSizeAtLeastExpandOnTop(tempHashedRootS.size);
+  for (int i=0; i<tempHashedRootS.size; i++)
+    if (tempHashedRootS.TheObjects[i].IsPositiveOrZero())
+      this->RootsOfBorel.AddObjectOnTop(tempHashedRootS.TheObjects[i]);
+  this->RootsOfBorel.QuickSortAscending();
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+    this->RootSystem.AddObjectOnTopHash(this->RootsOfBorel.TheObjects[i]);
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+    this->RootSystem.AddObjectOnTopHash(-this->RootsOfBorel.TheObjects[i]);
 }
 
 void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho)
@@ -12197,7 +12197,7 @@ void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
   roots tempRoots;
   tempRoots.AddRoot(this->rho);
   this->ClearTheObjects();
-  static hashedRoots tempRoots2;
+  hashedRoots tempRoots2;
   tempRoots2.ClearTheObjects();
   this->GenerateOrbit(tempRoots, false, tempRoots2, true, *this, false, UpperLimitNumElements);
 }
@@ -17903,13 +17903,13 @@ bool ElementSimpleLieAlgebra::IsEqualToZero()const
   return true;
 }
 
-void ElementSimpleLieAlgebra::init (SemisimpleLieAlgebra& owner)
+void ElementSimpleLieAlgebra::init(const SemisimpleLieAlgebra& owner)
 { this->Hcomponent.SetSizeExpandOnTopLight(owner.theWeyl.CartanSymmetric.NumRows);
   this->coeffsRootSpaces.SetSizeExpandOnTopNoObjectInit(owner.theWeyl.RootSystem.size);
   this->NonZeroElements.init(owner.theWeyl.RootSystem.size);
 }
 
-void ElementSimpleLieAlgebra::Nullify(SemisimpleLieAlgebra& owner)
+void ElementSimpleLieAlgebra::Nullify(const SemisimpleLieAlgebra& owner)
 { this->init(owner);
   this->Hcomponent.MakeZero(owner.theWeyl.CartanSymmetric.NumRows);
   for(int j=0; j<this->coeffsRootSpaces.size; j++)

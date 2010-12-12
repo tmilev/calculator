@@ -77,12 +77,12 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
-  //civilizedInput="[i[g_2,g_-2],ig_2]";
+  //civilizedInput="(n_1+n_2)^2";
   //theParser.DefaultWeylRank=3;
   //theParser.DefaultWeylLetter='B';
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
-   //theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);
+    //theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);
     //std::cout << tempS;
   }
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);

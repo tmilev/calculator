@@ -77,9 +77,9 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
-  //civilizedInput="(n_1+n_2)^2";
-  //theParser.DefaultWeylRank=3;
-  //theParser.DefaultWeylLetter='B';
+//  civilizedInput="[ig_2,g_{-3}^{n_3}g_{-5}^{n_2}g_{-7}^{n_1}]";
+//  theParser.DefaultWeylRank=3;
+//  theParser.DefaultWeylLetter='B';
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
     //theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);

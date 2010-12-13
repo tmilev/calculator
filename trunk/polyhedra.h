@@ -3203,6 +3203,7 @@ public:
   void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
   void AddConstant(const ElementOfCommutativeRingWithIdentity& theConst);
   void IncreaseNumVariables(short increase);
+  void SetNumVariablesSubDeletedVarsByOne(short newNumVars);
   void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
   void DecreaseNumVariables(short increment, Polynomial<ElementOfCommutativeRingWithIdentity>& output);
   void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
@@ -4088,6 +4089,23 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::SetNumVariablesSubDeletedVarsByOne(short newNumVars)
+{ Polynomial<ElementOfCommutativeRingWithIdentity> Accum;
+  Accum.Nullify(newNumVars);
+  Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
+  Monomial<ElementOfCommutativeRingWithIdentity> tempM;
+  tempM.init(Accum.NumVars);
+  int minNumVars=MathRoutines::Minimum(this->NumVars, Accum.NumVars);
+  for (int i=0; i<this->size; i++)
+  { for (int j=0; j<minNumVars; j++)
+      tempM.degrees[j]=this->TheObjects[i].degrees[j];
+    tempM.Coefficient=this->TheObjects[i].Coefficient;
+    Accum.AddMonomial(tempM);
+  }
+  this->CopyFromPoly(Accum);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(short increase)
 { Polynomial<ElementOfCommutativeRingWithIdentity> Accum;
   Accum.Nullify(this->NumVars+increase);
@@ -4097,7 +4115,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(shor
   int minNumVars=MathRoutines::Minimum(this->NumVars, Accum.NumVars);
   for (int i=0; i<this->size; i++)
   { for (int j=0; j<minNumVars; j++)
-      tempM.degrees[j]=this->TheObjects[i].degrees[i];
+      tempM.degrees[j]=this->TheObjects[i].degrees[j];
     tempM.Coefficient=this->TheObjects[i].Coefficient;
     Accum.AddMonomial(tempM);
   }
@@ -6367,6 +6385,9 @@ public:
     for (int i=0; i<this->generatorsIndices.size; i++)
       output.AddPolynomial(this->Powers.TheObjects[i]);
   };
+  bool CommutingLeftIndexAroundRightIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
+  bool CommutingRightIndexAroundLeftIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
+  bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex, MonomialUniversalEnveloping& output);
   void MakeConst(const PolynomialRationalCoeff& theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
   //we assume the standard order for being simplified to be Descending.
   //this way the positive roots will end up being in the end, which is very convenient for computing with Verma modules
@@ -6375,7 +6396,8 @@ public:
   //The order of the roots is reverse to the order in which roots are kept in WeylGroup::RootSystem
   // with the "zero level roots" - i.e. the elements of the Cartan subalgebra - put in between.
   void Simplify(ElementUniversalEnveloping& output);
-  void CommuteConsecutiveIndices(int theIndeX, ElementUniversalEnveloping& output);
+  void CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnveloping& output);
+  void CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnveloping& output);
   MonomialUniversalEnveloping(){this->owner=0;};
   bool operator==(const MonomialUniversalEnveloping& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;};
   inline void operator=(const MonomialUniversalEnveloping& other)

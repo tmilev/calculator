@@ -3909,7 +3909,7 @@ bool ParserNode::ConvertToType(int theType)
     return false;
   if (this->ExpressionType==this->typePoly)
       if (this->polyValue.NumVars< this->owner->NumVariables)
-        this->polyValue.IncreaseNumVariables(this->owner->NumVariables-polyValue.NumVars);
+        this->polyValue.SetNumVariablesSubDeletedVarsByOne(this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEelement)
     this->UEElement.SetNumVariables(this->owner->NumVariables);
   if (this->ExpressionType==theType)
@@ -4528,6 +4528,7 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables
 void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnveloping& output)
 { int IndexlowestNonSimplified=0;
   ElementUniversalEnveloping buffer2;
+  MonomialUniversalEnveloping tempMon;
   //simplified order is descending order
   while (IndexlowestNonSimplified<output.size)
   { bool reductionOccurred=false;
@@ -4536,14 +4537,29 @@ void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit(Element
     else
       for (int i=0; i<output.TheObjects[IndexlowestNonSimplified].generatorsIndices.size-1; i++)
         if (!this->owner->AreOrderedProperly(output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
-          if (output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i].TotalDegree()==0)
-          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndices(i, buffer2);
+        { if (output.TheObjects[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute(i, tempMon))
+          { output.AddMonomialNoCleanUpZeroCoeff(tempMon);
+            tempMon.ComputeDebugString();
+            reductionOccurred=true;
+            break;
+          }
+          if (this->CommutingLeftIndexAroundRightIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
+          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer2);
             for (int j=0; j<buffer2.size; j++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
             output.ComputeDebugString();
             reductionOccurred=true;
             break;
           }
+          if (this->CommutingRightIndexAroundLeftIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
+          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer2);
+            for (int j=0; j<buffer2.size; j++)
+              output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
+            output.ComputeDebugString();
+            reductionOccurred=true;
+            break;
+          }
+        }
     if (reductionOccurred)
       output.PopIndexSwapWithLastHash(IndexlowestNonSimplified);
     else
@@ -4551,6 +4567,52 @@ void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit(Element
     output.ComputeDebugString();
   }
   output.CleanUpZeroCoeff();
+}
+
+bool MonomialUniversalEnveloping::CommutingLeftIndexAroundRightIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex)
+{ if (theLeftPower.TotalDegree()==0)
+  { if(theRightPower.TotalDegree()==0)
+      return true;
+    int numPosRoots=this->owner->theWeyl.RootsOfBorel.size;
+    int theDimension= this->owner->theWeyl.CartanSymmetric.NumRows;
+    if(rightGeneratorIndex>= numPosRoots && rightGeneratorIndex<numPosRoots+theDimension)
+    { if (this->owner->theLiebracketPairingCoefficients.elements[leftGeneratorIndex][rightGeneratorIndex].IsEqualToZero())
+        return true;
+      else
+        return false;
+    } else
+      return true;
+  }
+  return false;
+}
+
+bool MonomialUniversalEnveloping::SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex, MonomialUniversalEnveloping& output)
+{ if (theLeftIndex>= this->generatorsIndices.size-1)
+    return false;
+  int leftGenerator=this->generatorsIndices.TheObjects[theLeftIndex];
+  int rightGenerator=this->generatorsIndices.TheObjects[theLeftIndex+1];
+  if (this->owner->OppositeRootSpaces.TheObjects[leftGenerator]==rightGenerator)
+    return false;
+  if (this->owner->theLiebracketPairingCoefficients.elements[leftGenerator][rightGenerator].IsEqualToZero())
+  { this->ComputeDebugString();
+    output.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
+    output.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
+    output.Nullify(this->Coefficient.NumVars, *this->owner);
+    output.Coefficient=this->Coefficient;
+    output.ComputeDebugString();
+    for (int i=0; i<theLeftIndex; i++)
+      output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+    output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theLeftIndex+1], this->Powers.TheObjects[theLeftIndex+1]);
+    output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theLeftIndex], this->Powers.TheObjects[theLeftIndex]);
+    for (int i=theLeftIndex+2; i<this->generatorsIndices.size; i++)
+      output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+    return true;
+  }
+  return false;
+}
+
+bool MonomialUniversalEnveloping::CommutingRightIndexAroundLeftIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex)
+{ return this->CommutingLeftIndexAroundRightIndexAllowed(theRightPower, rightGeneratorIndex, theLeftPower, leftGeneratorIndex);
 }
 
 void MonomialUniversalEnveloping::Simplify(ElementUniversalEnveloping& output)
@@ -4578,7 +4640,80 @@ void MonomialUniversalEnveloping::MultiplyByNoSimplify(const MonomialUniversalEn
   }
 }
 
-void MonomialUniversalEnveloping::CommuteConsecutiveIndices(int theIndeX, ElementUniversalEnveloping& output)
+void MonomialUniversalEnveloping::CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnveloping& output)
+{ if (theIndeX==this->generatorsIndices.size-1)
+    return;
+  output.Nullify(this->owner);
+  MonomialUniversalEnveloping tempMon;
+  tempMon.Nullify(this->Coefficient.NumVars, *this->owner);
+  tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.Powers.size=0;
+  tempMon.generatorsIndices.size=0;
+  int rightGeneratorIndeX= this->generatorsIndices.TheObjects[theIndeX+1];
+  int leftGeneratorIndeX=this->generatorsIndices.TheObjects[theIndeX];
+  PolynomialRationalCoeff theRightPoweR, theLeftPoweR;
+  theRightPoweR= this->Powers.TheObjects[theIndeX+1];
+  theLeftPoweR= this->Powers.TheObjects[theIndeX];
+  theRightPoweR-=1;
+  int powerDroP=0;
+  PolynomialRationalCoeff acquiredCoefficienT, polyOne;
+  acquiredCoefficienT.Assign(this->Coefficient);
+  for (int i=0; i<theIndeX; i++)
+    tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+  int startMonSize=tempMon.generatorsIndices.size;
+  ElementSimpleLieAlgebra adResulT, tempElT, tempLefttElt;
+  adResulT.AssignGeneratorCoeffOne(rightGeneratorIndeX, *this->owner);
+  tempLefttElt.AssignGeneratorCoeffOne(leftGeneratorIndeX, *this->owner);
+  tempLefttElt.ComputeDebugString(*this->owner, false, false);
+  polyOne.MakeNVarConst(this->Coefficient.NumVars, (Rational) 1);
+  do
+  { acquiredCoefficienT.ComputeDebugString();
+    theRightPoweR.ComputeDebugString();
+    theLeftPoweR.ComputeDebugString();
+    adResulT.ComputeDebugString(*this->owner, false, false);
+    tempMon.ComputeDebugString();
+    if (adResulT.NonZeroElements.CardinalitySelection>0)
+    { int theNewGeneratorIndex= this->owner->RootIndexToGeneratorIndex(adResulT.NonZeroElements.elements[0]);
+      tempMon.Coefficient=acquiredCoefficienT;
+      tempMon.Coefficient.TimesConstant(adResulT.coeffsRootSpaces.TheObjects[adResulT.NonZeroElements.elements[0]]);
+      tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, polyOne);
+      tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, theLeftPoweR);
+      tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
+      for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
+        tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+      tempMon.ComputeDebugString();
+      output.AddObjectOnTopHash(tempMon);
+    } else
+    { int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
+      int numPosRoots= this->owner->theWeyl.RootsOfBorel.size;
+      for (int i=0; i<theDimension; i++)
+        if (!adResulT.Hcomponent.TheObjects[i].IsEqualToZero())
+        { tempMon.Coefficient=acquiredCoefficienT;
+          tempMon.Coefficient.TimesConstant(adResulT.Hcomponent.TheObjects[i]);
+          tempMon.MultiplyByGeneratorPowerOnTheRight(i+numPosRoots, polyOne);
+          tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, theLeftPoweR);
+          tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
+          for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
+            tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+          tempMon.ComputeDebugString();
+          output.AddObjectOnTopHash(tempMon);
+        }
+    }
+    acquiredCoefficienT.MultiplyBy(theLeftPoweR);
+    theLeftPoweR-=1;
+    tempMon.generatorsIndices.size=startMonSize;
+    tempMon.Powers.size=startMonSize;
+    this->owner->LieBracket(tempLefttElt, adResulT, tempElT);
+    adResulT=tempElT;
+    powerDroP++;
+    acquiredCoefficienT.DivByInteger(powerDroP);
+    adResulT.ComputeDebugString(*this->owner, false, false);
+  }while(!adResulT.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
+}
+
+
+void MonomialUniversalEnveloping::CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnveloping& output)
 { if (theIndeX==this->generatorsIndices.size-1)
     return;
   output.Nullify(this->owner);
@@ -4801,11 +4936,9 @@ void ElementUniversalEnveloping::ElementToString(std::string& output)
 void MonomialUniversalEnveloping::SetNumVariables(int newNumVars)
 { if (this->Coefficient.NumVars==newNumVars)
     return;
-  int increase=newNumVars- this->Coefficient.NumVars;
-  assert(increase>=0);
-  this->Coefficient.IncreaseNumVariables(increase);
+  this->Coefficient.SetNumVariablesSubDeletedVarsByOne(newNumVars);
   for(int i=0; i<this->generatorsIndices.size; i++)
-    this->Powers.TheObjects[i].IncreaseNumVariables(increase);
+    this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(newNumVars);
 }
 
 std::string MonomialUniversalEnveloping::ElementToString(bool useLatex)
@@ -5157,6 +5290,16 @@ void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool u
   int numRoots=this->theWeyl.RootSystem.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
+  if (usePNG)
+  { out << "\\begin{tabular}{cc}\\hline generator & corresponding root space\\\\\\hline";
+    for (int i=0; i<this->theWeyl.RootSystem.size; i++)
+    { int tempI=i+1;
+      if (tempI>this->theWeyl.RootsOfBorel.size)
+        tempI=-tempI+theWeyl.RootsOfBorel.size;
+      out << "$g_{" << tempI << "}$&" << this->theWeyl.RootSystem.TheObjects[i].ElementToString() << "\\\\";
+    }
+    out << "\\end{tabular}";
+  }
   out << beginMath;
   ElementUniversalEnveloping tempElt1, tempElt2, tempElt3;
   for (int i=0; i<numRoots+theDimension+1; i++)
@@ -5206,16 +5349,6 @@ void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool u
     //  out << "\\end{tabular}\n\n\n" << tempHeader;
   }
   out << endMath;
-  if (usePNG)
-  { out << "\\begin{tabular}{cc}\\hline generator & corresponding root space\\\\\\hline";
-    for (int i=0; i<this->theWeyl.RootSystem.size; i++)
-    { int tempI=i+1;
-      if (tempI>this->theWeyl.RootsOfBorel.size)
-        tempI=-tempI+theWeyl.RootsOfBorel.size;
-      out << "$g_{" << tempI << "}$&" << this->theWeyl.RootSystem.TheObjects[i].ElementToString() << "\\\\";
-    }
-    out << "\\end{tabular}";
-  }
   output=out.str();
 }
 

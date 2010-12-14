@@ -4543,16 +4543,16 @@ void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit(Element
             reductionOccurred=true;
             break;
           }
-          if (this->CommutingLeftIndexAroundRightIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
-          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer2);
+          if (this->CommutingRightIndexAroundLeftIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
+          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer2);
             for (int j=0; j<buffer2.size; j++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
             output.ComputeDebugString();
             reductionOccurred=true;
             break;
           }
-          if (this->CommutingRightIndexAroundLeftIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
-          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer2);
+          if (this->CommutingLeftIndexAroundRightIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
+          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer2);
             for (int j=0; j<buffer2.size; j++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
             output.ComputeDebugString();
@@ -4661,7 +4661,8 @@ void MonomialUniversalEnveloping::CommuteConsecutiveIndicesRightIndexAroundLeft(
   acquiredCoefficienT.Assign(this->Coefficient);
   for (int i=0; i<theIndeX; i++)
     tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
-  int startMonSize=tempMon.generatorsIndices.size;
+  MonomialUniversalEnveloping startMon;
+  startMon=tempMon;
   ElementSimpleLieAlgebra adResulT, tempElT, tempLefttElt;
   adResulT.AssignGeneratorCoeffOne(rightGeneratorIndeX, *this->owner);
   tempLefttElt.AssignGeneratorCoeffOne(leftGeneratorIndeX, *this->owner);
@@ -4689,7 +4690,8 @@ void MonomialUniversalEnveloping::CommuteConsecutiveIndicesRightIndexAroundLeft(
       int numPosRoots= this->owner->theWeyl.RootsOfBorel.size;
       for (int i=0; i<theDimension; i++)
         if (!adResulT.Hcomponent.TheObjects[i].IsEqualToZero())
-        { tempMon.Coefficient=acquiredCoefficienT;
+        { tempMon=startMon;
+          tempMon.Coefficient=acquiredCoefficienT;
           tempMon.Coefficient.TimesConstant(adResulT.Hcomponent.TheObjects[i]);
           tempMon.MultiplyByGeneratorPowerOnTheRight(i+numPosRoots, polyOne);
           tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, theLeftPoweR);
@@ -4702,8 +4704,7 @@ void MonomialUniversalEnveloping::CommuteConsecutiveIndicesRightIndexAroundLeft(
     }
     acquiredCoefficienT.MultiplyBy(theLeftPoweR);
     theLeftPoweR-=1;
-    tempMon.generatorsIndices.size=startMonSize;
-    tempMon.Powers.size=startMonSize;
+    tempMon=startMon;
     this->owner->LieBracket(tempLefttElt, adResulT, tempElT);
     adResulT=tempElT;
     powerDroP++;
@@ -4735,7 +4736,8 @@ void MonomialUniversalEnveloping::CommuteConsecutiveIndicesLeftIndexAroundRight(
   for (int i=0; i<theIndeX; i++)
     tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
   tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndeX], theLeftPower);
-  int startMonSize=tempMon.generatorsIndices.size;
+  MonomialUniversalEnveloping startMon, tempMon2;
+  startMon=tempMon;
   ElementSimpleLieAlgebra adResult, tempElt, tempRightElt;
   adResult.AssignGeneratorCoeffOne(leftGeneratorIndex, *this->owner);
   tempRightElt.AssignGeneratorCoeffOne(rightGeneratorIndex, *this->owner);
@@ -4747,11 +4749,13 @@ void MonomialUniversalEnveloping::CommuteConsecutiveIndicesLeftIndexAroundRight(
     adResult.ComputeDebugString(*this->owner, false, false);
     tempMon.ComputeDebugString();
     tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
+    tempMon.ComputeDebugString();
     if (adResult.NonZeroElements.CardinalitySelection>0)
     { int theNewGeneratorIndex= this->owner->RootIndexToGeneratorIndex(adResult.NonZeroElements.elements[0]);
       tempMon.Coefficient=acquiredCoefficient;
       tempMon.Coefficient.TimesConstant(adResult.coeffsRootSpaces.TheObjects[adResult.NonZeroElements.elements[0]]);
       tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, polyOne);
+
       for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
         tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
       tempMon.ComputeDebugString();
@@ -4759,9 +4763,11 @@ void MonomialUniversalEnveloping::CommuteConsecutiveIndicesLeftIndexAroundRight(
     } else
     { int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
       int numPosRoots= this->owner->theWeyl.RootsOfBorel.size;
+      tempMon.Coefficient=acquiredCoefficient;
+      tempMon2=tempMon;
       for (int i=0; i<theDimension; i++)
         if (!adResult.Hcomponent.TheObjects[i].IsEqualToZero())
-        { tempMon.Coefficient=acquiredCoefficient;
+        { tempMon=tempMon2;
           tempMon.Coefficient.TimesConstant(adResult.Hcomponent.TheObjects[i]);
           tempMon.MultiplyByGeneratorPowerOnTheRight(i+numPosRoots, polyOne);
           for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
@@ -4772,8 +4778,7 @@ void MonomialUniversalEnveloping::CommuteConsecutiveIndicesLeftIndexAroundRight(
     }
     acquiredCoefficient.MultiplyBy(theRightPower);
     theRightPower-=1;
-    tempMon.generatorsIndices.size=startMonSize;
-    tempMon.Powers.size=startMonSize;
+    tempMon=startMon;
     this->owner->LieBracket(adResult, tempRightElt, tempElt);
     adResult=tempElt;
     powerDrop++;

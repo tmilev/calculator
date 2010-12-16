@@ -54,6 +54,15 @@ int main(int argc, char **argv)
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;
+
+/*  VectorPartition tempVP;
+  tempVP.PartitioningRoots.AddObjectOnTop("(0,1)");
+  tempVP.PartitioningRoots.AddObjectOnTop("(1,1)");
+  tempVP.PartitioningRoots.AddObjectOnTop("(1,2)");
+  tempVP.theRoot="(5,10)";
+  tempVP.ComputeAllPartitions();
+  std::cout << tempVP.ElementToString(true);*/
+
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
   inputStrings.SetSizeExpandOnTopNoObjectInit(3);
@@ -76,14 +85,28 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=1;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=30000000;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
   //civilizedInput="h_1g_{-1}";
-  //theParser.DefaultWeylRank=1;
-  //theParser.DefaultWeylLetter='A';
+  theParser.DefaultWeylRank=3;
+  theParser.DefaultWeylLetter='B';
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+    List<ElementUniversalEnveloping> tempList;
+    root tempRoot="(1,2)";
+//    theParser.theHmm.WriteAllUEMonomialsWithWeightWRTDomain(tempList, tempRoot, theGlobalVariables);
     //theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);
     //std::cout << tempS;
+    PolynomialRationalCoeff tempP1, tempP2, tempP3;
+//    theParser.ParseEvaluateAndSimplify("(n_1+n_2^3-n_3^2)(n_1^2-4n_2^2)", theGlobalVariables);
+    theParser.ParseEvaluateAndSimplify("n_1+n_2", theGlobalVariables);
+    tempP1=theParser.theValue.polyValue;
+    theParser.ParseEvaluateAndSimplify("n_1-n_2", theGlobalVariables);
+    tempP2=theParser.theValue.polyValue;
+    RationalFunction tempRF;
+    tempRF.RemainderDivision(tempP1, tempP2, tempP3);
+    std::cout << "<br>the remainder dividing " << tempP1.ElementToString() << " by " << tempP2.ElementToString() << " is " << tempP3.ElementToString();
+    tempRF.lcm(tempP1, tempP2, tempP3);
+    std::cout << "<br>the lcm of " << tempP1.ElementToString() << " and " << tempP2.ElementToString() << " is " << tempP3.ElementToString();
   }
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);

@@ -214,10 +214,14 @@ template < > int List<minimalRelationsProverState>::ListActualSizeIncrement=800;
 template < > int List<minimalRelationsProverStateFixedK>::ListActualSizeIncrement=10;
 template < > int List<VermaModuleMonomial>::ListActualSizeIncrement=10;
 template < > int List<MonomialUniversalEnveloping>::ListActualSizeIncrement=20;
+template < > int List<ElementUniversalEnveloping>::ListActualSizeIncrement=20;
+template < > int List<List<PolynomialRationalCoeff> >::ListActualSizeIncrement=20;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
 template < > std::string Matrix<Rational>::MatrixElementSeparator= ", \t";
+template < > std::string Matrix<PolynomialRationalCoeff>::MatrixElementSeparator= ", \t";
+template < > std::string Matrix<RationalFunction>::MatrixElementSeparator= ", \t";
 
 //template < > int ListPointers<partFraction>::MemoryAllocationIncrement=100;
 ListPointers<partFraction> partFraction::GlobalCollectorPartFraction;
@@ -8050,7 +8054,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
   }
   if (CarryOver!=0)
   { for (int i=x.size; i<this->size; i++)
-    { if ( this->TheObjects[i]>0)
+    { if (this->TheObjects[i]>0)
       { this->TheObjects[i]--;
         break;
       }
@@ -8065,6 +8069,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output)
 { assert(this!=&output && this!=&x && this!=&output);
   output.SetSizeExpandOnTopNoObjectInit(x.size+output.size);
+  LargeIntUnsigned tempI;
   for(int i=0; i<output.size; i++)
     output.TheObjects[i]=0;
   for (int i=0; i<this->size; i++)
@@ -8074,7 +8079,6 @@ void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output)
       tempLong= tempLong*tempLong2;
       unsigned long long lowPart= tempLong%LargeIntUnsigned::CarryOverBound;
       unsigned long long highPart= tempLong/LargeIntUnsigned::CarryOverBound;
-      LargeIntUnsigned tempI;
       tempI.AssignShiftedUInt((unsigned int) lowPart, i+j);
       output.AddNoFitSize(tempI);
       tempI.AssignShiftedUInt((unsigned int) highPart, i+j+1);
@@ -8952,9 +8956,9 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
   if (!UsingVarChange)
   { if (includeNumerator)
       { if (this->UncoveringBrackets)
-          NumLinesUsed+=ComputationalBufferCoefficient.StringPrintOutAppend (stringPoly, PolyFormatLocal);
+          NumLinesUsed+=ComputationalBufferCoefficient.StringPrintOutAppend(stringPoly, PolyFormatLocal);
         else
-          NumLinesUsed+=ComputationalBufferCoefficientNonExpanded.StringPrintOutAppend (stringPoly, PolyFormatLocal);
+          NumLinesUsed+=ComputationalBufferCoefficientNonExpanded.StringPrintOutAppend(stringPoly, PolyFormatLocal);
       }
     else
       stringPoly="(...)";
@@ -8973,10 +8977,10 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
   if (stringPoly=="-1")
     stringPoly="-";
   if ((this->Coefficient.size>1 && this->UncoveringBrackets) || (this->CoefficientNonExpanded.size>1 && !this->UncoveringBrackets))
-    out2<<"(";
-  out2<<stringPoly;
+    out2 << "(";
+  out2 << stringPoly;
   if ((this->Coefficient.size>1 && this->UncoveringBrackets) || (this->CoefficientNonExpanded.size>1 && !this->UncoveringBrackets))
-    out2<<")";
+    out2 << ")";
   stringPoly= out2.str();
 //  this->intRootToString(out, this->RootShift, false);
   out << " ";
@@ -10107,9 +10111,9 @@ int partFractions::ReadFromFileComputedContributions(std::fstream& input, Global
 
 void partFractions::WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables)
 { output.seekp(0);
-  output<< "Partial_fraction_index/file_storage_position\n";
+  output << "Partial_fraction_index/file_storage_position\n";
   for (int i=0; i<this->size; i++)
-    output<< i<<" "<<this->TheObjects[i].FileStoragePosition<<"\n";
+    output <<  i<< " " << this->TheObjects[i].FileStoragePosition << "\n";
 }
 
 
@@ -10227,13 +10231,13 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
     tempFrac.AssignDenominatorOnly(*this);
     tempFrac.Coefficient.SetSizeExpandOnTopLight(1);
     tempFrac.Coefficient.TheObjects[0].Assign(this->Coefficient.TheObjects[k]);
-    if (  tempMat.RowEchelonFormToLinearSystemSolution(tempSel, matColumn, matLinComb))
+    if (tempMat.RowEchelonFormToLinearSystemSolution(tempSel, matColumn, matLinComb))
     { tempMon.Assign(this->Coefficient.TheObjects[k]);
       if (this->flagAnErrorHasOccurredTimeToPanic)
         matLinComb.ComputeDebugString();
       for (int i=0; i<matLinComb.NumRows; i++)
       { thePowers.MaxMultiplicities.TheObjects[i]=0;
-        if (  matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) || matLinComb.elements[i][0].IsNegative() )
+        if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) || matLinComb.elements[i][0].IsNegative())
         { int tempI=matLinComb.elements[i][0].floor();
           thePowersSigned.TheObjects[i]=tempI;
           if (tempI<0)
@@ -10429,23 +10433,23 @@ int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange
   { if (this->TheObjects[i].Coefficient.size>0 )
     { TotalLines+=this->TheObjects[i].ElementToStringBasisChange(*this, VarChange, UsingVarChange, tempS, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
       if (LatexFormat)
-        out <<"&&";
+        out << "&&";
       if (tempS[0]!='-')
-        out<<"+";
-      out<<tempS;
+        out << "+";
+      out << tempS;
       if (LatexFormat)
-      { out<<"\\\\ \n";
+      { out << "\\\\ \n";
         TotalLines++;
       }
       else
-        out <<"\n";
+        out << "\n";
       if (LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
-      { out<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
+      { out << "\\end{eqnarray*}\\begin{eqnarray*}\n";
         LastCutOff=TotalLines;
       }
     }
     if (TotalLines>this->flagMaxNumStringOutputLines)
-    { out<< "\n Number of lines exceeded " << this->flagMaxNumStringOutputLines<< "; The rest of the output was suppressed.";
+    { out << "\n Number of lines exceeded " << this->flagMaxNumStringOutputLines << "; The rest of the output was suppressed.";
       break;
     }
   }
@@ -10472,18 +10476,18 @@ int partFractions::ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFi
   { if (this->TheObjects[i].Coefficient.size>0 )
     { TotalLines+=this->TheObjects[i].ElementToStringBasisChange(  *this, VarChange, UsingVarChange, tempS, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
       if (LatexFormat)
-        output <<"&&";
+        output << "&&";
       if (tempS[0]!='-')
-        output<<"+";
-      output<<tempS;
+        output << "+";
+      output << tempS;
       if (LatexFormat)
-      { output<<"\\\\ \n";
+      { output << "\\\\ \n";
         TotalLines++;
       }
       else
-        output <<"\n";
+        output << "\n";
       if (LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
-      { output<<"\\end{eqnarray*}\\begin{eqnarray*}\n";
+      { output << "\\end{eqnarray*}\\begin{eqnarray*}\n";
         LastCutOff=TotalLines;
       }
     }
@@ -10532,16 +10536,16 @@ void partFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlob
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out1, out2, out3;
-  out1<< this->NumberRelevantReducedFractions << " relevant reduced + "<< this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
+  out1 << this->NumberRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
   if (this->NumRelevantNonReducedFractions!=0)
-    out1<<" + " << this->NumRelevantNonReducedFractions <<" relevant unreduced ";
-  out1<<" out of "<<this->size <<" total fractions";
+    out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
+  out1 << " out of "<< this->size << " total fractions";
   theGlobalVariables.theIndicatorVariables.ProgressReportString1= out1.str();
-  out2<<this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + " << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
-      << this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions <<" out of "<<this->NumMonomialsInTheNumerators << " total monomials in the numerators";
+  out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + " << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
+          << this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions << " out of " << this->NumMonomialsInTheNumerators << " total monomials in the numerators";
   theGlobalVariables.theIndicatorVariables.ProgressReportString2= out2.str();
   if (this->NumGeneratorsInTheNumerators!=0)
-  { out3<<this->NumGeneratorsRelevenatFractions << " relevant reduced + " << this->NumGeneratorsIrrelevantFractions << " disjoint = " << this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions <<" out of "<<this->NumGeneratorsInTheNumerators << " total generators in the numerators";
+  { out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + " << this->NumGeneratorsIrrelevantFractions << " disjoint = " << this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions << " out of " << this->NumGeneratorsInTheNumerators << " total generators in the numerators";
     theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
   } else
     theGlobalVariables.theIndicatorVariables.ProgressReportString3.clear();
@@ -10553,7 +10557,7 @@ void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariabl
   if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out2, out3;
-  out2  << "Processed " << this->NumProcessedForVPFfractions<<" out of " <<this->NumberRelevantReducedFractions << " relevant fractions";
+  out2  << "Processed " << this->NumProcessedForVPFfractions << " out of " << this->NumberRelevantReducedFractions << " relevant fractions";
 //  out3  << "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //        << " relevant fractions";
   theGlobalVariables.theIndicatorVariables.ProgressReportString2= out2.str();
@@ -10580,7 +10584,7 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
   }
   if (this->flagMakingProgressReport)
   { std::stringstream out;
-    out <<"Checksum: " << output.ElementToString();
+    out << "Checksum: " << output.ElementToString();
     theGlobalVariables.theIndicatorVariables.ProgressReportString5= out.str();
     theGlobalVariables.MakeReport();
   }
@@ -10634,7 +10638,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
     { i--;
       if (this->flagMakingProgressReport)
       { std::stringstream out;
-        out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
+        out << "Elongating denominator " << i+1 << " out of " << this->size;
         theGlobalVariables.theIndicatorVariables.ProgressReportString3=out.str();
         theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
       }
@@ -10651,12 +10655,12 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
   for (int i=0; i<this->size; i++)
   { tempFrac.Assign(this->TheObjects[i]);
     if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem(*this, Indicator, theGlobalVariables, this->AmbientDimension))
-    {  this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
+    { this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
       this->AddAlreadyReduced(tempFrac, theGlobalVariables, Indicator);
     }
     if (this->flagMakingProgressReport)
     { std::stringstream out;
-      out<<"Elongating denominator "<<i+1<<" out of "<<this->size;
+      out << "Elongating denominator " << i+1 << " out of " << this->size;
       theGlobalVariables.theIndicatorVariables.ProgressReportString4=out.str();
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
@@ -10802,17 +10806,17 @@ void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalV
 
 void partFractions::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { std::string tempS;
-  output<<"Dimension: ";
-  output<<this->AmbientDimension<<"\n";
-  output<<"Indices_of_roots:\n";
+  output << "Dimension: ";
+  output << this->AmbientDimension << "\n";
+  output << "Indices_of_roots:\n";
   for (int i=0; i<this->RootsToIndices.size; i++)
   { this->RootsToIndices.TheObjects[i].ElementToString(tempS);
-    output<<"| "<<i<<"    "<<tempS <<"\n";
+    output << "| " << i << "    " << tempS << "\n";
   }
-  output<<"Alphabet_used:\n";
+  output << "Alphabet_used:\n";
   for (int i=0; i<this->AmbientDimension; i++)
-    output<<PolyFormatLocal.GetLetterIndex(i)<<" ";
-  output<<"\n"<<"Number_of_fractions: " <<this->size<<"\n";
+    output << PolyFormatLocal.GetLetterIndex(i) << " ";
+  output << "\n" << "Number_of_fractions: " << this->size << "\n";
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].WriteToFile(output, theGlobalVariables);
 }
@@ -10833,30 +10837,30 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobal
   assert(input.is_open());
   input.seekg(0);
   std::string tempS;
-  input>>tempS;
-  input>>this->AmbientDimension;
-  input>>tempS;
+  input >> tempS;
+  input >> this->AmbientDimension;
+  input >> tempS;
   intRoot tempRoot;
-  for (input>>tempS; tempS!="Alphabet_used:"; input>>tempS)
+  for (input >> tempS; tempS!="Alphabet_used:"; input >> tempS)
   { int tempI;
-    input>>tempI;
-    input>>tempS;
+    input >> tempI;
+    input >> tempS;
     for (int i=0; i<this->AmbientDimension; i++)
-    { input>>tempRoot.TheObjects[i];
-      input>>tempS;
+    { input >> tempRoot.TheObjects[i];
+      input >> tempS;
     }
     tempRoots.AddObjectOnTop(tempRoot);
   }
   tempRoots.ComputeDebugString();
   this->RootsToIndices.initFromRoots(tempRoots, 0);
   for (int i=0; i<this->AmbientDimension; i++)
-  { input>>tempS;
+  { input >> tempS;
     PolyFormatLocal.SetLetterIndex(tempS, i);
   }
   int tempI;
-  input>>tempS;
+  input >> tempS;
   assert(tempS=="Number_of_fractions:");
-  input >>tempI;
+  input >> tempI;
   partFraction tempFrac;
   this->MakeActualSizeAtLeastExpandOnTop(tempI);
   for(int i=0; i<tempI; i++)
@@ -11147,37 +11151,37 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFra
   if (!LatexFormat)
     out << "1/(1-";
   else
-    out <<"\\frac{1}{(1-";
+    out << "\\frac{1}{(1-";
   for(int i=0; i<NumCoords; i++)
     if (tempRoot.TheObjects[i]!=0)
-    { out <<PolyFormatLocal.GetLetterIndex(i);
+    { out << PolyFormatLocal.GetLetterIndex(i);
       if (tempRoot.TheObjects[i]!=1)
-        out<<"^{"<<tempRoot.TheObjects[i]<<"}";
+        out << "^{" << tempRoot.TheObjects[i] << "}";
     }
-  out <<")";
+  out << ")";
   if (this->Multiplicities.TheObjects[indexElongation]>1)
     out << "^" << this->Multiplicities.TheObjects[indexElongation];
-  if (LatexFormat){ out<<"}"; }
+  if (LatexFormat){ out << "}"; }
   output= out.str();
 }
 
 void oneFracWithMultiplicitiesAndElongations::ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int index, int theDimension)
 {  if (this->Multiplicities.size==0)
-  {  output.clear();
+  { output.clear();
     return;
   }
   std::string tempS;
   std::stringstream out;
   for (int k=0; k<this->Multiplicities.size; k++)
   { this->OneFracToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, theDimension);
-    out<<tempS;
+    out << tempS;
   }
-  out<<" ";
+  out << " ";
   output= out.str();
 }
 
 bool oneFracWithMultiplicitiesAndElongations::operator ==  (oneFracWithMultiplicitiesAndElongations& right)
-{  if (this->Elongations.size!=right.Elongations.size)
+{ if (this->Elongations.size!=right.Elongations.size)
     return false;
   for (int i=0; i<this->Elongations.size; i++)
   { bool Found=false;
@@ -11217,13 +11221,13 @@ int intRoot::HashFunction() const
 
 void intRoot::ElementToString(std::string& output)
 { std::stringstream out;
-  out<<"( ";
+  out << "( ";
   for (int i=0; i<this->size; i++)
-  { out<<this->TheObjects[i];
+  { out << this->TheObjects[i];
     if (i!=this->size-1)
-      out <<" , ";
+      out << " , ";
   }
-  out<<" )";
+  out << " )";
   output= out.str();
 }
 
@@ -11274,7 +11278,7 @@ inline bool intRoot::IsGEQNoWeight(intRoot& r)
 }
 
 inline bool intRoot::IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights)
-{  assert(this->size == r.size);
+{ assert(this->size == r.size);
   int accum=0;
   for (int i=0; i<this->size; i++)
     accum+=(this->TheObjects[i]-r.TheObjects[i])*theWeights.TheObjects[i];
@@ -11392,7 +11396,7 @@ int ::SelectionWithMaxMultiplicity::CardinalitySelectionWithMultiplicities()
 }
 
 bool SelectionWithMaxMultiplicity::HasMultiplicitiesZeroAndOneOnly()
-{  for(int i=0; i<this->elements.size; i++)
+{ for(int i=0; i<this->elements.size; i++)
     if (this->Multiplicities.TheObjects[elements.TheObjects[i]]>1)
       return false;
   return true;
@@ -11604,7 +11608,7 @@ void WeylGroup::SimpleReflectionRootAlg( int index, PolynomialsRationalCoeff& th
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
 { int tempI= this->TheObjects[index].size;
   for (int i=0; i<tempI; i++)
-  {  this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], output.affinePoint, RhoAction, UseMinusRho);
+  { this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], output.affinePoint, RhoAction, UseMinusRho);
 //    output.affinePoint.ComputeDebugString();
     this->SimpleReflectionDualSpace(this->TheObjects[index].TheObjects[tempI-i-1], output.normal);
   }
@@ -11670,7 +11674,7 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
 }
 
 void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
-{  for (int i=0; i<theRoots.size; i++)
+{ for (int i=0; i<theRoots.size; i++)
     output.AddObjectOnTopHash(theRoots.TheObjects[i]);
   root currentRoot;
   ElementWeylGroup tempEW;
@@ -11681,10 +11685,10 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
     outputSubset.AddObjectOnTopHash(tempEW);
   }
   for (int i=0; i<output.size; i++)
-  {  if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
+  { if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
     { tempEW=outputSubset.TheObjects[i]; }
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
-    {  currentRoot=output.TheObjects[i];
+    { currentRoot=output.TheObjects[i];
       //if (this->flagAnErrorHasOcurredTimeToPanic)
       //{ currentRoot.ComputeDebugString();
       //}
@@ -11693,7 +11697,7 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
       //{ currentRoot.ComputeDebugString();
       //}
       if (output.IndexOfObjectHash(currentRoot)==-1)
-      {  output.AddObjectOnTopHash(currentRoot);
+      { output.AddObjectOnTopHash(currentRoot);
         if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
         { tempEW.AddObjectOnTop(j);
           outputSubset.AddObjectOnTopHash(tempEW);
@@ -11742,7 +11746,7 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoef
   output.MakeActualSizeAtLeastExpandOnTop(OrbitGeneratingSubset.size);
   input.ComputeDebugString();
   for (int i=0; i<OrbitGeneratingSubset.size; i++)
-  {  bool tempBool= TheIndicatorsOrbit.TheObjects[i].IsPositiveOrZero()||(!PositiveWeightsOnly);
+  { bool tempBool= TheIndicatorsOrbit.TheObjects[i].IsPositiveOrZero()||(!PositiveWeightsOnly);
     if (LimitingCone!=0)
       tempBool = tempBool && LimitingCone->IsInCone(TheIndicatorsOrbit.TheObjects[i]);
     if (onlyLowerWeights)
@@ -11752,7 +11756,7 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoef
       tempBool = tempBool && tempRoot2.IsPositiveOrZero();
     }
     if (tempBool)
-    {  theRoot= input;
+    { theRoot= input;
       OrbitGeneratingSubset.ActOnRootAlgByGroupElement(i, theRoot, RhoAction);
       output.AddObjectOnTop(theRoot);
       output.ChamberIndicators.AddRoot(TheIndicatorsOrbit.TheObjects[i]);
@@ -11762,12 +11766,12 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoef
 }
 
 void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
-{  for (int i=0; i<this->TheObjects[index].size; i++)
+{ for (int i=0; i<this->TheObjects[index].size; i++)
     this->SimpleReflectionRootAlg(this->TheObjects[index].TheObjects[i], theRoot, RhoAction);
 }
 
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(roots& output)
-{  this->ComputeWeylGroup();
+{ this->ComputeWeylGroup();
   output.size=0;
   for (int i=0; i<this->RootSystem.size; i++)
     if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
@@ -21720,7 +21724,6 @@ void IrreducibleFiniteDimensionalModule::InitAndPrepareTheChambersForComputation
   theChambers.AmbientDimension= this->theMatrix.NumRows;
   theChambers.theCurrentIndex=-1;
   theChambers.theDirections.ComputeDebugString();
-
 }
 
 void DyckPaths::ComputeGoodPathsExcludeTrivialPath()

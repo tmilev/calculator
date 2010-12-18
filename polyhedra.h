@@ -3105,6 +3105,11 @@ public:
   void init(short nv);
   void initNoDegreesInit(short nv);
   void NullifyDegrees();
+  bool operator>(const Monomial<ElementOfCommutativeRingWithIdentity>& other)const
+  { if (this->operator==(other))
+      return false;
+    return this->IsGEQ(other);
+  };
   bool IsDivisibleBy(const Monomial<ElementOfCommutativeRingWithIdentity>& other)const
   { for (int i=0; i<this->NumVariables; i++)
       if (this->degrees[i]< other.degrees[i])
@@ -3125,7 +3130,7 @@ public:
   void MakeMonomialOneLetter(short NumVars, int LetterIndex, short Power, const ElementOfCommutativeRingWithIdentity& Coeff);
   void IncreaseNumVariables(short increase);
   bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
-  bool IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity>& m);
+  bool IsGEQ(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
   bool IsEqualToZero() const;
   bool IsPositive();
   void DecreaseNumVariables(short increment);
@@ -3135,7 +3140,7 @@ public:
   bool IsAConstant();
   void InvertDegrees();
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
-  bool operator==(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
+  bool operator==(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
   void operator=(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   int SizeWithoutCoefficient();
   Monomial();
@@ -3731,21 +3736,66 @@ public:
   void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify(theNumVars); this->Denominator.MakeNVarConst(this->NumVariables, (Rational) 1);};
   void MakeNVarConst(int theNumVars, const Rational& theCoeff) {this->Nullify(theNumVars); this->Numerator.MakeNVarConst(theNumVars, theCoeff);};
   bool IsEqualToZero(){return this->Numerator.IsEqualToZero();};
-  void ReduceGroebnerBasis
-  (List<PolynomialRationalCoeff>& theBasis)
+  static void ReduceGroebnerBasis
+(
+List<PolynomialRationalCoeff>& theBasis,
+PolynomialRationalCoeff& buffer1
+)
   ;
-  void TransformToGroebnerBasis
-  (List<PolynomialRationalCoeff>& theBasis)
+  static void TransformToGroebnerBasis
+  (
+  List<PolynomialRationalCoeff>& theBasis,
+  PolynomialRationalCoeff& buffer1,
+  PolynomialRationalCoeff& buffer2,
+  PolynomialRationalCoeff& buffer3,
+  PolynomialRationalCoeff& buffer4,
+  Monomial<Rational>& bufferMon1,
+  Monomial<Rational>& bufferMon2
+  )
   ;
-  void RemainderDivisionWithRespectToBasis
-  (PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder)
+  static void RemainderDivisionWithRespectToBasis
+  (PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder,
+  PolynomialRationalCoeff& buffer1,
+  PolynomialRationalCoeff& buffer2,
+  Monomial<Rational>& bufferMon1
+  )
   ;
-  void RemainderDivision
-  (PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder)
+  static void RemainderDivision
+  (PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder,
+  PolynomialRationalCoeff& buffer,
+  Monomial<Rational>& bufferMon1
+  )
   ;
   int GetIndexMaxMonomial(PolynomialRationalCoeff& input);
-  void gcd(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output);
-  void lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output);
+  static void gcd
+  (PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
+  { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5;
+    List<PolynomialRationalCoeff> bufferList;
+    Monomial<Rational> tempMon1, tempMon2;
+    RationalFunction::gcd(left, right, output, buffer1, buffer2, buffer3, buffer4, buffer5, tempMon1, tempMon2, bufferList);
+  };
+  static void gcd
+  ( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
+  PolynomialRationalCoeff& buffer1,
+  PolynomialRationalCoeff& buffer2,
+  PolynomialRationalCoeff& buffer3,
+  PolynomialRationalCoeff& buffer4,
+  PolynomialRationalCoeff& buffer5,
+  Monomial<Rational>& bufferMon1,
+  Monomial<Rational>& bufferMon2,
+  List<PolynomialRationalCoeff>& bufferList
+  )
+  ;
+  static void lcm
+( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
+  PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2,
+  PolynomialRationalCoeff& buffer3,
+  PolynomialRationalCoeff& buffer4,
+  Monomial<Rational>& bufferMon1,
+  Monomial<Rational>& bufferMon2,
+  List<PolynomialRationalCoeff>& bufferList
+)
+;
   void Minus(){this->Numerator.TimesInteger(-1);};
 };
 
@@ -3848,13 +3898,13 @@ ParallelComputing::GlobalPointerCounter-=this->NumVariables;
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat)
 { if (this->Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
-  { out<< "0";
+  { out << "0";
     return;
   }
   std::string tempS;
   this->Coefficient.ElementToString(tempS);
   if (this->IsAConstant())
-  { out<< tempS;
+  { out << tempS;
     return;
   }
   if (tempS=="-1")
@@ -3871,7 +3921,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(
       }
       else
         if (this->degrees[i]!=1)
-          out << "^{" << this->degrees[i]<<"}";
+          out << "^{" << this->degrees[i] << "}";
     }
 }
 
@@ -3885,7 +3935,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ(Monomial<ElementOfCommutativeRingWithIdentity>& m)
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const
 { assert(this->NumVariables==m.NumVariables);
   for (int i=this->NumVariables-1; i>=0; i--)
   { if (this->degrees[i]>m.degrees[i])
@@ -3959,7 +4009,7 @@ ParallelComputing::GlobalPointerCounter+=increase;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::GetMonomialWithCoeffOne( Monomial<ElementOfCommutativeRingWithIdentity>& output)
+void Monomial<ElementOfCommutativeRingWithIdentity>::GetMonomialWithCoeffOne(Monomial<ElementOfCommutativeRingWithIdentity>& output)
 { output.Coefficient.Assign(ElementOfCommutativeRingWithIdentity::TheRingUnit);
   output.initNoDegreesInit(this->NumVariables);
   for (int i=0; i< this->NumVariables; i++)
@@ -3967,14 +4017,15 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::GetMonomialWithCoeffOne( Mo
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::operator ==(const Monomial<ElementOfCommutativeRingWithIdentity>& m)
+bool Monomial<ElementOfCommutativeRingWithIdentity>::operator ==(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const
 { for(int i=0; i<this->NumVariables; i++)
-    if (this->degrees[i]!=m.degrees[i]) return false;
+    if (this->degrees[i]!=m.degrees[i])
+      return false;
   return true;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::operator = (const Monomial<ElementOfCommutativeRingWithIdentity>& m)
+void Monomial<ElementOfCommutativeRingWithIdentity>::operator=(const Monomial<ElementOfCommutativeRingWithIdentity>& m)
 { this->initNoDegreesInit(m.NumVariables);
   for (int i=0; i<NumVariables; i++)
     this->degrees[i]=m.degrees[i];
@@ -4569,7 +4620,6 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
   }
   output.CopyFromPoly(Accum);
 }
-
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output)
@@ -7040,6 +7090,7 @@ class ParserNode
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
+  void EvaluateGCD(GlobalVariables& theGlobalVariables);
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
@@ -7063,7 +7114,7 @@ public:
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable, tokenGCD
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -7088,6 +7139,9 @@ public:
   bool TokenProhibitsUnaryMinus(int theToken);
   void AddIndexingExpressionOnTop();
   void AddLetterExpressionOnTop();
+  void AddGCDOnTop();
+  bool IsAWordSeparatingCharacter(char c);
+  bool LookUpInDictionaryAndAdd(std::string& input);
   void Own(int indexParent, int indexChild1, int indexChild2);
   void Own(int indexParent, int indexChild1);
   void ExtendOnTop(int numNew);
@@ -7106,7 +7160,7 @@ public:
   void Clear();
   void DecreaseStackSetExpressionLastNode(int Decrease);
   void ComputeNumberOfVariablesAndAdjustNodes();
-  Parser(){ this->numEmptyTokensAtBeginning=5; this->NumVariables=0;};
+  Parser(){ this->numEmptyTokensAtBeginning=6; this->NumVariables=0;};
 };
 
 class IrreducibleFiniteDimensionalModule

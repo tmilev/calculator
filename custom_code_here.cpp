@@ -3424,39 +3424,18 @@ void Parser::ParserInit(const std::string& input)
   this->TokenBuffer.size=0;
   this->ValueBuffer.size=0;
   this->size=0;
-  for (int i=0; i<(signed) input.size(); i++)
-  { switch (input.at(i))
-    { case '0': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '1': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(1); break;
-      case '2': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(2); break;
-      case '3': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(3); break;
-      case '4': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(4); break;
-      case '5': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(5); break;
-      case '6': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(6); break;
-      case '7': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(7); break;
-      case '8': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(8); break;
-      case '9': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(9); break;
-      case '*': this->TokenBuffer.AddObjectOnTop(Parser::tokenTimes); this->ValueBuffer.AddObjectOnTop(9); break;
-      case '}': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseCurlyBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '{': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenCurlyBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '[': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case ']': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseLieBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '(': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case ',': this->TokenBuffer.AddObjectOnTop(Parser::tokenComma); this->ValueBuffer.AddObjectOnTop(0); break;
-      case ')': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseBracket); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '^': this->TokenBuffer.AddObjectOnTop(Parser::tokenPower); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '+': this->TokenBuffer.AddObjectOnTop(Parser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '-': this->TokenBuffer.AddObjectOnTop(Parser::tokenMinus); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '_': this->TokenBuffer.AddObjectOnTop(Parser::tokenUnderscore); this->ValueBuffer.AddObjectOnTop(0); break;
-      case '/': this->TokenBuffer.AddObjectOnTop(Parser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'x': this->TokenBuffer.AddObjectOnTop(Parser::tokenX); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'd': this->TokenBuffer.AddObjectOnTop(Parser::tokenPartialDerivative); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'g': this->TokenBuffer.AddObjectOnTop(Parser::tokenG); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'h': this->TokenBuffer.AddObjectOnTop(Parser::tokenH); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'c': this->TokenBuffer.AddObjectOnTop(Parser::tokenC); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'i': this->TokenBuffer.AddObjectOnTop(Parser::tokenMap); this->ValueBuffer.AddObjectOnTop(0); break;
-      case 'n': this->TokenBuffer.AddObjectOnTop(Parser::tokenVariable); this->ValueBuffer.AddObjectOnTop(0); break;
-      default: this->TokenBuffer.AddObjectOnTop(Parser::tokenEmpty); this->ValueBuffer.AddObjectOnTop(0); break;
+  std::string buffer;
+  int theLength=(signed) input.size();
+  char LookAheadChar;
+  for (int i=0; i<theLength; i++)
+  { buffer.push_back(input[i]);
+    if (i<theLength-1)
+      LookAheadChar=input[i+1];
+    else
+      LookAheadChar=' ';
+    if (this->IsAWordSeparatingCharacter(buffer[0]) || this->IsAWordSeparatingCharacter(LookAheadChar))
+    { this->LookUpInDictionaryAndAdd(buffer);
+      buffer="";
     }
   }
   this->ValueStack.size=0;
@@ -3468,6 +3447,107 @@ void Parser::ParserInit(const std::string& input)
   { this->TokenStack.AddObjectOnTop(this->tokenEmpty);
     this->ValueStack.AddObjectOnTop(0);
   }
+}
+
+bool Parser::IsAWordSeparatingCharacter(char c)
+{ switch (c)
+  { case '0': return true;
+    case '1': return true;
+    case '2': return true;
+    case '3': return true;
+    case '4': return true;
+    case '5': return true;
+    case '6': return true;
+    case '7': return true;
+    case '8': return true;
+    case '9': return true;
+    case '*': return true;
+    case '}': return true;
+    case '{': return true;
+    case '[': return true;
+    case ']': return true;
+    case '(': return true;
+    case ',': return true;
+    case ')': return true;
+    case '^': return true;
+    case '+': return true;
+    case '-': return true;
+    case '_': return true;
+    case '/': return true;
+    case ' ': return true;
+    default: return false;
+  }
+  return false;
+}
+
+bool Parser::LookUpInDictionaryAndAdd(std::string& input)
+{ switch (input.at(0))
+  { case '0': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '1': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(1); return true;
+    case '2': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(2); return true;
+    case '3': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(3); return true;
+    case '4': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(4); return true;
+    case '5': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(5); return true;
+    case '6': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(6); return true;
+    case '7': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(7); return true;
+    case '8': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(8); return true;
+    case '9': this->TokenBuffer.AddObjectOnTop(Parser::tokenDigit); this->ValueBuffer.AddObjectOnTop(9); return true;
+    case '*': this->TokenBuffer.AddObjectOnTop(Parser::tokenTimes); this->ValueBuffer.AddObjectOnTop(9); return true;
+    case '}': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseCurlyBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '{': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenCurlyBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '[': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenLieBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case ']': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseLieBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '(': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case ',': this->TokenBuffer.AddObjectOnTop(Parser::tokenComma); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case ')': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '^': this->TokenBuffer.AddObjectOnTop(Parser::tokenPower); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '+': this->TokenBuffer.AddObjectOnTop(Parser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '-': this->TokenBuffer.AddObjectOnTop(Parser::tokenMinus); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '_': this->TokenBuffer.AddObjectOnTop(Parser::tokenUnderscore); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '/': this->TokenBuffer.AddObjectOnTop(Parser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); return true;
+    default: break;
+  }
+  if (input=="x")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenX);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input=="d")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenPartialDerivative);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input=="g")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenG);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input =="h")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenH);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input=="c")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenC);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input =="i")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenMap);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input=="n")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenVariable);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input=="gcd")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenGCD);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  return false;
 }
 
 void Parser::Parse(const std::string& input)
@@ -3534,6 +3614,7 @@ bool Parser::ApplyRules(int lookAheadToken)
   int tokenThirdToLast=this->TokenStack.TheObjects[this->TokenStack.size-3];
   int tokenFourthToLast=this->TokenStack.TheObjects[this->TokenStack.size-4];
   int tokenFifthToLast=this->TokenStack.TheObjects[this->TokenStack.size-5];
+  int tokenSixthToLast=this->TokenStack.TheObjects[this->TokenStack.size-6];
   if (tokenLast==this->tokenEmpty)
   { this->PopTokenAndValueStacksLast();
     return true;
@@ -3545,6 +3626,10 @@ bool Parser::ApplyRules(int lookAheadToken)
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMap && lookAheadToken!=this->tokenUnderscore)
   { this->AddMapOnTop();
+    return true;
+  }
+  if (tokenLast==this->tokenCloseBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenBracket && tokenSixthToLast==this->tokenGCD)
+  { this->AddGCDOnTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMinus && !this->TokenProhibitsUnaryMinus(tokenThirdToLast) && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
@@ -3628,6 +3713,14 @@ void Parser::AddPowerOnTop()
   this->DecreaseStackSetExpressionLastNode(2);
 }
 
+void Parser::AddGCDOnTop()
+{ this->ExtendOnTop(1);
+  this->LastObject()->Clear();
+  this->LastObject()->Operation=this->tokenGCD;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
+  this->DecreaseStackSetExpressionLastNode(5);
+}
+
 void Parser::AddLetterExpressionOnTop()
 { this->ExtendOnTop(1);
   this->LastObject()->Clear();
@@ -3666,7 +3759,6 @@ void Parser::AddDivideOnTop()
   this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
   this->DecreaseStackSetExpressionLastNode(2);
 }
-
 
 void Parser::AddMinusOnTop()
 { this->ExtendOnTop(1);
@@ -3787,6 +3879,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
     case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
+    case Parser::tokenGCD: this->EvaluateGCD(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
 }
@@ -4069,6 +4162,56 @@ void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)
   this->ExpressionType=this->typeUEelement;
 }
 
+void ParserNode::EvaluateGCD(GlobalVariables& theGlobalVariables)
+{if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->SetError(this->errorOperationByUndefinedOrErrorType);
+    return;
+  }
+  if (this->children.size!=2)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
+  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
+  LargeIntUnsigned tempUI1, tempUI2, tempUI3;
+  LargeInt tempInt;
+  switch(leftNode.ExpressionType)
+  { case ParserNode::typeIntegerOrIndex:
+      if (leftNode.intValue==0 || rightNode.intValue==0)
+      { this->SetError(this->errorDivisionByZero);
+        return;
+      }
+      this->intValue= Rational::gcd(leftNode.intValue, rightNode.intValue);
+      this->ExpressionType=this->typeIntegerOrIndex;
+      break;
+    case ParserNode::typeRational:
+      if (!leftNode.rationalValue.IsInteger() && !rightNode.rationalValue.IsInteger())
+        this->SetError(this->errorDunnoHowToDoOperation);
+      else
+      { leftNode.rationalValue.GetNumUnsigned(tempUI1);
+        rightNode.rationalValue.GetNumUnsigned(tempUI2);
+        LargeIntUnsigned::gcd(tempUI1, tempUI2, tempUI3);
+        tempInt.AddLargeIntUnsigned(tempUI3);
+        this->rationalValue.AssignLargeInteger(tempInt);
+        this->ExpressionType=this->typeRational;
+      }
+      break;
+    case ParserNode::typePoly:
+      if (leftNode.polyValue.IsEqualToZero() || rightNode.polyValue.IsEqualToZero())
+      { this->SetError(this->errorDivisionByZero);
+        return;
+      }
+      RationalFunction::gcd(leftNode.polyValue, rightNode.polyValue, this->polyValue);
+      this->ExpressionType=this->typePoly;
+      break;
+    case ParserNode::typeUEelement:
+      this->SetError(errorDunnoHowToDoOperation);
+    break;
+    default: this->SetError(this->errorDunnoHowToDoOperation); return;
+  }
+}
+
 void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
@@ -4223,6 +4366,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenMap: out << "i"; break;
     case Parser::tokenMinusUnary: out << "-"; break;
     case Parser::tokenVariable: out << "n"; break;
+    case Parser::tokenGCD: out << "gcd"; break;
     default: out << "?"; break;
   }
 }
@@ -5542,7 +5686,6 @@ void CGIspecificRoutines::ReplaceEqualitiesAndAmpersantsBySpaces(std::string& in
       inputOutput[i]=' ';
 }
 
-
 void VectorPartition::ComputeAllPartitions()
 { List<int> currentPartition;
   currentPartition.initFillInObject(PartitioningRoots.size, 0);
@@ -5613,33 +5756,42 @@ std::string RationalFunction::ElementToString()
 }
 
 void RationalFunction::RemainderDivisionWithRespectToBasis
-  (PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder)
+  (PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder,
+  PolynomialRationalCoeff& buffer1,
+  PolynomialRationalCoeff& buffer2,
+  Monomial<Rational>& bufferMon1
+  )
 { assert(&outputRemainder!=&input);
-  outputRemainder=input;
-  PolynomialRationalCoeff tempP;
+  PolynomialRationalCoeff* currentRemainder=&input;
+  PolynomialRationalCoeff* nextRemainder=&buffer1;
   for (int i=0; i<theBasis.size; i++)
-  { this->RemainderDivision(outputRemainder, theBasis.TheObjects[i], tempP);
-    outputRemainder=tempP;
+  { RationalFunction::RemainderDivision(*currentRemainder, theBasis.TheObjects[i], *nextRemainder, buffer2, bufferMon1);
+    MathRoutines::swap(currentRemainder, nextRemainder);
+    if (currentRemainder->IsEqualToZero())
+      break;
   }
+  if (currentRemainder!=&outputRemainder)
+    outputRemainder.Assign(*currentRemainder);
 }
 
 void RationalFunction::RemainderDivision
-  (PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder)
+  (PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder,
+  PolynomialRationalCoeff& buffer,
+  Monomial<Rational>& bufferMon1
+  )
 { assert(&input!=&outputRemainder);
-  PolynomialRationalCoeff tempP;
   outputRemainder.Assign(input);
-  int divisorHighest=this->GetIndexMaxMonomial(divisor);
+  int divisorHighest=divisor.GetIndexMaxMonomial();
   Monomial<Rational>& highestMonDivisor=divisor.TheObjects[divisorHighest];
   int remainderHighest=-1;
   int theNumVars=input.NumVars;
-  Monomial<Rational> tempMon;
-  tempMon.init(theNumVars);
+  bufferMon1.init(theNumVars);
   assert(input.NumVars==theNumVars);
   assert(divisor.NumVars==theNumVars);
   while (true)
   { if (outputRemainder.size==0)
       return;
-    remainderHighest=  this->GetIndexMaxMonomial(outputRemainder);
+    remainderHighest=  outputRemainder.GetIndexMaxMonomial();
     Monomial<Rational>& highestMonRemainder=outputRemainder.TheObjects[remainderHighest];
     /*outputRemainder.ComputeDebugString();
     highestMonRemainder.ComputeDebugString();
@@ -5647,68 +5799,67 @@ void RationalFunction::RemainderDivision
     for (int i=0; i<theNumVars; i++)
     { if (highestMonRemainder.degrees[i]<highestMonDivisor.degrees[i])
         return;
-      tempMon.degrees[i]=highestMonRemainder.degrees[i]-highestMonDivisor.degrees[i];
+      bufferMon1.degrees[i]=highestMonRemainder.degrees[i]-highestMonDivisor.degrees[i];
     }
-    tempMon.Coefficient=highestMonRemainder.Coefficient/highestMonDivisor.Coefficient;
-    tempP.Assign(divisor);
-    tempP.MultiplyByMonomial(tempMon);
+    bufferMon1.Coefficient=highestMonRemainder.Coefficient/highestMonDivisor.Coefficient;
+    divisor.MultiplyByMonomial(bufferMon1, buffer);
 /*    outputRemainder.ComputeDebugString();
     tempP.ComputeDebugString();
     highestMonRemainder.ComputeDebugString();
     tempMon.ComputeDebugString();
     highestMonDivisor.ComputeDebugString();*/
-    outputRemainder.Subtract(tempP);/*
+    outputRemainder.Subtract(buffer);/*
     outputRemainder.ComputeDebugString();*/
   }
 }
 
-int RationalFunction::GetIndexMaxMonomial(PolynomialRationalCoeff& input)
-{ if (input.size==0)
-    return -1;
-  int result=0;
-  for (int i=1; i<input.size; i++)
-    if (input.TheObjects[i].IsGEQ(input.TheObjects[result]))
-      result=i;
-  return result;
-}
-
 void RationalFunction::TransformToGroebnerBasis
-  (List<PolynomialRationalCoeff>& theBasis)
-{ PolynomialRationalCoeff tempP, Spoly;
-  Monomial<Rational> leftShift, rightShift;
+  (
+  List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2,
+  PolynomialRationalCoeff& buffer3,
+  PolynomialRationalCoeff& buffer4,
+  Monomial<Rational>& bufferMon1,
+  Monomial<Rational>& bufferMon2
+  )
+{ PolynomialRationalCoeff& tempP=buffer1;
+  PolynomialRationalCoeff& Spoly=buffer2;
+  Monomial<Rational>& leftShift=bufferMon1;
+  Monomial<Rational>& rightShift=bufferMon2;
   int theNumVars=theBasis.TheObjects[0].NumVars;
   leftShift.init(theNumVars);
   rightShift.init(theNumVars);
-  std::string tempS;
+ // std::string tempS;
   for (int lowestNonExplored=0; lowestNonExplored< theBasis.size; lowestNonExplored++)
   { //warning! currentPoly may expire if theBasis.TheObjects changes size
 //    PolynomialRationalCoeff& currentPoly=;
     for (int j=0; j<theBasis.size; j++)
     { PolynomialRationalCoeff& currentLeft= theBasis.TheObjects[lowestNonExplored];
       PolynomialRationalCoeff& currentRight= theBasis.TheObjects[j];
-      Monomial<Rational>& leftHighestMon=currentLeft.TheObjects[this->GetIndexMaxMonomial(currentLeft)];
-      Monomial<Rational>& rightHighestMon=currentRight.TheObjects[this->GetIndexMaxMonomial(currentRight)];
-      leftHighestMon.ComputeDebugString();
-      rightHighestMon.ComputeDebugString();
-      currentRight.ComputeDebugString();
-      currentLeft.ComputeDebugString();
+      Monomial<Rational>& leftHighestMon=currentLeft.TheObjects[currentLeft.GetIndexMaxMonomial()];
+      Monomial<Rational>& rightHighestMon=currentRight.TheObjects[currentRight.GetIndexMaxMonomial()];
+      //leftHighestMon.ComputeDebugString();
+      //rightHighestMon.ComputeDebugString();
+      //currentRight.ComputeDebugString();
+      //currentLeft.ComputeDebugString();
       leftShift.Coefficient=-rightHighestMon.Coefficient;
       rightShift.Coefficient=leftHighestMon.Coefficient;
       for (int k=0; k<leftHighestMon.NumVariables; k++)
         if (leftHighestMon.degrees[k]>rightHighestMon.degrees[k])
-          rightShift.degrees[k]=leftHighestMon.degrees[k]-rightHighestMon.degrees[k];
+        { rightShift.degrees[k]=leftHighestMon.degrees[k]-rightHighestMon.degrees[k];
+          leftShift.degrees[k]=0;
+        }
         else
-          leftShift.degrees[k]=rightHighestMon.degrees[k]-leftHighestMon.degrees[k];
-      tempP.Assign(currentLeft);
-      tempP.MultiplyByMonomial(leftShift);
-      Spoly.Assign(currentRight);
-      Spoly.MultiplyByMonomial(rightShift);
+        { leftShift.degrees[k]=rightHighestMon.degrees[k]-leftHighestMon.degrees[k];
+          rightShift.degrees[k]=0;
+        }
+      currentLeft.MultiplyByMonomial(leftShift, tempP);
+      currentRight.MultiplyByMonomial(rightShift, Spoly);
       Spoly.AddPolynomial(tempP);
-      Spoly.ComputeDebugString();
-      theBasis.ElementToStringGeneric(tempS);
-      this->RemainderDivisionWithRespectToBasis(Spoly, theBasis, tempP);
+      //Spoly.ComputeDebugString();
+//      theBasis.ElementToStringGeneric(tempS);
+      RationalFunction::RemainderDivisionWithRespectToBasis(Spoly, theBasis, tempP, buffer3, buffer4, bufferMon1);
 
-      tempP.ComputeDebugString();
+      //tempP.ComputeDebugString();
       if (!tempP.IsEqualToZero())
       { theBasis.AddObjectOnTop(tempP);
         std::cout << "<br> new element found: " << tempP.ElementToString();
@@ -5718,26 +5869,40 @@ void RationalFunction::TransformToGroebnerBasis
   std::cout << "<br> ... and the basis before reduction is: <br>";
   for (int i=0; i<theBasis.size; i++)
     std::cout << theBasis.TheObjects[i].ElementToString() << ", ";
-  this->ReduceGroebnerBasis(theBasis);
+  RationalFunction::ReduceGroebnerBasis(theBasis, buffer1);
+
 }
 
-void RationalFunction::ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis)
-{ List<Monomial<Rational> > LeadingCoeffs;
+void RationalFunction::ReduceGroebnerBasis
+(
+List<PolynomialRationalCoeff>& theBasis,
+PolynomialRationalCoeff& buffer1
+)
+{ PolynomialRationalCoeff& LeadingCoeffs=buffer1;
   LeadingCoeffs.MakeActualSizeAtLeastExpandOnTop(theBasis.size);
+  LeadingCoeffs.ClearTheObjects();
+  List<Monomial< Rational> > tempList;
   std::cout << "<br> ... and the leading coefficients are: <br>";
   for (int i=0; i<theBasis.size; i++)
   { PolynomialRationalCoeff& current=theBasis.TheObjects[i];
-    LeadingCoeffs.AddObjectOnTop(current.TheObjects[this->GetIndexMaxMonomial(current)]);
+    LeadingCoeffs.AddObjectOnTopHash(current.TheObjects[current.GetIndexMaxMonomial()]);
     LeadingCoeffs.LastObject()->Coefficient=1;
     LeadingCoeffs.LastObject()->ComputeDebugString();
-    std::cout << LeadingCoeffs.LastObject()->DebugString <<", ";
+    std::cout << LeadingCoeffs.LastObject()->DebugString << ", ";
+  }
+  tempList.CopyFromBase(LeadingCoeffs);
+  tempList.QuickSortAscending();
+  std::cout << "<br><br> and the sorted leading monomials are: ";
+  for (int i=0; i<theBasis.size; i++)
+  { tempList.TheObjects[i].ComputeDebugString();
+    std::cout << tempList.TheObjects[i].DebugString << ", ";
   }
   for (int i=0; i<LeadingCoeffs.size; i++)
   { Monomial<Rational>& currentMon=LeadingCoeffs.TheObjects[i];
     for (int j=0; j<LeadingCoeffs.size; j++)
       if (i!=j)
         if (currentMon.IsDivisibleBy(LeadingCoeffs.TheObjects[j]))
-        { LeadingCoeffs.PopIndexSwapWithLast(i);
+        { LeadingCoeffs.PopIndexSwapWithLastHash(i);
           theBasis.PopIndexSwapWithLast(i);
           i--;
           break;
@@ -5745,38 +5910,71 @@ void RationalFunction::ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBas
   }
 }
 
-void RationalFunction::lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
-{ PolynomialRationalCoeff leftTemp, rightTemp;
+void RationalFunction::gcd
+  ( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
+  PolynomialRationalCoeff& buffer1,
+  PolynomialRationalCoeff& buffer2,
+  PolynomialRationalCoeff& buffer3,
+  PolynomialRationalCoeff& buffer4,
+  PolynomialRationalCoeff& buffer5,
+  Monomial<Rational>& bufferMon1,
+  Monomial<Rational>& bufferMon2,
+  List<PolynomialRationalCoeff>& bufferList
+  )
+{ RationalFunction::lcm(left, right, buffer4, buffer1, buffer2, buffer3, buffer5, bufferMon1, bufferMon2, bufferList);
+  left.MultiplyBy(right, buffer2);
+  buffer4.ComputeDebugString();
+  buffer2.ComputeDebugString();
+  std::cout << "<br>the product: " << buffer2.DebugString << " and the gcd: " << buffer4.DebugString << "<br>";
+  buffer2.DivideBy(buffer4, output, buffer3);
+}
+
+void RationalFunction::lcm
+( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
+  PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2,
+  PolynomialRationalCoeff& buffer3,
+  PolynomialRationalCoeff& buffer4,
+  Monomial<Rational>& bufferMon1,
+  Monomial<Rational>& bufferMon2,
+  List<PolynomialRationalCoeff>& bufferList
+)
+{ PolynomialRationalCoeff& leftTemp=buffer1;
+  PolynomialRationalCoeff& rightTemp=buffer2;
+  PolynomialRationalCoeff& tempP=buffer3;
+  List<PolynomialRationalCoeff>& tempList=bufferList;
   leftTemp.Assign(left);
   rightTemp.Assign(right);
   assert(left.NumVars==right.NumVars);
   int theNumVars=left.NumVars;
   leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
-  PolynomialRationalCoeff tempP;
   tempP.MakeMonomialOneLetter(theNumVars+1, theNumVars, 1, (Rational) 1);
   leftTemp.MultiplyBy(tempP);
   tempP.TimesConstant((Rational)-1);
   tempP.AddConstant((Rational) 1);
   rightTemp.MultiplyBy(tempP);
-  List<PolynomialRationalCoeff> tempList;
+  tempList.size=0;
   tempList.AddObjectOnTop(leftTemp);
   tempList.AddObjectOnTop(rightTemp);
   std::cout << "<br>In the beginning: <br>";
   for (int i=0; i<tempList.size; i++)
   { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ElementToString() << "<br>\n";
   }
-  this->TransformToGroebnerBasis(tempList);
+  RationalFunction::TransformToGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
   std::cout << "<br><br> ... and the basis is: <br>";
   for (int i=0; i<tempList.size; i++)
   { std::cout << tempList.TheObjects[i].ElementToString() << "<br>\n";
   }
   for(int i=0; i<tempList.size; i++)
   { PolynomialRationalCoeff& current=tempList.TheObjects[i];
-    Monomial<Rational>& currentMon= current.TheObjects[this->GetIndexMaxMonomial(current)];
+    Monomial<Rational>& currentMon= current.TheObjects[current.GetIndexMaxMonomial()];
+    currentMon.ComputeDebugString();
     if (currentMon.degrees[theNumVars]==0)
-      output=current;
+    { output=current;
+      std::cout << "<br> the highest mon is: " << currentMon.DebugString << "<br>";
+      output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
       return;
+    }
   }
   output.Nullify(theNumVars);
 }

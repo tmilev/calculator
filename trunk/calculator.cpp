@@ -86,10 +86,20 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
-  //civilizedInput="h_1g_{-1}";
-  theParser.DefaultWeylRank=3;
+  //civilizedInput="gcd(n_1, n_2n_1)";
+  /*theParser.DefaultWeylRank=3;
   theParser.DefaultWeylLetter='B';
-  if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
+  PolynomialRationalCoeff tempP1, tempP2, tempP3, tempP4;
+  theParser.ParseEvaluateAndSimplify("n_2^{13}-n_1^{8}n_2^{5}+n_1^{13}-n_1^{5}n_2^{8}", theGlobalVariables);
+  tempP1=theParser.theValue.polyValue;
+  theParser.ParseEvaluateAndSimplify("(n_1^5-n_2^5)", theGlobalVariables);
+  tempP2=theParser.theValue.polyValue;
+  theParser.ParseEvaluateAndSimplify("( n_1^8-n_2^8)", theGlobalVariables);
+  tempP3=theParser.theValue.polyValue;
+  tempP2.MultiplyBy(tempP3);
+  tempP1.DivideBy(tempP2, tempP3, tempP4);
+  std::cout << "quotient:  " << tempP3.ElementToString() << " remainder: " << tempP4.ElementToString();*/
+/*  if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
     List<ElementUniversalEnveloping> tempList;
     root tempRoot="(1,2)";
@@ -107,7 +117,7 @@ int main(int argc, char **argv)
     std::cout << "<br>the remainder dividing " << tempP1.ElementToString() << " by " << tempP2.ElementToString() << " is " << tempP3.ElementToString();
     tempRF.lcm(tempP1, tempP2, tempP3);
     std::cout << "<br>the lcm of " << tempP1.ElementToString() << " and " << tempP2.ElementToString() << " is " << tempP3.ElementToString();
-  }
+  }*/
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
 

@@ -562,7 +562,7 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream& th
   theFile << tempS;
   theFile << "\n\n";
   tempS.clear();
-  this->theOutput.StringPrintOutAppend(tempS, PolyFormatLocal);
+  this->theOutput.StringPrintOutAppend(tempS, PolyFormatLocal, true);
   theFile << "\\begin{eqnarray*}&&" << tempS << "\\end{eqnarray*}";
   LaTeXProcedures::endLatexDocument(theFile);
 }
@@ -7938,7 +7938,7 @@ double Rational::DoubleValue()
 
 void Rational::Add(const Rational& r)
 { //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-  if (r.Extended==0)
+  if (r.Extended==0 && this->Extended==0)
     if (this->TryToAddQuickly(r.NumShort, r.DenShort))
       return;
   if (this==&r)
@@ -8956,9 +8956,9 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
   if (!UsingVarChange)
   { if (includeNumerator)
       { if (this->UncoveringBrackets)
-          NumLinesUsed+=ComputationalBufferCoefficient.StringPrintOutAppend(stringPoly, PolyFormatLocal);
+          NumLinesUsed+=ComputationalBufferCoefficient.StringPrintOutAppend(stringPoly, PolyFormatLocal, true);
         else
-          NumLinesUsed+=ComputationalBufferCoefficientNonExpanded.StringPrintOutAppend(stringPoly, PolyFormatLocal);
+          NumLinesUsed+=ComputationalBufferCoefficientNonExpanded.StringPrintOutAppend(stringPoly, PolyFormatLocal, true);
       }
     else
       stringPoly="(...)";
@@ -8970,7 +8970,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
     tempSub.MakeExponentSubstitution(VarChange);
     tempP2.AssignIntegerPoly(ComputationalBufferCoefficient);
     tempP2.Substitution(tempSub, tempP, (short)VarChange.NumRows);
-    NumLinesUsed+=tempP.StringPrintOutAppend(stringPoly, PolyFormatLocal);
+    NumLinesUsed+=tempP.StringPrintOutAppend(stringPoly, PolyFormatLocal, true);
   }
   if (stringPoly=="1")
     stringPoly="";
@@ -8995,7 +8995,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
     this->partFractionToPartitionFunctionSplit(owner, tempQP, false, false, theGlobalVariables, theDimension);
     PolyFormatLocal.MakeAlphabetyi();
     PolyFormatLocal.cutOffString=false;
-    tempQP.StringPrintOutAppend(tempS2, PolyFormatLocal);
+    tempQP.StringPrintOutAppend(tempS2, PolyFormatLocal, true);
     PolyFormatLocal.MakeAlphabetxi();
     PolyFormatLocal.cutOffString=false;
     out << "\\\\\n&&[";
@@ -9037,8 +9037,8 @@ bool partFraction::rootIsInFractionCone(partFractions& owner, root* theRoot, Glo
     //{ Stop();
     //}
   }
-  static MatrixLargeRational tempMat, MatOneCol;
-  static Selection NonPivotPoints;
+  MatrixLargeRational tempMat, MatOneCol;
+  Selection NonPivotPoints;
   Cone tempCone; roots tempRoots;
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { int tempI= this->IndicesNonZeroMults.TheObjects[i];
@@ -12424,7 +12424,7 @@ void hashedRoots::ComputeDebugString()
 void PolynomialsRationalCoeff::ElementToString(std::string& output)
 { output.clear();
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].StringPrintOutAppend(output, PolyFormatLocal);
+  { this->TheObjects[i].StringPrintOutAppend(output, PolyFormatLocal, true);
     output.append("\n");
   }
 }
@@ -12929,9 +12929,9 @@ void OneVarPolynomials::ElementToString(std::string& output)
   std::stringstream out;
   for (int i=0; i<this->size; i++)
   { tempS.clear();
-    this->TheObjects[i].StringPrintOutAppend(tempS, PolyFormatLocal);
+    this->TheObjects[i].StringPrintOutAppend(tempS, PolyFormatLocal, true);
     if (tempS!="")
-      out <<i<<". "<<tempS<<"; ";
+      out << i << ". " << tempS << "; ";
   }
   output= out.str();
 }
@@ -12941,9 +12941,9 @@ void OneVarPolynomials::ElementToString(std::string& output, int KLindex)
   std::stringstream out;
   for (int i=0; i<this->size; i++)
   { tempS.clear();
-    this->TheObjects[i].StringPrintOutAppend(tempS, PolyFormatLocal);
+    this->TheObjects[i].StringPrintOutAppend(tempS, PolyFormatLocal, true);
     if (tempS!="")
-      out<<KLindex<<"||"<<i<<" "<<tempS<<"; ";
+      out << KLindex << "||" << i << " " << tempS << "; ";
   }
   output= out.str();
 }

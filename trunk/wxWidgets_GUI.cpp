@@ -448,7 +448,7 @@ void RunComputationalThread()
 void* RunComputationalThread(void*ptr)
 #endif
 {	MainWindow1->theComputationSetup.Run();
-  wxPostEvent(MainWindow1->GetEventHandler(),MainWindow1->wxComputationOver);
+  wxPostEvent(MainWindow1->GetEventHandler(), MainWindow1->wxComputationOver);
 #ifndef WIN32
   pthread_exit(NULL);
 #endif

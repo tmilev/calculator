@@ -2735,7 +2735,8 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
 }
 
 void MatrixLargeRational::FindZeroEigenSpace(roots& output, GlobalVariables& theGlobalVariables)
-{ MatrixLargeRational tempMat=*this;
+{ MatrixLargeRational tempMat;
+  tempMat.Assign(*this);
   MatrixLargeRational emptyMat;
   Selection nonPivotPts;
   tempMat.GaussianEliminationByRows(tempMat, emptyMat, nonPivotPts);
@@ -3547,6 +3548,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddObjectOnTop(0);
     return true;
   }
+  if (input=="lcm")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenLCM);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
   return false;
 }
 
@@ -3628,8 +3634,8 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddMapOnTop();
     return true;
   }
-  if (tokenLast==this->tokenCloseBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenBracket && tokenSixthToLast==this->tokenGCD)
-  { this->AddGCDOnTop();
+  if (tokenLast==this->tokenCloseBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenBracket && (tokenSixthToLast==this->tokenGCD || tokenSixthToLast==this->tokenLCM))
+  { this->AddFObECECbOnTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMinus && !this->TokenProhibitsUnaryMinus(tokenThirdToLast) && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
@@ -3713,10 +3719,10 @@ void Parser::AddPowerOnTop()
   this->DecreaseStackSetExpressionLastNode(2);
 }
 
-void Parser::AddGCDOnTop()
+void Parser::AddFObECECbOnTop()
 { this->ExtendOnTop(1);
   this->LastObject()->Clear();
-  this->LastObject()->Operation=this->tokenGCD;
+  this->LastObject()->Operation=this->TokenStack.TheObjects[this->TokenStack.size-6];
   this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
   this->DecreaseStackSetExpressionLastNode(5);
 }
@@ -3879,7 +3885,8 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
     case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
-    case Parser::tokenGCD: this->EvaluateGCD(theGlobalVariables); break;
+    case Parser::tokenGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
+    case Parser::tokenLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
 }
@@ -4162,7 +4169,7 @@ void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)
   this->ExpressionType=this->typeUEelement;
 }
 
-void ParserNode::EvaluateGCD(GlobalVariables& theGlobalVariables)
+void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
 {if (!this->AllChildrenAreOfDefinedNonErrorType())
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
     return;
@@ -4175,15 +4182,31 @@ void ParserNode::EvaluateGCD(GlobalVariables& theGlobalVariables)
   ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
   ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
   LargeIntUnsigned tempUI1, tempUI2, tempUI3;
-  LargeInt tempInt;
+  LargeInt tempInt=0;
+  Rational tempRat;
+  int tempI2;
   switch(leftNode.ExpressionType)
   { case ParserNode::typeIntegerOrIndex:
       if (leftNode.intValue==0 || rightNode.intValue==0)
       { this->SetError(this->errorDivisionByZero);
         return;
       }
-      this->intValue= Rational::gcd(leftNode.intValue, rightNode.intValue);
-      this->ExpressionType=this->typeIntegerOrIndex;
+      if (this->Operation==Parser::tokenGCD)
+      { this->intValue= Rational::gcd(leftNode.intValue, rightNode.intValue);
+        this->ExpressionType=this->typeIntegerOrIndex;
+      } else
+      { tempRat=leftNode.intValue;
+        tempRat.MultiplyByInt(rightNode.intValue);
+        tempI2=Rational::gcd(leftNode.intValue, rightNode.intValue);
+        tempRat.DivideByInteger(tempI2);
+        if (tempRat.IsSmallInteger())
+        { this->intValue=tempRat.NumShort;
+          this->ExpressionType=this->typeIntegerOrIndex;
+        } else
+        { this->rationalValue=tempRat;
+          this->ExpressionType=this->typeRational;
+        }
+      }
       break;
     case ParserNode::typeRational:
       if (!leftNode.rationalValue.IsInteger() && !rightNode.rationalValue.IsInteger())
@@ -4191,7 +4214,10 @@ void ParserNode::EvaluateGCD(GlobalVariables& theGlobalVariables)
       else
       { leftNode.rationalValue.GetNumUnsigned(tempUI1);
         rightNode.rationalValue.GetNumUnsigned(tempUI2);
-        LargeIntUnsigned::gcd(tempUI1, tempUI2, tempUI3);
+        if (this->Operation==Parser::tokenGCD)
+          LargeIntUnsigned::gcd(tempUI1, tempUI2, tempUI3);
+        else
+          LargeIntUnsigned::lcm(tempUI1, tempUI2, tempUI3);
         tempInt.AddLargeIntUnsigned(tempUI3);
         this->rationalValue.AssignLargeInteger(tempInt);
         this->ExpressionType=this->typeRational;
@@ -4202,7 +4228,10 @@ void ParserNode::EvaluateGCD(GlobalVariables& theGlobalVariables)
       { this->SetError(this->errorDivisionByZero);
         return;
       }
-      RationalFunction::gcd(leftNode.polyValue, rightNode.polyValue, this->polyValue);
+      if (this->Operation==Parser::tokenGCD)
+        RationalFunction::gcd(leftNode.polyValue, rightNode.polyValue, this->polyValue);
+      else
+        RationalFunction::lcm(leftNode.polyValue, rightNode.polyValue, this->polyValue);
       this->ExpressionType=this->typePoly;
       break;
     case ParserNode::typeUEelement:
@@ -4367,6 +4396,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenMinusUnary: out << "-"; break;
     case Parser::tokenVariable: out << "n"; break;
     case Parser::tokenGCD: out << "gcd"; break;
+    case Parser::tokenLCM: out << "lcm"; break;
     default: out << "?"; break;
   }
 }
@@ -4429,6 +4459,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
     case ParserNode::errorProgramming: out << "error: there has been some programming mistake (it's not your expression's fault). Slap the programmer!"; break;
     case ParserNode::errorBadIndex: out << "error: bad index"; break;
     case ParserNode::errorDunnoHowToDoOperation: out << "error: my master hasn't taught me how to do this operation (maybe he doesn't know how either)"; break;
+    case ParserNode::errorUnknownOperation: out << "error: unknown operation. The lazy programmer has added the operation to the dictionary, but hasn't implemented it yet. Lazy programmers deserve no salary. "; break;
     default: out << "Non-documented error. Lazy programmers deserve no salaries.";
   }
   return out.str();
@@ -4604,6 +4635,7 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
   List<List<PolynomialRationalCoeff> > theSystem;
   theSystem.size=0;
   theSystem.SetSizeExpandOnTopNoObjectInit(output.size);
+  ElementUniversalEnveloping basisMonomialBuffer;
   for (int i=0; i<targets.size; i++)
   { List<ElementUniversalEnveloping>& currentTargets= targets.TheObjects[i];
     List<ElementUniversalEnveloping>& currentTargetsNoMod= targetsNoMod.TheObjects[i];
@@ -4624,10 +4656,14 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
       std::cout << currentTargetsNoMod.TheObjects[j].ElementToString() << ", \\quad ";
     std::cout << endMath << "\n<br>";
     List<rootPoly> tempList;
-    ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements(currentTargets, tempList, theGlobalVariables);
+    //Let the monomials corresponding to the given partition be m_1, \dots, m_l
+    //Let the Chevalley generators of the smaller Lie algebra be k_1,\dots, k_s
+    //Then the elements [k_i, m_1], \dots, [k_i, m_l] are recorded in this order in currentTargets
+    ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements(currentTargets, tempList, basisMonomialBuffer, theGlobalVariables);
     std::cout << "Coordinate form of the above elements: ";
     for (int j=0; j<tempList.size; j++)
     { std::cout << tempList.TheObjects[j].ElementToString() << ",";
+      //theSystem holds in the j^th row the action on the monomial m_j
       theSystem.TheObjects[j].AddListOnTop(tempList.TheObjects[j]);
     }
     std::cout << "<br>";
@@ -4638,14 +4674,38 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
   for (int i=0; i<matSystem.NumRows; i++)
     for (int j=0; j<matSystem.NumCols; j++)
       matSystem.elements[i][j]=theSystem.TheObjects[j].TheObjects[i];
-  matSystem.ComputeDebugString(true, false);
-  std::cout << "<br><br>" << matSystem.DebugString << "<br>";
+  matSystem.ComputeDebugString(false, true);
+  std::cout << "<br>The system we need to solve:<br>" << beginMath << matSystem.DebugString << endMath << "<br>";
   RationalFunction ZeroPoly, UnitPoly, MinusUnitPoly;
   ZeroPoly.MakeNVarConst(theDimension, (Rational) 0);
   UnitPoly.MakeNVarConst(theDimension, (Rational) 1);
   MinusUnitPoly.MakeNVarConst(theDimension, (Rational) -1);
   List<List<RationalFunction> > theAnswer;
   matSystem.FindZeroEigenSpacE(theAnswer, UnitPoly, MinusUnitPoly, ZeroPoly, theGlobalVariables);
+  std::cout << "The found solutions: <br>";
+  rootRationalFunction tempRatRoot;
+  std::string tempS;
+  for (int i=0; i<theAnswer.size; i++)
+  { tempRatRoot.CopyFromBase(theAnswer.TheObjects[i]);
+    std::cout << beginMath << tempRatRoot.ElementToString() << endMath << "<br>";
+    std::cout << "Corresponding expression in monomial form: " <<beginMath;
+    for (int j=0; j<output.size; j++)
+    { RationalFunction& currentCoeff= theAnswer.TheObjects[i].TheObjects[j];
+      if (!currentCoeff.IsEqualToZero())
+      { tempS= currentCoeff.ElementToString(true, false);
+        if (tempS=="-1")
+          std::cout << "-";
+        else
+        { if (j!=0)
+            std::cout << "+";
+          if (tempS!="1")
+            std::cout << "(" << tempS << ")";
+        }
+        std::cout << output.TheObjects[i].ElementToString();
+      }
+    }
+    std::cout << endMath << "<br>";
+  }
 }
 
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables)
@@ -5176,26 +5236,25 @@ void ElementUniversalEnveloping::ModOutVermaRelations()
 }
 
 void ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements
-(List<ElementUniversalEnveloping>& theElements, List<rootPoly>& output, GlobalVariables& theGlobalVariables)
+(List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
 { if (theElements.size==0)
     return;
-  ElementUniversalEnveloping ListOfAllMonomials;
-  ListOfAllMonomials.Nullify(theElements.TheObjects[0].owner);
+  outputCorrespondingMonomials.Nullify(theElements.TheObjects[0].owner);
   MonomialUniversalEnveloping tempMon;
-  int numVars= ListOfAllMonomials.owner->theWeyl.CartanSymmetric.NumRows;
+  int numVars= outputCorrespondingMonomials.owner->theWeyl.CartanSymmetric.NumRows;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      ListOfAllMonomials.AddObjectOnTopNoRepetitionOfObjectHash(theElements.TheObjects[i].TheObjects[j]);
-  output.SetSizeExpandOnTopNoObjectInit(theElements.size);
+      outputCorrespondingMonomials.AddObjectOnTopNoRepetitionOfObjectHash(theElements.TheObjects[i].TheObjects[j]);
+  outputCoordinates.SetSizeExpandOnTopNoObjectInit(theElements.size);
   PolynomialRationalCoeff ZeroPoly;
   ZeroPoly.Nullify(numVars);
   for (int i=0; i<theElements.size; i++)
-  { rootPoly& current=output.TheObjects[i];
-    current.initFillInObject(ListOfAllMonomials.size, ZeroPoly);
+  { rootPoly& current=outputCoordinates.TheObjects[i];
+    current.initFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
     ElementUniversalEnveloping& currentElt=theElements.TheObjects[i];
     for (int j=0; j<currentElt.size; j++)
     { MonomialUniversalEnveloping& currentMon=currentElt.TheObjects[j];
-      current.TheObjects[ListOfAllMonomials.IndexOfObjectHash(currentMon)]=currentMon.Coefficient;
+      current.TheObjects[outputCorrespondingMonomials.IndexOfObjectHash(currentMon)]=currentMon.Coefficient;
     }
   }
 }
@@ -5749,18 +5808,23 @@ std::string rootPoly::ElementToString()
   return out.str();
 }
 
-std::string RationalFunction::ElementToString()
+std::string RationalFunction::ElementToString(bool useLatex, bool breakLinesLatex)
 { std::stringstream out;
-  out << this->Numerator.ElementToString() << "/" << this->Denominator.ElementToString();
+  bool hasDenominator=!this->Denominator.IsEqualToOne();
+  if (hasDenominator && useLatex)
+    out << "\\frac{";
+  out << this->Numerator.ElementToString(breakLinesLatex);
+  if (hasDenominator)
+  { if (useLatex)
+      out << "}{";
+    out << this->Denominator.ElementToString(breakLinesLatex);
+    if (useLatex)
+      out << "}";
+  }
   return out.str();
 }
 
-void RationalFunction::RemainderDivisionWithRespectToBasis
-  (PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder,
-  PolynomialRationalCoeff& buffer1,
-  PolynomialRationalCoeff& buffer2,
-  Monomial<Rational>& bufferMon1
-  )
+void RationalFunction::RemainderDivisionWithRespectToBasis(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1)
 { assert(&outputRemainder!=&input);
   PolynomialRationalCoeff* currentRemainder=&input;
   PolynomialRationalCoeff* nextRemainder=&buffer1;
@@ -5774,11 +5838,7 @@ void RationalFunction::RemainderDivisionWithRespectToBasis
     outputRemainder.Assign(*currentRemainder);
 }
 
-void RationalFunction::RemainderDivision
-  (PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder,
-  PolynomialRationalCoeff& buffer,
-  Monomial<Rational>& bufferMon1
-  )
+void RationalFunction::RemainderDivision(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1)
 { assert(&input!=&outputRemainder);
   outputRemainder.Assign(input);
   int divisorHighest=divisor.GetIndexMaxMonomial();
@@ -5813,14 +5873,7 @@ void RationalFunction::RemainderDivision
   }
 }
 
-void RationalFunction::TransformToGroebnerBasis
-  (
-  List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2,
-  PolynomialRationalCoeff& buffer3,
-  PolynomialRationalCoeff& buffer4,
-  Monomial<Rational>& bufferMon1,
-  Monomial<Rational>& bufferMon2
-  )
+void RationalFunction::TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2)
 { PolynomialRationalCoeff& tempP=buffer1;
   PolynomialRationalCoeff& Spoly=buffer2;
   Monomial<Rational>& leftShift=bufferMon1;
@@ -5861,7 +5914,8 @@ void RationalFunction::TransformToGroebnerBasis
 
       //tempP.ComputeDebugString();
       if (!tempP.IsEqualToZero())
-      { theBasis.AddObjectOnTop(tempP);
+      { tempP.ScaleToIntegralNoGCDCoeffs();
+        theBasis.AddObjectOnTop(tempP);
         std::cout << "<br> new element found: " << tempP.ElementToString();
       }
     }
@@ -5873,11 +5927,7 @@ void RationalFunction::TransformToGroebnerBasis
 
 }
 
-void RationalFunction::ReduceGroebnerBasis
-(
-List<PolynomialRationalCoeff>& theBasis,
-PolynomialRationalCoeff& buffer1
-)
+void RationalFunction::ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1)
 { PolynomialRationalCoeff& LeadingCoeffs=buffer1;
   LeadingCoeffs.MakeActualSizeAtLeastExpandOnTop(theBasis.size);
   LeadingCoeffs.ClearTheObjects();
@@ -5910,34 +5960,14 @@ PolynomialRationalCoeff& buffer1
   }
 }
 
-void RationalFunction::gcd
-  ( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
-  PolynomialRationalCoeff& buffer1,
-  PolynomialRationalCoeff& buffer2,
-  PolynomialRationalCoeff& buffer3,
-  PolynomialRationalCoeff& buffer4,
-  PolynomialRationalCoeff& buffer5,
-  Monomial<Rational>& bufferMon1,
-  Monomial<Rational>& bufferMon2,
-  List<PolynomialRationalCoeff>& bufferList
-  )
+void RationalFunction::gcd(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, PolynomialRationalCoeff& buffer5, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList)
 { RationalFunction::lcm(left, right, buffer4, buffer1, buffer2, buffer3, buffer5, bufferMon1, bufferMon2, bufferList);
-  left.MultiplyBy(right, buffer2);
-  buffer4.ComputeDebugString();
-  buffer2.ComputeDebugString();
+  left.MultiplyBy(right, buffer2, buffer1, bufferMon1);
   std::cout << "<br>the product: " << buffer2.DebugString << " and the gcd: " << buffer4.DebugString << "<br>";
   buffer2.DivideBy(buffer4, output, buffer3);
 }
 
-void RationalFunction::lcm
-( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
-  PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2,
-  PolynomialRationalCoeff& buffer3,
-  PolynomialRationalCoeff& buffer4,
-  Monomial<Rational>& bufferMon1,
-  Monomial<Rational>& bufferMon2,
-  List<PolynomialRationalCoeff>& bufferList
-)
+void RationalFunction::lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList)
 { PolynomialRationalCoeff& leftTemp=buffer1;
   PolynomialRationalCoeff& rightTemp=buffer2;
   PolynomialRationalCoeff& tempP=buffer3;
@@ -5948,6 +5978,8 @@ void RationalFunction::lcm
   int theNumVars=left.NumVars;
   leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
+  leftTemp.ScaleToIntegralNoGCDCoeffs();
+  rightTemp.ScaleToIntegralNoGCDCoeffs();
   tempP.MakeMonomialOneLetter(theNumVars+1, theNumVars, 1, (Rational) 1);
   leftTemp.MultiplyBy(tempP);
   tempP.TimesConstant((Rational)-1);
@@ -5977,4 +6009,102 @@ void RationalFunction::lcm
     }
   }
   output.Nullify(theNumVars);
+}
+
+std::string rootRationalFunction::ElementToString()
+{ std::stringstream out;
+  out << "(";
+  for (int i=0; i<this->size; i++)
+  { out << this->TheObjects[i].ElementToString(true, false);
+    if (i!=this->size-1)
+      out << ",";
+  }
+  out << ")";
+  return out.str();
+}
+
+void RationalFunction::Simplify()
+{ if (this->Numerator.IsEqualToZero())
+  { this->Denominator.MakeNVarConst(this->NumVariables, (Rational) 1);
+    return;
+  }
+  if (this->Denominator.IsEqualToOne())
+    return;
+  PolynomialRationalCoeff theGCD, tempP, tempP2;
+  this->gcd(this->Numerator, this->Denominator, theGCD);
+  this->Numerator.DivideBy(theGCD, tempP, tempP2);
+  this->Numerator.Assign(tempP);
+  this->Denominator.DivideBy(theGCD, tempP, tempP2);
+  this->Denominator.Assign(tempP);
+  Rational tempRat, tempRat2;
+  tempRat=this->Denominator.FindGCDCoefficientDenominators();
+  tempRat2=this->Denominator.FindGCDCoefficientNumerators();
+  tempRat.DivideBy(tempRat2);
+  if (!tempRat.IsEqualToOne())
+  { this->Denominator.TimesConstant(tempRat);
+    this->Numerator.TimesConstant(tempRat);
+  }
+}
+
+Rational PolynomialRationalCoeff::FindGCDCoefficientNumerators()
+{ if (this->size==0)
+    return (Rational) 1;
+  Rational result; LargeIntUnsigned Accum, tempUI;
+  this->TheObjects[0].Coefficient.GetNumUnsigned(Accum);
+  for (int i=1; i<this->size; i++)
+  { this->TheObjects[i].Coefficient.GetNumUnsigned(tempUI);
+    LargeIntUnsigned::gcd(Accum, tempUI, Accum);
+  }
+  LargeInt tempInt;
+  tempInt.AssignLargeIntUnsigned(Accum);
+  result.AssignLargeInteger(tempInt);
+  if (this->size>0)
+  { if (this->TheObjects[0].Coefficient.IsNegative())
+      result.Minus();
+  }
+  return result;
+}
+
+Rational PolynomialRationalCoeff::FindGCDCoefficientDenominators()
+{ if (this->size==0)
+    return (Rational) 1;
+  Rational result; LargeIntUnsigned Accum, tempUI;
+  this->TheObjects[0].Coefficient.GetDen(Accum);
+  for (int i=1; i<this->size; i++)
+  { this->TheObjects[i].Coefficient.GetDen(tempUI);
+    LargeIntUnsigned::gcd(Accum, tempUI, Accum);
+  }
+  LargeInt tempInt;
+  tempInt.AssignLargeIntUnsigned(Accum);
+  result.AssignLargeInteger(tempInt);
+  return result;
+}
+
+void PolynomialRationalCoeff::ScaleToIntegralNoGCDCoeffs()
+{ if(this->size==0)
+    return;
+  int indexHighestMon=0;
+  LargeIntUnsigned tempInt1, tempInt2, accumNum, accumDen;
+  accumDen.MakeOne();
+  this->TheObjects[0].Coefficient.GetNumUnsigned(accumNum);
+  for (int i=0; i<this->size; i++)
+  { if (this->TheObjects[i].IsGEQ(this->TheObjects[indexHighestMon]))
+      indexHighestMon=i;
+    Rational& tempRat=this->TheObjects[i].Coefficient;
+    tempRat.GetDen(tempInt1);
+    tempRat.GetNumUnsigned(tempInt2);
+    LargeIntUnsigned::lcm(tempInt1, accumDen, accumDen);
+    LargeIntUnsigned::gcd(tempInt2, accumNum, accumNum);
+  }
+  Rational theMultiple;
+  theMultiple.MakeOne();
+  if (this->TheObjects[indexHighestMon].Coefficient.IsNegative())
+    theMultiple.MakeMOne();
+  theMultiple.MultiplyByLargeIntUnsigned(accumDen);
+  Rational tempRat2;
+  LargeInt tempInt3;
+  tempInt3.AssignLargeIntUnsigned(accumNum);
+  tempRat2.AssignLargeInteger(tempInt3);
+  theMultiple.DivideBy(tempRat2);
+  this->TimesConstant(theMultiple);
 }

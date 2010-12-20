@@ -621,6 +621,7 @@ public:
 template <typename Element>
 class MatrixElementaryLooseMemoryFit
 {
+  MatrixElementaryLooseMemoryFit(const MatrixElementaryLooseMemoryFit<Element>& other);
 public:
   int NumRows; int ActualNumRows;
   int NumCols; int ActualNumCols;
@@ -631,9 +632,9 @@ public:
   void Resize(int r, int c, bool PreserveValues);
   void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
   void MakeIdMatrix(int theDimension);
-  inline void operator=(const MatrixElementaryLooseMemoryFit<Element>& right){this->Assign(right); };
-  MatrixElementaryLooseMemoryFit<Element>();
-  ~MatrixElementaryLooseMemoryFit<Element>();
+  inline void operator=(const MatrixElementaryLooseMemoryFit<Element>& other){this->Assign(other); };
+  MatrixElementaryLooseMemoryFit();
+  ~MatrixElementaryLooseMemoryFit();
 };
 
 template <typename Element>
@@ -1093,7 +1094,7 @@ inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, 
   if (useHtml)
     out << "<table>";
   if (useLatex)
-  { out << "$\\left(\\begin{array}{";
+  { out << "\\left(\\begin{array}{";
     for (int j=0; j<this->NumCols; j++)
       out << "c";
     out << "}";
@@ -1124,14 +1125,15 @@ inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, 
   if (useHtml)
     out << "</table>";
   if (useLatex)
-    out << "\\end{array}\\right)$";
+    out << "\\end{array}\\right)";
   output = out.str();
 }
 
 template<typename Element>
 void Matrix<Element>::FindZeroEigenSpacE(List<List<Element> >& output, Element& theRingUnit, Element& theRingMinusUnit, Element& theRingZero, GlobalVariables& theGlobalVariables)
-{ Matrix<Element> tempMat=*this;
+{ Matrix<Element> tempMat;
   Matrix<Element> emptyMat;
+  tempMat.Assign(*this);
   Selection nonPivotPts;
   tempMat.GaussianEliminationByRows(tempMat, emptyMat, nonPivotPts);
   output.SetSizeExpandOnTopNoObjectInit(nonPivotPts.CardinalitySelection);
@@ -1191,8 +1193,7 @@ inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex, int Ro
     if (!this->elements[i][columnIndex].IsEqualToZero())
       return i;
   return -1;
-};
-
+}
 
 template <typename Element>
 inline void Matrix<Element>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar)
@@ -1227,7 +1228,6 @@ bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists( 
   Matrix<Element>::GaussianEliminationByRows(A, b, thePivotPoints, false);
   return A.RowEchelonFormToLinearSystemSolution( thePivotPoints, b, output);
 }
-
 
 template <typename Element>
 bool Matrix<Element>::RowEchelonFormToLinearSystemSolution( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution)
@@ -1417,7 +1417,9 @@ public:
   bool IsNonPositive(){return !this->IsPositive(); };
   bool IsEqualTo(LargeInt& x);
   bool IsEqualToZero(){ return this->value.IsEqualToZero(); }
+  bool IsEqualToOne(){ return this->value.IsEqualToOne() && this->sign==1; }
   void Assign(const LargeInt& x);
+  void AssignLargeIntUnsigned(const LargeIntUnsigned& x){this->value.Assign(x); this->sign=1;};
   void AssignInt(int x);
   void Add(const LargeInt& x);
   void AddLargeIntUnsigned(LargeIntUnsigned& x);
@@ -1606,6 +1608,7 @@ ParallelComputing::GlobalPointerCounter++;
   void Assign(const Rational& r);
   void AssignInteger(int x);
   bool IsInteger();
+  bool IsSmallInteger(){return (this->Extended==0)&& this->DenShort==1; };
   bool IsGreaterThan(const Rational& r) const;
   inline void AssignNumeratorAndDenominator(int n, int d)
   { if (d<0){ d=-d; n=-n; }
@@ -1624,13 +1627,17 @@ ParallelComputing::GlobalPointerCounter++;
   { this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x.value);
     this->Extended->num.sign*=x.sign; this->Simplify();
   };
-  void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x)
-  { this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x); this->Simplify();
-  };
+  void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){ this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x); this->Simplify(); };
   void ElementToString(std::string& output);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS;};
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(Rational& right);
+  inline bool IsEqualToOne()const
+  { if (this->Extended==0)
+      return (this->NumShort==1 && this->DenShort==1);
+    else
+      return (this->Extended->num.IsEqualToOne() && this->Extended->den.IsEqualToOne());
+  };
   inline bool IsEqualToZero()const
   { if (this->Extended==0)
       return this->NumShort==0;
@@ -1713,10 +1720,10 @@ ParallelComputing::GlobalPointerCounter++;
     return a;
   };
   static int gcdSigned(int a, int b){if (a<0) {a*=-1; } if (b<0){b*=-1; } return Rational::gcd(a, b); };
-  inline bool CheckForElementSanity()
-  { if (this->Extended==0) return true;
-    if (this->DenShort<0) return false;
-    if (((unsigned)this->DenShort)>LargeIntUnsigned::CarryOverBound) return false;
+  inline bool CheckForElementSanity(){ return this->Extended==0;};
+  inline bool ConsistencyCheck()
+  { if (this->Extended==0)
+      return this->DenShort>0;
     return true;
   };
   inline void operator=(const Rational& right){this->Assign(right); };
@@ -2828,7 +2835,7 @@ bool ListPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
 
 template<class Object>
 bool ListPointers<Object>::IsAnElementOf(Object* o)
-{  for(int i=0; i<this->size; i++)
+{ for(int i=0; i<this->size; i++)
     if (this->TheObjects[i]==o)
       return true;
   return false;
@@ -3168,9 +3175,10 @@ public:
   void Assign(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
   std::string DebugString;
   // returns the number of lines used
-  int StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat);
-  void ElementToString(std::string& output){ output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal);};
-  std::string ElementToString(){ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal); return output;};
+  int StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat, bool breakLinesLatex);
+  std::string ElementToString(bool breakLinesLatex){ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, breakLinesLatex); return output;};
+  void ElementToString(std::string& output){ output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true);};
+  std::string ElementToString(){ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true); return output;};
   bool ComputeDebugString();
   int TotalDegree();
   bool IsEqualTo(TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
@@ -3181,7 +3189,13 @@ public:
   void MakeNVarConst(short nVar, const ElementOfCommutativeRingWithIdentity& coeff);
   bool HasGEQMonomial(TemplateMonomial& m, int& WhichIndex);
   void MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
-  void MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output);
+  void MultiplyBy
+  (
+const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p,
+TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output,
+TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& bufferPoly,
+TemplateMonomial& bufferMon
+);
   void RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output);
   void RaiseToPower(int d);
   void AddPolynomial(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
@@ -3676,6 +3690,8 @@ public:
   void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables);
   void MakeLinPolyFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
   int FindGCMCoefficientDenominators();
+  Rational FindGCDCoefficientDenominators();
+  Rational FindGCDCoefficientNumerators();
   void MakeLinearPoly(short NumVars);
   int SizeWithoutDebugString();
   //works at the moment for linear polynomials only!!!!!!
@@ -3691,6 +3707,7 @@ public:
   void operator=(const PolynomialRationalCoeff& right);
   void operator-=(const Rational& theConst){ Monomial<Rational> tempMon; tempMon.MakeConstantMonomial(this->NumVars, -theConst); this->AddMonomial(tempMon);};
   void MakePChooseK(const PolynomialRationalCoeff& P, int k, PolynomialRationalCoeff& output);
+  void ScaleToIntegralNoGCDCoeffs();
   void Subtract(const PolynomialRationalCoeff& other)
   { PolynomialRationalCoeff tempP;
     tempP.Assign(other);
@@ -3707,8 +3724,8 @@ public:
   PolynomialRationalCoeff Denominator;
   int NumVariables;
   std::string DebugString;
-  std::string ElementToString();
-  void ElementToString(std::string& output){output=this->ElementToString();};
+  std::string ElementToString(bool useLatex, bool breakLinesLatex);
+  void ElementToString(std::string& output){output=this->ElementToString(true, false);};
   RationalFunction(){this->NumVariables=0;};
   void operator=(const PolynomialRationalCoeff& other){ this->Numerator=other; this->NumVariables=other.NumVars; this->Denominator.MakeNVarConst(this->NumVariables, (Rational) 1);};
   inline void operator=(const RationalFunction& other){this->Assign(other);};
@@ -3720,6 +3737,7 @@ public:
   void MultiplyBy(const RationalFunction& other)
   { this->Numerator.MultiplyBy(other.Numerator);
     this->Denominator.MultiplyBy(other.Denominator);
+    this->Simplify();
   };
   void Add(const RationalFunction& other)
   { RationalFunction output;
@@ -3729,77 +3747,41 @@ public:
     this->Denominator.MultiplyBy(other.Numerator);
     output.Numerator.AddPolynomial(this->Denominator);
     this->Assign(output);
+    this->Simplify();
   };
+  void Simplify();
   void operator+=(const RationalFunction& other){this->Add(other);};
   void operator*=(const RationalFunction& other){this->MultiplyBy(other);};
   void Invert(){PolynomialRationalCoeff tempP; tempP=this->Numerator; this->Numerator=this->Denominator; this->Denominator=tempP;};
   void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify(theNumVars); this->Denominator.MakeNVarConst(this->NumVariables, (Rational) 1);};
   void MakeNVarConst(int theNumVars, const Rational& theCoeff) {this->Nullify(theNumVars); this->Numerator.MakeNVarConst(theNumVars, theCoeff);};
   bool IsEqualToZero(){return this->Numerator.IsEqualToZero();};
-  static void ReduceGroebnerBasis
-(
-List<PolynomialRationalCoeff>& theBasis,
-PolynomialRationalCoeff& buffer1
-)
-  ;
-  static void TransformToGroebnerBasis
-  (
-  List<PolynomialRationalCoeff>& theBasis,
-  PolynomialRationalCoeff& buffer1,
-  PolynomialRationalCoeff& buffer2,
-  PolynomialRationalCoeff& buffer3,
-  PolynomialRationalCoeff& buffer4,
-  Monomial<Rational>& bufferMon1,
-  Monomial<Rational>& bufferMon2
-  )
-  ;
-  static void RemainderDivisionWithRespectToBasis
-  (PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder,
-  PolynomialRationalCoeff& buffer1,
-  PolynomialRationalCoeff& buffer2,
-  Monomial<Rational>& bufferMon1
-  )
-  ;
-  static void RemainderDivision
-  (PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder,
-  PolynomialRationalCoeff& buffer,
-  Monomial<Rational>& bufferMon1
-  )
-  ;
-  int GetIndexMaxMonomial(PolynomialRationalCoeff& input);
-  static void gcd
-  (PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
-  { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5;
-    List<PolynomialRationalCoeff> bufferList;
-    Monomial<Rational> tempMon1, tempMon2;
+  static void ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1);
+  static void TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2);
+  static void RemainderDivisionWithRespectToBasis(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1);
+  static void RemainderDivision(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1);
+  static inline void gcd(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
+  { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
     RationalFunction::gcd(left, right, output, buffer1, buffer2, buffer3, buffer4, buffer5, tempMon1, tempMon2, bufferList);
   };
-  static void gcd
-  ( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
-  PolynomialRationalCoeff& buffer1,
-  PolynomialRationalCoeff& buffer2,
-  PolynomialRationalCoeff& buffer3,
-  PolynomialRationalCoeff& buffer4,
-  PolynomialRationalCoeff& buffer5,
-  Monomial<Rational>& bufferMon1,
-  Monomial<Rational>& bufferMon2,
-  List<PolynomialRationalCoeff>& bufferList
-  )
-  ;
-  static void lcm
-( PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output,
-  PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2,
-  PolynomialRationalCoeff& buffer3,
-  PolynomialRationalCoeff& buffer4,
-  Monomial<Rational>& bufferMon1,
-  Monomial<Rational>& bufferMon2,
-  List<PolynomialRationalCoeff>& bufferList
-)
-;
+  static void gcd(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, PolynomialRationalCoeff& buffer5, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList);
+  static void lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList);
+  static inline void lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
+  { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
+    RationalFunction::lcm(left, right, output, buffer1, buffer2, buffer3, buffer4, tempMon1, tempMon2, bufferList);
+  };
   void Minus(){this->Numerator.TimesInteger(-1);};
 };
 
 class rootPoly: public List<PolynomialRationalCoeff>
+{
+public:
+  std::string DebugString;
+  std::string ElementToString();
+  void ComputeDebugString(){this->DebugString=this->ElementToString();};
+};
+
+class rootRationalFunction: public List<RationalFunction>
 {
 public:
   std::string DebugString;
@@ -4279,31 +4261,36 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(shor
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> &p, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> &output)
+inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::MultiplyBy
+(
+const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p,
+TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output,
+TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& bufferPoly,
+ TemplateMonomial& bufferMon
+)
 { if (p.size==0)
   { output.ClearTheObjects();
     return;
   }
-  TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> Accum;
-  TemplateMonomial tempM;
-  Accum.MakeActualSizeAtLeastExpandOnTop(this->size*p.size);
-  Accum.ClearTheObjects();
-  Accum.NumVars= p.NumVars;
+  bufferPoly.MakeActualSizeAtLeastExpandOnTop(this->size*p.size);
+  bufferPoly.Nullify(p.NumVars);
   for (int i=0; i<p.size; i++)
     for (int j=0; j<this->size; j++)
-    { this->TheObjects[j].MultiplyBy(p.TheObjects[i], tempM);
+    { this->TheObjects[j].MultiplyBy(p.TheObjects[i], bufferMon);
 //      tempM.ComputeDebugString(PolyFormatLocal);
 //      Accum.ComputeDebugString();
-      Accum.AddMonomial(tempM);
+      bufferPoly.AddMonomial(bufferMon);
       ParallelComputing::SafePoint();
 //      Accum.ComputeDebugString();
     }
-  output.CopyFromPoly(Accum);
+  output.CopyFromPoly(bufferPoly);
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> &p)
-{ this->MultiplyBy(p, *this);
+{ TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> bufferPoly;
+  TemplateMonomial bufferMon;
+  this->MultiplyBy(p, *this, bufferPoly, bufferMon);
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
@@ -4416,7 +4403,7 @@ bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat)
+int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)
 { std::stringstream out;
   int NumChars=0;
   int TotalNumLines=0;
@@ -4448,7 +4435,7 @@ int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::
         }
         else
           NumChars+= tempS.size();
-        if (NumChars>PolyFormat.LatexMaxLineLength)
+        if (breakLinesLatex && NumChars>PolyFormat.LatexMaxLineLength)
         { NumChars=0;
           out << "\\\\&&\n ";
           TotalNumLines++;
@@ -4765,7 +4752,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
 { this->DebugString.clear();
-  this->StringPrintOutAppend(this->DebugString, PolyFormatLocal);
+  this->StringPrintOutAppend(this->DebugString, PolyFormatLocal, true);
   return true;
 }
 
@@ -6596,7 +6583,7 @@ public:
   void Simplify();
   void ModOutVermaRelations();
   static void GetCoordinateFormOfSpanOfElements
-(List<ElementUniversalEnveloping>& theElements, List<rootPoly>& output, GlobalVariables& theGlobalVariables)
+(List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
   ;
   void SetNumVariables(int newNumVars);
   void RaiseToPower(int thePower);
@@ -7090,7 +7077,7 @@ class ParserNode
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
-  void EvaluateGCD(GlobalVariables& theGlobalVariables);
+  void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
@@ -7114,7 +7101,7 @@ public:
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable, tokenGCD
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable, tokenGCD, tokenLCM
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -7139,7 +7126,7 @@ public:
   bool TokenProhibitsUnaryMinus(int theToken);
   void AddIndexingExpressionOnTop();
   void AddLetterExpressionOnTop();
-  void AddGCDOnTop();
+  void AddFObECECbOnTop();
   bool IsAWordSeparatingCharacter(char c);
   bool LookUpInDictionaryAndAdd(std::string& input);
   void Own(int indexParent, int indexChild1, int indexChild2);

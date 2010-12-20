@@ -1,8 +1,9 @@
 #include <iostream>
-#ifndef WIN32
-#include <unistd.h>
-#endif
 #include "polyhedra.h"
+#include <sys/time.h>
+#include <unistd.h>
+#include <pthread.h>
+//#include <stdlib.h>
 
 extern int GlobalPointerCounter;
 
@@ -30,9 +31,36 @@ void getPath(char* path, std::string& output)
 
 extern void static_html1( std::stringstream& output);
 
+timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
+const double MaxAllowedComputationTime=20;
+bool ComputationComplete;
+
+double GetElapsedTimeInSeconds()
+{ gettimeofday(&LastMeasureOfCurrentTime, NULL);
+  int miliSeconds =(LastMeasureOfCurrentTime.tv_sec- ComputationStartGlobal.tv_sec)*1000+(LastMeasureOfCurrentTime.tv_usec- ComputationStartGlobal.tv_usec)/1000;
+  return ((double) miliSeconds)/1000;
+}
+
+void* RunTimer(void* ptr)
+{ for (; GetElapsedTimeInSeconds()<MaxAllowedComputationTime;)
+  { usleep(10000);
+    if (ComputationComplete)
+      break;
+  }
+  if (!ComputationComplete)
+  { std::cout << "</div><br><br><br>Your computation has taken " << GetElapsedTimeInSeconds() << " seconds so far.";
+    std::cout << "<br>The maximum allowed computation time is <b>" << MaxAllowedComputationTime << " seconds</b>. Please use the offline version of the calculator. ";
+    std::exit(0);
+  } else
+    pthread_exit(NULL);
+}
+
+
 int main(int argc, char **argv)
 { std::string inputString, inputPath, tempS;
 	std::cin >> inputString;
+	gettimeofday(&ComputationStartGlobal, NULL);
+	ComputationComplete=false;
 	if (inputString=="")
 	{
 #ifdef WIN32
@@ -54,14 +82,9 @@ int main(int argc, char **argv)
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;
+	pthread_t TimerThread;
+  pthread_create(&TimerThread, NULL,*RunTimer, 0);
 
-/*  VectorPartition tempVP;
-  tempVP.PartitioningRoots.AddObjectOnTop("(0,1)");
-  tempVP.PartitioningRoots.AddObjectOnTop("(1,1)");
-  tempVP.PartitioningRoots.AddObjectOnTop("(1,2)");
-  tempVP.theRoot="(5,10)";
-  tempVP.ComputeAllPartitions();
-  std::cout << tempVP.ElementToString(true);*/
 
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
@@ -89,34 +112,13 @@ int main(int argc, char **argv)
   //civilizedInput="gcd(n_1, n_2n_1)";
   /*theParser.DefaultWeylRank=3;
   theParser.DefaultWeylLetter='B';
-  PolynomialRationalCoeff tempP1, tempP2, tempP3, tempP4;
-  theParser.ParseEvaluateAndSimplify("n_2^{13}-n_1^{8}n_2^{5}+n_1^{13}-n_1^{5}n_2^{8}", theGlobalVariables);
-  tempP1=theParser.theValue.polyValue;
-  theParser.ParseEvaluateAndSimplify("(n_1^5-n_2^5)", theGlobalVariables);
-  tempP2=theParser.theValue.polyValue;
-  theParser.ParseEvaluateAndSimplify("( n_1^8-n_2^8)", theGlobalVariables);
-  tempP3=theParser.theValue.polyValue;
-  tempP2.MultiplyBy(tempP3);
-  tempP1.DivideBy(tempP2, tempP3, tempP4);
-  std::cout << "quotient:  " << tempP3.ElementToString() << " remainder: " << tempP4.ElementToString();*/
-/*  if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
+  if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
     List<ElementUniversalEnveloping> tempList;
     root tempRoot="(1,2)";
-//    theParser.theHmm.WriteAllUEMonomialsWithWeightWRTDomain(tempList, tempRoot, theGlobalVariables);
-    //theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);
-    //std::cout << tempS;
-    PolynomialRationalCoeff tempP1, tempP2, tempP3;
-//    theParser.ParseEvaluateAndSimplify("(n_1+n_2^3-n_3^2)(n_1^2-4n_2^2)", theGlobalVariables);
-    theParser.ParseEvaluateAndSimplify("n_1+n_2", theGlobalVariables);
-    tempP1=theParser.theValue.polyValue;
-    theParser.ParseEvaluateAndSimplify("n_1-n_2", theGlobalVariables);
-    tempP2=theParser.theValue.polyValue;
-    RationalFunction tempRF;
-    tempRF.RemainderDivision(tempP1, tempP2, tempP3);
-    std::cout << "<br>the remainder dividing " << tempP1.ElementToString() << " by " << tempP2.ElementToString() << " is " << tempP3.ElementToString();
-    tempRF.lcm(tempP1, tempP2, tempP3);
-    std::cout << "<br>the lcm of " << tempP1.ElementToString() << " and " << tempP2.ElementToString() << " is " << tempP3.ElementToString();
+    theParser.theHmm.WriteAllUEMonomialsWithWeightWRTDomain(tempList, tempRoot, theGlobalVariables);
+    theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);
+    std::cout << tempS;
   }*/
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.ComputeDebugString(theGlobalVariables);
@@ -134,7 +136,11 @@ int main(int argc, char **argv)
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
-  std::cout << "<br>result: " << theResult;
+  std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " << GetElapsedTimeInSeconds() << " seconds<br>";
+  if (GetElapsedTimeInSeconds()>1)
+    std::cout << "If your computation takes too long it is probably due to the weak algorithms used for your computation.<br> Feel free to email the author(s) with requests for speed improvement.";
+  ComputationComplete=true;
+  std::cout.flush();
   std::cout << "</td>";
   std::cout << " <td></td>\n<td>\n";
   std::stringstream tempStream;
@@ -173,8 +179,18 @@ int main(int argc, char **argv)
     tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
     latexCommandTemp= tempStreamPNG.str();
     LatexCommands.AddObjectOnTop(latexCommandTemp);
-  } else
-    std::cout << "<br><br><br>the file: " << fileNameLieBracketFullPathPNGEnding << " exists<br>";
+  }
+  std::cout << " <br>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++ source(1 out of 3 files (header file))</a>\n";
+  std::cout << " <br>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.cpp?view=markup\"> Vector partition c++ source(2 out of 3 files (.cpp file that has passed minimal testing))</a>\n";
+  std::cout << " <br>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/custom_code_here.cpp?view=markup\"> Vector partition c++ source(3 out of 3 files (.cpp file for current development))</a>\n";
+  std::cout << " <br>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/calculator.cpp?view=markup\"> Server c++ source(1 out of 1 files)</a>\n";
+  std::cout << " <br>\n";
+  std::cout << " To run the calculator on your own web server you might want to install the <a href=\"http://httpd.apache.org/\">Apache web server</a> (comes preinstalled on <a href=\"http://www.ubuntu.com/\">Ubuntu</a>)";
+  std::cout << " <br>\n";
   std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
   std::cout << "<br>civilized input strings: " << civilizedInput << "<br> chopped strings: <br>";
   for (int i=0; i<inputStrings.size; i++)

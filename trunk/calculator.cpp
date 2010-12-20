@@ -79,6 +79,9 @@ int main(int argc, char **argv)
 
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><head><title>Vector partition calculator</title>";
+  //below follows a script for collapsing and expanding menus
+  //script taken from the website of dustin diaz. Thanks mate!
+  std::cout << "<script type=\"text/javascript\"> function switchMenu(obj) {	var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) {	el.style.display = 'none'; } else { el.style.display = '';}}</script>";
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;
@@ -136,7 +139,8 @@ int main(int argc, char **argv)
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
-  std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " << GetElapsedTimeInSeconds() << " seconds<br>";
+  if (civilizedInput!="")
+    std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " << GetElapsedTimeInSeconds() << " seconds<br>";
   if (GetElapsedTimeInSeconds()>1)
     std::cout << "If your computation takes too long it is probably due to the weak algorithms used for your computation.<br> Feel free to email the author(s) with requests for speed improvement.";
   ComputationComplete=true;
@@ -180,7 +184,11 @@ int main(int argc, char **argv)
     latexCommandTemp= tempStreamPNG.str();
     LatexCommands.AddObjectOnTop(latexCommandTemp);
   }
-  std::cout << " <br>\n";
+  std::cout << "<br>";
+  std::cout << "<button onclick=\"switchMenu('sourceDetails');\"  >C++ source</button>";
+  std::cout << "<button onclick=\"switchMenu('debugDetails');\">Debugging</button>";
+  std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
+	std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++ source(1 out of 3 files (header file))</a>\n";
   std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.cpp?view=markup\"> Vector partition c++ source(2 out of 3 files (.cpp file that has passed minimal testing))</a>\n";
@@ -191,7 +199,9 @@ int main(int argc, char **argv)
   std::cout << " <br>\n";
   std::cout << " To run the calculator on your own web server you might want to install the <a href=\"http://httpd.apache.org/\">Apache web server</a> (comes preinstalled on <a href=\"http://www.ubuntu.com/\">Ubuntu</a>)";
   std::cout << " <br>\n";
-  std::cout << "<br><br><br><br><br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
+	std::cout <<	"</div>";
+  std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
+  std::cout << "<br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
   std::cout << "<br>civilized input strings: " << civilizedInput << "<br> chopped strings: <br>";
   for (int i=0; i<inputStrings.size; i++)
     std::cout << "string " << i << ": " << inputStrings.TheObjects[i] << "<br>";
@@ -201,6 +211,7 @@ int main(int argc, char **argv)
   std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
 //  theParser.theLieAlgebra.ComputeDebugString();
 //  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();
+  std::cout << "</div>";
   std::cout << "\n</td></table>";
   std::cout << "</body></html>";
   std::string command1, command2;

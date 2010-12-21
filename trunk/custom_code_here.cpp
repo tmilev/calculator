@@ -4087,17 +4087,23 @@ void ParserNode::InitForMultiplication()
   this->UEElement.AssignInt(1, this->owner->NumVariables, *this->ContextLieAlgebra);
 }
 
-void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren()
-{ for (int i=0; i<this->children.size; i++)
+int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
+{ int result=this->typeUndefined;
+  for (int i=0; i<this->children.size; i++)
   { int childExpressionType=this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType;
-    if (childExpressionType>this->ExpressionType)
-      this->ExpressionType=childExpressionType;
+    if (childExpressionType>result)
+      result=childExpressionType;
   }
   for (int i=0; i<this->children.size; i++)
-    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(this->ExpressionType))
+    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(result))
     { this->SetError(this->owner->TheObjects[this->children.TheObjects[i]].ErrorType);
-      return;
+      return this->typeError;
     }
+  return result;
+}
+
+void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren()
+{ this->ExpressionType=this->GetStrongestExpressionChildrenConvertChildrenIfNeeded();
 }
 
 void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
@@ -4222,9 +4228,9 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorWrongNumberOfArguments);
     return;
   }
-  theRootNode.ConvertChildrenAndMyselfToStrongestExpressionChildren();
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
-  theRootNode.ExpressionType=this->typeRoot;
+  this->ExpressionType=theRootNode.GetStrongestExpressionChildrenConvertChildrenIfNeeded();
+  if (this->ExpressionType==this->typeError)
+    return;
   ParserNode& leftNode=this->owner->TheObjects[theTrueChildren.TheObjects[0]];
   ParserNode& rightNode=this->owner->TheObjects[theTrueChildren.TheObjects[1]];
   LargeIntUnsigned tempUI1, tempUI2, tempUI3;

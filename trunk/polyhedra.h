@@ -7053,10 +7053,12 @@ class ParserNode
     this->polyValue=other.polyValue;
   };
   void Clear();
+  int GetStrongestExpressionChildrenConvertChildrenIfNeeded();
   void ConvertChildrenAndMyselfToStrongestExpressionChildren();
   bool ConvertToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement, typeError, typeRoot};
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement,typeRoot, typeError //typeError must ALWAYS have the highest numerical value
+  };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation, errorWrongNumberOfArguments, errorBadOrNoArgument};
   void InitForAddition();
   void InitForMultiplication();

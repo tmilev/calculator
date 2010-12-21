@@ -1391,6 +1391,7 @@ public:
   void MultiplyBy(LargeIntUnsigned& right);
   void MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output);
   void MultiplyByUInt(unsigned int x);
+  void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
   void Assign(const LargeIntUnsigned& x){this->CopyFromBase(x); };
   int GetUnsignedIntValueTruncated();
@@ -4612,17 +4613,9 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output)
-{ assert(d>=0);
-  if (d==0)
-  { short nv=this->NumVars;
-    this->MakeNVarConst(nv, ElementOfCommutativeRingWithIdentity::TheRingUnit);
-    return;
-  }
-  TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> Accum;
-  Accum.CopyFromPoly(*this);
-  for (int i=0; i<d-1; i++)
-    Accum.MultiplyBy(*this);
-  output.CopyFromPoly(Accum);
+{ TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> tempOne;
+  tempOne.MakeNVarConst(this->NumVars, ElementOfCommutativeRingWithIdentity::TheRingUnit);
+  MathRoutines::RaiseToPower(*this, d, tempOne);
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>

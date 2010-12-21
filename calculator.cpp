@@ -1,9 +1,11 @@
 #include <iostream>
 #include "polyhedra.h"
+#ifndef WIN32
 #include <sys/time.h>
 #include <unistd.h>
 #include <pthread.h>
-//#include <stdlib.h>
+#include <stdlib.h>
+#endif
 
 extern int GlobalPointerCounter;
 
@@ -31,9 +33,11 @@ void getPath(char* path, std::string& output)
 
 extern void static_html1( std::stringstream& output);
 
-timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 const double MaxAllowedComputationTime=20;
 bool ComputationComplete;
+
+#ifndef WIN32
+timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
 double GetElapsedTimeInSeconds()
 { gettimeofday(&LastMeasureOfCurrentTime, NULL);
@@ -54,12 +58,15 @@ void* RunTimer(void* ptr)
   } else
     pthread_exit(NULL);
 }
+#endif
 
 int main(int argc, char **argv)
 { std::string inputString, inputPath, tempS;
 	std::cin >> inputString;
-	gettimeofday(&ComputationStartGlobal, NULL);
-	ComputationComplete=false;
+#ifndef WIN32
+  gettimeofday(&ComputationStartGlobal, NULL);
+#endif
+  ComputationComplete=false;
 	if (inputString=="")
 	{
 #ifdef WIN32
@@ -84,9 +91,10 @@ int main(int argc, char **argv)
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;
-	pthread_t TimerThread;
+#ifndef WIN32
+  pthread_t TimerThread;
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
-
+#endif
 
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
@@ -112,7 +120,8 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
   Rational tempRat=2;
-  tempRat.RaiseToPower(5);
+  tempRat.RaiseToPower(20);
+  tempRat.ElementToString(tempS);
   civilizedInput="2^5";
   /*theParser.DefaultWeylRank=3;
   theParser.DefaultWeylLetter='B';
@@ -140,11 +149,13 @@ int main(int argc, char **argv)
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
+#ifndef WIN32
   if (civilizedInput!="")
     std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " << GetElapsedTimeInSeconds() << " seconds<br>";
   if (GetElapsedTimeInSeconds()>1)
     std::cout << "If your computation takes too long it is probably due to the weak algorithms used for your computation.<br> Feel free to email the author(s) with requests for speed improvement.";
   ComputationComplete=true;
+#endif
   std::cout.flush();
   std::cout << "</td>";
   std::cout << " <td></td>\n<td>\n";

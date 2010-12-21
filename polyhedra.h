@@ -3729,7 +3729,7 @@ public:
   std::string ElementToString(bool useLatex, bool breakLinesLatex);
   void ElementToString(std::string& output){output=this->ElementToString(true, false);};
   RationalFunction(){this->NumVariables=0;};
-  void operator=(const PolynomialRationalCoeff& other){ this->Numerator=other; this->NumVariables=other.NumVars; this->Denominator.MakeNVarConst(this->NumVariables, (Rational) 1);};
+  void operator=(const PolynomialRationalCoeff& other){ this->Numerator=other; this->NumVariables=other.NumVars; this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);};
   inline void operator=(const RationalFunction& other){this->Assign(other);};
   void Assign(const RationalFunction& other)
   { this->Numerator=other.Numerator;
@@ -3755,8 +3755,8 @@ public:
   void operator+=(const RationalFunction& other){this->Add(other);};
   void operator*=(const RationalFunction& other){this->MultiplyBy(other);};
   void Invert(){PolynomialRationalCoeff tempP; tempP=this->Numerator; this->Numerator=this->Denominator; this->Denominator=tempP;};
-  void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify(theNumVars); this->Denominator.MakeNVarConst(this->NumVariables, (Rational) 1);};
-  void MakeNVarConst(int theNumVars, const Rational& theCoeff) {this->Nullify(theNumVars); this->Numerator.MakeNVarConst(theNumVars, theCoeff);};
+  void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify((short)theNumVars); this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);};
+  void MakeNVarConst(int theNumVars, const Rational& theCoeff) {this->Nullify((short)theNumVars); this->Numerator.MakeNVarConst((short)theNumVars, theCoeff);};
   bool IsEqualToZero(){return this->Numerator.IsEqualToZero();};
   static void ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1);
   static void TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2);
@@ -7703,15 +7703,19 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
   log2RoundedDown--;
   containerList.MakeActualSizeAtLeastExpandOnTop(log2RoundedDown);
   Result=theElement;
-  for (int i=1; i<thePower; i*=2)
+  containerList.AddObjectOnTop(Result);
+  for (int i=1; i<=log2RoundedDown; i++)
   { Result.MultiplyBy(Result);
     containerList.AddObjectOnTop(Result);
   }
   thePower-=HighestPowerLowerThanOrEqualToThePower;
+  HighestPowerLowerThanOrEqualToThePower/=2;
   int currentIndex=containerList.size-2;
-  for (; thePower>0; thePower-=HighestPowerLowerThanOrEqualToThePower)
+  for (; thePower>0; )
   { if (thePower>=HighestPowerLowerThanOrEqualToThePower)
-      Result.MultiplyBy(containerList.TheObjects[currentIndex]);
+    { Result.MultiplyBy(containerList.TheObjects[currentIndex]);
+      thePower-=HighestPowerLowerThanOrEqualToThePower;
+    }
     currentIndex--;
     HighestPowerLowerThanOrEqualToThePower/=2;
   }

@@ -7615,24 +7615,9 @@ void Rational::WriteToFile(std::fstream& output)
 }
 
 inline void Rational::RaiseToPower(int x)
-{ if (x==0)
-  {  assert(!this->IsEqualToZero());
-    this->MakeOne();
-    return;
-  }
-  if (x<0)
-  { x=-x;
-    this->Invert();
-  }
-  Rational tempRat;
-  tempRat.Assign(*this);
-  for (int i=1; i<x; i++)
-  {//if (Rational::flagAnErrorHasOccurredTimeToPanic && i==8)
-    //{ std::string tempS;
-    //  this->ElementToString(tempS);
-    //}
-    this->MultiplyBy(tempRat);
-  }
+{ Rational tempRat;
+  tempRat.MakeOne();
+  MathRoutines::RaiseToPower(*this, x, tempRat);
 }
 
 inline void Rational::Invert()

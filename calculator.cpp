@@ -55,7 +55,6 @@ void* RunTimer(void* ptr)
     pthread_exit(NULL);
 }
 
-
 int main(int argc, char **argv)
 { std::string inputString, inputPath, tempS;
 	std::cin >> inputString;
@@ -112,7 +111,9 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
-  //civilizedInput="gcd(n_1, n_2n_1)";
+  Rational tempRat=2;
+  tempRat.RaiseToPower(5);
+  civilizedInput="2^5";
   /*theParser.DefaultWeylRank=3;
   theParser.DefaultWeylLetter='B';
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
@@ -189,13 +190,13 @@ int main(int argc, char **argv)
   std::cout << "<button onclick=\"switchMenu('debugDetails');\">Debugging</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++ source(1 out of 3 files (header file))</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++(1 out of 3 files (header file))</a>\n";
   std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.cpp?view=markup\"> Vector partition c++ source(2 out of 3 files (.cpp file that has passed minimal testing))</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.cpp?view=markup\"> Vector partition c++(2 out of 3 files (.cpp file that has passed minimal testing))</a>\n";
   std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/custom_code_here.cpp?view=markup\"> Vector partition c++ source(3 out of 3 files (.cpp file for current development))</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/custom_code_here.cpp?view=markup\"> Vector partition c++(3 out of 3 files (.cpp file for current development))</a>\n";
   std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/calculator.cpp?view=markup\"> Server c++ source(1 out of 1 files)</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/calculator.cpp?view=markup\"> Calculator interface c++ (1 out of 1 files)</a>\n";
   std::cout << " <br>\n";
   std::cout << " To run the calculator on your own web server you might want to install the <a href=\"http://httpd.apache.org/\">Apache web server</a> (comes preinstalled on <a href=\"http://www.ubuntu.com/\">Ubuntu</a>)";
   std::cout << " <br>\n";

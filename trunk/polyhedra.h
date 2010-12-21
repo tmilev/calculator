@@ -271,6 +271,8 @@ public:
   static int KToTheNth(int k, int n);
   inline static int parity(int n){if (n%2==0) return 1; else return -1; };
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
+  template <class Element>
+  static void RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit);
   inline static int Maximum(int a, int b){  if (a>b) return a; else return b; };
   template <typename T>
   inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; };
@@ -7673,6 +7675,47 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariabl
       changeData.outputWidth=0;
     }
   }
+}
+template <class Element>
+void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit)
+{ if (thePower<0)
+    return;
+  if (thePower==1)
+    return;
+  if (thePower==0)
+  { theElement=theRingUnit;
+    return;
+  }
+  Element Result;
+  Result=theRingUnit;
+  if (thePower<4)
+  { for (int i=0; i<thePower; i++)
+      Result.MultiplyBy(theElement);
+    theElement=Result;
+    return;
+  }
+  List<Element> containerList;
+  int log2RoundedDown=0;
+  int HighestPowerLowerThanOrEqualToThePower=1;
+  for (; HighestPowerLowerThanOrEqualToThePower<=thePower; HighestPowerLowerThanOrEqualToThePower*=2)
+    log2RoundedDown++;
+  HighestPowerLowerThanOrEqualToThePower/=2;
+  log2RoundedDown--;
+  containerList.MakeActualSizeAtLeastExpandOnTop(log2RoundedDown);
+  Result=theElement;
+  for (int i=1; i<thePower; i*=2)
+  { Result.MultiplyBy(Result);
+    containerList.AddObjectOnTop(Result);
+  }
+  thePower-=HighestPowerLowerThanOrEqualToThePower;
+  int currentIndex=containerList.size-2;
+  for (; thePower>0; thePower-=HighestPowerLowerThanOrEqualToThePower)
+  { if (thePower>=HighestPowerLowerThanOrEqualToThePower)
+      Result.MultiplyBy(containerList.TheObjects[currentIndex]);
+    currentIndex--;
+    HighestPowerLowerThanOrEqualToThePower/=2;
+  }
+  theElement=Result;
 }
 
 class GlobalVariablesContainer :public List<GlobalVariables>

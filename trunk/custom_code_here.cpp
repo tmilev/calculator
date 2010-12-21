@@ -3990,6 +3990,8 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     this->ExpressionType=this->typeUEelement;
     return;
   }
+  if (leftNode.Operation==Parser::tokenX)
+    leftNode.Operation=Parser::tokenVariable;
   if (leftNode.Operation==Parser::tokenVariable)
   { if (theIndex<1 || theIndex>1000)
     { this->SetError(this->errorBadIndex);
@@ -4468,7 +4470,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 void ParserNode::ElementToString(std::string& output)
 { std::stringstream out; std::string tempS;
   owner->TokenToStringStream(out, this->Operation);
-  PolyFormatLocal.MakeAlphabetArbitraryWithIndex("n");
+  PolyFormatLocal.MakeAlphabetArbitraryWithIndex("x");
   if (this->ExpressionType==this->typeRational)
     out << " is the rational number " << this->rationalValue.ElementToString();
   if (this->ExpressionType==this->typeIntegerOrIndex)

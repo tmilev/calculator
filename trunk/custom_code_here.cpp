@@ -3104,8 +3104,8 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(root& alpha, root
     if (!weightSupport.ContainsObject(tempRoot))
       return i;
   }
-  assert(false);
-  return -1;
+//  assert(false);
+//  return -1;
 }
 
 void SemisimpleLieAlgebra::ElementToStringEmbedding(std::string& output)
@@ -3394,8 +3394,8 @@ int Lattice::GetRankElementRepresentedBy(root& elementRepresentative)
     if (this->IsInLattice(tempRoot))
       return result;
   }
-  assert(false);
-  return -1;
+//  assert(false);
+//  return -1;
 }
 
 ElementUniversalEnveloping Parser::ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables)
@@ -3478,7 +3478,7 @@ bool Parser::IsAWordSeparatingCharacter(char c)
     case ' ': return true;
     default: return false;
   }
-  return false;
+//  return false;
 }
 
 bool Parser::LookUpInDictionaryAndAdd(std::string& input)
@@ -3998,7 +3998,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
       return;
     }
     this->owner->NumVariables=MathRoutines::Maximum(theIndex, this->owner->NumVariables);
-    this->polyValue.MakeMonomialOneLetter(this->owner->NumVariables, theIndex-1, 1, (Rational) 1);
+    this->polyValue.MakeMonomialOneLetter((short)this->owner->NumVariables, theIndex-1, 1, (Rational) 1);
     this->ExpressionType=this->typePoly;
     return;
   }
@@ -4011,7 +4011,7 @@ bool ParserNode::ConvertToType(int theType)
     return false;
   if (this->ExpressionType==this->typePoly)
       if (this->polyValue.NumVars< this->owner->NumVariables)
-        this->polyValue.SetNumVariablesSubDeletedVarsByOne(this->owner->NumVariables);
+        this->polyValue.SetNumVariablesSubDeletedVarsByOne((short)this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEelement)
     this->UEElement.SetNumVariables(this->owner->NumVariables);
   if (this->ExpressionType==theType)
@@ -4023,13 +4023,13 @@ bool ParserNode::ConvertToType(int theType)
   { if (theType==this->typeRational)
       this->rationalValue= this->intValue;
     if (theType==this->typePoly)
-      this->polyValue.MakeNVarConst(this->owner->NumVariables, (Rational) this->intValue);
+      this->polyValue.MakeNVarConst((short) this->owner->NumVariables, (Rational) this->intValue);
     if (theType==this->typeUEelement)
-      this->UEElement.AssignInt(this->intValue, this->owner->NumVariables, *this->ContextLieAlgebra);
+      this->UEElement.AssignInt(this->intValue, (short)this->owner->NumVariables, *this->ContextLieAlgebra);
   }
   if (this->ExpressionType==this->typeRational)
   { if (theType==this->typePoly)
-      this->polyValue.MakeNVarConst(this->owner->NumVariables, this->rationalValue);
+      this->polyValue.MakeNVarConst((short)this->owner->NumVariables, this->rationalValue);
     if (theType==this->typeUEelement)
       this->UEElement.MakeConst(this->rationalValue, this->owner->NumVariables, *this->ContextLieAlgebra);
   }
@@ -4043,14 +4043,14 @@ bool ParserNode::ConvertToType(int theType)
 void ParserNode::InitForAddition()
 { this->intValue=0;
   this->rationalValue.MakeZero();
-  this->polyValue.Nullify(this->owner->NumVariables);
+  this->polyValue.Nullify((short)this->owner->NumVariables);
   this->UEElement.Nullify(this->ContextLieAlgebra);
 //  this->WeylAlgebraElement.Nullify(this->owner->NumVariables);
 }
 
 void ParserNode::InitForMultiplication()
 { this->intValue=1;
-  this->polyValue.MakeNVarConst(this->owner->NumVariables, (Rational)1);
+  this->polyValue.MakeNVarConst((short)this->owner->NumVariables, (Rational)1);
   this->rationalValue=1;
   this->UEElement.AssignInt(1, this->owner->NumVariables, *this->ContextLieAlgebra);
 }
@@ -4619,7 +4619,7 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
   { currentMon.Nullify(theDomainDimension, this->theRange);
     Rational tempRat=1;
     currentMon.Coefficient.ComputeDebugString();
-    currentMon.Coefficient.MakeNVarConst(theDimension, tempRat);
+    currentMon.Coefficient.MakeNVarConst((short)theDimension, tempRat);
     for (int j=0; j<theVP.thePartitions.TheObjects[i].size; j++)
       currentMon.MultiplyByGeneratorPowerOnTheRight(numPosRootsRange+theDimension+j, theVP.thePartitions.TheObjects[i].TheObjects[j]);
     std::cout << currentMon.ElementToString(false) << "<br>" ;
@@ -5173,7 +5173,7 @@ void ElementUniversalEnveloping::MakeOneGeneratorCoeffOne(int theIndex, int numV
 { this->Nullify(&theOwner);
   MonomialUniversalEnveloping tempMon;
   tempMon.Nullify(numVars, theOwner);
-  tempMon.Coefficient.MakeNVarConst(numVars, (Rational) 1);
+  tempMon.Coefficient.MakeNVarConst((short)numVars, (Rational) 1);
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, tempMon.Coefficient);
   this->AddObjectOnTopHash(tempMon);
 }
@@ -5215,11 +5215,11 @@ void ElementUniversalEnveloping::AssignElementLieAlgebra(const ElementSimpleLieA
   tempMon.Nullify(numVars, theOwner);
   tempMon.generatorsIndices.SetSizeExpandOnTopNoObjectInit(1);
   tempMon.Powers.SetSizeExpandOnTopNoObjectInit(1);
-  tempMon.Powers.TheObjects[0].MakeNVarConst(numVars, 1);
+  tempMon.Powers.TheObjects[0].MakeNVarConst((short)numVars, 1);
   for (int i=0; i<input.NonZeroElements.CardinalitySelection; i++)
   { int theIndex=input.NonZeroElements.elements[i];
     int theGeneratorIndex=theOwner.RootIndexToGeneratorIndex(theIndex);
-    tempMon.Coefficient.MakeNVarConst(numVars, input.coeffsRootSpaces.TheObjects[theIndex]);
+    tempMon.Coefficient.MakeNVarConst((short)numVars, input.coeffsRootSpaces.TheObjects[theIndex]);
     tempMon.generatorsIndices.TheObjects[0]=theGeneratorIndex;
     this->AddObjectOnTopHash(tempMon);
   }
@@ -5249,7 +5249,7 @@ void ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements
       outputCorrespondingMonomials.AddObjectOnTopNoRepetitionOfObjectHash(theElements.TheObjects[i].TheObjects[j]);
   outputCoordinates.SetSizeExpandOnTopNoObjectInit(theElements.size);
   PolynomialRationalCoeff ZeroPoly;
-  ZeroPoly.Nullify(numVars);
+  ZeroPoly.Nullify((short)numVars);
   for (int i=0; i<theElements.size; i++)
   { rootPoly& current=outputCoordinates.TheObjects[i];
     current.initFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
@@ -5272,8 +5272,8 @@ void ElementUniversalEnveloping::AssignElementCartan(const root& input, int numV
   for (int i=0; i<theDimension; i++)
     if (!input.TheObjects[i].IsEqualToZero())
     { (*tempMon.generatorsIndices.LastObject())=i+numPosRoots;
-      tempMon.Powers.LastObject()->MakeNVarConst(numVars, 1);
-      tempMon.Coefficient.MakeNVarConst(numVars, input.TheObjects[i]);
+      tempMon.Powers.LastObject()->MakeNVarConst((short)numVars, 1);
+      tempMon.Coefficient.MakeNVarConst((short)numVars, input.TheObjects[i]);
       this->AddObjectOnTopHash(tempMon);
     }
 }
@@ -5298,9 +5298,9 @@ void ElementUniversalEnveloping::ElementToString(std::string& output)
 void MonomialUniversalEnveloping::SetNumVariables(int newNumVars)
 { if (this->Coefficient.NumVars==newNumVars)
     return;
-  this->Coefficient.SetNumVariablesSubDeletedVarsByOne(newNumVars);
+  this->Coefficient.SetNumVariablesSubDeletedVarsByOne((short)newNumVars);
   for(int i=0; i<this->generatorsIndices.size; i++)
-    this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(newNumVars);
+    this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne((short)newNumVars);
 }
 
 std::string MonomialUniversalEnveloping::ElementToString(bool useLatex)
@@ -5371,7 +5371,7 @@ void MonomialUniversalEnveloping::ModOutVermaRelations()
 }
 
 void MonomialUniversalEnveloping::Nullify(int numVars, SemisimpleLieAlgebra& theOwner)
-{ this->Coefficient.Nullify(numVars);
+{ this->Coefficient.Nullify((short)numVars);
   this->owner=&theOwner;
   this->generatorsIndices.size=0;
   this->Powers.size=0;
@@ -5463,7 +5463,7 @@ void ElementUniversalEnveloping::MakeConst(const Rational& coeff, int numVars, S
 { MonomialUniversalEnveloping tempMon;
   this->Nullify(&theOwner);
   PolynomialRationalCoeff tempP;
-  tempP.MakeNVarConst(numVars, coeff);
+  tempP.MakeNVarConst((short)numVars, coeff);
   tempMon.MakeConst(tempP, theOwner);
   this->AddMonomialNoCleanUpZeroCoeff(tempMon);
   this->CleanUpZeroCoeff();
@@ -5847,10 +5847,10 @@ void RationalFunction::RemainderDivision(PolynomialRationalCoeff& input, Polynom
   Monomial<Rational>& highestMonDivisor=divisor.TheObjects[divisorHighest];
   int remainderHighest=-1;
   int theNumVars=input.NumVars;
-  bufferMon1.init(theNumVars);
+  bufferMon1.init((short)theNumVars);
   assert(input.NumVars==theNumVars);
   assert(divisor.NumVars==theNumVars);
-  while (true)
+  for(;;)
   { if (outputRemainder.size==0)
       return;
     remainderHighest=  outputRemainder.GetIndexMaxMonomial();
@@ -5881,8 +5881,8 @@ void RationalFunction::TransformToGroebnerBasis(List<PolynomialRationalCoeff>& t
   Monomial<Rational>& leftShift=bufferMon1;
   Monomial<Rational>& rightShift=bufferMon2;
   int theNumVars=theBasis.TheObjects[0].NumVars;
-  leftShift.init(theNumVars);
-  rightShift.init(theNumVars);
+  leftShift.init((short)theNumVars);
+  rightShift.init((short)theNumVars);
  // std::string tempS;
   for (int lowestNonExplored=0; lowestNonExplored< theBasis.size; lowestNonExplored++)
   { //warning! currentPoly may expire if theBasis.TheObjects changes size
@@ -5978,11 +5978,11 @@ void RationalFunction::lcm(PolynomialRationalCoeff& left, PolynomialRationalCoef
   rightTemp.Assign(right);
   assert(left.NumVars==right.NumVars);
   int theNumVars=left.NumVars;
-  leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
-  rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
+  leftTemp.SetNumVariablesSubDeletedVarsByOne((short)theNumVars+1);
+  rightTemp.SetNumVariablesSubDeletedVarsByOne((short)theNumVars+1);
   leftTemp.ScaleToIntegralNoGCDCoeffs();
   rightTemp.ScaleToIntegralNoGCDCoeffs();
-  tempP.MakeMonomialOneLetter(theNumVars+1, theNumVars, 1, (Rational) 1);
+  tempP.MakeMonomialOneLetter((short)theNumVars+1,(short) theNumVars, 1, (Rational) 1);
   leftTemp.MultiplyBy(tempP);
   tempP.TimesConstant((Rational)-1);
   tempP.AddConstant((Rational) 1);
@@ -6006,11 +6006,11 @@ void RationalFunction::lcm(PolynomialRationalCoeff& left, PolynomialRationalCoef
     if (currentMon.degrees[theNumVars]==0)
     { output=current;
       std::cout << "<br> the highest mon is: " << currentMon.DebugString << "<br>";
-      output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
+      output.SetNumVariablesSubDeletedVarsByOne((short)theNumVars);
       return;
     }
   }
-  output.Nullify(theNumVars);
+  output.Nullify((short)theNumVars);
 }
 
 std::string rootRationalFunction::ElementToString()
@@ -6027,7 +6027,7 @@ std::string rootRationalFunction::ElementToString()
 
 void RationalFunction::Simplify()
 { if (this->Numerator.IsEqualToZero())
-  { this->Denominator.MakeNVarConst(this->NumVariables, (Rational) 1);
+  { this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);
     return;
   }
   if (this->Denominator.IsEqualToOne())

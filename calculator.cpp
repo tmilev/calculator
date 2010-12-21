@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><head><title>Vector partition calculator</title>";
+  std::cout << "<html><head><title>Vector partition calculator updated 21 Dec, 2010</title>";
   //below follows a script for collapsing and expanding menus
   //script taken from the website of dustin diaz. Thanks mate!
   std::cout << "<script type=\"text/javascript\"> function switchMenu(obj) {	var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) {	el.style.display = 'none'; } else { el.style.display = '';}}</script>";

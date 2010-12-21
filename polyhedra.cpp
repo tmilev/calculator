@@ -216,7 +216,9 @@ template < > int List<VermaModuleMonomial>::ListActualSizeIncrement=10;
 template < > int List<MonomialUniversalEnveloping>::ListActualSizeIncrement=20;
 template < > int List<ElementUniversalEnveloping>::ListActualSizeIncrement=20;
 template < > int List<List<PolynomialRationalCoeff> >::ListActualSizeIncrement=20;
-
+template < > int List<TemplatePolynomial<Monomial<Rational>, Rational> >::ListActualSizeIncrement=20;
+template < > int List<TemplatePolynomial<Monomial<Integer>, Integer> >::ListActualSizeIncrement=20;
+template < > int List<TemplatePolynomial<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>, Integer> >::ListActualSizeIncrement=20;
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
 template < > std::string Matrix<Rational>::MatrixElementSeparator= ", \t";
@@ -7948,7 +7950,9 @@ void Rational::Simplify()
   { if (this->NumShort==0)
       this->DenShort=1;
     else
-    { int tempGCD;
+    { if (this->DenShort==1)
+        return;
+      int tempGCD;
       if (this->NumShort>0)
         tempGCD= this->gcd(this->NumShort, this->DenShort);
       else
@@ -7962,17 +7966,38 @@ void Rational::Simplify()
   { this->MakeZero();
     return;
   }
-  LargeIntUnsigned tempI;
-  LargeIntUnsigned::gcd(this->Extended->den, this->Extended->num.value, tempI);
-  /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-  { std::string tempS1, tempS2, tempS3;
-    tempI.ElementToString(tempS1);
-    this->ElementToString(tempS2);
-  }*/
-  LargeIntUnsigned tempI2;
-  this->Extended->den.DivPositive(tempI, this->Extended->den, tempI2);
-  this->Extended->num.value.DivPositive(tempI, this->Extended->num.value, tempI2);
+  if (!this->Extended->den.IsEqualToOne())
+  { LargeIntUnsigned tempI;
+    LargeIntUnsigned::gcd(this->Extended->den, this->Extended->num.value, tempI);
+    /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
+    { std::string tempS1, tempS2, tempS3;
+      tempI.ElementToString(tempS1);
+      this->ElementToString(tempS2);
+    }*/
+    LargeIntUnsigned tempI2;
+    this->Extended->den.DivPositive(tempI, this->Extended->den, tempI2);
+    this->Extended->num.value.DivPositive(tempI, this->Extended->num.value, tempI2);
+  }
   this->ShrinkExtendedPartIfPossible();
+}
+
+inline void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift)
+{ assert(x<LargeIntUnsigned::CarryOverBound);
+  while (x>0)
+  { if (shift>=this->size)
+    { int oldsize=this->size;
+      this->SetSizeExpandOnTopNoObjectInit(shift+1);
+      for (int i=oldsize; i<this->size; i++)
+        this->TheObjects[i]=0;
+    }
+    this->TheObjects[shift]+=x;
+    if (this->TheObjects[shift]>=LargeIntUnsigned::CarryOverBound)
+    { this->TheObjects[shift]-=LargeIntUnsigned::CarryOverBound;
+      x=1;
+      shift++;
+    } else
+      x=0;
+  }
 }
 
 inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
@@ -8052,9 +8077,8 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 }
 
 void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output)
-{ assert(this!=&output && this!=&x && this!=&output);
+{ assert(this!=&output && &x!=&output);
   output.SetSizeExpandOnTopNoObjectInit(x.size+output.size);
-  LargeIntUnsigned tempI;
   for(int i=0; i<output.size; i++)
     output.TheObjects[i]=0;
   for (int i=0; i<this->size; i++)
@@ -8064,10 +8088,8 @@ void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output)
       tempLong= tempLong*tempLong2;
       unsigned long long lowPart= tempLong%LargeIntUnsigned::CarryOverBound;
       unsigned long long highPart= tempLong/LargeIntUnsigned::CarryOverBound;
-      tempI.AssignShiftedUInt((unsigned int) lowPart, i+j);
-      output.AddNoFitSize(tempI);
-      tempI.AssignShiftedUInt((unsigned int) highPart, i+j+1);
-      output.AddNoFitSize(tempI);
+      output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) lowPart, i+j);
+      output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) highPart, i+j+1);
     }
   output.FitSize();
 //  assert(this->CheckForConsistensy());

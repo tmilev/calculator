@@ -7056,8 +7056,8 @@ class ParserNode
   void ConvertChildrenAndMyselfToStrongestExpressionChildren();
   bool ConvertToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement, typeError};
-  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation};
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement, typeError, typeRoot};
+  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation, errorWrongNumberOfArguments, errorBadOrNoArgument};
   void InitForAddition();
   void InitForMultiplication();
   std::string ElementToStringValueOnly(bool useHtml);
@@ -7096,7 +7096,8 @@ public:
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable, tokenGCD, tokenLCM
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable, tokenGCD, tokenLCM,
+    tokenRoot
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -7121,7 +7122,9 @@ public:
   bool TokenProhibitsUnaryMinus(int theToken);
   void AddIndexingExpressionOnTop();
   void AddLetterExpressionOnTop();
-  void AddFObECECbOnTop();
+  void AddFunctionOnTop();
+  void AddRootOnTop(int theDimension);
+  bool StackTopIsARoot(int& outputDimension);
   bool IsAWordSeparatingCharacter(char c);
   bool LookUpInDictionaryAndAdd(std::string& input);
   void Own(int indexParent, int indexChild1, int indexChild2);

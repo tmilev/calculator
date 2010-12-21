@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #endif
+#define cgiLimitRAMuseNumPointersInList
 
 extern int GlobalPointerCounter;
 
@@ -118,11 +119,11 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=1;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
+//  ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
 //  Rational tempRat=2;
 //  tempRat.RaiseToPower(20);
 //  tempRat.ElementToString(tempS);
-  //civilizedInput="2^32";
+  civilizedInput="lcm(5,6)";
   /*theParser.DefaultWeylRank=3;
   theParser.DefaultWeylLetter='B';
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
@@ -134,6 +135,8 @@ int main(int argc, char **argv)
     std::cout << tempS;
   }*/
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
+  theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;
+  theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   //std::cout << "Computation done in " << GetElapsedTimeInSeconds() << "seconds <br>";
   std::cout.flush();
   theParser.ComputeDebugString(theGlobalVariables);

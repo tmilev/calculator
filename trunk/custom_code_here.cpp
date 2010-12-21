@@ -3620,7 +3620,7 @@ bool Parser::ApplyRules(int lookAheadToken)
   int tokenThirdToLast=this->TokenStack.TheObjects[this->TokenStack.size-3];
   int tokenFourthToLast=this->TokenStack.TheObjects[this->TokenStack.size-4];
   int tokenFifthToLast=this->TokenStack.TheObjects[this->TokenStack.size-5];
-  int tokenSixthToLast=this->TokenStack.TheObjects[this->TokenStack.size-6];
+//  int tokenSixthToLast=this->TokenStack.TheObjects[this->TokenStack.size-6];
   if (tokenLast==this->tokenEmpty)
   { this->PopTokenAndValueStacksLast();
     return true;
@@ -3634,8 +3634,8 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddMapOnTop();
     return true;
   }
-  if (tokenLast==this->tokenCloseBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenBracket && (tokenSixthToLast==this->tokenGCD || tokenSixthToLast==this->tokenLCM))
-  { this->AddFObECECbOnTop();
+  if (tokenSecondToLast==this->tokenLCM && tokenLast==this->tokenExpression)
+  { this->AddFunctionOnTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMinus && !this->TokenProhibitsUnaryMinus(tokenThirdToLast) && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
@@ -3696,6 +3696,28 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddMinusOnTop();
     return true;
   }
+  int rootDim;
+  if (this->StackTopIsARoot(rootDim))
+  { this->AddRootOnTop(rootDim);
+    return true;
+  }
+  return false;
+}
+
+bool Parser::StackTopIsARoot(int& outputDimension)
+{ if (*this->TokenStack.LastObject()!=this->tokenCloseBracket)
+    return false;
+  outputDimension=0;
+  for (int i=this->TokenStack.size-2; i>=1; i--)
+  { if (this->TokenStack.TheObjects[i]!=this->tokenExpression)
+      return false;
+    i--;
+    outputDimension++;
+    if (this->TokenStack.TheObjects[i]==this->tokenOpenBracket)
+      return true;
+    if (this->TokenStack.TheObjects[i]!=this->tokenComma)
+      return false;
+  }
   return false;
 }
 
@@ -3719,14 +3741,6 @@ void Parser::AddPowerOnTop()
   this->DecreaseStackSetExpressionLastNode(2);
 }
 
-void Parser::AddFObECECbOnTop()
-{ this->ExtendOnTop(1);
-  this->LastObject()->Clear();
-  this->LastObject()->Operation=this->TokenStack.TheObjects[this->TokenStack.size-6];
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
-  this->DecreaseStackSetExpressionLastNode(5);
-}
-
 void Parser::AddLetterExpressionOnTop()
 { this->ExtendOnTop(1);
   this->LastObject()->Clear();
@@ -3736,15 +3750,20 @@ void Parser::AddLetterExpressionOnTop()
 
 void Parser::AddIntegerOnTopConvertToExpression()
 { this->ExtendOnTop(1);
-  this->LastObject()->Clear();
   this->LastObject()->rationalValue=this->LargeIntegerReader;
   this->LastObject()->Operation=this->tokenInteger;
   this->DecreaseStackSetExpressionLastNode(0);
 }
 
+void Parser::AddFunctionOnTop()
+{ this->ExtendOnTop(1);
+  this->LastObject()->Operation=this->TokenStack.TheObjects[this->TokenStack.size-2];
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-1]);
+  this->DecreaseStackSetExpressionLastNode(1);
+}
+
 void Parser::AddIndexingExpressionOnTop()
 { this->ExtendOnTop(1);
-  this->LastObject()->Clear();
   this->LastObject()->Operation = this->tokenUnderscore;
   this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
   this->DecreaseStackSetExpressionLastNode(2);
@@ -3817,8 +3836,21 @@ void Parser::ParseAndCompute(const std::string& input, std::string& output, Glob
   output=out.str();
 }
 
+void Parser::AddRootOnTop(int theDimension)
+{ this->ExtendOnTop(1);
+  ParserNode& lastNode=*this->LastObject();
+  lastNode.Operation=this->tokenRoot;
+  lastNode.children.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { int indexChild=this->ValueStack.TheObjects[this->ValueStack.size-2-2*i];
+    lastNode.children.TheObjects[theDimension-1-i]=indexChild;
+    this->TheObjects[indexChild].indexParent=this->size-1;
+  }
+  this->DecreaseStackSetExpressionLastNode(theDimension*2);
+}
+
 void Parser::Own(int indexParent, int indexChild1)
-{ ParserNode* theNode= & this->TheObjects[indexParent];
+{ ParserNode* theNode= &this->TheObjects[indexParent];
   theNode->children.SetSizeExpandOnTopNoObjectInit(1);
   theNode->children.TheObjects[0]=indexChild1;
   this->TheObjects[indexChild1].indexParent= indexParent;
@@ -3835,13 +3867,12 @@ void Parser::Own(int indexParent, int indexChild1, int indexChild2)
 
 void Parser::Evaluate(GlobalVariables& theGlobalVariables)
 { if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
-  { if (*this->TokenStack.LastObject()==this->tokenExpression)
+    if (*this->TokenStack.LastObject()==this->tokenExpression)
     { this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].Evaluate(theGlobalVariables);
 //      this->WeylAlgebraValue.Assign(this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].WeylAlgebraElement);
 //      this->LieAlgebraValue= this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].LieAlgebraElement;
       this->theValue=this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
     }
-  }
   if (this->TokenStack.size>this->numEmptyTokensAtBeginning+1)
     this->theValue.ExpressionType=ParserNode::typeError;
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
@@ -3887,6 +3918,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
     case Parser::tokenGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
     case Parser::tokenLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
+    case Parser::tokenRoot: this->ExpressionType=this->typeRoot; break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
 }
@@ -4172,17 +4204,29 @@ void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
-{if (!this->AllChildrenAreOfDefinedNonErrorType())
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
     return;
   }
-  if (this->children.size!=2)
+  if (this->children.size!=1)
   { this->SetError(this->errorProgramming);
     return;
   }
+  ParserNode& theRootNode= this->owner->TheObjects[this->children.TheObjects[0]];
+  List<int>& theTrueChildren= theRootNode.children;
+  if (theRootNode.ExpressionType!=this->typeRoot)
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  if (theTrueChildren.size!=2)
+  { this->SetError(this->errorWrongNumberOfArguments);
+    return;
+  }
+  theRootNode.ConvertChildrenAndMyselfToStrongestExpressionChildren();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
-  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
-  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
+  theRootNode.ExpressionType=this->typeRoot;
+  ParserNode& leftNode=this->owner->TheObjects[theTrueChildren.TheObjects[0]];
+  ParserNode& rightNode=this->owner->TheObjects[theTrueChildren.TheObjects[1]];
   LargeIntUnsigned tempUI1, tempUI2, tempUI3;
   LargeInt tempInt=0;
   Rational tempRat;
@@ -4399,6 +4443,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenVariable: out << "n"; break;
     case Parser::tokenGCD: out << "gcd"; break;
     case Parser::tokenLCM: out << "lcm"; break;
+    case Parser::tokenRoot: out << "root"; break;
     default: out << "?"; break;
   }
 }

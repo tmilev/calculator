@@ -4785,7 +4785,7 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
   for (int i=0; i<theAnswer.size; i++)
   { tempRatRoot.CopyFromBase(theAnswer.TheObjects[i]);
     std::cout << beginMath << tempRatRoot.ElementToString() << endMath << "<br>";
-    std::cout << "Corresponding expression in monomial form: " <<beginMath;
+    std::cout << "Corresponding expression in monomial form: " << beginMath;
     for (int j=0; j<output.size; j++)
     { RationalFunction& currentCoeff= theAnswer.TheObjects[i].TheObjects[j];
       if (!currentCoeff.IsEqualToZero())
@@ -4798,7 +4798,7 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
           if (tempS!="1")
             std::cout << "(" << tempS << ")";
         }
-        std::cout << output.TheObjects[i].ElementToString();
+        std::cout << output.TheObjects[j].ElementToString();
       }
     }
     std::cout << endMath << "<br>";

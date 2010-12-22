@@ -3544,13 +3544,18 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     return true;
   }
   if (input=="gcd")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenGCD);
-    this->ValueBuffer.AddObjectOnTop(0);
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionGCD);
     return true;
   }
   if (input=="lcm")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenLCM);
-    this->ValueBuffer.AddObjectOnTop(0);
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionLCM);
+    return true;
+  }
+  if (input=="eigen")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionEigen);
     return true;
   }
   return false;
@@ -3634,7 +3639,7 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddMapOnTop();
     return true;
   }
-  if (tokenSecondToLast==this->tokenLCM && tokenLast==this->tokenExpression)
+  if (tokenSecondToLast==this->tokenFunction && tokenLast==this->tokenExpression)
   { this->AddFunctionOnTop();
     return true;
   }
@@ -3758,6 +3763,7 @@ void Parser::AddIntegerOnTopConvertToExpression()
 void Parser::AddFunctionOnTop()
 { this->ExtendOnTop(1);
   this->LastObject()->Operation=this->TokenStack.TheObjects[this->TokenStack.size-2];
+  this->LastObject()->intValue=this->ValueStack.TheObjects[this->ValueStack.size-2];
   this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-1]);
   this->DecreaseStackSetExpressionLastNode(1);
 }
@@ -3874,7 +3880,7 @@ void Parser::Evaluate(GlobalVariables& theGlobalVariables)
       this->theValue=this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
     }
   if (this->TokenStack.size>this->numEmptyTokensAtBeginning+1)
-    this->theValue.ExpressionType=ParserNode::typeError;
+    this->theValue.SetError(ParserNode::errorBadSyntax);
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 }
 
@@ -3916,8 +3922,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
     case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
-    case Parser::tokenGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
-    case Parser::tokenLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
+    case Parser::tokenFunction: this->EvaluateFunction(theGlobalVariables); break;
     case Parser::tokenRoot: this->ExpressionType=this->typeRoot; break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
@@ -4102,6 +4107,38 @@ int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
   return result;
 }
 
+void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
+{ switch(this->intValue)
+  { case Parser::functionGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
+    case Parser::functionLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
+    case Parser::functionEigen: this->EvaluateEigen(theGlobalVariables); break;
+    default: this->SetError(this->errorUnknownOperation); break;
+  }
+}
+
+void ParserNode::EvaluateEigen(GlobalVariables& theGlobalVariables)
+{ if (this->children.size!=1)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
+  int theDimension= theArgument.children.size;
+  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
+  if (theArgument.GetStrongestExpressionChildrenConvertChildrenIfNeeded()!=this->typeIntegerOrIndex || theDimension!=theHmm.theDomain.theWeyl.CartanSymmetric.NumRows)
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  List<ElementUniversalEnveloping> theList;
+  root theWeight;
+  theWeight.SetSizeExpandOnTopLight(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
+    theWeight.TheObjects[i]=current.intValue;
+  }
+  this->owner->theHmm.WriteAllUEMonomialsWithWeightWRTDomain(theList, theWeight, theGlobalVariables);
+  this->ExpressionType=this->typeUndefined;
+}
+
 void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren()
 { this->ExpressionType=this->GetStrongestExpressionChildrenConvertChildrenIfNeeded();
 }
@@ -4237,13 +4274,14 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
   LargeInt tempInt=0;
   Rational tempRat;
   int tempI2;
+  int theFunction=this->intValue;
   switch(leftNode.ExpressionType)
   { case ParserNode::typeIntegerOrIndex:
       if (leftNode.intValue==0 || rightNode.intValue==0)
       { this->SetError(this->errorDivisionByZero);
         return;
       }
-      if (this->Operation==Parser::tokenGCD)
+      if (theFunction==Parser::functionGCD)
       { this->intValue= Rational::gcd(leftNode.intValue, rightNode.intValue);
         this->ExpressionType=this->typeIntegerOrIndex;
       } else
@@ -4266,7 +4304,7 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
       else
       { leftNode.rationalValue.GetNumUnsigned(tempUI1);
         rightNode.rationalValue.GetNumUnsigned(tempUI2);
-        if (this->Operation==Parser::tokenGCD)
+        if (theFunction==Parser::functionGCD)
           LargeIntUnsigned::gcd(tempUI1, tempUI2, tempUI3);
         else
           LargeIntUnsigned::lcm(tempUI1, tempUI2, tempUI3);
@@ -4280,7 +4318,7 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
       { this->SetError(this->errorDivisionByZero);
         return;
       }
-      if (this->Operation==Parser::tokenGCD)
+      if (theFunction==Parser::functionGCD)
         RationalFunction::gcd(leftNode.polyValue, rightNode.polyValue, this->polyValue);
       else
         RationalFunction::lcm(leftNode.polyValue, rightNode.polyValue, this->polyValue);
@@ -4447,9 +4485,8 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenMap: out << "i"; break;
     case Parser::tokenMinusUnary: out << "-"; break;
     case Parser::tokenVariable: out << "n"; break;
-    case Parser::tokenGCD: out << "gcd"; break;
-    case Parser::tokenLCM: out << "lcm"; break;
     case Parser::tokenRoot: out << "root"; break;
+    case Parser::tokenFunction: out << "function"; break;
     default: out << "?"; break;
   }
 }
@@ -4484,6 +4521,9 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
     else
       out << " a rational number of value: <div class=\"math\">" << this->rationalValue.ElementToString() << "</div>";
   }
+  if (this->ExpressionType==this->typeRoot)
+  { out << " is a root ";
+  }
   if (this->ExpressionType==this->typePoly)
   { if (!useHtml)
       out << " a polynomial of value: " << this->polyValue.ElementToString();
@@ -4504,14 +4544,16 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
 std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 { std::stringstream out;
   switch (this->ErrorType)
-  { case ParserNode::errorDivisionByZero: out << "error: division by zero"; break;
+  { case ParserNode::errorBadIndex: out << "error: bad index"; break;
+    case ParserNode::errorBadOrNoArgument: out << "error: bad or no argument"; break;
+    case ParserNode::errorBadSyntax: out << "error: bad syntax."; break;
+    case ParserNode::errorDunnoHowToDoOperation: out << "error: my master hasn't taught me how to do this operation (maybe he doesn't know how either)"; break;
+    case ParserNode::errorDivisionByZero: out << "error: division by zero"; break;
     case ParserNode::errorDivisionByNonAllowedType: out << "error: division of/by non-allowed type"; break;
     case ParserNode::errorMultiplicationByNonAllowedTypes: out << "error: multiplication by non-allowed types"; break;
     case ParserNode::errorNoError: out << "error: error type claims no error, but expression type claims error. Slap the programmer."; break;
     case ParserNode::errorOperationByUndefinedOrErrorType: out << "error: operation with an undefined type"; break;
     case ParserNode::errorProgramming: out << "error: there has been some programming mistake (it's not your expression's fault). Slap the programmer!"; break;
-    case ParserNode::errorBadIndex: out << "error: bad index"; break;
-    case ParserNode::errorDunnoHowToDoOperation: out << "error: my master hasn't taught me how to do this operation (maybe he doesn't know how either)"; break;
     case ParserNode::errorUnknownOperation: out << "error: unknown operation. The lazy programmer has added the operation to the dictionary, but hasn't implemented it yet. Lazy programmers deserve no salary. "; break;
     default: out << "Non-documented error. Lazy programmers deserve no salaries.";
   }
@@ -4530,6 +4572,8 @@ void ParserNode::ElementToString(std::string& output)
   { this->polyValue.ElementToString(tempS);
     out << " is the polynomial " << tempS;
   }
+  if (this->ExpressionType==this->typeRoot)
+    out << " is a root ";
   if (this->ExpressionType==this->typeUndefined)
     out << " is of type undefined ";
   if (this->ExpressionType==this->typeWeylAlgebraElement)

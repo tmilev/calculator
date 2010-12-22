@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #endif
-#define cgiLimitRAMuseNumPointersInList
+//#define cgiLimitRAMuseNumPointersInList
 
 extern int GlobalPointerCounter;
 
@@ -85,10 +85,10 @@ int main(int argc, char **argv)
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><head><title>Vector partition calculator updated 21 Dec, 2010</title>";
+  std::cout << "<html><head><title>Vector partition calculator updated 22 Dec, 2010</title>";
   //below follows a script for collapsing and expanding menus
   //script taken from the website of dustin diaz. Thanks mate!
-  std::cout << "<script type=\"text/javascript\"> function switchMenu(obj) {	var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) {	el.style.display = 'none'; } else { el.style.display = '';}}</script>";
+  std::cout << "<script type=\"text/javascript\"> function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) { el.style.display = 'none'; } else { el.style.display = '';}}</script>";
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;
@@ -119,21 +119,15 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=1;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
-//  ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
 //  Rational tempRat=2;
 //  tempRat.RaiseToPower(20);
 //  tempRat.ElementToString(tempS);
-  civilizedInput="lcm(5,6)";
+  //civilizedInput="lcm(5,6)";
   /*theParser.DefaultWeylRank=3;
-  theParser.DefaultWeylLetter='B';
+  theParser.DefaultWeylLetter='B';*/
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
-  { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
-    List<ElementUniversalEnveloping> tempList;
-    root tempRoot="(1,2)";
-    theParser.theHmm.WriteAllUEMonomialsWithWeightWRTDomain(tempList, tempRoot, theGlobalVariables);
-    theParser.theHmm.RestrictedRootSystem.ElementToString(tempS, false, true, true);
-    std::cout << tempS;
-  }*/
+    theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;

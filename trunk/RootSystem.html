@@ -1,113 +1,27 @@
-<html>
-<head><title>Root Systems </title>
-</head>
-<body>
-
-
 <SCRIPT TYPE="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" djConfig = "parseOnLoad: true"></SCRIPT>
-<div style="width:400;height:400;border:solid 1px" id="canvasMain" onmouseup="//clickCanvasMain(event.clientX, event.clientY);" onmousedown="generateRootSystemFromWeylLetterAndDim('G',2);"></div>
+<select id="textType" onchange="initRecompute();">
+  <option>A</option>
+  <option selected="1">B</option>
+  <option>C</option>
+  <option>D</option>
+  <option>E</option>
+  <option>F</option>
+  <option>G</option>
+</select>
+<select id="textDim" onchange="initRecompute();">
+  <option>1</option>
+  <option>2</option>
+  <option selected="1">3</option>
+  <option>4</option>
+  <option>5</option>
+  <option>6</option>
+  <option>7</option>
+  <option>8</option>
+</select>
+<div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="clickCanvasMain(event.clientX, event.clientY);" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
+<textarea id="outputField">
+</textarea>
 
-<div id="outputField">
-</div>
-<script type="text/javascript">
-/*	var oldDimension=-1;
-	var oldNumVectors=-1;
-	var NumElements=0;
-	var node;
-	var surface;
-	var MaxNumCoords=5;
-	var Basis= new Array(MaxNumCoords);
-	var Xshift=150;
-	var Yshift=250;
-	var selectedBasisIndex=-1;//-2 = center of coord system is selected
-	var GraphicsUnit=100;
-	var clickTolerance=0.1;
-	var RootsArray;
-	function ptsWithinClickTolerance(x1, y1, x2, y2)
-	{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )
-		{ return false;
-		}
-		return true;
-	}
-	function clickCanvasMain(cx,cy)
-	{ divPosX=0;
-		divPosY=0;
-		thePointer= canvasMain;
-		while(thePointer)
-		{ divPosX += thePointer.offsetLeft;
-    	divPosY += thePointer.offsetTop;
-    	thePointer = thePointer.offsetParent;
-		}
-//		alert(cy-divPosY+document.body.scrollTop);
-		posx=(cx-divPosX+document.body.scrollLeft-Xshift)/GraphicsUnit;
-		posy=(cy-divPosY+document.body.scrollTop-Yshift)/GraphicsUnit;
-		if (!(selectedBasisIndex==-1))
-		{ if (selectedBasisIndex==-2)
-			{ Xshift=(cx-divPosX+document.body.scrollLeft);
-				Yshift=(cy-divPosY+document.body.scrollTop);
-			}
-			else
-			{	Basis[selectedBasisIndex][0]=posx;
-				Basis[selectedBasisIndex][1]=posy;
-			}
-			surface.clear();
-			selectedBasisIndex=-1;
-			drawOnCanvasMain();
-			//nothing after this procedure gets executed (dunno why, wtf)
-		} else
-		{ if (ptsWithinClickTolerance(posx,posy,0,0))
-			{ selectedBasisIndex=-2;
-			}
-			for (i=0;i<MaxNumCoords;i++)
-			{ if (ptsWithinClickTolerance(posx,posy,Basis[i][0],Basis[i][1]))
-				{ selectedBasisIndex=i;
-				}
-			}
-			//alert("selected index"+selectedBasisIndex);
-		}
-	}
-	for (i=0; i<5; i++)
-	{ Basis[i]= new Array(2);
-	}
-	Basis[0][0]=1.7;  Basis[0][1]=0.8;
-	Basis[1][0]=0;    Basis[1][1]=-2;
-	Basis[2][0]=1.5;  Basis[2][1]=-1.8;
-	Basis[3][0]=-0.8; Basis[3][1]=1.4;
-	Basis[4][0]=1.6;  Basis[4][1]=0.9;
-	function getCoord(thePoint,Coord)
-	{ result=Number(0);
-		for (counterI=0;counterI<oldDimension;counterI++)
-		{ result= result+ thePoint[counterI]*Basis[counterI][Coord];
-		}
-		result=Math.floor(result);
-		return result;
-	}
-	function drawOnCanvasMain()
-	{//	alert("paint");
-		for (CounterK=0; CounterK<numdaLines; CounterK++)
-		{ xCoord1=getCoord(da1[CounterK],0)+Xshift;
-			yCoord1=getCoord(da1[CounterK],1)+Yshift;
-			xCoord2=getCoord(da2[CounterK],0)+Xshift;
-			yCoord2=getCoord(da2[CounterK],1)+Yshift;
-			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(clrda[CounterK]);
-		}
-		for (CounterK=0; CounterK<numlLines; CounterK++)
-		{ xCoord1=getCoord(l1[CounterK],0)+Xshift;
-			yCoord1=getCoord(l1[CounterK],1)+Yshift;
-			xCoord2=getCoord(l2[CounterK],0)+Xshift;
-			yCoord2=getCoord(l2[CounterK],1)+Yshift;
-			surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke(clrl[CounterK]);
-		}
-	}
-	function drawOnCanvasMainPlusInit()
-	{ node = dojo.byId(canvasMain);
-		surface = dojox.gfx.createSurface(node, 400, 400);
-		drawOnCanvasMain();
-	}
-	dojo.require("dojox.gfx");
-	dojo.addOnLoad(drawOnCanvasMainPlusInit);
-//generatePageFromDimAndNum(3,9,-1,-1);*/
-</script>
 <script type="text/javascript">
 var CartanSymmetric;
 var theRootSystem;
@@ -119,7 +33,7 @@ var theWeylLetter;
 var theWeylDim;
 
 function generateRootSystemFromWeylLetterAndDim(WeylLetter, WeylDim)
-{ if (WeylLetter!='A' && WeylLetter!='B' && WeylLetter!='C' && WeylLetter!='D' && WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G' )
+{ if (WeylLetter!="A" && WeylLetter!="B" && WeylLetter!="C" && WeylLetter!="D" && WeylLetter!="E" && WeylLetter!="F" && WeylLetter!="G" )
     return;
   if (WeylDim>9 || WeylDim<1)
     return;
@@ -130,25 +44,30 @@ function generateRootSystemFromWeylLetterAndDim(WeylLetter, WeylDim)
 function makeCartanArbitrary(WeylLetter, WeylDim)
 { theWeylLetter=WeylLetter;
   theWeylDim= WeylDim;
-  if (theWeylLetter=='E')
+  if (theWeylLetter=="E")
   { if (theWeylDim<6)
       theWeylDim=6;
     if (theWeylDim>8)
       theWeylDim=8;
   }
-  if (theWeylLetter=='G')
+  if (theWeylLetter=="G")
     theWeylDim=2;
   makeCartanAn(theWeylDim);
-  if (theWeylLetter=='E')
+  if (theWeylLetter=="B")
+  { CartanSymmetric[theWeylDim-1][theWeylDim-1]=1;
+  }
+  if (theWeylLetter=="E")
   { CartanSymmetric[0][1]=0; CartanSymmetric[1][0]=0;
     CartanSymmetric[1][2]=0; CartanSymmetric[2][1]=0;
     CartanSymmetric[0][2]=-1; CartanSymmetric[2][0]=-1;
     CartanSymmetric[1][3]=-1; CartanSymmetric[3][1]=-1;
   }  
-  if (theWeylLetter=='G')
+  if (theWeylLetter=="G")
   { CartanSymmetric[0][0]=6; CartanSymmetric[0][1]=-3;
     CartanSymmetric[1][0]=-3; CartanSymmetric[1][1]=2;
   }
+  document.getElementById("textDim").value=theWeylDim;
+  document.getElementById("textType").value=theWeylLetter;  
 }
 
 function makeCartanAn(WeylDim)
@@ -252,10 +171,13 @@ function GenerateRootSystem()
     }
   }
   WriteRootSystem();
+  drawOnCanvasMain();
 }
 
 function WriteRootSystem()
 { var output = document.getElementById("outputField");
+  output.value="";
+  output.rows=theRootSystemSize;
   var tempS;
   for (var i=0; i<theRootSystemSize; i++)
   { tempS="(";
@@ -265,13 +187,158 @@ function WriteRootSystem()
         tempS=tempS+",";
     }
     tempS=tempS+")";
-    output.appendChild(document.createTextNode(tempS));
+    output.value+=tempS;
     if (i!=theRootSystemSize-1)
-      output.appendChild(document.createElement("br"));
+      output.value+="\n";
   }  
 }
 </script>
-</body>
-</html>
+
+<script type="text/javascript">
+var NumElements=0;
+var node;
+var surface;
+var MaxNumCoords=8;
+var Basis= new Array(MaxNumCoords);
+var Xshift=200;
+var Yshift=200;
+var selectedBasisIndex=-1;//-2 = center of coord system is selected
+var GraphicsUnit=50;
+var clickTolerance=5;
+var RootsArray;
+var ZeroRoot;
+var ButtonIsDown=false;
+for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)
+  Basis[tempCounter]= new Array(2);
+tempCounter=0;
+Basis[tempCounter][0]=1;  Basis[tempCounter][1]=0; tempCounter++; 
+Basis[tempCounter][0]=-0.5;    Basis[tempCounter][1]=0.29; tempCounter++; 
+Basis[tempCounter][0]=1.5;  Basis[tempCounter][1]=-1.8; tempCounter++; 
+Basis[tempCounter][0]=-0.8;  Basis[tempCounter][1]=1.4; tempCounter++; 
+Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.9; tempCounter++; 
+Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.8; tempCounter++; 
+Basis[tempCounter][0]=1.5;  Basis[tempCounter][1]=0.8; tempCounter++; 
+Basis[tempCounter][0]=1.4;  Basis[tempCounter][1]=0.8; tempCounter++; 
+for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)
+{ Basis[tempCounter][0]*= GraphicsUnit;
+  Basis[tempCounter][1]*= GraphicsUnit;
+} 
+
+function ptsWithinClickTolerance(x1, y1, x2, y2)
+{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )
+    return false;
+  return true;
+}
+
+function clickCanvasMain(cx,cy)
+{ var divPosX=0;
+  var divPosY=0;
+  var thePointer= canvasMain;
+  while(thePointer)
+  { divPosX += thePointer.offsetLeft;
+    divPosY += thePointer.offsetTop;
+    thePointer = thePointer.offsetParent;
+  }
+  var posx=(cx-divPosX+document.body.scrollLeft-Xshift);
+  var posy=(cy-divPosY+document.body.scrollTop-Yshift);
+  selectedBasisIndex=-1;
+  if (ptsWithinClickTolerance(posx,posy,0,0))
+    selectedBasisIndex=-2;
+  for (i=0;i<MaxNumCoords;i++)
+  { if (ptsWithinClickTolerance(posx,posy,Basis[i][0], Basis[i][1]))
+      selectedBasisIndex=i;
+  }
+}
+ 
+function mouseMoveRedraw(cx, cy)
+{ if (selectedBasisIndex!=-1)
+  { var divPosX=0;
+    var divPosY=0;
+    var thePointer= canvasMain;
+    while(thePointer)
+    { divPosX += thePointer.offsetLeft;
+      divPosY += thePointer.offsetTop;
+      thePointer = thePointer.offsetParent;
+    }
+    var posx=(cx-divPosX+document.body.scrollLeft-Xshift);
+    var posy=(cy-divPosY+document.body.scrollTop-Yshift);
+    if (selectedBasisIndex==-2)
+    { Xshift=(cx-divPosX+document.body.scrollLeft);
+      Yshift=(cy-divPosY+document.body.scrollTop);
+    }
+		else
+    {	Basis[selectedBasisIndex][0]=posx;
+      Basis[selectedBasisIndex][1]=posy;
+    }
+    drawOnCanvasMain();
+  }
+}
+
+function getCoord(thePoint, Coord)
+{ var result=Number(0);
+  for (var counterI=0; counterI<theWeylDim; counterI++)
+    result= result+ thePoint[counterI]*Basis[counterI][Coord];
+  result=Math.floor(result);
+  return result;
+}
+
+function drawLineBetweenZeroAndRoot(theRoot)
+{ xCoord1=getCoord(ZeroRoot,0)+Xshift;
+  yCoord1=getCoord(ZeroRoot,1)+Yshift;
+  xCoord2=getCoord(theRoot,0)+Xshift;
+  yCoord2=getCoord(theRoot,1)+Yshift;
+  surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke({color : "blue"});
+}
+
+function drawCircleAtRoot(theRoot)
+{ xCoord1=getCoord(theRoot,0)+Xshift;
+  yCoord1=getCoord(theRoot,1)+Yshift;
+  surface.createEllipse({ cx : xCoord1, cy : yCoord1, rx : 2, ry : 2 }).setStroke({color : "red"});
+}
+
+function drawTextAtRoot(theRoot, theText)
+{ xCoord1=getCoord(theRoot,0)+Xshift;
+  yCoord1=getCoord(theRoot,1)+Yshift;
+  var tempText=surface.createText({x: xCoord1, y: yCoord1, text: theText});
+  tempText.setFont({family : "Arial", size : "9pt"});
+  tempText.setStroke("black");
+}
+
+function drawOnCanvasMain()
+{//	alert("paint");
+  surface.clear();
+  ZeroRoot= new Array(theWeylDim);
+  var tempRoot=new Array(theWeylDim);
+  for (var i=0; i<theWeylDim; i++)
+  { ZeroRoot[i]=0;
+    tempRoot[i]=0;
+  }
+  for (var i=0; i<theWeylDim; i++)
+  { tempRoot[i]=1;
+    drawCircleAtRoot(tempRoot);
+    drawTextAtRoot(tempRoot, i+1);
+    tempRoot[i]=0;
+  }
+  for (var CounterK=0; CounterK<theRootSystemSize; CounterK++)
+    drawLineBetweenZeroAndRoot(theRootSystem[CounterK]);  
+}
+
+function initDojo()
+{ node = dojo.byId(canvasMain);
+  surface = dojox.gfx.createSurface(node, 400, 400);
+  initRecompute();
+}
+
+function initRecompute()
+{ var tempWeylLetter=document.getElementById("textType").value;
+  var tempWeylDim=document.getElementById("textDim").value;
+  tempWeylDim=Number(tempWeylDim);
+  tempWeylLetter=tempWeylLetter.toUpperCase();
+  generateRootSystemFromWeylLetterAndDim(tempWeylLetter, tempWeylDim); 
+  drawOnCanvasMain();
+}
+dojo.require("dojox.gfx");
+dojo.addOnLoad(initDojo);
+</script>
 
 

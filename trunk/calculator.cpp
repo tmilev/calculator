@@ -32,7 +32,7 @@ void getPath(char* path, std::string& output)
   }
 }
 
-extern void static_html1( std::stringstream& output);
+extern void static_html2( std::stringstream& output);
 
 const double MaxAllowedComputationTime=20;
 bool ComputationComplete;
@@ -196,8 +196,14 @@ int main(int argc, char **argv)
     LatexCommands.AddObjectOnTop(latexCommandTemp);
   }
   std::cout << "<br>";
+  std::cout << "<button onclick=\"switchMenu('rootSystem');\"  >Root system</button>";
   std::cout << "<button onclick=\"switchMenu('sourceDetails');\"  >C++ source</button>";
   std::cout << "<button onclick=\"switchMenu('debugDetails');\">Debugging</button>";
+  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
+  std::stringstream tempStream3;
+  static_html2(tempStream3);
+  std::cout << tempStream3.str();
+  std::cout << "</div>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++(1 out of 3 files (header file))</a>\n";
@@ -206,7 +212,9 @@ int main(int argc, char **argv)
   std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/custom_code_here.cpp?view=markup\"> Vector partition c++(3 out of 3 files (.cpp file for current development))</a>\n";
   std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/calculator.cpp?view=markup\"> Calculator interface c++ (1 out of 1 files)</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/calculator.cpp?view=markup\"> Calculator interface c++ (1 out of 2 files)</a>\n";
+  std::cout << " <br>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/RootSystem.html.cpp?view=markup\"> Calculator interface c++ (2 out of 2 files)</a>\n";
   std::cout << " <br>\n";
   std::cout << " To run the calculator on your own web server you might want to install the <a href=\"http://httpd.apache.org/\">Apache web server</a> (comes preinstalled on <a href=\"http://www.ubuntu.com/\">Ubuntu</a>)";
   std::cout << " <br>\n";

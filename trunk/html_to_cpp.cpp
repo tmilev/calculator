@@ -34,60 +34,65 @@ void getPathTemp(char* path, std::string& output)
 
 void htmlTocpp(std::string& input, std::string& output)
 { std::stringstream out;
-  out<< "output <<\" ";
+  out << "output << \" ";
   for (unsigned int i=0; i<input.length();i++)
   { if (input[i]=='\"')
-      out <<"\\\"";
+      out << "\\\"";
     else
     { if (input[i]=='\\')
-        out <<"\\\\";
+        out << "\\\\";
       else
-      { out <<input[i];
+      { out << input[i];
       }
     }
   }
-  out <<"\\n\";";
+  out << "\\n\";";
   output = out.str();
 }
 
-int main(int argc, char **argv)
-{ std::string tempS, tempS2, tempS3;
-  getPathTemp(argv[0], tempS);
-  tempS2=tempS;
-  tempS3=tempS;
-  tempS.append("../vector_partition.html");
-  tempS2.append("../vector_partition.html.cpp");
-  tempS3.append("../polyhedra.cpp");
-  std::stringstream BufferIO;
-  std::fstream fileHeaderHtml;
+std::string thePath;
+
+void writeStatic(const std::string& fileIn, const std::string& fileoutName, int functionIndex)
+{ std::fstream fileHeaderHtml;
+  std::string tempS, tempS2;
+  tempS2= thePath;
+  tempS2.append(fileoutName);
   std::fstream fileout;
-  fileHeaderHtml.open(tempS.c_str(),std::fstream::in|std::fstream::out);
   fileout.open(tempS2.c_str(), std::fstream::out| std::fstream::trunc);
+  fileout << "#include<sstream>\n";
+  tempS=thePath;
+  tempS.append(fileIn);
+  fileHeaderHtml.open(fileIn.c_str(), std::fstream::in|std::fstream::out);
+  std::stringstream BufferIO;
   fileHeaderHtml.clear(std::ios::goodbit);
-  fileHeaderHtml.seekp(0,std::ios_base::end);
+  fileHeaderHtml.seekp(0, std::ios_base::end);
   fileHeaderHtml.seekg(0);
   char buffer[10000];
   while (!fileHeaderHtml.eof())
-  { fileHeaderHtml.read(buffer,5000);
+  { fileHeaderHtml.read(buffer, 5000);
 		BufferIO.write(buffer, fileHeaderHtml.gcount());
   }
   fileHeaderHtml.close();
-  BufferIO <<"\n<EndOfFile>";
+  BufferIO << "\n<EndOfFile>";
   BufferIO.seekg(0);
-  fileout <<"#include<sstream>\n";
-  fileout <<"void static_html1(std::stringstream& output){\n";
+  fileout << "void static_html" << functionIndex << "(std::stringstream& output){\n";
   for (;;)
-  { BufferIO.getline(buffer,5000);
+  { BufferIO.getline(buffer, 5000);
     tempS=buffer;
     if (tempS=="<EndOfFile>")
       break;
     htmlTocpp(tempS, tempS2);
-    fileout << tempS2 <<"\n";
+    fileout << tempS2 << "\n";
   }
-  fileout <<"}";
+  fileout << "}\n";
   fileout.flush();
-  fileout.close();
-  
-  
+ }
+
+int main(int argc, char **argv)
+{ std::string tempS2, tempS3;
+  getPathTemp(argv[0], thePath);
+  thePath.append("../../");
+  writeStatic("vector_partition.html", "vector_partition.html.cpp", 1);
+  writeStatic("RootSystem.html", "RootSystem.html.cpp", 2);
   return 0;
 }

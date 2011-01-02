@@ -32,7 +32,8 @@ void getPath(char* path, std::string& output)
   }
 }
 
-extern void static_html2( std::stringstream& output);
+extern void static_html4( std::stringstream& output);
+extern void static_html3( std::stringstream& output);
 
 const double MaxAllowedComputationTime=20;
 bool ComputationComplete;
@@ -141,12 +142,18 @@ int main(int argc, char **argv)
   std::cout << " <img src=\"../karlin.gif\" width=\"46\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
   std::cout << "</td><tr valign=\"top\">\n<td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
-  std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
-  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>\n<br>\n";
+  std::stringstream tempStream4;
+  static_html3(tempStream4);
+  std:: cout << tempStream4.str();
+//  std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
+//  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>";
+  std::cout << "\n<br>\n";
   std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">" << civilizedInput  << "</textarea>\n<br>\n";
 //  std::cout << "<input type=\"textarea\" size=\"20\" name=\"textInput\" value=\"" << civilizedInput << "\"></input>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
+  std::cout << "<script type=\"text/javascript\"> document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";
+  std::cout << "document.getElementById(\"textType\").value=" << theParser.DefaultWeylLetter << "; </script>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
 #ifndef WIN32
   if (civilizedInput!="")
@@ -201,7 +208,7 @@ int main(int argc, char **argv)
   std::cout << "<button onclick=\"switchMenu('debugDetails');\">Debugging</button>";
   std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
   std::stringstream tempStream3;
-  static_html2(tempStream3);
+  static_html4(tempStream3);
   std::cout << tempStream3.str();
   std::cout << "</div>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";

@@ -79,6 +79,11 @@ void writeStatic(const std::string& fileIn, const std::string& fileoutName, int 
   for (;;)
   { BufferIO.getline(buffer, 5000);
     tempS=buffer;
+    if (tempS=="<!>")
+    { fileout << "}\n";
+      functionIndex++;
+      fileout << "void static_html" << functionIndex << "(std::stringstream& output){\n";
+    }
     if (tempS=="<EndOfFile>")
       break;
     htmlTocpp(tempS, tempS2);

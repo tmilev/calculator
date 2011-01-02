@@ -1,13 +1,17 @@
 #include<sstream>
 void static_html2(std::stringstream& output){
 output << " <html>\n";
-output << " <head><title>Root Systems </title>\n";
+output << " <head> \n";
+output << " <title>\n";
+output << " Root systems\n";
+output << " </title>\n";
 output << " </head>\n";
 output << " <body>\n";
-output << " \n";
-output << " \n";
-output << " <SCRIPT TYPE=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js\" djConfig = \"parseOnLoad: true\"></SCRIPT>\n";
-output << " <select id=\"textType\" onchange=\"initRecompute();\">\n";
+}
+void static_html3(std::stringstream& output){
+output << " <!>\n";
+output << " <!--Option-->\n";
+output << " <select name=\"textType\" id=\"textType\" onchange=\"initRecompute();\">\n";
 output << "   <option>A</option>\n";
 output << "   <option selected=\"1\">B</option>\n";
 output << "   <option>C</option>\n";
@@ -16,7 +20,7 @@ output << "   <option>E</option>\n";
 output << "   <option>F</option>\n";
 output << "   <option>G</option>\n";
 output << " </select>\n";
-output << " <select id=\"textDim\" onchange=\"initRecompute();\">\n";
+output << " <select name=\"textDim\" id=\"textDim\" onchange=\"initRecompute();\">\n";
 output << "   <option>1</option>\n";
 output << "   <option>2</option>\n";
 output << "   <option selected=\"1\">3</option>\n";
@@ -26,6 +30,11 @@ output << "   <option>6</option>\n";
 output << "   <option>7</option>\n";
 output << "   <option>8</option>\n";
 output << " </select>\n";
+}
+void static_html4(std::stringstream& output){
+output << " <!>\n";
+output << " \n";
+output << " <script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js\" djConfig = \"parseOnLoad: true\"></script>\n";
 output << " <div style=\"width:400;height:400;border:solid 1px\" id=\"canvasMain\" onmousemove=\"mouseMoveRedraw(event.clientX, event.clientY);\" onmousedown=\"clickCanvasMain(event.clientX, event.clientY);\" onmouseup=\"ButtonIsDown=false; selectedBasisIndex=-1;\"></div>\n";
 output << " <textarea id=\"outputField\">\n";
 output << " </textarea>\n";
@@ -348,9 +357,11 @@ output << " }\n";
 output << " dojo.require(\"dojox.gfx\");\n";
 output << " dojo.addOnLoad(initDojo);\n";
 output << " </script>\n";
+}
+void static_html5(std::stringstream& output){
+output << " <!>\n";
 output << " </body>\n";
 output << " </html>\n";
-output << " \n";
 output << " \n";
 output << " \n";
 }

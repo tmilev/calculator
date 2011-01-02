@@ -8,8 +8,8 @@ Root systems
 <!>
 <!--Option-->
 <select name="textType" id="textType" onchange="initRecompute();">
-  <option>A</option>
-  <option selected="1">B</option>
+  <option selected="1">A</option>
+  <option>B</option>
   <option>C</option>
   <option>D</option>
   <option>E</option>
@@ -17,9 +17,9 @@ Root systems
   <option>G</option>
 </select>
 <select name="textDim" id="textDim" onchange="initRecompute();">
-  <option>1</option>
+  <option selected="1">1</option>
   <option>2</option>
-  <option selected="1">3</option>
+  <option>3</option>
   <option>4</option>
   <option>5</option>
   <option>6</option>
@@ -30,6 +30,7 @@ Root systems
 
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" djConfig = "parseOnLoad: true"></script>
 <div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="clickCanvasMain(event.clientX, event.clientY);" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
+You can drag the center and the basis vectors.<br>
 <textarea id="outputField">
 </textarea>
 

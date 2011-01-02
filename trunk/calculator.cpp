@@ -149,11 +149,10 @@ int main(int argc, char **argv)
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>";
   std::cout << "\n<br>\n";
   std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">" << civilizedInput  << "</textarea>\n<br>\n";
-//  std::cout << "<input type=\"textarea\" size=\"20\" name=\"textInput\" value=\"" << civilizedInput << "\"></input>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
   std::cout << "<script type=\"text/javascript\"> document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";
-  std::cout << "document.getElementById(\"textType\").value=" << theParser.DefaultWeylLetter << "; </script>";
+  std::cout << "document.getElementById(\"textType\").value=\"" << theParser.DefaultWeylLetter << "\"; </script>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
 #ifndef WIN32
   if (civilizedInput!="")

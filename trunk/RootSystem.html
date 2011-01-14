@@ -28,20 +28,37 @@ Root systems
 </select>
 <!>
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" djConfig = "parseOnLoad: true"></script>
+
+<script type="text/javascript" 
+src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" 
+djConfig = "parseOnLoad: true"></script>
+<script type="text/javascript"> 
+function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != "none" ) { el.style.display = 'none'; } else { el.style.display = '';}}
+</script>
 <div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
 clickCanvasMain(event.clientX, event.clientY);
 //changeBasis(1, 50, 50); drawOnCanvasMain();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
-<textarea id="debugField" cols="128" rows="15">
-</textarea>
 <br>
-You can drag the center and the basis vectors.<br>
+The basis vectors correspond to the vertices of the Dynkin diagram.<br>
+You can drag the center and the basis vectors.<button onclick="switchMenu('rotationExplanation')">More info</button>
+<br>
+<div id="rotationExplanation" style="display: none">
+The i^th vector corresponds to the i^th node of the Dynkin diagram of the root system.<br>
+The nodes are labeled in Bourbaki order.<br>
 Let the two dimensional plane we project onto be spanned by vectors e_1 and e_2.<br>
+Let v be a basis vector which you drag, with orthogonal projection in the (e_1,e_2) plane equal to v' <br>
+and with orthogonal complement v'':=v-v'.<br>
 When you drag a basis vector v, you do two things.<br>
-1) You modify e_1 and e_2 with a multiple of v,<br>
-in the unique possible fashion so v points where you mouse is.<br>
-2) Let the lowest indexed basis vector different from v be w'. <br> 
-2.1) Let w be a linear combination of   
+1) You rotate e_1 and e_2 in the (e_1,e_2) plane, to match the rotation angle given by your mouse pointer<br>
+2) Then you apply a rotation in the (v,v'')-plane that preserves the orthogonal complement of the (v,v'')-plane <br> 
+such as to match the length of v' determined by your mouse pointer. <br>
+Note that this operation is not defined if v lies in the (e_1, e_2) plane. <br>
+If the above is the case, you will not be able to modify the length of v'. <br>  
+<textarea id="debugField" cols="128" rows="15">
+</textarea><br>
+</div><br>
+The root system in simple basis coordinates follows. <br>
+
 
 <textarea id="outputField">
 </textarea>
@@ -69,11 +86,9 @@ function generateRootSystemFromWeylLetterAndDim(WeylLetter, WeylDim)
   VectorE1= new Array(theWeylDim);
   VectorE2= new Array(theWeylDim);
   for (var i=0; i<theWeylDim; i++)
-  { VectorE1[i]=0;
-    VectorE2[i]=0;
+  { VectorE1[i]=(i+1)*(i+1)+1;
+    VectorE2[i]=i*3+1;
   }
-  VectorE1[0]=1; VectorE1[1]=0.2;
-  VectorE2[1]=1; VectorE2[0]=0.3; VectorE2[2]=0.7;
   AddVectorTimes(VectorE1, VectorE2, -getScalarProduct(VectorE1, VectorE2)/getScalarProduct(VectorE2, VectorE2));
   MultiplyVector(VectorE1, Math.sqrt(1/(getScalarProduct(VectorE1, VectorE1))));
   MultiplyVector(VectorE2, Math.sqrt(1/(getScalarProduct(VectorE2, VectorE2))));
@@ -345,15 +360,48 @@ function RootToString(theRoot)
   return output;
 }
 
+function getQuadrantFromXandY(theX, theY)
+{ if (theX>0 && theY>=0)
+    return 1;
+  if (theX<=0 && theY>0)
+    return 2;
+  if (theX<0 && theY<=0)
+    return 3;
+  return 4;
+}
+
+function getAngleFromXandY(x, y, neighborX, neighborY)
+{ var result;
+  if (x!=0)
+   result= Math.atan(y/x);
+  else 
+    if (y>0)
+      result= Math.PI/2;
+    else
+      result= -Math.PI/2;
+  return result;     
+}
+
 function changeBasis(selectedIndex, newX, newY)
-{ DebugString="";
+{ if (newX==0 && newY==0)
+    return;
+  DebugString="";
   var selectedRoot=theRootSystem[selectedIndex];
   var selectedRootLength=getScalarProduct(selectedRoot,selectedRoot);  
   var oldX=Basis[selectedIndex][0]/GraphicsUnit;
   var oldY=Basis[selectedIndex][1]/GraphicsUnit; 
   newX/=GraphicsUnit;
   newY/=GraphicsUnit;
-  var AngleChange= -Math.atan(newY/newX)+Math.atan(oldY/oldX);
+  var oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
+  var newAngle= getAngleFromXandY(newX, newY, oldX, oldY);    
+  var AngleChange= -newAngle+oldAngle;
+  var epsilon=0.015;
+  while (AngleChange>=Math.PI/2+epsilon)
+  { AngleChange-=Math.PI;}
+  while (AngleChange<=-Math.PI/2-epsilon)
+  { AngleChange+=Math.PI;}
+  DebugString+="\nold angle:"+ oldAngle.toFixed(2);
+  DebugString+="\nnew angle: "+newAngle.toFixed(2);
   var NewVectorE1=dojo.clone(VectorE1);
   var NewVectorE2= dojo.clone(VectorE2);
   MultiplyVector(NewVectorE1, Math.cos(AngleChange));
@@ -373,13 +421,19 @@ function changeBasis(selectedIndex, newX, newY)
   var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);
   DebugString+="\noldRatio: "+oldRatioProjectionOverHeightSquared;
   DebugString+="\nnewRatio: "+newRatioProjectionOverHeightSquared;
-  ScaleToUnitLength(vProjection);
-  ScaleToUnitLength(vOrthogonal);
-  DebugString+="\nscaled vOrthogonal="+RootToString(vOrthogonal)+"->"+getScalarProduct(vOrthogonal,vOrthogonal);
-  DebugString+="\nscaled vProjection="+RootToString(vProjection)+"->"+getScalarProduct(vProjection,vProjection); 
-  DebugString+="\ntheScalarProd: "+getScalarProduct(vOrthogonal, vProjection);  
-  VectorE1=RotateOutOfPlane(VectorE1, vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
-  VectorE2=RotateOutOfPlane(VectorE2, vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+  if (getScalarProduct(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct(vOrthogonal, vOrthogonal)<-epsilon)
+  { ScaleToUnitLength(vProjection);
+    ScaleToUnitLength(vOrthogonal);
+    DebugString+="\nscaled vOrthogonal="+RootToString(vOrthogonal)+"->"+getScalarProduct(vOrthogonal,vOrthogonal);
+    DebugString+="\nscaled vProjection="+RootToString(vProjection)+"->"+getScalarProduct(vProjection,vProjection); 
+    DebugString+="\ntheScalarProd: "+getScalarProduct(vOrthogonal, vProjection);  
+    VectorE1=RotateOutOfPlane(VectorE1, vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+    VectorE2=RotateOutOfPlane(VectorE2, vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+  }
+  AddVectorTimes(VectorE2, VectorE1, -getScalarProduct(VectorE1, VectorE1)*getScalarProduct(VectorE1, VectorE2));
+  ScaleToUnitLength(VectorE1);
+  ScaleToUnitLength(VectorE2);
+  
   DebugString+="\ne1="+RootToString(VectorE1);
   DebugString+="\ne2="+RootToString(VectorE2);
   DebugString+="\ne1*e2="+getScalarProduct(VectorE1, VectorE2);  
@@ -553,26 +607,6 @@ function drawOnCanvasMain()
     drawLineBetweenZeroAndRoot(theRootSystem[CounterK]);  
   var debugLog = document.getElementById("debugField");
   debugLog.value=DebugString;
-  /*var text1="e1=(";
-  var text2="e2=(";
-  for (var i=0; i<theWeylDim; i++)
-  { text1=text1+ VectorE1[i].toFixed(2);
-    text2=text2+ VectorE2[i].toFixed(2);
-    if (i!=theWeylDim-1)
-    { text1+=",";
-      text2+=",";
-    }
-  }
-  text1+=")->";
-  text2+=")->";
-  text1+=getScalarProduct(VectorE1,VectorE1);
-  text2+=getScalarProduct(VectorE2,VectorE2);  
-  var tempText=surface.createText({x: 20, y: 10, text: text1});
-  tempText.setFont({family : "Arial", size : "9pt"});
-  tempText.setStroke("black");
-  var tempText=surface.createText({x: 20, y: 20, text: text2});
-  tempText.setFont({family : "Arial", size : "9pt"});
-  tempText.setStroke("black");*/
 }
 
 function initDojo()

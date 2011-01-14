@@ -138,6 +138,8 @@ int main(int argc, char **argv)
 
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
+  EigenVectorComputation tempEigen;
+  //std::cout << tempEigen.ComputeAndReturnString(theGlobalVariables);
   std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td></td><td>";
   std::cout << " <img src=\"../karlin.gif\" width=\"46\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
   std::cout << "</td><tr valign=\"top\">\n<td>";
@@ -339,3 +341,5 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
   }
   return false;
 }
+
+

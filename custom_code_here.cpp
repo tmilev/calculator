@@ -4534,7 +4534,7 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
   { if (!useHtml)
       out << " an element of U(g) of value: " << this->UEElement.ElementToString();
     else
-      out << " an element of U(g) of value: <div class=\"math\">" << this->UEElement.ElementToString() << "</div>";
+      out << " an element of U(g) of value: <div class=\"math\">\\begin{eqnarray*}&&" << this->UEElement.ElementToString(true) << "\\end{eqnarray*}</div>";
   }
   if (this->ExpressionType==this->typeError)
     out << this->ElementToStringErrorCode(useHtml);
@@ -5373,11 +5373,12 @@ void ElementUniversalEnveloping::AssignElementCartan(const root& input, int numV
     }
 }
 
-void ElementUniversalEnveloping::ElementToString(std::string& output)
+void ElementUniversalEnveloping::ElementToString(std::string& output, bool useLatex)
 { std::stringstream out;
   std::string tempS;
   if (this->size==0)
     out << "0";
+  int IndexCharAtLastLineBreak=0;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping& current=this->TheObjects[i];
     tempS=current.ElementToString(false);
@@ -5386,6 +5387,10 @@ void ElementUniversalEnveloping::ElementToString(std::string& output)
         if (tempS[0]!='-')
           out << '+';
     out << tempS;
+    if (((int)out.tellp())- IndexCharAtLastLineBreak> 150)
+    { IndexCharAtLastLineBreak=out.tellp();
+      out << "\\\\&&";
+    }
   }
   output=out.str();
 }
@@ -6204,4 +6209,57 @@ void PolynomialRationalCoeff::ScaleToIntegralNoGCDCoeffs()
   tempRat2.AssignLargeInteger(tempInt3);
   theMultiple.DivideBy(tempRat2);
   this->TimesConstant(theMultiple);
+}
+
+
+std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  Parser theParser;
+  theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  ElementUniversalEnveloping theElt, tempElt1, tempElt2;
+  this->MakeGenericVermaElement(theElt, theParser.theHmm.theRange);
+  int theDomainRank=theParser.theHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
+  int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
+  int numDomainPosRoots= theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
+  int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
+  for (int i=0; i<theDomainRank; i++)
+  { tempElt1.AssignElementLieAlgebra(theParser.theHmm.ImagesSimpleChevalleyGenerators.TheObjects[i], theRangeRank*2, theParser.theHmm.theRange);
+    tempElt1.LieBracketOnTheRight(theElt, tempElt2);
+    this->DetermineEquationsFromResultLieBracket(theParser, tempElt2, out, theGlobalVariables);
+  }
+  return out.str();
+}
+
+void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output)
+{ int theRank=theAlgebra.theWeyl.CartanSymmetric.NumRows;
+  int numPosRoots=theAlgebra.theWeyl.RootsOfBorel.size;
+  output.MakeNVarDegOnePoly((short)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
+}
+
+void EigenVectorComputation::DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
+{ int theDomainRank=theParser.theHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
+  int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
+  int numDomainPosRoots= theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
+  int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
+  for (int i=0; i<theElt.size; i++)
+  { for (int j=0; j<numRangePosRoots; j++)
+    {
+    }
+  }
+}
+
+void EigenVectorComputation::MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& owner)
+{ theElt.owner=&owner;
+  int numPosRoots= owner.theWeyl.RootsOfBorel.size;
+  int theRank=owner.theWeyl.CartanSymmetric.NumRows;
+  theElt.MakeActualSizeAtLeastExpandOnTop(numPosRoots);
+  theElt.MakeConst(Rational (1), theRank+numPosRoots, owner);
+  MonomialUniversalEnveloping tempMon;
+  PolynomialRationalCoeff tempP;
+  tempP.MakeNVarConst((short) theRank+numPosRoots, (Rational) 1);
+  tempMon.MakeConst(tempP, owner);
+  for (int i=0; i<numPosRoots; i++)
+  { tempP.MakeNVarDegOnePoly(theRank+numPosRoots, numPosRoots+i, (Rational) 1);
+    tempMon.MultiplyByGeneratorPowerOnTheRight(owner.RootIndexToGeneratorIndex(2*numPosRoots-1-i), tempP);
+  }
 }

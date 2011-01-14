@@ -905,7 +905,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   for (int i=0; i<output.VPVectors.size; i++)
   { output.VPVectors.TheObjects[i].SetSizeExpandOnTopLight(output.thePartialFraction.theChambers.AmbientDimension);
     for(int j=0; j<(signed int)output.thePartialFraction.theChambers.AmbientDimension; j++)
-    { tempStream>> tempS>>tempS>>tempI;
+    { tempStream >> tempS >> tempS >> tempI;
       output.VPVectors.TheObjects[i].TheObjects[j].AssignInteger(tempI);
     }
   }
@@ -1024,7 +1024,7 @@ void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output, bool inc
 { std::string tempS;
   this->thePartialFraction.ElementToString(tempS, true, false, true, *this->theGlobalVariablesContainer->Default());
   if (includeLatexHeaderAndFooter)
-    output << "\\documentclass{article}\n\\begin{document}" <<tempS<< "\n\\end{document}";
+    output << "\\documentclass{article}\n\\begin{document}" << tempS << "\n\\end{document}";
 }
 
 void ComputationSetup::oneIncrement(GlobalVariables& theGlobalVariables)
@@ -1353,7 +1353,7 @@ void ComputationSetup::Run()
         out << "\n\n\n" << tempS;
       }
       if (this->flagHavingDocumentClassForLaTeX)
-        out<< "\n\\end{document}";
+        out << "\n\\end{document}";
       this->theOutput.DebugString= out.str();
     }
     if (this->flagDisplayingPartialFractions)
@@ -1796,9 +1796,9 @@ void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive()
 
 void root::ReadFromFile(std::fstream& input)
 { std::string tempS;
-  input>>tempS; assert(tempS=="root_dim:");
+  input >> tempS; assert(tempS=="root_dim:");
   int tempI;
-  input>>tempI;
+  input >> tempI;
   this->SetSizeExpandOnTopLight(tempI);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ReadFromFile(input);
@@ -1808,7 +1808,7 @@ void root::WriteToFile(std::fstream& output)
 { output << "root_dim: " << this->size << " ";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output);
-    output<<" ";
+    output << " ";
   }
 }
 
@@ -2379,27 +2379,27 @@ void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bo
 { std::stringstream out;
   std::string tempS;
   if (! useLaTeX && ! useHtml)
-    out<<"Num roots: "<<this->size<<"\n";
+    out << "Num roots: " << this->size << "\n";
   if (useLaTeX && makeTable)
-    out <<"\\begin{tabular}{c}";
+    out << "\\begin{tabular}{c}";
   if (useHtml && makeTable)
-    out <<"<table>";
+    out << "<table>";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS, useLaTeX);
     if (useHtml&& makeTable)
-      out <<"<tr><td>";
-    out<<tempS;
+      out << "<tr><td>";
+    out << tempS;
     if (!makeTable && i!=this->size-1)
-      out<<", ";
+      out << ", ";
     if (useLaTeX && makeTable)
-      out <<"\\\\\n";
+      out << "\\\\\n";
     if (useHtml && makeTable)
-      out <<"</td></tr>";
+      out << "</td></tr>";
   }
   if (useHtml&& makeTable)
     out << "</table>";
   if (useLaTeX && makeTable)
-    out <<"\\end{tabular}";
+    out << "\\end{tabular}";
   output = out.str();
 }
 
@@ -2679,9 +2679,9 @@ void roots::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariable
   for (int i=0; i<this->size; i++)
     for (int j=0; j<theDimension; j++)
     { this->TheObjects[i].TheObjects[j].WriteToFile(output);
-      output<<" ";
+      output << " ";
     }
-  output<<"\n";
+  output << "\n";
 }
 
 void roots::ReadCivilizedHumanReadableFormat(std::stringstream& input)
@@ -2711,7 +2711,7 @@ void roots::ReadCivilizedHumanReadableFormat(std::stringstream& input)
   { this->TheObjects[i].MakeZero(theDimension);
     for(int j=0; j<theDimension; j++)
     { int x;
-      tempI>> x;
+      tempI >> x;
       this->TheObjects[i].TheObjects[j]=x;
     }
   }
@@ -3837,9 +3837,7 @@ bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotC
   theNormals.size=0;
   roots theVertices;
   for (int i=0; i<outputIndicesChambersToGlue.size; i++)
-  { if (this->GetHashFromSortedNormals()==58238520)
-      owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->ComputeDebugString(owner);
-    for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
+  { for (int j=0; j<owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.size; j++)
     { WallData& currentWall=owner.TheObjects[outputIndicesChambersToGlue.TheObjects[i]]->Externalwalls.TheObjects[j];
       root& theNormal=currentWall.normal;
       if (theNormals.ContainsObject(-theNormal))

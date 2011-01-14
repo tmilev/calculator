@@ -3111,7 +3111,7 @@ public:
   int HashFunction() const;
 //  int DegreesToIndex(int MaxDeg);
   void MakeConstantMonomial(short Nvar, const ElementOfCommutativeRingWithIdentity& coeff);
-  void MakeNVarFirstDegree(int LetterIndex, short NumVars, ElementOfCommutativeRingWithIdentity& coeff);
+  void MakeNVarFirstDegree(int LetterIndex, short NumVars, const ElementOfCommutativeRingWithIdentity& coeff);
   void init(short nv);
   void initNoDegreesInit(short nv);
   void NullifyDegrees();
@@ -3247,9 +3247,9 @@ public:
   void MakeMonomialOneLetter(short NumVars, int LetterIndex, short Power, const ElementOfCommutativeRingWithIdentity& Coeff);
   Polynomial(){};
   Polynomial(int degree, ElementOfCommutativeRingWithIdentity& coeff);
-  void MakeNVarDegOnePoly(short NVar, int NonZeroIndex, ElementOfCommutativeRingWithIdentity& coeff);
-  void MakeNVarDegOnePoly(short NVar, int NonZeroIndex1, int NonZeroIndex2, ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& coeff2);
-  void MakeNVarDegOnePoly(short NVar, int NonZeroIndex, ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& ConstantTerm);
+  void MakeNVarDegOnePoly(short NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff);
+  void MakeNVarDegOnePoly(short NVar, int NonZeroIndex1, int NonZeroIndex2, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& coeff2);
+  void MakeNVarDegOnePoly(short NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& ConstantTerm);
   void MakeLinPolyFromRoot(root& r);
   void TimesInteger(int a);
   void DivideBy(Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
@@ -4114,7 +4114,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MakeConstantMonomial(short 
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::MakeNVarFirstDegree(int LetterIndex, short NumVars, ElementOfCommutativeRingWithIdentity& coeff)
+void Monomial<ElementOfCommutativeRingWithIdentity>::MakeNVarFirstDegree(int LetterIndex, short NumVars, const ElementOfCommutativeRingWithIdentity& coeff)
 { this->MakeConstantMonomial(NumVars, coeff);
   this->degrees[LetterIndex]=1;
 }
@@ -4714,7 +4714,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(List<Polynom
 
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex, ElementOfCommutativeRingWithIdentity& coeff)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff)
 { this->ClearTheObjects();
   this->NumVars=NVar;
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
@@ -4723,18 +4723,18 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short 
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex1, int NonZeroIndex2, ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& coeff2)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex1, int NonZeroIndex2, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& coeff2)
 { this->ClearTheObjects();
   this->NumVars=NVar;
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-  tempM.MakeNVarFirstDegree( NonZeroIndex1, NVar, coeff1);
+  tempM.MakeNVarFirstDegree(NonZeroIndex1, NVar, coeff1);
   this->AddMonomial(tempM);
   tempM.MakeNVarFirstDegree(NonZeroIndex2, NVar, coeff2);
   this->AddMonomial(tempM);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex, ElementOfCommutativeRingWithIdentity& coeff1, ElementOfCommutativeRingWithIdentity& ConstantTerm)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& ConstantTerm)
 { this->ClearTheObjects();
   this->NumVars =NVar;
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
@@ -6562,8 +6562,10 @@ private:
   friend class MonomialUniversalEnveloping;
 public:
   std::string DebugString;
-  void ElementToString(std::string& output);
+  void ElementToString(std::string& output){this->ElementToString(output, true);};
+  void ElementToString(std::string& output, bool useLatex);
   std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
+  std::string ElementToString(bool useLatex){std::string tempS; this->ElementToString(tempS, useLatex); return tempS;};
   void ComputeDebugString(){this->ElementToString(this->DebugString);};
   SemisimpleLieAlgebra* owner;
   void AddMonomial(const MonomialUniversalEnveloping& input);
@@ -6577,9 +6579,7 @@ public:
   void MakeConst(const PolynomialRationalCoeff& coeff, SemisimpleLieAlgebra& theOwner){this->Nullify(&theOwner); MonomialUniversalEnveloping tempMon; tempMon.MakeConst(coeff, theOwner); this->AddMonomial(tempMon);};
   void Simplify();
   void ModOutVermaRelations();
-  static void GetCoordinateFormOfSpanOfElements
-(List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
-  ;
+  static void GetCoordinateFormOfSpanOfElements(List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables);
   void SetNumVariables(int newNumVars);
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator()
@@ -7727,6 +7727,20 @@ class GlobalVariablesContainer :public List<GlobalVariables>
 {
 public:
   GlobalVariables* Default(){return &this->TheObjects[0]; };
+};
+
+class EigenVectorComputation
+{
+public:
+  std::string ComputeAndReturnString(GlobalVariables& theGlobalVariables);
+  //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots
+  //variables correspond to the exponents: the rank-of-theOwner+1st variable corresponds to the
+  //exponent of the 1st negative root, (the root with index -1).
+  //The rank-of-theOwner+2nd variable corresponds to the exponent of the 2nd negative root (the root with index -2)
+  //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
+  void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
+  void DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
+  void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };
 
 #endif

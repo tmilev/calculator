@@ -88,8 +88,6 @@ int main(int argc, char **argv)
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><head><title>Vector partition calculator updated 22 Dec, 2010</title>";
   //below follows a script for collapsing and expanding menus
-  //script taken from the website of dustin diaz. Thanks mate!
-  std::cout << "<script type=\"text/javascript\"> function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) { el.style.display = 'none'; } else { el.style.display = '';}}</script>";
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
 //  std::cout << inputString;

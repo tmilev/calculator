@@ -26,15 +26,15 @@ Root systems
   <option>7</option>
   <option>8</option>
 </select>
-<!>
-
-
-<script type="text/javascript" 
-src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" 
-djConfig = "parseOnLoad: true"></script>
 <script type="text/javascript"> 
 function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != "none" ) { el.style.display = 'none'; } else { el.style.display = '';}}
 </script>
+<!>
+
+src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" 
+<script type="text/javascript" 
+src="dojo.xd.js" 
+djConfig = "parseOnLoad: true"></script>
 <div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
 clickCanvasMain(event.clientX, event.clientY);
 //changeBasis(1, 50, 50); drawOnCanvasMain();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
@@ -395,7 +395,7 @@ function changeBasis(selectedIndex, newX, newY)
   var oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
   var newAngle= getAngleFromXandY(newX, newY, oldX, oldY);    
   var AngleChange= -newAngle+oldAngle;
-  var epsilon=0.015;
+  var epsilon=0.00015;
   while (AngleChange>=Math.PI/2+epsilon)
   { AngleChange-=Math.PI;}
   while (AngleChange<=-Math.PI/2-epsilon)

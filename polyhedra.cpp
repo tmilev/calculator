@@ -12199,7 +12199,7 @@ void WeylGroup::ComputeWeylGroup()
 
 void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
 { this->ComputeRho(true);
-  this->ComputeDebugString();
+//  this->ComputeDebugString();
   roots tempRoots;
   tempRoots.AddRoot(this->rho);
   this->ClearTheObjects();

@@ -35,7 +35,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4( std::stringstream& output);
 extern void static_html3( std::stringstream& output);
 
-const double MaxAllowedComputationTime=20;
+const double MaxAllowedComputationTime=400;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -48,7 +48,7 @@ double GetElapsedTimeInSeconds()
 }
 
 void* RunTimer(void* ptr)
-{ for (; GetElapsedTimeInSeconds()<MaxAllowedComputationTime;)
+{ for (; GetElapsedTimeInSeconds()<MaxAllowedComputationTime || MaxAllowedComputationTime<=0;)
   { usleep(10000);
     if (ComputationComplete)
       break;
@@ -127,6 +127,7 @@ int main(int argc, char **argv)
   theParser.DefaultWeylLetter='B';*/
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
     theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  PolynomialRationalCoeff::PreferredHashSize=10;
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
@@ -137,7 +138,7 @@ int main(int argc, char **argv)
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
   EigenVectorComputation tempEigen;
-  //std::cout << tempEigen.ComputeAndReturnString(theGlobalVariables);
+  std::cout << beginMath << "\\begin{eqnarray*}&&" << tempEigen.ComputeAndReturnString(theGlobalVariables) << "\\end{eqnarray*}" << endMath;
   std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td></td><td>";
   std::cout << " <img src=\"../karlin.gif\" width=\"46\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
   std::cout << "</td><tr valign=\"top\">\n<td>";
@@ -179,6 +180,7 @@ int main(int argc, char **argv)
   std::string fileNameLieBracketFullPathPNGEnding;
   fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
   fileNameLieBracketFullPathPNGEnding.append(".png");
+
   LatexCommands.size=0;
   if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
   { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";

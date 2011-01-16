@@ -30,17 +30,17 @@ output << "   <option>6</option>\n";
 output << "   <option>7</option>\n";
 output << "   <option>8</option>\n";
 output << " </select>\n";
+output << " <script type=\"text/javascript\"> \n";
+output << " function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) { el.style.display = 'none'; } else { el.style.display = '';}}\n";
+output << " </script>\n";
 }
 void static_html4(std::stringstream& output){
 output << " <!>\n";
 output << " \n";
-output << " \n";
-output << " <script type=\"text/javascript\" \n";
 output << " src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js\" \n";
+output << " <script type=\"text/javascript\" \n";
+output << " src=\"dojo.xd.js\" \n";
 output << " djConfig = \"parseOnLoad: true\"></script>\n";
-output << " <script type=\"text/javascript\"> \n";
-output << " function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) { el.style.display = 'none'; } else { el.style.display = '';}}\n";
-output << " </script>\n";
 output << " <div style=\"width:400;height:400;border:solid 1px\" id=\"canvasMain\" onmousemove=\"mouseMoveRedraw(event.clientX, event.clientY);\" onmousedown=\"\n";
 output << " clickCanvasMain(event.clientX, event.clientY);\n";
 output << " //changeBasis(1, 50, 50); drawOnCanvasMain();\" onmouseup=\"ButtonIsDown=false; selectedBasisIndex=-1;\"></div>\n";

@@ -106,13 +106,15 @@ public:
   {	this->Create(parent, winid, pos, size, style, name);
   };
   void onMouseDownOnCanvas(wxMouseEvent &ev);
+  void onMouseUpOnCanvas(wxMouseEvent &ev);
   void onSizing(::wxSizeEvent&ev);
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE( drawCanvas, wxPanel )
+BEGIN_EVENT_TABLE(drawCanvas, wxPanel)
     EVT_PAINT(drawCanvas::OnPaint)
-    EVT_LEFT_DOWN( drawCanvas::onMouseDownOnCanvas)
+    EVT_LEFT_DOWN(drawCanvas::onMouseDownOnCanvas)
+//    EVT_LEFT_UP(drawCanvas::onMouseUpOnCanvas)
 END_EVENT_TABLE()
 
 class guiMainWindow : public wxFrame
@@ -239,6 +241,7 @@ public:
   void onComputationOver(wxCommandEvent& ev);
   void onRePaint(wxPaintEvent& ev);
   void onMouseDownOnCanvas(wxMouseEvent& ev);
+  void onMouseUpOnCanvas(wxMouseEvent& ev);
   void onCheckBoxesGraphics(wxCommandEvent& ev);
   void ReadVPVectorsAndOptions();
   void WriteIndicatorWeight(root& tempRoot);

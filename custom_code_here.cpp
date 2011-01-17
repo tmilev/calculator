@@ -3558,6 +3558,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddObjectOnTop(this->functionEigen);
     return true;
   }
+  if (input =="secretSauce")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(this->functionSecretSauce);
+    return true;
+  }
   return false;
 }
 
@@ -3637,6 +3642,14 @@ bool Parser::ApplyRules(int lookAheadToken)
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMap && lookAheadToken!=this->tokenUnderscore)
   { this->AddMapOnTop();
+    return true;
+  }
+  if (tokenLast== this->tokenFunctionNoArgument)
+  { this->ExtendOnTop(1);
+    this->LastObject()->Operation=this->tokenFunction;
+    this->LastObject()->intValue=*this->ValueStack.LastObject();
+    *this->TokenStack.LastObject()=this->tokenExpression;
+    *this->ValueStack.LastObject()=this->size-1;
     return true;
   }
   if (tokenSecondToLast==this->tokenFunction && tokenLast==this->tokenExpression)
@@ -4112,6 +4125,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
   { case Parser::functionGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
     case Parser::functionLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
     case Parser::functionEigen: this->EvaluateEigen(theGlobalVariables); break;
+    case Parser::functionSecretSauce: this->EvaluateSecretSauce(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -4212,6 +4226,12 @@ bool ParserNode::AllChildrenAreOfDefinedNonErrorType()
     if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeError || this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeUndefined)
       return false;
   return true;
+}
+
+void ParserNode::EvaluateSecretSauce(GlobalVariables& theGlobalVariables)
+{ EigenVectorComputation theComp;
+  this->outputString=theComp.ComputeAndReturnString(theGlobalVariables);
+  this->ExpressionType=this->typeString;
 }
 
 void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
@@ -4487,6 +4507,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenVariable: out << "n"; break;
     case Parser::tokenRoot: out << "root"; break;
     case Parser::tokenFunction: out << "function"; break;
+    case Parser::tokenFunctionNoArgument: out << "functionNoArgument"; break;
     default: out << "?"; break;
   }
 }
@@ -4535,6 +4556,9 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
       out << " an element of U(g) of value: " << this->UEElement.ElementToString();
     else
       out << " an element of U(g) of value: <div class=\"math\">\\begin{eqnarray*}&&" << this->UEElement.ElementToString(true) << "\\end{eqnarray*}</div>";
+  }
+  if (this->ExpressionType==this->typeString)
+  { out << "a printout: " << this->outputString;
   }
   if (this->ExpressionType==this->typeError)
     out << this->ElementToStringErrorCode(useHtml);
@@ -6214,7 +6238,6 @@ void PolynomialRationalCoeff::ScaleToIntegralNoGCDCoeffs()
   this->TimesConstant(theMultiple);
 }
 
-
 std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   Parser theParser;
@@ -6229,10 +6252,15 @@ std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theG
   { tempElt1.AssignElementLieAlgebra(theParser.theHmm.ImagesSimpleChevalleyGenerators.TheObjects[i], theRangeRank+numRangePosRoots, theParser.theHmm.theRange);
     tempElt1.LieBracketOnTheRight(theElt, tempElt2);
     tempElt2.Simplify();
-    out << "[" << tempElt1.ElementToString(true) << "," << theElt.ElementToString(true) << "]=" << tempElt2.ElementToString(true) << "\\\\&&";
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out << "[" << tempElt1.ElementToString(true) << "," << theElt.ElementToString(true) << "]=" << tempElt2.ElementToString(true);
+    out << "\\end{eqnarray*}</div>";
     tempElt2.ModOutVermaRelations();
-    out << "\\\\&& \\mathrm{mod~Verma~rels:~}" << tempElt2.ElementToString(true) <<"\\\\";
-    this->DetermineEquationsFromResultLieBracket(theParser, tempElt2, out, theGlobalVariables);
+    out << "mod Verma rels:";
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out  << tempElt2.ElementToString(true);
+    out << "\\end{eqnarray*}</div>";
+    this->DetermineEquationsFromResultLieBracket(theParser, theElt, tempElt2, out, theGlobalVariables);
   }
   return out.str();
 }
@@ -6243,15 +6271,22 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialR
   output.MakeNVarDegOnePoly((short)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
 }
 
-void EigenVectorComputation::DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
+void EigenVectorComputation::DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
 { int theDomainRank=theParser.theHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
   int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   int numDomainPosRoots= theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
   int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
+  PolynomialRationalCoeff tempP;
+  MonomialUniversalEnveloping& originalMon= theStartingGeneric.TheObjects[0];
   for (int i=0; i<theElt.size; i++)
+  { MonomialUniversalEnveloping& theMon= theElt.TheObjects[i];
+    out << "<br>\nDifference in monomial index " << i << ": ";
     for (int j=0; j<numRangePosRoots; j++)
-    {
+    { tempP= originalMon.Powers.TheObjects[j]- theMon.Powers.TheObjects[j];
+      out << tempP.ElementToString() << " ";
+
     }
+  }
 }
 
 void EigenVectorComputation::MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& owner)

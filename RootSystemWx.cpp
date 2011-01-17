@@ -229,6 +229,7 @@ guiMainWindow *MainWindow1=0;
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { if (MainWindow1!=0)
   { wxWindowDC dc(MainWindow1->Canvas1); wxPen tempPen;
+    tempPen.SetWidth(2);
     switch (thePenStyle)
     { case DrawingVariables::PenStyleNormal:
         tempPen.SetStyle(::wxSOLID);
@@ -344,8 +345,6 @@ END_EVENT_TABLE()
 void drawCanvas::onMouseDownOnCanvas(wxMouseEvent& ev)
 { if (MainWindow1==0)
     return;
-  int Realx=ev.GetX();//-this->Canvas1->GetRect().GetTop();
-  int Realy=ev.GetY();//-this->GetRect().GetLeft();
   MainWindow1->theGraphics.click(ev.GetX(), ev.GetY());
 }
 
@@ -534,8 +533,14 @@ void RootSystemGraphics::mouseMove(int X, int Y)
 }
 
 void RootSystemGraphics::draw()
-{ for (int i=0; i<this->theWeyl.RootSystem.size; i++)
-    drawline(shiftX, shiftY, this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[0]+this->shiftX, this->shiftY-this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[1], DrawingVariables::PenStyleNormal, 0);
+{ Rational RootLength;
+  for (int i=0; i<this->theWeyl.RootSystem.size; i++)
+  { int tempColor= CGIspecificRoutines::RedGreenBlue(200, 200, 255);
+    RootLength= this->theWeyl.RootScalarCartanRoot(this->theWeyl.RootSystem.TheObjects[i], this->theWeyl.RootSystem.TheObjects[i]);
+    if (this->theWeyl.LongRootLength== RootLength)
+      tempColor=CGIspecificRoutines::RedGreenBlue(50, 50, 255);
+    drawline(shiftX, shiftY, this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[0]+this->shiftX, this->shiftY-this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[1], DrawingVariables::PenStyleNormal, tempColor);
+  }
   int theDim=this->theWeyl.CartanSymmetric.NumRows;
   for (int i=0; i<theDim; i++)
   { drawCircle(shiftX+this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[0], shiftY-this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[1], 3, CGIspecificRoutines::RedGreenBlue(200, 50, 50) );

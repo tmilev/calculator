@@ -31,9 +31,9 @@ function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.d
 </script>
 <!>
 
-src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js" 
+
 <script type="text/javascript" 
-src="dojo.xd.js" 
+src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  
 djConfig = "parseOnLoad: true"></script>
 <div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
 clickCanvasMain(event.clientX, event.clientY);
@@ -67,6 +67,8 @@ The root system in simple basis coordinates follows. <br>
 var CartanSymmetric;
 var InvertedCartan;
 var theRootSystem;
+var theRootSystemLongLength;
+var theRootSystemLengths;
 var theRootSystemSize;
 var theRootSystemHashes;
 var theRootSystemHashesSizes;
@@ -93,6 +95,13 @@ function generateRootSystemFromWeylLetterAndDim(WeylLetter, WeylDim)
   MultiplyVector(VectorE1, Math.sqrt(1/(getScalarProduct(VectorE1, VectorE1))));
   MultiplyVector(VectorE2, Math.sqrt(1/(getScalarProduct(VectorE2, VectorE2))));
   GenerateRootSystem();
+  theRootSystemLengths= new Array(theRootSystem.length);
+  theRootSystemLongLength= getScalarProduct(theRootSystem[0], theRootSystem[0]);
+  for (var i=0; i<theRootSystemSize; i++)
+  { theRootSystemLengths[i]= getScalarProduct(theRootSystem[i], theRootSystem[i]);
+    if (theRootSystemLengths[i]>theRootSystemLongLength)
+      theRootSystemLongLength=theRootSystemLengths[i];
+  }
   ComputeProjections();
 }
 
@@ -124,9 +133,28 @@ function makeCartanArbitrary(WeylLetter, WeylDim)
   }
   if (theWeylLetter=="G")
     theWeylDim=2;
+  if (theWeylLetter=="F")
+    theWeylDim=4;
   makeCartanAn(theWeylDim);
   if (theWeylLetter=="B")
   { CartanSymmetric[theWeylDim-1][theWeylDim-1]=1;
+  }
+  if (theWeylLetter=="C")
+  {CartanSymmetric[theWeylDim-1][theWeylDim-1]=4;
+   CartanSymmetric[theWeylDim-1][theWeylDim-2]=-2;
+   CartanSymmetric[theWeylDim-2][theWeylDim-1]=-2;
+  }
+  if (theWeylLetter=="F")
+  { CartanSymmetric[0][0]=2 ; CartanSymmetric[0][1]=-1;
+    CartanSymmetric[1][0]=-1; CartanSymmetric[1][1]=2 ; CartanSymmetric[1][2]=-2;
+    CartanSymmetric[2][1]=-2; CartanSymmetric[2][2]=4 ; CartanSymmetric[2][3]=-2;
+    CartanSymmetric[3][2]=-2; CartanSymmetric[3][3]=4 ;
+  }
+  if (theWeylLetter=="D")
+  { CartanSymmetric[theWeylDim-2][theWeylDim-1]=0;
+    CartanSymmetric[theWeylDim-1][theWeylDim-2]=0;
+    CartanSymmetric[theWeylDim-3][theWeylDim-1]=-1;
+    CartanSymmetric[theWeylDim-1][theWeylDim-3]=-1;
   }
   if (theWeylLetter=="E")
   { CartanSymmetric[0][1]=0; CartanSymmetric[1][0]=0;
@@ -395,7 +423,7 @@ function changeBasis(selectedIndex, newX, newY)
   var oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
   var newAngle= getAngleFromXandY(newX, newY, oldX, oldY);    
   var AngleChange= -newAngle+oldAngle;
-  var epsilon=0.00015;
+  var epsilon=0.000015;
   while (AngleChange>=Math.PI/2+epsilon)
   { AngleChange-=Math.PI;}
   while (AngleChange<=-Math.PI/2-epsilon)
@@ -569,7 +597,12 @@ function drawLineBetweenZeroAndRoot(theRoot)
   yCoord1=-getCoord(ZeroRoot,1)+Yshift;
   xCoord2=getCoord(theRoot,0)+Xshift;
   yCoord2=-getCoord(theRoot,1)+Yshift;
-  surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke({color : "blue"});
+  var theColor;
+  if (getScalarProduct(theRoot, theRoot)==theRootSystemLongLength)
+    theColor ="blue";
+  else
+    theColor ="#C0C0FF"; 
+  surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke({color : theColor});
 }
 
 function drawCircleAtRoot(theRoot)

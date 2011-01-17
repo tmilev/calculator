@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 //  Rational tempRat=2;
 //  tempRat.RaiseToPower(20);
 //  tempRat.ElementToString(tempS);
-  //civilizedInput="lcm(5,6)";
+  //civilizedInput="secretSauce";
   /*theParser.DefaultWeylRank=3;
   theParser.DefaultWeylLetter='B';*/
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
@@ -137,8 +137,6 @@ int main(int argc, char **argv)
 
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
-  EigenVectorComputation tempEigen;
-  std::cout << beginMath << "\\begin{eqnarray*}&&" << tempEigen.ComputeAndReturnString(theGlobalVariables) << "\\end{eqnarray*}" << endMath;
   std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td></td><td>";
   std::cout << " <img src=\"../karlin.gif\" width=\"46\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
   std::cout << "</td><tr valign=\"top\">\n<td>";

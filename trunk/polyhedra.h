@@ -3687,6 +3687,8 @@ public:
 class PolynomialRationalCoeff: public Polynomial<Rational>
 {
 public:
+  PolynomialRationalCoeff(){};
+  PolynomialRationalCoeff(const PolynomialRationalCoeff& other){this->Assign(other);};
   void AssignIntegerPoly(IntegerPoly& p);
   void Evaluate(intRoot& values, Rational& output);
   void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
@@ -3708,7 +3710,14 @@ public:
 //  void operator*=(const Rational& theConst){ this->TimesConstant(theConst);};
   bool operator==(const PolynomialRationalCoeff& right){ PolynomialRationalCoeff tempP; tempP.Assign(right); tempP.Subtract(*this); return tempP.IsEqualToZero();};
   void operator=(const PolynomialRationalCoeff& right);
+  void operator=(const Polynomial<Rational>& right){this->Assign(right);};
   void operator-=(const Rational& theConst){ Monomial<Rational> tempMon; tempMon.MakeConstantMonomial(this->NumVars, -theConst); this->AddMonomial(tempMon);};
+  PolynomialRationalCoeff operator-(const PolynomialRationalCoeff& other)
+  { PolynomialRationalCoeff tempP;
+    tempP.Assign(*this);
+    tempP.Subtract(other);
+    return tempP;
+  };
   void MakePChooseK(const PolynomialRationalCoeff& P, int k, PolynomialRationalCoeff& output);
   void ScaleToIntegralNoGCDCoeffs();
   void Subtract(const PolynomialRationalCoeff& other)
@@ -7022,6 +7031,7 @@ class ParserNode
 {
   public:
   std::string DebugString;
+  std::string outputString;
   void ComputeDebugString(){ this->ElementToString(DebugString); };
   void ElementToString(std::string& output);
   Parser* owner;
@@ -7051,13 +7061,16 @@ class ParserNode
     this->UEElement=other.UEElement;
     this->ContextLieAlgebra=other.ContextLieAlgebra;
     this->polyValue=other.polyValue;
+    this->outputString= other.outputString;
   };
   void Clear();
   int GetStrongestExpressionChildrenConvertChildrenIfNeeded();
   void ConvertChildrenAndMyselfToStrongestExpressionChildren();
   bool ConvertToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement,typeRoot, typeError //typeError must ALWAYS have the highest numerical value
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement,typeRoot,
+  typeString,
+  typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation, errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax};
   void InitForAddition();
@@ -7076,6 +7089,7 @@ class ParserNode
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
+  void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
@@ -7101,9 +7115,9 @@ public:
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
-    tokenRoot, tokenFunction
+    tokenRoot, tokenFunction, tokenFunctionNoArgument
   };
-  enum functionList{ functionEigen, functionLCM, functionGCD };
+  enum functionList{ functionEigen, functionLCM, functionGCD, functionSecretSauce };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
   List<int> TokenStack;
@@ -7739,7 +7753,7 @@ public:
   //The rank-of-theOwner+2nd variable corresponds to the exponent of the 2nd negative root (the root with index -2)
   //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
   void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
-  void DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
+  void DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };
 

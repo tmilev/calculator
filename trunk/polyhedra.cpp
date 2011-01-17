@@ -7614,6 +7614,10 @@ void Rational::WriteToFile(std::fstream& output)
 inline void Rational::RaiseToPower(int x)
 { Rational tempRat;
   tempRat.MakeOne();
+  if (x<0)
+  { x=-x;
+    this->Invert();
+  }
   MathRoutines::RaiseToPower(*this, x, tempRat);
 }
 
@@ -9131,9 +9135,9 @@ bool partFraction::DecomposeFromLinRelation(MatrixLargeRational& theLinearRelati
   int GainingMultiplicityIndexInLinRelation=-1;
   int GainingMultiplicityIndex=-1;
   int ElongationGainingMultiplicityIndex=-1;
-  static List<int> ParticipatingIndices;
-  static List<int> theGreatestElongations;
-  static List<int> theCoefficients;
+  List<int> ParticipatingIndices;
+  List<int> theGreatestElongations;
+  List<int> theCoefficients;
   Rational oldCheckSum;
   ParticipatingIndices.size=0;
   theCoefficients.size=0;
@@ -9144,7 +9148,8 @@ bool partFraction::DecomposeFromLinRelation(MatrixLargeRational& theLinearRelati
   theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].MultiplyByInt(tempI);
   //theLinearRelation.ComputeDebugString();
   theLinearRelation.ScaleToIntegralForMinRationalHeightNoSignChange();
-  //theLinearRelation.ComputeDebugString();
+  if (this->flagAnErrorHasOccurredTimeToPanic)
+    theLinearRelation.ComputeDebugString();
   ElongationGainingMultiplicityIndex =theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].NumShort;
   if (ElongationGainingMultiplicityIndex<0)
     ElongationGainingMultiplicityIndex=-ElongationGainingMultiplicityIndex;
@@ -9152,7 +9157,7 @@ bool partFraction::DecomposeFromLinRelation(MatrixLargeRational& theLinearRelati
     theLinearRelation.MultiplyByInt(-1);
   //theLinearRelation.ComputeDebugString();
   for (int i=0; i<theLinearRelation.NumRows; i++)
-    if (i!=GainingMultiplicityIndexInLinRelation && theLinearRelation.elements[i][0].NumShort!=0)
+    if (i!=GainingMultiplicityIndexInLinRelation && !theLinearRelation.elements[i][0].IsEqualToZero())
     { int tempI=this->IndicesNonZeroMults.TheObjects[i];
       ParticipatingIndices.AddObjectOnTop(tempI);
       theGreatestElongations.AddObjectOnTop(this->TheObjects[tempI].GetLargestElongation());
@@ -9243,13 +9248,15 @@ void partFraction::GetNElongationPolyWithMonomialContribution(partFractions& own
 }
 
 void partFraction::ApplyGeneralizedSzenesVergneFormula(List<int>& theSelectedIndices, List<int>& theGreatestElongations, List<int>& theCoefficients, int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
-{ static partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
-  static IntegerPoly tempP;
-  static PolyPartFractionNumerator tempNum;
-  static IntegerPoly ComputationalBufferCoefficient;
-  static PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
+{ partFraction tempFrac; tempFrac.RelevanceIsComputed=false;
+  IntegerPoly tempP;
+  PolyPartFractionNumerator tempNum;
+  IntegerPoly ComputationalBufferCoefficient;
+  PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
   //this->lastApplicationOfSVformulaNumNewGenerators=0;
   //this->lastApplicationOfSVformulaNumNewMonomials=0;
+  if (this->flagAnErrorHasOccurredTimeToPanic)
+    this->ComputeDebugString(Accum, theGlobalVariables);
   Rational StartCheckSum, theDiff;
   if (this->flagAnErrorHasOccurredTimeToPanic)
   { Accum.ComputeOneCheckSum(StartCheckSum, theGlobalVariables);
@@ -9257,7 +9264,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(List<int>& theSelectedInd
   }
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
   TheBigBadIndexingSet.initIncomplete(theSelectedIndices.size);
-  static int TotalMultiplicity;
+  int TotalMultiplicity;
   TotalMultiplicity=0;
   for (int i=0; i<theSelectedIndices.size; i++)
   { int tempI= this->TheObjects[theSelectedIndices.TheObjects[i]].GetMultiplicityLargestElongation()-1;
@@ -9294,7 +9301,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(List<int>& theSelectedInd
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempP.ComputeDebugString();
           ComputationalBufferCoefficient.MultiplyBy(tempP);
-          static Integer tempInt;
+          Integer tempInt;
           int tempI;
           if (k==i) tempI = oldMaxMultiplicity; else tempI=multiplicityChange;
           tempInt.value=MathRoutines::NChooseK(tempN, tempI);
@@ -9316,6 +9323,8 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(List<int>& theSelectedInd
         tempFrac.ComputeDebugString(Accum, theGlobalVariables);
       tempFrac.ComputeIndicesNonZeroMults();
       Accum.AddAndReduce(tempFrac, theGlobalVariables, Indicator);
+      if (this->flagAnErrorHasOccurredTimeToPanic)
+        Accum.ComputeDebugString(theGlobalVariables);
       TheBigBadIndexingSet.IncrementSubset();
     }
     TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]= oldMaxMultiplicity;
@@ -9878,17 +9887,16 @@ bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, root* Indi
   std::string OldDebugString;
   int ProblemCounter=0;
   //Checksum code follows:
-  //std::string tempS1, tempS2;
+  std::string tempS1, tempS2;
 //  this->ComputeDebugString();
 //  partFraction::MakingConsistencyCheck=true;
   //if (Indicator!=0)
   //  this->AssureIndicatorRegularity(theGlobalVariables, *Indicator);
   //this->IndicatorRoot.MakeZero();
-  //if (partFraction::MakingConsistencyCheck)
-  //{  oneFracWithMultiplicitiesAndElongations::CheckSumRoot.ComputeDebugString();
-  //  this->CheckSum.ElementToString(tempS1);
-  //  this->ComputeDebugString();
-  //}
+  if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+  { this->CheckSum.ElementToString(tempS1);
+    this->ComputeDebugString(theGlobalVariables);
+  }
   std::stringstream out; std::string tempS;
   while (this->IndexLowestNonProcessed<this->size )
   { if (this->SplitStepsCounter>= this->LimitSplittingSteps && this->LimitSplittingSteps>0)
@@ -9945,7 +9953,7 @@ bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, root* Indi
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
     { ProblemCounter++;
       this->ComputeDebugString(theGlobalVariables);
-      out <<this->DebugString<<"\\\\ = \\\\";
+      out << this->DebugString<< "\\\\ = \\\\";
       tempS= out.str();
       this->CompareCheckSums(theGlobalVariables);
     }

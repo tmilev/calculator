@@ -35,7 +35,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4( std::stringstream& output);
 extern void static_html3( std::stringstream& output);
 
-const double MaxAllowedComputationTime=400;
+const double MaxAllowedComputationTimeInSeconds=400;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -48,14 +48,14 @@ double GetElapsedTimeInSeconds()
 }
 
 void* RunTimer(void* ptr)
-{ for (; GetElapsedTimeInSeconds()<MaxAllowedComputationTime || MaxAllowedComputationTime<=0;)
+{ for (; GetElapsedTimeInSeconds()<MaxAllowedComputationTimeInSeconds || MaxAllowedComputationTimeInSeconds<=0;)
   { usleep(10000);
     if (ComputationComplete)
       break;
   }
   if (!ComputationComplete)
   { std::cout << "</div><br><br><br>Your computation has taken " << GetElapsedTimeInSeconds() << " seconds so far.";
-    std::cout << "<br>The maximum allowed computation time is <b>" << MaxAllowedComputationTime << " seconds</b>. Please use the offline version of the calculator. ";
+    std::cout << "<br>The maximum allowed computation time is <b>" << MaxAllowedComputationTimeInSeconds<< " seconds</b>. Please use the offline version of the calculator. ";
     std::exit(0);
   } else
     pthread_exit(NULL);
@@ -96,6 +96,7 @@ int main(int argc, char **argv)
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
 #endif
 
+
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
   inputStrings.SetSizeExpandOnTopNoObjectInit(3);
@@ -122,9 +123,16 @@ int main(int argc, char **argv)
 //  Rational tempRat=2;
 //  tempRat.RaiseToPower(20);
 //  tempRat.ElementToString(tempS);
-  //civilizedInput="secretSauce";
-  /*theParser.DefaultWeylRank=3;
-  theParser.DefaultWeylLetter='B';*/
+  //civilizedInput="outerAuto";
+  //theParser.DefaultWeylRank=3;
+  //theParser.DefaultWeylLetter='B';
+  SemisimpleSubalgebras theComputation;
+  theComputation.FindHCandidates('D', 4, theGlobalVariables);
+
+
+  theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
+  EigenVectorComputation theEigen;
+  //std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
     theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
   PolynomialRationalCoeff::PreferredHashSize=10;

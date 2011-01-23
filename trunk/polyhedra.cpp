@@ -1644,7 +1644,7 @@ void root::ElementToString(std::string& output, bool useLaTeX)
   output.append(")");
 }
 
-void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)
+std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex)
 { std::stringstream out;
   std::string tempS;
   bool found=false;
@@ -1664,16 +1664,17 @@ void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool u
       }
       found=true;
       out << tempS;
-      if (useLatex)
-        out << "$\\varepsilon_{";
-      else
-        out << "e_";
-      out << i+1;
-      if (useLatex)
-        out << "}$";
+      out << inputLetter<< "_{" << i+1 << "}";
     }
   }
-  output=out.str();
+  return out.str();
+}
+
+void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)
+{ if (useLatex)
+    output= this->ElementToStringLetterFormat("\\varepsilon", useLatex);
+  else
+    output = this->ElementToStringLetterFormat("e", useLatex);
 }
 
 void root::MinusRoot()
@@ -18132,6 +18133,27 @@ void ElementSimpleLieAlgebra::MultiplyByRational(SemisimpleLieAlgebra& owner, co
   this->Hcomponent.MultiplyByLargeRational(theNumber);
   for(int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
     this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].MultiplyBy(theNumber);
+}
+
+std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst(SemisimpleLieAlgebra& owner)
+{ std::stringstream out;
+  std::string tempS;
+  if (this->NonZeroElements.CardinalitySelection==0 && this->Hcomponent.IsEqualToZero())
+    return "0";
+  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
+  { int theIndex=this->NonZeroElements.elements[i];
+    int DisplayIndex=owner.RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(theIndex);
+    if (!this->coeffsRootSpaces.TheObjects[theIndex].IsNegative()&& i!=0)
+      out << "+";
+    out << this->coeffsRootSpaces.TheObjects[theIndex].ElementToString() << "g_{" << DisplayIndex << "}";
+  }
+  if (this->Hcomponent.IsEqualToZero())
+    return out.str();
+  tempS=this->Hcomponent.ElementToStringLetterFormat("\\alpha", true);
+  if (tempS[0]!='-' && this->NonZeroElements.CardinalitySelection>0)
+    out << "+";
+  out << tempS;
+  return out.str();
 }
 
 void ElementSimpleLieAlgebra::ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)

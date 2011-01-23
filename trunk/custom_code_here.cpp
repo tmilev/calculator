@@ -2755,6 +2755,19 @@ void MatrixLargeRational::FindZeroEigenSpace(roots& output, GlobalVariables& the
   }
 }
 
+void ElementSimpleLieAlgebra::AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositive(int generatorIndex, const SemisimpleLieAlgebra& owner)
+{ int numPosRoots=owner.theWeyl.RootsOfBorel.size;
+  int theDimension= owner.theWeyl.CartanSymmetric.NumRows;
+  if(generatorIndex< numPosRoots)
+    this->AssignGeneratorCoeffOne(2*numPosRoots-generatorIndex-1, owner);
+  if (generatorIndex>=numPosRoots && generatorIndex< numPosRoots+theDimension)
+  { this->Nullify(owner);
+    this->Hcomponent=owner.theWeyl.RootsOfBorel.TheObjects[generatorIndex-numPosRoots];
+  }
+  if(generatorIndex>= numPosRoots+theDimension)
+    this->AssignGeneratorCoeffOne(generatorIndex-numPosRoots-theDimension, owner);
+}
+
 void ElementSimpleLieAlgebra::AssignGeneratorCoeffOne(int generatorIndex, const SemisimpleLieAlgebra& owner)
 { int numPosRoots=owner.theWeyl.RootsOfBorel.size;
   int theDimension=owner.theWeyl.CartanSymmetric.NumRows;
@@ -2784,7 +2797,7 @@ void ElementSimpleLieAlgebra::ElementToVectorNegativeRootSpacesFirst(root& outpu
   int numPosRoots=this->coeffsRootSpaces.size/2;
   for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
   { int theIndex=this->NonZeroElements.elements[i];
-    int targetIndex= (theIndex<numPosRoots) ? theIndex+numPosRoots+i : -theIndex+2*numPosRoots-1;
+    int targetIndex= (theIndex<numPosRoots) ? theIndex+numPosRoots+this->Hcomponent.size : -theIndex+2*numPosRoots-1;
     output.TheObjects[targetIndex]= this->coeffsRootSpaces.TheObjects[theIndex];
   }
   for (int i=0; i<this->Hcomponent.size; i++)
@@ -2885,8 +2898,8 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
     }
   else
     for (int i=0; i<Range.size; i++)
-    { Range.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
-      Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
+    { Range.TheObjects[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight.TheObjects[i]);
+      Domain.TheObjects[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft.TheObjects[i]);
     }
   outputAuto.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight, theGlobalVariables);
 }
@@ -5663,6 +5676,16 @@ bool SemisimpleLieAlgebra::AreOrderedProperly(int leftIndex, int rightIndex)
   return leftIndex<=rightIndex;
 }
 
+int SemisimpleLieAlgebra::RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex)
+{ int numPosRoots=this->theWeyl.RootsOfBorel.size;
+  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
+  if (theIndex>=numPosRoots)
+    return numPosRoots*2-1-theIndex;
+  if (theIndex<numPosRoots)
+    return numPosRoots+theDimension+theIndex;
+  return -10000;
+}
+
 int SemisimpleLieAlgebra::RootIndexToGeneratorIndex(int theIndex)
 { if (theIndex<0  || theIndex>=this->theWeyl.RootSystem.size)
     return -1;
@@ -5900,7 +5923,7 @@ void CGIspecificRoutines::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theR
     theRank=1;
 }
 
-void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
   root tempRoot;
@@ -5914,7 +5937,9 @@ void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool u
     endMath="\\end{tabular}";
   }
   int numRoots=this->theWeyl.RootSystem.size;
+//  int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
+  ElementSimpleLieAlgebra tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
   if (usePNG)
   { out << "\\begin{tabular}{cc}\\hline generator & corresponding root space\\\\\\hline";
@@ -5927,7 +5952,7 @@ void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool u
     out << "\\end{tabular}";
   }
   out << beginMath;
-  ElementUniversalEnveloping tempElt1, tempElt2, tempElt3;
+//  ElementUniversalEnveloping tempSSElt1, tempSSElt2, tempSSElt3;
   for (int i=0; i<numRoots+theDimension+1; i++)
     out << "c";
   out << "}";
@@ -5937,9 +5962,9 @@ void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool u
   out << "[\\bullet, \\bullet]\n";
   if(usePNG)
     out << "$";
-  for (int i=0; i<this->theLiebracketPairingCoefficients.NumRows; i++)
-  { tempElt1.MakeOneGeneratorCoeffOne(i, 0, *this);
-    tempElt1.ElementToString(tempS);
+  for (int i=0; i<numRoots+theDimension; i++)
+  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositive(i, *this);
+    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst(*this);
     out << " & ";
     if(usePNG)
       out << "$";
@@ -5949,19 +5974,18 @@ void SemisimpleLieAlgebra::ElementToStringLieBracket(std::string& output, bool u
   }
   out << "\\\\\n";
   Rational tempRat;
-  for (int i=0; i<this->theLiebracketPairingCoefficients.NumRows; i++)
-  { tempElt1.MakeOneGeneratorCoeffOne(i, 0, *this);
-    tempElt1.ElementToString(tempS);
+  for (int i=0; i<numRoots+theDimension; i++)
+  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositive(i,*this);
+    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst(*this);
     if(usePNG)
       out << "$";
     out << tempS;
     if(usePNG)
       out << "$";
-    for (int j=0; j<this->theLiebracketPairingCoefficients.NumRows; j++)
-    { tempElt2.MakeOneGeneratorCoeffOne(j, 0, *this);
-      tempElt1.LieBracketOnTheRight(tempElt2, tempElt3);
-      tempElt3.Simplify();
-      tempElt3.ElementToString(tempS);
+    for (int j=0; j<numRoots+theDimension; j++)
+    { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositive(j, *this);
+      this->LieBracket(tempElt1, tempElt2, tempElt3);
+      tempS=tempElt3.ElementToStringNegativeRootSpacesFirst(*this);
       out << "& ";
       if(usePNG)
         out << "$";

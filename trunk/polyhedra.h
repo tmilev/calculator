@@ -1800,6 +1800,7 @@ public:
     return result;
   }
   void ElementToString(std::string& output);
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; };
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
   void ElementToString(std::string& output, bool useLaTeX);
@@ -6252,11 +6253,13 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
   void ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(output, owner, useHtml, useLatex, false, 0, 0);};
+  std::string ElementToStringNegativeRootSpacesFirst(SemisimpleLieAlgebra& owner);
   void ComputeDebugString(SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex, false, 0, 0);  };
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   List<Rational> coeffsRootSpaces;
   root Hcomponent;
+  void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositive(int theIndex, const SemisimpleLieAlgebra& owner);
   void ElementToVectorRootSpacesFirstThenCartan(root& output);
   void ElementToVectorNegativeRootSpacesFirst(root& output);
   void AssingVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
@@ -6409,7 +6412,7 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); };
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
-  void ElementToStringLieBracket(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables);
+  void ElementToStringNegativeRootSpacesFirst(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables);
   std::string ElementToStringLieBracketPairing();
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){  this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); };
   bool flagAnErrorHasOccurredTimeToPanic;
@@ -6447,6 +6450,7 @@ public:
   };
   int RootToIndexInUE(const root& input){ return this->RootIndexToGeneratorIndex(this->theWeyl.RootSystem.IndexOfObjectHash(input));};
   int RootIndexToGeneratorIndex(int theIndex);
+  int RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex);
   int IndexToRootIndex(int theRootIndex);
   bool AreOrderedProperly(int leftIndex, int rightIndex);
   std::string getLetterFromGeneratorIndex(int theIndex, bool useLatex);

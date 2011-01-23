@@ -123,11 +123,11 @@ int main(int argc, char **argv)
 //  Rational tempRat=2;
 //  tempRat.RaiseToPower(20);
 //  tempRat.ElementToString(tempS);
-  //civilizedInput="outerAuto";
+  civilizedInput="outerAuto";
   //theParser.DefaultWeylRank=3;
   //theParser.DefaultWeylLetter='B';
-  SemisimpleSubalgebras theComputation;
-  theComputation.FindHCandidates('D', 4, theGlobalVariables);
+  //SemisimpleSubalgebras theComputation;
+  //theComputation.FindHCandidates('D', 4, theGlobalVariables);
 
 
   theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
     tempS=tempCommand.str();
     system(tempS.c_str());
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
-    theParser.theHmm.theRange.ElementToStringLieBracket(tempS, false, true, true, theGlobalVariables);
+    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, true, true, theGlobalVariables);
     lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     lieBracketFile.close();
     std::stringstream tempStreamLatex, tempStreamPNG;

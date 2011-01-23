@@ -288,6 +288,7 @@ public:
   void ReadSettingsIfAvailable();
   void WriteSettingsIfAvailable();
   void ArrangeWindows();
+  void readSettingsWeylInfo();
   void Recompute();
   static void* DoTheAnimation(void* ptr);
   guiMainWindow();
@@ -463,7 +464,7 @@ void drawCanvas::onMouseMove(wxMouseEvent& ev)
   MainWindow1->Refresh();
 }
 
-void guiMainWindow::onListBox1Change(wxCommandEvent& ev)
+void guiMainWindow::readSettingsWeylInfo()
 { if (MainWindow1->theGraphics.Animating)
     return;
   int tempI=this->ListBox1WeylGroup->GetCurrentSelection();
@@ -478,16 +479,6 @@ void guiMainWindow::onListBox1Change(wxCommandEvent& ev)
     case 6: WeylLetter='G'; break;
   }
 //  MainWindow1->Text4mutex->SetValue(wxT("locked"));
-  this->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
-  this->theGraphics.theWeyl.MakeArbitrary(WeylLetter, this->theGraphics.theWeyl.CartanSymmetric.NumCols);
-  this->Recompute();
-  this->theGraphics.CantModifyMe.UnlockSafePoint();
-//  MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
-}
-
-void guiMainWindow::onSpinner(wxSpinEvent & ev)
-{ if (MainWindow1->theGraphics.Animating)
-      return;
   int candidateDim= this->Spin1Dim->GetValue();
   if (candidateDim>8)
   { candidateDim=8;
@@ -495,14 +486,27 @@ void guiMainWindow::onSpinner(wxSpinEvent & ev)
   }
   if (candidateDim<1)
   { candidateDim=1;
-     this->Spin1Dim->SetValue(1);
+    this->Spin1Dim->SetValue(1);
   }
 //  MainWindow1->Text4mutex->SetValue(wxT("locked"));
   this->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
-  this->theGraphics.theWeyl.MakeArbitrary(this->theGraphics.theWeyl.WeylLetter, candidateDim);
+  this->theGraphics.theWeyl.MakeArbitrary(WeylLetter, candidateDim);
   this->Recompute();
   this->theGraphics.CantModifyMe.UnlockSafePoint();
 //  MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
+  this->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+  this->theGraphics.theWeyl.MakeArbitrary(WeylLetter, this->theGraphics.theWeyl.CartanSymmetric.NumCols);
+  this->Recompute();
+  this->theGraphics.CantModifyMe.UnlockSafePoint();
+//  MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
+}
+
+void guiMainWindow::onListBox1Change(wxCommandEvent& ev)
+{ this->readSettingsWeylInfo();
+}
+
+void guiMainWindow::onSpinner(wxSpinEvent & ev)
+{ this->readSettingsWeylInfo();
 }
 
 void RootSystemGraphics::ScaleToUnitLength(rootDouble& theRoot)
@@ -694,6 +698,8 @@ void RootSystemGraphics::Recompute()
   this->ModifyToOrthonormalNoShiftSecond(this->e1, this->e2);
   this->animationTargetE1.MakeEi(theDim, 0);
   this->animationTargetE2.MakeEi(theDim, 1);
+  this->animationStartE1=this->e1;
+  this->animationStartE2=this->e2;
   this->ComputeProjections();
 }
 
@@ -825,14 +831,17 @@ void* guiMainWindow::DoTheAnimation(void* ptr)
   theGraphics.animationTargetE2.ComputeDebugString();
   MainWindow1->Text2e1->SetValue(ConvertToWxString(theGraphics.animationTargetE1.DebugString));
   MainWindow1->Text3e2->SetValue(ConvertToWxString(theGraphics.animationTargetE2.DebugString));
-  usleep(10);
+  usleep(100000);
+  MainWindow1->Layout();
   MainWindow1->Refresh();
-  usleep(10);
+  usleep(100000);
   MainWindow1->theGraphics.CantModifyMe.SafePoint();
   //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
   int numRuns=100;
   for (int i=0; i<numRuns; i++)
   { usleep(100000);
+    if (i==1)
+      MainWindow1->Refresh();
     double a=((double) (i+1))/ ((double) numRuns);
     double b=1.0-a;
     theGraphics.e1= theGraphics.animationStartE1*b+theGraphics.animationTargetE1*a;
@@ -848,9 +857,11 @@ void* guiMainWindow::DoTheAnimation(void* ptr)
     tempOutput << "\na: " << a << " b: " << b << "\n" << "starting e1: " << startingE1.DebugString << "\nstarting e2: " << startingE2.DebugString;
     tempOutput << "\ntarget e1: " << theGraphics.animationTargetE1.DebugString << "\ntarget e2: " << theGraphics.animationTargetE2.DebugString;
     MainWindow1->theGraphics.DebugString.append(tempOutput.str());
-    usleep(10);
+    usleep(10000);
+//    MainWindow1->();
     MainWindow1->Refresh();
-    usleep(10);
+//    MainWindow1->onRePaint(MainWindow1->paintEvent);
+    usleep(10000);
     //MainWindow1->GetEventHandler()->AddPendingEvent(MainWindow1->paintEvent);
     MainWindow1->theGraphics.CantModifyMe.SafePoint();
     //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));

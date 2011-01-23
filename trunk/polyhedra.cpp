@@ -219,6 +219,8 @@ template < > int List<List<PolynomialRationalCoeff> >::ListActualSizeIncrement=2
 template < > int List<TemplatePolynomial<Monomial<Rational>, Rational> >::ListActualSizeIncrement=20;
 template < > int List<TemplatePolynomial<Monomial<Integer>, Integer> >::ListActualSizeIncrement=20;
 template < > int List<TemplatePolynomial<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>, Integer> >::ListActualSizeIncrement=20;
+template < > int List<LargeIntUnsigned>::ListActualSizeIncrement=20;
+template < > int List<double>::ListActualSizeIncrement=20;
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
 template < > std::string Matrix<Rational>::MatrixElementSeparator= ", \t";
@@ -1822,7 +1824,13 @@ void root::MultiplyByLargeRational(const Rational& a)
     this->TheObjects[i].MultiplyBy(a);
 }
 
-void root::Add(const root&r)
+void root::operator=(const SelectionWithMultiplicities& other)
+{ this->SetSizeExpandOnTopLight(other.Multiplicities.size);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i]=other.Multiplicities.TheObjects[i];
+}
+
+void root::Add(const root& r)
 { assert(r.size==this->size);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].Add(r.TheObjects[i]);
@@ -7414,7 +7422,7 @@ void QuasiNumber::Simplify()
     return;
   int NumCycles = MathRoutines::KToTheNth(theLCM, this->NumVariables);
   SelectionWithMaxMultiplicity theSubset;
-  theSubset.initMe2(this->NumVariables, theLCM-1);
+  theSubset.initMaxMultiplicity(this->NumVariables, theLCM-1);
 //  bool oneValue=true;
   Rational theValue, tempRat;
   std::string tempS, tempS2;
@@ -7618,7 +7626,19 @@ inline void Rational::RaiseToPower(int x)
   { x=-x;
     this->Invert();
   }
-  MathRoutines::RaiseToPower(*this, x, tempRat);
+  if (!this->IsInteger())
+    MathRoutines::RaiseToPower(*this, x, tempRat);
+  else
+  { LargeIntUnsigned tempNum;
+    this->GetNumUnsigned(tempNum);
+    LargeIntUnsigned oneLI;
+    oneLI.MakeOne();
+    MathRoutines::RaiseToPower(tempNum, x, oneLI);
+    LargeInt tempNumSigned;
+    tempNumSigned.AssignLargeIntUnsigned(tempNum);
+    tempNumSigned.sign= (this->IsPositive() || x%2==0) ? 1 :-1;
+    this->AssignLargeInteger(tempNumSigned);
+  }
 }
 
 inline void Rational::Invert()
@@ -11378,7 +11398,7 @@ int RootToIndexTable::getIndexDoubleOfARoot(intRoot& TheRoot)
   return this->getIndex(tempRoot);
 }
 
-void ::SelectionWithMultiplicities::initMe(int NumElements)
+void SelectionWithMultiplicities::initWithMultiplicities(int NumElements)
 {  this->Multiplicities.SetSizeExpandOnTopNoObjectInit(NumElements);
   for (int i=0; i<this->Multiplicities.size; i++)
     this->Multiplicities.TheObjects[i]=0;
@@ -11393,8 +11413,8 @@ void SelectionWithMultiplicities::ElementToString(std::string& output)
   output= out.str();
 }
 
-void SelectionWithMaxMultiplicity::initMe2(int NumElements, int MaxMult)
-{ this->initMe(NumElements);
+void SelectionWithMaxMultiplicity::initMaxMultiplicity(int NumElements, int MaxMult)
+{ this->::SelectionWithMultiplicities::initWithMultiplicities(NumElements);
   this->MaxMultiplicity=MaxMult;
 }
 
@@ -11946,7 +11966,7 @@ void WeylGroup::MakeG2()
   this->CartanSymmetric.elements[0][1]=-3;
 }
 
-void WeylGroup::GetEpsilonCoordsWRTsubalgebra(  roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables)
+void WeylGroup::GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& basisChange = theGlobalVariables.matGetEpsilonCoords2;
   MatrixLargeRational& tempMat = theGlobalVariables.matGetEpsilonCoords3;
   DynkinDiagramRootSubalgebra& tempDyn = theGlobalVariables.dynGetEpsCoords;
@@ -11966,7 +11986,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra(  roots& generators, List<root>& i
   basisChange.Resize(0, 0, true);
   for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
   { this->GetEpsilonMatrix(tempDyn.DynkinTypeStrings.TheObjects[i].at(1), tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size, theGlobalVariables, tempMat);
-    basisChange.DirectSumWith(tempMat);
+    basisChange.DirectSumWith(tempMat, (Rational) 0);
     //basisChange.ComputeDebugString();
   }
   tempDyn.SimpleBasesConnectedComponents.CollectionToRoots(simpleBasis);
@@ -14450,7 +14470,7 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, ro
   SelectionWithMaxMultiplicity tempSel;
   roots& chosenAlphas= theGlobalVariables.rootsAttepmtTheTripleTrickWRTSA;
   for (int i=2; i<=MathRoutines::Maximum(highestWeightsAllowed.size, this->AmbientWeyl.CartanSymmetric.NumRows); i++)
-  { tempSel.initMe2(highestWeightsAllowed.size, i);
+  { tempSel.initMaxMultiplicity(highestWeightsAllowed.size, i);
     int NumElts=tempSel.NumCombinationsOfCardinality(i);
     for (int j=0; j<NumElts; j++)
     { tempSel.IncrementSubsetFixedCardinality(i);
@@ -18520,8 +18540,8 @@ bool minimalRelationsProverState::ComputeStateReturnFalseIfDubious(minimalRelati
   this->BKSingularGmodLRoots.AddRootSnoRepetition(this->PartialRelation.Alphas);
   this->PositiveKroots.AddRootSnoRepetition(this->ChosenPositiveKroots);
   SelectionWithMaxMultiplicity selBetas, selAlphas;
-  selBetas.initMe2(this->PartialRelation.Betas.size, 1);
-  selAlphas.initMe2(this->PartialRelation.Alphas.size, 1);
+  selBetas.initMaxMultiplicity(this->PartialRelation.Betas.size, 1);
+  selAlphas.initMaxMultiplicity(this->PartialRelation.Alphas.size, 1);
   int NumAlphas= MathRoutines::KToTheNth(selAlphas.MaxMultiplicity+1, this->PartialRelation.Alphas.size);
   int NumBetas=MathRoutines::KToTheNth(selBetas.MaxMultiplicity+1, this->PartialRelation.Betas.size);
 //  this->ComputeDebugString(theWeyl, theGlobalVariables);
@@ -18571,8 +18591,8 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious(GlobalV
   for (int i=0; i<this->PartialRelation.Alphas.size; i++)
     this->theGmodLmodules.AddSelectionAppendNewIndex(this->owner->GetModuleIndex(this->PartialRelation.Alphas.TheObjects[i]));
   SelectionWithMaxMultiplicity selBetas, selAlphas;
-  selBetas.initMe2(this->PartialRelation.Betas.size, 1);
-  selAlphas.initMe2(this->PartialRelation.Alphas.size, 1);
+  selBetas.initMaxMultiplicity(this->PartialRelation.Betas.size, 1);
+  selAlphas.initMaxMultiplicity(this->PartialRelation.Alphas.size, 1);
   int NumAlphas= MathRoutines::KToTheNth(selAlphas.MaxMultiplicity+1, this->PartialRelation.Alphas.size);
   int NumBetas=MathRoutines::KToTheNth(selBetas.MaxMultiplicity+1, this->PartialRelation.Betas.size);
 //  this->ComputeDebugString(theWeyl, theGlobalVariables);

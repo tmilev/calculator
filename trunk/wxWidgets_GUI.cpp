@@ -1001,7 +1001,9 @@ void guiMainWindow::onButton22TestChambers(wxCommandEvent& ev)
 
 void guiMainWindow::onButton23Experiments(wxCommandEvent& ev)
 { //this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.DuflosComputation;
-  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.TestParser;
+  this->theComputationSetup.WeylGroupIndex= 4;
+  this->theComputationSetup.WeylGroupLetter='D';
+  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ExperimentSSsubalgebras;
   this->RunTheComputation();
 }
 

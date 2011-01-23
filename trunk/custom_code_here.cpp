@@ -1335,7 +1335,7 @@ void WeylGroup::MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, 
     if (theMultiplicities!=0)
       numSummands =theMultiplicities->TheObjects[i];
     for (int j=0; j<numSummands; j++)
-      this->CartanSymmetric.DirectSumWith(tempW.CartanSymmetric);
+      this->CartanSymmetric.DirectSumWith(tempW.CartanSymmetric, (Rational) 0);
   }
 }
 
@@ -2713,7 +2713,7 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
  // theLie.
   MatrixLargeRational theAuto;
   theLie.ComputeChevalleyConstants('D', 4, theGlobalVariables);
-  theLie.ComputeOneAutomorphism(theGlobalVariables, theAuto);
+  theLie.ComputeOneAutomorphism(theGlobalVariables, theAuto, false );
   theAuto.ElementToString(tempS, false, true);
   out << tempS;
   MatrixLargeRational tempMat;
@@ -2779,6 +2779,18 @@ void ElementSimpleLieAlgebra::AssingVectorRootSpacesFirstThenCartan(const root& 
   this->ComputeNonZeroElements();
 }
 
+void ElementSimpleLieAlgebra::ElementToVectorNegativeRootSpacesFirst(root& output)
+{ output.MakeZero(this->coeffsRootSpaces.size+ this->Hcomponent.size);
+  int numPosRoots=this->coeffsRootSpaces.size/2;
+  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
+  { int theIndex=this->NonZeroElements.elements[i];
+    int targetIndex= (theIndex<numPosRoots) ? theIndex+numPosRoots+i : -theIndex+2*numPosRoots-1;
+    output.TheObjects[targetIndex]= this->coeffsRootSpaces.TheObjects[theIndex];
+  }
+  for (int i=0; i<this->Hcomponent.size; i++)
+    output.TheObjects[i+numPosRoots]= this->Hcomponent.TheObjects[i];
+}
+
 void ElementSimpleLieAlgebra::ElementToVectorRootSpacesFirstThenCartan(root& output)
 { output.MakeZero(this->coeffsRootSpaces.size+ this->Hcomponent.size);
   for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
@@ -2789,7 +2801,7 @@ void ElementSimpleLieAlgebra::ElementToVectorRootSpacesFirstThenCartan(root& out
     output.TheObjects[i+this->coeffsRootSpaces.size]= this->Hcomponent.TheObjects[i];
 }
 
-void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto)
+void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto, bool useNegativeRootsFirst)
 { rootSubalgebra theRootSA;
   theRootSA.AmbientWeyl.Assign(this->theWeyl);
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
@@ -2798,9 +2810,16 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   theRootSA.GenerateAutomorphismsPreservingBorel(theGlobalVariables, theAutos);
   MatrixLargeRational mapOnRootSpaces;
   int theAutoIndex= theAutos.ExternalAutomorphisms.size>1? 1 : 0;
+  /*if (this->theWeyl.WeylLetter=='D' && theDimension==4)
+    theAutoIndex=2;
+*/
   mapOnRootSpaces.AssignRootsToRowsOfMatrix(theAutos.ExternalAutomorphisms.TheObjects[theAutoIndex]);
   mapOnRootSpaces.Transpose(theGlobalVariables);
-  mapOnRootSpaces.ComputeDebugString();
+//  mapOnRootSpaces.ComputeDebugString();
+//  MatrixLargeRational theDet=mapOnRootSpaces;
+//  Rational tempRat;
+//  theDet.ComputeDeterminantOverwriteMatrix(tempRat);
+//  std::cout << " ... and the det is: " << tempRat.ElementToString();
   Selection NonExplored;
   int numRoots= this->theWeyl.RootSystem.size;
   NonExplored.init(numRoots);
@@ -2859,10 +2878,16 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   roots vectorsLeft, vectorsRight;
   vectorsLeft.SetSizeExpandOnTopNoObjectInit(Range.size);
   vectorsRight.SetSizeExpandOnTopNoObjectInit(Range.size);
-  for (int i=0; i<Range.size; i++)
-  { Range.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
-    Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
-  }
+  if (!useNegativeRootsFirst)
+    for (int i=0; i<Range.size; i++)
+    { Range.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
+      Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
+    }
+  else
+    for (int i=0; i<Range.size; i++)
+    { Range.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsRight.TheObjects[i]);
+      Domain.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(vectorsLeft.TheObjects[i]);
+    }
   outputAuto.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight, theGlobalVariables);
 }
 
@@ -3411,7 +3436,9 @@ std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVar
   this->ComputeDebugString(theGlobalVariables);
   this->Evaluate(theGlobalVariables);
   this->theValue.UEElement.Simplify();
-  return this->theValue.ElementToStringValueOnly(true);
+  std::stringstream out;
+  out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueOnly(true);
+  return out.str();
 }
 
 int DebugCounter=-1;
@@ -3562,6 +3589,14 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
     this->ValueBuffer.AddObjectOnTop(this->functionSecretSauce);
     return true;
+  }
+  if (input=="dim")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionWeylDimFormula);
+  }
+  if (input=="outerAuto")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(Parser::functionOuterAutos);
   }
   return false;
 }
@@ -4054,6 +4089,15 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
   }
 }
 
+bool ParserNode::ConvertChildrenToType(int theType)
+{ for (int i=0; i<this->children.size; i++)
+  { ParserNode& current= this->owner->TheObjects[this->children.TheObjects[i]];
+    if (!current.ConvertToType(theType))
+      return false;
+  }
+  return true;
+}
+
 bool ParserNode::ConvertToType(int theType)
 { if (this->ExpressionType==this->typeError)
     return false;
@@ -4126,8 +4170,46 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
     case Parser::functionEigen: this->EvaluateEigen(theGlobalVariables); break;
     case Parser::functionSecretSauce: this->EvaluateSecretSauce(theGlobalVariables); break;
+    case Parser::functionWeylDimFormula: this->EvaluateWeylDimFormula(theGlobalVariables); break;
+    case Parser::functionOuterAutos: this->EvaluateOuterAutos(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); break;
   }
+}
+
+void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational tempMat;
+  std::stringstream out;
+  this->ExpressionType=this->typeString;
+  this->owner->theHmm.theRange.ComputeOneAutomorphism(theGlobalVariables, tempMat, true);
+  MatrixLargeRational tempMat2=tempMat;
+  Rational tempRat;
+  tempMat2.ComputeDeterminantOverwriteMatrix(tempRat);
+  out << "<br>one outer automorphism of the Lie algebra is realized as the following matrix. <br> The coordinates of the matrix are given in the ordered basis ";
+  out << " <div class=\"math\" scale=\"50\"> g_{-n}, \\dots, g_{-1}, h_1,\\dots, h_k, g_1,\\dots, g_n</div> where the generators are as in the table on the right.<br> Its determinant is \n" << tempRat.ElementToString();
+  out << "<div class=\"math\" scale=\"50\">" << tempMat.ElementToString(false, true) << "</div>";
+  this->outputString=out.str();
+}
+
+void ParserNode::EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables)
+{ if (this->children.size!=1)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
+  int theDimension= theArgument.children.size;
+  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
+  if (!theArgument.ConvertChildrenToType(this->typeRational) || theDimension!=theHmm.theRange.theWeyl.CartanSymmetric.NumRows)
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  root theWeight;
+  theWeight.SetSizeExpandOnTopLight(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
+    theWeight.TheObjects[i]=current.rationalValue;
+  }
+  this->rationalValue= theHmm.theRange.theWeyl.WeylDimFormula(theWeight, theGlobalVariables);
+  this->ExpressionType=this->typeRational;
 }
 
 void ParserNode::EvaluateEigen(GlobalVariables& theGlobalVariables)
@@ -4149,7 +4231,7 @@ void ParserNode::EvaluateEigen(GlobalVariables& theGlobalVariables)
   { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
     theWeight.TheObjects[i]=current.intValue;
   }
-  this->owner->theHmm.WriteAllUEMonomialsWithWeightWRTDomain(theList, theWeight, theGlobalVariables);
+  this->outputString= this->owner->theHmm.WriteAllUEMonomialsWithWeightWRTDomain(theList, theWeight, theGlobalVariables);
   this->ExpressionType=this->typeUndefined;
 }
 
@@ -4230,7 +4312,7 @@ bool ParserNode::AllChildrenAreOfDefinedNonErrorType()
 
 void ParserNode::EvaluateSecretSauce(GlobalVariables& theGlobalVariables)
 { EigenVectorComputation theComp;
-  this->outputString=theComp.ComputeAndReturnString(theGlobalVariables);
+  this->outputString=theComp.ComputeAndReturnString(theGlobalVariables, *this->owner);
   this->ExpressionType=this->typeString;
 }
 
@@ -4543,7 +4625,7 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
       out << " a rational number of value: <div class=\"math\">" << this->rationalValue.ElementToString() << "</div>";
   }
   if (this->ExpressionType==this->typeRoot)
-  { out << " is a root ";
+  { out << " is a an ordered tuple ";
   }
   if (this->ExpressionType==this->typePoly)
   { if (!useHtml)
@@ -4557,9 +4639,8 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
     else
       out << " an element of U(g) of value: <div class=\"math\">\\begin{eqnarray*}&&" << this->UEElement.ElementToString(true) << "\\end{eqnarray*}</div>";
   }
-  if (this->ExpressionType==this->typeString)
-  { out << "a printout: " << this->outputString;
-  }
+  if (this->outputString!="")
+    out << "a printout: " << this->outputString;
   if (this->ExpressionType==this->typeError)
     out << this->ElementToStringErrorCode(useHtml);
   return out.str();
@@ -4705,11 +4786,12 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   return true;
 }
 
-void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables)
+std::string HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables)
 { output.size=0;
 //  this->theDomain.theWeyl.
   roots PosRootsEmbeddings, PosRootsProjections;
   root imageOfTheWeight;
+  std::stringstream out;
   int theDimension=this->theRange.theWeyl.CartanSymmetric.NumRows;
   int theDomainDimension= this->theDomain.theWeyl.CartanSymmetric.NumRows;
   imageOfTheWeight.MakeZero(theDimension);
@@ -4721,16 +4803,16 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
     for (int j=0; j<theDomainDimension; j++)
       PosRootsEmbeddings.TheObjects[i]+=this->ImagesAllChevalleyGenerators.TheObjects[numPosRootsDomain+j].Hcomponent*this->theDomain.theWeyl.RootsOfBorel.TheObjects[i].TheObjects[j];
   }
-  std::cout << "Embeddings of roots:" << PosRootsEmbeddings.ElementToString(false, true, true);
+  out << "Embeddings of roots:" << PosRootsEmbeddings.ElementToString(false, true, true);
   PosRootsProjections.SetSizeExpandOnTopNoObjectInit(numPosRootsRange);
   for (int i=0; i<numPosRootsRange; i++)
     this->ProjectOntoSmallCartan(this->theRange.theWeyl.RootsOfBorel.TheObjects[i], PosRootsProjections.TheObjects[i], theGlobalVariables);
-  std::cout << "<br>Projections of roots: " << PosRootsProjections.ElementToString(false, true, true);
+  out << "<br>Projections of roots: " << PosRootsProjections.ElementToString(false, true, true);
   VectorPartition theVP;
   theVP.PartitioningRoots=PosRootsProjections;
   theVP.theRoot=theWeight;
   theVP.ComputeAllPartitions();
-  std::cout << "the partitions: <br>" << theVP.ElementToString(true);
+  out << "the partitions: <br>" << theVP.ElementToString(true);
   output.SetSizeExpandOnTopNoObjectInit(theVP.thePartitions.size);
   MonomialUniversalEnveloping currentMon;
   ElementUniversalEnveloping tempElt;
@@ -4741,7 +4823,7 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
     currentMon.Coefficient.MakeNVarConst((short)theDimension, tempRat);
     for (int j=0; j<theVP.thePartitions.TheObjects[i].size; j++)
       currentMon.MultiplyByGeneratorPowerOnTheRight(numPosRootsRange+theDimension+j, theVP.thePartitions.TheObjects[i].TheObjects[j]);
-    std::cout << currentMon.ElementToString(false) << "<br>" ;
+    out << currentMon.ElementToString(false) << "<br>" ;
     tempElt.Nullify(this->theRange);
     tempElt.AddObjectOnTopHash(currentMon);
     output.TheObjects[i]=tempElt;
@@ -4751,8 +4833,8 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
   targets.SetSizeExpandOnTopNoObjectInit(theDomainDimension);
   targetsNoMod.SetSizeExpandOnTopNoObjectInit(theDomainDimension);
   ElementUniversalEnveloping theSimpleGenerator;
-  std::string beginMath="<DIV class=\"math\" scale=\"50\">";
-  std::string endMath="</DIV>";
+  std::string beginMath = "<DIV class=\"math\" scale=\"50\">";
+  std::string endMath = "</DIV>";
   List<List<PolynomialRationalCoeff> > theSystem;
   theSystem.size=0;
   theSystem.SetSizeExpandOnTopNoObjectInit(output.size);
@@ -4762,32 +4844,32 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
     List<ElementUniversalEnveloping>& currentTargetsNoMod= targetsNoMod.TheObjects[i];
     theSimpleGenerator.AssignElementLieAlgebra(this->ImagesSimpleChevalleyGenerators.TheObjects[i], theDimension, this->theRange);
     theSimpleGenerator.ComputeDebugString();
-    std::cout << "Generator number " << i+1 << ": " << beginMath;
+    out << "Generator number " << i+1 << ": " << beginMath;
     for (int j=0; j<output.size; j++)
     { theSimpleGenerator.LieBracketOnTheRight(output.TheObjects[j], tempElt);
       tempElt.Simplify();
       currentTargetsNoMod.AddObjectOnTop(tempElt);
       tempElt.ModOutVermaRelations();
       currentTargets.AddObjectOnTop(tempElt);
-      std::cout << tempElt.ElementToString() << ", \\quad ";
+      out << tempElt.ElementToString() << ", \\quad ";
     }
-    std::cout << endMath << "\n<br>";
-    std::cout << "Elements before modding out: " << beginMath;
+    out << endMath << "\n<br>";
+    out << "Elements before modding out: " << beginMath;
     for (int j=0; j<output.size; j++)
-      std::cout << currentTargetsNoMod.TheObjects[j].ElementToString() << ", \\quad ";
-    std::cout << endMath << "\n<br>";
+      out << currentTargetsNoMod.TheObjects[j].ElementToString() << ", \\quad ";
+    out << endMath << "\n<br>";
     List<rootPoly> tempList;
     //Let the monomials corresponding to the given partition be m_1, \dots, m_l
     //Let the Chevalley generators of the smaller Lie algebra be k_1,\dots, k_s
     //Then the elements [k_i, m_1], \dots, [k_i, m_l] are recorded in this order in currentTargets
     ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements(currentTargets, tempList, basisMonomialBuffer, theGlobalVariables);
-    std::cout << "Coordinate form of the above elements: ";
+    out << "Coordinate form of the above elements: ";
     for (int j=0; j<tempList.size; j++)
-    { std::cout << tempList.TheObjects[j].ElementToString() << ",";
+    { out << tempList.TheObjects[j].ElementToString() << ",";
       //theSystem holds in the j^th row the action on the monomial m_j
       theSystem.TheObjects[j].AddListOnTop(tempList.TheObjects[j]);
     }
-    std::cout << "<br>";
+    out << "<br>";
   }
   Matrix<RationalFunction> matSystem;
   int numEquations=theSystem.TheObjects[0].size;
@@ -4796,37 +4878,38 @@ void HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(Li
     for (int j=0; j<matSystem.NumCols; j++)
       matSystem.elements[i][j]=theSystem.TheObjects[j].TheObjects[i];
   matSystem.ComputeDebugString(false, true);
-  std::cout << "<br>The system we need to solve:<br>" << beginMath << matSystem.DebugString << endMath << "<br>";
+  out << "<br>The system we need to solve:<br>" << beginMath << matSystem.DebugString << endMath << "<br>";
   RationalFunction ZeroPoly, UnitPoly, MinusUnitPoly;
   ZeroPoly.MakeNVarConst(theDimension, (Rational) 0);
   UnitPoly.MakeNVarConst(theDimension, (Rational) 1);
   MinusUnitPoly.MakeNVarConst(theDimension, (Rational) -1);
   List<List<RationalFunction> > theAnswer;
   matSystem.FindZeroEigenSpacE(theAnswer, UnitPoly, MinusUnitPoly, ZeroPoly, theGlobalVariables);
-  std::cout << "The found solutions: <br>";
+  out << "The found solutions: <br>";
   rootRationalFunction tempRatRoot;
   std::string tempS;
   for (int i=0; i<theAnswer.size; i++)
   { tempRatRoot.CopyFromBase(theAnswer.TheObjects[i]);
-    std::cout << beginMath << tempRatRoot.ElementToString() << endMath << "<br>";
-    std::cout << "Corresponding expression in monomial form: " << beginMath;
+    out << beginMath << tempRatRoot.ElementToString() << endMath << "<br>";
+    out << "Corresponding expression in monomial form: " << beginMath;
     for (int j=0; j<output.size; j++)
     { RationalFunction& currentCoeff= theAnswer.TheObjects[i].TheObjects[j];
       if (!currentCoeff.IsEqualToZero())
       { tempS= currentCoeff.ElementToString(true, false);
         if (tempS=="-1")
-          std::cout << "-";
+          out << "-";
         else
         { if (j!=0)
-            std::cout << "+";
+            out << "+";
           if (tempS!="1")
-            std::cout << "(" << tempS << ")";
+            out << "(" << tempS << ")";
         }
-        std::cout << output.TheObjects[j].ElementToString();
+        out << output.TheObjects[j].ElementToString();
       }
     }
-    std::cout << endMath << "<br>";
+    out << endMath << "<br>";
   }
+  return out.str();
 }
 
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables)
@@ -4868,6 +4951,28 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(ElementUniversalEnvelop
     output+=tempElt;
   }
   return true;
+}
+
+void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(char theWeylLetter, int theWeylDim, GlobalVariables& theGlobalVariables)
+{ this->theDomain.ComputeChevalleyConstants(theWeylLetter, theWeylDim, theGlobalVariables);
+  this->theRange.ComputeChevalleyConstants(theWeylLetter, theWeylDim, theGlobalVariables);
+  int numPosRoots=this->theDomain.theWeyl.RootsOfBorel.size;
+  this->ImagesAllChevalleyGenerators.SetSizeExpandOnTopNoObjectInit(numPosRoots*2+theWeylDim);
+  this->theChevalleyGenerators.SetSizeExpandOnTopNoObjectInit(numPosRoots*2+theWeylDim);
+  this->ImagesSimpleChevalleyGenerators.SetSizeExpandOnTopNoObjectInit(theWeylDim*2);
+  for (int i=0; i<2*numPosRoots+theWeylDim; i++)
+  { ElementSimpleLieAlgebra& tempElt1=this->ImagesAllChevalleyGenerators.TheObjects[i];
+    ElementSimpleLieAlgebra& tempElt2=this->theChevalleyGenerators.TheObjects[i];
+    tempElt2.AssignGeneratorCoeffOne(i, this->theDomain);
+    tempElt1.AssignGeneratorCoeffOne(i, this->theRange);
+  }
+  for (int i=0; i<theWeylDim; i++)
+  { ElementSimpleLieAlgebra& tempElt1=this->ImagesSimpleChevalleyGenerators.TheObjects[i];
+    tempElt1.AssignGeneratorCoeffOne(i, this->theRange);
+    ElementSimpleLieAlgebra& tempElt2=this->ImagesSimpleChevalleyGenerators.TheObjects[theWeylDim+i];
+    tempElt2.AssignGeneratorCoeffOne(i+numPosRoots, this->theRange);
+  }
+//  std::cout << this->ElementToString(theGlobalVariables);
 }
 
 void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables)
@@ -5761,6 +5866,11 @@ void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int
   }*/
 }
 
+void ComputationSetup::ExperimentSSsubalgebras(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ SemisimpleSubalgebras theComputation;
+  theComputation.FindHCandidates(inputData.WeylGroupLetter, inputData.WeylGroupIndex, theGlobalVariables);
+}
+
 void ComputationSetup::TestParser(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { std::string inputString;
   std::stringstream out;
@@ -6045,13 +6155,13 @@ void RationalFunction::TransformToGroebnerBasis(List<PolynomialRationalCoeff>& t
       if (!tempP.IsEqualToZero())
       { tempP.ScaleToIntegralNoGCDCoeffs();
         theBasis.AddObjectOnTop(tempP);
-        std::cout << "<br> new element found: " << tempP.ElementToString();
+//        std::cout << "<br> new element found: " << tempP.ElementToString();
       }
     }
   }
-  std::cout << "<br> ... and the basis before reduction is: <br>";
-  for (int i=0; i<theBasis.size; i++)
-    std::cout << theBasis.TheObjects[i].ElementToString() << ", ";
+//  std::cout << "<br> ... and the basis before reduction is: <br>";
+//  for (int i=0; i<theBasis.size; i++)
+//    std::cout << theBasis.TheObjects[i].ElementToString() << ", ";
   RationalFunction::ReduceGroebnerBasis(theBasis, buffer1);
 
 }
@@ -6061,21 +6171,21 @@ void RationalFunction::ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBas
   LeadingCoeffs.MakeActualSizeAtLeastExpandOnTop(theBasis.size);
   LeadingCoeffs.ClearTheObjects();
   List<Monomial< Rational> > tempList;
-  std::cout << "<br> ... and the leading coefficients are: <br>";
+//  std::cout << "<br> ... and the leading coefficients are: <br>";
   for (int i=0; i<theBasis.size; i++)
   { PolynomialRationalCoeff& current=theBasis.TheObjects[i];
     LeadingCoeffs.AddObjectOnTopHash(current.TheObjects[current.GetIndexMaxMonomial()]);
     LeadingCoeffs.LastObject()->Coefficient=1;
-    LeadingCoeffs.LastObject()->ComputeDebugString();
-    std::cout << LeadingCoeffs.LastObject()->DebugString << ", ";
+//    LeadingCoeffs.LastObject()->ComputeDebugString();
+//    std::cout << LeadingCoeffs.LastObject()->DebugString << ", ";
   }
   tempList.CopyFromBase(LeadingCoeffs);
   tempList.QuickSortAscending();
-  std::cout << "<br><br> and the sorted leading monomials are: ";
-  for (int i=0; i<theBasis.size; i++)
-  { tempList.TheObjects[i].ComputeDebugString();
-    std::cout << tempList.TheObjects[i].DebugString << ", ";
-  }
+//  std::cout << "<br><br> and the sorted leading monomials are: ";
+//  for (int i=0; i<theBasis.size; i++)
+//  { tempList.TheObjects[i].ComputeDebugString();
+//    std::cout << tempList.TheObjects[i].DebugString << ", ";
+//  }
   for (int i=0; i<LeadingCoeffs.size; i++)
   { Monomial<Rational>& currentMon=LeadingCoeffs.TheObjects[i];
     for (int j=0; j<LeadingCoeffs.size; j++)
@@ -6092,7 +6202,7 @@ void RationalFunction::ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBas
 void RationalFunction::gcd(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, PolynomialRationalCoeff& buffer5, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList)
 { RationalFunction::lcm(left, right, buffer4, buffer1, buffer2, buffer3, buffer5, bufferMon1, bufferMon2, bufferList);
   left.MultiplyBy(right, buffer2, buffer1, bufferMon1);
-  std::cout << "<br>the product: " << buffer2.DebugString << " and the gcd: " << buffer4.DebugString << "<br>";
+//  std::cout << "<br>the product: " << buffer2.DebugString << " and the gcd: " << buffer4.DebugString << "<br>";
   buffer2.DivideBy(buffer4, output, buffer3);
 }
 
@@ -6117,22 +6227,22 @@ void RationalFunction::lcm(PolynomialRationalCoeff& left, PolynomialRationalCoef
   tempList.size=0;
   tempList.AddObjectOnTop(leftTemp);
   tempList.AddObjectOnTop(rightTemp);
-  std::cout << "<br>In the beginning: <br>";
-  for (int i=0; i<tempList.size; i++)
-  { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ElementToString() << "<br>\n";
-  }
+//  std::cout << "<br>In the beginning: <br>";
+//  for (int i=0; i<tempList.size; i++)
+//  { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ElementToString() << "<br>\n";
+//  }
   RationalFunction::TransformToGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
-  std::cout << "<br><br> ... and the basis is: <br>";
-  for (int i=0; i<tempList.size; i++)
-  { std::cout << tempList.TheObjects[i].ElementToString() << "<br>\n";
-  }
+//  std::cout << "<br><br> ... and the basis is: <br>";
+//  for (int i=0; i<tempList.size; i++)
+//  { std::cout << tempList.TheObjects[i].ElementToString() << "<br>\n";
+//  }
   for(int i=0; i<tempList.size; i++)
   { PolynomialRationalCoeff& current=tempList.TheObjects[i];
     Monomial<Rational>& currentMon= current.TheObjects[current.GetIndexMaxMonomial()];
     currentMon.ComputeDebugString();
     if (currentMon.degrees[theNumVars]==0)
     { output=current;
-      std::cout << "<br> the highest mon is: " << currentMon.DebugString << "<br>";
+//      std::cout << "<br> the highest mon is: " << currentMon.DebugString << "<br>";
       output.SetNumVariablesSubDeletedVarsByOne((short)theNumVars);
       return;
     }
@@ -6238,10 +6348,8 @@ void PolynomialRationalCoeff::ScaleToIntegralNoGCDCoeffs()
   this->TimesConstant(theMultiple);
 }
 
-std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theGlobalVariables)
+std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theGlobalVariables, Parser& theParser)
 { std::stringstream out;
-  Parser theParser;
-  theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
   ElementUniversalEnveloping theElt, tempElt1, tempElt2;
   this->MakeGenericVermaElement(theElt, theParser.theHmm.theRange);
   int theDomainRank=theParser.theHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
@@ -6258,10 +6366,24 @@ std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theG
     tempElt2.ModOutVermaRelations();
     out << "mod Verma rels:";
     out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
-    out  << tempElt2.ElementToString(true);
+    out << tempElt2.ElementToString(true);
     out << "\\end{eqnarray*}</div>";
     this->DetermineEquationsFromResultLieBracket(theParser, theElt, tempElt2, out, theGlobalVariables);
   }
+  out << "<br><div class=\"math\" scale=\"50\">\\left(\\begin{array}{";
+  for (int i=0; i<theSystem.NumCols; i++)
+    out << "c";
+  out << "}";
+  for (int j=0; j<theSystem.NumRows; j++)
+  { for (int i=0; i<theSystem.NumCols; i++)
+    { RationalFunction& tempRF= theSystem.elements[j][i];
+      out << tempRF.ElementToString(true, false);
+      if (i!=theSystem.NumCols-1)
+        out << "&";
+    }
+    out << "\\\\";
+  }
+  out << "\\end{array}\\right)</div>";
   return out.str();
 }
 
@@ -6272,21 +6394,36 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialR
 }
 
 void EigenVectorComputation::DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
-{ int theDomainRank=theParser.theHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
-  int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
-  int numDomainPosRoots= theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
+{ int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
   PolynomialRationalCoeff tempP;
   MonomialUniversalEnveloping& originalMon= theStartingGeneric.TheObjects[0];
+  int oldSize=this->theExponentShifts.size;
+  this->theExponentShifts.SetSizeExpandOnTopNoObjectInit(oldSize+theElt.size);
+  this->theExponentShifts.SetSizeExpandOnTopNoObjectInit(theElt.size);
+  Matrix<RationalFunction> matNewEquationLine;
+  matNewEquationLine.init(1, theElt.size);
   for (int i=0; i<theElt.size; i++)
   { MonomialUniversalEnveloping& theMon= theElt.TheObjects[i];
     out << "<br>\nDifference in monomial index " << i << ": ";
+    List<int>& currentShift= this->theExponentShifts.TheObjects[oldSize+i];
+    currentShift.SetSizeExpandOnTopNoObjectInit(numRangePosRoots);
     for (int j=0; j<numRangePosRoots; j++)
     { tempP= originalMon.Powers.TheObjects[j]- theMon.Powers.TheObjects[j];
       out << tempP.ElementToString() << " ";
-
+      if (tempP.size>1)
+        currentShift.TheObjects[j]=-10000;
+      if (tempP.size==0)
+        currentShift.TheObjects[j]=0;
+      if (tempP.size==1)
+        currentShift.TheObjects[j]=-tempP.TheObjects[0].Coefficient.NumShort;
     }
+    RationalFunction& tempRF= matNewEquationLine.elements[0][i];
+    tempRF.operator=(theElt.TheObjects[i].Coefficient);
   }
+  RationalFunction ZeroRF;
+  ZeroRF.MakeNVarConst(numRangePosRoots+theRangeRank, (Rational) 0);
+  this->theSystem.DirectSumWith(matNewEquationLine, ZeroRF);
 }
 
 void EigenVectorComputation::MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& owner)
@@ -6304,4 +6441,82 @@ void EigenVectorComputation::MakeGenericVermaElement(ElementUniversalEnveloping&
     tempMon.MultiplyByGeneratorPowerOnTheRight(owner.RootIndexToGeneratorIndex(2*numPosRoots-1-i), tempP);
   }
   theElt.AddMonomial(tempMon);
+}
+
+Rational WeylGroup::WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables)
+{ root theWeightInSimpleBasis=theWeightInFundamentalBasis;
+  MatrixLargeRational invertedCartan;
+  for (int i=0; i<this->CartanSymmetric.NumRows; i++)
+    theWeightInSimpleBasis.TheObjects[i]/=2/this->CartanSymmetric.elements[i][i];
+  invertedCartan=this->CartanSymmetric;
+  invertedCartan.Invert(theGlobalVariables);
+  invertedCartan.ActOnAroot(theWeightInSimpleBasis, theWeightInSimpleBasis);
+  Rational Result=1;
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+  { Result.MultiplyBy(this->RootScalarCartanRoot(theWeightInSimpleBasis+this->rho, this->RootsOfBorel.TheObjects[i]));
+    Result/=this->RootScalarCartanRoot(this->rho, this->RootsOfBorel.TheObjects[i]);
+  }
+  return Result;
+}
+
+std::string SemisimpleSubalgebras::ElementToString()
+{ std::stringstream out; std::string tempS;
+  this->theHcandidates.ElementToStringGeneric(tempS);
+  out << tempS;
+  return out.str();
+}
+
+void SemisimpleSubalgebras::FindHCandidates(char WeylLetter, int WeylDim, GlobalVariables& theGlobalVariables)
+{ roots emptyStart;
+//  List<List<root> >::ListActualSizeIncrement=10000;
+  this->theAlgebra.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylDim, theGlobalVariables);
+  this->theHcandidates.size=0;
+  this->theHcandidates.AddObjectOnTop(emptyStart);
+  for (this->indexLowestUnexplored=0; this->indexLowestUnexplored<this->theHcandidates.size; this->indexLowestUnexplored++)
+    this->FindHCandidatesWithOneExtraHContaining(this->theHcandidates.TheObjects[this->indexLowestUnexplored], theGlobalVariables);
+  this->ComputeDebugString();
+  theGlobalVariables.theIndicatorVariables.StatusString1.append(this->DebugString);
+  theGlobalVariables.MakeReport();
+}
+
+void  SemisimpleSubalgebras::FindHCandidatesWithOneExtraHContaining(roots& inpuT, GlobalVariables& theGlobalVariables)
+{ int theDimension= this->theAlgebra.theWeyl.CartanSymmetric.NumRows;
+  SelectionWithMaxMultiplicity theSel;
+  theSel.initMaxMultiplicity(theDimension, 2);
+  int theCounter=MathRoutines::KToTheNth(3, theDimension);
+  root theRoot;
+  WeylGroup& theWeyl=this->theAlgebra.theWeyl;
+  MatrixLargeRational invertedCartan=this->theAlgebra.theWeyl.CartanSymmetric;
+  invertedCartan.Invert(theGlobalVariables);
+  roots tempRoots;
+  tempRoots=inpuT;
+  roots inputCopy;
+  inputCopy=inpuT;
+  for (int i=0; i<theCounter; i++, theSel.IncrementSubset())
+  { //slTwo& currentSl2=this->theSl2s.TheObjects[i];
+    theRoot=theSel;
+    invertedCartan.ActOnAroot(theRoot, theRoot);
+    bool isGood=true;
+    if (!inputCopy.LinSpanContainsRoot(theRoot, theGlobalVariables))
+    { for (int j=0; j<inputCopy.size; j++)
+        if (theWeyl.RootScalarCartanRoot(inputCopy.TheObjects[j], theRoot).IsPositive())
+        { isGood=false;
+          break;
+        }
+      if (isGood)
+      { tempRoots= inputCopy;
+        tempRoots.AddObjectOnTop(theRoot);
+        for (int k=tempRoots.size-1; k>0; k--)
+          if (tempRoots.TheObjects[k]< tempRoots.TheObjects[k-1])
+            tempRoots.SwapTwoIndices(k, k-1);
+        this->theHcandidates.AddOnTopNoRepetition(tempRoots);
+        //this->th
+      }
+      std::stringstream out;
+      out <<  "index lowest non explored: " << this->indexLowestUnexplored+1 << " Total number found: " << this->theHcandidates.size;
+      theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+      theGlobalVariables.MakeReport();
+    }
+  }
 }

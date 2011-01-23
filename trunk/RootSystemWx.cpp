@@ -14,6 +14,7 @@
 #include "wx/fontdlg.h"
 #include "wx/numdlg.h"
 #include "wx/tglbtn.h"
+#include <sys/time.h>
 
 #include "wx/grid.h"
 #include "wx/generic/gridctrl.h"
@@ -58,7 +59,7 @@ public:
   void onMouseUpOnCanvas(wxMouseEvent &ev);
   void onMouseMove(wxMouseEvent& ev);
   void OnMouseWheel(wxMouseEvent& event);
-  void onSizing(::wxSizeEvent&ev);
+  void onSizing(::wxSizeEvent& ev);
   DECLARE_EVENT_TABLE()
 };
 
@@ -75,6 +76,33 @@ class rootDouble: public List<double>
   public:
   std::string DebugString;
   void ComputeDebugString(){this->DebugString=this->ElementToString();};
+  void AssignString(std::string& input)
+  { unsigned int startIndex=0;
+    for (; startIndex<input.size(); startIndex++)
+      if (input[startIndex]=='(')
+        break;
+    startIndex++;
+    this->SetSizeExpandOnTopNoObjectInit(0);
+    std::string tempS;
+    tempS.resize(input.size());
+    tempS="";
+    for (; startIndex<input.size(); startIndex++)
+    { if (input[startIndex]==')' || input[startIndex]==',')
+      { std::stringstream tempstream;
+        tempstream << tempS;
+        tempstream.seekg(0);
+        double coordinate;
+        tempstream >> coordinate;
+        tempS="";
+        this->AddObjectOnTop(coordinate);
+      } else
+      { tempS.resize(tempS.size()+1);
+        tempS[tempS.size()-1]=input[startIndex];
+      }
+      if (input[startIndex]==')')
+        break;
+    }
+  };
   std::string ElementToString()
   { std::stringstream out;
     out << "(";
@@ -86,7 +114,18 @@ class rootDouble: public List<double>
     out << ")";
     return out.str();
   };
+  void MakeEi(int theDim, int theIndex)
+  { this->SetSizeExpandOnTopNoObjectInit(theDim);
+    for (int i=0; i<theDim; i++)
+      this->TheObjects[i]=0;
+    this->TheObjects[theIndex]=1;
+  };
   rootDouble(){};
+  void operator=(const root& other)
+  { this->SetSizeExpandOnTopNoObjectInit(other.size);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i]=other.TheObjects[i].DoubleValue();
+  };
   rootDouble(const rootDouble& other)
   { this->operator=(other);
   };
@@ -94,6 +133,12 @@ class rootDouble: public List<double>
   { rootDouble result; result.SetSizeExpandOnTopNoObjectInit(this->size);
     for (int i=0; i<this->size; i++)
       result.TheObjects[i]= this->TheObjects[i]*coeff;
+    return result;
+  };
+  rootDouble operator+(const rootDouble& other)
+  { rootDouble result; result.SetSizeExpandOnTopNoObjectInit(this->size);
+    for (int i=0; i<this->size; i++)
+      result.TheObjects[i]= this->TheObjects[i]+ other.TheObjects[i];
     return result;
   };
   void operator*=(double coeff)
@@ -117,6 +162,21 @@ class rootDouble: public List<double>
   };
 };
 
+std::string ConvertWXstring(const wxString& input)
+{ char* buf;
+  int wantedSize=input.size();
+  buf= new char[wantedSize*3+5];
+  strcpy(buf, (const char*)input.mb_str(wxConvUTF8) );
+  std::string tempS=buf;
+  delete [] buf;
+  return tempS;
+}
+
+wxString ConvertToWxString(const std::string& input)
+{ wxString theString(input.c_str(), wxConvUTF8);
+  return theString;
+}
+
 class RootSystemGraphics
 {
   public:
@@ -127,10 +187,18 @@ class RootSystemGraphics
   int SelectedIndex; //-2= none, -1=center of coordinate system, nonnegative integers= selectedindex
   rootDouble e1;
   rootDouble e2;
+//  MutexWrapper onAnimatingAccess;
+  bool Animating;
+  rootDouble animationTargetE1;
+  rootDouble animationTargetE2;
+  rootDouble animationStartE1;
+  rootDouble animationStartE2;
+  Controller CantModifyMe;
   int ClickToleranceX;
   int ClickToleranceY;
   List<rootDouble> theRootSystem;
   List<rootDouble> theRootSystemProjectionsScaled;
+  char DisplayBuffer[10000];
   std::string DebugString;
   std::string ElementToString()
   { std::stringstream out;
@@ -173,6 +241,8 @@ class RootSystemGraphics
   RootSystemGraphics()
   { this->graphicsUnit=100;
     this->SelectedIndex=-2;
+    this->Animating=false;
+//    this->ComputingAnimation=false;
     this->shiftX=400;
     this->shiftY=200;
     this->ClickToleranceX=5;
@@ -185,6 +255,7 @@ class guiMainWindow : public wxFrame
   ListPointers<wxFont> theFonts;
 public:
   std::fstream fileSettings;
+  wxPaintEvent paintEvent;
   wxComboBox* ListBox1WeylGroup;
   RootSystemGraphics theGraphics;
   wxCommandEvent wxProgressReportEvent;
@@ -192,23 +263,33 @@ public:
   wxBoxSizer* BoxSizer1VerticalBackground;
   wxBoxSizer* BoxSizer2HorizontalButtons;
   wxTextCtrl* Text1Output;
+  wxStaticText* Static1E1;
+  wxStaticText* Static2E2;
+  //wxTextCtrl* Text4mutex;
+  wxTextCtrl* Text2e1;
+  wxTextCtrl* Text3e2;
  ::wxSpinCtrl* Spin1Dim;
   wxFont* theFont;
   ::drawCanvas* Canvas1;
-  ::wxToggleButton* ToggleButton1UsingCustom;
-  ::wxToggleButton* ToggleButton2ViewCombinatorialChambers;
+  ::wxButton* Button1Animation;
+  pthread_t AnimationThread;
   ::IndicatorWindowVariables progressReportVariables;
   //wxEVT_ProgressReport ProgressReportEvent;
   wxFont* GetFont(int theSize);
+  //void DisplayUnlockedStatus() {this->Text4mutex->SetValue(wxT("Unlocked"));};
+  //void DisplayLockedStatus(){this->Text4mutex->SetValue(wxT("Locked"));};
+
   void onRePaint(wxPaintEvent& ev);
   void onMouseDownOnCanvas(wxMouseEvent& ev);
   void onMouseUpOnCanvas(wxMouseEvent& ev);
   void onSpinner(wxSpinEvent & ev);
   void onListBox1Change(wxCommandEvent& ev);
+  void onAnimation(wxCommandEvent& ev);
   void ReadSettingsIfAvailable();
   void WriteSettingsIfAvailable();
   void ArrangeWindows();
   void Recompute();
+  static void* DoTheAnimation(void* ptr);
   guiMainWindow();
   ~guiMainWindow();
   void OnExit(wxCloseEvent& event);
@@ -216,6 +297,7 @@ public:
   { ID_MainWindow= 1001,
     ID_ListBox1,
     ID_Canvas1,
+    ID_Button1,
     ID_ComputationUpdate,
     ID_Spin1Dim,
     ID_Paint,
@@ -289,11 +371,18 @@ void drawCanvas::OnMouseWheel(wxMouseEvent& event)
 { // scroll in drop down list using mouse wheel
   if (MainWindow1==0)
     return;
+ 	if (MainWindow1->theGraphics.Animating)
+      return;
   int rot = event.GetWheelRotation()/event.GetWheelDelta();
   MainWindow1->theGraphics.graphicsUnit+=rot*5;
+  //MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  MainWindow1->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   MainWindow1->theGraphics.ComputeProjections();
-  wxPaintEvent temp;
-  MainWindow1->onRePaint(temp);
+  MainWindow1->theGraphics.CantModifyMe.UnlockSafePoint();
+  //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
+  //wxPaintEvent temp;
+
+  MainWindow1->Refresh();
 }
 
 std::string MainWindow1GlobalPath;
@@ -339,13 +428,20 @@ BEGIN_EVENT_TABLE(guiMainWindow, wxFrame)
     EVT_COMBOBOX(guiMainWindow::ID_ListBox1, guiMainWindow::onListBox1Change)
     EVT_CLOSE(guiMainWindow::OnExit)
     EVT_SPINCTRL(guiMainWindow::ID_Spin1Dim, guiMainWindow::onSpinner)
+    EVT_BUTTON(guiMainWindow::ID_Button1, guiMainWindow::onAnimation)
     //EVT_PAINT(guiMainWindow::onPaint)
 END_EVENT_TABLE()
 
 void drawCanvas::onMouseDownOnCanvas(wxMouseEvent& ev)
 { if (MainWindow1==0)
     return;
+ 	if (MainWindow1->theGraphics.Animating)
+    return;
+  //MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  MainWindow1->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   MainWindow1->theGraphics.click(ev.GetX(), ev.GetY());
+  MainWindow1->theGraphics.CantModifyMe.UnlockSafePoint();
+  //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
 }
 
 void drawCanvas::onMouseUpOnCanvas(wxMouseEvent& ev)
@@ -357,13 +453,20 @@ void drawCanvas::onMouseUpOnCanvas(wxMouseEvent& ev)
 void drawCanvas::onMouseMove(wxMouseEvent& ev)
 { if (MainWindow1==0)
     return;
+ 	if (MainWindow1->theGraphics.Animating)
+      return;
+  //MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  MainWindow1->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   MainWindow1->theGraphics.mouseMove(ev.GetX(), ev.GetY());
-  wxPaintEvent temp;
-  MainWindow1->onRePaint(temp);
+  MainWindow1->theGraphics.CantModifyMe.UnlockSafePoint();
+  //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
+  MainWindow1->Refresh();
 }
 
 void guiMainWindow::onListBox1Change(wxCommandEvent& ev)
-{ int tempI=this->ListBox1WeylGroup->GetCurrentSelection();
+{ if (MainWindow1->theGraphics.Animating)
+    return;
+  int tempI=this->ListBox1WeylGroup->GetCurrentSelection();
   char WeylLetter;
   switch(tempI)
   { case 0: WeylLetter='A'; break;
@@ -374,12 +477,18 @@ void guiMainWindow::onListBox1Change(wxCommandEvent& ev)
     case 5: WeylLetter='F'; break;
     case 6: WeylLetter='G'; break;
   }
+//  MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  this->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   this->theGraphics.theWeyl.MakeArbitrary(WeylLetter, this->theGraphics.theWeyl.CartanSymmetric.NumCols);
   this->Recompute();
+  this->theGraphics.CantModifyMe.UnlockSafePoint();
+//  MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
 }
 
 void guiMainWindow::onSpinner(wxSpinEvent & ev)
-{ int candidateDim= this->Spin1Dim->GetValue();
+{ if (MainWindow1->theGraphics.Animating)
+      return;
+  int candidateDim= this->Spin1Dim->GetValue();
   if (candidateDim>8)
   { candidateDim=8;
     this->Spin1Dim->SetValue(8);
@@ -388,8 +497,12 @@ void guiMainWindow::onSpinner(wxSpinEvent & ev)
   { candidateDim=1;
      this->Spin1Dim->SetValue(1);
   }
+//  MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  this->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   this->theGraphics.theWeyl.MakeArbitrary(this->theGraphics.theWeyl.WeylLetter, candidateDim);
   this->Recompute();
+  this->theGraphics.CantModifyMe.UnlockSafePoint();
+//  MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
 }
 
 void RootSystemGraphics::ScaleToUnitLength(rootDouble& theRoot)
@@ -399,7 +512,9 @@ void RootSystemGraphics::ScaleToUnitLength(rootDouble& theRoot)
 }
 
 void RootSystemGraphics::ModifyToOrthonormalNoShiftSecond(rootDouble& root1, rootDouble& root2)
-{ double theScalar= this->getScalarProduct(root1, root2)/this->getScalarProduct(root2, root2);
+{ //if  (this->getScalarProduct(root2, root2)==0)
+  //  root2.MakeEi(this->theWeyl.CartanSymmetric.NumRows,1);
+  double theScalar= this->getScalarProduct(root1, root2)/this->getScalarProduct(root2, root2);
   root1-=root2*theScalar;
   this->ScaleToUnitLength(root1);
   this->ScaleToUnitLength(root2);
@@ -454,6 +569,8 @@ void RootSystemGraphics::RotateOutOfPlane(std::stringstream& logger, rootDouble&
 
 void RootSystemGraphics::changeBasis(double newX, double newY)
 { if (newX==0 && newY==0)
+    return;
+ 	if (MainWindow1->theGraphics.Animating)
     return;
   std::stringstream out;
   rootDouble& selectedRoot=this->theRootSystem.TheObjects[this->SelectedIndex];
@@ -533,7 +650,9 @@ void RootSystemGraphics::mouseMove(int X, int Y)
 }
 
 void RootSystemGraphics::draw()
-{ Rational RootLength;
+{ //this->CantModifyMe.LockMe();
+  this->CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+  Rational RootLength;
   for (int i=0; i<this->theWeyl.RootSystem.size; i++)
   { int tempColor= CGIspecificRoutines::RedGreenBlue(200, 200, 255);
     RootLength= this->theWeyl.RootScalarCartanRoot(this->theWeyl.RootSystem.TheObjects[i], this->theWeyl.RootSystem.TheObjects[i]);
@@ -549,10 +668,13 @@ void RootSystemGraphics::draw()
     std::string tempS=tempChar.str();
     drawtext(shiftX+this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[0]+5, shiftY-this->theRootSystemProjectionsScaled.TheObjects[i].TheObjects[1]+5, tempS.c_str(), 1, CGIspecificRoutines::RedGreenBlue(50, 50, 50), 9);
   }
+  //this->CantModifyMe.UnlockMe();
 }
 
 void RootSystemGraphics::Recompute()
-{ this->theWeyl.ComputeRho(true);
+{ if (this->Animating)
+    return;
+  this->theWeyl.ComputeRho(true);
   int theDim=this->theWeyl.CartanSymmetric.NumRows;
   this->e1.SetSizeExpandOnTopNoObjectInit(theDim);
   this->e2.SetSizeExpandOnTopNoObjectInit(theDim);
@@ -563,18 +685,22 @@ void RootSystemGraphics::Recompute()
       this->theRootSystem.TheObjects[i].TheObjects[j]=this->theWeyl.RootSystem.TheObjects[i].TheObjects[j].DoubleValue();
 //  this->theBasis.SetSizeExpandOnTopNoObjectInit(theDim);
   for (int i=0; i<theDim; i++)
-  { this->e1.TheObjects[i]=(i+1.3)*(i+1.3)+1;
-    this->e2.TheObjects[i]=i*3+1.7;
+  { this->e1.TheObjects[i]=((i-1.3)*sqrt(i+1.3)-1);
+    this->e2.TheObjects[i]=(i*3+1.7);
   }
   rootDouble tempRoot;
   tempRoot.SetSizeExpandOnTopNoObjectInit(2);
   this->theRootSystemProjectionsScaled.initFillInObject(numRoots, tempRoot);
   this->ModifyToOrthonormalNoShiftSecond(this->e1, this->e2);
+  this->animationTargetE1.MakeEi(theDim, 0);
+  this->animationTargetE2.MakeEi(theDim, 1);
   this->ComputeProjections();
 }
 
 void guiMainWindow::Recompute()
 { this->theGraphics.Recompute();
+  this->Text2e1->SetValue(ConvertToWxString(this->theGraphics.animationTargetE1.ElementToString()));
+  this->Text3e2->SetValue(ConvertToWxString(this->theGraphics.animationTargetE2.ElementToString()));
   wxPaintEvent temp;
   this->onRePaint(temp);
 }
@@ -585,13 +711,25 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 { //this->theComputationSetup.flagDoCustomComputation=true;
   this->BoxSizer1VerticalBackground = new ::wxBoxSizer(wxVERTICAL);
   this->BoxSizer2HorizontalButtons= new ::wxBoxSizer(wxHORIZONTAL);
+  this->Button1Animation= new wxButton(this, guiMainWindow::ID_Button1, wxT("Animate"));
   this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
   this->theFont= new ::wxFont(10, wxDEFAULT, wxNORMAL,wxNORMAL);
   this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
   this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
   this->ListBox1WeylGroup= new ::wxComboBox(this, this->ID_ListBox1, wxT("B"), wxPoint(0, 0), wxDefaultSize, 0, 0, wxCB_DROPDOWN);
+  this->Text2e1 = new wxTextCtrl(this, wxID_ANY, wxT("(1,0,0)"));//, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+  this->Text3e2 = new wxTextCtrl(this, wxID_ANY, wxT("(0,1,0)"));
+//  this->Text4mutex = new wxTextCtrl(this, wxID_ANY);
+  this->Static1E1 = new wxStaticText(this, wxID_ANY, wxT("Animation targets e1 | e2:"));
+  this->Static2E2 = new wxStaticText(this, wxID_ANY, wxT("|"));
   this->BoxSizer2HorizontalButtons->Add(this->ListBox1WeylGroup);
   this->BoxSizer2HorizontalButtons->Add(this->Spin1Dim);
+  this->BoxSizer2HorizontalButtons->Add(this->Button1Animation);
+  this->BoxSizer2HorizontalButtons->Add(this->Static1E1);
+  this->BoxSizer2HorizontalButtons->Add(this->Text2e1);
+  this->BoxSizer2HorizontalButtons->Add(this->Static2E2);
+  this->BoxSizer2HorizontalButtons->Add(this->Text3e2);
+  //this->BoxSizer2HorizontalButtons->Add(this->Text4mutex);
   this->BoxSizer1VerticalBackground->Add(this->BoxSizer2HorizontalButtons, 0, wxEXPAND|::wxALL);
   this->BoxSizer1VerticalBackground->Add(this->Canvas1, 5, wxEXPAND|::wxALL);
   this->BoxSizer1VerticalBackground->Add(this->Text1Output, 2, wxEXPAND|wxALL);
@@ -615,8 +753,14 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
 void drawCanvas::onSizing(wxSizeEvent& ev)
 { if (MainWindow1==0)
 		return;
+ 	if (MainWindow1->theGraphics.Animating)
+   return;
+  //MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  MainWindow1->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   MainWindow1->Layout();
   MainWindow1->theGraphics.draw();
+  MainWindow1->theGraphics.CantModifyMe.UnlockSafePoint();
+  //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
   this->Refresh();
 }
 
@@ -638,15 +782,88 @@ void drawCanvas::OnPaint(::wxPaintEvent& ev)
 { wxPaintDC  dc(this);
 	if (MainWindow1==0)
 		return;
+  //MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  MainWindow1->theGraphics.CantModifyMe.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   dc.SetBackground(MainWindow1->GetBackgroundColour());
   dc.DrawRectangle(wxPoint(0,0), this->GetSize());
   MainWindow1->theGraphics.draw();
-  wxString temptext(MainWindow1->theGraphics.DebugString.c_str(), wxConvUTF8);
-  MainWindow1->Text1Output->SetValue(temptext);
+  MainWindow1->Text1Output->SetValue(ConvertToWxString(MainWindow1->theGraphics.DebugString));
+  MainWindow1->theGraphics.CantModifyMe.UnlockSafePoint();
+  //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
 }
 
 void guiMainWindow::OnExit(wxCloseEvent &event)
 {	this->Destroy();
+}
+
+double GetElapsedTimeInSeconds(timeval& StartingTime)
+{ timeval tempTime;
+  gettimeofday(&tempTime, NULL);
+  int miliSeconds =(tempTime.tv_sec- StartingTime.tv_sec)*1000+(tempTime.tv_usec- StartingTime.tv_usec)/1000;
+  return ((double) miliSeconds)/1000;
+}
+
+void* guiMainWindow::DoTheAnimation(void* ptr)
+{ MainWindow1->theGraphics.Animating=true;
+  timeval startingTime;
+  gettimeofday(&startingTime, NULL);
+  RootSystemGraphics& theGraphics=MainWindow1->theGraphics;
+  //MainWindow1->Text4mutex->SetValue(wxT("locked"));
+  theGraphics.CantModifyMe.InitComputation();
+  std::string inputStringE1= ConvertWXstring(MainWindow1->Text2e1->GetValue());
+  std::string inputStringE2= ConvertWXstring(MainWindow1->Text3e2->GetValue());
+  theGraphics.animationTargetE1.AssignString(inputStringE1);
+  theGraphics.animationTargetE2.AssignString(inputStringE2);
+  rootDouble& startingE1= theGraphics.animationStartE1;
+  rootDouble& startingE2= theGraphics.animationStartE2;
+  startingE1=theGraphics.e1;
+  startingE2=theGraphics.e2;
+  startingE1.ComputeDebugString();
+  startingE2.ComputeDebugString();
+  MainWindow1->theGraphics.ModifyToOrthonormalNoShiftSecond(theGraphics.animationTargetE1, theGraphics.animationTargetE2);
+  theGraphics.animationTargetE1.ComputeDebugString();
+  theGraphics.animationTargetE2.ComputeDebugString();
+  MainWindow1->Text2e1->SetValue(ConvertToWxString(theGraphics.animationTargetE1.DebugString));
+  MainWindow1->Text3e2->SetValue(ConvertToWxString(theGraphics.animationTargetE2.DebugString));
+  usleep(10);
+  MainWindow1->Refresh();
+  usleep(10);
+  MainWindow1->theGraphics.CantModifyMe.SafePoint();
+  //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
+  int numRuns=100;
+  for (int i=0; i<numRuns; i++)
+  { usleep(100000);
+    double a=((double) (i+1))/ ((double) numRuns);
+    double b=1.0-a;
+    theGraphics.e1= theGraphics.animationStartE1*b+theGraphics.animationTargetE1*a;
+    theGraphics.e2= theGraphics.animationStartE2*b+theGraphics.animationTargetE2*a;
+    theGraphics.e1.ComputeDebugString();
+    theGraphics.e2.ComputeDebugString();
+    theGraphics.ModifyToOrthonormalNoShiftSecond(MainWindow1->theGraphics.e1, MainWindow1->theGraphics.e2);
+    theGraphics.e1.ComputeDebugString();
+    theGraphics.e2.ComputeDebugString();
+    theGraphics.ComputeProjections();
+    theGraphics.ComputeDebugString();
+    std::stringstream tempOutput;
+    tempOutput << "\na: " << a << " b: " << b << "\n" << "starting e1: " << startingE1.DebugString << "\nstarting e2: " << startingE2.DebugString;
+    tempOutput << "\ntarget e1: " << theGraphics.animationTargetE1.DebugString << "\ntarget e2: " << theGraphics.animationTargetE2.DebugString;
+    MainWindow1->theGraphics.DebugString.append(tempOutput.str());
+    usleep(10);
+    MainWindow1->Refresh();
+    usleep(10);
+    //MainWindow1->GetEventHandler()->AddPendingEvent(MainWindow1->paintEvent);
+    MainWindow1->theGraphics.CantModifyMe.SafePoint();
+    //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
+
+  }
+  theGraphics.CantModifyMe.ExitComputation();
+  MainWindow1->theGraphics.Animating=false;
+  usleep(100000);
+  pthread_exit(NULL);
+}
+
+void guiMainWindow::onAnimation(wxCommandEvent& ev)
+{ pthread_create(&this->AnimationThread, NULL, &this->DoTheAnimation, 0);
 }
 
 void guiMainWindow::WriteSettingsIfAvailable()

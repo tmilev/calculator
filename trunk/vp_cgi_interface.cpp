@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   //inputString="textType=d&textRank=4&usePNG=on&buttonGoSl2SAs=sl%282%29+subalgebras";
   //inputString="textType=G&textRank=2&buttonGoSl2SAs=sl%282%29+subalgebras&checkUsePNG=on";
   //inputString="experiments";
-	inputString="textDim=3&textNumVectors=6&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=0&textCoord3=2&textCoord3=0&textCoord4=1&textCoord4=1&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=undefined";
+	//inputString="textDim=3&textNumVectors=6&textCoord0=1&textCoord0=0&textCoord0=0&textCoord1=0&textCoord1=1&textCoord1=0&textCoord2=0&textCoord2=0&textCoord2=1&textCoord3=0&textCoord3=2&textCoord3=0&textCoord4=1&textCoord4=1&textCoord4=0&textCoord5=0&textCoord5=1&textCoord5=1&buttonOneChamber=Vector_partition_function_chamber_%23&chamberNumber=undefined";
 	std::cout << "Content-Type: text/html\n\n";
 //	std::cout << "inputString: " << inputString;
 	std::cout.flush();

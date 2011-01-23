@@ -199,6 +199,7 @@ class Controller
 {
   MutexWrapper mutexLockMeToPauseCallersOfSafePoint;
   MutexWrapper mutexSignalMeWhenReachingSafePoint;
+  MutexWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;
 public:
@@ -209,7 +210,13 @@ public:
     this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
   };
   inline void SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint()
-  { this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
+  { this->mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
+    if (this->flagIsPausedWhileRunning)
+    { this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
+      return;
+    }
+    this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
+    this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
     this->mutexSignalMeWhenReachingSafePoint.LockMe();
     this->flagIsPausedWhileRunning=true;
     this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
@@ -437,10 +444,10 @@ private:
   int ActualSize;
   int IndexOfVirtualZero;
   Object* TheActualObjects;
-  List(List<Object>&);
   void ExpandArrayOnTop(int increase);
   void ExpandArrayOnBottom(int increase);
   void QuickSortAscending(int BottomIndex, int TopIndex);
+  List(const List<Object>& other);
 public:
   static int ListActualSizeIncrement;
   Object* TheObjects;
@@ -768,6 +775,8 @@ template <typename Element>
 class Matrix: public MatrixElementaryLooseMemoryFit<Element>
 {
 public:
+  Matrix(const Matrix<Element>& other){this->Assign(other);};
+  Matrix(){};
   std::string DebugString;
   static bool flagComputingDebugInfo;
   static std::string MatrixElementSeparator;
@@ -775,8 +784,9 @@ public:
   void ComputeDebugString(bool useHtml, bool useLatex){this->ElementToString(this->DebugString, useHtml, useLatex);};
   void ElementToString(std::string& output);
   void ElementToString(std::string& output, bool useHtml, bool useLatex);
+  std::string ElementToString(bool useHtml, bool useLatex){std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;};
   void SwitchTwoRows(int row1, int row2);
-  int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex );
+  int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex);
   void RowTimesScalar(int rowIndex, Element& scalar);
   void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, Element& scalar);
   void MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output);
@@ -794,7 +804,7 @@ public:
   // and everything else you fill with zeros
   void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
   void FindZeroEigenSpacE(List<List<Element> >& output, Element& theRingUnit, Element& theRingMinusUnit, Element& theRingZero, GlobalVariables& theGlobalVariables);
-  void DirectSumWith(const Matrix<Element>& m2);
+  void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero);
   bool IsEqualToZero()
   { for(int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
@@ -937,15 +947,17 @@ public:
   List<int> elements;
   List<int> Multiplicities;
   int CardinalitySelectionWithoutMultiplicities();
-  void initMe(int NumElements);
+  void initWithMultiplicities(int NumElements);
   void ComputeElements();
 };
 
 class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities
 { void init(int NumElements);
+  void InitMe(int NumElements);
+  void initWithMultiplicities(int NumElements);
 public:
   int MaxMultiplicity;
-  void initMe2(int NumElements, int MaxMult);
+  void initMaxMultiplicity(int NumElements, int MaxMult);
   int NumCombinationsOfCardinality(int cardinality);
   void IncrementSubset();
   void IncrementSubsetFixedCardinality(int Cardinality);
@@ -958,7 +970,7 @@ class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultipliciti
 {
 public:
   List<int> MaxMultiplicities;
-  void initIncomplete(int NumElements){  this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements); this->initMe(NumElements); };
+  void initIncomplete(int NumElements){  this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements); this->initWithMultiplicities(NumElements); };
   void clearNoMaxMultiplicitiesChange();
   void IncrementSubset();
   int getTotalNumSubsets();
@@ -1170,18 +1182,18 @@ void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
 }
 
 template<typename Element>
-void Matrix<Element>::DirectSumWith(const Matrix<Element>& m2)
+void Matrix<Element>::DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero)
 { int oldNumRows=this->NumRows; int oldNumCols=this->NumCols;
   this->Resize(this->NumRows+m2.NumRows, this->NumCols+m2.NumCols, true);
   for(int i=0; i<m2.NumRows; i++)
   { for(int j=0; j<m2.NumCols; j++)
       this->elements[i+oldNumRows][j+oldNumCols]=m2.elements[i][j];
     for(int j=0; j<oldNumCols; j++)
-      this->elements[i+oldNumRows][j]=0;
+      this->elements[i+oldNumRows][j]=theRingZero;
   }
   for(int j=0; j<oldNumRows; j++)
     for (int i=oldNumCols; i<this->NumCols; i++)
-      this->elements[j][i]=0;
+      this->elements[j][i]=theRingZero;
 }
 
 template <typename Element>
@@ -1849,6 +1861,7 @@ public:
   root(const char* input){std::string tempS; tempS=input; this->AssignString(tempS);};
   void operator=(const std::string& input){this->AssignString(input);};
   void operator=(const char* input){std::string tempS; tempS=input; this->AssignString(input);};
+  void operator=(const SelectionWithMultiplicities& other);
   inline void operator=(const root& right){this->Assign(right); };
   void AssignString(const std::string& input)
   { unsigned int startIndex=0;
@@ -1884,6 +1897,7 @@ public:
   root operator*(const Rational& right)const{ root tempRoot; tempRoot.Assign(*this); tempRoot.MultiplyByLargeRational(right); return tempRoot;};
   Rational operator*(const root& right)const{ Rational tempRat; this->RootScalarEuclideanRoot(*this, right, tempRat); return tempRat; };
   root operator/(const Rational& right)const{ root tempRoot; tempRoot.Assign(*this); tempRoot.DivByLargeRational(right); return tempRoot;};
+  inline bool operator<(const root& other)const {return other.operator>(*this);};
   bool operator>(const root& other)const
   { assert(this->size==other.size);
     Rational tempRat1=0, tempRat2=0;
@@ -5668,6 +5682,7 @@ public:
   void MakeDn(int n);
   void MakeF4();
   void MakeG2();
+  Rational WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables);
   void RaiseToHighestWeight(root& theWeight);
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); };
@@ -6243,6 +6258,7 @@ public:
   List<Rational> coeffsRootSpaces;
   root Hcomponent;
   void ElementToVectorRootSpacesFirstThenCartan(root& output);
+  void ElementToVectorNegativeRootSpacesFirst(root& output);
   void AssingVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
@@ -6469,7 +6485,7 @@ public:
   void GenerateOneMonomialPerWeightInTheWeightSupport(root& theHighestWeight, GlobalVariables& theGlobalVariables);
   void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables);
   int GetLengthStringAlongAlphaThroughBeta(root& alpha, root& beta, int& distanceToHighestWeight, roots& weightSupport);
-  void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto);
+  void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto,  bool useNegativeRootsFirst);
   void operator=(const SemisimpleLieAlgebra& other){ this->Assign(other);};
   void Assign(const SemisimpleLieAlgebra& other);
 };
@@ -6494,12 +6510,13 @@ public:
   List<ElementSimpleLieAlgebra> theChevalleyGenerators;
   roots RestrictedRootSystem;
   std::string DebugString;
-  void WriteAllUEMonomialsWithWeightWRTDomain
+  std::string WriteAllUEMonomialsWithWeightWRTDomain
   (List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables)
   ;
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables) {this->ElementToString(output, false, theGlobalVariables);};
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
+  void MakeGinGWithId(char theWeylLetter, int theWeylDim, GlobalVariables& theGlobalVariables);
   void ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);};
   void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, useHtml, theGlobalVariables);};
@@ -7067,6 +7084,7 @@ class ParserNode
   int GetStrongestExpressionChildrenConvertChildrenIfNeeded();
   void ConvertChildrenAndMyselfToStrongestExpressionChildren();
   bool ConvertToType(int theType);
+  bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement,typeRoot,
   typeString,
@@ -7085,9 +7103,11 @@ class ParserNode
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
+  void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
+  void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
@@ -7117,7 +7137,7 @@ public:
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
     tokenRoot, tokenFunction, tokenFunctionNoArgument
   };
-  enum functionList{ functionEigen, functionLCM, functionGCD, functionSecretSauce };
+  enum functionList{functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos};
   List<int> TokenBuffer;
   List<int> ValueBuffer;
   List<int> TokenStack;
@@ -7438,6 +7458,7 @@ public:
   static void TestQuickSort(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TestUnitCombinatorialChambersChambers(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void ExperimentSSsubalgebras(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void G2InD4Experiment(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void DuflosComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TestParser(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
@@ -7746,7 +7767,10 @@ public:
 class EigenVectorComputation
 {
 public:
-  std::string ComputeAndReturnString(GlobalVariables& theGlobalVariables);
+  List<List<int> > theExponentShifts;
+  PolynomialRationalCoeff coefficientInFrontOfMon;
+  Matrix<RationalFunction> theSystem;
+  std::string ComputeAndReturnString(GlobalVariables& theGlobalVariables, Parser& theParser);
   //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots
   //variables correspond to the exponents: the rank-of-theOwner+1st variable corresponds to the
   //exponent of the 1st negative root, (the root with index -1).
@@ -7755,6 +7779,29 @@ public:
   void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
   void DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
+};
+
+class AdmissibleHs :public rootsCollection
+{
+  public:
+};
+
+class SemisimpleSubalgebras
+{
+public:
+  std::string DebugString;
+  std::string ElementToString();
+  void ComputeDebugString(){this->DebugString=this->ElementToString();};
+  SltwoSubalgebras theSl2s;
+  SemisimpleLieAlgebra theAlgebra;
+  AdmissibleHs theHcandidates;
+  int indexLowestUnexplored;
+  void FindHCandidates
+    (char WeylLetter, int WeylDim, GlobalVariables& theGlobalVariables)
+  ;
+  void FindHCandidatesWithOneExtraHContaining
+  (roots& inpuT, GlobalVariables& theGlobalVariables)
+  ;
 };
 
 #endif

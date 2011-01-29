@@ -689,8 +689,8 @@ void RootSystemGraphics::Recompute()
       this->theRootSystem.TheObjects[i].TheObjects[j]=this->theWeyl.RootSystem.TheObjects[i].TheObjects[j].DoubleValue();
 //  this->theBasis.SetSizeExpandOnTopNoObjectInit(theDim);
   for (int i=0; i<theDim; i++)
-  { this->e1.TheObjects[i]=((i-1.3)*sqrt(i+1.3)-1);
-    this->e2.TheObjects[i]=(i*3+1.7);
+  { this->e1.TheObjects[i]= (((i+3)*(i+8)*(i+9))%41) +(i+1)*0.1;
+    this->e2.TheObjects[i]=(((i+2)*(i+7)*(i+4))%43) +(i+1)*0.3;
   }
   rootDouble tempRoot;
   tempRoot.SetSizeExpandOnTopNoObjectInit(2);
@@ -723,8 +723,8 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Spin1Dim = new wxSpinCtrl(this,this->ID_Spin1Dim);
   this->Text1Output= new ::wxTextCtrl(this,::wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
   this->ListBox1WeylGroup= new ::wxComboBox(this, this->ID_ListBox1, wxT("B"), wxPoint(0, 0), wxDefaultSize, 0, 0, wxCB_DROPDOWN);
-  this->Text2e1 = new wxTextCtrl(this, wxID_ANY, wxT("(1,0,0)"));//, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-  this->Text3e2 = new wxTextCtrl(this, wxID_ANY, wxT("(0,1,0)"));
+  this->Text2e1 = new wxTextCtrl(this, wxID_ANY, wxT("(1,0,0)"), wxPoint(0,0), wxSize(200,25));
+  this->Text3e2 = new wxTextCtrl(this, wxID_ANY, wxT("(0,1,0)"), wxPoint(0,0), wxSize(200,25));
 //  this->Text4mutex = new wxTextCtrl(this, wxID_ANY);
   this->Static1E1 = new wxStaticText(this, wxID_ANY, wxT("Animation targets e1 | e2:"));
   this->Static2E2 = new wxStaticText(this, wxID_ANY, wxT("|"));
@@ -829,8 +829,8 @@ void* guiMainWindow::DoTheAnimation(void* ptr)
   MainWindow1->theGraphics.ModifyToOrthonormalNoShiftSecond(theGraphics.animationTargetE1, theGraphics.animationTargetE2);
   theGraphics.animationTargetE1.ComputeDebugString();
   theGraphics.animationTargetE2.ComputeDebugString();
-  MainWindow1->Text2e1->SetValue(ConvertToWxString(theGraphics.animationTargetE1.DebugString));
-  MainWindow1->Text3e2->SetValue(ConvertToWxString(theGraphics.animationTargetE2.DebugString));
+//  MainWindow1->Text2e1->SetValue(ConvertToWxString(theGraphics.animationTargetE1.DebugString));
+//  MainWindow1->Text3e2->SetValue(ConvertToWxString(theGraphics.animationTargetE2.DebugString));
   usleep(100000);
   MainWindow1->Layout();
   MainWindow1->Refresh();

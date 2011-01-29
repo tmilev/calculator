@@ -96,7 +96,6 @@ int main(int argc, char **argv)
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
 #endif
 
-
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
   inputStrings.SetSizeExpandOnTopNoObjectInit(3);
@@ -123,16 +122,14 @@ int main(int argc, char **argv)
 //  Rational tempRat=2;
 //  tempRat.RaiseToPower(20);
 //  tempRat.ElementToString(tempS);
-  civilizedInput="outerAuto";
-  //theParser.DefaultWeylRank=3;
-  //theParser.DefaultWeylLetter='B';
+  //civilizedInput="i(h_1)";
+  theParser.DefaultWeylRank=3;
+  theParser.DefaultWeylLetter='B';
   //SemisimpleSubalgebras theComputation;
   //theComputation.FindHCandidates('D', 4, theGlobalVariables);
-
-
-  theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
-  EigenVectorComputation theEigen;
-  //std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
+  //theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
+//  EigenVectorComputation theEigen;
+//  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
     theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
   PolynomialRationalCoeff::PreferredHashSize=10;
@@ -186,7 +183,6 @@ int main(int argc, char **argv)
   std::string fileNameLieBracketFullPathPNGEnding;
   fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
   fileNameLieBracketFullPathPNGEnding.append(".png");
-
   LatexCommands.size=0;
   if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
   { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";

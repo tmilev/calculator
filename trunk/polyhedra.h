@@ -6253,13 +6253,13 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
   void ElementToString(std::string& output, SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(output, owner, useHtml, useLatex, false, 0, 0);};
-  std::string ElementToStringNegativeRootSpacesFirst(SemisimpleLieAlgebra& owner);
+  std::string ElementToStringNegativeRootSpacesFirst(bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner);
   void ComputeDebugString(SemisimpleLieAlgebra& owner, bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, owner, useHtml, useLatex, false, 0, 0);  };
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   List<Rational> coeffsRootSpaces;
   root Hcomponent;
-  void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositive(int theIndex, const SemisimpleLieAlgebra& owner);
+  void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(int theIndex, const SemisimpleLieAlgebra& owner);
   void ElementToVectorRootSpacesFirstThenCartan(root& output);
   void ElementToVectorNegativeRootSpacesFirst(root& output);
   void AssingVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
@@ -6269,7 +6269,6 @@ public:
   void SetCoefficient(const root& indexingRoot, int theCoeff, const  SemisimpleLieAlgebra& owner);
   //range is the image of the vectors e_i
   bool IsEqualToZero()const;
-  void AssignGeneratorCoeffOne(int generatorIndex, const SemisimpleLieAlgebra& owner);
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);
@@ -6448,13 +6447,17 @@ public:
       return true;
     return false;
   };
-  int RootToIndexInUE(const root& input){ return this->RootIndexToGeneratorIndex(this->theWeyl.RootSystem.IndexOfObjectHash(input));};
-  int RootIndexToGeneratorIndex(int theIndex);
-  int RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex);
-  int IndexToRootIndex(int theRootIndex);
+  int CartanIndexToChevalleyGeneratorIndex(int theIndex){ return this->theWeyl.RootsOfBorel.size+theIndex;};
+  int RootToIndexInUE(const root& input){ return this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(this->theWeyl.RootSystem.IndexOfObjectHash(input));};
+  int DisplayIndexToRootIndex(int theIndex);
+  int RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(int theIndex)const;
+  int RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex)const;
+  //the below function returns a negative number if the chevalley generator is an element of the Cartan subalgebra
+  int ChevalleyGeneratorIndexToRootIndex(int theIndex)const;
+  int ChevalleyGeneratorIndexToElementCartanIndex(int theIndex){ return theIndex-this->theWeyl.RootsOfBorel.size;};
+  int ChevalleyGeneratorIndexToDisplayIndex(int theIndex)const{ return this->RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(this->ChevalleyGeneratorIndexToRootIndex(theIndex));};
   bool AreOrderedProperly(int leftIndex, int rightIndex);
-  std::string getLetterFromGeneratorIndex(int theIndex, bool useLatex);
-  //std::string getStringFromOppositeRoots(root& theRoot, bool useLatex);
+  std::string GetLetterFromGeneratorIndex(int theIndex, bool useLatex);
   void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
@@ -6506,12 +6509,10 @@ public:
   //Let rk:=Rank(Domain)
   //format of ImagesSimpleChevalleyGenerators: the first rk elements give the images of the Chevalley generators corresponding to simple positive roots
   //the second rk elements give the images of the Chevalley generators corresponding to simple negative roots
-  List<ElementSimpleLieAlgebra> ImagesSimpleChevalleyGenerators;
-  //format of ImagesAllChevalleyGenerators: the first #positive roots elements give the images of the Chevalley generators corresponding to the positive roots
-  //the second rk elements give the images of the basis elements of the Cartan
-  //the third #positive roots elements give the images of the Chevalley generators corresponding to simple negative roots
-  List<ElementSimpleLieAlgebra> ImagesAllChevalleyGenerators;
-  List<ElementSimpleLieAlgebra> theChevalleyGenerators;
+  List<ElementSimpleLieAlgebra> imagesSimpleChevalleyGenerators;
+  //format of ImagesAllChevalleyGenerators: the Generators are given in the same order as the one used in MonomialUniversalEnveloping
+  List<ElementSimpleLieAlgebra> imagesAllChevalleyGenerators;
+  List<ElementSimpleLieAlgebra> domainAllChevalleyGenerators;
   roots RestrictedRootSystem;
   std::string DebugString;
   std::string WriteAllUEMonomialsWithWeightWRTDomain
@@ -6565,11 +6566,12 @@ public:
   bool CommutingRightIndexAroundLeftIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
   bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex, MonomialUniversalEnveloping& output);
   void MakeConst(const PolynomialRationalCoeff& theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
-  //we assume the standard order for being simplified to be Descending.
+  //we assume the standard order for being simplified to be Ascending.
   //this way the positive roots will end up being in the end, which is very convenient for computing with Verma modules
   //format of the order of the generators:
-  // first come the negative roots, then the elements of the Cartan subalgebra, then the positive roots.
-  //The order of the roots is reverse to the order in which roots are kept in WeylGroup::RootSystem
+  // first come the negative roots, in increasing height, then the elements of the Cartan subalgebra, then the positive roots, in increasing height
+  //The order of the positive roots is the same as the order in which roots are kept in WeylGroup::RootSystem
+  // The order of the negative roots is reverse to the order in which they are kept in WeylGroup::RootSystem
   // with the "zero level roots" - i.e. the elements of the Cartan subalgebra - put in between.
   void Simplify(ElementUniversalEnveloping& output);
   void CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnveloping& output);
@@ -7771,9 +7773,11 @@ public:
 class EigenVectorComputation
 {
 public:
-  List<List<int> > theExponentShifts;
+  List<List<int> > theExponentShiftsTarget;
   PolynomialRationalCoeff coefficientInFrontOfMon;
+  Matrix<RationalFunction> theSystemPerTarget;
   Matrix<RationalFunction> theSystem;
+  List<List<int> > theExponentShifts;
   std::string ComputeAndReturnString(GlobalVariables& theGlobalVariables, Parser& theParser);
   //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots
   //variables correspond to the exponents: the rank-of-theOwner+1st variable corresponds to the
@@ -7781,7 +7785,8 @@ public:
   //The rank-of-theOwner+2nd variable corresponds to the exponent of the 2nd negative root (the root with index -2)
   //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
   void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
-  void DetermineEquationsFromResultLieBracket(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
+  void DetermineEquationsFromResultLieBracketEquationsPerTarget(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
+  void DetermineEquationsFromResultLieBracketEquationsPerVariable(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };
 

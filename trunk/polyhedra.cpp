@@ -17668,12 +17668,12 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
   this->OppositeRootSpaces.initFillInObject(numRoots+theDimension, -1);
   for (int i=0; i<numRoots; i++)
   { root& left= this->theWeyl.RootSystem.TheObjects[i];
-    int indexLeft=this->RootIndexToGeneratorIndex(i);
+    int indexLeft=this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(i);
     for (int j=0; j<numRoots; j++)
     { root& right= this->theWeyl.RootSystem.TheObjects[j];
-      int indexRight= this->RootIndexToGeneratorIndex(j);
+      int indexRight= this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(j);
       tempRoot=left+right;
-      int indexSum =this->RootIndexToGeneratorIndex(this->theWeyl.RootSystem.IndexOfObjectHash(tempRoot));
+      int indexSum =this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(this->theWeyl.RootSystem.IndexOfObjectHash(tempRoot));
       if (tempRoot.IsEqualToZero())
         this->OppositeRootSpaces.TheObjects[indexLeft]=indexRight;
       this->theLiebracketPairingIndices.elements[indexLeft][indexRight]= indexSum;
@@ -18135,7 +18135,7 @@ void ElementSimpleLieAlgebra::MultiplyByRational(SemisimpleLieAlgebra& owner, co
     this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].MultiplyBy(theNumber);
 }
 
-std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst(SemisimpleLieAlgebra& owner)
+std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst(bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner)
 { std::stringstream out;
   std::string tempS;
   if (this->NonZeroElements.CardinalitySelection==0 && this->Hcomponent.IsEqualToZero())
@@ -18145,14 +18145,34 @@ std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst(Semi
     int DisplayIndex=owner.RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(theIndex);
     if (!this->coeffsRootSpaces.TheObjects[theIndex].IsNegative()&& i!=0)
       out << "+";
-    out << this->coeffsRootSpaces.TheObjects[theIndex].ElementToString() << "g_{" << DisplayIndex << "}";
+    tempS=this->coeffsRootSpaces.TheObjects[theIndex].ElementToString();
+    if (tempS=="1")
+      tempS="";
+    if (tempS=="-1")
+      tempS="-";
+    out << tempS << "g_{" << DisplayIndex << "}";
   }
   if (this->Hcomponent.IsEqualToZero())
     return out.str();
-  tempS=this->Hcomponent.ElementToStringLetterFormat("\\alpha", true);
+  if (useCompactRootNotation && owner.theWeyl.RootSystem.ContainsObjectHash(this->Hcomponent))
+  { root tempRoot=this->Hcomponent;
+    if (tempRoot.IsNegativeOrZero())
+    { out << "-";
+      tempRoot.MinusRoot();
+    }
+    out << "h_{" << owner.RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(owner.theWeyl.RootSystem.IndexOfObjectHash(tempRoot)) << "}";
+    return out.str();
+  }
+  if (useRootNotation)
+    tempS=this->Hcomponent.ElementToStringLetterFormat("\\alpha", true);
+  else
+    tempS=this->Hcomponent.ElementToStringLetterFormat("h", true);
   if (tempS[0]!='-' && this->NonZeroElements.CardinalitySelection>0)
     out << "+";
-  out << tempS;
+  if (useRootNotation)
+    out << "h_{" << tempS << "}";
+  else
+    out << tempS;
   return out.str();
 }
 

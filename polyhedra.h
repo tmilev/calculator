@@ -202,6 +202,9 @@ class Controller
   MutexWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;
+  inline bool IsPausedWhileRunning()
+  { return this->flagIsPausedWhileRunning;
+  };
 public:
   inline void SafePoint()
   { this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
@@ -233,12 +236,10 @@ public:
   { this->flagIsRunning=false;
     this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
   };
-  inline bool IsRunning()
+  inline bool IsRunningUnsafeDeprecatedDontUse()
   { return this->flagIsRunning;
   };
-  inline bool IsPausedWhileRunning()
-  { return this->flagIsPausedWhileRunning;
-  };
+
   Controller()
   { this->flagIsRunning=false;
     this->flagIsPausedWhileRunning=false;
@@ -638,7 +639,8 @@ public:
   void init(int r, int c);
   void ReleaseMemory();
   bool IsEqualTo(MatrixElementaryLooseMemoryFit<Element>& right);
-  void Resize(int r, int c, bool PreserveValues);
+  void Resize(int r, int c, bool PreserveValues) {this->Resize(r, c, PreserveValues, 0);};
+  void Resize(int r, int c, bool PreserveValues, Element* TheRingZero);
   void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
   void MakeIdMatrix(int theDimension);
   inline void operator=(const MatrixElementaryLooseMemoryFit<Element>& other){this->Assign(other); };
@@ -688,7 +690,7 @@ void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
 }
 
 template <typename Element>
-inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool PreserveValues)
+inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool PreserveValues, Element* TheRingZero)
 { if (r<0)
     r=0;
   if (c<0)
@@ -696,8 +698,8 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool P
   if (r==this->NumRows && c== this->NumCols)
     return;
   if (r==0 || c==0)
-  { this->NumRows=0;
-    this->NumCols=0;
+  { this->NumRows=r;
+    this->NumCols=c;
     return;
   }
   Element** newElements=0;
@@ -717,10 +719,23 @@ ParallelComputing::GlobalPointerCounter+=newActualNumCols;
 #endif
     }
   }
+  int firstInvalidRow=MathRoutines::Minimum(this->NumRows, r);
+  int firstInvalidCol=MathRoutines::Minimum(this->NumCols, c);
   if (PreserveValues && newElements!=0)
-    for (int j=MathRoutines::Minimum(this->NumRows, r)-1; j>=0; j--)
-      for (int i=MathRoutines::Minimum(this->NumCols, c)-1; i>=0; i--)
+    for (int j=0; j<firstInvalidRow; j++)
+      for (int i=0; i<firstInvalidCol; i++)
         newElements[j][i]= this->elements[j][i];
+  if (TheRingZero!=0)
+  { if (!PreserveValues)
+    { firstInvalidRow=0;
+      firstInvalidCol=0;
+    }
+    for (int i=0; i<r; i++)
+    { int colStart= (i<firstInvalidRow) ? firstInvalidCol : 0;
+      for (int j=colStart; j<c; j++)
+        newElements[i][j]=*TheRingZero;
+    }
+  }
   if (newElements!=0)
   { this->ReleaseMemory();
     this->elements = newElements;
@@ -3300,7 +3315,7 @@ class Polynomials: public List<Polynomial<ElementOfCommutativeRingWithIdentity> 
   //The first row denotes the constant term in the substitution of the respective variable!
   //An element in the x-th row and y-th column
   //is defined as ElementOfCommutativeRingWithIdentity[x][y] !
-  void MakeLinearSubstitution(ElementOfCommutativeRingWithIdentity** coeffs, short NumStartVar, short NumTargetVar);
+  void MakeIdSubstitution(short numVars, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   void MakeExponentSubstitution(MatrixIntTightMemoryFit& theSub);
   void PrintPolys(std::string& output, ElementOfCommutativeRingWithIdentity& TheRingUnit, ElementOfCommutativeRingWithIdentity& TheRingZero);
   void MakeSubstitutionLastVariableToEndPoint(short numVars, Polynomial<ElementOfCommutativeRingWithIdentity>& EndPoint);
@@ -3391,7 +3406,7 @@ class intRoot :public List<int>
 {
 private:
 public:
-  void AssignRoot(root&r);
+  void AssignRoot(root& r);
   int HashFunction() const;
   void ElementToString(std::string& output);
   bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
@@ -3659,7 +3674,6 @@ public:
   void operator=(const PolynomialsRationalCoeff& right);
   bool operator==(const PolynomialsRationalCoeff& right);
   void ComputeB(PolynomialRationalCoeff& output, int cutOffIndex, int theDimension);
-  void MakeUsualParametricRoot(int theDimension);
   void MakeOneParameterSubFromDirection(root& direction);
   void MakeOneParameterSubFromDirectionInts(int x1, int x2, int x3, int x4, int x5);
   void MakeOneParameterSubFromDirectionIntsAndConstants(int x1, int x2, int x3, int x4, int x5, int c1, int c2, int c3, int c4, int c5);
@@ -3778,6 +3792,7 @@ public:
   };
   void Simplify();
   void operator+=(const RationalFunction& other){this->Add(other);};
+  void operator+=(int theConstant){RationalFunction tempRF; tempRF.MakeNVarConst(this->NumVariables, (Rational) theConstant); (*this)+=tempRF;};
   void operator*=(const RationalFunction& other){this->MultiplyBy(other);};
   void Invert(){PolynomialRationalCoeff tempP; tempP=this->Numerator; this->Numerator=this->Denominator; this->Denominator=tempP;};
   void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify((short)theNumVars); this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);};
@@ -4639,7 +4654,9 @@ template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output)
 { TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> tempOne;
   tempOne.MakeNVarConst(this->NumVars, ElementOfCommutativeRingWithIdentity::TheRingUnit);
-  MathRoutines::RaiseToPower(*this, d, tempOne);
+  if (&output!=this)
+    output=*this;
+  MathRoutines::RaiseToPower(output, d, tempOne);
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
@@ -4798,19 +4815,11 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::PrintPolys(std::string &
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeLinearSubstitution(ElementOfCommutativeRingWithIdentity** coeffs, short NumStartVar, short NumTargetVar)
-{ if (this->size!=NumStartVar)
-  {  this->KillAllElements();
-    this->initAndCreateNewObjects(NumStartVar);
-  }
+void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeIdSubstitution(short numVars, const ElementOfCommutativeRingWithIdentity& theRingUnit)
+{ this->SetSizeExpandOnTopNoObjectInit(numVars);
   for (int i=0; i<this->size; i++)
-  { Monomial<ElementOfCommutativeRingWithIdentity> tempM;
-    Polynomial<ElementOfCommutativeRingWithIdentity>* tempP=this->TheObjects[i]->ClearTheObjects();
-    tempP->MakeNVarConst(NumTargetVar, coeffs[0][i]);
-    for (int j=0; j<NumTargetVar; j++)
-    { tempM.MakeNVarFirstDegree(j, NumTargetVar, coeffs[i][j+1]);
-      tempP->AddMonomial(tempM);
-    }
+  { Polynomial<ElementOfCommutativeRingWithIdentity>& currentPoly=this->TheObjects[i];
+    currentPoly.MakeNVarDegOnePoly(numVars, i, theRingUnit);
   }
 }
 
@@ -7119,6 +7128,7 @@ class ParserNode
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
+  void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
   void EvaluateFunction(GlobalVariables& theGlobalVariables);
   bool AllChildrenAreOfDefinedNonErrorType();
   ParserNode();
@@ -7143,7 +7153,7 @@ public:
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
     tokenRoot, tokenFunction, tokenFunctionNoArgument
   };
-  enum functionList{functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos};
+  enum functionList{functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos, functionMod};
   List<int> TokenBuffer;
   List<int> ValueBuffer;
   List<int> TokenStack;
@@ -7773,11 +7783,12 @@ public:
 class EigenVectorComputation
 {
 public:
-  List<List<int> > theExponentShiftsTarget;
+  rootsCollection theExponentShiftsTargetPerSimpleGenerator;
+  roots theExponentShifts;
   PolynomialRationalCoeff coefficientInFrontOfMon;
-  Matrix<RationalFunction> theSystemPerTarget;
+//  List<Matrix<RationalFunction> > theSystemsPerGenerator;
   Matrix<RationalFunction> theSystem;
-  List<List<int> > theExponentShifts;
+//  List<List<int> > theExponentShifts;
   std::string ComputeAndReturnString(GlobalVariables& theGlobalVariables, Parser& theParser);
   //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots
   //variables correspond to the exponents: the rank-of-theOwner+1st variable corresponds to the
@@ -7786,7 +7797,6 @@ public:
   //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
   void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
   void DetermineEquationsFromResultLieBracketEquationsPerTarget(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
-  void DetermineEquationsFromResultLieBracketEquationsPerVariable(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };
 

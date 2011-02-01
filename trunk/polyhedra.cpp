@@ -12319,14 +12319,6 @@ void PolynomialsRationalCoeff::operator=(const PolynomialsRationalCoeff& right)
 { this->CopyFromBase(right);
 }
 
-void PolynomialsRationalCoeff::MakeUsualParametricRoot(int theDimension)
-{ PolynomialRationalCoeff tempP;
-  for (int i=0; i<theDimension; i++)
-  { tempP.MakeNVarDegOnePoly((short)theDimension, i, ROne);
-    this->AddObjectOnTop(tempP);
-  }
-}
-
 void PolynomialsRationalCoeff::Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget)
 { PolynomialRationalCoeff tempP;
   for (int i=0; i<this->size; i++)
@@ -13223,8 +13215,8 @@ void rootFKFTcomputation::MakeTheRootFKFTSum (  root& ChamberIndicator, partFrac
   Cone TheNilradicalCone;
   TheNilradicalCone.ComputeFromDirections(theNilradical, *this->TheGlobalVariables, 5);
   TheNilradicalCone.ComputeDebugString();
-  StartingRoot.MakeUsualParametricRoot(5);
-  theHighestWeights.TheWeylGroup->GenerateOrbitAlg(  ChamberIndicator, StartingRoot, TheChambersInTheGame, true, false, &TheNilradicalCone, true);
+  StartingRoot.MakeIdSubstitution(5, (Rational) 1);
+  theHighestWeights.TheWeylGroup->GenerateOrbitAlg(ChamberIndicator, StartingRoot, TheChambersInTheGame, true, false, &TheNilradicalCone, true);
   QuasiPolynomial tempQP1, Accum;
   Accum.Nullify(5);
   for (int i=0; i<TheChambersInTheGame.size; i++)

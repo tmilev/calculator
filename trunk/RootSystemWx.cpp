@@ -372,8 +372,8 @@ void drawCanvas::OnMouseWheel(wxMouseEvent& event)
 { // scroll in drop down list using mouse wheel
   if (MainWindow1==0)
     return;
- 	if (MainWindow1->theGraphics.Animating)
-      return;
+// 	if (MainWindow1->theGraphics.Animating)
+//      return;
   int rot = event.GetWheelRotation()/event.GetWheelDelta();
   MainWindow1->theGraphics.graphicsUnit+=rot*5;
   //MainWindow1->Text4mutex->SetValue(wxT("locked"));
@@ -780,7 +780,7 @@ guiMainWindow::~guiMainWindow()
 
 
 void guiMainWindow::onRePaint(wxPaintEvent& ev)
-{ wxPaintDC dc;
+{ wxPaintDC dc(this);
   this->Refresh();
 }
 
@@ -832,16 +832,21 @@ void* guiMainWindow::DoTheAnimation(void* ptr)
 //  MainWindow1->Text2e1->SetValue(ConvertToWxString(theGraphics.animationTargetE1.DebugString));
 //  MainWindow1->Text3e2->SetValue(ConvertToWxString(theGraphics.animationTargetE2.DebugString));
   usleep(100000);
-  MainWindow1->Layout();
-  MainWindow1->Refresh();
+//  MainWindow1->Layout();
+//  MainWindow1->Refresh();
+  MainWindow1->GetEventHandler()->AddPendingEvent(MainWindow1->paintEvent);
+//  MainWindow1->onRePaint(MainWindow1->paintEvent);
+//  MainWindow1->Unfreeze();
   usleep(100000);
   MainWindow1->theGraphics.CantModifyMe.SafePoint();
   //MainWindow1->Text4mutex->SetValue(wxT("unlocked"));
   int numRuns=100;
   for (int i=0; i<numRuns; i++)
   { usleep(100000);
-    if (i==1)
+    if (i<5)
+    { MainWindow1->Refresh();
       MainWindow1->Refresh();
+    }
     double a=((double) (i+1))/ ((double) numRuns);
     double b=1.0-a;
     theGraphics.e1= theGraphics.animationStartE1*b+theGraphics.animationTargetE1*a;
@@ -857,6 +862,7 @@ void* guiMainWindow::DoTheAnimation(void* ptr)
     tempOutput << "\na: " << a << " b: " << b << "\n" << "starting e1: " << startingE1.DebugString << "\nstarting e2: " << startingE2.DebugString;
     tempOutput << "\ntarget e1: " << theGraphics.animationTargetE1.DebugString << "\ntarget e2: " << theGraphics.animationTargetE2.DebugString;
     MainWindow1->theGraphics.DebugString.append(tempOutput.str());
+//    MainWindow1->GetEventHandler()->AddPendingEvent(MainWindow1->paintEvent);
     usleep(10000);
 //    MainWindow1->();
     MainWindow1->Refresh();

@@ -1554,7 +1554,7 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 }
 
 void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (inputData.theRootSubalgebras.controllerLProhibitingRelations.IsRunning())
+{ if (inputData.theRootSubalgebras.controllerLProhibitingRelations.IsRunningUnsafeDeprecatedDontUse())
     return;
   rootSubalgebras& theRootSAs= inputData.theRootSubalgebras;
   inputData.theRootSubalgebras.controllerLProhibitingRelations.InitComputation();
@@ -1893,7 +1893,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 }
 
 void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (inputData.thePartialFraction.theChambers.thePauseController.IsRunning())
+{ if (inputData.thePartialFraction.theChambers.thePauseController.IsRunningUnsafeDeprecatedDontUse())
     return;
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
@@ -3590,10 +3590,17 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="dim")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionWeylDimFormula);
+    return true;
   }
   if (input=="outerAuto")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
     this->ValueBuffer.AddObjectOnTop(Parser::functionOuterAutos);
+    return true;
+  }
+  if (input=="mod")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(Parser::functionMod);
+    return true;
   }
   return false;
 }
@@ -4166,8 +4173,25 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionSecretSauce: this->EvaluateSecretSauce(theGlobalVariables); break;
     case Parser::functionWeylDimFormula: this->EvaluateWeylDimFormula(theGlobalVariables); break;
     case Parser::functionOuterAutos: this->EvaluateOuterAutos(theGlobalVariables); break;
+    case Parser::functionMod: this->EvaluateModVermaRelations(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); break;
   }
+}
+
+void ParserNode::EvaluateModVermaRelations(GlobalVariables& theGlobalVariables)
+{ if (this->children.size!=1)
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
+  if (!theArgument.ConvertChildrenToType(this->typeUEelement) )
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  this->UEElement=theArgument.UEElement;
+  this->UEElement.Simplify();
+  this->UEElement.ModOutVermaRelations();
+  this->ExpressionType=this->typeUEelement;
 }
 
 void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
@@ -6394,22 +6418,8 @@ std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theG
     out << tempElt2.ElementToString(true);
     out << "\\end{eqnarray*}</div>";
     this->DetermineEquationsFromResultLieBracketEquationsPerTarget(theParser, theElt, tempElt2, out, theGlobalVariables);
-    this->DetermineEquationsFromResultLieBracketEquationsPerVariable(theParser, theElt, tempElt2, out, theGlobalVariables);
   }
-  out << "<br><div class=\"math\" scale=\"50\">\\left(\\begin{array}{";
-  for (int i=0; i<theSystemPerTarget.NumCols; i++)
-    out << "c";
-  out << "}";
-  for (int j=0; j<theSystemPerTarget.NumRows; j++)
-  { for (int i=0; i<theSystemPerTarget.NumCols; i++)
-    { RationalFunction& tempRF= theSystemPerTarget.elements[j][i];
-      out << tempRF.ElementToString(true, false);
-      if (i!=theSystemPerTarget.NumCols-1)
-        out << "&";
-    }
-    out << "\\\\";
-  }
-  out << "\\end{array}\\right)</div>";
+  out << "<div class=\"math\" scale=\"50\">" << this->theSystem.ElementToString(false, true) << "</div>";
   return out.str();
 }
 
@@ -6422,64 +6432,62 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialR
 void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerTarget(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
 { int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
-  PolynomialRationalCoeff tempP;
+  int numCoeffVars=theRangeRank+numRangePosRoots;
+  PolynomialRationalCoeff theDiffPoly;
   MonomialUniversalEnveloping& originalMon= theStartingGeneric.TheObjects[0];
-  int oldSize=this->theExponentShiftsTarget.size;
-  this->theExponentShiftsTarget.SetSizeExpandOnTopNoObjectInit(oldSize+theElt.size);
-  this->theExponentShiftsTarget.SetSizeExpandOnTopNoObjectInit(theElt.size);
-  Matrix<RationalFunction> matNewEquationLine;
-  matNewEquationLine.init(1, theElt.size);
+  this->theExponentShiftsTargetPerSimpleGenerator.SetSizeExpandOnTopNoObjectInit(this->theExponentShiftsTargetPerSimpleGenerator.size+1);
+  roots& currentTargetShifts =*this->theExponentShiftsTargetPerSimpleGenerator.LastObject();
+  currentTargetShifts.SetSizeExpandOnTopNoObjectInit(theElt.size);
   for (int i=0; i<theElt.size; i++)
   { MonomialUniversalEnveloping& theMon= theElt.TheObjects[i];
     out << "<br>\nDifference in monomial index " << i << ": ";
-    List<int>& currentShift= this->theExponentShiftsTarget.TheObjects[oldSize+i];
-    currentShift.SetSizeExpandOnTopNoObjectInit(numRangePosRoots);
+    root& currentShift= currentTargetShifts.TheObjects[i];
+    currentShift.MakeZero(numRangePosRoots);
     for (int j=0; j<numRangePosRoots; j++)
-    { tempP= originalMon.Powers.TheObjects[j]- theMon.Powers.TheObjects[j];
-      out << tempP.ElementToString() << " ";
-      if (tempP.size>1)
+    { theDiffPoly = originalMon.Powers.TheObjects[j] - theMon.Powers.TheObjects[j];
+      out << theDiffPoly.ElementToString() << " ";
+      if (theDiffPoly.size>1)
         currentShift.TheObjects[j]=-10000;
-      if (tempP.size==0)
+      if (theDiffPoly.size==0)
         currentShift.TheObjects[j]=0;
-      if (tempP.size==1)
-        currentShift.TheObjects[j]=-tempP.TheObjects[0].Coefficient.NumShort;
+      if (theDiffPoly.size==1)
+        currentShift.TheObjects[j]=-theDiffPoly.TheObjects[0].Coefficient;
     }
-    RationalFunction& tempRF= matNewEquationLine.elements[0][i];
-    tempRF.operator=(theElt.TheObjects[i].Coefficient);
   }
+  root tempRoot;
   RationalFunction ZeroRF;
   ZeroRF.MakeNVarConst(numRangePosRoots+theRangeRank, (Rational) 0);
-  this->theSystemPerTarget.DirectSumWith(matNewEquationLine, ZeroRF);
-}
-
-void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerVariable(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
-{ this->theExponentShifts.MakeActualSizeAtLeastExpandOnTop(this->theExponentShifts.size+theElt.size);
-  int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
-  int numCoefficientVariables=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows + numRangePosRoots;
-  List<int> currentShift;
-  currentShift.SetSizeExpandOnTopNoObjectInit(numRangePosRoots);
-  this->theSystem.Resize(this->theSystem.NumRows+1, this->theSystem.NumCols, true);
+  tempRoot.MakeZero(numRangePosRoots);
+  if(this->theExponentShifts.AddOnTopNoRepetition(tempRoot))
+    this->theSystem.Resize(this->theSystem.NumRows, this->theSystem.NumCols+1, true, &ZeroRF);
+  int indexMainMon=this->theExponentShifts.IndexOfObject(tempRoot);
+  PolynomialsRationalCoeff theSub;
+  PolynomialRationalCoeff tempP;
   for (int i=0; i<theElt.size; i++)
-  { MonomialUniversalEnveloping& theMon= theElt.TheObjects[i];
-    for (int j=0; j<numRangePosRoots; j++)
-    { tempP= originalMon.Powers.TheObjects[j]- theMon.Powers.TheObjects[j];
-      out << tempP.ElementToString() << " ";
-      if (tempP.size>1)
-        currentShift.TheObjects[j]=-10000;
-      if (tempP.size==0)
-        currentShift.TheObjects[j]=0;
-      if (tempP.size==1)
-        currentShift.TheObjects[j]=-tempP.TheObjects[0].Coefficient.NumShort;
-    }
-    int theVarIndex=this->theExponentShifts.IndexOfObject(currentShift);
-    if (theVarIndex<0)
-    { theVarIndex= this->theSystem.NumCols;
-      this->theSystem.Resize(this->theSystem.NumRows, this->theSystem.NumCols+1, true);
-      for (int j=0; j<this->theSystem.NumRows; j++)
-        this->theSystem.elements[j][this->theSystem.NumCols-1].Nullify(numCoefficientVariables);
-    }
+  { int indexCurrentRow=this->theSystem.NumRows;
+    this->theSystem.Resize(this->theSystem.NumRows+1, this->theSystem.NumCols, true, &ZeroRF);
+    this->theSystem.elements[indexCurrentRow][indexMainMon]=theElt.TheObjects[i].Coefficient;
+    for (int j=0; j<theElt.size; j++)
+      if (i!=j)
+      { theSub.MakeIdSubstitution(numCoeffVars, (Rational) 1);
+        tempRoot= currentTargetShifts.TheObjects[i]-currentTargetShifts.TheObjects[j];
+        for (int k=0; k<tempRoot.size; k++)
+          theSub.TheObjects[k+theRangeRank].AddConstant(tempRoot.TheObjects[k]);
+        int theVarIndex = this->theExponentShifts.IndexOfObject(tempRoot);
+        if (theVarIndex<0)
+        { theVarIndex=this->theExponentShifts.size;
+          this->theExponentShifts.AddObjectOnTop(tempRoot);
+          this->theSystem.Resize(this->theSystem.NumRows, this->theExponentShifts.size, true, &ZeroRF);
+          out <<  "<br>Shift of monomial in play: " << tempRoot.ElementToString();
+        }
+        tempP=theElt.TheObjects[j].Coefficient;
+        theSub.ComputeDebugString();
+        tempP.ComputeDebugString();
+        tempP.Substitution(theSub, numCoeffVars);
+        tempP.ComputeDebugString();
+        this->theSystem.elements[indexCurrentRow][theVarIndex]=tempP;
+      }
   }
-
 }
 
 void EigenVectorComputation::MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& owner)
@@ -6569,7 +6577,7 @@ void  SemisimpleSubalgebras::FindHCandidatesWithOneExtraHContaining(roots& inpuT
         //this->th
       }
       std::stringstream out;
-      out <<  "index lowest non explored: " << this->indexLowestUnexplored+1 << " Total number found: " << this->theHcandidates.size;
+      out << "index lowest non explored: " << this->indexLowestUnexplored+1 << " Total number found: " << this->theHcandidates.size;
       theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
       theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
       theGlobalVariables.MakeReport();

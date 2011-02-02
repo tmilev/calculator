@@ -3148,7 +3148,7 @@ public:
   bool operator>(const Monomial<ElementOfCommutativeRingWithIdentity>& other)const
   { if (this->operator==(other))
       return false;
-    return this->IsGEQ(other);
+    return this->IsGEQLexicographicLastVariableStrongest(other);
   };
   bool IsDivisibleBy(const Monomial<ElementOfCommutativeRingWithIdentity>& other)const
   { for (int i=0; i<this->NumVariables; i++)
@@ -3170,7 +3170,14 @@ public:
   void MakeMonomialOneLetter(short NumVars, int LetterIndex, short Power, const ElementOfCommutativeRingWithIdentity& Coeff);
   void IncreaseNumVariables(short increase);
   bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
-  bool IsGEQ(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
+  bool IsGEQLexicographicLastVariableStrongest(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
+  bool IsGEQTotalDegThenLexicographic(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const
+  { if (this->TotalDegree()>m.TotalDegree())
+      return true;
+    if (this->TotalDegree()<m.TotalDegree())
+      return false;
+    return this->IsGEQLexicographicLastVariableStrongest(m);
+  };
   bool IsEqualToZero() const;
   bool IsPositive();
   void DecreaseNumVariables(short increment);
@@ -3294,7 +3301,8 @@ public:
   void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
   int TotalDegree();
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
-  int GetIndexMaxMonomial();
+  int GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  int GetIndexMaxMonomialTotalDegThenLexicographic();
   void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
   int FindMaxPowerOfVariableIndex(int VariableIndex);
   //has to be rewritten please don't use!
@@ -3959,7 +3967,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQ(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQLexicographicLastVariableStrongest(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const
 { assert(this->NumVariables==m.NumVariables);
   for (int i=this->NumVariables-1; i>=0; i--)
   { if (this->degrees[i]>m.degrees[i])
@@ -4512,13 +4520,25 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::TimesConstant(const Eleme
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-int Polynomial<ElementOfCommutativeRingWithIdentity>::GetIndexMaxMonomial()
+int Polynomial<ElementOfCommutativeRingWithIdentity>::GetIndexMaxMonomialLexicographicLastVariableStrongest()
 { if (this->size==0)
     return -1;
   int result;
   result = 0;
   for (int i=1; i<this->size; i++)
-    if (this->TheObjects[i].IsGEQ(this->TheObjects[result]))
+    if (this->TheObjects[i].IsGEQLexicographicLastVariableStrongest(this->TheObjects[result]))
+      result=i;
+  return result;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+int Polynomial<ElementOfCommutativeRingWithIdentity>::GetIndexMaxMonomialTotalDegThenLexicographic()
+{ if (this->size==0)
+    return -1;
+  int result;
+  result = 0;
+  for (int i=1; i<this->size; i++)
+    if (this->TheObjects[i].IsGEQTotalDegThenLexicographic(this->TheObjects[result]))
       result=i;
   return result;
 }
@@ -4548,8 +4568,8 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<Eleme
   tempInput.Assign(inputDivisor);
   outputRemainder.ScaleToPositiveMonomials(scaleRemainder);
   tempInput.ScaleToPositiveMonomials(scaleInput);
-  int remainderMaxMonomial=outputRemainder.GetIndexMaxMonomial();
-  int inputMaxMonomial= tempInput.GetIndexMaxMonomial();
+  int remainderMaxMonomial=outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  int inputMaxMonomial= tempInput.GetIndexMaxMonomialLexicographicLastVariableStrongest();
   outputQuotient.Nullify(this->NumVars);
   if (remainderMaxMonomial==-1)
     return;
@@ -4564,7 +4584,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<Eleme
   }
   assert(remainderMaxMonomial<outputRemainder.size);
   assert(inputMaxMonomial<tempInput.size);
-  while (outputRemainder.TheObjects[remainderMaxMonomial].IsGEQ(tempInput.TheObjects[inputMaxMonomial]))
+  while (outputRemainder.TheObjects[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput.TheObjects[inputMaxMonomial]))
   { assert(remainderMaxMonomial<outputRemainder.size);
     outputRemainder.TheObjects[remainderMaxMonomial].DivideBy(tempInput.TheObjects[inputMaxMonomial], tempMon);
     if (!tempMon.IsPositive())
@@ -4576,7 +4596,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<Eleme
     tempP.MultiplyByMonomial(tempMon);
     tempP.TimesConstant(ElementOfCommutativeRingWithIdentity::TheRingMUnit);
     outputRemainder.AddPolynomial(tempP);
-    remainderMaxMonomial= outputRemainder.GetIndexMaxMonomial();
+    remainderMaxMonomial= outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
     if (remainderMaxMonomial==-1)
       break;
     if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -5187,7 +5207,7 @@ public:
   //plus an extra row for the constant terms of the linear expressions and
   //columns for each of the substituted variables.
   //in the substitution x_1\mapsto x_1+2x_2+4x_3+3
-  //                    x_2\mapsto x_1-x_2-2x_3+1
+  //                             x_2\mapsto x_1-x_2-2x_3+1
   // QPSub should look like (2 columns, 4 rows):
   // 1   1
   // 2  -1
@@ -6144,9 +6164,7 @@ public:
   void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
   void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
   void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
-  void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
-  { this->ElementToString(this->DebugString, 0, useLatex, useHtml, includeKEpsCoords, htmlPathPhysical, htmlPathServer, theGlobalVariables);
-  };
+  void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, 0, useLatex, useHtml, includeKEpsCoords, htmlPathPhysical, htmlPathServer, theGlobalVariables);};
   void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
   void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void initForNilradicalGeneration()
@@ -6524,9 +6542,7 @@ public:
   List<ElementSimpleLieAlgebra> domainAllChevalleyGenerators;
   roots RestrictedRootSystem;
   std::string DebugString;
-  std::string WriteAllUEMonomialsWithWeightWRTDomain
-  (List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables)
-  ;
+  std::string WriteAllUEMonomialsWithWeightWRTDomain(List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables) {this->ElementToString(output, false, theGlobalVariables);};
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
@@ -7678,7 +7694,7 @@ public:
   inline void MakeReport()
   { if (this->FeedDataToIndicatorWindowDefault!=0)
       this->FeedDataToIndicatorWindowDefault(this->theIndicatorVariables);
-  }
+  };
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -7788,6 +7804,7 @@ public:
   PolynomialRationalCoeff coefficientInFrontOfMon;
 //  List<Matrix<RationalFunction> > theSystemsPerGenerator;
   Matrix<RationalFunction> theSystem;
+  List<ElementWeylAlgebra> theOperators;
 //  List<List<int> > theExponentShifts;
   std::string ComputeAndReturnString(GlobalVariables& theGlobalVariables, Parser& theParser);
   //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots
@@ -7796,6 +7813,8 @@ public:
   //The rank-of-theOwner+2nd variable corresponds to the exponent of the 2nd negative root (the root with index -2)
   //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
   void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
+  void GetDiffOperatorFromShiftAndCoefficient(PolynomialRationalCoeff& theCoeff, root& theShift, ElementWeylAlgebra& output);
+  void MakeGenericMonomialBranchingCandidate(HomomorphismSemisimpleLieAlgebra& theHmm, ElementUniversalEnveloping& theElt, GlobalVariables& theGlobalVariables);
   void DetermineEquationsFromResultLieBracketEquationsPerTarget(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };

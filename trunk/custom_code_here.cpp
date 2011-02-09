@@ -1866,71 +1866,208 @@ void EigenVectorComputation::GetDiffOperatorFromShiftAndCoefficient
 
 void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSemisimpleLieAlgebra& theHmm, GlobalVariables& theGlobalVariables)
 { this->owner.Assign(theHmm.theDomain);
-//  out << this->owner.ElementToStringNegativeRootSpacesFirst(false, true, false, theGlobalVariables);
   int theDomainRank=this->owner.theWeyl.CartanSymmetric.NumRows;
   int numPosRootsDomain=this->owner.theWeyl.RootsOfBorel.size;
   int numGeneratorsDomain= theDomainRank+numPosRootsDomain*2;
   int numGeneratorsRange= theHmm.theRange.theWeyl.CartanSymmetric.NumRows+ theHmm.theRange.theWeyl.RootsOfBorel.size*2;
-//  List<ElementSimpleLieAlgebra> theImages;
-  roots theAlgebra;
-  this->basisNegativeRootSpacesFirstThenCartanThenPositiveRootSpaceS.SetSizeExpandOnTopNoObjectInit(numGeneratorsDomain);
-  this->actionsNegativeRootSpacesCartanPositiveRootspaces.SetSizeExpandOnTopNoObjectInit(numGeneratorsDomain);
-  int dimQuotient = -numGeneratorsDomain + numGeneratorsRange;
-  root tempRoot;
-  for (int i=0; i<numGeneratorsDomain; i++)
-  { ElementSimpleLieAlgebra& current=this->basisNegativeRootSpacesFirstThenCartanThenPositiveRootSpaceS.TheObjects[i];
-    current.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, this->owner);
-    out << "<br>" << current.ElementToStringNegativeRootSpacesFirst(false, false, this->owner);
-    MatrixLargeRational& currentMat=this->actionsNegativeRootSpacesCartanPositiveRootspaces.TheObjects[i];
-    currentMat.init(dimQuotient, dimQuotient);
-    theHmm.imagesAllChevalleyGenerators.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(tempRoot);
-    theAlgebra.AddObjectOnTop(tempRoot);
+  List<ElementSimpleLieAlgebra> posGenerators, negGenerators, allSimpleGenerators;
+  posGenerators.SetSizeExpandOnTopNoObjectInit(theDomainRank);
+  negGenerators.SetSizeExpandOnTopNoObjectInit(theDomainRank);
+  allSimpleGenerators.SetSizeExpandOnTopNoObjectInit(theDomainRank*2);
+  for (int i=0; i<theDomainRank; i++)
+  { posGenerators.TheObjects[i] =theHmm.imagesAllChevalleyGenerators.TheObjects[numPosRootsDomain+theDomainRank+i];
+    negGenerators.TheObjects[i] =theHmm.imagesAllChevalleyGenerators.TheObjects[numPosRootsDomain-1-i];
+    allSimpleGenerators.TheObjects[i]=posGenerators.TheObjects[i];
+    allSimpleGenerators.TheObjects[i+theDomainRank]=negGenerators.TheObjects[i];
   }
-  roots basisAlgebraFirstThenModule;
-  basisAlgebraFirstThenModule=theAlgebra;
-  List<ElementSimpleLieAlgebra> rangeGenerators;
-  rangeGenerators.SetSizeExpandOnTopNoObjectInit(numGeneratorsRange);
+  List<MatrixLargeRational> negGeneratorsMatForm, posGeneratorsMatForm, allSimpleGeneratorsMatForm;
+  this->ConvertElementsToAdMatrixFormNegativeRootSpacesFirst(negGenerators, theHmm.theRange, negGeneratorsMatForm);
+  this->ConvertElementsToAdMatrixFormNegativeRootSpacesFirst(posGenerators, theHmm.theRange, posGeneratorsMatForm);
+  this->ConvertElementsToAdMatrixFormNegativeRootSpacesFirst(allSimpleGenerators, theHmm.theRange, allSimpleGeneratorsMatForm);
+  rootsCollection theModules;
+  roots newlyFoundStartingVectors, BasisAllFoundElements, BasisNewlyFoundElements;
+  root currentElementRootForm, oneRootFromDomainAlgebra;
+  ElementSimpleLieAlgebra currentElt;
+  int IndexFirstModuleNotEqualToDomain=-1;
+  theHmm.imagesAllChevalleyGenerators.TheObjects[0].ElementToVectorNegativeRootSpacesFirst(oneRootFromDomainAlgebra);
+  this->moduleElementsEmbedded.SetSizeExpandOnTopNoObjectInit(numGeneratorsDomain);
   for (int i=0; i<numGeneratorsRange; i++)
-  { ElementSimpleLieAlgebra& currentElt=rangeGenerators.TheObjects[i];
-    currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, theHmm.theRange);
-    currentElt.ElementToVectorRootSpacesFirstThenCartan(tempRoot);
-    basisAlgebraFirstThenModule.AddObjectOnTop(tempRoot);
-    if (basisAlgebraFirstThenModule.GetRankOfSpanOfElements(theGlobalVariables)<basisAlgebraFirstThenModule.size)
-      basisAlgebraFirstThenModule.PopLastObject();
+  { currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, theHmm.theRange);
+    currentElt.ElementToVectorNegativeRootSpacesFirst(currentElementRootForm);
+    if (!BasisAllFoundElements.LinSpanContainsRoot(currentElementRootForm, theGlobalVariables))
+    { this->ExtractHighestWeightVectorsFromVector(currentElementRootForm, newlyFoundStartingVectors, posGeneratorsMatForm, negGeneratorsMatForm);
+      for (int j=0; j<newlyFoundStartingVectors.size; j++)
+        if (!BasisAllFoundElements.LinSpanContainsRoot(newlyFoundStartingVectors.TheObjects[j], theGlobalVariables))
+        { currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(newlyFoundStartingVectors.TheObjects[j], theHmm.theRange);
+          out << "<br><br> starting vector: " << currentElt.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange);
+          this->GenerateSubmoduleFromRootNegativeRootSpacesFirst(newlyFoundStartingVectors.TheObjects[j], BasisNewlyFoundElements, allSimpleGeneratorsMatForm, theGlobalVariables);
+          theModules.AddObjectOnTop(BasisNewlyFoundElements);
+          BasisAllFoundElements.AddListOnTop(BasisNewlyFoundElements);
+          out << "<br>basis of generated module: ";
+          for (int k=0; k<BasisNewlyFoundElements.size; k++)
+          { currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(BasisNewlyFoundElements.TheObjects[k], theHmm.theRange);
+            out << "<br>" << currentElt.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange);
+          }
+          if (IndexFirstModuleNotEqualToDomain==-1)
+            if (!theModules.LastObject()->LinSpanContainsRoot(oneRootFromDomainAlgebra, theGlobalVariables))
+            { IndexFirstModuleNotEqualToDomain=theModules.size-1;
+              for (int k=0; k<BasisNewlyFoundElements.size; k++)
+                this->moduleElementsEmbedded.TheObjects[k].AssignVectorNegRootSpacesCartanPosRootSpaces(BasisNewlyFoundElements.TheObjects[k], theHmm.theRange);
+            }
+        }
+    }
+    if (BasisAllFoundElements.size==numGeneratorsRange)
+      break;
   }
-  out << basisAlgebraFirstThenModule.ElementToString();
-  List<ElementSimpleLieAlgebra> theModuleRepresentatives;
-  theModuleRepresentatives.SetSizeExpandOnTopNoObjectInit(dimQuotient);
-  for (int i=theAlgebra.size; i<numGeneratorsRange; i++)
-  { ElementSimpleLieAlgebra& current= theModuleRepresentatives.TheObjects[i-theAlgebra.size];
-    current.AssingVectorRootSpacesFirstThenCartan(basisAlgebraFirstThenModule.TheObjects[i], theHmm.theRange);
-    out << "<br>" << current.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange);
-  }
-  root tempRoot2;
+  roots theAlgebra;
+  roots& theModule= theModules.TheObjects[IndexFirstModuleNotEqualToDomain];
+  this->actionsNegativeRootSpacesCartanPositiveRootspaces.SetSizeExpandOnTopNoObjectInit(numGeneratorsDomain);
   ElementSimpleLieAlgebra tempElt;
   for (int j=0; j<numGeneratorsDomain; j++)
-    for (int i=0; i<theModuleRepresentatives.size; i++)
-    { out << "<br>[" << theHmm.imagesAllChevalleyGenerators.TheObjects[j].ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange);
-      out << "," << theModuleRepresentatives.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange) << "]";
-      theHmm.theRange.LieBracket(theHmm.imagesAllChevalleyGenerators.TheObjects[j], theModuleRepresentatives.TheObjects[i], tempElt);
-      out << "= " << tempElt.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange);
-      tempElt.ElementToVectorRootSpacesFirstThenCartan(tempRoot);
-      tempRoot.GetCoordsInBasis(basisAlgebraFirstThenModule, tempRoot2, theGlobalVariables);
-      MatrixLargeRational& currentMat=this->actionsNegativeRootSpacesCartanPositiveRootspaces.TheObjects[j];
-      for (int k=0; k<theModuleRepresentatives.size; k++)
-      { currentMat.elements[k][i]=tempRoot2.TheObjects[k+numGeneratorsDomain];
+  { MatrixLargeRational& theMat=this->actionsNegativeRootSpacesCartanPositiveRootspaces.TheObjects[j];
+    ElementSimpleLieAlgebra& currentGenerator=theHmm.imagesAllChevalleyGenerators.TheObjects[j];
+    this->ComputeAdMatrixFromModule(currentGenerator, theModule, theHmm.theRange, theMat, theGlobalVariables);
+    out << "<br> <div class=\"math\" scale=\"50\">" << currentGenerator.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange) << "\\to" << theMat.ElementToString(false, true) <<"</div>";
+  }
+}
+
+void SSalgebraModule::ComputeAdMatrixFromModule
+  (ElementSimpleLieAlgebra& theElt, roots& theModule, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output,
+   GlobalVariables& theGlobalVariables)
+{ ElementSimpleLieAlgebra tempElt1, tempElt2;
+  root tempRoot1, tempRoot2;
+  output.init(theModule.size, theModule.size);
+  for (int i=0; i<theModule.size; i++)
+  { tempElt1.AssignVectorNegRootSpacesCartanPosRootSpaces(theModule.TheObjects[i], ambientLieAlgebra);
+    ambientLieAlgebra.LieBracket(theElt, tempElt1, tempElt2);
+    tempElt2.ElementToVectorNegativeRootSpacesFirst(tempRoot1);
+    assert(theModule.LinSpanContainsRoot(tempRoot1, theGlobalVariables));
+    tempRoot1.GetCoordsInBasis(theModule, tempRoot2, theGlobalVariables);
+    for (int j=0; j<theModule.size; j++)
+      output.elements[j][i]=tempRoot2.TheObjects[j];
+  }
+}
+
+void SSalgebraModule::GenerateSubmoduleFromRootNegativeRootSpacesFirst
+  (root& input, roots& output, List<MatrixLargeRational>& allSimpleGenerators, GlobalVariables& theGlobalVariables)
+{ output.size=0;
+  output.AddObjectOnTop(input);
+  root tempRoot;
+  for (int lowestNonExplored=0; lowestNonExplored<output.size; lowestNonExplored++)
+    for (int i=0; i<allSimpleGenerators.size; i++)
+    { allSimpleGenerators.TheObjects[i].ActOnAroot(output.TheObjects[lowestNonExplored], tempRoot);
+      output.AddObjectOnTop(tempRoot);
+      if (output.GetRankOfSpanOfElements(theGlobalVariables)<output.size)
+        output.PopLastObject();
+    }
+}
+
+void SSalgebraModule::ExtractHighestWeightVectorsFromVector
+  (root& input, roots& outputVectors, List<MatrixLargeRational>& simplePosGenerators, List<MatrixLargeRational>& simpleNegGenerators)
+{ //Index ordering of sipleNegGenerators:
+  //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
+  //simpleNegGenerators.TheObjects[i]
+  outputVectors.size=0;
+  root remainderRoot=input;
+  root componentRoot;
+  root tempRoot;
+  Rational theCoeff;
+  List<int> GeneratorSequence;
+  List<int> GeneratorPowers;
+  while(!remainderRoot.IsEqualToZero())
+  { this->ClimbUpFromVector(remainderRoot, tempRoot, simplePosGenerators, GeneratorSequence, GeneratorPowers);
+    this->ClimbDownFromVectorAccordingToSequence(tempRoot, componentRoot, theCoeff, simplePosGenerators, simpleNegGenerators, GeneratorSequence, GeneratorPowers);
+    assert(!theCoeff.IsEqualToZero());
+    outputVectors.AddObjectOnTop(componentRoot/theCoeff);
+    remainderRoot-=*outputVectors.LastObject();
+  }
+}
+
+void SSalgebraModule::ClimbDownFromVectorAccordingToSequence
+  (root& input, root& output, Rational& outputCoeff, List<MatrixLargeRational>& simplePosGenerators, List<MatrixLargeRational>& SimpleNegGenerators,
+   List<int>& inputGeneratorSequence, List<int>& inputGeneratorPowers)
+{ assert(&input!=&output);
+  output=input;
+  root tempRoot;
+  outputCoeff.MakeOne();
+  Rational tempRat;
+  for (int i=inputGeneratorSequence.size-1; i>=0; i--)
+  { MatrixLargeRational& currentPosGen= simplePosGenerators.TheObjects[inputGeneratorSequence.TheObjects[i]];
+    MatrixLargeRational& currentNegGen=SimpleNegGenerators.TheObjects[inputGeneratorSequence.TheObjects[i]];
+    this->ClimbDownFromHighestWeightAlongSl2String(output, tempRoot, tempRat, currentPosGen, currentNegGen, inputGeneratorPowers.TheObjects[i]);
+    outputCoeff.MultiplyBy(tempRat);
+    output=tempRoot;
+  }
+}
+
+void SSalgebraModule::ClimbDownFromHighestWeightAlongSl2String
+  (root& input, root& output, Rational& outputCoeff, MatrixLargeRational& posGenerator, MatrixLargeRational& negGenerator, int generatorPower)
+{ assert(&input!=&output);
+  Rational currentWeight;
+  negGenerator.ActOnAroot(input, output);
+  posGenerator.ActOnAroot(output);
+  input.IsProportionalTo(output, currentWeight);
+  Rational RaiseCoeff;
+  RaiseCoeff.MakeZero();
+  outputCoeff.MakeOne();
+  output=input;
+  for (int i=0; i<generatorPower; i++)
+  { RaiseCoeff+=currentWeight;
+    currentWeight-=2;
+    outputCoeff*=RaiseCoeff;
+    negGenerator.ActOnAroot(output);
+  }
+}
+
+void SSalgebraModule::ClimbUpFromVector
+  (root& input, root& outputLastNonZero, List<MatrixLargeRational>& SimplePositiveGenerators, List<int>& outputGeneratorSequence, List<int>& outputGeneratorPowers)
+{ root tempRoot;
+  assert(&input!=&outputLastNonZero);
+  outputLastNonZero=input;
+  outputGeneratorPowers.size=0;
+  outputGeneratorSequence.size=0;
+  bool found=true;
+  while (found)
+  { found=false;
+    for (int i=0; i<SimplePositiveGenerators.size; i++)
+    { MatrixLargeRational& currentMat=SimplePositiveGenerators.TheObjects[i];
+      int counter=0;
+      for(currentMat.ActOnAroot(outputLastNonZero, tempRoot); !tempRoot.IsEqualToZero(); currentMat.ActOnAroot(tempRoot))
+      { counter++;
+        found=true;
+        outputLastNonZero=tempRoot;
+//        std::cout << "<br>" << outputLastNonZero.ElementToString();
+//        std::cout.flush();
+      }
+      if (found)
+      { outputGeneratorSequence.AddObjectOnTop(i);
+        outputGeneratorPowers.AddObjectOnTop(counter);
       }
     }
-  for (int j=0; j<numGeneratorsDomain; j++)
-    out << "<br><div class=\"math\", scale=\"50\">" << this->actionsNegativeRootSpacesCartanPositiveRootspaces.TheObjects[j].ElementToString(false, true) << "</div>";
-  PolynomialRationalCoeff tempP="x_7^2+x_6^3";
-  out << "<br><br>" << tempP.ElementToString() << " num vars: " << tempP.NumVars;
-  PolynomialOverModule tempP2, tempP3;
-  tempP2.PolynomialRationalCoeff::Assign(tempP);
-  tempP2.owner=this;
-  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(0, this->owner);
-  this->ActOnPolynomialOverModule(tempElt, tempP2, tempP3);
-  out << "<br><br>" << tempP3.ElementToString();
+  }
+}
+
+void SSalgebraModule::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
+  (const List<ElementSimpleLieAlgebra>& input, const SemisimpleLieAlgebra& ambientLieAlgebra, List<MatrixLargeRational>& output)
+{ output.SetSizeExpandOnTopNoObjectInit(input.size);
+  for (int i=0; i<input.size; i++)
+    this->ConvertElementsToAdMatrixFormNegativeRootSpacesFirst(input.TheObjects[i], ambientLieAlgebra, output.TheObjects[i]);
+}
+
+void SSalgebraModule::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
+  (const ElementSimpleLieAlgebra& input, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output)
+{ ElementSimpleLieAlgebra tempElt1, tempElt2;
+  int numGenerators=ambientLieAlgebra.GetNumGenerators();
+  output.init(numGenerators, numGenerators);
+  root tempRoot;
+  for (int i=0; i<numGenerators; i++)
+  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i,ambientLieAlgebra);
+    ambientLieAlgebra.LieBracket(input, tempElt1, tempElt2);
+    tempElt2.ElementToVectorNegativeRootSpacesFirst(tempRoot);
+    for (int j=0; j<numGenerators; j++)
+      output.elements[j][i]=tempRoot.TheObjects[j];
+  }
+//  std::cout << "<br><div class=\"math\">" << output.ElementToString(false, true) << "</div>";
 }
 
 void SSalgebraModule::ActOnPolynomialOverModule
@@ -1980,7 +2117,7 @@ void SSalgebraModule::ComputeInvariantsOfDegree
   int theDim=this->GetDim();
   int numPosRoots=this->owner.theWeyl.RootsOfBorel.size;
   int theRank= this->owner.theWeyl.CartanSymmetric.NumRows;
-  int numGenerators=this->actionsNegativeRootSpacesCartanPositiveRootspaces.size;
+//  int numGenerators=this->actionsNegativeRootSpacesCartanPositiveRootspaces.size;
   theSel.initMaxMultiplicity(theDim, degree);
   int numCycles=theSel.NumCombinationsOfCardinality(degree);
   PolynomialRationalCoeff basisMonsZeroWeight, basisMonsAll;
@@ -2020,20 +2157,26 @@ void SSalgebraModule::ComputeInvariantsOfDegree
   }
   out << "<br>Num cycles:" << numCycles << "<br>The basis mons (thera are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ElementToString();
   MatrixLargeRational tempMat;
-  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
+  tempMat.init(basisMonsAll.size*theRank*2, basisMonsZeroWeight.size);
+//  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
   PolynomialRationalCoeff tempP;
-  for (int i=0; i<numGenerators; i++)
-    for (int k=0; k<basisMonsZeroWeight.size; k++)
-    { this->ActOnMonomialOverModule(i, basisMonsZeroWeight.TheObjects[k], tempP);
-      for (int j=0; j<basisMonsAll.size; j++)
-      { int indexInResult=tempP.IndexOfObjectHash(basisMonsAll.TheObjects[j]);
-        int currentRow=i*basisMonsAll.size+j;
-        if (indexInResult==-1)
-          tempMat.elements[currentRow][k]=0;
-        else
-          tempMat.elements[currentRow][k]=tempP.TheObjects[indexInResult].Coefficient;
+  for (int l=0; l<2; l++)
+    for (int i=0; i<theRank; i++)
+//    for (int i=0; i<numGenerators; i++)
+      for (int k=0; k<basisMonsZeroWeight.size; k++)
+      { int theIndex= (l==0) ? numPosRoots+theRank+i : numPosRoots-1-i;
+        //int theIndex=i;
+        this->ActOnMonomialOverModule(theIndex, basisMonsZeroWeight.TheObjects[k], tempP);
+        for (int j=0; j<basisMonsAll.size; j++)
+        { int indexInResult=tempP.IndexOfObjectHash(basisMonsAll.TheObjects[j]);
+          int currentRow=(theRank*l+i)*basisMonsAll.size+j;
+          //int currentRow=i*basisMonsAll.size+j;
+          if (indexInResult==-1)
+            tempMat.elements[currentRow][k]=0;
+          else
+            tempMat.elements[currentRow][k]=tempP.TheObjects[indexInResult].Coefficient;
+        }
       }
-    }
   if (tempMat.NumRows<120)
     out << "<div class=\"math\" scale=\"50\">" << tempMat.ElementToString(false, true) << "</div>";
   roots tempRoots;

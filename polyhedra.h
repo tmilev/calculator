@@ -865,6 +865,7 @@ public:
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void MultiplyByLargeRational(Rational& x);
   void MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables);
+  void ActOnAroot(root& theRoot){ this->ActOnAroot(theRoot, theRoot); };
   void ActOnAroot(root& input, root& output);
   void ActOnRoots(roots& input, roots& output);
   void DivideByRational(Rational& x);
@@ -1306,14 +1307,13 @@ void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Ele
       output.RowTimesScalar(NumFoundPivots, tempElement);
       for (int j = 0; j<mat.NumRows; j++)
         if (j!=NumFoundPivots)
-        { if (!mat.elements[j][i].IsEqualToZero())
+          if (!mat.elements[j][i].IsEqualToZero())
           { tempElement.Assign(mat.elements[j][i]);
             tempElement.Minus();
             mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
             output.AddTwoRows(NumFoundPivots, j, 0, tempElement);
             //mat.ComputeDebugString();
           }
-        }
       NumFoundPivots++;
       if (!returnNonPivotPoints)
         outputSelection.AddSelectionAppendNewIndex(i);
@@ -1851,7 +1851,8 @@ public:
       this->TheObjects[i].Assign(right.TheObjects[i]);
   };
   void AssignIntRoot(intRoot& right);
-  bool IsProportianalTo(root& r);
+  bool IsProportionalTo(root& r);
+  bool IsProportionalTo(const root& input, Rational& outputTimesMeEqualsInput)const;
   bool IsPositiveOrZero() const;
   bool IsNegativeOrZero();
   bool IsEqualToZero() const
@@ -1904,6 +1905,7 @@ public:
         break;
     }
   };
+  inline void operator*=(const Rational& other){this->MultiplyByLargeRational(other);};
   inline bool operator==(const root& right){return IsEqualTo(right); };
   inline root operator+(const root& right)const{ root result; result.Assign(*this); result.Add(right); return result;};
   inline root operator-(const root& right)const{ root result; result.Assign(*this); result.Subtract(right); return result;};
@@ -5759,12 +5761,12 @@ public:
   bool IsPositiveOrPerpWRTh(const root& input, const root& theH){ return this->RootScalarCartanRoot(input, theH).IsNonNegative(); };
   void ReflectBetaWRTAlpha(root& alpha, root& Beta, bool RhoAction, root& Output);
   bool IsRegular(root& input, int* indexFirstPerpendicularRoot);
-  void RootScalarCartanRoot(const root& r1, const root& r2, Rational& output);
+  void RootScalarCartanRoot(const root& r1, const root& r2, Rational& output)const;
+  Rational RootScalarCartanRoot(const root& r1, const root& r2)const{ Rational tempRat; this->RootScalarCartanRoot(r1, r2, tempRat); return tempRat; };
   //the below functions perturbs input so that inputH has non-zero scalar product with roots of the root system,
   //without changing the inputH-sign of any root that had a non-zero scalar product to begin with
   void PerturbWeightToRegularWRTrootSystem(const root& inputH, root& output);
   bool IsDominantWeight(root& theWeight);
-  Rational RootScalarCartanRoot(const root& r1, const root& r2){ Rational tempRat; this->RootScalarCartanRoot(r1, r2, tempRat); return tempRat; };
   void TransformToSimpleBasisGenerators(roots& theGens);
   void TransformToSimpleBasisGeneratorsWRTh(roots& theGens, root& theH);
   int length(int index);
@@ -5785,7 +5787,7 @@ public:
   void ComputeDebugString(){this->ElementToString(DebugString); };
   void ElementToString(std::string& output);
   bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
-  void ComputeSubGroupFromGeneratingReflections  (roots& generators, rootsCollection& ExternalAutos,  GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
+  void ComputeSubGroupFromGeneratingReflections(roots& generators, rootsCollection& ExternalAutos,  GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   void ActByElement(int index, root& theRoot);
   void ActByElement(int index, root& input, root& output);
@@ -6296,7 +6298,8 @@ public:
   void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(int theIndex, const SemisimpleLieAlgebra& owner);
   void ElementToVectorRootSpacesFirstThenCartan(root& output);
   void ElementToVectorNegativeRootSpacesFirst(root& output)const;
-  void AssingVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
+  void AssignVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
+  void AssignVectorNegRootSpacesCartanPosRootSpaces(const root& input, const SemisimpleLieAlgebra& owner);
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
   void SetCoefficient(const root& indexingRoot, Rational& theCoeff, const SemisimpleLieAlgebra& owner);
@@ -6482,6 +6485,9 @@ public:
       return true;
     return false;
   };
+  inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;};
+  inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;};
+  inline int GetRank()const{ return this->theWeyl.CartanSymmetric.NumRows;};
   int CartanIndexToChevalleyGeneratorIndex(int theIndex){ return this->theWeyl.RootsOfBorel.size+theIndex;};
   int RootToIndexInUE(const root& input){ return this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(this->theWeyl.RootSystem.IndexOfObjectHash(input));};
   int DisplayIndexToRootIndex(int theIndex);
@@ -6498,7 +6504,7 @@ public:
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
   //then the below function computes n_{-\epsilon, -\zeta}
-  void LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output);
+  void LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)const;
   void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
   void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
@@ -7843,8 +7849,37 @@ class SSalgebraModule
 public:
   SemisimpleLieAlgebra owner;
   PolynomialsRationalCoeff invariantsFound;
-  List<ElementSimpleLieAlgebra> basisNegativeRootSpacesFirstThenCartanThenPositiveRootSpaceS;
   List<MatrixLargeRational> actionsNegativeRootSpacesCartanPositiveRootspaces;
+  List<ElementSimpleLieAlgebra> moduleElementsEmbedded;
+  //Index ordering of sipleNegGenerators:
+  //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
+  //simpleNegGenerators.TheObjects[i]
+  void GenerateSubmoduleFromRootNegativeRootSpacesFirst
+  (root& input, roots& output, List<MatrixLargeRational>& allSimpleGenerators, GlobalVariables& theGlobalVariables)
+  ;
+  void ExtractHighestWeightVectorsFromVector
+  (root& input, roots& outputVectors, List<MatrixLargeRational>& simplePosGenerators, List<MatrixLargeRational>& simpleNegGenerators)
+  ;
+  void ClimbDownFromHighestWeightAlongSl2String
+  (root& input, root& output, Rational& outputCoeff, MatrixLargeRational& posGenerator, MatrixLargeRational& negGenerator, int generatorPower)
+  ;
+  void ClimbDownFromVectorAccordingToSequence
+  (root& input, root& output, Rational& outputCoeff, List<MatrixLargeRational>& simplePosGenerators, List<MatrixLargeRational>& SimpleNegGenerators,
+   List<int>& inputGeneratorSequence, List<int>& inputGeneratorPowers)
+  ;
+  void ClimbUpFromVector
+  (root& input, root& outputLastNonZero, List<MatrixLargeRational>& SimplePositiveGenerators, List<int>& outputGeneratorSequence, List<int>& outputGeneratorPowers)
+  ;
+  void ComputeAdMatrixFromModule
+  (ElementSimpleLieAlgebra& theElt, roots& theModule, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output,
+   GlobalVariables& theGlobalVariables)
+     ;
+  void ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
+  (const List<ElementSimpleLieAlgebra>& input, const SemisimpleLieAlgebra& ambientLieAlgebra, List<MatrixLargeRational>& output)
+  ;
+  void ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
+  (const ElementSimpleLieAlgebra& input, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output)
+  ;
   void ComputeInvariantsOfDegree
   (int degree, std::stringstream& out, GlobalVariables& theGlobalVariables)
   ;

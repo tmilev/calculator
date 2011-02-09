@@ -1742,7 +1742,29 @@ bool root::IsEqualTo(const root& right) const
   return true;
 }
 
-bool root::IsProportianalTo(root& r)
+bool root::IsProportionalTo(const root& input, Rational& outputTimesMeEqualsInput)const
+{ if (this->size!= input.size)
+    return false;
+  int IndexFirstNonZero=-1;
+  for(int i=0; i<this->size; i++)
+    if (!this->TheObjects[i].IsEqualToZero())
+    { IndexFirstNonZero=i;
+      break;
+    }
+  if (IndexFirstNonZero==-1)
+  { if (input.IsEqualToZero())
+    { outputTimesMeEqualsInput.MakeZero();
+      return true;
+    }
+    return false;
+  }
+  root tempRoot=*this;
+  outputTimesMeEqualsInput= input.TheObjects[IndexFirstNonZero]/this->TheObjects[IndexFirstNonZero];
+  tempRoot*=outputTimesMeEqualsInput;
+  return tempRoot.IsEqualTo(input);
+}
+
+bool root::IsProportionalTo(root& r)
 { if (this->size!=r.size)
     return false;
   //r.ComputeDebugString();
@@ -4964,7 +4986,7 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVa
       if (!(hasNegative && hasPositive))
       {  bool IsValid=true;
         for (int j=0; j<this->size; j++)
-          if (normalCandidate.IsProportianalTo(this->TheObjects[j]))
+          if (normalCandidate.IsProportionalTo(this->TheObjects[j]))
             IsValid=false;
         if (IsValid)
           this->AddRootNoRepetition(normalCandidate);
@@ -11751,7 +11773,7 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
   }
 }
 
-void WeylGroup::RootScalarCartanRoot(const root& r1, const root& r2, Rational& output)
+void WeylGroup::RootScalarCartanRoot(const root& r1, const root& r2, Rational& output)const
 { output.MakeZero();
   for (int i=0; i<this->CartanSymmetric.NumRows; i++)
     for (int j=0; j<this->CartanSymmetric.NumCols; j++)
@@ -17947,7 +17969,7 @@ void ElementSimpleLieAlgebra::Nullify(const SemisimpleLieAlgebra& owner)
   this->NonZeroElements.init(this->coeffsRootSpaces.size);
 }
 
-void SemisimpleLieAlgebra::LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)
+void SemisimpleLieAlgebra::LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)const
 { assert(&output!=&g1 && &output!=&g2);
   output.Nullify(*this);
   root tempRoot, root1plusRoot2;
@@ -24551,12 +24573,26 @@ void ElementSimpleLieAlgebra::AssignChevalleyGeneratorCoeffOneIndexNegativeRoots
   this->Hcomponent.MakeEi(theDimension, generatorIndex-numPosRoots);
 }
 
-void ElementSimpleLieAlgebra::AssingVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner)
+void ElementSimpleLieAlgebra::AssignVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner)
 { this->Nullify(owner);
   for (int i=0; i<this->coeffsRootSpaces.size; i++)
     this->coeffsRootSpaces.TheObjects[i]=input.TheObjects[i];
   for (int i=0; i<this->Hcomponent.size; i++)
    this->Hcomponent.TheObjects[i]=input.TheObjects[i+this->coeffsRootSpaces.size];
+  this->ComputeNonZeroElements();
+}
+
+void ElementSimpleLieAlgebra::AssignVectorNegRootSpacesCartanPosRootSpaces(const root& input, const SemisimpleLieAlgebra& owner)
+{ this->Nullify(owner);
+  int numPosRoots=owner.GetNumPosRoots();
+  for (int i=0; i<numPosRoots; i++)
+  { this->coeffsRootSpaces.TheObjects[owner.ChevalleyGeneratorIndexToRootIndex(i)]=input.TheObjects[i];
+    int index=i+numPosRoots+owner.GetRank();
+    this->coeffsRootSpaces.TheObjects[owner.ChevalleyGeneratorIndexToRootIndex(index)]=input.TheObjects[index];
+  }
+  this->Hcomponent.SetSizeExpandOnTopLight(owner.GetRank());
+  for (int i=0; i<this->Hcomponent.size; i++)
+   this->Hcomponent.TheObjects[i]=input.TheObjects[i+numPosRoots];
   this->ComputeNonZeroElements();
 }
 
@@ -26405,7 +26441,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   for (int i=0; i<this->imagesAllChevalleyGenerators.size; i++)
   { this->domainAllChevalleyGenerators.TheObjects[i].ElementToVectorRootSpacesFirstThenCartan(tempRoot);
     tempMat.ActOnAroot(tempRoot, imageRoot);
-    this->imagesAllChevalleyGenerators.TheObjects[i].AssingVectorRootSpacesFirstThenCartan(imageRoot, this->theRange);
+    this->imagesAllChevalleyGenerators.TheObjects[i].AssignVectorRootSpacesFirstThenCartan(imageRoot, this->theRange);
 //    std::cout << this->domainAllChevalleyGenerators.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
 //    std::cout << "->" << this->imagesAllChevalleyGenerators.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
 //    std::cout << "<br>";

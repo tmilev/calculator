@@ -791,6 +791,7 @@ class Matrix: public MatrixElementaryLooseMemoryFit<Element>
 {
 public:
   Matrix(const Matrix<Element>& other){this->Assign(other);};
+  void operator=(const Matrix<Element>& other){this->Assign(other);};
   Matrix(){};
   std::string DebugString;
   static bool flagComputingDebugInfo;
@@ -3726,6 +3727,9 @@ class PolynomialRationalCoeff: public Polynomial<Rational>
 public:
   PolynomialRationalCoeff(){};
   PolynomialRationalCoeff(const PolynomialRationalCoeff& other){this->Assign(other);};
+  //the below constructor is very slow use for testing purposes only
+  //Parsing stuff is inherently slow and I use the mighty parser
+  PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);};
   void AssignIntegerPoly(IntegerPoly& p);
   void Evaluate(intRoot& values, Rational& output);
   void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
@@ -3748,6 +3752,9 @@ public:
   bool operator==(const PolynomialRationalCoeff& right){ PolynomialRationalCoeff tempP; tempP.Assign(right); tempP.Subtract(*this); return tempP.IsEqualToZero();};
   void operator=(const PolynomialRationalCoeff& right);
   void operator=(const Polynomial<Rational>& right){this->Assign(right);};
+  //the below is very slow use for testing purposes only
+  //Parsing stuff is inherently slow and I use the mighty parser
+  void operator=(const std::string& input);
   void operator-=(const Rational& theConst){ Monomial<Rational> tempMon; tempMon.MakeConstantMonomial(this->NumVars, -theConst); this->AddMonomial(tempMon);};
   PolynomialRationalCoeff operator-(const PolynomialRationalCoeff& other)
   { PolynomialRationalCoeff tempP;
@@ -6288,7 +6295,7 @@ public:
   root Hcomponent;
   void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(int theIndex, const SemisimpleLieAlgebra& owner);
   void ElementToVectorRootSpacesFirstThenCartan(root& output);
-  void ElementToVectorNegativeRootSpacesFirst(root& output);
+  void ElementToVectorNegativeRootSpacesFirst(root& output)const;
   void AssingVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
@@ -6439,14 +6446,15 @@ public:
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); };
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
   void ElementToStringNegativeRootSpacesFirst(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables);
+  std::string ElementToStringNegativeRootSpacesFirst(bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToStringNegativeRootSpacesFirst(tempS, useHtml, useLatex, usePNG, theGlobalVariables); return tempS;};
   std::string ElementToStringLieBracketPairing();
-  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){  this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); };
+  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); };
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //List<VermaModuleWord> VermaWords;
-  List<VermaModuleMonomial> VermaMonomials;
+/*  List<VermaModuleMonomial> VermaMonomials;
   List<MatrixLargeRational> EmbeddingsRootSpaces;
-  List<MatrixLargeRational> EmbeddingsCartan;
+  List<MatrixLargeRational> EmbeddingsCartan;*/
   //format:
   //the Chevalley constants are listed in the same order as the root system of the Weyl group
   // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
@@ -6521,7 +6529,14 @@ public:
   int GetLengthStringAlongAlphaThroughBeta(root& alpha, root& beta, int& distanceToHighestWeight, roots& weightSupport);
   void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto,  bool useNegativeRootsFirst);
   void operator=(const SemisimpleLieAlgebra& other){ this->Assign(other);};
-  void Assign(const SemisimpleLieAlgebra& other);
+  void Assign(const SemisimpleLieAlgebra& other)
+  { this->theWeyl.Assign(other.theWeyl);
+    this->ChevalleyConstants.Assign(other.ChevalleyConstants);
+    this->OppositeRootSpaces.CopyFromBase(other.OppositeRootSpaces);
+    this->theLiebracketPairingCoefficients.Assign(other.theLiebracketPairingCoefficients);
+    this->theLiebracketPairingIndices.Assign(other.theLiebracketPairingIndices);
+    this->Computed.Assign(other.Computed);
+  };
 };
 
 class Parser;
@@ -7035,12 +7050,14 @@ public:
 class ElementWeylAlgebra
 {
 private:
+  //the standard order is as follows. First come the variables, then the differential operators, i.e. for 2 variables the order is x_1 x_2 \partial_{x_1}\partial_{x_2}
   PolynomialRationalCoeff StandardOrder;
 public:
   std::string DebugString;
   void ComputeDebugString(bool useBeginEqnArray, bool useXYs){this->ElementToString(this->DebugString, useXYs, true, useBeginEqnArray); };
   void ElementToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
   void ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
+  std::string ElementToString(bool useLatex){std::string tempS; this->ElementToString(tempS, false, useLatex, false); return tempS;};
   int NumVariables;
   void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
   void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
@@ -7059,14 +7076,12 @@ public:
   void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
   void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
   void LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
-  void Assign(const ElementWeylAlgebra& other)
-  { this->StandardOrder.Assign(other.StandardOrder);
-    this->NumVariables=other.NumVariables;
-  };
+  void Assign(const ElementWeylAlgebra& other){ this->StandardOrder.Assign(other.StandardOrder); this->NumVariables=other.NumVariables;};
+  void AssignPolynomial(const Polynomial<Rational>& thePoly){ this->StandardOrder.Assign(thePoly); this->StandardOrder.IncreaseNumVariables(thePoly.NumVars); this->NumVariables=thePoly.NumVars;};
   void Subtract(ElementWeylAlgebra& other){ this->StandardOrder.Subtract(other.StandardOrder);};
-  void MakeConst (int NumVars, Rational& theConst);
+  void MakeConst (int NumVars, const Rational& theConst);
   void Add(ElementWeylAlgebra& other){ this->StandardOrder.AddPolynomial(other.StandardOrder);};
-  void MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
+  void MultiplyTwoMonomials(Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
   ElementWeylAlgebra(){ this->NumVariables=0; };
   void operator=(const std::string& input);
   bool IsLetter(char theLetter);
@@ -7117,7 +7132,7 @@ class ParserNode
   bool ConvertToType(int theType);
   bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement,typeRoot,
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement, typeRoot,
   typeString,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
@@ -7144,6 +7159,7 @@ class ParserNode
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
+  void EvaluateInvariants(GlobalVariables& theGlobalVariabltes);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
   void EvaluateFunction(GlobalVariables& theGlobalVariables);
   bool AllChildrenAreOfDefinedNonErrorType();
@@ -7169,7 +7185,7 @@ public:
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
     tokenRoot, tokenFunction, tokenFunctionNoArgument
   };
-  enum functionList{functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos, functionMod};
+  enum functionList{functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos, functionMod, functionInvariants};
   List<int> TokenBuffer;
   List<int> ValueBuffer;
   List<int> TokenStack;
@@ -7813,15 +7829,56 @@ public:
   //The rank-of-theOwner+2nd variable corresponds to the exponent of the 2nd negative root (the root with index -2)
   //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
   void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
-  void GetDiffOperatorFromShiftAndCoefficient(PolynomialRationalCoeff& theCoeff, root& theShift, ElementWeylAlgebra& output);
+  void GetDiffOperatorFromShiftAndCoefficient
+  (PolynomialRationalCoeff& theCoeff, root& theShift, ElementWeylAlgebra& output, GlobalVariables& theGlobalVariables)
+  ;
   void MakeGenericMonomialBranchingCandidate(HomomorphismSemisimpleLieAlgebra& theHmm, ElementUniversalEnveloping& theElt, GlobalVariables& theGlobalVariables);
   void DetermineEquationsFromResultLieBracketEquationsPerTarget(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };
 
+class PolynomialOverModule;
+class SSalgebraModule
+{
+public:
+  SemisimpleLieAlgebra owner;
+  PolynomialsRationalCoeff invariantsFound;
+  List<ElementSimpleLieAlgebra> basisNegativeRootSpacesFirstThenCartanThenPositiveRootSpaceS;
+  List<MatrixLargeRational> actionsNegativeRootSpacesCartanPositiveRootspaces;
+  void ComputeInvariantsOfDegree
+  (int degree, std::stringstream& out, GlobalVariables& theGlobalVariables)
+  ;
+  void InduceFromEmbedding(std::stringstream& out, HomomorphismSemisimpleLieAlgebra& theHmm, GlobalVariables& theGlobalVariables);
+  void ActOnPolynomialOverModule
+  (const ElementSimpleLieAlgebra& theActingElement, const PolynomialOverModule& theArgument, PolynomialOverModule& output)
+  ;
+  void ActOnMonomialOverModule
+  (int indexChevalleyGeneratorNegativeSpacesFirst, const Monomial<Rational>& theArgument, PolynomialRationalCoeff& output)
+  ;
+  int GetDim()const {if (this->actionsNegativeRootSpacesCartanPositiveRootspaces.size==0) return -1; return this->actionsNegativeRootSpacesCartanPositiveRootspaces.TheObjects[0].NumRows;};
+};
+
+class PolynomialOverModule : PolynomialRationalCoeff
+{
+  friend class SSalgebraModule;
+public:
+  SSalgebraModule* owner;
+  std::string ElementToString(){ return this->::PolynomialRationalCoeff::ElementToString(); };
+  void Assign(const PolynomialOverModule& other){ this->::PolynomialRationalCoeff::Assign(other); this->owner=other.owner;};
+  void operator=(const PolynomialOverModule& other){ this->Assign(other); };
+  int GetNumVars(){return this->NumVars;};
+  void Nullify(SSalgebraModule& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());};
+};
+
+class InvariantsComputationModule
+{
+public:
+
+};
+
 class AdmissibleHs :public rootsCollection
 {
-  public:
+public:
 };
 
 class SemisimpleSubalgebras

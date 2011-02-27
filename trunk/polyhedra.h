@@ -122,6 +122,10 @@ class slTwo;
 class SltwoSubalgebras;
 class DrawingVariables;
 class ElementSimpleLieAlgebra;
+class ElementUniversalEnveloping;
+class MonomialUniversalEnveloping;
+class rootPoly;
+
 
 extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
 //polyhedra.cpp used to format the polynomial printouts.
@@ -479,6 +483,7 @@ public:
   void RemoveFirstOccurenceSwapWithLast(Object& o);
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
+  std::string ElementToStringGeneric(){ std::string tempS; this->ElementToStringGeneric(tempS); return tempS;};
   void ElementToStringGeneric(std::string& output);
   void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
   int IndexOfObject(const Object& o) const;
@@ -490,10 +495,10 @@ public:
   inline Object* LastObject();
   void ReleaseMemory();
   void operator=(const List<Object>& right){this->CopyFromBase(right); };
-  static void swap(List<Object>&l1, List<Object>&l2);
+  static void swap(List<Object>& l1, List<Object>& l2);
   void ReverseOrderElements();
   void CopyFromBase (const List<Object>& From);
-  bool IsEqualTo(const List<Object>& Other) const
+  bool IsEqualTo(const List<Object>& Other)const
   { if (this->size!=Other.size)
       return false;
     for (int i=0; i<Other.size; i++)
@@ -501,14 +506,11 @@ public:
         return false;
     return true;
   };
-  inline bool operator!=(const List<Object>& other) const
-  { return !this->IsEqualTo(other);
-  };
-  inline bool operator==(const List<Object>& other) const
-  { return this->IsEqualTo(other);
-  };
-  bool operator>(const List<Object>& other) const;
+  inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);};
+  inline bool operator==(const List<Object>& other)const{ return this->IsEqualTo(other);};
+  bool operator>(const List<Object>& other)const;
   void ShiftUpExpandOnTop(int StartingIndex);
+  List(int StartingSize);
   List();
   ~List();
 };
@@ -976,6 +978,7 @@ public:
   int MaxMultiplicity;
   void initMaxMultiplicity(int NumElements, int MaxMult);
   int NumCombinationsOfCardinality(int cardinality);
+  int NumSelectionsTotal(){return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);};
   void IncrementSubset();
   void IncrementSubsetFixedCardinality(int Cardinality);
   bool HasMultiplicitiesZeroAndOneOnly();
@@ -2024,6 +2027,8 @@ public:
   void operator = (const roots& right){this->CopyFromBase(right); };
   void ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  roots(){};
+  roots(int StartingSize):List<root>::List<root>(StartingSize){};
 };
 
 class Lattice
@@ -2528,6 +2533,16 @@ List<Object>::List()
   this->size=0;
   this->TheObjects=0;
   this->TheActualObjects=0;
+}
+
+template <class Object>
+List<Object>::List(int StartingSize)
+{ this->ActualSize=0;
+  this->IndexOfVirtualZero=0;
+  this->size=0;
+  this->TheObjects=0;
+  this->TheActualObjects=0;
+  this->SetSizeExpandOnTopNoObjectInit(StartingSize);
 }
 
 template <class Object>
@@ -3137,12 +3152,16 @@ public:
   int TotalDegree();
   short* degrees;
   static bool InitWithZero;
-  std::string DebugString;
-  bool ComputeDebugString(PolynomialOutputFormat& PolyFormat);
-  bool ComputeDebugString();
   ElementOfCommutativeRingWithIdentity Coefficient;
   int HashFunction() const;
 //  int DegreesToIndex(int MaxDeg);
+  std::string DebugString;
+  bool ComputeDebugString(PolynomialOutputFormat& PolyFormat);
+  bool ComputeDebugString();
+  void StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output);
+  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
   void MakeConstantMonomial(short Nvar, const ElementOfCommutativeRingWithIdentity& coeff);
   void MakeNVarFirstDegree(int LetterIndex, short NumVars, const ElementOfCommutativeRingWithIdentity& coeff);
   void init(short nv);
@@ -3184,9 +3203,6 @@ public:
   bool IsEqualToZero() const;
   bool IsPositive();
   void DecreaseNumVariables(short increment);
-  void StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat);
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
-  void ElementToString(std::string& output);
   bool IsAConstant();
   void InvertDegrees();
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
@@ -3807,6 +3823,7 @@ public:
     this->Assign(output);
     this->Simplify();
   };
+  void operator*=(const PolynomialRationalCoeff& other){this->Numerator.MultiplyBy(other); this->Simplify();};
   void Simplify();
   void operator+=(const RationalFunction& other){this->Add(other);};
   void operator+=(int theConstant){RationalFunction tempRF; tempRF.MakeNVarConst(this->NumVariables, (Rational) theConstant); (*this)+=tempRF;};
@@ -3814,7 +3831,7 @@ public:
   void Invert(){PolynomialRationalCoeff tempP; tempP=this->Numerator; this->Numerator=this->Denominator; this->Denominator=tempP;};
   void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify((short)theNumVars); this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);};
   void MakeNVarConst(int theNumVars, const Rational& theCoeff) {this->Nullify((short)theNumVars); this->Numerator.MakeNVarConst((short)theNumVars, theCoeff);};
-  bool IsEqualToZero(){return this->Numerator.IsEqualToZero();};
+  bool IsEqualToZero()const{return this->Numerator.IsEqualToZero();};
   static void ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1);
   static void TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2);
   static void RemainderDivisionWithRespectToBasis(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1);
@@ -3823,6 +3840,9 @@ public:
   { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
     RationalFunction::gcd(left, right, output, buffer1, buffer2, buffer3, buffer4, buffer5, tempMon1, tempMon2, bufferList);
   };
+  static void ScaleClearDenominator
+  (List<RationalFunction>& input, rootPoly& output)
+  ;
   static void gcd(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, PolynomialRationalCoeff& buffer5, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList);
   static void lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList);
   static inline void lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
@@ -5984,7 +6004,8 @@ public:
   void initPermutation(int n);
   void initPermutation(List<int>& disjointSubsets, int TotalNumElements);
   void incrementAndGetPermutation(List<int>& output);
-  void GetPermutation(List<int>& output);
+  void GetPermutationLthElementIsTheImageofLthIndex(List<int>& output);
+  int GetNumPermutations() {return this->getTotalNumSubsets();};
 };
 
 class rootSubalgebra
@@ -6511,6 +6532,12 @@ public:
   void ExploitTheCyclicTrick(int i, int j, int k);
   int GetMaxQForWhichBetaMinusQAlphaIsARoot(root& alpha, root& beta);
   Rational GetConstant(const root& root1, const root& root2);
+  void ComputeCommonAdEigenVectors
+(int theDegree, List<ElementUniversalEnveloping>& theGenerators, List<ElementUniversalEnveloping>& generatorsBeingActedOn,
+ List<ElementUniversalEnveloping>& output, std::stringstream& out,
+ roots* Hsubs,
+ GlobalVariables& theGlobalVariables)
+  ;
   bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
   void ElementToStringVermaMonomials(std::string& output);
   void ElementToStringEmbedding(std::string& output);
@@ -6546,9 +6573,6 @@ public:
 };
 
 class Parser;
-class ElementUniversalEnveloping;
-class MonomialUniversalEnveloping;
-
 class HomomorphismSemisimpleLieAlgebra
 {
 public:
@@ -6600,7 +6624,7 @@ public:
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
   void Nullify(int numVars, SemisimpleLieAlgebra& theOwner);
-  void ModOutVermaRelations();
+  void ModOutVermaRelations(bool SubHighestWeightWithZeroes);
   void SetNumVariables(int newNumVars);
   int HashFunction() const;
   void GetDegree(PolynomialRationalCoeff& output)
@@ -6656,8 +6680,22 @@ public:
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& theOwner);
   void MakeConst(const PolynomialRationalCoeff& coeff, SemisimpleLieAlgebra& theOwner){this->Nullify(theOwner); MonomialUniversalEnveloping tempMon; tempMon.MakeConst(coeff, theOwner); this->AddMonomial(tempMon);};
   void Simplify();
-  void ModOutVermaRelations();
-  static void GetCoordinateFormOfSpanOfElements(List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables);
+  int GetNumVariables()
+  { if (this->size==0)
+      return 0;
+    else
+      return this->TheObjects[0].Coefficient.NumVars;
+  };
+  inline void MultiplyBy(const ElementUniversalEnveloping& other){this->operator*=(other);};
+  void ModOutVermaRelations(){ this->ModOutVermaRelations(false);};
+  void ModOutVermaRelations(bool SubHighestWeightWithZeroes);
+  static void GetCoordinateFormOfSpanOfElements
+  (int numVars, List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
+;
+  static void GetCoordinateFormOfSpanOfElements(List<ElementUniversalEnveloping>& theElements, roots& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables);
+  void AssignFromCoordinateFormWRTBasis
+  (List<ElementUniversalEnveloping>& theBasis, rootPoly& input, SemisimpleLieAlgebra& owner)
+  ;
   void SetNumVariables(int newNumVars);
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator()
@@ -6684,6 +6722,7 @@ public:
   void operator*=(const ElementUniversalEnveloping& other);
   void operator/=(const Rational& other);
   void operator*=(const Rational& other);
+  void operator*=(const PolynomialRationalCoeff& other);
   ElementUniversalEnveloping(){this->owner=0;};
   ElementUniversalEnveloping(const ElementUniversalEnveloping& other){this->operator=(other);};
 };
@@ -7166,6 +7205,9 @@ class ParserNode
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
   void EvaluateInvariants(GlobalVariables& theGlobalVariabltes);
+  void EvaluateEigenUE(GlobalVariables& theGlobalVariabltes);
+  void EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVariables);
+  void EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVariables);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
   void EvaluateFunction(GlobalVariables& theGlobalVariables);
   bool AllChildrenAreOfDefinedNonErrorType();
@@ -7191,7 +7233,10 @@ public:
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
     tokenRoot, tokenFunction, tokenFunctionNoArgument
   };
-  enum functionList{functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos, functionMod, functionInvariants};
+  enum functionList
+  { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos, functionMod, functionInvariants,
+    functionEigenUE
+  };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
   List<int> TokenStack;
@@ -7847,10 +7892,12 @@ class PolynomialOverModule;
 class SSalgebraModule
 {
 public:
-  SemisimpleLieAlgebra owner;
+  SemisimpleLieAlgebra theAlgebra;
+  SemisimpleLieAlgebra ambientAlgebrA;
   PolynomialsRationalCoeff invariantsFound;
   List<MatrixLargeRational> actionsNegativeRootSpacesCartanPositiveRootspaces;
   List<ElementSimpleLieAlgebra> moduleElementsEmbedded;
+  List<ElementUniversalEnveloping> invariantsMappedToEmbedding;
   //Index ordering of sipleNegGenerators:
   //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
   //simpleNegGenerators.TheObjects[i]
@@ -7883,6 +7930,13 @@ public:
   void ComputeInvariantsOfDegree
   (int degree, std::stringstream& out, GlobalVariables& theGlobalVariables)
   ;
+  void mapInvariantsToEmbedding
+  (std::stringstream& out, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+  ;
+  void mapMonomialToEmbedding
+  (Monomial<Rational>& input, ElementUniversalEnveloping& Accum, SemisimpleLieAlgebra& owner, std::stringstream& out, GlobalVariables& theGlobalVariables)
+  ;
+
   void InduceFromEmbedding(std::stringstream& out, HomomorphismSemisimpleLieAlgebra& theHmm, GlobalVariables& theGlobalVariables);
   void ActOnPolynomialOverModule
   (const ElementSimpleLieAlgebra& theActingElement, const PolynomialOverModule& theArgument, PolynomialOverModule& output)

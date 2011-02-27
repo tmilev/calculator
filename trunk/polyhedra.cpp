@@ -11502,21 +11502,22 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
   for (int i=this->Multiplicities.size-1; currentCardinality<Cardinality; i--)
   { assert(this->Multiplicities.TheObjects[i]==0);
     if (Cardinality-currentCardinality>=this->MaxMultiplicity)
-        this->Multiplicities.TheObjects[i]=this->MaxMultiplicity;
-      else
-        this->Multiplicities.TheObjects[i]=Cardinality-currentCardinality;
-      currentCardinality+=this->Multiplicities.TheObjects[i];
+      this->Multiplicities.TheObjects[i]=this->MaxMultiplicity;
+    else
+      this->Multiplicities.TheObjects[i]=Cardinality-currentCardinality;
+    currentCardinality+=this->Multiplicities.TheObjects[i];
   }
   this->ComputeElements();
 }
 
 int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality)
-{ return ::MathRoutines::NChooseK(this->Multiplicities.size+cardinality-1, cardinality);
+{ int fixThisShit;
+  return ::MathRoutines::NChooseK(this->Multiplicities.size+cardinality-1, cardinality);
 }
 
 void SelectionWithMaxMultiplicity::IncrementSubset()
 { for (int i=this->Multiplicities.size-1; i>=0; i--)
-  { if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
+    if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
     { if (this->Multiplicities.TheObjects[i]==0)
         this->elements.AddObjectOnTop(i);
       this->Multiplicities.TheObjects[i]++;
@@ -11526,7 +11527,6 @@ void SelectionWithMaxMultiplicity::IncrementSubset()
     { this->Multiplicities.TheObjects[i]=0;
       this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
-  }
 }
 
 void SelectionWithMultiplicities::ComputeElements()
@@ -17259,10 +17259,10 @@ void permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
 
 void permutation::incrementAndGetPermutation(List<int>& output)
 { this->IncrementSubset();
-  this->GetPermutation(output);
+  this->GetPermutationLthElementIsTheImageofLthIndex(output);
 }
 
-void permutation::GetPermutation(List<int>& output)
+void permutation::GetPermutationLthElementIsTheImageofLthIndex(List<int>& output)
 { int numElements=this->Multiplicities.size;
   output.SetSizeExpandOnTopNoObjectInit(numElements);
   for (int i=0; i<numElements; i++)
@@ -19904,7 +19904,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(minimalRelation
   //theDomain.AddListOnTop(theState.ChosenPositiveKroots);
   for (int l=0; l<NumCyclesK; l++)
   { thePermutedKs.size=0;
-    thePermK.GetPermutation(tempList);
+    thePermK.GetPermutationLthElementIsTheImageofLthIndex(tempList);
     for (int k=0; k<tempList.size; k++)
     { root& tempRoot=theKroots.TheObjects[tempList.TheObjects[k]];
       thePermutedKs.AddObjectOnTop(tempRoot);
@@ -19913,7 +19913,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(minimalRelation
     for(int i=0; i<NumCyclesAlphas; i++)
     { theDomain.size=theKroots.size;
       thePermutedAlphas.size=0;
-      thePermAlphas.GetPermutation(tempList);
+      thePermAlphas.GetPermutationLthElementIsTheImageofLthIndex(tempList);
       for (int k=0; k<tempList.size; k++)
       { root& tempRoot=theAlphas.TheObjects[tempList.TheObjects[k]];
         thePermutedAlphas.AddObjectOnTop(tempRoot);
@@ -19923,7 +19923,7 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(minimalRelation
       for (int j=0; j<NumCyclesBetas; j++)
       { theDomain.size=theAlphas.size+theKroots.size;
         thePermutedBetas.size=0;
-        thePermBetas.GetPermutation(tempList);
+        thePermBetas.GetPermutationLthElementIsTheImageofLthIndex(tempList);
         for (int k=0; k<tempList.size; k++)
         { root& tempRoot=theBetas.TheObjects[tempList.TheObjects[k]];
           thePermutedBetas.AddObjectOnTop(tempRoot);
@@ -20039,7 +20039,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(roots& Domain, roots& Range, 
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI2= permComponentsCentralizer.getTotalNumSubsets();
   int NumAutosCentralizer= tempAutosCentralizer.getTotalNumSubsets();
-  permComponentsCentralizer.GetPermutation(tempPermutation2);
+  permComponentsCentralizer.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   for (int i=0; i<Domain.size; i++)
   { isoDomain.AddObjectOnTop(Domain.TheObjects[i]);
     if (isoDomain.GetRankOfSpanOfElements(theGlobalVariables)<isoDomain.size)
@@ -20762,8 +20762,8 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, 
   NumAutos=tempAutos.getTotalNumSubsets();
   int tempI2= permComponentsCentralizer.getTotalNumSubsets();
   int NumAutosCentralizer= tempAutosCentralizer.getTotalNumSubsets();
-  permComponents.GetPermutation(tempPermutation1);
-  permComponentsCentralizer.GetPermutation(tempPermutation2);
+  permComponents.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation1);
+  permComponentsCentralizer.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   for (int i=0; i<tempI1; i++)
   { for(int j=0; j<tempI2; j++)
     { for (int k=0; k<NumAutos; k++)
@@ -26525,7 +26525,7 @@ std::string HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDo
     //Let the monomials corresponding to the given partition be m_1, \dots, m_l
     //Let the Chevalley generators of the smaller Lie algebra be k_1,\dots, k_s
     //Then the elements [k_i, m_1], \dots, [k_i, m_l] are recorded in this order in currentTargets
-    ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements(currentTargets, tempList, basisMonomialBuffer, theGlobalVariables);
+    ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements(numPosRootsRange+theDimension, currentTargets, tempList, basisMonomialBuffer, theGlobalVariables);
     out << "Coordinate form of the above elements: ";
     for (int j=0; j<tempList.size; j++)
     { out << tempList.TheObjects[j].ElementToString() << ",";

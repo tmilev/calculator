@@ -123,7 +123,10 @@ int main(int argc, char **argv)
   //  tempRat.RaiseToPower(20);
   //  tempRat.ElementToString(tempS);
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
-  //civilizedInput="invariant(2)";
+  //civilizedInput="eigenVerma(2, i(g_1), i(g_2), i(h_1)-3x_2, i(h_2)-x_1-2x_3)";
+  //theParser.DefaultWeylLetter='A';
+  //theParser.DefaultWeylRank=2;
+   // civilizedInput="gcd(x_1^3+x_2^3+x_3^3, x_1^{5}+x_2^{5}+x_3^{5})";
   //theParser.DefaultWeylRank=3;
   //theParser.DefaultWeylLetter='B';
   //SemisimpleSubalgebras theComputation;
@@ -133,7 +136,6 @@ int main(int argc, char **argv)
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
     theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  PolynomialRationalCoeff::PreferredHashSize=10;
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;

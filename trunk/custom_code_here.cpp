@@ -31,7 +31,8 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionOuterAutos: this->EvaluateOuterAutos(theGlobalVariables); break;
     case Parser::functionMod: this->EvaluateModVermaRelations(theGlobalVariables); break;
     case Parser::functionInvariants: this->EvaluateInvariants(theGlobalVariables); break;
-    case Parser::functionEigenUE: this->EvaluateEigenUE(theGlobalVariables); break;
+    case Parser::functionEigenUE: this->EvaluateEigenUEUserInputGenerators(theGlobalVariables); break;
+    case Parser::functionEigenUEofWeight: this->EvaluateEigenUEDefaultOperators(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -64,33 +65,30 @@ void ParserNode::EvaluateInvariants(GlobalVariables& theGlobalVariables)
   this->outputString=out.str();
 }
 
-void ParserNode::EvaluateEigenUE(GlobalVariables& theGlobalVariables)
-{ /*if (this->owner->DefaultWeylLetter!='B' && this->owner->DefaultWeylRank!=3)
-  { this->SetError(this->errorUnknownOperation);
-    return;
-  }*/
-  if (this->children.size!=1)
+void ParserNode::EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVariables)
+{ if (this->children.size!=1)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
   ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  if (theArgument.ExpressionType==this->typeIntegerOrIndex)
-    this->EvaluateEigenUEDefaultOperators(theGlobalVariables);
-  else if (theArgument.ExpressionType==this->typeRoot)
-    this->EvaluateEigenUEUserInputGenerators(theGlobalVariables);
-  else
-    this->SetError(this->errorBadOrNoArgument);
-}
-
-void ParserNode::EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVariables)
-{ ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  if (theArgument.ExpressionType!=this->typeIntegerOrIndex)
+  if (theArgument.ExpressionType!=this->typeRoot)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  if (theArgument.intValue<0)
+  int RangeRank=this->owner->theHmm.theRange.GetRank();
+  if (theArgument.children.size!=RangeRank)
   { this->SetError(this->errorBadOrNoArgument);
     return;
+  }
+  root theWeight;
+  theWeight.SetSizeExpandOnTopLight(RangeRank);
+  for (int i=0; i< theArgument.children.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[theArgument.children.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typeRational))
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    }
+    theWeight.TheObjects[i]=currentNode.rationalValue;
   }
   std::stringstream log;
   List<ElementUniversalEnveloping> theGenerators;
@@ -101,22 +99,26 @@ void ParserNode::EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVaria
   for (int i=0; i<rankDomain; i++)
   { ElementUniversalEnveloping& currentUE=theGenerators.TheObjects[i];
     currentUE.AssignElementLieAlgebra(this->owner->theHmm.imagesSimpleChevalleyGenerators.TheObjects[i], 0, this->owner->theHmm.theRange);
-    theHsToBeQuotioned.TheObjects[i]=this->owner->theHmm.imagesAllChevalleyGenerators.TheObjects[this->owner->theHmm.theDomain.RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(i)].Hcomponent;
+    int currentHindex=this->owner->theHmm.theDomain.GetNumPosRoots()+i;
+    theHsToBeQuotioned.TheObjects[i]=this->owner->theHmm.imagesAllChevalleyGenerators.TheObjects[currentHindex].Hcomponent;
+    log << "<br>" << this->owner->theHmm.imagesAllChevalleyGenerators.TheObjects[currentHindex].ElementToStringNegativeRootSpacesFirst(false, false, this->owner->theHmm.theRange) << " current h index: " << currentHindex << " corresponding root: " << theHsToBeQuotioned.TheObjects[i].ElementToString();
   }
-  List<ElementUniversalEnveloping> theEigenvectors, theNilradical;
-  int numPosRoots= this->owner->theHmm.theRange.GetNumPosRoots();
-  theNilradical.SetSizeExpandOnTopNoObjectInit(numPosRoots);
-  for (int i=0; i<numPosRoots; i++)
-  { ElementUniversalEnveloping& currentUE=theNilradical.TheObjects[i];
-    currentUE.MakeOneGeneratorCoeffOne(i, 0, this->owner->theHmm.theRange);
-  }
-  this->owner->theHmm.theRange.ComputeCommonAdEigenVectors(theArgument.intValue, theGenerators, theNilradical, theEigenvectors, log, &theHsToBeQuotioned, theGlobalVariables);
+  List<ElementUniversalEnveloping> theEigenvectors;
+  this->owner->theHmm.theRange.ComputeCommonAdEigenVectorsFixedWeight(theWeight, theHsToBeQuotioned, theGenerators, theEigenvectors, log, theGlobalVariables);
   this->ExpressionType=this->typeString;
   this->outputString=log.str();
 }
 
 void ParserNode::EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVariables)
-{ ParserNode& ArrayOfArguments= this->owner->TheObjects[this->children.TheObjects[0]];
+{ if (this->children.size!=1)
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  ParserNode& ArrayOfArguments= this->owner->TheObjects[this->children.TheObjects[0]];
+  if (ArrayOfArguments.ExpressionType!=this->typeRoot)
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
   ParserNode& firstArgument=this->owner->TheObjects[ArrayOfArguments.children.TheObjects[0]];
   if (!(firstArgument.ExpressionType==this->typeIntegerOrIndex && firstArgument.intValue>=1) || ArrayOfArguments.children.size<=1)
   { this->SetError(this->errorBadOrNoArgument);
@@ -140,7 +142,7 @@ void ParserNode::EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVa
   { ElementUniversalEnveloping& currentUE=theNilradical.TheObjects[i];
     currentUE.MakeOneGeneratorCoeffOne(i, 0, this->owner->theHmm.theRange);
   }
-  this->owner->theHmm.theRange.ComputeCommonAdEigenVectors(firstArgument.intValue, theGenerators, theNilradical, theEigenvectors, log, 0, theGlobalVariables);
+  this->owner->theHmm.theRange.ComputeCommonAdEigenVectors(firstArgument.intValue, theGenerators, theNilradical, theEigenvectors, log, theGlobalVariables);
   this->ExpressionType=this->typeString;
   this->outputString=log.str();
 }
@@ -301,6 +303,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="eigenVerma")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionEigenUE);
+    return true;
+  }
+  if (input=="eigenVermaOfWeight")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionEigenUEofWeight);
     return true;
   }
   if (input =="secretSauce")
@@ -2384,7 +2391,6 @@ void ElementUniversalEnveloping::AssignFromCoordinateFormWRTBasis
 void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
 (int theDegree, List<ElementUniversalEnveloping>& theGenerators, List<ElementUniversalEnveloping>& generatorsBeingActedOn,
  List<ElementUniversalEnveloping>& output, std::stringstream& out,
- roots* Hsubs,
  GlobalVariables& theGlobalVariables)
 { SelectionWithMaxMultiplicity theSel;
   PolynomialRationalCoeff::PreferredHashSize=1;
@@ -2431,11 +2437,6 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
       //out << "  (mod Verma relations)";
       //out << "\\end{eqnarray*}</div>";
     }
-    if (Hsubs!=0)
-      for (int j=0; j<Hsubs->size; j++)
-      { tempElt.AssignElementCartan(Hsubs->TheObjects[j], numVars, *this);
-
-      }
   }
   out << "<br>number of monomials of given degree: " << candidateElements.size;
   List<rootPoly> theBasisRootForm;
@@ -2490,4 +2491,139 @@ void RationalFunction::ScaleClearDenominator
   output.SetSizeExpandOnTopNoObjectInit(input.size);
   for (int i=0; i<buffer.size; i++)
     output.TheObjects[i].operator=(buffer.TheObjects[i].Numerator);
+}
+
+void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
+(root& theWeight, roots& theHs, List<ElementUniversalEnveloping>& theGenerators,
+ List<ElementUniversalEnveloping>& output, std::stringstream& out,
+ GlobalVariables& theGlobalVariables)
+{ VectorPartition theVP;
+  PolynomialRationalCoeff::PreferredHashSize=1;
+  int numGenerators= this->GetNumPosRoots();
+  int numVars=this->GetRank();
+  int theRank=this->GetRank();
+  theVP.PartitioningRoots.SetSizeExpandOnTopNoObjectInit(numGenerators);
+  List<ElementUniversalEnveloping> generatorsBeingActedOn;
+  generatorsBeingActedOn.SetSizeExpandOnTopNoObjectInit(numGenerators);
+  theVP.PartitioningRoots.operator=(this->theWeyl.RootsOfBorel);
+  out << "<br>" << theWeight.ElementToString() << "<br> the H's: " << theHs.ElementToString();
+  out << "<br> Partitioning roots: " << theVP.PartitioningRoots.ElementToString();
+  for (int i=0; i<numGenerators; i++)
+  { ElementUniversalEnveloping& currentUE=generatorsBeingActedOn.TheObjects[i];
+    currentUE.MakeOneGeneratorCoeffOne(i, 0, *this);
+  }
+  theVP.theRoot=theWeight;
+  theVP.ComputeAllPartitions();
+  out << "<br><br>" << theVP.ElementToString(true);
+  root accumulatedHweight, tempRoot;
+  for (int i=0; i<theVP.thePartitions.size; i++)
+  { List<int>& currentPartition=theVP.thePartitions.TheObjects[i];
+    accumulatedHweight.MakeZero(theRank);
+    for (int generatorIndex=0; generatorIndex<currentPartition.size; generatorIndex++)
+    { int generatorPower=currentPartition.TheObjects[generatorIndex];
+      accumulatedHweight+=this->theWeyl.RootSystem.TheObjects[this->theWeyl.RootSystem.size-1-generatorIndex]* generatorPower;
+    }
+    bool isGood=true;
+    for (int j=0; j<theHs.size; j++)
+    { root& currentH=theHs.TheObjects[j];
+      Rational theTargetScalar;
+      Rational currentScalar;
+      bool found=false;
+      for (int k=0; k<currentH.size; k++)
+        if (currentH.TheObjects[k]!=0)
+        { tempRoot.MakeEi(currentH.size, k);
+          currentScalar=this->theWeyl.RootScalarCartanRoot(tempRoot, accumulatedHweight);
+          if (!found)
+          { theTargetScalar=currentScalar;
+            found=true;
+          }
+          if (theTargetScalar!=currentScalar)
+          { isGood=false;
+            break;
+          }
+        }
+      if (!isGood)
+        break;
+    }
+    if (isGood)
+    { out << "<br>" << accumulatedHweight.ElementToString();
+      out << " is good";
+    } else
+    { theVP.thePartitions.PopIndexSwapWithLast(i);
+      i--;
+    }
+  }
+  List<ElementUniversalEnveloping> candidateElements, theBracketsOfTheElements;
+  ElementUniversalEnveloping tempElt, tempElt2, currentOutput, Accum, UEUnit;
+  theBracketsOfTheElements.ListActualSizeIncrement=50;
+  theBracketsOfTheElements.size=0;
+  for (int i=0; i<theVP.thePartitions.size; i++)
+  { Accum.MakeConst((Rational) 1, 0, *this);
+    List<int>& currentPartition=theVP.thePartitions.TheObjects[i];
+    for (int generatorIndex=0; generatorIndex<currentPartition.size; generatorIndex++)
+    { int generatorPower=currentPartition.TheObjects[generatorIndex];
+      tempElt.operator=(generatorsBeingActedOn.TheObjects[generatorIndex]);
+      tempElt.RaiseToPower(generatorPower);
+      Accum.MultiplyBy(tempElt);
+    }
+    tempElt.operator=(Accum);
+    tempElt.SetNumVariables(numVars);
+    candidateElements.AddObjectOnTop(tempElt);
+//    out << "<br>" << Accum.ElementToString(true);
+    for (int j=0; j<theGenerators.size; j++)
+    { tempElt2.operator=(theGenerators.TheObjects[j]);
+      tempElt2.SetNumVariables(numVars);
+      tempElt2.LieBracketOnTheRight(tempElt, currentOutput);
+//      currentOutput.ComputeDebugString();
+//      std::cout<< currentOutput.DebugString;
+      currentOutput.Simplify();
+      if (numVars==0)
+        currentOutput.ModOutVermaRelations(true);
+      else
+        currentOutput.ModOutVermaRelations(false);
+      theBracketsOfTheElements.AddObjectOnTop(currentOutput);
+      out << "<br>";
+      //out << "<div class=\"math\">";
+      out << "[" << theGenerators.TheObjects[j].ElementToString() << "," << Accum.ElementToString() << "]=";
+      //out << "\\begin{eqnarray*}&&";
+      out << currentOutput.ElementToString();
+      //out << "  (mod Verma relations)";
+      //out << "\\end{eqnarray*}</div>";
+    }
+  }
+  out << "<br>number of monomials of given degree: " << candidateElements.size;
+  List<rootPoly> theBasisRootForm;
+  ElementUniversalEnveloping theMonBasis;
+  ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements(numVars, theBracketsOfTheElements, theBasisRootForm, theMonBasis, theGlobalVariables);
+  std::string tempS;
+  out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
+  for (int i=0; i<theMonBasis.size; i++)
+    out << theMonBasis.TheObjects[i].ElementToString(false) << ", ";
+  Matrix<RationalFunction> theSystem;
+  theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
+  for (int k=0; k<theGenerators.size; k++)
+    for (int i=0; i<candidateElements.size; i++)
+    { rootPoly& currentRoot=theBasisRootForm.TheObjects[k+i*theGenerators.size];
+      //out << "<br>root index" << i << ": " << currentRoot.ElementToString();
+      for (int j=0; j<currentRoot.size; j++)
+        theSystem.elements[currentRoot.size*k+j][i]=currentRoot.TheObjects[j];
+    }
+  out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ElementToString(false, true) << "</div>";
+  List<List<RationalFunction> > theEigenVectors;
+  PolynomialRationalCoeff::PreferredHashSize=50;
+  RationalFunction oneRF, minusOneRF, zeroRF;
+  oneRF.MakeNVarConst(numVars, (Rational) 1);
+  minusOneRF.MakeNVarConst(numVars, (Rational) -1);
+  zeroRF.MakeNVarConst(numVars, (Rational) 0);
+
+  theSystem.FindZeroEigenSpacE(theEigenVectors, oneRF, minusOneRF, zeroRF, theGlobalVariables);
+  out << "<br> the dim of the eigen space: " << theEigenVectors.size;
+  rootPoly tempProot;
+
+  for (int i=0; i<theEigenVectors.size; i++)
+  { List<RationalFunction>& currentEigen=theEigenVectors.TheObjects[i];
+    RationalFunction::ScaleClearDenominator(currentEigen, tempProot);
+    tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
+    out << "<br>" << tempElt.ElementToString();
+  }
 }

@@ -6535,9 +6535,13 @@ public:
   void ComputeCommonAdEigenVectors
 (int theDegree, List<ElementUniversalEnveloping>& theGenerators, List<ElementUniversalEnveloping>& generatorsBeingActedOn,
  List<ElementUniversalEnveloping>& output, std::stringstream& out,
- roots* Hsubs,
  GlobalVariables& theGlobalVariables)
   ;
+  void ComputeCommonAdEigenVectorsFixedWeight
+(root& theWeight, roots& theHs, List<ElementUniversalEnveloping>& theGenerators,
+ List<ElementUniversalEnveloping>& output, std::stringstream& out,
+ GlobalVariables& theGlobalVariables)
+;
   bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
   void ElementToStringVermaMonomials(std::string& output);
   void ElementToStringEmbedding(std::string& output);
@@ -7205,7 +7209,6 @@ class ParserNode
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
   void EvaluateInvariants(GlobalVariables& theGlobalVariabltes);
-  void EvaluateEigenUE(GlobalVariables& theGlobalVariabltes);
   void EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVariables);
   void EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVariables);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
@@ -7235,7 +7238,7 @@ public:
   };
   enum functionList
   { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos, functionMod, functionInvariants,
-    functionEigenUE
+    functionEigenUE, functionEigenUEofWeight
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

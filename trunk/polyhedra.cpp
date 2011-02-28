@@ -26201,7 +26201,7 @@ void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables&
   }
   if (useHtml)
     out << "<br><br>";
-  out << "\n\nValue: " << this->theValue.ElementToStringValueOnly(true);
+  out << "\n\nValue: " << this->theValue.ElementToStringValueOnly(false);
 
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 //  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
@@ -26453,11 +26453,9 @@ std::string HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDo
 { output.size=0;
 //  this->theDomain.theWeyl.
   roots PosRootsEmbeddings, PosRootsProjections;
-  root imageOfTheWeight;
   std::stringstream out;
   int theDimension=this->theRange.theWeyl.CartanSymmetric.NumRows;
   int theDomainDimension= this->theDomain.theWeyl.CartanSymmetric.NumRows;
-  imageOfTheWeight.MakeZero(theDimension);
   int numPosRootsDomain=this->theDomain.theWeyl.RootsOfBorel.size;
   int numPosRootsRange=this->theRange.theWeyl.RootsOfBorel.size;
   PosRootsEmbeddings.SetSizeExpandOnTopNoObjectInit(numPosRootsDomain);

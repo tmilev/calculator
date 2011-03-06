@@ -35,7 +35,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4( std::stringstream& output);
 extern void static_html3( std::stringstream& output);
 
-const double MaxAllowedComputationTimeInSeconds=20000;
+const double MaxAllowedComputationTimeInSeconds=200000;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
   //  tempRat.RaiseToPower(20);
   //  tempRat.ElementToString(tempS);
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
-  //civilizedInput="eigenVermaOfWeight((1,2,1))";
+  //civilizedInput="f_2f_1+g_1";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;
    // civilizedInput="gcd(x_1^3+x_2^3+x_3^3, x_1^{5}+x_2^{5}+x_3^{5})";
@@ -135,7 +135,38 @@ int main(int argc, char **argv)
   //  EigenVectorComputation theEigen;
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
-    theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+    SSalgebraModule theModule;
+    std::stringstream out;
+    theModule.InduceFromEmbedding(out, theParser.theHmm, theGlobalVariables);
+    List<ElementSimpleLieAlgebra> theBasis;
+    theBasis.SetSizeExpandOnTopNoObjectInit(theParser.theHmm.theRange.GetNumGenerators());
+    /*int domainRank=theParser.theHmm.theDomain.GetRank();
+    int rangeRank=theParser.theHmm.theRange.GetRank();
+    int numDomainPosRoots=theParser.theHmm.theDomain.GetNumPosRoots();
+    int numRangePosRoots=theParser.theHmm.theRange.GetNumPosRoots();*/
+    for (int i=0; i<theParser.theHmm.imagesAllChevalleyGenerators.size; i++)
+    { int theIndex=i;
+      if (i>=6 && i<8)
+        theIndex=3+i;
+      if (i>=8)
+        theIndex=i+7;
+      ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
+      currentElt=theParser.theHmm.imagesAllChevalleyGenerators.TheObjects[i];
+    }
+    for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
+    { int theIndex=i+6;
+      if (i>=3)
+        theIndex=8+i;
+      ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
+      currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
+    }
+    //for (int i=0; i<theBasis.size; i++)
+    //{ std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
+    //}
+    theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
+  } else
+    theParser.testAlgebra.initDefaultOrder(theParser.theHmm.theRange, theGlobalVariables);
   std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
   theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;

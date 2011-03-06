@@ -3760,6 +3760,7 @@ public:
   int SizeWithoutDebugString();
   //works at the moment for linear polynomials only!!!!!!
   void DivByInteger(int x);
+  bool IsAnInteger(){ if (this->size>1) return false; if (this->size==0) return true; if (this->TotalDegree()==0) if (this->TheObjects[0].Coefficient.IsInteger()) return true; return false;};
   bool IsEqualToOne(){ if (this->size!=1) return false; if (this->TotalDegree()!=0) return false; if (this->TheObjects[0].Coefficient!=1) return false; return true;};
   void DivByRational(const Rational& other){Rational tempRat=other; tempRat.Invert(); this->TimesConstant(tempRat);};
   void TimesInteger(int x);
@@ -6323,6 +6324,8 @@ public:
   void AssignVectorNegRootSpacesCartanPosRootSpaces(const root& input, const SemisimpleLieAlgebra& owner);
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
+  bool IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner);
+  bool MustUseBracketsWhenDisplayingMeRaisedToPower();
   void SetCoefficient(const root& indexingRoot, Rational& theCoeff, const SemisimpleLieAlgebra& owner);
   void SetCoefficient(const root& indexingRoot, int theCoeff, const  SemisimpleLieAlgebra& owner);
   //range is the image of the vectors e_i
@@ -6607,8 +6610,161 @@ public:
   bool ApplyHomomorphism(MonomialUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
 };
 
-class ElementUniversalEnveloping;
 
+class SemisimpleLieAlgebraOrdered
+{
+public:
+  SemisimpleLieAlgebra theOwner;
+  //the format of the order is arbitrary except for the following requirements:
+  //-All elements of the order must be either 1) nilpotent or 2) elements of the Cartan
+  //-Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K-1 must
+  //   correspond to the elements of the Cartan.
+  List<ElementSimpleLieAlgebra> theOrder;
+  //The order of chevalley generators is as follows. First come negative roots, then elements of cartan, then positive roots
+  //The weights are in increasing order
+  MatrixLargeRational ChevalleyGeneratorsInCurrentCoords;
+  void AssignGeneratorCoeffOne(int theIndex, ElementSimpleLieAlgebra& output){output.operator=(this->theOrder.TheObjects[theIndex]);};
+  void GetLinearCombinationFrom
+  (ElementSimpleLieAlgebra& input, root& theCoeffs)
+  ;
+  void init
+  (List<ElementSimpleLieAlgebra>& inputOrder, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+;
+ void initDefaultOrder
+  (SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+;
+};
+
+class ElementUniversalEnvelopingOrdered;
+
+class MonomialUniversalEnvelopingOrdered
+{
+  void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnvelopingOrdered& output);
+public:
+  SemisimpleLieAlgebraOrdered* owner;
+  std::string DebugString;
+  std::string ElementToString(bool useLatex);
+  void ComputeDebugString(){this->DebugString=this->ElementToString(false);};
+  // SelectedIndices gives the non-zero powers of the generators participating in the monomial
+  // Powers gives the powers of the generators in the order specified in the owner
+  List<int> generatorsIndices;
+  List<PolynomialRationalCoeff> Powers;
+  PolynomialRationalCoeff Coefficient;
+  void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnvelopingOrdered& output);
+  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const PolynomialRationalCoeff& thePower);
+  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
+  void MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
+  void Nullify(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
+  void ModOutVermaRelations(bool SubHighestWeightWithZeroes);
+  void SetNumVariables(int newNumVars);
+  int HashFunction() const;
+  void GetDegree(PolynomialRationalCoeff& output)
+  { output.Nullify(this->Coefficient.NumVars);
+    for (int i=0; i<this->generatorsIndices.size; i++)
+      output.AddPolynomial(this->Powers.TheObjects[i]);
+  };
+  bool GetElementUniversalEnveloping
+  (ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner)
+  ;
+  bool CommutingLeftIndexAroundRightIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
+  bool CommutingRightIndexAroundLeftIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
+  bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex, MonomialUniversalEnvelopingOrdered& output);
+  void MakeConst(const PolynomialRationalCoeff& theConst, SemisimpleLieAlgebraOrdered& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
+  void Simplify(ElementUniversalEnvelopingOrdered& output);
+  void CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnvelopingOrdered& output);
+  void CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnvelopingOrdered& output);
+  MonomialUniversalEnvelopingOrdered(){this->owner=0;};
+  bool operator==(const MonomialUniversalEnvelopingOrdered& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;};
+  inline void operator=(const MonomialUniversalEnvelopingOrdered& other)
+  { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
+    this->Powers.CopyFromBase(other.Powers);
+    this->Coefficient.Assign(other.Coefficient);
+    this->owner=other.owner;
+  };
+};
+
+class ElementUniversalEnvelopingOrdered : public HashedList<MonomialUniversalEnvelopingOrdered>
+{
+private:
+  void AddMonomialNoCleanUpZeroCoeff(const MonomialUniversalEnvelopingOrdered& input);
+  void CleanUpZeroCoeff();
+  friend class MonomialUniversalEnvelopingOrdered;
+public:
+  std::string DebugString;
+  void ElementToString(std::string& output){this->ElementToString(output, true);};
+  void ElementToString(std::string& output, bool useLatex);
+  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
+  std::string ElementToString(bool useLatex){std::string tempS; this->ElementToString(tempS, useLatex); return tempS;};
+  void ComputeDebugString(){this->ElementToString(this->DebugString);};
+  SemisimpleLieAlgebraOrdered* owner;
+  void AddMonomial(const MonomialUniversalEnvelopingOrdered& input);
+  void AssignElementCartan(const root& input, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
+  void AssignElementLieAlgebra
+  (const ElementSimpleLieAlgebra& input, int numVars, SemisimpleLieAlgebraOrdered& theOwner)
+;
+  void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebraOrdered& owner);
+//  void MakeOneGeneratorCoeffOne(root& rootSpace, int numVars, SemisimpleLieAlgebraOrdered& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), numVars, theOwner);};
+  void Nullify(SemisimpleLieAlgebraOrdered& theOwner);
+  bool AssignElementUniversalEnveloping
+  (ElementUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner)
+  ;
+  bool AssignMonomialUniversalEnveloping
+  (MonomialUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner)
+  ;
+
+  bool GetElementUniversalEnveloping(ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner);
+  bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
+  void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
+  void MakeConst(const PolynomialRationalCoeff& coeff, SemisimpleLieAlgebraOrdered& theOwner){this->Nullify(theOwner); MonomialUniversalEnvelopingOrdered tempMon; tempMon.MakeConst(coeff, theOwner); this->AddMonomial(tempMon);};
+  void Simplify();
+  int GetNumVariables()
+  { if (this->size==0)
+      return 0;
+    else
+      return this->TheObjects[0].Coefficient.NumVars;
+  };
+  inline void MultiplyBy(const ElementUniversalEnvelopingOrdered& other){this->operator*=(other);};
+  void ModOutVermaRelations(){ this->ModOutVermaRelations(false);};
+  void ModOutVermaRelations(bool SubHighestWeightWithZeroes);
+  static void GetCoordinateFormOfSpanOfElements
+  (int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
+;
+  static void GetCoordinateFormOfSpanOfElements(List<ElementUniversalEnvelopingOrdered>& theElements, roots& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables);
+  void AssignFromCoordinateFormWRTBasis
+  (List<ElementUniversalEnveloping>& theBasis, rootPoly& input, SemisimpleLieAlgebraOrdered& owner)
+  ;
+  void SetNumVariables(int newNumVars);
+  void RaiseToPower(int thePower);
+  bool IsAPowerOfASingleGenerator()
+  { if (this->size!=1)
+      return false;
+    MonomialUniversalEnvelopingOrdered& tempMon=this->TheObjects[0];
+    if (!tempMon.Coefficient.IsEqualToOne())
+      return false;
+    if (tempMon.generatorsIndices.size!=1)
+      return false;
+    return true;
+  };
+  void MakeCasimir(SemisimpleLieAlgebra& theOwner, int numVars, GlobalVariables& theGlobalVariables);
+  void LieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
+  void AssignInt(int coeff, int numVars, SemisimpleLieAlgebraOrdered& theOwner){ Rational tempRat=coeff; this->MakeConst(tempRat, numVars, theOwner);};
+  void operator=(const ElementUniversalEnvelopingOrdered& other)
+  { this->CopyFromHash(other);
+    this->owner=other.owner;
+  };
+  void operator+=(const ElementUniversalEnvelopingOrdered& other);
+  void operator+=(int other);
+  void operator+=(const Rational& other);
+  void operator-=(const ElementUniversalEnvelopingOrdered& other);
+  void operator*=(const ElementUniversalEnvelopingOrdered& other);
+  void operator/=(const Rational& other);
+  void operator*=(const Rational& other);
+  void operator*=(const PolynomialRationalCoeff& other);
+  ElementUniversalEnvelopingOrdered(){this->owner=0;};
+  ElementUniversalEnvelopingOrdered(const ElementUniversalEnvelopingOrdered& other){this->operator=(other);};
+};
+
+class ElementUniversalEnveloping;
 class MonomialUniversalEnveloping
 {
 private:
@@ -7159,6 +7315,7 @@ class ParserNode
   Rational rationalValue;
   ElementWeylAlgebra WeylAlgebraElement;
   ElementUniversalEnveloping UEElement;
+  ElementUniversalEnvelopingOrdered UEElementOrdered;
   void operator=(const ParserNode& other)
   { this->owner=other.owner;
     this->ExpressionType=other.ExpressionType;
@@ -7171,6 +7328,7 @@ class ParserNode
     this->rationalValue=other.rationalValue;
     this->WeylAlgebraElement=other.WeylAlgebraElement;
     this->UEElement=other.UEElement;
+    this->UEElementOrdered=other.UEElementOrdered;
     this->ContextLieAlgebra=other.ContextLieAlgebra;
     this->polyValue=other.polyValue;
     this->outputString= other.outputString;
@@ -7181,8 +7339,8 @@ class ParserNode
   bool ConvertToType(int theType);
   bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEelement, typeWeylAlgebraElement, typeRoot,
-  typeString,
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEElementOrdered,
+  typeUEelement, typeWeylAlgebraElement, typeRoot, typeString,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation, errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax};
@@ -7214,6 +7372,7 @@ class ParserNode
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
   void EvaluateFunction(GlobalVariables& theGlobalVariables);
   bool AllChildrenAreOfDefinedNonErrorType();
+  bool OneChildrenOrMoreAreOfType(int theType);
   ParserNode();
 };
 
@@ -7228,12 +7387,13 @@ public:
   int DefaultWeylRank;
   ParserNode theValue;
   HomomorphismSemisimpleLieAlgebra theHmm;
+  SemisimpleLieAlgebraOrdered testAlgebra;
 //  SemisimpleLieAlgebra theLieAlgebra;
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); };
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
     tokenRoot, tokenFunction, tokenFunctionNoArgument
   };
   enum functionList
@@ -7306,12 +7466,8 @@ class DrawTextOperation
 {
 public:
   double X1; double Y1; std::string theText; int ColorIndex; int fontSize; int TextStyle;
-  void init(double x1, double y1, const std::string& inputText, int color, int theFontSize, int theTextStyle)
-  { this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color; this->fontSize=theFontSize; this->TextStyle=theTextStyle;
-  };
-  void operator=(const DrawTextOperation& other)
-  { this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle;
-  };
+  void init(double x1, double y1, const std::string& inputText, int color, int theFontSize, int theTextStyle){ this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color; this->fontSize=theFontSize; this->TextStyle=theTextStyle;};
+  void operator=(const DrawTextOperation& other){ this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle; };
 };
 
 class DrawLineOperation
@@ -7323,12 +7479,8 @@ public:
   double Y2;
   int thePenStyle;
   int ColorIndex;
-  inline void init(double x1, double y1, double x2, double y2, unsigned long PenStyle, int colorIndex)
-  { this->X1=x1; this->Y1= y1; this->X2=x2; this->Y2=y2; this->thePenStyle=PenStyle; this->ColorIndex= colorIndex;
-  };
-  void operator=(const DrawLineOperation& other)
-  { this->X1=other.X1; this->Y1=other.Y1; this->X2=other.X2; this->Y2=other.Y2; this->thePenStyle=other.thePenStyle; this->ColorIndex=other.ColorIndex;
-  };
+  inline void init(double x1, double y1, double x2, double y2, unsigned long PenStyle, int colorIndex){ this->X1=x1; this->Y1= y1; this->X2=x2; this->Y2=y2; this->thePenStyle=PenStyle; this->ColorIndex= colorIndex;};
+  void operator=(const DrawLineOperation& other){ this->X1=other.X1; this->Y1=other.Y1; this->X2=other.X2; this->Y2=other.Y2; this->thePenStyle=other.thePenStyle; this->ColorIndex=other.ColorIndex;};
 };
 
 class DrawLineBetweenTwoRootsOperation
@@ -7338,12 +7490,8 @@ public:
   root v2;
   int thePenStyle;
   int ColorIndex;
-  void init(root& input1, root& input2, unsigned long PenStyle, int colorIndex)
-  { this->v1=input1; this->v2=input2; this->thePenStyle=PenStyle; this->ColorIndex=colorIndex;
-  };
-  void operator=(const DrawLineBetweenTwoRootsOperation& other)
-  { this->v1=other.v1; this->v2=other.v2; this->thePenStyle=other.thePenStyle; this->ColorIndex=other.ColorIndex;
-  };
+  void init(root& input1, root& input2, unsigned long PenStyle, int colorIndex){ this->v1=input1; this->v2=input2; this->thePenStyle=PenStyle; this->ColorIndex=colorIndex; };
+  void operator=(const DrawLineBetweenTwoRootsOperation& other){ this->v1=other.v1; this->v2=other.v2; this->thePenStyle=other.thePenStyle; this->ColorIndex=other.ColorIndex;};
 };
 
 class DrawTextAtVectorOperation
@@ -7354,12 +7502,8 @@ public:
   int ColorIndex;
   int fontSize;
   int TextStyle;
-  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
-  { this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText; this->fontSize=theFontSize; this->TextStyle=theTextStyle;
-  };
-  void operator=(const DrawTextAtVectorOperation& other)
-  { this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle;
-  };
+  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle){ this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText; this->fontSize=theFontSize; this->TextStyle=theTextStyle; };
+  void operator=(const DrawTextAtVectorOperation& other){ this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle;};
 };
 
 class DrawOperations
@@ -7383,12 +7527,7 @@ class DrawOperations
     this->IndexNthDrawOperation.size=0; this->TypeNthDrawOperation.size=0;
     this->theDrawTextOperations.size=0; this->theDrawLineOperations.size=0; this->theDrawLineBetweenTwoRootsOperations.size=0; this->theDrawTextAtVectorOperations.size=0;
   }
-  enum DrawOperationType
-  { typeDrawLine,
-    typeDrawText,
-    typeDrawLineBetweenTwoVectors,
-    typeDrawTextAtVector,
-  };
+  enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, };
 };
 
 class DrawingVariables
@@ -7939,7 +8078,6 @@ public:
   void mapMonomialToEmbedding
   (Monomial<Rational>& input, ElementUniversalEnveloping& Accum, SemisimpleLieAlgebra& owner, std::stringstream& out, GlobalVariables& theGlobalVariables)
   ;
-
   void InduceFromEmbedding(std::stringstream& out, HomomorphismSemisimpleLieAlgebra& theHmm, GlobalVariables& theGlobalVariables);
   void ActOnPolynomialOverModule
   (const ElementSimpleLieAlgebra& theActingElement, const PolynomialOverModule& theArgument, PolynomialOverModule& output)

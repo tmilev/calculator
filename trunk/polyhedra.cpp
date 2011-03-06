@@ -163,6 +163,8 @@ template < > int HashedList<coneRelation>::PreferredHashSize=1000;
 template < > int HashedList<slTwo>::PreferredHashSize=1000;
 template < > int HashedList<ElementSimpleLieAlgebra>::PreferredHashSize=100;
 template < > int HashedList<MonomialUniversalEnveloping>::PreferredHashSize=10000;
+template < > int HashedList<MonomialUniversalEnvelopingOrdered>::PreferredHashSize=20;
+
 
 template < > int List<affineCone>::ListActualSizeIncrement=1;
 template < > int List<CombinatorialChamber*>::ListActualSizeIncrement=1000;
@@ -221,6 +223,8 @@ template < > int List<TemplatePolynomial<Monomial<Integer>, Integer> >::ListActu
 template < > int List<TemplatePolynomial<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>, Integer> >::ListActualSizeIncrement=20;
 template < > int List<LargeIntUnsigned>::ListActualSizeIncrement=20;
 template < > int List<double>::ListActualSizeIncrement=20;
+template < > int List<MonomialUniversalEnvelopingOrdered>::ListActualSizeIncrement=20;
+
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
 template < > std::string Matrix<Rational>::MatrixElementSeparator= ", \t";
@@ -25253,6 +25257,7 @@ std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVar
   this->ComputeDebugString(theGlobalVariables);
   this->Evaluate(theGlobalVariables);
   this->theValue.UEElement.Simplify();
+  this->theValue.UEElementOrdered.Simplify();
   std::stringstream out;
   out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueOnly(true);
   return out.str();
@@ -25440,7 +25445,7 @@ bool Parser::ApplyRules(int lookAheadToken)
   { this->AddIntegerOnTopConvertToExpression();
     return true;
   }
-  if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC || tokenLast==this->tokenVariable)
+  if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenF || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC || tokenLast==this->tokenVariable)
   { this->AddLetterExpressionOnTop();
     return true;
   }
@@ -25690,6 +25695,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenTimes: this->EvaluateTimes(theGlobalVariables); break;
     case Parser::tokenG: break;
     case Parser::tokenH: break;
+    case Parser::tokenF: break;
     case Parser::tokenVariable: break;
     case Parser::tokenC: this->ExpressionType=this->typeUEelement; this->UEElement.MakeCasimir(*this->ContextLieAlgebra, this->owner->NumVariables, theGlobalVariables); break;
     case Parser::tokenDivide: this->EvaluateDivide(theGlobalVariables); break;
@@ -25802,6 +25808,21 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     this->ExpressionType=this->typeUEelement;
     return;
   }
+  if (leftNode.Operation==Parser::tokenF)
+  { if (theIndex>0 && theIndex<=this->ContextLieAlgebra->GetNumPosRoots())
+      theIndex+= this->ContextLieAlgebra->GetNumPosRoots()+this->ContextLieAlgebra->GetRank()-1;
+    else if (theIndex<=0)
+      theIndex+= this->ContextLieAlgebra->GetNumPosRoots();
+    else
+      theIndex--;
+    if (theIndex<0 || theIndex>this->ContextLieAlgebra->theWeyl.RootSystem.size+this->ContextLieAlgebra->GetRank())
+    { this->SetError(this->errorBadIndex);
+      return;
+    }
+    this->UEElementOrdered.MakeOneGeneratorCoeffOne(theIndex, this->owner->NumVariables, this->owner->testAlgebra);
+    this->ExpressionType=this->typeUEElementOrdered;
+    return;
+  }
   if (leftNode.Operation==Parser::tokenX)
     leftNode.Operation=Parser::tokenVariable;
   if (leftNode.Operation==Parser::tokenVariable)
@@ -25818,46 +25839,8 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
 
 bool ParserNode::ConvertChildrenToType(int theType)
 { for (int i=0; i<this->children.size; i++)
-  { ParserNode& current= this->owner->TheObjects[this->children.TheObjects[i]];
-    if (!current.ConvertToType(theType))
+    if (!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(theType))
       return false;
-  }
-  return true;
-}
-
-bool ParserNode::ConvertToType(int theType)
-{ if (this->ExpressionType==this->typeError)
-    return false;
-  if (theType==this->typeUndefined)
-    return false;
-  if (this->ExpressionType==this->typePoly)
-      if (this->polyValue.NumVars< this->owner->NumVariables)
-        this->polyValue.SetNumVariablesSubDeletedVarsByOne((short)this->owner->NumVariables);
-  if (this->ExpressionType==this->typeUEelement)
-    this->UEElement.SetNumVariables(this->owner->NumVariables);
-  if (this->ExpressionType==theType)
-    return true;
-  if (this->ExpressionType> theType)
-    return false;
-  //we have eliminated the corner cases. Time to do some real conversion :)
-  if (this->ExpressionType==this->typeIntegerOrIndex)
-  { if (theType==this->typeRational)
-      this->rationalValue= this->intValue;
-    if (theType==this->typePoly)
-      this->polyValue.MakeNVarConst((short) this->owner->NumVariables, (Rational) this->intValue);
-    if (theType==this->typeUEelement)
-      this->UEElement.AssignInt(this->intValue, (short)this->owner->NumVariables, *this->ContextLieAlgebra);
-  }
-  if (this->ExpressionType==this->typeRational)
-  { if (theType==this->typePoly)
-      this->polyValue.MakeNVarConst((short)this->owner->NumVariables, this->rationalValue);
-    if (theType==this->typeUEelement)
-      this->UEElement.MakeConst(this->rationalValue, this->owner->NumVariables, *this->ContextLieAlgebra);
-  }
-  if (this->ExpressionType==this->typePoly)
-    if (theType==this->typeUEelement)
-      this->UEElement.MakeConst(this->polyValue, *this->ContextLieAlgebra);
-  this->ExpressionType=theType;
   return true;
 }
 
@@ -25874,6 +25857,7 @@ void ParserNode::InitForMultiplication()
   this->polyValue.MakeNVarConst((short)this->owner->NumVariables, (Rational)1);
   this->rationalValue=1;
   this->UEElement.AssignInt(1, this->owner->NumVariables, *this->ContextLieAlgebra);
+  this->UEElementOrdered.AssignInt(1, this->owner->NumVariables, this->owner->testAlgebra);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
@@ -25937,6 +25921,7 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
       case ParserNode::typeRational: if (i==0) this->rationalValue+=currentChild.rationalValue; else this->rationalValue-=currentChild.rationalValue; break;
       case ParserNode::typePoly: if(i==0) this->polyValue.AddPolynomial(currentChild.polyValue); else this->polyValue.Subtract(currentChild.polyValue); break;
       case ParserNode::typeUEelement: if (i==0) this->UEElement+=currentChild.UEElement; else this->UEElement-=currentChild.UEElement; break;
+      case ParserNode::typeUEElementOrdered: if (i==0) this->UEElementOrdered+=currentChild.UEElementOrdered; else this->UEElementOrdered-=currentChild.UEElementOrdered; break;
       default: this->ExpressionType=this->typeError; return;
     }
   }
@@ -25959,6 +25944,13 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
   }
 }
 
+bool ParserNode::OneChildrenOrMoreAreOfType(int theType)
+{ for (int i=0; i<this->children.size; i++)
+    if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==theType)
+      return true;
+  return false;
+}
+
 bool ParserNode::AllChildrenAreOfDefinedNonErrorType()
 { for (int i=0; i<this->children.size; i++)
     if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeError || this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeUndefined)
@@ -25977,14 +25969,25 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
-  this->ExpressionType=this->typeUEelement;
+  this->ExpressionType= this->typeUEelement;
+  if (this->OneChildrenOrMoreAreOfType(this->typeUEElementOrdered))
+    this->ExpressionType=this->typeUEElementOrdered;
   for (int i=0; i<this->children.size; i++)
-  { ParserNode& current= this->owner->TheObjects[this->children.TheObjects[i]];
-    current.ConvertToType(this->typeUEelement);
+    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(this->ExpressionType))
+    { this->SetError(this->errorDunnoHowToDoOperation);
+      return;
+    }
+  if (this->ExpressionType==this->typeUEelement)
+  { ElementUniversalEnveloping& left= this->owner->TheObjects[this->children.TheObjects[0]].UEElement;
+    ElementUniversalEnveloping& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElement;
+    left.LieBracketOnTheRight(right, this->UEElement);
+  } else if (this->ExpressionType==this->typeUEElementOrdered)
+  { ElementUniversalEnvelopingOrdered& left=this->owner->TheObjects[this->children.TheObjects[0]].UEElementOrdered;
+    ElementUniversalEnvelopingOrdered& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElementOrdered;
+    left.LieBracketOnTheRight(right, this->UEElementOrdered);
+  } else
+  { this->SetError(this->errorProgramming);
   }
-  ElementUniversalEnveloping& left= this->owner->TheObjects[this->children.TheObjects[0]].UEElement;
-  ElementUniversalEnveloping& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElement;
-  left.LieBracketOnTheRight(right, this->UEElement);
 }
 
 void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)
@@ -26162,6 +26165,7 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
       case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
       case ParserNode::typePoly: this->polyValue.MultiplyBy(currentChild.polyValue); break;
       case ParserNode::typeUEelement: this->UEElement*=currentChild.UEElement; break;
+      case ParserNode::typeUEElementOrdered: this->UEElementOrdered*=currentChild.UEElementOrdered; break;
       default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
     }
   }
@@ -26246,6 +26250,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenRoot: out << "root"; break;
     case Parser::tokenFunction: out << "function"; break;
     case Parser::tokenFunctionNoArgument: out << "functionNoArgument"; break;
+    case Parser::tokenF: out << "f"; break;
     default: out << "?"; break;
   }
 }
@@ -26281,13 +26286,15 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
       out << " a rational number of value: <div class=\"math\">" << this->rationalValue.ElementToString() << "</div>";
   }
   if (this->ExpressionType==this->typeRoot)
-  { out << " is a an ordered tuple ";
-  }
+    out << " is a an ordered tuple ";
   if (this->ExpressionType==this->typePoly)
   { if (!useHtml)
       out << " a polynomial of value: " << this->polyValue.ElementToString();
     else
       out << " a polynomial of value: <div class=\"math\">\\begin{eqnarray*}&&" << this->polyValue.ElementToString() << "\\end{eqnarray*}</div>";
+  }
+  if (this->ExpressionType==this->typeUEElementOrdered)
+  { out << "an element of U(g) ordered: <div class=\"math\">" << this->UEElementOrdered.ElementToString(true) << "</div>";
   }
   if (this->ExpressionType==this->typeUEelement)
   { if (!useHtml)
@@ -26344,6 +26351,10 @@ void ParserNode::ElementToString(std::string& output)
   if (this->ExpressionType==this->typeUEelement)
   { this->UEElement.ElementToString(tempS);
     out << " is the universal enveloping algebra element: " << tempS;
+  }
+  if (this->ExpressionType==this->typeUEElementOrdered)
+  { this->UEElementOrdered.ElementToString(tempS);
+    out << "is the universal enveloping algebra element (ordered): " << tempS;
   }
   if (this->children.size>0)
   { out << " Its children are: ";
@@ -26447,130 +26458,6 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
 //    std::cout << "<br>";
   }
   return true;
-}
-
-std::string HomomorphismSemisimpleLieAlgebra::WriteAllUEMonomialsWithWeightWRTDomain(List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables)
-{ output.size=0;
-//  this->theDomain.theWeyl.
-  roots PosRootsEmbeddings, PosRootsProjections;
-  std::stringstream out;
-  int theDimension=this->theRange.theWeyl.CartanSymmetric.NumRows;
-  int theDomainDimension= this->theDomain.theWeyl.CartanSymmetric.NumRows;
-  int numPosRootsDomain=this->theDomain.theWeyl.RootsOfBorel.size;
-  int numPosRootsRange=this->theRange.theWeyl.RootsOfBorel.size;
-  PosRootsEmbeddings.SetSizeExpandOnTopNoObjectInit(numPosRootsDomain);
-  for (int i=0; i<numPosRootsDomain; i++)
-  { PosRootsEmbeddings.TheObjects[i].MakeZero(theDimension);
-    for (int j=0; j<theDomainDimension; j++)
-      PosRootsEmbeddings.TheObjects[i]+=this->imagesAllChevalleyGenerators.TheObjects[numPosRootsDomain+j].Hcomponent*this->theDomain.theWeyl.RootsOfBorel.TheObjects[i].TheObjects[j];
-  }
-  out << "Embeddings of roots:" << PosRootsEmbeddings.ElementToString(false, true, true);
-  PosRootsProjections.SetSizeExpandOnTopNoObjectInit(numPosRootsRange);
-  for (int i=0; i<numPosRootsRange; i++)
-    this->ProjectOntoSmallCartan(this->theRange.theWeyl.RootsOfBorel.TheObjects[i], PosRootsProjections.TheObjects[i], theGlobalVariables);
-  out << "<br>Projections of roots: " << PosRootsProjections.ElementToString(false, true, true);
-  VectorPartition theVP;
-  theVP.PartitioningRoots=PosRootsProjections;
-  theVP.theRoot=theWeight;
-  theVP.ComputeAllPartitions();
-  out << "the partitions: <br>" << theVP.ElementToString(true);
-  output.SetSizeExpandOnTopNoObjectInit(theVP.thePartitions.size);
-  MonomialUniversalEnveloping currentMon;
-  ElementUniversalEnveloping tempElt;
-  for (int i=0; i<output.size; i++)
-  { currentMon.Nullify(theDomainDimension, this->theRange);
-    Rational tempRat=1;
-    currentMon.Coefficient.ComputeDebugString();
-    currentMon.Coefficient.MakeNVarConst((short)theDimension, tempRat);
-    for (int j=0; j<theVP.thePartitions.TheObjects[i].size; j++)
-      currentMon.MultiplyByGeneratorPowerOnTheRight(this->theRange.RootToIndexInUE(-this->theRange.theWeyl.RootsOfBorel.TheObjects[j]), theVP.thePartitions.TheObjects[i].TheObjects[j]);
-    out << currentMon.ElementToString(false) << "<br>" ;
-    tempElt.Nullify(this->theRange);
-    tempElt.AddObjectOnTopHash(currentMon);
-    output.TheObjects[i]=tempElt;
-  }
-  List<List<ElementUniversalEnveloping> > targets;
-  List<List<ElementUniversalEnveloping> > targetsNoMod;
-  targets.SetSizeExpandOnTopNoObjectInit(theDomainDimension);
-  targetsNoMod.SetSizeExpandOnTopNoObjectInit(theDomainDimension);
-  ElementUniversalEnveloping theSimpleGenerator;
-  std::string beginMath = "<DIV class=\"math\" scale=\"50\">";
-  std::string endMath = "</DIV>";
-  List<List<PolynomialRationalCoeff> > theSystem;
-  theSystem.size=0;
-  theSystem.SetSizeExpandOnTopNoObjectInit(output.size);
-  ElementUniversalEnveloping basisMonomialBuffer;
-  for (int i=0; i<targets.size; i++)
-  { List<ElementUniversalEnveloping>& currentTargets= targets.TheObjects[i];
-    List<ElementUniversalEnveloping>& currentTargetsNoMod= targetsNoMod.TheObjects[i];
-    theSimpleGenerator.AssignElementLieAlgebra(this->imagesSimpleChevalleyGenerators.TheObjects[i], theDimension, this->theRange);
-    theSimpleGenerator.ComputeDebugString();
-    out << "Generator number " << i+1 << ": " << beginMath;
-    for (int j=0; j<output.size; j++)
-    { theSimpleGenerator.LieBracketOnTheRight(output.TheObjects[j], tempElt);
-      tempElt.Simplify();
-      currentTargetsNoMod.AddObjectOnTop(tempElt);
-      tempElt.ModOutVermaRelations();
-      currentTargets.AddObjectOnTop(tempElt);
-      out << tempElt.ElementToString() << ", \\quad ";
-    }
-    out << endMath << "\n<br>";
-    out << "Elements before modding out: " << beginMath;
-    for (int j=0; j<output.size; j++)
-      out << currentTargetsNoMod.TheObjects[j].ElementToString() << ", \\quad ";
-    out << endMath << "\n<br>";
-    List<rootPoly> tempList;
-    //Let the monomials corresponding to the given partition be m_1, \dots, m_l
-    //Let the Chevalley generators of the smaller Lie algebra be k_1,\dots, k_s
-    //Then the elements [k_i, m_1], \dots, [k_i, m_l] are recorded in this order in currentTargets
-    ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements(numPosRootsRange+theDimension, currentTargets, tempList, basisMonomialBuffer, theGlobalVariables);
-    out << "Coordinate form of the above elements: ";
-    for (int j=0; j<tempList.size; j++)
-    { out << tempList.TheObjects[j].ElementToString() << ",";
-      //theSystem holds in the j^th row the action on the monomial m_j
-      theSystem.TheObjects[j].AddListOnTop(tempList.TheObjects[j]);
-    }
-    out << "<br>";
-  }
-  Matrix<RationalFunction> matSystem;
-  int numEquations=theSystem.TheObjects[0].size;
-  matSystem.init(numEquations, output.size);
-  for (int i=0; i<matSystem.NumRows; i++)
-    for (int j=0; j<matSystem.NumCols; j++)
-      matSystem.elements[i][j]=theSystem.TheObjects[j].TheObjects[i];
-  matSystem.ComputeDebugString(false, true);
-  out << "<br>The system we need to solve:<br>" << beginMath << matSystem.DebugString << endMath << "<br>";
-  RationalFunction ZeroPoly, UnitPoly, MinusUnitPoly;
-  ZeroPoly.MakeNVarConst(theDimension, (Rational) 0);
-  UnitPoly.MakeNVarConst(theDimension, (Rational) 1);
-  MinusUnitPoly.MakeNVarConst(theDimension, (Rational) -1);
-  List<List<RationalFunction> > theAnswer;
-  matSystem.FindZeroEigenSpacE(theAnswer, UnitPoly, MinusUnitPoly, ZeroPoly, theGlobalVariables);
-  out << "The found solutions: <br>";
-  rootRationalFunction tempRatRoot;
-  std::string tempS;
-  for (int i=0; i<theAnswer.size; i++)
-  { tempRatRoot.CopyFromBase(theAnswer.TheObjects[i]);
-    out << beginMath << tempRatRoot.ElementToString() << endMath << "<br>";
-    out << "Corresponding expression in monomial form: " << beginMath;
-    for (int j=0; j<output.size; j++)
-    { RationalFunction& currentCoeff= theAnswer.TheObjects[i].TheObjects[j];
-      if (!currentCoeff.IsEqualToZero())
-      { tempS= currentCoeff.ElementToString(true, false);
-        if (tempS=="-1")
-          out << "-";
-        else
-        { if (j!=0)
-            out << "+";
-          if (tempS!="1")
-            out << "(" << tempS << ")";
-        }
-        out << output.TheObjects[j].ElementToString();
-      }
-    }
-    out << endMath << "<br>";
-  }
-  return out.str();
 }
 
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables)
@@ -26683,8 +26570,9 @@ void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, bool
     if  (useHtml)
       out << "<br>";
   }
-
   output=out.str();
 }
+
+
 
 

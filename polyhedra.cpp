@@ -25742,6 +25742,18 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
           this->ExpressionType=this->typeUEelement;
           return;
         }
+     if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEElementOrdered)
+      if (leftNode.UEElementOrdered.IsAPowerOfASingleGenerator())
+        { rightNode.ConvertToType(this->typePoly);
+          leftNode.UEElementOrdered.SetNumVariables(this->owner->NumVariables);
+          MonomialUniversalEnvelopingOrdered tempMon;
+          tempMon.operator=(leftNode.UEElementOrdered.TheObjects[0]);
+          tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue);
+          this->UEElementOrdered.Nullify(this->owner->testAlgebra);
+          this->UEElementOrdered.AddMonomial(tempMon);
+          this->ExpressionType=this->typeUEElementOrdered;
+          return;
+        }
     this->SetError(this->errorDunnoHowToDoOperation);
     return;
   }

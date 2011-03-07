@@ -1113,7 +1113,7 @@ void ElementUniversalEnveloping::operator*=(const ElementUniversalEnveloping& ot
 }
 
 void ElementUniversalEnveloping::SetNumVariables(int newNumVars)
-{ this->ComputeDebugString();
+{ //this->ComputeDebugString();
   if (this->size==0)
     return;
   int currentNumVars=this->TheObjects[0].Coefficient.NumVars;
@@ -1127,9 +1127,9 @@ void ElementUniversalEnveloping::SetNumVariables(int newNumVars)
     tempMon.SetNumVariables(newNumVars);
     Accum.AddMonomial(tempMon);
   }
-  Accum.ComputeDebugString();
+//  Accum.ComputeDebugString();
   this->operator=(Accum);
-  this->ComputeDebugString();
+ // this->ComputeDebugString();
 }
 
 void ElementUniversalEnveloping::RaiseToPower(int thePower)
@@ -3460,3 +3460,30 @@ bool ElementSimpleLieAlgebra::IsACoeffOneChevalleyGenerator(int& outputGenerator
   return true;
 }
 
+void ElementUniversalEnvelopingOrdered::SetNumVariables(int newNumVars)
+{ //this->ComputeDebugString();
+  if (this->size==0)
+    return;
+  int currentNumVars=this->TheObjects[0].Coefficient.NumVars;
+  if (currentNumVars==newNumVars)
+    return;
+  ElementUniversalEnvelopingOrdered Accum;
+  Accum.Nullify(*this->owner);
+  MonomialUniversalEnvelopingOrdered tempMon;
+  for (int i=0; i<this->size; i++)
+  { tempMon=this->TheObjects[i];
+    tempMon.SetNumVariables(newNumVars);
+    Accum.AddMonomial(tempMon);
+  }
+//  Accum.ComputeDebugString();
+  this->operator=(Accum);
+ // this->ComputeDebugString();
+}
+
+void MonomialUniversalEnvelopingOrdered::SetNumVariables(int newNumVars)
+{ if (this->Coefficient.NumVars==newNumVars)
+    return;
+  this->Coefficient.SetNumVariablesSubDeletedVarsByOne((short)newNumVars);
+  for(int i=0; i<this->generatorsIndices.size; i++)
+    this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne((short)newNumVars);
+}

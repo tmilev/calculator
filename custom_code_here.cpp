@@ -3036,13 +3036,13 @@ void MonomialUniversalEnvelopingOrdered::CommuteConsecutiveIndicesLeftIndexAroun
     //theRightPower.ComputeDebugString();
     //adResult.ComputeDebugString(*this->owner, false, false);
     //tempMon.ComputeDebugString();
-    tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
     //tempMon.ComputeDebugString();
     this->owner->GetLinearCombinationFrom(adResult, theCoeffs);
     for (int i=0; i<theCoeffs.size; i++)
       if(theCoeffs.TheObjects[i]!=0)
       { int theNewGeneratorIndex= i;
         tempMon=startMon;
+        tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
         tempMon.Coefficient=acquiredCoefficient;
         tempMon.Coefficient.TimesConstant(theCoeffs.TheObjects[i]);
         tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, polyOne);
@@ -3355,6 +3355,8 @@ bool ParserNode::ConvertToType(int theType)
   if (this->ExpressionType==this->typePoly)
       if (this->polyValue.NumVars< this->owner->NumVariables)
         this->polyValue.SetNumVariablesSubDeletedVarsByOne((short)this->owner->NumVariables);
+  if (this->ExpressionType==this->typeUEElementOrdered)
+    this->UEElementOrdered.SetNumVariables(this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEelement)
     this->UEElement.SetNumVariables(this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEelement && theType==this->typeUEElementOrdered)
@@ -3486,4 +3488,51 @@ void MonomialUniversalEnvelopingOrdered::SetNumVariables(int newNumVars)
   this->Coefficient.SetNumVariablesSubDeletedVarsByOne((short)newNumVars);
   for(int i=0; i<this->generatorsIndices.size; i++)
     this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne((short)newNumVars);
+}
+
+std::string ParserNode::ElementToStringValueOnly(bool useHtml)
+{ std::stringstream out;
+  std::stringstream LatexOutput;
+  if (this->ExpressionType==this->typeIntegerOrIndex)
+  { out << " an integer of value: ";
+    LatexOutput << this->intValue;
+  }
+  if (this->ExpressionType==this->typeRational)
+  { out << " a rational number of value: ";
+    LatexOutput << this->rationalValue.ElementToString();
+  }
+  if (this->ExpressionType==this->typeRoot)
+    out << " is a an ordered tuple ";
+  if (this->ExpressionType==this->typePoly)
+  { out << " a polynomial of value: ";
+    LatexOutput << this->polyValue.ElementToString();
+  }
+  if (this->ExpressionType==this->typeUEElementOrdered)
+  { out << "an element of U(g) ordered:";
+    LatexOutput << this->UEElementOrdered.ElementToString(true);
+  }
+  if (this->ExpressionType==this->typeUEelement)
+  { out << " an element of U(g) of value: ";
+    LatexOutput << this->UEElement.ElementToString();
+  }
+  if (this->outputString!="")
+    out << "a printout: " << this->outputString;
+  if (this->ExpressionType==this->typeError)
+    out << this->ElementToStringErrorCode(useHtml);
+  std::string tempS=LatexOutput.str();
+  if (tempS!="")
+  { if (!useHtml)
+      out << tempS;
+    else
+    { out << "\n<div id=\"theResult\" class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+      out << tempS;
+      out << "\\end{eqnarray*}</div>";
+      out << "<textarea id=\"theResultLatex\" style=\"display: none\">";
+      out << "\\begin{eqnarray*}" << tempS << "\\end{eqnarray*}";
+      out << "</textarea>";
+      out << "<br>" << "\n<button id=\"ButtonToggleLatex\" onclick=\"switchMenu('theResult'); switchMenu('theResultLatex');\""
+            << "\">Show LaTeX/Show eye candy</button>";
+    }
+  }
+  return out.str();
 }

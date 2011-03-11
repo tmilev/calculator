@@ -26283,44 +26283,6 @@ void Parser::ComputeNumberOfVariablesAndAdjustNodes()
     this->TheObjects[i].WeylAlgebraElement.SetNumVariablesPreserveExistingOnes(this->NumVariables);
 }
 
-std::string ParserNode::ElementToStringValueOnly(bool useHtml)
-{ std::stringstream out;
-  if (this->ExpressionType==this->typeIntegerOrIndex)
-  { if (!useHtml)
-      out << " an integer of value: " << this->intValue;
-    else
-      out << " an integer of value: <div class=\"math\">" << this->intValue << "</div>";
-  }
-  if (this->ExpressionType==this->typeRational)
-  { if (!useHtml)
-      out << " a rational number of value: " << this->rationalValue.ElementToString();
-    else
-      out << " a rational number of value: <div class=\"math\">" << this->rationalValue.ElementToString() << "</div>";
-  }
-  if (this->ExpressionType==this->typeRoot)
-    out << " is a an ordered tuple ";
-  if (this->ExpressionType==this->typePoly)
-  { if (!useHtml)
-      out << " a polynomial of value: " << this->polyValue.ElementToString();
-    else
-      out << " a polynomial of value: <div class=\"math\">\\begin{eqnarray*}&&" << this->polyValue.ElementToString() << "\\end{eqnarray*}</div>";
-  }
-  if (this->ExpressionType==this->typeUEElementOrdered)
-  { out << "an element of U(g) ordered: <div class=\"math\">" << this->UEElementOrdered.ElementToString(true) << "</div>";
-  }
-  if (this->ExpressionType==this->typeUEelement)
-  { if (!useHtml)
-      out << " an element of U(g) of value: " << this->UEElement.ElementToString();
-    else
-      out << " an element of U(g) of value: <div class=\"math\">\\begin{eqnarray*}&&" << this->UEElement.ElementToString(true) << "\\end{eqnarray*}</div>";
-  }
-  if (this->outputString!="")
-    out << "a printout: " << this->outputString;
-  if (this->ExpressionType==this->typeError)
-    out << this->ElementToStringErrorCode(useHtml);
-  return out.str();
-}
-
 std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 { std::stringstream out;
   switch (this->ErrorType)

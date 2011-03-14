@@ -511,6 +511,7 @@ public:
   bool operator>(const List<Object>& other)const;
   void ShiftUpExpandOnTop(int StartingIndex);
   List(int StartingSize);
+  List(int StartingSize, const Object& fillInValue);
   List();
   ~List();
 };
@@ -544,8 +545,8 @@ public:
   void KillAllElements();
   void KillElementIndex(int i);
   bool AddObjectNoRepetitionOfPointer(Object* o);
-  void PopAllOccurrencesSwapWithLast(Object*o);
-  int ObjectPointerToIndex(Object*o);
+  void PopAllOccurrencesSwapWithLast(Object* o);
+  int ObjectPointerToIndex(Object* o);
   void resizeToLargerCreateNewObjects(int increase);
   void IncreaseSizeWithZeroPointers(int increase);
   void initAndCreateNewObjects(int d);
@@ -619,12 +620,12 @@ public:
   inline bool operator==(Integer& y){return this->value==y.value; };
   inline void Assign(const Integer& y){this->value=y.value; };
   inline bool IsEqualTo(const Integer&y)const {return this->value==y.value; };
-  inline bool IsEqualToZero() const {return this->value==0; }
+  inline bool IsEqualToZero()const {return this->value==0; }
   inline void DivideBy(Integer& y){this->value/=y.value; };
   inline void WriteToFile(std::fstream& output){output<<this->value; };
   inline void ReadFromFile(std::fstream& input){input>>this->value; };
   inline void ElementToString(std::string& output)
-  { std::stringstream out; out<<this->value; output= out.str();
+  { std::stringstream out; out << this->value; output= out.str();
   };
   Integer(int x){this->value=x; };
   Integer(){};
@@ -990,7 +991,7 @@ class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultipliciti
 {
 public:
   List<int> MaxMultiplicities;
-  void initIncomplete(int NumElements){  this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements); this->initWithMultiplicities(NumElements); };
+  void initIncomplete(int NumElements){ this->MaxMultiplicities.SetSizeExpandOnTopNoObjectInit(NumElements); this->initWithMultiplicities(NumElements); };
   void clearNoMaxMultiplicitiesChange();
   void IncrementSubset();
   int getTotalNumSubsets();
@@ -1049,7 +1050,7 @@ ParallelComputing::GlobalPointerCounter-=this->NumRows*this->NumCols+this->NumRo
 
 template <typename Element>
 void Matrix<Element>::WriteToFile(std::fstream& output)
-{ output << "Matrix_NumRows: " << this->NumRows <<" Matrix_NumCols: " << this->NumCols << "\n";
+{ output << "Matrix_NumRows: " << this->NumRows << " Matrix_NumCols: " << this->NumCols << "\n";
   for (int i=0; i<this->NumRows; i++)
   { for (int j=0; j<this->NumCols; j++)
     { this->elements[i][j].WriteToFile(output);
@@ -1256,7 +1257,7 @@ inline void Matrix<Element>::SwitchTwoRows( int row1, int row2)
 }
 
 template <typename Element>
-bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists( Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output)
+bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output)
 { assert(A.NumRows== b.NumRows);
   Selection thePivotPoints;
   Matrix<Element>::GaussianEliminationByRows(A, b, thePivotPoints, false);
@@ -1264,7 +1265,7 @@ bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists( 
 }
 
 template <typename Element>
-bool Matrix<Element>::RowEchelonFormToLinearSystemSolution( Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution)
+bool Matrix<Element>::RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution)
 { assert(inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1 && inputRightHandSide.NumRows==this->NumRows);
   //this->ComputeDebugString();
   //inputRightHandSide.ComputeDebugString();
@@ -1858,6 +1859,12 @@ public:
   bool IsProportionalTo(const root& input, Rational& outputTimesMeEqualsInput)const;
   bool IsPositiveOrZero() const;
   bool IsNegativeOrZero();
+  bool IsIntegral()const
+  { for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].IsInteger())
+        return false;
+    return true;
+  };
   bool IsEqualToZero() const
   { for (int i=0; i<this->size; i++)
       if (!this->TheObjects[i].IsEqualToZero())
@@ -2537,12 +2544,14 @@ List<Object>::List()
 
 template <class Object>
 List<Object>::List(int StartingSize)
-{ this->ActualSize=0;
-  this->IndexOfVirtualZero=0;
-  this->size=0;
-  this->TheObjects=0;
-  this->TheActualObjects=0;
+{ List();
   this->SetSizeExpandOnTopNoObjectInit(StartingSize);
+}
+
+template <class Object>
+List<Object>::List(int StartingSize, const Object& fillInObject)
+{ List();
+  this->initFillInObject(StartingSize, fillInObject);
 }
 
 template <class Object>
@@ -3774,6 +3783,8 @@ public:
   //the below is very slow use for testing purposes only
   //Parsing stuff is inherently slow and I use the mighty parser
   void operator=(const std::string& input);
+  void operator++(){this->operator+=((Rational)1);};
+  void operator--(){this->operator-=((Rational)1);};
   void operator-=(const Rational& theConst){ Monomial<Rational> tempMon; tempMon.MakeConstantMonomial(this->NumVars, -theConst); this->AddMonomial(tempMon);};
   PolynomialRationalCoeff operator-(const PolynomialRationalCoeff& other)
   { PolynomialRationalCoeff tempP;
@@ -4711,7 +4722,8 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d)
-{ this->RaiseToPower(d, *this);
+{ if (d!=1)
+    this->RaiseToPower(d, *this);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -5808,7 +5820,7 @@ public:
   void ComputeDebugString(){this->ElementToString(DebugString); };
   void ElementToString(std::string& output);
   bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
-  void ComputeSubGroupFromGeneratingReflections(roots& generators, rootsCollection& ExternalAutos,  GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
+  void ComputeSubGroupFromGeneratingReflections(roots& generators, rootsCollection& ExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   void ActByElement(int index, root& theRoot);
   void ActByElement(int index, root& input, root& output);
@@ -6610,7 +6622,6 @@ public:
   bool ApplyHomomorphism(MonomialUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
 };
 
-
 class SemisimpleLieAlgebraOrdered
 {
 public:
@@ -6624,6 +6635,7 @@ public:
   //The weights are in increasing order
   MatrixLargeRational ChevalleyGeneratorsInCurrentCoords;
   void AssignGeneratorCoeffOne(int theIndex, ElementSimpleLieAlgebra& output){output.operator=(this->theOrder.TheObjects[theIndex]);};
+  int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom
   (ElementSimpleLieAlgebra& input, root& theCoeffs)
   ;
@@ -6643,8 +6655,8 @@ class MonomialUniversalEnvelopingOrdered
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
-  std::string ElementToString(bool useLatex);
-  void ComputeDebugString(){this->DebugString=this->ElementToString(false);};
+  std::string ElementToString(bool useLatex, bool useGeneratorLetters);
+  void ComputeDebugString(){this->DebugString=this->ElementToString(false, true);};
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
@@ -6975,7 +6987,7 @@ public:
   root SeparatingNormalUsed;
   roots nonAlphas;
   roots nonBetas;
-  List<int > indicesIsosRespectingInitialNilradicalChoice;
+  List<int> indicesIsosRespectingInitialNilradicalChoice;
   root currentSeparatingNormalEpsilonForm;
   roots theChoicesWeMake;
   coneRelation PartialRelation;
@@ -7071,7 +7083,7 @@ public:
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::string& fileName, GlobalVariables& theGlobalVariables);
-  void ReadFromFile (std::string& fileName, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::string& fileName, GlobalVariables& theGlobalVariables);
 };
 
 class minimalRelationsProverStates;
@@ -7273,6 +7285,7 @@ public:
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   void Nullify(int NumVars);
+  void GetStandardOrder(PolynomialRationalCoeff& output){output.Assign(this->StandardOrder);};
   void SetNumVariablesPreserveExistingOnes(int newNumVars);
   void TimesConstant(Rational& theConstant){ this->StandardOrder.TimesConstant(theConstant);};
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
@@ -7363,6 +7376,7 @@ class ParserNode
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
+  void EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables);
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
@@ -7397,8 +7411,8 @@ public:
     tokenRoot, tokenFunction, tokenFunctionNoArgument
   };
   enum functionList
-  { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionWeylDimFormula, functionOuterAutos, functionMod, functionInvariants,
-    functionEigenUE, functionEigenUEofWeight
+  { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
+    functionMod, functionInvariants, functionEigenUE, functionEigenUEofWeight
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -7953,6 +7967,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariabl
     }
   }
 }
+
 template <class Element>
 void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit)
 { if (thePower<0)
@@ -8005,6 +8020,62 @@ public:
   GlobalVariables* Default(){return &this->TheObjects[0]; };
 };
 
+/*class NonExpandedOnTheRightRationalPoly
+{
+public:
+  std::string ElementToString();
+  List<PolynomialRationalCoeff> theRightCoeffs;
+  ListPointers<NonExpandedOnTheRightRationalPoly> theLeftBrackets;
+};*/
+
+class GeneralizedMonomialRational
+{
+  public:
+  PolynomialRationalCoeff Coefficient;
+  List<PolynomialRationalCoeff> degrees;
+  void MakeOne(int NumVars);
+  void Nullify
+  (int numVars)
+  ;
+  std::string ElementToString();
+  void MakeGenericMon
+(int numVars,  int startingIndexFormalExponent)
+  ;
+  bool IsConstant()const
+  { for(int i=0; i<degrees.size; i++)
+      if (!this->degrees.TheObjects[i].IsEqualToZero())
+        return false;
+    return true;
+  };
+  int HashFunction()const
+  { int result=0;
+    int upperBound=MathRoutines::Minimum(degrees.size, SomeRandomPrimesSize);
+    for (int i=0; i<upperBound; i++)
+      for (int j=0; j<degrees.TheObjects[i].size; j++)
+        result+=SomeRandomPrimes[i]*degrees.TheObjects[i].TheObjects[j].HashFunction();
+    return result;
+  };
+  bool IsEqualToZero()const{ return this->Coefficient.IsEqualToZero();};
+  bool operator==(const GeneralizedMonomialRational& other)const{ return this->degrees.operator==(other.degrees); };
+  void operator=(const GeneralizedMonomialRational& other) {this->Coefficient.operator=(other.Coefficient); this->degrees.operator=(other.degrees);};
+};
+
+class GeneralizedPolynomialRational: public HashedList<GeneralizedMonomialRational>
+{
+  public:
+  int NumCoeffVars;
+  int NumMainVars;
+
+  std::string ElementToString();
+  void Nullify
+(int numVarsCoeff, int numberMainVars)
+  ;
+  void MakeGenericMonomial(int numberMainVars, int numVarsCoeff);
+  void MakeConst(int NumVars, const Rational& theCoeff);
+  void MakeConst(int NumVars, const PolynomialRationalCoeff& theCoeff);
+  void operator+=(const GeneralizedMonomialRational& theMon);
+};
+
 class EigenVectorComputation
 {
 public:
@@ -8015,18 +8086,40 @@ public:
   Matrix<RationalFunction> theSystem;
   List<ElementWeylAlgebra> theOperators;
 //  List<List<int> > theExponentShifts;
-  std::string ComputeAndReturnString(GlobalVariables& theGlobalVariables, Parser& theParser);
+  std::string ComputeAndReturnStringNonOrdered(GlobalVariables& theGlobalVariables, Parser& theParser);
+  std::string ComputeAndReturnStringOrdered(GlobalVariables& theGlobalVariables, Parser& theParser);
+
   //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots
   //variables correspond to the exponents: the rank-of-theOwner+1st variable corresponds to the
   //exponent of the 1st negative root, (the root with index -1).
   //The rank-of-theOwner+2nd variable corresponds to the exponent of the 2nd negative root (the root with index -2)
   //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
   void MakeGenericVermaElement(ElementUniversalEnveloping& theElt, SemisimpleLieAlgebra& theOwner);
+  void WeylElementActsOnGeneralizedMonomial
+  (ElementWeylAlgebra& inputWeylElement, GeneralizedMonomialRational& inputMonomial, GeneralizedPolynomialRational& output)
+  ;
+  void WeylMonomialActsOnGeneralizedMonomial
+  (Monomial<Rational>& inputWeylMon, GeneralizedMonomialRational& inputMonomial, GeneralizedMonomialRational& output)
+  ;
+  bool AreUnimodular
+(roots& input, Selection& outputBasisUnimodularity, GlobalVariables& theGlobalVariables)
+  ;
+ /* void TakeOutOfTheBracketFromTheRight
+  (PolynomialRationalCoeff& input, NonExpandedOnTheRightRationalPoly& output)
+  ;*/
+  void MakeGenericVermaElementOrdered
+  (ElementUniversalEnvelopingOrdered& theElt, SemisimpleLieAlgebraOrdered& theOwner)
+  ;
   void GetDiffOperatorFromShiftAndCoefficient
   (PolynomialRationalCoeff& theCoeff, root& theShift, ElementWeylAlgebra& output, GlobalVariables& theGlobalVariables)
   ;
   void MakeGenericMonomialBranchingCandidate(HomomorphismSemisimpleLieAlgebra& theHmm, ElementUniversalEnveloping& theElt, GlobalVariables& theGlobalVariables);
-  void DetermineEquationsFromResultLieBracketEquationsPerTarget(Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables);
+  void DetermineEquationsFromResultLieBracketEquationsPerTarget
+  (Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
+  ;
+  void DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered
+  (Parser& theParser, ElementUniversalEnvelopingOrdered& theStartingGeneric, ElementUniversalEnvelopingOrdered& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
+  ;
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };
 

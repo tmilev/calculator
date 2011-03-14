@@ -164,7 +164,7 @@ template < > int HashedList<slTwo>::PreferredHashSize=1000;
 template < > int HashedList<ElementSimpleLieAlgebra>::PreferredHashSize=100;
 template < > int HashedList<MonomialUniversalEnveloping>::PreferredHashSize=10000;
 template < > int HashedList<MonomialUniversalEnvelopingOrdered>::PreferredHashSize=20;
-
+template < > int HashedList<GeneralizedMonomialRational>::PreferredHashSize=20;
 
 template < > int List<affineCone>::ListActualSizeIncrement=1;
 template < > int List<CombinatorialChamber*>::ListActualSizeIncrement=1000;
@@ -224,6 +224,7 @@ template < > int List<TemplatePolynomial<MonomialInCommutativeAlgebra<Integer, G
 template < > int List<LargeIntUnsigned>::ListActualSizeIncrement=20;
 template < > int List<double>::ListActualSizeIncrement=20;
 template < > int List<MonomialUniversalEnvelopingOrdered>::ListActualSizeIncrement=20;
+template < > int List<GeneralizedMonomialRational>::ListActualSizeIncrement=20;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
@@ -2684,9 +2685,12 @@ void root::GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariabl
   tempRoots.size=0;
   tempRoots.AddListOnTop(inputBasis);
   tempRoots.AddObjectOnTop(*this);
+//  tempRoots.ComputeDebugString();
+//  tempMat.ComputeDebugString();
+//  this->ComputeDebugString();
   bool tempBool=tempRoots.GetLinearDependence(tempMat);
-  //tempRoots.ComputeDebugString();
-  //tempMat.ComputeDebugString();
+//  tempRoots.ComputeDebugString();
+//  tempMat.ComputeDebugString();
   assert(tempBool);
   tempMat.DivideByRational(tempMat.elements[tempMat.NumRows-1][0]);
   outputCoords.SetSizeExpandOnTopLight(tempMat.NumRows-1);
@@ -11517,6 +11521,8 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
 int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality)
 { int fixThisShit;
   return ::MathRoutines::NChooseK(this->Multiplicities.size+cardinality-1, cardinality);
+  int fixThisShit2;
+  return fixThisShit2;
 }
 
 void SelectionWithMaxMultiplicity::IncrementSubset()
@@ -25972,7 +25978,13 @@ bool ParserNode::AllChildrenAreOfDefinedNonErrorType()
 
 void ParserNode::EvaluateSecretSauce(GlobalVariables& theGlobalVariables)
 { EigenVectorComputation theComp;
-  this->outputString=theComp.ComputeAndReturnString(theGlobalVariables, *this->owner);
+  this->outputString=theComp.ComputeAndReturnStringNonOrdered(theGlobalVariables, *this->owner);
+  this->ExpressionType=this->typeString;
+}
+
+void ParserNode::EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables)
+{ EigenVectorComputation theComp;
+  this->outputString=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *this->owner);
   this->ExpressionType=this->typeString;
 }
 

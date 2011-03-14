@@ -123,7 +123,7 @@ int main(int argc, char **argv)
   //  tempRat.RaiseToPower(20);
   //  tempRat.ElementToString(tempS);
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
-  //civilizedInput="[f_2,f_1^{n_1}]";
+  //civilizedInput="secretSauceOrdered";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;
    // civilizedInput="gcd(x_1^3+x_2^3+x_3^3, x_1^{5}+x_2^{5}+x_3^{5})";
@@ -151,6 +151,22 @@ int main(int argc, char **argv)
         theIndex=3+i;
       if (i>=8)
         theIndex=i+7;
+      /*
+      if (i==0) theIndex=3;
+      if (i==1) theIndex=4;
+      if (i==2) theIndex=5;
+      if (i==3) theIndex=6;
+      if (i==4) theIndex=7;
+      if (i==5) theIndex=8;
+      if (i==6) theIndex=9;
+      if (i==7) theIndex=10;
+      if (i==8) theIndex=12;
+      if (i==9) theIndex=13;
+      if (i==10) theIndex=14;
+      if (i==11) theIndex=15;
+      if (i==12) theIndex=16;
+      if (i==13) theIndex=17;
+      */
       ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
       currentElt=theParser.theHmm.imagesAllChevalleyGenerators.TheObjects[i];
     }
@@ -158,12 +174,21 @@ int main(int argc, char **argv)
     { int theIndex=i+6;
       if (i>=3)
         theIndex=8+i;
+      /*
+      if (i==0) theIndex=0;
+      if (i==1) theIndex=1;
+      if (i==2) theIndex=2;
+      if (i==3) theIndex=11;
+      if (i==4) theIndex=18;
+      if (i==5) theIndex=19;
+      if (i==6) theIndex=20;
+      */
       ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
       currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
     }
-    //for (int i=0; i<theBasis.size; i++)
-    //{ std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
-    //}
+    for (int i=0; i<theBasis.size; i++)
+    { std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
+    }
     theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
   } else
     theParser.testAlgebra.initDefaultOrder(theParser.theHmm.theRange, theGlobalVariables);
@@ -292,7 +317,7 @@ void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, 
   int inputSize=(signed) input.size();
   for (int i=0; i<inputSize; i++)
   { readAhead="";
-    for (int j=0; j<3; j++)
+    for (int j=0; j<6; j++)
     { if (i+j<inputSize)
         readAhead.push_back(input[i+j]);
       if (CGIspecificRoutines::AttemptToCivilize(readAhead, out))
@@ -374,6 +399,9 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
   if (readAhead=="%7D")
   { out << "}";
     return true;
+  }
+  if (readAhead=="%0D%0A")
+  { return true;
   }
   return false;
 }

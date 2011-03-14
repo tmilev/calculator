@@ -27,6 +27,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
     case Parser::functionEigen: this->EvaluateEigen(theGlobalVariables); break;
     case Parser::functionSecretSauce: this->EvaluateSecretSauce(theGlobalVariables); break;
+    case Parser::functionSecretSauceOrdered: this->EvaluateSecretSauceOrdered(theGlobalVariables); break;
     case Parser::functionWeylDimFormula: this->EvaluateWeylDimFormula(theGlobalVariables); break;
     case Parser::functionOuterAutos: this->EvaluateOuterAutos(theGlobalVariables); break;
     case Parser::functionMod: this->EvaluateModVermaRelations(theGlobalVariables); break;
@@ -318,6 +319,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input =="secretSauce")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
     this->ValueBuffer.AddObjectOnTop(this->functionSecretSauce);
+    return true;
+  }
+  if (input=="secretSauceOrdered")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(this->functionSecretSauceOrdered);
     return true;
   }
   if (input=="dim")
@@ -775,6 +781,18 @@ void ElementUniversalEnveloping::ModOutVermaRelations(bool SubHighestWeightWithZ
   this->operator=(output);
 }
 
+void ElementUniversalEnvelopingOrdered::ModOutVermaRelations(bool SubHighestWeightWithZeroes)
+{ MonomialUniversalEnvelopingOrdered tempMon;
+  ElementUniversalEnvelopingOrdered output;
+  output.Nullify(*this->owner);
+  for (int i=0; i<this->size; i++)
+  { tempMon= this->TheObjects[i];
+    tempMon.ModOutVermaRelations(SubHighestWeightWithZeroes);
+    output.AddMonomial(tempMon);
+  }
+  this->operator=(output);
+}
+
 void ElementUniversalEnveloping::GetCoordinateFormOfSpanOfElements
 (int numVars, List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
 { if (theElements.size==0)
@@ -917,6 +935,44 @@ void MonomialUniversalEnveloping::ModOutVermaRelations(bool SubHighestWeightWith
       tempP.MakeLinPolyFromRoot(tempRoot);
       if (theDegree!=1)
         tempP.RaiseToPower(theDegree);
+      this->Coefficient.MultiplyBy(tempP);
+      this->generatorsIndices.size--;
+      this->Powers.size--;
+    }
+  }
+}
+
+void MonomialUniversalEnvelopingOrdered::ModOutVermaRelations(bool SubHighestWeightWithZeroes)
+{ int numPosRoots=this->owner->theOwner.GetNumPosRoots();
+  int theDimension=this->owner->theOwner.GetRank();
+  int theNumVars=this->Coefficient.NumVars;
+  this->ComputeDebugString();
+  if (theNumVars<theDimension && !SubHighestWeightWithZeroes)
+  { this->SetNumVariables(theDimension);
+    theNumVars=theDimension;
+  }
+  for (int i=this->generatorsIndices.size-1; i>=0; i--)
+  { int IndexCurrentGenerator=this->generatorsIndices.TheObjects[i];
+    if (IndexCurrentGenerator>=numPosRoots+theDimension)
+    { this->Nullify(theNumVars, *this->owner);
+      return;
+    }
+    if (IndexCurrentGenerator<numPosRoots)
+      return;
+    if (IndexCurrentGenerator>=numPosRoots &&  IndexCurrentGenerator<numPosRoots+theDimension)
+    { if (this->Powers.TheObjects[i].TotalDegree()!=0)
+        return;
+      if (SubHighestWeightWithZeroes)
+      { this->Nullify(theNumVars, *this->owner);
+        return;
+      }
+      int theDegree = this->Powers.TheObjects[i].TheObjects[0].Coefficient.NumShort;
+      PolynomialRationalCoeff tempP;
+      root tempRoot;
+      tempRoot.Assign(this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent);
+      tempP.MakeLinPolyFromRoot(tempRoot);
+      tempP.SetNumVariablesSubDeletedVarsByOne(numPosRoots+theDimension);
+      tempP.RaiseToPower(theDegree);
       this->Coefficient.MultiplyBy(tempP);
       this->generatorsIndices.size--;
       this->Powers.size--;
@@ -1702,7 +1758,44 @@ void PolynomialRationalCoeff::ScaleToIntegralNoGCDCoeffs()
   this->TimesConstant(theMultiple);
 }
 
-std::string EigenVectorComputation::ComputeAndReturnString(GlobalVariables& theGlobalVariables, Parser& theParser)
+std::string EigenVectorComputation::ComputeAndReturnStringOrdered(GlobalVariables& theGlobalVariables, Parser& theParser)
+{ std::stringstream out;
+  ElementUniversalEnvelopingOrdered theElt, tempElt1, tempElt2;
+  //this->MakeGenericMonomialBranchingCandidate(theParser.theHmm, theElt, theGlobalVariables);
+  this->MakeGenericVermaElementOrdered(theElt, theParser.testAlgebra);
+  int theDomainRank=theParser.theHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
+  int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
+//  int numDomainPosRoots= theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
+  int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
+  //int dimQuotient=numRangePosRoots-theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
+  this->theSystem.init(0,0);
+  this->theOperators.size=0;
+  this->theExponentShifts.size=0;
+  for (int i=0; i<theDomainRank; i++)
+  { tempElt1.AssignElementLieAlgebra(theParser.theHmm.imagesSimpleChevalleyGenerators.TheObjects[i], theRangeRank+numRangePosRoots, theParser.testAlgebra);
+    tempElt1.LieBracketOnTheRight(theElt, tempElt2);
+    tempElt2.Simplify();
+    std::cout << "<br>" << tempElt1.ElementToString();
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out << "[" << tempElt1.ElementToString(true) << "," << theElt.ElementToString(true) << "]=" << tempElt2.ElementToString(true);
+    out << "\\end{eqnarray*}</div>";
+    std::cout << "<br>" << tempElt2.ElementToString();
+    tempElt2.ModOutVermaRelations();
+    out << "mod Verma rels:";
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out << tempElt2.ElementToString(true);
+    out << "\\end{eqnarray*}</div>";
+    this->DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered(theParser, theElt, tempElt2, out, theGlobalVariables);
+  }
+  this->theExponentShiftsTargetPerSimpleGenerator.CollectionToRoots(this->theExponentShifts);
+  out << "<br><br> And the total rank is: " << this->theExponentShifts.GetRankOfSpanOfElements(theGlobalVariables);
+  out << "<div class=\"math\" scale=\"50\">" << this->theSystem.ElementToString(false, true) << "</div>";
+  return out.str();
+}
+
+
+
+std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered(GlobalVariables& theGlobalVariables, Parser& theParser)
 { std::stringstream out;
   ElementUniversalEnveloping theElt, tempElt1, tempElt2;
   //this->MakeGenericMonomialBranchingCandidate(theParser.theHmm, theElt, theGlobalVariables);
@@ -1808,6 +1901,93 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
   }
 }
 
+void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered
+  (Parser& theParser, ElementUniversalEnvelopingOrdered& theStartingGeneric, ElementUniversalEnvelopingOrdered& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
+{ int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
+  int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
+//  int dimQuotient=theParser.theHmm.theRange.theWeyl.RootsOfBorel.size- theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
+  int numCoeffVars=theRangeRank+numRangePosRoots;
+  PolynomialRationalCoeff theDiffPoly;
+  MonomialUniversalEnvelopingOrdered& originalMon= theStartingGeneric.TheObjects[0];
+  this->theExponentShiftsTargetPerSimpleGenerator.SetSizeExpandOnTopNoObjectInit(this->theExponentShiftsTargetPerSimpleGenerator.size+1);
+  roots& currentTargetShifts =*this->theExponentShiftsTargetPerSimpleGenerator.LastObject();
+  currentTargetShifts.SetSizeExpandOnTopNoObjectInit(theElt.size);
+  ElementWeylAlgebra tempWeyl;
+  this->theOperators.SetSizeExpandOnTopNoObjectInit(this->theOperators.size+1);
+  ElementWeylAlgebra& currentOperator = *this->theOperators.LastObject();
+  currentOperator.Nullify(numCoeffVars);
+  for (int i=0; i<theElt.size; i++)
+  { MonomialUniversalEnvelopingOrdered& theMon= theElt.TheObjects[i];
+    out << "<br>\nDifference in monomial index " << i << ": ";
+    root& currentShift= currentTargetShifts.TheObjects[i];
+    currentShift.MakeZero(numRangePosRoots);
+    for (int j=0; j<numRangePosRoots; j++)
+    { theDiffPoly = originalMon.Powers.TheObjects[j] - theMon.Powers.TheObjects[j];
+      out << theDiffPoly.ElementToString() << " ";
+      if (theDiffPoly.size>1)
+        currentShift.TheObjects[j]=-10000;
+      if (theDiffPoly.size==0)
+        currentShift.TheObjects[j]=0;
+      if (theDiffPoly.size==1)
+        currentShift.TheObjects[j]=-theDiffPoly.TheObjects[0].Coefficient;
+    }
+    this->GetDiffOperatorFromShiftAndCoefficient(theMon.Coefficient, currentShift, tempWeyl, theGlobalVariables);
+    currentOperator.Add(tempWeyl);
+  }
+  out << "<br>and the rank is: " << currentTargetShifts.GetRankOfSpanOfElements(theGlobalVariables);
+  Selection tempSel;
+  if (this->AreUnimodular(currentTargetShifts, tempSel, theGlobalVariables))
+  { roots tempRoots, tempRoots2;
+    currentTargetShifts.SubSelection(tempSel, tempRoots);
+    out << "<br> one unimodular basis: " << tempRoots.ElementToString(false, true, false);
+    currentTargetShifts.GetCoordsInBasis(tempRoots, tempRoots2, theGlobalVariables);
+    out << "<br> in the above unimodular basis the coordinates are:<br> " << tempRoots2.ElementToString(false, true, true);
+  }
+  GeneralizedPolynomialRational tempGP;
+  GeneralizedMonomialRational tempGM;
+  tempGM.MakeGenericMon(numRangePosRoots+theRangeRank, theRangeRank);
+  out << "<br>...and the generic monomial is: " << tempGM.ElementToString();
+  this->WeylElementActsOnGeneralizedMonomial(currentOperator, tempGM, tempGP);
+  out << "<br> ...and the action on the generic monomial is: <div class=\"math\">\\begin{eqnarray*}&&" << tempGP.ElementToString() << "\\end{eqnarray*}</div>";
+
+
+  out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&&" << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
+  /*root tempRoot;
+  RationalFunction ZeroRF;
+  ZeroRF.MakeNVarConst(numCoeffVars, (Rational) 0);
+  tempRoot.MakeZero(numRangePosRoots);
+  if(this->theExponentShifts.AddOnTopNoRepetition(tempRoot))
+    this->theSystem.Resize(this->theSystem.NumRows, this->theSystem.NumCols+1, true, &ZeroRF);
+  int indexMainMon=this->theExponentShifts.IndexOfObject(tempRoot);
+  PolynomialsRationalCoeff theSub;
+  PolynomialRationalCoeff tempP;
+  for (int i=0; i<theElt.size; i++)
+  { int indexCurrentRow=this->theSystem.NumRows;
+    this->theSystem.Resize(this->theSystem.NumRows+1, this->theSystem.NumCols, true, &ZeroRF);
+    this->theSystem.elements[indexCurrentRow][indexMainMon]=theElt.TheObjects[i].Coefficient;
+    for (int j=0; j<theElt.size; j++)
+      if (i!=j)
+      { theSub.MakeIdSubstitution(numCoeffVars, (Rational) 1);
+        tempRoot= currentTargetShifts.TheObjects[i]-currentTargetShifts.TheObjects[j];
+        for (int k=0; k<tempRoot.size; k++)
+          theSub.TheObjects[k+theRangeRank].AddConstant(tempRoot.TheObjects[k]);
+        int theVarIndex = this->theExponentShifts.IndexOfObject(tempRoot);
+        if (theVarIndex<0)
+        { theVarIndex=this->theExponentShifts.size;
+          this->theExponentShifts.AddObjectOnTop(tempRoot);
+          this->theSystem.Resize(this->theSystem.NumRows, this->theExponentShifts.size, true, &ZeroRF);
+          out << "<br>Shift of monomial in play: " << tempRoot.ElementToString();
+        }
+        tempP=theElt.TheObjects[j].Coefficient;
+        theSub.ComputeDebugString();
+        tempP.ComputeDebugString();
+        tempP.Substitution(theSub, numCoeffVars);
+        tempP.ComputeDebugString();
+        this->theSystem.elements[indexCurrentRow][theVarIndex]=tempP;
+      }
+  }*/
+}
+
 void EigenVectorComputation::MakeGenericMonomialBranchingCandidate(HomomorphismSemisimpleLieAlgebra& theHmm, ElementUniversalEnveloping& theElt, GlobalVariables& theGlobalVariables)
 { int RangeRank=theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   int numPosRootsRange=theHmm.theRange.theWeyl.RootsOfBorel.size;
@@ -1859,6 +2039,22 @@ void EigenVectorComputation::MakeGenericVermaElement(ElementUniversalEnveloping&
   }
   theElt.AddMonomial(tempMon);
 }
+
+void EigenVectorComputation::MakeGenericVermaElementOrdered(ElementUniversalEnvelopingOrdered& theElt, SemisimpleLieAlgebraOrdered& owner)
+{ int numPosRoots= owner.theOwner.theWeyl.RootsOfBorel.size;
+  int theRank=owner.theOwner.GetRank();
+  theElt.Nullify(owner);
+  MonomialUniversalEnvelopingOrdered tempMon;
+  PolynomialRationalCoeff tempP;
+  tempP.MakeNVarConst((short) theRank+numPosRoots, (Rational) 1);
+  tempMon.MakeConst(tempP, owner);
+  for (int i=0; i<numPosRoots; i++)
+  { tempP.MakeNVarDegOnePoly(theRank+numPosRoots, theRank+i, (Rational) 1);
+    tempMon.MultiplyByGeneratorPowerOnTheRight(i, tempP);
+  }
+  theElt.AddMonomial(tempMon);
+}
+
 
 Rational WeylGroup::WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables)
 { root theWeightInSimpleBasis=theWeightInFundamentalBasis;
@@ -3136,6 +3332,16 @@ void ElementUniversalEnvelopingOrdered::MakeOneGeneratorCoeffOne(int theIndex, i
   this->AddObjectOnTopHash(tempMon);
 }
 
+int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int GeneratorIndex)
+{ int numPosRoots=this->theOwner.GetNumPosRoots();
+  int posRootsPlusRank=numPosRoots+this->theOwner.GetRank();
+  if (GeneratorIndex>= posRootsPlusRank )
+    return GeneratorIndex-posRootsPlusRank+1;
+  if (GeneratorIndex>=numPosRoots)
+    return GeneratorIndex+1;
+  return -numPosRoots+GeneratorIndex;
+}
+
 void SemisimpleLieAlgebraOrdered::init
 (List<ElementSimpleLieAlgebra>& inputOrder, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
 { if (inputOrder.size!=owner.GetNumGenerators())
@@ -3186,7 +3392,7 @@ bool ElementSimpleLieAlgebra::MustUseBracketsWhenDisplayingMeRaisedToPower()
   return true;
 }
 
-std::string MonomialUniversalEnvelopingOrdered::ElementToString(bool useLatex)
+std::string MonomialUniversalEnvelopingOrdered::ElementToString(bool useLatex, bool useGeneratorLetters)
 { std::stringstream out;
   std::string tempS;
   if (this->owner==0)
@@ -3208,10 +3414,18 @@ std::string MonomialUniversalEnvelopingOrdered::ElementToString(bool useLatex)
   for (int i=0; i<this->generatorsIndices.size; i++)
   { PolynomialRationalCoeff& thePower=this->Powers.TheObjects[i];
     int theIndex=this->generatorsIndices.TheObjects[i];
-    tempS=this->owner->theOrder.TheObjects[theIndex].ElementToStringNegativeRootSpacesFirst(false, false, this->owner->theOwner);
+    if (!useGeneratorLetters)
+      tempS=this->owner->theOrder.TheObjects[theIndex].ElementToStringNegativeRootSpacesFirst(false, false, this->owner->theOwner);
+    else
+    { std::stringstream tempStream;
+      tempStream << "f_{" << this->owner->GetDisplayIndexFromGeneratorIndex(theIndex) << "}";
+      tempS=tempStream.str();
+    }
     //if (thePower>1)
     //  out << "(";
-    bool usebrackets=this->owner->theOrder.TheObjects[theIndex].MustUseBracketsWhenDisplayingMeRaisedToPower();
+    bool usebrackets=false;
+    if (!useGeneratorLetters)
+      usebrackets=this->owner->theOrder.TheObjects[theIndex].MustUseBracketsWhenDisplayingMeRaisedToPower();
     if (usebrackets)
       out << "(";
     out << tempS;
@@ -3239,7 +3453,7 @@ void ElementUniversalEnvelopingOrdered::ElementToString(std::string& output, boo
   int IndexCharAtLastLineBreak=0;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnvelopingOrdered& current=this->TheObjects[i];
-    tempS=current.ElementToString(false);
+    tempS=current.ElementToString(false, true);
     if (i!=0)
       if (tempS.size()>0)
         if (tempS[0]!='-')
@@ -3532,6 +3746,186 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
       out << "</textarea>";
       out << "<br>" << "\n<button id=\"ButtonToggleLatex\" onclick=\"switchMenu('theResult'); switchMenu('theResultLatex');\""
             << "\">Show LaTeX/Show eye candy</button>";
+    }
+  }
+  return out.str();
+}
+
+bool EigenVectorComputation::AreUnimodular
+(roots& input, Selection& outputBasisUnimodularity, GlobalVariables& theGlobalVariables)
+{ int theRank=input.GetRankOfSpanOfElements(theGlobalVariables);
+  Selection theSel;
+  theSel.init(input.size);
+  int NumCycles=MathRoutines::NChooseK(input.size, theRank);
+  theSel.incrementSelectionFixedCardinality(theRank);
+  roots currentSelection;
+  root tempRoot2;
+  bool isIntegral=true;
+  for (int i=0; i<NumCycles; i++, theSel.incrementSelectionFixedCardinality(theRank))
+  { input.SubSelection(theSel, currentSelection);
+    if (currentSelection.GetRankOfSpanOfElements(theGlobalVariables)==theRank)
+    { isIntegral=true;
+      for (int j=0; j<input.size; j++)
+        if(!theSel.selected[j])
+        { input.TheObjects[j].GetCoordsInBasis(currentSelection, tempRoot2, theGlobalVariables);
+          isIntegral=tempRoot2.IsIntegral();
+          if(!isIntegral)
+            break;
+        }
+      if (isIntegral)
+        break;
+    }
+  }
+  if(isIntegral)
+    outputBasisUnimodularity.Assign(theSel);
+  return isIntegral;
+}
+
+/*void EigenVectorComputation::TakeOutOfTheBracketFromTheRight
+  (PolynomialRationalCoeff& input, NonExpandedOnTheRightRationalPoly& output)
+{ int numVars=input.NumVars;
+  List<bool> Explored(input.size, false);
+  PolynomialRationalCoeff currentInnerPoly;
+  Monomial<Rational> tempMon;
+  for (int i=0; i<input.size; i++)
+    if(!Explored.TheObjects[i])
+    { Monomial<Rational>& currentMon=input.TheObjects[i];
+      Explored.TheObjects[i]=true;
+      int indexFirstNonZeroPowerFromTheRight=-1;
+      int powerFirstNonZeroPowerFromTheRight=-1;
+      for (int k=0; k<currentMon.NumVariables; k++)
+        if (currentMon.degrees[k]!=0)
+        { indexFirstNonZeroPowerFromTheRight=k;
+          inde
+          break;
+        }
+      if (indexFirstNonZeroPowerFromTheRight!=-1)
+      { currentInnerPoly.Nullify(numVars);
+        for (int j=i; j<input.size; j++)
+          if(!Explored.TheObjects[j] && input.TheObjects[j].degrees[indexFirstNonZeroPowerFromTheRight]!=0)
+          { Monomial<Rational>& currentInnerMon=input.nput.TheObjects[j];
+            tempMon.Assign(currentInnerMon);
+            tempMon.degrees[indexFirstNonZeroPowerFromTheRight]=0;
+          }
+      }
+    }
+}*/
+
+void GeneralizedMonomialRational::MakeOne(int NumVars)
+{ PolynomialRationalCoeff tempP;
+  tempP.Nullify((short)NumVars);
+  this->degrees.initFillInObject(NumVars, tempP);
+  this->Coefficient.MakeNVarConst((short) NumVars, (Rational) 1);
+}
+
+void GeneralizedMonomialRational::Nullify
+  (int numVars)
+{ PolynomialRationalCoeff tempP;
+  tempP.Nullify((short)numVars);
+  this->degrees.initFillInObject(numVars, tempP);
+  this->Coefficient.Nullify(numVars);
+}
+
+void GeneralizedPolynomialRational::Nullify
+(int numVarsCoeff, int numberMainVars)
+{ this->ClearTheObjects();
+  this->NumCoeffVars=numVarsCoeff;
+  this->NumMainVars=numberMainVars;
+}
+
+void EigenVectorComputation::WeylElementActsOnGeneralizedMonomial
+  (ElementWeylAlgebra& inputWeylElement, GeneralizedMonomialRational& inputMonomial, GeneralizedPolynomialRational& output)
+{ output.Nullify(inputMonomial.degrees.size, inputMonomial.Coefficient.size);
+  PolynomialRationalCoeff weylBuffer;
+  GeneralizedMonomialRational tempM;
+  inputWeylElement.GetStandardOrder(weylBuffer);
+  for (int i=0; i<weylBuffer.size; i++)
+  { this->WeylMonomialActsOnGeneralizedMonomial(weylBuffer.TheObjects[i], inputMonomial, tempM);
+    output.operator+=(tempM);
+  }
+}
+
+void EigenVectorComputation::WeylMonomialActsOnGeneralizedMonomial
+  (Monomial<Rational>& inputWeylMon, GeneralizedMonomialRational& inputMonomial, GeneralizedMonomialRational& output)
+{ output.operator=(inputMonomial);
+  for (int i=0; i<inputWeylMon.NumVariables/2; i++)
+  { int posInWeylMon=i+inputWeylMon.NumVariables/2;
+    for (int j=0; j<inputWeylMon.degrees[posInWeylMon]; j++)
+    { output.Coefficient.MultiplyBy(output.degrees.TheObjects[i]);
+      if (output.Coefficient.IsEqualToZero())
+      { output.Nullify(inputMonomial.Coefficient.NumVars);
+        return;
+      }
+      output.degrees.TheObjects[i]-=1;
+    }
+  }
+  for (int i=0; i<inputWeylMon.NumVariables/2; i++)
+    output.degrees.TheObjects[i]+=inputWeylMon.degrees[i];
+  output.Coefficient.TimesConstant(inputWeylMon.Coefficient);
+}
+
+void GeneralizedPolynomialRational::operator+=(const GeneralizedMonomialRational& theMon)
+{ if (theMon.IsEqualToZero())
+    return;
+  int theIndex=this->IndexOfObjectHash(theMon);
+  if (theIndex==-1)
+    this->AddObjectOnTopHash(theMon);
+  else
+  { this->TheObjects[theIndex].Coefficient+=theMon.Coefficient;
+    if (this->TheObjects[theIndex].IsEqualToZero())
+      this->PopIndexSwapWithLastHash(theIndex);
+  }
+}
+
+void GeneralizedMonomialRational::MakeGenericMon
+(int numVars,  int startingIndexFormalExponent)
+{ if (numVars<0)
+    return;
+  this->degrees.SetSizeExpandOnTopNoObjectInit(numVars);
+  for (int i=0; i<startingIndexFormalExponent; i++)
+    this->degrees.TheObjects[i].Nullify(numVars);
+  for (int i=startingIndexFormalExponent; i<this->degrees.size; i++)
+    this->degrees.TheObjects[i].MakeMonomialOneLetter((short) numVars, i, 1, (Rational) 1);
+  this->Coefficient.MakeNVarConst(numVars, (Rational) 1);
+}
+
+std::string GeneralizedMonomialRational::ElementToString()
+{ if (this->IsConstant())
+    return this->Coefficient.ElementToString();
+  std::stringstream out;
+  std::string tempS;
+  if (this->Coefficient.size>1) out << "(";
+  this->Coefficient.ElementToString(tempS);
+  if (tempS=="1")
+    tempS="";
+  if (tempS=="-1")
+    tempS="-";
+  out << tempS;
+  if (this->Coefficient.size>1) out << ")";
+  for (int i=0; i<this->degrees.size; i++)
+    if (!this->degrees.TheObjects[i].IsEqualToZero())
+    { out << "y_{" << i+1 << "}";
+      if (!this->degrees.TheObjects[i].IsEqualToOne())
+        out << "^{" << this->degrees.TheObjects[i].ElementToString() << "}";
+    }
+  return out.str();
+}
+
+std::string GeneralizedPolynomialRational::ElementToString()
+{ if (this->size==0)
+    return "0";
+  std::stringstream out;
+  std::string buffer;
+  int sizeSinceLastCutOff=0;
+  for (int i=0; i<this->size; i++)
+  { buffer=this->TheObjects[i].ElementToString();
+    if (buffer[0]!='-' && i!=0)
+      out << "+";
+    out << buffer;
+    sizeSinceLastCutOff+=buffer.size();
+    if (sizeSinceLastCutOff>200)
+    { sizeSinceLastCutOff=0;
+      out << "\\\\&&";
     }
   }
   return out.str();

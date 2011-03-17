@@ -301,6 +301,37 @@ class DrawElementInputOutput
   int outputHeight;
 };
 
+template <class Object>
+class MemorySaving
+{
+private:
+  Object* theValue;
+public:
+  const Object& GetElementConst()const{ return *this->theValue;};
+  Object& GetElement()
+  { if (this->theValue==0)
+    { this->theValue=new Object;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter++;
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+#endif
+    }
+    return *(this->theValue);
+  };
+  bool IsZeroPointer()const{return this->theValue==0;};
+  void FreeMemory()
+  { delete this->theValue;
+    this->theValue=0;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter--;
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+#endif
+  };
+  void operator=(const MemorySaving<Object>& other){if (!other.IsZeroPointer()) this->GetElement()=other.GetElementConst();};
+  MemorySaving(){this->theValue=0;};
+  ~MemorySaving(){this->FreeMemory();};
+};
+
 //The below class is to be used together with List.
 //The purpose of the class is to save up RAM memory use.
 //This is the "light" version it is to be used for storage purposes only.
@@ -621,7 +652,7 @@ public:
   inline void Assign(const Integer& y){this->value=y.value; };
   inline bool IsEqualTo(const Integer&y)const {return this->value==y.value; };
   inline bool IsEqualToZero()const {return this->value==0; }
-  inline void DivideBy(Integer& y){this->value/=y.value; };
+  inline void DivideBy(const Integer& y){this->value/=y.value; };
   inline void WriteToFile(std::fstream& output){output<<this->value; };
   inline void ReadFromFile(std::fstream& input){input>>this->value; };
   inline void ElementToString(std::string& output)
@@ -2544,13 +2575,21 @@ List<Object>::List()
 
 template <class Object>
 List<Object>::List(int StartingSize)
-{ List();
+{ this->ActualSize=0;
+  this->IndexOfVirtualZero=0;
+  this->size=0;
+  this->TheObjects=0;
+  this->TheActualObjects=0;
   this->SetSizeExpandOnTopNoObjectInit(StartingSize);
 }
 
 template <class Object>
 List<Object>::List(int StartingSize, const Object& fillInObject)
-{ List();
+{ this->ActualSize=0;
+  this->IndexOfVirtualZero=0;
+  this->size=0;
+  this->TheObjects=0;
+  this->TheActualObjects=0;
   this->initFillInObject(StartingSize, fillInObject);
 }
 
@@ -3193,6 +3232,19 @@ public:
   void MonomialExponentToRoot(intRoot& output);
   void MakeFromRoot(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
   void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
+  bool IsOneLetterFirstDegree(int& whichLetter)
+  { whichLetter=-1;
+    for (int i=0; i<this->NumVariables; i++)
+      if (this->degrees[i]==1)
+      { if (whichLetter==-1)
+          whichLetter=i;
+        else
+          return false;
+      } else
+        if (this->degrees[i]!=0)
+          return false;
+    return true;
+  };
   void GetMonomialWithCoeffOne(Monomial<ElementOfCommutativeRingWithIdentity>& output);
   void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m, Monomial<ElementOfCommutativeRingWithIdentity>& output);
   bool HasSameExponent(Monomial<ElementOfCommutativeRingWithIdentity>& m);
@@ -3319,7 +3371,7 @@ public:
   void TimesInteger(int a);
   void DivideBy(Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder);
   void TimesConstant(const ElementOfCommutativeRingWithIdentity& r);
-  void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
+  void DivideByConstant(const ElementOfCommutativeRingWithIdentity& r);
   void AddConstant(const ElementOfCommutativeRingWithIdentity& theConst);
   void IncreaseNumVariables(short increase);
   void SetNumVariablesSubDeletedVarsByOne(short newNumVars);
@@ -3337,6 +3389,7 @@ public:
   bool IsGreaterThanZeroLexicographicOrder();
   bool IsEqualTo(Polynomial<ElementOfCommutativeRingWithIdentity>& p);
   inline void operator=(const Polynomial<ElementOfCommutativeRingWithIdentity>& other){this->Assign(other);};
+  inline void operator/=(const ElementOfCommutativeRingWithIdentity& theConst){this->DivideByConstant(theConst);};
   inline void operator*=(const Polynomial<ElementOfCommutativeRingWithIdentity>& other){this->MultiplyBy(other);};
 };
 
@@ -4650,7 +4703,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<Eleme
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideByConstant (ElementOfCommutativeRingWithIdentity& r)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideByConstant(const ElementOfCommutativeRingWithIdentity& r)
 { for (int i=0; i<this->size; i++)
     this->TheObjects[i].Coefficient.DivideBy(r);
 }
@@ -7322,30 +7375,16 @@ class ParserNode
   int ErrorType;
   SemisimpleLieAlgebra* ContextLieAlgebra;
   bool Evaluated;
+  MemorySaving<PolynomialRationalCoeff> polyValue;
+  MemorySaving<ElementWeylAlgebra> WeylAlgebraElement;
+  MemorySaving<ElementUniversalEnveloping> UEElement;
+  MemorySaving<ElementUniversalEnvelopingOrdered> UEElementOrdered;
+  MemorySaving<PolynomialRationalCoeff> polyBeingMappedTo;
+
   List<int> children;
   int intValue;
-  PolynomialRationalCoeff polyValue;
   Rational rationalValue;
-  ElementWeylAlgebra WeylAlgebraElement;
-  ElementUniversalEnveloping UEElement;
-  ElementUniversalEnvelopingOrdered UEElementOrdered;
-  void operator=(const ParserNode& other)
-  { this->owner=other.owner;
-    this->ExpressionType=other.ExpressionType;
-    this->indexParent=other.indexParent;
-    this->Operation=other.Operation;
-    this->Evaluated= other.Evaluated;
-    this->children.CopyFromBase(other.children);
-    this->intValue=other.intValue;
-    this->ErrorType=other.ErrorType;
-    this->rationalValue=other.rationalValue;
-    this->WeylAlgebraElement=other.WeylAlgebraElement;
-    this->UEElement=other.UEElement;
-    this->UEElementOrdered=other.UEElementOrdered;
-    this->ContextLieAlgebra=other.ContextLieAlgebra;
-    this->polyValue=other.polyValue;
-    this->outputString= other.outputString;
-  };
+  void operator=(const ParserNode& other);
   void Clear();
   int GetStrongestExpressionChildrenConvertChildrenIfNeeded();
   void ConvertChildrenAndMyselfToStrongestExpressionChildren();
@@ -7353,10 +7392,11 @@ class ParserNode
   bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeRoot, typeString,
+  typeUEelement, typeWeylAlgebraElement, typeRoot, typeMap, typeString,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
-  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation, errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax};
+  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
+  errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution};
   void InitForAddition();
   void InitForMultiplication();
   std::string ElementToStringValueOnly(bool useHtml);
@@ -7380,7 +7420,9 @@ class ParserNode
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
-  void EvaluateInvariants(GlobalVariables& theGlobalVariabltes);
+  void EvaluateInvariants(GlobalVariables& theGlobalVariables);
+  void EvaluateSubstitution(GlobalVariables& theGlobalVariables);
+  void EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
   void EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVariables);
   void EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVariables);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
@@ -7408,7 +7450,7 @@ public:
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
-    tokenRoot, tokenFunction, tokenFunctionNoArgument
+    tokenRoot, tokenMapsTo, tokenColon, tokenEndStatement, tokenFunction, tokenFunctionNoArgument
   };
   enum functionList
   { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
@@ -7434,25 +7476,29 @@ public:
   bool ApplyRules(int lookAheadToken);
   bool lookAheadTokenProhibitsPlus(int theToken);
   bool lookAheadTokenProhibitsTimes(int theToken);
+  bool lookAheadTokenAllowsMapsTo(int theToken);
   bool TokenProhibitsUnaryMinus(int theToken);
   void AddIndexingExpressionOnTop();
   void AddLetterExpressionOnTop();
   void AddFunctionOnTop();
-  void AddRootOnTop(int theDimension);
+  void AddXECdotsCEX(int theDimension);
+  void AddXECdotsCEXEX(int theDimension);
   bool StackTopIsARoot(int& outputDimension);
+  bool StackTopIsASub(int& outputNumEntries);
+  bool StackTopIsADelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter);
+  bool StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
+  (int& outputDimension, int LeftDelimiter, int middleDelimiter, int rightDelimiter)
+  ;
   bool IsAWordSeparatingCharacter(char c);
   bool LookUpInDictionaryAndAdd(std::string& input);
   void Own(int indexParent, int indexChild1, int indexChild2);
   void Own(int indexParent, int indexChild1);
   void ExtendOnTop(int numNew);
   void TokenToStringStream(std::stringstream& out, int theToken);
-  void AddDivideOnTop();
-  void AddPlusOnTop();
-  void AddPowerOnTop();
-  void AddMinusOnTop();
-  void AddUnaryMinusOnTop();
   void AddMapOnTop();
-  void AddTimesOnTop();
+  void AddUnaryMinusOnTop();
+  void AddEOEOnTop();
+  void AddImpiedTimesOnTop();
   void AddLieBracketOnTop();
   void PopLastAndThirdToLast();
   void AddIntegerOnTopConvertToExpression();

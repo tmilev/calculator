@@ -124,6 +124,7 @@ int main(int argc, char **argv)
   //  tempRat.ElementToString(tempS);
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
   //civilizedInput="secretSauceOrdered";
+  //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;
    // civilizedInput="gcd(x_1^3+x_2^3+x_3^3, x_1^{5}+x_2^{5}+x_3^{5})";
@@ -388,12 +389,24 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
   { out << "{";
     return true;
   }
+  if (readAhead=="%3B")
+  { out << ";";
+    return true;
+  }
   if (readAhead=="%2F")
   { out << "/";
     return true;
   }
+  if (readAhead=="%3A")
+  { out << ":";
+    return true;
+  }
   if (readAhead=="%5E")
   { out << "^";
+    return true;
+  }
+  if (readAhead=="%5C")
+  { out << "\\";
     return true;
   }
   if (readAhead=="%7D")

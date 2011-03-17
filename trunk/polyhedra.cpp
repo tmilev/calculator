@@ -5891,7 +5891,7 @@ void PolynomialRationalCoeff::operator=(const std::string& tempS)
   GlobalVariables tempGV;
   theParser.ParseEvaluateAndSimplify(tempS, tempGV);
   if (theParser.theValue.ExpressionType==ParserNode::typePoly)
-    this->Assign(theParser.theValue.polyValue);
+    this->Assign(theParser.theValue.polyValue.GetElement());
   else
     this->Nullify(-1);
 }
@@ -25253,8 +25253,8 @@ int Lattice::GetRankElementRepresentedBy(root& elementRepresentative)
 ElementUniversalEnveloping Parser::ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables)
 { this->Parse(input);
   this->Evaluate(theGlobalVariables);
-  this->theValue.UEElement.Simplify();
-  return this->theValue.UEElement;
+  this->theValue.UEElement.GetElement().Simplify();
+  return this->theValue.UEElement.GetElement();
 }
 
 std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables)
@@ -25262,8 +25262,10 @@ std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVar
   this->Parse(input);
   this->ComputeDebugString(theGlobalVariables);
   this->Evaluate(theGlobalVariables);
-  this->theValue.UEElement.Simplify();
-  this->theValue.UEElementOrdered.Simplify();
+  if (!this->theValue.UEElement.IsZeroPointer())
+    this->theValue.UEElement.GetElement().Simplify();
+  if(!this->theValue.UEElement.IsZeroPointer())
+    this->theValue.UEElementOrdered.GetElement().Simplify();
   std::stringstream out;
   out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueOnly(true);
   return out.str();
@@ -25331,6 +25333,8 @@ bool Parser::IsAWordSeparatingCharacter(char c)
     case '_': return true;
     case '/': return true;
     case ' ': return true;
+    case ';': return true;
+    case ':': return true;
     default: return false;
   }
 //  return false;
@@ -25435,6 +25439,10 @@ bool Parser::ApplyRules(int lookAheadToken)
     this->PopTokenAndValueStacksShiftDown(this->TokenStack.size-2);
     return true;
   }
+  if (tokenSecondToLast==this->tokenMapsTo && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && this->lookAheadTokenAllowsMapsTo(lookAheadToken))
+  { this->AddEOEOnTop();
+    return true;
+  }
   if (tokenLast== this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenLieBracket)
   { this->AddLieBracketOnTop();
     return true;
@@ -25460,51 +25468,37 @@ bool Parser::ApplyRules(int lookAheadToken)
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenPower && tokenThirdToLast==this->tokenExpression)
-  { this->AddPowerOnTop();
+  { this->AddEOEOnTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenDivide && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddDivideOnTop();
+  { this->AddEOEOnTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && tokenSecondToLast==tokenTimes && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->PopTokenAndValueStacksShiftDown(this->TokenStack.size-2);
-    this->AddTimesOnTop();
+  { this->AddEOEOnTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddTimesOnTop();
+  { this->AddImpiedTimesOnTop();
     return true;
   }
   if (tokenSecondToLast==this->tokenPlus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddPlusOnTop();
+  { this->AddEOEOnTop();
     return true;
   }
   if (tokenSecondToLast==this->tokenMinus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddMinusOnTop();
+  { this->AddEOEOnTop();
     return true;
   }
   int rootDim;
   if (this->StackTopIsARoot(rootDim))
-  { this->AddRootOnTop(rootDim);
+  { this->AddXECdotsCEX(rootDim);
     return true;
   }
-  return false;
-}
-
-bool Parser::StackTopIsARoot(int& outputDimension)
-{ if (*this->TokenStack.LastObject()!=this->tokenCloseBracket)
-    return false;
-  outputDimension=0;
-  for (int i=this->TokenStack.size-2; i>=1; i--)
-  { if (this->TokenStack.TheObjects[i]!=this->tokenExpression)
-      return false;
-    i--;
-    outputDimension++;
-    if (this->TokenStack.TheObjects[i]==this->tokenOpenBracket)
-      return true;
-    if (this->TokenStack.TheObjects[i]!=this->tokenComma)
-      return false;
+  if (this->StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3(rootDim, this->tokenOpenBracket, this->tokenColon, this->tokenCloseBracket))
+  { this->AddXECdotsCEXEX(rootDim);
+    return true;
   }
   return false;
 }
@@ -25519,14 +25513,6 @@ void Parser::DecreaseStackSetExpressionLastNode(int Decrease)
 void Parser::MergeLastTwoIntegers()
 { this->LargeIntegerReader=this->LargeIntegerReader*10+(*this->ValueStack.LastObject());
   this->PopTokenAndValueStacksLast();
-}
-
-void Parser::AddPowerOnTop()
-{ this->ExtendOnTop(1);
-  this->LastObject()->Clear();
-  this->LastObject()->Operation=this->tokenPower;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(2);
 }
 
 void Parser::AddLetterExpressionOnTop()
@@ -25564,26 +25550,10 @@ void Parser::AddIndexingExpressionOnTop()
   this->DecreaseStackSetExpressionLastNode(2);
 }
 
-void Parser::AddPlusOnTop()
+void Parser::AddEOEOnTop()
 { this->ExtendOnTop(1);
   ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenPlus;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(2);
-}
-
-void Parser::AddDivideOnTop()
-{ this->ExtendOnTop(1);
-  ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenDivide;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(2);
-}
-
-void Parser::AddMinusOnTop()
-{ this->ExtendOnTop(1);
-  ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenMinus;
+  theNode->Operation=this->TokenStack.TheObjects[this->TokenStack.size-2];
   this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
   this->DecreaseStackSetExpressionLastNode(2);
 }
@@ -25604,7 +25574,7 @@ void Parser::AddMapOnTop()
   this->DecreaseStackSetExpressionLastNode(1);
 }
 
-void Parser::AddTimesOnTop()
+void Parser::AddImpiedTimesOnTop()
 { this->ExtendOnTop(1);
   ParserNode* theNode=this->LastObject();
   theNode->Operation=this->tokenTimes;
@@ -25629,19 +25599,6 @@ void Parser::ParseAndCompute(const std::string& input, std::string& output, Glob
   out << tempS;
   out << "\\end{eqnarray*}";
   output=out.str();
-}
-
-void Parser::AddRootOnTop(int theDimension)
-{ this->ExtendOnTop(1);
-  ParserNode& lastNode=*this->LastObject();
-  lastNode.Operation=this->tokenRoot;
-  lastNode.children.SetSizeExpandOnTopNoObjectInit(theDimension);
-  for (int i=0; i<theDimension; i++)
-  { int indexChild=this->ValueStack.TheObjects[this->ValueStack.size-2-2*i];
-    lastNode.children.TheObjects[theDimension-1-i]=indexChild;
-    this->TheObjects[indexChild].indexParent=this->size-1;
-  }
-  this->DecreaseStackSetExpressionLastNode(theDimension*2);
 }
 
 void Parser::Own(int indexParent, int indexChild1)
@@ -25703,7 +25660,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenH: break;
     case Parser::tokenF: break;
     case Parser::tokenVariable: break;
-    case Parser::tokenC: this->ExpressionType=this->typeUEelement; this->UEElement.MakeCasimir(*this->ContextLieAlgebra, this->owner->NumVariables, theGlobalVariables); break;
+    case Parser::tokenC: this->ExpressionType=this->typeUEelement; this->UEElement.GetElement().MakeCasimir(*this->ContextLieAlgebra, this->owner->NumVariables, theGlobalVariables); break;
     case Parser::tokenDivide: this->EvaluateDivide(theGlobalVariables); break;
     case Parser::tokenUnderscore: this->EvaluateUnderscore(theGlobalVariables); break;
     case Parser::tokenPartialDerivative: this->ExpressionType=this->typeWeylAlgebraElement; break;
@@ -25714,6 +25671,8 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
     case Parser::tokenFunction: this->EvaluateFunction(theGlobalVariables); break;
     case Parser::tokenRoot: this->ExpressionType=this->typeRoot; break;
+    case Parser::tokenMapsTo: this->EvaluateSubstitution(theGlobalVariables); break;
+    case Parser::tokenColon: this->EvaluateApplySubstitution(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
 }
@@ -25737,26 +25696,26 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
   ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
   if (rightNode.ExpressionType!=this->typeIntegerOrIndex)
   { if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEelement)
-      if (leftNode.UEElement.IsAPowerOfASingleGenerator())
+      if (leftNode.UEElement.GetElement().IsAPowerOfASingleGenerator())
         { rightNode.ConvertToType(this->typePoly);
-          leftNode.UEElement.SetNumVariables(this->owner->NumVariables);
+          leftNode.UEElement.GetElement().SetNumVariables(this->owner->NumVariables);
           MonomialUniversalEnveloping tempMon;
-          tempMon.operator=(leftNode.UEElement.TheObjects[0]);
-          tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue);
-          this->UEElement.Nullify(*this->ContextLieAlgebra);
-          this->UEElement.AddMonomial(tempMon);
+          tempMon.operator=(leftNode.UEElement.GetElement().TheObjects[0]);
+          tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue.GetElement());
+          this->UEElement.GetElement().Nullify(*this->ContextLieAlgebra);
+          this->UEElement.GetElement().AddMonomial(tempMon);
           this->ExpressionType=this->typeUEelement;
           return;
         }
      if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEElementOrdered)
-      if (leftNode.UEElementOrdered.IsAPowerOfASingleGenerator())
+      if (leftNode.UEElementOrdered.GetElement().IsAPowerOfASingleGenerator())
         { rightNode.ConvertToType(this->typePoly);
-          leftNode.UEElementOrdered.SetNumVariables(this->owner->NumVariables);
+          leftNode.UEElementOrdered.GetElement().SetNumVariables(this->owner->NumVariables);
           MonomialUniversalEnvelopingOrdered tempMon;
-          tempMon.operator=(leftNode.UEElementOrdered.TheObjects[0]);
-          tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue);
-          this->UEElementOrdered.Nullify(this->owner->testAlgebra);
-          this->UEElementOrdered.AddMonomial(tempMon);
+          tempMon.operator=(leftNode.UEElementOrdered.GetElement().TheObjects[0]);
+          tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue.GetElement());
+          this->UEElementOrdered.GetElement().Nullify(this->owner->testAlgebra);
+          this->UEElementOrdered.GetElement().AddMonomial(tempMon);
           this->ExpressionType=this->typeUEElementOrdered;
           return;
         }
@@ -25776,13 +25735,13 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
       this->ExpressionType=this->typeRational;
       break;
     case ParserNode::typePoly:
-      this->polyValue=leftNode.polyValue;
-      this->polyValue.RaiseToPower(thePower);
+      this->polyValue.GetElement()=leftNode.polyValue.GetElement();
+      this->polyValue.GetElement().RaiseToPower(thePower);
       this->ExpressionType=this->typePoly;
       break;
     case ParserNode::typeUEelement:
-      this->UEElement=leftNode.UEElement;
-      this->UEElement.RaiseToPower(thePower);
+      this->UEElement.GetElement()=leftNode.UEElement.GetElement();
+      this->UEElement.GetElement().RaiseToPower(thePower);
       this->ExpressionType=this->typeUEelement;
     break;
     default: this->ExpressionType=this->typeError; return;
@@ -25811,7 +25770,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     }
     root tempRoot;
     tempRoot.MakeEi(theDimension, theIndex);
-    this->UEElement.AssignElementCartan(tempRoot, this->owner->NumVariables, *this->ContextLieAlgebra);
+    this->UEElement.GetElement().AssignElementCartan(tempRoot, this->owner->NumVariables, *this->ContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return;
   }
@@ -25822,7 +25781,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     { this->SetError(this->errorBadIndex);
       return;
     }
-    this->UEElement.MakeOneGeneratorCoeffOne(theIndex, this->owner->NumVariables, *this->ContextLieAlgebra);
+    this->UEElement.GetElement().MakeOneGeneratorCoeffOne(theIndex, this->owner->NumVariables, *this->ContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return;
   }
@@ -25837,7 +25796,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     { this->SetError(this->errorBadIndex);
       return;
     }
-    this->UEElementOrdered.MakeOneGeneratorCoeffOne(theIndex, this->owner->NumVariables, this->owner->testAlgebra);
+    this->UEElementOrdered.GetElement().MakeOneGeneratorCoeffOne(theIndex, this->owner->NumVariables, this->owner->testAlgebra);
     this->ExpressionType=this->typeUEElementOrdered;
     return;
   }
@@ -25849,7 +25808,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
       return;
     }
     this->owner->NumVariables=MathRoutines::Maximum(theIndex, this->owner->NumVariables);
-    this->polyValue.MakeMonomialOneLetter((short)this->owner->NumVariables, theIndex-1, 1, (Rational) 1);
+    this->polyValue.GetElement().MakeMonomialOneLetter((short)this->owner->NumVariables, theIndex-1, 1, (Rational) 1);
     this->ExpressionType=this->typePoly;
     return;
   }
@@ -25865,17 +25824,22 @@ bool ParserNode::ConvertChildrenToType(int theType)
 void ParserNode::InitForAddition()
 { this->intValue=0;
   this->rationalValue.MakeZero();
-  this->polyValue.Nullify((short)this->owner->NumVariables);
-  this->UEElement.Nullify(*this->ContextLieAlgebra);
+  this->polyValue.GetElement().Nullify((short)this->owner->NumVariables);
+  this->UEElement.GetElement().Nullify(*this->ContextLieAlgebra);
 //  this->WeylAlgebraElement.Nullify(this->owner->NumVariables);
 }
 
 void ParserNode::InitForMultiplication()
 { this->intValue=1;
-  this->polyValue.MakeNVarConst((short)this->owner->NumVariables, (Rational)1);
   this->rationalValue=1;
-  this->UEElement.AssignInt(1, this->owner->NumVariables, *this->ContextLieAlgebra);
-  this->UEElementOrdered.AssignInt(1, this->owner->NumVariables, this->owner->testAlgebra);
+  if(this->ExpressionType==this->typePoly)
+    this->polyValue.GetElement().MakeNVarConst((short)this->owner->NumVariables, (Rational)1);
+  if(this->ExpressionType==this->typeUEelement)
+    this->UEElement.GetElement().AssignInt(1, this->owner->NumVariables, *this->ContextLieAlgebra);
+  if(this->ExpressionType==this->typeUEElementOrdered)
+    this->UEElementOrdered.GetElement().AssignInt(1, this->owner->NumVariables, this->owner->testAlgebra);
+  if(this->ExpressionType==this->typeWeylAlgebraElement)
+    assert(false);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
@@ -25918,8 +25882,8 @@ void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
           this->intValue=theInt.value.TheObjects[0]*theInt.sign;
       break;
       case ParserNode::typeRational: this->rationalValue+=currentChild.rationalValue; break;
-      case ParserNode::typePoly: this->polyValue.AddPolynomial(currentChild.polyValue); break;
-      case ParserNode::typeUEelement: this->UEElement+=currentChild.UEElement; break;
+      case ParserNode::typePoly: this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); break;
+      case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
       default: this->ExpressionType=this->typeError; return;
     }
   }
@@ -25930,16 +25894,16 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
-  this->InitForAddition();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  this->InitForAddition();
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
     switch (this->ExpressionType)
     { case ParserNode::typeIntegerOrIndex: if (i==0) this->intValue+=currentChild.intValue; else this->intValue-=currentChild.intValue; break;
       case ParserNode::typeRational: if (i==0) this->rationalValue+=currentChild.rationalValue; else this->rationalValue-=currentChild.rationalValue; break;
-      case ParserNode::typePoly: if(i==0) this->polyValue.AddPolynomial(currentChild.polyValue); else this->polyValue.Subtract(currentChild.polyValue); break;
-      case ParserNode::typeUEelement: if (i==0) this->UEElement+=currentChild.UEElement; else this->UEElement-=currentChild.UEElement; break;
-      case ParserNode::typeUEElementOrdered: if (i==0) this->UEElementOrdered+=currentChild.UEElementOrdered; else this->UEElementOrdered-=currentChild.UEElementOrdered; break;
+      case ParserNode::typePoly: if(i==0) this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); else this->polyValue.GetElement().Subtract(currentChild.polyValue.GetElement()); break;
+      case ParserNode::typeUEelement: if (i==0) this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); else this->UEElement.GetElement()-=currentChild.UEElement.GetElement(); break;
+      case ParserNode::typeUEElementOrdered: if (i==0) this->UEElementOrdered.GetElement()+=currentChild.UEElementOrdered.GetElement(); else this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
       default: this->ExpressionType=this->typeError; return;
     }
   }
@@ -25950,14 +25914,14 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
-  this->InitForAddition();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  this->InitForAddition();
   ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[0]];
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: this->intValue-=currentChild.intValue; break;
     case ParserNode::typeRational: this->rationalValue-=currentChild.rationalValue; break;
-    case ParserNode::typePoly: this->polyValue.Subtract(currentChild.polyValue); break;
-    case ParserNode::typeUEelement: this->UEElement-=currentChild.UEElement; break;
+    case ParserNode::typePoly: this->polyValue.GetElement().Subtract(currentChild.polyValue.GetElement()); break;
+    case ParserNode::typeUEelement: this->UEElement.GetElement()-=currentChild.UEElement.GetElement(); break;
     default: this->ExpressionType=this->typeError; return;
   }
 }
@@ -26002,13 +25966,13 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
       return;
     }
   if (this->ExpressionType==this->typeUEelement)
-  { ElementUniversalEnveloping& left= this->owner->TheObjects[this->children.TheObjects[0]].UEElement;
-    ElementUniversalEnveloping& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElement;
-    left.LieBracketOnTheRight(right, this->UEElement);
+  { ElementUniversalEnveloping& left= this->owner->TheObjects[this->children.TheObjects[0]].UEElement.GetElement();
+    ElementUniversalEnveloping& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElement.GetElement();
+    left.LieBracketOnTheRight(right, this->UEElement.GetElement());
   } else if (this->ExpressionType==this->typeUEElementOrdered)
-  { ElementUniversalEnvelopingOrdered& left=this->owner->TheObjects[this->children.TheObjects[0]].UEElementOrdered;
-    ElementUniversalEnvelopingOrdered& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElementOrdered;
-    left.LieBracketOnTheRight(right, this->UEElementOrdered);
+  { ElementUniversalEnvelopingOrdered& left=this->owner->TheObjects[this->children.TheObjects[0]].UEElementOrdered.GetElement();
+    ElementUniversalEnvelopingOrdered& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElementOrdered.GetElement();
+    left.LieBracketOnTheRight(right, this->UEElementOrdered.GetElement());
   } else
   { this->SetError(this->errorProgramming);
   }
@@ -26024,7 +25988,7 @@ void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
     return;
   }
-  if (! this->owner->theHmm.ApplyHomomorphism(child.UEElement, this->UEElement, theGlobalVariables))
+  if (! this->owner->theHmm.ApplyHomomorphism(child.UEElement.GetElement(), this->UEElement.GetElement(), theGlobalVariables))
   { this->SetError(this->errorBadIndex);
     return;
   }
@@ -26099,14 +26063,14 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
       }
       break;
     case ParserNode::typePoly:
-      if (leftNode.polyValue.IsEqualToZero() || rightNode.polyValue.IsEqualToZero())
+      if (leftNode.polyValue.GetElement().IsEqualToZero() || rightNode.polyValue.GetElement().IsEqualToZero())
       { this->SetError(this->errorDivisionByZero);
         return;
       }
       if (theFunction==Parser::functionGCD)
-        RationalFunction::gcd(leftNode.polyValue, rightNode.polyValue, this->polyValue);
+        RationalFunction::gcd(leftNode.polyValue.GetElement(), rightNode.polyValue.GetElement(), this->polyValue.GetElement());
       else
-        RationalFunction::lcm(leftNode.polyValue, rightNode.polyValue, this->polyValue);
+        RationalFunction::lcm(leftNode.polyValue.GetElement(), rightNode.polyValue.GetElement(), this->polyValue.GetElement());
       this->ExpressionType=this->typePoly;
       break;
     case ParserNode::typeUEelement:
@@ -26153,13 +26117,13 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
       this->ExpressionType=this->typeRational;
       break;
     case ParserNode::typePoly:
-      this->polyValue=leftNode.polyValue;
-      this->polyValue.DivByRational(theDenominator);
+      this->polyValue.GetElement()=leftNode.polyValue.GetElement();
+      this->polyValue.GetElement().DivByRational(theDenominator);
       this->ExpressionType=this->typePoly;
       break;
     case ParserNode::typeUEelement:
-      this->UEElement=leftNode.UEElement;
-      this->UEElement/=theDenominator;
+      this->UEElement.GetElement()=leftNode.UEElement.GetElement();
+      this->UEElement.GetElement()/=theDenominator;
       this->ExpressionType=this->typeUEelement;
     break;
     default: this->SetError(this->errorDivisionByNonAllowedType); return;
@@ -26171,8 +26135,8 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
     return;
   }
-  this->InitForMultiplication();
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  this->InitForMultiplication();
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
@@ -26187,9 +26151,9 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
           this->intValue=theInt.value.TheObjects[0]*theInt.sign;
       break;
       case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
-      case ParserNode::typePoly: this->polyValue.MultiplyBy(currentChild.polyValue); break;
-      case ParserNode::typeUEelement: this->UEElement*=currentChild.UEElement; break;
-      case ParserNode::typeUEElementOrdered: this->UEElementOrdered*=currentChild.UEElementOrdered; break;
+      case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
+      case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
+      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
       default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
     }
   }
@@ -26272,7 +26236,11 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenMinusUnary: out << "-"; break;
     case Parser::tokenVariable: out << "n"; break;
     case Parser::tokenRoot: out << "root"; break;
+    case Parser::tokenMapsTo: out << "->"; break;
     case Parser::tokenFunction: out << "function"; break;
+    case Parser::tokenEndStatement: out << ";"; break;
+    case Parser::tokenColon: out << ":"; break;
+//    case Parser::tokenSubstitution: out << "Substitution: "; break;
     case Parser::tokenFunctionNoArgument: out << "functionNoArgument"; break;
     case Parser::tokenF: out << "f"; break;
     default: out << "?"; break;
@@ -26281,7 +26249,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
 
 void Parser::Clear()
 { this->theValue.Clear();
-  this->theValue.UEElement.Nullify(this->theHmm.theRange);
+  this->theValue.UEElement.GetElement().Nullify(this->theHmm.theRange);
   this->TokenStack.size=0;
   this->ValueStack.size=0;
 }
@@ -26289,10 +26257,10 @@ void Parser::Clear()
 void Parser::ComputeNumberOfVariablesAndAdjustNodes()
 { this->NumVariables=0;
   for(int i=0; i<this->size; i++)
-    if (this->NumVariables< this->TheObjects[i].WeylAlgebraElement.NumVariables)
-      this->NumVariables=this->TheObjects[i].WeylAlgebraElement.NumVariables;
+    if (this->NumVariables< this->TheObjects[i].WeylAlgebraElement.GetElement().NumVariables)
+      this->NumVariables=this->TheObjects[i].WeylAlgebraElement.GetElement().NumVariables;
   for (int i=0; i<this->size; i++)
-    this->TheObjects[i].WeylAlgebraElement.SetNumVariablesPreserveExistingOnes(this->NumVariables);
+    this->TheObjects[i].WeylAlgebraElement.GetElement().SetNumVariablesPreserveExistingOnes(this->NumVariables);
 }
 
 std::string ParserNode::ElementToStringErrorCode(bool useHtml)
@@ -26323,7 +26291,7 @@ void ParserNode::ElementToString(std::string& output)
   if (this->ExpressionType==this->typeIntegerOrIndex)
     out << " is the integer " << this->intValue;
   if (this->ExpressionType==this->typePoly)
-  { this->polyValue.ElementToString(tempS);
+  { this->polyValue.GetElement().ElementToString(tempS);
     out << " is the polynomial " << tempS;
   }
   if (this->ExpressionType==this->typeRoot)
@@ -26331,15 +26299,15 @@ void ParserNode::ElementToString(std::string& output)
   if (this->ExpressionType==this->typeUndefined)
     out << " is of type undefined ";
   if (this->ExpressionType==this->typeWeylAlgebraElement)
-  { this->WeylAlgebraElement.ElementToString(tempS, false, false, false);
+  { this->WeylAlgebraElement.GetElement().ElementToString(tempS, false, false, false);
     out << " is the algebra element " << tempS << " ";
   }
   if (this->ExpressionType==this->typeUEelement)
-  { this->UEElement.ElementToString(tempS);
+  { this->UEElement.GetElement().ElementToString(tempS);
     out << " is the universal enveloping algebra element: " << tempS;
   }
   if (this->ExpressionType==this->typeUEElementOrdered)
-  { this->UEElementOrdered.ElementToString(tempS);
+  { this->UEElementOrdered.GetElement().ElementToString(tempS);
     out << "is the universal enveloping algebra element (ordered): " << tempS;
   }
   if (this->children.size>0)

@@ -3939,7 +3939,6 @@ std::string GeneralizedPolynomialRational::ElementToString()
   return out.str();
 }
 
-
 void ParserNode::EvaluateSubstitution(GlobalVariables& theGlobalVariables)
 { if (this->children.size!=2)
   { this->SetError(this->errorBadOrNoArgument);

@@ -21951,7 +21951,11 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     if (!usePNG)
       tempMat.ElementToString(tempS, useHtml, useLatex);
     else
+    { std::stringstream tempStreamX;
       tempMat.ElementToString(tempS, false, true);
+      tempStreamX << "\\[" << tempS << "\\]";
+      tempS=tempStreamX.str();
+    }
     if (useHtml)
       out << "<br>";
     out << "\nSymmetric Cartan matrix in Bourbaki order:\n";
@@ -22606,13 +22610,13 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
   //  body<< "Index "<< i<<": ";
     if(useHtml)
-      body<<"<br>";
-    body<<tempS;
+      body << "<br>";
+    body << tempS;
     if(useHtml)
-      body<<"<HR width=\"100%\">";
+      body << "<HR width=\"100%\">";
   }
   if(useHtml)
-    out<<"<br>";
+    out << "<br>";
   this->ElementToStringNoGenerators(tempS, theGlobalVariables, theWeyl, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
   out << tempS;
   tempS = body.str();
@@ -22647,20 +22651,20 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a><br> <a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
-  out <<tempS;
+  out << tempS;
   if(usePNG)
   { fileName= physicalPath;
     fileName.append("sl2s.html");
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
     tempS= out.str();
-    theFile<< "<HMTL><BODY>"<<notation<<"<a href=\""<< htmlPathServer<< "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
+    theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
     theFile.close();
   }
   fileName= physicalPath;
   fileName.append("sl2s_nopng.html");
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, &physicalPath, &htmlPathServer);
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
-  theFile<< "<HMTL><BODY>"<<notation<<"<a href=\""<< htmlPathServer<< "sl2s.html\"> "<<".png rich html for your viewing pleasure</a><br>\n" <<tempS<<"</HTML></BODY>";
+  theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s.html\"> " << ".png rich html for your viewing pleasure</a><br>\n" << tempS << "</HTML></BODY>";
   theFile.close();
   fileName= physicalPath;
   fileName.append("StructureConstants.html");
@@ -22675,7 +22679,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
     { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
       fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile.TheObjects[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
-      tempStreamLatex << "latex "<< " -output-directory=" << physicalPath << " " << this->texFileNamesForPNG.TheObjects[i];
+      tempStreamLatex << "latex " << " -output-directory=" << physicalPath << " " << this->texFileNamesForPNG.TheObjects[i];
       tempS= this->texFileNamesForPNG.TheObjects[i];
       tempS.resize(tempS.size()-4);
       tempStreamPNG << "dvipng " << tempS << ".dvi -o " << tempS << ".png -T tight";

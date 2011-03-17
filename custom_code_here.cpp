@@ -62,7 +62,7 @@ void ParserNode::EvaluateInvariants(GlobalVariables& theGlobalVariables)
   theModule.ComputeInvariantsOfDegree(theArgument.intValue, out, theGlobalVariables);
   this->ExpressionType=this->typePoly;
   if (theModule.invariantsFound.size>0)
-    this->polyValue=theModule.invariantsFound.TheObjects[0];
+    this->polyValue.GetElement().operator=(theModule.invariantsFound.TheObjects[0]);
   this->outputString=out.str();
 }
 
@@ -133,7 +133,7 @@ void ParserNode::EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVa
     { this->SetError(this->errorBadOrNoArgument);
       return;
     } else
-      theGenerators.TheObjects[i-1].operator=(current.UEElement);
+      theGenerators.TheObjects[i-1].operator=(current.UEElement.GetElement());
   }
   std::stringstream log;
   List<ElementUniversalEnveloping> theEigenvectors, theNilradical;
@@ -158,10 +158,10 @@ void ParserNode::EvaluateModVermaRelations(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  this->UEElement=theArgument.UEElement;
-  this->outputString.append(this->UEElement.ElementToString(true));
-  this->UEElement.Simplify();
-  this->UEElement.ModOutVermaRelations();
+  this->UEElement.GetElement()=theArgument.UEElement.GetElement();
+  this->outputString.append(this->UEElement.GetElement().ElementToString(true));
+  this->UEElement.GetElement().Simplify();
+  this->UEElement.GetElement().ModOutVermaRelations();
   this->ExpressionType=this->typeUEelement;
 }
 
@@ -248,6 +248,8 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     case '+': this->TokenBuffer.AddObjectOnTop(Parser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); return true;
     case '-': this->TokenBuffer.AddObjectOnTop(Parser::tokenMinus); this->ValueBuffer.AddObjectOnTop(0); return true;
     case '_': this->TokenBuffer.AddObjectOnTop(Parser::tokenUnderscore); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case ';': this->TokenBuffer.AddObjectOnTop(Parser::tokenEndStatement); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case ':': this->TokenBuffer.AddObjectOnTop(Parser::tokenColon); this->ValueBuffer.AddObjectOnTop(0); return true;
     case '/': this->TokenBuffer.AddObjectOnTop(Parser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); return true;
     default: break;
   }
@@ -314,6 +316,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="eigenVermaOfWeight")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionEigenUEofWeight);
+    return true;
+  }
+  if (input=="\\mapsto")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenMapsTo);
+    this->ValueBuffer.AddObjectOnTop(0);
     return true;
   }
   if (input =="secretSauce")
@@ -1006,7 +1013,6 @@ void ParserNode::Clear()
   this->rationalValue.MakeZero();
   if (this->owner!=0)
     this->ContextLieAlgebra=&this->owner->theHmm.theRange;
-  this->polyValue.Nullify(0);
 }
 
 std::string SemisimpleLieAlgebra::GetLetterFromGeneratorIndex(int theIndex, bool useLatex)
@@ -1943,6 +1949,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
     currentTargetShifts.GetCoordsInBasis(tempRoots, tempRoots2, theGlobalVariables);
     out << "<br> in the above unimodular basis the coordinates are:<br> " << tempRoots2.ElementToString(false, true, true);
   }
+  out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&&" << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
   GeneralizedPolynomialRational tempGP;
   GeneralizedMonomialRational tempGM;
   tempGM.MakeGenericMon(numRangePosRoots+theRangeRank, theRangeRank);
@@ -1951,7 +1958,6 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
   out << "<br> ...and the action on the generic monomial is: <div class=\"math\">\\begin{eqnarray*}&&" << tempGP.ElementToString() << "\\end{eqnarray*}</div>";
 
 
-  out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&&" << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
   /*root tempRoot;
   RationalFunction ZeroRF;
   ZeroRF.MakeNVarConst(numCoeffVars, (Rational) 0);
@@ -3567,14 +3573,14 @@ bool ParserNode::ConvertToType(int theType)
   if (theType==this->typeUndefined)
     return false;
   if (this->ExpressionType==this->typePoly)
-      if (this->polyValue.NumVars< this->owner->NumVariables)
-        this->polyValue.SetNumVariablesSubDeletedVarsByOne((short)this->owner->NumVariables);
+      if (this->polyValue.GetElement().NumVars< this->owner->NumVariables)
+        this->polyValue.GetElement().SetNumVariablesSubDeletedVarsByOne((short)this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEElementOrdered)
-    this->UEElementOrdered.SetNumVariables(this->owner->NumVariables);
+    this->UEElementOrdered.GetElement().SetNumVariables(this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEelement)
-    this->UEElement.SetNumVariables(this->owner->NumVariables);
+    this->UEElement.GetElement().SetNumVariables(this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEelement && theType==this->typeUEElementOrdered)
-  { if (this->UEElementOrdered.AssignElementUniversalEnveloping(this->UEElement, this->owner->testAlgebra))
+  { if (this->UEElementOrdered.GetElement().AssignElementUniversalEnveloping(this->UEElement.GetElement(), this->owner->testAlgebra))
     { this->ExpressionType=this->typeUEElementOrdered;
       return true;
     }
@@ -3589,29 +3595,29 @@ bool ParserNode::ConvertToType(int theType)
   { if (theType==this->typeRational)
       this->rationalValue= this->intValue;
     if (theType==this->typePoly)
-      this->polyValue.MakeNVarConst((short) this->owner->NumVariables, (Rational) this->intValue);
+      this->polyValue.GetElement().MakeNVarConst((short) this->owner->NumVariables, (Rational) this->intValue);
     if (theType==this->typeUEElementOrdered)
-      this->UEElementOrdered.MakeConst((Rational) this->intValue, (short) this->owner->NumVariables, this->owner->testAlgebra);
+      this->UEElementOrdered.GetElement().MakeConst((Rational) this->intValue, (short) this->owner->NumVariables, this->owner->testAlgebra);
     if (theType==this->typeUEelement)
-      this->UEElement.AssignInt(this->intValue, (short)this->owner->NumVariables, *this->ContextLieAlgebra);
+      this->UEElement.GetElement().AssignInt(this->intValue, (short)this->owner->NumVariables, *this->ContextLieAlgebra);
   }
   if (this->ExpressionType==this->typeRational)
   { if (theType==this->typePoly)
-      this->polyValue.MakeNVarConst((short)this->owner->NumVariables, this->rationalValue);
+      this->polyValue.GetElement().MakeNVarConst((short)this->owner->NumVariables, this->rationalValue);
     if (theType==this->typeUEElementOrdered)
-      this->UEElementOrdered.MakeConst(this->rationalValue, this->owner->NumVariables, this->owner->testAlgebra);
+      this->UEElementOrdered.GetElement().MakeConst(this->rationalValue, this->owner->NumVariables, this->owner->testAlgebra);
     if (theType==this->typeUEelement)
-      this->UEElement.MakeConst(this->rationalValue, this->owner->NumVariables, *this->ContextLieAlgebra);
+      this->UEElement.GetElement().MakeConst(this->rationalValue, this->owner->NumVariables, *this->ContextLieAlgebra);
   }
   if (this->ExpressionType==this->typePoly)
   { if (theType==this->typeUEElementOrdered)
-      this->UEElementOrdered.MakeConst(this->polyValue, this->owner->testAlgebra);
+      this->UEElementOrdered.GetElement().MakeConst(this->polyValue.GetElement(), this->owner->testAlgebra);
     if (theType==this->typeUEelement)
-      this->UEElement.MakeConst(this->polyValue, *this->ContextLieAlgebra);
+      this->UEElement.GetElement().MakeConst(this->polyValue.GetElement(), *this->ContextLieAlgebra);
   }
   if (this->ExpressionType==this->typeUEElementOrdered)
     if(theType==this->typeUEelement)
-      if(!this->UEElementOrdered.GetElementUniversalEnveloping(this->UEElement, this->owner->theHmm.theRange))
+      if(!this->UEElementOrdered.GetElement().GetElementUniversalEnveloping(this->UEElement.GetElement(), this->owner->theHmm.theRange))
         return false;
   this->ExpressionType=theType;
   return true;
@@ -3719,15 +3725,15 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
     out << " is a an ordered tuple ";
   if (this->ExpressionType==this->typePoly)
   { out << " a polynomial of value: ";
-    LatexOutput << this->polyValue.ElementToString();
+    LatexOutput << this->polyValue.GetElement().ElementToString();
   }
   if (this->ExpressionType==this->typeUEElementOrdered)
   { out << "an element of U(g) ordered:";
-    LatexOutput << this->UEElementOrdered.ElementToString(true);
+    LatexOutput << this->UEElementOrdered.GetElement().ElementToString(true);
   }
   if (this->ExpressionType==this->typeUEelement)
   { out << " an element of U(g) of value: ";
-    LatexOutput << this->UEElement.ElementToString();
+    LatexOutput << this->UEElement.GetElement().ElementToString();
   }
   if (this->outputString!="")
     out << "a printout: " << this->outputString;
@@ -3859,9 +3865,11 @@ void EigenVectorComputation::WeylMonomialActsOnGeneralizedMonomial
       output.degrees.TheObjects[i]-=1;
     }
   }
+  Monomial<Rational> tempM;
+  tempM.MakeConstantMonomial(inputWeylMon.NumVariables/2, inputWeylMon.Coefficient);
   for (int i=0; i<inputWeylMon.NumVariables/2; i++)
-    output.degrees.TheObjects[i]+=inputWeylMon.degrees[i];
-  output.Coefficient.TimesConstant(inputWeylMon.Coefficient);
+    tempM.degrees[i]=inputWeylMon.degrees[i];
+  output.Coefficient.MultiplyByMonomial(tempM);
 }
 
 void GeneralizedPolynomialRational::operator+=(const GeneralizedMonomialRational& theMon)
@@ -3929,4 +3937,158 @@ std::string GeneralizedPolynomialRational::ElementToString()
     }
   }
   return out.str();
+}
+
+
+void ParserNode::EvaluateSubstitution(GlobalVariables& theGlobalVariables)
+{ if (this->children.size!=2)
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  if(!this->ConvertChildrenToType(this->typePoly))
+  { this->SetError(this->errorBadOrNoArgument);
+    return;
+  }
+  this->polyValue=this->owner->TheObjects[this->children.TheObjects[0]].polyValue;
+  this->polyBeingMappedTo=this->owner->TheObjects[this->children.TheObjects[1]].polyValue;
+  this->ExpressionType=this->typeMap;
+}
+
+void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
+{ for (int i=0; i<this->children.size-1; i++)
+    if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType!=this->typeMap)
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    }
+  ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
+  if (!lastNode.ConvertToType(this->typePoly))
+  { this->SetError(this->errorDunnoHowToDoOperation);
+    return;
+  }
+  PolynomialsRationalCoeff theSub;
+  int theDimension=this->owner->NumVariables;
+  theSub.MakeIdSubstitution((short) theDimension, (Rational) 1);
+  List<bool> Explored(theDimension, false);
+  for (int i=0; i<this->children.size-1; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
+    if (currentNode.polyValue.GetElement().size!=1)
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    }
+    Monomial<Rational>& theMon=currentNode.polyValue.GetElement().TheObjects[0];
+    int theLetterIndex;
+    if (!theMon.IsOneLetterFirstDegree(theLetterIndex))
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    }
+    if (Explored.TheObjects[theLetterIndex])
+    { this->SetError(this->errorBadSubstitution);
+      return;
+    }
+    Explored.TheObjects[theLetterIndex]=true;
+    theSub.TheObjects[theLetterIndex]=currentNode.polyBeingMappedTo.GetElement();
+    theSub.TheObjects[theLetterIndex]/=theMon.Coefficient;
+  }
+  this->polyValue.GetElement().operator=(lastNode.polyValue.GetElement());
+  this->polyValue.GetElement().Substitution(theSub, theDimension);
+  theSub.ElementToString(this->outputString);
+  this->ExpressionType=this->typePoly;
+}
+
+void ParserNode::operator=(const ParserNode& other)
+{ this->owner=other.owner;
+  this->ExpressionType=other.ExpressionType;
+  this->indexParent=other.indexParent;
+  this->Operation=other.Operation;
+  this->Evaluated= other.Evaluated;
+  this->children.CopyFromBase(other.children);
+  this->intValue=other.intValue;
+  this->ErrorType=other.ErrorType;
+  this->rationalValue=other.rationalValue;
+  this->ContextLieAlgebra=other.ContextLieAlgebra;
+  this->outputString= other.outputString;
+  if (other.ExpressionType==this->typeWeylAlgebraElement)
+    this->WeylAlgebraElement.GetElement().Assign(other.WeylAlgebraElement.GetElementConst());
+  if (other.ExpressionType==this->typeUEelement)
+    this->UEElement.GetElement().operator=(other.UEElement.GetElementConst());
+  if (other.ExpressionType==this->typeUEElementOrdered)
+    this->UEElementOrdered.GetElement().operator=(other.UEElementOrdered.GetElementConst());
+  if (other.ExpressionType==this->typePoly)
+    this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
+  if (other.ExpressionType==this->typeMap)
+  { this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
+    this->polyBeingMappedTo.GetElement().operator=(other.polyBeingMappedTo.GetElementConst());
+  }
+}
+
+bool Parser::lookAheadTokenAllowsMapsTo(int theToken)
+{ return theToken==this->tokenComma || theToken==this->tokenCloseBracket || theToken==this->tokenEnd || theToken==this->tokenEndStatement || theToken==this->tokenColon;
+}
+
+bool Parser::StackTopIsARoot(int& outputDimension)
+{ return this->StackTopIsADelimiter1ECdotsCEDelimiter2(outputDimension, this->tokenOpenBracket, this->tokenCloseBracket);
+}
+
+void Parser::AddXECdotsCEX(int theDimension)
+{ this->ExtendOnTop(1);
+  ParserNode& lastNode=*this->LastObject();
+  lastNode.Operation=this->tokenRoot;
+  lastNode.children.SetSizeExpandOnTopNoObjectInit(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { int indexChild=this->ValueStack.TheObjects[this->ValueStack.size-2-2*i];
+    lastNode.children.TheObjects[theDimension-1-i]=indexChild;
+    this->TheObjects[indexChild].indexParent=this->size-1;
+  }
+  this->DecreaseStackSetExpressionLastNode(theDimension*2);
+}
+
+void Parser::AddXECdotsCEXEX(int theDimension)
+{ this->ExtendOnTop(1);
+  ParserNode& lastNode=*this->LastObject();
+  lastNode.Operation=this->tokenColon;
+  lastNode.children.SetSizeExpandOnTopNoObjectInit(theDimension+1);
+  for (int i=0; i<theDimension+1; i++)
+  { int indexChild=this->ValueStack.TheObjects[this->ValueStack.size- theDimension*2-2+i*2];
+    lastNode.children.TheObjects[i]=indexChild;
+    this->TheObjects[indexChild].indexParent=this->size-1;
+  }
+  this->DecreaseStackSetExpressionLastNode(theDimension*2+2);
+}
+
+bool Parser::StackTopIsADelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter)
+{ if (*this->TokenStack.LastObject()!=RightDelimiter)
+    return false;
+  outputDimension=0;
+  for (int i=this->TokenStack.size-2; i>=1; i--)
+  { if (this->TokenStack.TheObjects[i]!=this->tokenExpression)
+      return false;
+    i--;
+    outputDimension++;
+    if (this->TokenStack.TheObjects[i]==LeftDelimiter)
+      return true;
+    if (this->TokenStack.TheObjects[i]!=this->tokenComma)
+      return false;
+  }
+  return false;
+}
+
+bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
+  (int& outputDimension, int LeftDelimiter, int middleDelimiter, int rightDelimiter)
+{ int LastToken=this->TokenStack.TheObjects[this->TokenStack.size-1];
+  int SecondToLastToken=this->TokenStack.TheObjects[this->TokenStack.size-2];
+  int ThirdToLastToken=this->TokenStack.TheObjects[this->TokenStack.size-3];
+  if (LastToken!=rightDelimiter || SecondToLastToken!=this->tokenExpression || ThirdToLastToken!=middleDelimiter)
+    return false;
+  outputDimension=0;
+  for (int i=this->TokenStack.size-4; i>=1; i--)
+  { if (this->TokenStack.TheObjects[i]!=this->tokenExpression)
+      return false;
+    i--;
+    outputDimension++;
+    if (this->TokenStack.TheObjects[i]==LeftDelimiter)
+      return true;
+    if (this->TokenStack.TheObjects[i]!=this->tokenComma)
+      return false;
+  }
+  return false;
 }

@@ -7350,7 +7350,7 @@ public:
   void Assign(const ElementWeylAlgebra& other){ this->StandardOrder.Assign(other.StandardOrder); this->NumVariables=other.NumVariables;};
   void AssignPolynomial(const Polynomial<Rational>& thePoly){ this->StandardOrder.Assign(thePoly); this->StandardOrder.IncreaseNumVariables(thePoly.NumVars); this->NumVariables=thePoly.NumVars;};
   void Subtract(ElementWeylAlgebra& other){ this->StandardOrder.Subtract(other.StandardOrder);};
-  void MakeConst (int NumVars, const Rational& theConst);
+  void MakeConst(int NumVars, const Rational& theConst);
   void Add(ElementWeylAlgebra& other){ this->StandardOrder.AddPolynomial(other.StandardOrder);};
   void MultiplyTwoMonomials(Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
   ElementWeylAlgebra(){ this->NumVariables=0; };
@@ -7369,7 +7369,8 @@ class ParserNode
   void ComputeDebugString(){ this->ElementToString(DebugString); };
   void ElementToString(std::string& output);
   Parser* owner;
-  int indexParent;
+  int indexParentNode;
+  int indexInOwner;
   int Operation; //using tokenTypes from class Parser
   int ExpressionType;
   int ErrorType;
@@ -7380,7 +7381,7 @@ class ParserNode
   MemorySaving<ElementUniversalEnveloping> UEElement;
   MemorySaving<ElementUniversalEnvelopingOrdered> UEElementOrdered;
   MemorySaving<PolynomialRationalCoeff> polyBeingMappedTo;
-
+  MemorySaving<List<int> > array;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -7388,11 +7389,12 @@ class ParserNode
   void Clear();
   int GetStrongestExpressionChildrenConvertChildrenIfNeeded();
   void ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  void CopyValue(const ParserNode& other);
   bool ConvertToType(int theType);
   bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeRoot, typeMap, typeString,
+  typeUEelement, typeWeylAlgebraElement, typeRoot, typeMap, typeString, typeArray,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
@@ -7411,6 +7413,7 @@ class ParserNode
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
+  void EvaluateArray(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
@@ -7450,7 +7453,7 @@ public:
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
-    tokenRoot, tokenMapsTo, tokenColon, tokenEndStatement, tokenFunction, tokenFunctionNoArgument
+    tokenRoot, tokenMapsTo, tokenColon, tokenArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument
   };
   enum functionList
   { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
@@ -7478,11 +7481,13 @@ public:
   bool lookAheadTokenProhibitsTimes(int theToken);
   bool lookAheadTokenAllowsMapsTo(int theToken);
   bool TokenProhibitsUnaryMinus(int theToken);
-  void AddIndexingExpressionOnTop();
   void AddLetterExpressionOnTop();
   void AddFunctionOnTop();
-  void AddXECdotsCEX(int theDimension);
-  void AddXECdotsCEXEX(int theDimension);
+  void AddXECdotsCEX(int theDimension, int theOperation);
+  void AddXECdotsCEXEX(int theDimension, int theOperation);
+  void AddEOEonTop();
+  void AddEXEXonTop(int theOperation);
+  void AddXECEXOnTop(int theOperation);
   bool StackTopIsARoot(int& outputDimension);
   bool StackTopIsASub(int& outputNumEntries);
   bool StackTopIsADelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter);
@@ -7497,9 +7502,7 @@ public:
   void TokenToStringStream(std::stringstream& out, int theToken);
   void AddMapOnTop();
   void AddUnaryMinusOnTop();
-  void AddEOEOnTop();
   void AddImpiedTimesOnTop();
-  void AddLieBracketOnTop();
   void PopLastAndThirdToLast();
   void AddIntegerOnTopConvertToExpression();
   void MergeLastTwoIntegers();

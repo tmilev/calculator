@@ -21972,33 +21972,33 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   container.IndicesSl2decompositionFlas.TheObjects[indexInContainer]=container.texFileNamesForPNG.size-1;
   out << "\nThe below list one possible realization of the sl(2) subalgebra.";
   if (useHtml)
-    out <<"\n<br>\n";
+    out << "\n<br>\n";
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   this->theH.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamH<<"\n$h=$ $" <<tempS<<"$";
+  tempStreamH << "\n$h=$ $" << tempS << "$";
   tempS= tempStreamH.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->theE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamE<<"\n$e=$ $" <<tempS<<"$";
+  tempStreamE << "\n$e=$ $" << tempS << "$";
   tempS= tempStreamE.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->theF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamF <<"\n$f=$ $" <<tempS<<"$";
+  tempStreamF << "\n$f=$ $" << tempS << "$";
   tempS= tempStreamF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  out <<"\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
+  out << "\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
   if (useHtml)
-    out <<"\n<br>\n";
+    out << "\n<br>\n";
   this->bufferEbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamEF<< "\n$[e, f]=$ $" <<tempS <<"$";
+  tempStreamEF << "\n$[e, f]=$ $" << tempS << "$";
   tempS= tempStreamEF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->bufferHbracketE.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamHE<< "\n$[h, e]=$ $" <<tempS <<"$";
+  tempStreamHE << "\n$[h, e]=$ $" << tempS << "$";
   tempS= tempStreamHE.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   this->bufferHbracketF.ElementToString(tempS, *this->owner, useHtml, useLatex);
-  tempStreamHF<< "\n$[h, f]=$ $" <<tempS <<"$";
+  tempStreamHF << "\n$[h, f]=$ $" << tempS << "$";
   tempS= tempStreamHF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   //this->theSystemMatrixForm.ElementToString(tempS);
@@ -22010,16 +22010,16 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   { this->theSystemToBeSolved.TheObjects[i].ElementToString(tempS);
     if (tempS=="")
     { if (useLatex || usePNG)
-        tempStreamActual<<"~\\\\";
+        tempStreamActual << "~\\\\";
       else
-        tempStreamActual<<"\n\n";
+        tempStreamActual << "\n\n";
     }
     else
-      tempStreamActual<<"\\noindent \\begin{eqnarray*}&&"<< tempS<<"=0\\end{eqnarray*}\n\n";
+      tempStreamActual << "\\noindent \\begin{eqnarray*}&&" << tempS << "=0\\end{eqnarray*}\n\n";
   }
   out << "\nThe system we need to solve:\n";
   if (useHtml)
-    out <<"\n<br>\n";
+    out << "\n<br>\n";
   tempS= tempStreamActual.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   output = out.str();
@@ -22541,8 +22541,8 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
   { this->TheObjects[i].ElementToStringModuleDecompositionMinimalContainingRegularSAs(useLatex, useHtml, *this, tempS);
     out << tempS;
     if (useHtml)
-      out <<"\n<br>";
-    out <<"\n";
+      out << "\n<br>";
+    out << "\n";
   }
   output=out.str();
 }
@@ -22553,11 +22553,11 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
   std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   std::string tooltipContainingRegular="A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a root subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
   std::string tooltipHvalue="The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
-  out <<"Number of sl(2) subalgebras "<< this->size<<"\n";
+  out << "Number of sl(2) subalgebras "<< this->size<<"\n";
   if (this->IndicesSl2decompositionFlas.size < this->size)
     usePNG = false;
   if(useHtml)
-    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGIspecificRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)  << "</td><td align=\"center\" title=\""<<tooltipHvalue<<"\"> h</td><td style=\"padding-left:20px\" title=\""<<tooltipVDecomposition<<"\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular semisimple SAs</td><td title=\""<<tooltipContainingRegular<<"\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
+    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGIspecificRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)  << "</td><td align=\"center\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular semisimple SAs</td><td title=\"" << tooltipContainingRegular << "\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
   if (this->BadHCharacteristics.size>0)
   { if (useHtml)
       out << "<tr><td>Bad values of h</td><td>";
@@ -22569,7 +22569,7 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
   for (int i=0; i<this->size; i++)
   { slTwo& theSl2= this->TheObjects[i];
     if (useHtml)
-      out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index" << i << "\"title=\"" << tooltipHchar <<"\" >";
+      out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index" << i << "\"title=\"" << tooltipHchar << "\" >";
     out << theSl2.hCharacteristic.ElementToString();
     if (useHtml)
       out << "</a></td><td title=\"" << tooltipHvalue << "\">";
@@ -22577,7 +22577,7 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
     if (useHtml)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
     if (useHtml && usePNG)
-      out << "<img src=\"./fla"<< this->IndicesSl2decompositionFlas.TheObjects[i]+1 <<  ".png\"></td><td>";
+      out << "<img src=\"./fla" << this->IndicesSl2decompositionFlas.TheObjects[i]+1 << ".png\"></td><td>";
     else
     { theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
       out << tempS;
@@ -22594,7 +22594,7 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesContainingRootSAs.TheObjects[j]];
       CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DebugString, tempS);
-      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesContainingRootSAs.TheObjects[j] << ".html\">" <<tempS<< "</a>"<<";  ";
+      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesContainingRootSAs.TheObjects[j] << ".html\">" << tempS << "</a>" << ";  ";
     }
     if (useHtml)
       out <<"</td></tr>\n";
@@ -22796,7 +22796,7 @@ void ComputationSetup::ExperimentWithH(ComputationSetup& inputData, GlobalVariab
   std::stringstream out;
   tempSl2s.theRootSAs.AmbientWeyl.ProjectOnTwoPlane(h1s.TheObjects[0], h2s.TheObjects[0], theGlobalVariables);
   for (int i=0; i<h1s.size; i++)
-    out << "h1: " << h1s.TheObjects[i].ElementToString() << " h2: " << h2s.TheObjects[i].ElementToString() <<"\n\n";
+    out << "h1: " << h1s.TheObjects[i].ElementToString() << " h2: " << h2s.TheObjects[i].ElementToString() << "\n\n";
   theGlobalVariables.theIndicatorVariables.StatusString1 = out.str();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -23086,7 +23086,7 @@ void reductiveSubalgebras::ElementToStringDynkinType(int theIndex, bool useLatex
     char theLetter= this->theLetters.TheObjects[theIndex].TheObjects[j];
     if (theMult!=1)
       out << theMult;
-    out << theLetter << "_" <<theRank << " ";
+    out << theLetter << "_" << theRank << " ";
     if (j!=this->theLetters.TheObjects[theIndex].size-1)
       out << "+ ";
   }
@@ -23139,7 +23139,7 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
       else
         out << " orbits do not fit, embedding impossible\n";
       if (useHtml)
-        out<< "<br>\n";
+        out << "<br>\n";
       currentSl2s.ElementToStringNoGenerators(tempS, theGlobalVariables, currentSl2s.theRootSAs.AmbientWeyl, useLatex, useHtml, false, 0, 0);
       out << tempS;
     }
@@ -24489,12 +24489,12 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     for (int i=0; i<tempMat.NumCols; i++)
     { out << "c";
       if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension-1 || i==theDimension))
-        out  << "|";
+        out << "|";
     }
     out << "}";
     for (int i=0; i< tempMat.NumRows; i++)
     { if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension || i==theDimension+1))
-        out  << "\\hline";
+        out << "\\hline";
       for (int j=0; j<tempMat.NumCols; j++)
       { if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]==0)
           out << "\\blacktriangle";
@@ -24548,9 +24548,7 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
   std::string tempS2;
   tempRoots.ElementToString(tempS2, true, false, true);
   out << "\n\n" << tempS2 << "\n\n" << tempS;
-
   out << "\\end{document}";
-
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
 }
@@ -25089,7 +25087,7 @@ void Lattice::DuflosComputationOneSA(char WeylLetter, int rank, std::string& out
   WeylGroup& theWeyl= theRootSubalgebras.AmbientWeyl;
   int theDimension= theWeyl.CartanSymmetric.NumRows;
   niceTable << "\\begin{tabular}{cc}\n\\multicolumn{2}{c}{Root system $\\Delta$ of type" << theRootSubalgebras.TheObjects[0].theDynkinDiagram.DebugString << "} \\\\\\hline\n Dynkin type subsystem $\\Delta'$ & Structure of $\\Lambda(\\Delta)/\\Lambda(\\Delta')$\\\\\\hline\n";
-  out << "\n\nRoot system of "<< theRootSubalgebras.TheObjects[0].theDynkinDiagram.DebugString << ":\n\n";
+  out << "\n\nRoot system of " << theRootSubalgebras.TheObjects[0].theDynkinDiagram.DebugString << ":\n\n";
   roots tempRoots;
   tempRoots.CopyFromBase(theWeyl.RootSystem);
   out << tempRoots.ElementToString() << "\n\n";
@@ -25106,7 +25104,7 @@ void Lattice::DuflosComputationOneSA(char WeylLetter, int rank, std::string& out
       List<int> list1, list2;
       this->GetStructureQuotientRootCase(currentSA.AmbientWeyl, tempS, list1, list2, theGlobalVariables);
       out << "\n\nStructure: " << tempS;
-      niceTable << currentSA.theDynkinDiagram.DebugString << " & " << tempS <<" \\\\\n";
+      niceTable << currentSA.theDynkinDiagram.DebugString << " & " << tempS << " \\\\\n";
     }
   }
   niceTable << "\\end{tabular}";
@@ -25385,6 +25383,8 @@ bool Parser::lookAheadTokenProhibitsPlus(int theToken)
     return false;
   if (theToken==this->tokenComma)
     return false;
+  if (theToken==this->tokenColon)
+    return false;
 //  if (theToken==this->tokenExpression)
 //    return true;
 //  if (theToken==this->tokenUnderscore)
@@ -25444,11 +25444,15 @@ bool Parser::ApplyRules(int lookAheadToken)
     return true;
   }
   if (tokenSecondToLast==this->tokenMapsTo && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && this->lookAheadTokenAllowsMapsTo(lookAheadToken))
-  { this->AddEOEOnTop();
+  { this->AddEOEonTop();
     return true;
   }
   if (tokenLast== this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenLieBracket)
-  { this->AddLieBracketOnTop();
+   { this->AddXECEXOnTop(this->tokenLieBracket);
+    return true;
+  }
+  if (tokenLast==this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenOpenLieBracket && tokenFourthToLast==this->tokenExpression)
+  { this->AddEXEXonTop(this->tokenArray);
     return true;
   }
   if (tokenLast==this->tokenDigit)
@@ -25468,19 +25472,19 @@ bool Parser::ApplyRules(int lookAheadToken)
     return true;
   }
   if (tokenSecondToLast==this->tokenUnderscore && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && tokenFourthToLast!=this->tokenUnderscore)
-  { this->AddIndexingExpressionOnTop();
+  { this->AddEOEonTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenPower && tokenThirdToLast==this->tokenExpression)
-  { this->AddEOEOnTop();
+  { this->AddEOEonTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenDivide && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddEOEOnTop();
+  { this->AddEOEonTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && tokenSecondToLast==tokenTimes && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddEOEOnTop();
+  { this->AddEOEonTop();
     return true;
   }
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
@@ -25488,20 +25492,20 @@ bool Parser::ApplyRules(int lookAheadToken)
     return true;
   }
   if (tokenSecondToLast==this->tokenPlus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddEOEOnTop();
+  { this->AddEOEonTop();
     return true;
   }
   if (tokenSecondToLast==this->tokenMinus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddEOEOnTop();
+  { this->AddEOEonTop();
     return true;
   }
   int rootDim;
   if (this->StackTopIsARoot(rootDim))
-  { this->AddXECdotsCEX(rootDim);
+  { this->AddXECdotsCEX(rootDim, this->tokenRoot);
     return true;
   }
   if (this->StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3(rootDim, this->tokenOpenBracket, this->tokenColon, this->tokenCloseBracket))
-  { this->AddXECdotsCEXEX(rootDim);
+  { this->AddXECdotsCEXEX(rootDim, this->tokenColon);
     return true;
   }
   return false;
@@ -25547,14 +25551,14 @@ void Parser::AddFunctionOnTop()
   this->DecreaseStackSetExpressionLastNode(1);
 }
 
-void Parser::AddIndexingExpressionOnTop()
+void Parser::AddEXEXonTop(int theOperation)
 { this->ExtendOnTop(1);
-  this->LastObject()->Operation = this->tokenUnderscore;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(2);
+  this->LastObject()->Operation=theOperation;
+  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
+  this->DecreaseStackSetExpressionLastNode(3);
 }
 
-void Parser::AddEOEOnTop()
+void Parser::AddEOEonTop()
 { this->ExtendOnTop(1);
   ParserNode* theNode=this->LastObject();
   theNode->Operation=this->TokenStack.TheObjects[this->TokenStack.size-2];
@@ -25586,10 +25590,9 @@ void Parser::AddImpiedTimesOnTop()
   this->DecreaseStackSetExpressionLastNode(1);
 }
 
-void Parser::AddLieBracketOnTop()
+void Parser::AddXECEXOnTop(int theOperation)
 { this->ExtendOnTop(1);
-  ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenLieBracket;
+  this->LastObject()->Operation=theOperation;
   this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
   this->DecreaseStackSetExpressionLastNode(4);
 }
@@ -25609,7 +25612,7 @@ void Parser::Own(int indexParent, int indexChild1)
 { ParserNode* theNode= &this->TheObjects[indexParent];
   theNode->children.SetSizeExpandOnTopNoObjectInit(1);
   theNode->children.TheObjects[0]=indexChild1;
-  this->TheObjects[indexChild1].indexParent= indexParent;
+  this->TheObjects[indexChild1].indexParentNode= indexParent;
 }
 
 void Parser::Own(int indexParent, int indexChild1, int indexChild2)
@@ -25617,8 +25620,8 @@ void Parser::Own(int indexParent, int indexChild1, int indexChild2)
   theNode->children.SetSizeExpandOnTopNoObjectInit(2);
   theNode->children.TheObjects[0]=indexChild1;
   theNode->children.TheObjects[1]=indexChild2;
-  this->TheObjects[indexChild1].indexParent= indexParent;
-  this->TheObjects[indexChild2].indexParent= indexParent;
+  this->TheObjects[indexChild1].indexParentNode= indexParent;
+  this->TheObjects[indexChild2].indexParentNode= indexParent;
 }
 
 void Parser::Evaluate(GlobalVariables& theGlobalVariables)
@@ -25639,6 +25642,7 @@ void Parser::ExtendOnTop(int numNew)
   for (int i=0; i<numNew; i++)
   { this->TheObjects[this->size-1-i].owner=this;
     this->TheObjects[this->size-1-i].Clear();
+    this->TheObjects[this->size-1-i].indexInOwner=this->size-1-i;
   }
 }
 
@@ -25677,6 +25681,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenRoot: this->ExpressionType=this->typeRoot; break;
     case Parser::tokenMapsTo: this->EvaluateSubstitution(theGlobalVariables); break;
     case Parser::tokenColon: this->EvaluateApplySubstitution(theGlobalVariables); break;
+    case Parser::tokenArray: this->EvaluateArray(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
 }
@@ -25789,6 +25794,16 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     this->ExpressionType=this->typeUEelement;
     return;
   }
+  if (leftNode.Operation==Parser::tokenPartialDerivative)
+  { theIndex--;
+    if (theIndex<0 || theIndex>1000)
+    { this->SetError(this->errorBadIndex);
+      return;
+    }
+    this->owner->NumVariables=MathRoutines::Maximum(theIndex+1, this->owner->NumVariables);
+    this->WeylAlgebraElement.GetElement().Makedi(theIndex, this->owner->NumVariables);
+    this->ExpressionType=this->typeWeylAlgebraElement;
+  }
   if (leftNode.Operation==Parser::tokenF)
   { if (theIndex>0 && theIndex<=this->ContextLieAlgebra->GetNumPosRoots())
       theIndex+= this->ContextLieAlgebra->GetNumPosRoots()+this->ContextLieAlgebra->GetRank()-1;
@@ -25828,9 +25843,14 @@ bool ParserNode::ConvertChildrenToType(int theType)
 void ParserNode::InitForAddition()
 { this->intValue=0;
   this->rationalValue.MakeZero();
-  this->polyValue.GetElement().Nullify((short)this->owner->NumVariables);
-  this->UEElement.GetElement().Nullify(*this->ContextLieAlgebra);
-//  this->WeylAlgebraElement.Nullify(this->owner->NumVariables);
+  if (this->ExpressionType==this->typePoly)
+    this->polyValue.GetElement().Nullify((short)this->owner->NumVariables);
+  if (this->ExpressionType==this->typeUEelement)
+    this->UEElement.GetElement().Nullify(*this->ContextLieAlgebra);
+  if (this->ExpressionType==this->typeUEElementOrdered)
+    this->UEElementOrdered.GetElement().Nullify(this->owner->testAlgebra);
+  if (this->ExpressionType==this->typeWeylAlgebraElement)
+    this->WeylAlgebraElement.GetElement().Nullify(this->owner->NumVariables);
 }
 
 void ParserNode::InitForMultiplication()
@@ -25843,7 +25863,7 @@ void ParserNode::InitForMultiplication()
   if(this->ExpressionType==this->typeUEElementOrdered)
     this->UEElementOrdered.GetElement().AssignInt(1, this->owner->NumVariables, this->owner->testAlgebra);
   if(this->ExpressionType==this->typeWeylAlgebraElement)
-    assert(false);
+    this->WeylAlgebraElement.GetElement().Nullify(this->owner->NumVariables);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
@@ -25887,7 +25907,9 @@ void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
       break;
       case ParserNode::typeRational: this->rationalValue+=currentChild.rationalValue; break;
       case ParserNode::typePoly: this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); break;
+      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
+      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().Add(currentChild.WeylAlgebraElement.GetElement()); break;
       default: this->ExpressionType=this->typeError; return;
     }
   }
@@ -25952,8 +25974,14 @@ void ParserNode::EvaluateSecretSauce(GlobalVariables& theGlobalVariables)
 
 void ParserNode::EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables)
 { EigenVectorComputation theComp;
-  this->outputString=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *this->owner);
-  this->ExpressionType=this->typeString;
+  //Note: the ComputeAndReturnStringOrdered following code might relocate the *this object
+  //Until I think of a more conceptual solution I shall use the below safe but rather ugly workaround
+  int indexInOwner=this->indexInOwner;
+  Parser* theOwner=this->owner;
+  std::string buffer=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *this->owner);
+  theOwner->TheObjects[indexInOwner].outputString=buffer;
+  theOwner->TheObjects[indexInOwner].ExpressionType=ParserNode::typeArray;
+  theOwner->TheObjects[indexInOwner].array.GetElement();
 }
 
 void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
@@ -26350,7 +26378,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
 //  std::cout << this->ElementToString(theGlobalVariables) << "<br>";
   ElementSimpleLieAlgebra tempElt;
   root right;
-  while(NonExplored.CardinalitySelection>0)
+  while (NonExplored.CardinalitySelection>0)
   { for (int i=0; i<NonExplored.CardinalitySelection; i++)
     { int theIndex = NonExplored.elements[i];
       root& current = this->theDomain.theWeyl.RootSystem.TheObjects[theIndex];
@@ -26530,7 +26558,4 @@ void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, bool
   }
   output=out.str();
 }
-
-
-
 

@@ -7394,7 +7394,7 @@ class ParserNode
   bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeRoot, typeMap, typeString, typeArray,
+  typeUEelement, typeWeylAlgebraElement, typeMap, typeString, typeArray,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
@@ -7413,7 +7413,7 @@ class ParserNode
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
-  void EvaluateArray(GlobalVariables& theGlobalVariables);
+  void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
@@ -7453,7 +7453,7 @@ public:
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
-    tokenRoot, tokenMapsTo, tokenColon, tokenArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument
+    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument
   };
   enum functionList
   { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
@@ -8136,7 +8136,9 @@ public:
   List<ElementWeylAlgebra> theOperators;
 //  List<List<int> > theExponentShifts;
   std::string ComputeAndReturnStringNonOrdered(GlobalVariables& theGlobalVariables, Parser& theParser);
-  std::string ComputeAndReturnStringOrdered(GlobalVariables& theGlobalVariables, Parser& theParser);
+  std::string ComputeAndReturnStringOrdered
+(GlobalVariables& theGlobalVariables, Parser& theParser, int NodeIndex)
+  ;
 
   //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots
   //variables correspond to the exponents: the rank-of-theOwner+1st variable corresponds to the
@@ -8167,7 +8169,7 @@ public:
   (Parser& theParser, ElementUniversalEnveloping& theStartingGeneric, ElementUniversalEnveloping& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
   ;
   void DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered
-  (Parser& theParser, ElementUniversalEnvelopingOrdered& theStartingGeneric, ElementUniversalEnvelopingOrdered& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
+  (Parser& theParser, int nodeIndex, ElementUniversalEnvelopingOrdered& theStartingGeneric, ElementUniversalEnvelopingOrdered& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
   ;
   void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, PolynomialRationalCoeff& output);
 };

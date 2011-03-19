@@ -25452,7 +25452,7 @@ bool Parser::ApplyRules(int lookAheadToken)
     return true;
   }
   if (tokenLast==this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenOpenLieBracket && tokenFourthToLast==this->tokenExpression)
-  { this->AddEXEXonTop(this->tokenArray);
+  { this->AddEXEXonTop(this->tokenDereferenceArray);
     return true;
   }
   if (tokenLast==this->tokenDigit)
@@ -25501,7 +25501,7 @@ bool Parser::ApplyRules(int lookAheadToken)
   }
   int rootDim;
   if (this->StackTopIsARoot(rootDim))
-  { this->AddXECdotsCEX(rootDim, this->tokenRoot);
+  { this->AddXECdotsCEX(rootDim, this->tokenArraY);
     return true;
   }
   if (this->StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3(rootDim, this->tokenOpenBracket, this->tokenColon, this->tokenCloseBracket))
@@ -25678,10 +25678,10 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
     case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
     case Parser::tokenFunction: this->EvaluateFunction(theGlobalVariables); break;
-    case Parser::tokenRoot: this->ExpressionType=this->typeRoot; break;
+    case Parser::tokenArraY: this->array.GetElement().CopyFromBase(this->children); this->ExpressionType=this->typeArray; break;
     case Parser::tokenMapsTo: this->EvaluateSubstitution(theGlobalVariables); break;
     case Parser::tokenColon: this->EvaluateApplySubstitution(theGlobalVariables); break;
-    case Parser::tokenArray: this->EvaluateArray(theGlobalVariables); break;
+    case Parser::tokenDereferenceArray: this->EvaluateDereferenceArray(theGlobalVariables); break;
     default: this->SetError(this->errorUnknownOperation); return;
   }
 }
@@ -25976,12 +25976,12 @@ void ParserNode::EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables)
 { EigenVectorComputation theComp;
   //Note: the ComputeAndReturnStringOrdered following code might relocate the *this object
   //Until I think of a more conceptual solution I shall use the below safe but rather ugly workaround
-  int indexInOwner=this->indexInOwner;
+  int indexInOwneR=this->indexInOwner;
   Parser* theOwner=this->owner;
-  std::string buffer=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *this->owner);
-  theOwner->TheObjects[indexInOwner].outputString=buffer;
-  theOwner->TheObjects[indexInOwner].ExpressionType=ParserNode::typeArray;
-  theOwner->TheObjects[indexInOwner].array.GetElement();
+  std::string buffer=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *this->owner, indexInOwneR);
+  theOwner->TheObjects[indexInOwneR].outputString=buffer;
+  theOwner->TheObjects[indexInOwneR].ExpressionType=ParserNode::typeArray;
+  theOwner->TheObjects[indexInOwneR].array.GetElement();
 }
 
 void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
@@ -26038,7 +26038,7 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
   }
   ParserNode& theRootNode= this->owner->TheObjects[this->children.TheObjects[0]];
   List<int>& theTrueChildren= theRootNode.children;
-  if (theRootNode.ExpressionType!=this->typeRoot)
+  if (theRootNode.ExpressionType!=this->typeArray)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
@@ -26267,7 +26267,8 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenMap: out << "i"; break;
     case Parser::tokenMinusUnary: out << "-"; break;
     case Parser::tokenVariable: out << "n"; break;
-    case Parser::tokenRoot: out << "root"; break;
+    case Parser::tokenArraY: out << "array"; break;
+    case Parser::tokenDereferenceArray: out << "deref[]"; break;
     case Parser::tokenMapsTo: out << "->"; break;
     case Parser::tokenFunction: out << "function"; break;
     case Parser::tokenEndStatement: out << ";"; break;
@@ -26326,8 +26327,8 @@ void ParserNode::ElementToString(std::string& output)
   { this->polyValue.GetElement().ElementToString(tempS);
     out << " is the polynomial " << tempS;
   }
-  if (this->ExpressionType==this->typeRoot)
-    out << " is a root ";
+  if (this->ExpressionType==this->typeArray)
+    out << " is an ordered tuple ";
   if (this->ExpressionType==this->typeUndefined)
     out << " is of type undefined ";
   if (this->ExpressionType==this->typeWeylAlgebraElement)

@@ -72,7 +72,7 @@ void ParserNode::EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVaria
     return;
   }
   ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  if (theArgument.ExpressionType!=this->typeRoot)
+  if (theArgument.ExpressionType!=this->typeArray)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
@@ -116,7 +116,7 @@ void ParserNode::EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVa
     return;
   }
   ParserNode& ArrayOfArguments= this->owner->TheObjects[this->children.TheObjects[0]];
-  if (ArrayOfArguments.ExpressionType!=this->typeRoot)
+  if (ArrayOfArguments.ExpressionType!=this->typeArray)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
@@ -1765,7 +1765,8 @@ void PolynomialRationalCoeff::ScaleToIntegralNoGCDCoeffs()
   this->TimesConstant(theMultiple);
 }
 
-std::string EigenVectorComputation::ComputeAndReturnStringOrdered(GlobalVariables& theGlobalVariables, Parser& theParser)
+std::string EigenVectorComputation::ComputeAndReturnStringOrdered
+(GlobalVariables& theGlobalVariables, Parser& theParser, int NodeIndex)
 { std::stringstream out;
   ElementUniversalEnvelopingOrdered theElt, tempElt1, tempElt2;
   //this->MakeGenericMonomialBranchingCandidate(theParser.theHmm, theElt, theGlobalVariables);
@@ -1778,6 +1779,7 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered(GlobalVariable
   this->theSystem.init(0,0);
   this->theOperators.size=0;
   this->theExponentShifts.size=0;
+  theParser.TheObjects[NodeIndex].ExpressionType=ParserNode::typeArray;
   for (int i=0; i<theDomainRank; i++)
   { tempElt1.AssignElementLieAlgebra(theParser.theHmm.imagesSimpleChevalleyGenerators.TheObjects[i], theRangeRank+numRangePosRoots, theParser.testAlgebra);
     tempElt1.LieBracketOnTheRight(theElt, tempElt2);
@@ -1792,7 +1794,12 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered(GlobalVariable
     out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
     out << tempElt2.ElementToString(true);
     out << "\\end{eqnarray*}</div>";
-    this->DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered(theParser, theElt, tempElt2, out, theGlobalVariables);
+    this->DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered(theParser, NodeIndex, theElt, tempElt2, out, theGlobalVariables);
+    theParser.ExtendOnTop(1);
+    ParserNode& currentOutputNode=*theParser.LastObject();
+    currentOutputNode.ExpressionType=ParserNode::typeWeylAlgebraElement;
+    currentOutputNode.WeylAlgebraElement.GetElement().Assign(this->theOperators.TheObjects[i]);
+    theParser.TheObjects[NodeIndex].array.GetElement().AddObjectOnTop(theParser.size-1);
   }
   this->theExponentShiftsTargetPerSimpleGenerator.CollectionToRoots(this->theExponentShifts);
   out << "<br><br> And the total rank is: " << this->theExponentShifts.GetRankOfSpanOfElements(theGlobalVariables);
@@ -1800,9 +1807,8 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered(GlobalVariable
   return out.str();
 }
 
-
-
-std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered(GlobalVariables& theGlobalVariables, Parser& theParser)
+std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered
+(GlobalVariables& theGlobalVariables, Parser& theParser)
 { std::stringstream out;
   ElementUniversalEnveloping theElt, tempElt1, tempElt2;
   //this->MakeGenericMonomialBranchingCandidate(theParser.theHmm, theElt, theGlobalVariables);
@@ -1815,8 +1821,6 @@ std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered(GlobalVaria
   this->theSystem.init(0,0);
   this->theOperators.size=0;
   this->theExponentShifts.size=0;
-  int initialObjectIndex=theParser.size-1;
-  theParser.TheObjects[initialObjectIndex].ExpressionType=ParserNode::typeArray;
   for (int i=0; i<theDomainRank; i++)
   { tempElt1.AssignElementLieAlgebra(theParser.theHmm.imagesSimpleChevalleyGenerators.TheObjects[i], theRangeRank+numRangePosRoots, theParser.theHmm.theRange);
     tempElt1.LieBracketOnTheRight(theElt, tempElt2);
@@ -1830,11 +1834,6 @@ std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered(GlobalVaria
     out << tempElt2.ElementToString(true);
     out << "\\end{eqnarray*}</div>";
     this->DetermineEquationsFromResultLieBracketEquationsPerTarget(theParser, theElt, tempElt2, out, theGlobalVariables);
-    theParser.ExtendOnTop(1);
-    ParserNode& currentOutputNode=*theParser.LastObject();
-    currentOutputNode.ExpressionType=ParserNode::typeWeylAlgebraElement;
-    currentOutputNode.WeylAlgebraElement.GetElement().Assign(this->theOperators.TheObjects[i]);
-    theParser.TheObjects[initialObjectIndex].array.GetElement().AddObjectOnTop(theParser.size-1);
   }
   out << "<div class=\"math\" scale=\"50\">" << this->theSystem.ElementToString(false, true) << "</div>";
   return out.str();
@@ -1916,7 +1915,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
 }
 
 void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered
-  (Parser& theParser, ElementUniversalEnvelopingOrdered& theStartingGeneric, ElementUniversalEnvelopingOrdered& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
+  (Parser& theParser, int nodeIndex, ElementUniversalEnvelopingOrdered& theStartingGeneric, ElementUniversalEnvelopingOrdered& theElt, std::stringstream& out, GlobalVariables& theGlobalVariables)
 { int theRangeRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
 //  int dimQuotient=theParser.theHmm.theRange.theWeyl.RootsOfBorel.size- theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
@@ -1964,7 +1963,6 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
   out << "<br>...and the generic monomial is: " << tempGM.ElementToString();
   this->WeylElementActsOnGeneralizedMonomial(currentOperator, tempGM, tempGP);
   out << "<br> ...and the action on the generic monomial is: <div class=\"math\">\\begin{eqnarray*}&&" << tempGP.ElementToString() << "\\end{eqnarray*}</div>";
-
 
   /*root tempRoot;
   RationalFunction ZeroRF;
@@ -3743,8 +3741,6 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
   { out << " a rational number of value: ";
     LatexOutput << this->rationalValue.ElementToString();
   }
-  if (this->ExpressionType==this->typeRoot)
-    out << " is a an ordered tuple ";
   if (this->ExpressionType==this->typePoly)
   { out << " a polynomial of value: ";
     LatexOutput << this->polyValue.GetElement().ElementToString();
@@ -3762,9 +3758,14 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
     LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true);
   }
   if (this->ExpressionType==this->typeArray)
-    out << " an array of " << this->array.GetElement().size << " elements";
+    out << " an array of " << this->array.GetElement().size << " elements. ";
   if (this->outputString!="")
-    out << "a printout: " << this->outputString;
+  { if (this->ExpressionType!=this->typeString)
+      out << "In addition, the program generated the following printout. ";
+    else
+      out << "A printout of value: ";
+    out << this->outputString;
+  }
   if (this->ExpressionType==this->typeError)
     out << this->ElementToStringErrorCode(useHtml);
   std::string tempS=LatexOutput.str();
@@ -3980,36 +3981,26 @@ void ParserNode::EvaluateSubstitution(GlobalVariables& theGlobalVariables)
   this->ExpressionType=this->typeMap;
 }
 
-void ParserNode::EvaluateArray(GlobalVariables& theGlobalVariables)
+void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
 { if (this->children.size!=2)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
   ParserNode& firstChild=this->owner->TheObjects[this->children.TheObjects[0]];
   ParserNode& secondChild=this->owner->TheObjects[this->children.TheObjects[1]];
-  if (secondChild.ExpressionType!=this->typeIntegerOrIndex)
+  if (secondChild.ExpressionType!=this->typeIntegerOrIndex || firstChild.ExpressionType!=this->typeArray)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  if (firstChild.ExpressionType!=this->typeArray && firstChild.ExpressionType!=this->typeRoot)
-  { this->SetError(this->errorBadOrNoArgument);
+  int arraySize=firstChild.array.GetElement().size;
+  int arrayIndex=secondChild.intValue-1;
+  if (arrayIndex>=arraySize || arrayIndex<0)
+  { this->SetError(this->errorBadIndex);
     return;
   }
-  int arraySize=firstChild.children.size;
-  int arrayIndex=secondChild.intValue;
-  if (firstChild.ExpressionType==this->typeRoot)
-  { if (arrayIndex>=arraySize || arrayIndex<0)
-    { this->SetError(this->errorBadIndex);
-      return;
-    }
-    ParserNode& relevantChild=this->owner->TheObjects[firstChild.children.TheObjects[arrayIndex]];
-    this->CopyValue(relevantChild);
-    return;
-  }
-  if (firstChild.ExpressionType==this->typeArray)
-  { this->SetError(this->errorDunnoHowToDoOperation);
-    return;
-  }
+  ParserNode& relevantChild=this->owner->TheObjects[firstChild.array.GetElement().TheObjects[arrayIndex]];
+  this->CopyValue(relevantChild);
+  return;
 }
 
 void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)

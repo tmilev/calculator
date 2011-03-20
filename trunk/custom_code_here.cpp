@@ -873,12 +873,13 @@ void MonomialUniversalEnveloping::SetNumVariables(int newNumVars)
 std::string MonomialUniversalEnveloping::ElementToString(bool useLatex)
 { std::stringstream out;
   std::string tempS;
+  PolynomialOutputFormat PolyFormatLocal;
   if (this->owner==0)
     return "faulty monomial non-initialized owner. Slap the programmer.";
   if (this->Coefficient.IsEqualToZero())
     tempS="0";
   else
-    tempS = this->Coefficient.ElementToString();
+    tempS = this->Coefficient.ElementToString(PolyFormatLocal);
   if (this->generatorsIndices.size>0)
   { if (tempS=="1")
       tempS="";
@@ -900,7 +901,7 @@ std::string MonomialUniversalEnveloping::ElementToString(bool useLatex)
     { out << "^";
      // if (useLatex)
       out << "{";
-      out << thePower.ElementToString();
+      out << thePower.ElementToString(PolyFormatLocal);
       //if (useLatex)
       out << "}";
     }
@@ -1454,9 +1455,10 @@ std::string VectorPartition::ElementToString(bool useHtml)
 
 std::string rootPoly::ElementToString()
 { std::stringstream out;
+  PolynomialOutputFormat PolyFormatLocal;
   out << "(";
   for (int i=0; i<this->size; i++)
-  { out << this->TheObjects[i].ElementToString();
+  { out << this->TheObjects[i].ElementToString(PolyFormatLocal);
     if (i<this->size-1)
       out << ",";
   }
@@ -1466,14 +1468,15 @@ std::string rootPoly::ElementToString()
 
 std::string RationalFunction::ElementToString(bool useLatex, bool breakLinesLatex)
 { std::stringstream out;
+  PolynomialOutputFormat PolyFormatLocal;
   bool hasDenominator=!this->Denominator.IsEqualToOne();
   if (hasDenominator && useLatex)
     out << "\\frac{";
-  out << this->Numerator.ElementToString(breakLinesLatex);
+  out << this->Numerator.ElementToString(breakLinesLatex, PolyFormatLocal);
   if (hasDenominator)
   { if (useLatex)
       out << "}{";
-    out << this->Denominator.ElementToString(breakLinesLatex);
+    out << this->Denominator.ElementToString(breakLinesLatex, PolyFormatLocal);
     if (useLatex)
       out << "}";
   }
@@ -1851,6 +1854,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
 //  int dimQuotient=theParser.theHmm.theRange.theWeyl.RootsOfBorel.size- theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
   int numCoeffVars=theRangeRank+numRangePosRoots;
   PolynomialRationalCoeff theDiffPoly;
+  PolynomialOutputFormat PolyFormatLocal;
   MonomialUniversalEnveloping& originalMon= theStartingGeneric.TheObjects[0];
   this->theExponentShiftsTargetPerSimpleGenerator.SetSizeExpandOnTopNoObjectInit(this->theExponentShiftsTargetPerSimpleGenerator.size+1);
   roots& currentTargetShifts =*this->theExponentShiftsTargetPerSimpleGenerator.LastObject();
@@ -1866,7 +1870,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
     currentShift.MakeZero(numRangePosRoots);
     for (int j=0; j<numRangePosRoots; j++)
     { theDiffPoly = originalMon.Powers.TheObjects[j] - theMon.Powers.TheObjects[j];
-      out << theDiffPoly.ElementToString() << " ";
+      out << theDiffPoly.ElementToString(PolyFormatLocal) << " ";
       if (theDiffPoly.size>1)
         currentShift.TheObjects[j]=-10000;
       if (theDiffPoly.size==0)
@@ -1929,6 +1933,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
   this->theOperators.SetSizeExpandOnTopNoObjectInit(this->theOperators.size+1);
   ElementWeylAlgebra& currentOperator = *this->theOperators.LastObject();
   currentOperator.Nullify(numCoeffVars);
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<theElt.size; i++)
   { MonomialUniversalEnvelopingOrdered& theMon= theElt.TheObjects[i];
     out << "<br>\nDifference in monomial index " << i << ": ";
@@ -1936,7 +1941,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
     currentShift.MakeZero(numRangePosRoots);
     for (int j=0; j<numRangePosRoots; j++)
     { theDiffPoly = originalMon.Powers.TheObjects[j] - theMon.Powers.TheObjects[j];
-      out << theDiffPoly.ElementToString() << " ";
+      out << theDiffPoly.ElementToString(PolyFormatLocal) << " ";
       if (theDiffPoly.size>1)
         currentShift.TheObjects[j]=-10000;
       if (theDiffPoly.size==0)
@@ -1960,9 +1965,9 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
   GeneralizedPolynomialRational tempGP;
   GeneralizedMonomialRational tempGM;
   tempGM.MakeGenericMon(numRangePosRoots+theRangeRank, theRangeRank);
-  out << "<br>...and the generic monomial is: " << tempGM.ElementToString();
+  out << "<br>...and the generic monomial is: " << tempGM.ElementToString(PolyFormatLocal);
   this->WeylElementActsOnGeneralizedMonomial(currentOperator, tempGM, tempGP);
-  out << "<br> ...and the action on the generic monomial is: <div class=\"math\">\\begin{eqnarray*}&&" << tempGP.ElementToString() << "\\end{eqnarray*}</div>";
+  out << "<br> ...and the action on the generic monomial is: <div class=\"math\">\\begin{eqnarray*}&&" << tempGP.ElementToString(PolyFormatLocal) << "\\end{eqnarray*}</div>";
 
   /*root tempRoot;
   RationalFunction ZeroRF;
@@ -2155,6 +2160,7 @@ void EigenVectorComputation::GetDiffOperatorFromShiftAndCoefficient
   AccumPolyPart.MakeNVarConst(theCoeff.NumVars, (Rational) 1);
   output.MakeConst(theCoeff.NumVars, (Rational) 1);
   ElementWeylAlgebra tempW;
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<theShift.size; i++)
     if (theShift.TheObjects[i].NumShort<0)
       for (int j=0; j<-theShift.TheObjects[i].NumShort; j++)
@@ -2167,7 +2173,7 @@ void EigenVectorComputation::GetDiffOperatorFromShiftAndCoefficient
     { tempP.MakeMonomialOneLetter(theCoeff.NumVars, i+dimCartan, theShift.TheObjects[i].NumShort, (Rational) 1);
       AccumPolyPart.MultiplyBy(tempP);
     }
-  std::cout << "<br>" << theCoeff.ElementToString(false) << "  " << theShift.ElementToString() << ": " << AccumDiffPart.ElementToString(false);
+  std::cout << "<br>" << theCoeff.ElementToString(false, PolyFormatLocal) << "  " << theShift.ElementToString() << ": " << AccumDiffPart.ElementToString(false, PolyFormatLocal);
   theCoeff.DivideBy(AccumDiffPart, tempP, tempP2);
   if (!tempP2.IsEqualToZero())
     std::cout << "  problem problem problem!!!!";
@@ -2175,7 +2181,7 @@ void EigenVectorComputation::GetDiffOperatorFromShiftAndCoefficient
   { tempW.AssignPolynomial(tempP);
     output.MultiplyOnTheLeft(tempW, theGlobalVariables);
   }
-  std::cout << " poly part: " << AccumPolyPart.ElementToString(false);
+  std::cout << " poly part: " << AccumPolyPart.ElementToString(false, PolyFormatLocal);
   tempW.AssignPolynomial(AccumPolyPart);
   output.MultiplyOnTheLeft(tempW, theGlobalVariables);
   //std::cout << "<div class=\"math\" scale=\"50\">"  << output.ElementToString(true) << "</div>";
@@ -2445,6 +2451,7 @@ void SSalgebraModule::ComputeInvariantsOfDegree
   int theRank= this->theAlgebra.theWeyl.CartanSymmetric.NumRows;
 //  int numGenerators=this->actionsNegativeRootSpacesCartanPositiveRootspaces.size;
   theSel.initMaxMultiplicity(theDim, degree);
+  PolynomialOutputFormat PolyFormatLocal;
   int numCycles=theSel.NumCombinationsOfCardinality(degree);
   PolynomialRationalCoeff basisMonsZeroWeight, basisMonsAll;
   basisMonsZeroWeight.Nullify(theDim);
@@ -2481,7 +2488,7 @@ void SSalgebraModule::ComputeInvariantsOfDegree
       basisMonsZeroWeight.AddMonomial(theMon);
     }
   }
-  out << "<br>Num cycles:" << numCycles << "<br>The basis mons (thera are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ElementToString();
+  out << "<br>Num cycles:" << numCycles << "<br>The basis mons (thera are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ElementToString(PolyFormatLocal);
   MatrixLargeRational tempMat;
   tempMat.init(basisMonsAll.size*theRank*2, basisMonsZeroWeight.size);
 //  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
@@ -2518,13 +2525,14 @@ void SSalgebraModule::ComputeInvariantsOfDegree
         theMon.Coefficient=tempRoots.TheObjects[i].TheObjects[j];
         current.AddMonomial(theMon);
       }
-    out << "<br>Invariant " << i << ":<br>" << current.ElementToString();
+    out << "<br>Invariant " << i << ":<br>" << current.ElementToString(PolyFormatLocal);
   }
 }
 
 void SSalgebraModule::mapInvariantsToEmbedding
   (std::stringstream& out, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
 { //PolynomialRationalCoeff tempP="x_1^2";
+  PolynomialOutputFormat PolyFormatLocal;
   this->invariantsMappedToEmbedding.SetSizeExpandOnTopNoObjectInit(this->invariantsFound.size);
   for (int i=0; i<this->invariantsFound.size; i++)
   { ElementUniversalEnveloping& currentElt=this->invariantsMappedToEmbedding.TheObjects[i];
@@ -2534,13 +2542,14 @@ void SSalgebraModule::mapInvariantsToEmbedding
     { this->mapMonomialToEmbedding(currentPoly.TheObjects[k], currentElt, owner, out, theGlobalVariables);
     }
 //    currentElt.Simplify();
-    out << "<br>The substitution: <div class=\"math\" scale=\"50\">\\begin{eqnarray*}" << currentPoly.ElementToString(false) << "&\\to&" << currentElt.ElementToString(true) << "\\end{eqnarray*}</div>";
+    out << "<br>The substitution: <div class=\"math\" scale=\"50\">\\begin{eqnarray*}" << currentPoly.ElementToString(false, PolyFormatLocal) << "&\\to&" << currentElt.ElementToString(true) << "\\end{eqnarray*}</div>";
   }
 }
 
 void SSalgebraModule::mapMonomialToEmbedding
   (Monomial<Rational>& input, ElementUniversalEnveloping& Accum, SemisimpleLieAlgebra& owner, std::stringstream& out, GlobalVariables& theGlobalVariables)
 { permutation thePermutation;
+  PolynomialOutputFormat PolyFormatLocal;
   thePermutation.initPermutation(input.NumVariables);
   int numPermutations= thePermutation.GetNumPermutations();
   ElementUniversalEnveloping tempElt;
@@ -2549,7 +2558,7 @@ void SSalgebraModule::mapMonomialToEmbedding
   theUEUnit.MakeConst((Rational) 1, 0, owner);
   List<int> permutationMap;
   thePermutation.GetPermutationLthElementIsTheImageofLthIndex(permutationMap);
-  out << input.ElementToString();
+  out << input.ElementToString(PolyFormatLocal);
   for (int i=0; i<numPermutations; i++, thePermutation.incrementAndGetPermutation(permutationMap))
   { currentContribution.MakeConst((Rational)1, 0, owner);
     for (int j=0; j<input.NumVariables; j++)
@@ -3404,7 +3413,7 @@ bool ElementSimpleLieAlgebra::MustUseBracketsWhenDisplayingMeRaisedToPower()
   return true;
 }
 
-std::string MonomialUniversalEnvelopingOrdered::ElementToString(bool useLatex, bool useGeneratorLetters)
+std::string MonomialUniversalEnvelopingOrdered::ElementToString(bool useLatex, bool useGeneratorLetters, PolynomialOutputFormat& PolyFormatLocal)
 { std::stringstream out;
   std::string tempS;
   if (this->owner==0)
@@ -3412,7 +3421,7 @@ std::string MonomialUniversalEnvelopingOrdered::ElementToString(bool useLatex, b
   if (this->Coefficient.IsEqualToZero())
     tempS="0";
   else
-    tempS = this->Coefficient.ElementToString();
+    tempS = this->Coefficient.ElementToString(PolyFormatLocal);
   if (this->generatorsIndices.size>0)
   { if (tempS=="1")
       tempS="";
@@ -3447,7 +3456,7 @@ std::string MonomialUniversalEnvelopingOrdered::ElementToString(bool useLatex, b
     { out << "^";
      // if (useLatex)
       out << "{";
-      out << thePower.ElementToString();
+      out << thePower.ElementToString(PolyFormatLocal);
       //if (useLatex)
       out << "}";
     }
@@ -3463,9 +3472,10 @@ void ElementUniversalEnvelopingOrdered::ElementToString(std::string& output, boo
   if (this->size==0)
     out << "0";
   int IndexCharAtLastLineBreak=0;
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnvelopingOrdered& current=this->TheObjects[i];
-    tempS=current.ElementToString(false, true);
+    tempS=current.ElementToString(false, true, PolyFormatLocal);
     if (i!=0)
       if (tempS.size()>0)
         if (tempS[0]!='-')
@@ -3733,6 +3743,7 @@ void MonomialUniversalEnvelopingOrdered::SetNumVariables(int newNumVars)
 std::string ParserNode::ElementToStringValueOnly(bool useHtml)
 { std::stringstream out;
   std::stringstream LatexOutput;
+  PolynomialOutputFormat PolyFormatLocal;
   if (this->ExpressionType==this->typeIntegerOrIndex)
   { out << " an integer of value: ";
     LatexOutput << this->intValue;
@@ -3743,7 +3754,7 @@ std::string ParserNode::ElementToStringValueOnly(bool useHtml)
   }
   if (this->ExpressionType==this->typePoly)
   { out << " a polynomial of value: ";
-    LatexOutput << this->polyValue.GetElement().ElementToString();
+    LatexOutput << this->polyValue.GetElement().ElementToString(PolyFormatLocal);
   }
   if (this->ExpressionType==this->typeUEElementOrdered)
   { out << "an element of U(g) ordered:";
@@ -3925,13 +3936,13 @@ void GeneralizedMonomialRational::MakeGenericMon
   this->Coefficient.MakeNVarConst(numVars, (Rational) 1);
 }
 
-std::string GeneralizedMonomialRational::ElementToString()
+std::string GeneralizedMonomialRational::ElementToString(PolynomialOutputFormat& PolyFormatLocal)
 { if (this->IsConstant())
-    return this->Coefficient.ElementToString();
+    return this->Coefficient.ElementToString(PolyFormatLocal);
   std::stringstream out;
   std::string tempS;
   if (this->Coefficient.size>1) out << "(";
-  this->Coefficient.ElementToString(tempS);
+  this->Coefficient.ElementToString(tempS, PolyFormatLocal);
   if (tempS=="1")
     tempS="";
   if (tempS=="-1")
@@ -3942,19 +3953,19 @@ std::string GeneralizedMonomialRational::ElementToString()
     if (!this->degrees.TheObjects[i].IsEqualToZero())
     { out << "y_{" << i+1 << "}";
       if (!this->degrees.TheObjects[i].IsEqualToOne())
-        out << "^{" << this->degrees.TheObjects[i].ElementToString() << "}";
+        out << "^{" << this->degrees.TheObjects[i].ElementToString(PolyFormatLocal) << "}";
     }
   return out.str();
 }
 
-std::string GeneralizedPolynomialRational::ElementToString()
+std::string GeneralizedPolynomialRational::ElementToString(PolynomialOutputFormat& PolyFormatLocal)
 { if (this->size==0)
     return "0";
   std::stringstream out;
   std::string buffer;
   int sizeSinceLastCutOff=0;
   for (int i=0; i<this->size; i++)
-  { buffer=this->TheObjects[i].ElementToString();
+  { buffer=this->TheObjects[i].ElementToString(PolyFormatLocal);
     if (buffer[0]!='-' && i!=0)
       out << "+";
     out << buffer;
@@ -4009,11 +4020,6 @@ void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
     { this->SetError(this->errorBadOrNoArgument);
       return;
     }
-  ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
-  if (!lastNode.ConvertToType(this->typePoly))
-  { this->SetError(this->errorDunnoHowToDoOperation);
-    return;
-  }
   PolynomialsRationalCoeff theSub;
   int theDimension=this->owner->NumVariables;
   theSub.MakeIdSubstitution((short) theDimension, (Rational) 1);
@@ -4039,10 +4045,35 @@ void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
     theSub.TheObjects[theLetterIndex]/=theMon.Coefficient;
     theSub.TheObjects[theLetterIndex].SetNumVariablesSubDeletedVarsByOne(this->owner->NumVariables);
   }
-  this->polyValue.GetElement().operator=(lastNode.polyValue.GetElement());
-  this->polyValue.GetElement().Substitution(theSub, theDimension);
-  //theSub.ElementToString(this->outputString);
-  this->ExpressionType=this->typePoly;
+  ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
+  switch(lastNode.ExpressionType)
+  { case ParserNode::typeIntegerOrIndex:
+    case ParserNode::typeRational:
+    case ParserNode::typePoly:
+      if (!lastNode.ConvertToType(this->typePoly))
+      { this->SetError(this->errorDunnoHowToDoOperation);
+        return;
+      }
+      this->polyValue.GetElement().operator=(lastNode.polyValue.GetElement());
+      this->polyValue.GetElement().Substitution(theSub, theDimension);
+      //theSub.ElementToString(this->outputString);
+      this->ExpressionType=this->typePoly;
+      break;
+    case ParserNode::typeWeylAlgebraElement:
+      if (!lastNode.ConvertToType(this->typeWeylAlgebraElement))
+      { this->SetError(this->errorDunnoHowToDoOperation);
+        return;
+      }
+      this->WeylAlgebraElement.GetElement().Assign(lastNode.WeylAlgebraElement.GetElement());
+      if (!this->WeylAlgebraElement.GetElement().SubstitutionPolyPartOnly(theSub))
+      { this->SetError(this->errorDunnoHowToDoOperation);
+        return;
+      }
+      this->ExpressionType=this->typeWeylAlgebraElement;
+      break;
+    default: this->SetError(this->errorDunnoHowToDoOperation); return;
+  }
+
 }
 
 void ParserNode::CopyValue(const ParserNode& other)
@@ -4148,4 +4179,31 @@ bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
       return false;
   }
   return false;
+}
+
+bool ElementWeylAlgebra::SubstitutionPolyPartOnly
+(PolynomialsRationalCoeff& theSub)
+{ Monomial<Rational> polyPartMon;
+  Monomial<Rational> diffPartMon;
+  PolynomialRationalCoeff tempP, Accum;
+  Accum.Nullify(this->NumVariables*2);
+  if (theSub.size!=this->NumVariables)
+    return false;
+  for (int i=0; i<this->NumVariables; i++)
+    if (theSub.TheObjects[i].NumVars!=this->NumVariables)
+      return false;
+  for (int i=0; i<this->StandardOrder.size; i++)
+  { polyPartMon.Assign(this->StandardOrder.TheObjects[i]);
+    diffPartMon.Assign(this->StandardOrder.TheObjects[i]);
+    for (int j=0; j<this->NumVariables; j++)
+      diffPartMon.degrees[j]=0;
+    polyPartMon.SetNumVariablesSubDeletedVarsByOne(this->NumVariables);
+    polyPartMon.Coefficient.MakeOne();
+    polyPartMon.Substitution(theSub, tempP, this->NumVariables);
+    tempP.SetNumVariablesSubDeletedVarsByOne(this->NumVariables*2);
+    tempP.MultiplyByMonomial(diffPartMon);
+    Accum+=tempP;
+  }
+  this->StandardOrder=tempP;
+  return true;
 }

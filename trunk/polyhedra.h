@@ -127,10 +127,6 @@ class MonomialUniversalEnveloping;
 class rootPoly;
 
 
-extern ::PolynomialOutputFormat PolyFormatLocal; //a global variable in
-//polyhedra.cpp used to format the polynomial printouts.
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The documentation of pthreads.h can be found at:
 // https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
@@ -327,7 +323,7 @@ ParallelComputing::GlobalPointerCounter--;
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
 #endif
   };
-  void operator=(const MemorySaving<Object>& other){if (!other.IsZeroPointer()) this->GetElement()=other.GetElementConst();};
+  void operator=(const MemorySaving<Object>& other){if (!other.IsZeroPointer()) this->GetElement()=other.GetElementConst(); else this->FreeMemory();};
   MemorySaving(){this->theValue=0;};
   ~MemorySaving(){this->FreeMemory();};
 };
@@ -2223,9 +2219,9 @@ public:
   void SortNormals();
   bool GetSplittingFacet(root& output, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   bool ComputeDebugString(CombinatorialChamberContainer& owner);
-  bool ElementToString(std::string& output, CombinatorialChamberContainer& owner);
-  bool ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
-  void ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml);
+  bool ElementToString(std::string& output, CombinatorialChamberContainer& owner, PolynomialOutputFormat& PolyFormatLocal);
+  bool ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal);
+  void ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal);
   void ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner);
   bool ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
   //bool FacetIsInternal(Facet* f);
@@ -3171,6 +3167,7 @@ public:
 struct PolynomialOutputFormat
 {
   List<std::string> alphabet;
+  void operator=(const PolynomialOutputFormat& other);
 public:
   std::string GetLetterIndex(int index);
   void SetLetterIndex(const std::string& theLetter, int index);
@@ -3205,11 +3202,12 @@ public:
 //  int DegreesToIndex(int MaxDeg);
   std::string DebugString;
   bool ComputeDebugString(PolynomialOutputFormat& PolyFormat);
-  bool ComputeDebugString();
+  bool ComputeDebugString(){PolynomialOutputFormat PolyFormatLocal; return this->ComputeDebugString(PolyFormatLocal); }
   void StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat);
   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
-  void ElementToString(std::string& output);
-  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
+  std::string ElementToString(PolynomialOutputFormat& PolyFormat){std::string tempS; this->ElementToString(tempS, PolyFormat); return tempS;}
+  //void ElementToString(std::string& output);
+  //std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
   void MakeConstantMonomial(short Nvar, const ElementOfCommutativeRingWithIdentity& coeff);
   void MakeNVarFirstDegree(int LetterIndex, short NumVars, const ElementOfCommutativeRingWithIdentity& coeff);
   void init(short nv);
@@ -3219,7 +3217,7 @@ public:
   { if (this->operator==(other))
       return false;
     return this->IsGEQLexicographicLastVariableStrongest(other);
-  };
+  }
   bool IsDivisibleBy(const Monomial<ElementOfCommutativeRingWithIdentity>& other)const
   { for (int i=0; i<this->NumVariables; i++)
       if (this->degrees[i]< other.degrees[i])
@@ -3264,6 +3262,7 @@ public:
   bool IsEqualToZero() const;
   bool IsPositive();
   void DecreaseNumVariables(short increment);
+  void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   bool IsAConstant();
   void InvertDegrees();
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
@@ -3296,9 +3295,12 @@ public:
   std::string DebugString;
   // returns the number of lines used
   int StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat, bool breakLinesLatex);
-  std::string ElementToString(bool breakLinesLatex){ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, breakLinesLatex); return output;};
-  void ElementToString(std::string& output){ output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true);};
-  std::string ElementToString(){ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true); return output;};
+  std::string ElementToString(bool breakLinesLatex, PolynomialOutputFormat& PolyFormatLocal)
+  { std::string output; output.clear();
+    this->StringPrintOutAppend(output, PolyFormatLocal, breakLinesLatex); return output;
+  };
+  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormatLocal){ output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true);};
+  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal){ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true); return output;};
   bool ComputeDebugString();
   int TotalDegree();
   bool IsEqualTo(TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
@@ -3380,7 +3382,7 @@ public:
   void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
   void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
   int TotalDegree();
-  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
+  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, PolynomialOutputFormat& PolyFormatLocal);
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
   int GetIndexMaxMonomialTotalDegThenLexicographic();
   void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
@@ -4073,14 +4075,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQLexicographicLastVaria
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
-{ std::stringstream out;
-  this->StringStreamPrintOutAppend(out, PolyFormat);
-  output=out.str();
-}
-
-template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output)
+void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormatLocal)
 { std::stringstream out;
   this->StringStreamPrintOutAppend(out, PolyFormatLocal);
   output=out.str();
@@ -4093,13 +4088,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString(Polynomi
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
-{ this->ElementToString(this->DebugString, PolyFormatLocal);
-  return true;
-}
-
-template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::MultiplyBy (Monomial<ElementOfCommutativeRingWithIdentity>& m, Monomial<ElementOfCommutativeRingWithIdentity>& output)
+void Monomial<ElementOfCommutativeRingWithIdentity>::MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m, Monomial<ElementOfCommutativeRingWithIdentity>& output)
 { assert(m.NumVariables == this->NumVariables);
   output.init(this->NumVariables);
   output.Coefficient.Assign(m.Coefficient);
@@ -4208,6 +4197,19 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy(  Monomial<Element
   output.Coefficient.DivideBy(input.Coefficient);
   for (int i=0; i<this->NumVariables; i++)
     output.degrees[i]=this->degrees[i]-input.degrees[i];
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
+{ if (newNumVars<0)
+    return;
+  int minNumVars=MathRoutines::Minimum((short) this->NumVariables, (short) newNumVars);
+  Monomial<ElementOfCommutativeRingWithIdentity> tempM;
+  tempM.init(newNumVars);
+  tempM.Coefficient=this->Coefficient;
+  for (int j=0; j<minNumVars; j++)
+    tempM.degrees[j]=this->degrees[j];
+  this->Assign(tempM);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4575,7 +4577,7 @@ int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::
             { found=true; break; }
             else
               extraChars++;
-          if (found)  NumChars=extraChars;  else  NumChars+=extraChars;
+          if (found) NumChars=extraChars; else  NumChars+=extraChars;
         }
         else
           NumChars+= tempS.size();
@@ -4903,6 +4905,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::ComputeDebugString()
 { this->DebugString.clear();
+  PolynomialOutputFormat PolyFormatLocal;
   this->StringPrintOutAppend(this->DebugString, PolyFormatLocal, true);
   return true;
 }
@@ -4920,6 +4923,7 @@ Polynomial<ElementOfCommutativeRingWithIdentity>::Polynomial(int degree, Element
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomials<ElementOfCommutativeRingWithIdentity>::PrintPolys(std::string &output, ElementOfCommutativeRingWithIdentity& TheRingUnit, ElementOfCommutativeRingWithIdentity& TheRingZero)
 { std::stringstream out;
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->size; i++)
   { std::string tempS;
     out << i << ". ";
@@ -5057,7 +5061,6 @@ public:
   void MultiplyByLargeRational(Rational& r);
   void ComputeDebugString();
   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
-  void ElementToString(std::string& output);
   bool HasSameExponent(BasicQN& q);
   bool ExponentIsEqualToZero();
   void DecreaseNumVars(short decrease);
@@ -5094,8 +5097,8 @@ public:
   void Assign(const QuasiNumber& q);
   void AssignLargeRational(short NumVars, Rational& coeff);
   void AssignInteger(short NumVars, int x);
+  void ElementToString(std::string& output){PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, PolyFormatLocal);}
   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
-  void ElementToString(std::string& output);
   void MakeConst(Rational& Coeff, short NumV);
   void DivideByRational(Rational& r);
 //  void DecreaseNumVars(int decrease);
@@ -5371,8 +5374,8 @@ public:
   void operator=(oneFracWithMultiplicitiesAndElongations& right);
   bool operator==(oneFracWithMultiplicitiesAndElongations& right);
   void ElementToString(std::string& output, int index, bool LatexFormat);
-  void ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int index, int theDimension);
-  void OneFracToStringBasisChange(partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension);
+  void ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int index, int theDimension, PolynomialOutputFormat& PolyFormatLocal);
+  void OneFracToStringBasisChange(partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension, PolynomialOutputFormat& PolyFormatLocal);
 };
 
 class rootWithMultiplicity: public root
@@ -5543,8 +5546,8 @@ public:
   void AssignDenominatorOnly(const partFraction& p);
   void AssignNoIndicesNonZeroMults(partFraction& p);
   int getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner, int minIndex);
-  int ControlLineSizeFracs(std::string& output);
-  int ControlLineSizeStringPolys(std::string& output);
+  int ControlLineSizeFracs(std::string& output, PolynomialOutputFormat& PolyFormatLocal);
+  int ControlLineSizeStringPolys(std::string& output, PolynomialOutputFormat& PolyFormatLocal);
   //void swap(int indexA, int indexB);
   partFraction();
   ~partFraction();
@@ -5561,7 +5564,7 @@ public:
   void initFromRootSystem(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
   void initFromRoots(partFractions& owner, roots& input);
   int ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-  int ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+  int ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables);
   void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables&  theGlobalVariables, int theDimension);
   void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
   int GetNumMonomialsInNumerator();
@@ -6411,11 +6414,11 @@ class slTwo
 {
 public:
   std::string DebugString;
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml){ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0);};
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, PolynomialOutputFormat& PolyFormatLocal);
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal){ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0, PolyFormatLocal);};
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
-  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){  this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml); };
+  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){ PolynomialOutputFormat PolyFormatLocal; this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml, PolyFormatLocal); };
   List<int> highestWeights;
   List<int> multiplicitiesHighestWeights;
   List<int> weightSpaceDimensions;
@@ -6708,8 +6711,8 @@ class MonomialUniversalEnvelopingOrdered
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
-  std::string ElementToString(bool useLatex, bool useGeneratorLetters);
-  void ComputeDebugString(){this->DebugString=this->ElementToString(false, true);};
+  std::string ElementToString(bool useLatex, bool useGeneratorLetters, PolynomialOutputFormat& PolyFormatLocal);
+  void ComputeDebugString(){ PolynomialOutputFormat PolyFormatLocal; this->DebugString=this->ElementToString(false, true, PolyFormatLocal);};
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
@@ -7349,12 +7352,17 @@ public:
   void LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
   void Assign(const ElementWeylAlgebra& other){ this->StandardOrder.Assign(other.StandardOrder); this->NumVariables=other.NumVariables;};
   void AssignPolynomial(const Polynomial<Rational>& thePoly){ this->StandardOrder.Assign(thePoly); this->StandardOrder.IncreaseNumVariables(thePoly.NumVars); this->NumVariables=thePoly.NumVars;};
-  void Subtract(ElementWeylAlgebra& other){ this->StandardOrder.Subtract(other.StandardOrder);};
+  void Subtract(const ElementWeylAlgebra& other){ this->StandardOrder.Subtract(other.StandardOrder);};
   void MakeConst(int NumVars, const Rational& theConst);
-  void Add(ElementWeylAlgebra& other){ this->StandardOrder.AddPolynomial(other.StandardOrder);};
+  bool SubstitutionPolyPartOnly
+  (PolynomialsRationalCoeff& theSub)
+  ;
+  void Add(const ElementWeylAlgebra& other){ this->StandardOrder.AddPolynomial(other.StandardOrder);};
   void MultiplyTwoMonomials(Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
   ElementWeylAlgebra(){ this->NumVariables=0; };
   void operator=(const std::string& input);
+  void operator+=(const ElementWeylAlgebra& other){this->Add(other);};
+  void operator-=(const ElementWeylAlgebra& other){this->Subtract(other);};
   bool IsLetter(char theLetter);
   bool IsIndex(char theIndex);
   bool IsNumber(char theNumber);
@@ -7998,7 +8006,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, PolynomialOutputFormat& PolyFormatLocal)
 { DrawElementInputOutput changeData;
   changeData.TopLeftCornerX = theDrawData.TopLeftCornerX;
   changeData.TopLeftCornerY = theDrawData.TopLeftCornerY;
@@ -8008,7 +8016,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DrawElement(GlobalVariabl
     changeData.TopLeftCornerX+=changeData.outputWidth;
     changeData.outputWidth=0;
     if( i!=this->size-1)
-    { this->TheObjects[i+1].ElementToString(tempS);
+    { this->TheObjects[i+1].ElementToString(tempS, PolyFormatLocal);
       if (tempS.at(0)!='-')
         theGlobalVariables.theDrawingVariables.drawString(changeData, "+", theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
       changeData.TopLeftCornerX+=changeData.outputWidth+3;
@@ -8086,7 +8094,7 @@ class GeneralizedMonomialRational
   void Nullify
   (int numVars)
   ;
-  std::string ElementToString();
+  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal);
   void MakeGenericMon
 (int numVars,  int startingIndexFormalExponent)
   ;
@@ -8115,7 +8123,7 @@ class GeneralizedPolynomialRational: public HashedList<GeneralizedMonomialRation
   int NumCoeffVars;
   int NumMainVars;
 
-  std::string ElementToString();
+  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal);
   void Nullify
 (int numVarsCoeff, int numberMainVars)
   ;
@@ -8237,11 +8245,11 @@ class PolynomialOverModule : PolynomialRationalCoeff
   friend class SSalgebraModule;
 public:
   SSalgebraModule* owner;
-  std::string ElementToString(){ return this->::PolynomialRationalCoeff::ElementToString(); };
+  std::string ElementToString(){ PolynomialOutputFormat PolyFormatLocal; return this->::PolynomialRationalCoeff::ElementToString(PolyFormatLocal); };
   void Assign(const PolynomialOverModule& other){ this->::PolynomialRationalCoeff::Assign(other); this->owner=other.owner;};
   void operator=(const PolynomialOverModule& other){ this->Assign(other); };
   int GetNumVars(){return this->NumVars;};
-  void Nullify(SSalgebraModule& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());};
+  void Nullify(SSalgebraModule& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());}
 };
 
 class InvariantsComputationModule

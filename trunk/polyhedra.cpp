@@ -128,7 +128,6 @@ Rational partFraction::CheckSum2;
 
 PolynomialsRationalCoeff PrecomputedPolys;
 PrecomputedQuasiPolynomialIntegrals PrecomputedQuasiPolys;
-PolynomialOutputFormat PolyFormatLocal;
 int PolynomialOutputFormat::LatexMaxLineLength=100;
 int PolynomialOutputFormat::LatexCutOffLine=15;
 bool PolynomialOutputFormat::UsingLatexFormat=true;
@@ -557,6 +556,7 @@ void DrawingVariables::ApplyScale(double inputScale)
 
 void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream& theFile, GlobalVariables& theGlobalVariables)
 { theFile.clear();
+  PolynomialOutputFormat PolyFormatLocal;
   LaTeXProcedures::beginDocument(theFile);
   if (this->thePartialFraction.size>0)
     this->WriteToFilePFdecomposition(theFile, false);
@@ -1163,7 +1163,6 @@ void ComputationSetup::InitComputationSetup()
     this->flagComputationDone=false;
     this->flagComputationInProgress=true;
     this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed=0;
-    PolyFormatLocal.MakeAlphabetxi();
     this->theGlobalVariablesContainer->Default()->theIndicatorVariables.Nullify();
     PolynomialOutputFormat::LatexMaxLineLength=100;
     PolynomialOutputFormat::UsingLatexFormat=true;
@@ -1347,7 +1346,8 @@ void ComputationSetup::Run()
           out  << this->NotationExplanationLatex1 << tempS << this->NotationExplanationLatex2 << this->thePartialFraction.AmbientDimension << this->NotationExplanationLatex3;
           if (this->flagComputingChambers)
           { int tempI =this->thePartialFraction.theChambers.RootBelongsToChamberIndex(this->IndicatorRoot, 0);
-            this->thePartialFraction.theChambers.TheObjects[tempI]->ElementToInequalitiesString(tempS, this->thePartialFraction.theChambers, true, false);
+            PolynomialOutputFormat PolyFormatLocal;
+            this->thePartialFraction.theChambers.TheObjects[tempI]->ElementToInequalitiesString(tempS, this->thePartialFraction.theChambers, true, false, PolyFormatLocal);
             out << tempS;
           } else
             out << "\n\n(Inequalities missing)\n\n";
@@ -1356,7 +1356,8 @@ void ComputationSetup::Run()
       }
       out << "\\begin{eqnarray*}&&\n" << this->theOutput.DebugString << "\\end{eqnarray*}";
       if (this->IndexChamberOfInterest!=-1 && !this->flagHavingNotationExplanation)
-      { this->thePartialFraction.theChambers.TheObjects[this->IndexChamberOfInterest]->ElementToInequalitiesString(tempS, this->thePartialFraction.theChambers, true, false);
+      { PolynomialOutputFormat PolyFormatLocal;
+        this->thePartialFraction.theChambers.TheObjects[this->IndexChamberOfInterest]->ElementToInequalitiesString(tempS, this->thePartialFraction.theChambers, true, false, PolyFormatLocal);
         out << "\n\n\n" << tempS;
       }
       if (this->flagHavingDocumentClassForLaTeX)
@@ -3244,7 +3245,8 @@ bool CombinatorialChamber::CheckSplittingPointCandidate(Selection& SelectionTarg
 }
 
 bool CombinatorialChamber::ComputeDebugString(CombinatorialChamberContainer& owner)
-{ this->ElementToString(this->DebugString, owner);
+{ PolynomialOutputFormat PolyFormatLocal;
+  this->ElementToString(this->DebugString, owner, PolyFormatLocal);
   return true;
 }
 
@@ -3265,11 +3267,11 @@ void CombinatorialChamber::ChamberNumberToString(std::string& output, Combinator
   output=out.str();
 }
 
-bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer& owner)
-{ return this->ElementToString(output, owner, false, false);
+bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer& owner, PolynomialOutputFormat& PolyFormatLocal)
+{ return this->ElementToString(output, owner, false, false, PolyFormatLocal);
 }
 
-void CombinatorialChamber::ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
+void CombinatorialChamber::ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal)
 { int theDimension=owner.AmbientDimension;
   this->SortNormals();
   this->AllVertices.QuickSortAscending();
@@ -4431,6 +4433,7 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
   std::string tempS;
   std::string endOfLine;
   root tempRoot;
+  PolynomialOutputFormat PolyFormatLocal;
   endOfLine="\n";
   if (useLatex)
     endOfLine="\\\\\n";
@@ -4460,7 +4463,7 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
       //if (!this->TheObjects[i]->flagHasZeroPolynomiaL || !useHtml)
-      { this->TheObjects[i]->ElementToString(tempS, *this, useLatex, useHtml);
+      { this->TheObjects[i]->ElementToString(tempS, *this, useLatex, useHtml, PolyFormatLocal);
         out << tempS;
         if (useHtml)
         { this->TheObjects[i]->ComputeInternalPoint(tempRoot, this->AmbientDimension);
@@ -5806,6 +5809,7 @@ void ComplexQN::LinPartToString(std::string& output)
 { output.clear();
   std::stringstream out;
   std::string tempS;
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->NumVars; i++)
     if (!this->Exponent.TheObjects[i].IsEqualTo(RZero))
     { if (!this->Exponent.TheObjects[i].IsEqualTo(ROne))
@@ -5815,12 +5819,12 @@ void ComplexQN::LinPartToString(std::string& output)
         else
           tempS.assign("-");
         if (tempS[0]!='-')
-          out<<"+";
-        out<<tempS;
+          out << "+";
+        out << tempS;
       }
       else
-        out<<"+";
-      out<<PolyFormatLocal.GetLetterIndex(i);
+        out << "+";
+      out << PolyFormatLocal.GetLetterIndex(i);
     }
   output= out.str();
   if (output.size()!=0)
@@ -6969,11 +6973,8 @@ inline void BasicQN::Assign(const BasicQN &q)
 }
 
 void BasicQN::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
-}
-
-void BasicQN::ElementToString(std::string &output)
-{ this->ElementToString(output, PolyFormatLocal);
+{ PolynomialOutputFormat PolyFormatLocal;
+  this->ElementToString(this->DebugString, PolyFormatLocal);
 }
 
 void BasicQN::ElementToString(std::string &output, PolynomialOutputFormat& PolyFormat)
@@ -7003,7 +7004,7 @@ void BasicQN::ElementToString(std::string &output, PolynomialOutputFormat& PolyF
           else
             out2 << this->Exp.elements[i][j];
         }
-        out2 << PolyFormatLocal.GetLetterIndex(j);
+        out2 << PolyFormat.GetLetterIndex(j);
       }
     }
     out2 << "=" << this->Nums.elements[i][0] << ")";
@@ -7266,10 +7267,6 @@ void BasicQN::ExpToDebugString()
   this->ComputeDebugString();
 }
 
-void QuasiNumber::ElementToString(std::string& output)
-{ this->ElementToString(output, PolyFormatLocal);
-}
-
 void QuasiNumber::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
 { std::stringstream out;
   std::string tempS;
@@ -7280,7 +7277,7 @@ void QuasiNumber::ElementToString(std::string& output, PolynomialOutputFormat& P
   { this->TheObjects[i].ElementToString(tempS, PolyFormat);
     if (!(tempS[0]=='0'))
     { if(!(tempS[0]=='-'))
-      {  out << "+";
+      { out << "+";
         LineLengthCounter++;
       }
       out << tempS;
@@ -7361,8 +7358,9 @@ void QuasiNumber::Assign(const QuasiNumber& q)
 }
 
 bool QuasiNumber::ComputeDebugString()
-{ this->DebugString.clear();
-  this->ElementToString(this->DebugString);
+{ PolynomialOutputFormat PolyFormatLocal;
+  this->DebugString.clear();
+  this->ElementToString(this->DebugString, PolyFormatLocal);
   return true;
 }
 
@@ -8925,7 +8923,8 @@ void partFraction::AssignNoIndicesNonZeroMults(partFraction& p)
 
 int partFraction::ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { MatrixIntTightMemoryFit tempMat;
-  return this->ElementToStringBasisChange(owner, tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
+  PolynomialOutputFormat PolyFormatLocal;
+  return this->ElementToStringBasisChange(owner, tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, PolyFormatLocal, theGlobalVariables);
 }
 
 int partFraction::GetNumMonomialsInNumerator()
@@ -9007,7 +9006,7 @@ void partFraction::ComputeOneCheckSum(partFractions& owner, Rational& output, in
 #ifdef WIN32
 #pragma warning(disable:4018)//grrrrr
 #endif
-int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
+int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)
 { std::stringstream out, out2;
   std::string tempS, stringPoly;
   if (this->Coefficient.size==0)
@@ -9051,7 +9050,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
 //  this->intRootToString(out, this->RootShift, false);
   out << " ";
   for (int i =0; i<this->size; i++)
-  { this->TheObjects[i].ElementToStringBasisChange(owner, VarChange, UsingVarChange, tempS, LatexFormat, i, theDimension);
+  { this->TheObjects[i].ElementToStringBasisChange(owner, VarChange, UsingVarChange, tempS, LatexFormat, i, theDimension, PolyFormatLocal);
     out << tempS;
   }
   if (includeVPsummand && LatexFormat)
@@ -10495,13 +10494,14 @@ int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange
 { std::stringstream out;
   std::string tempS;
   int TotalLines=0;
+  PolynomialOutputFormat PolyFormatLocal;
   PolyFormatLocal.ExtraLinesCounterLatex=0;
   if (LatexFormat)
   { out << "\\begin{eqnarray*}\n"; }
   int LastCutOff=0;
   for (int i=0; i<this->size; i++)
   { if (this->TheObjects[i].Coefficient.size>0 )
-    { TotalLines+=this->TheObjects[i].ElementToStringBasisChange(*this, VarChange, UsingVarChange, tempS, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
+    { TotalLines+=this->TheObjects[i].ElementToStringBasisChange(*this, VarChange, UsingVarChange, tempS, LatexFormat, includeVPsummand, includeNumerator, PolyFormatLocal, theGlobalVariables);
       if (LatexFormat)
         out << "&&";
       if (tempS[0]!='-')
@@ -10538,13 +10538,14 @@ int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange
 int partFractions::ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
 { std::string tempS;
   int TotalLines=0;
+  PolynomialOutputFormat PolyFormatLocal;
   PolyFormatLocal.ExtraLinesCounterLatex=0;
   if (LatexFormat)
     output << "\\begin{eqnarray*}\n";
   int LastCutOff=0;
   for (int i=0; i<this->size; i++)
   { if (this->TheObjects[i].Coefficient.size>0 )
-    { TotalLines+=this->TheObjects[i].ElementToStringBasisChange(  *this, VarChange, UsingVarChange, tempS, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
+    { TotalLines+=this->TheObjects[i].ElementToStringBasisChange(*this, VarChange, UsingVarChange, tempS, LatexFormat, includeVPsummand, includeNumerator, PolyFormatLocal, theGlobalVariables);
       if (LatexFormat)
         output << "&&";
       if (tempS[0]!='-')
@@ -10570,7 +10571,7 @@ int partFractions::ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFi
 #ifdef WIN32
 #pragma warning(disable:4018)//grrrrr
 #endif
-int partFraction::ControlLineSizeFracs(std::string& output)
+int partFraction::ControlLineSizeFracs(std::string& output, PolynomialOutputFormat& PolyFormatLocal)
 { int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
   int LastCutOffIndex=0;
   int NumLinesAdded=0;
@@ -10585,7 +10586,7 @@ int partFraction::ControlLineSizeFracs(std::string& output)
   return NumLinesAdded;
 }
 
-int partFraction::ControlLineSizeStringPolys(std::string& output)
+int partFraction::ControlLineSizeStringPolys(std::string& output, PolynomialOutputFormat& PolyFormatLocal)
 { int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
   int LastCutOffIndex=0;
   int NumLinesAdded=0;
@@ -10879,6 +10880,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables& theGlobal
   output << "Dimension: ";
   output << this->AmbientDimension << "\n";
   output << "Indices_of_roots:\n";
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->RootsToIndices.size; i++)
   { this->RootsToIndices.TheObjects[i].ElementToString(tempS);
     output << "| " << i << "    " << tempS << "\n";
@@ -10894,6 +10896,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables& theGlobal
 void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { intRoots tempRoots;
   this->PrepareIndicatorVariables();
+  PolynomialOutputFormat PolyFormatLocal;
   //input.seekg(0, std::ios::end);
   //int bufferSize= input.tellg();
   //bufferSize = ::Minimum(bufferSize, this->MaxReadFileBufferSize)+1;
@@ -11197,7 +11200,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIn
   }
 }
 
-void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension)
+void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFractions& owner, int indexElongation, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension, PolynomialOutputFormat& PolyFormatLocal)
 { std::stringstream  out;
   std::string tempS;
   intRoot tempRoot2, tempRoot;
@@ -11235,22 +11238,22 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(partFra
   output= out.str();
 }
 
-void oneFracWithMultiplicitiesAndElongations::ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int index, int theDimension)
-{  if (this->Multiplicities.size==0)
+void oneFracWithMultiplicitiesAndElongations::ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int index, int theDimension, PolynomialOutputFormat& PolyFormatLocal)
+{ if (this->Multiplicities.size==0)
   { output.clear();
     return;
   }
   std::string tempS;
   std::stringstream out;
   for (int k=0; k<this->Multiplicities.size; k++)
-  { this->OneFracToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, theDimension);
+  { this->OneFracToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, theDimension, PolyFormatLocal);
     out << tempS;
   }
   out << " ";
   output= out.str();
 }
 
-bool oneFracWithMultiplicitiesAndElongations::operator ==  (oneFracWithMultiplicitiesAndElongations& right)
+bool oneFracWithMultiplicitiesAndElongations::operator ==(oneFracWithMultiplicitiesAndElongations& right)
 { if (this->Elongations.size!=right.Elongations.size)
     return false;
   for (int i=0; i<this->Elongations.size; i++)
@@ -11798,6 +11801,7 @@ void WeylGroup::RootScalarCartanRoot(const root& r1, const root& r2, Rational& o
 void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights)
 { hashedRoots TheIndicatorsOrbit;
   WeylGroup OrbitGeneratingSubset;
+  PolynomialOutputFormat PolyFormatLocal;
   roots tempRoots;
   tempRoots.size=0;
   tempRoots.AddRoot(ChamberIndicator);
@@ -12487,6 +12491,7 @@ void hashedRoots::ComputeDebugString()
 
 void PolynomialsRationalCoeff::ElementToString(std::string& output)
 { output.clear();
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].StringPrintOutAppend(output, PolyFormatLocal, true);
     output.append("\n");
@@ -12820,6 +12825,7 @@ void VermaModulesWithMultiplicities::initFromWeyl(WeylGroup* theWeylGroup)
 
 void VermaModulesWithMultiplicities::ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex)
 {  this->GeneratePartialBruhatOrder();
+  PolynomialOutputFormat PolyFormatLocal;
   PolyFormatLocal.SetLetterIndex("q", 0);
   this->ComputeRPolys();
 //  this->ComputeDebugString();
@@ -12991,6 +12997,7 @@ void OneVarPolynomials::ComputeDebugString()
 void OneVarPolynomials::ElementToString(std::string& output)
 { std::string tempS;
   std::stringstream out;
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->size; i++)
   { tempS.clear();
     this->TheObjects[i].StringPrintOutAppend(tempS, PolyFormatLocal, true);
@@ -13003,6 +13010,7 @@ void OneVarPolynomials::ElementToString(std::string& output)
 void OneVarPolynomials::ElementToString(std::string& output, int KLindex)
 { std::string tempS;
   std::stringstream out;
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->size; i++)
   { tempS.clear();
     this->TheObjects[i].StringPrintOutAppend(tempS, PolyFormatLocal, true);
@@ -21606,6 +21614,8 @@ void ElementWeylAlgebra::ElementToString(std::string& output, List<std::string>&
   int numLettersSinceLastNewLine=0;
   if (useLatex && useBeginEqnArray)
     out << "\\begin{eqnarray*}&&";
+  if (this->StandardOrder.IsEqualToZero())
+    out << 0;
   for (int i=0; i<this->StandardOrder.size; i++)
   { this->StandardOrder.TheObjects[i].Coefficient.ElementToString(tempS);
     bool hasMinus=(tempS[0]=='-');
@@ -21910,7 +21920,7 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
     output << "\n<br>\n";
 }
 
-void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, PolynomialOutputFormat& PolyFormatLocal)
 { std::stringstream out;  std::string tempS;
   this->hCharacteristic.ElementToString(tempS);
   out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<  tempS << "</a>";
@@ -22007,7 +22017,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   //out <<"\nColumn vector of the system:\n"<<tempS;
   std::stringstream tempStreamActual;
   for (int i=0; i<this->theSystemToBeSolved.size; i++)
-  { this->theSystemToBeSolved.TheObjects[i].ElementToString(tempS);
+  { this->theSystemToBeSolved.TheObjects[i].ElementToString(tempS, PolyFormatLocal);
     if (tempS=="")
     { if (useLatex || usePNG)
         tempStreamActual << "~\\\\";
@@ -22606,8 +22616,9 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
 
 void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::string tempS; std::stringstream out; std::stringstream body;
+  PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer, PolyFormatLocal);
   //  body<< "Index "<< i<<": ";
     if(useHtml)
       body << "<br>";
@@ -22853,7 +22864,8 @@ void ComputationSetup::TestGraphicalOutputPolys(ComputationSetup& inputData, Glo
   DrawElementInputOutput theDrawData;
   theDrawData.TopLeftCornerX=50;
   theDrawData.TopLeftCornerY=50;
-  tempP.DrawElement(theGlobalVariables, theDrawData);
+  PolynomialOutputFormat PolyFormatLocal;
+  tempP.DrawElement(theGlobalVariables, theDrawData, PolyFormatLocal);
 }
 
 void ComputationSetup::ComputeReductiveSAs(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
@@ -23644,7 +23656,7 @@ void WeylGroup::ReadFromFile(std::fstream& input)
   this->CartanSymmetric.ReadFromFile(input);
 }
 
-bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml)
+bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal)
 { std::stringstream out;
   std::string tempS;
   //assert(this->ExternalWalls->size== this->ExternalWallsNormals.size);
@@ -23664,7 +23676,7 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
     out << endOfLine << "Projective representation\n\n";
   out << " index in owner: " << this->IndexInOwnerComplex << "\n";
   out << "Hash_id: " << this->GetHashFromSortedNormals() << "\n";
-  this->ElementToInequalitiesString(tempS, owner, useLatex, useHtml);
+  this->ElementToInequalitiesString(tempS, owner, useLatex, useHtml, PolyFormatLocal);
   out << tempS;
   out << "Neighbors: ";
   for (int k=0; k<this->Externalwalls.size; k++)
@@ -25863,7 +25875,7 @@ void ParserNode::InitForMultiplication()
   if(this->ExpressionType==this->typeUEElementOrdered)
     this->UEElementOrdered.GetElement().AssignInt(1, this->owner->NumVariables, this->owner->testAlgebra);
   if(this->ExpressionType==this->typeWeylAlgebraElement)
-    this->WeylAlgebraElement.GetElement().Nullify(this->owner->NumVariables);
+    this->WeylAlgebraElement.GetElement().MakeConst(this->owner->NumVariables, (Rational) 1);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
@@ -25930,6 +25942,7 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
       case ParserNode::typePoly: if(i==0) this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); else this->polyValue.GetElement().Subtract(currentChild.polyValue.GetElement()); break;
       case ParserNode::typeUEelement: if (i==0) this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); else this->UEElement.GetElement()-=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeUEElementOrdered: if (i==0) this->UEElementOrdered.GetElement()+=currentChild.UEElementOrdered.GetElement(); else this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
+      case ParserNode::typeWeylAlgebraElement: if (i==0) this->WeylAlgebraElement.GetElement()+=currentChild.WeylAlgebraElement.GetElement(); else this->WeylAlgebraElement.GetElement()-=currentChild.WeylAlgebraElement.GetElement(); break;
       default: this->ExpressionType=this->typeError; return;
     }
   }
@@ -25948,6 +25961,8 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
     case ParserNode::typeRational: this->rationalValue-=currentChild.rationalValue; break;
     case ParserNode::typePoly: this->polyValue.GetElement().Subtract(currentChild.polyValue.GetElement()); break;
     case ParserNode::typeUEelement: this->UEElement.GetElement()-=currentChild.UEElement.GetElement(); break;
+    case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
+    case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement()-=currentChild.WeylAlgebraElement.GetElement(); break;
     default: this->ExpressionType=this->typeError; return;
   }
 }
@@ -26186,6 +26201,7 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
       case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
+      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement(), theGlobalVariables); break;
       default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
     }
   }
@@ -26318,13 +26334,13 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 void ParserNode::ElementToString(std::string& output)
 { std::stringstream out; std::string tempS;
   owner->TokenToStringStream(out, this->Operation);
-  PolyFormatLocal.MakeAlphabetArbitraryWithIndex("x");
+  PolynomialOutputFormat PolyFormatLocal;
   if (this->ExpressionType==this->typeRational)
     out << " is the rational number " << this->rationalValue.ElementToString();
   if (this->ExpressionType==this->typeIntegerOrIndex)
     out << " is the integer " << this->intValue;
   if (this->ExpressionType==this->typePoly)
-  { this->polyValue.GetElement().ElementToString(tempS);
+  { this->polyValue.GetElement().ElementToString(tempS, PolyFormatLocal);
     out << " is the polynomial " << tempS;
   }
   if (this->ExpressionType==this->typeArray)

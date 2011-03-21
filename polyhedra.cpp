@@ -224,6 +224,7 @@ template < > int List<LargeIntUnsigned>::ListActualSizeIncrement=20;
 template < > int List<double>::ListActualSizeIncrement=20;
 template < > int List<MonomialUniversalEnvelopingOrdered>::ListActualSizeIncrement=20;
 template < > int List<GeneralizedMonomialRational>::ListActualSizeIncrement=20;
+template < > int List<ElementWeylAlgebra>::ListActualSizeIncrement=20;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
@@ -8133,7 +8134,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 //  assert(this->CheckForConsistensy());
 }
 
-void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output)
+void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)
 { assert(this!=&output && &x!=&output);
   output.SetSizeExpandOnTopNoObjectInit(x.size+output.size);
   for(int i=0; i<output.size; i++)
@@ -8169,7 +8170,7 @@ void LargeIntUnsigned::MultiplyByUInt(unsigned int x)
   this->MultiplyBy(tempLI);
 }
 
-void LargeIntUnsigned::MultiplyBy(LargeIntUnsigned& x)
+void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x)
 { LargeIntUnsigned tempInt;
   this->MultiplyBy(x, tempInt);
   this->Assign(tempInt);
@@ -21498,9 +21499,9 @@ void ElementWeylAlgebra::operator=(const std::string& input)
   }*/
 }
 
-void ElementWeylAlgebra::MultiplyTwoMonomials( Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables)
+void ElementWeylAlgebra::MultiplyTwoMonomials(Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput)
 { Monomial<Rational> buffer;
-  SelectionWithDifferentMaxMultiplicities& tempSel=theGlobalVariables.selWeylAlgebra1;
+  SelectionWithDifferentMaxMultiplicities tempSel;
   assert(left.NumVariables%2==0);
   int theDimension=left.NumVariables/2;
   tempSel.Multiplicities.initFillInObject(theDimension, 0);
@@ -21590,19 +21591,19 @@ void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, 
   Accum.Nullify((short) this->NumVariables*2);
   for (int j=0; j<standsOnTheLeft.StandardOrder.size; j++)
     for (int i=0; i<this->StandardOrder.size; i++)
-    { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder.TheObjects[j], this->StandardOrder.TheObjects[i], buffer, theGlobalVariables);
+    { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder.TheObjects[j], this->StandardOrder.TheObjects[i], buffer);
       Accum.AddPolynomial(buffer);
     }
   this->StandardOrder.Assign(Accum);
 }
 
-void ElementWeylAlgebra::MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
+void ElementWeylAlgebra::MultiplyOnTheRight(const ElementWeylAlgebra& standsOnTheRight)
 { PolynomialRationalCoeff buffer;
   PolynomialRationalCoeff Accum;
   Accum.Nullify((short) this->NumVariables*2);
   for (int j=0; j<standsOnTheRight.StandardOrder.size; j++)
     for (int i=0; i<this->StandardOrder.size; i++)
-    { this->MultiplyTwoMonomials(this->StandardOrder.TheObjects[i], standsOnTheRight.StandardOrder.TheObjects[j], buffer, theGlobalVariables);
+    { this->MultiplyTwoMonomials(this->StandardOrder.TheObjects[i], standsOnTheRight.StandardOrder.TheObjects[j], buffer);
       Accum.AddPolynomial(buffer);
     }
   this->StandardOrder.Assign(Accum);
@@ -25765,7 +25766,17 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
       this->UEElement.GetElement().RaiseToPower(thePower);
       this->ExpressionType=this->typeUEelement;
     break;
-    default: this->ExpressionType=this->typeError; return;
+    case ParserNode::typeUEElementOrdered:
+      this->UEElementOrdered.GetElement()=leftNode.UEElementOrdered.GetElement();
+      this->UEElementOrdered.GetElement().RaiseToPower(thePower);
+      this->ExpressionType=this->typeUEElementOrdered;
+    break;
+    case ParserNode::typeWeylAlgebraElement:
+      this->WeylAlgebraElement.GetElement()=leftNode.WeylAlgebraElement.GetElement();
+      this->WeylAlgebraElement.GetElement().RaiseToPower(thePower);
+      this->ExpressionType=this->typeWeylAlgebraElement;
+    break;
+    default: this->SetError(this->errorDunnoHowToDoOperation); return;
   }
 }
 
@@ -26201,7 +26212,7 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
       case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
-      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement(), theGlobalVariables); break;
+      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement()); break;
       default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
     }
   }

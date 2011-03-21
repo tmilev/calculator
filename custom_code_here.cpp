@@ -263,6 +263,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddObjectOnTop(0);
     return true;
   }
+  if (input=="\\partial")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenPartialDerivative);
+    this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
   if (input=="g")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenG);
     this->ValueBuffer.AddObjectOnTop(0);
@@ -2167,7 +2172,7 @@ void EigenVectorComputation::GetDiffOperatorFromShiftAndCoefficient
       { tempP.MakeNVarDegOnePoly(theCoeff.NumVars, i+dimCartan, (Rational) 1, (Rational) -j);
         AccumDiffPart.MultiplyBy(tempP);
         tempW.Makedi(i+dimCartan, theCoeff.NumVars);
-        output.MultiplyOnTheRight(tempW, theGlobalVariables);
+        output.MultiplyOnTheRight(tempW);
       }
     else if (theShift.TheObjects[i].NumShort>0)
     { tempP.MakeMonomialOneLetter(theCoeff.NumVars, i+dimCartan, theShift.TheObjects[i].NumShort, (Rational) 1);
@@ -4065,7 +4070,7 @@ void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
         return;
       }
       this->WeylAlgebraElement.GetElement().Assign(lastNode.WeylAlgebraElement.GetElement());
-      if (!this->WeylAlgebraElement.GetElement().SubstitutionPolyPartOnly(theSub))
+      if (!this->WeylAlgebraElement.GetElement().SubstitutionDiffPartOnly(theSub))
       { this->SetError(this->errorDunnoHowToDoOperation);
         return;
       }
@@ -4181,7 +4186,7 @@ bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
   return false;
 }
 
-bool ElementWeylAlgebra::SubstitutionPolyPartOnly
+bool ElementWeylAlgebra::SubstitutionDiffPartOnly
 (PolynomialsRationalCoeff& theSub)
 { Monomial<Rational> polyPartMon;
   Monomial<Rational> diffPartMon;
@@ -4194,16 +4199,23 @@ bool ElementWeylAlgebra::SubstitutionPolyPartOnly
       return false;
   for (int i=0; i<this->StandardOrder.size; i++)
   { polyPartMon.Assign(this->StandardOrder.TheObjects[i]);
-    diffPartMon.Assign(this->StandardOrder.TheObjects[i]);
+    diffPartMon.MakeConstantMonomial(this->NumVariables, (Rational) 1);
     for (int j=0; j<this->NumVariables; j++)
-      diffPartMon.degrees[j]=0;
-    polyPartMon.SetNumVariablesSubDeletedVarsByOne(this->NumVariables);
-    polyPartMon.Coefficient.MakeOne();
-    polyPartMon.Substitution(theSub, tempP, this->NumVariables);
-    tempP.SetNumVariablesSubDeletedVarsByOne(this->NumVariables*2);
-    tempP.MultiplyByMonomial(diffPartMon);
+    { diffPartMon.degrees[j]=this->StandardOrder.TheObjects[i].degrees[j+this->NumVariables];
+      polyPartMon.degrees[j+this->NumVariables]=0;
+    }
+    diffPartMon.SetNumVariablesSubDeletedVarsByOne(this->NumVariables);
+    diffPartMon.Substitution(theSub, tempP, this->NumVariables);
+    tempP.IncreaseNumVariablesShiftVarIndicesToTheRight(this->NumVariables);
+    tempP.MultiplyByMonomial(polyPartMon);
     Accum+=tempP;
   }
-  this->StandardOrder=tempP;
+  this->StandardOrder=Accum;
   return true;
+}
+
+void ElementWeylAlgebra::RaiseToPower(int thePower)
+{ ElementWeylAlgebra WeylOne;
+  WeylOne.MakeConst(this->NumVariables, (Rational) 1);
+  MathRoutines::RaiseToPower(*this, thePower, WeylOne);
 }

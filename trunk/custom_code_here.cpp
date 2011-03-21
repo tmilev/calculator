@@ -3624,7 +3624,7 @@ bool ParserNode::ConvertToType(int theType)
     if (theType==this->typeUEelement)
       this->UEElement.GetElement().AssignInt(this->intValue, (short)this->owner->NumVariables, *this->ContextLieAlgebra);
     if (theType==this->typeWeylAlgebraElement)
-      this->WeylAlgebraElement.GetElement().MakeConst(this->owner->NumVariables, (Rational) this->typeIntegerOrIndex);
+      this->WeylAlgebraElement.GetElement().MakeConst(this->owner->NumVariables, (Rational) this->intValue);
   }
   if (this->ExpressionType==this->typeRational)
   { if (theType==this->typePoly)
@@ -3988,13 +3988,13 @@ void ParserNode::EvaluateSubstitution(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  if(!this->ConvertChildrenToType(this->typePoly))
+  if(!this->ConvertChildrenToType(this->typeWeylAlgebraElement))
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  this->polyValue=this->owner->TheObjects[this->children.TheObjects[0]].polyValue;
-  this->polyBeingMappedTo=this->owner->TheObjects[this->children.TheObjects[1]].polyValue;
-  this->ExpressionType=this->typeMap;
+  this->WeylAlgebraElement=this->owner->TheObjects[this->children.TheObjects[0]].WeylAlgebraElement;
+  this->weylEltBeingMappedTo=this->owner->TheObjects[this->children.TheObjects[1]].WeylAlgebraElement;
+  this->ExpressionType=this->typeMapWeylAlgebra;
 }
 
 void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
@@ -4020,22 +4020,24 @@ void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
-{ for (int i=0; i<this->children.size-1; i++)
-    if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType!=this->typeMap)
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    }
+{ if (this->children.size<2)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
   PolynomialsRationalCoeff theSub;
   int theDimension=this->owner->NumVariables;
-  theSub.MakeIdSubstitution((short) theDimension, (Rational) 1);
-  List<bool> Explored(theDimension, false);
+  theSub.MakeIdSubstitution((short) theDimension*2, (Rational) 1);
+  List<bool> Explored(theDimension*2, false);
+  PolynomialRationalCoeff currentLeft, currentRight;
   for (int i=0; i<this->children.size-1; i++)
   { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
-    if (currentNode.polyValue.GetElement().size!=1)
+    currentNode.WeylAlgebraElement.GetElement().GetStandardOrder(currentLeft);
+    currentNode.weylEltBeingMappedTo.GetElement().GetStandardOrder(currentRight);
+    if (currentLeft.size!=1)
     { this->SetError(this->errorBadOrNoArgument);
       return;
     }
-    Monomial<Rational>& theMon=currentNode.polyValue.GetElement().TheObjects[0];
+    Monomial<Rational>& theMon=currentLeft.TheObjects[0];
     int theLetterIndex;
     if (!theMon.IsOneLetterFirstDegree(theLetterIndex))
     { this->SetError(this->errorBadOrNoArgument);
@@ -4045,40 +4047,38 @@ void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
     { this->SetError(this->errorBadSubstitution);
       return;
     }
+//    std::cout << "<br> currentRight is: " << currentRight.ElementToString();
     Explored.TheObjects[theLetterIndex]=true;
-    theSub.TheObjects[theLetterIndex]=currentNode.polyBeingMappedTo.GetElement();
+    theSub.TheObjects[theLetterIndex]=currentRight;
+//    std::cout << "<br> and currently we have: " << theSub.TheObjects[theLetterIndex].ElementToString();
     theSub.TheObjects[theLetterIndex]/=theMon.Coefficient;
-    theSub.TheObjects[theLetterIndex].SetNumVariablesSubDeletedVarsByOne(this->owner->NumVariables);
+//    std::cout << "<br> and currently we have: " << theSub.TheObjects[theLetterIndex].ElementToString();
+    theSub.TheObjects[theLetterIndex].SetNumVariablesSubDeletedVarsByOne(theDimension*2);
+//    std::cout << "<br> and currently we have: " << theSub.TheObjects[theLetterIndex].ElementToString();
   }
   ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
   switch(lastNode.ExpressionType)
-  { case ParserNode::typeIntegerOrIndex:
+  { case ParserNode::typeWeylAlgebraElement:
+      this->WeylAlgebraElement=lastNode.WeylAlgebraElement;
+      this->WeylAlgebraElement.GetElement().SubstitutionTreatPartialsAndVarsAsIndependent(theSub);
+      this->ExpressionType=this->typeWeylAlgebraElement;
+      return;
+    case ParserNode::typeIntegerOrIndex:
     case ParserNode::typeRational:
     case ParserNode::typePoly:
-      if (!lastNode.ConvertToType(this->typePoly))
-      { this->SetError(this->errorDunnoHowToDoOperation);
-        return;
-      }
-      this->polyValue.GetElement().operator=(lastNode.polyValue.GetElement());
+      this->polyValue=lastNode.polyValue;
+ //     std::cout << "<br> ... and the sub is: " << theSub.ElementToString();
+      theSub.SetSizeExpandOnTopNoObjectInit(theDimension);
+      for (int i=0; i<theDimension; i++)
+        theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
+   //   std::cout << "<br> ... and the sub is: " << theSub.ElementToString();
       this->polyValue.GetElement().Substitution(theSub, theDimension);
-      //theSub.ElementToString(this->outputString);
       this->ExpressionType=this->typePoly;
-      break;
-    case ParserNode::typeWeylAlgebraElement:
-      if (!lastNode.ConvertToType(this->typeWeylAlgebraElement))
-      { this->SetError(this->errorDunnoHowToDoOperation);
-        return;
-      }
-      this->WeylAlgebraElement.GetElement().Assign(lastNode.WeylAlgebraElement.GetElement());
-      if (!this->WeylAlgebraElement.GetElement().SubstitutionDiffPartOnly(theSub))
-      { this->SetError(this->errorDunnoHowToDoOperation);
-        return;
-      }
-      this->ExpressionType=this->typeWeylAlgebraElement;
-      break;
-    default: this->SetError(this->errorDunnoHowToDoOperation); return;
+      return;
+    default:
+      this->SetError(this->errorDunnoHowToDoOperation);
+      return;
   }
-
 }
 
 void ParserNode::CopyValue(const ParserNode& other)
@@ -4098,9 +4098,13 @@ void ParserNode::CopyValue(const ParserNode& other)
     this->UEElementOrdered.GetElement().operator=(other.UEElementOrdered.GetElementConst());
   if (other.ExpressionType==this->typePoly)
     this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
-  if (other.ExpressionType==this->typeMap)
+  if (other.ExpressionType==this->typeMapPolY)
   { this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
     this->polyBeingMappedTo.GetElement().operator=(other.polyBeingMappedTo.GetElementConst());
+  }
+  if (other.ExpressionType==this->typeMapWeylAlgebra)
+  { this->WeylAlgebraElement.GetElement().operator=(other.WeylAlgebraElement.GetElementConst());
+    this->weylEltBeingMappedTo.GetElement().operator=(other.weylEltBeingMappedTo.GetElementConst());
   }
   if (other.ExpressionType==this->typeArray)
     this->array.GetElement().CopyFromBase(other.array.GetElementConst());
@@ -4186,32 +4190,11 @@ bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
   return false;
 }
 
-bool ElementWeylAlgebra::SubstitutionDiffPartOnly
+void ElementWeylAlgebra::SubstitutionTreatPartialsAndVarsAsIndependent
 (PolynomialsRationalCoeff& theSub)
-{ Monomial<Rational> polyPartMon;
-  Monomial<Rational> diffPartMon;
-  PolynomialRationalCoeff tempP, Accum;
-  Accum.Nullify(this->NumVariables*2);
-  if (theSub.size!=this->NumVariables)
-    return false;
-  for (int i=0; i<this->NumVariables; i++)
-    if (theSub.TheObjects[i].NumVars!=this->NumVariables)
-      return false;
-  for (int i=0; i<this->StandardOrder.size; i++)
-  { polyPartMon.Assign(this->StandardOrder.TheObjects[i]);
-    diffPartMon.MakeConstantMonomial(this->NumVariables, (Rational) 1);
-    for (int j=0; j<this->NumVariables; j++)
-    { diffPartMon.degrees[j]=this->StandardOrder.TheObjects[i].degrees[j+this->NumVariables];
-      polyPartMon.degrees[j+this->NumVariables]=0;
-    }
-    diffPartMon.SetNumVariablesSubDeletedVarsByOne(this->NumVariables);
-    diffPartMon.Substitution(theSub, tempP, this->NumVariables);
-    tempP.IncreaseNumVariablesShiftVarIndicesToTheRight(this->NumVariables);
-    tempP.MultiplyByMonomial(polyPartMon);
-    Accum+=tempP;
-  }
-  this->StandardOrder=Accum;
-  return true;
+{ assert(theSub.size==this->NumVariables*2);
+  std::cout << "<br>...and the sub is: " << theSub.ElementToString();
+  this->StandardOrder.Substitution(theSub, this->NumVariables*2);
 }
 
 void ElementWeylAlgebra::RaiseToPower(int thePower)

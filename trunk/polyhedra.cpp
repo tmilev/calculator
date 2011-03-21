@@ -25297,6 +25297,7 @@ void Parser::ParserInit(const std::string& input)
   this->TokenBuffer.size=0;
   this->ValueBuffer.size=0;
   this->size=0;
+  this->NumVariables=0;
   std::string buffer;
   int theLength=(signed) input.size();
   char LookAheadChar;
@@ -25681,11 +25682,11 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenH: break;
     case Parser::tokenF: break;
     case Parser::tokenVariable: break;
+    case Parser::tokenPartialDerivative: break;
+    case Parser::tokenX: break;
     case Parser::tokenC: this->ExpressionType=this->typeUEelement; this->UEElement.GetElement().MakeCasimir(*this->ContextLieAlgebra, this->owner->NumVariables, theGlobalVariables); break;
     case Parser::tokenDivide: this->EvaluateDivide(theGlobalVariables); break;
     case Parser::tokenUnderscore: this->EvaluateUnderscore(theGlobalVariables); break;
-    case Parser::tokenPartialDerivative: this->ExpressionType=this->typeWeylAlgebraElement; break;
-    case Parser::tokenX: this->ExpressionType=this->typeWeylAlgebraElement; break;
     case Parser::tokenInteger: this->EvaluateInteger(theGlobalVariables); break;
     case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
@@ -26015,9 +26016,16 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
-  this->ExpressionType= this->typeUEelement;
-  if (this->OneChildrenOrMoreAreOfType(this->typeUEElementOrdered))
-    this->ExpressionType=this->typeUEElementOrdered;
+  this->ExpressionType=this->typeUEelement;
+  if (this->OneChildrenOrMoreAreOfType(this->typeWeylAlgebraElement))
+  { this->ExpressionType=this->typeWeylAlgebraElement;
+    if (this->OneChildrenOrMoreAreOfType(this->typeUEelement) || this->OneChildrenOrMoreAreOfType(this->typeUEElementOrdered))
+    { this->SetError(this->errorMultiplicationByNonAllowedTypes);
+      return;
+    }
+  }
+  if (this->OneChildrenOrMoreAreOfType(this->typeUEElementOrdered) && !this->OneChildrenOrMoreAreOfType(this->typeUEelement))
+    this->ExpressionType= this->typeUEElementOrdered;
   for (int i=0; i<this->children.size; i++)
     if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(this->ExpressionType))
     { this->SetError(this->errorDunnoHowToDoOperation);
@@ -26031,9 +26039,13 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
   { ElementUniversalEnvelopingOrdered& left=this->owner->TheObjects[this->children.TheObjects[0]].UEElementOrdered.GetElement();
     ElementUniversalEnvelopingOrdered& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElementOrdered.GetElement();
     left.LieBracketOnTheRight(right, this->UEElementOrdered.GetElement());
+  } else if (this->ExpressionType==this->typeWeylAlgebraElement)
+  { ElementWeylAlgebra& left=this->owner->TheObjects[this->children.TheObjects[0]].WeylAlgebraElement.GetElement();
+    ElementWeylAlgebra& right= this->owner->TheObjects[this->children.TheObjects[1]].WeylAlgebraElement.GetElement();
+    this->WeylAlgebraElement.GetElement().Assign(left);
+    this->WeylAlgebraElement.GetElement().LieBracketOnTheRight(right, theGlobalVariables);
   } else
-  { this->SetError(this->errorProgramming);
-  }
+    this->SetError(this->errorProgramming);
 }
 
 void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)

@@ -4031,6 +4031,8 @@ void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   PolynomialRationalCoeff currentLeft, currentRight;
   for (int i=0; i<this->children.size-1; i++)
   { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
+    currentNode.WeylAlgebraElement.GetElement().SetNumVariablesPreserveExistingOnes(theDimension);
+    currentNode.weylEltBeingMappedTo.GetElement().SetNumVariablesPreserveExistingOnes(theDimension);
     currentNode.WeylAlgebraElement.GetElement().GetStandardOrder(currentLeft);
     currentNode.weylEltBeingMappedTo.GetElement().GetStandardOrder(currentRight);
     if (currentLeft.size!=1)

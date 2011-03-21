@@ -1447,8 +1447,9 @@ public:
     output.DivPositive(tempUI, output, tempUI2);
     assert(!output.IsEqualToZero());
   };
-  void MultiplyBy(LargeIntUnsigned& right);
-  void MultiplyBy(LargeIntUnsigned& x, LargeIntUnsigned& output);
+  void MultiplyBy(const LargeIntUnsigned& right);
+  inline void operator*=(const LargeIntUnsigned& right){this->MultiplyBy(right);}
+  void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output);
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
@@ -3311,13 +3312,8 @@ public:
   void MakeNVarConst(short nVar, const ElementOfCommutativeRingWithIdentity& coeff);
   bool HasGEQMonomial(TemplateMonomial& m, int& WhichIndex);
   void MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
-  void MultiplyBy
-  (
-const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p,
-TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output,
-TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& bufferPoly,
-TemplateMonomial& bufferMon
-);
+  inline void operator*=(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p){ this->MultiplyBy(p);}
+  void MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& bufferPoly, TemplateMonomial& bufferMon);
   void RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output);
   void RaiseToPower(int d);
   void AddPolynomial(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
@@ -3375,7 +3371,9 @@ public:
   void TimesConstant(const ElementOfCommutativeRingWithIdentity& r);
   void DivideByConstant(const ElementOfCommutativeRingWithIdentity& r);
   void AddConstant(const ElementOfCommutativeRingWithIdentity& theConst);
-  void IncreaseNumVariables(short increase);
+  void IncreaseNumVariables(short increase){this->IncreaseNumVariablesWithShiftToTheRight(0, increase);};
+  void IncreaseNumVariablesShiftVarIndicesToTheRight(short theShift){this->IncreaseNumVariablesWithShiftToTheRight(theShift, theShift);};
+  void IncreaseNumVariablesWithShiftToTheRight(short theShift, short theIncrease);
   void SetNumVariablesSubDeletedVarsByOne(short newNumVars);
   void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
   void DecreaseNumVariables(short increment, Polynomial<ElementOfCommutativeRingWithIdentity>& output);
@@ -3390,9 +3388,9 @@ public:
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
   bool IsEqualTo(Polynomial<ElementOfCommutativeRingWithIdentity>& p);
-  inline void operator=(const Polynomial<ElementOfCommutativeRingWithIdentity>& other){this->Assign(other);};
-  inline void operator/=(const ElementOfCommutativeRingWithIdentity& theConst){this->DivideByConstant(theConst);};
-  inline void operator*=(const Polynomial<ElementOfCommutativeRingWithIdentity>& other){this->MultiplyBy(other);};
+  inline void operator=(const Polynomial<ElementOfCommutativeRingWithIdentity>& other){this->Assign(other);}
+  inline void operator/=(const ElementOfCommutativeRingWithIdentity& theConst){this->DivideByConstant(theConst);}
+  inline void operator*=(const Polynomial<ElementOfCommutativeRingWithIdentity>& other){this->MultiplyBy(other);}
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3416,7 +3414,7 @@ class Polynomials: public List<Polynomial<ElementOfCommutativeRingWithIdentity> 
   void NullifyAll(int NumVars)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i].Nullify((short)NumVars);
-  };
+  }
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -3506,13 +3504,13 @@ public:
   void MultiplyByInteger(int x)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]*=x;
-  };
+  }
   void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
   void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
   //remark: zero is considered to be a positive vector!
   bool IsPositive();
   void AddRoot(intRoot& theRoot);
-  intRoot(){};
+  intRoot(){}
 };
 
 class GeneratorPFAlgebraRecord
@@ -3535,9 +3533,9 @@ public:
   ~GeneratorPFAlgebraRecord();
   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
   void GetValue(IntegerPoly& output, int theDimension);
-  void operator = (const GeneratorPFAlgebraRecord& right);
+  void operator=(const GeneratorPFAlgebraRecord& right);
   int HashFunction()const{ return this->Elongation+ this->GeneratorRoot.HashFunction();};
-  bool operator == (const GeneratorPFAlgebraRecord& right){ return (this->GeneratorRoot == right.GeneratorRoot) && (this->Elongation == right.Elongation);};
+  bool operator==(const GeneratorPFAlgebraRecord& right){ return (this->GeneratorRoot == right.GeneratorRoot) && (this->Elongation == right.Elongation);};
 };
 
 class GeneratorsPartialFractionAlgebra
@@ -3552,11 +3550,11 @@ public:
   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat, int theDimension);
   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
   int HashFunction() const;
-  void operator = (const GeneratorsPartialFractionAlgebra& right);
+  void operator=(const GeneratorsPartialFractionAlgebra& right);
   void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
   //IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count.
   //This might have to be rewritten.
-  bool operator == (const GeneratorsPartialFractionAlgebra& right);
+  bool operator==(const GeneratorsPartialFractionAlgebra& right);
   int GeneratorIndex;
   int GeneratorPower;
 };
@@ -3585,8 +3583,8 @@ public:
   int MultiplyByGenerator(GeneratorsOfAlgebraRecord& g, int Power);
   int MultiplyByGenerator(int GeneratorIndex, int GeneratorPower);
   void Assign(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
-  bool IsEqualToZero()const ;
-  MonomialInCommutativeAlgebra(){};
+  bool IsEqualToZero()const;
+  MonomialInCommutativeAlgebra(){}
   //IMPORTANT: the coefficients of two monomials are not compared, that is,
   //two monomials are equal if they have the same
   //generators at same powers
@@ -3681,7 +3679,7 @@ int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, Generator
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-int MonomialInCommutativeAlgebra <  ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(int GeneratorIndex, int GeneratorPower)
+int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(int GeneratorIndex, int GeneratorPower)
 { GeneratorsPartialFractionAlgebra tempG;
   tempG.GeneratorIndex= GeneratorIndex;
   tempG.GeneratorPower= GeneratorPower;
@@ -3807,11 +3805,11 @@ public:
 class PolynomialRationalCoeff: public Polynomial<Rational>
 {
 public:
-  PolynomialRationalCoeff(){};
-  PolynomialRationalCoeff(const PolynomialRationalCoeff& other){this->Assign(other);};
+  PolynomialRationalCoeff(){}
+  PolynomialRationalCoeff(const PolynomialRationalCoeff& other){this->Assign(other);}
   //the below constructor is very slow use for testing purposes only
   //Parsing stuff is inherently slow and I use the mighty parser
-  PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);};
+  PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);}
   void AssignIntegerPoly(IntegerPoly& p);
   void Evaluate(intRoot& values, Rational& output);
   void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
@@ -3824,12 +3822,12 @@ public:
   int SizeWithoutDebugString();
   //works at the moment for linear polynomials only!!!!!!
   void DivByInteger(int x);
-  bool IsAnInteger(){ if (this->size>1) return false; if (this->size==0) return true; if (this->TotalDegree()==0) if (this->TheObjects[0].Coefficient.IsInteger()) return true; return false;};
-  bool IsEqualToOne(){ if (this->size!=1) return false; if (this->TotalDegree()!=0) return false; if (this->TheObjects[0].Coefficient!=1) return false; return true;};
-  void DivByRational(const Rational& other){Rational tempRat=other; tempRat.Invert(); this->TimesConstant(tempRat);};
+  bool IsAnInteger(){ if (this->size>1) return false; if (this->size==0) return true; if (this->TotalDegree()==0) if (this->TheObjects[0].Coefficient.IsInteger()) return true; return false;}
+  bool IsEqualToOne(){ if (this->size!=1) return false; if (this->TotalDegree()!=0) return false; if (this->TheObjects[0].Coefficient!=1) return false; return true;}
+  void DivByRational(const Rational& other){Rational tempRat=other; tempRat.Invert(); this->TimesConstant(tempRat);}
   void TimesInteger(int x);
-  void operator+=(const PolynomialRationalCoeff& other){ this->AddPolynomial(other);};
-  void operator+=(const Rational& theConst){ Monomial<Rational> tempMon; tempMon.MakeConstantMonomial(this->NumVars,theConst); this->AddMonomial(tempMon);};
+  void operator+=(const PolynomialRationalCoeff& other){ this->AddPolynomial(other);}
+  void operator+=(const Rational& theConst){ Monomial<Rational> tempMon; tempMon.MakeConstantMonomial(this->NumVars,theConst); this->AddMonomial(tempMon);}
   inline void operator*=(const PolynomialsRationalCoeff& other);
 //  void operator*=(const Rational& theConst){ this->TimesConstant(theConst);};
   bool operator==(const PolynomialRationalCoeff& right){ PolynomialRationalCoeff tempP; tempP.Assign(right); tempP.Subtract(*this); return tempP.IsEqualToZero();};
@@ -3846,7 +3844,7 @@ public:
     tempP.Assign(*this);
     tempP.Subtract(other);
     return tempP;
-  };
+  }
   void MakePChooseK(const PolynomialRationalCoeff& P, int k, PolynomialRationalCoeff& output);
   void ScaleToIntegralNoGCDCoeffs();
   void Subtract(const PolynomialRationalCoeff& other)
@@ -3855,7 +3853,7 @@ public:
     Rational tempRat; tempRat.MakeMOne();
     tempP.TimesConstant(tempRat);
     this->AddPolynomial(tempP);
-  };
+  }
 };
 
 class RationalFunction
@@ -3868,8 +3866,8 @@ public:
   std::string ElementToString(bool useLatex, bool breakLinesLatex);
   void ElementToString(std::string& output){output=this->ElementToString(true, false);};
   RationalFunction(){this->NumVariables=0;};
-  void operator=(const PolynomialRationalCoeff& other){ this->Numerator=other; this->NumVariables=other.NumVars; this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);};
-  inline void operator=(const RationalFunction& other){this->Assign(other);};
+  void operator=(const PolynomialRationalCoeff& other){ this->Numerator=other; this->NumVariables=other.NumVars; this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);}
+  inline void operator=(const RationalFunction& other){this->Assign(other);}
   void Assign(const RationalFunction& other)
   { this->Numerator=other.Numerator;
     this->Denominator=other.Denominator;
@@ -3889,15 +3887,15 @@ public:
     output.Numerator.AddPolynomial(this->Denominator);
     this->Assign(output);
     this->Simplify();
-  };
-  void operator*=(const PolynomialRationalCoeff& other){this->Numerator.MultiplyBy(other); this->Simplify();};
+  }
+  void operator*=(const PolynomialRationalCoeff& other){this->Numerator.MultiplyBy(other); this->Simplify();}
   void Simplify();
   void operator+=(const RationalFunction& other){this->Add(other);};
-  void operator+=(int theConstant){RationalFunction tempRF; tempRF.MakeNVarConst(this->NumVariables, (Rational) theConstant); (*this)+=tempRF;};
+  void operator+=(int theConstant){RationalFunction tempRF; tempRF.MakeNVarConst(this->NumVariables, (Rational) theConstant); (*this)+=tempRF;}
   void operator*=(const RationalFunction& other){this->MultiplyBy(other);};
-  void Invert(){PolynomialRationalCoeff tempP; tempP=this->Numerator; this->Numerator=this->Denominator; this->Denominator=tempP;};
-  void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify((short)theNumVars); this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);};
-  void MakeNVarConst(int theNumVars, const Rational& theCoeff) {this->Nullify((short)theNumVars); this->Numerator.MakeNVarConst((short)theNumVars, theCoeff);};
+  void Invert(){PolynomialRationalCoeff tempP; tempP=this->Numerator; this->Numerator=this->Denominator; this->Denominator=tempP;}
+  void Nullify(int theNumVars){this->NumVariables=theNumVars; this->Numerator.Nullify((short)theNumVars); this->Denominator.MakeNVarConst((short)this->NumVariables, (Rational) 1);}
+  void MakeNVarConst(int theNumVars, const Rational& theCoeff) {this->Nullify((short)theNumVars); this->Numerator.MakeNVarConst((short)theNumVars, theCoeff);}
   bool IsEqualToZero()const{return this->Numerator.IsEqualToZero();};
   static void ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1);
   static void TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2);
@@ -3906,7 +3904,7 @@ public:
   static inline void gcd(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
   { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
     RationalFunction::gcd(left, right, output, buffer1, buffer2, buffer3, buffer4, buffer5, tempMon1, tempMon2, bufferList);
-  };
+  }
   static void ScaleClearDenominator
   (List<RationalFunction>& input, rootPoly& output)
   ;
@@ -3915,8 +3913,8 @@ public:
   static inline void lcm(PolynomialRationalCoeff& left, PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
   { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
     RationalFunction::lcm(left, right, output, buffer1, buffer2, buffer3, buffer4, tempMon1, tempMon2, bufferList);
-  };
-  void Minus(){this->Numerator.TimesInteger(-1);};
+  }
+  void Minus(){this->Numerator.TimesInteger(-1);}
 };
 
 class rootPoly: public List<PolynomialRationalCoeff>
@@ -3924,7 +3922,7 @@ class rootPoly: public List<PolynomialRationalCoeff>
 public:
   std::string DebugString;
   std::string ElementToString();
-  void ComputeDebugString(){this->DebugString=this->ElementToString();};
+  void ComputeDebugString(){this->DebugString=this->ElementToString();}
 };
 
 class rootRationalFunction: public List<RationalFunction>
@@ -3932,13 +3930,13 @@ class rootRationalFunction: public List<RationalFunction>
 public:
   std::string DebugString;
   std::string ElementToString();
-  void ComputeDebugString(){this->DebugString=this->ElementToString();};
+  void ComputeDebugString(){this->DebugString=this->ElementToString();}
 };
 
 class QuasiPolynomials:public Polynomials<QuasiNumber>
 {
 public:
-  void IntegrateDiscreteInDirectionFromZeroTo(  root& direction, PolynomialRationalCoeff& EndPoint, QuasiPolynomial& output, QuasiPolynomial& input, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void IntegrateDiscreteInDirectionFromZeroTo(root& direction, PolynomialRationalCoeff& EndPoint, QuasiPolynomial& output, QuasiPolynomial& input, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4379,16 +4377,16 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::SetNumVariablesSubDeleted
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(short increase)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariablesWithShiftToTheRight(short theShift, short theIncrease)
 { Polynomial<ElementOfCommutativeRingWithIdentity> Accum;
-  Accum.Nullify(this->NumVars+increase);
+  Accum.Nullify(this->NumVars+theIncrease);
   Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
   tempM.init(Accum.NumVars);
   int minNumVars=MathRoutines::Minimum(this->NumVars, Accum.NumVars);
   for (int i=0; i<this->size; i++)
   { for (int j=0; j<minNumVars; j++)
-      tempM.degrees[j]=this->TheObjects[i].degrees[j];
+      tempM.degrees[j+theShift]=this->TheObjects[i].degrees[j];
     tempM.Coefficient=this->TheObjects[i].Coefficient;
     Accum.AddMonomial(tempM);
   }
@@ -7345,7 +7343,7 @@ public:
   void SetNumVariablesPreserveExistingOnes(int newNumVars);
   void TimesConstant(Rational& theConstant){ this->StandardOrder.TimesConstant(theConstant);};
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
-  void MultiplyOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
+  void MultiplyOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
   void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
   void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
@@ -7354,15 +7352,17 @@ public:
   void AssignPolynomial(const Polynomial<Rational>& thePoly){ this->StandardOrder.Assign(thePoly); this->StandardOrder.IncreaseNumVariables(thePoly.NumVars); this->NumVariables=thePoly.NumVars;};
   void Subtract(const ElementWeylAlgebra& other){ this->StandardOrder.Subtract(other.StandardOrder);};
   void MakeConst(int NumVars, const Rational& theConst);
-  bool SubstitutionPolyPartOnly
+  bool SubstitutionDiffPartOnly
   (PolynomialsRationalCoeff& theSub)
   ;
-  void Add(const ElementWeylAlgebra& other){ this->StandardOrder.AddPolynomial(other.StandardOrder);};
-  void MultiplyTwoMonomials(Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput, GlobalVariables& theGlobalVariables);
+  void RaiseToPower(int thePower);
+  void Add(const ElementWeylAlgebra& other){ this->StandardOrder.AddPolynomial(other.StandardOrder);}
+  void MultiplyTwoMonomials(Monomial<Rational>& left, Monomial<Rational>& right, PolynomialRationalCoeff& OrderedOutput);
   ElementWeylAlgebra(){ this->NumVariables=0; };
   void operator=(const std::string& input);
-  void operator+=(const ElementWeylAlgebra& other){this->Add(other);};
-  void operator-=(const ElementWeylAlgebra& other){this->Subtract(other);};
+  void operator+=(const ElementWeylAlgebra& other){this->Add(other);}
+  inline void operator*=(const ElementWeylAlgebra& other){ this->MultiplyOnTheRight(other);}
+  void operator-=(const ElementWeylAlgebra& other){this->Subtract(other);}
   bool IsLetter(char theLetter);
   bool IsIndex(char theIndex);
   bool IsNumber(char theNumber);
@@ -8039,7 +8039,7 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
   Result=theRingUnit;
   if (thePower<4)
   { for (int i=0; i<thePower; i++)
-      Result.MultiplyBy(theElement);
+      Result.operator*=(theElement);
     theElement=Result;
     return;
   }
@@ -8054,7 +8054,7 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
   Result=theElement;
   containerList.AddObjectOnTop(Result);
   for (int i=1; i<=log2RoundedDown; i++)
-  { Result.MultiplyBy(Result);
+  { Result.operator*=(Result);
     containerList.AddObjectOnTop(Result);
   }
   thePower-=HighestPowerLowerThanOrEqualToThePower;
@@ -8062,7 +8062,7 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
   int currentIndex=containerList.size-2;
   for (; thePower>0; )
   { if (thePower>=HighestPowerLowerThanOrEqualToThePower)
-    { Result.MultiplyBy(containerList.TheObjects[currentIndex]);
+    { Result.operator*=(containerList.TheObjects[currentIndex]);
       thePower-=HighestPowerLowerThanOrEqualToThePower;
     }
     currentIndex--;
@@ -8111,7 +8111,7 @@ class GeneralizedMonomialRational
       for (int j=0; j<degrees.TheObjects[i].size; j++)
         result+=SomeRandomPrimes[i]*degrees.TheObjects[i].TheObjects[j].HashFunction();
     return result;
-  };
+  }
   bool IsEqualToZero()const{ return this->Coefficient.IsEqualToZero();};
   bool operator==(const GeneralizedMonomialRational& other)const{ return this->degrees.operator==(other.degrees); };
   void operator=(const GeneralizedMonomialRational& other) {this->Coefficient.operator=(other.Coefficient); this->degrees.operator=(other.degrees);};
@@ -8245,9 +8245,9 @@ class PolynomialOverModule : PolynomialRationalCoeff
   friend class SSalgebraModule;
 public:
   SSalgebraModule* owner;
-  std::string ElementToString(){ PolynomialOutputFormat PolyFormatLocal; return this->::PolynomialRationalCoeff::ElementToString(PolyFormatLocal); };
-  void Assign(const PolynomialOverModule& other){ this->::PolynomialRationalCoeff::Assign(other); this->owner=other.owner;};
-  void operator=(const PolynomialOverModule& other){ this->Assign(other); };
+  std::string ElementToString(){ PolynomialOutputFormat PolyFormatLocal; return this->::PolynomialRationalCoeff::ElementToString(PolyFormatLocal); }
+  void Assign(const PolynomialOverModule& other){ this->::PolynomialRationalCoeff::Assign(other); this->owner=other.owner;}
+  void operator=(const PolynomialOverModule& other){ this->Assign(other); }
   int GetNumVars(){return this->NumVars;};
   void Nullify(SSalgebraModule& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());}
 };

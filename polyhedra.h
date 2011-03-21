@@ -3296,6 +3296,7 @@ public:
   std::string DebugString;
   // returns the number of lines used
   int StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat, bool breakLinesLatex);
+  std::string ElementToString(){ PolynomialOutputFormat LocalFormat; return this->ElementToString(false, LocalFormat);}
   std::string ElementToString(bool breakLinesLatex, PolynomialOutputFormat& PolyFormatLocal)
   { std::string output; output.clear();
     this->StringPrintOutAppend(output, PolyFormatLocal, breakLinesLatex); return output;
@@ -3759,6 +3760,7 @@ class PolynomialsRationalCoeff: public Polynomials<Rational>
 public:
   std::string DebugString;
   void ElementToString(std::string& output);
+  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
   void ComputeDebugString();
   void operator=(const PolynomialsRationalCoeff& right);
   bool operator==(const PolynomialsRationalCoeff& right);
@@ -7352,7 +7354,7 @@ public:
   void AssignPolynomial(const Polynomial<Rational>& thePoly){ this->StandardOrder.Assign(thePoly); this->StandardOrder.IncreaseNumVariables(thePoly.NumVars); this->NumVariables=thePoly.NumVars;};
   void Subtract(const ElementWeylAlgebra& other){ this->StandardOrder.Subtract(other.StandardOrder);};
   void MakeConst(int NumVars, const Rational& theConst);
-  bool SubstitutionDiffPartOnly
+  void SubstitutionTreatPartialsAndVarsAsIndependent
   (PolynomialsRationalCoeff& theSub)
   ;
   void RaiseToPower(int thePower);
@@ -7370,8 +7372,7 @@ public:
 
 class Parser;
 class ParserNode
-{
-  public:
+{ public:
   std::string DebugString;
   std::string outputString;
   void ComputeDebugString(){ this->ElementToString(DebugString); };
@@ -7389,6 +7390,7 @@ class ParserNode
   MemorySaving<ElementUniversalEnveloping> UEElement;
   MemorySaving<ElementUniversalEnvelopingOrdered> UEElementOrdered;
   MemorySaving<PolynomialRationalCoeff> polyBeingMappedTo;
+  MemorySaving<ElementWeylAlgebra> weylEltBeingMappedTo;
   MemorySaving<List<int> > array;
   List<int> children;
   int intValue;
@@ -7402,7 +7404,7 @@ class ParserNode
   bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeMap, typeString, typeArray,
+  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
@@ -7438,6 +7440,7 @@ class ParserNode
   void EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVariables);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
   void EvaluateFunction(GlobalVariables& theGlobalVariables);
+  void ExtractAndEvalWeylSubFromMap(GlobalVariables& theGlobalVariables);
   bool AllChildrenAreOfDefinedNonErrorType();
   bool OneChildrenOrMoreAreOfType(int theType);
   ParserNode();

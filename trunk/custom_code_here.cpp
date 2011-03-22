@@ -4195,7 +4195,7 @@ bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
 void ElementWeylAlgebra::SubstitutionTreatPartialsAndVarsAsIndependent
 (PolynomialsRationalCoeff& theSub)
 { assert(theSub.size==this->NumVariables*2);
-  std::cout << "<br>...and the sub is: " << theSub.ElementToString();
+//  std::cout << "<br>...and the sub is: " << theSub.ElementToString();
   this->StandardOrder.Substitution(theSub, this->NumVariables*2);
 }
 

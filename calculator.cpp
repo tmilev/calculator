@@ -189,7 +189,7 @@ int main(int argc, char **argv)
       currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
     }
     for (int i=0; i<theBasis.size; i++)
-    { std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
+    { //std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
     }
     theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
   } else

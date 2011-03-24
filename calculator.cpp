@@ -123,8 +123,8 @@ int main(int argc, char **argv)
   //  tempRat.RaiseToPower(20);
   //  tempRat.ElementToString(tempS);
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
-  //civilizedInput="(x_1\\mapsto 5: x_1)";
-  //civilizedInput="(x_1\\mapsto 1, x_2\\mapsto 1: x_1)";
+  //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
+  civilizedInput="eigenOrdered(0,1)";
   //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
       currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
     }
     for (int i=0; i<theBasis.size; i++)
-    { //std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
+    { std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
     }
     theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
   } else

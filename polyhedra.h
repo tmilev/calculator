@@ -6393,6 +6393,18 @@ public:
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
   bool IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner);
+  bool IsProportionalTo(const ElementSimpleLieAlgebra& other)const
+  { root tempRoot1, tempRoot2;
+    this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
+    other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
+    return tempRoot1.IsProportionalTo(tempRoot2);
+  }
+  bool IsProportionalTo(const ElementSimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput)const
+  { root tempRoot1, tempRoot2;
+    this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
+    other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
+    return tempRoot1.IsProportionalTo(tempRoot2, outputTimesMeEqualsInput);
+  }
   bool MustUseBracketsWhenDisplayingMeRaisedToPower();
   void SetCoefficient(const root& indexingRoot, Rational& theCoeff, const SemisimpleLieAlgebra& owner);
   void SetCoefficient(const root& indexingRoot, int theCoeff, const  SemisimpleLieAlgebra& owner);
@@ -6402,11 +6414,11 @@ public:
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);
     this->NonZeroElements.Assign(other.NonZeroElements);
-  };
+  }
   void init(const SemisimpleLieAlgebra& owner);
   void Nullify(const SemisimpleLieAlgebra& owner);
   void TimesConstant(const Rational& input);
-  bool operator==(const ElementSimpleLieAlgebra& other)const{ return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);};
+  bool operator==(const ElementSimpleLieAlgebra& other)const{ return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);}
   void operator+=(const ElementSimpleLieAlgebra& other);
 };
 
@@ -6415,10 +6427,10 @@ class slTwo
 public:
   std::string DebugString;
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, PolynomialOutputFormat& PolyFormatLocal);
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal){ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0, PolyFormatLocal);};
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal){ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0, PolyFormatLocal);}
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
-  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){ PolynomialOutputFormat PolyFormatLocal; this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml, PolyFormatLocal); };
+  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){ PolynomialOutputFormat PolyFormatLocal; this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml, PolyFormatLocal); }
   List<int> highestWeights;
   List<int> multiplicitiesHighestWeights;
   List<int> weightSpaceDimensions;
@@ -6662,7 +6674,6 @@ public:
   List<ElementSimpleLieAlgebra> domainAllChevalleyGenerators;
   roots RestrictedRootSystem;
   std::string DebugString;
-  std::string WriteAllUEMonomialsWithWeightWRTDomain(List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables) {this->ElementToString(output, false, theGlobalVariables);};
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
@@ -6795,9 +6806,11 @@ public:
   void ModOutVermaRelations(){ this->ModOutVermaRelations(false);};
   void ModOutVermaRelations(bool SubHighestWeightWithZeroes);
   static void GetCoordinateFormOfSpanOfElements
-  (int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
+  (int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
 ;
-  static void GetCoordinateFormOfSpanOfElements(List<ElementUniversalEnvelopingOrdered>& theElements, roots& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables);
+  static void GetCoordinateFormOfSpanOfElements
+  (List<ElementUniversalEnvelopingOrdered>& theElements, roots& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
+;
   void AssignFromCoordinateFormWRTBasis
   (List<ElementUniversalEnveloping>& theBasis, rootPoly& input, SemisimpleLieAlgebraOrdered& owner)
   ;
@@ -7411,10 +7424,14 @@ class ParserNode
   errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution};
   void InitForAddition();
   void InitForMultiplication();
-  std::string ElementToStringValueOnly(bool useHtml);
+  std::string ElementToStringValueAndType(bool useHtml){return this->ElementToStringValueAndType(useHtml, 0, 3);};
+  std::string ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth);
+  std::string ElementToStringValueOnlY(bool useHtml){return this->ElementToStringValueOnlY(useHtml, 0,2);}
+  std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
   std::string ElementToStringErrorCode(bool useHtml);
-  void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;};
-  void SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError;};
+  void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
+  void SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError;}
+  void CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
   void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
   void Evaluate(GlobalVariables& theGlobalVariables);
   void EvaluateTimes(GlobalVariables& theGlobalVariables);
@@ -7428,6 +7445,7 @@ class ParserNode
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
+  void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables);
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
@@ -7436,8 +7454,6 @@ class ParserNode
   void EvaluateInvariants(GlobalVariables& theGlobalVariables);
   void EvaluateSubstitution(GlobalVariables& theGlobalVariables);
   void EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
-  void EvaluateEigenUEDefaultOperators(GlobalVariables& theGlobalVariables);
-  void EvaluateEigenUEUserInputGenerators(GlobalVariables& theGlobalVariables);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
   void EvaluateFunction(GlobalVariables& theGlobalVariables);
   void ExtractAndEvalWeylSubFromMap(GlobalVariables& theGlobalVariables);
@@ -7467,8 +7483,8 @@ public:
     tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument
   };
   enum functionList
-  { functionEigen, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
-    functionMod, functionInvariants, functionEigenUE, functionEigenUEofWeight
+  { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
+    functionMod, functionInvariants
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -8149,6 +8165,12 @@ public:
   std::string ComputeAndReturnStringNonOrdered(GlobalVariables& theGlobalVariables, Parser& theParser);
   std::string ComputeAndReturnStringOrdered
 (GlobalVariables& theGlobalVariables, Parser& theParser, int NodeIndex)
+  ;
+  std::string ComputeEigenVectorsOfWeight
+  (HomomorphismSemisimpleLieAlgebra& inputHmm, List<ElementUniversalEnveloping>& output, root& theWeight, GlobalVariables& theGlobalVariables)
+  ;
+  std::string ComputeEigenVectorsOfWeightConventionOrdered
+  (HomomorphismSemisimpleLieAlgebra& inputHmm, SemisimpleLieAlgebraOrdered& theOwner, List<ElementUniversalEnvelopingOrdered>& output, root& theWeight, GlobalVariables& theGlobalVariables)
   ;
 
   //the first rank-of-theOwner variables correspond to the coordinates of the highest weight; the next #positive roots

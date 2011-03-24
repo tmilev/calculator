@@ -225,6 +225,7 @@ template < > int List<double>::ListActualSizeIncrement=20;
 template < > int List<MonomialUniversalEnvelopingOrdered>::ListActualSizeIncrement=20;
 template < > int List<GeneralizedMonomialRational>::ListActualSizeIncrement=20;
 template < > int List<ElementWeylAlgebra>::ListActualSizeIncrement=20;
+template < > int List<ElementUniversalEnvelopingOrdered>::ListActualSizeIncrement=20;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
@@ -25282,7 +25283,7 @@ std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVar
   if(!this->theValue.UEElement.IsZeroPointer())
     this->theValue.UEElementOrdered.GetElement().Simplify();
   std::stringstream out;
-  out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueOnly(true);
+  out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueAndType(true);
   return out.str();
 }
 
@@ -26264,7 +26265,7 @@ void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables&
   }
   if (useHtml)
     out << "<br><br>";
-  out << "\n\nValue: " << this->theValue.ElementToStringValueOnly(false);
+  out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false);
 
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 //  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
@@ -26357,36 +26358,13 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 void ParserNode::ElementToString(std::string& output)
 { std::stringstream out; std::string tempS;
   owner->TokenToStringStream(out, this->Operation);
-  PolynomialOutputFormat PolyFormatLocal;
-  if (this->ExpressionType==this->typeRational)
-    out << " is the rational number " << this->rationalValue.ElementToString();
-  if (this->ExpressionType==this->typeIntegerOrIndex)
-    out << " is the integer " << this->intValue;
-  if (this->ExpressionType==this->typePoly)
-  { this->polyValue.GetElement().ElementToString(tempS, PolyFormatLocal);
-    out << " is the polynomial " << tempS;
-  }
-  if (this->ExpressionType==this->typeArray)
-    out << " is an ordered tuple ";
-  if (this->ExpressionType==this->typeUndefined)
-    out << " is of type undefined ";
-  if (this->ExpressionType==this->typeWeylAlgebraElement)
-  { this->WeylAlgebraElement.GetElement().ElementToString(tempS, false, false, false);
-    out << " is the algebra element " << tempS << " ";
-  }
-  if (this->ExpressionType==this->typeUEelement)
-  { this->UEElement.GetElement().ElementToString(tempS);
-    out << " is the universal enveloping algebra element: " << tempS;
-  }
-  if (this->ExpressionType==this->typeUEElementOrdered)
-  { this->UEElementOrdered.GetElement().ElementToString(tempS);
-    out << "is the universal enveloping algebra element (ordered): " << tempS;
-  }
   if (this->children.size>0)
   { out << " Its children are: ";
     for (int i=0; i<this->children.size; i++)
       out << this->children.TheObjects[i] << ", ";
   }
+  PolynomialOutputFormat PolyFormatLocal;
+  out << this->ElementToStringValueAndType(false);
   output=out.str();
 }
 

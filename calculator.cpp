@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
-  inputStrings.SetSizeExpandOnTopNoObjectInit(3);
+  inputStrings.SetSize(3);
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
   //  tempRat.ElementToString(tempS);
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
   //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
-  civilizedInput="eigenOrdered(0,1)";
+  civilizedInput="secretSauceOrdered";
   //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     std::stringstream out;
     theModule.InduceFromEmbedding(out, theParser.theHmm, theGlobalVariables);
     List<ElementSimpleLieAlgebra> theBasis;
-    theBasis.SetSizeExpandOnTopNoObjectInit(theParser.theHmm.theRange.GetNumGenerators());
+    theBasis.SetSize(theParser.theHmm.theRange.GetNumGenerators());
     /*int domainRank=theParser.theHmm.theDomain.GetRank();
     int rangeRank=theParser.theHmm.theRange.GetRank();
     int numDomainPosRoots=theParser.theHmm.theDomain.GetNumPosRoots();
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
       currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
     }
     for (int i=0; i<theBasis.size; i++)
-    { std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
+    { //std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
     }
     theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
   } else
@@ -334,12 +334,12 @@ void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, 
 void CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output)
 { int inputLength= (signed) input.size();
   bool reading=false;
-  output.SetSizeExpandOnTopNoObjectInit(1);
+  output.SetSize(1);
   for (int i=0; i<inputLength; i++)
   { if (input[i]=='=')
       reading=!reading;
     if (input[i]=='&')
-    { output.SetSizeExpandOnTopNoObjectInit(output.size+1);
+    { output.SetSize(output.size+1);
       output.LastObject()->reserve(1000);
       *output.LastObject()="";
       reading=false;

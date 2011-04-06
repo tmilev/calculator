@@ -1435,7 +1435,7 @@ public:
   //2. (CarryOverBound*2)^2-1 must fit inside (long long)
   //    on the system.
   ////////////////////////////////////////////////////////
-  //On a 32 bit machine any number smaller than 2^31 will work.
+  //On a 32 bit machine any number smaller than or equal to 2^31 will work.
   //If you got no clue what to put just leave CarryOverBound= 2^31
   //static const unsigned int CarryOverBound=37;
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
@@ -4033,6 +4033,7 @@ public:
   void operator+=(const RationalFunction& other){this->Add(other);}
   void operator+=(int theConstant){RationalFunction tempRF; tempRF.MakeNVarConst(this->NumVars, (Rational) theConstant); (*this)+=tempRF;}
   void operator*=(const RationalFunction& other){this->MultiplyBy(other);}
+  void operator-=(int theConstant){RationalFunction tempRF; tempRF.MakeNVarConst(this->NumVars, (Rational) -theConstant); (*this)+=tempRF;}
   void TimesConstant(const Rational& theConst)
   { if (theConst.IsEqualToZero())
       this->Nullify(this->NumVars);
@@ -4188,7 +4189,7 @@ ParallelComputing::GlobalPointerCounter-=this->NumVariables;
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat)
-{ if (this->Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
+{ if (this->Coefficient.IsEqualToZero())
   { out << "0";
     return;
   }
@@ -5069,7 +5070,6 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(List<Polynom
 { this->Substitution(TheSubstitution, *this, NumVarTarget);
 }
 
-
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeNVarDegOnePoly(short NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff)
 { this->ClearTheObjects();
@@ -5461,8 +5461,8 @@ class PrecomputedTaukn
 public:
   int k, n;
   CompositeComplexQN Taukn;
-  PrecomputedTaukn(int theK, int theN){k=theK; n=theN; };
-  PrecomputedTaukn(){};
+  PrecomputedTaukn(int theK, int theN){k=theK; n=theN; }
+  PrecomputedTaukn(){}
 };
 
 class PrecomputedTauknPointersKillOnExit: public ListPointers<PrecomputedTaukn>
@@ -5471,7 +5471,7 @@ private:
   void ComputeTaukn(int k, int n, CompositeComplexQN& output);
 public:
   void GetTaukn(int k, int n, CompositeComplexQN& output);
-  ~PrecomputedTauknPointersKillOnExit(){this->KillAllElements(); };
+  ~PrecomputedTauknPointersKillOnExit(){this->KillAllElements(); }
 };
 
 class PrecomputedQuasiPolynomialIntegral
@@ -6226,18 +6226,18 @@ public:
     this->theDiagramRelAndK=right.theDiagramRelAndK;
     this->IndexOwnerRootSubalgebra=right.IndexOwnerRootSubalgebra;
     this->DebugString= right.DebugString;
-  };
+  }
   bool operator==(const coneRelation& right)
   { return this->DebugString==right.DebugString;
-  };
+  }
   int HashFunction() const
   { int tempI= ::MathRoutines::Minimum(this->DebugString.length(), ::SomeRandomPrimesSize);
     int result=0;
     for (int i=0; i<tempI; i++)
       result+= this->DebugString[i]*::SomeRandomPrimes[i];
     return result;
-  };
-  coneRelation(){this->IndexOwnerRootSubalgebra=-1; };
+  }
+  coneRelation(){this->IndexOwnerRootSubalgebra=-1; }
 };
 
 class coneRelations: public HashedList<coneRelation>
@@ -6253,7 +6253,7 @@ public:
   void ElementToString (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(rootSubalgebras& owners, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
   { this->ElementToString (this->DebugString, owners, true, false, htmlPathPhysical, htmlPathServer, theGlobalVariables);
-  };
+  }
   void ComputeDebugString(rootSubalgebras& owners, GlobalVariables& theGlobalVariables){ this->ComputeDebugString(owners, 0, 0, theGlobalVariables); };
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
@@ -6263,7 +6263,7 @@ public:
     this->flagIncludeSmallerRelations=true;
     this->flagIncludeCoordinateRepresentation=false;
     this->flagIncludeSubalgebraDataInDebugString=false;
-  };
+  }
 };
 
 class permutation: public SelectionWithDifferentMaxMultiplicities
@@ -6273,7 +6273,7 @@ public:
   void initPermutation(List<int>& disjointSubsets, int TotalNumElements);
   void incrementAndGetPermutation(List<int>& output);
   void GetPermutationLthElementIsTheImageofLthIndex(List<int>& output);
-  int GetNumPermutations() {return this->getTotalNumSubsets();};
+  int GetNumPermutations() {return this->getTotalNumSubsets();}
 };
 
 class rootSubalgebra
@@ -6576,9 +6576,9 @@ class ElementSimpleLieAlgebra
 {
 public:
   std::string DebugString;
-  std::string ElementToString() { std::string output; this->ElementToString(output, false, false); return output;}
-  void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
-  void ElementToString(std::string& output, bool useHtml, bool useLatex){ this->ElementToString(output, useHtml, useLatex, false, 0, 0);};
+  std::string ElementToString()const { std::string output; this->ElementToString(output, false, false); return output;}
+  void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
+  void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);};
   std::string ElementToStringNegativeRootSpacesFirst(bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner);
   void ComputeDebugString(bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, useHtml, useLatex, false, 0, 0);  };
   Selection NonZeroElements;
@@ -6594,7 +6594,7 @@ public:
   (const root& input, int numRoots, int theAlgebraRank)
   ;
   bool GetCoordsInBasis
-  (List<ElementSimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output, GlobalVariables& theGlobalVariables)const
+  (const List<ElementSimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output, GlobalVariables& theGlobalVariables)const
   ;
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
@@ -6967,7 +6967,7 @@ public:
   List<CoefficientType> Powers;
   CoefficientType Coefficient;
   void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnvelopingOrdered<CoefficientType>& output);
-  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const PolynomialRationalCoeff& thePower);
+  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const CoefficientType& thePower);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
   void Nullify(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
@@ -6986,8 +6986,9 @@ public:
   bool GetElementUniversalEnveloping
   (ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner)
   ;
-  bool CommutingLeftIndexAroundRightIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
-  bool CommutingRightIndexAroundLeftIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
+  bool IsEqualToZero()const{return this->Coefficient.IsEqualToZero();}
+  bool CommutingLeftIndexAroundRightIndexAllowed(CoefficientType& theLeftPower, int leftGeneratorIndex, CoefficientType& theRightPower, int rightGeneratorIndex);
+  bool CommutingRightIndexAroundLeftIndexAllowed(CoefficientType& theLeftPower, int leftGeneratorIndex, CoefficientType& theRightPower, int rightGeneratorIndex);
   bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex, MonomialUniversalEnvelopingOrdered& output);
   void MakeConst(const CoefficientType& theConst, SemisimpleLieAlgebraOrdered& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;};
   void Simplify(ElementUniversalEnvelopingOrdered<CoefficientType>& output);
@@ -8566,8 +8567,9 @@ public:
     const RationalFunction& RFOne, const RationalFunction& RFZero, GlobalVariables& theGlobalVariables)
     ;
   bool GetCoordsInBasis
-  (List<ElementVermaModuleOrdered<CoefficientType> >& theBasis, Vector<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables& theGlobalVariables)const
+  (const List<ElementVermaModuleOrdered<CoefficientType> >& theBasis, Vector<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables& theGlobalVariables)const
   ;
+  void Nullify(SemisimpleLieAlgebraOrdered& owner){this->theElt.Nullify(owner);}
   void operator*=(const CoefficientType& theConst){this->theElt.operator*=(theConst);}
 };
 

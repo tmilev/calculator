@@ -18224,7 +18224,7 @@ std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst(bool
   return out.str();
 }
 
-void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const
 { std::stringstream out; std::string tempS;
   if (useLatex)
     out << "$";
@@ -24628,9 +24628,8 @@ void ElementSimpleLieAlgebra::AssignVectorNegRootSpacesCartanPosRootSpaces
 { this->Nullify(numRoots, theAlgebraRank);
   int numPosRoots=numRoots/2;
   for (int i=0; i<numPosRoots; i++)
-  { this->coeffsRootSpaces.TheObjects[i+numPosRoots]=input.TheObjects[i];
-    int index=i+numPosRoots+theAlgebraRank;
-    this->coeffsRootSpaces.TheObjects[i]=input.TheObjects[index];
+  { this->coeffsRootSpaces.TheObjects[-i+numRoots-1]=input.TheObjects[i];
+    this->coeffsRootSpaces.TheObjects[i]=input.TheObjects[i+numPosRoots+theAlgebraRank];
   }
   this->Hcomponent.SetSize(theAlgebraRank);
   for (int i=0; i<this->Hcomponent.size; i++)

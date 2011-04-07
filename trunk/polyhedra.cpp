@@ -1687,7 +1687,7 @@ std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bo
       }
       found=true;
       out << tempS;
-      out << inputLetter<< "_{" << i+1 << "}";
+      out << inputLetter << "_{" << i+1 << "}";
     }
   }
   return out.str();

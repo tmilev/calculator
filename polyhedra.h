@@ -516,9 +516,9 @@ public:
   void RemoveFirstOccurenceSwapWithLast(const Object& o);
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
-  std::string ElementToStringGeneric(){ std::string tempS; this->ElementToStringGeneric(tempS); return tempS;};
-  void ElementToStringGeneric(std::string& output);
-  void ElementToStringGeneric(std::string& output, int NumElementsToPrint);
+  std::string ElementToStringGeneric()const{ std::string tempS; this->ElementToStringGeneric(tempS); return tempS;};
+  void ElementToStringGeneric(std::string& output)const;
+  void ElementToStringGeneric(std::string& output, int NumElementsToPrint)const;
   int IndexOfObject(const Object& o) const;
   bool ContainsObject(const Object& o){return this->IndexOfObject(o)!=-1; };
   void ReadFromFile(std::fstream& input);
@@ -676,7 +676,9 @@ public:
   void ReleaseMemory();
   bool IsEqualTo(MatrixElementaryLooseMemoryFit<Element>& right);
   void Resize(int r, int c, bool PreserveValues) {this->Resize(r, c, PreserveValues, 0);};
-  void Resize(int r, int c, bool PreserveValues, Element* TheRingZero);
+  void Resize
+  (int r, int c, bool PreserveValues, const Element* TheRingZero)
+  ;
   void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
   void MakeIdMatrix(int theDimension);
   inline void operator=(const MatrixElementaryLooseMemoryFit<Element>& other){this->Assign(other); };
@@ -726,7 +728,7 @@ void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
 }
 
 template <typename Element>
-inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool PreserveValues, Element* TheRingZero)
+inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool PreserveValues, const Element* const TheRingZero)
 { if (r<0)
     r=0;
   if (c<0)
@@ -1835,6 +1837,35 @@ template <class CoefficientType>
 class Vector: public ListLight<CoefficientType>
 {
 public:
+  std::string DebugString;
+  void ComputeDebugString();
+  void ElementToString(std::string& output)
+  { output.clear();
+    std::string tempStr;
+    output.append("(");
+    for(int i=0; i<this->size; i++)
+    { this->TheObjects[i].ElementToString(tempStr);
+      output.append(tempStr);
+      if (i!=this->size-1)
+        output.append(", ");
+    }
+    output.append(")");
+  }
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
+  std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; };
+  void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
+  void ElementToString(std::string& output, bool useLaTeX)
+  { output.clear();
+    std::string tempStr;
+    output.append("(");
+    for(int i=0; i<this->size; i++)
+    { this->TheObjects[i].ElementToString(tempStr);
+      output.append(tempStr);
+      if (i!=this->size-1)
+        output.append(", ");
+    }
+    output.append(")");
+  }
   void MakeZero(int theDim, const CoefficientType& theRingZero)
   { this->SetSize(theDim);
     for (int i=0; i<theDim; i++)
@@ -1856,6 +1887,36 @@ template <class CoefficientType>
 class Vectors: public List<Vector<CoefficientType> >
 {
   public:
+  std::string DebugString;
+  std::string ElementToString(){return this->ElementToString(false, false, false);}
+  std::string ElementToString(bool useLaTeX, bool useHtml, bool makeTable)
+  { std::stringstream out;
+    std::string tempS;
+    if (! useLaTeX && ! useHtml)
+      out << "Num roots: " << this->size << "\n";
+    if (useLaTeX && makeTable)
+      out << "\\begin{tabular}{c}";
+    if (useHtml && makeTable)
+      out << "<table>";
+    for (int i=0; i<this->size; i++)
+    { this->TheObjects[i].ElementToString(tempS, useLaTeX);
+      if (useHtml&& makeTable)
+        out << "<tr><td>";
+      out << tempS;
+      if (!makeTable && i!=this->size-1)
+        out << ", ";
+      if (useLaTeX && makeTable)
+        out << "\\\\\n";
+      if (useHtml && makeTable)
+        out << "</td></tr>";
+    }
+    if (useHtml&& makeTable)
+      out << "</table>";
+    if (useLaTeX && makeTable)
+      out << "\\end{tabular}";
+    return out.str();
+  }
+  void ComputeDebugString(){this->DebugString=this->ElementToString();}
   bool LinSpanContainsRoot
   (const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
   ;
@@ -1863,7 +1924,10 @@ class Vectors: public List<Vector<CoefficientType> >
   { Matrix<CoefficientType> buffer;
     Selection bufferSelection;
     return this->LinSpanContainsRoot(input, buffer, bufferSelection);
-    }
+  }
+  void SelectABasis
+  (Vectors<CoefficientType>& output, const CoefficientType& theRingZero, Selection& outputSelectedIndices)const
+  ;
   int GetRankOfSpanOfElements
   (Matrix<CoefficientType>& buffer, Selection& bufferSelection)const
 ;
@@ -1887,9 +1951,7 @@ class root :public Vector<Rational>
 public:
 //the below is to facilitate operator overloading
   root(const root& right){this->Assign(right); };
-  std::string DebugString;
   void MultiplyByLargeRational(const Rational& a);
-  void ComputeDebugString();
   void MakeZero(int DesiredDimension);
   void MakeEi(int DesiredDimension, int NonZeroIndex);
   void Add(const root& r);
@@ -1914,6 +1976,8 @@ public:
       result+=this->TheObjects[i];
     return result;
   }
+  std::string DebugString;
+  void ComputeDebugString();
   void ElementToString(std::string& output);
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; };
@@ -2590,12 +2654,12 @@ void List<Object>::ReadFromFile(std::fstream& input)
 }
 
 template <class Object>
-inline void List<Object>::ElementToStringGeneric(std::string& output)
+inline void List<Object>::ElementToStringGeneric(std::string& output)const
 { this->ElementToStringGeneric(output, this->size);
 }
 
 template <class Object>
-inline void List<Object>::ElementToStringGeneric(std::string& output, int NumElementsToPrint)
+inline void List<Object>::ElementToStringGeneric(std::string& output, int NumElementsToPrint)const
 { std::stringstream out; std::string tempS;
   int Upper=MathRoutines::Minimum(NumElementsToPrint, this->size);
   for (int i=0; i<Upper; i++)
@@ -3445,7 +3509,7 @@ public:
   void MakeNVarDegOnePoly(short NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& ConstantTerm);
   void MakeLinPolyFromRoot(root& r);
   void TimesInteger(int a);
-  void DivideBy(Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder)const;
+  void DivideBy(const Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder)const;
   void TimesConstant(const ElementOfCommutativeRingWithIdentity& r);
   void DivideByConstant(const ElementOfCommutativeRingWithIdentity& r);
   void AddConstant(const ElementOfCommutativeRingWithIdentity& theConst);
@@ -3457,7 +3521,7 @@ public:
   void DecreaseNumVariables(short increment, Polynomial<ElementOfCommutativeRingWithIdentity>& output);
   void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, short NumVarTarget);
   void Substitution(List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, short NumVarTarget);
-  int TotalDegree();
+  int TotalDegree()const;
   bool IsAConstant()const
   { if (this->size>1)
       return false;
@@ -4053,8 +4117,13 @@ public:
   static void TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2);
   static void RemainderDivisionWithRespectToBasis(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1);
   static void RemainderDivision(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1);
+  static bool gcdQuick
+  (const PolynomialRationalCoeff& left, const PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
+  ;
   static inline void gcd(const PolynomialRationalCoeff& left, const PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
-  { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
+  { if (RationalFunction::gcdQuick(left, right, output))
+      return;
+    PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
     RationalFunction::gcd(left, right, output, buffer1, buffer2, buffer3, buffer4, buffer5, tempMon1, tempMon2, bufferList);
   }
   static void ScaleClearDenominator
@@ -4840,7 +4909,7 @@ bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsProportionalTo(const Po
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder)const
+void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(const Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder)const
 { assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
   outputRemainder.Assign(*this);
   Monomial<ElementOfCommutativeRingWithIdentity> scaleRemainder;
@@ -4982,7 +5051,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-int Polynomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()
+int Polynomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()const
 { int result=0;
   for (int i=0; i<this->size; i++)
     result=MathRoutines::Maximum(this->TheObjects[i].TotalDegree(), result);
@@ -6576,6 +6645,7 @@ class ElementSimpleLieAlgebra
 {
 public:
   std::string DebugString;
+  void ElementToString(std::string& output){this->ElementToString(output, false, false);}
   std::string ElementToString()const { std::string output; this->ElementToString(output, false, false); return output;}
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);};
@@ -7013,11 +7083,11 @@ private:
   friend class MonomialUniversalEnvelopingOrdered<CoefficientType>;
 public:
   std::string DebugString;
-  void ElementToString(std::string& output){PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, true, PolyFormatLocal);}
+  void ElementToString(std::string& output)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, true, PolyFormatLocal);}
   void ElementToString
-  (std::string& output, bool useLatex, PolynomialOutputFormat& PolyFormatLocal);
-  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
-  std::string ElementToString(bool useLatex, PolynomialOutputFormat& PolyFormatLocal){std::string tempS; this->ElementToString(tempS, useLatex, PolyFormatLocal); return tempS;}
+  (std::string& output, bool useLatex, PolynomialOutputFormat& PolyFormatLocal)const;
+  std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
+  std::string ElementToString(bool useLatex, PolynomialOutputFormat& PolyFormatLocal)const{std::string tempS; this->ElementToString(tempS, useLatex, PolyFormatLocal); return tempS;}
   void ComputeDebugString(){this->ElementToString(this->DebugString);}
   SemisimpleLieAlgebraOrdered* owner;
   void AddMonomial(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input);
@@ -8555,7 +8625,10 @@ class ElementVermaModuleOrdered
 {
 public:
   ElementUniversalEnvelopingOrdered<CoefficientType> theElt;
-  std::string ElementToString();
+  std::string DebugString;
+  void ComputeDebugString(){this->DebugString=this->ElementToString();}
+  std::string ElementToString()const;
+  void ElementToString(std::string& output)const{output=this->ElementToString();}
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
   (ElementUniversalEnvelopingOrdered<CoefficientType>& input)
   ;
@@ -8681,9 +8754,7 @@ void Vector<CoefficientType>::GetCoordsInBasiS
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddObjectOnTop(*this);
-//  tempRoots.ComputeDebugString();
-//  tempMat.ComputeDebugString();
-//  this->ComputeDebugString();
+  bufferVectors.ComputeDebugString();
   bool tempBool=bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero);
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
@@ -8740,6 +8811,37 @@ void Matrix<Element>::NonPivotPointsToEigenVector
     }
     else
       output.elements[i][0]=theRingUnit;
+  }
+}
+
+template <class CoefficientType>
+void Vectors<CoefficientType>::SelectABasis
+  (Vectors<CoefficientType>& output, const CoefficientType& theRingZero, Selection& outputSelectedIndices)const
+{ assert(this!=&output);
+  if (this->size==0)
+    return;
+  int theDim=this->TheObjects[0].size;
+  output.MakeActualSizeAtLeastExpandOnTop(this->size);
+  output.size=0;
+  Matrix<CoefficientType> theMat, matEmpty;
+  theMat.init(1, theDim);
+  int currentRow=0;
+  Selection theSel;
+  outputSelectedIndices.init(this->size);
+  for (int i=0; i<this->size; i++)
+  { for (int j=0; j<theDim; j++)
+      theMat.elements[currentRow][j]=this->TheObjects[i].TheObjects[j];
+    theMat.ComputeDebugString(false, false);
+    theMat.GaussianEliminationByRows(theMat, matEmpty, theSel);
+    theMat.ComputeDebugString(false, false);
+    if (currentRow<theDim-theSel.CardinalitySelection)
+    { output.AddObjectOnTop(this->TheObjects[i]);
+      outputSelectedIndices.AddSelectionAppendNewIndex(i);
+      theMat.Resize(currentRow+2, theDim, true, &theRingZero);
+    }
+    currentRow=theDim-theSel.CardinalitySelection;
+    if (currentRow==theDim)
+      return;
   }
 }
 

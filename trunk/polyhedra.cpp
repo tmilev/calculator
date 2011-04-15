@@ -1630,9 +1630,9 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(root& input, root& output, 
   normal.MakeZero(input.size);
   for (int i=0; i<input.size; i++)
   { if (input.TheObjects[i].IsNonNegative())
-      normal.TheObjects[i].Add(ROne);
+      normal.TheObjects[i]+=(ROne);
     else
-      normal.TheObjects[i].Add(RMOne);
+      normal.TheObjects[i]+=(RMOne);
   }
   basepoint.MakeZero(input.size);
   basepoint.TheObjects[0].AssignInteger(1);
@@ -1879,7 +1879,7 @@ void root::operator=(const SelectionWithMultiplicities& other)
 void root::Add(const root& r)
 { assert(r.size==this->size);
   for (int i=0; i<this->size; i++)
-    this->TheObjects[i].Add(r.TheObjects[i]);
+    this->TheObjects[i]+=(r.TheObjects[i]);
 }
 
 bool root::OurScalarProductIsPositive(const root& right)
@@ -1979,7 +1979,7 @@ void root::InitFromIntegers(int Dimension, int x1, int x2, int x3, int x4, int x
 void root::GetHeight(Rational& output)
 { output.MakeZero();
   for(int i=0; i<this->size; i++)
-    output.Add(this->TheObjects[i]);
+    output+=(this->TheObjects[i]);
 }
 
 Rational root::GetHeight()
@@ -2655,7 +2655,7 @@ void root::RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& outp
   for (int i=0; i<r1.size; i++)
   { tempRat.Assign(r2.TheObjects[i]);
     tempRat.MultiplyBy(rat);
-    output.TheObjects[i].Add(tempRat);
+    output.TheObjects[i]+=(tempRat);
     //r1.ComputeDebugString();
   }
 }
@@ -2669,7 +2669,7 @@ void root::RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, 
     { tempRat.Assign(r1.TheObjects[i]);
       tempRat.MultiplyBy(KillingForm.elements[i][j]);
       tempRat.MultiplyBy(r2.TheObjects[j]);
-      output.Add(tempRat);
+      output+=(tempRat);
     }
 }
 
@@ -2680,7 +2680,7 @@ void root::RootScalarEuclideanRoot(const root& r1, const  root& r2, Rational& ou
   for(int i=0; i<r1.size; i++)
   { tempRat.Assign(r1.TheObjects[i]);
     tempRat.MultiplyBy(r2.TheObjects[i]);
-    output.Add(tempRat);
+    output+=(tempRat);
   }
 }
 
@@ -3208,7 +3208,7 @@ inline bool Rational::IsGreaterThanOrEqualTo(Rational& right)
   return tempRat.IsNonNegative();
 }
 
-inline void Rational::ElementToString(std::string& output)
+inline void Rational::ElementToString(std::string& output)const
 { std::stringstream out;
   if (this->Extended==0)
   { out << this->NumShort;
@@ -5578,7 +5578,7 @@ bool ComplexQN::operator ==(ComplexQN& q)
 
 void ComplexQN::MultiplyBy(ComplexQN& q)
 { for (int i=0; i<this->NumVars; i++)
-    this->Exponent.TheObjects[i].Add(q.Exponent.TheObjects[i]);
+    this->Exponent.TheObjects[i]+=(q.Exponent.TheObjects[i]);
   this->Coefficient.MultiplyBy(q.Coefficient);
   this->Simplify();
 }
@@ -5643,7 +5643,7 @@ void CompositeComplexQN::AddComplexQN(ComplexQN& q)
   this->AddObjectOnTop(q);
 }
 
-void CompositeComplexQN::Add(const CompositeComplexQN &q)
+void CompositeComplexQN::operator+=(const CompositeComplexQN &q)
 { for(int i=0; i<q.size; i++)
     this->AddComplexQN(q.TheObjects[i]);
 }
@@ -5849,11 +5849,11 @@ void ComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
   for (int i=0; i<this->NumVars; i++)
   { tempRat.Assign(TheSub.elements[0][i]);
     tempRat.MultiplyBy(this->Exponent.TheObjects[i]);
-    tempBC.Exp.Add(tempRat);
+    tempBC.Exp+=(tempRat);
     for (int j=1; j<TheSub.NumRows; j++)
     { tempRat.Assign(TheSub.elements[j][i]);
       tempRat.MultiplyBy(this->Exponent.TheObjects[i]);
-      tempExponent.TheObjects[j-1].Add(tempRat);
+      tempExponent.TheObjects[j-1]+=(tempRat);
     }
   }
   this->NumVars= TheSub.NumRows-1;
@@ -6289,7 +6289,7 @@ void QuasiPolynomial::Evaluate(intRoot& values, Rational& output)
       }
       tempLRat.ElementToString(tempS);
     }*/
-    output.Add(tempLRat);
+    output+=(tempLRat);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
     {  output.ElementToString(tempS);
     }*/
@@ -6465,7 +6465,7 @@ void CompositeComplexQNSub::MakeSubNVarForOtherChamber(root& direction, root& no
       this->MatrixForCoeffs.elements[j+1][i].DivideBy(tempLargeRat);
       this->MatrixForCoeffs.elements[j+1][i].MultiplyBy(direction.TheObjects[i]);
       if (i==j)
-        this->MatrixForCoeffs.elements[j+1][i].Add(ROne);
+        this->MatrixForCoeffs.elements[j+1][i]+=(ROne);
     }
   }
 }
@@ -6482,7 +6482,7 @@ void BasicComplexNumber::init(Rational& coeff, Rational & exp)
 
 void BasicComplexNumber::MultiplyBy(BasicComplexNumber &c)
 { this->Coeff.MultiplyBy(c.Coeff);
-  this->Exp.Add(c.Exp);
+  this->Exp+=(c.Exp);
 }
 
 void BasicComplexNumber::MultiplyByLargeRational(Rational &c)
@@ -6563,7 +6563,7 @@ void CompositeComplex::MultiplyBy(CompositeComplex& c)
 void CompositeComplex::AddLargeRational(Rational& r)
 { for (int i=0; i<this->size; i++)
     if(this->TheObjects[i].Exp.IsEqualTo(RZero))
-    { this->TheObjects[i].Coeff.Add(r);
+    { this->TheObjects[i].Coeff+=(r);
       if (this->TheObjects[i].Coeff.IsEqualToZero())
         this->PopIndexSwapWithLast(i);
       return;
@@ -6685,7 +6685,7 @@ void CompositeComplex::Assign(const CompositeComplex& c)
 void CompositeComplex::AddBasicComplex(BasicComplexNumber& b)
 { for(int i=0; i<this->size; i++)
     if (this->TheObjects[i].Exp.IsEqualTo(b.Exp))
-    { this->TheObjects[i].Coeff.Add(b.Coeff);
+    { this->TheObjects[i].Coeff+=(b.Coeff);
       if (this->TheObjects[i].Coeff.IsEqualToZero())
         this->PopIndexSwapWithLast(i);
       return;
@@ -6696,7 +6696,7 @@ void CompositeComplex::AddBasicComplex(BasicComplexNumber& b)
 void CompositeComplex::AddRational(Rational& r)
 { for (int i=0; i<this->size; i++)
     if(this->TheObjects[i].Exp.IsEqualTo(RZero))
-    { this->TheObjects[i].Coeff.Add(r);
+    { this->TheObjects[i].Coeff+=(r);
       if (this->TheObjects[i].Coeff.IsEqualToZero())
         this->PopIndexSwapWithLast(i);
       return;
@@ -7303,7 +7303,7 @@ void QuasiNumber::ElementToString(std::string& output, PolynomialOutputFormat& P
       output.erase(0, 1);
 }
 
-void QuasiNumber::Add(const QuasiNumber& q)
+void QuasiNumber::operator+=(const QuasiNumber& q)
 { for (int i=0; i<q.size; i++)
     this->AddBasicQuasiNumber(q.TheObjects[i]);
 }
@@ -7339,7 +7339,7 @@ void QuasiNumber::AddBasicQuasiNumber(BasicQN& q)
   for (int i=0; i<this->TheHashedArrays[tempH].size; i++)
   {  int tempI = this->TheHashedArrays[tempH].TheObjects[i];
     if (this->TheObjects[tempI].HasSameExponent(q))
-    {  this->TheObjects[tempI].Coefficient.Add(q.Coefficient);
+    {  this->TheObjects[tempI].Coefficient+=(q.Coefficient);
       if (this->TheObjects[tempI].Coefficient.IsEqualToZero())
         this->PopIndexSwapWithLastHash(tempI);
       return;
@@ -7373,7 +7373,7 @@ void QuasiNumber::Evaluate(List<int>& theVars, Rational& output)
   Rational tempRat;
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].Evaluate(theVars, tempRat);
-    output.Add(tempRat);
+    output+=(tempRat);
   }
 }
 
@@ -7856,7 +7856,7 @@ Rational Rational::operator*(const Rational& right) const
 Rational Rational::operator+(const Rational& right) const
 { Rational tempRat;
   tempRat.Assign(*this);
-  tempRat.Add(right);
+  tempRat+=(right);
   return tempRat;
 }
 
@@ -7912,7 +7912,7 @@ inline void Rational::AssignFracValue()
 void Rational::AddInteger(int x)
 { Rational tempRat;
   tempRat.AssignNumeratorAndDenominator(x, 1);
-  this->Add(tempRat);
+  this->operator+=(tempRat);
 }
 
 bool Rational::IsGreaterThan(const Rational& r) const
@@ -7926,7 +7926,7 @@ void Rational::Subtract(const Rational& r)
 { Rational temp;
   temp.Assign(r);
   temp.Minus();
-  this->Add(temp);
+  this->operator+=(temp);
 }
 
 void Rational::AssignInteger(int x)
@@ -7970,7 +7970,7 @@ Rational Rational::NtoTheKth(int n, int k)
   return result;
 }
 
-bool Rational::IsInteger()
+bool Rational::IsInteger()const
 { if (this->Extended==0)
     return this->DenShort==1;
   else
@@ -7982,28 +7982,6 @@ double Rational::DoubleValue()
     return (double)this->NumShort/(double)this->DenShort;
   else
     return this->Extended->num.GetDoubleValue()/this->Extended->den.GetDoubleValue();
-}
-
-void Rational::Add(const Rational& r)
-{ //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-  if (r.Extended==0 && this->Extended==0)
-    if (this->TryToAddQuickly(r.NumShort, r.DenShort))
-      return;
-  if (this==&r)
-  { this->MultiplyByInt(2);
-    return;
-  }
-  this->InitExtendedFromShortIfNeeded();
-  Rational tempRat;
-  tempRat.Assign(r);
-  tempRat.InitExtendedFromShortIfNeeded();
-  LargeInt tempI;
-  tempI.Assign(tempRat.Extended->num);
-  tempI.value.MultiplyBy(this->Extended->den);
-  this->Extended->num.value.MultiplyBy(tempRat.Extended->den);
-  this->Extended->num.Add(tempI);
-  this->Extended->den.MultiplyBy(tempRat.Extended->den);
-  this->Simplify();
 }
 
 void Rational::Simplify()
@@ -8525,7 +8503,7 @@ void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomial& output, bo
       Rational tempLR;
       tempQP.Evaluate(partFraction::theVectorToBePartitioned, tempLR);
       //assert (tempLR.den.IsEqualTo(LIOne));
-      partFractions::CheckSum.Add(tempLR);
+      partFractions::CheckSum+=(tempLR);
       //partFraction::CheckSum.Add(tempLR);
 //      assert(partFractions::CheckSum.den.IsEqualTo(LIOne));
     }
@@ -8570,14 +8548,14 @@ void partFractionPolynomials::AddPolynomialLargeRational(root& rootLatticeIndica
     for(int j=0; j<theDimension; j++)
     { tempRat.Assign(this->theNormals.elements[i][j]);
       tempRat.MultiplyBy(rootLatticeIndicator.TheObjects[j]);
-      tempRoot.TheObjects[i].Add(tempRat);
+      tempRoot.TheObjects[i]+=(tempRat);
       if (partFraction::MakingConsistencyCheck)
       { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
         { Stop();
         }
         tempRat2.AssignInteger(partFraction::theVectorToBePartitioned.TheObjects[j]);
         tempRat2.MultiplyBy(this->theNormals.elements[i][j]);
-        tempRoot2.TheObjects[i].Add(tempRat2);
+        tempRoot2.TheObjects[i]+=(tempRat2);
       }
     }
     tempRoot.TheObjects[i].AssignFracValue();
@@ -8599,7 +8577,7 @@ void partFractionPolynomials::AddPolynomialLargeRational(root& rootLatticeIndica
       input.Evaluate(partFraction::theVectorToBePartitioned, tempLRat);
       tempLRat.ElementToString(tempS1);
   //    tempLRat.ElementToString(tempS1);
-      partFraction::CheckSum.Add(tempLRat);
+      partFraction::CheckSum+=(tempLRat);
       if (partFraction::flagAnErrorHasOccurredTimeToPanic)
       { partFraction::CheckSum.ElementToString(tempS1);
       }
@@ -8639,7 +8617,7 @@ void partFractionPolynomials::CheckConsistency(root& RootLatticeIndicator, Polyn
     for(int j=0; j<theDimension; j++)
     { tempRat.Assign(this->theNormals.elements[i][j]);
       tempRat.MultiplyBy(tempRoot2.TheObjects[j]);
-      tempRoot.TheObjects[i].Add(tempRat);
+      tempRoot.TheObjects[i]+=(tempRat);
     }
     tempRoot.TheObjects[i].AssignFracValue();
   }
@@ -9706,7 +9684,7 @@ void partFraction::MakePolynomialFromOneNormal(root& normal, root& shiftRational
     }
     tempRat2.AssignNumeratorAndDenominator(-1, j+1);
     tempRat2.MultiplyBy(tempRat);
-    tempRat2.Add(LROne);
+    tempRat2+=(LROne);
     Rational tempRat3;
     tempRat3.AssignNumeratorAndDenominator(1, j+1);
     tempP.TimesConstant(tempRat3);
@@ -10649,7 +10627,7 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
     { std::string tempS;
       tempRat.ElementToString(tempS);
     }
-    output.Add(tempRat);
+    output+=(tempRat);
     if (this->flagMakingProgressReport)
     { std::stringstream out;
       out << "Checksum " << i+1 << " out of " << this->size;
@@ -11617,18 +11595,18 @@ void WeylGroup::ReflectBetaWRTAlpha(root& alpha, root &Beta, bool RhoAction, roo
     { tempRat.Assign(result.TheObjects[j]);
       tempRat.MultiplyBy(alpha.TheObjects[i]);
       tempRat.MultiplyBy(this->CartanSymmetric.elements[i][j]*(-2));
-      alphaShift.Add(tempRat);
+      alphaShift+=(tempRat);
       tempRat.Assign(alpha.TheObjects[i]);
       tempRat.MultiplyBy(alpha.TheObjects[j]);
       tempRat.MultiplyBy(this->CartanSymmetric.elements[i][j]);
-      lengthA.Add(tempRat);
+      lengthA+=(tempRat);
     }
   alphaShift.DivideBy(lengthA);
   Output.SetSize(this->CartanSymmetric.NumRows);
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat.Assign(alphaShift);
     tempRat.MultiplyBy(alpha.TheObjects[i]);
-    tempRat.Add(result.TheObjects[i]);
+    tempRat+=(result.TheObjects[i]);
     Output.TheObjects[i].Assign(tempRat);
   }
   if (RhoAction)
@@ -11642,7 +11620,7 @@ void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat.Assign(coefficient);
     tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
-    DualSpaceElement.TheObjects[i].Add(tempRat);
+    DualSpaceElement.TheObjects[i]+=(tempRat);
   }
 }
 
@@ -11652,7 +11630,7 @@ void WeylGroup::SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, b
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat.Assign(theRoot.TheObjects[i]);
     tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
-    alphaShift.Add(tempRat);
+    alphaShift+=(tempRat);
   }
   if (this->flagAnErrorHasOcurredTimeToPanic)
   { std::string tempS;
@@ -11665,7 +11643,7 @@ void WeylGroup::SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, b
     else
       alphaShift.AddInteger(-1);
   }
-  theRoot.TheObjects[index].Add(alphaShift);
+  theRoot.TheObjects[index]+=(alphaShift);
 }
 
 void WeylGroup::SimpleReflectionRootAlg( int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
@@ -11798,7 +11776,7 @@ void WeylGroup::RootScalarCartanRoot(const root& r1, const root& r2, Rational& o
       tempRat.Assign(r1.TheObjects[i]);
       tempRat.MultiplyBy(r2.TheObjects[j]);
       tempRat.MultiplyBy(this->CartanSymmetric.elements[i][j]);
-      output.Add(tempRat);
+      output+=(tempRat);
     }
 }
 
@@ -12059,7 +12037,7 @@ void WeylGroup::GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBas
     for (int j=0; j<input.size; j++)
     { tempRat.Assign(tempMat.elements[i][j]);
       tempRat.MultiplyBy(input.TheObjects[j]);
-      result.TheObjects[i].Add(tempRat);
+      result.TheObjects[i]+=(tempRat);
     }
 //  result.ComputeDebugString();
   output.Assign(result);
@@ -13560,7 +13538,7 @@ void IntegerPoly::Evaluate(root& values, Rational& output)
 //      { //Rational::flagAnErrorHasOccurredTimeToPanic=true;
 //      }
 //    }
-    output.Add(tempRat1);
+    output+=(tempRat1);
 //    if(this->flagAnErrorHasOccurredTimeToPanic)
 //    { output.ElementToString(tempS2);
 //    }
@@ -15040,7 +15018,7 @@ bool rootSubalgebra::IsAnIsomorphism(roots &domain, roots &range, GlobalVariable
       for (int j=0; j<theDimension; j++)
       { tempRat2.Assign(range.TheObjects[j].TheObjects[k]);
         tempRat2.MultiplyBy(matB.elements[i][j]);
-        tempRoots.TheObjects[i].TheObjects[k].Add(tempRat2);
+        tempRoots.TheObjects[i].TheObjects[k]+=(tempRat2);
       }
   //if (this->flagAnErrorHasOccuredTimeToPanic)
     //tempRoots.ComputeDebugString();
@@ -15341,7 +15319,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, ro
             theRelation.BetaCoeffs.AddObjectOnTop(theRelation.AlphaCoeffs.TheObjects[i]);
           }
           else
-            theRelation.BetaCoeffs.TheObjects[tempI].Add(theRelation.AlphaCoeffs.TheObjects[i]);
+            theRelation.BetaCoeffs.TheObjects[tempI]+=(theRelation.AlphaCoeffs.TheObjects[i]);
           isMaximal=false;
           break;
         }
@@ -15764,7 +15742,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
         { Rational tempRat;
           tempRat.Assign(tempMat.elements[k][j]);
           tempRat.MultiplyBy(AllRoots.TheObjects[i].TheObjects[k]);
-          linComb.TheObjects[j].Add(tempRat);
+          linComb.TheObjects[j]+=(tempRat);
         }
       }
       int x= linComb.FindLCMDenominatorsTruncateToInt();
@@ -15817,7 +15795,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
             { Rational tempRat;
               tempRat.Assign(tempMat.elements[k][j]);
               tempRat.MultiplyBy(AllRoots.TheObjects[i].TheObjects[k]);
-              linComb.TheObjects[j].Add(tempRat);
+              linComb.TheObjects[j]+=(tempRat);
             }
           }
           int x= linComb.FindLCMDenominatorsTruncateToInt();
@@ -15941,7 +15919,7 @@ void rootSubalgebra::KEnumerationsToLinComb(GlobalVariables& theGlobalVariables)
         { Rational tempRat;
           tempRat.Assign(tempMat.elements[k][j]);
           tempRat.MultiplyBy(TestedRootAlpha.TheObjects[k]);
-          linComb.TheObjects[j].Add(tempRat);
+          linComb.TheObjects[j]+=(tempRat);
         }
       }
       int x= linComb.FindLCMDenominatorsTruncateToInt();
@@ -15972,7 +15950,7 @@ void PolynomialRationalCoeff::Evaluate(intRoot& values, Rational& output)
       { tempLRat.MultiplyByInt(values.TheObjects[j]);
         ParallelComputing::SafePoint();
       }
-    output.Add(tempLRat);
+    output+=(tempLRat);
   }
 }
 
@@ -16305,7 +16283,7 @@ void MatrixLargeRational::ComputePotentialChangeGradient(MatrixLargeRational& ma
   outputChangeGradient.MakeZero();
   for (int j=0; j<matA.NumRows; j++)
   { if (BaseVariables.elements[j]>=NumTrueVariables)
-      outputChangeGradient.Add(matA.elements[j][ColumnIndex]);
+      outputChangeGradient+=(matA.elements[j][ColumnIndex]);
     hasAPotentialLeavingVariable =hasAPotentialLeavingVariable || matA.elements[j][ColumnIndex].IsPositive();
   }
   if (ColumnIndex>=NumTrueVariables)
@@ -16341,7 +16319,7 @@ bool MatrixLargeRational  ::SystemLinearEqualitiesWithPositiveColumnVectorHasNon
   Rational GlobalGoal; GlobalGoal.MakeZero();
   assert (matA.NumRows== matb.NumRows);
   for (int j=0; j<matb.NumRows; j++)
-  { GlobalGoal.Add(matb.elements[j][0]);
+  { GlobalGoal+=(matb.elements[j][0]);
     assert(!matb.elements[j][0].IsNegative());
   }
   if (GlobalGoal.IsEqualToZero())
@@ -16403,7 +16381,7 @@ bool MatrixLargeRational  ::SystemLinearEqualitiesWithPositiveColumnVectorHasNon
       //  tempMatA.ComputeDebugString();
       tempTotalChange.Assign(MaxMovement);
       tempTotalChange.MultiplyBy(ChangeGradient);
-      matX.elements[EnteringVariable][0].Add(MaxMovement);
+      matX.elements[EnteringVariable][0]+=(MaxMovement);
       if (!tempTotalChange.IsEqualToZero())
       { VisitedVertices.ClearTheObjects();
         GlobalGoal.Subtract(tempTotalChange);
@@ -17206,7 +17184,7 @@ void coneRelation::FixRepeatingRoots(roots& theRoots, List<Rational>& coeffs)
     }
     for (int j=i+1; j<theRoots.size; j++)
       if (theRoots.TheObjects[i].IsEqualTo(theRoots.TheObjects[j]))
-      { coeffs.TheObjects[i].Add(coeffs.TheObjects[j]);
+      { coeffs.TheObjects[i]+=(coeffs.TheObjects[j]);
         theRoots.PopIndexSwapWithLast(j);
         coeffs.PopIndexSwapWithLast(j);
         j--;
@@ -17963,7 +17941,7 @@ void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
 
 void ElementSimpleLieAlgebra::operator+=(const ElementSimpleLieAlgebra& other)
 { for(int i=0; i<other.NonZeroElements.CardinalitySelection; i++)
-    this->coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]].Add(other.coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]]);
+    this->coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]]+=(other.coeffsRootSpaces.TheObjects[other.NonZeroElements.elements[i]]);
   this->ComputeNonZeroElements();
   this->Hcomponent.Add(other.Hcomponent);
 }
@@ -18029,7 +18007,7 @@ void SemisimpleLieAlgebra::LieBracket(const ElementSimpleLieAlgebra& g1, const E
         { int theIndex=this->theWeyl.RootSystem.IndexOfObjectHash(root1plusRoot2);
           tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i1]);
           tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[i2]);
-          output.coeffsRootSpaces.TheObjects[theIndex].Add(tempRat*this->ChevalleyConstants.elements[i1][i2]);
+          output.coeffsRootSpaces.TheObjects[theIndex]+=(tempRat*this->ChevalleyConstants.elements[i1][i2]);
         }
       }
     }
@@ -18042,7 +18020,7 @@ void SemisimpleLieAlgebra::LieBracket(const ElementSimpleLieAlgebra& g1, const E
     { this->theWeyl.RootScalarCartanRoot(this->theWeyl.RootSystem.TheObjects[element2->NonZeroElements.elements[j]], element1->Hcomponent, tempRat);
       tempRat.MultiplyBy(element2->coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]]);
       tempRat.MultiplyBy(order);
-      output.coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]].Add(tempRat);
+      output.coeffsRootSpaces.TheObjects[element2->NonZeroElements.elements[j]]+=(tempRat);
     }
     order.MakeMOne();
     element1=&g2;
@@ -18226,6 +18204,8 @@ std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst(bool
 
 void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const
 { std::stringstream out; std::string tempS;
+  if (this->IsEqualToZero())
+    out << "0";
   if (useLatex)
     out << "$";
   for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
@@ -25895,6 +25875,8 @@ void ParserNode::InitForAddition()
     this->UEElementOrdered.GetElement().Nullify(this->owner->testAlgebra);
   if (this->ExpressionType==this->typeWeylAlgebraElement)
     this->WeylAlgebraElement.GetElement().Nullify(this->owner->NumVariables);
+  if (this->ExpressionType==this->typeRationalFunction)
+    this->ratFunction.GetElement().Nullify(this->owner->NumVariables);
 }
 
 void ParserNode::InitForMultiplication()
@@ -25908,6 +25890,8 @@ void ParserNode::InitForMultiplication()
     this->UEElementOrdered.GetElement().AssignInt(1, this->owner->NumVariables, this->owner->testAlgebra);
   if(this->ExpressionType==this->typeWeylAlgebraElement)
     this->WeylAlgebraElement.GetElement().MakeConst(this->owner->NumVariables, (Rational) 1);
+  if (this->ExpressionType==this->typeRationalFunction)
+    this->ratFunction.GetElement().MakeNVarConst(this->owner->NumVariables, (Rational) 1);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
@@ -25950,6 +25934,7 @@ void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
           this->intValue=theInt.value.TheObjects[0]*theInt.sign;
       break;
       case ParserNode::typeRational: this->rationalValue+=currentChild.rationalValue; break;
+      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()+=currentChild.ratFunction.GetElement(); break;
       case ParserNode::typePoly: this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); break;
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
@@ -25996,6 +25981,22 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
     case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
     case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement()-=currentChild.WeylAlgebraElement.GetElement(); break;
     default: this->ExpressionType=this->typeError; return;
+  }
+}
+
+void ParserNode::ReduceRatFunction()
+{ if (this->ExpressionType!=this->typeRationalFunction)
+    return;
+  this->ratFunction.GetElement().ReduceMemory();
+  switch (this->ratFunction.GetElement().expressionType)
+  { case RationalFunction::typeRational:
+      this->rationalValue= this->ratFunction.GetElement().ratValue;
+      this->ExpressionType=this->typeRational;
+      break;
+    case RationalFunction::typePoly:
+      this->polyValue.GetElement().operator=(this->ratFunction.GetElement().Numerator.GetElement());
+      this->ExpressionType=this->typePoly;
+      break;
   }
 }
 
@@ -26170,56 +26171,6 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
   }
 }
 
-void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
-{ if (!this->AllChildrenAreOfDefinedNonErrorType())
-  { this->SetError(this->errorOperationByUndefinedOrErrorType);
-    return;
-  }
-  if (this->children.size!=2)
-  { this->SetError(this->errorProgramming);
-    return;
-  }
-  this->InitForMultiplication();
-  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
-  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
-  if (rightNode.ExpressionType==this->typeIntegerOrIndex)
-  { rightNode.ExpressionType=this->typeRational;
-    rightNode.rationalValue=rightNode.intValue;
-  }
-  if (rightNode.ExpressionType!=this->typeRational)
-  { this->SetError(this->errorDivisionByNonAllowedType);
-    return;
-  }
-  if (rightNode.rationalValue.IsEqualToZero())
-  { this->SetError(this->errorDivisionByZero);
-    return;
-  }
-  Rational& theDenominator= rightNode.rationalValue;
-  switch(leftNode.ExpressionType)
-  { case ParserNode::typeIntegerOrIndex:
-      this->rationalValue=leftNode.intValue;
-      this->rationalValue/=theDenominator;
-      this->ExpressionType=this->typeRational;
-      break;
-    case ParserNode::typeRational:
-      this->rationalValue=leftNode.rationalValue;
-      this->rationalValue/=theDenominator;
-      this->ExpressionType=this->typeRational;
-      break;
-    case ParserNode::typePoly:
-      this->polyValue.GetElement()=leftNode.polyValue.GetElement();
-      this->polyValue.GetElement().DivByRational(theDenominator);
-      this->ExpressionType=this->typePoly;
-      break;
-    case ParserNode::typeUEelement:
-      this->UEElement.GetElement()=leftNode.UEElement.GetElement();
-      this->UEElement.GetElement()/=theDenominator;
-      this->ExpressionType=this->typeUEelement;
-    break;
-    default: this->SetError(this->errorDivisionByNonAllowedType); return;
-  }
-}
-
 void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
@@ -26241,6 +26192,7 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
           this->intValue=theInt.value.TheObjects[0]*theInt.sign;
       break;
       case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
+      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()*=currentChild.ratFunction.GetElement(); break;
       case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;

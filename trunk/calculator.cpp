@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=300000000;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   //  Rational tempRat=2;
   //  tempRat.RaiseToPower(20);
   //  tempRat.ElementToString(tempS);

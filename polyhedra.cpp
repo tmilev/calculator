@@ -2350,7 +2350,7 @@ void roots::SubSelection(Selection& theSelection, roots& output)
 }
 
 void roots::SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output)
-{ output.init((short)OutputDimension, (short)theSelection.CardinalitySelection);
+{ output.init((int)OutputDimension, (int)theSelection.CardinalitySelection);
   this->SelectionToMatrixAppend(theSelection, OutputDimension, output, 0);
 }
 
@@ -2445,10 +2445,10 @@ void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bo
 }
 
 void roots::rootsToMatrix(MatrixLargeRational& output)
-{ short tempNumCols= 0;
+{ int tempNumCols= 0;
   if (this->size!=0)
-    tempNumCols=(short)this->TheObjects[0].size;
-  output.init((short) this->size, tempNumCols);
+    tempNumCols=(int)this->TheObjects[0].size;
+  output.init((int) this->size, tempNumCols);
   for (int i=0; i<this->size; i++)
     for (int j=0; j<tempNumCols; j++)
       output.elements[i][j].Assign(this->TheObjects[i].TheObjects[j]);
@@ -2812,8 +2812,8 @@ bool roots::GetMinLinearDependenceWithNonZeroCoefficientForFixedIndex(MatrixLarg
 void roots::GetLinearDependenceRunTheLinearAlgebra(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints)
 { if (this->size==0)
     return;
-  short Dimension=(short) this->TheObjects[0].size;
-  outputTheSystem.init(Dimension, (short)this->size);
+  int Dimension=(int) this->TheObjects[0].size;
+  outputTheSystem.init(Dimension, (int)this->size);
   MatrixLargeRational matOutputEmpty;
   matOutputEmpty.init(-1, -1);
   for(int i=0; i<this->size; i++)
@@ -2836,7 +2836,7 @@ bool roots::GetLinearDependence(MatrixLargeRational& outputTheLinearCombination)
 }
 
 void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const
-{ inputMatrix.init((short)this->size, (short)theDimension);
+{ inputMatrix.init((int)this->size, (int)theDimension);
   MatrixLargeRational matOutputEmpty;
   matOutputEmpty.init(-1, -1);
   outputNonPivotPoints.init(theDimension);
@@ -2892,7 +2892,7 @@ bool roots::ComputeNormalExcludingIndex(root& output, int index, GlobalVariables
     return false;
   int theDimension= this->TheObjects[0].size;
   output.SetSize(theDimension);
-  tempMatrix.init((short)this->size-1, (short)theDimension);
+  tempMatrix.init((int)this->size-1, (int)theDimension);
   matOutputEmpty.init(-1, -1);
   int k=-1;
   for(int i=0; i<this->size; i++)
@@ -2915,7 +2915,7 @@ bool roots::ComputeNormalFromSelection(root& output, Selection& theSelection, Gl
   Selection& NonPivotPoints=theGlobalVariables.selComputeNormalFromSelection;
   matOutputEmpty.init(-1, -1);
   output.SetSize(theDimension);
-  tempMatrix.init((short)theSelection.CardinalitySelection, (short)theDimension);
+  tempMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
   for(int i=0; i<theSelection.CardinalitySelection; i++)
     for(int j=0; j<theDimension; j++)
       tempMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
@@ -2934,7 +2934,7 @@ bool roots::ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot
   MatrixLargeRational& tempMatrix=theGlobalVariables.matComputeNormalFromSelectionAndExtraRoot;
   MatrixLargeRational  matOutputEmpty;
   Selection& NonPivotPoints=theGlobalVariables.selComputeNormalFromSelectionAndExtraRoot;
-  tempMatrix.init((short)theSelection.CardinalitySelection+1, (short)theDimension);
+  tempMatrix.init((int)theSelection.CardinalitySelection+1, (int)theDimension);
   matOutputEmpty.init(-1, -1);
   for(int j=0; j<theDimension; j++)
   { for(int i=0; i<theSelection.CardinalitySelection; i++)
@@ -2958,7 +2958,7 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots( root& output, root& Extr
   int theDimension= this->TheObjects[0].size;
   output.SetSize(theDimension);
   matOutputEmpty.init(-1, -1);
-  tempMatrix.init((short)theSelection.CardinalitySelection+2, (short)theDimension);
+  tempMatrix.init((int)theSelection.CardinalitySelection+2, (int)theDimension);
   for(int j=0; j<theDimension; j++)
   { for(int i=0; i<theSelection.CardinalitySelection; i++)
       tempMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
@@ -3786,7 +3786,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputation(Selection& theSelec
   assert(theDimension -1== theSelection.CardinalitySelection);
   MatrixLargeRational& RMinus1ByR=theGlobalVariables.matLinearAlgebraForVertexComputation;
   MatrixLargeRational  matOutputEmpty;
-  RMinus1ByR.init((short)(theDimension-1), (short)theDimension);
+  RMinus1ByR.init((int)(theDimension-1), (int)theDimension);
   matOutputEmpty.init(-1, -1);
   Selection& NonPivotPoints= theGlobalVariables.selLinearAlgebraForVertexComputation;
   for (int i =0; i<theDimension-1; i++)
@@ -5910,12 +5910,12 @@ void PolynomialRationalCoeff::operator=(const PolynomialRationalCoeff& right)
 
 void PolynomialRationalCoeff::MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables)
 { this->ClearTheObjects();
-  this->NumVars=(short)r.size;
+  this->NumVars=(int)r.size;
   Monomial<Rational>& tempM=theGlobalVariables.monMakePolyExponentFromIntRoot;
-  tempM.init((short)r.size);
+  tempM.init((int)r.size);
   tempM.Coefficient.Assign(ROne);
   for (int i=0; i<r.size; i++)
-    tempM.degrees[i]=(short) r.TheObjects[i];
+    tempM.degrees[i]=(int) r.TheObjects[i];
   this->AddMonomial(tempM);
 }
 
@@ -5959,10 +5959,10 @@ void PolynomialRationalCoeff::MakePolyFromDirectionAndNormal(root& direction, ro
 { Rational tempRat2;
   root::RootScalarEuclideanRoot(direction, normal, tempRat2);
   this->ClearTheObjects();
-  this->NumVars=(short)direction.size;
+  this->NumVars=(int)direction.size;
   Monomial<Rational>& tempM=theGlobalVariables.monMakePolyFromDirectionAndNormal;
   for (int i=0; i<direction.size; i++)
-  { tempM.MakeNVarFirstDegree(i, (short)direction.size, normal.TheObjects[i]);
+  { tempM.MakeNVarFirstDegree(i, (int)direction.size, normal.TheObjects[i]);
     tempM.Coefficient.DivideBy(tempRat2);
     this->AddMonomial(tempM);
   }
@@ -6054,7 +6054,7 @@ void PolynomialsRationalCoeff::MakeSubAddExtraVarForIntegration(root& direction)
 { this->SetSize(direction.size);
   for (int i=0; i<direction.size; i++)
   { Rational tempRat; tempRat.Assign(direction.TheObjects[i]); tempRat.Minus();
-    this->TheObjects[i].MakeNVarDegOnePoly((short)(direction.size+1), i, direction.size, ROne, tempRat);
+    this->TheObjects[i].MakeNVarDegOnePoly((int)(direction.size+1), i, direction.size, ROne, tempRat);
   }
 }
 
@@ -6067,12 +6067,12 @@ void PolynomialsRationalCoeff::MakeSubNVarForOtherChamber(root& direction, root&
     TempPoly2.CopyFromPoly(TempPoly);
     TempPoly2.TimesConstant(direction.TheObjects[i]);
     TempPoly2.TimesConstant(RMOne);
-    this->TheObjects[i].MakeNVarDegOnePoly((short)direction.size, i, ROne);
+    this->TheObjects[i].MakeNVarDegOnePoly((int)direction.size, i, ROne);
     this->TheObjects[i].AddPolynomial(TempPoly2);
   }
 }
 
-void PolynomialsRationalCoeff::MakeLinearSubOnLastVariable(short NumVars, PolynomialRationalCoeff& LastVarSub)
+void PolynomialsRationalCoeff::MakeLinearSubOnLastVariable(int NumVars, PolynomialRationalCoeff& LastVarSub)
 { this->SetSize(NumVars);
   for (int i=0; i<NumVars-1; i++)
     this->TheObjects[i].MakeNVarDegOnePoly(NumVars, i, ROne);
@@ -6181,7 +6181,7 @@ void PolynomialRationalCoeff::IntegrateDiscreteFromZeroTo
 void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output)
 { if (this->Coefficient.IsEqualToZero())
   { output.ClearTheObjects();
-    output.NumVars= (short)TheSub.TheQNSub.NumRows;
+    output.NumVars= (int)TheSub.TheQNSub.NumRows;
     return;
   }
   PolynomialRationalCoeff tempP;
@@ -6190,8 +6190,8 @@ void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& o
   tempM.Coefficient.Assign(ROne);
   for (int i=0; i<this->NumVariables; i++)
     tempM.degrees[i]= this->degrees[i];
-  tempM.Substitution(TheSub.RationalPolyForm, tempP, (short)(TheSub.TheQNSub.NumRows-1));
-  QuasiNumber tempQ((short)TheSub.TheQNSub.NumRows);
+  tempM.Substitution(TheSub.RationalPolyForm, tempP, (int)(TheSub.TheQNSub.NumRows-1));
+  QuasiNumber tempQ((int)TheSub.TheQNSub.NumRows);
   tempQ.Assign(this->Coefficient);
   tempQ.LinearSubstitution(TheSub);
   output.AssignPolynomialRationalCoeff(tempP);
@@ -6221,7 +6221,7 @@ void QuasiPolynomial::AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p)
   }
 }
 
-void QuasiPolynomial::Nullify(short numVars)
+void QuasiPolynomial::Nullify(int numVars)
 { this->ClearTheObjects();
   this->NumVars=numVars;
 }
@@ -6308,7 +6308,7 @@ void QuasiPolynomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial&
 { QuasiPolynomial tempQP;
   QuasiPolynomial Accum;
   Accum.ClearTheObjects();
-  Accum.NumVars= (short)TheSub.TheQNSub.NumRows;
+  Accum.NumVars= (int)TheSub.TheQNSub.NumRows;
   for (int i=0; i<this->size; i++)
   {  QuasiMonomial tempQM;
     tempQM.Assign(this->TheObjects[i]);
@@ -6429,7 +6429,7 @@ void CompositeComplexQNSub::MakeLinearSubIntegrand(root& normal, root& direction
 { PolynomialRationalCoeff EndPoint;
   EndPoint.MakePolyFromDirectionAndNormal(direction, normal, Correction, theGlobalVariables);
   this->RationalPolyForm.MakeSubstitutionLastVariableToEndPoint(1, EndPoint);
-  this->MatrixForCoeffs.init((short)(direction.size+1), 1);
+  this->MatrixForCoeffs.init((int)(direction.size+1), 1);
   Rational tempLargeRat;
   root::RootScalarEuclideanRoot(direction, normal, tempLargeRat);
   MatrixForCoeffs.elements[0][0].Assign(Correction);
@@ -6441,7 +6441,7 @@ void CompositeComplexQNSub::MakeLinearSubIntegrand(root& normal, root& direction
 
 void CompositeComplexQNSub::MakeSubAddExtraVarForIntegration(root &direction)
 { this->RationalPolyForm.MakeSubAddExtraVarForIntegration(direction);
-  this->MatrixForCoeffs.init((short)direction.size+2, (short)direction.size);
+  this->MatrixForCoeffs.init((int)direction.size+2, (int)direction.size);
   this->MatrixForCoeffs.NullifyAll();
   for (int i=0; i<this->MatrixForCoeffs.NumCols; i++)
   { this->MatrixForCoeffs.elements[i][i].Assign(ROne);
@@ -6452,7 +6452,7 @@ void CompositeComplexQNSub::MakeSubAddExtraVarForIntegration(root &direction)
 
 void CompositeComplexQNSub::MakeSubNVarForOtherChamber(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables)
 { this->RationalPolyForm.MakeSubNVarForOtherChamber(direction, normal, Correction, theGlobalVariables);
-  this->MatrixForCoeffs.init((short)direction.size+1, (short)direction.size);
+  this->MatrixForCoeffs.init((int)direction.size+1, (int)direction.size);
   Rational tempLargeRat;
   root::RootScalarEuclideanRoot(direction, normal, tempLargeRat);
   tempLargeRat.Minus();
@@ -6623,7 +6623,7 @@ bool CompositeComplex::SimplifyTrue()
   { for (int i=0; i<this->size; i++)
     {this->TheObjects[i].Exp.Subtract(CommonFactor); }
   } */
-  for (short i=1; i<=this->FindMaxDenExp(); i++)
+  for (int i=1; i<=this->FindMaxDenExp(); i++)
     result= result || this->SimplifyWRT(i);
 /*  if (CommonFactor.IsGreaterThan(RZero))
   { for (int i=0; i<this->size; i++)
@@ -6639,7 +6639,7 @@ int CompositeComplex::FindMaxDenExp()
   return result;
 }
 
-bool CompositeComplex::SimplifyWRT(short n)
+bool CompositeComplex::SimplifyWRT(int n)
 { if (n==1)
     return false;
   Rational CoeffFirst;
@@ -6746,7 +6746,7 @@ void CyclotomicList::DivOneVarByOneVarPoly(PolynomialRationalCoeff& p, Polynomia
   }
 }
 
-void CyclotomicList::GetSumPrimitiveRoots(short n, Rational& output)
+void CyclotomicList::GetSumPrimitiveRoots(int n, Rational& output)
 { this->ComputeCyclotomic(n);
   int phi= this->EulerPhi(n);
   for (int i=0; i<this->TheObjects[n-1].size; i++)
@@ -6758,14 +6758,14 @@ void CyclotomicList::GetSumPrimitiveRoots(short n, Rational& output)
   output.MakeZero();
 }
 
-void CyclotomicList::ComputeCyclotomic(short n)
+void CyclotomicList::ComputeCyclotomic(int n)
 { if (this->size<n)
     this->SetSize(n);
   if(this->TheObjects[n-1].size==0)
   { PolynomialRationalCoeff tempP;
     tempP.MakeMonomialOneLetter(1, 0, n, ROne);
     tempP.AddConstant(RMOne);
-    for (short i=1; i<n; i++)
+    for (int i=1; i<n; i++)
     { if (((n/i)*i)==n)
       { this->ComputeCyclotomic(i);
         PolynomialRationalCoeff tempD, tempR, tempQ;
@@ -6778,7 +6778,7 @@ void CyclotomicList::ComputeCyclotomic(short n)
   }
 }
 
-int CyclotomicList::EulerPhi(short n)
+int CyclotomicList::EulerPhi(int n)
 { this->ComputeCyclotomic(n);
   int result=0;
   for(int i=0; i<this->TheObjects[n-1].size; i++)
@@ -6823,12 +6823,12 @@ void BasicQN::GetCoeffInFrontOfLast(Rational& output)
     output.MakeZero();
 }
 
-short BasicQN::GaussianEliminationByRows()
+int BasicQN::GaussianEliminationByRows()
 { return this->GaussianEliminationByRowsCol(this->NumVars-1, false);
 }
 
-short BasicQN::GaussianEliminationByRowsCol(int Col, bool MoveToRight)
-{ short Row=0;
+int BasicQN::GaussianEliminationByRowsCol(int Col, bool MoveToRight)
+{ int Row=0;
   while(Row<this->Exp.NumRows && Col<this->NumVars && Col>=0)
   { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
     { this->ComputeDebugString();
@@ -6894,10 +6894,10 @@ void BasicQN::WriteToFile(std::fstream& output)
   }
 }
 
-void BasicQN::ReadFromFile(std::fstream& input, short NumV)
+void BasicQN::ReadFromFile(std::fstream& input, int NumV)
 {  std::string tempS;
   this->Coefficient.ReadFromFile(input);
-  short tempI;
+  int tempI;
   input >> tempS >> this->Den >> tempI >> tempS;
   this->Exp.init(tempI, NumV);
   this->Nums.init(tempI, NumV);
@@ -7089,8 +7089,8 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
 void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column)
 { this->Coefficient.MakeOne();
   int theDimension = column.size;
-  this->NumVars=(short) theDimension;
-  this->Exp.init(theMat.NumRows, (short)theDimension);
+  this->NumVars=(int) theDimension;
+  this->Exp.init(theMat.NumRows, (int)theDimension);
   this->Nums.init(theMat.NumRows, 1);
   int tempLCM= 1;
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -7142,7 +7142,7 @@ void BasicQN::BasicQNToComplexQN(CompositeComplexQN& output)
   output.MultiplyByLargeRational(this->Coefficient);
 }
 
-inline void BasicQN::DecreaseNumVars(short decrease)
+inline void BasicQN::DecreaseNumVars(int decrease)
 { this->Exp.Resize(this->Exp.NumRows, this->Exp.NumCols-decrease, true);
   this->NumVars-=decrease;
 }
@@ -7172,7 +7172,7 @@ inline void BasicQN::SwitchTwoRows(int rowI1, int rowI2, int StartCol)
 }
 
 void BasicQN::Simplify()
-{ short FirstZeroRow=this->GaussianEliminationByRows();
+{ int FirstZeroRow=this->GaussianEliminationByRows();
   if (partFractions::flagAnErrorHasOccurredTimeToPanic)
     this->ComputeDebugString();
   if (Den==1)
@@ -7210,12 +7210,12 @@ void BasicQN::LinearSubstitution(QPSub& theSub)
   }
   this->Exp.Assign(tempOutput.Exp);
   this->Nums.Assign(tempOutput.Nums);
-  this->NumVars=(short)theSub.TheQNSub.NumRows-1;
+  this->NumVars=(int)theSub.TheQNSub.NumRows-1;
   this->ComputeDebugString();
   this->Simplify();
 }
 
-void BasicQN::MakeConst(Rational& Coeff, short NumV)
+void BasicQN::MakeConst(Rational& Coeff, int NumV)
 { this->Exp.Free();
   this->Nums.Free();
   this->Coefficient.Assign(Coeff);
@@ -7230,12 +7230,12 @@ void BasicQN::MakeFromNormalAndDirection(root& normal, root& direction, int theM
   root::RootScalarEuclideanRoot(normal, direction, tempLargeRat);
   tempRoot.Assign(normal);
   tempRoot.DivByLargeRational(tempLargeRat);
-  this->Exp.init(1, (short)theDimension);
+  this->Exp.init(1, (int)theDimension);
   this->Nums.init(1, 1);
   this->Den= tempRoot.FindLCMDenominatorsTruncateToInt();
   tempRoot.MultiplyByInteger(this->Den);
   this->Coefficient.Assign(coeff);
-  this->NumVars= (short)theDimension;
+  this->NumVars= (int)theDimension;
   this->Nums.elements[0][0]=theMod;
   for (int i=0; i<theDimension; i++)
     this->Exp.elements[0][i]=tempRoot.TheObjects[i].NumShort;
@@ -7249,7 +7249,7 @@ int BasicQN::HashFunction() const
   return result;
 }
 
-void BasicQN::MakePureQN(short NumVariables, int NonZeroIndex, Rational&coeff, int theExp, int Num, int theDen)
+void BasicQN::MakePureQN(int NumVariables, int NonZeroIndex, Rational&coeff, int theExp, int Num, int theDen)
 { this->NumVars= NumVariables;
   this->Exp.init(1, NumVariables);
   this->Nums.init(1, 1);
@@ -7348,7 +7348,7 @@ void QuasiNumber::AddBasicQuasiNumber(BasicQN& q)
   this->AddObjectOnTopHash(q);
 }
 
-void QuasiNumber::AssignInteger(short NumVars, int x)
+void QuasiNumber::AssignInteger(int NumVars, int x)
 { Rational tempRat;
   tempRat.AssignInteger(x);
   this->AssignLargeRational(NumVars, tempRat);
@@ -7431,7 +7431,7 @@ bool QuasiNumber::IsEqualToZero()const
 void QuasiNumber::LinearSubstitution(QPSub& TheSub)
 {  QuasiNumber Accum;
   BasicQN tempQ;
-  Accum.MakeZero((short)(TheSub.TheQNSub.NumRows-1));
+  Accum.MakeZero((int)(TheSub.TheQNSub.NumRows-1));
   for(int i=0; i<this->size; i++)
   {  tempQ.Assign(this->TheObjects[i]);
     tempQ.LinearSubstitution(TheSub);
@@ -7440,7 +7440,7 @@ void QuasiNumber::LinearSubstitution(QPSub& TheSub)
   this->Assign(Accum);
 }
 
-void QuasiNumber::MakeZero(short NumVars)
+void QuasiNumber::MakeZero(int NumVars)
 { this->ClearTheObjects();
   this->NumVariables= NumVars;
 }
@@ -7483,14 +7483,14 @@ void QuasiNumber::Simplify()
   this->AssignLargeRational(this->NumVariables, theValue);
 }
 
-void QuasiNumber::AssignLargeRational(short NumVars, Rational& coeff)
+void QuasiNumber::AssignLargeRational(int NumVars, Rational& coeff)
 {  BasicQN q;
   this->MakeZero(NumVars);
   q.MakeConst(coeff, NumVars);
   this->AddBasicQuasiNumber(q);
 }
 
-void QuasiNumber::MakePureQN(short NumVar, int NonZeroIndex, Rational&coeff, int theExp, int Num, int theDen)
+void QuasiNumber::MakePureQN(int NumVar, int NonZeroIndex, Rational&coeff, int theExp, int Num, int theDen)
 { this->MakeZero(NumVar);
   BasicQN tempQ;
   tempQ.MakePureQN(NumVar, NonZeroIndex, coeff, theExp, Num, theDen);
@@ -7498,13 +7498,13 @@ void QuasiNumber::MakePureQN(short NumVar, int NonZeroIndex, Rational&coeff, int
 }
 
 void QuasiNumber::MakeFromNormalAndDirection(root& normal, root& direction, int theMod, Rational& coeff)
-{ this->MakeZero((short)normal.size);
+{ this->MakeZero((int)normal.size);
   BasicQN tempQ;
   tempQ.MakeFromNormalAndDirection(normal, direction, theMod, coeff);
   this->AddBasicQuasiNumber(tempQ);
 }
 
-void QuasiNumber::MakeConst(Rational& Coeff, short NumV)
+void QuasiNumber::MakeConst(Rational& Coeff, int NumV)
 {  BasicQN q;
   this->MakeZero(NumV);
   q.MakeConst(Coeff, NumV);
@@ -7521,7 +7521,7 @@ void QuasiNumber::MakeConst(Rational& Coeff, short NumV)
 
 void QuasiNumber::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column)
 { this->ClearTheObjects();
-  this->NumVariables= (short)column.size;
+  this->NumVariables= (int)column.size;
   BasicQN tempBQN;
   tempBQN.MakeQNFromMatrixAndColumn(theMat, column);
   this->AddBasicQuasiNumber(tempBQN);
@@ -7552,7 +7552,7 @@ void QPSub::MakeLinearSubIntegrand(root& normal, root& direction, Rational& Corr
 { PolynomialRationalCoeff EndPoint;
   EndPoint.MakePolyFromDirectionAndNormal(direction, normal, Correction, theGlobalVariables);
   this->RationalPolyForm.MakeSubstitutionLastVariableToEndPoint(1, EndPoint);
-  this->TheQNSub.init((short)(normal.size+1), 1);
+  this->TheQNSub.init((int)(normal.size+1), 1);
   Rational tempRat;
   root tempRoot; tempRoot.SetSize(normal.size);
   root::RootScalarEuclideanRoot(direction, normal, tempRat);
@@ -7575,7 +7575,7 @@ void QPSub::MakeLinearSubIntegrand(root& normal, root& direction, Rational& Corr
 
 void QPSub::MakeSubAddExtraVarForIntegration(root& direction)
 { this->RationalPolyForm.MakeSubAddExtraVarForIntegration(direction);
-  this->TheQNSub.init((short)direction.size+2, (short)direction.size);
+  this->TheQNSub.init((int)direction.size+2, (int)direction.size);
   this->TheQNSub.NullifyAll();
   this->QNSubDen=1;
   for (int i=0; i<this->TheQNSub.NumCols; i++)
@@ -7597,7 +7597,7 @@ void QPSub::MakeSubFromPolynomialsRationalCoeff(PolynomialsRationalCoeff& input)
   int theDimension= input.TheObjects[0].NumVars;
   for(int i=0; i<input.size; i++)
     this->RationalPolyForm.TheObjects[i].CopyFromPoly(input.TheObjects[i]);
-  this->TheQNSub.init((short)theDimension+1, (short)theDimension);
+  this->TheQNSub.init((int)theDimension+1, (int)theDimension);
   this->TheQNSub.NullifyAll();
   for (int i=0; i<input.size; i++)
     for (int k=0; k<input.TheObjects[i].size; k++)
@@ -7617,7 +7617,7 @@ void QPSub::MakeSubFromPolynomialsRationalCoeff(PolynomialsRationalCoeff& input)
 void QPSub::MakeSubNVarForOtherChamber(root &direction, root &normal, Rational &Correction, GlobalVariables& theGlobalVariables)
 { this->RationalPolyForm.MakeSubNVarForOtherChamber(direction, normal, Correction, theGlobalVariables);
   int theDimension= direction.size;
-  this->TheQNSub.init((short)theDimension+1, (short)theDimension);
+  this->TheQNSub.init((int)theDimension+1, (int)theDimension);
   Rational tempRat;
   root::RootScalarEuclideanRoot(direction, normal, tempRat);
   root tempRoot; tempRoot.SetSize(theDimension);
@@ -8481,7 +8481,7 @@ void CompositeComplexQNPoly::AssignQP(QuasiPolynomial& q)
 }
 
 void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables)
-{ output.Nullify((short)theDimension);
+{ output.Nullify((int)theDimension);
   for (int i=0; i<this->size; i++)
   { if (RecordNumMonomials)
     { std::stringstream out;
@@ -8514,7 +8514,7 @@ void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomial& output, bo
 
 void partFractionPolynomials::initLatticeIndicatorsFromPartFraction(partFractions& ownerExpression, partFraction& owner, GlobalVariables& theGlobalVariables, int theDimension)
 { this->LatticeIndicators.size=0;
-  this->theNormals.init((short)theDimension, (short)theDimension);
+  this->theNormals.init((int)theDimension, (int)theDimension);
   for (int i=0; i<theDimension; i++)
   { int tempI=owner.IndicesNonZeroMults.TheObjects[i];
     assert(owner.TheObjects[tempI].Elongations.size==1);
@@ -8645,7 +8645,7 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(partFractions& o
       { IntegerPoly& tempP=theGlobalVariables.IPRemoveRedundantShortRootsClassicalRootSystem;
         assert(this->TheObjects[tempI1].Multiplicities.size==1 && this->TheObjects[tempI2].Multiplicities.size==1);
         tempP.ClearTheObjects();
-        tempP.NumVars= (short)theDimension;
+        tempP.NumVars= (int)theDimension;
         tempP.MakePolyExponentFromIntRoot(owner.RootsToIndices.TheObjects[tempI1]);
         tempP.AddConstant(IOne);
         //tempP.ComputeDebugString();
@@ -8942,7 +8942,7 @@ void partFraction::ReadFromFile(partFractions& owner, std::fstream& input, Globa
       input >> this->TheObjects[j].Multiplicities.TheObjects[i] >> this->TheObjects[j].Elongations.TheObjects[i];
   }
   input >>tempS;
-  this->Coefficient.ReadFromFile(input, (short)theDimension);
+  this->Coefficient.ReadFromFile(input, (int)theDimension);
   input>>tempS;
   this->ComputeIndicesNonZeroMults();
 }
@@ -9013,10 +9013,10 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
   else
   { PolynomialRationalCoeff tempP, tempP2;
     Polynomials<Rational> tempSub;
-    tempP.Nullify((short)VarChange.NumRows);
+    tempP.Nullify((int)VarChange.NumRows);
     tempSub.MakeExponentSubstitution(VarChange);
     tempP2.AssignIntegerPoly(ComputationalBufferCoefficient);
-    tempP2.Substitution(tempSub, tempP, (short)VarChange.NumRows);
+    tempP2.Substitution(tempSub, tempP, (int)VarChange.NumRows);
     NumLinesUsed+=tempP.StringPrintOutAppend(stringPoly, PolyFormatLocal, true);
   }
   if (stringPoly=="1")
@@ -9038,7 +9038,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
   if (includeVPsummand && LatexFormat)
   { std::string tempS2;
     QuasiPolynomial tempQP;
-    tempQP.Nullify((short)theDimension);
+    tempQP.Nullify((int)theDimension);
     this->partFractionToPartitionFunctionSplit(owner, tempQP, false, false, theGlobalVariables, theDimension);
     PolyFormatLocal.MakeAlphabetyi();
     PolyFormatLocal.cutOffString=false;
@@ -9277,12 +9277,12 @@ void partFraction::AttemptReduction(partFractions& owner, int myIndex, GlobalVar
 void partFraction::GetNElongationPolyWithMonomialContribution(partFractions& owner, List<int>& theSelectedIndices, List<int>& theCoefficients, List<int>& theGreatestElongations, int theIndex, IntegerPoly& output, int theDimension)
 { static Monomial<Integer> tempM;
   static IntegerPoly tempP;
-  tempM.init((short)theDimension);
+  tempM.init((int)theDimension);
   tempM.Coefficient.value=1;
   for (int i=0; i<theIndex; i++)
   { int tempI= theSelectedIndices.TheObjects[i];
     for (int j=0; j<theDimension; j++)
-      tempM.degrees[j]+=(short)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]*owner.RootsToIndices.TheObjects[tempI].TheObjects[j]);
+      tempM.degrees[j]+=(int)(theCoefficients.TheObjects[i] *theGreatestElongations.TheObjects[i]*owner.RootsToIndices.TheObjects[tempI].TheObjects[j]);
   }
   this->GetNElongationPoly(owner, theSelectedIndices.TheObjects[theIndex], theGreatestElongations.TheObjects[theIndex], theCoefficients.TheObjects[theIndex], output, theDimension);
   output.MultiplyByMonomial(tempM);
@@ -9402,12 +9402,12 @@ void partFraction::ApplySzenesVergneFormula(List<int>& theSelectedIndices, List<
     currentFrac.AddMultiplicity(-1, LargestElongation);
     static Monomial<Integer> tempM;
     if (this->UncoveringBrackets)
-    { tempM.init((short)Accum.AmbientDimension);
+    { tempM.init((int)Accum.AmbientDimension);
       tempM.Coefficient.Assign(IOne);
       for (int j=0; j<i; j++)
-      { short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
+      { int tempElongation=(int) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
         for (int k=0; k<Accum.AmbientDimension; k++)
-          tempM.degrees[k]+=(short)theElongations.TheObjects[j]*tempElongation*(short)Accum.RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]].TheObjects[k];
+          tempM.degrees[k]+=(int)theElongations.TheObjects[j]*tempElongation*(int)Accum.RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]].TheObjects[k];
       }
       ParallelComputing::SafePoint();
       ComputationalBufferCoefficient.MultiplyByMonomial(tempM);
@@ -9423,7 +9423,7 @@ void partFraction::ApplySzenesVergneFormula(List<int>& theSelectedIndices, List<
       tempM.Coefficient.Assign(IOne);
       tempM.ClearTheObjects();
       for (int j=0; j<i; j++)
-      { short tempElongation=(short) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
+      { int tempElongation=(int) this->TheObjects[theSelectedIndices.TheObjects[j]].GetLargestElongation();
         intRoot tempRoot;
         tempRoot= Accum.RootsToIndices.TheObjects[theSelectedIndices.TheObjects[j]];
         tempRoot.MultiplyByInteger(theElongations.TheObjects[j]*tempElongation);
@@ -9523,26 +9523,26 @@ void partFraction::ComputeIndicesNonZeroMults()
 }
 
 void partFraction::GetAlphaMinusNBetaPoly(partFractions& owner, int indexA, int indexB, int n, IntegerPoly& output, int theDimension)
-{ output.Nullify((short)theDimension);
+{ output.Nullify((int)theDimension);
   Monomial<Integer> tempM;
-  tempM.init((short)theDimension);
+  tempM.init((int)theDimension);
   tempM.Coefficient.Assign(IMOne);
   for (int i=0; i<n; i++)
   { for (int j=0; j<theDimension; j++)
-      tempM.degrees[j]= (short)(owner.RootsToIndices.TheObjects[indexA].TheObjects[j]- (i+1)*owner.RootsToIndices.TheObjects[indexB].TheObjects[j]);
+      tempM.degrees[j]= (int)(owner.RootsToIndices.TheObjects[indexA].TheObjects[j]- (i+1)*owner.RootsToIndices.TheObjects[indexB].TheObjects[j]);
     output.AddMonomial(tempM);
   }
 }
 
 void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output, int theDimension)
-{ output.Nullify((short)theDimension);
+{ output.Nullify((int)theDimension);
   Monomial<Integer> tempM;
-  tempM.init((short)theDimension);
+  tempM.init((int)theDimension);
   if (LengthOfGeometricSeries>0)
   { tempM.Coefficient.Assign(IOne);
     for (int i=0; i<LengthOfGeometricSeries; i++)
     { for (int j=0; j<theDimension; j++)
-        tempM.degrees[j]=(short)(baseElongation*i*owner.RootsToIndices.TheObjects[index].TheObjects[j]);
+        tempM.degrees[j]=(int)(baseElongation*i*owner.RootsToIndices.TheObjects[index].TheObjects[j]);
       output.AddMonomial(tempM);
     }
   }
@@ -9551,7 +9551,7 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
     tempM.Coefficient.Assign(IMOne);
     for (int i=-1; i>=LengthOfGeometricSeries; i--)
     { for (int j=0; j<theDimension; j++)
-        tempM.degrees[j]=short(baseElongation*i*owner.RootsToIndices.TheObjects[index].TheObjects[j]);
+        tempM.degrees[j]=int(baseElongation*i*owner.RootsToIndices.TheObjects[index].TheObjects[j]);
       output.AddMonomial(tempM);
     }
   }
@@ -9565,7 +9565,7 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
   tempRoot= owner.RootsToIndices.TheObjects[index];
   tempRoot.MultiplyByInteger(baseElongation);
   ::GeneratorsPartialFractionAlgebra::GetMonomialFromExponentAndElongation(tempRoot, LengthOfGeometricSeries, tempM);
-  output.Nullify((short)theDimension);
+  output.Nullify((int)theDimension);
   output.AddMonomial(tempM);
 }
 
@@ -9579,7 +9579,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
   }
   if (this->FileStoragePosition!=-1)
   { partFraction::TheBigDump.seekg(this->FileStoragePosition);
-    output.ReadFromFile(partFraction::TheBigDump, (short)theDimension);
+    output.ReadFromFile(partFraction::TheBigDump, (int)theDimension);
     if (RecordNumMonomials && ! this->AlreadyAccountedForInGUIDisplay)
     { this->AlreadyAccountedForInGUIDisplay=true;
       partFractions::NumProcessedForVPFMonomialsTotal+=this->Coefficient.size;
@@ -9647,7 +9647,7 @@ void partFraction::ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff
   }
   Rational tempRat;
   tempRat.AssignInteger(this->Coefficient.TheObjects[index].Coefficient.value);
-  output.MakeNVarConst((short)theDimension, tempRat);
+  output.MakeNVarConst((int)theDimension, tempRat);
   for (int i=0; i<theDimension; i++)
   { static root beta; beta.SetSize(theDimension);
     static Rational tempRat, tempRat2;
@@ -9673,7 +9673,7 @@ void partFraction::MakePolynomialFromOneNormal(root& normal, root& shiftRational
 { Rational tempRat, tempRat2;
   static PolynomialRationalCoeff tempP;
   int theDimension= normal.size;
-  output.MakeNVarConst((short)theDimension, LROne);
+  output.MakeNVarConst((int)theDimension, LROne);
   if (theMult==1)
     return;
   root::RootScalarEuclideanRoot(normal, shiftRational, tempRat);
@@ -10106,9 +10106,9 @@ void partFraction::initFromRootSystem(partFractions& owner, intRoots& theFractio
   if (theFraction.size==0)
     return;
   int theDimension = theFraction.TheObjects[0].size;
-  ComputationalBufferCoefficient.MakeNVarConst((short)theDimension, IOne);
+  ComputationalBufferCoefficient.MakeNVarConst((int)theDimension, IOne);
   this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-  ComputationalBufferCoefficientNonExpanded.MakeNVarConst((short)theDimension, IOne);
+  ComputationalBufferCoefficientNonExpanded.MakeNVarConst((int)theDimension, IOne);
   this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
   owner.RootsToIndices.initFromRoots(theAlgorithmBasis, weights);
   this->init(owner.RootsToIndices.size);
@@ -10127,9 +10127,9 @@ void partFraction::initFromRoots(partFractions& owner, roots& input)
   if (input.size==0)
     return;
   int theDimension = input.TheObjects[0].size;
-  ComputationalBufferCoefficient.MakeNVarConst((short)theDimension, IOne);
+  ComputationalBufferCoefficient.MakeNVarConst((int)theDimension, IOne);
   this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-  ComputationalBufferCoefficientNonExpanded.MakeNVarConst((short)theDimension, IOne);
+  ComputationalBufferCoefficientNonExpanded.MakeNVarConst((int)theDimension, IOne);
   this->CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
   intRoots tempRoots;
   tempRoots.AssignRoots(input);
@@ -10254,7 +10254,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
   MatrixLargeRational& matLinComb = theGlobalVariables.matReduceMonomialByMonomial2;
   Selection& tempSel= theGlobalVariables.selReduceMonomialByMonomial;
   Monomial<Integer> tempMon; intRoot tempRoot;
-  tempMat.init(owner.AmbientDimension, (short) this->IndicesNonZeroMults.size);
+  tempMat.init(owner.AmbientDimension, (int) this->IndicesNonZeroMults.size);
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
     for (int j=0; j<owner.AmbientDimension; j++)
       tempMat.elements[j][i].AssignInteger(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].TheObjects[j]*this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
@@ -10315,7 +10315,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
         if (this->flagAnErrorHasOccurredTimeToPanic)
         { tempFracs.initFromOtherPartFractions(owner, theGlobalVariables);
           tempFrac.AssignDenominatorOnly(*this);
-          tempFrac.Coefficient.Nullify((short)owner.AmbientDimension);
+          tempFrac.Coefficient.Nullify((int)owner.AmbientDimension);
           tempFrac.Coefficient.AddObjectOnTopLight(this->Coefficient.TheObjects[k]);
           tempFrac.ComputeOneCheckSum(owner, tempDiff, owner.AmbientDimension, theGlobalVariables);
         }
@@ -10355,7 +10355,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
 void partFraction::ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, List<int>& thePowersSigned, Monomial<Integer>& input)
 { IntegerPoly& theNumerator=theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial1;
   IntegerPoly& tempP=theGlobalVariables.IPReduceMonomialByMonomialModifyOneMonomial2;
-  theNumerator.Nullify((short)Accum.AmbientDimension);
+  theNumerator.Nullify((int)Accum.AmbientDimension);
   theNumerator.AddMonomial(input);
   assert(thePowersSigned.size== thePowers.Multiplicities.size);
   if (this->flagAnErrorHasOccurredTimeToPanic)
@@ -10384,11 +10384,11 @@ void partFraction::ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accu
 
 void partFraction::GetPolyReduceMonomialByMonomial(partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, IntegerPoly& output)
 { if (StartMonomialPower==0)
-  { output.MakeNVarConst((short)owner.AmbientDimension, IOne);
+  { output.MakeNVarConst((int)owner.AmbientDimension, IOne);
     return;
   }
-  Monomial<Integer> tempMon;  tempMon.init((short)owner.AmbientDimension);
-  output.Nullify((short)owner.AmbientDimension);
+  Monomial<Integer> tempMon;  tempMon.init((int)owner.AmbientDimension);
+  output.Nullify((int)owner.AmbientDimension);
   if (StartMonomialPower>0)
   { if (DenPowerReduction!=startDenominatorPower)
     { tempMon.Coefficient.value= MathRoutines::NChooseK(StartMonomialPower, DenPowerReduction);
@@ -10448,7 +10448,7 @@ void partFractions::AddAlreadyReduced(partFraction& f, GlobalVariables& theGloba
     //end of accounting
   }
   if (this->flagSplitTestModeNoNumerators)
-    this->TheObjects[tempI].Coefficient.MakeConst(IOne, (short)this->AmbientDimension);
+    this->TheObjects[tempI].Coefficient.MakeConst(IOne, (int)this->AmbientDimension);
   if (this->TheObjects[tempI].IsEqualToZero())
   { this->PopIndexHashChooseSwapByLowestNonProcessedAndAccount(tempI, theGlobalVariables, Indicator);
     shouldAttemptReduction=false;
@@ -10708,7 +10708,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
   for (int i=0; i<this->size; i++)
   { tempFrac.Assign(this->TheObjects[i]);
     if(tempFrac.RemoveRedundantShortRootsClassicalRootSystem(*this, Indicator, theGlobalVariables, this->AmbientDimension))
-    { this->TheObjects[i].Coefficient.Nullify((short)this->AmbientDimension);
+    { this->TheObjects[i].Coefficient.Nullify((int)this->AmbientDimension);
       this->AddAlreadyReduced(tempFrac, theGlobalVariables, Indicator);
     }
     if (this->flagMakingProgressReport)
@@ -10764,7 +10764,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(  QuasiPolynom
     assert(tempBool);
   }
   theGlobalVariables.theIndicatorVariables.NumProcessedMonomialsCurrentFraction=0;
-  output.Nullify((short)this->AmbientDimension);
+  output.Nullify((int)this->AmbientDimension);
   ///////////////////////////////////////////////
   //this->flagAnErrorHasOccurredTimeToPanic=true;
   //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
@@ -10960,7 +10960,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
   roots tempRoots;
   WeylGroup tempW;
   this->ClearTheObjects();
-  this->AmbientDimension=(short) WeylGroupNumber;
+  this->AmbientDimension=(int) WeylGroupNumber;
   if (WeylGroupLetter=='A')
   { tempW.MakeAn(WeylGroupNumber);
   }
@@ -11068,11 +11068,11 @@ int oneFracWithMultiplicitiesAndElongations::HashFunction() const
 void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent)
 { assert(MultiplicityIndex<this->Multiplicities.size);
   Monomial<Integer> tempM;
-  output.MakeNVarConst((short)theExponent.size, IOne);
-  tempM.init((short)theExponent.size);
+  output.MakeNVarConst((int)theExponent.size, IOne);
+  tempM.init((int)theExponent.size);
   tempM.Coefficient.Assign(IMOne);
   for (int i=0; i<theExponent.size; i++)
-    tempM.degrees[i]=(short)(theExponent.TheObjects[i]*this->Elongations.TheObjects[MultiplicityIndex]);
+    tempM.degrees[i]=(int)(theExponent.TheObjects[i]*this->Elongations.TheObjects[MultiplicityIndex]);
   output.AddMonomial(tempM);
 }
 
@@ -11649,9 +11649,9 @@ void WeylGroup::SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, b
 void WeylGroup::SimpleReflectionRootAlg( int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
 {  int lengthA=this->CartanSymmetric.elements[index][index].NumShort;
   PolynomialRationalCoeff AscalarB, tempP;
-  AscalarB.Nullify((short)this->CartanSymmetric.NumRows);
+  AscalarB.Nullify((int)this->CartanSymmetric.NumRows);
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempP.Nullify((short)this->CartanSymmetric.NumRows);
+  { tempP.Nullify((int)this->CartanSymmetric.NumRows);
     tempP.CopyFromPoly(theRoot.TheObjects[i]);
     tempP.TimesConstant(CartanSymmetric.elements[index][i]);
     AscalarB.AddPolynomial(tempP);
@@ -12074,7 +12074,7 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
     output.elements[WeylRank-1][WeylRank-1]=1;
   }
   if (WeylLetter=='D')
-  { //the triple node comes first, then the long string, then the two short strings.
+  { //the triple node comes first, then the long string, then the two int strings.
     // the long string is oriented with the end that is connected to the triple node having
     //smaller index
     output.init(WeylRank, WeylRank);
@@ -12346,7 +12346,7 @@ void PolynomialsRationalCoeff::operator=(const PolynomialsRationalCoeff& right)
 { this->CopyFromBase(right);
 }
 
-void PolynomialsRationalCoeff::Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget)
+void PolynomialsRationalCoeff::Substitution(PolynomialsRationalCoeff& theSub, int NumVarsTarget)
 { PolynomialRationalCoeff tempP;
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].Substitution(theSub, tempP, NumVarsTarget);
@@ -12395,9 +12395,9 @@ void PolynomialsRationalCoeff::MakeLinearSubWithConstTermFromMatrixRational(Matr
 { this->SetSize(theMat.NumCols);
   for (int i=0; i<this->size; i++)
   { static Monomial<Rational> tempM;
-    this->TheObjects[i].Nullify((short)theMat.NumRows-1);
+    this->TheObjects[i].Nullify((int)theMat.NumRows-1);
     for (int j=0; j<theMat.NumRows-1; j++)
-    { tempM.init((short)theMat.NumRows-1);
+    { tempM.init((int)theMat.NumRows-1);
       tempM.degrees[j]=1;
       tempM.Coefficient.Assign(theMat.elements[j][i]);
       this->TheObjects[i].AddMonomial(tempM);
@@ -12527,7 +12527,7 @@ void PolynomialsRationalCoeffCollection::ElementToStringComputeFunctionB(std::st
   output=out.str();
 }
 
-void PolynomialsRationalCoeffCollection::Substitution(PolynomialsRationalCoeff& theSub, short NumVarsTarget)
+void PolynomialsRationalCoeffCollection::Substitution(PolynomialsRationalCoeff& theSub, int NumVarsTarget)
 { for (int i=0; i<this->size; i++)
   { this->TheObjects[i].Substitution(theSub, NumVarsTarget);
   }
@@ -13547,12 +13547,12 @@ void IntegerPoly::Evaluate(root& values, Rational& output)
 
 void IntegerPoly::MakePolyExponentFromIntRoot(intRoot&r)
 { this->ClearTheObjects();
-  this->NumVars=(short)r.size;
+  this->NumVars=(int)r.size;
   Monomial<Integer> tempM;
-  tempM.init((short)r.size);
+  tempM.init((int)r.size);
   tempM.Coefficient.Assign(IOne);
   for (int i=0; i<r.size; i++)
-    tempM.degrees[i]=(short) r.TheObjects[i];
+    tempM.degrees[i]=(int) r.TheObjects[i];
   this->AddMonomial(tempM);
 }
 
@@ -13724,7 +13724,7 @@ void thePFcomputation::SelectionToString(std::string &output, int theDimension)
 }
 
 void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational& output, int theDimension)
-{ output.init((short)theDimension, (short)theDimension);
+{ output.init((int)theDimension, (int)theDimension);
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       output.elements[i][j].Assign(this->theWeylGroup.RootSystem.TheObjects[this->theSelection.elements[i]].TheObjects[j]);
@@ -14260,9 +14260,9 @@ bool roots::GetNormalSeparatingCones(GlobalVariables& theGlobalVariables, int th
   if (coneStrictlyPositiveCoeffs.size==0)
     return true;
   int numRows= coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
-  matA.init((short)numRows, (short)theDimension*2+numRows);
+  matA.init((int)numRows, (int)theDimension*2+numRows);
   matA.NullifyAll();
-  matb.init((short)numRows, 1);
+  matb.init((int)numRows, 1);
   matb.NullifyAll();
   for (int i=0; i<coneStrictlyPositiveCoeffs.size; i++)
   { for (int k=0; k<theDimension; k++)
@@ -14314,8 +14314,8 @@ bool roots::ConesIntersect(GlobalVariables& theGlobalVariables, List<root>& Stri
   if (StrictCone.size==0)
     return false;
   int numCols= StrictCone.size + NonStrictCone.size;
-  matA.init((short)theDimension+1, (short)numCols);
-  matb.init((short)theDimension+1, 1);
+  matA.init((int)theDimension+1, (int)numCols);
+  matb.init((int)theDimension+1, 1);
   matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
   for (int i=0; i<StrictCone.size; i++)
   { for (int k=0; k<theDimension; k++)
@@ -15901,7 +15901,7 @@ void rootSubalgebra::KEnumerationsToLinComb(GlobalVariables& theGlobalVariables)
 { int theDimension = this->AmbientWeyl.CartanSymmetric.NumRows;
   MatrixLargeRational tempMat;
   Selection tempSelection;
-  tempMat.init((short)theDimension, (short)theDimension);
+  tempMat.init((int)theDimension, (int)theDimension);
   int counter=0;
   for (int i=0; i<this->PosRootsKConnectedComponents.size; i++)
   { this->PosRootsKConnectedComponents.TheObjects[i].SelectionToMatrixAppend(this->theKEnumerations.TheObjects[i], theDimension, tempMat, counter);
@@ -16134,14 +16134,14 @@ void GeneratorsPartialFractionAlgebra::ConvertToIntegerPoly(IntegerPoly& output,
     assert(output.TheObjects[0].Coefficient.IsEqualTo(IOne));
     static Monomial<Integer> tempM;
     tempM.Coefficient.Assign(IOne);
-    tempM.init((short)theDimension);
+    tempM.init((int)theDimension);
     for (int i=0; i<theDimension; i++)
-      tempM.degrees[i]=(short)(output.TheObjects[0].degrees[i]*this->GeneratorPower);
+      tempM.degrees[i]=(int)(output.TheObjects[0].degrees[i]*this->GeneratorPower);
     output.ClearTheObjects();
     output.AddMonomial(tempM);
   }
   if (this->GeneratorPower==0)
-  { output.MakeNVarConst((short)theDimension, IOne);
+  { output.MakeNVarConst((int)theDimension, IOne);
     assert(false);
   }
   if (this->GeneratorPower>1)
@@ -16158,11 +16158,11 @@ void GeneratorsPartialFractionAlgebra::operator =(const GeneratorsPartialFractio
 }
 
 void PolyPartFractionNumerator::ConvertToIntegerPoly(IntegerPoly& output, int theDimension)
-{ output.Nullify((short)theDimension);
+{ output.Nullify((int)theDimension);
   IntegerPoly tempP;
   IntegerPoly tempP2;
   for (int i=0; i<this->size; i++)
-  { tempP.MakeNVarConst((short)theDimension, this->TheObjects[i].Coefficient);
+  { tempP.MakeNVarConst((int)theDimension, this->TheObjects[i].Coefficient);
     tempP.ComputeDebugString();
     for(int j=0; j<this->TheObjects[i].size; j++)
     { this->TheObjects[i].TheObjects[j].ConvertToIntegerPoly(tempP2, theDimension);
@@ -16198,10 +16198,10 @@ void GeneratorPFAlgebraRecord::GetValue(IntegerPoly& output, int theDimension)
   { output.Assign(*this->Value);
     return;
   }
-  output.Nullify((short)theDimension);
+  output.Nullify((int)theDimension);
   this->ValueIsComputed=true;
   Monomial<Integer> tempM;
-  tempM.init((short)theDimension);
+  tempM.init((int)theDimension);
   if (this->Elongation>=0)
     tempM.Coefficient.Assign(IOne);
   else
@@ -16212,11 +16212,11 @@ void GeneratorPFAlgebraRecord::GetValue(IntegerPoly& output, int theDimension)
   for (int i=0; i<tempI; i++)
   { for (int j=0; j<theDimension; j++)
     { if ( this->Elongation<0)
-        tempM.degrees[j]=(short) (-this->GeneratorRoot.TheObjects[j]*(i+1));
+        tempM.degrees[j]=(int) (-this->GeneratorRoot.TheObjects[j]*(i+1));
       if( this->Elongation>0)
-        tempM.degrees[j]=(short) (this->GeneratorRoot.TheObjects[j]*i);
+        tempM.degrees[j]=(int) (this->GeneratorRoot.TheObjects[j]*i);
       if( this->Elongation==0)
-        tempM.degrees[j]=(short) (this->GeneratorRoot.TheObjects[j]);
+        tempM.degrees[j]=(int) (this->GeneratorRoot.TheObjects[j]);
     }
     output.AddMonomial(tempM);
   }
@@ -16233,7 +16233,7 @@ void PolyPartFractionNumeratorLight::AssignPolyPartFractionNumerator(PolyPartFra
 }
 
 void PolyPartFractionNumeratorLight::ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output, int theDimension) const
-{ output.Nullify((short)theDimension);
+{ output.Nullify((int)theDimension);
   output.MakeActualSizeAtLeastExpandOnTop(this->size);
   for (int i=0; i<this->size; i++)
   { MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> tempM;
@@ -16463,8 +16463,8 @@ bool MatrixLargeRational  ::SystemLinearEqualitiesWithPositiveColumnVectorHasNon
 bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint)
 {/* static MatrixLargeRational tempMatA;
   static MatrixLargeRational matX;
-  static short NumTrueVariables;
-  short numExtraColumns=0;
+  static int NumTrueVariables;
+  int numExtraColumns=0;
   static Rational GlobalGoal;
   GlobalGoal.MakeZero();
   assert (matA.NumRows== matb.NumRows);
@@ -16489,7 +16489,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRationa
     }
   }
   int LowestBadIndex= tempMatA.NumCols- numExtraColumns;
-  short tempCounter=0;
+  int tempCounter=0;
   for (int j=0; j<matA.NumRows; j++)
   { tempMatA.elements[j][j+NumTrueVariables*2].MakeOne();
     if (matb.elements[j][0].IsNonNegative())
@@ -21511,7 +21511,7 @@ void ElementWeylAlgebra::MultiplyTwoMonomials(Monomial<Rational>& left, Monomial
   for (int i=0; i<numCycles; i++)
   { buffer.Coefficient.Assign(coeffProd);
     for (int k=0; k< theDimension; k++)
-    { short multDrop=(short)tempSel.Multiplicities.TheObjects[k];
+    { int multDrop=(int)tempSel.Multiplicities.TheObjects[k];
       buffer.Coefficient.MultiplyBy(Rational::NChooseK(left.degrees[theDimension+k], multDrop)*Rational::NChooseK(right.degrees[k], multDrop)* Rational::Factorial(multDrop));
       buffer.degrees[k]=left.degrees[k]+right.degrees[k]-multDrop;
       buffer.degrees[k+theDimension]= left.degrees[k+theDimension]+right.degrees[k+theDimension]-multDrop;
@@ -21559,7 +21559,7 @@ void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft
 void ElementWeylAlgebra::MakeConst(int NumVars, const Rational& theConst)
 { this->Nullify(NumVars);
   Monomial<Rational> tempM;
-  tempM.init((short)this->NumVariables*2);
+  tempM.init((int)this->NumVariables*2);
   tempM.Coefficient.Assign(theConst);
   this->StandardOrder.AddMonomial(tempM);
 }
@@ -21580,7 +21580,7 @@ void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRig
 void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
 { PolynomialRationalCoeff buffer;
   PolynomialRationalCoeff Accum;
-  Accum.Nullify((short) this->NumVariables*2);
+  Accum.Nullify((int) this->NumVariables*2);
   for (int j=0; j<standsOnTheLeft.StandardOrder.size; j++)
     for (int i=0; i<this->StandardOrder.size; i++)
     { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder.TheObjects[j], this->StandardOrder.TheObjects[i], buffer);
@@ -21592,7 +21592,7 @@ void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, 
 void ElementWeylAlgebra::MultiplyOnTheRight(const ElementWeylAlgebra& standsOnTheRight)
 { PolynomialRationalCoeff buffer;
   PolynomialRationalCoeff Accum;
-  Accum.Nullify((short) this->NumVariables*2);
+  Accum.Nullify((int) this->NumVariables*2);
   for (int j=0; j<standsOnTheRight.StandardOrder.size; j++)
     for (int i=0; i<this->StandardOrder.size; i++)
     { this->MultiplyTwoMonomials(this->StandardOrder.TheObjects[i], standsOnTheRight.StandardOrder.TheObjects[j], buffer);
@@ -21670,11 +21670,11 @@ void ElementWeylAlgebra::SetNumVariablesPreserveExistingOnes(int newNumVars)
 { if (newNumVars<this->NumVariables)
     this->NumVariables=newNumVars;
   PolynomialRationalCoeff Accum;
-  Accum.Nullify((short)newNumVars*2);
+  Accum.Nullify((int)newNumVars*2);
   Accum.MakeActualSizeAtLeastExpandOnTop(this->StandardOrder.size);
   Monomial<Rational> tempM;
   for (int i=0; i<this->StandardOrder.size; i++)
-  { tempM.init((short)newNumVars*2);
+  { tempM.init((int)newNumVars*2);
     for (int j=0; j< this->NumVariables; j++)
     { tempM.degrees[j]=this->StandardOrder.TheObjects[i].degrees[j];
       tempM.degrees[j+newNumVars]=this->StandardOrder.TheObjects[i].degrees[j+this->NumVariables];
@@ -21690,13 +21690,13 @@ void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]=1;
   tempMon.degrees[j+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon);
 
   tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[j]=1;
   tempMon.degrees[i+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon);
@@ -21706,13 +21706,13 @@ void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]=1;
   tempMon.degrees[j+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon);
 
   tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[j+NumVars]=1;
   tempMon.degrees[i+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon);
@@ -21722,13 +21722,13 @@ void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
 { this->Nullify(NumVars*2);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i+NumVars]=1;
   tempMon.degrees[j+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon);
 
   tempMon.Coefficient.MakeMOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[j+NumVars]=1;
   tempMon.degrees[i+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon);
@@ -21738,7 +21738,7 @@ void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
 { this->Nullify(NumVars);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i+NumVars]++;
   tempMon.degrees[j+NumVars]++;
   this->StandardOrder.AddMonomial(tempMon);
@@ -21748,7 +21748,7 @@ void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
 { this->Nullify(NumVars);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]++;
   tempMon.degrees[j]++;
   this->StandardOrder.AddMonomial(tempMon);
@@ -21758,7 +21758,7 @@ void ElementWeylAlgebra::Makexi(int i, int NumVars)
 { this->Nullify(NumVars);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]++;
   this->StandardOrder.AddMonomial(tempMon);
 }
@@ -21767,7 +21767,7 @@ void ElementWeylAlgebra::Makedi(int i, int NumVars)
 { this->Nullify(NumVars);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i+NumVars]++;
   this->StandardOrder.AddMonomial(tempMon);
 }
@@ -21776,7 +21776,7 @@ void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
 { this->Nullify(NumVars);
   Monomial<Rational> tempMon;
   tempMon.Coefficient.MakeOne();
-  tempMon.MakeConstantMonomial((short)this->NumVariables*2, tempMon.Coefficient);
+  tempMon.MakeConstantMonomial((int)this->NumVariables*2, tempMon.Coefficient);
   tempMon.degrees[i]=1;
   tempMon.degrees[NumVars+j]=1;
   this->StandardOrder.AddMonomial(tempMon);
@@ -21784,7 +21784,7 @@ void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
 
 void ElementWeylAlgebra::Nullify(int NumVars)
 { this->NumVariables=NumVars;
-  this->StandardOrder.Nullify ((short)this->NumVariables*2);
+  this->StandardOrder.Nullify ((int)this->NumVariables*2);
 }
 
 void IrreducibleFiniteDimensionalModule::ElementToString(std::string& output)
@@ -22192,7 +22192,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(roots& RootsWit
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
   Monomial<Rational> tempM;
-  tempM.init((short)numberVariables);
+  tempM.init((int)numberVariables);
   MatrixLargeRational coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i=0; i<numRootsChar2; i++)
@@ -22240,9 +22240,9 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Se
           indexEquation=outputSystemToBeSolved.size;
 //          IndicesEquationsByRootSpace.AddObjectOnTop(indexEquation);
           outputSystemToBeSolved.SetSize(outputSystemToBeSolved.size+1);
-          outputSystemToBeSolved.LastObject()->Nullify((short)numberVariables);
+          outputSystemToBeSolved.LastObject()->Nullify((int)numberVariables);
         }
-        tempM.init((short)numberVariables);
+        tempM.init((int)numberVariables);
         tempM.degrees[i]=1;
         tempM.degrees[j+halfNumberVariables]=1;
         tempM.Coefficient= this->GetConstant(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[j]);
@@ -22253,13 +22253,13 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Se
   int oldSize=outputSystemToBeSolved.size;
   outputSystemToBeSolved.SetSize(oldSize+this->theWeyl.CartanSymmetric.NumRows);
   for(int i=oldSize; i<outputSystemToBeSolved.size; i++)
-    outputSystemToBeSolved.TheObjects[i].Nullify((short)numberVariables);
+    outputSystemToBeSolved.TheObjects[i].Nullify((int)numberVariables);
   //outputSystemToBeSolved.ComputeDebugString();
   for (int i=0; i<rootsInPlay.size; i++)
   { assert(rootsInPlay.size==halfNumberVariables);
     this->GetConstantOrHElement(rootsInPlay.TheObjects[i], -rootsInPlay.TheObjects[i], tempRat, tempRoot);
     for (int j=0; j<this->theWeyl.CartanSymmetric.NumRows; j++)
-    { tempM.init((short)numberVariables);
+    { tempM.init((int)numberVariables);
       tempM.degrees[i]=1;
       tempM.degrees[i+halfNumberVariables]=1;
       tempM.Coefficient= tempRoot.TheObjects[j];
@@ -25760,6 +25760,11 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
       this->polyValue.GetElement().RaiseToPower(thePower);
       this->ExpressionType=this->typePoly;
       break;
+    case ParserNode::typeRationalFunction:
+      this->ratFunction.GetElement()=leftNode.ratFunction.GetElementConst();
+      this->ratFunction.GetElement().RaiseToPower(thePower);
+      this->ExpressionType=this->typeRationalFunction;
+      break;
     case ParserNode::typeUEelement:
       this->UEElement.GetElement()=leftNode.UEElement.GetElement();
       this->UEElement.GetElement().RaiseToPower(thePower);
@@ -25851,7 +25856,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
       return;
     }
     this->owner->NumVariables=MathRoutines::Maximum(theIndex, this->owner->NumVariables);
-    this->polyValue.GetElement().MakeMonomialOneLetter((short)this->owner->NumVariables, theIndex-1, 1, (Rational) 1);
+    this->polyValue.GetElement().MakeMonomialOneLetter((int)this->owner->NumVariables, theIndex-1, 1, (Rational) 1);
     this->ExpressionType=this->typePoly;
     return;
   }
@@ -25868,7 +25873,7 @@ void ParserNode::InitForAddition()
 { this->intValue=0;
   this->rationalValue.MakeZero();
   if (this->ExpressionType==this->typePoly)
-    this->polyValue.GetElement().Nullify((short)this->owner->NumVariables);
+    this->polyValue.GetElement().Nullify((int)this->owner->NumVariables);
   if (this->ExpressionType==this->typeUEelement)
     this->UEElement.GetElement().Nullify(*this->ContextLieAlgebra);
   if (this->ExpressionType==this->typeUEElementOrdered)
@@ -25883,7 +25888,7 @@ void ParserNode::InitForMultiplication()
 { this->intValue=1;
   this->rationalValue=1;
   if(this->ExpressionType==this->typePoly)
-    this->polyValue.GetElement().MakeNVarConst((short)this->owner->NumVariables, (Rational)1);
+    this->polyValue.GetElement().MakeNVarConst((int)this->owner->NumVariables, (Rational)1);
   if(this->ExpressionType==this->typeUEelement)
     this->UEElement.GetElement().AssignInt(1, this->owner->NumVariables, *this->ContextLieAlgebra);
   if(this->ExpressionType==this->typeUEElementOrdered)
@@ -25957,6 +25962,7 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
     { case ParserNode::typeIntegerOrIndex: if (i==0) this->intValue+=currentChild.intValue; else this->intValue-=currentChild.intValue; break;
       case ParserNode::typeRational: if (i==0) this->rationalValue+=currentChild.rationalValue; else this->rationalValue-=currentChild.rationalValue; break;
       case ParserNode::typePoly: if(i==0) this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); else this->polyValue.GetElement().Subtract(currentChild.polyValue.GetElement()); break;
+      case ParserNode::typeRationalFunction: if(i==0) this->ratFunction.GetElement()+=(currentChild.ratFunction.GetElement()); else this->ratFunction.GetElement()-=(currentChild.ratFunction.GetElement()); break;
       case ParserNode::typeUEelement: if (i==0) this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); else this->UEElement.GetElement()-=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeUEElementOrdered: if (i==0) this->UEElementOrdered.GetElement()+=currentChild.UEElementOrdered.GetElement(); else this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
       case ParserNode::typeWeylAlgebraElement: if (i==0) this->WeylAlgebraElement.GetElement()+=currentChild.WeylAlgebraElement.GetElement(); else this->WeylAlgebraElement.GetElement()-=currentChild.WeylAlgebraElement.GetElement(); break;
@@ -26547,3 +26553,4 @@ void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, bool
   }
   output=out.str();
 }
+

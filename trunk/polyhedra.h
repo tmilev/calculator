@@ -1395,7 +1395,9 @@ void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Ele
         if (j!=NumFoundPivots)
           if (!mat.elements[j][i].IsEqualToZero())
           { if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
-              tempS=tempElement.ElementToString();
+            { tempS=tempElement.ElementToString();
+              mat.ComputeDebugString();
+            }
             tempElement.Assign(mat.elements[j][i]);
             tempElement.Minus();
             if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)

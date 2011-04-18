@@ -1735,6 +1735,7 @@ void RationalFunction::operator*=(const RationalFunction& other)
   other.Numerator.GetElementConst().DivideBy(theGCD2, tempP1, tempP2);
   assert(tempP2.IsEqualToZero());
   this->Numerator.GetElement().MultiplyBy(tempP1);
+  this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
 }
 

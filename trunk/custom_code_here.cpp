@@ -1969,8 +1969,20 @@ class TensorProductSpaceAndElements: public List<TensorProductElement<ElementLef
      const CoefficientType& theRingUnit,
      GlobalVariables& theGlobalVariables)
      ;
+  void initTheSpacesSl2StringVersion
+  ( List<ElementSimpleLieAlgebra>& theElementsActing, SemisimpleLieAlgebra& theAlgebra, List<ElementLeft>& theLeftElts, List<ElementRight>& theRightElts,
+    const ElementLeft& leftZero, const ElementRight& rightZero, const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
+    GlobalVariables& theGlobalVariables)
+     ;
   void GetRootForm(roots& output, GlobalVariables& theGlobalVariables);
   bool FindEigenVectorsWithRespectTo
+  (List<ElementSimpleLieAlgebra>& theElementsActing,  List<ElementLeft>& theLeftElts, List<ElementRight>& theRightElts,
+   SemisimpleLieAlgebra& theAlgebra, TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>& output,
+   const ElementLeft& leftZero, const ElementRight& rightZero,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
+   GlobalVariables& theGlobalVariables)
+  ;
+  bool FindEigenVectorsWithRespectToSl2StringVersion
   (List<ElementSimpleLieAlgebra>& theElementsActing,  List<ElementLeft>& theLeftElts, List<ElementRight>& theRightElts,
    SemisimpleLieAlgebra& theAlgebra, TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>& output,
    const ElementLeft& leftZero, const ElementRight& rightZero,
@@ -1988,14 +2000,20 @@ bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
 class TranslationFunctorGmodKVermaModule
 {
 public:
-  List<TensorProductSpaceAndElements<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction> >theElements;
-  List<TensorProductSpaceAndElements<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction> >theEigenVectors;
+  List<TensorProductSpaceAndElements<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction> > theElements;
+  List<TensorProductSpaceAndElements<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction> > theEigenVectors;
+  TensorProductSpaceAndElements<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction> theSpace;
   roots theModuleWeightsShifted;
   List<ElementSimpleLieAlgebra> ElementsOfKofNegativeWeights;
-  List<List<ElementVermaModuleOrdered<RationalFunction> > > theLeftComponents;
-  List<List<ElementSimpleLieAlgebra> > theRightComponents;
+  List<ElementVermaModuleOrdered<RationalFunction> > leftComponentS;
+  List<ElementSimpleLieAlgebra> rightComponentS;
+  List<List<ElementVermaModuleOrdered<RationalFunction> > > theLeftComponentsByWeight;
+  List<List<ElementSimpleLieAlgebra> > theRightComponentsByWeight;
   VectorPartition theVectorPartition;
   PolynomialsRationalCoeff HighestWeightSub;
+  std::string RunTheComputationSl2StringVersion
+  (Parser& theParser, GlobalVariables& theGlobalVariables, EigenVectorComputation& owner)
+  ;
 
   std::string RunTheComputation
   (Parser& theParser, GlobalVariables& theGlobalVariables, EigenVectorComputation& owner)
@@ -2007,8 +2025,14 @@ public:
   std::string initTheCandidateMonomials
     (Parser& theParser, GlobalVariables& theGlobalVariables)
   ;
+  std::string initTheCandidateMonomialsSl2StringVersion
+    (Parser& theParser, GlobalVariables& theGlobalVariables)
+  ;
   std::string GetLeftAndRightFromVP
   (int indexTotalWeight, int indexRightWeight, VectorPartition& theVP, Parser& theParser, GlobalVariables& theGlobalVariables)
+ ;
+  std::string GetLeftFromVP
+  (int indexTotalWeight, VectorPartition& theVP, Parser& theParser, GlobalVariables& theGlobalVariables)
  ;
 };
 
@@ -2016,7 +2040,7 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
 (GlobalVariables& theGlobalVariables, Parser& theParser, int NodeIndex)
 { std::stringstream out;
   TranslationFunctorGmodKVermaModule theTranslationFunctor;
-  out << theTranslationFunctor.RunTheComputation(theParser, theGlobalVariables, *this);
+  out << theTranslationFunctor.RunTheComputationSl2StringVersion(theParser, theGlobalVariables, *this);
   return out.str();
   ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> theElt, tempElt1, tempElt2;
   PolynomialOutputFormat PolyFormatLocal;
@@ -4834,6 +4858,33 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtK
   }
 }
 
+std::string TranslationFunctorGmodKVermaModule::RunTheComputationSl2StringVersion
+  (Parser& theParser, GlobalVariables& theGlobalVariables, EigenVectorComputation& owner)
+{ std::stringstream out;
+  owner.PrepareCartanSub(theParser.testAlgebra, this->HighestWeightSub, theGlobalVariables);
+  std::cout << this->HighestWeightSub.ElementToString();
+
+  out << this->initTheCandidateMonomialsSl2StringVersion(theParser, theGlobalVariables);
+
+  int theDomainRank=theParser.theHmm.theDomain.GetRank();
+  int numPosRootsDomain=theParser.theHmm.theDomain.GetNumPosRoots();
+  List<ElementSimpleLieAlgebra> theSimpleGenerators;
+  theSimpleGenerators.SetSize(theDomainRank);
+  for (int i=0; i<theDomainRank; i++)
+    theSimpleGenerators.TheObjects[i]=theParser.theHmm.imagesAllChevalleyGenerators.TheObjects[i+theDomainRank+numPosRootsDomain];
+  //return out.str();
+  ElementSimpleLieAlgebra zeroAlgebraElement;
+  ElementVermaModuleOrdered<RationalFunction> zeroVermaElement;
+  zeroAlgebraElement.Nullify(theParser.theHmm.theRange);
+  zeroVermaElement.Nullify(theParser.testAlgebra, this->HighestWeightSub);
+  RationalFunction RFOne, RFZero;
+  RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
+  RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
+  this->theSpace.FindEigenVectorsWithRespectToSl2StringVersion(theSimpleGenerators, this->leftComponentS, this->rightComponentS, theParser.theHmm.theRange, this->theSpace, zeroVermaElement, zeroAlgebraElement, RFOne, RFZero, theGlobalVariables);
+  return out.str();
+}
+
+
 std::string TranslationFunctorGmodKVermaModule::RunTheComputation
   (Parser& theParser, GlobalVariables& theGlobalVariables, EigenVectorComputation& owner)
 { std::stringstream out;
@@ -4858,7 +4909,7 @@ std::string TranslationFunctorGmodKVermaModule::RunTheComputation
   //for (int i=this->theModuleWeightsShifted.size-1; i>=0; i--)
   int i=0;
   { TensorProductSpaceAndElements<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction>& currentCollection=this->theElements.TheObjects[i];
-    currentCollection.FindEigenVectorsWithRespectTo(theSimpleGenerators, this->theLeftComponents.TheObjects[i], this->theRightComponents.TheObjects[i], theParser.theHmm.theRange, this->theEigenVectors.TheObjects[i], zeroVermaElement, zeroAlgebraElement, RFOne, RFZero, theGlobalVariables);
+    currentCollection.FindEigenVectorsWithRespectTo(theSimpleGenerators, this->theLeftComponentsByWeight.TheObjects[i], this->theRightComponentsByWeight.TheObjects[i], theParser.theHmm.theRange, this->theEigenVectors.TheObjects[i], zeroVermaElement, zeroAlgebraElement, RFOne, RFZero, theGlobalVariables);
   }
   return out.str();
 }
@@ -4874,20 +4925,20 @@ std::string TranslationFunctorGmodKVermaModule::initTheWeights
 //  SemisimpleLieAlgebraOrdered& theAlgebra=theParser.testAlgebra;
   this->theElements.SetSize(this->theModuleWeightsShifted.size);
   this->theEigenVectors.SetSize(this->theModuleWeightsShifted.size);
-  this->theLeftComponents.SetSize(this->theModuleWeightsShifted.size);
-  this->theRightComponents.SetSize(this->theModuleWeightsShifted.size);
+  this->theLeftComponentsByWeight.SetSize(this->theModuleWeightsShifted.size);
+  this->theRightComponentsByWeight.SetSize(this->theModuleWeightsShifted.size);
 
   MatrixLargeRational invertedCartan;
   invertedCartan=theParser.theHmm.theDomain.theWeyl.CartanSymmetric;
   invertedCartan.Invert(theGlobalVariables);
-  out << "<br>" << this->theModuleWeightsShifted.ElementToString() << "<br>";
+//  out << "<br>" << this->theModuleWeightsShifted.ElementToString() << "<br>";
   invertedCartan.ActOnRoots(this->theModuleWeightsShifted);
   invertedCartan.ActOnRoots(theAlgebraWeights);
-  out << "<br>" << this->theModuleWeightsShifted.ElementToString() << "<br>";
+//  out << "<br>" << this->theModuleWeightsShifted.ElementToString() << "<br>";
   root tempRoot=*this->theModuleWeightsShifted.LastObject();
   for (int i=0; i<this->theModuleWeightsShifted.size; i++)
     this->theModuleWeightsShifted.TheObjects[i]-=tempRoot;
-  out << "<br>" << this->theModuleWeightsShifted.ElementToString() << "<br>";
+//  out << "<br>" << this->theModuleWeightsShifted.ElementToString() << "<br>";
   this->ElementsOfKofNegativeWeights.size=0;
   this->theVectorPartition.PartitioningRoots.size=0;
   for (int i=0; i<theAlgebraWeights.size; i++)
@@ -4928,6 +4979,61 @@ std::string TranslationFunctorGmodKVermaModule::initTheCandidateMonomials
   return out.str();
 }
 
+std::string TranslationFunctorGmodKVermaModule::initTheCandidateMonomialsSl2StringVersion
+  (Parser& theParser, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  out << this->initTheWeights(theParser, theGlobalVariables);
+  out << this->theVectorPartition.ElementToString(true);
+  assert(this->HighestWeightSub.size==3);
+  this->leftComponentS.size=0;
+  for (int i=this->theModuleWeightsShifted.size-1; i>=0; i--)
+  { root& weightTotal=theModuleWeightsShifted.TheObjects[i];
+    this->theVectorPartition.theRoot=-weightTotal;
+    this->theVectorPartition.ComputeAllPartitions();
+    out << this->GetLeftFromVP(i, this->theVectorPartition, theParser, theGlobalVariables);
+    out << "<br><br><br>";
+  }
+  return out.str();
+}
+
+std::string TranslationFunctorGmodKVermaModule::GetLeftFromVP
+  (int indexTotalWeight, VectorPartition& theVP, Parser& theParser, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  out << "<br>total weight: " << this->theModuleWeightsShifted.TheObjects[indexTotalWeight].ElementToString();
+  ElementVermaModuleOrdered<RationalFunction> leftComponent;
+  ElementUniversalEnvelopingOrdered<RationalFunction> leftComponentBeforeModdingVermaRels, tempElt;
+  ElementSimpleLieAlgebra& rightComponent=theParser.theHmm.GmodK.TheObjects[indexTotalWeight];
+  this->rightComponentS.AddObjectOnTop(rightComponent);
+  RationalFunction RFOne, RFZero;
+  PolynomialOutputFormat polyFormatLocal;
+  int theNumVars=theParser.theHmm.theRange.GetRank();
+  RFOne.MakeNVarConst(theNumVars, (Rational) 1, &theGlobalVariables);
+  RFZero.Nullify(theNumVars, &theGlobalVariables);
+  out << "<br> the vector partition: " << theVP.ElementToString(true);
+  ElementVermaModuleOrdered<RationalFunction> theVermaZero;
+  assert(this->HighestWeightSub.size==3);
+  theVermaZero.Nullify(theParser.testAlgebra, this->HighestWeightSub);
+  for (int i=0; i<theVP.thePartitions.size; i++)
+  { leftComponentBeforeModdingVermaRels.MakeConst(RFOne, theParser.testAlgebra);
+    for (int j=0; j<theVP.thePartitions.TheObjects[i].size; j++)
+    { int currentMultiplicity=theVP.thePartitions.TheObjects[i].TheObjects[j];
+      if (currentMultiplicity>0)
+      { tempElt.AssignElementLieAlgebra(this->ElementsOfKofNegativeWeights.TheObjects[j], RFOne, RFZero, theParser.testAlgebra);
+        tempElt.RaiseToPower(currentMultiplicity, RFOne);
+        leftComponentBeforeModdingVermaRels.operator*=(tempElt);
+      }
+    }
+
+    leftComponent.AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(leftComponentBeforeModdingVermaRels, theVermaZero, &theGlobalVariables);
+    this->leftComponentS.AddObjectOnTop(leftComponent);
+    //out << "<br>Left element before modding: " << leftComponentBeforeModdingVermaRels.ElementToString() << " and after modding: "<< leftComponent.ElementToString();
+    out << "<br>Left element: "<< leftComponent.ElementToString();
+  }
+  return out.str();
+//  currentElement.AssignTensor(leftComponent, rightComponent);
+}
+
+
 std::string TranslationFunctorGmodKVermaModule::GetLeftAndRightFromVP
   (int indexTotalWeight, int indexRightWeight, VectorPartition& theVP, Parser& theParser, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
@@ -4943,8 +5049,8 @@ std::string TranslationFunctorGmodKVermaModule::GetLeftAndRightFromVP
   RFZero.Nullify(theNumVars, &theGlobalVariables);
   //RFOne.operator=(PolyOne);
   out << "<br>right element:" << rightComponent.ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
-  List<ElementVermaModuleOrdered<RationalFunction> >& currentLeftCollection= this->theLeftComponents.TheObjects[indexTotalWeight];
-  List<ElementSimpleLieAlgebra>& currentRightCollection = this->theRightComponents.TheObjects[indexTotalWeight];
+  List<ElementVermaModuleOrdered<RationalFunction> >& currentLeftCollection= this->theLeftComponentsByWeight.TheObjects[indexTotalWeight];
+  List<ElementSimpleLieAlgebra>& currentRightCollection = this->theRightComponentsByWeight.TheObjects[indexTotalWeight];
   out << "<br> the vector partition: " << theVP.ElementToString(true);
   ElementVermaModuleOrdered<RationalFunction> theVermaZero;
   assert(this->HighestWeightSub.size==3);
@@ -5026,6 +5132,20 @@ std::string TensorProductSpaceAndElements<ElementLeft, ElementRight, Coefficient
   return out.str();
 }
 
+template <class ElementLeft, class ElementRight, class CoefficientType>
+bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::FindEigenVectorsWithRespectToSl2StringVersion
+  (List<ElementSimpleLieAlgebra>& theElementsActing,  List<ElementLeft>& theLeftElts, List<ElementRight>& theRightElts,
+   SemisimpleLieAlgebra& theAlgebra, TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>& output,
+   const ElementLeft& leftZero, const ElementRight& rightZero,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
+   GlobalVariables& theGlobalVariables)
+{ Matrix<RationalFunction> theSystem;
+  this->initTheSpacesForAdjointAction(theElementsActing, theAlgebra, theLeftElts, theRightElts, leftZero, rightZero, theRingUnit, theRingZero, theGlobalVariables);
+  std::cout << "<br><br>the starting space: " << this->theStartingSpace.ElementToString();
+  std::cout << "<br><br>the target space: " << this->theTargetSpace.ElementToString();
+  this->PrepareTheMatrix(theElementsActing, theAlgebra, theSystem, theGlobalVariables);
+  return false;
+}
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::FindEigenVectorsWithRespectTo
@@ -5120,6 +5240,21 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
     std::cout << this->TheObjects[i].ElementToString() << ", ";
   }
 
+}
+
+template <class ElementLeft, class ElementRight, class CoefficientType>
+void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::initTheSpacesSl2StringVersion
+  ( List<ElementSimpleLieAlgebra>& theElementsActing, SemisimpleLieAlgebra& theAlgebra, List<ElementLeft>& theLeftElts, List<ElementRight>& theRightElts,
+    const ElementLeft& leftZero, const ElementRight& rightZero, const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
+    GlobalVariables& theGlobalVariables)
+{ this->theTargetSpace.theRingUniT=theRingUnit;
+  this->theTargetSpace.theRingZerO=theRingZero;
+  this->theTargetSpace.leftSpaceBasis=theLeftElts;
+  this->theTargetSpace.rightSpaceBasis=theRightElts;
+  this->SetSize(theLeftElts.size*theRightElts.size);
+  for (int i=0; i<theLeftElts.size; i++)
+    for (int j=0; j<theRightElts.size; j++)
+      this->TheObjects[i].SetTensorProduct(theLeftElts.TheObjects[i], theRightElts.TheObjects[j], this->theTargetSpace, theGlobalVariables);
 }
 
 template <class ElementLeft, class ElementRight, class CoefficientType>

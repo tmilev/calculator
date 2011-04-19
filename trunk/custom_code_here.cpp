@@ -732,14 +732,14 @@ void ElementUniversalEnveloping::ModOutVermaRelations(bool SubHighestWeightWithZ
 
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
-  (bool SubHighestWeightWithZeroes, PolynomialsRationalCoeff& highestWeightSub)
+  (bool SubHighestWeightWithZeroes, const PolynomialsRationalCoeff& highestWeightSub, GlobalVariables* theContext)
 { MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
   ElementUniversalEnvelopingOrdered<CoefficientType> output;
   output.Nullify(*this->owner);
   for (int i=0; i<this->size; i++)
   { tempMon= this->TheObjects[i];
     tempMon.ComputeDebugString();
-    tempMon.ModOutVermaRelations(SubHighestWeightWithZeroes, highestWeightSub);
+    tempMon.ModOutVermaRelations(SubHighestWeightWithZeroes, highestWeightSub, theContext);
     tempMon.ComputeDebugString();
     output.AddMonomial(tempMon);
   }
@@ -898,7 +898,7 @@ void MonomialUniversalEnveloping::ModOutVermaRelations(bool SubHighestWeightWith
 
 template <class CoefficientType>
 void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
-  (bool SubHighestWeightWithZeroes, PolynomialsRationalCoeff& highestWeightSub)
+  (bool SubHighestWeightWithZeroes, const PolynomialsRationalCoeff& highestWeightSub, GlobalVariables* theContext)
 { int numPosRoots=this->owner->theOwner.GetNumPosRoots();
   int theDimension=this->owner->theOwner.GetRank();
   int theNumVars=this->Coefficient.NumVars;
@@ -910,7 +910,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
   { int IndexCurrentGenerator=this->generatorsIndices.TheObjects[i];
     if (IndexCurrentGenerator>=numPosRoots+theDimension)
-    { this->Nullify(theNumVars, *this->owner);
+    { this->Nullify(theNumVars, *this->owner, theContext);
       return;
     }
     if (IndexCurrentGenerator<numPosRoots)
@@ -920,7 +920,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
       if (!this->Powers.TheObjects[i].IsSmallInteger(theDegree))
         return;
       if (SubHighestWeightWithZeroes)
-      { this->Nullify(theNumVars, *this->owner);
+      { this->Nullify(theNumVars, *this->owner, theContext);
         return;
       }
       PolynomialRationalCoeff tempP;
@@ -1642,7 +1642,7 @@ std::string rootRationalFunction::ElementToString()
 
 void RationalFunction::operator*=(const PolynomialRationalCoeff& other)
 { if (other.IsEqualToZero())
-  { this->Nullify(this->NumVars);
+  { this->Nullify(this->NumVars, this->context);
     return;
   }
   if (this->expressionType== this->typeRational)
@@ -1653,29 +1653,44 @@ void RationalFunction::operator*=(const PolynomialRationalCoeff& other)
     return;
   }
   PolynomialRationalCoeff theGCD, theResult, tempP;
-  RationalFunction::gcd(this->Denominator.GetElement(), other, theGCD);
+  if (this->context!=0)
+  { std::stringstream out;
+    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
+    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
+    this->context->theIndicatorVariables.StatusString1=out.str();
+    this->context->MakeReport();
+  }
+  RationalFunction::gcd(this->Denominator.GetElement(), other, theGCD, this->context);
   this->Numerator.GetElement()*=other;
   this->Numerator.GetElement().DivideBy(theGCD, theResult, tempP);
-  theGCD.ComputeDebugString();
-  theResult.ComputeDebugString();
-  tempP.ComputeDebugString();
+  //theGCD.ComputeDebugString();
+  //theResult.ComputeDebugString();
+  //tempP.ComputeDebugString();
   assert(tempP.IsEqualToZero());
   this->Numerator.GetElement()=theResult;
   this->Denominator.GetElement().DivideBy(theGCD, theResult, tempP);
-  theGCD.ComputeDebugString();
-  theResult.ComputeDebugString();
+  //theGCD.ComputeDebugString();
+  //theResult.ComputeDebugString();
   tempP.ComputeDebugString();
   assert(tempP.IsEqualToZero());
   this->Denominator.GetElement()=theResult;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
-  this->ComputeDebugString();
+  if (this->context!=0)
+  { std::stringstream out;
+    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
+    out << " and the result is:\n" << this->ElementToString();
+    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
+    this->context->theIndicatorVariables.StatusString1=out.str();
+    this->context->MakeReport();
+  }
+//  this->ComputeDebugString();
 }
 
 void RationalFunction::operator*=(const Rational& other)
 { assert(this->checkConsistency());
   if (other.IsEqualToZero())
-  { this->Nullify(this->NumVars);
+  { this->Nullify(this->NumVars, this->context);
     return;
   }
   switch(this->expressionType)
@@ -1690,8 +1705,10 @@ void RationalFunction::operator*=(const RationalFunction& other)
   assert(this->checkConsistency());
   assert(other.checkConsistency());
   assert(this!=&other);
+  if (other.context!=0)
+    this->context=other.context;
   if (other.IsEqualToZero() || this->IsEqualToZero())
-  { this->Nullify(this->NumVars);
+  { this->Nullify(this->NumVars, this->context);
     return;
   }
   if (other.expressionType==this->typeRational)
@@ -1718,11 +1735,18 @@ void RationalFunction::operator*=(const RationalFunction& other)
   }
   PolynomialRationalCoeff theGCD1, theGCD2, tempP1, tempP2;
   //this->ComputeDebugString();
-  RationalFunction tempde_Bugger;
-  tempde_Bugger=other;
-  tempde_Bugger.ComputeDebugString();
-  RationalFunction::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1);
-  RationalFunction::gcd(this->Denominator.GetElement(), other.Numerator.GetElementConst(), theGCD2);
+//  RationalFunction tempde_Bugger;
+//  tempde_Bugger=other;
+//  tempde_Bugger.ComputeDebugString();
+  if (this->context!=0)
+  { std::stringstream out;
+    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
+    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
+    this->context->theIndicatorVariables.StatusString1=out.str();
+    this->context->MakeReport();
+  }
+  RationalFunction::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1, this->context);
+  RationalFunction::gcd(this->Denominator.GetElement(), other.Numerator.GetElementConst(), theGCD2, this->context);
   this->Numerator.GetElement().DivideBy(theGCD1, tempP1, tempP2);
   this->Numerator.GetElement()=tempP1;
   assert(tempP2.IsEqualToZero());
@@ -1737,13 +1761,21 @@ void RationalFunction::operator*=(const RationalFunction& other)
   this->Numerator.GetElement().MultiplyBy(tempP1);
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
+  if (this->context!=0)
+  { std::stringstream out;
+    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
+    out << " and the result is:\n" << this->ElementToString();
+    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
+    this->context->theIndicatorVariables.StatusString1=out.str();
+    this->context->MakeReport();
+  }
 }
 
 void RationalFunction::Simplify()
 { if (this->expressionType==this->typeRationalFunction)
     if(!this->Numerator.GetElement().IsEqualToZero())
     { PolynomialRationalCoeff theGCD, tempP, tempP2;
-      this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD);
+      this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD, this->context);
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Numerator.GetElement().Assign(tempP);
       this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2);
@@ -1963,9 +1995,10 @@ public:
   List<List<ElementVermaModuleOrdered<RationalFunction> > > theLeftComponents;
   List<List<ElementSimpleLieAlgebra> > theRightComponents;
   VectorPartition theVectorPartition;
+  PolynomialsRationalCoeff HighestWeightSub;
 
   std::string RunTheComputation
-  (Parser& theParser, GlobalVariables& theGlobalVariables)
+  (Parser& theParser, GlobalVariables& theGlobalVariables, EigenVectorComputation& owner)
   ;
   std::string initTheWeights
     (Parser& theParser, GlobalVariables& theGlobalVariables)
@@ -1983,7 +2016,7 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
 (GlobalVariables& theGlobalVariables, Parser& theParser, int NodeIndex)
 { std::stringstream out;
   TranslationFunctorGmodKVermaModule theTranslationFunctor;
-  out << theTranslationFunctor.RunTheComputation(theParser, theGlobalVariables);
+  out << theTranslationFunctor.RunTheComputation(theParser, theGlobalVariables, *this);
   return out.str();
   ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> theElt, tempElt1, tempElt2;
   PolynomialOutputFormat PolyFormatLocal;
@@ -2004,13 +2037,13 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   for (int i=0; i<theDomainRank; i++)
   { tempElt1.AssignElementLieAlgebra(theParser.theHmm.imagesSimpleChevalleyGenerators.TheObjects[i], polyOne, polyZero, theParser.testAlgebra);
     tempElt1.LieBracketOnTheRight(theElt, tempElt2);
-    tempElt2.Simplify();
+    tempElt2.Simplify(&theGlobalVariables);
     std::cout << "<br>" << tempElt1.ElementToString();
     out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
     out << "[" << tempElt1.ElementToString(true, PolyFormatLocal) << "," << theElt.ElementToString(true, PolyFormatLocal) << "]=" << tempElt2.ElementToString(true, PolyFormatLocal);
     out << "\\end{eqnarray*}</div>";
     std::cout << "<br>" << tempElt2.ElementToString();
-    tempElt2.ModOutVermaRelationS();
+    tempElt2.ModOutVermaRelationS(&theGlobalVariables);
     out << "mod Verma rels:";
     out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
     out << tempElt2.ElementToString(true, PolyFormatLocal);
@@ -2109,7 +2142,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
   out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&&" << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
   root tempRoot;
   RationalFunction ZeroRF;
-  ZeroRF.MakeNVarConst(numCoeffVars, (Rational) 0);
+  ZeroRF.MakeNVarConst(numCoeffVars, (Rational) 0, &theGlobalVariables);
   tempRoot.MakeZero(numRangePosRoots);
   if(this->theExponentShifts.AddOnTopNoRepetition(tempRoot))
     this->theSystem.Resize(this->theSystem.NumRows, this->theSystem.NumCols+1, true, &ZeroRF);
@@ -2914,9 +2947,9 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   List<List<RationalFunction> > theEigenVectors;
   PolynomialRationalCoeff::PreferredHashSize=50;
   RationalFunction oneRF, minusOneRF, zeroRF;
-  oneRF.MakeNVarConst(numVars, (Rational) 1);
-  minusOneRF.MakeNVarConst(numVars, (Rational) -1);
-  zeroRF.MakeNVarConst(numVars, (Rational) 0);
+  oneRF.MakeNVarConst(numVars, (Rational) 1, &theGlobalVariables);
+  minusOneRF.MakeNVarConst(numVars, (Rational) -1, &theGlobalVariables);
+  zeroRF.MakeNVarConst(numVars, (Rational) 0, &theGlobalVariables);
 
   theSystem.FindZeroEigenSpacE(theEigenVectors, oneRF, minusOneRF, zeroRF, theGlobalVariables);
   out << "<br> the dim of the eigen space: " << theEigenVectors.size;
@@ -3069,9 +3102,9 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   List<List<RationalFunction> > theEigenVectors;
   PolynomialRationalCoeff::PreferredHashSize=50;
   RationalFunction oneRF, minusOneRF, zeroRF;
-  oneRF.MakeNVarConst(numVars, (Rational) 1);
-  minusOneRF.MakeNVarConst(numVars, (Rational) -1);
-  zeroRF.MakeNVarConst(numVars, (Rational) 0);
+  oneRF.MakeNVarConst(numVars, (Rational) 1, &theGlobalVariables);
+  minusOneRF.MakeNVarConst(numVars, (Rational) -1, &theGlobalVariables);
+  zeroRF.MakeNVarConst(numVars, (Rational) 0, &theGlobalVariables);
 
   theSystem.FindZeroEigenSpacE(theEigenVectors, oneRF, minusOneRF, zeroRF, theGlobalVariables);
   out << "<br> the dim of the eigen space: " << theEigenVectors.size;
@@ -3176,15 +3209,15 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
       matSystem.elements[i][j]=theSystem.TheObjects[j].TheObjects[i];
   matSystem.ComputeDebugString(false, true);
   out << "<br>The system we need to solve:<br>" << beginMath << matSystem.DebugString << endMath << "<br>";
-  RationalFunction ZeroPoly, unitRF, MinusUnitPoly;
-  ZeroPoly.MakeNVarConst(theDimension, (Rational) 0);
-  unitRF.MakeNVarConst(theDimension, (Rational) 1);
+  RationalFunction ZeroRF, unitRF, MinusUnitPoly;
+  ZeroRF.MakeNVarConst(theDimension, (Rational) 0, &theGlobalVariables);
+  unitRF.MakeNVarConst(theDimension, (Rational) 1, &theGlobalVariables);
   PolynomialRationalCoeff unitPoly, zeroPolynomial;
   unitPoly.MakeNVarConst(theDimension, (Rational) 1);
   zeroPolynomial.Nullify(theDimension);
-  MinusUnitPoly.MakeNVarConst(theDimension, (Rational) -1);
+  MinusUnitPoly.MakeNVarConst(theDimension, (Rational) -1, &theGlobalVariables);
   List<List<RationalFunction> > theAnswer;
-  matSystem.FindZeroEigenSpacE(theAnswer, unitRF, MinusUnitPoly, ZeroPoly, theGlobalVariables);
+  matSystem.FindZeroEigenSpacE(theAnswer, unitRF, MinusUnitPoly, ZeroRF, theGlobalVariables);
   out << "The found solutions: <br>";
   rootRationalFunction tempRatRoot;
   std::string tempS;
@@ -3239,6 +3272,7 @@ void EigenVectorComputation::PrepareCartanSub
   outputSub.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
   { MatrixCartanSub.RowToRoot(i, tempRoot);
+    tempRoot.ComputeDebugString();
     outputSub.TheObjects[i].MakeLinPolyFromRoot(tempRoot);
   }
 }
@@ -3281,7 +3315,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeightConventionOrdered
   MonomialUniversalEnvelopingOrdered<PolynomialRationalCoeff> currentMon;
   ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> tempElt;
   for (int i=0; i<output.size; i++)
-  { currentMon.Nullify(theDomainDimension, theOwner);
+  { currentMon.Nullify(theDomainDimension, theOwner, &theGlobalVariables);
     Rational tempRat=1;
     currentMon.Coefficient.ComputeDebugString();
     currentMon.Coefficient.MakeNVarConst(theDimension, tempRat);
@@ -3316,9 +3350,9 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeightConventionOrdered
     out << "Generator number " << i+1 << ": " << beginMath;
     for (int j=0; j<output.size; j++)
     { theSimpleGenerator.LieBracketOnTheRight(output.TheObjects[j], tempElt);
-      tempElt.Simplify();
+      tempElt.Simplify(&theGlobalVariables);
       currentTargetsNoMod.AddObjectOnTop(tempElt);
-      tempElt.ModOutVermaRelations(false, theSub);
+      tempElt.ModOutVermaRelations(false, theSub, &theGlobalVariables);
       currentTargets.AddObjectOnTop(tempElt);
       out << tempElt.ElementToString() << ", \\quad ";
     }
@@ -3348,13 +3382,13 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeightConventionOrdered
       matSystem.elements[i][j]=theSystem.TheObjects[j].TheObjects[i];
   matSystem.ComputeDebugString(false, true);
   out << "<br>The system we need to solve:<br>" << beginMath << matSystem.DebugString << endMath << "<br>";
-  RationalFunction ZeroPoly, UnitPoly, MinusUnitPoly;
-  ZeroPoly.MakeNVarConst(theDimension, (Rational) 0);
-  UnitPoly.MakeNVarConst(theDimension, (Rational) 1);
-  MinusUnitPoly.MakeNVarConst(theDimension, (Rational) -1);
+  RationalFunction ZeroRF, UnitPoly, MinusUnitPoly;
+  ZeroRF.MakeNVarConst(theDimension, (Rational) 0, &theGlobalVariables);
+  UnitPoly.MakeNVarConst(theDimension, (Rational) 1, &theGlobalVariables);
+  MinusUnitPoly.MakeNVarConst(theDimension, (Rational) -1, &theGlobalVariables);
   List<List<RationalFunction> > theAnswer;
   //return out.str();
-  matSystem.FindZeroEigenSpacE(theAnswer, UnitPoly, MinusUnitPoly, ZeroPoly, theGlobalVariables);
+  matSystem.FindZeroEigenSpacE(theAnswer, UnitPoly, MinusUnitPoly, ZeroRF, theGlobalVariables);
   if (theAnswer.size>0)
     out << "The found solutions: <br>";
   else
@@ -3392,13 +3426,13 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeightConventionOrdered
 }
 
 template <class CoefficientType>
-void ElementUniversalEnvelopingOrdered<CoefficientType>::Simplify()
+void ElementUniversalEnvelopingOrdered<CoefficientType>::Simplify(GlobalVariables* theContext)
 { ElementUniversalEnvelopingOrdered buffer;
   ElementUniversalEnvelopingOrdered output;
   //this->ComputeDebugString();
   output.Nullify(*this->owner);
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].Simplify(buffer);
+  { this->TheObjects[i].Simplify(buffer, theContext);
     output+=buffer;
     //output.ComputeDebugString();
   }
@@ -3412,10 +3446,10 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::Nullify(SemisimpleLieAl
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnvelopingOrdered<CoefficientType>::Simplify(ElementUniversalEnvelopingOrdered<CoefficientType>& output)
+void MonomialUniversalEnvelopingOrdered<CoefficientType>::Simplify(ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext)
 { output.Nullify(*this->owner);
   output.AddObjectOnTopHash(*this);
-  this->SimplifyAccumulateInOutputNoOutputInit(output);
+  this->SimplifyAccumulateInOutputNoOutputInit(output, theContext);
 }
 
 template <class CoefficientType>
@@ -3529,7 +3563,8 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::AddMonomialNoCleanUpZer
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnvelopingOrdered<CoefficientType>& output)
+void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOutputNoOutputInit
+(ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext)
 { int IndexlowestNonSimplified=0;
   ElementUniversalEnvelopingOrdered<CoefficientType> buffer2;
   MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
@@ -3541,14 +3576,14 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOu
     else
       for (int i=0; i<output.TheObjects[IndexlowestNonSimplified].generatorsIndices.size-1; i++)
         if (output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i]>output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1])
-        { if (output.TheObjects[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute(i, tempMon))
+        { if (output.TheObjects[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute(i, tempMon, theContext))
           { output.AddMonomialNoCleanUpZeroCoeff(tempMon);
             tempMon.ComputeDebugString();
             reductionOccurred=true;
             break;
           }
           if (this->CommutingRightIndexAroundLeftIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
-          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer2);
+          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer2, theContext);
             for (int j=0; j<buffer2.size; j++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
             output.ComputeDebugString();
@@ -3556,7 +3591,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOu
             break;
           }
           if (this->CommutingLeftIndexAroundRightIndexAllowed(output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].Powers.TheObjects[i+1], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
-          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer2);
+          { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer2, theContext);
             for (int j=0; j<buffer2.size; j++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
             output.ComputeDebugString();
@@ -3575,7 +3610,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOu
 
 template <class CoefficientType>
 bool MonomialUniversalEnvelopingOrdered<CoefficientType>::SwitchConsecutiveIndicesIfTheyCommute
-(int theLeftIndex, MonomialUniversalEnvelopingOrdered<CoefficientType>& output)
+(int theLeftIndex, MonomialUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext)
 { if (theLeftIndex>=this->generatorsIndices.size-1)
     return false;
   int theLeftGeneratorIndex=this->generatorsIndices.TheObjects[theLeftIndex];
@@ -3585,7 +3620,7 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::SwitchConsecutiveIndic
   if (tempElt.IsEqualToZero())
   { output.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
     output.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
-    output.Nullify(this->Coefficient.NumVars, *this->owner);
+    output.Nullify(this->Coefficient.NumVars, *this->owner, theContext);
     output.Coefficient=this->Coefficient;
     //output.ComputeDebugString();
     for (int i=0; i<theLeftIndex; i++)
@@ -3605,12 +3640,12 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::CommutingRightIndexAro
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output)
+void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext)
 { if (theIndeX==this->generatorsIndices.size-1)
     return;
   output.Nullify(*this->owner);
   MonomialUniversalEnvelopingOrdered tempMon;
-  tempMon.Nullify(this->Coefficient.NumVars, *this->owner);
+  tempMon.Nullify(this->Coefficient.NumVars, *this->owner, theContext);
   tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
   tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
@@ -3632,7 +3667,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   this->owner->AssignGeneratorCoeffOne(rightGeneratorIndeX, adResulT);
   this->owner->AssignGeneratorCoeffOne(leftGeneratorIndeX, theLeftElt);
   //tempLefttElt.ComputeDebugString(*this->owner, false, false);
-  polyOne.MakeNVarConst(this->Coefficient.NumVars, (Rational) 1);
+  polyOne.MakeNVarConst(this->Coefficient.NumVars, (Rational) 1, theContext);
   root theCoeffs;
   do
   { //acquiredCoefficienT.ComputeDebugString();
@@ -3667,12 +3702,12 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output)
+void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext)
 { if (theIndeX==this->generatorsIndices.size-1)
     return;
   output.Nullify(*this->owner);
   MonomialUniversalEnvelopingOrdered tempMon;
-  tempMon.Nullify(this->Coefficient.NumVars, *this->owner);
+  tempMon.Nullify(this->Coefficient.NumVars, *this->owner, theContext);
   tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
   tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
@@ -3695,7 +3730,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   this->owner->AssignGeneratorCoeffOne(leftGeneratorIndex, adResult);
   this->owner->AssignGeneratorCoeffOne(rightGeneratorIndex, tempRightElt);
 //  tempRightElt.ComputeDebugString(*this->owner, false, false);
-  polyOne.MakeNVarConst(this->Coefficient.NumVars, (Rational) 1);
+  polyOne.MakeNVarConst(this->Coefficient.NumVars, (Rational) 1, theContext);
   root theCoeffs;
   do
   { //acquiredCoefficient.ComputeDebugString();
@@ -3748,8 +3783,8 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::CommutingLeftIndexArou
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnvelopingOrdered<CoefficientType>::Nullify(int numVars, SemisimpleLieAlgebraOrdered& theOwner)
-{ this->Coefficient.Nullify((int)numVars);
+void MonomialUniversalEnvelopingOrdered<CoefficientType>::Nullify(int numVars, SemisimpleLieAlgebraOrdered& theOwner, GlobalVariables* theContext)
+{ this->Coefficient.Nullify((int)numVars, theContext);
   this->owner=&theOwner;
   this->generatorsIndices.size=0;
   this->Powers.size=0;
@@ -4800,8 +4835,11 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtK
 }
 
 std::string TranslationFunctorGmodKVermaModule::RunTheComputation
-  (Parser& theParser, GlobalVariables& theGlobalVariables)
+  (Parser& theParser, GlobalVariables& theGlobalVariables, EigenVectorComputation& owner)
 { std::stringstream out;
+  owner.PrepareCartanSub(theParser.testAlgebra, this->HighestWeightSub, theGlobalVariables);
+  std::cout << this->HighestWeightSub.ElementToString();
+//return "";
   out << this->initTheCandidateMonomials(theParser, theGlobalVariables);
   int theDomainRank=theParser.theHmm.theDomain.GetRank();
   int numPosRootsDomain=theParser.theHmm.theDomain.GetNumPosRoots();
@@ -4813,10 +4851,10 @@ std::string TranslationFunctorGmodKVermaModule::RunTheComputation
   ElementSimpleLieAlgebra zeroAlgebraElement;
   ElementVermaModuleOrdered<RationalFunction> zeroVermaElement;
   zeroAlgebraElement.Nullify(theParser.theHmm.theRange);
-  zeroVermaElement.Nullify(theParser.testAlgebra);
+  zeroVermaElement.Nullify(theParser.testAlgebra, this->HighestWeightSub);
   RationalFunction RFOne, RFZero;
-  RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1);
-  RFZero.Nullify(theParser.theHmm.theRange.GetRank());
+  RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
+  RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
   //for (int i=this->theModuleWeightsShifted.size-1; i>=0; i--)
   int i=0;
   { TensorProductSpaceAndElements<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction>& currentCollection=this->theElements.TheObjects[i];
@@ -4865,6 +4903,7 @@ std::string TranslationFunctorGmodKVermaModule::initTheCandidateMonomials
   (Parser& theParser, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   out << this->initTheWeights(theParser, theGlobalVariables);
+  assert(this->HighestWeightSub.size==3);
   for (int i=this->theModuleWeightsShifted.size-1; i>=0; i--)
   {     //for testing purposes:
     //if (i<theModuleWeightsShifted.size-2)
@@ -4900,13 +4939,16 @@ std::string TranslationFunctorGmodKVermaModule::GetLeftAndRightFromVP
   RationalFunction RFOne, RFZero;
   PolynomialOutputFormat polyFormatLocal;
   int theNumVars=theParser.theHmm.theRange.GetRank();
-  RFOne.MakeNVarConst(theNumVars, (Rational) 1);
-  RFZero.Nullify(theNumVars);
+  RFOne.MakeNVarConst(theNumVars, (Rational) 1, &theGlobalVariables);
+  RFZero.Nullify(theNumVars, &theGlobalVariables);
   //RFOne.operator=(PolyOne);
   out << "<br>right element:" << rightComponent.ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
   List<ElementVermaModuleOrdered<RationalFunction> >& currentLeftCollection= this->theLeftComponents.TheObjects[indexTotalWeight];
   List<ElementSimpleLieAlgebra>& currentRightCollection = this->theRightComponents.TheObjects[indexTotalWeight];
   out << "<br> the vector partition: " << theVP.ElementToString(true);
+  ElementVermaModuleOrdered<RationalFunction> theVermaZero;
+  assert(this->HighestWeightSub.size==3);
+  theVermaZero.Nullify(theParser.testAlgebra, this->HighestWeightSub);
 
   for (int i=0; i<theVP.thePartitions.size; i++)
   { leftComponentBeforeModdingVermaRels.MakeConst(RFOne, theParser.testAlgebra);
@@ -4919,7 +4961,7 @@ std::string TranslationFunctorGmodKVermaModule::GetLeftAndRightFromVP
       }
     }
 
-    leftComponent.AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(leftComponentBeforeModdingVermaRels);
+    leftComponent.AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(leftComponentBeforeModdingVermaRels, theVermaZero, &theGlobalVariables);
     currentLeftCollection.AddObjectOnTop(leftComponent);
     currentRightCollection.AddObjectOnTop(rightComponent);
     out << "<br>Left element before modding: " << leftComponentBeforeModdingVermaRels.ElementToString() << " and after modding: "<< leftComponent.ElementToString();
@@ -4930,16 +4972,18 @@ std::string TranslationFunctorGmodKVermaModule::GetLeftAndRightFromVP
 
 template <class CoefficientType>
 void ElementVermaModuleOrdered<CoefficientType>::AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
-  (ElementUniversalEnvelopingOrdered<CoefficientType>& input)
-{ this->theElt.operator=(input);
-  this->theElt.ModOutVermaRelationS(false);
+  (ElementUniversalEnvelopingOrdered<CoefficientType>& input, const ElementVermaModuleOrdered<CoefficientType>& theRingZero, GlobalVariables* theContext)
+{ this->theElT.operator=(input);
+  assert(theRingZero.theSub.size==3);
+  this->theSub=theRingZero.theSub;
+  this->theElT.ModOutVermaRelations(false, this->theSub, theContext);
 }
 
 template <class CoefficientType>
 std::string ElementVermaModuleOrdered<CoefficientType>::ElementToString()const
 { std::stringstream out;
   PolynomialOutputFormat polyFormatLocal;
-  std::string tempS=this->theElt.ElementToString(true, polyFormatLocal);
+  std::string tempS=this->theElT.ElementToString(true, polyFormatLocal);
   if (tempS.size()>1 && tempS[0]!='(')
     out << "(";
   if (tempS!="1")
@@ -4953,15 +4997,16 @@ std::string ElementVermaModuleOrdered<CoefficientType>::ElementToString()const
 
 template<class CoefficientType>
 void ElementVermaModuleOrdered<CoefficientType>::ActOnMe
-  (const ElementSimpleLieAlgebra& actingElt, ElementVermaModuleOrdered<CoefficientType>& output, SemisimpleLieAlgebra& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+  (const ElementSimpleLieAlgebra& actingElt, ElementVermaModuleOrdered<CoefficientType>& output, SemisimpleLieAlgebra& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)const
 { ElementUniversalEnvelopingOrdered<CoefficientType> tempElt;
-  tempElt.AssignElementLieAlgebra(actingElt, theRingUnit, theRingZero, *this->theElt.owner);
+  tempElt.AssignElementLieAlgebra(actingElt, theRingUnit, theRingZero, *this->theElT.owner);
   std::cout << "<br>" << actingElt.ElementToString() << " acts on " << tempElt.ElementToString();
-  tempElt.LieBracketOnTheRight(this->theElt, output.theElt);
-  output.theElt.Simplify();
+  tempElt.LieBracketOnTheRight(this->theElT, output.theElT);
+  output.theElT.Simplify(theContext);
+  output.theSub=this->theSub;
   std::cout << "<br>and the result before modding out is: " << output.ElementToString();
 //  int numVars=output.theElt.GetNumVariables();
-  output.theElt.ModOutVermaRelationS(false);
+  output.theElT.ModOutVermaRelations(false, this->theSub, theContext);
   std::cout << "<br>and after modding out we get: " << output.ElementToString();
 }
 
@@ -5016,7 +5061,8 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
   this->SetSize(theLeftElts.size);
   for (int i=0; i<theLeftElts.size; i++)
     for (int j=0; j<theElementsActing.size; j++)
-    { theLeftElts.TheObjects[i].ActOnMe(theElementsActing.TheObjects[j], tempLeft, theAlgebra, theRingUnit, theRingZero);
+    { assert(theLeftElts.TheObjects[i].theSub.size==3);
+      theLeftElts.TheObjects[i].ActOnMe(theElementsActing.TheObjects[j], tempLeft, theAlgebra, theRingUnit, theRingZero, &theGlobalVariables);
       tempLeftElts.AddObjectOnTop(tempLeft);
       theRightElts.TheObjects[i].ActOnMe(theElementsActing.TheObjects[j], tempRight, theAlgebra);
       tempRightElts.AddObjectOnTop(tempRight);
@@ -5035,11 +5081,37 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
   std::cout << "<br> before extracting a basis the new right elements are:<br>";
   for (int i=0; i<tempRightElts.size; i++)
     std::cout << tempRightElts.TheObjects[i].ElementToString() << "<br>";
+  std::stringstream out;
+  if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+  { theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+    out << "Obtaining basis on the *target* left vector space...";
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.MakeReport();
+  }
   ElementLeft::GetBasisFromSpanOfElements(tempLeftElts, tempCoords, this->theTargetSpace.leftSpaceBasis, theRingUnit, theRingZero, theGlobalVariables);
+  if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+  { out << "done\nObtaining basis on the *target* right vector space...";
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.MakeReport();
+  }
   ElementRight::GetBasisFromSpanOfElements(tempRightElts, tempCoords, this->theTargetSpace.rightSpaceBasis, theGlobalVariables);
-
+  if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+  { out << "done\nObtaining basis on the *starting* left vector space";
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.MakeReport();
+  }
   ElementLeft::GetBasisFromSpanOfElements(theLeftElts, tempCoords, this->theStartingSpace.leftSpaceBasis, theRingUnit, theRingZero, theGlobalVariables);
+  if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+  { out << "done\nObtaining basis on the *starting* right vector space";
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.MakeReport();
+  }
   ElementRight::GetBasisFromSpanOfElements(theRightElts, tempCoords, this->theStartingSpace.rightSpaceBasis, theGlobalVariables);
+  if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+  { out << "done\n";
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.MakeReport();
+  }
   std::cout << "<br> starting space LOOK here: " << this->theStartingSpace.ElementToString();
   std::cout << "<br> target space LOOK here: " << this->theTargetSpace.ElementToString();
   std::cout << "<br> the elements we are acting upon are (" << theLeftElts.size << "): ";
@@ -5063,16 +5135,16 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
     //if (i<1)
     //  i=1;
     for (int j=0; j<this->size; j++)
-    { if (j<6 && i==0)
-        j=6;
+    { //if (j<6 && i==0)
+        //j=6;
       TensorProductElement<ElementLeft, ElementRight, CoefficientType>& currentElt= this->TheObjects[j];
       assert(currentElt.internalRepresentation.NumVars==this->theStartingSpace.leftSpaceBasis.size+this->theStartingSpace.rightSpaceBasis.size);
       currentElt.ActOnMe(currentGenerator, resultElt, this->theStartingSpace, this->theTargetSpace, theAlgebra, theGlobalVariables);
-      resultElt.ComputeDebugString();
+      /*resultElt.ComputeDebugString();
       if (i==1 && j==2)
       { resultElt.ComputeDebugString();
         this->flagAnErrorHasOccurredTimeToPanic=true;
-      }
+      }*/
       resultElt.ElementToVector(theVector, this->theTargetSpace, theGlobalVariables);
       theVector.ComputeDebugString();
       std::cout << "<br>" << currentGenerator.ElementToString() << " acting on ";
@@ -5143,7 +5215,7 @@ void TensorProductElement<ElementLeft, ElementRight, CoefficientType>::ActOnMe
   { theStartingSpace.GetComponentsFromInternalRepresentation(this->internalRepresentation.TheObjects[i], leftComponent, rightComponent);
     leftComponent.ComputeDebugString();
     rightComponent.ComputeDebugString(false, false);
-    leftComponent.ActOnMe(theElt, newLeftComponent, theAlgebra, theStartingSpace.theRingUniT, theStartingSpace.theRingZerO);
+    leftComponent.ActOnMe(theElt, newLeftComponent, theAlgebra, theStartingSpace.theRingUniT, theStartingSpace.theRingZerO, &theGlobalVariables);
     std::cout << "<br>" << theElt.ElementToString() << " acting on " << leftComponent.ElementToString() << " gives " << newLeftComponent.ElementToString();
     rightComponent.ActOnMe(theElt, newRightComponent, theAlgebra);
     leftComponent.ComputeDebugString();
@@ -5206,7 +5278,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetBasisFromSpanOfEleme
   basisCoordForm.MakeActualSizeAtLeastExpandOnTop(theElements.size);
   Selection selectedBasis;
   outputCoordsBeforeReduction.ComputeDebugString();
-  outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis);
+  outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis, theGlobalVariables);
   for (int i=0; i<selectedBasis.CardinalitySelection; i++)
     outputTheBasis.AddObjectOnTop(theElements.TheObjects[selectedBasis.elements[i]]);
   Matrix<CoefficientType> bufferMat;
@@ -5314,12 +5386,14 @@ void ElementVermaModuleOrdered<CoefficientType>::GetBasisFromSpanOfElements
 { List<ElementUniversalEnvelopingOrdered<CoefficientType> > theEltsUEform;
   theEltsUEform.SetSize(theElements.size);
   for (int i=0; i<theElements.size; i++)
-    theEltsUEform.TheObjects[i]=theElements.TheObjects[i].theElt;
+    theEltsUEform.TheObjects[i]=theElements.TheObjects[i].theElT;
   List<ElementUniversalEnvelopingOrdered<CoefficientType> > theBasisUEform;
   ElementUniversalEnvelopingOrdered<CoefficientType>::GetBasisFromSpanOfElements(theEltsUEform, outputCoordinates, theBasisUEform, RFOne, RFZero, theGlobalVariables);
   outputTheBasis.SetSize(theBasisUEform.size);
   for (int i=0; i<theBasisUEform.size; i++)
-    outputTheBasis.TheObjects[i].theElt=theBasisUEform.TheObjects[i];
+  { outputTheBasis.TheObjects[i].theElT=theBasisUEform.TheObjects[i];
+    outputTheBasis.TheObjects[i].theSub=theElements.TheObjects[0].theSub;
+  }
 }
 
 template<class CoefficientType>
@@ -5328,8 +5402,9 @@ bool ElementVermaModuleOrdered<CoefficientType>::GetCoordsInBasis
 { List<ElementUniversalEnvelopingOrdered<CoefficientType> > theEltsUEform;
   theEltsUEform.SetSize(theBasis.size);
   for (int i=0; i<theBasis.size; i++)
-    theEltsUEform.TheObjects[i]=theBasis.TheObjects[i].theElt;
-  return this->theElt.GetCoordsInBasis(theEltsUEform, output, theRingUnit, theRingZero, theGlobalVariables);
+  { theEltsUEform.TheObjects[i]=theBasis.TheObjects[i].theElT;
+  }
+  return this->theElT.GetCoordsInBasis(theEltsUEform, output, theRingUnit, theRingZero, theGlobalVariables);
 }
 
 bool ElementSimpleLieAlgebra::GetCoordsInBasis(const List<ElementSimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output, GlobalVariables& theGlobalVariables)const
@@ -5343,7 +5418,7 @@ bool ElementSimpleLieAlgebra::GetCoordsInBasis(const List<ElementSimpleLieAlgebr
   int numVars=this->Hcomponent.size;
   output.SetSize(theAnswer.size);
   for (int i=0; i<theAnswer.size; i++)
-    output.TheObjects[i].MakeNVarConst(numVars, theAnswer.TheObjects[i]);
+    output.TheObjects[i].MakeNVarConst(numVars, theAnswer.TheObjects[i], &theGlobalVariables);
   return true;
 }
 
@@ -5392,7 +5467,7 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
     case ParserNode::typePoly:
     case ParserNode::typeRationalFunction:
       this->ExpressionType=this->typeRationalFunction;
-      this->InitForMultiplication();
+      this->InitForMultiplication(&theGlobalVariables);
       if (! rightNode.ConvertToType(this->typeRationalFunction))
       { this->SetError(this->errorConversionError);
         return;
@@ -5442,3 +5517,73 @@ void RationalFunction::RaiseToPower(int thePower)
   }
   this->checkConsistency();
 }
+
+
+void ComputationSetup::TheG2inB3Computation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
+{ Parser theParser;
+  theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  SSalgebraModule theModule;
+  std::stringstream out;
+  theModule.InduceFromEmbedding(out, theParser.theHmm, theGlobalVariables);
+  List<ElementSimpleLieAlgebra> theBasis;
+  theBasis.SetSize(theParser.theHmm.theRange.GetNumGenerators());
+  for (int i=0; i<theParser.theHmm.imagesAllChevalleyGenerators.size; i++)
+  { int theIndex=i;
+    if (i>=6 && i<8)
+      theIndex=3+i;
+    if (i>=8)
+      theIndex=i+7;
+      /*
+      if (i==0) theIndex=3;
+      if (i==1) theIndex=4;
+      if (i==2) theIndex=5;
+      if (i==3) theIndex=6;
+      if (i==4) theIndex=7;
+      if (i==5) theIndex=8;
+      if (i==6) theIndex=9;
+      if (i==7) theIndex=10;
+      if (i==8) theIndex=12;
+      if (i==9) theIndex=13;
+      if (i==10) theIndex=14;
+      if (i==11) theIndex=15;
+      if (i==12) theIndex=16;
+      if (i==13) theIndex=17;
+      */
+    ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
+    currentElt=theParser.theHmm.imagesAllChevalleyGenerators.TheObjects[i];
+  }
+  for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
+  { int theIndex=i+6;
+    if (i>=3)
+      theIndex=8+i;
+    /*
+    if (i==0) theIndex=0;
+    if (i==1) theIndex=1;
+    if (i==2) theIndex=2;
+    if (i==3) theIndex=11;
+    if (i==4) theIndex=18;
+    if (i==5) theIndex=19;
+    if (i==6) theIndex=20;
+    */
+    ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
+    currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
+  }
+  for (int i=0; i<theBasis.size; i++)
+  { //std::cout << "<br>" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
+  }
+  theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
+  std::string  civilizedInput="secretSauceOrdered";
+  theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
+}
+
+void RationalFunction::gcd
+(const PolynomialRationalCoeff& left, const PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, GlobalVariables* theContext)
+{ if (RationalFunction::gcdQuicK(left, right, output))
+    return;
+  if (theContext==0)
+  { PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4, buffer5; List<PolynomialRationalCoeff> bufferList; Monomial<Rational> tempMon1, tempMon2;
+    RationalFunction::gcd(left, right, output, buffer1, buffer2, buffer3, buffer4, buffer5, tempMon1, tempMon2, bufferList);
+  } else
+    RationalFunction::gcd(left, right, output, theContext->RFgcdBuffer1, theContext->RFgcdBuffer2, theContext->RFgcdBuffer3, theContext->RFgcdBuffer4, theContext->RFgcdBuffer5,  theContext->RFgcdBuferMon1, theContext->RFgcdBuferMon2,  theContext->RFgcdBufferList1);
+}
+

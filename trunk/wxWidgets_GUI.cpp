@@ -332,7 +332,7 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
 wxFont* guiMainWindow::GetFont(int theSize)
 { if (this->theFonts.size<theSize)
   { int oldsize=this->theFonts.size;
-    this->theFonts.SetSizeExpandOnTopNoObjectInit(theSize);
+    this->theFonts.SetSize(theSize);
     for (int i=oldsize; i<theSize; i++)
       this->theFonts.TheObjects[i]=0;
   }
@@ -723,7 +723,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   //////////////////////////////////////////
   /*this->theComputationSetup.UsingCustomVectors=true;
   root::AmbientDimension=8;
-  this->theComputationSetup.VPVectors.SetSizeExpandOnTopNoObjectInit(10);
+  this->theComputationSetup.VPVectors.SetSize(10);
   this->theComputationSetup.VPVectors.TheObjects[0].InitFromIntegers(0	,	 0,	0,	0	,	 0,	1	,	1	,0);
   this->theComputationSetup.VPVectors.TheObjects[1].InitFromIntegers(2	,	 0,	0,	0	,	1	,-2,	0	,1);
   this->theComputationSetup.VPVectors.TheObjects[2].InitFromIntegers(-1	,	 1,	0,	1	,	-1,	2	,	1	,0);
@@ -831,7 +831,7 @@ void guiMainWindow::onToggleButton1UsingCustom(wxCommandEvent& ev)
 void wxDialogOutput::onButton4SaveReadable(wxCommandEvent& ev)
 { if (MainWindow1==0)
 		return;
-	if (MainWindow1->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunning())
+	if (MainWindow1->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunningUnsafeDeprecatedDontUse())
     return;
 	std::fstream tempFile;
   MainWindow1->OpenFile(tempFile);
@@ -941,7 +941,7 @@ void guiMainWindow::onButton17Custom2PauseSaveResume(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
-{ if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsRunning())
+{ if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsRunningUnsafeDeprecatedDontUse())
   { this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.UnlockSafePoint();
     return;
   }
@@ -954,9 +954,9 @@ void guiMainWindow::onButton3LprohibitingGo(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton18LprohibitingPauseAndSave(wxCommandEvent& ev)
-{ if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsPausedWhileRunning())
+{ if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsPausedWhileRunningDeprecatedDontUse())
     return;
-  if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsRunning())
+  if (this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.IsRunningUnsafeDeprecatedDontUse())
     this->theComputationSetup.theRootSubalgebras.controllerLProhibitingRelations.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   if (this->theComputationSetup.theRootSubalgebras.size==0)
     return;
@@ -967,7 +967,7 @@ void guiMainWindow::onButton18LprohibitingPauseAndSave(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
-{ if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunning())
+{ if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunningUnsafeDeprecatedDontUse())
   { this->theComputationSetup.thePartialFraction.theChambers.thePauseController.UnlockSafePoint();
     return;
   }
@@ -982,9 +982,9 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton21SplitChambersPauseAndSave(wxCommandEvent& ev)
-{ if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsPausedWhileRunning())
+{ if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsPausedWhileRunningDeprecatedDontUse())
     return;
-  if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunning())
+  if (this->theComputationSetup.thePartialFraction.theChambers.thePauseController.IsRunningUnsafeDeprecatedDontUse())
     this->theComputationSetup.thePartialFraction.theChambers.thePauseController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   if (this->theComputationSetup.thePartialFraction.theChambers.size==0)
     return;
@@ -1003,7 +1003,7 @@ void guiMainWindow::onButton23Experiments(wxCommandEvent& ev)
 { //this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.DuflosComputation;
   this->theComputationSetup.WeylGroupIndex= 4;
   this->theComputationSetup.WeylGroupLetter='D';
-  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ExperimentSSsubalgebras;
+  this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.TheG2inB3Computation;
   this->RunTheComputation();
 }
 
@@ -1028,7 +1028,7 @@ void guiMainWindow::OpenFile(std::fstream& output)
 void guiMainWindow::onButton2Eval(wxCommandEvent& ev)
 { if (this->theComputationSetup.theOutput.NumVars!=this->Table3Values->GetNumberCols())
     return;
-  intRoot tempRoot; tempRoot.SetSizeExpandOnTopNoObjectInit(this->theComputationSetup.theOutput.NumVars);
+  intRoot tempRoot; tempRoot.SetSize(this->theComputationSetup.theOutput.NumVars);
   for (int i=0; i<this->theComputationSetup.theOutput.NumVars; i++)
     this->theComputationSetup.ValueRoot.TheObjects[i]= wxAtoi(this->Table3Values->GetCellValue(0,i));
   this->theComputationSetup.EvaluatePoly();
@@ -1310,7 +1310,7 @@ void guiMainWindow::ReadVPVectorsAndOptions()
     this->theComputationSetup.WeylGroupIndex= theDimension;
     this->theComputationSetup.VPVectors.size=0;
     for (int i=0; i<this->Spin2NumVect->GetValue(); i++)
-    { root tempRoot; tempRoot.SetSizeExpandOnTopLight(theDimension);
+    { root tempRoot; tempRoot.SetSize(theDimension);
       for (int j=0; j<theDimension; j++)
       { int tempI=wxAtoi(this->Table1Input->GetCellValue(i,j));
         tempRoot.TheObjects[j].AssignInteger(tempI);
@@ -1319,14 +1319,13 @@ void guiMainWindow::ReadVPVectorsAndOptions()
     }
     this->theComputationSetup.VPVectors.ComputeDebugString();
   }
-  this->theComputationSetup.IndicatorRoot.SetSizeExpandOnTopLight(this->theComputationSetup.WeylGroupIndex);
+  this->theComputationSetup.IndicatorRoot.SetSize(this->theComputationSetup.WeylGroupIndex);
   for (int j=0;j<this->theComputationSetup.WeylGroupIndex;j++)
   { int tempI=wxAtoi(this->Table2Indicator->GetCellValue(0, j));
     this->theComputationSetup.IndicatorRoot.TheObjects[j].AssignInteger(tempI);
   }
   this->theComputationSetup.IndicatorRoot.size=this->theComputationSetup.WeylGroupIndex;
 }
-
 
 void guiMainWindow::TurnOnAllDangerousButtons()
 { if (this->theComputationSetup.flagUsingCustomVectors)

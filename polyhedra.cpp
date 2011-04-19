@@ -216,7 +216,7 @@ template < > int List<ElementSimpleLieAlgebra>::ListActualSizeIncrement=100;
 template < > int List<ReflectionSubgroupWeylGroup>::ListActualSizeIncrement=5;
 template < > int List<minimalRelationsProverState>::ListActualSizeIncrement=800;
 template < > int List<minimalRelationsProverStateFixedK>::ListActualSizeIncrement=10;
-template < > int List<VermaModuleMonomial>::ListActualSizeIncrement=10;
+//template < > int List<VermaModuleMonomial>::ListActualSizeIncrement=10;
 template < > int List<MonomialUniversalEnveloping>::ListActualSizeIncrement=20;
 template < > int List<ElementUniversalEnveloping>::ListActualSizeIncrement=20;
 template < > int List<List<PolynomialRationalCoeff> >::ListActualSizeIncrement=20;
@@ -6145,7 +6145,6 @@ void PolynomialOutputFormat::MakeAlphabetArbitraryWithIndex(const std::string& t
   this->cutOffString=false;
   this->cutOffSize=500;
 }
-
 
 void PolynomialOutputFormat::MakeAlphabetyi()
 { this->MakeAlphabetArbitraryWithIndex("y");
@@ -24797,102 +24796,6 @@ void WeylGroup::RaiseToHighestWeight(root& theWeight)
   }
 }
 
-void SemisimpleLieAlgebra::GenerateOneMonomialPerWeightInTheWeightSupport(root& theHighestWeight, GlobalVariables& theGlobalVariables)
-{ /*roots weightSupport;
-  this->GenerateWeightSupport(theHighestWeight, weightSupport, theGlobalVariables);
-  List<bool> Explored;
-  Explored.initFillInObject(weightSupport.size, false);
-  this->VermaMonomials.SetSize(1);
-  this->VermaMonomials.TheObjects[0].MakeConst(theHighestWeight, Rational::TheRingUnit, this);
-  roots simpleBasis;
-  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
-  simpleBasis.MakeEiBasis(theDimension);
-  root current, tempRoot;
-  VermaModuleMonomial tempMon;
-  for (int indexLowestNonExplored=0; indexLowestNonExplored<this->VermaMonomials.size; indexLowestNonExplored++)
-  { Explored.TheObjects[indexLowestNonExplored]=true;
-    for (int i=0; i<theDimension; i++)
-    { this->VermaMonomials.TheObjects[indexLowestNonExplored].GetWeight(current);
-      current.ComputeDebugString();
-      current-=simpleBasis.TheObjects[i];
-      current.ComputeDebugString();
-      int index=weightSupport.IndexOfObject(current);
-      if (index!=-1)
-        if (!Explored.TheObjects[index])
-        { Explored.TheObjects[index]=true;
-          this->VermaMonomials.TheObjects[indexLowestNonExplored].MultiplyBySimpleGenerator(i, tempMon);
-          this->VermaMonomials.AddObjectOnTop(tempMon);
-        }
-    }
-  }*/
-}
-
-void VermaModuleMonomial::GetWeight(root& output)
-{ int theDimension= this->owner->theWeyl.CartanSymmetric.NumRows;
-  roots simpleBasis;
-  simpleBasis.MakeEiBasis(theDimension);
-  output=this->theHighestWeight;
-  for (int i=0; i<this->theSimpleGenerators.size; i++)
-    output-=simpleBasis.TheObjects[this->theSimpleGenerators.TheObjects[i]]*this->thePowers.TheObjects[i];
-}
-
-void VermaModuleMonomial::MultiplyBySimpleGenerator(int index, VermaModuleMonomial& output)
-{ output=*this;
-  bool tempBool=true;
-  if (this->theSimpleGenerators.size==0)
-    tempBool=false;
-  else
-    tempBool=(*this->theSimpleGenerators.LastObject()==index);
-  if (tempBool)
-    (*output.thePowers.LastObject())++;
-  else
-  { output.theSimpleGenerators.AddObjectOnTop(index);
-    output.thePowers.AddObjectOnTop(1);
-  }
-}
-
-void VermaModuleMonomial::MakeConst(root& highestWeight, Rational& theCoeff, SemisimpleLieAlgebra* theOwner)
-{ this->theHighestWeight=highestWeight;
-  this->coeff= theCoeff;
-  this->owner=theOwner;
-  this->thePowers.size=0;
-  this->theSimpleGenerators.size=0;
-}
-
-void VermaModuleMonomial::operator=(const VermaModuleMonomial& right)
-{ this->owner= right.owner;
-  this->theHighestWeight= right.theHighestWeight;
-  this->thePowers= right.thePowers;
-  this->theSimpleGenerators= right.theSimpleGenerators;
-  this->coeff= right.coeff;
-}
-
-void SemisimpleLieAlgebra::ElementToStringVermaMonomials(std::string& output)
-{ /*std::stringstream out;
-  for (int i=0; i<this->VermaMonomials.size; i++)
-  { VermaModuleMonomial& tempMon= this->VermaMonomials.TheObjects[i];
-    out << "$" << tempMon.ElementToString() << "$\n\n";
-  }
-  output=out.str();*/
-}
-
-void VermaModuleMonomial::ElementToString(std::string& output)
-{ std::stringstream out;
-  for (int i=0; i<this->theSimpleGenerators.size; i++)
-  { int thePower= this->thePowers.TheObjects[i];
-    int theGen= this->theSimpleGenerators.TheObjects[i];
-    if (thePower>1)
-      out << "(";
-    out << "g^{-\\alpha_{" << theGen+1 << "}}";
-    if (thePower>1)
-      out << ")^{" << thePower << "}";
-  }
-  if (this->theSimpleGenerators.size>0)
-    out << "\\cdot";
-  out << " v";
-  output=out.str();
-}
-
 void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables)
 { /*roots weightSupport;
   this->GenerateWeightSupport(theHighestWeight, weightSupport, theGlobalVariables);
@@ -25276,7 +25179,7 @@ std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVar
   if (!this->theValue.UEElement.IsZeroPointer())
     this->theValue.UEElement.GetElement().Simplify();
   if(!this->theValue.UEElement.IsZeroPointer())
-    this->theValue.UEElementOrdered.GetElement().Simplify();
+    this->theValue.UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
   std::stringstream out;
   out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueAndType(true);
   return out.str();
@@ -25844,7 +25747,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     }
     PolynomialRationalCoeff polyOne;
     polyOne.MakeNVarConst(this->owner->NumVariables, (Rational) 1);
-    this->UEElementOrdered.GetElement().MakeOneGenerator(theIndex, polyOne, this->owner->testAlgebra);
+    this->UEElementOrdered.GetElement().MakeOneGenerator(theIndex, polyOne, this->owner->testAlgebra, &theGlobalVariables);
     this->ExpressionType=this->typeUEElementOrdered;
     return;
   }
@@ -25869,7 +25772,7 @@ bool ParserNode::ConvertChildrenToType(int theType)
   return true;
 }
 
-void ParserNode::InitForAddition()
+void ParserNode::InitForAddition(GlobalVariables* theContext)
 { this->intValue=0;
   this->rationalValue.MakeZero();
   if (this->ExpressionType==this->typePoly)
@@ -25881,10 +25784,10 @@ void ParserNode::InitForAddition()
   if (this->ExpressionType==this->typeWeylAlgebraElement)
     this->WeylAlgebraElement.GetElement().Nullify(this->owner->NumVariables);
   if (this->ExpressionType==this->typeRationalFunction)
-    this->ratFunction.GetElement().Nullify(this->owner->NumVariables);
+    this->ratFunction.GetElement().Nullify(this->owner->NumVariables, theContext);
 }
 
-void ParserNode::InitForMultiplication()
+void ParserNode::InitForMultiplication(GlobalVariables* theContext)
 { this->intValue=1;
   this->rationalValue=1;
   if(this->ExpressionType==this->typePoly)
@@ -25896,7 +25799,7 @@ void ParserNode::InitForMultiplication()
   if(this->ExpressionType==this->typeWeylAlgebraElement)
     this->WeylAlgebraElement.GetElement().MakeConst(this->owner->NumVariables, (Rational) 1);
   if (this->ExpressionType==this->typeRationalFunction)
-    this->ratFunction.GetElement().MakeNVarConst(this->owner->NumVariables, (Rational) 1);
+    this->ratFunction.GetElement().MakeNVarConst(this->owner->NumVariables, (Rational) 1, theContext);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
@@ -25924,7 +25827,7 @@ void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
     return;
   }
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
-  this->InitForAddition();
+  this->InitForAddition(&theGlobalVariables);
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
@@ -25955,7 +25858,7 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
     return;
   }
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
-  this->InitForAddition();
+  this->InitForAddition(&theGlobalVariables);
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
     switch (this->ExpressionType)
@@ -25977,7 +25880,7 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
     return;
   }
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
-  this->InitForAddition();
+  this->InitForAddition(&theGlobalVariables);
   ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[0]];
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: this->intValue-=currentChild.intValue; break;
@@ -26165,7 +26068,7 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
         return;
       }
       if (theFunction==Parser::functionGCD)
-        RationalFunction::gcd(leftNode.polyValue.GetElement(), rightNode.polyValue.GetElement(), this->polyValue.GetElement());
+        RationalFunction::gcd(leftNode.polyValue.GetElement(), rightNode.polyValue.GetElement(), this->polyValue.GetElement(), &theGlobalVariables);
       else
         RationalFunction::lcm(leftNode.polyValue.GetElement(), rightNode.polyValue.GetElement(), this->polyValue.GetElement());
       this->ExpressionType=this->typePoly;
@@ -26183,7 +26086,7 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
     return;
   }
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
-  this->InitForMultiplication();
+  this->InitForMultiplication(&theGlobalVariables);
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];

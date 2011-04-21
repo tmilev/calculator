@@ -237,6 +237,7 @@ template < > int List<Vector<RationalFunction> >::ListActualSizeIncrement=20;
 template < > int List<ElementUniversalEnvelopingOrdered<RationalFunction> >::ListActualSizeIncrement=20;
 template < > int List<Vector<Rational> >::ListActualSizeIncrement=10;
 template < > int List<Monomial<RationalFunction> >::ListActualSizeIncrement=20;
+template < > int List<TemplatePolynomial<Monomial<RationalFunction>, RationalFunction> >::ListActualSizeIncrement=20;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
@@ -6042,7 +6043,7 @@ void PolynomialsRationalCoeff::ComputeDiscreteIntegrationUpTo(int d)
       Accum.AddPolynomial(tempPoly);
     }
     tempPoly.MakeNVarDegOnePoly(1, 0, ROne, ROne);
-    tempPoly.RaiseToPower(i+1);
+    tempPoly.RaiseToPower(i+1, (Rational) 1);
     Accum.AddPolynomial(tempPoly);
     Rational tempRat(1, i+1);
     Accum.TimesConstant(tempRat);
@@ -6189,7 +6190,7 @@ void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& o
   tempM.Coefficient.Assign(ROne);
   for (int i=0; i<this->NumVariables; i++)
     tempM.degrees[i]= this->degrees[i];
-  tempM.Substitution(TheSub.RationalPolyForm, tempP, (int)(TheSub.TheQNSub.NumRows-1));
+  tempM.Substitution(TheSub.RationalPolyForm, tempP, (int)(TheSub.TheQNSub.NumRows-1), (Rational) 1);
   QuasiNumber tempQ((int)TheSub.TheQNSub.NumRows);
   tempQ.Assign(this->Coefficient);
   tempQ.LinearSubstitution(TheSub);
@@ -8704,14 +8705,14 @@ bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVar
           if (thePF.UncoveringBrackets)
           { thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
             tempIP.ComputeDebugString();
-            tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
+            tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], IOne);
             tempIP.ComputeDebugString();
             ComputationalBufferCoefficient.MultiplyBy(tempIP);
           }
           else
           { PolyPartFractionNumerator tempP;
             thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempP, this->AmbientDimension);
-            tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i]);
+            tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], IOne);
 //            this->CoefficientNonExpanded.ComputeDebugString();
             ComputationalBufferCoefficientNonExpanded.MultiplyBy(tempP);
 //            this->CoefficientNonExpanded.ComputeDebugString();
@@ -9015,7 +9016,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
     tempP.Nullify((int)VarChange.NumRows);
     tempSub.MakeExponentSubstitution(VarChange);
     tempP2.AssignIntegerPoly(ComputationalBufferCoefficient);
-    tempP2.Substitution(tempSub, tempP, (int)VarChange.NumRows);
+    tempP2.Substitution(tempSub, tempP, (int)VarChange.NumRows, (Rational) 1);
     NumLinesUsed+=tempP.StringPrintOutAppend(stringPoly, PolyFormatLocal, true);
   }
   if (stringPoly=="1")
@@ -9337,7 +9338,7 @@ void partFraction::ApplyGeneralizedSzenesVergneFormula(List<int>& theSelectedInd
         { this->GetNElongationPolyWithMonomialContribution(Accum, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, Accum.AmbientDimension);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempP.ComputeDebugString();
-          tempP.RaiseToPower(multiplicityChange);
+          tempP.RaiseToPower(multiplicityChange, IOne);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempP.ComputeDebugString();
           ComputationalBufferCoefficient.MultiplyBy(tempP);
@@ -11423,7 +11424,7 @@ int RootToIndexTable::getIndexDoubleOfARoot(intRoot& TheRoot)
 }
 
 void SelectionWithMultiplicities::initWithMultiplicities(int NumElements)
-{  this->Multiplicities.SetSize(NumElements);
+{ this->Multiplicities.SetSize(NumElements);
   for (int i=0; i<this->Multiplicities.size; i++)
     this->Multiplicities.TheObjects[i]=0;
   this->elements.MakeActualSizeAtLeastExpandOnTop(NumElements);
@@ -12348,7 +12349,7 @@ void PolynomialsRationalCoeff::operator=(const PolynomialsRationalCoeff& right)
 void PolynomialsRationalCoeff::Substitution(PolynomialsRationalCoeff& theSub, int NumVarsTarget)
 { PolynomialRationalCoeff tempP;
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].Substitution(theSub, tempP, NumVarsTarget);
+  { this->TheObjects[i].Substitution(theSub, tempP, NumVarsTarget, (Rational) 1);
     this->TheObjects[i].CopyFromPoly(tempP);
   }
 }
@@ -16131,7 +16132,7 @@ void GeneratorsPartialFractionAlgebra::ConvertToIntegerPoly(IntegerPoly& output,
   if (this->GeneratorPower<0)
   { assert(output.size==1);
     assert(output.TheObjects[0].Coefficient.IsEqualTo(IOne));
-    static Monomial<Integer> tempM;
+    Monomial<Integer> tempM;
     tempM.Coefficient.Assign(IOne);
     tempM.init((int)theDimension);
     for (int i=0; i<theDimension; i++)
@@ -16144,7 +16145,7 @@ void GeneratorsPartialFractionAlgebra::ConvertToIntegerPoly(IntegerPoly& output,
     assert(false);
   }
   if (this->GeneratorPower>1)
-    output.RaiseToPower(this->GeneratorPower);
+    output.RaiseToPower(this->GeneratorPower, IOne);
 }
 
 bool GeneratorsPartialFractionAlgebra::operator ==(const GeneratorsPartialFractionAlgebra& right)
@@ -22852,7 +22853,7 @@ void ComputationSetup::TestGraphicalOutputPolys(ComputationSetup& inputData, Glo
   Rational tempRat1=-1;
   Rational tempRat2= 2;
   tempP.MakeNVarDegOnePoly(5, 0, 4, tempRat1, tempRat2);
-  tempP.RaiseToPower(8);
+  tempP.RaiseToPower(8, (Rational) 1);
   DrawElementInputOutput theDrawData;
   theDrawData.TopLeftCornerX=50;
   theDrawData.TopLeftCornerY=50;
@@ -25660,7 +25661,7 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
       break;
     case ParserNode::typePoly:
       this->polyValue.GetElement()=leftNode.polyValue.GetElement();
-      this->polyValue.GetElement().RaiseToPower(thePower);
+      this->polyValue.GetElement().RaiseToPower(thePower, (Rational) 1);
       this->ExpressionType=this->typePoly;
       break;
     case ParserNode::typeRationalFunction:

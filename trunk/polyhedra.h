@@ -659,6 +659,7 @@ public:
   inline bool IsEqualTo(const Integer&y)const {return this->value==y.value; }
   inline bool IsEqualToZero()const {return this->value==0; }
   inline void DivideBy(const Integer& y){this->value/=y.value; }
+  inline void operator/=(const Integer& y){this->value/=y.value; }
   inline void WriteToFile(std::fstream& output){output<<this->value; }
   inline void ReadFromFile(std::fstream& input){input>>this->value; }
   inline void ElementToString(std::string& output) { std::stringstream out; out << this->value; output= out.str(); }
@@ -3440,7 +3441,7 @@ public:
   void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m, Monomial<ElementOfCommutativeRingWithIdentity>& output);
   bool HasSameExponent(Monomial<ElementOfCommutativeRingWithIdentity>& m);
   void Assign(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
-  void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget);
+  void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   void MakeMonomialOneLetter(int NumVars, int LetterIndex, int Power, const ElementOfCommutativeRingWithIdentity& Coeff);
   void IncreaseNumVariables(int increase);
   bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
@@ -3510,8 +3511,8 @@ public:
   void MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
   inline void operator*=(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p){ this->MultiplyBy(p);}
   void MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& bufferPoly, TemplateMonomial& bufferMon)const;
-  void RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output);
-  void RaiseToPower(int d);
+  void RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output, const ElementOfCommutativeRingWithIdentity& theRingUniT);
+  void RaiseToPower(int d,  const ElementOfCommutativeRingWithIdentity& theRingUniT);
   void AddPolynomial(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, int NumV);
@@ -3574,8 +3575,8 @@ public:
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<ElementOfCommutativeRingWithIdentity>& output);
-  void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget);
-  void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, int NumVarTarget);
+  void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget, const ElementOfCommutativeRingWithIdentity& theRingUnit);
+  void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, int NumVarTarget, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   int TotalDegree()const;
   bool IsAConstant()const
   { if (this->size>1)
@@ -3585,7 +3586,7 @@ public:
     Monomial<ElementOfCommutativeRingWithIdentity>& theMon=this->TheObjects[0];
     return theMon.IsAConstant();
   }
-  bool IsProportionalTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& other, ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther)const;
+  bool IsProportionalTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& other, ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther, const ElementOfCommutativeRingWithIdentity& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, PolynomialOutputFormat& PolyFormatLocal);
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
   int GetIndexMaxMonomialTotalDegThenLexicographic();
@@ -4118,7 +4119,7 @@ private:
   }
   void AddHonestRF(const RationalFunction& other)
   { Rational tempRat;
-    if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat))
+    if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, (Rational) 1))
     { RationalFunction output;
       output=*this;
       output.Denominator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
@@ -4438,7 +4439,10 @@ int Monomial<ElementOfCommutativeRingWithIdentity>::TotalDegree()const
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget)
+void Monomial<ElementOfCommutativeRingWithIdentity>::Substitution
+(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution,
+ Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget,
+ const ElementOfCommutativeRingWithIdentity& theRingUnit)
 { if (this->IsAConstant())
   { output.MakeNVarConst(NumVarTarget, this->Coefficient);
     return;
@@ -4450,7 +4454,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::Substitution(const List<Pol
   for (int i=0; i<this->NumVariables; i++)
     if (this->degrees[i]!=0)
     {  //TheSubstitution.TheObjects[i]->ComputeDebugString();
-      TheSubstitution.TheObjects[i].RaiseToPower(this->degrees[i], tempPoly);
+      TheSubstitution.TheObjects[i].RaiseToPower(this->degrees[i], tempPoly, theRingUnit);
 //      tempPoly.ComputeDebugString();
       output.MultiplyBy(tempPoly);
 //      output.ComputeDebugString();
@@ -5098,7 +5102,7 @@ int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::TimesConstant(const ElementOfCommutativeRingWithIdentity& r)
-{ if(r.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
+{ if(r.IsEqualToZero())
     this->ClearTheObjects();
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].Coefficient.MultiplyBy(r);
@@ -5144,11 +5148,13 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials(
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsProportionalTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& other, ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther)const
+bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsProportionalTo
+(const Polynomial<ElementOfCommutativeRingWithIdentity>& other,
+ ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther, const ElementOfCommutativeRingWithIdentity& theRingUnit)const
 { if (this->size!=other.size)
     return false;
   if (other.size==0)
-  { TimesMeEqualsOther=1;
+  { TimesMeEqualsOther=theRingUnit;
     return true;
   }
   Monomial<ElementOfCommutativeRingWithIdentity>& firstMon= this->TheObjects[0];
@@ -5217,7 +5223,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideBy(const Polynomial
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::DivideByConstant(const ElementOfCommutativeRingWithIdentity& r)
 { for (int i=0; i<this->size; i++)
-    this->TheObjects[i].Coefficient.DivideBy(r);
+    this->TheObjects[i].Coefficient/=r;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -5240,7 +5246,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::SubtractMonomial(const TemplateMonomial& m)
-{ if (m.Coefficient.IsEqualTo(ElementOfCommutativeRingWithIdentity::TheRingZero))
+{ if (m.Coefficient.IsEqualToZero())
     return;
   int j= this->IndexOfObjectHash(m);
   if (j==-1)
@@ -5292,18 +5298,19 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output)
+void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower
+(int d, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output, const ElementOfCommutativeRingWithIdentity& theRingUniT)
 { TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> tempOne;
-  tempOne.MakeNVarConst(this->NumVars, ElementOfCommutativeRingWithIdentity::TheRingUnit);
+  tempOne.MakeNVarConst(this->NumVars, theRingUniT);
   if (&output!=this)
     output=*this;
   MathRoutines::RaiseToPower(output, d, tempOne);
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d)
+void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::RaiseToPower(int d, const ElementOfCommutativeRingWithIdentity& theRingUniT)
 { if (d!=1)
-    this->RaiseToPower(d, *this);
+    this->RaiseToPower(d, *this, theRingUniT);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -5379,20 +5386,24 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::ComponentInFrontOfVariabl
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution
+(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget,
+ const ElementOfCommutativeRingWithIdentity& theRingUnit)
 { Polynomial<ElementOfCommutativeRingWithIdentity> Accum, TempPoly;
   Accum.ClearTheObjects();
   Accum.NumVars=NumVarTarget;
   for(int i=0; i<this->size; i++)
-  { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, NumVarTarget);
+  { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, NumVarTarget, theRingUnit);
     Accum.AddPolynomial(TempPoly);
   }
   output.CopyFromPoly(Accum);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, int NumVarTarget)
-{ this->Substitution(TheSubstitution, *this, NumVarTarget);
+void Polynomial<ElementOfCommutativeRingWithIdentity>::Substitution
+(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, int NumVarTarget,
+ const ElementOfCommutativeRingWithIdentity& theRingUnit)
+{ this->Substitution(TheSubstitution, *this, NumVarTarget, theRingUnit);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -7268,7 +7279,7 @@ public:
   void Nullify(const CoefficientType& theRingZero, SemisimpleLieAlgebraOrdered& theOwner);
   void ModOutVermaRelationS(bool SubHighestWeightWithZeroes);
   void ModOutVermaRelations
-  (bool SubHighestWeightWithZeroes, const PolynomialsRationalCoeff& highestWeightSub, GlobalVariables* theContext)
+  (bool SubHighestWeightWithZeroes, const PolynomialsRationalCoeff& highestWeightSub, GlobalVariables* theContext, const CoefficientType& theRingUnit)
   ;
   void SetNumVariables(int newNumVars);
   int HashFunction() const;
@@ -7346,13 +7357,15 @@ public:
       return this->TheObjects[0].Coefficient.NumVars;
   }
   inline void MultiplyBy(const ElementUniversalEnvelopingOrdered& other){this->operator*=(other);}
-  void ModOutVermaRelationS(GlobalVariables* theContext){ this->ModOutVermaRelationS(false, theContext);}
-  void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables* theContext)
+  void ModOutVermaRelationS(GlobalVariables* theContext, const CoefficientType& theRingUnit){ this->ModOutVermaRelationS(false, theContext, theRingUnit);}
+  void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables* theContext, const CoefficientType& theRingUnit)
   { PolynomialsRationalCoeff theSub;
     theSub.MakeIdSubstitution(this->GetNumVariables(), (Rational) 1);
-    this->ModOutVermaRelations(SubHighestWeightWithZeroes, theSub, theContext);
+    this->ModOutVermaRelations(SubHighestWeightWithZeroes, theSub, theContext, theRingUnit);
   }
-  void ModOutVermaRelations(bool SubHighestWeightWithZeroes, const PolynomialsRationalCoeff& highestWeightSub, GlobalVariables* theContext);
+  void ModOutVermaRelations
+  (bool SubHighestWeightWithZeroes, const PolynomialsRationalCoeff& highestWeightSub, GlobalVariables* theContext, const CoefficientType& theRingUnit)
+  ;
 template<class CoefficientTypeQuotientField>
   static void GetBasisFromSpanOfElements
   (List<ElementUniversalEnvelopingOrdered<CoefficientType> >& theElements,
@@ -8867,7 +8880,8 @@ public:
   std::string ElementToString()const;
   void ElementToString(std::string& output)const{output=this->ElementToString();}
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
-  (ElementUniversalEnvelopingOrdered<CoefficientType>& input, const ElementVermaModuleOrdered<CoefficientType>& theRingZero, GlobalVariables* theContext)
+  (ElementUniversalEnvelopingOrdered<CoefficientType>& input, const ElementVermaModuleOrdered<CoefficientType>& theRingZero,
+   GlobalVariables* theContext, const CoefficientType& theRingUnit)
   ;
   void ActOnMe
   (const ElementSimpleLieAlgebra& actingElt, ElementVermaModuleOrdered<CoefficientType>& output, SemisimpleLieAlgebra& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)const
@@ -8982,12 +8996,7 @@ void Vectors<CoefficientType>::GetCoordsInBasis
 { assert(this!=&outputCoords);
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
-  { if (i==13)
-    { std::cout << "Stop";
-      Matrix<RationalFunction>::flagAnErrorHasOccurredTimeToPanic=true;
-    }
     this->TheObjects[i].GetCoordsInBasiS(inputBasis, outputCoords.TheObjects[i], bufferVectors, bufferMat, theRingUnit, theRingZero);
-  }
 }
 
 template <class CoefficientType>
@@ -8997,9 +9006,7 @@ void Vector<CoefficientType>::GetCoordsInBasiS
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddObjectOnTop(*this);
-  bufferVectors.ComputeDebugString();
-  if (this==(Vector<CoefficientType>*)0x01521f2c)
-    std::cout << this->ElementToString();
+//  bufferVectors.ComputeDebugString();
   bool tempBool=bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero);
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();

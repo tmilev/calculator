@@ -1925,15 +1925,15 @@ public:
     for (int i=0; i<theDim; i++)
       this->TheObjects[i]=theRingZero;
   }
-  void GetCoordsInBasiS
+  bool GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
   Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
-  void GetCoordsInBasiS
+  bool GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { Vectors<CoefficientType> buffer;
   Matrix<CoefficientType> matBuffer;
-  this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
+  return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
 }
 };
 
@@ -6936,6 +6936,10 @@ public:
   void ActOnMe
   (const ElementSimpleLieAlgebra& theElt, ElementSimpleLieAlgebra& output, SemisimpleLieAlgebra& owner)
   ;
+  void ActOnMe
+    (const ElementSimpleLieAlgebra& theElt, ElementSimpleLieAlgebra& output, SemisimpleLieAlgebra& owner,
+   const RationalFunction& theRingUnit, const RationalFunction& theRingZero, GlobalVariables* theGlobalVariables)
+   ;
   bool IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner);
   bool IsProportionalTo(const ElementSimpleLieAlgebra& other)const
   { root tempRoot1, tempRoot2;
@@ -7339,7 +7343,7 @@ public:
   bool AssignMonomialUniversalEnveloping
   (MonomialUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
-
+  bool IsEqualToZero()const {return this->size==0;}
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner);
   bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
@@ -7415,13 +7419,18 @@ template<class CoefficientTypeQuotientField>
   void operator+=(const Rational& other);
   void operator-=(const ElementUniversalEnvelopingOrdered& other);
   void operator*=(const ElementUniversalEnvelopingOrdered& other);
+  void operator/=(const CoefficientType& other);
   void operator/=(const Rational& other)
   { for (int i=0; i<this->size; i++)
-    this->TheObjects[i].Coefficient.DivByRational(other);
+      this->TheObjects[i].Coefficient.DivByRational(other);
   }
   void operator*=(const Rational& other);
   void operator*=(const CoefficientType& other);
   ElementUniversalEnvelopingOrdered(){this->owner=0;};
+  bool IsProportionalTo
+ (const ElementUniversalEnvelopingOrdered<CoefficientType>& other, CoefficientType& outputTimesMeEqualsOther,
+  const CoefficientType& theRingZero)const
+  ;
   ElementUniversalEnvelopingOrdered(const ElementUniversalEnvelopingOrdered& other){this->operator=(other);};
 };
 
@@ -8748,6 +8757,7 @@ public:
   rootsCollection theExponentShiftsTargetPerSimpleGenerator;
   roots theExponentShifts;
   PolynomialRationalCoeff coefficientInFrontOfMon;
+  roots theModuleWeightsShifted;
 //  List<Matrix<RationalFunction> > theSystemsPerGenerator;
   Matrix<RationalFunction> theSystem;
   List<ElementWeylAlgebra> theOperators;
@@ -8879,6 +8889,7 @@ public:
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
   std::string ElementToString()const;
   void ElementToString(std::string& output)const{output=this->ElementToString();}
+  bool IsEqualToZero()const {return this->theElT.IsEqualToZero();}
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
   (ElementUniversalEnvelopingOrdered<CoefficientType>& input, const ElementVermaModuleOrdered<CoefficientType>& theRingZero,
    GlobalVariables* theContext, const CoefficientType& theRingUnit)
@@ -8893,8 +8904,13 @@ public:
   bool GetCoordsInBasis
   (const List<ElementVermaModuleOrdered<CoefficientType> >& theBasis, Vector<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables& theGlobalVariables)const
   ;
+  bool IsProportionalTo(const ElementVermaModuleOrdered<CoefficientType>& other, CoefficientType& outputTimesMeEqualsOther, const CoefficientType& theRingZero)const
+  { return this->theElT.IsProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero);
+  }
   void Nullify(SemisimpleLieAlgebraOrdered& owner, PolynomialsRationalCoeff& incomingSub){this->theElT.Nullify(owner); this->theSub=incomingSub;}
   void operator*=(const CoefficientType& theConst){this->theElT.operator*=(theConst);}
+  void operator/=(const CoefficientType& theConst){this->theElT.operator/=(theConst);}
+  void operator-=(const ElementVermaModuleOrdered& other){ this->theElT-=other.theElT;}
   void operator=(const ElementVermaModuleOrdered& other){ this->theElT=other.theElT; this->theSub=other.theSub;}
 };
 
@@ -9000,23 +9016,24 @@ void Vectors<CoefficientType>::GetCoordsInBasis
 }
 
 template <class CoefficientType>
-void Vector<CoefficientType>::GetCoordsInBasiS
+bool Vector<CoefficientType>::GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
   Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddObjectOnTop(*this);
 //  bufferVectors.ComputeDebugString();
-  bool tempBool=bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero);
+  if(!bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero))
+    return false;
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
-  assert(tempBool);
   bufferMat/=bufferMat.elements[bufferMat.NumRows-1][0];
   output.SetSize(bufferMat.NumRows-1);
   for (int i=0; i<bufferMat.NumRows-1; i++)
   { bufferMat.elements[i][0].Minus();
     output.TheObjects[i].Assign(bufferMat.elements[i][0]);
   }
+  return true;
 }
 
 template <class CoefficientType>

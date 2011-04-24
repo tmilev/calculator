@@ -125,7 +125,8 @@ int main(int argc, char **argv)
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
   //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
   //civilizedInput="1/x_1*(1-1)";
-  civilizedInput="secretSauceOrdered";
+//  civilizedInput="secretSauceOrdered";
+  civilizedInput="2f_1";
   //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;

@@ -2129,7 +2129,7 @@ class ElementGeneralizedVerma
   List<ElementVermaModuleOrdered<CoefficientType> > leftComponents;
   ElementGeneralizedVerma(){this->theOwner=0;}
   std::string ExtractHighestWeightVectors
-  ( List<ElementGeneralizedVerma<CoefficientType> >& outputVectors,
+  (Parser& theParser, List<ElementGeneralizedVerma<CoefficientType> >& outputVectors,
     GlobalVariables& theGlobalVariables)
 ;
   void Nullify
@@ -2148,13 +2148,16 @@ class ElementGeneralizedVerma
   void ActOnMe
   (const ElementSimpleLieAlgebra& theElt, ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
 ;
+  bool ActOnMe
+  (const ElementUniversalEnvelopingOrdered<CoefficientType>& theElt, ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
+;
   void ActOnMe(const ElementSimpleLieAlgebra& theElt, GlobalVariables* theContext) {ElementGeneralizedVerma<CoefficientType> output; this->ActOnMe(theElt, output, theContext); this->operator=(output);};
 
   void ClimbDownFromHighestWeightAlongSl2String
 (ElementGeneralizedVerma<CoefficientType>& input,
    ElementGeneralizedVerma<CoefficientType>& output,
     CoefficientType& outputCoeff,
-   const ElementSimpleLieAlgebra& negGenerator, const ElementSimpleLieAlgebra& posGenerator,
+   const ElementSimpleLieAlgebra& posGenerator, const ElementSimpleLieAlgebra& negGenerator,
      int generatorPower, GlobalVariables& theGlobalVariables)
   ;
   void ClimbDownFromVectorAccordingToSequence
@@ -2167,6 +2170,10 @@ class ElementGeneralizedVerma
    ElementGeneralizedVerma<CoefficientType>& outputLastNonZero,
    List<int>& outputGeneratorSequence, List<int>& outputGeneratorPowers, GlobalVariables& theGlobalVariables)
   ;
+  void operator=(const ElementGeneralizedVerma<CoefficientType>& other)
+  { this->leftComponents=other.leftComponents;
+    this->theOwner=other.theOwner;
+  }
   bool IsEqualToZero()const
   { for (int i=0; i<this->leftComponents.size; i++)
       if (!this->leftComponents.TheObjects[i].IsEqualToZero())
@@ -2185,8 +2192,19 @@ class ElementGeneralizedVerma
   { for (int i=0; i<this->leftComponents.size; i++)
       this->leftComponents.TheObjects[i]-=other.leftComponents.TheObjects[i];
   }
+  void operator+=(const ElementGeneralizedVerma<CoefficientType>& other)
+  { for (int i=0; i<this->leftComponents.size; i++)
+      this->leftComponents.TheObjects[i]+=other.leftComponents.TheObjects[i];
+  }
   bool IsProportionalTo(const ElementGeneralizedVerma<CoefficientType>& other, CoefficientType& outputTimesMeEqualsInput)const
   { assert(this->leftComponents.size==other.leftComponents.size);
+    if (this->IsEqualToZero())
+    { if (other.IsEqualToZero())
+      { outputTimesMeEqualsInput=this->theOwner->theRingZero;
+        return true;
+      }
+      return false;
+    }
     for (int i=0; i<this->leftComponents.size; i++)
       if (!this->leftComponents.TheObjects[i].IsEqualToZero())
       { if (!this->leftComponents.TheObjects[i].IsProportionalTo(other.leftComponents.TheObjects[i], outputTimesMeEqualsInput, this->theOwner->theRingZero))
@@ -2200,7 +2218,12 @@ class ElementGeneralizedVerma
     tempElt-=other;
     return tempElt.IsEqualToZero();
   }
+  void ClearDenominators
+  (CoefficientType& outputWasMultipliedByThis)
+  ;
 };
+
+template < > int List<ElementGeneralizedVerma<RationalFunction> >::ListActualSizeIncrement=10;
 
 std::string EigenVectorComputation::ComputeAndReturnStringOrdered
 (GlobalVariables& theGlobalVariables, Parser& theParser, int NodeIndex)
@@ -2214,9 +2237,11 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   ElementGeneralizedVerma<RationalFunction> startingElement;
   this->PrepareCartanSub(theParser.testAlgebra, theData.VermaHighestWeighSub, theGlobalVariables);
   theData.init(theParser, &theGlobalVariables);
-  startingElement.AssignDefaultGeneratorIndex(this->theModuleWeightsShifted.size-1, theData, &theGlobalVariables);
+//  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
+  startingElement.AssignDefaultGeneratorIndex(4, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
-  startingElement.ExtractHighestWeightVectors(theEigenVectors, theGlobalVariables);
+  std::cout << "<br>the starting element is: " << startingElement.ElementToString();
+  startingElement.ExtractHighestWeightVectors(theParser, theEigenVectors, theGlobalVariables);
   return out.str();
   ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> theElt, tempElt1, tempElt2;
   PolynomialOutputFormat PolyFormatLocal;
@@ -3753,10 +3778,13 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::IsProportionalTo
   int theIndex=other.IndexOfObjectHash(theMon);
   if (theIndex==-1)
     return false;
-  MonomialUniversalEnvelopingOrdered<CoefficientType>& otherMon= this->TheObjects[theIndex];
+  MonomialUniversalEnvelopingOrdered<CoefficientType>& otherMon= other.TheObjects[theIndex];
+  theMon.ComputeDebugString();
+  otherMon.ComputeDebugString();
   outputTimesMeEqualsOther=otherMon.Coefficient;
   outputTimesMeEqualsOther/=theMon.Coefficient;
   ElementUniversalEnvelopingOrdered<CoefficientType> tempElt;
+
   tempElt=*this;
   tempElt*=outputTimesMeEqualsOther;
   tempElt-=other;
@@ -3895,8 +3923,14 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   theLeftPoweR= this->Powers.TheObjects[theIndeX];
   theRightPoweR-=1;
   int powerDroP=0;
+  if (this->ElementToString()=="2f_{5}f_{-5}f_{-4}" || this->ElementToString()=="2f_{11}f_{-4}")
+  { std::cout << "here we are!";
+    this->flagAnErrorHasOccurredTimeToPanic=true;
+  }
+
   CoefficientType acquiredCoefficienT, polyOne;
   acquiredCoefficienT=this->Coefficient;
+  tempMon.Coefficient=this->Coefficient;
   for (int i=0; i<theIndeX; i++)
     tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
   MonomialUniversalEnvelopingOrdered startMon;
@@ -3908,25 +3942,41 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   polyOne.MakeNVarConst(this->Coefficient.NumVars, (Rational) 1, theContext);
   root theCoeffs;
   do
-  { //acquiredCoefficienT.ComputeDebugString();
-    //theRightPoweR.ComputeDebugString();
-    //theLeftPoweR.ComputeDebugString();
-    //adResulT.ComputeDebugString(*this->owner, false, false);
-    //tempMon.ComputeDebugString();
+  { if(this->flagAnErrorHasOccurredTimeToPanic)
+    { acquiredCoefficienT.ComputeDebugString();
+      theRightPoweR.ComputeDebugString();
+      theLeftPoweR.ComputeDebugString();
+      adResulT.ComputeDebugString( false, false);
+      tempMon.ComputeDebugString();
+    }
     this->owner->GetLinearCombinationFrom(adResulT, theCoeffs);
     for (int i=0; i<theCoeffs.size; i++)
       if (theCoeffs.TheObjects[i]!=0)
       { int theNewGeneratorIndex=i;
         tempMon=startMon;
+        if (this->flagAnErrorHasOccurredTimeToPanic)
+        { tempMon.ComputeDebugString();
+          this->ComputeDebugString();
+        }
         tempMon.Coefficient=acquiredCoefficienT;
+        if (this->flagAnErrorHasOccurredTimeToPanic)
+        { tempMon.ComputeDebugString();
+          this->ComputeDebugString();
+        }
         tempMon.Coefficient.TimesConstant(theCoeffs.TheObjects[i]);
+        if (this->flagAnErrorHasOccurredTimeToPanic)
+        { tempMon.ComputeDebugString();
+          this->ComputeDebugString();
+        }
         tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, polyOne);
         tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, theLeftPoweR);
         tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
         for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
           tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
-        tempMon.ComputeDebugString();
-        this->ComputeDebugString();
+        if (this->flagAnErrorHasOccurredTimeToPanic)
+        { tempMon.ComputeDebugString();
+          this->ComputeDebugString();
+        }
         output.AddObjectOnTopHash(tempMon);
       }
     acquiredCoefficienT.MultiplyBy(theLeftPoweR);
@@ -3935,7 +3985,8 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
     adResulT=tempElT;
     powerDroP++;
     acquiredCoefficienT/=powerDroP;
-    //adResulT.ComputeDebugString(*this->owner, false, false);
+    if (this->flagAnErrorHasOccurredTimeToPanic)
+      adResulT.ComputeDebugString(false, false);
   }while(!adResulT.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
 }
 
@@ -3957,8 +4008,14 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   theLeftPower= this->Powers.TheObjects[theIndeX];
   theLeftPower-=1;
   int powerDrop=0;
+  if (this->ElementToString()=="2f_{5}f_{-5}f_{-4}" || this->ElementToString()=="2f_{11}f_{-4}")
+  { std::cout << "here we are!";
+    this->flagAnErrorHasOccurredTimeToPanic=true;
+  }
+
   CoefficientType acquiredCoefficient, polyOne;
   acquiredCoefficient.Assign(this->Coefficient);
+  tempMon.Coefficient=this->Coefficient;
   for (int i=0; i<theIndeX; i++)
     tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
   tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndeX], theLeftPower);
@@ -4237,8 +4294,8 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::AssignMonomialUniversal
   (MonomialUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { ElementUniversalEnvelopingOrdered theMon;
   ElementSimpleLieAlgebra tempElt;
-  int numVars=input.Coefficient.NumVars;
-  this->MakeConst( (Rational) 1, numVars, owner);
+//  int numVars=input.Coefficient.NumVars;
+  this->MakeConst( theRingUnit, owner);
 
   for (int i=0; i<input.generatorsIndices.size; i++)
   { tempElt.Nullify(owner.theOwner);
@@ -4254,17 +4311,6 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::AssignMonomialUniversal
       return false;
   }
   return true;
-}
-
-template <class CoefficientType>
-void ElementUniversalEnvelopingOrdered<CoefficientType>::MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebraOrdered& theOwner)
-{ MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
-  this->Nullify(theOwner);
-  PolynomialRationalCoeff tempP;
-  tempP.MakeNVarConst((int)numVars, coeff);
-  tempMon.MakeConst(tempP, theOwner);
-  this->AddMonomialNoCleanUpZeroCoeff(tempMon);
-  this->CleanUpZeroCoeff();
 }
 
 template <class CoefficientType>
@@ -5328,15 +5374,30 @@ void ElementVermaModuleOrdered<CoefficientType>::AssignElementUniversalEnvelopin
 }
 
 template <class CoefficientType>
+void ElementVermaModuleOrdered<CoefficientType>::MultiplyOnTheLeft
+(const ElementSimpleLieAlgebra& other, ElementVermaModuleOrdered<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)
+{ ElementUniversalEnvelopingOrdered<CoefficientType> tempElt;
+  tempElt.AssignElementLieAlgebra(other, theRingUnit, theRingZero, *this->theElT.owner);
+  //std::cout << "<br>multiplying " << tempElt.ElementToString() << " times " << this->ElementToString();
+  tempElt*=this->theElT;
+  output.theElT=tempElt;
+  //std::cout << "<br> ... and the result before simplifying is: " << output.theElT.ElementToString();
+  output.theElT.Simplify(theContext);
+  //std::cout << "<br> before modding out we get: " << output.theElT.ElementToString();
+  output.theElT.ModOutVermaRelations(false, this->theSub, theContext, theRingUnit);
+  //std::cout << "<br> finally we get: " << output.theElT.ElementToString();
+}
+
+template <class CoefficientType>
 std::string ElementVermaModuleOrdered<CoefficientType>::ElementToString()const
 { std::stringstream out;
   PolynomialOutputFormat polyFormatLocal;
   std::string tempS=this->theElT.ElementToString(true, polyFormatLocal);
-  if (tempS.size()>1 && tempS[0]!='(')
+  if (tempS.size()>1)
     out << "(";
   if (tempS!="1")
     out << tempS;
-  if (tempS.size()>1 && tempS[0]!='(')
+  if (tempS.size()>1)
     out << ")";
   if (tempS!="0")
     out << " v";
@@ -5349,14 +5410,14 @@ void ElementVermaModuleOrdered<CoefficientType>::ActOnMe
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)const
 { ElementUniversalEnvelopingOrdered<CoefficientType> tempElt;
   tempElt.AssignElementLieAlgebra(actingElt, theRingUnit, theRingZero, *this->theElT.owner);
-  std::cout << "<br>" << actingElt.ElementToString() << " acts on " << this->ElementToString();
+//  std::cout << "<br>" << actingElt.ElementToString() << " acts on " << this->ElementToString();
   tempElt.LieBracketOnTheRight(this->theElT, output.theElT);
   output.theElT.Simplify(theContext);
   output.theSub=this->theSub;
-  std::cout << "<br>and the result before modding out is: " << output.ElementToString();
+//  std::cout << "<br>and the result before modding out is: " << output.ElementToString();
 //  int numVars=output.theElt.GetNumVariables();
   output.theElT.ModOutVermaRelations(false, this->theSub, theContext, theRingUnit);
-  std::cout << "<br>and after modding out we get: " << output.ElementToString();
+//  std::cout << "<br>and after modding out we get: " << output.ElementToString();
 }
 
 void ElementSimpleLieAlgebra::ActOnMe
@@ -6121,28 +6182,51 @@ void ElementGeneralizedVerma<CoefficientType>::Nullify
 
 template <class CoefficientType>
 std::string ElementGeneralizedVerma<CoefficientType>::ExtractHighestWeightVectors
-  ( List<ElementGeneralizedVerma<CoefficientType> >& outputVectors,
+  (Parser& theParser, List<ElementGeneralizedVerma<CoefficientType> >& outputVectors,
     GlobalVariables& theGlobalVariables)
 { //Index ordering of simpleNegGenerators:
   //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
   //simpleNegGenerators.TheObjects[i]
   std::stringstream out;
   outputVectors.size=0;
-  ElementGeneralizedVerma<CoefficientType> remainderElement, componentElement, currentHighestWeightElement;
+  ElementGeneralizedVerma<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
   remainderElement=*this;
-  CoefficientType theCoeff;
+  CoefficientType tempCoeff, theCoeff, CentralCharacterAction;
   List<int> GeneratorSequence, GeneratorPowers;
-  while(!remainderElement.IsEqualToZero())
-  { this->ClimbUpFromVector
+  int counter=0;
+  ElementUniversalEnveloping abstractCasimir, embeddedCasimirNonOrdered;
+  abstractCasimir.MakeCasimir(theParser.theHmm.theDomain, theParser.theHmm.theRange.GetRank(), theGlobalVariables);
+  std::cout << "<br>abstract Casimir: " << abstractCasimir.ElementToString();
+  theParser.theHmm.ApplyHomomorphism(abstractCasimir, embeddedCasimirNonOrdered, theGlobalVariables);
+  embeddedCasimirNonOrdered.Simplify();
+  std::cout << "<br> embedded Casimir non-ordered: " << embeddedCasimirNonOrdered.ElementToString();
+  ElementUniversalEnvelopingOrdered<CoefficientType> embeddedCasimir;
+  embeddedCasimir.AssignElementUniversalEnveloping(embeddedCasimirNonOrdered, theParser.testAlgebra, this->theOwner->theRingUnit, this->theOwner->theRingZero);
+  std::cout << "<br>the embedded Casimir is: " << embeddedCasimir.ElementToString();
+  return out.str();
+  while(!remainderElement.IsEqualToZero()&& counter<3)
+  { //std::cout << "<br>remainder element: " << remainderElement.ElementToString();
+    this->ClimbUpFromVector
       (remainderElement, currentHighestWeightElement,
        GeneratorSequence, GeneratorPowers, theGlobalVariables);
-    this->ClimbDownFromVectorAccordingToSequence
-      (currentHighestWeightElement, componentElement, theCoeff, GeneratorSequence, GeneratorPowers, theGlobalVariables);
-    assert(!theCoeff.IsEqualToZero());
-    componentElement/=theCoeff;
-    outputVectors.AddObjectOnTop(componentElement);
-    remainderElement-=*outputVectors.LastObject();
-    std::cout << "<br>found element: " << componentElement.ElementToString();
+    assert(GeneratorSequence.size==GeneratorPowers.size);
+    std::cout << "<br><br><br>And the current sequence is: ";
+    for (int i=0; i<GeneratorSequence.size; i++)
+    { std:: cout << "(generator " << GeneratorSequence.TheObjects[i] << ")^" << GeneratorPowers.TheObjects[i] << ", ";
+    }
+    std::cout << "<br>current highest weight element: " << currentHighestWeightElement.ElementToString();
+    currentHighestWeightElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
+    std::cout << "<br>Casimir acting on current highest: " << tempElt.ElementToString();
+    bool tempBool=currentHighestWeightElement.IsProportionalTo(tempElt, CentralCharacterAction);
+    std::cout << "<br>proportionality coefficient: " << CentralCharacterAction.ElementToString();
+    assert(tempBool);
+    remainderElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
+    std::cout << "<br>Casimir acting on " << remainderElement.ElementToString() << " yields " << tempElt.ElementToString();
+    remainderElement*=CentralCharacterAction;
+    remainderElement-=tempElt;
+//    remainderElement.ClearDenominators(tempCoeff);
+    std::cout << "<br><br>Remaining after clearing the denominators: " << remainderElement.ElementToString();
+    counter++;
   }
   return out.str();
 }
@@ -6150,9 +6234,13 @@ std::string ElementGeneralizedVerma<CoefficientType>::ExtractHighestWeightVector
 template <class CoefficientType>
 std::string ElementGeneralizedVerma<CoefficientType>::ElementToString()
 { std::stringstream out;
+  out << "(";
   for (int i=0; i<this->leftComponents.size; i++)
-  { out << "<br>compoenent index " << i << ": " <<this->leftComponents.TheObjects[i].ElementToString();
+  { out << this->leftComponents.TheObjects[i].ElementToString();
+    if (i!=this->leftComponents.size-1)
+      out << ", ";
   }
+  out << ")";
   return out.str();
 }
 
@@ -6161,13 +6249,26 @@ void ElementGeneralizedVerma<CoefficientType>::ClimbDownFromHighestWeightAlongSl
 (ElementGeneralizedVerma<CoefficientType>& input,
    ElementGeneralizedVerma<CoefficientType>& output,
     CoefficientType& outputCoeff,
-   const ElementSimpleLieAlgebra& negGenerator, const ElementSimpleLieAlgebra& posGenerator,
+   const ElementSimpleLieAlgebra& posGenerator, const ElementSimpleLieAlgebra& negGenerator,
      int generatorPower, GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
   CoefficientType currentWeight;
+  ElementGeneralizedVerma<CoefficientType> debugElt;
+  input.ActOnMe(posGenerator, debugElt, &theGlobalVariables);
+  std::cout << "<br>climbing down with (" << negGenerator.ElementToString() << " )^" << generatorPower << ": ";
+  std::cout << input.ElementToString() << "->";
+  //if (!debugElt.IsEqualToZero())
+  //{ std::cout << "<br>positive generator acting on the supposedly highest weight vector equals: " << debugElt.ElementToString();
+  //  std::cout.flush();
+  //  assert(false);
+  //}
   input.ActOnMe(negGenerator, output, &theGlobalVariables);
+  std::cout << output.ElementToString() << "->";
   output.ActOnMe(posGenerator, &theGlobalVariables);
-  input.IsProportionalTo(output, currentWeight);
+  std::cout << output.ElementToString() << "->";
+  std::cout.flush();
+  bool tempBool=input.IsProportionalTo(output, currentWeight);
+  assert(tempBool);
   CoefficientType RaiseCoeff;
   RaiseCoeff=this->theOwner->theRingZero;
   outputCoeff=this->theOwner->theRingUnit;
@@ -6176,7 +6277,8 @@ void ElementGeneralizedVerma<CoefficientType>::ClimbDownFromHighestWeightAlongSl
   { RaiseCoeff+=currentWeight;
     currentWeight-=2;
     outputCoeff*=RaiseCoeff;
-    output.ActOnMe(negGenerator, output, &theGlobalVariables);
+    output.ActOnMe(negGenerator, &theGlobalVariables);
+
   }
 }
 
@@ -6192,20 +6294,21 @@ void ElementGeneralizedVerma<CoefficientType>::ClimbUpFromVector
   outputGeneratorSequence.size=0;
   bool found=true;
   while (found)
-  { found=false;
-    for (int i=0; i<this->theOwner->posGenerators.size; i++)
+  { for (int i=0; i<this->theOwner->posGenerators.size; i++)
     { ElementSimpleLieAlgebra& currentGen=this->theOwner->posGenerators.TheObjects[i];
       int counter=0;
+      found=false;
       for(outputLastNonZero.ActOnMe(currentGen, tempElt, &theGlobalVariables); !tempElt.IsEqualToZero(); tempElt.ActOnMe(currentGen, &theGlobalVariables))
       { counter++;
         found=true;
         outputLastNonZero=tempElt;
-//        std::cout << "<br>" << outputLastNonZero.ElementToString();
-//        std::cout.flush();
+  //      std::cout << "<br> Current state of the element: " << outputLastNonZero.ElementToString();
+    //    std::cout.flush();
       }
       if (found)
       { outputGeneratorSequence.AddObjectOnTop(i);
         outputGeneratorPowers.AddObjectOnTop(counter);
+      //  std:: cout << "<br> the corresponding generator: " << i << " to the power of " << counter;
       }
     }
   }
@@ -6223,16 +6326,26 @@ void ElementGeneralizedVerma<CoefficientType>::ActOnMe
   for (int i=0; i<output.leftComponents.size; i++)
   { ElementVermaModuleOrdered<CoefficientType>& currentLeft= this->leftComponents.TheObjects[i];
     currentLeft.ActOnMe(theElt, output.leftComponents.TheObjects[i], this->theOwner->theOwner.theOwner, this->theOwner->theRingUnit, this->theOwner->theRingZero, theContext);
+    currentLeft.MultiplyOnTheLeft(theElt, output.leftComponents.TheObjects[i], this->theOwner->theRingUnit, this->theOwner->theRingZero, theContext);
   }
+//  std::cout << "<br><br>acting on the Universal enveloping part we get:" << output.ElementToString();
+  ElementVermaModuleOrdered<CoefficientType> tempElt;
   for (int i=0; i<output.leftComponents.size; i++)
   { ElementSimpleLieAlgebra& currentAlgebraElt=this->theOwner->theFDspace.TheObjects[i];
     this->theOwner->theOwner.theOwner.LieBracket(theElt, currentAlgebraElt, tempLieElt);
-    tempLieElt.GetCoordsInBasis(this->theOwner->theFDspace, coordFormRightElt, *theContext);
-    for (int i=0; i<coordFormRightElt.size; i++)
-    {
+  //  std::cout << "<br><br>" << theElt.ElementToString() << " acts on " << currentAlgebraElt.ElementToString() << " to obtain: " << tempLieElt.ElementToString();
+
+    bool tempBool=tempLieElt.GetCoordsInBasis(this->theOwner->theFDspace, coordFormRightElt, *theContext);
+    //std::cout << "<br>translated in coordinate form this is: " << coordFormRightElt.ElementToString();
+    assert(tempBool);
+    for (int j=0; j<coordFormRightElt.size; j++)
+    { tempElt=this->leftComponents.TheObjects[i];
+      tempElt*=(coordFormRightElt.TheObjects[j]);
+      output.leftComponents.TheObjects[j]+=tempElt;
     }
   }
-  int FinishMeTomorrow;
+//  std::cout<< "<br><br>finally we have: " << output.ElementToString() << " <br>";
+
 }
 
 template <class CoefficientType>
@@ -6247,10 +6360,58 @@ void ElementGeneralizedVerma<CoefficientType>::ClimbDownFromVectorAccordingToSeq
   CoefficientType tempCoeff;
   for (int i=inputGeneratorSequence.size-1; i>=0; i--)
   { ElementSimpleLieAlgebra& currentPosGen= this->theOwner->posGenerators.TheObjects[inputGeneratorSequence.TheObjects[i]];
-    ElementSimpleLieAlgebra& currentNegGen=this->theOwner->posGenerators.TheObjects[inputGeneratorSequence.TheObjects[i]];
+    ElementSimpleLieAlgebra& currentNegGen=this->theOwner->negGenerators.TheObjects[inputGeneratorSequence.TheObjects[i]];
     this->ClimbDownFromHighestWeightAlongSl2String
     (output, tempElt, tempCoeff, currentPosGen, currentNegGen, inputGeneratorPowers.TheObjects[i], theGlobalVariables);
     outputCoeff*=(tempCoeff);
+//    std::cout << "<br><br><br>... and the coefficient currently is: " << outputCoeff.ElementToString();
     output=tempElt;
   }
+}
+
+template <class CoefficientType>
+void ElementGeneralizedVerma<CoefficientType>::ClearDenominators
+  (CoefficientType& outputWasMultipliedByThis)
+{ outputWasMultipliedByThis=this->theOwner->theRingUnit;
+  CoefficientType CurrentCoeff;
+  for (int i=0; i<this->leftComponents.size; i++)
+  { ElementVermaModuleOrdered<CoefficientType>& currentElt=this->leftComponents.TheObjects[i];
+    currentElt.ClearDenominators(CurrentCoeff, this->theOwner->theRingUnit);
+    for (int j=0; j<this->leftComponents.size; j++)
+      if (i!=j)
+        this->leftComponents.TheObjects[j]*=CurrentCoeff;
+    outputWasMultipliedByThis*=CurrentCoeff;
+  }
+}
+
+void RationalFunction::ClearDenominators
+(RationalFunction& outputWasMultipliedBy)
+{ outputWasMultipliedBy.MakeNVarConst(this->NumVars, (Rational) 1, this->context);
+  if (this->expressionType!=this->typeRationalFunction)
+    return;
+  outputWasMultipliedBy.operator=(this->Denominator.GetElement());
+  *this*=outputWasMultipliedBy;
+}
+
+template <class CoefficientType>
+bool ElementGeneralizedVerma<CoefficientType>::ActOnMe
+  (const ElementUniversalEnvelopingOrdered<CoefficientType>& theElt, ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
+{ ElementGeneralizedVerma<CoefficientType> Accum, tempElt;
+  Accum.Nullify(*this->theOwner);
+  for (int i=0; i<theElt.size; i++)
+  { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=theElt.TheObjects[i];
+    tempElt=*this;
+    for (int j=currentMon.generatorsIndices.size-1; j>=0 ; j--)
+    { int thePower;
+      if (!currentMon.Powers.TheObjects[j].IsSmallInteger(thePower))
+        return false;
+      ElementSimpleLieAlgebra& currentLieElt=this->theOwner->theOwner.theOrder.TheObjects[currentMon.generatorsIndices.TheObjects[j]];
+      for (int k=0; k<thePower; k++)
+        tempElt.ActOnMe(currentLieElt, theContext);
+    }
+    tempElt*=currentMon.Coefficient;
+    Accum+=tempElt;
+  }
+  output=Accum;
+  return true;
 }

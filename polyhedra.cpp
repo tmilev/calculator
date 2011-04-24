@@ -25796,7 +25796,10 @@ void ParserNode::InitForMultiplication(GlobalVariables* theContext)
   if(this->ExpressionType==this->typeUEelement)
     this->UEElement.GetElement().AssignInt(1, this->owner->NumVariables, *this->ContextLieAlgebra);
   if(this->ExpressionType==this->typeUEElementOrdered)
-    this->UEElementOrdered.GetElement().AssignInt(1, this->owner->NumVariables, this->owner->testAlgebra);
+  { PolynomialRationalCoeff PolyOne;
+    PolyOne.MakeNVarConst(this->owner->NumVariables, (Rational) 1);
+    this->UEElementOrdered.GetElement().MakeConst(PolyOne, this->owner->testAlgebra);
+  }
   if(this->ExpressionType==this->typeWeylAlgebraElement)
     this->WeylAlgebraElement.GetElement().MakeConst(this->owner->NumVariables, (Rational) 1);
   if (this->ExpressionType==this->typeRationalFunction)

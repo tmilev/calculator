@@ -4275,6 +4275,9 @@ public:
       default: output.MakeNVarConst(this->NumVars, (Rational) 1); return;
     }
   }
+  void ClearDenominators
+  (RationalFunction& outputWasMultipliedBy)
+  ;
   void MultiplyBy(const RationalFunction& other){this->operator*=(other);};
   void Add(const RationalFunction& other)
   { assert(this->NumVars==other.NumVars);
@@ -7275,6 +7278,7 @@ public:
   List<int> generatorsIndices;
   List<CoefficientType> Powers;
   CoefficientType Coefficient;
+  static bool flagAnErrorHasOccurredTimeToPanic;
   void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnvelopingOrdered<CoefficientType>& output);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const CoefficientType& thePower);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
@@ -7314,6 +7318,9 @@ public:
 };
 
 template <class CoefficientType>
+bool MonomialUniversalEnvelopingOrdered<CoefficientType>::flagAnErrorHasOccurredTimeToPanic=false;
+
+template <class CoefficientType>
 class ElementUniversalEnvelopingOrdered : public HashedList<MonomialUniversalEnvelopingOrdered<CoefficientType> >
 {
 private:
@@ -7346,7 +7353,6 @@ public:
   bool IsEqualToZero()const {return this->size==0;}
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner);
   bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
-  void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
   void MakeConst(const CoefficientType& coeff, SemisimpleLieAlgebraOrdered& theOwner)
   { this->Nullify(theOwner);
     MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
@@ -7380,7 +7386,6 @@ template<class CoefficientTypeQuotientField>
   static void GetBasisFromSpanOfElements
   (List<ElementUniversalEnvelopingOrdered>& theElements, List<rootPoly>& outputCoordinates, List<ElementUniversalEnvelopingOrdered>& outputTheBasis, GlobalVariables& theGlobalVariables)
 ;
-
   bool GetCoordsInBasis
   (List<ElementUniversalEnvelopingOrdered<CoefficientType> >& theBasis, Vector<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables& theGlobalVariables)const
   ;
@@ -7406,10 +7411,10 @@ template<class CoefficientTypeQuotientField>
       return false;
     return true;
   };
-  void MakeCasimir(SemisimpleLieAlgebra& theOwner, int numVars, GlobalVariables& theGlobalVariables);
+  void MakeCasimir(SemisimpleLieAlgebraOrdered& theOwner, int numVars, GlobalVariables& theGlobalVariables);
+
   void ActOnMe(const ElementSimpleLieAlgebra& theElt, ElementUniversalEnvelopingOrdered& output);
   void LieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
-  void AssignInt(int coeff, int numVars, SemisimpleLieAlgebraOrdered& theOwner){ Rational tempRat=coeff; this->MakeConst(tempRat, numVars, theOwner);};
   void operator=(const ElementUniversalEnvelopingOrdered& other)
   { this->CopyFromHash(other);
     this->owner=other.owner;
@@ -7432,6 +7437,18 @@ template<class CoefficientTypeQuotientField>
   const CoefficientType& theRingZero)const
   ;
   ElementUniversalEnvelopingOrdered(const ElementUniversalEnvelopingOrdered& other){this->operator=(other);};
+  void ClearDenominators(CoefficientType& outputWasMultipliedBy, const CoefficientType& theRingUnit)
+  { outputWasMultipliedBy=theRingUnit;
+    CoefficientType currentCoeff;
+    for (int i=0; i<this->size; i++)
+    { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=this->TheObjects[i];
+      currentMon.Coefficient.ClearDenominators(currentCoeff);
+      for (int j=0; j<this->size; j++)
+        if (j!=i)
+          this->TheObjects[j].Coefficient*=currentCoeff;
+      outputWasMultipliedBy*=currentCoeff;
+    }
+  }
 };
 
 class ElementUniversalEnveloping;
@@ -8009,8 +8026,8 @@ class ParserNode
 ;
   bool ConvertChildrenToType(int theType);
   //the order of the types matters, they will be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeRationalFunction, typeMapWeylAlgebra, typeString, typeArray,
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
+  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
@@ -8068,6 +8085,7 @@ public:
   ParserNode theValue;
   HomomorphismSemisimpleLieAlgebra theHmm;
   SemisimpleLieAlgebraOrdered testAlgebra;
+  SemisimpleLieAlgebraOrdered testSubAlgebra;
 //  SemisimpleLieAlgebra theLieAlgebra;
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); };
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
@@ -8909,8 +8927,15 @@ public:
   }
   void Nullify(SemisimpleLieAlgebraOrdered& owner, PolynomialsRationalCoeff& incomingSub){this->theElT.Nullify(owner); this->theSub=incomingSub;}
   void operator*=(const CoefficientType& theConst){this->theElT.operator*=(theConst);}
+  void MultiplyOnTheLeft
+(const ElementSimpleLieAlgebra& other, ElementVermaModuleOrdered<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)
+;
+  void ClearDenominators(CoefficientType& outputWasMultipliedBy, const CoefficientType& theRingUnit)
+  { this->theElT.ClearDenominators(outputWasMultipliedBy, theRingUnit);
+  }
   void operator/=(const CoefficientType& theConst){this->theElT.operator/=(theConst);}
   void operator-=(const ElementVermaModuleOrdered& other){ this->theElT-=other.theElT;}
+  void operator+=(const ElementVermaModuleOrdered& other){ this->theElT+=other.theElT;}
   void operator=(const ElementVermaModuleOrdered& other){ this->theElT=other.theElT; this->theSub=other.theSub;}
 };
 

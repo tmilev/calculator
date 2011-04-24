@@ -4420,6 +4420,10 @@ bool ParserNode::ConvertToNextType
         this->ratFunction.GetElement()=this->polyValue.GetElement();
         this->ExpressionType=this->typeRationalFunction;
         return true;
+      case ParserNode::typeUEElementOrdered:
+        this->UEElementOrdered.GetElement().MakeConst(this->polyValue.GetElement(), this->owner->testAlgebra);
+        this->ExpressionType=this->typeUEElementOrdered;
+        return true;
     }
   }
   if (this->ExpressionType==this->typeUEelement)

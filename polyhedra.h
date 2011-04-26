@@ -293,6 +293,26 @@ public:
   template <typename T>
   inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; }
   inline static int Minimum(int a, int b){ if (a>b) return b; else return a; }
+  template<class Element>
+  static inline std::string ElementToStringBrackets(const Element& input)
+  { if (!input.ElementToStringNeedsBracketsForMultiplication())
+      return input.ElementToString();
+    std::string result;
+    result.append("(");
+    result.append(input.ElementToString());
+    result.append(")");
+    return result;
+  }
+  template<class Element>
+  static inline std::string ElementToStringBrackets(const Element& input, const PolynomialOutputFormat& theFormat)
+  { if (!input.ElementToStringNeedsBracketsForMultiplication())
+      return input.ElementToString(theFormat);
+    std::string result;
+    result.append("(");
+    result.append(input.ElementToString(theFormat));
+    result.append(")");
+    return result;
+  }
 };
 
 class DrawElementInputOutput
@@ -662,7 +682,7 @@ public:
   inline void operator/=(const Integer& y){this->value/=y.value; }
   inline void WriteToFile(std::fstream& output){output<<this->value; }
   inline void ReadFromFile(std::fstream& input){input>>this->value; }
-  inline void ElementToString(std::string& output) { std::stringstream out; out << this->value; output= out.str(); }
+  inline void ElementToString(std::string& output)const{ std::stringstream out; out << this->value; output= out.str(); }
   Integer(int x){this->value=x; }
   Integer(){}
 };
@@ -1478,16 +1498,16 @@ public:
   //the below must be less than or equal to the square root of CarryOverBound.
   //it is used for quick multiplication of LargeRationals.
   static const int SquareRootOfCarryOverBound=32768; //=2^15
-  void ElementToString(std::string& output);
+  void ElementToString(std::string& output)const;
   void DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
   void Add(const LargeIntUnsigned& x);
   void AddUInt(unsigned int x){static LargeIntUnsigned tempI; tempI.AssignShiftedUInt(x, 0); this->Add(tempI); };
   void MakeZero();
-  bool IsEqualToZero(){return this->size==1 && this->TheObjects[0]==0; };
+  bool IsEqualToZero()const{return this->size==1 && this->TheObjects[0]==0; };
   bool IsEqualTo(LargeIntUnsigned& right);
   bool IsPositive(){ return this->size>1 || this->TheObjects[0]>0; };
-  bool IsEqualToOne(){ return this->size==1 && this->TheObjects[0]==1; };
+  bool IsEqualToOne()const{ return this->size==1 && this->TheObjects[0]==1; };
   bool IsGEQ(const LargeIntUnsigned& x);
   static void gcd(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output);
   static void lcm(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output)
@@ -1524,14 +1544,14 @@ public:
   LargeIntUnsigned value;
   void MultiplyBy(LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); };
   void MultiplyByInt(int x);
-  void ElementToString(std::string& output);
+  void ElementToString(std::string& output)const;
   bool IsPositive(){return this->sign==1 && (this->value.IsPositive()); };
   bool IsNegative(){return this->sign==-1&& (this->value.IsPositive()); };
   bool IsNonNegative(){return !this->IsNegative(); };
   bool IsNonPositive(){return !this->IsPositive(); };
   bool IsEqualTo(LargeInt& x);
-  bool IsEqualToZero(){ return this->value.IsEqualToZero(); }
-  bool IsEqualToOne(){ return this->value.IsEqualToOne() && this->sign==1; }
+  bool IsEqualToZero()const{ return this->value.IsEqualToZero(); }
+  bool IsEqualToOne()const{ return this->value.IsEqualToOne() && this->sign==1; }
   void Assign(const LargeInt& x);
   void AssignLargeIntUnsigned(const LargeIntUnsigned& x){this->value.Assign(x); this->sign=1;};
   void AssignInt(int x);
@@ -1674,6 +1694,11 @@ public:
   //changed it back to int. Grrrrr.
   int DenShort;
   LargeRationalExtended *Extended;
+  void GetDen(Rational& output)
+  { LargeIntUnsigned tempInt;
+    this->GetDen(tempInt);
+    output.AssignLargeIntUnsigned(tempInt);
+  }
   inline void GetDen(LargeIntUnsigned& output)
   { if (this->Extended==0)
     { unsigned int tempI= (unsigned int) this->DenShort;
@@ -1699,6 +1724,11 @@ public:
   void Subtract(const Rational& r);
   void AdD(const Rational& r){this->operator+=(r);}
   void AddInteger(int x);
+  void AssignLargeIntUnsigned(const LargeIntUnsigned& other)
+  { LargeInt tempInt;
+    tempInt.AssignLargeIntUnsigned(other);
+    this->AssignLargeInteger(tempInt);
+  }
   void AssignLargeInteger(const LargeInt& other)
   { if (this->Extended==0)
     { this->Extended= new LargeRationalExtended;
@@ -1924,6 +1954,13 @@ public:
   { this->SetSize(theDim);
     for (int i=0; i<theDim; i++)
       this->TheObjects[i]=theRingZero;
+  }
+  int GetNumNonZeroCoords()const
+  { int result=0;
+    for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].IsEqualToZero())
+        result++;
+    return result;
   }
   bool GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
@@ -3363,7 +3400,7 @@ struct PolynomialOutputFormat
   List<std::string> alphabet;
   void operator=(const PolynomialOutputFormat& other);
 public:
-  std::string GetLetterIndex(int index);
+  std::string GetLetterIndex(int index)const;
   void SetLetterIndex(const std::string& theLetter, int index);
   PolynomialOutputFormat();
   void MakeNumPartFrac();
@@ -3396,8 +3433,8 @@ public:
   std::string DebugString;
   bool ComputeDebugString(PolynomialOutputFormat& PolyFormat);
   bool ComputeDebugString(){PolynomialOutputFormat PolyFormatLocal; return this->ComputeDebugString(PolyFormatLocal); }
-  void StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat);
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
+  void StringStreamPrintOutAppend(std::stringstream& out, const PolynomialOutputFormat& PolyFormat)const;
+  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat);
   std::string ElementToString(PolynomialOutputFormat& PolyFormat){std::string tempS; this->ElementToString(tempS, PolyFormat); return tempS;}
   //void ElementToString(std::string& output);
   //std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
@@ -3457,7 +3494,7 @@ public:
   bool IsPositive();
   void DecreaseNumVariables(int increment);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
-  bool IsAConstant();
+  bool IsAConstant()const;
   void InvertDegrees();
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   bool operator==(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
@@ -3484,19 +3521,20 @@ public:
   void MultiplyByMonomial(TemplateMonomial& m);
   void MultiplyByMonomial(TemplateMonomial& m, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity >& output);
   void AddMonomial(const TemplateMonomial& m);
+  bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
   void SubtractMonomial(const TemplateMonomial& m);
   void CopyFromPoly(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
   void Assign(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
   std::string DebugString;
   // returns the number of lines used
-  int StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const;
+  int StringPrintOutAppend(std::string& output, const PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const;
   std::string ElementToString()const{ PolynomialOutputFormat LocalFormat; return this->ElementToString(false, LocalFormat);}
-  std::string ElementToString(bool breakLinesLatex, PolynomialOutputFormat& PolyFormatLocal)const
+  std::string ElementToString(bool breakLinesLatex, const PolynomialOutputFormat& PolyFormatLocal)const
   { std::string output; output.clear();
     this->StringPrintOutAppend(output, PolyFormatLocal, breakLinesLatex); return output;
   };
   void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormatLocal)const{ output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true);};
-  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal)const{ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true); return output;};
+  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const{ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true); return output;};
   bool ComputeDebugString();
   int TotalDegree();
   bool IsEqualTo(TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
@@ -3742,7 +3780,7 @@ public:
   bool ValueIsComputed;
   GeneratorPFAlgebraRecord();
   ~GeneratorPFAlgebraRecord();
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
   void GetValue(IntegerPoly& output, int theDimension);
   void operator=(const GeneratorPFAlgebraRecord& right);
   int HashFunction()const{ return this->Elongation+ this->GeneratorRoot.HashFunction();};
@@ -3758,8 +3796,8 @@ public:
   // the numerator in the geometric series sum corresponding to elongation
   static void GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation, MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>& output);
   std::string DebugString;
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat, int theDimension);
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat, int theDimension)const;
+  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
   int HashFunction() const;
   void operator=(const GeneratorsPartialFractionAlgebra& right);
   void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
@@ -3780,8 +3818,8 @@ public:
   ElementOfCommutativeRingWithIdentity Coefficient;
   std::string DebugString;
   void ComputeDebugString(PolynomialOutputFormat &PolyFormat);
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
-  void StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat);
+  void StringStreamPrintOutAppend(std::stringstream& out, const PolynomialOutputFormat& PolyFormat);
   int HashFunction()const;
   void MakeConstantMonomial(int Nvar, const ElementOfCommutativeRingWithIdentity& coeff);
   void MultiplyBy(MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra<  ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
@@ -3809,7 +3847,7 @@ bool MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, Generato
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::StringStreamPrintOutAppend(std::stringstream& out, ::PolynomialOutputFormat& PolyFormat)
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::StringStreamPrintOutAppend(std::stringstream& out, const PolynomialOutputFormat& PolyFormat)
 { std::stringstream out1;
   std::string tempS;
   for(int i=0; i<this->size; i++)
@@ -3918,7 +3956,7 @@ int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, Generator
 }
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
-void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
+void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)
 { std::stringstream out;
   this->StringStreamPrintOutAppend(out, PolyFormat);
   output=out.str();
@@ -4078,7 +4116,7 @@ public:
   void operator+=(const PolynomialRationalCoeff& other){ this->AddPolynomial(other);}
   void operator+=(const Rational& theConst){ Monomial<Rational> tempMon; tempMon.MakeConstantMonomial(this->NumVars,theConst); this->AddMonomial(tempMon);}
   inline void operator*=(const PolynomialRationalCoeff& other){this->MultiplyBy(other);}
-//  void operator*=(const Rational& theConst){ this->TimesConstant(theConst);};
+  void operator*=(const Rational& theConst){ this->TimesConstant(theConst);}
   bool operator==(const PolynomialRationalCoeff& right){ PolynomialRationalCoeff tempP; tempP.Assign(right); tempP.Subtract(*this); return tempP.IsEqualToZero();};
   void operator=(const PolynomialRationalCoeff& right);
   void operator=(const Polynomial<Rational>& right){this->Assign(right);}
@@ -4093,6 +4131,16 @@ public:
     tempP.Assign(*this);
     tempP.Subtract(other);
     return tempP;
+  }
+  void ClearDenominators(Rational& output)
+  { output.MakeOne();
+    Rational tempRat;
+    for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].Coefficient.IsInteger())
+      { this->TheObjects[i].Coefficient.GetDen(tempRat);
+        *this*=tempRat;
+        output*=tempRat;
+      }
   }
   void MakePChooseK(const PolynomialRationalCoeff& P, int k, PolynomialRationalCoeff& output);
   void ScaleToIntegralNoGCDCoeffs();
@@ -4186,7 +4234,15 @@ public:
   void ComputeDebugString(){assert(this->checkConsistency()); this->DebugString=this->ElementToString();}
   std::string ElementToString()const {assert(this->checkConsistency()); return this->ElementToString(true, false);}
   std::string ElementToString(bool useLatex, bool breakLinesLatex)const;
-  std::string ElementToString(PolynomialOutputFormat& theFormat)const{assert(this->checkConsistency()); return this->ElementToString(true, true);}
+  bool ElementToStringNeedsBracketsForMultiplication()const
+  { switch(this->expressionType)
+    { case RationalFunction::typeRational: return false;
+      case RationalFunction::typePoly: return this->Numerator.GetElementConst().ElementToStringNeedsBracketsForMultiplication();
+      case RationalFunction::typeRationalFunction: return false;
+    }
+    return false;
+  }
+  std::string ElementToString(const PolynomialOutputFormat& theFormat)const{assert(this->checkConsistency()); return this->ElementToString(true, true);}
   void ElementToString(std::string& output)const{output=this->ElementToString(true, false);}
   RationalFunction(){this->NumVars=0; this->expressionType=this->typeRational; this->ratValue.MakeZero(); this->context=0;}
   void RaiseToPower(int thePower);
@@ -4520,7 +4576,7 @@ ParallelComputing::GlobalPointerCounter-=this->NumVariables;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(std::stringstream& out, PolynomialOutputFormat& PolyFormat)
+void Monomial<ElementOfCommutativeRingWithIdentity>::StringStreamPrintOutAppend(std::stringstream& out, const PolynomialOutputFormat& PolyFormat)const
 { if (this->Coefficient.IsEqualToZero())
   { out << "0";
     return;
@@ -4571,7 +4627,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQLexicographicLastVaria
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormatLocal)
+void Monomial<ElementOfCommutativeRingWithIdentity>::ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormatLocal)
 { std::stringstream out;
   this->StringStreamPrintOutAppend(out, PolyFormatLocal);
   output=out.str();
@@ -4644,7 +4700,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::operator=(const Monomial<El
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()const
 { for (int i=0; i<this->NumVariables; i++)
     if (this->degrees[i]!=0) return false;
   return true;
@@ -5045,7 +5101,7 @@ bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend(std::string& output, PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const
+int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::StringPrintOutAppend(std::string& output, const PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const
 { std::stringstream out;
   int NumChars=0;
   int TotalNumLines=0;
@@ -5598,7 +5654,7 @@ public:
   void MultiplyBy(BasicQN& q);
   void MultiplyByLargeRational(Rational& r);
   void ComputeDebugString();
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
   bool HasSameExponent(BasicQN& q);
   bool ExponentIsEqualToZero();
   void DecreaseNumVars(int decrease);
@@ -5636,8 +5692,8 @@ public:
   void Assign(const QuasiNumber& q);
   void AssignLargeRational(int NumVars, Rational& coeff);
   void AssignInteger(int NumVars, int x);
-  void ElementToString(std::string& output){PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, PolyFormatLocal);}
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat);
+  void ElementToString(std::string& output)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, PolyFormatLocal);}
+  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
   void MakeConst(Rational& Coeff, int NumV);
   void DivideByRational(Rational& r);
 //  void DecreaseNumVars(int decrease);
@@ -5724,7 +5780,7 @@ public:
   void MultiplyByComplexQN(ComplexQN& q);
   void MultiplyBy(CompositeComplexQN& q);
   void Assign(const CompositeComplexQN& q);
-  void ElementToString(std::string& output);
+  void ElementToString(std::string& output)const;
   void MakeConst(Rational& Coeff, int numVars);
   void DivideByRational(Rational& r);
   void Simplify();
@@ -5741,7 +5797,7 @@ public:
   static CompositeComplexQN TheRingZero;
   static CompositeComplexQN TheRingMUnit;
   bool ElementHasPlusInFront();
-  int NumNonZeroElements();
+  int NumNonZeroElements()const;
   CompositeComplexQN(int numVars){this->size=0; this->NumVariables=numVars; }
   CompositeComplexQN(){this->size=0; this->NumVariables=0; }
   CompositeComplexQN(Rational* expArg, int numVars, Rational& coeff){this->MakePureQN(expArg, numVars, coeff) ; }
@@ -6912,6 +6968,7 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output){this->ElementToString(output, false, false);}
   std::string ElementToString()const { std::string output; this->ElementToString(output, false, false); return output;}
+  bool ElementToStringNeedsBracketsForMultiplication()const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);};
   std::string ElementToStringNegativeRootSpacesFirst(bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner);
@@ -6929,8 +6986,18 @@ public:
   (const root& input, int numRoots, int theAlgebraRank)
   ;
   bool GetCoordsInBasis
+  (const List<ElementSimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
+;
+  bool GetCoordsInBasis
   (const List<ElementSimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output, GlobalVariables& theGlobalVariables)const
-  ;
+  { Vector<Rational> tempVect;
+    if (! this->GetCoordsInBasis(theBasis, tempVect, theGlobalVariables))
+      return false;
+    output.SetSize(tempVect.size);
+    for (int i=0; i<tempVect.size; i++)
+      output.TheObjects[i].MakeNVarConst(this->Hcomponent.size, tempVect.TheObjects[i], &theGlobalVariables);
+    return true;
+  }
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   void ComputeNonZeroElements();
   static void GetBasisFromSpanOfElements
@@ -7246,6 +7313,7 @@ public:
   List<ElementSimpleLieAlgebra> theOrder;
   //The order of chevalley generators is as follows. First come negative roots, then elements of cartan, then positive roots
   //The weights are in increasing order
+  //The i^th column of the matrix gives the coordinates of the i^th Chevalley generator in the current coordinates
   MatrixLargeRational ChevalleyGeneratorsInCurrentCoords;
   void AssignGeneratorCoeffOne(int theIndex, ElementSimpleLieAlgebra& output){output.operator=(this->theOrder.TheObjects[theIndex]);};
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
@@ -7271,7 +7339,7 @@ public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
   std::string ElementToString()const{PolynomialOutputFormat PolyFormatLocal; return this->ElementToString(false, true, PolyFormatLocal);}
-  std::string ElementToString(bool useLatex, bool useGeneratorLetters, PolynomialOutputFormat& PolyFormatLocal)const;
+  std::string ElementToString(bool useLatex, bool useGeneratorLetters, const PolynomialOutputFormat& PolyFormatLocal)const;
   void ComputeDebugString(){ PolynomialOutputFormat PolyFormatLocal; this->DebugString=this->ElementToString(false, true, PolyFormatLocal);};
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
@@ -7279,7 +7347,9 @@ public:
   List<CoefficientType> Powers;
   CoefficientType Coefficient;
   static bool flagAnErrorHasOccurredTimeToPanic;
-  void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnvelopingOrdered<CoefficientType>& output);
+  void MultiplyBy
+  (const MonomialUniversalEnveloping& other, ElementUniversalEnvelopingOrdered<CoefficientType>& output)
+  ;
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const CoefficientType& thePower);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
@@ -7309,6 +7379,7 @@ public:
   void CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
   MonomialUniversalEnvelopingOrdered(){this->owner=0;};
   bool operator==(const MonomialUniversalEnvelopingOrdered& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;};
+  void operator*=(const MonomialUniversalEnvelopingOrdered& other);
   inline void operator=(const MonomialUniversalEnvelopingOrdered& other)
   { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
     this->Powers.CopyFromBase(other.Powers);
@@ -7331,9 +7402,11 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, true, PolyFormatLocal);}
   void ElementToString
-  (std::string& output, bool useLatex, PolynomialOutputFormat& PolyFormatLocal)const;
+  (std::string& output, bool useLatex, const PolynomialOutputFormat& PolyFormatLocal)const;
   std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
-  std::string ElementToString(bool useLatex, PolynomialOutputFormat& PolyFormatLocal)const{std::string tempS; this->ElementToString(tempS, useLatex, PolyFormatLocal); return tempS;}
+  std::string ElementToString(bool useLatex, const PolynomialOutputFormat& PolyFormatLocal)const{std::string tempS; this->ElementToString(tempS, useLatex, PolyFormatLocal); return tempS;}
+  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const{std::string tempS; this->ElementToString(tempS, true, PolyFormatLocal); return tempS;}
+  bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
   void ComputeDebugString(){this->ElementToString(this->DebugString);}
   SemisimpleLieAlgebraOrdered* owner;
   void AddMonomial(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input);
@@ -7345,10 +7418,10 @@ public:
 //  void MakeOneGeneratorCoeffOne(root& rootSpace, int numVars, SemisimpleLieAlgebraOrdered& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), numVars, theOwner);};
   void Nullify(SemisimpleLieAlgebraOrdered& theOwner);
   bool AssignElementUniversalEnveloping
-  (ElementUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  (ElementUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)
   ;
   bool AssignMonomialUniversalEnveloping
-  (MonomialUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  (MonomialUniversalEnveloping& input, SemisimpleLieAlgebraOrdered& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)
   ;
   bool IsEqualToZero()const {return this->size==0;}
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner);
@@ -7412,7 +7485,6 @@ template<class CoefficientTypeQuotientField>
     return true;
   };
   void MakeCasimir(SemisimpleLieAlgebraOrdered& theOwner, int numVars, GlobalVariables& theGlobalVariables);
-
   void ActOnMe(const ElementSimpleLieAlgebra& theElt, ElementUniversalEnvelopingOrdered& output);
   void LieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
   void operator=(const ElementUniversalEnvelopingOrdered& other)
@@ -8017,14 +8089,16 @@ class ParserNode
   Rational rationalValue;
   void operator=(const ParserNode& other);
   void Clear();
-  int GetStrongestExpressionChildrenConvertChildrenIfNeeded();
-  void ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  int GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables);
+  void ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables);
   void CopyValue(const ParserNode& other);
-  bool ConvertToType(int theType);
+  bool ConvertToType
+(int theType, GlobalVariables& theGlobalVariables)
+  ;
   bool ConvertToNextType
-  (int GoalType, bool& ErrorHasOccured)
+(int GoalType, bool& ErrorHasOccured, GlobalVariables& theGlobalVariables)
 ;
-  bool ConvertChildrenToType(int theType);
+  bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray,
@@ -8047,6 +8121,7 @@ class ParserNode
   void Evaluate(GlobalVariables& theGlobalVariables);
   void EvaluateTimes(GlobalVariables& theGlobalVariables);
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
+  void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
@@ -8096,7 +8171,7 @@ public:
   };
   enum functionList
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
-    functionMod, functionInvariants
+    functionMod, functionInvariants, functionOrder
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -8908,6 +8983,7 @@ public:
   std::string ElementToString()const;
   void ElementToString(std::string& output)const{output=this->ElementToString();}
   bool IsEqualToZero()const {return this->theElT.IsEqualToZero();}
+  bool ElementToStringNeedsBracketsForMultiplication()const;
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
   (ElementUniversalEnvelopingOrdered<CoefficientType>& input, const ElementVermaModuleOrdered<CoefficientType>& theRingZero,
    GlobalVariables* theContext, const CoefficientType& theRingUnit)

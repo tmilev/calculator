@@ -5612,7 +5612,7 @@ void CompositeComplexQN::MakeConst(Rational& Coeff, int numVars)
   return true;
 }
 */
-void CompositeComplexQN::ElementToString(std::string& output)
+void CompositeComplexQN::ElementToString(std::string& output)const
 { std::stringstream out;
   int NumNonZero = this->NumNonZeroElements();
   std::string tempS;
@@ -5720,7 +5720,7 @@ void CompositeComplexQN::Simplify()
     this->TheObjects[i].Simplify();
 }
 
-int CompositeComplexQN::NumNonZeroElements()
+int CompositeComplexQN::NumNonZeroElements()const
 { int result=0;
   for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].IsEqualToZero())
@@ -6117,7 +6117,7 @@ void PolynomialOutputFormat::MakeRegularAlphabet()
   this->cutOffSize=500;
 }
 
-std::string PolynomialOutputFormat::GetLetterIndex(int index)
+std::string PolynomialOutputFormat::GetLetterIndex(int index)const
 { if (index<this->alphabet.size)
     return this->alphabet.TheObjects[index];
   std::stringstream out;
@@ -6981,7 +6981,7 @@ void BasicQN::ComputeDebugString()
   this->ElementToString(this->DebugString, PolyFormatLocal);
 }
 
-void BasicQN::ElementToString(std::string &output, PolynomialOutputFormat& PolyFormat)
+void BasicQN::ElementToString(std::string &output, const PolynomialOutputFormat& PolyFormat)const
 { std::stringstream out;
   std::string tempS;
   if (this->Exp.NumRows==0)
@@ -7271,7 +7271,7 @@ void BasicQN::ExpToDebugString()
   this->ComputeDebugString();
 }
 
-void QuasiNumber::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
+void QuasiNumber::ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const
 { std::stringstream out;
   std::string tempS;
   if (this->size>1)
@@ -8091,7 +8091,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 { unsigned int CarryOver=0;
   assert(this->IsGEQ(x));
   for (int i=0; i<x.size; i++)
-  { if (this->TheObjects[i]<x.TheObjects[i]+CarryOver)
+    if (this->TheObjects[i]<x.TheObjects[i]+CarryOver)
     { this->TheObjects[i]+=LargeIntUnsigned::CarryOverBound;
       this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);
       CarryOver=1;
@@ -8100,16 +8100,14 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
     { this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);
       CarryOver=0;
     }
-  }
   if (CarryOver!=0)
   { for (int i=x.size; i<this->size; i++)
-    { if (this->TheObjects[i]>0)
+      if (this->TheObjects[i]>0)
       { this->TheObjects[i]--;
         break;
       }
       else
         this->TheObjects[i]=LargeIntUnsigned::CarryOverBound-1;
-    }
   }
   this->FitSize();
 //  assert(this->CheckForConsistensy());
@@ -8165,7 +8163,7 @@ void LargeInt::MultiplyByInt(int x)
   this->MultiplyBy(tempI);
 }
 
-void LargeIntUnsigned::ElementToString(std::string& output)
+void LargeIntUnsigned::ElementToString(std::string& output)const
 { int base=10;
   int tempI;
   if (this->IsEqualToZero())
@@ -8211,7 +8209,7 @@ double LargeInt::GetDoubleValue()
 { return this->GetIntValueTruncated();
 }
 
-void LargeInt::ElementToString(std::string& output)
+void LargeInt::ElementToString(std::string& output)const
 { std::stringstream out;
   if (this->IsEqualToZero())
   { output.assign("0");
@@ -16110,11 +16108,11 @@ int GeneratorsPartialFractionAlgebra::HashFunction() const
 { return this->GeneratorIndex;
 }
 
-void GeneratorsPartialFractionAlgebra::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
+void GeneratorsPartialFractionAlgebra::ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const
 { this->ElementToString(output, PolyFormat, -1);
 }
 
-void GeneratorsPartialFractionAlgebra::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat, int theDimension)
+void GeneratorsPartialFractionAlgebra::ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat, int theDimension)const
 { std::string tempS;
   GeneratorPFAlgebraRecord& currentGen= this->theGenerators.TheObjects[this->GeneratorIndex];
   currentGen.ElementToString(tempS, PolyFormat);
@@ -16175,7 +16173,7 @@ void PolyPartFractionNumerator::ConvertToIntegerPoly(IntegerPoly& output, int th
   }
 }
 
-void GeneratorPFAlgebraRecord::ElementToString(std::string& output, PolynomialOutputFormat& PolyFormat)
+void GeneratorPFAlgebraRecord::ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const
 { std::stringstream out1, out2;
   int theDimension= this->GeneratorRoot.size;
   for (int i=0; i<theDimension; i++)
@@ -25620,7 +25618,7 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
   if (rightNode.ExpressionType!=this->typeIntegerOrIndex)
   { if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEelement)
       if (leftNode.UEElement.GetElement().IsAPowerOfASingleGenerator())
-        { rightNode.ConvertToType(this->typePoly);
+        { rightNode.ConvertToType(this->typePoly, theGlobalVariables);
           leftNode.UEElement.GetElement().SetNumVariables(this->owner->NumVariables);
           MonomialUniversalEnveloping tempMon;
           tempMon.operator=(leftNode.UEElement.GetElement().TheObjects[0]);
@@ -25632,7 +25630,7 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
         }
      if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEElementOrdered)
       if (leftNode.UEElementOrdered.GetElement().IsAPowerOfASingleGenerator())
-        { rightNode.ConvertToType(this->typePoly);
+        { rightNode.ConvertToType(this->typePoly, theGlobalVariables);
           leftNode.UEElementOrdered.GetElement().SetNumVariables(this->owner->NumVariables);
           MonomialUniversalEnvelopingOrdered<PolynomialRationalCoeff> tempMon;
           tempMon.operator=(leftNode.UEElementOrdered.GetElement().TheObjects[0]);
@@ -25766,9 +25764,9 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
   }
 }
 
-bool ParserNode::ConvertChildrenToType(int theType)
+bool ParserNode::ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<this->children.size; i++)
-    if (!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(theType))
+    if (!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(theType, theGlobalVariables))
       return false;
   return true;
 }
@@ -25806,7 +25804,7 @@ void ParserNode::InitForMultiplication(GlobalVariables* theContext)
     this->ratFunction.GetElement().MakeNVarConst(this->owner->NumVariables, (Rational) 1, theContext);
 }
 
-int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
+int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables)
 { int result=this->typeUndefined;
   for (int i=0; i<this->children.size; i++)
   { int childExpressionType=this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType;
@@ -25814,15 +25812,15 @@ int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded()
       result=childExpressionType;
   }
   for (int i=0; i<this->children.size; i++)
-    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(result))
+    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(result, theGlobalVariables))
     { this->SetError(this->owner->TheObjects[this->children.TheObjects[i]].ErrorType);
       return this->typeError;
     }
   return result;
 }
 
-void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren()
-{ this->ExpressionType=this->GetStrongestExpressionChildrenConvertChildrenIfNeeded();
+void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables)
+{ this->ExpressionType=this->GetStrongestExpressionChildrenConvertChildrenIfNeeded(theGlobalVariables);
 }
 
 void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
@@ -25830,7 +25828,7 @@ void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
   this->InitForAddition(&theGlobalVariables);
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)
@@ -25861,7 +25859,7 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
   this->InitForAddition(&theGlobalVariables);
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
@@ -25883,7 +25881,7 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
   { this->ExpressionType=this->typeError;
     return;
   }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
   this->InitForAddition(&theGlobalVariables);
   ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[0]];
   switch (this->ExpressionType)
@@ -25961,7 +25959,7 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
   if (this->OneChildrenOrMoreAreOfType(this->typeUEElementOrdered) && !this->OneChildrenOrMoreAreOfType(this->typeUEelement))
     this->ExpressionType= this->typeUEElementOrdered;
   for (int i=0; i<this->children.size; i++)
-    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(this->ExpressionType))
+    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(this->ExpressionType, theGlobalVariables))
     { this->SetError(this->errorDunnoHowToDoOperation);
       return;
     }
@@ -25973,6 +25971,7 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
   { ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff>& left=this->owner->TheObjects[this->children.TheObjects[0]].UEElementOrdered.GetElement();
     ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff>& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElementOrdered.GetElement();
     left.LieBracketOnTheRight(right, this->UEElementOrdered.GetElement());
+    this->UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
   } else if (this->ExpressionType==this->typeWeylAlgebraElement)
   { ElementWeylAlgebra& left=this->owner->TheObjects[this->children.TheObjects[0]].WeylAlgebraElement.GetElement();
     ElementWeylAlgebra& right= this->owner->TheObjects[this->children.TheObjects[1]].WeylAlgebraElement.GetElement();
@@ -26018,7 +26017,7 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorWrongNumberOfArguments);
     return;
   }
-  this->ExpressionType=theRootNode.GetStrongestExpressionChildrenConvertChildrenIfNeeded();
+  this->ExpressionType=theRootNode.GetStrongestExpressionChildrenConvertChildrenIfNeeded(theGlobalVariables);
   if (this->ExpressionType==this->typeError)
     return;
   ParserNode& leftNode=this->owner->TheObjects[theTrueChildren.TheObjects[0]];
@@ -26089,7 +26088,7 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
     return;
   }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren();
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
   this->InitForMultiplication(&theGlobalVariables);
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)

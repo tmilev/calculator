@@ -33,6 +33,8 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionOuterAutos: this->EvaluateOuterAutos(theGlobalVariables); break;
     case Parser::functionMod: this->EvaluateModVermaRelations(theGlobalVariables); break;
     case Parser::functionInvariants: this->EvaluateInvariants(theGlobalVariables); break;
+    case Parser::functionPrintDecomposition: this->EvaluatePrintDecomposition(theGlobalVariables); break;
+    case Parser::functionEmbedding: this->EvaluatePrintEmbedding(theGlobalVariables); break;
     case Parser::functionOrder: this->EvaluateOrder(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
@@ -50,6 +52,18 @@ void ParserNode::EvaluateOrder(GlobalVariables& theGlobalVariables)
   }
   this->UEElementOrdered.GetElement()=theArgument.UEElementOrdered.GetElement();
   this->ExpressionType=this->typeUEElementOrdered;
+}
+
+void ParserNode::EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables)
+{ SSalgebraModule theModule;
+  std::stringstream out, out2;
+  theModule.InduceFromEmbedding(out2, this->owner->theHmm, theGlobalVariables);
+  for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
+  { out << "<br>f_{" << i-12 << "}=" << theModule.moduleElementsEmbedded.TheObjects[i].ElementToString() << "";
+  }
+  out << out2.str();
+  this->outputString=out.str();
+  this->ExpressionType=this->typeString;
 }
 
 void ParserNode::EvaluateInvariants(GlobalVariables& theGlobalVariables)
@@ -268,6 +282,16 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="eigen")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionEigen);
+    return true;
+  }
+  if (input=="printEmbedding")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(this->functionEmbedding);
+    return true;
+  }
+  if (input=="printDecomposition")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(this->functionPrintDecomposition);
     return true;
   }
   if (input=="eigenOrdered")
@@ -2260,7 +2284,7 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   this->PrepareCartanSub(theParser.testAlgebra, theData.VermaHighestWeighSub, theGlobalVariables);
   theData.init(theParser, &theGlobalVariables);
 //  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
-  startingElement.AssignDefaultGeneratorIndex(5, theData, &theGlobalVariables);
+  startingElement.AssignDefaultGeneratorIndex(4, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
   std::cout << "<br>the starting element is: " << startingElement.ElementToString();
   startingElement.ExtractHighestWeightVectors(theParser, theEigenVectors, theGlobalVariables);

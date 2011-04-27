@@ -25931,6 +25931,17 @@ void ParserNode::EvaluateSecretSauce(GlobalVariables& theGlobalVariables)
   this->ExpressionType=this->typeString;
 }
 
+void ParserNode::EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables)
+{ SSalgebraModule theModule;
+  std::stringstream out;
+  theModule.InduceFromEmbedding(out, this->owner->theHmm, theGlobalVariables);
+  for (int i=0; i<theModule.actionsNegativeRootSpacesCartanPositiveRootspaces.size; i++)
+  { out << "<br><div class=\"math\">" << theModule.actionsNegativeRootSpacesCartanPositiveRootspaces.TheObjects[i].ElementToString(false, true) << "</div>";
+  }
+  this->outputString=out.str();
+  this->ExpressionType=this->typeString;
+}
+
 void ParserNode::EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables)
 { EigenVectorComputation theComp;
   //Note: the ComputeAndReturnStringOrdered following code might relocate the *this object

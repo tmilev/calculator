@@ -8132,6 +8132,7 @@ class ParserNode
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
   void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
   void EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables);
+  void EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables);
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
   void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
@@ -8173,7 +8174,7 @@ public:
   };
   enum functionList
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
-    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition
+    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

@@ -35,6 +35,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionInvariants: this->EvaluateInvariants(theGlobalVariables); break;
     case Parser::functionPrintDecomposition: this->EvaluatePrintDecomposition(theGlobalVariables); break;
     case Parser::functionEmbedding: this->EvaluatePrintEmbedding(theGlobalVariables); break;
+    case Parser::functionPrintRootSystem: this->EvaluatePrintRootSystem(theGlobalVariables); break;
     case Parser::functionOrder: this->EvaluateOrder(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
@@ -58,10 +59,18 @@ void ParserNode::EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables)
 { SSalgebraModule theModule;
   std::stringstream out, out2;
   theModule.InduceFromEmbedding(out2, this->owner->theHmm, theGlobalVariables);
-  for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
-  { out << "<br>f_{" << i-12 << "}=" << theModule.moduleElementsEmbedded.TheObjects[i].ElementToString() << "";
-  }
   out << out2.str();
+  this->outputString=out.str();
+  this->ExpressionType=this->typeString;
+}
+
+void ParserNode::EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">" << this->owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) << "</div>Root system:";
+  for (int i=0; i<this->owner->theHmm.theRange.theWeyl.RootSystem.size; i++)
+  { root& current=this->owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
+    out << "<br>" << current.ElementToString();
+  }
   this->outputString=out.str();
   this->ExpressionType=this->typeString;
 }
@@ -292,6 +301,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="printDecomposition")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
     this->ValueBuffer.AddObjectOnTop(this->functionPrintDecomposition);
+    return true;
+  }
+  if (input=="printRootSystem")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(this->functionPrintRootSystem);
     return true;
   }
   if (input=="eigenOrdered")
@@ -2167,8 +2181,10 @@ class ElementGeneralizedVerma
 {
   public:
   std::string DebugString;
-  std::string ElementToString(){ return this->ElementToString(true);}
-  std::string ElementToString(bool displayLeftComponenetsOnTheRight);
+  std::string ElementToString(){ return this->ElementToString(true, false, true);}
+  std::string ElementToString
+  (bool displayLeftComponenetsOnTheRight, bool useOtimes, bool useFs)
+;
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
   GeneralizedVermaModuleData<CoefficientType>* theOwner;
   List<ElementVermaModuleOrdered<CoefficientType> > leftComponents;
@@ -2191,6 +2207,7 @@ class ElementGeneralizedVerma
     currentElt.AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(tempElt, zeroVermaElt, theContext, this->theOwner->theRingUnit);
     currentElt.theSub=this->theOwner->VermaHighestWeighSub;
   }
+  std::string GetStringFormGmodKindex(int theIndex);
   void ActOnMe
   (const ElementSimpleLieAlgebra& theElt, ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
 ;
@@ -2284,10 +2301,10 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   this->PrepareCartanSub(theParser.testAlgebra, theData.VermaHighestWeighSub, theGlobalVariables);
   theData.init(theParser, &theGlobalVariables);
 //  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
-  startingElement.AssignDefaultGeneratorIndex(4, theData, &theGlobalVariables);
+  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
-  std::cout << "<br>the starting element is: " << startingElement.ElementToString();
-  startingElement.ExtractHighestWeightVectors(theParser, theEigenVectors, theGlobalVariables);
+  out << "<br>the starting element is: " << startingElement.ElementToString();
+  out << startingElement.ExtractHighestWeightVectors(theParser, theEigenVectors, theGlobalVariables);
   return out.str();
   ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> theElt, tempElt1, tempElt2;
   PolynomialOutputFormat PolyFormatLocal;
@@ -2765,11 +2782,6 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
           this->GenerateSubmoduleFromRootNegativeRootSpacesFirst(newlyFoundStartingVectors.TheObjects[j], BasisNewlyFoundElements, allSimpleGeneratorsMatForm, theGlobalVariables);
           theModules.AddObjectOnTop(BasisNewlyFoundElements);
           BasisAllFoundElements.AddListOnTop(BasisNewlyFoundElements);
-          out << "<br>basis of generated module: ";
-          for (int k=0; k<BasisNewlyFoundElements.size; k++)
-          { currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(BasisNewlyFoundElements.TheObjects[k], theHmm.theRange);
-            out << "<br>" << currentElt.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange);
-          }
           if (!theModules.LastObject()->LinSpanContainsRoot(oneRootFromDomainAlgebra, theGlobalVariables))
           { for (int k=0; k<BasisNewlyFoundElements.size; k++)
             { this->moduleElementsEmbedded.SetSize(this->moduleElementsEmbedded.size+1);
@@ -2779,12 +2791,37 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
             }
             if (IndexFirstModuleNotEqualToDomain==-1)
               IndexFirstModuleNotEqualToDomain=theModules.size-1;
+          } else
+          { out << "<br>Basis of the subalgebra:<br><table>";
+            for (int k=0; k<theHmm.imagesAllChevalleyGenerators.size; k++)
+            { std::stringstream displayString;
+              if (k>= theHmm.theDomain.GetNumPosRoots()+theHmm.theDomain.GetRank())
+                displayString << "f_{" << k+(-theHmm.theDomain.GetNumGenerators()+1+theHmm.theRange.GetNumPosRoots()) << "}=";
+              if (k< theHmm.theDomain.GetNumPosRoots()+theHmm.theDomain.GetRank() && k>=theHmm.theDomain.GetNumPosRoots())
+                displayString << "f_{0," << k-theHmm.theDomain.GetNumPosRoots() << "}=f_{" << k+theHmm.theRange.GetNumPosRoots()+1-theHmm.theDomain.GetNumPosRoots() << "}=";
+              if (k< theHmm.theDomain.GetNumPosRoots())
+                displayString << "f_{" << -theHmm.theRange.GetNumPosRoots()+k<< "}=";
+              out << "<tr><td>" << displayString.str() << "</td><td>" << theHmm.imagesAllChevalleyGenerators.TheObjects[k].ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange) << "</td></tr>";
+            }
+            out << "</table>";
           }
         }
     }
     if (BasisAllFoundElements.size==numGeneratorsRange)
       break;
   }
+  out << "<br>basis of generated module:<br><table> ";
+  for (int k=0; k<theHmm.GmodK.size; k++)
+  { std::stringstream displayString;
+    if (k==theHmm.GmodK.size/2)
+      displayString << "f_{0," << theHmm.theRange.GetRank() << "}=f_{" << theHmm.theRange.GetNumPosRoots()+theHmm.theRange.GetRank() << "}=";
+    if (k>theHmm.GmodK.size/2)
+      displayString << "f_{" << k-theHmm.GmodK.size/2 << "}=";
+    if (k<theHmm.GmodK.size/2)
+      displayString << "f_{" << k-theHmm.GmodK.size/2 << "}=";
+    out << "<tr><td>" << displayString.str() <<"</td><td>" << theHmm.GmodK.TheObjects[k].ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange) << "</td></tr>" ;
+  }
+  out << "</table>";
   roots theAlgebra;
   roots& theModule= theModules.TheObjects[IndexFirstModuleNotEqualToDomain];
   this->actionsNegativeRootSpacesCartanPositiveRootspaces.SetSize(numGeneratorsDomain);
@@ -6049,7 +6086,6 @@ void RationalFunction::RaiseToPower(int thePower)
   this->checkConsistency();
 }
 
-
 void ComputationSetup::TheG2inB3Computation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { Parser theParser;
   theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
@@ -6248,13 +6284,13 @@ std::string ElementGeneralizedVerma<CoefficientType>::ExtractHighestWeightVector
   int counter=0;
   ElementUniversalEnveloping abstractCasimir, embeddedCasimirNonOrdered;
   abstractCasimir.MakeCasimir(theParser.theHmm.theDomain, theParser.theHmm.theRange.GetRank(), theGlobalVariables);
-  std::cout << "<br>abstract Casimir: " << abstractCasimir.ElementToString();
+  out << "<br>abstract Casimir: " << abstractCasimir.ElementToString();
   theParser.theHmm.ApplyHomomorphism(abstractCasimir, embeddedCasimirNonOrdered, theGlobalVariables);
   embeddedCasimirNonOrdered.Simplify();
-  std::cout << "<br> embedded Casimir non-ordered: " << embeddedCasimirNonOrdered.ElementToString();
+  out << "<br> embedded Casimir non-ordered: " << embeddedCasimirNonOrdered.ElementToString();
   ElementUniversalEnvelopingOrdered<CoefficientType> embeddedCasimir;
   embeddedCasimir.AssignElementUniversalEnveloping(embeddedCasimirNonOrdered, theParser.testAlgebra, this->theOwner->theRingUnit, this->theOwner->theRingZero, &theGlobalVariables);
-  std::cout << "<br>the embedded Casimir is: " << embeddedCasimir.ElementToString();
+  out << "<br>the embedded Casimir is: " << embeddedCasimir.ElementToString();
   //return out.str();
   while(!remainderElement.IsEqualToZero() )//&& counter<7)
   { //std::cout << "<br>remainder element: " << remainderElement.ElementToString();
@@ -6266,14 +6302,14 @@ std::string ElementGeneralizedVerma<CoefficientType>::ExtractHighestWeightVector
     for (int i=0; i<GeneratorSequence.size; i++)
     { std:: cout << "(generator " << GeneratorSequence.TheObjects[i] << ")^" << GeneratorPowers.TheObjects[i] << ", ";
     }
-    std::cout << "<br>current highest weight element: <div class=\"math\"> " << currentHighestWeightElement.ElementToString() << "</div>";
+    out << "<br>current highest weight element: <div class=\"math\"> " << currentHighestWeightElement.ElementToString() << "</div>";
     currentHighestWeightElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
-    std::cout << "<br>Casimir acting on current highest: <div class=\"math\"> " << tempElt.ElementToString() <<"</div>";
+    out << "<br>Casimir acting on current highest: <div class=\"math\"> " << tempElt.ElementToString() <<"</div>";
     bool tempBool=currentHighestWeightElement.IsProportionalTo(tempElt, CentralCharacterAction);
-    std::cout << "<br>proportionality coefficient: " << CentralCharacterAction.ElementToString();
+    out << "<br>proportionality coefficient: " << CentralCharacterAction.ElementToString();
     assert(tempBool);
     remainderElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
-    std::cout << "<br>Casimir acting on <div class=\"math\">" << remainderElement.ElementToString() << "</div> yields <div class=\"math\">" << tempElt.ElementToString() << "</div>";
+    out << "<br>Casimir acting on <div class=\"math\">" << remainderElement.ElementToString() << "</div> yields <div class=\"math\">" << tempElt.ElementToString() << "</div>";
     remainderElement*=CentralCharacterAction;
     remainderElement-=tempElt;
     remainderElement.ClearDenominators(tempCoeff);
@@ -6284,7 +6320,20 @@ std::string ElementGeneralizedVerma<CoefficientType>::ExtractHighestWeightVector
 }
 
 template <class CoefficientType>
-std::string ElementGeneralizedVerma<CoefficientType>::ElementToString(bool displayLeftComponenetsOnTheRight)
+std::string ElementGeneralizedVerma<CoefficientType>::GetStringFormGmodKindex(int theIndex)
+{ std::stringstream out;
+  if (theIndex<3)
+    out << "f_{" << theIndex-3 << "}";
+  if (theIndex==3)
+    out << "f_{0,3}";
+  if (theIndex>3)
+    out << "f_{" << theIndex-3 << "}";
+  return out.str();
+}
+
+template <class CoefficientType>
+std::string ElementGeneralizedVerma<CoefficientType>::ElementToString
+(bool displayLeftComponenetsOnTheRight, bool useOtimes, bool useFs)
 { if (this->IsEqualToZero())
     return "0";
   std::stringstream out; std::string leftString, rightString;
@@ -6296,10 +6345,16 @@ std::string ElementGeneralizedVerma<CoefficientType>::ElementToString(bool displ
         out << "+";
       foundFirstNonZero=true;
       leftString=MathRoutines::ElementToStringBrackets(currentElt);
-      rightString= MathRoutines::ElementToStringBrackets(this->theOwner->theFDspace.TheObjects[i]);
+      if (!useFs)
+        rightString=MathRoutines::ElementToStringBrackets(this->theOwner->theFDspace.TheObjects[i]);
+      else
+        rightString= this->GetStringFormGmodKindex(i);
       if (displayLeftComponenetsOnTheRight)
         MathRoutines::swap(leftString, rightString);
-      out << leftString  << "\\otimes" << rightString;
+      out << leftString;
+      if (useOtimes)
+        out << "\\otimes";
+      out << rightString;
     }
   }
   return out.str();

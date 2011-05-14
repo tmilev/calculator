@@ -127,7 +127,7 @@ int main(int argc, char **argv)
   //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
   //civilizedInput="1/x_1*(1-1)";
   //civilizedInput="secretSauceOrdered";
-  //civilizedInput="2f_1";
+  //civilizedInput="slTwoInSlN(4,5)";
   //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;

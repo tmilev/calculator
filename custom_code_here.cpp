@@ -26,6 +26,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
   { case Parser::functionGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
     case Parser::functionLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
     case Parser::functionEigen: this->EvaluateEigen(theGlobalVariables); break;
+    case Parser::functionSlTwoInSlN: this->EvaluateSlTwoInSlN(theGlobalVariables); break;
     case Parser::functionEigenOrdered: this->EvaluateEigenOrdered(theGlobalVariables); break;
     case Parser::functionSecretSauce: this->EvaluateSecretSauce(theGlobalVariables); break;
     case Parser::functionSecretSauceOrdered: this->EvaluateSecretSauceOrdered(theGlobalVariables); break;
@@ -120,6 +121,8 @@ void ParserNode::EvaluateModVermaRelations(GlobalVariables& theGlobalVariables)
   this->ExpressionType=this->typeUEelement;
 }
 
+class slTwoInSlN;
+
 void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
 { MatrixLargeRational tempMat;
   std::stringstream out;
@@ -140,18 +143,27 @@ void ParserNode::EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables)
     return;
   }
   ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  int theDimension= theArgument.children.size;
   HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
-  if (!theArgument.ConvertChildrenToType(this->typeRational, theGlobalVariables) || theDimension!=theHmm.theRange.theWeyl.CartanSymmetric.NumRows)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
   root theWeight;
-  theWeight.SetSize(theDimension);
-  for (int i=0; i<theDimension; i++)
-  { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
-    theWeight.TheObjects[i]=current.rationalValue;
-  }
+  if (theHmm.theRange.GetRank()>1)
+  { if (!theArgument.ConvertChildrenToType(this->typeRational, theGlobalVariables)|| theHmm.theRange.GetRank()!=theArgument.children.size)
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    }
+    int theDimension=theArgument.children.size;
+    theWeight.SetSize(theDimension);
+    for (int i=0; i<theDimension; i++)
+    { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
+      theWeight.TheObjects[i]=current.rationalValue;
+    }
+  } else
+    if (!theArgument.ConvertToType(this->typeRational, theGlobalVariables))
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    } else
+    { theWeight.SetSize(1);
+      theWeight.TheObjects[0]=theArgument.rationalValue;
+    }
   this->rationalValue= theHmm.theRange.theWeyl.WeylDimFormula(theWeight, theGlobalVariables);
   this->ExpressionType=this->typeRational;
 }
@@ -351,6 +363,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="invariant")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(Parser::functionInvariants);
+    return true;
+  }
+  if (input=="slTwoInSlN")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(Parser::functionSlTwoInSlN);
     return true;
   }
   return false;
@@ -6554,4 +6571,181 @@ bool ElementSimpleLieAlgebra::ElementToStringNeedsBracketsForMultiplication()con
 template<class CoefficientType>
 bool ElementVermaModuleOrdered<CoefficientType>::ElementToStringNeedsBracketsForMultiplication()const
 { return this->theElT.ElementToStringNeedsBracketsForMultiplication();
+}
+
+class slTwoInSlN
+{
+  int GetModuleIndexFromHighestWeightVector(const MatrixLargeRational& input)
+  { Rational tempRat;
+    for (int i=0; i<this->theHighestWeightVectors.size; i++)
+      if (this->theHighestWeightVectors.TheObjects[i].IsProportionalTo(input, tempRat))
+        return i;
+    return -1;
+  }
+public:
+  int theDimension;
+  MatrixLargeRational theH;
+  MatrixLargeRational theE;
+  MatrixLargeRational theF;
+  List<int> thePartition;
+  List<MatrixLargeRational> theHighestWeightVectors;
+  List<List<MatrixLargeRational> > theGmodKModules;
+  std::string initFromModuleDecomposition(List<int>& decompositionDimensions);
+  void ExtractHighestWeightVectorsFromVector
+  (MatrixLargeRational& input, List<MatrixLargeRational>& outputDecompositionOfInput, List<MatrixLargeRational>& outputTheHWVectors)
+  ;
+  void ClimbDownFromHighestWeightAlongSl2String
+  (MatrixLargeRational& input, MatrixLargeRational& output, Rational& outputCoeff, int generatorPower)
+  ;
+  void ClimbUpFromVector
+  (MatrixLargeRational& input, MatrixLargeRational& outputLastNonZero, int& largestPowerNotKillingInput)
+  ;
+};
+
+void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String
+  (MatrixLargeRational& input, MatrixLargeRational& output, Rational& outputCoeff, int generatorPower)
+{ assert(&input!=&output);
+  Rational currentWeight;
+  MatrixLargeRational::LieBracket(this->theH, input, output);
+  bool tempBool=input.IsProportionalTo(output, currentWeight);
+  if (!tempBool)
+    std::cout << "<br>oh no! climbing down is fucked up!";
+  Rational RaiseCoeff;
+  RaiseCoeff.MakeZero();
+  outputCoeff.MakeOne();
+  output=input;
+  for (int i=0; i<generatorPower; i++)
+  { RaiseCoeff+=currentWeight;
+    currentWeight-=2;
+    outputCoeff*=RaiseCoeff;
+    MatrixLargeRational::LieBracket(this->theF, output, output);
+  }
+}
+
+void slTwoInSlN::ExtractHighestWeightVectorsFromVector
+  (MatrixLargeRational& input, List<MatrixLargeRational>& outputDecompositionOfInput, List<MatrixLargeRational>& outputTheHWVectors)
+{ outputDecompositionOfInput.size=0; outputTheHWVectors.size=0;
+  MatrixLargeRational remainder; remainder=input;
+  MatrixLargeRational component, tempMat;
+  Rational theCoeff, tempRat;
+  int largestPowerNotKillingInput;
+  while(!remainder.IsEqualToZero() )
+  { //std::cout << "<br>remainder:<div class=\"math\">" << remainder.ElementToString(false, true) << "</div>";
+    this->ClimbUpFromVector(remainder, tempMat, largestPowerNotKillingInput);
+    //std::cout << "<br>highest weight vector:<div class=\"math\">" << tempMat.ElementToString(false, true) << "</div>";
+    this->ClimbDownFromHighestWeightAlongSl2String(tempMat, component, theCoeff, largestPowerNotKillingInput);
+    tempMat.FindFirstNonZeroElementSearchEntireRow(tempRat);
+    tempMat/=tempRat;
+    outputTheHWVectors.AddObjectOnTop(tempMat);
+    //assert(!theCoeff.IsEqualToZero());
+    component.DivideByRational(theCoeff);
+    outputDecompositionOfInput.AddObjectOnTop(component);
+    //std::cout << "<br>component:<div class=\"math\">" << component.ElementToString(false, true) << "</div><br><br><br><br>";
+    remainder.Subtract(component);
+  }
+  //remainder.NullifyAll();
+//  for (int i=0; i<outputVectors.size; i++)
+//    remainder.Add(outputVectors.TheObjects[i]);
+//  std::cout << "<br>sum of all components:<div class=\"math\">" << remainder.ElementToString(false, true) << "</div>";
+
+}
+
+void slTwoInSlN::ClimbUpFromVector
+  (MatrixLargeRational& input, MatrixLargeRational& outputLastNonZero, int& largestPowerNotKillingInput)
+{ MatrixLargeRational tempMat;
+  assert(&input!=&outputLastNonZero);
+  outputLastNonZero=input;
+  largestPowerNotKillingInput=0;
+  for(MatrixLargeRational::LieBracket(this->theE, outputLastNonZero, tempMat); !tempMat.IsEqualToZero(); MatrixLargeRational::LieBracket(this->theE, outputLastNonZero, tempMat))
+  { largestPowerNotKillingInput++;
+    outputLastNonZero=tempMat;
+  }
+}
+
+std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions)
+{ std::stringstream out;
+  this->thePartition.CopyFromBase(decompositionDimensions);
+  this->thePartition.QuickSortDescending();
+  this->theDimension=0;
+  for (int i=0; i<this->thePartition.size; i++)
+    this->theDimension+=this->thePartition.TheObjects[i];
+  theH.init(this->theDimension, this->theDimension); theH.NullifyAll();
+  theE.init(this->theDimension, this->theDimension); theE.NullifyAll();
+  theF.init(this->theDimension, this->theDimension); theF.NullifyAll();
+  int currentOffset=0;
+  for (int i=0; i<this->thePartition.size; i++)
+  { for (int j=0; j<this->thePartition.TheObjects[i]; j++)
+    { theH.elements[currentOffset+j][currentOffset+j]=this->thePartition.TheObjects[i]-1-2*j;
+      if (j!=this->thePartition.TheObjects[i]-1)
+      { theF.elements[currentOffset +j+1][currentOffset +j]=1;
+        theE.elements[currentOffset +j][currentOffset +j+1]=(j+1)*(this->thePartition.TheObjects[i]-j-1);
+      }
+    }
+    currentOffset+=this->thePartition.TheObjects[i];
+  }
+  out << "<div class=\"math\">h=" << this->theH.ElementToString(false, true) << "</div>";
+  out << "<div class=\"math\">e=" << this->theE.ElementToString(false, true) << "</div>";
+  out << "<div class=\"math\">f=" << this->theF.ElementToString(false, true) << "</div>";
+  MatrixLargeRational tempMat;
+  tempMat.init(this->theDimension, this->theDimension);
+  List<MatrixLargeRational> Decomposition, theHwCandidates;
+  this->theHighestWeightVectors.size=0;
+  this->theGmodKModules.size=0;
+  for (int i=0; i<this->theDimension; i++)
+    for (int j=0; j< this->theDimension; j++)
+    { tempMat.NullifyAll();
+      tempMat.elements[i][j]=1;
+      this->ExtractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidates);
+      for (int k=0; k<theHwCandidates.size; k++)
+        if (this->GetModuleIndexFromHighestWeightVector(theHwCandidates.TheObjects[k])==-1)
+        { MatrixLargeRational& currentHighest=theHwCandidates.TheObjects[k];
+          this->theHighestWeightVectors.AddObjectOnTop(currentHighest);
+          this->theGmodKModules.ExpandOnTop(1);
+          List<MatrixLargeRational>& currentMod=*this->theGmodKModules.LastObject();
+          currentMod.size=0;
+          for (tempMat=currentHighest; !tempMat.IsEqualToZero(); MatrixLargeRational::LieBracket(this->theF, tempMat, tempMat))
+            currentMod.AddObjectOnTop(tempMat);
+        }
+    }
+  out << "<br>...and the module decomposition is (" << this->theHighestWeightVectors.size << " modules):";
+  for (int i=0; i<this->theHighestWeightVectors.size; i++)
+  { out << "<br><div class=\"math\">" << this->theHighestWeightVectors.TheObjects[i].ElementToString(false, true) << "</div>";
+    for (int j=1; j<this->theGmodKModules.TheObjects[i].size; j++)
+      out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ElementToString(false, true) << "</div>";
+    out << "<br><br><br>";
+  }
+
+  return out.str();
+}
+
+void ParserNode::EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables)
+{ if (this->children.size!=1)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
+  List<int> thePartition;
+  if (theArgument.ExpressionType==this->typeArray)
+  { if (!theArgument.ConvertChildrenToType(this->typeIntegerOrIndex, theGlobalVariables))
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    }
+    int theDimension=theArgument.children.size;
+    thePartition.SetSize(theDimension);
+    for (int i=0; i<theDimension; i++)
+    { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
+      thePartition.TheObjects[i]=current.intValue;
+    }
+  } else
+    if (!theArgument.ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    } else
+    { thePartition.SetSize(1);
+      thePartition.TheObjects[0]=theArgument.intValue;
+    }
+    slTwoInSlN theSl2;
+
+    this->ExpressionType=this->typeString;
+    this->outputString=theSl2.initFromModuleDecomposition(thePartition);
 }

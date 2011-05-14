@@ -507,6 +507,7 @@ private:
   void ExpandArrayOnTop(int increase);
   void ExpandArrayOnBottom(int increase);
   void QuickSortAscending(int BottomIndex, int TopIndex);
+  void QuickSortDescending(int BottomIndex, int TopIndex);
   List(const List<Object>& other);
 public:
   static int ListActualSizeIncrement;
@@ -532,7 +533,8 @@ public:
   };
   void PopIndexSwapWithLast(int index);
   void PopLastObject();
-  void QuickSortAscending();
+  void QuickSortAscending(){ this->QuickSortAscending(0, this->size-1);}
+  void QuickSortDescending(){this->QuickSortAscending(); this->ReverseOrderElements();}
   // the below function is named a bit awkwardly because otherwise there is a risk of confusion
   // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
@@ -866,6 +868,15 @@ public:
   void SwitchTwoRows(int row1, int row2);
   void RowToRoot(int rowIndex, root& output)const;
   int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex);
+  bool FindFirstNonZeroElementSearchEntireRow(Element& output)
+  { for (int i=0; i<this->NumCols; i++)
+      for(int j=0; j<this->NumRows; j++)
+        if (!this->elements[i][j].IsEqualToZero())
+        { output=this->elements[i][j];
+          return true;
+        }
+    return false;
+  }
   void RowTimesScalar(int rowIndex, Element& scalar);
   void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar);
   void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar);
@@ -888,12 +899,32 @@ public:
   void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
   void FindZeroEigenSpacE(List<List<Element> >& output, Element& theRingUnit, Element& theRingMinusUnit, Element& theRingZero, GlobalVariables& theGlobalVariables);
   void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero);
-  bool IsEqualToZero()
+  bool IsEqualToZero()const
   { for(int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         if (this->elements[i][j]!=0)
           return false;
     return true;
+  }
+  bool IsProportionalTo(const Matrix<Element>& input, Element& outputTimesMeEqualsInput)
+  { if (input.NumCols!=this->NumCols || input.NumRows!=this->NumRows)
+      return false;
+    bool found=false;
+    for (int i=0; i<this->NumRows &&!found; i++)
+      for (int j=0; j<this->NumCols; j++)
+        if (!this->elements[i][j].IsEqualToZero())
+        { found=true;
+          outputTimesMeEqualsInput=input.elements[i][j];
+          outputTimesMeEqualsInput/=this->elements[i][j];
+          break;
+        }
+    if (!found)
+      return input.IsEqualToZero();
+    Matrix<Element> tempMat;
+    tempMat=*this;
+    tempMat*=outputTimesMeEqualsInput;
+    tempMat.Subtract(input);
+    return tempMat.IsEqualToZero();
   }
   //returns true if the system has a solution, false otherwise
   bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
@@ -902,7 +933,7 @@ public:
   { assert(this->NumRows==right.NumRows && this->NumCols==right.NumCols);
     for (int i=0; i< this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
-        this->elements[i][j].Add(right.elements[i][j]);
+        this->elements[i][j]+=(right.elements[i][j]);
   }
   void Subtract(const Matrix<Element>& right)
   { assert(this->NumRows==right.NumRows && this->NumCols==right.NumCols);
@@ -916,6 +947,21 @@ public:
   { for (int j=0; j<this->NumRows; j++)
       for (int i=0; i<this->NumCols; i++)
         this->elements[j][i]/=input;
+  }
+  void operator*=(const Element& input)
+  { for (int j=0; j<this->NumRows; j++)
+      for (int i=0; i<this->NumCols; i++)
+        this->elements[j][i]*=input;
+  }
+  static void LieBracket(const Matrix<Element>& left, const Matrix<Element>& right, Matrix<Element>& output)
+  { assert(left.NumCols==left.NumRows && right.NumCols==right.NumRows && left.NumCols==right.NumCols);
+    Matrix<Element> tempPlus, tempMinus;
+    tempPlus.Assign(right);
+    tempPlus.MultiplyOnTheLeft(left);
+    tempMinus.Assign(left);
+    tempMinus.MultiplyOnTheLeft(right);
+    tempPlus.Subtract(tempMinus);
+    output=tempPlus;
   }
   static void GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
@@ -943,7 +989,6 @@ public:
   void ActOnRoots(roots& theRoots);
 
   void DivideByRational(Rational& x);
-  bool IsProportionalTo(MatrixLargeRational& right);
   void LieBracketWith(MatrixLargeRational& right);
   void MatrixToRoot(root& output);
 //  MatrixLargeRational LieBracketWith(MatrixLargeRational& right)
@@ -2528,11 +2573,6 @@ public:
   CombinatorialChamber();
 //  ~CombinatorialChamber(){this->IndexInOwnerComplex=-2; };
 };
-
-template <class Object>
-void List<Object>::QuickSortAscending()
-{ this->QuickSortAscending(0, this->size-1);
-}
 
 template <class Object>
 void List<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
@@ -8128,6 +8168,7 @@ class ParserNode
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
+  void EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
   void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
@@ -8174,7 +8215,7 @@ public:
   };
   enum functionList
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
-    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem
+    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

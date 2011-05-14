@@ -238,6 +238,7 @@ template < > int List<ElementUniversalEnvelopingOrdered<RationalFunction> >::Lis
 template < > int List<Vector<Rational> >::ListActualSizeIncrement=10;
 template < > int List<Monomial<RationalFunction> >::ListActualSizeIncrement=20;
 template < > int List<TemplatePolynomial<Monomial<RationalFunction>, RationalFunction> >::ListActualSizeIncrement=20;
+template < > int List<MatrixLargeRational>::ListActualSizeIncrement=10;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
@@ -24941,26 +24942,6 @@ bool SemisimpleLieAlgebra::CheckClosedness(std::string& output, GlobalVariables&
         return false;
       }
     }*/
-  return true;
-}
-
-bool MatrixLargeRational::IsProportionalTo(MatrixLargeRational& right)
-{ Rational coeff=0;
-  bool found=false;
-  for (int i=0; i<this->NumRows; i++)
-    for(int j=0; j<this->NumCols; j++)
-      if (this->elements[i][j]==0)
-      { if (right.elements[i][j]!=0)
-          return false;
-      } else
-      { if (!found)
-        { found=true;
-          coeff = right.elements[i][j]/this->elements[i][j];
-        } else
-        { if (coeff!=(right.elements[i][j]/this->elements[i][j]))
-            return false;
-        }
-      }
   return true;
 }
 

@@ -25177,6 +25177,7 @@ void Parser::ParserInit(const std::string& input)
   this->ValueBuffer.size=0;
   this->size=0;
   this->NumVariables=0;
+  this->SystemCommands.size=0;
   std::string buffer;
   int theLength=(signed) input.size();
   char LookAheadChar;

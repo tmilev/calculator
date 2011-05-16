@@ -864,6 +864,7 @@ public:
   void ComputeDebugString(bool useHtml, bool useLatex){this->ElementToString(this->DebugString, useHtml, useLatex);}
   void ElementToString(std::string& output);
   void ElementToString(std::string& output, bool useHtml, bool useLatex);
+  std::string ElementToStringWithBlocks(List<int>& theBlocks);
   std::string ElementToString(bool useHtml, bool useLatex){std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
   void SwitchTwoRows(int row1, int row2);
   void RowToRoot(int rowIndex, root& output)const;
@@ -1236,6 +1237,44 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Ele
 template <typename Element>
 inline void Matrix<Element>::ElementToString(std::string& output)
 { this->ElementToString(output, false, false);
+}
+
+template <typename Element>
+std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
+{ std::stringstream out;
+  std::string tempS;
+  out << "\\left(\\begin{array}{";
+  int offset=0; int blockIndex=0;
+  for (int j=0; j<this->NumCols; j++)
+  { out << "c";
+    offset++;
+    if (offset==theBlocks.TheObjects[blockIndex])
+    { offset=0;
+      blockIndex++;
+      if (j!=this->NumCols-1)
+        out << "|";
+    }
+  }
+  out << "}";
+  offset=0; blockIndex=0;
+  for (int i=0; i<this->NumRows; i++)
+  { for (int j=0; j<this->NumCols; j++)
+    { this->elements[i][j].ElementToString(tempS);
+      out << tempS;
+      if (j!=this->NumCols-1)
+        out << " & ";
+    }
+    out << "\\\\\n";
+    offset++;
+    if (offset==theBlocks.TheObjects[blockIndex])
+    { offset=0;
+      blockIndex++;
+      if (i!=this->NumCols-1)
+        out << "\\hline";
+    }
+  }
+  out << "\\end{array}\\right)";
+  return out.str();
 }
 
 template <typename Element>
@@ -8141,7 +8180,7 @@ class ParserNode
   bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they will be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray,
+  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
@@ -8199,6 +8238,9 @@ public:
   LargeInt LargeIntegerReader;
   std::string DebugString;
   std::string StringBeingParsed;
+  List<std::string> SystemCommands;
+  std::string outputFolderPath;
+  std::string outputFolderDisplayPath;
   char DefaultWeylLetter;
   int DefaultWeylRank;
   ParserNode theValue;

@@ -6587,10 +6587,22 @@ public:
   MatrixLargeRational theH;
   MatrixLargeRational theE;
   MatrixLargeRational theF;
+
   List<int> thePartition;
+  List<MatrixLargeRational> theProjectors;
   List<MatrixLargeRational> theHighestWeightVectors;
   List<List<MatrixLargeRational> > theGmodKModules;
-  std::string initFromModuleDecomposition(List<int>& decompositionDimensions);
+  List<List<List<int> > > PairingTable;
+  void GetIsPlusKIndexingFrom(int input, int& s, int& k);
+  std::string ElementMatrixToTensorString(const MatrixLargeRational& input, bool useHtml);
+  std::string initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml);
+  std::string initPairingTable(bool useHtml);
+  std::string ElementModuleIndexToString(int input, bool useHtml);
+  std::string GetNotationString(bool useHtml);
+
+  std::string PairTwoIndices
+  (List<int>& output, int leftIndex, int rightIndex, bool useHtml)
+  ;
   void ExtractHighestWeightVectorsFromVector
   (MatrixLargeRational& input, List<MatrixLargeRational>& outputDecompositionOfInput, List<MatrixLargeRational>& outputTheHWVectors)
   ;
@@ -6622,21 +6634,126 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String
   }
 }
 
+std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml)
+{ std::string beginMath, endMath, newLine;
+  if (useHtml)
+  { beginMath= "<span class=\"math\">";
+    endMath= "</span>";
+    newLine="<br>";
+  } else
+  { beginMath="$";
+    endMath="$";
+    newLine="\n\n\n";
+  }
+  MatrixLargeRational& currentHW=this->theHighestWeightVectors.TheObjects[input];
+  int currentEtaHw=this->theGmodKModules.TheObjects[input].size-1;
+  //currentEtaHw-=currentEtaHw/2;
+  int firstNonZeroRow, firstNonZeroColumn;
+  bool found=false;
+  for (int i=0; i<currentHW.NumRows; i++)
+  { if (found)
+      break;
+    for (int j=0; j<currentHW.NumCols; j++)
+      if (!currentHW.elements[i][j].IsEqualToZero())
+      { firstNonZeroColumn=j;
+        firstNonZeroRow=i;
+        found =true;
+        break;
+      }
+  }
+  int sRow, kRow, sColumn, kColumn;
+  this->GetIsPlusKIndexingFrom(firstNonZeroRow, sRow, kRow);
+  this->GetIsPlusKIndexingFrom(firstNonZeroColumn, sColumn, kColumn);
+  std::stringstream out;
+  out << "V_{";
+  if (currentEtaHw!=0)
+  { if (currentEtaHw!=1)
+      out << currentEtaHw;
+    out << "\\frac\\eta 2";
+  }
+  if (sRow!=sColumn)
+    out << "-\\zeta_" << sColumn << "+\\zeta_" << sRow;
+  out << "}";
+  return out.str();
+}
+
+void slTwoInSlN::GetIsPlusKIndexingFrom(int input, int& s, int& k)
+{ s=0;
+  k=input;
+  if (input >=this->theDimension || input <0)
+    return;
+  for (int offset=0; offset<=input; offset+=this->thePartition.TheObjects[s-1])
+  { k=input-offset;
+    s++;
+  }
+}
+
+std::string slTwoInSlN::ElementMatrixToTensorString(const MatrixLargeRational& input, bool useHtml)
+{ std::string beginMath, endMath, newLine;
+  if (useHtml)
+  { beginMath= "<span class=\"math\">";
+    endMath= "</span>";
+    newLine="<br>";
+  } else
+  { beginMath="$";
+    endMath="$";
+    newLine="\n\n\n";
+  }
+  std::stringstream out;
+  std::string tempS;
+  bool found=false;
+  for (int i=0; i<input.NumRows; i++)
+    for(int j=0; j<input.NumCols; j++)
+      if (!input.elements[i][j].IsEqualToZero())
+      { input.elements[i][j].ElementToString(tempS);
+        if (tempS=="-1")
+          tempS="-";
+        if (tempS=="1")
+        { tempS="";
+          if (found)
+            out << "+";
+        } else
+          if (found)
+            if (tempS[0]!='-')
+              out << "+";
+        found=true;
+        out << tempS;
+        int sI, kI, sJ, kJ;
+        this->GetIsPlusKIndexingFrom(i, sI, kI);
+        this->GetIsPlusKIndexingFrom(j, sJ, kJ);
+        out << "v_{i_{" << sI << "}";
+        if (kI!=0)
+          out <<"+" << kI;
+        out << "}\\otimes v^*_{i_{" << sJ << "}";
+        if (kJ!=0)
+          out  << "+" << kJ;
+        out << "}";
+      }
+  return out.str();
+}
+
 void slTwoInSlN::ExtractHighestWeightVectorsFromVector
   (MatrixLargeRational& input, List<MatrixLargeRational>& outputDecompositionOfInput, List<MatrixLargeRational>& outputTheHWVectors)
 { outputDecompositionOfInput.size=0; outputTheHWVectors.size=0;
   MatrixLargeRational remainder; remainder=input;
-  MatrixLargeRational component, tempMat;
+  MatrixLargeRational component, highestWeightVector, tempMat;
   Rational theCoeff, tempRat;
   int largestPowerNotKillingInput;
   while(!remainder.IsEqualToZero() )
   { //std::cout << "<br>remainder:<div class=\"math\">" << remainder.ElementToString(false, true) << "</div>";
-    this->ClimbUpFromVector(remainder, tempMat, largestPowerNotKillingInput);
-    //std::cout << "<br>highest weight vector:<div class=\"math\">" << tempMat.ElementToString(false, true) << "</div>";
-    this->ClimbDownFromHighestWeightAlongSl2String(tempMat, component, theCoeff, largestPowerNotKillingInput);
-    tempMat.FindFirstNonZeroElementSearchEntireRow(tempRat);
-    tempMat/=tempRat;
-    outputTheHWVectors.AddObjectOnTop(tempMat);
+    this->ClimbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
+    //std::cout << "<br>highest weight vector:<div class=\"math\">" << highestWeightVector.ElementToString(false, true) << "</div>";
+    this->ClimbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
+    for (int i=0; i<this->theProjectors.size; i++)
+    { MatrixLargeRational& currentProjector=this->theProjectors.TheObjects[i];
+      tempMat=highestWeightVector;
+      tempMat.MultiplyOnTheLeft(currentProjector);
+      if (!tempMat.IsEqualToZero())
+      { tempMat.FindFirstNonZeroElementSearchEntireRow(tempRat);
+        tempMat/=tempRat;
+        outputTheHWVectors.AddObjectOnTop(tempMat);
+      }
+    }
     //assert(!theCoeff.IsEqualToZero());
     component.DivideByRational(theCoeff);
     outputDecompositionOfInput.AddObjectOnTop(component);
@@ -6662,7 +6779,32 @@ void slTwoInSlN::ClimbUpFromVector
   }
 }
 
-std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions)
+std::string slTwoInSlN::GetNotationString(bool useHtml)
+{ std::stringstream out;
+  std::string beginMath, endMath, newLine;
+  if (useHtml)
+  { beginMath= "<span class=\"math\">";
+    endMath= "</span>";
+    newLine="<br>";
+  } else
+  { beginMath="$";
+    endMath="$";
+    newLine="\n\n\n";
+  }
+  out << newLine << "Let the starting index of the j-th block be " << beginMath << "i_j" << endMath;
+  out << "." << newLine << "In particular let: ";
+  int offset=1;
+  for (int i=0; i< this->thePartition.size; i++)
+  { out << beginMath << "i_" << i+1 << "=" << offset << endMath << " ";
+    out << " (size of block = " << this->thePartition.TheObjects[i] << "), ";
+    offset+=this->thePartition.TheObjects[i];
+  }
+  out << newLine << "Let " << beginMath << "\\eta" << endMath << " be the weight corresponding to h.";
+  out << newLine << "Let " << beginMath << "\\zeta_{j}" << endMath << " be the weight corresponding to the j-th block";
+  return out.str();
+}
+
+std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml)
 { std::stringstream out;
   this->thePartition.CopyFromBase(decompositionDimensions);
   this->thePartition.QuickSortDescending();
@@ -6672,10 +6814,24 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   theH.init(this->theDimension, this->theDimension); theH.NullifyAll();
   theE.init(this->theDimension, this->theDimension); theE.NullifyAll();
   theF.init(this->theDimension, this->theDimension); theF.NullifyAll();
+  this->theProjectors.SetSize(this->thePartition.size);
   int currentOffset=0;
+  std::string beginMath, endMath, newLine;
+  if (useHtml)
+  { beginMath= "<span class=\"math\">";
+    endMath= "</span>";
+    newLine="<br>";
+  } else
+  { beginMath="$";
+    endMath="$";
+    newLine="\n\n\n";
+  }
   for (int i=0; i<this->thePartition.size; i++)
-  { for (int j=0; j<this->thePartition.TheObjects[i]; j++)
+  { this->theProjectors.TheObjects[i].init(this->theDimension, this->theDimension);
+    this->theProjectors.TheObjects[i].NullifyAll();
+    for (int j=0; j<this->thePartition.TheObjects[i]; j++)
     { theH.elements[currentOffset+j][currentOffset+j]=this->thePartition.TheObjects[i]-1-2*j;
+      this->theProjectors.TheObjects[i].elements[currentOffset+j][currentOffset+j]=1;
       if (j!=this->thePartition.TheObjects[i]-1)
       { theF.elements[currentOffset +j+1][currentOffset +j]=1;
         theE.elements[currentOffset +j][currentOffset +j+1]=(j+1)*(this->thePartition.TheObjects[i]-j-1);
@@ -6683,22 +6839,30 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     }
     currentOffset+=this->thePartition.TheObjects[i];
   }
-  out << "<div class=\"math\">h=" << this->theH.ElementToString(false, true) << "</div>";
-  out << "<div class=\"math\">e=" << this->theE.ElementToString(false, true) << "</div>";
-  out << "<div class=\"math\">f=" << this->theF.ElementToString(false, true) << "</div>";
+  out << newLine << beginMath << "h=" << this->ElementMatrixToTensorString(this->theH, useHtml) << "=" << this->theH.ElementToStringWithBlocks(this->thePartition) << endMath;
+  out << newLine << beginMath << "e=" << this->ElementMatrixToTensorString(this->theE, useHtml) << "=" << this->theE.ElementToStringWithBlocks(this->thePartition) << endMath;
+  out << newLine << beginMath << "f=" << this->ElementMatrixToTensorString(this->theF, useHtml) << "=" << this->theF.ElementToStringWithBlocks(this->thePartition)  << endMath;
   MatrixLargeRational tempMat;
   tempMat.init(this->theDimension, this->theDimension);
-  List<MatrixLargeRational> Decomposition, theHwCandidates;
+  List<MatrixLargeRational> Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
   this->theHighestWeightVectors.size=0;
   this->theGmodKModules.size=0;
   for (int i=0; i<this->theDimension; i++)
     for (int j=0; j< this->theDimension; j++)
     { tempMat.NullifyAll();
       tempMat.elements[i][j]=1;
-      this->ExtractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidates);
-      for (int k=0; k<theHwCandidates.size; k++)
-        if (this->GetModuleIndexFromHighestWeightVector(theHwCandidates.TheObjects[k])==-1)
-        { MatrixLargeRational& currentHighest=theHwCandidates.TheObjects[k];
+      this->ExtractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
+      theHwCandidatesProjected.size=0;
+      for (int k=0; k<theHwCandidatesBeforeProjection.size; k++)
+        for (int l=0; l<this->theProjectors.size; l++)
+        { tempMat=theHwCandidatesBeforeProjection.TheObjects[k];
+          tempMat.MultiplyOnTheLeft(this->theProjectors.TheObjects[l]);
+          if (!tempMat.IsEqualToZero())
+            theHwCandidatesProjected.AddObjectOnTop(tempMat);
+        }
+      for (int k=0; k<theHwCandidatesProjected.size; k++)
+        if (this->GetModuleIndexFromHighestWeightVector(theHwCandidatesProjected.TheObjects[k])==-1)
+        { MatrixLargeRational& currentHighest=theHwCandidatesProjected.TheObjects[k];
           this->theHighestWeightVectors.AddObjectOnTop(currentHighest);
           this->theGmodKModules.ExpandOnTop(1);
           List<MatrixLargeRational>& currentMod=*this->theGmodKModules.LastObject();
@@ -6707,14 +6871,76 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
             currentMod.AddObjectOnTop(tempMat);
         }
     }
-  out << "<br>...and the module decomposition is (" << this->theHighestWeightVectors.size << " modules):";
+  out << this->GetNotationString(useHtml);
+  out << newLine << "...and the highest weights of the module decomposition are (" << this->theHighestWeightVectors.size << " modules):";
   for (int i=0; i<this->theHighestWeightVectors.size; i++)
-  { out << "<br><div class=\"math\">" << this->theHighestWeightVectors.TheObjects[i].ElementToString(false, true) << "</div>";
-    for (int j=1; j<this->theGmodKModules.TheObjects[i].size; j++)
-      out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ElementToString(false, true) << "</div>";
-    out << "<br><br><br>";
+  { out << newLine << beginMath << this->ElementMatrixToTensorString(theHighestWeightVectors.TheObjects[i], useHtml) << endMath << ", highest weight of ";
+    out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
+   //for (int j=1; j<this->theGmodKModules.TheObjects[i].size; j++)
+   //   out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ElementToString(false, true) << "</div>";
+   // out << "<br><br><br>";
   }
+  out << this->initPairingTable(useHtml);
+  return out.str();
+}
 
+std::string slTwoInSlN::initPairingTable(bool useHtml)
+{ std::stringstream out;
+  this->PairingTable.SetSize(this->theHighestWeightVectors.size);
+  for (int i=0; i<this->PairingTable.size; i++)
+  { this->PairingTable.TheObjects[i].SetSize(this->theHighestWeightVectors.size);
+    for(int j=0; j<this->PairingTable.TheObjects[i].size; j++)
+    { List<int>& currentPairing=this->PairingTable.TheObjects[i].TheObjects[j];
+      out << this->PairTwoIndices(currentPairing, i, j, useHtml);
+    }
+  }
+  return out.str();
+}
+
+std::string slTwoInSlN::PairTwoIndices
+  (List<int>& output, int leftIndex, int rightIndex, bool useHtml)
+{ std::string beginMath, endMath, newLine;
+  if (useHtml)
+  { beginMath= "<span class=\"math\">";
+    endMath= "</span>";
+    newLine="<br>";
+  } else
+  { beginMath="$";
+    endMath="$";
+    newLine="\n\n\n";
+  }
+  std::stringstream out;
+  output.size=0;
+  List<MatrixLargeRational>& leftElements=this->theGmodKModules.TheObjects[leftIndex];
+  List<MatrixLargeRational>& rightElements=this->theGmodKModules.TheObjects[rightIndex];
+  MatrixLargeRational tempMat;
+  List<MatrixLargeRational> HighestWeightsContainingModules;
+  List<MatrixLargeRational> tempDecomposition;
+  for (int i=0; i<leftElements.size; i++)
+    for (int j=0; j<rightElements.size; j++)
+    { MatrixLargeRational& leftElt=leftElements.TheObjects[i];
+      MatrixLargeRational& rightElt=rightElements.TheObjects[j];
+      MatrixLargeRational::LieBracket(leftElt, rightElt, tempMat);
+      if (!tempMat.IsEqualToZero())
+      { this->ExtractHighestWeightVectorsFromVector(tempMat, tempDecomposition, HighestWeightsContainingModules);
+        for (int k=0; k<HighestWeightsContainingModules.size; k++)
+        { output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k]));
+          if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k])==-1)
+            std::cout << newLine << beginMath << "[" << leftElt.ElementToString(false, true) << ", " << rightElt.ElementToString(false, true) << "]=" << tempMat.ElementToString(false, true) << endMath;
+        }
+      }
+    }
+  out << newLine << beginMath << this->ElementModuleIndexToString(leftIndex, useHtml) << endMath << " and " << beginMath << this->ElementModuleIndexToString(rightIndex, useHtml) << endMath << " pair to: ";
+  for (int i=0; i<output.size; i++)
+  { out << beginMath << this->ElementModuleIndexToString(output.TheObjects[i], useHtml) << endMath;
+    if (i!=output.size-1)
+      out << beginMath << "\\oplus" << endMath;
+  }
+  if (output.size>0)
+  { out << "  hw vectors: ";
+    for (int i=0; i<output.size; i++)
+      out << beginMath << this->ElementMatrixToTensorString(this->theHighestWeightVectors.TheObjects[output.TheObjects[i]], useHtml) << endMath << ",";
+  }
   return out.str();
 }
 
@@ -6747,5 +6973,17 @@ void ParserNode::EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables)
     slTwoInSlN theSl2;
 
     this->ExpressionType=this->typeString;
-    this->outputString=theSl2.initFromModuleDecomposition(thePartition);
+    std::fstream outputFile;
+    std::string fileName;
+    fileName.append(this->owner->outputFolderPath);
+    fileName.append("output.tex");
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
+    outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false) << "\n\\end{document}";
+    std::stringstream out;
+    out << "A latex/pdf file: <a href=\"" << this->owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
+    out << ", <a href=\"" << this->owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
+    this->outputString=out.str();
+    std::stringstream theCommand;
+    theCommand << "pdflatex -output-directory=" << this->owner->outputFolderPath << "   " << fileName ;
+    this->owner->SystemCommands.AddObjectOnTop(theCommand.str());
 }

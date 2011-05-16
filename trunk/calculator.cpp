@@ -127,7 +127,7 @@ int main(int argc, char **argv)
   //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
   //civilizedInput="1/x_1*(1-1)";
   //civilizedInput="secretSauceOrdered";
-  //civilizedInput="slTwoInSlN(4,5)";
+  //civilizedInput="slTwoInSlN(2,2)";
   //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;
@@ -139,6 +139,9 @@ int main(int argc, char **argv)
   //theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
   //  EigenVectorComputation theEigen;
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
+  theParser.outputFolderPath.append(inputPath);
+  theParser.outputFolderPath.append("../htdocs/tmp/");
+  theParser.outputFolderDisplayPath="/htdocs/tmp/";
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
     SSalgebraModule theModule;
@@ -319,6 +322,10 @@ int main(int argc, char **argv)
   std::cout.flush();
   for (int i=0; i<LatexCommands.size; i++)
     system(LatexCommands.TheObjects[i].c_str());
+  for(int i=0; i<theParser.SystemCommands.size; i++)
+  { std::cout << "\n\ncommand: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
+    system(theParser.SystemCommands.TheObjects[i].c_str());
+  }
   std::cout << "-->";
 	return 0;   // Toavoid Apache errors.
 }

@@ -2407,11 +2407,12 @@ class WallData
 public:
   std::string DebugString;
   int indexInOwnerChamber;
+  bool flagIsClosed;
   root normal;
   List<CombinatorialChamber*> NeighborsAlongWall;
   List<int> IndicesMirrorWalls;
   static bool flagDisplayWallDetails;
-  void ComputeDebugString(){this->ElementToString(this->DebugString); };
+  void ComputeDebugString(){this->ElementToString(this->DebugString); }
   void ElementToString(std::string& output);
   void RemoveNeighborhoodBothSidesNoRepetitionNeighbors(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
   int RemoveNeighborhoodBothSidesAllowRepetitionsReturnNeighborsDecrease(CombinatorialChamber* owner, CombinatorialChamber* NeighborPointer);
@@ -2429,14 +2430,14 @@ public:
           outputIndex=i;
       }
     return outputIndex!=-1;
-  };
+  }
   bool IsInFacetNoBoundaries(root& point);
   bool FacetContainsChamberOnlyOnce(CombinatorialChamber* owner);
   void SubstituteNeighborOneOccurenceNeighborOnly(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   void SubstituteNeighborOneAllowNeighborAppearingNotOnce(CombinatorialChamber* oldNeighbor, CombinatorialChamber* newNeighbor, int IndexNewNeighborWall);
   bool IsExternalWithRespectToDirection(root& direction);
   int GetIndexWallToNeighbor(CombinatorialChamber* neighbor);
-  inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point); };
+  inline bool ContainsPoint(root& point){return this->normal.OurScalarProductIsZero(point); }
   bool ContainsNeighborAtMostOnce(CombinatorialChamber* neighbor);
   bool ContainsNeighborExactlyOnce(CombinatorialChamber* neighbor);
   void RemoveNeighborExtraOcurrences(CombinatorialChamber* neighbor);
@@ -2445,6 +2446,10 @@ public:
   bool EveryNeigborIsExplored(bool& allNeighborsHaveZeroPoly);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner);
+  void TransformToWeylProjective
+  (CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
+  ;
+  WallData(){this->flagIsClosed=true;}
 };
 
 class affineHyperplane
@@ -2564,6 +2569,9 @@ public:
   bool ComputeVertexFromSelection(GlobalVariables& theGlobalVariables, root& output, Selection& theSel, int theDimension);
   void ComputeHyperplanesCurrentDirection(GlobalVariables& theGlobalVariables);
   void Triangulate(CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
+  void TransformToWeylProjective
+  (CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
+  ;
   //the below function returns false if the cross-section affine walls have been modified
   //and aborts its execution
   bool ProjectToDefaultAffineSpace(CombinatorialChamberContainer* owner, GlobalVariables& theGlobalVariables);
@@ -3039,7 +3047,8 @@ void HashedList<Object>::ClearHashes()
 { if (this->size<this->HashSize)
     for (int i=0; i<this->size; i++)
     { int hashIndex=this->TheObjects[i].HashFunction()%this->HashSize;
-      if (hashIndex<0){hashIndex+=this->HashSize; }
+      if (hashIndex<0)
+        hashIndex+=this->HashSize;
       this->TheHashedArrays[hashIndex].size=0;
     }
   else
@@ -3105,7 +3114,8 @@ void HashedList<Object>::PopIndexSwapWithLastHash(int index)
   int tempI=this->size-1;
   Object* oTop= &this->TheObjects[tempI];
   int hashIndexTop= oTop->HashFunction()% this->HashSize;
-  if (hashIndexTop<0){hashIndexTop+=this->HashSize; }
+  if (hashIndexTop<0)
+    hashIndexTop+=this->HashSize;
   this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
   this->TheHashedArrays[hashIndexTop].AddObjectOnTop(index);
   this->List<Object>::PopIndexSwapWithLast(index);
@@ -3284,7 +3294,6 @@ public:
   void ElementToString(std::string& output, bool useHtml);
 };
 
-
 //class pertains to the Q^+span of a set of roots.
 class Cone : public roots
 { //The roots are the normals to the walls of the cone
@@ -3335,6 +3344,7 @@ class CombinatorialChamberContainer: public ListPointers<CombinatorialChamber>
 public:
   int FirstNonExploredIndex;
   int AmbientDimension;
+  std::stringstream log;
   std::string DebugString;
   hashedRoots theHyperplanes;
   roots HyperplanesComingFromCurrentDirectionAndSmallerIndices;
@@ -3345,6 +3355,7 @@ public:
   HashedList<affineHyperplane> AffineWallsOfWeylChambers;
   affineHyperplanes theWeylGroupAffineHyperplaneImages;
   root IndicatorRoot;
+  MemorySaving<WeylGroup> AmbientWeyl;
   List<int> PreferredNextChambers;
   List<int> IndicesInActualNonConvexChamber;
   List<List<int> > NonConvexActualChambers;
@@ -3405,7 +3416,11 @@ public:
   void SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace);
   void SliceOneDirection(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
   void OneSlice(root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
+  //when projectivizing the newly added dimension corresponds to the last coordinate
   void InduceFromLowerDimensionalAndProjectivize(CombinatorialChamberContainer& input, GlobalVariables& theGlobalVariables);
+  void TransformToWeylProjective
+  (GlobalVariables& theGlobalVariables)
+  ;
   void MakeExtraProjectivePlane();
   int GetNumVisibleChambersNoLabeling();
   int GetNumNonZeroPointers();
@@ -3470,6 +3485,12 @@ public:
   void drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, std::fstream* outputLatex);
   bool TestPossibleIndexToSlice(root& direction, int index);
   void ComputeNonConvexActualChambers(GlobalVariables& theGlobalVariables);
+  void initCharacterComputation
+  (WeylGroup& inputWeyl, roots& inputWeights, GlobalVariables& theGlobalVariables)
+  ;
+  void incrementCharacterComputation
+  (GlobalVariables& theGlobalVariables)
+  ;
   CombinatorialChamberContainer();
   ~CombinatorialChamberContainer();
 };
@@ -4045,7 +4066,6 @@ template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra,
 void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::ComputeDebugString(PolynomialOutputFormat& PolyFormat)
 { this->ElementToString(this->DebugString, PolyFormat);
 }
-
 
 template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
 inline void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::Assign(const MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& right)
@@ -5038,13 +5058,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(int 
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::MultiplyBy
-(
-const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p,
-TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output,
-TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& bufferPoly,
- TemplateMonomial& bufferMon
-)const
+inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::MultiplyBy(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& output, TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& bufferPoly, TemplateMonomial& bufferMon)const
 { if (p.size==0)
   { output.ClearTheObjects();
     return;
@@ -5286,9 +5300,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::ScaleToPositiveMonomials(
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsProportionalTo
-(const Polynomial<ElementOfCommutativeRingWithIdentity>& other,
- ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther, const ElementOfCommutativeRingWithIdentity& theRingUnit)const
+bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsProportionalTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& other, ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther, const ElementOfCommutativeRingWithIdentity& theRingUnit)const
 { if (this->size!=other.size)
     return false;
   if (other.size==0)
@@ -6471,6 +6483,7 @@ public:
   void ComputeRho(bool Recompute);
   void ComputeDebugString();
   void ElementToString(std::string& output);
+  std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS;}
   void MakeArbitrary(char WeylGroupLetter, int n);
   void GenerateAdditivelyClosedSubset(roots& input, roots& output);
   void MakeAn(int n);
@@ -8567,6 +8580,7 @@ public:
   static void DuflosComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TestParser(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TheG2inB3Computation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void ComputeCharaterFormulas(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   static void TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();

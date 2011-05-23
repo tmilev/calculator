@@ -152,6 +152,7 @@ public:
   wxBoxSizer* BoxSizer18LProhibiting;
   wxBoxSizer* BoxSizer19DyckPaths;
   wxBoxSizer* BoxSizer20ChamberSplit;
+  wxBoxSizer* BoxSizer21CharacterChamberSplit;
   //wxRadioButton* RB1OneSlice;
   //wxRadioButton* RB2OneIncrement;
   //wxRadioButton* RB3FullChop;
@@ -196,6 +197,9 @@ public:
 	::wxButton* Button21SplitChambersPauseAndSave;
 	::wxButton* Button22TestChambers;
 	::wxButton* Button23Experiments;
+	::wxButton* Button24CharacterSplitFull;
+	::wxButton* Button25CharacterSplitIncrement;
+
   ::wxSpinCtrl* Spin1Dim;
   ::wxSpinCtrl* Spin2NumVect;
   ::wxCheckBox* CheckBox1ComputePFs;
@@ -236,6 +240,8 @@ public:
   void onButton21SplitChambersPauseAndSave(wxCommandEvent& ev);
   void onButton22TestChambers(wxCommandEvent& ev);
   void onButton23Experiments(wxCommandEvent& ev);
+  void onButton24(wxCommandEvent& ev);
+  void onButton25(wxCommandEvent& ev);
   void onRBGroup1SlicingOptions(wxCommandEvent& ev);
   void onSpinner1and2 (wxSpinEvent & ev);
   void onComputationOver(wxCommandEvent& ev);
@@ -300,6 +306,8 @@ public:
     ID_Button21SplitChambersPauseAndSave,
     ID_Button22TestChambers,
     ID_Button23Experiments,
+    ID_Button24CharacterComputationAll,
+    ID_Button25CharacterComputationStep,
     ID_Paint,
   };
   DECLARE_EVENT_TABLE()
@@ -402,6 +410,8 @@ BEGIN_EVENT_TABLE( guiMainWindow, wxFrame )
     EVT_BUTTON(guiMainWindow::ID_Button21SplitChambersPauseAndSave, guiMainWindow::onButton21SplitChambersPauseAndSave)
     EVT_BUTTON(guiMainWindow::ID_Button22TestChambers, guiMainWindow::onButton22TestChambers)
     EVT_BUTTON(guiMainWindow::ID_Button23Experiments, guiMainWindow::onButton23Experiments)
+    EVT_BUTTON(guiMainWindow::ID_Button24CharacterComputationAll, guiMainWindow::onButton24)
+    EVT_BUTTON(guiMainWindow::ID_Button25CharacterComputationStep, guiMainWindow::onButton25)
     EVT_BUTTON(guiMainWindow::ID_Button6OneSlice, guiMainWindow::onButton6OneSlice)
     EVT_BUTTON(guiMainWindow::ID_Button7Increment, guiMainWindow::onButton7SliceIncrement)
     EVT_BUTTON(guiMainWindow::ID_Button8FullChop, guiMainWindow::onButton8FullChop)
@@ -541,6 +551,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->BoxSizer18LProhibiting= new wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer19DyckPaths = new wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer20ChamberSplit = new wxBoxSizer(wxHORIZONTAL);
+  this->BoxSizer21CharacterChamberSplit = new wxBoxSizer(wxHORIZONTAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);
   this->Table2Indicator = new wxGridExtra( this,::wxID_ANY);
@@ -588,6 +599,9 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Button21SplitChambersPauseAndSave= new wxButton(this, this->ID_Button21SplitChambersPauseAndSave, wxT("Pause and save"));
   this->Button22TestChambers= new wxButton(this, this->ID_Button22TestChambers, wxT("Test chambers algorithm (very slow, 30+min)"));
   this->Button23Experiments= new wxButton(this, this->ID_Button23Experiments, wxT("Experiments"));
+  this->Button24CharacterSplitFull= new wxButton(this, this->ID_Button24CharacterComputationAll, wxT("Weyl split full"));
+  this->Button25CharacterSplitIncrement= new wxButton(this, this->ID_Button25CharacterComputationStep, wxT("Weyl split step"));
+
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
   //this->Button8FullChopping= new wxButton(this,this->ID_Button8FullChop,wxT("Full chop"));
@@ -648,6 +662,9 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
       this->BoxSizer20ChamberSplit->Add(this->Button20SplitChambers);
       this->BoxSizer20ChamberSplit->Add(this->Button21SplitChambersPauseAndSave);
       this->BoxSizer20ChamberSplit->Add(this->Button22TestChambers);
+      this->BoxSizer20ChamberSplit->Add(this->BoxSizer21CharacterChamberSplit);
+        this->BoxSizer21CharacterChamberSplit->Add(this->Button24CharacterSplitFull);
+        this->BoxSizer21CharacterChamberSplit->Add(this->Button25CharacterSplitIncrement);
 		this->BoxSizer11VerticalOptions->Add(this->Button19CountNilradicals);
 		this->BoxSizer11VerticalOptions->Add(this->Button23Experiments);
   this->BoxSizer10HorizontalProgressReportsAndOptions->Add(this->BoxSizer12VerticalProgressReports);
@@ -978,6 +995,15 @@ void guiMainWindow::onButton20SplitChambers(wxCommandEvent& ev)
 //  this->theComputationSetup.thePartialFraction.theChambers.flagAnErrorHasOcurredTimeToPanic=true;
   this->theComputationSetup.thePartialFraction.theChambers.theDirections = this->theComputationSetup.VPVectors;
   this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ChamberSlice;
+  this->RunTheComputation();
+}
+
+void guiMainWindow::onButton24(wxCommandEvent& ev)
+{
+}
+
+void guiMainWindow::onButton25(wxCommandEvent& ev)
+{ this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ComputeCharaterFormulas;
   this->RunTheComputation();
 }
 
@@ -1582,7 +1608,6 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
   MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
   MainWindow1->progressReportVariables.Busy=false;
 }
-
 
 #endif
 

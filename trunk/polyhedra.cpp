@@ -1137,20 +1137,8 @@ void ComputationSetup::oneStepChamberSlice(GlobalVariables& theGlobalVariables)
 { this->flagAllowRepaint=false;
   this->flagComputationInProgress=true;
   this->thePartialFraction.theChambers.flagDrawingProjective=true;
-  if (this->thePartialFraction.theChambers.PreferredNextChambers.size==0 && this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed  < this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.size)
-    this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed++;
-  if (this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed  < this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.size)
-  { if (this->thePartialFraction.theChambers.PreferredNextChambers.size==0)
-      this->thePartialFraction.theChambers.SliceWithAWallInit(this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.TheObjects[this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed], theGlobalVariables);
-    else
-      this->thePartialFraction.theChambers.SliceWithAWallOneIncrement(this->thePartialFraction.theChambers.NewHyperplanesToSliceWith.TheObjects[this->thePartialFraction.theChambers.NumAffineHyperplanesProcessed], theGlobalVariables);
-  } else
-  { this->thePartialFraction.theChambers.flagDrawingProjective=false;
-    this->thePartialFraction.theChambers.ProjectToDefaultAffineSpace(theGlobalVariables);
+  if (!this->thePartialFraction.theChambers.oneStepChamberSlice(theGlobalVariables))
     this->flagComputationDone=true;
-    this->thePartialFraction.theChambers.ComputeDebugString();
-  }
- // this->theChambers.ComputeDebugString();
   this->flagAllowRepaint=true;
 }
 
@@ -4160,7 +4148,8 @@ void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNorma
   this->PreferredNextChambers.size=0;
   this->LabelAllUnexplored();
   root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
-  TheKillerFacetNormal.ComputeDebugString();
+  if (this->flagAnErrorHasOcurredTimeToPanic)
+    TheKillerFacetNormal.ComputeDebugString();
   for (int i=0; i<this->size; i++)
   { if (this->flagAnErrorHasOcurredTimeToPanic)
       this->ComputeDebugString();
@@ -4188,9 +4177,9 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
   if (!this->flagSliceWithAWallInitDone)
     this->SliceWithAWallInit(TheKillerFacetNormal, theGlobalVariables);
   else
-  { if(this->PreferredNextChambers.size>0)
+    if(this->PreferredNextChambers.size>0)
     { if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]!=0)
-      { if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
+        if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
         { delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
@@ -4198,12 +4187,10 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
 #endif
           this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
         }
-      }
       this->PreferredNextChambers.PopIndexShiftUp(0);
       if (this->flagAnErrorHasOcurredTimeToPanic)
         this->ComputeDebugString();
     }
-  }
   if (this->PreferredNextChambers.size>0)
     this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
   else
@@ -11600,7 +11587,7 @@ void WeylGroup::SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, b
   }
   alphaShift.DivideBy(this->CartanSymmetric.elements[index][index]);
   if (RhoAction)
-  {  if(UseMinusRho)
+  { if(UseMinusRho)
       alphaShift.AddInteger(1);
     else
       alphaShift.AddInteger(-1);
@@ -11609,7 +11596,7 @@ void WeylGroup::SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, b
 }
 
 void WeylGroup::SimpleReflectionRootAlg( int index, PolynomialsRationalCoeff& theRoot, bool RhoAction)
-{  int lengthA=this->CartanSymmetric.elements[index][index].NumShort;
+{ int lengthA=this->CartanSymmetric.elements[index][index].NumShort;
   PolynomialRationalCoeff AscalarB, tempP;
   AscalarB.Nullify((int)this->CartanSymmetric.NumRows);
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
@@ -11651,6 +11638,7 @@ void WeylGroup::Assign(const WeylGroup& right)
 //  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
 //  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
 //  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
+  this->CartanSymmetricIntBuffer.Assign(right.CartanSymmetricIntBuffer);
   this->CartanSymmetric.Assign(right.CartanSymmetric);
   this->CopyFromHash(right);
   this->RootSystem.CopyFromHash(right.RootSystem);
@@ -11698,14 +11686,19 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
   root currentRoot;
   ElementWeylGroup tempEW;
   if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
-  { tempEW.size=0;
+  { int expectedNumElements=(this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim())).NumShort;
+    if (UpperLimitNumElements!=-1)
+      expectedNumElements=MathRoutines::Minimum(UpperLimitNumElements, expectedNumElements);
+    tempEW.size=0;
+    outputSubset.MakeActualSizeAtLeastExpandOnTop(expectedNumElements);
+    output.MakeActualSizeAtLeastExpandOnTop(expectedNumElements);
     outputSubset.CartanSymmetric.Assign(this->CartanSymmetric);
     outputSubset.size=0;
     outputSubset.AddObjectOnTopHash(tempEW);
   }
   for (int i=0; i<output.size; i++)
   { if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
-    { tempEW=outputSubset.TheObjects[i]; }
+      tempEW=outputSubset.TheObjects[i];
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
     { currentRoot=output.TheObjects[i];
       //if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -11887,10 +11880,11 @@ void WeylGroup::MakeDn(int n)
   this->CartanSymmetric.elements[n-2][n-1]=0;
   this->CartanSymmetric.elements[n-3][n-1]=-1;
   this->CartanSymmetric.elements[n-1][n-3]=-1;
+  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeAn(int n)
-{  if (n<0)
+{ if (n<0)
     return;
   this->WeylLetter='A';
   this->LongRootLength=2;
@@ -11908,10 +11902,11 @@ void WeylGroup::MakeAn(int n)
     this->CartanSymmetric.elements[i][i+1]=-1;
   }
   this->CartanSymmetric.elements[n-1][n-1]=2;
+  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeEn(int n)
-{  this->MakeAn(n);
+{ this->MakeAn(n);
   if (n<4)
     return;
   this->WeylLetter='E';
@@ -11923,10 +11918,11 @@ void WeylGroup::MakeEn(int n)
   this->CartanSymmetric.elements[1][3]=-1;
   this->CartanSymmetric.elements[2][0]=-1;
   this->CartanSymmetric.elements[3][1]=-1;
+  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeF4()
-{  this->WeylLetter='F';
+{ this->WeylLetter='F';
   this->LongRootLength=4;
 //  this->ShortRootLength=2;
 //  this->LongLongScalarProdPositive=2;
@@ -11939,6 +11935,7 @@ void WeylGroup::MakeF4()
   this->CartanSymmetric.elements[1][0]=-1; this->CartanSymmetric.elements[1][1]=2 ; this->CartanSymmetric.elements[1][2]=-2; this->CartanSymmetric.elements[1][3]=0 ;
   this->CartanSymmetric.elements[2][0]=0 ; this->CartanSymmetric.elements[2][1]=-2; this->CartanSymmetric.elements[2][2]=4 ; this->CartanSymmetric.elements[2][3]=-2;
   this->CartanSymmetric.elements[3][0]=0 ; this->CartanSymmetric.elements[3][1]=0 ; this->CartanSymmetric.elements[3][2]=-2; this->CartanSymmetric.elements[3][3]=4 ;
+  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeG2()
@@ -11954,6 +11951,7 @@ void WeylGroup::MakeG2()
   this->CartanSymmetric.elements[1][1]=2;
   this->CartanSymmetric.elements[1][0]=-3;
   this->CartanSymmetric.elements[0][1]=-3;
+  this->UpdateIntBuffer();
 }
 
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables)
@@ -12194,6 +12192,7 @@ void WeylGroup::MakeBn(int n)
 //  this->ShortShortScalarProdPositive=0;
   this->WeylLetter='B';
   this->CartanSymmetric.elements[n-1][n-1]=1;
+  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeCn(int n)
@@ -12209,6 +12208,7 @@ void WeylGroup::MakeCn(int n)
   this->CartanSymmetric.elements[n-1][n-1]=4;
   this->CartanSymmetric.elements[n-2][n-1]=-2;
   this->CartanSymmetric.elements[n-1][n-2]=-2;
+  this->UpdateIntBuffer();
 }
 
 void WeylGroup::ComputeWeylGroup()
@@ -12270,7 +12270,7 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
   root currentRoot;
   for (int i=0; i<this->RootSubsystem.size; i++)
     for (int j=0; j<this->simpleGenerators.size; j++)
-    {  currentRoot.Assign(this->RootSubsystem.TheObjects[i]);
+    { currentRoot.Assign(this->RootSubsystem.TheObjects[i]);
       this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j], currentRoot, false, currentRoot);
       this->RootSubsystem.AddObjectOnTopNoRepetitionOfObjectHash(currentRoot);
     }
@@ -12417,14 +12417,14 @@ void hashedRoots::ElementToString(std::string& output)
 void hashedRoots::ElementToString(std::string& output, bool useHtml)
 { std::stringstream  out;
   std::string tempS;
-  out <<"Number of vectors: "<<this->size<<"\n";
+  out << "Number of vectors: " << this->size << "\n";
   if (useHtml)
-    out <<"\n<br>\n";
+    out << "\n<br>\n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS);
-    out<<tempS<<"\n";
+    out << tempS << "\n";
     if (useHtml)
-      out <<"\n<br>\n";
+      out << "\n<br>\n";
   }
   output= out.str();
 }
@@ -12463,8 +12463,7 @@ void PolynomialsRationalCoeff::ComputeB(PolynomialRationalCoeff& output, int cut
       EpsForm.TheObjects[j].TimesConstant(RMOne);
   output.Nullify(2);
   for (int i=0; i<theDimension; i++)
-  { output.AddPolynomial(EpsForm.TheObjects[i]);
-  }
+    output.AddPolynomial(EpsForm.TheObjects[i]);
 }
 
 void PolynomialsRationalCoeffCollection::ElementToString(std::string& output, int theDimension)
@@ -12474,25 +12473,24 @@ void PolynomialsRationalCoeffCollection::ElementToString(std::string& output, in
 void PolynomialsRationalCoeffCollection::ElementToStringComputeFunctionB(std::string& output, bool computingB, int theDimension)
 { std::string tempS;
   std::stringstream  out;
-  out<<"Number of elements: "<<this->size<<"\n";
+  out << "Number of elements: " << this->size << "\n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS);
-    out<< tempS;
+    out << tempS;
     if (computingB)
     { static PolynomialRationalCoeff tempP;
       this->TheObjects[i].ComputeB(tempP, 2, theDimension);
       tempP.ComputeDebugString();
-      out <<"  function B: "<<tempP.DebugString;
+      out << "  function B: " << tempP.DebugString;
     }
-    out<<"\n";
+    out << "\n";
   }
   output=out.str();
 }
 
 void PolynomialsRationalCoeffCollection::Substitution(PolynomialsRationalCoeff& theSub, int NumVarsTarget)
 { for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].Substitution(theSub, NumVarsTarget);
-  }
+    this->TheObjects[i].Substitution(theSub, NumVarsTarget);
 }
 
 void PolynomialsRationalCoeffCollection::ComputeDebugString(int theDimension)
@@ -12501,26 +12499,26 @@ void PolynomialsRationalCoeffCollection::ComputeDebugString(int theDimension)
 
 void VermaModulesWithMultiplicities::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex)
 { output.clear();
-  output<< "Top_index: "<<TopIndex<<"\n";
+  output << "Top_index: " << TopIndex << "\n";
   std::string tempS;
   this->KLcoeffsToString(KLcoeff,  tempS);
-  output<<tempS;
+  output << tempS;
 }
 
 int VermaModulesWithMultiplicities::ReadKLCoeffsFromFile(std::fstream& input, List<int>& output)
 { std::string tempS;
   int TopIndex;
-  input>>tempS>>TopIndex;
+  input >> tempS >>TopIndex;
   output.SetSize(this->size);
   for (int i=0; i<this->size; i++)
-    input>>tempS>> output.TheObjects[i];
+    input>>tempS >> output.TheObjects[i];
   return TopIndex;
 }
 
 void VermaModulesWithMultiplicities::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output)
 { std::stringstream out;
   for (int i=0; i<theKLCoeffs.size; i++)
-    out<< i<<".  "<<theKLCoeffs.TheObjects[i]<<"\n";
+    out << i << ".  " << theKLCoeffs.TheObjects[i] << "\n";
   output=out.str();
 }
 
@@ -12674,7 +12672,8 @@ int VermaModulesWithMultiplicities::FindLowestBruhatNonExplored()
           break;
         }
       }
-      if (isGood ) {return i; }
+      if (isGood )
+        return i;
     }
   return -1;
 }
@@ -12690,7 +12689,8 @@ int VermaModulesWithMultiplicities::FindHighestBruhatNonExplored(List<bool>& the
           break;
         }
       }
-      if (isGood ) {return i; }
+      if (isGood)
+        return i;
     }
   return -1;
 }
@@ -12802,11 +12802,10 @@ void VermaModulesWithMultiplicities::ComputeRPolys()
     while (a!=-1)
     { bool tempBool = false;
       for (int j=0; j<theDimension; j++)
-      { if (this->ComputeRxy(this->LowestNonExplored, a, j))
-        {  tempBool =true;
+        if (this->ComputeRxy(this->LowestNonExplored, a, j))
+        { tempBool =true;
           break;
         }
-      }
       assert (tempBool);
       ExploredFromTop.TheObjects[a]=true;
       a= this->FindHighestBruhatNonExplored(ExploredFromTop);
@@ -12827,12 +12826,12 @@ bool VermaModulesWithMultiplicities::IndexGEQIndex(int a, int b)
 }
 
 bool VermaModulesWithMultiplicities::IndexGreaterThanIndex(int a, int b)
-{ if (a==b) {return false; }
+{ if (a==b)
+    return false;
   return this->IndexGEQIndex(a, b);
 }
 
-int VermaModulesWithMultiplicities::ComputeProductfromSimpleReflectionsActionList
-      (int x, int y)
+int VermaModulesWithMultiplicities::ComputeProductfromSimpleReflectionsActionList(int x, int y)
 { int start = y;
   for (int i=0; i<this->TheWeylGroup->TheObjects[x].size; i++)
     start=this->SimpleReflectionsActionList.TheObjects[start].TheObjects[this->TheWeylGroup->TheObjects[x].TheObjects[i]];
@@ -12840,9 +12839,9 @@ int VermaModulesWithMultiplicities::ComputeProductfromSimpleReflectionsActionLis
 }
 
 void VermaModulesWithMultiplicities::ComputeKLxy(int w, int x)
-{ static OneVarIntPolynomial Accum, tempP1, tempP2;
+{ OneVarIntPolynomial Accum, tempP1, tempP2;
   if (x==w)
-  {  this->KLPolys.TheObjects[w].TheObjects[x].MakeConst(1);
+  { this->KLPolys.TheObjects[w].TheObjects[x].MakeConst(1);
     return;
   }
   if (!this->IndexGEQIndex(w, x))
@@ -12852,15 +12851,13 @@ void VermaModulesWithMultiplicities::ComputeKLxy(int w, int x)
   Accum.Nullify();
   this->KLPolys.TheObjects[w].TheObjects[x].Nullify();
   for (int i=0; i<this->size; i++)
-  { if (this->IndexGreaterThanIndex(i, x) &&
-        this->IndexGEQIndex(w, i))
+  { if (this->IndexGreaterThanIndex(i, x) && this->IndexGEQIndex(w, i))
     { int tempI;
       if ((this->TheWeylGroup->length(x)+this->TheWeylGroup->length(i))%2==0)
         tempI=1;
       else
         tempI=-1;
-      int powerQ= -this->TheWeylGroup->length(x)+2*this->TheWeylGroup->length(i)
-                  -this->TheWeylGroup->length(w);
+      int powerQ= -this->TheWeylGroup->length(x)+2*this->TheWeylGroup->length(i) -this->TheWeylGroup->length(w);
 //      this->RPolys.TheObjects[i].TheObjects[x].ComputeDebugString();
       tempP1.Assign(this->RPolys.TheObjects[i].TheObjects[x]);
 //      tempP1.ComputeDebugString();
@@ -12919,7 +12916,7 @@ void VermaModulesWithMultiplicities::KLPolysToString(std::string &output)
   std::string tempS;
   for (int i=0; i<this->KLPolys.size; i++)
   { this->KLPolys.TheObjects[i].ElementToString(tempS, i);
-    out <<tempS<<"\n";
+    out << tempS << "\n";
   }
   output = out.str();
 }
@@ -12929,7 +12926,7 @@ void VermaModulesWithMultiplicities::RPolysToString(std::string &output)
   std::string tempS;
   for (int i=0; i<this->RPolys.size; i++)
   { this->RPolys.TheObjects[i].ElementToString(tempS, i);
-    out <<tempS<<"\n";
+    out << tempS << "\n";
   }
   output = out.str();
 }
@@ -13152,7 +13149,7 @@ bool rootFKFTcomputation::OpenDataFile(std::fstream& theFile, std::string& theFi
     theFile.seekp(0, std::ios_base::end);
     int tempI=theFile.tellp();
     if (tempI>=1)
-    {  theFile.seekg(0);
+    { theFile.seekg(0);
       return true;
     }
   }
@@ -13214,7 +13211,7 @@ void rootFKFTcomputation::MakeTheRootFKFTSum(root& ChamberIndicator, partFractio
   Accum.Nullify(5);
   for (int i=0; i<TheChambersInTheGame.size; i++)
     if (theKLCoeffs.TheObjects[i]!=0)
-    {  tempQP1.Nullify(5);
+    { tempQP1.Nullify(5);
       theBVdecomposition.partFractionsToPartitionFunctionAdaptedToRoot(tempQP1, TheChambersInTheGame.ChamberIndicators.TheObjects[i], true, true, *this->TheGlobalVariables, false);
 //      tempQP1.ComputeDebugString();
       tempQP1.TimesInteger(theKLCoeffs.TheObjects[i]);
@@ -13342,40 +13339,41 @@ void OneVarIntPolynomial::ElementToString(std::string& output)
 { std::stringstream out;
   std::string tempS;
   for (int i=this->RationalPart.size-1; i>=0; i--)
-  { if (this->RationalPart.TheObjects[i]!=0)
+    if (this->RationalPart.TheObjects[i]!=0)
     { std::stringstream out2;
       if (this->RationalPart.TheObjects[i]==-1)
-        out2<<"-";
+        out2 << "-";
       else
         if (this->RationalPart.TheObjects[i]!=1)
-          out2<<this->RationalPart.TheObjects[i];
-      out2<<"q^{"<<-i-1<<"}";
+          out2 << this->RationalPart.TheObjects[i];
+      out2 << "q^{" << -i-1 << "}";
       tempS=out2.str();
       if (tempS[0]!='-')
         tempS.insert(0, "+");
-      out<< tempS;
+      out << tempS;
     }
-  }
   if (this->PolynomialPart.size>0)
   { if (this->PolynomialPart.TheObjects[0]>0)
-      out <<"+"<<this->PolynomialPart.TheObjects[0];
+      out << "+" << this->PolynomialPart.TheObjects[0];
     if (this->PolynomialPart.TheObjects[0]<0)
-      out<<this->PolynomialPart.TheObjects[0];
+      out << this->PolynomialPart.TheObjects[0];
   }
   for (int i=1; i<this->PolynomialPart.size; i++)
   { if (this->PolynomialPart.TheObjects[i]!=0)
     { std::stringstream out2;
       if (this->PolynomialPart.TheObjects[i]==-1)
-        out2<<"-";
+        out2 << "-";
       else
         if (this->PolynomialPart.TheObjects[i]!=1)
-          out2<<this->PolynomialPart.TheObjects[i];
+          out2 << this->PolynomialPart.TheObjects[i];
       if (i!=1)
-      {  out2<<"q^{"<<i<<"}"; }else{out2<<"q"; }
+        out2 << "q^{" << i << "}";
+      else
+        out2 << "q";
       tempS=out2.str();
       if (tempS[0]!='-')
         tempS.insert(0, "+");
-      out<< tempS;
+      out << tempS;
     }
   }
   output= out.str();
@@ -13450,7 +13448,7 @@ void OneVarIntPolynomials::ElementToString(std::string& output)
   { tempS.clear();
     this->TheObjects[i].ElementToString(tempS);
     if (tempS!="")
-      out <<i<<". "<<tempS<<"; ";
+      out << i << ". " << tempS << "; ";
   }
   output= out.str();
 }
@@ -13462,7 +13460,7 @@ void OneVarIntPolynomials::ElementToString(std::string& output, int KLindex)
   { tempS.clear();
     this->TheObjects[i].ElementToString(tempS);
     if (tempS!="")
-      out<<KLindex<<"||"<<i<<" "<<tempS<<"; ";
+      out << KLindex << "||" << i << " " << tempS << "; ";
   }
   output= out.str();
 }
@@ -13528,19 +13526,19 @@ int IntegerPoly::SizeWithoutDebugString()
 }
 
 void LaTeXProcedures::beginPSTricks(std::fstream& output)
-{ output<<"\\begin{pspicture}(8, 8)";
+{ output << "\\begin{pspicture}(8, 8)";
 }
 
 void LaTeXProcedures::endPSTricks(std::fstream& output)
-{ output<<"\\end{pspicture}\\medskip \\\\ \\noindent ";
+{ output << "\\end{pspicture}\\medskip \\\\ \\noindent ";
 }
 
 void LaTeXProcedures::beginDocument(std::fstream& output)
-{ output<< "\\documentclass{article}\n \\usepackage{pstricks} \\begin{document}";
+{ output << "\\documentclass{article}\n \\usepackage{pstricks} \\begin{document}";
 }
 
 void LaTeXProcedures::endLatexDocument(std::fstream& output)
-{ output <<"\\end{document}";
+{ output << "\\end{document}";
 }
 
 void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput)
@@ -13593,7 +13591,7 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
     tempS="lightgray";
   else
     LaTeXProcedures::GetStringFromColorIndex(ColorIndex, tempS, drawInput);
-  output  << "\\psline[linewidth=0.3pt, linecolor=" << tempS << "](" << X1-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y1 << ")" << "(" << X2-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y2 << ")\n";
+  output << "\\psline[linewidth=0.3pt, linecolor=" << tempS << "](" << X1-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y1 << ")" << "(" << X2-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y2 << ")\n";
 }
 
 void thePFcomputation::Run()
@@ -13900,7 +13898,7 @@ void rootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, 
   for (int i=0; i<theSize; i++)
   { outMultTable.TheObjects[i].SetSize(theSize);
     for (int j=0; j<theSize; j++)
-    { input>> tempI;
+    { input >> tempI;
       outMultTable.TheObjects[i].TheObjects[j].SetSize(tempI);
       for(int k=0; k<outMultTable.TheObjects[i].TheObjects[j].size; k++)
         input >> outMultTable.TheObjects[i].TheObjects[j].TheObjects[k];
@@ -14922,14 +14920,13 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(roots& Domain, r
   }
   //find a minimal possible new kmodule to throw in
   for (int i=0; i<leftSA.kModules.size; i++)
-  { if (leftSA.kModules.TheObjects[i].size> leftSA.kModules.TheObjects[counter].size)
+    if (leftSA.kModules.TheObjects[i].size> leftSA.kModules.TheObjects[counter].size)
     { domainRec.LastObject()->Assign(leftSA.HighestWeightsGmodK.TheObjects[i]);
       if (domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank)
         domainRec.LastObject()->Assign(leftSA.HighestWeightsGmodK.TheObjects[counter]);
       else
         counter=i;
     }
-  }
   assert(domainRec.GetRankOfSpanOfElements(theGlobalVariables)==CurrentRank+1);
   roots& firstKmodLeft= leftSA.kModules.TheObjects[counter];
   bool result=false;
@@ -15165,7 +15162,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       out << "\n<tr><td>";
     if (useLatex)
       out << "\\hline ";
-    out<<i;
+    out << i;
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
@@ -15226,7 +15223,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     }
   }
   if (useHtml)
-    out <<"</table>";
+    out << "</table>";
   if (useLatex)
     out << latexFooter;
   if ((useLatex|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
@@ -15300,7 +15297,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, ro
 void DynkinDiagramRootSubalgebra::Sort()
 { //doing bubble sort
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-  { for (int j=i+1; j<this->SimpleBasesConnectedComponents.size; j++)
+    for (int j=i+1; j<this->SimpleBasesConnectedComponents.size; j++)
     { bool tempBool=false;
       if (this->SimpleBasesConnectedComponents.TheObjects[i].size<this->SimpleBasesConnectedComponents.TheObjects[j].size)
         tempBool=true;
@@ -15311,7 +15308,6 @@ void DynkinDiagramRootSubalgebra::Sort()
         this->SimpleBasesConnectedComponents.SwapTwoIndices(i, j);
       }
     }
-  }
   this->sameTypeComponents.size=0;
   this->indexInUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
   this->indexUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
@@ -16151,7 +16147,7 @@ void GeneratorPFAlgebraRecord::ElementToString(std::string& output, const Polyno
   { output= out1.str();
     return;
   }
-  out2<< "p_{"<< this->Elongation<<"}("<<out1.str()<<")";
+  out2 << "p_{" << this->Elongation << "}(" << out1.str() << ")";
   output= out2.str();
 }
 
@@ -16223,7 +16219,7 @@ bool affineCone::SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affin
 }
 
 bool affineCone::WallIsInternalInCone(affineHyperplane& theKillerCandidate)
-{  return true;
+{ return true;
 }
 
 inline int affineCone::GetDimension()
@@ -16574,7 +16570,7 @@ void affineCone::ProjectFromCombinatorialChamber(CombinatorialChamber& input)
   }*/
 }
 
-inline bool affineHyperplane::operator ==(const affineHyperplane& right)
+bool affineHyperplane::operator ==(const affineHyperplane& right)
 { root tempRoot1, tempRoot2;
   tempRoot1.Assign(this->normal);
   tempRoot2.Assign(right.normal);
@@ -16740,7 +16736,7 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool us
     if (useLaTeX)
     { out << "\\\\";
       if (i==owner.CentralizerRoots.size-1)
-        out<< "\\cline{2-" << owner.CentralizerRoots.size+1 << "}";
+        out << "\\cline{2-" << owner.CentralizerRoots.size+1 << "}";
     }
   }
   if (useLaTeX)
@@ -16749,21 +16745,21 @@ void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool us
     out << "<tr><td>opposite</td>";
   for (int i=0; i<owner.theOppositeKmods.size; i++)
   { if (useHtml)
-      out <<"<td>";
-    out << i<<"/"<< owner.theOppositeKmods.TheObjects[i];
+      out << "<td>";
+    out << i << "/" << owner.theOppositeKmods.TheObjects[i];
     if (useHtml)
-      out <<"</td>";
+      out << "</td>";
     if (useLaTeX)
     { if (i!=owner.theOppositeKmods.size-1)
       { if (useLaTeX)
-          out<<" & ";
+          out << " & ";
         else
-          out <<"\t";
+          out << "\t";
       }
     }
   }
   if (useLaTeX)
-    out <<"\n\\end{tabular}";
+    out << "\n\\end{tabular}";
   output=out.str();
 }
 
@@ -16785,10 +16781,10 @@ void rootSubalgebra::initForNilradicalGeneration()
 void rootsWithMultiplicitiesContainer::ElementToString(std::string& output)
 { std::stringstream out;
   std::string tempS;
-  out << "Num Elements: "<< this->size<<"    \n";
+  out << "Num Elements: " << this->size << "    \n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS);
-    out<< tempS<<"\n";
+    out << tempS << "\n";
   }
   output=out.str();
 }
@@ -16796,9 +16792,9 @@ void rootsWithMultiplicitiesContainer::ElementToString(std::string& output)
 void rootWithMultiplicity::ElementToString(std::string& output)
 { std::stringstream out;
   std::string tempS;
-  out<< this->multiplicity <<" (";
+  out << this->multiplicity << " (";
   this->::root::ElementToString(tempS);
-  out << tempS<<")";
+  out << tempS<< ")";
   output=out.str();
 }
 
@@ -16827,9 +16823,9 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Ra
       theRoots.TheObjects[i].ElementToString(tempS);
     else
       theRoots.TheObjects[i].ElementToStringEpsilonForm(tempS, true, false);
-    out <<"("<<tempS<<")";
+    out << "(" << tempS << ")";
     if (i!=theRoots.size-1)
-      out <<" + ";
+      out << " + ";
   }
    output=out.str();
 }
@@ -16840,17 +16836,17 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
   std::stringstream out;
   std::string tempS;
   if (useLatex)
-  { out <<"\\begin{tabular}{";
+  { out << "\\begin{tabular}{";
     for (int i=0; i< theRoots.size; i++)
-      out <<"c";
-    out <<"}";
+      out << "c";
+    out << "}";
   }
   for (int i=0; i<theRoots.size; i++)
   { coeffs.TheObjects[i].ElementToString(tempS);
     if (tempS=="1")  tempS="";
     if (tempS=="-1") tempS="-";
     assert(!(tempS=="0"));
-    out<< tempS;
+    out << tempS;
     if (!useLatex)
     { theRoots.TheObjects[i].ElementToString(tempS);
       out << "(" << tempS << ")";
@@ -16887,7 +16883,7 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
     if (useLatex)
     { out << " }";
       if(i!=kComponents.size-1)
-        out <<" & ";
+        out << " & ";
     }
   }
   if (useLatex)
@@ -26416,7 +26412,6 @@ void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, bool
   output=out.str();
 }
 
-
 void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
 { switch(this->intValue)
   { case Parser::functionGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
@@ -26434,6 +26429,9 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionEmbedding: this->EvaluatePrintEmbedding(theGlobalVariables); break;
     case Parser::functionPrintRootSystem: this->EvaluatePrintRootSystem(theGlobalVariables); break;
     case Parser::functionOrder: this->EvaluateOrder(theGlobalVariables); break;
+    case Parser::functionActByWeyl: this->EvaluateWeylAction(theGlobalVariables); break;
+    case Parser::functionActByAffineWeyl: this->EvaluateWeylRhoAction(theGlobalVariables); break;
+    case Parser::functionPrintWeylGroup: this->EvaluatePrintWeyl(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26457,6 +26455,28 @@ void ParserNode::EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables)
   std::stringstream out, out2;
   theModule.InduceFromEmbedding(out2, this->owner->theHmm, theGlobalVariables);
   out << out2.str();
+  this->outputString=out.str();
+  this->ExpressionType=this->typeString;
+}
+
+void ParserNode::EvaluatePrintWeyl(GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  WeylGroup& theWeyl=this->owner->theHmm.theRange.theWeyl;
+  theWeyl.ComputeWeylGroup(51840);
+  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">" << this->owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) << "</div>Root system:";
+  out << "<br>Size of Weyl group by formula: " << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ElementToString();
+  out << "<br>Explicitly computed elements: " << theWeyl.size;
+  out << "<br>Each element is parametrized by a list of simple reflections. <br>For example an element parametrized by 1,2 corresponds to the element <span class=\"math\">s_{\\alpha_1}s_{\\alpha_2}</span>,";
+  out << " where <span class=\"math\">s_{\\beta}</span> is the reflection with respect to <span class=\"math\">\\beta</span> and <span class=\"math\">\\alpha_i</span> is the i^th simple root";
+  for (int i=0; i<theWeyl.size; i++)
+  { ElementWeylGroup& current=theWeyl.TheObjects[i];
+    out << "<br>";
+    if (current.size==0)
+      out << "id";
+    else
+      for (int j=0; j<current.size; j++)
+        out << current.TheObjects[j]+1 << ",";
+  }
   this->outputString=out.str();
   this->ExpressionType=this->typeString;
 }
@@ -26706,9 +26726,24 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddObjectOnTop(this->functionEmbedding);
     return true;
   }
+  if (input=="actByWeylAffine")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionActByAffineWeyl);
+    return true;
+  }
+  if (input=="actByWeyl")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionActByWeyl);
+    return true;
+  }
   if (input=="printDecomposition")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
     this->ValueBuffer.AddObjectOnTop(this->functionPrintDecomposition);
+    return true;
+  }
+  if (input=="printWeylGroup")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(this->functionPrintWeylGroup);
     return true;
   }
   if (input=="printRootSystem")

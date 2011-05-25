@@ -35,7 +35,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4( std::stringstream& output);
 extern void static_html3( std::stringstream& output);
 
-const double MaxAllowedComputationTimeInSeconds=200000;
+const double MaxAllowedComputationTimeInSeconds=20;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -128,6 +128,9 @@ int main(int argc, char **argv)
   //civilizedInput="1/x_1*(1-1)";
   //civilizedInput="secretSauceOrdered";
   //civilizedInput="slTwoInSlN(2,2)";
+//  theParser.DefaultWeylLetter='E';
+//  theParser.DefaultWeylRank=6;
+//  civilizedInput="actByWeylAffine(x_1,x_2,x_3,x_4,x_5,x_6)";
   //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;
@@ -217,7 +220,7 @@ int main(int argc, char **argv)
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
   std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td></td><td>";
-  std::cout << " <img src=\"../karlin.gif\" width=\"46\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
+  std::cout << " <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
   std::cout << "</td><tr valign=\"top\">\n<td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
   std::stringstream tempStream4;

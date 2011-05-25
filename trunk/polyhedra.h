@@ -2470,7 +2470,7 @@ public:
   bool HasACommonPointWithPositiveTwoToTheNth_ant();
   void Assign(const affineHyperplane& right){ this->affinePoint.Assign(right.affinePoint); this->normal.Assign(right.normal); };
   inline void operator=(const affineHyperplane& right){this->Assign(right); };
-  inline bool operator==(const affineHyperplane& right);
+  bool operator==(const affineHyperplane& right);
 };
 
 class affineHyperplanes: public List<affineHyperplane>
@@ -3411,6 +3411,9 @@ public:
   void ConvertHasZeroPolyToPermanentlyZero();
   void AddWeylChamberWallsToHyperplanes(GlobalVariables& theGlobalVariables, WeylGroup& theWeylGroup);
   bool IsSurelyOutsideGlobalCone(rootsCollection& TheVertices);
+  void GetAffineWallImage
+  (int indexWeylElement, WallData& input, affineHyperplane& output, GlobalVariables& theGlobalVariables)
+  ;
   int FindVisibleChamberWithDisplayNumber(int inputDisplayNumber);
   void SliceTheEuclideanSpace(root* theIndicatorRoot, GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace);
   void SliceTheEuclideanSpace(GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace);
@@ -3458,6 +3461,9 @@ public:
   void MakeStartingChambersDontSpanEntireSpace(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
   void ComputeNextIndexToSlice(root& direction);
   void ComputeVerticesFromNormals(GlobalVariables& theGlobalVariables);
+  bool oneStepChamberSlice
+  (GlobalVariables& theGlobalVariables)
+  ;
   void SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
   void SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
   void SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables);
@@ -6466,6 +6472,13 @@ public:
 
 class WeylGroup: public HashedList<ElementWeylGroup>
 {
+  Matrix<int> CartanSymmetricIntBuffer;
+  void UpdateIntBuffer()
+  { this->CartanSymmetricIntBuffer.init(this->CartanSymmetric.NumRows, this->CartanSymmetric.NumCols);
+    for (int i=0; i<this->CartanSymmetric.NumRows; i++)
+      for (int j=0; j<this->CartanSymmetric.NumCols; j++)
+        this->CartanSymmetricIntBuffer.elements[i][j]=this->CartanSymmetric.elements[i][j].NumShort;
+  }
 public:
   std::string DebugString;
   MatrixLargeRational CartanSymmetric;
@@ -6522,12 +6535,25 @@ public:
   void ReadFromFile(std::fstream& input);
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
+  template <class Element>
+  void ActOn
+  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
+  { for (int i=0; i<this->TheObjects[index].size; i++)
+      this->SimpleReflection(this->TheObjects[index].TheObjects[i], theVector, RhoAction, UseMinusRho, theRingZero);
+  }
+  template <class Element>
+  void ActOnDual(int index,Vector<Element>& theVector, bool RhoAction, const Element& theRingZero)
+  ;
   //theRoot is a list of the simple coordinates of the root
   //theRoot serves as both input and output
   void ActOnRootAlgByGroupElement(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
   void ActOnRootByGroupElement(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
   void ActOnDualSpaceElementByGroupElement(int index, root& theDualSpaceElement, bool RhoAction);
   void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
+  template <class Element>
+  void SimpleReflection
+  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
+  ;
   void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
   bool IsPositiveOrPerpWRTh(const root& input, const root& theH){ return this->RootScalarCartanRoot(input, theH).IsNonNegative(); }
@@ -6542,7 +6568,32 @@ public:
   void TransformToSimpleBasisGenerators(roots& theGens);
   void TransformToSimpleBasisGeneratorsWRTh(roots& theGens, root& theH);
   int length(int index);
+  void operator=(const WeylGroup& other){this->Assign(other);}
 };
+
+template <class Element>
+void WeylGroup::SimpleReflection
+  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
+{ Element alphaShift, tempRat;
+  alphaShift=theRingZero;
+  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  { tempRat.Assign(theVector.TheObjects[i]);
+    tempRat*=(this->CartanSymmetric.elements[index][i]*(-2));
+    alphaShift+=(tempRat);
+  }
+  if (this->flagAnErrorHasOcurredTimeToPanic)
+  { std::string tempS;
+    alphaShift.ElementToString(tempS);
+  }
+  alphaShift/=(this->CartanSymmetric.elements[index][index]);
+  if (RhoAction)
+  { if(UseMinusRho)
+      alphaShift+=(1);
+    else
+      alphaShift+=(-1);
+  }
+  theVector.TheObjects[index]+=(alphaShift);
+}
 
 class ReflectionSubgroupWeylGroup: public HashedList<ElementWeylGroup>
 {
@@ -8215,12 +8266,19 @@ class ParserNode
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
+  void EvaluateWeylAction(GlobalVariables& theGlobalVariables){this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
+  void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
+  void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
+  void EvaluateWeylAction
+  (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
+  ;
   void EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables);
+  void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
   void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
@@ -8245,6 +8303,7 @@ class ParserNode
 };
 
 //the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
+
 class Parser: public List<ParserNode>
 {
 public:
@@ -8266,11 +8325,12 @@ public:
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
-    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument
+    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
   };
   enum functionList
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
-    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN
+    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
+    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

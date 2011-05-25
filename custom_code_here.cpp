@@ -92,13 +92,20 @@ void CombinatorialChamberContainer::TransformToWeylProjective
   this->ElementToString(tempS);
   this->log << "\nWeyl chamber: " << this->WeylChamber.ElementToString() << "\n";
   this->log << tempS;
+  affineHyperplane wallToSliceWith;
+  for (int k=0; k<this->AmbientWeyl.GetElement().size; k++)
+    for (int i=0; i<this->size; i++)
+      if (this->TheObjects[i]!=0)
+        for (int j=0; j<this->TheObjects[i]->Externalwalls.size; j++)
+        { this->GetAffineWallImage(k, this->TheObjects[i]->Externalwalls.TheObjects[j], wallToSliceWith, theGlobalVariables);
+          this->AffineWallsOfWeylChambers.AddObjectOnTopNoRepetitionOfObjectHash(wallToSliceWith);
+        }
   this->AmbientDimension=this->AmbientDimension*2+1;
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
       this->TheObjects[i]->TransformToWeylProjective(*this, theGlobalVariables);
   this->ElementToString(tempS);
   this->log << tempS;
-
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=this->log.str();
   theGlobalVariables.MakeReport();
@@ -150,4 +157,79 @@ void CombinatorialChamber::ElementToInequalitiesString(std::string& output, Comb
   if (useLatex)
     out << "\\end{eqnarray*}";
   output=out.str();
+}
+
+bool CombinatorialChamberContainer::oneStepChamberSlice(GlobalVariables& theGlobalVariables)
+{ if (this->PreferredNextChambers.size==0 && this->NumAffineHyperplanesProcessed  < this->NewHyperplanesToSliceWith.size)
+    this->NumAffineHyperplanesProcessed++;
+  if (!(this->NumAffineHyperplanesProcessed  < this->NewHyperplanesToSliceWith.size))
+  { this->flagDrawingProjective=false;
+    this->ProjectToDefaultAffineSpace(theGlobalVariables);
+    this->ComputeDebugString();
+    return false;
+  }
+  if (this->PreferredNextChambers.size==0)
+    this->SliceWithAWallInit(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
+  else
+    this->SliceWithAWallOneIncrement(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
+  return true;
+}
+
+void CombinatorialChamberContainer::GetAffineWallImage
+  (int indexWeylElement, WallData& input, affineHyperplane& output, GlobalVariables& theGlobalVariables)
+{ WeylGroup& currentWeyl=this->AmbientWeyl.GetElement();
+  root tempRoot;
+  tempRoot.MakeZero(this->AmbientDimension);
+  Rational tempRat; tempRat.MakeZero();
+  currentWeyl.ActOn(indexWeylElement, tempRoot, true, true, tempRat);
+  output.MakeFromNormalAndPoint(tempRoot, input.normal);
+}
+
+void ParserNode::EvaluateWeylAction
+  (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
+{ if (this->children.size!=1)
+  { this->SetError(this->errorProgramming);
+    return;
+  }
+  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
+  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
+  Vector<RationalFunction> theWeight;
+  if (theHmm.theRange.GetRank()>1)
+  { if (!theArgument.ConvertChildrenToType(this->typeRationalFunction, theGlobalVariables)|| theHmm.theRange.GetRank()!=theArgument.children.size)
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    }
+    int theDimension=theArgument.children.size;
+    theWeight.SetSize(theDimension);
+    for (int i=0; i<theDimension; i++)
+    { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
+      theWeight.TheObjects[i]=current.ratFunction.GetElement();
+    }
+  } else
+    if (!theArgument.ConvertToType(this->typeRationalFunction, theGlobalVariables))
+    { this->SetError(this->errorBadOrNoArgument);
+      return;
+    } else
+    { theWeight.SetSize(1);
+      theWeight.TheObjects[0]=theArgument.ratFunction.GetElement();
+    }
+  std::stringstream out;
+  theHmm.theRange.theWeyl.ComputeWeylGroup(51840);
+  if (theHmm.theRange.theWeyl.size>=51840)
+    out << "Only the first 51840 elements have been computed. <br> If you want a larger computation <br> please use the C++ code directly.";
+  out << "Number of elements: " << theHmm.theRange.theWeyl.size << "<br>";
+  Vector<RationalFunction> theOrbitElement;
+  RationalFunction RFZero;
+  RFZero.Nullify(this->owner->NumVariables, &theGlobalVariables);
+  for (int i=0; i<theHmm.theRange.theWeyl.size; i++)
+  { theOrbitElement=theWeight;
+    if (!DualAction)
+      theHmm.theRange.theWeyl.ActOn<RationalFunction>(i, theOrbitElement, useRho, useMinusRho, RFZero);
+    else
+    {
+    }
+    out << theOrbitElement.ElementToString() << "<br>";
+  }
+  this->outputString=out.str();
+  this->ExpressionType=this->typeString;
 }

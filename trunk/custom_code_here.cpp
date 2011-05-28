@@ -23,10 +23,10 @@
 
 void ComputationSetup::ComputeCharaterFormulas(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { if (inputData.thePartialFraction.theChambers.flagSliceWithAWallInitDone)
-    inputData.thePartialFraction.theChambers.incrementCharacterComputation(theGlobalVariables);
+    while (inputData.thePartialFraction.theChambers.oneStepChamberSlice(theGlobalVariables)){}
   else
   { WeylGroup A2test;
-    A2test.MakeAn(2);
+    A2test.MakeArbitrary('G', 2);
     A2test.ComputeRho(true);
     inputData.thePartialFraction.theChambers.initCharacterComputation(A2test, A2test.RootsOfBorel, theGlobalVariables);
   }
@@ -48,6 +48,7 @@ void CombinatorialChamberContainer::initCharacterComputation
   tempRoots.AssignMatrixRows(tempMat);
   this->WeylChamber.ComputeFromDirections(tempRoots, theGlobalVariables, theWeyl.GetDim());
   this->TransformToWeylProjective(theGlobalVariables);
+  this->NumAffineHyperplanesProcessed=-1;
 }
 
 void WallData::TransformToWeylProjective
@@ -62,26 +63,33 @@ void WallData::TransformToWeylProjective
   this->normal=tempRoot;
 }
 
+void CombinatorialChamberContainer::GetWeylChamberWallsForCharacterComputation(roots& output)
+{ output.SetSize(this->WeylChamber.size+1);
+  int startingDimension=(this->AmbientDimension-1)/2;
+  for (int i=0; i<this->WeylChamber.size; i++)
+  { output.TheObjects[i].MakeZero(this->AmbientDimension);
+    for(int j=0; j<startingDimension; j++)
+      output.TheObjects[i].TheObjects[startingDimension+j]=this->WeylChamber.TheObjects[i].TheObjects[j];
+    output.TheObjects[i].ComputeDebugString();
+  }
+  output.LastObject()->MakeZero(this->AmbientDimension);
+  *output.LastObject()->LastObject()=1;
+}
+
 void CombinatorialChamber::TransformToWeylProjective
   (CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<this->Externalwalls.size; i++)
     this->Externalwalls.TheObjects[i].TransformToWeylProjective(owner, theGlobalVariables);
   WallData newWall;
-  int startingDimension=(owner.AmbientDimension-1)/2;
   this->Externalwalls.MakeActualSizeAtLeastExpandOnTop(owner.WeylChamber.size+this->Externalwalls.size);
-  for (int i=0; i<owner.WeylChamber.size; i++)
-  { newWall.normal.MakeZero(startingDimension*2+1);
-    for(int j=0; j<startingDimension; j++)
-      newWall.normal.TheObjects[startingDimension+j]=owner.WeylChamber.TheObjects[i].TheObjects[j];
+  roots newExternalWalls;
+  owner.GetWeylChamberWallsForCharacterComputation(newExternalWalls);
+  for (int i=0; i<newExternalWalls.size; i++)
+  { newWall.normal=newExternalWalls.TheObjects[i];
     this->Externalwalls.AddObjectOnTop(newWall);
   }
   this->AllVertices.size=0;
   this->ComputeVerticesFromNormals(owner, theGlobalVariables);
-}
-
-void CombinatorialChamberContainer::incrementCharacterComputation
-  (GlobalVariables& theGlobalVariables)
-{
 }
 
 void CombinatorialChamberContainer::TransformToWeylProjective
@@ -92,18 +100,47 @@ void CombinatorialChamberContainer::TransformToWeylProjective
   this->ElementToString(tempS);
   this->log << "\nWeyl chamber: " << this->WeylChamber.ElementToString() << "\n";
   this->log << tempS;
-  affineHyperplane wallToSliceWith;
+  this->NewHyperplanesToSliceWith.size=0;
+  this->theHyperplanes.size=0;
+  root wallToSliceWith;
+//  roots oldDirections;
   for (int k=0; k<this->AmbientWeyl.GetElement().size; k++)
     for (int i=0; i<this->size; i++)
       if (this->TheObjects[i]!=0)
         for (int j=0; j<this->TheObjects[i]->Externalwalls.size; j++)
         { this->GetAffineWallImage(k, this->TheObjects[i]->Externalwalls.TheObjects[j], wallToSliceWith, theGlobalVariables);
-          this->AffineWallsOfWeylChambers.AddObjectOnTopNoRepetitionOfObjectHash(wallToSliceWith);
+//          if (k==0)
+//            oldDirections.AddOnBottomNoRepetition(wallToSliceWith);
+          wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+          if (k>0)
+            this->NewHyperplanesToSliceWith.AddOnTopNoRepetition(wallToSliceWith);
+          this->theHyperplanes.AddObjectOnTopNoRepetitionOfObjectHash(wallToSliceWith);
         }
+  this->log << "\n Affine walls to slice with:";
+  for (int i=0; i<this->NewHyperplanesToSliceWith.size; i++)
+    this->log << "\n" << this->NewHyperplanesToSliceWith.TheObjects[i].ElementToString();
+  this->log << "\n";
   this->AmbientDimension=this->AmbientDimension*2+1;
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
-      this->TheObjects[i]->TransformToWeylProjective(*this, theGlobalVariables);
+    { this->TheObjects[i]->TransformToWeylProjective(*this, theGlobalVariables);
+//      theVertices.AddRootSnoRepetition(this->TheObjects[i]->AllVertices);
+    }
+  //this->startingCones.initFromDirections()
+  root tempRoot;
+  for (int i=0; i<this->TheGlobalConeNormals.size; i++)
+  { tempRoot.MakeZero(this->AmbientDimension);
+    int startingDim=this->TheGlobalConeNormals.TheObjects[i].size;
+    for (int j=0; j<startingDim; j++)
+    { tempRoot.TheObjects[j]=this->TheGlobalConeNormals.TheObjects[i].TheObjects[j];
+      tempRoot.TheObjects[j+startingDim]=-tempRoot.TheObjects[j];
+    }
+    this->TheGlobalConeNormals.TheObjects[i]=tempRoot;
+  }
+  roots tempRoots;
+  this->GetWeylChamberWallsForCharacterComputation(tempRoots);
+  this->TheGlobalConeNormals.AddListOnTop(tempRoots);
+  this->log << "the global cone normals: " << this->TheGlobalConeNormals.ElementToString();
   this->ElementToString(tempS);
   this->log << tempS;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -160,29 +197,61 @@ void CombinatorialChamber::ElementToInequalitiesString(std::string& output, Comb
 }
 
 bool CombinatorialChamberContainer::oneStepChamberSlice(GlobalVariables& theGlobalVariables)
-{ if (this->PreferredNextChambers.size==0 && this->NumAffineHyperplanesProcessed  < this->NewHyperplanesToSliceWith.size)
-    this->NumAffineHyperplanesProcessed++;
-  if (!(this->NumAffineHyperplanesProcessed  < this->NewHyperplanesToSliceWith.size))
+{ if (this->PreferredNextChambers.size==0 && this->NumAffineHyperplanesProcessed<this->NewHyperplanesToSliceWith.size)
+  this->NumAffineHyperplanesProcessed++;
+  if (!(this->NumAffineHyperplanesProcessed < this->NewHyperplanesToSliceWith.size))
   { this->flagDrawingProjective=false;
-    this->ProjectToDefaultAffineSpace(theGlobalVariables);
+//    this->ProjectToDefaultAffineSpace(theGlobalVariables);
     this->ComputeDebugString();
     return false;
   }
   if (this->PreferredNextChambers.size==0)
-    this->SliceWithAWallInit(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
+    this->SliceWithAWallInitSimple(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
   else
     this->SliceWithAWallOneIncrement(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
+  std::stringstream out;
+  this->ComputeDebugString();
+  out << "Next chamber to slice: " << this->indexNextChamberToSlice;
+  out << "Preferred next chambers:  ";
+  for (int i=0; i<this->PreferredNextChambers.size; i++)
+    out << this->PreferredNextChambers.TheObjects[i] << ",";
+  out << "\nProcessed hyperplanes: " << this->NumAffineHyperplanesProcessed  << " out of " << this->NewHyperplanesToSliceWith.size << "\n";
+  out << this->DebugString;
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.MakeReport();
   return true;
 }
 
 void CombinatorialChamberContainer::GetAffineWallImage
-  (int indexWeylElement, WallData& input, affineHyperplane& output, GlobalVariables& theGlobalVariables)
+  (int indexWeylElement, WallData& input, root& output, GlobalVariables& theGlobalVariables)
 { WeylGroup& currentWeyl=this->AmbientWeyl.GetElement();
-  root tempRoot;
-  tempRoot.MakeZero(this->AmbientDimension);
-  Rational tempRat; tempRat.MakeZero();
-  currentWeyl.ActOn(indexWeylElement, tempRoot, true, true, tempRat);
-  output.MakeFromNormalAndPoint(tempRoot, input.normal);
+  Vector<PolynomialRationalCoeff> tempRoot;
+  PolynomialRationalCoeff tempP, PZero;
+  PZero.Nullify(this->AmbientDimension);
+  tempRoot.SetSize(this->AmbientDimension);
+  for (int i=0; i<this->AmbientDimension; i++)
+  { tempP.MakeMonomialOneLetter(this->AmbientDimension, i, 1, (Rational) 1);
+    tempRoot.TheObjects[i]=tempP;
+  }
+  this->log << "\nConverting: " << input.normal.ElementToString() << ". Action of element " << indexWeylElement << " on " << tempRoot.ElementToString();
+  currentWeyl.ActOn(indexWeylElement, tempRoot, true, true, PZero);
+  this->log << ": " << tempRoot.ElementToString();
+  output.MakeZero(this->AmbientDimension*2+1);
+  for (int i=0; i<this->AmbientDimension; i++)
+  { output.TheObjects[i]=input.normal.TheObjects[i];
+    PolynomialRationalCoeff& tempP=tempRoot.TheObjects[i];
+    for (int j=0; j< tempP.size; j++)
+    { Monomial<Rational>& tempMon=tempP.TheObjects[j];
+      int theVarIndex;
+      if (tempMon.IsAConstant())
+        (*output.LastObject())+=-tempMon.Coefficient*output.TheObjects[i];
+      else
+      { if (!tempMon.IsOneLetterFirstDegree(theVarIndex))
+          assert(false);
+        output.TheObjects[theVarIndex+this->AmbientDimension]+=-tempMon.Coefficient*output.TheObjects[i];
+      }
+    }
+  }
 }
 
 void ParserNode::EvaluateWeylAction
@@ -232,4 +301,78 @@ void ParserNode::EvaluateWeylAction
   }
   this->outputString=out.str();
   this->ExpressionType=this->typeString;
+}
+
+void CombinatorialChamberContainer::SliceWithAWallInitSimple(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
+{ this->flagMakingASingleHyperplaneSlice=true;
+  this->flagSliceWithAWallInitDone=false;
+  this->PurgeZeroPointers();
+  this->PreferredNextChambers.size=0;
+  this->LabelAllUnexplored();
+  this->PreferredNextChambers.size=0;
+  for (int i=0; i<this->size; i++)
+    if (this->TheObjects[i]!=0)
+      this->PreferredNextChambers.AddObjectOnTop(i);
+  this->indexNextChamberToSlice=*this->PreferredNextChambers.LastObject();
+  this->PreferredNextChambers.PopLastObject();
+  this->flagSliceWithAWallInitDone=true;
+}
+
+void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
+{ this->flagMakingASingleHyperplaneSlice=true;
+  this->flagSliceWithAWallInitDone=false;
+  this->PurgeZeroPointers();
+  this->PreferredNextChambers.size=0;
+  this->LabelAllUnexplored();
+  root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
+  if (this->flagAnErrorHasOcurredTimeToPanic)
+    TheKillerFacetNormal.ComputeDebugString();
+  for (int i=0; i<this->size; i++)
+  { if (this->flagAnErrorHasOcurredTimeToPanic)
+      this->ComputeDebugString();
+    if (this->TheObjects[i]!=0)
+    { this->indexNextChamberToSlice=i;
+      if (this->TheObjects[i]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
+      { delete this->TheObjects[i];
+#ifdef CGIversionLimitRAMuse
+  ParallelComputing::GlobalPointerCounter--;
+  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+#endif
+        this->TheObjects[i]=0;
+        break;
+      }
+    }
+  }
+  this->flagSliceWithAWallInitDone=true;
+}
+
+void CombinatorialChamberContainer::SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
+{ this->SliceWithAWallInitSimple(TheKillerFacetNormal, theGlobalVariables);
+  while (this->PreferredNextChambers.size>0)
+    this->SliceWithAWallOneIncrement(TheKillerFacetNormal, theGlobalVariables);
+  this->PurgeZeroPointers();
+  this->PurgeInternalWalls();
+}
+
+void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
+{ root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
+  if (!this->flagSliceWithAWallInitDone)
+    this->SliceWithAWallInitSimple(TheKillerFacetNormal, theGlobalVariables);
+  else
+    if(this->PreferredNextChambers.size>0)
+    { this->indexNextChamberToSlice=this->PreferredNextChambers.TheObjects[0];
+      if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]!=0)
+        if (!this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->flagExplored)
+          if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
+          { delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
+  #ifdef CGIversionLimitRAMuse
+    ParallelComputing::GlobalPointerCounter--;
+    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  #endif
+            this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
+          }
+      this->PreferredNextChambers.PopIndexShiftUp(0);
+      if (this->flagAnErrorHasOcurredTimeToPanic)
+        this->ComputeDebugString();
+    }
 }

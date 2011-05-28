@@ -202,7 +202,10 @@ bool CombinatorialChamberContainer::oneStepChamberSlice(GlobalVariables& theGlob
   if (!(this->NumAffineHyperplanesProcessed < this->NewHyperplanesToSliceWith.size))
   { this->flagDrawingProjective=false;
 //    this->ProjectToDefaultAffineSpace(theGlobalVariables);
+    std::stringstream out;
     this->ComputeDebugString();
+    out << this->DebugString;
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
     return false;
   }
   if (this->PreferredNextChambers.size==0)
@@ -210,13 +213,14 @@ bool CombinatorialChamberContainer::oneStepChamberSlice(GlobalVariables& theGlob
   else
     this->SliceWithAWallOneIncrement(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
   std::stringstream out;
-  this->ComputeDebugString();
+//  this->ComputeDebugString();
   out << "Next chamber to slice: " << this->indexNextChamberToSlice;
   out << "Preferred next chambers:  ";
   for (int i=0; i<this->PreferredNextChambers.size; i++)
     out << this->PreferredNextChambers.TheObjects[i] << ",";
   out << "\nProcessed hyperplanes: " << this->NumAffineHyperplanesProcessed  << " out of " << this->NewHyperplanesToSliceWith.size << "\n";
-  out << this->DebugString;
+  out << "Number of chamber pointers (including zero pointers): " << this->size;
+//  out << this->DebugString;
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
   return true;

@@ -623,6 +623,7 @@ void CGIspecificRoutines::clearDollarSigns(std::string& theString, std::string& 
       out << theString[i];
   output=out.str();
 }
+
 void CGIspecificRoutines::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
@@ -632,6 +633,7 @@ void CGIspecificRoutines::subEqualitiesWithSimeq(std::string& theString, std::st
       out << "\\simeq ";
   output=out.str();
 }
+
 void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2, unsigned long thePenStyle, int r, int g, int b)
 { if (thePenStyle!=DrawingVariables::PenStyleInvisible)
   { //do not add extra spaces in the following string! we use the fact that the string is one piece later in the code with the stringstream::operator>>
@@ -898,7 +900,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
     output.flagExecuteSystemCommandsCGIapplication=false;
     output.flagCGIRecomputeAll = true;
     for (int i=0; i<2; i++)
-    { tempStream1>> tempS;
+    { tempStream1 >> tempS;
       if (tempS=="checkUsePNG")
         output.flagExecuteSystemCommandsCGIapplication=true;
       if (tempS=="checkUseDatabase")
@@ -936,7 +938,7 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
     }
   }
   if (!CGIspecificRoutines::CheckForInputSanity(output))
-  { std::cout << "<br><b>Bad input:</b> " <<   inputBad << "<br>\n";
+  { std::cout << "<br><b>Bad input:</b> " << inputBad << "<br>\n";
     return CGIspecificRoutines::choiceInitAndDisplayMainPage;
   }
   tempStream >> tempS;
@@ -2315,8 +2317,8 @@ void Selection::init(int maxNumElements)
     maxNumElements=0;
   }
   if (maxNumElements>0 && maxNumElements!=this->MaxSize)
-  { delete [] selected;
-    delete [] elements;
+  { delete [] this->selected;
+    delete [] this->elements;
     //delete [] elementsInverseSelection;
     this->selected = new bool[maxNumElements];
     this->elements = new int[maxNumElements];
@@ -2351,7 +2353,6 @@ void roots::SelectionToMatrixAppend(Selection& theSelection, int OutputDimension
       output.elements[StartRowIndex+i][j].Assign(tempRoot.TheObjects[j]);
   }
 }
-
 
 void roots::ComputeDebugString()
 { this->ElementToString(this->DebugString);
@@ -2417,7 +2418,7 @@ void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bo
     out << "<table>";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS, useLaTeX);
-    if (useHtml&& makeTable)
+    if (useHtml && makeTable)
       out << "<tr><td>";
     out << tempS;
     if (!makeTable && i!=this->size-1)
@@ -2427,7 +2428,7 @@ void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bo
     if (useHtml && makeTable)
       out << "</td></tr>";
   }
-  if (useHtml&& makeTable)
+  if (useHtml && makeTable)
     out << "</table>";
   if (useLaTeX && makeTable)
     out << "\\end{tabular}";
@@ -2507,10 +2508,10 @@ void Selection::ShrinkMaxSize()
 }
 
 void Selection::ExpandMaxSize()
-{ elements[CardinalitySelection]=MaxSize;
-  selected[MaxSize]=true;
-  MaxSize++;
-  CardinalitySelection++;
+{ this->elements[this->CardinalitySelection]=this->MaxSize;
+  this->selected[this->MaxSize]=true;
+  this->MaxSize++;
+  this->CardinalitySelection++;
 }
 
 void Selection::ComputeDebugString()
@@ -2518,9 +2519,9 @@ void Selection::ComputeDebugString()
 }
 
 void Selection::WriteToFile(std::fstream& output)
-{ output<<"Sel_max_size: " << this->MaxSize<<" cardinality: "<< this->CardinalitySelection<<" ";
+{ output << "Sel_max_size: " << this->MaxSize << " cardinality: " << this->CardinalitySelection << " ";
   for (int i=0; i<this->CardinalitySelection; i++)
-    output << this->elements[i]<<" ";
+    output << this->elements[i] << " ";
 }
 
 void Selection::ReadFromFile(std::fstream& input)
@@ -3732,7 +3733,7 @@ bool CombinatorialChamber::IsABogusNeighbor(WallData& NeighborWall, Combinatoria
   return true;
 }
 
-bool CombinatorialChamber::LinearAlgebraForVertexComputation(Selection& theSelection,  root& output, GlobalVariables& theGlobalVariables, int theDimension)
+bool CombinatorialChamber::LinearAlgebraForVertexComputation(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension)
 { output.SetSize(theDimension);
   assert(theDimension -1== theSelection.CardinalitySelection);
   MatrixLargeRational& RMinus1ByR=theGlobalVariables.matLinearAlgebraForVertexComputation;
@@ -3910,7 +3911,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
     tempBool=LocalLinearAlgebra.AddRootNoRepetition(Externalwalls.TheObjects[i].normal);
     if(!output.startingCones.theFacets.ContainsObjectHash(*LocalLinearAlgebra.LastObject()))
     { LocalLinearAlgebra.LastObject()->MinusRoot();
-      assert(output.startingCones.theFacets.ContainsObjectHash(*LocalLinearAlgebra.LastObject()));
+ //     assert(output.startingCones.theFacets.ContainsObjectHash(*LocalLinearAlgebra.LastObject()));
     }
     if (!tempBool)
       this->ComputeDebugString(output);
@@ -3918,7 +3919,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   }
   if (output.flagAnErrorHasOcurredTimeToPanic)
     theKillerPlaneNormal.ComputeDebugString();
-   LocalLinearAlgebra.AddRoot(theKillerPlaneNormal);
+  LocalLinearAlgebra.AddRoot(theKillerPlaneNormal);
   theSelection.init(LocalLinearAlgebra.size);
   int NumCandidates = MathRoutines::NChooseK(LocalLinearAlgebra.size, output.AmbientDimension-1);
   LocalContainerPlusVertices.SetSize(LocalLinearAlgebra.size);
@@ -3960,10 +3961,15 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   }
   if (!(hasPositive && hasNegative) || foundBad)
   { if (output.flagMakingASingleHyperplaneSlice && output.flagSliceWithAWallInitDone)
-    { if (hasPositive)
-        this->PropagateSlicingWallThroughNonExploredNeighbors(theKillerPlaneNormal, LocalContainerMinusVertices, output, theGlobalVariables);
-      else
-        this->PropagateSlicingWallThroughNonExploredNeighbors(theKillerPlaneNormal, LocalContainerPlusVertices, output, theGlobalVariables);
+    { //Note: this code needs review. Disabled it to simplify the scheme. I need to consider whether the
+      //old scheme which is now commented out actually saves time or not.
+      //if (hasPositive)
+      //  this->PropagateSlicingWallThroughNonExploredNeighbors(theKillerPlaneNormal, LocalContainerMinusVertices, output, theGlobalVariables);
+      //else
+      //  this->PropagateSlicingWallThroughNonExploredNeighbors(theKillerPlaneNormal, LocalContainerPlusVertices, output, theGlobalVariables);
+      //there is something wrong here: the below line seems logical, but contradicts the following comment, which I wrote long ago
+      // and I really don't remember why I wrote it and what was the issue...
+      this->flagExplored=true;
       //Note: this line here is forbidden! this->flagExplored=true; There is no guarantee that all neighbors have been explored at this phase of the algorithm.
     }
     return false;
@@ -3995,6 +4001,10 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   NewMinusChamber->flagHasZeroPolynomiaL = this->flagHasZeroPolynomiaL;
   NewPlusChamber->IndexStartingCrossSectionNormal = this->IndexStartingCrossSectionNormal;
   NewMinusChamber->IndexStartingCrossSectionNormal = this->IndexStartingCrossSectionNormal;
+  if (output.flagMakingASingleHyperplaneSlice)
+  { NewPlusChamber->flagExplored=true;
+    NewMinusChamber->flagExplored=true;
+  }
   output.AddChamberPointerSetUpPreferredIndices(NewPlusChamber, theGlobalVariables);
   output.AddChamberPointerSetUpPreferredIndices(NewMinusChamber, theGlobalVariables);
   if (output.flagStoringVertices)
@@ -4106,11 +4116,13 @@ void CombinatorialChamberContainer::AddWeylChamberWallsToHyperplanes(GlobalVaria
 void CombinatorialChamberContainer::AddChamberPointerSetUpPreferredIndices(CombinatorialChamber* theChamber, GlobalVariables& theGlobalVariables)
 { theChamber->IndexInOwnerComplex=this->size;
   this->AddObjectOnTop(theChamber);
-  if (!theChamber->flagPermanentlyZero)
-    this->PreferredNextChambers.AddOnTopNoRepetition(this->size-1);
-//    this->PreferredNextChambers.AddOnBottomNoRepetition(this->size-1);
-  else
-    theChamber->flagExplored=true;
+  if (!this->flagMakingASingleHyperplaneSlice)
+  { if (!theChamber->flagPermanentlyZero)
+      this->PreferredNextChambers.AddOnTopNoRepetition(this->size-1);
+  //    this->PreferredNextChambers.AddOnBottomNoRepetition(this->size-1);
+    else
+      theChamber->flagExplored=true;
+  }
 }
 
 void CombinatorialChamber::MakeNewMutualNeighbors(CombinatorialChamber* NewPlusChamber, CombinatorialChamber* NewMinusChamber, root& normal)
@@ -4127,74 +4139,10 @@ void CombinatorialChamber::MakeNewMutualNeighbors(CombinatorialChamber* NewPlusC
 //  }
 }
 
-void CombinatorialChamberContainer::SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ this->SliceWithAWallInit(TheKillerFacetNormal, theGlobalVariables);
-  while (this->PreferredNextChambers.size>0)
-    this->SliceWithAWallOneIncrement(TheKillerFacetNormal, theGlobalVariables);
-  this->PurgeZeroPointers();
-  this->PurgeInternalWalls();
-}
-
 void CombinatorialChamberContainer::PurgeInternalWalls()
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]!=0)
       this->TheObjects[i]->PurgeInternalWalls();
-}
-
-void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ this->flagMakingASingleHyperplaneSlice=true;
-  this->flagSliceWithAWallInitDone=false;
-  this->PurgeZeroPointers();
-  this->PreferredNextChambers.size=0;
-  this->LabelAllUnexplored();
-  root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
-  if (this->flagAnErrorHasOcurredTimeToPanic)
-    TheKillerFacetNormal.ComputeDebugString();
-  for (int i=0; i<this->size; i++)
-  { if (this->flagAnErrorHasOcurredTimeToPanic)
-      this->ComputeDebugString();
-    if (this->TheObjects[i]!=0)
-    { if (this->TheObjects[i]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
-      { delete this->TheObjects[i];
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
-#endif
-        this->TheObjects[i]=0;
-        break;
-      }
-    }
-  }
-  if (this->PreferredNextChambers.size>0)
-    this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
-  else
-    this->indexNextChamberToSlice=-1;
-  this->flagSliceWithAWallInitDone=true;
-}
-
-void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
-  if (!this->flagSliceWithAWallInitDone)
-    this->SliceWithAWallInit(TheKillerFacetNormal, theGlobalVariables);
-  else
-    if(this->PreferredNextChambers.size>0)
-    { if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]!=0)
-        if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
-        { delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
-#endif
-          this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
-        }
-      this->PreferredNextChambers.PopIndexShiftUp(0);
-      if (this->flagAnErrorHasOcurredTimeToPanic)
-        this->ComputeDebugString();
-    }
-  if (this->PreferredNextChambers.size>0)
-    this->indexNextChamberToSlice= this->PreferredNextChambers.TheObjects[0];
-  else
-    this->indexNextChamberToSlice=-1;
 }
 
 bool CombinatorialChamberContainer::IsSurelyOutsideGlobalCone(rootsCollection& TheVertices)
@@ -4397,8 +4345,7 @@ void CombinatorialChamberContainer::ElementToString(std::string& output, bool us
     endOfLine="\n";
 //  this->PurgeZeroPointers();
   if (useHtml)
-  { out << "<html><title> Chambers </title><body>";
-  }
+    out << "<html><title> Chambers </title><body>";
   out << "Number of visible chambers: " << this->LabelChambersForDisplayAndGetNumVisibleChambers() << endOfLine;
   if (this->AffineWallsOfWeylChambers.size>0)
   { int tempI=this->LabelChambersAndGetNumChambersInWeylChamber(this->WeylChamber);

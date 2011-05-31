@@ -2445,7 +2445,7 @@ public:
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, CombinatorialChamberContainer& owner);
   void TransformToWeylProjective
-  (CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
+  (GlobalVariables& theGlobalVariables)
   ;
   WallData(){this->flagIsClosed=true;}
 };
@@ -3170,7 +3170,8 @@ public:
 
 template<class Object>
 void ListPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
-{ if (increase<=0){return; }
+{ if (increase<=0)
+    return;
   if (this->ActualSize<this->size+increase)
   { Object** newArray= new Object*[this->size+increase];
 #ifdef CGIversionLimitRAMuse
@@ -3503,6 +3504,9 @@ public:
   void drawFacetVerticesMethod2(DrawingVariables& TDV, roots& r, roots& directions, int ChamberIndex, WallData& TheFacet, int DrawingStyle, int DrawingStyleDashes, std::fstream* outputLatex);
   bool TestPossibleIndexToSlice(root& direction, int index);
   void ComputeNonConvexActualChambers(GlobalVariables& theGlobalVariables);
+  void initComplexPullbackWithAffineTranslates
+  (WeylGroup& inputWeyl, roots& inputWeights, GlobalVariables& theGlobalVariables)
+  ;
   void initCharacterComputation
   (WeylGroup& inputWeyl, roots& inputWeights, GlobalVariables& theGlobalVariables)
   ;
@@ -4451,7 +4455,7 @@ public:
   void ClearDenominators
   (RationalFunction& outputWasMultipliedBy)
   ;
-  void MultiplyBy(const RationalFunction& other){this->operator*=(other);};
+  void MultiplyBy(const RationalFunction& other){this->operator*=(other);}
   void Add(const RationalFunction& other)
   { assert(this->NumVars==other.NumVars);
     assert(this->checkConsistency());
@@ -5255,7 +5259,8 @@ int TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::
 //  std::string tempS;
   tempS= out.str();
   if (tempS.size()!=0)
-    if (tempS[0]=='+'){tempS.erase(0, 1); }
+    if (tempS[0]=='+')
+      tempS.erase(0, 1);
   if (PolyFormat.UsingLatexFormat)
     if (tempS[LatexBeginString.size()]=='+')
       tempS.erase(LatexBeginString.size(), 1);
@@ -6401,7 +6406,7 @@ public:
     this->RationalPart.CopyFromBase(p.RationalPart);
   }
   void ReleaseMemory();
-  void operator=(OneVarIntPolynomial& p){this->Assign(p); };
+  void operator=(OneVarIntPolynomial& p){this->Assign(p); }
   void FitSize();
   static void SetSizeAtLeastInitProperly(List<int>& theArray, int desiredSize);
 };
@@ -6551,6 +6556,7 @@ public:
   void SimpleReflection
   (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
   ;
+  void GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatrix);
   void SimpleReflectionDualSpace(int index, root& DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialsRationalCoeff& theRoot, bool RhoAction);
   bool IsPositiveOrPerpWRTh(const root& input, const root& theH){ return this->RootScalarCartanRoot(input, theH).IsNonNegative(); }
@@ -6908,7 +6914,7 @@ public:
   void ComputeKModules();
   void ComputeHighestWeightInTheSameKMod(root& input, root& outputHW);
   void ComputeExtremeWeightInTheSameKMod(root& input, root& outputW, bool lookingForHighest);
-  inline void operator=(const rootSubalgebra& right){this->Assign(right); };
+  inline void operator=(const rootSubalgebra& right){this->Assign(right); }
   void Assign(const rootSubalgebra& right);
   void ComputeLowestWeightInTheSameKMod(root& input, root& outputLW);
   void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
@@ -7108,9 +7114,9 @@ public:
   std::string ElementToString()const { std::string output; this->ElementToString(output, false, false); return output;}
   bool ElementToStringNeedsBracketsForMultiplication()const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
-  void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);};
+  void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);}
   std::string ElementToStringNegativeRootSpacesFirst(bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner);
-  void ComputeDebugString(bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, useHtml, useLatex, false, 0, 0);  };
+  void ComputeDebugString(bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, useHtml, useLatex, false, 0, 0);  }
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   List<Rational> coeffsRootSpaces;
@@ -7430,6 +7436,7 @@ public:
   void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
   void MakeGinGWithId(char theWeylLetter, int theWeylDim, GlobalVariables& theGlobalVariables);
   void ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables);
+  void ProjectOntoSmallCartan(roots& input, roots& output, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);}
   void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, useHtml, theGlobalVariables);}
   std::string ElementToString(GlobalVariables& theGlobalVariables){ std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS; }
@@ -7503,7 +7510,7 @@ public:
   { output.Nullify(this->Coefficient.NumVars);
     for (int i=0; i<this->generatorsIndices.size; i++)
       output.AddPolynomial(this->Powers.TheObjects[i]);
-  };
+  }
   bool GetElementUniversalEnveloping
   (ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner)
   ;
@@ -7515,8 +7522,8 @@ public:
   void Simplify(ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
   void CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
   void CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
-  MonomialUniversalEnvelopingOrdered(){this->owner=0;};
-  bool operator==(const MonomialUniversalEnvelopingOrdered& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;};
+  MonomialUniversalEnvelopingOrdered(){this->owner=0;}
+  bool operator==(const MonomialUniversalEnvelopingOrdered& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;}
   void operator*=(const MonomialUniversalEnvelopingOrdered& other);
   inline void operator=(const MonomialUniversalEnvelopingOrdered& other)
   { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
@@ -8537,6 +8544,7 @@ struct ComputationSetup
 {
 public:
   Runnable theFunctionToRun;
+  Parser theParser;
   partFractions thePartialFraction;
   QuasiPolynomial theOutput;
   rootSubalgebras theRootSubalgebras;
@@ -8635,6 +8643,7 @@ public:
   static void TestParser(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void TheG2inB3Computation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   static void ComputeCharaterFormulas(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
+  static void ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   static void TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();

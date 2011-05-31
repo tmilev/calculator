@@ -572,11 +572,11 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   tempS[2].assign(wxT("Single slice"));
   this->RBGroup1SlicingOptions= new wxRadioBox(this, this->ID_RBGroup1SliceOptions, wxT("Slicing options"), wxDefaultPosition, wxDefaultSize, 3, tempS);
   this->CheckBox3ComputeChambers= new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Compute chambers"));
-  this->CheckBox4ChamberLabels=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Chamber labels"));
-  this->CheckBox5InvisibleChambers=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Invisibles"));
+  this->CheckBox4ChamberLabels=new ::wxCheckBox(this, this->ID_CheckBoxesGraphics,wxT("Chamber labels"));
+  this->CheckBox5InvisibleChambers=new ::wxCheckBox(this, this->ID_CheckBoxesGraphics,wxT("Invisibles"));
   this->CheckBox6Dashes=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Dashes"));
   this->CheckBox7UseIndicatorForPFDecomposition=new ::wxCheckBox(this,this->ID_CheckBoxesGraphics,wxT("Make complete pf decomposition"));
-	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox(this,this->ID_CheckBox1,wxT("Act by Weyl group"));
+	this->CheckBox8DoTheWeylGroup=new ::wxCheckBox(this, this->ID_CheckBox1,wxT("Act by Weyl group"));
   //this->Spin2NumVect->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   //this->Spin1Dim->SetSize(this->DefaultButtonWidth,this->DefaultButtonHeight);
   this->Canvas1 = new ::drawCanvas(this,::wxID_ANY,::wxDefaultPosition,::wxDefaultSize,::wxEXPAND|wxALL);
@@ -600,7 +600,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Button22TestChambers= new wxButton(this, this->ID_Button22TestChambers, wxT("Test chambers algorithm (very slow, 30+min)"));
   this->Button23Experiments= new wxButton(this, this->ID_Button23Experiments, wxT("Experiments"));
   this->Button24CharacterSplitFull= new wxButton(this, this->ID_Button24CharacterComputationAll, wxT("Weyl split full"));
-  this->Button25CharacterSplitIncrement= new wxButton(this, this->ID_Button25CharacterComputationStep, wxT("Weyl split step"));
+  this->Button25CharacterSplitIncrement= new wxButton(this, this->ID_Button25CharacterComputationStep, wxT("Gen. Verma M. chambers"));
 
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
@@ -1003,7 +1003,7 @@ void guiMainWindow::onButton24(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onButton25(wxCommandEvent& ev)
-{ this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ComputeCharaterFormulas;
+{ this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ComputeGenVermaCharaterG2inB3;
   this->RunTheComputation();
 }
 

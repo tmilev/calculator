@@ -26246,6 +26246,12 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   return true;
 }
 
+void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(roots& input, roots& output, GlobalVariables& theGlobalVariables)
+{ output.SetSize(input.size);
+  for (int i=0; i<input.size; i++)
+    this->ProjectOntoSmallCartan(input.TheObjects[i], output.TheObjects[i], theGlobalVariables);
+}
+
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational invertedSmallCartan;
   invertedSmallCartan=this->theDomain.theWeyl.CartanSymmetric;

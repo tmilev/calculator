@@ -39,9 +39,13 @@ public:
   roots GmodKnegativeWeights;
   Cone PreimageWeylChamberLargerAlgebra;
   roots theTranslations;
+  roots theTranslationsProjected;
   std::stringstream log;
   void initFromHomomorphism
   (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjective
+  (WallData& output, GlobalVariables& theGlobalVariables)
   ;
   void TransformToWeylProjective
   (CombinatorialChamberContainer& output, GlobalVariables& theGlobalVariables)
@@ -50,37 +54,41 @@ public:
   (CombinatorialChamberContainer& owner, CombinatorialChamber& output, GlobalVariables& theGlobalVariables)
   ;
   void TransformToWeylProjective
-  (WallData& output, GlobalVariables& theGlobalVariables)
-  ;
-  void GetNormalLinearOperator
   (int indexOperator, root& startingNormal, root& outputNormal)
   ;
 };
 
-void GeneralizedVermaModuleCharacters::GetNormalLinearOperator
+void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   (int indexOperator, root& startingNormal, root& outputNormal)
 { MatrixLargeRational& theOperator=this->theLinearOperators.TheObjects[indexOperator];
-  root& theTranslation=this->theTranslations.TheObjects[indexOperator];
+  root& theTranslation=this->theTranslationsProjected.TheObjects[indexOperator];
   outputNormal.MakeZero(startingNormal.size+theOperator.NumCols+1);
   for (int i=0; i<startingNormal.size; i++)
-    outputNormal.TheObjects[i]=startingNormal.TheObjects[i];
-  for (int i=0; i<theOperator.NumCols; i++)
-  { *outputNormal.LastObject()-=theTranslation.TheObjects[i]*startingNormal.TheObjects[i];
-    for (int j=0; j<theOperator.NumRows; j++)
-      outputNormal.TheObjects[startingNormal.size+j]-=theOperator.elements[j][i]*startingNormal.TheObjects[i];
+  { outputNormal.TheObjects[i]=startingNormal.TheObjects[i];
+    *outputNormal.LastObject()-=theTranslation.TheObjects[i]*startingNormal.TheObjects[i];
   }
+  for (int i=0; i<theOperator.NumCols; i++)
+    for (int j=0; j<theOperator.NumRows; j++)
+      outputNormal.TheObjects[startingNormal.size+i]-=theOperator.elements[j][i]*startingNormal.TheObjects[j];
+}
+
+void GeneralizedVermaModuleCharacters::TransformToWeylProjective
+  (WallData& output, GlobalVariables& theGlobalVariables)
+{ root tempRoot=output.normal;
+  this->TransformToWeylProjective(0, tempRoot, output.normal);
 }
 
 void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   (CombinatorialChamberContainer& owner, CombinatorialChamber& output, GlobalVariables& theGlobalVariables)
 { for (int i=0; i<output.Externalwalls.size; i++)
-    output.Externalwalls.TheObjects[i].TransformToWeylProjective(theGlobalVariables);
+    this->TransformToWeylProjective(output.Externalwalls.TheObjects[i], theGlobalVariables);
   WallData newWall;
   output.Externalwalls.MakeActualSizeAtLeastExpandOnTop(this->PreimageWeylChamberLargerAlgebra.size+output.Externalwalls.size);
-for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.size; i++)
+  for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.size; i++)
   { newWall.normal=PreimageWeylChamberLargerAlgebra.TheObjects[i];
     output.Externalwalls.AddObjectOnTop(newWall);
   }
+//  output.ComputeDebugString(owner);
   output.AllVertices.size=0;
   output.ComputeVerticesFromNormals(owner, theGlobalVariables);
 }
@@ -97,13 +105,14 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   this->log << tempS;
   output.NewHyperplanesToSliceWith.size=0;
   output.theHyperplanes.size=0;
+  output.AmbientDimension=output.AmbientDimension+this->theLinearOperators.TheObjects[0].NumCols+1;
   root wallToSliceWith;
 //  roots oldDirections;
   for (int k=0; k<this->theLinearOperators.size; k++)
     for (int i=0; i<output.size; i++)
       if (output.TheObjects[i]!=0)
         for (int j=0; j<output.TheObjects[i]->Externalwalls.size; j++)
-        { this->GetNormalLinearOperator(k, output.TheObjects[i]->Externalwalls.TheObjects[j].normal, wallToSliceWith);
+        { this->TransformToWeylProjective(k, output.TheObjects[i]->Externalwalls.TheObjects[j].normal, wallToSliceWith);
 //          if (k==0)
 //            oldDirections.AddOnBottomNoRepetition(wallToSliceWith);
           wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
@@ -111,11 +120,10 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
             output.NewHyperplanesToSliceWith.AddOnTopNoRepetition(wallToSliceWith);
           output.theHyperplanes.AddObjectOnTopNoRepetitionOfObjectHash(wallToSliceWith);
         }
-  this->log << "\n Affine walls to slice with:";
+  this->log << "\n Projectivized walls to slice with(" << output.NewHyperplanesToSliceWith.size << "):" ;
   for (int i=0; i<output.NewHyperplanesToSliceWith.size; i++)
     this->log << "\n" << output.NewHyperplanesToSliceWith.TheObjects[i].ElementToString();
   this->log << "\n";
-  output.AmbientDimension=output.AmbientDimension*2+1;
   for (int i=0; i<output.size; i++)
     if (output.TheObjects[i]!=0)
       this->TransformToWeylProjective(output, *output.TheObjects[i], theGlobalVariables);
@@ -149,37 +157,52 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   theWeyl.ComputeWeylGroup();
   this->theLinearOperators.SetSize(theWeyl.size);
   this->theTranslations.SetSize(theWeyl.size);
-  root tempRoot;
-  this->log << "\nMatrix form of the elements of W(B_3) (" << theWeyl.size << " elements):\n";
-  for (int i=0; i<theWeyl.size; i++)
-  { theWeyl.GetMatrixOfElement(i, this->theLinearOperators.TheObjects[i]);
-    this->log << "\n" << this->theLinearOperators.TheObjects[i].ElementToString(false, false);
-    this->theTranslations.TheObjects[i]=theWeyl.rho;
-    theWeyl.ActOn(i, this->theTranslations.TheObjects[i], true, false, (Rational) 0);
-  }
+  this->theTranslationsProjected.SetSize(theWeyl.size);
   MatrixLargeRational theProjection;
   theProjection.init(input.theDomain.GetRank(), input.theRange.GetRank());
   root startingWeight, projectedWeight;
-  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, this->GmodKnegativeWeights, theGlobalVariables);
+  SSalgebraModule tempM;
+  std::stringstream tempStream;
+  input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
+  tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
+  input.GetWeightsGmodK(this->GmodKnegativeWeights, theGlobalVariables);
+  MatrixLargeRational tempMat;
+  tempMat=input.theDomain.theWeyl.CartanSymmetric;
+  tempMat.Invert(theGlobalVariables);
+  tempMat.ActOnRoots(this->GmodKnegativeWeights);
+  this->log << this->GmodKnegativeWeights.ElementToString();
+  for (int i=0; i<this->GmodKnegativeWeights.size; i++)
+    if (this->GmodKnegativeWeights.TheObjects[i].IsNegativeOrZero())
+    { this->GmodKnegativeWeights.PopIndexSwapWithLast(i);
+      i--;
+    }
   for (int i=0; i< input.theRange.GetRank(); i++)
   { startingWeight.MakeEi(input.theRange.GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
     for (int j=0; j<projectedWeight.size; j++)
       theProjection.elements[j][i]=projectedWeight.TheObjects[j];
   }
+  this->log << "\nMatrix form of the elements of W(B_3) (" << theWeyl.size << " elements):\n";
+  for (int i=0; i<theWeyl.size; i++)
+  { theWeyl.GetMatrixOfElement(i, this->theLinearOperators.TheObjects[i]);
+    this->log << "\n" << this->theLinearOperators.TheObjects[i].ElementToString(false, false);
+    this->theTranslations.TheObjects[i]=theWeyl.rho;
+    theWeyl.ActOn(i, this->theTranslations.TheObjects[i], true, false, (Rational) 0);
+    theProjection.ActOnAroot(this->theTranslations.TheObjects[i], this->theTranslationsProjected.TheObjects[i]);
+  }
   this->log << "\n\n\nMatrix of the projection operator:\n" << theProjection.ElementToString(false, false);
-  this->log << "\n\n\nMatrix form of the operators $u_w$ and the translations:";
+  this->log << "\n\n\nMatrix form of the operators $u_w$, the translations and their projections:";
   for (int i=0; i<this->theLinearOperators.size; i++)
   { this->theLinearOperators.TheObjects[i].MultiplyOnTheLeft(theProjection);
     this->log << "\n\n" << this->theLinearOperators.TheObjects[i].ElementToString(false, false);
-    this->log << this->theTranslations.TheObjects[i].ElementToString();
+    this->log << this->theTranslations.TheObjects[i].ElementToString() << ";   " << this->theTranslationsProjected.TheObjects[i].ElementToString();
   }
-  MatrixLargeRational tempMat;
   tempMat=theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.AssignMatrixRows(tempMat);
   this->PreimageWeylChamberLargerAlgebra.ComputeFromDirections(tempRoots, theGlobalVariables, theWeyl.GetDim());
   this->log << "\nWeyl chamber before projectivizing: " << this->PreimageWeylChamberLargerAlgebra.ElementToString() << "\n";
+  root tempRoot;
   for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.size; i++)
   { tempRoot.MakeZero(input.theRange.GetRank()+input.theDomain.GetRank()+1);
     for (int j=0; j<input.theRange.GetRank(); j++)
@@ -213,7 +236,7 @@ void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData
   { GeneralizedVermaModuleCharacters tempChars;
     inputData.theParser.theHmm.MakeG2InB3(inputData.theParser, theGlobalVariables);
     tempChars.initFromHomomorphism(inputData.theParser.theHmm, theGlobalVariables);
-    //tempChars.TransformToWeylProjective(inputData.thePartialFraction.theChambers, theGlobalVariables);
+    tempChars.TransformToWeylProjective(inputData.thePartialFraction.theChambers, theGlobalVariables);
   }
 }
 

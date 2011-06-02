@@ -275,7 +275,8 @@ void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, root& in
     output.TheObjects[j]=input.TheObjects[j];
   currentOperator.ActOnAroot(tempRoot2);
   output-=tempRoot2;
-  output-=currentTranslation;
+  currentOperator.ActOnAroot(currentTranslation, tempRoot2);
+  output-=tempRoot2;
 }
 
 void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex

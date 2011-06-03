@@ -39,7 +39,8 @@ public:
   roots GmodKnegativeWeights;
   Cone PreimageWeylChamberLargerAlgebra;
   Cone WeylChamberSmallerAlgebra;
-  List< List<QuasiPolynomial> > theQPs;
+  List< List<QuasiPolynomial> > theQPsNonSubstituted;
+  List< List<QuasiPolynomial> > theQPsSubstituted;
   roots theTranslations;
   roots theTranslationsProjected;
   std::stringstream log;
@@ -47,6 +48,7 @@ public:
   void ComputeQPsFromChamberComplex
   (partFractions& thePFs, GlobalVariables& theGlobalVariables)
   ;
+  void GetSubFromIndex(QPSub& output, int theIndex);
   void initFromHomomorphism
   (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
   ;
@@ -99,8 +101,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   output.ComputeVerticesFromNormals(owner, theGlobalVariables);
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjective
-  (CombinatorialChamberContainer& output, GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::TransformToWeylProjective(CombinatorialChamberContainer& output, GlobalVariables& theGlobalVariables)
 { output.flagSliceWithAWallInitDone=true;
   output.theDirections=this->GmodKnegativeWeights;
   output.init();
@@ -208,12 +209,15 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     theProjection.ActOnAroot(this->theTranslations.TheObjects[i], this->theTranslationsProjected.TheObjects[i]);
   }
   this->log << "\n\n\nMatrix of the projection operator:\n" << theProjection.ElementToString(false, false);
-  this->log << "\n\n\nMatrix form of the operators $u_w$, the translations and their projections:";
+  this->log << "\n\n\nMatrix form of the operators $u_w$, the translations and their projections (" << this->theLinearOperators.size << "):";
+  List<MatrixLargeRational> tempList;
   for (int i=0; i<this->theLinearOperators.size; i++)
   { this->theLinearOperators.TheObjects[i].MultiplyOnTheLeft(theProjection);
     this->log << "\n\n" << this->theLinearOperators.TheObjects[i].ElementToString(false, false);
     this->log << this->theTranslations.TheObjects[i].ElementToString() << ";   " << this->theTranslationsProjected.TheObjects[i].ElementToString();
+    tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
   }
+  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   tempMat=theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.AssignMatrixRows(tempMat);
@@ -279,21 +283,72 @@ void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, root& in
   output-=tempRoot2;
 }
 
+void MatrixLargeRational::GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen)
+{ outputDen=this->FindPositiveLCMCoefficientDenominatorsTruncated();
+  outputMat.init(this->NumRows, this->NumCols);
+  for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+      outputMat.elements[i][j]=(this->elements[i][j]*outputDen).NumShort;
+}
+
+void QPSub::MakeSubFromMatrixRational(MatrixLargeRational& input)
+{ input.GetMatrixIntWithDen(this->TheQNSub, this->QNSubDen);
+  this->MakeSubFromMatrixIntAndDen(this->TheQNSub, this->QNSubDen);
+}
+
+void GeneralizedVermaModuleCharacters::GetSubFromIndex(QPSub& output, int theIndex)
+{ MatrixLargeRational& theOperator=this->theLinearOperators.TheObjects[theIndex];
+  int dimLargerAlgebra=theOperator.NumCols;
+  int dimSmallerAlgebra=theOperator.NumRows;
+  root& theTranslation=this->theTranslations.TheObjects[theIndex];
+  MatrixLargeRational tempMat;
+  tempMat.init(dimLargerAlgebra+dimSmallerAlgebra+1, dimSmallerAlgebra);
+  tempMat.NullifyAll();
+  for (int j=0; j<dimSmallerAlgebra; j++)
+  { tempMat.elements[j][j]=1;
+    for (int i=0; i<dimLargerAlgebra; i++)
+      tempMat.elements[i][j]-=theOperator.elements[j][i];
+    tempMat.elements[dimLargerAlgebra+dimSmallerAlgebra][j]=-theTranslation.TheObjects[j];
+  }
+  output.MakeSubFromMatrixRational(tempMat);
+}
+
+std::string QPSub::ElementToString()
+{ std::stringstream out;
+  out << "Matrix den:" << this->QNSubDen << " and the matrix:\n";
+  for (int i=0; i<this->TheQNSub.NumRows; i++)
+  { for (int j=0; j<this->TheQNSub.NumCols; j++)
+      out << this->TheQNSub.elements[i][j] << "\t";
+    out << "\n";
+  }
+  for (int i=0; i<this->RationalPolyForm.size; i++)
+    out << "x_" << i+1 << "->" << this->RationalPolyForm.TheObjects[i].ElementToString() << ", ";
+  return out.str();
+}
+
 void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 (partFractions& thePFs, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
   root tempRoot;
-  this->theQPs.SetSize(thePFs.theChambers.size);
+  QPSub theSub;
+  this->theQPsNonSubstituted.SetSize(thePFs.theChambers.size);
+  this->theQPsSubstituted.SetSize(thePFs.theChambers.size);
   for (int i=0; i<thePFs.theChambers.size; i++)
     if (thePFs.theChambers.TheObjects[i]!=0)
       if (!thePFs.theChambers.TheObjects[i]->flagPermanentlyZero)
-      { this->theQPs.TheObjects[i].SetSize(this->theLinearOperators.size);
+      { this->theQPsNonSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
+        this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
         for (int k=0; k<this->theLinearOperators.size; k++)
-        { QuasiPolynomial& currentQP= this->theQPs.TheObjects[i].TheObjects[k];
+        { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i].TheObjects[k];
+          QuasiPolynomial& currentQPSub= this->theQPsSubstituted.TheObjects[i].TheObjects[k];
           this->GetProjection(k, thePFs.theChambers.TheObjects[i]->InternalPoint, tempRoot);
-          thePFs.partFractionsToPartitionFunctionAdaptedToRoot(currentQP, tempRoot, false, false, theGlobalVariables, true);
-          out << "\nChamber " << i << " translation " << k << ": " << currentQP.ElementToString(false, theFormat);
+          thePFs.partFractionsToPartitionFunctionAdaptedToRoot(currentQPNoSub, tempRoot, false, false, theGlobalVariables, true);
+          out << "\nChamber " << i << " translation " << k << ": " << currentQPNoSub.ElementToString(false, theFormat);
+          this->GetSubFromIndex(theSub, k);
+          currentQPNoSub.RationalLinearSubstitution(theSub, currentQPSub);
+          out << "; after substitution we get: " << currentQPSub.ElementToString(false, theFormat);
+          out << "\nthe sub is: " << theSub.ElementToString();
         }
       }
   out << "\n\n" << thePFs.theChambers.DebugString;
@@ -317,9 +372,9 @@ void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData
     inputData.thePartialFraction.split(theGlobalVariables, 0);
     inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
     out << "=" << inputData.thePartialFraction.DebugString;
-    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.theIndicatorVariables.StatusString1=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.log.str();
     theGlobalVariables.MakeReport();
-    QuasiPolynomial tempQP;
+    /*QuasiPolynomial tempQP;
     PolynomialOutputFormat polyFormat;
     root tempRoot;
     tempRoot="(-1,-3)";
@@ -327,7 +382,7 @@ void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData
     out << "\nIndicator: " << tempRoot.ElementToString() << "\n" << tempQP.ElementToString(false, polyFormat);
     theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
     theGlobalVariables.MakeReport();
-
+*/
   }
 }
 

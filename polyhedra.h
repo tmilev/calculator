@@ -897,6 +897,15 @@ public:
   void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
   void FindZeroEigenSpacE(List<List<Element> >& output, Element& theRingUnit, Element& theRingMinusUnit, Element& theRingZero, GlobalVariables& theGlobalVariables);
   void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero);
+  inline bool operator==(const Matrix<Element>& other)const
+  { if (this->NumRows!=other.NumRows || this->NumCols!=other.NumCols)
+      return false;
+    for(int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        if (!(this->elements[i][j]==other.elements[i][j]))
+          return false;
+    return true;
+  }
   bool IsEqualToZero()const
   { for(int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
@@ -985,6 +994,7 @@ public:
   void ActOnAroot(root& input, root& output);
   void ActOnRoots(roots& input, roots& output);
   void ActOnRoots(roots& theRoots);
+  void GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen);
 
   void DivideByRational(Rational& x);
   void LieBracketWith(MatrixLargeRational& right);
@@ -3768,14 +3778,24 @@ template <class ElementOfCommutativeRingWithIdentity>
 class Polynomials: public List<Polynomial<ElementOfCommutativeRingWithIdentity> >
 {
   public:
+  //the general format of the substitution is:
+  // the i^th element denotes the image of x_i,
+  // For example, if polynomials is the array
+  // x_1+x_2 (poly in 3 variables)
+  // x_1x_3+2 (poly in 3 variables)
+  // this mens that it can be applied to polynomials in two variables
+  // like this: x_1-> x_1+x_2
+  // x_2-> (x_1x_3+2)
+  // to produce a polynomial in three variables
+  void MakeIdSubstitution(int numVars, const ElementOfCommutativeRingWithIdentity& theRingUnit);
+  //In the following function we have that:
   //the format of the linear substitution is:
-  //coeff is a MatrixLargeRational whose number of rows minus 1 must equal the # number of
+  //theSub is a  whose number of rows minus 1 must equal the # number of
   //target variables and whose number of columns must equal the number of variables in
   //the current polynomial (this->NumVariables).
   //The first row denotes the constant term in the substitution of the respective variable!
   //An element in the x-th row and y-th column
   //is defined as ElementOfCommutativeRingWithIdentity[x][y] !
-  void MakeIdSubstitution(int numVars, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   void MakeExponentSubstitution(MatrixIntTightMemoryFit& theSub);
   void PrintPolys(std::string& output, ElementOfCommutativeRingWithIdentity& TheRingUnit, ElementOfCommutativeRingWithIdentity& TheRingZero);
   void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<ElementOfCommutativeRingWithIdentity>& EndPoint);
@@ -5998,6 +6018,7 @@ class QPSub
 public:
   MatrixIntTightMemoryFit TheQNSub;
   int QNSubDen;
+  std::string ElementToString();
   PolynomialsRationalCoeff RationalPolyForm;
   //PolynomialsRationalCoeff RationalPolyForm;
   //format of the substitution:

@@ -7483,13 +7483,13 @@ void QPSub::MakeSubAddExtraVarForIntegration(root& direction)
 }
 
 void QPSub::MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit& theMat, int Den)
-{  this->RationalPolyForm.MakeSubFromMatrixIntAndDen(theMat, Den);
+{ this->RationalPolyForm.MakeSubFromMatrixIntAndDen(theMat, Den);
   this->QNSubDen=Den;
   this->TheQNSub.Assign(theMat);
 }
 
 void QPSub::MakeSubFromPolynomialsRationalCoeff(PolynomialsRationalCoeff& input)
-{  this->RationalPolyForm.SetSize(input.size);
+{ this->RationalPolyForm.SetSize(input.size);
   if (input.size<1)
     return;
   int theDimension= input.TheObjects[0].NumVars;

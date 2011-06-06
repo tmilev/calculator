@@ -6142,6 +6142,12 @@ void QuasiPolynomial::TimesInteger(int x)
   this->TimesConstant(tempQN);
 }
 
+void QuasiPolynomial::operator*=(const Rational& x )
+{ QuasiNumber tempQN;
+  tempQN.AssignLargeRational(this->NumVars, x);
+  this->TimesConstant(tempQN);
+}
+
 void QuasiPolynomial::Evaluate(intRoot& values, Rational& output)
 { output.MakeZero();
   std::string tempS;
@@ -7113,7 +7119,7 @@ void BasicQN::LinearSubstitution(QPSub& theSub)
   this->Simplify();
 }
 
-void BasicQN::MakeConst(Rational& Coeff, int NumV)
+void BasicQN::MakeConst(const Rational& Coeff, int NumV)
 { this->Exp.Free();
   this->Nums.Free();
   this->Coefficient.Assign(Coeff);
@@ -7381,7 +7387,7 @@ void QuasiNumber::Simplify()
   this->AssignLargeRational(this->NumVariables, theValue);
 }
 
-void QuasiNumber::AssignLargeRational(int NumVars, Rational& coeff)
+void QuasiNumber::AssignLargeRational(int NumVars, const Rational& coeff)
 {  BasicQN q;
   this->MakeZero(NumVars);
   q.MakeConst(coeff, NumVars);
@@ -26385,6 +26391,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionActByWeyl: this->EvaluateWeylAction(theGlobalVariables); break;
     case Parser::functionActByAffineWeyl: this->EvaluateWeylRhoAction(theGlobalVariables); break;
     case Parser::functionPrintWeylGroup: this->EvaluatePrintWeyl(theGlobalVariables); break;
+    case Parser::functionChamberParam: this->EvaluateChamberParam(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26507,32 +26514,24 @@ void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables)
-{ if (this->children.size!=1)
-  { this->SetError(this->errorProgramming);
+{ List<int> argumentList;
+  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
+  bool tempBool=this->ExtractArgumentList(argumentList);
+  if (!tempBool || argumentList.size!=theHmm.theRange.GetRank())
+  { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
   root theWeight;
-  if (theHmm.theRange.GetRank()>1)
-  { if (!theArgument.ConvertChildrenToType(this->typeRational, theGlobalVariables)|| theHmm.theRange.GetRank()!=theArgument.children.size)
+  int theDimension=argumentList.size;
+  theWeight.SetSize(theDimension);
+  for (int i=0; i<theDimension ; i++)
+  { ParserNode& current= this->owner->TheObjects[argumentList.TheObjects[i]];
+    if (!current.ConvertToType(this->typeRational, theGlobalVariables))
     { this->SetError(this->errorBadOrNoArgument);
       return;
     }
-    int theDimension=theArgument.children.size;
-    theWeight.SetSize(theDimension);
-    for (int i=0; i<theDimension; i++)
-    { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
-      theWeight.TheObjects[i]=current.rationalValue;
-    }
-  } else
-    if (!theArgument.ConvertToType(this->typeRational, theGlobalVariables))
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    } else
-    { theWeight.SetSize(1);
-      theWeight.TheObjects[0]=theArgument.rationalValue;
-    }
+    theWeight.TheObjects[i]=current.rationalValue;
+  }
   this->rationalValue= theHmm.theRange.theWeyl.WeylDimFormula(theWeight, theGlobalVariables);
   this->ExpressionType=this->typeRational;
 }
@@ -26712,6 +26711,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="\\mapsto")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenMapsTo);
     this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input=="combinatorialChamberParam")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionChamberParam);
     return true;
   }
   if (input =="secretSauce")

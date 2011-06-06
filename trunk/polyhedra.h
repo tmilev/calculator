@@ -935,7 +935,6 @@ public:
   }
   //returns true if the system has a solution, false otherwise
   bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
-  inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints){ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);  }
   void Add(const Matrix<Element>& right)
   { assert(this->NumRows==right.NumRows && this->NumCols==right.NumCols);
     for (int i=0; i< this->NumRows; i++)
@@ -970,6 +969,15 @@ public:
     tempPlus.Subtract(tempMinus);
     output=tempPlus;
   }
+  //The Gaussian elimination below brings the matrix to a row-echelon form, that is, makes the matrix be something like (example is 4x5):
+  //1 0 3 0 0
+  //0 1 0 0 0
+  //0 0 0 1 0
+  //0 0 0 0 0
+  //In the Gaussian elimination below, we define non-pivot points to be indices of the columns
+  // that do not have a pivot 1 in them.
+  // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
+  inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints){ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);  }
   static void GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
 };
@@ -3447,6 +3455,13 @@ public:
   ;
   void GetWeylChamberWallsForCharacterComputation(roots& output);
   void MakeExtraProjectivePlane();
+  int GetFirstChamberIndexContainingPoint(const root& input)
+  { for (int i=0; i<this->size; i++)
+      if (this->TheObjects[i]!=0)
+        if (this->TheObjects[i]->PointIsInChamber(input))
+          return i;
+    return -1;
+  }
   int GetNumVisibleChambersNoLabeling();
   int GetNumNonZeroPointers();
   void WireChamberAdjacencyInfoAsIn(CombinatorialChamberContainer& input);
@@ -5783,7 +5798,7 @@ public:
   bool ExponentIsEqualToZero();
   void DecreaseNumVars(int decrease);
   bool IsEqualToZero();
-  void MakeConst(Rational& Coeff, int NumV);
+  void MakeConst(const Rational& Coeff, int NumV);
   void MakeFromNormalAndDirection(root& normal, root& direction, int theMod, Rational& coeff);
   void MakePureQN(int NumVariables, int NonZeroIndex, Rational& coeff, int theExp, int Num, int theDen);
   void BasicQNToComplexQN(CompositeComplexQN& output);
@@ -5814,7 +5829,7 @@ public:
   void MultiplyByBasicQuasiNumber(BasicQN& q);
   void MultiplyBy(const QuasiNumber& q);
   void Assign(const QuasiNumber& q);
-  void AssignLargeRational(int NumVars, Rational& coeff);
+  void AssignLargeRational(int NumVars, const Rational& coeff);
   void AssignInteger(int NumVars, int x);
   void ElementToString(std::string& output)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, PolyFormatLocal);}
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
@@ -5950,6 +5965,7 @@ public:
   void IntegrateDiscreteInDirectionFromOldChamber(root& direction, root& normal, QuasiPolynomial& OldChamberPoly, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
   void WriteComplexFormToDebugString();
   void TimesInteger(int x);
+  void operator*=(const Rational& x);
   void DivByInteger(int x);
   void Evaluate(intRoot& values, Rational& output);
   int SizeWithoutDebugString();
@@ -8288,6 +8304,8 @@ class ParserNode
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
+  void EvaluateChamberParam(GlobalVariables& theGlobalVariables);
+  bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
   void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
   void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
@@ -8352,7 +8370,7 @@ public:
   enum functionList
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
-    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup
+    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

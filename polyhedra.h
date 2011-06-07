@@ -549,6 +549,13 @@ public:
   int SizeWithoutObjects();
   inline Object* LastObject();
   void ReleaseMemory();
+  int HashFunction()const
+  { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
+    int result=0;
+    for (int i=0; i<numCycles; i++)
+      result+=SomeRandomPrimes[i]*this->TheObjects[i].HashFunction();
+    return result;
+  }
   void operator=(const List<Object>& right){ this->CopyFromBase(right); }
   static void swap(List<Object>& l1, List<Object>& l2);
   void ReverseOrderElements();
@@ -2330,6 +2337,7 @@ public:
   bool ElementsHaveNonNegativeScalarProduct(const root& theRoot)const;
   bool ElementsHavePositiveScalarProduct(const root& theRoot)const;
   bool ElementsHaveNonPositiveScalarProduct(const root& theRoot)const;
+  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml);
   bool ContainsOppositeRoots();
   bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
@@ -2339,6 +2347,15 @@ public:
   void Sum(root& output);
   void Pop(int index);
   void intersectWith(roots& right, roots& output);
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex)
+  { std::stringstream out;
+    for (int i=0; i<this->size; i++)
+    { out << this->TheObjects[i].ElementToStringLetterFormat(inputLetter, useLatex);
+      if (i!=this->size-1)
+        out << ",";
+    }
+    return out.str();
+  }
   bool ContainsARootNonPerpendicularTo(root& input, WeylGroup& theWeyl);
   bool ContainsARootNonStronglyPerpendicularTo(root& input, WeylGroup& theWeyl);
   int NumRootsConnectedTo(root& input, WeylGroup& theWeyl);
@@ -2374,11 +2391,11 @@ public:
   void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString, false, false, false); }
   void ElementToLinearCombinationString(std::string& output);
   void ElementToString(std::string& output);
-  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;};
+  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
   std::string ElementToString(bool useLatex, bool useHtml, bool makeTable){std::string tempS; this->ElementToString(tempS, useLatex, useHtml, makeTable); return tempS;};
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable);
   void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable);
-  std::string* ElementToStringDebuggerCallOnly(){ this->ComputeDebugString(); return &this->DebugString;};
+  std::string* ElementToStringDebuggerCallOnly(){ this->ComputeDebugString(); return &this->DebugString;}
   //The below function is required to preserve the order of elements given by theSelection.elements.
   void SubSelection(Selection& theSelection, roots& output);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
@@ -8295,7 +8312,7 @@ class ParserNode
   std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
   std::string ElementToStringErrorCode(bool useHtml);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
-  void SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError;}
+  int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
   void CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
   void ReduceRatFunction();
   void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
@@ -8304,7 +8321,7 @@ class ParserNode
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
-  void EvaluateChamberParam(GlobalVariables& theGlobalVariables);
+  int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
   void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}

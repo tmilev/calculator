@@ -41,18 +41,20 @@ public:
   Cone WeylChamberSmallerAlgebra;
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
-  List<CombinatorialChamber> parametricChambers;
+//  List<CombinatorialChamber> parametricChambers;
   List<QuasiPolynomial> theSums;
   List<Rational> theCoeffs;
   roots theTranslations;
   roots theTranslationsProjected;
   partFractions thePfs;
+  List<List<roots> > paramSubChambers, nonParamVertices;
+  List<List<QuasiPolynomial> > ExtremeQPsParamSubchambers;
   CombinatorialChamberContainer projectivizedChamber;
   std::stringstream log;
   void GetProjection(int indexOperator, root& input, root& output);
   void FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables);
   void ProcessParametricChambers
-  (int numNonParams, int numParams, CombinatorialChamber& input, List<CombinatorialChamber>& output, GlobalVariables& theGlobalVariables)
+  (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
   ;
   void ComputeQPsFromChamberComplex
   (GlobalVariables& theGlobalVariables)
@@ -546,6 +548,24 @@ void CombinatorialChamberContainer::TransformToWeylProjective
   theGlobalVariables.MakeReport();
 }
 
+std::string roots::ElementsToInequalitiesString(bool useLatex, bool useHtml)
+{ std::stringstream out;
+  std::string theLetter="x";
+  if (useLatex)
+    out << "\\begin{array}{l}";
+  for (int i=0; i<this->size; i++)
+  { root& current=this->TheObjects[i];
+    out << current.ElementToStringLetterFormat(theLetter, useLatex);
+    if (useLatex)
+      out << "\\geq 0\\\\";
+    else
+      out << "=>0\n";
+  }
+  if (useLatex)
+    out << "\\end{array}";
+  return out.str();
+}
+
 void CombinatorialChamber::ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal)
 { int theDimension=owner.AmbientDimension;
   this->SortNormals();
@@ -780,12 +800,42 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
 }
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables)
-{ this->parametricChambers.size=0;
+{ roots currentChamberNormals;
+  this->paramSubChambers.SetSize(this->projectivizedChamber.size);
+  this->nonParamVertices.SetSize(this->projectivizedChamber.size);
+  this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamber.size);
+  std::stringstream out;
   for (int i=0; i<this->projectivizedChamber.size; i++)
     if (this->projectivizedChamber.TheObjects[i]!=0)
-      this->ProcessParametricChambers
-      (this->theLinearOperators.TheObjects[0].NumRows, this->theLinearOperators.TheObjects[0].NumCols+1,
-       *this->projectivizedChamber.TheObjects[i], this->parametricChambers, theGlobalVariables);
+      if (!this->projectivizedChamber.TheObjects[i]->flagPermanentlyZero)
+      { this->projectivizedChamber.TheObjects[i]->GetWallNormals(currentChamberNormals);
+        List<roots>& currentParamChamberList=this->paramSubChambers.TheObjects[i];
+        List<roots>& currentNonParamVerticesList=this->nonParamVertices.TheObjects[i];
+        theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+        std::stringstream progressReport1;
+        progressReport1 << "processing chamber " << i+1;
+        theGlobalVariables.theIndicatorVariables.ProgressReportString1=progressReport1.str();
+        theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+        theGlobalVariables.MakeReport();
+        this->ProcessParametricChambers
+        (this->theLinearOperators.TheObjects[0].NumRows, this->theLinearOperators.TheObjects[0].NumCols+1, currentChamberNormals,
+        currentParamChamberList, currentNonParamVerticesList, theGlobalVariables);
+        this->ExtremeQPsParamSubchambers.TheObjects[i].SetSize(currentParamChamberList.size);
+        for (int j=0; j< currentParamChamberList.size; j++)
+        { std::stringstream progressReport2;
+          progressReport2 << "processing chamber " << i+1 << " subchamber " << j+1 << " out of " << currentParamChamberList.size;
+          theGlobalVariables.theIndicatorVariables.ProgressReportString2=progressReport2.str();
+          theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+          theGlobalVariables.MakeReport();
+          roots& currentParamChamber=currentParamChamberList.TheObjects[j];
+          roots& currentNonParamVertices=currentNonParamVerticesList.TheObjects[j];
+          out << "\nChamber: " << currentParamChamber.ElementsToInequalitiesString(false, false);
+          out << "\nVertices: " << currentNonParamVertices.ElementToStringLetterFormat("x", false);
+        }
+      }
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.MakeReport();
 }
 
 bool ParserNode::ExtractArgumentList
@@ -800,15 +850,46 @@ bool ParserNode::ExtractArgumentList
   return true;
 }
 
-void ParserNode::EvaluateChamberParam(GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluateChamberParam(GlobalVariables& theGlobalVariables)
 { List<int> theArguments;
   this->ExtractArgumentList(theArguments);
-
+  GeneralizedVermaModuleCharacters tempChars;
+  if (theArguments.size<=2)
+    return this->SetError(this->errorBadOrNoArgument);
+  if (!this->owner->TheObjects[theArguments.TheObjects[0]].ConvertToType(this->typeIntegerOrIndex, theGlobalVariables) || !this->owner->TheObjects[theArguments.TheObjects[1]].ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  int dimNonParam=this->owner->TheObjects[theArguments.TheObjects[0]].intValue;
+  int dimParam=this->owner->TheObjects[theArguments.TheObjects[1]].intValue;
+  roots theWalls;
+  root tempRoot;
+  List<int> nodesCurrentRoot;
+  for (int i=2; i<theArguments.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[theArguments.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+    nodesCurrentRoot= currentNode.array.GetElement();
+    if (nodesCurrentRoot.size!=dimNonParam+dimParam)
+      return this->SetError(this->errorBadOrNoArgument);
+    tempRoot.SetSize(nodesCurrentRoot.size);
+    for (int j=0; j<nodesCurrentRoot.size; j++)
+    { ParserNode& currentCoordinateNode=this->owner->TheObjects[nodesCurrentRoot.TheObjects[j]];
+      if (!currentCoordinateNode.ConvertToType(this->typeRational, theGlobalVariables))
+        return this->SetError(this->errorBadOrNoArgument);
+      tempRoot.TheObjects[j]=currentCoordinateNode.rationalValue;
+    }
+    theWalls.AddObjectOnTop(tempRoot);
+  }
+  List<roots> outputParamChambers, outputNonParamVertices;
+  tempChars.ProcessParametricChambers(dimNonParam, dimParam, theWalls, outputParamChambers, outputNonParamVertices, theGlobalVariables);
+  std::stringstream out;
+  out << "<div class=\"math\">" << theWalls.ElementsToInequalitiesString(true, false) << "</div>";
+  this->outputString=out.str();
+  this->ExpressionType=(this->typeString);
+  return this->errorNoError;
 }
 
-
 void GeneralizedVermaModuleCharacters::ProcessParametricChambers
-  (int numNonParams, int numParams, CombinatorialChamber& input, List<CombinatorialChamber>& output, GlobalVariables& theGlobalVariables)
+  (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
 { /*roots nonParametricPart, parametricPart;
   nonParametricPart.SetSize(input.Externalwalls.size);
   parametricPart.SetSize(input.Externalwalls.size);
@@ -823,24 +904,57 @@ void GeneralizedVermaModuleCharacters::ProcessParametricChambers
       currentNP.TheObjects[j]=input.Externalwalls.TheObjects[i].normal.TheObjects[numNonParams+j];
   }*/
   Selection selectedNormals;
-  selectedNormals.init(input.Externalwalls.size);
-  int numCycles=MathRoutines::NChooseK(input.Externalwalls.size, numNonParams);
+  selectedNormals.init(inputNormals.size);
+  int numCycles=MathRoutines::NChooseK(inputNormals.size, numNonParams);
   MatrixLargeRational matrixNonParams, matrixParams;
-  matrixNonParams.init(numNonParams, numNonParams);
-  matrixParams.init(numNonParams, numParams);
+  matrixNonParams.init(inputNormals.size, numNonParams);
+  matrixParams.init(inputNormals.size, numParams);
   Selection NonPivotPoints;
+  roots basisRoots;
+  basisRoots.SetSize(numNonParams);
+  roots inducedParamChamber;
+  roots nonParamVertices;
+  inducedParamChamber.SetSize(inputNormals.size-numNonParams);
+  nonParamVertices.SetSize(numNonParams);
+  theParamChambers.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  theNonParamVertices.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  theParamChambers.size=0;
+  theNonParamVertices.size=0;
   for (int i=0; i<numCycles; i++)
   { selectedNormals.incrementSelectionFixedCardinality(numNonParams);
     for (int j=0; j<numNonParams; j++)
-    { root& currentNormal=input.Externalwalls.TheObjects[selectedNormals.elements[j]].normal;
+    { root& currentNormal=inputNormals.TheObjects[selectedNormals.elements[j]];
+      root& currentBasisElt=basisRoots.TheObjects[j];
+      currentBasisElt.SetSize(numNonParams);
       for (int k=0; k<numNonParams; k++)
-        matrixNonParams.elements[j][k]=currentNormal.TheObjects[k];
+      { matrixNonParams.elements[j][k]=currentNormal.TheObjects[k];
+        currentBasisElt.TheObjects[k]=currentNormal.TheObjects[k];
+      }
       for (int k=0; k<numParams; k++)
         matrixParams.elements[j][k]=currentNormal.TheObjects[k+numNonParams];
     }
-    MatrixLargeRational::GaussianEliminationByRows(matrixNonParams, matrixParams, NonPivotPoints);
-    if (NonPivotPoints.CardinalitySelection==0)
-    {
+    if (basisRoots.GetRankOfSpanOfElements(theGlobalVariables)==numNonParams)
+    { for (int j=0, counter=numNonParams; j<inputNormals.size; j++)
+        if (!selectedNormals.selected[j])
+        { root& currentNormal=inputNormals.TheObjects[j];
+          for (int k=0; k<numNonParams; k++)
+            matrixNonParams.elements[counter][k]=currentNormal.TheObjects[k];
+          for (int k=0; k<numParams; k++)
+            matrixParams.elements[counter][k]=currentNormal.TheObjects[k+numNonParams];
+          counter++;
+        }
+      MatrixLargeRational::GaussianEliminationByRows(matrixNonParams, matrixParams, NonPivotPoints);
+      for (int j=0; j<numNonParams; j++)
+        matrixParams.RowToRoot(j, nonParamVertices.TheObjects[j]);
+      for (int j=0; j<numParams; j++)
+        matrixParams.RowToRoot(j+numNonParams, inducedParamChamber.TheObjects[j]);
+      theNonParamVertices.AddObjectOnTop(nonParamVertices);
+      theParamChambers.AddObjectOnTop(inducedParamChamber);
     }
+  }
+  for (int i=0; i< theNonParamVertices.size; i++)
+  { std::cout << "<br>Number " << i+1 << ", vertices: " << theNonParamVertices.TheObjects[i].ElementToString();
+    std::cout << "<br>the parametric chamber: ";
+    std::cout << "<div class=\"math\">" << theParamChambers.TheObjects[i].ElementsToInequalitiesString(true, false) << "</div>";
   }
 }

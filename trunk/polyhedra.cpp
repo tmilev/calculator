@@ -166,6 +166,7 @@ template < > int HashedList<MonomialUniversalEnvelopingOrdered<PolynomialRationa
 template < > int HashedList<GeneralizedMonomialRational>::PreferredHashSize=20;
 template < > int HashedList<MonomialUniversalEnvelopingOrdered<RationalFunction> >::PreferredHashSize=20;
 template < > int HashedList<Monomial<RationalFunction> >::PreferredHashSize=20;
+template < > int HashedList<roots>::PreferredHashSize=10000;
 
 
 template < > int List<affineCone>::ListActualSizeIncrement=1;
@@ -1660,11 +1661,13 @@ void root::ElementToString(std::string& output, bool useLaTeX)
 }
 
 std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex)
-{ std::stringstream out;
+{ if (this->IsEqualToZero())
+    return "0";
+  std::stringstream out;
   std::string tempS;
   bool found=false;
   for(int i=0; i<this->size; i++)
-  { if (!this->TheObjects[i].IsEqualToZero())
+    if (!this->TheObjects[i].IsEqualToZero())
     { this->TheObjects[i].ElementToString(tempS);
       if (tempS=="1")
         tempS="";
@@ -1681,7 +1684,6 @@ std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bo
       out << tempS;
       out << inputLetter << "_{" << i+1 << "}";
     }
-  }
   return out.str();
 }
 

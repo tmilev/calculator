@@ -887,8 +887,11 @@ public:
   void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar);
   void MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output);
   void MultiplyOnTheLeft(const Matrix<Element>& input);
-  void NonPivotPointsToEigenVector
-(Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
+  void NonPivotPointsToEigenVectorMatrixForm
+  (Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
+;
+void NonPivotPointsToEigenVector
+(Selection& TheNonPivotPoints, Vector<Element>& output, const Element& theRingUnit, const Element& theRingZero)
 ;
   //returns true if successful, false otherwise
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
@@ -986,8 +989,12 @@ public:
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints){ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);  }
   static void GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
+  void GaussianEliminationByRowsNoRowSwapPivotPointsByRows
+(int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
+;
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
 };
+
 
 template <class Element>
 bool Matrix<Element>::flagAnErrorHasOccurredTimeToPanic=false;
@@ -997,7 +1004,7 @@ class MatrixLargeRational: public Matrix<Rational>
 public:
   static bool flagAnErrorHasOccurredTimeToPanic;
   void ComputeDeterminantOverwriteMatrix( Rational& output);
-  void NonPivotPointsToRoot(Selection& TheNonPivotPoints, int OutputDimension, root& output);
+  void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
   void Transpose(GlobalVariables& theGlobalVariables);
   void MultiplyByInt(int x);
   void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
@@ -1075,9 +1082,11 @@ public:
   void incrementSelection();
   int SelectionToIndex();
   void ExpandMaxSize();
+  int GetNumCombinationsFixedCardinality(int theCardinality){return MathRoutines::NChooseK(this->MaxSize, theCardinality);}
   void ShrinkMaxSize();
   void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
-  void incrementSelectionFixedCardinality(int card);
+  inline void incrementSelectionFixedCardinality(int card){int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore; this->incrementSelectionFixedCardinality(card, IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);}
+  void incrementSelectionFixedCardinality(int card, int& IndexLastZeroWithOneBefore, int& NumOnesAfterLastZeroWithOneBefore);
   void Assign(const Selection& right);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
@@ -1469,6 +1478,42 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution(Selection& inputPivot
       return false;
   return true;
 }
+
+template <typename Element>
+void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows
+(int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
+{ outputPivotPointCols.SetSize(this->NumRows);
+  Element tempElement;
+  for (int i=firstNonProcessedRow; i<this->numRows; i++)
+  { int currentPivotCol=-1;
+    for (int j=0; j<this->NumCols; j++)
+      if (!this->elements[i][j].IsEqualToZero())
+      { currentPivotCol=j;
+        break;
+      }
+    outputPivotPointCols.TheObjects[i]=currentPivotCol;
+    if (currentPivotCol!=-1)
+    { tempElement=this->elements[i][currentPivotCol];
+      tempElement.Invert();
+      this->RowTimesScalar(i, tempElement);
+      for (int j=0; j<this->NumRows; j++)
+        if (i!=j)
+          if (!this->elements[j][i].IsEqualToZero())
+          { tempElement.Assign(this->elements[j][i]);
+            this->SubtractRows(j, i, 0, tempElement);
+          }
+    }
+  }
+  if (outputNonPivotPoints__WarningSelectionNotInitialized!=0)
+  { for (int i=0; i<this->NumCols; i++)
+      outputNonPivotPoints__WarningSelectionNotInitialized->selected[i]=true;
+    for (int i=0; i<this->NumRows; i++)
+      if (outputPivotPointCols.TheObjects[i]!=-1)
+        outputNonPivotPoints__WarningSelectionNotInitialized->selected[outputPivotPointCols.TheObjects[i]]=false;
+    outputNonPivotPoints__WarningSelectionNotInitialized->ComputeIndicesFromSelection();
+  }
+}
+
 
 template <typename Element>
 void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints)
@@ -2045,6 +2090,16 @@ public:
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; }
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
+  CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other) const
+  { CoefficientType result, tempElt;
+    assert(this->size==other.size);
+    for (int i=0; i<this->size; i++)
+    { tempElt=other.TheObjects[i];
+      tempElt*=this->TheObjects[i];
+      result+=tempElt;
+    }
+    return result;
+  }
   void ElementToString(std::string& output, bool useLaTeX)
   { output.clear();
     std::string tempStr;
@@ -2115,6 +2170,25 @@ class Vectors: public List<Vector<CoefficientType> >
     return out.str();
   }
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
+  bool LinearAlgebraForVertexComputation(Selection& theSelection, Vector<CoefficientType>& output, Matrix<CoefficientType>& buffer, Selection& NonPivotPointsBuffer)
+  { if (this->size==0)
+      return false;
+    int theDimension=this->TheObjects[0].size;
+    output.SetSize(theDimension);
+    assert(theDimension -1== theSelection.CardinalitySelection);
+    Matrix<CoefficientType> matOutputEmpty;
+    buffer.init((int)(theDimension-1), (int)theDimension);
+    matOutputEmpty.init(-1, -1);
+    for (int i =0; i<theDimension-1; i++)
+      for (int j=0; j<theDimension; j++)
+        buffer.elements[i][j].Assign(this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
+    Matrix<CoefficientType>::GaussianEliminationByRows(buffer, matOutputEmpty, NonPivotPointsBuffer);
+    if (NonPivotPointsBuffer.CardinalitySelection==1)
+    { buffer.NonPivotPointsToRoot(NonPivotPointsBuffer, output);
+      return true;
+    }
+    return false;
+  }
   bool LinSpanContainsRoot
   (const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
   ;
@@ -2144,7 +2218,7 @@ class Vectors: public List<Vector<CoefficientType> >
 
 };
 
-class root :public Vector<Rational>
+class root: public Vector<Rational>
 {
 public:
 //the below is to facilitate operator overloading
@@ -2356,6 +2430,18 @@ public:
     }
     return out.str();
   }
+  bool HasAnElementWithNegativeScalarProduct(const root& input)const
+  { for (int i=0; i<this->size; i++)
+      if (root::RootScalarEuclideanRoot(this->TheObjects[i], input).IsNegative())
+        return true;
+    return false;
+  }
+  bool HasAnElementWithPositiveScalarProduct(const root& input)const
+  { for (int i=0; i<this->size; i++)
+      if (root::RootScalarEuclideanRoot(this->TheObjects[i], input).IsPositive())
+        return true;
+    return false;
+  }
   bool ContainsARootNonPerpendicularTo(root& input, WeylGroup& theWeyl);
   bool ContainsARootNonStronglyPerpendicularTo(root& input, WeylGroup& theWeyl);
   int NumRootsConnectedTo(root& input, WeylGroup& theWeyl);
@@ -2405,7 +2491,7 @@ public:
   bool ComputeNormalFromSelection(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension);
   bool ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
   bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output, root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
-  bool operator==(const roots& right);
+  bool operator==(const roots& right)const;
   void operator = (const roots& right){this->CopyFromBase(right); }
   void ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
@@ -3317,7 +3403,7 @@ public:
   void Average(root& output, int Number, int theDimension);
   void ResetCounters();
   void CollectionToRoots(roots& output);
-  ~rootsCollection(){};
+  ~rootsCollection(){}
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
@@ -3338,7 +3424,7 @@ public:
 };
 
 //class pertains to the Q^+span of a set of roots.
-class Cone : public roots
+class ConeGlobal : public roots
 { //The roots are the normals to the walls of the cone
 public:
   void ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVariables, int theDimension);
@@ -3363,10 +3449,10 @@ public:
   bool PointIsAVertex(root& thePoint, GlobalVariables& theGlobalVariables){ return this->PointIsAVertex(*this, thePoint, theGlobalVariables);}
 //  int HashFunction() const;
   List<int> ChamberTestArray;
-  void operator=(const Cone& right);
+  void operator=(const ConeGlobal& right);
 };
 
-class simplicialCones : public List<Cone>
+class simplicialCones : public List<ConeGlobal>
 {
 public:
   hashedRoots theFacets;
@@ -3394,8 +3480,8 @@ public:
   std::string DebugString;
   hashedRoots theHyperplanes;
   roots HyperplanesComingFromCurrentDirectionAndSmallerIndices;
-  Cone TheGlobalConeNormals;
-  Cone WeylChamber;
+  ConeGlobal TheGlobalConeNormals;
+  ConeGlobal WeylChamber;
   simplicialCones startingCones;
   roots NewHyperplanesToSliceWith;
   HashedList<affineHyperplane> AffineWallsOfWeylChambers;
@@ -3489,7 +3575,7 @@ public:
   { this->SetupRootsOfBorel(WeylLetter, Dimension, reverseOrderElementsForTest);
     this->SliceAndComputeDebugString(theGlobalVariables, SpanTheEntireSpace);
   }
-  int LabelChambersAndGetNumChambersInWeylChamber(Cone& theWeylChamber);
+  int LabelChambersAndGetNumChambersInWeylChamber(ConeGlobal& theWeylChamber);
   int LabelChambersForDisplayAndGetNumVisibleChambers();
   void ElementToString(std::string& output, bool useLatex, bool useHtml);
   void ElementToString(std::string& output);
@@ -6585,7 +6671,7 @@ public:
   static Rational GetSizeWeylByFormula(char weylLetter, int theDim);
   bool IsARoot(const root& input){ return this->RootSystem.ContainsObjectHash(input); }
   void GenerateRootSubsystem(roots& theRoots);
-  void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights);
+  void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, ConeGlobal* LimitingCone, bool onlyLowerWeights);
   void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho);
   void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
   void GenerateRootSystemFromKillingFormMatrix();
@@ -8747,15 +8833,78 @@ public:
   };
 };
 
+class Cone
+{
+  public:
+  roots Vertices;
+  roots Normals;
+  bool flagHasSufficientlyManyVertices;
+  int LowestIndexIHaventBeenCheckedForSplitting;
+  std::string ElementToString();
+  void CreateFromNormals
+  (roots& inputNormals, GlobalVariables& theGlobalVariables)
+  ;
+  int HashFunction()const
+  { return this->Vertices.HashFunction();
+  }
+  bool IsInCone(const root& point)const
+  { Rational tempRat;
+    for (int i=0; i<this->Normals.size; i++)
+    { root::RootScalarEuclideanRoot(this->Normals.TheObjects[i], point, tempRat);
+      if (tempRat.IsNegative())
+        return false;
+    }
+    return true;
+  }
+  void operator=(const Cone& other)
+  { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
+    this->Vertices=other.Vertices;
+    this->Normals=other.Normals;
+    this->LowestIndexIHaventBeenCheckedForSplitting=other.LowestIndexIHaventBeenCheckedForSplitting;
+  }
+  Cone(){this->LowestIndexIHaventBeenCheckedForSplitting=0; this->flagHasSufficientlyManyVertices=true;}
+  bool operator==(const Cone& other)const
+  { return this->Normals==other.Normals;
+  }
+};
+
+class ConeComplex : public HashedList<Cone>
+{
+public:
+  bool flagChambersHaveTooFewVertices;
+  bool flagIsRefined;
+  List<int> NonRefinedChambers;
+  hashedRoots splittingNormals;
+  void RefineOneStep(GlobalVariables& theGlobalVariables);
+  void Refine(GlobalVariables& theGlobalVariables);
+  void AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
+  void PopChamberSwapWithLast(int index);
+  std::string ElementToString();
+  void initFromCones
+  (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
+  ;
+  bool SplitChamber
+  (int indexChamberBeingRefined, root& killerNormal, GlobalVariables& theGlobalVariables)
+  ;
+  void GetNewVertices
+  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
+  ;
+  ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
+};
+
 class GlobalVariables
 {
 private:
   FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
 public:
+  roots rootsGeneralPurposeBuffer1;
+  roots rootsGeneralPurposeBuffer2;
   roots rootsWallBasis;
   roots rootsIsABogusNeighbor1;
   roots rootsIsABogusNeighbor2;
   roots rootsSplitChamber1;
+  roots rootsSplitChamber2;
+  roots rootsSplitChamber3;
   roots rootsNilradicalRoots;
   roots rootsConeConditionHolds2;
   roots rootsRootSAIso;
@@ -8795,10 +8944,12 @@ public:
   rootSubalgebras rootSAsGenerateAll;
 
   hashedRoots hashedRootsComputeSubGroupFromGeneratingReflections;
+  hashedRoots hashedRootsNewChamberSplit;
 
   List<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
   List<int> listWallDataPtSplitChamber;
   List<int> listWallDataPtSplitChamber2;
+  List<int> listPivotColsNewSplit;
 
   Monomial<Rational> monMakePolyExponentFromIntRoot;
   Monomial<Rational> monMakePolyFromDirectionAndNormal;
@@ -8851,6 +9002,8 @@ public:
   PolyPartFractionNumerator PPFNAddPartFraction1;
   PolyPartFractionNumerator PPFNAddPartFraction2;
 
+  Selection selGeneralPurposeBuffer1;
+  Selection selNonPivotPointsNewSplit;
   Selection selLinearAlgebraForVertexComputation;
   Selection selComputeNormalFromSelection;
   Selection selComputeNormalExcludingIndex;
@@ -8865,6 +9018,8 @@ public:
   Selection selSimplexAlg2;
   Selection selApproveSelAgainstOneGenerator;
   Selection selBogusNeighbor;
+  Cone coneBuffer1NewSplit;
+  Cone coneBuffer2NewSplit;
 
   PolynomialRationalCoeff RFgcdBuffer1, RFgcdBuffer2, RFgcdBuffer3, RFgcdBuffer4, RFgcdBuffer5;
   Monomial<Rational> RFgcdBuferMon1, RFgcdBuferMon2;
@@ -9376,13 +9531,13 @@ bool Vectors<CoefficientType>::GetLinearDependence
   if (nonPivotPoints.CardinalitySelection==0)
     return false;
   outputTheLinearCombination.ComputeDebugString();
-  tempMat.NonPivotPointsToEigenVector(nonPivotPoints, outputTheLinearCombination, theRingUnit, theRingZero);
+  tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination, theRingUnit, theRingZero);
   //outputTheLinearCombination.ComputeDebugString();
   return true;
 }
 
 template<typename Element>
-void Matrix<Element>::NonPivotPointsToEigenVector
+void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm
 (Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
 { int RowCounter=0;
   output.init(this->NumCols, 1);
@@ -9395,6 +9550,23 @@ void Matrix<Element>::NonPivotPointsToEigenVector
     }
     else
       output.elements[i][0]=theRingUnit;
+  }
+}
+
+template<typename Element>
+void Matrix<Element>::NonPivotPointsToEigenVector
+(Selection& TheNonPivotPoints, Vector<Element>& output, const Element& theRingUnit, const Element& theRingZero)
+{ int RowCounter=0;
+  output.SetSize(this->NumCols);
+  for (int i=0; i<this->NumCols; i++)
+  { if (!TheNonPivotPoints.selected[i])
+    { output.TheObjects[i]=theRingZero;
+      for (int j=0; j<TheNonPivotPoints.CardinalitySelection; j++)
+        output.TheObjects[i]-=(this->elements[RowCounter][TheNonPivotPoints.elements[j]]);
+      RowCounter++;
+    }
+    else
+      output.TheObjects[i]=theRingUnit;
   }
 }
 

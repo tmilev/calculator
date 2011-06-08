@@ -35,10 +35,11 @@ void ComputationSetup::ComputeCharaterFormulas(ComputationSetup& inputData, Glob
 class GeneralizedVermaModuleCharacters
 {
 public:
+  bool flagUsingNewSplit;
   List<MatrixLargeRational> theLinearOperators;
   roots GmodKnegativeWeights;
-  Cone PreimageWeylChamberLargerAlgebra;
-  Cone WeylChamberSmallerAlgebra;
+  ConeGlobal PreimageWeylChamberLargerAlgebra;
+  ConeGlobal WeylChamberSmallerAlgebra;
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
 //  List<CombinatorialChamber> parametricChambers;
@@ -50,7 +51,9 @@ public:
   List<List<roots> > paramSubChambers, nonParamVertices;
   List<List<QuasiPolynomial> > ExtremeQPsParamSubchambers;
   CombinatorialChamberContainer projectivizedChamber;
+  ConeComplex projectivizedChamberTest;
   std::stringstream log;
+  GeneralizedVermaModuleCharacters(){this->flagUsingNewSplit=true;}
   void GetProjection(int indexOperator, root& input, root& output);
   void FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables);
   void ProcessParametricChambers
@@ -171,6 +174,18 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
         if (root::RootScalarEuclideanRoot(current.InternalPoint, currentWeylWall).IsNegative())
           current.flagPermanentlyZero=true;
       }
+  }
+  if(this->flagUsingNewSplit)
+  { List<roots> tempChambers;
+    tempChambers.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size);
+    for (int j=0; j<this->projectivizedChamber.size; j++)
+      if (this->projectivizedChamber.TheObjects[j]!=0)
+        if (!this->projectivizedChamber.TheObjects[j]->flagPermanentlyZero)
+        { CombinatorialChamber& current=*this->projectivizedChamber.TheObjects[j];
+          tempChambers.SetSize(tempChambers.size+1);
+          current.GetWallNormals(*tempChambers.LastObject());
+        }
+    this->projectivizedChamberTest.initFromCones(tempChambers, theGlobalVariables);
   }
   this->projectivizedChamber.ElementToString(tempS);
   this->log << tempS;
@@ -419,15 +434,21 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 
 void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { if (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.flagSliceWithAWallInitDone)
-  { while (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.oneStepChamberSlice(theGlobalVariables)){}
-    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.ComputeQPsFromChamberComplex(theGlobalVariables);
-    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.FindMultiplicitiesExtrema(theGlobalVariables);
+  { //while (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.oneStepChamberSlice(theGlobalVariables)){}
+    //if (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.flagUsingNewSplit)
+    //  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.Refine(theGlobalVariables);
+    //tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.ComputeQPsFromChamberComplex(theGlobalVariables);
+    //tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.FindMultiplicitiesExtrema(theGlobalVariables);
+    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.RefineOneStep(theGlobalVariables);
+    std::stringstream out;
+    out << tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.ElementToString();
   }
   else
   { inputData.theParser.theHmm.MakeG2InB3(inputData.theParser, theGlobalVariables);
     tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.initFromHomomorphism(inputData.theParser.theHmm, theGlobalVariables);
     tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.TransformToWeylProjective(theGlobalVariables);
-    theGlobalVariables.theIndicatorVariables.StatusString1=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.log.str();
+//    theGlobalVariables.theIndicatorVariables.StatusString1=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.log.str();
+    theGlobalVariables.theIndicatorVariables.StatusString1=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.ElementToString();
     theGlobalVariables.MakeReport();
   }
 }
@@ -957,4 +978,213 @@ void GeneralizedVermaModuleCharacters::ProcessParametricChambers
     std::cout << "<br>the parametric chamber: ";
     std::cout << "<div class=\"math\">" << theParamChambers.TheObjects[i].ElementsToInequalitiesString(true, false) << "</div>";
   }
+}
+
+void ConeComplex::GetNewVertices
+  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
+{ int theDimMinusTwo=killerNormal.size-2;
+  int theDim=killerNormal.size;
+  int numCycles=MathRoutines::NChooseK(myDyingCone.Normals.size, theDimMinusTwo);
+  Selection& theSel=theGlobalVariables.selComputeNormalExcludingIndex;
+  Selection& nonPivotPoints=theGlobalVariables.selNonPivotPointsNewSplit;
+  theSel.init(myDyingCone.Normals.size);
+//  int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore;
+  MatrixLargeRational& theLinearAlgebra=theGlobalVariables.matComputeNormalExcludingIndex;
+  MatrixLargeRational matEmpty;
+  theLinearAlgebra.init(theDimMinusTwo, theDim);
+  nonPivotPoints.init(theDimMinusTwo);
+  root tempRoot;
+  for (int i=0; i<numCycles; i++)
+  { theSel.incrementSelectionFixedCardinality(theDimMinusTwo);//, IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
+    //int LowestRowUnchanged=theDimMinusTwo-2-NumOnesAfterLastZeroWithOneBefore;
+    //for (int j=theDimMinusTwo-1; j>LowestRowUnchanged; j--)
+    for (int j=0; j<theDimMinusTwo; j++)
+    { root& currentNormal=myDyingCone.Normals.TheObjects[theSel.elements[j]];
+      for (int k=0; k<theDim; k++)
+        theLinearAlgebra.elements[j][k]=currentNormal.TheObjects[k];
+    }
+    for (int k=0; k<theDim; k++)
+      theLinearAlgebra.elements[theDimMinusTwo-1][k]=killerNormal.TheObjects[k];
+    theLinearAlgebra.GaussianEliminationByRows(theLinearAlgebra, matEmpty, nonPivotPoints);
+    if (nonPivotPoints.CardinalitySelection==1)
+      theLinearAlgebra.NonPivotPointsToRoot(nonPivotPoints, tempRoot);
+    if (myDyingCone.IsInCone(tempRoot))
+      outputVertices.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+    else
+    { tempRoot.MinusRoot();
+      if (myDyingCone.IsInCone(tempRoot))
+        outputVertices.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+    }
+  }
+}
+
+bool ConeComplex::SplitChamber
+(int indexChamberBeingRefined, root& killerNormal, GlobalVariables& theGlobalVariables)
+{ Cone& myDyingCone=this->TheObjects[indexChamberBeingRefined];
+  if (!myDyingCone.flagHasSufficientlyManyVertices)
+  { this->flagChambersHaveTooFewVertices=true;
+    return false;
+  }
+  Cone& newPlusCone= theGlobalVariables.coneBuffer1NewSplit;
+  Cone& newMinusCone=theGlobalVariables.coneBuffer2NewSplit;
+  newPlusCone.flagHasSufficientlyManyVertices=true;
+  newMinusCone.flagHasSufficientlyManyVertices=true;
+  newPlusCone.LowestIndexIHaventBeenCheckedForSplitting=myDyingCone.LowestIndexIHaventBeenCheckedForSplitting+1;
+  newMinusCone.LowestIndexIHaventBeenCheckedForSplitting=myDyingCone.LowestIndexIHaventBeenCheckedForSplitting+1;
+  newPlusCone.Vertices.size=0; newPlusCone.Normals.size=0;
+  newMinusCone.Vertices.size=0; newMinusCone.Normals.size=0;
+  hashedRoots& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit;
+  ZeroVertices.ClearTheObjects();
+  Rational tempRat;
+  for (int i=0; i<myDyingCone.Vertices.size; i++)
+  { root::RootScalarEuclideanRoot(killerNormal, myDyingCone.Vertices.TheObjects[i], tempRat);
+    if (tempRat.IsPositive())
+      newPlusCone.Vertices.AddObjectOnTop(myDyingCone.Vertices.TheObjects[i]);
+    if (tempRat.IsEqualToZero())
+      ZeroVertices.AddObjectOnTopNoRepetitionOfObjectHash(myDyingCone.Vertices.TheObjects[i]);
+    if (tempRat.IsNegative())
+      newMinusCone.Vertices.AddObjectOnTop(myDyingCone.Vertices.TheObjects[i]);
+  }
+  if (newPlusCone.Vertices.size==0 || newMinusCone.Vertices.size==0)
+    return false;
+  for (int i=0; i<myDyingCone.Normals.size; i++)
+  { if (newPlusCone.Vertices.HasAnElementWithPositiveScalarProduct(myDyingCone.Normals.TheObjects[i]))
+      newPlusCone.Normals.AddObjectOnTop(myDyingCone.Normals.TheObjects[i]);
+    if (newMinusCone.Vertices.HasAnElementWithNegativeScalarProduct(myDyingCone.Normals.TheObjects[i]))
+      newMinusCone.Normals.AddObjectOnTop(myDyingCone.Normals.TheObjects[i]);
+  }
+  newPlusCone.Normals.AddObjectOnTop(killerNormal);
+  newMinusCone.Normals.AddObjectOnTop(killerNormal);
+  newPlusCone.Vertices.AddListOnTop(ZeroVertices);
+  newMinusCone.Vertices.AddListOnTop(ZeroVertices);
+  this->PopChamberSwapWithLast(indexChamberBeingRefined);
+  this->AddNonRefinedChamberOnTopNoRepetition(newPlusCone);
+  this->AddNonRefinedChamberOnTopNoRepetition(newMinusCone);
+  return true;
+}
+
+void ConeComplex::PopChamberSwapWithLast(int index)
+{ this->PopIndexSwapWithLastHash(index);
+}
+
+void ConeComplex::AddNonRefinedChamberOnTopNoRepetition(Cone& newCone)
+{ newCone.Normals.QuickSortAscending();
+  if(this->AddObjectOnTopNoRepetitionOfObjectHash(newCone))
+    this->NonRefinedChambers.AddObjectOnTop(this->size-1);
+}
+
+void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
+{ if (this->NonRefinedChambers.size==0)
+    return;
+  int indexBeingProcessed=this->NonRefinedChambers.TheObjects[0];
+  this->NonRefinedChambers.PopIndexSwapWithLast(0);
+  Cone& currentCone=this->TheObjects[indexBeingProcessed];
+  for (; currentCone.LowestIndexIHaventBeenCheckedForSplitting<this->splittingNormals.size; currentCone.LowestIndexIHaventBeenCheckedForSplitting++)
+    if (this->SplitChamber(indexBeingProcessed, this->splittingNormals.TheObjects[currentCone.LowestIndexIHaventBeenCheckedForSplitting], theGlobalVariables))
+      return;
+}
+
+void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
+{ while (this->NonRefinedChambers.size>0)
+    this->RefineOneStep(theGlobalVariables);
+}
+
+void Cone::CreateFromNormals
+  (roots& inputNormals, GlobalVariables& theGlobalVariables)
+{ this->Normals.CopyFromBase(inputNormals);
+//  roots& candidateVertices=theGlobalVariables.rootsGeneralPurposeBuffer1;
+  Selection theSel, nonPivotPoints;
+  this->Vertices.size=0;
+  if (this->Normals.size==0)
+    return;
+  for (int i=0; i<this->Normals.size; i++)
+    this->Normals.TheObjects[i].ScaleToIntegralMinHeight();
+  int theDim=this->Normals.TheObjects[0].size;
+  theSel.init(this->Normals.size);
+  int numCycles=theSel.GetNumCombinationsFixedCardinality(theDim-1);
+  MatrixLargeRational& theMat=theGlobalVariables.matComputeNormalFromSelection;
+  MatrixLargeRational emptyMat;
+  root tempRoot;
+  theMat.init(theDim-1, theDim);
+  for (int i=0; i<numCycles; i++)
+  { theSel.incrementSelectionFixedCardinality(theDim-1);
+    for (int j=0; j<theSel.CardinalitySelection; j++)
+      for (int k=0; k<theDim; k++)
+        theMat.elements[j][k]=this->Normals.TheObjects[theSel.elements[j]].TheObjects[k];
+    theMat.GaussianEliminationByRows(theMat, emptyMat, nonPivotPoints);
+    if (nonPivotPoints.CardinalitySelection==1)
+    { theMat.NonPivotPointsToRoot(nonPivotPoints, tempRoot);
+      bool tempBool=this->IsInCone(tempRoot);
+      if (!tempBool)
+      { tempRoot.MinusRoot();
+        tempBool=this->IsInCone(tempRoot);
+      }
+      if (tempBool)
+      { tempRoot.ScaleToIntegralMinHeight();
+        this->Vertices.AddOnTopNoRepetition(tempRoot);
+      }
+    }
+  }
+  //time to eliminate possible fake walls
+  roots& verticesOnWall=theGlobalVariables.rootsGeneralPurposeBuffer2;
+  for (int i=0; i<this->Normals.size; i++)
+  { root& currentNormal=this->Normals.TheObjects[i];
+    verticesOnWall.size=0;
+    bool wallIsGood=false;
+    for (int j=0; j<this->Vertices.size; j++)
+      if (root::RootScalarEuclideanRoot(this->Vertices.TheObjects[j], currentNormal).IsEqualToZero())
+      { verticesOnWall.AddObjectOnTop(this->Vertices.TheObjects[j]);
+        int theRank=verticesOnWall.GetRankOfSpanOfElements(theGlobalVariables);
+        if (theRank< verticesOnWall.size)
+          verticesOnWall.PopLastObject();
+        else
+          if (theRank==theDim-1)
+          { wallIsGood=true;
+            break;
+          }
+      }
+    if (!wallIsGood)
+    { this->Normals.PopIndexSwapWithLast(i);
+      i--;
+    }
+  }
+  this->Normals.QuickSortAscending();
+}
+
+void ConeComplex::initFromCones
+(List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
+{ Cone tempCone;
+  this->ClearTheObjects();
+  for (int i=0; i<NormalsOfCones.size; i++)
+  { tempCone.CreateFromNormals(NormalsOfCones.TheObjects[i], theGlobalVariables);
+    this->AddNonRefinedChamberOnTopNoRepetition(tempCone);
+  }
+  root tempRoot;
+  this->splittingNormals.ClearTheObjects();
+  for (int i=0; i<this->size; i++)
+    for (int j=0; j<this->TheObjects[i].Normals.size; j++)
+    { tempRoot=this->TheObjects[i].Normals.TheObjects[j];
+      tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+      this->splittingNormals.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+    }
+}
+
+std::string Cone::ElementToString()
+{ std::stringstream out;
+  out << "Normals:\n";
+  out << this->Normals.ElementsToInequalitiesString(false, false);
+  out << "\nVertices:" << this->Vertices.ElementToString();
+  return out.str();
+}
+
+std::string ConeComplex::ElementToString()
+{ std::stringstream out;
+  out << "Number of chambers:" << this->size << " Non refined chambers:\n";
+  for (int i=0; i<this->NonRefinedChambers.size; i++)
+    out << this->NonRefinedChambers.TheObjects[i];
+  for (int i=0; i<this->size; i++)
+  { out << "Chamber " << i+1 << ":\n";
+    out << this->TheObjects[i].ElementToString() << "\n\n\n";
+  }
+  return out.str();
 }

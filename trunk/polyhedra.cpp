@@ -167,8 +167,10 @@ template < > int HashedList<GeneralizedMonomialRational>::PreferredHashSize=20;
 template < > int HashedList<MonomialUniversalEnvelopingOrdered<RationalFunction> >::PreferredHashSize=20;
 template < > int HashedList<Monomial<RationalFunction> >::PreferredHashSize=20;
 template < > int HashedList<roots>::PreferredHashSize=10000;
+template < > int HashedList<Cone>::PreferredHashSize=10000;
 
 
+template < > int List<Cone>::ListActualSizeIncrement=100;
 template < > int List<affineCone>::ListActualSizeIncrement=1;
 template < > int List<CombinatorialChamber*>::ListActualSizeIncrement=1000;
 template < > int List<ComplexQN>::ListActualSizeIncrement=1;
@@ -2249,19 +2251,8 @@ void MatrixLargeRational::AssignRootsToRowsOfMatrix(const roots& input)
       this->elements[i][j].Assign(input.TheObjects[i].TheObjects[j]);
 }
 
-void MatrixLargeRational::NonPivotPointsToRoot(Selection& TheNonPivotPoints, int OutputDimension, root& output)
-{ int RowCounter=0;
-  output.SetSize(OutputDimension);
-  for (int i=0; i<OutputDimension; i++)
-  { if (!TheNonPivotPoints.selected[i])
-    { output.TheObjects[i].MakeZero();
-      for (int j=0; j<TheNonPivotPoints.CardinalitySelection; j++ )
-        output.TheObjects[i].Subtract(this->elements[RowCounter][TheNonPivotPoints.elements[j]]);
-      RowCounter++;
-    }
-    else
-      output.TheObjects[i].MakeOne();
-  }
+void MatrixLargeRational::NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output)
+{ this->NonPivotPointsToEigenVector(TheNonPivotPoints, output, (Rational) 1, (Rational) 0);
 }
 
 int MathRoutines::lcm(int a, int b)
@@ -2557,8 +2548,20 @@ void Selection::incrementSelection()
   this->ComputeIndicesFromSelection();
 }
 
-void Selection::incrementSelectionFixedCardinality(int card)
-{ if (card>this->MaxSize)
+void Selection::incrementSelectionFixedCardinality(int card, int& IndexLastZeroWithOneBefore, int& NumOnesAfterLastZeroWithOneBefore)
+{ //example of the order of generation of all combinations when card=2 and MaxSize=5. The second column indicates the
+  //state of the array at the point in code marked with *** below
+  //11000     (->10000) IndexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 0
+  //10100     (->10000) IndexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
+  //10010     (->10000) IndexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
+  //10001     (->00000) IndexLastZeroWithOneBefore: 1 NumOnesAfterLastZeroWithOneBefore: 1
+  //01100     (->01000) IndexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
+  //01010     (->01000) IndexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
+  //01001     (->00000) IndexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 1
+  //00110     (->00100) IndexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
+  //00101     (->00000) IndexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 1
+  //00011
+  if (card>this->MaxSize)
     return;
   if (this->CardinalitySelection!=card)
   { this->initNoMemoryAllocation();
@@ -2566,15 +2569,16 @@ void Selection::incrementSelectionFixedCardinality(int card)
     { this->selected[i]=true;
       this->elements[i]=i;
     }
+    IndexLastZeroWithOneBefore=0;
     this->CardinalitySelection=card;
     return;
   }
   if(card==this->MaxSize || card==0)
     return;
-  int IndexLastZeroWithOneBefore=-1;
-  int NumOnesAfterLastZeroWithOneBefore=0;
+  IndexLastZeroWithOneBefore=-1;
+  NumOnesAfterLastZeroWithOneBefore=0;
   for(int i=this->MaxSize-1; i>=0; i--)
-  { if (selected[i])
+  { if (this->selected[i])
     { if (IndexLastZeroWithOneBefore==-1)
         NumOnesAfterLastZeroWithOneBefore++;
       else
@@ -2586,10 +2590,11 @@ void Selection::incrementSelectionFixedCardinality(int card)
   if (IndexLastZeroWithOneBefore==0)
     return;
   for(int i=0; i<NumOnesAfterLastZeroWithOneBefore+1; i++)
-    this->selected[elements[CardinalitySelection-i-1]]=false;
+    this->selected[this->elements[this->CardinalitySelection-i-1]]=false;
+  //***At this point in time the second column is recorded
   for(int i=0; i<NumOnesAfterLastZeroWithOneBefore+1; i++)
   { this->selected[i+ IndexLastZeroWithOneBefore]=true;
-    this->elements[CardinalitySelection+i-NumOnesAfterLastZeroWithOneBefore-1] = i+ IndexLastZeroWithOneBefore;
+    this->elements[this->CardinalitySelection+i-NumOnesAfterLastZeroWithOneBefore-1] = i+ IndexLastZeroWithOneBefore;
   }
 }
 
@@ -2823,7 +2828,7 @@ bool roots::GetLinearDependence(MatrixLargeRational& outputTheLinearCombination)
   this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
   if (nonPivotPoints.CardinalitySelection==0)
     return false;
-  tempMat.NonPivotPointsToEigenVector(nonPivotPoints, outputTheLinearCombination, ROne, RZero);
+  tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination, ROne, RZero);
   //outputTheLinearCombination.ComputeDebugString();
   return true;
 }
@@ -2850,7 +2855,7 @@ void roots::ComputeNormal(root& output)
   this->GaussianEliminationForNormalComputation(tempMatrix, NonPivotPoints, theDimension);
   if (NonPivotPoints.CardinalitySelection!=1)
     return;
-  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, theDimension, output);
+  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, output);
 }
 
 bool roots::IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension)
@@ -2898,7 +2903,7 @@ bool roots::ComputeNormalExcludingIndex(root& output, int index, GlobalVariables
   MatrixLargeRational::GaussianEliminationByRows(tempMatrix, matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
-  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, theDimension, output);
+  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, output);
   return true;
 }
 
@@ -2915,7 +2920,7 @@ bool roots::ComputeNormalFromSelection(root& output, Selection& theSelection, Gl
   MatrixLargeRational::GaussianEliminationByRows(tempMatrix, matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
-  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, theDimension, output);
+  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, output);
   return true;
 }
 
@@ -2937,7 +2942,7 @@ bool roots::ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot
   MatrixLargeRational::GaussianEliminationByRows(tempMatrix, matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
-  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, theDimension, output);
+  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, output);
   return true;
 }
 
@@ -2961,7 +2966,7 @@ bool roots::ComputeNormalFromSelectionAndTwoExtraRoots( root& output, root& Extr
   MatrixLargeRational::GaussianEliminationByRows(tempMatrix, matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
-  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, theDimension, output);
+  tempMatrix.NonPivotPointsToRoot(NonPivotPoints, output);
   return true;
 }
 
@@ -3036,7 +3041,7 @@ void roots::AddRootSnoRepetition(roots &r)
     this->AddRootNoRepetition(r.TheObjects[i]);
 }
 
-bool roots::operator ==(const roots& right)
+bool roots::operator ==(const roots& right)const
 { if (this->size!= right.size)
     return false;
   for (int i=0; i<right.size; i++)
@@ -3600,7 +3605,7 @@ bool CombinatorialChamber::PointIsAVertex(const root& point, GlobalVariables& th
   return false;
 }
 
-bool Cone::PointIsAVertex(const roots& coneNormals, root& thePoint, GlobalVariables& theGlobalVariables)
+bool ConeGlobal::PointIsAVertex(const roots& coneNormals, root& thePoint, GlobalVariables& theGlobalVariables)
 { roots WallsContainingPoint; WallsContainingPoint.MakeActualSizeAtLeastExpandOnTop(thePoint.size-1);
   for (int i=0; i<coneNormals.size; i++)
   { if (coneNormals.TheObjects[i].OurScalarProductIsZero(thePoint))
@@ -3748,7 +3753,7 @@ bool CombinatorialChamber::LinearAlgebraForVertexComputation(Selection& theSelec
       RMinus1ByR.elements[i][j].Assign(this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
   MatrixLargeRational::GaussianEliminationByRows(RMinus1ByR, matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection==1)
-  { RMinus1ByR.NonPivotPointsToRoot(NonPivotPoints, theDimension, output);
+  { RMinus1ByR.NonPivotPointsToRoot(NonPivotPoints, output);
     return true;
   }
   return false;
@@ -4542,7 +4547,7 @@ int CombinatorialChamberContainer::GetNumNonZeroPointers()
   return result;
 }
 
-int CombinatorialChamberContainer::LabelChambersAndGetNumChambersInWeylChamber(Cone& theWeylChamber)
+int CombinatorialChamberContainer::LabelChambersAndGetNumChambersInWeylChamber(ConeGlobal& theWeylChamber)
 { int NumChambersInWeyl=0;
   int NumZeroChambers=0;
   int NumChambersNonZeroNotInWeyl=0;
@@ -4797,14 +4802,14 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theG
   this->flagIsRunning=false;
 }
 
-void Cone::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void ConeGlobal::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
 { this->roots::WriteToFile(output, theGlobalVariables);
   output << "\nChamberTestArray: " << this->ChamberTestArray.size << " ";
   for (int i=0; i<this->ChamberTestArray.size; i++)
     output << this->ChamberTestArray.TheObjects[i] << " ";
 }
 
-void Cone::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void ConeGlobal::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS; int tempI;
   this->roots::ReadFromFile(input, theGlobalVariables);
   input >> tempS >> tempI;
@@ -4876,7 +4881,7 @@ void hashedRoots::ReadFromFile(std::fstream& input)
    }
 }
 
-void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVariables, int theDimension)
+void ConeGlobal::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVariables, int theDimension)
 { this->size=0;
   int NumCandidates = MathRoutines::NChooseK(directions.size, theDimension-1);
   Selection theSelection;
@@ -4911,13 +4916,13 @@ void Cone::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVa
   this->ChamberTestArray.SetSize(this->size);
 }
 
-bool Cone::IsSurelyOutsideCone(roots& TheVertices)
+bool ConeGlobal::IsSurelyOutsideCone(roots& TheVertices)
 { if (!this->FillInChamberTestArray(TheVertices, true))
     return false;
   return this->IsSurelyOutsideConeAccordingToChamberTestArray();
 }
 
-bool Cone::FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray)
+bool ConeGlobal::FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray)
 { //init first the array we will use for check
   //values in the array: 0 undertermined, -1 - outside with respect to the normal of the particular wall, +1 inside with respect to the normal of the particular wall
   if (initChamberTestArray)
@@ -4949,14 +4954,14 @@ bool Cone::FillInChamberTestArray(roots& TheVertices, bool initChamberTestArray)
   return true;
 }
 
-bool Cone::IsSurelyOutsideConeAccordingToChamberTestArray()
+bool ConeGlobal::IsSurelyOutsideConeAccordingToChamberTestArray()
 { for (int i=0; i<this->size; i++)
     if (this->ChamberTestArray.TheObjects[i]==-1)
       return true;
   return false;
 }
 
-bool Cone::IsSurelyOutsideCone(rootsCollection& TheVertices)
+bool ConeGlobal::IsSurelyOutsideCone(rootsCollection& TheVertices)
 { bool firstRun=true;
   for (int i=0; i<TheVertices.size; i++)
   { if (!this->FillInChamberTestArray(TheVertices.TheObjects[i], firstRun))
@@ -5022,7 +5027,7 @@ void CombinatorialChamber::WireChamberAndWallAdjacencyData(CombinatorialChamberC
   }
 }
 
-bool Cone::IsInCone(const root& r)
+bool ConeGlobal::IsInCone(const root& r)
 { for (int i=0; i<this->size; i++)
   { Rational tempRat;
     root::RootScalarEuclideanRoot(r, this->TheObjects[i], tempRat);
@@ -5032,14 +5037,14 @@ bool Cone::IsInCone(const root& r)
   return true;
 }
 
-bool Cone::IsInCone(const roots& theRoots)
+bool ConeGlobal::IsInCone(const roots& theRoots)
 { for (int i=0; i<theRoots.size; i++)
     if (!this->IsInCone(theRoots.TheObjects[i]))
       return false;
   return true;
 }
 
-int Cone::GetSignWRTCone(const root& r)
+int ConeGlobal::GetSignWRTCone(const root& r)
 { Rational tempRat;
   bool allPositive=true;
   for (int i=0; i<this->size; i++)
@@ -5054,7 +5059,7 @@ int Cone::GetSignWRTCone(const root& r)
   return 0;
 }
 
-bool Cone::IsOnConeBorder(const root& r)
+bool ConeGlobal::IsOnConeBorder(const root& r)
 { bool found=false;
   for (int i=0; i<this->size; i++)
   { Rational tempRat;
@@ -5067,7 +5072,7 @@ bool Cone::IsOnConeBorder(const root& r)
   return found;
 }
 
-bool Cone::IsStrictlyInsideCone(const root& r)
+bool ConeGlobal::IsStrictlyInsideCone(const root& r)
 { for (int i=0; i<this->size; i++)
   { Rational tempRat;
     root::RootScalarEuclideanRoot(r, this->TheObjects[i], tempRat);
@@ -5077,13 +5082,13 @@ bool Cone::IsStrictlyInsideCone(const root& r)
   return true;
 }
 
-bool Cone::SeparatesPoints(root& point1, root& point2)
+bool ConeGlobal::SeparatesPoints(root& point1, root& point2)
 { bool tempB1= this->IsInCone(point1);
   bool tempB2= this->IsInCone(point2);
   return !(tempB1==tempB2);
 }
 
-void Cone::operator=(const Cone& right)
+void ConeGlobal::operator=(const ConeGlobal& right)
 { this->CopyFromBase(right);
   this->ChamberTestArray.CopyFromBase(right.ChamberTestArray);
 }
@@ -8990,7 +8995,7 @@ bool partFraction::rootIsInFractionCone(partFractions& owner, root* theRoot, Glo
   }
   MatrixLargeRational tempMat, MatOneCol;
   Selection NonPivotPoints;
-  Cone tempCone; roots tempRoots;
+  ConeGlobal tempCone; roots tempRoots;
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { int tempI= this->IndicesNonZeroMults.TheObjects[i];
     tempRoots.AddIntRoot(owner.RootsToIndices.TheObjects[tempI]);
@@ -11690,7 +11695,7 @@ void WeylGroup::RootScalarCartanRoot(const root& r1, const root& r2, Rational& o
     }
 }
 
-void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, Cone* LimitingCone, bool onlyLowerWeights)
+void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, ConeGlobal* LimitingCone, bool onlyLowerWeights)
 { hashedRoots TheIndicatorsOrbit;
   WeylGroup OrbitGeneratingSubset;
   PolynomialOutputFormat PolyFormatLocal;
@@ -13157,7 +13162,7 @@ void rootFKFTcomputation::MakeTheRootFKFTSum(root& ChamberIndicator, partFractio
 { PolynomialsRationalCoeffCollection TheChambersInTheGame;
   PolynomialsRationalCoeff StartingRoot;
   //::theGlobalVariables.theIndicatorVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
-  Cone TheNilradicalCone;
+  ConeGlobal TheNilradicalCone;
   TheNilradicalCone.ComputeFromDirections(theNilradical, *this->TheGlobalVariables, 5);
   TheNilradicalCone.ComputeDebugString();
   StartingRoot.MakeIdSubstitution(5, (Rational) 1);

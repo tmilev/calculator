@@ -550,7 +550,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->BoxSizer17HorizontalProverButtons=  new ::wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer18LProhibiting= new wxBoxSizer(wxHORIZONTAL);
   this->BoxSizer19DyckPaths = new wxBoxSizer(wxHORIZONTAL);
-  this->BoxSizer20ChamberSplit = new wxBoxSizer(wxHORIZONTAL);
+  this->BoxSizer20ChamberSplit = new wxBoxSizer(wxVERTICAL);
   this->BoxSizer21CharacterChamberSplit = new wxBoxSizer(wxHORIZONTAL);
   this->ToggleButton1UsingCustom= new ::wxToggleButton(this, guiMainWindow::ID_ToggleButton1UsingCustom,wxT("Switch to custom"));
   this->Table1Input = new ::wxGridExtra( this,wxID_ANY);

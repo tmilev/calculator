@@ -2416,9 +2416,10 @@ public:
   bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
   void ChooseABasis(GlobalVariables& theGlobalVariables);
-  void Average(root& output, int theDimension);
-  void Sum(root& output, int theDimension);
-  void Sum(root& output);
+  void average(root& output);
+  void average(root& output, int theDimension);
+  void sum(root& output, int theDimension);
+  void sum(root& output);
   void Pop(int index);
   void intersectWith(roots& right, roots& output);
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex)
@@ -2429,6 +2430,12 @@ public:
         out << ",";
     }
     return out.str();
+  }
+  bool HasAnElementPerpendicularTo(const root& input)const
+  { for (int i=0; i<this->size; i++)
+      if (root::RootScalarEuclideanRoot(this->TheObjects[i], input).IsEqualToZero())
+        return true;
+    return false;
   }
   bool HasAnElementWithNegativeScalarProduct(const root& input)const
   { for (int i=0; i<this->size; i++)
@@ -8841,9 +8848,15 @@ class Cone
   bool flagHasSufficientlyManyVertices;
   int LowestIndexIHaventBeenCheckedForSplitting;
   std::string ElementToString();
-  void CreateFromNormals
+  std::string DebugString;
+  void ComputeDebugString(){ this->DebugString=this->ElementToString();}
+  bool CreateFromNormals
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
   ;
+  void GetInternalPoint(root& output)
+  { this->Vertices.sum(output);
+  }
+  root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
   int HashFunction()const
   { return this->Vertices.HashFunction();
   }
@@ -8873,20 +8886,23 @@ class ConeComplex : public HashedList<Cone>
 public:
   bool flagChambersHaveTooFewVertices;
   bool flagIsRefined;
-  List<int> NonRefinedChambers;
+//  List<int> NonRefinedChambers;
+  int indexLowestNonRefinedChamber;
   hashedRoots splittingNormals;
+  std::string DebugString;
   void RefineOneStep(GlobalVariables& theGlobalVariables);
   void Refine(GlobalVariables& theGlobalVariables);
   void AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
   void PopChamberSwapWithLast(int index);
   std::string ElementToString();
+  void ComputeDebugString(){this->DebugString=this->ElementToString();}
   void initFromCones
   (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
   ;
   bool SplitChamber
   (int indexChamberBeingRefined, root& killerNormal, GlobalVariables& theGlobalVariables)
   ;
-  void GetNewVertices
+  void GetNewVerticesAppend
   (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
   ;
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}

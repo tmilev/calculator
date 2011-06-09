@@ -333,7 +333,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
     { newChamber->AllVertices.PopIndexSwapWithLast(i);
       i--;
     }
-  newChamber->AllVertices.Average(newChamber->InternalPoint, this->AmbientDimension);
+  newChamber->AllVertices.average(newChamber->InternalPoint, this->AmbientDimension);
   newChamber->flagExplored=true;
   newChamber->flagHasZeroPolynomiaL= this->TheObjects[IndicesToGlue.TheObjects[0]]->flagHasZeroPolynomiaL;
   newChamber->IndexStartingCrossSectionNormal= this->TheObjects[IndicesToGlue.TheObjects[0]]->IndexStartingCrossSectionNormal;
@@ -954,8 +954,9 @@ int CGIspecificRoutines::ReadDataFromCGIinput(std::string& inputBad, Computation
   { tempStream >> tempS >> tempS >> tempS >> tempS >> output.DisplayNumberChamberOfInterest;
    // std::cout<< "Chamber of interest: "<< output.DisplayNumberChamberOfInterest;
   }
+  int theDimension=output.thePartialFraction.theChambers.AmbientDimension;
   if (output.flagComputingVectorPartitions && output.DisplayNumberChamberOfInterest==-1)
-  { output.VPVectors.Average(output.IndicatorRoot, output.thePartialFraction.theChambers.AmbientDimension);
+  { output.VPVectors.average(output.IndicatorRoot, theDimension);
     output.IndicatorRoot.MultiplyByInteger(output.VPVectors.size);
   }
   //output.VPVectors.ComputeDebugString();
@@ -2673,6 +2674,11 @@ void root::RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, 
 
 void root::RootScalarEuclideanRoot(const root& r1, const  root& r2, Rational& output)
 { Rational tempRat;
+  if (r1.size!=r2.size)
+  { int* x;
+    x=0;
+    *x=5;
+  }
   assert(r1.size==r2.size);
   output.MakeZero();
   for(int i=0; i<r1.size; i++)
@@ -3004,20 +3010,27 @@ void roots::AssignMatrixColumns(MatrixLargeRational& mat)
   }
 }
 
-void roots::Average(root& output, int theDimension)
-{ this->Sum(output, theDimension);
+void roots::average(root& output, int theDimension)
+{ this->sum(output, theDimension);
   if (this->size==0)
     return;
   output.DivByInteger(this->size);
 }
 
-void roots::Sum(root& output, int theDimension)
+void roots::average(root& output)
+{ this->sum(output);
+  if (this->size==0)
+    return;
+  output.DivByInteger(this->size);
+}
+
+void roots::sum(root& output, int theDimension)
 { output.MakeZero(theDimension);
   for (int i=0; i<this->size; i++)
     output.Add(this->TheObjects[i]);
 }
 
-void roots::Sum(root& output)
+void roots::sum(root& output)
 { assert(this->size>0);
   output.MakeZero(this->TheObjects[0].size);
   for (int i=0; i<this->size; i++)
@@ -3469,7 +3482,7 @@ void CombinatorialChamber::ComputeInternalPoint(root& InternalPoint, int theDime
 }
 
 void CombinatorialChamber::ComputeAffineInternalPoint(root& outputPoint, int theDimension)
-{ this->affineVertices.Average(outputPoint, theDimension);
+{ this->affineVertices.average(outputPoint, theDimension);
 }
 
 void CombinatorialChamber::LabelWallIndicesProperly()
@@ -6330,8 +6343,8 @@ void rootsCollection::Average(root& output, int Number, int theDimension)
   if (this->size==0)
     return;
   for(int i=0; i<Number; i++)
-  { this->TheObjects[i].Average(tempRoot, theDimension);
-    output.Add(tempRoot);
+  { this->TheObjects[i].average(tempRoot, theDimension);
+    output+=tempRoot;
   }
   output.DivByInteger(this->size);
 }
@@ -9707,13 +9720,13 @@ bool partFractions::AssureIndicatorRegularity(GlobalVariables& theGlobalVariable
 { roots tempRoots;
   tempRoots.AssignHashedIntRoots(this->RootsToIndices);
   if (theIndicator.IsEqualToZero())
-  { tempRoots.Average(theIndicator, this->AmbientDimension);
+  { tempRoots.average(theIndicator, this->AmbientDimension);
     theIndicator.MultiplyByInteger(tempRoots.size);
   }
   return  tempRoots.PerturbVectorToRegular(  theIndicator, theGlobalVariables, theIndicator.size);
 }
 
-void partFractions::UncoverBracketsNumerators( GlobalVariables& theGlobalVariables, root* Indicator)
+void partFractions::UncoverBracketsNumerators(GlobalVariables& theGlobalVariables, root* Indicator)
 { if (partFraction::UncoveringBrackets)
     return;
   int changeOfNumMonomials=0;
@@ -14547,7 +14560,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
     this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, tempRoots, this->kModulesKepsCoords.TheObjects[i], theGlobalVariables);
     this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->kModules.TheObjects[i], this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
     root tempRoot;
-    this->kModulesKepsCoords.TheObjects[i].Average(tempRoot, this->kModulesKepsCoords.TheObjects[i].TheObjects[0].size);
+    this->kModulesKepsCoords.TheObjects[i].average(tempRoot);
     assert(tempRoot.IsEqualToZero());
    // this->kModulesgEpsCoords.TheObjects[i].Average
      // (tempRoot, this->kModulesgEpsCoords.TheObjects[i].TheObjects[0].size);
@@ -24069,7 +24082,7 @@ void CombinatorialChamberContainer::MakeStartingChambersDontSpanEntireSpace(root
     theStartingChamber.Externalwalls.TheObjects[i].normal.Assign(this->TheGlobalConeNormals.TheObjects[i]);
   this->StartingCrossSections.SetSize(1);
   theStartingChamber.IndexStartingCrossSectionNormal=0;
-  this->TheGlobalConeNormals.Average(this->StartingCrossSections.TheObjects[0].normal, this->AmbientDimension);
+  this->TheGlobalConeNormals.average(this->StartingCrossSections.TheObjects[0].normal, this->AmbientDimension);
   this->StartingCrossSections.TheObjects[0].affinePoint.Assign(directions.TheObjects[0]);
   Selection tempSel;
   tempSel.init(this->TheGlobalConeNormals.size);
@@ -24152,7 +24165,7 @@ void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& d
     assert(this->TheObjects[i]->ConsistencyCheck(this->AmbientDimension, false, *this, theGlobalVariables));
     if (this->TheGlobalConeNormals.IsSurelyOutsideCone(this->TheObjects[i]->AllVertices))
       this->TheObjects[i]->flagPermanentlyZero=true;
-    this->TheObjects[i]->AllVertices.Average(this->TheObjects[i]->InternalPoint, this->AmbientDimension);
+    this->TheObjects[i]->AllVertices.average(this->TheObjects[i]->InternalPoint, this->AmbientDimension);
   }
   this->TheObjects[NumStartingChambers-1]->flagHasZeroPolynomiaL=false;
   this->initNextIndex();

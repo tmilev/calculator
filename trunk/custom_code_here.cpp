@@ -49,14 +49,16 @@ public:
   roots theTranslationsProjected;
   partFractions thePfs;
   List<List<roots> > paramSubChambers, nonParamVertices;
+  List<roots> allParamSubChambersRepetitionsAllowed;
   List<List<QuasiPolynomial> > ExtremeQPsParamSubchambers;
   CombinatorialChamberContainer projectivizedChamber;
+  ConeComplex projectivizedParamComplex;
   ConeComplex projectivizedChamberTest;
   std::stringstream log;
   GeneralizedVermaModuleCharacters(){this->flagUsingNewSplit=true;}
-  void GetProjection(int indexOperator, root& input, root& output);
+  void GetProjection(int indexOperator, const root& input, root& output);
   void FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables);
-  void ProcessParametricChambers
+  void ProcessOneParametricChamber
   (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
   ;
   void ComputeQPsFromChamberComplex
@@ -186,6 +188,8 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
           current.GetWallNormals(*tempChambers.LastObject());
         }
     this->projectivizedChamberTest.initFromCones(tempChambers, theGlobalVariables);
+    this->projectivizedChamberTest.splittingNormals.ClearTheObjects();
+    this->projectivizedChamberTest.splittingNormals.AddListOnTopNoRepetitionOfObjectHash(this->projectivizedChamber.theHyperplanes);
   }
   this->projectivizedChamber.ElementToString(tempS);
   this->log << tempS;
@@ -303,7 +307,7 @@ void WeylGroup::GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatr
 
 GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
 
-void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, root& input, root& output)
+void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const root& input, root& output)
 { MatrixLargeRational& currentOperator=this->theLinearOperators.TheObjects[indexOperator];
   root& currentTranslation=this->theTranslations.TheObjects[indexOperator];
   root tempRoot2;
@@ -364,7 +368,9 @@ std::string QPSub::ElementToString()
 
 void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 (GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
+{ if (!this->flagUsingNewSplit)
+    return;
+  std::stringstream out;
   PolynomialOutputFormat theFormat;
   root tempRoot;
   QPSub theSub;
@@ -375,8 +381,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << "=" << this->thePfs.DebugString;
   int totalDim=this->theTranslations.TheObjects[0].size-1;
-  this->theQPsSubstituted.SetSize(this->projectivizedChamber.size);
-  this->theSums.SetSize(this->projectivizedChamber.size);
+  this->theQPsSubstituted.SetSize(this->projectivizedChamberTest.size);
+  this->theSums.SetSize(this->projectivizedChamberTest.size);
   this->thePfs.theChambers.init();
   this->thePfs.theChambers.theDirections=this->GmodKnegativeWeights;
   this->thePfs.theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
@@ -388,60 +394,60 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     }
   QuasiPolynomial theQPNoSub;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-    if (this->projectivizedChamber.TheObjects[i]!=0)
-      if (!this->projectivizedChamber.TheObjects[i]->flagPermanentlyZero)
-      { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
-        for (int k=0; k<this->theLinearOperators.size; k++)
-        { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
-          this->GetProjection(k, this->projectivizedChamber.TheObjects[i]->InternalPoint, tempRoot);
-          int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
-          if (theIndex==-1)
-            theQPNoSub.Nullify(tempRoot.size);
-          else
-            theQPNoSub=this->theQPsNonSubstituted.TheObjects[theIndex];
-          std::stringstream tempStream;
-          tempStream << "chamber " << i+1 << " linear opeator " << k+1;
-          theGlobalVariables.theIndicatorVariables.ProgressReportString1= tempStream.str();
-          theGlobalVariables.MakeReport();
-          out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, theFormat);
-          this->GetSubFromIndex(theSub, k);
-          theQPNoSub.RationalLinearSubstitution(theSub, currentQPSub);
-          out << "; after substitution we get: " << currentQPSub.ElementToString(false, theFormat);
-          out << "\nthe sub is: " << theSub.ElementToString();
-        }
-      }
+  for (int i=0; i<this->projectivizedChamberTest.size; i++)
+  { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
+    for (int k=0; k<this->theLinearOperators.size; k++)
+    { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
+      this->GetProjection(k, this->projectivizedChamberTest.TheObjects[i].GetInternalPoint(), tempRoot);
+      int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
+      if (theIndex==-1)
+        theQPNoSub.Nullify(tempRoot.size);
+      else
+        theQPNoSub=this->theQPsNonSubstituted.TheObjects[theIndex];
+      std::stringstream tempStream;
+      tempStream << "chamber " << i+1 << " linear opeator " << k+1;
+      theGlobalVariables.theIndicatorVariables.ProgressReportString1= tempStream.str();
+      theGlobalVariables.MakeReport();
+      out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, theFormat);
+      this->GetSubFromIndex(theSub, k);
+      theQPNoSub.RationalLinearSubstitution(theSub, currentQPSub);
+      out << "; after substitution we get: " << currentQPSub.ElementToString(false, theFormat);
+      out << "\nthe sub is: " << theSub.ElementToString();
+    }
+  }
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   QuasiPolynomial tempQP;
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-    if (this->projectivizedChamber.TheObjects[i]!=0)
-      if (!this->projectivizedChamber.TheObjects[i]->flagPermanentlyZero)
-      { QuasiPolynomial& currentSum=this->theSums.TheObjects[i];
-        currentSum.Nullify(totalDim);
-        for (int k=0; k<this->theLinearOperators.size; k++)
-        { tempQP=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
-          tempQP*=this->theCoeffs.TheObjects[k];
-          currentSum+=tempQP;
-        }
-        out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString();\
-        this->projectivizedChamber.TheObjects[i]->ComputeDebugString(this->projectivizedChamber);
-        out << "\nThe chamber is: " << this->projectivizedChamber.TheObjects[i]->DebugString;
-      }
-  out << "\n\n" << this->projectivizedChamber.DebugString;
+  for (int i=0; i<this->projectivizedChamberTest.size; i++)
+  { QuasiPolynomial& currentSum=this->theSums.TheObjects[i];
+    currentSum.Nullify(totalDim);
+    for (int k=0; k<this->theLinearOperators.size; k++)
+    { tempQP=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
+      tempQP*=this->theCoeffs.TheObjects[k];
+      currentSum+=tempQP;
+    }
+    out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString();\
+    out << "\nThe chamber is: " << this->projectivizedChamberTest.TheObjects[i].ElementToString();
+  }
+  this->projectivizedChamberTest.ComputeDebugString();
+  out << "\n\n" << this->projectivizedChamberTest.DebugString;
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
 }
 
 void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { if (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.flagSliceWithAWallInitDone)
-  { //while (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.oneStepChamberSlice(theGlobalVariables)){}
-    //if (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.flagUsingNewSplit)
-    //  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.Refine(theGlobalVariables);
-    //tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.ComputeQPsFromChamberComplex(theGlobalVariables);
-    //tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.FindMultiplicitiesExtrema(theGlobalVariables);
-    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.RefineOneStep(theGlobalVariables);
-    std::stringstream out;
-    out << tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.ElementToString();
+  { if (!tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.flagUsingNewSplit)
+    { while (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.oneStepChamberSlice(theGlobalVariables)){}
+    } else
+    { tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.Refine(theGlobalVariables);
+      std::stringstream out;
+      out << tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.ElementToString();
+      theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+      theGlobalVariables.MakeReport();
+    }
+//    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.ComputeQPsFromChamberComplex(theGlobalVariables);
+    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.FindMultiplicitiesExtrema(theGlobalVariables);
   }
   else
   { inputData.theParser.theHmm.MakeG2InB3(inputData.theParser, theGlobalVariables);
@@ -821,41 +827,47 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
 }
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables)
-{ roots currentChamberNormals;
-  this->paramSubChambers.SetSize(this->projectivizedChamber.size);
-  this->nonParamVertices.SetSize(this->projectivizedChamber.size);
-  this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamber.size);
+{ if (!this->flagUsingNewSplit)
+    return;
+  this->paramSubChambers.SetSize(this->projectivizedChamberTest.size);
+  this->nonParamVertices.SetSize(this->projectivizedChamberTest.size);
+  int theDimension=6;
+  if (this->projectivizedChamberTest.size>0)
+    theDimension=this->projectivizedChamberTest.TheObjects[0].Normals.TheObjects[0].size;
+  this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamberTest.size);
+  this->allParamSubChambersRepetitionsAllowed.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamberTest.size*theDimension);
+  this->allParamSubChambersRepetitionsAllowed.size=0;
   std::stringstream out;
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-    if (this->projectivizedChamber.TheObjects[i]!=0)
-      if (!this->projectivizedChamber.TheObjects[i]->flagPermanentlyZero)
-      { this->projectivizedChamber.TheObjects[i]->GetWallNormals(currentChamberNormals);
-        List<roots>& currentParamChamberList=this->paramSubChambers.TheObjects[i];
-        List<roots>& currentNonParamVerticesList=this->nonParamVertices.TheObjects[i];
-        theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
-        std::stringstream progressReport1;
-        progressReport1 << "processing chamber " << i+1;
-        theGlobalVariables.theIndicatorVariables.ProgressReportString1=progressReport1.str();
-        theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-        theGlobalVariables.MakeReport();
-        this->ProcessParametricChambers
-        (this->theLinearOperators.TheObjects[0].NumRows, this->theLinearOperators.TheObjects[0].NumCols+1, currentChamberNormals,
-        currentParamChamberList, currentNonParamVerticesList, theGlobalVariables);
-        this->ExtremeQPsParamSubchambers.TheObjects[i].SetSize(currentParamChamberList.size);
-        for (int j=0; j< currentParamChamberList.size; j++)
-        { std::stringstream progressReport2;
-          progressReport2 << "processing chamber " << i+1 << " subchamber " << j+1 << " out of " << currentParamChamberList.size;
-          theGlobalVariables.theIndicatorVariables.ProgressReportString2=progressReport2.str();
-          theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-          theGlobalVariables.MakeReport();
-          roots& currentParamChamber=currentParamChamberList.TheObjects[j];
-          roots& currentNonParamVertices=currentNonParamVerticesList.TheObjects[j];
-          out << "\nChamber: " << currentParamChamber.ElementsToInequalitiesString(false, false);
-          out << "\nVertices: " << currentNonParamVertices.ElementToStringLetterFormat("x", false);
-        }
-      }
+  for (int i=0; i<this->projectivizedChamberTest.size; i++)
+  { List<roots>& currentParamChamberList=this->paramSubChambers.TheObjects[i];
+    List<roots>& currentNonParamVerticesList=this->nonParamVertices.TheObjects[i];
+    theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+    std::stringstream progressReport1;
+    progressReport1 << "processing chamber " << i+1;
+    theGlobalVariables.theIndicatorVariables.ProgressReportString1=progressReport1.str();
+    theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+    theGlobalVariables.MakeReport();
+    this->ProcessOneParametricChamber
+    (this->theLinearOperators.TheObjects[0].NumRows, this->theLinearOperators.TheObjects[0].NumCols+1, this->projectivizedChamberTest.TheObjects[i].Normals,
+    currentParamChamberList, currentNonParamVerticesList, theGlobalVariables);
+    this->allParamSubChambersRepetitionsAllowed.AddListOnTop(currentParamChamberList);
+    this->ExtremeQPsParamSubchambers.TheObjects[i].SetSize(currentParamChamberList.size);
+    for (int j=0; j< currentParamChamberList.size; j++)
+    { std::stringstream progressReport2;
+      progressReport2 << "processing chamber " << i+1 << " subchamber " << j+1 << " out of " << currentParamChamberList.size << " Total: " << this->allParamSubChambersRepetitionsAllowed.size;
+      theGlobalVariables.theIndicatorVariables.ProgressReportString2=progressReport2.str();
+      theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+      theGlobalVariables.MakeReport();
+      roots& currentParamChamber=currentParamChamberList.TheObjects[j];
+      roots& currentNonParamVertices=currentNonParamVerticesList.TheObjects[j];
+      out << "\nChamber: " << currentParamChamber.ElementsToInequalitiesString(false, false);
+      out << "\nVertices: " << currentNonParamVertices.ElementToStringLetterFormat("x", false);
+    }
+  }
+  this->projectivizedParamComplex.initFromCones(this->allParamSubChambersRepetitionsAllowed, theGlobalVariables);
+  this->projectivizedParamComplex.Refine(theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.theIndicatorVariables.StatusString1=this->projectivizedParamComplex.ElementToString();
   theGlobalVariables.MakeReport();
 }
 
@@ -901,7 +913,7 @@ int ParserNode::EvaluateChamberParam(GlobalVariables& theGlobalVariables)
     theWalls.AddObjectOnTop(tempRoot);
   }
   List<roots> outputParamChambers, outputNonParamVertices;
-  tempChars.ProcessParametricChambers(dimNonParam, dimParam, theWalls, outputParamChambers, outputNonParamVertices, theGlobalVariables);
+  tempChars.ProcessOneParametricChamber(dimNonParam, dimParam, theWalls, outputParamChambers, outputNonParamVertices, theGlobalVariables);
   std::stringstream out;
   out << "<div class=\"math\">" << theWalls.ElementsToInequalitiesString(true, false) << "</div>";
   this->outputString=out.str();
@@ -909,7 +921,7 @@ int ParserNode::EvaluateChamberParam(GlobalVariables& theGlobalVariables)
   return this->errorNoError;
 }
 
-void GeneralizedVermaModuleCharacters::ProcessParametricChambers
+void GeneralizedVermaModuleCharacters::ProcessOneParametricChamber
   (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
 { /*roots nonParametricPart, parametricPart;
   nonParametricPart.SetSize(input.Externalwalls.size);
@@ -967,7 +979,7 @@ void GeneralizedVermaModuleCharacters::ProcessParametricChambers
       MatrixLargeRational::GaussianEliminationByRows(matrixNonParams, matrixParams, NonPivotPoints);
       for (int j=0; j<numNonParams; j++)
         matrixParams.RowToRoot(j, nonParamVertices.TheObjects[j]);
-      for (int j=0; j<numParams; j++)
+      for (int j=0; j<inputNormals.size-numNonParams; j++)
         matrixParams.RowToRoot(j+numNonParams, inducedParamChamber.TheObjects[j]);
       theNonParamVertices.AddObjectOnTop(nonParamVertices);
       theParamChambers.AddObjectOnTop(inducedParamChamber);
@@ -980,7 +992,7 @@ void GeneralizedVermaModuleCharacters::ProcessParametricChambers
   }
 }
 
-void ConeComplex::GetNewVertices
+void ConeComplex::GetNewVerticesAppend
   (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
 { int theDimMinusTwo=killerNormal.size-2;
   int theDim=killerNormal.size;
@@ -991,8 +1003,7 @@ void ConeComplex::GetNewVertices
 //  int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore;
   MatrixLargeRational& theLinearAlgebra=theGlobalVariables.matComputeNormalExcludingIndex;
   MatrixLargeRational matEmpty;
-  theLinearAlgebra.init(theDimMinusTwo, theDim);
-  nonPivotPoints.init(theDimMinusTwo);
+  theLinearAlgebra.init(theDimMinusTwo+1, theDim);
   root tempRoot;
   for (int i=0; i<numCycles; i++)
   { theSel.incrementSelectionFixedCardinality(theDimMinusTwo);//, IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
@@ -1004,16 +1015,18 @@ void ConeComplex::GetNewVertices
         theLinearAlgebra.elements[j][k]=currentNormal.TheObjects[k];
     }
     for (int k=0; k<theDim; k++)
-      theLinearAlgebra.elements[theDimMinusTwo-1][k]=killerNormal.TheObjects[k];
+      theLinearAlgebra.elements[theDimMinusTwo][k]=killerNormal.TheObjects[k];
     theLinearAlgebra.GaussianEliminationByRows(theLinearAlgebra, matEmpty, nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection==1)
-      theLinearAlgebra.NonPivotPointsToRoot(nonPivotPoints, tempRoot);
-    if (myDyingCone.IsInCone(tempRoot))
-      outputVertices.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
-    else
-    { tempRoot.MinusRoot();
+    { theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, (Rational) 1, (Rational) 0);
+      tempRoot.ScaleToIntegralMinHeight();
       if (myDyingCone.IsInCone(tempRoot))
         outputVertices.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+      else
+      { tempRoot.MinusRoot();
+        if (myDyingCone.IsInCone(tempRoot))
+          outputVertices.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+      }
     }
   }
 }
@@ -1047,16 +1060,23 @@ bool ConeComplex::SplitChamber
   }
   if (newPlusCone.Vertices.size==0 || newMinusCone.Vertices.size==0)
     return false;
+  this->GetNewVerticesAppend(myDyingCone, killerNormal, ZeroVertices, theGlobalVariables);
   for (int i=0; i<myDyingCone.Normals.size; i++)
-  { if (newPlusCone.Vertices.HasAnElementWithPositiveScalarProduct(myDyingCone.Normals.TheObjects[i]))
+  { if (newPlusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals.TheObjects[i]))
       newPlusCone.Normals.AddObjectOnTop(myDyingCone.Normals.TheObjects[i]);
-    if (newMinusCone.Vertices.HasAnElementWithNegativeScalarProduct(myDyingCone.Normals.TheObjects[i]))
+    if (newMinusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals.TheObjects[i]))
       newMinusCone.Normals.AddObjectOnTop(myDyingCone.Normals.TheObjects[i]);
   }
   newPlusCone.Normals.AddObjectOnTop(killerNormal);
-  newMinusCone.Normals.AddObjectOnTop(killerNormal);
+  newMinusCone.Normals.AddObjectOnTop(-killerNormal);
   newPlusCone.Vertices.AddListOnTop(ZeroVertices);
   newMinusCone.Vertices.AddListOnTop(ZeroVertices);
+/*  Cone tempCone;
+  tempCone.CreateFromNormals(newPlusCone.Normals, theGlobalVariables);
+  assert(tempCone.Vertices.size==newPlusCone.Vertices.size);
+  tempCone.CreateFromNormals(newMinusCone.Normals, theGlobalVariables);
+  assert(tempCone.Vertices.size==newMinusCone.Vertices.size);
+*/
   this->PopChamberSwapWithLast(indexChamberBeingRefined);
   this->AddNonRefinedChamberOnTopNoRepetition(newPlusCone);
   this->AddNonRefinedChamberOnTopNoRepetition(newMinusCone);
@@ -1069,34 +1089,38 @@ void ConeComplex::PopChamberSwapWithLast(int index)
 
 void ConeComplex::AddNonRefinedChamberOnTopNoRepetition(Cone& newCone)
 { newCone.Normals.QuickSortAscending();
-  if(this->AddObjectOnTopNoRepetitionOfObjectHash(newCone))
-    this->NonRefinedChambers.AddObjectOnTop(this->size-1);
+  this->AddObjectOnTopNoRepetitionOfObjectHash(newCone);
 }
 
 void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
-{ if (this->NonRefinedChambers.size==0)
+{ if (this->indexLowestNonRefinedChamber>=this->size)
     return;
-  int indexBeingProcessed=this->NonRefinedChambers.TheObjects[0];
-  this->NonRefinedChambers.PopIndexSwapWithLast(0);
-  Cone& currentCone=this->TheObjects[indexBeingProcessed];
+  Cone& currentCone=this->TheObjects[this->indexLowestNonRefinedChamber];
   for (; currentCone.LowestIndexIHaventBeenCheckedForSplitting<this->splittingNormals.size; currentCone.LowestIndexIHaventBeenCheckedForSplitting++)
-    if (this->SplitChamber(indexBeingProcessed, this->splittingNormals.TheObjects[currentCone.LowestIndexIHaventBeenCheckedForSplitting], theGlobalVariables))
+    if (this->SplitChamber(this->indexLowestNonRefinedChamber, this->splittingNormals.TheObjects[currentCone.LowestIndexIHaventBeenCheckedForSplitting], theGlobalVariables))
       return;
+    this->indexLowestNonRefinedChamber++;
 }
 
 void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
-{ while (this->NonRefinedChambers.size>0)
-    this->RefineOneStep(theGlobalVariables);
+{ while (this->indexLowestNonRefinedChamber<this->size)
+  { this->RefineOneStep(theGlobalVariables);
+    std::stringstream out;
+    out << "Refined " << this->indexLowestNonRefinedChamber << " out of " << this->size;
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+    theGlobalVariables.MakeReport();
+  }
 }
 
-void Cone::CreateFromNormals
+bool Cone::CreateFromNormals
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
 { this->Normals.CopyFromBase(inputNormals);
 //  roots& candidateVertices=theGlobalVariables.rootsGeneralPurposeBuffer1;
   Selection theSel, nonPivotPoints;
   this->Vertices.size=0;
   if (this->Normals.size==0)
-    return;
+    return false;
   for (int i=0; i<this->Normals.size; i++)
     this->Normals.TheObjects[i].ScaleToIntegralMinHeight();
   int theDim=this->Normals.TheObjects[0].size;
@@ -1149,15 +1173,29 @@ void Cone::CreateFromNormals
     }
   }
   this->Normals.QuickSortAscending();
+  //this->ComputeDebugString();
+  for (int i=0; i<this->Normals.size; i++)
+    if (!(this->Vertices.HasAnElementWithNegativeScalarProduct(this->Normals.TheObjects[i])||this->Vertices.HasAnElementWithPositiveScalarProduct(this->Normals.TheObjects[i])))
+      return false;
+  return true;
 }
 
 void ConeComplex::initFromCones
 (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
 { Cone tempCone;
   this->ClearTheObjects();
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.StatusString1=NormalsOfCones.ElementToStringGeneric();
+  theGlobalVariables.MakeReport();
+  theGlobalVariables.MakeReport();
+//  for (int i=0; i<10000000; i++){int j=i*i*i;}
   for (int i=0; i<NormalsOfCones.size; i++)
-  { tempCone.CreateFromNormals(NormalsOfCones.TheObjects[i], theGlobalVariables);
-    this->AddNonRefinedChamberOnTopNoRepetition(tempCone);
+  { if (tempCone.CreateFromNormals(NormalsOfCones.TheObjects[i], theGlobalVariables))
+      this->AddNonRefinedChamberOnTopNoRepetition(tempCone);
+    std::stringstream out;
+    out << "Initializing cone " << i+1 << " out of " << NormalsOfCones.size;
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.MakeReport();
   }
   root tempRoot;
   this->splittingNormals.ClearTheObjects();
@@ -1166,11 +1204,18 @@ void ConeComplex::initFromCones
     { tempRoot=this->TheObjects[i].Normals.TheObjects[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       this->splittingNormals.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
+      std::stringstream out;
+      out << "Extracting walls from cone " << i+1 << " out of " << this->size << " total distinct chambers.";
+      out << "\nProcessed " << j+1 << " out of " << this->TheObjects[i].Normals.size << " walls of the current chamber.";
+      out << "\nTotal # of distinct walls found: " << this->splittingNormals.size;
+      theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+      theGlobalVariables.MakeReport();
     }
 }
 
 std::string Cone::ElementToString()
 { std::stringstream out;
+  out << "Index next wall to refine by: " << this->LowestIndexIHaventBeenCheckedForSplitting << "\n";
   out << "Normals:\n";
   out << this->Normals.ElementsToInequalitiesString(false, false);
   out << "\nVertices:" << this->Vertices.ElementToString();
@@ -1179,11 +1224,9 @@ std::string Cone::ElementToString()
 
 std::string ConeComplex::ElementToString()
 { std::stringstream out;
-  out << "Number of chambers:" << this->size << " Non refined chambers:\n";
-  for (int i=0; i<this->NonRefinedChambers.size; i++)
-    out << this->NonRefinedChambers.TheObjects[i];
+  out << "Number of chambers: " << this->size << " Next non-refined chamber: " << this->indexLowestNonRefinedChamber+1;
   for (int i=0; i<this->size; i++)
-  { out << "Chamber " << i+1 << ":\n";
+  { out << "\nChamber " << i+1 << ":\n";
     out << this->TheObjects[i].ElementToString() << "\n\n\n";
   }
   return out.str();

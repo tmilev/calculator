@@ -43,21 +43,29 @@ public:
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
 //  List<CombinatorialChamber> parametricChambers;
-  List<QuasiPolynomial> theSums;
+  List<QuasiPolynomial> theMultiplicities;
+  List<QuasiPolynomial > theMultiplicitiesExtremaCandidates;
+  int tempDebugCounter;
   List<Rational> theCoeffs;
   roots theTranslations;
   roots theTranslationsProjected;
   partFractions thePfs;
   List<List<roots> > paramSubChambers, nonParamVertices;
-  List<roots> allParamSubChambersRepetitionsAllowed;
   List<List<QuasiPolynomial> > ExtremeQPsParamSubchambers;
+  List<roots> allParamSubChambersRepetitionsAllowed;
+  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   CombinatorialChamberContainer projectivizedChamber;
   ConeComplex projectivizedParamComplex;
   ConeComplex projectivizedChamberTest;
   std::stringstream log;
-  GeneralizedVermaModuleCharacters(){this->flagUsingNewSplit=true;}
+  GeneralizedVermaModuleCharacters(){this->flagUsingNewSplit=true;
+  this->tempDebugCounter=1;
+  }
   void GetProjection(int indexOperator, const root& input, root& output);
   void FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables);
+  void ProcessExtremaOneChamber
+  (Cone& input, GlobalVariables& theGlobalVariables)
+  ;
   void ProcessOneParametricChamber
   (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
   ;
@@ -65,6 +73,9 @@ public:
   (GlobalVariables& theGlobalVariables)
   ;
   void GetSubFromIndex(QPSub& output, int theIndex);
+  void GetSubFromNonParamArray
+  (QPSub& output, roots& NonParams, int numParams)
+  ;
   void initQPs
   (GlobalVariables& theGlobalVariables)
   ;
@@ -382,7 +393,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   out << "=" << this->thePfs.DebugString;
   int totalDim=this->theTranslations.TheObjects[0].size-1;
   this->theQPsSubstituted.SetSize(this->projectivizedChamberTest.size);
-  this->theSums.SetSize(this->projectivizedChamberTest.size);
+  this->theMultiplicities.SetSize(this->projectivizedChamberTest.size);
   this->thePfs.theChambers.init();
   this->thePfs.theChambers.theDirections=this->GmodKnegativeWeights;
   this->thePfs.theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
@@ -395,8 +406,10 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   QuasiPolynomial theQPNoSub;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
   for (int i=0; i<this->projectivizedChamberTest.size; i++)
+//  if(i<this->tempDebugCounter)
   { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
     for (int k=0; k<this->theLinearOperators.size; k++)
+//    if (k<this->tempDebugCounter)
     { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
       this->GetProjection(k, this->projectivizedChamberTest.TheObjects[i].GetInternalPoint(), tempRoot);
       int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
@@ -418,9 +431,11 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   QuasiPolynomial tempQP;
   for (int i=0; i<this->projectivizedChamberTest.size; i++)
-  { QuasiPolynomial& currentSum=this->theSums.TheObjects[i];
+//  if (i<this->tempDebugCounter)
+  { QuasiPolynomial& currentSum=this->theMultiplicities.TheObjects[i];
     currentSum.Nullify(totalDim);
     for (int k=0; k<this->theLinearOperators.size; k++)
+//    if (k<this->tempDebugCounter)
     { tempQP=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
       tempQP*=this->theCoeffs.TheObjects[k];
       currentSum+=tempQP;
@@ -446,7 +461,7 @@ void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData
       theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
       theGlobalVariables.MakeReport();
     }
-//    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.ComputeQPsFromChamberComplex(theGlobalVariables);
+    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.ComputeQPsFromChamberComplex(theGlobalVariables);
     tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.FindMultiplicitiesExtrema(theGlobalVariables);
   }
   else
@@ -587,6 +602,8 @@ std::string roots::ElementsToInequalitiesString(bool useLatex, bool useHtml)
       out << "\\geq 0\\\\";
     else
       out << "=>0\n";
+    if (useHtml)
+      out << "<br>";
   }
   if (useLatex)
     out << "\\end{array}";
@@ -826,6 +843,20 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
     }
 }
 
+void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
+(QPSub& output, roots& NonParams, int numParams)
+{ int numNonParams=NonParams.size;
+  MatrixLargeRational subRationalForm;
+  subRationalForm.init(numParams, numParams+numNonParams-1);
+  subRationalForm.NullifyAll();
+  for (int k=0; k<numParams; k++)
+    for (int l=0; l<numNonParams; l++)
+      subRationalForm.elements[k][l]= NonParams.TheObjects[l].TheObjects[k];
+  for (int l=0; l<numParams-1; l++)
+    subRationalForm.elements[l][l+numNonParams]= 1;
+  output.MakeSubFromMatrixRational(subRationalForm);
+}
+
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables)
 { if (!this->flagUsingNewSplit)
     return;
@@ -838,6 +869,15 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
   this->allParamSubChambersRepetitionsAllowed.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamberTest.size*theDimension);
   this->allParamSubChambersRepetitionsAllowed.size=0;
   std::stringstream out;
+  QPSub subForFindingExtrema;
+  QuasiPolynomial currentExtremaCandidate;
+  int numParams=0, numNonParams=0;
+  if (this->theLinearOperators.size>0)
+  { numParams=this->theLinearOperators.TheObjects[0].NumCols+1;
+    numNonParams=this->theLinearOperators.TheObjects[0].NumRows;
+  }
+//  List<QPSub> tempQPSubList;
+  this->theMultiplicitiesExtremaCandidates.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamberTest.size*theDimension);
   for (int i=0; i<this->projectivizedChamberTest.size; i++)
   { List<roots>& currentParamChamberList=this->paramSubChambers.TheObjects[i];
     List<roots>& currentNonParamVerticesList=this->nonParamVertices.TheObjects[i];
@@ -851,6 +891,14 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
     (this->theLinearOperators.TheObjects[0].NumRows, this->theLinearOperators.TheObjects[0].NumCols+1, this->projectivizedChamberTest.TheObjects[i].Normals,
     currentParamChamberList, currentNonParamVerticesList, theGlobalVariables);
     this->allParamSubChambersRepetitionsAllowed.AddListOnTop(currentParamChamberList);
+//    if (i<this->tempDebugCounter)
+    for (int j=0; j<currentNonParamVerticesList.size; j++)
+    { this->GetSubFromNonParamArray(subForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
+     // tempQPSubList.AddObjectOnTop(subForFindingExtrema);
+      this->theMultiplicities.TheObjects[i].RationalLinearSubstitution(subForFindingExtrema, currentExtremaCandidate);
+      this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
+    }
+
     this->ExtremeQPsParamSubchambers.TheObjects[i].SetSize(currentParamChamberList.size);
     for (int j=0; j< currentParamChamberList.size; j++)
     { std::stringstream progressReport2;
@@ -864,10 +912,51 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
       out << "\nVertices: " << currentNonParamVertices.ElementToStringLetterFormat("x", false);
     }
   }
+  std::stringstream out2;
+//  for (int i=0; i<tempQPSubList.size; i++)
+//  { out2 << " Chamber candidate " << i+1 << " the Sub:\n" << tempQPSubList.TheObjects[i].ElementToString() << "\n";
+ // }
+  this->allParamSubChambersRepetitionsAllowedConeForm.SetSize(this->allParamSubChambersRepetitionsAllowed.size);
+  for (int i=0; i<this->allParamSubChambersRepetitionsAllowed.size; i++)
+  { Cone& currentCone= this->allParamSubChambersRepetitionsAllowedConeForm.TheObjects[i];
+    currentCone.CreateFromNormals(this->allParamSubChambersRepetitionsAllowed.TheObjects[i], theGlobalVariables);
+    std::stringstream out4;
+    out4 << "preparing starting cones: " << i+1 << " out of " << this->allParamSubChambersRepetitionsAllowed.size;
+    theGlobalVariables.theIndicatorVariables.StatusString1=out4.str();
+    theGlobalVariables.MakeReport();
+  }
   this->projectivizedParamComplex.initFromCones(this->allParamSubChambersRepetitionsAllowed, theGlobalVariables);
-  this->projectivizedParamComplex.Refine(theGlobalVariables);
+
+  //this->projectivizedParamComplex.Refine(theGlobalVariables);
+  this->theMultiplicitiesExtremaCandidates.SetSize(this->projectivizedParamComplex.size);
+  std::stringstream out3;
+  for (int i=0; i<this->projectivizedParamComplex.size; i++)
+  if (i<this->tempDebugCounter)
+  { Cone& currentCone= this->projectivizedParamComplex.TheObjects[i];
+    out3 << "\n\n\nChamber " << i+1 << " the extreme multiplicities are among \n ";
+    this->ProcessExtremaOneChamber(currentCone, theGlobalVariables);
+  }
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.StatusString1=this->projectivizedParamComplex.ElementToString();
+//  theGlobalVariables.theIndicatorVariables.StatusString1=this->projectivizedParamComplex.ElementToString();
+//  theGlobalVariables.theIndicatorVariables.StatusString1=out2.str();
+  //theGlobalVariables.theIndicatorVariables.StatusString1=out3.str();
+  theGlobalVariables.MakeReport();
+}
+void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
+  (Cone& input, GlobalVariables& theGlobalVariables)
+{ std::stringstream out3;
+  out3 << "extreme multiplicities are among: ";
+  for (int j=0; j<this->allParamSubChambersRepetitionsAllowedConeForm.size; j++)
+  // if (j<this->tempDebugCounter)
+    if (input.IsInCone(this->allParamSubChambersRepetitionsAllowedConeForm.TheObjects[j].GetInternalPoint()))
+    { out3 << this->theMultiplicitiesExtremaCandidates.TheObjects[j].ElementToString() << "\n";
+      std::stringstream out4;
+      out4 << "starting chamber " << j+1 << " out of " << this->allParamSubChambersRepetitionsAllowedConeForm.size;
+      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+      theGlobalVariables.theIndicatorVariables.StatusString1=out4.str();
+      theGlobalVariables.MakeReport();
+    }
+  theGlobalVariables.theIndicatorVariables.StatusString1=out3.str();
   theGlobalVariables.MakeReport();
 }
 
@@ -1116,6 +1205,7 @@ void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
 bool Cone::CreateFromNormals
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
 { this->Normals.CopyFromBase(inputNormals);
+//o  this->Data=inputData;
 //  roots& candidateVertices=theGlobalVariables.rootsGeneralPurposeBuffer1;
   Selection theSel, nonPivotPoints;
   this->Vertices.size=0;
@@ -1172,6 +1262,8 @@ bool Cone::CreateFromNormals
       i--;
     }
   }
+  if (this->Normals.size==0 || this->Vertices.size==0)
+    return false;
   this->Normals.QuickSortAscending();
   //this->ComputeDebugString();
   for (int i=0; i<this->Normals.size; i++)
@@ -1213,11 +1305,15 @@ void ConeComplex::initFromCones
     }
 }
 
-std::string Cone::ElementToString()
+std::string Cone::ElementToString(bool useLatex, bool useHtml)
 { std::stringstream out;
   out << "Index next wall to refine by: " << this->LowestIndexIHaventBeenCheckedForSplitting << "\n";
+  if (useHtml)
+    out << "<br>";
   out << "Normals:\n";
-  out << this->Normals.ElementsToInequalitiesString(false, false);
+  if (useHtml)
+    out << "<br>";
+  out << this->Normals.ElementsToInequalitiesString(useLatex, useHtml);
   out << "\nVertices:" << this->Vertices.ElementToString();
   return out.str();
 }
@@ -1230,4 +1326,65 @@ std::string ConeComplex::ElementToString()
     out << this->TheObjects[i].ElementToString() << "\n\n\n";
   }
   return out.str();
+}
+
+int ParserNode::EvaluateCone(GlobalVariables& theGlobalVariables)
+{ List<int> argumentsList;
+  this->ExtractArgumentList(argumentsList);
+  int theDim=-1;
+  roots coneWalls; root currentWall;
+  for (int i=0; i<argumentsList.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[argumentsList.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+    if (theDim==-1)
+      theDim=currentNode.array.GetElement().size;
+    if (currentNode.array.GetElement().size!=theDim)
+      return this->SetError(this->errorDimensionProblem);
+    currentWall.SetSize(theDim);
+    for (int j=0; j<currentNode.array.GetElement().size; j++)
+    { ParserNode& currentCoord=this->owner->TheObjects[currentNode.array.GetElement().TheObjects[j]];
+      if (!currentCoord.ConvertToType(this->typeRational, theGlobalVariables))
+        return this->SetError(this->errorBadOrNoArgument);
+      currentWall.TheObjects[j]=currentCoord.rationalValue;
+    }
+    coneWalls.AddObjectOnTop(currentWall);
+  }
+  std::stringstream out;
+  if (!this->theCone.GetElement().CreateFromNormals(coneWalls, theGlobalVariables))
+    out << "the cone has too few or no vertices.";
+  out << "<br>Cone walls input: " << coneWalls.ElementToString(false, false, false);
+  out << "<br><br>Cone:" << this->theCone.GetElement().ElementToString(false, true);
+  this->outputString=out.str();
+
+  this->ExpressionType=this->typeCone;
+  return this->errorNoError;
+}
+
+int ParserNode::EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size<2)
+    return this->SetError(this->errorBadOrNoArgument);
+  List<PolynomialRationalCoeff> thePolys;
+  thePolys.SetSize(argumentList.size-1);
+  for (int i=0; i<argumentList.size-1; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typePoly, theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+    thePolys.TheObjects[i]=currentNode.polyValue.GetElement();
+  }
+  ParserNode& coneNode=this->owner->TheObjects[*argumentList.LastObject()];
+  if (!coneNode.ConvertToType(this->typeCone, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  Cone currentCone;
+  currentCone=coneNode.theCone.GetElement();
+  std::stringstream out;
+  out << "input polys: ";
+  for (int i=0; i<thePolys.size; i++)
+    out <<  thePolys.TheObjects[i].ElementToString() << "<br>";
+  out << "<br>The cone: " << currentCone.ElementToString();
+  this->outputString=out.str();
+  this->ExpressionType=this->typeString;
+  return this->errorNoError;
 }

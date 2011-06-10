@@ -125,7 +125,8 @@ int main(int argc, char **argv)
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
   //civilizedInput="printEmbedding";
   //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
-  civilizedInput="combinatorialChamberParam(1, 2, (-1,1,0), (1,0,0), (-1,-1,1))";
+  civilizedInput="maximumLinearFunctionOverCone(x_1+x_2+x_3, x_1-x_3+2x_2,Cone((1,2,3),(3,-5,0),(1,-1,2), (0,0,-1)))";
+  //civilizedInput="combinatorialChamberParam(1, 2, (-1,1,0), (1,0,0), (-1,-1,1))";
   //civilizedInput="secretSauceOrdered";
   //civilizedInput="slTwoInSlN(2,2)";
 //  theParser.DefaultWeylLetter='E';

@@ -242,6 +242,7 @@ template < > int List<Vector<Rational> >::ListActualSizeIncrement=10;
 template < > int List<Monomial<RationalFunction> >::ListActualSizeIncrement=20;
 template < > int List<TemplatePolynomial<Monomial<RationalFunction>, RationalFunction> >::ListActualSizeIncrement=20;
 template < > int List<MatrixLargeRational>::ListActualSizeIncrement=10;
+template < > int List<QPSub>::ListActualSizeIncrement=1000;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
@@ -6123,7 +6124,7 @@ void PrecomputedQuasiPolynomialIntegral::operator=(PrecomputedQuasiPolynomialInt
   this->Value.Assign(right.Value);
 }
 
-void QuasiPolynomial::operator=(QuasiPolynomial& right)
+void QuasiPolynomial::operator=(const QuasiPolynomial& right)
 { this->CopyFromPoly(right);
 }
 
@@ -6234,7 +6235,7 @@ void QuasiPolynomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial&
   Accum.ClearTheObjects();
   Accum.NumVars= (int)TheSub.TheQNSub.NumRows;
   for (int i=0; i<this->size; i++)
-  {  QuasiMonomial tempQM;
+  { QuasiMonomial tempQM;
     tempQM.Assign(this->TheObjects[i]);
     tempQM.RationalLinearSubstitution(TheSub, tempQP);
     Accum.AddPolynomial(tempQP);
@@ -26412,6 +26413,8 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionActByAffineWeyl: this->EvaluateWeylRhoAction(theGlobalVariables); break;
     case Parser::functionPrintWeylGroup: this->EvaluatePrintWeyl(theGlobalVariables); break;
     case Parser::functionChamberParam: this->EvaluateChamberParam(theGlobalVariables); break;
+    case Parser::functionCone: this->EvaluateCone(theGlobalVariables); break;
+    case Parser::functionMaximumLFoverCone: this->EvaluateMaxLFOverCone(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26771,6 +26774,16 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="invariant")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(Parser::functionInvariants);
+    return true;
+  }
+  if (input=="maximumLinearFunctionOverCone")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(Parser::functionMaximumLFoverCone);
+    return true;
+  }
+  if (input=="Cone")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(Parser::functionCone);
     return true;
   }
   if (input=="slTwoInSlN")
@@ -31094,6 +31107,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeUEElementOrdered: LatexOutput << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal); break;
     case ParserNode::typeUEelement: LatexOutput << this->UEElement.GetElement().ElementToString(); break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
+   // case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
       RecursionDepth++;
@@ -31127,6 +31141,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeArray: out << " an array of " << this->array.GetElement().size << " elements. "; break;
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
+    case ParserNode::typeCone: out << "a cone with walls: "; break;
     default: out << "The programmer(s) have forgotten to enter a type description. "; break;
   }
   if (stringValueOnly!="")

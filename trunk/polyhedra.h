@@ -849,6 +849,7 @@ public:
   void Free();
   void Resize(int r, int c, bool PreserveValues);
   void Assign(const MatrixElementaryTightMemoryFit<Element>& m);
+  inline void operator=(const MatrixElementaryTightMemoryFit<Element>& m){this->Assign(m);};
   MatrixElementaryTightMemoryFit<Element>();
   ~MatrixElementaryTightMemoryFit<Element>();
 };
@@ -6079,7 +6080,7 @@ public:
   void DivByInteger(int x);
   void Evaluate(intRoot& values, Rational& output);
   int SizeWithoutDebugString();
-  void operator=(QuasiPolynomial& right);
+  void operator=(const QuasiPolynomial& right);
   void Simplify();
   QuasiPolynomial();
   void Nullify(int numVars);
@@ -6165,6 +6166,7 @@ public:
   void MakeSubNVarForOtherChamber(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
   void MakeSubAddExtraVarForIntegration(root& direction);
   void MakeSubFromPolynomialsRationalCoeff(PolynomialsRationalCoeff& input);
+  void operator=(const QPSub& other){this->TheQNSub=other.TheQNSub; this->QNSubDen=other.QNSubDen; this->RationalPolyForm=other.RationalPolyForm;}
 };
 
 template <class Object>
@@ -8352,189 +8354,6 @@ public:
   bool IsNumber(char theNumber);
 };
 
-class Parser;
-class ParserNode
-{ public:
-  std::string DebugString;
-  std::string outputString;
-  void ComputeDebugString(){ this->ElementToString(DebugString); }
-  void ElementToString(std::string& output);
-  Parser* owner;
-  int indexParentNode;
-  int indexInOwner;
-  int Operation; //using tokenTypes from class Parser
-  int ExpressionType;
-  int ErrorType;
-  SemisimpleLieAlgebra* ContextLieAlgebra;
-  bool Evaluated;
-  MemorySaving<PolynomialRationalCoeff> polyValue;
-  MemorySaving<ElementWeylAlgebra> WeylAlgebraElement;
-  MemorySaving<ElementUniversalEnveloping> UEElement;
-  MemorySaving<ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> > UEElementOrdered;
-  MemorySaving<PolynomialRationalCoeff> polyBeingMappedTo;
-  MemorySaving<ElementWeylAlgebra> weylEltBeingMappedTo;
-  MemorySaving<List<int> > array;
-  MemorySaving<RationalFunction> ratFunction;
-  List<int> children;
-  int intValue;
-  Rational rationalValue;
-  void operator=(const ParserNode& other);
-  void Clear();
-  int GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables);
-  void ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables);
-  void CopyValue(const ParserNode& other);
-  bool ConvertToType
-(int theType, GlobalVariables& theGlobalVariables)
-  ;
-  bool ConvertToNextType
-(int GoalType, bool& ErrorHasOccured, GlobalVariables& theGlobalVariables)
-;
-  bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
-  //the order of the types matters, they will be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF,
-  typeError //typeError must ALWAYS have the highest numerical value!!!!!
-  };
-  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
-  errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError};
-  void InitForAddition(GlobalVariables* theContext);
-  void InitForMultiplication(GlobalVariables* theContext);
-  std::string ElementToStringValueAndType(bool useHtml){return this->ElementToStringValueAndType(useHtml, 0, 3);}
-  std::string ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth);
-  std::string ElementToStringValueOnlY(bool useHtml){return this->ElementToStringValueOnlY(useHtml, 0,2);}
-  std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
-  std::string ElementToStringErrorCode(bool useHtml);
-  void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
-  int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
-  void CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
-  void ReduceRatFunction();
-  void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
-  void Evaluate(GlobalVariables& theGlobalVariables);
-  void EvaluateTimes(GlobalVariables& theGlobalVariables);
-  void EvaluateDivide(GlobalVariables& theGlobalVariables);
-  void EvaluateOrder(GlobalVariables& theGlobalVariables);
-  void EvaluateInteger(GlobalVariables& theGlobalVariables);
-  int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
-  bool ExtractArgumentList(List<int>& outputArgumentIndices);
-  void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
-  void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
-  void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
-  void EvaluateWeylAction
-  (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
-  ;
-  void EvaluatePlus(GlobalVariables& theGlobalVariables);
-  void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
-  void EvaluateMinus(GlobalVariables& theGlobalVariables);
-  void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
-  void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
-  void EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
-  void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
-  void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables);
-  void EvaluateEigen(GlobalVariables& theGlobalVariables);
-  void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
-  void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
-  void EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables);
-  void EvaluateThePower(GlobalVariables& theGlobalVariables);
-  void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
-  void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
-  void EvaluateInvariants(GlobalVariables& theGlobalVariables);
-  void EvaluateSubstitution(GlobalVariables& theGlobalVariables);
-  void EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
-  void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
-  void EvaluateFunction(GlobalVariables& theGlobalVariables);
-  void ExtractAndEvalWeylSubFromMap(GlobalVariables& theGlobalVariables);
-  bool AllChildrenAreOfDefinedNonErrorType();
-  bool OneChildrenOrMoreAreOfType(int theType);
-  ParserNode();
-};
-
-//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
-
-class Parser: public List<ParserNode>
-{
-public:
-  LargeInt LargeIntegerReader;
-  std::string DebugString;
-  std::string StringBeingParsed;
-  List<std::string> SystemCommands;
-  std::string outputFolderPath;
-  std::string outputFolderDisplayPath;
-  char DefaultWeylLetter;
-  int DefaultWeylRank;
-  ParserNode theValue;
-  HomomorphismSemisimpleLieAlgebra theHmm;
-  SemisimpleLieAlgebraOrdered testAlgebra;
-  SemisimpleLieAlgebraOrdered testSubAlgebra;
-//  SemisimpleLieAlgebra theLieAlgebra;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); }
-  void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
-  enum tokenTypes
-  { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
-    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
-  };
-  enum functionList
-  { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
-    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
-    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam
-  };
-  List<int> TokenBuffer;
-  List<int> ValueBuffer;
-  List<int> TokenStack;
-  List<int> ValueStack;
-  int numEmptyTokensAtBeginning;
-  int NumVariables;
-//  ElementSimpleLieAlgebra LieAlgebraValue;
-//  ElementWeylAlgebra WeylAlgebraValue;
-  void PopTokenAndValueStacksShiftDown(int theIndex){ this->ValueStack.PopIndexShiftDown(theIndex); this->TokenStack.PopIndexShiftDown(theIndex); }
-  void PopTokenAndValueStacksLast(){ this->ValueStack.PopLastObject(); this->TokenStack.PopLastObject();}
-  void ParserInit(const std::string& input);
-  void Evaluate(GlobalVariables& theGlobalVariables);
-  std::string ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables);
-  ElementUniversalEnveloping ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables);
-  void Parse(const std::string& input);
-  void ParseNoInit(int indexFrom, int indexTo);
-  void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);
-  bool ApplyRules(int lookAheadToken);
-  bool lookAheadTokenProhibitsPlus(int theToken);
-  bool lookAheadTokenProhibitsTimes(int theToken);
-  bool lookAheadTokenAllowsMapsTo(int theToken);
-  bool TokenProhibitsUnaryMinus(int theToken);
-  void AddLetterExpressionOnTop();
-  void AddFunctionOnTop();
-  void AddXECdotsCEX(int theDimension, int theOperation);
-  void AddXECdotsCEXEX(int theDimension, int theOperation);
-  void AddEOEonTop();
-  void AddEXEXonTop(int theOperation);
-  void AddXECEXOnTop(int theOperation);
-  bool StackTopIsARoot(int& outputDimension);
-  bool StackTopIsASub(int& outputNumEntries);
-  bool StackTopIsADelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter);
-  bool StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
-  (int& outputDimension, int LeftDelimiter, int middleDelimiter, int rightDelimiter)
-  ;
-  bool IsAWordSeparatingCharacter(char c);
-  bool LookUpInDictionaryAndAdd(std::string& input);
-  void Own(int indexParent, int indexChild1, int indexChild2);
-  void Own(int indexParent, int indexChild1);
-  void ExtendOnTop(int numNew);
-  void TokenToStringStream(std::stringstream& out, int theToken);
-  void AddMapOnTop();
-  void AddUnaryMinusOnTop();
-  void AddImpiedTimesOnTop();
-  void PopLastAndThirdToLast();
-  void AddIntegerOnTopConvertToExpression();
-  void MergeLastTwoIntegers();
-  void Clear();
-  void DecreaseStackSetExpressionLastNode(int Decrease);
-  void ComputeNumberOfVariablesAndAdjustNodes();
-  Parser(){ this->numEmptyTokensAtBeginning=6; this->NumVariables=0;}
-};
-
 class IrreducibleFiniteDimensionalModule
 {
   public:
@@ -8687,6 +8506,305 @@ public:
   }
 };
 
+struct CGIspecificRoutines
+{
+public:
+  static std::stringstream outputStream;
+  static int numLinesAll;
+  static int numRegularLines;
+  static int numDashedLines;
+  static int numDottedLines;
+  static int shiftX;
+  static int shiftY;
+  static int scale;
+  static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
+  static void MakeVPReportFromComputationSetup(ComputationSetup& input);
+  static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
+  static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
+  static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
+  static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
+  static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
+  static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
+  static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
+  static void MakePFAndChamberReportFromComputationSetup(ComputationSetup& input);
+  static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);
+  static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
+  static void WeylGroupToHtml(WeylGroup&input, std::string& path);
+  static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path);
+  static bool FileExists(const std::string& theFileName);
+  static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static void clearDollarSigns(std::string& theString, std::string& output);
+  static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
+  static bool CheckForInputSanity(ComputationSetup& input);
+  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output);
+  static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true); };
+  static inline int RedGreenBlue(int r, int g, int b){ return r | (g<<8) | b<<16;}
+  static void FormatCPPSourceCode(const std::string& FileName);
+  enum TheChoicesWeMake
+  { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
+  };
+};
+
+class Cone
+{
+  public:
+  roots Vertices;
+  roots Normals;
+  bool flagHasSufficientlyManyVertices;
+  int LowestIndexIHaventBeenCheckedForSplitting;
+  //ignore: the following is the information carrying variable. Write in it anything you want, say an index to an array
+  //containing large data for the chamber, such as quasipolynomials, etc.
+  //int Data;
+  std::string ElementToString(){return this->ElementToString(false, false);}
+  std::string ElementToString(bool useLatex, bool useHtml);
+  std::string DebugString;
+  void ComputeDebugString(){ this->DebugString=this->ElementToString();}
+  bool CreateFromNormals
+  (roots& inputNormals, GlobalVariables& theGlobalVariables)
+  ;
+  void GetInternalPoint(root& output)
+  { this->Vertices.sum(output);
+  }
+  root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
+  int HashFunction()const
+  { return this->Vertices.HashFunction();
+  }
+  bool IsInCone(const root& point)const
+  { Rational tempRat;
+    for (int i=0; i<this->Normals.size; i++)
+    { root::RootScalarEuclideanRoot(this->Normals.TheObjects[i], point, tempRat);
+      if (tempRat.IsNegative())
+        return false;
+    }
+    return true;
+  }
+  void operator=(const Cone& other)
+  { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
+    this->Vertices=other.Vertices;
+    this->Normals=other.Normals;
+    this->LowestIndexIHaventBeenCheckedForSplitting=other.LowestIndexIHaventBeenCheckedForSplitting;
+  }
+  Cone(){this->LowestIndexIHaventBeenCheckedForSplitting=0; this->flagHasSufficientlyManyVertices=true;}
+  bool operator==(const Cone& other)const
+  { return this->Normals==other.Normals;
+  }
+};
+
+class ConeComplex : public HashedList<Cone>
+{
+public:
+  bool flagChambersHaveTooFewVertices;
+  bool flagIsRefined;
+//  List<int> NonRefinedChambers;
+  int indexLowestNonRefinedChamber;
+  hashedRoots splittingNormals;
+  std::string DebugString;
+  void RefineOneStep(GlobalVariables& theGlobalVariables);
+  void Refine(GlobalVariables& theGlobalVariables);
+  void AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
+  void PopChamberSwapWithLast(int index);
+  std::string ElementToString();
+  void ComputeDebugString(){this->DebugString=this->ElementToString();}
+  void initFromCones
+  (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
+  ;
+  bool SplitChamber
+  (int indexChamberBeingRefined, root& killerNormal, GlobalVariables& theGlobalVariables)
+  ;
+  void GetNewVerticesAppend
+  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
+  ;
+  ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
+};
+
+class Parser;
+class ParserNode
+{ public:
+  std::string DebugString;
+  std::string outputString;
+  void ComputeDebugString(){ this->ElementToString(DebugString); }
+  void ElementToString(std::string& output);
+  Parser* owner;
+  int indexParentNode;
+  int indexInOwner;
+  int Operation; //using tokenTypes from class Parser
+  int ExpressionType;
+  int ErrorType;
+  SemisimpleLieAlgebra* ContextLieAlgebra;
+  bool Evaluated;
+  MemorySaving<PolynomialRationalCoeff> polyValue;
+  MemorySaving<ElementWeylAlgebra> WeylAlgebraElement;
+  MemorySaving<ElementUniversalEnveloping> UEElement;
+  MemorySaving<ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> > UEElementOrdered;
+  MemorySaving<PolynomialRationalCoeff> polyBeingMappedTo;
+  MemorySaving<ElementWeylAlgebra> weylEltBeingMappedTo;
+  MemorySaving<List<int> > array;
+  MemorySaving<RationalFunction> ratFunction;
+  MemorySaving<Cone> theCone;
+  List<int> children;
+  int intValue;
+  Rational rationalValue;
+  void operator=(const ParserNode& other);
+  void Clear();
+  int GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables);
+  void ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables);
+  void CopyValue(const ParserNode& other);
+  bool ConvertToType
+(int theType, GlobalVariables& theGlobalVariables)
+  ;
+  bool ConvertToNextType
+(int GoalType, bool& ErrorHasOccured, GlobalVariables& theGlobalVariables)
+;
+  bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
+  //the order of the types matters, they WILL be compared by numerical value!
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
+  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF, typeCone,
+  typeError //typeError must ALWAYS have the highest numerical value!!!!!
+  };
+  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
+  errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem};
+  void InitForAddition(GlobalVariables* theContext);
+  void InitForMultiplication(GlobalVariables* theContext);
+  std::string ElementToStringValueAndType(bool useHtml){return this->ElementToStringValueAndType(useHtml, 0, 3);}
+  std::string ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth);
+  std::string ElementToStringValueOnlY(bool useHtml){return this->ElementToStringValueOnlY(useHtml, 0,2);}
+  std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
+  std::string ElementToStringErrorCode(bool useHtml);
+  void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
+  int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
+  void CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
+  void ReduceRatFunction();
+  void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
+  void Evaluate(GlobalVariables& theGlobalVariables);
+  void EvaluateTimes(GlobalVariables& theGlobalVariables);
+  void EvaluateDivide(GlobalVariables& theGlobalVariables);
+  void EvaluateOrder(GlobalVariables& theGlobalVariables);
+  void EvaluateInteger(GlobalVariables& theGlobalVariables);
+  int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
+  bool ExtractArgumentList(List<int>& outputArgumentIndices);
+  void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
+  void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
+  void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
+  int EvaluateCone(GlobalVariables& theGlobalVariables);
+  int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
+  void EvaluateWeylAction
+  (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
+  ;
+  void EvaluatePlus(GlobalVariables& theGlobalVariables);
+  void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
+  void EvaluateMinus(GlobalVariables& theGlobalVariables);
+  void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
+  void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
+  void EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables);
+  void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
+  void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
+  void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
+  void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
+  void EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables);
+  void EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables);
+  void EvaluateEigen(GlobalVariables& theGlobalVariables);
+  void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
+  void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
+  void EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables);
+  void EvaluateThePower(GlobalVariables& theGlobalVariables);
+  void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
+  void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
+  void EvaluateInvariants(GlobalVariables& theGlobalVariables);
+  void EvaluateSubstitution(GlobalVariables& theGlobalVariables);
+  void EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
+  void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
+  void EvaluateFunction(GlobalVariables& theGlobalVariables);
+  void ExtractAndEvalWeylSubFromMap(GlobalVariables& theGlobalVariables);
+  bool AllChildrenAreOfDefinedNonErrorType();
+  bool OneChildrenOrMoreAreOfType(int theType);
+  ParserNode();
+};
+
+//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
+
+class Parser: public List<ParserNode>
+{
+public:
+  LargeInt LargeIntegerReader;
+  std::string DebugString;
+  std::string StringBeingParsed;
+  List<std::string> SystemCommands;
+  std::string outputFolderPath;
+  std::string outputFolderDisplayPath;
+  char DefaultWeylLetter;
+  int DefaultWeylRank;
+  ParserNode theValue;
+  HomomorphismSemisimpleLieAlgebra theHmm;
+  SemisimpleLieAlgebraOrdered testAlgebra;
+  SemisimpleLieAlgebraOrdered testSubAlgebra;
+//  SemisimpleLieAlgebra theLieAlgebra;
+  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); }
+  void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
+  enum tokenTypes
+  { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
+    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
+  };
+  enum functionList
+  { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
+    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
+    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone
+  };
+  List<int> TokenBuffer;
+  List<int> ValueBuffer;
+  List<int> TokenStack;
+  List<int> ValueStack;
+  int numEmptyTokensAtBeginning;
+  int NumVariables;
+//  ElementSimpleLieAlgebra LieAlgebraValue;
+//  ElementWeylAlgebra WeylAlgebraValue;
+  void PopTokenAndValueStacksShiftDown(int theIndex){ this->ValueStack.PopIndexShiftDown(theIndex); this->TokenStack.PopIndexShiftDown(theIndex); }
+  void PopTokenAndValueStacksLast(){ this->ValueStack.PopLastObject(); this->TokenStack.PopLastObject();}
+  void ParserInit(const std::string& input);
+  void Evaluate(GlobalVariables& theGlobalVariables);
+  std::string ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables);
+  ElementUniversalEnveloping ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables);
+  void Parse(const std::string& input);
+  void ParseNoInit(int indexFrom, int indexTo);
+  void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);
+  bool ApplyRules(int lookAheadToken);
+  bool lookAheadTokenProhibitsPlus(int theToken);
+  bool lookAheadTokenProhibitsTimes(int theToken);
+  bool lookAheadTokenAllowsMapsTo(int theToken);
+  bool TokenProhibitsUnaryMinus(int theToken);
+  void AddLetterExpressionOnTop();
+  void AddFunctionOnTop();
+  void AddXECdotsCEX(int theDimension, int theOperation);
+  void AddXECdotsCEXEX(int theDimension, int theOperation);
+  void AddEOEonTop();
+  void AddEXEXonTop(int theOperation);
+  void AddXECEXOnTop(int theOperation);
+  bool StackTopIsARoot(int& outputDimension);
+  bool StackTopIsASub(int& outputNumEntries);
+  bool StackTopIsADelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter);
+  bool StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
+  (int& outputDimension, int LeftDelimiter, int middleDelimiter, int rightDelimiter)
+  ;
+  bool IsAWordSeparatingCharacter(char c);
+  bool LookUpInDictionaryAndAdd(std::string& input);
+  void Own(int indexParent, int indexChild1, int indexChild2);
+  void Own(int indexParent, int indexChild1);
+  void ExtendOnTop(int numNew);
+  void TokenToStringStream(std::stringstream& out, int theToken);
+  void AddMapOnTop();
+  void AddUnaryMinusOnTop();
+  void AddImpiedTimesOnTop();
+  void PopLastAndThirdToLast();
+  void AddIntegerOnTopConvertToExpression();
+  void MergeLastTwoIntegers();
+  void Clear();
+  void DecreaseStackSetExpressionLastNode(int Decrease);
+  void ComputeNumberOfVariablesAndAdjustNodes();
+  Parser(){ this->numEmptyTokensAtBeginning=6; this->NumVariables=0;}
+};
+
 typedef void (*Runnable) (ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
 
 struct ComputationSetup
@@ -8797,115 +8915,6 @@ public:
   static void TestUnitCombinatorialChamberHelperFunction(std::stringstream& logstream, char WeylLetter, int Dimension, ComputationSetup& inputData, GlobalVariables& theGlobalVariables);
   ComputationSetup();
   ~ComputationSetup();
-};
-
-struct CGIspecificRoutines
-{
-public:
-  static std::stringstream outputStream;
-  static int numLinesAll;
-  static int numRegularLines;
-  static int numDashedLines;
-  static int numDottedLines;
-  static int shiftX;
-  static int shiftY;
-  static int scale;
-  static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
-  static void MakeVPReportFromComputationSetup(ComputationSetup& input);
-  static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-  static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
-  static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
-  static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
-  static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
-  static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
-  static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  static void MakePFAndChamberReportFromComputationSetup(ComputationSetup& input);
-  static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);
-  static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
-  static void WeylGroupToHtml(WeylGroup&input, std::string& path);
-  static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path);
-  static bool FileExists(const std::string& theFileName);
-  static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static void clearDollarSigns(std::string& theString, std::string& output);
-  static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
-  static bool CheckForInputSanity(ComputationSetup& input);
-  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output);
-  static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true); };
-  static inline int RedGreenBlue(int r, int g, int b){ return r | (g<<8) | b<<16;}
-  static void FormatCPPSourceCode(const std::string& FileName);
-  enum TheChoicesWeMake
-  { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
-  };
-};
-
-class Cone
-{
-  public:
-  roots Vertices;
-  roots Normals;
-  bool flagHasSufficientlyManyVertices;
-  int LowestIndexIHaventBeenCheckedForSplitting;
-  std::string ElementToString();
-  std::string DebugString;
-  void ComputeDebugString(){ this->DebugString=this->ElementToString();}
-  bool CreateFromNormals
-  (roots& inputNormals, GlobalVariables& theGlobalVariables)
-  ;
-  void GetInternalPoint(root& output)
-  { this->Vertices.sum(output);
-  }
-  root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
-  int HashFunction()const
-  { return this->Vertices.HashFunction();
-  }
-  bool IsInCone(const root& point)const
-  { Rational tempRat;
-    for (int i=0; i<this->Normals.size; i++)
-    { root::RootScalarEuclideanRoot(this->Normals.TheObjects[i], point, tempRat);
-      if (tempRat.IsNegative())
-        return false;
-    }
-    return true;
-  }
-  void operator=(const Cone& other)
-  { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
-    this->Vertices=other.Vertices;
-    this->Normals=other.Normals;
-    this->LowestIndexIHaventBeenCheckedForSplitting=other.LowestIndexIHaventBeenCheckedForSplitting;
-  }
-  Cone(){this->LowestIndexIHaventBeenCheckedForSplitting=0; this->flagHasSufficientlyManyVertices=true;}
-  bool operator==(const Cone& other)const
-  { return this->Normals==other.Normals;
-  }
-};
-
-class ConeComplex : public HashedList<Cone>
-{
-public:
-  bool flagChambersHaveTooFewVertices;
-  bool flagIsRefined;
-//  List<int> NonRefinedChambers;
-  int indexLowestNonRefinedChamber;
-  hashedRoots splittingNormals;
-  std::string DebugString;
-  void RefineOneStep(GlobalVariables& theGlobalVariables);
-  void Refine(GlobalVariables& theGlobalVariables);
-  void AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
-  void PopChamberSwapWithLast(int index);
-  std::string ElementToString();
-  void ComputeDebugString(){this->DebugString=this->ElementToString();}
-  void initFromCones
-  (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
-  ;
-  bool SplitChamber
-  (int indexChamberBeingRefined, root& killerNormal, GlobalVariables& theGlobalVariables)
-  ;
-  void GetNewVerticesAppend
-  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
-  ;
-  ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
 };
 
 class GlobalVariables

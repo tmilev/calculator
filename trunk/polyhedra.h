@@ -2091,9 +2091,10 @@ public:
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; }
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
-  CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other) const
+  CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other, const CoefficientType& theRingZero) const
   { CoefficientType result, tempElt;
     assert(this->size==other.size);
+    result=theRingZero;
     for (int i=0; i<this->size; i++)
     { tempElt=other.TheObjects[i];
       tempElt*=this->TheObjects[i];

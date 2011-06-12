@@ -4432,26 +4432,7 @@ private:
     this->ReduceMemory();
     assert(this->checkConsistency());
   }
-  void AddHonestRF(const RationalFunction& other)
-  { Rational tempRat;
-    if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, (Rational) 1))
-    { RationalFunction output;
-      output=*this;
-      output.Denominator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
-      output.Numerator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
-      this->Denominator.GetElement().MultiplyBy(other.Numerator.GetElementConst());
-      output.Numerator.GetElement().AddPolynomial(this->Denominator.GetElementConst());
-      this->Assign(output);
-      this->Simplify();
-    } else
-    { this->Numerator.GetElement().TimesConstant(tempRat);
-      this->Denominator.GetElement().TimesConstant(tempRat);
-      this->Numerator.GetElement().AddPolynomial(other.Numerator.GetElementConst());
-      this->ReduceMemory();
-      this->SimplifyLeadingCoefficientOnly();
-    }
-    assert(this->checkConsistency());
-  }
+  void AddHonestRF(const RationalFunction& other);
   void ReduceRFToPoly()
   { if (this->expressionType==this->typeRationalFunction)
     { if (this->Denominator.GetElement().IsAConstant())
@@ -4498,8 +4479,8 @@ public:
   int expressionType;
   enum typeExpression{ typeRational=0, typePoly=1, typeRationalFunction=2, typeError=3};
   std::string DebugString;
-  void ComputeDebugString(){assert(this->checkConsistency()); this->DebugString=this->ElementToString();}
-  std::string ElementToString()const {assert(this->checkConsistency()); return this->ElementToString(true, false);}
+  void ComputeDebugString(){ this->DebugString=this->ElementToString();}
+  std::string ElementToString()const {return this->ElementToString(true, false);}
   std::string ElementToString(bool useLatex, bool breakLinesLatex)const;
   bool ElementToStringNeedsBracketsForMultiplication()const
   { switch(this->expressionType)
@@ -4509,7 +4490,7 @@ public:
     }
     return false;
   }
-  std::string ElementToString(const PolynomialOutputFormat& theFormat)const{assert(this->checkConsistency()); return this->ElementToString(true, true);}
+  std::string ElementToString(const PolynomialOutputFormat& theFormat)const{return this->ElementToString(true, true);}
   void ElementToString(std::string& output)const{output=this->ElementToString(true, false);}
   RationalFunction(){this->NumVars=0; this->expressionType=this->typeRational; this->ratValue.MakeZero(); this->context=0;}
   void RaiseToPower(int thePower);
@@ -5479,7 +5460,7 @@ bool Polynomial<ElementOfCommutativeRingWithIdentity>::IsProportionalTo(const Po
   TimesMeEqualsOther=other.TheObjects[indexInOther].Coefficient;
   TimesMeEqualsOther/=firstMon.Coefficient;
   Polynomial<ElementOfCommutativeRingWithIdentity> tempP;
-  tempP.Assign(other);
+  tempP.Assign(*this);
   tempP.TimesConstant(TimesMeEqualsOther);
   tempP.Subtract(other);
   return tempP.IsEqualToZero();
@@ -8605,8 +8586,12 @@ public:
   void Refine(GlobalVariables& theGlobalVariables);
   void AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
   void PopChamberSwapWithLast(int index);
-  std::string ElementToString();
+  std::string ElementToString(){return this->ElementToString(false, false);}
+  std::string ElementToString(bool useLatex, bool useHtml);
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
+  bool findMaxLFOverConeProjective
+  (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
+  ;
   void initFromCones
   (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
   ;
@@ -8616,6 +8601,7 @@ public:
   void GetNewVerticesAppend
   (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
   ;
+  void init(){this->splittingNormals.ClearTheObjects(); this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
 };
 
@@ -9047,6 +9033,9 @@ public:
   Cone coneBuffer2NewSplit;
 
   PolynomialRationalCoeff RFgcdBuffer1, RFgcdBuffer2, RFgcdBuffer3, RFgcdBuffer4, RFgcdBuffer5;
+  PolynomialRationalCoeff polyGeneralPurposeBuffer1;
+  PolynomialRationalCoeff polyGeneralPurposeBuffer2;
+  PolynomialRationalCoeff polyGeneralPurposeBuffer3;
   Monomial<Rational> RFgcdBuferMon1, RFgcdBuferMon2;
   List<PolynomialRationalCoeff> RFgcdBufferList1;
 

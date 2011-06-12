@@ -1314,7 +1314,10 @@ std::string Cone::ElementToString(bool useLatex, bool useHtml)
   if (useHtml)
     out << "<br>";
   out << this->Normals.ElementsToInequalitiesString(useLatex, useHtml);
-  out << "\nVertices:" << this->Vertices.ElementToString();
+  out << "\nVertices: " << this->Vertices.ElementToString();
+  if (useHtml)
+    out << "<br>";
+  out << "\nInternal point: " << this->GetInternalPoint().ElementToString();
   return out.str();
 }
 
@@ -1409,9 +1412,10 @@ int ParserNode::EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables)
 bool ConeComplex::findMaxLFOverConeProjective
   (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
 { this->init();
+  std::cout << "Starting cone: " << input.ElementToString(false, true);
   this->AddNonRefinedChamberOnTopNoRepetition(input);
   roots HyperPlanesCorrespondingToLF;
-  if (input.Normals.size<1)
+  if (input.Normals.size<1 || inputLinPolys.size<1)
     return false;
   int theDim=input.Normals.TheObjects[0].size;
   HyperPlanesCorrespondingToLF.SetSize(inputLinPolys.size);
@@ -1436,100 +1440,27 @@ bool ConeComplex::findMaxLFOverConeProjective
       if (!tempRoot.IsEqualToZero())
         this->splittingNormals.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
     }
-  std::cout << this->ElementToString(false, true);
+//  std::cout << this->ElementToString(false, true);
   this->Refine(theGlobalVariables);
+  outputMaximumOverEeachSubChamber.SetSize(this->size);
+  Rational theMax=0;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].GetInternalPoint(tempRoot);
+    bool isInitialized=false;
+    tempRoot.ComputeDebugString();
+    for (int j=0; j<HyperPlanesCorrespondingToLF.size; j++)
+      if (!isInitialized || tempRoot.ScalarEuclidean(HyperPlanesCorrespondingToLF.TheObjects[j], (Rational) 0)>theMax)
+      { HyperPlanesCorrespondingToLF.TheObjects[j].ComputeDebugString();
+        theMax=tempRoot.ScalarEuclidean(HyperPlanesCorrespondingToLF.TheObjects[j], (Rational) 0);
+        outputMaximumOverEeachSubChamber.TheObjects[i]=j;
+        isInitialized=true;
+      }
+  }
+  for (int i=0; i<this->size; i++)
+  { std::cout << "<br>Chamber " << i+1 << " maximum linear function is the function of index " << outputMaximumOverEeachSubChamber.TheObjects[i] << ": " << inputLinPolys.TheObjects[outputMaximumOverEeachSubChamber.TheObjects[i]].ElementToString();
+    std::cout << "<br>The chamber is given by: " << this->TheObjects[i].ElementToString(false, true);
+  }
   return true;
 }
 
-void RationalFunction::AddHonestRF
-(const RationalFunction& other)
-{ Rational tempRat;
-  if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, (Rational) 1))
-  { PolynomialRationalCoeff buffer;
-    RationalFunction debugger;
-    debugger=other;
-    debugger.ComputeDebugString();
-    this->ComputeDebugString();
-    buffer=this->Denominator.GetElement();
-    this->Numerator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
-    buffer.MultiplyBy(other.Numerator.GetElementConst());
-    this->Numerator.GetElement().AddPolynomial(buffer);
-    this->Denominator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
-    this->Simplify();
-    this->ComputeDebugString();
-  } else
-  { this->Numerator.GetElement().TimesConstant(tempRat);
-    this->Denominator.GetElement().TimesConstant(tempRat);
-    this->Numerator.GetElement().AddPolynomial(other.Numerator.GetElementConst());
-    this->ReduceMemory();
-    this->SimplifyLeadingCoefficientOnly();
-  }
-  assert(this->checkConsistency());
-}
-
-void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
-{ if (!this->AllChildrenAreOfDefinedNonErrorType())
-  { this->SetError(this->errorOperationByUndefinedOrErrorType);
-    return;
-  }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForMultiplication(&theGlobalVariables);
-  LargeInt theInt;
-  for (int i=0; i<this->children.size; i++)
-  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
-    switch (this->ExpressionType)
-    { case ParserNode::typeIntegerOrIndex:
-        theInt=this->intValue;
-        theInt*=currentChild.intValue;
-        if (theInt.value.size>1)
-        { this->ExpressionType= this->typeRational;
-          this->rationalValue=theInt;
-        } else
-          this->intValue=theInt.value.TheObjects[0]*theInt.sign;
-      break;
-      case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
-      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()*=currentChild.ratFunction.GetElement(); break;
-      case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
-      case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
-      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
-      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement()); break;
-      default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
-    }
-  }
-}
-
-void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
-{ if (!this->AllChildrenAreOfDefinedNonErrorType())
-  { this->ExpressionType=this->typeError;
-    return;
-  }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForAddition(&theGlobalVariables);
-  LargeInt theInt;
-  if (this->children.TheObjects[0]==6 && this->children.TheObjects[1]==14)
-  { int x=MathRoutines::NChooseK(15,5);
-
-  }
-  for (int i=0; i<this->children.size; i++)
-  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
-    switch (this->ExpressionType)
-    { case ParserNode::typeIntegerOrIndex:
-        theInt=this->intValue;
-        theInt+=currentChild.intValue;
-        if (theInt.value.size>1)
-        { this->ExpressionType= this->typeRational;
-          this->rationalValue=theInt;
-        } else
-          this->intValue=theInt.value.TheObjects[0]*theInt.sign;
-      break;
-      case ParserNode::typeRational: this->rationalValue+=currentChild.rationalValue; break;
-      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()+=currentChild.ratFunction.GetElement(); break;
-      case ParserNode::typePoly: this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); break;
-      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
-      case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
-      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().Add(currentChild.WeylAlgebraElement.GetElement()); break;
-      default: this->ExpressionType=this->typeError; return;
-    }
-  }
-}
 

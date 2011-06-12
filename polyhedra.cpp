@@ -33348,3 +33348,91 @@ void ParserNode::EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables)
     theCommand << "pdflatex -output-directory=" << this->owner->outputFolderPath << "   " << fileName ;
     this->owner->SystemCommands.AddObjectOnTop(theCommand.str());
 }
+
+void RationalFunction::AddHonestRF
+(const RationalFunction& other)
+{ Rational tempRat;
+  if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, (Rational) 1))
+  { PolynomialRationalCoeff buffer;
+    RationalFunction debugger;
+    debugger=other;
+    debugger.ComputeDebugString();
+    this->ComputeDebugString();
+    buffer=this->Denominator.GetElement();
+    this->Numerator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
+    buffer.MultiplyBy(other.Numerator.GetElementConst());
+    this->Numerator.GetElement().AddPolynomial(buffer);
+    this->Denominator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
+    this->Simplify();
+    this->ComputeDebugString();
+  } else
+  { this->Numerator.GetElement().TimesConstant(tempRat);
+    this->Denominator.GetElement().TimesConstant(tempRat);
+    this->Numerator.GetElement().AddPolynomial(other.Numerator.GetElementConst());
+    this->ReduceMemory();
+    this->SimplifyLeadingCoefficientOnly();
+  }
+  assert(this->checkConsistency());
+}
+
+void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->SetError(this->errorOperationByUndefinedOrErrorType);
+    return;
+  }
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
+  this->InitForMultiplication(&theGlobalVariables);
+  LargeInt theInt;
+  for (int i=0; i<this->children.size; i++)
+  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
+    switch (this->ExpressionType)
+    { case ParserNode::typeIntegerOrIndex:
+        theInt=this->intValue;
+        theInt*=currentChild.intValue;
+        if (theInt.value.size>1)
+        { this->ExpressionType= this->typeRational;
+          this->rationalValue=theInt;
+        } else
+          this->intValue=theInt.value.TheObjects[0]*theInt.sign;
+      break;
+      case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
+      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()*=currentChild.ratFunction.GetElement(); break;
+      case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
+      case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
+      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
+      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement()); break;
+      default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
+    }
+  }
+}
+
+void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
+{ if (!this->AllChildrenAreOfDefinedNonErrorType())
+  { this->ExpressionType=this->typeError;
+    return;
+  }
+  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
+  this->InitForAddition(&theGlobalVariables);
+  LargeInt theInt;
+  for (int i=0; i<this->children.size; i++)
+  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
+    switch (this->ExpressionType)
+    { case ParserNode::typeIntegerOrIndex:
+        theInt=this->intValue;
+        theInt+=currentChild.intValue;
+        if (theInt.value.size>1)
+        { this->ExpressionType= this->typeRational;
+          this->rationalValue=theInt;
+        } else
+          this->intValue=theInt.value.TheObjects[0]*theInt.sign;
+      break;
+      case ParserNode::typeRational: this->rationalValue+=currentChild.rationalValue; break;
+      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()+=currentChild.ratFunction.GetElement(); break;
+      case ParserNode::typePoly: this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); break;
+      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
+      case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
+      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().Add(currentChild.WeylAlgebraElement.GetElement()); break;
+      default: this->ExpressionType=this->typeError; return;
+    }
+  }
+}

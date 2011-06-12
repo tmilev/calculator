@@ -25738,37 +25738,6 @@ void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVar
 { this->ExpressionType=this->GetStrongestExpressionChildrenConvertChildrenIfNeeded(theGlobalVariables);
 }
 
-void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
-{ if (!this->AllChildrenAreOfDefinedNonErrorType())
-  { this->ExpressionType=this->typeError;
-    return;
-  }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForAddition(&theGlobalVariables);
-  LargeInt theInt;
-  for (int i=0; i<this->children.size; i++)
-  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
-    switch (this->ExpressionType)
-    { case ParserNode::typeIntegerOrIndex:
-        theInt=this->intValue;
-        theInt+=currentChild.intValue;
-        if (theInt.value.size>1)
-        { this->ExpressionType= this->typeRational;
-          this->rationalValue=theInt;
-        } else
-          this->intValue=theInt.value.TheObjects[0]*theInt.sign;
-      break;
-      case ParserNode::typeRational: this->rationalValue+=currentChild.rationalValue; break;
-      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()+=currentChild.ratFunction.GetElement(); break;
-      case ParserNode::typePoly: this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); break;
-      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
-      case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
-      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().Add(currentChild.WeylAlgebraElement.GetElement()); break;
-      default: this->ExpressionType=this->typeError; return;
-    }
-  }
-}
-
 void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
   { this->ExpressionType=this->typeError;
@@ -26006,37 +25975,6 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
       this->SetError(errorDunnoHowToDoOperation);
     break;
     default: this->SetError(this->errorDunnoHowToDoOperation); return;
-  }
-}
-
-void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
-{ if (!this->AllChildrenAreOfDefinedNonErrorType())
-  { this->SetError(this->errorOperationByUndefinedOrErrorType);
-    return;
-  }
-  this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForMultiplication(&theGlobalVariables);
-  LargeInt theInt;
-  for (int i=0; i<this->children.size; i++)
-  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
-    switch (this->ExpressionType)
-    { case ParserNode::typeIntegerOrIndex:
-        theInt=this->intValue;
-        theInt*=currentChild.intValue;
-        if (theInt.value.size>1)
-        { this->ExpressionType= this->typeRational;
-          this->rationalValue=theInt;
-        } else
-          this->intValue=theInt.value.TheObjects[0]*theInt.sign;
-      break;
-      case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
-      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()*=currentChild.ratFunction.GetElement(); break;
-      case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
-      case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
-      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
-      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement()); break;
-      default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
-    }
   }
 }
 

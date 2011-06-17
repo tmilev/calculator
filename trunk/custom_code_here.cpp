@@ -40,18 +40,18 @@ public:
   roots GmodKnegativeWeights;
   ConeGlobal PreimageWeylChamberLargerAlgebra;
   ConeGlobal WeylChamberSmallerAlgebra;
-  List<QuasiPolynomial> theQPsNonSubstituted;
-  List<List<QuasiPolynomial> > theQPsSubstituted;
+  List<QuasiPolynomialOld> theQPsNonSubstituted;
+  List<List<QuasiPolynomialOld> > theQPsSubstituted;
 //  List<CombinatorialChamber> parametricChambers;
-  List<QuasiPolynomial> theMultiplicities;
-  List<QuasiPolynomial > theMultiplicitiesExtremaCandidates;
+  List<QuasiPolynomialOld> theMultiplicities;
+  List<QuasiPolynomialOld > theMultiplicitiesExtremaCandidates;
   int tempDebugCounter;
   List<Rational> theCoeffs;
   roots theTranslations;
   roots theTranslationsProjected;
   partFractions thePfs;
   List<List<roots> > paramSubChambers, nonParamVertices;
-  List<List<QuasiPolynomial> > ExtremeQPsParamSubchambers;
+  List<List<QuasiPolynomialOld> > ExtremeQPsParamSubchambers;
   List<roots> allParamSubChambersRepetitionsAllowed;
   List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   CombinatorialChamberContainer projectivizedChamber;
@@ -334,6 +334,27 @@ void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const ro
   output-=tempRoot2;
 }
 
+void MatrixLargeRational::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen)
+{ outputDen.MakeOne();
+  MatrixLargeRational tempMat;
+  tempMat=*this;
+  outputMat.init(this->NumRows, this->NumCols);
+  LargeIntUnsigned tempUI;
+  Rational tempRat;
+  for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+    { tempMat.elements[i][j].GetDen(tempUI);
+      if (!tempUI.IsEqualToOne())
+      { outputDen*=tempUI;
+        tempRat=tempUI;
+        tempMat*=tempRat;
+      }
+    }
+  for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+      tempMat.elements[i][j].GetNum(outputMat.elements[i][j]);
+}
+
 void MatrixLargeRational::GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen)
 { outputDen=this->FindPositiveLCMCoefficientDenominatorsTruncated();
   outputMat.init(this->NumRows, this->NumCols);
@@ -400,17 +421,17 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->theQPsNonSubstituted.SetSize(this->thePfs.theChambers.size);
   for (int i=0; i<this->thePfs.theChambers.size; i++)
     if (this->thePfs.theChambers.TheObjects[i]!=0)
-    { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
+    { QuasiPolynomialOld& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
       this->thePfs.partFractionsToPartitionFunctionAdaptedToRoot(currentQPNoSub, this->thePfs.theChambers.TheObjects[i]->InternalPoint, false, true, theGlobalVariables, true);
     }
-  QuasiPolynomial theQPNoSub;
+  QuasiPolynomialOld theQPNoSub;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
   for (int i=0; i<this->projectivizedChamberTest.size; i++)
 //  if(i<this->tempDebugCounter)
   { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
     for (int k=0; k<this->theLinearOperators.size; k++)
 //    if (k<this->tempDebugCounter)
-    { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
+    { QuasiPolynomialOld& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
       this->GetProjection(k, this->projectivizedChamberTest.TheObjects[i].GetInternalPoint(), tempRoot);
       int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
       if (theIndex==-1)
@@ -429,10 +450,10 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     }
   }
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  QuasiPolynomial tempQP;
+  QuasiPolynomialOld tempQP;
   for (int i=0; i<this->projectivizedChamberTest.size; i++)
 //  if (i<this->tempDebugCounter)
-  { QuasiPolynomial& currentSum=this->theMultiplicities.TheObjects[i];
+  { QuasiPolynomialOld& currentSum=this->theMultiplicities.TheObjects[i];
     currentSum.Nullify(totalDim);
     for (int k=0; k<this->theLinearOperators.size; k++)
 //    if (k<this->tempDebugCounter)
@@ -870,7 +891,7 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
   this->allParamSubChambersRepetitionsAllowed.size=0;
   std::stringstream out;
   QPSub subForFindingExtrema;
-  QuasiPolynomial currentExtremaCandidate;
+  QuasiPolynomialOld currentExtremaCandidate;
   int numParams=0, numNonParams=0;
   if (this->theLinearOperators.size>0)
   { numParams=this->theLinearOperators.TheObjects[0].NumCols+1;
@@ -942,14 +963,33 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
   //theGlobalVariables.theIndicatorVariables.StatusString1=out3.str();
   theGlobalVariables.MakeReport();
 }
+
 void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
   (Cone& input, GlobalVariables& theGlobalVariables)
 { std::stringstream out3;
   out3 << "extreme multiplicities are among: ";
+  ConeComplex extremaComplex;
+  extremaComplex.init();
+  extremaComplex.AddNonRefinedChamberOnTopNoRepetition(input);
+  root projectivizedNormal;
+  int projectiveDimension=input.GetDim();
+  roots projectivizedNormals;
+  projectivizedNormals.MakeActualSizeAtLeastExpandOnTop(this->allParamSubChambersRepetitionsAllowedConeForm.size);
+
+  QuasiNumber tempQN, theQNZero;
+  theQNZero.MakeZero(projectiveDimension);
   for (int j=0; j<this->allParamSubChambersRepetitionsAllowedConeForm.size; j++)
   // if (j<this->tempDebugCounter)
     if (input.IsInCone(this->allParamSubChambersRepetitionsAllowedConeForm.TheObjects[j].GetInternalPoint()))
-    { out3 << this->theMultiplicitiesExtremaCandidates.TheObjects[j].ElementToString() << "\n";
+    { QuasiPolynomialOld& currentPoly= this->theMultiplicitiesExtremaCandidates.TheObjects[j];
+      projectivizedNormal.MakeZero(projectiveDimension);
+      for (int i=0; i<projectiveDimension-1; i++)
+      { currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(i, tempQN, theQNZero);
+        projectivizedNormal.TheObjects[i]=tempQN.TheObjects[0].Coefficient;
+      }
+      currentPoly.GetConstantTerm(tempQN, theQNZero);
+      *projectivizedNormal.LastObject()=tempQN.TheObjects[0].Coefficient;
+      projectivizedNormals.AddObjectOnTop(projectivizedNormal);
       std::stringstream out4;
       out4 << "starting chamber " << j+1 << " out of " << this->allParamSubChambersRepetitionsAllowedConeForm.size;
       theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -1463,4 +1503,141 @@ bool ConeComplex::findMaxLFOverConeProjective
   return true;
 }
 
+class Lattice
+{
+public:
+  Matrix<LargeInt> basis;
+  LargeIntUnsigned Den;
+  void Reduce
+  ()
+  ;
+  std::string ElementToString()const;
+  bool operator==(const Lattice& other);
+  void RefineByOtherLattice(const Lattice& other);
+  void AssignRootsToBasisAndReduce
+  (const roots& input)
+  ;
+};
+
+void Lattice::Reduce
+()
+{ LargeInt tempInt;
+  tempInt.MakeMOne();
+  this->basis.GaussianEliminationEuclideanDomain(tempInt);
+}
+
+class QuasiPolynomial
+{
+public:
+  int GetNumVars(){return this->AmbientLatticeReduced.basis.NumRows;}
+  GlobalVariables* buffers;
+  Lattice AmbientLatticeReduced;
+  roots theConstantTerms;
+  List<PolynomialRationalCoeff> valueOnEachLatticePoint;
+  void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
+  void operator+=(const QuasiPolynomial& other);
+  QuasiPolynomial(){this->buffers=0;}
+};
+
+
+
+void Lattice::RefineByOtherLattice(const Lattice& other)
+{
+}
+
+void  QuasiPolynomial::operator+=(const QuasiPolynomial& other)
+{
+}
+
+int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
+{ List<int> theArgumentList;
+  this->ExtractArgumentList(theArgumentList);
+  if (theArgumentList.size<1)
+    return this->SetError(this->errorBadOrNoArgument);
+  int theDim=this->owner->TheObjects[theArgumentList.TheObjects[0]].array.GetElement().size;
+  if (theArgumentList.size<theDim)
+    return this->SetError(this->errorDimensionProblem);
+  root currentRoot;
+  roots LatticeBase;
+  currentRoot.SetSize(theDim);
+  for (int i=0; i<theArgumentList.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[theArgumentList.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+    if (currentNode.array.GetElement().size!=theDim)
+      return this->SetError(this->errorDimensionProblem);
+    for (int j=0; j<currentNode.array.GetElement().size; j++)
+    { ParserNode& currentCoord=this->owner->TheObjects[currentNode.array.GetElement().TheObjects[j]];
+      if (!currentCoord.ConvertToType(this->typeRational, theGlobalVariables))
+        return this->SetError(this->errorConversionError);
+      currentRoot.TheObjects[j]=currentCoord.rationalValue;
+    }
+    LatticeBase.AddObjectOnTop(currentRoot);
+  }
+  Lattice theLattice;
+  theLattice.AssignRootsToBasisAndReduce(LatticeBase);
+  this->outputString=theLattice.ElementToString();
+  this->ExpressionType=this->typeString;
+  return this->errorNoError;
+}
+
+void Lattice::AssignRootsToBasisAndReduce(const roots& input)
+{ MatrixLargeRational tempMat;
+  tempMat.AssignRootsToRowsOfMatrix(input);
+  std::cout << tempMat.ElementToString(true, false);
+  tempMat.GetMatrixIntWithDen(this->basis, this->Den);
+  this->Reduce();
+
+}
+
+std::string Lattice::ElementToString()const
+{ std::stringstream out;
+  out << "Basis: Denominator=" << this->Den.ElementToString() << " \n";
+  out << "<br>Matrix=" << this->basis.ElementToString(true, false);
+  return out.str();
+}
+
+#ifdef WIN32
+#pragma warning(disable:4244)//warning 4244: data loss from conversion
+#endif
+void LargeIntUnsigned::DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const
+{ LargeIntUnsigned remainder, quotient, divisor;
+  remainder.Assign(*this);
+  divisor.Assign(x);
+  assert(!divisor.IsEqualToZero());
+  quotient.MakeZero();
+  //std::string tempS1, tempS2, tempS3;
+  while (remainder.IsGEQ(divisor))
+  { unsigned int q;
+    LargeIntUnsigned current, Total;
+    if (*remainder.LastObject()>*divisor.LastObject())
+    { q=*remainder.LastObject()/(*divisor.LastObject()+1);
+      current.AssignShiftedUInt(q, remainder.size-divisor.size);
+    }
+    else
+    { if (remainder.size==divisor.size)
+        current.AssignShiftedUInt(1, 0);
+      else
+      { q=this->CarryOverBound/(divisor.TheObjects[divisor.size-1]+1);
+        current.AssignShiftedUInt(q, remainder.size- divisor.size-1);
+        current.MultiplyByUInt(remainder.TheObjects[remainder.size-1]);
+      }
+    }
+    Total.Assign(divisor);
+    Total.MultiplyBy(current);
+    //if (!remainder.IsGEQ(Total))
+    //{ tempS1= remainder.ElementToString();
+    //  tempS2=Total.ElementToString();
+    //  remainder.IsGEQ(Total);
+    //}
+    remainder.SubtractSmallerPositive(Total);
+    quotient.Add(current);
+  }
+  remainderOutput.Assign(remainder);
+  quotientOutput.Assign(quotient);
+//  assert(remainderOut.CheckForConsistensy());
+}
+#ifdef WIN32
+#pragma warning(default:4244)//warning 4244: data loss from conversion
+#endif
 

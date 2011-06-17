@@ -72,7 +72,7 @@ class PolynomialsRationalCoeff;
 class PrecomputedQuasiPolynomialIntegrals;
 class hashedRoots;
 class PrecomputedTauknPointersKillOnExit;
-class QuasiPolynomial;
+class QuasiPolynomialOld;
 class VertexSelectionPointers;
 class CombinatorialChamberContainer;
 class CompositeComplexQN;
@@ -83,6 +83,8 @@ class PolynomialLight;
 class Selection;
 class IntegerPoly;
 class Rational;
+class LargeInt;
+class LargeIntUnsigned;
 class rootSubalgebra;
 class intRoot;
 class PolyPartFractionNumerator;
@@ -643,7 +645,7 @@ protected:
   friend class partFractions;
   friend class QuasiMonomial;
   friend class CombinatorialChamber;
-  friend class QuasiPolynomial;
+  friend class QuasiPolynomialOld;
   void ClearHashes();
   List<int>* TheHashedArrays;
 public:
@@ -867,10 +869,10 @@ public:
   static std::string MatrixElementSeparator;
   void ComputeDebugString();
   void ComputeDebugString(bool useHtml, bool useLatex){this->ElementToString(this->DebugString, useHtml, useLatex);}
-  void ElementToString(std::string& output);
-  void ElementToString(std::string& output, bool useHtml, bool useLatex);
+  void ElementToString(std::string& output)const;
+  void ElementToString(std::string& output, bool useHtml, bool useLatex)const ;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
-  std::string ElementToString(bool useHtml, bool useLatex){std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
+  std::string ElementToString(bool useHtml, bool useLatex)const{std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
   void SwitchTwoRows(int row1, int row2);
   void RowToRoot(int rowIndex, root& output)const;
   int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex);
@@ -883,7 +885,7 @@ public:
         }
     return false;
   }
-  void RowTimesScalar(int rowIndex, Element& scalar);
+  void RowTimesScalar(int rowIndex, const Element& scalar);
   void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar);
   void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar);
   void MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output);
@@ -993,9 +995,57 @@ void NonPivotPointsToEigenVector
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows
 (int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
 ;
+
+  void GaussianEliminationEuclideanDomain
+(const Element& theRingMinusUnit)
+  ;
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
 };
 
+template <class Element>
+void Matrix<Element>::GaussianEliminationEuclideanDomain
+(const Element& theRingMinusUnit)
+{ int col=0;
+  Element tempElt;
+  int row=0;
+  while(row<this->NumRows && col<this->NumCols)
+  { int findPivotRow=-1;
+    for (int i=row; i<this->NumRows; i++)
+      if(!this->elements[i][col].IsEqualToZero())
+      { findPivotRow=i;
+        break;
+      }
+    if (findPivotRow!=-1)
+    { this->SwitchTwoRows(row, findPivotRow);
+      if (this->elements[row][col]<0)
+        this->RowTimesScalar(row, theRingMinusUnit);
+      int ExploringRow= row+1;
+      while (ExploringRow<this->NumRows)
+      { Element& PivotElt=this->elements[row][col];
+        Element& otherElt=this->elements[ExploringRow][col];
+        if (otherElt<0)
+          this->RowTimesScalar(ExploringRow, theRingMinusUnit);
+        if (PivotElt<=otherElt)
+        { tempElt=otherElt/PivotElt;
+          this->SubtractRows(ExploringRow, row, 0, tempElt);
+        }
+        if (this->elements[ExploringRow][col].IsEqualToZero())
+          ExploringRow++;
+        else
+          this->SwitchTwoRows(ExploringRow, row);
+      }
+      Element& PivotElt = this->elements[row][col];
+      for (int i=0; i<row; i++)
+        if (!this->elements[i][col].IsEqualToZero())
+          if (PivotElt<=this->elements[i][col])
+          { tempElt =this->elements[i][col]/PivotElt;
+            this->SubtractRows(i, row, 0, tempElt);
+          }
+      row++;
+    }
+    col++;
+  }
+}
 
 template <class Element>
 bool Matrix<Element>::flagAnErrorHasOccurredTimeToPanic=false;
@@ -1018,6 +1068,7 @@ public:
   void ActOnRoots(roots& input, roots& output);
   void ActOnRoots(roots& theRoots);
   void GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen);
+  void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
 
   void DivideByRational(Rational& x);
   void LieBracketWith(MatrixLargeRational& right);
@@ -1265,7 +1316,7 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Ele
 }
 
 template <typename Element>
-inline void Matrix<Element>::ElementToString(std::string& output)
+inline void Matrix<Element>::ElementToString(std::string& output)const
 { this->ElementToString(output, false, false);
 }
 
@@ -1308,7 +1359,7 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
 }
 
 template <typename Element>
-inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, bool useLatex)
+inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, bool useLatex)const
 { std::stringstream out;
   std::string tempS;
   if (useHtml)
@@ -1436,14 +1487,16 @@ inline void Matrix<Element>::SubtractRows(int indexRowWeSubtractFrom, int indexS
 }
 
 template <typename Element>
-inline void Matrix<Element>::RowTimesScalar(int rowIndex, Element& scalar)
+inline void Matrix<Element>::RowTimesScalar(int rowIndex, const Element& scalar)
 { for (int i=0; i<this->NumCols; i++)
     this->elements[rowIndex][i].MultiplyBy(scalar);
 }
 
 template <typename Element>
-inline void Matrix<Element>::SwitchTwoRows( int row1, int row2)
-{ Element tempElement;
+inline void Matrix<Element>::SwitchTwoRows(int row1, int row2)
+{ if (row1==row2)
+    return;
+  Element tempElement;
   for(int i = 0; i<this->NumCols; i++)
   { tempElement.Assign(this->elements[row1][i]);
     this->elements[row1][i].Assign(this->elements[row2][i]);
@@ -1633,6 +1686,8 @@ ParallelComputing::GlobalPointerCounter+=c;
 class LargeIntUnsigned: public List<unsigned int>
 { void AddNoFitSize(const LargeIntUnsigned& x);
 public:
+  //The zero element is assumed to have length one array with a Zero entry
+  //
   // Carry over bound is the "base" over which we work
   //Requirements on the CarryOverBound:
   //1.  CarryOverBound*2-1 must fit inside an unsigned (int)
@@ -1649,6 +1704,7 @@ public:
   //it is used for quick multiplication of LargeRationals.
   static const int SquareRootOfCarryOverBound=32768; //=2^15
   void ElementToString(std::string& output)const;
+  inline std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
   void DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
   void Add(const LargeIntUnsigned& x);
@@ -1656,9 +1712,9 @@ public:
   void MakeZero();
   bool IsEqualToZero()const{return this->size==1 && this->TheObjects[0]==0; }
   bool IsEqualTo(LargeIntUnsigned& right);
-  bool IsPositive(){ return this->size>1 || this->TheObjects[0]>0; };
+  bool IsPositive()const{ return this->size>1 || this->TheObjects[0]>0; }
   bool IsEqualToOne()const{ return this->size==1 && this->TheObjects[0]==1; }
-  bool IsGEQ(const LargeIntUnsigned& x);
+  bool IsGEQ(const LargeIntUnsigned& x)const;
   static void gcd(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output);
   static void lcm(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output)
   { LargeIntUnsigned tempUI, tempUI2;
@@ -1682,6 +1738,7 @@ public:
   LargeIntUnsigned operator/(LargeIntUnsigned& x)const;
   LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); }
   LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; }
+  inline bool operator<(const LargeIntUnsigned& other)const{return !this->IsGEQ(other);}
   //must be rewritten:
   double GetDoubleValue();
   void FitSize();
@@ -1692,13 +1749,13 @@ class LargeInt
 public:
   signed char sign;
   LargeIntUnsigned value;
-  void MultiplyBy(LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); }
+  void MultiplyBy(const LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); }
   void MultiplyByInt(int x);
   void ElementToString(std::string& output)const;
-  bool IsPositive(){return this->sign==1 && (this->value.IsPositive()); }
-  bool IsNegative(){return this->sign==-1&& (this->value.IsPositive()); }
-  bool IsNonNegative(){return !this->IsNegative(); }
-  bool IsNonPositive(){return !this->IsPositive(); }
+  bool IsPositive()const{return this->sign==1 && (this->value.IsPositive()); }
+  bool IsNegative()const{return this->sign==-1&& (this->value.IsPositive()); }
+  inline bool IsNonNegative()const{return !this->IsNegative(); }
+  inline bool IsNonPositive()const{return !this->IsPositive(); }
   bool IsEqualTo(LargeInt& x);
   bool IsEqualToZero()const{ return this->value.IsEqualToZero(); }
   bool IsEqualToOne()const{ return this->value.IsEqualToOne() && this->sign==1; }
@@ -1712,13 +1769,32 @@ public:
   bool CheckForConsistensy();
   void MakeZero();
   void MakeOne(){this->value.MakeOne(); this->sign=1; }
-  void MakeMOne();
+  void MakeMOne(){this->value.MakeOne(); this->sign=-1;}
   int GetIntValueTruncated(){return this->sign* this->value.GetUnsignedIntValueTruncated(); }
   double GetDoubleValue();
   int operator %(int x);
-  inline void operator = (const LargeInt& x){ this->Assign(x);  }
+  inline void operator=(const LargeInt& x){ this->Assign(x);}
+  inline void operator=(const LargeIntUnsigned& other) {this->value=other; this->sign=1;}
+  inline void operator*=(const LargeInt& other){this->MultiplyBy(other);}
   inline void operator*=(int x){ this->MultiplyByInt(x);}
   inline void operator+=(int x){this->AddInt(x);}
+  inline void Minus(){if (!this->IsEqualToZero()) this->sign*=-1;}
+  inline void operator-=(const LargeInt& other)
+  { this->Minus();
+    this->Add(other);
+    this->Minus();
+  }
+  inline bool operator<=(const LargeInt& other) const{ return ! (other<*this);}
+  inline bool operator<(const LargeInt& other)const
+  { if (other.IsNonNegative())
+    { if (this->IsNonNegative())
+        return this->value<other.value;
+      return true;
+    }
+    if (this->IsNegative())
+      return other.value< this->value;
+    return false;
+  }
   inline LargeInt operator+(const LargeInt& other){LargeInt tempInt; tempInt.Assign(*this); tempInt.Add(other); return tempInt;}
   inline LargeInt operator+(int x){LargeInt tempInt; tempInt.Assign(*this); tempInt.AddInt(x); return tempInt;}
   LargeInt operator*(int x){ LargeInt tempInt; tempInt.Assign(*this); tempInt.MultiplyByInt(x); return tempInt;}
@@ -1856,6 +1932,12 @@ public:
     }
     else
       output.Assign(this->Extended->den);
+  }
+  inline void GetNum(LargeInt& output)
+  { this->GetNumUnsigned(output.value);
+    output.sign=1;
+    if (this->IsNegative())
+      output.sign=-1;
   }
   inline void GetNumUnsigned(LargeIntUnsigned& output)
   { if (this->Extended==0)
@@ -2024,6 +2106,7 @@ ParallelComputing::GlobalPointerCounter++;
       return this->DenShort>0;
     return true;
   }
+  inline void operator=(const LargeIntUnsigned& right){LargeInt tempI; tempI=right; this->operator=(tempI); }
   inline void operator=(const Rational& right){this->Assign(right); }
   inline bool operator==(const Rational& right)const{return this->IsEqualTo(right); }
   inline void operator+=(const Rational& r)
@@ -2508,7 +2591,7 @@ public:
   roots(int StartingSize){ this->SetSize(StartingSize);}
 };
 
-class Lattice
+class LatticeRoot
 {
 public:
   roots LatticeBasis;
@@ -2643,7 +2726,7 @@ public:
   bool flagExplored;
   bool flagPermanentlyZero;
   bool flagNormalsAreSorted;
-  //QuasiPolynomial* ThePolynomial;
+  //QuasiPolynomialOld* ThePolynomial;
   int CreationNumber;
   int DisplayNumber;
   int IndexInOwnerComplex;
@@ -2937,7 +3020,7 @@ void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o)
 template <class Object>
 void List<Object>::SetSize(int theSize)
 { this->MakeActualSizeAtLeastExpandOnTop(theSize);
-  size=theSize;
+  this->size=theSize;
 }
 
 template <class Object>
@@ -3852,7 +3935,8 @@ class Polynomial: public TemplatePolynomial<Monomial<ElementOfCommutativeRingWit
 {
 public:
   static bool flagAnErrorHasOccuredTimeToPanic;
-  void FindCoeffInFrontOfLinearTermVariableIndex(int index, ElementOfCommutativeRingWithIdentity& output);
+  void GetConstantTerm(ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero);
+  void GetCoeffInFrontOfLinearTermVariableIndex(int index, ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero);
   void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
   void MakeMonomialOneLetter(int NumVars, int LetterIndex, int Power, const ElementOfCommutativeRingWithIdentity& Coeff);
   Polynomial(){}
@@ -3888,7 +3972,7 @@ public:
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
   int GetIndexMaxMonomialTotalDegThenLexicographic();
   void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
-  int FindMaxPowerOfVariableIndex(int VariableIndex);
+  int GetMaxPowerOfVariableIndex(int VariableIndex);
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
   bool IsEqualTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& p)const;
@@ -4735,7 +4819,7 @@ public:
 class QuasiPolynomials:public Polynomials<QuasiNumber>
 {
 public:
-  void IntegrateDiscreteInDirectionFromZeroTo(root& direction, PolynomialRationalCoeff& EndPoint, QuasiPolynomial& output, QuasiPolynomial& input, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void IntegrateDiscreteInDirectionFromZeroTo(root& direction, PolynomialRationalCoeff& EndPoint, QuasiPolynomialOld& output, QuasiPolynomialOld& input, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -5082,7 +5166,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::Assign(const Monomial<Eleme
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-int Polynomial<ElementOfCommutativeRingWithIdentity>::FindMaxPowerOfVariableIndex(int VariableIndex)
+int Polynomial<ElementOfCommutativeRingWithIdentity>::GetMaxPowerOfVariableIndex(int VariableIndex)
 { int result=0;
   for (int i=0; i<this->size; i++)
     result= Maximum(result, this->TheObjects[i].degrees[VariableIndex]);
@@ -5090,21 +5174,25 @@ int Polynomial<ElementOfCommutativeRingWithIdentity>::FindMaxPowerOfVariableInde
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::FindCoeffInFrontOfLinearTermVariableIndex (int index, ElementOfCommutativeRingWithIdentity& output)
-{ for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i].degrees[index]=1)
-    { bool FoundLinearTerm= true;
-      for (int j=0; j<this->NumVars; j++)
-        if (this->TheObjects[i].degrees[j]!=0 && j!=index)
-        { FoundLinearTerm=false;
-          break;
-        }
-      if (FoundLinearTerm)
-      { output.Assign(this->TheObjects[i].Coefficient);
-        return;
-      }
-    }
-  output.Assign(*ElementOfCommutativeRingWithIdentity::TheRingZero);
+void Polynomial<ElementOfCommutativeRingWithIdentity>::GetConstantTerm(ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero)
+{ Monomial<ElementOfCommutativeRingWithIdentity> tempM;
+  tempM.MakeConstantMonomial(this->NumVars, theRingZero);
+  int i=this->IndexOfObjectHash(tempM);
+  if (i==-1)
+    output=theRingZero;
+  else
+    output=this->TheObjects[i].Coefficient;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::GetCoeffInFrontOfLinearTermVariableIndex(int index, ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero)
+{ Monomial<ElementOfCommutativeRingWithIdentity> tempM;
+  tempM.MakeNVarFirstDegree(index, this->NumVars, theRingZero);
+  int i=this->IndexOfObjectHash(tempM);
+  if (i==-1)
+    output=theRingZero;
+  else
+    output=this->TheObjects[i].Coefficient;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -5288,7 +5376,7 @@ template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::AddPolynomial(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p)
 { this->MakeActualSizeAtLeastExpandOnTop(p.size+this->size);
   //std::string tempS1;
-  /*if (QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic)
+  /*if (QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic)
   {  std::string tempS;
     RandomCodeIDontWantToDelete::EvilList1.AddObjectOnTop(tempS);
     tempS1=& RandomCodeIDontWantToDelete::EvilList1.TheObjects
@@ -5304,11 +5392,11 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
     //  currentList->AddObjectOnTop(tempS);
   }*/
   for (int i=0; i<p.size; i++)
-  {  /*if (QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic)
+  {  /*if (QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic)
     {  std::string tempS;
       Rational tempRat;
-      QuasiPolynomial* tempP;
-      tempP=(QuasiPolynomial*)this;
+      QuasiPolynomialOld* tempP;
+      tempP=(QuasiPolynomialOld*)this;
       tempP->Evaluate(partFraction::theVectorToBePartitioned, tempRat);
       tempRat.ElementToString(tempS);
     //  currentList->AddObjectOnTop(tempS);
@@ -6038,13 +6126,13 @@ public:
 class CompositeComplexQNPoly: public Polynomial<CompositeComplexQN>
 {
 public:
-void AssignQP(QuasiPolynomial& q);
+void AssignQP(QuasiPolynomialOld& q);
 };
 
-class QuasiPolynomial: public Polynomial<QuasiNumber>
+class QuasiPolynomialOld: public Polynomial<QuasiNumber>
 {
 public:
-  static ListPointers<QuasiPolynomial> GlobalCollectorsPolys;
+  static ListPointers<QuasiPolynomialOld> GlobalCollectorsPolys;
   static int TotalCreatedPolys;
   int CreationNumber; //for debug purposes
   static PrecomputedTauknPointersKillOnExit* PrecomputedTaus;
@@ -6052,19 +6140,19 @@ public:
   void AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p);
   void MakeTauknp(int k, int n);
   void MakePureQuasiPolynomial(PolynomialRationalCoeff& p, int NumVars);
-  void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output);
-  void IntegrateDiscreteFromZeroTo(QPSub& EndPointSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-  void IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-  void IntegrateDiscreteInDirectionFromOldChamber(root& direction, root& normal, QuasiPolynomial& OldChamberPoly, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomialOld& output);
+  void IntegrateDiscreteFromZeroTo(QPSub& EndPointSub, QuasiPolynomialOld &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomialOld &output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void IntegrateDiscreteInDirectionFromOldChamber(root& direction, root& normal, QuasiPolynomialOld& OldChamberPoly, QuasiPolynomialOld& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
   void WriteComplexFormToDebugString();
   void TimesInteger(int x);
   void operator*=(const Rational& x);
   void DivByInteger(int x);
   void Evaluate(intRoot& values, Rational& output);
   int SizeWithoutDebugString();
-  void operator=(const QuasiPolynomial& right);
+  void operator=(const QuasiPolynomialOld& right);
   void Simplify();
-  QuasiPolynomial();
+  QuasiPolynomialOld();
   void Nullify(int numVars);
 };
 
@@ -6081,9 +6169,9 @@ public:
 class QuasiMonomial: public Monomial<QuasiNumber>
 {
 public:
-  void IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-  void IntegrateDiscreteFromZeroTo(QPSub& EndPointSub, QuasiPolynomial& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
-  void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output);
+  void IntegrateDiscreteInDirectionFromZeroTo(QPSub& EndPointSub, QPSub& DirectionSub, QuasiPolynomialOld& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void IntegrateDiscreteFromZeroTo(QPSub& EndPointSub, QuasiPolynomialOld& output, PrecomputedQuasiPolynomialIntegrals& PrecomputedDiscreteIntegrals);
+  void RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomialOld& output);
 };
 
 class PrecomputedTaukn
@@ -6110,7 +6198,7 @@ public:
   int Num;
   int Den;
   int degree;
-  QuasiPolynomial Value;
+  QuasiPolynomialOld Value;
   void ComputeValue(PolynomialsRationalCoeff& PreComputedBernoulli);
   void operator=(PrecomputedQuasiPolynomialIntegral& right);
 };
@@ -6119,7 +6207,7 @@ class PrecomputedQuasiPolynomialIntegrals: public List<PrecomputedQuasiPolynomia
 {
 public:
   static PolynomialsRationalCoeff* PreComputedBernoulli;
-  void GetQuasiPolynomialIntegral(int Num, int Den, int degree, QuasiPolynomial& output);
+  void GetQuasiPolynomialIntegral(int Num, int Den, int degree, QuasiPolynomialOld& output);
 };
 
 class QPSub
@@ -6175,7 +6263,7 @@ void ListPointersKillOnExitFakeSize<Object>::setFakeSize(int theFakeSize, int pa
   this->FakeSize =theFakeSize;
 }
 
-class SortedQPs : public ListPointersKillOnExitFakeSize<ListPointersKillOnExitFakeSize<ListPointersKillOnExitFakeSize<QuasiPolynomial> > >
+class SortedQPs : public ListPointersKillOnExitFakeSize<ListPointersKillOnExitFakeSize<ListPointersKillOnExitFakeSize<QuasiPolynomialOld> > >
 {
 public:
   void AddToEntry(int x, int y, int z, QuasiMonomial& QM);
@@ -6290,7 +6378,7 @@ public:
   void CheckConsistency(root& RootLatticeIndicator, PolynomialRationalCoeff& input);
   void initLatticeIndicatorsFromPartFraction(partFractions& ownerExpression, partFraction& owner, GlobalVariables& theGlobalVariables, int theDimension);
   void AddPolynomialLargeRational(root& rootLatticeIndicator, PolynomialRationalCoeff& input);
-  void ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables);
+  void ComputeQuasiPolynomial(QuasiPolynomialOld& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables);
 };
 
 class partFraction: ListLight<oneFracWithMultiplicitiesAndElongations>
@@ -6329,9 +6417,9 @@ public:
   void ComputeNormals(partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
   int ComputeGainingMultiplicityIndexInLinearRelation(partFractions& owner,  MatrixLargeRational& theLinearRelation);
   void UncoverBracketsNumerator(GlobalVariables& theGlobalVariables, int theDimension);
-  void partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
+  void partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomialOld& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
   //void partFractionToPartitionFunctionStoreAnswer
-  //      (  QuasiPolynomial& output, bool RecordSplitPowerSeriesCoefficient,
+  //      (  QuasiPolynomialOld& output, bool RecordSplitPowerSeriesCoefficient,
   //        bool StoreToFile);
   bool IsEqualToZero();
   void ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables);
@@ -6471,7 +6559,7 @@ public:
   int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-  bool partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
+  bool partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomialOld& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
   bool VerifyFileComputedContributions(GlobalVariables& theGlobalVariables);
   void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
   int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
@@ -6486,7 +6574,7 @@ public:
   void MakeProgressReportRemovingRedundantRoots(GlobalVariables& theGlobalVariables);
   void MakeProgressReportUncoveringBrackets(GlobalVariables& theGlobalVariables);
   void MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables);
-  void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables& theGlobalVariables);
+  void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomialOld& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables& theGlobalVariables);
 };
 
 class ElementWeylGroup: public List<int>
@@ -7186,7 +7274,7 @@ public:
   void MakeRootFKFTsub(root& direction, QPSub& theSub);
   void initA2A1A1inD5();
   void RunA2A1A1inD5beta12221();
-  void processA2A1A1inD5beta12221Answer(QuasiPolynomial& theAnswer);
+  void processA2A1A1inD5beta12221Answer(QuasiPolynomialOld& theAnswer);
   //format: the polynomials must be root::AmbientDimension in count
   //these are the coordinates in simple basis of the vector.
   //They are allowed to be arbitrary
@@ -7196,7 +7284,7 @@ public:
   //of the orbit with Borel-positive weights
   //give a Limiting cone if you want only to observe weights lying in a
   //certain cone. Set 0 if there is no particular cone of interest.
-  void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs, QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
+  void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs, QuasiPolynomialOld& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
 };
 
 struct IndicatorWindowVariables
@@ -8542,6 +8630,7 @@ class Cone
   std::string ElementToString(){return this->ElementToString(false, false);}
   std::string ElementToString(bool useLatex, bool useHtml);
   std::string DebugString;
+  int GetDim(){if (this->Normals.size==0) return 0; return this->Normals.TheObjects[0].size;}
   void ComputeDebugString(){ this->DebugString=this->ElementToString();}
   bool CreateFromNormals
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
@@ -8669,6 +8758,7 @@ class ParserNode
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
+  int EvaluateLattice(GlobalVariables& theGlobalVariables);
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
@@ -8737,7 +8827,8 @@ public:
   enum functionList
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
-    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone
+    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
+    functionLattice
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -8752,6 +8843,8 @@ public:
   void ParserInit(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables);
+  void ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables);
+  std::string ParseEvaluateAndSimplifyPart2(const std::string& input, GlobalVariables& theGlobalVariables);
   ElementUniversalEnveloping ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables);
   void Parse(const std::string& input);
   void ParseNoInit(int indexFrom, int indexTo);
@@ -8800,7 +8893,7 @@ public:
   Runnable theFunctionToRun;
   Parser theParser;
   partFractions thePartialFraction;
-  QuasiPolynomial theOutput;
+  QuasiPolynomialOld theOutput;
   rootSubalgebras theRootSubalgebras;
   SemisimpleLieAlgebra theChevalleyConstantComputer;
   minimalRelationsProverStates theProver;
@@ -9000,7 +9093,7 @@ public:
   partFraction fracRemoveRedundantRootsBuffer1;
  // partFraction fracRemoveRedundantRootsBuffer2;
   partFraction fracSplit1;
-  QuasiPolynomial QPComputeQuasiPolynomial;
+  QuasiPolynomialOld QPComputeQuasiPolynomial;
   QuasiNumber QNComputeQuasiPolynomial;
 
   IntegerPoly IPRemoveRedundantShortRootsClassicalRootSystem;

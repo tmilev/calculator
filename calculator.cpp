@@ -124,6 +124,7 @@ int main(int argc, char **argv)
   //  tempRat.ElementToString(tempS);
   //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
   //civilizedInput="printEmbedding";
+  //civilizedInput="Lattice((2,1,2), (3,2,1), (2,3,5))";
   //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
  // civilizedInput="maximumLinearFunctionOverCone(x_1+x_2+x_3, x_1-x_3+2x_2, -x_1-x_3, Cone((1,2,3),(3,-5,0),(1,-1,2), (0,0,1), (0,1,0),(1,0,0)))";
   //civilizedInput="1/(x_1+1)+1/(-x_1+1)";
@@ -212,7 +213,11 @@ int main(int argc, char **argv)
     theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
   } else
     theParser.testAlgebra.initDefaultOrder(theParser.theHmm.theRange, theGlobalVariables);
-  std::string theResult = theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
+  double TimeParsing=0, TimeEvaluation=0;
+  theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
+  TimeParsing=GetElapsedTimeInSeconds();
+  std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, theGlobalVariables);
+  TimeEvaluation=GetElapsedTimeInSeconds()-TimeParsing;
   theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   //std::cout << "Computation done in " << GetElapsedTimeInSeconds() << "seconds <br>";
@@ -238,8 +243,9 @@ int main(int argc, char **argv)
   std::cout << "document.getElementById(\"textType\").value=\"" << theParser.DefaultWeylLetter << "\"; </script>";
 //  \n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n <input type=\"textarea\" rows=\"60\" cols=\"60\" name=\"textInput\" \"></textarea>\n<br>\n";
 #ifndef WIN32
+  double TimeTotalElapsed=GetElapsedTimeInSeconds();
   if (civilizedInput!="")
-    std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " << GetElapsedTimeInSeconds() << " seconds<br>";
+    std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " <<  TimeTotalElapsed<< " seconds<br> (" << TimeParsing << " parsing + " << TimeEvaluation <<  " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing << " processing)<br>";
   if (GetElapsedTimeInSeconds()>1)
     std::cout << "If your computation takes too long it is probably due to the weak algorithms used for your computation.<br> Feel free to email the author(s) with requests for speed improvement.";
   ComputationComplete=true;

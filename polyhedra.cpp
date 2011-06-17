@@ -95,7 +95,7 @@ CompositeComplexQN& CQNOne =CompositeComplexQN::TheRingUnit ;
 CompositeComplexQN& CQNMOne=CompositeComplexQN::TheRingMUnit;
 CompositeComplexQN& CQNZero=CompositeComplexQN::TheRingZero ;
 
-PrecomputedTauknPointersKillOnExit* QuasiPolynomial::PrecomputedTaus;
+PrecomputedTauknPointersKillOnExit* QuasiPolynomialOld::PrecomputedTaus;
 PolynomialsRationalCoeff*
 PrecomputedQuasiPolynomialIntegrals::PreComputedBernoulli;
 PolynomialsRationalCoeff PreComputedBernoulliLocal;
@@ -114,7 +114,7 @@ int CombinatorialChamberContainer::DefragSpacing;
 int CombinatorialChamberContainer::flagMaxNumCharsAllowedInStringOutput=100000; //16777216;
 std::fstream CombinatorialChamberContainer::TheBigDump;
 
-ListPointers<QuasiPolynomial> QuasiPolynomial::GlobalCollectorsPolys;
+ListPointers<QuasiPolynomialOld> QuasiPolynomialOld::GlobalCollectorsPolys;
 ListPointers<ComplexQN> ComplexQN::GlobalCollectorsComplexQNs;
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
@@ -133,7 +133,7 @@ int PolynomialOutputFormat::LatexCutOffLine=15;
 bool PolynomialOutputFormat::UsingLatexFormat=true;
 bool PolynomialOutputFormat::CarriageReturnRegular=true;
 PolynomialOutputFormat PolyFormatNumFrac;
-int QuasiPolynomial::TotalCreatedPolys=0;
+int QuasiPolynomialOld::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
 
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
@@ -179,7 +179,7 @@ template < > int List<char>::ListActualSizeIncrement=5;
 template < > int List<Monomial<CompositeComplexQN> >::ListActualSizeIncrement=10;
 template < > int List<BasicQN*>::ListActualSizeIncrement=1000;
 template < > int List<ComplexQN*>::ListActualSizeIncrement=10000;
-template < > int List<QuasiPolynomial*>::ListActualSizeIncrement=1;
+template < > int List<QuasiPolynomialOld*>::ListActualSizeIncrement=1;
 template < > int List<PrecomputedTaukn*>::ListActualSizeIncrement=1;
 template < > int List<BasicComplexNumber>::ListActualSizeIncrement=1;
 template < > int List<MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord> >::ListActualSizeIncrement=100;
@@ -193,7 +193,7 @@ template < > int List<oneFracWithMultiplicitiesAndElongations>::ListActualSizeIn
 template < > int List<ElementWeylGroup>::ListActualSizeIncrement= 101680;
 template < > int List<PolynomialsRationalCoeff>::ListActualSizeIncrement=1;
 template < > int List<root>::ListActualSizeIncrement=10;
-template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
+template < > int List<QuasiPolynomialOld>::ListActualSizeIncrement=100;
 template < > int List<PolynomialRationalCoeff>::ListActualSizeIncrement=1;
 template < > int List<Monomial<LargeInt> >::ListActualSizeIncrement=1;
 template < > int List<Polynomial<Rational> >::ListActualSizeIncrement=1;
@@ -251,6 +251,7 @@ template < > int List<TensorProductMonomial<ElementVermaModuleOrdered<Polynomial
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
 template < > std::string Matrix<Rational>::MatrixElementSeparator= ", \t";
+template < > std::string Matrix<LargeInt>::MatrixElementSeparator= ", \t";
 template < > std::string Matrix<PolynomialRationalCoeff>::MatrixElementSeparator= ", \t";
 template < > std::string Matrix<RationalFunction>::MatrixElementSeparator= ", \t";
 
@@ -266,7 +267,7 @@ int partFractions::NumProcessedForVPFMonomialsTotal=0;
 int partFractions::flagMaxNumStringOutputLines=500;
 //int partFraction::lastApplicationOfSVformulaNumNewGenerators=0;
 //int partFraction::lastApplicationOfSVformulaNumNewMonomials=0;
-bool QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic=false;
+bool QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
@@ -780,6 +781,7 @@ void CGIspecificRoutines::FormatCPPSourceCode(const std::string& FileName)
       default:  fileOut << buffer[i]; break;
     }
   }
+  delete [] buffer;
 }
 
 bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
@@ -5892,8 +5894,8 @@ void PolynomialRationalCoeff::MakePolyFromDirectionAndNormal(root& direction, ro
 /*
 void QuasiPolynomialPointers::IntegrateDiscreteInDirectionFromZeroTo
                               (root& direction, PolynomialRationalCoeff& EndPoint,
-                              QuasiPolynomial& output,
-                              QuasiPolynomial& input,
+                              QuasiPolynomialOld& output,
+                              QuasiPolynomialOld& input,
                               PrecomputedQuasiPolynomialIntegralPointersKillOnExit&
                                                                   PrecomputedDiscreteIntegrals)
 {
@@ -6097,7 +6099,7 @@ void PolynomialRationalCoeff::IntegrateDiscreteFromZeroTo
   }
 }*/
 
-void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output)
+void QuasiMonomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomialOld& output)
 { if (this->Coefficient.IsEqualToZero())
   { output.ClearTheObjects();
     output.NumVars= (int)TheSub.TheQNSub.NumRows;
@@ -6124,11 +6126,11 @@ void PrecomputedQuasiPolynomialIntegral::operator=(PrecomputedQuasiPolynomialInt
   this->Value.Assign(right.Value);
 }
 
-void QuasiPolynomial::operator=(const QuasiPolynomial& right)
+void QuasiPolynomialOld::operator=(const QuasiPolynomialOld& right)
 { this->CopyFromPoly(right);
 }
 
-void QuasiPolynomial::AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p)
+void QuasiPolynomialOld::AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p)
 { this->Nullify(p.NumVars);
   static QuasiMonomial tempM;
   tempM.initNoDegreesInit(this->NumVars);
@@ -6140,36 +6142,36 @@ void QuasiPolynomial::AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p)
   }
 }
 
-void QuasiPolynomial::Nullify(int numVars)
+void QuasiPolynomialOld::Nullify(int numVars)
 { this->ClearTheObjects();
   this->NumVars=numVars;
 }
 
-void QuasiPolynomial::WriteComplexFormToDebugString()
+void QuasiPolynomialOld::WriteComplexFormToDebugString()
 { CompositeComplexQNPoly p;
   p.AssignQP(*this);
   p.ComputeDebugString();
   this->DebugString.assign(p.DebugString);
 }
 
-void QuasiPolynomial::Simplify()
+void QuasiPolynomialOld::Simplify()
 { for (int i=0; i<this->size; i++)
     this->TheObjects[i].Coefficient.Simplify();
 }
 
-void QuasiPolynomial::TimesInteger(int x)
+void QuasiPolynomialOld::TimesInteger(int x)
 { QuasiNumber tempQN;
   tempQN.AssignInteger(this->NumVars, x);
   this->TimesConstant(tempQN);
 }
 
-void QuasiPolynomial::operator*=(const Rational& x )
+void QuasiPolynomialOld::operator*=(const Rational& x )
 { QuasiNumber tempQN;
   tempQN.AssignLargeRational(this->NumVars, x);
   this->TimesConstant(tempQN);
 }
 
-void QuasiPolynomial::Evaluate(intRoot& values, Rational& output)
+void QuasiPolynomialOld::Evaluate(intRoot& values, Rational& output)
 { output.MakeZero();
   std::string tempS;
   /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
@@ -6221,7 +6223,7 @@ void QuasiPolynomial::Evaluate(intRoot& values, Rational& output)
   }
 }
 
-void QuasiPolynomial::DivByInteger(int x)
+void QuasiPolynomialOld::DivByInteger(int x)
 { Rational tempRat2;
   tempRat2.AssignNumeratorAndDenominator(1, x);
   QuasiNumber tempQN;
@@ -6229,9 +6231,9 @@ void QuasiPolynomial::DivByInteger(int x)
   this->TimesConstant(tempQN);
 }
 
-void QuasiPolynomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial& output)
-{ QuasiPolynomial tempQP;
-  QuasiPolynomial Accum;
+void QuasiPolynomialOld::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomialOld& output)
+{ QuasiPolynomialOld tempQP;
+  QuasiPolynomialOld Accum;
   Accum.ClearTheObjects();
   Accum.NumVars= (int)TheSub.TheQNSub.NumRows;
   for (int i=0; i<this->size; i++)
@@ -6243,13 +6245,13 @@ void QuasiPolynomial::RationalLinearSubstitution(QPSub& TheSub, QuasiPolynomial&
   output.CopyFromPoly(Accum);
 }
 
-QuasiPolynomial::QuasiPolynomial()
-{ QuasiPolynomial::TotalCreatedPolys++;
-  this->CreationNumber=QuasiPolynomial::TotalCreatedPolys;
+QuasiPolynomialOld::QuasiPolynomialOld()
+{ QuasiPolynomialOld::TotalCreatedPolys++;
+  this->CreationNumber=QuasiPolynomialOld::TotalCreatedPolys;
   GlobalCollectorsPolys.AddObjectOnTop(this);
 };
 
-void QuasiPolynomial::MakeTauknp(int k, int n)
+void QuasiPolynomialOld::MakeTauknp(int k, int n)
 { QuasiNumber tempQN;
   tempQN.MakePureQN(1, 0, ROne, 1, k, n);
   this->MakeNVarConst(1, tempQN);
@@ -7962,6 +7964,7 @@ inline void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned i
     } else
       x=0;
   }
+//  this->FitSize();
 }
 
 inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
@@ -8194,43 +8197,6 @@ void LargeInt::Add(const LargeInt& x)
 //  assert(this->CheckForConsistensy());
 }
 
-#ifdef WIN32
-#pragma warning(disable:4244)//warning 4244: data loss from conversion
-#endif
-void LargeIntUnsigned::DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const
-{ LargeIntUnsigned remainder, quotient, divisor;
-  remainder.Assign(*this);
-  divisor.Assign(x);
-  quotient.MakeZero();
-  while (remainder.IsGEQ(divisor))
-  { unsigned int q;
-    LargeIntUnsigned current, Total;
-    if (remainder.TheObjects[remainder.size-1]> divisor.TheObjects[divisor.size-1])
-    { q=remainder.TheObjects[remainder.size-1]/(divisor.TheObjects[divisor.size-1]+1);
-      current.AssignShiftedUInt(q, remainder.size-divisor.size);
-    }
-    else
-    { if (remainder.size==divisor.size)
-        current.AssignShiftedUInt(1, 0);
-      else
-      { q=this->CarryOverBound/(divisor.TheObjects[divisor.size-1]+1);
-        current.AssignShiftedUInt(q, remainder.size- divisor.size-1);
-        current.MultiplyByUInt(remainder.TheObjects[remainder.size-1]);
-      }
-    }
-    Total.Assign(divisor);
-    Total.MultiplyBy(current);
-    remainder.SubtractSmallerPositive(Total);
-    quotient.Add(current);
-  }
-  remainderOutput.Assign(remainder);
-  quotientOutput.Assign(quotient);
-//  assert(remainderOut.CheckForConsistensy());
-}
-#ifdef WIN32
-#pragma warning(default:4244)//warning 4244: data loss from conversion
-#endif
-
 int LargeIntUnsigned::GetUnsignedIntValueTruncated()
 { return  (int) this->TheObjects[0];
 }
@@ -8376,7 +8342,7 @@ void LargeIntUnsigned::MakeZero()
   this->TheObjects[0]=0;
 }
 
-bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x)
+bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x)const
 { if (this->size>x.size)
     return true;
   if (this->size<x.size)
@@ -8390,7 +8356,7 @@ bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x)
   return true;
 }
 
-void CompositeComplexQNPoly::AssignQP(QuasiPolynomial& q)
+void CompositeComplexQNPoly::AssignQP(QuasiPolynomialOld& q)
 { Monomial<CompositeComplexQN> tempM;
   tempM.init(q.NumVars);
   this->ClearTheObjects();
@@ -8403,7 +8369,7 @@ void CompositeComplexQNPoly::AssignQP(QuasiPolynomial& q)
   }
 }
 
-void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomial& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables)
+void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomialOld& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables)
 { output.Nullify((int)theDimension);
   for (int i=0; i<this->size; i++)
   { if (RecordNumMonomials)
@@ -8411,7 +8377,7 @@ void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomial& output, bo
       out<<i<<" out of "<<this->size<<" accounted for";
       theGlobalVariables.theIndicatorVariables.ProgressReportString4= out.str();
     }
-    QuasiPolynomial& tempQP = theGlobalVariables.QPComputeQuasiPolynomial;
+    QuasiPolynomialOld& tempQP = theGlobalVariables.QPComputeQuasiPolynomial;
     QuasiNumber& tempQN = theGlobalVariables.QNComputeQuasiPolynomial;
     tempQP.AssignPolynomialRationalCoeff(this->TheObjects[i]);
     //tempQP.ComputeDebugString();
@@ -8960,7 +8926,7 @@ int partFraction::ElementToStringBasisChange(partFractions& owner, MatrixIntTigh
   }
   if (includeVPsummand && LatexFormat)
   { std::string tempS2;
-    QuasiPolynomial tempQP;
+    QuasiPolynomialOld tempQP;
     tempQP.Nullify((int)theDimension);
     this->partFractionToPartitionFunctionSplit(owner, tempQP, false, false, theGlobalVariables, theDimension);
     PolyFormatLocal.MakeAlphabetyi();
@@ -9492,7 +9458,7 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
   output.AddMonomial(tempM);
 }
 
-void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomial& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension)
+void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomialOld& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension)
 { static PolynomialRationalCoeff shiftedPoly, tempP;
   static roots normals;
   static partFractionPolynomials tempSplitPowerSeriesCoefficient;
@@ -10665,7 +10631,7 @@ bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalV
   return(tempSize>=tempI);
 }
 
-bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(  QuasiPolynomial& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance)
+bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(  QuasiPolynomialOld& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance)
 { if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
   { theGlobalVariables.theIndicatorVariables.flagRootIsModified=true;
     theGlobalVariables.theIndicatorVariables.modifiedRoot.AssignRoot(newIndicator);
@@ -10679,7 +10645,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(  QuasiPolynom
     return false;
   this->NumProcessedForVPFfractions=0;
   Rational oldCheckSum;
-  QuasiPolynomial oldOutput;
+  QuasiPolynomialOld oldOutput;
   if (partFraction::MakingConsistencyCheck)
     partFractions::CheckSum.MakeZero();
   if (StoreToFile && UseOldData)
@@ -10693,7 +10659,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(  QuasiPolynom
   //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
   //this->ComputeDebugString();
   ///////////////////////////////////////////////
-  static QuasiPolynomial tempQP;
+  static QuasiPolynomialOld tempQP;
   for (int i=0; i<this->size; i++)
   { assert(partFraction::TheBigDump.is_open()||!StoreToFile);
     assert(partFractions::ComputedContributionsList.is_open()||!StoreToFile);
@@ -10724,7 +10690,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(  QuasiPolynom
         assert(tempLRat4.IsEqualTo(partFractions::CheckSum));
         if (i==4)
         { Stop();
-          QuasiPolynomial::flagAnErrorHasOccurredTimeToPanic=true;
+          QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic=true;
           ::RandomCodeIDontWantToDelete theEvilBug;
           theEvilBug.EvilPoly1.Assign(output);
           theEvilBug.EvilPoly2.Assign(tempQP);
@@ -10877,7 +10843,7 @@ void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarCh
 { this->ElementToStringBasisChange( VarChange, true, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
 }
 
-void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables)
+void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomialOld& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables)
 { intRoots theBorel, theVPbasis;
   intRoot tempWeight; tempWeight.SetSize(WeylGroupNumber);
   roots tempRoots;
@@ -13011,7 +12977,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
   if (this->useOutputFileForFinalAnswer)
   { std::fstream tempFile;
     tempFile.open(this->OutputFile.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
-    QuasiPolynomial tempQP;
+    QuasiPolynomialOld tempQP;
     tempQP.ReadFromFile(tempFile, 5);
     tempFile.close();
     this->processA2A1A1inD5beta12221Answer(tempQP);
@@ -13063,7 +13029,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 
 //  theVPfunction.initFromRootSystem(tempRoots1, tempRoots1, 0);
  /* partFractions tempTest;
-  QuasiPolynomial tempQPtest;
+  QuasiPolynomialOld tempQPtest;
   //tempTest.ComputeKostantFunctionFromWeylGroup('A', 3, tempQPtest, 0, false, false);
   this->OpenDataFileOrCreateIfNotPresent(PartialFractionsFile, this->PartialFractionsFileString, false);
   //tempTest.WriteToFile(PartialFractionsFile);
@@ -13085,7 +13051,7 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
 //  theVPfunction.ComputeDebugString();
   for (int i=0; i<theVPfunction.size; i++)
     assert(theVPfunction.TheObjects[i].IndicesNonZeroMults.size==5);
-  QuasiPolynomial tempQP;
+  QuasiPolynomialOld tempQP;
   beta.MultiplyByInteger(100);
   beta.Add(D5.rho);
   roots tempRoots;
@@ -13101,13 +13067,13 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
   PartialFractionsFile.close();
 }
 
-void rootFKFTcomputation::processA2A1A1inD5beta12221Answer(QuasiPolynomial& theAnswer)
+void rootFKFTcomputation::processA2A1A1inD5beta12221Answer(QuasiPolynomialOld& theAnswer)
 { theAnswer.ComputeDebugString();
   root beta;
   beta.InitFromIntegers(5, 1, 2, 2, 2, 1);
   QPSub theSub;
   this->MakeRootFKFTsub(beta, theSub);
-  QuasiPolynomial tempQP2;
+  QuasiPolynomialOld tempQP2;
   theAnswer.RationalLinearSubstitution(theSub, tempQP2);
   std::fstream tempFile;
   tempFile.open("C:/math/outSub.txt", std::fstream::out | std::fstream::trunc);
@@ -13172,7 +13138,7 @@ void rootFKFTcomputation::MakeRootFKFTsub(root& direction, QPSub& theSub)
   theSub.MakeSubFromMatrixIntAndDen(tempMat, tempLCM);
 }
 
-void rootFKFTcomputation::MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs,  QuasiPolynomial& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical)
+void rootFKFTcomputation::MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs,  QuasiPolynomialOld& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical)
 { PolynomialsRationalCoeffCollection TheChambersInTheGame;
   PolynomialsRationalCoeff StartingRoot;
   //::theGlobalVariables.theIndicatorVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
@@ -13181,7 +13147,7 @@ void rootFKFTcomputation::MakeTheRootFKFTSum(root& ChamberIndicator, partFractio
   TheNilradicalCone.ComputeDebugString();
   StartingRoot.MakeIdSubstitution(5, (Rational) 1);
   theHighestWeights.TheWeylGroup->GenerateOrbitAlg(ChamberIndicator, StartingRoot, TheChambersInTheGame, true, false, &TheNilradicalCone, true);
-  QuasiPolynomial tempQP1, Accum;
+  QuasiPolynomialOld tempQP1, Accum;
   Accum.Nullify(5);
   for (int i=0; i<TheChambersInTheGame.size; i++)
     if (theKLCoeffs.TheObjects[i]!=0)
@@ -22756,7 +22722,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.thePartialFraction.theChambers.ComputeDebugString();
   assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(false, theGlobalVariables));
   IrreducibleFiniteDimensionalModule theModule;
-  QuasiPolynomial tempP;
+  QuasiPolynomialOld tempP;
   if (!inputData.flagDyckPathComputationLoaded)
     theModule.InitAndPrepareTheChambersForComputation(3, inputData.thePartialFraction.theChambers, theGlobalVariables);
   inputData.thePartialFraction.theChambers.flagMustStop=false;
@@ -23847,7 +23813,7 @@ void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables)
   this->theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
   this->theChambers.thePauseController.ExitComputation();
   this->initAndSplit(this->theChambers.theDirections, theGlobalVariables);
-  QuasiPolynomial tempQP;
+  QuasiPolynomialOld tempQP;
   for (int i=0; i<this->theChambers.size; i++)
     if (this->theChambers.TheObjects[i]!=0)
       this->partFractionsToPartitionFunctionAdaptedToRoot(tempQP, this->theChambers.TheObjects[i]->InternalPoint, false, false, theGlobalVariables, true);
@@ -24890,7 +24856,7 @@ void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGl
   this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);
 }
 
-void Lattice::DuflosComputation(List<char>& WeylLetters, List<int>& ranks, std::string& output, GlobalVariables& theGlobalVariables)
+void LatticeRoot::DuflosComputation(List<char>& WeylLetters, List<int>& ranks, std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream body, tables;
   std::string tempBody, tempTable;
   tables << "\\documentclass{article}\n\\usepackage{amssymb}\n\\begin{document}\n";
@@ -24904,7 +24870,7 @@ void Lattice::DuflosComputation(List<char>& WeylLetters, List<int>& ranks, std::
   output = tables.str();
 }
 
-void Lattice::DuflosComputationOneSA(char WeylLetter, int rank, std::string& outputTable, std::string& outputBody, GlobalVariables& theGlobalVariables)
+void LatticeRoot::DuflosComputationOneSA(char WeylLetter, int rank, std::string& outputTable, std::string& outputBody, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::stringstream niceTable;
   rootSubalgebras theRootSubalgebras;
@@ -24939,7 +24905,7 @@ void Lattice::DuflosComputationOneSA(char WeylLetter, int rank, std::string& out
 
 void ComputationSetup::DuflosComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
 { std::string tempS;
-  Lattice tempLattice;
+  LatticeRoot tempLattice;
   List<char> WeylLetters;
   List<int> ranks;
  /* WeylLetters.AddObjectOnTop('E');
@@ -24963,7 +24929,7 @@ void ComputationSetup::DuflosComputation(ComputationSetup& inputData, GlobalVari
   theGlobalVariables.MakeReport();
 }
 
-bool Lattice::IsInLattice(const root& input)
+bool LatticeRoot::IsInLattice(const root& input)
 { roots tempRoots;
   tempRoots = this->LatticeBasis;
   int theDimension = this->LatticeBasis.size;
@@ -24981,7 +24947,7 @@ bool Lattice::IsInLattice(const root& input)
   return true;
 }
 
-void Lattice::GetZnModLatticeRepresentatives(WeylGroup* theWeyl, roots& representativesOutput, GlobalVariables& theGlobalVariables)
+void LatticeRoot::GetZnModLatticeRepresentatives(WeylGroup* theWeyl, roots& representativesOutput, GlobalVariables& theGlobalVariables)
 { int theDimension= this->LatticeBasis.size;
   if (theDimension<1)
     return;
@@ -25015,15 +24981,15 @@ void Lattice::GetZnModLatticeRepresentatives(WeylGroup* theWeyl, roots& represen
   }
 }
 
-bool Lattice::ContainsConjugacyClassRepresentedBy(roots& representatives, root& input)
+bool LatticeRoot::ContainsConjugacyClassRepresentedBy(roots& representatives, root& input)
 { for (int i=0; i<representatives.size; i++)
     if (this->IsInLattice(representatives.TheObjects[i]-input))
       return true;
   return false;
 }
 
-void Lattice::GetStructureQuotientRootCase(WeylGroup& theWeyl, std::string& output, List<int>& outputIndices, List<int>& outputMults, GlobalVariables& theGlobalVariables)
-{ Lattice tempLattice;
+void LatticeRoot::GetStructureQuotientRootCase(WeylGroup& theWeyl, std::string& output, List<int>& outputIndices, List<int>& outputMults, GlobalVariables& theGlobalVariables)
+{ LatticeRoot tempLattice;
   std::stringstream out;
   tempLattice.LatticeBasis=this->LatticeBasis;
   tempLattice.GetZnModLatticeRepresentativesRootCase(theWeyl, theGlobalVariables);
@@ -25054,7 +25020,7 @@ void Lattice::GetStructureQuotientRootCase(WeylGroup& theWeyl, std::string& outp
   output=out.str();
 }
 
-int Lattice::GetIndexFirstElementOfMaxRank(int& outputRank)
+int LatticeRoot::GetIndexFirstElementOfMaxRank(int& outputRank)
 { int result=-1;
   outputRank=0;
   for (int i=0; i<this->RepresentativesQuotient.size; i++)
@@ -25065,7 +25031,7 @@ int Lattice::GetIndexFirstElementOfMaxRank(int& outputRank)
   return result;
 }
 
-int Lattice::GetRankElementRepresentedBy(root& elementRepresentative)
+int LatticeRoot::GetRankElementRepresentedBy(root& elementRepresentative)
 { root tempRoot;
   tempRoot.MakeZero(elementRepresentative.size);
   for (int result=1; ; result++)
@@ -25084,11 +25050,14 @@ ElementUniversalEnveloping Parser::ParseAndCompute(const std::string& input, Glo
   return this->theValue.UEElement.GetElement();
 }
 
-std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables)
+void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables)
 { this->theHmm.theRange.ComputeChevalleyConstants(this->DefaultWeylLetter, this->DefaultWeylRank, theGlobalVariables);
   this->Parse(input);
   this->ComputeDebugString(theGlobalVariables);
-  this->Evaluate(theGlobalVariables);
+}
+
+std::string Parser::ParseEvaluateAndSimplifyPart2(const std::string& input, GlobalVariables& theGlobalVariables)
+{ this->Evaluate(theGlobalVariables);
   if (!this->theValue.UEElement.IsZeroPointer())
     this->theValue.UEElement.GetElement().Simplify();
   if(!this->theValue.UEElement.IsZeroPointer())
@@ -25096,6 +25065,11 @@ std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVar
   std::stringstream out;
   out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueAndType(true);
   return out.str();
+}
+
+std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables)
+{ this->ParseEvaluateAndSimplifyPart1(input, theGlobalVariables);
+  return this->ParseEvaluateAndSimplifyPart2(input, theGlobalVariables);
 }
 
 int DebugCounter=-1;
@@ -26087,6 +26061,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 { std::stringstream out;
   switch (this->ErrorType)
   { case ParserNode::errorBadIndex: out << "error: bad index"; break;
+    case ParserNode::errorDimensionProblem: out << "error with dimension and/or number of arguments"; break;
     case ParserNode::errorBadOrNoArgument: out << "error: bad or no argument"; break;
     case ParserNode::errorBadSyntax: out << "error: bad syntax."; break;
     case ParserNode::errorDunnoHowToDoOperation: out << "error: my master hasn't taught me how to do this operation (maybe he doesn't know how either)"; break;
@@ -26353,6 +26328,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionChamberParam: this->EvaluateChamberParam(theGlobalVariables); break;
     case Parser::functionCone: this->EvaluateCone(theGlobalVariables); break;
     case Parser::functionMaximumLFoverCone: this->EvaluateMaxLFOverCone(theGlobalVariables); break;
+    case Parser::functionLattice: this->EvaluateLattice(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26652,6 +26628,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="printDecomposition")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
     this->ValueBuffer.AddObjectOnTop(this->functionPrintDecomposition);
+    return true;
+  }
+  if (input=="Lattice")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionLattice);
     return true;
   }
   if (input=="printWeylGroup")

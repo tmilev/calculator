@@ -1521,9 +1521,9 @@ public:
 
 void Lattice::Reduce
 ()
-{ LargeInt tempInt;
-  tempInt.MakeMOne();
-  this->basis.GaussianEliminationEuclideanDomain(tempInt);
+{ LargeInt tempInt, tempInt2;
+  tempInt.MakeMOne(); tempInt2.MakeOne();
+  this->basis.GaussianEliminationEuclideanDomain(tempInt, tempInt2);
 }
 
 class QuasiPolynomial

@@ -997,14 +997,14 @@ void NonPivotPointsToEigenVector
 ;
 
   void GaussianEliminationEuclideanDomain
-(const Element& theRingMinusUnit)
+(const Element& theRingMinusUnit, const Element& theRingUnit)
   ;
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
 };
 
 template <class Element>
 void Matrix<Element>::GaussianEliminationEuclideanDomain
-(const Element& theRingMinusUnit)
+(const Element& theRingMinusUnit, const Element& theRingUnit)
 { int col=0;
   Element tempElt;
   int row=0;
@@ -1037,9 +1037,11 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       Element& PivotElt = this->elements[row][col];
       for (int i=0; i<row; i++)
         if (!this->elements[i][col].IsEqualToZero())
-          if (PivotElt<=this->elements[i][col])
+          if (PivotElt<=this->elements[i][col] || this->elements[i][col].IsNegative())
           { tempElt =this->elements[i][col]/PivotElt;
             this->SubtractRows(i, row, 0, tempElt);
+            if (this->elements[i][col].IsNegative())
+              this->AddTwoRows(row, i, 0, theRingUnit);
           }
       row++;
     }
@@ -1779,6 +1781,7 @@ public:
   inline void operator*=(int x){ this->MultiplyByInt(x);}
   inline void operator+=(int x){this->AddInt(x);}
   inline void Minus(){if (!this->IsEqualToZero()) this->sign*=-1;}
+  inline void operator+=(const LargeInt& other){ this->Add(other);}
   inline void operator-=(const LargeInt& other)
   { this->Minus();
     this->Add(other);

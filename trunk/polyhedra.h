@@ -503,7 +503,7 @@ std::fstream& operator>>(std::fstream& input, List<Object>& theList);
 //List kills the objects it contains when it expires
 template <class Object>
 class List
-{ friend std::fstream& operator<< <Object> (std::fstream& output, const List<Object>& theList);
+{ friend std::fstream& operator<< <Object>(std::fstream& output, const List<Object>& theList);
   friend std::fstream& operator>> <Object>(std::fstream& input, List<Object>& theList);
 private:
   friend class PolynomialRationalCoeff;
@@ -517,8 +517,8 @@ private:
   void ExpandArrayOnBottom(int increase);
   void QuickSortAscending(int BottomIndex, int TopIndex);
   void QuickSortDescending(int BottomIndex, int TopIndex);
-  List(const List<Object>& other);
 public:
+  List(const List<Object>& other){this->CopyFromBase(other);}
   static int ListActualSizeIncrement;
   Object* TheObjects;
   int size;
@@ -8749,6 +8749,7 @@ public:
   Matrix<LargeInt> basis;
   LargeIntUnsigned Den;
   int GetDim()const{return this->basis.NumCols;}
+  int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
   void Reduce
@@ -8780,8 +8781,11 @@ public:
   Lattice AmbientLatticeReduced;
   roots LatticeShifts;
   List<PolynomialRationalCoeff> valueOnEachLatticeShift;
+  std::string ElementToString(){PolynomialOutputFormat tempFormat; return this->ElementToString(tempFormat);}
+  std::string ElementToString(const PolynomialOutputFormat& thePolyFormat);
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
-  void RefineLattice(const Lattice& latticeToRefineBy);
+  void MakeRougherLattice(const Lattice& latticeToRefineBy);
+  void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice);
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){this->buffers=0;}
 };
@@ -8811,6 +8815,7 @@ class ParserNode
   MemorySaving<RationalFunction> ratFunction;
   MemorySaving<Cone> theCone;
   MemorySaving<Lattice> theLattice;
+  MemorySaving<QuasiPolynomial> theQP;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -8829,6 +8834,7 @@ class ParserNode
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF, typeLattice, typeCone,
+  typeQuasiPolynomial,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
@@ -8841,6 +8847,7 @@ class ParserNode
   std::string ElementToStringValueOnlY(bool useHtml){return this->ElementToStringValueOnlY(useHtml, 0,2);}
   std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
   std::string ElementToStringErrorCode(bool useHtml);
+  bool GetRootRational(root& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
   int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
   void CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
@@ -8851,6 +8858,7 @@ class ParserNode
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
+  int EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateLattice(GlobalVariables& theGlobalVariables);
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
@@ -8923,7 +8931,7 @@ public:
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
-    functionLattice, functionGetAllRepresentatives, functionInvertLattice
+    functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

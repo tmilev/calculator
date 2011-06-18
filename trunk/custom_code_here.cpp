@@ -1712,15 +1712,23 @@ int ParserNode::EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariable
   return this->errorNoError;
 }
 
-void QuasiPolynomial::RefineLattice(const Lattice& latticeToRefineBy)
+void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRefineBy)
 { if (this->AmbientLatticeReduced==latticeToRefineBy)
     return;
   Lattice OldLattice;
   OldLattice=this->AmbientLatticeReduced;
-  this->AmbientLatticeReduced.RefineByOtherLattice(latticeToRefineBy);
+  this->AmbientLatticeReduced.IntersectWith(latticeToRefineBy);
   roots representativesQuotientLattice;
-  this->AmbientLatticeReduced.GetAllRepresentatitves(OldLattice, representativesQuotientLattice);
-  //for (int i
+  OldLattice.GetAllRepresentatitves(this->AmbientLatticeReduced, representativesQuotientLattice);
+  roots OldLatticeShifts=this->LatticeShifts;
+  List<PolynomialRationalCoeff> oldValues=this->valueOnEachLatticeShift;
+  this->LatticeShifts.SetSize(OldLatticeShifts.size*representativesQuotientLattice.size);
+  this->valueOnEachLatticeShift.SetSize(this->LatticeShifts.size);
+  for (int i=0; i<OldLatticeShifts.size; i++)
+    for (int j=0; j<representativesQuotientLattice.size; j++)
+    { this->LatticeShifts.TheObjects[i*representativesQuotientLattice.size+j]=OldLatticeShifts.TheObjects[i]+representativesQuotientLattice.TheObjects[j];
+      this->valueOnEachLatticeShift.TheObjects[i*representativesQuotientLattice.size+j]=oldValues.TheObjects[i];
+    }
 }
 
 void Lattice::GetDualLattice(Lattice& output)const
@@ -1745,7 +1753,7 @@ void Lattice::IntersectWith(const Lattice& other)
 }
 
 void QuasiPolynomial::operator+=(const QuasiPolynomial& other)
-{ this->RefineLattice(other.AmbientLatticeReduced);
+{ this->MakeRougherLattice(other.AmbientLatticeReduced);
 }
 
 int ParserNode::EvaluateInvertLattice(GlobalVariables& theGlobalVariables)
@@ -1759,5 +1767,68 @@ int ParserNode::EvaluateInvertLattice(GlobalVariables& theGlobalVariables)
   currentNode.theLattice.GetElement().GetDualLattice(this->theLattice.GetElement());
   this->ExpressionType=this->typeLattice;
   this->outputString=this->theLattice.GetElement().ElementToString();
+  return this->errorNoError;
+}
+
+std::string QuasiPolynomial::ElementToString(const PolynomialOutputFormat& thePolyFormat)
+{ std::stringstream out;
+  out << "the lattice: " << this->AmbientLatticeReduced.ElementToString();
+  out << "<br>We have " << this->LatticeShifts.size << " lattice shifts. The polynomial on each lattice shift follows.";
+  for (int i=0; i<this->LatticeShifts.size; i++)
+    out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: " << this->valueOnEachLatticeShift.TheObjects[i].ElementToString(thePolyFormat);
+
+
+  return out.str();
+}
+
+bool ParserNode::GetRootRational(root& output, GlobalVariables& theGlobalVariables)
+{ if (this->ExpressionType!=this->typeArray)
+  { if (!this->ConvertToType(this->typeRational, theGlobalVariables))
+      return false;
+    output.SetSize(1);
+    output.TheObjects[0]=this->rationalValue;
+    return true;
+  }
+  output.SetSize(this->array.GetElement().size);
+  for (int i=0; i<this->array.GetElement().size; i++)
+    if (!this->owner->TheObjects[this->array.GetElement().TheObjects[i]].ConvertToType(this->typeRational, theGlobalVariables))
+      return false;
+    else
+      output.TheObjects[i]=this->owner->TheObjects[this->array.GetElement().TheObjects[i]].rationalValue;
+  return true;
+}
+
+void QuasiPolynomial::MakeFromPolyShiftAndLattice
+(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice)
+{ this->AmbientLatticeReduced=theLattice;
+  this->LatticeShifts.SetSize(1);
+  this->LatticeShifts.TheObjects[0]=theShift;
+  this->valueOnEachLatticeShift.SetSize(1);
+  this->valueOnEachLatticeShift.TheObjects[0]=inputPoly;
+}
+
+int ParserNode::EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+//  std::cout << "number of arguments: " << argumentList.size;
+  if (argumentList.size!=3)
+    return this->SetError(this->errorBadOrNoArgument);
+  root theShift;
+  ParserNode& thePolyNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  ParserNode& theShiftNode=this->owner->TheObjects[argumentList.TheObjects[1]];
+  ParserNode& theLatticeNode=this->owner->TheObjects[argumentList.TheObjects[2]];
+  if (!thePolyNode.ConvertToType(this->typePoly, theGlobalVariables) || !theShiftNode.GetRootRational(theShift, theGlobalVariables) || !theLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
+    return this->SetError(this->errorConversionError);
+  QuasiPolynomial& output=this->theQP.GetElement();
+  int theDim=theShift.size;
+//  std::cout << "Dimension: " << theDim;
+ // std::cout << thePolyNode.ElementToStringValueAndType(true);
+//  if (thePolyNode.polyValue.GetElement().NumVars!=theDim)
+//    std::cout << "poly conversion failed";
+  if (thePolyNode.polyValue.GetElement().NumVars!=theDim || theLatticeNode.theLattice.GetElement().GetDim()!=theDim || theLatticeNode.theLattice.GetElement().GetRank()!=theDim)
+    return this->SetError(this->errorDimensionProblem);
+  output.MakeFromPolyShiftAndLattice(thePolyNode.polyValue.GetElement(), theShift, theLatticeNode.theLattice.GetElement());
+  this->outputString=output.ElementToString();
+  this->ExpressionType=this->typeQuasiPolynomial;
   return this->errorNoError;
 }

@@ -54,6 +54,7 @@ bool Stop()
 }
 
 int ParallelComputing::GlobalPointerCounter=0;
+int ParallelComputing::PointerCounterPeakRamUse=0;
 Integer Integer::TheRingUnit(1) ;
 Integer Integer::TheRingMUnit(-1);
 Integer Integer::TheRingZero(0) ;
@@ -314,7 +315,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
   CombinatorialChamber* newChamber= new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   int totalWalls=0;
   for (int i=0; i<IndicesToGlue.size; i++)
@@ -344,7 +345,7 @@ void CombinatorialChamberContainer::Glue(List<int>& IndicesToGlue, roots& normal
     this->TheObjects[IndicesToGlue.TheObjects[i]]=0;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   }
   newChamber->ConsistencyCheck(this->AmbientDimension, true, *this, theGlobalVariables);
@@ -1039,7 +1040,7 @@ ComputationSetup::ComputationSetup()
   this->NotationExplanationLatex4 = out4.str();
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->theGlobalVariablesContainer->SetSize(1);
 //  this->RankEuclideanSpaceGraphics=3;
@@ -1050,7 +1051,7 @@ ComputationSetup::~ComputationSetup()
   this->theGlobalVariablesContainer=0;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
 }
 
@@ -2243,6 +2244,15 @@ void MatrixLargeRational::AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat
       this->elements[i][j].AssignNumeratorAndDenominator(theMat.elements[i][j], Den);
 }
 
+void MatrixLargeRational::AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, LargeIntUnsigned& Den)
+{ this->init(theMat.NumRows, theMat.NumCols);
+  for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+    { this->elements[i][j]=theMat.elements[i][j];
+      this->elements[i][j]/=Den;
+    }
+}
+
 void MatrixLargeRational::AssignRootsToRowsOfMatrix(const roots& input)
 { if (input.size<=0)
   { this->init(0, 0);
@@ -2321,7 +2331,7 @@ void Selection::init(int maxNumElements)
     this->elements = new int[maxNumElements];
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter+=(maxNumElements-this->MaxSize)*2;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     this->MaxSize =maxNumElements;
   }
@@ -2480,7 +2490,7 @@ Selection::~Selection()
   delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter-=this->MaxSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   //  delete [] elementsInverseSelection;
   this->MaxSize=0;
@@ -4014,7 +4024,7 @@ bool CombinatorialChamber::SplitChamber(root& theKillerPlaneNormal, Combinatoria
   NewMinusChamber = new CombinatorialChamber;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter+=2;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   NewPlusChamber->flagPermanentlyZero = PlusChamberIsPermanentZero;
   NewMinusChamber->flagPermanentlyZero = MinusChamberIsPermanentZero;
@@ -6267,7 +6277,7 @@ void PrecomputedTauknPointersKillOnExit::GetTaukn(int k, int n, CompositeComplex
   PrecomputedTaukn* NewMember = new PrecomputedTaukn;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->AddObjectOnTop(NewMember);
   NewMember->k=k;
@@ -8041,7 +8051,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 //  assert(this->CheckForConsistensy());
 }
 
-void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)
+void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const
 { assert(this!=&output && &x!=&output);
   output.SetSize(x.size+output.size);
   for(int i=0; i<output.size; i++)
@@ -8114,7 +8124,7 @@ void LargeIntUnsigned::ElementToString(std::string& output)const
 //  assert(this->CheckForConsistensy());
 }
 
-bool LargeInt::IsEqualTo(LargeInt& x)
+bool LargeInt::IsEqualTo(const LargeInt& x)const
 { if (x.sign!=this->sign)
   { if (x.IsEqualToZero() && this->IsEqualToZero())
       return true;
@@ -8201,7 +8211,7 @@ int LargeIntUnsigned::GetUnsignedIntValueTruncated()
 { return  (int) this->TheObjects[0];
 }
 
-bool LargeIntUnsigned::IsEqualTo(LargeIntUnsigned &right)
+bool LargeIntUnsigned::IsEqualTo(const LargeIntUnsigned &right)const
 { if (this->size!=right.size)
     return false;
   for (int i=0; i<this->size; i++)
@@ -8215,7 +8225,7 @@ double LargeIntUnsigned::GetDoubleValue()
   return this->GetUnsignedIntValueTruncated();
 }
 
-void LargeIntUnsigned::gcd(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output)
+void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
 { LargeIntUnsigned p, q, r, temp;
   std::string tempSP, tempSQ, tempSR, tempS;
   p.Assign(a);
@@ -8316,7 +8326,7 @@ LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
   return result;
 }
 
-LargeIntUnsigned LargeIntUnsigned::operator/(LargeIntUnsigned& x)const
+LargeIntUnsigned LargeIntUnsigned::operator/(const LargeIntUnsigned& x)const
 { LargeIntUnsigned result;
   LargeIntUnsigned remainder;
   this->DivPositive(x, result, remainder);
@@ -11440,6 +11450,12 @@ void SelectionWithDifferentMaxMultiplicities::initFromInts(int* theMaxMults, int
   this->elements.initFillInObject(NumberMaxMults, 0);
 }
 
+void SelectionWithDifferentMaxMultiplicities::initFromInts(const List<int>& theMaxMults)
+{ this->Multiplicities.initFillInObject(theMaxMults.size, 0);
+  this->elements.initFillInObject(theMaxMults.size, 0);
+  this->MaxMultiplicities=theMaxMults;
+}
+
 int ::SelectionWithDifferentMaxMultiplicities::TotalMultiplicity()
 { int result=0;
   for (int i=0; i<this->Multiplicities.size; i++)
@@ -12959,7 +12975,7 @@ rootFKFTcomputation::rootFKFTcomputation()
   this->TheGlobalVariables= new GlobalVariables;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
 }
 
@@ -12967,7 +12983,7 @@ rootFKFTcomputation::~rootFKFTcomputation()
 { delete this->TheGlobalVariables;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
 }
 
@@ -15985,7 +16001,7 @@ GeneratorPFAlgebraRecord::GeneratorPFAlgebraRecord()
   this->Value = new IntegerPoly;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
 }
 
@@ -23904,7 +23920,7 @@ void CombinatorialChamberContainer::OneSlice(root* theIndicatorRoot, GlobalVaria
             delete this->TheObjects[this->indexNextChamberToSlice];
   #ifdef CGIversionLimitRAMuse
     ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+    ParallelComputing::CheckPointerCounters();
   #endif
             this->TheObjects[this->indexNextChamberToSlice]=0;
           }
@@ -24161,7 +24177,7 @@ void CombinatorialChamberContainer::PurgeZeroPolyChambers(GlobalVariables& theGl
       {
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
         delete this->TheObjects[i];
         this->TheObjects[i]=0;
@@ -26072,6 +26088,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
     case ParserNode::errorOperationByUndefinedOrErrorType: out << "error: operation with an undefined type"; break;
     case ParserNode::errorProgramming: out << "error: there has been some programming mistake (it's not your expression's fault). Slap the programmer!"; break;
     case ParserNode::errorUnknownOperation: out << "error: unknown operation. The lazy programmer has added the operation to the dictionary, but hasn't implemented it yet. Lazy programmers deserve no salary. "; break;
+    case ParserNode::errorImplicitRequirementNotSatisfied: out << "Error: an implicit requirement for the funciton input has not been satisfied."; break;
     default: out << "Non-documented error. Lazy programmers deserve no salaries.";
   }
   return out.str();
@@ -26329,6 +26346,8 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionCone: this->EvaluateCone(theGlobalVariables); break;
     case Parser::functionMaximumLFoverCone: this->EvaluateMaxLFOverCone(theGlobalVariables); break;
     case Parser::functionLattice: this->EvaluateLattice(theGlobalVariables); break;
+    case Parser::functionGetAllRepresentatives: this->EvaluateGetAllRepresentatives(theGlobalVariables); break;
+    case Parser::functionInvertLattice: this->EvaluateInvertLattice(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26615,9 +26634,19 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddObjectOnTop(this->functionEmbedding);
     return true;
   }
+  if (input=="GetAllRepresentatives")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionGetAllRepresentatives);
+    return true;
+  }
   if (input=="actByWeylAffine")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionActByAffineWeyl);
+    return true;
+  }
+  if (input=="InvertLattice")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionInvertLattice);
     return true;
   }
   if (input=="actByWeyl")
@@ -31060,6 +31089,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeArray: out << " an array of " << this->array.GetElement().size << " elements. "; break;
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
+    case ParserNode::typeLattice: out << "A lattice."; break;
     case ParserNode::typeCone: out << "a cone with walls: "; break;
     default: out << "The programmer(s) have forgotten to enter a type description. "; break;
   }
@@ -33356,11 +33386,9 @@ void RationalFunction::AddHonestRF
   assert(this->checkConsistency());
 }
 
-void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
-  { this->SetError(this->errorOperationByUndefinedOrErrorType);
-    return;
-  }
+    return this->SetError(this->errorOperationByUndefinedOrErrorType);
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
   this->InitForMultiplication(&theGlobalVariables);
   LargeInt theInt;
@@ -33382,16 +33410,20 @@ void ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
       case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
       case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement()); break;
-      default: this->SetError(this->errorMultiplicationByNonAllowedTypes); return;
+      case ParserNode::typeLattice:
+        this->theLattice.GetElement()=this->owner->TheObjects[this->children.TheObjects[0]].theLattice.GetElement();
+        this->theLattice.GetElement().IntersectWith(this->owner->TheObjects[this->children.TheObjects[1]].theLattice.GetElement());
+        this->outputString=this->theLattice.GetElement().ElementToString();
+        return this->errorNoError;
+      default: return this->SetError(this->errorMultiplicationByNonAllowedTypes);
     }
   }
+  return this->errorNoError;
 }
 
-void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
-  { this->ExpressionType=this->typeError;
-    return;
-  }
+    return this->SetError(this->errorOperationByUndefinedOrErrorType);
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
   this->InitForAddition(&theGlobalVariables);
   LargeInt theInt;
@@ -33413,7 +33445,13 @@ void ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().Add(currentChild.WeylAlgebraElement.GetElement()); break;
-      default: this->ExpressionType=this->typeError; return;
+      case ParserNode::typeLattice:
+        this->theLattice.GetElement()=currentChild.theLattice.GetElement();
+        this->theLattice.GetElement().RefineByOtherLattice(this->owner->TheObjects[this->children.TheObjects[1]].theLattice.GetElement());
+        this->outputString=this->theLattice.GetElement().ElementToString();
+        return this->errorNoError;
+      default: return this->SetError(this->errorUnknownOperation);
     }
   }
+  return this->errorNoError;
 }

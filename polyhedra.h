@@ -257,9 +257,19 @@ class ParallelComputing
 {
 public:
   static int GlobalPointerCounter;
+  static int PointerCounterPeakRamUse;
   static Controller controllerLockThisMutexToSignalPause;
 #ifdef CGIversionLimitRAMuse
   static int cgiLimitRAMuseNumPointersInList;
+  inline static void CheckPointerCounters()
+  { if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
+    { std::cout << "<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<
+      ParallelComputing::cgiLimitRAMuseNumPointersInList;
+      std::exit(0);
+    }
+    if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
+      ParallelComputing::PointerCounterPeakRamUse=ParallelComputing::GlobalPointerCounter;
+  }
 #endif
   inline static void SafePoint()
   { ParallelComputing::controllerLockThisMutexToSignalPause.SafePoint();
@@ -337,7 +347,7 @@ public:
     { this->theValue=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     }
     return *(this->theValue);
@@ -348,7 +358,7 @@ ParallelComputing::GlobalPointerCounter++;
     this->theValue=0;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   }
   MemorySaving(){this->theValue=0;}
@@ -423,7 +433,7 @@ inline void ListLight<Object>::SetSize(int theSize)
   {
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter-=this->size;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     this->size=0;
     delete [] this->TheObjects;
@@ -433,7 +443,7 @@ inline void ListLight<Object>::SetSize(int theSize)
   Object* newArray= new Object[theSize];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=theSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   int CopyUpTo= this->size;
   if (this->size>theSize)
@@ -443,7 +453,7 @@ ParallelComputing::GlobalPointerCounter+=theSize;
   delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->size;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->TheObjects=newArray;
   this->size= theSize;
@@ -460,7 +470,7 @@ ListLight<Object>::~ListLight()
 { delete [] this->TheObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->size;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->TheObjects=0;
 }
@@ -778,13 +788,13 @@ inline void MatrixElementaryLooseMemoryFit<Element>::Resize(int r, int c, bool P
   { newElements  = new Element*[newActualNumRows];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumRows;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     for (int i=0; i<newActualNumRows; i++)
     { newElements[i]= new Element[newActualNumCols];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=newActualNumCols;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     }
   }
@@ -831,7 +841,7 @@ inline void MatrixElementaryLooseMemoryFit<Element>::ReleaseMemory()
   delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols+this->ActualNumRows;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->elements=0;
   this->NumCols=0;
@@ -874,7 +884,7 @@ public:
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   std::string ElementToString(bool useHtml, bool useLatex)const{std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
   void SwitchTwoRows(int row1, int row2);
-  void RowToRoot(int rowIndex, root& output)const;
+  void RowToRoot(int rowIndex, Vector<Element>& output)const;
   int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex);
   bool FindFirstNonZeroElementSearchEntireRow(Element& output)
   { for (int i=0; i<this->NumCols; i++)
@@ -899,7 +909,8 @@ void NonPivotPointsToEigenVector
   //returns true if successful, false otherwise
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<Element>& inputColumn, Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
-  bool Invert(GlobalVariables& theGlobalVariables);
+  bool Invert(GlobalVariables& theGlobalVariables){return this->Invert();}
+  bool Invert();
   void NullifyAll();
   void NullifyAll(const Element& theRingZero);
   //if m1 corresponds to a linear operator from V1 to V2 and
@@ -1061,6 +1072,7 @@ public:
   void Transpose(GlobalVariables& theGlobalVariables);
   void MultiplyByInt(int x);
   void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
+  void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, LargeIntUnsigned& Den);
   void AssignRootsToRowsOfMatrix(const roots& input);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void MultiplyByLargeRational(Rational& x);
@@ -1200,6 +1212,7 @@ public:
   int TotalMultiplicity();
   int MaxTotalMultiplicity();
   void initFromInts(int* theMaxMults, int NumberMaxMults);
+  void initFromInts(const List<int>& theMaxMults);
   bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other){ return this->MaxMultiplicities.IsEqualTo(other.MaxMultiplicities); }
   void operator=(const SelectionWithDifferentMaxMultiplicities& right)
   { this->Multiplicities.CopyFromBase(right.Multiplicities);
@@ -1241,7 +1254,7 @@ inline void MatrixElementaryTightMemoryFit<Element>::Free()
   delete [] this->elements;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->NumRows*this->NumCols+this->NumRows;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->elements=0;
   this->NumRows=0;
@@ -1272,7 +1285,7 @@ void Matrix<Element>::ReadFromFile(std::fstream& input)
 }
 
 template <typename Element>
-bool Matrix<Element>::Invert(GlobalVariables& theGlobalVariables)
+bool Matrix<Element>::Invert()
 { assert(this->NumCols==this->NumRows);
   if (this->flagComputingDebugInfo)
     this->ComputeDebugString();
@@ -1666,13 +1679,13 @@ inline void MatrixElementaryTightMemoryFit<Element>::Resize(int r, int c, bool P
   Element** newElements= new Element*[r];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=r;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   for (int i=0; i<r; i++)
   { newElements[i]= new Element[c];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=c;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   }
   if (PreserveValues)
@@ -1707,18 +1720,18 @@ public:
   static const int SquareRootOfCarryOverBound=32768; //=2^15
   void ElementToString(std::string& output)const;
   inline std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
-  void DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
+  void DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
   void Add(const LargeIntUnsigned& x);
   void AddUInt(unsigned int x){static LargeIntUnsigned tempI; tempI.AssignShiftedUInt(x, 0); this->Add(tempI); }
   void MakeZero();
   bool IsEqualToZero()const{return this->size==1 && this->TheObjects[0]==0; }
-  bool IsEqualTo(LargeIntUnsigned& right);
+  bool IsEqualTo(const LargeIntUnsigned& right)const;
   bool IsPositive()const{ return this->size>1 || this->TheObjects[0]>0; }
   bool IsEqualToOne()const{ return this->size==1 && this->TheObjects[0]==1; }
   bool IsGEQ(const LargeIntUnsigned& x)const;
-  static void gcd(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output);
-  static void lcm(LargeIntUnsigned& a, LargeIntUnsigned& b, LargeIntUnsigned& output)
+  static void gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output);
+  static void lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
   { LargeIntUnsigned tempUI, tempUI2;
     LargeIntUnsigned::gcd(a, b, tempUI);
     a.MultiplyBy(b, tempUI2);
@@ -1728,7 +1741,7 @@ public:
   }
   void MultiplyBy(const LargeIntUnsigned& right);
   inline void operator*=(const LargeIntUnsigned& right){this->MultiplyBy(right);}
-  void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output);
+  void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const;
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
@@ -1737,7 +1750,7 @@ public:
   int operator %(unsigned int x);
   inline void operator = (const LargeIntUnsigned& x){ this->Assign(x); }
   LargeIntUnsigned operator/(unsigned int x)const;
-  LargeIntUnsigned operator/(LargeIntUnsigned& x)const;
+  LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); }
   LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; }
   inline bool operator<(const LargeIntUnsigned& other)const{return !this->IsGEQ(other);}
@@ -1748,6 +1761,12 @@ public:
 
 class LargeInt
 { friend class Rational;
+  friend LargeInt operator*(const LargeInt& left, const LargeInt& right)
+  { LargeInt tempI; tempI=left; tempI*=right; return tempI;
+  }
+  friend LargeInt operator*(const LargeInt& left, const LargeIntUnsigned& right)
+  { LargeInt tempI; tempI=right; return left*tempI;
+  }
 public:
   signed char sign;
   LargeIntUnsigned value;
@@ -1758,7 +1777,7 @@ public:
   bool IsNegative()const{return this->sign==-1&& (this->value.IsPositive()); }
   inline bool IsNonNegative()const{return !this->IsNegative(); }
   inline bool IsNonPositive()const{return !this->IsPositive(); }
-  bool IsEqualTo(LargeInt& x);
+  bool IsEqualTo(const LargeInt& x)const;
   bool IsEqualToZero()const{ return this->value.IsEqualToZero(); }
   bool IsEqualToOne()const{ return this->value.IsEqualToOne() && this->sign==1; }
   void Assign(const LargeInt& x);
@@ -1782,6 +1801,7 @@ public:
   inline void operator+=(int x){this->AddInt(x);}
   inline void Minus(){if (!this->IsEqualToZero()) this->sign*=-1;}
   inline void operator+=(const LargeInt& other){ this->Add(other);}
+  bool operator==(const LargeInt& other)const{return this->IsEqualTo(other);}
   inline void operator-=(const LargeInt& other)
   { this->Minus();
     this->Add(other);
@@ -1889,7 +1909,7 @@ class Rational
     this->Extended= new LargeRationalExtended;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     this->Extended->den.AssignShiftedUInt((unsigned int)this->DenShort, 0);
     this->Extended->num.AssignInt(this->NumShort);
@@ -1901,7 +1921,7 @@ ParallelComputing::GlobalPointerCounter++;
     delete this->Extended; this->Extended=0;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   }
   bool ShrinkExtendedPartIfPossible()
@@ -1969,7 +1989,7 @@ public:
     { this->Extended= new LargeRationalExtended;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     }
     this->Extended->num.Assign(other);
@@ -2136,6 +2156,7 @@ ParallelComputing::GlobalPointerCounter++;
   inline void operator-=(const Rational& right){this->Subtract(right); }
   inline void operator*=(const Rational& right){this->MultiplyBy(right); }
   inline void operator/=(const Rational& right){this->DivideBy(right);}
+  inline void operator/=(const LargeIntUnsigned& right){Rational tempRat; tempRat=right; this->DivideBy(tempRat);}
   inline void operator+=(int right){this->AddInteger(right); }
   inline void operator-=(int right){Rational tempRat=right; this->Subtract(tempRat);}
   inline bool operator==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat); }
@@ -2156,12 +2177,25 @@ ParallelComputing::GlobalPointerCounter++;
   inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this); }
 };
 
+template<class CoefficientType>
+inline Vector<CoefficientType> operator-(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right)
+{ Vector<CoefficientType> result;
+  result.SetSize(left.size);
+  for (int i=0; i<left.size; i++)
+  { result.TheObjects[i]=left.TheObjects[i];
+    result.TheObjects[i]-=right.TheObjects[i];
+  }
+  return result;
+}
+
 template <class CoefficientType>
 class Vector: public ListLight<CoefficientType>
-{
+{ friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right);
 public:
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(this->DebugString);}
+  Vector(){}
+  Vector(const Vector<CoefficientType>& other){*this=other;}
   void ElementToString(std::string& output)
   { output.clear();
     std::string tempStr;
@@ -2221,6 +2255,16 @@ public:
   { Vectors<CoefficientType> buffer;
     Matrix<CoefficientType> matBuffer;
     return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
+  }
+  void operator*=(const CoefficientType& other)
+  { for (int i=0; i<this->size; i++)
+      this->TheObjects[i]*=other;
+  }
+  bool IsEqualToZero()const
+  { for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].IsEqualToZero())
+        return false;
+    return true;
   }
 };
 
@@ -2475,7 +2519,7 @@ inline root operator-(const root& right)
 }
 
 template<typename Element>
-void Matrix<Element>::RowToRoot(int rowIndex, root& output)const
+void Matrix<Element>::RowToRoot(int rowIndex, Vector<Element>& output)const
 { output.SetSize(this->NumCols);
     for (int i=0; i<this->NumCols; i++)
       output.TheObjects[i]=this->elements[rowIndex][i];
@@ -3126,7 +3170,7 @@ void List<Object>::ReleaseMemory()
 { delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->ActualSize=0;
   this->IndexOfVirtualZero=0;
@@ -3141,7 +3185,7 @@ List<Object>::~List()
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
   this->ActualSize=0;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->TheActualObjects=0;
   this->TheObjects=0;
@@ -3154,14 +3198,14 @@ void List<Object>::ExpandArrayOnBottom(int increase)
   Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   for (int i=0; i<this->size; i++)
     newArray[i+increase+this->IndexOfVirtualZero]=this->TheObjects[i];
   delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->TheActualObjects= newArray;
   this->ActualSize+=increase;
@@ -3176,14 +3220,14 @@ void List<Object>::ExpandArrayOnTop(int increase)
   Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   for (int i=0; i<this->size; i++)
     newArray[i+this->IndexOfVirtualZero]=this->TheObjects[i];
   delete [] this->TheActualObjects;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->TheActualObjects= newArray;
   this->ActualSize+=increase;
@@ -3350,7 +3394,7 @@ void HashedList<Object>::SetHashSize(int HS)
   { delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     this->TheHashedArrays= new  List<int>[HS];
     this->HashSize=HS;
@@ -3371,7 +3415,7 @@ HashedList<Object>::~HashedList()
 { delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->HashSize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->HashSize=0;
   this->TheHashedArrays=0;
@@ -3392,7 +3436,7 @@ void ListPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
   { Object** newArray= new Object*[this->size+increase];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
     for (int i=0; i<this->size; i++)
       newArray[i]=this->TheObjects[i];
@@ -3413,7 +3457,7 @@ void ListPointers<Object>::initAndCreateNewObjects(int d)
     this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=d;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
 }
 
@@ -3422,7 +3466,7 @@ void ListPointers<Object>::KillElementIndex(int i)
 { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   this->size--;
   this->TheObjects[i]=this->TheObjects[this->size];
@@ -3446,7 +3490,7 @@ void ListPointers<Object>::resizeToLargerCreateNewObjects(int increase)
     this->TheObjects[i]=new Object;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
 }
 
@@ -3456,7 +3500,7 @@ void ListPointers<Object>::KillAllElements()
   { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
     if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+    ParallelComputing::CheckPointerCounters();
 #endif
     this->TheObjects[i]=0;
   }
@@ -4874,7 +4918,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::init(int nv)
 { assert(nv>=0);
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   if(this->NumVariables!=nv)
   { NumVariables=nv;
@@ -4890,7 +4934,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::initNoDegreesInit(int nv)
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   if(this->NumVariables!=nv)
   { this->NumVariables=nv;
@@ -4904,7 +4948,7 @@ Monomial<ElementOfCommutativeRingWithIdentity>::~Monomial()
 { delete [] this->degrees;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter-=this->NumVariables;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
 }
 
@@ -4996,7 +5040,7 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariables(int in
 {
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=increase;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
   int* newDegrees= new int[NumVariables+increase];
   for(int i=0; i<this->NumVariables; i++)
@@ -8698,6 +8742,50 @@ public:
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
 };
 
+class Lattice
+{
+public:
+  MatrixLargeRational basisRationalForm;
+  Matrix<LargeInt> basis;
+  LargeIntUnsigned Den;
+  int GetDim()const{return this->basis.NumCols;}
+  void IntersectWith(const Lattice& other);
+  void GetDualLattice(Lattice& output)const;
+  void Reduce
+  ()
+  ;
+  //returning false means that the lattice given as rougher is not actually rougher than the current lattice
+  //or that there are too many representatives
+  bool GetAllRepresentatitves
+  (const Lattice& rougherLattice, roots& output)
+  ;
+  std::string ElementToString()const;
+  bool operator==(const Lattice& other){return this->basisRationalForm==other.basisRationalForm;};
+  void operator=(const Lattice& other)
+  { this->basis=other.basis;
+    this->Den=other.Den;
+    this->basisRationalForm=other.basisRationalForm;
+  }
+  void RefineByOtherLattice(const Lattice& other);
+  void AssignRootsToBasisAndReduce
+  (const roots& input)
+  ;
+};
+
+class QuasiPolynomial
+{
+public:
+  int GetNumVars()const{return this->AmbientLatticeReduced.basis.NumRows;}
+  GlobalVariables* buffers;
+  Lattice AmbientLatticeReduced;
+  roots LatticeShifts;
+  List<PolynomialRationalCoeff> valueOnEachLatticeShift;
+  void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
+  void RefineLattice(const Lattice& latticeToRefineBy);
+  void operator+=(const QuasiPolynomial& other);
+  QuasiPolynomial(){this->buffers=0;}
+};
+
 class Parser;
 class ParserNode
 { public:
@@ -8722,6 +8810,7 @@ class ParserNode
   MemorySaving<List<int> > array;
   MemorySaving<RationalFunction> ratFunction;
   MemorySaving<Cone> theCone;
+  MemorySaving<Lattice> theLattice;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -8739,11 +8828,12 @@ class ParserNode
   bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF, typeCone,
+  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF, typeLattice, typeCone,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
-  errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem};
+  errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem,
+  errorImplicitRequirementNotSatisfied };
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
   std::string ElementToStringValueAndType(bool useHtml){return this->ElementToStringValueAndType(useHtml, 0, 3);}
@@ -8757,22 +8847,24 @@ class ParserNode
   void ReduceRatFunction();
   void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
   void Evaluate(GlobalVariables& theGlobalVariables);
-  void EvaluateTimes(GlobalVariables& theGlobalVariables);
+  int EvaluateTimes(GlobalVariables& theGlobalVariables);
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   int EvaluateLattice(GlobalVariables& theGlobalVariables);
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
+  int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
   void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
   void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
   int EvaluateCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
+  int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
   void EvaluateWeylAction
   (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
   ;
-  void EvaluatePlus(GlobalVariables& theGlobalVariables);
+  int EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
@@ -8831,7 +8923,7 @@ public:
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
-    functionLattice
+    functionLattice, functionGetAllRepresentatives, functionInvertLattice
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

@@ -35,7 +35,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4( std::stringstream& output);
 extern void static_html3( std::stringstream& output);
 
-const double MaxAllowedComputationTimeInSeconds=200000;
+const double MaxAllowedComputationTimeInSeconds=20000;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -245,7 +245,9 @@ int main(int argc, char **argv)
 #ifndef WIN32
   double TimeTotalElapsed=GetElapsedTimeInSeconds();
   if (civilizedInput!="")
-    std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " <<  TimeTotalElapsed<< " seconds<br> (" << TimeParsing << " parsing + " << TimeEvaluation <<  " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing << " processing)<br>";
+  { std::cout << "<br>result: " << theResult << "<br>Parsing+evaluation time: " <<  TimeTotalElapsed<< " seconds<br> (" << TimeParsing << " parsing + " << TimeEvaluation <<  " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing << " processing)<br>";
+    std::cout << "#  pointers at peak RAM: " << ParallelComputing::PointerCounterPeakRamUse << "<br>(excluding std::string, std::stringstream)<br>";
+  }
   if (GetElapsedTimeInSeconds()>1)
     std::cout << "If your computation takes too long it is probably due to the weak algorithms used for your computation.<br> Feel free to email the author(s) with requests for speed improvement.";
   ComputationComplete=true;

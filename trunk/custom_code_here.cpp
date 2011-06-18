@@ -823,7 +823,7 @@ void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNorma
       { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter--;
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+  ParallelComputing::CheckPointerCounters();
 #endif
         this->TheObjects[i]=0;
         break;
@@ -854,7 +854,7 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
           { delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
   #ifdef CGIversionLimitRAMuse
     ParallelComputing::GlobalPointerCounter--;
-    if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList){ std::cout <<"<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<::ParallelComputing::cgiLimitRAMuseNumPointersInList; std::exit(0); }
+    ParallelComputing::CheckPointerCounters();
   #endif
             this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
           }
@@ -1503,50 +1503,48 @@ bool ConeComplex::findMaxLFOverConeProjective
   return true;
 }
 
-class Lattice
-{
-public:
-  Matrix<LargeInt> basis;
-  LargeIntUnsigned Den;
-  void Reduce
-  ()
-  ;
-  std::string ElementToString()const;
-  bool operator==(const Lattice& other);
-  void RefineByOtherLattice(const Lattice& other);
-  void AssignRootsToBasisAndReduce
-  (const roots& input)
-  ;
-};
-
 void Lattice::Reduce
 ()
 { LargeInt tempInt, tempInt2;
   tempInt.MakeMOne(); tempInt2.MakeOne();
   this->basis.GaussianEliminationEuclideanDomain(tempInt, tempInt2);
+  int numRowsToTrim=0;
+  for (int i=this->basis.NumRows-1; i>=0; i--)
+  { bool foundNonZeroRow=false;
+    for (int j=0; j<this->basis.NumCols; j++)
+      if (!this->basis.elements[i][j].IsEqualToZero())
+      { foundNonZeroRow=true;
+        break;
+      }
+    if (foundNonZeroRow)
+      break;
+    numRowsToTrim++;
+  }
+  this->basis.Resize(this->basis.NumRows-numRowsToTrim, this->basis.NumCols, true);
+  this->basisRationalForm.AssignMatrixIntWithDen(this->basis, this->Den);
 }
-
-class QuasiPolynomial
-{
-public:
-  int GetNumVars(){return this->AmbientLatticeReduced.basis.NumRows;}
-  GlobalVariables* buffers;
-  Lattice AmbientLatticeReduced;
-  roots theConstantTerms;
-  List<PolynomialRationalCoeff> valueOnEachLatticePoint;
-  void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
-  void operator+=(const QuasiPolynomial& other);
-  QuasiPolynomial(){this->buffers=0;}
-};
-
 
 
 void Lattice::RefineByOtherLattice(const Lattice& other)
-{
-}
-
-void  QuasiPolynomial::operator+=(const QuasiPolynomial& other)
-{
+{ if (other.basis.NumCols==0)
+    return;
+  if (other.basis==this->basis && this->Den==other.Den)
+    return;
+  assert(other.GetDim()==this->GetDim());
+  int theDim=this->GetDim();
+  LargeIntUnsigned oldDen=this->Den;
+  LargeIntUnsigned::lcm(other.Den, oldDen, this->Den);
+  LargeIntUnsigned scaleThis, scaleOther;
+  scaleThis=this->Den/oldDen;
+  scaleOther=this->Den/other.Den;
+  int oldNumRows=this->basis.NumRows;
+  LargeInt tempI; tempI=scaleThis;
+  this->basis*=tempI;
+  this->basis.Resize(this->basis.NumRows+other.basis.NumRows, theDim, true);
+  for (int i=oldNumRows; i<this->basis.NumRows; i++)
+    for (int j=0; j<this->basis.NumCols; j++)
+      this->basis.elements[i][j]=other.basis.elements[i-oldNumRows][j]*scaleOther;
+  this->Reduce();
 }
 
 int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
@@ -1574,17 +1572,15 @@ int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
     }
     LatticeBase.AddObjectOnTop(currentRoot);
   }
-  Lattice theLattice;
-  theLattice.AssignRootsToBasisAndReduce(LatticeBase);
-  this->outputString=theLattice.ElementToString();
-  this->ExpressionType=this->typeString;
+  this->theLattice.GetElement().AssignRootsToBasisAndReduce(LatticeBase);
+  this->outputString=this->theLattice.GetElement().ElementToString();
+  this->ExpressionType=this->typeLattice;
   return this->errorNoError;
 }
 
 void Lattice::AssignRootsToBasisAndReduce(const roots& input)
 { MatrixLargeRational tempMat;
   tempMat.AssignRootsToRowsOfMatrix(input);
-  std::cout << tempMat.ElementToString(true, false);
   tempMat.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
 
@@ -1592,7 +1588,8 @@ void Lattice::AssignRootsToBasisAndReduce(const roots& input)
 
 std::string Lattice::ElementToString()const
 { std::stringstream out;
-  out << "Basis: Denominator=" << this->Den.ElementToString() << " \n";
+  out << "<br>Basis:<br>" <<this->basisRationalForm.ElementToString(true, false) << "<br>";
+  out << "Integral form: Denominator=" << this->Den.ElementToString() << " \n";
   out << "<br>Matrix=" << this->basis.ElementToString(true, false);
   return out.str();
 }
@@ -1600,7 +1597,7 @@ std::string Lattice::ElementToString()const
 #ifdef WIN32
 #pragma warning(disable:4244)//warning 4244: data loss from conversion
 #endif
-void LargeIntUnsigned::DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const
+void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const
 { LargeIntUnsigned remainder, quotient, divisor;
   remainder.Assign(*this);
   divisor.Assign(x);
@@ -1641,3 +1638,126 @@ void LargeIntUnsigned::DivPositive(LargeIntUnsigned& x, LargeIntUnsigned& quotie
 #pragma warning(default:4244)//warning 4244: data loss from conversion
 #endif
 
+//returning false means that the lattice given as rougher is not actually rougher than the current lattice
+//or that there are too many representatives
+bool Lattice::GetAllRepresentatitves
+  (const Lattice& rougherLattice, roots& output)
+{ output.size=0;
+  if (this->basis.NumRows!=rougherLattice.basis.NumRows)
+    return false;
+  List<int> thePeriods;
+  roots thePeriodVectors;
+  thePeriods.SetSize(this->basis.NumRows);
+  thePeriodVectors.SetSize(this->basis.NumRows);
+  root tempRoot, tempRoot2;
+  int col=0;
+  int theDim=this->GetDim();
+  Rational currentPeriod;
+  LargeInt currentPeriodInt;
+  for (int i=0; i<this->basis.NumRows; i++)
+  { while (this->basisRationalForm.elements[i][col].IsEqualToZero())
+      col++;
+    currentPeriod=rougherLattice.basisRationalForm.elements[i][col]/this->basisRationalForm.elements[i][col];
+    currentPeriod.GetNum(currentPeriodInt);
+    if (currentPeriodInt.value.size>1)
+//    { std::cout << "exited at point 1 counter i is " << i;
+      return false;
+//    }
+    else
+      thePeriods.TheObjects[i]=currentPeriodInt.value.TheObjects[0];
+    this->basisRationalForm.RowToRoot(i, thePeriodVectors.TheObjects[i]);
+    rougherLattice.basisRationalForm.RowToRoot(i, tempRoot2);
+    tempRoot=thePeriodVectors.TheObjects[i];
+    tempRoot*=thePeriods.TheObjects[i];
+    if (!(tempRoot-tempRoot2).IsEqualToZero())
+//    { std::cout << "exited at point 2 counter i is " << i;
+      return false;
+//    }
+  }
+//  std::cout << thePeriodVectors.ElementToString() << "<br>The periods: ";
+//  for (int i=0; i<thePeriods.size; i++)
+//    std::cout << thePeriods.TheObjects[i] << ", ";
+  for (int i=0; i<thePeriods.size; i++)
+    thePeriods.TheObjects[i]--;
+  SelectionWithDifferentMaxMultiplicities theCoeffSelection;
+  theCoeffSelection.initFromInts(thePeriods);
+  int NumCycles=theCoeffSelection.getTotalNumSubsets();
+  output.SetSize(NumCycles);
+  for (int i=0; i<NumCycles; i++, theCoeffSelection.IncrementSubset())
+  { output.TheObjects[i].MakeZero(theDim);
+    for (int j=0; j<theCoeffSelection.Multiplicities.size; j++)
+      output.TheObjects[i]+=thePeriodVectors.TheObjects[j]*theCoeffSelection.Multiplicities.TheObjects[j];
+  }
+//  std::cout << "The representatives: " << output.ElementToString(false, true, false);
+  return true;
+}
+
+int ParserNode::EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size!=2)
+    return this->SetError(this->errorBadOrNoArgument);
+  for (int i=0; i<argumentList.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typeLattice, theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+  }
+  Lattice& finerLattice=this->owner->TheObjects[argumentList.TheObjects[0]].theLattice.GetElement();
+  Lattice& rougherLattice=this->owner->TheObjects[argumentList.TheObjects[1]].theLattice.GetElement();
+  roots tempRoots;
+  if (!finerLattice.GetAllRepresentatitves(rougherLattice, tempRoots))
+    return this->SetError(this->errorImplicitRequirementNotSatisfied);
+  this->outputString=tempRoots.ElementToString();
+  this->ExpressionType=this->typeString;
+  return this->errorNoError;
+}
+
+void QuasiPolynomial::RefineLattice(const Lattice& latticeToRefineBy)
+{ if (this->AmbientLatticeReduced==latticeToRefineBy)
+    return;
+  Lattice OldLattice;
+  OldLattice=this->AmbientLatticeReduced;
+  this->AmbientLatticeReduced.RefineByOtherLattice(latticeToRefineBy);
+  roots representativesQuotientLattice;
+  this->AmbientLatticeReduced.GetAllRepresentatitves(OldLattice, representativesQuotientLattice);
+  //for (int i
+}
+
+void Lattice::GetDualLattice(Lattice& output)const
+{ MatrixLargeRational tempMat;
+  tempMat=this->basisRationalForm;
+  tempMat.Invert();
+  tempMat.GetMatrixIntWithDen(output.basis, output.Den);
+  output.Reduce();
+}
+
+void Lattice::IntersectWith(const Lattice& other)
+{ Lattice dualLatticeThis, dualLatticeOther;
+  //std::cout << "intersecting " << this->ElementToString() << " and " << other.ElementToString();
+  this->GetDualLattice(dualLatticeThis);
+  //std::cout << "<br>dual lattice of left: " << dualLatticeThis.ElementToString();
+  other.GetDualLattice(dualLatticeOther);
+  //std::cout << "<br>dual lattice of right: " << dualLatticeOther.ElementToString();
+  dualLatticeThis.RefineByOtherLattice(dualLatticeOther);
+  //std::cout << "<br> common refinement of dual lattice: " << dualLatticeThis.ElementToString();
+  dualLatticeThis.GetDualLattice(*this);
+  //std::cout << "<br>final result: " << this->ElementToString();
+}
+
+void QuasiPolynomial::operator+=(const QuasiPolynomial& other)
+{ this->RefineLattice(other.AmbientLatticeReduced);
+}
+
+int ParserNode::EvaluateInvertLattice(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size!=1)
+    return this->SetError(this->errorBadOrNoArgument);
+  ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  if(!currentNode.ConvertToType(this->typeLattice, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  currentNode.theLattice.GetElement().GetDualLattice(this->theLattice.GetElement());
+  this->ExpressionType=this->typeLattice;
+  this->outputString=this->theLattice.GetElement().ElementToString();
+  return this->errorNoError;
+}

@@ -26348,6 +26348,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionLattice: this->EvaluateLattice(theGlobalVariables); break;
     case Parser::functionGetAllRepresentatives: this->EvaluateGetAllRepresentatives(theGlobalVariables); break;
     case Parser::functionInvertLattice: this->EvaluateInvertLattice(theGlobalVariables); break;
+    case Parser::functionQuasiPolynomial: this->EvaluateQuasiPolynomial(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26687,6 +26688,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="combinatorialChamberParam")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionChamberParam);
+    return true;
+  }
+  if (input=="QuasiPolynomial")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionQuasiPolynomial);
     return true;
   }
   if (input =="secretSauce")

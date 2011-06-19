@@ -1588,9 +1588,9 @@ void Lattice::AssignRootsToBasisAndReduce(const roots& input)
 
 std::string Lattice::ElementToString()const
 { std::stringstream out;
-  out << "<br>Basis:<br>" <<this->basisRationalForm.ElementToString(true, false) << "<br>";
-  out << "Integral form: Denominator=" << this->Den.ElementToString() << " \n";
-  out << "<br>Matrix=" << this->basis.ElementToString(true, false);
+  out << "<br>Basis:" <<this->basisRationalForm.ElementToString(true, false);
+  //out << "Integral form: Denominator=" << this->Den.ElementToString() << " \n";
+  //out << "<br>Matrix=" << this->basis.ElementToString(true, false);
   return out.str();
 }
 
@@ -1669,9 +1669,10 @@ bool Lattice::GetAllRepresentatitves
     rougherLattice.basisRationalForm.RowToRoot(i, tempRoot2);
     tempRoot=thePeriodVectors.TheObjects[i];
     tempRoot*=thePeriods.TheObjects[i];
-    if (!(tempRoot-tempRoot2).IsEqualToZero())
-//    { std::cout << "exited at point 2 counter i is " << i;
-      return false;
+
+//    if (!(tempRoot-tempRoot2).IsEqualToZero())
+//    { std::cout << "exited at point 2 counter i is " << i << " the period vector=" << thePeriodVectors.TheObjects[i].ElementToString() << " rougher lattice basis vector: " << tempRoot2.ElementToString();
+//      return false;
 //    }
   }
 //  std::cout << thePeriodVectors.ElementToString() << "<br>The periods: ";
@@ -1712,16 +1713,20 @@ int ParserNode::EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariable
   return this->errorNoError;
 }
 
-void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRefineBy)
-{ if (this->AmbientLatticeReduced==latticeToRefineBy)
+void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRoughenBy)
+{ if (this->AmbientLatticeReduced==latticeToRoughenBy)
     return;
+  //std::cout << "roughening " << this->AmbientLatticeReduced.ElementToString() << "by" << latticeToRoughenBy.ElementToString();
   Lattice OldLattice;
   OldLattice=this->AmbientLatticeReduced;
-  this->AmbientLatticeReduced.IntersectWith(latticeToRefineBy);
+  this->AmbientLatticeReduced.IntersectWith(latticeToRoughenBy);
   roots representativesQuotientLattice;
+  //std::cout << "getting all representatives of " << OldLattice.ElementToString() << "inside" << this->AmbientLatticeReduced.ElementToString();
+  //std::cout << "<br><br><br><br>*********<br><br><br><br>";
   OldLattice.GetAllRepresentatitves(this->AmbientLatticeReduced, representativesQuotientLattice);
   roots OldLatticeShifts=this->LatticeShifts;
-  List<PolynomialRationalCoeff> oldValues=this->valueOnEachLatticeShift;
+  List<PolynomialRationalCoeff> oldValues;
+  oldValues=this->valueOnEachLatticeShift;
   this->LatticeShifts.SetSize(OldLatticeShifts.size*representativesQuotientLattice.size);
   this->valueOnEachLatticeShift.SetSize(this->LatticeShifts.size);
   for (int i=0; i<OldLatticeShifts.size; i++)
@@ -1732,9 +1737,12 @@ void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRefineBy)
 }
 
 void Lattice::GetDualLattice(Lattice& output)const
-{ MatrixLargeRational tempMat;
+{ if (this->GetRank()!=this->GetDim())
+    return;
+  MatrixLargeRational tempMat;
   tempMat=this->basisRationalForm;
   tempMat.Invert();
+  tempMat.Transpose();
   tempMat.GetMatrixIntWithDen(output.basis, output.Den);
   output.Reduce();
 }
@@ -1753,7 +1761,26 @@ void Lattice::IntersectWith(const Lattice& other)
 }
 
 void QuasiPolynomial::operator+=(const QuasiPolynomial& other)
-{ this->MakeRougherLattice(other.AmbientLatticeReduced);
+{ //std::cout << "current ambient lattice: " << this->AmbientLatticeReduced.ElementToString();
+  this->MakeRougherLattice(other.AmbientLatticeReduced);
+  //std::cout << "roughened: " << this->AmbientLatticeReduced.ElementToString();
+  QuasiPolynomial tempQP=other;
+  //std::cout << "<br><br>other ambient lattice: " << this->AmbientLatticeReduced.ElementToString();
+  tempQP.MakeRougherLattice(this->AmbientLatticeReduced);
+  //std::cout << "roughened: " << this->AmbientLatticeReduced.ElementToString() << "<br><br><br><br>*******<br><br><br>";
+  for(int i=0; i<tempQP.LatticeShifts.size; i++)
+  { int index=this->LatticeShifts.IndexOfObject(tempQP.LatticeShifts.TheObjects[i]);
+    if (index==-1)
+    { this->LatticeShifts.AddObjectOnTop(tempQP.LatticeShifts.TheObjects[i]);
+      this->valueOnEachLatticeShift.AddObjectOnTop(tempQP.valueOnEachLatticeShift.TheObjects[i]);
+    } else
+    { this->valueOnEachLatticeShift.TheObjects[index]+=tempQP.valueOnEachLatticeShift.TheObjects[i];
+      if (this->valueOnEachLatticeShift.TheObjects[index].IsEqualToZero())
+      { this->valueOnEachLatticeShift.PopIndexSwapWithLast(index);
+        this->LatticeShifts.PopIndexSwapWithLast(index);
+      }
+    }
+  }
 }
 
 int ParserNode::EvaluateInvertLattice(GlobalVariables& theGlobalVariables)
@@ -1770,14 +1797,17 @@ int ParserNode::EvaluateInvertLattice(GlobalVariables& theGlobalVariables)
   return this->errorNoError;
 }
 
-std::string QuasiPolynomial::ElementToString(const PolynomialOutputFormat& thePolyFormat)
+std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat)
 { std::stringstream out;
-  out << "the lattice: " << this->AmbientLatticeReduced.ElementToString();
-  out << "<br>We have " << this->LatticeShifts.size << " lattice shifts. The polynomial on each lattice shift follows.";
+  if (useHtml)
+  { out << "the lattice: " << this->AmbientLatticeReduced.ElementToString();
+    out << "<br>We have " << this->LatticeShifts.size << " lattice shifts. The polynomial on each lattice shift follows.";
+  }
   for (int i=0; i<this->LatticeShifts.size; i++)
-    out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: " << this->valueOnEachLatticeShift.TheObjects[i].ElementToString(thePolyFormat);
-
-
+  { if(useHtml)
+      out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: ";
+    out << this->valueOnEachLatticeShift.TheObjects[i].ElementToString(thePolyFormat);
+  }
   return out.str();
 }
 
@@ -1799,12 +1829,31 @@ bool ParserNode::GetRootRational(root& output, GlobalVariables& theGlobalVariabl
 }
 
 void QuasiPolynomial::MakeFromPolyShiftAndLattice
-(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice)
+(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { this->AmbientLatticeReduced=theLattice;
   this->LatticeShifts.SetSize(1);
   this->LatticeShifts.TheObjects[0]=theShift;
+  this->AmbientLatticeReduced.ReduceVector(this->LatticeShifts.TheObjects[0], theGlobalVariables);
   this->valueOnEachLatticeShift.SetSize(1);
   this->valueOnEachLatticeShift.TheObjects[0]=inputPoly;
+}
+
+bool Lattice::ReduceVector(root& theVector, GlobalVariables& theGlobalVariables)
+{ root output;
+  roots basisRoots;
+  basisRoots.AssignMatrixRows(this->basisRationalForm);
+  //std::cout <<  "the basis: " << basisRoots.ElementToString();
+  if (!theVector.GetCoordsInBasis(basisRoots, output, theGlobalVariables))
+  { std::cout << "oops bad!";
+    return false;
+  }
+  for (int i=0; i<output.size; i++)
+    output.TheObjects[i].AssignFracValue();
+  theVector.MakeZero(theVector.size);
+  for (int i=0; i<basisRoots.size; i++)
+    theVector+=basisRoots.TheObjects[i]*output.TheObjects[i];
+  //std::cout << "the vector " << theVector.ElementToString() << " in the basis " << basisRoots.ElementToString() << " has coordinates: " << output.ElementToString();
+  return true;
 }
 
 int ParserNode::EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables)
@@ -1817,18 +1866,36 @@ int ParserNode::EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables)
   ParserNode& thePolyNode=this->owner->TheObjects[argumentList.TheObjects[0]];
   ParserNode& theShiftNode=this->owner->TheObjects[argumentList.TheObjects[1]];
   ParserNode& theLatticeNode=this->owner->TheObjects[argumentList.TheObjects[2]];
-  if (!thePolyNode.ConvertToType(this->typePoly, theGlobalVariables) || !theShiftNode.GetRootRational(theShift, theGlobalVariables) || !theLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
+  if (!theShiftNode.GetRootRational(theShift, theGlobalVariables) )
+    return this->SetError(this->errorConversionError);
+  int theDim=theShift.size;
+  if (theDim<this->owner->NumVariables)
+    return this->SetError(this->errorDimensionProblem);
+  this->owner->NumVariables=theDim;
+  if (!thePolyNode.ConvertToType(this->typePoly, theGlobalVariables) || !theLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
     return this->SetError(this->errorConversionError);
   QuasiPolynomial& output=this->theQP.GetElement();
-  int theDim=theShift.size;
 //  std::cout << "Dimension: " << theDim;
  // std::cout << thePolyNode.ElementToStringValueAndType(true);
 //  if (thePolyNode.polyValue.GetElement().NumVars!=theDim)
 //    std::cout << "poly conversion failed";
   if (thePolyNode.polyValue.GetElement().NumVars!=theDim || theLatticeNode.theLattice.GetElement().GetDim()!=theDim || theLatticeNode.theLattice.GetElement().GetRank()!=theDim)
     return this->SetError(this->errorDimensionProblem);
-  output.MakeFromPolyShiftAndLattice(thePolyNode.polyValue.GetElement(), theShift, theLatticeNode.theLattice.GetElement());
-  this->outputString=output.ElementToString();
+  output.MakeFromPolyShiftAndLattice(thePolyNode.polyValue.GetElement(), theShift, theLatticeNode.theLattice.GetElement(), theGlobalVariables);
+  this->outputString=output.ElementToString(true, false);
   this->ExpressionType=this->typeQuasiPolynomial;
   return this->errorNoError;
+}
+
+void Lattice::MakeZn(int theDim)
+{ this->basisRationalForm.MakeIdMatrix(theDim);
+  this->basis.MakeIdMatrix(theDim);
+  this->Den.MakeOne();
+}
+
+void QuasiPolynomial::MakeZeroLatticeZn(int theDim)
+{ this->AmbientLatticeReduced.MakeZn(theDim);
+  this->LatticeShifts.size=0;
+  this->valueOnEachLatticeShift.size=0;
+
 }

@@ -2190,8 +2190,14 @@ void MatrixLargeRational::ComputeDeterminantOverwriteMatrix(Rational &output)
   }
 }
 
-void MatrixLargeRational::Transpose(GlobalVariables& theGlobalVariables)
-{ MatrixLargeRational& tempMat=theGlobalVariables.matTransposeBuffer;
+void MatrixLargeRational::Transpose()
+{ if (this->NumCols==this->NumRows)
+  { for (int i=0; i<this->NumRows; i++)
+      for (int j=i+1; j<this->NumCols; j++)
+        MathRoutines::swap<Rational>(this->elements[j][i], this->elements[i][j]);
+    return;
+  }
+  MatrixLargeRational tempMat;
   tempMat.init(this->NumCols, this->NumRows);
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
@@ -2701,7 +2707,7 @@ void root::RootScalarEuclideanRoot(const root& r1, const  root& r2, Rational& ou
   }
 }
 
-void root::GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariables& theGlobalVariables)
+bool root::GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariables& theGlobalVariables)
 { roots& tempRoots=theGlobalVariables.rootsGetCoordsInBasis;
   MatrixLargeRational& tempMat=theGlobalVariables.matGetCoordsInBasis;
   tempRoots.size=0;
@@ -2710,16 +2716,20 @@ void root::GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariabl
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
 //  this->ComputeDebugString();
+//tempRoots.ComputeDebugString();
+//std::cout << "looking for linear relation b/n: " << tempRoots.ElementToString();
   bool tempBool=tempRoots.GetLinearDependence(tempMat);
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
-  assert(tempBool);
+  if(!tempBool)
+    return false;
   tempMat.DivideByRational(tempMat.elements[tempMat.NumRows-1][0]);
   outputCoords.SetSize(tempMat.NumRows-1);
   for (int i=0; i<tempMat.NumRows-1; i++)
   { tempMat.elements[i][0].Minus();
     outputCoords.TheObjects[i].Assign(tempMat.elements[i][0]);
   }
+  return true;
 }
 
 inline void roots::Pop(int index)
@@ -7817,7 +7827,7 @@ void Rational::Assign(const Rational& r)
   this->Extended->den.Assign(r.Extended->den);
 }
 
-inline void Rational::AssignFracValue()
+void Rational::AssignFracValue()
 { if (this->Extended==0)
   { if (this->NumShort==0)
       return;
@@ -8187,6 +8197,7 @@ void LargeInt::AddLargeIntUnsigned(LargeIntUnsigned& x)
     tempI.Assign(x);
     tempI.SubtractSmallerPositive(this->value);
     this->value.Assign(tempI);
+    this->sign=1;
   }
 }
 
@@ -25689,6 +25700,8 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
     this->WeylAlgebraElement.GetElement().Nullify(this->owner->NumVariables);
   if (this->ExpressionType==this->typeRationalFunction)
     this->ratFunction.GetElement().Nullify(this->owner->NumVariables, theContext);
+  if (this->ExpressionType==this->typeQuasiPolynomial)
+    this->theQP.GetElement().MakeZeroLatticeZn(this->owner->NumVariables);
 }
 
 void ParserNode::InitForMultiplication(GlobalVariables* theContext)
@@ -30944,6 +30957,12 @@ bool ParserNode::ConvertToType
     case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().SetNumVariables(this->owner->NumVariables); break;
     case ParserNode::typeMapWeylAlgebra: this->weylEltBeingMappedTo.GetElement().SetNumVariablesPreserveExistingOnes(this->owner->NumVariables);
     case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().SetNumVariablesPreserveExistingOnes(this->owner->NumVariables); break;
+    case ParserNode::typeQuasiPolynomial:
+      if (this->owner->NumVariables!=this->theQP.GetElement().GetNumVars())
+      { this->SetError(this->errorDimensionProblem);
+        return false;
+      }
+      break;
   }
   bool ConversionError;
   while (this->ConvertToNextType(theType, ConversionError, theGlobalVariables))
@@ -31061,6 +31080,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeUEElementOrdered: LatexOutput << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal); break;
     case ParserNode::typeUEelement: LatexOutput << this->UEElement.GetElement().ElementToString(); break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
+    //case ParserNode::typeQuasiPolynomial: LatexOutput << this->theQP.GetElement().ElementToString(); break;
    // case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
@@ -31097,6 +31117,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
     case ParserNode::typeLattice: out << "A lattice."; break;
     case ParserNode::typeCone: out << "a cone with walls: "; break;
+    case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     default: out << "The programmer(s) have forgotten to enter a type description. "; break;
   }
   if (stringValueOnly!="")
@@ -33456,6 +33477,9 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
         this->theLattice.GetElement().RefineByOtherLattice(this->owner->TheObjects[this->children.TheObjects[1]].theLattice.GetElement());
         this->outputString=this->theLattice.GetElement().ElementToString();
         return this->errorNoError;
+      case ParserNode::typeQuasiPolynomial: this->theQP.GetElement()+=currentChild.theQP.GetElement();
+        this->outputString=this->theQP.GetElement().ElementToString(true, false);
+        break;
       default: return this->SetError(this->errorUnknownOperation);
     }
   }

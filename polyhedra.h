@@ -285,6 +285,22 @@ class MathRoutines
 public:
   static int lcm(int a, int b);
   static int TwoToTheNth(int n);
+  static int GetIntFromDigit(char DigitHumanReadable)
+  { switch (DigitHumanReadable)
+    { case '0': return 0;
+      case '1': return 1;
+      case '2': return 2;
+      case '3': return 3;
+      case '4': return 4;
+      case '5': return 5;
+      case '6': return 6;
+      case '7': return 7;
+      case '8': return 8;
+      case '9': return 9;
+      default:
+        return-1;
+    }
+  }
   static int NChooseK(int n, int k)
   { int result=1;
     for (int i =0; i<k; i++)
@@ -647,9 +663,9 @@ private:
   void PopIndexShiftDown(int index);
   void PopIndexSwapWithLast(int index);
   void RemoveFirstOccurenceSwapWithLast(Object& o);
-  void CopyFromBase (const List<Object>& From);
+  void CopyFromBase(const List<Object>& From);
   void SwapTwoIndices(int index1, int index2);
-  void operator=(const List<Object>& right){this->CopyFromBase(right); }
+  void operator=(const List<Object>& right);
   void AssignLight(const ListLight<Object>& from);
   void SetSize(int theSize);
   int IndexOfObject(const Object& o);
@@ -685,6 +701,7 @@ public:
   HashedList();
   ~HashedList();
   void CopyFromHash(const HashedList<Object>& From);
+  inline void operator=(const HashedList<Object>& From){this->CopyFromHash(From);}
 };
 
 class Integer
@@ -1164,7 +1181,7 @@ public:
   void Assign(const Selection& right);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
-  inline void operator=(const Selection& right){this->Assign(right); };
+  inline void operator=(const Selection& right){this->Assign(right); }
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
   inline bool operator==(const Selection& right) const
@@ -1177,6 +1194,7 @@ public:
   }
   Selection();
   Selection(int m);
+  Selection(const Selection& other){this->Assign(other);}
   ~Selection();
 };
 
@@ -1749,14 +1767,16 @@ public:
   }
   void MultiplyBy(const LargeIntUnsigned& right);
   inline void operator*=(const LargeIntUnsigned& right){this->MultiplyBy(right);}
+  inline void operator*=(unsigned int x){this->MultiplyByUInt(x);}
+  inline void operator+=(unsigned int x){this->AddUInt(x);}
   void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const;
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
   void Assign(const LargeIntUnsigned& x){this->CopyFromBase(x); }
   int GetUnsignedIntValueTruncated();
-  int operator %(unsigned int x);
-  inline void operator = (const LargeIntUnsigned& x){ this->Assign(x); }
+  int operator%(unsigned int x);
+  inline void operator=(const LargeIntUnsigned& x){ this->Assign(x); }
   LargeIntUnsigned operator/(unsigned int x)const;
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); }
@@ -1796,6 +1816,9 @@ public:
   inline void AddInt(int x) {LargeInt tempInt; tempInt.AssignInt(x); this->Add(tempInt);}
   //bool IsGEQ(LargeInt& x);
   bool CheckForConsistensy();
+  void WriteToFile(std::fstream& output);
+  void AssignString(const std::string& input);
+  void ReadFromFile(std::fstream& input);
   void MakeZero();
   void MakeOne(){this->value.MakeOne(); this->sign=1; }
   void MakeMOne(){this->value.MakeOne(); this->sign=-1;}
@@ -1831,6 +1854,14 @@ public:
   LargeInt operator*(int x){ LargeInt tempInt; tempInt.Assign(*this); tempInt.MultiplyByInt(x); return tempInt;}
   LargeInt operator/(int x)const;
   LargeInt operator/(LargeInt& x)const;
+  void operator/=(const LargeInt& other)
+  { if (this->IsEqualToZero())
+      return;
+    this->sign*=other.sign;
+    LargeIntUnsigned quotient, remainder;
+    this->value.DivPositive(other.value, quotient, remainder);
+    this->value=quotient;
+  }
   LargeInt(const LargeInt& x){this->Assign(x);}
   LargeInt(int x){this->AssignInt(x); }
   LargeInt(){this->sign=1; }
@@ -2099,7 +2130,7 @@ ParallelComputing::GlobalPointerCounter++;
   void MakeZero(){this->NumShort=0;  this->DenShort=1; this->FreeExtended(); }
   void MakeOne(){this->NumShort=1;  this->DenShort=1; this->FreeExtended(); }
   void MakeMOne(){this->NumShort=-1; this->DenShort=1; this->FreeExtended(); }
-  void WriteToFile (std::fstream& output);
+  void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus(); }
@@ -3856,7 +3887,7 @@ public:
   void DivideByExponentOnly(intRoot& input);
   void MonomialExponentToRoot(root& output);
   void MonomialExponentToRoot(intRoot& output);
-  void MakeFromRoot(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
+  void MakeFromRoot(const ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
   void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
   bool IsOneLetterFirstDegree(int& whichLetter)
   { whichLetter=-1;
@@ -4085,7 +4116,7 @@ public:
   void AssignPolynomial(Polynomial<ElementOfCommutativeRingWithIdentity>& from);
   void AssignPolynomialLight(const PolynomialLight<ElementOfCommutativeRingWithIdentity>& from);
   void Nullify(int numberVariables);
-  void MakeConst(ElementOfCommutativeRingWithIdentity& theConstant, int theNumVars);
+  void MakeConst(const ElementOfCommutativeRingWithIdentity& theConstant, int theNumVars);
   bool IsEqualToZero();
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, int numV);
@@ -4123,7 +4154,7 @@ inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::Nullify(int n
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::MakeConst(ElementOfCommutativeRingWithIdentity& theConstant, int theNumVars)
+inline void PolynomialLight<ElementOfCommutativeRingWithIdentity>::MakeConst(const ElementOfCommutativeRingWithIdentity& theConstant, int theNumVars)
 { this->NumVars= theNumVars;
   this->SetSize(1);
   this->TheObjects[0].MakeConstantMonomial(theNumVars, theConstant);
@@ -4184,12 +4215,11 @@ public:
   intRoot GeneratorRoot;
   int Elongation;
   std::string DebugString;
-  IntegerPoly* Value;
+  Polynomial<LargeInt> Value;
   bool ValueIsComputed;
-  GeneratorPFAlgebraRecord();
-  ~GeneratorPFAlgebraRecord();
+  GeneratorPFAlgebraRecord(){this->ValueIsComputed=false;}
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
-  void GetValue(IntegerPoly& output, int theDimension);
+  void GetValue(Polynomial<LargeInt>& output, int theDimension);
   void operator=(const GeneratorPFAlgebraRecord& right);
   int HashFunction()const{ return this->Elongation+ this->GeneratorRoot.HashFunction();}
   bool operator==(const GeneratorPFAlgebraRecord& right){ return (this->GeneratorRoot == right.GeneratorRoot) && (this->Elongation == right.Elongation);}
@@ -4202,13 +4232,13 @@ public:
   //elongation zero means we are looking for x^exponent
   //other elongations means we are looking for p_elongation(x^exponent), where p is
   // the numerator in the geometric series sum corresponding to elongation
-  static void GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation, MonomialInCommutativeAlgebra<Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>& output);
+  static void GetMonomialFromExponentAndElongation(intRoot& exponent, int elongation, MonomialInCommutativeAlgebra<LargeInt, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>& output);
   std::string DebugString;
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat, int theDimension)const;
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
   int HashFunction() const;
   void operator=(const GeneratorsPartialFractionAlgebra& right);
-  void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
+  void ConvertToIntegerPoly(Polynomial<LargeInt>& output, int theDimension);
   //IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count.
   //This might have to be rewritten.
   bool operator==(const GeneratorsPartialFractionAlgebra& right);
@@ -4290,16 +4320,16 @@ void MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, Generato
   }
 }
 
-class PolyPartFractionNumerator: public TemplatePolynomial<  MonomialInCommutativeAlgebra<  Integer, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>, Integer>
+class PolyPartFractionNumerator: public TemplatePolynomial<MonomialInCommutativeAlgebra<LargeInt, GeneratorsPartialFractionAlgebra, GeneratorPFAlgebraRecord>, LargeInt>
 {
 public:
-  void ConvertToIntegerPoly(IntegerPoly& output, int theDimension);
+  void ConvertToIntegerPoly(Polynomial<LargeInt>& output, int theDimension);
 };
 
 class PolyPartFractionNumeratorLight: public ListLight<ListLight<GeneratorsPartialFractionAlgebra> >
 {
 public:
-  ListLight<int> Coefficients;
+  ListLight<LargeInt> Coefficients;
   void AssignPolyPartFractionNumerator(PolyPartFractionNumerator& from);
   void ComputePolyPartFractionNumerator(PolyPartFractionNumerator& output, int theDimension) const;
   void AssignPolyPartFractionNumeratorLight(const PolyPartFractionNumeratorLight& right);
@@ -4469,11 +4499,12 @@ public:
   //the below constructor is very slow use for testing purposes only
   //Parsing stuff is inherently slow and I use the mighty parser
   PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);}
-  void AssignIntegerPoly(IntegerPoly& p);
+  void AssignIntegerPoly(const Polynomial<LargeInt>& p);
   void Evaluate(intRoot& values, Rational& output);
   void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
   void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables);
   void MakeLinPolyFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
+  bool GetIntegerPoly(Polynomial<LargeInt>& output)const;
   int FindGCMCoefficientDenominators();
   Rational FindGCDCoefficientDenominators();
   Rational FindGCDCoefficientNumerators();
@@ -5092,7 +5123,7 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsAConstant()const
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot(ElementOfCommutativeRingWithIdentity& coeff, intRoot& input)
+void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot(const ElementOfCommutativeRingWithIdentity& coeff, intRoot& input)
 { this->init((int)input.size);
   this->Coefficient.Assign(coeff);
   for (int i=0; i<this->NumVariables; i++)
@@ -5128,10 +5159,10 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::DivideByExponentOnly(intRoo
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy(  Monomial<ElementOfCommutativeRingWithIdentity>& input, Monomial<ElementOfCommutativeRingWithIdentity>& output)
+void Monomial<ElementOfCommutativeRingWithIdentity>::DivideBy(Monomial<ElementOfCommutativeRingWithIdentity>& input, Monomial<ElementOfCommutativeRingWithIdentity>& output)
 { output.init(this->NumVariables);
   output.Coefficient.Assign(this->Coefficient);
-  output.Coefficient.DivideBy(input.Coefficient);
+  output.Coefficient/=input.Coefficient;
   for (int i=0; i<this->NumVariables; i++)
     output.degrees[i]=this->degrees[i]-input.degrees[i];
 }
@@ -6335,7 +6366,7 @@ public:
   void AddMultiplicity(int MultiplicityIncrement, int Elongation);
   int IndexLargestElongation();
   int GetLargestElongation();
-  void GetPolyDenominator(IntegerPoly& output, int MultiplicityIndex, intRoot& theExponent);
+  void GetPolyDenominator(Polynomial<LargeInt>& output, int MultiplicityIndex, intRoot& theExponent);
   int GetMultiplicityLargestElongation();
   int GetLCMElongations();
   int GetTotalMultiplicity() const;
@@ -6410,6 +6441,7 @@ public:
 
 class RootToIndexTable : public HashedList<intRoot>
 {
+  RootToIndexTable(const RootToIndexTable& other);
 public:
   MatrixIntTightMemoryFit TableAllowedAminusB;
   MatrixIntTightMemoryFit TableAllowedAminus2B;
@@ -6423,6 +6455,15 @@ public:
   int getIndex(intRoot& TheRoot);
   int getIndexDoubleOfARoot(intRoot& TheRoot);
   void ComputeTable(int theDimension);
+  void operator=(const RootToIndexTable& other)
+  { this->CopyFromHash(other);
+    this->TableAllowedAminus2B=other.TableAllowedAminus2B;
+    this->IndicesRedundantShortRoots=other.IndicesRedundantShortRoots;
+    this->IndicesDoublesOfRedundantShortRoots=other.IndicesDoublesOfRedundantShortRoots;
+    this->NumNonRedundantShortRoots=other.NumNonRedundantShortRoots;
+    this->weights=other.weights;
+  }
+  RootToIndexTable(){}
 };
 
 class partFractionPolynomials: public List<PolynomialRationalCoeff>
@@ -6434,6 +6475,66 @@ public:
   void initLatticeIndicatorsFromPartFraction(partFractions& ownerExpression, partFraction& owner, GlobalVariables& theGlobalVariables, int theDimension);
   void AddPolynomialLargeRational(root& rootLatticeIndicator, PolynomialRationalCoeff& input);
   void ComputeQuasiPolynomial(QuasiPolynomialOld& output, bool RecordNumMonomials, int theDimension, GlobalVariables& theGlobalVariables);
+};
+
+class Lattice
+{
+public:
+  MatrixLargeRational basisRationalForm;
+  Matrix<LargeInt> basis;
+  LargeIntUnsigned Den;
+  int GetDim()const{return this->basis.NumCols;}
+  int GetRank()const{return this->basis.NumRows;}
+  void IntersectWith(const Lattice& other);
+  void GetDualLattice(Lattice& output)const;
+  //returns false if the vector is not in the lattice
+  bool ReduceVector(root& theVector, GlobalVariables& theGlobalVariables);
+  void Reduce
+  ()
+  ;
+  //returning false means that the lattice given as rougher is not actually rougher than the current lattice
+  //or that there are too many representatives
+  bool GetAllRepresentatitves
+  (const Lattice& rougherLattice, roots& output)
+  ;
+  std::string ElementToString()const;
+  bool operator==(const Lattice& other){return this->basisRationalForm==other.basisRationalForm;};
+  void operator=(const Lattice& other)
+  { this->basis=other.basis;
+    this->Den=other.Den;
+    this->basisRationalForm=other.basisRationalForm;
+  }
+  void MakeZn(int theDim);
+  void RefineByOtherLattice(const Lattice& other);
+  void MakeFromRoots
+  (const roots& input)
+  ;
+};
+
+class QuasiPolynomial
+{
+public:
+  int GetNumVars()const{return this->AmbientLatticeReduced.basis.NumRows;}
+  GlobalVariables* buffers;
+  Lattice AmbientLatticeReduced;
+  roots LatticeShifts;
+  List<PolynomialRationalCoeff> valueOnEachLatticeShift;
+  std::string ElementToString(bool useHtml, bool useLatex){PolynomialOutputFormat tempFormat; return this->ElementToString(useHtml, useLatex, tempFormat);}
+  std::string ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat);
+  void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
+  void MakeRougherLattice(const Lattice& latticeToRoughenBy);
+  void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
+  void MakeZeroLatticeZn(int theDim);
+  void operator+=(const QuasiPolynomial& other);
+  QuasiPolynomial(){this->buffers=0;}
+  QuasiPolynomial(const QuasiPolynomial& other){this->operator=(other);}
+  void operator=(const QuasiPolynomial& other)
+  { this->AmbientLatticeReduced=other.AmbientLatticeReduced;
+    this->LatticeShifts=other.LatticeShifts;
+    this->valueOnEachLatticeShift=other.valueOnEachLatticeShift;
+    this->buffers=other.buffers;
+  }
+
 };
 
 class partFraction: ListLight<oneFracWithMultiplicitiesAndElongations>
@@ -6453,7 +6554,7 @@ public:
   bool IsIrrelevant;
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
-  IntegerPolyLight Coefficient;
+  PolynomialLight<LargeInt> Coefficient;
   PolyPartFractionNumeratorLight CoefficientNonExpanded;
   bool RemoveRedundantShortRootsClassicalRootSystem(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
   bool RemoveRedundantShortRoots(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
@@ -6468,15 +6569,31 @@ public:
   static intRoot theVectorToBePartitioned;
   static ListPointers<partFraction> GlobalCollectorPartFraction;
   void ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff& output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
+  void ComputePolyCorrespondingToOneMonomial
+  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals, Lattice& theLattice)
+  ;
+  static void EvaluateIntPoly
+  (const Polynomial<LargeInt>& input, const root& values, Rational& output)
+  ;
   static void MakePolynomialFromOneNormal(root& normal, root& shiftRational, int theMult,  PolynomialRationalCoeff& output);
   void ComputeNormals(partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables);
   int ComputeGainingMultiplicityIndexInLinearRelation(partFractions& owner,  MatrixLargeRational& theLinearRelation);
   void UncoverBracketsNumerator(GlobalVariables& theGlobalVariables, int theDimension);
+  void GetRootsFromDenominator
+  (partFractions& owner, roots& output)
+;
+  void GetVectorPartitionFunction
+  (partFractions& owner, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+  ;
+  LargeInt EvaluateIntPolyAtOne(Polynomial<LargeInt>& input);
   void partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomialOld& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension);
   //void partFractionToPartitionFunctionStoreAnswer
   //      (  QuasiPolynomialOld& output, bool RecordSplitPowerSeriesCoefficient,
   //        bool StoreToFile);
   bool IsEqualToZero();
+  void MakePolyExponentFromIntRoot
+  (Polynomial<LargeInt>& output, const intRoot& input)
+  ;
   void ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables);
   void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange);
   //void InsertNewRootIndex(int index);
@@ -6507,7 +6624,7 @@ public:
   bool DecreasePowerOneFrac(int index, int increment);
   //void GetNumerator(PolynomialRationalCoeff& output);
   //void SetNumerator(PolynomialRationalCoeff& input);
-  void PrepareFraction(int indexA, int indexB,  int AminusNBindex, bool indexAisNullified, partFraction& output, IntegerPoly& AminusNbetaPoly);
+  void PrepareFraction(int indexA, int indexB,  int AminusNBindex, bool indexAisNullified, partFraction& output, Polynomial<LargeInt>& AminusNbetaPoly);
   void Assign(const partFraction& p);
   void AssignDenominatorOnly(const partFraction& p);
   void AssignNoIndicesNonZeroMults(partFraction& p);
@@ -6517,18 +6634,19 @@ public:
   //void swap(int indexA, int indexB);
   partFraction();
   ~partFraction();
-  void GetPolyReduceMonomialByMonomial(partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, IntegerPoly& output);
-  void ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, List<int>&thePowersSigned, Monomial<Integer>& input);
-  void GetAlphaMinusNBetaPoly(partFractions& owner, int indexA, int indexB, int n, IntegerPoly& output, int theDimension);
-  void GetNElongationPolyWithMonomialContribution(partFractions& owner, List<int>& theSelectedIndices, List<int>& theCoefficients, List<int>& theGreatestElongations, int theIndex, IntegerPoly& output, int theDimension);
-  void GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, IntegerPoly& output, int theDimension);
-  static void GetNElongationPoly(intRoot& exponent, int n, IntegerPoly& output, int theDimension);
+  void GetPolyReduceMonomialByMonomial(partFractions& owner, GlobalVariables& theGlobalVariables, intRoot& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, Polynomial<LargeInt>& output);
+  void ReduceMonomialByMonomialModifyOneMonomial(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers, List<int>&thePowersSigned, Monomial<LargeInt>& input);
+  void GetAlphaMinusNBetaPoly(partFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output, int theDimension);
+  void GetNElongationPolyWithMonomialContribution(partFractions& owner, List<int>& theSelectedIndices, List<int>& theCoefficients, List<int>& theGreatestElongations, int theIndex, Polynomial<LargeInt>& output, int theDimension);
+  void GetNElongationPoly
+  (partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, Polynomial<LargeInt>& output, int theDimension);
+  static void GetNElongationPoly(intRoot& exponent, int n, Polynomial<LargeInt>& output, int theDimension);
   void GetNElongationPoly(partFractions& owner, int index, int baseElongation, int LengthOfGeometricSeries, PolyPartFractionNumerator& output, int theDimension);
   int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
   bool operator==(const partFraction& right);
   void operator=(const partFraction& right);
   void initFromRootSystem(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
-  void initFromRoots(partFractions& owner, roots& input);
+  bool initFromRoots(partFractions& owner, roots& input);
   int ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables);
   void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables&  theGlobalVariables, int theDimension);
@@ -6541,6 +6659,7 @@ class partFractions: public HashedList<partFraction>
 { bool ShouldIgnore(GlobalVariables& theGlobalVariables, root* Indicator);
   bool splitPartial(GlobalVariables& theGlobalVariables, root* Indicator);
   void initCommon();
+  partFractions(const partFractions& other);
 public:
   int AmbientDimension;
   int IndexLowestNonProcessed;
@@ -6590,7 +6709,7 @@ public:
   void ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables);
   void ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange, GlobalVariables& theGlobalVariables);
   void initFromRootSystem(intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights, GlobalVariables& theGlobalVariables);
-  void initFromRoots(roots& input, GlobalVariables& theGlobalVariables);
+  bool initFromRoots(roots& input, GlobalVariables& theGlobalVariables);
   void initAndSplit(roots& input, GlobalVariables& theGlobalVariables);
   void Run(roots& input, GlobalVariables& theGlobalVariables);
   //row index is the index of the root; column(second) index is the coordinate index
@@ -6614,6 +6733,9 @@ public:
   int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+  bool GetVectorPartitionFunction
+  (QuasiPolynomial& output, root& newIndicator, GlobalVariables& theGlobalVariables)
+  ;
   bool partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomialOld& output, root& newIndicator, bool StoreToFile, bool UseOldData, GlobalVariables& theGlobalVariables, bool ResetRelevance );
   bool VerifyFileComputedContributions(GlobalVariables& theGlobalVariables);
   void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
@@ -6630,6 +6752,7 @@ public:
   void MakeProgressReportUncoveringBrackets(GlobalVariables& theGlobalVariables);
   void MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables);
   void ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomialOld& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables& theGlobalVariables);
+  void operator=(const partFractions& other);
 };
 
 class ElementWeylGroup: public List<int>
@@ -8750,66 +8873,6 @@ public:
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
 };
 
-class Lattice
-{
-public:
-  MatrixLargeRational basisRationalForm;
-  Matrix<LargeInt> basis;
-  LargeIntUnsigned Den;
-  int GetDim()const{return this->basis.NumCols;}
-  int GetRank()const{return this->basis.NumRows;}
-  void IntersectWith(const Lattice& other);
-  void GetDualLattice(Lattice& output)const;
-  //returns false if the vector is not in the lattice
-  bool ReduceVector(root& theVector, GlobalVariables& theGlobalVariables);
-  void Reduce
-  ()
-  ;
-  //returning false means that the lattice given as rougher is not actually rougher than the current lattice
-  //or that there are too many representatives
-  bool GetAllRepresentatitves
-  (const Lattice& rougherLattice, roots& output)
-  ;
-  std::string ElementToString()const;
-  bool operator==(const Lattice& other){return this->basisRationalForm==other.basisRationalForm;};
-  void operator=(const Lattice& other)
-  { this->basis=other.basis;
-    this->Den=other.Den;
-    this->basisRationalForm=other.basisRationalForm;
-  }
-  void MakeZn(int theDim);
-  void RefineByOtherLattice(const Lattice& other);
-  void AssignRootsToBasisAndReduce
-  (const roots& input)
-  ;
-};
-
-class QuasiPolynomial
-{
-public:
-  int GetNumVars()const{return this->AmbientLatticeReduced.basis.NumRows;}
-  GlobalVariables* buffers;
-  Lattice AmbientLatticeReduced;
-  roots LatticeShifts;
-  List<PolynomialRationalCoeff> valueOnEachLatticeShift;
-  std::string ElementToString(bool useHtml, bool useLatex){PolynomialOutputFormat tempFormat; return this->ElementToString(useHtml, useLatex, tempFormat);}
-  std::string ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat);
-  void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
-  void MakeRougherLattice(const Lattice& latticeToRoughenBy);
-  void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
-  void MakeZeroLatticeZn(int theDim);
-  void operator+=(const QuasiPolynomial& other);
-  QuasiPolynomial(){this->buffers=0;}
-  QuasiPolynomial(const QuasiPolynomial& other){this->operator=(other);}
-  void operator=(const QuasiPolynomial& other)
-  { this->AmbientLatticeReduced=other.AmbientLatticeReduced;
-    this->LatticeShifts=other.LatticeShifts;
-    this->valueOnEachLatticeShift=other.valueOnEachLatticeShift;
-    this->buffers=other.buffers;
-  }
-
-};
-
 class Parser;
 class ParserNode
 { public:
@@ -8836,6 +8899,7 @@ class ParserNode
   MemorySaving<Cone> theCone;
   MemorySaving<Lattice> theLattice;
   MemorySaving<QuasiPolynomial> theQP;
+  MemorySaving<partFractions> thePFs;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -8854,7 +8918,7 @@ class ParserNode
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF, typeLattice, typeCone,
-  typeQuasiPolynomial,
+  typeQuasiPolynomial, typePartialFractions,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
@@ -8868,6 +8932,7 @@ class ParserNode
   std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
   std::string ElementToStringErrorCode(bool useHtml);
   bool GetRootRational(root& output, GlobalVariables& theGlobalVariables);
+  bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
   int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
   void CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
@@ -8889,6 +8954,8 @@ class ParserNode
   int EvaluateCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
+  int EvaluatePartialFractions(GlobalVariables& theGlobalVariables);
+  int EvaluateSplit(GlobalVariables& theGlobalVariables);
   void EvaluateWeylAction
   (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
   ;
@@ -8951,7 +9018,7 @@ public:
   { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
-    functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial
+    functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -9218,6 +9285,13 @@ public:
   partFraction fracSplit1;
   QuasiPolynomialOld QPComputeQuasiPolynomial;
   QuasiNumber QNComputeQuasiPolynomial;
+
+  Polynomial<LargeInt> PolyLargeIntPartFracBuffer1;
+  Polynomial<LargeInt> PolyLargeIntPartFracBuffer2;
+  Polynomial<LargeInt> PolyLargeIntPartFracBuffer3;
+  Polynomial<LargeInt> PolyLargeIntPartFracBuffer4;
+  Polynomial<LargeInt> PolyLargeIntPartFracBuffer5;
+  Polynomial<LargeInt> PolyLargeIntPartFracBuffer6;
 
   IntegerPoly IPRemoveRedundantShortRootsClassicalRootSystem;
   IntegerPoly IPElementToStringBasisChange;

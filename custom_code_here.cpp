@@ -1524,7 +1524,6 @@ void Lattice::Reduce
   this->basisRationalForm.AssignMatrixIntWithDen(this->basis, this->Den);
 }
 
-
 void Lattice::RefineByOtherLattice(const Lattice& other)
 { if (other.basis.NumCols==0)
     return;
@@ -1572,13 +1571,13 @@ int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
     }
     LatticeBase.AddObjectOnTop(currentRoot);
   }
-  this->theLattice.GetElement().AssignRootsToBasisAndReduce(LatticeBase);
+  this->theLattice.GetElement().MakeFromRoots(LatticeBase);
   this->outputString=this->theLattice.GetElement().ElementToString();
   this->ExpressionType=this->typeLattice;
   return this->errorNoError;
 }
 
-void Lattice::AssignRootsToBasisAndReduce(const roots& input)
+void Lattice::MakeFromRoots(const roots& input)
 { MatrixLargeRational tempMat;
   tempMat.AssignRootsToRowsOfMatrix(input);
   tempMat.GetMatrixIntWithDen(this->basis, this->Den);
@@ -1811,6 +1810,23 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
   return out.str();
 }
 
+bool ParserNode::GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables)
+{ if (this->ExpressionType!=this->typeArray)
+  { if (!this->ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
+      return false;
+    output.SetSize(1);
+    output.TheObjects[0]=this->intValue;
+    return true;
+  }
+  output.SetSize(this->array.GetElement().size);
+  for (int i=0; i<this->array.GetElement().size; i++)
+    if (!this->owner->TheObjects[this->array.GetElement().TheObjects[i]].ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
+      return false;
+    else
+      output.TheObjects[i]=this->owner->TheObjects[this->array.GetElement().TheObjects[i]].intValue;
+  return true;
+}
+
 bool ParserNode::GetRootRational(root& output, GlobalVariables& theGlobalVariables)
 { if (this->ExpressionType!=this->typeArray)
   { if (!this->ConvertToType(this->typeRational, theGlobalVariables))
@@ -1897,5 +1913,252 @@ void QuasiPolynomial::MakeZeroLatticeZn(int theDim)
 { this->AmbientLatticeReduced.MakeZn(theDim);
   this->LatticeShifts.size=0;
   this->valueOnEachLatticeShift.size=0;
+}
 
+void partFraction::GetRootsFromDenominator
+(partFractions& owner, roots& output)
+{ output.SetSize(this->IndicesNonZeroMults.size);
+  for (int i=0; i<this->IndicesNonZeroMults.size; i++)
+    output.TheObjects[i].AssignIntRoot(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]]);
+}
+
+void partFraction::ComputePolyCorrespondingToOneMonomial
+  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals, Lattice& theLattice)
+{ int theDimension=owner.AmbientDimension;
+  root shiftRational; shiftRational.SetSize(theDimension);
+  Monomial<LargeInt>& currentMon=this->Coefficient.TheObjects[monomialIndex];
+  PolynomialRationalCoeff tempP, outputPolyPart;
+  for (int j=0; j<theDimension; j++)
+    shiftRational.TheObjects[j].AssignInteger(currentMon.degrees[j]);
+  Rational tempRat, tempRat2;
+  tempRat=currentMon.Coefficient;
+  outputPolyPart.MakeNVarConst((int)theDimension, tempRat);
+  for (int i=0; i<theDimension; i++)
+  { this->MakePolynomialFromOneNormal(normals.TheObjects[i], shiftRational, this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].Multiplicities.TheObjects[0], tempP);
+    outputPolyPart.MultiplyBy(tempP);
+  }
+
+  this->AlreadyAccountedForInGUIDisplay=true;
+}
+
+void partFraction::GetVectorPartitionFunction
+  (partFractions& owner, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+{ QuasiPolynomial shiftedPoly;
+  roots theNormals, theLatticeGenerators;
+  if (partFraction::MakingConsistencyCheck)
+    partFraction::CheckSum.MakeZero();
+  if (partFraction::flagAnErrorHasOccurredTimeToPanic)
+    this->ComputeDebugString(owner, theGlobalVariables);
+  this->GetRootsFromDenominator(owner, theLatticeGenerators);
+  Lattice theLattice;
+  theLattice.MakeFromRoots(theLatticeGenerators);
+  MatrixLargeRational theNormalsMatForm;
+  theNormalsMatForm.AssignRootsToRowsOfMatrix(theLatticeGenerators);
+  theNormalsMatForm.Invert();
+  theNormals.AssignMatrixColumns(theNormalsMatForm);
+  output.MakeZeroLatticeZn(owner.AmbientDimension);
+
+  for (int i=0; i<this->Coefficient.size; i++)
+  { this->ComputePolyCorrespondingToOneMonomial(owner, shiftedPoly, i, theNormals, theLattice);
+    output+=shiftedPoly;
+//    if (RecordNumMonomials)
+//    { std::stringstream out4, out3;
+//      out4 << "Current fraction: " << i+1<< " out of " << this->Coefficient.size << " processed";
+//      partFractions::NumProcessedForVPFMonomialsTotal++;
+//      out3  << " Processed " << partFractions::NumProcessedForVPFMonomialsTotal << " out of " << partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
+//      theGlobalVariables.theIndicatorVariables.ProgressReportString4= out4.str();
+//      theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+//      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+//    }
+  }
+//  if (partFraction::MakingConsistencyCheck)
+//  { Rational tempLRat;
+//    output.Evaluate(partFraction::theVectorToBePartitioned, tempLRat);
+//    assert(tempLRat.DenShort==1);
+//    assert(tempLRat.IsEqualTo(partFraction::CheckSum));
+//  }
+//  if (StoreToFile)
+//  { this->FileStoragePosition= partFraction::TheBigDump.tellp();
+//    output.WriteToFile(partFraction::TheBigDump);
+//    partFractions::ComputedContributionsList.flush();
+//  }
+
+//  Accum.ComputeDebugString();
+}
+
+bool partFractions::GetVectorPartitionFunction
+  (QuasiPolynomial& output, root& newIndicator, GlobalVariables& theGlobalVariables)
+{ if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
+  { theGlobalVariables.theIndicatorVariables.flagRootIsModified=true;
+    theGlobalVariables.theIndicatorVariables.modifiedRoot.AssignRoot(newIndicator);
+    theGlobalVariables.theIndicatorVariables.ProgressReportString5="Indicator modified to regular";
+    theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  } else
+    theGlobalVariables.theIndicatorVariables.flagRootIsModified=false;
+  this->ResetRelevanceIsComputed();
+  if (!this->CheckForMinimalityDecompositionWithRespectToRoot(&newIndicator, theGlobalVariables))
+    return false;
+  this->NumProcessedForVPFfractions=0;
+  Rational oldCheckSum;
+  QuasiPolynomialOld oldOutput;
+  if (partFraction::MakingConsistencyCheck)
+    partFractions::CheckSum.MakeZero();
+  theGlobalVariables.theIndicatorVariables.NumProcessedMonomialsCurrentFraction=0;
+  output.MakeZeroLatticeZn(this->AmbientDimension);
+  ///////////////////////////////////////////////
+  //this->flagAnErrorHasOccurredTimeToPanic=true;
+  //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+  //this->ComputeDebugString();
+  ///////////////////////////////////////////////
+  QuasiPolynomial tempQP;
+  for (int i=0; i<this->size; i++)
+  { //if (this->flagAnErrorHasOccurredTimeToPanic)
+    //{ this->TheObjects[i].ComputeDebugString();
+    //}
+    if (this->TheObjects[i].rootIsInFractionCone(*this, &newIndicator, theGlobalVariables))
+    { partFraction& currentPF=this->TheObjects[i];
+      currentPF.GetVectorPartitionFunction(*this, tempQP, theGlobalVariables);
+/*      if(partFraction::MakingConsistencyCheck)
+      {  Rational tempLRat2, tempLRat3, tempLRat4;
+        std::string tempS1, tempS2, tempS3, tempS4;
+        tempQP.Evaluate(partFraction::theVectorToBePartitioned, tempLRat2);
+        output.Evaluate(partFraction::theVectorToBePartitioned, tempLRat3);
+        tempLRat2.ElementToString(tempS1);
+        tempLRat3.ElementToString(tempS2);
+        tempLRat4.Assign(tempLRat2);
+        tempLRat4.Add(tempLRat3);
+        partFraction::CheckSum.ElementToString(tempS3);
+        partFractions::CheckSum.ElementToString(tempS4);
+        assert(tempLRat2.den.IsEqualTo(LIOne));
+        assert(tempLRat3.den.IsEqualTo(LIOne));
+        assert(tempLRat2.IsEqualTo(partFraction::CheckSum));
+        assert(tempLRat4.IsEqualTo(partFractions::CheckSum));
+        if (i==4)
+        { Stop();
+          QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic=true;
+          ::RandomCodeIDontWantToDelete theEvilBug;
+          theEvilBug.EvilPoly1.Assign(output);
+          theEvilBug.EvilPoly2.Assign(tempQP);
+          theEvilBug.RevealTheEvilConspiracy();
+          RandomCodeIDontWantToDelete::UsingEvilList1=false;
+        }
+      }*/
+      output+=tempQP;
+  /*    if (partFraction::MakingConsistencyCheck)
+      {  Rational tempLRat;
+        output.Evaluate(partFraction::theVectorToBePartitioned, tempLRat);
+        if ((! tempLRat.IsEqualTo(partFractions::CheckSum)) || (! tempLRat.den.IsEqualTo(LIOne)))
+        { std::string tempS, tempS2, tempS3, tempS4;
+          Rational tempLRat2;
+          tempQP.Evaluate(partFraction::theVectorToBePartitioned, tempLRat2);
+          partFractions::CheckSum.ElementToString(tempS);
+          tempLRat.ElementToString(tempS2);
+          oldCheckSum.ElementToString(tempS3);
+          tempLRat2.ElementToString(tempS4);
+          partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+  //        assert(false);
+        }
+        oldCheckSum.Assign(partFractions::CheckSum);
+        oldOutput.Assign(output);
+      }*/
+      this->MakeProgressVPFcomputation(theGlobalVariables);
+    }
+  }
+/*  if (partFraction::MakingConsistencyCheck)
+  { std::string tempS;
+    partFractions::CheckSum.ElementToString(tempS);
+    Stop();
+  }*/
+  return true;
+}
+
+bool PolynomialRationalCoeff::GetIntegerPoly(Polynomial<LargeInt>& output)const
+{ output.Nullify(this->NumVars);
+  Monomial<LargeInt> tempM;
+  tempM.init(this->NumVars);
+  output.MakeActualSizeAtLeastExpandOnTop(this->size);
+  for (int i=0; i<this->size; i++)
+  { Monomial<Rational>& currentMon=this->TheObjects[i];
+    if (!currentMon.Coefficient.IsInteger())
+      return false;
+    for (int j=0; j<this->NumVars; j++)
+      tempM.degrees[i]=currentMon.degrees[i];
+    currentMon.Coefficient.GetNum(tempM.Coefficient);
+    output.AddMonomial(tempM);
+  }
+  return true;
+}
+
+void LargeInt::WriteToFile(std::fstream& output)
+{ std::string tempS;
+  this->ElementToString(tempS);
+  output << tempS;
+}
+
+void LargeInt::ReadFromFile(std::fstream& input)
+{ std::string tempS;
+  input >> tempS;
+  this->AssignString(tempS);
+}
+
+void LargeInt::AssignString(const std::string& input)
+{ if (input.size()==0)
+    return;
+  this->MakeZero();
+  unsigned int startingIndex=0;
+  if (input[0]=='-')
+    startingIndex=1;
+  for (unsigned int i=startingIndex; i<input.size(); i++)
+  { int x=MathRoutines::GetIntFromDigit(input[i]);
+    if (x==-1)
+      return;
+    if (i>startingIndex)
+      this->value*=10;
+    this->value+=(unsigned) x;
+  }
+  if (!this->IsEqualToZero())
+    if (input[0]=='-')
+      this->sign=-1;
+}
+
+int ParserNode::EvaluateSplit(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size!=1)
+    return this->SetError(this->errorBadOrNoArgument);
+  ParserNode& thePFNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  this->thePFs.GetElement()=thePFNode.thePFs.GetElement();
+  this->thePFs.GetElement().split(theGlobalVariables, 0);
+  std::string tempS;
+  std::stringstream out;
+  this->thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
+  out << "<div class=\"math\">" << tempS << "</div>";
+  this->outputString=out.str();
+  this->ExpressionType=this->typePartialFractions;
+  return this->errorNoError;
+}
+
+int ParserNode::EvaluatePartialFractions(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size==0)
+    return this->SetError(this->errorBadOrNoArgument);
+  roots theVectors;
+  theVectors.SetSize(argumentList.size);
+  for (int i=0; i<argumentList.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
+    if (!currentNode.GetRootRational(theVectors.TheObjects[i], theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+    if (theVectors.TheObjects[i].size!=theVectors.TheObjects[0].size)
+      return this->SetError(this->errorDimensionProblem);
+  }
+  if (!this->thePFs.GetElement().initFromRoots(theVectors, theGlobalVariables))
+    return this->SetError(this->errorImplicitRequirementNotSatisfied);
+  std::string tempS;
+  std::stringstream out;
+  this->thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
+  out << "<div class=\"math\">" << tempS << "</div>";
+  this->outputString=out.str();
+  this->ExpressionType=this->typePartialFractions;
+  return this->errorNoError;
 }

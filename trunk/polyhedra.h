@@ -518,7 +518,14 @@ private:
   void QuickSortAscending(int BottomIndex, int TopIndex);
   void QuickSortDescending(int BottomIndex, int TopIndex);
 public:
-  List(const List<Object>& other){this->CopyFromBase(other);}
+  List(const List<Object>& other)
+  { this->ActualSize=0;
+    this->IndexOfVirtualZero=0;
+    this->size=0;
+    this->TheObjects=0;
+    this->TheActualObjects=0;
+    this->CopyFromBase(other);
+  }
   static int ListActualSizeIncrement;
   Object* TheObjects;
   int size;
@@ -1069,7 +1076,8 @@ public:
   static bool flagAnErrorHasOccurredTimeToPanic;
   void ComputeDeterminantOverwriteMatrix( Rational& output);
   void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
-  void Transpose(GlobalVariables& theGlobalVariables);
+  void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
+  void Transpose();
   void MultiplyByInt(int x);
   void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, LargeIntUnsigned& Den);
@@ -2365,7 +2373,7 @@ public:
   void DivByInteger(int a);
   void DivByLargeInt(LargeInt& a);
   void DivByLargeIntUnsigned(LargeIntUnsigned& a);
-  void GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariables& theGlobalVariables);
+  bool GetCoordsInBasis(roots& inputBasis, root& outputCoords, GlobalVariables& theGlobalVariables);
   inline void MakeNormalInProjectivizationFromAffineHyperplane(affineHyperplane& input);
   void MakeNormalInProjectivizationFromPointAndNormal(root& point, root& normal);
   bool MakeAffineProjectionFromNormal(affineHyperplane& output);
@@ -8752,6 +8760,8 @@ public:
   int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
+  //returns false if the vector is not in the lattice
+  bool ReduceVector(root& theVector, GlobalVariables& theGlobalVariables);
   void Reduce
   ()
   ;
@@ -8767,6 +8777,7 @@ public:
     this->Den=other.Den;
     this->basisRationalForm=other.basisRationalForm;
   }
+  void MakeZn(int theDim);
   void RefineByOtherLattice(const Lattice& other);
   void AssignRootsToBasisAndReduce
   (const roots& input)
@@ -8781,13 +8792,22 @@ public:
   Lattice AmbientLatticeReduced;
   roots LatticeShifts;
   List<PolynomialRationalCoeff> valueOnEachLatticeShift;
-  std::string ElementToString(){PolynomialOutputFormat tempFormat; return this->ElementToString(tempFormat);}
-  std::string ElementToString(const PolynomialOutputFormat& thePolyFormat);
+  std::string ElementToString(bool useHtml, bool useLatex){PolynomialOutputFormat tempFormat; return this->ElementToString(useHtml, useLatex, tempFormat);}
+  std::string ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat);
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
-  void MakeRougherLattice(const Lattice& latticeToRefineBy);
-  void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice);
+  void MakeRougherLattice(const Lattice& latticeToRoughenBy);
+  void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
+  void MakeZeroLatticeZn(int theDim);
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){this->buffers=0;}
+  QuasiPolynomial(const QuasiPolynomial& other){this->operator=(other);}
+  void operator=(const QuasiPolynomial& other)
+  { this->AmbientLatticeReduced=other.AmbientLatticeReduced;
+    this->LatticeShifts=other.LatticeShifts;
+    this->valueOnEachLatticeShift=other.valueOnEachLatticeShift;
+    this->buffers=other.buffers;
+  }
+
 };
 
 class Parser;
@@ -9739,9 +9759,10 @@ bool Vectors<CoefficientType>::GetLinearDependence
 { Matrix<CoefficientType> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
+  //std::cout << tempMat.ElementToString(true, false);
   if (nonPivotPoints.CardinalitySelection==0)
     return false;
-  outputTheLinearCombination.ComputeDebugString();
+//  outputTheLinearCombination.ComputeDebugString();
   tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination, theRingUnit, theRingZero);
   //outputTheLinearCombination.ComputeDebugString();
   return true;

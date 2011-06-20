@@ -1529,6 +1529,7 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
     return;
   if (other.basis==this->basis && this->Den==other.Den)
     return;
+
   assert(other.GetDim()==this->GetDim());
   int theDim=this->GetDim();
   LargeIntUnsigned oldDen=this->Den;
@@ -1585,9 +1586,11 @@ void Lattice::MakeFromRoots(const roots& input)
 
 }
 
-std::string Lattice::ElementToString()const
+std::string Lattice::ElementToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
-  out << "<br>Basis:" <<this->basisRationalForm.ElementToString(true, false);
+  if (useHtml)
+    out << "<br>Basis:";
+  out <<this->basisRationalForm.ElementToString(useHtml, useLatex);
   //out << "Integral form: Denominator=" << this->Den.ElementToString() << " \n";
   //out << "<br>Matrix=" << this->basis.ElementToString(true, false);
   return out.str();
@@ -1798,10 +1801,9 @@ int ParserNode::EvaluateInvertLattice(GlobalVariables& theGlobalVariables)
 
 std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat)
 { std::stringstream out;
-  if (useHtml)
-  { out << "the lattice: " << this->AmbientLatticeReduced.ElementToString();
-    out << "<br>We have " << this->LatticeShifts.size << " lattice shifts. The polynomial on each lattice shift follows.";
-  }
+  //if (useHtml)
+  out << "the lattice: " << this->AmbientLatticeReduced.ElementToString(useHtml, useLatex);
+  out << "<br>We have " << this->LatticeShifts.size << " lattice shifts. The polynomial on each lattice shift follows.";
   for (int i=0; i<this->LatticeShifts.size; i++)
   { if(useHtml)
       out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: ";
@@ -1923,7 +1925,7 @@ void partFraction::GetRootsFromDenominator
 }
 
 void partFraction::ComputePolyCorrespondingToOneMonomial
-  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals, Lattice& theLattice)
+  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals, Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { int theDimension=owner.AmbientDimension;
   root shiftRational; shiftRational.SetSize(theDimension);
   Monomial<LargeInt>& currentMon=this->Coefficient.TheObjects[monomialIndex];
@@ -1937,7 +1939,7 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
   { this->MakePolynomialFromOneNormal(normals.TheObjects[i], shiftRational, this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].Multiplicities.TheObjects[0], tempP);
     outputPolyPart.MultiplyBy(tempP);
   }
-
+  outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, shiftRational, theLattice, theGlobalVariables);
   this->AlreadyAccountedForInGUIDisplay=true;
 }
 
@@ -1959,7 +1961,9 @@ void partFraction::GetVectorPartitionFunction
   output.MakeZeroLatticeZn(owner.AmbientDimension);
 
   for (int i=0; i<this->Coefficient.size; i++)
-  { this->ComputePolyCorrespondingToOneMonomial(owner, shiftedPoly, i, theNormals, theLattice);
+  { this->ComputePolyCorrespondingToOneMonomial(owner, shiftedPoly, i, theNormals, theLattice, theGlobalVariables);
+    output.ComputeDebugString();
+    shiftedPoly.ComputeDebugString();
     output+=shiftedPoly;
 //    if (RecordNumMonomials)
 //    { std::stringstream out4, out3;
@@ -2160,5 +2164,31 @@ int ParserNode::EvaluatePartialFractions(GlobalVariables& theGlobalVariables)
   out << "<div class=\"math\">" << tempS << "</div>";
   this->outputString=out.str();
   this->ExpressionType=this->typePartialFractions;
+  return this->errorNoError;
+}
+
+int ParserNode::EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size!=2)
+    return this->SetError(this->errorBadOrNoArgument);
+  ParserNode& PFNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  ParserNode& IndicatorNode=this->owner->TheObjects[argumentList.TheObjects[1]];
+  if (!PFNode.ConvertToType(this->typePartialFractions, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  root theIndicator;
+  if (!IndicatorNode.GetRootRational(theIndicator, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  partFractions& currentPF=PFNode.thePFs.GetElement();
+  QuasiPolynomial& currentQP=this->theQP.GetElement();
+  std::stringstream out;
+  std::string startingPFString, splitPFString ;
+  currentPF.ElementToString(startingPFString, theGlobalVariables);
+  currentPF.split(theGlobalVariables, 0);
+  currentPF.ElementToString(splitPFString, theGlobalVariables);
+  currentPF.GetVectorPartitionFunction(currentQP, theIndicator, theGlobalVariables);
+  this->ExpressionType=this->typeQuasiPolynomial;
+  out << currentQP.ElementToString(true, false) << "<br><div class=\"math\">" << startingPFString << "</div>=<div class=\"math\">" << splitPFString << " </div>";
+  this->outputString=out.str();
   return this->errorNoError;
 }

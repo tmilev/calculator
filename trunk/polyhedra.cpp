@@ -5621,7 +5621,7 @@ void CompositeComplexQN::LinearSubstitution(MatrixLargeRational& TheSub)
 void CompositeComplexQN::MakePureQN(Rational* expArg, int numVars)
 { this->NumVariables=numVars;
   this->size=0;
-  static ComplexQN tempQ(numVars);
+  ComplexQN tempQ(numVars);
   tempQ.MakePureQN(expArg, numVars);
   this->AddObjectOnTop(tempQ);
 }
@@ -6156,7 +6156,7 @@ void QuasiPolynomialOld::operator=(const QuasiPolynomialOld& right)
 
 void QuasiPolynomialOld::AssignPolynomialRationalCoeff(PolynomialRationalCoeff& p)
 { this->Nullify(p.NumVars);
-  static QuasiMonomial tempM;
+  QuasiMonomial tempM;
   tempM.initNoDegreesInit(this->NumVars);
   for (int i=0; i<p.size; i++)
   { for (int j=0; j<this->NumVars; j++)
@@ -6561,7 +6561,7 @@ bool CompositeComplex::SimplifyTrue()
 { bool result = false;
   if (this->size==0)
     return result;
-/*  static Rational CommonFactor; */
+/*  Rational CommonFactor; */
   this->TheObjects[0].Simplify();
 /*  CommonFactor.Assign(this->TheObjects[0].Exp);     */
   for (int i=1; i<this->size; i++)
@@ -7465,7 +7465,7 @@ void QuasiNumber::MakeConst(Rational& Coeff, int NumV)
 /*void QuasiNumber::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column)
 { this->ClearTheObjects();
   this->NumVariables= root::AmbientDimension;
-  static BasicQN tempBQN;
+  BasicQN tempBQN;
   tempBQN.MakeQNFromMatrixAndColumn(theMat, column);
   this->AddBasicQuasiNumber(tempBQN);
 }*/
@@ -9495,10 +9495,10 @@ void partFraction::GetNElongationPoly(partFractions& owner, int index, int baseE
 }
 
 void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, QuasiPolynomialOld& output, bool RecordNumMonomials, bool StoreToFile, GlobalVariables& theGlobalVariables, int theDimension)
-{ static PolynomialRationalCoeff shiftedPoly, tempP;
-  static roots normals;
-  static partFractionPolynomials tempSplitPowerSeriesCoefficient;
-  static partFractionPolynomials* SplitPowerSeriesCoefficient;
+{ PolynomialRationalCoeff shiftedPoly, tempP;
+  roots normals;
+  partFractionPolynomials tempSplitPowerSeriesCoefficient;
+  partFractionPolynomials* SplitPowerSeriesCoefficient;
   if (partFraction::MakingConsistencyCheck)
   { partFraction::CheckSum.MakeZero();
   }
@@ -9573,9 +9573,9 @@ void partFraction::ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff
   Rational tempRat;
   tempRat=this->Coefficient.TheObjects[index].Coefficient;
   output.MakeNVarConst((int)theDimension, tempRat);
+  root beta; beta.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
-  { static root beta; beta.SetSize(theDimension);
-    static Rational tempRat, tempRat2;
+  { Rational tempRat, tempRat2;
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
     { normals.ComputeDebugString();
     }
@@ -9625,7 +9625,7 @@ void partFraction::MakePolynomialFromOneNormal(root& normal, root& shiftRational
 }
 
 void partFraction::ComputeNormals(partFractions& owner, roots& output, int theDimension, GlobalVariables& theGlobalVariables)
-{ static roots dens;
+{ roots dens;
   root tempRoot; tempRoot.SetSize(theDimension);
   dens.size=0;
   output.size=0;
@@ -9633,9 +9633,9 @@ void partFraction::ComputeNormals(partFractions& owner, roots& output, int theDi
   { tempRoot.AssignIntRoot(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]]);
     dens.AddRoot(tempRoot);
   }
+  Rational tempRat, tempRat2;
   for (int i=0; i<theDimension; i++)
-  { static Rational tempRat, tempRat2;
-    dens.ComputeNormalExcludingIndex(tempRoot, i, theGlobalVariables);
+  { dens.ComputeNormalExcludingIndex(tempRoot, i, theGlobalVariables);
     root::RootScalarEuclideanRoot(tempRoot, dens.TheObjects[i], tempRat);
     assert(!tempRat.IsEqualToZero());
     tempRoot.DivByLargeRational(tempRat);
@@ -9736,7 +9736,7 @@ void partFractions::UncoverBracketsNumerators(GlobalVariables& theGlobalVariable
   for (int i=0; i<this->size; i++)
   { if (this->flagMakingProgressReport)
     { std::stringstream out;
-      out <<"Uncovering brackets"<< i+1 <<" out of " << this->size;
+      out << "Uncovering brackets" << i+1 << " out of " << this->size;
       theGlobalVariables.theIndicatorVariables.ProgressReportString4=out.str();
       changeOfNumMonomials-=this->TheObjects[i].Coefficient.size;
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -9747,7 +9747,7 @@ void partFractions::UncoverBracketsNumerators(GlobalVariables& theGlobalVariable
     if (this->flagMakingProgressReport)
     { changeOfNumMonomials+=this->TheObjects[i].Coefficient.size;
       std::stringstream out;
-      out <<"Number actual monomials"<< changeOfNumMonomials;
+      out << "Number actual monomials" << changeOfNumMonomials;
       theGlobalVariables.theIndicatorVariables.ProgressReportString5=out.str();
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
@@ -10729,7 +10729,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomia
   //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
   //this->ComputeDebugString();
   ///////////////////////////////////////////////
-  static QuasiPolynomialOld tempQP;
+  QuasiPolynomialOld tempQP;
   for (int i=0; i<this->size; i++)
   { assert(partFraction::TheBigDump.is_open()||!StoreToFile);
     assert(partFractions::ComputedContributionsList.is_open()||!StoreToFile);
@@ -12371,9 +12371,9 @@ void PolynomialsRationalCoeff::MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFi
 
 void PolynomialsRationalCoeff::MakeLinearSubWithConstTermFromMatrixRational(MatrixLargeRational &theMat)
 { this->SetSize(theMat.NumCols);
+  Monomial<Rational> tempM;
   for (int i=0; i<this->size; i++)
-  { static Monomial<Rational> tempM;
-    this->TheObjects[i].Nullify((int)theMat.NumRows-1);
+  { this->TheObjects[i].Nullify((int)theMat.NumRows-1);
     for (int j=0; j<theMat.NumRows-1; j++)
     { tempM.init((int)theMat.NumRows-1);
       tempM.degrees[j]=1;
@@ -12494,7 +12494,7 @@ void PolynomialsRationalCoeffCollection::ElementToStringComputeFunctionB(std::st
   { this->TheObjects[i].ElementToString(tempS);
     out << tempS;
     if (computingB)
-    { static PolynomialRationalCoeff tempP;
+    { PolynomialRationalCoeff tempP;
       this->TheObjects[i].ComputeB(tempP, 2, theDimension);
       tempP.ComputeDebugString();
       out << "  function B: " << tempP.DebugString;
@@ -12737,6 +12737,7 @@ void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromChamberIndicator(r
 
 int VermaModulesWithMultiplicities::ChamberIndicatorToIndex(root &ChamberIndicator)
 { int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
+  root tempRoot; tempRoot.SetSize(theDimension);
   root ChamberIndicatorPlusRho;
   ChamberIndicatorPlusRho.Assign(ChamberIndicator);
   ChamberIndicatorPlusRho.Add(this->TheWeylGroup->rho);
@@ -12746,7 +12747,6 @@ int VermaModulesWithMultiplicities::ChamberIndicatorToIndex(root &ChamberIndicat
     bool haveSameSigns=true;
     for (int j=0; j<this->TheWeylGroup->RootSystem.size; j++)
     { this->TheWeylGroup->RootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->RootSystem.TheObjects[j], tempRat1);
-      static root tempRoot; tempRoot.SetSize(theDimension);
       tempRoot.Assign(this->TheObjects[i]);
       tempRoot.Add(this->TheWeylGroup->rho);
       this->TheWeylGroup->RootScalarCartanRoot(tempRoot, this->TheWeylGroup->RootSystem.TheObjects[j], tempRat2);
@@ -13271,7 +13271,7 @@ void OneVarIntPolynomial::AddPolynomial(OneVarIntPolynomial &p)
 }
 
 void OneVarIntPolynomial::MultiplyBy(OneVarIntPolynomial &p)
-{ static OneVarIntPolynomial Accum;
+{ OneVarIntPolynomial Accum;
   Accum.RationalPart.size=0;
   Accum.PolynomialPart.size=0;
   OneVarIntPolynomial::SetSizeAtLeastInitProperly(  Accum.PolynomialPart, this->PolynomialPart.size+p.PolynomialPart.size -1);
@@ -13684,7 +13684,7 @@ void thePFcomputation::ComputeNewRestrictionsFromOld(int depth, int newIndex)
 }
 
 void thePFcomputation::ComputeDeterminantSelection(int theDimension)
-{  static MatrixLargeRational tempMat;
+{ MatrixLargeRational tempMat;
   this->SelectionToMatrixRational(tempMat, theDimension);
   //tempMat.ComputeDebugString();
   Rational tempRat;
@@ -16421,11 +16421,11 @@ bool MatrixLargeRational  ::SystemLinearEqualitiesWithPositiveColumnVectorHasNon
 //and records a point at outputPoint
 //else returns false
 bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint)
-{/* static MatrixLargeRational tempMatA;
-  static MatrixLargeRational matX;
-  static int NumTrueVariables;
+{/*  MatrixLargeRational tempMatA;
+   MatrixLargeRational matX;
+   int NumTrueVariables;
   int numExtraColumns=0;
-  static Rational GlobalGoal;
+   Rational GlobalGoal;
   GlobalGoal.MakeZero();
   assert (matA.NumRows== matb.NumRows);
   for (int j=0; j<matb.NumRows; j++)
@@ -16434,10 +16434,10 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRationa
   NumTrueVariables= matA.NumCols;
   tempMatA.init(matA.NumRows, NumTrueVariables*2+matA.NumRows+numExtraColumns);
   matX.init(tempMatA.NumCols, 1);
-  static HashedList<Selection> VisitedVertices;
+   HashedList<Selection> VisitedVertices;
   VisitedVertices.ClearTheObjects();
-  static Selection NonZeroSlackVariables;
-  static Selection BaseVariables;
+   Selection NonZeroSlackVariables;
+   Selection BaseVariables;
   BaseVariables.init(tempMatA.NumCols);
   tempMatA.NullifyAll();
   matX.NullifyAll();
@@ -16468,7 +16468,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRationa
     }
   }
   tempMatA.ComputeDebugString(); matX.ComputeDebugString();
-  static Rational  PotentialChangeGradient, ChangeGradient; //Change, PotentialChange;
+   Rational  PotentialChangeGradient, ChangeGradient; //Change, PotentialChange;
   int EnteringVariable=0;
   bool WeHaveNotEnteredACycle=true;
   while (EnteringVariable!=-1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
@@ -16481,7 +16481,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRationa
         bool hasAPotentialLeavingVariable=false;
         for (int j=0; j<tempMatA.NumRows; j++)
         {  if (BaseVariables.elements[j]>=LowestBadIndex)
-          {  static Rational tempRat;
+          {   Rational tempRat;
             tempRat.Assign(tempMatA.elements[j][i]);
             PotentialChangeGradient.Add(tempRat);
           }
@@ -16497,10 +16497,10 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRationa
     }
     if (EnteringVariable!=-1)
     {  int LeavingVariableRow=-1;
-      static Rational  MaxMovement;
+       Rational  MaxMovement;
       MaxMovement.MakeZero();
       for(int i=0; i<tempMatA.NumRows; i++)
-      { static Rational tempRat;
+      {  Rational tempRat;
         tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
         if (tempRat.IsPositive() && BaseVariables.elements[i]>=NumTrueVariables)
         { tempRat.Invert();
@@ -16511,7 +16511,7 @@ bool MatrixLargeRational::SystemLinearInequalitiesHasSolution(MatrixLargeRationa
           }
         }
       }
-      static Rational tempRat, tempTotalChange;
+       Rational tempRat, tempTotalChange;
       assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.Invert();
@@ -26398,6 +26398,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionInvertLattice: this->EvaluateInvertLattice(theGlobalVariables); break;
     case Parser::functionQuasiPolynomial: this->EvaluateQuasiPolynomial(theGlobalVariables); break;
     case Parser::functionPartialFractions: this->EvaluatePartialFractions(theGlobalVariables); break;
+    case Parser::functionGetVPIndicator: this->EvaluateVectorPFIndicator(theGlobalVariables); break;
     case Parser::functionSplit: this->EvaluateSplit(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
@@ -26693,6 +26694,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="split")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionSplit);
+    return true;
+  }
+  if (input=="vpf")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionGetVPIndicator);
     return true;
   }
   if (input=="PartialFractions")
@@ -31494,26 +31500,55 @@ void ParserNode::CopyValue(const ParserNode& other)
   this->Evaluated= other.Evaluated;
   this->outputString= other.outputString;
   this->ExpressionType=other.ExpressionType;
-  if (other.ExpressionType==this->typeWeylAlgebraElement)
-    this->WeylAlgebraElement.GetElement().Assign(other.WeylAlgebraElement.GetElementConst());
-  if (other.ExpressionType==this->typeUEelement)
-    this->UEElement.GetElement().operator=(other.UEElement.GetElementConst());
-  if (other.ExpressionType==this->typeUEElementOrdered)
-    this->UEElementOrdered.GetElement().operator=(other.UEElementOrdered.GetElementConst());
-  if (other.ExpressionType==this->typePoly)
-    this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
-  if (other.ExpressionType==this->typeMapPolY)
-  { this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
-    this->polyBeingMappedTo.GetElement().operator=(other.polyBeingMappedTo.GetElementConst());
+  switch (other.ExpressionType)
+  { case ParserNode::typeError:
+    case ParserNode::typeIntegerOrIndex:
+    case ParserNode::typeRational:
+    case ParserNode::typeUndefined:
+    case ParserNode::typeString:
+      break;
+    case ParserNode::typeWeylAlgebraElement:
+      this->WeylAlgebraElement.GetElement().Assign(other.WeylAlgebraElement.GetElementConst());
+      break;
+    case ParserNode::typeUEelement:
+      this->UEElement.GetElement().operator=(other.UEElement.GetElementConst());
+      break;
+    case ParserNode::typeUEElementOrdered:
+      this->UEElementOrdered.GetElement().operator=(other.UEElementOrdered.GetElementConst());
+      break;
+    case ParserNode::typePoly:
+      this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
+      break;
+    case ParserNode::typeMapPolY:
+      this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
+      this->polyBeingMappedTo.GetElement().operator=(other.polyBeingMappedTo.GetElementConst());
+      break;
+    case ParserNode::typeMapWeylAlgebra:
+      this->WeylAlgebraElement.GetElement().operator=(other.WeylAlgebraElement.GetElementConst());
+      this->weylEltBeingMappedTo.GetElement().operator=(other.weylEltBeingMappedTo.GetElementConst());
+      break;
+    case ParserNode::typeArray:
+      this->array.GetElement().CopyFromBase(other.array.GetElementConst());
+      break;
+    case ParserNode::typeRationalFunction:
+      this->ratFunction.GetElement().operator=(other.ratFunction.GetElementConst());
+      break;
+    case ParserNode::typeCone:
+      this->theCone=other.theCone;
+      break;
+    case ParserNode::typePartialFractions:
+      this->thePFs=other.thePFs;
+      break;
+    case ParserNode::typeQuasiPolynomial:
+      this->theQP=other.theQP;
+      break;
+    case ParserNode::typeLattice:
+      this->theLattice=other.theLattice;
+      break;
+    default:
+      assert(false);
+      break;
   }
-  if (other.ExpressionType==this->typeMapWeylAlgebra)
-  { this->WeylAlgebraElement.GetElement().operator=(other.WeylAlgebraElement.GetElementConst());
-    this->weylEltBeingMappedTo.GetElement().operator=(other.weylEltBeingMappedTo.GetElementConst());
-  }
-  if (other.ExpressionType==this->typeArray)
-    this->array.GetElement().CopyFromBase(other.array.GetElementConst());
-  if(other.ExpressionType==this->typeRationalFunction)
-    this->ratFunction.GetElement().operator=(other.ratFunction.GetElementConst());
 }
 
 void ParserNode::operator=(const ParserNode& other)

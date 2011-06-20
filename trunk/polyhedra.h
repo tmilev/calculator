@@ -354,9 +354,9 @@ class MemorySaving
 {
 private:
   Object* theValue;
-  void operator=(const MemorySaving<Object>& other){if (!other.IsZeroPointer()) (this->GetElement()).operator=(other.GetElementConst()); else this->FreeMemory();}
   MemorySaving(const MemorySaving<Object>& other){assert(false);}
 public:
+  void operator=(const MemorySaving<Object>& other){if (!other.IsZeroPointer()) (this->GetElement()).operator=(other.GetElementConst()); else this->FreeMemory();}
   const Object& GetElementConst()const{ assert(this->theValue!=0); return *this->theValue;}
   Object& GetElement()
   { if (this->theValue==0)
@@ -6497,8 +6497,9 @@ public:
   bool GetAllRepresentatitves
   (const Lattice& rougherLattice, roots& output)
   ;
-  std::string ElementToString()const;
-  bool operator==(const Lattice& other){return this->basisRationalForm==other.basisRationalForm;};
+  inline std::string ElementToString()const{return this->ElementToString(true, false);}
+  std::string ElementToString(bool useHtml, bool useLatex)const;
+  bool operator==(const Lattice& other){return this->basisRationalForm==other.basisRationalForm;}
   void operator=(const Lattice& other)
   { this->basis=other.basis;
     this->Den=other.Den;
@@ -6518,9 +6519,11 @@ public:
   GlobalVariables* buffers;
   Lattice AmbientLatticeReduced;
   roots LatticeShifts;
+  std::string DebugString;
   List<PolynomialRationalCoeff> valueOnEachLatticeShift;
   std::string ElementToString(bool useHtml, bool useLatex){PolynomialOutputFormat tempFormat; return this->ElementToString(useHtml, useLatex, tempFormat);}
   std::string ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat);
+  void ComputeDebugString(){this->DebugString=this->ElementToString(false, false);}
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
   void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
@@ -6570,7 +6573,7 @@ public:
   static ListPointers<partFraction> GlobalCollectorPartFraction;
   void ComputePolyCorrespondingToOneMonomial(PolynomialRationalCoeff& output, int index, roots& normals, partFractionPolynomials* SplitPowerSeriesCoefficient, int theDimension);
   void ComputePolyCorrespondingToOneMonomial
-  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals, Lattice& theLattice)
+  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals, Lattice& theLattice, GlobalVariables& theGlobalVariables)
   ;
   static void EvaluateIntPoly
   (const Polynomial<LargeInt>& input, const root& values, Rational& output)
@@ -8946,6 +8949,7 @@ class ParserNode
   int EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateLattice(GlobalVariables& theGlobalVariables);
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
+  int EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables);
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
@@ -9019,6 +9023,7 @@ public:
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
     functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
+    functionGetVPIndicator,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

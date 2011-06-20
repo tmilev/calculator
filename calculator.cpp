@@ -32,8 +32,8 @@ void getPath(char* path, std::string& output)
   }
 }
 
-extern void static_html4( std::stringstream& output);
-extern void static_html3( std::stringstream& output);
+extern void static_html4(std::stringstream& output);
+extern void static_html3(std::stringstream& output);
 
 const double MaxAllowedComputationTimeInSeconds=20000;
 bool ComputationComplete;
@@ -122,8 +122,9 @@ int main(int argc, char **argv)
   //  Rational tempRat=2;
   //  tempRat.RaiseToPower(20);
   //  tempRat.ElementToString(tempS);
+//  civilizedInput="vpf(PartialFractions((1,0),(0,1),(1,1)),(1,2))";
   //civilizedInput="split(PartialFractions((1,0),(0,1),(1,1)))";
-//  civilizedInput="PartialFractions((1,0),(0,1),(1,1))";
+  //civilizedInput="PartialFractions((1,0),(0,1),(1,1))";
  // civilizedInput="GetAllRepresentatives(Lattice((7,4),(1,3)),Lattice((1,1),(1,0)))";
   //civilizedInput="Lattice((1,1),(1,0))Lattice((7,4),(1,3))";
   //civilizedInput="GetAllRepresentatitves(Lattice((1,1),(1,0)),Lattice((7,4),(1,3)))";

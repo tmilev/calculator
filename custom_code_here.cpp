@@ -2221,9 +2221,12 @@ bool Lattice::SubstitutionHomogeneous
   MatrixLargeRational theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
   theMat=theSub;
   oldBasisTransformed=this->basisRationalForm;
+  oldBasisTransformed.Transpose();
   Selection nonPivotPoints;
   theMat.ComputeDebugString(false, false);
+  std::cout << "<br>the matrices to be transformed: " << theMat.ElementToString(true, false) << "<br>" << oldBasisTransformed.ElementToString(true, false);
   theMat.GaussianEliminationByRows(oldBasisTransformed, nonPivotPoints);
+  std::cout << "<br>afer transformation: " << theMat.ElementToString(true, false) << "<br>" << oldBasisTransformed.ElementToString(true, false);
   if (nonPivotPoints.CardinalitySelection!=0)
     return false;
   int numNonZeroRows=nonPivotPoints.MaxSize;
@@ -2234,6 +2237,7 @@ bool Lattice::SubstitutionHomogeneous
       matRelationBetweenStartingVariables.elements[i][j]=oldBasisTransformed.elements[i+numNonZeroRows][j];
   roots theEigenSpace;
   matRelationBetweenStartingVariables.FindZeroEigenSpace(theEigenSpace, theGlobalVariables);
+  std::cout << "<br>matRelationBetweenStartingVariables" <<  matRelationBetweenStartingVariables.ElementToString(true, false);
   for (int i=0; i<theEigenSpace.size; i++)
     theEigenSpace.TheObjects[i].ScaleToIntegralMinHeight();
   std::cout << "the basis: " << theEigenSpace.ElementToString();
@@ -2244,7 +2248,8 @@ bool Lattice::SubstitutionHomogeneous
     for (int j=0; j<targetDim; j++)
       this->basisRationalForm.elements[i][j]=theEigenSpace.TheObjects[i].TheObjects[j];
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
-  std::cout <<"<br><br>and the sub result is: <br>" << this->ElementToString(true, false);
+  this->Reduce();
+  std::cout << "<br><br>and the sub result is: <br>" << this->ElementToString(true, false);
   return true;
 }
 

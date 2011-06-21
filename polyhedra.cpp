@@ -31133,7 +31133,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeUEElementOrdered: LatexOutput << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal); break;
     case ParserNode::typeUEelement: LatexOutput << this->UEElement.GetElement().ElementToString(); break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
-    //case ParserNode::typeQuasiPolynomial: LatexOutput << this->theQP.GetElement().ElementToString(); break;
+    //case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
    // case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
@@ -31487,6 +31487,7 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Globa
         theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(minNumberVarsAfterSub);
       if (!this->theLattice.GetElement().SubstitutionHomogeneous(theSub, theGlobalVariables))
         return this->SetError(this->errorImplicitRequirementNotSatisfied);
+      this->outputString=this->theLattice.GetElement().ElementToString(true, false);
       return this->errorNoError;
     default:
       return this->SetError(this->errorDunnoHowToDoOperation);

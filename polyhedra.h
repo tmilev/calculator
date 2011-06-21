@@ -1027,6 +1027,9 @@ void NonPivotPointsToEigenVector
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints){ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);  }
   static void GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
+  void GaussianEliminationByRows(Matrix<Element>& otherMatrix, Selection& outputSelection)
+  { Matrix<Element>::GaussianEliminationByRows(*this, otherMatrix, outputSelection);
+  }
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows
 (int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
 ;
@@ -3889,6 +3892,10 @@ public:
   void MonomialExponentToRoot(intRoot& output);
   void MakeFromRoot(const ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
   void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
+  bool IsLinearNoConstantTerm()
+  { int tempInt;
+    return this->IsOneLetterFirstDegree(tempInt);
+  }
   bool IsOneLetterFirstDegree(int& whichLetter)
   { whichLetter=-1;
     for (int i=0; i<this->NumVariables; i++)
@@ -3908,6 +3915,12 @@ public:
   void Assign(const Monomial<ElementOfCommutativeRingWithIdentity>& m);
   void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   void MakeMonomialOneLetter(int NumVars, int LetterIndex, int Power, const ElementOfCommutativeRingWithIdentity& Coeff);
+  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+  { for (int i=this->NumVariables-1; i>=0; i--)
+      if (this->degrees[i]!=0)
+        return i;
+    return -1;
+  }
   void IncreaseNumVariables(int increase);
   bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
   bool IsGEQLexicographicLastVariableStrongest(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
@@ -4040,6 +4053,12 @@ public:
   void IncreaseNumVariablesShiftVarIndicesToTheRight(int theShift){this->IncreaseNumVariablesWithShiftToTheRight(theShift, theShift);};
   void IncreaseNumVariablesWithShiftToTheRight(int theShift, int theIncrease);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
+  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+  { int result=-1;
+    for (int i=0; i<this->size; i++)
+      result=MathRoutines::Maximum(result, this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate());
+    return result;
+  }
   void ScaleToPositiveMonomials(Monomial<ElementOfCommutativeRingWithIdentity>& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<ElementOfCommutativeRingWithIdentity>& output);
   void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget, const ElementOfCommutativeRingWithIdentity& theRingUnit);
@@ -4052,6 +4071,12 @@ public:
       return true;
     Monomial<ElementOfCommutativeRingWithIdentity>& theMon=this->TheObjects[0];
     return theMon.IsAConstant();
+  }
+  bool IsLinearNoConstantTerm()
+  { for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].IsLinearNoConstantTerm())
+        return false;
+    return true;
   }
   bool IsProportionalTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& other, ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther, const ElementOfCommutativeRingWithIdentity& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, PolynomialOutputFormat& PolyFormatLocal);
@@ -4099,6 +4124,12 @@ class Polynomials: public List<Polynomial<ElementOfCommutativeRingWithIdentity> 
   void AddConstant(ElementOfCommutativeRingWithIdentity& theConst);
   void TimesConstant(ElementOfCommutativeRingWithIdentity& r);
   void DivideByConstant(ElementOfCommutativeRingWithIdentity& r);
+  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+  { int result=-1;
+    for (int i=0; i<this->size; i++)
+      result=MathRoutines::Maximum(result, this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate());
+    return result;
+  }
   void NullifyAll(int NumVars)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i].Nullify((int)NumVars);
@@ -6489,6 +6520,23 @@ public:
   void GetDualLattice(Lattice& output)const;
   //returns false if the vector is not in the lattice
   bool ReduceVector(root& theVector, GlobalVariables& theGlobalVariables);
+  //In the below, the format of the matrix theSub of the substitution is as follows.
+  //Let the ambient dimension be n, and the coordinates be y_1,..., y_n.
+  //Let the new vector space be of dimension m, with coordinates x_1,..., x_m.
+  //Then theSub is an n by m matrix, where the i^th row of the matrix gives the expression of y_i via the x_j's.
+  //In addition, we require that n>=m (otherwise, in general, we do not expect to get a lattice).
+  //For example, if we want to carry out the substitution
+  //y_1=x_1+x_2, y_2=x_1-x_2, y_3=x_1, then
+  //theSub should be initialized as:
+  //1  1
+  //1 -1
+  //1  0
+  bool SubstitutionHomogeneous
+    (const MatrixLargeRational& theSub, GlobalVariables& theGlobalVariables)
+;
+  bool SubstitutionHomogeneous
+    (const PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
+;
   void Reduce
   ()
   ;
@@ -6528,9 +6576,13 @@ public:
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
   void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
   void MakeZeroLatticeZn(int theDim);
+  void Substitution
+  (const QPSub& theSub, QuasiPolynomial& output)const
+  ;
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){this->buffers=0;}
   QuasiPolynomial(const QuasiPolynomial& other){this->operator=(other);}
+  void operator*=(const Rational& theConst);
   void operator=(const QuasiPolynomial& other)
   { this->AmbientLatticeReduced=other.AmbientLatticeReduced;
     this->LatticeShifts=other.LatticeShifts;
@@ -8938,7 +8990,7 @@ class ParserNode
   bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
   int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
-  void CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
+  int CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables);
   void ReduceRatFunction();
   void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
   void Evaluate(GlobalVariables& theGlobalVariables);
@@ -8983,8 +9035,8 @@ class ParserNode
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
   void EvaluateInvariants(GlobalVariables& theGlobalVariables);
-  void EvaluateSubstitution(GlobalVariables& theGlobalVariables);
-  void EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
+  int EvaluateSubstitution(GlobalVariables& theGlobalVariables);
+  int EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
   void EvaluateFunction(GlobalVariables& theGlobalVariables);
   void ExtractAndEvalWeylSubFromMap(GlobalVariables& theGlobalVariables);

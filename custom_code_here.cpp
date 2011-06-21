@@ -40,11 +40,11 @@ public:
   roots GmodKnegativeWeights;
   ConeGlobal PreimageWeylChamberLargerAlgebra;
   ConeGlobal WeylChamberSmallerAlgebra;
-  List<QuasiPolynomialOld> theQPsNonSubstituted;
-  List<List<QuasiPolynomialOld> > theQPsSubstituted;
+  List<QuasiPolynomial> theQPsNonSubstituted;
+  List<List<QuasiPolynomial> > theQPsSubstituted;
 //  List<CombinatorialChamber> parametricChambers;
-  List<QuasiPolynomialOld> theMultiplicities;
-  List<QuasiPolynomialOld > theMultiplicitiesExtremaCandidates;
+  List<QuasiPolynomial> theMultiplicities;
+  List<QuasiPolynomial > theMultiplicitiesExtremaCandidates;
   int tempDebugCounter;
   List<Rational> theCoeffs;
   roots theTranslations;
@@ -421,47 +421,47 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->theQPsNonSubstituted.SetSize(this->thePfs.theChambers.size);
   for (int i=0; i<this->thePfs.theChambers.size; i++)
     if (this->thePfs.theChambers.TheObjects[i]!=0)
-    { QuasiPolynomialOld& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
-      this->thePfs.partFractionsToPartitionFunctionAdaptedToRoot(currentQPNoSub, this->thePfs.theChambers.TheObjects[i]->InternalPoint, false, true, theGlobalVariables, true);
+    { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
+      this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambers.TheObjects[i]->InternalPoint, theGlobalVariables);
     }
-  QuasiPolynomialOld theQPNoSub;
+  QuasiPolynomial theQPNoSub;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
   for (int i=0; i<this->projectivizedChamberTest.size; i++)
 //  if(i<this->tempDebugCounter)
   { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
     for (int k=0; k<this->theLinearOperators.size; k++)
 //    if (k<this->tempDebugCounter)
-    { QuasiPolynomialOld& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
+    { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
       this->GetProjection(k, this->projectivizedChamberTest.TheObjects[i].GetInternalPoint(), tempRoot);
       int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
       if (theIndex==-1)
-        theQPNoSub.Nullify(tempRoot.size);
+        theQPNoSub.MakeZeroLatticeZn(tempRoot.size);
       else
         theQPNoSub=this->theQPsNonSubstituted.TheObjects[theIndex];
       std::stringstream tempStream;
       tempStream << "chamber " << i+1 << " linear opeator " << k+1;
       theGlobalVariables.theIndicatorVariables.ProgressReportString1= tempStream.str();
       theGlobalVariables.MakeReport();
-      out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, theFormat);
+      out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, false);
       this->GetSubFromIndex(theSub, k);
-      theQPNoSub.RationalLinearSubstitution(theSub, currentQPSub);
-      out << "; after substitution we get: " << currentQPSub.ElementToString(false, theFormat);
+      theQPNoSub.Substitution(theSub, currentQPSub);
+      out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
       out << "\nthe sub is: " << theSub.ElementToString();
     }
   }
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  QuasiPolynomialOld tempQP;
+  QuasiPolynomial tempQP;
   for (int i=0; i<this->projectivizedChamberTest.size; i++)
 //  if (i<this->tempDebugCounter)
-  { QuasiPolynomialOld& currentSum=this->theMultiplicities.TheObjects[i];
-    currentSum.Nullify(totalDim);
+  { QuasiPolynomial& currentSum=this->theMultiplicities.TheObjects[i];
+    currentSum.MakeZeroLatticeZn(totalDim);
     for (int k=0; k<this->theLinearOperators.size; k++)
 //    if (k<this->tempDebugCounter)
     { tempQP=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
       tempQP*=this->theCoeffs.TheObjects[k];
       currentSum+=tempQP;
     }
-    out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString();\
+    out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString(false, false);
     out << "\nThe chamber is: " << this->projectivizedChamberTest.TheObjects[i].ElementToString();
   }
   this->projectivizedChamberTest.ComputeDebugString();
@@ -891,7 +891,7 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
   this->allParamSubChambersRepetitionsAllowed.size=0;
   std::stringstream out;
   QPSub subForFindingExtrema;
-  QuasiPolynomialOld currentExtremaCandidate;
+  QuasiPolynomial currentExtremaCandidate;
   int numParams=0, numNonParams=0;
   if (this->theLinearOperators.size>0)
   { numParams=this->theLinearOperators.TheObjects[0].NumCols+1;
@@ -916,7 +916,7 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
     for (int j=0; j<currentNonParamVerticesList.size; j++)
     { this->GetSubFromNonParamArray(subForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
      // tempQPSubList.AddObjectOnTop(subForFindingExtrema);
-      this->theMultiplicities.TheObjects[i].RationalLinearSubstitution(subForFindingExtrema, currentExtremaCandidate);
+      this->theMultiplicities.TheObjects[i].Substitution(subForFindingExtrema, currentExtremaCandidate);
       this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
     }
 
@@ -975,27 +975,23 @@ void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
   int projectiveDimension=input.GetDim();
   roots projectivizedNormals;
   projectivizedNormals.MakeActualSizeAtLeastExpandOnTop(this->allParamSubChambersRepetitionsAllowedConeForm.size);
-
-  QuasiNumber tempQN, theQNZero;
-  theQNZero.MakeZero(projectiveDimension);
   for (int j=0; j<this->allParamSubChambersRepetitionsAllowedConeForm.size; j++)
   // if (j<this->tempDebugCounter)
     if (input.IsInCone(this->allParamSubChambersRepetitionsAllowedConeForm.TheObjects[j].GetInternalPoint()))
-    { QuasiPolynomialOld& currentPoly= this->theMultiplicitiesExtremaCandidates.TheObjects[j];
-      projectivizedNormal.MakeZero(projectiveDimension);
-      for (int i=0; i<projectiveDimension-1; i++)
-      { currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(i, tempQN, theQNZero);
-        projectivizedNormal.TheObjects[i]=tempQN.TheObjects[0].Coefficient;
+      for (int k=0; k<this->theMultiplicitiesExtremaCandidates.TheObjects[j].valueOnEachLatticeShift.size; k++)
+      { QuasiPolynomial&  currentQP=this->theMultiplicitiesExtremaCandidates.TheObjects[j];
+        projectivizedNormal.MakeZero(projectiveDimension);
+        PolynomialRationalCoeff& currentPoly=currentQP.valueOnEachLatticeShift.TheObjects[k];
+        for (int i=0; i<projectiveDimension-1; i++)
+          currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(i, projectivizedNormal.TheObjects[i], (Rational) 0);
+        currentPoly.GetConstantTerm(*projectivizedNormal.LastObject(), (Rational) 0);
+        projectivizedNormals.AddObjectOnTop(projectivizedNormal);
+        std::stringstream out4;
+        out4 << "starting chamber " << j+1 << " out of " << this->allParamSubChambersRepetitionsAllowedConeForm.size;
+        theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+        theGlobalVariables.theIndicatorVariables.StatusString1=out4.str();
+        theGlobalVariables.MakeReport();
       }
-      currentPoly.GetConstantTerm(tempQN, theQNZero);
-      *projectivizedNormal.LastObject()=tempQN.TheObjects[0].Coefficient;
-      projectivizedNormals.AddObjectOnTop(projectivizedNormal);
-      std::stringstream out4;
-      out4 << "starting chamber " << j+1 << " out of " << this->allParamSubChambersRepetitionsAllowedConeForm.size;
-      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-      theGlobalVariables.theIndicatorVariables.StatusString1=out4.str();
-      theGlobalVariables.MakeReport();
-    }
   theGlobalVariables.theIndicatorVariables.StatusString1=out3.str();
   theGlobalVariables.MakeReport();
 }
@@ -2191,4 +2187,73 @@ int ParserNode::EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables)
   out << currentQP.ElementToString(true, false) << "<br><div class=\"math\">" << startingPFString << "</div>=<div class=\"math\">" << splitPFString << " </div>";
   this->outputString=out.str();
   return this->errorNoError;
+}
+
+void QuasiPolynomial::Substitution
+  (const QPSub& theSub, QuasiPolynomial& output)const
+{
+}
+
+bool Lattice::SubstitutionHomogeneous
+    (const PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
+{ if (theSub.size<1)
+    return false;
+  int theTargetDim=theSub.TheObjects[0].NumVars;
+  MatrixLargeRational matSub;
+  matSub.init(theSub.size, theTargetDim);
+  for (int i=0; i<theSub.size; i++)
+  { Polynomial<Rational>& currentPoly=theSub.TheObjects[i];
+    if (!currentPoly.IsLinearNoConstantTerm())
+      return false;
+    for (int j=0; j<theTargetDim; j++)
+      currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(j, matSub.elements[i][j], (Rational) 0);
+  }
+  return this->SubstitutionHomogeneous(matSub, theGlobalVariables);
+}
+
+bool Lattice::SubstitutionHomogeneous
+  (const MatrixLargeRational& theSub, GlobalVariables& theGlobalVariables)
+{ int targetDim=theSub.NumCols;
+  if (theSub.NumRows!=this->GetDim())
+    return false;
+  std::cout <<"<br> the sub: " << theSub.ElementToString(true, false) << "<br>";
+  int startingDim=this->GetDim();
+  MatrixLargeRational theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
+  theMat=theSub;
+  oldBasisTransformed=this->basisRationalForm;
+  Selection nonPivotPoints;
+  theMat.ComputeDebugString(false, false);
+  theMat.GaussianEliminationByRows(oldBasisTransformed, nonPivotPoints);
+  if (nonPivotPoints.CardinalitySelection!=0)
+    return false;
+  int numNonZeroRows=nonPivotPoints.MaxSize;
+  int numZeroRows=theMat.NumRows-numNonZeroRows;
+  matRelationBetweenStartingVariables.init(numZeroRows, startingDim);
+  for (int i=0; i<numZeroRows; i++)
+    for (int j=0; j<startingDim; j++)
+      matRelationBetweenStartingVariables.elements[i][j]=oldBasisTransformed.elements[i+numNonZeroRows][j];
+  roots theEigenSpace;
+  matRelationBetweenStartingVariables.FindZeroEigenSpace(theEigenSpace, theGlobalVariables);
+  for (int i=0; i<theEigenSpace.size; i++)
+    theEigenSpace.TheObjects[i].ScaleToIntegralMinHeight();
+  std::cout << "the basis: " << theEigenSpace.ElementToString();
+  oldBasisTransformed.ActOnRoots(theEigenSpace);
+  std::cout << "<br>the basis transformed: " << theEigenSpace.ElementToString();
+  this->basisRationalForm.init(targetDim, targetDim);
+  for (int i=0; i<targetDim; i++)
+    for (int j=0; j<targetDim; j++)
+      this->basisRationalForm.elements[i][j]=theEigenSpace.TheObjects[i].TheObjects[j];
+  this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
+  std::cout <<"<br><br>and the sub result is: <br>" << this->ElementToString(true, false);
+  return true;
+}
+
+void QuasiPolynomial::operator*=(const Rational& theConst)
+{ if (theConst.IsEqualToZero())
+  { this->valueOnEachLatticeShift.size=0;
+    this->LatticeShifts.size=0;
+    return;
+  }
+  for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
+    this->valueOnEachLatticeShift.TheObjects[i]*=theConst;
 }

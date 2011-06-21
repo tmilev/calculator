@@ -119,9 +119,9 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
-  civilizedInput= "(x_1\\mapsto x_1-3x_2, x_2\\mapsto 1/2x_2: Lattice((1,1),(0,2)))";
+  //civilizedInput= "(x_1\\mapsto x_1-3x_2, x_2\\mapsto 1/2x_2: Lattice((1,1),(0,2)))";
   //civilizedInput="(x_1\\mapsto x_1, x_2\\mapsto x_1: Lattice((1,0),(0,1)))";
-//  civilizedInput="vpf(PartialFractions((1,0),(0,1),(1,1)),(1,2))";
+  //civilizedInput="vpf(PartialFractions((1,0),(0,1),(1,1)),(1,2))";
   //civilizedInput="split(PartialFractions((1,0),(0,1),(1,1)))";
   //civilizedInput="PartialFractions((1,0),(0,1),(1,1))";
  // civilizedInput="GetAllRepresentatives(Lattice((7,4),(1,3)),Lattice((1,1),(1,0)))";
@@ -139,9 +139,9 @@ int main(int argc, char **argv)
   //civilizedInput="combinatorialChamberParam(1, 2, (-1,1,0), (1,0,0), (-1,-1,1))";
   //civilizedInput="secretSauceOrdered";
   //civilizedInput="slTwoInSlN(2,2)";
-//  theParser.DefaultWeylLetter='E';
-//  theParser.DefaultWeylRank=6;
-//  civilizedInput="actByWeylAffine(x_1,x_2,x_3,x_4,x_5,x_6)";
+  //theParser.DefaultWeylLetter='E';
+  //theParser.DefaultWeylRank=6;
+  //civilizedInput="actByWeylAffine(x_1,x_2,x_3,x_4,x_5,x_6)";
   //civilizedInput="(x_2\\mapsto 2, x_1\\mapsto 1:x_1x_2)";
   //theParser.DefaultWeylLetter='A';
   //theParser.DefaultWeylRank=2;

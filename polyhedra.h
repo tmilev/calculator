@@ -943,6 +943,16 @@ void NonPivotPointsToEigenVector
   //this means you write the matrix m1 in the upper left corner m2 in the lower right
   // and everything else you fill with zeros
   void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
+  void AssignVectorColumn(const Vector<Element>& input)
+  { this->init(input.size, 1);
+    for (int i=0; i<input.size; i++)
+      this->elements[i][0]=input.TheObjects[i];
+  }
+  void AssignVectorRow(const Vector<Element>& input)
+  { this->init(1, input.size);
+    for (int i=0; i<input.size; i++)
+      this->elements[0][i]=input.TheObjects[i];
+  }
   void FindZeroEigenSpacE(List<List<Element> >& output, Element& theRingUnit, Element& theRingMinusUnit, Element& theRingZero, GlobalVariables& theGlobalVariables);
   void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero);
   inline bool operator==(const Matrix<Element>& other)const
@@ -994,6 +1004,9 @@ void NonPivotPointsToEigenVector
     for (int i=0; i< this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j].Subtract(right.elements[i][j]);
+  }
+  inline void operator-=(const Matrix<Element>& other)
+  { this->Subtract(other);
   }
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
@@ -1099,7 +1112,7 @@ public:
   void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void Transpose();
   void MultiplyByInt(int x);
-  void AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den);
+  void AssignMatrixIntWithDen(const MatrixIntTightMemoryFit& theMat, int Den);
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, LargeIntUnsigned& Den);
   void AssignRootsToRowsOfMatrix(const roots& input);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
@@ -2263,6 +2276,21 @@ public:
       result+=tempElt;
     }
     return result;
+  }
+  bool AssignMatDetectRowOrColumn(const Matrix<CoefficientType>& input)
+  { if (input.NumCols==1)
+    { this->SetSize(input.NumRows);
+      for (int i=0; i<this->size; i++)
+        this->TheObjects[i]=input.elements[i][0];
+      return true;
+    }
+    if (input.NumRows==1)
+    { this->SetSize(input.NumCols);
+      for (int i=0; i<this->size; i++)
+        this->TheObjects[i]=input.elements[0][i];
+      return true;
+    }
+    return false;
   }
   void ElementToString(std::string& output, bool useLaTeX)
   { output.clear();
@@ -3892,11 +3920,14 @@ public:
   void MonomialExponentToRoot(intRoot& output);
   void MakeFromRoot(const ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
   void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
-  bool IsLinearNoConstantTerm()
+  bool IsLinear()const
+  { return this->IsAConstant() || this->IsLinearNoConstantTerm();
+  }
+  bool IsLinearNoConstantTerm()const
   { int tempInt;
     return this->IsOneLetterFirstDegree(tempInt);
   }
-  bool IsOneLetterFirstDegree(int& whichLetter)
+  bool IsOneLetterFirstDegree(int& whichLetter)const
   { whichLetter=-1;
     for (int i=0; i<this->NumVariables; i++)
       if (this->degrees[i]==1)
@@ -4075,6 +4106,12 @@ public:
   bool IsLinearNoConstantTerm()
   { for (int i=0; i<this->size; i++)
       if (!this->TheObjects[i].IsLinearNoConstantTerm())
+        return false;
+    return true;
+  }
+  bool IsLinear()
+  { for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].IsLinear())
         return false;
     return true;
   }
@@ -6339,8 +6376,9 @@ public:
   //TheQNSub has rows for each new variable
   //plus an extra row for the constant terms of the linear expressions and
   //columns for each of the substituted variables.
-  //in the substitution x_1\mapsto x_1+2x_2+4x_3+3
-  //                             x_2\mapsto x_1-x_2-2x_3+1
+  //in the substitution
+  //x_1 \mapsto x_1+2x_2+4x_3+3
+  //x_2 \mapsto x_1-x_2-2x_3+1
   // QPSub should look like (2 columns, 4 rows):
   // 1   1
   // 2  -1
@@ -6540,6 +6578,9 @@ public:
   void Reduce
   ()
   ;
+static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
+(const PolynomialsRationalCoeff& theSub, MatrixLargeRational& output, GlobalVariables& theGlobalVariables)
+;
   //returning false means that the lattice given as rougher is not actually rougher than the current lattice
   //or that there are too many representatives
   bool GetAllRepresentatitves
@@ -6576,8 +6617,8 @@ public:
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
   void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
   void MakeZeroLatticeZn(int theDim);
-  void Substitution
-  (const QPSub& theSub, QuasiPolynomial& output)const
+  bool Substitution
+  (const PolynomialsRationalCoeff& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
   ;
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){this->buffers=0;}
@@ -8986,6 +9027,7 @@ class ParserNode
   std::string ElementToStringValueOnlY(bool useHtml){return this->ElementToStringValueOnlY(useHtml, 0,2);}
   std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
   std::string ElementToStringErrorCode(bool useHtml);
+  void TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension);
   bool GetRootRational(root& output, GlobalVariables& theGlobalVariables);
   bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}

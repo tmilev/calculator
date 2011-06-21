@@ -171,8 +171,8 @@ template < > int HashedList<Monomial<RationalFunction> >::PreferredHashSize=20;
 template < > int HashedList<roots>::PreferredHashSize=10000;
 template < > int HashedList<Cone>::PreferredHashSize=10000;
 
-
 template < > int List<Cone>::ListActualSizeIncrement=100;
+template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
 template < > int List<affineCone>::ListActualSizeIncrement=1;
 template < > int List<CombinatorialChamber*>::ListActualSizeIncrement=1000;
 template < > int List<ComplexQN>::ListActualSizeIncrement=1;
@@ -31381,18 +31381,15 @@ std::string GeneralizedPolynomialRational::ElementToString(PolynomialOutputForma
   return out.str();
 }
 
-void ParserNode::EvaluateSubstitution(GlobalVariables& theGlobalVariables)
+int  ParserNode::EvaluateSubstitution(GlobalVariables& theGlobalVariables)
 { if (this->children.size!=2)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
+    return this->SetError(this->errorBadOrNoArgument);
   if(!this->ConvertChildrenToType(this->typeWeylAlgebraElement, theGlobalVariables))
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
+    return this->SetError(this->errorBadOrNoArgument);
   this->WeylAlgebraElement.GetElement()=this->owner->TheObjects[this->children.TheObjects[0]].WeylAlgebraElement.GetElementConst();
   this->weylEltBeingMappedTo.GetElement()=this->owner->TheObjects[this->children.TheObjects[1]].WeylAlgebraElement.GetElementConst();
   this->ExpressionType=this->typeMapWeylAlgebra;
+  return this->errorNoError;
 }
 
 void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
@@ -31417,11 +31414,9 @@ void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
   return;
 }
 
-void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
 { if (this->children.size<2)
-  { this->SetError(this->errorProgramming);
-    return;
-  }
+    return this->SetError(this->errorProgramming);
   PolynomialsRationalCoeff theSub;
   int theDimension=this->owner->NumVariables;
   theSub.MakeIdSubstitution((int) theDimension*2, (Rational) 1);
@@ -31434,19 +31429,13 @@ void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
     currentNode.WeylAlgebraElement.GetElement().GetStandardOrder(currentLeft);
     currentNode.weylEltBeingMappedTo.GetElement().GetStandardOrder(currentRight);
     if (currentLeft.size!=1)
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    }
+      return this->SetError(this->errorBadOrNoArgument);
     Monomial<Rational>& theMon=currentLeft.TheObjects[0];
     int theLetterIndex;
     if (!theMon.IsOneLetterFirstDegree(theLetterIndex))
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    }
+      return this->SetError(this->errorBadOrNoArgument);
     if (Explored.TheObjects[theLetterIndex])
-    { this->SetError(this->errorBadSubstitution);
-      return;
-    }
+      return this->SetError(this->errorBadSubstitution);
 //    std::cout << "<br> currentRight is: " << currentRight.ElementToString();
     Explored.TheObjects[theLetterIndex]=true;
     theSub.TheObjects[theLetterIndex]=currentRight;
@@ -31458,18 +31447,19 @@ void ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   }
   ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
   this->CopyValue(lastNode);
-  this->CarryOutSubstitutionInMe(theSub, theGlobalVariables);
+  return this->CarryOutSubstitutionInMe(theSub, theGlobalVariables);
 }
 
-void ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
+int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
 { int theDimension=this->owner->NumVariables;
+  int minNumberVarsAfterSub=0;
   Rational ratOne;
   ratOne.MakeOne();
   switch(this->ExpressionType)
   { case ParserNode::typeWeylAlgebraElement:
       this->WeylAlgebraElement.GetElement().SubstitutionTreatPartialsAndVarsAsIndependent(theSub);
       this->ExpressionType=this->typeWeylAlgebraElement;
-      return;
+      return this->errorNoError;
     case ParserNode::typeIntegerOrIndex:
     case ParserNode::typeRational:
     case ParserNode::typePoly:
@@ -31480,14 +31470,26 @@ void ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Glob
    //   std::cout << "<br> ... and the sub is: " << theSub.ElementToString();
       this->polyValue.GetElement().Substitution(theSub, theDimension, ratOne);
       this->ExpressionType=this->typePoly;
-      return;
+      return this->errorNoError;
     case ParserNode::typeArray:
       for (int i=0; i<this->array.GetElement().size; i++)
         this->owner->TheObjects[this->array.GetElement().TheObjects[i]].CarryOutSubstitutionInMe(theSub, theGlobalVariables);
-      return;
+      return this->errorNoError;
+    case ParserNode::typeLattice:
+      theSub.SetSize(theDimension);
+      if (theDimension!=this->theLattice.GetElement().GetDim())
+        return this->SetError(this->errorDimensionProblem);
+      for (int i=0; i<theDimension; i++)
+        theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
+      minNumberVarsAfterSub=theSub.GetHighestIndexSuchThatHigherIndexVarsDontParticipate()+1;
+//      std::cout << "minNumberVarsAfterSub: " << minNumberVarsAfterSub << "  " << theSub.ElementToString() << "<br>";
+      for (int i=0; i<theDimension; i++)
+        theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(minNumberVarsAfterSub);
+      if (!this->theLattice.GetElement().SubstitutionHomogeneous(theSub, theGlobalVariables))
+        return this->SetError(this->errorImplicitRequirementNotSatisfied);
+      return this->errorNoError;
     default:
-      this->SetError(this->errorDunnoHowToDoOperation);
-      return;
+      return this->SetError(this->errorDunnoHowToDoOperation);
   }
 }
 

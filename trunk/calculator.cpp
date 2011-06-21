@@ -119,9 +119,7 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
-  //  Rational tempRat=2;
-  //  tempRat.RaiseToPower(20);
-  //  tempRat.ElementToString(tempS);
+  //civilizedInput="(x_1\\mapsto x_1, x_2\\mapsto x_1: Lattice((1,0),(0,1)))";
 //  civilizedInput="vpf(PartialFractions((1,0),(0,1),(1,1)),(1,2))";
   //civilizedInput="split(PartialFractions((1,0),(0,1),(1,1)))";
   //civilizedInput="PartialFractions((1,0),(0,1),(1,1))";

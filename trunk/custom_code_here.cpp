@@ -444,7 +444,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
       theGlobalVariables.MakeReport();
       out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, false);
       this->GetSubFromIndex(theSub, k);
-      theQPNoSub.Substitution(theSub, currentQPSub);
+      theQPNoSub.Substitution(theSub.RationalPolyForm, currentQPSub, theGlobalVariables);
       out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
       out << "\nthe sub is: " << theSub.ElementToString();
     }
@@ -916,7 +916,7 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
     for (int j=0; j<currentNonParamVerticesList.size; j++)
     { this->GetSubFromNonParamArray(subForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
      // tempQPSubList.AddObjectOnTop(subForFindingExtrema);
-      this->theMultiplicities.TheObjects[i].Substitution(subForFindingExtrema, currentExtremaCandidate);
+      this->theMultiplicities.TheObjects[i].Substitution(subForFindingExtrema.RationalPolyForm, currentExtremaCandidate, theGlobalVariables);
       this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
     }
 
@@ -2189,26 +2189,59 @@ int ParserNode::EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables)
   return this->errorNoError;
 }
 
-void QuasiPolynomial::Substitution
-  (const QPSub& theSub, QuasiPolynomial& output)const
-{
+bool QuasiPolynomial::Substitution
+  (const PolynomialsRationalCoeff& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
+{ MatrixLargeRational theLatticeSub, theSubLatticeShift;
+  if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub, theGlobalVariables))
+    return false;
+  output.AmbientLatticeReduced=this->AmbientLatticeReduced;
+  if(!output.AmbientLatticeReduced.SubstitutionHomogeneous(theLatticeSub, theGlobalVariables))
+    return false;
+  theSubLatticeShift.init(theLatticeSub.NumRows,1);
+  for (int i=0; i<theSubLatticeShift.NumRows; i++)
+    theSub.TheObjects[i].GetConstantTerm(theSubLatticeShift.elements[i][0], (Rational) 0);
+  MatrixLargeRational theShiftImage, shiftMatForm;
+  output.LatticeShifts.size=0;
+  output.valueOnEachLatticeShift.size=0;
+  output.valueOnEachLatticeShift.MakeActualSizeAtLeastExpandOnTop(this->LatticeShifts.size);
+  output.LatticeShifts.MakeActualSizeAtLeastExpandOnTop(this->LatticeShifts.size);
+  root tempRoot;
+  PolynomialRationalCoeff tempP;
+  for (int i=0; i<this->LatticeShifts.size; i++)
+  { shiftMatForm.AssignVectorColumn(this->LatticeShifts.TheObjects[i]);
+    shiftMatForm-=theSubLatticeShift;
+    if (theLatticeSub.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, theShiftImage))
+    { tempRoot.AssignMatDetectRowOrColumn(theShiftImage);
+      output.LatticeShifts.AddObjectOnTop(tempRoot);
+      this->valueOnEachLatticeShift.TheObjects[i].Substitution(theSub, tempP, tempRoot.size, (Rational) 1);
+      output.valueOnEachLatticeShift.AddObjectOnTop(tempP);
+    }
+  }
+  return true;
 }
 
 bool Lattice::SubstitutionHomogeneous
     (const PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational matSub;
+  if (!this->GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, matSub, theGlobalVariables))
+    return false;
+  return this->SubstitutionHomogeneous(matSub, theGlobalVariables);
+}
+
+bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
+(const PolynomialsRationalCoeff& theSub, MatrixLargeRational& output, GlobalVariables& theGlobalVariables)
 { if (theSub.size<1)
     return false;
   int theTargetDim=theSub.TheObjects[0].NumVars;
-  MatrixLargeRational matSub;
-  matSub.init(theSub.size, theTargetDim);
+  output.init(theSub.size, theTargetDim);
   for (int i=0; i<theSub.size; i++)
   { Polynomial<Rational>& currentPoly=theSub.TheObjects[i];
-    if (!currentPoly.IsLinearNoConstantTerm())
+    if (!currentPoly.IsLinear())
       return false;
     for (int j=0; j<theTargetDim; j++)
-      currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(j, matSub.elements[i][j], (Rational) 0);
+      currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(j, output.elements[i][j], (Rational) 0);
   }
-  return this->SubstitutionHomogeneous(matSub, theGlobalVariables);
+  return true;
 }
 
 bool Lattice::SubstitutionHomogeneous

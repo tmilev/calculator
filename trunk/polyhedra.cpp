@@ -2247,7 +2247,7 @@ void MatrixLargeRational::ActOnRoots(roots& input, roots& output)
     this->ActOnAroot(input.TheObjects[i], output.TheObjects[i]);
 }
 
-void MatrixLargeRational::AssignMatrixIntWithDen(MatrixIntTightMemoryFit& theMat, int Den)
+void MatrixLargeRational::AssignMatrixIntWithDen(const MatrixIntTightMemoryFit& theMat, int Den)
 { this->init(theMat.NumRows, theMat.NumCols);
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
@@ -31450,11 +31450,21 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   return this->CarryOutSubstitutionInMe(theSub, theGlobalVariables);
 }
 
+void ParserNode::TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension)
+{ theSub.SetSize(theDimension);
+  for (int i=0; i<theSub.size; i++)
+    theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
+  int minNumberVarsAfterSub=theSub.GetHighestIndexSuchThatHigherIndexVarsDontParticipate()+1;
+//      std::cout << "minNumberVarsAfterSub: " << minNumberVarsAfterSub << "  " << theSub.ElementToString() << "<br>";
+  for (int i=0; i<theDimension; i++)
+    theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(minNumberVarsAfterSub);
+}
+
 int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
 { int theDimension=this->owner->NumVariables;
-  int minNumberVarsAfterSub=0;
   Rational ratOne;
   ratOne.MakeOne();
+  QuasiPolynomial tempQP;
   switch(this->ExpressionType)
   { case ParserNode::typeWeylAlgebraElement:
       this->WeylAlgebraElement.GetElement().SubstitutionTreatPartialsAndVarsAsIndependent(theSub);
@@ -31476,18 +31486,21 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Globa
         this->owner->TheObjects[this->array.GetElement().TheObjects[i]].CarryOutSubstitutionInMe(theSub, theGlobalVariables);
       return this->errorNoError;
     case ParserNode::typeLattice:
-      theSub.SetSize(theDimension);
       if (theDimension!=this->theLattice.GetElement().GetDim())
         return this->SetError(this->errorDimensionProblem);
-      for (int i=0; i<theDimension; i++)
-        theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
-      minNumberVarsAfterSub=theSub.GetHighestIndexSuchThatHigherIndexVarsDontParticipate()+1;
-//      std::cout << "minNumberVarsAfterSub: " << minNumberVarsAfterSub << "  " << theSub.ElementToString() << "<br>";
-      for (int i=0; i<theDimension; i++)
-        theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(minNumberVarsAfterSub);
+      this->TrimSubToMinNumVars(theSub, theDimension);
       if (!this->theLattice.GetElement().SubstitutionHomogeneous(theSub, theGlobalVariables))
         return this->SetError(this->errorImplicitRequirementNotSatisfied);
       this->outputString=this->theLattice.GetElement().ElementToString(true, false);
+      return this->errorNoError;
+    case ParserNode::typeQuasiPolynomial:
+      if(theDimension!=this->theQP.GetElement().GetNumVars())
+        return this->SetError(this->errorDimensionProblem);
+      this->TrimSubToMinNumVars(theSub, theDimension);
+      tempQP=this->theQP.GetElement();
+      if (!tempQP.Substitution(theSub, this->theQP.GetElement(), theGlobalVariables))
+        return this->SetError(this->errorImplicitRequirementNotSatisfied);
+      this->outputString=this->theQP.GetElement().ElementToString(true, false);
       return this->errorNoError;
     default:
       return this->SetError(this->errorDunnoHowToDoOperation);

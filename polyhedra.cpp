@@ -2979,7 +2979,6 @@ bool roots::ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot
   return true;
 }
 
-
 bool roots::ComputeNormalFromSelectionAndTwoExtraRoots( root& output, root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational& tempMatrix= theGlobalVariables.matComputeNormalFromSelectionAndTwoExtraRoots;
   MatrixLargeRational matOutputEmpty;
@@ -25207,6 +25206,7 @@ bool Parser::IsAWordSeparatingCharacter(char c)
 
 void Parser::Parse(const std::string& input)
 { this->ParserInit(input);
+  //std::cout << "Num vars before actual parsing: " << this->NumVariables;
   this->ParseNoInit(0, this->TokenBuffer.size-1);
   this->ComputeNumberOfVariablesAndAdjustNodes();
 }
@@ -26393,6 +26393,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionChamberParam: this->EvaluateChamberParam(theGlobalVariables); break;
     case Parser::functionCone: this->EvaluateCone(theGlobalVariables); break;
     case Parser::functionMaximumLFoverCone: this->EvaluateMaxLFOverCone(theGlobalVariables); break;
+    case Parser::functionMaximumQPoverCone: this->EvaluateMaxQPOverCone(theGlobalVariables); break;
     case Parser::functionLattice: this->EvaluateLattice(theGlobalVariables); break;
     case Parser::functionGetAllRepresentatives: this->EvaluateGetAllRepresentatives(theGlobalVariables); break;
     case Parser::functionInvertLattice: this->EvaluateInvertLattice(theGlobalVariables); break;
@@ -26794,6 +26795,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="invariant")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(Parser::functionInvariants);
+    return true;
+  }
+  if (input=="MaximumQuasipolynomialsOverCone")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(Parser::functionMaximumQPoverCone);
     return true;
   }
   if (input=="maximumLinearFunctionOverCone")

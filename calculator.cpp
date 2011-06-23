@@ -124,7 +124,8 @@ int main(int argc, char **argv)
   //civilizedInput="vpf(PartialFractions((1,0),(0,1),(1,1)),(1,2))";
   //civilizedInput="split(PartialFractions((1,0),(0,1),(1,1)))";
   //civilizedInput="PartialFractions((1,0),(0,1),(1,1))";
- // civilizedInput="GetAllRepresentatives(Lattice((7,4),(1,3)),Lattice((1,1),(1,0)))";
+  //civilizedInput="MaximumQuasipolynomialsOverCone(QuasiPolynomial(x_1+4x_2, (0,0), Lattice((1,0),(0,2))),QuasiPolynomial(x_2, (0,0), Lattice((1,1),(0,2))),QuasiPolynomial(x_1+3x_2+1/2, (0,0), Lattice((0,1),(1,0))), Cone ((1,2,0),(1,-1,0),(0,0,1)))";
+  //civilizedInput="GetAllRepresentatives(Lattice((7,4),(1,3)),Lattice((1,1),(1,0)))";
   //civilizedInput="Lattice((1,1),(1,0))Lattice((7,4),(1,3))";
   //civilizedInput="GetAllRepresentatitves(Lattice((1,1),(1,0)),Lattice((7,4),(1,3)))";
   //civilizedInput="Lattice((1,2),(0,3))Lattice((1,0),(0,3))";
@@ -134,7 +135,7 @@ int main(int argc, char **argv)
   //civilizedInput="printEmbedding";
   //civilizedInput="Lattice((2,1,2), (3,2,1), (2,3,5))";
   //civilizedInput="(d_11\\mapsto 0 : secretSauceOrdered)";
- // civilizedInput="maximumLinearFunctionOverCone(x_1+x_2+x_3, x_1-x_3+2x_2, -x_1-x_3, Cone((1,2,3),(3,-5,0),(1,-1,2), (0,0,1), (0,1,0),(1,0,0)))";
+  //civilizedInput="maximumLinearFunctionOverCone(x_1+x_2+x_3, x_1-x_3+2x_2, -x_1-x_3, Cone((1,2,3),(3,-5,0),(1,-1,2), (0,0,1), (0,1,0),(1,0,0)))";
   //civilizedInput="1/(x_1+1)+1/(-x_1+1)";
   //civilizedInput="combinatorialChamberParam(1, 2, (-1,1,0), (1,0,0), (-1,-1,1))";
   //civilizedInput="secretSauceOrdered";
@@ -222,6 +223,7 @@ int main(int argc, char **argv)
   } else
     theParser.testAlgebra.initDefaultOrder(theParser.theHmm.theRange, theGlobalVariables);
   double TimeParsing=0, TimeEvaluation=0;
+  //std::cout << "before parsing numvars is: " << theParser.NumVariables;
   theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
   TimeParsing=GetElapsedTimeInSeconds();
   std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, theGlobalVariables);

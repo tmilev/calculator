@@ -26137,7 +26137,8 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
     case ParserNode::errorProgramming: out << "error: there has been some programming mistake (it's not your expression's fault). Slap the programmer!"; break;
     case ParserNode::errorUnknownOperation: out << "error: unknown operation. The lazy programmer has added the operation to the dictionary, but hasn't implemented it yet. Lazy programmers deserve no salary. "; break;
     case ParserNode::errorImplicitRequirementNotSatisfied: out << "Error: an implicit requirement for the funciton input has not been satisfied."; break;
-    default: out << "Non-documented error. Lazy programmers deserve no salaries.";
+    case ParserNode::errorBadFileFormat: out << "Bad input file format. "; break;
+    default: out << "Non-documented error. Lazy programmers deserve no salaries."; break;
   }
   return out.str();
 }
@@ -26401,6 +26402,8 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionPartialFractions: this->EvaluatePartialFractions(theGlobalVariables); break;
     case Parser::functionGetVPIndicator: this->EvaluateVectorPFIndicator(theGlobalVariables); break;
     case Parser::functionSplit: this->EvaluateSplit(theGlobalVariables); break;
+    case Parser::functionWriteToFile: this->EvaluateWriteToFile(theGlobalVariables); break;
+    case Parser::functionReadFromFile: this->EvaluateReadFromFile(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26722,6 +26725,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddObjectOnTop(this->functionActByWeyl);
     return true;
   }
+  if (input=="WriteToFile")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionWriteToFile);
+    return true;
+  }
   if (input=="printDecomposition")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
     this->ValueBuffer.AddObjectOnTop(this->functionPrintDecomposition);
@@ -26795,6 +26803,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="invariant")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(Parser::functionInvariants);
+    return true;
+  }
+  if (input=="ReadFromFile")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    this->ValueBuffer.AddObjectOnTop(Parser::functionReadFromFile);
     return true;
   }
   if (input=="MaximumQuasipolynomialsOverCone")
@@ -31566,6 +31579,8 @@ void ParserNode::CopyValue(const ParserNode& other)
       break;
     case ParserNode::typeLattice:
       this->theLattice=other.theLattice;
+      break;
+    case ParserNode::typeFile:
       break;
     default:
       assert(false);

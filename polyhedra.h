@@ -2549,7 +2549,7 @@ public:
   void operator=(const char* input){std::string tempS; tempS=input; this->AssignString(input);}
   void operator=(const SelectionWithMultiplicities& other);
   inline void operator=(const root& right){this->Assign(right); }
-  void AssignString(const std::string& input)
+  bool AssignString(const std::string& input)
   { unsigned int startIndex=0;
     for (; startIndex<input.size(); startIndex++)
       if (input[startIndex]=='(')
@@ -2566,12 +2566,14 @@ public:
         tempS="";
         this->AddObjectOnTopLight(tempRat);
       } else
-      { tempS.resize(tempS.size()+1);
-        tempS[tempS.size()-1]=input[startIndex];
+      { //tempS.resize(tempS.size()+1);
+        //tempS[tempS.size()-1]=input[startIndex];
+        tempS.push_back(input[startIndex]);
       }
       if (input[startIndex]==')')
         break;
     }
+    return true;
   }
   inline void operator*=(const Rational& other){this->MultiplyByLargeRational(other);}
   inline bool operator==(const root& right){return IsEqualTo(right); }
@@ -8972,6 +8974,12 @@ class Cone
     }
     return true;
   }
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
   void operator=(const Cone& other)
   { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
     this->Vertices=other.Vertices;
@@ -9064,12 +9072,12 @@ class ParserNode
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF, typeLattice, typeCone,
-  typeQuasiPolynomial, typePartialFractions,
+  typeQuasiPolynomial, typePartialFractions, typeFile,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
   errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem,
-  errorImplicitRequirementNotSatisfied };
+  errorImplicitRequirementNotSatisfied, errorBadFileFormat };
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
   std::string ElementToStringValueAndType(bool useHtml){return this->ElementToStringValueAndType(useHtml, 0, 3);}
@@ -9095,6 +9103,7 @@ class ParserNode
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
   int EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables);
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
+  int EvaluateReadFromFile(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
   void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
@@ -9102,6 +9111,7 @@ class ParserNode
   int EvaluateCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
+  int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);
   int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
   int EvaluatePartialFractions(GlobalVariables& theGlobalVariables);
   int EvaluateSplit(GlobalVariables& theGlobalVariables);
@@ -9168,7 +9178,7 @@ public:
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
     functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
-    functionGetVPIndicator, functionMaximumQPoverCone,
+    functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -9369,6 +9379,7 @@ public:
   roots rootsAttepmtTheTripleTrickWRTSA;
   roots rootsreduceOnceGeneralMethod;
   roots rootsGlueingGetNonSeparableChambers;
+  roots rootsConeWriteToFileBuffer;
 
   rootsCollection rootsCollectionSplitChamber1;
   rootsCollection rootsCollectionSplitChamber2;

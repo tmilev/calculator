@@ -2326,9 +2326,26 @@ public:
     Matrix<CoefficientType> matBuffer;
     return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
   }
+  Vector<CoefficientType> operator*(const CoefficientType& other)
+  { Vector<CoefficientType> result;
+    result.SetSize(this->size);
+    for (int i=0; i<this->size; i++)
+    { result.TheObjects[i]=this->TheObjects[i];
+      result.TheObjects[i]*=other;
+    }
+    return result;
+  }
   void operator*=(const CoefficientType& other)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]*=other;
+  }
+  void operator/=(const CoefficientType& other)
+  { for (int i=0; i<this->size; i++)
+      this->TheObjects[i]/=other;
+  }
+  void operator+=(const Vector<CoefficientType>& other)
+  { for (int i=0; i<this->size; i++)
+      this->TheObjects[i]+=other.TheObjects[i];
   }
   bool IsEqualToZero()const
   { for (int i=0; i<this->size; i++)
@@ -2417,7 +2434,15 @@ class Vectors: public List<Vector<CoefficientType> >
   void GetLinearDependenceRunTheLinearAlgebra
   (Matrix<CoefficientType>& outputTheLinearCombination, Matrix<CoefficientType>& outputTheSystem, Selection& outputNonPivotPoints)
   ;
-
+  void AssignMatrixRows(Matrix<CoefficientType>& mat)
+  { this->size=0;
+    this->SetSize(mat.NumRows);
+    for (int i=0; i<mat.NumRows; i++)
+    { this->TheObjects[i].SetSize(mat.NumCols);
+      for (int j=0; j<mat.NumCols; j++)
+        this->TheObjects[i].TheObjects[j]=mat.elements[i][j];
+    }
+  }
 };
 
 class root: public Vector<Rational>
@@ -4115,6 +4140,9 @@ public:
         return false;
     return true;
   }
+  void Evaluate
+(const Vector<ElementOfCommutativeRingWithIdentity>& input, ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero)
+  ;
   bool IsProportionalTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& other, ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther, const ElementOfCommutativeRingWithIdentity& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, PolynomialOutputFormat& PolyFormatLocal);
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
@@ -4569,6 +4597,7 @@ public:
   PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);}
   void AssignIntegerPoly(const Polynomial<LargeInt>& p);
   void Evaluate(intRoot& values, Rational& output);
+  void Evaluate(root& values, Rational& output){ this->::Polynomial<Rational>::Evaluate(values, output, (Rational) 0);}
   void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
   void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables);
   void MakeLinPolyFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
@@ -5434,6 +5463,22 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariablesWithS
   }
   this->CopyFromPoly(Accum);
 }
+template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::Evaluate
+(const Vector<ElementOfCommutativeRingWithIdentity>& input, ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero)
+{ output=theRingZero;
+  ElementOfCommutativeRingWithIdentity tempElt;
+  for (int i=0; i<this->size; i++)
+  { tempElt=this->TheObjects[i].Coefficient;
+    for (int j=0; j<this->NumVars; j++)
+      for (int k=0; k<this->TheObjects[i].degrees[j]; k++)
+      { tempElt*=input.TheObjects[j];
+        ParallelComputing::SafePoint();
+      }
+    output+=(tempElt);
+  }
+}
+
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::DecreaseNumVariables(int increment, Polynomial<ElementOfCommutativeRingWithIdentity>& output)
@@ -6556,8 +6601,8 @@ public:
   int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
-  //returns false if the vector is not in the lattice
-  bool ReduceVector(root& theVector, GlobalVariables& theGlobalVariables);
+  //returns false if the vector is not in the vector space spanned by the lattice
+  bool ReduceVector(Vector<Rational>& theVector);
   //In the below, the format of the matrix theSub of the substitution is as follows.
   //Let the ambient dimension be n, and the coordinates be y_1,..., y_n.
   //Let the new vector space be of dimension m, with coordinates x_1,..., x_m.
@@ -6613,6 +6658,8 @@ public:
   std::string ElementToString(bool useHtml, bool useLatex){PolynomialOutputFormat tempFormat; return this->ElementToString(useHtml, useLatex, tempFormat);}
   std::string ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat);
   void ComputeDebugString(){this->DebugString=this->ElementToString(false, false);}
+  void Evaluate(const root& input);
+  void AddLatticeShift(const PolynomialRationalCoeff& input, const root& inputShift);
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
   void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
@@ -8956,6 +9003,9 @@ public:
   bool findMaxLFOverConeProjective
   (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
   ;
+  bool findMaxQPOverConeProjective
+  (Cone& input, List<QuasiPolynomial>& inputQPs, List<QuasiPolynomial>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
+  ;
   void initFromCones
   (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
   ;
@@ -9051,6 +9101,7 @@ class ParserNode
   void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
   int EvaluateCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
+  int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
   int EvaluatePartialFractions(GlobalVariables& theGlobalVariables);
   int EvaluateSplit(GlobalVariables& theGlobalVariables);
@@ -9117,7 +9168,7 @@ public:
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
     functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
-    functionGetVPIndicator,
+    functionGetVPIndicator, functionMaximumQPoverCone,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

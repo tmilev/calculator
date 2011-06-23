@@ -119,6 +119,8 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
+  //civilizedInput="ReadFromFile";
+  //civilizedInput="WriteToFile(Cone((0,1),(1,0)))";
   //civilizedInput= "(x_1\\mapsto x_1-3x_2, x_2\\mapsto 1/2x_2: Lattice((1,1),(0,2)))";
   //civilizedInput="(x_1\\mapsto x_1, x_2\\mapsto x_1: Lattice((1,0),(0,1)))";
   //civilizedInput="vpf(PartialFractions((1,0),(0,1),(1,1)),(1,2))";
@@ -130,7 +132,7 @@ int main(int argc, char **argv)
   //civilizedInput="GetAllRepresentatitves(Lattice((1,1),(1,0)),Lattice((7,4),(1,3)))";
   //civilizedInput="Lattice((1,2),(0,3))Lattice((1,0),(0,3))";
   //civilizedInput="QuasiPolynomial(x_1, (1,2), Lattice((1,2),(0,3)))+QuasiPolynomial(x_2, (0,0), Lattice((1,1),(1,0)))";
-  //  civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
+  //civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
   //civilizedInput= "QuasiPolynomial(x_1+x_2, (10101/71,10000/99), Lattice((2,1/8),(5,10)))";
   //civilizedInput="printEmbedding";
   //civilizedInput="Lattice((2,1,2), (3,2,1), (2,3,5))";

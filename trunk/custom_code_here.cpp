@@ -1492,10 +1492,10 @@ bool ConeComplex::findMaxQPOverConeProjective
     } else
       theLatticeIntersection.IntersectWith(currentQP.AmbientLatticeReduced);
   }
-  std::cout << "allPolys: ";
-  for (int i=0; i<allPolys.size; i++)
-  { std::cout << allPolys.TheObjects[i].ElementToString() << " with numvars: " << allPolys.TheObjects[i].NumVars << ", ";
-  }
+  //std::cout << "allPolys: ";
+  //for (int i=0; i<allPolys.size; i++)
+  //{ std::cout << allPolys.TheObjects[i].ElementToString() << " with numvars: " << allPolys.TheObjects[i].NumVars << ", ";
+  //}
   List<int> tempList;
   if (!this->findMaxLFOverConeProjective(input, allPolys, tempList, theGlobalVariables))
     return false;
@@ -1524,13 +1524,13 @@ bool ConeComplex::findMaxQPOverConeProjective
       Rational theMax, currentValue;
       currentValue=0; theMax=0;
       tempP.Nullify(currentCone.GetDim());
-      for (int k=0; k<commonlyRefinedQPs.size; k++)
+      /*for (int k=0; k<commonlyRefinedQPs.size; k++)
       { QuasiPolynomial& currentQP=commonlyRefinedQPs.TheObjects[k];
         for (int l=0; l< currentQP.LatticeShifts.size; l++)
         { currentQP.valueOnEachLatticeShift.TheObjects[l].Evaluate(currentInternalPoint, currentValue);
           std::cout << "<br>cone " << i+1 << " shift " << j+1 << " poly " << k+1 << " shift "<< currentQP.LatticeShifts.TheObjects[l].ElementToString() <<  " value: " << currentValue.ElementToString();
         }
-      }
+      }*/
       for (int k=0; k<commonlyRefinedQPs.size; k++)
       { QuasiPolynomial& currentQP=commonlyRefinedQPs.TheObjects[k];
         int index=currentQP.LatticeShifts.IndexOfObject(currentShift);
@@ -1556,7 +1556,7 @@ bool ConeComplex::findMaxQPOverConeProjective
 bool ConeComplex::findMaxLFOverConeProjective
   (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
 { this->init();
-  std::cout << "Starting cone: " << input.ElementToString(false, true);
+  //std::cout << "Starting cone: " << input.ElementToString(false, true);
   this->AddNonRefinedChamberOnTopNoRepetition(input);
   roots HyperPlanesCorrespondingToLF;
   if (input.Normals.size<1 || inputLinPolys.size<1)
@@ -1603,8 +1603,8 @@ bool ConeComplex::findMaxLFOverConeProjective
       }
   }
   for (int i=0; i<this->size; i++)
-  { std::cout << "<br>Chamber " << i+1 << " maximum linear function is the function of index " << outputMaximumOverEeachSubChamber.TheObjects[i] << ": " << inputLinPolys.TheObjects[outputMaximumOverEeachSubChamber.TheObjects[i]].ElementToString();
-    std::cout << "<br>The chamber is given by: " << this->TheObjects[i].ElementToString(false, true);
+  { //std::cout << "<br>Chamber " << i+1 << " maximum linear function is the function of index " << outputMaximumOverEeachSubChamber.TheObjects[i] << ": " << inputLinPolys.TheObjects[outputMaximumOverEeachSubChamber.TheObjects[i]].ElementToString();
+    //std::cout << "<br>The chamber is given by: " << this->TheObjects[i].ElementToString(false, true);
   }
   return true;
 }
@@ -1986,7 +1986,7 @@ int ParserNode::EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables)
 { List<int> argumentList;
   this->ExtractArgumentList(argumentList);
 //  std::cout << "number of arguments: " << argumentList.size;
-  std::cout << "<br> before evaluating your quasipoly the dim is " << this->owner->NumVariables;
+  //std::cout << "<br> before evaluating your quasipoly the dim is " << this->owner->NumVariables;
   if (argumentList.size!=3)
     return this->SetError(this->errorBadOrNoArgument);
   root theShift;
@@ -2423,4 +2423,99 @@ void QuasiPolynomial::operator*=(const Rational& theConst)
   }
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
     this->valueOnEachLatticeShift.TheObjects[i]*=theConst;
+}
+
+int ParserNode::EvaluateReadFromFile(GlobalVariables& theGlobalVariables)
+{ std::fstream input;
+  std::string theFileName, tempS;
+  theFileName=this->owner->outputFolderPath;
+  theFileName.append("output.txt");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, theFileName, false, false, false);
+  input.seekg(0);
+  std::stringstream outString;
+  int candidateExpressionType;
+  input >> tempS >> candidateExpressionType;
+  //std::cout << "header: " << tempS << " expression type: " << candidateExpressionType;
+  if (tempS!="ExpressionType:")
+  { outString << "missing header of file " << theFileName << " header read is: " << tempS;
+    this->outputString=outString.str();;
+    return this->SetError(this->errorBadFileFormat);
+  }
+  switch (candidateExpressionType)
+  { case ParserNode::typeCone:
+      if(!this->theCone.GetElement().ReadFromFile(input, theGlobalVariables))
+        return this->SetError(this->errorBadFileFormat);
+      this->outputString=this->theCone.GetElement().ElementToString(false, true);
+      this->ExpressionType=candidateExpressionType;
+      return this->errorNoError;
+    default: return this->SetError(this->errorBadFileFormat);
+  }
+
+}
+
+int ParserNode::EvaluateWriteToFile(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size!=1)
+    return this->SetError(this->errorBadOrNoArgument);
+  ParserNode& argument=this->owner->TheObjects[argumentList.TheObjects[0]];
+  std::fstream output;
+  std::string theFileName;
+  theFileName=this->owner->outputFolderPath;
+  theFileName.append("output.txt");
+  //std::cout  <<theFileName;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, theFileName, false, true, false);
+  std::stringstream outString;
+  output << "ExpressionType: " << argument.ExpressionType << "\n";
+  switch (argument.ExpressionType)
+  { case ParserNode::typeCone:
+      argument.theCone.GetElement().WriteToFile(output, theGlobalVariables);
+      outString << "A latex/pdf file: <a href=\"" <<  this->owner->outputFolderDisplayPath << "output.txt\"> output.txt</a>";
+      this->outputString=outString.str();
+      this->ExpressionType=this->typeFile;
+      return this->errorNoError;
+    default: return this->SetError(this->errorDunnoHowToDoOperation);
+  }
+}
+
+void Cone::WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "Cone( ";
+  for (int i=0; i<this->Normals.size; i++)
+  { output << "(";
+    for (int j=0; j<this->Normals.TheObjects[i].size; j++)
+    { output << this->Normals.TheObjects[i].TheObjects[j].ElementToString();
+      if (j!=this->Normals.TheObjects[i].size-1)
+        output << ",";
+    }
+    output << ")";
+    if (i!=this->Normals.size-1)
+      output << ", ";
+  }
+  output << " ) ";
+}
+
+bool Cone::ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS, rootString;
+  input >> tempS;
+  roots& buffer=theGlobalVariables.rootsConeWriteToFileBuffer;
+  buffer.size=0;
+  root tempRoot;
+  if (tempS!="Cone(")
+  { std::cout << "tempS was instead " << tempS;
+    return false;
+  }
+  for (input >> tempS; tempS!=")" && tempS!=""; input >> tempS)
+  { tempRoot.AssignString(tempS);
+    buffer.AddObjectOnTop(tempRoot);
+    //std::cout << "vector input " << tempS << " read as " << tempRoot.ElementToString();
+  }
+  if (buffer.size<1)
+    return false;
+  int theDim=buffer.TheObjects[0].size;
+  for (int i=1; i<buffer.size; i++)
+    if (buffer.TheObjects[i].size!=theDim)
+      return false;
+  return this->CreateFromNormals(buffer, theGlobalVariables);
 }

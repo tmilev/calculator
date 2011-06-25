@@ -70,8 +70,8 @@ public:
 	pthread_t ComputationalThreadLinux;
 #endif
   bool isRunning;
-  bool CriticalSectionWorkThreadEntered;
   bool CriticalSectionPauseButtonEntered;
+  MutexWrapper mutexAccessingSharedData;
   void run();
 };
 
@@ -758,7 +758,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Canvas1->ClickToleranceX=10;
   this->Canvas1->ClickToleranceY=10;
   this->WorkThread1.CriticalSectionPauseButtonEntered=false;
-  this->WorkThread1.CriticalSectionWorkThreadEntered=false;
+//  this->WorkThread1.CriticalSectionWorkThreadEntered=false;
   //this->Button3LprohibitingGo->Disable();
   this->wxProgressReportEvent.SetId(this->GetId());
   this->wxProgressReportEvent.SetEventObject(this);
@@ -915,7 +915,7 @@ void guiMainWindow::RunTheComputation()
 #endif
       MainWindow1->WorkThread1.isRunning=false;
       MainWindow1->Button1Go->SetLabel(wxT("Go"));
-      MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
+//      MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
       MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered=false;
     }	else
     { MainWindow1->Button1Go->SetLabel(wxT("Pause"));
@@ -1557,10 +1557,8 @@ void guiMainWindow::onComputationOver(wxCommandEvent& ev)
 }
 
 void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
-{ IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
-  //if (output.Busy)
-	//	return;
-	output.Busy=true;
+{ this->WorkThread1.mutexAccessingSharedData.LockMe();
+  IndicatorWindowVariables& output= MainWindow1->progressReportVariables;
 	if (output.String1NeedsRefresh)
   { wxString tempS1(output.ProgressReportString1.c_str(),wxConvUTF8);
 		MainWindow1->Label1ProgressReport->SetLabel(tempS1);
@@ -1591,22 +1589,14 @@ void guiMainWindow::onProgressReport(::wxCommandEvent& ev)
     tempRoot.AssignIntRoot(output.modifiedRoot);
     MainWindow1->WriteIndicatorWeight(tempRoot);
   }
-  output.Busy=false;
+  this->WorkThread1.mutexAccessingSharedData.UnlockMe();
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
-{ MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=true;
-  if (MainWindow1->WorkThread1.CriticalSectionPauseButtonEntered)
-  { MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
-    return;
-  }
-  if (MainWindow1->progressReportVariables.Busy)
-		return;
-  MainWindow1->progressReportVariables.Busy=true;
+{ MainWindow1->WorkThread1.mutexAccessingSharedData.LockMe();
   MainWindow1->progressReportVariables.Assign(output);
   wxPostEvent(MainWindow1->GetEventHandler(), MainWindow1->wxProgressReportEvent);
-  MainWindow1->WorkThread1.CriticalSectionWorkThreadEntered=false;
-  MainWindow1->progressReportVariables.Busy=false;
+  MainWindow1->WorkThread1.mutexAccessingSharedData.UnlockMe();
 }
 
 #endif

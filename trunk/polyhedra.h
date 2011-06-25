@@ -578,8 +578,10 @@ public:
   void ElementToStringGeneric(std::string& output, int NumElementsToPrint)const;
   int IndexOfObject(const Object& o) const;
   bool ContainsObject(const Object& o){ return this->IndexOfObject(o)!=-1; }
-  void ReadFromFile(std::fstream& input);
+  bool ReadFromFile(std::fstream& input);
+  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output);
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
 //  inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1; };
   int SizeWithoutObjects();
   inline Object* LastObject();
@@ -1009,7 +1011,8 @@ void NonPivotPointsToEigenVector
   { this->Subtract(other);
   }
   void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input);
+  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables){return this->ReadFromFile(input);}
+  bool ReadFromFile(std::fstream& input);
   void operator/=(const Element& input)
   { for (int j=0; j<this->NumRows; j++)
       for (int i=0; i<this->NumCols; i++)
@@ -1316,14 +1319,18 @@ void Matrix<Element>::WriteToFile(std::fstream& output)
 }
 
 template <typename Element>
-void Matrix<Element>::ReadFromFile(std::fstream& input)
+bool Matrix<Element>::ReadFromFile(std::fstream& input)
 { int r, c; std::string tempS;
   input >> tempS >> r >> tempS >> c;
-  assert(tempS=="Matrix_NumCols:");
+  if (tempS!="Matrix_NumCols:")
+  { assert(false);
+    return false;
+  }
   this->init(r, c);
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
       this->elements[i][j].ReadFromFile(input);
+  return true;
 }
 
 template <typename Element>
@@ -2729,7 +2736,7 @@ public:
   bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output, root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
   bool operator==(const roots& right)const;
   void operator = (const roots& right){this->CopyFromBase(right); }
-  void ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariables);
+  bool ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
   roots(){}
   roots(int StartingSize){ this->SetSize(StartingSize);}
@@ -3177,13 +3184,38 @@ void List<Object>::WriteToFile(std::fstream& output)
 }
 
 template <class Object>
-void List<Object>::ReadFromFile(std::fstream& input)
+void List<Object>::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "List_size: " << this->size << "\n";
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+    output << "\n";
+  }
+}
+
+template <class Object>
+bool List<Object>::ReadFromFile(std::fstream& input)
 { std::string tempS; int tempI;
   input >> tempS >> tempI;
   assert(tempS=="List_size:");
+  if(tempS!="List_size:")
+    return false;
   this->SetSize(tempI);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ReadFromFile(input);
+  return true;
+}
+
+template <class Object>
+bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS; int tempI;
+  input >> tempS >> tempI;
+  assert(tempS=="List_size:");
+  if(tempS!="List_size:")
+    return false;
+  this->SetSize(tempI);
+  for (int i=0; i<this->size; i++)
+    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+  return true;
 }
 
 template <class Object>
@@ -3653,7 +3685,7 @@ public:
       this->AddObjectOnTopHash(input.TheObjects[i]);
   }
   void WriteToFile (std::fstream& output);
-  void ReadFromFile(std::fstream& input);
+  bool ReadFromFile(std::fstream& input);
   void ComputeDebugString();
   void ElementToString(std::string& output);
   void ElementToString(std::string& output, bool useHtml);
@@ -4052,7 +4084,8 @@ public:
   void RaiseToPower(int d,  const ElementOfCommutativeRingWithIdentity& theRingUniT);
   void AddPolynomial(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
   void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input, int NumV);
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables){return this->WriteToFile(output);}
+  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
   int HasSameExponentMonomial(TemplateMonomial& m);
   void operator= (const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& right);
   bool operator== (const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& right);
@@ -4217,7 +4250,7 @@ public:
   void MakeConst(const ElementOfCommutativeRingWithIdentity& theConstant, int theNumVars);
   bool IsEqualToZero();
   void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input, int numV);
+  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4266,9 +4299,9 @@ void PolynomialLight<ElementOfCommutativeRingWithIdentity>::WriteToFile(std::fst
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, int numV)
+void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
-  ComputationalBuffer.ReadFromFile(input, numV);
+  ComputationalBuffer.ReadFromFile(input, theGlobalVariables);
   this->AssignPolynomial(ComputationalBuffer);
 }
 
@@ -5393,8 +5426,10 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::WriteToFile(std::fstream& output)
-{ output << "|/-- " << this->size << "\n";
+void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::WriteToFile
+(std::fstream& output)
+{ output << "NumVars: " << this->NumVars << "\n";
+  output << "|/-- " << this->size << "\n";
   for (int i=0; i<this->size; i++)
   { output << "| ";
     this->TheObjects[i].Coefficient.WriteToFile(output);
@@ -5407,14 +5442,23 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
-inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, int NumV)
+inline bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::ReadFromFile
+(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS;
+  int candidateVars;
+  input >> tempS >> candidateVars;
+  if (tempS!="NumVars:" || candidateVars<0)
+  { assert(false);
+    return false;
+  }
   TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> Buffer;
-  Buffer.Nullify(NumV);
+  Buffer.Nullify(candidateVars);
   TemplateMonomial tempM;
-  tempM.init(NumV);
+  tempM.init(candidateVars);
   input >> tempS;
   assert (tempS=="|/--");
+  if (tempS!="|/--")
+    return false;
   int tempSize;
   input >> tempSize;
   Buffer.MakeActualSizeAtLeastExpandOnTop(tempSize);
@@ -5423,13 +5467,16 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
     tempM.Coefficient.ReadFromFile(input);
 //    tempM.Coefficient.ComputeDebugString();
     input >> tempS;
-    for (int j=0; j<NumV; j++)
+    for (int j=0; j<candidateVars; j++)
       input >> tempM.degrees[j];
     Buffer.AddMonomial(tempM);
   }
   input >> tempS;
   assert(tempS=="|\\--");
+  if (tempS!="|\\--")
+    return false;
   this->CopyFromPoly(Buffer);
+  return true;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -6641,6 +6688,12 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
     this->Den=other.Den;
     this->basisRationalForm=other.basisRationalForm;
   }
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
   void MakeZn(int theDim);
   void RefineByOtherLattice(const Lattice& other);
   void MakeFromRoots
@@ -6671,6 +6724,8 @@ public:
   ;
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){this->buffers=0;}
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
   QuasiPolynomial(const QuasiPolynomial& other){this->operator=(other);}
   void operator*=(const Rational& theConst);
   void operator=(const QuasiPolynomial& other)
@@ -9025,6 +9080,12 @@ public:
   ;
   void init(){this->splittingNormals.ClearTheObjects(); this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
 };
 
 class Parser;

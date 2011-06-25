@@ -35,14 +35,13 @@ void ComputationSetup::ComputeCharaterFormulas(ComputationSetup& inputData, Glob
 class GeneralizedVermaModuleCharacters
 {
 public:
-  bool flagUsingNewSplit;
+//  bool flagUsingNewSplit;
   List<MatrixLargeRational> theLinearOperators;
   roots GmodKnegativeWeights;
   ConeGlobal PreimageWeylChamberLargerAlgebra;
   ConeGlobal WeylChamberSmallerAlgebra;
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
-//  List<CombinatorialChamber> parametricChambers;
   List<QuasiPolynomial> theMultiplicities;
   List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
   int tempDebugCounter;
@@ -58,11 +57,30 @@ public:
   ConeComplex projectivizedParamComplex;
   ConeComplex projectivizedChamberTest;
   std::stringstream log;
-  GeneralizedVermaModuleCharacters(){this->flagUsingNewSplit=true;
-  this->tempDebugCounter=1;
+  Parser theParser;
+  int computationPhase;
+
+  void IncrementComputation(GlobalVariables& theGlobalVariables);
+  GeneralizedVermaModuleCharacters(){ this->tempDebugCounter=1; this->computationPhase=0;}
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  { std::string tempS;
+    input >> tempS >> this->computationPhase;
+    if (tempS!="ComputationPhase:")
+      return false;
+    return this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
   }
+  bool ReadFromFileNoComputationPhase
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
   void GetProjection(int indexOperator, const root& input, root& output);
-  void FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep2(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables);
   void ProcessExtremaOneChamber
   (Cone& input, GlobalVariables& theGlobalVariables)
   ;
@@ -188,7 +206,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
           current.flagPermanentlyZero=true;
       }
   }
-  if(this->flagUsingNewSplit)
+//  if(this->flagUsingNewSplit)
   { List<roots> tempChambers;
     tempChambers.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size);
     for (int j=0; j<this->projectivizedChamber.size; j++)
@@ -400,9 +418,7 @@ std::string QPSub::ElementToString()
 
 void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 (GlobalVariables& theGlobalVariables)
-{ if (!this->flagUsingNewSplit)
-    return;
-  std::stringstream out;
+{ std::stringstream out;
   PolynomialOutputFormat theFormat;
   root tempRoot;
   QPSub theSub;
@@ -471,27 +487,58 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 }
 
 void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.flagSliceWithAWallInitDone)
-  { if (!tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.flagUsingNewSplit)
-    { while (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamber.oneStepChamberSlice(theGlobalVariables)){}
-    } else
-    { tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.Refine(theGlobalVariables);
-      std::stringstream out;
-      out << tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.ElementToString();
-      theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-      theGlobalVariables.MakeReport();
-    }
-    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.ComputeQPsFromChamberComplex(theGlobalVariables);
-    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.FindMultiplicitiesExtrema(theGlobalVariables);
+{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation(theGlobalVariables);
+}
+
+void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  std::fstream input; std::string tempS;
+  std::string theFileName="/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt";
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, theFileName, false, false, false);
+  int candidatePhase;
+  input >> tempS >> candidatePhase;
+  if (tempS=="ComputationPhase:")
+  { this->computationPhase=candidatePhase;
+    this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
+  } else
+    this->computationPhase=0;
+  input.close();
+  switch (this->computationPhase)
+  { case 0:
+      this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
+      this->initFromHomomorphism(this->theParser.theHmm, theGlobalVariables);
+      this->TransformToWeylProjective(theGlobalVariables);
+      out << this->projectivizedChamberTest.ElementToString();
+      break;
+    case 1:
+      this->projectivizedChamberTest.Refine(theGlobalVariables);
+      out << this->projectivizedChamberTest.ElementToString();
+      break;
+    case 2:
+      this->ComputeQPsFromChamberComplex(theGlobalVariables);
+      break;
+    case 3:
+      this->FindMultiplicitiesExtremaStep1(theGlobalVariables);
+      break;
+    case 4:
+      this->FindMultiplicitiesExtremaStep2(theGlobalVariables);
+      break;
+    case 5:
+      this->FindMultiplicitiesExtremaStep3(theGlobalVariables);
+      break;
+    case 6:
+      this->FindMultiplicitiesExtremaStep4(theGlobalVariables);
+      break;
+    default:
+      break;
   }
-  else
-  { inputData.theParser.theHmm.MakeG2InB3(inputData.theParser, theGlobalVariables);
-    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.initFromHomomorphism(inputData.theParser.theHmm, theGlobalVariables);
-    tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.TransformToWeylProjective(theGlobalVariables);
-//    theGlobalVariables.theIndicatorVariables.StatusString1=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.log.str();
-    theGlobalVariables.theIndicatorVariables.StatusString1=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.projectivizedChamberTest.ElementToString();
-    theGlobalVariables.MakeReport();
+  this->computationPhase++;
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.MakeReport();
+  if (this->computationPhase < 10)
+  { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, theFileName, false, true, false);
+    this->WriteToFile(input, theGlobalVariables);
   }
 }
 
@@ -878,10 +925,8 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
   output.MakeSubFromMatrixRational(subRationalForm);
 }
 
-void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables& theGlobalVariables)
-{ if (!this->flagUsingNewSplit)
-    return;
-  this->paramSubChambers.SetSize(this->projectivizedChamberTest.size);
+void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables)
+{ this->paramSubChambers.SetSize(this->projectivizedChamberTest.size);
   this->nonParamVertices.SetSize(this->projectivizedChamberTest.size);
   int theDimension=6;
   if (this->projectivizedChamberTest.size>0)
@@ -919,7 +964,6 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
       this->theMultiplicities.TheObjects[i].Substitution(subForFindingExtrema.RationalPolyForm, currentExtremaCandidate, theGlobalVariables);
       this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
     }
-
     this->ExtremeQPsParamSubchambers.TheObjects[i].SetSize(currentParamChamberList.size);
     for (int j=0; j< currentParamChamberList.size; j++)
     { std::stringstream progressReport2;
@@ -933,7 +977,10 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
       out << "\nVertices: " << currentNonParamVertices.ElementToStringLetterFormat("x", false);
     }
   }
-  std::stringstream out2;
+}
+
+void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep2(GlobalVariables& theGlobalVariables)
+{ std::stringstream out2;
 //  for (int i=0; i<tempQPSubList.size; i++)
 //  { out2 << " Chamber candidate " << i+1 << " the Sub:\n" << tempQPSubList.TheObjects[i].ElementToString() << "\n";
  // }
@@ -947,9 +994,14 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtrema(GlobalVariables
     theGlobalVariables.MakeReport();
   }
   this->projectivizedParamComplex.initFromCones(this->allParamSubChambersRepetitionsAllowed, theGlobalVariables);
+}
 
-  //this->projectivizedParamComplex.Refine(theGlobalVariables);
-  this->theMultiplicitiesExtremaCandidates.SetSize(this->projectivizedParamComplex.size);
+void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables)
+{ this->projectivizedParamComplex.Refine(theGlobalVariables);
+}
+
+void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables)
+{ this->theMultiplicitiesExtremaCandidates.SetSize(this->projectivizedParamComplex.size);
   std::stringstream out3;
   for (int i=0; i<this->projectivizedParamComplex.size; i++)
   if (i<this->tempDebugCounter)
@@ -2446,10 +2498,21 @@ int ParserNode::EvaluateReadFromFile(GlobalVariables& theGlobalVariables)
       if(!this->theCone.GetElement().ReadFromFile(input, theGlobalVariables))
         return this->SetError(this->errorBadFileFormat);
       this->outputString=this->theCone.GetElement().ElementToString(false, true);
-      this->ExpressionType=candidateExpressionType;
-      return this->errorNoError;
+      break;
+    case ParserNode::typeQuasiPolynomial:
+      if(!this->theQP.GetElement().ReadFromFile(input, theGlobalVariables))
+        return this->SetError(this->errorBadFileFormat);
+      this->outputString=this->theQP.GetElement().ElementToString(true, false);
+      break;
+    case ParserNode::typeLattice:
+      if(!this->theLattice.GetElement().ReadFromFile(input, theGlobalVariables))
+        return this->SetError(this->errorBadFileFormat);
+      this->outputString=this->theLattice.GetElement().ElementToString(true, false);
+      break;
     default: return this->SetError(this->errorBadFileFormat);
   }
+  this->ExpressionType=candidateExpressionType;
+  return this->errorNoError;
 
 }
 
@@ -2470,12 +2533,19 @@ int ParserNode::EvaluateWriteToFile(GlobalVariables& theGlobalVariables)
   switch (argument.ExpressionType)
   { case ParserNode::typeCone:
       argument.theCone.GetElement().WriteToFile(output, theGlobalVariables);
-      outString << "A latex/pdf file: <a href=\"" <<  this->owner->outputFolderDisplayPath << "output.txt\"> output.txt</a>";
-      this->outputString=outString.str();
-      this->ExpressionType=this->typeFile;
-      return this->errorNoError;
+      break;
+    case ParserNode::typeQuasiPolynomial:
+      argument.theQP.GetElement().WriteToFile(output, theGlobalVariables);
+      break;
+    case ParserNode::typeLattice:
+      argument.theLattice.GetElement().WriteToFile(output, theGlobalVariables);
+      break;
     default: return this->SetError(this->errorDunnoHowToDoOperation);
   }
+  outString << "A latex/pdf file: <a href=\"" <<  this->owner->outputFolderDisplayPath << "output.txt\"> output.txt</a>";
+  this->outputString=outString.str();
+  this->ExpressionType=this->typeFile;
+  return this->errorNoError;
 }
 
 void Cone::WriteToFile
@@ -2517,5 +2587,139 @@ bool Cone::ReadFromFile
   for (int i=1; i<buffer.size; i++)
     if (buffer.TheObjects[i].size!=theDim)
       return false;
-  return this->CreateFromNormals(buffer, theGlobalVariables);
+  bool tempBool=this->CreateFromNormals(buffer, theGlobalVariables);
+  assert(tempBool);
+  return tempBool;
+}
+
+void GeneralizedVermaModuleCharacters::WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "ComputationPhase: " << this->computationPhase << "\n";
+  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
+  theGlobalVariables.MakeReport();
+  this->allParamSubChambersRepetitionsAllowed.WriteToFile(output, theGlobalVariables);
+  this->allParamSubChambersRepetitionsAllowedConeForm.WriteToFile(output, theGlobalVariables);
+  this->ExtremeQPsParamSubchambers.WriteToFile(output, theGlobalVariables);
+  this->GmodKnegativeWeights.WriteToFile(output, theGlobalVariables);
+  this->theLinearOperators.WriteToFile(output);
+  this->PreimageWeylChamberLargerAlgebra.WriteToFile(output, theGlobalVariables);
+  this->WeylChamberSmallerAlgebra.WriteToFile(output, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing QP's non-subbed... ";
+  theGlobalVariables.MakeReport();
+  this->theQPsNonSubstituted.WriteToFile(output, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing QP's subbed... ";
+  theGlobalVariables.MakeReport();
+  this->theQPsSubstituted.WriteToFile(output, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
+  theGlobalVariables.MakeReport();
+  this->theMultiplicities.WriteToFile(output, theGlobalVariables);
+  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
+  this->theCoeffs.WriteToFile(output);
+  this->theTranslations.WriteToFile(output, theGlobalVariables);
+  this->theTranslationsProjected.WriteToFile(output, theGlobalVariables);
+  this->thePfs.WriteToFile(output, theGlobalVariables);
+  this->paramSubChambers.WriteToFile(output, theGlobalVariables);
+  this->nonParamVertices.WriteToFile(output, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing param chamber complex... ";
+  theGlobalVariables.MakeReport();
+  this->projectivizedParamComplex.WriteToFile(output, theGlobalVariables);
+  this->projectivizedChamberTest.WriteToFile(output, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing to file done... ";
+  theGlobalVariables.MakeReport();
+}
+
+void QuasiPolynomial::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->valueOnEachLatticeShift.WriteToFile(output, theGlobalVariables);
+  this->AmbientLatticeReduced.WriteToFile(output, theGlobalVariables);
+  this->LatticeShifts.WriteToFile(output, theGlobalVariables);
+}
+
+bool QuasiPolynomial::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ this->valueOnEachLatticeShift.ReadFromFile(input, theGlobalVariables);
+  this->AmbientLatticeReduced.ReadFromFile(input, theGlobalVariables);
+  this->LatticeShifts.ReadFromFile(input, theGlobalVariables);
+  this->buffers=&theGlobalVariables;
+  return true;
+}
+
+void Lattice::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+{ output << "Lattice: ";
+  this->basisRationalForm.WriteToFile(output);
+}
+
+bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ std::string tempS;
+  input >> tempS;
+  if (tempS!="Lattice:")
+  { assert(false);
+    return false;
+  }
+  if(!this->basisRationalForm.ReadFromFile(input))
+    return false;
+  this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
+  return true;
+}
+
+bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+{ theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param subchambers...";
+  theGlobalVariables.MakeReport();
+  this->allParamSubChambersRepetitionsAllowed.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param subchambers cone form... ";
+  theGlobalVariables.MakeReport();
+  this->allParamSubChambersRepetitionsAllowedConeForm.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading extreme QPs subchambers...";
+  theGlobalVariables.MakeReport();
+  this->ExtremeQPsParamSubchambers.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading more pieces of data... ";
+  theGlobalVariables.MakeReport();
+  this->GmodKnegativeWeights.ReadFromFile(input, theGlobalVariables);
+  this->theLinearOperators.ReadFromFile(input, theGlobalVariables);
+  this->PreimageWeylChamberLargerAlgebra.ReadFromFile(input, theGlobalVariables);
+  this->WeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
+  this->theQPsNonSubstituted.ReadFromFile(input, theGlobalVariables);
+  this->theQPsSubstituted.ReadFromFile(input, theGlobalVariables);
+  this->theMultiplicities.ReadFromFile(input, theGlobalVariables);
+  this->theMultiplicitiesExtremaCandidates.ReadFromFile(input, theGlobalVariables);
+  this->theCoeffs.ReadFromFile(input);
+  this->theTranslations.ReadFromFile(input, theGlobalVariables);
+  this->theTranslationsProjected.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading partial fractions... ";
+  theGlobalVariables.MakeReport();
+  this->thePfs.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param subchambers subdivided... ";
+  theGlobalVariables.MakeReport();
+  this->paramSubChambers.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading more data... ";
+  theGlobalVariables.MakeReport();
+  this->nonParamVertices.ReadFromFile(input, theGlobalVariables);
+  this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables);
+  this->projectivizedChamberTest.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading complete... ";
+  theGlobalVariables.MakeReport();
+  return true;
+}
+
+void ConeComplex::WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->List<Cone>::WriteToFile(output, theGlobalVariables);
+  output << "IndexLowestNonRefined: " << this->indexLowestNonRefinedChamber << "\n";
+  this->splittingNormals.WriteToFile(output);
+}
+
+bool ConeComplex::ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+{ if(!this->List<Cone>::ReadFromFile(input, theGlobalVariables))
+  { assert(false);
+    return false;
+  }
+  std::string tempS;
+  input >> tempS >> this->indexLowestNonRefinedChamber;
+  if (tempS!="IndexLowestNonRefined:")
+  { assert(false);
+    return false;
+  }
+  return this->splittingNormals.ReadFromFile(input);
 }

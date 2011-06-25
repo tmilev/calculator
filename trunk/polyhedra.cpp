@@ -806,12 +806,16 @@ bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile
     }
   }
   if(theFile.is_open())
-  { theFile.clear(std::ios::goodbit); // false);
+  { theFile.clear();
     theFile.seekp(0, std::ios_base::end);
-    //theFile.seekg(0);
     int tempI=theFile.tellp();
-    if (tempI>=1)
+    if (tempI>0)
+    { if (!OpenInAppendMode)
+      { theFile.seekp(0);
+        theFile.seekg(0);
+      }
       return true;
+    }
   }
   theFile.close();
   theFile.open(theFileName.c_str(), std::fstream::out | std::fstream::in | std::fstream::trunc);
@@ -2792,10 +2796,12 @@ void roots::ReadCivilizedHumanReadableFormat(std::stringstream& input)
   }
 }
 
-void roots::ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariables)
+bool roots::ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables)
 { std::string tempS;
   input >> tempS;
   assert (tempS=="Num_roots|Dim:");
+  if (tempS!="Num_roots|Dim:")
+    return false;
   int theDim, theSize;
   input >> theSize >> theDim;
   if (theSize<0)
@@ -2806,6 +2812,7 @@ void roots::ReadFromFile (std::fstream &input, GlobalVariables& theGlobalVariabl
     for (int j=0; j<theDim; j++)
       this->TheObjects[i].TheObjects[j].ReadFromFile(input);
   }
+  return true;
 }
 
 inline void roots::AddIntRoot(intRoot& r)
@@ -3057,10 +3064,10 @@ void roots::sum(root& output, int theDimension)
 }
 
 void roots::sum(root& output)
-{ assert(this->size>0);
-  output.MakeZero(this->TheObjects[0].size);
+{ output.MakeZero(this->TheObjects[0].size);
   for (int i=0; i<this->size; i++)
     output.Add(this->TheObjects[i]);
+  assert(this->size>0);
 }
 
 bool roots::ContainsOppositeRoots()
@@ -4905,7 +4912,7 @@ void hashedRoots::WriteToFile(std::fstream& output)
     }
 }
 
-void hashedRoots::ReadFromFile(std::fstream& input)
+bool hashedRoots::ReadFromFile(std::fstream& input)
 { int theDimension; std::string tempS;
   int theSize;
   this->ClearTheObjects();
@@ -4918,6 +4925,7 @@ void hashedRoots::ReadFromFile(std::fstream& input)
       tempRoot.TheObjects[j].ReadFromFile(input);
     this->AddObjectOnTopHash(tempRoot);
    }
+   return true;
 }
 
 void ConeGlobal::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVariables, int theDimension)
@@ -8854,9 +8862,9 @@ void partFraction::ReadFromFile(partFractions& owner, std::fstream& input, Globa
     for (int i=0; i<this->TheObjects[j].Multiplicities.size; i++)
       input >> this->TheObjects[j].Multiplicities.TheObjects[i] >> this->TheObjects[j].Elongations.TheObjects[i];
   }
-  input >>tempS;
-  this->Coefficient.ReadFromFile(input, (int)theDimension);
-  input>>tempS;
+  input >> tempS;
+  this->Coefficient.ReadFromFile(input, theGlobalVariables);
+  input >> tempS;
   this->ComputeIndicesNonZeroMults();
 }
 
@@ -9503,7 +9511,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
   }
   if (this->FileStoragePosition!=-1)
   { partFraction::TheBigDump.seekg(this->FileStoragePosition);
-    output.ReadFromFile(partFraction::TheBigDump, (int)theDimension);
+    output.ReadFromFile(partFraction::TheBigDump, theGlobalVariables);
     if (RecordNumMonomials && ! this->AlreadyAccountedForInGUIDisplay)
     { this->AlreadyAccountedForInGUIDisplay=true;
       partFractions::NumProcessedForVPFMonomialsTotal+=this->Coefficient.size;
@@ -10848,12 +10856,12 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobal
 //  oldInputBuffer=input.rdbuf();
 //  input.rdbuf(TempBuffer);
   assert(input.is_open());
-  input.seekg(0);
   std::string tempS;
   input >> tempS;
   input >> this->AmbientDimension;
   input >> tempS;
   intRoot tempRoot;
+  tempRoot.SetSize(this->AmbientDimension);
   for (input >> tempS; tempS!="Alphabet_used:"; input >> tempS)
   { int tempI;
     input >> tempI;
@@ -13053,7 +13061,8 @@ void rootFKFTcomputation::RunA2A1A1inD5beta12221()
   { std::fstream tempFile;
     tempFile.open(this->OutputFile.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
     QuasiPolynomialOld tempQP;
-    tempQP.ReadFromFile(tempFile, 5);
+    GlobalVariables theGlobalVariables;
+    tempQP.ReadFromFile(tempFile, theGlobalVariables);
     tempFile.close();
     this->processA2A1A1inD5beta12221Answer(tempQP);
     return;
@@ -18936,19 +18945,19 @@ void ::minimalRelationsProverStatesFixedK::WriteToFile(std::fstream& output, Glo
 void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
 { std::string tempS;
   int tempI;
-  input >> tempS>> this->theWeylGroup.WeylLetter >> tempS>> tempI;
+  input >> tempS >> this->theWeylGroup.WeylLetter >> tempS >> tempI;
   if (tempI<=0)
     return;
   this->theWeylGroup.MakeArbitrary(this->theWeylGroup.WeylLetter, tempI);
-  input>> tempS;
+  input >> tempS;
   this->theK.genK.ReadFromFile(input, theGlobalVariables);
   this->theK.genK.ComputeDebugString();
   this->theIsos.ReadFromFile(input, theGlobalVariables);
-  input>>tempS>>tempI;
+  input >> tempS >> tempI;
   this->theIndexStack.SetSize(tempI);
   for (int i=0; i<this->theIndexStack.size; i++)
-    input>>this->theIndexStack.TheObjects[i];
-  input>> tempS>> tempI;
+    input >> this->theIndexStack.TheObjects[i];
+  input >> tempS >> tempI;
   this->SetSize(tempI);
   for(int i=0; i<this->size; i++)
   { this->TheObjects[i].ReadFromFile(input, theGlobalVariables);

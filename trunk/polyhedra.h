@@ -1043,8 +1043,8 @@ void NonPivotPointsToEigenVector
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints){ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);  }
   static void GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
-  void GaussianEliminationByRows(Matrix<Element>& otherMatrix, Selection& outputSelection)
-  { Matrix<Element>::GaussianEliminationByRows(*this, otherMatrix, outputSelection);
+  void GaussianEliminationByRows(Matrix<Element>& otherMatrix, Selection& outputNonPivotColumns)
+  { Matrix<Element>::GaussianEliminationByRows(*this, otherMatrix, outputNonPivotColumns);
   }
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows
 (int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
@@ -1121,7 +1121,7 @@ public:
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void MultiplyByLargeRational(Rational& x);
   void MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables);
-  void ActOnAroot(root& theRoot){ this->ActOnAroot(theRoot, theRoot); };
+  void ActOnAroot(root& theRoot){ this->ActOnAroot(theRoot, theRoot); }
   void ActOnAroot(root& input, root& output);
   void ActOnRoots(roots& input, roots& output);
   void ActOnRoots(roots& theRoots);
@@ -1137,7 +1137,8 @@ public:
  //   tempMat.LieBracketWith(right);
 //    return tempMat;
 //  }
-  void FindZeroEigenSpace(roots& output, GlobalVariables& theGlobalVariables);
+  inline void FindZeroEigenSpace(roots& output, GlobalVariables& theGlobalVariables){this->FindZeroEigenSpaceOneOneForEachNonPivot(output, theGlobalVariables);}
+  void FindZeroEigenSpaceOneOneForEachNonPivot(roots& output, GlobalVariables& theGlobalVariables);
   static bool SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution, GlobalVariables& theGlobalVariables);
   static void ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
@@ -1145,7 +1146,7 @@ public:
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
   MatrixLargeRational(const MatrixLargeRational& right){this->Assign(right);}
-  MatrixLargeRational(){};
+  MatrixLargeRational(){}
   MatrixLargeRational operator-(const MatrixLargeRational& right)const
   { MatrixLargeRational tempMat;
     tempMat.Assign(*this);
@@ -1631,7 +1632,6 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows
     outputNonPivotPoints__WarningSelectionNotInitialized->ComputeIndicesFromSelection();
   }
 }
-
 
 template <typename Element>
 void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints)
@@ -2441,7 +2441,7 @@ class Vectors: public List<Vector<CoefficientType> >
   void GetLinearDependenceRunTheLinearAlgebra
   (Matrix<CoefficientType>& outputTheLinearCombination, Matrix<CoefficientType>& outputTheSystem, Selection& outputNonPivotPoints)
   ;
-  void AssignMatrixRows(Matrix<CoefficientType>& mat)
+  void AssignMatrixRows(const Matrix<CoefficientType>& mat)
   { this->size=0;
     this->SetSize(mat.NumRows);
     for (int i=0; i<mat.NumRows; i++)
@@ -2450,6 +2450,11 @@ class Vectors: public List<Vector<CoefficientType> >
         this->TheObjects[i].TheObjects[j]=mat.elements[i][j];
     }
   }
+  static void IntersectTwoLinSpaces
+  (const Vectors<CoefficientType>& firstSpace, const Vectors<CoefficientType>& secondSpace,
+   Vectors<CoefficientType>& output, const CoefficientType& theRingZero,
+   GlobalVariables& theGlobalVariables)
+     ;
 };
 
 class root: public Vector<Rational>
@@ -2484,11 +2489,11 @@ public:
   }
   std::string DebugString;
   void ComputeDebugString();
-  void ElementToString(std::string& output);
+  void ElementToString(std::string& output)const;
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
-  std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; };
+  std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; };
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
-  void ElementToString(std::string& output, bool useLaTeX);
+  void ElementToString(std::string& output, bool useLaTeX)const;
   bool CheckForElementSanity();
   //void RootToLinPolyToString(std::string& output, PolynomialOutputFormat& PolyOutput);
   void ScaleToFirstNonZeroCoordinatePositive();
@@ -2509,6 +2514,8 @@ public:
   bool OurScalarProductIsNegative(const root& right);
   bool OurScalarProductIsZero(const root& right);
   void MinusRoot();
+  Rational ScalarEuclidean(const root& other){return this->Vector<Rational>::ScalarEuclidean(other, (Rational) 0); }
+  Rational ScalarEuclidean(const root& other, const Rational& theRingZero){return this->ScalarEuclidean(other); }
   void Subtract(const root& r);
   void AssignWithoutLastCoordinate(root& right);
   void ReadFromFile(std::fstream& input);
@@ -2636,7 +2643,7 @@ public:
   bool CheckForElementSanity();
   void AssignIntRoots(intRoots& r);
   void AssignHashedIntRoots(HashedList<intRoot>& r);
-  void AssignMatrixRows(MatrixLargeRational& mat);
+  void AssignMatrixRows(const MatrixLargeRational& mat);
   void AssignMatrixColumns(MatrixLargeRational& mat);
   void ComputeDebugString();
   int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)const;
@@ -2719,11 +2726,11 @@ public:
   void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
   void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString, false, false, false); }
   void ElementToLinearCombinationString(std::string& output);
-  void ElementToString(std::string& output);
-  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
-  std::string ElementToString(bool useLatex, bool useHtml, bool makeTable){std::string tempS; this->ElementToString(tempS, useLatex, useHtml, makeTable); return tempS;};
+  void ElementToString(std::string& output)const;
+  std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
+  std::string ElementToString(bool useLatex, bool useHtml, bool makeTable)const{std::string tempS; this->ElementToString(tempS, useLatex, useHtml, makeTable); return tempS;};
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable);
-  void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable);
+  void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable)const;
   std::string* ElementToStringDebuggerCallOnly(){ this->ComputeDebugString(); return &this->DebugString;}
   //The below function is required to preserve the order of elements given by theSelection.elements.
   void SubSelection(Selection& theSelection, roots& output);
@@ -6649,16 +6656,17 @@ public:
   int GetDim()const{return this->basis.NumCols;}
   int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
+  void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
   //returns false if the vector is not in the vector space spanned by the lattice
   bool ReduceVector(Vector<Rational>& theVector);
-  //In the below, the format of the matrix theSub of the substitution is as follows.
-  //Let the ambient dimension be n, and the coordinates be y_1,..., y_n.
-  //Let the new vector space be of dimension m, with coordinates x_1,..., x_m.
-  //Then theSub is an n by m matrix, where the i^th row of the matrix gives the expression of y_i via the x_j's.
+  //In the following two functions, the format of the matrix theSub of the substitution is as follows.
+  //Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
+  //Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
+  //Then theSub is an n by m matrix, where the i^th row of the matrix gives the expression of x_i via the y_j's.
   //In addition, we require that n>=m (otherwise, in general, we do not expect to get a lattice).
   //For example, if we want to carry out the substitution
-  //y_1=x_1+x_2, y_2=x_1-x_2, y_3=x_1, then
+  //x_1=y_1+y_2, x_2=y_1-y_2, x_3=y_1, then
   //theSub should be initialized as:
   //1  1
   //1 -1
@@ -6669,9 +6677,17 @@ public:
   bool SubstitutionHomogeneous
     (const PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
 ;
+//the following function follows the same convention as the preceding except that we allow n<m. However,
+// in order to assure that the preimage of the lattice is a lattice,
+//we provide as input an ambient lattice in the new vector space of dimension m
+  bool SubstitutionHomogeneous
+    (const MatrixLargeRational& theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables)
+;
   void Reduce
   ()
   ;
+  void IntersectWithLinearSubspace(const roots& theSubspace);
+  void IntersectWithLinearSubspace(const root& IntersectWithLinearSubspace);
 static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
 (const PolynomialsRationalCoeff& theSub, MatrixLargeRational& output, GlobalVariables& theGlobalVariables)
 ;
@@ -6698,6 +6714,9 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
   void RefineByOtherLattice(const Lattice& other);
   void MakeFromRoots
   (const roots& input)
+  ;
+  void MakeFromMat
+  (const MatrixLargeRational& input)
   ;
 };
 
@@ -7121,6 +7140,7 @@ public:
   void GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
+  void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   inline int GetDim(){return this->CartanSymmetric.NumRows;}
   void ComputeWeylGroup(int UpperLimitNumElements);
   void ComputeWeylGroupAndRootsOfBorel(roots& output);
@@ -9175,6 +9195,7 @@ class ParserNode
   int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);
   int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
   int EvaluatePartialFractions(GlobalVariables& theGlobalVariables);
+  int EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables);
   int EvaluateSplit(GlobalVariables& theGlobalVariables);
   void EvaluateWeylAction
   (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
@@ -9190,7 +9211,7 @@ class ParserNode
   void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
   void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
   void EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables);
+  int EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables);
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
   void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
@@ -9239,7 +9260,7 @@ public:
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
     functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
-    functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile
+    functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile, functionIntersectWithSubspace,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

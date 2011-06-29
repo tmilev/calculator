@@ -1658,11 +1658,11 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(root& input, root& output, 
     output.MakeZero(input.size);
 }
 
-void root::ElementToString(std::string& output)
+void root::ElementToString(std::string& output)const
 { this->ElementToString(output, false);
 }
 
-void root::ElementToString(std::string& output, bool useLaTeX)
+void root::ElementToString(std::string& output, bool useLaTeX)const
 { output.clear();
   std::string tempStr;
   output.append("(");
@@ -2379,7 +2379,7 @@ void roots::ComputeDebugString()
 { this->ElementToString(this->DebugString);
 }
 
-void roots::ElementToString(std::string& output)
+void roots::ElementToString(std::string& output)const
 { this->ElementToString(output, false, false, false);
 }
 
@@ -2428,10 +2428,10 @@ void roots::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool 
   output=out.str();
 }
 
-void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable)
+void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable)const
 { std::stringstream out;
   std::string tempS;
-  if (! useLaTeX && ! useHtml)
+  if (!useLaTeX && !useHtml)
     out << "Num roots: " << this->size << "\n";
   if (useLaTeX && makeTable)
     out << "\\begin{tabular}{c}";
@@ -3019,7 +3019,7 @@ void roots::GetGramMatrix(MatrixLargeRational& output, WeylGroup& theWeyl) const
     }
 }
 
-void roots::AssignMatrixRows(MatrixLargeRational& mat)
+void roots::AssignMatrixRows(const MatrixLargeRational& mat)
 { this->size=0;
   root tempRoot;
   this->SetSize(mat.NumRows);
@@ -24526,7 +24526,7 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
   theGlobalVariables.MakeReport();
 }
 
-void MatrixLargeRational::FindZeroEigenSpace(roots& output, GlobalVariables& theGlobalVariables)
+void MatrixLargeRational::FindZeroEigenSpaceOneOneForEachNonPivot(roots& output, GlobalVariables& theGlobalVariables)
 { MatrixLargeRational tempMat;
   tempMat.Assign(*this);
   MatrixLargeRational emptyMat;
@@ -26413,6 +26413,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionSplit: this->EvaluateSplit(theGlobalVariables); break;
     case Parser::functionWriteToFile: this->EvaluateWriteToFile(theGlobalVariables); break;
     case Parser::functionReadFromFile: this->EvaluateReadFromFile(theGlobalVariables); break;
+    case Parser::functionIntersectWithSubspace: this->EvaluateIntersectLatticeWithSubspaces(theGlobalVariables); break;
    default: this->SetError(this->errorUnknownOperation); break;
   }
 }
@@ -26457,17 +26458,6 @@ void ParserNode::EvaluatePrintWeyl(GlobalVariables& theGlobalVariables)
     else
       for (int j=0; j<current.size; j++)
         out << current.TheObjects[j]+1 << ",";
-  }
-  this->outputString=out.str();
-  this->ExpressionType=this->typeString;
-}
-
-void ParserNode::EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">" << this->owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) << "</div>Root system:";
-  for (int i=0; i<this->owner->theHmm.theRange.theWeyl.RootSystem.size; i++)
-  { root& current=this->owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
-    out << "<br>" << current.ElementToString();
   }
   this->outputString=out.str();
   this->ExpressionType=this->typeString;
@@ -26712,6 +26702,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="vpf")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionGetVPIndicator);
+    return true;
+  }
+  if (input=="IntersectLatticeWithSubspaces")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionIntersectWithSubspace);
     return true;
   }
   if (input=="PartialFractions")

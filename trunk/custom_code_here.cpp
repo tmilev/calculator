@@ -37,6 +37,8 @@ class GeneralizedVermaModuleCharacters
 public:
 //  bool flagUsingNewSplit;
   List<MatrixLargeRational> theLinearOperators;
+  std::fstream theMultiplicitiesMaxOutput;
+  std::fstream theMultiplicitiesMaxOutputReport2;
   roots GmodKnegativeWeights;
   ConeGlobal PreimageWeylChamberLargerAlgebra;
   ConeGlobal WeylChamberSmallerAlgebra;
@@ -422,6 +424,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   PolynomialOutputFormat theFormat;
   root tempRoot;
   QPSub theSub;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
+  (this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKnegativeWeights, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -435,13 +439,20 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->thePfs.theChambers.theDirections=this->GmodKnegativeWeights;
   this->thePfs.theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
   this->theQPsNonSubstituted.SetSize(this->thePfs.theChambers.size);
+  out << "\n\nThe vector partition functions in each chamber follow.";
   for (int i=0; i<this->thePfs.theChambers.size; i++)
     if (this->thePfs.theChambers.TheObjects[i]!=0)
     { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
       this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambers.TheObjects[i]->InternalPoint, theGlobalVariables);
+      out << "\nChamber " << i+1 << " with internal point " << this->thePfs.theChambers.TheObjects[i]->InternalPoint.ElementToString() << " the quasipoly is: " << currentQPNoSub.ElementToString(false, false);
     }
   QuasiPolynomial theQPNoSub;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
+  Lattice integralLattice;
+  MatrixLargeRational theExtendedIntegralLatticeMatForm;
+  this->theParser.theHmm.theRange.theWeyl.GetIntegralLatticeInSimpleCoordinates(integralLattice);
+  out << "\nThe integral lattice:\n" << integralLattice.ElementToString(false, false);
+  this->theMultiplicitiesMaxOutputReport2.flush();
   for (int i=0; i<this->projectivizedChamber.size; i++)
   { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
     for (int k=0; k<this->theLinearOperators.size; k++)
@@ -458,7 +469,11 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
       theGlobalVariables.MakeReport();
       out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, false);
       this->GetSubFromIndex(theSub, k);
-      theQPNoSub.Substitution(theSub.RationalPolyForm, currentQPSub, theGlobalVariables);
+      Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub.RationalPolyForm, theExtendedIntegralLatticeMatForm, theGlobalVariables);
+      this->theMultiplicitiesMaxOutputReport2 << "\nExtended lattice:\n " << theExtendedIntegralLatticeMatForm.ElementToString(false, false);
+      this->theMultiplicitiesMaxOutputReport2.flush();
+      //theExtendedIntegralLatticeMatForm.Resize(
+//      theQPNoSub.Substitution(theSub.RationalPolyForm, theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
       out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
       out << "\nthe sub is: " << theSub.ElementToString();
     }
@@ -481,6 +496,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
+  this->theMultiplicitiesMaxOutputReport2 << out.str();
 }
 
 void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
@@ -983,6 +999,8 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep3(GlobalVari
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables)
 { this->theMultiplicitiesExtremaCandidates.SetSize(this->projectivizedParamComplex.size);
   theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
+  (this->theMultiplicitiesMaxOutput, "/home/todor/math/vectorpartition/trunk/ExtremaOutput.txt", false, true, false);
   for (int i=0; i<this->projectivizedParamComplex.size; i++)
   //if (i<this->tempDebugCounter)
   { Cone& currentCone= this->projectivizedParamComplex.TheObjects[i];
@@ -990,13 +1008,15 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep4(GlobalVari
     out3 << "Processing extrema in chamber " << i+1 << " out of " << this->projectivizedParamComplex.size;
     theGlobalVariables.theIndicatorVariables.ProgressReportString1=out3.str();
     theGlobalVariables.MakeReport();
+    this->theMultiplicitiesMaxOutput << "\n\n\n\n\nChamber " << i+ 1;
     this->ProcessExtremaOneChamber(currentCone, theGlobalVariables);
   }
+  this->theMultiplicitiesMaxOutput.close();
 }
 
 void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
   (Cone& input, GlobalVariables& theGlobalVariables)
-{ std::stringstream out3;
+{ std::stringstream out3, out1, out2;
 //  int projectiveDimension=input.GetDim();
   List<QuasiPolynomial> theExtremaOutput, extremaCandidates;
   for (int j=0; j<this->allParamSubChambersRepetitionsAllowedConeForm.size; j++)
@@ -1008,7 +1028,30 @@ void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
   theGlobalVariables.theIndicatorVariables.ProgressReportString2=out3.str();
   theGlobalVariables.MakeReport();
   ConeComplex extremaComplex;
-  extremaComplex.findMaxQPOverConeProjective(input, extremaCandidates, theExtremaOutput, theGlobalVariables);
+  out1 << "size of required subdivision: ?";
+  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out1.str();
+  theGlobalVariables.MakeReport();
+  this->theMultiplicitiesMaxOutput << "\nNumber of candidates for maximum: " << extremaCandidates.size;
+  for (int i=0; i<extremaCandidates.size; i++)
+  { this->theMultiplicitiesMaxOutput << "\nCandidate "<< i+1 << ": " << extremaCandidates.TheObjects[i].ElementToString(false, false);
+  }
+  bool tempBool=  extremaComplex.findMaxQPOverConeProjective(input, extremaCandidates, theExtremaOutput, theGlobalVariables);
+  if (tempBool)
+  { this->theMultiplicitiesMaxOutput << "\n\nFound extrema: ";
+    if (extremaComplex.size>1)
+      this->theMultiplicitiesMaxOutput << "\n" << extremaComplex.size << " subchambers total";
+    for (int i=0; i<extremaComplex.size; i++)
+    { if (extremaComplex.size>1)
+        this->theMultiplicitiesMaxOutput << "Subchamber " << i+1<< ": ";
+      this->theMultiplicitiesMaxOutput << theExtremaOutput.TheObjects[i].ElementToString(false, false);
+    }
+  } else
+  { this->theMultiplicitiesMaxOutput << "\nFailed to find extrema! Something is wrong...";
+  }
+  out2 << "size of required subdivision:   " << extremaComplex.size;
+  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out2.str();
+  theGlobalVariables.MakeReport();
 
 }
 
@@ -1717,12 +1760,17 @@ int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
   return this->errorNoError;
 }
 
+void Lattice::MakeFromMat(const MatrixLargeRational& input)
+{ this->basisRationalForm=input;
+  this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
+  this->Reduce();
+}
+
 void Lattice::MakeFromRoots(const roots& input)
 { MatrixLargeRational tempMat;
   tempMat.AssignRootsToRowsOfMatrix(input);
   tempMat.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
-
 }
 
 std::string Lattice::ElementToString(bool useHtml, bool useLatex)const
@@ -1889,8 +1937,23 @@ void Lattice::GetDualLattice(Lattice& output)const
 }
 
 void Lattice::IntersectWith(const Lattice& other)
+{ roots commonBasis, otherBasis, startBasis;
+  startBasis.AssignMatrixRows(this->basisRationalForm);
+  otherBasis.AssignMatrixRows(other.basisRationalForm);
+  GlobalVariables theGlobalVariables;
+assert(false);
+//  startBasis.IntersectTwoLinSpaces(startBasis, otherBasis, commonBasis, (Rational) 0, theGlobalVariables);
+  Lattice thisLatticeIntersected, otherLatticeIntersected;
+  thisLatticeIntersected=*this;
+  thisLatticeIntersected.IntersectWithLinearSubspace(commonBasis);
+  otherLatticeIntersected.IntersectWithLinearSubspace(commonBasis);
+  assert(false);
+}
+
+void Lattice::IntersectWithBothOfMaxRank(const Lattice& other)
 { Lattice dualLatticeThis, dualLatticeOther;
   //std::cout << "intersecting " << this->ElementToString() << " and " << other.ElementToString();
+  assert(this->basis.NumRows==this->GetDim() && this->GetDim()==other.GetDim() && other.basis.NumRows== this->GetDim());
   this->GetDualLattice(dualLatticeThis);
   //std::cout << "<br>dual lattice of left: " << dualLatticeThis.ElementToString();
   other.GetDualLattice(dualLatticeOther);
@@ -2354,9 +2417,10 @@ void QuasiPolynomial::AddLatticeShift(const PolynomialRationalCoeff& input, cons
 
 bool QuasiPolynomial::Substitution
   (const PolynomialsRationalCoeff& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
-{ MatrixLargeRational theLatticeSub, theSubLatticeShift;
+{ MatrixLargeRational theLatticeSub;
   if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub, theGlobalVariables))
     return false;
+  MatrixLargeRational theSubLatticeShift;
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
   if(!output.AmbientLatticeReduced.SubstitutionHomogeneous(theLatticeSub, theGlobalVariables))
     return false;
@@ -2404,6 +2468,82 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
       currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(j, output.elements[i][j], (Rational) 0);
   }
   return true;
+}
+
+void Lattice::IntersectWithLinearSubspace(const root& theSubspaceNormal)
+{ std::cout << "Starting lattice: " << this->ElementToString(true, false) << "<br>";
+  roots startingBasis, resultBasis;
+  startingBasis.AssignMatrixRows(this->basisRationalForm);
+  std::cout << "Starting normal: " << theSubspaceNormal.ElementToString();
+  root theScalarProducts;
+  theScalarProducts.SetSize(startingBasis.size);
+  for (int i=0; i<this->basisRationalForm.NumRows; i++)
+    theScalarProducts.TheObjects[i]=root::RootScalarEuclideanRoot(startingBasis.TheObjects[i], theSubspaceNormal);
+  if (theScalarProducts.IsEqualToZero())
+    return;
+  std::cout << "<br>the scalar products: " << theScalarProducts.ElementToString();
+  int pivotColumnIndex=theScalarProducts.getIndexLastNonZeroCoordinate();
+  Rational pivotCoeff=theScalarProducts.TheObjects[pivotColumnIndex];
+  theScalarProducts/=-pivotCoeff;
+  std::cout << "<br>the scalar products after scaling: " << theScalarProducts.ElementToString();
+  roots eigenSpacePlusOrthogonalComponent;
+  eigenSpacePlusOrthogonalComponent.SetSize(theScalarProducts.size);
+  for (int i=0; i<theScalarProducts.size; i++)
+    if (i!=pivotColumnIndex)
+    { root& currentRoot=eigenSpacePlusOrthogonalComponent.TheObjects[i];
+      currentRoot.MakeZero(theScalarProducts.size);
+      currentRoot.TheObjects[i]=1;
+      currentRoot.TheObjects[pivotColumnIndex]=theScalarProducts.TheObjects[i];
+    }
+  theScalarProducts.ScaleToIntegralMinHeight();
+  std::cout << "<br>the scalar products after scaling to integral: " << theScalarProducts.ElementToString();
+  eigenSpacePlusOrthogonalComponent.TheObjects[pivotColumnIndex]=theScalarProducts;
+  std::cout << "<br>The eigenspace before intersection: " << eigenSpacePlusOrthogonalComponent.ElementToString();
+  Lattice eigenLattice, theZnLattice;
+  eigenLattice.MakeFromRoots(eigenSpacePlusOrthogonalComponent);
+  std::cout << "<br>The eigen-Lattice: " << eigenLattice.ElementToString(true, false);
+  theZnLattice.MakeZn(theScalarProducts.size);
+  std::cout << "<br>The Zn-Lattice: " << theZnLattice.ElementToString(true, false);
+  theZnLattice.IntersectWithBothOfMaxRank(eigenLattice);
+  std::cout << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ElementToString(true, false);
+  resultBasis.MakeActualSizeAtLeastExpandOnTop(theScalarProducts.size-1);
+  root tempRoot, resultRoot; Rational orthogonalComponent;
+  for (int i=0; i<theZnLattice.basisRationalForm.NumRows; i++)
+  { theZnLattice.basisRationalForm.RowToRoot(i, tempRoot);
+    orthogonalComponent=tempRoot.ScalarEuclidean(theScalarProducts)/theScalarProducts.ScalarEuclidean(theScalarProducts);
+    tempRoot-=theScalarProducts*orthogonalComponent;
+    assert(orthogonalComponent.IsInteger());
+    if (!tempRoot.IsEqualToZero())
+    { resultRoot.MakeZero(this->GetDim());
+      for (int j=0; j<startingBasis.size; j++)
+        resultRoot+=startingBasis.TheObjects[j]*tempRoot.TheObjects[j];
+      resultBasis.AddObjectOnTop(resultRoot);
+    }
+  }
+  std::cout << "<br>Resulting basis: " << resultBasis.ElementToString();
+  this->MakeFromRoots(resultBasis);
+  std::cout << "<br>Final answer lattice form: " << this->ElementToString(true, false);
+}
+
+void Lattice::IntersectWithLinearSubspace(const roots& theSubspace)
+{ for (int i=0; i<theSubspace.size; i++)
+    this->IntersectWithLinearSubspace(theSubspace.TheObjects[i]);
+}
+
+bool Lattice::SubstitutionHomogeneous
+ (const MatrixLargeRational& theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables)
+{ /*roots preimageBasis;
+  preimageBasis.AssignMatrixRows(this->basisRationalForm);
+  MatrixLargeRational theSubModifiable, currentBasisVector, oneSolution;
+  for (int i=0; i<preimageBasis.size; i++)
+  { theSubModifiable=theSub;
+    currentBasisVector.AssignVectorColumn(preimageBasis.TheObjects[i]);
+    if (theSubModifiable.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSubModifiable, currentBasisVector, oneSolution))
+    { theSubModifiable=theSub;
+      theSubModifiable.fin
+    }
+  }*/
+return false;
 }
 
 bool Lattice::SubstitutionHomogeneous
@@ -2644,7 +2784,8 @@ bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariab
 
 bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   (std::fstream& input, GlobalVariables& theGlobalVariables)
-{ theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+{ this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
 //  this->allParamSubChambersRepetitionsAllowed.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param subchambers cone form... ";
   theGlobalVariables.MakeReport();
@@ -2697,4 +2838,94 @@ bool ConeComplex::ReadFromFile
     return false;
   }
   return this->splittingNormals.ReadFromFile(input);
+}
+
+void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
+{ output.basisRationalForm=this->CartanSymmetric;
+  output.basisRationalForm.Invert();
+  output.basisRationalForm.GetMatrixIntWithDen(output.basis, output.Den);
+  output.Reduce();
+}
+
+int ParserNode::EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  WeylGroup& theWeyl=this->owner->theHmm.theRange.theWeyl;
+  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">" << this->owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) << "</div>";
+  Rational tempRat;
+  MatrixLargeRational tempMat;
+  tempMat=  theWeyl.CartanSymmetric;
+  tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
+  out  << "The determinant of the symmetric Cartan matrix is: " << tempRat.ElementToString();
+  out << "<br>Root system:";
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
+  { root& current=this->owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
+    out << "<br>" << current.ElementToString();
+  }
+  this->outputString=out.str();
+  this->ExpressionType=this->typeString;
+  return this->errorNoError;
+}
+
+int ParserNode::EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  //std::stringstream out;
+  if (argumentList.size<2)
+    return this->SetError(this->errorBadOrNoArgument);
+  ParserNode& latticeNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  if (!latticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  roots tempRoots;
+  tempRoots.SetSize(argumentList.size-1);
+  this->theLattice.GetElement()=latticeNode.theLattice.GetElement();
+  int theDim=this->theLattice.GetElement().GetDim();
+  for (int i=1; i<argumentList.size; i++)
+  { if (!this->owner->TheObjects[argumentList.TheObjects[i]].GetRootRational(tempRoots.TheObjects[i-1], theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+    if (tempRoots.TheObjects[i-1].size!=theDim)
+      return this->SetError(this->errorDimensionProblem);
+  }
+  this->theLattice.GetElement().IntersectWithLinearSubspace(tempRoots);
+  //this->outputString=out.str();
+  this->ExpressionType=this->typeLattice;
+  return this->errorNoError;
+}
+
+template<class CoefficientType>
+void Vectors<CoefficientType>::IntersectTwoLinSpaces
+  (const Vectors<CoefficientType>& firstSpace, const Vectors<CoefficientType>& secondSpace,
+   Vectors<CoefficientType>& output, const CoefficientType& theRingZero,
+   GlobalVariables& theGlobalVariables)
+{ //this function is completely untested (since it is not used at the moment), please check its implementation before attempting to use!
+  Vectors<CoefficientType> firstReduced, secondReduced;
+  Selection tempSel;
+  firstSpace.SelectABasis(firstReduced, theRingZero, tempSel, theGlobalVariables);
+  secondSpace.SelectABasis(secondReduced, theRingZero, tempSel, theGlobalVariables);
+  if (firstReduced.size==0 || secondReduced.size==0)
+  { output.size=0;
+    return;
+  }
+  int theDim=firstReduced.TheObjects[0].size;
+  Matrix<CoefficientType> theMat;
+  theMat.init(theDim, firstReduced.size+secondReduced.size);
+  for (int i=0; i<theDim; i++)
+  { for (int j=0; j<firstReduced.size; j++)
+      theMat.elements[i][j]=firstReduced.TheObjects[j].TheObjects[i];
+    for (int j=0; j<secondReduced.size; j++)
+      theMat.elements[i][firstReduced.size+j]=secondReduced.TheObjects[j].TheObjects[i];
+  }
+  Matrix<CoefficientType> matEmpty;
+  theMat.GaussianEliminationByRows(matEmpty, tempSel);
+  output.MakeActualSizeAtLeastExpandOnTop(tempSel.CardinalitySelection);
+  output.size=0;
+  Vector<CoefficientType> nextIntersection;
+  for(int i=0; i<tempSel.CardinalitySelection; i++)
+  { int currentIndex=tempSel.elements[i];
+    assert(currentIndex>=firstReduced.size);
+    nextIntersection.MakeZero(theDim, theRingZero);
+    for (int j=0; j<firstReduced.size; j++)
+      if (tempSel.selected[j])
+        nextIntersection.TheObjects[j]=theMat.elements[j][currentIndex];
+    output.AddObjectOnTop(nextIntersection);
+  }
 }

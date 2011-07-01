@@ -747,7 +747,6 @@ public:
   (int r, int c, bool PreserveValues, const Element* TheRingZero)
   ;
   void Assign(const MatrixElementaryLooseMemoryFit<Element>& m);
-  void MakeIdMatrix(int theDimension);
   inline void operator=(const MatrixElementaryLooseMemoryFit<Element>& other){this->Assign(other); }
   MatrixElementaryLooseMemoryFit();
   ~MatrixElementaryLooseMemoryFit();
@@ -781,17 +780,6 @@ bool MatrixElementaryLooseMemoryFit<Element>::IsEqualTo(MatrixElementaryLooseMem
       if(!(this->elements[i][j]==right.elements[i][j]))
         return false;
   return true;
-}
-
-template <typename Element>
-void MatrixElementaryLooseMemoryFit<Element>::MakeIdMatrix(int theDimension)
-{ this->init(theDimension, theDimension);
-  for (int i=0; i<theDimension; i++)
-    for (int j=0; j<theDimension; j++)
-      if (j!=i)
-        this->elements[i][j]=0;
-      else
-        this->elements[i][j]=1;
 }
 
 template <typename Element>
@@ -903,13 +891,54 @@ public:
   static bool flagComputingDebugInfo;
   static bool flagAnErrorHasOccurredTimeToPanic;
   static std::string MatrixElementSeparator;
+  void Transpose()
+  { if (this->NumCols==this->NumRows)
+    { for (int i=0; i<this->NumRows; i++)
+        for (int j=i+1; j<this->NumCols; j++)
+          MathRoutines::swap<Element>(this->elements[j][i], this->elements[i][j]);
+      return;
+    }
+    Matrix<Element> tempMat;
+    tempMat.init(this->NumCols, this->NumRows);
+    for (int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        tempMat.elements[j][i].Assign(this->elements[i][j]);
+    this->Assign(tempMat);
+  }
   void ComputeDebugString();
   void ComputeDebugString(bool useHtml, bool useLatex){this->ElementToString(this->DebugString, useHtml, useLatex);}
   void ElementToString(std::string& output)const;
+  void ActOnVectorColumn(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)
+  { assert(&input!=&output);
+    assert(this->NumCols==input.size);
+    output.MakeZero(this->NumRows, TheRingZero);
+    Element tempElt;
+    for (int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+      { tempElt=this->elements[i][j];
+        tempElt*=input.TheObjects[j];
+        output.TheObjects[j]+=tempElt;
+      }
+  }
+  void ActOnVectorColumn(Vector<Element>& inputOutput, const Element& TheRingZero){ Vector<Element> buffer; this->ActOnVectorColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const ;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   std::string ElementToString(bool useHtml, bool useLatex)const{std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
+  void MakeIdMatrix(int theDimension, const Element& theRingUnit, const Element& theRingZero)
+  { this->init(theDimension, theDimension);
+    for (int i=0; i<theDimension; i++)
+      for (int j=0; j<theDimension; j++)
+        if (j!=i)
+          this->elements[i][j]=theRingZero;
+        else
+          this->elements[i][j]=theRingUnit;
+  }
   void SwitchTwoRows(int row1, int row2);
+  inline void SwitchTwoRowsWithCarbonCopy(int row1, int row2, Matrix<Element>* theCarbonCopy)
+  { this->SwitchTwoRows(row1, row2);
+    if (theCarbonCopy!=0)
+      theCarbonCopy->SwitchTwoRows(row1, row2);
+  }
   void RowToRoot(int rowIndex, Vector<Element>& output)const;
   int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex);
   bool FindFirstNonZeroElementSearchEntireRow(Element& output)
@@ -922,8 +951,23 @@ public:
     return false;
   }
   void RowTimesScalar(int rowIndex, const Element& scalar);
+  inline void RowTimesScalarWithCarbonCopy(int rowIndex, const Element& scalar, Matrix<Element>* theCarbonCopy)
+  { this->RowTimesScalar(rowIndex, scalar);
+    if (theCarbonCopy!=0)
+      theCarbonCopy->RowTimesScalar(rowIndex, scalar);
+  }
   void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar);
+  inline void AddTwoRowsWithCarbonCopy(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar, Matrix<Element>* theCarbonCopy)
+  { this->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
+    if (theCarbonCopy!=0)
+      theCarbonCopy->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
+  }
   void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar);
+  inline void SubtractRowsWithCarbonCopy(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar, Matrix<Element>* theCarbonCopy)
+  { this->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
+    if (theCarbonCopy!=0)
+      theCarbonCopy->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
+  }
   void MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output);
   void MultiplyOnTheLeft(const Matrix<Element>& input);
   void NonPivotPointsToEigenVectorMatrixForm
@@ -1049,16 +1093,17 @@ void NonPivotPointsToEigenVector
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows
 (int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
 ;
-
   void GaussianEliminationEuclideanDomain
-(const Element& theRingMinusUnit, const Element& theRingUnit)
-  ;
+(Matrix<Element>* otherMatrix, const Element& theRingMinusUnit, const Element& theRingUnit)
+;
+inline  void GaussianEliminationEuclideanDomain
+(const Element& theRingMinusUnit, const Element& theRingUnit) {this->GaussianEliminationEuclideanDomain(0, theRingMinusUnit, theRingUnit);}
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
 };
 
 template <class Element>
 void Matrix<Element>::GaussianEliminationEuclideanDomain
-(const Element& theRingMinusUnit, const Element& theRingUnit)
+(Matrix<Element>* otherMatrix, const Element& theRingMinusUnit, const Element& theRingUnit)
 { int col=0;
   Element tempElt;
   int row=0;
@@ -1070,32 +1115,32 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
         break;
       }
     if (findPivotRow!=-1)
-    { this->SwitchTwoRows(row, findPivotRow);
+    { this->SwitchTwoRowsWithCarbonCopy(row, findPivotRow, otherMatrix);
       if (this->elements[row][col]<0)
-        this->RowTimesScalar(row, theRingMinusUnit);
+        this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       int ExploringRow= row+1;
       while (ExploringRow<this->NumRows)
       { Element& PivotElt=this->elements[row][col];
         Element& otherElt=this->elements[ExploringRow][col];
         if (otherElt<0)
-          this->RowTimesScalar(ExploringRow, theRingMinusUnit);
+          this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
         if (PivotElt<=otherElt)
         { tempElt=otherElt/PivotElt;
-          this->SubtractRows(ExploringRow, row, 0, tempElt);
+          this->SubtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
         }
         if (this->elements[ExploringRow][col].IsEqualToZero())
           ExploringRow++;
         else
-          this->SwitchTwoRows(ExploringRow, row);
+          this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
       }
       Element& PivotElt = this->elements[row][col];
       for (int i=0; i<row; i++)
         if (!this->elements[i][col].IsEqualToZero())
           if (PivotElt<=this->elements[i][col] || this->elements[i][col].IsNegative())
           { tempElt =this->elements[i][col]/PivotElt;
-            this->SubtractRows(i, row, 0, tempElt);
+            this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
             if (this->elements[i][col].IsNegative())
-              this->AddTwoRows(row, i, 0, theRingUnit);
+              this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
           }
       row++;
     }
@@ -1127,7 +1172,7 @@ public:
   void ActOnRoots(roots& theRoots)const;
   void GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen);
   void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
-
+  void MakeIdMatrix(int theDim);
   void DivideByRational(Rational& x);
   void LieBracketWith(MatrixLargeRational& right);
   void MatrixToRoot(root& output);
@@ -1751,9 +1796,9 @@ ParallelComputing::GlobalPointerCounter+=c;
 class LargeIntUnsigned: public List<unsigned int>
 { void AddNoFitSize(const LargeIntUnsigned& x);
 public:
-  //The zero element is assumed to have length one array with a Zero entry
+  //The zero element is assumed to have length one array with a zero entry.
   //
-  // Carry over bound is the "base" over which we work
+  //CarryOverBound is the "base" over which we work.
   //Requirements on the CarryOverBound:
   //1.  CarryOverBound*2-1 must fit inside an unsigned (int)
   //    on the system
@@ -1761,12 +1806,12 @@ public:
   //    on the system.
   ////////////////////////////////////////////////////////
   //On a 32 bit machine any number smaller than or equal to 2^31 will work.
-  //If you got no clue what to put just leave CarryOverBound= 2^31
+  //If you got no clue what to put just leave CarryOverBound= 2^31.
   //static const unsigned int CarryOverBound=37;
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
   static const unsigned int CarryOverBound=2147483648UL; //=2^31
-  //the below must be less than or equal to the square root of CarryOverBound.
-  //it is used for quick multiplication of LargeRationals.
+  //The following must be less than or equal to the square root of CarryOverBound.
+  //It is used for quick multiplication of Rational-s.
   static const int SquareRootOfCarryOverBound=32768; //=2^15
   void ElementToString(std::string& output)const;
   inline std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
@@ -2108,6 +2153,7 @@ ParallelComputing::GlobalPointerCounter++;
     else
       return this->Extended->num.IsEqualToZero();
   }
+  inline bool operator<=(const Rational& other)const{ return !(other<*this);}
   inline bool IsNonNegative()
   { if (this->Extended==0)
       return this->NumShort>=0;
@@ -2323,6 +2369,14 @@ public:
         result++;
     return result;
   }
+  bool GetIntegralCoordsInBasisIfTheyExist
+(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
+  Matrix<CoefficientType>& bufferMatGaussianEliminationCC,
+  Matrix<CoefficientType>& bufferMatGaussianElimination,
+  const CoefficientType& theRingUnit,
+  const CoefficientType& theRingMinusUnit,
+  const CoefficientType& theRingZero)
+  ;
   bool GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
   Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -2353,6 +2407,10 @@ public:
   void operator+=(const Vector<CoefficientType>& other)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]+=other.TheObjects[i];
+  }
+  void operator-=(const Vector<CoefficientType>& other)
+  { for (int i=0; i<this->size; i++)
+      this->TheObjects[i]-=other.TheObjects[i];
   }
   bool IsEqualToZero()const
   { for (int i=0; i<this->size; i++)
@@ -2429,10 +2487,38 @@ class Vectors: public List<Vector<CoefficientType> >
   int GetRankOfSpanOfElements
   (Matrix<CoefficientType>& buffer, Selection& bufferSelection)const
 ;
+
   void GetCoordsInBasis
   (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& outputCoords,
    Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
+  bool GetIntegralCoordsInBasisIfTheyExist
+  (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& output,
+  const CoefficientType& theRingUnit,
+  const CoefficientType& theRingMinusUnit,
+  const CoefficientType& theRingZero)
+  { Matrix<CoefficientType> bufferMatGaussianEliminationCC, bufferMatGaussianElimination;
+    bool result=true;
+    output.SetSize(this->size);
+    for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].GetIntegralCoordsInBasisIfTheyExist(inputBasis, output.TheObjects[i], bufferMatGaussianEliminationCC, bufferMatGaussianElimination, theRingUnit, theRingMinusUnit, theRingZero))
+        result=false;
+    return result;
+  }
+  bool GetIntegralCoordsInBasisIfTheyExist
+  (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& output,
+  Matrix<CoefficientType>& bufferMatGaussianEliminationCC,
+  Matrix<CoefficientType>& bufferMatGaussianElimination,
+  const CoefficientType& theRingUnit,
+  const CoefficientType& theRingMinusUnit,
+  const CoefficientType& theRingZero)
+  { bool result=true;
+    output.SetSize(this->size);
+    for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].GetIntegralCoordsInBasisIfTheyExist(inputBasis, output.TheObjects[i], bufferMatGaussianEliminationCC, bufferMatGaussianElimination, theRingUnit, theRingMinusUnit, theRingZero))
+        result=false;
+    return result;
+  }
   void GaussianEliminationForNormalComputation(Matrix<CoefficientType>& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
   bool GetLinearDependence
@@ -10058,6 +10144,45 @@ void Vectors<CoefficientType>::GetCoordsInBasis
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
     this->TheObjects[i].GetCoordsInBasiS(inputBasis, outputCoords.TheObjects[i], bufferVectors, bufferMat, theRingUnit, theRingZero);
+}
+
+template <class CoefficientType>
+bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
+(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
+  Matrix<CoefficientType>& bufferMatGaussianEliminationCC,
+  Matrix<CoefficientType>& bufferMatGaussianElimination,
+  const CoefficientType& theRingUnit,
+  const CoefficientType& theRingMinusUnit,
+  const CoefficientType& theRingZero)
+{ int theDim=this->size;
+  bufferMatGaussianElimination.init(inputBasis.size, theDim);
+  for (int i=0; i<inputBasis.size; i++)
+    for (int j=0; j<theDim; j++)
+      bufferMatGaussianElimination.elements[i][j]=inputBasis.TheObjects[i].TheObjects[j];
+  bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.NumRows, theRingUnit, theRingZero);
+  bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);
+  Vector<CoefficientType> tempRoot, theCombination;
+  assert(this!=&output);
+  output.MakeZero(inputBasis.size, theRingZero);
+  theCombination=*this;
+  int col=0;
+  for (int i=0; i<inputBasis.size; i++)
+  { for (; col<theDim; col++)
+      if (!bufferMatGaussianElimination.elements[i][col].IsEqualToZero())
+        break;
+    if (col>=theDim)
+       break;
+    bufferMatGaussianElimination.RowToRoot(i, tempRoot);
+    output.TheObjects[i]=this->TheObjects[col];
+    output.TheObjects[i]/=bufferMatGaussianElimination.elements[i][col];
+    tempRoot*=output.TheObjects[i];
+    theCombination-=tempRoot;
+  }
+  if (!theCombination.IsEqualToZero())
+    return false;
+  bufferMatGaussianEliminationCC.Transpose();
+  bufferMatGaussianEliminationCC.ActOnVectorColumn(output, theRingZero);
+  return true;
 }
 
 template <class CoefficientType>

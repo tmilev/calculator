@@ -1944,6 +1944,7 @@ void Lattice::IntersectWithPreimageOfLattice
   roots resultNonKernelPart, resultKernelPart, result, tempRoots;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
   std::cout << "<br>Starting basis: " << startingBasis.ElementToString();
+  std::cout << "<br>The linear map: " << theLinearMap.ElementToString(true, false);
   theLinearMap.ActOnRoots(startingBasis, imageStartingBasis);
   std::cout << "<br>Image of starting basis: " << imageStartingBasis.ElementToString();
   Lattice ImageLattice;
@@ -1951,8 +1952,13 @@ void Lattice::IntersectWithPreimageOfLattice
   ImageLattice.IntersectWith(other);
   std::cout << "<br>Image lattice: " << ImageLattice.ElementToString(true, false);
   basisImageIntersection.AssignMatrixRows(ImageLattice.basisRationalForm);
-  basisImageIntersection.GetCoordsInBasis(imageStartingBasis, ImageBasisInImageStartingBasisCoords, theGlobalVariables);
-  std::cout << "<br> Basis (of image lattice) in image of starting basis coordinates: " << ImageBasisInImageStartingBasisCoords.ElementToString();
+  Vectors<Rational> tempBasisImageIntersection, tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords;
+  basisImageIntersection.GetVectorsRational(tempBasisImageIntersection);
+  imageStartingBasis.GetVectorsRational(tempImageStartingBasis);
+  bool tempBool=tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, (Rational) 1, (Rational) -1, (Rational) 0);
+  ImageBasisInImageStartingBasisCoords.AssignVectorsRational(tempImageBasisInImageStartingBasisCoords);
+  assert(tempBool);
+  std::cout << "<br> Basis of image lattice expressed in coordinates with respect to image of starting basis: " << ImageBasisInImageStartingBasisCoords.ElementToString();
   resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
   for (int i=0; i<resultNonKernelPart.size; i++)
   { root& currentRoot=resultNonKernelPart.TheObjects[i];
@@ -2176,7 +2182,7 @@ int ParserNode::EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables)
 
 void Lattice::MakeZn(int theDim)
 { this->basisRationalForm.MakeIdMatrix(theDim);
-  this->basis.MakeIdMatrix(theDim);
+  this->basis.MakeIdMatrix(theDim, (LargeInt) 1, (LargeInt) 0);
   this->Den.MakeOne();
 }
 
@@ -2598,8 +2604,10 @@ void Lattice::IntersectWithLinearSubspaceSpannedBy(const roots& theSubspaceBasis
 }
 
 void Lattice::IntersectWithLinearSubspaceGivenByNormals(const roots& theSubspaceNormals)
-{ for (int i=0; i<theSubspaceNormals.size; i++)
+{ std::cout << "<br>********************Debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
+  for (int i=0; i<theSubspaceNormals.size; i++)
     this->IntersectWithLinearSubspaceGivenByNormal(theSubspaceNormals.TheObjects[i]);
+  std::cout << "<br>********************End of debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
 }
 
 bool Lattice::SubstitutionHomogeneous
@@ -3020,15 +3028,15 @@ int ParserNode::EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& the
     return this->SetError(this->errorBadOrNoArgument);
   roots theLinearMap;
   root tempRoot;
-  ParserNode& firstLatticeNode=this->owner->TheObjects[0];
-  ParserNode& secondLatticeNode=this->owner->TheObjects[1];
+  ParserNode& firstLatticeNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  ParserNode& secondLatticeNode=this->owner->TheObjects[argumentList.TheObjects[1]];
   if (!firstLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
     return this->SetError(this->errorBadOrNoArgument);
   if (!secondLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
     return this->SetError(this->errorBadOrNoArgument);
   int theDim=-1;
   for (int i=2; i<argumentList.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[i];
+  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
     if (!currentNode.GetRootRational(tempRoot, theGlobalVariables))
       return this->SetError(this->errorBadOrNoArgument);
     if (theDim==-1)
@@ -3039,6 +3047,7 @@ int ParserNode::EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& the
   }
   MatrixLargeRational theLinearMapMat;
   theLinearMapMat.AssignRootsToRowsOfMatrix(theLinearMap);
+  theLinearMapMat.Transpose();
   if (firstLatticeNode.theLattice.GetElement().GetDim()!=theLinearMapMat.NumCols || secondLatticeNode.theLattice.GetElement().GetDim()!=theLinearMapMat.NumRows)
     return this->SetError(this->errorDimensionProblem);
   this->theLattice.GetElement()=firstLatticeNode.theLattice.GetElement();

@@ -10195,7 +10195,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
     for (int j=0; j<owner.AmbientDimension; j++)
       tempMat.elements[j][i].AssignInteger(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]].TheObjects[j]*this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetLargestElongation());
   if (this->flagAnErrorHasOccurredTimeToPanic)
-  {  this->ComputeDebugString(owner, theGlobalVariables);
+  { this->ComputeDebugString(owner, theGlobalVariables);
     tempMat.ComputeDebugString();
   }
   startAsIdMat.MakeIdMatrix(owner.AmbientDimension);
@@ -16244,6 +16244,10 @@ inline int affineCone::HashFunction() const
   for (int i=0; i<tempMin; i++)
     result+= this->theWalls.TheObjects[i].HashFunction()*::SomeRandomPrimes[i];
   return result;
+}
+
+void MatrixLargeRational::MakeIdMatrix(int theDim)
+{ this->::Matrix<Rational>::MakeIdMatrix(theDim, (Rational) 1, (Rational) 0);
 }
 
 void MatrixLargeRational::ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable)
@@ -24320,7 +24324,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   int theDimension=this->AmbientWeyl.CartanSymmetric.NumRows;
   if (this->AmbientWeyl.WeylLetter=='B')
   { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords, theGlobalVariables);
-    tempMat.MakeIdMatrix(theDimension*2+1);
+    tempMat.MakeIdMatrix(theDimension*2+1, 1, 0);
     tempMat.elements[theDimension][theDimension]=0;
     for (int i=0; i<epsCoords.size; i++)
     { bool isShort=false;
@@ -24383,7 +24387,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   }
   if (this->AmbientWeyl.WeylLetter=='C')
   { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords, theGlobalVariables);
-    tempMat.MakeIdMatrix(theDimension*2);
+    tempMat.MakeIdMatrix(theDimension*2, 1, 0);
     for (int i=0; i<epsCoords.size; i++)
     { bool isLong=false;
       int firstIndex=-1;

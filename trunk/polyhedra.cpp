@@ -2230,7 +2230,7 @@ void MatrixLargeRational::DivideByRational(Rational& x)
 { this->operator/=(x);
 }
 
-void MatrixLargeRational::ActOnAroot(root& input, root& output)
+void MatrixLargeRational::ActOnAroot(root& input, root& output)const
 { assert(this->NumCols==input.size);
   root result;
   result.MakeZero(this->NumRows);
@@ -2240,12 +2240,12 @@ void MatrixLargeRational::ActOnAroot(root& input, root& output)
   output = result;
 }
 
-void MatrixLargeRational::ActOnRoots(roots& theRoots)
+void MatrixLargeRational::ActOnRoots(roots& theRoots)const
 { for (int i=0; i<theRoots.size; i++)
     this->ActOnAroot(theRoots.TheObjects[i]);
 }
 
-void MatrixLargeRational::ActOnRoots(roots& input, roots& output)
+void MatrixLargeRational::ActOnRoots(roots& input, roots& output)const
 { output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     this->ActOnAroot(input.TheObjects[i], output.TheObjects[i]);
@@ -2456,7 +2456,7 @@ void roots::ElementToString(std::string& output, bool useLaTeX, bool useHtml, bo
   output = out.str();
 }
 
-void roots::rootsToMatrix(MatrixLargeRational& output)
+void roots::GetMatRootsToRows(MatrixLargeRational& output)const
 { int tempNumCols= 0;
   if (this->size!=0)
     tempNumCols=(int)this->TheObjects[0].size;
@@ -15713,7 +15713,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   //this->ComputeDebugString(theGlobalVariables);
   out2 << this->DebugString << "\n";
   MatrixLargeRational tempMat;
-  this->SimpleBasisK.rootsToMatrix(tempMat);
+  this->SimpleBasisK.GetMatRootsToRows(tempMat);
   tempMat.Invert(theGlobalVariables);
   int counter=0;
   hashedRoots& AllRoots= this->AmbientWeyl.RootSystem;
@@ -15768,7 +15768,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
       tempRoots.CopyFromBase(this->SimpleBasisK);
       tempRoots.TheObjects[l].Assign(tempRoot);
       MatrixLargeRational tempMat;
-      tempRoots.rootsToMatrix(tempMat);
+      tempRoots.GetMatRootsToRows(tempMat);
       tempMat.Invert(theGlobalVariables);
       for(int i=0; i<AllRoots.size; i++)
       { root linComb;
@@ -24526,7 +24526,7 @@ void ComputationSetup::G2InD4Experiment(ComputationSetup& inputData, GlobalVaria
   theGlobalVariables.MakeReport();
 }
 
-void MatrixLargeRational::FindZeroEigenSpaceOneOneForEachNonPivot(roots& output, GlobalVariables& theGlobalVariables)
+void MatrixLargeRational::FindZeroEigenSpaceOneOneForEachNonPivot(roots& output)
 { MatrixLargeRational tempMat;
   tempMat.Assign(*this);
   MatrixLargeRational emptyMat;
@@ -26407,6 +26407,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionLattice: this->EvaluateLattice(theGlobalVariables); break;
     case Parser::functionGetAllRepresentatives: this->EvaluateGetAllRepresentatives(theGlobalVariables); break;
     case Parser::functionInvertLattice: this->EvaluateInvertLattice(theGlobalVariables); break;
+    case Parser::functionIntersectLatticeWithLatticePreimage: this->EvaluateIntersectLatticeWithPreimageLattice(theGlobalVariables); break;
     case Parser::functionQuasiPolynomial: this->EvaluateQuasiPolynomial(theGlobalVariables); break;
     case Parser::functionPartialFractions: this->EvaluatePartialFractions(theGlobalVariables); break;
     case Parser::functionGetVPIndicator: this->EvaluateVectorPFIndicator(theGlobalVariables); break;
@@ -26762,6 +26763,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="\\mapsto")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenMapsTo);
     this->ValueBuffer.AddObjectOnTop(0);
+    return true;
+  }
+  if (input=="IntersectLatticeWithPreimageOfLattice")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionIntersectLatticeWithLatticePreimage);
     return true;
   }
   if (input=="combinatorialChamberParam")

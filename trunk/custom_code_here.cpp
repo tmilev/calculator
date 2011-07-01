@@ -1735,8 +1735,6 @@ int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
   if (theArgumentList.size<1)
     return this->SetError(this->errorBadOrNoArgument);
   int theDim=this->owner->TheObjects[theArgumentList.TheObjects[0]].array.GetElement().size;
-  if (theArgumentList.size<theDim)
-    return this->SetError(this->errorDimensionProblem);
   root currentRoot;
   roots LatticeBase;
   currentRoot.SetSize(theDim);
@@ -1775,11 +1773,15 @@ void Lattice::MakeFromRoots(const roots& input)
 
 std::string Lattice::ElementToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
-  if (useHtml)
-    out << "<br>Basis:";
-  out <<this->basisRationalForm.ElementToString(useHtml, useLatex);
-  //out << "Integral form: Denominator=" << this->Den.ElementToString() << " \n";
-  //out << "<br>Matrix=" << this->basis.ElementToString(true, false);
+  out << "L=<";
+  roots tempRoots;
+  tempRoots.AssignMatrixRows(this->basisRationalForm);
+  for (int i=0; i<this->basisRationalForm.NumRows; i++)
+  { out << tempRoots.TheObjects[i].ElementToString();
+    if (i!=this->basisRationalForm.NumRows-1)
+      out << ",";
+  }
+  out << ">";
   return out.str();
 }
 
@@ -1936,18 +1938,80 @@ void Lattice::GetDualLattice(Lattice& output)const
   output.Reduce();
 }
 
+void Lattice::IntersectWithPreimageOfLattice
+  (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
+{ roots startingBasis, imageStartingBasis, basisImageIntersection, basisImageIntersectionInCoordsWRTimageStartingBasis, ImageBasisInImageStartingBasisCoords;
+  roots resultNonKernelPart, resultKernelPart, result, tempRoots;
+  startingBasis.AssignMatrixRows(this->basisRationalForm);
+  std::cout << "<br>Starting basis: " << startingBasis.ElementToString();
+  theLinearMap.ActOnRoots(startingBasis, imageStartingBasis);
+  std::cout << "<br>Image of starting basis: " << imageStartingBasis.ElementToString();
+  Lattice ImageLattice;
+  ImageLattice.MakeFromRoots(imageStartingBasis);
+  ImageLattice.IntersectWith(other);
+  std::cout << "<br>Image lattice: " << ImageLattice.ElementToString(true, false);
+  basisImageIntersection.AssignMatrixRows(ImageLattice.basisRationalForm);
+  basisImageIntersection.GetCoordsInBasis(imageStartingBasis, ImageBasisInImageStartingBasisCoords, theGlobalVariables);
+  std::cout << "<br> Basis (of image lattice) in image of starting basis coordinates: " << ImageBasisInImageStartingBasisCoords.ElementToString();
+  resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
+  for (int i=0; i<resultNonKernelPart.size; i++)
+  { root& currentRoot=resultNonKernelPart.TheObjects[i];
+    currentRoot.MakeZero(this->GetDim());
+    for (int j=0; j<startingBasis.size; j++)
+      currentRoot+=startingBasis.TheObjects[j]*ImageBasisInImageStartingBasisCoords.TheObjects[i].TheObjects[j];
+  }
+  std::cout << "<br> Result non-kernel part (representatives): " << resultNonKernelPart.ElementToString();
+  Lattice KernelPart;
+  KernelPart=*this;
+  tempRoots.AssignMatrixRows(theLinearMap);
+  KernelPart.IntersectWithLinearSubspaceGivenByNormals(tempRoots);
+  std::cout << "<br>Kernel part of the result: " << KernelPart.ElementToString(true, false);
+  result.AssignMatrixRows(KernelPart.basisRationalForm);
+  result.AddListOnTop(resultNonKernelPart);
+  this->MakeFromRoots(result);
+  std::cout << "<br> And the result is.... " << this->ElementToString(true, false);
+}
+
 void Lattice::IntersectWith(const Lattice& other)
 { roots commonBasis, otherBasis, startBasis;
   startBasis.AssignMatrixRows(this->basisRationalForm);
   otherBasis.AssignMatrixRows(other.basisRationalForm);
   GlobalVariables theGlobalVariables;
-assert(false);
-//  startBasis.IntersectTwoLinSpaces(startBasis, otherBasis, commonBasis, (Rational) 0, theGlobalVariables);
+  std::cout << "<br>this basis: " << startBasis.ElementToString();
+  std::cout << "<br>other basis: " << otherBasis.ElementToString();
+  startBasis.IntersectTwoLinSpaces(startBasis, otherBasis, commonBasis, theGlobalVariables);
+  std::cout << "<br> basis of linear space intersection: " << commonBasis.ElementToString() << "<br><br> ";
   Lattice thisLatticeIntersected, otherLatticeIntersected;
   thisLatticeIntersected=*this;
-  thisLatticeIntersected.IntersectWithLinearSubspace(commonBasis);
-  otherLatticeIntersected.IntersectWithLinearSubspace(commonBasis);
-  assert(false);
+  otherLatticeIntersected=other;
+  thisLatticeIntersected.IntersectWithLinearSubspaceSpannedBy(commonBasis);
+  std::cout << "<br> linear space intersected with this lattice: " << thisLatticeIntersected.ElementToString(true, false);
+  otherLatticeIntersected.IntersectWithLinearSubspaceSpannedBy(commonBasis);
+  std::cout << "<br> linear space intersected with other lattice: " << otherLatticeIntersected.ElementToString(true, false);
+  roots thisCommonBasis, otherCommonBasis, thisCommonCoords, otherCommonCoords;
+  thisCommonBasis.AssignMatrixRows(thisLatticeIntersected.basisRationalForm);
+  otherCommonBasis.AssignMatrixRows(otherLatticeIntersected.basisRationalForm);
+  thisCommonBasis.GetCoordsInBasis(commonBasis, thisCommonCoords, theGlobalVariables);
+  otherCommonBasis.GetCoordsInBasis(commonBasis, otherCommonCoords, theGlobalVariables);
+  std::cout << "<br>this lattice intersection new coords: " << thisCommonBasis.ElementToString();
+  std::cout << "<br>other lattice intersection new coords: " << otherBasis.ElementToString();
+  Lattice thisCommonCoordsLattice, otherCommonCoordsLattice;
+  thisCommonCoordsLattice.MakeFromRoots(thisCommonCoords);
+  otherCommonCoordsLattice.MakeFromRoots(otherCommonCoords);
+  std::cout << "<br> linear space intersected with this lattice new coords: " << thisCommonCoordsLattice.ElementToString(true, false);
+  std::cout << "<br> linear space intersected with other lattice new coords: " << otherCommonCoordsLattice.ElementToString(true, false);
+  thisCommonCoordsLattice.IntersectWithBothOfMaxRank(otherCommonCoordsLattice);
+  std::cout << "<br> intersection lattice new coords: " << thisCommonCoordsLattice.ElementToString(true, false);
+  roots resultBasis;
+  resultBasis.SetSize(thisCommonCoordsLattice.basisRationalForm.NumRows);
+  for (int i=0; i<resultBasis.size; i++)
+  { root& currentRoot=resultBasis.TheObjects[i];
+    currentRoot.MakeZero(this->GetDim());
+    for (int j=0; j< thisCommonCoordsLattice.basisRationalForm.NumCols; j++)
+      currentRoot+=thisCommonCoordsLattice.basisRationalForm.elements[i][j]*commonBasis.TheObjects[j];
+  }
+  this->MakeFromRoots(resultBasis);
+  std::cout << "<br>final answer: intersection is: " << this->ElementToString(true, false);
 }
 
 void Lattice::IntersectWithBothOfMaxRank(const Lattice& other)
@@ -2470,15 +2534,15 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
   return true;
 }
 
-void Lattice::IntersectWithLinearSubspace(const root& theSubspaceNormal)
-{ std::cout << "Starting lattice: " << this->ElementToString(true, false) << "<br>";
+void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
+{ std::cout << "<br>Starting lattice: " << this->ElementToString(true, false) << "<br>";
   roots startingBasis, resultBasis;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
-  std::cout << "Starting normal: " << theSubspaceNormal.ElementToString();
+  std::cout << "Starting normal: " << theNormal.ElementToString();
   root theScalarProducts;
   theScalarProducts.SetSize(startingBasis.size);
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
-    theScalarProducts.TheObjects[i]=root::RootScalarEuclideanRoot(startingBasis.TheObjects[i], theSubspaceNormal);
+    theScalarProducts.TheObjects[i]=root::RootScalarEuclideanRoot(startingBasis.TheObjects[i], theNormal);
   if (theScalarProducts.IsEqualToZero())
     return;
   std::cout << "<br>the scalar products: " << theScalarProducts.ElementToString();
@@ -2525,9 +2589,17 @@ void Lattice::IntersectWithLinearSubspace(const root& theSubspaceNormal)
   std::cout << "<br>Final answer lattice form: " << this->ElementToString(true, false);
 }
 
-void Lattice::IntersectWithLinearSubspace(const roots& theSubspace)
-{ for (int i=0; i<theSubspace.size; i++)
-    this->IntersectWithLinearSubspace(theSubspace.TheObjects[i]);
+void Lattice::IntersectWithLinearSubspaceSpannedBy(const roots& theSubspaceBasis)
+{ roots theNormals;
+  MatrixLargeRational theMat;
+  theSubspaceBasis.GetMatRootsToRows(theMat);
+  theMat.FindZeroEigenSpace(theNormals);
+  this->IntersectWithLinearSubspaceGivenByNormals(theNormals);
+}
+
+void Lattice::IntersectWithLinearSubspaceGivenByNormals(const roots& theSubspaceNormals)
+{ for (int i=0; i<theSubspaceNormals.size; i++)
+    this->IntersectWithLinearSubspaceGivenByNormal(theSubspaceNormals.TheObjects[i]);
 }
 
 bool Lattice::SubstitutionHomogeneous
@@ -2885,7 +2957,7 @@ int ParserNode::EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobal
     if (tempRoots.TheObjects[i-1].size!=theDim)
       return this->SetError(this->errorDimensionProblem);
   }
-  this->theLattice.GetElement().IntersectWithLinearSubspace(tempRoots);
+  this->theLattice.GetElement().IntersectWithLinearSubspaceSpannedBy(tempRoots);
   //this->outputString=out.str();
   this->ExpressionType=this->typeLattice;
   return this->errorNoError;
@@ -2896,11 +2968,15 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
   (const Vectors<CoefficientType>& firstSpace, const Vectors<CoefficientType>& secondSpace,
    Vectors<CoefficientType>& output, const CoefficientType& theRingZero,
    GlobalVariables& theGlobalVariables)
-{ //this function is completely untested (since it is not used at the moment), please check its implementation before attempting to use!
+{ //std::cout << "<br>*****Debugging Intersection linear spaces: ";
+  //std::cout << "<br>input first space: " << firstSpace.ElementToString();
+  //std::cout << "<br>input second space: " << secondSpace.ElementToString();
   Vectors<CoefficientType> firstReduced, secondReduced;
   Selection tempSel;
   firstSpace.SelectABasis(firstReduced, theRingZero, tempSel, theGlobalVariables);
   secondSpace.SelectABasis(secondReduced, theRingZero, tempSel, theGlobalVariables);
+  //std::cout << "<br>first selected basis: " << firstSpace.ElementToString();
+  //std::cout << "<br>second selected basis: " << secondSpace.ElementToString();
   if (firstReduced.size==0 || secondReduced.size==0)
   { output.size=0;
     return;
@@ -2912,20 +2988,61 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
   { for (int j=0; j<firstReduced.size; j++)
       theMat.elements[i][j]=firstReduced.TheObjects[j].TheObjects[i];
     for (int j=0; j<secondReduced.size; j++)
-      theMat.elements[i][firstReduced.size+j]=secondReduced.TheObjects[j].TheObjects[i];
+    { theMat.elements[i][firstReduced.size+j]=theRingZero;
+      theMat.elements[i][firstReduced.size+j]-=secondReduced.TheObjects[j].TheObjects[i];
+    }
   }
   Matrix<CoefficientType> matEmpty;
+  //std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ElementToString(true, false);
   theMat.GaussianEliminationByRows(matEmpty, tempSel);
+  //std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ElementToString(true, false);
   output.MakeActualSizeAtLeastExpandOnTop(tempSel.CardinalitySelection);
   output.size=0;
   Vector<CoefficientType> nextIntersection;
   for(int i=0; i<tempSel.CardinalitySelection; i++)
   { int currentIndex=tempSel.elements[i];
+    //std::cout << "<br>current pivot index : " << currentIndex;
     assert(currentIndex>=firstReduced.size);
     nextIntersection.MakeZero(theDim, theRingZero);
     for (int j=0; j<firstReduced.size; j++)
-      if (tempSel.selected[j])
-        nextIntersection.TheObjects[j]=theMat.elements[j][currentIndex];
+      if (!tempSel.selected[j])
+        nextIntersection+=firstReduced.TheObjects[j]*theMat.elements[j][currentIndex];
     output.AddObjectOnTop(nextIntersection);
   }
+  //std::cout << "<br> final output: " << output.ElementToString();
+  //std::cout << "<br>******************End of debugging linear space intersections";
+}
+
+int ParserNode::EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size<3)
+    return this->SetError(this->errorBadOrNoArgument);
+  roots theLinearMap;
+  root tempRoot;
+  ParserNode& firstLatticeNode=this->owner->TheObjects[0];
+  ParserNode& secondLatticeNode=this->owner->TheObjects[1];
+  if (!firstLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  if (!secondLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  int theDim=-1;
+  for (int i=2; i<argumentList.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[i];
+    if (!currentNode.GetRootRational(tempRoot, theGlobalVariables))
+      return this->SetError(this->errorBadOrNoArgument);
+    if (theDim==-1)
+      theDim=tempRoot.size;
+    if (theDim!=tempRoot.size)
+      return this->SetError(this->errorDimensionProblem);
+    theLinearMap.AddObjectOnTop(tempRoot);
+  }
+  MatrixLargeRational theLinearMapMat;
+  theLinearMapMat.AssignRootsToRowsOfMatrix(theLinearMap);
+  if (firstLatticeNode.theLattice.GetElement().GetDim()!=theLinearMapMat.NumCols || secondLatticeNode.theLattice.GetElement().GetDim()!=theLinearMapMat.NumRows)
+    return this->SetError(this->errorDimensionProblem);
+  this->theLattice.GetElement()=firstLatticeNode.theLattice.GetElement();
+  this->theLattice.GetElement().IntersectWithPreimageOfLattice(theLinearMapMat, secondLatticeNode.theLattice.GetElement(), theGlobalVariables);
+  this->ExpressionType=this->typeLattice;
+  return this->errorNoError;
 }

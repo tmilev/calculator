@@ -1121,10 +1121,10 @@ public:
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void MultiplyByLargeRational(Rational& x);
   void MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables);
-  void ActOnAroot(root& theRoot){ this->ActOnAroot(theRoot, theRoot); }
-  void ActOnAroot(root& input, root& output);
-  void ActOnRoots(roots& input, roots& output);
-  void ActOnRoots(roots& theRoots);
+  void ActOnAroot(root& theRoot)const{ this->ActOnAroot(theRoot, theRoot); }
+  void ActOnAroot(root& input, root& output)const;
+  void ActOnRoots(roots& input, roots& output)const;
+  void ActOnRoots(roots& theRoots)const;
   void GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen);
   void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
 
@@ -1137,8 +1137,9 @@ public:
  //   tempMat.LieBracketWith(right);
 //    return tempMat;
 //  }
-  inline void FindZeroEigenSpace(roots& output, GlobalVariables& theGlobalVariables){this->FindZeroEigenSpaceOneOneForEachNonPivot(output, theGlobalVariables);}
-  void FindZeroEigenSpaceOneOneForEachNonPivot(roots& output, GlobalVariables& theGlobalVariables);
+  inline void FindZeroEigenSpace(roots& output, GlobalVariables& theGlobalVariables){this->FindZeroEigenSpaceOneOneForEachNonPivot(output);}
+  inline void FindZeroEigenSpace(roots& output){this->FindZeroEigenSpaceOneOneForEachNonPivot(output);}
+  void FindZeroEigenSpaceOneOneForEachNonPivot(roots& output);
   static bool SystemLinearInequalitiesHasSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputPoint);
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(MatrixLargeRational& matA, MatrixLargeRational& matb, MatrixLargeRational& outputSolution, GlobalVariables& theGlobalVariables);
   static void ComputePotentialChangeGradient(MatrixLargeRational& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
@@ -1923,16 +1924,15 @@ class Rational
     if (N==0)
     { this->NumShort=0;
       this->DenShort=1;
+      return true;
     }
+    register int tempGCD;
+    if (N>0)
+      tempGCD= Rational::gcd(N, D);
     else
-    { register int tempGCD;
-      if (N>0)
-        tempGCD= Rational::gcd(N, D);
-      else
-        tempGCD= Rational::gcd(-N, D);
-      this->NumShort= (N/tempGCD);
-      this->DenShort= (D/tempGCD);
-    }
+      tempGCD= Rational::gcd(-N, D);
+    this->NumShort=(N/tempGCD);
+    this->DenShort= (D/tempGCD);
     return true;
   }
   inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen)
@@ -2367,8 +2367,8 @@ class Vectors: public List<Vector<CoefficientType> >
 {
   public:
   std::string DebugString;
-  std::string ElementToString(){return this->ElementToString(false, false, false);}
-  std::string ElementToString(bool useLaTeX, bool useHtml, bool makeTable)
+  std::string ElementToString()const{return this->ElementToString(false, false, false);}
+  std::string ElementToString(bool useLaTeX, bool useHtml, bool makeTable)const
   { std::stringstream out;
     std::string tempS;
     if (! useLaTeX && ! useHtml)
@@ -2649,6 +2649,11 @@ public:
   int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)const;
   void AddRoot(root& r);
   void AddIntRoot(intRoot& r);
+  void GetVectorsRational(Vectors<Rational>& output)const
+  { output.SetSize(this->size);
+    for (int i=0; i<this->size; i++)
+      output.TheObjects[i].CopyFromLight(this->TheObjects[i]);
+  }
   void AddRootSnoRepetition(roots& r);
   bool AddRootNoRepetition(root& r);
   bool ElementsHaveNonNegativeScalarProduct(const root& theRoot)const;
@@ -2703,6 +2708,22 @@ public:
   bool GetLinearDependence(MatrixLargeRational& outputTheLinearCombination);
   void GetLinearDependenceRunTheLinearAlgebra(MatrixLargeRational& outputTheLinearCombination, MatrixLargeRational& outputTheSystem, Selection& outputNonPivotPoints);
   void ReadCivilizedHumanReadableFormat(std::stringstream& input);
+  void AssignVectorsRational(const Vectors<Rational>& input)
+  { this->SetSize(input.size);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i].CopyFromLight(input.TheObjects[i]);
+  }
+  static void IntersectTwoLinSpaces
+  (const roots& firstSpace, const roots& secondSpace,
+   roots& output,
+   GlobalVariables& theGlobalVariables)
+  { Vectors<Rational> firstSpaceVectors, secondSpaceVectors, outputVectors;
+    firstSpace.GetVectorsRational(firstSpaceVectors);
+    secondSpace.GetVectorsRational(secondSpaceVectors);
+    Vectors<Rational>::IntersectTwoLinSpaces(firstSpaceVectors, secondSpaceVectors, outputVectors, (Rational) 0, theGlobalVariables);
+    output.AssignVectorsRational(outputVectors);
+  }
+
   int GetDimensionOfElements();
   //Strict cone: The zero linear combination is not allowed.
   //Non-Strict cone: the zero linear combination is allowed.
@@ -2722,7 +2743,7 @@ public:
   void GaussianEliminationForNormalComputation (MatrixLargeRational& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
   // the below function is slow
   int ArrangeFirstVectorsBeOfMaxPossibleRank(GlobalVariables& theGlobalVariables);
-  void rootsToMatrix(MatrixLargeRational& output);
+  void GetMatRootsToRows(MatrixLargeRational& output)const;
   void rootsToMatrixRationalTruncate(MatrixLargeRational& output);
   void ComputeDebugStringEpsilonForm(){this->ElementToStringEpsilonForm(this->DebugString, false, false, false); }
   void ElementToLinearCombinationString(std::string& output);
@@ -6656,6 +6677,10 @@ public:
   int GetDim()const{return this->basis.NumCols;}
   int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
+  void IntersectWithPreimageOfLattice
+  (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
+;
+
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
   //returns false if the vector is not in the vector space spanned by the lattice
@@ -6686,8 +6711,9 @@ public:
   void Reduce
   ()
   ;
-  void IntersectWithLinearSubspace(const roots& theSubspace);
-  void IntersectWithLinearSubspace(const root& IntersectWithLinearSubspace);
+  void IntersectWithLinearSubspaceSpannedBy(const roots& theSubspaceBasis);
+  void IntersectWithLinearSubspaceGivenByNormals(const roots& theSubspaceNormals);
+  void IntersectWithLinearSubspaceGivenByNormal(const root& theNormal);
 static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
 (const PolynomialsRationalCoeff& theSub, MatrixLargeRational& output, GlobalVariables& theGlobalVariables)
 ;
@@ -9185,6 +9211,7 @@ class ParserNode
   int EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables);
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
   int EvaluateReadFromFile(GlobalVariables& theGlobalVariables);
+  int EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
   void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
@@ -9256,11 +9283,12 @@ public:
     tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
   };
   enum functionList
-  { functionEigen,functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
+  { functionEigen, functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
     functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
     functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile, functionIntersectWithSubspace,
+    functionIntersectLatticeWithLatticePreimage,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

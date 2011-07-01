@@ -119,6 +119,8 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
+
+  //civilizedInput="Lattice((1,0,1),(1,1,0))*Lattice((1,0,0),(1,2,-2))";
   //civilizedInput="IntersectLatticeWithSubspaces(Lattice((1/2,1/2,1/2), (0,1,2), (0,0,5)),(0,1,2),(1,0,0))";
   //civilizedInput="IntersectLatticeWithSubspaces(Lattice((1/2,1/2,1/2), (0,1,2), (0,0,5)),(0,1,2))";
   //civilizedInput="ReadFromFile";

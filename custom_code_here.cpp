@@ -972,7 +972,8 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVari
       progressReport2 << "Parametric chamber candidate " << j+1 << " out of " << currentParamChamberList.size;
       if (currentCone.CreateFromNormals(currentParamChamberList.TheObjects[j], theGlobalVariables))
       { this->GetSubFromNonParamArray(subForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
-        this->theMultiplicities.TheObjects[i].Substitution(subForFindingExtrema.RationalPolyForm, currentExtremaCandidate, theGlobalVariables);
+        assert(false);
+        //this->theMultiplicities.TheObjects[i].SubstitutionLessVariables(subForFindingExtrema.RationalPolyForm, currentExtremaCandidate, theGlobalVariables);
         this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
         this->allParamSubChambersRepetitionsAllowedConeForm.AddObjectOnTop(currentCone);
         progressReport2 << " is non-trivial";
@@ -1687,7 +1688,14 @@ bool ConeComplex::findMaxLFOverConeProjective
 
 void Lattice::Reduce
 ()
-{ LargeInt tempInt, tempInt2;
+{ //////////////////////////////////the below function is for debugging purposes only!
+  //Don't wanna mess around with #ifdefs, but it should be surrounded by #ifdef DEBUG .... #endif
+  //bool flagTesting=true;
+  //static MatrixLargeRational testMatrix;
+  //if (flagTesting)
+  //  this->TestGaussianEliminationEuclideanDomainRationals(testMatrix);
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  LargeInt tempInt, tempInt2;
   tempInt.MakeMOne(); tempInt2.MakeOne();
   this->basis.GaussianEliminationEuclideanDomain(tempInt, tempInt2);
   int numRowsToTrim=0;
@@ -1704,6 +1712,18 @@ void Lattice::Reduce
   }
   this->basis.Resize(this->basis.NumRows-numRowsToTrim, this->basis.NumCols, true);
   this->basisRationalForm.AssignMatrixIntWithDen(this->basis, this->Den);
+//  if (flagTesting)
+//  { testMatrix.Resize(this->basis.NumRows-numRowsToTrim, this->basis.NumCols, true);
+//    std::cout << "<br>basis rational form: " << this->basisRationalForm.ElementToString(true, false);
+//    assert(testMatrix==this->basisRationalForm);
+//  }
+}
+
+void Lattice::TestGaussianEliminationEuclideanDomainRationals(MatrixLargeRational& output)
+{ output.AssignMatrixIntWithDen(this->basis, this->Den);
+  std::cout << "Test output: " << output.ElementToString(true, false);
+  output.GaussianEliminationEuclideanDomain((Rational) -1, (Rational) 1);
+  std::cout << "<br>After gaussian elimination:" << output.ElementToString(true, false);
 }
 
 void Lattice::RefineByOtherLattice(const Lattice& other)
@@ -1938,6 +1958,17 @@ void Lattice::GetDualLattice(Lattice& output)const
   output.Reduce();
 }
 
+bool Lattice::FindOnePreimageInLatticeOf
+    (const MatrixLargeRational& theLinearMap, const roots& input, roots& output, GlobalVariables& theGlobalVariables)
+{ Vectors<Rational> thisBasis, tempInput, tempOutput;
+  thisBasis.AssignMatrixRows(this->basisRationalForm);
+  theLinearMap.ActOnVectorsColumn(thisBasis, (Rational) 0);
+  input.GetVectorsRational(tempInput);
+  bool result=tempInput.GetIntegralCoordsInBasisIfTheyExist(thisBasis, tempOutput, (Rational) 1, (Rational) -1, (Rational) 0);
+  output.AssignVectorsRational(tempOutput);
+  return result;
+}
+
 void Lattice::IntersectWithPreimageOfLattice
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 { roots startingBasis, imageStartingBasis, basisImageIntersection, basisImageIntersectionInCoordsWRTimageStartingBasis, ImageBasisInImageStartingBasisCoords;
@@ -1955,7 +1986,7 @@ void Lattice::IntersectWithPreimageOfLattice
   Vectors<Rational> tempBasisImageIntersection, tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords;
   basisImageIntersection.GetVectorsRational(tempBasisImageIntersection);
   imageStartingBasis.GetVectorsRational(tempImageStartingBasis);
-  bool tempBool=tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, (Rational) 1, (Rational) -1, (Rational) 0);
+  bool tempBool= tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, (Rational) 1, (Rational) -1, (Rational) 0);
   ImageBasisInImageStartingBasisCoords.AssignVectorsRational(tempImageBasisInImageStartingBasisCoords);
   assert(tempBool);
   std::cout << "<br> Basis of image lattice expressed in coordinates with respect to image of starting basis: " << ImageBasisInImageStartingBasisCoords.ElementToString();
@@ -2485,7 +2516,60 @@ void QuasiPolynomial::AddLatticeShift(const PolynomialRationalCoeff& input, cons
   }
 }
 
-bool QuasiPolynomial::Substitution
+
+void QuasiPolynomial::Substitution
+  (const MatrixLargeRational& mapFromNewSpaceToOldSpace,
+   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+{ assert(this!=&output);
+  output.AmbientLatticeReduced=ambientLatticeNewSpace;
+  output.AmbientLatticeReduced.IntersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced, theGlobalVariables);
+  roots allRepresentatives, imagesAllRepresentatives;
+  mapFromNewSpaceToOldSpace.ActOnRoots(allRepresentatives, imagesAllRepresentatives);
+  AmbientLatticeReduced.GetAllRepresentatitves(output.AmbientLatticeReduced, allRepresentatives);
+  PolynomialsRationalCoeff theSub;
+  theSub.SetSize(this->GetNumVars());
+  root tempRoot;
+  for (int i=0; i<theSub.size; i++)
+  { Polynomial<Rational>& currentPoly=theSub.TheObjects[i];
+    mapFromNewSpaceToOldSpace.RowToRoot(i, tempRoot);
+    currentPoly.MakeLinPolyFromRootNoConstantTerm(tempRoot);
+  }
+  PolynomialRationalCoeff tempP;
+  for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
+  { this->valueOnEachLatticeShift.TheObjects[i].Substitution(theSub, tempP, mapFromNewSpaceToOldSpace.NumCols, (Rational) 1);
+    for (int j=0; j<allRepresentatives.size; j++)
+      if (imagesAllRepresentatives.TheObjects[j]==this->LatticeShifts.TheObjects[i])
+        output.AddLatticeShift(tempP, allRepresentatives.TheObjects[j]);
+  }
+}
+
+void QuasiPolynomial::Substitution
+(const root& inputTranslation, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+{ //format of the translation. If the starting quasipolynomial was P(y_1, ..., y_n),
+  //and the translation has coordinates (t_1, ..., t_n),
+  //then the resulting quasipolynomial will be P(x_1-t_1, ..., x_n-t_n)
+  PolynomialsRationalCoeff theSub;
+  theSub.MakeIdSubstitution(this->GetNumVars(), (Rational) 1);
+  for (int i=0; i<theSub.size; i++)
+    theSub.TheObjects[i].AddConstant(-inputTranslation.TheObjects[i]);
+  PolynomialRationalCoeff tempP;
+  output.MakeZeroLatticeZn(this->GetNumVars());
+  output.AmbientLatticeReduced=this->AmbientLatticeReduced;
+  for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
+  { this->valueOnEachLatticeShift.TheObjects[i].Substitution(theSub, tempP, this->GetNumVars(), (Rational) 1);
+    output.AddLatticeShift(tempP, this->LatticeShifts.TheObjects[i]+inputTranslation);
+  }
+}
+
+void QuasiPolynomial::Substitution
+  (const MatrixLargeRational& mapFromNewSpaceToOldSpace, const root& inputTranslation,
+   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+{ QuasiPolynomial tempQP;
+  this->Substitution(inputTranslation, tempQP, theGlobalVariables);
+  return tempQP.Substitution(mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output, theGlobalVariables);
+}
+
+bool QuasiPolynomial::SubstitutionLessVariables
   (const PolynomialsRationalCoeff& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
 { MatrixLargeRational theLatticeSub;
   if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub, theGlobalVariables))

@@ -908,7 +908,7 @@ public:
   void ComputeDebugString();
   void ComputeDebugString(bool useHtml, bool useLatex){this->ElementToString(this->DebugString, useHtml, useLatex);}
   void ElementToString(std::string& output)const;
-  void ActOnVectorColumn(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)
+  void ActOnVectorColumn(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)const
   { assert(&input!=&output);
     assert(this->NumCols==input.size);
     output.MakeZero(this->NumRows, TheRingZero);
@@ -920,7 +920,15 @@ public:
         output.TheObjects[j]+=tempElt;
       }
   }
-  void ActOnVectorColumn(Vector<Element>& inputOutput, const Element& TheRingZero){ Vector<Element> buffer; this->ActOnVectorColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
+  void ActOnVectorsColumn(const Vectors<Element>& input, Vectors<Element>& output, const Element& TheRingZero)const
+  { assert(&input!=&output);
+    assert(this->NumCols==input.size);
+    output.SetSize(input.size);
+    for (int i=0; i<input.size; i++)
+      this->ActOnVectorColumn(input.TheObjects[i], output.TheObjects[i], TheRingZero);
+  }
+  void ActOnVectorColumn(Vector<Element>& inputOutput, const Element& TheRingZero)const{ Vector<Element> buffer; this->ActOnVectorColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
+  void ActOnVectorsColumn(Vectors<Element>& inputOutput, const Element& TheRingZero)const{ Vectors<Element> buffer; this->ActOnVectorsColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const ;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   std::string ElementToString(bool useHtml, bool useLatex)const{std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
@@ -1108,7 +1116,8 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
   Element tempElt;
   int row=0;
   while(row<this->NumRows && col<this->NumCols)
-  { int findPivotRow=-1;
+  { //std::cout << "<br>****************row: " << row << " status: " << this->ElementToString(true, false);
+    int findPivotRow=-1;
     for (int i=row; i<this->NumRows; i++)
       if(!this->elements[i][col].IsEqualToZero())
       { findPivotRow=i;
@@ -1119,6 +1128,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       if (this->elements[row][col]<0)
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       int ExploringRow= row+1;
+//      std::cout << "<br>before second while: " << this->ElementToString(true, false);
       while (ExploringRow<this->NumRows)
       { Element& PivotElt=this->elements[row][col];
         Element& otherElt=this->elements[ExploringRow][col];
@@ -1126,18 +1136,21 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
           this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
         if (PivotElt<=otherElt)
         { tempElt=otherElt/PivotElt;
+          tempElt.AssignFloor();
           this->SubtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
         }
         if (this->elements[ExploringRow][col].IsEqualToZero())
           ExploringRow++;
         else
           this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
+//        std::cout << "<br>second while cycle end: " << this->ElementToString(true, false);
       }
       Element& PivotElt = this->elements[row][col];
       for (int i=0; i<row; i++)
         if (!this->elements[i][col].IsEqualToZero())
           if (PivotElt<=this->elements[i][col] || this->elements[i][col].IsNegative())
           { tempElt =this->elements[i][col]/PivotElt;
+            tempElt.AssignFloor();
             this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
             if (this->elements[i][col].IsNegative())
               this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
@@ -1145,6 +1158,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       row++;
     }
     col++;
+//    std::cout << "end of cycle status: " << this->ElementToString(true, false) << "<br>****************";
   }
 }
 
@@ -1894,6 +1908,7 @@ public:
   int GetIntValueTruncated(){return this->sign* this->value.GetUnsignedIntValueTruncated(); }
   double GetDoubleValue();
   int operator %(int x);
+  inline void AssignFloor(){}
   inline void operator=(const LargeInt& x){ this->Assign(x);}
   inline void operator=(const LargeIntUnsigned& other) {this->value=other; this->sign=1;}
   inline void operator*=(const LargeInt& other){this->MultiplyBy(other);}
@@ -2105,6 +2120,11 @@ ParallelComputing::GlobalPointerCounter++;
   }
   void AssignString(const std::string& input);
   void AssignFracValue();
+  void AssignFloor()
+  { Rational tempRat=*this;
+    tempRat.AssignFracValue();
+    *this-=tempRat;
+  }
   void MultiplyBy(const Rational& r);
   int HashFunction() const{return this->NumShort*::SomeRandomPrimes[0]+this->DenShort*::SomeRandomPrimes[1]; }
   //void MultiplyByLargeRational(int num, int den);
@@ -4248,7 +4268,7 @@ public:
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int NonZeroIndex2, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& coeff2);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& ConstantTerm);
-  void MakeLinPolyFromRoot(root& r);
+  void MakeLinPolyFromRootNoConstantTerm(const root& r);
   void TimesInteger(int a);
   void DivideBy(const Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder)const;
   void TimesConstant(const ElementOfCommutativeRingWithIdentity& r);
@@ -5710,7 +5730,7 @@ bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeLinPolyFromRoot(root& r)
+void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeLinPolyFromRootNoConstantTerm(const root& r)
 { this->Nullify((int)r.size);
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
   for (int i=0; i<r.size; i++)
@@ -6756,6 +6776,7 @@ public:
 
 class Lattice
 {
+  void TestGaussianEliminationEuclideanDomainRationals(MatrixLargeRational& output);
 public:
   MatrixLargeRational basisRationalForm;
   Matrix<LargeInt> basis;
@@ -6763,10 +6784,12 @@ public:
   int GetDim()const{return this->basis.NumCols;}
   int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
+  bool FindOnePreimageInLatticeOf
+    (const MatrixLargeRational& theLinearMap, const roots& input, roots& output, GlobalVariables& theGlobalVariables)
+;
   void IntersectWithPreimageOfLattice
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
-
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
   //returns false if the vector is not in the vector space spanned by the lattice
@@ -6850,7 +6873,21 @@ public:
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
   void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
   void MakeZeroLatticeZn(int theDim);
-  bool Substitution
+//  bool ExtractLinearMapAndTranslationFromSub
+//  ()
+ // ;
+  void Substitution
+  (const MatrixLargeRational& mapFromNewSpaceToOldSpace, const root& inputTranslation,
+   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+  ;
+  void Substitution
+  (const MatrixLargeRational& mapFromNewSpaceToOldSpace,
+   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+  ;
+  void Substitution
+  (const root& inputTranslation, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool SubstitutionLessVariables
   (const PolynomialsRationalCoeff& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
   ;
   void operator+=(const QuasiPolynomial& other);

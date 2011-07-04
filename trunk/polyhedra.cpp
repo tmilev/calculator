@@ -5844,7 +5844,7 @@ bool ComplexQN::IsEqualToZero()
 void PolynomialRationalCoeff::MakeLinPolyFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5)
 { root tempRoot;
   tempRoot.InitFromIntegers(theDimension, x1, x2, x3, x4, x5);
-  this->MakeLinPolyFromRoot(tempRoot);
+  this->MakeLinPolyFromRootNoConstantTerm(tempRoot);
 }
 
 void PolynomialRationalCoeff::operator=(const std::string& tempS)
@@ -9610,7 +9610,7 @@ void partFraction::MakePolynomialFromOneNormal(root& normal, root& shiftRational
   PolynomialRationalCoeff tempP;
   root::RootScalarEuclideanRoot(normal, shiftRational, tempRat);
   for (int j=0; j<theMult-1; j++)
-  { tempP.MakeLinPolyFromRoot(normal);
+  { tempP.MakeLinPolyFromRootNoConstantTerm(normal);
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
     { tempP.ComputeDebugString();
     }
@@ -27435,7 +27435,7 @@ void MonomialUniversalEnveloping::ModOutVermaRelations(bool SubHighestWeightWith
       PolynomialRationalCoeff tempP;
       root tempRoot;
       tempRoot.MakeEi(theNumVars, this->owner->ChevalleyGeneratorIndexToElementCartanIndex(this->generatorsIndices.TheObjects[i]));
-      tempP.MakeLinPolyFromRoot(tempRoot);
+      tempP.MakeLinPolyFromRootNoConstantTerm(tempRoot);
       if (theDegree!=1)
         tempP.RaiseToPower(theDegree, (Rational) 1);
       this->Coefficient.MultiplyBy(tempP);
@@ -27477,7 +27477,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
       tempRoot.MakeZero(theNumVars);
       for (int i=0; i<this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent.size; i++)
         tempRoot.TheObjects[i]=this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent.TheObjects[i];
-      tempP.MakeLinPolyFromRoot(tempRoot);
+      tempP.MakeLinPolyFromRootNoConstantTerm(tempRoot);
       tempP.Substitution(highestWeightSub, theNumVars, (Rational) 1);
       tempP.RaiseToPower(theDegree, (Rational) 1);
       tempP.ComputeDebugString();
@@ -30073,7 +30073,7 @@ void EigenVectorComputation::PrepareCartanSub
   for (int i=0; i<theDimension; i++)
   { MatrixCartanSub.RowToRoot(i, tempRoot);
     tempRoot.ComputeDebugString();
-    outputSub.TheObjects[i].MakeLinPolyFromRoot(tempRoot);
+    outputSub.TheObjects[i].MakeLinPolyFromRootNoConstantTerm(tempRoot);
   }
 }
 
@@ -31531,7 +31531,7 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Globa
         return this->SetError(this->errorDimensionProblem);
       this->TrimSubToMinNumVars(theSub, theDimension);
       tempQP=this->theQP.GetElement();
-      if (!tempQP.Substitution(theSub, this->theQP.GetElement(), theGlobalVariables))
+      if (!tempQP.SubstitutionLessVariables(theSub, this->theQP.GetElement(), theGlobalVariables))
         return this->SetError(this->errorImplicitRequirementNotSatisfied);
       this->outputString=this->theQP.GetElement().ElementToString(true, false);
       return this->errorNoError;

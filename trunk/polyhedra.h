@@ -6829,7 +6829,7 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
   //returning false means that the lattice given as rougher is not actually rougher than the current lattice
   //or that there are too many representatives
   bool GetAllRepresentatitves
-  (const Lattice& rougherLattice, roots& output)
+  (const Lattice& rougherLattice, roots& output)const
   ;
   inline std::string ElementToString()const{return this->ElementToString(true, false);}
   std::string ElementToString(bool useHtml, bool useLatex)const;

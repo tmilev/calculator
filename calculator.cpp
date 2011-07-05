@@ -119,6 +119,7 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
+  civilizedInput="QPSubAmbientLatticeZn(QuasiPolynomial(x_1+4x_2, (0,0), Lattice((1,0),(0,2))), ( (1,0),(0,1),(1,1),(1,2)), (0,1))";
   //civilizedInput="Lattice((1,1/2), (1,-1/3))";
   //civilizedInput="IntersectLatticeWithPreimageOfLattice(Lattice((1,1,1,0), (0,2,1,1), (0,0,2,0), (0,0,0,2)),  Lattice((1,1,0),(0,2,0)), (1,2,0),(0,1,1),(1,0,1), (0,0,1) )";
   //civilizedInput="Lattice((1,0,1),(1,1,0))*Lattice((1,0,0),(1,2,-2))";

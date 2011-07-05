@@ -25524,6 +25524,10 @@ void Parser::ExtendOnTop(int numNew)
 
 void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
 { //this->UEElement.ComputeDebugString();
+  if (this->owner->TheObjects[24].ExpressionType==this->typeError)
+    std::cout << "Error detected first at " << this->indexInOwner << "\n";
+  if (this->indexInOwner==24)
+    std::cout << "Error is here!";
   this->Evaluated=true;
   for (int i=0; i<this->children.size; i++)
   { if (this->Operation==Parser::tokenMap)
@@ -26151,7 +26155,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
     case ParserNode::errorUnknownOperation: out << "error: unknown operation. The lazy programmer has added the operation to the dictionary, but hasn't implemented it yet. Lazy programmers deserve no salary. "; break;
     case ParserNode::errorImplicitRequirementNotSatisfied: out << "Error: an implicit requirement for the funciton input has not been satisfied."; break;
     case ParserNode::errorBadFileFormat: out << "Bad input file format. "; break;
-    default: out << "Non-documented error. Lazy programmers deserve no salaries."; break;
+    default: out << "Non-documented error number " << this->ErrorType << ". Lazy programmers deserve no salaries."; break;
   }
   return out.str();
 }
@@ -26409,6 +26413,7 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
     case Parser::functionMaximumLFoverCone: this->EvaluateMaxLFOverCone(theGlobalVariables); break;
     case Parser::functionMaximumQPoverCone: this->EvaluateMaxQPOverCone(theGlobalVariables); break;
     case Parser::functionLattice: this->EvaluateLattice(theGlobalVariables); break;
+    case Parser::functionSubstitutionInQuasipolynomial: this->EvaluateSubstitutionInQuasipolynomial(theGlobalVariables); break;
     case Parser::functionGetAllRepresentatives: this->EvaluateGetAllRepresentatives(theGlobalVariables); break;
     case Parser::functionInvertLattice: this->EvaluateInvertLattice(theGlobalVariables); break;
     case Parser::functionIntersectLatticeWithLatticePreimage: this->EvaluateIntersectLatticeWithPreimageLattice(theGlobalVariables); break;
@@ -26687,6 +26692,11 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
   if (input=="eigen")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(this->functionEigen);
+    return true;
+  }
+  if (input=="QPSubAmbientLatticeZn")
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(this->functionSubstitutionInQuasipolynomial);
     return true;
   }
   if (input=="printEmbedding")
@@ -31056,11 +31066,7 @@ bool ParserNode::ConvertToType
     { this->SetError(this->errorConversionError);
       return false;
     }
-  if (this->ExpressionType!=theType)
-  { this->SetError(this->errorConversionError);
-    return false;
-  }
-  return true;
+  return this->ExpressionType==theType;
 }
 
 template <class CoefficientType>

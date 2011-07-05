@@ -9301,7 +9301,7 @@ class ParserNode
   bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typeArray, typePDF, typeLattice, typeCone,
+  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, typeArray,
   typeQuasiPolynomial, typePartialFractions, typeFile,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
@@ -9333,6 +9333,7 @@ class ParserNode
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
   int EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables);
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
+  int EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateReadFromFile(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
@@ -9411,7 +9412,7 @@ public:
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
     functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
     functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile, functionIntersectWithSubspace,
-    functionIntersectLatticeWithLatticePreimage,
+    functionIntersectLatticeWithLatticePreimage, functionSubstitutionInQuasipolynomial,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;

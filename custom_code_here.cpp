@@ -1862,7 +1862,7 @@ void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& 
 //returning false means that the lattice given as rougher is not actually rougher than the current lattice
 //or that there are too many representatives
 bool Lattice::GetAllRepresentatitves
-  (const Lattice& rougherLattice, roots& output)
+  (const Lattice& rougherLattice, roots& output)const
 { output.size=0;
   if (this->basis.NumRows!=rougherLattice.basis.NumRows)
     return false;
@@ -2534,8 +2534,9 @@ void QuasiPolynomial::Substitution
   output.AmbientLatticeReduced=ambientLatticeNewSpace;
   output.AmbientLatticeReduced.IntersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced, theGlobalVariables);
   roots allRepresentatives, imagesAllRepresentatives;
+  bool tempBool=ambientLatticeNewSpace.GetAllRepresentatitves(output.AmbientLatticeReduced, allRepresentatives);
+  assert(tempBool);
   mapFromNewSpaceToOldSpace.ActOnRoots(allRepresentatives, imagesAllRepresentatives);
-  AmbientLatticeReduced.GetAllRepresentatitves(output.AmbientLatticeReduced, allRepresentatives);
   PolynomialsRationalCoeff theSub;
   theSub.SetSize(this->GetNumVars());
   root tempRoot;
@@ -2576,7 +2577,7 @@ void QuasiPolynomial::Substitution
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
 { QuasiPolynomial tempQP;
   this->Substitution(inputTranslation, tempQP, theGlobalVariables);
-  return tempQP.Substitution(mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output, theGlobalVariables);
+  tempQP.Substitution(mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output, theGlobalVariables);
 }
 
 bool QuasiPolynomial::SubstitutionLessVariables
@@ -3194,5 +3195,6 @@ int ParserNode::EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobal
   AmbientLattice.MakeZn(theLinearMapMat.NumCols);
   currentQP.Substitution(theLinearMapMat, theTranslation, AmbientLattice, this->theQP.GetElement(), theGlobalVariables);
   this->ExpressionType=this->typeQuasiPolynomial;
+  this->outputString=this->theQP.GetElement().ElementToString(true, false);
   return this->errorNoError;
 }

@@ -25524,10 +25524,6 @@ void Parser::ExtendOnTop(int numNew)
 
 void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
 { //this->UEElement.ComputeDebugString();
-  if (this->owner->TheObjects[24].ExpressionType==this->typeError)
-    std::cout << "Error detected first at " << this->indexInOwner << "\n";
-  if (this->indexInOwner==24)
-    std::cout << "Error is here!";
   this->Evaluated=true;
   for (int i=0; i<this->children.size; i++)
   { if (this->Operation==Parser::tokenMap)

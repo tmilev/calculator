@@ -37,6 +37,10 @@ class GeneralizedVermaModuleCharacters
 public:
 //  bool flagUsingNewSplit;
   List<MatrixLargeRational> theLinearOperators;
+  //the first k variables correspond to the Cartan of the smaller Lie algebra
+  //the next l variables correspond to the Cartan of the larger Lie algebra
+  //the last variable is the projectivization
+  List<MatrixLargeRational> theLinearOperatorsExtended;
   std::fstream theMultiplicitiesMaxOutput;
   std::fstream theMultiplicitiesMaxOutputReport2;
   roots GmodKnegativeWeights;
@@ -94,7 +98,7 @@ public:
   ;
   void GetSubFromIndex(QPSub& output, int theIndex);
   void GetSubFromNonParamArray
-  (QPSub& output, roots& NonParams, int numParams)
+(MatrixLargeRational& output, root& outputTranslation, roots& NonParams, int numParams)
   ;
   void initQPs
   (GlobalVariables& theGlobalVariables)
@@ -239,6 +243,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "projections: " << tempRoots.ElementToString();
   theWeyl.ComputeWeylGroup();
   this->theLinearOperators.SetSize(theWeyl.size);
+  this->theLinearOperatorsExtended.SetSize(theWeyl.size);
   this->theTranslations.SetSize(theWeyl.size);
   this->theTranslationsProjected.SetSize(theWeyl.size);
   this->theCoeffs.SetSize(theWeyl.size);
@@ -260,7 +265,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     { this->GmodKnegativeWeights.PopIndexSwapWithLast(i);
       i--;
     }
-  for (int i=0; i< input.theRange.GetRank(); i++)
+  for (int i=0; i<input.theRange.GetRank(); i++)
   { startingWeight.MakeEi(input.theRange.GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
     for (int j=0; j<projectedWeight.size; j++)
@@ -268,8 +273,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   }
   this->log << "\nMatrix form of the elements of W(B_3) (" << theWeyl.size << " elements):\n";
   for (int i=0; i<theWeyl.size; i++)
-  { theWeyl.GetMatrixOfElement(i, this->theLinearOperators.TheObjects[i]);
-    this->log << "\n" << this->theLinearOperators.TheObjects[i].ElementToString(false, false);
+  { MatrixLargeRational& currentLinearOperator=this->theLinearOperators.TheObjects[i];
+    theWeyl.GetMatrixOfElement(i, currentLinearOperator);
+    this->log << "\n" << currentLinearOperator.ElementToString(false, false);
     this->theTranslations.TheObjects[i]=theWeyl.rho;
     theWeyl.ActOn(i, this->theTranslations.TheObjects[i], true, false, (Rational) 0);
     this->theTranslations.TheObjects[i]-=theWeyl.rho;
@@ -281,14 +287,21 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   }
   this->log << "\n\n\nMatrix of the projection operator:\n" << theProjection.ElementToString(false, false);
   this->log << "\n\n\nMatrix form of the operators $u_w$, the translations and their projections (" << this->theLinearOperators.size << "):";
-  List<MatrixLargeRational> tempList;
+  //List<MatrixLargeRational> tempList;
   for (int i=0; i<this->theLinearOperators.size; i++)
-  { this->theLinearOperators.TheObjects[i].MultiplyOnTheLeft(theProjection);
-    this->log << "\n\n" << this->theLinearOperators.TheObjects[i].ElementToString(false, false);
+  { MatrixLargeRational& currentLO=this->theLinearOperators.TheObjects[i];
+    MatrixLargeRational& currentLOExtended=this->theLinearOperatorsExtended.TheObjects[i];
+    currentLO.MultiplyOnTheLeft(theProjection);
+    this->log << "\n\n" << currentLO.ElementToString(false, false);
     this->log << this->theTranslations.TheObjects[i].ElementToString() << ";   " << this->theTranslationsProjected.TheObjects[i].ElementToString();
-    tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
+    //tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
+    currentLOExtended.MakeIdMatrix(currentLO.NumRows);
+    currentLOExtended.Resize(currentLO.NumRows, currentLO.NumRows+currentLO.NumCols, true);
+    for (int i=0; i<currentLO.NumRows; i++)
+      for (int j=0; j<currentLO.NumCols; j++)
+        currentLOExtended.elements[i][j+currentLO.NumRows]=currentLO.elements[i][j];
   }
-  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
+//  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   tempMat=theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.AssignMatrixRows(tempMat);
@@ -432,7 +445,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->thePfs.split(theGlobalVariables, 0);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << "=" << this->thePfs.DebugString;
-  int totalDim=this->theTranslations.TheObjects[0].size-1;
+  int totalDim=this->theTranslations.TheObjects[0].size+this->theTranslationsProjected.TheObjects[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChamber.size);
   this->theMultiplicities.SetSize(this->projectivizedChamber.size);
   this->thePfs.theChambers.init();
@@ -448,11 +461,11 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     }
   QuasiPolynomial theQPNoSub;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
-  Lattice integralLattice;
-  MatrixLargeRational theExtendedIntegralLatticeMatForm;
-  this->theParser.theHmm.theRange.theWeyl.GetIntegralLatticeInSimpleCoordinates(integralLattice);
-  out << "\nThe integral lattice:\n" << integralLattice.ElementToString(false, false);
-  this->theMultiplicitiesMaxOutputReport2.flush();
+  Lattice theExtendedIntegralLatticeMatForm;
+//  this->theParser.theHmm.theRange.theWeyl.GetIntegralLatticeInSimpleCoordinates(integralLattice);
+  //out << "\nThe integral lattice:\n" << integralLattice.ElementToString(false, false);
+  //this->theMultiplicitiesMaxOutputReport2.flush();
+  theExtendedIntegralLatticeMatForm.MakeZn(totalDim);
   for (int i=0; i<this->projectivizedChamber.size; i++)
   { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
     for (int k=0; k<this->theLinearOperators.size; k++)
@@ -468,12 +481,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
       theGlobalVariables.theIndicatorVariables.ProgressReportString1= tempStream.str();
       theGlobalVariables.MakeReport();
       out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, false);
-      this->GetSubFromIndex(theSub, k);
-      Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub.RationalPolyForm, theExtendedIntegralLatticeMatForm, theGlobalVariables);
-      this->theMultiplicitiesMaxOutputReport2 << "\nExtended lattice:\n " << theExtendedIntegralLatticeMatForm.ElementToString(false, false);
       this->theMultiplicitiesMaxOutputReport2.flush();
-      //theExtendedIntegralLatticeMatForm.Resize(
-//      theQPNoSub.Substitution(theSub.RationalPolyForm, theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
+      theQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjected.TheObjects[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
       out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
       out << "\nthe sub is: " << theSub.ElementToString();
     }
@@ -925,36 +934,37 @@ void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFa
 }
 
 void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
-(QPSub& output, roots& NonParams, int numParams)
-{ int numNonParams=NonParams.size;
-  MatrixLargeRational subRationalForm;
-  subRationalForm.init(numParams, numParams+numNonParams-1);
-  subRationalForm.NullifyAll();
+(MatrixLargeRational& output, root& outputTranslation, roots& NonParams, int numParams)
+{ //reminder: the very last variable comes from the projectivization and contributes to the translation only!
+  int numNonParams=NonParams.size;
+  output.init(numParams, numParams+numNonParams-1);
+  outputTranslation.SetSize(numNonParams);
+  output.NullifyAll();
   for (int k=0; k<numParams; k++)
     for (int l=0; l<numNonParams; l++)
-      subRationalForm.elements[k][l]= NonParams.TheObjects[l].TheObjects[k];
+      output.elements[k][l]= NonParams.TheObjects[l].TheObjects[k];
   for (int l=0; l<numParams-1; l++)
-    subRationalForm.elements[l][l+numNonParams]= 1;
-  output.MakeSubFromMatrixRational(subRationalForm);
+    output.elements[l][l+numNonParams]= 1;
+  for (int l=0; l<numParams; l++)
+    outputTranslation.TheObjects[l]=*NonParams.TheObjects[l].LastObject();
 }
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables)
-{ //this->paramSubChambers.SetSize(this->projectivizedChamber.size);
-  //this->nonParamVertices.SetSize(this->projectivizedChamber.size);
-  int theDimension=6;
+{ int theDimension=6;
   if (this->projectivizedChamber.size>0)
     theDimension=this->projectivizedChamber.TheObjects[0].Normals.TheObjects[0].size;
   this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamber.size);
-//  this->allParamSubChambersRepetitionsAllowed.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size*theDimension);
-//  this->allParamSubChambersRepetitionsAllowed.size=0;
   std::stringstream out;
-  QPSub subForFindingExtrema;
+  MatrixLargeRational subForFindingExtrema;
+  root translationForFindingExtrema;
   QuasiPolynomial currentExtremaCandidate;
+  Lattice AmbientLattice;
   int numParams=0, numNonParams=0;
   if (this->theLinearOperators.size>0)
   { numParams=this->theLinearOperators.TheObjects[0].NumCols+1;
     numNonParams=this->theLinearOperators.TheObjects[0].NumRows;
   }
+  AmbientLattice.MakeZn(numParams+numNonParams-1);
   List<roots> currentParamChamberList, currentNonParamVerticesList;
   this->theMultiplicitiesExtremaCandidates.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size*theDimension);
   this->allParamSubChambersRepetitionsAllowedConeForm.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size*theDimension);
@@ -971,9 +981,9 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVari
     { std::stringstream progressReport2;
       progressReport2 << "Parametric chamber candidate " << j+1 << " out of " << currentParamChamberList.size;
       if (currentCone.CreateFromNormals(currentParamChamberList.TheObjects[j], theGlobalVariables))
-      { this->GetSubFromNonParamArray(subForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
-        assert(false);
-        //this->theMultiplicities.TheObjects[i].SubstitutionLessVariables(subForFindingExtrema.RationalPolyForm, currentExtremaCandidate, theGlobalVariables);
+      { this->GetSubFromNonParamArray(subForFindingExtrema, translationForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
+        QuasiPolynomial& currentQP=this->theMultiplicities.TheObjects[i];
+        currentQP.Substitution(subForFindingExtrema, translationForFindingExtrema, AmbientLattice, currentExtremaCandidate, theGlobalVariables);
         this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
         this->allParamSubChambersRepetitionsAllowedConeForm.AddObjectOnTop(currentCone);
         progressReport2 << " is non-trivial";
@@ -2888,6 +2898,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   this->ExtremeQPsParamSubchambers.WriteToFile(output, theGlobalVariables);
   this->GmodKnegativeWeights.WriteToFile(output, theGlobalVariables);
   this->theLinearOperators.WriteToFile(output);
+  this->theLinearOperatorsExtended.WriteToFile(output);
   this->PreimageWeylChamberLargerAlgebra.WriteToFile(output, theGlobalVariables);
   this->WeylChamberSmallerAlgebra.WriteToFile(output, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing QP's non-subbed... ";
@@ -2961,6 +2972,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   theGlobalVariables.MakeReport();
   this->GmodKnegativeWeights.ReadFromFile(input, theGlobalVariables);
   this->theLinearOperators.ReadFromFile(input, theGlobalVariables);
+  this->theLinearOperatorsExtended.ReadFromFile(input, theGlobalVariables);
   this->PreimageWeylChamberLargerAlgebra.ReadFromFile(input, theGlobalVariables);
   this->WeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
   this->theQPsNonSubstituted.ReadFromFile(input, theGlobalVariables);
@@ -3137,5 +3149,50 @@ int ParserNode::EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& the
   this->theLattice.GetElement()=firstLatticeNode.theLattice.GetElement();
   this->theLattice.GetElement().IntersectWithPreimageOfLattice(theLinearMapMat, secondLatticeNode.theLattice.GetElement(), theGlobalVariables);
   this->ExpressionType=this->typeLattice;
+  return this->errorNoError;
+}
+
+int ParserNode::EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size!=3)
+    return this->SetError(this->errorBadOrNoArgument);
+  roots theLinearMap;
+  root tempRoot, theTranslation;
+  ParserNode& QPNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  ParserNode& mapNode=this->owner->TheObjects[argumentList.TheObjects[1]];
+  ParserNode& translationNode=this->owner->TheObjects[argumentList.TheObjects[2]];
+
+  if (!QPNode.ConvertToType(this->typeQuasiPolynomial, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  if (!translationNode.GetRootRational(theTranslation, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  int theDim=theTranslation.size;
+  if (theDim!=QPNode.theQP.GetElement().GetNumVars())
+    return this->SetError(this->errorDimensionProblem);
+  if (mapNode.GetRootRational(tempRoot, theGlobalVariables))
+    theLinearMap.AddObjectOnTop(tempRoot);
+  else
+    if (mapNode.ConvertToType(this->typeArray, theGlobalVariables))
+      for (int i=0; i<mapNode.array.GetElement().size; i++)
+      { ParserNode& currentNode=this->owner->TheObjects[mapNode.array.GetElement().TheObjects[i]];
+        if (!currentNode.GetRootRational(tempRoot, theGlobalVariables))
+          return this->SetError(this->errorBadOrNoArgument);
+        if (theDim!=tempRoot.size)
+          return this->SetError(this->errorDimensionProblem);
+        theLinearMap.AddObjectOnTop(tempRoot);
+      }
+    else
+      return this->SetError(this->errorBadOrNoArgument);
+  MatrixLargeRational theLinearMapMat;
+  theLinearMapMat.AssignRootsToRowsOfMatrix(theLinearMap);
+  theLinearMapMat.Transpose();
+  QuasiPolynomial& currentQP=QPNode.theQP.GetElement();
+  if (currentQP.GetNumVars()!=theLinearMapMat.NumRows)
+    return this->SetError(this->errorDimensionProblem);
+  Lattice AmbientLattice;
+  AmbientLattice.MakeZn(theLinearMapMat.NumCols);
+  currentQP.Substitution(theLinearMapMat, theTranslation, AmbientLattice, this->theQP.GetElement(), theGlobalVariables);
+  this->ExpressionType=this->typeQuasiPolynomial;
   return this->errorNoError;
 }

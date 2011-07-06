@@ -12373,22 +12373,7 @@ void PolynomialsRationalCoeff::MakeOneParameterSubFromDirectionIntsAndConstants(
 void PolynomialsRationalCoeff::MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit &theMat, int Den)
 { MatrixLargeRational tempMat;
   tempMat.AssignMatrixIntWithDen(theMat, Den);
-  this->MakeLinearSubWithConstTermFromMatrixRational(tempMat);
-}
-
-void PolynomialsRationalCoeff::MakeLinearSubWithConstTermFromMatrixRational(MatrixLargeRational &theMat)
-{ this->SetSize(theMat.NumCols);
-  Monomial<Rational> tempM;
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].Nullify((int)theMat.NumRows-1);
-    for (int j=0; j<theMat.NumRows-1; j++)
-    { tempM.init((int)theMat.NumRows-1);
-      tempM.degrees[j]=1;
-      tempM.Coefficient.Assign(theMat.elements[j][i]);
-      this->TheObjects[i].AddMonomial(tempM);
-    }
-    this->TheObjects[i].AddConstant(theMat.elements[theMat.NumRows-1][i]);
-  }
+  this->MakeLinearSubConstTermsLastRow(tempMat);
 }
 
 bool PolynomialsRationalCoeff::operator==(const PolynomialsRationalCoeff& right)

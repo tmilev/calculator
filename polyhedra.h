@@ -4719,7 +4719,8 @@ public:
   void MakeOneParameterSubFromDirectionInts(int x1, int x2, int x3, int x4, int x5);
   void MakeOneParameterSubFromDirectionIntsAndConstants(int x1, int x2, int x3, int x4, int x5, int c1, int c2, int c3, int c4, int c5);
   void MakeSubFromMatrixIntAndDen(MatrixIntTightMemoryFit& theMat, int Den);
-  void MakeLinearSubWithConstTermFromMatrixRational(MatrixLargeRational& theMat);
+  void MakeLinearSubConstTermsLastRow(MatrixLargeRational& theMat);
+  void MakeLinearSubbedVarsCorrespondToMatRows(MatrixLargeRational& theMat, root& theConstants);
   void ComputeDiscreteIntegrationUpTo(int d);
   void MakeLinearSubOnLastVariable(int NumVars, PolynomialRationalCoeff& LastVarSub);
   void MakeSubNVarForOtherChamber(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);

@@ -937,16 +937,16 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
 (MatrixLargeRational& output, root& outputTranslation, roots& NonParams, int numParams)
 { //reminder: the very last variable comes from the projectivization and contributes to the translation only!
   int numNonParams=NonParams.size;
-  output.init(numParams, numParams+numNonParams-1);
-  outputTranslation.SetSize(numNonParams);
+  output.init(numParams+numNonParams-1, numParams-1);
+  outputTranslation.MakeZero(numParams+numNonParams-1);
   output.NullifyAll();
-  for (int k=0; k<numParams; k++)
-    for (int l=0; l<numNonParams; l++)
-      output.elements[k][l]= NonParams.TheObjects[l].TheObjects[k];
-  for (int l=0; l<numParams-1; l++)
-    output.elements[l][l+numNonParams]= 1;
-  for (int l=0; l<numParams; l++)
+  for (int l=0; l<numNonParams; l++)
+  { for (int k=0; k<numParams-1; k++)
+      output.elements[l][k]= NonParams.TheObjects[l].TheObjects[k];
     outputTranslation.TheObjects[l]=*NonParams.TheObjects[l].LastObject();
+  }
+  for (int l=0; l<numParams-1; l++)
+    output.elements[l+numNonParams][l]= 1;
 }
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables)
@@ -955,22 +955,25 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVari
     theDimension=this->projectivizedChamber.TheObjects[0].Normals.TheObjects[0].size;
   this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamber.size);
   std::stringstream out;
+  std::fstream MultReport;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(MultReport, "/home/todor/math/vectorpartition/trunk/ReportFindMultiplicitiesExtremaStep1.txt", false, true, false);
   MatrixLargeRational subForFindingExtrema;
   root translationForFindingExtrema;
   QuasiPolynomial currentExtremaCandidate;
-  Lattice AmbientLattice;
+//  Lattice AmbientLattice;
   int numParams=0, numNonParams=0;
   if (this->theLinearOperators.size>0)
   { numParams=this->theLinearOperators.TheObjects[0].NumCols+1;
     numNonParams=this->theLinearOperators.TheObjects[0].NumRows;
   }
-  AmbientLattice.MakeZn(numParams+numNonParams-1);
+//  AmbientLattice.MakeZn(numParams);
   List<roots> currentParamChamberList, currentNonParamVerticesList;
   this->theMultiplicitiesExtremaCandidates.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size*theDimension);
   this->allParamSubChambersRepetitionsAllowedConeForm.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size*theDimension);
   Cone currentCone;
   theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+  PolynomialsRationalCoeff tempSub;
   for (int i=0; i<this->projectivizedChamber.size; i++)
   { std::stringstream progressReport1;
     progressReport1 << "processing chamber " << i+1;
@@ -983,9 +986,13 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVari
       if (currentCone.CreateFromNormals(currentParamChamberList.TheObjects[j], theGlobalVariables))
       { this->GetSubFromNonParamArray(subForFindingExtrema, translationForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
         QuasiPolynomial& currentQP=this->theMultiplicities.TheObjects[i];
-        currentQP.Substitution(subForFindingExtrema, translationForFindingExtrema, AmbientLattice, currentExtremaCandidate, theGlobalVariables);
+        tempSub.MakeLinearSubbedVarsCorrespondToMatRows(subForFindingExtrema, translationForFindingExtrema);
+        bool tempBool = currentQP.SubstitutionLessVariables(tempSub, currentExtremaCandidate, theGlobalVariables);
+        assert(tempBool);
+//        currentQP.Substitution(subForFindingExtrema, translationForFindingExtrema, AmbientLattice, currentExtremaCandidate, theGlobalVariables);
         this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
         this->allParamSubChambersRepetitionsAllowedConeForm.AddObjectOnTop(currentCone);
+        MultReport << "Chamber " << i+1 << " parametric chamber candidate " << j+1 << " out of " << currentParamChamberList.size << "; candidate found: " << currentExtremaCandidate.ElementToString(false, false) << "\n";
         progressReport2 << " is non-trivial";
       } else
         progressReport2 << " is trivial";
@@ -2530,7 +2537,19 @@ void QuasiPolynomial::AddLatticeShift(const PolynomialRationalCoeff& input, cons
 void QuasiPolynomial::Substitution
   (const MatrixLargeRational& mapFromNewSpaceToOldSpace,
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
-{ assert(this!=&output);
+{ //Format of the substitution.
+  //If we want to carry out a substitution in P(y_1, ..., y_m),
+  // of the form
+  //y_1=a_11 x_1+...+a_1nx_n
+  //...
+  //y_m=a_m1 x_1+...+a_mnx_n
+  // then the mapFromNewSpaceToOldSpace shouldbe the matrix
+  //a_11 ... a_1n
+  //...
+  //a_m1 ... a_mn
+  assert(this!=&output);
+  assert(mapFromNewSpaceToOldSpace.NumRows==this->GetNumVars());
+  assert(ambientLatticeNewSpace.GetDim()==mapFromNewSpaceToOldSpace.NumCols);
   output.AmbientLatticeReduced=ambientLatticeNewSpace;
   output.AmbientLatticeReduced.IntersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced, theGlobalVariables);
   roots allRepresentatives, imagesAllRepresentatives;
@@ -3197,4 +3216,29 @@ int ParserNode::EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobal
   this->ExpressionType=this->typeQuasiPolynomial;
   this->outputString=this->theQP.GetElement().ElementToString(true, false);
   return this->errorNoError;
+}
+
+void PolynomialsRationalCoeff::MakeLinearSubbedVarsCorrespondToMatRows(MatrixLargeRational& theMat, root& theConstants)
+{ MatrixLargeRational tempMat;
+  tempMat=theMat;
+  tempMat.Transpose();
+  tempMat.Resize(tempMat.NumRows+1, tempMat.NumCols, true);
+  for (int i=0; i<theConstants.size; i++)
+    tempMat.elements[tempMat.NumRows-1][i]=theConstants.TheObjects[i];
+  this->MakeLinearSubConstTermsLastRow(tempMat);
+}
+
+void PolynomialsRationalCoeff::MakeLinearSubConstTermsLastRow(MatrixLargeRational& theMat)
+{ this->SetSize(theMat.NumCols);
+  Monomial<Rational> tempM;
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].Nullify((int)theMat.NumRows-1);
+    for (int j=0; j<theMat.NumRows-1; j++)
+    { tempM.init((int)theMat.NumRows-1);
+      tempM.degrees[j]=1;
+      tempM.Coefficient.Assign(theMat.elements[j][i]);
+      this->TheObjects[i].AddMonomial(tempM);
+    }
+    this->TheObjects[i].AddConstant(theMat.elements[theMat.NumRows-1][i]);
+  }
 }

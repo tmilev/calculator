@@ -1147,14 +1147,14 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       }
       Element& PivotElt = this->elements[row][col];
       for (int i=0; i<row; i++)
-        if (!this->elements[i][col].IsEqualToZero())
-          if (PivotElt<=this->elements[i][col] || this->elements[i][col].IsNegative())
-          { tempElt =this->elements[i][col]/PivotElt;
-            tempElt.AssignFloor();
-            this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
-            if (this->elements[i][col].IsNegative())
-              this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
-          }
+      { tempElt =this->elements[i][col]/PivotElt;
+//        std::cout << " the floor of " << tempElt.ElementToString();
+        tempElt.AssignFloor();
+//        std::cout << " is " << tempElt.ElementToString();
+        this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
+        if (this->elements[i][col].IsNegative())
+          this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
+      }
       row++;
     }
     col++;
@@ -1884,6 +1884,7 @@ public:
   void MultiplyBy(const LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); }
   void MultiplyByInt(int x);
   void ElementToString(std::string& output)const;
+  inline std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
   bool IsPositive()const{return this->sign==1 && (this->value.IsPositive()); }
   bool IsNegative()const{return this->sign==-1&& (this->value.IsPositive()); }
   inline bool IsNonNegative()const{return !this->IsNegative(); }

@@ -36,6 +36,7 @@ class GeneralizedVermaModuleCharacters
 {
 public:
 //  bool flagUsingNewSplit;
+  Controller thePauseController;
   List<MatrixLargeRational> theLinearOperators;
   //the first k variables correspond to the Cartan of the smaller Lie algebra
   //the next l variables correspond to the Cartan of the larger Lie algebra
@@ -55,19 +56,20 @@ public:
   roots theTranslations;
   roots theTranslationsProjected;
   partFractions thePfs;
-//  List<List<roots> > paramSubChambers, nonParamVertices;
-  List<List<QuasiPolynomial> > ExtremeQPsParamSubchambers;
-//  List<roots> allParamSubChambersRepetitionsAllowed;
   List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   CombinatorialChamberContainer projectivizedChamberOld;
   ConeComplex projectivizedParamComplex;
+  List<List<QuasiPolynomial> > theExtrema;
+  List<List<Cone> > projectivizedExtremaCones;
   ConeComplex projectivizedChamber;
   std::stringstream log;
   Parser theParser;
   int computationPhase;
-
+  int NumProcessedConesParam;
+  void ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
+  void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
   void IncrementComputation(GlobalVariables& theGlobalVariables);
-  GeneralizedVermaModuleCharacters(){ this->tempDebugCounter=1; this->computationPhase=0;}
+  GeneralizedVermaModuleCharacters(){ this->tempDebugCounter=1; this->computationPhase=0; this->NumProcessedConesParam=0;}
   void WriteToFile
   (std::fstream& output, GlobalVariables& theGlobalVariables)
   ;
@@ -88,7 +90,7 @@ public:
   void FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables);
   void FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables);
   void ProcessExtremaOneChamber
-  (Cone& input, GlobalVariables& theGlobalVariables)
+  (Cone& input, List<Cone>& outputSubdivision, List<QuasiPolynomial>& theExtremaOutput, GlobalVariables& theGlobalVariables)
   ;
   void ProcessOneParametricChamber
   (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
@@ -509,14 +511,15 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 }
 
 void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation(theGlobalVariables);
+{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.InitComputation();
+  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation(theGlobalVariables);
+  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.ExitComputation();
 }
 
-void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  std::fstream input; std::string tempS;
-  std::string theFileName="/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt";
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, theFileName, false, false, false);
+void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables& theGlobalVariables)
+{ std::fstream input;
+  std::string tempS;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
   int candidatePhase;
   input >> tempS >> candidatePhase;
   if (tempS=="ComputationPhase:")
@@ -525,6 +528,17 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& the
   } else
     this->computationPhase=0;
   input.close();
+}
+
+void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables& theGlobalVariables)
+{ std::fstream output;
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
+  this->WriteToFile(output, theGlobalVariables);
+}
+
+void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  this->ReadFromDefaultFile(theGlobalVariables);
   switch (this->computationPhase)
   { case 0:
       this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
@@ -559,9 +573,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& the
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
   if (this->computationPhase < 10)
-  { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, theFileName, false, true, false);
-    this->WriteToFile(input, theGlobalVariables);
-  }
+    this->WriteToDefaultFile(theGlobalVariables);
 }
 
 void CombinatorialChamberContainer::initCharacterComputation
@@ -953,7 +965,7 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVari
 { int theDimension=6;
   if (this->projectivizedChamber.size>0)
     theDimension=this->projectivizedChamber.TheObjects[0].Normals.TheObjects[0].size;
-  this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamber.size);
+//  this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamber.size);
   std::stringstream out;
   std::fstream MultReport;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(MultReport, "/home/todor/math/vectorpartition/trunk/ReportFindMultiplicitiesExtremaStep1.txt", false, true, false);
@@ -1012,33 +1024,35 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep2(GlobalVari
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables)
 { this->projectivizedParamComplex.Refine(theGlobalVariables);
+  this->projectivizedExtremaCones.SetSize(this->projectivizedParamComplex.size);
+  this->theExtrema.SetSize(this->projectivizedParamComplex.size);
 }
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables)
 { this->theMultiplicitiesExtremaCandidates.SetSize(this->projectivizedParamComplex.size);
   theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
-  (this->theMultiplicitiesMaxOutput, "/home/todor/math/vectorpartition/trunk/ExtremaOutput.txt", false, true, false);
-  for (int i=0; i<this->projectivizedParamComplex.size; i++)
-  //if (i<this->tempDebugCounter)
-  { Cone& currentCone= this->projectivizedParamComplex.TheObjects[i];
+  (this->theMultiplicitiesMaxOutput, "/home/todor/math/vectorpartition/trunk/ExtremaOutput.txt", true, false, false);
+  for (; this->NumProcessedConesParam<this->projectivizedParamComplex.size; this->NumProcessedConesParam++)
+  { Cone& currentCone= this->projectivizedParamComplex.TheObjects[this->NumProcessedConesParam];
     std::stringstream out3;
-    out3 << "Processing extrema in chamber " << i+1 << " out of " << this->projectivizedParamComplex.size;
+    out3 << "Processing extrema in chamber " << this->NumProcessedConesParam+1 << " out of " << this->projectivizedParamComplex.size;
     theGlobalVariables.theIndicatorVariables.ProgressReportString1=out3.str();
     theGlobalVariables.MakeReport();
-    this->theMultiplicitiesMaxOutput << "\n\n\n\n\nChamber " << i+ 1;
-    this->ProcessExtremaOneChamber(currentCone, theGlobalVariables);
+    this->theMultiplicitiesMaxOutput << "\n\n\n\n\nChamber " << this->NumProcessedConesParam+ 1;
+    this->ProcessExtremaOneChamber(currentCone, this->projectivizedExtremaCones.TheObjects[this->NumProcessedConesParam], this->theExtrema.TheObjects[this->NumProcessedConesParam], theGlobalVariables);
+    this->thePauseController.SafePoint();
   }
   this->theMultiplicitiesMaxOutput.close();
 }
 
 void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
-  (Cone& input, GlobalVariables& theGlobalVariables)
+  (Cone& input, List<Cone>& outputSubdivision, List<QuasiPolynomial>& theExtremaOutput, GlobalVariables& theGlobalVariables)
 { std::stringstream out3, out1, out2;
 //  int projectiveDimension=input.GetDim();
-  List<QuasiPolynomial> theExtremaOutput, extremaCandidates;
+  List<QuasiPolynomial> extremaCandidates;
+  extremaCandidates.MakeActualSizeAtLeastExpandOnTop(allParamSubChambersRepetitionsAllowedConeForm.size);
   for (int j=0; j<this->allParamSubChambersRepetitionsAllowedConeForm.size; j++)
-  // if (j<this->tempDebugCounter)
     if (this->allParamSubChambersRepetitionsAllowedConeForm.TheObjects[j].IsInCone(input.GetInternalPoint()))
       extremaCandidates.AddObjectOnTop(this->theMultiplicitiesExtremaCandidates.TheObjects[j]);
   out3 << "# of maximum candidates: " << extremaCandidates.size;
@@ -1070,7 +1084,7 @@ void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
   out2 << "size of required subdivision:   " << extremaComplex.size;
   theGlobalVariables.theIndicatorVariables.ProgressReportString3=out2.str();
   theGlobalVariables.MakeReport();
-
+  outputSubdivision.CopyFromBase(extremaComplex);
 }
 
 bool ParserNode::ExtractArgumentList
@@ -1703,6 +1717,7 @@ bool ConeComplex::findMaxLFOverConeProjective
   return true;
 }
 
+//std::string tempDebugString;
 void Lattice::Reduce
 ()
 { //////////////////////////////////the below function is for debugging purposes only!
@@ -1730,17 +1745,24 @@ void Lattice::Reduce
   this->basis.Resize(this->basis.NumRows-numRowsToTrim, this->basis.NumCols, true);
   this->basisRationalForm.AssignMatrixIntWithDen(this->basis, this->Den);
 //  if (flagTesting)
-//  { testMatrix.Resize(this->basis.NumRows-numRowsToTrim, this->basis.NumCols, true);
+ // { testMatrix.Resize(testMatrix.NumRows-numRowsToTrim, testMatrix.NumCols, true);
+//    std::stringstream out;
 //    std::cout << "<br>basis rational form: " << this->basisRationalForm.ElementToString(true, false);
+//    out << "<br>basis rational form: " << this->basisRationalForm.ElementToString(true, false);
+//    std::string tempS=out.str();
 //    assert(testMatrix==this->basisRationalForm);
 //  }
 }
 
 void Lattice::TestGaussianEliminationEuclideanDomainRationals(MatrixLargeRational& output)
 { output.AssignMatrixIntWithDen(this->basis, this->Den);
+  std::stringstream out;
   std::cout << "Test output: " << output.ElementToString(true, false);
+  out << "Test output: " << output.ElementToString(true, false);
   output.GaussianEliminationEuclideanDomain((Rational) -1, (Rational) 1);
   std::cout << "<br>After gaussian elimination:" << output.ElementToString(true, false);
+  out << "<br>After gaussian elimination:" << output.ElementToString(true, false);
+//  tempDebugString=out.str();
 }
 
 void Lattice::RefineByOtherLattice(const Lattice& other)
@@ -2031,31 +2053,31 @@ void Lattice::IntersectWith(const Lattice& other)
   startBasis.AssignMatrixRows(this->basisRationalForm);
   otherBasis.AssignMatrixRows(other.basisRationalForm);
   GlobalVariables theGlobalVariables;
-  std::cout << "<br>this basis: " << startBasis.ElementToString();
-  std::cout << "<br>other basis: " << otherBasis.ElementToString();
+//  std::cout << "<br>this basis: " << startBasis.ElementToString();
+//  std::cout << "<br>other basis: " << otherBasis.ElementToString();
   startBasis.IntersectTwoLinSpaces(startBasis, otherBasis, commonBasis, theGlobalVariables);
-  std::cout << "<br> basis of linear space intersection: " << commonBasis.ElementToString() << "<br><br> ";
+//  std::cout << "<br> basis of linear space intersection: " << commonBasis.ElementToString() << "<br><br> ";
   Lattice thisLatticeIntersected, otherLatticeIntersected;
   thisLatticeIntersected=*this;
   otherLatticeIntersected=other;
   thisLatticeIntersected.IntersectWithLinearSubspaceSpannedBy(commonBasis);
-  std::cout << "<br> linear space intersected with this lattice: " << thisLatticeIntersected.ElementToString(true, false);
+//  std::cout << "<br> linear space intersected with this lattice: " << thisLatticeIntersected.ElementToString(true, false);
   otherLatticeIntersected.IntersectWithLinearSubspaceSpannedBy(commonBasis);
-  std::cout << "<br> linear space intersected with other lattice: " << otherLatticeIntersected.ElementToString(true, false);
+//  std::cout << "<br> linear space intersected with other lattice: " << otherLatticeIntersected.ElementToString(true, false);
   roots thisCommonBasis, otherCommonBasis, thisCommonCoords, otherCommonCoords;
   thisCommonBasis.AssignMatrixRows(thisLatticeIntersected.basisRationalForm);
   otherCommonBasis.AssignMatrixRows(otherLatticeIntersected.basisRationalForm);
   thisCommonBasis.GetCoordsInBasis(commonBasis, thisCommonCoords, theGlobalVariables);
   otherCommonBasis.GetCoordsInBasis(commonBasis, otherCommonCoords, theGlobalVariables);
-  std::cout << "<br>this lattice intersection new coords: " << thisCommonBasis.ElementToString();
-  std::cout << "<br>other lattice intersection new coords: " << otherBasis.ElementToString();
+//  std::cout << "<br>this lattice intersection new coords: " << thisCommonBasis.ElementToString();
+//  std::cout << "<br>other lattice intersection new coords: " << otherBasis.ElementToString();
   Lattice thisCommonCoordsLattice, otherCommonCoordsLattice;
   thisCommonCoordsLattice.MakeFromRoots(thisCommonCoords);
   otherCommonCoordsLattice.MakeFromRoots(otherCommonCoords);
-  std::cout << "<br> linear space intersected with this lattice new coords: " << thisCommonCoordsLattice.ElementToString(true, false);
-  std::cout << "<br> linear space intersected with other lattice new coords: " << otherCommonCoordsLattice.ElementToString(true, false);
+//  std::cout << "<br> linear space intersected with this lattice new coords: " << thisCommonCoordsLattice.ElementToString(true, false);
+//  std::cout << "<br> linear space intersected with other lattice new coords: " << otherCommonCoordsLattice.ElementToString(true, false);
   thisCommonCoordsLattice.IntersectWithBothOfMaxRank(otherCommonCoordsLattice);
-  std::cout << "<br> intersection lattice new coords: " << thisCommonCoordsLattice.ElementToString(true, false);
+//  std::cout << "<br> intersection lattice new coords: " << thisCommonCoordsLattice.ElementToString(true, false);
   roots resultBasis;
   resultBasis.SetSize(thisCommonCoordsLattice.basisRationalForm.NumRows);
   for (int i=0; i<resultBasis.size; i++)
@@ -2065,7 +2087,7 @@ void Lattice::IntersectWith(const Lattice& other)
       currentRoot+=thisCommonCoordsLattice.basisRationalForm.elements[i][j]*commonBasis.TheObjects[j];
   }
   this->MakeFromRoots(resultBasis);
-  std::cout << "<br>final answer: intersection is: " << this->ElementToString(true, false);
+//  std::cout << "<br>final answer: intersection is: " << this->ElementToString(true, false);
 }
 
 void Lattice::IntersectWithBothOfMaxRank(const Lattice& other)
@@ -2655,21 +2677,21 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
 }
 
 void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
-{ std::cout << "<br>Starting lattice: " << this->ElementToString(true, false) << "<br>";
+{ //std::cout << "<br>Starting lattice: " << this->ElementToString(true, false) << "<br>";
   roots startingBasis, resultBasis;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
-  std::cout << "Starting normal: " << theNormal.ElementToString();
+  //std::cout << "Starting normal: " << theNormal.ElementToString();
   root theScalarProducts;
   theScalarProducts.SetSize(startingBasis.size);
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
     theScalarProducts.TheObjects[i]=root::RootScalarEuclideanRoot(startingBasis.TheObjects[i], theNormal);
   if (theScalarProducts.IsEqualToZero())
     return;
-  std::cout << "<br>the scalar products: " << theScalarProducts.ElementToString();
+  //std::cout << "<br>the scalar products: " << theScalarProducts.ElementToString();
   int pivotColumnIndex=theScalarProducts.getIndexLastNonZeroCoordinate();
   Rational pivotCoeff=theScalarProducts.TheObjects[pivotColumnIndex];
   theScalarProducts/=-pivotCoeff;
-  std::cout << "<br>the scalar products after scaling: " << theScalarProducts.ElementToString();
+  //std::cout << "<br>the scalar products after scaling: " << theScalarProducts.ElementToString();
   roots eigenSpacePlusOrthogonalComponent;
   eigenSpacePlusOrthogonalComponent.SetSize(theScalarProducts.size);
   for (int i=0; i<theScalarProducts.size; i++)
@@ -2680,16 +2702,16 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
       currentRoot.TheObjects[pivotColumnIndex]=theScalarProducts.TheObjects[i];
     }
   theScalarProducts.ScaleToIntegralMinHeight();
-  std::cout << "<br>the scalar products after scaling to integral: " << theScalarProducts.ElementToString();
+  //std::cout << "<br>the scalar products after scaling to integral: " << theScalarProducts.ElementToString();
   eigenSpacePlusOrthogonalComponent.TheObjects[pivotColumnIndex]=theScalarProducts;
-  std::cout << "<br>The eigenspace before intersection: " << eigenSpacePlusOrthogonalComponent.ElementToString();
+  //std::cout << "<br>The eigenspace before intersection: " << eigenSpacePlusOrthogonalComponent.ElementToString();
   Lattice eigenLattice, theZnLattice;
   eigenLattice.MakeFromRoots(eigenSpacePlusOrthogonalComponent);
-  std::cout << "<br>The eigen-Lattice: " << eigenLattice.ElementToString(true, false);
+  //std::cout << "<br>The eigen-Lattice: " << eigenLattice.ElementToString(true, false);
   theZnLattice.MakeZn(theScalarProducts.size);
-  std::cout << "<br>The Zn-Lattice: " << theZnLattice.ElementToString(true, false);
+  //std::cout << "<br>The Zn-Lattice: " << theZnLattice.ElementToString(true, false);
   theZnLattice.IntersectWithBothOfMaxRank(eigenLattice);
-  std::cout << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ElementToString(true, false);
+  //std::cout << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ElementToString(true, false);
   resultBasis.MakeActualSizeAtLeastExpandOnTop(theScalarProducts.size-1);
   root tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i=0; i<theZnLattice.basisRationalForm.NumRows; i++)
@@ -2704,9 +2726,9 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
       resultBasis.AddObjectOnTop(resultRoot);
     }
   }
-  std::cout << "<br>Resulting basis: " << resultBasis.ElementToString();
+  //std::cout << "<br>Resulting basis: " << resultBasis.ElementToString();
   this->MakeFromRoots(resultBasis);
-  std::cout << "<br>Final answer lattice form: " << this->ElementToString(true, false);
+  //std::cout << "<br>Final answer lattice form: " << this->ElementToString(true, false);
 }
 
 void Lattice::IntersectWithLinearSubspaceSpannedBy(const roots& theSubspaceBasis)
@@ -2718,10 +2740,10 @@ void Lattice::IntersectWithLinearSubspaceSpannedBy(const roots& theSubspaceBasis
 }
 
 void Lattice::IntersectWithLinearSubspaceGivenByNormals(const roots& theSubspaceNormals)
-{ std::cout << "<br>********************Debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
+{ //std::cout << "<br>********************Debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
   for (int i=0; i<theSubspaceNormals.size; i++)
     this->IntersectWithLinearSubspaceGivenByNormal(theSubspaceNormals.TheObjects[i]);
-  std::cout << "<br>********************End of debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
+  //std::cout << "<br>********************End of debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
 }
 
 bool Lattice::SubstitutionHomogeneous
@@ -2910,12 +2932,13 @@ bool Cone::ReadFromFile
 void GeneralizedVermaModuleCharacters::WriteToFile
   (std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "ComputationPhase: " << this->computationPhase << "\n";
+  output << "NumProcessedConesParam: " << this->NumProcessedConesParam << "\n";
   theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
   theGlobalVariables.MakeReport();
 //  this->allParamSubChambersRepetitionsAllowed.WriteToFile(output, theGlobalVariables);
   this->allParamSubChambersRepetitionsAllowedConeForm.WriteToFile(output, theGlobalVariables);
-  this->ExtremeQPsParamSubchambers.WriteToFile(output, theGlobalVariables);
+//  this->ExtremeQPsParamSubchambers.WriteToFile(output, theGlobalVariables);
   this->GmodKnegativeWeights.WriteToFile(output, theGlobalVariables);
   this->theLinearOperators.WriteToFile(output);
   this->theLinearOperatorsExtended.WriteToFile(output);
@@ -2941,6 +2964,12 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   theGlobalVariables.MakeReport();
   this->projectivizedParamComplex.WriteToFile(output, theGlobalVariables);
   this->projectivizedChamber.WriteToFile(output, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing param chamber extrema subcones... ";
+  theGlobalVariables.MakeReport();
+  this->projectivizedExtremaCones.WriteToFile(output, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing the extrema... ";
+  theGlobalVariables.MakeReport();
+  this->theExtrema.WriteToFile(output, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing to file done... ";
   theGlobalVariables.MakeReport();
 }
@@ -2979,15 +3008,18 @@ bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariab
 
 bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   (std::fstream& input, GlobalVariables& theGlobalVariables)
-{ this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
+{ std::string tempS;
+  input >> tempS >> this->NumProcessedConesParam;
+  if (tempS!="NumProcessedConesParam:")
+  { assert(false);
+    return false;
+  }
+  this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
 //  this->allParamSubChambersRepetitionsAllowed.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param subchambers cone form... ";
   theGlobalVariables.MakeReport();
   this->allParamSubChambersRepetitionsAllowedConeForm.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading extreme QPs subchambers...";
-  theGlobalVariables.MakeReport();
-  this->ExtremeQPsParamSubchambers.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading more pieces of data... ";
   theGlobalVariables.MakeReport();
   this->GmodKnegativeWeights.ReadFromFile(input, theGlobalVariables);
@@ -3009,6 +3041,12 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   theGlobalVariables.MakeReport();
   this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables);
   this->projectivizedChamber.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param chamber extrema subcones...";
+  theGlobalVariables.MakeReport();
+  this->projectivizedExtremaCones.ReadFromFile(input, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading the extrema...";
+  theGlobalVariables.MakeReport();
+  this->theExtrema.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading complete... ";
   theGlobalVariables.MakeReport();
   return true;

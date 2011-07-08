@@ -600,7 +600,7 @@ guiMainWindow::guiMainWindow(): wxFrame((wxFrame *)NULL, guiMainWindow::ID_MainW
   this->Button22TestChambers= new wxButton(this, this->ID_Button22TestChambers, wxT("Test chambers algorithm (very slow, 30+min)"));
   this->Button23Experiments= new wxButton(this, this->ID_Button23Experiments, wxT("Experiments"));
   this->Button24CharacterSplitFull= new wxButton(this, this->ID_Button24CharacterComputationAll, wxT("Weyl split full"));
-  this->Button25CharacterSplitIncrement= new wxButton(this, this->ID_Button25CharacterComputationStep, wxT("Gen. Verma M. chambers"));
+  this->Button25CharacterSplitIncrement= new wxButton(this, this->ID_Button25CharacterComputationStep, wxT("GVM computation increment"));
 
   //this->Button6OneSlice= new wxButton(this,this->ID_Button6OneSlice,wxT("One slice"));
   //this->Button7OneDirectionIncrement= new wxButton(this,this->ID_Button7Increment,wxT("Increment"));
@@ -1002,9 +1002,113 @@ void guiMainWindow::onButton24(wxCommandEvent& ev)
 {
 }
 
+class GeneralizedVermaModuleCharacters
+{
+public:
+//  bool flagUsingNewSplit;
+  Controller thePauseController;
+  List<MatrixLargeRational> theLinearOperators;
+  //the first k variables correspond to the Cartan of the smaller Lie algebra
+  //the next l variables correspond to the Cartan of the larger Lie algebra
+  //the last variable is the projectivization
+  List<MatrixLargeRational> theLinearOperatorsExtended;
+  std::fstream theMultiplicitiesMaxOutput;
+  std::fstream theMultiplicitiesMaxOutputReport2;
+  roots GmodKnegativeWeights;
+  ConeGlobal PreimageWeylChamberLargerAlgebra;
+  ConeGlobal WeylChamberSmallerAlgebra;
+  List<QuasiPolynomial> theQPsNonSubstituted;
+  List<List<QuasiPolynomial> > theQPsSubstituted;
+  List<QuasiPolynomial> theMultiplicities;
+  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
+  int tempDebugCounter;
+  List<Rational> theCoeffs;
+  roots theTranslations;
+  roots theTranslationsProjected;
+  partFractions thePfs;
+  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
+  CombinatorialChamberContainer projectivizedChamberOld;
+  ConeComplex projectivizedParamComplex;
+  List<List<QuasiPolynomial> > theExtrema;
+  List<List<Cone> > projectivizedExtremaCones;
+  ConeComplex projectivizedChamber;
+  std::stringstream log;
+  Parser theParser;
+  int computationPhase;
+  int NumProcessedConesParam;
+  void ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
+  void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
+  void IncrementComputation(GlobalVariables& theGlobalVariables);
+  GeneralizedVermaModuleCharacters(){ this->tempDebugCounter=1; this->computationPhase=0; this->NumProcessedConesParam=0;}
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  { std::string tempS;
+    input >> tempS >> this->computationPhase;
+    if (tempS!="ComputationPhase:")
+      return false;
+    return this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
+  }
+  bool ReadFromFileNoComputationPhase
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
+  void GetProjection(int indexOperator, const root& input, root& output);
+  void FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep2(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables);
+  void ProcessExtremaOneChamber
+  (Cone& input, List<Cone>& outputSubdivision, List<QuasiPolynomial>& theExtremaOutput, GlobalVariables& theGlobalVariables)
+  ;
+  void ProcessOneParametricChamber
+  (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
+  ;
+  void ComputeQPsFromChamberComplex
+  (GlobalVariables& theGlobalVariables)
+  ;
+  void GetSubFromIndex(QPSub& output, int theIndex);
+  void GetSubFromNonParamArray
+(MatrixLargeRational& output, root& outputTranslation, roots& NonParams, int numParams)
+  ;
+  void initQPs
+  (GlobalVariables& theGlobalVariables)
+  ;
+  void initFromHomomorphism
+  (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjective
+  (WallData& output, GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjective
+  (GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjective
+  (CombinatorialChamberContainer& owner, CombinatorialChamber& output, GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjective
+  (int indexOperator, root& startingNormal, root& outputNormal)
+  ;
+};
+extern GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
+
 void guiMainWindow::onButton25(wxCommandEvent& ev)
-{ this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ComputeGenVermaCharaterG2inB3;
-  this->RunTheComputation();
+{ HashedList<Monomial<Rational> >::PreferredHashSize=10;
+  if (!tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.IsRunningUnsafeDeprecatedDontUse())
+  { this->theComputationSetup.theFunctionToRun = &this->theComputationSetup.ComputeGenVermaCharaterG2inB3;
+    this->Button25CharacterSplitIncrement->SetLabel(wxT("Pause+save"));
+    this->RunTheComputation();
+  } else
+  { if (tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.IsPausedWhileRunningDeprecatedDontUse())
+    { tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.UnlockSafePoint();
+      this->Button25CharacterSplitIncrement->SetLabel(wxT("Pause+save"));
+    }else
+    { tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+      tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.WriteToDefaultFile(*this->theComputationSetup.GetGlobalVars());
+      this->Button25CharacterSplitIncrement->SetLabel(wxT("File saved... Continue"));
+    }
+  }
 }
 
 void guiMainWindow::onButton21SplitChambersPauseAndSave(wxCommandEvent& ev)

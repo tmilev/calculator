@@ -12357,7 +12357,6 @@ void PolynomialsRationalCoeff::MakeOneParameterSubFromDirectionInts(int x1, int 
   this->MakeOneParameterSubFromDirection(tempRoot);
 }
 
-
 void PolynomialsRationalCoeff::MakeOneParameterSubFromDirectionIntsAndConstants(int x1, int x2, int x3, int x4, int x5, int c1, int c2, int c3, int c4, int c5)
 { this->MakeOneParameterSubFromDirectionInts(x1, x2, x3, x4, x5);
   Rational rc1, rc2, rc3, rc4, rc5;

@@ -119,6 +119,13 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
+  HashedList<Monomial<Rational> >::PreferredHashSize=10;
+  //civilizedInput=
+//  theParser.DefaultWeylLetter='A';
+//  civilizedInput="(0,1)";
+//  civilizedInput="Cone((1,0),(0,1), (1,1))";
+//  civilizedInput="(i(c))^2";
+  //civilizedInput="IntersectHyperplaneByCone(Cone((1,0), (0,1)), (1,-1))";
 //  civilizedInput="QPSubAmbientLatticeZn(QuasiPolynomial(x_1+4x_2, (0,0), Lattice((1,0),(0,2))), ( (1,0),(0,1),(1,1),(1,2)), (0,0))";
   //civilizedInput="QPSubAmbientLatticeZn(QuasiPolynomial(x_1+4x_2, (0,0), Lattice((1,0),(0,2))), ( (1,0),(0,1),(1,1),(1,2)), (0,1))";
   //civilizedInput="Lattice((1,1/2), (1,-1/3))";
@@ -273,7 +280,7 @@ int main(int argc, char **argv)
 #endif
   std::cout.flush();
   std::cout << "</td>";
-  std::cout << " <td></td>\n<td>\n";
+  std::cout << " <td>"  << theParser.GetFunctionDescription() << "</td>\n<td>\n";
   std::stringstream tempStream;
   inputPath.append("../htdocs/tmp/");
   std::stringstream tempStream2;

@@ -2771,10 +2771,9 @@ public:
   bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
   void ChooseABasis(GlobalVariables& theGlobalVariables);
-  void average(root& output);
   void average(root& output, int theDimension);
   void sum(root& output, int theDimension);
-  void sum(root& output);
+//  void sum(root& output);
   void Pop(int index);
   void intersectWith(roots& right, roots& output);
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex)
@@ -9172,7 +9171,7 @@ class Cone
   roots Vertices;
   roots Normals;
   bool flagHasSufficientlyManyVertices;
-  int LowestIndexIHaventBeenCheckedForSplitting;
+  int LowestIndexNotCheckedForSplitting;
   //ignore: the following is the information carrying variable. Write in it anything you want, say an index to an array
   //containing large data for the chamber, such as quasipolynomials, etc.
   //int Data;
@@ -9185,7 +9184,7 @@ class Cone
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
   ;
   void GetInternalPoint(root& output)
-  { this->Vertices.sum(output);
+  { this->Vertices.sum(output, this->GetDim());
   }
   root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
   int HashFunction()const
@@ -9210,9 +9209,20 @@ class Cone
   { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
     this->Vertices=other.Vertices;
     this->Normals=other.Normals;
-    this->LowestIndexIHaventBeenCheckedForSplitting=other.LowestIndexIHaventBeenCheckedForSplitting;
+    this->LowestIndexNotCheckedForSplitting=other.LowestIndexNotCheckedForSplitting;
   }
-  Cone(){this->LowestIndexIHaventBeenCheckedForSplitting=0; this->flagHasSufficientlyManyVertices=true;}
+  Cone(){this->LowestIndexNotCheckedForSplitting=0; this->flagHasSufficientlyManyVertices=true;}
+  void IntersectAHyperplane
+  (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
+  ;
+  bool GetRootFromLPolyConstantTermGoesToLastVariable
+  (PolynomialRationalCoeff& inputLPoly, root& output)
+  ;
+  bool SolveLPolyEqualsZeroIAmProjective
+  ( PolynomialRationalCoeff& inputLPoly,
+   Cone& outputCone, GlobalVariables& theGlobalVariables
+   )
+  ;
   bool operator==(const Cone& other)const
   { return this->Normals==other.Normals;
   }
@@ -9280,7 +9290,6 @@ class ParserNode
   MemorySaving<ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> > UEElementOrdered;
   MemorySaving<PolynomialRationalCoeff> polyBeingMappedTo;
   MemorySaving<ElementWeylAlgebra> weylEltBeingMappedTo;
-  MemorySaving<List<int> > array;
   MemorySaving<RationalFunction> ratFunction;
   MemorySaving<Cone> theCone;
   MemorySaving<Lattice> theLattice;
@@ -9302,13 +9311,15 @@ class ParserNode
 ;
   bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they WILL be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered,
-  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, typeArray,
-  typeQuasiPolynomial, typePartialFractions, typeFile,
+  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
+  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
+  typeArray, typeQuasiPolynomial, typePartialFractions, typeFile, typeDots,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
-  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes, errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
-  errorWrongNumberOfArguments, errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem,
+  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes,
+  errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
+  errorWrongNumberOfArguments,//errorWrongNumberOfArguments=9
+  errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem,
   errorImplicitRequirementNotSatisfied, errorBadFileFormat };
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
@@ -9338,11 +9349,15 @@ class ParserNode
   int EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateReadFromFile(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables);
+  int EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
   void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
   void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
-  int EvaluateCone(GlobalVariables& theGlobalVariables);
+  static int EvaluateSolveLPolyEqualsZeroOverCone
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
+  static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
+
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);
@@ -9383,12 +9398,90 @@ class ParserNode
   ParserNode();
 };
 
-//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
+class ParserFunctionArgumentTree
+{ public:
+  //format: the if the function argument is composite, then it corresponds to the first non-used element of nestedArgumentsOfArguments
+  // for example, the function argument (A, (B,C), D, (E,F) )
+  // would have functionArguments: typeA, typeComposite, typeD, typeComposite
+  // and nestedArgumentsOfArguments would have two elements, the parametrizing respectively (B ,C) and (E,F)
+  List<int> functionArguments;
+  List<ParserFunctionArgumentTree> nestedArgumentsOfArguments;
+  void operator=(const ParserFunctionArgumentTree& other)
+  { this->functionArguments=other.functionArguments;
+    this->nestedArgumentsOfArguments=other.nestedArgumentsOfArguments;
+  }
+  std::string ElementToString(bool useHtml, bool useLatex)const;
+  void Nullify(){this->functionArguments.size=0; this->nestedArgumentsOfArguments.size=0;}
 
+bool ConvertOneArgumentIndex
+  (ParserNode& theNode, int theIndex, int& lowestNestedIndexNonExplored, GlobalVariables& theGlobalVariables)
+  ;
+  bool ConvertArguments
+  (ParserNode& theNode, List<int>& outputArgumentIndices, GlobalVariables& theGlobalVariables)
+    ;
+  bool MakeFunctionArgumentFromString(const std::string& theArgumentList);
+  bool MakeFromString(unsigned int& currentChar, const std::string& theArgumentList);
+  bool AddArgumentNonNestedChangeInput(std::string& theArgument);
+  static int GetTokenFromArgumentStringChangeInput(std::string& theArgument)
+  { unsigned int finalSize=0;
+    for (unsigned int i=0; i< theArgument.size(); i++)
+      if (theArgument[i]!=' ')
+      { theArgument[finalSize]=theArgument[i];
+        finalSize++;
+      }
+    theArgument.resize(finalSize);
+    return ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces(theArgument);
+  }
+  static int GetTokenFromArgumentStringNoSpaces(const std::string& theArgument);
+  static std::string GetArgumentStringFromToken(int theArgument);
+
+};
+
+class ParserFunction
+{
+public:
+  ParserFunctionArgumentTree theArguments;
+  int (*theActualFunction)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables);
+  std::string functionDescription;
+  std::string functionName;
+  std::string example;
+  std::string ElementToString
+  (bool useHtml, bool useLatex)const
+  ;
+  int CallMe
+  (ParserNode& theNode, GlobalVariables& theGlobalVariables)
+  ;
+  bool MakeMe
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
+  ;
+  int HashFunction()const
+  { return this->GetHashFromString(this->functionName);
+  }
+  int GetHashFromString(const std::string& input)const
+  { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, input.size());
+    int result=0;
+    for(int i=0; i<numCycles; i++)
+      result+=SomeRandomPrimes[i]*input[i];
+    return result;
+  }
+  void operator=(const ParserFunction& other)
+  { this->theArguments=other.theArguments;
+    this->theActualFunction=other.theActualFunction;
+    this->functionDescription=other.functionDescription;
+    this->functionName=other.functionName;
+    this->example=other.example;
+  }
+  bool operator==(const ParserFunction& other)const
+  { return this->functionName==other.functionName;
+  }
+  ParserFunction(){}
+  void MakeFunctionNoArguments(){this->theArguments.Nullify();}
+};
+
+//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
 class Parser: public List<ParserNode>
 {
 public:
-  LargeInt LargeIntegerReader;
   std::string DebugString;
   std::string StringBeingParsed;
   List<std::string> SystemCommands;
@@ -9405,27 +9498,153 @@ public:
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenMap, tokenVariable,
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenEmbedding, tokenVariable,
     tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
   };
+  HashedList<ParserFunction> theFunctionList;
   enum functionList
   { functionEigen, functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
     functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
     functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
     functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
     functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile, functionIntersectWithSubspace,
-    functionIntersectLatticeWithLatticePreimage, functionSubstitutionInQuasipolynomial,
+    functionIntersectLatticeWithLatticePreimage, functionSubstitutionInQuasipolynomial, functionIntersectHyperplaneByACone,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
   List<int> TokenStack;
   List<int> ValueStack;
+  List<int> NodeIndexStack;
   int numEmptyTokensAtBeginning;
   int NumVariables;
+  bool flagFunctionListInitialized;
 //  ElementSimpleLieAlgebra LieAlgebraValue;
 //  ElementWeylAlgebra WeylAlgebraValue;
-  void PopTokenAndValueStacksShiftDown(int theIndex){ this->ValueStack.PopIndexShiftDown(theIndex); this->TokenStack.PopIndexShiftDown(theIndex); }
-  void PopTokenAndValueStacksLast(){ this->ValueStack.PopLastObject(); this->TokenStack.PopLastObject();}
+  //Transform operations create no new nodes.
+  //Replace operations create new nodes.
+  void ExpandOnTop(int numNew)
+  { this->SetSize(this->size+numNew);
+    for (int i=0; i<numNew; i++)
+    { this->TheObjects[this->size-1-i].owner=this;
+      this->TheObjects[this->size-1-i].Clear();
+      this->TheObjects[this->size-1-i].indexInOwner=this->size-1-i;
+    }
+  }
+  bool ReplaceObyE()
+  { this->ExpandOnTopUseOperationOffset(0, this->tokenExpression);
+    this->TransformRepeatXAtoA(1);
+    return true;
+  }
+  bool ReplaceYOZbyE()
+  { return this->ReplaceTwoChildrenOperationOffset(-2, 0, -1, 3, this->tokenExpression);
+  }
+  bool ReplaceOXAXbyE()
+  { return this->ReplaceOneChildOperationOffset(-1, -3, 4, this->tokenExpression);
+  }
+  bool ReplaceOYbyE()
+  { return this->ReplaceOneChildOperationOffset(0, -1, 2, this->tokenExpression);
+  }
+  bool ReplaceZYbyE(int theOperationToken)
+  { return this->ReplaceTwoChildrenOperationToken(-1,0,2, theOperationToken, this->tokenExpression);
+  }
+  bool ReplaceXYbyE(int theOperationToken)
+  { return this->ReplaceOneChildOperationToken(0, 2, theOperationToken, this->tokenExpression);
+  }
+  bool ReplaceXYCZXbyE(int theOperationToken)
+  { return this->ReplaceTwoChildrenOperationToken(-3, -1, 5, theOperationToken, this->tokenExpression);
+  }
+  bool ReplaceXYXbyA()
+  { return this->ReplaceOneChildOperationOffset(-1, 3, this->tokenArraY, this->tokenArraY);
+  }
+  bool ReplaceEXEXbyE(int theOperation)
+  { return this->ReplaceTwoChildrenOperationToken(-3, -1, 4, theOperation, this->tokenExpression);
+  }
+  bool ReplaceDdotsDbyEdoTheArithmetic();
+  bool ReplaceXECdotsCEXbyE(int theDimension, int theNewToken);
+  bool ReplaceXECdotsCEXEXbyE(int theDimension, int theOperation);
+  void FatherByLastNodeChildrenWithIndexInNodeIndex(int IndexInNodeIndex)
+  { int childIndex=this->NodeIndexStack.TheObjects[IndexInNodeIndex];
+    this->LastObject()->children.AddObjectOnTop(childIndex);
+    this->TheObjects[childIndex].indexParentNode=this->size-1;
+  }
+  bool ReplaceOneChildOperationToken
+  (int child1Offset, int StackDecreaseNotCountingNewExpression, int theOperationToken, int theToken)
+  { int lastIndexInNodeIndex=this->TokenStack.size-1;
+    this->ExpandOnTopIncreaseStacks(theOperationToken, theToken, 0);
+    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
+    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
+    return true;
+  }
+  bool ReplaceTwoChildrenOperationToken
+  (int child1Offset, int child2Offset, int StackDecreaseNotCountingNewExpression, int theOperationToken, int theToken)
+  { int lastIndexInNodeIndex=this->TokenStack.size-1;
+    this->ExpandOnTopIncreaseStacks(theOperationToken, theToken, 0);
+    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
+    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child2Offset);
+    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
+    return true;
+  }
+  bool ExpandOnTopIncreaseStacks(int theOperationToken, int theToken, int theIntValue)
+  { this->ExpandOnTop(1);
+    this->LastObject()->Operation=theOperationToken;
+    this->LastObject()->intValue=theIntValue;
+    this->NodeIndexStack.AddObjectOnTop(this->size-1);
+    this->ValueStack.AddObjectOnTop(theIntValue);
+    this->TokenStack.AddObjectOnTop(theToken);
+    return true;
+  }
+  bool ExpandOnTopUseOperationOffset(int OperationOffset, int theToken)
+  { return this->ExpandOnTopIncreaseStacks(this->TokenStack.TheObjects[this->TokenStack.size-1+OperationOffset], theToken, this->ValueStack.TheObjects[this->TokenStack.size-1+OperationOffset]);
+  }
+  bool ReplaceTwoChildrenOperationOffset
+  (int child1Offset, int child2Offset, int OperationOffset, int StackDecreaseNotCountingNewExpression, int theToken)
+  { int lastIndexInNodeIndex=this->TokenStack.size-1;
+    this->ExpandOnTopUseOperationOffset(OperationOffset, theToken);
+    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
+    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child2Offset);
+    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
+    return true;
+  }
+  bool ReplaceOneChildOperationOffset
+  (int child1Offset, int OperationOffset, int StackDecreaseNotCountingNewExpression, int theToken)
+  { int lastIndexInNodeIndex=this->TokenStack.size-1;
+    this->ExpandOnTopUseOperationOffset(OperationOffset, theToken);
+    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
+    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
+    return true;
+  }
+  bool TransformXtoE()
+  { *this->TokenStack.LastObject()=this->tokenExpression;
+    *this->ValueStack.LastObject()=0;
+    return true;
+  }
+  bool TransformRepeatXAtoA(int repeat)
+  { int startIndex=this->ValueStack.size-1;
+    int targetIndex=startIndex-repeat;
+    this->ValueStack.SwapTwoIndices(startIndex, targetIndex);
+    this->NodeIndexStack.SwapTwoIndices(startIndex, targetIndex);
+    this->TokenStack.SwapTwoIndices(startIndex, targetIndex);
+    this->ValueStack.size-=repeat;
+    this->NodeIndexStack.size-=repeat;
+    this->TokenStack.size-=repeat;
+    return true;
+  }
+  bool TransformXtoNothing()
+  { this->ValueStack.PopLastObject();
+    this->TokenStack.PopLastObject();
+    this->NodeIndexStack.PopLastObject();
+    return true;
+  }
+  bool TransformRepeatXtoNothing(int repeat)
+  { for (int i=0; i<repeat; i++)
+      this->TransformXtoNothing();
+    return true;
+  }
+  bool TransformXYXtoY()
+  { this->TransformXtoNothing();
+    this->TransformRepeatXAtoA(1);
+    return true;
+  }
   void ParserInit(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables);
@@ -9440,35 +9659,32 @@ public:
   bool lookAheadTokenProhibitsTimes(int theToken);
   bool lookAheadTokenAllowsMapsTo(int theToken);
   bool TokenProhibitsUnaryMinus(int theToken);
-  void AddLetterExpressionOnTop();
-  void AddFunctionOnTop();
-  void AddXECdotsCEX(int theDimension, int theOperation);
-  void AddXECdotsCEXEX(int theDimension, int theOperation);
-  void AddEOEonTop();
-  void AddEXEXonTop(int theOperation);
-  void AddXECEXOnTop(int theOperation);
-  bool StackTopIsARoot(int& outputDimension);
+  void initFunctionList();
+  void AddOneFunctionToDictionaryNoFail
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
+  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
+    assert(tempBool);
+  }
+  bool AddOneFunctionToDictionary
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
+  { ParserFunction newFunction;
+    bool result=newFunction.MakeMe(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
+    if (!this->theFunctionList.AddObjectOnTopNoRepetitionOfObjectHash(newFunction))
+      return false;
+    return result;
+  }
+  void SubAby(int newToken);
+  std::string GetFunctionDescription();
   bool StackTopIsASub(int& outputNumEntries);
-  bool StackTopIsADelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter);
-  bool StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
-  (int& outputDimension, int LeftDelimiter, int middleDelimiter, int rightDelimiter)
-  ;
+  bool StackTopIsAVector(int& outputDimension);
+  bool StackTopIsDelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter);
+  bool StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3(int& outputDimension, int LeftDelimiter, int middleDelimiter, int rightDelimiter);
   bool IsAWordSeparatingCharacter(char c);
   bool LookUpInDictionaryAndAdd(std::string& input);
-  void Own(int indexParent, int indexChild1, int indexChild2);
-  void Own(int indexParent, int indexChild1);
-  void ExtendOnTop(int numNew);
   void TokenToStringStream(std::stringstream& out, int theToken);
-  void AddMapOnTop();
-  void AddUnaryMinusOnTop();
-  void AddImpiedTimesOnTop();
-  void PopLastAndThirdToLast();
-  void AddIntegerOnTopConvertToExpression();
-  void MergeLastTwoIntegers();
   void Clear();
-  void DecreaseStackSetExpressionLastNode(int Decrease);
   void ComputeNumberOfVariablesAndAdjustNodes();
-  Parser(){ this->numEmptyTokensAtBeginning=6; this->NumVariables=0;}
+  Parser(){ this->flagFunctionListInitialized=false;}
 };
 
 typedef void (*Runnable) (ComputationSetup& inputData, GlobalVariables& theGlobalVariables);

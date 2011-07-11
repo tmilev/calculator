@@ -1089,13 +1089,7 @@ void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
 
 bool ParserNode::ExtractArgumentList
 (List<int>& outputArgumentIndices)
-{ if (this->children.size!=1)
-    return false;
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  if (theArgument.ExpressionType==this->typeArray)
-    outputArgumentIndices=theArgument.array.GetElement();
-  else
-    outputArgumentIndices.initFillInObject(1, this->children.TheObjects[0]);
+{ assert(false);
   return true;
 }
 
@@ -1116,7 +1110,7 @@ int ParserNode::EvaluateChamberParam(GlobalVariables& theGlobalVariables)
   { ParserNode& currentNode=this->owner->TheObjects[theArguments.TheObjects[i]];
     if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
       return this->SetError(this->errorBadOrNoArgument);
-    nodesCurrentRoot= currentNode.array.GetElement();
+    nodesCurrentRoot= currentNode.children;
     if (nodesCurrentRoot.size!=dimNonParam+dimParam)
       return this->SetError(this->errorBadOrNoArgument);
     tempRoot.SetSize(nodesCurrentRoot.size);
@@ -1258,8 +1252,8 @@ bool ConeComplex::SplitChamber
   Cone& newMinusCone=theGlobalVariables.coneBuffer2NewSplit;
   newPlusCone.flagHasSufficientlyManyVertices=true;
   newMinusCone.flagHasSufficientlyManyVertices=true;
-  newPlusCone.LowestIndexIHaventBeenCheckedForSplitting=myDyingCone.LowestIndexIHaventBeenCheckedForSplitting+1;
-  newMinusCone.LowestIndexIHaventBeenCheckedForSplitting=myDyingCone.LowestIndexIHaventBeenCheckedForSplitting+1;
+  newPlusCone.LowestIndexNotCheckedForSplitting=myDyingCone.LowestIndexNotCheckedForSplitting+1;
+  newMinusCone.LowestIndexNotCheckedForSplitting=myDyingCone.LowestIndexNotCheckedForSplitting+1;
   newPlusCone.Vertices.size=0; newPlusCone.Normals.size=0;
   newMinusCone.Vertices.size=0; newMinusCone.Normals.size=0;
   hashedRoots& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit;
@@ -1312,8 +1306,8 @@ void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
 { if (this->indexLowestNonRefinedChamber>=this->size)
     return;
   Cone& currentCone=this->TheObjects[this->indexLowestNonRefinedChamber];
-  for (; currentCone.LowestIndexIHaventBeenCheckedForSplitting<this->splittingNormals.size; currentCone.LowestIndexIHaventBeenCheckedForSplitting++)
-    if (this->SplitChamber(this->indexLowestNonRefinedChamber, this->splittingNormals.TheObjects[currentCone.LowestIndexIHaventBeenCheckedForSplitting], theGlobalVariables))
+  for (; currentCone.LowestIndexNotCheckedForSplitting<this->splittingNormals.size; currentCone.LowestIndexNotCheckedForSplitting++)
+    if (this->SplitChamber(this->indexLowestNonRefinedChamber, this->splittingNormals.TheObjects[currentCone.LowestIndexNotCheckedForSplitting], theGlobalVariables))
       return;
     this->indexLowestNonRefinedChamber++;
 }
@@ -1434,7 +1428,7 @@ void ConeComplex::initFromCones
 
 std::string Cone::ElementToString(bool useLatex, bool useHtml)
 { std::stringstream out;
-  out << "Index next wall to refine by: " << this->LowestIndexIHaventBeenCheckedForSplitting << "\n";
+  out << "Index next wall to refine by: " << this->LowestIndexNotCheckedForSplitting << "\n";
   if (useHtml)
     out << "<br>";
   out << "Normals:\n";
@@ -1471,37 +1465,22 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
   return out.str();
 }
 
-int ParserNode::EvaluateCone(GlobalVariables& theGlobalVariables)
-{ List<int> argumentsList;
-  this->ExtractArgumentList(argumentsList);
-  int theDim=-1;
-  roots coneWalls; root currentWall;
-  for (int i=0; i<argumentsList.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[argumentsList.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    if (theDim==-1)
-      theDim=currentNode.array.GetElement().size;
-    if (currentNode.array.GetElement().size!=theDim)
-      return this->SetError(this->errorDimensionProblem);
-    currentWall.SetSize(theDim);
-    for (int j=0; j<currentNode.array.GetElement().size; j++)
-    { ParserNode& currentCoord=this->owner->TheObjects[currentNode.array.GetElement().TheObjects[j]];
-      if (!currentCoord.ConvertToType(this->typeRational, theGlobalVariables))
-        return this->SetError(this->errorBadOrNoArgument);
-      currentWall.TheObjects[j]=currentCoord.rationalValue;
-    }
-    coneWalls.AddObjectOnTop(currentWall);
+int ParserNode::EvaluateCone
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ roots theNormals;
+  theNormals.SetSize(theArgumentList.size);
+  for (int i=0; i<theArgumentList.size; i++)
+  { ParserNode& currentNode = theNode.owner->TheObjects[theArgumentList.TheObjects[i]];
+    if (!currentNode.GetRootRational(theNormals.TheObjects[i], theGlobalVariables))
+      return theNode.SetError(theNode.errorDimensionProblem);
+    if (theNormals.TheObjects[i].size!=theNormals.TheObjects[0].size)
+      return theNode.SetError(theNode.errorDimensionProblem);
   }
-  std::stringstream out;
-  if (!this->theCone.GetElement().CreateFromNormals(coneWalls, theGlobalVariables))
-    out << "the cone has too few or no vertices.";
-  out << "<br>Cone walls input: " << coneWalls.ElementToString(false, false, false);
-  out << "<br><br>Cone:" << this->theCone.GetElement().ElementToString(false, true);
-  this->outputString=out.str();
-
-  this->ExpressionType=this->typeCone;
-  return this->errorNoError;
+  Cone& currentCone=theNode.theCone.GetElement();
+  currentCone.CreateFromNormals(theNormals, theGlobalVariables);
+  theNode.outputString=currentCone.ElementToString(false, true);
+  theNode.ExpressionType=theNode.typeCone;
+  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables)
@@ -1793,7 +1772,7 @@ int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
   this->ExtractArgumentList(theArgumentList);
   if (theArgumentList.size<1)
     return this->SetError(this->errorBadOrNoArgument);
-  int theDim=this->owner->TheObjects[theArgumentList.TheObjects[0]].array.GetElement().size;
+  int theDim=this->owner->TheObjects[theArgumentList.TheObjects[0]].children.size;
   root currentRoot;
   roots LatticeBase;
   currentRoot.SetSize(theDim);
@@ -1801,10 +1780,10 @@ int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
   { ParserNode& currentNode=this->owner->TheObjects[theArgumentList.TheObjects[i]];
     if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
       return this->SetError(this->errorBadOrNoArgument);
-    if (currentNode.array.GetElement().size!=theDim)
+    if (currentNode.children.size!=theDim)
       return this->SetError(this->errorDimensionProblem);
-    for (int j=0; j<currentNode.array.GetElement().size; j++)
-    { ParserNode& currentCoord=this->owner->TheObjects[currentNode.array.GetElement().TheObjects[j]];
+    for (int j=0; j<currentNode.children.size; j++)
+    { ParserNode& currentCoord=this->owner->TheObjects[currentNode.children.TheObjects[j]];
       if (!currentCoord.ConvertToType(this->typeRational, theGlobalVariables))
         return this->SetError(this->errorConversionError);
       currentRoot.TheObjects[j]=currentCoord.rationalValue;
@@ -2157,36 +2136,25 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
 }
 
 bool ParserNode::GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables)
-{ if (this->ExpressionType!=this->typeArray)
-  { if (!this->ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
-      return false;
-    output.SetSize(1);
-    output.TheObjects[0]=this->intValue;
-    return true;
-  }
-  output.SetSize(this->array.GetElement().size);
-  for (int i=0; i<this->array.GetElement().size; i++)
-    if (!this->owner->TheObjects[this->array.GetElement().TheObjects[i]].ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
-      return false;
-    else
-      output.TheObjects[i]=this->owner->TheObjects[this->array.GetElement().TheObjects[i]].intValue;
+{ assert(false);
   return true;
 }
 
 bool ParserNode::GetRootRational(root& output, GlobalVariables& theGlobalVariables)
 { if (this->ExpressionType!=this->typeArray)
-  { if (!this->ConvertToType(this->typeRational, theGlobalVariables))
+  { output.SetSize(1);
+    if (!this->ConvertToType(this->typeRational, theGlobalVariables))
       return false;
-    output.SetSize(1);
     output.TheObjects[0]=this->rationalValue;
     return true;
   }
-  output.SetSize(this->array.GetElement().size);
-  for (int i=0; i<this->array.GetElement().size; i++)
-    if (!this->owner->TheObjects[this->array.GetElement().TheObjects[i]].ConvertToType(this->typeRational, theGlobalVariables))
+  output.SetSize(this->children.size);
+  for (int i=0; i<output.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typeRational, theGlobalVariables))
       return false;
-    else
-      output.TheObjects[i]=this->owner->TheObjects[this->array.GetElement().TheObjects[i]].rationalValue;
+    output.TheObjects[i]=currentNode.rationalValue;
+  }
   return true;
 }
 
@@ -3232,8 +3200,8 @@ int ParserNode::EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobal
     theLinearMap.AddObjectOnTop(tempRoot);
   else
     if (mapNode.ConvertToType(this->typeArray, theGlobalVariables))
-      for (int i=0; i<mapNode.array.GetElement().size; i++)
-      { ParserNode& currentNode=this->owner->TheObjects[mapNode.array.GetElement().TheObjects[i]];
+      for (int i=0; i<mapNode.children.size; i++)
+      { ParserNode& currentNode=this->owner->TheObjects[mapNode.children.TheObjects[i]];
         if (!currentNode.GetRootRational(tempRoot, theGlobalVariables))
           return this->SetError(this->errorBadOrNoArgument);
         if (theDim!=tempRoot.size)
@@ -3279,4 +3247,261 @@ void PolynomialsRationalCoeff::MakeLinearSubConstTermsLastRow(MatrixLargeRationa
     }
     this->TheObjects[i].AddConstant(theMat.elements[theMat.NumRows-1][i]);
   }
+}
+
+void Cone::IntersectAHyperplane
+  (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
+{ roots tempRoots=this->Normals;
+  tempRoots.AddObjectOnTop(theNormal);
+  tempRoots.AddObjectOnTop(-theNormal);
+  bool tempBool=outputConeLowerDim.CreateFromNormals(tempRoots, theGlobalVariables);
+  assert(!tempBool);
+
+}
+
+int ParserNode::EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables)
+{ List<int> argumentList;
+  this->ExtractArgumentList(argumentList);
+  if (argumentList.size!=2)
+    return this->SetError(this->errorBadOrNoArgument);
+  ParserNode& coneNode=this->owner->TheObjects[argumentList.TheObjects[0]];
+  ParserNode& hyperplaneNode=this->owner->TheObjects[argumentList.TheObjects[1]];
+  if (!coneNode.ConvertToType(this->typeCone, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  root tempRoot;
+  if (!hyperplaneNode.GetRootRational(tempRoot, theGlobalVariables))
+    return this->SetError(this->errorBadOrNoArgument);
+  if (tempRoot.size!=coneNode.theCone.GetElement().GetDim())
+    return this->SetError(this->errorDimensionProblem);
+  Cone& currentCone= coneNode.theCone.GetElement();
+  currentCone.IntersectAHyperplane(tempRoot, this->theCone.GetElement(), theGlobalVariables);
+  this->outputString=this->theCone.GetElement().ElementToString(false, true);
+  return this->errorNoError;
+}
+
+bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable
+(PolynomialRationalCoeff& inputLPoly, root& output)
+{ if (!inputLPoly.IsLinear())
+    return false;
+  output.MakeZero(inputLPoly.NumVars+1);
+  for (int i=0; i<inputLPoly.size; i++)
+  { int theIndex;
+    if (inputLPoly.TheObjects[i].::Monomial<Rational>::IsOneLetterFirstDegree(theIndex))
+      output.TheObjects[theIndex]=inputLPoly.TheObjects[i].Coefficient;
+    else
+      *output.LastObject()=inputLPoly.TheObjects[i].Coefficient;
+  }
+  return true;
+}
+
+bool Cone::SolveLPolyEqualsZeroIAmProjective
+  ( PolynomialRationalCoeff& inputLPoly,
+   Cone& outputCone, GlobalVariables& theGlobalVariables
+   )
+{ root theNormal;
+  if (!this->GetRootFromLPolyConstantTermGoesToLastVariable(inputLPoly, theNormal))
+    return false;
+  this->IntersectAHyperplane(theNormal, outputCone, theGlobalVariables);
+  return true;
+}
+
+bool ParserFunctionArgumentTree::ConvertOneArgumentIndex
+  (ParserNode& theNode, int theIndex, int& lowestNestedIndexNonExplored, GlobalVariables& theGlobalVariables)
+{ int theType=this->functionArguments.TheObjects[theIndex];
+  if (theType==theNode.typeDots)
+  { int oldlowestNestedIndexNonExplored=lowestNestedIndexNonExplored-1;
+    return this->ConvertOneArgumentIndex(theNode, theIndex-1, oldlowestNestedIndexNonExplored, theGlobalVariables);
+  }
+  if (theType==theNode.typeArray)
+  { List<int> tempList;
+    lowestNestedIndexNonExplored++;
+    return this->nestedArgumentsOfArguments.TheObjects[lowestNestedIndexNonExplored-1].ConvertArguments(theNode, tempList, theGlobalVariables);
+  }
+  return theNode.ConvertToType(theType, theGlobalVariables);
+}
+
+bool ParserFunctionArgumentTree::ConvertArguments
+  (ParserNode& theNode, List<int>& outputArgumentIndices, GlobalVariables& theGlobalVariables)
+{ if (theNode.ExpressionType==theNode.typeArray)
+    outputArgumentIndices=theNode.children;
+  else
+  { outputArgumentIndices.size=0;
+    outputArgumentIndices.AddObjectOnTop(theNode.indexInOwner);
+  }
+  int argumentCounter=0;
+  int lowestNestedIndexNonExplored=0;
+  List<int> tempList;
+  for (int i=0; i<this->functionArguments.size; i++)
+    if (this->functionArguments.TheObjects[i]==theNode.typeDots)
+      while(argumentCounter<outputArgumentIndices.size)
+      { ParserNode& currentNode=theNode.owner->TheObjects[outputArgumentIndices.TheObjects[argumentCounter]];
+        if (!this->ConvertOneArgumentIndex(currentNode, i, lowestNestedIndexNonExplored, theGlobalVariables))
+          break;
+        else
+          argumentCounter++;
+      }
+    else
+      if (argumentCounter<outputArgumentIndices.size)
+      { ParserNode& currentNode=theNode.owner->TheObjects[outputArgumentIndices.TheObjects[argumentCounter]];
+        if (!this->ConvertOneArgumentIndex(currentNode, i, lowestNestedIndexNonExplored, theGlobalVariables))
+          return false;
+        argumentCounter++;
+      }
+      else
+        return false;
+  return true;
+}
+
+int ParserFunction::CallMe
+  (ParserNode& theNode, GlobalVariables& theGlobalVariables)
+{ assert(this->theActualFunction!=0);
+  List<int> argumentsIndices;
+  assert(theNode.children.size==1);
+  ParserNode& argumentNode=theNode.owner->TheObjects[theNode.children.TheObjects[0]];
+  if(this->theArguments.ConvertArguments(argumentNode, argumentsIndices, theGlobalVariables))
+    return this->theActualFunction(theNode, argumentsIndices, theGlobalVariables);
+  return theNode.SetError(theNode.errorBadOrNoArgument);
+}
+
+bool ParserFunction::MakeMe
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
+{ if(!this->theArguments.MakeFunctionArgumentFromString(theFunctionArguments))
+    return false;
+  this->functionDescription=theFunctionDescription;
+  this->functionName=theFunctionName;
+  this->theActualFunction=inputFunctionAddress;
+  this->example=theExample;
+  return true;
+}
+
+std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgument)
+{ switch(theArgument)
+  { case ParserNode::typeRational: return "Rational";
+    case ParserNode::typeQuasiPolynomial: return "QP";
+    case ParserNode::typePoly: return "Poly";
+    case ParserNode::typeCone: return "Cone";
+    case ParserNode::typeDots: return "...";
+    case ParserNode::typeArray: return "";
+    default: return "Error";
+  }
+}
+
+int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
+(const std::string& theArgument)
+{ if (theArgument=="Rational")
+    return ParserNode::typeRational;
+  if (theArgument=="QP")
+    return ParserNode::typeQuasiPolynomial;
+  if (theArgument=="Poly")
+    return ParserNode::typePoly;
+  if (theArgument=="Cone")
+    return ParserNode::typeCone;
+  if (theArgument=="...")
+    return ParserNode::typeDots;
+  return -1;
+}
+
+bool ParserFunctionArgumentTree::MakeFunctionArgumentFromString
+(const std::string& theArgumentList)
+{ unsigned int currentChar=0;
+  return this->MakeFromString(currentChar, theArgumentList);
+}
+
+bool ParserFunctionArgumentTree::MakeFromString
+(unsigned int& currentChar, const std::string& theArgumentList)
+{ std::string currentArgument;
+  this->functionArguments.size=0;
+  this->nestedArgumentsOfArguments.size=0;
+  for (; currentChar<theArgumentList.size(); currentChar++)
+    if (theArgumentList[currentChar]=='(')
+      break;
+  currentChar++;
+  for (; currentChar<theArgumentList.size(); currentChar++)
+  { if (theArgumentList[currentChar]==',' || theArgumentList[currentChar]==')')
+    { if (currentArgument!="")
+      { this->functionArguments.AddObjectOnTop(this->GetTokenFromArgumentStringChangeInput(currentArgument));
+        if (*this->functionArguments.LastObject()==-1)
+          return false;
+        currentArgument="";
+      }
+    }
+    else
+      currentArgument.push_back(theArgumentList[currentChar]);
+    if (theArgumentList[currentChar]==')')
+      return true;
+    if (theArgumentList[currentChar]=='(')
+    { this->functionArguments.AddObjectOnTop(ParserNode::typeArray);
+      this->nestedArgumentsOfArguments.ExpandOnTop(1);
+      if(!this->nestedArgumentsOfArguments.LastObject()->MakeFromString(currentChar, theArgumentList))
+        return false;
+      currentArgument="";
+    }
+  }
+  return false;
+}
+
+void Parser::initFunctionList()
+{ if (this->flagFunctionListInitialized)
+    return;
+  this->flagFunctionListInitialized=true;
+  ParserFunction theFunction;
+
+  this->AddOneFunctionToDictionaryNoFail
+  ("EvaluateLPolyEqualsZeroOverCone",
+   "(Poly, Cone)",
+   "Finds the zeroes of linear polynomial over a cone. The cone is projective, i.e. the dimension of the cone must be one greater than the number of polynomial variables.",
+   "EvaluateLPolyEqualsZeroOverCone(x_1+x_2+2, Cone((1,0,3),(0,-1,0))) ",
+    & ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("Cone",
+   "((Rational,...),...)",
+   "A projective cone. The argument vectors describe the normals of the cone walls.",
+   "Cone((1,0),(0,1)) ",
+    & ParserNode::EvaluateCone
+   );
+}
+
+int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ ParserNode& polyNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
+  ParserNode& coneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
+  if (polyNode.polyValue.GetElement().NumVars!=coneNode.theCone.GetElement().GetDim()-1)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  Cone& currentCone=coneNode.theCone.GetElement();
+  currentCone.SolveLPolyEqualsZeroIAmProjective(polyNode.polyValue.GetElement(), theNode.theCone.GetElement(), theGlobalVariables);
+  theNode.outputString=theNode.theCone.GetElement().ElementToString(false, true);
+  return theNode.errorNoError;
+}
+
+std::string Parser::GetFunctionDescription()
+{ std::stringstream out;
+  for (int i=0; i<this->theFunctionList.size; i++)
+    out << this->theFunctionList.TheObjects[i].ElementToString(true, false) << "<br>";
+  return out.str();
+}
+
+std::string ParserFunctionArgumentTree::ElementToString(bool useHtml, bool useLatex)const
+{ std::stringstream out;
+  out << "(";
+  int lowestIndexNonExplored=0;
+  for (int i=0; i<this->functionArguments.size; i++)
+  { out << this->GetArgumentStringFromToken(this->functionArguments.TheObjects[i]);
+    if (this->functionArguments.TheObjects[i]==ParserNode::typeArray)
+    { out << this->nestedArgumentsOfArguments.TheObjects[lowestIndexNonExplored].ElementToString(useHtml, useLatex);
+      lowestIndexNonExplored++;
+    }
+    if (i!=this->functionArguments.size-1)
+      out << ", ";
+  }
+  out  << ")";
+  return out.str();
+}
+
+std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
+{ std::stringstream out;
+  out << this->functionName;
+  out << this->theArguments.ElementToString(useHtml, useLatex);
+  out << "<br>Short description. " << this->functionDescription << "<br>Example. " << this->example;
+  return out.str();
 }

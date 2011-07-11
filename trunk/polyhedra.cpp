@@ -170,6 +170,7 @@ template < > int HashedList<MonomialUniversalEnvelopingOrdered<RationalFunction>
 template < > int HashedList<Monomial<RationalFunction> >::PreferredHashSize=20;
 template < > int HashedList<roots>::PreferredHashSize=10000;
 template < > int HashedList<Cone>::PreferredHashSize=10000;
+template < > int HashedList<ParserFunction>::PreferredHashSize=100;
 
 template < > int List<Cone>::ListActualSizeIncrement=100;
 template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
@@ -248,6 +249,8 @@ template < > int List<Monomial<RationalFunction> >::ListActualSizeIncrement=20;
 template < > int List<TemplatePolynomial<Monomial<RationalFunction>, RationalFunction> >::ListActualSizeIncrement=20;
 template < > int List<MatrixLargeRational>::ListActualSizeIncrement=10;
 template < > int List<QPSub>::ListActualSizeIncrement=1000;
+template < > int List<ParserFunction>::ListActualSizeIncrement=20;
+template < > int List<ParserFunctionArgumentTree>::ListActualSizeIncrement=3;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
@@ -3050,24 +3053,10 @@ void roots::average(root& output, int theDimension)
   output.DivByInteger(this->size);
 }
 
-void roots::average(root& output)
-{ this->sum(output);
-  if (this->size==0)
-    return;
-  output.DivByInteger(this->size);
-}
-
 void roots::sum(root& output, int theDimension)
 { output.MakeZero(theDimension);
   for (int i=0; i<this->size; i++)
     output.Add(this->TheObjects[i]);
-}
-
-void roots::sum(root& output)
-{ output.MakeZero(this->TheObjects[0].size);
-  for (int i=0; i<this->size; i++)
-    output.Add(this->TheObjects[i]);
-  assert(this->size>0);
 }
 
 bool roots::ContainsOppositeRoots()
@@ -14597,7 +14586,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
     this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, tempRoots, this->kModulesKepsCoords.TheObjects[i], theGlobalVariables);
     this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->kModules.TheObjects[i], this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
     root tempRoot;
-    this->kModulesKepsCoords.TheObjects[i].average(tempRoot);
+    this->kModulesKepsCoords.TheObjects[i].average(tempRoot, simpleBasisG.size);
     assert(tempRoot.IsEqualToZero());
    // this->kModulesgEpsCoords.TheObjects[i].Average
      // (tempRoot, this->kModulesgEpsCoords.TheObjects[i].TheObjects[0].size);
@@ -25140,9 +25129,12 @@ void Parser::ParserInit(const std::string& input)
   this->ValueStack.size=0;
   this->TokenBuffer.size=0;
   this->ValueBuffer.size=0;
+  this->NodeIndexStack.size=0;
   this->size=0;
   this->NumVariables=0;
+  this->numEmptyTokensAtBeginning=6;
   this->SystemCommands.size=0;
+  this->initFunctionList();
   std::string buffer;
   int theLength=(signed) input.size();
   char LookAheadChar;
@@ -25157,14 +25149,14 @@ void Parser::ParserInit(const std::string& input)
       buffer="";
     }
   }
-  this->ValueStack.size=0;
-  this->TokenStack.size=0;
   this->ValueStack.MakeActualSizeAtLeastExpandOnTop(this->ValueBuffer.size);
   this->TokenStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
+  this->NodeIndexStack.MakeActualSizeAtLeastExpandOnTop(this->TokenBuffer.size);
   this->StringBeingParsed=input;
   for (int i=0; i<this->numEmptyTokensAtBeginning; i++)
   { this->TokenStack.AddObjectOnTop(this->tokenEmpty);
     this->ValueStack.AddObjectOnTop(0);
+    this->NodeIndexStack.AddObjectOnTop(-1);
   }
 }
 
@@ -25214,6 +25206,7 @@ void Parser::ParseNoInit(int indexFrom, int indexTo)
   for (int i=indexFrom; i<=indexTo; i++)
   { this->ValueStack.AddObjectOnTop(this->ValueBuffer.TheObjects[i]);
     this->TokenStack.AddObjectOnTop(this->TokenBuffer.TheObjects[i]);
+    this->NodeIndexStack.AddObjectOnTop(-1);
     int lookAheadToken=this->tokenEnd;
     if (i<this->TokenBuffer.size-1)
       lookAheadToken=this->TokenBuffer.TheObjects[i+1];
@@ -25270,191 +25263,53 @@ bool Parser::ApplyRules(int lookAheadToken)
   int tokenFifthToLast=this->TokenStack.TheObjects[this->TokenStack.size-5];
 //  int tokenSixthToLast=this->TokenStack.TheObjects[this->TokenStack.size-6];
   if (tokenLast==this->tokenEmpty)
-  { this->PopTokenAndValueStacksLast();
-    return true;
-  }
+    return this->TransformXtoNothing();
   if (tokenLast==this->tokenCloseCurlyBracket && tokenThirdToLast==this->tokenOpenCurlyBracket && tokenSecondToLast==this->tokenExpression)
-  { this->PopTokenAndValueStacksLast();
-    this->PopTokenAndValueStacksShiftDown(this->TokenStack.size-2);
-    return true;
-  }
-  if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMap && lookAheadToken!=this->tokenUnderscore)
-  { this->AddMapOnTop();
-    return true;
-  }
+    return this->TransformXYXtoY();
+  if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenEmbedding && lookAheadToken!=this->tokenUnderscore)
+    return this->ReplaceOYbyE();
   if (tokenLast== this->tokenFunctionNoArgument)
-  { this->ExtendOnTop(1);
-    this->LastObject()->Operation=this->tokenFunction;
-    this->LastObject()->intValue=*this->ValueStack.LastObject();
-    *this->TokenStack.LastObject()=this->tokenExpression;
-    *this->ValueStack.LastObject()=this->size-1;
-    return true;
-  }
-  if (tokenSecondToLast==this->tokenFunction && tokenLast==this->tokenExpression)
-  { this->AddFunctionOnTop();
-    return true;
-  }
+    return this->ReplaceObyE();
+  if (tokenSecondToLast==this->tokenFunction && tokenLast== this->tokenArraY)
+    return this->ReplaceOYbyE();
+  if (tokenFourthToLast==this->tokenFunction && tokenThirdToLast==this->tokenOpenBracket && tokenSecondToLast== this->tokenExpression && tokenLast==this->tokenCloseBracket)
+    return this->ReplaceXYXbyA();
+  if (tokenLast==this->tokenArraY)
+    return this->TransformXtoE();
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenMinus && !this->TokenProhibitsUnaryMinus(tokenThirdToLast) && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddUnaryMinusOnTop();
-    return true;
-  }
+    return this->ReplaceXYbyE(this->tokenMinusUnary);
   if (tokenLast==this->tokenCloseBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenOpenBracket)
-  { this->PopTokenAndValueStacksLast();
-    this->PopTokenAndValueStacksShiftDown(this->TokenStack.size-2);
-    return true;
-  }
+    return this->TransformXYXtoY();
   if (tokenSecondToLast==this->tokenMapsTo && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && this->lookAheadTokenAllowsMapsTo(lookAheadToken))
-  { this->AddEOEonTop();
-    return true;
-  }
+    return this->ReplaceYOZbyE();
   if (tokenLast== this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenComma && tokenFourthToLast==this->tokenExpression && tokenFifthToLast==this->tokenOpenLieBracket)
-   { this->AddXECEXOnTop(this->tokenLieBracket);
-    return true;
-  }
+    return this->ReplaceXYCZXbyE(this->tokenLieBracket);
   if (tokenLast==this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenOpenLieBracket && tokenFourthToLast==this->tokenExpression)
-  { this->AddEXEXonTop(this->tokenDereferenceArray);
-    return true;
-  }
-  if (tokenLast==this->tokenDigit)
-  { *this->TokenStack.LastObject()=this->tokenInteger;
-    if (tokenSecondToLast!=this->tokenInteger)
-      this->LargeIntegerReader=*this->ValueStack.LastObject();
-    else
-      this->MergeLastTwoIntegers();
-    return true;
-  }
-  if (tokenLast==this->tokenInteger && lookAheadToken!=this->tokenDigit)
-  { this->AddIntegerOnTopConvertToExpression();
-    return true;
-  }
+    return this->ReplaceEXEXbyE(this->tokenDereferenceArray);
+  if (tokenLast==this->tokenDigit && lookAheadToken!=this->tokenDigit)
+    return this->ReplaceDdotsDbyEdoTheArithmetic();
   if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenF || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC || tokenLast==this->tokenVariable)
-  { this->AddLetterExpressionOnTop();
-    return true;
-  }
+    return this->ReplaceObyE();
   if (tokenSecondToLast==this->tokenUnderscore && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && tokenFourthToLast!=this->tokenUnderscore)
-  { this->AddEOEonTop();
-    return true;
-  }
+    return this->ReplaceYOZbyE();
   if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenPower && tokenThirdToLast==this->tokenExpression)
-  { this->AddEOEonTop();
-    return true;
-  }
+    return this->ReplaceYOZbyE();
   if (tokenLast==this->tokenExpression && tokenSecondToLast== this->tokenDivide && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddEOEonTop();
-    return true;
-  }
+    return this->ReplaceYOZbyE();
   if (tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && tokenSecondToLast==tokenTimes && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddEOEonTop();
-    return true;
-  }
+    return this->ReplaceYOZbyE();
   if (tokenLast==this->tokenExpression && tokenSecondToLast==this->tokenExpression && !this->lookAheadTokenProhibitsTimes(lookAheadToken))
-  { this->AddImpiedTimesOnTop();
-    return true;
-  }
+    return this->ReplaceZYbyE(this->tokenTimes);
   if (tokenSecondToLast==this->tokenPlus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddEOEonTop();
-    return true;
-  }
+    return this->ReplaceYOZbyE();
   if (tokenSecondToLast==this->tokenMinus && tokenLast==this->tokenExpression && tokenThirdToLast==this->tokenExpression && !this->lookAheadTokenProhibitsPlus(lookAheadToken))
-  { this->AddEOEonTop();
-    return true;
-  }
+    return this->ReplaceYOZbyE();
   int rootDim;
-  if (this->StackTopIsARoot(rootDim))
-  { this->AddXECdotsCEX(rootDim, this->tokenArraY);
-    return true;
-  }
+  if (this->StackTopIsDelimiter1ECdotsCEDelimiter2(rootDim, this->tokenOpenBracket, this->tokenCloseBracket))
+    return this->ReplaceXECdotsCEXbyE(rootDim, this->tokenArraY);
   if (this->StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3(rootDim, this->tokenOpenBracket, this->tokenColon, this->tokenCloseBracket))
-  { this->AddXECdotsCEXEX(rootDim, this->tokenColon);
-    return true;
-  }
+    return this->ReplaceXECdotsCEXEXbyE(rootDim, this->tokenColon);
   return false;
-}
-
-void Parser::DecreaseStackSetExpressionLastNode(int Decrease)
-{ this->TokenStack.size-=Decrease;
-  this->ValueStack.size-=Decrease;
-  *this->TokenStack.LastObject()=this->tokenExpression;
-  *this->ValueStack.LastObject()=this->size-1;
-}
-
-void Parser::MergeLastTwoIntegers()
-{ this->LargeIntegerReader=this->LargeIntegerReader*10+(*this->ValueStack.LastObject());
-  this->PopTokenAndValueStacksLast();
-}
-
-void Parser::AddLetterExpressionOnTop()
-{ this->ExtendOnTop(1);
-  this->LastObject()->Clear();
-  this->LastObject()->Operation=*this->TokenStack.LastObject();
-  this->DecreaseStackSetExpressionLastNode(0);
-}
-
-void Parser::AddIntegerOnTopConvertToExpression()
-{ this->ExtendOnTop(1);
-  this->LastObject()->rationalValue=this->LargeIntegerReader;
-  this->LastObject()->Operation=this->tokenInteger;
-  this->DecreaseStackSetExpressionLastNode(0);
-}
-
-void Parser::AddFunctionOnTop()
-{ /*if (this->LastObject()->Operation!=this->tokenRoot)
-  { this->ExtendOnTop(1);
-    this->LastObject()->Operation=this->tokenRoot;
-    this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-1]);
-    this->DecreaseStackSetExpressionLastNode(0);
-  }*/
-  this->ExtendOnTop(1);
-  this->LastObject()->Operation=this->TokenStack.TheObjects[this->TokenStack.size-2];
-  this->LastObject()->intValue=this->ValueStack.TheObjects[this->ValueStack.size-2];
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(1);
-}
-
-void Parser::AddEXEXonTop(int theOperation)
-{ this->ExtendOnTop(1);
-  this->LastObject()->Operation=theOperation;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
-  this->DecreaseStackSetExpressionLastNode(3);
-}
-
-void Parser::AddEOEonTop()
-{ this->ExtendOnTop(1);
-  ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->TokenStack.TheObjects[this->TokenStack.size-2];
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-3], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(2);
-}
-
-void Parser::AddUnaryMinusOnTop()
-{ this->ExtendOnTop(1);
-  ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenMinusUnary;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(1);
-}
-
-void Parser::AddMapOnTop()
-{ this->ExtendOnTop(1);
-  ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenMap;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(1);
-}
-
-void Parser::AddImpiedTimesOnTop()
-{ this->ExtendOnTop(1);
-  ParserNode* theNode=this->LastObject();
-  theNode->Operation=this->tokenTimes;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-2], this->ValueStack.TheObjects[this->ValueStack.size-1]);
-  this->DecreaseStackSetExpressionLastNode(1);
-}
-
-void Parser::AddXECEXOnTop(int theOperation)
-{ this->ExtendOnTop(1);
-  this->LastObject()->Operation=theOperation;
-  this->Own(this->size-1, this->ValueStack.TheObjects[this->ValueStack.size-4], this->ValueStack.TheObjects[this->ValueStack.size-2]);
-  this->DecreaseStackSetExpressionLastNode(4);
 }
 
 void Parser::ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables)
@@ -25468,49 +25323,24 @@ void Parser::ParseAndCompute(const std::string& input, std::string& output, Glob
   output=out.str();
 }
 
-void Parser::Own(int indexParent, int indexChild1)
-{ ParserNode* theNode= &this->TheObjects[indexParent];
-  theNode->children.SetSize(1);
-  theNode->children.TheObjects[0]=indexChild1;
-  this->TheObjects[indexChild1].indexParentNode= indexParent;
-}
-
-void Parser::Own(int indexParent, int indexChild1, int indexChild2)
-{ ParserNode* theNode= & this->TheObjects[indexParent];
-  theNode->children.SetSize(2);
-  theNode->children.TheObjects[0]=indexChild1;
-  theNode->children.TheObjects[1]=indexChild2;
-  this->TheObjects[indexChild1].indexParentNode= indexParent;
-  this->TheObjects[indexChild2].indexParentNode= indexParent;
-}
-
 void Parser::Evaluate(GlobalVariables& theGlobalVariables)
 { if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
     if (*this->TokenStack.LastObject()==this->tokenExpression)
-    { this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].Evaluate(theGlobalVariables);
+    { this->TheObjects[this->NodeIndexStack.TheObjects[this->numEmptyTokensAtBeginning]].Evaluate(theGlobalVariables);
 //      this->WeylAlgebraValue.Assign(this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].WeylAlgebraElement);
 //      this->LieAlgebraValue= this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].LieAlgebraElement;
-      this->theValue=this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]];
+      this->theValue=this->TheObjects[this->NodeIndexStack.TheObjects[this->numEmptyTokensAtBeginning]];
     }
   if (this->TokenStack.size>this->numEmptyTokensAtBeginning+1)
     this->theValue.SetError(ParserNode::errorBadSyntax);
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 }
 
-void Parser::ExtendOnTop(int numNew)
-{ this->SetSize(this->size+numNew);
-  for (int i=0; i<numNew; i++)
-  { this->TheObjects[this->size-1-i].owner=this;
-    this->TheObjects[this->size-1-i].Clear();
-    this->TheObjects[this->size-1-i].indexInOwner=this->size-1-i;
-  }
-}
-
 void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
 { //this->UEElement.ComputeDebugString();
   this->Evaluated=true;
   for (int i=0; i<this->children.size; i++)
-  { if (this->Operation==Parser::tokenMap)
+  { if (this->Operation==Parser::tokenEmbedding)
       this->ContextLieAlgebra=&this->owner->theHmm.theDomain;
     this->owner->TheObjects[this->children.TheObjects[i]].ContextLieAlgebra=this->ContextLieAlgebra;
     this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
@@ -25536,9 +25366,9 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenInteger: this->EvaluateInteger(theGlobalVariables); break;
     case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
-    case Parser::tokenMap: this->EvaluateEmbedding(theGlobalVariables); break;
+    case Parser::tokenEmbedding: this->EvaluateEmbedding(theGlobalVariables); break;
     case Parser::tokenFunction: this->EvaluateFunction(theGlobalVariables); break;
-    case Parser::tokenArraY: this->array.GetElement().CopyFromBase(this->children); this->ExpressionType=this->typeArray; break;
+    case Parser::tokenArraY: this->ExpressionType=this->typeArray; break;
     case Parser::tokenMapsTo: this->EvaluateSubstitution(theGlobalVariables); break;
     case Parser::tokenColon: this->EvaluateApplySubstitution(theGlobalVariables); break;
     case Parser::tokenDereferenceArray: this->EvaluateDereferenceArray(theGlobalVariables); break;
@@ -25870,7 +25700,6 @@ void ParserNode::EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables)
   std::string buffer=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *this->owner, indexInOwneR);
   theOwner->TheObjects[indexInOwneR].outputString=buffer;
   theOwner->TheObjects[indexInOwneR].ExpressionType=ParserNode::typeArray;
-  theOwner->TheObjects[indexInOwneR].array.GetElement();
 }
 
 void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
@@ -26086,7 +25915,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenH: out << "h"; break;
     case Parser::tokenPower: out << "^"; break;
     case Parser::tokenC: out << "c"; break;
-    case Parser::tokenMap: out << "i"; break;
+    case Parser::tokenEmbedding: out << "i"; break;
     case Parser::tokenMinusUnary: out << "-"; break;
     case Parser::tokenVariable: out << "n"; break;
     case Parser::tokenArraY: out << "array"; break;
@@ -26131,10 +25960,12 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
     case ParserNode::errorMultiplicationByNonAllowedTypes: out << "error: multiplication by non-allowed types"; break;
     case ParserNode::errorNoError: out << "error: error type claims no error, but expression type claims error. Slap the programmer."; break;
     case ParserNode::errorOperationByUndefinedOrErrorType: out << "error: operation with an undefined type"; break;
+    case ParserNode::errorWrongNumberOfArguments: out << "error: wrong number of arguments."; break;
     case ParserNode::errorProgramming: out << "error: there has been some programming mistake (it's not your expression's fault). Slap the programmer!"; break;
     case ParserNode::errorUnknownOperation: out << "error: unknown operation. The lazy programmer has added the operation to the dictionary, but hasn't implemented it yet. Lazy programmers deserve no salary. "; break;
     case ParserNode::errorImplicitRequirementNotSatisfied: out << "Error: an implicit requirement for the funciton input has not been satisfied."; break;
     case ParserNode::errorBadFileFormat: out << "Bad input file format. "; break;
+    case ParserNode::errorConversionError: out << "Error with the conversion routines. This is likely to be a programming error."; break;
     default: out << "Non-documented error number " << this->ErrorType << ". Lazy programmers deserve no salaries."; break;
   }
   return out.str();
@@ -26369,43 +26200,10 @@ void HomomorphismSemisimpleLieAlgebra::ElementToString(std::string& output, bool
 }
 
 void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
-{ switch(this->intValue)
-  { case Parser::functionGCD: this->EvaluateGCDorLCM(theGlobalVariables); break;
-    case Parser::functionLCM: this->EvaluateGCDorLCM(theGlobalVariables); break;
-    case Parser::functionEigen: this->EvaluateEigen(theGlobalVariables); break;
-    case Parser::functionSlTwoInSlN: this->EvaluateSlTwoInSlN(theGlobalVariables); break;
-    case Parser::functionEigenOrdered: this->EvaluateEigenOrdered(theGlobalVariables); break;
-    case Parser::functionSecretSauce: this->EvaluateSecretSauce(theGlobalVariables); break;
-    case Parser::functionSecretSauceOrdered: this->EvaluateSecretSauceOrdered(theGlobalVariables); break;
-    case Parser::functionWeylDimFormula: this->EvaluateWeylDimFormula(theGlobalVariables); break;
-    case Parser::functionOuterAutos: this->EvaluateOuterAutos(theGlobalVariables); break;
-    case Parser::functionMod: this->EvaluateModVermaRelations(theGlobalVariables); break;
-    case Parser::functionInvariants: this->EvaluateInvariants(theGlobalVariables); break;
-    case Parser::functionPrintDecomposition: this->EvaluatePrintDecomposition(theGlobalVariables); break;
-    case Parser::functionEmbedding: this->EvaluatePrintEmbedding(theGlobalVariables); break;
-    case Parser::functionPrintRootSystem: this->EvaluatePrintRootSystem(theGlobalVariables); break;
-    case Parser::functionOrder: this->EvaluateOrder(theGlobalVariables); break;
-    case Parser::functionActByWeyl: this->EvaluateWeylAction(theGlobalVariables); break;
-    case Parser::functionActByAffineWeyl: this->EvaluateWeylRhoAction(theGlobalVariables); break;
-    case Parser::functionPrintWeylGroup: this->EvaluatePrintWeyl(theGlobalVariables); break;
-    case Parser::functionChamberParam: this->EvaluateChamberParam(theGlobalVariables); break;
-    case Parser::functionCone: this->EvaluateCone(theGlobalVariables); break;
-    case Parser::functionMaximumLFoverCone: this->EvaluateMaxLFOverCone(theGlobalVariables); break;
-    case Parser::functionMaximumQPoverCone: this->EvaluateMaxQPOverCone(theGlobalVariables); break;
-    case Parser::functionLattice: this->EvaluateLattice(theGlobalVariables); break;
-    case Parser::functionSubstitutionInQuasipolynomial: this->EvaluateSubstitutionInQuasipolynomial(theGlobalVariables); break;
-    case Parser::functionGetAllRepresentatives: this->EvaluateGetAllRepresentatives(theGlobalVariables); break;
-    case Parser::functionInvertLattice: this->EvaluateInvertLattice(theGlobalVariables); break;
-    case Parser::functionIntersectLatticeWithLatticePreimage: this->EvaluateIntersectLatticeWithPreimageLattice(theGlobalVariables); break;
-    case Parser::functionQuasiPolynomial: this->EvaluateQuasiPolynomial(theGlobalVariables); break;
-    case Parser::functionPartialFractions: this->EvaluatePartialFractions(theGlobalVariables); break;
-    case Parser::functionGetVPIndicator: this->EvaluateVectorPFIndicator(theGlobalVariables); break;
-    case Parser::functionSplit: this->EvaluateSplit(theGlobalVariables); break;
-    case Parser::functionWriteToFile: this->EvaluateWriteToFile(theGlobalVariables); break;
-    case Parser::functionReadFromFile: this->EvaluateReadFromFile(theGlobalVariables); break;
-    case Parser::functionIntersectWithSubspace: this->EvaluateIntersectLatticeWithSubspaces(theGlobalVariables); break;
-   default: this->SetError(this->errorUnknownOperation); break;
-  }
+{ if (this->intValue<this->owner->theFunctionList.size && this->intValue>=0)
+    this->owner->theFunctionList.TheObjects[this->intValue].CallMe(*this, theGlobalVariables);
+  else
+    this->SetError(this->errorUnknownOperation);
 }
 
 void ParserNode::EvaluateOrder(GlobalVariables& theGlobalVariables)
@@ -26614,6 +26412,17 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     case '/': this->TokenBuffer.AddObjectOnTop(Parser::tokenDivide); this->ValueBuffer.AddObjectOnTop(0); return true;
     default: break;
   }
+  ParserFunction tempPF;
+  tempPF.functionName=input;
+  int functionIndex= this->theFunctionList.IndexOfObjectHash(tempPF);
+  if (functionIndex!=-1)
+  { if (this->theFunctionList.TheObjects[functionIndex].theArguments.functionArguments.size==0)
+      this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
+    else
+      this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
+    this->ValueBuffer.AddObjectOnTop(functionIndex);
+    return true;
+  }
   if (input=="x")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenX);
     this->ValueBuffer.AddObjectOnTop(0);
@@ -26650,7 +26459,7 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     return true;
   }
   if (input =="i")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenMap);
+  { this->TokenBuffer.AddObjectOnTop(Parser::tokenEmbedding);
     this->ValueBuffer.AddObjectOnTop(0);
     return true;
   }
@@ -26659,181 +26468,12 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddObjectOnTop(0);
     return true;
   }
-  if (input=="gcd")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionGCD);
-    return true;
-  }
-  if (input=="lcm")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionLCM);
-    return true;
-  }
-  if (input=="eigen")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionEigen);
-    return true;
-  }
-  if (input=="QPSubAmbientLatticeZn")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionSubstitutionInQuasipolynomial);
-    return true;
-  }
-  if (input=="printEmbedding")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(this->functionEmbedding);
-    return true;
-  }
-  if (input=="GetAllRepresentatives")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionGetAllRepresentatives);
-    return true;
-  }
-  if (input=="split")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionSplit);
-    return true;
-  }
-  if (input=="vpf")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionGetVPIndicator);
-    return true;
-  }
-  if (input=="IntersectLatticeWithSubspaces")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionIntersectWithSubspace);
-    return true;
-  }
-  if (input=="PartialFractions")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionPartialFractions);
-    return true;
-  }
-  if (input=="actByWeylAffine")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionActByAffineWeyl);
-    return true;
-  }
-  if (input=="InvertLattice")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionInvertLattice);
-    return true;
-  }
-  if (input=="actByWeyl")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionActByWeyl);
-    return true;
-  }
-  if (input=="WriteToFile")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionWriteToFile);
-    return true;
-  }
-  if (input=="printDecomposition")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(this->functionPrintDecomposition);
-    return true;
-  }
-  if (input=="Lattice")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionLattice);
-    return true;
-  }
-  if (input=="printWeylGroup")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(this->functionPrintWeylGroup);
-    return true;
-  }
-  if (input=="printRootSystem")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(this->functionPrintRootSystem);
-    return true;
-  }
-  if (input=="eigenOrdered")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionEigenOrdered);
-    return true;
-  }
   if (input=="\\mapsto")
   { this->TokenBuffer.AddObjectOnTop(Parser::tokenMapsTo);
     this->ValueBuffer.AddObjectOnTop(0);
     return true;
   }
-  if (input=="IntersectLatticeWithPreimageOfLattice")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionIntersectLatticeWithLatticePreimage);
-    return true;
-  }
-  if (input=="combinatorialChamberParam")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionChamberParam);
-    return true;
-  }
-  if (input=="QuasiPolynomial")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionQuasiPolynomial);
-    return true;
-  }
-  if (input =="secretSauce")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(this->functionSecretSauce);
-    return true;
-  }
-  if (input=="secretSauceOrdered")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(this->functionSecretSauceOrdered);
-    return true;
-  }
-  if (input=="dim")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionWeylDimFormula);
-    return true;
-  }
-  if (input=="order")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(this->functionOrder);
-    return true;
-  }
-  if (input=="outerAuto")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionOuterAutos);
-    return true;
-  }
-  if (input=="mod")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionMod);
-    return true;
-  }
-  if (input=="invariant")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionInvariants);
-    return true;
-  }
-  if (input=="ReadFromFile")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunctionNoArgument);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionReadFromFile);
-    return true;
-  }
-  if (input=="MaximumQuasipolynomialsOverCone")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionMaximumQPoverCone);
-    return true;
-  }
-  if (input=="maximumLinearFunctionOverCone")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionMaximumLFoverCone);
-    return true;
-  }
-  if (input=="Cone")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionCone);
-    return true;
-  }
-  if (input=="slTwoInSlN")
-  { this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
-    this->ValueBuffer.AddObjectOnTop(Parser::functionSlTwoInSlN);
-    return true;
-  }
+
   return false;
 }
 
@@ -27166,6 +26806,7 @@ void ElementUniversalEnveloping::Simplify()
 { ElementUniversalEnveloping buffer;
   ElementUniversalEnveloping output;
   //this->ComputeDebugString();
+  //return;
   output.Nullify(*this->owner);
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].Simplify(buffer);
@@ -28818,11 +28459,11 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
     out << tempElt2.ElementToString(true, PolyFormatLocal);
     out << "\\end{eqnarray*}</div>";
     this->DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered(theParser, NodeIndex, theElt, tempElt2, out, theGlobalVariables);
-    theParser.ExtendOnTop(1);
+    theParser.ExpandOnTop(1);
     ParserNode& currentOutputNode=*theParser.LastObject();
     currentOutputNode.ExpressionType=ParserNode::typeWeylAlgebraElement;
     currentOutputNode.WeylAlgebraElement.GetElement().Assign(this->theOperators.TheObjects[i]);
-    theParser.TheObjects[NodeIndex].array.GetElement().AddObjectOnTop(theParser.size-1);
+    theParser.TheObjects[NodeIndex].children.AddObjectOnTop(theParser.size-1);
   }
   this->theExponentShiftsTargetPerSimpleGenerator.CollectionToRoots(this->theExponentShifts);
   out << "<br><br> And the total rank is: " << this->theExponentShifts.GetRankOfSpanOfElements(theGlobalVariables);
@@ -31158,9 +30799,9 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
       LatexOutput << "(";
       RecursionDepth++;
       if (RecursionDepth<=maxRecursionDepth)
-        for (i=0; i<this->array.GetElement().size; i++)
-        { LatexOutput << this->owner->TheObjects[this->array.GetElement().TheObjects[i]].ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth);
-          if (i!=this->array.GetElement().size-1)
+        for (i=0; i<this->children.size; i++)
+        { LatexOutput << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth);
+          if (i!=this->children.size-1)
             LatexOutput << ",";
         }
       else
@@ -31184,13 +30825,13 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeUEElementOrdered: out << "an element of U(g) ordered:"; break;
     case ParserNode::typeUEelement: out << " an element of U(g) of value: "; break;
     case ParserNode::typeWeylAlgebraElement: out << " a Weyl algebra element: "; break;
-    case ParserNode::typeArray: out << " an array of " << this->array.GetElement().size << " elements. "; break;
+    case ParserNode::typeArray: out << " an array of " << this->children.size << " elements. "; break;
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
     case ParserNode::typeLattice: out << "A lattice."; break;
     case ParserNode::typeCone: out << "a cone with walls: "; break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
-    default: out << "The programmer(s) have forgotten to enter a type description. "; break;
+    default: out << "Expression type " << this->ExpressionType << "; the programmer(s) have forgotten to enter a type description. "; break;
   }
   if (stringValueOnly!="")
   { if (!useHtml)
@@ -31212,8 +30853,8 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
   { out << "<br>Elements of the array follow.";
     RecursionDepth++;
     if (RecursionDepth<=maxRecursionDepth)
-      for (int i=0; i<this->array.GetElement().size; i++)
-        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->array.GetElement().TheObjects[i]].ElementToStringValueAndType(useHtml, RecursionDepth, maxRecursionDepth);
+      for (int i=0; i<this->children.size; i++)
+        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueAndType(useHtml, RecursionDepth, maxRecursionDepth);
   }
   return out.str();
 }
@@ -31422,13 +31063,13 @@ void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  int arraySize=firstChild.array.GetElement().size;
+  int arraySize=firstChild.children.size;
   int arrayIndex=secondChild.intValue-1;
   if (arrayIndex>=arraySize || arrayIndex<0)
   { this->SetError(this->errorBadIndex);
     return;
   }
-  ParserNode& relevantChild=this->owner->TheObjects[firstChild.array.GetElement().TheObjects[arrayIndex]];
+  ParserNode& relevantChild=this->owner->TheObjects[firstChild.children.TheObjects[arrayIndex]];
   this->CopyValue(relevantChild);
   return;
 }
@@ -31501,8 +31142,8 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Globa
       this->ExpressionType=this->typePoly;
       return this->errorNoError;
     case ParserNode::typeArray:
-      for (int i=0; i<this->array.GetElement().size; i++)
-        this->owner->TheObjects[this->array.GetElement().TheObjects[i]].CarryOutSubstitutionInMe(theSub, theGlobalVariables);
+      for (int i=0; i<this->children.size; i++)
+        this->owner->TheObjects[this->children.TheObjects[i]].CarryOutSubstitutionInMe(theSub, theGlobalVariables);
       return this->errorNoError;
     case ParserNode::typeLattice:
       if (theDimension!=this->theLattice.GetElement().GetDim())
@@ -31563,7 +31204,6 @@ void ParserNode::CopyValue(const ParserNode& other)
       this->weylEltBeingMappedTo.GetElement().operator=(other.weylEltBeingMappedTo.GetElementConst());
       break;
     case ParserNode::typeArray:
-      this->array.GetElement().CopyFromBase(other.array.GetElementConst());
       break;
     case ParserNode::typeRationalFunction:
       this->ratFunction.GetElement().operator=(other.ratFunction.GetElementConst());
@@ -31600,37 +31240,42 @@ bool Parser::lookAheadTokenAllowsMapsTo(int theToken)
 { return theToken==this->tokenComma || theToken==this->tokenCloseBracket || theToken==this->tokenEnd || theToken==this->tokenEndStatement || theToken==this->tokenColon;
 }
 
-bool Parser::StackTopIsARoot(int& outputDimension)
-{ return this->StackTopIsADelimiter1ECdotsCEDelimiter2(outputDimension, this->tokenOpenBracket, this->tokenCloseBracket);
+bool Parser::StackTopIsAVector(int& outputDimension)
+{ return this->StackTopIsDelimiter1ECdotsCEDelimiter2(outputDimension, this->tokenOpenBracket, this->tokenCloseBracket);
 }
 
-void Parser::AddXECdotsCEX(int theDimension, int theOperation)
-{ this->ExtendOnTop(1);
-  ParserNode& lastNode=*this->LastObject();
-  lastNode.Operation=theOperation;
-  lastNode.children.SetSize(theDimension);
+bool Parser::ReplaceDdotsDbyEdoTheArithmetic()
+{ int numDigits=0;
+  for (int i= this->TokenStack.size-1; i>=0; i++)
+    if(this->TokenStack.TheObjects[i]!=this->tokenDigit)
+      break;
+    else
+      numDigits++;
+  assert(numDigits>0);
+  LargeInt LargeIntegerReader;
+  LargeIntegerReader.MakeZero();
+  for (int i=this->ValueStack.size-numDigits; i<this->ValueStack.size; i++)
+    LargeIntegerReader+=LargeIntegerReader*10+this->ValueStack.TheObjects[i];
+  this->ExpandOnTopIncreaseStacks(this->tokenInteger, this->tokenExpression, 0);
+  this->LastObject()->rationalValue=LargeIntegerReader;
+  this->TransformRepeatXAtoA(numDigits);
+  return true;
+}
+
+bool Parser::ReplaceXECdotsCEXbyE(int theDimension, int theNewToken)
+{ this->ExpandOnTopIncreaseStacks(theNewToken, theNewToken, 0);
+  int stackSize=this->ValueStack.size;
   for (int i=0; i<theDimension; i++)
-  { int indexChild=this->ValueStack.TheObjects[this->ValueStack.size-2-2*i];
-    lastNode.children.TheObjects[theDimension-1-i]=indexChild;
-    this->TheObjects[indexChild].indexParentNode=this->size-1;
-  }
-  this->DecreaseStackSetExpressionLastNode(theDimension*2);
+    this->FatherByLastNodeChildrenWithIndexInNodeIndex(stackSize-1-2*theDimension+2*i);
+  this->TransformRepeatXAtoA(theDimension*2+1);
+  return true;
 }
 
-void Parser::AddXECdotsCEXEX(int theDimension, int theOperation)
-{ this->ExtendOnTop(1);
-  ParserNode& lastNode=*this->LastObject();
-  lastNode.Operation=theOperation;
-  lastNode.children.SetSize(theDimension+1);
-  for (int i=0; i<theDimension+1; i++)
-  { int indexChild=this->ValueStack.TheObjects[this->ValueStack.size- theDimension*2-2+i*2];
-    lastNode.children.TheObjects[i]=indexChild;
-    this->TheObjects[indexChild].indexParentNode=this->size-1;
-  }
-  this->DecreaseStackSetExpressionLastNode(theDimension*2+2);
+bool Parser::ReplaceXECdotsCEXEXbyE(int theDimension, int theOperation)
+{ return this->ReplaceXECdotsCEXbyE(theDimension+1, theOperation);
 }
 
-bool Parser::StackTopIsADelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter)
+bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter)
 { if (*this->TokenStack.LastObject()!=RightDelimiter)
     return false;
   outputDimension=0;

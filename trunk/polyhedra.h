@@ -1205,6 +1205,7 @@ public:
   static void GetMaxMovementAndLeavingVariableRow(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, MatrixLargeRational& tempMatA, MatrixLargeRational& matX, Selection& BaseVariables);
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
+  bool IsIdMatrix()const;
   MatrixLargeRational(const MatrixLargeRational& right){this->Assign(right);}
   MatrixLargeRational(){}
   MatrixLargeRational operator-(const MatrixLargeRational& right)const
@@ -2597,7 +2598,9 @@ public:
   std::string DebugString;
   void ComputeDebugString();
   void ElementToString(std::string& output)const;
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
+  std::string ElementToStringLetterFormat(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar);
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar);
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex){ return this->ElementToStringLetterFormat(inputLetter, useLatex, false);}
   std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; };
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
   void ElementToString(std::string& output, bool useLaTeX)const;
@@ -2766,7 +2769,8 @@ public:
   bool ElementsHaveNonNegativeScalarProduct(const root& theRoot)const;
   bool ElementsHavePositiveScalarProduct(const root& theRoot)const;
   bool ElementsHaveNonPositiveScalarProduct(const root& theRoot)const;
-  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml);
+  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml){ return this->ElementsToInequalitiesString(useLatex, useHtml, false);}
+  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant);
   bool ContainsOppositeRoots();
   bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
@@ -9176,7 +9180,8 @@ class Cone
   //containing large data for the chamber, such as quasipolynomials, etc.
   //int Data;
   std::string ElementToString(){return this->ElementToString(false, false);}
-  std::string ElementToString(bool useLatex, bool useHtml);
+  std::string ElementToString(bool useLatex, bool useHtml){return this->ElementToString(useLatex, useHtml, false, false);}
+  std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant);
   std::string DebugString;
   int GetDim(){if (this->Normals.size==0) return 0; return this->Normals.TheObjects[0].size;}
   void ComputeDebugString(){ this->DebugString=this->ElementToString();}
@@ -9223,6 +9228,11 @@ class Cone
    Cone& outputCone, GlobalVariables& theGlobalVariables
    )
   ;
+  bool SolveLQuasiPolyEqualsZeroIAmProjective
+  ( QuasiPolynomial& inputLQP,
+   List<Cone>& outputConesOverEachLatticeShift, GlobalVariables& theGlobalVariables
+   )
+  ;
   bool operator==(const Cone& other)const
   { return this->Normals==other.Normals;
   }
@@ -9267,6 +9277,13 @@ public:
   bool ReadFromFile
   (std::fstream& input, GlobalVariables& theGlobalVariables)
   ;
+  void operator=(const ConeComplex& other)
+  { this->:: HashedList<Cone>::operator=(other);
+    this->splittingNormals=other.splittingNormals;
+    this->indexLowestNonRefinedChamber=other.indexLowestNonRefinedChamber;
+    this->flagIsRefined=other.flagIsRefined;
+    this->flagChambersHaveTooFewVertices=other.flagChambersHaveTooFewVertices;
+  }
 };
 
 class Parser;
@@ -10315,15 +10332,104 @@ public:
   void Nullify(SSalgebraModule& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());}
 };
 
-class InvariantsComputationModule
+class GeneralizedVermaModuleCharacters
 {
 public:
-
-};
-
-class AdmissibleHs :public rootsCollection
-{
-public:
+//  bool flagUsingNewSplit;
+  Controller thePauseController;
+  List<MatrixLargeRational> theLinearOperators;
+  //the first k variables correspond to the Cartan of the smaller Lie algebra
+  //the next l variables correspond to the Cartan of the larger Lie algebra
+  //the last variable is the projectivization
+  List<MatrixLargeRational> theLinearOperatorsExtended;
+  root NonIntegralOriginModification;
+  std::fstream theMultiplicitiesMaxOutput;
+  std::fstream theMultiplicitiesMaxOutputReport2;
+  roots GmodKnegativeWeights;
+  ConeGlobal PreimageWeylChamberLargerAlgebra;
+  ConeGlobal PreimageWeylChamberSmallerAlgebra;
+  List<QuasiPolynomial> theQPsNonSubstituted;
+  List<List<QuasiPolynomial> > theQPsSubstituted;
+  List<QuasiPolynomial> theMultiplicities;
+  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
+  int tempDebugCounter;
+  List<Rational> theCoeffs;
+  roots theTranslations;
+  roots theTranslationsProjected;
+  partFractions thePfs;
+  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
+  CombinatorialChamberContainer projectivizedChamberOld;
+  ConeComplex projectivizedParamComplex;
+  List<List<QuasiPolynomial> > theExtrema;
+  List<List<Cone> > projectivizedExtremaCones;
+  List<List<List<Cone> > > projectivizedExtremaEqualsOneCones;
+  ConeComplex projectivizedChamber;
+  std::stringstream log;
+  Parser theParser;
+  int computationPhase;
+  int NumProcessedConesParam;
+  int NumProcessedExtremaEqualOne;
+  void ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
+  void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
+  void IncrementComputation(GlobalVariables& theGlobalVariables);
+  std::string PrepareReport(GlobalVariables& theGlobalVariables);
+  GeneralizedVermaModuleCharacters()
+  { this->tempDebugCounter=1;
+    this->computationPhase=0;
+    this->NumProcessedConesParam=0;
+    this->NumProcessedExtremaEqualOne=0;
+  }
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  { std::string tempS;
+    input >> tempS >> this->computationPhase;
+    if (tempS!="ComputationPhase:")
+      return false;
+    return this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
+  }
+  bool ReadFromFileNoComputationPhase
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
+  std::string PrepareReportOneCone
+  (PolynomialOutputFormat& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
+  ;
+  void GetProjection(int indexOperator, const root& input, root& output);
+  void FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep2(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables);
+  void FindMultiplicitiesExtremaStep5(GlobalVariables& theGlobalVariables);
+  void ProcessExtremaOneChamber
+  (Cone& input, List<Cone>& outputSubdivision, List<QuasiPolynomial>& theExtremaOutput, GlobalVariables& theGlobalVariables)
+  ;
+  void ProcessOneParametricChamber
+  (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
+  ;
+  void ComputeQPsFromChamberComplex
+  (GlobalVariables& theGlobalVariables)
+  ;
+  void GetSubFromIndex(QPSub& output, int theIndex);
+  void GetSubFromNonParamArray
+(MatrixLargeRational& output, root& outputTranslation, roots& NonParams, int numParams)
+  ;
+  void initQPs
+  (GlobalVariables& theGlobalVariables)
+  ;
+  void initFromHomomorphism
+  (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjectiveStep1
+  (GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjectiveStep2
+  (GlobalVariables& theGlobalVariables)
+  ;
+  void TransformToWeylProjective
+  (int indexOperator, root& startingNormal, root& outputNormal)
+  ;
 };
 
 class SemisimpleSubalgebras
@@ -10334,7 +10440,7 @@ public:
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
   SltwoSubalgebras theSl2s;
   SemisimpleLieAlgebra theAlgebra;
-  AdmissibleHs theHcandidates;
+  rootsCollection theHcandidates;
   int indexLowestUnexplored;
   void FindHCandidates
     (char WeylLetter, int WeylDim, GlobalVariables& theGlobalVariables)

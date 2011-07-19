@@ -1678,33 +1678,6 @@ void root::ElementToString(std::string& output, bool useLaTeX)const
   output.append(")");
 }
 
-std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex)
-{ if (this->IsEqualToZero())
-    return "0";
-  std::stringstream out;
-  std::string tempS;
-  bool found=false;
-  for(int i=0; i<this->size; i++)
-    if (!this->TheObjects[i].IsEqualToZero())
-    { this->TheObjects[i].ElementToString(tempS);
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (found)
-      { if (tempS.size()>0)
-        { if (tempS[0]!='-')
-            out << "+";
-        } else
-          out << "+";
-      }
-      found=true;
-      out << tempS;
-      out << inputLetter << "_{" << i+1 << "}";
-    }
-  return out.str();
-}
-
 void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)
 { if (useLatex)
     output= this->ElementToStringLetterFormat("\\varepsilon", useLatex);
@@ -6073,7 +6046,7 @@ void PolynomialOutputFormat::SetLetterIndex(const std::string& theLetter, int in
 }
 
 void PolynomialOutputFormat::MakeAlphabetArbitraryWithIndex(const std::string& theLetter)
-{ this->alphabet.SetSize(1000);
+{ this->alphabet.SetSize(20);
   for (int i=0; i<this->alphabet.size; i++)
   { std::stringstream out;
     out << theLetter << "_";

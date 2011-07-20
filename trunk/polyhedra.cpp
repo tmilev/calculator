@@ -47,6 +47,7 @@ Controller ParallelComputing::controllerLockThisMutexToSignalPause;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
+  this->ReadWriteRecursionDepth=0;
 }
 
 bool Stop()
@@ -15357,9 +15358,9 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
       return true;
      if (right.SimpleBasesConnectedComponents.TheObjects[i].size>this->SimpleBasesConnectedComponents.TheObjects[i].size)
       return false;
-    if (this->LetterIsDynkinGreaterThanLetter( this->DynkinTypeStrings.TheObjects[i].at(1), right.DynkinTypeStrings.TheObjects[i].at(1)))
+    if (this->LetterIsDynkinGreaterThanLetter(this->DynkinTypeStrings.TheObjects[i].at(1), right.DynkinTypeStrings.TheObjects[i].at(1)))
       return true;
-     if (this->LetterIsDynkinGreaterThanLetter( right.DynkinTypeStrings.TheObjects[i].at(1), this->DynkinTypeStrings.TheObjects[i].at(1)))
+     if (this->LetterIsDynkinGreaterThanLetter(right.DynkinTypeStrings.TheObjects[i].at(1), this->DynkinTypeStrings.TheObjects[i].at(1)))
       return false;
   }
   return this->DebugString>right.DebugString;
@@ -15581,7 +15582,7 @@ void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int 
   }
 }
 
-void DynkinDiagramRootSubalgebra::GetAutomorphisms(List<List<List<int> > > & output)
+void DynkinDiagramRootSubalgebra::GetAutomorphisms(List<List<List<int> > >& output)
 { output.SetSize(this->SimpleBasesConnectedComponents.size);
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
     this->GetAutomorphism( output.TheObjects[i], i);

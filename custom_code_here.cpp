@@ -166,6 +166,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     this->theTranslations.TheObjects[i]=theWeyl.rho;
     theWeyl.ActOn(i, this->theTranslations.TheObjects[i], true, false, (Rational) 0);
     this->theTranslations.TheObjects[i]-=theWeyl.rho;
+    this->theTranslations.TheObjects[i].MinusRoot();
     theProjection.ActOnAroot(this->theTranslations.TheObjects[i], this->theTranslationsProjected.TheObjects[i]);
     if (theWeyl.TheObjects[i].size%2==0)
       this->theCoeffs.TheObjects[i]=1;
@@ -173,20 +174,20 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       this->theCoeffs.TheObjects[i]=-1;
   }
   this->log << "\n\n\nMatrix of the projection operator:\n" << theProjection.ElementToString(false, false);
-  this->log << "\n\n\nMatrix form of the operators $u_w$, the translations and their projections (" << this->theLinearOperators.size << "):";
+  this->log << "\n\n\nMatrix form of the operators $u_w$, the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
   //List<MatrixLargeRational> tempList;
-  for (int i=0; i<this->theLinearOperators.size; i++)
-  { MatrixLargeRational& currentLO=this->theLinearOperators.TheObjects[i];
-    MatrixLargeRational& currentLOExtended=this->theLinearOperatorsExtended.TheObjects[i];
+  for (int k=0; k<this->theLinearOperators.size; k++)
+  { MatrixLargeRational& currentLO=this->theLinearOperators.TheObjects[k];
+    MatrixLargeRational& currentLOExtended=this->theLinearOperatorsExtended.TheObjects[k];
     currentLO.MultiplyOnTheLeft(theProjection);
-    this->log << "\n\n" << currentLO.ElementToString(false, false);
-    this->log << this->theTranslations.TheObjects[i].ElementToString() << ";   " << this->theTranslationsProjected.TheObjects[i].ElementToString();
     //tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
     currentLOExtended.MakeIdMatrix(currentLO.NumRows);
     currentLOExtended.Resize(currentLO.NumRows, currentLO.NumRows+currentLO.NumCols, true);
     for (int i=0; i<currentLO.NumRows; i++)
       for (int j=0; j<currentLO.NumCols; j++)
         currentLOExtended.elements[i][j+currentLO.NumRows]=-currentLO.elements[i][j];
+    this->log << "\n\n" << currentLOExtended.ElementToString(false, false);
+    this->log << this->theTranslations.TheObjects[k].ElementToString() << ";   " << this->theTranslationsProjected.TheObjects[k].ElementToString();
   }
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   tempMat=theWeyl.CartanSymmetric;
@@ -225,7 +226,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   }
   this->NonIntegralOriginModification.SetSize(input.theDomain.GetRank());
   for (int i=0; i<this->NonIntegralOriginModification.size; i++)
-      this->NonIntegralOriginModification.TheObjects[i].AssignNumeratorAndDenominator(1,2);
+    this->NonIntegralOriginModification.TheObjects[i].AssignNumeratorAndDenominator(1,2);
   tempRoot.MakeEi(input.theRange.GetRank()+input.theDomain.GetRank()+1, input.theRange.GetRank()+input.theDomain.GetRank());
   this->PreimageWeylChamberLargerAlgebra.AddObjectOnTop(tempRoot);
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString() << "\n";
@@ -457,19 +458,23 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& the
       this->ComputeQPsFromChamberComplex(theGlobalVariables);
       break;
     case 4:
-      this->FindMultiplicitiesExtremaStep1(theGlobalVariables);
+      this->FindMultiplicitiesFree(theGlobalVariables);
+      out << this->projectivezedChambersSplitByMultFreeWalls.ElementToString(false, false);
       break;
     case 5:
-      this->FindMultiplicitiesExtremaStep2(theGlobalVariables);
+//      this->FindMultiplicitiesExtremaStep1(theGlobalVariables);
       break;
     case 6:
-      this->FindMultiplicitiesExtremaStep3(theGlobalVariables);
+//      this->FindMultiplicitiesExtremaStep2(theGlobalVariables);
       break;
     case 7:
-      this->FindMultiplicitiesExtremaStep4(theGlobalVariables);
+ //     this->FindMultiplicitiesExtremaStep3(theGlobalVariables);
       break;
     case 8:
-      this->FindMultiplicitiesExtremaStep5(theGlobalVariables);
+//      this->FindMultiplicitiesExtremaStep4(theGlobalVariables);
+      break;
+    case 9:
+//      this->FindMultiplicitiesExtremaStep5(theGlobalVariables);
       break;
     default:
       break;
@@ -2866,7 +2871,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   this->theQPsSubstituted.WriteToFile(output, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
   theGlobalVariables.MakeReport();
-  this->theMultiplicities.WriteToFile(output, theGlobalVariables);
+  this->theMultiplicities.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
   this->theCoeffs.WriteToFile(output);
   this->theTranslations.WriteToFile(output, theGlobalVariables);
@@ -2877,7 +2882,8 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing param chamber complex... ";
   theGlobalVariables.MakeReport();
   this->projectivizedParamComplex.WriteToFile(output, theGlobalVariables);
-  this->projectivizedChamber.WriteToFile(output, theGlobalVariables);
+  this->projectivizedChamber.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->projectivezedChambersSplitByMultFreeWalls.WriteToFile(output, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing param chamber extrema subcones... ";
   theGlobalVariables.MakeReport();
   this->projectivizedExtremaCones.WriteToFile(output, theGlobalVariables);
@@ -2963,6 +2969,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   theGlobalVariables.MakeReport();
   this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables);
   this->projectivizedChamber.ReadFromFile(input, theGlobalVariables);
+  this->projectivezedChambersSplitByMultFreeWalls.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param chamber extrema subcones...";
   theGlobalVariables.MakeReport();
   this->projectivizedExtremaCones.ReadFromFile(input, theGlobalVariables);
@@ -2978,8 +2985,8 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
 }
 
 void ConeComplex::WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
-{ this->List<Cone>::WriteToFile(output, theGlobalVariables);
+  (std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimit)
+{ this->List<Cone>::WriteToFile(output, theGlobalVariables, UpperLimit);
   output << "IndexLowestNonRefined: " << this->indexLowestNonRefinedChamber << "\n";
   this->splittingNormals.WriteToFile(output);
 }
@@ -3503,20 +3510,68 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
   int tempI=0;
+  root tempRoot;
   theFormat.alphabet.TheObjects[tempI]="x_1"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="x_2"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="y_1"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="y_2"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="y_3"; tempI++;
   out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}\n\\begin{document}\\tiny\n";
+  out << "\n The chamber complex + multiplicities follow. \\begin{longtable}{cc} ";
+  out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
+  int numFoundChambers=0;
+  List<int> DisplayIndicesprojectivizedChambers;
+  for (int i=0; i<this->projectivizedChamber.size; i++)
+  { QuasiPolynomial& theMult=this->theMultiplicities.TheObjects[i];
+    if (!theMult.IsEqualToZero())
+    { numFoundChambers++;
+      out << "\\hline\\multicolumn{2}{c}{Chamber " << numFoundChambers << "}\\\\\n";
+      DisplayIndicesprojectivizedChambers.AddObjectOnTop(numFoundChambers);
+      out << this->PrepareReportOneCone(theFormat, this->projectivizedChamber.TheObjects[i], theGlobalVariables) << "&";
+      out << theMult.ElementToString(false, true, theFormat) << "\\\\\n";
+    } else
+      DisplayIndicesprojectivizedChambers.AddObjectOnTop(-1);
+  }
+  out << "\\end{longtable}\n\n\n Multiplicity free chambers \n";
+  numFoundChambers=0;
   out << "\n\\begin{longtable}{cc} ";
   out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-  { out << "\\hline\\multicolumn{2}{c}{Chamber " << i+1 << "}\\\\\n";
-    out << this->PrepareReportOneCone(theFormat, this->projectivizedChamber.TheObjects[i], theGlobalVariables) << "&";
-    out << this->theMultiplicities.TheObjects[i].ElementToString(false, true, theFormat) << "\\\\\n";
-
+  for (int i=0; i<this->projectivezedChambersSplitByMultFreeWalls.size; i++)
+  { tempRoot=this->projectivezedChambersSplitByMultFreeWalls.TheObjects[i].GetInternalPoint();
+    bool found=false;
+    for (int j=0; j<this->projectivizedChamber.size; j++)
+      if (this->projectivizedChamber.TheObjects[j].IsInCone(tempRoot))
+      { assert(!found);
+        found=true;
+      }
   }
+  for (int i=0; i<this->projectivizedChamber.size; i++)
+  { QuasiPolynomial& theMult=this->theMultiplicities.TheObjects[i];
+    if (!theMult.IsEqualToZero())
+    { int indexMultFreeChamber=-1;
+      for (int j=0; j<this->projectivezedChambersSplitByMultFreeWalls.size; j++)
+      { tempRoot=this->projectivezedChambersSplitByMultFreeWalls.TheObjects[j].GetInternalPoint();
+        if (this->projectivizedChamber.TheObjects[i].IsInCone(tempRoot))
+        { Rational tempRat;
+          tempRat=*tempRoot.LastObject();
+          if (tempRat!=0)
+            tempRoot/=tempRat;
+          theMult.valueOnEachLatticeShift.TheObjects[0].Evaluate(tempRoot, tempRat);
+          if(tempRat<1)
+          { indexMultFreeChamber=j;
+            break;
+          }
+        }
+      }
+      if (indexMultFreeChamber!=-1)
+      { numFoundChambers++;
+        out << "\\hline\\multicolumn{2}{c}{Chamber " << DisplayIndicesprojectivizedChambers.TheObjects[i] << "}\\\\\n";
+        out << this->PrepareReportOneCone(theFormat, this->projectivezedChambersSplitByMultFreeWalls.TheObjects[indexMultFreeChamber], theGlobalVariables) << "&";
+        out << theMult.ElementToString(false, true, theFormat) << "\\\\\n";
+      }
+    }
+  }
+  out << "Total number of chambers with multiplicity 1 or less: " << numFoundChambers;
   out << "\\end{longtable}\n\n\n\n";
   out << "\\end{document}";
   return out.str();
@@ -3592,3 +3647,45 @@ bool MatrixLargeRational::IsIdMatrix()const
            return false;
    return true;
 }
+
+void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
+(GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  this->projectivezedChambersSplitByMultFreeWalls.init();
+  ConeComplex tempComplex;
+  root theMultFreeWall;
+  for (int i=0; i<this->projectivizedChamber.size; i++)
+  { Cone& currentCone=this->projectivizedChamber.TheObjects[i];
+    tempComplex.init();
+    tempComplex.AddNonRefinedChamberOnTopNoRepetition(currentCone);
+    assert(tempComplex.size==1);
+    tempComplex.LastObject()->LowestIndexNotCheckedForSplitting=0;
+    QuasiPolynomial& theMult=this->theMultiplicities.TheObjects[i];
+    for (int j=0; j<theMult.valueOnEachLatticeShift.size; j++)
+    { PolynomialRationalCoeff& currentPoly= theMult.valueOnEachLatticeShift.TheObjects[j];
+      theMultFreeWall.MakeZero(theMult.GetNumVars()+1);
+      for (int k=0; k< currentPoly.size; k++)
+      { Monomial<Rational>& theMon=currentPoly.TheObjects[k];
+        if (theMon.IsAConstant())
+          *theMultFreeWall.LastObject()=theMon.Coefficient-1;
+        else
+        { int theIndex=0;
+          if(!theMon.IsOneLetterFirstDegree(theIndex))
+            assert(false);
+          theMultFreeWall.TheObjects[theIndex]=theMon.Coefficient;
+        }
+      }
+      tempComplex.splittingNormals.AddObjectOnTopHash(theMultFreeWall);
+      *theMultFreeWall.LastObject()+=1025;
+      tempComplex.splittingNormals.AddObjectOnTopHash(theMultFreeWall);
+    }
+    tempComplex.Refine(theGlobalVariables);
+    assert(tempComplex.size<=2);
+    this->projectivezedChambersSplitByMultFreeWalls.AddListOnTopNoRepetitionOfObjectHash(tempComplex);
+  }
+  out << this->projectivezedChambersSplitByMultFreeWalls.ElementToString(false, false);
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.MakeReport();
+}
+

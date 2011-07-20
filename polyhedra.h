@@ -579,9 +579,11 @@ public:
   int IndexOfObject(const Object& o) const;
   bool ContainsObject(const Object& o){ return this->IndexOfObject(o)!=-1; }
   bool ReadFromFile(std::fstream& input);
-  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes);
+  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables){return this->ReadFromFile(input, theGlobalVariables, -1);}
   void WriteToFile(std::fstream& output);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes);
 //  inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1; };
   int SizeWithoutObjects();
   inline Object* LastObject();
@@ -3322,9 +3324,12 @@ void List<Object>::WriteToFile(std::fstream& output)
 }
 
 template <class Object>
-void List<Object>::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output << "List_size: " << this->size << "\n";
-  for (int i=0; i<this->size; i++)
+void List<Object>::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes)
+{ int NumWritten=this->size;
+  if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<NumWritten)
+    NumWritten=UpperLimitForDebugPurposes;
+  output << "List_size: " << NumWritten << "\n";
+  for (int i=0; i<NumWritten; i++)
   { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
     output << "\n";
   }
@@ -3340,19 +3345,6 @@ bool List<Object>::ReadFromFile(std::fstream& input)
   this->SetSize(tempI);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ReadFromFile(input);
-  return true;
-}
-
-template <class Object>
-bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS; int tempI;
-  input >> tempS >> tempI;
-  assert(tempS=="List_size:");
-  if(tempS!="List_size:")
-    return false;
-  this->SetSize(tempI);
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
   return true;
 }
 
@@ -5651,6 +5643,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::IncreaseNumVariablesWithS
   }
   this->CopyFromPoly(Accum);
 }
+
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::Evaluate
 (const Vector<ElementOfCommutativeRingWithIdentity>& input, ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero)
@@ -6881,6 +6874,7 @@ public:
 //  bool ExtractLinearMapAndTranslationFromSub
 //  ()
  // ;
+  bool IsEqualToZero()const {return this->valueOnEachLatticeShift.size==0;}
   void Substitution
   (const MatrixLargeRational& mapFromNewSpaceToOldSpace, const root& inputTranslation,
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
@@ -9254,6 +9248,12 @@ public:
   std::string ElementToString(){return this->ElementToString(false, false);}
   std::string ElementToString(bool useLatex, bool useHtml);
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
+  int GetLowestIndexchamberContaining(const root& theRoot)const
+  { for (int i=0; i<this->size; i++)
+      if (this->TheObjects[i].IsInCone(theRoot))
+        return i;
+    return -1;
+  }
   bool findMaxLFOverConeProjective
   (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
   ;
@@ -9272,7 +9272,9 @@ public:
   void init(){this->splittingNormals.ClearTheObjects(); this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
   void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  (std::fstream& output, GlobalVariables& theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimit)
   ;
   bool ReadFromFile
   (std::fstream& input, GlobalVariables& theGlobalVariables)
@@ -9821,6 +9823,7 @@ class GlobalVariables
 private:
   FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
 public:
+  int ReadWriteRecursionDepth;
   roots rootsGeneralPurposeBuffer1;
   roots rootsGeneralPurposeBuffer2;
   roots rootsWallBasis;
@@ -10352,7 +10355,7 @@ public:
   List<List<QuasiPolynomial> > theQPsSubstituted;
   List<QuasiPolynomial> theMultiplicities;
   List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
-  int tempDebugCounter;
+  int UpperLimitChambersForDebugPurposes;
   List<Rational> theCoeffs;
   roots theTranslations;
   roots theTranslationsProjected;
@@ -10364,6 +10367,7 @@ public:
   List<List<Cone> > projectivizedExtremaCones;
   List<List<List<Cone> > > projectivizedExtremaEqualsOneCones;
   ConeComplex projectivizedChamber;
+  ConeComplex projectivezedChambersSplitByMultFreeWalls;
   std::stringstream log;
   Parser theParser;
   int computationPhase;
@@ -10374,7 +10378,7 @@ public:
   void IncrementComputation(GlobalVariables& theGlobalVariables);
   std::string PrepareReport(GlobalVariables& theGlobalVariables);
   GeneralizedVermaModuleCharacters()
-  { this->tempDebugCounter=1;
+  { this->UpperLimitChambersForDebugPurposes=33;
     this->computationPhase=0;
     this->NumProcessedConesParam=0;
     this->NumProcessedExtremaEqualOne=0;
@@ -10402,8 +10406,12 @@ public:
   void FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables);
   void FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables);
   void FindMultiplicitiesExtremaStep5(GlobalVariables& theGlobalVariables);
+  void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
   void ProcessExtremaOneChamber
   (Cone& input, List<Cone>& outputSubdivision, List<QuasiPolynomial>& theExtremaOutput, GlobalVariables& theGlobalVariables)
+  ;
+  void FindMultiplicitiesFree
+  (GlobalVariables& theGlobalVariables)
   ;
   void ProcessOneParametricChamber
   (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
@@ -10677,6 +10685,48 @@ void Vectors<CoefficientType>::SelectABasis
     if (currentRow==theDim)
       return;
   }
+}
+
+template <class Object>
+bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes)
+{ std::string tempS; int tempI;
+  input >> tempS >> tempI;
+  assert(tempS=="List_size:");
+  if(tempS!="List_size:")
+    return false;
+  theGlobalVariables.ReadWriteRecursionDepth++;
+  this->SetSize(tempI);
+  for (int i=0; i<this->size; i++)
+  { if (UpperLimitForDebugPurposes>0 && i>=UpperLimitForDebugPurposes)
+      break;
+    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+    if (this->size>30)
+    { std::stringstream report;
+      report << "Reading object number " << i+1 << " out of " << this->size;
+      switch(theGlobalVariables.ReadWriteRecursionDepth)
+      { case 1:
+          theGlobalVariables.theIndicatorVariables.ProgressReportString2=report.str();
+          theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
+          break;
+        case 2:
+          theGlobalVariables.theIndicatorVariables.ProgressReportString3=report.str();
+          theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+          break;
+        case 3:
+          theGlobalVariables.theIndicatorVariables.ProgressReportString4=report.str();
+          theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
+          break;
+        case 4:
+          theGlobalVariables.theIndicatorVariables.ProgressReportString5=report.str();
+          theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
+          break;
+        default: break;
+      }
+      theGlobalVariables.MakeReport();
+    }
+  }
+  theGlobalVariables.ReadWriteRecursionDepth--;
+  return true;
 }
 
 #endif

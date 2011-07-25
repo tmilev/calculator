@@ -120,8 +120,8 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
-  //civilizedInput=
-//  theParser.DefaultWeylLetter='A';
+  //civilizedInput="slTwoInSlN(3)";
+  //theParser.DefaultWeylLetter='A';
 //  civilizedInput="(0,1)";
 //  civilizedInput="Cone((1,0),(0,1), (1,1))";
 //  civilizedInput="(i(c))^2";
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
   theParser.outputFolderPath.append(inputPath);
   theParser.outputFolderPath.append("../htdocs/tmp/");
-  theParser.outputFolderDisplayPath="/htdocs/tmp/";
+  theParser.outputFolderDisplayPath="/tmp/";
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
     SSalgebraModule theModule;
@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 #endif
   std::cout.flush();
   std::cout << "</td>";
-  std::cout << " <td>"  << theParser.GetFunctionDescription() << "</td>\n<td>\n";
+  std::cout << " <td width=\"300\">" << theParser.GetFunctionDescription() << "</td>\n<td>\n";
   std::stringstream tempStream;
   inputPath.append("../htdocs/tmp/");
   std::stringstream tempStream2;
@@ -319,8 +319,8 @@ int main(int argc, char **argv)
     LatexCommands.AddObjectOnTop(latexCommandTemp);
   }
   std::cout << "<br>";
-  std::cout << "<button onclick=\"switchMenu('rootSystem');\"  >Root system</button>";
-  std::cout << "<button onclick=\"switchMenu('sourceDetails');\"  >C++ source</button>";
+  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
+  std::cout << "<button onclick=\"switchMenu('sourceDetails');\" >C++ source</button>";
   std::cout << "<button onclick=\"switchMenu('debugDetails');\">Debugging</button>";
   std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
   std::stringstream tempStream3;

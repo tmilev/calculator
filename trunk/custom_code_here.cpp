@@ -749,53 +749,42 @@ void CombinatorialChamberContainer::GetAffineWallImage
   }
 }
 
-void ParserNode::EvaluateWeylAction
-  (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
-{ if (this->children.size!=1)
-  { this->SetError(this->errorProgramming);
-    return;
+int ParserNode::EvaluateWeylAction
+  (ParserNode& theNode,
+   List<int>& theArgumentList, GlobalVariables& theGlobalVariables,
+   bool DualAction, bool useRho, bool useMinusRho)
+{ Vector<RationalFunction> theWeight;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  if (theArgumentList.size!=theWeyl.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  int theDim=theArgumentList.size;
+  int numVars=MathRoutines::Maximum(theDim, theNode.owner->NumVariables);
+  theWeight.SetSize(theArgumentList.size);
+  for (int i=0; i<theArgumentList.size; i++)
+  { theWeight.TheObjects[i]=theNode.owner->TheObjects[theArgumentList.TheObjects[i]].ratFunction.GetElement();
+    theWeight.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(numVars);
   }
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
-  Vector<RationalFunction> theWeight;
-  if (theHmm.theRange.GetRank()>1)
-  { if (!theArgument.ConvertChildrenToType(this->typeRationalFunction, theGlobalVariables)|| theHmm.theRange.GetRank()!=theArgument.children.size)
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    }
-    int theDimension=theArgument.children.size;
-    theWeight.SetSize(theDimension);
-    for (int i=0; i<theDimension; i++)
-    { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
-      theWeight.TheObjects[i]=current.ratFunction.GetElement();
-    }
-  } else
-    if (!theArgument.ConvertToType(this->typeRationalFunction, theGlobalVariables))
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    } else
-    { theWeight.SetSize(1);
-      theWeight.TheObjects[0]=theArgument.ratFunction.GetElement();
-    }
   std::stringstream out;
-  theHmm.theRange.theWeyl.ComputeWeylGroup(51840);
-  if (theHmm.theRange.theWeyl.size>=51840)
+  theWeyl.ComputeWeylGroup(51840);
+//  std::cout << theWeight.ElementToString();
+  if (theWeyl.size>=51840)
     out << "Only the first 51840 elements have been computed. <br> If you want a larger computation <br> please use the C++ code directly.";
-  out << "Number of elements: " << theHmm.theRange.theWeyl.size << "<br>";
+  out << "Number of elements: " << theWeyl.size << "<br>";
   Vector<RationalFunction> theOrbitElement;
   RationalFunction RFZero;
-  RFZero.Nullify(this->owner->NumVariables, &theGlobalVariables);
-  for (int i=0; i<theHmm.theRange.theWeyl.size; i++)
+  RFZero.Nullify(numVars, &theGlobalVariables);
+  for (int i=0; i<theWeyl.size; i++)
   { theOrbitElement=theWeight;
     if (!DualAction)
-      theHmm.theRange.theWeyl.ActOn<RationalFunction>(i, theOrbitElement, useRho, useMinusRho, RFZero);
+      theWeyl.ActOn<RationalFunction>(i, theOrbitElement, useRho, useMinusRho, RFZero);
     else
     {
     }
     out << theOrbitElement.ElementToString() << "<br>";
   }
-  this->outputString=out.str();
-  this->ExpressionType=this->typeString;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
 }
 
 void CombinatorialChamberContainer::SliceWithAWallInitSimple(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
@@ -3013,23 +3002,24 @@ void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
   output.Reduce();
 }
 
-int ParserNode::EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluatePrintRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  WeylGroup& theWeyl=this->owner->theHmm.theRange.theWeyl;
-  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">" << this->owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) << "</div>";
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">" << theNode.owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) << "</div>";
   Rational tempRat;
   MatrixLargeRational tempMat;
-  tempMat=  theWeyl.CartanSymmetric;
+  tempMat = theWeyl.CartanSymmetric;
   tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
   out  << "The determinant of the symmetric Cartan matrix is: " << tempRat.ElementToString();
   out << "<br>Root system:";
   for (int i=0; i<theWeyl.RootSystem.size; i++)
-  { root& current=this->owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
+  { root& current=theNode.owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
     out << "<br>" << current.ElementToString();
   }
-  this->outputString=out.str();
-  this->ExpressionType=this->typeString;
-  return this->errorNoError;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables)
@@ -3331,11 +3321,15 @@ int ParserFunction::CallMe
   (ParserNode& theNode, GlobalVariables& theGlobalVariables)
 { assert(this->theActualFunction!=0);
   List<int> argumentsIndices;
-  assert(theNode.children.size==1);
-  ParserNode& argumentNode=theNode.owner->TheObjects[theNode.children.TheObjects[0]];
-  if(this->theArguments.ConvertArguments(argumentNode, argumentsIndices, theGlobalVariables))
-    return this->theActualFunction(theNode, argumentsIndices, theGlobalVariables);
-  return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (theNode.Operation==Parser::tokenFunction)
+  { assert(theNode.children.size>0);
+    ParserNode& argumentNode=theNode.owner->TheObjects[theNode.children.TheObjects[0]];
+    if(!this->theArguments.ConvertArguments(argumentNode, argumentsIndices, theGlobalVariables))
+      return theNode.SetError(theNode.errorBadOrNoArgument);
+  } else
+  { assert(theNode.Operation==Parser::tokenFunctionNoArgument);
+  }
+  return this->theActualFunction(theNode, argumentsIndices, theGlobalVariables);
 }
 
 bool ParserFunction::MakeMe
@@ -3353,8 +3347,10 @@ std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgume
 { switch(theArgument)
   { case ParserNode::typeRational: return "Rational";
     case ParserNode::typeQuasiPolynomial: return "QP";
+    case ParserNode::typeIntegerOrIndex: return "Integer";
     case ParserNode::typePoly: return "Poly";
     case ParserNode::typeCone: return "Cone";
+    case ParserNode::typeRationalFunction: return "RF";
     case ParserNode::typeDots: return "...";
     case ParserNode::typeArray: return "";
     default: return "Error";
@@ -3371,6 +3367,10 @@ int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
     return ParserNode::typePoly;
   if (theArgument=="Cone")
     return ParserNode::typeCone;
+  if (theArgument=="Integer")
+    return ParserNode::typeIntegerOrIndex;
+  if (theArgument=="RF")
+    return ParserNode::typeRationalFunction;
   if (theArgument=="...")
     return ParserNode::typeDots;
   return -1;
@@ -3415,28 +3415,6 @@ bool ParserFunctionArgumentTree::MakeFromString
   return false;
 }
 
-void Parser::initFunctionList()
-{ if (this->flagFunctionListInitialized)
-    return;
-  this->flagFunctionListInitialized=true;
-  ParserFunction theFunction;
-
-  this->AddOneFunctionToDictionaryNoFail
-  ("EvaluateLPolyEqualsZeroOverCone",
-   "(Poly, Cone)",
-   "Finds the zeroes of linear polynomial over a cone. The cone is projective, i.e. the dimension of the cone must be one greater than the number of polynomial variables.",
-   "EvaluateLPolyEqualsZeroOverCone(x_1+x_2+2, Cone((1,0,3),(0,-1,0))) ",
-    & ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("Cone",
-   "((Rational,...),...)",
-   "A projective cone. The argument vectors describe the normals of the cone walls.",
-   "Cone((1,0),(0,1)) ",
-    & ParserNode::EvaluateCone
-   );
-}
-
 int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { ParserNode& polyNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
@@ -3460,6 +3438,8 @@ std::string ParserFunctionArgumentTree::ElementToString(bool useHtml, bool useLa
 { std::stringstream out;
   out << "(";
   int lowestIndexNonExplored=0;
+  if (this->functionArguments.size==0)
+    return "";
   for (int i=0; i<this->functionArguments.size; i++)
   { out << this->GetArgumentStringFromToken(this->functionArguments.TheObjects[i]);
     if (this->functionArguments.TheObjects[i]==ParserNode::typeArray)
@@ -3473,11 +3453,40 @@ std::string ParserFunctionArgumentTree::ElementToString(bool useHtml, bool useLa
   return out.str();
 }
 
+std::string CGIspecificRoutines::UnCivilizeStringCGI(const std::string& input)
+{ std::stringstream out;
+  for (unsigned int i=0; i<input.size(); i++)
+    switch (input[i])
+    { case ' ': out << "+"; break;
+      case '+': out << "%2B"; break;
+      case '(': out << "%28"; break;
+      case ')': out << "%29"; break;
+      case '[': out << "%5B"; break;
+      case ']': out << "%5D"; break;
+      case ',': out << "%2C"; break;
+      case '{': out << "%7B"; break;
+      case ';': out << "%3B"; break;
+      case '/': out << "%2F"; break;
+      case ':': out << "%3A"; break;
+      case '^': out << "%5E"; break;
+      case '\\': out << "%5C"; break;
+      case '}': out << "%7D"; break;
+      case '\n': out << "%0D%0A"; break;
+//      case '': out << ""; break;
+      default: out << input[i]; break;
+    }
+  return out.str();
+}
+
 std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
   out << this->functionName;
   out << this->theArguments.ElementToString(useHtml, useLatex);
-  out << "<br>Short description. " << this->functionDescription << "<br>Example. " << this->example;
+  out << "<button onclick=\"switchMenu('fun" << this->functionName << "');\">More info</button><div id=\"fun" << this->functionName
+        << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
+        << " textType=B&textDim=3&textInput="
+        << CGIspecificRoutines::UnCivilizeStringCGI(this->example)
+        << "\"> " << this->example << "</a></div>";
   return out.str();
 }
 
@@ -3689,3 +3698,53 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
   theGlobalVariables.MakeReport();
 }
 
+void Parser::initFunctionList()
+{ if (this->flagFunctionListInitialized)
+    return;
+  this->flagFunctionListInitialized=true;
+  ParserFunction theFunction;
+
+/*  this->AddOneFunctionToDictionaryNoFail
+  ("EvaluateLPolyEqualsZeroOverCone",
+   "(Poly, Cone)",
+   "<b> At the moment this function is experimental and causes program crash. Please don't use before this notice is removed.</b>Finds the zeroes of linear polynomial over a cone. The cone is projective, i.e. the dimension of the cone must be one greater than the number of polynomial variables.",
+   "EvaluateLPolyEqualsZeroOverCone(x_1+x_2+2, Cone((1,0,3),(0,-1,0))) ",
+    & ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
+   );*/
+  this->AddOneFunctionToDictionaryNoFail
+  ("Cone",
+   "((Rational,...),...)",
+   "A projective cone. The argument vectors describe the normals of the cone walls.",
+   "Cone((1,0),(0,1)) ",
+    & ParserNode::EvaluateCone
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("slTwoInSlN",
+   "(Integer,...)",
+   "Prints out sl(2) embedden in sl(N) according to the partition described by the arguments.",
+   "slTwoInSlN(2,3)",
+    & ParserNode::EvaluateSlTwoInSlN
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("WeylDim",
+   "(Rational,...)",
+   "Evaluates the Weyl dimension formula. Input: a vector in dual root coordinates.",
+   "WeylDim(0,0,1)",
+    & ParserNode::EvaluateWeylDimFormula
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("printRootSystem",
+   "()",
+   "Print the root system of the ambient Lie algebra.",
+   "printRootSystem",
+    & ParserNode::EvaluatePrintRootSystem
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("actByWeyl",
+   "(RF,...)",
+   "Act by the weyl group on a rational function (the i^th variable corresponds to the i^th coordinate in the simple basis). <br> Variables of index higher than the ambient dimension are treated as constants.",
+   "actByWeyl(x_1, 1, 1/2+x_2)",
+    & ParserNode::EvaluateWeylAction
+   );
+
+}

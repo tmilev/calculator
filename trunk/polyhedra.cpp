@@ -11792,7 +11792,7 @@ void WeylGroup::ElementToString(std::string& output)
   this->rho.ElementToString(tempS);
   out << "rho:" << tempS << "\n";
   this->RootSystem.ElementToString(tempS);
-  out<< "Root system:\n" << tempS << "\n";
+  out << "Root system:\n" << tempS << "\n";
   out << "Elements of the group:\n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS);
@@ -25342,6 +25342,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
     case Parser::tokenEmbedding: this->EvaluateEmbedding(theGlobalVariables); break;
     case Parser::tokenFunction: this->EvaluateFunction(theGlobalVariables); break;
+    case Parser::tokenFunctionNoArgument: this->EvaluateFunction(theGlobalVariables); break;
     case Parser::tokenArraY: this->ExpressionType=this->typeArray; break;
     case Parser::tokenMapsTo: this->EvaluateSubstitution(theGlobalVariables); break;
     case Parser::tokenColon: this->EvaluateApplySubstitution(theGlobalVariables); break;
@@ -26194,13 +26195,15 @@ void ParserNode::EvaluateOrder(GlobalVariables& theGlobalVariables)
   this->ExpressionType=this->typeUEElementOrdered;
 }
 
-void ParserNode::EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluatePrintDecomposition
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { SSalgebraModule theModule;
   std::stringstream out, out2;
-  theModule.InduceFromEmbedding(out2, this->owner->theHmm, theGlobalVariables);
+  theModule.InduceFromEmbedding(out2, theNode.owner->theHmm, theGlobalVariables);
   out << out2.str();
-  this->outputString=out.str();
-  this->ExpressionType=this->typeString;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
 }
 
 void ParserNode::EvaluatePrintWeyl(GlobalVariables& theGlobalVariables)
@@ -26286,27 +26289,19 @@ void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
   this->outputString=out.str();
 }
 
-void ParserNode::EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
-  bool tempBool=this->ExtractArgumentList(argumentList);
-  if (!tempBool || argumentList.size!=theHmm.theRange.GetRank())
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
+int ParserNode::EvaluateWeylDimFormula
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
   root theWeight;
-  int theDimension=argumentList.size;
+  int theDimension=theArgumentList.size;
+  if (theDimension!=theHmm.theRange.theWeyl.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
   theWeight.SetSize(theDimension);
   for (int i=0; i<theDimension ; i++)
-  { ParserNode& current= this->owner->TheObjects[argumentList.TheObjects[i]];
-    if (!current.ConvertToType(this->typeRational, theGlobalVariables))
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    }
-    theWeight.TheObjects[i]=current.rationalValue;
-  }
-  this->rationalValue= theHmm.theRange.theWeyl.WeylDimFormula(theWeight, theGlobalVariables);
-  this->ExpressionType=this->typeRational;
+    theWeight.TheObjects[i]= theNode.owner->TheObjects[theArgumentList.TheObjects[i]].rationalValue;
+  theNode.rationalValue= theHmm.theRange.theWeyl.WeylDimFormula(theWeight, theGlobalVariables);
+  theNode.ExpressionType=theNode.typeRational;
+  return theNode.errorNoError;
 }
 
 void ParserNode::EvaluateEigenOrdered(GlobalVariables& theGlobalVariables)
@@ -31220,7 +31215,7 @@ bool Parser::StackTopIsAVector(int& outputDimension)
 
 bool Parser::ReplaceDdotsDbyEdoTheArithmetic()
 { int numDigits=0;
-  for (int i= this->TokenStack.size-1; i>=0; i++)
+  for (int i= this->TokenStack.size-1; i>=0; i--)
     if(this->TokenStack.TheObjects[i]!=this->tokenDigit)
       break;
     else
@@ -31229,7 +31224,7 @@ bool Parser::ReplaceDdotsDbyEdoTheArithmetic()
   LargeInt LargeIntegerReader;
   LargeIntegerReader.MakeZero();
   for (int i=this->ValueStack.size-numDigits; i<this->ValueStack.size; i++)
-    LargeIntegerReader+=LargeIntegerReader*10+this->ValueStack.TheObjects[i];
+    LargeIntegerReader=LargeIntegerReader*10 + this->ValueStack.TheObjects[i];
   this->ExpandOnTopIncreaseStacks(this->tokenInteger, this->tokenExpression, 0);
   this->LastObject()->rationalValue=LargeIntegerReader;
   this->TransformRepeatXAtoA(numDigits);
@@ -33081,48 +33076,31 @@ std::string slTwoInSlN::PairTwoIndices
   return out.str();
 }
 
-void ParserNode::EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables)
-{ if (this->children.size!=1)
-  { this->SetError(this->errorProgramming);
-    return;
+int ParserNode::EvaluateSlTwoInSlN
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ List<int> thePartition;
+  thePartition.SetSize(theArgumentList.size);
+  for (int i=0; i<theArgumentList.size; i++)
+  { thePartition.TheObjects[i]=theNode.owner->TheObjects[theArgumentList.TheObjects[i]].intValue;
+//    std::cout<< thePartition.TheObjects[i] << ",";
   }
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  List<int> thePartition;
-  if (theArgument.ExpressionType==this->typeArray)
-  { if (!theArgument.ConvertChildrenToType(this->typeIntegerOrIndex, theGlobalVariables))
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    }
-    int theDimension=theArgument.children.size;
-    thePartition.SetSize(theDimension);
-    for (int i=0; i<theDimension; i++)
-    { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
-      thePartition.TheObjects[i]=current.intValue;
-    }
-  } else
-    if (!theArgument.ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
-    { this->SetError(this->errorBadOrNoArgument);
-      return;
-    } else
-    { thePartition.SetSize(1);
-      thePartition.TheObjects[0]=theArgument.intValue;
-    }
-    slTwoInSlN theSl2;
-
-    this->ExpressionType=this->typeString;
-    std::fstream outputFile;
-    std::string fileName;
-    fileName.append(this->owner->outputFolderPath);
-    fileName.append("output.tex");
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
-    outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false) << "\n\\end{document}";
-    std::stringstream out;
-    out << "A latex/pdf file: <a href=\"" << this->owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
-    out << ", <a href=\"" << this->owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
-    this->outputString=out.str();
-    std::stringstream theCommand;
-    theCommand << "pdflatex -output-directory=" << this->owner->outputFolderPath << "   " << fileName ;
-    this->owner->SystemCommands.AddObjectOnTop(theCommand.str());
+  slTwoInSlN theSl2;
+  theNode.ExpressionType=theNode.typeString;
+  std::fstream outputFile;
+  std::string fileName;
+  fileName.append(theNode.owner->outputFolderPath);
+  fileName.append("output.tex");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
+  outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false) << "\n\\end{document}";
+  std::stringstream out;
+  out << "A latex/pdf file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
+  out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
+  theNode.outputString=out.str();
+  std::stringstream theCommand;
+  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName ;
+  //std::cout << theCommand.str();
+  theNode.owner->SystemCommands.AddObjectOnTop(theCommand.str());
+  return theNode.errorNoError;
 }
 
 void RationalFunction::AddHonestRF

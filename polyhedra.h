@@ -1937,8 +1937,8 @@ public:
       return other.value< this->value;
     return false;
   }
-  inline LargeInt operator+(const LargeInt& other){LargeInt tempInt; tempInt.Assign(*this); tempInt.Add(other); return tempInt;}
-  inline LargeInt operator+(int x){LargeInt tempInt; tempInt.Assign(*this); tempInt.AddInt(x); return tempInt;}
+  inline LargeInt operator+(const LargeInt& other)const{LargeInt tempInt; tempInt.Assign(*this); tempInt.Add(other); return tempInt;}
+  inline LargeInt operator+(int x)const{LargeInt tempInt; tempInt.Assign(*this); tempInt.AddInt(x); return tempInt;}
   LargeInt operator*(int x){ LargeInt tempInt; tempInt.Assign(*this); tempInt.MultiplyByInt(x); return tempInt;}
   LargeInt operator/(int x)const;
   LargeInt operator/(LargeInt& x)const;
@@ -9139,6 +9139,7 @@ public:
   static int ReadDataFromCGIinput(std::string& inputBad, ComputationSetup& output, std::string& thePath);
   static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
   static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
+  static std::string UnCivilizeStringCGI(const std::string& input);
   static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
   static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
@@ -9370,12 +9371,21 @@ class ParserNode
   int EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
-  void EvaluateWeylAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, false, false);}
-  void EvaluateWeylRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, false);}
-  void EvaluateWeylMinusRhoAction(GlobalVariables& theGlobalVariables){ this->EvaluateWeylAction(theGlobalVariables, false, true, true);}
+
+  static int EvaluateWeylAction
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return theNode.EvaluateWeylAction(theNode, theArgumentList, theGlobalVariables, false, false, false);}
+  static int EvaluateWeylRhoAction
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return theNode.EvaluateWeylAction(theNode, theArgumentList, theGlobalVariables, false, true, false);}
+  static int EvaluateWeylMinusRhoAction
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return theNode.EvaluateWeylAction(theNode, theArgumentList,  theGlobalVariables, false, true, true);}
   static int EvaluateSolveLPolyEqualsZeroOverCone
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
   static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
+  static int EvaluateSlTwoInSlN(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
 
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
@@ -9384,21 +9394,29 @@ class ParserNode
   int EvaluatePartialFractions(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables);
   int EvaluateSplit(GlobalVariables& theGlobalVariables);
-  void EvaluateWeylAction
-  (GlobalVariables& theGlobalVariables, bool DualAction, bool useRho, bool useMinusRho)
+  static int EvaluateWeylAction
+  (ParserNode& theNode,
+   List<int>& theArgumentList, GlobalVariables& theGlobalVariables,
+   bool DualAction, bool useRho, bool useMinusRho)
   ;
   int EvaluatePlus(GlobalVariables& theGlobalVariables);
   void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
-  void EvaluateSlTwoInSlN(GlobalVariables& theGlobalVariables);
   void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
-  void EvaluateWeylDimFormula(GlobalVariables& theGlobalVariables);
+  static int  EvaluateWeylDimFormula
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
+
   void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintDecomposition(GlobalVariables& theGlobalVariables);
-  int EvaluatePrintRootSystem(GlobalVariables& theGlobalVariables);
+  static int EvaluatePrintDecomposition
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
+  static int EvaluatePrintRootSystem
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
   void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
@@ -9516,18 +9534,23 @@ public:
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); }
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
-  { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, tokenH, tokenC, tokenEmbedding, tokenVariable,
+  { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  //=8
+    tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,//=13
+    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, //=19
+    tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, //=23
+    tokenH, tokenC, tokenEmbedding, tokenVariable,
     tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
   };
   HashedList<ParserFunction> theFunctionList;
   enum functionList
-  { functionEigen, functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, functionWeylDimFormula, functionOuterAutos,
-    functionMod, functionInvariants, functionOrder, functionEmbedding, functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN,
-    functionActByWeyl, functionActByAffineWeyl, functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone,
-    functionLattice, functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit,
-    functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile, functionIntersectWithSubspace,
-    functionIntersectLatticeWithLatticePreimage, functionSubstitutionInQuasipolynomial, functionIntersectHyperplaneByACone,
+  { functionEigen, functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, //=5
+    functionWeylDimFormula, functionOuterAutos, functionMod, functionInvariants, functionOrder, functionEmbedding, //=11
+    functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN, functionActByWeyl, functionActByAffineWeyl, //=16
+    functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone, functionLattice, //21
+    functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit, //=26
+    functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile, //=30
+    functionIntersectWithSubspace, functionIntersectLatticeWithLatticePreimage, functionSubstitutionInQuasipolynomial, //=33
+    functionIntersectHyperplaneByACone,
   };
   List<int> TokenBuffer;
   List<int> ValueBuffer;
@@ -9573,7 +9596,7 @@ public:
   { return this->ReplaceTwoChildrenOperationToken(-3, -1, 5, theOperationToken, this->tokenExpression);
   }
   bool ReplaceXYXbyA()
-  { return this->ReplaceOneChildOperationOffset(-1, 3, this->tokenArraY, this->tokenArraY);
+  { return this->ReplaceOneChildOperationToken(-1, 3, this->tokenArraY, this->tokenArraY);
   }
   bool ReplaceEXEXbyE(int theOperation)
   { return this->ReplaceTwoChildrenOperationToken(-3, -1, 4, theOperation, this->tokenExpression);

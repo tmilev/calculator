@@ -10021,6 +10021,9 @@ bool partFraction::initFromRoots(partFractions& owner, roots& input)
   PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
   if (input.size==0)
     return false;
+  for(int i=0; i<input.size; i++)
+    if (!input.TheObjects[i].IsPositiveOrZero() || input.TheObjects[i].IsEqualToZero())
+      return false;
   int theDimension = input.TheObjects[0].size;
   ComputationalBufferCoefficient.MakeNVarConst((int)theDimension, (LargeInt) 1);
   this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
@@ -10038,7 +10041,7 @@ bool partFraction::initFromRoots(partFractions& owner, roots& input)
   }
   this->ComputeIndicesNonZeroMults();
   for (int i=0; i<input.size; i++)
-    for (int j=0; j<input.TheObjects[j].size; j++)
+    for (int j=0; j<input.TheObjects[i].size; j++)
       if (!input.TheObjects[i].TheObjects[j].IsSmallInteger())
         return false;
   return true;
@@ -30800,6 +30803,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeLattice: out << "A lattice."; break;
     case ParserNode::typeCone: out << "a cone with walls: "; break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
+    case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;
     default: out << "Expression type " << this->ExpressionType << "; the programmer(s) have forgotten to enter a type description. "; break;
   }
   if (stringValueOnly!="")

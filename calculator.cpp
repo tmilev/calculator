@@ -120,6 +120,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
+//  civilizedInput="PartialFraction(1,1,(0,1))";
   //civilizedInput="slTwoInSlN(3)";
   //theParser.DefaultWeylLetter='A';
 //  civilizedInput="(0,1)";

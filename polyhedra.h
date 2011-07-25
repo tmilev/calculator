@@ -9333,13 +9333,14 @@ class ParserNode
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
-  typeArray, typeQuasiPolynomial, typePartialFractions, typeFile, typeDots,
+  typeArray, typeQuasiPolynomial, typePartialFractions, //=17
+  typeFile, typeDots,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
   enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes,
   errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
-  errorWrongNumberOfArguments,//errorWrongNumberOfArguments=9
-  errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem,
+  errorWrongNumberOfArguments,//=9
+  errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem,//=14
   errorImplicitRequirementNotSatisfied, errorBadFileFormat };
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
@@ -9362,7 +9363,6 @@ class ParserNode
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   int EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables);
-  int EvaluateLattice(GlobalVariables& theGlobalVariables);
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
   int EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables);
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
@@ -9371,7 +9371,12 @@ class ParserNode
   int EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
-
+  bool ExtractRootsEqualDimNoConversionNoEmptyArgument
+(List<int>& theArgumentList, roots& output, int& outputDim)
+;
+  int EvaluateLattice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateWeylAction
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   { return theNode.EvaluateWeylAction(theNode, theArgumentList, theGlobalVariables, false, false, false);}
@@ -9391,9 +9396,7 @@ class ParserNode
   int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);
   int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
-  int EvaluatePartialFractions(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables);
-  int EvaluateSplit(GlobalVariables& theGlobalVariables);
   static int EvaluateWeylAction
   (ParserNode& theNode,
    List<int>& theArgumentList, GlobalVariables& theGlobalVariables,
@@ -9406,6 +9409,12 @@ class ParserNode
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
+  static int EvaluatePartialFractions
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
+  static int EvaluateSplit
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int  EvaluateWeylDimFormula
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;

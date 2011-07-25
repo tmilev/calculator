@@ -1689,33 +1689,43 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
   this->Reduce();
 }
 
-int ParserNode::EvaluateLattice(GlobalVariables& theGlobalVariables)
-{ List<int> theArgumentList;
-  this->ExtractArgumentList(theArgumentList);
-  if (theArgumentList.size<1)
-    return this->SetError(this->errorBadOrNoArgument);
-  int theDim=this->owner->TheObjects[theArgumentList.TheObjects[0]].children.size;
-  root currentRoot;
-  roots LatticeBase;
-  currentRoot.SetSize(theDim);
+bool ParserNode::ExtractRootsEqualDimNoConversionNoEmptyArgument
+(List<int>& theArgumentList, roots& output, int& outputDim)
+{ ParserNode& firstNode= this->owner->TheObjects[theArgumentList.TheObjects[0]];
+  output.SetSize(theArgumentList.size);
+  if (firstNode.ExpressionType!=this->typeArray)
+  { outputDim=1;
+    for (int i=0; i<theArgumentList.size; i++)
+    { ParserNode& currentNode=this->owner->TheObjects[theArgumentList.TheObjects[i]];
+      if (currentNode.ExpressionType!=this->typeRational)
+        return false;
+      output.TheObjects[i].SetSize(1);
+      output.TheObjects[i].TheObjects[0]=currentNode.rationalValue;
+    }
+    return true;
+  }
+  outputDim=firstNode.children.size;
   for (int i=0; i<theArgumentList.size; i++)
   { ParserNode& currentNode=this->owner->TheObjects[theArgumentList.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    if (currentNode.children.size!=theDim)
-      return this->SetError(this->errorDimensionProblem);
+    if (outputDim!=currentNode.children.size)
+      return false;
+    output.TheObjects[i].SetSize(outputDim);
     for (int j=0; j<currentNode.children.size; j++)
-    { ParserNode& currentCoord=this->owner->TheObjects[currentNode.children.TheObjects[j]];
-      if (!currentCoord.ConvertToType(this->typeRational, theGlobalVariables))
-        return this->SetError(this->errorConversionError);
-      currentRoot.TheObjects[j]=currentCoord.rationalValue;
-    }
-    LatticeBase.AddObjectOnTop(currentRoot);
+      output.TheObjects[i].TheObjects[j]=this->owner->TheObjects[currentNode.children.TheObjects[j]].rationalValue;
   }
-  this->theLattice.GetElement().MakeFromRoots(LatticeBase);
-  this->outputString=this->theLattice.GetElement().ElementToString();
-  this->ExpressionType=this->typeLattice;
-  return this->errorNoError;
+  return true;
+}
+
+int ParserNode::EvaluateLattice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ roots LatticeBase;
+  int theDim=-1;
+  if(!theNode.ExtractRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, LatticeBase, theDim))
+    return theNode.SetError(theNode.errorDimensionProblem);
+  theNode.theLattice.GetElement().MakeFromRoots(LatticeBase);
+  theNode.outputString=theNode.theLattice.GetElement().ElementToString();
+  theNode.ExpressionType=theNode.typeLattice;
+  return theNode.errorNoError;
 }
 
 void Lattice::MakeFromMat(const MatrixLargeRational& input)
@@ -2374,46 +2384,36 @@ void LargeInt::AssignString(const std::string& input)
       this->sign=-1;
 }
 
-int ParserNode::EvaluateSplit(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size!=1)
-    return this->SetError(this->errorBadOrNoArgument);
-  ParserNode& thePFNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  this->thePFs.GetElement()=thePFNode.thePFs.GetElement();
-  this->thePFs.GetElement().split(theGlobalVariables, 0);
+int ParserNode::EvaluateSplit
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ ParserNode& thePFNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
+  theNode.thePFs.GetElement()=thePFNode.thePFs.GetElement();
+  theNode.thePFs.GetElement().split(theGlobalVariables, 0);
   std::string tempS;
   std::stringstream out;
-  this->thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
+  theNode.thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
   out << "<div class=\"math\">" << tempS << "</div>";
-  this->outputString=out.str();
-  this->ExpressionType=this->typePartialFractions;
-  return this->errorNoError;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typePartialFractions;
+  return theNode.errorNoError;
 }
 
-int ParserNode::EvaluatePartialFractions(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size==0)
-    return this->SetError(this->errorBadOrNoArgument);
-  roots theVectors;
-  theVectors.SetSize(argumentList.size);
-  for (int i=0; i<argumentList.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
-    if (!currentNode.GetRootRational(theVectors.TheObjects[i], theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    if (theVectors.TheObjects[i].size!=theVectors.TheObjects[0].size)
-      return this->SetError(this->errorDimensionProblem);
-  }
-  if (!this->thePFs.GetElement().initFromRoots(theVectors, theGlobalVariables))
-    return this->SetError(this->errorImplicitRequirementNotSatisfied);
+int ParserNode::EvaluatePartialFractions
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ roots theVectors;
+  int theDim=-1;
+  if (!theNode.ExtractRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theVectors, theDim))
+    return theNode.SetError(theNode.errorDimensionProblem);
+  //std::cout << theVectors.ElementToString();
+  if (!theNode.thePFs.GetElement().initFromRoots(theVectors, theGlobalVariables))
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   std::string tempS;
   std::stringstream out;
-  this->thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
+  theNode.thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
   out << "<div class=\"math\">" << tempS << "</div>";
-  this->outputString=out.str();
-  this->ExpressionType=this->typePartialFractions;
-  return this->errorNoError;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typePartialFractions;
+  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables)
@@ -3351,6 +3351,7 @@ std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgume
     case ParserNode::typePoly: return "Poly";
     case ParserNode::typeCone: return "Cone";
     case ParserNode::typeRationalFunction: return "RF";
+    case ParserNode::typePartialFractions: return "PF";
     case ParserNode::typeDots: return "...";
     case ParserNode::typeArray: return "";
     default: return "Error";
@@ -3369,6 +3370,8 @@ int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
     return ParserNode::typeCone;
   if (theArgument=="Integer")
     return ParserNode::typeIntegerOrIndex;
+  if (theArgument=="PF")
+    return ParserNode::typePartialFractions;
   if (theArgument=="RF")
     return ParserNode::typeRationalFunction;
   if (theArgument=="...")
@@ -3746,5 +3749,18 @@ void Parser::initFunctionList()
    "actByWeyl(x_1, 1, 1/2+x_2)",
     & ParserNode::EvaluateWeylAction
    );
-
+  this->AddOneFunctionToDictionaryNoFail
+  ("PartialFraction",
+   "((Rational,...),...)",
+   "Gives the partial fraction corresponding to the vector partition function of the arguments.<br> The arguments must be non-zero vectors with non-negative integral coordinates.",
+   "PartialFraction((1,0), (0,1), (1,1))",
+    & ParserNode::EvaluatePartialFractions
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("split",
+   "(PF)",
+   "Splits a partial fraction according to this <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>, or a modification/improvement of it.",
+   "split(PartialFraction((1,0), (0,1), (1,1)))",
+    & ParserNode::EvaluateSplit
+   );
 }

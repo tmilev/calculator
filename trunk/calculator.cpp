@@ -120,6 +120,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
+  //civilizedInput="split(PartialFraction((1,0), (1,2), (1,-2)))";
 //  civilizedInput="PartialFraction(1,1,(0,1))";
   //civilizedInput="slTwoInSlN(3)";
   //theParser.DefaultWeylLetter='A';
@@ -253,7 +254,10 @@ int main(int argc, char **argv)
 
   std::string beginMath="<DIV class=\"math\" scale=\"50\">";
   std::string endMath ="</DIV>";
-  std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td></td><td>";
+  std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td><button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
+                  << "<a href=\"http://wwwmathlabo.univ-poitiers.fr/~maavl/LiE/form.html\"> LiE software online </a>"
+                 // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
+                  << "</div></td><td>";
   std::cout << " <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
   std::cout << "</td><tr valign=\"top\">\n<td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;

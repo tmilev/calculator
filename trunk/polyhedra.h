@@ -6667,7 +6667,7 @@ public:
   int GetTotalMultiplicity() const;
   void invert();
   void init();
-  static root CheckSumRoot;
+  static root GetCheckSumRoot(int NumVars);
   int HashFunction() const;
   void ComputeOneCheckSum(Rational& output, intRoot& theExp, int theDimension);
   bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
@@ -7095,6 +7095,7 @@ public:
   void PrepareIndicatorVariables();
   void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
   void IncreaseHighestIndex(int increment);
+  std::string ElementToString(GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, theGlobalVariables);  return tempS;}
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
   int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
@@ -9294,8 +9295,8 @@ class ParserNode
 { public:
   std::string DebugString;
   std::string outputString;
-  void ComputeDebugString(){ this->ElementToString(DebugString); }
-  void ElementToString(std::string& output);
+  void ComputeDebugString(GlobalVariables& theGlobalVariables){ this->ElementToString(DebugString, theGlobalVariables); }
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
   Parser* owner;
   int indexParentNode;
   int indexInOwner;
@@ -9344,10 +9345,10 @@ class ParserNode
   errorImplicitRequirementNotSatisfied, errorBadFileFormat };
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
-  std::string ElementToStringValueAndType(bool useHtml){return this->ElementToStringValueAndType(useHtml, 0, 3);}
-  std::string ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth);
-  std::string ElementToStringValueOnlY(bool useHtml){return this->ElementToStringValueOnlY(useHtml, 0,2);}
-  std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth);
+  std::string ElementToStringValueAndType(bool useHtml, GlobalVariables& theGlobalVariables){return this->ElementToStringValueAndType(useHtml, 0, 3, theGlobalVariables);}
+  std::string ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables);
+  std::string ElementToStringValueOnlY(bool useHtml, GlobalVariables& theGlobalVariables){return this->ElementToStringValueOnlY(useHtml, 0, 2, theGlobalVariables);}
+  std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables);
   std::string ElementToStringErrorCode(bool useHtml);
   void TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension);
   bool GetRootRational(root& output, GlobalVariables& theGlobalVariables);

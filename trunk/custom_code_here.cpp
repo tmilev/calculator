@@ -2389,11 +2389,11 @@ int ParserNode::EvaluateSplit
 { ParserNode& thePFNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
   theNode.thePFs.GetElement()=thePFNode.thePFs.GetElement();
   theNode.thePFs.GetElement().split(theGlobalVariables, 0);
-  std::string tempS;
-  std::stringstream out;
-  theNode.thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
-  out << "<div class=\"math\">" << tempS << "</div>";
-  theNode.outputString=out.str();
+//  std::string tempS;
+//  std::stringstream out;
+//  theNode.thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
+//  out << "<div class=\"math\">" << tempS << "</div>";
+//  theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typePartialFractions;
   return theNode.errorNoError;
 }
@@ -3485,7 +3485,7 @@ std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
   out << this->functionName;
   out << this->theArguments.ElementToString(useHtml, useLatex);
-  out << "<button onclick=\"switchMenu('fun" << this->functionName << "');\">More info</button><div id=\"fun" << this->functionName
+  out << "<button onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
         << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
         << " textType=B&textDim=3&textInput="
         << CGIspecificRoutines::UnCivilizeStringCGI(this->example)
@@ -3658,6 +3658,97 @@ bool MatrixLargeRational::IsIdMatrix()const
          if (!this->elements[i][j].IsEqualToZero())
            return false;
    return true;
+}
+
+root oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(int NumVars)
+{ root output;
+  output.SetSize(NumVars);
+  for (int i=0; i<NumVars; i++)
+    output.TheObjects[i]=i+2;
+  return output;
+}
+
+bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVariables, root* Indicator, int theIndex)
+{ if (!this->TheObjects[theIndex].rootIsInFractionCone(*this, Indicator, theGlobalVariables))
+    return false;
+  bool found=false;
+  for (int k=0; k < this->TheObjects[theIndex].IndicesNonZeroMults.size; k++)
+  { int currentIndex=this->TheObjects[theIndex].IndicesNonZeroMults.TheObjects[k];
+    oneFracWithMultiplicitiesAndElongations& currentFrac = this->TheObjects[theIndex].TheObjects[currentIndex];
+    if (currentFrac.Elongations.size>1)
+    { found=true;
+      break;
+    }
+  }
+  if (!found)
+    return false;
+  partFraction& thePF= theGlobalVariables.fracRemoveRedundantRootsBuffer1;
+  thePF.Assign(this->TheObjects[theIndex]);
+  this->PopIndexSwapLastHashAndAccount(theIndex, theGlobalVariables, Indicator);
+  Rational localStartCheckSum, localEndCheckSum;
+  std::string tempS, tempS1, tempS2;
+  Polynomial<LargeInt> ComputationalBufferCoefficient, tempIP;
+  PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded, tempPP;
+  ComputationalBufferCoefficient.AssignPolynomialLight(thePF.Coefficient);
+  thePF.CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded, this->AmbientDimension);
+  if (this->flagMakingProgressReport || this->flagAnErrorHasOccurredTimeToPanic)
+  { //thePF.ComputeDebugString(*this, theGlobalVariables);
+    //std::cout << thePF.DebugString;
+    thePF.ComputeOneCheckSum(*this, localStartCheckSum, this->AmbientDimension, theGlobalVariables);
+    localStartCheckSum.ElementToString(tempS2);
+  }
+  for (int k=0; k<thePF.IndicesNonZeroMults.size; k++)
+  { int currentIndex=thePF.IndicesNonZeroMults.TheObjects[k];
+    oneFracWithMultiplicitiesAndElongations& currentFrac = thePF.TheObjects[currentIndex];
+    int LCMElongations = currentFrac.GetLCMElongations();
+    this->RootsToIndices.TheObjects[currentIndex].ElementToString(tempS);
+    while (currentFrac.Elongations.size>1)
+    { for (int i=0; i<currentFrac.Elongations.size; i++)
+      { int ElongationValue=currentFrac.Elongations.TheObjects[i];
+        if (ElongationValue!=LCMElongations)
+        { int numSummands=LCMElongations/ElongationValue;
+          if (thePF.UncoveringBrackets)
+          { thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
+            tempIP.ComputeDebugString();
+            tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
+            tempIP.ComputeDebugString();
+            ComputationalBufferCoefficient.MultiplyBy(tempIP);
+          }
+          else
+          { PolyPartFractionNumerator tempP;
+            thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempP, this->AmbientDimension);
+            tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
+//            this->CoefficientNonExpanded.ComputeDebugString();
+            ComputationalBufferCoefficientNonExpanded.MultiplyBy(tempP);
+//            this->CoefficientNonExpanded.ComputeDebugString();
+          }
+          ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
+          currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i], LCMElongations);
+          currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i], ElongationValue);
+          thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+          thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
+          assert(localEndCheckSum.IsEqualTo(localStartCheckSum));
+        }
+      }
+    }
+    if (partFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic)
+    { thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+      thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
+      localEndCheckSum.ElementToString(tempS1);
+      assert(localStartCheckSum.IsEqualTo(localEndCheckSum));
+    }
+  }
+  thePF.CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
+  thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
+  int tempI = this->IndexOfObjectHash(thePF);
+  if (tempI==-1)
+    this->AddAlreadyReduced(thePF, theGlobalVariables, Indicator);
+  else
+  { this->AccountPartFractionInternals(-1, tempI, Indicator, theGlobalVariables);
+    this->TheObjects[tempI].AddReturnShouldAttemptReduction(thePF, *this, theGlobalVariables);
+    this->AccountPartFractionInternals(1, tempI, Indicator, theGlobalVariables);
+  }
+  return true;
 }
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree

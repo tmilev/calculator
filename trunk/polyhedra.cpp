@@ -596,7 +596,8 @@ void ComputationSetup::WriteReportToFile(DrawingVariables& TDV, std::fstream& th
   this->VPVectors.ElementToString(tempS);
   theFile << "\\title{" << this->WeylGroupLetter << (int)(this->WeylGroupIndex) << "}" << "\\maketitle ";
   this->thePartialFraction.theChambers.WriteReportToFile(TDV, this->VPVectors, theFile);
-  this->thePartialFraction.ElementToString(tempS, theGlobalVariables);
+  PolynomialOutputFormat theFormat;
+  this->thePartialFraction.ElementToString(tempS, theGlobalVariables, theFormat);
   theFile << "\n\n";
   theFile << tempS;
   theFile << "\n\n";
@@ -1069,7 +1070,8 @@ ComputationSetup::~ComputationSetup()
 
 void ComputationSetup::WriteToFilePFdecomposition(std::fstream& output, bool includeLatexHeaderAndFooter)
 { std::string tempS;
-  this->thePartialFraction.ElementToString(tempS, true, false, true, *this->theGlobalVariablesContainer->Default());
+  PolynomialOutputFormat tempFormat;
+  this->thePartialFraction.ElementToString(tempS, true, false, true, *this->theGlobalVariablesContainer->Default(), tempFormat);
   if (includeLatexHeaderAndFooter)
     output << "\\documentclass{article}\n\\begin{document}" << tempS << "\n\\end{document}";
 }
@@ -1338,8 +1340,9 @@ void ComputationSetup::Run()
       tempRoots.AssignRoots(this->VPVectors);
       if (!this->flagPartialFractionSplitPrecomputed)
       { this->thePartialFraction.initFromRootSystem(tempRoots, tempRoots, 0, *this->theGlobalVariablesContainer->Default());
+        PolynomialOutputFormat tempFormat;
         if (this->flagHavingStartingExpression)
-          this->thePartialFraction.ElementToString(BeginString, *this->theGlobalVariablesContainer->Default());
+          this->thePartialFraction.ElementToString(BeginString, *this->theGlobalVariablesContainer->Default(), tempFormat);
         if (this->IndexChamberOfInterest!=-1)
         { roots tempRoots;
           tempRoots.AssignHashedIntRoots(this->thePartialFraction.RootsToIndices);
@@ -8627,7 +8630,7 @@ bool partFraction::reduceOnceGeneralMethod(partFractions& Accum, GlobalVariables
   //  { tempMat.ComputeDebugString();
   //  }
   //  tempMat.ComputeDebugString();
-    if ( ShouldDecompose && (this->LastDistinguishedIndex!=-1 || this->LastDistinguishedIndex==Accum.RootsToIndices.size))
+    if (ShouldDecompose && (this->LastDistinguishedIndex!=-1 || this->LastDistinguishedIndex==Accum.RootsToIndices.size))
     { if (IndexInLinRelationOfLastGainingMultiplicityIndex==-1)
         ShouldDecompose=false;
       else
@@ -8705,9 +8708,8 @@ void partFraction::AssignNoIndicesNonZeroMults(partFraction& p)
   this->CoefficientNonExpanded.AssignPolyPartFractionNumeratorLight(p.CoefficientNonExpanded);
 }
 
-int partFraction::ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
+int partFraction::ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& PolyFormatLocal)
 { MatrixIntTightMemoryFit tempMat;
-  PolynomialOutputFormat PolyFormatLocal;
   return this->ElementToStringBasisChange(owner, tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, PolyFormatLocal, theGlobalVariables);
 }
 
@@ -9750,7 +9752,8 @@ bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, root* Indi
     this->IndexCurrentlyProcessed= this->IndexLowestNonProcessed;
     if (!this->ShouldIgnore(theGlobalVariables, Indicator))
     { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      { this->ElementToString(OldDebugString, theGlobalVariables);
+      { PolynomialOutputFormat tempFormat;
+        this->ElementToString(OldDebugString, theGlobalVariables, tempFormat);
       //  ProblemCounter++;
       //  if (ProblemCounter==14)
       //    Stop();
@@ -9991,7 +9994,8 @@ partFractions::partFractions()
 }
 
 void partFraction::ComputeDebugString(partFractions& owner, GlobalVariables& theGlobalVariables)
-{ this->ElementToString(owner, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
+{ PolynomialOutputFormat tempFormat;
+  this->ElementToString(owner, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
 }
 
 void partFractions::PopIndexSwapLastHashAndAccount(int index, GlobalVariables& theGlobalVariables, root* Indicator)
@@ -10272,9 +10276,9 @@ void partFractions::AddAlreadyReduced(partFraction& f, GlobalVariables& theGloba
   }
 }
 
-int partFractions::ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
+int partFractions::ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { MatrixIntTightMemoryFit tempMat;
-  return this->ElementToStringBasisChange (tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
+  return this->ElementToStringBasisChange(tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables, theFormat);
 }
 
 int partFractions::ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables)
@@ -10282,11 +10286,12 @@ int partFractions::ElementToStringOutputToFile(std::fstream& output, bool LatexF
   return this->ElementToStringBasisChangeOutputToFile(tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables);
 }
 
-int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables )
+int partFractions::ElementToStringBasisChange
+(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat,
+ bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& PolyFormatLocal)
 { std::stringstream out;
   std::string tempS;
   int TotalLines=0;
-  PolynomialOutputFormat PolyFormatLocal;
   PolyFormatLocal.ExtraLinesCounterLatex=0;
   if (LatexFormat)
     out << "\\begin{eqnarray*}\n";
@@ -10682,19 +10687,22 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomia
 }
 
 void partFractions::ComputeDebugString(GlobalVariables& theGlobalVariables)
-{ this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
+{ PolynomialOutputFormat tempFormat;
+  this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
 }
 
-void partFractions::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
-{ this->ElementToString(output, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
+void partFractions::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+{ this->ElementToString(output, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables)
-{ this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, false, theGlobalVariables);
+{ PolynomialOutputFormat theFormat;
+  this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, false, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables)
-{ this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, true, true, theGlobalVariables);
+{ PolynomialOutputFormat theFormat;
+  this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, true, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
@@ -10791,7 +10799,8 @@ void partFractions::ComputeSupport(List<roots>& output, std::stringstream& outpu
 }
 
 void partFractions::ComputeDebugStringBasisChange(MatrixIntTightMemoryFit& VarChange, GlobalVariables& theGlobalVariables)
-{ this->ElementToStringBasisChange( VarChange, true, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables);
+{ PolynomialOutputFormat tempFormat;
+  this->ElementToStringBasisChange(VarChange, true, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
 }
 
 void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomialOld& output, root* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables)
@@ -30665,6 +30674,8 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SetNumVariables(int ne
 std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables)
 { std::stringstream LatexOutput;
   PolynomialOutputFormat PolyFormatLocal;
+//  PolyFormatLocal.alphabet.TheObjects[0]="z";
+//  PolyFormatLocal.alphabet.TheObjects[1]="x";
   int i;
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: LatexOutput << this->intValue; break;
@@ -30674,7 +30685,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeUEElementOrdered: LatexOutput << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal); break;
     case ParserNode::typeUEelement: LatexOutput << this->UEElement.GetElement().ElementToString(); break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
-    case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables); break;
+    case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, PolyFormatLocal); break;
     //case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
    // case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(); break;
     case ParserNode::typeArray:

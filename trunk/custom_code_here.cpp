@@ -1390,14 +1390,9 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
 int ParserNode::EvaluateCone
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { roots theNormals;
-  theNormals.SetSize(theArgumentList.size);
-  for (int i=0; i<theArgumentList.size; i++)
-  { ParserNode& currentNode = theNode.owner->TheObjects[theArgumentList.TheObjects[i]];
-    if (!currentNode.GetRootRational(theNormals.TheObjects[i], theGlobalVariables))
-      return theNode.SetError(theNode.errorDimensionProblem);
-    if (theNormals.TheObjects[i].size!=theNormals.TheObjects[0].size)
-      return theNode.SetError(theNode.errorDimensionProblem);
-  }
+  int theDim;
+  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theNormals, theDim))
+    return theNode.SetError(theNode.errorDimensionProblem);
   Cone& currentCone=theNode.theCone.GetElement();
   currentCone.CreateFromNormals(theNormals, theGlobalVariables);
   theNode.outputString=currentCone.ElementToString(false, true);
@@ -1689,7 +1684,7 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
   this->Reduce();
 }
 
-bool ParserNode::ExtractRootsEqualDimNoConversionNoEmptyArgument
+bool ParserNode::GetRootsEqualDimNoConversionNoEmptyArgument
 (List<int>& theArgumentList, roots& output, int& outputDim)
 { ParserNode& firstNode= this->owner->TheObjects[theArgumentList.TheObjects[0]];
   output.SetSize(theArgumentList.size);
@@ -1720,7 +1715,7 @@ int ParserNode::EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { roots LatticeBase;
   int theDim=-1;
-  if(!theNode.ExtractRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, LatticeBase, theDim))
+  if(!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, LatticeBase, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
   theNode.theLattice.GetElement().MakeFromRoots(LatticeBase);
   theNode.outputString=theNode.theLattice.GetElement().ElementToString();
@@ -2402,44 +2397,42 @@ int ParserNode::EvaluatePartialFractions
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { roots theVectors;
   int theDim=-1;
-  if (!theNode.ExtractRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theVectors, theDim))
+  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theVectors, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
   //std::cout << theVectors.ElementToString();
   if (!theNode.thePFs.GetElement().initFromRoots(theVectors, theGlobalVariables))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   std::string tempS;
   std::stringstream out;
-  theNode.thePFs.GetElement().ElementToString(tempS, theGlobalVariables);
+  PolynomialOutputFormat theFormat;
+  theNode.thePFs.GetElement().ElementToString(tempS, theGlobalVariables, theFormat);
   out << "<div class=\"math\">" << tempS << "</div>";
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typePartialFractions;
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size!=2)
-    return this->SetError(this->errorBadOrNoArgument);
-  ParserNode& PFNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  ParserNode& IndicatorNode=this->owner->TheObjects[argumentList.TheObjects[1]];
-  if (!PFNode.ConvertToType(this->typePartialFractions, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  root theIndicator;
-  if (!IndicatorNode.GetRootRational(theIndicator, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  partFractions& currentPF=PFNode.thePFs.GetElement();
-  QuasiPolynomial& currentQP=this->theQP.GetElement();
+int ParserNode::EvaluateVectorPFIndicator
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ partFractions& currentPF=theNode.thePFs.GetElement();
+  roots toBePartitioned; int tempDim;
+  theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim);
+  currentPF.DoTheFullComputation(theGlobalVariables, toBePartitioned);
   std::stringstream out;
-  std::string startingPFString, splitPFString ;
-  currentPF.ElementToString(startingPFString, theGlobalVariables);
-  currentPF.split(theGlobalVariables, 0);
-  currentPF.ElementToString(splitPFString, theGlobalVariables);
-  currentPF.GetVectorPartitionFunction(currentQP, theIndicator, theGlobalVariables);
-  this->ExpressionType=this->typeQuasiPolynomial;
-  out << currentQP.ElementToString(true, false) << "<br><div class=\"math\">" << startingPFString << "</div>=<div class=\"math\">" << splitPFString << " </div>";
-  this->outputString=out.str();
-  return this->errorNoError;
+  std::string startingPFString, splitPFString, tempS;
+  QuasiPolynomial currentQP;
+  PolynomialOutputFormat theFormat;
+  for (int i=0; i<currentPF.theChambers.size; i++)
+    if (currentPF.theChambers.TheObjects[i]!=0)
+    { CombinatorialChamber& currentChamber=*currentPF.theChambers.TheObjects[i];
+      currentPF.GetVectorPartitionFunction(currentQP, currentChamber.InternalPoint, theGlobalVariables);
+      currentChamber.ElementToInequalitiesString(tempS, currentPF.theChambers, false, true, theFormat);
+      out << "Chamber: " <<  tempS;
+      out << "Quasipolynomial: " << currentQP.ElementToString(true, false, theFormat) << "<br>";
+    }
+  theNode.ExpressionType=theNode.typeString;
+  theNode.outputString=out.str();
+  return theNode.errorNoError;
 }
 
 void QuasiPolynomial::AddLatticeShift(const PolynomialRationalCoeff& input, const root& inputShift)
@@ -3854,4 +3847,12 @@ void Parser::initFunctionList()
    "split(PartialFraction((1,0), (0,1), (1,1)))",
     & ParserNode::EvaluateSplit
    );
+  this->AddOneFunctionToDictionaryNoFail
+  ("vpf",
+   "((Rational,...),...)",
+   "Computes the vector partition function with respect to the input vectors, according to this <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>.",
+   "vpf((1,0), (0,1), (1,1))",
+    & ParserNode::EvaluateVectorPFIndicator
+   );
+
 }

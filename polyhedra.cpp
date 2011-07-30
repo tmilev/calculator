@@ -288,7 +288,6 @@ int RankGlobal;
 //DrawingVariables TDV(200, 400);
 bool QuasiNumber::flagAnErrorHasOccurredTimeToPanic=false;
 bool IntegerPoly::flagAnErrorHasOccurredTimeToPanic=false;
-root oneFracWithMultiplicitiesAndElongations::CheckSumRoot;
 bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
 
@@ -8549,87 +8548,6 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(partFractions& o
   return result;
 }
 
-bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVariables, root* Indicator, int theIndex)
-{ if (!this->TheObjects[theIndex].rootIsInFractionCone(*this, Indicator, theGlobalVariables))
-    return false;
-  bool found=false;
-  for (int k=0; k < this->TheObjects[theIndex].IndicesNonZeroMults.size; k++)
-  { int currentIndex=this->TheObjects[theIndex].IndicesNonZeroMults.TheObjects[k];
-    oneFracWithMultiplicitiesAndElongations& currentFrac = this->TheObjects[theIndex].TheObjects[currentIndex];
-    if (currentFrac.Elongations.size>1)
-    { found=true;
-      break;
-    }
-  }
-  if (!found)
-    return false;
-  partFraction& thePF= theGlobalVariables.fracRemoveRedundantRootsBuffer1;
-  thePF.Assign(this->TheObjects[theIndex]);
-  this->PopIndexSwapLastHashAndAccount(theIndex, theGlobalVariables, Indicator);
-  Rational localStartCheckSum, localEndCheckSum;
-  std::string tempS, tempS1, tempS2;
-  Polynomial<LargeInt> ComputationalBufferCoefficient, tempIP;
-  PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded, tempPP;
-  ComputationalBufferCoefficient.AssignPolynomialLight(thePF.Coefficient);
-  thePF.CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded, this->AmbientDimension);
-  if (this->flagMakingProgressReport || this->flagAnErrorHasOccurredTimeToPanic)
-  { thePF.ComputeOneCheckSum(*this, localStartCheckSum, this->AmbientDimension, theGlobalVariables);
-    localStartCheckSum.ElementToString(tempS2);
-  }
-  for (int k=0; k<thePF.IndicesNonZeroMults.size; k++)
-  { int currentIndex=thePF.IndicesNonZeroMults.TheObjects[k];
-    oneFracWithMultiplicitiesAndElongations& currentFrac = thePF.TheObjects[currentIndex];
-    int LCMElongations = currentFrac.GetLCMElongations();
-    this->RootsToIndices.TheObjects[currentIndex].ElementToString(tempS);
-    while (currentFrac.Elongations.size>1)
-    { for (int i=0; i<currentFrac.Elongations.size; i++)
-      { int ElongationValue=currentFrac.Elongations.TheObjects[i];
-        if (ElongationValue!=LCMElongations)
-        { int numSummands=LCMElongations/ElongationValue;
-          if (thePF.UncoveringBrackets)
-          { thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
-            tempIP.ComputeDebugString();
-            tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
-            tempIP.ComputeDebugString();
-            ComputationalBufferCoefficient.MultiplyBy(tempIP);
-          }
-          else
-          { PolyPartFractionNumerator tempP;
-            thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempP, this->AmbientDimension);
-            tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
-//            this->CoefficientNonExpanded.ComputeDebugString();
-            ComputationalBufferCoefficientNonExpanded.MultiplyBy(tempP);
-//            this->CoefficientNonExpanded.ComputeDebugString();
-          }
-          ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
-          currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i], LCMElongations);
-          currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i], ElongationValue);
-          thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-          thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
-          assert(localEndCheckSum.IsEqualTo(localStartCheckSum));
-        }
-      }
-    }
-    if (partFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic)
-    { thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-      thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
-      localEndCheckSum.ElementToString(tempS1);
-      assert(localStartCheckSum.IsEqualTo(localEndCheckSum));
-    }
-  }
-  thePF.CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
-  thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-  int tempI = this->IndexOfObjectHash(thePF);
-  if (tempI==-1)
-    this->AddAlreadyReduced(thePF, theGlobalVariables, Indicator);
-  else
-  { this->AccountPartFractionInternals(-1, tempI, Indicator, theGlobalVariables);
-    this->TheObjects[tempI].AddReturnShouldAttemptReduction(thePF, *this, theGlobalVariables);
-    this->AccountPartFractionInternals(1, tempI, Indicator, theGlobalVariables);
-  }
-  return true;
-}
-
 bool partFraction::reduceOnceTotalOrderMethod(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
 { for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { for (int j=0; j<this->IndicesNonZeroMults.size; j++)
@@ -8854,7 +8772,8 @@ void partFraction::ComputeOneCheckSum(partFractions& owner, Rational& output, in
   }
   Polynomial<LargeInt> ComputationalBufferCoefficient;
   ComputationalBufferCoefficient.AssignPolynomialLight(this->Coefficient);
-  this->EvaluateIntPoly(ComputationalBufferCoefficient, oneFracWithMultiplicitiesAndElongations::CheckSumRoot, output);
+  root CheckSumRoot=oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(owner.AmbientDimension);
+  this->EvaluateIntPoly(ComputationalBufferCoefficient, CheckSumRoot, output);
   std::string tempS;
   if (this->flagAnErrorHasOccurredTimeToPanic && Rational::flagAnErrorHasOccurredTimeToPanic)
   { output.ElementToString(tempS);
@@ -9741,19 +9660,6 @@ void partFractions::PrepareCheckSums(GlobalVariables& theGlobalVariables)
 //  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.MultiplyByInteger(3);
   if (!this->flagUsingCheckSum)
     return;
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.SetSize(12);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[0].AssignNumeratorAndDenominator(1, 2);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[1].AssignNumeratorAndDenominator(2, 3);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[2].AssignNumeratorAndDenominator(3, 4);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[3].AssignNumeratorAndDenominator(4, 5);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[4].AssignNumeratorAndDenominator(11, 13);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[5].AssignNumeratorAndDenominator(13, 17);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[6].AssignNumeratorAndDenominator(17, 19);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[7].AssignNumeratorAndDenominator(19, 23);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[8].AssignNumeratorAndDenominator(23, 29);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[9].AssignNumeratorAndDenominator(31, 37);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[10].AssignNumeratorAndDenominator(37, 41);
-  ::oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[11].AssignNumeratorAndDenominator(41, 43);
   this->ComputeOneCheckSum(this->StartCheckSum, theGlobalVariables);
 }
 
@@ -9929,6 +9835,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
   }
   if (this->splitPartial(theGlobalVariables, Indicator))
   { //this->ComputeDebugString();
+//    this->CompareCheckSums(theGlobalVariables);
     this->RemoveRedundantShortRoots(theGlobalVariables, Indicator);
     //this->ComputeDebugString();
     this->UncoverBracketsNumerators(theGlobalVariables, Indicator);
@@ -10021,8 +9928,9 @@ bool partFraction::initFromRoots(partFractions& owner, roots& input)
   PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
   if (input.size==0)
     return false;
+
   for(int i=0; i<input.size; i++)
-    if (!input.TheObjects[i].IsPositiveOrZero() || input.TheObjects[i].IsEqualToZero())
+    if (input.TheObjects[i].IsEqualToZero())
       return false;
   int theDimension = input.TheObjects[0].size;
   ComputationalBufferCoefficient.MakeNVarConst((int)theDimension, (LargeInt) 1);
@@ -10381,7 +10289,7 @@ int partFractions::ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange
   PolynomialOutputFormat PolyFormatLocal;
   PolyFormatLocal.ExtraLinesCounterLatex=0;
   if (LatexFormat)
-  { out << "\\begin{eqnarray*}\n"; }
+    out << "\\begin{eqnarray*}\n";
   int LastCutOff=0;
   for (int i=0; i<this->size; i++)
   { if (this->TheObjects[i].Coefficient.size>0 )
@@ -11050,6 +10958,7 @@ void oneFracWithMultiplicitiesAndElongations::init()
 void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& output, intRoot& theExp, int theDimension)
 { output.Assign(LROne);
   std::string tempS;
+  root CheckSumRoot=oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(theDimension);
   for (int i=0; i<this->Elongations.size; i++)
   { Rational tempRat, tempRat2, tempRat3;
     tempRat.Assign(LROne);
@@ -11058,7 +10967,7 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& outpu
     { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
       { theExp.ElementToString(tempS);
       }
-      tempRat3.Assign(oneFracWithMultiplicitiesAndElongations::CheckSumRoot.TheObjects[j]);
+      tempRat3.Assign(CheckSumRoot.TheObjects[j]);
       if (!tempRat3.IsEqualToZero())
         tempRat3.RaiseToPower(theExp.TheObjects[j]*this->Elongations.TheObjects[i]);
       tempRat2.MultiplyBy(tempRat3);
@@ -25087,7 +24996,7 @@ std::string Parser::ParseEvaluateAndSimplifyPart2(const std::string& input, Glob
   if(!this->theValue.UEElement.IsZeroPointer())
     this->theValue.UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
   std::stringstream out;
-  out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueAndType(true);
+  out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueAndType(true, theGlobalVariables);
   return out.str();
 }
 
@@ -25847,14 +25756,14 @@ void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables&
   if (useHtml)
     out << "<br>";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS);
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables);
     out << " Index: " << i << " " << tempS << ";\n";
     if (useHtml)
       out << "<br>";
   }
   if (useHtml)
     out << "<br><br>";
-  out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false);
+  out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false, theGlobalVariables);
 
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 //  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
@@ -25949,7 +25858,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
   return out.str();
 }
 
-void ParserNode::ElementToString(std::string& output)
+void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   owner->TokenToStringStream(out, this->Operation);
   if (this->children.size>0)
@@ -25958,7 +25867,7 @@ void ParserNode::ElementToString(std::string& output)
       out << this->children.TheObjects[i] << ", ";
   }
   PolynomialOutputFormat PolyFormatLocal;
-  out << this->ElementToStringValueAndType(false);
+  out << this->ElementToStringValueAndType(false, theGlobalVariables);
   output=out.str();
 }
 
@@ -30753,7 +30662,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SetNumVariables(int ne
     this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
 }
 
-std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth)
+std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables)
 { std::stringstream LatexOutput;
   PolynomialOutputFormat PolyFormatLocal;
   int i;
@@ -30765,6 +30674,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeUEElementOrdered: LatexOutput << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal); break;
     case ParserNode::typeUEelement: LatexOutput << this->UEElement.GetElement().ElementToString(); break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
+    case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables); break;
     //case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
    // case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(); break;
     case ParserNode::typeArray:
@@ -30772,7 +30682,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
       RecursionDepth++;
       if (RecursionDepth<=maxRecursionDepth)
         for (i=0; i<this->children.size; i++)
-        { LatexOutput << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth);
+        { LatexOutput << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables);
           if (i!=this->children.size-1)
             LatexOutput << ",";
         }
@@ -30785,10 +30695,10 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
   return LatexOutput.str();
 }
 
-std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth)
+std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   PolynomialOutputFormat PolyFormatLocal;
-  std::string stringValueOnly= this->ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth);
+  std::string stringValueOnly= this->ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables);
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex:  out << " an integer of value: "; break;
     case ParserNode::typeRational: out << " a rational number of value: "; break;
@@ -30827,7 +30737,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     RecursionDepth++;
     if (RecursionDepth<=maxRecursionDepth)
       for (int i=0; i<this->children.size; i++)
-        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueAndType(useHtml, RecursionDepth, maxRecursionDepth);
+        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueAndType(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables);
   }
   return out.str();
 }

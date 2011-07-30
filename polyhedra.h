@@ -6926,12 +6926,12 @@ public:
   bool RemoveRedundantShortRootsClassicalRootSystem(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
   bool RemoveRedundantShortRoots(partFractions& owner, root* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
-  static  bool flagAnErrorHasOccurredTimeToPanic;
+  static bool flagAnErrorHasOccurredTimeToPanic;
 //  static  bool flagUsingPrecomputedOrlikSolomonBases;
-  static  bool UncoveringBrackets;
-  static  std::fstream TheBigDump;
-  static  bool UseGlobalCollector;
-  static  bool MakingConsistencyCheck;
+  static bool UncoveringBrackets;
+  static std::fstream TheBigDump;
+  static bool UseGlobalCollector;
+  static bool MakingConsistencyCheck;
   static Rational CheckSum, CheckSum2;
   static intRoot theVectorToBePartitioned;
   static ListPointers<partFraction> GlobalCollectorPartFraction;
@@ -7014,7 +7014,11 @@ public:
   void operator=(const partFraction& right);
   void initFromRootSystem(partFractions& owner, intRoots& theFraction, intRoots& theAlgorithmBasis, intRoot* weights);
   bool initFromRoots(partFractions& owner, roots& input);
-  int ElementToString(partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+  int ElementToString
+  (partFractions& owner, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
+   GlobalVariables& theGlobalVariables,
+   PolynomialOutputFormat& PolyFormatLocal)
+   ;
   int ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables);
   void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables&  theGlobalVariables, int theDimension);
   void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
@@ -7095,10 +7099,16 @@ public:
   void PrepareIndicatorVariables();
   void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
   void IncreaseHighestIndex(int increment);
-  std::string ElementToString(GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, theGlobalVariables);  return tempS;}
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
-  int ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-  int ElementToStringBasisChange(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat){std::string tempS; this->ElementToString(tempS, theGlobalVariables, theFormat);  return tempS;}
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
+  int ElementToString
+  (std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
+   GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+   ;
+  int ElementToStringBasisChange
+  (MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat,
+ bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& PolyFormatLocal)
+;
   int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringBasisChangeOutputToFile(MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   bool GetVectorPartitionFunction
@@ -9365,14 +9375,13 @@ class ParserNode
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   int EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
-  int EvaluateVectorPFIndicator(GlobalVariables& theGlobalVariables);
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
   int EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateReadFromFile(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
-  bool ExtractRootsEqualDimNoConversionNoEmptyArgument
+  bool GetRootsEqualDimNoConversionNoEmptyArgument
 (List<int>& theArgumentList, roots& output, int& outputDim)
 ;
   int EvaluateLattice
@@ -9392,6 +9401,9 @@ class ParserNode
   ;
   static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
   static int EvaluateSlTwoInSlN(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
+  static int EvaluateVectorPFIndicator
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
 
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);

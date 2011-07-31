@@ -7071,8 +7071,8 @@ public:
   static  bool flagUsingCheckSum;
   static int flagMaxNumStringOutputLines;
   void PrepareCheckSums(GlobalVariables& theGlobalVariables);
-  void DoTheFullComputation(GlobalVariables& theGlobalVariables);
-  void DoTheFullComputation(GlobalVariables& theGlobalVariables, roots& toBePartitioned);
+  std::string DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
+  std::string DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat);
   bool AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
   void CompareCheckSums(GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables);
@@ -9372,6 +9372,9 @@ class ParserNode
   int EvaluateTimes(GlobalVariables& theGlobalVariables);
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
+  void CreateDefaultLatexAndPDFfromString
+  (std::string& theLatexFileString)
+  ;
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   int EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateChamberParam(GlobalVariables& theGlobalVariables);

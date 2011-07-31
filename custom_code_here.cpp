@@ -2047,19 +2047,43 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
   { //if(useHtml)
       //out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: ";
     if (useLatex)
-      out << "$";
+    { if(!useHtml)
+        out << "$";
+      else
+        out << "<span class=\"math\">";
+    }
     out << this->valueOnEachLatticeShift.TheObjects[i].ElementToString(thePolyFormat);
     if (useLatex)
-      out << "$";
+    { if(!useHtml)
+        out << "$";
+      else
+        out << "</span>";
+    }
     out << " over ";
     if (!this->LatticeShifts.TheObjects[i].IsEqualToZero())
       out << this->LatticeShifts.TheObjects[i].ElementToString() << " + ";
+    if (useLatex)
+    { if (!useHtml)
+        out << "$\\Lambda$ ";
+      else
+        out << "<span class=\"math\"> \\Lambda</span>";
+    } else
+      out << "L ";
+    if (this->LatticeShifts.size>1)
+    { if (useHtml)
+        out << "<br>";
+      out << "\n\n";
+    }
   }
   if (!this->AmbientLatticeReduced.basisRationalForm.IsIdMatrix())
   { if (useLatex)
-      out << "$\\Lambda$, where $\\Lambda$=<";
+    { if (!useHtml)
+        out << ", where $\\Lambda$=<";
+      else
+        out << ", where <span class=\"math\">\\Lambda</span>=<";
+    }
     else
-      out << "L, where L=< ";
+      out << ", where L=< ";
     roots tempRoots;
     tempRoots.AssignMatrixRows(this->AmbientLatticeReduced.basisRationalForm);
     for (int i=0; i<tempRoots.size; i++)
@@ -2070,7 +2094,7 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
     out << ">";
   } else
     if (useLatex)
-      out << "$\\mathbb{Z}^{" <<  this->GetNumVars() << "}$";
+      out << ", where $\\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}$";
     else
       out << "Z^" <<  this->GetNumVars();
   return out.str();
@@ -2412,26 +2436,75 @@ int ParserNode::EvaluatePartialFractions
   return theNode.errorNoError;
 }
 
+void ParserNode::CreateDefaultLatexAndPDFfromString
+(std::string& theLatexFileString)
+{ std::fstream outputFile;
+  std::string fileName;
+  std::stringstream out;
+  fileName.append(this->owner->outputFolderPath);
+  fileName.append("output.tex");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
+  outputFile << theLatexFileString;
+  out << "A latex/pdf file: <a href=\"" << this->owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
+  out << ", <a href=\"" << this->owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
+  this->outputString=out.str();
+  std::stringstream theCommand;
+  theCommand << "pdflatex -output-directory=" << this->owner->outputFolderPath << "   " << fileName ;
+  //std::cout << theCommand.str();
+  this->owner->SystemCommands.AddObjectOnTop(theCommand.str());
+  this->ExpressionType=this->typeString;
+}
+
+std::string partFractions::DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat)
+{ if (toBePartitioned.size<1)
+    return "";
+  this->AmbientDimension= toBePartitioned.TheObjects[0].size;
+  this->theChambers.AmbientDimension= this->AmbientDimension;
+  this->theChambers.theDirections.CopyFromBase(toBePartitioned);
+  return this->DoTheFullComputationReturnLatexFileString(theGlobalVariables, theFormat);
+}
+
+std::string partFractions::DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+{ this->theChambers.thePauseController.InitComputation();
+  //this->theChambers.ReadFromDefaultFile(theGlobalVariables);
+  std::stringstream out;
+  this->theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
+  this->theChambers.QuickSortAscending();
+  this->theChambers.LabelChamberIndicesProperly();
+  root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
+  tempRoot.MakeZero(this->AmbientDimension);
+  this->theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+  this->theChambers.thePauseController.ExitComputation();
+  this->initFromRoots(theChambers.theDirections, theGlobalVariables);
+  out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
+  out << "Generating function: " << this->ElementToString(theGlobalVariables, theFormat);
+  this->split(theGlobalVariables, 0);
+  out << "Generating funciton splitted:" << this->ElementToString(theGlobalVariables, theFormat);
+  QuasiPolynomial tempQP;
+  std::string tempS;
+  for (int i=0; i<this->theChambers.size; i++)
+    if (this->theChambers.TheObjects[i]!=0)
+    { CombinatorialChamber& currentChamber=*this->theChambers.TheObjects[i];
+      this->GetVectorPartitionFunction(tempQP, currentChamber.InternalPoint, theGlobalVariables);
+      currentChamber.ElementToInequalitiesString(tempS, this->theChambers, true, false, theFormat);
+      out << "\n\nChamber: " << tempS;
+      out << "Quasipolynomial: " << tempQP.ElementToString(false, true, theFormat);
+    }
+  out << "\\end{document}";
+  return out.str();
+}
+
 int ParserNode::EvaluateVectorPFIndicator
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { partFractions& currentPF=theNode.thePFs.GetElement();
   roots toBePartitioned; int tempDim;
   theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim);
-  currentPF.DoTheFullComputation(theGlobalVariables, toBePartitioned);
   std::stringstream out;
-  std::string startingPFString, splitPFString, tempS;
-  QuasiPolynomial currentQP;
   PolynomialOutputFormat theFormat;
-  for (int i=0; i<currentPF.theChambers.size; i++)
-    if (currentPF.theChambers.TheObjects[i]!=0)
-    { CombinatorialChamber& currentChamber=*currentPF.theChambers.TheObjects[i];
-      currentPF.GetVectorPartitionFunction(currentQP, currentChamber.InternalPoint, theGlobalVariables);
-      currentChamber.ElementToInequalitiesString(tempS, currentPF.theChambers, false, true, theFormat);
-      out << "Chamber: " <<  tempS;
-      out << "Quasipolynomial: " << currentQP.ElementToString(true, false, theFormat) << "<br>";
-    }
-  theNode.ExpressionType=theNode.typeString;
-  theNode.outputString=out.str();
+//  theFormat.alphabet.TheObjects[0]="t_1";
+//  theFormat.alphabet.TheObjects[1]="t_2";
+  std::string tempS= currentPF.DoTheFullComputationReturnLatexFileString(theGlobalVariables, toBePartitioned, theFormat);
+  theNode.CreateDefaultLatexAndPDFfromString(tempS);
   return theNode.errorNoError;
 }
 
@@ -3476,13 +3549,14 @@ std::string CGIspecificRoutines::UnCivilizeStringCGI(const std::string& input)
 
 std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
+  out << "<div style=\"display: inline\" id=\"functionBox" << this->functionName << "\" >";
   out << this->functionName;
   out << this->theArguments.ElementToString(useHtml, useLatex);
-  out << "<button onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
+  out <<  "<button onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
         << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
         << " textType=B&textDim=3&textInput="
         << CGIspecificRoutines::UnCivilizeStringCGI(this->example)
-        << "\"> " << this->example << "</a></div>";
+        << "\"> " << this->example << "</a></div></div>";
   return out.str();
 }
 

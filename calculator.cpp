@@ -120,6 +120,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
+  //civilizedInput="vpf((1,-3), (1,-1), (1,1), (1,3))";
   //civilizedInput="split(PartialFraction((1,0), (1,2), (1,-2)))";
 //  civilizedInput="PartialFraction(1,1,(0,1))";
   //civilizedInput="slTwoInSlN(3)";
@@ -267,7 +268,7 @@ int main(int argc, char **argv)
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>";
   std::cout << "\n<br>\n";
-  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">" << civilizedInput  << "</textarea>\n<br>\n";
+  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">" << civilizedInput  << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
   std::cout << "<script type=\"text/javascript\"> document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";
@@ -285,7 +286,8 @@ int main(int argc, char **argv)
 #endif
   std::cout.flush();
   std::cout << "</td>";
-  std::cout << " <td width=\"300\">" << theParser.GetFunctionDescription() << "</td>\n<td>\n";
+  std::cout << " <td width=\"300\">" << theParser.GetFunctionDescription() << "</td>\n";
+  std::cout << "<td>\n";
   std::stringstream tempStream;
   inputPath.append("../htdocs/tmp/");
   std::stringstream tempStream2;
@@ -332,6 +334,18 @@ int main(int argc, char **argv)
   static_html4(tempStream3);
   std::cout << tempStream3.str();
   std::cout << "</div>";
+
+  std::cout << "<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
+  for (int i=0; i<theParser.theFunctionList.size; i++)
+  { ParserFunction& currentFun=theParser.theFunctionList.TheObjects[i];
+    std::cout << "\"" << currentFun.functionName << "\"";
+    if (i!=theParser.theFunctionList.size-1)
+      std::cout << ",";
+  }
+  std::cout << ");</script>";
+  std::cout << "<script language=\"javascript\"> var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>";
+
+
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++(1 out of 3 files (header file))</a>\n";

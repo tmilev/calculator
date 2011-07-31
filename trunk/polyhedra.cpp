@@ -22664,6 +22664,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   inputData.thePartialFraction.theChambers.ComputeDebugString();
   assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(false, theGlobalVariables));
   IrreducibleFiniteDimensionalModule theModule;
+  PolynomialOutputFormat tempFormat;
   QuasiPolynomialOld tempP;
   if (!inputData.flagDyckPathComputationLoaded)
     theModule.InitAndPrepareTheChambersForComputation(3, inputData.thePartialFraction.theChambers, theGlobalVariables);
@@ -22681,7 +22682,7 @@ void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, 
   theGlobalVariables.MakeReport();
   inputData.thePartialFraction.theChambers.flagUsingStartingConesSeparation=true;
   inputData.thePartialFraction.theChambers.SliceTheEuclideanSpace(theGlobalVariables, true);
-  inputData.thePartialFraction.DoTheFullComputation(theGlobalVariables);
+  inputData.thePartialFraction.DoTheFullComputationReturnLatexFileString(theGlobalVariables, tempFormat);
   inputData.thePartialFraction.ComputeDebugString(theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1= inputData.thePartialFraction.DebugString;
@@ -23733,32 +23734,6 @@ void CombinatorialChamber::ReplaceMeByAddExtraWallsToNewChamber(CombinatorialCha
 //    this->ComputeDebugString(owner);
 //    newChamber->ComputeDebugString(owner);
   }
-}
-
-void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables, roots& toBePartitioned)
-{ if (toBePartitioned.size<1)
-    return;
-  this->AmbientDimension= toBePartitioned.TheObjects[0].size;
-  this->theChambers.AmbientDimension= this->AmbientDimension;
-  this->theChambers.theDirections.CopyFromBase(toBePartitioned);
-  this->DoTheFullComputation(theGlobalVariables);
-}
-
-void partFractions::DoTheFullComputation(GlobalVariables& theGlobalVariables)
-{ this->theChambers.thePauseController.InitComputation();
-  this->theChambers.ReadFromDefaultFile(theGlobalVariables);
-  this->theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
-  this->theChambers.QuickSortAscending();
-  this->theChambers.LabelChamberIndicesProperly();
-  root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
-  tempRoot.MakeZero(this->AmbientDimension);
-  this->theChambers.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
-  this->theChambers.thePauseController.ExitComputation();
-  this->initAndSplit(this->theChambers.theDirections, theGlobalVariables);
-  QuasiPolynomialOld tempQP;
-  for (int i=0; i<this->theChambers.size; i++)
-    if (this->theChambers.TheObjects[i]!=0)
-      this->partFractionsToPartitionFunctionAdaptedToRoot(tempQP, this->theChambers.TheObjects[i]->InternalPoint, false, false, theGlobalVariables, true);
 }
 
 bool CombinatorialChamber::GetSplittingFacet(root& output, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)

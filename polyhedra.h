@@ -5101,7 +5101,12 @@ public:
     return false;
   }
   static void ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1);
-  static void TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2);
+
+  static void TransformToReducedGroebnerBasis
+  (List<PolynomialRationalCoeff>& theBasis,
+   PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3,
+   PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2)
+   ;
   static void RemainderDivisionWithRespectToBasis(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1);
   static void RemainderDivision(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1);
   static bool gcdQuicK
@@ -9388,6 +9393,9 @@ class ParserNode
 (List<int>& theArgumentList, roots& output, int& outputDim)
 ;
   int EvaluateLattice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateGroebner
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateWeylAction

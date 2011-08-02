@@ -27535,7 +27535,7 @@ void RationalFunction::RemainderDivision(PolynomialRationalCoeff& input, Polynom
   }
 }
 
-void RationalFunction::TransformToGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2)
+void RationalFunction::TransformToReducedGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2)
 { PolynomialRationalCoeff& tempP=buffer1;
   PolynomialRationalCoeff& Spoly=buffer2;
   Monomial<Rational>& leftShift=bufferMon1;
@@ -27654,7 +27654,7 @@ void RationalFunction::lcm(const PolynomialRationalCoeff& left, const Polynomial
 //  for (int i=0; i<tempList.size; i++)
 //  { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ElementToString() << "<br>\n";
 //  }
-  RationalFunction::TransformToGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
+  RationalFunction::TransformToReducedGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
 //  std::cout << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)
 //  { std::cout << tempList.TheObjects[i].ElementToString() << "<br>\n";

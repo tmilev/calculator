@@ -1387,6 +1387,32 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
   return out.str();
 }
 
+int ParserNode::EvaluateGroebner
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ List<PolynomialRationalCoeff> inputBasis, outputGroebner;
+  for (int i=0; i<theArgumentList.size; i++)
+  { ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList.TheObjects[i]];
+    outputGroebner.AddObjectOnTop(currentNode.polyValue.GetElement());
+  }
+  inputBasis=outputGroebner;
+  PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4;
+  Monomial<Rational> bufferMon1, bufferMon2;
+  RationalFunction::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
+  std::stringstream out;
+  out << "<br>Starting basis:  <span class=\"math\">";
+  PolynomialOutputFormat theFormat;
+  for(int i=0; i<inputBasis.size; i++)
+    out << inputBasis.TheObjects[i].ElementToString(theFormat) << ", ";
+  out << "</span>";
+  out << "<br>Groebner reduced basis:<span class=\"math\">";
+  for(int i=0; i<outputGroebner.size; i++)
+    out << outputGroebner.TheObjects[i].ElementToString(theFormat) << ", ";
+  out << "</span>";
+  theNode.ExpressionType=theNode.typeString;
+  theNode.outputString= out.str();
+  return theNode.errorNoError;
+}
+
 int ParserNode::EvaluateCone
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { roots theNormals;
@@ -2048,14 +2074,14 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
       //out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: ";
     if (useLatex)
     { if(!useHtml)
-        out << "$";
+        out << "$\\begin{array}{rcl}&&";
       else
         out << "<span class=\"math\">";
     }
     out << this->valueOnEachLatticeShift.TheObjects[i].ElementToString(thePolyFormat);
     if (useLatex)
     { if(!useHtml)
-        out << "$";
+        out << "\\end{array}$";
       else
         out << "</span>";
     }
@@ -2078,7 +2104,7 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
   if (!this->AmbientLatticeReduced.basisRationalForm.IsIdMatrix())
   { if (useLatex)
     { if (!useHtml)
-        out << ", where $\\Lambda$=<";
+        out << ", where $\\Lambda$=$<$ ";
       else
         out << ", where <span class=\"math\">\\Lambda</span>=<";
     }
@@ -2091,7 +2117,10 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
       if (i!=tempRoots.size-1)
         out << ", ";
     }
-    out << ">";
+    if (!useLatex)
+      out << ">";
+    else
+      out << " $>$";
   } else
     if (useLatex)
       out << ", where $\\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}$";
@@ -2477,9 +2506,13 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString(GlobalVaria
   this->theChambers.thePauseController.ExitComputation();
   this->initFromRoots(theChambers.theDirections, theGlobalVariables);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
-  out << "Generating function: " << this->ElementToString(theGlobalVariables, theFormat);
+  out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
+        << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: " << theChambers.theDirections.ElementToStringGeneric();
+  out << "\n\n The corresponding generating function is: " << this->ElementToString(theGlobalVariables, theFormat) << "= (after splitting acording to algorithm)";
   this->split(theGlobalVariables, 0);
-  out << "Generating funciton splitted:" << this->ElementToString(theGlobalVariables, theFormat);
+  out << this->ElementToString(theGlobalVariables, theFormat);
+  out << "Therefore the vector partition function is given by " << this->theChambers.GetNumNonZeroPointers()
+        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
   QuasiPolynomial tempQP;
   std::string tempS;
   for (int i=0; i<this->theChambers.size; i++)
@@ -3414,7 +3447,7 @@ std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgume
   { case ParserNode::typeRational: return "Rational";
     case ParserNode::typeQuasiPolynomial: return "QP";
     case ParserNode::typeIntegerOrIndex: return "Integer";
-    case ParserNode::typePoly: return "Poly";
+    case ParserNode::typePoly: return "Polynomial";
     case ParserNode::typeCone: return "Cone";
     case ParserNode::typeRationalFunction: return "RF";
     case ParserNode::typePartialFractions: return "PF";
@@ -3430,7 +3463,7 @@ int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
     return ParserNode::typeRational;
   if (theArgument=="QP")
     return ParserNode::typeQuasiPolynomial;
-  if (theArgument=="Poly")
+  if (theArgument=="Polynomial")
     return ParserNode::typePoly;
   if (theArgument=="Cone")
     return ParserNode::typeCone;
@@ -3927,6 +3960,13 @@ void Parser::initFunctionList()
    "Computes the vector partition function with respect to the input vectors, according to this <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>.",
    "vpf((1,0), (0,1), (1,1))",
     & ParserNode::EvaluateVectorPFIndicator
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("TransformToReducedGroebnerBasis",
+   "((Polynomial,...),...)",
+   "Transforms to reduced Groebner basis with respect to the monomial ordering x_1< x_2<x_3<....",
+   "TransformToReducedGroebnerBasis(x_1^3+x_1x_2+1, x_1x_2 ,x_2^3)",
+    & ParserNode::EvaluateGroebner
    );
 
 }

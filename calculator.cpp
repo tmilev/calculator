@@ -35,7 +35,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
 
-const double MaxAllowedComputationTimeInSeconds=20000;
+const double MaxAllowedComputationTimeInSeconds=20;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><head><title>Vector partition calculator updated 22 Dec, 2010</title>";
+  std::cout << "<html><head><title>Vector partition calculator updated 2 August, 2011</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
@@ -257,6 +257,7 @@ int main(int argc, char **argv)
   std::string endMath ="</DIV>";
   std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td><button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
                   << "<a href=\"http://wwwmathlabo.univ-poitiers.fr/~maavl/LiE/form.html\"> LiE software online </a>"
+                  << "<br><br><a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\"> IE not suppoted.</a> "
                  // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
                   << "</div></td><td>";
   std::cout << " <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";

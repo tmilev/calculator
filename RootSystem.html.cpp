@@ -37,7 +37,9 @@ output << " </script>\n";
 void static_html4(std::stringstream& output){
 output << " <!>\n";
 output << "   <script language=\"javascript\">\n";
-output << " \n";
+output << "     //The script is courtesy of Madan Chaudhary. The original code was hosted at http://simpleandeasycodes.blogspot.com/ .\n";
+output << "     //The code is slightly modified from the original, and will continue to be modified.\n";
+output << "     //Many thanks to Madan Chaudhary for allowing the use of his code!\n";
 output << "     //****************************************************************************\n";
 output << "     function actb(obj,ca){\n";
 output << "     /* ---- Public Variables ---- */\n";

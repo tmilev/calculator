@@ -1399,15 +1399,88 @@ int ParserNode::EvaluateGroebner
   Monomial<Rational> bufferMon1, bufferMon2;
   RationalFunction::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
   std::stringstream out;
-  out << "<br>Starting basis:  <span class=\"math\">";
+  out << "<br>Starting basis: ";
+  std::stringstream out1, out2;
   PolynomialOutputFormat theFormat;
   for(int i=0; i<inputBasis.size; i++)
-    out << inputBasis.TheObjects[i].ElementToString(theFormat) << ", ";
-  out << "</span>";
-  out << "<br>Groebner reduced basis:<span class=\"math\">";
+    out1 << inputBasis.TheObjects[i].ElementToString(theFormat) << ", ";
+  out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(out1.str());
+  out << "<br>Reduced Groebner basis:";
   for(int i=0; i<outputGroebner.size; i++)
-    out << outputGroebner.TheObjects[i].ElementToString(theFormat) << ", ";
-  out << "</span>";
+    out2 << outputGroebner.TheObjects[i].ElementToString(theFormat) << ", ";
+  out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(out2.str());
+  theNode.ExpressionType=theNode.typeString;
+  theNode.outputString= out.str();
+  return theNode.errorNoError;
+}
+
+void RationalFunction::GetRelations
+  ( List<PolynomialRationalCoeff>& theGenerators, GlobalVariables& theGlobalVariables
+   )
+{ if (theGenerators.size==0)
+    return;
+  List<PolynomialRationalCoeff> theGroebnerBasis;
+  theGroebnerBasis=theGenerators;
+  int numStartingGenerators=theGenerators.size;
+  int numStartingVariables= theGenerators.TheObjects[0].NumVars;
+  PolynomialRationalCoeff tempP;
+  PolynomialOutputFormat tempFormat;
+  for (int i=0; i<numStartingGenerators; i++)
+  { PolynomialRationalCoeff& currentPoly=theGroebnerBasis.TheObjects[i];
+    currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables+numStartingGenerators);
+    tempP.MakeNVarDegOnePoly(numStartingVariables+numStartingGenerators, i+numStartingVariables, (Rational) -1);
+    currentPoly+=tempP;
+//  std::cout << currentPoly.ElementToString(false, tempFormat) << "<br>";
+  }
+  PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4;
+  Monomial<Rational> bufferMon1, bufferMon2;
+  RationalFunction::TransformToReducedGroebnerBasis
+  (
+   theGroebnerBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2,
+   & Monomial<Rational>::LeftIsGEQLexicographicLastVariableWeakest
+  );
+//  std::cout << "<br>the ending generators:<br> ";
+//  for (int i=0; i<theGroebnerBasis.size; i++)
+//  { std::cout << theGroebnerBasis.TheObjects[i].ElementToString(false, tempFormat) << "<br>";
+//  }
+  theGenerators.MakeActualSizeAtLeastExpandOnTop(theGroebnerBasis.size);
+  theGenerators.size=0;
+  for (int i=0; i<theGroebnerBasis.size; i++)
+  { PolynomialRationalCoeff& currentPoly= theGroebnerBasis.TheObjects[i];
+    bool bad=false;
+    for (int j=0; j<numStartingVariables; j++)
+      if(currentPoly.GetMaxPowerOfVariableIndex(j)>0)
+      { bad=true;
+        break;
+      }
+    if (!bad)
+     theGenerators.AddObjectOnTop(currentPoly);
+  }
+}
+
+int ParserNode::EvaluateRelations
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ List<PolynomialRationalCoeff> inputBasis, outputRelations;
+  for (int i=0; i<theArgumentList.size; i++)
+  { ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList.TheObjects[i]];
+    outputRelations.AddObjectOnTop(currentNode.polyValue.GetElement());
+  }
+  inputBasis=outputRelations;
+  RationalFunction::GetRelations(outputRelations, theGlobalVariables);
+  std::stringstream out;
+  out << "<br>Starting elements:";
+  int numVariables= inputBasis.TheObjects[0].NumVars;
+  PolynomialOutputFormat theFormat;
+  std::stringstream out3;
+  for(int i=0; i<inputBasis.size; i++)
+    out3 << "u_{" << i+numVariables+1 << "}:=" << inputBasis.TheObjects[i].ElementToString(theFormat) << ", ";
+  out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(out3.str());
+  out << "<br>Resulting relations:";
+  std::stringstream out2;
+  theFormat.MakeAlphabetArbitraryWithIndex("u");
+  for(int i=0; i<outputRelations.size; i++)
+    out2 << outputRelations.TheObjects[i].ElementToString(theFormat) << ", ";
+  out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(out2.str());
   theNode.ExpressionType=theNode.typeString;
   theNode.outputString= out.str();
   return theNode.errorNoError;
@@ -3532,7 +3605,7 @@ int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
 std::string Parser::GetFunctionDescription()
 { std::stringstream out;
   for (int i=0; i<this->theFunctionList.size; i++)
-    out << this->theFunctionList.TheObjects[i].ElementToString(true, false) << "<br>";
+    out << this->theFunctionList.TheObjects[i].ElementToString(true, false) << " <br>";
   return out.str();
 }
 
@@ -3585,7 +3658,7 @@ std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
   out << "<div style=\"display: inline\" id=\"functionBox" << this->functionName << "\" >";
   out << this->functionName;
   out << this->theArguments.ElementToString(useHtml, useLatex);
-  out <<  "<button onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
+  out <<  "<button" << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
         << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
         << " textType=B&textDim=3&textInput="
         << CGIspecificRoutines::UnCivilizeStringCGI(this->example)
@@ -3892,6 +3965,29 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
   theGlobalVariables.MakeReport();
 }
 
+std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string& input, bool useDiv)
+{ std::stringstream out;
+  CGIspecificRoutines::GlobalFormulaIdentifier++;
+  if (useDiv)
+    out << "<div";
+  else
+    out << "<span";
+  out << " id=\"theResult" << CGIspecificRoutines::GlobalFormulaIdentifier << "\" class=\"math\" scale=\"50\">\\begin{array}{rcl}&&\n";
+  out << input;
+  out << "\n\\end{array}";
+  if (useDiv)
+    out << "</div>";
+  else
+    out << "</span>";
+  out << "<textarea id=\"theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "\" style=\"display: none\">";
+  out << "\\begin{array}{rcl}&&\n" << input << "\n\\end{array}";
+  out << "</textarea>";
+  out << "\n<button id=\"ButtonToggleLatex"  <<CGIspecificRoutines::GlobalFormulaIdentifier
+        << " \" " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
+        << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">Show LaTeX/Show eye candy</button>";
+  return out.str();
+}
+
 void Parser::initFunctionList()
 { if (this->flagFunctionListInitialized)
     return;
@@ -3906,10 +4002,10 @@ void Parser::initFunctionList()
     & ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
    );*/
   this->AddOneFunctionToDictionaryNoFail
-  ("Cone",
+  ("cone",
    "((Rational,...),...)",
    "A projective cone. The argument vectors describe the normals of the cone walls.",
-   "Cone((1,0),(0,1)) ",
+   "cone((1,0),(0,1)) ",
     & ParserNode::EvaluateCone
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -3920,10 +4016,10 @@ void Parser::initFunctionList()
     & ParserNode::EvaluateSlTwoInSlN
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("WeylDim",
+  ("getWeylDim",
    "(Rational,...)",
    "Evaluates the Weyl dimension formula. Input: a vector in dual root coordinates.",
-   "WeylDim(0,0,1)",
+   "getWeylDim(0,0,1)",
     & ParserNode::EvaluateWeylDimFormula
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -3941,17 +4037,17 @@ void Parser::initFunctionList()
     & ParserNode::EvaluateWeylAction
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("PartialFraction",
+  ("partialFraction",
    "((Rational,...),...)",
    "Gives the partial fraction corresponding to the vector partition function of the arguments.<br> The arguments must be non-zero vectors with non-negative integral coordinates.",
-   "PartialFraction((1,0), (0,1), (1,1))",
+   "partialFraction((1,0), (0,1), (1,1))",
     & ParserNode::EvaluatePartialFractions
    );
   this->AddOneFunctionToDictionaryNoFail
   ("split",
    "(PF)",
    "Splits a partial fraction according to this <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>, or a modification/improvement of it.",
-   "split(PartialFraction((1,0), (0,1), (1,1)))",
+   "split(partialFraction((1,0), (0,1), (1,1)))",
     & ParserNode::EvaluateSplit
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -3962,11 +4058,18 @@ void Parser::initFunctionList()
     & ParserNode::EvaluateVectorPFIndicator
    );
    this->AddOneFunctionToDictionaryNoFail
-  ("TransformToReducedGroebnerBasis",
-   "((Polynomial,...),...)",
+  ("transformToReducedGroebnerBasis",
+   "(Polynomial,...)",
    "Transforms to reduced Groebner basis with respect to the monomial ordering x_1< x_2<x_3<....",
-   "TransformToReducedGroebnerBasis(x_1^3+x_1x_2+1, x_1x_2 ,x_2^3)",
+   "transformToReducedGroebnerBasis(x_1^3+x_1x_2+1, x_1x_2, x_2^3)",
     & ParserNode::EvaluateGroebner
    );
-
+   this->AddOneFunctionToDictionaryNoFail
+  ("getRelations",
+   "(Polynomial,...)",
+   "Get the algebraic relations between the input polynomials.",
+   "getRelations(x_1^2, x_1x_2, x_2^2)",
+    & ParserNode::EvaluateRelations
+   );
+   this->theFunctionList.QuickSortAscending();
 }

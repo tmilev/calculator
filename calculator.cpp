@@ -120,6 +120,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
+//  civilizedInput="GetRelations(x_1^2, x_1x_2, x_2^2)";
   //civilizedInput="vpf((1,-3), (1,-1), (1,1), (1,3))";
   //civilizedInput="split(PartialFraction((1,0), (1,2), (1,-2)))";
 //  civilizedInput="PartialFraction(1,1,(0,1))";
@@ -253,15 +254,9 @@ int main(int argc, char **argv)
   std::cout.flush();
   theParser.ComputeDebugString(theGlobalVariables);
 
-  std::string beginMath="<DIV class=\"math\" scale=\"50\">";
-  std::string endMath ="</DIV>";
-  std::cout << "<table>\n <tr valign=\"top\">\n <td></td><td><button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
-                  << "<a href=\"http://wwwmathlabo.univ-poitiers.fr/~maavl/LiE/form.html\"> LiE software online </a>"
-                  << "<br><br><a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\"> IE not suppoted.</a> "
-                 // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
-                  << "</div></td><td>";
-  std::cout << " <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
-  std::cout << "</td><tr valign=\"top\">\n<td>";
+  std::string beginMath="<div class=\"math\" scale=\"50\">";
+  std::string endMath ="</div>";
+  std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
   std::stringstream tempStream4;
   static_html3(tempStream4);
@@ -288,7 +283,14 @@ int main(int argc, char **argv)
   std::cout.flush();
   std::cout << "</td>";
   std::cout << " <td width=\"300\">" << theParser.GetFunctionDescription() << "</td>\n";
-  std::cout << "<td>\n";
+  std::cout << "<td>";
+  std::cout << " <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
+  std::cout << "<button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
+                  << "<a href=\"http://wwwmathlabo.univ-poitiers.fr/~maavl/LiE/form.html\"> LiE software online </a>"
+                  << "<br><br><a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\"> IE not suppoted.</a> "
+                 // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
+                  << "</div>";
+  std::cout << "<br>";
   std::stringstream tempStream;
   inputPath.append("../htdocs/tmp/");
   std::stringstream tempStream2;
@@ -374,7 +376,7 @@ int main(int argc, char **argv)
 //  theParser.theLieAlgebra.ComputeDebugString();
 //  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();
   std::cout << "</div>";
-  std::cout << "\n</td></table>";
+  std::cout << "\n</td></tr></table>";
   std::cout << "</body></html>";
   std::string command1, command2;
   std::cout << "<!--";

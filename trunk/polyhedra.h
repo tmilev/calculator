@@ -677,7 +677,6 @@ private:
   void ReverseOrderElements();
   void ShiftUpExpandOnTop(int StartingIndex);
   void PopLastObject();
-  void QuickSort();
 protected:
   friend class partFractions;
   friend class QuasiMonomial;
@@ -702,6 +701,14 @@ public:
   int IndexOfObjectHash(const Object& o) const;
   void SetHashSize(int HS);
   int SizeWithoutObjects();
+  void AssignList(const List<Object>& other)
+  { this->ClearTheObjects();
+    this->MakeActualSizeAtLeastExpandOnTop(other.size);
+    for (int i=0; i<other.size; i++)
+      this->AddObjectOnTopHash(other.TheObjects[i]);
+  }
+  void QuickSortAscending(){ List<Object> theList; theList=*this; theList.QuickSortAscending(); this->AssignList(theList);}
+  void QuickSortDescending(){ List<Object> theList; theList=*this; theList.QuickSortDescending(); this->AssignList(theList);}
   HashedList();
   ~HashedList();
   void CopyFromHash(const HashedList<Object>& From);
@@ -4143,7 +4150,16 @@ public:
   }
   void IncreaseNumVariables(int increase);
   bool IsGEQpartialOrder(Monomial<ElementOfCommutativeRingWithIdentity>& m);
+  static bool LeftIsGEQLexicographicLastVariableStrongest
+  (const Monomial<ElementOfCommutativeRingWithIdentity>& left, const Monomial<ElementOfCommutativeRingWithIdentity>& right)
+  { return left.IsGEQLexicographicLastVariableStrongest(right);
+  }
+  static bool LeftIsGEQLexicographicLastVariableWeakest
+  (const Monomial<ElementOfCommutativeRingWithIdentity>& left, const Monomial<ElementOfCommutativeRingWithIdentity>& right)
+  { return left.IsGEQLexicographicLastVariableWeakest(right);
+  }
   bool IsGEQLexicographicLastVariableStrongest(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
+  bool IsGEQLexicographicLastVariableWeakest(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const;
   bool IsGEQTotalDegThenLexicographic(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const
   { if (this->TotalDegree()>m.TotalDegree())
       return true;
@@ -4164,6 +4180,7 @@ public:
   Monomial();
   ~Monomial();
 };
+
 
 template <class ElementOfCommutativeRingWithIdentity>
 bool Monomial<ElementOfCommutativeRingWithIdentity>::InitWithZero=true;
@@ -4310,6 +4327,16 @@ public:
   ;
   bool IsProportionalTo(const Polynomial<ElementOfCommutativeRingWithIdentity>& other, ElementOfCommutativeRingWithIdentity& TimesMeEqualsOther, const ElementOfCommutativeRingWithIdentity& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, PolynomialOutputFormat& PolyFormatLocal);
+  int GetIndexMaxMonomial( bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<ElementOfCommutativeRingWithIdentity>& left, const Monomial<ElementOfCommutativeRingWithIdentity>& right))
+  { if (this->size==0)
+      return -1;
+    int result=0;
+    for (int i=1; i<this->size; i++)
+    { if ( MonomialOrderLeftIsGreaterThanOrEqualToRight(this->TheObjects[i], this->TheObjects[result]))
+        result=i;
+    }
+    return result;
+  }
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
   int GetIndexMaxMonomialTotalDegThenLexicographic();
   void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<ElementOfCommutativeRingWithIdentity> >& output, int UpToPower);
@@ -5100,15 +5127,41 @@ public:
     assert(false);
     return false;
   }
-  static void ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1);
-
+  static void ReduceGroebnerBasis
+  (List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1,
+ bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+   )
+  ;
+  static void GetRelations
+  ( List<PolynomialRationalCoeff>& theGenerators, GlobalVariables& theGlobalVariables
+   )
+   ;
   static void TransformToReducedGroebnerBasis
   (List<PolynomialRationalCoeff>& theBasis,
    PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3,
    PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2)
+  { RationalFunction::TransformToReducedGroebnerBasis
+    (
+     theBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, &Monomial<Rational>::LeftIsGEQLexicographicLastVariableStrongest
+     );
+  }
+  static void TransformToReducedGroebnerBasis
+  (List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2,
+  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+ )
+ ;
+  static void RemainderDivisionWithRespectToBasis
+(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1,
+ PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1,
+ bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+ )
+ ;
+  static void RemainderDivision
+(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder,
+ PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1,
+   bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+ )
    ;
-  static void RemainderDivisionWithRespectToBasis(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1);
-  static void RemainderDivision(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1);
   static bool gcdQuicK
   (const PolynomialRationalCoeff& left, const PolynomialRationalCoeff& right, PolynomialRationalCoeff& output)
   ;
@@ -5295,6 +5348,18 @@ bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQpartialOrder(Monomial<
   for (int i=0; i<m.NumVariables; i++)
     if (this->degrees[i]<m.degrees[i])
       return false;
+  return true;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+bool Monomial<ElementOfCommutativeRingWithIdentity>::IsGEQLexicographicLastVariableWeakest(const Monomial<ElementOfCommutativeRingWithIdentity>& m)const
+{ assert(this->NumVariables==m.NumVariables);
+  for (int i=0; i<this->NumVariables; i++)
+  { if (this->degrees[i]>m.degrees[i])
+      return true;
+    if (this->degrees[i]<m.degrees[i])
+      return false;
+  }
   return true;
 }
 
@@ -5523,7 +5588,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 int Polynomial<ElementOfCommutativeRingWithIdentity>::GetMaxPowerOfVariableIndex(int VariableIndex)
 { int result=0;
   for (int i=0; i<this->size; i++)
-    result= Maximum(result, this->TheObjects[i].degrees[VariableIndex]);
+    result= MathRoutines::Maximum(result, this->TheObjects[i].degrees[VariableIndex]);
   return result;
 }
 
@@ -9142,6 +9207,7 @@ struct CGIspecificRoutines
 {
 public:
   static std::stringstream outputStream;
+  static int GlobalFormulaIdentifier;
   static int numLinesAll;
   static int numRegularLines;
   static int numDashedLines;
@@ -9163,6 +9229,15 @@ public:
   static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
+  static std::string GetHtmlMathDivFromLatexFormula
+  (const std::string& input)
+  {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormula(input, true);}
+  static std::string GetHtmlMathSpanFromLatexFormula
+  (const std::string& input) {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormula(input, false);}
+  static std::string GetHtmlMathFromLatexFormula
+  (const std::string& input, bool useDiv)
+  ;
+  static std::string GetStyleButtonLikeHtml(){return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";}
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path);
   static bool FileExists(const std::string& theFileName);
   static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
@@ -9398,6 +9473,9 @@ class ParserNode
   static int EvaluateGroebner
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateRelations
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateWeylAction
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   { return theNode.EvaluateWeylAction(theNode, theArgumentList, theGlobalVariables, false, false, false);}
@@ -9540,6 +9618,9 @@ public:
     this->functionDescription=other.functionDescription;
     this->functionName=other.functionName;
     this->example=other.example;
+  }
+  bool operator>(const ParserFunction& other) const
+  { return this->functionName>other.functionName;
   }
   bool operator==(const ParserFunction& other)const
   { return this->functionName==other.functionName;

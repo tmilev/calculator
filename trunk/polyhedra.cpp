@@ -138,6 +138,8 @@ PolynomialOutputFormat PolyFormatNumFrac;
 int QuasiPolynomialOld::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
 
+int CGIspecificRoutines::GlobalFormulaIdentifier=0;
+
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
 ListPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
 int BasicQN::NumTotalCreated=0;
@@ -27486,12 +27488,16 @@ std::string RationalFunction::ElementToString(bool useLatex, bool breakLinesLate
   return out.str();
 }
 
-void RationalFunction::RemainderDivisionWithRespectToBasis(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1)
+void RationalFunction::RemainderDivisionWithRespectToBasis
+(PolynomialRationalCoeff& input, List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer1,
+ PolynomialRationalCoeff& buffer2, Monomial<Rational>& bufferMon1,
+ bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+ )
 { assert(&outputRemainder!=&input);
   PolynomialRationalCoeff* currentRemainder=&input;
   PolynomialRationalCoeff* nextRemainder=&buffer1;
   for (int i=0; i<theBasis.size; i++)
-  { RationalFunction::RemainderDivision(*currentRemainder, theBasis.TheObjects[i], *nextRemainder, buffer2, bufferMon1);
+  { RationalFunction::RemainderDivision(*currentRemainder, theBasis.TheObjects[i], *nextRemainder, buffer2, bufferMon1, MonomialOrderLeftIsGreaterThanOrEqualToRight);
     MathRoutines::swap(currentRemainder, nextRemainder);
     if (currentRemainder->IsEqualToZero())
       break;
@@ -27500,10 +27506,14 @@ void RationalFunction::RemainderDivisionWithRespectToBasis(PolynomialRationalCoe
     outputRemainder.Assign(*currentRemainder);
 }
 
-void RationalFunction::RemainderDivision(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder, PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1)
+void RationalFunction::RemainderDivision
+(PolynomialRationalCoeff& input, PolynomialRationalCoeff& divisor, PolynomialRationalCoeff& outputRemainder,
+ PolynomialRationalCoeff& buffer, Monomial<Rational>& bufferMon1,
+   bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+ )
 { assert(&input!=&outputRemainder);
   outputRemainder.Assign(input);
-  int divisorHighest=divisor.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  int divisorHighest=divisor.GetIndexMaxMonomial(MonomialOrderLeftIsGreaterThanOrEqualToRight);
   Monomial<Rational>& highestMonDivisor=divisor.TheObjects[divisorHighest];
   int remainderHighest=-1;
   int theNumVars=input.NumVars;
@@ -27513,7 +27523,7 @@ void RationalFunction::RemainderDivision(PolynomialRationalCoeff& input, Polynom
   for(;;)
   { if (outputRemainder.size==0)
       return;
-    remainderHighest=  outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+    remainderHighest=  outputRemainder.GetIndexMaxMonomial(MonomialOrderLeftIsGreaterThanOrEqualToRight);
     Monomial<Rational>& highestMonRemainder=outputRemainder.TheObjects[remainderHighest];
     /*outputRemainder.ComputeDebugString();
     highestMonRemainder.ComputeDebugString();
@@ -27535,7 +27545,10 @@ void RationalFunction::RemainderDivision(PolynomialRationalCoeff& input, Polynom
   }
 }
 
-void RationalFunction::TransformToReducedGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2)
+void RationalFunction::TransformToReducedGroebnerBasis
+  (List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2,
+  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+ )
 { PolynomialRationalCoeff& tempP=buffer1;
   PolynomialRationalCoeff& Spoly=buffer2;
   Monomial<Rational>& leftShift=bufferMon1;
@@ -27550,8 +27563,8 @@ void RationalFunction::TransformToReducedGroebnerBasis(List<PolynomialRationalCo
     for (int j=0; j<theBasis.size; j++)
     { PolynomialRationalCoeff& currentLeft= theBasis.TheObjects[lowestNonExplored];
       PolynomialRationalCoeff& currentRight= theBasis.TheObjects[j];
-      Monomial<Rational>& leftHighestMon=currentLeft.TheObjects[currentLeft.GetIndexMaxMonomialLexicographicLastVariableStrongest()];
-      Monomial<Rational>& rightHighestMon=currentRight.TheObjects[currentRight.GetIndexMaxMonomialLexicographicLastVariableStrongest()];
+      Monomial<Rational>& leftHighestMon=currentLeft.TheObjects[currentLeft.GetIndexMaxMonomial(MonomialOrderLeftIsGreaterThanOrEqualToRight)];
+      Monomial<Rational>& rightHighestMon=currentRight.TheObjects[currentRight.GetIndexMaxMonomial(MonomialOrderLeftIsGreaterThanOrEqualToRight)];
       //leftHighestMon.ComputeDebugString();
       //rightHighestMon.ComputeDebugString();
       //currentRight.ComputeDebugString();
@@ -27571,25 +27584,29 @@ void RationalFunction::TransformToReducedGroebnerBasis(List<PolynomialRationalCo
       currentRight.MultiplyByMonomial(rightShift, Spoly);
       Spoly.AddPolynomial(tempP);
       //Spoly.ComputeDebugString();
+      //std::cout << "<br> Spoly found: " << Spoly.DebugString;
 //      theBasis.ElementToStringGeneric(tempS);
-      RationalFunction::RemainderDivisionWithRespectToBasis(Spoly, theBasis, tempP, buffer3, buffer4, bufferMon1);
+      RationalFunction::RemainderDivisionWithRespectToBasis(Spoly, theBasis, tempP, buffer3, buffer4, bufferMon1, MonomialOrderLeftIsGreaterThanOrEqualToRight);
 
       //tempP.ComputeDebugString();
       if (!tempP.IsEqualToZero())
       { tempP.ScaleToIntegralNoGCDCoeffs();
         theBasis.AddObjectOnTop(tempP);
-//        std::cout << "<br> new element found: " << tempP.ElementToString();
+        //std::cout << "<br> new element found: " << tempP.ElementToString();
       }
     }
   }
 //  std::cout << "<br> ... and the basis before reduction is: <br>";
 //  for (int i=0; i<theBasis.size; i++)
 //    std::cout << theBasis.TheObjects[i].ElementToString() << ", ";
-  RationalFunction::ReduceGroebnerBasis(theBasis, buffer1);
+  RationalFunction::ReduceGroebnerBasis(theBasis, buffer1, MonomialOrderLeftIsGreaterThanOrEqualToRight);
 
 }
 
-void RationalFunction::ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1)
+void RationalFunction::ReduceGroebnerBasis
+(List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1,
+ bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+ )
 { PolynomialRationalCoeff& LeadingCoeffs=buffer1;
   LeadingCoeffs.MakeActualSizeAtLeastExpandOnTop(theBasis.size);
   LeadingCoeffs.ClearTheObjects();
@@ -27597,7 +27614,7 @@ void RationalFunction::ReduceGroebnerBasis(List<PolynomialRationalCoeff>& theBas
 //  std::cout << "<br> ... and the leading coefficients are: <br>";
   for (int i=0; i<theBasis.size; i++)
   { PolynomialRationalCoeff& current=theBasis.TheObjects[i];
-    LeadingCoeffs.AddObjectOnTopHash(current.TheObjects[current.GetIndexMaxMonomialLexicographicLastVariableStrongest()]);
+    LeadingCoeffs.AddObjectOnTopHash(current.TheObjects[current.GetIndexMaxMonomial(MonomialOrderLeftIsGreaterThanOrEqualToRight)]);
     LeadingCoeffs.LastObject()->Coefficient=1;
 //    LeadingCoeffs.LastObject()->ComputeDebugString();
 //    std::cout << LeadingCoeffs.LastObject()->DebugString << ", ";
@@ -30706,14 +30723,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
   { if (!useHtml)
       out << stringValueOnly;
     else
-    { out << "\n<div id=\"theResult" << this->indexInOwner << "\" class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
-      out << stringValueOnly;
-      out << "\\end{eqnarray*}</div>";
-      out << "<textarea id=\"theResultLatex" << this->indexInOwner << "\" style=\"display: none\">";
-      out << "\\begin{eqnarray*}" << stringValueOnly << "\\end{eqnarray*}";
-      out << "</textarea>";
-      out << "<br>\n<button id=\"ButtonToggleLatex\" onclick=\"switchMenu('theResult" << this->indexInOwner << "'); switchMenu('theResultLatex" << this->indexInOwner << "');\"\">Show LaTeX/Show eye candy</button>";
-    }
+      out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(stringValueOnly);
   }
   if (this->outputString!="" && this->ExpressionType!=this->typeString)
     out << "<br>In addition, the program generated the following printout. ";

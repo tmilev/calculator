@@ -30668,6 +30668,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
   PolynomialOutputFormat PolyFormatLocal;
 //  PolyFormatLocal.alphabet.TheObjects[0]="z";
 //  PolyFormatLocal.alphabet.TheObjects[1]="x";
+
   int i;
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: LatexOutput << this->intValue; break;

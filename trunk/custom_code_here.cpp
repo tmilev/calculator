@@ -3976,15 +3976,17 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string&
   out << input;
   out << "\n\\end{array}";
   if (useDiv)
-    out << "</div>";
+    out << "</div><br>";
   else
     out << "</span>";
   out << "<textarea id=\"theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "\" style=\"display: none\">";
   out << "\\begin{array}{rcl}&&\n" << input << "\n\\end{array}";
   out << "</textarea>";
+  if (useDiv)
+    out << "\n<br>";
   out << "\n<button id=\"ButtonToggleLatex"  <<CGIspecificRoutines::GlobalFormulaIdentifier
         << " \" " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
-        << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">Show LaTeX/Show eye candy</button>";
+        << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">LaTeX code on/off</button>";
   return out.str();
 }
 

@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #endif
 //#define cgiLimitRAMuseNumPointersInList
+#ifndef __DATE__
+#define __DATE__ " unknown date "
+#endif
+
 
 extern int GlobalPointerCounter;
 
@@ -86,7 +90,7 @@ int main(int argc, char **argv)
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><head><title>Vector partition calculator updated 2 August, 2011</title>";
+  std::cout << "<html><head><title>Vector partition calculator updated " << __DATE__ << "</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";

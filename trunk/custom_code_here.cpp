@@ -3602,6 +3602,56 @@ int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
   return theNode.errorNoError;
 }
 
+int ParserNode::EvaluatePrintRootSAsAndSlTwos
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos)
+{ std::stringstream out1, out2, outSltwoPath, outSltwoDisplayPath, out;
+  char weylLetter=theNode.owner->DefaultWeylLetter;
+  int theRank=theNode.owner->DefaultWeylRank;
+  out1 << theNode.owner->outputFolderPath << weylLetter << theRank << "/rootHtml.html";
+  out2 << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/rootHtml.html";
+  outSltwoPath << theNode.owner->outputFolderPath << weylLetter << theRank << "/sl2s/";
+  outSltwoDisplayPath << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/sl2s/";
+  bool NeedASecondRun=false;
+  if (!CGIspecificRoutines::FileExists(out1.str()))
+  { std::stringstream outMkDirCommand1, outMkDirCommand2;
+    outMkDirCommand1 << "mkdir " << theNode.owner->outputFolderPath << weylLetter << theRank;
+    outMkDirCommand2 << "mkdir " << theNode.owner->outputFolderPath << weylLetter << theRank << "/sl2s";
+    theNode.owner->SystemCommands.AddObjectOnTop(outMkDirCommand1.str());
+    theNode.owner->SystemCommands.AddObjectOnTop(outMkDirCommand2.str());
+    if (!CGIspecificRoutines::FileExists(outSltwoPath.str()))
+      NeedASecondRun=true;
+    else
+    { SltwoSubalgebras theSl2s;
+      theSl2s.owner.FindSl2Subalgebras(theSl2s, weylLetter, theRank, theGlobalVariables);
+      std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
+      theSl2s.ElementToHtml(theGlobalVariables, theSl2s.owner.theWeyl, true, PathSl2, DisplayPathSl2);
+      theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
+      theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
+    }
+  }
+  if (!NeedASecondRun)
+  { out << "<META http-equiv=\"refresh\" content=\"0; url=";
+    if (!redirectToSlTwos)
+      out << out2.str();
+    else
+      out << outSltwoDisplayPath.str() << "sl2s.html";
+    out << "\">  Redirecting to the list of all root subalgebras: <br><br> <a href=\"" <<  out2.str() << "\">"  << out1.str() << "</a>.<br><br>";
+  }
+  else
+  { out << "<br><br>... Created the missing folders for the database. <b> Running  a second time... (you wil be redirected automatically)</b><br><br><META http-equiv=\"refresh\" content=\"0; url="
+          << "/cgi-bin/calculator?"
+          << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput=";
+    if (redirectToSlTwos)
+      out << CGIspecificRoutines::UnCivilizeStringCGI("printRootSubalgebras");
+    else
+      out << CGIspecificRoutines::UnCivilizeStringCGI("printSlTwos");
+    out << "\">";
+  }
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
 std::string Parser::GetFunctionDescription()
 { std::stringstream out;
   for (int i=0; i<this->theFunctionList.size; i++)
@@ -3626,6 +3676,23 @@ std::string ParserFunctionArgumentTree::ElementToString(bool useHtml, bool useLa
   }
   out  << ")";
   return out.str();
+}
+
+bool CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output)
+{ std::stringstream out;
+  bool result=false;
+  for (unsigned int i=0; i<input.size(); i++)
+  { if (input[i]=='<')
+      out << "&lt;";
+    if (input[i]=='>')
+      out << "&gt;";
+    if (input[i]!='<' && input[i]!='>')
+      out << input[i];
+    else
+      result=true;
+  }
+  output=out.str();
+  return result;
 }
 
 std::string CGIspecificRoutines::UnCivilizeStringCGI(const std::string& input)
@@ -3986,7 +4053,7 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string&
     out << "\n<br>";
   out << "\n<button id=\"ButtonToggleLatex"  <<CGIspecificRoutines::GlobalFormulaIdentifier
         << " \" " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
-        << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">LaTeX code on/off</button>";
+        << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">LaTeX show/hide</button>";
   return out.str();
 }
 
@@ -4032,6 +4099,13 @@ void Parser::initFunctionList()
     & ParserNode::EvaluatePrintRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
+  ("printBthreeDecomposedOverGtwo",
+   "()",
+   "Prints the decomposition of so(7) over G2. The G2-generators embedding is hardcoded according to an article of MacGovern.",
+   "printBthreeDecomposedOverGtwo",
+    & ParserNode::EvaluatePrintDecomposition
+   );
+  this->AddOneFunctionToDictionaryNoFail
   ("actByWeyl",
    "(RF,...)",
    "Act by the weyl group on a rational function (the i^th variable corresponds to the i^th coordinate in the simple basis). <br> Variables of index higher than the ambient dimension are treated as constants.",
@@ -4073,5 +4147,20 @@ void Parser::initFunctionList()
    "getRelations(x_1^2, x_1x_2, x_2^2)",
     & ParserNode::EvaluateRelations
    );
+    this->AddOneFunctionToDictionaryNoFail
+  ("printRootSubalgebras",
+   "()",
+   "Computes all root subalgebras. The computation is served from the hard disk if it isalready computed. The function will redirect you to a new page, to return to the calculator use the back button.",
+   "printRootSubalgebras",
+    & ParserNode::EvaluatePrintRootSAs
+   );
+    this->AddOneFunctionToDictionaryNoFail
+  ("printSlTwos",
+   "()",
+   "Computes all sl(2) subalgebras (equivalently, all nilpotent orbits) over the complex numbers. The computation is served from the hard disk if it isalready computed. The function will redirect you to a new page, to return to the calculator use the back button.",
+   "printSlTwos",
+    & ParserNode::EvaluatePrintSlTwos
+   );
+   //printAllSlTwos
    this->theFunctionList.QuickSortAscending();
 }

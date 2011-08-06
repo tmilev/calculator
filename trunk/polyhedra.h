@@ -9229,6 +9229,7 @@ public:
   static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
+  static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
   static std::string GetHtmlMathDivFromLatexFormula
   (const std::string& input)
   {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormula(input, true);}
@@ -9493,7 +9494,17 @@ class ParserNode
   static int EvaluateVectorPFIndicator
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-
+  static int EvaluatePrintRootSAsAndSlTwos
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos)
+;
+  static int EvaluatePrintSlTwos
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, true);
+  }
+  static int EvaluatePrintRootSAs
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false);
+  }
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);

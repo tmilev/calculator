@@ -39,7 +39,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
 
-const double MaxAllowedComputationTimeInSeconds=20;
+static double MaxAllowedComputationTimeInSeconds=20;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -124,6 +124,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
+  //civilizedInput="printRootSubalgebras";
 //  civilizedInput="GetRelations(x_1^2, x_1x_2, x_2^2)";
   //civilizedInput="vpf((1,-3), (1,-1), (1,1), (1,3))";
   //civilizedInput="split(PartialFraction((1,0), (1,2), (1,-2)))";
@@ -268,7 +269,12 @@ int main(int argc, char **argv)
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>";
   std::cout << "\n<br>\n";
-  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">" << civilizedInput  << "</textarea>\n<br>\n";
+  std::string civilizedInputSafish;
+  if (CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
+    std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
+  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">";
+  std::cout <<civilizedInputSafish;
+  std::cout << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
   std::cout << "\n</FORM>";
   std::cout << "<script type=\"text/javascript\"> document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";
@@ -305,12 +311,10 @@ int main(int argc, char **argv)
   std::string fileNameLieBracketFullPathNoEnding=inputPath;
   fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
   std::cout << "<img src=\"/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
-  List<std::string> LatexCommands;
   std::string latexCommandTemp;
   std::string fileNameLieBracketFullPathPNGEnding;
   fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
   fileNameLieBracketFullPathPNGEnding.append(".png");
-  LatexCommands.size=0;
   if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
   { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";
     std::fstream lieBracketFile;
@@ -327,10 +331,10 @@ int main(int argc, char **argv)
     std::stringstream tempStreamLatex, tempStreamPNG;
     tempStreamLatex << "latex  -output-directory=" << inputPath << " " << inputPath << fileNameLieBracketNoEnding << ".tex";
     latexCommandTemp=tempStreamLatex.str();
-    LatexCommands.AddObjectOnTop(latexCommandTemp);
+    theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
     tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
     latexCommandTemp= tempStreamPNG.str();
-    LatexCommands.AddObjectOnTop(latexCommandTemp);
+     theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
   }
   std::cout << "<br>";
   std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
@@ -370,12 +374,13 @@ int main(int argc, char **argv)
 	std::cout <<	"</div>";
   std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
   std::cout << "<br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
-  std::cout << "<br>civilized input strings: " << civilizedInput << "<br> chopped strings: <br>";
+  std::cout << "<br>civilized input strings: " << civilizedInputSafish << "<br> chopped strings: <br>";
   for (int i=0; i<inputStrings.size; i++)
     std::cout << "string " << i << ": " << inputStrings.TheObjects[i] << "<br>";
   std::cout << "system commands: <br>";
-  for (int i=0; i<LatexCommands.size; i++)
-    std::cout << LatexCommands.TheObjects[i] << "<br>";
+  MaxAllowedComputationTimeInSeconds=10000;
+  for (int i=0; i< theParser.SystemCommands.size; i++)
+    std::cout <<  theParser.SystemCommands.TheObjects[i] << "<br>";
   std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
 //  theParser.theLieAlgebra.ComputeDebugString();
 //  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();
@@ -385,8 +390,6 @@ int main(int argc, char **argv)
   std::string command1, command2;
   std::cout << "<!--";
   std::cout.flush();
-  for (int i=0; i<LatexCommands.size; i++)
-    system(LatexCommands.TheObjects[i].c_str());
   for(int i=0; i<theParser.SystemCommands.size; i++)
   { std::cout << "\n\ncommand: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
     system(theParser.SystemCommands.TheObjects[i].c_str());
@@ -474,6 +477,14 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
   }
   if (readAhead=="%3B")
   { out << ";";
+    return true;
+  }
+  if (readAhead=="%3C")
+  { out << "<";
+    return true;
+  }
+  if (readAhead=="%3E")
+  { out << ">";
     return true;
   }
   if (readAhead=="%2F")

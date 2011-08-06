@@ -14483,8 +14483,10 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
     this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, tempRoots, this->kModulesKepsCoords.TheObjects[i], theGlobalVariables);
     this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->kModules.TheObjects[i], this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
     root tempRoot;
-    this->kModulesKepsCoords.TheObjects[i].average(tempRoot, simpleBasisG.size);
-    assert(tempRoot.IsEqualToZero());
+    if (this->kModulesKepsCoords.TheObjects[i].size>0)
+    { this->kModulesKepsCoords.TheObjects[i].average(tempRoot, this->kModulesKepsCoords.TheObjects[i].TheObjects[0].size);
+      assert(tempRoot.IsEqualToZero());
+    }
    // this->kModulesgEpsCoords.TheObjects[i].Average
      // (tempRoot, this->kModulesgEpsCoords.TheObjects[i].TheObjects[0].size);
     //assert(tempRoot.IsEqualToZero());
@@ -25722,7 +25724,12 @@ ParserNode::ParserNode()
 
 void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
-  out << "String: " << this->StringBeingParsed << "\n";
+  std::string htmlSafish;
+  if (CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(this->StringBeingParsed, htmlSafish))
+    out << "&lt; -modified string: ";
+  else
+    out << "String: ";
+  out << htmlSafish << "\n";
   if (useHtml)
     out << "<br>";
   out << "Tokens: ";
@@ -28834,7 +28841,7 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
   { MatrixLargeRational& theMat=this->actionsNegativeRootSpacesCartanPositiveRootspaces.TheObjects[j];
     ElementSimpleLieAlgebra& currentGenerator=theHmm.imagesAllChevalleyGenerators.TheObjects[j];
     this->ComputeAdMatrixFromModule(currentGenerator, theModule, theHmm.theRange, theMat, theGlobalVariables);
-    out << "<br> <div class=\"math\" scale=\"50\">" << currentGenerator.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange) << "\\to" << theMat.ElementToString(false, true) <<"</div>";
+    out << "<br> <div class=\"math\" scale=\"50\">" << currentGenerator.ElementToStringNegativeRootSpacesFirst(false, false, theHmm.theRange) << "\\mapsto" << theMat.ElementToString(false, true) <<"</div>";
   }
 }
 

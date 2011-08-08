@@ -39,7 +39,7 @@ void getPath(char* path, std::string& output)
 extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
 
-static double MaxAllowedComputationTimeInSeconds=20;
+static double MaxAllowedComputationTimeInSeconds=10;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
-  //civilizedInput="(2/7)^1000-1";
+  //civilizedInput="invariantsSlTwoOfDegree(30,(2,3))";
   //civilizedInput="(x_1\\mapsto x_1, x_2\\mapsto x_2-1: 1/4x_1^2-1/4x_2^2+x_1+1)";
   //civilizedInput="printRootSubalgebras";
 //  civilizedInput="GetRelations(x_1^2, x_1x_2, x_2^2)";
@@ -251,6 +251,8 @@ int main(int argc, char **argv)
     theParser.testAlgebra.initDefaultOrder(theParser.theHmm.theRange, theGlobalVariables);
   double TimeParsing=0, TimeEvaluation=0;
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;
+  CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, tempS);
+  civilizedInput=tempS;
   theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
   TimeParsing=GetElapsedTimeInSeconds();
   std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, theGlobalVariables);
@@ -294,7 +296,7 @@ int main(int argc, char **argv)
 #endif
   std::cout.flush();
   std::cout << "</td>";
-  std::cout << " <td width=\"300\">" << theParser.GetFunctionDescription() << "</td>\n";
+  std::cout << " <td style=\"width:300\"> List of available functions follows. <hr> " << theParser.GetFunctionDescription() << "</td>\n";
   std::cout << "<td>";
   std::cout << "<b>Links: </b><br>"
                 //<< "<button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
@@ -306,9 +308,9 @@ int main(int argc, char **argv)
                  // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
                   //<< "</div>"
                   << "";
-  std::cout << "<hr>";
-  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
-  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info (developers)</button>";
+  std::cout << "<hr>Computation is limited to " << MaxAllowedComputationTimeInSeconds << " seconds. <br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\"+ wrong result= <b>very serious calculator bug</b>.";
+  std::cout << "<br>Bug reports = my wholehearted gratitude.<br><button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
+  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++(1 out of 3 files (header file))</a>\n";
@@ -321,7 +323,8 @@ int main(int argc, char **argv)
   std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/RootSystem.html.cpp?view=markup\"> Calculator interface c++ (2 out of 2 files)</a>\n";
   std::cout << " <br>\n";
-  std::cout << " To run the calculator on your own web server you might want to install the <a href=\"http://httpd.apache.org/\">Apache web server</a> (comes preinstalled on <a href=\"http://www.ubuntu.com/\">Ubuntu</a>)";
+  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>.";
+  std::cout << " ";
   std::cout << " <br>\n";
 	std::cout <<	"</div>";
   std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
@@ -376,7 +379,7 @@ int main(int argc, char **argv)
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
   std::cout << "<br>A two dimensional visualization of the root system follows. <br> The basis vectors (small red cirles) can be dragged with the mouse pointer. <br> The <a href=\"/tmp/RootSystem_no_autocomplete.html\">visualization code</a>"
-                  << " is uses javascript + google script for drawing lines and cirles.<br>";
+                  << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";
   std::stringstream tempStream3;
   static_html4(tempStream3);
   std::cout << tempStream3.str();

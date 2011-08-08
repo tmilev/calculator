@@ -4008,7 +4008,11 @@ int ParserNode::EvaluateInvariantsSl2DegreeM
   slTwoInSlN theSl2;
   theNode.ExpressionType=theNode.typeString;
   List<PolynomialRationalCoeff> outputList;
-  theSl2.ComputeInvariantsOfDegree(thePartition, theDegree, outputList, theGlobalVariables);
+  std::string tempS;
+  if (! theSl2.ComputeInvariantsOfDegree(thePartition, theDegree, outputList, tempS, theGlobalVariables))
+  { theNode.outputString=tempS;
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  }
   theNode.ExpressionType=theNode.typeString;
   std::stringstream out;
   out << "A basis for the invariants of degree" << theDegree << " is given by";
@@ -4035,13 +4039,18 @@ void MatrixLargeRational::ActOnMonomialAsDifferentialOperator(Monomial<Rational>
     }
 }
 
-void slTwoInSlN::ComputeInvariantsOfDegree
-  (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, GlobalVariables& theGlobalVariables)
+bool slTwoInSlN::ComputeInvariantsOfDegree
+  (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, std::string& outputError, GlobalVariables& theGlobalVariables)
 { this->initFromModuleDecomposition(decompositionDimensions, false, false);
   SelectionWithMaxMultiplicity theSel;
   theSel.initMaxMultiplicity(this->theDimension, theDegree);
   PolynomialOutputFormat PolyFormatLocal;
+  outputError="";
   int numCycles=theSel.NumCombinationsOfCardinality(theDegree);
+  if (numCycles<=0)
+  { outputError= " Computation too large. ";
+    return false;
+  }
   PolynomialRationalCoeff basisMonsZeroWeight, basisMonsAll;
   basisMonsZeroWeight.Nullify(this->theDimension);
   basisMonsZeroWeight.MakeActualSizeAtLeastExpandOnTop(numCycles);
@@ -4106,6 +4115,7 @@ void slTwoInSlN::ComputeInvariantsOfDegree
       }
  //   std::cout << "<br>Invariant " << i << ":<br>" << current.ElementToString(PolyFormatLocal);
   }
+  return true;
 }
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree

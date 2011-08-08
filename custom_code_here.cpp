@@ -3991,6 +3991,123 @@ bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVar
   return true;
 }
 
+int ParserNode::EvaluateInvariantsSl2DegreeM
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ List<int> thePartition;
+  int theDegree=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].intValue;
+  if (theDegree<0)
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  ParserNode& partitionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
+  thePartition.SetSize(partitionNode.children.size);
+  for (int i=0; i<partitionNode.children.size; i++)
+  { thePartition.TheObjects[i]=theNode.owner->TheObjects[partitionNode.children.TheObjects[i]].intValue;
+    if (thePartition.TheObjects[i]<1)
+      return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+//    std::cout<< thePartition.TheObjects[i] << ",";
+  }
+  slTwoInSlN theSl2;
+  theNode.ExpressionType=theNode.typeString;
+  List<PolynomialRationalCoeff> outputList;
+  theSl2.ComputeInvariantsOfDegree(thePartition, theDegree, outputList, theGlobalVariables);
+  theNode.ExpressionType=theNode.typeString;
+  std::stringstream out;
+  out << "A basis for the invariants of degree" << theDegree << " is given by";
+  for (int i=0; i<outputList.size; i++)
+  { out << "<br>" << outputList.TheObjects[i].ElementToString() << ", ";
+  }
+  theNode.outputString=out.str();
+  return theNode.errorNoError;
+}
+
+void MatrixLargeRational::ActOnMonomialAsDifferentialOperator(Monomial<Rational>& input, PolynomialRationalCoeff& output)
+{ assert(this->NumRows==this->NumCols && this->NumRows==input.NumVariables);
+  Monomial<Rational> tempMon;
+  tempMon.init(tempMon.NumVariables);
+  output.Nullify(tempMon.NumVariables);
+  for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+    { tempMon=input;
+      tempMon.Coefficient*=tempMon.degrees[j];
+      tempMon.Coefficient*=this->elements[i][j];
+      tempMon.degrees[j]--;
+      tempMon.degrees[i]++;
+      output.AddMonomial(tempMon);
+    }
+}
+
+void slTwoInSlN::ComputeInvariantsOfDegree
+  (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, GlobalVariables& theGlobalVariables)
+{ this->initFromModuleDecomposition(decompositionDimensions, false, false);
+  SelectionWithMaxMultiplicity theSel;
+  theSel.initMaxMultiplicity(this->theDimension, theDegree);
+  PolynomialOutputFormat PolyFormatLocal;
+  int numCycles=theSel.NumCombinationsOfCardinality(theDegree);
+  PolynomialRationalCoeff basisMonsZeroWeight, basisMonsAll;
+  basisMonsZeroWeight.Nullify(this->theDimension);
+  basisMonsZeroWeight.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  basisMonsAll.Nullify(this->theDimension);
+  basisMonsAll.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  Monomial<Rational> theMon;
+  theMon.init(this->theDimension);
+  root theWeight;
+  root theCartanAction;
+  theCartanAction.SetSize(this->theDimension);
+  theWeight.SetSize(this->theDimension);
+  for (int j=0; j<this->theDimension; j++)
+    theCartanAction.TheObjects[j]=this->theH.elements[j][j];
+  theSel.IncrementSubsetFixedCardinality(theDegree);
+  theMon.Coefficient.MakeOne();
+  for (int i=0; i<numCycles; i++, theSel.IncrementSubsetFixedCardinality(theDegree))
+  { for (int j=0; j<this->theDimension; j++)
+    { theMon.degrees[j]=theSel.Multiplicities.TheObjects[j];
+      theWeight.TheObjects[j]=theMon.degrees[j];
+    }
+    basisMonsAll.AddMonomial(theMon);
+    if (root::RootScalarEuclideanRoot(theWeight, theCartanAction).IsEqualToZero())
+      basisMonsZeroWeight.AddMonomial(theMon);
+  }
+//  std::cout << "<br>Num cycles:" << numCycles << "<br>The basis mons (there are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ElementToString(PolyFormatLocal);
+  MatrixLargeRational tempMat;
+  tempMat.init(basisMonsAll.size*2, basisMonsZeroWeight.size);
+//  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
+  PolynomialRationalCoeff tempP;
+  for (int l=0; l<2; l++)
+    for (int k=0; k<basisMonsZeroWeight.size; k++)
+    { if (l==0)
+      { this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
+
+      }
+      else
+        this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
+      for (int j=0; j<basisMonsAll.size; j++)
+      { int indexInResult=tempP.IndexOfObjectHash(basisMonsAll.TheObjects[j]);
+        int currentRow=l*basisMonsAll.size+j;
+        if (indexInResult==-1)
+          tempMat.elements[currentRow][k]=0;
+        else
+          tempMat.elements[currentRow][k]=tempP.TheObjects[indexInResult].Coefficient;
+      }
+    }
+//  if (tempMat.NumRows<120)
+//    std::cout << "<div class=\"math\" scale=\"50\">" << tempMat.ElementToString(false, true) << "</div>";
+  roots tempRoots;
+  tempMat.FindZeroEigenSpace(tempRoots, theGlobalVariables);
+  output.SetSize(tempRoots.size);
+//  std::cout << "<br>invariants root form: " << tempRoots.ElementToString();
+//  std::cout << "<br> .... and the invariants are: ";
+  for (int i=0; i<output.size; i++)
+  { Polynomial<Rational>& current=output.TheObjects[i];
+    current.Nullify(this->theDimension);
+    for (int j=0; j<basisMonsZeroWeight.size; j++)
+      if (!tempRoots.TheObjects[i].TheObjects[j].IsEqualToZero())
+      { theMon.Assign(basisMonsZeroWeight.TheObjects[j]);
+        theMon.Coefficient=tempRoots.TheObjects[i].TheObjects[j];
+        current.AddMonomial(theMon);
+      }
+ //   std::cout << "<br>Invariant " << i << ":<br>" << current.ElementToString(PolyFormatLocal);
+  }
+}
+
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
 (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
@@ -4051,7 +4168,7 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string&
   out << "</textarea>";
   if (useDiv)
     out << "\n<br>";
-  out << "\n<button id=\"ButtonToggleLatex"  <<CGIspecificRoutines::GlobalFormulaIdentifier
+  out << "\n<button id=\"ButtonToggleLatex"  << CGIspecificRoutines::GlobalFormulaIdentifier
         << " \" " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
         << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">LaTeX show/hide</button>";
   return out.str();
@@ -4136,7 +4253,7 @@ void Parser::initFunctionList()
    this->AddOneFunctionToDictionaryNoFail
   ("transformToReducedGroebnerBasis",
    "(Polynomial,...)",
-   "Transforms to reduced Groebner basis with respect to the monomial ordering x_1< x_2<x_3<....",
+   "Transforms to reduced Groebner basis with respect to the monomial ordering x_1&lt; x_2&lt;x_3&lt;....",
    "transformToReducedGroebnerBasis(x_1^3+x_1x_2+1, x_1x_2, x_2^3)",
     & ParserNode::EvaluateGroebner
    );
@@ -4147,19 +4264,26 @@ void Parser::initFunctionList()
    "getRelations(x_1^2, x_1x_2, x_2^2)",
     & ParserNode::EvaluateRelations
    );
-    this->AddOneFunctionToDictionaryNoFail
+  this->AddOneFunctionToDictionaryNoFail
   ("printRootSubalgebras",
    "()",
    "Computes all root subalgebras. The computation is served from the hard disk if it isalready computed. The function will redirect you to a new page, to return to the calculator use the back button.",
    "printRootSubalgebras",
     & ParserNode::EvaluatePrintRootSAs
    );
-    this->AddOneFunctionToDictionaryNoFail
+  this->AddOneFunctionToDictionaryNoFail
   ("printSlTwos",
    "()",
-   "Computes all sl(2) subalgebras (equivalently, all nilpotent orbits) over the complex numbers. The computation is served from the hard disk if it isalready computed. The function will redirect you to a new page, to return to the calculator use the back button.",
+   "Computes all sl(2) subalgebras (equivalently, all nilpotent orbits) over the complex numbers. The computation is served from the hard disk if it is already computed. The function will redirect you to a new page, to return to the calculator use the back button.",
    "printSlTwos",
     & ParserNode::EvaluatePrintSlTwos
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("invariantsSlTwoOfDegree",
+   "(Integer, (Integer,...))",
+   "Given an sl(2)-representation  V_1+...+V_n , computes the symmetric tensor algebra invariants of sl(2). Input: the first variable is the degree, followed by a vector describing the dimensions of  each V_i.",
+   "invariantsSlTwoOfDegree(2,(2,2))",
+    & ParserNode::EvaluateInvariantsSl2DegreeM
    );
    //printAllSlTwos
    this->theFunctionList.QuickSortAscending();

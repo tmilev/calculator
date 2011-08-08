@@ -1,0 +1,663 @@
+<html>
+<head> 
+<title>
+Root systems
+</title>
+</head>
+<body>
+<!>
+<!--Option-->
+<select name="textType" id="textType" onchange="initRecompute();">
+  <option>A</option>
+  <option selected="1">B</option>
+  <option>C</option>
+  <option>D</option>
+  <option>E</option>
+  <option>F</option>
+  <option>G</option>
+</select>
+<select name="textDim" id="textDim" onchange="initRecompute();">
+  <option>1</option>
+  <option>2</option>
+  <option selected="1">3</option>
+  <option>4</option>
+  <option>5</option>
+  <option>6</option>
+  <option>7</option>
+  <option>8</option>
+</select>
+<script type="text/javascript"> 
+function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != "none" ) { el.style.display = 'none'; } else { el.style.display = '';}}
+</script>
+
+<script type="text/javascript" 
+src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  
+djConfig = "parseOnLoad: true"></script>
+<div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
+clickCanvasMain(event.clientX, event.clientY);
+//changeBasis(1, 50, 50); drawOnCanvasMain();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
+<br>
+The basis vectors correspond to the vertices of the Dynkin diagram.<br>
+You can drag the center and the basis vectors.<button onclick="switchMenu('rotationExplanation')">More info</button>
+<br>
+<div id="rotationExplanation" style="display: none">
+The i^th vector corresponds to the i^th node of the Dynkin diagram of the root system.<br>
+The nodes are labeled in Bourbaki order.<br>
+Let the two dimensional plane we project onto be spanned by vectors e_1 and e_2.<br>
+Let v be a basis vector which you drag, with orthogonal projection in the (e_1,e_2) plane equal to v' <br>
+and with orthogonal complement v'':=v-v'.<br>
+When you drag a basis vector v, you do two things.<br>
+1) You rotate e_1 and e_2 in the (e_1,e_2) plane, to match the rotation angle given by your mouse pointer<br>
+2) Then you apply a rotation in the (v,v'')-plane that preserves the orthogonal complement of the (v,v'')-plane <br> 
+such as to match the length of v' determined by your mouse pointer. <br>
+Note that this operation is not defined if v lies in the (e_1, e_2) plane. <br>
+If the above is the case, you will not be able to modify the length of v'. <br>  
+<textarea id="debugField" cols="128" rows="15">
+</textarea><br>
+</div><br>
+The root system in simple basis coordinates follows. <br>
+
+
+<textarea id="outputField">
+</textarea>
+
+<script type="text/javascript">
+var CartanSymmetric;
+var InvertedCartan;
+var theRootSystem;
+var theRootSystemLongLength;
+var theRootSystemLengths;
+var theRootSystemSize;
+var theRootSystemHashes;
+var theRootSystemHashesSizes;
+var HashSize=1000;
+var theWeylLetter;
+var theWeylDim;
+var VectorE1;
+var VectorE2;
+
+function generateRootSystemFromWeylLetterAndDim(WeylLetter, WeylDim)
+{ if (WeylLetter!="A" && WeylLetter!="B" && WeylLetter!="C" && WeylLetter!="D" && WeylLetter!="E" && WeylLetter!="F" && WeylLetter!="G" )
+    return;
+  if (WeylDim>9 || WeylDim<1)
+    return;
+  makeCartanArbitrary(WeylLetter, WeylDim);
+  InvertedCartan=invertMatrix(CartanSymmetric);
+  VectorE1= new Array(theWeylDim);
+  VectorE2= new Array(theWeylDim);
+  for (var i=0; i<theWeylDim; i++)
+  { VectorE1[i]=(i+1)*(i+1)+1;
+    VectorE2[i]=i*3+1;
+  }
+  AddVectorTimes(VectorE1, VectorE2, -getScalarProduct(VectorE1, VectorE2)/getScalarProduct(VectorE2, VectorE2));
+  MultiplyVector(VectorE1, Math.sqrt(1/(getScalarProduct(VectorE1, VectorE1))));
+  MultiplyVector(VectorE2, Math.sqrt(1/(getScalarProduct(VectorE2, VectorE2))));
+  GenerateRootSystem();
+  theRootSystemLengths= new Array(theRootSystem.length);
+  theRootSystemLongLength= getScalarProduct(theRootSystem[0], theRootSystem[0]);
+  for (var i=0; i<theRootSystemSize; i++)
+  { theRootSystemLengths[i]= getScalarProduct(theRootSystem[i], theRootSystem[i]);
+    if (theRootSystemLengths[i]>theRootSystemLongLength)
+      theRootSystemLongLength=theRootSystemLengths[i];
+  }
+  ComputeProjections();
+}
+
+function ComputeProjections()
+{ for (var i=0; i<theWeylDim; i++)
+  { Basis[i][0]=GraphicsUnit*getScalarProduct(VectorE1, theRootSystem[i]);
+    Basis[i][1]=GraphicsUnit*getScalarProduct(VectorE2, theRootSystem[i]);
+  }
+}
+
+function MultiplyVector(output, coeff)
+{ for (var i=0; i<output.length; i++)
+    output[i]*=coeff;
+}
+
+function AddVectorTimes(output, inputVector, coeff)
+{ for (var i=0; i<output.length; i++)
+    output[i]+=inputVector[i]*coeff;
+}
+
+function makeCartanArbitrary(WeylLetter, WeylDim)
+{ theWeylLetter=WeylLetter;
+  theWeylDim= WeylDim;
+  if (theWeylLetter=="E")
+  { if (theWeylDim<6)
+      theWeylDim=6;
+    if (theWeylDim>8)
+      theWeylDim=8;
+  }
+  if (theWeylLetter=="G")
+    theWeylDim=2;
+  if (theWeylLetter=="F")
+    theWeylDim=4;
+  makeCartanAn(theWeylDim);
+  if (theWeylLetter=="B")
+  { CartanSymmetric[theWeylDim-1][theWeylDim-1]=1;
+  }
+  if (theWeylLetter=="C")
+  {CartanSymmetric[theWeylDim-1][theWeylDim-1]=4;
+   CartanSymmetric[theWeylDim-1][theWeylDim-2]=-2;
+   CartanSymmetric[theWeylDim-2][theWeylDim-1]=-2;
+  }
+  if (theWeylLetter=="F")
+  { CartanSymmetric[0][0]=2 ; CartanSymmetric[0][1]=-1;
+    CartanSymmetric[1][0]=-1; CartanSymmetric[1][1]=2 ; CartanSymmetric[1][2]=-2;
+    CartanSymmetric[2][1]=-2; CartanSymmetric[2][2]=4 ; CartanSymmetric[2][3]=-2;
+    CartanSymmetric[3][2]=-2; CartanSymmetric[3][3]=4 ;
+  }
+  if (theWeylLetter=="D")
+  { CartanSymmetric[theWeylDim-2][theWeylDim-1]=0;
+    CartanSymmetric[theWeylDim-1][theWeylDim-2]=0;
+    CartanSymmetric[theWeylDim-3][theWeylDim-1]=-1;
+    CartanSymmetric[theWeylDim-1][theWeylDim-3]=-1;
+  }
+  if (theWeylLetter=="E")
+  { CartanSymmetric[0][1]=0; CartanSymmetric[1][0]=0;
+    CartanSymmetric[1][2]=0; CartanSymmetric[2][1]=0;
+    CartanSymmetric[0][2]=-1; CartanSymmetric[2][0]=-1;
+    CartanSymmetric[1][3]=-1; CartanSymmetric[3][1]=-1;
+  }  
+  if (theWeylLetter=="G")
+  { CartanSymmetric[0][0]=6; CartanSymmetric[0][1]=-3;
+    CartanSymmetric[1][0]=-3; CartanSymmetric[1][1]=2;
+  }
+  document.getElementById("textDim").value=theWeylDim;
+  document.getElementById("textType").value=theWeylLetter;  
+}
+
+function makeCartanAn(WeylDim)
+{ CartanSymmetric= new Array(WeylDim);
+  for (var i=0; i<WeylDim; i++)
+  { CartanSymmetric[i]= new Array(WeylDim);
+    for (var j=0; j<WeylDim; j++)
+      CartanSymmetric[i][j]=0;
+    CartanSymmetric[i][i]=2;
+    if (i<WeylDim-1)
+      CartanSymmetric[i][i+1]=-1;
+    if (i>0)
+      CartanSymmetric[i][i-1]=-1;
+  }
+}
+
+function ClearRootSystem()
+{ theRootSystemHashes= new Array(HashSize);
+  theRootSystemHashesSizes= new Array(HashSize);
+  theRootSystem= new Object(Array(HashSize));
+  for (var i=0; i<HashSize; i++)
+  { theRootSystemHashesSizes[i]=0;
+    theRootSystemHashes[i]= new Array();
+  }
+  theRootSystemSize=0;
+}
+
+function HashFunctionRoot(theRoot, theWeylDim)
+{ var result=0;
+  for (var i=0; i<theWeylDim; i++)
+    result+=(i+6)*(6+1)*theRoot[i];
+  result= result % HashSize;
+  if (result<0)
+    result+=HashSize;
+  return result;
+}
+
+function getRootIndex(theRoot, theWeylDim)
+{ var theHash = HashFunctionRoot(theRoot, theWeylDim);
+  var hashArraySize=theRootSystemHashesSizes[theHash];
+  for (var i=0; i<hashArraySize; i++)
+  { theIndex=theRootSystemHashes[theHash][i];
+    if (AreEqualRoots(theRootSystem[theIndex], theRoot, theWeylDim))
+      return theIndex;
+  }
+  return -1;
+}
+
+function AreEqualRoots(root1, root2, theDim)
+{ for (var i=0; i<theDim; i++)
+    if (root1[i]!=root2[i])
+      return false;
+  return true;
+}
+
+function addToRootSystemNoRepetition(theRoot)
+{ var theIndex=getRootIndex(theRoot, theWeylDim);
+  if (theIndex==-1)
+  { theRootSystem[theRootSystemSize]=new Array(theWeylDim);
+    for (var i=0; i<theWeylDim; i++)
+      theRootSystem[theRootSystemSize][i]=theRoot[i];
+    var theHashIndex=HashFunctionRoot(theRoot, theWeylDim);
+    var theHashSize=theRootSystemHashesSizes[theHashIndex];
+    theRootSystemHashes[theHashIndex][theHashSize]=theRootSystemSize;
+    theRootSystemHashesSizes[theHashIndex]++;
+    theRootSystemSize++;
+  }
+  return false;
+}
+
+function getScalarProduct(root1, root2)
+{ var result=0; 
+  for (var i=0; i<theWeylDim; i++)
+    for (var j=0; j<theWeylDim; j++)
+      result+= root1[i]*root2[j]*CartanSymmetric[i][j];
+  
+  return result;
+}
+
+function ActOnARootGenIndex(theIndex, input, output)
+{ for (i=0; i<theWeylDim; i++)
+    output[i]= input[i];
+  theScalarProduct=getScalarProduct(theRootSystem[theIndex], input);
+  output[theIndex]-= theScalarProduct*2/getScalarProduct(theRootSystem[theIndex],theRootSystem[theIndex]);
+  return output;
+}
+
+function GenerateRootSystem()
+{ var theOutputRoot= new Object(Array(theWeylDim));
+  ClearRootSystem();
+  for (var j=0; j<theWeylDim; j++)
+  { for (var i=0; i<theWeylDim; i++)
+      theOutputRoot[i]=0;
+    theOutputRoot[j]=1;
+    addToRootSystemNoRepetition(theOutputRoot);
+  }
+  for (var l=0; l<theRootSystemSize; l++)
+  { for (var j=0; j<theWeylDim; j++)
+    { theOutputRoot=ActOnARootGenIndex(j, theRootSystem[l], theOutputRoot);
+      addToRootSystemNoRepetition(theOutputRoot);
+    }
+  }
+  WriteRootSystem();
+  drawOnCanvasMain();
+}
+
+function WriteRootSystem()
+{ var output = document.getElementById("outputField");
+  output.value="";
+  output.rows=theRootSystemSize;
+  var tempS;
+  for (var i=0; i<theRootSystemSize; i++)
+  { tempS="(";
+    for (var j=0; j<theWeylDim; j++)
+    { tempS=tempS+theRootSystem[i][j];
+      if (j!=theWeylDim-1)
+        tempS=tempS+",";
+    }
+    tempS=tempS+")";
+    output.value+=tempS;
+    if (i!=theRootSystemSize-1)
+      output.value+="\n";
+  }  
+}
+</script>
+
+<script type="text/javascript">
+var NumElements=0;
+var node;
+var surface;
+var MaxNumCoords=8;
+var Basis= new Array(MaxNumCoords);
+var Xshift=200;
+var Yshift=200;
+var selectedBasisIndex=-1;//-2 = center of coord system is selected
+var GraphicsUnit=80;
+var clickTolerance=5;
+var RootsArray;
+var ZeroRoot;
+var ButtonIsDown=false;
+var DebugString;
+for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)
+  Basis[tempCounter]= new Array(2);
+tempCounter=0;
+Basis[tempCounter][0]=0.3;  Basis[tempCounter][1]=0; tempCounter++; 
+Basis[tempCounter][0]=0.4;    Basis[tempCounter][1]=-0.1; tempCounter++; 
+Basis[tempCounter][0]=0.4;   Basis[tempCounter][1]=0.1; tempCounter++; 
+Basis[tempCounter][0]=-0.8;  Basis[tempCounter][1]=1.4; tempCounter++; 
+Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.9; tempCounter++; 
+Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.8; tempCounter++; 
+Basis[tempCounter][0]=1.5;  Basis[tempCounter][1]=0.8; tempCounter++; 
+Basis[tempCounter][0]=1.4;  Basis[tempCounter][1]=0.8; tempCounter++; 
+for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)
+{ Basis[tempCounter][0]*= GraphicsUnit;
+  Basis[tempCounter][1]*= GraphicsUnit;
+} 
+
+function ptsWithinClickTolerance(x1, y1, x2, y2)
+{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )
+    return false;
+  return true;
+}
+
+function clickCanvasMain(cx,cy)
+{ var divPosX=0;
+  var divPosY=0;
+  var thePointer= canvasMain;
+  while(thePointer)
+  { divPosX += thePointer.offsetLeft;
+    divPosY += thePointer.offsetTop;
+    thePointer = thePointer.offsetParent;
+  }
+  var posx=(cx-divPosX+document.body.scrollLeft-Xshift);
+  var posy=-(cy-divPosY+document.body.scrollTop-Yshift);
+  selectedBasisIndex=-1;
+  if (ptsWithinClickTolerance(posx,posy,0,0))
+    selectedBasisIndex=-2;
+  for (i=0;i<MaxNumCoords;i++)
+  { if (ptsWithinClickTolerance(posx, posy, Basis[i][0], Basis[i][1]))
+      selectedBasisIndex=i;
+  }
+}
+
+function RotateOutOfPlane(input, orthoBasis1, orthoBasis2, oldTanSquared, newTanSquared)
+{ var projection= dojo.clone(orthoBasis1);
+  var vComponent= dojo.clone(input);
+  var scal1= getScalarProduct(orthoBasis1, input);
+  var scal2= getScalarProduct(orthoBasis2, input);
+  MultiplyVector(projection, scal1);
+  AddVectorTimes(projection, orthoBasis2, scal2);
+  AddVectorTimes(vComponent, projection, -1);
+  DebugString+="\ngetScalarProd="+getScalarProduct(projection, vComponent);
+  var oldAngle=Math.atan(Math.sqrt(oldTanSquared));
+  var newAngle=Math.atan(Math.sqrt(newTanSquared));
+  if (isNaN(oldAngle) || isNaN(newAngle))
+    return input;
+  var angleChange=-oldAngle+newAngle;  
+  projection=dojo.clone(orthoBasis1);
+  MultiplyVector(projection,              Math.cos(angleChange)*scal1-Math.sin(angleChange)*scal2);
+  AddVectorTimes(projection, orthoBasis2, Math.sin(angleChange)*scal1+Math.sin(angleChange)*scal2);
+  var result= vComponent;
+  AddVectorTimes(result, projection, 1);  
+  return result;
+}
+
+function ScaleToUnitLength(vector)
+{ MultiplyVector(vector, 1/Math.sqrt(getScalarProduct(vector,vector)));
+}
+
+function RootToString(theRoot)
+{  var output="(";
+  for (var i=0; i<theWeylDim; i++)
+  { output=output+ theRoot[i].toFixed(2);
+    if (i!=theWeylDim-1)
+     output+=",";
+  }
+  output+=")";
+  return output;
+}
+
+function getQuadrantFromXandY(theX, theY)
+{ if (theX>0 && theY>=0)
+    return 1;
+  if (theX<=0 && theY>0)
+    return 2;
+  if (theX<0 && theY<=0)
+    return 3;
+  return 4;
+}
+
+function getAngleFromXandY(x, y, neighborX, neighborY)
+{ var result;
+  if (x!=0)
+   result= Math.atan(y/x);
+  else 
+    if (y>0)
+      result= Math.PI/2;
+    else
+      result= -Math.PI/2;
+  return result;     
+}
+
+function changeBasis(selectedIndex, newX, newY)
+{ if (newX==0 && newY==0)
+    return;
+  DebugString="";
+  var selectedRoot=theRootSystem[selectedIndex];
+  var selectedRootLength=getScalarProduct(selectedRoot,selectedRoot);  
+  var oldX=Basis[selectedIndex][0]/GraphicsUnit;
+  var oldY=Basis[selectedIndex][1]/GraphicsUnit; 
+  newX/=GraphicsUnit;
+  newY/=GraphicsUnit;
+  var oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
+  var newAngle= getAngleFromXandY(newX, newY, oldX, oldY);    
+  var AngleChange= -newAngle+oldAngle;
+  var epsilon=0.000015;
+  while (AngleChange>=Math.PI/2+epsilon)
+  { AngleChange-=Math.PI;}
+  while (AngleChange<=-Math.PI/2-epsilon)
+  { AngleChange+=Math.PI;}
+  DebugString+="\nold angle:"+ oldAngle.toFixed(2);
+  DebugString+="\nnew angle: "+newAngle.toFixed(2);
+  var NewVectorE1=dojo.clone(VectorE1);
+  var NewVectorE2= dojo.clone(VectorE2);
+  MultiplyVector(NewVectorE1, Math.cos(AngleChange));
+  AddVectorTimes(NewVectorE1, VectorE2, Math.sin(AngleChange));
+  MultiplyVector(NewVectorE2, Math.cos(AngleChange));
+  AddVectorTimes(NewVectorE2, VectorE1, -Math.sin(AngleChange));
+  VectorE1=NewVectorE1;
+  VectorE2=NewVectorE2;
+  var RootTimesE1=getScalarProduct(selectedRoot, VectorE1);
+  var RootTimesE2=getScalarProduct(selectedRoot, VectorE2);
+  var vOrthogonal=dojo.clone(selectedRoot);
+  var vProjection=dojo.clone(VectorE1); 
+  MultiplyVector(vProjection, RootTimesE1);
+  AddVectorTimes(vProjection, VectorE2, RootTimesE2);
+  AddVectorTimes(vOrthogonal, vProjection, -1);
+  var oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);
+  var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);
+  DebugString+="\noldRatio: "+oldRatioProjectionOverHeightSquared;
+  DebugString+="\nnewRatio: "+newRatioProjectionOverHeightSquared;
+  if (getScalarProduct(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct(vOrthogonal, vOrthogonal)<-epsilon)
+  { ScaleToUnitLength(vProjection);
+    ScaleToUnitLength(vOrthogonal);
+    DebugString+="\nscaled vOrthogonal="+RootToString(vOrthogonal)+"->"+getScalarProduct(vOrthogonal,vOrthogonal);
+    DebugString+="\nscaled vProjection="+RootToString(vProjection)+"->"+getScalarProduct(vProjection,vProjection); 
+    DebugString+="\ntheScalarProd: "+getScalarProduct(vOrthogonal, vProjection);  
+    VectorE1=RotateOutOfPlane(VectorE1, vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+    VectorE2=RotateOutOfPlane(VectorE2, vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+  }
+  AddVectorTimes(VectorE2, VectorE1, -getScalarProduct(VectorE1, VectorE1)*getScalarProduct(VectorE1, VectorE2));
+  ScaleToUnitLength(VectorE1);
+  ScaleToUnitLength(VectorE2);
+  
+  DebugString+="\ne1="+RootToString(VectorE1);
+  DebugString+="\ne2="+RootToString(VectorE2);
+  DebugString+="\ne1*e2="+getScalarProduct(VectorE1, VectorE2);  
+  ComputeProjections();
+}
+
+function fixE1AndE2andComputeProjections()
+{ var tempE1= new Array(theWeylDim);
+  var tempE2= new Array(theWeylDim);
+  for (var i=0; i<theWeylDim; i++)
+  { tempE1[i]=Basis[i][0];
+    tempE2[i]=Basis[i][1];
+  }
+  VectorE1=matrixActOnRow(InvertedCartan, tempE1);
+  VectorE2=matrixActOnRow(InvertedCartan, tempE2);
+  var tempLength1=getScalarProduct(VectorE1, VectorE1);
+  var tempLength2=getScalarProduct(VectorE2, VectorE2);
+  
+}
+
+function matrixActOnRow(theMatrix, theRow)
+{ var output=new Array(theRow.length);
+  for (var i=0; i<theMatrix.length; i++)
+  { output[i]=0;
+    for (var j=0; j<theMatrix.length; j++)
+      output[i]+=theMatrix[j][i]*theRow[j];
+  }
+  return output;
+}
+
+function swapTwoRows(theMatrix, index1, index2)
+{ var temp;
+  for (var i=0; i<theMatrix.length; i++)
+  { temp=theMatrix[index1][i];
+    theMatrix[index1][i]=theMatrix[index2][i];
+    theMatrix[index2][i]=temp;
+  }
+}
+
+function addToRowRowTimesCoeff(theMatrix, indexModified, indexOther, coeff)
+{ for (var i=0; i<theMatrix.length; i++)
+    theMatrix[indexModified][i]+=coeff*theMatrix[indexOther][i];
+}
+
+function multiplyRowBy(theMatrix, rowIndex, coeff)
+{ for (var i=0; i<theMatrix.length; i++)
+    theMatrix[rowIndex][i]*=coeff;
+}
+
+function findPivot(theMatrix, columnIndex, minPossibleAnswer)
+{ for (var i=minPossibleAnswer; i<theMatrix.length; i++)
+    if (theMatrix[i][columnIndex]!=0)
+      return i;
+  return -1;
+}
+
+function getIdentityMatrix(dimension)
+{ var answer= new Array(dimension);
+  for (var i=0; i<dimension; i++)
+  { answer[i]= new Array(dimension);
+    for (var j=0; j<dimension; j++)
+      if (i==j)
+        answer[i][j]=1;
+      else
+        answer[i][j]=0;
+  }
+  return answer;
+}
+
+function invertMatrix(theInputMatrix)
+{ var theMatrix= dojo.clone(theInputMatrix);
+  var theDim=theMatrix.length;
+  var answer= getIdentityMatrix(theDim);
+  for (var i=0; i<theDim; i++)
+  { var thePivotIndex=findPivot(theMatrix, i, i);
+    if (thePivotIndex==-1)
+      return;
+    swapTwoRows(answer, thePivotIndex, i);
+    swapTwoRows(theMatrix, thePivotIndex, i);
+    multiplyRowBy(answer, i, 1/theMatrix[i][i]);    
+    multiplyRowBy(theMatrix, i, 1/theMatrix[i][i]);
+    for (var j=0; j<theDim; j++)
+      if (i!=j)
+      { addToRowRowTimesCoeff(answer, j, i, -theMatrix[j][i]);
+        addToRowRowTimesCoeff(theMatrix, j, i, -theMatrix[j][i]);
+      }
+  }
+  return answer;
+}
+
+function solveTwoByTwoSystem(a11, a12, a21, a22, coeff1, coeff2)
+{ var answer= new Array(2);
+  var theDeterminant=a11*a22-a21*a12;
+  answer[0]=(coeff1*a22-coeff2*a12)/theDeterminant;
+  answer[1]=(a11*coeff2-a21*coeff1)/theDeterminant;
+  return answer;
+} 
+ 
+function mouseMoveRedraw(cx, cy)
+{ if (selectedBasisIndex!=-1)
+  { var divPosX=0;
+    var divPosY=0;
+    var thePointer= canvasMain;
+    while(thePointer)
+    { divPosX += thePointer.offsetLeft;
+      divPosY += thePointer.offsetTop;
+      thePointer = thePointer.offsetParent;
+    }
+    var posx=(cx-divPosX+document.body.scrollLeft-Xshift);
+    var posy=-(cy-divPosY+document.body.scrollTop-Yshift);
+    if (selectedBasisIndex==-2)
+    { Xshift=(cx-divPosX+document.body.scrollLeft);
+      Yshift=(cy-divPosY+document.body.scrollTop);
+    }
+		else
+    {	//posx=50; posy=50;
+      changeBasis(selectedBasisIndex, posx, posy);
+    }
+    drawOnCanvasMain();
+  }
+}
+
+function getCoord(thePoint, Coord)
+{ var result=Number(0);
+  for (var counterI=0; counterI<theWeylDim; counterI++)
+    result= result+ thePoint[counterI]*Basis[counterI][Coord];
+  result=Math.floor(result);
+  return result;
+}
+
+function drawLineBetweenZeroAndRoot(theRoot)
+{ xCoord1=getCoord(ZeroRoot,0)+Xshift;
+  yCoord1=-getCoord(ZeroRoot,1)+Yshift;
+  xCoord2=getCoord(theRoot,0)+Xshift;
+  yCoord2=-getCoord(theRoot,1)+Yshift;
+  var theColor;
+  if (getScalarProduct(theRoot, theRoot)==theRootSystemLongLength)
+    theColor ="blue";
+  else
+    theColor ="#C0C0FF"; 
+  surface.createLine({ x1 : xCoord1, y1 : yCoord1, x2 : xCoord2, y2 : yCoord2 }).setStroke({color : theColor});
+}
+
+function drawCircleAtRoot(theRoot)
+{ xCoord1=getCoord(theRoot,0)+Xshift;
+  yCoord1=-getCoord(theRoot,1)+Yshift;
+  surface.createEllipse({ cx : xCoord1, cy : yCoord1, rx : 2, ry : 2 }).setStroke({color : "red"});
+}
+
+function drawTextAtRoot(theRoot, theText)
+{ xCoord1=getCoord(theRoot,0)+Xshift;
+  yCoord1=-getCoord(theRoot,1)+Yshift;
+  var tempText=surface.createText({x: xCoord1, y: yCoord1, text: theText});
+  tempText.setFont({family : "Arial", size : "9pt"});
+  tempText.setStroke("black");
+}
+
+function drawOnCanvasMain()
+{//	alert("paint");
+  surface.clear();
+  ZeroRoot= new Array(theWeylDim);
+  var tempRoot=new Array(theWeylDim);
+  surface.createLine({ x1 : Xshift, y1 : Yshift, x2 : Xshift, y2 : Yshift-GraphicsUnit }).setStroke({color : "#EFEFEF"});
+  surface.createLine({ x1 : Xshift, y1 : Yshift, x2 : Xshift+GraphicsUnit, y2 : Yshift }).setStroke({color : "#EFEFEF"});
+  for (var i=0; i<theWeylDim; i++)
+  { ZeroRoot[i]=0;
+    tempRoot[i]=0;
+  }
+  for (var i=0; i<theWeylDim; i++)
+  { tempRoot[i]=1;
+    drawCircleAtRoot(tempRoot);
+    drawTextAtRoot(tempRoot, i+1);
+    tempRoot[i]=0;
+  }
+  for (var CounterK=0; CounterK<theRootSystemSize; CounterK++)
+    drawLineBetweenZeroAndRoot(theRootSystem[CounterK]);  
+  var debugLog = document.getElementById("debugField");
+  debugLog.value=DebugString;
+}
+
+function initDojo()
+{ node = dojo.byId(canvasMain);
+  surface = dojox.gfx.createSurface(node, 400, 400);
+  initRecompute();
+}
+
+function initRecompute()
+{ var tempWeylLetter=document.getElementById("textType").value;
+  var tempWeylDim=document.getElementById("textDim").value;
+  tempWeylDim=Number(tempWeylDim);
+  tempWeylLetter=tempWeylLetter.toUpperCase();
+  generateRootSystemFromWeylLetterAndDim(tempWeylLetter, tempWeylDim); 
+  drawOnCanvasMain();
+}
+dojo.require("dojox.gfx");
+dojo.addOnLoad(initDojo);
+</script>
+<!>
+</body>
+</html>
+

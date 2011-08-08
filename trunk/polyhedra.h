@@ -79,6 +79,8 @@ class CompositeComplexQN;
 template <class ElementOfCommutativeRingWithIdentity>
 class Polynomial;
 template <class ElementOfCommutativeRingWithIdentity>
+class Monomial;
+template <class ElementOfCommutativeRingWithIdentity>
 class PolynomialLight;
 class Selection;
 class IntegerPoly;
@@ -131,6 +133,7 @@ class ElementSimpleLieAlgebra;
 class ElementUniversalEnveloping;
 class MonomialUniversalEnveloping;
 class rootPoly;
+class PolynomialRationalCoeff;
 
 
 
@@ -1193,6 +1196,7 @@ public:
   void ActOnAroot(root& input, root& output)const;
   void ActOnRoots(roots& input, roots& output)const;
   void ActOnRoots(roots& theRoots)const;
+  void ActOnMonomialAsDifferentialOperator(Monomial<Rational>& input, PolynomialRationalCoeff& output);
   void GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen);
   void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
   void MakeIdMatrix(int theDim);
@@ -2035,6 +2039,15 @@ class Rational
       this->DenShort= (D/tempGCD);
     }
     return true;
+  }
+  void AllocateExtended()
+  { if (this->Extended!=0)
+      return;
+    this->Extended= new LargeRationalExtended;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter++;
+  ParallelComputing::CheckPointerCounters();
+#endif
   }
   bool InitExtendedFromShortIfNeeded()
   { if (this->Extended!=0)
@@ -9539,6 +9552,9 @@ class ParserNode
   static int EvaluatePrintRootSystem
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateInvariantsSl2DegreeM
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
   void EvaluateEigen(GlobalVariables& theGlobalVariables);
   void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
@@ -9546,7 +9562,6 @@ class ParserNode
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
-  void EvaluateInvariants(GlobalVariables& theGlobalVariables);
   int EvaluateSubstitution(GlobalVariables& theGlobalVariables);
   int EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
   void EvaluateModVermaRelations(GlobalVariables& theGlobalVariables);
@@ -9663,7 +9678,7 @@ public:
     tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,//=13
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, //=19
     tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, //=23
-    tokenH, tokenC, tokenEmbedding, tokenVariable,
+    tokenH, tokenC, tokenEmbedding, tokenVariable, //=27
     tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
   };
   HashedList<ParserFunction> theFunctionList;
@@ -9727,8 +9742,8 @@ public:
   { return this->ReplaceTwoChildrenOperationToken(-3, -1, 4, theOperation, this->tokenExpression);
   }
   bool ReplaceDdotsDbyEdoTheArithmetic();
-  bool ReplaceXECdotsCEXbyE(int theDimension, int theNewToken);
-  bool ReplaceXECdotsCEXEXbyE(int theDimension, int theOperation);
+  bool ReplaceXECdotsCEXbyE(int theDimension, int theNewToken, int theOperation);
+  bool ReplaceXECdotsCEXEXbyE(int theDimension, int theNewToken, int theOperation);
   void FatherByLastNodeChildrenWithIndexInNodeIndex(int IndexInNodeIndex)
   { int childIndex=this->NodeIndexStack.TheObjects[IndexInNodeIndex];
     this->LastObject()->children.AddObjectOnTop(childIndex);
@@ -10481,6 +10496,49 @@ public:
   void operator=(const PolynomialOverModule& other){ this->Assign(other); }
   int GetNumVars(){return this->NumVars;};
   void Nullify(SSalgebraModule& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());}
+};
+
+class slTwoInSlN
+{
+  int GetModuleIndexFromHighestWeightVector(const MatrixLargeRational& input)
+  { Rational tempRat;
+    for (int i=0; i<this->theHighestWeightVectors.size; i++)
+      if (this->theHighestWeightVectors.TheObjects[i].IsProportionalTo(input, tempRat))
+        return i;
+    return -1;
+  }
+public:
+  int theDimension;
+  MatrixLargeRational theH;
+  MatrixLargeRational theE;
+  MatrixLargeRational theF;
+
+  List<int> thePartition;
+  List<MatrixLargeRational> theProjectors;
+  List<MatrixLargeRational> theHighestWeightVectors;
+  List<List<MatrixLargeRational> > theGmodKModules;
+  List<List<List<int> > > PairingTable;
+  void GetIsPlusKIndexingFrom(int input, int& s, int& k);
+  std::string ElementMatrixToTensorString(const MatrixLargeRational& input, bool useHtml);
+  std::string initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml, bool computePairingTable);
+  std::string initPairingTable(bool useHtml);
+  std::string ElementModuleIndexToString(int input, bool useHtml);
+  std::string GetNotationString(bool useHtml);
+  void ComputeInvariantsOfDegree
+  (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, GlobalVariables& theGlobalVariables)
+  ;
+  std::string PairTwoIndices
+  (List<int>& output, int leftIndex, int rightIndex, bool useHtml)
+  ;
+  void ExtractHighestWeightVectorsFromVector
+  (MatrixLargeRational& input, List<MatrixLargeRational>& outputDecompositionOfInput, List<MatrixLargeRational>& outputTheHWVectors)
+  ;
+  void ClimbDownFromHighestWeightAlongSl2String
+  (MatrixLargeRational& input, MatrixLargeRational& output, Rational& outputCoeff, int generatorPower)
+  ;
+  void ClimbUpFromVector
+  (MatrixLargeRational& input, MatrixLargeRational& outputLastNonZero, int& largestPowerNotKillingInput)
+  ;
 };
 
 class GeneralizedVermaModuleCharacters

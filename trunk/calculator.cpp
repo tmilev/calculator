@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><head><title>Vector partition calculator updated " << __DATE__ << "</title>";
+  std::cout << "<html><meta name=\"keywords\" content= \"Vector partition function calculator, Semisimple Lie algebras, root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated " << __DATE__ << "</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
@@ -124,13 +124,15 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=10;
+  //civilizedInput="(2/7)^1000-1";
+  //civilizedInput="(x_1\\mapsto x_1, x_2\\mapsto x_2-1: 1/4x_1^2-1/4x_2^2+x_1+1)";
   //civilizedInput="printRootSubalgebras";
 //  civilizedInput="GetRelations(x_1^2, x_1x_2, x_2^2)";
   //civilizedInput="vpf((1,-3), (1,-1), (1,1), (1,3))";
   //civilizedInput="split(PartialFraction((1,0), (1,2), (1,-2)))";
 //  civilizedInput="PartialFraction(1,1,(0,1))";
   //civilizedInput="slTwoInSlN(3)";
-  //theParser.DefaultWeylLetter='A';
+ // theParser.DefaultWeylLetter='A';
 //  civilizedInput="(0,1)";
 //  civilizedInput="Cone((1,0),(0,1), (1,1))";
 //  civilizedInput="(i(c))^2";
@@ -294,69 +296,19 @@ int main(int argc, char **argv)
   std::cout << "</td>";
   std::cout << " <td width=\"300\">" << theParser.GetFunctionDescription() << "</td>\n";
   std::cout << "<td>";
-  std::cout << " <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img><br>";
-  std::cout << "<button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
+  std::cout << "<b>Links: </b><br>"
+                //<< "<button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
                   << "<a href=\"http://wwwmathlabo.univ-poitiers.fr/~maavl/LiE/form.html\"> LiE software online </a>"
-                  << "<br><br><a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\"> IE not suppoted.</a> "
+                  << "<br>"
+                  << "<a href=\"http://www.gap-system.org/Download/index.html\">GAP </a>, see also "
+                  << "<a href=\"http://www.science.unitn.it/~degraaf/sla.html\">Willem A. de Graaf's SLA package </a>"
+                  << "<br><a href=\"http://www.liegroups.org/\">Atlas of Lie groups </a> "
                  // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
-                  << "</div>";
-  std::cout << "<br>";
-  std::stringstream tempStream;
-  inputPath.append("../htdocs/tmp/");
-  std::stringstream tempStream2;
-  tempStream2 << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/";
-  inputPath.append(tempStream2.str());
-  tempStream << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "table";
-  std::string fileNameLieBracketNoEnding=tempStream.str();
-  std::string fileNameLieBracketFullPathNoEnding=inputPath;
-  fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
-  std::cout << "<img src=\"/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
-  std::string latexCommandTemp;
-  std::string fileNameLieBracketFullPathPNGEnding;
-  fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
-  fileNameLieBracketFullPathPNGEnding.append(".png");
-  if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
-  { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";
-    std::fstream lieBracketFile;
-    std::string tempFileName= fileNameLieBracketFullPathNoEnding;
-    tempFileName.append(".tex");
-    std::stringstream tempCommand;
-    tempCommand << "mkdir " << inputPath;
-    tempS=tempCommand.str();
-    system(tempS.c_str());
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
-    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, true, true, theGlobalVariables);
-    lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    lieBracketFile.close();
-    std::stringstream tempStreamLatex, tempStreamPNG;
-    tempStreamLatex << "latex  -output-directory=" << inputPath << " " << inputPath << fileNameLieBracketNoEnding << ".tex";
-    latexCommandTemp=tempStreamLatex.str();
-    theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
-    tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
-    latexCommandTemp= tempStreamPNG.str();
-     theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
-  }
-  std::cout << "<br>";
-  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
-  std::cout << "<button onclick=\"switchMenu('sourceDetails');\" >C++ source</button>";
-  std::cout << "<button onclick=\"switchMenu('debugDetails');\">Debugging</button>";
-  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
-  std::stringstream tempStream3;
-  static_html4(tempStream3);
-  std::cout << tempStream3.str();
-  std::cout << "</div>";
-
-  std::cout << "<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
-  for (int i=0; i<theParser.theFunctionList.size; i++)
-  { ParserFunction& currentFun=theParser.theFunctionList.TheObjects[i];
-    std::cout << "\"" << currentFun.functionName << "\"";
-    if (i!=theParser.theFunctionList.size-1)
-      std::cout << ",";
-  }
-  std::cout << ");</script>";
-  std::cout << "<script language=\"javascript\"> var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>";
-
-
+                  //<< "</div>"
+                  << "";
+  std::cout << "<hr>";
+  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
+  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info (developers)</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++(1 out of 3 files (header file))</a>\n";
@@ -385,7 +337,64 @@ int main(int argc, char **argv)
 //  theParser.theLieAlgebra.ComputeDebugString();
 //  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();
   std::cout << "</div>";
-  std::cout << "\n</td></tr></table>";
+
+  std::stringstream tempStream;
+  inputPath.append("../htdocs/tmp/");
+  std::stringstream tempStream2;
+  tempStream2 << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/";
+  inputPath.append(tempStream2.str());
+  tempStream << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "table";
+  std::string fileNameLieBracketNoEnding=tempStream.str();
+  std::string fileNameLieBracketFullPathNoEnding=inputPath;
+  fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
+  std::cout << " <hr>A Chevalley-Weyl basis of the selected simple Lie algebra of type " <<  theParser.DefaultWeylLetter << theParser.DefaultWeylRank << " follows.<br> <a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/" << fileNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\"/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
+  std::string latexCommandTemp;
+  std::string fileNameLieBracketFullPathPNGEnding;
+  fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
+  fileNameLieBracketFullPathPNGEnding.append(".png");
+  if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
+  { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";
+    std::fstream lieBracketFile;
+    std::string tempFileName= fileNameLieBracketFullPathNoEnding;
+    tempFileName.append(".tex");
+    std::stringstream tempCommand;
+    tempCommand << "mkdir " << inputPath;
+    tempS=tempCommand.str();
+    system(tempS.c_str());
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
+    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, true, true, theGlobalVariables);
+    lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    lieBracketFile.close();
+    std::stringstream tempStreamLatex, tempStreamPNG;
+    tempStreamLatex << "latex  -output-directory=" << inputPath << " " << inputPath << fileNameLieBracketNoEnding << ".tex";
+    latexCommandTemp=tempStreamLatex.str();
+    theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
+    tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
+    latexCommandTemp= tempStreamPNG.str();
+     theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
+  }
+  //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
+//  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
+  std::cout << "<br>A two dimensional visualization of the root system follows. <br> The basis vectors (small red cirles) can be dragged with the mouse pointer. <br> The <a href=\"/tmp/RootSystem_no_autocomplete.html\">visualization code</a>"
+                  << " is uses javascript + google script for drawing lines and cirles.<br>";
+  std::stringstream tempStream3;
+  static_html4(tempStream3);
+  std::cout << tempStream3.str();
+//  std::cout << "</div>";
+
+  std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
+  for (int i=0; i<theParser.theFunctionList.size; i++)
+  { ParserFunction& currentFun=theParser.theFunctionList.TheObjects[i];
+    std::cout << "\"" << currentFun.functionName << "\"";
+    if (i!=theParser.theFunctionList.size-1)
+      std::cout << ",";
+  }
+  std::cout << ");</script>";
+  std::cout << "<script language=\"javascript\"> var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>";
+  std::cout << "\n</td>";
+  std::cout << "<td> <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img>";
+  std::cout << "<br>\n\nThe page <a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\">does not support Internet Explorer </a>. To view this page properly you might need to install another browser.</td>";
+  std::cout << "</tr></table>";
   std::cout << "</body></html>";
   std::string command1, command2;
   std::cout << "<!--";

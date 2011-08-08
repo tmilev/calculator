@@ -7593,19 +7593,19 @@ inline void Rational::RaiseToPower(int x)
   { x=-x;
     this->Invert();
   }
-  if (!this->IsInteger())
-    MathRoutines::RaiseToPower(*this, x, tempRat);
-  else
-  { LargeIntUnsigned tempNum;
-    this->GetNumUnsigned(tempNum);
-    LargeIntUnsigned oneLI;
-    oneLI.MakeOne();
-    MathRoutines::RaiseToPower(tempNum, x, oneLI);
-    LargeInt tempNumSigned;
-    tempNumSigned.AssignLargeIntUnsigned(tempNum);
-    tempNumSigned.sign= (this->IsPositive() || x%2==0) ? 1 :-1;
-    this->AssignLargeInteger(tempNumSigned);
-  }
+  LargeIntUnsigned tempNum, tempDen;
+  this->GetNumUnsigned(tempNum);
+  LargeIntUnsigned oneLI;
+  oneLI.MakeOne();
+  MathRoutines::RaiseToPower(tempNum, x, oneLI);
+  this->GetDen(tempDen);
+  MathRoutines::RaiseToPower(tempDen, x, oneLI);
+  int theSign= (this->IsPositive() || x%2==0) ? 1 :-1;
+  this->AllocateExtended();
+  this->Extended->num.sign=theSign;
+  this->Extended->den=tempDen;
+  this->Extended->num.value=tempNum;
+  this->ShrinkExtendedPartIfPossible();
 }
 
 inline void Rational::Invert()
@@ -25180,9 +25180,9 @@ bool Parser::ApplyRules(int lookAheadToken)
     return this->ReplaceYOZbyE();
   int rootDim;
   if (this->StackTopIsDelimiter1ECdotsCEDelimiter2(rootDim, this->tokenOpenBracket, this->tokenCloseBracket))
-    return this->ReplaceXECdotsCEXbyE(rootDim, this->tokenArraY);
+    return this->ReplaceXECdotsCEXbyE(rootDim, this->tokenArraY, this->tokenArraY);
   if (this->StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3(rootDim, this->tokenOpenBracket, this->tokenColon, this->tokenCloseBracket))
-    return this->ReplaceXECdotsCEXEXbyE(rootDim, this->tokenColon);
+    return this->ReplaceXECdotsCEXEXbyE(rootDim, this->tokenExpression, this->tokenColon);
   return false;
 }
 
@@ -26131,34 +26131,6 @@ void ParserNode::EvaluatePrintWeyl(GlobalVariables& theGlobalVariables)
   }
   this->outputString=out.str();
   this->ExpressionType=this->typeString;
-}
-
-void ParserNode::EvaluateInvariants(GlobalVariables& theGlobalVariables)
-{ if (this->owner->DefaultWeylLetter!='B' && this->owner->DefaultWeylRank!=3)
-  { this->SetError(this->errorUnknownOperation);
-    return;
-  }
-  if (this->children.size!=1)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  if (theArgument.ExpressionType!=this->typeIntegerOrIndex)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
-  if (theArgument.intValue<0)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
-  std::stringstream out;
-  SSalgebraModule theModule;
-  theModule.InduceFromEmbedding(out, this->owner->theHmm, theGlobalVariables);
-  theModule.ComputeInvariantsOfDegree(theArgument.intValue, out, theGlobalVariables);
-  this->ExpressionType=this->typePoly;
-  if (theModule.invariantsFound.size>0)
-    this->polyValue.GetElement().operator=(theModule.invariantsFound.TheObjects[0]);
-  this->outputString=out.str();
 }
 
 void ParserNode::EvaluateModVermaRelations(GlobalVariables& theGlobalVariables)
@@ -31149,8 +31121,8 @@ bool Parser::ReplaceDdotsDbyEdoTheArithmetic()
   return true;
 }
 
-bool Parser::ReplaceXECdotsCEXbyE(int theDimension, int theNewToken)
-{ this->ExpandOnTopIncreaseStacks(theNewToken, theNewToken, 0);
+bool Parser::ReplaceXECdotsCEXbyE(int theDimension, int theNewToken, int theOperation)
+{ this->ExpandOnTopIncreaseStacks(theOperation, theNewToken, 0);
   int stackSize=this->ValueStack.size;
   for (int i=0; i<theDimension; i++)
     this->FatherByLastNodeChildrenWithIndexInNodeIndex(stackSize-1-2*theDimension+2*i);
@@ -31158,8 +31130,8 @@ bool Parser::ReplaceXECdotsCEXbyE(int theDimension, int theNewToken)
   return true;
 }
 
-bool Parser::ReplaceXECdotsCEXEXbyE(int theDimension, int theOperation)
-{ return this->ReplaceXECdotsCEXbyE(theDimension+1, theOperation);
+bool Parser::ReplaceXECdotsCEXEXbyE(int theDimension, int theNewToken, int theOperation)
+{ return this->ReplaceXECdotsCEXbyE(theDimension+1, theNewToken, theOperation);
 }
 
 bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter)
@@ -32623,47 +32595,6 @@ bool ElementVermaModuleOrdered<CoefficientType>::ElementToStringNeedsBracketsFor
 { return this->theElT.ElementToStringNeedsBracketsForMultiplication();
 }
 
-class slTwoInSlN
-{
-  int GetModuleIndexFromHighestWeightVector(const MatrixLargeRational& input)
-  { Rational tempRat;
-    for (int i=0; i<this->theHighestWeightVectors.size; i++)
-      if (this->theHighestWeightVectors.TheObjects[i].IsProportionalTo(input, tempRat))
-        return i;
-    return -1;
-  }
-public:
-  int theDimension;
-  MatrixLargeRational theH;
-  MatrixLargeRational theE;
-  MatrixLargeRational theF;
-
-  List<int> thePartition;
-  List<MatrixLargeRational> theProjectors;
-  List<MatrixLargeRational> theHighestWeightVectors;
-  List<List<MatrixLargeRational> > theGmodKModules;
-  List<List<List<int> > > PairingTable;
-  void GetIsPlusKIndexingFrom(int input, int& s, int& k);
-  std::string ElementMatrixToTensorString(const MatrixLargeRational& input, bool useHtml);
-  std::string initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml);
-  std::string initPairingTable(bool useHtml);
-  std::string ElementModuleIndexToString(int input, bool useHtml);
-  std::string GetNotationString(bool useHtml);
-
-  std::string PairTwoIndices
-  (List<int>& output, int leftIndex, int rightIndex, bool useHtml)
-  ;
-  void ExtractHighestWeightVectorsFromVector
-  (MatrixLargeRational& input, List<MatrixLargeRational>& outputDecompositionOfInput, List<MatrixLargeRational>& outputTheHWVectors)
-  ;
-  void ClimbDownFromHighestWeightAlongSl2String
-  (MatrixLargeRational& input, MatrixLargeRational& output, Rational& outputCoeff, int generatorPower)
-  ;
-  void ClimbUpFromVector
-  (MatrixLargeRational& input, MatrixLargeRational& outputLastNonZero, int& largestPowerNotKillingInput)
-  ;
-};
-
 void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String
   (MatrixLargeRational& input, MatrixLargeRational& output, Rational& outputCoeff, int generatorPower)
 { assert(&input!=&output);
@@ -32854,7 +32785,7 @@ std::string slTwoInSlN::GetNotationString(bool useHtml)
   return out.str();
 }
 
-std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml)
+std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml, bool computePairingTable)
 { std::stringstream out;
   this->thePartition.CopyFromBase(decompositionDimensions);
   this->thePartition.QuickSortDescending();
@@ -32930,7 +32861,8 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
    //   out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ElementToString(false, true) << "</div>";
    // out << "<br><br><br>";
   }
-  out << this->initPairingTable(useHtml);
+  if (computePairingTable)
+    out << this->initPairingTable(useHtml);
   return out.str();
 }
 
@@ -33009,7 +32941,7 @@ int ParserNode::EvaluateSlTwoInSlN
   fileName.append(theNode.owner->outputFolderPath);
   fileName.append("output.tex");
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
-  outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false) << "\n\\end{document}";
+  outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false, true) << "\n\\end{document}";
   std::stringstream out;
   out << "A latex/pdf file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
   out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
@@ -33028,15 +32960,15 @@ void RationalFunction::AddHonestRF
   { PolynomialRationalCoeff buffer;
     RationalFunction debugger;
     debugger=other;
-    debugger.ComputeDebugString();
-    this->ComputeDebugString();
+//    debugger.ComputeDebugString();
+//    this->ComputeDebugString();
     buffer=this->Denominator.GetElement();
     this->Numerator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
     buffer.MultiplyBy(other.Numerator.GetElementConst());
     this->Numerator.GetElement().AddPolynomial(buffer);
     this->Denominator.GetElement().MultiplyBy(other.Denominator.GetElementConst());
     this->Simplify();
-    this->ComputeDebugString();
+//    this->ComputeDebugString();
   } else
   { this->Numerator.GetElement().TimesConstant(tempRat);
     this->Denominator.GetElement().TimesConstant(tempRat);

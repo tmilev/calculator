@@ -26102,9 +26102,12 @@ void ParserNode::EvaluateOrder(GlobalVariables& theGlobalVariables)
 
 int ParserNode::EvaluatePrintDecomposition
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ SSalgebraModule theModule;
+{ Parser tempParser;
+  HomomorphismSemisimpleLieAlgebra tempHmm;
+  tempHmm.MakeG2InB3(tempParser, theGlobalVariables);
+  SSalgebraModule theModule;
   std::stringstream out, out2;
-  theModule.InduceFromEmbedding(out2, theNode.owner->theHmm, theGlobalVariables);
+  theModule.InduceFromEmbedding(out2, tempHmm, theGlobalVariables);
   out << out2.str();
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;

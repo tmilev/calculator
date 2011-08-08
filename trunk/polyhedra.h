@@ -308,7 +308,11 @@ public:
   { int result=1;
     for (int i =0; i<k; i++)
     { result*=(n-i);
+      if (result <0)
+        return -1;
       result/=(i+1);
+      if (result <0)
+        return -1;
     }
     return result;
   }
@@ -10524,8 +10528,8 @@ public:
   std::string initPairingTable(bool useHtml);
   std::string ElementModuleIndexToString(int input, bool useHtml);
   std::string GetNotationString(bool useHtml);
-  void ComputeInvariantsOfDegree
-  (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, GlobalVariables& theGlobalVariables)
+  bool ComputeInvariantsOfDegree
+  (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, std::string& outputError, GlobalVariables& theGlobalVariables)
   ;
   std::string PairTwoIndices
   (List<int>& output, int leftIndex, int rightIndex, bool useHtml)

@@ -27529,7 +27529,8 @@ void RationalFunction::RemainderDivision
 
 void RationalFunction::TransformToReducedGroebnerBasis
   (List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2,
-  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right),
+   GlobalVariables* theGlobalVariables
  )
 { PolynomialRationalCoeff& tempP=buffer1;
   PolynomialRationalCoeff& Spoly=buffer2;
@@ -27576,6 +27577,14 @@ void RationalFunction::TransformToReducedGroebnerBasis
         theBasis.AddObjectOnTop(tempP);
         //std::cout << "<br> new element found: " << tempP.ElementToString();
       }
+      if (theGlobalVariables!=0)
+        if (theGlobalVariables->GetFeedDataToIndicatorWindowDefault()!=0)
+        { std::stringstream out;
+          out << "<br> Exploring element " << lowestNonExplored+1 << " out of " << theBasis.size;
+          theGlobalVariables->theIndicatorVariables.String1NeedsRefresh=true;
+          theGlobalVariables->theIndicatorVariables.ProgressReportString1=out.str();
+          theGlobalVariables->MakeReport();
+        }
     }
   }
 //  std::cout << "<br> ... and the basis before reduction is: <br>";
@@ -27628,7 +27637,9 @@ void RationalFunction::gcd(const PolynomialRationalCoeff& left, const Polynomial
   buffer2.DivideBy(buffer4, output, buffer3);
 }
 
-void RationalFunction::lcm(const PolynomialRationalCoeff& left, const PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, List<PolynomialRationalCoeff>& bufferList)
+void RationalFunction::lcm(const PolynomialRationalCoeff& left, const PolynomialRationalCoeff& right, PolynomialRationalCoeff& output, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3,
+                           PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2,
+                           List<PolynomialRationalCoeff>& bufferList)
 { PolynomialRationalCoeff& leftTemp=buffer1;
   PolynomialRationalCoeff& rightTemp=buffer2;
   PolynomialRationalCoeff& tempP=buffer3;
@@ -27653,7 +27664,7 @@ void RationalFunction::lcm(const PolynomialRationalCoeff& left, const Polynomial
 //  for (int i=0; i<tempList.size; i++)
 //  { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ElementToString() << "<br>\n";
 //  }
-  RationalFunction::TransformToReducedGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
+  RationalFunction::TransformToReducedGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, 0);
 //  std::cout << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)
 //  { std::cout << tempList.TheObjects[i].ElementToString() << "<br>\n";
@@ -30700,6 +30711,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeCone: out << "a cone with walls: "; break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;
+    case ParserNode::typeUndefined: out << "Undefined expression (type 0)."; break;
     default: out << "Expression type " << this->ExpressionType << "; the programmer(s) have forgotten to enter a type description. "; break;
   }
   if (stringValueOnly!="")

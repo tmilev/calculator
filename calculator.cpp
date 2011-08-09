@@ -36,10 +36,12 @@ void getPath(char* path, std::string& output)
   }
 }
 
+extern void static_html6(std::stringstream& output);
+extern void static_html5(std::stringstream& output);
 extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
 
-static double MaxAllowedComputationTimeInSeconds=10;
+static double MaxAllowedComputationTimeInSeconds=2000;
 bool ComputationComplete;
 
 #ifndef WIN32
@@ -66,8 +68,20 @@ void* RunTimer(void* ptr)
 }
 #endif
 
+Parser theParser;
+void makeReport(IndicatorWindowVariables& input)
+{ std::fstream theFile;
+  std::string reportFileName=theParser.outputFolderPath;
+  reportFileName.append("report.txt");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, reportFileName, false, true, false);
+  std::stringstream outStream;
+  theFile << " Elapsed seconds: " << GetElapsedTimeInSeconds();
+  theFile << input.ProgressReportString1 << "<br>" << input.ProgressReportString2;
+}
+
 int main(int argc, char **argv)
-{ std::string inputString, inputPath, tempS;
+{ std::string inputString, inputPath;
+  std::string tempS;
 	std::cin >> inputString;
 #ifndef WIN32
   gettimeofday(&ComputationStartGlobal, NULL);
@@ -94,6 +108,10 @@ int main(int argc, char **argv)
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
+//  std::stringstream tempStreamX;
+//  static_html3(tempStreamX);
+//  static_html5(tempStreamX);
+//  std::cout << tempStreamX.str() << std::endl;
 //  std::cout << inputString;
 #ifndef WIN32
   pthread_t TimerThread;
@@ -107,8 +125,8 @@ int main(int argc, char **argv)
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
-  Parser theParser;
   GlobalVariables theGlobalVariables;
+  theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
     theParser.DefaultWeylLetter=inputWeylString[0];
   else
@@ -123,11 +141,11 @@ int main(int argc, char **argv)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
-  HashedList<Monomial<Rational> >::PreferredHashSize=10;
+  HashedList<Monomial<Rational> >::PreferredHashSize=100;
   //civilizedInput="invariantsSlTwoOfDegree(30,(2,3))";
   //civilizedInput="(x_1\\mapsto x_1, x_2\\mapsto x_2-1: 1/4x_1^2-1/4x_2^2+x_1+1)";
   //civilizedInput="printRootSubalgebras";
-//  civilizedInput="GetRelations(x_1^2, x_1x_2, x_2^2)";
+  //civilizedInput="getRelations(x_1^2, x_1x_2, x_2^2)";
   //civilizedInput="vpf((1,-3), (1,-1), (1,1), (1,3))";
   //civilizedInput="split(PartialFraction((1,0), (1,2), (1,-2)))";
 //  civilizedInput="PartialFraction(1,1,(0,1))";
@@ -184,6 +202,16 @@ int main(int argc, char **argv)
   theParser.outputFolderPath.append(inputPath);
   theParser.outputFolderPath.append("../htdocs/tmp/");
   theParser.outputFolderDisplayPath="/tmp/";
+  std::string indicatorFileString;
+  indicatorFileString=theParser.outputFolderPath;
+  indicatorFileString.append("indicator.html");
+  if (!CGIspecificRoutines::FileExists(indicatorFileString))
+  { std::stringstream tempStreamX;
+    static_html3(tempStreamX);
+    std::fstream tempFile;
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempFile, indicatorFileString, false, true, false);
+    tempFile << tempStreamX.str();
+  }
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
   { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
     SSalgebraModule theModule;
@@ -253,6 +281,12 @@ int main(int argc, char **argv)
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;
   CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, tempS);
   civilizedInput=tempS;
+/*  std::cout << "<div id=\"divProgressReport\"> <script type=\"text/javascript\"> window.setTimeout("Click()", 100);</script> </div>";
+
+  <script  document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";
+  std::cout << "document.getElementById(\"textType\").value=\"" << theParser.DefaultWeylLetter << "\"; </script>";
+  */
+
   theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
   TimeParsing=GetElapsedTimeInSeconds();
   std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, theGlobalVariables);
@@ -268,7 +302,7 @@ int main(int argc, char **argv)
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
   std::stringstream tempStream4;
-  static_html3(tempStream4);
+  static_html4(tempStream4);
   std:: cout << tempStream4.str();
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>";
@@ -280,6 +314,7 @@ int main(int argc, char **argv)
   std::cout <<civilizedInputSafish;
   std::cout << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
+  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
   std::cout << "\n</FORM>";
   std::cout << "<script type=\"text/javascript\"> document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";
   std::cout << "document.getElementById(\"textType\").value=\"" << theParser.DefaultWeylLetter << "\"; </script>";
@@ -296,9 +331,9 @@ int main(int argc, char **argv)
 #endif
   std::cout.flush();
   std::cout << "</td>";
-  std::cout << " <td style=\"width:300\"> List of available functions follows. <hr> " << theParser.GetFunctionDescription() << "</td>\n";
+  std::cout << " <td style=\"width:300\"> <b>List of available functions.</b><br> " << theParser.GetFunctionDescription() << "</td>\n";
   std::cout << "<td>";
-  std::cout << "<b>Links: </b><br>"
+  std::cout << "<b>Links. </b><br>"
                 //<< "<button onclick=\"switchMenu('idLinksText');\">Show/hide links</button> <div id=\"idLinksText\" style=\"display: none\">"
                   << "<a href=\"http://wwwmathlabo.univ-poitiers.fr/~maavl/LiE/form.html\"> LiE software online </a>"
                   << "<br>"
@@ -308,7 +343,7 @@ int main(int argc, char **argv)
                  // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
                   //<< "</div>"
                   << "";
-  std::cout << "<hr>Computation is limited to " << MaxAllowedComputationTimeInSeconds << " seconds. <br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\"+ wrong result= <b>very serious calculator bug</b>.";
+  std::cout << "<hr><b>Notes.</b><br> Computation is limited to " << MaxAllowedComputationTimeInSeconds << " seconds. <br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\"+ wrong result= <b>very serious calculator bug</b>.";
   std::cout << "<br>Bug reports = my wholehearted gratitude.<br><button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
   std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
@@ -323,7 +358,8 @@ int main(int argc, char **argv)
   std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/RootSystem.html.cpp?view=markup\"> Calculator interface c++ (2 out of 2 files)</a>\n";
   std::cout << " <br>\n";
-  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>.";
+  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. <br> All precomputed data is stored in a \"database\" <a href=\"/tmp/\">here</a>. <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() calls. The LaTeX logs can be found by viewing the calculator page's source. <br> The html output is hardcoded: either by hand or transformed from a separate .html file using a micro-tool written for the purpose. ";
+  std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() left by me (blank screen), or 2) by Apache/the system (internal server error).";
   std::cout << " ";
   std::cout << " <br>\n";
 	std::cout <<	"</div>";
@@ -350,7 +386,7 @@ int main(int argc, char **argv)
   std::string fileNameLieBracketNoEnding=tempStream.str();
   std::string fileNameLieBracketFullPathNoEnding=inputPath;
   fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
-  std::cout << " <hr>A Chevalley-Weyl basis of the selected simple Lie algebra of type " <<  theParser.DefaultWeylLetter << theParser.DefaultWeylRank << " follows.<br> <a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/" << fileNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\"/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
+  std::cout << " <hr><b>Chevalley-Weyl basis.</b><br> Simple Lie algebra of type " <<  theParser.DefaultWeylLetter << theParser.DefaultWeylRank << ". <a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/" << fileNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\"/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
   std::string latexCommandTemp;
   std::string fileNameLieBracketFullPathPNGEnding;
   fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
@@ -378,10 +414,11 @@ int main(int argc, char **argv)
   }
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
-  std::cout << "<br>A two dimensional visualization of the root system follows. <br> The basis vectors (small red cirles) can be dragged with the mouse pointer. <br> The <a href=\"/tmp/RootSystem_no_autocomplete.html\">visualization code</a>"
+  std::cout << "<hr><b> Root system visualization</b><br> The basis vectors (small red cirles) can be dragged with the mouse pointer. <br> The <a href=\"/tmp/RootSystem_no_autocomplete.html\">visualization code</a>"
                   << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";
   std::stringstream tempStream3;
-  static_html4(tempStream3);
+  static_html5(tempStream3);
+  static_html6(tempStream3);
   std::cout << tempStream3.str();
 //  std::cout << "</div>";
 

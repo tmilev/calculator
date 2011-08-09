@@ -5156,15 +5156,15 @@ public:
   static void TransformToReducedGroebnerBasis
   (List<PolynomialRationalCoeff>& theBasis,
    PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3,
-   PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2)
+   PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2, GlobalVariables* theGlobalVariables)
   { RationalFunction::TransformToReducedGroebnerBasis
     (
-     theBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, &Monomial<Rational>::LeftIsGEQLexicographicLastVariableStrongest
+     theBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, &Monomial<Rational>::LeftIsGEQLexicographicLastVariableStrongest, theGlobalVariables
      );
   }
   static void TransformToReducedGroebnerBasis
-  (List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2,
-  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right)
+    (List<PolynomialRationalCoeff>& theBasis, PolynomialRationalCoeff& buffer1, PolynomialRationalCoeff& buffer2, PolynomialRationalCoeff& buffer3, PolynomialRationalCoeff& buffer4, Monomial<Rational>& bufferMon1, Monomial<Rational>& bufferMon2,
+  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const Monomial<Rational>& left, const Monomial<Rational>& right), GlobalVariables* theGlobalVariables
  )
  ;
   static void RemainderDivisionWithRespectToBasis

@@ -6,6 +6,30 @@ Root systems
 </head>
 <body>
 <!>
+<script type="text/javascript"> 
+var timeOutCounter=0;
+window.setTimeout("progressReport()",1000);
+var newReportString="";
+function progressReport()
+{ timeOutCounter++;
+  var oRequest = new XMLHttpRequest();
+  var sURL  = "/tmp/report.txt";
+  oRequest.open("GET",sURL,false);
+  oRequest.setRequestHeader("User-Agent",navigator.userAgent);
+  oRequest.send(null)
+  if (oRequest.status==200)
+    newReportString= oRequest.responseText;
+  el = document.getElementById("idProgressReport").innerHTML= "Number of clock ticks since last open: "+ timeOutCounter+"<br>Status file content:<br>" +newReportString;
+  window.setTimeout("progressReport()",1000);
+}
+</script>
+<div id="idProgressReport">
+</div>
+</script>
+<div id="idProgressReport">
+</div>
+
+<!>
 <!--Option-->
 
 Select root system. <select name="textType" id="textType" onchange="initRecompute();">
@@ -754,6 +778,7 @@ function saec_VPF_isDelim(input)
     //****************************************************************************
   </script>
 
+<!>
 
 <script type="text/javascript" 
 src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  

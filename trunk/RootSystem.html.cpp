@@ -10,8 +10,35 @@ output << " <body>\n";
 }
 void static_html3(std::stringstream& output){
 output << " <!>\n";
+output << " <script type=\"text/javascript\"> \n";
+output << " var timeOutCounter=0;\n";
+output << " window.setTimeout(\"progressReport()\",1000);\n";
+output << " var newReportString=\"\";\n";
+output << " function progressReport()\n";
+output << " { timeOutCounter++;\n";
+output << "   var oRequest = new XMLHttpRequest();\n";
+output << "   var sURL  = \"/tmp/report.txt\";\n";
+output << "   oRequest.open(\"GET\",sURL,false);\n";
+output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
+output << "   oRequest.send(null)\n";
+output << "   if (oRequest.status==200)\n";
+output << "     newReportString= oRequest.responseText;\n";
+output << "   el = document.getElementById(\"idProgressReport\").innerHTML= \"Number of clock ticks since last open: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
+output << "   window.setTimeout(\"progressReport()\",1000);\n";
+output << " }\n";
+output << " </script>\n";
+output << " <div id=\"idProgressReport\">\n";
+output << " </div>\n";
+output << " </script>\n";
+output << " <div id=\"idProgressReport\">\n";
+output << " </div>\n";
+output << " \n";
+}
+void static_html4(std::stringstream& output){
+output << " <!>\n";
 output << " <!--Option-->\n";
-output << " <select name=\"textType\" id=\"textType\" onchange=\"initRecompute();\">\n";
+output << " \n";
+output << " Select root system. <select name=\"textType\" id=\"textType\" onchange=\"initRecompute();\">\n";
 output << "   <option>A</option>\n";
 output << "   <option selected=\"1\">B</option>\n";
 output << "   <option>C</option>\n";
@@ -34,7 +61,7 @@ output << " <script type=\"text/javascript\"> \n";
 output << " function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != \"none\" ) { el.style.display = 'none'; } else { el.style.display = '';}}\n";
 output << " </script>\n";
 }
-void static_html4(std::stringstream& output){
+void static_html5(std::stringstream& output){
 output << " <!>\n";
 output << "   <script language=\"javascript\">\n";
 output << "     //The script is courtesy of Madan Chaudhary. The original code was hosted at http://simpleandeasycodes.blogspot.com/ .\n";
@@ -759,6 +786,9 @@ output << " \n";
 output << "     //****************************************************************************\n";
 output << "   </script>\n";
 output << " \n";
+}
+void static_html6(std::stringstream& output){
+output << " <!>\n";
 output << " \n";
 output << " <script type=\"text/javascript\" \n";
 output << " src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js\"  \n";
@@ -1388,7 +1418,7 @@ output << " dojo.require(\"dojox.gfx\");\n";
 output << " dojo.addOnLoad(initDojo);\n";
 output << " </script>\n";
 }
-void static_html5(std::stringstream& output){
+void static_html7(std::stringstream& output){
 output << " <!>\n";
 output << " </body>\n";
 output << " </html>\n";

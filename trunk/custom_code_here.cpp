@@ -1397,7 +1397,7 @@ int ParserNode::EvaluateGroebner
   inputBasis=outputGroebner;
   PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4;
   Monomial<Rational> bufferMon1, bufferMon2;
-  RationalFunction::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2);
+  RationalFunction::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, & theGlobalVariables);
   std::stringstream out;
   out << "<br>Starting basis: ";
   std::stringstream out1, out2;
@@ -1437,7 +1437,7 @@ void RationalFunction::GetRelations
   RationalFunction::TransformToReducedGroebnerBasis
   (
    theGroebnerBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2,
-   & Monomial<Rational>::LeftIsGEQLexicographicLastVariableWeakest
+   & Monomial<Rational>::LeftIsGEQLexicographicLastVariableWeakest, & theGlobalVariables
   );
 //  std::cout << "<br>the ending generators:<br> ";
 //  for (int i=0; i<theGroebnerBasis.size; i++)
@@ -4015,7 +4015,7 @@ int ParserNode::EvaluateInvariantsSl2DegreeM
   }
   theNode.ExpressionType=theNode.typeString;
   std::stringstream out;
-  out << "A basis for the invariants of degree" << theDegree << " is given by";
+  out << "A basis for the invariants of degree " << theDegree << " is given by (number of elements: " << outputList.size << ")";
   for (int i=0; i<outputList.size; i++)
   { out << "<br>" << outputList.TheObjects[i].ElementToString() << ", ";
   }

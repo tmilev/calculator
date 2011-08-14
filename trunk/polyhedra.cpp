@@ -25008,7 +25008,7 @@ void Parser::ParserInit(const std::string& input)
   this->NumVariables=0;
   this->numEmptyTokensAtBeginning=6;
   this->SystemCommands.size=0;
-  this->initFunctionList();
+  this->initFunctionList(this->DefaultWeylLetter, this->DefaultWeylRank);
   std::string buffer;
   int theLength=(signed) input.size();
   char LookAheadChar;

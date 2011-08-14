@@ -1009,42 +1009,103 @@ bool ParserNode::ExtractArgumentList
   return true;
 }
 
-int ParserNode::EvaluateChamberParam(GlobalVariables& theGlobalVariables)
-{ List<int> theArguments;
-  this->ExtractArgumentList(theArguments);
+int ParserNode::EvaluateSolveLNEqParamOverConeAndLattice
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ PolynomialRationalCoeff& theLinPoly=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].polyValue.GetElement();
+  int numNonParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[1]].intValue;
+  int numParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[2]].intValue;
+  Cone& currentCone=theNode.owner->TheObjects[theArgumentList.TheObjects[3]].theCone.GetElement();
+  Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[4]].theLattice.GetElement();
+  root theNEq;
+  if(!theLinPoly.IsLinearGetRootConstantTermLastCoordinate(theNEq, (Rational) 0))
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  if(theNEq.size!=currentCone.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  if (theNEq.size!=numNonParams+numParams+1)
+    return theNode.SetError(theNode.errorBadOrNoArgument);
   GeneralizedVermaModuleCharacters tempChars;
-  if (theArguments.size<=2)
-    return this->SetError(this->errorBadOrNoArgument);
-  if (!this->owner->TheObjects[theArguments.TheObjects[0]].ConvertToType(this->typeIntegerOrIndex, theGlobalVariables) || !this->owner->TheObjects[theArguments.TheObjects[1]].ConvertToType(this->typeIntegerOrIndex, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  int dimNonParam=this->owner->TheObjects[theArguments.TheObjects[0]].intValue;
-  int dimParam=this->owner->TheObjects[theArguments.TheObjects[1]].intValue;
-  roots theWalls;
   root tempRoot;
   List<int> nodesCurrentRoot;
-  for (int i=2; i<theArguments.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[theArguments.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeArray, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    nodesCurrentRoot= currentNode.children;
-    if (nodesCurrentRoot.size!=dimNonParam+dimParam)
-      return this->SetError(this->errorBadOrNoArgument);
-    tempRoot.SetSize(nodesCurrentRoot.size);
-    for (int j=0; j<nodesCurrentRoot.size; j++)
-    { ParserNode& currentCoordinateNode=this->owner->TheObjects[nodesCurrentRoot.TheObjects[j]];
-      if (!currentCoordinateNode.ConvertToType(this->typeRational, theGlobalVariables))
-        return this->SetError(this->errorBadOrNoArgument);
-      tempRoot.TheObjects[j]=currentCoordinateNode.rationalValue;
-    }
-    theWalls.AddObjectOnTop(tempRoot);
-  }
   List<roots> outputParamChambers, outputNonParamVertices;
-  tempChars.ProcessOneParametricChamber(dimNonParam, dimParam, theWalls, outputParamChambers, outputNonParamVertices, theGlobalVariables);
+  PolynomialOutputFormat tempFormat;
+  std::cout << "Input data: normal: " << theNEq.ElementToString()
+  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
+  << "; cone: " << currentCone.ElementToString(false, true, false, true);
+  ConeComplex theConeComplex;
+  currentCone.SolveLNeqParamOverLattice
+  (numNonParams, numParams, currentLattice, theConeComplex, theGlobalVariables);
   std::stringstream out;
-  out << "<div class=\"math\">" << theWalls.ElementsToInequalitiesString(true, false) << "</div>";
-  this->outputString=out.str();
-  this->ExpressionType=(this->typeString);
-  return this->errorNoError;
+  out << currentCone.ElementToString(false, true);
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+void Cone::SolveLNeqParamOverLattice
+    (int numNonParams, int numParamsNoConstTerm, Lattice& theLattice,
+     ConeComplex& output, GlobalVariables& theGlobalVariables)
+{ Selection selectedNormals;
+  List<roots> theParamChambers, theNonParamVertices;
+  selectedNormals.init(this->Normals.size);
+  int numCycles=MathRoutines::NChooseK(this->Normals.size, numNonParams);
+  MatrixLargeRational matrixNonParams, matrixParams;
+  matrixNonParams.init(this->Normals.size, numNonParams);
+  int numParamsWithConstTerm=numParamsNoConstTerm+1;
+  matrixParams.init(this->Normals.size, numParamsWithConstTerm);
+  Selection NonPivotPoints;
+  roots basisRoots;
+  basisRoots.SetSize(numNonParams);
+  roots inducedParamChamber;
+  roots nonParamVertices;
+  inducedParamChamber.SetSize(this->Normals.size-numNonParams);
+  nonParamVertices.SetSize(numNonParams);
+  theParamChambers.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  theNonParamVertices.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  theParamChambers.size=0;
+  theNonParamVertices.size=0;
+  std::cout << "<hr>Num cycles: " << numCycles << "<br>";
+  for (int i=0; i<numCycles; i++)
+  { selectedNormals.incrementSelectionFixedCardinality(numNonParams);
+    for (int j=0; j<numNonParams; j++)
+    { root& currentNormal=this->Normals.TheObjects[selectedNormals.elements[j]];
+      root& currentBasisElt=basisRoots.TheObjects[j];
+      currentBasisElt.SetSize(numNonParams);
+      for (int k=0; k<numNonParams; k++)
+      { matrixNonParams.elements[j][k]=currentNormal.TheObjects[k];
+        currentBasisElt.TheObjects[k]=currentNormal.TheObjects[k];
+      }
+      for (int k=0; k<numParamsWithConstTerm; k++)
+        matrixParams.elements[j][k]=currentNormal.TheObjects[k+numNonParams];
+    }
+    if (basisRoots.GetRankOfSpanOfElements(theGlobalVariables)==numNonParams)
+    { for (int j=0, counter=numNonParams; j<this->Normals.size; j++)
+        if (!selectedNormals.selected[j])
+        { root& currentNormal=this->Normals.TheObjects[j];
+          for (int k=0; k<numNonParams; k++)
+            matrixNonParams.elements[counter][k]=currentNormal.TheObjects[k];
+          for (int k=0; k<numParamsWithConstTerm; k++)
+            matrixParams.elements[counter][k]=currentNormal.TheObjects[k+numNonParams];
+          counter++;
+        }
+      std::cout << "<br>Solving: " << matrixNonParams.ElementToString(true, false) << " and " << matrixParams.ElementToString(true, false);
+      MatrixLargeRational::GaussianEliminationByRows(matrixNonParams, matrixParams, NonPivotPoints);
+      for (int j=0; j<numNonParams; j++)
+        matrixParams.RowToRoot(j, nonParamVertices.TheObjects[j]);
+      for (int j=0; j<this->Normals.size-numNonParams; j++)
+        matrixParams.RowToRoot(j+numNonParams, inducedParamChamber.TheObjects[j]);
+      theNonParamVertices.AddObjectOnTop(nonParamVertices);
+      theParamChambers.AddObjectOnTop(inducedParamChamber);
+    }
+  }
+  for (int i=0; i< theNonParamVertices.size; i++)
+  { std::cout << "<br>Number " << i+1 << ", vertices: " << theNonParamVertices.TheObjects[i].ElementToString();
+    std::cout << "<br>the parametric chamber: ";
+    std::cout << "<div class=\"math\">" << theParamChambers.TheObjects[i].ElementsToInequalitiesString(true, false, true) << "</div>";
+  }
+  output.initFromCones(theParamChambers, theGlobalVariables);
+  std::cout << "<hr>Starting cone: "  << output.ElementToString(false, true);
+  output.Refine(theGlobalVariables);
+  std::cout << "<hr>Cone refined: " << output.ElementToString(false, true);
 }
 
 void GeneralizedVermaModuleCharacters::ProcessOneParametricChamber
@@ -3377,10 +3438,25 @@ void PolynomialsRationalCoeff::MakeLinearSubConstTermsLastRow(MatrixLargeRationa
 
 void Cone::IntersectAHyperplane
   (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
-{ roots tempRoots=this->Normals;
-  tempRoots.AddObjectOnTop(theNormal);
-  tempRoots.AddObjectOnTop(-theNormal);
-  bool tempBool=outputConeLowerDim.CreateFromNormals(tempRoots, theGlobalVariables);
+{ assert(!theNormal.IsEqualToZero());
+  int theDimension=theNormal.size;
+  MatrixLargeRational tempMat, theEmbedding, theProjection;
+  tempMat.AssignVectorRow(theNormal);
+  roots theBasis;
+  tempMat.FindZeroEigenSpace(theBasis);
+  assert(theBasis.size==theNormal.size-1);
+  theEmbedding.AssignRootsToRowsOfMatrix(theBasis);
+  theEmbedding.Transpose();
+  theBasis.AddObjectOnTop(theNormal);
+  roots tempRoots, tempRoots2;
+  tempRoots.MakeEiBasis(theDimension);
+  tempRoots.GetCoordsInBasis(theBasis, tempRoots2, theGlobalVariables);
+  theProjection.AssignRootsToRowsOfMatrix(tempRoots2);
+  theProjection.Transpose();
+  theProjection.Resize(theDimension-1, theDimension, false);
+  roots newNormals=this->Normals;
+  theProjection.ActOnRoots(newNormals);
+  bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, theGlobalVariables);
   assert(!tempBool);
 
 }
@@ -3524,6 +3600,7 @@ std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgume
     case ParserNode::typeCone: return "Cone";
     case ParserNode::typeRationalFunction: return "RF";
     case ParserNode::typePartialFractions: return "PF";
+    case ParserNode::typeLattice: return "Lattice";
     case ParserNode::typeDots: return "...";
     case ParserNode::typeArray: return "";
     default: return "Error";
@@ -3544,6 +3621,8 @@ int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
     return ParserNode::typeIntegerOrIndex;
   if (theArgument=="PF")
     return ParserNode::typePartialFractions;
+  if (theArgument=="Lattice")
+    return ParserNode::typeLattice;
   if (theArgument=="RF")
     return ParserNode::typeRationalFunction;
   if (theArgument=="...")
@@ -3603,16 +3682,18 @@ int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
 }
 
 int ParserNode::EvaluatePrintRootSAsAndSlTwos
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos)
-{ std::stringstream out1, out2, outSltwoPath, outSltwoDisplayPath, out;
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
+{ std::stringstream out1, out2, outSltwoPath, outSltwoDisplayPath, outSltwoMainFile, out;
   char weylLetter=theNode.owner->DefaultWeylLetter;
   int theRank=theNode.owner->DefaultWeylRank;
   out1 << theNode.owner->outputFolderPath << weylLetter << theRank << "/rootHtml.html";
   out2 << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/rootHtml.html";
   outSltwoPath << theNode.owner->outputFolderPath << weylLetter << theRank << "/sl2s/";
   outSltwoDisplayPath << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/sl2s/";
+  outSltwoMainFile << outSltwoPath.str() << "sl2s_nopng.html";
+  //std::string tempS=outSltwoMainFile.str();
   bool NeedASecondRun=false;
-  if (!CGIspecificRoutines::FileExists(out1.str()))
+  if (!CGIspecificRoutines::FileExists(out1.str()) || !CGIspecificRoutines::FileExists(outSltwoMainFile.str()) || forceRecompute)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << theNode.owner->outputFolderPath << weylLetter << theRank;
     outMkDirCommand2 << "mkdir " << theNode.owner->outputFolderPath << weylLetter << theRank << "/sl2s";
@@ -3634,8 +3715,8 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
     if (!redirectToSlTwos)
       out << out2.str();
     else
-      out << outSltwoDisplayPath.str() << "sl2s.html";
-    out << "\">  Redirecting to the list of all root subalgebras: <br><br> <a href=\"" <<  out2.str() << "\">"  << out1.str() << "</a>.<br><br>";
+      out << outSltwoDisplayPath.str() << "sl2s_nopng.html";
+    out << "\">  Redirecting to the requested page: <br><br> <a href=\"" <<  out2.str() << "\">"  << out1.str() << "</a>.<br><br>";
   }
   else
   { out << "<br><br>... Created the missing folders for the database. <b> Running  a second time... (you wil be redirected automatically)</b><br><br><META http-equiv=\"refresh\" content=\"0; url="
@@ -3727,7 +3808,7 @@ std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
   out << this->theArguments.ElementToString(useHtml, useLatex);
   out <<  "<button" << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
         << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
-        << " textType=B&textDim=3&textInput="
+        << " textType=" << this->exampleAmbientWeylLetter << "&textDim=" << this->exampleAmbientWeylRank << "&textInput="
         << CGIspecificRoutines::UnCivilizeStringCGI(this->example)
         << "\"> " << this->example << "</a></div></div>";
   return out.str();
@@ -3994,16 +4075,23 @@ bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVar
 int ParserNode::EvaluateInvariantsSl2DegreeM
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { List<int> thePartition;
+  if (theArgumentList.size!=2)
+    return theNode.SetError(theNode.errorWrongNumberOfArguments);
   int theDegree=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].intValue;
   if (theDegree<0)
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   ParserNode& partitionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
-  thePartition.SetSize(partitionNode.children.size);
-  for (int i=0; i<partitionNode.children.size; i++)
-  { thePartition.TheObjects[i]=theNode.owner->TheObjects[partitionNode.children.TheObjects[i]].intValue;
-    if (thePartition.TheObjects[i]<1)
-      return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-//    std::cout<< thePartition.TheObjects[i] << ",";
+  if (partitionNode.ExpressionType==typeArray)
+  { thePartition.SetSize(partitionNode.children.size);
+    for (int i=0; i<partitionNode.children.size; i++)
+    { thePartition.TheObjects[i]=theNode.owner->TheObjects[partitionNode.children.TheObjects[i]].intValue;
+      if (thePartition.TheObjects[i]<1)
+        return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  //    std::cout<< thePartition.TheObjects[i] << ",";
+    }
+  } else
+  { thePartition.SetSize(1);
+    thePartition.TheObjects[0]=partitionNode.intValue;
   }
   slTwoInSlN theSl2;
   theNode.ExpressionType=theNode.typeString;
@@ -4184,19 +4272,11 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string&
   return out.str();
 }
 
-void Parser::initFunctionList()
+void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)
 { if (this->flagFunctionListInitialized)
     return;
   this->flagFunctionListInitialized=true;
   ParserFunction theFunction;
-
-/*  this->AddOneFunctionToDictionaryNoFail
-  ("EvaluateLPolyEqualsZeroOverCone",
-   "(Poly, Cone)",
-   "<b> At the moment this function is experimental and causes program crash. Please don't use before this notice is removed.</b>Finds the zeroes of linear polynomial over a cone. The cone is projective, i.e. the dimension of the cone must be one greater than the number of polynomial variables.",
-   "EvaluateLPolyEqualsZeroOverCone(x_1+x_2+2, Cone((1,0,3),(0,-1,0))) ",
-    & ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
-   );*/
   this->AddOneFunctionToDictionaryNoFail
   ("cone",
    "((Rational,...),...)",
@@ -4223,6 +4303,7 @@ void Parser::initFunctionList()
    "()",
    "Print the root system of the ambient Lie algebra.",
    "printRootSystem",
+   DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -4263,14 +4344,14 @@ void Parser::initFunctionList()
    this->AddOneFunctionToDictionaryNoFail
   ("transformToReducedGroebnerBasis",
    "(Polynomial,...)",
-   "Transforms to reduced Groebner basis with respect to the monomial ordering x_1&lt; x_2&lt;x_3&lt;....",
+   "<b> This function is largely untested. If you use it make sure to double-check the output. </b> Transforms to reduced Groebner basis using Buchberger's algorithm with respect to the lexicographic monomial ordering x_1^l&lt; x_2^m&lt;x_3^n&lt;....",
    "transformToReducedGroebnerBasis(x_1^3+x_1x_2+1, x_1x_2, x_2^3)",
     & ParserNode::EvaluateGroebner
    );
    this->AddOneFunctionToDictionaryNoFail
   ("getRelations",
    "(Polynomial,...)",
-   "Get the algebraic relations between the input polynomials.",
+   "<b> This function is largely untested. If you use it make sure to double-check the output. </b>Get the algebraic relations between the input polynomials.",
    "getRelations(x_1^2, x_1x_2, x_2^2)",
     & ParserNode::EvaluateRelations
    );
@@ -4279,6 +4360,7 @@ void Parser::initFunctionList()
    "()",
    "Computes all root subalgebras. The computation is served from the hard disk if it isalready computed. The function will redirect you to a new page, to return to the calculator use the back button.",
    "printRootSubalgebras",
+   DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintRootSAs
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -4286,7 +4368,16 @@ void Parser::initFunctionList()
    "()",
    "Computes all sl(2) subalgebras (equivalently, all nilpotent orbits) over the complex numbers. The computation is served from the hard disk if it is already computed. The function will redirect you to a new page, to return to the calculator use the back button.",
    "printSlTwos",
+   DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintSlTwos
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("printRootSlTwosAndRootSAsFORCERecompute",
+   "()",
+   "The same as printRootSubalgebras, printSlTwos, but forces a recompute, doesn't use the database. <br> If the printRootSubalgebras function has problems, try calling this function.<br>As I do not yet have an automatic testing unit for the calculator functions, regression-errors with the database might occur. <br> If you need to call this function, a bug has probably occurred.",
+   "printRootSlTwosAndRootSAsFORCERecompute",
+    DefaultWeylLetter, DefaultWeylRank,
+    & ParserNode::EvaluatePrintRootSAsForceRecompute
    );
   this->AddOneFunctionToDictionaryNoFail
   ("invariantsSlTwoOfDegree",
@@ -4295,6 +4386,28 @@ void Parser::initFunctionList()
    "invariantsSlTwoOfDegree(2,(2,2))",
     & ParserNode::EvaluateInvariantsSl2DegreeM
    );
+  this->AddOneFunctionToDictionaryNoFail
+  ("solveLinNEQParamOverCone",
+   "(Polynomial, Integer, Integer, Cone, Lattice)",
+   "<b> This function is under development. It does not do what it claims it does; please don't use until this message disappers (you are seeing this function only if I forgot to hide it).</b>Solve linear inequality given by the linear polynomial over the cone and lattice, where the first integer gives number of non-parameters x_i and the socond integer is the number of parameters y_i. The solution is the set of y_i's for which the linear poly is satisfied for all x_j's, allowed by the starting cone.",
+   "solveLinNEQParamOverCone(-2x_1+x_2,1, 1, cone((-1,1,0),(0,1,0), (-1,-2,4)), lattice((1,0),(0,1)))",
+    & ParserNode::EvaluateSolveLNEqParamOverConeAndLattice
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("lattice",
+   "((Rational,...),...)",
+   "Rational lattice generated by the argument vectors.",
+   "lattice((1,3), (2,2))",
+    & ParserNode::EvaluateLattice
+   );
+
+/*   this->AddOneFunctionToDictionaryNoFail
+  ("solveLPolyEqualsZeroOverCone",
+   "(Polynomial, Cone)",
+   "<b> This function is largely untested. If you use it make sure to double-check the output. </b> Solves a linear equation over a set of linear inequalities. The first argument must be the linear polynomial (of, say, n variables). Then second argument must be the set of projectivized linear inequalities (in n+1 variables).",
+   "solveLPolyEqualsZeroOverCone(x_1+x_2-1/2,cone((1,0,0), (0,1,0), (1, 1, 1) ))",
+    & ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
+   );*/
    //printAllSlTwos
    this->theFunctionList.QuickSortAscending();
 }

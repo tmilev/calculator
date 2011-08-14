@@ -32,7 +32,7 @@ function progressReport()
 <!>
 <!--Option-->
 
-Select root system. <select name="textType" id="textType" onchange="initRecompute();">
+ <select name="textType" id="textType" onchange="makeCartanArbitrary(document.getElementById('textType'), document.getElementById(textDim));  this.form.submit();">
   <option>A</option>
   <option selected="1">B</option>
   <option>C</option>
@@ -41,7 +41,7 @@ Select root system. <select name="textType" id="textType" onchange="initRecomput
   <option>F</option>
   <option>G</option>
 </select>
-<select name="textDim" id="textDim" onchange="initRecompute();">
+<select name="textDim" id="textDim" onchange="makeCartanArbitrary(document.getElementById('textType'), document.getElementById(textDim));  this.form.submit();">
   <option>1</option>
   <option>2</option>
   <option selected="1">3</option>
@@ -50,7 +50,7 @@ Select root system. <select name="textType" id="textType" onchange="initRecomput
   <option>6</option>
   <option>7</option>
   <option>8</option>
-</select>
+</select> Root system.
 <script type="text/javascript"> 
 function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != "none" ) { el.style.display = 'none'; } else { el.style.display = '';}}
 </script>
@@ -783,7 +783,7 @@ function saec_VPF_isDelim(input)
 <script type="text/javascript" 
 src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  
 djConfig = "parseOnLoad: true"></script>
-<div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
+<div style="width:400;height:400;border:solid 1px" id="idCanvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
 clickCanvasMain(event.clientX, event.clientY);
 //changeBasis(1, 50, 50); drawOnCanvasMain();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
 <br>
@@ -1057,6 +1057,7 @@ var RootsArray;
 var ZeroRoot;
 var ButtonIsDown=false;
 var DebugString;
+var canvasMain=document.getElementById("idCanvasMain");
 for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)
   Basis[tempCounter]= new Array(2);
 tempCounter=0;
@@ -1391,7 +1392,7 @@ function drawOnCanvasMain()
 }
 
 function initDojo()
-{ node = dojo.byId(canvasMain);
+{ node = dojo.byId("idCanvasMain");
   surface = dojox.gfx.createSurface(node, 400, 400);
   initRecompute();
 }

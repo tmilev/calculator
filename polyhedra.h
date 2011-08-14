@@ -37,6 +37,15 @@
 
 #ifndef polyhedra_h_already_included
 #define polyhedra_h_already_included
+
+//the following option turns on a RAM memory limit safeguard, as well as
+// very limited memory allocation statistics. See
+//ParallelComputing::CheckPointerCounters. The 3 main files should compile and link just fine with the following 3 lines commented out.
+//If not, it's a bug.
+#ifndef CGIversionLimitRAMuse
+#define CGIversionLimitRAMuse
+#endif
+
 #include <assert.h>
 #include <sstream>
 #include <cstdlib>
@@ -134,6 +143,7 @@ class ElementUniversalEnveloping;
 class MonomialUniversalEnveloping;
 class rootPoly;
 class PolynomialRationalCoeff;
+class ConeComplex;
 
 
 
@@ -4151,7 +4161,7 @@ public:
       } else
         if (this->degrees[i]!=0)
           return false;
-    return true;
+    return whichLetter!=-1;
   }
   void GetMonomialWithCoeffOne(Monomial<ElementOfCommutativeRingWithIdentity>& output);
   void MultiplyBy(Monomial<ElementOfCommutativeRingWithIdentity>& m, Monomial<ElementOfCommutativeRingWithIdentity>& output);
@@ -4337,6 +4347,19 @@ public:
   { for (int i=0; i<this->size; i++)
       if (!this->TheObjects[i].IsLinear())
         return false;
+    return true;
+  }
+  bool IsLinearGetRootConstantTermLastCoordinate(Vector<ElementOfCommutativeRingWithIdentity>& outputRoot, const ElementOfCommutativeRingWithIdentity& theZero)
+  { outputRoot.MakeZero(this->NumVars+1, theZero);
+    int index;
+    for (int i=0; i<this->size; i++)
+      if(this->TheObjects[i].IsAConstant())
+        *outputRoot.LastObject()=this->TheObjects[i].Coefficient;
+      else
+        if (this->TheObjects[i].IsOneLetterFirstDegree(index))
+          outputRoot.TheObjects[index]=this->TheObjects[i].Coefficient;
+        else
+          return false;
     return true;
   }
   void Evaluate
@@ -9247,6 +9270,7 @@ public:
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
+  static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
   static std::string GetHtmlMathDivFromLatexFormula
   (const std::string& input)
   {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormula(input, true);}
@@ -9327,6 +9351,10 @@ class Cone
   bool GetRootFromLPolyConstantTermGoesToLastVariable
   (PolynomialRationalCoeff& inputLPoly, root& output)
   ;
+  void SolveLNeqParamOverLattice
+    (int numNonParams, int numParamsNoConstTerm, Lattice& theLattice,
+     ConeComplex& output, GlobalVariables& theGlobalVariables)
+     ;
   bool SolveLPolyEqualsZeroIAmProjective
   ( PolynomialRationalCoeff& inputLPoly,
    Cone& outputCone, GlobalVariables& theGlobalVariables
@@ -9485,7 +9513,7 @@ class ParserNode
   bool GetRootsEqualDimNoConversionNoEmptyArgument
 (List<int>& theArgumentList, roots& output, int& outputDim)
 ;
-  int EvaluateLattice
+  static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateGroebner
@@ -9512,20 +9540,30 @@ class ParserNode
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluatePrintRootSAsAndSlTwos
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos)
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
 ;
   static int EvaluatePrintSlTwos
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, true);
+  { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, true, false);
+  }
+  static int EvaluatePrintRootSAsForceRecompute
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false, true);
   }
   static int EvaluatePrintRootSAs
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false);
+  { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false, false);
   }
   int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);
   int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
+  void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
+  void EvaluateMinus(GlobalVariables& theGlobalVariables);
+  void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
+  void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
+  void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
+  void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables);
   static int EvaluateWeylAction
   (ParserNode& theNode,
@@ -9533,16 +9571,13 @@ class ParserNode
    bool DualAction, bool useRho, bool useMinusRho)
   ;
   int EvaluatePlus(GlobalVariables& theGlobalVariables);
-  void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
-  void EvaluateMinus(GlobalVariables& theGlobalVariables);
-  void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
-  void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
-  void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
   static int EvaluatePartialFractions
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateSplit
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateSolveLNEqParamOverConeAndLattice
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int  EvaluateWeylDimFormula
@@ -9620,6 +9655,8 @@ class ParserFunction
 public:
   ParserFunctionArgumentTree theArguments;
   int (*theActualFunction)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables);
+  char exampleAmbientWeylLetter;
+  int exampleAmbientWeylRank;
   std::string functionDescription;
   std::string functionName;
   std::string example;
@@ -9648,6 +9685,8 @@ public:
     this->functionDescription=other.functionDescription;
     this->functionName=other.functionName;
     this->example=other.example;
+    this->exampleAmbientWeylRank=other.exampleAmbientWeylRank;
+    this->exampleAmbientWeylLetter=other.exampleAmbientWeylLetter;
   }
   bool operator>(const ParserFunction& other) const
   { return this->functionName>other.functionName;
@@ -9845,18 +9884,28 @@ public:
   bool lookAheadTokenProhibitsTimes(int theToken);
   bool lookAheadTokenAllowsMapsTo(int theToken);
   bool TokenProhibitsUnaryMinus(int theToken);
-  void initFunctionList();
+  void initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank);
   void AddOneFunctionToDictionaryNoFail
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
-  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
+   )
+  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, 'B', 3, inputFunctionAddress);
+    assert(tempBool);
+  }
+  void AddOneFunctionToDictionaryNoFail
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
+   )
+  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, ExampleWeylLetter, ExampleWeylRank, inputFunctionAddress);
     assert(tempBool);
   }
   bool AddOneFunctionToDictionary
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
+)
   { ParserFunction newFunction;
     bool result=newFunction.MakeMe(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
     if (!this->theFunctionList.AddObjectOnTopNoRepetitionOfObjectHash(newFunction))
       return false;
+    this->theFunctionList.LastObject()->exampleAmbientWeylLetter=ExampleWeylLetter;
+    this->theFunctionList.LastObject()->exampleAmbientWeylRank=ExampleWeylRank;
     return result;
   }
   void SubAby(int newToken);

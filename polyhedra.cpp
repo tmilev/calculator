@@ -48,6 +48,7 @@ Controller ParallelComputing::controllerLockThisMutexToSignalPause;
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
   this->ReadWriteRecursionDepth=0;
+  this->MaxAllowedComputationTimeInSeconds=1000;
 }
 
 bool Stop()
@@ -56,6 +57,10 @@ bool Stop()
 
 int ParallelComputing::GlobalPointerCounter=0;
 int ParallelComputing::PointerCounterPeakRamUse=0;
+
+void (*CGIspecificRoutines::functionCGIServerIgnoreUserAbort) (void)=0;
+
+
 Integer Integer::TheRingUnit(1) ;
 Integer Integer::TheRingMUnit(-1);
 Integer Integer::TheRingZero(0) ;
@@ -30672,7 +30677,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeUEelement: LatexOutput << this->UEElement.GetElement().ElementToString(); break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, PolyFormatLocal); break;
-    //case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
+    case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
    // case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
@@ -30707,7 +30712,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeArray: out << " an array of " << this->children.size << " elements. "; break;
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
-    case ParserNode::typeLattice: out << "A lattice."; break;
+    case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
     case ParserNode::typeCone: out << "a cone with walls: "; break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;

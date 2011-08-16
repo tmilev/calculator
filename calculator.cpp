@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <signal.h>
 #endif
 //#define cgiLimitRAMuseNumPointersInList
 #ifndef __DATE__
@@ -36,16 +37,25 @@ void getPath(char* path, std::string& output)
   }
 }
 
+void ignoreUserAbortSignal()
+{
+#ifndef WIN32
+  signal(SIGABRT,SIG_IGN);
+  signal(SIGTERM,SIG_IGN);
+#endif
+}
+
 extern void static_html6(std::stringstream& output);
 extern void static_html5(std::stringstream& output);
 extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
 
-static double MaxAllowedComputationTimeInSeconds=1000;
 bool ComputationComplete;
 
 #ifndef WIN32
 timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
+
+GlobalVariables theGlobalVariables;
 
 double GetElapsedTimeInSeconds()
 { gettimeofday(&LastMeasureOfCurrentTime, NULL);
@@ -54,14 +64,14 @@ double GetElapsedTimeInSeconds()
 }
 
 void* RunTimer(void* ptr)
-{ for (; GetElapsedTimeInSeconds()<MaxAllowedComputationTimeInSeconds || MaxAllowedComputationTimeInSeconds<=0;)
+{ for (; GetElapsedTimeInSeconds()<theGlobalVariables.MaxAllowedComputationTimeInSeconds || theGlobalVariables.MaxAllowedComputationTimeInSeconds<=0;)
   { usleep(10000);
     if (ComputationComplete)
       break;
   }
   if (!ComputationComplete)
   { std::cout << "</div><br><br><br>Your computation has taken " << GetElapsedTimeInSeconds() << " seconds so far.";
-    std::cout << "<br>The maximum allowed computation time is <b>" << MaxAllowedComputationTimeInSeconds << " seconds</b>. Please use an offline version of the calculator. ";
+    std::cout << "<br>The maximum allowed computation time is <b>" << theGlobalVariables.MaxAllowedComputationTimeInSeconds << " seconds</b>. Please use an offline version of the calculator. ";
     std::exit(0);
   } else
     pthread_exit(NULL);
@@ -108,7 +118,7 @@ int main(int argc, char **argv)
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><meta name=\"keywords\" content= \"Vector partition function calculator, vector partition functions, Semisimple Lie algebras, root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated " << __DATE__ << "</title>";
+  std::cout << "<html><meta name=\"keywords\" content= \"root system, root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated " << __DATE__ << "</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body>\n";
@@ -121,15 +131,15 @@ int main(int argc, char **argv)
   pthread_t TimerThread;
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
 #endif
-
+  CGIspecificRoutines::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings;
   CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
   inputStrings.SetSize(3);
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=1000;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
-  GlobalVariables theGlobalVariables;
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
     theParser.DefaultWeylLetter=inputWeylString[0];
@@ -146,6 +156,8 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  //civilizedInput="getPointOnLatticeClosestToWallInDirection( (2,3), (1,1/5,1/3), lattice((1,1), (0,2)))";
+//  civilizedInput="intersectLatticeWithPreimageOfLattice(  lattice((1,1), (0,2)), lattice(26/5), (1,1/5) )";
   //civilizedInput="solveLPolyEqualsZeroOverCone(x_1+x_2-1/2,cone((1,0,0), (0,1,0), (1, 1, 1) ))";
   //civilizedInput="printSlTwos";
   //civilizedInput="invariantsSlTwoOfDegree(30,(2,3))";
@@ -349,7 +361,7 @@ int main(int argc, char **argv)
                  // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
                   //<< "</div>"
                   << "";
-  std::cout << "<hr><b>Notes.</b><br> Computation is limited to " << MaxAllowedComputationTimeInSeconds << " seconds. <br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
+  std::cout << "<hr><b>Notes.</b><br> Computation is limited to " << theGlobalVariables.MaxAllowedComputationTimeInSeconds << " seconds. <br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
   std::cout << "<br>Bug reports = my wholehearted gratitude.<br><button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
   std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
@@ -364,14 +376,17 @@ int main(int argc, char **argv)
   std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/RootSystem.html.cpp?view=markup\"> Calculator interface c++ (2 out of 2 files)</a>\n";
   std::cout << " <br>\n";
-  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). "
-  << "In order to get it up and running on your machine you need to do the following (I will try to simplify the installation procedure some time soon). <br>0) You need a Linux machine. I have tested it only on Ubuntu. <br>1) Download the above files. <br>2) Put them in a C++ project and make sure you have the following includes work:"
-  << "#include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. They should work by default on almost any Linux distro. <br>3) Build the project to a console application with default settings.  <br> 4) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts(you might have to google how to, it's not too easy).  Apache comes preinstalled on Ubuntu.<br>5) Put the calculator file in the cgi-bin/ folder (or wherever your cgi scripts are located). <br> 6) Assume your cgi-bin folder is  x/. Then you need to create folders x/../htdocs, x/../htdocs/tmp/. Finally, you need to give every user read/write access to those two folders. This should finish the installation; run the calculator throught the browser. "
-  <<"<br>7) The calculator calls latex, so you need to install latex. <br>8) You need install the jsmath script in the base (root) folder of your apache server."
-  <<"  <br> All precomputed data is stored in a \"database\" <a href=\"/tmp/\">here</a>. <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() calls. The LaTeX logs can be found by viewing the calculator page's source. <br> The html output is hardcoded: either by hand or transformed from a separate .html file using a micro-tool written for the purpose. ";
-  std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() left by me (blank screen), or 2) by Apache/the system (internal server error).";
+  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). ";
+  std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() left by me (blank screen), or 2) by Apache/the system (internal server error)."
+  << "  \n<br> All precomputed data is stored in a \"database\" <a href=\"/tmp/\">here</a>. <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() calls. The LaTeX logs can be found by viewing the calculator page's source. <br> The html output is hardcoded: either by hand or transformed from a separate .html file using a micro-tool written for the purpose. ";
   std::cout << " ";
-  std::cout << " <br>\n";
+  std::cout << " \n";
+  std::cout << "<hr><b>Installing the calculator on your machine from c++ source. </b><br> In order to get the calculator running on your machine you need to do the following. I will work on simplifying the installation some time soon. <br>0) You need a Linux machine. I have tested it only on Ubuntu. <br>1) Download the c++ files in the links above. <br>2) Put them in a c++ project and make sure the following includes work:"
+  << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. They should work by default on almost any Linux distro. <br>3) Build the project to a console application with default console application settings.  <br> 4) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts (you might have to google how to, it's not easy).  Apache comes preinstalled on Ubuntu.\n"
+  << "<br>5) Assume the location of your server's cgi-bin folder is some_folder_path/cgi-bin/ (you can google where this folder is located). Put the calculator executable file in some_folder_path/cgi-bin/  .  <br> 6) Create folders some_folder_path/cgi-bin/../htdocs, some_folder_path/cgi-bin/../htdocs/tmp/. "
+  << "Enable read/write access to those two folders for every user. This completes a basic installation; you should test by running the calculator through your web browser. The remaining steps are needed in order to get a nicely formatted output and to avoid broken links in the calculator. "
+  << "<br>7) The calculator calls latex, so you need to install latex. <br>8) You need install the jsmath script in the base (root) folder of your apache server.";
+
 	std::cout <<	"</div>";
   std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
   std::cout << "<br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
@@ -379,7 +394,7 @@ int main(int argc, char **argv)
   for (int i=0; i<inputStrings.size; i++)
     std::cout << "string " << i << ": " << inputStrings.TheObjects[i] << "<br>";
   std::cout << "system commands: <br>";
-  MaxAllowedComputationTimeInSeconds=10000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   for (int i=0; i< theParser.SystemCommands.size; i++)
     std::cout <<  theParser.SystemCommands.TheObjects[i] << "<br>";
   std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
@@ -420,7 +435,7 @@ int main(int argc, char **argv)
     theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
     tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
     latexCommandTemp= tempStreamPNG.str();
-     theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
+    theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
   }
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";

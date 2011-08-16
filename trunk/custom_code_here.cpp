@@ -1041,10 +1041,46 @@ int ParserNode::EvaluateSolveLNEqParamOverConeAndLattice
   return theNode.errorNoError;
 }
 
+
+void Cone::SolveLNeqParamOverLatticeOneNonParam
+    (Lattice& theLattice, root& theShift,
+     List<Cone>& outputCones, List<Lattice>& outputLattices, roots outputShifts, GlobalVariables& theGlobalVariables)
+{ //the first variable is non-parameter, the remaining ones are parameters. The last variable represents constants.
+  /*MatrixLargeRational column, theMat;
+  column.init(this->Normals.size, 1);
+  root currentColumn;
+  Selection NonPivotPoints;
+  roots theNewNormals;
+  Lattice CurrentLattice;
+
+  for (int i=0; i<this->Normals.size; i++)
+  { theMat.AssignRootsToRowsOfMatrix(this->Normals);
+    theMat.SwitchTwoRows(i, 0);
+    if (!theMat.elements[0][0].IsEqualToZero())
+    { Rational
+
+      for (int j=0; j<column.NumRows; j++)
+        column.elements[j][0]=theMat.elements[j][0];
+      column.GaussianEliminationByRows(theMat, NonPivotPoints);
+      theNewNormals.SetSize(column.NumRows-1);
+      for (int j=0; j<theMat.NumRows-1; j++)
+      { root& currentRoot=theNewNormals.TheObjects[j+1];
+        currentRoot.SetSize(theMat.NumCols-1);
+        for (int k=0; k<theMat.NumCols-1; k++)
+          currentRoot.TheObjects[k]=theMat.elements[j+1][k+1];
+      }
+    }
+
+  }
+*/
+}
+
 void Cone::SolveLNeqParamOverLattice
     (int numNonParams, int numParamsNoConstTerm, Lattice& theLattice,
      ConeComplex& output, GlobalVariables& theGlobalVariables)
-{ Selection selectedNormals;
+{ //this->SolveLNeqParamOverLatticeOneNonParam(0, theLattice, output, theGlobalVariables);
+
+  /*Selection selectedNormals;
   List<roots> theParamChambers, theNonParamVertices;
   selectedNormals.init(this->Normals.size);
   int numCycles=MathRoutines::NChooseK(this->Normals.size, numNonParams);
@@ -1105,8 +1141,9 @@ void Cone::SolveLNeqParamOverLattice
   output.initFromCones(theParamChambers, theGlobalVariables);
   std::cout << "<hr>Starting cone: "  << output.ElementToString(false, true);
   output.Refine(theGlobalVariables);
-  std::cout << "<hr>Cone refined: " << output.ElementToString(false, true);
+  std::cout << "<hr>Cone refined: " << output.ElementToString(false, true);*/
 }
+
 
 void GeneralizedVermaModuleCharacters::ProcessOneParametricChamber
   (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
@@ -2071,6 +2108,12 @@ bool Lattice::FindOnePreimageInLatticeOf
   input.GetVectorsRational(tempInput);
   bool result=tempInput.GetIntegralCoordsInBasisIfTheyExist(thisBasis, tempOutput, (Rational) 1, (Rational) -1, (Rational) 0);
   output.AssignVectorsRational(tempOutput);
+  //std::cout << "<hr>acting by " << this->basisRationalForm.ElementToString(true, false) << " on " << output.ElementToString();
+  MatrixLargeRational tempMat;
+  tempMat=this->basisRationalForm;
+  tempMat.Transpose();
+  tempMat.ActOnRoots(output);
+  //std::cout << "<br> to get " << output.ElementToString();
   return result;
 }
 
@@ -3330,39 +3373,26 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
   //std::cout << "<br>******************End of debugging linear space intersections";
 }
 
-int ParserNode::EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size<3)
-    return this->SetError(this->errorBadOrNoArgument);
-  roots theLinearMap;
-  root tempRoot;
-  ParserNode& firstLatticeNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  ParserNode& secondLatticeNode=this->owner->TheObjects[argumentList.TheObjects[1]];
-  if (!firstLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  if (!secondLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  int theDim=-1;
-  for (int i=2; i<argumentList.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
-    if (!currentNode.GetRootRational(tempRoot, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    if (theDim==-1)
-      theDim=tempRoot.size;
-    if (theDim!=tempRoot.size)
-      return this->SetError(this->errorDimensionProblem);
-    theLinearMap.AddObjectOnTop(tempRoot);
-  }
+int ParserNode::EvaluateIntersectLatticeWithPreimageLattice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ roots theLinearMap;
+  Lattice& firstLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].theLattice.GetElement();
+  Lattice& secondLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[1]].theLattice.GetElement();
+  List<int> theMapTempList;
+  theMapTempList.AddObjectOnTop(theArgumentList.TheObjects[2]);
+  int theDim;
+  if (!theNode.owner->TheObjects[theArgumentList.TheObjects[2]].GetRootsEqualDimNoConversionNoEmptyArgument(theMapTempList, theLinearMap, theDim))
+    return theNode.SetError(theNode.errorDimensionProblem);
   MatrixLargeRational theLinearMapMat;
   theLinearMapMat.AssignRootsToRowsOfMatrix(theLinearMap);
-  theLinearMapMat.Transpose();
-  if (firstLatticeNode.theLattice.GetElement().GetDim()!=theLinearMapMat.NumCols || secondLatticeNode.theLattice.GetElement().GetDim()!=theLinearMapMat.NumRows)
-    return this->SetError(this->errorDimensionProblem);
-  this->theLattice.GetElement()=firstLatticeNode.theLattice.GetElement();
-  this->theLattice.GetElement().IntersectWithPreimageOfLattice(theLinearMapMat, secondLatticeNode.theLattice.GetElement(), theGlobalVariables);
-  this->ExpressionType=this->typeLattice;
-  return this->errorNoError;
+  if(theLinearMapMat.NumCols!=firstLattice.GetDim() || theLinearMapMat.NumRows!=secondLattice.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  //theLinearMapMat.Transpose();
+
+  theNode.theLattice.GetElement()=firstLattice;
+  theNode.theLattice.GetElement().IntersectWithPreimageOfLattice(theLinearMapMat, secondLattice, theGlobalVariables);
+  theNode.ExpressionType=theNode.typeLattice;
+  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables)
@@ -3684,6 +3714,9 @@ int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
 int ParserNode::EvaluatePrintRootSAsAndSlTwos
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
 { std::stringstream out1, out2, outSltwoPath, outSltwoDisplayPath, outSltwoMainFile, out;
+  CGIspecificRoutines::SetCGIServerIgnoreUserAbort();
+  //double oldMaxAllowedComputationTimeInSeconds= theGlobalVariables.MaxAllowedComputationTimeInSeconds;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   char weylLetter=theNode.owner->DefaultWeylLetter;
   int theRank=theNode.owner->DefaultWeylRank;
   out1 << theNode.owner->outputFolderPath << weylLetter << theRank << "/rootHtml.html";
@@ -3715,7 +3748,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
     if (!redirectToSlTwos)
       out << out2.str();
     else
-      out << outSltwoDisplayPath.str() << "sl2s_nopng.html";
+      out << outSltwoDisplayPath.str() << "sl2s.html";
     out << "\">  Redirecting to the requested page: <br><br> <a href=\"" <<  out2.str() << "\">"  << out1.str() << "</a>.<br><br>";
   }
   else
@@ -3730,6 +3763,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
   }
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
+//  theGlobalVariables.MaxAllowedComputationTimeInSeconds=oldMaxAllowedComputationTimeInSeconds;
   return theNode.errorNoError;
 }
 
@@ -4127,6 +4161,98 @@ void MatrixLargeRational::ActOnMonomialAsDifferentialOperator(Monomial<Rational>
     }
 }
 
+void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
+  (root& theDirection, root& theAffineHyperplane, GlobalVariables& theGlobalVariables)
+{ if (theAffineHyperplane.TheObjects[0].IsEqualToZero())
+    return;
+  root theNormal=theAffineHyperplane;
+  theNormal.SetSize(theNormal.size-1);
+  roots theBasis;
+  theBasis.AssignMatrixRows(this->basisRationalForm);
+  Lattice normalProjectionLattice, theDirectionLattice, theTrueProjectionLattice;
+  roots tempRoots;
+  tempRoots.AddObjectOnTop(theDirection);
+  theDirectionLattice.MakeFromRoots(tempRoots);
+  theDirectionLattice.IntersectWith(*this);
+  root theTrueDirection;
+  theDirectionLattice.basisRationalForm.RowToRoot(0, theTrueDirection);
+  roots theNormalProjections;
+  theNormalProjections.SetSize(theBasis.size);
+  MatrixLargeRational projectionMap;
+  projectionMap.AssignVectorRow(theNormal);
+  for (int i=0; i<theBasis.size; i++)
+  { theNormalProjections.TheObjects[i].SetSize(1);
+    theNormalProjections.TheObjects[i].TheObjects[0]= theNormal.ScalarEuclidean(theBasis.TheObjects[i]);
+  }
+  normalProjectionLattice.MakeFromRoots(theNormalProjections);
+
+  std::cout << "<br>the normal: " << theNormal.ElementToString();
+  std::cout << "<br>normal projection lattice: " << normalProjectionLattice.ElementToString();
+  std::cout << "<br> the direction lattice: " << theDirectionLattice.ElementToString();
+
+  root theTrueProjection; theTrueProjection.SetSize(1);
+  theTrueProjection.TheObjects[0]= theTrueDirection.ScalarEuclidean(theNormal);
+  tempRoots.size=0;
+  tempRoots.AddObjectOnTop(theTrueProjection);
+  theTrueProjectionLattice.MakeFromRoots(tempRoots);
+  std::cout << "<br> the true projection lattice: " << theTrueProjectionLattice.ElementToString(true, false);
+  Lattice theRougherLattice;
+
+  theRougherLattice=*this;
+  std::cout << "<br> starting lattice: " << this->ElementToString();
+  theRougherLattice.IntersectWithPreimageOfLattice(projectionMap, theTrueProjectionLattice, theGlobalVariables);
+  std::cout << "<br> the rougher lattice: " << theRougherLattice.ElementToString(true, false);
+  roots allRepresentativesStartingLattice;
+  this->GetAllRepresentatitves(theRougherLattice, allRepresentativesStartingLattice);
+  root theShift; theShift.SetSize(1);
+  theShift.TheObjects[0]=-*theAffineHyperplane.LastObject();
+  roots allRepresentatives, allRepresentativesPreimages; root tempRoot;
+  normalProjectionLattice.GetAllRepresentatitves(theTrueProjectionLattice, allRepresentatives);
+  std::cout << "<br>all the representatives: " << allRepresentatives.ElementToString();
+  std::cout << "<br> the shift: " << theShift.ElementToString();
+  for (int i=0; i< allRepresentatives.size; i++)
+  { allRepresentatives.TheObjects[i]+=theShift;
+    theTrueProjectionLattice.ReduceVector(allRepresentatives.TheObjects[i]);
+  }
+  this->FindOnePreimageInLatticeOf(projectionMap, allRepresentatives, allRepresentativesPreimages, theGlobalVariables);
+  std::cout << "<br>all the representatives shifted and modded: " << allRepresentatives.ElementToString();
+  std::cout << "<br> one preimage for each representative: " << allRepresentativesPreimages.ElementToString();
+  roots outputShifts;
+  PolynomialRationalCoeff tempP, tempP2;
+  PolynomialOutputFormat tempFormat;
+  for (int i=0; i<allRepresentatives.size; i++)
+  { tempP.Nullify(this->GetDim());
+    Rational theDen=theTrueDirection.ScalarEuclidean(theNormal);
+    for (int j=0; j<this->GetDim(); j++)
+    { tempP2.MakeNVarDegOnePoly(this->GetDim(), j, -theNormal.TheObjects[j]/theDen+1);
+      tempP+=tempP2;
+    }
+    tempP+=allRepresentatives.TheObjects[i].TheObjects[0]/theDen;
+    std::cout << "<br>representative" << i+1 << ": " << tempP.ElementToString(tempFormat);
+  }
+}
+
+int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[2]].theLattice.GetElement();
+  ParserNode& theHyperplaneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
+  ParserNode& theDirectionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
+
+  //ParserNode& theRayNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
+  root theAffineNormal, theRay;//, theRay;
+  if (!theHyperplaneNode.GetRootRational(theAffineNormal, theGlobalVariables))
+    return theNode.SetError(theNode.errorProgramming);
+  if (!theDirectionNode.GetRootRational(theRay, theGlobalVariables))
+    return theNode.SetError(theNode.errorProgramming);
+//  if (!theRayNode.GetRootRational(theRay, theGlobalVariables))
+//    return theNode.SetError(theNode.errorProgramming);
+  //int theDim=t;
+  if (theAffineNormal.size-1!=currentLattice.GetDim() || currentLattice.GetRank()!=currentLattice.GetDim() || theRay.size!=currentLattice.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theRay, theAffineNormal, theGlobalVariables);
+  return theNode.errorNoError;
+}
+
 bool slTwoInSlN::ComputeInvariantsOfDegree
   (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, std::string& outputError, GlobalVariables& theGlobalVariables)
 { this->initFromModuleDecomposition(decompositionDimensions, false, false);
@@ -4358,7 +4484,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("printRootSubalgebras",
    "()",
-   "Computes all root subalgebras. The computation is served from the hard disk if it isalready computed. The function will redirect you to a new page, to return to the calculator use the back button.",
+   "Computes all root subalgebras. The computation is served from the hard disk if it is already computed. The function will redirect you to a new page, to return to the calculator use the back button.",
    "printRootSubalgebras",
    DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintRootSAs
@@ -4372,10 +4498,10 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluatePrintSlTwos
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("printRootSlTwosAndRootSAsFORCERecompute",
+  ("printSlTwosAndRootSAsFORCERecompute",
    "()",
-   "The same as printRootSubalgebras, printSlTwos, but forces a recompute, doesn't use the database. <br> If the printRootSubalgebras function has problems, try calling this function.<br>As I do not yet have an automatic testing unit for the calculator functions, regression-errors with the database might occur. <br> If you need to call this function, a bug has probably occurred.",
-   "printRootSlTwosAndRootSAsFORCERecompute",
+   "<b>Use only if there are broken links in root subalgebra/sl(2)-database. When executing this command, please be patient and do not click any links until automatically redirected. </b> I have a problem with setting up the Apache server and the way it handles SIGABORT signals (this is what happens when you don't wait for the computation to finish and click on a link prematurely). This function is a temporary solution to this (minor) technical problem.",
+   "printSlTwosAndRootSAsFORCERecompute",
     DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintRootSAsForceRecompute
    );
@@ -4385,14 +4511,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "Given an sl(2)-representation  V_1+...+V_n , computes the symmetric tensor algebra invariants of sl(2). Input: the first variable is the degree, followed by a vector describing the dimensions of  each V_i.",
    "invariantsSlTwoOfDegree(2,(2,2))",
     & ParserNode::EvaluateInvariantsSl2DegreeM
-   );
+   );/*
   this->AddOneFunctionToDictionaryNoFail
   ("solveLinNEQParamOverCone",
    "(Polynomial, Integer, Integer, Cone, Lattice)",
    "<b> This function is under development. It does not do what it claims it does; please don't use until this message disappers (you are seeing this function only if I forgot to hide it).</b>Solve linear inequality given by the linear polynomial over the cone and lattice, where the first integer gives number of non-parameters x_i and the socond integer is the number of parameters y_i. The solution is the set of y_i's for which the linear poly is satisfied for all x_j's, allowed by the starting cone.",
    "solveLinNEQParamOverCone(-2x_1+x_2,1, 1, cone((-1,1,0),(0,1,0), (-1,-2,4)), lattice((1,0),(0,1)))",
     & ParserNode::EvaluateSolveLNEqParamOverConeAndLattice
-   );
+   );*/
   this->AddOneFunctionToDictionaryNoFail
   ("lattice",
    "((Rational,...),...)",
@@ -4400,7 +4526,20 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "lattice((1,3), (2,2))",
     & ParserNode::EvaluateLattice
    );
-
+  this->AddOneFunctionToDictionaryNoFail
+  ("getPointOnLatticeClosestToWallInDirection",
+   "((Rational,...), (Rational,...), Lattice)",
+   "<b>Experimental, please don't use</b>.",
+   "getPointOnLatticeClosestToWallInDirection( (2,3), (1,1/5,1/3), lattice((1,1), (0,2)))",
+    & ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("intersectLatticeWithPreimageOfLattice",
+   "(Lattice, Lattice, ((Rational,...),...))",
+   "Intersects the first lattice with the preimage of the second lattice under the linear map described by the third argument. Suppose the dimension of vector space of the first lattice is m, and the dimension of the vector space of the second lattice is n. Then the linear map should be given by a list of m vectors, with n coordinates each. The i^th of these vectors should give the image of the i^th basis vector of the vector space of the first lattice. ",
+   "intersectLatticeWithPreimageOfLattice(  lattice((1,1), (0,2)), lattice(26/5), ( (1), (1/5)) )",
+    & ParserNode::EvaluateIntersectLatticeWithPreimageLattice
+   );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",
    "(Polynomial, Cone)",

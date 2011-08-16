@@ -934,6 +934,19 @@ public:
   void ComputeDebugString();
   void ComputeDebugString(bool useHtml, bool useLatex){this->ElementToString(this->DebugString, useHtml, useLatex);}
   void ElementToString(std::string& output)const;
+  void ActMultiplyVectorRowOnTheRight(Vector<Element>& theRoot,  const Element& TheRingZero)const{ Vector<Element> output; this->ActMultiplyVectorRowOnTheRight(theRoot, output, TheRingZero); theRoot=output; }
+  void ActMultiplyVectorRowOnTheRight(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)const
+  { assert(&input!=&output);
+    assert(this->NumRows==input.size);
+    output.MakeZero(this->NumCols, TheRingZero);
+    Element tempElt;
+    for (int i=0; i<this->NumCols; i++)
+      for (int j=0; j<this->NumRows; j++)
+      { tempElt=this->elements[j][i];
+        tempElt*=input.TheObjects[j];
+        output.TheObjects[i]+=tempElt;
+      }
+  }
   void ActOnVectorColumn(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)const
   { assert(&input!=&output);
     assert(this->NumCols==input.size);
@@ -943,7 +956,7 @@ public:
       for (int j=0; j<this->NumCols; j++)
       { tempElt=this->elements[i][j];
         tempElt*=input.TheObjects[j];
-        output.TheObjects[j]+=tempElt;
+        output.TheObjects[i]+=tempElt;
       }
   }
   void ActOnVectorsColumn(const Vectors<Element>& input, Vectors<Element>& output, const Element& TheRingZero)const
@@ -6898,6 +6911,9 @@ public:
   void IntersectWithPreimageOfLattice
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
+  void GetClosestPointToHyperplaneWRTFirstCoordinate
+(root& theDirection, root& theAffineHyperplane, GlobalVariables& theGlobalVariables)
+  ;
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
   //returns false if the vector is not in the vector space spanned by the lattice
@@ -9292,6 +9308,11 @@ public:
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true); };
   static inline int RedGreenBlue(int r, int g, int b){ return r | (g<<8) | b<<16;}
   static void FormatCPPSourceCode(const std::string& FileName);
+  static void(*functionCGIServerIgnoreUserAbort)(void);
+  static void SetCGIServerIgnoreUserAbort()
+  { if (CGIspecificRoutines::functionCGIServerIgnoreUserAbort!=0)
+      CGIspecificRoutines::functionCGIServerIgnoreUserAbort();
+  }
   enum TheChoicesWeMake
   { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
   };
@@ -9354,6 +9375,10 @@ class Cone
   void SolveLNeqParamOverLattice
     (int numNonParams, int numParamsNoConstTerm, Lattice& theLattice,
      ConeComplex& output, GlobalVariables& theGlobalVariables)
+     ;
+  void SolveLNeqParamOverLatticeOneNonParam
+    (Lattice& theLattice, root& theShift,
+     List<Cone>& outputCones, List<Lattice>& outputLattices, roots outputShifts, GlobalVariables& theGlobalVariables)
      ;
   bool SolveLPolyEqualsZeroIAmProjective
   ( PolynomialRationalCoeff& inputLPoly,
@@ -9507,7 +9532,6 @@ class ParserNode
   int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
   int EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables);
   int EvaluateReadFromFile(GlobalVariables& theGlobalVariables);
-  int EvaluateIntersectLatticeWithPreimageLattice(GlobalVariables& theGlobalVariables);
   int EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables);
   bool ExtractArgumentList(List<int>& outputArgumentIndices);
   bool GetRootsEqualDimNoConversionNoEmptyArgument
@@ -9550,6 +9574,9 @@ class ParserNode
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false, true);
   }
+  static int EvaluateClosestPointToHyperplaneAlongTheNormal
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluatePrintRootSAs
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false, false);
@@ -9583,7 +9610,9 @@ class ParserNode
   static int  EvaluateWeylDimFormula
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
-
+  static int EvaluateIntersectLatticeWithPreimageLattice
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
   void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
   static int EvaluatePrintDecomposition
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -10040,6 +10069,7 @@ private:
   FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
 public:
   int ReadWriteRecursionDepth;
+  double MaxAllowedComputationTimeInSeconds;
   roots rootsGeneralPurposeBuffer1;
   roots rootsGeneralPurposeBuffer2;
   roots rootsWallBasis;
@@ -10789,12 +10819,15 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
     for (int j=0; j<theDim; j++)
       bufferMatGaussianElimination.elements[i][j]=inputBasis.TheObjects[i].TheObjects[j];
   bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.NumRows, theRingUnit, theRingZero);
+  //std::cout << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ElementToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ElementToString(true, false);
   bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);
+  //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ElementToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ElementToString(true, false);
   Vector<CoefficientType> tempRoot, theCombination;
   assert(this!=&output);
   output.MakeZero(inputBasis.size, theRingZero);
   theCombination=*this;
   int col=0;
+//  std::cout << "<br>vector whose coords we wanna find: " << this->ElementToString();
   for (int i=0; i<inputBasis.size; i++)
   { for (; col<theDim; col++)
       if (!bufferMatGaussianElimination.elements[i][col].IsEqualToZero())
@@ -10809,8 +10842,9 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
   }
   if (!theCombination.IsEqualToZero())
     return false;
-  bufferMatGaussianEliminationCC.Transpose();
-  bufferMatGaussianEliminationCC.ActOnVectorColumn(output, theRingZero);
+//  std::cout << "<br>" << bufferMatGaussianEliminationCC.ElementToString(true, false) << " acting on " << output.ElementToString();
+  bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output, theRingZero);
+//  std::cout << " gives " << output.ElementToString();
   return true;
 }
 

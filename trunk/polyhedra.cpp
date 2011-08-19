@@ -7865,12 +7865,16 @@ void Rational::AssignInteger(int x)
   this->NumShort=x;
 }
 
-Rational Rational::Factorial(int n)
-{ Rational result;
-  result.MakeOne();
-  for (int i=0; i<n; i++)
-    result.MultiplyByInt(i+1);
-  return result;
+Rational Rational::Factorial(int n, GlobalVariables* theGlobalVariables)
+{ if (n<0)
+  { assert(false);
+    return 0;
+  }
+  LargeIntUnsigned result;
+  result.AssignFactorial((unsigned int) n, theGlobalVariables);
+  Rational answer;
+  answer=result;
+  return answer;
 }
 
 Rational Rational::TwoToTheNth(int n)
@@ -8095,26 +8099,17 @@ void LargeInt::MultiplyByInt(int x)
 }
 
 void LargeIntUnsigned::ElementToString(std::string& output)const
-{ int base=10;
-  int tempI;
-  if (this->IsEqualToZero())
+{ if (this->IsEqualToZero())
   { output="0";
     return;
   }
-  LargeIntUnsigned tempInt;
-  tempInt.Assign(*this);
-  std::string tempS;
-  std::stringstream out;
-  while(!tempInt.IsEqualToZero() )
-  { tempI= tempInt%base;
-    out << tempI;
-    tempInt= tempInt/base;
+  if (this->size>1)
+  { this->ElementToStringLargeElementDecimal(output);
+    return;
   }
-  tempS= out.str();
-  output.resize(tempS.size());
-  for (unsigned int i=0; i<tempS.size(); i++)
-    output[i]=tempS[tempS.size()-1-i];
-//  assert(this->CheckForConsistensy());
+  std::stringstream out;
+  out << this->TheObjects[0];
+  output=out.str();
 }
 
 bool LargeInt::IsEqualTo(const LargeInt& x)const

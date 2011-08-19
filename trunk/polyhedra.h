@@ -1864,11 +1864,14 @@ public:
   //If you got no clue what to put just leave CarryOverBound= 2^31.
   //static const unsigned int CarryOverBound=37;
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
-  static const unsigned int CarryOverBound=2147483648UL; //=2^31
+//  static const unsigned int CarryOverBound=2147483648UL; //=2^31
+  static const unsigned int CarryOverBound=1000000000UL;
   //The following must be less than or equal to the square root of CarryOverBound.
   //It is used for quick multiplication of Rational-s.
-  static const int SquareRootOfCarryOverBound=32768; //=2^15
+//  static const int SquareRootOfCarryOverBound=32768; //=2^15
+  static const int SquareRootOfCarryOverBound=31000; //=2^15
   void ElementToString(std::string& output)const;
+  void ElementToStringLargeElementDecimal(std::string& output)const;
   inline std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
   void DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
@@ -1880,6 +1883,19 @@ public:
   bool IsPositive()const{ return this->size>1 || this->TheObjects[0]>0; }
   bool IsEqualToOne()const{ return this->size==1 && this->TheObjects[0]==1; }
   bool IsGEQ(const LargeIntUnsigned& x)const;
+  static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
+  { List<int> theSieve;
+    theSieve.initFillInObject(n+1,1);
+    output.MakeActualSizeAtLeastExpandOnTop(n/2);
+    output.size=0;
+    for (unsigned int i=2; i<=n; i++)
+      if (theSieve.TheObjects[i]!=0)
+      { output.AddObjectOnTop(i);
+//        std::cout << i << ",";
+        for (unsigned int j=i; j<=n; j+=i)
+          theSieve.TheObjects[j]=0;
+      }
+  }
   static void gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output);
   static void lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
   { LargeIntUnsigned tempUI, tempUI2;
@@ -1893,6 +1909,9 @@ public:
   inline void operator*=(const LargeIntUnsigned& right){this->MultiplyBy(right);}
   inline void operator*=(unsigned int x){this->MultiplyByUInt(x);}
   inline void operator+=(unsigned int x){this->AddUInt(x);}
+  void AssignFactorial(unsigned int x){ this->AssignFactorial(x, 0);}
+  void AssignFactorial(unsigned int x, GlobalVariables* theGlobalVariables);
+
   void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const;
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
@@ -1901,10 +1920,13 @@ public:
   int GetUnsignedIntValueTruncated();
   int operator%(unsigned int x);
   inline void operator=(const LargeIntUnsigned& x){ this->Assign(x); }
+  inline void operator=(unsigned int x){ this->AssignShiftedUInt(x,0); }
+  inline void operator+=(const LargeIntUnsigned& other){this->Add(other);}
   LargeIntUnsigned operator/(unsigned int x)const;
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); }
   LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; }
+//  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
   inline bool operator<(const LargeIntUnsigned& other)const{return !this->IsGEQ(other);}
   //must be rewritten:
   double GetDoubleValue();
@@ -2275,7 +2297,8 @@ ParallelComputing::GlobalPointerCounter++;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus(); }
   static Rational NChooseK(int n, int k);
-  static Rational Factorial(int n);
+  static Rational Factorial(int n, GlobalVariables* theGlobalVariables);
+  static Rational Factorial(int n){return Rational::Factorial(n,0);}
   static Rational TwoToTheNth(int n);
   static Rational NtoTheKth(int n, int k);
   void RaiseToPower(int x);
@@ -2401,6 +2424,10 @@ public:
     }
     return result;
   }
+  void MakeEi(int DesiredDimension, int NonZeroIndex, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  { this->MakeZero(DesiredDimension, theRingZero);
+    this->TheObjects[NonZeroIndex]=theRingUnit;
+  }
   bool AssignMatDetectRowOrColumn(const Matrix<CoefficientType>& input)
   { if (input.NumCols==1)
     { this->SetSize(input.NumRows);
@@ -2448,6 +2475,29 @@ public:
   const CoefficientType& theRingMinusUnit,
   const CoefficientType& theRingZero)
   ;
+  void GetVectorsPerpendicularTo(Vectors<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  { int Pivot=-1;
+    if (!this->FindIndexFirstNonZeroCoordinateFromTheLeft(Pivot))
+    { output.MakeEiBasis(this->size, theRingUnit, theRingZero);
+      return;
+    }
+    output.SetSize(this->size-1);
+    for (int i=0; i<this->size; i++)
+      if (i!=Pivot)
+      { Vector<CoefficientType>& current=output.TheObjects[i];
+        current.MakeEi(this->size, i, theRingUnit, theRingZero);
+        current.TheObjects[Pivot]-=this->TheObjects[i];
+      }
+  }
+  bool FindIndexFirstNonZeroCoordinateFromTheLeft(int& theIndex)
+  { theIndex=-1;
+    for (int i=0; i<this->size; i++)
+      if (!this->TheObjects[i].IsEqualToZero())
+      { theIndex=i;
+        return true;
+      }
+    return false;
+  }
   bool GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
   Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -2547,6 +2597,11 @@ class Vectors: public List<Vector<CoefficientType> >
   bool LinSpanContainsRoot
   (const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
   ;
+  void MakeEiBasis(int theDimension, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  { this->SetSize(theDimension);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i].MakeEi(theDimension, i, theRingUnit, theRingZero);
+  }
   bool LinSpanContainsRoot(const Vector<CoefficientType>& input)const
   { Matrix<CoefficientType> buffer;
     Selection bufferSelection;
@@ -6912,7 +6967,7 @@ public:
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
   void GetClosestPointToHyperplaneWRTFirstCoordinate
-(root& theDirection, root& theAffineHyperplane, GlobalVariables& theGlobalVariables)
+  (root& theDirection, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
   ;
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
@@ -9618,6 +9673,12 @@ class ParserNode
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluatePrintRootSystem
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateFactorial
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluatePrintAllPrimesEratosthenes
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateInvariantsSl2DegreeM

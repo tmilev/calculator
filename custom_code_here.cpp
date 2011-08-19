@@ -3584,7 +3584,7 @@ bool ParserFunctionArgumentTree::ConvertArguments
           argumentCounter++;
       }
     else
-      if (argumentCounter<outputArgumentIndices.size)
+    { if (argumentCounter<outputArgumentIndices.size)
       { ParserNode& currentNode=theNode.owner->TheObjects[outputArgumentIndices.TheObjects[argumentCounter]];
         if (!this->ConvertOneArgumentIndex(currentNode, i, lowestNestedIndexNonExplored, theGlobalVariables))
           return false;
@@ -3592,6 +3592,9 @@ bool ParserFunctionArgumentTree::ConvertArguments
       }
       else
         return false;
+    }
+  if (argumentCounter<outputArgumentIndices.size)
+    return false;
   return true;
 }
 
@@ -4161,22 +4164,182 @@ void MatrixLargeRational::ActOnMonomialAsDifferentialOperator(Monomial<Rational>
     }
 }
 
+void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)const
+{ std::stringstream out;
+  if (this->CarryOverBound==1000000000UL)
+  { std::string tempS;
+    out << (this->TheObjects[this->size-1]);
+    for (int i=this->size-2; i>=0; i--)
+    { std::stringstream tempStream;
+      tempStream << this->TheObjects[i];
+      tempS=tempStream.str();
+      int numZeroesToPad=9-tempS.length();
+      for (int j=0; j<numZeroesToPad; j++)
+          out << "0";
+      out << tempS;
+    }
+    output= out.str();
+    return;
+  }
+  unsigned int base=10;
+  int MaxNumIntegersPerCarryOverBound=11;
+  List<LargeIntUnsigned> bufferPowersOfBase;
+  int initialNumDigitsEstimate=MaxNumIntegersPerCarryOverBound*this->size;
+  int sizeBufferPowersOfBase=MathRoutines::Minimum(initialNumDigitsEstimate, 10000);
+  bufferPowersOfBase.SetSize(sizeBufferPowersOfBase);
+  LargeIntUnsigned currentPower;
+  LargeIntUnsigned Remainder=*this;
+  int numRemainingDigits;
+  while (!Remainder.IsEqualToZero())
+  { currentPower.MakeOne();
+    numRemainingDigits=0;
+    int highestBufferIndex=-1;
+    bufferPowersOfBase.TheObjects[0].MakeOne();
+    bool bufferFilled=false;
+    while (Remainder.IsGEQ(currentPower))
+    { numRemainingDigits++;
+      highestBufferIndex++;
+      highestBufferIndex%=sizeBufferPowersOfBase;
+      bufferPowersOfBase.TheObjects[highestBufferIndex]=currentPower;
+      if (highestBufferIndex==sizeBufferPowersOfBase-1)
+        bufferFilled=true;
+      currentPower*=base;
+    }
+    int startIndex=highestBufferIndex;
+    do
+    { currentPower=bufferPowersOfBase.TheObjects[highestBufferIndex];
+      unsigned int theDigit=0;
+      while (Remainder.IsGEQ(currentPower))
+      { theDigit++;
+        currentPower+=bufferPowersOfBase.TheObjects[highestBufferIndex];
+      }
+      out << theDigit;
+      numRemainingDigits--;
+      if (theDigit!=1)
+        bufferPowersOfBase.TheObjects[highestBufferIndex]*=theDigit;
+      Remainder.SubtractSmallerPositive(bufferPowersOfBase.TheObjects[highestBufferIndex]);
+      highestBufferIndex--;
+      if (highestBufferIndex==-1)
+      { highestBufferIndex=sizeBufferPowersOfBase-1;
+        if (!bufferFilled)
+          break;
+      }
+    } while (highestBufferIndex!=startIndex);
+  }
+  for (int i=0; i<numRemainingDigits; i++)
+    out << "0";
+  output=out.str();
+}
+
+int ParserNode::EvaluateFactorial
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ Rational tempRat;
+  int theArgument=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].intValue;
+  if (theArgument<0)
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  if (theArgument>5000)
+  { theNode.outputString="Computation too large.";
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  }
+  theNode.rationalValue=tempRat.Factorial(theArgument, & theGlobalVariables);
+//  theNode.ExpressionType=theNode.typeRational;
+  theNode.ExpressionType=theNode.typeRational;
+  //theNode.outputString=theNode.rationalValue.ElementToString();
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluatePrintAllPrimesEratosthenes
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ Rational tempRat;
+  int theArgument=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].intValue;
+  if (theArgument<0)
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  if (theArgument>20000)
+  { theNode.outputString="Computation too large.";
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  }
+  List<unsigned int> thePrimes;
+  LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(theArgument, thePrimes);
+  std::stringstream out;
+  for (int i=0; i<thePrimes.size; i++)
+    out << thePrimes.TheObjects[i] << ", ";
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGlobalVariables)
+{ this->MakeOne();
+  List<unsigned int> primesBelowX;
+  LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(x, primesBelowX);
+  LargeIntUnsigned tempInt, tempOne;
+  tempOne.MakeOne();
+  for (int i=0; i<primesBelowX.size; i++)
+  { unsigned int thePrime=primesBelowX.TheObjects[i];
+    unsigned int thePowerOfThePrime=0;
+    unsigned int currentPower=thePrime;
+    do
+    { thePowerOfThePrime+=x/currentPower;
+      currentPower*=thePrime;
+    }
+    while (currentPower<=x);
+    tempInt.AssignShiftedUInt(thePrime, 0);
+    MathRoutines::RaiseToPower(tempInt, thePowerOfThePrime, tempOne);
+    *this*=tempInt;
+/*    if (theGlobalVariables!=0)
+    { std::stringstream out;
+      out << "processing prime " << thePrime << " (" << i+1 << " out of " << primesBelowX.size << ").";
+      theGlobalVariables->theIndicatorVariables.ProgressReportString1=out.str();
+      theGlobalVariables->theIndicatorVariables.String1NeedsRefresh=true;
+      theGlobalVariables->MakeReport();
+    }*/
+  }
+}
+
 void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
-  (root& theDirection, root& theAffineHyperplane, GlobalVariables& theGlobalVariables)
+  (root& theDirection, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
 { if (theAffineHyperplane.TheObjects[0].IsEqualToZero())
     return;
   root theNormal=theAffineHyperplane;
   theNormal.SetSize(theNormal.size-1);
+  if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero())
+    return;
+  Rational theConstOnTheOtherSide=-*theAffineHyperplane.LastObject();
   roots theBasis;
   theBasis.AssignMatrixRows(this->basisRationalForm);
-  Lattice normalProjectionLattice, theDirectionLattice, theTrueProjectionLattice;
-  roots tempRoots;
+  Lattice theHyperplaneLatticeNoShift, theDirectionLattice, theRougherLattice;//, normalProjectionLattice, theTrueProjectionLattice;
+  roots tempRoots; //root tempRoot;
   tempRoots.AddObjectOnTop(theDirection);
-  theDirectionLattice.MakeFromRoots(tempRoots);
-  theDirectionLattice.IntersectWith(*this);
+  theDirectionLattice=*this;
+  theDirectionLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
   root theTrueDirection;
   theDirectionLattice.basisRationalForm.RowToRoot(0, theTrueDirection);
-  roots theNormalProjections;
+  std::cout << "<br>the normal: " << theNormal.ElementToString();
+  std::cout << "<br> the direction lattice: " << theDirectionLattice.ElementToString();
+  theHyperplaneLatticeNoShift=*this;
+  theHyperplaneLatticeNoShift.IntersectWithLinearSubspaceGivenByNormal(theNormal);
+  std::cout << "<br>the non-affine hyperplane intersected with the lattice: " << theHyperplaneLatticeNoShift.ElementToString();
+  tempRoots.AssignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
+  tempRoots.AddObjectOnTop(theTrueDirection);
+  theRougherLattice.MakeFromRoots(tempRoots);
+  this->GetAllRepresentatitves(theRougherLattice, outputRepresentatives);
+  std::cout << "<br>the rougher lattice: " << theRougherLattice.ElementToString();
+  std::cout << "<br>representatives of the quotient of the two lattices: " << outputRepresentatives.ElementToString();
+  Rational theShiftedConst, unitMovement, tempRat;
+  unitMovement=theNormal.ScalarEuclidean(theTrueDirection);
+  movementInDirectionPerRepresentative.SetSize(outputRepresentatives.size);
+  std::cout << "<br>Affine hyperplane per representative: ";
+  for (int i=0; i<outputRepresentatives.size; i++)
+  { tempRat=(theNormal.ScalarEuclidean(outputRepresentatives.TheObjects[i]) -theConstOnTheOtherSide)/unitMovement;
+    tempRat.AssignFracValue();
+    theShiftedConst=theConstOnTheOtherSide+tempRat;
+    root& currentMovement=movementInDirectionPerRepresentative.TheObjects[i];
+    currentMovement=theAffineHyperplane;
+    *currentMovement.LastObject()=theShiftedConst;
+    std::cout << "<br>Representative: " << outputRepresentatives.TheObjects[i].ElementToString() << " and the hyperplane: " << currentMovement.ElementToString();
+    //currentMovement
+  }
+/*  roots theNormalProjections;
   theNormalProjections.SetSize(theBasis.size);
   MatrixLargeRational projectionMap;
   projectionMap.AssignVectorRow(theNormal);
@@ -4186,9 +4349,7 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
   }
   normalProjectionLattice.MakeFromRoots(theNormalProjections);
 
-  std::cout << "<br>the normal: " << theNormal.ElementToString();
   std::cout << "<br>normal projection lattice: " << normalProjectionLattice.ElementToString();
-  std::cout << "<br> the direction lattice: " << theDirectionLattice.ElementToString();
 
   root theTrueProjection; theTrueProjection.SetSize(1);
   theTrueProjection.TheObjects[0]= theTrueDirection.ScalarEuclidean(theNormal);
@@ -4229,7 +4390,7 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
     }
     tempP+=allRepresentatives.TheObjects[i].TheObjects[0]/theDen;
     std::cout << "<br>representative" << i+1 << ": " << tempP.ElementToString(tempFormat);
-  }
+  }*/
 }
 
 int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
@@ -4249,7 +4410,8 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
   //int theDim=t;
   if (theAffineNormal.size-1!=currentLattice.GetDim() || currentLattice.GetRank()!=currentLattice.GetDim() || theRay.size!=currentLattice.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
-  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theRay, theAffineNormal, theGlobalVariables);
+  roots representatives, theMovements;
+  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theRay, theAffineNormal, representatives, theMovements, theGlobalVariables);
   return theNode.errorNoError;
 }
 
@@ -4506,12 +4668,27 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluatePrintRootSAsForceRecompute
    );
   this->AddOneFunctionToDictionaryNoFail
+  ("factorial",
+   "(Integer)",
+   "Returns the factorial of a non-negative integer.<=5000",
+   "factorial(2011)",
+    & ParserNode::EvaluateFactorial
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("printAllPrimesUpTo",
+   "(Integer)",
+   "Prints all primes smaller than argument and smaller than<=20000 using Eratosthenes sieve.",
+   "printAllPrimesUpTo(2011)",
+    & ParserNode::EvaluatePrintAllPrimesEratosthenes
+   );
+  this->AddOneFunctionToDictionaryNoFail
   ("invariantsSlTwoOfDegree",
    "(Integer, (Integer,...))",
    "Given an sl(2)-representation  V_1+...+V_n , computes the symmetric tensor algebra invariants of sl(2). Input: the first variable is the degree, followed by a vector describing the dimensions of  each V_i.",
    "invariantsSlTwoOfDegree(2,(2,2))",
     & ParserNode::EvaluateInvariantsSl2DegreeM
-   );/*
+   );
+   /*
   this->AddOneFunctionToDictionaryNoFail
   ("solveLinNEQParamOverCone",
    "(Polynomial, Integer, Integer, Cone, Lattice)",

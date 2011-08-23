@@ -1009,31 +1009,38 @@ bool ParserNode::ExtractArgumentList
   return true;
 }
 
-int ParserNode::EvaluateSolveLNEqParamOverConeAndLattice
+int ParserNode::EvaluateFindExtremaInDirectionOverLatticeOneNonParam
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { PolynomialRationalCoeff& theLinPoly=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].polyValue.GetElement();
-  int numNonParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[1]].intValue;
-  int numParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[2]].intValue;
+ // int numNonParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[1]].intValue;
+  //int numParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[2]].intValue;
+  ParserNode& theShiftNode= theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
+  Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[2]].theLattice.GetElement();
   Cone& currentCone=theNode.owner->TheObjects[theArgumentList.TheObjects[3]].theCone.GetElement();
-  Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[4]].theLattice.GetElement();
+  root theShift;
   root theNEq;
   if(!theLinPoly.IsLinearGetRootConstantTermLastCoordinate(theNEq, (Rational) 0))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   if(theNEq.size!=currentCone.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
-  if (theNEq.size!=numNonParams+numParams+1)
-    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (!theShiftNode.GetRootRational(theShift, theGlobalVariables))
+    return theNode.SetError(errorDimensionProblem);
+  theNEq.SetSize(theNEq.size-1);
+  if (theShift.size!=theNEq.size)
+    return theNode.SetError(errorDimensionProblem);
+/*  if (theNEq.size!=numNonParams+numParams+1)
+    return theNode.SetError(theNode.errorBadOrNoArgument);*/
   GeneralizedVermaModuleCharacters tempChars;
-  root tempRoot;
   List<int> nodesCurrentRoot;
   List<roots> outputParamChambers, outputNonParamVertices;
   PolynomialOutputFormat tempFormat;
   std::cout << "Input data: normal: " << theNEq.ElementToString()
-  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
+//  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
   << "; cone: " << currentCone.ElementToString(false, true, false, true);
   ConeComplex theConeComplex;
-  currentCone.SolveLNeqParamOverLattice
-  (numNonParams, numParams, currentLattice, theConeComplex, theGlobalVariables);
+
+  currentCone.FindExtremaInDirectionOverLatticeOneNonParam
+  (theNEq, currentLattice, theShift, theConeComplex, theGlobalVariables);
   std::stringstream out;
   out << currentCone.ElementToString(false, true);
   theNode.outputString=out.str();
@@ -1041,107 +1048,93 @@ int ParserNode::EvaluateSolveLNEqParamOverConeAndLattice
   return theNode.errorNoError;
 }
 
-
-void Cone::SolveLNeqParamOverLatticeOneNonParam
-    (Lattice& theLattice, root& theShift,
-     List<Cone>& outputCones, List<Lattice>& outputLattices, roots outputShifts, GlobalVariables& theGlobalVariables)
-{ //the first variable is non-parameter, the remaining ones are parameters. The last variable represents constants.
-  /*MatrixLargeRational column, theMat;
-  column.init(this->Normals.size, 1);
-  root currentColumn;
-  Selection NonPivotPoints;
-  roots theNewNormals;
-  Lattice CurrentLattice;
-
-  for (int i=0; i<this->Normals.size; i++)
-  { theMat.AssignRootsToRowsOfMatrix(this->Normals);
-    theMat.SwitchTwoRows(i, 0);
-    if (!theMat.elements[0][0].IsEqualToZero())
-    { Rational
-
-      for (int j=0; j<column.NumRows; j++)
-        column.elements[j][0]=theMat.elements[j][0];
-      column.GaussianEliminationByRows(theMat, NonPivotPoints);
-      theNewNormals.SetSize(column.NumRows-1);
-      for (int j=0; j<theMat.NumRows-1; j++)
-      { root& currentRoot=theNewNormals.TheObjects[j+1];
-        currentRoot.SetSize(theMat.NumCols-1);
-        for (int k=0; k<theMat.NumCols-1; k++)
-          currentRoot.TheObjects[k]=theMat.elements[j+1][k+1];
-      }
-    }
-
-  }
-*/
+int ParserNode::EvaluateSliceCone
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ Cone& theCone=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].theCone.GetElement();
+  root theDirection;
+  if (! theNode.owner->TheObjects[theArgumentList.TheObjects[1]].GetRootRational(theDirection, theGlobalVariables))
+    return theNode.errorProgramming;
+  if (theCone.GetDim()!=theDirection.size)
+    return theNode.errorDimensionProblem;
+  ConeComplex theComplex;
+  theCone.SliceInDirection(theDirection, theComplex, theGlobalVariables);
+  theNode.outputString=theComplex.ElementToString(false, true);
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
 }
 
-void Cone::SolveLNeqParamOverLattice
-    (int numNonParams, int numParamsNoConstTerm, Lattice& theLattice,
-     ConeComplex& output, GlobalVariables& theGlobalVariables)
-{ //this->SolveLNeqParamOverLatticeOneNonParam(0, theLattice, output, theGlobalVariables);
 
-  /*Selection selectedNormals;
-  List<roots> theParamChambers, theNonParamVertices;
-  selectedNormals.init(this->Normals.size);
-  int numCycles=MathRoutines::NChooseK(this->Normals.size, numNonParams);
-  MatrixLargeRational matrixNonParams, matrixParams;
-  matrixNonParams.init(this->Normals.size, numNonParams);
-  int numParamsWithConstTerm=numParamsNoConstTerm+1;
-  matrixParams.init(this->Normals.size, numParamsWithConstTerm);
-  Selection NonPivotPoints;
-  roots basisRoots;
-  basisRoots.SetSize(numNonParams);
-  roots inducedParamChamber;
-  roots nonParamVertices;
-  inducedParamChamber.SetSize(this->Normals.size-numNonParams);
-  nonParamVertices.SetSize(numNonParams);
-  theParamChambers.MakeActualSizeAtLeastExpandOnTop(numCycles);
-  theNonParamVertices.MakeActualSizeAtLeastExpandOnTop(numCycles);
-  theParamChambers.size=0;
-  theNonParamVertices.size=0;
-  std::cout << "<hr>Num cycles: " << numCycles << "<br>";
-  for (int i=0; i<numCycles; i++)
-  { selectedNormals.incrementSelectionFixedCardinality(numNonParams);
-    for (int j=0; j<numNonParams; j++)
-    { root& currentNormal=this->Normals.TheObjects[selectedNormals.elements[j]];
-      root& currentBasisElt=basisRoots.TheObjects[j];
-      currentBasisElt.SetSize(numNonParams);
-      for (int k=0; k<numNonParams; k++)
-      { matrixNonParams.elements[j][k]=currentNormal.TheObjects[k];
-        currentBasisElt.TheObjects[k]=currentNormal.TheObjects[k];
-      }
-      for (int k=0; k<numParamsWithConstTerm; k++)
-        matrixParams.elements[j][k]=currentNormal.TheObjects[k+numNonParams];
-    }
-    if (basisRoots.GetRankOfSpanOfElements(theGlobalVariables)==numNonParams)
-    { for (int j=0, counter=numNonParams; j<this->Normals.size; j++)
-        if (!selectedNormals.selected[j])
-        { root& currentNormal=this->Normals.TheObjects[j];
-          for (int k=0; k<numNonParams; k++)
-            matrixNonParams.elements[counter][k]=currentNormal.TheObjects[k];
-          for (int k=0; k<numParamsWithConstTerm; k++)
-            matrixParams.elements[counter][k]=currentNormal.TheObjects[k+numNonParams];
-          counter++;
-        }
-      std::cout << "<br>Solving: " << matrixNonParams.ElementToString(true, false) << " and " << matrixParams.ElementToString(true, false);
-      MatrixLargeRational::GaussianEliminationByRows(matrixNonParams, matrixParams, NonPivotPoints);
-      for (int j=0; j<numNonParams; j++)
-        matrixParams.RowToRoot(j, nonParamVertices.TheObjects[j]);
-      for (int j=0; j<this->Normals.size-numNonParams; j++)
-        matrixParams.RowToRoot(j+numNonParams, inducedParamChamber.TheObjects[j]);
-      theNonParamVertices.AddObjectOnTop(nonParamVertices);
-      theParamChambers.AddObjectOnTop(inducedParamChamber);
-    }
+bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection
+  (root& SlicingDirection, root& normal1, root& normal2, root& output)
+{ // we are looking for a normal n of the form n=t1*normal1+t2*normal2
+  // such that  <t1*normal1+t2*normal2, slicingDirection>=0
+  Rational normal1ScalarDirection=normal1.ScalarEuclidean(SlicingDirection);
+  if (normal1ScalarDirection.IsEqualToZero())
+  { output=normal1;
+    return false;
   }
-  for (int i=0; i< theNonParamVertices.size; i++)
-  { std::cout << "<br>Number " << i+1 << ", vertices: " << theNonParamVertices.TheObjects[i].ElementToString();
-    std::cout << "<br>the parametric chamber: ";
-    std::cout << "<div class=\"math\">" << theParamChambers.TheObjects[i].ElementsToInequalitiesString(true, false, true) << "</div>";
-  }
-  output.initFromCones(theParamChambers, theGlobalVariables);
-  std::cout << "<hr>Starting cone: "  << output.ElementToString(false, true);
+  //from now on we assume t2=1;
+  Rational t1=-normal2.ScalarEuclidean(SlicingDirection)/normal1ScalarDirection;
+  output=normal2;
+  output+=normal1*t1;
+  output.ScaleByPositiveRationalToIntegralMinHeight();
+  return true;
+}
+
+void Cone::SliceInDirection
+  (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables)
+{ output.init();
+  output.AddNonRefinedChamberOnTopNoRepetition(*this);
+  output.slicingDirections.AddObjectOnTop(theDirection);
+  //std::cout <<output.ElementToString(false, true);
   output.Refine(theGlobalVariables);
-  std::cout << "<hr>Cone refined: " << output.ElementToString(false, true);*/
+  //std::cout <<output.ElementToString(false, true);
+}
+
+void Cone::FindExtremaInDirectionOverLatticeOneNonParam
+    ( root& theLPToMaximize, Lattice& theLattice, root& theShift,
+     ConeComplex& output, GlobalVariables& theGlobalVariables)
+{ root theDirection;
+  int theDim=this->GetDim();
+  theDirection.MakeEi(theDim, 0);
+  ConeComplex complexBeforeProjection;
+  complexBeforeProjection.init();
+  complexBeforeProjection.AddNonRefinedChamberOnTopNoRepetition(*this);
+  complexBeforeProjection.slicingDirections.AddObjectOnTop(theDirection);
+  complexBeforeProjection.slicingDirections.AddObjectOnTop(-theDirection);
+  std::cout << "<hr>complex before refining: <br>\n" << complexBeforeProjection.ElementToString(false, true);
+  complexBeforeProjection.Refine(theGlobalVariables);
+  std::cout << "<hr>complex before projection: <br>\n" << complexBeforeProjection.ElementToString(false, true);
+  Cone projectionCone;
+  root tempRoot, extraEquation;
+  root theDirectionSmallerDim;
+  roots exitRepresentatives, enteringRepresentatives, exitWallShifted, enteringWallShifted;
+  theDirectionSmallerDim.MakeEi(theDim-1, 0);
+  std::cout << "<hr>";
+  for (int i=0; i<complexBeforeProjection.size; i++)
+  { Cone& currentCone=complexBeforeProjection.TheObjects[i];
+    int numNonPerpWalls=0;
+    projectionCone.Normals.size=0;
+    for (int j=0; j<currentCone.Normals.size; j++)
+    { root& currentNormal=currentCone.Normals.TheObjects[j];
+      if (currentNormal [0]==0)
+      { tempRoot.SetSize(this->GetDim()-1);
+        for (int k=0; k<currentNormal.size-1; k++)
+          tempRoot[k]=currentNormal[k+1];
+        projectionCone.Normals.AddObjectOnTop(tempRoot);
+      } else
+      { std::cout << "<hr>";
+        std::cout << "<br>currentWall: " << currentNormal.ElementToString();
+        numNonPerpWalls++;
+        assert(numNonPerpWalls<3);
+        if (currentNormal.ScalarEuclidean(theDirection).IsPositive())
+          theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theDirectionSmallerDim, theShift, currentNormal, exitRepresentatives, exitWallShifted, theGlobalVariables);
+        else
+          theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(-theDirectionSmallerDim, theShift, currentNormal, enteringRepresentatives, enteringWallShifted, theGlobalVariables);
+      }
+    }
+
+  }
 }
 
 
@@ -1243,7 +1236,7 @@ void ConeComplex::GetNewVerticesAppend
     theLinearAlgebra.GaussianEliminationByRows(theLinearAlgebra, matEmpty, nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection==1)
     { theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, (Rational) 1, (Rational) 0);
-      tempRoot.ScaleToIntegralMinHeight();
+      tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
       if (myDyingCone.IsInCone(tempRoot))
         outputVertices.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
       else
@@ -1256,7 +1249,7 @@ void ConeComplex::GetNewVerticesAppend
 }
 
 bool ConeComplex::SplitChamber
-(int indexChamberBeingRefined, root& killerNormal, GlobalVariables& theGlobalVariables)
+(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
 { Cone& myDyingCone=this->TheObjects[indexChamberBeingRefined];
   if (!myDyingCone.flagHasSufficientlyManyVertices)
   { this->flagChambersHaveTooFewVertices=true;
@@ -1266,8 +1259,14 @@ bool ConeComplex::SplitChamber
   Cone& newMinusCone=theGlobalVariables.coneBuffer2NewSplit;
   newPlusCone.flagHasSufficientlyManyVertices=true;
   newMinusCone.flagHasSufficientlyManyVertices=true;
-  newPlusCone.LowestIndexNotCheckedForSplitting=myDyingCone.LowestIndexNotCheckedForSplitting+1;
-  newMinusCone.LowestIndexNotCheckedForSplitting=myDyingCone.LowestIndexNotCheckedForSplitting+1;
+  newPlusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
+  newMinusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
+  newPlusCone.LowestIndexNotCheckedForChopping=myDyingCone.LowestIndexNotCheckedForChopping;
+  newMinusCone.LowestIndexNotCheckedForChopping=myDyingCone.LowestIndexNotCheckedForChopping;
+  if (weAreChopping)
+  { newPlusCone.LowestIndexNotCheckedForChopping++;
+    newMinusCone.LowestIndexNotCheckedForChopping++;
+  }
   newPlusCone.Vertices.size=0; newPlusCone.Normals.size=0;
   newMinusCone.Vertices.size=0; newMinusCone.Normals.size=0;
   hashedRoots& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit;
@@ -1314,16 +1313,26 @@ void ConeComplex::PopChamberSwapWithLast(int index)
 void ConeComplex::AddNonRefinedChamberOnTopNoRepetition(Cone& newCone)
 { newCone.Normals.QuickSortAscending();
   this->AddObjectOnTopNoRepetitionOfObjectHash(newCone);
+
 }
 
 void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
 { if (this->indexLowestNonRefinedChamber>=this->size)
     return;
   Cone& currentCone=this->TheObjects[this->indexLowestNonRefinedChamber];
-  for (; currentCone.LowestIndexNotCheckedForSplitting<this->splittingNormals.size; currentCone.LowestIndexNotCheckedForSplitting++)
-    if (this->SplitChamber(this->indexLowestNonRefinedChamber, this->splittingNormals.TheObjects[currentCone.LowestIndexNotCheckedForSplitting], theGlobalVariables))
+  for (; currentCone.LowestIndexNotCheckedForChopping<this->splittingNormals.size; currentCone.LowestIndexNotCheckedForChopping++)
+   if (this->SplitChamber(this->indexLowestNonRefinedChamber, false, true, this->splittingNormals.TheObjects[currentCone.LowestIndexNotCheckedForChopping], theGlobalVariables))
       return;
-    this->indexLowestNonRefinedChamber++;
+  root currentNewWall;
+  for (; currentCone.LowestIndexNotCheckedForSlicingInDirection< this->slicingDirections.size; currentCone.LowestIndexNotCheckedForSlicingInDirection++)
+    for (int i=0; i<currentCone.Normals.size; i++)
+      if (this->slicingDirections.TheObjects[currentCone.LowestIndexNotCheckedForSlicingInDirection].ScalarEuclidean(currentCone.Normals.TheObjects[i]).IsPositive())
+        for (int j=i+1; j<currentCone.Normals.size; j++)
+          if (this->slicingDirections.TheObjects[currentCone.LowestIndexNotCheckedForSlicingInDirection].ScalarEuclidean(currentCone.Normals.TheObjects[j]).IsPositive())
+            if (currentCone.ProduceNormalFromTwoNormalsAndSlicingDirection(this->slicingDirections.TheObjects[currentCone.LowestIndexNotCheckedForSlicingInDirection], currentCone.Normals.TheObjects[i], currentCone.Normals.TheObjects[j], currentNewWall))
+              if (this->SplitChamber(this->indexLowestNonRefinedChamber, true, false, currentNewWall, theGlobalVariables))
+                return;
+  this->indexLowestNonRefinedChamber++;
 }
 
 void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
@@ -1347,7 +1356,7 @@ bool Cone::CreateFromNormals
   if (this->Normals.size==0)
     return false;
   for (int i=0; i<this->Normals.size; i++)
-    this->Normals.TheObjects[i].ScaleToIntegralMinHeight();
+    this->Normals.TheObjects[i].ScaleByPositiveRationalToIntegralMinHeight();
   int theDim=this->Normals.TheObjects[0].size;
   theSel.init(this->Normals.size);
   int numCycles=theSel.GetNumCombinationsFixedCardinality(theDim-1);
@@ -1369,7 +1378,7 @@ bool Cone::CreateFromNormals
         tempBool=this->IsInCone(tempRoot);
       }
       if (tempBool)
-      { tempRoot.ScaleToIntegralMinHeight();
+      { tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
         this->Vertices.AddOnTopNoRepetition(tempRoot);
       }
     }
@@ -1443,7 +1452,9 @@ void ConeComplex::initFromCones
 std::string Cone::ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant)
 { std::stringstream out;
   if (!PrepareMathReport)
-    out << "Index next wall to refine by: " << this->LowestIndexNotCheckedForSplitting << "\n";
+  { out << "Index next wall to refine by: " << this->LowestIndexNotCheckedForChopping << "\n";
+    out << "<br>\nIndex next direction to slice in: " << this->LowestIndexNotCheckedForSlicingInDirection;
+  }
   if (useHtml)
     out << "<br>";
   out << "Normals:\n";
@@ -1474,6 +1485,11 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
   roots tempRoots;
   tempRoots.CopyFromBase(this->splittingNormals);
   out << tempRoots.ElementToString(useLatex, useHtml, false);
+  if (this->slicingDirections.size>0)
+  { if (useHtml)
+      out << "<br>\n";
+    out << " Directions to slice along: " << this->slicingDirections.ElementToString();
+  }
   for (int i=0; i<this->size; i++)
   { if (useHtml)
       out << "<br>";
@@ -2881,7 +2897,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
       currentRoot.TheObjects[i]=1;
       currentRoot.TheObjects[pivotColumnIndex]=theScalarProducts.TheObjects[i];
     }
-  theScalarProducts.ScaleToIntegralMinHeight();
+  theScalarProducts.ScaleByPositiveRationalToIntegralMinHeight();
   //std::cout << "<br>the scalar products after scaling to integral: " << theScalarProducts.ElementToString();
   eigenSpacePlusOrthogonalComponent.TheObjects[pivotColumnIndex]=theScalarProducts;
   //std::cout << "<br>The eigenspace before intersection: " << eigenSpacePlusOrthogonalComponent.ElementToString();
@@ -2970,7 +2986,7 @@ bool Lattice::SubstitutionHomogeneous
   matRelationBetweenStartingVariables.FindZeroEigenSpace(theEigenSpace, theGlobalVariables);
   //std::cout << "<br>matRelationBetweenStartingVariables" <<  matRelationBetweenStartingVariables.ElementToString(true, false);
   for (int i=0; i<theEigenSpace.size; i++)
-    theEigenSpace.TheObjects[i].ScaleToIntegralMinHeight();
+    theEigenSpace.TheObjects[i].ScaleByPositiveRationalToIntegralMinHeight();
   //std::cout << "the basis: " << theEigenSpace.ElementToString();
   oldBasisTransformed.ActOnRoots(theEigenSpace);
   //std::cout << "<br>the basis transformed: " << theEigenSpace.ElementToString();
@@ -3964,7 +3980,6 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
     if(!normalNoConstant.IsEqualToZero())
       out1 << "$" << normalNoConstant.ElementToStringLetterFormat(theFormat, true, false) << "$ & $\\geq$ & $"
                << theConst.ElementToString() << "$ \\\\";
-
   }
   out1 << "\\end{tabular}";
   return out1.str();
@@ -4297,10 +4312,8 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGloba
 }
 
 void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
-  (root& theDirection, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
-{ if (theAffineHyperplane.TheObjects[0].IsEqualToZero())
-    return;
-  root theNormal=theAffineHyperplane;
+  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
+{ root theNormal=theAffineHyperplane;
   theNormal.SetSize(theNormal.size-1);
   if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero())
     return;
@@ -4325,93 +4338,47 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
   this->GetAllRepresentatitves(theRougherLattice, outputRepresentatives);
   std::cout << "<br>the rougher lattice: " << theRougherLattice.ElementToString();
   std::cout << "<br>representatives of the quotient of the two lattices: " << outputRepresentatives.ElementToString();
+  for (int i=0; i<outputRepresentatives.size; i++)
+  { outputRepresentatives.TheObjects[i]+=theShift;
+    theRougherLattice.ReduceVector(outputRepresentatives.TheObjects[i]);
+  }
   Rational theShiftedConst, unitMovement, tempRat;
   unitMovement=theNormal.ScalarEuclidean(theTrueDirection);
   movementInDirectionPerRepresentative.SetSize(outputRepresentatives.size);
   std::cout << "<br>Affine hyperplane per representative: ";
   for (int i=0; i<outputRepresentatives.size; i++)
-  { tempRat=(theNormal.ScalarEuclidean(outputRepresentatives.TheObjects[i]) -theConstOnTheOtherSide)/unitMovement;
+  { tempRat=(theNormal.ScalarEuclidean(outputRepresentatives.TheObjects[i]) - theConstOnTheOtherSide)/unitMovement;
     tempRat.AssignFracValue();
-    theShiftedConst=theConstOnTheOtherSide+tempRat;
+    theShiftedConst=theConstOnTheOtherSide + tempRat;
     root& currentMovement=movementInDirectionPerRepresentative.TheObjects[i];
     currentMovement=theAffineHyperplane;
     *currentMovement.LastObject()=theShiftedConst;
     std::cout << "<br>Representative: " << outputRepresentatives.TheObjects[i].ElementToString() << " and the hyperplane: " << currentMovement.ElementToString();
-    //currentMovement
   }
-/*  roots theNormalProjections;
-  theNormalProjections.SetSize(theBasis.size);
-  MatrixLargeRational projectionMap;
-  projectionMap.AssignVectorRow(theNormal);
-  for (int i=0; i<theBasis.size; i++)
-  { theNormalProjections.TheObjects[i].SetSize(1);
-    theNormalProjections.TheObjects[i].TheObjects[0]= theNormal.ScalarEuclidean(theBasis.TheObjects[i]);
-  }
-  normalProjectionLattice.MakeFromRoots(theNormalProjections);
-
-  std::cout << "<br>normal projection lattice: " << normalProjectionLattice.ElementToString();
-
-  root theTrueProjection; theTrueProjection.SetSize(1);
-  theTrueProjection.TheObjects[0]= theTrueDirection.ScalarEuclidean(theNormal);
-  tempRoots.size=0;
-  tempRoots.AddObjectOnTop(theTrueProjection);
-  theTrueProjectionLattice.MakeFromRoots(tempRoots);
-  std::cout << "<br> the true projection lattice: " << theTrueProjectionLattice.ElementToString(true, false);
-  Lattice theRougherLattice;
-
-  theRougherLattice=*this;
-  std::cout << "<br> starting lattice: " << this->ElementToString();
-  theRougherLattice.IntersectWithPreimageOfLattice(projectionMap, theTrueProjectionLattice, theGlobalVariables);
-  std::cout << "<br> the rougher lattice: " << theRougherLattice.ElementToString(true, false);
-  roots allRepresentativesStartingLattice;
-  this->GetAllRepresentatitves(theRougherLattice, allRepresentativesStartingLattice);
-  root theShift; theShift.SetSize(1);
-  theShift.TheObjects[0]=-*theAffineHyperplane.LastObject();
-  roots allRepresentatives, allRepresentativesPreimages; root tempRoot;
-  normalProjectionLattice.GetAllRepresentatitves(theTrueProjectionLattice, allRepresentatives);
-  std::cout << "<br>all the representatives: " << allRepresentatives.ElementToString();
-  std::cout << "<br> the shift: " << theShift.ElementToString();
-  for (int i=0; i< allRepresentatives.size; i++)
-  { allRepresentatives.TheObjects[i]+=theShift;
-    theTrueProjectionLattice.ReduceVector(allRepresentatives.TheObjects[i]);
-  }
-  this->FindOnePreimageInLatticeOf(projectionMap, allRepresentatives, allRepresentativesPreimages, theGlobalVariables);
-  std::cout << "<br>all the representatives shifted and modded: " << allRepresentatives.ElementToString();
-  std::cout << "<br> one preimage for each representative: " << allRepresentativesPreimages.ElementToString();
-  roots outputShifts;
-  PolynomialRationalCoeff tempP, tempP2;
-  PolynomialOutputFormat tempFormat;
-  for (int i=0; i<allRepresentatives.size; i++)
-  { tempP.Nullify(this->GetDim());
-    Rational theDen=theTrueDirection.ScalarEuclidean(theNormal);
-    for (int j=0; j<this->GetDim(); j++)
-    { tempP2.MakeNVarDegOnePoly(this->GetDim(), j, -theNormal.TheObjects[j]/theDen+1);
-      tempP+=tempP2;
-    }
-    tempP+=allRepresentatives.TheObjects[i].TheObjects[0]/theDen;
-    std::cout << "<br>representative" << i+1 << ": " << tempP.ElementToString(tempFormat);
-  }*/
 }
 
 int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[2]].theLattice.GetElement();
-  ParserNode& theHyperplaneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
+{ Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[3]].theLattice.GetElement();
+  ParserNode& theHyperplaneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
   ParserNode& theDirectionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
+  ParserNode& theShiftNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
 
   //ParserNode& theRayNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
-  root theAffineNormal, theRay;//, theRay;
+  root theAffineNormal, theRay, theShift;//, theRay;
   if (!theHyperplaneNode.GetRootRational(theAffineNormal, theGlobalVariables))
     return theNode.SetError(theNode.errorProgramming);
   if (!theDirectionNode.GetRootRational(theRay, theGlobalVariables))
     return theNode.SetError(theNode.errorProgramming);
+  if (!theShiftNode.GetRootRational(theShift, theGlobalVariables))
+    return theNode.SetError(theNode.errorProgramming);
 //  if (!theRayNode.GetRootRational(theRay, theGlobalVariables))
 //    return theNode.SetError(theNode.errorProgramming);
   //int theDim=t;
-  if (theAffineNormal.size-1!=currentLattice.GetDim() || currentLattice.GetRank()!=currentLattice.GetDim() || theRay.size!=currentLattice.GetDim())
+  if (theAffineNormal.size-1!=currentLattice.GetDim() || currentLattice.GetRank()!=currentLattice.GetDim() || theRay.size!=currentLattice.GetDim() || theRay.size!=theShift.size)
     return theNode.SetError(theNode.errorDimensionProblem);
   roots representatives, theMovements;
-  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theRay, theAffineNormal, representatives, theMovements, theGlobalVariables);
+  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theRay, theShift, theAffineNormal, representatives, theMovements, theGlobalVariables);
   return theNode.errorNoError;
 }
 
@@ -4505,7 +4472,8 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
     tempComplex.init();
     tempComplex.AddNonRefinedChamberOnTopNoRepetition(currentCone);
     assert(tempComplex.size==1);
-    tempComplex.LastObject()->LowestIndexNotCheckedForSplitting=0;
+    tempComplex.LastObject()->LowestIndexNotCheckedForChopping=0;
+    tempComplex.LastObject()->LowestIndexNotCheckedForSlicingInDirection=0;
     QuasiPolynomial& theMult=this->theMultiplicities.TheObjects[i];
     for (int j=0; j<theMult.valueOnEachLatticeShift.size; j++)
     { PolynomialRationalCoeff& currentPoly= theMult.valueOnEachLatticeShift.TheObjects[j];
@@ -4533,6 +4501,10 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
+}
+
+std::string Cone::DrawMeToHtml(DrawingVariables& theDrawingVariables)
+{ return "";
 }
 
 std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string& input, bool useDiv)
@@ -4604,8 +4576,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("actByWeyl",
    "(RF,...)",
-   "Act by the weyl group on a rational function (the i^th variable corresponds to the i^th coordinate in the simple basis). <br> Variables of index higher than the ambient dimension are treated as constants.",
-   "actByWeyl(x_1, 1, 1/2+x_2)",
+   "Act by the weyl group on a weight vector whose coordinates are given in simple basis coordinates. For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the first and second simple roots, and x_1 is a variable. The coordinates are allowed to be arbitrary rational functions. ",
+   "actByWeyl(x_1, x_2, x_3)",
     & ParserNode::EvaluateWeylAction
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -4688,14 +4660,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "invariantsSlTwoOfDegree(2,(2,2))",
     & ParserNode::EvaluateInvariantsSl2DegreeM
    );
-   /*
+
   this->AddOneFunctionToDictionaryNoFail
-  ("solveLinNEQParamOverCone",
-   "(Polynomial, Integer, Integer, Cone, Lattice)",
-   "<b> This function is under development. It does not do what it claims it does; please don't use until this message disappers (you are seeing this function only if I forgot to hide it).</b>Solve linear inequality given by the linear polynomial over the cone and lattice, where the first integer gives number of non-parameters x_i and the socond integer is the number of parameters y_i. The solution is the set of y_i's for which the linear poly is satisfied for all x_j's, allowed by the starting cone.",
-   "solveLinNEQParamOverCone(-2x_1+x_2,1, 1, cone((-1,1,0),(0,1,0), (-1,-2,4)), lattice((1,0),(0,1)))",
-    & ParserNode::EvaluateSolveLNEqParamOverConeAndLattice
-   );*/
+  ("findExtremaInDirectionOverLatticeShiftedOneNonParam",
+   "(Polynomial, (Rational,...), Lattice, Cone)",
+   "<b> Experimental please don't use.</b>",
+   "findExtremaInDirectionOverLatticeShiftedOneNonParam(-2x_1+x_2, (0,0), lattice((1,0),(0,1)), cone((-1,1,0),(1,0,0), (-2,-1,4)))",
+    & ParserNode::EvaluateFindExtremaInDirectionOverLatticeOneNonParam
+   );
   this->AddOneFunctionToDictionaryNoFail
   ("lattice",
    "((Rational,...),...)",
@@ -4704,10 +4676,10 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateLattice
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("getPointOnLatticeClosestToWallInDirection",
-   "((Rational,...), (Rational,...), Lattice)",
+  ("getPointOnShiftedLatticeClosestToWallInDirection",
+   "((Rational,...), (Rational,...), (Rational,...), Lattice)",
    "<b>Experimental, please don't use</b>.",
-   "getPointOnLatticeClosestToWallInDirection( (2,3), (1,1/5,1/3), lattice((1,1), (0,2)))",
+   "getPointOnShiftedLatticeClosestToWallInDirection( (2,3), (1/2,1/2), (1,1/5,1/3), lattice((1,1), (0,2)))",
     & ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -4716,6 +4688,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "Intersects the first lattice with the preimage of the second lattice under the linear map described by the third argument. Suppose the dimension of vector space of the first lattice is m, and the dimension of the vector space of the second lattice is n. Then the linear map should be given by a list of m vectors, with n coordinates each. The i^th of these vectors should give the image of the i^th basis vector of the vector space of the first lattice. ",
    "intersectLatticeWithPreimageOfLattice(  lattice((1,1), (0,2)), lattice(26/5), ( (1), (1/5)) )",
     & ParserNode::EvaluateIntersectLatticeWithPreimageLattice
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("sliceConeInUniqueExitWall",
+   "(Cone, (Rational, ...))",
+   "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, tracing a ray in the direction opposite to the one given by the second argument will exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point. ",
+   "sliceConeInUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
+    & ParserNode::EvaluateSliceCone
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

@@ -1715,7 +1715,7 @@ void root::MultiplyByLargeIntUnsigned(LargeIntUnsigned& a)
     this->TheObjects[i].MultiplyByLargeIntUnsigned(a);
 }
 
-void root::ScaleToIntegralMinHeight()
+void root::ScaleByPositiveRationalToIntegralMinHeight()
 { LargeIntUnsigned numGCD, tempUI;
   bool foundNonZero=false;
   for (int i=0; i<this->size; i++)
@@ -1833,7 +1833,7 @@ void root::ScaleToFirstNonZeroCoordinatePositive()
 }
 
 void root::ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive()
-{ this->ScaleToIntegralMinHeight();
+{ this->ScaleByPositiveRationalToIntegralMinHeight();
   this->ScaleToFirstNonZeroCoordinatePositive();
 }
 
@@ -2688,9 +2688,7 @@ void root::RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, 
 void root::RootScalarEuclideanRoot(const root& r1, const  root& r2, Rational& output)
 { Rational tempRat;
   if (r1.size!=r2.size)
-  { int* x;
-    x=0;
-    *x=5;
+  { int* x=0; *x=5; assert(false);
   }
   assert(r1.size==r2.size);
   output.MakeZero();
@@ -2815,7 +2813,7 @@ bool roots::PerturbVectorToRegular(root& output, GlobalVariables& theGlobalVaria
     output.Add(normal);
   }
   if (result)
-    output.ScaleToIntegralMinHeight();
+    output.ScaleByPositiveRationalToIntegralMinHeight();
   return result;
 }
 
@@ -3552,12 +3550,12 @@ bool CombinatorialChamber::ComputeVertexFromSelection(GlobalVariables& theGlobal
 
 bool CombinatorialChamber::PlusMinusPointIsInChamberModifyInput(root& point)
 { if (this->PointIsInChamber(point))
-  { point.ScaleToIntegralMinHeight();
+  { point.ScaleByPositiveRationalToIntegralMinHeight();
     return true;
   }
   point.MinusRoot();
   if (this->PointIsInChamber(point))
-  { point.ScaleToIntegralMinHeight();
+  { point.ScaleByPositiveRationalToIntegralMinHeight();
     return true;
   }
   return false;
@@ -4919,7 +4917,7 @@ void ConeGlobal::ComputeFromDirections(roots& directions, GlobalVariables& theGl
         if (tempRat.IsPositive())
           hasPositive=true;
       }
-      normalCandidate.ScaleToIntegralMinHeight();
+      normalCandidate.ScaleByPositiveRationalToIntegralMinHeight();
       if ((hasNegative && !hasPositive))
         normalCandidate.MinusRoot();
       if (!(hasNegative && hasPositive))
@@ -33066,3 +33064,119 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
   }
   return this->errorNoError;
 }
+
+void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, std::string& output)
+{ std::string readAhead;
+  std::stringstream out;
+  int inputSize=(signed) input.size();
+  for (int i=0; i<inputSize; i++)
+  { readAhead="";
+    for (int j=0; j<6; j++)
+    { if (i+j<inputSize)
+        readAhead.push_back(input[i+j]);
+      if (CGIspecificRoutines::AttemptToCivilize(readAhead, out))
+      { i+=j;
+        break;
+      }
+    }
+  }
+  output=out.str();
+}
+
+void CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output)
+{ int inputLength= (signed) input.size();
+  bool reading=false;
+  output.SetSize(1);
+  for (int i=0; i<inputLength; i++)
+  { if (input[i]=='=')
+      reading=!reading;
+    if (input[i]=='&')
+    { output.SetSize(output.size+1);
+      output.LastObject()->reserve(1000);
+      *output.LastObject()="";
+      reading=false;
+    }
+    if (input[i]!='=' && input[i]!='&' && reading)
+      output.LastObject()->push_back(input[i]);
+  }
+}
+
+bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
+{ if (readAhead[0]!='%' && readAhead[0]!='&' && readAhead[0]!='+')
+  { out << readAhead[0];
+    return true;
+  }
+  if (readAhead=="&")
+  { out << " ";
+    return true;
+  }
+  if (readAhead=="+")
+  { out << " ";
+    return true;
+  }
+  if (readAhead=="%2B")
+  { out << "+";
+    return true;
+  }
+  if (readAhead=="%28")
+  { out << "(";
+    return true;
+  }
+  if (readAhead=="%29")
+  { out << ")";
+    return true;
+  }
+  if (readAhead=="%5B")
+  { out << "[";
+    return true;
+  }
+  if (readAhead=="%5D")
+  { out << "]";
+    return true;
+  }
+  if (readAhead=="%2C")
+  { out << ",";
+    return true;
+  }
+  if (readAhead=="%7B")
+  { out << "{";
+    return true;
+  }
+  if (readAhead=="%3B")
+  { out << ";";
+    return true;
+  }
+  if (readAhead=="%3C")
+  { out << "<";
+    return true;
+  }
+  if (readAhead=="%3E")
+  { out << ">";
+    return true;
+  }
+  if (readAhead=="%2F")
+  { out << "/";
+    return true;
+  }
+  if (readAhead=="%3A")
+  { out << ":";
+    return true;
+  }
+  if (readAhead=="%5E")
+  { out << "^";
+    return true;
+  }
+  if (readAhead=="%5C")
+  { out << "\\";
+    return true;
+  }
+  if (readAhead=="%7D")
+  { out << "}";
+    return true;
+  }
+  if (readAhead=="%0D%0A")
+  { return true;
+  }
+  return false;
+}
+

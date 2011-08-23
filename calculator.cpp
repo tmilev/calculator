@@ -156,6 +156,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  //civilizedInput="sliceConeInUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )";
  // civilizedInput="factorial(20000)";
   //civilizedInput="10000000000";
   //civilizedInput="getPointOnLatticeClosestToWallInDirection( (2,3), (1,1/5,1/3), lattice((1,1), (0,2)))";
@@ -331,7 +332,7 @@ int main(int argc, char **argv)
   if (CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
   std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">";
-  std::cout <<civilizedInputSafish;
+  std::cout << civilizedInputSafish;
   std::cout << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
 //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
@@ -342,7 +343,7 @@ int main(int argc, char **argv)
 #ifndef WIN32
   double TimeTotalElapsed=GetElapsedTimeInSeconds();
   if (civilizedInput!="")
-  { std::cout << "<hr><b>Result.</b> " << theResult << "<br><hr><br>Parsing+evaluation time: " <<  TimeTotalElapsed<< " seconds<br> (" << TimeParsing << " parsing + " << TimeEvaluation <<  " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing << " processing)<br>";
+  { std::cout << "<hr><b>Result.</b> " << theResult << "<br><hr><br>Parsing+evaluation time: " << TimeTotalElapsed << " seconds<br> (" << TimeParsing << " parsing + " << TimeEvaluation <<  " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing << " processing)<br>";
     std::cout << "#  pointers at peak RAM: " << ParallelComputing::PointerCounterPeakRamUse << "<br>(excluding std::string, std::stringstream)<br>";
   }
   if (GetElapsedTimeInSeconds()>1)
@@ -378,7 +379,7 @@ int main(int argc, char **argv)
   std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/RootSystem.html.cpp?view=markup\"> Calculator interface c++ (2 out of 2 files)</a>\n";
   std::cout << " <br>\n";
-  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). ";
+  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
   std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() left by me (blank screen), or 2) by Apache/the system (internal server error)."
   << "  \n<br> All precomputed data is stored in a \"database\" <a href=\"/tmp/\">here</a>. <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() calls. The LaTeX logs can be found by viewing the calculator page's source. <br> The html output is hardcoded: either by hand or transformed from a separate .html file using a micro-tool written for the purpose. ";
   std::cout << " ";
@@ -386,9 +387,8 @@ int main(int argc, char **argv)
   std::cout << "<hr><b>Installing the calculator on your machine from c++ source. </b><br> In order to get the calculator running on your machine you need to do the following. I will work on simplifying the installation some time soon. <br>0) You need a Linux machine. I have tested it only on Ubuntu. <br>1) Download the c++ files in the links above. <br>2) Put them in a c++ project and make sure the following includes work:"
   << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. They should work by default on almost any Linux distro. <br>3) Build the project to a console application with default console application settings.  <br> 4) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts (you might have to google how to, it's not easy).  Apache comes preinstalled on Ubuntu.\n"
   << "<br>5) Assume the location of your server's cgi-bin folder is some_folder_path/cgi-bin/ (you can google where this folder is located). Put the calculator executable file in some_folder_path/cgi-bin/  .  <br> 6) Create folders some_folder_path/cgi-bin/../htdocs, some_folder_path/cgi-bin/../htdocs/tmp/. "
-  << "Enable read/write access to those two folders for every user. This completes a basic installation; you should test by running the calculator through your web browser. The remaining steps are needed in order to get a nicely formatted output and to avoid broken links in the calculator. "
-  << "<br>7) The calculator calls latex, so you need to install latex. <br>8) You need install the jsmath script in the base (root) folder of your apache server.";
-
+  << "Enable read/write access to those two folders for every user. <br>7) The basic installation is now complete; test the calculator by running it through your web browser. The remaining steps are needed in order to get a nicely formatted output and to avoid broken links in the calculator. "
+  << "<br>8) The calculator calls latex, so you need to install latex. <br>9) You need install the jsmath script in the base (root) folder of your apache server.";
 	std::cout <<	"</div>";
   std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
   std::cout << "<br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
@@ -471,122 +471,8 @@ int main(int argc, char **argv)
     system(theParser.SystemCommands.TheObjects[i].c_str());
   }
   std::cout << "-->";
-	return 0;   // Toavoid Apache errors.
+	return 0;   // To avoid Apache errors.
 }
 
-void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, std::string& output)
-{ std::string readAhead;
-  std::stringstream out;
-  int inputSize=(signed) input.size();
-  for (int i=0; i<inputSize; i++)
-  { readAhead="";
-    for (int j=0; j<6; j++)
-    { if (i+j<inputSize)
-        readAhead.push_back(input[i+j]);
-      if (CGIspecificRoutines::AttemptToCivilize(readAhead, out))
-      { i+=j;
-        break;
-      }
-    }
-  }
-  output=out.str();
-}
-
-void CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output)
-{ int inputLength= (signed) input.size();
-  bool reading=false;
-  output.SetSize(1);
-  for (int i=0; i<inputLength; i++)
-  { if (input[i]=='=')
-      reading=!reading;
-    if (input[i]=='&')
-    { output.SetSize(output.size+1);
-      output.LastObject()->reserve(1000);
-      *output.LastObject()="";
-      reading=false;
-    }
-    if (input[i]!='=' && input[i]!='&' && reading)
-      output.LastObject()->push_back(input[i]);
-  }
-}
-
-bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
-{ if (readAhead[0]!='%' && readAhead[0]!='&' && readAhead[0]!='+')
-  { out << readAhead[0];
-    return true;
-  }
-  if (readAhead=="&")
-  { out << " ";
-    return true;
-  }
-  if (readAhead=="+")
-  { out << " ";
-    return true;
-  }
-  if (readAhead=="%2B")
-  { out << "+";
-    return true;
-  }
-  if (readAhead=="%28")
-  { out << "(";
-    return true;
-  }
-  if (readAhead=="%29")
-  { out << ")";
-    return true;
-  }
-  if (readAhead=="%5B")
-  { out << "[";
-    return true;
-  }
-  if (readAhead=="%5D")
-  { out << "]";
-    return true;
-  }
-  if (readAhead=="%2C")
-  { out << ",";
-    return true;
-  }
-  if (readAhead=="%7B")
-  { out << "{";
-    return true;
-  }
-  if (readAhead=="%3B")
-  { out << ";";
-    return true;
-  }
-  if (readAhead=="%3C")
-  { out << "<";
-    return true;
-  }
-  if (readAhead=="%3E")
-  { out << ">";
-    return true;
-  }
-  if (readAhead=="%2F")
-  { out << "/";
-    return true;
-  }
-  if (readAhead=="%3A")
-  { out << ":";
-    return true;
-  }
-  if (readAhead=="%5E")
-  { out << "^";
-    return true;
-  }
-  if (readAhead=="%5C")
-  { out << "\\";
-    return true;
-  }
-  if (readAhead=="%7D")
-  { out << "}";
-    return true;
-  }
-  if (readAhead=="%0D%0A")
-  { return true;
-  }
-  return false;
-}
 
 

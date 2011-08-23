@@ -432,6 +432,7 @@ public:
     for (int i=0; i<this->size; i++)
       this->TheObjects[i]=o;
   }
+  inline Object& operator[](int i){return this->TheObjects[i];}
   void operator = (const ListLight<Object>& right);
   void operator == (const ListLight<Object>& right);
   inline Object* LastObject(){return &this->TheObjects[this->size-1]; }
@@ -624,6 +625,7 @@ public:
         return false;
     return true;
   }
+  inline Object& operator[](int i){return this->TheObjects[i];}
   inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);}
   inline bool operator==(const List<Object>& other)const{ return this->IsEqualTo(other);}
   bool operator>(const List<Object>& other)const;
@@ -2711,7 +2713,7 @@ public:
   bool CheckForElementSanity();
   //void RootToLinPolyToString(std::string& output, PolynomialOutputFormat& PolyOutput);
   void ScaleToFirstNonZeroCoordinatePositive();
-  void ScaleToIntegralMinHeight();
+  void ScaleByPositiveRationalToIntegralMinHeight();
   void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   void FindLCMDenominators(LargeIntUnsigned& output);
 //  root(const char* input){std::string tempS=input; this->operator=(tempS);}
@@ -2728,8 +2730,8 @@ public:
   bool OurScalarProductIsNegative(const root& right);
   bool OurScalarProductIsZero(const root& right);
   void MinusRoot();
-  Rational ScalarEuclidean(const root& other){return this->Vector<Rational>::ScalarEuclidean(other, (Rational) 0); }
-  Rational ScalarEuclidean(const root& other, const Rational& theRingZero){return this->ScalarEuclidean(other); }
+  Rational ScalarEuclidean(const root& other)const{return this->Vector<Rational>::ScalarEuclidean(other, (Rational) 0); }
+  Rational ScalarEuclidean(const root& other, const Rational& theRingZero)const{return this->ScalarEuclidean(other); }
   void Subtract(const root& r);
   void AssignWithoutLastCoordinate(root& right);
   void ReadFromFile(std::fstream& input);
@@ -6967,7 +6969,7 @@ public:
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
   void GetClosestPointToHyperplaneWRTFirstCoordinate
-  (root& theDirection, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
+  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
   ;
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
@@ -9379,16 +9381,21 @@ class Cone
   roots Vertices;
   roots Normals;
   bool flagHasSufficientlyManyVertices;
-  int LowestIndexNotCheckedForSplitting;
+  int LowestIndexNotCheckedForChopping;
+  int LowestIndexNotCheckedForSlicingInDirection;
   //ignore: the following is the information carrying variable. Write in it anything you want, say an index to an array
   //containing large data for the chamber, such as quasipolynomials, etc.
   //int Data;
   std::string ElementToString(){return this->ElementToString(false, false);}
   std::string ElementToString(bool useLatex, bool useHtml){return this->ElementToString(useLatex, useHtml, false, false);}
   std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant);
+  std::string DrawMeToHtml(DrawingVariables& theDrawingVariables);
   std::string DebugString;
   int GetDim(){if (this->Normals.size==0) return 0; return this->Normals.TheObjects[0].size;}
   void ComputeDebugString(){ this->DebugString=this->ElementToString();}
+  void SliceInDirection
+  (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
+;
   bool CreateFromNormals
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
   ;
@@ -9399,6 +9406,9 @@ class Cone
   int HashFunction()const
   { return this->Vertices.HashFunction();
   }
+  bool ProduceNormalFromTwoNormalsAndSlicingDirection
+  (root& SlicingDirection, root& normal1, root& normal2, root& output)
+  ;
   bool IsInCone(const root& point)const
   { Rational tempRat;
     for (int i=0; i<this->Normals.size; i++)
@@ -9418,22 +9428,19 @@ class Cone
   { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
     this->Vertices=other.Vertices;
     this->Normals=other.Normals;
-    this->LowestIndexNotCheckedForSplitting=other.LowestIndexNotCheckedForSplitting;
+    this->LowestIndexNotCheckedForSlicingInDirection=other.LowestIndexNotCheckedForSlicingInDirection;
+    this->LowestIndexNotCheckedForChopping=other.LowestIndexNotCheckedForChopping;
   }
-  Cone(){this->LowestIndexNotCheckedForSplitting=0; this->flagHasSufficientlyManyVertices=true;}
+  Cone(){this->LowestIndexNotCheckedForSlicingInDirection=0; this->LowestIndexNotCheckedForChopping=0; this->flagHasSufficientlyManyVertices=true;}
   void IntersectAHyperplane
   (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
   ;
   bool GetRootFromLPolyConstantTermGoesToLastVariable
   (PolynomialRationalCoeff& inputLPoly, root& output)
   ;
-  void SolveLNeqParamOverLattice
-    (int numNonParams, int numParamsNoConstTerm, Lattice& theLattice,
+  void FindExtremaInDirectionOverLatticeOneNonParam
+    ( root& theLPToMaximize, Lattice& theLattice, root& theShift,
      ConeComplex& output, GlobalVariables& theGlobalVariables)
-     ;
-  void SolveLNeqParamOverLatticeOneNonParam
-    (Lattice& theLattice, root& theShift,
-     List<Cone>& outputCones, List<Lattice>& outputLattices, roots outputShifts, GlobalVariables& theGlobalVariables)
      ;
   bool SolveLPolyEqualsZeroIAmProjective
   ( PolynomialRationalCoeff& inputLPoly,
@@ -9458,6 +9465,7 @@ public:
 //  List<int> NonRefinedChambers;
   int indexLowestNonRefinedChamber;
   hashedRoots splittingNormals;
+  roots slicingDirections;
   std::string DebugString;
   void RefineOneStep(GlobalVariables& theGlobalVariables);
   void Refine(GlobalVariables& theGlobalVariables);
@@ -9482,12 +9490,12 @@ public:
   (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
   ;
   bool SplitChamber
-  (int indexChamberBeingRefined, root& killerNormal, GlobalVariables& theGlobalVariables)
+(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
   ;
   void GetNewVerticesAppend
   (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
   ;
-  void init(){this->splittingNormals.ClearTheObjects(); this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
+  void init(){this->splittingNormals.ClearTheObjects(); this->slicingDirections.size=0; this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
   void WriteToFile
   (std::fstream& output, GlobalVariables& theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
@@ -9613,6 +9621,9 @@ class ParserNode
   static int EvaluateSolveLPolyEqualsZeroOverCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
+  static int EvaluateSliceCone
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
   static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
   static int EvaluateSlTwoInSlN(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
   static int EvaluateVectorPFIndicator
@@ -9659,7 +9670,7 @@ class ParserNode
   static int EvaluateSplit
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateSolveLNEqParamOverConeAndLattice
+  static int EvaluateFindExtremaInDirectionOverLatticeOneNonParam
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int  EvaluateWeylDimFormula
@@ -10365,40 +10376,20 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
   { theElement=theRingUnit;
     return;
   }
-  Element Result;
-  Result=theRingUnit;
-  if (thePower<4)
-  { for (int i=0; i<thePower; i++)
-      Result.operator*=(theElement);
-    theElement=Result;
+  Element squares;
+	squares=theElement;
+	if (thePower<4)
+  { for (int i=1; i<thePower; i++)
+      theElement*=squares;
     return;
   }
-  List<Element> containerList;
-  int log2RoundedDown=0;
-  int HighestPowerLowerThanOrEqualToThePower=1;
-  for (; HighestPowerLowerThanOrEqualToThePower<=thePower; HighestPowerLowerThanOrEqualToThePower*=2)
-    log2RoundedDown++;
-  HighestPowerLowerThanOrEqualToThePower/=2;
-  log2RoundedDown--;
-  containerList.MakeActualSizeAtLeastExpandOnTop(log2RoundedDown);
-  Result=theElement;
-  containerList.AddObjectOnTop(Result);
-  for (int i=1; i<=log2RoundedDown; i++)
-  { Result.operator*=(Result);
-    containerList.AddObjectOnTop(Result);
-  }
-  thePower-=HighestPowerLowerThanOrEqualToThePower;
-  HighestPowerLowerThanOrEqualToThePower/=2;
-  int currentIndex=containerList.size-2;
-  for (; thePower>0; )
-  { if (thePower>=HighestPowerLowerThanOrEqualToThePower)
-    { Result.operator*=(containerList.TheObjects[currentIndex]);
-      thePower-=HighestPowerLowerThanOrEqualToThePower;
-    }
-    currentIndex--;
-    HighestPowerLowerThanOrEqualToThePower/=2;
-  }
-  theElement=Result;
+  theElement=theRingUnit;
+	while (thePower>0)
+	{	if (thePower%2==1)
+			theElement*=squares;
+		squares*=squares;
+		thePower/=2;
+	}
 }
 
 class GlobalVariablesContainer :public List<GlobalVariables>

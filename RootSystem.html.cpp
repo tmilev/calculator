@@ -37,6 +37,9 @@ output << " \n";
 void static_html4(std::stringstream& output){
 output << " <!>\n";
 output << " <!--Option-->\n";
+output << " <script type=\"text/javascript\" \n";
+output << " src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js\"  \n";
+output << " djConfig = \"parseOnLoad: true\"></script>\n";
 output << " \n";
 output << "  <select name=\"textType\" id=\"textType\" onchange=\"makeCartanArbitrary(document.getElementById('textType'), document.getElementById(textDim));  this.form.submit();\">\n";
 output << "   <option>A</option>\n";
@@ -789,10 +792,6 @@ output << " \n";
 }
 void static_html6(std::stringstream& output){
 output << " <!>\n";
-output << " \n";
-output << " <script type=\"text/javascript\" \n";
-output << " src=\"/dojo.xd.js\"  \n";
-output << " djConfig = \"parseOnLoad: true\"></script>\n";
 output << " <div style=\"width:400;height:400;border:solid 1px\" id=\"idCanvasMain\" onmousemove=\"mouseMoveRedraw(event.clientX, event.clientY);\" onmousedown=\"\n";
 output << " clickCanvasMain(event.clientX, event.clientY);\n";
 output << " //changeBasis(1, 50, 50); drawOnCanvasMain();\" onmouseup=\"ButtonIsDown=false; selectedBasisIndex=-1;\"></div>\n";

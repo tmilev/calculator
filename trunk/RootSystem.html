@@ -31,6 +31,9 @@ function progressReport()
 
 <!>
 <!--Option-->
+<script type="text/javascript" 
+src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  
+djConfig = "parseOnLoad: true"></script>
 
  <select name="textType" id="textType" onchange="makeCartanArbitrary(document.getElementById('textType'), document.getElementById(textDim));  this.form.submit();">
   <option>A</option>
@@ -779,10 +782,6 @@ function saec_VPF_isDelim(input)
   </script>
 
 <!>
-
-<script type="text/javascript" 
-src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  
-djConfig = "parseOnLoad: true"></script>
 <div style="width:400;height:400;border:solid 1px" id="idCanvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
 clickCanvasMain(event.clientX, event.clientY);
 //changeBasis(1, 50, 50); drawOnCanvasMain();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>

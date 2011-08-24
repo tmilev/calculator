@@ -1025,8 +1025,7 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLatticeOneNonParam
     return theNode.SetError(theNode.errorDimensionProblem);
   if (!theShiftNode.GetRootRational(theShift, theGlobalVariables))
     return theNode.SetError(errorDimensionProblem);
-  theNEq.SetSize(theNEq.size-1);
-  if (theShift.size!=theNEq.size)
+  if (theShift.size!=theNEq.size-1)
     return theNode.SetError(errorDimensionProblem);
 /*  if (theNEq.size!=numNonParams+numParams+1)
     return theNode.SetError(theNode.errorBadOrNoArgument);*/
@@ -1037,10 +1036,16 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLatticeOneNonParam
   std::cout << "Input data: normal: " << theNEq.ElementToString()
 //  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
   << "; cone: " << currentCone.ElementToString(false, true, false, true);
-  ConeComplex theConeComplex;
-
-  currentCone.FindExtremaInDirectionOverLatticeOneNonParam
-  (theNEq, currentLattice, theShift, theConeComplex, theGlobalVariables);
+  List<ConeLatticeAndShift> theConeComplex;
+  List<Lattice> resultingLattices;
+  List<roots> resultingShifts;
+  roots resultingLPs;
+  ConeLatticeAndShift theCLS;
+  theCLS.theProjectivizedCone=currentCone;
+  theCLS.theLattice=currentLattice;
+  theCLS.theShift=theShift;
+  theCLS.FindExtremaInDirectionOverLatticeOneNonParam
+  (theNEq, resultingLPs, theConeComplex, theGlobalVariables);
   std::stringstream out;
   out << currentCone.ElementToString(false, true);
   theNode.outputString=out.str();
@@ -1091,49 +1096,114 @@ void Cone::SliceInDirection
   //std::cout <<output.ElementToString(false, true);
 }
 
-void Cone::FindExtremaInDirectionOverLatticeOneNonParam
-    ( root& theLPToMaximize, Lattice& theLattice, root& theShift,
-     ConeComplex& output, GlobalVariables& theGlobalVariables)
+void Lattice::ApplyLinearMap(MatrixLargeRational& theMap, Lattice& output)
+{ roots tempRoots;
+  tempRoots.AssignMatrixRows(this->basisRationalForm);
+  theMap.ActOnRoots(tempRoots);
+  output.MakeFromRoots(tempRoots);
+}
+
+void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
+    ( root& theLPToMaximizeAffine, roots& outputLPToMaximizeAffine,
+     List<ConeLatticeAndShift>& output, GlobalVariables& theGlobalVariables)
 { root theDirection;
-  int theDim=this->GetDim();
-  theDirection.MakeEi(theDim, 0);
+  int theDimProjectivized=this->GetDimProjectivized();
+  theDirection.MakeEi(theDimProjectivized, 0);
   ConeComplex complexBeforeProjection;
   complexBeforeProjection.init();
-  complexBeforeProjection.AddNonRefinedChamberOnTopNoRepetition(*this);
+  complexBeforeProjection.AddNonRefinedChamberOnTopNoRepetition(this->theProjectivizedCone);
+  if (theDirection.ScalarEuclidean(theLPToMaximizeAffine).IsNegative())
+    theDirection.MinusRoot();
   complexBeforeProjection.slicingDirections.AddObjectOnTop(theDirection);
   complexBeforeProjection.slicingDirections.AddObjectOnTop(-theDirection);
   std::cout << "<hr>complex before refining: <br>\n" << complexBeforeProjection.ElementToString(false, true);
   complexBeforeProjection.Refine(theGlobalVariables);
   std::cout << "<hr>complex before projection: <br>\n" << complexBeforeProjection.ElementToString(false, true);
-  Cone projectionCone;
-  root tempRoot, extraEquation;
+  root tempRoot, extraEquation, exitNormalAffine, enteringNormalAffine, exitNormalLatticeLevel, enteringNormalLatticeLevel;
   root theDirectionSmallerDim;
-  roots exitRepresentatives, enteringRepresentatives, exitWallShifted, enteringWallShifted;
-  theDirectionSmallerDim.MakeEi(theDim-1, 0);
+  root theShiftReduced=this->theShift;
+  this->theLattice.ReduceVector(theShiftReduced);
+  roots representativesShifted, exitRepresentatives, enteringRepresentatives, exitWallShifted, enteringWallShifted;
+  roots currentShifts;
+  Lattice exitRougherLattice, enteringRougherLattice;
+  ConeLatticeAndShift tempCLS;
+  theDirectionSmallerDim.MakeEi(theDimProjectivized-1, 0);
   std::cout << "<hr>";
+  MatrixLargeRational theProjectionLatticeLevel;
+  MatrixLargeRational theProjectionAffine;
+  theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
+  theProjectionLatticeLevel.NullifyAll();
+  for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
+    theProjectionLatticeLevel.elements[i][i+1]=1;
+  outputLPToMaximizeAffine.SetSize(complexBeforeProjection.size);
+  output.size=0;
   for (int i=0; i<complexBeforeProjection.size; i++)
   { Cone& currentCone=complexBeforeProjection.TheObjects[i];
     int numNonPerpWalls=0;
-    projectionCone.Normals.size=0;
+    tempCLS.theProjectivizedCone.Normals.size=0;
+    bool foundEnteringNormal=false;
     for (int j=0; j<currentCone.Normals.size; j++)
     { root& currentNormal=currentCone.Normals.TheObjects[j];
       if (currentNormal [0]==0)
-      { tempRoot.SetSize(this->GetDim()-1);
+      { tempRoot.SetSize(theDimProjectivized-1);
         for (int k=0; k<currentNormal.size-1; k++)
           tempRoot[k]=currentNormal[k+1];
-        projectionCone.Normals.AddObjectOnTop(tempRoot);
+        tempCLS.theProjectivizedCone.Normals.AddObjectOnTop(tempRoot);
       } else
       { std::cout << "<hr>";
         std::cout << "<br>currentWall: " << currentNormal.ElementToString();
         numNonPerpWalls++;
         assert(numNonPerpWalls<3);
-        if (currentNormal.ScalarEuclidean(theDirection).IsPositive())
-          theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theDirectionSmallerDim, theShift, currentNormal, exitRepresentatives, exitWallShifted, theGlobalVariables);
+        if (currentNormal.ScalarEuclidean(theDirection).IsNegative())
+        { theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate
+          (theDirectionSmallerDim, theShift, currentNormal, exitRepresentatives, exitWallShifted, exitRougherLattice,
+           theGlobalVariables);
+          exitNormalAffine=currentNormal;
+          exitNormalLatticeLevel=exitNormalAffine;
+          exitNormalLatticeLevel.SetSize(theDimProjectivized-1);
+        }
         else
-          theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(-theDirectionSmallerDim, theShift, currentNormal, enteringRepresentatives, enteringWallShifted, theGlobalVariables);
+        { theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate
+          (-theDirectionSmallerDim, theShift, currentNormal, enteringRepresentatives, enteringWallShifted, enteringRougherLattice,
+           theGlobalVariables);
+          enteringNormalAffine=currentNormal;
+          foundEnteringNormal=true;
+//          enteringNormalLatticeLevel=enteringNormalAffine;
+//          enteringNormalLatticeLevel.SetSize(theDimProjectivized-1);
+        }
       }
     }
-
+    theLattice.GetAllRepresentatives(exitRougherLattice, representativesShifted);
+    currentShifts.SetSize(representativesShifted.size);
+    exitRougherLattice.ApplyLinearMap(theProjectionLatticeLevel, tempCLS.theLattice);
+    for (int j=0; j<representativesShifted.size; j++)
+      representativesShifted[j]+=theShiftReduced;
+    for (int j=0; j<representativesShifted.size; j++)
+    { Rational theB;
+      theB=(- *exitNormalAffine.LastObject()-representativesShifted[j].TheObjects[0])/exitNormalLatticeLevel.TheObjects[0];
+      theB.AssignFracValue();
+      theB=(- *exitNormalAffine.LastObject())/exitNormalLatticeLevel.TheObjects[0]-theB;
+      //x_1 is mapped to b
+      tempRoot.SetSize(theDimProjectivized-1);
+      for (int k=0; k<theDimProjectivized-1; k++)
+        tempRoot[k]=theLPToMaximizeAffine[k+1];
+      if (foundEnteringNormal)
+      { extraEquation.SetSize(theDimProjectivized-1);
+        for (int k=0; k<theDimProjectivized-1; k++)
+          extraEquation[k]=enteringNormalAffine[k+1];
+        *extraEquation.LastObject()+=theB*enteringNormalAffine[0];
+        tempCLS.theProjectivizedCone.Normals.AddObjectOnTop(extraEquation);
+      }
+      *tempRoot.LastObject()+=theLPToMaximizeAffine.TheObjects[0]*theB;
+      outputLPToMaximizeAffine.AddObjectOnTop(tempRoot);
+      tempCLS.theProjectivizedCone.CreateFromNormals(tempCLS.theProjectivizedCone.Normals, theGlobalVariables);
+      theProjectionLatticeLevel.ActOnAroot(representativesShifted[j], tempCLS.theShift);
+      output.AddObjectOnTop(tempCLS);
+    }
+  }
+  std::cout << "<hr><hr><hr>";
+  for (int i=0; i<output.size; i++)
+  { std::cout << output[i].theProjectivizedCone.ElementToString(false, true, true, true);
   }
 }
 
@@ -2009,7 +2079,7 @@ void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& 
 
 //returning false means that the lattice given as rougher is not actually rougher than the current lattice
 //or that there are too many representatives
-bool Lattice::GetAllRepresentatitves
+bool Lattice::GetAllRepresentatives
   (const Lattice& rougherLattice, roots& output)const
 { output.size=0;
   if (this->basis.NumRows!=rougherLattice.basis.NumRows)
@@ -2062,6 +2132,19 @@ bool Lattice::GetAllRepresentatitves
   return true;
 }
 
+bool Lattice::GetAllRepresentativesProjectingDownTo
+  (const Lattice& rougherLattice, roots& startingShifts, roots& output)const
+{ roots tempRepresentatives;
+  if (!this->GetAllRepresentatives(rougherLattice, tempRepresentatives))
+    return false;
+  output.MakeActualSizeAtLeastExpandOnTop(startingShifts.size*tempRepresentatives.size);
+  output.size=0;
+  for (int i=0; i<startingShifts.size; i++)
+    for (int j=0; j<tempRepresentatives.size; j++)
+      output.AddObjectOnTop(startingShifts.TheObjects[i]+tempRepresentatives[j]);
+  return true;
+}
+
 int ParserNode::EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables)
 { List<int> argumentList;
   this->ExtractArgumentList(argumentList);
@@ -2075,7 +2158,7 @@ int ParserNode::EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariable
   Lattice& finerLattice=this->owner->TheObjects[argumentList.TheObjects[0]].theLattice.GetElement();
   Lattice& rougherLattice=this->owner->TheObjects[argumentList.TheObjects[1]].theLattice.GetElement();
   roots tempRoots;
-  if (!finerLattice.GetAllRepresentatitves(rougherLattice, tempRoots))
+  if (!finerLattice.GetAllRepresentatives(rougherLattice, tempRoots))
     return this->SetError(this->errorImplicitRequirementNotSatisfied);
   this->outputString=tempRoots.ElementToString();
   this->ExpressionType=this->typeString;
@@ -2092,7 +2175,7 @@ void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRoughenBy)
   roots representativesQuotientLattice;
   //std::cout << "getting all representatives of " << OldLattice.ElementToString() << "inside" << this->AmbientLatticeReduced.ElementToString();
   //std::cout << "<br><br><br><br>*********<br><br><br><br>";
-  OldLattice.GetAllRepresentatitves(this->AmbientLatticeReduced, representativesQuotientLattice);
+  OldLattice.GetAllRepresentatives(this->AmbientLatticeReduced, representativesQuotientLattice);
   roots OldLatticeShifts=this->LatticeShifts;
   List<PolynomialRationalCoeff> oldValues;
   oldValues=this->valueOnEachLatticeShift;
@@ -2771,7 +2854,7 @@ void QuasiPolynomial::Substitution
   output.AmbientLatticeReduced=ambientLatticeNewSpace;
   output.AmbientLatticeReduced.IntersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced, theGlobalVariables);
   roots allRepresentatives, imagesAllRepresentatives;
-  bool tempBool=ambientLatticeNewSpace.GetAllRepresentatitves(output.AmbientLatticeReduced, allRepresentatives);
+  bool tempBool=ambientLatticeNewSpace.GetAllRepresentatives(output.AmbientLatticeReduced, allRepresentatives);
   assert(tempBool);
   mapFromNewSpaceToOldSpace.ActOnRoots(allRepresentatives, imagesAllRepresentatives);
   PolynomialsRationalCoeff theSub;
@@ -4312,7 +4395,10 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGloba
 }
 
 void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
-  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
+  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives,
+   roots& movementInDirectionPerRepresentative,
+   Lattice& outputRougherLattice,
+   GlobalVariables& theGlobalVariables)
 { root theNormal=theAffineHyperplane;
   theNormal.SetSize(theNormal.size-1);
   if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero())
@@ -4320,7 +4406,7 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
   Rational theConstOnTheOtherSide=-*theAffineHyperplane.LastObject();
   roots theBasis;
   theBasis.AssignMatrixRows(this->basisRationalForm);
-  Lattice theHyperplaneLatticeNoShift, theDirectionLattice, theRougherLattice;//, normalProjectionLattice, theTrueProjectionLattice;
+  Lattice theHyperplaneLatticeNoShift, theDirectionLattice;//, normalProjectionLattice, theTrueProjectionLattice;
   roots tempRoots; //root tempRoot;
   tempRoots.AddObjectOnTop(theDirection);
   theDirectionLattice=*this;
@@ -4334,13 +4420,13 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
   std::cout << "<br>the non-affine hyperplane intersected with the lattice: " << theHyperplaneLatticeNoShift.ElementToString();
   tempRoots.AssignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
   tempRoots.AddObjectOnTop(theTrueDirection);
-  theRougherLattice.MakeFromRoots(tempRoots);
-  this->GetAllRepresentatitves(theRougherLattice, outputRepresentatives);
-  std::cout << "<br>the rougher lattice: " << theRougherLattice.ElementToString();
+  outputRougherLattice.MakeFromRoots(tempRoots);
+  this->GetAllRepresentatives(outputRougherLattice, outputRepresentatives);
+  std::cout << "<br>the rougher lattice: " << outputRougherLattice.ElementToString();
   std::cout << "<br>representatives of the quotient of the two lattices: " << outputRepresentatives.ElementToString();
   for (int i=0; i<outputRepresentatives.size; i++)
   { outputRepresentatives.TheObjects[i]+=theShift;
-    theRougherLattice.ReduceVector(outputRepresentatives.TheObjects[i]);
+    outputRougherLattice.ReduceVector(outputRepresentatives.TheObjects[i]);
   }
   Rational theShiftedConst, unitMovement, tempRat;
   unitMovement=theNormal.ScalarEuclidean(theTrueDirection);
@@ -4355,6 +4441,7 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
     *currentMovement.LastObject()=theShiftedConst;
     std::cout << "<br>Representative: " << outputRepresentatives.TheObjects[i].ElementToString() << " and the hyperplane: " << currentMovement.ElementToString();
   }
+//  std::cout << "<hr>"
 }
 
 int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
@@ -4363,7 +4450,6 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
   ParserNode& theHyperplaneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
   ParserNode& theDirectionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
   ParserNode& theShiftNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
-
   //ParserNode& theRayNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
   root theAffineNormal, theRay, theShift;//, theRay;
   if (!theHyperplaneNode.GetRootRational(theAffineNormal, theGlobalVariables))
@@ -4378,7 +4464,9 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
   if (theAffineNormal.size-1!=currentLattice.GetDim() || currentLattice.GetRank()!=currentLattice.GetDim() || theRay.size!=currentLattice.GetDim() || theRay.size!=theShift.size)
     return theNode.SetError(theNode.errorDimensionProblem);
   roots representatives, theMovements;
-  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theRay, theShift, theAffineNormal, representatives, theMovements, theGlobalVariables);
+  Lattice theRougherLattice;
+  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate
+  (theRay, theShift, theAffineNormal, representatives, theMovements, theRougherLattice, theGlobalVariables);
   return theNode.errorNoError;
 }
 
@@ -4503,8 +4591,134 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
   theGlobalVariables.MakeReport();
 }
 
+std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
+{ std::stringstream out;
+  int r=colorIndex/65536;
+  int g=(colorIndex/256)%256;
+  int b=colorIndex%65536;
+  out << "#";
+  if (r<16)
+    out << 0;
+  out << std::hex  << r;
+  if (g<16)
+    out << 0;
+  out << std::hex  << g;
+  if (b<16)
+    out << 0;
+  out << std::hex  << b;
+  return out.str();
+}
+
+std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
+{ std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
+  std::stringstream tempStream7, tempStream8, tempStream9, tempStream10;
+  this->NumHtmlGraphics++;
+  int timesCalled=this->NumHtmlGraphics;
+  tempStream1 << "drawConeInit" << timesCalled;
+  std::string theInitFunctionName= tempStream1.str();
+  tempStream5 << "drawCone" << timesCalled;
+  std::string theDrawFunctionName= tempStream5.str();
+  tempStream2 << "idCanvasCone" << timesCalled;
+  std::string theCanvasId= tempStream2.str();
+  tempStream3 << "surfaceCone" << timesCalled;
+  std::string theSurfaceName=tempStream3.str();
+  tempStream4 << "points1Array" << timesCalled;
+  std::string Points1ArrayName=tempStream4.str();
+  tempStream10 << "points2Array" << timesCalled;
+  std::string Points2ArrayName=tempStream10.str();
+  tempStream6 << "basisCone" << timesCalled;
+  std::string basisName = tempStream6.str();
+  tempStream7 << "shiftXCone" << timesCalled;
+  std::string shiftX=tempStream7.str();
+  tempStream8 << "shiftYCone" << timesCalled;
+  std::string shiftY=tempStream8.str();
+  tempStream9 << "convertToXYCone" << timesCalled;
+  std::string functionConvertToXYName=tempStream9.str();
+
+  out << "<div style=\"width:400;height:400;border:solid 1px\" id=\"" << theCanvasId << "\"></div>";
+  out << "<script type=\"text/javascript\">\n"
+  << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
+  << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
+  for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
+  { root& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
+    root& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
+    out << Points1ArrayName << "[" << i << "]=[";
+    for (int j=0; j<theDimension; j++)
+    { out << current1[j].ElementToString();
+      if (j!=theDimension-1)
+        out << ",";
+    }
+    out << "];\n";
+    out << Points2ArrayName << "[" << i << "]=[";
+    for (int j=0; j<theDimension; j++)
+    { out << current2[j].ElementToString();
+      if (j!=theDimension-1)
+        out << ",";
+    }
+    out << "];\n";
+  }
+  out  << "var " << basisName << "=new Array(8);\n";
+  out << basisName << "[0]=[100,0];\n";
+  out << basisName << "[1]=[0,-100];\n";
+  out << basisName << "[2]=[50,50];\n";
+  out << basisName << "[3]=[-50,50];\n";
+  out << basisName << "[4]=[-50,50];\n";
+  out << basisName << "[5]=[-50,50];\n";
+  out << basisName << "[6]=[-50,50];\n";
+  out << basisName << "[7]=[-50,50];\n";
+  out << "var " << shiftX << "=150;\n";
+  out << "var " <<  shiftY << "=200;\n";
+  out << "function " << functionConvertToXYName << "(vector){\n";
+  out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i=0; i<" << theDimension << "; i++){\n";
+  out << "resultX+=vector[i]*" << basisName << "[i][0];\n";
+  out << "resultY+=vector[i]*" << basisName << "[i][1];\n}\n";
+  out << "result=[resultX, resultY];\n";
+  out << "return result;\n";
+  out << "}\n";
+  out << "var " << theSurfaceName << ";\n"
+  << "function " << theDrawFunctionName << "(){\n"
+  << theSurfaceName << ".clear();\n";
+  for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
+  { int currentIndex=this->theBuffer.IndexNthDrawOperation[i];
+    switch(theBuffer.TypeNthDrawOperation[i])
+    { case DrawOperations::typeDrawLineBetweenTwoVectors:
+        out << theSurfaceName << ".createLine({"
+              << " x1 :" << functionConvertToXYName << "( " << Points1ArrayName << "["
+              << currentIndex<< "])[0],"
+              << " y1 :" << functionConvertToXYName << "( " << Points1ArrayName << "["
+              << currentIndex << "])[1],"
+              << " x2 :"  << functionConvertToXYName << "( " << Points2ArrayName << "["
+              << currentIndex << "])[0],"
+              << " y2 :" << functionConvertToXYName << "( " << Points2ArrayName << "["
+              << currentIndex << "])[1] }).setStroke({color : \""
+              << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
+              << "\"});\n";
+        break;
+      default: break;
+    }
+  }
+  out << "}\n"
+  << "function " << theInitFunctionName << "(){\n"
+  << "node = dojo.byId(\"" << theCanvasId << "\");\n"
+  << theSurfaceName << "  = dojox.gfx.createSurface(node, 400, 400);\n"
+  << theDrawFunctionName << "();\n"
+  << " }\n"
+  << "dojo.addOnLoad(" << theInitFunctionName << "); "
+   << "</script>";
+   return out.str();
+}
+
 std::string Cone::DrawMeToHtml(DrawingVariables& theDrawingVariables)
-{ return "";
+{ root ZeroRoot;
+  ZeroRoot.MakeZero(this->GetDim());
+  theDrawingVariables.theBuffer.init();
+  for (int i=0; i<this->Vertices.size; i++)
+    for (int j=i+1; j<this->Vertices.size; j++)
+      theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+      (this->Vertices[i], this->Vertices[j], theDrawingVariables.PenStyleNormal, 0, 0);
+  for (int i=0; i<this->Vertices.size; i++)
+    theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, this->Vertices[i], theDrawingVariables.PenStyleNormal, 0, 0);
+  return theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
 }
 
 std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string& input, bool useDiv)
@@ -4660,7 +4874,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "invariantsSlTwoOfDegree(2,(2,2))",
     & ParserNode::EvaluateInvariantsSl2DegreeM
    );
-
   this->AddOneFunctionToDictionaryNoFail
   ("findExtremaInDirectionOverLatticeShiftedOneNonParam",
    "(Polynomial, (Rational,...), Lattice, Cone)",

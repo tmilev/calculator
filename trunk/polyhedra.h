@@ -6969,7 +6969,13 @@ public:
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
   void GetClosestPointToHyperplaneWRTFirstCoordinate
-  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives, roots& movementInDirectionPerRepresentative, GlobalVariables& theGlobalVariables)
+  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives,
+   roots& movementInDirectionPerRepresentative,
+   Lattice& outputRougherLattice,
+   GlobalVariables& theGlobalVariables)
+     ;
+  void ApplyLinearMap
+  (MatrixLargeRational& theMap, Lattice& output)
   ;
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
@@ -7009,8 +7015,11 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
 ;
   //returning false means that the lattice given as rougher is not actually rougher than the current lattice
   //or that there are too many representatives
-  bool GetAllRepresentatitves
+  bool GetAllRepresentatives
   (const Lattice& rougherLattice, roots& output)const
+  ;
+  bool GetAllRepresentativesProjectingDownTo
+  (const Lattice& rougherLattice, roots& startingShifts, roots& output)const
   ;
   inline std::string ElementToString()const{return this->ElementToString(true, false);}
   std::string ElementToString(bool useHtml, bool useLatex)const;
@@ -9264,6 +9273,7 @@ public:
   bool flagDrawingInvisibles;
   bool flagDrawingLinkToOrigin;
   int Selected;
+  int NumHtmlGraphics;
   double centerX;
   double centerY;
   int textX;
@@ -9295,9 +9305,11 @@ public:
   void SetCoordsForB2();
   void SetCoordsForA2();
   void SetCoordsForC2();
+  std::string GetColorHtmlFromColorIndex(int colorIndex);
   DrawOperations theBuffer;
   inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
   inline int GetActualTextStyleFromFlagsAnd(int inputTextStyle);
+  std::string GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension);
   void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
@@ -9438,10 +9450,6 @@ class Cone
   bool GetRootFromLPolyConstantTermGoesToLastVariable
   (PolynomialRationalCoeff& inputLPoly, root& output)
   ;
-  void FindExtremaInDirectionOverLatticeOneNonParam
-    ( root& theLPToMaximize, Lattice& theLattice, root& theShift,
-     ConeComplex& output, GlobalVariables& theGlobalVariables)
-     ;
   bool SolveLPolyEqualsZeroIAmProjective
   ( PolynomialRationalCoeff& inputLPoly,
    Cone& outputCone, GlobalVariables& theGlobalVariables
@@ -9455,6 +9463,25 @@ class Cone
   bool operator==(const Cone& other)const
   { return this->Normals==other.Normals;
   }
+};
+
+class ConeLatticeAndShift
+{
+  public:
+  Cone theProjectivizedCone;
+  Lattice theLattice;
+  root theShift;
+  void FindExtremaInDirectionOverLatticeOneNonParam
+    ( root& theLPToMaximizeAffine, roots& outputLPToMaximizeAffine,
+     List<ConeLatticeAndShift>& output, GlobalVariables& theGlobalVariables)
+       ;
+  void operator=(const ConeLatticeAndShift& other)
+  { this->theProjectivizedCone=other.theProjectivizedCone;
+    this->theLattice=other.theLattice;
+    this->theShift=other.theShift;
+  }
+  int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
+  int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
 };
 
 class ConeComplex : public HashedList<Cone>

@@ -259,6 +259,7 @@ template < > int List<MatrixLargeRational>::ListActualSizeIncrement=10;
 template < > int List<QPSub>::ListActualSizeIncrement=1000;
 template < > int List<ParserFunction>::ListActualSizeIncrement=20;
 template < > int List<ParserFunctionArgumentTree>::ListActualSizeIncrement=3;
+template < > int List<ConeLatticeAndShift>::ListActualSizeIncrement=50;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
@@ -451,6 +452,7 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
 { this->theDrawLineFunction=0;
   this->theDrawTextFunction=0;
+  this->NumHtmlGraphics=0;
   this->fontSizeNormal=10;
   this->fontSizeSubscript=6;
   this->flagLaTeXDraw= false;
@@ -30706,7 +30708,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
     case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
-    case ParserNode::typeCone: out << "a cone with walls: "; break;
+    case ParserNode::typeCone: out << "a cone: " << this->theCone.GetElement().DrawMeToHtml(theGlobalVariables.theDrawingVariables); break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;
     case ParserNode::typeUndefined: out << "Undefined expression (type 0)."; break;

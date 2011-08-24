@@ -138,7 +138,7 @@ int main(int argc, char **argv)
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
@@ -156,6 +156,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  //civilizedInput=" findExtremaInDirectionOverLatticeShiftedOneNonParam(-2x_1+x_2, (0,0), lattice((1,0),(0,1)), cone((-1,1,0),(1,0,0), (-2,-1,4)))";
   //civilizedInput="sliceConeInUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )";
  // civilizedInput="factorial(20000)";
   //civilizedInput="10000000000";
@@ -193,7 +194,7 @@ int main(int argc, char **argv)
   //civilizedInput="MaximumQuasipolynomialsOverCone(QuasiPolynomial(x_1+4x_2, (0,0), Lattice((1,0),(0,2))),QuasiPolynomial(x_2, (0,0), Lattice((1,1),(0,2))),QuasiPolynomial(x_1+3x_2+1/2, (0,0), Lattice((0,1),(1,0))), Cone ((1,2,0),(1,-1,0),(0,0,1)))";
   //civilizedInput="GetAllRepresentatives(Lattice((7,4),(1,3)),Lattice((1,1),(1,0)))";
   //civilizedInput="Lattice((1,1),(1,0))Lattice((7,4),(1,3))";
-  //civilizedInput="GetAllRepresentatitves(Lattice((1,1),(1,0)),Lattice((7,4),(1,3)))";
+  //civilizedInput="GetAllRepresentatives(Lattice((1,1),(1,0)),Lattice((7,4),(1,3)))";
   //civilizedInput="Lattice((1,2),(0,3))Lattice((1,0),(0,3))";
   //civilizedInput="QuasiPolynomial(x_1, (1,2), Lattice((1,2),(0,3)))+QuasiPolynomial(x_2, (0,0), Lattice((1,1),(1,0)))";
   //civilizedInput="mod([i(c),g_{-9}^{n_{12}}g_{-8}^{n_{11}}g_{-7}^{n_{10}}g_{-6}^{n_9}g_{-5}^{n_8}g_{-4}^{n_7}g_{-3}^{n_6}g_{-2}^{n_5}g_{-1}^{n_4}])";
